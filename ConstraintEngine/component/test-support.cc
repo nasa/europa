@@ -28,6 +28,7 @@ void initConstraintLibrary() {
     // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
     REGISTER_NARY(AddEqualConstraint, "addeq", "Default");
     REGISTER_NARY(AddMultEqualConstraint, "addmuleq", "Default");
+    REGISTER_NARY(EqualConstraint, "asame", "Default"); // all same
     REGISTER_NARY(CondAllSameConstraint, "condeq", "Default");
     REGISTER_NARY(EqualConstraint, "eq", "Default");
     REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
