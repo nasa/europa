@@ -1665,9 +1665,6 @@ namespace Prototype {
     
     if (!s_runAlready) {
       // Register constraint Factories
-      REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
-      REGISTER_CONSTRAINT(LockConstraint, "Lock", "Default");
-      REGISTER_CONSTRAINT(EqualConstraint, "Equal", "Default");
       REGISTER_CONSTRAINT(AddEqualConstraint, "AddEqual", "Default");
       REGISTER_CONSTRAINT(AddMultEqualConstraint, "AddMultEqual", "Default");
       REGISTER_CONSTRAINT(AllDiffConstraint, "AllDiff", "Default");
@@ -1677,7 +1674,7 @@ namespace Prototype {
       REGISTER_CONSTRAINT(CondEqualSumConstraint, "CondEqualSum", "Default");
       REGISTER_CONSTRAINT(CountNonZerosConstraint, "CountNonZeros", "Default");
       REGISTER_CONSTRAINT(CountZerosConstraint, "CountZeros", "Default");
-      REGISTER_CONSTRAINT(OrConstraint, "Or", "Default");
+      REGISTER_CONSTRAINT(EqualConstraint, "Equal", "Default");
       REGISTER_CONSTRAINT(EqualMaximumConstraint, "EqualMaximum", "Default");
       REGISTER_CONSTRAINT(EqualMinimumConstraint, "EqualMinimum", "Default");
       REGISTER_CONSTRAINT(EqualProductConstraint, "EqualProduct", "Default");
@@ -1688,40 +1685,49 @@ namespace Prototype {
       REGISTER_CONSTRAINT(LessThanConstraint, "LessThan", "Default");
       REGISTER_CONSTRAINT(LessThanEqualConstraint, "LessThanEqual", "Default");
       REGISTER_CONSTRAINT(LessThanSumConstraint, "LessThanSum", "Default");
+      REGISTER_CONSTRAINT(LockConstraint, "Lock", "Default");
       REGISTER_CONSTRAINT(MemberImplyConstraint, "MemberImply", "Default");
       REGISTER_CONSTRAINT(MultEqualConstraint, "MultEqual", "Default");
       REGISTER_CONSTRAINT(NotEqualConstraint, "NotEqual", "Default");
+      REGISTER_CONSTRAINT(OrConstraint, "Or", "Default");
+      REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
       REGISTER_CONSTRAINT(TestEqConstraint, "TestEqual", "Default");
 
       // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
       REGISTER_CONSTRAINT(AddEqualConstraint, "addeq", "Default");
-      REGISTER_CONSTRAINT(NegateConstraint, "neg", "Default");
       REGISTER_CONSTRAINT(AddMultEqualConstraint, "addmuleq", "Default");
       REGISTER_CONSTRAINT(AllDiffConstraint, "adiff", "Default"); // all different
-      REGISTER_CONSTRAINT(EqualConstraint, "asame", "Default"); // all same
+      REGISTER_CONSTRAINT(AllDiffConstraint, "fadiff", "Default"); // flexible all different
+      REGISTER_CONSTRAINT(AllDiffConstraint, "fneq", "Default"); // flexible not equal
       REGISTER_CONSTRAINT(CardinalityConstraint, "card", "Default"); // cardinality not more than
-      REGISTER_CONSTRAINT(CountNonZerosConstraint, "cardeq", "Default"); // cardinality equals
       REGISTER_CONSTRAINT(CondAllSameConstraint, "condeq", "Default");
+      REGISTER_CONSTRAINT(CountNonZerosConstraint, "cardeq", "Default"); // cardinality equals
+      REGISTER_CONSTRAINT(EqualConstraint, "asame", "Default"); // all same
       REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
       REGISTER_CONSTRAINT(EqualConstraint, "fasame", "Default"); // flexible all same
-      REGISTER_CONSTRAINT(OrConstraint, "for", "Default"); // flexible or
-      REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
-      REGISTER_CONSTRAINT(LessOrEqThanSumConstraint, "leqsum", "Default");
-      REGISTER_CONSTRAINT(LessThanConstraint, "lt", "Default");
-      REGISTER_CONSTRAINT(MemberImplyConstraint, "memberImply", "Default");
-      REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
-      REGISTER_CONSTRAINT(OrConstraint, "or", "Default");
+      REGISTER_CONSTRAINT(EqualMaximumConstraint, "fallmax", "Default"); // flexible all max
+      REGISTER_CONSTRAINT(EqualMinimumConstraint, "fallmin", "Default"); // flexible all min
       REGISTER_CONSTRAINT(EqualProductConstraint, "product", "Default");
       REGISTER_CONSTRAINT(EqualSumConstraint, "sum", "Default");
+      REGISTER_CONSTRAINT(LessOrEqThanSumConstraint, "leqsum", "Default");
+      REGISTER_CONSTRAINT(LessThanConstraint, "lt", "Default");
+      REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
+      REGISTER_CONSTRAINT(MemberImplyConstraint, "memberImply", "Default");
+      REGISTER_CONSTRAINT(NegateConstraint, "neg", "Default");
+      REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
+      REGISTER_CONSTRAINT(OrConstraint, "for", "Default"); // flexible or
+      REGISTER_CONSTRAINT(OrConstraint, "or", "Default");
 
       // Rotate scope right one (last var moves to front) to ...
       // ... change addleq constraint to GreaterOrEqThan constraint:
       REGISTER_ROTATED_CONSTRAINT("addleq", "Default", "GreaterOrEqThanSum", 1);
       // ... change addlt constraint to GreaterThanSum constraint:
       REGISTER_ROTATED_CONSTRAINT("addlt", "Default", "GreaterThanSum", 1);
-      // ... change max constraint to EqualMaximum constraint:
+      // ... change allmax and max constraint to EqualMaximum constraint:
+      REGISTER_ROTATED_CONSTRAINT("allmax", "Default", "EqualMaximum", 1);
       REGISTER_ROTATED_CONSTRAINT("max", "Default", "EqualMaximum", 1);
-      // ... change min constraint to EqualMinimum constraint:
+      // ... change allmin and min constraint to EqualMinimum constraint:
+      REGISTER_ROTATED_CONSTRAINT("allmin", "Default", "EqualMinimum", 1);
       REGISTER_ROTATED_CONSTRAINT("min", "Default", "EqualMinimum", 1);
 
       // But addeqcond is harder, requiring two "steps":
