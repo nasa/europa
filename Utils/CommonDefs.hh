@@ -17,7 +17,7 @@
  * @note Should only be used in test programs.
  * @note Likely precursor to new error handling support.
  */
-#define assertTrue(cond) assert(cond)
+#define assertTrue(cond) (assert(cond))
 
 /**
  * @def assertFalse
@@ -25,9 +25,9 @@
  * @note Should only be used in test programs.
  * @note Likely precursor to new error handling support.
  */
-#define assertFalse(cond) assert(!(cond))
+#define assertFalse(cond) (assert(!(cond)))
 
-#define streamIsEmpty(s) (s).str() == ""
+#define streamIsEmpty(s) ((s).str() == "")
 
   /**
    * @def DECLARE_GLOBAL_CONST(TYPE,NAME)
@@ -46,7 +46,7 @@
 #define DEFINE_GLOBAL_CONST(TYPE, NAME, VALUE) \
   const TYPE& NAME() { \
     static const TYPE sl_data(VALUE); \
-    return sl_data; \
+    return(sl_data); \
   }
 
   /**
@@ -57,12 +57,11 @@
 #define DEFINE_GLOBAL_EMPTY_CONST(TYPE, NAME) \
   const TYPE& NAME() { \
     static const TYPE sl_data; \
-    return sl_data; \
+    return(sl_data); \
   }
 
-
 DECLARE_GLOBAL_CONST(bool, g_alwaysFails);
-#define ALWAYS_FAILS g_alwaysFails()
+#define ALWAYS_FAILS (g_alwaysFails())
 
 namespace Prototype {
   DECLARE_GLOBAL_CONST(int, g_maxInt);
@@ -74,9 +73,9 @@ namespace Prototype {
 
 #define MAX_INT (Prototype::g_maxInt())
 
-#define MAX_FINITE_TIME MAX_INT
+#define MAX_FINITE_TIME (MAX_INT)
 
-#define MIN_FINITE_TIME -MAX_INT
+#define MIN_FINITE_TIME (-MAX_INT)
 
 #define PLUS_INFINITY (Prototype::g_infiniteTime())
 
