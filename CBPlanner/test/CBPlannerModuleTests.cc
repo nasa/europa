@@ -1355,11 +1355,11 @@ namespace PLASMA {
     HSTSPlanIdReader pireader(noBranchSpec);
     pireader.read("../component/NoBranch.pi");
 
-    DecisionManagerId dm = planner.getDecisionManager();
-    HSTSOpenDecisionManager odm(dm, heuristics.getId());
-    dm->setOpenDecisionManager(odm.getId());
+    DecisionManagerId& dm = planner.getDecisionManager();
     HSTSNoBranchCondition cond(dm);
     cond.initialize(noBranchSpec);
+    HSTSOpenDecisionManagerId odm = (new HSTSOpenDecisionManager(dm, heuristics.getId()))->getId();
+    dm->setOpenDecisionManager(odm);
 
     return true;
   }
