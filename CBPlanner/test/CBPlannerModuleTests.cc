@@ -10,7 +10,6 @@
 #include "Choice.hh"
 #include "StringDomain.hh"
 #include "NumericDomain.hh"
-#include "Generator.hh"
 
 extern bool loggingEnabled();
 
