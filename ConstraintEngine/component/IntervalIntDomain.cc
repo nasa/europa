@@ -25,8 +25,8 @@ namespace Prototype {
     return IntervalDomain::operator==(dom);
   }
 
-  void IntervalIntDomain::intersect(const IntervalIntDomain& dom){
-    IntervalDomain::intersect(dom);
+  bool IntervalIntDomain::intersect(const IntervalIntDomain& dom){
+    return IntervalDomain::intersect(dom);
   }
 
   bool IntervalIntDomain::isSubsetOf(const IntervalIntDomain& dom) const{

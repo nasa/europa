@@ -30,7 +30,7 @@ namespace Prototype{
     IntervalIntDomain(Europa::Domain& org);
     IntervalIntDomain& operator=(const IntervalIntDomain& org);
     bool operator==(const IntervalIntDomain& dom) const;
-    void intersect(const IntervalIntDomain& dom);
+    bool intersect(const IntervalIntDomain& dom);
     bool isSubsetOf(const IntervalIntDomain& dom) const;
     const Europa::Domain makeDomain() const;
     const DomainType& getType() const;

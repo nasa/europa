@@ -10,6 +10,8 @@
 #include "ConstraintFactory.hh"
 #include "ConstraintLibrary.hh"
 #include "../Libraries/IdTable.hh"
+#include "EquivalenceClassCollection.hh"
+#include "EqualityConstraintPropagator.hh"
 
 /* Include for domain management */
 #include "AbstractDomain.hh"
@@ -670,6 +672,181 @@ private:
   }
 };
 
+class EquivalenceClassTest{
+public:
+  static bool test() {
+    runTest(testBasicAllocation, "BasicAllocation");
+    runTest(testConstructionOfSingleGraph, "ConstructionOfSingleGraph");
+    runTest(testSplittingOfSingleGraph, "SplittingOfSingleGraph");
+    runTest(testMultiGraphMerging, "MultiGraphMerging");
+    runTest(testEqualityConstraintPropagator, "EqualityConstraintPropagator");
+    return true;
+  }
+
+private:
+  static bool testBasicAllocation(){
+    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
+    EquivalenceClassCollection g0;
+    g0.addConnection(v0.getId(), v1.getId());
+    assert(g0.getGraphCount() == 1);
+    return true;
+  }
+
+  static bool testConstructionOfSingleGraph(){
+    EquivalenceClassCollection g0;
+    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
+    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
+    g0.addConnection(v0.getId(), v1.getId());
+    g0.addConnection(v1.getId(), v2.getId());
+    assert(g0.getGraphCount() == 1);
+    int graphKey = g0.getGraphKey(v0.getId());
+    assert(g0.getGraphKey(v1.getId()) == graphKey);
+    assert(g0.getGraphKey(v2.getId()) == graphKey);
+
+    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 100));
+    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(-100, 100));
+    g0.addConnection(v2.getId(), v3.getId());
+    g0.addConnection(v3.getId(), v4.getId());
+    assert(g0.getGraphCount() == 1);
+    assert(graphKey != g0.getGraphKey(v0.getId())); // Should have updated for all
+    return true;
+  }
+
+  static bool testSplittingOfSingleGraph(){
+    EquivalenceClassCollection g0;
+    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
+    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
+    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 100));
+    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(-100, 100));
+    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(-100, 1000));
+    VariableImpl<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(-100, 100));
+    VariableImpl<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(-100, 100));
+    VariableImpl<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(-100, 100));
+    g0.addConnection(v0.getId(), v1.getId());
+    g0.addConnection(v1.getId(), v2.getId());
+    g0.addConnection(v2.getId(), v3.getId());
+    g0.addConnection(v3.getId(), v4.getId());
+    g0.addConnection(v4.getId(), v5.getId());
+    g0.addConnection(v5.getId(), v6.getId());
+    g0.addConnection(v6.getId(), v7.getId());
+    g0.addConnection(v7.getId(), v8.getId());
+    assert(g0.getGraphCount() == 1);
+
+    // Cause a split by removing a connection in the middle
+    g0.removeConnection(v3.getId(), v4.getId());
+    assert(g0.getGraphCount() == 2);
+
+    // Cause another split
+    g0.removeConnection(v5.getId(), v6.getId());
+    assert(g0.getGraphCount() == 3);
+
+    // Test membership of resulting classes
+    assert((g0.getGraphKey(v1.getId()) + g0.getGraphKey(v2.getId()) + g0.getGraphKey(v3.getId()))/3 == g0.getGraphKey(v0.getId()));
+    assert(g0.getGraphKey(v4.getId()) == g0.getGraphKey(v5.getId()));
+    assert((g0.getGraphKey(v6.getId()) + g0.getGraphKey(v7.getId()))/2   == g0.getGraphKey(v8.getId()));
+
+    return true;
+  }
+
+  static bool testMultiGraphMerging(){
+    EquivalenceClassCollection g0;
+    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
+    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
+    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 100));
+    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(-100, 100));
+    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(-100, 1000));
+    VariableImpl<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(-100, 100));
+    VariableImpl<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(-100, 100));
+    VariableImpl<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(-100, 100));
+    // First group
+    g0.addConnection(v0.getId(), v1.getId());
+    g0.addConnection(v1.getId(), v2.getId());
+    g0.addConnection(v2.getId(), v3.getId());
+
+    // Second group
+    g0.addConnection(v4.getId(), v5.getId());
+
+    // Third group
+    g0.addConnection(v6.getId(), v7.getId());
+    g0.addConnection(v7.getId(), v8.getId());
+
+    // Test resulting classes
+    assert(g0.getGraphCount() == 3);
+    assert((g0.getGraphKey(v1.getId()) + g0.getGraphKey(v2.getId()) + g0.getGraphKey(v3.getId()))/3 == g0.getGraphKey(v0.getId()));
+    assert(g0.getGraphKey(v4.getId()) == g0.getGraphKey(v5.getId()));
+    assert((g0.getGraphKey(v6.getId()) + g0.getGraphKey(v7.getId()))/2   == g0.getGraphKey(v8.getId()));
+
+    // Add connectionto cause a merge
+    g0.addConnection(v3.getId(), v4.getId());
+    assert(g0.getGraphCount() == 2);
+    assert((g0.getGraphKey(v1.getId()) + g0.getGraphKey(v2.getId()) + g0.getGraphKey(v3.getId()))/3 == g0.getGraphKey(v0.getId()));
+    assert((g0.getGraphKey(v4.getId()) + g0.getGraphKey(v5.getId()))/2 == g0.getGraphKey(v0.getId()));
+    assert((g0.getGraphKey(v6.getId()) + g0.getGraphKey(v7.getId()))/2   == g0.getGraphKey(v8.getId()));
+
+
+    // Add connectionto cause a merge
+    g0.addConnection(v5.getId(), v6.getId());
+    assert(g0.getGraphCount() == 1);
+
+    return true;
+  }
+
+  static bool testEqualityConstraintPropagator(){
+    ConstraintEngineId ce((new ConstraintEngine())->getId());
+    new EqualityConstraintPropagator(ce);
+    {
+      std::vector<ConstrainedVariableId> variables;
+      // v0 == v1
+      VariableImpl<IntervalIntDomain> v0(ce, IntervalIntDomain(1, 10));
+      variables.push_back(v0.getId());
+      VariableImpl<IntervalIntDomain> v1(ce, IntervalIntDomain(-100, 100));
+      variables.push_back(v1.getId());
+      EqualConstraint c0(ce, variables);
+      ce->propagate();
+
+      variables.clear();
+      VariableImpl<IntervalIntDomain> v2(ce, IntervalIntDomain(8, 10));
+      variables.push_back(v2.getId());
+      VariableImpl<IntervalIntDomain> v3(ce, IntervalIntDomain(10, 200));
+      variables.push_back(v3.getId());
+      EqualConstraint c1(ce, variables);
+      ce->propagate();
+
+      assert(v0.getDerivedDomain().getUpperBound() == 10);
+      assert(v2.getDerivedDomain().getSingletonValue() == 10);
+
+      variables.clear();
+      variables.push_back(v3.getId());
+      variables.push_back(v1.getId());
+      EqualConstraint c2(ce, variables);
+
+      ce->propagate();
+      assert(ce->constraintConsistent());
+      assert(v0.getDerivedDomain().getSingletonValue() == 10);
+
+      variables.clear();
+      VariableImpl<IntervalIntDomain> v4(ce, IntervalIntDomain(1, 9));
+      variables.push_back(v3.getId());
+      variables.push_back(v4.getId());
+      ConstraintId c3((new EqualConstraint(ce, variables))->getId());
+      ce->propagate();
+      assert(ce->provenInconsistent());
+
+      delete (Constraint*) c3;
+      assert(ce->pending());
+      ce->propagate();
+      assert(ce->constraintConsistent());
+      assert(v0.getDerivedDomain().getSingletonValue() == 10);
+    }
+    delete (ConstraintEngine*) ce;
+    return true;
+  }
+};
+
 class IntegrationTest
 {
 public:
@@ -699,5 +876,6 @@ int main()
   runTestSuite(ConstraintTest::test, "ConstraintTests"); 
   runTestSuite(FactoryTest::test, "FactoryTests");  
   runTestSuite(IntegrationTest::test, "IntegrationTests"); 
+  runTestSuite(EquivalenceClassTest::test, "EquivalenceClassTests"); 
   cout << "Finished" << endl;
 }

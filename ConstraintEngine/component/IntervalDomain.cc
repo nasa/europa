@@ -16,7 +16,7 @@ namespace Prototype {
   IntervalDomain::~IntervalDomain(){}
 
   IntervalDomain::IntervalDomain(const IntervalDomain& org)
-    : AbstractDomain(org.m_finite, org.m_closed, org.m_listener), m_ub(org.m_ub), m_lb(org.m_lb){}
+    : AbstractDomain(org.m_finite, org.m_closed, DomainListenerId::noId()), m_ub(org.m_ub), m_lb(org.m_lb){}
 
 
   IntervalDomain::IntervalDomain(Europa::Domain& org)
@@ -114,9 +114,9 @@ namespace Prototype {
     check_error(lb <= ub);
 
     // Ensure this domain is a subset of the new bounds for relaxation
-    check_error(lb <= m_lb && ub >= m_ub);
+    check_error(isEmpty() || (lb <= m_lb && ub >= m_ub));
 
-    // Test of really causes a change
+    // Test if really causes a change
     bool relaxed = (ub > m_ub) || ( lb < m_lb);
 
     if(relaxed){
