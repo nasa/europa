@@ -73,22 +73,17 @@ int main(int argc, const char ** argv) {
   //   make this called via dlopen.
   SchemaId schema = NDDL::loadSchema();
 
+  bool planFound = false;
   // Encapsulate allocation so that they go out of scope before calling terminate.
   {  
-    std::cerr << "Allocating assembly..." << std::endl;
-
-
-    // Allocate the standard assembly.
+    debugMsg("EuropaTest:allocation", "Allocating assembly");
     HSTSAssembly assembly(schema);
-
-    std::cerr << "Assembly planning..." << std::endl;
-
-    // Run the planner
+    debugMsg("EuropaTest:plan", "Starting planning");
     CBPlanner::Status result = assembly.plan(txSource, heurSource, pidSource);
-
     switch(result) {
     case CBPlanner::PLAN_FOUND: 
-      std::cerr << "Finished Planning. Printing the plan..." << std::endl;
+      planFound = true;
+      std::cerr << "Finished Planning. Printing the plan." << std::endl;
       std::cout << "runEUROPAtest found a plan at depth " << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched() << std::endl;
       // Dump the results
       assembly.write(std::cout);
@@ -100,22 +95,20 @@ int main(int argc, const char ** argv) {
       std::cout << "runEUROPAtest exhausted the search without finding a plan" << std::endl;
       break;
     case CBPlanner::INITIALLY_INCONSISTENT:
-      std::cout << "runEUROPAtest found the initial plan is inconsistent" << std::endl;
+      std::cout << "runEUROPAtest found the initial plan to be inconsistent" << std::endl;
       break;
     default:
       assert(false);
       break;
     }
-
+    condDebugMsg(!planFound, "EuropaTest:planState", "failed to find a plan at depth " << assembly.getDepthReached()
+                 << " after " << assembly.getTotalNodesSearched() << "; state is:\n");
+    condDebugStmt(!planFound, "EuropaTest:planState", assembly.write(DebugMessage::getStream()));
   }
 
   debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr));
-
-  std::cerr << "Terminating the assembly ..." << std::endl;
-
-  // Terminate the library
+  debugMsg("EuropaTest:termination", "Terminating the assembly");
   HSTSAssembly::terminate();
-
   std::cerr << "Finished" << std::endl;
-  exit(0);
+  exit(planFound ? 0 : 1);
 }
