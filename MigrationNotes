@@ -1,6 +1,6 @@
 Brief Migration Notes
 
-$Id: MigrationNotes,v 1.3 2004-11-26 20:40:33 wedgingt Exp $
+$Id: MigrationNotes,v 1.4 2004-12-02 01:16:08 wedgingt Exp $
 
 This file is intended to help users of the prior Europa (in the
 NewPlan CVS tree) planning system migrate their projects to this
@@ -65,3 +65,14 @@ NDDL file for use with Europa2.
 convert2 program will not complain about them (the NDDL compiler will,
 at least whenever there is a choice between two or more predicates
 because it is a ConstraintToken rather than a ValueToken).
+
+9. The NewPlan makefiles are designed to notice when the compiler
+version and other build options are changed and, when appropriate,
+modify an include file that, due to the dependencies in the makefiles
+(including many generated automatically via the compiler), will cause
+most everything to be recompiled.  There is nothing similar in the
+PLASMA jam files, so 'jam clean' (with appropriate -s options) needs
+to be run after changing any of the compilers being used (including,
+usually, the version of the compilers).  PLASMA's independent naming
+of files resulting from the different compilation variants mitigates
+but does not remove this problem.
