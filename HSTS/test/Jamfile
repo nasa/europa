@@ -15,6 +15,7 @@ LocalDepends tests : run-hsts-module-tests ;
 
 #
 # EUROPA TESTS
+#   Converted from NewPlan/ModuleTests/Parser, e.g.
 #
 ModuleObjects runEUROPAtest.cc : HSTS ;
 
@@ -33,6 +34,13 @@ rule RunEUROPATest {
   local xml = $(model:S=.xml) ;
   local o = $(cc:S=.o) ;
   local lib = $(model:S=) ;
+  local options = " -i "$(xml) ;
+  if $(heur) {
+    options += " -h "$(heur) ;
+  }
+  if ($pid) {
+    options += " -p "$(pid) ;
+  }
 
   # create .hh, .cc, .o, and .xml for a .nddl
   Includes $(cc) : $(hh) ;
@@ -41,11 +49,12 @@ rule RunEUROPATest {
 
   # create planner with linked model
   ModuleMain $(exe) : $(o) runEUROPAtest.o : HSTS ;
-  RunModuleMain run-$(exe) : $(exe) : -i $(xml) "-h "$(heur) "-p "$(pid) ;
+  RunModuleMain run-$(exe) : $(exe) : $(options) ;
   LocalDepends $(target) : run-$(exe) ;
-}
+ }
 }
 
+RunEUROPATest monkeyTests : timeline.nddl timeline-hacked.nddl timeline-hacked2.nddl timeline-hacked3.nddl ;
 #RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
 
 } # PLASMA_READY
