@@ -16,6 +16,12 @@ class Foo {
  Foo(){
   m_3 = "This string must be initialized";
  }
+
+ Foo(int _m_0, float _m_1){
+  m_0 = _m_1;
+  m_1 = _m_1;
+  // Forces failure: m_1 = 10;
+ }
 }
 
 // Declares mandatory world class, with constructor with no arguments.
