@@ -57,12 +57,17 @@ namespace Prototype {
     /**
      * @brief Insert a value into the domain.
      */
-    void insert(const ELEMENT_TYPE& value);
+    void insert(double value);
 
     /**
      * @brief Obtain the singleton value for this domain. It must be a singleton.
      */
     ELEMENT_TYPE getValue() const;
+
+    /**
+     * @brief Validates the mapping to and from a double does not vilate precision
+     */
+    static bool testValue(double value);
   };
 
   /**
@@ -110,8 +115,19 @@ namespace Prototype {
   ELEMENT_TYPE Domain<ELEMENT_TYPE>::getValue() const {return EnumeratedDomain::getValue();}
 
   template <class ELEMENT_TYPE>
-  void Domain<ELEMENT_TYPE>::insert(const ELEMENT_TYPE& value){
-    EnumeratedDomain::insert(double(value));
+  void Domain<ELEMENT_TYPE>::insert(double value){
+    check_error(testValue(value));
+    EnumeratedDomain::insert(value);
+  }
+
+  template <class ELEMENT_TYPE>
+  bool Domain<ELEMENT_TYPE>::testValue(double value){
+    ELEMENT_TYPE x = (ELEMENT_TYPE) value;
+    double y = (double) x;
+    if(y > value)
+      return (y - value < EPSILON);
+    else
+      return (value - y < EPSILON);
   }
 
   class LabelStr;

@@ -100,7 +100,7 @@ namespace Prototype{
      * @see DomainListener::DOMAIN_RELAXED
      * @todo Consider if it makes sense to error out if isMember(value)
      */
-    void insert(double value);
+    virtual void insert(double value);
 
     /**
      * @brief Remove the given elemenet form the domain.
