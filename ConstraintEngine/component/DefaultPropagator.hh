@@ -21,7 +21,6 @@ namespace Prototype {
 			    int argIndex, 
 			    const ConstraintId& constraint, 
 			    const DomainListener::ChangeType& changeType);
-    bool isAcceptable(const ConstraintId& constraint) const;
 
   private:
     std::set<ConstraintId> m_agenda;

@@ -164,9 +164,6 @@ namespace Prototype
 						   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){
     check_error(variables.size() == ARG_COUNT);
-    // Check the arguments - no enumerations supported
-    check_error(getCurrentDomain(m_variables[X]).isInterval());
-    check_error(getCurrentDomain(m_variables[Y]).isInterval());
   }
 
   void LessThanEqualConstraint::handleExecute()
@@ -180,11 +177,16 @@ namespace Prototype
 
     check_error(!domx.isEmpty() && !domy.isEmpty());
 
-    // Discontinue if they are not both finite or infinite
-    if(domx.isFinite() != domy.isFinite()){
-      domx.empty();
+    // Discontinue if any domain is enumerated but not a singleton
+    if (domx.isEnumerated() && !domx.isSingleton())
       return;
-    }
+
+    if (domy.isEnumerated() && !domy.isSingleton())
+      return;
+
+    // Discontinue if they are not both finite or infinite
+    if(domx.isFinite() != domy.isFinite())
+      return;
 
     if(domx.intersect(domx.getLowerBound(), domy.getUpperBound()) && domx.isEmpty())
       return;

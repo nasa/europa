@@ -23,7 +23,7 @@
 int main(){
   // Constraints with special names to allow mapping to temporal network propagator if necessary
   REGISTER_NARY(EqualConstraint, "concurrent", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "precede", "Default");
+  REGISTER_NARY(LessThanEqualConstraint, "before", "Default");
 
   // Constraints used in Token implementations
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");

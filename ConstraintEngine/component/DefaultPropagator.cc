@@ -33,11 +33,6 @@ namespace Prototype {
       m_agenda.insert(constraint);
   }
 
-  bool DefaultPropagator::isAcceptable(const ConstraintId& constraint) const {
-    check_error(constraint.isValid());
-    return(!constraint.isNoId());
-  }
-
   void DefaultPropagator::execute(){
     check_error(m_agenda.size() > 0);
     check_error(!getConstraintEngine()->provenInconsistent());

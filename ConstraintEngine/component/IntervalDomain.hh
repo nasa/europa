@@ -143,11 +143,6 @@ namespace Prototype{
     bool isMember(double value) const;
 
     /**
-     * @brief Always false
-     */
-    bool isEnumerated() const;
-
-    /**
      * @brief test for single valued domain.
      */
     bool isSingleton() const;

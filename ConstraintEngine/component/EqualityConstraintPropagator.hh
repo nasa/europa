@@ -44,7 +44,6 @@ namespace Prototype{
 			    int argIndex, 
 			    const ConstraintId& constraint, 
 			    const DomainListener::ChangeType& changeType);
-    bool isAcceptable(const ConstraintId& constraint) const;
 
     /**
      * Does the real work of propagating an equivalence class

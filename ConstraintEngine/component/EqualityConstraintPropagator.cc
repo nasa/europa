@@ -69,16 +69,14 @@ namespace Prototype {
 							int argIndex, 
 							const ConstraintId& constraint, 
 							const DomainListener::ChangeType& changeType){
+    check_error(Id<EqualConstraint>::convertable(constraint));
+
     if(!m_fullReprop && !m_active){
       int eqClassKey = m_eqClassCollection.getGraphKey(variable);
       check_error(m_eqClassCollection.getGraphVariables(eqClassKey).size() > 0);
       check_error(m_eqClassCollection.getGraphVariables(eqClassKey).find(variable) != m_eqClassCollection.getGraphVariables(eqClassKey).end());
       m_eqClassAgenda.insert(eqClassKey);
     }
-  }
-
-  bool EqualityConstraintPropagator::isAcceptable(const ConstraintId& constraint) const {
-    return (constraint->getName() == LabelStr("Equal"));
   }
 
   void processScope(const std::set<ConstrainedVariableId>& scope){
