@@ -30,6 +30,8 @@ Rover::At{
  // Test that we can reference other objects. Has semantics of posting
  // an equality constraint on the object variable
  meets(_foo.Bar bar);
+ Foo localFoo;
+ meets(localFoo.Bar baz);
 }
 
 Rover::Going{
