@@ -85,6 +85,8 @@ const std::string tokenVarTypes[6] =
 {REJECT_VAR, OBJECT_VAR, DURATION_VAR, START_VAR, END_VAR, PARAMETER_VAR};
 
 enum varTypes {I_REJECT = 0, I_OBJECT, I_DURATION, I_START, I_END, I_PARAMETER};
+enum objectTypes {O_OBJECT = 0, O_TIMELINE, O_RESOURCE};
+enum tokenTypes {T_INTERVAL = 0, T_RESOURCE};
 
 #define TAB "\t"
 #define COLON ":"
@@ -178,12 +180,9 @@ namespace Prototype {
 	  FatalErrno();
 	}
       }
+      realpath(dest.c_str(), destBuf);
       dest = destBuf;
       delete [] destBuf;
-
-      //if(dest.find_last_of('/') == dest.size()) {
-      //  dest += "/";
-      //}
       dest += "/";
 
       char timestr[NBBY * sizeof(seqId) * 28/93 + 4];
@@ -200,7 +199,7 @@ namespace Prototype {
       seqName = seqName.substr(0, extStart);
       if(stepsPerWrite) {
 	if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
-	  std::cerr << "Failed to make directory " << dest << std::endl;
+	  std::cerr << "Failed to make directory " << dest << endl;
 	  FatalErrno();
 	}
 	dest += seqName;
@@ -217,7 +216,6 @@ namespace Prototype {
 	  std::cerr << "Failed to open " << seqStr << std::endl;
 	  FatalErrno();
 	}
-	//cerr << "=====>" << dest << endl;
 	seqOut << dest << TAB << seqId << std::endl;
 	seqOut.close();
       
@@ -326,10 +324,12 @@ namespace Prototype {
       for(std::set<ObjectId>::iterator objectIterator = objects.begin();
 	  objectIterator != objects.end(); ++objectIterator) {
 	const ObjectId &objId = *objectIterator;
-	outputObject(objId, objOut);
-
-	if(! TimelineId::convertable(*objectIterator))
+	if(! TimelineId::convertable(objId)) {
+          outputObject(objId, O_OBJECT, objOut);
 	  continue;
+        }
+        else
+          outputObject(objId, O_TIMELINE, objOut);
 	TimelineId &tId = (TimelineId &) objId;
 	const std::list<TokenId>& orderedTokens = tId->getTokenSequence();
 	int slotIndex = 0;
@@ -337,12 +337,13 @@ namespace Prototype {
 	for(std::list<TokenId>::const_iterator tokenIterator = orderedTokens.begin();
 	    tokenIterator != orderedTokens.end(); ++tokenIterator) {
 	  const TokenId &token = *tokenIterator;
-	  outputToken(token, slotId, slotIndex, &tId, tokOut, tokRelOut, varOut);
+	  outputToken(token, T_INTERVAL, slotId, slotIndex, &tId, tokOut, tokRelOut, varOut);
 	  tokens.erase(token);
 	  std::set<TokenId>::const_iterator mergedTokenIterator = 
 	    token->getMergedTokens().begin();
 	  for(;mergedTokenIterator != token->getMergedTokens().end(); ++mergedTokenIterator) {
-	    outputToken(*mergedTokenIterator, slotId, slotIndex, &tId, tokOut, tokRelOut, varOut);
+	    outputToken(*mergedTokenIterator, T_INTERVAL, slotId, slotIndex, &tId, tokOut, 
+                        tokRelOut, varOut);
 	    tokens.erase(*mergedTokenIterator);
 	  }
 	  slotId++;
@@ -351,7 +352,7 @@ namespace Prototype {
 	  if(tokenIterator != orderedTokens.end()) {
 	    const TokenId &nextToken = *tokenIterator;
 	    if(token->getEnd()->lastDomain() != nextToken->getStart()->lastDomain()) {
-	      objOut << tId->getKey() << COMMA << slotId << COMMA << slotIndex << COLON;
+	      objOut << slotId << COMMA << slotIndex << COLON;
 	      emptySlots++;
 	      slotId++;
 	      slotIndex++;
@@ -367,7 +368,7 @@ namespace Prototype {
 	  ++tokenIterator) {
 	TokenId token = *tokenIterator;
 	check_error(token.isValid());
-	outputToken(token, 0, 0, NULL, tokOut, tokRelOut, varOut);
+	outputToken(token, T_INTERVAL, 0, 0, NULL, tokOut, tokRelOut, varOut);
       }
 
       (*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
@@ -386,41 +387,45 @@ namespace Prototype {
       nstep++;
     }
 
-    void PartialPlanWriter::outputObject(const ObjectId &objId, std::ofstream &objOut) {
-      objOut << objId->getKey() << TAB << ppId << TAB << objId->getName().toString() << TAB;
+    void PartialPlanWriter::outputObject(const ObjectId &objId, const int type,
+                                         std::ofstream &objOut) {
+      int parentKey = -1;
+      if(!objId->getParent().isNoId())
+        parentKey = objId->getParent()->getKey();
+      objOut << objId->getKey() << TAB << type << TAB << parentKey << TAB
+             << ppId << TAB << objId->getName().toString() << TAB;
+      for(std::set<ObjectId>::const_iterator childIt = objId->getComponents().begin();
+          childIt != objId->getComponents().end(); ++childIt) {
+        ObjectId child = *childIt;
+        objOut << child->getKey() << COMMA;
+      }
+      objOut << TAB;
       //<< SNULL;// << std::endl;
     }
 
-    void PartialPlanWriter::outputToken(const TokenId &token, const int slotId, const int slotIndex,
-					const TimelineId *tId, std::ofstream &tokOut, 
-					std::ofstream &tokRelOut, std::ofstream &varOut) {
+    void PartialPlanWriter::outputToken(const TokenId &token, const int type, const int slotId, 
+                                        const int slotIndex, const TimelineId *tId, 
+                                        std::ofstream &tokOut, std::ofstream &tokRelOut,
+                                        std::ofstream &varOut) {
       check_error(token.isValid());
       if(token->isIncomplete()) {
 	std::cerr << "Token " << token->getKey() << " is incomplete.  Skipping. " << std::endl;
 	return;
       }
       if(tId != NULL) {
-
-	ObjectId objId;
-	if((*tId)->getParent().isNoId()) {
-	  objId = (*tId);
-	}
-	else {
-	  objId = (*tId)->getParent();
-	}
-	tokOut << token->getKey() << TAB << slotId << TAB << slotIndex << TAB << ppId << TAB << 0
-	       << TAB << 1 << TAB << token->getStart()->getKey() << TAB << token->getEnd()->getKey()
-	       << TAB << token->getDuration()->getKey() << TAB << token->getState()->getKey()
-	       << TAB << token->getPredicateName().toString() << TAB << (*tId)->getKey() << TAB
-	       << (*tId)->getName().toString() << TAB << objId->getKey() << TAB
-	       << token->getObject()->getKey() << TAB;
+	tokOut << token->getKey() << TAB << type << TAB << slotId << TAB << slotIndex << TAB 
+               << ppId << TAB << 0 << TAB << 1 << TAB << token->getStart()->getKey() << TAB 
+               << token->getEnd()->getKey() << TAB << token->getDuration()->getKey() << TAB 
+               << token->getState()->getKey() << TAB << token->getPredicateName().toString() 
+               << TAB << (*tId)->getKey() << TAB << (*tId)->getName().toString() << TAB 
+               << token->getObject()->getKey() << TAB;
       }
       else {
-	tokOut << token->getKey() << TAB << SNULL << TAB << SNULL << TAB << ppId << TAB << 1 << TAB
-	       << 1 << TAB << token->getStart()->getKey() << TAB << token->getEnd()->getKey()
-	       << TAB << token->getDuration()->getKey() << TAB << token->getState()->getKey()
-	       << TAB << token->getPredicateName().toString() << TAB << SNULL << TAB << SNULL << TAB
-	       << SNULL << TAB << token->getObject()->getKey() << TAB;
+	tokOut << token->getKey() << TAB << type << TAB << SNULL << TAB << SNULL << TAB << ppId 
+               << TAB << 1 << TAB << 1 << TAB << token->getStart()->getKey() << TAB 
+               << token->getEnd()->getKey() << TAB << token->getDuration()->getKey() << TAB 
+               << token->getState()->getKey() << TAB << token->getPredicateName().toString() 
+               << TAB << SNULL << TAB << SNULL << TAB << token->getObject()->getKey() << TAB;
       }
       if(token->getMaster().isValid()) {
 	tokRelOut << ppId << TAB << token->getMaster()->getKey() << TAB 

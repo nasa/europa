@@ -44,9 +44,9 @@ namespace Prototype {
       std::list<Transaction> *transactionList;
       std::ofstream *transOut, *statsOut;
       std::string dest;
-      void outputObject(const ObjectId &, std::ofstream &);
-      void outputToken(const TokenId &, const int, const int, const TimelineId *, std::ofstream &,
-		       std::ofstream &, std::ofstream &);
+      void outputObject(const ObjectId &, const int, std::ofstream &);
+      void outputToken(const TokenId &, const int, const int, const int, const TimelineId *, 
+                       std::ofstream &, std::ofstream &, std::ofstream &);
       void outputEnumVar(const Id< TokenVariable<EnumeratedDomain> > &, const TokenId &,
 			 const int, std::ofstream &);
       void outputIntVar(const Id< TokenVariable<IntervalDomain> > &, const TokenId &,
