@@ -84,15 +84,16 @@ public:
 private:
   static bool testExceptions() {
     Error::doThrowExceptions();
-    int argc = 1;
+    int var = 1;
+    assertTrue(var == 1);
     try {
       check_error(Error::printingErrors());
       check_error(Error::getStream() == std::cerr);
       check_error(Error::displayWarnings());
-      check_error(argc == 1);
-      check_error(argc == 1, "check_error(argc == 1)");
-      check_error(argc == 1, Error("check_error(argc == 1)"));
-      condWarning(argc == 1, "argc is not 1");
+      check_error(var == 1);
+      check_error(var == 1, "check_error(var == 1)");
+      check_error(var == 1, Error("check_error(var == 1)"));
+      condWarning(var == 1, "var is not 1");
       warn("everything worked in first try() block of main()");
     } 
     catch (Error e) {
@@ -101,29 +102,29 @@ private:
     // check_error will not throw the errors for EUROPA_FAST
 #ifndef EUROPA_FAST
     try {
-      check_error(argc == 2);
-      __y__("check_error(argc == 2) did not throw an exception");
+      check_error(var == 2);
+      __y__("check_error(var == 2) did not throw an exception");
     } 
     catch (Error e) {
-      __z__(e, Error("argc == 2", __FILE__, __LINE__ - 4));
+      __z__(e, Error("var == 2", __FILE__, __LINE__ - 4));
     }
     try {
-      check_error(argc == 2, "check_error(argc == 2)");
-      __y__("check_error(argc == 2, blah) did not throw an exception");
+      check_error(var == 2, "check_error(var == 2)");
+      __y__("check_error(var == 2, blah) did not throw an exception");
     } 
     catch (Error e) {
-      __z__(e, Error("argc == 2", "check_error(argc == 2)", __FILE__, __LINE__ - 4));
+      __z__(e, Error("var == 2", "check_error(var == 2)", __FILE__, __LINE__ - 4));
     }
     try {
-      check_error(argc == 2, Error("check_error(argc == 2)"));
-      __y__("check_error(argc == 2, Error(blah)) did not throw an exception");
+      check_error(var == 2, Error("check_error(var == 2)"));
+      __y__("check_error(var == 2, Error(blah)) did not throw an exception");
     } 
     catch (Error e) {
-      __z__(e, Error("argc == 2", "check_error(argc == 2)", __FILE__, __LINE__ - 4));
+      __z__(e, Error("var == 2", "check_error(var == 2)", __FILE__, __LINE__ - 4));
     }
     try {
-      check_error(argc == 2, "check_error(argc == 2)", TestError::BadThing());
-      __y__("check_error(argc == 2, TestError::BadThing()) did not throw an exception");
+      check_error(var == 2, "check_error(var == 2)", TestError::BadThing());
+      __y__("check_error(var == 2, TestError::BadThing()) did not throw an exception");
     }
     catch(Error e) {
       assert(e.getType() == "BadThing");
@@ -286,7 +287,7 @@ private:
   static bool testConstId();
 };
 
-bool IdTests::test(){
+bool IdTests::test() {
   runTest(testBasicAllocation);
   runTest(testCollectionSupport);
   runTest(testDoubleConversion);
@@ -299,9 +300,10 @@ bool IdTests::test(){
   return true;
 }
 
-bool IdTests::testBasicAllocation()
-{
+bool IdTests::testBasicAllocation() {
+#ifndef EUROPA_FAST
   unsigned int initialSize = IdTable::size();
+#endif
   Foo *fooPtr = new Foo();
   Id<Foo> fId1(fooPtr);
   assert(Foo::getCount() == 1);
