@@ -143,13 +143,9 @@ namespace Prototype {
     TiXmlElement * object_el = new TiXmlElement("object");
     object_el->SetAttribute("name", object->getName().toString());
     element->LinkEndChild(object_el);
-    TiXmlElement * token_el = new TiXmlElement("token");
-    token_el->SetAttribute("path", m_client->getPathAsString(token));
-    element->LinkEndChild(token_el);
+    element->LinkEndChild(tokenAsXml(token));
     if (!successor.isNoId()) {
-      TiXmlElement * successor_el = new TiXmlElement("token");
-      successor_el->SetAttribute("path", m_client->getPathAsString(successor));
-      element->LinkEndChild(successor_el);
+      element->LinkEndChild(tokenAsXml(successor));
     }
     m_bufferedTransactions.push_back(element);
   }
@@ -159,93 +155,67 @@ namespace Prototype {
     TiXmlElement * object_el = new TiXmlElement("object");
     object_el->SetAttribute("name", object->getName().toString());
     element->LinkEndChild(object_el);
-    TiXmlElement * token_el = new TiXmlElement("token");
-    token_el->SetAttribute("path", m_client->getPathAsString(token));
-    element->LinkEndChild(token_el);
+    element->LinkEndChild(tokenAsXml(token));
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyActivated(const TokenId& token){
     TiXmlElement * element = new TiXmlElement("activate");
-    TiXmlElement * token_el = new TiXmlElement("token");
-    token_el->SetAttribute("path", m_client->getPathAsString(token));
-    element->LinkEndChild(token_el);
+    element->LinkEndChild(tokenAsXml(token));
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyMerged(const TokenId& token, const TokenId& activeToken){
     TiXmlElement * element = new TiXmlElement("merge");
-    TiXmlElement * token_el = new TiXmlElement("token");
-    token_el->SetAttribute("path", m_client->getPathAsString(token));
-    element->LinkEndChild(token_el);
-    TiXmlElement * active_el = new TiXmlElement("token");
-    active_el->SetAttribute("path", m_client->getPathAsString(activeToken));
-    element->LinkEndChild(active_el);
+    element->LinkEndChild(tokenAsXml(token));
+    element->LinkEndChild(tokenAsXml(activeToken));
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyRejected(const TokenId& token){
     TiXmlElement * element = new TiXmlElement("reject");
-    TiXmlElement * path_el = new TiXmlElement("token");
-    path_el->SetAttribute("path", m_client->getPathAsString(token));
-    element->LinkEndChild(path_el);
+    element->LinkEndChild(tokenAsXml(token));
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyCancelled(const TokenId& token){
     TiXmlElement * element = new TiXmlElement("cancel");
-    TiXmlElement * path_el = new TiXmlElement("token");
-    path_el->SetAttribute("path", m_client->getPathAsString(token));
-    element->LinkEndChild(path_el);
+    element->LinkEndChild(tokenAsXml(token));
     m_bufferedTransactions.push_back(element);
   }
 
-  void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint){}
+  void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint){
+    TiXmlElement * element = new TiXmlElement("invoke");
+    element->SetAttribute("name", constraint->getName().toString());    
+    const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
+    std::vector<ConstrainedVariableId>::const_iterator iter;
+    for (iter = variables.begin() ; iter != variables.end() ; iter++) {
+      const ConstrainedVariableId variable = *iter;
+      element->LinkEndChild(variableAsXml(variable));
+    }
+    m_bufferedTransactions.push_back(element);
+  }
 
-  void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint, const AbstractDomain& domain){}
+  void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint, const AbstractDomain& domain){
+    TiXmlElement * element = new TiXmlElement("invoke");
+    element->SetAttribute("name", constraint->getName().toString());    
+    const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
+    check_error(variables.size() == 1);
+    element->LinkEndChild(variableAsXml(variables[0]));
+    element->LinkEndChild(abstractDomainAsXml(&domain));
+    m_bufferedTransactions.push_back(element);
+  }
 
   void DbClientTransactionLog::notifyVariableSpecified(const ConstrainedVariableId& variable){
     TiXmlElement * element = new TiXmlElement("specify");
-    TiXmlElement var("variable");
-    const EntityId& parent = variable->getParent();
-    if (parent != EntityId::noId()) {
-      if (TokenId::convertable(parent)) {
-        var.SetAttribute("token", m_client->getPathAsString(parent));
-      } else {
-        check_error(ALWAYS_FAILS);
-      }
-    } else {
-      check_error(ALWAYS_FAILS);
-    }
-    if (variable->getIndex() != ConstrainedVariable::NO_INDEX) {
-      var.SetAttribute("index", variable->getIndex());
-    } else {
-      check_error(ALWAYS_FAILS);
-    }
-    element->InsertEndChild(var);
+    element->LinkEndChild(variableAsXml(variable));
     element->LinkEndChild(abstractDomainAsXml(&variable->specifiedDomain()));
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyVariableReset(const ConstrainedVariableId& variable){
     TiXmlElement * element = new TiXmlElement("reset");
-    TiXmlElement var("variable");
-    const EntityId& parent = variable->getParent();
-    if (parent != EntityId::noId()) {
-      if (TokenId::convertable(parent)) {
-        var.SetAttribute("token", m_client->getPathAsString(parent));
-      } else {
-        check_error(ALWAYS_FAILS);
-      }
-    } else {
-      check_error(ALWAYS_FAILS);
-    }
-    if (variable->getIndex() != ConstrainedVariable::NO_INDEX) {
-      var.SetAttribute("index", variable->getIndex());
-    } else {
-      check_error(ALWAYS_FAILS);
-    }
-    element->InsertEndChild(var);
+    element->LinkEndChild(variableAsXml(variable));
   }
 
   void DbClientTransactionLog::flush(std::ostream& os){
@@ -255,6 +225,43 @@ namespace Prototype {
       delete *iter;
     }
     m_bufferedTransactions.clear();
+  }
+
+  TiXmlElement *
+  DbClientTransactionLog::tokenAsXml(const TokenId& token) const
+  {
+    TiXmlElement * token_el = new TiXmlElement("token");
+    token_el->SetAttribute("path", m_client->getPathAsString(token));
+    return token_el;
+  }
+
+  TiXmlElement *
+  DbClientTransactionLog::variableAsXml(const ConstrainedVariableId& variable) const
+  {
+    TiXmlElement * var_el = new TiXmlElement("variable");
+    const EntityId& parent = variable->getParent();
+    if (parent != EntityId::noId()) {
+      if (TokenId::convertable(parent)) {
+        TokenId token = parent;
+        check_error(token.isValid());
+        var_el->SetAttribute("token", m_client->getPathAsString(token));
+      } else if (ObjectId::convertable(parent)) {
+        ObjectId object = parent;
+        check_error(object.isValid());
+        var_el->SetAttribute("object", object->getName().toString());
+      } else {
+        // rule variables
+        check_error(ALWAYS_FAILS);
+      } 
+    } else {
+      check_error(ALWAYS_FAILS);
+    }
+    if (variable->getIndex() != ConstrainedVariable::NO_INDEX) {
+      var_el->SetAttribute("index", variable->getIndex());
+    } else {
+      check_error(ALWAYS_FAILS);
+    }
+    return var_el;
   }
 
 }

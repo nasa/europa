@@ -3,6 +3,7 @@
 #include "DbClient.hh"
 #include "PlanDatabase.hh"
 #include "Token.hh"
+#include "Object.hh"
 #include "../TinyXml/tinyxml.h"
 #include "../ConstraintEngine/ConstraintEngine.hh"
 
@@ -83,6 +84,8 @@ namespace Prototype {
         playVariableSpecified(element);
       } else if (strcmp(tagname, "reset") == 0) {
         playVariableReset(element);
+      } else if (strcmp(tagname, "invoke") == 0) {
+        playInvokeConstraint(element);
       } else {
         check_error(ALWAYS_FAILS);
       }
@@ -236,54 +239,11 @@ namespace Prototype {
   {
     TiXmlElement * var_el = element.FirstChildElement();
     check_error(var_el != NULL);
-    check_error(strcmp(var_el->Value(), "variable") == 0);
-
-    const char * path = var_el->Attribute("token");
-    check_error(path != NULL);
-    TokenId token = m_client->getTokenByPath(pathAsVector(path));
-    check_error(token.isValid());
-
-    int index;
-    const char * i = var_el->Attribute("index", &index);
-    check_error(i != NULL);
-    check_error(0 <= index);
-    check_error((unsigned)index < token->getVariables().size());
-    ConstrainedVariableId variable = token->getVariables()[index];
+    ConstrainedVariableId variable = getVariable(*var_el);
 
     TiXmlElement * value_el = var_el->NextSiblingElement();
     check_error(value_el != NULL);
-    double value;
-    if (strcmp(value_el->Value(), "bool") == 0) {
-      const char * value_st = value_el->Attribute("value");
-      check_error(value_st != NULL);
-      if (strcmp(value_st, "true") == 0) {
-        value = 1;
-      } else if (strcmp(value_st, "false") == 0) {
-        value = 0;
-      } else {
-        check_error(ALWAYS_FAILS);
-      }
-    } else if (strcmp(value_el->Value(), "int") == 0) {
-      int i;
-      const char * value_st = value_el->Attribute("value", &i);
-      check_error(value_st != NULL);
-      value = i;
-    } else if (strcmp(value_el->Value(), "float") == 0) {
-      const char * value_st = value_el->Attribute("value", &value);
-      check_error(value_st != NULL);
-    } else if (strcmp(value_el->Value(), "string") == 0) {
-      const char * value_st = value_el->Attribute("value");
-      check_error(value_st != NULL);
-      value = LabelStr(value_st);
-    } else if (strcmp(value_el->Value(), "object") == 0) {
-      const char * value_st = value_el->Attribute("value");
-      check_error(value_st != NULL);
-      ObjectId object = m_client->getObject(LabelStr(value_st));
-      check_error(object.isValid());
-      value = (double)object;
-    } else {
-      check_error(ALWAYS_FAILS);
-    }
+    double value = getValue(*value_el);
     m_client->specify(variable, value);    
   }
 
@@ -291,20 +251,102 @@ namespace Prototype {
   {
     TiXmlElement * var_el = element.FirstChildElement();
     check_error(var_el != NULL);
-    check_error(strcmp(var_el->Value(), "variable") == 0);
+    m_client->reset(getVariable(*var_el));
+  }
 
-    const char * path = var_el->Attribute("token");
-    check_error(path != NULL);
-    TokenId token = m_client->getTokenByPath(pathAsVector(path));
-    check_error(token.isValid());
+  void DbClientTransactionPlayer::playInvokeConstraint(const TiXmlElement & element)
+  {
+    const char * name = element.Attribute("name");
+    check_error(name != NULL);
+    std::vector<ConstrainedVariableId> variables;
+    for (TiXmlElement * child_el = element.FirstChildElement() ;
+         child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+      if (strcmp(child_el->Value(), "variable") == 0) {
+        variables.push_back(getVariable(*child_el));
+      } else {
+        // unary constraint
+        check_error(variables.size() == 1);
+        check_error(child_el->NextSiblingElement() == NULL);
+        const AbstractDomain& domain = getAbstractDomain(*child_el);
+        m_client->createConstraint(LabelStr(name), variables[0], domain);
+        return;
+      }
+    }
+    m_client->createConstraint(LabelStr(name), variables);
+  }
+
+  const AbstractDomain & DbClientTransactionPlayer::getAbstractDomain(const TiXmlElement & abstractDomain)
+  {
+    
+  }
+
+  double DbClientTransactionPlayer::getValue(const TiXmlElement & value)
+  {
+    if (strcmp(value.Value(), "bool") == 0) {
+      const char * value_st = value.Attribute("value");
+      check_error(value_st != NULL);
+      if (strcmp(value_st, "true") == 0) {
+        return 1;
+      } else if (strcmp(value_st, "false") == 0) {
+        return 0;
+      }
+    }
+    if (strcmp(value.Value(), "int") == 0) {
+      int i;
+      const char * value_st = value.Attribute("value", &i);
+      check_error(value_st != NULL);
+      return i;
+    }
+    if (strcmp(value.Value(), "float") == 0) {
+      double val;
+      const char * value_st = value.Attribute("value", &val);
+      check_error(value_st != NULL);
+      return val;
+    }
+    if (strcmp(value.Value(), "string") == 0) {
+      const char * value_st = value.Attribute("value");
+      check_error(value_st != NULL);
+      return LabelStr(value_st);
+    }
+    if (strcmp(value.Value(), "object") == 0) {
+      const char * value_st = value.Attribute("value");
+      check_error(value_st != NULL);
+      ObjectId object = m_client->getObject(LabelStr(value_st));
+      check_error(object.isValid());
+      return (double)object;
+    }
+    check_error(ALWAYS_FAILS);
+    return 0;
+  }
+
+  ConstrainedVariableId DbClientTransactionPlayer::getVariable(const TiXmlElement & variable)
+  {
+    check_error(strcmp(variable.Value(), "variable") == 0);
 
     int index;
-    const char * i = var_el->Attribute("index", &index);
+    const char * i = variable.Attribute("index", &index);
     check_error(i != NULL);
     check_error(0 <= index);
-    check_error((unsigned)index < token->getVariables().size());
-    ConstrainedVariableId variable = token->getVariables()[index];
-    m_client->reset(variable);    
+
+    const char * token_path = variable.Attribute("token");
+    if (token_path != NULL) {
+      TokenId token = m_client->getTokenByPath(pathAsVector(token_path));
+      check_error(token.isValid());
+      check_error((unsigned)index < token->getVariables().size());
+      return token->getVariables()[index];
+    }
+
+    const char * object_name = variable.Attribute("object");
+    if (object_name != NULL) {
+      ObjectId object = m_client->getObject(LabelStr(object_name));
+      check_error(object.isValid());
+      check_error((unsigned)index < object->getVariables().size());
+      return object->getVariables()[index];
+    }
+
+    // rule variables
+    check_error(ALWAYS_FAILS);
+    return ConstrainedVariableId::noId();
   }
 
 }

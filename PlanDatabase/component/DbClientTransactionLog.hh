@@ -48,6 +48,9 @@ namespace Prototype {
     const std::list<TiXmlElement*>& getBufferedTransactions() const;
 
     std::list<TiXmlElement*> m_bufferedTransactions;
+
+    TiXmlElement * tokenAsXml(const TokenId& token) const;
+    TiXmlElement * variableAsXml(const ConstrainedVariableId& variable) const;
   };
 }
 #endif

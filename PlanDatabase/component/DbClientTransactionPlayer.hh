@@ -44,10 +44,15 @@ namespace Prototype {
     void playCancelled(const TiXmlElement & element);
     void playVariableSpecified(const TiXmlElement & element);
     void playVariableReset(const TiXmlElement & element);
+    void playInvokeConstraint(const TiXmlElement & element);
 
   private:
     DbClientId m_client;
     int m_objectCount;
+
+    const AbstractDomain & getAbstractDomain(const TiXmlElement & abstractDomain);
+    double getValue(const TiXmlElement & value);
+    ConstrainedVariableId getVariable(const TiXmlElement & variable);
   };
 
 }
