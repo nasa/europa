@@ -2,7 +2,7 @@
 
 // Include prototypes required to integrate to the NDDL generated model
 #include "Nddl.hh"
-#include "SamplePlanDatabase.hh"
+#include "StandardAssembly.hh"
 
 // Support for planner
 #include "CBPlanner.hh"
@@ -26,8 +26,7 @@ namespace EUROPA {
     void* libHandle;
     SchemaId (*fcn_loadSchema)();   //function pointer to NDDL::loadSchema()
     SchemaId schema;
-    bool replay = false;
-    SamplePlanDatabase *db1;
+    StandardAssembly *db1;
     DbClientId client;
 
 
@@ -56,7 +55,7 @@ namespace EUROPA {
 
     // initialize constraint factories
     try {
-      SamplePlanDatabase::initialize();
+      StandardAssembly::initialize();
     }
     catch (Error e) {
       printf("Unexpected exception initializing constraint factories\n");
@@ -96,63 +95,23 @@ namespace EUROPA {
     //fflush(stdout);
 
     try {
-      db1 = new SamplePlanDatabase(schema, replay);
+      db1 = new StandardAssembly(schema);
     }
     catch (Error e) {
-      printf("Unexpected exception creating SamplePlanDatabase \n");
+      printf("Unexpected exception creating StandardAssembly \n");
       fflush(stdout);
       e.display();
       throw;
     }
-    //save pointer for all functions that access SamplePlanDatabase
-    accessSamplePlanDB() = db1;
+    //save pointer for all functions that access the assembly
+    accessAssembly() = db1;
 
-    printf("SamplePlanDatabase created\n");
+    printf("StandardAssembly created\n");
     fflush(stdout);
 
-    // Set ResourceOpenDecisionManager
+    // Plan given the transactions in initialStatePath.
     try {
-      check_always(initialStatePath, "Initial transaction file not specified"); 
-      DecisionManagerId local_dm = db1->planner->getDecisionManager();
-      ResourceOpenDecisionManagerId local_rodm = (new ResourceOpenDecisionManager(local_dm))->getId();
-      local_dm->setOpenDecisionManager( local_rodm );
-
-      client = db1->planDatabase->getClient();
-
-      DbClientTransactionPlayer player(client);
-      std::ifstream in(initialStatePath);
-      player.play(in);
-      
-      bool prop_status = client->propagate();
-      check_always(prop_status, "Loading initial state led to inconsistancy");
-    }
-    catch (Error e) {
-      printf("Unexpected exception while initializing model\n");
-      fflush(stdout);
-      e.display();
-      throw;
-    }
-    printf("Plan database initialized with initial transactions\n");
-    fflush(stdout);
-
-    // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
-    try {
-      ObjectId world = client->getObject("world");
-      check_error(world.isValid());
-      ConstrainedVariableId horizonStart = world->getVariable("world.m_horizonStart");
-      check_error(horizonStart.isValid());
-      ConstrainedVariableId horizonEnd = world->getVariable("world.m_horizonEnd");
-      check_error(horizonEnd.isValid());
-      int start = (int) horizonStart->baseDomain().getSingletonValue();
-      int end = (int) horizonEnd->baseDomain().getSingletonValue();
-      db1->horizon->setHorizon(start, end);
-      //create and run planner
-      ConstrainedVariableId maxPlannerSteps = world->getVariable("world.m_maxPlannerSteps");
-      check_error(maxPlannerSteps.isValid());
-      int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
-      printf("Max number of steps in this plan is %d\n", steps);
-      fflush(stdout);
-      retStatus = db1->planner->initRun(steps);
+      retStatus = db1->plan(initialStatePath);
     }
     catch (Error e) {
       printf("Unexpected exception initializing planner\n");

@@ -14,9 +14,9 @@ namespace EUROPA {
    * to static variables within a function.
    */
 
-  inline SamplePlanDatabase* &accessSamplePlanDB() {
-    static SamplePlanDatabase *pSPdb;
-    return pSPdb;
+  inline StandardAssembly* &accessAssembly() {
+    static StandardAssembly *asmbly;
+    return asmbly;
   }
 
   inline void* &accessLibHandle() {

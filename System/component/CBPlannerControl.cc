@@ -3,7 +3,7 @@
 
 // Include prototypes required to integrate to the NDDL generated model
 #include "Nddl.hh"
-#include "SamplePlanDatabase.hh"
+#include "StandardAssembly.hh"
 
 // Support for planner
 #include "CBPlanner.hh"
@@ -21,7 +21,7 @@ namespace EUROPA {
 
   extern "C"
 
-  const char* SPDstr = "SamplePlanDatabase not initialized";
+  const char* SAstr = "StandardAssembly not initialized";
 
   int initModel(const char* libPath, const char* initialState, const char* destPath) {
 
@@ -38,9 +38,9 @@ namespace EUROPA {
       /*
        * now that PPW is initialized set the output destination path 
        */
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      db1->writer->setDest(destPath);
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
+      db1->getWriter()->setDest(destPath);
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:initModel()\n");
@@ -55,9 +55,9 @@ namespace EUROPA {
     int retStatus;
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      retStatus = db1->planner->getStatus();
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
+      retStatus = db1->getPlanner()->getStatus();
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:getStatus()\n");
@@ -73,9 +73,9 @@ namespace EUROPA {
     int nextPlannerStep;
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      nextPlannerStep = db1->planner->writeStep(step_num);
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
+      nextPlannerStep = db1->getPlanner()->writeStep(step_num);
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:writeStep()\n");
@@ -92,9 +92,9 @@ namespace EUROPA {
     int nextPlannerStep;
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      nextPlannerStep = db1->planner->writeNext(num_steps);
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
+      nextPlannerStep = db1->getPlanner()->writeNext(num_steps);
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:writeNext()\n");
@@ -111,11 +111,11 @@ namespace EUROPA {
     int lastStepCompleted;
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      lastStepCompleted = db1->planner->completeRun();
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
+      lastStepCompleted = db1->getPlanner()->completeRun();
 
-      PlanDatabaseWriter::write(db1->planDatabase, std::cout);
+      PlanDatabaseWriter::write(db1->getPlanDatabase(), std::cout);
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:completeRun()\n");
@@ -131,7 +131,7 @@ namespace EUROPA {
   int terminateRun(void) {
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
+      StandardAssembly *db1 = accessAssembly();
       if (db1) {
         db1->terminate();
         delete(db1);
@@ -157,9 +157,9 @@ namespace EUROPA {
     const char* dPath;
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      dest = db1->writer->getDest();
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
+      dest = db1->getWriter()->getDest();
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:getOutputLocation()\n");
@@ -176,9 +176,9 @@ namespace EUROPA {
     int numTypes;
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      numTypes = db1->writer->getNumTransactions();
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
+      numTypes = db1->getWriter()->getNumTransactions();
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:getNumTransactions()\n");
@@ -194,9 +194,9 @@ namespace EUROPA {
     int typeLength;
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      typeLength = db1->writer->getMaxLengthTransactions();
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
+      typeLength = db1->getWriter()->getMaxLengthTransactions();
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:getMaxLengthTransactions()\n");
@@ -212,9 +212,9 @@ namespace EUROPA {
     const char** types;
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      types = db1->writer->getTransactionNameStrs();
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
+      types = db1->getWriter()->getTransactionNameStrs();
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:getTransactionNameStrs()\n");
@@ -230,9 +230,9 @@ namespace EUROPA {
     bool* filterState;
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      filterState = db1->writer->getTransactionFilterStates();
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
+      filterState = db1->getWriter()->getTransactionFilterStates();
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:getTransactionFilterStates()\n");
@@ -250,13 +250,13 @@ namespace EUROPA {
     bool* filterState;
 
     try {
-      SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
+      StandardAssembly *db1 = accessAssembly();
+      check_always(db1, SAstr);
       filterState = new bool[numTypes];
       for (int i = 0; i < numTypes; i++) {
         filterState[i] = (states[i]) ? true : false;
       }
-      db1->writer->setTransactionFilterStates(filterState, numTypes);
+      db1->getWriter()->setTransactionFilterStates(filterState, numTypes);
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:setTransactionFilterStates()\n");
