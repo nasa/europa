@@ -61,6 +61,8 @@ RunEUROPATest monkeyTests : timeline.nddl timeline-hacked.nddl timeline-hacked2.
 
 RunEUROPATest monkey2Tests : timeline2.nddl timeline22.nddl timeline23.nddl ;
 
+RunEUROPATest robotTests : req1.nddl ;
+
 # Example; not yet converted or committed
 #RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
 

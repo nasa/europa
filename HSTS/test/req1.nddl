@@ -1,0 +1,63 @@
+// ../../../ModuleTests/Parser/robot/robot.ddl
+
+#include "../../NDDL/core/Plasma.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
+#include "robot.nddl"
+
+PlannerConfig world = new PlannerConfig(0, 100, 1000);
+
+Robot Robot1 = new Robot();
+
+Hole Hole1 = new Hole();
+
+close();
+
+goal(Robot___At.Robot_Loc g39);
+  g39.activate();
+  g39.start.specify(0);
+  g39.end.specify([1 99]);
+  g39.duration.specify([1 99]);
+  g39.Loc.specify(Location.'A');
+
+goal(Robot___At.Robot_Loc g60);
+  g60.activate();
+  g60.start.specify([1 99]);
+  g60.end.specify(100);
+  g60.duration.specify([1 99]);
+  g60.Loc.specify(Location.'B');
+
+goal(Robot___Task.Doing_Nothing g84);
+  g84.activate();
+  g84.start.specify(0);
+  g84.end.specify([1 99]);
+  g84.duration.specify([1 99]);
+
+goal(Robot___Task.Doing_Nothing g104);
+  g104.activate();
+  g104.start.specify([1 99]);
+  g104.end.specify(100);
+  g104.duration.specify([1 99]);
+
+goal(Robot___Charge.Charge_Full g127);
+  g127.activate();
+  g127.start.specify(0);
+  g127.end.specify(100);
+  g127.duration.specify(100);
+
+goal(Hole___HAt.Hole_Loc g149);
+  g149.activate();
+  g149.start.specify(0);
+  g149.end.specify(100);
+  g149.duration.specify(100);
+  g149.Loc.specify(Location.'A');
+
+goal(Hole___HStatus.Hole_Fixed g172);
+  g172.activate();
+  g172.start.specify(0);
+  g172.end.specify(100);
+  g172.duration.specify(100);
+
+g39 before g60; // key=69
+g39 before g60; // key=79
+g84 before g104; // key=112
+g84 before g104; // key=122
