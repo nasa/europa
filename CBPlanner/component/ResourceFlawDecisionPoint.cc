@@ -1,5 +1,6 @@
 #include "ResourceFlawDecisionPoint.hh"
 #include "ResourceFlawChoice.hh"
+#include "DecisionPoint.hh"
 #include "Resource.hh"
 #include "PlanDatabase.hh"
 #include "Transaction.hh"
@@ -15,6 +16,7 @@ namespace Prototype {
 
   ResourceFlawDecisionPoint::ResourceFlawDecisionPoint(const ResourceId& resource) : DecisionPoint(resource->getPlanDatabase()->getClient(), resource), m_resource(resource) {}
 
+  ResourceFlawDecisionPoint::~ResourceFlawDecisionPoint() {}
 
   const bool ResourceFlawDecisionPoint::assign(const ChoiceId& choice) { 
 #if (NOISE>5)
