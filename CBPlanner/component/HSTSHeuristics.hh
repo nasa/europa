@@ -133,6 +133,7 @@ namespace PLASMA {
     void setDefaultPriorityPreference(const PriorityPref pp);
     const PriorityPref getDefaultPriorityPreference();
     void setDefaultPriorityForTokenDPsWithParent(const Priority p, const TokenTypeId& tt);
+    const Priority getDefaultPriorityForTokenDPsWithParent(const TokenTypeId& tt);
     void setDefaultPriorityForTokenDPs(const Priority p);
     void setDefaultPriorityForConstrainedVariableDPs(const Priority p);
     void setDefaultPreferenceForTokenDPs(const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders);

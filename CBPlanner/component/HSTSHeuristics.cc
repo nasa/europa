@@ -203,6 +203,11 @@ namespace PLASMA {
     m_defaultCompatibilityPriority.insert(std::make_pair<LabelStr,Priority>(TokenType::getIndexKey(tt), p));
   }
 
+  const HSTSHeuristics::Priority HSTSHeuristics::getDefaultPriorityForTokenDPsWithParent(const TokenTypeId& tt) {
+    check_error(false);
+    return 0.0;
+  }
+
   void HSTSHeuristics::setDefaultPriorityForTokenDPs(const Priority p) {
     check_error(MIN_PRIORITY <= p);
     check_error(MAX_PRIORITY >= p);
