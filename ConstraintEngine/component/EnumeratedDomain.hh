@@ -151,7 +151,7 @@ namespace Prototype {
     /**
      * @brief Construct a mutual restriction of the 2 domains to the intersection between them.
      *
-     * This method is provided as a more efficient way to handle the common operation of equatint 2 EnumeratedDomain domains.
+     * This method is provided as a more efficient way to handle the common operation of equating 2 EnumeratedDomain domains.
      * Tackling changes to both domains at once allows us to take advantage of the sorted order of the domains.
      * @param The domain to be equated with this object. It may change.
      * @return true if a change to either domain has occurred.
