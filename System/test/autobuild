@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.3 2002-10-25 00:20:48 wedgingt Exp $
+# $Id: autobuild,v 1.4 2002-10-28 05:23:24 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -17,13 +17,25 @@ ulimit -v 1100000
 # wrong.
 ulimit -a
 
+# Sometimes, this is run via cron, which does not use the usual $PATH
+PATH=/usr/local/bin:/usr/local/teTeX/bin:"$PATH"
+export PATH
+
+CVSROOT=/home/cvs/ISG-Repository
+export CVSROOT
+
 set -x
+
+startdir="`dirname $0`"
+startdir="`cd $startdir; pwd`"
+
+echo cd "$startdir"
+cd "$startdir"
+
+trap 'rmdir $startdir/working $startdir/restart $startdir/resubmit' 0
 
 # Don't run this script more than once in the same directory.
 mkdir working || exit 1
-
-startdir="`pwd`"
-trap 'rmdir $startdir/working $startdir/restart $startdir/resubmit' 0
 
 # Create this directory during a run to have this script restart via at.
 mkdir restart || exit 1
