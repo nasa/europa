@@ -53,6 +53,11 @@ namespace Prototype {
     static bool testAllocation() {
       IntervalIntDomain intDomain(10, 20);
       assert(intDomain.isFinite());
+
+      double lb, ub;
+      intDomain.getBounds(lb,ub);
+      assert(lb<ub);
+
       assert(!intDomain.isDynamic());
       IntervalIntDomain d1(intDomain);
       d1.empty();
