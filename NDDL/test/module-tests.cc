@@ -39,6 +39,7 @@ class NddlSchemaTest {
 public:
   static bool test() {
     runTest(testObjectPredicateRelationships);
+    runTest(testPredicateParameterAccessors);
     return(true);
   }
 
@@ -80,8 +81,22 @@ private:
 
     check_error(schema.hasParent(LabelStr("Battery")));
     check_error(schema.getParent(LabelStr("Battery")) == LabelStr("Resource"));
-
     return(true);
+  }
+
+  static bool testPredicateParameterAccessors() {
+    NddlSchema schema(LabelStr("TestSchema"));
+    schema.addType(LabelStr("Resource"));
+    schema.addObjectParent(LabelStr("Resource"), LabelStr("NddlResource"));
+    schema.addPredicate(LabelStr("Resource.change"));
+    schema.addType(LabelStr("Battery"));
+    schema.addObjectParent(LabelStr("Battery"), LabelStr("Resource"));
+    schema.addObjectPredicate(LabelStr("Resource"), LabelStr("Resource.change"));
+    schema.addPredicateParameter(LabelStr("Resource.change"), LabelStr("quantity"));
+    schema.addPredicateParameter(LabelStr("Resource.change"), LabelStr("quality"));
+    check_error(schema.getIndexFromName(LabelStr("Resource.change"), LabelStr("quality")) == 1);
+    check_error(schema.getNameFromIndex(LabelStr("Resource.change"), 0).getKey() == LabelStr("quantity").getKey());
+    return true;
   }
 };
 
