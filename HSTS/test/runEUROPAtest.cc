@@ -21,7 +21,7 @@ int main(int argc, const char ** argv) {
     std::cerr << "Error: must provide at least an initial transactions file." << std::endl;
     return -1;
   }
-  if (argc > 5) {
+  if (argc > 7) {
     std::cerr << "Error: too many arguments.  Expecting at most 6: initial transactions, heuristics, and plan id files." << std::endl;
     return -1;
   } 
