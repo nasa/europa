@@ -5,7 +5,14 @@ Known areas of performance improvement:
 4. Update of variables from Temporal Network.
 5. Splitting merged tokens in a non-chronological backtrack.
 
-M_3: <Under development>
+M_4:
+1. Working version of DecisionPlay and Replay
+2. Some minor fixess to the NddlCompiler
+3. A bunch of new Constraints ported from EUROPA
+4. Introduction of Constraint test harness
+5. Other minor bug fixes
+
+M_3:
 1. Nddl Compiler Cleanup
 2. Added Factories to NddlCompiler generation.
 3. Added DbClient for playing logged transactions.
