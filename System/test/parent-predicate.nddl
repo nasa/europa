@@ -34,3 +34,4 @@ close();
 
 any(Rover.Move indirectChange);
 any(Battery.change directChange);
+mainBattery.constrain(directChange);

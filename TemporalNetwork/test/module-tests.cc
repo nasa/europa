@@ -133,17 +133,19 @@ private:
   }
 
   static bool testMemoryCleanups(){
-    TemporalNetwork tn;
-    TimepointId origin = tn.getOrigin();
-
     for(int i=0;i<10;i++){
-      TimepointId x = tn.addTimepoint();
-      TimepointId y = tn.addTimepoint();
-      tn.addTemporalConstraint(origin, x, (Time)i, i+1);
-      tn.addTemporalConstraint(x, y, (Time)i, i+1);
-      Time delta = g_noTime();
-      Time epsilon = g_noTime();
-      tn.calcDistanceBounds(x, y, delta, epsilon);
+      TemporalNetwork tn;
+      TimepointId origin = tn.getOrigin();
+
+      for(int j=0;j<100;j++){
+	TimepointId x = tn.addTimepoint();
+	TimepointId y = tn.addTimepoint();
+	tn.addTemporalConstraint(origin, x, (Time)j, j+1);
+	tn.addTemporalConstraint(x, y, (Time)j, j+1);
+	Time delta = g_noTime();
+	Time epsilon = g_noTime();
+	tn.calcDistanceBounds(x, y, delta, epsilon);
+      }
     }
     return true;
   }
@@ -385,7 +387,7 @@ private:
     assert(ce.propagate());
     assert(db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
 
-    // Make it to tight.
+    // Make it too tight.
     t1.getEnd()->specify(10);
     ce.propagate();
     assert(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));

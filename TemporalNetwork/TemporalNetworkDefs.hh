@@ -11,6 +11,12 @@ namespace Prototype {
   typedef void Void;
   typedef long Time;        // Temporal distance value.
 
+  class Dnode;
+  typedef Id<Dnode> DnodeId;
+
+  class Dedge;
+  typedef Id<Dedge> DedgeId;
+
   class Tnode;
   typedef Id< Tnode > TimepointId;
 
