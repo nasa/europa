@@ -13,7 +13,7 @@ namespace EUROPA {
   class SubgoalOnceRuleRoot : public RuleInstance {
   public:
     SubgoalOnceRuleRoot(const RuleId& rule, const TokenId& token, const PlanDatabaseId& pdb, 
-                        int count) : RuleInstance(rule, token, pdb, token->getObject()) { 
+                        int count) : RuleInstance(rule, token, pdb) { 
       m_count = count;
     }
     void handleExecute();

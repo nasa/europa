@@ -11,7 +11,7 @@ namespace EUROPA {
 
   class ConditionalRuleRoot : public RuleInstance {
   public:
-    ConditionalRuleRoot(const RuleId& rule, const TokenId& token, const PlanDatabaseId& pdb) : RuleInstance(rule, token, pdb, token->getObject()) { }
+    ConditionalRuleRoot(const RuleId& rule, const TokenId& token, const PlanDatabaseId& pdb) : RuleInstance(rule, token, pdb) { }
     void handleExecute();
   }; 
 
