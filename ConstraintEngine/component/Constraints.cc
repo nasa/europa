@@ -290,6 +290,18 @@ namespace Prototype {
     return(false);
   }
 
+  LessThanConstraint::LessThanConstraint(const LabelStr& name,
+                                         const LabelStr& propagatorName,
+                                         const ConstraintEngineId& constraintEngine,
+                                         const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_lessThanEqualConstraint(LabelStr("Internal:lessThanEqual"), propagatorName,
+                                constraintEngine, m_variables),
+      m_notEqualConstraint(LabelStr("Internal:notEqual"), propagatorName,
+                                constraintEngine, m_variables) {
+    check_error(m_variables.size() == 2);
+  }
+
   MultEqualConstraint::MultEqualConstraint(const LabelStr& name,
                                            const LabelStr& propagatorName,
                                            const ConstraintEngineId& constraintEngine,
@@ -320,44 +332,46 @@ namespace Prototype {
 
   /**
    * @brief Helper method to compute new bounds for both X and Y in X*Y == Z.
+   * @return True if the target domain was modified.
    */
   bool updateMinAndMax(IntervalDomain& targetDomain,
-		       double denomMin,
-		       double denomMax,
-		       double numMin,
-		       double numMax) {
+		       double denomMin, double denomMax,
+		       double numMin, double numMax) {
     double xMax = targetDomain.getUpperBound();
     double xMin = targetDomain.getLowerBound();
-    double newMin = xMax;
-    double newMax = xMin;
+    double newMin = xMin;
+    double newMax = xMax;
 
-    // Shouldn't this also check for 0 being between denomMin and denomMax? --wedgingt 2004 Feb 24
-    if (denomMin == 0 || denomMax == 0) {
-      // If the denominators are 0, we know the results are infinite.
-      if (numMax > 0)
-        newMax = PLUS_INFINITY;
-      if (numMin < 0)
-	newMin = MINUS_INFINITY;
-    } else {
-      // Otherwise we must examine min and max of various permutations in order to handle signs correctly.
-      if (denomMin != 0) {
-	newMax = max(newMax, max(numMax / denomMin, numMin / denomMin));
-	newMin = min(newMin, min(numMax / denomMin, numMin / denomMin));
+    // If the denominator could be zero, the result could be anything
+    //   except for some sign related restrictions.
+    if (denomMin <= 0.0 && denomMax >= 0.0) {
+      if ((numMin >= 0.0 && denomMin > 0.0) ||
+          (numMax <= 0.0 && denomMax < 0.0)) {
+        if (targetDomain.intersect(0.0, xMax))
+          return(true);
+      } else {
+        if ((numMax <= 0.0 && denomMin > 0.0) ||
+            (numMin >= 0.0 && denomMax < 0.0)) {
+          if (targetDomain.intersect(xMin, 0.0))
+            return(true);
+        }
       }
-      if (denomMax != 0) {
-	newMax = max(newMax, max(numMax / denomMax, numMin/ denomMax));
-	newMin = min(newMin, min(numMax / denomMax, numMin/ denomMax));
-      }
+      return(false);
     }
+    assertTrue(denomMin != 0.0 && denomMax != 0.0);
+
+    // Otherwise we must examine min and max of all pairings to deal with signs correctly.
+    newMax = max(max(numMax / denomMin, numMin / denomMin),
+                 max(numMax / denomMax, numMin/ denomMax));
+    newMin = min(min(numMax / denomMin, numMin / denomMin),
+                 min(numMax / denomMax, numMin/ denomMax));
 
     if (xMax > newMax)
       xMax = targetDomain.translateNumber(newMax, false);
     if (xMin < newMin)
       xMin = targetDomain.translateNumber(newMin, true);
 
-    if (targetDomain.intersect(xMin, xMax) && targetDomain.isEmpty())
-      return(false);
-    return(true);
+    return(targetDomain.intersect(xMin, xMax));
   }
 
   void MultEqualConstraint::handleExecute() {
@@ -369,7 +383,8 @@ namespace Prototype {
     check_error(AbstractDomain::canBeCompared(domx, domz));
     check_error(AbstractDomain::canBeCompared(domz, domy));
 
-    /* Test preconditions for continued execution */
+    /* Test preconditions for continued execution. */
+    /* Could support one dynamic domain, but only very messily due to REAL_ENUMERATED case. */
     if (domx.isDynamic() ||
         domy.isDynamic() ||
         domz.isDynamic())
@@ -377,35 +392,41 @@ namespace Prototype {
 
     check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
 
-    double xMin;
-    double xMax;
-    double yMin;
-    double yMax;
-    double zMin;
-    double zMax;
+    double xMin, xMax, yMin, yMax, zMin, zMax;
+    for (bool done = false; !done; ) {
+      done = true;
+      domx.getBounds(xMin, xMax);
+      domy.getBounds(yMin, yMax);
+      domz.getBounds(zMin, zMax);
 
-    domx.getBounds(xMin, xMax);
-    domy.getBounds(yMin, yMax);
-    domz.getBounds(zMin, zMax);
+      // Process Z
+      double max_z = max(max(xMax * yMax, xMin * yMin), max(xMin * yMax, xMax * yMin));
+      if (zMax > max_z)
+        zMax = domz.translateNumber(max_z, false);
 
-    // Process Z
-    double max_z = max(max(xMax * yMax, xMin * yMin), max(xMin * yMax, xMax * yMin));
-    if (zMax > max_z)
-      zMax = domz.translateNumber(max_z, false);
+      double min_z = min(min(xMax * yMax, xMin * yMin), min(xMin * yMax, xMax * yMin));
+      if (zMin < min_z)
+        zMin = domz.translateNumber(min_z, true);
 
-    double min_z = min(min(xMax * yMax, xMin * yMin), min(xMin * yMax, xMax * yMin));
-    if (zMin < min_z)
-      zMin = domz.translateNumber(min_z, true);
+      if (domz.intersect(zMin, zMax) && domz.isEmpty())
+        return;
 
-    if (domz.intersect(zMin, zMax) && domz.isEmpty())
-      return;
+      // Process X
+      if (updateMinAndMax(domx, yMin, yMax, zMin, zMax)) {
+        if (domx.isEmpty())
+          return;
+        else
+          done = false;
+      }
 
-    // Process X
-    if (!updateMinAndMax(domx, yMin, yMax, zMin, zMax))
-      return;
-
-    // Process Y
-    updateMinAndMax(domy, xMin, xMax, zMin, zMax);
+      // Process Y
+      if (updateMinAndMax(domy, xMin, xMax, zMin, zMax)) {
+        if (domy.isEmpty())
+          return;
+        else
+          done = false;
+      }
+    }
   }
 
   /**
@@ -425,11 +446,6 @@ namespace Prototype {
     check_error(m_variables.size() == (unsigned int) ARG_COUNT);
   }
 
-  /**
-   * @class EqSumConstraint
-   * @brief A = B + C where B and C can each be sums.
-   * Converted into an AddEqualConstraint and/or two EqSumConstraints with fewer variables.
-   */
   EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
                                          const LabelStr& propagatorName,
                                          const ConstraintEngineId& constraintEngine,
@@ -549,17 +565,152 @@ namespace Prototype {
       delete (Constraint*) m_eqSumC1;
   }
 
+  EqualProductConstraint::EqualProductConstraint(const LabelStr& name,
+                                                 const LabelStr& propagatorName,
+                                                 const ConstraintEngineId& constraintEngine,
+                                                 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      ARG_COUNT(variables.size()),
+      m_product1(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqProductVariable"), getId()),
+      m_product2(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqProductVariable"), getId()),
+      m_product3(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqProductVariable"), getId()),
+      m_product4(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqProductVariable"), getId()) {
+    check_error(ARG_COUNT > 2 && ARG_COUNT == (unsigned int)m_variables.size());
+    std::vector<ConstrainedVariableId> scope;
+    // B is always first and C is always second for the first set, so:
+    scope.push_back(m_variables[1]); // B * ...
+    scope.push_back(m_variables[2]); // ... C ...
+    switch (ARG_COUNT) {
+    case 3: // A = B * C
+      scope.push_back(m_variables[0]); // ... = A
+      m_eqProductC1 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+      break;
+    case 4: // A = (B * C) * D
+      scope.push_back(m_product1.getId()); // ... = (B * C)
+      m_eqProductC1 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+      scope.clear();
+      scope.push_back(m_product1.getId()); // (B * C) ...
+      scope.push_back(m_variables[3]); // ... * D = ...
+      scope.push_back(m_variables[0]); // ... A
+      m_eqProductC2 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+      break;
+    case 5: case 6: case 7:
+      // 5: A = (B * C) * (D * E)
+      // 6: A = (B * C) * (D * E * F)
+      // 7: A = (B * C) * (D * E * F * G)
+      // So, do (B * C) and (D * E ...) for all three:
+      scope.push_back(m_product1.getId()); // (B * C)
+      m_eqProductC1 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+      scope.clear();
+      scope.push_back(m_product1.getId()); // (B * C) * ...
+      scope.push_back(m_product2.getId()); // (D * E ...) = ...
+      scope.push_back(m_variables[0]); // A
+      m_eqProductC2 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+      scope.clear();
+      scope.push_back(m_variables[3]); // D * ...
+      scope.push_back(m_variables[4]); // E ...
+      switch (ARG_COUNT) {
+      case 5:
+        scope.push_back(m_product2.getId()); // ... = (D * E)
+        m_eqProductC3 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        break;
+      case 6:
+        scope.push_back(m_product3.getId()); // ... = (D * E)
+        m_eqProductC3 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        scope.clear();
+        scope.push_back(m_product3.getId()); // (D * E) * ...
+        scope.push_back(m_variables[5]); // ... F = ...
+        scope.push_back(m_product2.getId()); // ... (D * E * F)
+        m_eqProductC4 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        break;
+      case 7:
+        scope.push_back(m_product3.getId()); // ... = (D * E)
+        m_eqProductC3 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        scope.clear();
+        scope.push_back(m_product3.getId()); // (D * E) * ...
+        scope.push_back(m_product4.getId()); // ... (F * G) = ...
+        scope.push_back(m_product2.getId()); // (D * E * F * G)
+        m_eqProductC4 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        scope.clear();
+        scope.push_back(m_variables[5]); // F * ...
+        scope.push_back(m_variables[6]); // ... G = ...
+        scope.push_back(m_product4.getId()); // ... (F * G)
+        m_eqProductC5 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        break;
+      default:
+        check_error(ALWAYS_FAILS);
+        break;
+      } /* switch (ARGCOUNT) 5, 6, 7 */
+      break;
+    default:
+      { // A = first_half * second_half, recursively
+        check_error(ARG_COUNT > 7);
+        scope.clear(); // Was B * C for first set: those that only call MultEqual
+        scope.push_back(m_product1.getId()); // first_half * ...
+        scope.push_back(m_product2.getId()); // ... second_half = ...
+        scope.push_back(m_variables[0]); // ... A
+        m_eqProductC1 = (new MultEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine, scope))->getId();
+        scope.clear();
+        scope.push_back(m_product1.getId()); // first_half = ...
+        unsigned int half = ARG_COUNT/2;
+        unsigned int i = 1;
+        for ( ; i <= half; i++)
+          scope.push_back(m_variables[i]); // ... X * ...
+        m_eqProductC2 = (new EqualProductConstraint(LabelStr("EqualProduct"), propagatorName, constraintEngine, scope))->getId();
+        scope.clear();
+        scope.push_back(m_product2.getId()); // second_half = ...
+        for ( ; i < ARG_COUNT; i++)
+          scope.push_back(m_variables[i]); // ... Y * ...
+        m_eqProductC3 = (new EqualProductConstraint(LabelStr("EqualProduct"), propagatorName, constraintEngine, scope))->getId();
+        break;
+      }
+      break;
+    }
+  }
+
+  EqualProductConstraint::~EqualProductConstraint() {
+    // Have to remove these before the variables they refer to
+    //   and there's no other way to force the compiler to do
+    //   these first. --wedgingt 2004 Feb 27
+    if (!m_eqProductC5.isNoId())
+      delete (Constraint*) m_eqProductC5;
+    if (!m_eqProductC4.isNoId())
+      delete (Constraint*) m_eqProductC4;
+    if (!m_eqProductC3.isNoId())
+      delete (Constraint*) m_eqProductC3;
+    if (!m_eqProductC2.isNoId())
+      delete (Constraint*) m_eqProductC2;
+    if (!m_eqProductC1.isNoId())
+      delete (Constraint*) m_eqProductC1;
+  }
+
   LessOrEqThanSumConstraint::LessOrEqThanSumConstraint(const LabelStr& name,
                                                        const LabelStr& propagatorName,
                                                        const ConstraintEngineId& constraintEngine,
                                                        const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
-      m_lessThanEqualConstraint(LabelStr("Internal::lessThanEqual"), propagatorName, constraintEngine,
-                                makeScope(m_variables[X], m_interimVariable.getId())),
-      m_addEqualConstraint(LabelStr("Internal:addEqual"), propagatorName, constraintEngine,
-			   makeScope(m_variables[Y], m_variables[Z], m_interimVariable.getId())) {
-    check_error(m_variables.size() == (unsigned int) ARG_COUNT);
+      m_lessOrEqualConstraint(LabelStr("Internal:lessOrEqThanSum:lessOrEq"), propagatorName, constraintEngine,
+                              makeScope(m_variables[0], m_interimVariable.getId())) {
+    std::vector<ConstrainedVariableId> eqSumScope = m_variables;
+    eqSumScope[0] = m_interimVariable.getId();
+    m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:lessOrEqThanSum:eqSum"), propagatorName,
+                                                constraintEngine, eqSumScope))->getId();
+  }
+
+  LessThanSumConstraint::LessThanSumConstraint(const LabelStr& name,
+                                               const LabelStr& propagatorName,
+                                               const ConstraintEngineId& constraintEngine,
+                                               const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_lessThanConstraint(LabelStr("Internal:lessThanSum:lessThan"), propagatorName, constraintEngine,
+                           makeScope(m_variables[0], m_interimVariable.getId())) {
+    std::vector<ConstrainedVariableId> eqSumScope = m_variables;
+    eqSumScope[0] = m_interimVariable.getId();
+    m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:lessThanSum:eqSum"), propagatorName,
+                                                constraintEngine, eqSumScope))->getId();
+    assertTrue(m_eqSumConstraint != 0);
   }
 
   CondAllSameConstraint::CondAllSameConstraint(const LabelStr& name,
