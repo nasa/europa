@@ -196,5 +196,43 @@ namespace Prototype {
     LessThanEqualConstraint m_lessThanEqualConstraint;
     AddEqualConstraint m_addEqualConstraint;
   };
+
+  /**
+   * @class CondAllSame
+   * @brief If A, then B == C && B == D && C == D && ... ; if not A, then !(B == C && B == D && C == D && ...).
+   */
+  class CondAllSameConstraint : public Constraint {
+  public:
+    CondAllSameConstraint(const LabelStr& name,
+                          const LabelStr& propagatorName,
+                          const ConstraintEngineId& constraintEngine,
+                          const std::vector<ConstrainedVariableId>& variables);
+
+    ~CondAllSameConstraint() { }
+
+    void handleExecute();
+
+  private:
+    const unsigned int ARG_COUNT;
+  };
+
+  /**
+   * @class CondAllDiff
+   * @brief If A, then B != C && B != D && C != D && ... ; if not A, then !(B != C && B != D && C != D && ...).
+   */
+  class CondAllDiffConstraint : public Constraint {
+  public:
+    CondAllDiffConstraint(const LabelStr& name,
+                          const LabelStr& propagatorName,
+                          const ConstraintEngineId& constraintEngine,
+                          const std::vector<ConstrainedVariableId>& variables);
+
+    ~CondAllDiffConstraint() { }
+
+    void handleExecute();
+
+  private:
+    const unsigned int ARG_COUNT;
+  };
 }
 #endif
