@@ -1102,20 +1102,33 @@ private:
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
-    tokenB.getEnd()->specify(IntervalIntDomain(3, 10));
+
+    IntervalToken tokenC(db, 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
 
     // Post a constraint on tokenB so that it will always fail when it gets merged
-    ForceFailureConstraint c0(LabelStr("ForceFailure"), LabelStr("Default"), ce, tokenB.getState());
-    assert(ce->propagate());
+    ForceFailureConstraint c0(LabelStr("ForceFailure"), LabelStr("Default"), ce, tokenC.getState());
 
-    // Now do the merge
+    // Propagate and test our specified value
+    assert(ce->propagate());
+    assert(tokenA.getStart()->lastDomain().getSingletonValue() == 5);
+
+    // Now do the merges and test
     tokenB.merge(tokenA.getId());
+    assert(ce->propagate());
+    assert(tokenA.getStart()->lastDomain().getSingletonValue() == 5);
+
+    tokenC.merge(tokenA.getId());
     assert(!ce->propagate()); // Should always fail
 
-    // Now split it and test that the specified domaion is unchanged
-    tokenB.cancel();
+    // Now split it and test that the specified domain is unchanged
+    tokenC.cancel();
     assert(ce->propagate()); // Should be OK now
-    assert(tokenB.getEnd()->getSpecifiedDomain() == IntervalIntDomain(3, 10));
+    assert(tokenA.getStart()->lastDomain().getSingletonValue() == 5);
 
     DEFAULT_TEARDOWN();
     return true;
