@@ -174,8 +174,6 @@ namespace Prototype {
 
     static bool testPrinting() {
       IntervalIntDomain d1(1, 100);
-      //       std::stringstream ss1;
-      //       d1 >> ss1;
       std::stringstream ss1;
       d1 >> ss1;
       std::string actualString = ss1.str();
@@ -916,8 +914,10 @@ namespace Prototype {
     }
   };
 
-  // Has to be "global" or some compilers complain about uses as template type.
+  // These have to be "global" (outside any class, at least) or some
+  // compilers complain about uses as template type.
   typedef enum Fruits { orange, lemon, blueberry, raspberry } Fruits;
+  typedef enum Colors { orangeColor, yellow, blue, red } Colors;
 
   class MixedTypeTest {
   public:
@@ -1019,11 +1019,24 @@ namespace Prototype {
       dom1.insert(9.037);
       dom1.close();
 
-      assert(dom0 != dom1);
+      assert(dom0.getType() == AbstractDomain::USER_DEFINED);
+      assert(dom1.getType() == AbstractDomain::USER_DEFINED);
+      assert(dom0.getTypeName() != dom1.getTypeName());
+      // Last three assert()s imply next one.
+      assert(!AbstractDomain::canBeCompared(dom0, dom1));
 
       Domain<int> dom2(10);
       assert(!dom2.isOpen());
       assert(dom2.isSingleton());
+
+      assert(AbstractDomain::canBeCompared(dom0, dom2));
+      assert(dom0 != dom2);
+
+      assert(!dom0.isSubsetOf(dom2));
+      assert(dom0.isSubsetOf(dom0));
+      assert(dom2.isSubsetOf(dom0));
+      assert(dom2.isSubsetOf(dom2));
+
       return(true);
     }
 
@@ -1035,18 +1048,21 @@ namespace Prototype {
 
       copyPtr = falseDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+      assertTrue(copyPtr->getTypeName() == LabelStr("BOOL"));
       assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       delete copyPtr;
 
       copyPtr = trueDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+      assertTrue(copyPtr->getTypeName() == LabelStr("BOOL"));
       assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       delete copyPtr;
 
       copyPtr = both.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+      assertTrue(copyPtr->getTypeName() == LabelStr("BOOL"));
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       delete copyPtr;
@@ -1070,6 +1086,7 @@ namespace Prototype {
 
       copyPtr = emptyOpen.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
       assertTrue(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertTrue(copyPtr->isEnumerated());
@@ -1082,6 +1099,7 @@ namespace Prototype {
 
       copyPtr = fourDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
       assertTrue(copyPtr->isOpen());
       assertTrue(copyPtr->isEnumerated());
       copyPtr->close();
@@ -1091,6 +1109,7 @@ namespace Prototype {
 
       copyPtr = fiveDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isEnumerated());
       assertTrue(copyPtr->getSize() == 5);
@@ -1099,6 +1118,7 @@ namespace Prototype {
 
       copyPtr = oneDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isEnumerated());
       assertTrue(copyPtr->isSingleton());
@@ -1124,6 +1144,7 @@ namespace Prototype {
 
       copyPtr = empty.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
+      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
@@ -1145,6 +1166,7 @@ namespace Prototype {
 
       copyPtr = one2ten.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
+      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
@@ -1164,6 +1186,7 @@ namespace Prototype {
 
       copyPtr = four.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
+      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
@@ -1198,6 +1221,7 @@ namespace Prototype {
 
       copyPtr = empty.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
+      assertTrue(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
@@ -1219,6 +1243,7 @@ namespace Prototype {
 
       copyPtr = one2ten.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
+      assertTrue(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
@@ -1240,6 +1265,7 @@ namespace Prototype {
 
       copyPtr = four.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
+      assertTrue(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
@@ -1268,19 +1294,31 @@ namespace Prototype {
     static void testCopyingTemplateDomains() {
       AbstractDomain *copyPtr;
       Domain<Fruits> orangeOnly(orange);
+      Domain<Colors> yellowOnly(yellow);
       std::list<Fruits> fruitList;
+      Domain<Fruits> emptyFruit(fruitList);
       fruitList.push_back(lemon);
       fruitList.push_back(raspberry);
       Domain<Fruits> noOrange(fruitList);
       fruitList.push_back(orange);
       Domain<Fruits> fruitDom(fruitList);
-      Domain<Fruits> emptyFruit;
-      emptyFruit.close();
 
       // Should test dynamic domains
 
       copyPtr = emptyFruit.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+      assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
+      std::cerr << "\nCopy's type name is " << copyPtr->getTypeName().toString() << ".\n";
+
+      // This assertion is false in the current implementation because
+      // Domain<TYPE>::getTypeName() uses an implementation/compiler
+      // dependent way to get the name of the type that uses the usual
+      // C++ name "mangling" in all the compilers we have.
+      // Skipping this check is probably OK since the type names are
+      // compared within AbstractDomain::canBeCompared().
+      // --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 22
+      // assertTrue(copyPtr->getTypeName() == LabelStr("Fruits"));
+
+      assertFalse(AbstractDomain::canBeCompared(*copyPtr, yellowOnly));
       assertFalse(copyPtr->isOpen());
       assertFalse(copyPtr->isNumeric());
       assertTrue(copyPtr->isEnumerated());
@@ -1300,7 +1338,12 @@ namespace Prototype {
       delete copyPtr;
 
       copyPtr = orangeOnly.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+      assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
+
+      // See comment above near similar assertion.
+      // assertTrue(copyPtr->getTypeName() == LabelStr("Fruits"));
+
+      assertFalse(AbstractDomain::canBeCompared(*copyPtr, yellowOnly));
       assertFalse(copyPtr->isOpen());
       assertFalse(copyPtr->isNumeric());
       assertTrue(copyPtr->isEnumerated());
@@ -1325,7 +1368,12 @@ namespace Prototype {
       delete copyPtr;
 
       copyPtr = fruitDom.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+      assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
+      
+      // See comment above near similar assertion.
+      // assertTrue(copyPtr->getTypeName() == LabelStr("Fruits"));
+
+      assertFalse(AbstractDomain::canBeCompared(*copyPtr, yellowOnly));
       assertFalse(copyPtr->isOpen());
       assertFalse(copyPtr->isNumeric());
       assertTrue(copyPtr->isEnumerated());
@@ -1350,12 +1398,25 @@ namespace Prototype {
       assertFalse(copyPtr->isSubsetOf(noOrange));
       delete copyPtr;
 
+      copyPtr = yellowOnly.copy();
+      assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
+      
+      // See comment above near similar assertion.
+      // assertTrue(copyPtr->getTypeName() == LabelStr("Colors"));
+
+      assertTrue(AbstractDomain::canBeCompared(*copyPtr, yellowOnly));
+      assertFalse(AbstractDomain::canBeCompared(*copyPtr, orangeOnly));
+      delete copyPtr;
+
       // Cannot check that expected errors are detected until
       //   new error handling support is in use.
     }
 
     static bool testCopying() {
+
       // These five functions were mistakenly put in DomainTest.cc originally.
+      // They also test the new getTypeName() member functions a little and
+      // those member functions' effects on AbstractDomain::canBeCompared().
       testCopyingBoolDomains();
       testCopyingEnumeratedDomains();
       testCopyingIntervalDomains();
