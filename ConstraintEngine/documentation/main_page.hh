@@ -60,6 +60,33 @@
  * exploration of incremental changes to the core as we go.
  * @see Consraint, AbstractDomain, Propagator, ConstrainedVariable, Variable
  *
+ * @section results Performane Results
+ * A number of performance tests have been conducted. There are parallel versions of each test in DomainTest.cc and EuropaDomainTest.cc,
+ * reflecting the new constraint engine paradigm and the exiting Europa code respoectively. The tests are ass follows:
+ * @li testIntersection - compares the cost for domain creation and intersection for numeric intreval domains.
+ * @li testEquate - compares the cost of domain creation, and mutual intersection of 2 domains for LabelSet domains.
+ * @li testLabelSetPerformance - compares the cost of creation of 10 variables, creation of 9 equality constraints placing all variables in an
+ * equivalence class, and then looping over successive domain reductions to obtain a singleton value. This test is done with LabelSet based
+ * variables.
+ * @li testIntervalPerofmance - same basic setup as testLabelSetPerformance except in this case we use interval integer domains.
+ * 
+ * All results are based on the following:
+ * @li run on murphys (linux box)
+ * @li Europa is compiled with: make EUROPA_VERSION=_EUROPA_FAST_VERSION_ OPTIMIZE=3
+ * @li ConstraintEngineDefs.hh includes: #define #define _PROTOTYPE_FAST_VALUE_
+ * @li ConstraintEngine makefile has: CC_FLAGS=-O3
+ * 
+ * Results are shown below:
+ * @verbatim
+
+TEST                     ConstraintEngine                     Europa         Factor Improvement
+=================================================================================================
+testEquate                   2.82                              7.58              2.7
+testIntersection             0.35                              2.26              7.5
+testLabelSetPerformance      0.30                              1.48              4.9
+testIntervalPerformance      0.19                              1.03              5.4 @endverbatim
+ * 
+ * Note that the above results do not explore any possible improvements in algoritms or handling of propagation events.
  * @section guide Readers Guide
  * @li module-tests.cc provides test cases for the system which are also intstuctive for seeing its use. In particular, look at
  * methods in the Constrainttest class.
@@ -76,7 +103,6 @@
  *
  * @section build Build Instructions
  * Some of the basics are:
- * @li make this simple change to Value.cc:1320:  os << "Temporary hack to simplify linking while working on CE"; // os << obj->getName();
  * @li To build code, be sure to set the EUROPA_ROOT in the makefile.
  * @li make doc generates the html you are looking at :-)
  * @li make will run the module tests
