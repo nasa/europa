@@ -1,4 +1,9 @@
 
+class Y
+{
+  class G {}
+}
+
 class X
 extends Y.G
 {
