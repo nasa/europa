@@ -78,6 +78,12 @@
 #define DEFAULT_TEARDOWN_PLAN() \
     delete (DbLogger*) dbLId;
 
+
+#define DEFAULT_SETUP_HEURISTICS() \
+  HSTSHeuristics heuristics; 
+
+#define DEFAULT_TEARDOWN_HEURISTICS()
+
 class DefaultSetupTest {
 public:
   static bool test() {
@@ -324,6 +330,46 @@ private:
   }
 };
 
+class HeuristicsTest {
+public:
+  static bool test() {
+    runTest(testDefaultInitialization);
+    runTest(testTokenInitialization);
+    runTest(testVariableInitialization);
+    runTest(testReader);
+    return(true);
+  }
+private:
+  static bool testDefaultInitialization() {
+    bool retval = false;
+    DEFAULT_SETUP_HEURISTICS();
+    retval = testDefaultInitializationImpl(heuristics);
+    DEFAULT_TEARDOWN_HEURISTICS();
+    return retval;
+  }
+  static bool testTokenInitialization() {
+    bool retval = false;
+    DEFAULT_SETUP_HEURISTICS();
+    retval = testTokenInitializationImpl(heuristics);
+    DEFAULT_TEARDOWN_HEURISTICS();
+    return retval;
+  }
+  static bool testVariableInitialization() {
+    bool retval = false;
+    DEFAULT_SETUP_HEURISTICS();
+    retval = testVariableInitializationImpl(heuristics);
+    DEFAULT_TEARDOWN_HEURISTICS();
+    return retval;
+  }
+  static bool testReader() {
+    bool retval = false;
+    DEFAULT_SETUP_HEURISTICS();
+    retval = testReaderImpl(heuristics);
+    DEFAULT_TEARDOWN_HEURISTICS();
+    return retval;
+  }
+};
+
 int main() {
 
   REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
@@ -344,6 +390,7 @@ int main() {
     runTestSuite(MultipleDecisionManagerTest::test);
     runTestSuite(DecisionPointTest::test);
     runTestSuite(TwoCyclePlanningTest::test);
+    runTestSuite(HeuristicsTest::test);
   }
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();

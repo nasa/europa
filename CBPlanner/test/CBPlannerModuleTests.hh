@@ -16,6 +16,7 @@
 #include "TemporalVariableCondition.hh"
 #include "DynamicInfiniteRealCondition.hh"
 #include "TokenDecisionPoint.hh"
+#include "HSTSHeuristics.hh"
 
 namespace Prototype {
 
@@ -63,5 +64,13 @@ bool testMultipleDMsImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema,
   bool testFindAnotherPlanImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner);
 
   bool testAddSubgoalAfterPlanningImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner);
+
+  bool testDefaultInitializationImpl(HSTSHeuristics& heuristics);
+
+  bool testTokenInitializationImpl(HSTSHeuristics& heuristics);
+
+  bool testVariableInitializationImpl(HSTSHeuristics& heuristics);
+
+  bool testReaderImpl(HSTSHeuristics& heuristics);
 }
 #endif
