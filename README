@@ -6,6 +6,9 @@ Known areas of performance improvement:
 5. Improve exchange of data in TemporalPropagator with  direct calculation of duration variables.
 6. Update TemporalNetwork to adjust for deactivated constraints
 
+MIGRATED:
+1. Migrated to PLASMA build structure and cvs directory.
+
 M_15:
 1. Changed CBPlanner so that responsibilities for maintaining open
 decisions in sorted order relies on the OpenDecisionManager rather than the
