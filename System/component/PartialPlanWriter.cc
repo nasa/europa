@@ -348,15 +348,17 @@ namespace Prototype {
           int emptySlots = 0;
           for(std::list<TokenId>::const_iterator tokenIterator = orderedTokens.begin();
               tokenIterator != orderedTokens.end(); ++tokenIterator) {
+            int slotOrder = 0;
             const TokenId &token = *tokenIterator;
-            outputToken(token, T_INTERVAL, slotId, slotIndex, (ObjectId) tId, tokOut, tokRelOut, 
-                        varOut);
+            outputToken(token, T_INTERVAL, slotId, slotIndex, slotOrder, (ObjectId) tId, tokOut,
+                        tokRelOut, varOut);
             tokens.erase(token);
             std::set<TokenId>::const_iterator mergedTokenIterator = 
               token->getMergedTokens().begin();
             for(;mergedTokenIterator != token->getMergedTokens().end(); ++mergedTokenIterator) {
-              outputToken(*mergedTokenIterator, T_INTERVAL, slotId, slotIndex, (ObjectId &) tId, 
-                          tokOut, tokRelOut, varOut);
+              slotOrder++;
+              outputToken(*mergedTokenIterator, T_INTERVAL, slotId, slotIndex, slotOrder,
+                          (ObjectId &) tId, tokOut, tokRelOut, varOut);
               tokens.erase(*mergedTokenIterator);
             }
             slotId++;
@@ -392,7 +394,7 @@ namespace Prototype {
           for(std::list<TransactionId>::iterator transIt = resTrans.begin();
               transIt != resTrans.end(); ++transIt) {
             TransactionId trans = *transIt;
-            outputToken(trans, T_TRANSACTION, 0, 1, rId, tokOut, tokRelOut, varOut);
+            outputToken(trans, T_TRANSACTION, 0, 1, 0, rId, tokOut, tokRelOut, varOut);
             tokens.erase(trans);
           }
           std::list<InstantId> insts;
@@ -415,7 +417,7 @@ namespace Prototype {
           tokenIterator != tokens.end(); ++tokenIterator) {
 	TokenId token = *tokenIterator;
 	check_error(token.isValid());
-	outputToken(token, T_INTERVAL, 0, 0, ObjectId::noId(), tokOut, tokRelOut, varOut);
+	outputToken(token, T_INTERVAL, 0, 0, 0, ObjectId::noId(), tokOut, tokRelOut, varOut);
       }
 
       (*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
@@ -484,9 +486,9 @@ namespace Prototype {
     }
 
     void PartialPlanWriter::outputToken(const TokenId &token, const int type, const int slotId, 
-                                        const int slotIndex, const ObjectId &tId, 
-                                        std::ofstream &tokOut, std::ofstream &tokRelOut,
-                                        std::ofstream &varOut) {
+                                        const int slotIndex, const int slotOrder, 
+                                        const ObjectId &tId, std::ofstream &tokOut, 
+                                        std::ofstream &tokRelOut, std::ofstream &varOut) {
       check_error(token.isValid());
       if(token->isIncomplete()) {
 	std::cerr << "Token " << token->getKey() << " is incomplete.  Skipping. " << std::endl;
@@ -541,14 +543,16 @@ namespace Prototype {
       else {
 	tokOut << paramVarIds << TAB;
       }
-      /*ExtraData: QuantityMin:QuantityMax*/
+      /*ExtraInfo: QuantityMin:QuantityMax*/
       if(type == T_TRANSACTION) {
         TransactionId trans = (TransactionId) token;
         tokOut << trans->getMin() << COMMA << trans->getMax();
       }
+      /*ExtraInfo: SlotOrder*/
       else {
-        tokOut << SNULL;
+        tokOut << slotOrder;
       }
+      
       tokOut << std::endl;
       numTokens++;
     }
