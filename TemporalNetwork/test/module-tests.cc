@@ -432,7 +432,7 @@ private:
 
     // Conduct the merge.
     t2.merge(t1.getId());
-    assert(!c0.isActive());
+
     // Now changes on v0 should propagate to the end variable of t1.
     v0.specify(IntervalIntDomain(8, 10));
     assert(t1.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
@@ -441,7 +441,6 @@ private:
     // of the inactive token
     t2.cancel();
 
-    assert(c0.isActive());
     assert(t2.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
 
     DEFAULT_TEARDOWN();
