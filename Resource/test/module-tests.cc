@@ -2,7 +2,6 @@
 #include "Resource.hh"
 #include "Transaction.hh"
 #include "ResourceConstraint.hh"
-#include "ResourceTransactionConstraint.hh"
 #include "ResourcePropagator.hh"
 #include "ResourceListener.hh"
 
@@ -27,10 +26,8 @@
 #include <list>
 // Useful constants when doing constraint vio9lation tests
 const double initialCapacity = 5;
-const int horizonStart = 0;
-const int horizonEnd = 10;
-const double limitMax = 10;
 const double limitMin = 0;
+const double limitMax = 10;
 const double productionRateMax = 5;
 const double productionMax = 40;
 const double consumptionRateMax = -8;
@@ -138,9 +135,7 @@ private:
     assert(instants.size() == 0);
 
     // Construction with argument setting
-    ResourceId rid = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), 189.34, 0, 1000))->getId();
-    assert(rid->getHorizonStart() == 0);
-    assert(rid->getHorizonEnd() == 1000);
+    new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), 189.34, 0, 1000);
 
     db.close();
     DEFAULT_TEARDOWN();
@@ -175,11 +170,6 @@ private:
     r->getTransactions(transactions);
     assert(transactions.empty());
 
-    // Test insertion of t that is outside the horizon of the resource      
-    TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1001, 2000)))->getId();
-    bool res = t2->getObject()->getDerivedDomain().isMember(r);
-    assert( !res);
-
     // Test double insertion 
     r->constrain(t1);
     ce.propagate();
@@ -195,37 +185,38 @@ private:
   static bool testTransactionChangeHandling()
   {
     DEFAULT_SETUP(ce,db,false);
-    
+    const int HORIZON_END = 1000;
+
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
     assert(checkLevelArea(r) == 0);
 
-    TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, PLUS_INFINITY), 45, 45))->getId();
+    TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, HORIZON_END), 45, 45))->getId();
     r->constrain(t1);
     ce.propagate();
-    assert(checkSum(r) == (0*1 + 1000*1));
+    assert(checkSum(r) == (1*1 + 2*1));
     assert(checkLevelArea(r) == 1000 * 45);
 
-    TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, PLUS_INFINITY), 35, 35))->getId();
+    TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, HORIZON_END), 35, 35))->getId();
     r->constrain(t2);
     ce.propagate();
-    assert(checkSum(r) == (0*1 + 1*2 + 1000*2));
+    assert(checkSum(r) == (1*1 + 2*2 + 3*2));
     assert(checkLevelArea(r) == (1*45 + 80*999));
 
-    TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, PLUS_INFINITY), 20, 20))->getId();
+    TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, HORIZON_END), 20, 20))->getId();
     r->constrain(t3);
     assert(ce.propagate());
-    assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 1000*3));
+    assert(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
     assert(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
 
     t2->setEarliest(2);
     assert(ce.propagate());
-    assert(checkSum(r) == (0*1 + 2*3 + 1000*3));
+    assert(checkSum(r) == (1*1 + 2*3 + 3*3));
     assert(checkLevelArea(r) == (2*45 + 998*100));
 
     t2->setEarliest(1);
     assert(ce.propagate());
-    assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 1000*3));
+    assert(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
     assert(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
     DEFAULT_TEARDOWN();
     return(true);
@@ -237,54 +228,54 @@ private:
     DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 1, 7))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
     assert(ce.propagate() && checkSum(r) == 0); 
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 6)))->getId();
     r->constrain(t1);
-    assert(ce.propagate() && checkSum(r) == (1*0 + 4*1 + 6*1 + 7*0));
+    assert(ce.propagate() && checkSum(r) == (1*1 + 2*1));
 
     TransactionId t2  = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(-4, 10)))->getId();
     r->constrain(t2);
-    assert(ce.propagate() && checkSum(r) == (1*1 + 4*2 + 6*2 + 7*1));
+    assert(ce.propagate() && checkSum(r) == (1*1 + 2*2 + 3*2 + 4*1));
 
     TransactionId t3  = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 3)))->getId();
     r->constrain(t3);
-    assert(ce.propagate() && checkSum(r) == (1*2 + 3*2 + 4*2 + 6*2 + 7*1)); 
+    assert(ce.propagate() && checkSum(r) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1)); 
 
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 2)))->getId();
     r->constrain(t4);
-    assert(ce.propagate() && checkSum(r) == (1*3 + 2*3 + 3*2 + 4*2 + 6*2 + 7*1)); 
+    assert(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1)); 
 
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 7)))->getId();
     r->constrain(t5);
-    assert(ce.propagate() && checkSum(r) == (1*3 + 2*3 + 3*3 + 4*3 + 6*3 + 7*2)); 
+    assert(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1)); 
 
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 7)))->getId();
     r->constrain(t6);
-    assert(ce.propagate() && checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 6*4 + 7*3)); 
+    assert(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1)); 
 
     // Insert for a singleton value
     TransactionId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5,5)))->getId();
     r->constrain(t7);
-    assert(ce.propagate() && checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 5*5 + 6*4 + 7*3)); 
+    assert(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1)); 
 
     // Now free them and check the retractions are working correctly
     r->free(t7);
-    assert(ce.propagate() && checkSum(r)  == (1*3 + 2*3 + 3*3 + 4*4 + 6*4 + 7*3)); 
+    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
     r->free(t6);
-    assert(ce.propagate() && checkSum(r)  == (1*3 + 2*3 + 3*3 + 4*3 + 6*3 + 7*2)); 
+    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
     r->free(t5);
-    assert(ce.propagate() && checkSum(r)  == (1*3 + 2*3 + 3*2 + 4*2 + 6*2 + 7*1)); 
+    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
     r->free(t4);
-    assert(ce.propagate() && checkSum(r)  == (1*2 + 3*2 + 4*2 + 6*2 + 7*1)); 
+    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
     r->free(t3);
-    assert(ce.propagate() && checkSum(r)  == (1*1 + 4*2 + 6*2 + 7*1));
+    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*2 + 3*2 + 4*1));
     r->free(t2);
-    assert(ce.propagate() && checkSum(r)  == (1*0 + 4*1 + 6*1 + 7*0));
+    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*1));
     r->free(t1);
-    assert(ce.propagate() && checkSum(r) == 0); 
+    assert(ce.propagate() && checkSum(r) == 0);
 
     DEFAULT_TEARDOWN();
     return(true);
@@ -301,43 +292,43 @@ private:
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), 1, 1))->getId();
     r->constrain(t1);
     ce.propagate();
-    assert(checkSum(r) == (0*1 + 1*1 + 10*0)); 
+    assert(checkSum(r) == (1*1 + 2*1)); 
     assert(checkLevelArea(r) == 1);
 
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 3), -4, -4))->getId();
     r->constrain(t2);
     ce.propagate();
-    assert(checkSum(r) == (0*1 + 1*2 + 3*1 + 10*0)); 
+    assert(checkSum(r) == (1*1 + 2*2 + 3*1)); 
     assert(checkLevelArea(r) == (1 + 4*2));
 
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 4), 8, 8))->getId();
     r->constrain(t3);
     ce.propagate();
-    assert(checkSum(r) == (0*1 + 1*2 + 2*2 + 3*2 + 4*1 + 10*0)); 
+    assert(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1)); 
     assert(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 8*1));
 
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 6), 2, 2))->getId();
     r->constrain(t4);
     ce.propagate();
-    assert(checkSum(r) == (0*1 + 1*2 + 2*2 + 3*3 + 4*2 + 6*1 + 10*0));
+    assert(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
  
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 10), -6, -6))->getId();  
     r->constrain(t5);
     ce.propagate();
-    assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 3*4 + 4*3 + 6*2 + 10*1));
+    assert(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
 
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 8), 3, 3))->getId();
     r->constrain(t6);
     ce.propagate();
-    assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 3*4 + 4*3 + 6*3 + 8*2 + 10*1));
+    assert(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
 
     TransactionId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(7, 8), -4, -4))->getId();
     r->constrain(t7);
     ce.propagate();
-    assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 3*4 + 4*3 + 6*3 + 7*3 + 8*3 + 10*1));
+    assert(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + +7* 3 + 8*3 + 9*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
 
     DEFAULT_TEARDOWN();
@@ -370,7 +361,7 @@ private:
     t1->setMin(-4);
     t1->setMax(1);
     ce.propagate();
-    assert(checkLevelArea(r) == 5*7 + 5*2);
+    assert(checkLevelArea(r) == 5*7);
 
     DEFAULT_TEARDOWN();
     return(true);
@@ -468,8 +459,8 @@ private:
     DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+				 limitMin, limitMax, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
     // Make sure that it will reject a transaction that violates the spec up front
@@ -510,8 +501,8 @@ private:
     DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+				 limitMin, limitMax, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
     std::list<ResourceViolationId> violations;
@@ -563,8 +554,8 @@ private:
 
     DEFAULT_SETUP(ce,db,false);
     
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionMax, productionMax, MINUS_INFINITY, MINUS_INFINITY))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+				 limitMin, limitMax, productionMax, productionMax, MINUS_INFINITY, MINUS_INFINITY))->getId();
     db.close();
 
     std::list<ResourceViolationId> violations;
@@ -605,8 +596,8 @@ private:
 
     DEFAULT_SETUP(ce,db,false);
     
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, PLUS_INFINITY, PLUS_INFINITY, consumptionMax, consumptionMax))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+				 limitMin, limitMax, PLUS_INFINITY, PLUS_INFINITY, consumptionMax, consumptionMax))->getId();
     db.close();
 
     std::list<ResourceViolationId> violations;
@@ -679,10 +670,10 @@ private:
     // Define input constrains for the resource spec
     DEFAULT_SETUP(ce,db,false);
     
-    ResourceId r1 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, -consumptionRateMax, -consumptionMax, -productionRateMax, -productionMax))->getId();
-    ResourceId r2 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, -consumptionRateMax, -consumptionMax, -productionMax, -productionMax))->getId();
+    ResourceId r1 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+				 limitMin, limitMax, -consumptionRateMax, -consumptionMax, -productionRateMax, -productionMax))->getId();
+    ResourceId r2 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), initialCapacity,  
+				 limitMin, limitMax, -consumptionRateMax, -consumptionMax, -productionMax, -productionMax))->getId();
     db.close();
 
     std::list<ViolationId> violations;
@@ -749,10 +740,10 @@ private:
     // Define input constrains for the resource spec
     DEFAULT_SETUP(ce,db,false);
     
-    ResourceId r1 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
-    ResourceId r2 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionMax, productionMax, consumptionRateMax, consumptionMax))->getId();
+    ResourceId r1 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+				 limitMin, limitMax, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
+    ResourceId r2 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), initialCapacity,  
+				 limitMin, limitMax, productionMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
     std::list<ViolationId> violations;
@@ -821,8 +812,8 @@ private:
     // Define input constrains for the resource spec
     DEFAULT_SETUP(ce,db,false);
     
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity + 1, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionRateMax, productionMax + 100, consumptionRateMax, consumptionMax))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity + 1,  
+				 limitMin, limitMax, productionRateMax, productionMax + 100, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
 
@@ -851,8 +842,8 @@ private:
   {
     DEFAULT_SETUP(ce,db,false);
     
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+				 limitMin, limitMax, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
     // Set up constraints so that all rate and level constraints are OK - balanced consumption
@@ -908,8 +899,8 @@ private:
     // Define input constrains for the resource spec
     DEFAULT_SETUP(ce,db,false);
     ResourceId r = (new Resource( db.getId(), LabelStr("Resource"), LabelStr("r1"), 
-								  initialCapacity, horizonStart, horizonEnd, 
-								  limitMax, limitMin, productionRateMax, 5, consumptionRateMax, consumptionMax))->getId();
+								  initialCapacity, 
+								  limitMin, limitMax, productionRateMax, 5, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
 	// Register the listener
@@ -951,6 +942,7 @@ private:
     assert(r != ResourceId::noId());
     r->updateTransactionProfile();
     int sum = 0;
+    int count = 1;
     if(loggingEnabled())
       std::cout << "\n        Transactions  ";
     const std::map<int, InstantId>& instants = r->getInstants();
@@ -958,8 +950,12 @@ private:
       InstantId current = it->second;
       if(loggingEnabled())
 	std::cout <<  current->getTime() << ":[" << current->getTransactionCount() << "] ";
-      sum += current->getTime() * current->getTransactionCount();
+      sum += count * current->getTransactionCount();
+      count++;
     }
+
+    if(loggingEnabled())
+      std::cout << "\n";
 
     return(sum);
   }
@@ -987,9 +983,6 @@ private:
       ++it;
     }
 
-    // Final update is for the last instant, so use the end of the horizon
-    area += ((current->getLevelMax() - current->getLevelMin()) * (r->getHorizonEnd() - current->getTime()));
-
     //std::cout << "        Level      ";
     //r->print(std::cout);
     return area;
@@ -1010,7 +1003,7 @@ int main() {
   Schema::instance();
   initConstraintLibrary();
   REGISTER_CONSTRAINT(ResourceConstraint, "ResourceRelation", "Resource");
-  REGISTER_CONSTRAINT(ResourceTransactionConstraint, "HorizonRelation", "Default");
+  REGISTER_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Default");
   REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);

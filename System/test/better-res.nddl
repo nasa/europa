@@ -3,9 +3,9 @@
 
 //*****************************************************************
 class Battery extends Resource {
-      Battery(int hs, int he, float ic, float ll_min, float ll_max,
+      Battery(float ic, float ll_min, float ll_max,
 	float prod_max, float cm) {
-        super(hs, he, ic, ll_min, ll_max, prod_max, cm );
+        super(ic, ll_min, ll_max, prod_max, cm );
       } 
 }
 
@@ -47,9 +47,9 @@ Mission::SampleCycle{
 class Rover{
  Battery m_battery;
 
- Rover( int bhs, int bhe, float bat_start, float bat_low, float bat_high,
+ Rover( float bat_start, float bat_low, float bat_high,
 	float bat_prod, float mc ) {
-  m_battery = new Battery(bhs, bhe, bat_start, bat_low, bat_high, 
+  m_battery = new Battery(bat_start, bat_low, bat_high, 
 	bat_prod, mc);
  }
  // Do the work
@@ -91,20 +91,6 @@ Rover::Sample{
      eq(sb.m_x, m_x);
      eq(sb.m_y, m_y);
   }
-  /*
-  // What do we do before  
-  bool sw_before;
-  if (sw_before==false) {
-     met_by(Drive dr2);
-     eq(dr2.m_to_x, m_x);
-     eq(dr2.m_to_y, m_y);
-  }
-  if (sw_before==true) {
-     met_by(Standby sb2);
-     eq(sb2.m_x, m_x);
-     eq(sb2.m_y, m_y);
-  }
-*/
 }
 
 Rover::Drive{
@@ -117,13 +103,7 @@ Rover::Drive{
   
 
   // Ensure that the end points are different
-  //differentPoint(m_from_x, m_from_y, m_to_x, m_to_y);
-  /*  
-  bool nsx, nsy;
-  different( m_from_x, m_to_x, nsx );
-  different( m_from_y, m_to_y, nsy );
-  atLeastOne( nsx, nsy );
-  */
+
   float x_sq, y_sq, dist;
   diffSquare( m_from_x, m_to_x, x_sq );
   diffSquare( m_from_y, m_to_y, y_sq );
@@ -146,20 +126,6 @@ Rover::Drive{
      eq(sb.m_x, m_to_x);
      eq(sb.m_y, m_to_y);
   }
-  /*
-  // What do we do before
-  bool sw_before;
-  if (sw_before==false) {
-     met_by(Sample sm2);
-     eq(sm2.m_x, m_from_x);
-     eq(sm2.m_y, m_from_y);
-  }
-  if (sw_before==true) {
-     met_by(Standby sb2);
-     eq(sb2.m_x, m_from_x);
-     eq(sb2.m_y, m_from_y);
-  }
- */
 }
 
 Rover::Standby{
@@ -177,25 +143,11 @@ Rover::Standby{
      eq(sm.m_x, m_x);
      eq(sm.m_y, m_y);
   }
-  /*
-  // What do we do before
-  bool sw_before;
-  if (sw_before==false) {
-     met_by(Drive dr2);
-     eq(dr2.m_to_x, m_x);
-     eq(dr2.m_to_y, m_y);
-  }
-  if (sw_before==true) {
-     met_by(Sample sm2);
-     eq(sm2.m_x, m_x);
-     eq(sm2.m_y, m_y);
-  }
-  */
 }
 
 NddlWorld world = new NddlWorld(10, 101, 350);
 
-Rover rover = new Rover(10, 100, 0.0, 0.0, 100.0, 70.0, -70.0);
+Rover rover = new Rover(0.0, 0.0, 100.0, 70.0, -70.0);
 Wind wind = new Wind();
 Mission mission = new Mission();
 

@@ -614,9 +614,10 @@ namespace Prototype {
           ResourceId &rId = (ResourceId &) objId;
           
           /*ExtraData: resource info*/
-          objOut << rId->getHorizonStart() << COMMA << rId->getHorizonEnd() << COMMA
+          objOut << MINUS_INFINITY << COMMA << PLUS_INFINITY << COMMA
                  << rId->getInitialCapacity() << COMMA << rId->getLimitMin() << COMMA
                  << rId->getLimitMax() << COMMA;
+
           const std::set<TransactionId>& resTrans = rId->getTransactions();
           for(std::set<TransactionId>::iterator transIt = resTrans.begin();
               transIt != resTrans.end(); ++transIt) {
@@ -624,6 +625,7 @@ namespace Prototype {
             outputToken(trans, T_TRANSACTION, 0, 1, 0, rId, tokOut, varOut);
             tokens.erase(trans);
           }
+
           const std::map<int, InstantId>& insts = rId->getInstants();
           for(std::map<int,InstantId>::const_iterator instIt = insts.begin();
               instIt != insts.end(); ++instIt) {

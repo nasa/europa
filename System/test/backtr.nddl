@@ -13,20 +13,11 @@
 
 //*****************************************************************
 class Battery extends Resource {
-   Battery( int hs, int he, float ic, float ll_min, float ll_max,
+   Battery( float ic, float ll_min, float ll_max,
 			float prod_max, float prod_Rmax, float cons_max, float cons_Rmax) {
-      super(hs, he, ic, ll_min, ll_max, prod_max, prod_Rmax, cons_max, cons_Rmax );
+      super(ic, ll_min, ll_max, prod_max, prod_Rmax, cons_max, cons_Rmax );
    } 
 }
-/*
-class Battery extends Resource {
-   Battery( int hs, int he, float ic, float ll_min, float ll_max,
-			float prod_max, float cons_max) {
-      //super(hs, he, ic, ll_min, ll_max, prod_max, cons_max );
-      super(hs, he, ic, ll_min, ll_max, prod_max, cons_max );
-   } 
-}
-*/
 //*****************************************************************
 class Rover{
  Battery m_battery;
@@ -35,18 +26,10 @@ class Rover{
 
 
 
- Rover( int bhs, int bhe, float bat_start, float bat_low, float bat_high,
+ Rover( float bat_start, float bat_low, float bat_high,
 	    float prod_max, float prod_Rmax, float cons_max, float cons_Rmax ) {
-/*
- Rover( int bhs, int bhe, float bat_start, float bat_low, float bat_high,
-	    float prod_max, float cons_max ) {
-*/
-   m_battery = new Battery( bhs, bhe, bat_start, bat_low, bat_high, 
-	 					    prod_max, prod_Rmax, cons_max, cons_Rmax);
-/*
-   m_battery = new Battery( bhs, bhe, bat_start, bat_low, bat_high, 
-	 					    prod_max, cons_max);
-*/
+   m_battery = new Battery( bat_start, bat_low, bat_high, 
+	 		    prod_max, prod_Rmax, cons_max, cons_Rmax);
    m_antenna = new Antenna();
    m_memory = new Memory();
  }
@@ -101,20 +84,6 @@ Rover::Sample{
      eq(sb.m_x, m_x);
      eq(sb.m_y, m_y);
   }
-  /*
-  // What do we do before  
-  bool sw_before;
-  if (sw_before==false) {
-     met_by(Drive dr2);
-     eq(dr2.m_to_x, m_x);
-     eq(dr2.m_to_y, m_y);
-  }
-  if (sw_before==true) {
-     met_by(Standby sb2);
-     eq(sb2.m_x, m_x);
-     eq(sb2.m_y, m_y);
-  }
-*/
 }
 
 Rover::Drive{
@@ -150,20 +119,6 @@ Rover::Drive{
      eq(sb.m_x, m_to_x);
      eq(sb.m_y, m_to_y);
   }
-  /*
-  // What do we do before
-  bool sw_before;
-  if (sw_before==false) {
-     met_by(Sample sm2);
-     eq(sm2.m_x, m_from_x);
-     eq(sm2.m_y, m_from_y);
-  }
-  if (sw_before==true) {
-     met_by(Standby sb2);
-     eq(sb2.m_x, m_from_x);
-     eq(sb2.m_y, m_from_y);
-  }
- */
 }
 
 Rover::Standby{
@@ -179,20 +134,6 @@ Rover::Standby{
      eq(sm.m_x, m_x);
      eq(sm.m_y, m_y);
   }
-  /*
-  // What do we do before
-  bool sw_before;
-  if (sw_before==false) {
-     met_by(Drive dr2);
-     eq(dr2.m_to_x, m_x);
-     eq(dr2.m_to_y, m_y);
-  }
-  if (sw_before==true) {
-     met_by(Sample sm2);
-     eq(sm2.m_x, m_x);
-     eq(sm2.m_y, m_y);
-  }
-  */
 }
 
 class Antenna {
@@ -239,10 +180,9 @@ Memory::Empty{
 NddlWorld world = new NddlWorld(10, 101, 3000);
 
 // Limits are essentially infinity
-// int hs, int he, float ic, float ll_min, float ll_max,
+// float ic, float ll_min, float ll_max,
 // float prod_max, float prod_Rmax, float cons_max, float cons_Rmax
-Rover rover = new Rover(10, 30, 0.0, 0.0, 20.0, 76.0, 16.0, -76.0, -16.0);
-//Rover rover = new Rover(10, 100, 0.0, 0.0, 100.0, 1000.0, -1000.0);
+Rover rover = new Rover(0.0, 0.0, 20.0, 76.0, 16.0, -76.0, -16.0);
 
 NddlWorld.close();
 

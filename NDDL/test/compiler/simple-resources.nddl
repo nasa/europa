@@ -9,8 +9,8 @@ class World{
  predicate initialState{}
 
  World(){
-  mainBattery = new Battery(0, 100, 100, 0, 1000);
-  reserveBattery = new Battery(0, 100, 100, 100, 1000);
+  mainBattery = new Battery(100, 0, 1000);
+  reserveBattery = new Battery(100, 100, 1000);
  }
 }
 

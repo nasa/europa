@@ -11,7 +11,7 @@
 
 NddlWorld world = new NddlWorld(0,500,5000);
 
-Rover rover = new Rover(0,500,1000.);
+Rover rover = new Rover(1000.0);
 
 //Locations
 Location D14 = new Location();

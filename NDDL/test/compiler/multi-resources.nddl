@@ -30,9 +30,9 @@ class World{
  predicate initialState{}
 
  World(){
-  solarPanel = new SolarPanel(0, 100, 10, 0, 30);
-  mainBattery = new Battery(0, 100, 1000, 100, 1200);
-  reserveBattery = new Battery(0, 100, 1000, 100, 1200);
+  solarPanel = new SolarPanel(10, 0, 30);
+  mainBattery = new Battery(1000, 100, 1200);
+  reserveBattery = new Battery(1000, 100, 1200);
   rover = new Rover();
  }
 }

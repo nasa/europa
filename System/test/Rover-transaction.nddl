@@ -19,7 +19,7 @@ Path p2 = new Path("Moderately Long Way", lander, rock4, -1500.0);
 Path p3 = new Path("Short Cut", lander, rock4, -400.0);
 
 // Allocate Rover
-Battery battery = new Battery(0, 100, 1000.0, 0.0, 1000.0);
+Battery battery = new Battery(1000.0, 0.0, 1000.0);
 Rover spirit = new Rover(battery);
 
 close();

@@ -1,8 +1,8 @@
 #include "../../NDDL/core/Resources.nddl"
 
 class Battery extends Resource {
-  Battery(int hs, int he, float ic, float ll_min, float ll_max){
-   super(hs, he, ic, ll_min, ll_max, 0.0, 0.0, MINUS_INFINITY, MINUS_INFINITY);
+  Battery(float ic, float ll_min, float ll_max){
+   super(ic, ll_min, ll_max, 0.0, 0.0, MINUS_INFINITY, MINUS_INFINITY);
   }
 }
 

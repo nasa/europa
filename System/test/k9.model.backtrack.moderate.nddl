@@ -668,8 +668,8 @@ CHAMP::ipgetstatus {
 }
 
 class Energy extends Resource {
-  Energy(int hs, int he, float ic, float ll_min, float ll_max) {
-    super(hs, he, ic, ll_min, ll_max);
+  Energy(float ic, float ll_min, float ll_max) {
+    super(ic, ll_min, ll_max);
   } 
 }
 
@@ -685,14 +685,14 @@ class Rover {
   float BATTERY_MIN;
   float BATTERY_MAX;
 
-  Rover(int hs, int he, float ic) {    
+  Rover(float ic) {    
     BATTERY_MIN = 0;
     BATTERY_MAX = 518400;
     m_position = new Position(this);
     m_tracker = new Tracker(this);
     m_oppsci = new OpportunisticScience (this);
     m_champ = new CHAMP (this);
-    m_energy = new Energy(hs, he, ic, 0, 518400);
+    m_energy = new Energy(ic, 0, 518400);
   }
 
 }
