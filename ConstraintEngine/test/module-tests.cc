@@ -59,17 +59,18 @@ int DelegationTestConstraint::s_instanceCount = 0;
 
 class ChangeListener: public DomainListener {
 public:
-  ChangeListener(): m_change(NO_CHANGE){}
+  ChangeListener(): m_changed(false), m_change(RESET){}
 
   void notifyChange(const ChangeType& change){
+    m_changed = true;
     m_change = change;
   }
 
   bool checkAndClearChange(ChangeType& change) {
-    bool hasChanged = m_change != NO_CHANGE;
+    bool result = m_changed;
     change = m_change;
-    m_change = NO_CHANGE;
-    return (change != NO_CHANGE);
+    m_changed = false;
+    return (result);
   }
 
 private:

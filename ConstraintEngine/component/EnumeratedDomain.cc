@@ -118,7 +118,7 @@ namespace Prototype {
     if (changed_a){
       m_membership = intersection;
       if(isSingleton())
-	notifyChange(DomainListener::SET_TO_SINGLETON);
+	notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
       else
 	notifyChange(DomainListener::VALUE_REMOVED);
     }
@@ -126,7 +126,7 @@ namespace Prototype {
     if (changed_b){
       dom.m_membership = intersection;
       if(dom.isSingleton())
-	dom.notifyChange(DomainListener::SET_TO_SINGLETON);
+	dom.notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
       else
 	dom.notifyChange(DomainListener::VALUE_REMOVED);
     }
@@ -202,7 +202,7 @@ namespace Prototype {
       empty();
     else if (changed){
       if(isSingleton())
-	notifyChange(DomainListener::SET_TO_SINGLETON);
+	notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
       else
 	notifyChange(DomainListener::VALUE_REMOVED);
     }

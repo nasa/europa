@@ -104,7 +104,7 @@ namespace Prototype {
 
     // Select the strongest message available
     if(m_ub == m_lb && (lb_increased || ub_decreased))
-      notifyChange(DomainListener::SET_TO_SINGLETON);
+      notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
     else if(lb_increased && ub_decreased)
       notifyChange(DomainListener::BOUNDS_RESTRICTED);
     else if(lb_increased)
