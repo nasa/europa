@@ -57,6 +57,14 @@ namespace Prototype {
     m_fullReprop = true;
   }
 
+  void EqualityConstraintPropagator::handleConstraintActivated(const ConstraintId& constraint){
+    handleConstraintAdded(constraint);
+  }
+
+  void EqualityConstraintPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
+    handleConstraintRemoved(constraint);
+  }
+
   void EqualityConstraintPropagator::handleNotification(const ConstrainedVariableId& variable, 
 							int argIndex, 
 							const ConstraintId& constraint, 

@@ -28,6 +28,23 @@ using namespace Prototype;
 using namespace std;
 
 
+class DelegationTestConstraint: public Constraint{
+public:
+  DelegationTestConstraint(const ConstraintEngineId& constraintEngine,
+			   const ConstrainedVariableId& variable,
+			   const AbstractDomain&,
+			   const LabelStr& name = LabelStr("TestOnly"))
+    : Constraint(name, constraintEngine, variable){s_instanceCount++;}
+  ~DelegationTestConstraint(){s_instanceCount--;}
+  void handleExecute(){s_executionCount++;}
+  void handleExecute(const ConstrainedVariableId&,int, const DomainListener::ChangeType&){}
+  static int s_executionCount;
+  static int s_instanceCount;
+};
+
+int DelegationTestConstraint::s_executionCount = 0;
+int DelegationTestConstraint::s_instanceCount = 0;
+
 class ChangeListener: public DomainListener {
 public:
   ChangeListener(): m_change(NO_CHANGE){}
@@ -389,6 +406,7 @@ public:
     runTest(testForceInconsistency, "ForceInconsistency");
     runTest(testRepropagation, "Repropagation");
     runTest(testConstraintRemoval, "ConstraintRemoval");
+    runTest(testDelegation, "TestDelegation");
     return true;
   }
 
@@ -705,6 +723,61 @@ private:
     assert(ENGINE->constraintConsistent());
     return true;
   }
+
+  static bool testDelegation(){
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, 1000));
+    ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
+    ConstraintId c1 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
+    ConstraintId c2 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
+    ConstraintId c3 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
+    ConstraintId c4 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(DelegationTestConstraint::s_instanceCount == 5);
+    assert(DelegationTestConstraint::s_executionCount == 5);
+
+    // Cause a change in the domain which will impoact agenda, then deactivate a constraint and verify the correct execution count
+    v0.specify(IntervalIntDomain(0, 900));
+    c0->deactivate(c1);
+    assert(!c0->isActive());
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(DelegationTestConstraint::s_instanceCount == 5);
+    assert(DelegationTestConstraint::s_executionCount == 9);
+
+    // Delete the delegate and verify instance counts and that the prior delegate has been reinstated and executed.
+    delete (Constraint*) c1;
+    assert(c0->isActive());
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(DelegationTestConstraint::s_instanceCount == 4);
+    assert(DelegationTestConstraint::s_executionCount == 10);
+
+    // Now create a new instance and mark it for delegation only. Add remaining constraints as delegates
+    ConstraintId c5 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
+    c5->markForDelegationOnly();
+    c0->deactivate(c5);
+    c2->deactivate(c5);
+    c3->deactivate(c5);
+    c4->deactivate(c5);
+    assert(DelegationTestConstraint::s_instanceCount == 5);
+    ENGINE->propagate();
+    assert(DelegationTestConstraint::s_executionCount == 11);
+
+    // Force propagation and confirm only one instance executes
+    v0.specify(IntervalIntDomain(100, 900));
+    ENGINE->propagate();
+    assert(DelegationTestConstraint::s_executionCount == 12);
+
+    // Now confirm correct handling of constraint deletions
+    delete (Constraint*) c4;
+    delete (Constraint*) c3;
+    delete (Constraint*) c2;
+    assert(DelegationTestConstraint::s_instanceCount == 2);
+    delete (Constraint*) c0;
+    assert(DelegationTestConstraint::s_instanceCount == 0);
+    return true;
+  }
 };
 
 class FactoryTest
@@ -920,6 +993,7 @@ void testBitVector(){
 int main()
 {
   initConstraintLibrary();
+  REGISTER_UNARY(DelegationTestConstraint, "TestOnly");
   runTestSuite(LabelTest::test, "LabelTests"); 
   runTestSuite(DomainTest::test, "DomainTests");  
   runTestSuite(VariableTest::test, "VariableTests"); 

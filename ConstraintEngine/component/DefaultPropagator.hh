@@ -15,6 +15,8 @@ namespace Prototype {
   protected:
     void handleConstraintAdded(const ConstraintId& constrain);
     void handleConstraintRemoved(const ConstraintId& constraint);
+    void handleConstraintActivated(const ConstraintId& constrain);
+    void handleConstraintDeactivated(const ConstraintId& constraint);
     void handleNotification(const ConstrainedVariableId& variable, 
 			    int argIndex, 
 			    const ConstraintId& constraint, 
