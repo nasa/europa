@@ -57,7 +57,7 @@ namespace Prototype {
                         const int, std::ofstream &);
       void outputIntIntVar(const Id< TokenVariable<IntervalIntDomain> >&, const int,
 			   const int, std::ofstream &);
-      void outputObjVar(const Id< TokenVariable<ObjectSet> > &, const int, const int,
+      void outputObjVar(const ObjectVarId &, const int, const int,
                         std::ofstream &);
       void outputConstrVar(const ConstrainedVariableId &, const int, const int, 
 			   std::ofstream &);

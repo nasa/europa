@@ -60,6 +60,11 @@ namespace Prototype {
                                const DomainListener::ChangeType& changeType) {
     m_os << "CeLogger: " << VARIABLE_INDENT << "VARIABLE "
          << getName(variable) << " - ";
+
+    EntityId parent = variable->getParent();
+    if(!parent.isNoId())
+      m_os << parent->getKey() << ":";
+
     switch (changeType) {
     case DomainListener::UPPER_BOUND_DECREASED:
       m_os << "UPPER_BOUND_DECREASED";

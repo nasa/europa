@@ -17,9 +17,9 @@ namespace Prototype {
 
   public:
     static void write(PlanDatabaseId db, std::ostream& os) {
-      db->getConstraintEngine()->propagate();
-      std::set<ObjectId> objs = db->getObjects();
-      for (std::set<ObjectId>::const_iterator oit = objs.begin(); oit != objs.end() ; ++oit) {
+      check_error(db->getConstraintEngine()->constraintConsistent());
+      ObjectSet objs = db->getObjects();
+      for (ObjectSet::const_iterator oit = objs.begin(); oit != objs.end() ; ++oit) {
 	if (TimelineId::convertable((*oit))) {
 	  TimelineId timeline = (*oit);
 	  os << "Timeline: " << timeline->getName().toString() << "*************************" << std::endl;
@@ -33,8 +33,8 @@ namespace Prototype {
 	else { // Treat as any object
 	  ObjectId object = *oit;
 	  os << "Object: " << object->getName().toString() << "*************************" << std::endl;
-	  const std::set<TokenId>& tokens = object->getTokens();
-	  for(std::set<TokenId>::const_iterator tokit = tokens.begin(); tokit != tokens.end(); ++tokit){
+	  const TokenSet& tokens = object->getTokens();
+	  for(TokenSet::const_iterator tokit = tokens.begin(); tokit != tokens.end(); ++tokit){
 	    TokenId t = *tokit;
 	    writeToken(t, os);
 	  }

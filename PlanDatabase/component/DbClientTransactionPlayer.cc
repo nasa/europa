@@ -36,6 +36,7 @@ namespace Prototype {
   void DbClientTransactionPlayer::play(std::istream& is)
   {
     TiXmlElement tx("");
+    int txCounter = 0;
     while (!is.eof()) {
       if (is.peek() != '<') {
         is.get(); // discard characters up to '<'
@@ -44,6 +45,7 @@ namespace Prototype {
       is >> tx;
       processTransaction(tx);
       tx.Clear();
+      txCounter++;
     }
   }
 
@@ -58,8 +60,6 @@ namespace Prototype {
   }
 
   void DbClientTransactionPlayer::processTransaction(const TiXmlElement & element) {
-      m_client->propagate();
-
       const char * tagname = element.Value();
       if (strcmp(tagname, "new") == 0) {
         playNamedObjectCreated(element);
@@ -86,6 +86,8 @@ namespace Prototype {
       } else {
         check_error(ALWAYS_FAILS);
       }
+
+      m_client->propagate();
   }
 
   void DbClientTransactionPlayer::playNamedObjectCreated(const TiXmlElement & element)

@@ -404,25 +404,30 @@ namespace Prototype {
   }
 
   void EnumeratedDomain::operator>>(ostream&os) const {
-    if (!m_closed) // This makes this function almost useless for debugging. --wedgingt 2004 Mar 4
-      return;
-    AbstractDomain::operator>>(os);
-    os << "{";
-    int size = m_values.size();
-    int i = 0;
-    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it, i++) {
+
+    // First construct a lexicographic ordering for the set of values.
+    std::set<std::string> orderedSet;
+    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
       double valueAsDouble = *it;
       if (isNumeric())
         os << valueAsDouble;
       else
         if (LabelStr::isString(valueAsDouble))
-          os << LabelStr(valueAsDouble).toString();
+	  orderedSet.insert(LabelStr(valueAsDouble).toString());
         else {
           EntityId entity(valueAsDouble);
-          os << entity->getName().toString();
+	  orderedSet.insert(entity->getName().toString());
         }
-      if (i != size-1)
-        os << ",";
+    }
+
+    // Now commence output
+    AbstractDomain::operator>>(os);
+    os << "{";
+    std::string comma = "";
+    for (std::set<std::string>::const_iterator it = orderedSet.begin(); it != orderedSet.end(); ++it) {
+      os << comma;
+      os << *it;
+      comma = ",";
     }
     os << "}";
   }

@@ -131,8 +131,8 @@ namespace Prototype {
     // Should only progress if we are consistent
     check_error(isOk);
 
-    const std::set<TokenId>& tokensForThisObject = getTokens();
-    for(std::set<TokenId>::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it){
+    const TokenSet& tokensForThisObject = getTokens();
+    for(TokenSet::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it){
       TokenId token = *it;
       if(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end() && token->isActive())
 	results.push_back(token); // We should now have an active token that has not been constrained
@@ -140,9 +140,9 @@ namespace Prototype {
   }
 
   bool Timeline::hasTokensToOrder() const {
-    const std::set<TokenId>& tokensForThisObject = getTokens();
+    const TokenSet& tokensForThisObject = getTokens();
 
-    for(std::set<TokenId>::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it){
+    for(TokenSet::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it){
       TokenId token = *it;
       if(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end() && token->isActive())
 	return true;
@@ -266,7 +266,11 @@ namespace Prototype {
 
   bool Timeline::isValid(bool cleaningUp) const{
     check_error(m_tokenIndex.size() == m_tokenSequence.size());
-    int latest_time = MINUS_INFINITY - 1;
+    int prior_earlist_start = MINUS_INFINITY - 1;
+    int prior_earliest_end = MINUS_INFINITY-1;
+    int prior_latest_end = MINUS_INFINITY;
+    TokenId predecessor;
+
     std::set<TokenId> allTokens;
     for(std::list<TokenId>::const_iterator it = m_tokenSequence.begin(); it != m_tokenSequence.end(); ++it){
       TokenId token = *it;
@@ -275,11 +279,21 @@ namespace Prototype {
       check_error(cleaningUp || token->isActive());
 
       // Validate that earliset start times are monotonically increasing, as long as we are constraint consistent at any rate!
+      // Also ensure x.end <= (x+1).start.
       if(!cleaningUp && getPlanDatabase()->getConstraintEngine()->constraintConsistent()){
-	int l_time = (int) token->getStart()->lastDomain().getLowerBound();
-	check_error(l_time == MINUS_INFINITY || l_time == PLUS_INFINITY || l_time > latest_time);
-	latest_time = l_time;
+	if(!predecessor.isNoId())
+	  check_error(isConstrainedToPrecede(predecessor, token));
+	int earliest_start = (int) token->getStart()->lastDomain().getLowerBound();
+	int latest_start = (int) token->getStart()->lastDomain().getUpperBound();
+	check_error(earliest_start == MINUS_INFINITY || earliest_start == PLUS_INFINITY || earliest_start > prior_earlist_start);
+	check_error(prior_earliest_end <= earliest_start);
+	check_error(prior_latest_end <= latest_start);
+	prior_earliest_end = (int) token->getEnd()->lastDomain().getLowerBound();
+	prior_latest_end = (int) token->getEnd()->lastDomain().getLowerBound();
+	prior_earlist_start = earliest_start;
       }
+
+      predecessor = token;
     }
     check_error(allTokens.size() == m_tokenSequence.size()); // No duplicates.
     return true;

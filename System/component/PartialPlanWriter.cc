@@ -339,10 +339,10 @@ namespace Prototype {
 	outputConstraint(*it, constrOut, cvmOut);
       }
 
-      std::set<ObjectId> objects((*pdbId)->getObjects());
-      std::set<TokenId> tokens((*pdbId)->getTokens());
+      ObjectSet objects((*pdbId)->getObjects());
+      TokenSet tokens((*pdbId)->getTokens());
       int slotId = 1000000;
-      for(std::set<ObjectId>::iterator objectIterator = objects.begin();
+      for(ObjectSet::iterator objectIterator = objects.begin();
 	  objectIterator != objects.end(); ++objectIterator) {
 	const ObjectId &objId = *objectIterator;
         if(TimelineId::convertable(objId)) {
@@ -358,7 +358,7 @@ namespace Prototype {
             outputToken(token, T_INTERVAL, slotId, slotIndex, slotOrder, (ObjectId) tId, tokOut,
                         tokRelOut, varOut);
             tokens.erase(token);
-            std::set<TokenId>::const_iterator mergedTokenIterator = 
+            TokenSet::const_iterator mergedTokenIterator = 
               token->getMergedTokens().begin();
             for(;mergedTokenIterator != token->getMergedTokens().end(); ++mergedTokenIterator) {
               slotOrder++;
@@ -418,7 +418,7 @@ namespace Prototype {
           objOut << SNULL << std::endl;
         }
       }
-      for(std::set<TokenId>::iterator tokenIterator = tokens.begin(); 
+      for(TokenSet::iterator tokenIterator = tokens.begin(); 
           tokenIterator != tokens.end(); ++tokenIterator) {
 	TokenId token = *tokenIterator;
 	check_error(token.isValid());
@@ -453,7 +453,7 @@ namespace Prototype {
         objOut << SNULL << TAB;
       }
       else {
-        for(std::set<ObjectId>::const_iterator childIt = objId->getComponents().begin();
+        for(ObjectSet::const_iterator childIt = objId->getComponents().begin();
             childIt != objId->getComponents().end(); ++childIt) {
           ObjectId child = *childIt;
           objOut << child->getKey() << COMMA;
@@ -480,7 +480,7 @@ namespace Prototype {
         objOut << SNULL << TAB;
       }
       else {
-        for(std::set<TokenId>::const_iterator tokIt = objId->getTokens().begin();
+        for(TokenSet::const_iterator tokIt = objId->getTokens().begin();
             tokIt != objId->getTokens().end(); ++tokIt) {
           TokenId token = *tokIt;
           objOut << token->getKey() << COMMA;
@@ -610,7 +610,7 @@ namespace Prototype {
       varOut << tokenVarTypes[type] << std::endl;
     }
 
-    void PartialPlanWriter::outputObjVar(const Id<TokenVariable<ObjectSet> >& objVar,
+    void PartialPlanWriter::outputObjVar(const ObjectVarId& objVar,
 					 //const TokenId &tokId, const int type, 
                                          const int parentId, const int type,
 					 std::ofstream &varOut) {

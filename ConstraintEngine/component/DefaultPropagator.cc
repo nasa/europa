@@ -47,25 +47,12 @@ namespace Prototype {
 	Propagator::execute(constraint);
       }
 
-      if(getConstraintEngine()->provenInconsistent()){
+      if(getConstraintEngine()->provenInconsistent())
 	m_agenda.clear();
-	break;
-      }
       else
 	m_agenda.erase(it);
     }
-      /*
-    for(int i=0;i<m_agenda.size();i++){
-      ConstraintId constraint = m_agenda[i];
-      if(constraint->isActive()){
-	m_activeConstraint = constraint->getKey();
-	Propagator::execute(constraint);
-      }
 
-      if(getConstraintEngine()->provenInconsistent())
-	break;
-    }
-      */
     m_activeConstraint = 0;
   }
 

@@ -36,7 +36,7 @@ namespace Prototype {
 			     const ConstrainedVariableId& filter)
     : Constraint(LabelStr("ObjectFilter"), LabelStr("Default"), constraintEngine, makeScope(objectVariable, filter)),
       m_fieldIndex(fieldIndex), 
-      m_objectVar(static_cast<ObjectSet&>(getCurrentDomain(getScope()[OBJECT_VAR]))),
+      m_objectVar(static_cast<ObjectDomain&>(getCurrentDomain(getScope()[OBJECT_VAR]))),
       m_filterVar(static_cast<EnumeratedDomain&>(getCurrentDomain(getScope()[FILTER_VAR]))){
     check_error(isValid());
   }

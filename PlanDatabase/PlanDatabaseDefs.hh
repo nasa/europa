@@ -8,6 +8,7 @@
 namespace Prototype {
   class Object;
   typedef Id<Object> ObjectId;
+  typedef std::set<ObjectId, EntityComparator<ObjectId> > ObjectSet;
 
   class Timeline;
   typedef Id<Timeline> TimelineId;
@@ -34,8 +35,8 @@ namespace Prototype {
   class TokenTemporalVariable;
   typedef Id< TokenTemporalVariable > TempVarId;
 
-  typedef Domain<ObjectId>  ObjectSet;
-  typedef Id< TokenVariable<ObjectSet> > ObjectVarId;
+  typedef Domain<ObjectId>  ObjectDomain;
+  typedef Id< TokenVariable<ObjectDomain> > ObjectVarId;
 
   class Schema;
   typedef Id<Schema> SchemaId;

@@ -7,6 +7,8 @@
 #include "DecisionPoint.hh"
 #include "EUROPAHeuristicStrategy.hh"
 
+#include "PlanDatabaseWriter.hh"
+
 #include <fstream>
 
 SchemaId schema;
@@ -15,73 +17,94 @@ SchemaId schema;
 
 const char* TX_LOG = "TransactionLog.xml";
 const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
+bool replay = true;
 
-bool runPlanner(bool replay){
+bool runPlanner(){
+  std::stringstream os1;
+  {
 
-  SamplePlanDatabase db1(schema, true);
+    SamplePlanDatabase db1(schema, true);
 
   // Initialize the plan database
-  NDDL::initialize(db1.planDatabase);
+    NDDL::initialize(db1.planDatabase);
 
-  // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
-  std::list<ObjectId> objects;
-  db1.planDatabase->getObjectsByType(LabelStr("World"), objects);
-  ObjectId world = objects.front();
-  check_error(objects.size() == 1);
-  ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
-  check_error(horizonStart.isValid());
-  ConstrainedVariableId horizonEnd = world->getVariable(LabelStr("world.m_horizonEnd"));
-  check_error(horizonEnd.isValid());
-  int start = (int) horizonStart->baseDomain().getSingletonValue();
-  int end = (int) horizonEnd->baseDomain().getSingletonValue();
-  db1.horizon->setHorizon(start, end);
+    // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
+    std::list<ObjectId> objects;
+    db1.planDatabase->getObjectsByType(LabelStr("World"), objects);
+    ObjectId world = objects.front();
+    check_error(objects.size() == 1);
+    ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
+    check_error(horizonStart.isValid());
+    ConstrainedVariableId horizonEnd = world->getVariable(LabelStr("world.m_horizonEnd"));
+    check_error(horizonEnd.isValid());
+    int start = (int) horizonStart->baseDomain().getSingletonValue();
+    int end = (int) horizonEnd->baseDomain().getSingletonValue();
+    db1.horizon->setHorizon(start, end);
 
     // Create and run the planner
-  ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
-  check_error(maxPlannerSteps.isValid());
-  int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
-  CBPlanner planner(db1.planDatabase->getClient(), db1.flawQuery, steps);
-  EUROPAHeuristicStrategy strategy;
+    ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
+    check_error(maxPlannerSteps.isValid());
+    int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
+    CBPlanner planner(db1.planDatabase->getClient(), db1.flawQuery, steps);
+    EUROPAHeuristicStrategy strategy;
       
-  int res = planner.run(strategy.getId(), loggingEnabled());
+    int res = planner.run(strategy.getId(), loggingEnabled());
 
-  check_error(res == 1);
-      
-  std::cout << "Nr of Decisions = " << planner.getClosedDecisions().size() << std::endl;
+    std::cout << "\nNr. Of Decisions:" << planner.getClosedDecisions().size() << std::endl;
 
-  // Store transactions for recreation of database
+    db1.planDatabase->getClient()->toStream(os1);
+    PlanDatabaseWriter::write(db1.planDatabase, cout);
+
+    check_error(res == 1);
+
+    // Store transactions for recreation of database
+    {
+      //std::ofstream out(TX_LOG);
+      //db1.txLog->flush(out);
+      //out.close();
+    }
+  }
+  /* 
+  std::stringstream os2;
   {
-    std::cout << "Saving Transactions.." << std::endl;
-    std::ofstream out(TX_LOG);
-    db1.txLog->flush(out);
-    out.close();
+    SamplePlanDatabase db(schema, true);
+    DbClientTransactionPlayer player(db.planDatabase->getClient());
+    std::ifstream in(TX_LOG);
+    player.play(in);
+    db.planDatabase->getClient()->toStream(os2);
   }
 
-  std::cout << "Plan Database:" << std::endl;
-  PlanDatabaseWriter::write(db1.planDatabase, std::cout);
-
-  cout << "PASSED runPlanner\n";
+  std::string s1 = os1.str();
+  std::string s2 = os2.str();
+  assert(s1 == s2);
+  */
   return true;
 }
 
 bool copyFromFile(){
   // Populate plan database from transaction log
-    SamplePlanDatabase db1(schema, true);
-    DbClientTransactionPlayer player1(db1.planDatabase->getClient());
+  std::stringstream os1;
+  {
+    SamplePlanDatabase db(schema, true);
+    DbClientTransactionPlayer player(db.planDatabase->getClient());
     std::ifstream in(TX_LOG);
-    player1.play(in);
+    player.play(in);
+    db.planDatabase->getClient()->toStream(os1);
+  }
 
-    /*
-    SamplePlanDatabase db2(schema, true);
-    DbClientTransactionPlayer player2(db2.planDatabase->getClient());
-    player2.play(db1.txLog);
-    */
+  std::stringstream os2;
+  {
+    SamplePlanDatabase db(schema, true);
+    DbClientTransactionPlayer player(db.planDatabase->getClient());
+    std::ifstream in(TX_LOG);
+    player.play(in);
+    db.planDatabase->getClient()->toStream(os2);
+  }
 
-    std::cout << "Plan Database:" << std::endl;
-    PlanDatabaseWriter::write(db1.planDatabase, std::cout);
-
-    cout << "PASSED copyFromFile\n"; 
-    return true;
+  std::string s1 = os1.str();
+  std::string s2 = os2.str();
+  assert(s1 == s2);
+  return true;
 }
 
 int main(int argc, const char ** argv){
@@ -89,8 +112,10 @@ int main(int argc, const char ** argv){
   SamplePlanDatabase::initialize();
   schema = NDDL::schema();
 
-  assert(runPlanner(true));
-  assert(copyFromFile());
+  for(int i=0;i<1;i++){
+    runTest(runPlanner);
+    //runTest(copyFromFile);
+  }
 
   SamplePlanDatabase::terminate();
 

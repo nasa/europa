@@ -32,7 +32,7 @@ namespace Prototype
 
   private:
     const int m_fieldIndex;
-    ObjectSet& m_objectVar;
+    ObjectDomain& m_objectVar;
     EnumeratedDomain& m_filterVar;
 
     bool isValid() const;

@@ -29,7 +29,7 @@ namespace Prototype {
 
   void DbLogger::notifyDeactivated(const TokenId& token){m_os << "DbLogger: Token Deactivated " << token->getPredicateName().toString()  << " (" << token->getKey() << ")" << std::endl;}
 
-  void DbLogger::notifyMerged(const TokenId& token){m_os << "DbLogger: Token Merged " << token->getPredicateName().toString()  << " (" << token->getKey() << ")" << std::endl;}
+  void DbLogger::notifyMerged(const TokenId& token){m_os << "DbLogger: Token Merged " << token->getPredicateName().toString()  << " (" << token->getKey() << ") with active token (" << token->getActiveToken()->getKey() << ")" << std::endl;}
 
   void DbLogger::notifySplit(const TokenId& token){m_os << "DbLogger: Token Split " << token->getPredicateName().toString()  << " (" << token->getKey() << ")" << std::endl;}
 

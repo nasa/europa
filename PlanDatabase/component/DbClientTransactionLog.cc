@@ -83,19 +83,6 @@ namespace Prototype {
     return NULL;
   }
 
-  static std::string
-  pathAsString(const std::vector<int> & path)
-  {
-    std::stringstream s;
-    std::vector<int>::const_iterator it = path.begin();
-    s << *it;
-    for(++it ; it != path.end() ; ++it) {
-      s << "." << *it;
-    }
-    s << std::ends;
-    return s.str();
-  }
-
   DbClientTransactionLog::DbClientTransactionLog(const DbClientId& client)
     : DbClientListener(client){}
 
@@ -157,11 +144,11 @@ namespace Prototype {
     object_el->SetAttribute("name", object->getName().toString());
     element->LinkEndChild(object_el);
     TiXmlElement * token_el = new TiXmlElement("token");
-    token_el->SetAttribute("path", pathAsString(m_client->getPathByToken(token)));
+    token_el->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(token_el);
     if (!successor.isNoId()) {
       TiXmlElement * successor_el = new TiXmlElement("token");
-      successor_el->SetAttribute("path", pathAsString(m_client->getPathByToken(successor)));
+      successor_el->SetAttribute("path", m_client->getPathAsString(successor));
       element->LinkEndChild(successor_el);
     }
     m_bufferedTransactions.push_back(element);
@@ -173,7 +160,7 @@ namespace Prototype {
     object_el->SetAttribute("name", object->getName().toString());
     element->LinkEndChild(object_el);
     TiXmlElement * token_el = new TiXmlElement("token");
-    token_el->SetAttribute("path", pathAsString(m_client->getPathByToken(token)));
+    token_el->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(token_el);
     m_bufferedTransactions.push_back(element);
   }
@@ -181,7 +168,7 @@ namespace Prototype {
   void DbClientTransactionLog::notifyActivated(const TokenId& token){
     TiXmlElement * element = new TiXmlElement("activate");
     TiXmlElement * token_el = new TiXmlElement("token");
-    token_el->SetAttribute("path", pathAsString(m_client->getPathByToken(token)));
+    token_el->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(token_el);
     m_bufferedTransactions.push_back(element);
   }
@@ -189,10 +176,10 @@ namespace Prototype {
   void DbClientTransactionLog::notifyMerged(const TokenId& token, const TokenId& activeToken){
     TiXmlElement * element = new TiXmlElement("merge");
     TiXmlElement * token_el = new TiXmlElement("token");
-    token_el->SetAttribute("path", pathAsString(m_client->getPathByToken(token)));
+    token_el->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(token_el);
     TiXmlElement * active_el = new TiXmlElement("token");
-    active_el->SetAttribute("path", pathAsString(m_client->getPathByToken(activeToken)));
+    active_el->SetAttribute("path", m_client->getPathAsString(activeToken));
     element->LinkEndChild(active_el);
     m_bufferedTransactions.push_back(element);
   }
@@ -200,7 +187,7 @@ namespace Prototype {
   void DbClientTransactionLog::notifyRejected(const TokenId& token){
     TiXmlElement * element = new TiXmlElement("reject");
     TiXmlElement * path_el = new TiXmlElement("token");
-    path_el->SetAttribute("path", pathAsString(m_client->getPathByToken(token)));
+    path_el->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(path_el);
     m_bufferedTransactions.push_back(element);
   }
@@ -208,7 +195,7 @@ namespace Prototype {
   void DbClientTransactionLog::notifyCancelled(const TokenId& token){
     TiXmlElement * element = new TiXmlElement("cancel");
     TiXmlElement * path_el = new TiXmlElement("token");
-    path_el->SetAttribute("path", pathAsString(m_client->getPathByToken(token)));
+    path_el->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(path_el);
     m_bufferedTransactions.push_back(element);
   }
@@ -223,7 +210,7 @@ namespace Prototype {
     const EntityId& parent = variable->getParent();
     if (parent != EntityId::noId()) {
       if (TokenId::convertable(parent)) {
-        var.SetAttribute("token", pathAsString(m_client->getPathByToken(parent)));
+        var.SetAttribute("token", m_client->getPathAsString(parent));
       } else {
         check_error(ALWAYS_FAILS);
       }
@@ -246,7 +233,7 @@ namespace Prototype {
     const EntityId& parent = variable->getParent();
     if (parent != EntityId::noId()) {
       if (TokenId::convertable(parent)) {
-        var.SetAttribute("token", pathAsString(m_client->getPathByToken(parent)));
+        var.SetAttribute("token", m_client->getPathAsString(parent));
       } else {
         check_error(ALWAYS_FAILS);
       }

@@ -13,6 +13,7 @@ namespace Prototype{
   class TemporalNetworkLogger: public TemporalNetworkListener {
 
   public:
+    TemporalNetworkLogger(const TemporalPropagatorId& prop, std::ostream& os);
     virtual ~TemporalNetworkLogger();
     virtual void notifyTimepointAdded(const TempVarId& var, const TimepointId& timepoint);
     virtual void notifyTimepointDeleted(const TimepointId& timepoint);
@@ -24,7 +25,6 @@ namespace Prototype{
 
 
   protected:
-    TemporalNetworkLogger(const TemporalPropagatorId& prop, std::ostream& os);
     static std::string s_loggername;
 
   private:

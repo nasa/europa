@@ -77,7 +77,7 @@ public:
 
   static bool test() {
     runTest(testBasicAllocation);
-    runTest(testObjectSet);
+    runTest(testObjectDomain);
     runTest(testObjectVariables);
     runTest(testObjectTokenRelation);
     runTest(testCommonAncestorConstraint);
@@ -122,7 +122,7 @@ private:
     return(true);
   }
 
-  static bool testObjectSet(){
+  static bool testObjectDomain(){
     PlanDatabase db(ENGINE, SCHEMA);
     std::list<ObjectId> values;
     Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
@@ -130,7 +130,7 @@ private:
     assert(db.getObjects().size() == 2);
     values.push_back(o1.getId());
     values.push_back(o2.getId());
-    ObjectSet os1(values, true);
+    ObjectDomain os1(values, true);
     assert(os1.isMember(o1.getId()));
     os1.remove(o1.getId());
     assert(!os1.isMember(o1.getId()));
@@ -228,7 +228,7 @@ private:
     Object o6(o3.getId(), LabelStr("AllObjects"), LabelStr("o6"));
     Object o7(o3.getId(), LabelStr("AllObjects"), LabelStr("o7"));
 
-    ObjectSet allObjects;
+    ObjectDomain allObjects;
     allObjects.insert(o1.getId());
     allObjects.insert(o2.getId());
     allObjects.insert(o3.getId());
@@ -240,9 +240,9 @@ private:
 
     // Ensure there they agree on a common root.
     {
-      Variable<ObjectSet> first(ENGINE, ObjectSet(o4.getId()));
-      Variable<ObjectSet> second(ENGINE, ObjectSet(o7.getId()));
-      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o1.getId()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId()));
+      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId()));
       CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
 					  LabelStr("Default"), 
 					  ENGINE, 
@@ -253,9 +253,9 @@ private:
 
     // Now impose a different set of restrictions which will eliminate all options
     {
-      Variable<ObjectSet> first(ENGINE, ObjectSet(o4.getId()));
-      Variable<ObjectSet> second(ENGINE, ObjectSet(o7.getId()));
-      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o2.getId()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId()));
+      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId()));
       CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
 					  LabelStr("Default"), 
 					  ENGINE, 
@@ -266,9 +266,9 @@ private:
 
     // Now try a set of restrictions, which will allow it to pass
     {
-      Variable<ObjectSet> first(ENGINE, ObjectSet(o4.getId()));
-      Variable<ObjectSet> second(ENGINE, ObjectSet(o7.getId()));
-      Variable<ObjectSet> restrictions(ENGINE, allObjects);
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId()));
+      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId()));
+      Variable<ObjectDomain> restrictions(ENGINE, allObjects);
       CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
 					  LabelStr("Default"), 
 					  ENGINE, 
@@ -279,9 +279,9 @@ private:
 
     // Now try when no variable is a singleton, and then one becomes a singleton
     {
-      Variable<ObjectSet> first(ENGINE, allObjects);
-      Variable<ObjectSet> second(ENGINE, allObjects);
-      Variable<ObjectSet> restrictions(ENGINE, allObjects);
+      Variable<ObjectDomain> first(ENGINE, allObjects);
+      Variable<ObjectDomain> second(ENGINE, allObjects);
+      Variable<ObjectDomain> restrictions(ENGINE, allObjects);
       CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
 					  LabelStr("Default"), 
 					  ENGINE, 
@@ -318,8 +318,8 @@ private:
 
     // Positive test immediate ancestor
     {
-      Variable<ObjectSet> first(ENGINE, ObjectSet(o7.getId()));
-      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o3.getId()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o3.getId()));
       HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
 					  LabelStr("Default"), 
 					  ENGINE, 
@@ -330,8 +330,8 @@ private:
 
     // negative test immediate ancestor
     {
-      Variable<ObjectSet> first(ENGINE, ObjectSet(o7.getId()));
-      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o2.getId()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId()));
       HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
 					  LabelStr("Default"), 
 					  ENGINE, 
@@ -341,8 +341,8 @@ private:
     }
     // Positive test higher up  ancestor
     {
-      Variable<ObjectSet> first(ENGINE, ObjectSet(o7.getId()));
-      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o1.getId()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId()));
       HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
 					  LabelStr("Default"), 
 					  ENGINE, 
@@ -352,8 +352,8 @@ private:
     }
     // negative test higherup ancestor
     {
-      Variable<ObjectSet> first(ENGINE, ObjectSet(o7.getId()));
-      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o8.getId()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o8.getId()));
       HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
 					  LabelStr("Default"), 
 					  ENGINE, 
@@ -364,13 +364,13 @@ private:
 
     //positive restriction of the set.
     {
-      ObjectSet obs;
+      ObjectDomain obs;
       obs.insert(o7.getId());
       obs.insert(o4.getId());
       obs.close();
 
-      Variable<ObjectSet> first(ENGINE, obs);
-      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o2.getId()));
+      Variable<ObjectDomain> first(ENGINE, obs);
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId()));
       HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
 					  LabelStr("Default"), 
 					  ENGINE, 
@@ -382,13 +382,13 @@ private:
 
     //no restriction of the set.
     {
-      ObjectSet obs1;
+      ObjectDomain obs1;
       obs1.insert(o7.getId());
       obs1.insert(o4.getId());
       obs1.close();
 
-      Variable<ObjectSet> first(ENGINE, obs1);
-      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o1.getId()));
+      Variable<ObjectDomain> first(ENGINE, obs1);
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId()));
       HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
 					  LabelStr("Default"), 
 					  ENGINE, 
