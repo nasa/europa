@@ -156,45 +156,11 @@ namespace EUROPA {
     return true;
   }
 
-  bool testTokenTypeImpl(HSTSHeuristics& heuristics) {
-    std::vector<std::pair<LabelStr,LabelStr> > ds1;
-    TokenType tt1(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), ds1);
-
-    TokenType tt2(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), ds1);
-
-    assert(tt1.conflicts(tt2.getId()));
-
-    std::vector<std::pair<LabelStr,LabelStr> > ds3;
-    ds3.push_back(std::make_pair<LabelStr,LabelStr>("v1","val1"));
-    TokenType tt3(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), ds3);
-
-    assert(tt1.conflicts(tt3.getId()));
-
-    std::vector<std::pair<LabelStr,LabelStr> > ds4;
-    ds4.push_back(std::make_pair<LabelStr,LabelStr>("v2","val2"));
-    TokenType tt4(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), ds4);
-
-    assert(tt1.conflicts(tt4.getId()));
-    assert(tt3.conflicts(tt4.getId()));
-
-    std::vector<std::pair<LabelStr,LabelStr> > ds5;
-    ds5.push_back(std::make_pair<LabelStr,LabelStr>("v1","val2"));
-    TokenType tt5(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), ds5);
-
-    assert(tt1.conflicts(tt5.getId()));
-    assert(tt4.conflicts(tt5.getId()));
-    assert(!tt3.conflicts(tt5.getId()));
-
-    return true;
-  }
-
   bool testDefaultInitializationImpl(HSTSHeuristics& heuristics) {
     heuristics.setDefaultPriorityPreference(HSTSHeuristics::HIGH);
 
     std::vector<std::pair<LabelStr,LabelStr> > domainSpecs;
-    TokenType tt(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs);
-
-    heuristics.setDefaultPriorityForTokenDPsWithParent(20.3, tt.getId());
+    heuristics.setDefaultPriorityForTokenDPsWithParent(20.3, LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs);
 
     heuristics.setDefaultPriorityForTokenDPs(10000.0);
     
@@ -218,15 +184,10 @@ namespace EUROPA {
   }
 
   bool testTokenInitializationImpl(HSTSHeuristics& heuristics) {
-    std::vector<std::pair<LabelStr,LabelStr> > domainSpecs;
-    TokenType tta(LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Left"), domainSpecs);
-    heuristics.setHeuristicsForTokenDPsWithParent(5456.2,tta.getId());
-
     std::vector<std::pair<LabelStr,LabelStr> > dsb;
     dsb.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_trans"),LabelStr("NO_RIGHT")));
     dsb.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"),LabelStr("CON")));
     dsb.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("DES")));
-    TokenType ttb(LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsb);
     std::vector<LabelStr> statesb;
     statesb.push_back(Token::REJECTED);
     statesb.push_back(Token::MERGED);
@@ -237,34 +198,30 @@ namespace EUROPA {
     ordersb.push_back(HSTSHeuristics::NEAR);
     //    ordersb.push_back(HSTSHeuristics::NONE);
     ordersb.push_back(HSTSHeuristics::MIN_FLEXIBLE);
-    heuristics.setHeuristicsForTokenDP(334.5, ttb.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), statesb, ordersb);
+    std::vector<std::pair<LabelStr,LabelStr> > domainSpecs;
+    heuristics.setHeuristicsForTokenDP(334.5, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsb, HSTSHeuristics::ANY, NO_STRING,domainSpecs, statesb, ordersb);
 
     std::vector<std::pair<LabelStr,LabelStr> > dsc;
     dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_trans"),LabelStr("NO_RIGHT")));
     dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"),LabelStr("CON")));
     dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("DES")));
-    TokenType ttc(LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsc);
-    TokenType mttc(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs);
     std::vector<LabelStr> statesc;
     std::vector<HSTSHeuristics::CandidateOrder> ordersc;
     statesc.push_back(Token::MERGED);
     statesc.push_back(Token::ACTIVE);
     ordersc.push_back(HSTSHeuristics::TGENERATOR);
     ordersc.push_back(HSTSHeuristics::LATE);
-    heuristics.setHeuristicsForTokenDP(6213.7, ttc.getId(), HSTSHeuristics::AFTER, mttc.getId(), statesc, ordersc);
+    heuristics.setHeuristicsForTokenDP(6213.7, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsc, HSTSHeuristics::AFTER, LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs, statesc, ordersc);
 
     std::vector<std::pair<LabelStr,LabelStr> > dsd;
     dsd.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_trans"),LabelStr("NO_RIGHT")));
     dsd.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"),LabelStr("SIN")));
     dsd.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("RES")));
-    TokenType ttd(LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsd);
-    TokenType mttd(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs);
-
     std::vector<LabelStr> statesd;
     std::vector<HSTSHeuristics::CandidateOrder> ordersd;
     statesd.push_back(Token::ACTIVE);
     ordersd.push_back(HSTSHeuristics::EARLY);
-    heuristics.setHeuristicsForTokenDP(6213.7, ttd.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), statesd, ordersd);
+    heuristics.setHeuristicsForTokenDP(6213.7, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsd, HSTSHeuristics::ANY, NO_STRING, domainSpecs, statesd, ordersd);
 
     /* this rightly produces a duplicate entry error in the code 
     std::vector<LabelStr> statese;
