@@ -948,11 +948,9 @@ namespace Prototype {
   };
 }
 
-using namespace Prototype;
-
 bool DomainTests::test() {
-  runTestSuite(IntervalDomainTest::test);
-  runTestSuite(EnumeratedDomainTest::test);
-  runTestSuite(MixedTypeTest::test);
+  runTestSuite(Prototype::IntervalDomainTest::test);
+  runTestSuite(Prototype::EnumeratedDomainTest::test);
+  runTestSuite(Prototype::MixedTypeTest::test);
   return(true);
 }
