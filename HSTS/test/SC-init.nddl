@@ -11,7 +11,6 @@ Te s = new Te();
 close();
 
 goal(Te___st.Problem3C g11);
-  g11.activate();
   g11.start.specify(0);
   g11.end.specify([1 99]);
   g11.duration.specify([1 99]);
@@ -20,7 +19,6 @@ goal(Te___st.Problem3C g11);
   g11.b.specify([-inf -125]);
 
 goal(Te___st.Problem3C_Int g38);
-  g38.activate();
   g38.start.specify([1 99]);
   g38.end.specify(100);
   g38.duration.specify([1 99]);

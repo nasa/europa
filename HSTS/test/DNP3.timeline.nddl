@@ -17,19 +17,16 @@ DSS_Any DNP_DSS = new DSS_Any();
 close();
 
 goal(DNP_Science___Scan_Platform.Scan_Idle g46);
-  g46.activate();
   g46.start.specify(0);
   g46.end.specify(31536000);
   g46.duration.specify(31536000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Idle g69);
-  g69.activate();
   g69.start.specify(0);
   g69.end.specify([1 31535998]);
   g69.duration.specify([1 31535998]);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g90);
-  g90.activate();
   g90.start.specify([1 31535998]);
   g90.end.specify([2 31535999]);
   g90.duration.specify([1 31535998]);
@@ -38,13 +35,11 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g90);
   g90.Length.specify(3600);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Idle g116);
-  g116.activate();
   g116.start.specify([2 31535999]);
   g116.end.specify(31536000);
   g116.duration.specify([1 31535998]);
 
 goal(DNP_Data___SSR_Storage_Use.Constant_Storage g140);
-  g140.activate();
   g140.start.specify(0);
   g140.end.specify([1 31535999]);
   g140.duration.specify([1 31535999]);
@@ -52,7 +47,6 @@ goal(DNP_Data___SSR_Storage_Use.Constant_Storage g140);
   g140.DSS_Opp_Num.specify([0 +inf]);
 
 goal(DNP_Data___SSR_Storage_Use.Constant_Storage g168);
-  g168.activate();
   g168.start.specify([1 31535999]);
   g168.end.specify(31536000);
   g168.duration.specify([1 31535999]);
@@ -60,19 +54,16 @@ goal(DNP_Data___SSR_Storage_Use.Constant_Storage g168);
   g168.DSS_Opp_Num.specify([0 +inf]);
 
 goal(DNP_Comm___Comm_Activity.Comm_Idle g199);
-  g199.activate();
   g199.start.specify(0);
   g199.end.specify([1 31536000]);
   g199.duration.specify([1 31536000]);
 
 goal(DSS_Any___DSS_Availability.No_Window g222);
-  g222.activate();
   g222.start.specify(0);
   g222.end.specify(2225700);
   g222.duration.specify(2225700);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g242);
-  g242.activate();
   g242.start.specify(2225700);
   g242.end.specify(2248500);
   g242.duration.specify(22800);
@@ -83,7 +74,6 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g242);
   g242.Opp_Number.specify(13);
 
 goal(DSS_Any___DSS_Availability.No_Window g270);
-  g270.activate();
   g270.start.specify(2248500);
   g270.end.specify(31536000);
   g270.duration.specify(29287500);

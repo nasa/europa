@@ -11,7 +11,6 @@ Test T = new Test();
 close();
 
 goal(Test___Variable.Predicate g10);
-  g10.activate();
   g10.start.specify(0);
   g10.end.specify([1 +inf]);
   g10.duration.specify([1 +inf]);

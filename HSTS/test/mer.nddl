@@ -97,7 +97,6 @@ class HGA_Class___HGA_Mode_SV {
     SurvivalHtr_Use priorto_survival;
 
     eq(duration, 300);
-    eq(priorto_survival, *);
     eq(power, 18);
     addmuleq(0, power, duration, energy);
   }
@@ -114,7 +113,6 @@ class HGA_Class___HGA_Mode_SV {
     Comm_pred pred;
     int negdata;
 
-    eq(pred, *);
     eq(data, [0 50000000]);
     eq(negdata, [-50000000 0]);
   }
@@ -144,9 +142,6 @@ class IDD_Class___IDD_IDD_SV {
     int negpower;
     int energy;
 
-    eq(succ, *);
-    eq(pred, *);
-    eq(priorto_survival, *);
     eq(duration, 114);
     eq(power, 15);
     addmuleq(0, power, duration, energy);
@@ -170,7 +165,6 @@ class IDD_Class___IDD_IDD_SV {
     int energy;
 
     eq(duration, 114);
-    eq(pred, *);
     eq(power, 15);
     addmuleq(0, power, duration, energy);
   }
@@ -304,7 +298,6 @@ class PMA_Class___PMA_MT_SV {
     int energy;
     Slew_Within within;
 
-    eq(within, *);
     eq(duration, 120);
     eq(power, 14);
     addmuleq(0, power, duration, energy);
@@ -654,7 +647,7 @@ class OPHTR_Class {
 
 Comm_Window_Class___Comm_DSN_SV::Comm_DSN_Available {
   if (dsn_ant==DSN_Antenna.'HGA') {
-    contains [0 +inf] [0 +inf] (HGA_Class___HGA_Mode_SV.HGA_Comm s0);
+    contains(HGA_Class___HGA_Mode_SV.HGA_Comm s0);
       eq(s0.dir, dir);
       eq(s0.rate, rate);
   }
@@ -689,10 +682,11 @@ HGA_Class___HGA_Mode_SV::HGA_Slew {
   meets(HGA_Class___HGA_Mode_SV.HGA_Comm s1);
     eq(s1.pred, Comm_pred.'COMM_METBY_SLEW');
   if (priorto_survival==SurvivalHtr_Use.'SLEW_TO_NOHTR') {
-    starts_before [300 +inf] (SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
+    starts_before(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
+    temporaldistance(this.start, [300 +inf], s0.start);
   }
   if (priorto_survival==SurvivalHtr_Use.'SLEW_TO_HTR') {
-    after [0 300] (OPHTR_Class___OPHTR_HGA_SV.OPHTR_HGA_Active s0);
+    after(OPHTR_Class___OPHTR_HGA_SV.OPHTR_HGA_Active s0);
   }
 }
 
@@ -750,7 +744,7 @@ IDD_Class___IDD_IDD_SV::IDD_Stow {
 }
 
 IDD_Class___IDD_IDD_SV::IDD_Move {
-  after [0 60] (RCam_Class___HzC_F_SV.HzC_F_Active s0);
+  after(RCam_Class___HzC_F_SV.HzC_F_Active s0);
   if (succ==IDD_Move_succ.'MOVE_MEETS_ROTATE') {
     meets(IDD_Class___IDD_IDD_SV.IDD_Rotate s0);
   }
@@ -768,10 +762,11 @@ IDD_Class___IDD_IDD_SV::IDD_Move {
     met_by(IDD_Class___IDD_IDD_SV.IDD_In_Contact s0);
   }
   if (priorto_survival==IDD_Htr_Use.'BEFORE_SURVIVALHTR') {
-    starts_before [900 +inf] (SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
+    starts_before(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
+    temporaldistance(this.start, [900 +inf], s0.start);
   }
   if (priorto_survival==IDD_Htr_Use.'AFTER_OPHTR') {
-    after [0 900] (OPHTR_Class___OPHTR_IDD_SV.OPHTR_IDD_Active s0);
+    after(OPHTR_Class___OPHTR_IDD_SV.OPHTR_IDD_Active s0);
   }
 }
 
@@ -784,7 +779,7 @@ IDD_Class___IDD_IDD_SV::IDD_Rotate {
 
 IDD_Class___IDD_IDD_SV::IDD_Guarded_Move {
   meets(IDD_Class___IDD_IDD_SV.IDD_In_Contact s0);
-  after [0 60] (RCam_Class___HzC_F_SV.HzC_F_Active s1);
+  after(RCam_Class___HzC_F_SV.HzC_F_Active s1);
   if (pred==IDD_Guarded_pred.'GUARDEDMOVE_METBY_MOVE') {
     met_by(IDD_Class___IDD_IDD_SV.IDD_Move s0);
       eq(s0.succ, IDD_Move_succ.'MOVE_MEETS_GUARDEDMOVE');
@@ -798,16 +793,19 @@ IDD_Class___IDD_IDD_SV::IDD_In_Contact {
   met_by(IDD_Class___IDD_IDD_SV.IDD_Guarded_Move s0);
   meets(IDD_Class___IDD_IDD_SV.IDD_Move s1);
     eq(s1.pred, IDD_Move_pred.'MOVE_METBY_INCONTACT');
-  before [0 60] (RCam_Class___HzC_F_SV.HzC_F_Active s2);
+  before(RCam_Class___HzC_F_SV.HzC_F_Active s2);
+  temporaldistance(this.end, [0 60], s2.start);
 }
 
 IDD_Class___IDD_MI_SV::IDD_MI_Idle {
 }
 
 IDD_Class___IDD_MI_SV::IDD_MI_Active {
-  after [0 500] (IDD_Class___IDD_IDD_SV.IDD_Rotate s0);
+  after(IDD_Class___IDD_IDD_SV.IDD_Rotate s0);
     eq(s0.tool, IDD_Instrument.'MI');
-  contained_by [15 +inf] [0 +inf] (IDD_Class___IDD_IDD_SV.IDD_In_Contact s1);
+  contained_by(IDD_Class___IDD_IDD_SV.IDD_In_Contact s1);
+  temporaldistance(s1.start, [15 +inf], this.start);
+  temporaldistance(this.end, [0 +inf], s1.end);
 }
 
 IDD_Class___IDD_MI_SV::IDD_MI_SURVIVE {
@@ -820,7 +818,7 @@ IDD_Class___IDD_MB_SV::IDD_MB_Idle {
 }
 
 IDD_Class___IDD_MB_SV::IDD_MB_Active {
-  after [0 500] (IDD_Class___IDD_IDD_SV.IDD_Rotate s0);
+  after(IDD_Class___IDD_IDD_SV.IDD_Rotate s0);
     eq(s0.tool, IDD_Instrument.'MB');
   contained_by(IDD_Class___IDD_IDD_SV.IDD_In_Contact s1);
 }
@@ -829,7 +827,7 @@ IDD_Class___IDD_RAT_SV::IDD_RAT_Idle {
 }
 
 IDD_Class___IDD_RAT_SV::IDD_RAT_Active {
-  after [0 500] (IDD_Class___IDD_IDD_SV.IDD_Rotate s0);
+  after(IDD_Class___IDD_IDD_SV.IDD_Rotate s0);
     eq(s0.tool, IDD_Instrument.'RAT');
   contained_by(IDD_Class___IDD_IDD_SV.IDD_In_Contact s1);
 }
@@ -838,7 +836,7 @@ IDD_Class___IDD_APXS_SV::IDD_APXS_Idle {
 }
 
 IDD_Class___IDD_APXS_SV::IDD_APXS_Active {
-  after [0 500] (IDD_Class___IDD_IDD_SV.IDD_Rotate s0);
+  after(IDD_Class___IDD_IDD_SV.IDD_Rotate s0);
     eq(s0.tool, IDD_Instrument.'APXS');
   contained_by(IDD_Class___IDD_IDD_SV.IDD_In_Contact s1);
 }
@@ -895,13 +893,14 @@ PMA_Class___PMA_MT_SV::PMA_MT_Idle {
 PMA_Class___PMA_MT_SV::PMA_MT_Active {
   met_by(PMA_Class___PMA_MT_SV.PMA_MT_Slewing s0);
   if (_0_anon_OR_tag_1==1) {
-    starts_before [300 +inf] (SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
+    starts_before(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
+    temporaldistance(this.start, [300 +inf], s0.start);
   }
   if (_0_anon_OR_tag_1==2) {
-    after [0 300] (PMA_Class___PMA_MT_SV.PMA_MT_Slewing s0);
+    after(PMA_Class___PMA_MT_SV.PMA_MT_Slewing s0);
   }
   if (_0_anon_OR_tag_1==3) {
-    after [0 300] (OPHTR_Class___OPHTR_PMA_SV.OPHTR_PMA_Active s0);
+    after(OPHTR_Class___OPHTR_PMA_SV.OPHTR_PMA_Active s0);
   }
 }
 
@@ -942,26 +941,27 @@ PMA_Class___PMA_PC_SV::PMA_PC_Active {
   contained_by(PMA_Class___PMA_NC_SV.PMA_NC_Idle s2);
   contained_by(PMA_Class___PMA_MT_SV.PMA_MT_Idle s3);
   if (_0_anon_OR_tag_1==1) {
-    starts_before [300 +inf] (SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
+    starts_before(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
+    temporaldistance(this.start, [300 +inf], s0.start);
   }
   if (_0_anon_OR_tag_1==2) {
     if (_0_anon_OR_tag_2==1) {
-      after [0 300] (PMA_Class___PMA_Mount_SV.PMA_Mount_Slewing s0);
+      after(PMA_Class___PMA_Mount_SV.PMA_Mount_Slewing s0);
     }
   }
   if (_0_anon_OR_tag_1==2) {
     if (_0_anon_OR_tag_2==2) {
-      after [0 300] (OPHTR_Class___OPHTR_PMA_SV.OPHTR_PMA_Active s0);
+      after(OPHTR_Class___OPHTR_PMA_SV.OPHTR_PMA_Active s0);
     }
   }
   if (_0_anon_OR_tag_1==2) {
     if (_0_anon_OR_tag_3==1) {
-      after [0 300] (PMA_Class___PMA_PC_SV.PMA_PC_Active s0);
+      after(PMA_Class___PMA_PC_SV.PMA_PC_Active s0);
     }
   }
   if (_0_anon_OR_tag_1==2) {
     if (_0_anon_OR_tag_3==2) {
-      after [0 300] (OPHTR_Class___OPHTR_PC_SV.OPHTR_PC_Active s0);
+      after(OPHTR_Class___OPHTR_PC_SV.OPHTR_PC_Active s0);
     }
   }
 }
@@ -980,13 +980,14 @@ PMA_Class___PMA_NC_SV::PMA_NC_Active {
   contained_by(PMA_Class___PMA_PC_SV.PMA_PC_Idle s2);
   contained_by(PMA_Class___PMA_MT_SV.PMA_MT_Idle s3);
   if (_0_anon_OR_tag_1==1) {
-    starts_before [300 +inf] (SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
+    starts_before(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
+    temporaldistance(this.start, [300 +inf], s0.start);
   }
   if (_0_anon_OR_tag_1==2) {
-    after [0 300] (PMA_Class___PMA_Mount_SV.PMA_Mount_Slewing s0);
+    after(PMA_Class___PMA_Mount_SV.PMA_Mount_Slewing s0);
   }
   if (_0_anon_OR_tag_1==3) {
-    after [0 300] (OPHTR_Class___OPHTR_PMA_SV.OPHTR_PMA_Active s0);
+    after(OPHTR_Class___OPHTR_PMA_SV.OPHTR_PMA_Active s0);
   }
 }
 

@@ -17,7 +17,6 @@ DSS_Any DNP_DSS = new DSS_Any();
 close();
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g46);
-  g46.activate();
   g46.start.specify([1480284 31000000]);
   g46.end.specify([1482084 31001800]);
   g46.duration.specify(1800);
@@ -26,7 +25,6 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g46);
   g46.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g62);
-  g62.activate();
   g62.start.specify([1485810 31000000]);
   g62.end.specify([1488810 31003000]);
   g62.duration.specify(3000);
@@ -35,7 +33,6 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g62);
   g62.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g78);
-  g78.activate();
   g78.start.specify([1627403 31000000]);
   g78.end.specify([1629203 31001800]);
   g78.duration.specify(1800);
@@ -44,7 +41,6 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g78);
   g78.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g94);
-  g94.activate();
   g94.start.specify([1885724 31000000]);
   g94.end.specify([1888724 31003000]);
   g94.duration.specify(3000);
@@ -53,7 +49,6 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g94);
   g94.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g110);
-  g110.activate();
   g110.start.specify([1889177 31000000]);
   g110.end.specify([1890977 31001800]);
   g110.duration.specify(1800);
@@ -62,7 +57,6 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g110);
   g110.Length.specify(1800);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g126);
-  g126.activate();
   g126.start.specify([1530226 31000000]);
   g126.end.specify([1533826 31003600]);
   g126.duration.specify(3600);
@@ -71,7 +65,6 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g126);
   g126.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g142);
-  g142.activate();
   g142.start.specify([1530347 31000000]);
   g142.end.specify([1533947 31003600]);
   g142.duration.specify(3600);
@@ -80,7 +73,6 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g142);
   g142.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g158);
-  g158.activate();
   g158.start.specify([1555476 31000000]);
   g158.end.specify([1559076 31003600]);
   g158.duration.specify(3600);
@@ -89,7 +81,6 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g158);
   g158.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g174);
-  g174.activate();
   g174.start.specify([1731334 31000000]);
   g174.end.specify([1734934 31003600]);
   g174.duration.specify(3600);
@@ -98,7 +89,6 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g174);
   g174.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g190);
-  g190.activate();
   g190.start.specify([1733902 31000000]);
   g190.end.specify([1737502 31003600]);
   g190.duration.specify(3600);
@@ -107,31 +97,26 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g190);
   g190.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Scan_Idle g206);
-  g206.activate();
   g206.start.specify(0);
   g206.end.specify([1 31535999]);
   g206.duration.specify([1 31535999]);
 
 goal(DNP_Science___Scan_Platform.Scan_Idle g227);
-  g227.activate();
   g227.start.specify([1 31535999]);
   g227.end.specify(31536000);
   g227.duration.specify([1 31535999]);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Idle g251);
-  g251.activate();
   g251.start.specify(0);
   g251.end.specify([1 31535999]);
   g251.duration.specify([1 31535999]);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Idle g272);
-  g272.activate();
   g272.start.specify([1 31535999]);
   g272.end.specify(31536000);
   g272.duration.specify([1 31535999]);
 
 goal(DNP_Data___SSR_Storage_Use.Constant_Storage g296);
-  g296.activate();
   g296.start.specify(0);
   g296.end.specify([1 31535999]);
   g296.duration.specify([1 31535999]);
@@ -139,7 +124,6 @@ goal(DNP_Data___SSR_Storage_Use.Constant_Storage g296);
   g296.DSS_Opp_Num.specify([0 +inf]);
 
 goal(DNP_Data___SSR_Storage_Use.Constant_Storage g324);
-  g324.activate();
   g324.start.specify([1 31535999]);
   g324.end.specify(31536000);
   g324.duration.specify([1 31535999]);
@@ -148,19 +132,16 @@ goal(DNP_Data___SSR_Storage_Use.Constant_Storage g324);
   g324.Flagged_End.specify(End_Flag.'End');
 
 goal(DNP_Comm___Comm_Activity.Comm_Idle g355);
-  g355.activate();
   g355.start.specify(0);
   g355.end.specify([1 +inf]);
   g355.duration.specify([1 +inf]);
 
 goal(DSS_Any___DSS_Availability.No_Window g378);
-  g378.activate();
   g378.start.specify(0);
   g378.end.specify(1743600);
   g378.duration.specify(1743600);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g398);
-  g398.activate();
   g398.start.specify(1743600);
   g398.end.specify(1766100);
   g398.duration.specify(22500);
@@ -171,13 +152,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g398);
   g398.Opp_Number.specify(2);
 
 goal(DSS_Any___DSS_Availability.No_Window g426);
-  g426.activate();
   g426.start.specify(1766100);
   g426.end.specify(1805400);
   g426.duration.specify(39300);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g447);
-  g447.activate();
   g447.start.specify(1805400);
   g447.end.specify(1816800);
   g447.duration.specify(11400);
@@ -188,13 +167,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g447);
   g447.Opp_Number.specify(3);
 
 goal(DSS_Any___DSS_Availability.No_Window g475);
-  g475.activate();
   g475.start.specify(1816800);
   g475.end.specify(1816801);
   g475.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g496);
-  g496.activate();
   g496.start.specify(1816801);
   g496.end.specify(1841400);
   g496.duration.specify(24599);
@@ -205,13 +182,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g496);
   g496.Opp_Number.specify(4);
 
 goal(DSS_Any___DSS_Availability.No_Window g524);
-  g524.activate();
   g524.start.specify(1841400);
   g524.end.specify(1842300);
   g524.duration.specify(900);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g545);
-  g545.activate();
   g545.start.specify(1842300);
   g545.end.specify(1863900);
   g545.duration.specify(21600);
@@ -222,13 +197,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g545);
   g545.Opp_Number.specify(5);
 
 goal(DSS_Any___DSS_Availability.No_Window g573);
-  g573.activate();
   g573.start.specify(1863900);
   g573.end.specify(1873800);
   g573.duration.specify(9900);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g594);
-  g594.activate();
   g594.start.specify(1873800);
   g594.end.specify(1903500);
   g594.duration.specify(29700);
@@ -239,13 +212,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g594);
   g594.Opp_Number.specify(6);
 
 goal(DSS_Any___DSS_Availability.No_Window g622);
-  g622.activate();
   g622.start.specify(1903500);
   g622.end.specify(1903501);
   g622.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g643);
-  g643.activate();
   g643.start.specify(1903501);
   g643.end.specify(1909800);
   g643.duration.specify(6299);
@@ -256,13 +227,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g643);
   g643.Opp_Number.specify(7);
 
 goal(DSS_Any___DSS_Availability.No_Window g671);
-  g671.activate();
   g671.start.specify(1909800);
   g671.end.specify(1963500);
   g671.duration.specify(53700);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g692);
-  g692.activate();
   g692.start.specify(1963500);
   g692.end.specify(1989600);
   g692.duration.specify(26100);
@@ -273,13 +242,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g692);
   g692.Opp_Number.specify(8);
 
 goal(DSS_Any___DSS_Availability.No_Window g720);
-  g720.activate();
   g720.start.specify(1989600);
   g720.end.specify(1989601);
   g720.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g741);
-  g741.activate();
   g741.start.specify(1989601);
   g741.end.specify(1999500);
   g741.duration.specify(9899);
@@ -290,13 +257,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g741);
   g741.Opp_Number.specify(9);
 
 goal(DSS_Any___DSS_Availability.No_Window g769);
-  g769.activate();
   g769.start.specify(1999500);
   g769.end.specify(2049900);
   g769.duration.specify(50400);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g790);
-  g790.activate();
   g790.start.specify(2049900);
   g790.end.specify(2076000);
   g790.duration.specify(26100);
@@ -307,13 +272,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g790);
   g790.Opp_Number.specify(10);
 
 goal(DSS_Any___DSS_Availability.No_Window g818);
-  g818.activate();
   g818.start.specify(2076000);
   g818.end.specify(2076001);
   g818.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g839);
-  g839.activate();
   g839.start.specify(2076001);
   g839.end.specify(2085900);
   g839.duration.specify(9899);
@@ -324,13 +287,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g839);
   g839.Opp_Number.specify(11);
 
 goal(DSS_Any___DSS_Availability.No_Window g867);
-  g867.activate();
   g867.start.specify(2085900);
   g867.end.specify(2136300);
   g867.duration.specify(50400);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g888);
-  g888.activate();
   g888.start.specify(2136300);
   g888.end.specify(2162100);
   g888.duration.specify(25800);
@@ -341,13 +302,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g888);
   g888.Opp_Number.specify(12);
 
 goal(DSS_Any___DSS_Availability.No_Window g916);
-  g916.activate();
   g916.start.specify(2162100);
   g916.end.specify(2162101);
   g916.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g937);
-  g937.activate();
   g937.start.specify(2162101);
   g937.end.specify(2172300);
   g937.duration.specify(10199);
@@ -358,13 +317,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g937);
   g937.Opp_Number.specify(13);
 
 goal(DSS_Any___DSS_Availability.No_Window g965);
-  g965.activate();
   g965.start.specify(2172300);
   g965.end.specify(2225700);
   g965.duration.specify(53400);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g986);
-  g986.activate();
   g986.start.specify(2225700);
   g986.end.specify(2248500);
   g986.duration.specify(22800);
@@ -375,13 +332,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g986);
   g986.Opp_Number.specify(14);
 
 goal(DSS_Any___DSS_Availability.No_Window g1014);
-  g1014.activate();
   g1014.start.specify(2248500);
   g1014.end.specify(2248501);
   g1014.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1035);
-  g1035.activate();
   g1035.start.specify(2248501);
   g1035.end.specify(2261700);
   g1035.duration.specify(13199);
@@ -392,13 +347,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1035);
   g1035.Opp_Number.specify(15);
 
 goal(DSS_Any___DSS_Availability.No_Window g1063);
-  g1063.activate();
   g1063.start.specify(2261700);
   g1063.end.specify(2309100);
   g1063.duration.specify(47400);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1084);
-  g1084.activate();
   g1084.start.specify(2309100);
   g1084.end.specify(2334900);
   g1084.duration.specify(25800);
@@ -409,13 +362,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1084);
   g1084.Opp_Number.specify(16);
 
 goal(DSS_Any___DSS_Availability.No_Window g1112);
-  g1112.activate();
   g1112.start.specify(2334900);
   g1112.end.specify(2334901);
   g1112.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1133);
-  g1133.activate();
   g1133.start.specify(2334901);
   g1133.end.specify(2345100);
   g1133.duration.specify(10199);
@@ -426,13 +377,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1133);
   g1133.Opp_Number.specify(17);
 
 goal(DSS_Any___DSS_Availability.No_Window g1161);
-  g1161.activate();
   g1161.start.specify(2345100);
   g1161.end.specify(2385000);
   g1161.duration.specify(39900);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1182);
-  g1182.activate();
   g1182.start.specify(2385000);
   g1182.end.specify(2421000);
   g1182.duration.specify(36000);
@@ -443,13 +392,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1182);
   g1182.Opp_Number.specify(18);
 
 goal(DSS_Any___DSS_Availability.No_Window g1210);
-  g1210.activate();
   g1210.start.specify(2421000);
   g1210.end.specify(2478300);
   g1210.duration.specify(57300);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1231);
-  g1231.activate();
   g1231.start.specify(2478300);
   g1231.end.specify(2507400);
   g1231.duration.specify(29100);
@@ -460,13 +407,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1231);
   g1231.Opp_Number.specify(19);
 
 goal(DSS_Any___DSS_Availability.No_Window g1259);
-  g1259.activate();
   g1259.start.specify(2507400);
   g1259.end.specify(2507401);
   g1259.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1280);
-  g1280.activate();
   g1280.start.specify(2507401);
   g1280.end.specify(2514300);
   g1280.duration.specify(6899);
@@ -477,13 +422,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1280);
   g1280.Opp_Number.specify(20);
 
 goal(DSS_Any___DSS_Availability.No_Window g1308);
-  g1308.activate();
   g1308.start.specify(2514300);
   g1308.end.specify(2557500);
   g1308.duration.specify(43200);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1329);
-  g1329.activate();
   g1329.start.specify(2557500);
   g1329.end.specify(2593500);
   g1329.duration.specify(36000);
@@ -494,13 +437,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1329);
   g1329.Opp_Number.specify(21);
 
 goal(DSS_Any___DSS_Availability.No_Window g1357);
-  g1357.activate();
   g1357.start.specify(2593500);
   g1357.end.specify(2597100);
   g1357.duration.specify(3600);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1378);
-  g1378.activate();
   g1378.start.specify(2597100);
   g1378.end.specify(2631000);
   g1378.duration.specify(33900);
@@ -511,13 +452,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1378);
   g1378.Opp_Number.specify(22);
 
 goal(DSS_Any___DSS_Availability.No_Window g1406);
-  g1406.activate();
   g1406.start.specify(2631000);
   g1406.end.specify(2661600);
   g1406.duration.specify(30600);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1427);
-  g1427.activate();
   g1427.start.specify(2661600);
   g1427.end.specify(2697600);
   g1427.duration.specify(36000);
@@ -528,13 +467,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1427);
   g1427.Opp_Number.specify(23);
 
 goal(DSS_Any___DSS_Availability.No_Window g1455);
-  g1455.activate();
   g1455.start.specify(2697600);
   g1455.end.specify(2741400);
   g1455.duration.specify(43800);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1476);
-  g1476.activate();
   g1476.start.specify(2741400);
   g1476.end.specify(2766000);
   g1476.duration.specify(24600);
@@ -545,13 +482,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1476);
   g1476.Opp_Number.specify(24);
 
 goal(DSS_Any___DSS_Availability.No_Window g1504);
-  g1504.activate();
   g1504.start.specify(2766000);
   g1504.end.specify(2766001);
   g1504.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1525);
-  g1525.activate();
   g1525.start.specify(2766001);
   g1525.end.specify(2777400);
   g1525.duration.specify(11399);
@@ -562,13 +497,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1525);
   g1525.Opp_Number.specify(25);
 
 goal(DSS_Any___DSS_Availability.No_Window g1553);
-  g1553.activate();
   g1553.start.specify(2777400);
   g1553.end.specify(2811900);
   g1553.duration.specify(34500);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1574);
-  g1574.activate();
   g1574.start.specify(2811900);
   g1574.end.specify(2847900);
   g1574.duration.specify(36000);
@@ -579,13 +512,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1574);
   g1574.Opp_Number.specify(26);
 
 goal(DSS_Any___DSS_Availability.No_Window g1602);
-  g1602.activate();
   g1602.start.specify(2847900);
   g1602.end.specify(2872500);
   g1602.duration.specify(24600);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1623);
-  g1623.activate();
   g1623.start.specify(2872500);
   g1623.end.specify(2894700);
   g1623.duration.specify(22200);
@@ -596,13 +527,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1623);
   g1623.Opp_Number.specify(27);
 
 goal(DSS_Any___DSS_Availability.No_Window g1651);
-  g1651.activate();
   g1651.start.specify(2894700);
   g1651.end.specify(2894701);
   g1651.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1672);
-  g1672.activate();
   g1672.start.specify(2894701);
   g1672.end.specify(2908500);
   g1672.duration.specify(13799);
@@ -613,13 +542,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1672);
   g1672.Opp_Number.specify(28);
 
 goal(DSS_Any___DSS_Availability.No_Window g1700);
-  g1700.activate();
   g1700.start.specify(2908500);
   g1700.end.specify(2916600);
   g1700.duration.specify(8100);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1721);
-  g1721.activate();
   g1721.start.specify(2916600);
   g1721.end.specify(2945100);
   g1721.duration.specify(28500);
@@ -630,13 +557,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1721);
   g1721.Opp_Number.specify(29);
 
 goal(DSS_Any___DSS_Availability.No_Window g1749);
-  g1749.activate();
   g1749.start.specify(2945100);
   g1749.end.specify(2945101);
   g1749.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1770);
-  g1770.activate();
   g1770.start.specify(2945101);
   g1770.end.specify(2965500);
   g1770.duration.specify(20399);
@@ -647,13 +572,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1770);
   g1770.Opp_Number.specify(30);
 
 goal(DSS_Any___DSS_Availability.No_Window g1798);
-  g1798.activate();
   g1798.start.specify(2965500);
   g1798.end.specify(2965501);
   g1798.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1819);
-  g1819.activate();
   g1819.start.specify(2965501);
   g1819.end.specify(2973900);
   g1819.duration.specify(8399);
@@ -664,13 +587,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1819);
   g1819.Opp_Number.specify(31);
 
 goal(DSS_Any___DSS_Availability.No_Window g1847);
-  g1847.activate();
   g1847.start.specify(2973900);
   g1847.end.specify(3031200);
   g1847.duration.specify(57300);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1868);
-  g1868.activate();
   g1868.start.specify(3031200);
   g1868.end.specify(3067200);
   g1868.duration.specify(36000);
@@ -681,13 +602,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1868);
   g1868.Opp_Number.specify(32);
 
 goal(DSS_Any___DSS_Availability.No_Window g1896);
-  g1896.activate();
   g1896.start.specify(3067200);
   g1896.end.specify(3124800);
   g1896.duration.specify(57600);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1917);
-  g1917.activate();
   g1917.start.specify(3124800);
   g1917.end.specify(3153600);
   g1917.duration.specify(28800);
@@ -698,13 +617,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1917);
   g1917.Opp_Number.specify(33);
 
 goal(DSS_Any___DSS_Availability.No_Window g1945);
-  g1945.activate();
   g1945.start.specify(3153600);
   g1945.end.specify(3153601);
   g1945.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1966);
-  g1966.activate();
   g1966.start.specify(3153601);
   g1966.end.specify(3160800);
   g1966.duration.specify(7199);
@@ -715,13 +632,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g1966);
   g1966.Opp_Number.specify(34);
 
 goal(DSS_Any___DSS_Availability.No_Window g1994);
-  g1994.activate();
   g1994.start.specify(3160800);
   g1994.end.specify(3160801);
   g1994.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2015);
-  g2015.activate();
   g2015.start.specify(3160801);
   g2015.end.specify(3181500);
   g2015.duration.specify(20699);
@@ -732,13 +647,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2015);
   g2015.Opp_Number.specify(35);
 
 goal(DSS_Any___DSS_Availability.No_Window g2043);
-  g2043.activate();
   g2043.start.specify(3181500);
   g2043.end.specify(3203100);
   g2043.duration.specify(21600);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2064);
-  g2064.activate();
   g2064.start.specify(3203100);
   g2064.end.specify(3224400);
   g2064.duration.specify(21300);
@@ -749,13 +662,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2064);
   g2064.Opp_Number.specify(36);
 
 goal(DSS_Any___DSS_Availability.No_Window g2092);
-  g2092.activate();
   g2092.start.specify(3224400);
   g2092.end.specify(3224401);
   g2092.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2113);
-  g2113.activate();
   g2113.start.specify(3224401);
   g2113.end.specify(3239100);
   g2113.duration.specify(14699);
@@ -766,13 +677,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2113);
   g2113.Opp_Number.specify(37);
 
 goal(DSS_Any___DSS_Availability.No_Window g2141);
-  g2141.activate();
   g2141.start.specify(3239100);
   g2141.end.specify(3303300);
   g2141.duration.specify(64200);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2162);
-  g2162.activate();
   g2162.start.specify(3303300);
   g2162.end.specify(3326400);
   g2162.duration.specify(23100);
@@ -783,13 +692,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2162);
   g2162.Opp_Number.specify(38);
 
 goal(DSS_Any___DSS_Availability.No_Window g2190);
-  g2190.activate();
   g2190.start.specify(3326400);
   g2190.end.specify(3326401);
   g2190.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2211);
-  g2211.activate();
   g2211.start.specify(3326401);
   g2211.end.specify(3332100);
   g2211.duration.specify(5699);
@@ -800,13 +707,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2211);
   g2211.Opp_Number.specify(39);
 
 goal(DSS_Any___DSS_Availability.No_Window g2239);
-  g2239.activate();
   g2239.start.specify(3332100);
   g2239.end.specify(3360900);
   g2239.duration.specify(28800);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2260);
-  g2260.activate();
   g2260.start.specify(3360900);
   g2260.end.specify(3396900);
   g2260.duration.specify(36000);
@@ -817,13 +722,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2260);
   g2260.Opp_Number.specify(40);
 
 goal(DSS_Any___DSS_Availability.No_Window g2288);
-  g2288.activate();
   g2288.start.specify(3396900);
   g2288.end.specify(3436500);
   g2288.duration.specify(39600);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2309);
-  g2309.activate();
   g2309.start.specify(3436500);
   g2309.end.specify(3472500);
   g2309.duration.specify(36000);
@@ -834,13 +737,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2309);
   g2309.Opp_Number.specify(41);
 
 goal(DSS_Any___DSS_Availability.No_Window g2337);
-  g2337.activate();
   g2337.start.specify(3472500);
   g2337.end.specify(3506700);
   g2337.duration.specify(34200);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2358);
-  g2358.activate();
   g2358.start.specify(3506700);
   g2358.end.specify(3542700);
   g2358.duration.specify(36000);
@@ -851,13 +752,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2358);
   g2358.Opp_Number.specify(42);
 
 goal(DSS_Any___DSS_Availability.No_Window g2386);
-  g2386.activate();
   g2386.start.specify(3542700);
   g2386.end.specify(3592800);
   g2386.duration.specify(50100);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2407);
-  g2407.activate();
   g2407.start.specify(3592800);
   g2407.end.specify(3628800);
   g2407.duration.specify(36000);
@@ -868,13 +767,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2407);
   g2407.Opp_Number.specify(43);
 
 goal(DSS_Any___DSS_Availability.No_Window g2435);
-  g2435.activate();
   g2435.start.specify(3628800);
   g2435.end.specify(3693600);
   g2435.duration.specify(64800);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2456);
-  g2456.activate();
   g2456.start.specify(3693600);
   g2456.end.specify(3698400);
   g2456.duration.specify(4800);
@@ -885,13 +782,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2456);
   g2456.Opp_Number.specify(44);
 
 goal(DSS_Any___DSS_Availability.No_Window g2484);
-  g2484.activate();
   g2484.start.specify(3698400);
   g2484.end.specify(3698401);
   g2484.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2505);
-  g2505.activate();
   g2505.start.specify(3698401);
   g2505.end.specify(3729600);
   g2505.duration.specify(31199);
@@ -902,13 +797,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2505);
   g2505.Opp_Number.specify(45);
 
 goal(DSS_Any___DSS_Availability.No_Window g2533);
-  g2533.activate();
   g2533.start.specify(3729600);
   g2533.end.specify(3774900);
   g2533.duration.specify(45300);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2554);
-  g2554.activate();
   g2554.start.specify(3774900);
   g2554.end.specify(3789300);
   g2554.duration.specify(14400);
@@ -919,13 +812,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2554);
   g2554.Opp_Number.specify(46);
 
 goal(DSS_Any___DSS_Availability.No_Window g2582);
-  g2582.activate();
   g2582.start.specify(3789300);
   g2582.end.specify(3789301);
   g2582.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2603);
-  g2603.activate();
   g2603.start.specify(3789301);
   g2603.end.specify(3810900);
   g2603.duration.specify(21599);
@@ -936,13 +827,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2603);
   g2603.Opp_Number.specify(47);
 
 goal(DSS_Any___DSS_Availability.No_Window g2631);
-  g2631.activate();
   g2631.start.specify(3810900);
   g2631.end.specify(3866100);
   g2631.duration.specify(55200);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2652);
-  g2652.activate();
   g2652.start.specify(3866100);
   g2652.end.specify(3875100);
   g2652.duration.specify(9000);
@@ -953,13 +842,11 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2652);
   g2652.Opp_Number.specify(48);
 
 goal(DSS_Any___DSS_Availability.No_Window g2680);
-  g2680.activate();
   g2680.start.specify(3875100);
   g2680.end.specify(3875101);
   g2680.duration.specify(1);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2701);
-  g2701.activate();
   g2701.start.specify(3875101);
   g2701.end.specify(3902100);
   g2701.duration.specify(26999);
@@ -970,7 +857,6 @@ goal(DSS_Any___DSS_Availability.Downlink_Window g2701);
   g2701.Opp_Number.specify(49);
 
 goal(DSS_Any___DSS_Availability.No_Window g2729);
-  g2729.activate();
   g2729.start.specify(3902100);
   g2729.end.specify(31536000);
   g2729.duration.specify(27633900);

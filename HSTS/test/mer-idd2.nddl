@@ -25,49 +25,41 @@ OPHTR_Class OpHtr = new OPHTR_Class();
 close();
 
 goal(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops g170);
-  g170.activate();
   g170.start.specify(129513607);
   g170.end.specify(129524407);
   g170.duration.specify(10800);
 
 goal(SUN_Orient_Class___Sun_Orient_SV.Sunrise g190);
-  g190.activate();
   g190.start.specify(129524407);
   g190.end.specify(129524707);
   g190.duration.specify(300);
 
 goal(SUN_Orient_Class___Sun_Orient_SV.Day_Ops g212);
-  g212.activate();
   g212.start.specify(129524707);
   g212.end.specify(129553207);
   g212.duration.specify(28500);
 
 goal(SUN_Orient_Class___Sun_Orient_SV.Sunset g233);
-  g233.activate();
   g233.start.specify(129553207);
   g233.end.specify(129553507);
   g233.duration.specify(300);
 
 goal(SUN_Orient_Class___Sun_Orient_SV.Nominal_Night_Ops g255);
-  g255.activate();
   g255.start.specify(129553507);
   g255.end.specify(129571507);
   g255.duration.specify(18000);
 
 goal(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops g277);
-  g277.activate();
   g277.start.specify(129571507);
   g277.end.specify(129602383);
   g277.duration.specify(30876);
 
 goal(Comm_Window_Class___Comm_DSN_SV.Comm_DSN_Unavail g300);
-  g300.activate();
   g300.start.specify(129513607);
   g300.end.specify([129528907 129532507]);
   g300.duration.specify([15300 18900]);
 
 goal(Comm_Window_Class___Comm_DSN_SV.Comm_DSN_Available g320);
-  g320.activate();
   g320.start.specify([129528907 129532507]);
   g320.end.specify([129532507 129536107]);
   g320.duration.specify(3600);
@@ -77,37 +69,31 @@ goal(Comm_Window_Class___Comm_DSN_SV.Comm_DSN_Available g320);
   g320.rate.specify(6000);
 
 goal(Comm_Window_Class___Comm_DSN_SV.Comm_DSN_Unavail g347);
-  g347.activate();
   g347.start.specify([129532507 129536107]);
   g347.end.specify(129602383);
   g347.duration.specify([66276 69876]);
 
 goal(Comm_Window_Class___Comm_Orbiter_SV.Comm_Orbiter_Unavail g370);
-  g370.activate();
   g370.start.specify(129513607);
   g370.end.specify(129602383);
   g370.duration.specify(88776);
 
 goal(HGA_Class___HGA_Mode_SV.HGA_Stow g392);
-  g392.activate();
   g392.start.specify(129513607);
   g392.end.specify([129513608 +inf]);
   g392.duration.specify([1 +inf]);
 
 goal(UHF_Class___UHF_Mode_SV.UHF_Idle g414);
-  g414.activate();
   g414.start.specify(129513607);
   g414.end.specify(129602383);
   g414.duration.specify(88776);
 
 goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Idle g436);
-  g436.activate();
   g436.start.specify(129513607);
   g436.end.specify(129538387);
   g436.duration.specify(24780);
 
 goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Active g456);
-  g456.activate();
   g456.start.specify(129538387);
   g456.end.specify(129581587);
   g456.duration.specify(43200);
@@ -119,19 +105,16 @@ goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Active g456);
   g456.crit_p.specify(true);
 
 goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Idle g493);
-  g493.activate();
   g493.start.specify(129581587);
   g493.end.specify(129602383);
   g493.duration.specify(20796);
 
 goal(IDD_Class___IDD_IDD_SV.IDD_Stow g516);
-  g516.activate();
   g516.start.specify(129513607);
   g516.end.specify([129513608 129601925]);
   g516.duration.specify([1 88318]);
 
 goal(IDD_Class___IDD_IDD_SV.IDD_Move g536);
-  g536.activate();
   g536.start.specify([129513608 129601925]);
   g536.end.specify([129513722 129602039]);
   g536.duration.specify(114);
@@ -141,7 +124,6 @@ goal(IDD_Class___IDD_IDD_SV.IDD_Move g536);
   g536.energy.specify(1710);
 
 goal(IDD_Class___IDD_IDD_SV.IDD_Rotate g574);
-  g574.activate();
   g574.start.specify([129513722 129602039]);
   g574.end.specify([129513836 129602153]);
   g574.duration.specify(114);
@@ -150,7 +132,6 @@ goal(IDD_Class___IDD_IDD_SV.IDD_Rotate g574);
   g574.energy.specify(1710);
 
 goal(IDD_Class___IDD_IDD_SV.IDD_Guarded_Move g607);
-  g607.activate();
   g607.start.specify([129513836 129602153]);
   g607.end.specify([129513950 129602267]);
   g607.duration.specify(114);
@@ -159,13 +140,11 @@ goal(IDD_Class___IDD_IDD_SV.IDD_Guarded_Move g607);
   g607.energy.specify(1710);
 
 goal(IDD_Class___IDD_IDD_SV.IDD_In_Contact g641);
-  g641.activate();
   g641.start.specify([129513950 129602267]);
   g641.end.specify([129513951 129602268]);
   g641.duration.specify([1 88318]);
 
 goal(IDD_Class___IDD_IDD_SV.IDD_Move g662);
-  g662.activate();
   g662.start.specify([129513951 129602268]);
   g662.end.specify([129514065 129602382]);
   g662.duration.specify(114);
@@ -175,115 +154,96 @@ goal(IDD_Class___IDD_IDD_SV.IDD_Move g662);
   g662.energy.specify(1710);
 
 goal(IDD_Class___IDD_IDD_SV.IDD_Stow g700);
-  g700.activate();
   g700.start.specify([129514065 129602382]);
   g700.end.specify(129602383);
   g700.duration.specify([1 88318]);
 
 goal(IDD_Class___IDD_MI_SV.IDD_MI_Idle g723);
-  g723.activate();
   g723.start.specify(129513607);
   g723.end.specify(129602383);
   g723.duration.specify(88776);
 
 goal(IDD_Class___IDD_APXS_SV.IDD_APXS_Idle g747);
-  g747.activate();
   g747.start.specify(129513607);
   g747.end.specify(129602383);
   g747.duration.specify(88776);
 
 goal(IDD_Class___IDD_MB_SV.IDD_MB_Idle g769);
-  g769.activate();
   g769.start.specify(129513607);
   g769.end.specify(129538387);
   g769.duration.specify(24780);
 
 goal(IDD_Class___IDD_MB_SV.IDD_MB_Active g789);
-  g789.activate();
   g789.start.specify(129538387);
   g789.end.specify(129581587);
   g789.duration.specify(43200);
 
 goal(IDD_Class___IDD_MB_SV.IDD_MB_Idle g810);
-  g810.activate();
   g810.start.specify(129581587);
   g810.end.specify(129602383);
   g810.duration.specify(20796);
 
 goal(IDD_Class___IDD_RAT_SV.IDD_RAT_Idle g833);
-  g833.activate();
   g833.start.specify(129513607);
   g833.end.specify(129602383);
   g833.duration.specify(88776);
 
 goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Idle g855);
-  g855.activate();
   g855.start.specify(129513607);
   g855.end.specify(129602383);
   g855.duration.specify(88776);
 
 goal(PMA_Class___PMA_NC_SV.PMA_NC_Idle g877);
-  g877.activate();
   g877.start.specify(129513607);
   g877.end.specify(129602383);
   g877.duration.specify(88776);
 
 goal(PMA_Class___PMA_PC_SV.PMA_PC_Idle g899);
-  g899.activate();
   g899.start.specify(129513607);
   g899.end.specify(129602383);
   g899.duration.specify(88776);
 
 goal(PMA_Class___PMA_MT_SV.PMA_MT_Idle g923);
-  g923.activate();
   g923.start.specify(129513607);
   g923.end.specify(129602383);
   g923.duration.specify(88776);
 
 goal(PMA_Class___PMA_Mount_SV.PMA_Mount_Idle g947);
-  g947.activate();
   g947.start.specify(129513607);
   g947.end.specify(129602383);
   g947.duration.specify(88776);
 
 goal(RCam_Class___HzC_F_SV.HzC_F_Idle g969);
-  g969.activate();
   g969.start.specify(129513607);
   g969.end.specify([129513608 +inf]);
   g969.duration.specify([1 +inf]);
 
 goal(RCam_Class___SunC_SV.SunC_Idle g991);
-  g991.activate();
   g991.start.specify(129513607);
   g991.end.specify(129602383);
   g991.duration.specify(88776);
 
 goal(OPHTR_Class___OPHTR_PMA_SV.OPHTR_PMA_Idle g1013);
-  g1013.activate();
   g1013.start.specify(129513607);
   g1013.end.specify(129602383);
   g1013.duration.specify(88776);
 
 goal(OPHTR_Class___OPHTR_PC_SV.OPHTR_PC_Idle g1035);
-  g1035.activate();
   g1035.start.specify(129513607);
   g1035.end.specify(129602383);
   g1035.duration.specify(88776);
 
 goal(OPHTR_Class___OPHTR_IDD_SV.OPHTR_IDD_Idle g1057);
-  g1057.activate();
   g1057.start.specify(129513607);
   g1057.end.specify(129602383);
   g1057.duration.specify(88776);
 
 goal(OPHTR_Class___OPHTR_RAT_SV.OPHTR_RAT_Idle g1079);
-  g1079.activate();
   g1079.start.specify(129513607);
   g1079.end.specify(129602383);
   g1079.duration.specify(88776);
 
 goal(OPHTR_Class___OPHTR_HGA_SV.OPHTR_HGA_Idle g1101);
-  g1101.activate();
   g1101.start.specify(129513607);
   g1101.end.specify(129602383);
   g1101.duration.specify(88776);

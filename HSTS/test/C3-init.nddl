@@ -11,20 +11,17 @@ P4C3 T = new P4C3();
 close();
 
 goal(P4C3___B.Ib g23);
-  g23.activate();
   g23.start.specify(0);
   g23.end.specify([1 99]);
   g23.duration.specify([1 99]);
 
 goal(P4C3___B.C g43);
-  g43.activate();
   g43.start.specify([1 99]);
   g43.end.specify(100);
   g43.duration.specify([1 99]);
   g43.d.specify(-3);
 
 goal(P4C3___Q.Wb g68);
-  g68.activate();
   g68.start.specify(0);
   g68.end.specify([1 +inf]);
   g68.duration.specify([1 +inf]);
@@ -32,7 +29,6 @@ goal(P4C3___Q.Wb g68);
   g68.dy.specify([-inf 0]);
 
 goal(P4C3___R.S g96);
-  g96.activate();
   g96.start.specify(0);
   g96.end.specify([1 +inf]);
   g96.duration.specify([1 +inf]);
