@@ -4,6 +4,7 @@
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "PlanDatabase.hh"
 #include "Object.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -29,7 +30,9 @@ namespace EUROPA {
 	check_error(tok->isInactive());
 	std::vector<TokenId> compats;
 	tok->getPlanDatabase()->getCompatibleTokens(tok, compats);
-	// std::cout << " Choice.cc::getChoices() found " << compats.size() << " compatible tokens" << std::endl;
+	debugMsg("ValueChoice:makeChoices", "found " << compats.size() << " compatible tokens for token ("
+		 << tok->getKey() << ") of predicate '" << tok->getName().toString() << "'");
+
 	for(std::vector<TokenId>::iterator it2 = compats.begin(); it2 != compats.end(); ++it2){
 	  TokenId mergeCandidate = *it2;
 	  check_error(mergeCandidate->isActive());

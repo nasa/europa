@@ -325,16 +325,43 @@ namespace EUROPA {
     return true;
   }
 
+
   LessThanConstraint::LessThanConstraint(const LabelStr& name,
                                          const LabelStr& propagatorName,
                                          const ConstraintEngineId& constraintEngine,
                                          const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables),
-      m_lessThanEqualConstraint(LabelStr("LessThanEqual"), propagatorName,
-                                constraintEngine, m_variables),
-      m_notEqualConstraint(LabelStr("NotEqual"), propagatorName,
-                                constraintEngine, m_variables) {
-    check_error(m_variables.size() == 2);
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
+  }
+
+  void LessThanConstraint::handleExecute() {
+    IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
+    IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+
+    check_error(AbstractDomain::canBeCompared(domx, domy), "Cannot compare " + domx.toString() + " and " + domy.toString() + ".");
+
+    // Discontinue if either domain is open.
+    if (domx.isOpen() || domy.isOpen())
+      return;
+
+    if(domx.getUpperBound() >= domy.getUpperBound() && 
+       domy.getUpperBound() < PLUS_INFINITY &&
+       domx.intersect(domx.getLowerBound(), domy.getUpperBound() - domx.minDelta()) && 
+       domx.isEmpty())
+      return;
+
+    if(domy.getLowerBound() <= domx.getLowerBound() &&
+       domx.getLowerBound() > MINUS_INFINITY)
+      domy.intersect(domx.getLowerBound() + domy.minDelta(), domy.getUpperBound());
+  }
+
+  bool LessThanConstraint::canIgnore(const ConstrainedVariableId& variable,
+				     int argIndex,
+				     const DomainListener::ChangeType& changeType) {
+    return((argIndex == X &&
+	    (changeType == DomainListener::UPPER_BOUND_DECREASED)) ||
+	   (argIndex == Y &&
+	    (changeType == DomainListener::LOWER_BOUND_INCREASED)));
   }
 
   MultEqualConstraint::MultEqualConstraint(const LabelStr& name,

@@ -10,6 +10,7 @@
 #include "Entity.hh"
 
 #include <list>
+#include <set>
 
 namespace EUROPA {
   class AbstractDomain;
@@ -23,6 +24,8 @@ namespace EUROPA {
 
   class ConstrainedVariable;
   typedef Id<ConstrainedVariable> ConstrainedVariableId;
+  typedef std::set<ConstrainedVariableId, EntityComparator<ConstrainedVariableId> > ConstrainedVariableSet;
+
   class ConstrainedVariableListener;
   typedef Id<ConstrainedVariableListener> ConstrainedVariableListenerId;
   class VariableChangeListener;

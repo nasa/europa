@@ -124,6 +124,7 @@ namespace EUROPA {
     static const int ARG_COUNT = 2;
   };
 
+
   class LessThanConstraint : public Constraint {
   public:
     LessThanConstraint(const LabelStr& name,
@@ -131,12 +132,17 @@ namespace EUROPA {
                        const ConstraintEngineId& constraintEngine,
                        const std::vector<ConstrainedVariableId>& variables);
 
-    // All the work is done by the member constraints
-    inline void handleExecute() { }
+
+    void handleExecute();
+
+    bool canIgnore(const ConstrainedVariableId& variable,
+		   int argIndex,
+		   const DomainListener::ChangeType& changeType);
 
   private:
-    LessThanEqualConstraint m_lessThanEqualConstraint;
-    NotEqualConstraint m_notEqualConstraint;
+    static const int X = 0;
+    static const int Y = 1;
+    static const int ARG_COUNT = 2;
   };
 
   class MultEqualConstraint : public Constraint {

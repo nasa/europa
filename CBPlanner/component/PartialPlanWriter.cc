@@ -262,40 +262,36 @@ namespace EUROPA {
                                          const ConstraintEngineId &ceId2,
                                          const RulesEngineId &reId2,
                                          const CBPlannerId &plId2) {
-      havePlanner = true;
-      reId = const_cast<RulesEngineId *> (&reId2);
-      plId = const_cast<CBPlannerId *> (&plId2);
-      commonInit(planDb, ceId2);
+      commonInit(planDb, ceId2, reId2, plId2);
     }
 
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb,
                                          const ConstraintEngineId &ceId2,
                                          const RulesEngineId &reId2) {
-      havePlanner = false;
-      reId = const_cast<RulesEngineId *> (&reId2);
-      plId = NULL;
-      commonInit(planDb, ceId2);
+      commonInit(planDb, ceId2, reId2, CBPlannerId::noId());
     }
 
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb, 
                                          const ConstraintEngineId &ceId2) {
-      havePlanner = false;
-      reId = NULL;
-      plId = NULL;
-      commonInit(planDb, ceId2);
+      commonInit(planDb, ceId2, RulesEngineId::noId(), CBPlannerId::noId());
     }
 
     void PartialPlanWriter::allocateListeners() {
-      dbl = (new PPWPlanDatabaseListener(*pdbId, this))->getId();
-      cel = (new PPWConstraintEngineListener(*ceId, this))->getId();
-      if (!(*reId).isNoId())
-	rel = (new PPWRulesEngineListener(*reId, this))->getId();
-      if (!(*plId).isNoId())
-	pl = (new PPWPlannerListener(*plId, this))->getId();
+      dbl = (new PPWPlanDatabaseListener(pdbId, this))->getId();
+      cel = (new PPWConstraintEngineListener(ceId, this))->getId();
+      if (!reId.isNoId())
+	rel = (new PPWRulesEngineListener(reId, this))->getId();
+      if (!plId.isNoId())
+	pl = (new PPWPlannerListener(plId, this))->getId();
     }
 
     void PartialPlanWriter::commonInit(const PlanDatabaseId &planDb,
-                                       const ConstraintEngineId &ceId2) {
+                                       const ConstraintEngineId &ceId2,
+				       const RulesEngineId& _reId, 
+				       const CBPlannerId& _plId) {
+      havePlanner = (_plId.isNoId() ? false : true);
+      plId = _plId;
+      reId = _reId;
       nstep = 0;
       maxChoices = INT_MAX;
       destAlreadyInitialized = false;
@@ -304,8 +300,8 @@ namespace EUROPA {
         FatalError("gettimeofday()", "Failed to get current time.");
       }
       seqId = timeval2Id(currTime);
-      pdbId = const_cast<PlanDatabaseId *> (&planDb);
-      ceId = const_cast<ConstraintEngineId *> (&ceId2);
+      pdbId = planDb;
+      ceId = ceId2;
       transactionId = writeCounter = numTransactions = 0;
       transactionList = new std::list<Transaction>();
       stepsPerWrite = 0;
@@ -381,7 +377,7 @@ namespace EUROPA {
 
       char timestr[NBBY * sizeof(seqId) * 28/93 + 4];
       sprintf(timestr, "%lld", seqId);
-      std::string modelName = (*pdbId)->getSchema()->getName().toString();
+      std::string modelName = pdbId->getSchema()->getName().toString();
       {
         std::string::size_type tempIndex = modelName.rfind('/');
         if(tempIndex > 0 && tempIndex < modelName.length()) {
@@ -611,7 +607,7 @@ namespace EUROPA {
         FatalErrno();
       }
 
-      ppOut << stepnum << TAB << ppId << TAB << (*pdbId)->getSchema()->getName().toString()
+      ppOut << stepnum << TAB << ppId << TAB << pdbId->getSchema()->getName().toString()
 						<< TAB << seqId << std::endl;
       ppOut.close();
 
@@ -669,14 +665,14 @@ namespace EUROPA {
         FatalErrno();
       }
 
-      const std::set<ConstraintId, EntityComparator<EntityId> > &constraints = (*ceId)->getConstraints();
+      const std::set<ConstraintId, EntityComparator<EntityId> > &constraints = ceId->getConstraints();
       numConstraints = constraints.size();
       for(std::set<ConstraintId>::const_iterator it = constraints.begin(); it != constraints.end(); ++it) {
         outputConstraint(*it, constrOut, cvmOut);
       }
 
-      ObjectSet objects((*pdbId)->getObjects());
-      TokenSet tokens((*pdbId)->getTokens());
+      ObjectSet objects(pdbId->getObjects());
+      TokenSet tokens(pdbId->getTokens());
       int slotId = 1000000;
       for(ObjectSet::iterator objectIterator = objects.begin();
           objectIterator != objects.end(); ++objectIterator) {
@@ -769,8 +765,8 @@ namespace EUROPA {
 				outputToken(token, T_INTERVAL, 0, 0, 0, ObjectId::noId(), tokOut, varOut);
       }
 
-      if(plId != NULL) {
-        DecisionManagerId &dm = (*plId)->getDecisionManager();
+      if(!plId.isNoId()) {
+        const DecisionManagerId &dm = plId->getDecisionManager();
         std::list<DecisionPointId> decs;
         dm->getOpenDecisions(decs);
         const DecisionPointId &currDec = dm->getCurrentDecision();
@@ -781,7 +777,7 @@ namespace EUROPA {
           outputDecision(*it, decsOut);
       }
 
-      std::set<RuleInstanceId> ruleInst = (*reId)->getRuleInstances();
+      std::set<RuleInstanceId> ruleInst = reId->getRuleInstances();
       for(std::set<RuleInstanceId>::const_iterator it = ruleInst.begin();
           it != ruleInst.end(); ++it) {
         RuleInstanceId ri = *it;
@@ -838,11 +834,11 @@ namespace EUROPA {
        collected incrementally
      */
     void PartialPlanWriter::collectStats(void) {
-      TokenSet tokens((*pdbId)->getTokens());
+      TokenSet tokens(pdbId->getTokens());
       numTokens = tokens.size();
-      ConstrainedVariableSet variables = (*ceId)->getVariables();
+      ConstrainedVariableSet variables = ceId->getVariables();
       numVariables = variables.size();
-      const std::set<ConstraintId, EntityComparator<EntityId> > &constraints = (*ceId)->getConstraints();
+      const std::set<ConstraintId, EntityComparator<EntityId> > &constraints = ceId->getConstraints();
       numConstraints = constraints.size();
     }
 
@@ -1190,7 +1186,7 @@ namespace EUROPA {
         type = D_ERROR;
 		
       decOut << ppId << TAB << dp->getKey() << TAB << type << TAB << dp->getEntityKey() << TAB << isUnit << TAB;
-      if((*plId)->getDecisionManager()->getCurrentDecision() == dp) {
+      if(plId->getDecisionManager()->getCurrentDecision() == dp) {
         std::string choiceInfo = getChoiceInfo(dp);
         if(choiceInfo == "")
           choiceInfo = SNULL;

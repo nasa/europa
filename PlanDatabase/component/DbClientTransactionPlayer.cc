@@ -52,6 +52,7 @@ namespace EUROPA {
         is.get(); // discard characters up to '<'
         continue;
       }
+
       TiXmlElement tx("");
       is >> tx;
       processTransaction(tx);
@@ -71,8 +72,9 @@ namespace EUROPA {
 
   void DbClientTransactionPlayer::processTransaction(const TiXmlElement & element) {
     static unsigned int sl_txCount(0);
-    sl_txCount++;
     const char * tagname = element.Value();
+
+    sl_txCount++;
     if (strcmp(tagname, "class") == 0)
       playDefineClass(element);
     else if (strcmp(tagname, "enum") == 0)
@@ -104,7 +106,7 @@ namespace EUROPA {
     else if (strcmp(tagname, "invoke") == 0)
       playInvokeConstraint(element);
     else {
-      check_error(strcmp(tagname, "nddl") == 0, "Unknown tag name");
+      check_error(strcmp(tagname, "nddl") == 0, "Unknown tag name" + std::string(tagname));
       for (TiXmlElement * child_el = element.FirstChildElement() ;
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
         processTransaction(*child_el);

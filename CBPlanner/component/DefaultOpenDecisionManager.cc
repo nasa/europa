@@ -293,7 +293,7 @@ namespace EUROPA {
 	m_curChoice = activate;
       else if (!reject.isNoId()) 
 	m_curChoice = reject;
-    }      
+    }
 
     // If we have no choice selected and there is a choice, pick the first
     if (!choices.empty() && m_curChoice == ChoiceId::noId())

@@ -77,10 +77,10 @@ namespace EUROPA {
       long long int seqId;
       int numTokens, numConstraints, numVariables, numTransactions;
       int stepsPerWrite, transactionId, nstep, writeCounter, maxChoices;
-      ConstraintEngineId *ceId;
-      PlanDatabaseId *pdbId;
-      RulesEngineId *reId;
-      CBPlannerId *plId;
+      ConstraintEngineId ceId;
+      PlanDatabaseId pdbId;
+      RulesEngineId reId;
+      CBPlannerId plId;
       PlanDatabaseListenerId dbl;
       ConstraintEngineListenerId cel;
       RulesEngineListenerId rel;
@@ -93,7 +93,7 @@ namespace EUROPA {
       void parseGeneralConfigSection(std::ifstream&);
       void parseTransactionConfigSection(std::ifstream&);
       void parseRuleConfigSection(std::ifstream&);
-      void commonInit(const PlanDatabaseId &, const ConstraintEngineId &);
+      void commonInit(const PlanDatabaseId &, const ConstraintEngineId &, const RulesEngineId&, const CBPlannerId&);
       void outputObject(const ObjectId &, const int, std::ofstream &, std::ofstream &);
       void outputToken(const TokenId &, const int, const int, const int, const int, 
                        const ObjectId &, std::ofstream &, std::ofstream &);

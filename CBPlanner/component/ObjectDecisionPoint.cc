@@ -4,6 +4,8 @@
 #include "Token.hh"
 #include "Object.hh"
 #include "Utils.hh"
+#include "Debug.hh"
+
 #include <list>
 
 namespace EUROPA {
@@ -45,14 +47,14 @@ namespace EUROPA {
       std::vector<std::pair<TokenId, TokenId> > tuples;
       obj->getOrderingChoices(m_token, tuples);
       std::vector<std::pair<TokenId, TokenId> >::iterator it = tuples.begin();
-      //std::cout << "Choices for (" << getKey() << "):" << std::endl;
+      debugMsg("ObjectDecisionPoint:getChoices", "Choices constraining (" << m_token->getKey() << ")");
       for (; it != tuples.end(); it++) {
 	TokenId predecessor = it->first;
 	TokenId successor = it->second;
 	check_error(predecessor.isValid());
 	check_error(successor.isValid());
 	ChoiceId choice = (new TokenChoice(m_id, obj, predecessor, successor))->getId();
-	//std::cout << choice << std::endl;
+	debugMsg("ObjectDecisionPoint:getChoices", "  constrain(" << predecessor->getKey() << ", " << successor->getKey() << ")");
 	m_choices.push_back(choice);
       }
     }

@@ -224,6 +224,7 @@ private:
     SCHEMA->reset();
     SCHEMA->addObjectType(LabelStr("Foo"));
     SCHEMA->addObjectType(LabelStr("Baz"));
+    SCHEMA->addPredicate("Baz.pred");
 
     assertTrue(SCHEMA->isObjectType(LabelStr("Foo")));
     assertTrue(SCHEMA->isA(LabelStr("Foo"), LabelStr("Foo")));
@@ -255,6 +256,10 @@ private:
     assertTrue(SCHEMA->canContain(LabelStr("Bar"), LabelStr("Bar"), LabelStr("arg1")));
 
     assert(SCHEMA->getAllObjectTypes().size() == 3);
+
+    assertFalse(SCHEMA->hasPredicates("Foo"));
+    assertFalse(SCHEMA->hasPredicates("Foo")); // Call again for cached result
+    assertTrue(SCHEMA->hasPredicates("Baz")); // Call again for cached result
 
     return true;
   }
