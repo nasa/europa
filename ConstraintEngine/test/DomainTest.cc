@@ -156,8 +156,8 @@ void testLabelSetEqualityPerformance(const ConstraintEngineId& ce){
     Variable<LabelSet>*  p_v = (Variable<LabelSet>*) variables[i-1];
     p_v->specify(newDomain);
     ce->propagate();
-    check_error(ce->constraintConsistent());
-    check_error(p_v0->getDerivedDomain().getSize() == i-1);
+    assert(ce->constraintConsistent());
+    assert(p_v0->getCurrentDomain().getSize() == i-1);
   }
 }
 
@@ -256,9 +256,9 @@ void testIntervalEqualityPerformance(const ConstraintEngineId& ce){
     Variable<IntervalIntDomain>*  p_v = (Variable<IntervalIntDomain>*) variables[i-1];
     p_v->specify(newDomain);
     ce->propagate();
-    check_error(ce->constraintConsistent());
-    check_error(p_v0->getDerivedDomain().getUpperBound() == ub);
-    check_error(p_v0->getDerivedDomain().getLowerBound() == lb);
+    assert(ce->constraintConsistent());
+    assert(p_v0->getCurrentDomain().getUpperBound() == ub);
+    assert(p_v0->getCurrentDomain().getLowerBound() == lb);
   }
 }
 
