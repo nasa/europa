@@ -5,6 +5,8 @@
 #include "PartialPlanWriter.hh"
 
 #include "Choice.hh"
+#include "ValueChoice.hh"
+#include "TokenChoice.hh"
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "DecisionManager.hh"
 #include "ObjectDecisionPoint.hh"
@@ -1599,7 +1601,7 @@ namespace Prototype {
 				switch(choice->getType()) {
 				case Choice::token:
 					{
-						const TokenId &tId = choice->getToken();
+					  const TokenId &tId = Id<TokenChoice>(choice)->getToken();
 						if(!tId.isNoId())
 							retval << tId->getKey();
 						else
@@ -1608,29 +1610,16 @@ namespace Prototype {
 				break;
 				case Choice::value:
 					{
-						const TokenId &tId = choice->getToken();
+					  const TokenId &tId = Id<ValueChoice>(choice)->getToken();
 						if(!tId.isNoId())
 							retval << tId->getKey();
 						else
 							retval << -1;
-						retval << COMMA << choice->getValue();
+						retval << COMMA << Id<ValueChoice>(choice)->getValue();
 					}
 				break;
-				case Choice::domain:
-					{
-						const AbstractDomain &dom = choice->getDomain();
-						if(dom.isEnumerated())
-							retval << E_DOMAIN << COMMA << getEnumerationStr((EnumeratedDomain &) dom);
-						else if(dom.isInterval()) {
-							retval << I_DOMAIN << COMMA << getUpperBoundStr((IntervalDomain &) dom) << COMMA 
-												<< getLowerBoundStr((IntervalDomain &) dom);
-						}
-						else
-							FatalError("I don't know what my domain is!");
-					}
-				break;
-				case Choice::close:
-					retval << "CLOSE";
+				case Choice::defer:
+					retval << "DEFER";
 				}
 				retval << SEQ_COL_SEP;
 			}
