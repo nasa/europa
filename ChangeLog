@@ -1,5 +1,7 @@
 M_23:
 1. Fixed bug in Planner where it was retracting all the way out of the first decision failed. See System/tests/rejection.nddl.
+2. Reimplemented existential and universal quantification, driven by GNATS-2489.
+3. Implemented support for constraints of any arity and streamlined factory mechanism for constraints. Unary and Non-uanry construction is all the same now. Removed all special support for unary constraints, except for the provision for testing if a constraint is unary.
 
 
 M_22:
