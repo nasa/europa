@@ -8,5 +8,8 @@ using namespace EUROPA;
 void averInit(const PlanDatabaseId& db, 
               const DecisionManagerId& dm = DecisionManagerId::noId(),
               const ConstraintEngineId& ce = ConstraintEngineId::noId(),
-              const RulesEngineId& re = RulesEngineId::noId()) {}
-void averDeinit(){}
+              const RulesEngineId& re = RulesEngineId::noId()) {
+}
+
+void averDeinit(){
+}

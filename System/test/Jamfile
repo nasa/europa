@@ -19,8 +19,6 @@ for model in
         backtr.nddl better-res.nddl CAPER.nddl
         monkey1monkey-transaction.nddl
 #        monkey1twoMonkey.nddl # Uncomment for GNATS 2760 (predicted number; creating just after committing this change)
-#        sum-init.nddl # Uncomment for GNATS 2757
-#        C3-init.nddl # Uncomment for GNATS 2757
 {
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
