@@ -354,4 +354,17 @@ namespace Prototype {
     return false;
   }
 
+  void EnumeratedDomain::operator>>(ostream&os) const {
+    if (!m_closed) return;
+    AbstractDomain::operator>>(os);
+    os << "{";
+    int size = m_values.size();
+    int i=0;
+    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it,i++){
+      os << *it;
+      if (i != size-1)
+	os << ",";
+    }
+    os << "}";
+  }
 }

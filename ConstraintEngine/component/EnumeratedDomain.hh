@@ -236,6 +236,8 @@ namespace Prototype{
      */
     bool intersects(const AbstractDomain& dom) const;
 
+    void operator>>(ostream& os) const;
+
   protected:
     std::set<double> m_values; /*!< Holds the contents from which the set membership is then derived. */
   };
