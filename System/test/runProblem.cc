@@ -18,8 +18,6 @@ const char* averTestFile = NULL;
 bool replay = false;
 extern const char* TX_LOG;
 
-#define PERFORMANCE
-
 bool runPlanner(){
 
   TestAssembly assembly(schema);
@@ -32,13 +30,10 @@ bool runPlanner(){
 
   assert(result == CBPlanner::PLAN_FOUND);
 
-  // std::cout << "assembly.plan status = " << result << std::endl;
-
   std::cout << " found a plan at depth " << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched() << std::endl;
 
-#ifndef PERFORMANCE
-  assembly.write(std::cout);
-#endif
+  if (replay)  // this ensures we're not running the performance tests.
+    assembly.write(std::cout);
 
   // Store transactions for recreation of database
 
@@ -128,18 +123,21 @@ int main(int argc, const char** argv) {
   schema = NDDL::loadSchema();
 #endif //STANDALONE
 
-#ifdef PERFORMANCE
-  replay = false;
-  for(int i = 0; i < 1; i++) {
-    runTest(runPlanner);
+  const char* performanceTest = getenv("EUROPA_PERFORMANCE");
+
+  if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
+    replay = false;
+    for(int i = 0; i < 1; i++) {
+      runTest(runPlanner);
+    }
   }
-#else
-  for(int i = 0; i < 1; i++) {
-    replay = true;
-    runTest(runPlanner);
-    runTest(copyFromFile);
+  else {
+    for(int i = 0; i < 1; i++) {
+      replay = true;
+      runTest(runPlanner);
+      runTest(copyFromFile);
+    }
   }
-#endif
 
   TestAssembly::terminate();
 
