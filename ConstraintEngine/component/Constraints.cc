@@ -1111,6 +1111,22 @@ namespace Prototype {
     } // for changedOne = true; changedOne;
   } // end of CondAllDiffConstraint::handleExecute()
 
+  AllDiffConstraint::AllDiffConstraint(const LabelStr& name,
+                                       const LabelStr& propagatorName,
+                                       const ConstraintEngineId& constraintEngine,
+                                       const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_condVar(constraintEngine, BoolDomain(true), false, LabelStr("Internal:AllDiff:cond"), getId())
+  {
+    std::vector<ConstrainedVariableId> condAllDiffScope;
+    condAllDiffScope.reserve(m_variables.size() + 1);
+    condAllDiffScope.push_back(m_condVar.getId());
+    condAllDiffScope.insert(condAllDiffScope.end(), m_variables.begin(), m_variables.end());
+    assertTrue(m_variables.size() + 1 == condAllDiffScope.size());
+    m_condAllDiffConstraint = (new CondAllDiffConstraint(LabelStr("Internal:AllDiff:condAllDiff"), propagatorName,
+                                                         constraintEngine, condAllDiffScope))->getId();
+  }
+
   MemberImplyConstraint::MemberImplyConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
                                                const ConstraintEngineId& constraintEngine,
@@ -1279,8 +1295,9 @@ namespace Prototype {
 
   // If EqualMinConstraint::handleExecute's contributors were a class
   // data member, then EqualMinConstraint::canIgnore() could be quite
-  // specific about events to ignore.  If the event(s) were available
-  // to handleExecute(), it could focus on just the changed vars.
+  // specific about events to ignore.  If the event(s) were also
+  // available to handleExecute(), it could focus on just the changed
+  // vars.
 
   void EqualMinimumConstraint::handleExecute() {
     AbstractDomain& minDom = getCurrentDomain(m_variables[0]);
