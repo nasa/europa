@@ -55,8 +55,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define FatalError(s) { std::cerr << __FILE__ << ':' << __LINE__ << ": " << __PRETTY_FUNCTION__ << std::endl << (s) << std::endl; exit(errno == 0 ? -1 : errno); }
-#define FatalErrno() { FatalError(strerror(errno)) }
+#define FatalError(cond, msg...){Error(cond, msg, __FILE__, __LINE__).handleAssert();}
+#define FatalErrno(){FatalError("Condition", strerror(errno))}
 #define FatalErr(s) {std::cerr << (s) << std::endl; FatalErrno(); }
 
 const char *envPPWConfigFile = "PPW_CONFIG";
@@ -302,7 +302,7 @@ namespace Prototype {
 			maxChoices = INT_MAX;
       struct timeval currTime;
       if(gettimeofday(&currTime, NULL)) {
-				FatalError("Failed to get current time.");
+        FatalError("gettimeofday()", "Failed to get current time.");
       }
       seqId = timeval2Id(currTime);
       pdbId = const_cast<PlanDatabaseId *> (&planDb);
@@ -336,12 +336,12 @@ namespace Prototype {
                           FatalErrno();
 			}
 
+                        //std::cerr << "PPW DEBUG:constructing:configFile; configBuf = " << configBuf << std::endl;
 			std::ifstream configFile(configBuf);
 			if (!configFile) {
                           std::cerr << "Failed to open config file " << configBuf << std::endl;
                           FatalErrno();
 			}
-			
 			std::string buf;
 
       parseConfigFile(configFile);
@@ -379,10 +379,17 @@ namespace Prototype {
       seqName = seqName.substr(0, extStart);
 
       if(stepsPerWrite) {
-				if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
-					std::cerr << "Failed to make directory " << dest << std::endl;
-					FatalErrno();
-				}
+        if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
+          /*
+           * Failing with return code = -1, errno = 0 when dir already 
+           * exists.  Should be returning errno = EEXIST. 
+           * Check errno is non-zero before call to FatalErrno()
+           */
+          if (errno) {
+            std::cerr << "Failed to make directory " << dest << std::endl;
+            FatalErrno();
+          }
+        }
         if(seqName[0] != '/')
           dest += "/";
 				dest += seqName;
@@ -466,7 +473,52 @@ namespace Prototype {
         delete transactionList;
       }
     }
-  
+
+    // accessor to output destination full path
+    std::string PartialPlanWriter::getDest(void) {
+       return dest;
+    }
+
+    void PartialPlanWriter::setDest(std::string destPath) {
+       dest = destPath;
+       /*
+        * TBD - need to change the way PPW is initialized before
+        * this can be implemented.
+        */
+    }
+
+    int PartialPlanWriter::getNumTransactions() {
+      return transactionTotal - 1;
+    }
+
+    int PartialPlanWriter::getMaxLengthTransactions() {
+      std::string::size_type maxLen = 0;
+      std::string name;
+
+      for(int i = 0; i < transactionTotal; i++) {
+        name = transactionNameStrs[i];
+        if (name.length() > maxLen)
+           maxLen = name.length();
+      }
+      return (int)maxLen;
+    }
+
+    const char** PartialPlanWriter::getTransactionNameStrs() {
+      return transactionNameStrs;
+    }
+     
+    bool* PartialPlanWriter::getTransactionFilterStates() {
+      return allowTransaction;
+    }
+
+    void PartialPlanWriter::setTransactionFilterStates(bool* transFilterStates, 
+                                                       int numTrans) {
+      check_error(numTrans == transactionTotal - 1, "Wrong transaction total");
+      for (int i = 0; i < numTrans; i++) {
+        allowTransaction[i] = transFilterStates[i];
+      }
+    }
+
     void PartialPlanWriter::write(void) {
       if(!transOut || !statsOut)
         return;
@@ -474,7 +526,7 @@ namespace Prototype {
       ppId = 0LL;
       struct timeval currTime;
       if(gettimeofday(&currTime, NULL)) {
-				FatalError("Failed to get current time.");
+        FatalError("gettimeofday()", "Failed to get current time.");
       }
       ppId = timeval2Id(currTime);
 
@@ -704,7 +756,7 @@ namespace Prototype {
       ppId = 0LL;
       struct timeval currTime;
       if(gettimeofday(&currTime, NULL)) {
-        FatalError("Failed to get current time.");
+        FatalError("gettimeofday()", "Failed to get current time.");
       }
       ppId = timeval2Id(currTime);
 
@@ -950,8 +1002,8 @@ namespace Prototype {
 							 << getUpperBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB;
       }
       else {
-				std::cerr << " I don't know what my domain is!" << std::endl;
-				exit(-1);
+        FatalError("otherVar->lastDomain()isEnumerated() || otherVar->lastDomain().isInterval()",
+                   "I don't know what my domain is!");
       }
       varOut << tokenVarTypes[type] << std::endl;
     }
@@ -1801,7 +1853,7 @@ namespace Prototype {
     void PartialPlanWriter::parseConfigFile(std::ifstream& configFile) {
       while(parseSection(configFile)){}
       if(!configFile.eof())
-        FatalError("Error parsing config file.");
+        FatalError("!configFile.eof()", "Error parsing config file.");
     }
 
     bool PartialPlanWriter::parseSection(std::ifstream& configFile) {
@@ -1809,9 +1861,11 @@ namespace Prototype {
       bool retval = false;
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
+        //std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
+        
         if(line == GENERAL_CONFIG_SECTION) {
           parseGeneralConfigSection(configFile);
           retval = true;
@@ -1845,7 +1899,7 @@ namespace Prototype {
           std::string spw = line.substr(line.find("=")+1);
           stepsPerWrite = strtol(spw.c_str(), NULL, 10);
           if(stepsPerWrite < 0)
-            FatalError("StepsPerWrite must be a non-negative value");
+            FatalError("stepsPerWrite < 0", "StepsPerWrite must be a non-negative value");
           if(stepsPerWrite == LONG_MAX || stepsPerWrite == LONG_MIN)
             FatalErrno();
         }

@@ -8,6 +8,8 @@ ModuleComponent System
   AggregateListener.cc
   Assertion.cc
   TestSet.cc
+  CBPlannerControl.cc
+  LoadInitModel.cc
 	;
 
 local java_src_dir = [ FDirName $(SUBDIR) java ] ;

@@ -49,6 +49,16 @@ namespace Prototype {
                         const RulesEngineId &, const CBPlannerId &);
       virtual ~PartialPlanWriter(void);
       void write(void);
+
+      //PLASMA JNI runtime interface functions
+      std::string getDest(void);
+      void setDest(std::string destPath);
+      int getNumTransactions(void);
+      int getMaxLengthTransactions(void);
+      const char** getTransactionNameStrs(void);
+      bool* getTransactionFilterStates(void);
+      void setTransactionFilterStates(bool*, int);
+
       static int noFullWrite, writeStep;
     protected:
       virtual bool parseSection(std::ifstream& configFile);

@@ -169,6 +169,15 @@ rule LinkSharedLibraries
     NEEDSHARES on $(_t) += $(>) ;
 }
 
+rule LinkSharedLibrariesNoDeps
+{
+    # set NEEDSHARES variable used by 'actions Link'
+
+    local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+
+    NEEDSHARES on $(_t) += $(>) ;
+}
+
 #
 # Jambase modifications 
 #
