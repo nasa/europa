@@ -60,6 +60,8 @@ bool testMultipleDMsImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema,
 
   bool testObjectHorizonImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner);
 
+  bool testFindAnotherPlanImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner);
+
   bool testAddSubgoalAfterPlanningImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner);
 }
 #endif

@@ -303,10 +303,18 @@ private:
 class TwoCyclePlanningTest {
 public:
   static bool test() {
+    runTest(testFindAnotherPlan);
     runTest(testAddSubgoalAfterPlanning);
     return(true);
   }
 private:
+  static bool testFindAnotherPlan() {
+    bool retval = false;
+    DEFAULT_SETUP_PLAN(ce, db, schema, false);
+    retval = testFindAnotherPlanImpl(ce, db, schema, hor, planner);
+    DEFAULT_TEARDOWN_PLAN();
+    return retval;
+  }
   static bool testAddSubgoalAfterPlanning() {
     bool retval = false;
     DEFAULT_SETUP_PLAN(ce, db, schema, false);

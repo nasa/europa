@@ -920,6 +920,73 @@ namespace Prototype {
     return true;
   }
   
+  bool testFindAnotherPlanImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
+    hor.setHorizon(0,100);
+    std::list<LabelStr> values;
+    values.push_back(LabelStr("L1"));
+    values.push_back(LabelStr("L4"));
+
+    Variable<LabelSet> v0(ce.getId(), LabelSet(values, true));
+    Variable<LabelSet> v1(ce.getId(), LabelSet(values, false));
+    Variable<IntervalDomain> v2(ce.getId(), IntervalDomain(1, 2));
+    Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 2));
+    Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
+    Variable<EnumeratedDomain> v5(ce.getId(), EnumeratedDomain());
+    v5.insert(5);
+    v5.insert(23);
+    v5.close();
+
+    Object o1(db.getId(), LabelStr("Objects"), LabelStr("o1"));
+    Timeline t1(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    db.close();
+
+    IntervalToken tokenA(db.getId(), 
+			 LabelStr("PredicateA"),
+			 true,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(1, 1000));
+
+    IntervalToken tokenB(db.getId(), 
+			 LabelStr("PredicateB"),
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(1, 1000));
+
+    IntervalToken tokenC(db.getId(), 
+			 LabelStr("PredicateC"),
+			 true,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(1, 1000),
+			 LabelStr("o1"));
+
+    hor.setHorizon(0,200);
+
+    CBPlanner::Status result = planner.run();
+    assert(result == CBPlanner::PLAN_FOUND);
+
+    std::cout << "Nodes = " << planner.getTime() << "Depth = " <<  planner.getDepth() << std::endl;
+    /*
+    assert(planner.getTime() != planner.getDepth());
+    assert(planner.getDepth() == 8);
+    assert(planner.getTime() == 13);
+    */
+
+    DecisionManagerId dm = planner.getDecisionManager();
+    dm->retractDecision();
+    while(dm->hasDecisionToRetract() && dm->isRetracting())
+      dm->retractDecision();
+
+    result = planner.run();
+    assert(result == CBPlanner::PLAN_FOUND);
+
+    std::cout << "Nodes = " << planner.getTime() << "Depth = " <<  planner.getDepth() << std::endl;
+
+    return true;
+  }
+
   bool testAddSubgoalAfterPlanningImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
     hor.setHorizon(0,100);
 
