@@ -40,6 +40,7 @@ public:
   static bool test() {
     runTest(testObjectPredicateRelationships);
     runTest(testPredicateParameterAccessors);
+    runTest(testTypeQueries);
     return(true);
   }
 
@@ -96,6 +97,25 @@ private:
     schema.addPredicateParameter(LabelStr("Resource.change"), LabelStr("quality"));
     check_error(schema.getIndexFromName(LabelStr("Resource.change"), LabelStr("quality")) == 1);
     check_error(schema.getNameFromIndex(LabelStr("Resource.change"), 0).getKey() == LabelStr("quantity").getKey());
+    return true;
+  }
+
+  static bool testTypeQueries() {
+    NddlSchema schema(LabelStr("TestSchema"));
+    schema.addEnum(LabelStr("FooEnum"));
+    schema.addEnumMember(LabelStr("FooEnum"), LabelStr("FOO"));
+    schema.addEnumMember(LabelStr("FooEnum"), LabelStr("BAR"));
+    schema.addEnumMember(LabelStr("FooEnum"), LabelStr("BAZ"));
+    schema.addEnum(LabelStr("BarEnum"));
+    schema.addEnumMember(LabelStr("BarEnum"), LabelStr("QUUX"));
+    schema.addEnumMember(LabelStr("BarEnum"), LabelStr("QUUUX"));
+    check_error(schema.isEnum(LabelStr("FOO")));
+    check_error(schema.isEnum(LabelStr("QUUUX")));
+    check_error(!schema.isEnum(LabelStr("ARG")));
+
+    schema.addType(LabelStr("Foo"));
+    check_error(schema.isClass(LabelStr("Foo")));
+    check_error(!schema.isClass(LabelStr("Bar")));
     return true;
   }
 };
