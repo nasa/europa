@@ -80,7 +80,7 @@ private:
       check_error(argc == 1);
       check_error(argc == 1, "check_error(argc == 1)");
       check_error(argc == 1, Error("check_error(argc == 1)"));
-      condWarn(argc == 1, "argc is not 1");
+      condWarning(argc == 1, "argc is not 1");
       warn("everything worked in first try() block of main()");
     } 
     catch (Error e) {
