@@ -52,8 +52,6 @@ bool runPlanner(){
       
     int res = planner.run(strategy.getId(), loggingEnabled());
 
-    //std::cout << "\nNr. Of Decisions:" << planner.getClosedDecisions().size() << std::endl;
-
     PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
     assert(res == 1);
@@ -113,6 +111,7 @@ int main(int argc, const char ** argv){
   schema = NDDL::schema();
 
 #ifdef PERFORMANCE
+  replay = false;
   runTest(runPlanner);
 #else
   replay = true;
