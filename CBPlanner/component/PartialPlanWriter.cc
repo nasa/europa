@@ -319,6 +319,14 @@ namespace EUROPA {
       sourcePaths.push_back(".");
       sourcePaths.push_back("..");
       char *configPath = getenv(envPPWConfigFile);
+
+      // If null, then also test for existence of a default config file - PlanWorks.cfg
+      if(configPath == NULL){
+	std::ifstream config("PlanWorks.cfg");
+	if (config.good())
+	  configPath = "PlanWorks.cfg";
+      }
+
       if (configPath == NULL || configPath[0] == '\0') {
         std::cerr << "Warning: PPW_CONFIG not set or is empty." << std::endl;
         std::cerr << "   PartialPlanWriter will not write." << std::endl;
