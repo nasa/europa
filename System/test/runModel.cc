@@ -123,8 +123,6 @@ int main(int argc, const char ** argv) {
   char* error_msg;
   void* libHandle;
 
-  initDebug();
-
   SchemaId (*fcn_schema)();   //function pointer to NDDL::schema()
 
   switch (argc) {
