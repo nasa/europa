@@ -49,6 +49,7 @@ class NotTrackable extends Trackable {
 
 class Rover {
  predicate Navigate{
+  Path path;
   Location from;
   Location to;
   neq(from, to);
@@ -61,7 +62,9 @@ Rover::Navigate{
 	eq(to, p.to);
  };
 
- if(p){
+ eq(path, p);
+
+ if(path){
  	Trackable trackable : {
 		eq(trackable.path, p);
  	};
@@ -80,20 +83,4 @@ Rover::Navigate{
 		eq(target.object, t.target);
  	};
  }
-}
-
-class World {
- Rover rover;
- predicate initialState{}
- World(){
-  rover = new Rover();
- }
-}
-
-World::initialState{
- // Try one without a filter
- Rover r;
- foreach (t in r) {
-  contains(Rover.Navigate n);
- };
 }

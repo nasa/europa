@@ -12,8 +12,8 @@ SubInclude PLASMA PlanDatabase ;
 SubInclude PLASMA Resource ;
 SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA CBPlanner ;
-SubInclude PLASMA NDDL ;
 SubInclude PLASMA TemporalNetwork ;
+SubInclude PLASMA NDDL ;
 SubInclude PLASMA AgentDatabase ;
 SubInclude PLASMA System ;
 

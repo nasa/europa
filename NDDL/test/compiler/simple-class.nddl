@@ -23,6 +23,13 @@ class Foo {
   m_0 = _m_1;
   m_1 = _m_1;
   // Forces failure: m_1 = 10;
+  m_2 = false;
+  m_3 = "This still must be set!";
+  m_4 = Hill;
+  m_5 = 100;
+  m_6 = 3.78;
+  m_7 = A;
+  m_8 = 'Martian City';
  }
 }
 
@@ -40,3 +47,11 @@ class World {
   m_foo2 = new Foo();
  }
 }
+
+World w = new World();
+Foo f0 = new Foo();
+Foo f1 = new Foo(10, 1234.98);
+close();
+
+goal(World.initialState g0);
+g0.reject();

@@ -27,6 +27,7 @@ class World {
  Rover rover;
 
  predicate initialState{}
+
  World(){
   rover = new Rover();
  }
@@ -62,7 +63,18 @@ World::initialState{
  b after (Rover.At c);
  a meets c;
 
- //test use of starts
+ // test use of starts
  c starts (Rover.At d);
-
 }
+
+// Transactions
+World world = new World();
+close();
+
+goal(World.initialState t0);
+t0.activate();
+
+goal(Rover.Going t1);
+t1.activate();
+goal(Rover.Going t2);
+t2.merge(t1);

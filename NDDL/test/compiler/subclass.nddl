@@ -33,3 +33,8 @@ World::initialState{
  any(Bar.p1 p2);
  any(Bar.p2 p3);
 }
+
+World world = new World();
+close();
+goal(World.initialState g0);
+g0.activate();

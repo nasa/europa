@@ -102,3 +102,18 @@ World::initialState{
  leq(o.end, f.start);
  contains(Camera.On g);
 }
+
+World world = new World();
+close();
+goal(World.initialState g0);
+g0.activate();
+goal(Camera.Off g1);
+g1.activate();
+goal(Camera.On g2);
+g2.activate();
+goal(Camera.TakingPicture g3);
+g3.activate();
+goal(Rover.Going g4);
+g4.activate();
+goal(Rover.At g5);
+g5.activate();

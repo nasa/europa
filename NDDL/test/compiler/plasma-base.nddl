@@ -12,12 +12,17 @@ class BaseTimeline extends Timeline {
 class World extends Object {
  BaseTimeline _o1;
 
- predicate initialState{}
-
  World(){
  	_o1 = new BaseTimeline();
  }
 
 }
 
-World::initialState{}
+World world = new World();
+BaseTimeline timeline = new BaseTimeline();
+close();
+
+goal(BaseTimeline.p0 g0);
+g0.activate();
+timeline.constrain(g0);
+timeline.free(g0);

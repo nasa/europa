@@ -340,6 +340,25 @@ namespace Prototype {
       m_client->constrain(object, token, successor);
       return;
     }
+
+    if (strcmp(name, "free") == 0) {
+      // free token special case
+      const char * identifier = element.Attribute("identifier");
+      std::string object_name = identifier;
+      ObjectId object = m_client->getObject(LabelStr(object_name.c_str()));
+      check_error(object.isValid(),
+                  "free transaction refers to an undefined object: '"
+                   + object_name + "'");
+      TiXmlElement * token_el = element.FirstChildElement();
+      check_error(token_el != NULL, "missing mandatory token identifier for free transaction");
+      TokenId token = xmlAsToken(*token_el);
+      check_error(token.isValid(),
+                  "invalid token identifier for free transaction");
+
+      m_client->free(object, token);
+      return;
+    }
+
     if (strcmp(name, "activate") == 0) {
       // activate token special case
       const char * identifier = element.Attribute("identifier");

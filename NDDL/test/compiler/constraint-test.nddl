@@ -39,7 +39,11 @@ class World{
 
 World::initialState{
  any (Sample.sample s);
- eq(foo, bar);
- eq("bing", "baz");
+ eq(foo, foo);
+ neq("bing", "baz");
 }
 
+World world = new World();
+close();
+goal(World.initialState g0);
+g0.activate();

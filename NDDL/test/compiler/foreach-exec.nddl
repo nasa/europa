@@ -1,0 +1,57 @@
+#include "foreach.nddl"
+
+class World {
+ Rover rover;
+ predicate initialState{}
+ World(){
+  rover = new Rover();
+ }
+}
+
+World::initialState{
+ // Try one without a filter
+ Rover r;
+ foreach (t in r) {
+  contains(Rover.Navigate n);
+ };
+}
+
+World world = new World();
+Rover r0 = new Rover();
+Rover r1 = new Rover();
+Rover r2 = new Rover();
+
+Location l0 = new Location("Hill");
+Location l1 = new Location("Rock");
+Location l2 = new Location("Lander");
+
+Path p0 = new Path(l0, l1);
+Path p1 = new Path(l0, l2);
+Path p2 = new Path(l1, l2);
+Path p3 = new Path(l1, l0);
+Path p4 = new Path(l2, l0);
+
+Target t0 = new Target();
+Target t1 = new Target();
+Target t2 = new Target();
+Target t3 = new Target();
+
+Trackable tk0 = new Trackable(p0, t0);
+Trackable tk1 = new Trackable(p1, t2);
+Trackable tk2 = new Trackable(p1, t1);
+Trackable tk3 = new Trackable(p2, t1);
+
+NotTrackable nt0 = new NotTrackable(p1, t0);
+NotTrackable nt1 = new NotTrackable(p2, t0);
+
+close();
+
+goal(World.initialState g0);
+g0.activate();
+
+goal(Rover.Navigate g1);
+g1.activate();
+g1.from.specify(l0);
+g1.to.specify(l2);
+g1.path.specify(p1);
+

@@ -174,6 +174,11 @@ contains(Target.NotTracked nt_L0_target);
 eq(nt_L0_target.target, object.L0_target);
 eq(nt_L0_target.start, 0);
 
+
+contains(Target.NotTracked nt_L4_target);
+eq(nt_L4_target.target, object.L4_target);
+eq(nt_L4_target.start, 0);
+
 contains(Target.NotTracked nt_L1_target);
 eq(nt_L1_target.target, object.L1_target);
 eq(nt_L1_target.start, 0);
@@ -185,10 +190,6 @@ eq(nt_L2_target.start, 0);
 contains(Target.NotTracked nt_L3_target);
 eq(nt_L3_target.target, object.L3_target);
 eq(nt_L3_target.start, 0);
-
-contains(Target.NotTracked nt_L4_target);
-eq(nt_L4_target.target, object.L4_target);
-eq(nt_L4_target.start, 0);
 
 }
 

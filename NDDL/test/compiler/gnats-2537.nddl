@@ -19,4 +19,17 @@ class Region{
   hill = _hill;
   foo = _foo;
  }
+
+ Region(Location loc){
+  hill = new Hill();
+  location = loc;
+  foo = new Foo();
+ }
 }
+
+Hill hill = new Hill();
+Foo foo = new Foo();
+Region r0 = new Region(hill, foo);
+Region r1 = new Region();
+Region r2 = new Region(Hill);
+close();

@@ -2,7 +2,7 @@ SubDir PLASMA NDDL ;
 
 if ! $(PLASMA_READY) {
 
-Module NDDL : RulesEngine Resource ;
+Module NDDL : RulesEngine Resource TemporalNetwork ;
 
 SubInclude PLASMA NDDL core ;
 SubInclude PLASMA NDDL component ;

@@ -8,10 +8,9 @@
 #include "Constraints.hh"
 #include "CeLogger.hh"
 #include "Error.hh"
+#include "Utils.hh"
 
 using namespace Prototype;
-
-extern bool loggingEnabled();
 
 class DefaultEngineAccessor {
 public:

@@ -39,3 +39,21 @@ World::initialState
  any(Foo.pred1 a);
  any(Bar.pred1 b);
 }
+
+World world = new World();
+close();
+goal(World.initialState g0);
+g0.activate();
+
+goal(Foo.pred1 g1);
+g1.activate();
+g1.m_0.specify(Rock);
+g1.m_1.specify(10);
+g1.m_2.specify(1245.87);
+g1.m_3.specify(false);
+g1.m_4.specify(world);
+
+goal(Foo.pred1 g2);
+g2.merge(g1);
+g2.cancel();
+g2.activate();

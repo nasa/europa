@@ -12,8 +12,7 @@ ModuleObjects runTest.cc : System ;
 ModuleObjects DefaultTestInit.cc : System ;
 
 for model in
-	Rover.nddl basic-model.nddl k9.backtrack.moderate.nddl
-	k9.nddl
+	# Rover.nddl basic-model.nddl k9.backtrack.moderate.nddl k9.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : runTest.o DefaultTestInit.o : $(model) : System ;

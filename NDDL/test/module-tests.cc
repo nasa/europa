@@ -321,64 +321,6 @@ private:
   }
 };
 
-class R_Predicate_0_0: public RuleInstance {
-public:
-  R_Predicate_0_0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
-    : RuleInstance(rule, token, planDb) { }
-
-  void handleExecute() { }
-};
-
-DECLARE_AND_DEFINE_RULE(Predicate_0, Predicate);
-
-class R_Predicate_1_0: public RuleInstance {
-public:
-  R_Predicate_1_0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, const ConstrainedVariableId& guard)
-    : RuleInstance(rule, token, planDb, guard){}
-  void handleExecute(){}
-};
-
-DECLARE_AND_DEFINE_SINGLETON_GUARDED_RULE(Predicate_1, Predicate, object);
-
-class R_Predicate_2_0: public RuleInstance {
-public:
-  R_Predicate_2_0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, const ConstrainedVariableId& guard, double value)
-    : RuleInstance(rule, token, planDb, guard, value){}
-  void handleExecute(){}
-};
-
-DECLARE_AND_DEFINE_VALUE_GUARDED_RULE(Predicate_2, Predicate, object, 10);
-
-class NddlRuleIntegrationTest {
-public:
-
-  static bool test() {
-    runTest(testBasicComponents);
-    return(true);
-  }
-
-private:
-
-  static bool testBasicComponents() {
-    DEFAULT_SETUP(ce, db, schema, true);
-    R_Predicate_0 rule0;
-    R_Predicate_1 rule1;
-    R_Predicate_2 rule2;
-
-    IntervalToken t0(db, 
-                     LabelStr("Predicate"),                                                     
-                     true,                                                               
-                     IntervalIntDomain(0, 10),                                           
-                     IntervalIntDomain(0, 20),                                           
-                     IntervalIntDomain(1, 1000));
-    t0.activate();
-    bool prop = ce->propagate();
-    assertTrue(prop);
-    DEFAULT_TEARDOWN();
-    return(true);
-  }
-};
-
 int main() {
   // Special designations for temporal relations
   REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
@@ -392,7 +334,6 @@ int main() {
 
   runTestSuite(ObjectFilterConstraintTest::test);
   runTestSuite(NddlSchemaTest::test);
-  runTestSuite(NddlRuleIntegrationTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
 }

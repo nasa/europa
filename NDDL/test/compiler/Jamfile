@@ -14,16 +14,17 @@ local model ;
 
 for model in
 	class-constructor.nddl   simple-rules.nddl guards.nddl
-	existential.nddl         plasma-base.nddl       subclass.nddl
+	existential.nddl         plasma-base.nddl  subclass.nddl
 	simple-class.nddl constraint-test.nddl
 	interval-constants.nddl  simple-predicate.nddl
-	less-basic-model.nddl    foreach.nddl
+	less-basic-model.nddl    foreach-exec.nddl
 	gnats-2537.nddl simple-resources.nddl multi-resources.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;
-  RunModuleMain run-$(exe) : $(exe) ;
+  RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
   LocalDepends run-nddl-tests : run-$(exe) ;
+
 }
 
 } # PLASMA_READY

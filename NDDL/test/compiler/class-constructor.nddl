@@ -93,8 +93,6 @@ class World {
  Bat m_bat1;
  int m_int1;
 
- predicate initialState{}
-
  World(){
   m_str1 = "This is also a long string";
   m_foo1 = new Foo(this, 1, true, m_str1, Lander);
@@ -104,5 +102,18 @@ class World {
   m_foo4 = new Foo(this, m_int1, false);
   m_baz1 = new Baz(m_foo1);
   m_bat1 = new Bat(m_foo1);
- }
+ } 
 }
+
+// Transactions
+World world = new World();
+Foo f0 = new Foo(world);
+Foo f1 = new Foo(world, 1, true, "hello", Hill);
+Foo f2 = new Foo(world, 100, false);
+Bar bar = new Bar(123.45, world);
+Baz baz = new Baz(f0);
+Bat bat = new Bat(f1);
+Bing bing = new Bing();
+Bang bang = new Bang();
+Baluga baluga = new Baluga(Rock);
+close();

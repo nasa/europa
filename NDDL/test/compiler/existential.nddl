@@ -69,3 +69,8 @@ World::initialState{
 
  Path p3 : {};
 }
+
+World world = new World();
+close();
+goal(World.initialState g0);
+g0.activate();

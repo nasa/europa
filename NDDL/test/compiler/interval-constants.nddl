@@ -24,3 +24,8 @@ class World {
   obj1 = new Foo();
  }
 }
+
+World world = new World();
+close();
+goal(World.initialState g0);
+g0.activate();

@@ -11,8 +11,11 @@ class Foo{
   Locations location_arg;
  }
 
- predicate impliedObjectGuard{}
+ predicate impliedObjectGuard{
+  Foo allFoo;
+ }
  predicate impliedLocalVariableGuard{}
+
  predicate singletonGuard{}
  predicate mixGuardedWithUnguarded{}
  predicate localVariableGuard{}
@@ -24,6 +27,7 @@ class Foo{
 // RuleInstance to be created, which is an object guarded instance
 Foo::impliedObjectGuard{
  eq(object.arg1, 10);
+ eq(allFoo.arg1, [0 100]);
 
  // Comments:
  // 1. Should not be allowed to say this in-line! 
@@ -33,9 +37,8 @@ Foo::impliedObjectGuard{
 // Guard on local variable of objects is implied
 // by the constraint referencing a field.
 Foo::impliedLocalVariableGuard{
- // Not yet supported. 
- // Foo f1;
- // eq(f1.arg1, 20);
+ Foo f1;
+ eq(f1.arg1, 20);
 }
 
 // Singleton guard. Can be variables of tokens too
@@ -109,32 +112,29 @@ Foo::multipleNestedGuards{
  }
 }
 
-// Defines the initial state for the problem.
-class World {
- Foo foo;
+Foo foo1 = new Foo();
+Foo foo2 = new Foo();
+close();
 
- predicate initialState{}
- World(){
-  foo = new Foo();
- }
-}
+goal(Foo.impliedObjectGuard g1);
+g1.activate();
+g1.allFoo.specify(foo1);
 
-World::initialState{
- any(Foo.impliedObjectGuard g1);
- eq(g1.state, 2);
+goal(Foo.singletonGuard g2);
+g2.activate();
+g2.object.specify(foo2);
 
- any(Foo.singletonGuard g2);
- eq(g2.state, 2);
+goal(Foo.mixGuardedWithUnguarded g3);
+g3.activate();
 
- any(Foo.mixGuardedWithUnguarded g3);
- eq(g3.state, 2); 
+goal(Foo.tokenWithParameters g4);
+g4.activate();
+g4.bool_arg.specify(true);
+g4.int_arg.specify(10);
+g4.location_arg.specify(Lander);
 
- any(Foo.tokenWithParameters g4);
- eq(g4.state, 2); 
+goal(Foo.multipleNestedGuards g5);
+g5.activate();
 
- any(Foo.multipleNestedGuards g5);
- eq(g5.state, 2); 
-
- any(Foo.impliedLocalVariableGuard g6);
- eq(g6.state, 2);
-}
+goal(Foo.impliedLocalVariableGuard g6);
+g6.activate();
