@@ -44,7 +44,7 @@
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     RulesEngine re(db.getId()); \
     Horizon hor(0,200); \
-    DecisionManager dm(db.getId(), hor.getId()); \
+    DecisionManager dm(db.getId()); \
     Id<DbLogger> dbLId; \
     if (loggingEnabled()) { \
       new CeLogger(std::cout, ce.getId()); \
@@ -66,9 +66,6 @@
     RulesEngine re(db.getId()); \
     Horizon hor(0, 200); \
     CBPlanner planner(db.getId(), hor.getId()); \
-    HorizonCondition hcond(hor.getId(), planner.getDecisionManager()); \
-    TemporalVariableCondition tcond(hor.getId(), planner.getDecisionManager()); \
-    DynamicInfiniteRealCondition dcond(planner.getDecisionManager()); \
     Id<DbLogger> dbLId; \
     if (loggingEnabled()) { \
       new CeLogger(std::cout, ce.getId()); \
