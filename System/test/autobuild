@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.97 2004-10-08 18:44:37 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.98 2004-10-13 21:48:04 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -197,7 +197,7 @@ function jamCmd() {
   then
     (echo "$info";
      echo '';
-     echo 'PPW_Config='"$PPW_Config"'; export PPW_Config';
+     echo 'PPW_CONFIG='"$PPW_CONFIG"'; export PPW_CONFIG';
      echo 'jam '"$jam_args $1"' in '"`pwd`"' exited '"$status";
      more jam.$2.$var.$libmethod < /dev/null) | \
         Mail -s 'PLASMA Autobuild jam '"$jam_args $1"' on '"`hostname`"' failed' "$email"
@@ -263,19 +263,20 @@ do
     fi
     jam_args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
     jamCmd '' build
-    for target in run-all-tests clean
-    do
-      jamCmd $target $target
-    done
+    jamCmd run-all-tests run-all-tests
     if "$removePlasma"
     then
-        PPW_Config="$startdir"'/PLASMA/CBPlanner/component/sample-ppw-config'
+	jamCmd clean clean
+        PPW_CONFIG="$startdir"'/PLASMA/CBPlanner/component/sample-ppw-config'
     else
-        PPW_Config="$startdir"'/CBPlanner/component/sample-ppw-config'
+        PPW_CONFIG="$startdir"'/CBPlanner/component/sample-ppw-config'
     fi
-    export PPW_Config
+    export PPW_CONFIG
     jamCmd run-nddl-planner-tests withPPW
-    jamCmd clean clean
+    if "$removePlasma"
+    then
+	jamCmd clean clean
+    fi
     (echo "$info"; echo 'PLASMA autobuild and tests of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
         more jam.*.$var.$libmethod < /dev/null) | \
       Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
@@ -316,9 +317,17 @@ fi
 
 (echo "$info";
     echo '';
-    echo "All builds, tests, and cleans passed for each variant (of $variants) and";
-    echo "  each method of building the libraries (of $libmethods).";
-    echo "Tagged: 'cvs rtag $tag'") | \
+    if "$removePlasma"
+    then
+	echo "All builds, tests, and cleans passed for each variant (of $variants) and";
+	echo "  each method of building the libraries (of $libmethods).";
+	echo "Tagged: 'cvs rtag $tag'";
+    else
+	echo "All builds and tests passed for each variant (of $variants) and";
+	echo "  each method of building the libraries (of $libmethods).";
+	echo "Note: 'jam clean' was not run and no CVS tags were made or changed.";
+    fi
+  ) | \
   Mail -s 'PLASMA Autobuild on '"`hostname`"' passed' "$email"
 
 date > lastCompleted
