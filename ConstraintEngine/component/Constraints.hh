@@ -506,6 +506,22 @@ namespace Prototype {
   };
 
   /**
+   * @class EqualMaximumConstraint
+   * @brief First variable is the maximum value of the others.
+   */
+  class EqualMaximumConstraint : public Constraint {
+  public:
+    EqualMaximumConstraint(const LabelStr& name,
+                           const LabelStr& propagatorName,
+                           const ConstraintEngineId& constraintEngine,
+                           const std::vector<ConstrainedVariableId>& variables);
+
+    ~EqualMaximumConstraint() { }
+
+    void handleExecute();
+  };
+
+  /**
    * @class CondEqualSumConstraint
    * @brief If A is true, then B = C + D ...; if A is false, B != C + D ...
    * Converted into two constraints: CondAllSame(A, B, sum) and EqualSum(sum, C, D, ...).
