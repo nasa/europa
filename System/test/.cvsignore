@@ -70,7 +70,6 @@ parent-predicate.hh
 path-filter-transaction
 path-filter-transaction.cc
 path-filter-transaction.hh
-plans
 rejection
 rejection.cc
 rejection.hh
