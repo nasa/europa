@@ -35,6 +35,7 @@ namespace Prototype {
     void notifyCancelled(const TokenId& token);
     void notifyConstraintCreated(const ConstraintId& constraint);
     void notifyConstraintCreated(const ConstraintId& constraint, const AbstractDomain& domain);
+    void notifyVariableCreated(const ConstrainedVariableId& variable);
     void notifyVariableSpecified(const ConstrainedVariableId& variable);
     void notifyVariableReset(const ConstrainedVariableId& variable);
 

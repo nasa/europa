@@ -22,6 +22,24 @@ namespace Prototype {
 
   const std::list<TiXmlElement*>& DbClientTransactionLog::getBufferedTransactions() const {return m_bufferedTransactions;}
 
+  void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable){
+    TiXmlElement * element = new TiXmlElement("var");
+    const AbstractDomain& baseDomain = variable->baseDomain();
+    std::string type = domainTypeAsString(&baseDomain);
+    if (type == "object") {
+      ObjectId object = baseDomain.getLowerBound();
+      check_error(object.isValid());
+      type = object->getType().toString();
+    }
+    element->SetAttribute("type", type);
+    if (LabelStr::isString(variable->getName())) {
+      element->SetAttribute("name", variable->getName().toString());
+    }
+    TiXmlElement * value = abstractDomainAsXml(&baseDomain);
+    element->LinkEndChild(value);
+    m_bufferedTransactions.push_back(element);
+  }
+
   void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object){
     const std::vector<ConstructorArgument> noArguments;
     notifyObjectCreated(object, noArguments);
@@ -31,14 +49,12 @@ namespace Prototype {
     TiXmlElement * element = new TiXmlElement("new");
     if (LabelStr::isString(object->getName())) {
       element->SetAttribute("name", object->getName().toString());
-      element->SetAttribute("type", object->getType().toString());
     }
-
+    element->SetAttribute("type", object->getType().toString());
     std::vector<ConstructorArgument>::const_iterator iter;
     for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
       element->LinkEndChild(abstractDomainAsXml(iter->second));
     }
-
     m_bufferedTransactions.push_back(element);
   }
 

@@ -3,6 +3,8 @@
 
 #include "PlanDatabaseDefs.hh"
 #include <iostream>
+#include <map>
+#include <list>
 
 class TiXmlElement;
 
@@ -32,7 +34,9 @@ namespace Prototype {
 
   protected:
     void processTransaction(const TiXmlElement & element);
-    void playNamedObjectCreated(const TiXmlElement & element);
+    void playDefineClass(const TiXmlElement & element);
+    void playDefineEnumeration(const TiXmlElement & element);
+    void playVariableCreated(const TiXmlElement & element);
     void playObjectCreated(const TiXmlElement & element);
     void playTokenCreated(const TiXmlElement & element);
     void playConstrained(const TiXmlElement & element);
@@ -48,7 +52,10 @@ namespace Prototype {
   private:
     DbClientId m_client;
     int m_objectCount;
-    std::map<std::string, TokenId> m_named_tokens;
+    std::map<std::string, TokenId> m_tokens;
+    std::map<std::string, ConstrainedVariableId> m_variables;
+    std::list<std::string> m_enumerations;
+    std::list<std::string> m_classes;
 
   //! string input functions
 
@@ -67,12 +74,16 @@ namespace Prototype {
      */
     bool parseBool(const char * boolString);
 
+    /** 
+     * @brief read a value string as a variable identifier
+     */
+    ConstrainedVariableId parseVariable(const char * varString);
   //! XML input functions
 
     /** 
      * @brief create an abstract domain as represented by an xml element
      */
-    AbstractDomain * xmlAsAbstractDomain(const TiXmlElement & element);
+    const AbstractDomain * xmlAsAbstractDomain(const TiXmlElement & element, const char * name = NULL);
 
     /** 
      * @brief create an interval domain as represented by an xml element
@@ -87,7 +98,7 @@ namespace Prototype {
     /** 
      * @brief return a value as represented by an xml element
      */
-    double xmlAsValue(const TiXmlElement & value);
+    double xmlAsValue(const TiXmlElement & value, const char * name = NULL);
 
     /** 
      * @brief return a variable as represented by an xml element

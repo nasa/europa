@@ -4,10 +4,14 @@
 #include "PlanDatabase.hh"
 #include "Object.hh"
 #include "Token.hh"
-#include "EnumeratedDomain.hh"
+#include "BoolDomain.hh"
+#include "IntervalIntDomain.hh"
 #include "IntervalDomain.hh"
+#include "EnumeratedDomain.hh"
+#include "Domain.hh"
 #include "../TinyXml/tinyxml.h"
 #include "../ConstraintEngine/ConstraintEngine.hh"
+#include <algorithm>
 
 namespace Prototype {
 
@@ -30,6 +34,26 @@ namespace Prototype {
     std::string numstr = path.substr(path_back, path_end-path_back);
     result.push_back(atoi(numstr.c_str()));
     return result;
+  }
+
+  static std::string
+  domainTypeString(const AbstractDomain * domain)
+  {
+    if (domain->getType() == AbstractDomain::BOOL) {
+      return "bool";
+    } else if (domain->isNumeric()) {
+      if (domain->getType() == AbstractDomain::INT_INTERVAL) {
+        return "int";
+      } else {
+        return "float";
+      }
+    } else if (LabelStr::isString(domain->getUpperBound())) {
+      return "string";
+    } else {
+      ObjectId object = domain->getLowerBound();
+      check_error(object.isValid());
+      return object->getType().toString();
+    }
   }
 
   DbClientTransactionPlayer::DbClientTransactionPlayer(const DbClientId & client) : m_client(client), m_objectCount(0){}
@@ -63,7 +87,15 @@ namespace Prototype {
 
   void DbClientTransactionPlayer::processTransaction(const TiXmlElement & element) {
       const char * tagname = element.Value();
-      if (strcmp(tagname, "new") == 0) {
+      if (strcmp(tagname, "class") == 0) {
+        playDefineClass(element);
+      } else if (strcmp(tagname, "enum") == 0) {
+        playDefineEnumeration(element);
+      } else if (strcmp(tagname, "compat") == 0) {
+//        playDefineCompat(element);
+      } else if (strcmp(tagname, "var") == 0) {
+        playVariableCreated(element);
+      } else if (strcmp(tagname, "new") == 0) {
         playObjectCreated(element);
       } else if (strcmp(tagname, "goal") == 0) {
         playTokenCreated(element);
@@ -85,6 +117,11 @@ namespace Prototype {
         playVariableReset(element);
       } else if (strcmp(tagname, "invoke") == 0) {
         playInvokeConstraint(element);
+      } else if (strcmp(tagname, "nddl") == 0) {
+        for (TiXmlElement * child_el = element.FirstChildElement() ;
+             child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+          processTransaction(*child_el);
+        }
       } else {
         check_error(ALWAYS_FAILS);
       }
@@ -92,54 +129,83 @@ namespace Prototype {
       m_client->propagate();
   }
 
-  static std::string
-  domainTypeString(const AbstractDomain * domain)
+  void DbClientTransactionPlayer::playDefineClass(const TiXmlElement & element)
   {
-    if (domain->getType() == AbstractDomain::BOOL) {
-      return "bool";
-    } else if (domain->isNumeric()) {
-      if (domain->getType() == AbstractDomain::INT_INTERVAL) {
-        return "int";
-      } else {
-        return "float";
-      }
-    } else if (LabelStr::isString(domain->getUpperBound())) {
-      return "string";
-    } else {
-      return "object";
+    const char * name = element.Attribute("name");
+    check_error(name != NULL);
+    
+    std::string std_name = name;
+    m_classes.push_back(std_name);
+  }
+
+  void DbClientTransactionPlayer::playDefineEnumeration(const TiXmlElement & element)
+  {
+    const char * name = element.Attribute("name");
+    check_error(name != NULL);
+
+    std::string std_name = name;
+    m_enumerations.push_back(std_name);
+  }
+
+  void DbClientTransactionPlayer::playVariableCreated(const TiXmlElement & element)
+  {
+    const char * type = element.Attribute("type");
+    check_error(type != NULL);
+    const char * name = element.Attribute("name");
+    check_error(name != NULL);
+
+    TiXmlElement * value_el = element.FirstChildElement();
+    ConstrainedVariableId variable = ConstrainedVariableId::noId();
+    const AbstractDomain * baseDomain = NULL;
+    if (value_el != NULL) {
+      baseDomain = xmlAsAbstractDomain(*value_el, name);
     }
+    if (strcmp(type, "bool") == 0) {
+      const BoolDomain * domain = (baseDomain ? dynamic_cast<const BoolDomain*>(baseDomain) : new BoolDomain());
+      variable = m_client->createVariable(*domain, LabelStr(name));
+    } else if (strcmp(type, "int") == 0) {
+      const IntervalIntDomain * domain = (baseDomain ? dynamic_cast<const IntervalIntDomain*>(baseDomain) : new IntervalIntDomain());
+      variable = m_client->createVariable(*domain, LabelStr(name));
+    } else if (strcmp(type, "float") == 0) {
+      const IntervalDomain * domain = (baseDomain ? dynamic_cast<const IntervalDomain*>(baseDomain) : new IntervalDomain());
+      variable = m_client->createVariable(*domain, LabelStr(name));
+    } else if (strcmp(type, "string") == 0) {
+      const LabelSet * domain = (baseDomain ? dynamic_cast<const LabelSet*>(baseDomain) : new LabelSet());
+      variable = m_client->createVariable(*domain, LabelStr(name));
+    } else {
+      std::string std_type = type;
+      if (std::find(m_enumerations.begin(), m_enumerations.end(), std_type) != m_enumerations.end()) {
+        // enumerations are label sets too
+        const LabelSet * domain = (baseDomain ? dynamic_cast<const LabelSet*>(baseDomain) : new LabelSet());
+        variable = m_client->createVariable(*domain, LabelStr(name));
+      } else if (std::find(m_classes.begin(), m_classes.end(), std_type) != m_classes.end()) {
+        const ObjectDomain * domain = (baseDomain ? dynamic_cast<const ObjectDomain*>(baseDomain) : new ObjectDomain());
+        variable = m_client->createVariable(*domain, LabelStr(name));
+      } else if (baseDomain) {
+        if (LabelStr::isString(baseDomain->getUpperBound())) {
+          const LabelSet * domain = dynamic_cast<const LabelSet*>(baseDomain);
+          variable = m_client->createVariable(*domain, LabelStr(name));
+        } else {
+          ObjectId object = baseDomain->getLowerBound();
+          check_error(object.isValid());
+          const ObjectDomain * domain = dynamic_cast<const ObjectDomain*>(baseDomain);
+          variable = m_client->createVariable(*domain, LabelStr(name));
+        }
+      } else {
+        // unknown type
+        check_error(ALWAYS_FAILS);
+      }
+    }
+    check_error(variable.isValid());
+
+    std::string std_name = name;
+    m_variables[std_name] = variable;
   }
 
   void DbClientTransactionPlayer::playObjectCreated(const TiXmlElement & element)
   {
     const char * name = element.Attribute("name");
-    std::stringstream gen_name;
-    if (name == NULL) {
-      gen_name << "$OBJECT[" << m_objectCount++ << "]" << std::ends;
-    }
-    const char * type = element.Attribute("type");
-    check_error(type != NULL);
-
-    std::vector<ConstructorArgument> arguments;
-    for (TiXmlElement * child_el = element.FirstChildElement() ;
-         child_el != NULL ; child_el = child_el->NextSiblingElement()) {
-      AbstractDomain * domain;
-      std::string type;
-      if (strcmp(child_el->Value(), "object") != 0) {
-        domain = xmlAsAbstractDomain(*child_el);
-        type = domainTypeString(domain);
-      } else {
-        const char * name = child_el->Attribute("value");
-        check_error(name != NULL);
-        ObjectId object = m_client->getObject(LabelStr(name));
-        check_error(object.isValid());
-        type = object->getType().toString();
-        domain = new ObjectDomain(object);
-      }
-      arguments.push_back(ConstructorArgument(LabelStr(type.c_str()), domain));
-    }
-
-    m_client->createObject(LabelStr(type), LabelStr(name != NULL ? name : gen_name.str()), arguments);
+    xmlAsValue(element, name);
   }
 
   void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element)
@@ -148,12 +214,13 @@ namespace Prototype {
     check_error(child != NULL);
     const char * type = child->Attribute("type");
     check_error(type != NULL);
+
     TokenId token = m_client->createToken(LabelStr(type));
    
     const char * name = child->Attribute("name");
     if (name != NULL) {
       std::string std_name = name;
-      m_named_tokens[std_name] = token;
+      m_tokens[std_name] = token;
     }
   }
 
@@ -246,6 +313,7 @@ namespace Prototype {
     TiXmlElement * var_el = element.FirstChildElement();
     check_error(var_el != NULL);
     ConstrainedVariableId variable = xmlAsVariable(*var_el);
+    check_error(variable.isValid());
 
     TiXmlElement * value_el = var_el->NextSiblingElement();
     check_error(value_el != NULL);
@@ -264,26 +332,83 @@ namespace Prototype {
   {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
+    if (strcmp(name, "close") == 0) {
+      // close database special case
+      m_client->close();
+      return;
+    }
+    if (strcmp(name, "activate") == 0) {
+      // activate token special case
+      const char * identifier = element.Attribute("identifier");
+      std::string token_name = identifier;
+      TokenId token = m_tokens[token_name];
+      check_error(token.isValid());
+      m_client->activate(token);
+      return;
+    }
+    if (strcmp(name, "merge") == 0) {
+      // merge token special case
+      const char * identifier = element.Attribute("identifier");
+      std::string token_name = identifier;
+      TokenId token = m_tokens[token_name];
+      check_error(token.isValid());
+      TiXmlElement * active_el = element.FirstChildElement();
+      check_error(active_el != NULL);
+      TokenId activeToken = xmlAsToken(*active_el);
+      check_error(activeToken.isValid());
+      m_client->merge(token, activeToken);
+      return;
+    }
+    if (strcmp(name, "reject") == 0) {
+      // reject token special case
+      const char * identifier = element.Attribute("identifier");
+      std::string token_name = identifier;
+      TokenId token = m_tokens[token_name];
+      check_error(token.isValid());
+      m_client->reject(token);
+      return;
+    }
+    if (strcmp(name, "cancel") == 0) {
+      // cancel token special case
+      const char * identifier = element.Attribute("identifier");
+      std::string token_name = identifier;
+      TokenId token = m_tokens[token_name];
+      check_error(token.isValid());
+      m_client->cancel(token);
+      return;
+    }
+    if (strcmp(name, "specify") == 0) {
+      // specify variable special case
+      const char * identifier = element.Attribute("identifier");
+      ConstrainedVariableId variable = parseVariable(identifier);
+      TiXmlElement * value_el = element.FirstChildElement();
+      check_error(value_el != NULL);
+      const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+      if (value->isSingleton()) {
+        double v = value->getSingletonValue();
+        m_client->specify(variable, v);
+      } else {
+        m_client->specify(variable, *value);
+      }
+      return;
+    }
+    // normal constraints
     std::vector<ConstrainedVariableId> variables;
     for (TiXmlElement * child_el = element.FirstChildElement() ;
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
-      if (strcmp(child_el->Value(), "variable") == 0) {
+      if ((strcmp(child_el->Value(), "id") == 0) ||
+          (strcmp(child_el->Value(), "ident") == 0) ||
+          (strcmp(child_el->Value(), "variable") == 0)) {
         variables.push_back(xmlAsVariable(*child_el));
       } else {
         // unary constraint
         check_error(variables.size() == 1);
         check_error(child_el->NextSiblingElement() == NULL);
-        AbstractDomain * domain = xmlAsAbstractDomain(*child_el);
+        const AbstractDomain * domain = xmlAsAbstractDomain(*child_el);
         m_client->createConstraint(LabelStr(name), variables[0], *domain);
         delete domain;
         return;
       }
-    }
-    if (strcmp(name, "close") == 0) {
-      // close database special case
-      check_error(variables.size() == 0);
-      m_client->close();
-      return;
     }
     m_client->createConstraint(LabelStr(name), variables);
   }
@@ -330,11 +455,73 @@ namespace Prototype {
     return false;
   }
 
+  ConstrainedVariableId
+  DbClientTransactionPlayer::parseVariable(const char * varString)
+  {
+    check_error(varString != NULL);
+    std::string variable = varString;    
+    size_t ident_back, ident_front, variable_end;
+    ident_back = 0;
+    variable_end = variable.size();
+    ident_front = variable.find('.', ident_back);
+    if ((ident_front == std::string::npos) || (ident_front > variable_end)) {
+      // simple identifier (might be a symbol)
+      if (m_variables.find(variable) != m_variables.end()) {
+        return m_variables[variable];
+      } else {
+        // presumably a symbol
+        return ConstrainedVariableId::noId();
+      }
+    }
+    // compound identifier
+    std::string ident = variable.substr(ident_back, ident_front - ident_back);
+    TokenId token = m_tokens[ident];
+    if (token != token.noId()) {
+      std::string name = variable.substr(ident_front + 1);
+      const std::vector<ConstrainedVariableId> & variables = token->getVariables();
+      std::vector<ConstrainedVariableId>::const_iterator iter = variables.begin();
+      while (iter != variables.end()) {
+        ConstrainedVariableId variable = *iter++;
+        if (LabelStr(name.c_str()) == variable->getName()) {
+          return variable;
+        }        
+      }
+      check_error(ALWAYS_FAILS);
+    }
+    ConstrainedVariableId var = m_variables[ident];
+    check_error(var.isValid());
+    ObjectId object = var->specifiedDomain().getSingletonValue();
+    check_error(object.isValid());
+    var = object->getVariable(LabelStr(varString));
+    check_error(var.isValid());
+    return var;
+  }
+
   //! XML input functions
 
-  AbstractDomain * 
-  DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element)
+  const AbstractDomain * 
+  DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element, const char * name)
   {
+    if (strcmp(element.Value(), "new") == 0) {
+      return new ObjectDomain(xmlAsValue(element, name));
+    }
+    if (strcmp(element.Value(), "ident") == 0) {
+      const char * value = element.Attribute("value");
+      check_error(value != NULL);
+      std::string std_value = value;
+      ConstrainedVariableId var = m_variables[std_value];
+      if (var != ConstrainedVariableId::noId()) {
+        return &var->baseDomain();
+      }
+      // must be an enumerated domain
+      return new LabelSet(LabelStr(value));
+    }
+    if (strcmp(element.Value(), "id") == 0) {
+      const char * name = element.Attribute("name");
+      ConstrainedVariableId var = parseVariable(name);
+      check_error(var.isValid());
+      return &var->baseDomain();
+    }
     if (strcmp(element.Value(), "set") == 0) {
       return xmlAsEnumeratedDomain(element);
     }
@@ -356,7 +543,15 @@ namespace Prototype {
       return new LabelSet(LabelStr(value_st));
     }
     if (strcmp(element.Value(), "object") == 0) {
-      return new EnumeratedDomain(m_client->getObject(LabelStr(value_st)));
+      return new ObjectDomain(m_client->getObject(LabelStr(value_st)));
+    }
+    std::string klass = element.Value();
+    if (std::find(m_classes.begin(), m_classes.end(), klass) != m_classes.end()) {
+      return new ObjectDomain(m_client->getObject(LabelStr(value_st)));
+    }
+    ObjectId object = m_client->getObject(LabelStr(value_st));
+    if (object != ObjectId::noId()) {
+      return new ObjectDomain(object);
     }
     check_error(ALWAYS_FAILS);
     return NULL;
@@ -487,8 +682,26 @@ namespace Prototype {
     }
   }
 
-  double DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value)
+  double DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value, const char * name)
   {
+    if (strcmp(value.Value(), "new") == 0) {
+      std::stringstream gen_name;
+      if (name == NULL) {
+        gen_name << "$OBJECT[" << m_objectCount++ << "]" << std::ends;
+      }
+      const char * type = value.Attribute("type");
+      check_error(type != NULL);
+      std::vector<ConstructorArgument> arguments;
+      for (TiXmlElement * child_el = value.FirstChildElement() ;
+           child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+        const AbstractDomain * domain = xmlAsAbstractDomain(*child_el);
+        std::string type = domainTypeString(domain);
+        arguments.push_back(ConstructorArgument(LabelStr(type.c_str()), domain));
+      }
+      ObjectId object = m_client->createObject(LabelStr(type), LabelStr(name ? name : gen_name.str()), arguments);
+      check_error(object.isValid());
+      return (double)object;
+    }
     const char * value_st = value.Attribute("value");
     check_error(value_st != NULL);
     if (strcmp(value.Value(), "bool") == 0) {
@@ -508,54 +721,83 @@ namespace Prototype {
       check_error(object.isValid());
       return (double)object;
     }
+    ObjectId object = m_client->getObject(LabelStr(value_st));
+    if (object != ObjectId::noId()) {
+      return (double)object;
+    }
     check_error(ALWAYS_FAILS);
     return 0;
   }
 
   ConstrainedVariableId DbClientTransactionPlayer::xmlAsVariable(const TiXmlElement & variable)
   {
-    check_error(strcmp(variable.Value(), "variable") == 0);
-
-    int index;
-    const char * i = variable.Attribute("index", &index);
-    check_error(i != NULL);
-    check_error(0 <= index);
-
-    const char * token_path = variable.Attribute("token");
-    if (token_path != NULL) {
-      TokenId token = m_client->getTokenByPath(pathAsVector(token_path));
-      check_error(token.isValid());
-      check_error((unsigned)index < token->getVariables().size());
-      return token->getVariables()[index];
+    if (strcmp(variable.Value(), "ident") == 0) {
+      const char * value = variable.Attribute("value");
+      return parseVariable(value);
     }
-
-    const char * object_name = variable.Attribute("object");
-    if (object_name != NULL) {
-      ObjectId object = m_client->getObject(LabelStr(object_name));
-      check_error(object.isValid());
-      check_error((unsigned)index < object->getVariables().size());
-      return object->getVariables()[index];
+    if (strcmp(variable.Value(), "id") == 0) {
+      const char * name = variable.Attribute("name");
+      return parseVariable(name);
     }
-
-    // rule variables
-    return m_client->getVariableByIndex(index);
+    if (strcmp(variable.Value(), "variable") == 0) {
+      int index;
+      const char * i = variable.Attribute("index", &index);
+      check_error(i != NULL);
+      check_error(0 <= index);
+  
+      const char * token_path = variable.Attribute("token");
+      if (token_path != NULL) {
+        TokenId token = m_client->getTokenByPath(pathAsVector(token_path));
+        check_error(token.isValid());
+        check_error((unsigned)index < token->getVariables().size());
+        return token->getVariables()[index];
+      }
+  
+      const char * object_name = variable.Attribute("object");
+      if (object_name != NULL) {
+        ObjectId object = m_client->getObject(LabelStr(object_name));
+        check_error(object.isValid());
+        check_error((unsigned)index < object->getVariables().size());
+        return object->getVariables()[index];
+      }
+  
+      // rule variables
+      return m_client->getVariableByIndex(index);
+    }
+    check_error(ALWAYS_FAILS);
+    return ConstrainedVariableId::noId();
   }
 
   TokenId DbClientTransactionPlayer::xmlAsToken(const TiXmlElement & token)
   {
-    check_error(strcmp(token.Value(), "token") == 0);
-
-    const char * path = token.Attribute("path");
-    if (path != NULL) {
-      return m_client->getTokenByPath(pathAsVector(path));
+    if (strcmp(token.Value(), "ident") == 0) {
+      const char * value = token.Attribute("value");
+      check_error(value != NULL);
+      std::string std_value = value;
+      TokenId tok = m_tokens[std_value];
+      check_error(tok.isValid());
+      return tok;
     }
-
-    const char * name = token.Attribute("name");
-    if (name != NULL) {
+    if (strcmp(token.Value(), "id") == 0) {
+      const char * name = token.Attribute("name");
+      check_error(name != NULL);
       std::string std_name = name;
-      return m_named_tokens[std_name];
+      TokenId tok = m_tokens[std_name];
+      check_error(tok.isValid());
+      return tok;
     }
-
+    if (strcmp(token.Value(), "token") == 0) {
+      const char * path = token.Attribute("path");
+      if (path != NULL) {
+        return m_client->getTokenByPath(pathAsVector(path));
+      }
+  
+      const char * name = token.Attribute("name");
+      if (name != NULL) {
+        std::string std_name = name;
+        return m_tokens[std_name];
+      }
+    }  
     check_error(ALWAYS_FAILS);
     return TokenId::noId();
   }

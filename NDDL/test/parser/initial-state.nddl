@@ -34,6 +34,26 @@ Locations loc1 = Hill;
 
 Locations loc2 = 'Hill';
 
-close(Rover);
-
 close();
+
+Rover.close();
+
+timelineObject.constrain(predInstName);
+
+timelineObject.constrain(predInstName, predInstName2);
+
+timelineObject.free(predInstName);
+
+predInstName.activate();
+
+predInstName.merge(predOtherName);
+
+predInstName.reject();
+
+predInstName.cancel();
+
+predInstName2.start.specify(340);
+
+y.specify(3.1415);
+
+
