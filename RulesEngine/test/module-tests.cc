@@ -360,7 +360,7 @@ private:
 
 };
 
-int main(){
+int main() {
   initConstraintLibrary();
   
   // Special designations for temporal relations
@@ -372,7 +372,10 @@ int main(){
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
 
-  REGISTER_NARY(EqualConstraint, "eq", "Default");
+  // This is now done in ConstraintEngine/test-support.cc::initConstraintLibrary()
+  //   for ConstraintEngine/module-tests.cc::testArbitraryConstraints().
+  // --wedgingt 2004 Mar 11
+  //REGISTER_NARY(EqualConstraint, "eq", "Default");
 
   // Allocate default schema initially so tests don't fail because of ID's
   SCHEMA;
