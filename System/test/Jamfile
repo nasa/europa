@@ -11,12 +11,12 @@ for model in
   local exe = $(model:S=) ;
   NddlMain $(exe) : runTest.cc : $(model) : System ;
   RunModuleMain run-$(exe) : $(exe) ;
-  LocalDepends nddl-planner-tests : run-$(exe) ;
+  LocalDepends run-nddl-planner-tests : run-$(exe) ;
 }
 
 NddlMain k9-initial : runInitialTest.cc : k9-initial.nddl : System ;
 RunModuleMain run-k9-initial : k9-initial ;
-LocalDepends nddl-planner-tests : run-k9-initial ;
+LocalDepends run-nddl-planner-tests : run-k9-initial ;
 
 for model in
 	Rover-transaction.nddl basic-model-transaction.nddl k9.backtrack.moderate-transaction.nddl
@@ -25,7 +25,7 @@ for model in
   local exe = $(model:S=) ;
   NddlMain $(exe) : runTransactionTest.cc : $(model) : System ;
   RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
-  LocalDepends nddl-planner-tests : run-$(exe) ;
+  LocalDepends run-nddl-planner-tests : run-$(exe) ;
 }
 
 } # PLASMA_READY
