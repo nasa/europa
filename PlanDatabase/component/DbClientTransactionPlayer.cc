@@ -626,15 +626,6 @@ namespace EUROPA {
     }
     const char * value_st = element.Attribute("value");
     check_error(value_st != NULL);
-    LabelStr tLS(tag);
-    if ((strcmp(tag, "bool") == 0) || (strcmp(tag, "BOOL") == 0) || (tLS == BoolDomain::getDefaultTypeName()) ||
-        (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) || (tLS == IntervalIntDomain::getDefaultTypeName()) ||
-        (strcmp(tag, "float") == 0) || (strcmp(tag, "REAL_INTERVAL") == 0) || (tLS == IntervalDomain::getDefaultTypeName()) ||
-        (strcmp(tag, "string") == 0) || (strcmp(tag, "STRING_ENUMERATION") == 0) || (tLS == StringDomain::getDefaultTypeName())) {
-      AbstractDomain * domain = TypeFactory::baseDomain(tag).copy();
-      domain->set(TypeFactory::createValue(tag, value_st));
-      return(domain);
-    }
     if (strcmp(tag, "symbol") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
@@ -810,14 +801,6 @@ namespace EUROPA {
     }
     const char * value_st = value.Attribute("value");
     check_error(value_st != NULL, "missing value in transaction xml");
-    LabelStr tLS(tag);
-    if ((strcmp(tag, "bool") == 0) || (strcmp(tag, "BOOL") == 0) || (tLS == BoolDomain::getDefaultTypeName()) ||
-        (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) || (tLS == IntervalIntDomain::getDefaultTypeName()) ||
-        (strcmp(tag, "float") == 0) || (strcmp(tag, "REAL_INTERVAL") == 0) || (tLS == IntervalDomain::getDefaultTypeName()) ||
-        (strcmp(tag, "string") == 0) || (strcmp(tag, "STRING_ENUMERATION") == 0) || (tLS == StringDomain::getDefaultTypeName())) {
-      // Old style XML for simple types.
-      return(TypeFactory::createValue(tag, value_st));
-    }
     if (strcmp(tag, "symbol") == 0) {
       const char * type_st = value.Attribute("type");
       check_error(type_st != NULL, "missing type for symbol '" + std::string(value_st) + "' in transaction xml");

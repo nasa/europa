@@ -3636,10 +3636,12 @@ std::string DbTransPlayerTest::buildXMLCreateObjectStr(const std::string& classN
   str += className;
   str += "\" name=\"";
   str += objName;
-  str += "\"> <";
-  str += StringDomain::getDefaultTypeName().toString();
-  str += " value=\"";
+  str += "\"> <value ";
+  str += " name=\"";
   str += objName;
+  str += "\"";
+  str += " type=\"";
+  str += StringDomain::getDefaultTypeName().toString();
   str += "\"/> ";
   for (unsigned int i = 0; i < domains.size(); i++, str += " ")
     str += buildXMLDomainStr(*(domains[i]));
@@ -3806,8 +3808,11 @@ std::string DbTransPlayerTest::buildXMLVariableStr(const ConstrainedVariableId& 
 std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
   std::string str("<");
   if (dom.isSingleton() && dom.isNumeric()) {
+    str += "value";
+    str += " type=\"";
     str += dom.getTypeName().toString();
-    str += " value=\"";
+    str += "\"";
+    str += " name=\"";
     std::ostringstream oss;
     oss << dom.getSingletonValue();
     str += oss.str();
@@ -3830,11 +3835,11 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
   std::list<double> vals;
   for (dom.getValues(vals); !vals.empty(); vals.pop_front()) {
     str += "<";
-    if (dom.getType() == AbstractDomain::SYMBOL_ENUMERATION)
-      str += "symbol";
-    else
-      str += dom.getTypeName().toString();
-    str += " value=\"";
+    if (dom.getType() == AbstractDomain::SYMBOL_ENUMERATION) {
+      str += "symbol value=\"";
+    } else {
+      str += "value name=\"";
+    }
     if (dom.getType() == AbstractDomain::STRING_ENUMERATION ||
         dom.getType() == AbstractDomain::SYMBOL_ENUMERATION)
       str += LabelStr(*(vals.begin())).toString();
