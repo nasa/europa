@@ -49,7 +49,7 @@ namespace EUROPA {
   EnumeratedDomain::EnumeratedDomain(const AbstractDomain& org)
     : AbstractDomain(org) {
     check_error(org.isEnumerated(), 
-		"Invalid source domain " + org.getTypeName().toString() + " for enumeration");
+                "Invalid source domain " + org.getTypeName().toString() + " for enumeration");
     const EnumeratedDomain& enumOrg = static_cast<const EnumeratedDomain&>(org);
     m_values = enumOrg.m_values;
     m_isNumeric = enumOrg.m_isNumeric;
@@ -222,22 +222,18 @@ namespace EUROPA {
 
   bool EnumeratedDomain::isMember(double value) const {
     std::set<double>::const_iterator it = m_values.lower_bound(value);
-
-    // If we get a hit - the elem >= value
-    if(it != m_values.end()){
+    // If we get a hit - the entry >= value
+    if (it != m_values.end()) {
       double elem = *it;
       // Try fast compare first, then epsilon safe version
-      if(value == elem || compareEqual(value, elem))
-	return true;
-
+      if (value == elem || compareEqual(value, elem))
+        return(true);
       // Before giving up, see if prior position is within epsilon
       --it;
-      return (it != m_values.end() && compareEqual(value, *it));
+      return(it != m_values.end() && compareEqual(value, *it));
     }
-
-    if(m_values.empty())
-      return false;
-
+    if (m_values.empty())
+      return(false);
     // Otherwise, double check by looking at prior value with epsilon safe check
     --it;
     return(compareEqual(value, *it));
@@ -403,29 +399,25 @@ namespace EUROPA {
 
   AbstractDomain& EnumeratedDomain::operator=(const AbstractDomain& dom) {
     safeComparison(*this, dom);
-    check_error(m_listener.isNoId(), "Can onlyu do direct assigment if not registered with a listener");
+    check_error(m_listener.isNoId(), "Can only do direct assigment if not registered with a listener");
     const EnumeratedDomain& e_dom = static_cast<const EnumeratedDomain&>(dom);
     m_values = e_dom.m_values;
     return(*this);
   }
 
-  bool EnumeratedDomain::isSubsetOf(const AbstractDomain& dom) const {    
+  bool EnumeratedDomain::isSubsetOf(const AbstractDomain& dom) const {
     safeComparison(*this, dom);
-
-    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
+    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it)
       if (!dom.isMember(*it))
         return(false);
-    }
     return(true);
   }
 
-  bool EnumeratedDomain::intersects(const AbstractDomain& dom) const {  
+  bool EnumeratedDomain::intersects(const AbstractDomain& dom) const {
     safeComparison(*this, dom);
-
-    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
+    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it)
       if (dom.isMember(*it))
         return(true);
-    }
     return(false);
   }
 
