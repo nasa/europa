@@ -9,7 +9,7 @@ namespace Prototype {
   //
 
   IntervalIntTypeFactory::IntervalIntTypeFactory(const LabelStr& name)
-   : ConcreteTypeFactory(name), m_baseDomain(name)
+   : ConcreteTypeFactory(name), m_baseDomain(DomainListenerId::noId(), name)
   {
   }
 
