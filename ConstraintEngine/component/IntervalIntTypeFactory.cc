@@ -10,6 +10,8 @@ namespace Prototype {
 
   IntervalIntTypeFactory::IntervalIntTypeFactory() : ConcreteTypeFactory(IntervalIntDomain().getTypeName()) {}
 
+  IntervalIntTypeFactory::IntervalIntTypeFactory(const LabelStr& typeName) : ConcreteTypeFactory(typeName) {}
+
   ConstrainedVariableId
   IntervalIntTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                          const AbstractDomain& baseDomain,

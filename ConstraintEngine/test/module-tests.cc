@@ -2585,6 +2585,7 @@ private:
 };
 
 int main() {
+  initConstraintEngine();
   initConstraintLibrary();
   REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
   TypeFactory::createValue(LabelStr("INT_INTERVAL"), std::string("5"));

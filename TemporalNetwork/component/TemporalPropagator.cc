@@ -280,11 +280,11 @@ namespace Prototype {
     for(std::set<TempVarId>::const_iterator it = m_activeVariables.begin(); it != m_activeVariables.end(); ++it){
       TempVarId var = *it;
       check_error(var.isValid());
-      check_error(var->getIndex() != DURATION_VAR_INDEX);
+      check_error(var->getIndex() != DURATION_VAR_INDEX, "There is no corresponding timepoint for a duration variable");
 
       const TimepointId& tp = getTimepoint(var);
       check_error(tp.isValid());
-      check_error(tp->getExternalEntity() == var);
+      check_error(tp->getExternalEntity() == var, "Ensure the connection between TempVar and Timepointis correct");
 
       const Time& lb = tp->getLowerBound();
       const Time& ub = tp->getUpperBound();
@@ -294,6 +294,9 @@ namespace Prototype {
       IntervalIntDomain& dom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(var));
 
       check_error(!dom.isEmpty());
+      check_error(dom.isMember(lb) && dom.isMember(ub), 
+		  "Updated bounds must be a subset but are not for variable: " + var->getKey());
+
       double domlb, domub;
       dom.getBounds(domlb,domub);
       if (lb > domlb || ub < domub) {

@@ -145,6 +145,8 @@ namespace Prototype {
    * --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 22
    */
   void EqualConstraint::handleExecute() {
+    check_error(isActive());
+
     unsigned int i = 0;
     for ( ; i < m_argCount; i++)
       if (!getCurrentDomain(m_variables[i]).isOpen())

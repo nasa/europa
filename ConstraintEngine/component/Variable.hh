@@ -210,7 +210,7 @@ namespace Prototype {
     check_error(validate());
     return(m_baseDomain);
   }
-
+ 
   template<class DomainType>
   AbstractDomain& Variable<DomainType>::internal_specifiedDomain() {
     return(m_specifiedDomain);

@@ -2,6 +2,10 @@
 
 
 //*****************************************************************
+// Reproduces:
+// GNATS 2519: Typefactory not registered.
+// GNATS 2491, 2520, : Bad domain in temporal propagator, updating.
+//****************************************************************
 class Rover{
  Antenna m_antenna;
  Memory m_memory;
@@ -18,6 +22,7 @@ class Rover{
 
  predicate Drive {
   int m_from_x, m_from_y, m_to_x, m_to_y;
+  eq(duration, 4); // Any thing at all that is small
  }
 
  // Doing nothing, waiting for external forces to charge 
@@ -50,28 +55,11 @@ Rover::Sample{
      eq(sb.m_x, m_x);
      eq(sb.m_y, m_y);
   }
-  /*
-  // What do we do before  
-  bool sw_before;
-  if (sw_before==false) {
-     met_by(Drive dr2);
-     eq(dr2.m_to_x, m_x);
-     eq(dr2.m_to_y, m_y);
-  }
-  if (sw_before==true) {
-     met_by(Standby sb2);
-     eq(sb2.m_x, m_x);
-     eq(sb2.m_y, m_y);
-  }
-*/
 }
 
 Rover::Drive{
   // Ensure that the end points are different
   float x_sq, y_sq, dist;
-  diffSquare( m_from_x, m_to_x, x_sq );
-  diffSquare( m_from_y, m_to_y, y_sq );
-  distanceSquares( x_sq, y_sq, dist );
   neq( dist, 0 );
 
   // Battery consumption and driving duration are functions of distance

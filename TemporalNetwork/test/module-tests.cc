@@ -141,6 +141,7 @@ public:
     runTest(testCanPrecede);
     runTest(testCanFitBetween);
     runTest(testCanBeConcurrent);
+    runTest(testSynchronization);
     return true;
   }
 
@@ -394,6 +395,54 @@ private:
 
     delete (Constraint*) c0;
     delete (Constraint*) c1;
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+  static bool testSynchronization() {
+    DEFAULT_SETUP(ce,db,schema,false);
+
+    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    assert(!timeline.isNoId());
+
+    db.close();
+
+    // Allocate a token
+    IntervalToken t1(db.getId(),
+    		     LabelStr("P1"), 
+    		     true,
+    		     IntervalIntDomain(0, 10),
+    		     IntervalIntDomain(0, 20),
+    		     IntervalIntDomain(1, 1000));
+
+    // Activate immediately. We will merge against it.
+    t1.activate();
+
+    // Allocate another
+    IntervalToken t2(db.getId(), 
+    		     LabelStr("P1"), 
+    		     true,
+    		     IntervalIntDomain(0, 10),
+    		     IntervalIntDomain(0, 20),
+    		     IntervalIntDomain(1, 1000));
+
+    // Allocate a constraint on the inactive token, to constrain a timepoint
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain());
+    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), ENGINE, makeScope(t2.getEnd(), v0.getId()));
+
+    // Conduct the merge.
+    t2.merge(t1.getId());
+    // Now changes on v0 should propagate to the end variable of t1.
+    v0.specify(IntervalIntDomain(8, 10));
+    assert(t1.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
+
+    assert(ENGINE->propagate());
+
+    // If we split again, expect that the restriction now applies to the end-point
+    // of the inactive token
+    t2.cancel();
+
+    //    assert(t2.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
 
     DEFAULT_TEARDOWN();
     return true;

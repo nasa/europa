@@ -10,6 +10,11 @@ namespace Prototype {
     IntervalIntTypeFactory();
 
     /**
+     * Permit registration by an external name
+     */
+    IntervalIntTypeFactory(const LabelStr& typeName);
+
+    /**
      * @brief Create a variable
      */
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 

@@ -22,7 +22,8 @@ namespace Prototype {
   }
 
   void DefaultPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
-    // This is a no-op
+    // Remove from agenda
+    m_agenda.erase(constraint);
   }
 
   void DefaultPropagator::handleNotification(const ConstrainedVariableId& variable, 

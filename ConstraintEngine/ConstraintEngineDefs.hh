@@ -39,6 +39,12 @@ namespace Prototype {
   typedef Id<ConstraintEngineListener> ConstraintEngineListenerId;
   typedef std::pair<ConstraintId, int> ConstraintEntry;
   typedef std::list<ConstraintEntry> ConstraintList;
+
+  /**
+   * @brief Initialize all default elements of the module e.g. factories
+   */
+  void initConstraintEngine();
+
 } /* namespace Prototype */
 
 #endif /* #ifndef _H_ConstraintEngineDefs */
