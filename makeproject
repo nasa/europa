@@ -59,7 +59,7 @@ echo "" >> $DIRECTORY/Jamfile
 echo " # Create a build target for the planner executable with the given model." >> $DIRECTORY/Jamfile
 echo " NddlMain "$NAME"-planner : "$NAME"-Main.cc : "$NAME"-model.nddl : NDDL : "$NAME"-planner ;" >> $DIRECTORY/Jamfile
 echo " # Create a build target for the planner shared library with model." >> $DIRECTORY/Jamfile
-echo " ModuleSharedLibrary "$NAME" : "$NAME"-model.o : NDDL : "$NAME"-planner ;" >> $DIRECTORY/Jamfile
+echo " ModuleSharedLibrary "$NAME" : "$NAME"-model.o : NDDL : "$NAME" ;" >> $DIRECTORY/Jamfile
 echo "} # "$NAME"_READY" >> $DIRECTORY/Jamfile
 
 
