@@ -1,5 +1,14 @@
 /**
  * @defgroup ConstraintEngine
+ * <A NAME="ce_overview"></A>
+ * Briefly describe the functionality
+ * <A NAME="ce_entry"><H3>Constraint Engine API</H3></A>
+ * Indicate the main entry points to the API
+ * <A NAME="ce_use"><H3>Using the Constraint Engine API</H3></A>
+ * Indicate tests that provide examples of usage
+ * 
+ *
+ * ORIGINAL DOCUMENTATION:
  * <A NAME="intro"><H3>Introduction</H3></A>
  * This module is a prototype for a new Constraint Engine Framework. A framework is a set of interfaces and components for
  * building a range of particular constraint engines instances. Please use this page as a guide for reviewing the prototype

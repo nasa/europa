@@ -2,8 +2,8 @@
  * @defgroup NDDL
  * <A NAME="nddl_overview"></A>
  * Briefly describe the functionality
- * <A NAME="nddl_use"><H3>Using the NDDL module</H3></A>
- * Briefly state how to use the agent database
- * <A NAME="nddl_customize"><H3>Customizing the NDDL module</H3></A>
- * Briefly describe how to customize the NDDL module if appropriate
+ * <A NAME="nddl_entry"><H3>NDDL API</H3></A>
+ * Indicate the main entry points to the API
+ * <A NAME="nddl_use"><H3>Using the NDDL API</H3></A>
+ * Indicate tests that provide examples of usage
  */
