@@ -9,12 +9,12 @@ namespace PLASMA {
 
   class HSTSPlanIdReader {
   public:
-    HSTSPlanIdReader(HSTSNoBranch& noBranchSpec);
-    void read(const std::string& configFile);
+    HSTSPlanIdReader(HSTSNoBranchId& noBranchSpec);
     virtual ~HSTSPlanIdReader();
 
+    void read(const std::string& configFile);
   private:
-    HSTSNoBranch m_noBranchSpec;
+    HSTSNoBranchId m_noBranchSpec;
   };
 }
 #endif

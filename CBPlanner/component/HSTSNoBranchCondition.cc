@@ -9,8 +9,8 @@ namespace PLASMA {
 
   HSTSNoBranchCondition::~HSTSNoBranchCondition() { }
 
-  void HSTSNoBranchCondition::initialize(const HSTSNoBranch& noBranchSpec) {
-    m_noBranches = noBranchSpec.getNoBranchSpec();
+  void HSTSNoBranchCondition::initialize(const HSTSNoBranchId& noBranchSpec) {
+    m_noBranches = noBranchSpec->getNoBranchSpec();
     notifyChanged();
   }
 

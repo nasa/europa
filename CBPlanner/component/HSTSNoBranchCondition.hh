@@ -11,7 +11,7 @@ namespace PLASMA {
     HSTSNoBranchCondition(const DecisionManagerId& dm);
     virtual ~HSTSNoBranchCondition();
 
-    void initialize(const HSTSNoBranch& noBranchSpec);
+    void initialize(const HSTSNoBranchId& noBranchSpec);
 
     bool test(const EntityId& entity);
 
