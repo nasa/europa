@@ -99,10 +99,10 @@ close();
 goal(World.initialState t0);
 t0.activate();
 
-goal(Rover.Going t1);
+goal(Rover.At t1);
 t1.activate();
-goal(Rover.Going t2);
+goal(Rover.At t2);
 t2.merge(t1);
 
-goal(SuperRover.Going t3);
+goal(SuperRover.At t3);
 t3.activate();

@@ -43,19 +43,20 @@ namespace Prototype {
 	  }
 	}
       }
-      if (loggingEnabled()) {
-	os << "Free Tokens: *************************" << std::endl;
-	for(TokenSet::const_iterator tokit = alltokens.begin(); tokit != alltokens.end(); ++tokit){
-	  TokenId t = *tokit;	    
-	  writeToken(t, os);
-	}
+
+      os << "Free Tokens: *************************" << std::endl;
+      for(TokenSet::const_iterator tokit = alltokens.begin(); tokit != alltokens.end(); ++tokit){
+	TokenId t = *tokit;	    
+	writeToken(t, os);
       }
+
     }
 
   private:
+
     static void writeToken(const TokenId& t, ostream& os){
       TempVarId st = t->getStart();
-      os << "[ " << st->getDerivedDomain().getLowerBound() << " " << st->getDerivedDomain().getUpperBound() << " ]"<< std::endl;
+      os << "[ " << st->derivedDomain() << " ]"<< std::endl;
       os << "\t" << t->getPredicateName().toString() << "(" ;
       std::vector<ConstrainedVariableId> vars = t->getParameters();
       for(std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
@@ -64,10 +65,13 @@ namespace Prototype {
       }
       os << ")" <<std::endl;
       os << "\tKey=" << t->getKey() << std::endl;
+
       TokenSet mergedtoks = t->getMergedTokens();
+
       for(TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
 	os << "\t\tMerged Key=" << (*mit)->getKey() << std::endl;
-      os << "[ " << t->getEnd()->getDerivedDomain().getLowerBound() << " " << t->getEnd()->getDerivedDomain().getUpperBound() << " ]"<< std::endl;
+
+      os << "[ " << t->getEnd()->derivedDomain().getLowerBound() << " ]"<< std::endl;
     }
   };
 }

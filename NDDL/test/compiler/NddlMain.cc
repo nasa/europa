@@ -28,6 +28,7 @@ int main(int argc, const char ** argv){
     // Allocate the assembly
     StandardAssembly assembly(schema);
     assert(assembly.playTransactions(txSource));
+    assembly.write(std::cout);
   }
 
   // Terminate the library
