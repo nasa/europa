@@ -65,13 +65,13 @@ namespace Prototype {
       const std::string getVarInfo(const ConstrainedVariableId &) const;
       const std::string getLongVarInfo(const ConstrainedVariableId &) const;
 
-
       /****From PlanDatabaseListener****/
     
       void notifyAdded(const TokenId &); //TOKEN_CREATED
-      void notifyAdded(const ObjectId &, const TokenId &);  //TOKEN_INSERTED
+      //void notifyAdded(const ObjectId &, const TokenId &);  //TOKEN_INSERTED
       void notifyRemoved(const TokenId &); //TOKEN_DELETED
       void notifyRemoved(const ObjectId &, const TokenId &); //TOKEN_FREED
+      void notifyConstrained(const ObjectId &, const TokenId &, const TokenId &); //TOKEN_INSERTED
     
       /****From ConstraintEngineListener****/
       void notifyAdded(const ConstraintId &); //CONSTRAINT_CREATED

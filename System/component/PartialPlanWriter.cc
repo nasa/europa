@@ -367,26 +367,26 @@ namespace Prototype {
             objOut << SNULL;
           objOut << std::endl;
         }
-        //        else if(ResourceId::convertable(objId)) {
-          //          outputObject(objId, O_RESOURCE, objOut, varOut);
-//           ResourceId &rId = (ResourceId &) objId;
-//           std::list<TransactionId> resTrans;
-//           rId->getTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY);
-//           for(std::list<TransactionId>::iterator transIt = resTrans.begin();
-//               transIt != resTrans.end(); ++transIt) {
-//             TransactionId trans = *transIt;
-//             outputToken(trans, T_TRANSACTION, 0, 1, rId, tokOut, tokRelOut, varOut);
-//             tokens.erase(trans);
-//           }
-          //          objOut << SNULL << std::endl;
-        //}
+//          else if(ResourceId::convertable(objId)) {
+//            outputObject(objId, O_RESOURCE, objOut, varOut);
+//            ResourceId &rId = (ResourceId &) objId;
+//            std::list<TransactionId> resTrans;
+//            rId->getTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY);
+//            for(std::list<TransactionId>::iterator transIt = resTrans.begin();
+//                transIt != resTrans.end(); ++transIt) {
+//              TransactionId trans = *transIt;
+//              outputToken(trans, T_TRANSACTION, 0, 1, rId, tokOut, tokRelOut, varOut);
+//              tokens.erase(trans);
+//            }
+//            objOut << SNULL << std::endl;
+//          }
         else {
           outputObject(objId, O_OBJECT, objOut, varOut);
           objOut << SNULL << std::endl;
         }
       }
-      for(std::set<TokenId>::iterator tokenIterator = tokens.begin(); tokenIterator != tokens.end();
-	  ++tokenIterator) {
+      for(std::set<TokenId>::iterator tokenIterator = tokens.begin(); 
+          tokenIterator != tokens.end(); ++tokenIterator) {
 	TokenId token = *tokenIterator;
 	check_error(token.isValid());
 	outputToken(token, T_INTERVAL, 0, 0, ObjectId::noId(), tokOut, tokRelOut, varOut);
@@ -612,23 +612,46 @@ namespace Prototype {
     }
 
     const std::string PartialPlanWriter::getUpperBoundStr(IntervalDomain &dom) const {
-      std::stringstream stream;
-      if((int) dom.getUpperBound() == PLUS_INFINITY)
-	return PINFINITY;
-      else if((int) dom.getUpperBound() == MINUS_INFINITY)
-	return NINFINITY;
-      stream << (int) dom.getUpperBound();
-      return std::string(stream.str());
+      if(dom.isNumeric()) {
+        if((int) dom.getUpperBound() == PLUS_INFINITY)
+          return PINFINITY;
+        else if((int) dom.getUpperBound() == MINUS_INFINITY)
+          return NINFINITY;
+        else {
+          std::stringstream stream;
+          stream << (int) dom.getUpperBound();
+          return std::string(stream.str());
+        }
+      }
+      else if(LabelStr::isString((int)dom.getUpperBound())) {
+        LabelStr label((int)dom.getUpperBound());
+        return label.toString();
+      }
+      else {
+        return ObjectId(dom.getUpperBound())->getName().toString();
+      }
+      return std::string("");
     }
 
     const std::string PartialPlanWriter::getLowerBoundStr(IntervalDomain &dom) const {
-      std::stringstream stream;
-      if((int)dom.getLowerBound() == PLUS_INFINITY)
-	return PINFINITY;
-      else if((int) dom.getLowerBound() == MINUS_INFINITY)
-	return NINFINITY;
-      stream << (int) dom.getLowerBound();
-      return std::string(stream.str());
+      
+      if(dom.isNumeric()) {
+        if((int)dom.getLowerBound() == PLUS_INFINITY)
+          return PINFINITY;
+        else if((int) dom.getLowerBound() == MINUS_INFINITY)
+          return NINFINITY;
+        std::stringstream stream;
+        stream << (int) dom.getLowerBound();
+        return std::string(stream.str());
+      }
+      else if(LabelStr::isString((int)dom.getLowerBound())) {
+        LabelStr label((int)dom.getLowerBound());
+        return label.toString();
+      }
+      else {
+        return ObjectId(dom.getLowerBound())->getName().toString();
+      }
+      return std::string("");
     }
   
     const std::string PartialPlanWriter::getEnumerationStr(EnumeratedDomain &edom) const {
@@ -648,19 +671,21 @@ namespace Prototype {
 	dom.getValues(enumeration);
       }
       for(std::list<double>::iterator it = enumeration.begin(); it != enumeration.end(); ++it) {
-	if((int) (*it) == PLUS_INFINITY)
-	  stream << PINFINITY;
-	else if((int) (*it) == MINUS_INFINITY)
-	  stream << NINFINITY;
-	else {
-	  if(LabelStr::isString(*it)) {
-	    LabelStr label(*it);
-	    stream << label.toString() << " ";
-	  }
-	  else {
-	    stream << (int)(*it) << " ";
-	  }
-	}
+        if(dom.isNumeric()) {
+          if((int) (*it) == PLUS_INFINITY)
+            stream << PINFINITY;
+          else if((int) (*it) == MINUS_INFINITY)
+            stream << NINFINITY;
+          else
+            stream << (int)(*it) << " ";
+        }
+        else if(LabelStr::isString(*it)) {
+          LabelStr label(*it);
+          stream << label.toString() << " ";
+        }
+        else {
+          stream << ObjectId(*it)->getName().toString() << " ";
+        }
       }
       if(streamIsEmpty(stream)) {
 	return "bugStr";
@@ -679,12 +704,21 @@ namespace Prototype {
       }
     }
 
-    void PartialPlanWriter::notifyAdded(const ObjectId &objId, const TokenId &tokId) {
+    //    void PartialPlanWriter::notifyAdded(const ObjectId &objId, const TokenId &tokId) {
+//       if(stepsPerWrite) {
+// 	transactionList->push_back(Transaction(TOKEN_INSERTED, tokId->getKey(), UNKNOWN,
+// 					       transactionId++, seqId, nstep, 
+// 					       tokId->getPredicateName().toString()));
+// 	numTransactions++;
+//       }
+    //    }
+
+    void PartialPlanWriter::notifyConstrained(const ObjectId &objId, const TokenId &tokId,
+                                              const TokenId &successor) {
       if(stepsPerWrite) {
-	transactionList->push_back(Transaction(TOKEN_INSERTED, tokId->getKey(), UNKNOWN,
-					       transactionId++, seqId, nstep, 
-					       tokId->getPredicateName().toString()));
-	numTransactions++;
+        transactionList->push_back(Transaction(TOKEN_INSERTED, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               tokId->getPredicateName().toString()));
       }
     }
 
