@@ -17,13 +17,14 @@ namespace Prototype {
     Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName);
     virtual ~Timeline();
 
-    void getCandidatesForInsertion(const TokenId& token, std::vector<TokenId>& results);
-    void constrain(const TokenId& token, const TokenId& token = TokenId::noId());
+    void getOrderingChoices(const TokenId& token, std::vector<TokenId>& results);
+    void getTokensToOrder(std::vector<TokenId>& results);
+
+    void constrain(const TokenId& token, const TokenId& successor = TokenId::noId());
     void free(const TokenId& token);
   private:
     bool isValid() const;
     void constrainToSingleton(const TokenId& token, const AbstractDomain& domain, const ConstrainedVariableId& var);
-    void remove(const TokenId& token);
 
     std::list<TokenId> m_tokenSequence;
     std::map<double, std::list<TokenId>::iterator > m_tokenIndex;

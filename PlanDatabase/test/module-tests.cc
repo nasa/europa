@@ -2,7 +2,6 @@
 #include "Schema.hh"
 #include "Object.hh"
 #include "ObjectSet.hh"
-#include "StaticToken.hh"
 #include "EventToken.hh"
 #include "TokenVariable.hh"
 #include "ObjectTokenRelation.hh"
@@ -84,11 +83,6 @@ public:
 private:
   static bool testBasicTokenAllocation(){
     DEFAULT_SETUP(ce, db, schema, true);
-
-    // Static Token
-    StaticToken staticToken(db.getId(), LabelStr("Predicate"), LabelStr("o1"));
-    assert(staticToken.getStart()->getParent() == staticToken.getId());
-    staticToken.addParameter(IntervalIntDomain(-1000, 2000));
 
     // Event Token
     EventToken eventToken(db.getId(), LabelStr("Predicate"), IntervalIntDomain(0, 1), IntervalIntDomain(0, 1000));
@@ -280,6 +274,7 @@ class TimelineTest {
 public:
   static bool test(){
     runTest(testBasicInsertion, "BasicInsertion");
+    runTest(testObjectTokenRelation, "ObjectTokenRelation");
     return true;
   }
 
@@ -318,6 +313,75 @@ private:
     timeline.constrain(tokenC.getId(), tokenA.getId());
 
     check_error(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+    return true;
+  }
+
+  static bool testObjectTokenRelation(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    db.close();
+
+    IntervalToken tokenA(db.getId(), 
+		     LabelStr("P1"), 
+		     BooleanDomain(0, 1),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken tokenB(db.getId(), 
+		     LabelStr("P1"), 
+		     BooleanDomain(0, 1),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken tokenC(db.getId(), 
+		     LabelStr("P1"), 
+		     BooleanDomain(0, 1),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    // Object variables are not singletons - so query for tokens to order should return nothing
+    std::vector<TokenId> tokensToOrder;
+    timeline.getTokensToOrder(tokensToOrder);
+    check_error(tokensToOrder.empty());
+
+    // Specify the object variable of one - but still should return no tokens since they are all inactive
+    tokenA.getObject()->specify(timeline.getId());
+    timeline.getTokensToOrder(tokensToOrder);
+    check_error(tokensToOrder.empty());
+
+    // Now activate all of them - should only get back the one that was specified to a singleton
+    tokenA.activate();
+    tokenB.activate();
+    tokenC.activate();
+    timeline.getTokensToOrder(tokensToOrder);
+    check_error(tokensToOrder.size() == 1 && tokensToOrder.front() == tokenA.getId());
+
+    // Set remainders so they are singeltons and get all back
+    tokenB.getObject()->specify(timeline.getId());
+    tokenC.getObject()->specify(timeline.getId());
+    tokensToOrder.clear();
+    timeline.getTokensToOrder(tokensToOrder);
+    check_error(tokensToOrder.size() == 3);
+
+    // Now incrementally constrain and show reduction in tokens to order
+    timeline.constrain(tokenA.getId());
+    tokensToOrder.clear();
+    timeline.getTokensToOrder(tokensToOrder);
+    check_error(tokensToOrder.size() == 2);
+
+    timeline.constrain(tokenB.getId());
+    tokensToOrder.clear();
+    timeline.getTokensToOrder(tokensToOrder);
+    check_error(tokensToOrder.size() == 1);
+
+    timeline.constrain(tokenC.getId());
+    tokensToOrder.clear();
+    timeline.getTokensToOrder(tokensToOrder);
+    check_error(tokensToOrder.empty());
+
     return true;
   }
 };

@@ -30,6 +30,25 @@ namespace Prototype {
       delete (Constraint*) it->second;
   }
 
+
+  void Timeline::getOrderingChoices(const TokenId& token, std::vector<TokenId>& results){
+
+  }
+
+  void Timeline::getTokensToOrder(std::vector<TokenId>& results){
+    check_error(results.empty());
+
+    // Do propagation to update the information
+    getPlanDatabase()->getConstraintEngine()->propagate();
+
+    const std::set<TokenId>& tokensForThisObject = getTokens();
+    for(std::set<TokenId>::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it){
+      TokenId token = *it;
+      if(m_tokenIndex.find(token) == m_tokenIndex.end() && token->isActive())
+	results.push_back(token);
+    }
+  }
+
   void Timeline::constrain(const TokenId& token, const TokenId& successor){
     check_error(token.isValid());
     check_error(m_constraints.find((double)token) == m_constraints.end());
@@ -86,11 +105,6 @@ namespace Prototype {
 								   vars);
     m_constraints.insert(std::make_pair(token, constraint));
     check_error(isValid());
-  }
-
-  void Timeline::remove(const TokenId& token){
-    Object::remove(token);
-    free(token);
   }
 
   void Timeline::free(const TokenId& token){
