@@ -58,6 +58,11 @@ namespace EUROPA {
 
   private:
     static bool testAllocation() {
+      IntervalDomain realDomain(10.2,20.4);
+      assertFalse(realDomain.isEmpty());
+      assertFalse(realDomain.isFinite());
+      assert(realDomain.getSize() == PLUS_INFINITY);
+
       IntervalIntDomain intDomain(10, 20);
       assertTrue(intDomain.isFinite());
 
@@ -149,6 +154,10 @@ namespace EUROPA {
       dom4.equate(dom5);
       assertTrue(dom4 == dom6);
       assertTrue(dom5 == dom6);
+
+      IntervalDomain dom7(-1, 0);
+      dom6.intersect(dom7);
+      assertTrue(dom6.isEmpty());
       return(true);
     }
 

@@ -351,11 +351,16 @@ namespace EUROPA {
       return;
 
     if(domy.getLowerBound() <= domx.getLowerBound() &&
-       domx.getLowerBound() > MINUS_INFINITY)
-      domy.intersect(domx.getLowerBound() + domy.minDelta(), domy.getUpperBound());
+       domx.getLowerBound() > MINUS_INFINITY &&
+       domy.intersect(domx.getLowerBound() + domy.minDelta(), domy.getUpperBound()) &&
+       domy.isEmpty())
+      return;
 
-    checkError(domy.getLowerBound() > domx.getLowerBound(),
-	       "Failed to restrict correctly." << domx.toString() << " && " << domy.toString()); 
+    // Special handling for singletons, which could be infinite
+    if(domx.isSingleton() && domy.isSingleton() && domx.getSingletonValue() >= domy.getSingletonValue()){
+      domx.empty();
+      return;
+    }
   }
 
   bool LessThanConstraint::canIgnore(const ConstrainedVariableId& variable,

@@ -20,9 +20,9 @@ namespace EUROPA {
 
   IntervalDomain::IntervalDomain(double lb, double ub)
     : AbstractDomain(true, false, getDefaultTypeName().c_str()), m_ub(ub), m_lb(lb) {
-    check_error(ub >= lb);
-    check_error(ub <= PLUS_INFINITY);
-    check_error(lb >= MINUS_INFINITY);
+    checkError(ub >= lb, "Tried to construct a domain with bounds [" << lb << " " << ub << "]");
+    checkError(ub <= PLUS_INFINITY, "Upper bound " << ub << " is too large.");
+    checkError(lb >= MINUS_INFINITY, "Lower bound " << lb << " is too small.");
   }
 
   IntervalDomain::IntervalDomain(double value)
@@ -278,7 +278,7 @@ namespace EUROPA {
 
   bool IntervalDomain::isEmpty() const {
     check_error(!isOpen());
-    return(m_lb - m_ub > EPSILON);
+    return(m_ub - m_lb < -EPSILON);
   }
 
   void IntervalDomain::empty() {
@@ -288,15 +288,16 @@ namespace EUROPA {
   }
 
   int IntervalDomain::getSize() const {
-    check_error(!isOpen() && isFinite());
+    checkError(!isOpen(), "Cannot test for the size of an open domain.");
 
     if (isEmpty())
       return(0);
-    else
-      if (isSingleton()) // Need to test separately in case of rounding errors
+    else if (isSingleton()) // Need to test separately in case of rounding errors
         return(1);
-      else
-        return((int)(m_ub - m_lb + 1));
+    else if(isFinite())
+      return((int)(m_ub - m_lb + 1));
+    else
+      return PLUS_INFINITY;
   }
 
   void IntervalDomain::getValues(std::list<double>& results) const {
