@@ -237,25 +237,28 @@ namespace Prototype
   template<class DomainType>
   void Variable<DomainType>::specify(const AbstractDomain& domain){
     check_error(!domain.isDynamic() && !domain.isEmpty());
+    check_error(!m_baseDomain.isDynamic());
     check_error(domain.isSubsetOf(m_specifiedDomain));
 
     // If this actually changes the domain then propagate the change to the derived domain
     if(m_specifiedDomain.intersect(domain)){
-      if(domain.isSingleton())
+      if(m_specifiedDomain.isSingleton())
 	m_derivedDomain.set(m_specifiedDomain.getSingletonValue());
       else
 	m_derivedDomain.set(m_specifiedDomain);
     }
-
     check_error(isValid());
   }
 
   template <class DomainType>
   void Variable<DomainType>::specify(const double& singletonValue){
+    check_error(!m_baseDomain.isDynamic());
     check_error(m_specifiedDomain.isMember(singletonValue));
-    DomainType domain(m_specifiedDomain);
-    domain.set(singletonValue);
-    specify(domain);
+    if(!m_specifiedDomain.isSingleton()){
+      m_specifiedDomain.set(singletonValue);
+      m_derivedDomain.set(singletonValue);
+    }
+    check_error(isValid());
   }
 
   template<class DomainType>
