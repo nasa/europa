@@ -6,6 +6,7 @@
  */
 #include "TestSupport.hh"
 #include "Variable.hh"
+#include "InternalVariable.hh"
 #include "Constraints.hh"
 #include "ConstraintLibrary.hh"
 #include "../Libraries/IdTable.hh"
@@ -468,6 +469,10 @@ private:
     const IntervalIntDomain& dom1 = v0.getBaseDomain();
     assert (dom0 == dom1);
     assert(v0.isValid());
+    assert(v0.canBeSpecified());
+    InternalVariable<IntervalIntDomain> v1(ENGINE, dom1);
+    assert(!v1.canBeSpecified());
+    assert(v1.isValid());
     return true;
   }
 };
@@ -1082,6 +1087,9 @@ private:
   }
 };
 
+/**
+ * Keep this around for posterity
+ */
 void testBitVector(){
   bitset<20> bitvec;
   bitvec.set();

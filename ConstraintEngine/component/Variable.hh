@@ -99,8 +99,6 @@ namespace Prototype
 
     virtual void handleSpecified(const AbstractDomain& specDomain){}
     virtual void handleReset() {}
-
-    virtual bool isCompatible(const ConstrainedVariableId& var) const;
     virtual bool isSpecified() const;
 
   private:
@@ -215,11 +213,6 @@ namespace Prototype
   template<class DomainType>
   void Variable<DomainType>::relax(){
     m_derivedDomain = m_specifiedDomain;
-  }
-
-  template<class DomainType>
-  bool Variable<DomainType>::isCompatible(const ConstrainedVariableId& var) const {
-    return Europa::Id<Variable <DomainType> >::convertable(var);
   }
 
   template<class DomainType>
