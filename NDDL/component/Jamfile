@@ -2,6 +2,11 @@ SubDir PLASMA NDDL component ;
 
 if ! $(PLASMA_READY) {
 
-ModuleComponent NDDL ;
+ModuleComponent NDDL
+	:
+	boolType.cc
+	floatType.cc
+	intType.cc
+	;
 
 } # PLASMA_READY

@@ -11,6 +11,7 @@
 #include "Domain.hh"
 #include "tinyxml.h"
 #include "ConstraintEngine.hh"
+#include "TypeFactory.hh"
 #include <algorithm>
 
 namespace Prototype {
@@ -554,18 +555,12 @@ namespace Prototype {
     check_error(min_st != NULL);
     const char * max_st = element.Attribute("max");
     check_error(max_st != NULL);
-    if (strcmp(type_st, "float") == 0) {
-      double min = parseFloat(min_st);
-      double max = parseFloat(max_st);
-      return new IntervalDomain(min, max);
-    }
-    if (strcmp(type_st, "int") == 0) {
-      int min = parseInt(min_st);
-      int max = parseInt(max_st);
-      return new IntervalIntDomain(min, max);
-    }
-    check_error(ALWAYS_FAILS);
-    return NULL;
+    IntervalDomain * domain = dynamic_cast<IntervalDomain*>(TypeFactory::createDomain(LabelStr(type_st)));
+    check_error(domain != NULL, "type '" + std::string(type_st) + "' should indicate an interval domain type");
+    double min = TypeFactory::createValue(LabelStr(type_st), min_st);
+    double max = TypeFactory::createValue(LabelStr(type_st), max_st);
+    domain->intersect(min, max);
+    return domain;
   }
   
   EnumeratedDomain *
