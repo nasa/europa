@@ -411,8 +411,7 @@ public:
   }
 private:
   static bool testEquality(){
-    std::list<double> emptyList;
-    EnumeratedDomain dom(emptyList, false);
+    EnumeratedDomain dom;
     dom.insert(1.0);
     dom.insert(2.0);
     dom.close();
@@ -434,8 +433,7 @@ private:
   }
 
   static bool testIntersection(){
-    std::list<double> emptyList;
-    EnumeratedDomain dom0(emptyList, false);
+    EnumeratedDomain dom0;
     dom0.insert(0);
     dom0.insert(0.98);
     dom0.insert(1.0);
@@ -462,8 +460,7 @@ private:
   }
 
   static bool testSubset(){
-    std::list<double> emptyList;
-    EnumeratedDomain dom0(emptyList, false);
+    EnumeratedDomain dom0;
     dom0.insert(0);
     dom0.insert(0.98);
     dom0.insert(1.0);

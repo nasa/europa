@@ -55,6 +55,12 @@ namespace Prototype
      */
     virtual void reset();
     
+
+    /**
+     * @brief Allows a client to close a variables domain. The variable must be dynamic.
+     */
+    virtual void close();
+
     /**
      * @brief return the domain first used in initialization
      */
@@ -122,7 +128,7 @@ namespace Prototype
     bool validate() const;
 
   protected:
-    const DomainType m_baseDomain; /*!< The initial (and maximal) set for the domain of this variable */
+    DomainType m_baseDomain; /*!< The initial (and maximal, unless dynamic) set for the domain of this variable */
     DomainType m_specifiedDomain; /*!< May contain a user specified restriction on the maximum set of the domain */
     DomainType m_derivedDomain; /*!< The current domain of the variable based on user specifications and derived from
 				  constraint propagation */
@@ -138,6 +144,7 @@ namespace Prototype
     m_derivedDomain(baseDomain),
     m_isSpecified(false){
     m_derivedDomain.setListener(m_listener);
+    check_error(m_derivedDomain.isDynamic() || !m_derivedDomain.isEmpty());
   }
   
   template<class DomainType>
@@ -210,6 +217,14 @@ namespace Prototype
     m_specifiedDomain.relax(m_baseDomain);
     m_isSpecified = false;
     m_derivedDomain.reset(m_baseDomain);
+  }
+
+  template<class DomainType>
+  void Variable<DomainType>::close(){
+    check_error(m_baseDomain.isDynamic());
+    m_baseDomain.close();
+    m_specifiedDomain.close();
+    m_derivedDomain.close();
   }
 
   template<class DomainType>

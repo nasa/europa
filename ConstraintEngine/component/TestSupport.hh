@@ -16,7 +16,7 @@ public:
     if (s_instance.isNoId()){
       s_instance = (new ConstraintEngine())->getId();
       new DefaultPropagator(LabelStr("Default"), s_instance);
-#ifndef _EUROPA_FAST_VERSION_
+#ifdef _PROTOTYPE_ENABLE_LOGGING_
       new InstrumentationLogger(s_instance);
 #endif
     }

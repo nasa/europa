@@ -8,6 +8,9 @@ namespace Prototype {
     return s_type;
   }
 
+  EnumeratedDomain::EnumeratedDomain()
+    :AbstractDomain(false, true, DomainListenerId::noId()){}
+
   EnumeratedDomain::EnumeratedDomain(const std::list<double>& values, bool closed, const DomainListenerId& listener)
     :AbstractDomain(false, true, listener){
     for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
@@ -19,64 +22,41 @@ namespace Prototype {
   EnumeratedDomain::EnumeratedDomain(const EnumeratedDomain& org)
     : AbstractDomain(org.m_closed, true, DomainListenerId::noId()) {
     m_values = org.m_values;
-    m_membership = org.m_membership;
   }
-
-  EnumeratedDomain::EnumeratedDomain()
-    : AbstractDomain(false, true, DomainListenerId::noId()){}
 
   bool EnumeratedDomain::isFinite() const {
     check_error(!isDynamic());
     return true;
   }
 
-  bool EnumeratedDomain::isSingleton() const {return m_membership.count() == 1;}
+  bool EnumeratedDomain::isSingleton() const {return (m_values.size() == 1);}
 
   bool EnumeratedDomain::isEmpty() const {
-    return m_membership.none();
+    return m_values.empty();
   }
 
   void EnumeratedDomain::empty() {
-    m_membership.reset();
+    m_values.clear();
     notifyChange(DomainListener::EMPTIED);
   }
   void EnumeratedDomain::close() {
-
-    // Ok, now initialize all the membership bits
-    m_membership.reset(); // Negates everything
-
-    int i = 0;
-    for (std::set<double>::iterator it = m_values.begin(); it != m_values.end(); ++ it){
-      m_membership.set(i++);
-    }
-
     AbstractDomain::close();
   }
 
   int EnumeratedDomain::getSize() const {
     check_error(!isDynamic());
-    return m_membership.count();
+    return m_values.size();
   }
 
   void EnumeratedDomain::insert(double value){
     check_error(value <= PLUS_INFINITY && value >= MINUS_INFINITY);
-
-    if(isDynamic()){
-      std::pair<std::set<double>::iterator, bool> result = m_values.insert(value);
-      check_error(result.second); // Ensure it has been added - i.e. was not present.
-    }
-    else {
-      int index = getIndex(value);
-      check_error(index > -1);
-      m_membership.set(index);
-    }
+    std::pair<std::set<double>::iterator, bool> result = m_values.insert(value);
+    check_error(result.second || isDynamic()); // Ensure it has been added - i.e. was not present.
     notifyChange(DomainListener::RELAXED);
   }
 
   void EnumeratedDomain::remove(double value){
-    int index = getIndex(value);
-    check_error(index > -1);
-    m_membership.reset(index);
+    m_values.erase(value);
 
     if(!isEmpty())
       notifyChange(DomainListener::VALUE_REMOVED);
@@ -90,19 +70,13 @@ namespace Prototype {
   }
 
   void EnumeratedDomain::set(double value){
-    // Find the value in the current set.
-    int index = getIndex(value);
-
-    if (index < 0){
+    if (!isMember(value)){
       empty();
       return;
     }
 
-    if(!isSingleton()){ // Implying not currently a singleton
-      m_membership.reset();
-      m_membership.set(index);
-    }
-
+    m_values.clear();
+    m_values.insert(value);
     notifyChange(DomainListener::SET_TO_SINGLETON);
   }
 
@@ -117,43 +91,83 @@ namespace Prototype {
     check_error(isDynamic() || dom.isDynamic() || (!isEmpty() && !dom.isEmpty()));
     check_error(dom.isEnumerated());
 
-    EnumeratedDomain& l_dom = static_cast<EnumeratedDomain&>(dom);
-    std::bitset<MAX_SIZE> intersection = m_membership & l_dom.m_membership;
+    if(dom.isInterval()){
+      bool changed = intersect(dom);
 
-    if(intersection.none()){
-      empty();
-      return false;
+      if(isEmpty())
+	return true;
+
+      return (changed || dom.intersect(*this));
     }
+    else {
+      bool changed_a = false;
+      bool changed_b = false;
+      EnumeratedDomain& l_dom = static_cast<EnumeratedDomain&>(dom);
+      std::set<double>::iterator it_a = m_values.begin();
+      std::set<double>::iterator it_b = l_dom.m_values.begin();
 
-    bool changed_a = intersection.count() < m_membership.count();
-    bool changed_b = intersection.count() < l_dom.m_membership.count();
+      while(it_a != m_values.end() && it_b != l_dom.m_values.end()){
+	double val_a = *it_a;
+	double val_b = *it_b;
 
-    if (changed_a){
-      m_membership = intersection;
-      if(isSingleton())
-	notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
-      else
-	notifyChange(DomainListener::VALUE_REMOVED);
+	if(val_a == val_b){
+	  ++it_a;
+	  ++it_b;
+	}
+	else if(val_a < val_b){
+	  std::set<double>::iterator target = m_values.find(val_b);
+	  m_values.erase(it_a, target);
+	  it_a = target;
+	  changed_a = true;
+	  check_error(!isMember(val_a));
+	}
+	else {
+	  std::set<double>::iterator target = l_dom.m_values.find(val_a);
+	  l_dom.m_values.erase(it_b, target);
+	  it_b = target;
+	  changed_b = true;
+	  check_error(!l_dom.isMember(val_b));
+	}
+      }
+
+      if(it_a != m_values.end() && !l_dom.isEmpty()){
+	m_values.erase(it_a, m_values.end());
+	changed_a = true;
+	check_error(it_b == l_dom.m_values.end());
+      } 
+      else if(it_b != l_dom.m_values.end() && !isEmpty()){
+	l_dom.m_values.erase(it_b, l_dom.m_values.end());
+	changed_b = true;
+	check_error(it_a == m_values.end());
+      }
+
+      if(changed_a){
+	if(isEmpty())
+	  notifyChange(DomainListener::EMPTIED);
+	else if(isSingleton())
+	  notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
+	else
+	  notifyChange(DomainListener::VALUE_REMOVED);
+      }
+
+      if(changed_b){
+	if(l_dom.isEmpty())
+	  l_dom.notifyChange(DomainListener::EMPTIED);
+	else if(isSingleton())
+	  l_dom.notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
+	else
+	  l_dom.notifyChange(DomainListener::VALUE_REMOVED);
+      }
+
+      check_error(!isEmpty() || ! dom.isEmpty());
+      check_error(isEmpty() || dom.isEmpty() || (l_dom.m_values == m_values));
+      return (changed_a || changed_b);
     }
-
-    if (changed_b){
-      l_dom.m_membership = intersection;
-      if(l_dom.isSingleton())
-	l_dom.notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
-      else
-	l_dom.notifyChange(DomainListener::VALUE_REMOVED);
-    }
-
-    return (changed_a || changed_b);
   }
  
   bool EnumeratedDomain::isMember(double value) const {
     check_error(!isDynamic());
-    int index = getIndex(value);
-    if(index > -1)
-      return m_membership.test(index);
-    else
-      return false;
+    return m_values.find(value) != m_values.end();
   }
 
   bool EnumeratedDomain::operator==(const AbstractDomain& dom) const{
@@ -161,8 +175,7 @@ namespace Prototype {
 
     if(dom.isEnumerated()){
       const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
-      check_error(sameBaseSet(l_dom));
-      equal = (AbstractDomain::operator==(dom) && m_membership == l_dom.m_membership);
+      equal = (AbstractDomain::operator==(dom) && m_values == l_dom.m_values);
     }
     else 
       equal = (dom.isFinite() &&
@@ -184,34 +197,22 @@ namespace Prototype {
     if(!((*this) == dom)){
       const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
       m_values = l_dom.m_values;
-      m_membership = l_dom.m_membership;
       notifyChange(DomainListener::RELAXED);
     }
   }
 
   double EnumeratedDomain::getSingletonValue() const {
     check_error(isSingleton());
-    int i = 0;
-    for(std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it){
-      if(m_membership.test(i))
-	return (*it);
-      else
-	i++;
-    }
-
-    // Should never get to here!
-    check_error(ALWAYS_FAILS);
-    return 0;
+    return *m_values.begin();
   }
 
   void EnumeratedDomain::getValues(std::list<double>& results) const{
     check_error(results.empty());
     check_error(isFinite());
+
     int i=0;
-    for(std::set<double>::iterator it = m_values.begin(); it != m_values.end(); ++it){
-      if(m_membership.test(i++))
-	results.push_back(*it);
-    }
+    for(std::set<double>::iterator it = m_values.begin(); it != m_values.end(); ++it)
+      results.push_back(*it);
   }
 
   double EnumeratedDomain::getUpperBound() const{
@@ -229,18 +230,8 @@ namespace Prototype {
 
   bool EnumeratedDomain::getBounds(double& lb, double& ub) const{
     check_error(!isEmpty());
-    lb = PLUS_INFINITY;
-    ub = MINUS_INFINITY;
-    int index = 0;
-    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it){
-      if(m_membership.test(index++)){
-	double value = *it;
-	if(value < lb)
-	  lb = value;
-	if(value > ub)
-	  ub = value;
-      }
-    }
+    lb = *m_values.begin();
+    ub = *(--m_values.end());
     check_error(lb <= ub);
     return false; // ALWAYS FINITE
   }
@@ -248,84 +239,72 @@ namespace Prototype {
   bool EnumeratedDomain::intersect(const AbstractDomain& dom){
     check_error(isDynamic() || dom.isDynamic() || (!isEmpty() && !dom.isEmpty()));
 
-    if(dom.isEnumerated()){
-      const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
-      check_error(sameBaseSet(l_dom));
-
-      int lastCount = m_membership.count();
-      m_membership = m_membership & l_dom.m_membership;
-
-      bool changed = m_membership.count() < lastCount;
-
-      if(changed && m_membership.none())
-	empty();
-      else if (changed){
-	if(isSingleton())
-	  notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
-	else
-	  notifyChange(DomainListener::VALUE_REMOVED);
-      }
-      return changed;
-    }
-    else {
-      bool changed = false;
-
-      // Remove all values present that are not within the bounds
-      int index = 0;
-      for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it){
+    bool changed = false;
+    if(dom.isInterval()){
+      std::set<double>::iterator it = m_values.begin();
+      while(it != m_values.end()){
 	double value = *it;
-	if(m_membership.test(index) && !dom.isMember(value)){
+	if(!dom.isMember(value)){
 	  changed = true;
-	  m_membership.reset(index);
-	  if(!isEmpty())
-	    notifyChange(DomainListener::VALUE_REMOVED);
-	  else {
-	    notifyChange(DomainListener::EMPTIED);
+	  if(value > dom.getUpperBound()){
+	    m_values.erase(it, m_values.end());
 	    break;
 	  }
+	  else
+	    m_values.erase(it);
 	}
-	index++;
+	++it;
+      }
+    }
+    else {
+      const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
+      std::set<double>::iterator it_a = m_values.begin();
+      std::set<double>::const_iterator it_b = l_dom.m_values.begin();
+
+      while(it_a != m_values.end() && it_b != l_dom.m_values.end()){
+	double val_a = *it_a;
+	double val_b = *it_b;
+
+	if(val_a == val_b){
+	  ++it_a;
+	  ++it_b;
+	}
+	else if(val_a < val_b){
+	  std::set<double>::iterator target = m_values.find(val_b);
+	  m_values.erase(it_a, target);
+	  it_a = target;
+	  changed = true;
+	  check_error(!isMember(val_a));
+	}
+	else
+	  it_b = l_dom.m_values.find(val_a);
       }
 
-      return changed;
+      if(it_a != m_values.end()){
+	m_values.erase(it_a, m_values.end());
+	changed = true;
+      }
     }
+    if(!changed)
+      return false;
+
+    if(isEmpty())
+      notifyChange(DomainListener::EMPTIED);
+    else if(isSingleton())
+      notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
+    else
+      notifyChange(DomainListener::VALUE_REMOVED);
+
+    return true;
   }
 
   bool EnumeratedDomain::isSubsetOf(const AbstractDomain& dom) const{
     check_error(dom.isDynamic() || !dom.isEmpty());
 
-    if(dom.isEnumerated()){
-      const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
-      check_error(sameBaseSet(l_dom));
-      std::bitset<MAX_SIZE> intersection = l_dom.m_membership & m_membership;
-      return m_membership == intersection;
+    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it){
+      if(!dom.isMember(*it))
+	return false;
     }
-    else {
-      // Remove all values present that are not within the bounds
-      int index = 0;
-      for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it){
-	if(m_membership.test(index++) && !dom.isMember(*it))
-	  return false;
-      }
-      return true;
-    }
-  }
-
-  int EnumeratedDomain::getIndex(double value) const{
-    int i = 0;
-    double previous = *(m_values.begin());
-    for(std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it){
-      check_error(previous <= *it);
-      previous = *it;
-      if(*it == value)
-	return i;
-      else
-	i++;
-    }
-    return -1;
-  }
-
-  bool EnumeratedDomain::sameBaseSet(const EnumeratedDomain& dom) const{
-    return (dom.m_values == m_values);
+    return true;
   }
 }

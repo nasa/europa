@@ -9,7 +9,6 @@
  */
 #include "AbstractDomain.hh"
 #include <set>
-#include <bitset>
 
 namespace Prototype{
 
@@ -22,6 +21,11 @@ namespace Prototype{
    */
   class EnumeratedDomain: public AbstractDomain{
   public:
+
+    /**
+     * @brief Constructs an initially empty and open domain
+     */
+    EnumeratedDomain();
 
     /**
      * @brief Constructor
@@ -39,11 +43,6 @@ namespace Prototype{
      * @param org The source domain.
      */
     EnumeratedDomain(const EnumeratedDomain& org);
-
-    /**
-     * @brief Empty domain default constructor
-     */
-    EnumeratedDomain();
 
     /**
      * @brief Get the type of the domain to aid in type checking
@@ -217,13 +216,7 @@ namespace Prototype{
      */
     bool isSubsetOf(const AbstractDomain& dom) const;
   protected:
-    int getIndex(double value) const;
-    bool sameBaseSet(const EnumeratedDomain& dom) const;
-
-    static const int MAX_SIZE = 32; /*!< Since bitset have to have a fixed size, we allocate one large enough to hold all */
-
     std::set<double> m_values; /*!< Holds the contents from which the set membership is then derived. */
-    std::bitset<MAX_SIZE> m_membership; /*!< Efficient way to test for membership. */
   };
 }
 #endif

@@ -109,6 +109,8 @@ namespace Prototype
     check_error(!domx.isEmpty() && !domy.isEmpty());
 
     domx.equate(domy);
+
+    check_error(domx.isEmpty() || domy.isEmpty() || domx == domy);
   }
 
   void EqualConstraint::handleExecute(const ConstrainedVariableId& variable, 
@@ -122,13 +124,12 @@ namespace Prototype
 				     int argIndex, 
 				  const DomainListener::ChangeType& changeType) {
 
-    if(m_lastNotified == m_constraintEngine->cycleCount() ||
-       changeType == DomainListener::SET ||
-       changeType == DomainListener::SET_TO_SINGLETON)
+    if(m_lastNotified != m_constraintEngine->cycleCount()){
+      m_lastNotified = m_constraintEngine->cycleCount();
+      return false;
+    }
+    else
       return true;
-
-    m_lastNotified = m_constraintEngine->cycleCount();
-    return false;
   }
 
   AbstractDomain&  EqualConstraint::getCurrentDomain(const ConstrainedVariableId& var){

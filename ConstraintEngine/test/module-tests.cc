@@ -5,6 +5,7 @@
  * @brief Read the source for details
  */
 #include "TestSupport.hh"
+#include "Utils.hh"
 #include "Variable.hh"
 #include "InternalVariable.hh"
 #include "Constraints.hh"
@@ -141,14 +142,10 @@ private:
   }
   static bool testAddEqualConstraint()
   {
-    std::vector<ConstrainedVariableId> variables;
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
-    variables.push_back(v1.getId());
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
-    variables.push_back(v2.getId());
-    AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
@@ -168,12 +165,9 @@ private:
     baseValues.push_back(Prototype::LabelStr("E"));
     LabelSet baseDomain(baseValues);
 
-    std::vector<ConstrainedVariableId> variables;
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(-100, 1));
-    variables.push_back(v1.getId());
-    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
@@ -191,12 +185,9 @@ private:
     ls1.insert(Prototype::LabelStr("D"));
     ls1.insert(Prototype::LabelStr("E"));
 
-    variables.clear();
     Variable<LabelSet> v2(ENGINE, ls1);
-    variables.push_back(v2.getId());
     Variable<LabelSet> v3(ENGINE, ls1);
-    variables.push_back(v3.getId());
-    EqualConstraint c1(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    EqualConstraint c1(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId()));
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v2.getDerivedDomain() == v3.getDerivedDomain());
@@ -209,11 +200,8 @@ private:
     ENGINE->propagate();
     assert(!v3.getDerivedDomain().isMember(Prototype::LabelStr("E")));
 
-    variables.clear();
     Variable<LabelSet> v4(ENGINE, ls0);
-    variables.push_back(v2.getId());
-    variables.push_back(v4.getId());
-    EqualConstraint c2(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    EqualConstraint c2(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v4.getId()));
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v2.getDerivedDomain() == v3.getDerivedDomain());
@@ -226,12 +214,9 @@ private:
 
   static bool testLessThanEqualConstraint()
   {
-    std::vector<ConstrainedVariableId> variables;
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 100));
-    variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 100));
-    variables.push_back(v1.getId());
-    LessThanEqualConstraint c0(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    LessThanEqualConstraint c0(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain() == v1.getDerivedDomain());
@@ -250,32 +235,21 @@ private:
   }
 
   static bool testBasicPropagation(){
-    std::vector<ConstrainedVariableId> variables;
     // v0 == v1
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v1.getId());
-    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
 
     // v2 + v3 == v0
-    variables.clear();
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 4));
-    variables.push_back(v2.getId());
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
-    variables.push_back(v3.getId());
-    variables.push_back(v0.getId());
-    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId(), v0.getId()));
     assert(!v0.getDerivedDomain().isEmpty());
 
     // v4 + v5 == v1
-    variables.clear();
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v4.getId());
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(1, 1000));
-    variables.push_back(v5.getId());
-    variables.push_back(v1.getId());
-    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId(), v1.getId()));
 
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
@@ -284,38 +258,27 @@ private:
   }
 
   static bool testForceInconsistency(){
-    std::vector<ConstrainedVariableId> variables;
     // v0 == v1
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v1.getId());
-    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     
     // v2 + v3 == v0
-    variables.clear();
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 1));
-    variables.push_back(v2.getId());
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
-    variables.push_back(v3.getId());
-    variables.push_back(v0.getId());
-    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId(), v0.getId()));
 
     // v4 + v5 == v1
-    variables.clear();
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(2, 2));
-    variables.push_back(v4.getId());
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(2, 2));
-    variables.push_back(v5.getId());
-    variables.push_back(v1.getId());
-    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId(), v1.getId()));
     
     ENGINE->propagate();
     assert(ENGINE->provenInconsistent());
     assert(v1.getDerivedDomain().isEmpty());
     assert(v2.getDerivedDomain().isEmpty());
 
-    variables.clear();
+    std::vector<ConstrainedVariableId> variables;
     variables.push_back(v0.getId());
     variables.push_back(v1.getId());
     variables.push_back(v2.getId());
@@ -336,32 +299,21 @@ private:
 
   static bool testRepropagation()
   {
-    std::vector<ConstrainedVariableId> variables;
     // v0 == v1
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v1.getId());
-    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
 
 
     // v2 + v3 == v0
-    variables.clear();
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v2.getId());
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v3.getId());
-    variables.push_back(v0.getId());
-    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId(), v0.getId()));
 
     // v4 + v5 == v1
-    variables.clear();
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v4.getId());
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(1, 10));
-    variables.push_back(v5.getId());
-    variables.push_back(v1.getId());
-    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId(), v1.getId()));
 
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
@@ -715,7 +667,7 @@ void testBitVector(){
   assert(bitvec.none());
   bitvec.set(8);
   assert(bitvec.any());
-  cout << "BitVector Test Passed" << endl;
+  cout << "BitVector Test PASSED" << endl;
 }
 
 int main()
