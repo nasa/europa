@@ -132,8 +132,8 @@ namespace Prototype {
     // Why can't this be done in the constructor? --wedgingt 2004 Feb 23
     check_error(AbstractDomain::canBeCompared(domx, domy));
 
-    // Discontinue if either domain is dynamic.
-    if (domx.isDynamic() || domy.isDynamic())
+    // Discontinue if both domains are dynamic.
+    if (domx.isDynamic() && domy.isDynamic())
       return;
 
     check_error(!domx.isEmpty() && !domy.isEmpty());
@@ -442,7 +442,7 @@ namespace Prototype {
       m_sum2(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()),
       m_sum3(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()),
       m_sum4(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()) {
-    check_error(ARG_COUNT > 2 && ARG_COUNT == m_variables.size());
+    check_error(ARG_COUNT > 2 && ARG_COUNT == (unsigned int)m_variables.size());
     std::vector<ConstrainedVariableId> scope;
     // B is always first and C is always second for the first set, so:
     scope.push_back(m_variables[1]); // B + ...
@@ -519,8 +519,8 @@ namespace Prototype {
         m_eqSumC1 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
         scope.clear();
         scope.push_back(m_sum1.getId()); // first_half = ...
-        int half = ARG_COUNT/2;
-        int i = 1;
+        unsigned int half = ARG_COUNT/2;
+        unsigned int i = 1;
         for ( ; i <= half; i++)
           scope.push_back(m_variables[i]); // ... X + ...
         m_eqSumC2 = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName, constraintEngine, scope))->getId();
@@ -551,11 +551,6 @@ namespace Prototype {
       delete (Constraint*) m_eqSumC1;
   }
 
-  /**
-   * @class LessThanSumConstraint
-   * @brief X <= Y + Z.
-   * Converted into two constraints: X <= temp and temp equal to Y + Z.
-   */
   LessOrEqThanSumConstraint::LessOrEqThanSumConstraint(const LabelStr& name,
                                                        const LabelStr& propagatorName,
                                                        const ConstraintEngineId& constraintEngine,
