@@ -534,6 +534,8 @@ private:
 									  temp);
     t1.merge(t0.getId());
 
+    assert(!t0.getMergedTokens().empty());
+
     // Verify that the equality constraint has migrated and original has been deactivated.
     //TBW: when stacking instead of merging tokens, the next check is not true
     // assert(!equalityConstraint->isActive());
