@@ -897,7 +897,7 @@ namespace Prototype {
       varOut << ENUM_DOMAIN << TAB;
 
       std::list<ObjectId> objects;
-      objVar->getDerivedDomain().getValues(objects);
+      ((ObjectDomain &)objVar->lastDomain()).getValues(objects);
       for(std::list<ObjectId>::iterator it = objects.begin(); it != objects.end(); ++it) {
 				varOut << (*it)->getName().toString() << " ";
       }
@@ -952,22 +952,26 @@ namespace Prototype {
                        << TAB << ruleId->getToken()->getKey() << TAB;
 
        /*SlaveTokenIds*/
-       const std::vector<TokenId> slaves = ruleId->getSlaves();
+       //const std::vector<TokenId> slaves;// = ruleId->getSlaves();
+       std::set<TokenId> slaves;
+       std::set<ConstrainedVariableId> vars;
+       buildSlaveAndVarSets(slaves, vars, ruleId);
        if(slaves.empty()) {
          ruleInstanceOut << SNULL << TAB;
        }
        else {
-         for(std::vector<TokenId>::const_iterator it = slaves.begin();
+         for(std::set<TokenId>::const_iterator it = slaves.begin();
              it != slaves.end(); ++it) {
            TokenId slaveToken = *it;
-           ruleInstanceOut << slaveToken->getKey() << COMMA;
+           if(slaveToken.isValid())
+             ruleInstanceOut << slaveToken->getKey() << COMMA;
          }
          ruleInstanceOut << TAB;
        }
 
        /* gaurd and local variables */
-       std::set<ConstrainedVariableId> vars;
-       buildVarSet(vars, ruleId);
+       //std::set<ConstrainedVariableId> vars;
+       //buildVarSet(vars, ruleId);
        if(vars.empty()) {
          ruleInstanceOut << SNULL;
        }
@@ -982,22 +986,27 @@ namespace Prototype {
        ruleInstanceOut << std::endl;
      }
 
+    void PartialPlanWriter::buildSlaveAndVarSets(std::set<TokenId> &tokSet,
+                                                 std::set<ConstrainedVariableId> &varSet,
+                                                 const RuleInstanceId &ruleId) {
+      std::vector<TokenId> tokVec = ruleId->getSlaves();
+      for(std::vector<TokenId>::const_iterator tempIt = tokVec.begin(); tempIt != tokVec.end(); ++tempIt)
+        if(!((*tempIt).isNoId()))
+          tokSet.insert(*tempIt);
 
-     void PartialPlanWriter::buildVarSet(std::set<ConstrainedVariableId>& varSet,
-                                         const RuleInstanceId &ruleId) {
-       for(std::vector<ConstrainedVariableId>::const_iterator varIt = ruleId->getVariables().begin();
-      varIt != ruleId->getVariables().end(); ++varIt) {
-         ConstrainedVariableId var = *varIt;
-         if(RuleInstanceId::convertable(var->getParent())) {
-           varSet.insert(var);
-         }
-       }
-       for(std::vector<RuleInstanceId>::const_iterator ruleIt = ruleId->getChildRules().begin();
-           ruleIt != ruleId->getChildRules().end(); ++ruleIt) {
-         RuleInstanceId rid = *ruleIt;
-         buildVarSet(varSet, rid);
-       }
-     }
+      for(std::vector<ConstrainedVariableId>::const_iterator varIt = ruleId->getVariables().begin();
+          varIt != ruleId->getVariables().end(); ++varIt) {
+        ConstrainedVariableId var = *varIt;
+        if(RuleInstanceId::convertable(var->getParent())) {
+          varSet.insert(var);
+        }
+      }
+      for(std::vector<RuleInstanceId>::const_iterator ruleIt = ruleId->getChildRules().begin();
+          ruleIt != ruleId->getChildRules().end(); ++ruleIt) {
+        RuleInstanceId rid = *ruleIt;
+        buildSlaveAndVarSets(tokSet, varSet, rid);
+      }
+    }
 
 		void PartialPlanWriter::outputInstant(const InstantId &instId, const int resId, 
 																					std::ofstream &instOut) {
@@ -1599,7 +1608,7 @@ namespace Prototype {
 					continue;
 				retval << choice->getKey() << COMMA << choice->getType() << COMMA;
 				switch(choice->getType()) {
-				case Choice::token:
+				case Choice::TOKEN:
 					{
 					  const TokenId &tId = Id<TokenChoice>(choice)->getToken();
 						if(!tId.isNoId())
@@ -1608,7 +1617,7 @@ namespace Prototype {
 							retval << -1;
 					}
 				break;
-				case Choice::value:
+				case Choice::VALUE:
 					{
 					  const TokenId &tId = Id<ValueChoice>(choice)->getToken();
 						if(!tId.isNoId())
@@ -1618,8 +1627,8 @@ namespace Prototype {
 						retval << COMMA << Id<ValueChoice>(choice)->getValue();
 					}
 				break;
-				case Choice::defer:
-					retval << "DEFER";
+				case Choice::USER:
+					retval << "USER";
 				}
 				retval << SEQ_COL_SEP;
 			}

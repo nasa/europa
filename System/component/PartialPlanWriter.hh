@@ -79,7 +79,9 @@ namespace Prototype {
       void outputConstraint(const ConstraintId &, std::ofstream &, std::ofstream &);
       void outputInstant(const InstantId &, const int, std::ofstream &);
       void outputRuleInstance(const RuleInstanceId &, std::ofstream &, std::ofstream &);
-      void buildVarSet(std::set<ConstrainedVariableId> &, const RuleInstanceId &);
+      void buildSlaveAndVarSets(std::set<TokenId> &, std::set<ConstrainedVariableId> &, 
+                                const RuleInstanceId &);
+      //void buildVarSet(std::set<ConstrainedVariableId> &, const RuleInstanceId &);
       void outputDecision(const DecisionPointId &, std::ofstream &);
       const std::string getUpperBoundStr(IntervalDomain &dom) const;
       const std::string getLowerBoundStr(IntervalDomain &dom) const;
