@@ -172,18 +172,21 @@ namespace PLASMA {
     const char* error_msg;
     void* modelLibHandle = accessLibHandle();
 
-    if (dlclose(modelLibHandle)) {
-      error_msg = dlerror();
-      printf("Error during dlclose():\n");
-      try {
-        check_always(!error_msg, error_msg); 
+    if (modelLibHandle) {
+      if (dlclose(modelLibHandle)) {
+        error_msg = dlerror();
+        printf("Error during dlclose():\n");
+        try {
+          check_always(!error_msg, error_msg); 
+        }
+        catch (Error e) {
+          printf("Unexpected exception in unloadModel()\n");
+          fflush(stdout);
+          e.display();
+          throw;
+        }
       }
-      catch (Error e) {
-        printf("Unexpected exception in unloadModel()\n");
-        fflush(stdout);
-        e.display();
-        throw;
-      }
+      accessLibHandle() = 0;
     }
   }
 }

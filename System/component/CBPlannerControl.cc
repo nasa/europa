@@ -132,9 +132,10 @@ namespace PLASMA {
 
     try {
       SamplePlanDatabase *db1 = accessSamplePlanDB();
-      check_always(db1, SPDstr);
-      db1->terminate();
-      delete(db1);
+      if (db1) {
+        db1->terminate();
+        delete(db1);
+      }
       //unload dynamic library
       unloadModel();
     }
