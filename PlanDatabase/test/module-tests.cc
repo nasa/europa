@@ -35,7 +35,6 @@
 
 class TestRule: public Rule {
 public:
-
   TestRule(const RulesEngineId& rulesEngine, const LabelStr& name): Rule(rulesEngine, name){}
 
   /**
