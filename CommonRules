@@ -12,9 +12,12 @@ rule Execute {
   local prefix = $(4) ;
   local outputFN = $(5) ;
 
+  if $(TRACE_MODULE) = TRUE {
+    Echo Execute $(target) . $(executable) . $(arguments) . $(prefix) . $(outputFN) ;
+  }
+
   local target_exec_arg ;
   if $(arguments) {
-    #target_exec_arg = RUN_$(executable).$(arguments:J=.) ;
     target_exec_arg = RUN_$(executable) ;
     local arg ;
     for arg in $(arguments) {
@@ -33,6 +36,10 @@ rule ExecuteTarget {
   local arguments = $(3) ;
   local prefix = $(4) ; # E.g., "/usr/bin/time"
   local outputFN = $(5) ;
+
+  if $(TRACE_MODULE) = TRUE {
+    Echo ExecuteTarget $(exec_arg) . $(executable) . $(arguments) . $(prefix) . $(outputFN) ;
+  }
 
   Depends $(exec_arg) : $(executable) ;
   SEARCH on $(executable) += $(SEARCH_SOURCE) ;
