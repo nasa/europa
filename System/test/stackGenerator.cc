@@ -52,12 +52,13 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << "predicate Pointing {" << std::endl;
   out << " Target observation;" << std::endl;
   out << " eq(duration, [1 1]);" << std::endl;
-  for (int i=1; i <= prob.numParams; ++i) {
+  out << " Domain " << prob.parameters[1] << ";" << std::endl;
+  out << " Domain " << prob.parameters[2] << ";" << std::endl;
+  out << " perf(" << prob.parameters[1] << ", " << prob.parameters[2] << ");" << std::endl;
+  out << " perf(" << prob.parameters[2] << ", " << prob.parameters[1] << ");" << std::endl;
+  for (int i=3; i <= prob.numParams; ++i) {
     out << " Domain " << prob.parameters[i] << ";" << std::endl;
-    if (i == 1)
-      out << " perf(" << prob.parameters[i] << ", " << prob.parameters[2] << ");" << std::endl;
-    else
-      out << " perf(" << prob.parameters[i] << ", " << prob.parameters[1] << ");" << std::endl;
+    out << " perf(" << prob.parameters[i] << ", " << prob.parameters[1] << ");" << std::endl;
   }
   out << "}" << std::endl;
   out << "predicate slew {" << std::endl;
@@ -65,12 +66,13 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << " Target to;" << std::endl;
   out << " neq(from, to);" << std::endl;
   out << " eq(duration, [1 1]);" << std::endl;
-  for (int i=1; i <= prob.numParams; ++i) {
+  out << " Domain " << prob.parameters[1] << ";" << std::endl;
+  out << " Domain " << prob.parameters[2] << ";" << std::endl;
+  out << " perf(" << prob.parameters[1] << ", " << prob.parameters[2] << ");" << std::endl;
+  out << " perf(" << prob.parameters[2] << ", " << prob.parameters[1] << ");" << std::endl;
+  for (int i=3; i <= prob.numParams; ++i) {
     out << " Domain " << prob.parameters[i] << ";" << std::endl;
-    if (i == 1)
-      out << " perf(" << prob.parameters[i] << ", " << prob.parameters[2] << ");" << std::endl;
-    else
-      out << " perf(" << prob.parameters[i] << ", " << prob.parameters[1] << ");" << std::endl;
+    out << " perf(" << prob.parameters[i] << ", " << prob.parameters[1] << ");" << std::endl;
   }
   out << "}" << std::endl;
   out << "}" << std::endl;
@@ -284,6 +286,12 @@ int main (int argc, const char** argv) {
   if (prob.numSatellites >= MAX_SATELLITES) {
     std::cerr << "Error: " << argv[0] << " does not support more than " << MAX_SATELLITES-1 << " satellites." << std::endl;
     exit (-1);
+  }
+
+  // dumb restriction but nddl compiler does not allow single parameter constraints.
+  if (prob.numParams != 0 && prob.numParams < 2) {
+    std::cerr << "Error: " << argv[0] << " requires 0 or 2 or more parameters " << std::endl;
+    exit(-1);
   }
 
   std::cout << "Building model for " << prob.numSatellites << " satellites." << std::endl;
