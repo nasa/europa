@@ -90,6 +90,6 @@ LinkSharedLibrariesNoDeps runPlannerControlTest_g_rt : dl ;
 # TestLanguage TEST
 #
 
-SubInclude PLASMA System test testlang ;
+SubInclude PLASMA System test testLang ;
 
 } # PLASMA_READY
