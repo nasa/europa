@@ -5,6 +5,10 @@ class Foo {
  bool m_2;
  string m_3;
  predicate p1{}
+
+ Foo(){
+  m_3 = "String Value";
+ }
 }
 
 class Bar extends Foo {

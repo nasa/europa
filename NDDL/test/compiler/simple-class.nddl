@@ -13,6 +13,9 @@ class Foo {
  Frequencies m_6;
  enum ClassScopedEnum {A, B, C};
  ClassScopedEnum m_7;
+ Foo(){
+  m_3 = "This string must be initialized";
+ }
 }
 
 // Declares mandatory world class, with constructor with no arguments.

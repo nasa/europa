@@ -3,15 +3,16 @@ enum Locations {Hill, Rock, Lander};
 
 class Foo{
  int m_0;
-
+ string m_1;
  predicate pred1{
   Locations m_0;
   int m_1;
   float m_2;
-  string m_3;
-  bool m_4;
-  World m_5;
+  bool m_3;
+  World m_4;
  }
+
+ Foo(){m_1 = "Hello World";}
 }
 
 Foo::pred1{

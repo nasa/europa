@@ -20,6 +20,13 @@
 // Utility for obtaining defualt constraint library registration
 #include "TestSupport.hh"
 
+using namespace Prototype;
+
+namespace NDDL {
+
+  void validate(const PlanDatabaseId& db){}
+}
+
 int main(){
   // Constraints with special names to allow mapping to temporal network propagator if necessary
   REGISTER_NARY(EqualConstraint, "concurrent", "Default");
@@ -52,6 +59,9 @@ int main(){
   
   // Now kick in the initial state from generated function
   NDDL::initialize(db.getId());
+
+  // Now invoke validation on the plan database
+  NDDL::validate(db.getId());
 
   std::cout << "Finished" << std::endl;
 }
