@@ -42,21 +42,23 @@ namespace PLASMA {
   }
 
   void ValueChoice::printValue(std::ostream& os) const {
-    if (LabelStr::isString(m_value))
+    if (ConstrainedVariableDecisionPointId::convertable(m_decision)) {
+      ConstrainedVariableDecisionPointId cvdec(m_decision);
+      const AbstractDomain& dom = cvdec->getVariable()->specifiedDomain();
+      if (Schema::instance()->isObjectType(dom.getTypeName())) {
+	ObjectId obj(m_value);
+	os << obj->getName().c_str();
+      }
+      else if (dom.isNumeric())
+	os << m_value;
+      else if (LabelStr::isString(m_value))
+	os << LabelStr(m_value).c_str();
+      else os << m_value;
+    }
+    else if (LabelStr::isString(m_value))
       os << LabelStr(m_value).c_str();
     else
-      if (ConstrainedVariableDecisionPointId::convertable(m_decision)) {
-	ConstrainedVariableDecisionPointId cvdec(m_decision);
-	const AbstractDomain& dom = cvdec->getVariable()->specifiedDomain();
-	if (Schema::instance()->isObjectType(dom.getTypeName())) {
-	  ObjectId obj(m_value);
-	  os << obj->getName().c_str();
-	}
-	else
-	  os << m_value;
-      }
-      else
-	os << m_value;
+      os << m_value;
   }
 
   void ValueChoice::print(std::ostream& os) const {
