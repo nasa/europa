@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.115 2005-02-02 00:58:49 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.116 2005-02-05 22:02:05 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the EUROPA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -369,7 +369,10 @@ then
     jamCmd run-all-tests run-all-tests
     if "$performance"
         then
+        EUROPA_PERFORMANCE=1
+        export EUROPA_PERFORMANCE
         jamCmd run-performance-tests run-performance-tests
+        EUROPA_PERFORMANCE=''
     fi
     if "$removePlasma"
         then
