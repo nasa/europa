@@ -1,6 +1,6 @@
 SubDir PLASMA ConstraintEngine test ;
 
-ModuleTest ce-module-tests
+ModuleMain ce-module-tests
 	:
 	module-tests.cc
 	domain-tests.cc
@@ -9,3 +9,4 @@ ModuleTest ce-module-tests
 	ConstraintEngine
 	;
 
+RunModuleMain tests : ce-module-tests ;

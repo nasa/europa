@@ -1,3 +1,6 @@
 SubDir PLASMA PlanDatabase test ;
 
-ModuleTest db-module-tests : module-tests.cc : PlanDatabase ;
+ModuleMain db-module-tests : module-tests.cc : PlanDatabase ;
+
+RunModuleMain tests : db-module-tests ;
+

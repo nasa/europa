@@ -1,3 +1,5 @@
 SubDir PLASMA TemporalNetwork test ;
 
-ModuleTest tn-module-tests : module-tests.cc : TemporalNetwork ;
+ModuleMain tn-module-tests : module-tests.cc : TemporalNetwork ;
+
+RunModuleMain tests : tn-module-tests ;

@@ -1,0 +1,8 @@
+SubDir PLASMA TinyXml ;
+
+if ! $(TinyXml_INCLUDED) {
+TinyXml_INCLUDED = TRUE ;
+
+Module TinyXml ;
+
+}

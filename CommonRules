@@ -2,6 +2,40 @@ if ! $(CommonRules_INCLUDED) {
 CommonRules_INCLUDED = TRUE ;
 
 #
+# Execute run-it : it : it-arg0 it-arg1 it-arg2 ;
+#
+
+rule Execute {
+  local target = $(1) ;
+  local executable = $(2) ;
+  local arguments = $(3) ;
+
+  local target_exec_arg ;
+  if $(arguments) {
+    target_exec_arg = $(executable).$(arguments:J=.) ;
+  } else {
+    target_exec_arg = $(executable:G=$(target)) ;
+  }
+  LocalDepends $(target) : $(target_exec_arg) ;
+  ExecuteTarget $(target_exec_arg) : [ FAppendSuffix $(executable) : $(SUFEXE) ] : $(arguments) ;
+}
+
+rule ExecuteTarget {
+  local exec_arg = $(1) ;
+  local executable = $(2) ;
+  local arguments = $(3) ;
+
+  Depends $(exec_arg) : $(executable) ;
+  SEARCH on $(executable) += $(SEARCH_SOURCE) ;
+  ARGUMENTS on $(exec_arg) = $(arguments) ;
+}
+
+actions ExecuteTarget {
+  cd `dirname $(2)`
+  `basename $(2)` $(ARGUMENTS)
+}
+
+#
 # utilities
 #
 

@@ -1,3 +1,5 @@
 SubDir PLASMA Resource test ;
 
-ModuleTest rs-module-tests : module-tests.cc : Resource ;
+ModuleMain rs-module-tests : module-tests.cc : Resource ;
+
+RunModuleMain tests : rs-module-tests ;

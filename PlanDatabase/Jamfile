@@ -4,7 +4,8 @@ if ! $(PlanDatabase_INCLUDED) {
 PlanDatabase_INCLUDED = TRUE ;
 
 SubInclude PLASMA ConstraintEngine ;
+SubInclude PLASMA TinyXml ;
 
-Module PlanDatabase : ConstraintEngine ;
+Module PlanDatabase : ConstraintEngine TinyXml ;
 
 } # PlanDatabase_INCLUDED

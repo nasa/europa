@@ -47,7 +47,11 @@ if $(GCC_ROOTDIR) {
 
 # PROFILE_FLAGS = flags for profiling
 
-PROFILE_FLAGS ?= -pg ;
+if $(OS) = BEOS {
+	PROFILE_FLAGS ?= -p ;
+} else {
+	PROFILE_FLAGS ?= -pg ;
+}
 
 # OPTIMIZE_FLAGS = flags for optimization
 
@@ -64,7 +68,11 @@ if $(OS) = BEOS {
 
 # DEBUG_FLAGS = flags to enable debugging
 
-DEBUG_FLAGS ?= -g ;
+if $(OS) = BEOS {
+	DEBUG_FLAGS ?= -g3 ;
+} else {
+	DEBUG_FLAGS ?= -g ;
+}
 
 # SUFSHARE = suffix for shared libraries
 
@@ -105,4 +113,4 @@ if $(OS) = CYGWIN {
   NOARSCAN = true ;
 }
 
-}
+} # PlatformRules_INCLUDED

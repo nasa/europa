@@ -8,4 +8,5 @@ SubInclude PLASMA Resource ;
 SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA System ;
 SubInclude PLASMA TemporalNetwork ;
+SubInclude PLASMA TinyXml ;
 SubInclude PLASMA Utils ;

@@ -1,6 +1,7 @@
 if ! $(ModuleRules_INCLUDED) {
 ModuleRules_INCLUDED = TRUE ;
 
+include [ FDirName $(SUBDIR) CommonRules ] ;
 include [ FDirName $(SUBDIR) VariantRules ] ;
 
 # TRACE_MODULE ?= TRUE ;
@@ -65,14 +66,14 @@ rule ModuleDocumentation {
   }
 }
 
-# ModuleTest <name> : <files for this test> : <modules that this test depends on> ;
-rule ModuleTest {
+# ModuleMain <name> : <files for this test> : <modules that this test depends on> ;
+rule ModuleMain {
   local name = $(1) ;
   local files = $(2) ;
   local modules = (3) ;
 
   if $(TRACE_MODULE) = TRUE {
-    Echo ModuleTest $(name) . $(files) . $(modules) ;
+    Echo ModuleMain $(name) . $(files) . $(modules) ;
   }
 
   local links = [ FLinkModules $(module) ] ;
@@ -92,9 +93,9 @@ rule ModuleTest {
   for variant in $(VARIANTS) {
     local C++FLAGS = $(C++FLAGS) [ FVariantC++Flags $(variant) ] ;
     local CFLAGS = $(CFLAGS) [ FVariantCFlags $(variant) ] ;
-    local LINKFLAGS = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
 
     local exe = [ FVariantName $(name) : $(variant) ] ;
+	LINKFLAGS on $(exe) = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
 
     local outputs ;
     local file ;
@@ -121,7 +122,32 @@ rule ModuleTest {
         }
         MainFromObjects $(exe) : $(outputs) ;
       } else {
-        Exit ModuleTest unknown library type: $(library) ;
+        Exit ModuleMain unknown library type: $(library) ;
+      }
+    }
+  }
+}
+
+rule RunModuleMain {
+  local tests = $(1) ;
+  local executable = $(2) ;
+  local arguments = $(3) ;
+
+  if $(TRACE_MODULE) = TRUE {
+    Echo RunModuleMain $(tests) . $(executable) . $(arguments) ;
+  }
+
+  local variant ;
+  for variant in $(VARIANTS) {
+    for library in $(LIBRARIES) {
+      if $(library) = SHARED {
+        local exe = [ FVariantName $(executable) : $(variant) ] ;
+        Execute $(tests) : $(exe)_rt : $(arguments) ;
+      } else if $(library) = STATIC {
+        local exe = [ FVariantName $(executable) : $(variant) ] ;
+        Execute $(tests) : $(exe) : $(arguments) ;
+      } else {
+        Exit RunModuleMain unknown library type: $(library) ;
       }
     }
   }
@@ -250,4 +276,4 @@ rule ModuleSharedLibrary {
   }
 }
 
-}
+} # ModuleRules_INCLUDED

@@ -1,0 +1,3 @@
+SubDir PLASMA TinyXml component ;
+
+ModuleComponent TinyXml ;

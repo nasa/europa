@@ -1,3 +1,5 @@
 SubDir PLASMA CBPlanner test ;
 
-ModuleTest cbp-module-tests : SubgoalOnceRule.cc module-tests.cc : CBPlanner ;
+ModuleMain cbp-module-tests : SubgoalOnceRule.cc module-tests.cc : CBPlanner ;
+
+RunModuleMain tests : cbp-module-tests ;

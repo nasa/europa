@@ -1,9 +1,11 @@
 SubDir PLASMA PlanDatabase component ;
 
+SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
+
 ModuleComponent PlanDatabase
 	:
-#	DbClientTransactionLog.cc
-#	DbClientTransactionPlayer.cc
+	DbClientTransactionLog.cc
+	DbClientTransactionPlayer.cc
 	DbLogger.cc
 	EventToken.cc
 	IntervalToken.cc
