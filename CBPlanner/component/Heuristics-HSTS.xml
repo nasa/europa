@@ -132,7 +132,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <PredicateParameters/>
   </PredicateSpec>
   <Master/>
-  <DecisionPreference/>
+  <DecisionPreference>
+    <StateOrder>
+       <State>activate</State>
+       <Order>late</Order>
+    </StateOrder>
+    <State>reject</State>
+  </DecisionPreference>
 </Token>
 <Token>
   <Priority>200.4</Priority>
@@ -146,12 +152,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </PredicateParameters>
   </PredicateSpec>
   <Master/>
-   <DecisionPreference>
-    <StateOrder>
-       <State>activate</State>
-       <Order>early</Order>
-    </StateOrder>
-  </DecisionPreference>
+  <DecisionPreference/>
 </Token>
 <Token>
   <Priority>10000.0</Priority>
@@ -182,7 +183,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     </StateOrder>
     <StateOrder>
        <State>activate</State>
-       <Order>minFlexible</Order>
+       <Order>late</Order>
     </StateOrder>
     <State>reject</State>
   </DecisionPreference>
