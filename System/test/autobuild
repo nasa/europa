@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.101 2004-10-21 19:18:19 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.102 2004-10-22 00:21:05 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -80,7 +80,7 @@ do
 done
 
 # Usually, this is run via cron, which does not use the usual $PATH
-PATH="$JAVA_HOME"/bin:"$JAM_HOME":"$GCC_ROOTDIR"/bin:"$CVS_HOME"/bin:"$PATH"
+PATH="$JAVA_HOME"/bin:"$JAM_HOME":"$GCC_ROOTDIR"/bin:"$CVS_HOME"/bin:/usr/ucb:"$PATH"
 export GCC_ROOTDIR JAVA_HOME PATH
 
 info="Emailing to $email; removePlasma is $removePlasma`echo ''; uname -a; echo ''; g++ --version ; pwd ; echo ''`"
@@ -270,7 +270,7 @@ do
         cd PLASMA
     fi
     jam_args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
-    jamCmd plasma plasma
+    jamCmd plasma-all plasma
     jamCmd run-all-tests run-all-tests
     if "$removePlasma"
     then
