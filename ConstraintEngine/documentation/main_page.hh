@@ -81,6 +81,7 @@
  * @li make will run the module tests
  *
  * To run performance tests:
+ * @li make this simple change to Value.cc:1320:  os << "Hack to simplify linking while working on CE"; // os << obj->getName();
  * @li first make under NewPlan as follows: make EUROPA_VERSION=_EUROPA_FAST_VERSION_ OPTIMIZE=3.
  * @li with Europa built correctly, change CC_FLAGS in the local makefile to CC_FLAGS=-03.
  * @li define _PROTOTYPE_FAST_VALUE_ in ConstraintEngineDefs.hh
