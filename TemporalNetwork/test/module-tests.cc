@@ -282,6 +282,7 @@ private:
 
     // compute from advisor
     assert (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
+    assert (!db.getTemporalAdvisor()->canPrecede(second.getId(), first.getId()));
     
     DEFAULT_TEARDOWN();
     return true;
