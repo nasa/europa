@@ -3,12 +3,13 @@
 #include "tinyxml.h"
 #include "HSTSHeuristics.hh"
 #include "LabelStr.hh"
+#include "Schema.hh"
 
 namespace PLASMA {
 
 #define IS_TAG(x) (strcmp (tagName, x) == 0)
 
-  HSTSHeuristicsReader::HSTSHeuristicsReader(HSTSHeuristics& heuristics) : m_heuristics(heuristics) { }
+  HSTSHeuristicsReader::HSTSHeuristicsReader(HSTSHeuristics& heuristics, const SchemaId& schema) : m_heuristics(heuristics), m_schema(schema) { }
 
   HSTSHeuristicsReader::~HSTSHeuristicsReader() { }
 
@@ -59,14 +60,14 @@ namespace PLASMA {
       check_error(child != NULL, "Expected Default Specification.");
       const char* tagName = child->Value();
       check_error(tagName != NULL, "Expected Default Specification tag.");
-      if (IS_TAG("PriorityPref")) 
-	readPriorityPref(*child);
-      else if (IS_TAG("Compatibility"))
-	readCompatibility(*child);
-      else if (IS_TAG("Token"))
-	readToken(*child);
-      else if (IS_TAG("ConstrainedVariable"))
-	readConstrainedVariable(*child);
+      if (IS_TAG("DefaultPriorityPref")) 
+	readDefaultPriorityPref(*child);
+      else if (IS_TAG("DefaultCompatibility"))
+	readDefaultCompatibility(*child);
+      else if (IS_TAG("DefaultToken"))
+	readDefaultToken(*child);
+      else if (IS_TAG("DefaultConstrainedVariable"))
+	readDefaultConstrainedVariable(*child);
     }
   }
 
@@ -80,8 +81,8 @@ namespace PLASMA {
     return element.FirstChild()->ToText()->Value();
   }
 
-  void HSTSHeuristicsReader::readPriorityPref(const TiXmlElement& element) {
-    std::cout << "in ReadPriorityPref" << std::endl;
+  void HSTSHeuristicsReader::readDefaultPriorityPref(const TiXmlElement& element) {
+    std::cout << "in ReadDefaultPriorityPref" << std::endl;
 
     std::string tmp = getTextChild(element);
     HSTSHeuristics::PriorityPref pp;
@@ -90,11 +91,11 @@ namespace PLASMA {
     else if ((tmp == "high") || (tmp == "HIGH"))
       pp = HSTSHeuristics::HIGH;
     else
-      check_error(false, "Unexpected value for PriorityPref.");
+      check_error(false, "Unexpected value for DefaultPriorityPref.");
 
     std::cout << "     priority pref = " << pp << std::endl;
     m_heuristics.setDefaultPriorityPreference(pp);
-    check_error (m_heuristics.getDefaultPriorityPreference() == 0);
+    check_error (m_heuristics.getDefaultPriorityPreference() == 0, "Expected priority preference to be low on Heuristics-HSTS.xml.");
   }
 
   void HSTSHeuristicsReader::readVariableSpecification(const TiXmlElement& element){
@@ -108,7 +109,7 @@ namespace PLASMA {
       if (IS_TAG("ConstrainedVariable")) 
 	readConstrainedVariable(*child);
       else
-	check_error(false, "Unexpected stuff!");
+	check_error(false, "ConstrainedVariable is the only tag allowed in Variable Specification.");
     }
   }
   void HSTSHeuristicsReader::readTokenSpecification(const TiXmlElement& element){
@@ -122,42 +123,97 @@ namespace PLASMA {
       if (IS_TAG("Token"))
 	readToken(*child);
       else 
-	check_error(false,  "Unexpected stuff!");
+	check_error(false,  "Token is the only tag allowed in Token Specification.");
     }
   }
-  void HSTSHeuristicsReader::readCompatibility(const TiXmlElement& element){
-    std::cout << "in ReadCompatibility" << std::endl;
+
+  void HSTSHeuristicsReader::readDefaultCompatibility(const TiXmlElement& element){
+    std::cout << "in ReadDefaultCompatibility" << std::endl;
 
     HSTSHeuristics::Priority p;
     for (TiXmlElement* child = element.FirstChildElement(); child;
 	 child = child->NextSiblingElement()) {
-      check_error(child != NULL, "Expected Default Specification.");
+      check_error(child != NULL, "Expected Default Compatibility.");
       const char* tagName = child->Value();
-      check_error(tagName != NULL, "Expected Default Specification tag.");
+      check_error(tagName != NULL, "Expected Default Compatibility tag.");
       if (IS_TAG("Priority")) {
 	readPriority(*child,p);
       }
       else if (IS_TAG("PredicateSpec")) {
-	TokenTypeId tt;
-	readPredicateSpec(*child, tt);
-	//	m_heuristics.setDefaultPriorityForTokenDPsWithParent(p, tt);
-	//	check_error (m_heuristics.getDefaultPriorityForTokenDPsWithParent(tt) == 24.5);
+	LabelStr pred(NO_STRING); 
+	std::vector<std::pair<LabelStr,LabelStr> > domainSpec;
+	readPredicateSpec(*child, pred, domainSpec);
+	TokenType tt(pred,domainSpec);
+	std::cout << " initialized predicate spec with predicate = " << tt.getPredicate().c_str() << std::endl;
+	m_heuristics.setDefaultPriorityForTokenDPsWithParent(p, tt.getId());
       }
       else
-	check_error(false, "Unexpected tag in compatibility specification.");
+	check_error(false, "Expected Priority or PredicateSpec tag in compatibility specification.");
     }
 
   }
+
+  void HSTSHeuristicsReader::readDefaultToken(const TiXmlElement& element) {
+    std::cout << "in ReadDefaultToken" << std::endl;
+
+    HSTSHeuristics::Priority p;
+    for (TiXmlElement* child = element.FirstChildElement(); child;
+	 child = child->NextSiblingElement()) {
+      check_error(child != NULL, "Expected Default Token.");
+      const char* tagName = child->Value();
+      check_error(tagName != NULL, "Expected Default Token tag.");
+      if (IS_TAG("Priority")) {
+	readPriority(*child,p);
+	m_heuristics.setDefaultPriorityForTokenDPs(p);
+      }
+      else if (IS_TAG("DecisionPreference")) {
+	std::vector<LabelStr> states;
+	std::vector<HSTSHeuristics::CandidateOrder> orders;
+	states.reserve(5); // type allows for at most 5 states and orders
+	orders.reserve(5);
+	readDecisionPreference(*child, states, orders);
+	m_heuristics.setDefaultPreferenceForTokenDPs(states,orders);
+      }
+    }
+  }
+
+  void HSTSHeuristicsReader::readDefaultConstrainedVariable(const TiXmlElement& element){
+    std::cout << "in ReadDefaultConstrainedVariable" << std::endl;
+
+    HSTSHeuristics::Priority p;
+    LabelStr genName(NO_STRING);
+    HSTSHeuristics::DomainOrder dorder;
+    std::vector<LabelStr> values;
+    for (TiXmlElement* child = element.FirstChildElement(); child;
+	 child = child->NextSiblingElement()) {
+      check_error(child != NULL, "Expected State Order");
+      const char* tagName = child->Value();
+      check_error(tagName != NULL, "Expected State Order tag");
+      if (IS_TAG("Priority")) {
+	readPriority(*child,p);
+	m_heuristics.setDefaultPriorityForConstrainedVariableDPs(p);
+      }
+      else if (IS_TAG("Preference")) {
+	readPreference(*child, genName, dorder, values);
+	check_error(genName == NO_STRING, "Expected Generator Name to be empty.");
+	check_error(values.empty(), "Expected values to be empty.");
+	m_heuristics.setDefaultPreferenceForConstrainedVariableDPs(dorder);
+      }
+      else
+	check_error(false, "Expected Priority or Preference in DefaultConstrainedVariable.");
+    }
+  }
+
   void HSTSHeuristicsReader::readPriority(const TiXmlElement& element, HSTSHeuristics::Priority& p) {
     std::cout << "in ReadPriority" << std::endl;
     std::string tmp = getTextChild(element);
     p = atof(tmp.c_str()); // priority is a double!!
     std::cout << "  Priority = " << p << std::endl;
   }
-  void HSTSHeuristicsReader::readPredicateSpec(const TiXmlElement& element, TokenTypeId& tt){
+
+  void HSTSHeuristicsReader::readPredicateSpec(const TiXmlElement& element, LabelStr& pred, std::vector<std::pair<LabelStr,LabelStr> >& domainSpec) {
     std::cout << "in ReadPredicateSpec" << std::endl;
 
-    LabelStr pred("");
     for (TiXmlElement* child = element.FirstChildElement(); child;
 	 child = child->NextSiblingElement()) {
       check_error(child != NULL, "Expected Default Specification.");
@@ -168,27 +224,26 @@ namespace PLASMA {
 	std::cout << "   Predicate = " << pred.c_str() << std::endl;
       }
       else if (IS_TAG("PredicateParameters")) {
-	std::vector<std::pair<LabelStr,LabelStr> > domainSpec;
 	readPredicateParameters(*child, domainSpec);
       }
       else
-	check_error(false, "Unexpected stuff!");
+	check_error(false, "Expected PredicateName or PredicateParameters in PredicateSpec.");
     }
   }
 
   void HSTSHeuristicsReader::readPredicateParameters(const TiXmlElement& element, std::vector<std::pair<LabelStr,LabelStr> >& domainSpecs) {
     for (TiXmlElement* child = element.FirstChildElement(); child;
 	 child = child->NextSiblingElement()) {
-      check_error(child != NULL, "Expected Default Specification.");
+      check_error(child != NULL, "Expected PredicateParameters.");
       const char* tagName = child->Value();
-      check_error(tagName != NULL, "Expected Default Specification tag.");
+      check_error(tagName != NULL, "Expected PredicateParameters tag.");
       if (IS_TAG("Parameter")) {
 	int index;
 	char* value;
 	readParameter(*child, index, value);
       }
       else 
-	check_error(false, "Unexpected Stuff!");
+	check_error(false, "Expected Parameter tag in PredicateParameters.");
     }
   }
 
@@ -208,7 +263,7 @@ namespace PLASMA {
 	std::cout << "   Value = " << value << std::endl; 
       }
       else
-	check_error(false, "Unexpected stuff!");
+	check_error(false, "Expected Index or Value tag in Parameter.");
     }
   }
 
@@ -217,16 +272,14 @@ namespace PLASMA {
     std::cout << "   Index = " << index << std::endl;
   }
 
-  void HSTSHeuristicsReader::readDecisionPreference(const TiXmlElement& element){
+  void HSTSHeuristicsReader::readDecisionPreference(const TiXmlElement& element, std::vector<LabelStr>& states, std::vector<HSTSHeuristics::CandidateOrder>& orders){
     std::cout << "in ReadDecisionPreference" << std::endl;
 
-    std::vector<LabelStr> states; 
-    states.reserve(5);
-    std::vector<HSTSHeuristics::CandidateOrder> orders;
-    orders.reserve(5);
+    check_error(states.empty(), "States should be empty.");
+    check_error(orders.empty(), "Orders should be empty.");
     std::vector<LabelStr>::iterator s_pos = states.begin();
     std::vector<HSTSHeuristics::CandidateOrder>::iterator o_pos = orders.begin();
-    LabelStr state("");
+    LabelStr state(NO_STRING);
     HSTSHeuristics::CandidateOrder order;
     for (TiXmlElement* child = element.FirstChildElement(); child;
 	 child = child->NextSiblingElement()) {
@@ -246,9 +299,8 @@ namespace PLASMA {
 	s_pos++; o_pos++;
       }
       else
-	check_error(false, "Unexpected stuff!");
+	check_error(false, "Expected StateOrder or State tag in DecisionPreference.");
     }
-    m_heuristics.setDefaultPreferenceForTokenDPs(states,orders);
   }
 
   void HSTSHeuristicsReader::readStateOrder(const TiXmlElement& element, LabelStr& state, HSTSHeuristics::CandidateOrder& order) {
@@ -297,7 +349,7 @@ namespace PLASMA {
 	}
       }
       else
-	check_error(false, "Unexpected stuff!");
+	check_error(false, "Expected Order or State tag in StateOrder.");
     }
   }
 
@@ -312,36 +364,38 @@ namespace PLASMA {
     std::cout << "in ReadConstrainedVariable" << std::endl;
 
     HSTSHeuristics::Priority p;
-    HSTSHeuristics::DomainOrder order;
+    int index=-10;// any negative number to symbolize index has not been initialized
+    LabelStr varName(NO_STRING);
+    LabelStr pred(NO_STRING); 
+    std::vector<std::pair<LabelStr,LabelStr> > domainSpec;
+    LabelStr genName(NO_STRING);
+    HSTSHeuristics::DomainOrder dorder;
+    std::vector<LabelStr> values;
     for (TiXmlElement* child = element.FirstChildElement(); child;
 	 child = child->NextSiblingElement()) {
-      check_error(child != NULL, "Expected State Order");
+      check_error(child != NULL, "Expected ConstrainedVariable.");
       const char* tagName = child->Value();
-      check_error(tagName != NULL, "Expected State Order tag");
-      if (IS_TAG("Priority")) {
-	readPriority(*child,p);
-	m_heuristics.setDefaultPriorityForConstrainedVariableDPs(p);
-      }
-      else if (IS_TAG("ValueOrder")) {
-	readValueOrder(*child,order);
-	m_heuristics.setDefaultPreferenceForConstrainedVariableDPs(order);
-      }
+      check_error(tagName != NULL, "Expected ConstrainedVariable tag");
       if (IS_TAG("Priority"))
 	readPriority(*child,p);
-      else if (IS_TAG("Preference"))
-	readPreference(*child);
-      else if (IS_TAG("VariableSpec")) {
-	int index;
-	LabelStr varName("");
+      else if (IS_TAG("Preference")) 
+	readPreference(*child, genName, dorder, values);
+      else if (IS_TAG("VariableSpec"))
 	readVariableSpec(*child, index, varName);
-      }
-      else if (IS_TAG("PredicateSpec")) {
-	TokenTypeId tt;
-	readPredicateSpec(*child, tt);
-      }
+      else if (IS_TAG("PredicateSpec"))
+	readPredicateSpec(*child, pred, domainSpec);
       else
-	check_error(false, "Unexpected stuff!");
+	check_error(false, "Expected Priority, Preference, VariableSpec, or PredicateSpec in ConstrainedVariable");
     }
+    if (index>=0) {
+      check_error(varName == NO_STRING, "Expected varName to be empty.");
+      varName = m_schema->getNameFromIndex(pred,index);
+    } else {
+      check_error(varName != NO_STRING, "Expected varName to not be empty.");
+      check_error(index == -10, "Index should be uninitialized.");
+    }
+    TokenType tt(pred,domainSpec);
+    m_heuristics.setHeuristicsForConstrainedVariableDP(p, varName, tt.getId(), dorder, genName, values);
   }
 
   void HSTSHeuristicsReader::readVariableSpec(const TiXmlElement& element, int& index, LabelStr& varName) {
@@ -387,10 +441,9 @@ namespace PLASMA {
     std::cout << "     valueOrder = " << order << std::endl;
   }
     
-  void HSTSHeuristicsReader::readPreference(const TiXmlElement& element){
+  void HSTSHeuristicsReader::readPreference(const TiXmlElement& element, LabelStr& genName, HSTSHeuristics::DomainOrder& dorder, std::vector<LabelStr>& values) {
     std::cout << "in ReadPreference" << std::endl;
 
-    HSTSHeuristics::DomainOrder dorder;
     for (TiXmlElement* child = element.FirstChildElement(); child;
 	 child = child->NextSiblingElement()) {
       check_error(child != NULL, "Expected Preference.");
@@ -407,7 +460,6 @@ namespace PLASMA {
       }
       else if (IS_TAG("DomainOrder")) {
 	dorder = HSTSHeuristics::ENUMERATION;
-	std::vector<LabelStr> values;
 	readDomainOrder(*child,values);
       }
       else 
@@ -435,28 +487,30 @@ namespace PLASMA {
     std::cout << "in ReadToken" << std::endl;
 
     HSTSHeuristics::Priority p;
+    LabelStr pred(NO_STRING); 
+    std::vector<std::pair<LabelStr,LabelStr> > domainSpec;
+    std::vector<LabelStr> states;
+    std::vector<HSTSHeuristics::CandidateOrder> orders;
+    states.reserve(5); // type allows for at most 5 states and orders
+    orders.reserve(5);
+    TokenTypeId ttm;
+    HSTSHeuristics::Relationship rel;
     for (TiXmlElement* child = element.FirstChildElement(); child;
 	 child = child->NextSiblingElement()) {
       check_error(child != NULL, "Expected Default Specification.");
       const char* tagName = child->Value();
       check_error(tagName != NULL, "Expected Default Specification tag.");
-      if (IS_TAG("Priority")) {
+      if (IS_TAG("Priority"))
 	readPriority(*child,p);
-	m_heuristics.setDefaultPriorityForTokenDPs(p);
-      }
-      else if (IS_TAG("PredicateSpec")) {
-	TokenTypeId tt;
-	readPredicateSpec(*child, tt);
-      }
-      else if (IS_TAG("Master")) {
-	TokenTypeId ttm;
-	HSTSHeuristics::Relationship rel;
+      else if (IS_TAG("PredicateSpec"))
+	readPredicateSpec(*child, pred, domainSpec);
+      else if (IS_TAG("Master"))
 	readMaster(*child, rel, ttm);
-      }
-      else if (IS_TAG("DecisionPreference")) {
-	readDecisionPreference(*child);
-      }
+      else if (IS_TAG("DecisionPreference"))
+	readDecisionPreference(*child, states, orders);
     }
+    TokenType tt(pred,domainSpec);
+    m_heuristics.setHeuristicsForTokenDP(p, tt.getId(), rel, ttm, states, orders);
   }
 
   void HSTSHeuristicsReader::readMaster(const TiXmlElement& element, HSTSHeuristics::Relationship& rel, TokenTypeId& ttm) {
@@ -471,7 +525,9 @@ namespace PLASMA {
 	readRelation(*child,rel);
       }
       else if (IS_TAG("PredicateSpec")) {
-	readPredicateSpec(*child, ttm);
+	LabelStr pred(NO_STRING); 
+	std::vector<std::pair<LabelStr,LabelStr> > domainSpec;
+	readPredicateSpec(*child, pred, domainSpec);
       }
       else
 	check_error(false, "Unexpected stuff!");
@@ -504,5 +560,8 @@ namespace PLASMA {
     std::cout << "     relation = " << rel << std::endl;
   }
 
-  GeneratorId HSTSHeuristicsReader::getGeneratorFromName(std::string genName){ return GeneratorId::noId(); }
+  GeneratorId HSTSHeuristicsReader::getGeneratorFromName(std::string genName){ 
+    check_error(false, "Not implemented yet.");
+    return GeneratorId::noId(); 
+  }
 }
