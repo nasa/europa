@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.90 2004-09-29 18:34:16 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.91 2004-09-29 18:37:16 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -145,7 +145,7 @@ ulimit -a
 
 # Perform a cvs command, checking that it succeeds, etc., and send email if something goes wrong.
 function cvsCmd() {
-  if test "$1" != 'co' -a "$1" != 'rtag' -a "$removePlasma" = 'true'
+  if test "$1" != 'co' -a "$1" != 'checkout' -a "$1" != 'rtag' -a "$removePlasma" = 'true'
   then
     mkdir PLASMA/autobuild.bug
     (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments: '"$*") | \
@@ -153,7 +153,7 @@ function cvsCmd() {
     mkdir working/failed
     exit 22
   fi
-  if test "$1" != 'update' -a "$1" != 'up' -a "$removePlasma" = 'false'
+  if test "$1" != '-q' -a "$2" != 'update' -a "$removePlasma" = 'false'
   then
     mkdir PLASMA/autobuild.bug
     (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments: '"$*") | \
