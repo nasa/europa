@@ -27,16 +27,16 @@ LocalDepends tests : run-hsts-module-tests
 #       monkey1-timeline-twomonkeys
 #       monkey2-timeline2 monkey2-timeline22 monkey2-timeline23
         robotTests
-#       roverTests # Failing; see below
-#       roverCTTests # Failing; see below
-#       merTests # Failing; see below
-#       gnats-C3 # Failing; see below
-#       gnats-NoBranchBug # Failing; see below
-#       gnats-P4-C3 # Failing; see below
-#       gnats-P4-C3eq # Failing; see below
+#       roverTests
+#       roverCTTests
+#       merTests
+#       gnats-C3
+#       gnats-NoBranchBug
+#       gnats-P4-C3
+#       gnats-P4-C3eq
         gnats-condasame
         gnats-rover-fixed
-#       gnats-sum # Failing; see below
+#       gnats-sum
 #       dnp-timeline
 #       dnp-DNP2
 #       dnp-allDSS
@@ -142,7 +142,8 @@ RunEUROPATest robotTests : req1.nddl ;
 # Fails Id::isValid() check, I believe as noted in GNATS 2757.
 RunEUROPATest gnats-C3 : C3-init.nddl ;
 
-# Fails; not sure how or why yet, but no error message
+# Fails with seg fault in std::list::insert().
+#   Reported as GNATS 2770.
 RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
 
 # These two take over an hour on Token for some reason and may be infinite loop or similar
