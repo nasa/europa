@@ -1,6 +1,7 @@
 RUN_*.gprof
 RUN_*.output
 gmon.out
+re-module-tests
 re-module-tests_g
 re-module-tests_g_no
 re-module-tests_g_rt
