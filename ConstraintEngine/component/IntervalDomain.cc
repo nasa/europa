@@ -3,50 +3,56 @@
 
 namespace Prototype {
   IntervalDomain::IntervalDomain(double lb, double ub, bool closed, const DomainListenerId& listener)
-    : AbstractDomain(closed, listener), m_ub(ub), m_lb(lb){
+    : AbstractDomain(closed, false, listener), m_ub(ub), m_lb(lb){
     check_error(ub >= lb);
-  }
-
-  bool IntervalDomain::intersect(const IntervalDomain& dom) {
-    check_error(dom.isDynamic() || !dom.isEmpty());
-    check_error(isDynamic() || !isEmpty());
-    return intersect(dom.m_lb, dom.m_ub);
+    check_error(ub <= PLUS_INFINITY);
+    check_error(lb >= MINUS_INFINITY);
   }
 
   IntervalDomain::~IntervalDomain(){}
 
   IntervalDomain::IntervalDomain(const IntervalDomain& org)
-    : AbstractDomain(org.m_closed, DomainListenerId::noId()), m_ub(org.m_ub), m_lb(org.m_lb){}
+    : AbstractDomain(org.m_closed, false, DomainListenerId::noId()), m_ub(org.m_ub), m_lb(org.m_lb){}
 
-
-  IntervalDomain& IntervalDomain::operator=(const IntervalDomain& org){
-    AbstractDomain::operator=(org);
-    relax(org.m_lb, org.m_ub);
-    return (*this);
+  bool IntervalDomain::intersect(const AbstractDomain& dom) {
+    check_error(dom.isInterval());
+    check_error(dom.isDynamic() || !dom.isEmpty());
+    check_error(isDynamic() || !isEmpty());
+    return intersect(dom.getLowerBound(), dom.getUpperBound());
   }
 
-  bool IntervalDomain::operator==(const IntervalDomain& dom) const {
+  void IntervalDomain::relax(const AbstractDomain& dom){
+    check_error(dom.isInterval());
+    relax(dom.getLowerBound(), dom.getUpperBound());
+  }
+
+  bool IntervalDomain::operator==(const AbstractDomain& dom) const {
     return (AbstractDomain::operator==(dom) &&
 	    m_lb == dom.getLowerBound() &&
 	    m_ub == dom.getUpperBound());
   }
 
-  bool IntervalDomain::operator!=(const IntervalDomain& dom) const {
+  bool IntervalDomain::operator!=(const AbstractDomain& dom) const {
     return (! operator==(dom));
   }
 
-  bool IntervalDomain::isSubsetOf(const IntervalDomain& dom) const{
+  bool IntervalDomain::isSubsetOf(const AbstractDomain& dom) const{
     check_error(dom.isDynamic() || !dom.isEmpty());
     check_error(!isDynamic());
+    check_error(dom.isInterval());
     bool result = (dom.getUpperBound() >= m_ub && dom.getLowerBound() <= m_lb);
     return result;
+  }
+
+  bool IntervalDomain::equate(AbstractDomain& dom){
+    return (intersect(dom) && dom.intersect(*this));
   }
 
   double IntervalDomain::getUpperBound() const {return m_ub;}
 
   double IntervalDomain::getLowerBound() const {return m_lb;}
 
-  bool IntervalDomain::getBounds(double& lb, double& ub){
+  bool IntervalDomain::getBounds(double& lb, double& ub) const{
     lb = m_lb;
     ub = m_ub;
     return isInfinite();
@@ -57,7 +63,7 @@ namespace Prototype {
     return m_ub;
   }
  
-  void IntervalDomain::set(const IntervalDomain& dom){
+  void IntervalDomain::set(const AbstractDomain& dom){
     intersect(dom);
     notifyChange(DomainListener::SET);
   }
@@ -73,9 +79,10 @@ namespace Prototype {
     notifyChange(DomainListener::SET_TO_SINGLETON);
   }
 
-  void IntervalDomain::reset(const IntervalDomain& dom){
+  void IntervalDomain::reset(const AbstractDomain& dom){
+    check_error(dom.isInterval());
     if(*this != dom){
-      *this = dom;
+      relax(dom);
       notifyChange(DomainListener::RESET);
     }
   }
@@ -139,8 +146,6 @@ namespace Prototype {
     return (value >= m_lb && value <= m_ub);
   }
 
-  bool IntervalDomain::isEnumerated() const { return false;}
-
   bool IntervalDomain::isSingleton() const {
     check_error(!isDynamic());
     return m_ub == m_lb;
@@ -163,7 +168,15 @@ namespace Prototype {
     if(isEmpty())
       return 0;
     else
-      return (int)(m_ub - m_lb);
+      return (int)(m_ub - m_lb + 1);
+  }
+
+  void IntervalDomain::getValues(std::list<double>& results) const{
+    check_error(isFinite());
+    int lb = (int) check(m_lb);
+    int ub = (int) check(m_ub);
+    for(int i = lb; i <= ub; i++)
+      results.push_back(i);
   }
 
   double IntervalDomain::check(const double& value) const {

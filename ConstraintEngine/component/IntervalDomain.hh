@@ -48,13 +48,13 @@ namespace Prototype{
      * @param ub update this value with the upper bound
      * @return true if !isFinite()
      */
-    bool getBounds(double& lb, double& ub);
+    bool getBounds(double& lb, double& ub) const;
 
     /**
      * @brief Set to the specified domain. May empty the domain if target does not intersect the current domain.
      * @param value the target singleton value.
      */
-    void set(const IntervalDomain& dom);
+    void set(const AbstractDomain& dom);
 
     /**
      * @brief Set to a singleton. May empty the domain if value is not a member of the current domain.
@@ -67,21 +67,21 @@ namespace Prototype{
      * @param value the target singleton value.
      * @see relax
      */
-    void reset(const IntervalDomain& dom);
+    void reset(const AbstractDomain& dom);
 
     /**
      * @brief restricts this domain to the intersection of its values with the given domain.
      * @param dom the domain to intersect with. Must not be empty.
      * @return true if the intersection results in a change to this domain, otherwise false.
      */
-    bool intersect(const IntervalDomain& dom);
+    bool intersect(const AbstractDomain& dom);
 
     /**
      * @brief Convenience version of intersect.
      * @param lb the lower bound of domain to intersect with
      * @param ub the upper bound of domain to intersect with. ub must be >= lb.
      * @return true if the intersection results in a change to this domain, otherwise false.
-     * @see (const IntervalDomain& dom
+     * @see (const AbstractDomain& dom
      */
     bool intersect(double lb, double ub);
 
@@ -95,14 +95,14 @@ namespace Prototype{
      * @brief Relax this domain to that of the given domain
      * @param dom - The domain to relax it to. Must not be empty and must be a superset of this domain.
      */
-    IntervalDomain& operator=(const IntervalDomain& dom);
+    void relax(const AbstractDomain& dom);
 
     /**
      * @brief Convenience method for relaxing a domain.
      * @param lb the lower bound of domain to relax to. lb must be <= m_lb
      * @param ub the upper bound of domain to relax to. ub must be >= m_ub
      * @return true if relaxation causes a change to this domain
-     * @see operator=(const IntervalDomain& dom)
+     * @see operator=(const AbstractDomain& dom)
      */
     bool relax(double lb, double ub);
 
@@ -136,19 +136,34 @@ namespace Prototype{
     /**
      * @brief test for equality.
      */
-    bool operator==(const IntervalDomain& dom) const;
+    bool operator==(const AbstractDomain& dom) const;
 
     /**
      * @brief test for inequality.
      */
-    bool operator!=(const IntervalDomain& dom) const;
+    bool operator!=(const AbstractDomain& dom) const;
 
     /**
      * @brief test if this domain is a subset of dom.
      * @param dom the domain tested against.
      * @param true if all elements of this domain are in dom. Otherwise false.
      */
-    bool isSubsetOf(const IntervalDomain& dom) const;
+    bool isSubsetOf(const AbstractDomain& dom) const;
+
+    /**
+     * @brief Fill the given list with the contents of the set.
+     * 
+     * Should only be called on finite (and thus closed) domains.
+     * @param results The target collection to fill with all values in the set.
+     */
+    void getValues(std::list<double>& results) const;
+
+    /**
+     * @brief mutually constraint both domains to their respective intersections
+     * @param dom The domain to perform mutual intersection on
+     * @return true if the intersection results in a change to either domain, otherwise false. 
+     */
+    bool equate(AbstractDomain& dom);
 
   protected:
     IntervalDomain(double lb, double ub, bool closed, const DomainListenerId& listener);

@@ -35,8 +35,6 @@ private:
   static ConstraintEngineId s_instance;
 };
 
-ConstraintEngineId DefaultEngineAccessor::s_instance;
-
 #define ENGINE DefaultEngineAccessor::instance()
 
 #define runTest(test) { \
@@ -60,16 +58,6 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
     std::cout << #test << " FAILED." << std::endl; \
 }
 
-void initConstraintLibrary(){
-  static bool s_runAlready(false);
-
-  if(!s_runAlready){
-    // Register constraint Factories
-    REGISTER_UNARY(SubsetOfConstraint, "SubsetOf", "Default");
-    REGISTER_NARY(EqualConstraint, "Equal", "Default");
-    REGISTER_NARY(AddEqualConstraint, "AddEqual", "Default");\
-    s_runAlready = true;
-  }
-}
+void initConstraintLibrary();
 
 #endif

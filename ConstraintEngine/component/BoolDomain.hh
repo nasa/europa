@@ -24,12 +24,8 @@ namespace Prototype{
     BoolDomain(bool singletonValue, const DomainListenerId& listener = DomainListenerId::noId());
     BoolDomain(const DomainListenerId& listener = DomainListenerId::noId());
     BoolDomain(const BoolDomain& org);
-    bool isFinite() const;
-    BoolDomain& operator=(const BoolDomain& org);
-    bool operator==(const BoolDomain& dom) const;
-    bool intersect(const BoolDomain& dom);
-    bool isSubsetOf(const BoolDomain& dom) const;
     const DomainType& getType() const;
+    bool isFinite() const;
     bool isFalse() const;
     bool isTrue() const;
 

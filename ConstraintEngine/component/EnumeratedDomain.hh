@@ -31,7 +31,7 @@ namespace Prototype{
      * @see AbstractDomain::isDynamic()
      */
     EnumeratedDomain(const std::list<double>& values, 
-	     bool closed = true,  
+	     bool closed = true,
 	     const DomainListenerId& listener = DomainListenerId::noId());
 
     /**
@@ -57,12 +57,6 @@ namespace Prototype{
     bool isFinite() const;
 
     /**
-     * @brief Check if this is an enumerated domain.
-     * @return true always
-     */
-    bool isEnumerated() const;
-
-    /**
      * @see AbstractDomain::isSingleton()
      */
     bool isSingleton() const;
@@ -82,7 +76,6 @@ namespace Prototype{
      * @see AbstractDomain::close()
      */
     void close();
-
 
     /**
      * @brief Return the number of elements in the set.
@@ -109,7 +102,6 @@ namespace Prototype{
      */
     void remove(double value);
 
-
     /**
      * @brief Attempt to set the domain to the target.
      *
@@ -117,7 +109,7 @@ namespace Prototype{
      * @param dom The target domain.
      * @see DomainListener::EMPTIED, DomainListener::SET, intersect()
      */
-    void set(const EnumeratedDomain& dom);
+    void set(const AbstractDomain& dom);
 
     /**
      * @brief Attempt to set the domain to a singleton.
@@ -132,7 +124,15 @@ namespace Prototype{
     /**
      * @brief Reset the domain to the target value
      */
-    void reset(const EnumeratedDomain& dom);
+    void reset(const AbstractDomain& dom);
+
+    /**
+     * @brief Indicates assigment to the target domain as a relaxation triggered internally.
+     * @param value the target singleton value.
+     * @see relax
+     */
+    void relax(const AbstractDomain& dom);
+
     /**
      * @brief Construct a mutual restriction of the 2 domains to the intersection between them.
      *
@@ -142,7 +142,7 @@ namespace Prototype{
      * @return true if a change to either domain has occurred.
      * @see DomainListener::EMPTIED, DomainListener::SET_TO_SINGLETON, DomainListener::VALUE_REMOVED
      */
-    bool equate(EnumeratedDomain& labelSet);
+    bool equate(AbstractDomain& dom);
 
     /**
      * @brief Return the singleton value. Only callable when it ius in fact a singleton.
@@ -158,6 +158,25 @@ namespace Prototype{
      */
     void getValues(std::list<double>& results) const;
 
+   /**
+     * @brief Access upper bound
+     */
+    double getUpperBound() const;
+
+    /**
+     * @brief Access lower bound
+     */
+    double getLowerBound() const;
+
+
+    /**
+     * @brief Access both bounds in a convenience method, and indicates if the domain is infinite
+     * @param lb update this value with the lower bound
+     * @param ub update this value with the upper bound
+     * @return true if !isFinite()
+     */
+    bool getBounds(double& lb, double& ub) const;
+
     /**
      * @brief Test if the given value is a member of the set.
      *
@@ -168,20 +187,12 @@ namespace Prototype{
     bool isMember(double value) const;
 
     /**
-     * @brief Relax this domain to the target domain.
-     *
-     * @param org the source from which to assign the object. May not be an empty domain. Must be a superset
-     * of this domain.
-     */
-    EnumeratedDomain& operator=(const EnumeratedDomain& dom);
-
-    /**
      * @brief Test that the domains are exactly equal.
      * @param dom The domain to test against
      * @return true if the values in each are the same and they are equal according to the base class.
      * @see AbstractDomain::operator==()
      */
-    bool operator==(const EnumeratedDomain& dom) const;
+    bool operator==(const AbstractDomain& dom) const;
 
     /**
      * @brief Test that the domains are not equal.
@@ -189,14 +200,14 @@ namespace Prototype{
      * @return true if the values in each are not the same.
      * @see AbstractDomain::operator!=()
      */
-    bool operator!=(const EnumeratedDomain& dom) const;
+    bool operator!=(const AbstractDomain& dom) const;
 
     /**
      * @brief Computes the intersection of this object and the given object and assigns that intersection to this object.
      * @param dom the domain to be intersected with
      * @return true if a change occurs, otherwise false.
      */
-    bool intersect(const EnumeratedDomain& dom);
+    bool intersect(const AbstractDomain& dom);
 
 
     /**
@@ -204,10 +215,10 @@ namespace Prototype{
      * @param dom the domain to be compared against
      * @return true if all elements in this domain are present in dom, otherwise false.
      */
-    bool isSubsetOf(const EnumeratedDomain& dom) const;
+    bool isSubsetOf(const AbstractDomain& dom) const;
   protected:
     int getIndex(double value) const;
-    bool sameBaseSet(const EnumeratedDomain& dom) const;
+    bool sameBaseSet(const AbstractDomain& dom) const;
 
     static const int MAX_SIZE = 32; /*!< Since bitset have to have a fixed size, we allocate one large enough to hold all */
 

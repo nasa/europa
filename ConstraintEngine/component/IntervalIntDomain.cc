@@ -11,26 +11,9 @@ namespace Prototype {
   IntervalIntDomain::IntervalIntDomain(const IntervalIntDomain& org)
     :IntervalDomain(org){}
 
-  IntervalIntDomain& IntervalIntDomain::operator=(const IntervalIntDomain& org){
-    IntervalDomain::operator=(org);
-    return(*this);
-  }
-
   bool IntervalIntDomain::isFinite() const {
     check_error(!isDynamic());
     return (m_lb > -MAX_INT && m_ub < MAX_INT);
-  }
-
-  bool IntervalIntDomain::operator==(const IntervalIntDomain& dom) const{
-    return IntervalDomain::operator==(dom);
-  }
-
-  bool IntervalIntDomain::intersect(const IntervalIntDomain& dom){
-    return IntervalDomain::intersect(dom);
-  }
-
-  bool IntervalIntDomain::isSubsetOf(const IntervalIntDomain& dom) const{
-    return IntervalDomain::isSubsetOf(dom);
   }
 
   void IntervalIntDomain::testPrecision(const double& value) const {

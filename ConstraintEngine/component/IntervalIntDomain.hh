@@ -27,10 +27,6 @@ namespace Prototype{
     IntervalIntDomain(const DomainListenerId& listener);
     IntervalIntDomain(const IntervalIntDomain& org);
     bool isFinite() const;
-    IntervalIntDomain& operator=(const IntervalIntDomain& org);
-    bool operator==(const IntervalIntDomain& dom) const;
-    bool intersect(const IntervalIntDomain& dom);
-    bool isSubsetOf(const IntervalIntDomain& dom) const;
     const DomainType& getType() const;
 
   private:

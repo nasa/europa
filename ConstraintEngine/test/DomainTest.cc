@@ -278,7 +278,7 @@ void main()
 {
   //outerLoopForTestEquate();
   //outerLoopForTestIntersection();
-  outerLoopLabelSetEqualConstraint(true);
-  //outerLoopIntervalEqualConstraint(true);
+  //outerLoopLabelSetEqualConstraint(true);
+  outerLoopIntervalEqualConstraint(true);
   cout << "Finished" << endl;
 }

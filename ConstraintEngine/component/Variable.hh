@@ -205,14 +205,14 @@ namespace Prototype
 
   template<class DomainType>
   void Variable<DomainType>::reset(){
-    m_specifiedDomain = m_baseDomain;
+    m_specifiedDomain.relax(m_baseDomain);
     m_isSpecified = false;
     m_derivedDomain.reset(m_baseDomain);
   }
 
   template<class DomainType>
   void Variable<DomainType>::relax(){
-    m_derivedDomain = m_specifiedDomain;
+    m_derivedDomain.relax(m_specifiedDomain);
   }
 
   template<class DomainType>
