@@ -6,6 +6,7 @@ ModuleComponent CBPlanner
 	:
 	ConstrainedVariableDecisionPoint.cc
 	DMLogger.cc
+	DefaultOpenDecisionManager.cc
 	DynamicInfiniteRealCondition.cc
 	HorizonCondition.cc
 	ObjectDecisionPoint.cc
