@@ -30,9 +30,6 @@
 
 #include "RulesEngine.hh"
 #include "Rule.hh"
-#include "RuleInstance.hh"
-#include "ObjectFilter.hh"
-#include "TestRule.hh"
 
 #include <iostream>
 #include <string>
