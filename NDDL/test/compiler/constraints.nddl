@@ -1,5 +1,4 @@
 enum ENUM {foo, bar};
-enum ANOTHER {"bing", "baz"};
 
 // Goal is to test generation of constraint code
 class Sample {
