@@ -164,16 +164,8 @@ RunEUROPATest monkey-timeline : timeline0.nddl ;
 RunEUROPATest monkey-timeline-hacked : timeline-hacked.nddl ;
 RunEUROPATest monkey-timeline-hacked2 : timeline-hacked2.nddl ;
 RunEUROPATest monkey-timeline-hacked3 : timeline-hacked3.nddl ;
-
-# Fails: ConstraintEngine/component/IntervalIntDomain.cc:118: Error: isFinite() is false
-#   Reported as GNATS 2843.
 RunEUROPATest monkey-timeline-newHeur : timeline0.nddl : monkeyNewHeur.xml ;
-
-# Fails: HSTS/core/HSTSHeuristics.cc:197: Error: !enumeration.empty() is false
-#   Reported as GNATS 2844.
 RunEUROPATest monkey-timeline-extendedHeur : timeline0.nddl : monkeyExtendedHeur.xml ;
-
-# These two work.
 RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
 RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
 
@@ -202,7 +194,6 @@ RunEUROPATest roverTest1 : rover-test.nddl ;
 RunEUROPATest roverTest3 : rover3-test.nddl ;
 RunEUROPATest roverTest4 : rover4-test.nddl ;
 
-# Working
 RunEUROPATest roverTest2 : multrover-test.nddl ;
 
 # These use constraint tokens, which Europa2 (PLASMA) does not support.
@@ -211,8 +202,6 @@ RunEUROPATest roverTest2 : multrover-test.nddl ;
 
 # Working
 RunEUROPATest merTest1 : R1-files-p1.nddl ;
-
-# Working
 RunEUROPATest merTest2 : R1-files-p2.nddl ;
 
 # Failing with no error message
