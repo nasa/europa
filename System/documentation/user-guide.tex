@@ -208,9 +208,9 @@ extends
 before
 after
 contains
-contained_by
+contained\_by
 meets
-met_by
+met\_by
 concurrent
 precedes
 object
@@ -230,6 +230,111 @@ close
 
 \subsection{Appendix B: Constraint Library Reference}
 \subsection{Appendix C: Test Language Specification and Use}
+\subsection{Appendix D: Coding Guidelines}
+
+\begin{itemize}
+\item[] General Practices
+ \begin{itemize}
+  \item	Ensure you declare variables and methods in their narrowest scope.
+  \item	If you declare a static variable inside a non-static method, double check that the method should not be static and also double check that the variable should not be a member of the class.
+  \item	We discourage writing code in header files unless needed for templates or proven performance.
+  \item	Use STL classes and methods unless what you need is not provided.  Same goes for any other code.  Reuse as much as possible. 
+ \end{itemize}
+
+\item[] Pre-processing
+ \begin{itemize}
+  \item	Include system headers by using the angle bracket style. (\#include <stdio>)
+  \item	Include user files by using the double quote style. (\#include "File.h")
+  \item	Do not define your own pre-processor macros to control level of or presence of debugging output or error checks.
+ \end{itemize}
+
+\item[] Namespaces
+ \begin{itemize}
+  \item	Use the std:: prefix, or 'using namespace std;' when using STL.
+  \item	Put Europa code in the Europa namespace.
+ \end{itemize}
+
+\item[] Global Constants
+ \begin{itemize}
+  \item	Use DEFINE\_GLOBAL\_CONSTANT and DECLARE\_GLOBAL\_CONSTANT for globals.
+ \end{itemize}
+
+\item[] Static Class Members
+ \begin{itemize}
+  \item	When handling static data, you must provide an automatic purge mechanism or provide an explicit purge method.
+ \end{itemize}
+
+\item[] Module Initialization and Termination
+ \begin{itemize}
+  \item	We should standardize method calls to initialization and termination methods.  Such as nddl initialization which cascades onto constraint engine initialization.
+ \end{itemize}
+
+\item[] Iterator Use
+ \begin{itemize}	 
+  \item	 Use const iterators unless you have to use a non-const iterator. 
+  \item	 When using const iterators, use ++iterator rather than iterator++.
+ \end{itemize}
+
+\item[] Pointer References
+ \begin{itemize}	
+  \item	Direct pointer references are discouraged, use 
+  \item	When creating a reference, create an m\_id member that holds the id that gets constructed in the constructor initializer, in the destructor the m\_id should be removed.
+  \item	When deleting references to ids call delete on the cast operator (e.g. delete (ConstrainedVariable *) ref).
+ \end{itemize}
+
+\item[] Magic Numbers
+ \begin{itemize}      
+  \item	Define an enumerated type to handle number references instead of using magic numbers.
+ \end{itemize}
+
+\item[] Classes
+ \begin{itemize}
+  \item	Capitalize names of classes.  When composing names for classes capitalize the first letter of each word.
+  \item	Declare a virtual destructor.
+ \end{itemize}
+
+\item[] Pure Virtual Classes
+ \begin{itemize}
+  \item	Declare a protected constructor.
+  \item	Declare all functions pure virtual.
+ \end{itemize}
+
+\item[] Methods
+ \begin{itemize}
+  \item	Declare a method const where possible.
+  \item	Do not return bare pointers or non-const references.
+  \item	If the caller can own a data structure that is to be populated in the callee, create the data structure in the caller and then pass it by reference as an argument.
+  \item	Avoid copying of data structures where possible.
+  \item	Declare non-primitive arguments as const references.
+  \item	Return non-primitive values as const references.
+ \end{itemize}
+
+\item[] Error Checks
+ \begin{itemize}
+  \item	Use checkError to express pre-conditions.
+  \item	Use checkError to express invariants.
+  \item	Use checkError to express post-conditions.
+  \item	Avoid using non-const functions in checkError tests.
+  \item	Do not use assert.
+  \item	Do not use Id::isValid outside of checkError.
+  \item	Do not write "if (Test) checkError(...Check...);".  Write "checkError(!Test || ...Check...)".
+ \end{itemize}
+
+\item[] Debugging Output
+ \begin{itemize}
+  \item	Use the Europa debugging output management system.
+  \item	Do not put debugging output into stdout or stderr.
+ \end{itemize}
+
+\item[] Documentation
+ \begin{itemize}
+  \item	Use doxygen style comments with the javadoc style keywords. (@brief, etc.)
+  \item	Enforce emacs macros
+  \item	Class descriptions, file descriptions, parameters, method, return values, errors  
+  \item	Documentation is required for header files, recommended for implementation files
+ \end{itemize}
+\end{itemize}
+
 \end{document}
 
 
