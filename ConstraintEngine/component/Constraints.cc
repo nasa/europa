@@ -1725,6 +1725,7 @@ namespace PLASMA {
       REGISTER_CONSTRAINT(LessThanConstraint, "lt", "Default");
       REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
       REGISTER_CONSTRAINT(MemberImplyConstraint, "memberImply", "Default");
+      REGISTER_CONSTRAINT(MultEqualConstraint, "mulEq", "Default");
       REGISTER_CONSTRAINT(NegateConstraint, "neg", "Default");
       REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
       REGISTER_CONSTRAINT(OrConstraint, "for", "Default"); // flexible or

@@ -1,6 +1,12 @@
 #include "../../core/Plasma.nddl"
 
-class Battery extends Resource {}
+class Battery extends Resource {
+ predicate change{
+  float conversionRate;
+  float actualQuantity;
+  mulEq(quantity, conversionRate, actualQuantity);
+ }
+}
 
 enum Location {Hill, Rock, Lander}
 
@@ -41,7 +47,8 @@ class World{
 
 World::initialState{
  any(Battery.change tx);
- eq(tx.quantity, 4);
+ eq(tx.quantity, 4.0);
+ eq(tx.conversionRate, 0.7);
 }
 
 World world = new World();
