@@ -33,6 +33,18 @@ class World {
 }
 
 World::initialState{
+ // Enumerate all supported temporal relations
+ contains(Rover.At s0);
+ contained_by(Rover.At s1);
+ meets(Rover.At s2);
+ met_by(Rover.At s3);
+ before(Rover.At s4);
+ after(Rover.At s5);
+ starts(Rover.At s6);
+ ends(Rover.At s7);
+ any(Rover.At s8);
+ 
+ // Subgoal and bind
  contains(Rover.At a);
  eq(a._location, Lander);
 
@@ -52,4 +64,5 @@ World::initialState{
 
  //test use of starts
  c starts (Rover.At d);
+
 }
