@@ -1,12 +1,22 @@
 enum Locations {Hill, Rock, Lander};
 
+class Foo {
+ predicate Bar{}
+}
+
 class Rover{
+ Foo foo;
  predicate At{
   Locations _location;
+  Foo _foo;
  }
 
  predicate Going{
   Locations _from, _to;
+ }
+
+ Rover(){
+  foo = new Foo();
  }
 }
 
@@ -16,6 +26,10 @@ Rover::At{
 
  meets(Going from);
  eq(from._to, _location);
+
+ // Test that we can reference other objects. Has semantics of posting
+ // an equality constraint on the object variable
+ meets(_foo.Bar bar);
 }
 
 Rover::Going{
