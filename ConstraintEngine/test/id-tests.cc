@@ -150,7 +150,7 @@ bool IdTests::testCastingSupport()
   assert(cbId.isValid());
   assert(cbId == bId);
   bId.release();
-  assert(cbId.isInvalid());
+  non_fast_only_assert(cbId.isInvalid());
   return true;
 }
 
