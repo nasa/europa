@@ -228,7 +228,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>Monkey_Class___Banana_SV.HAVE_BANANA</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>any</Relation>
+  <PredicateSpec/>
+   </Master>
   <DecisionPreference>
    <State>merge</State>
    <State>activate</State>
@@ -241,7 +244,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>Monkey_Class___Banana_SV.GRABBING_BANANA</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>any</Relation>
+  <PredicateSpec/>
+   </Master>
   <DecisionPreference>
    <State>merge</State>
    <State>activate</State>
