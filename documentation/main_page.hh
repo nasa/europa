@@ -73,7 +73,10 @@
  * @li @ref System "System": includes a standard assembly to illustrate a
  * particular configuration of the system, Aver the test language,
  * system-level regression tests, and other system-level support files. You
- * can also find a user guide in the documentation subdirectory.
+ * can also find a user guide in the documentation subdirectory.  To
+ * generate the documentation type "jam user-guide" in the
+ * PLASMA/System/documentation directory.  This should generate a
+ * user-guide.pdf file that you can view with Acrobat Reader.
  *
  * @section motive Motivation
  * There are a number of perceived problems with the EUROPA which motivated
