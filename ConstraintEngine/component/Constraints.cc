@@ -30,8 +30,11 @@ namespace Prototype
        domz.isDynamic())
       return;
  
-
     check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
+
+    /* Nothing to be done if all domains are infinite. */
+    if(domx.isInfinite() &&domy.isInfinite() && domz.isInfinite())
+      return;
 
     double xMin;
     double xMax;

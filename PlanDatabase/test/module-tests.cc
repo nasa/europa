@@ -102,6 +102,10 @@ private:
     assert(id3->getName().toString() == "id1:id3");
     delete (Object*) id1;
     assert(db.getObjects().size() == 3);
+
+    // Now allocate dynamically and allow the plan database to clean it up when it deallocates
+    ObjectId id4 = ((new Object(db.getId(), LabelStr("AllObjects"), LabelStr("id4")))->getId());
+    ObjectId id5 = ((new Object(id4, LabelStr("AllObjects"), LabelStr("id4")))->getId());
     return true;
   }
 

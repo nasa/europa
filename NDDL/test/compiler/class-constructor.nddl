@@ -1,16 +1,46 @@
 // Declares a class, a consructor with arguments, and member variables initialized
-// via constructor as well as in the class declaration.
+// via constructor as well as in the class declaration. Illustrates multiple constructors
+// for a wide variety of argument types.
+
+enum Locations {Hill, Rock, Lander};
+
 class Foo {
  int m_0;
- // NOT SUPPORTED int m_1 = 10;
  int m_1;
  bool m_2;
- // NOT SUPPORTED bool m_3 = true;
  bool m_3;
+ string m_4;
+ Locations m_5;
+ float m_6;
+ World m_7;
 
- Foo(int a, bool b, bool c){
+ Foo(World w){
+  m_0 = 100;
+  m_1 = 200;
+  m_2 = false;
+  m_4 = "This is a very long string";
+  m_5 = Hill;
+  m_7 = w;
+ }
+
+ Foo(World w, int a, bool b, string c, Locations loc){
   m_0 = a;
   m_2 = b;
-  m_3 = c;
+  m_4 = c;
+  m_5 = loc;
+  m_6 = 198.65;
+  m_7 = w;
+ }
+}
+
+class World {
+ Foo m_foo1;
+ Foo m_foo2;
+ Foo m_foo3;
+
+ World(){
+  m_foo1 = new Foo(this, 1, true, "This is also a long string", Lander);
+  m_foo2 = new Foo(this);
+  m_foo3 = m_foo2;
  }
 }

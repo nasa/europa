@@ -1,4 +1,5 @@
 #include "Nddl.hh"
+#include "NddlUtils.hh"
 #include "PlanDatabase.hh"
 #include "RulesEngine.hh"
 #include "Schema.hh"
@@ -15,12 +16,32 @@
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/CeLogger.hh"
 
-#include "Macros.hh"
-
 #include <list>
 #include <vector>
 #include <iostream>
 #include <cassert>
+
+namespace NDDL {
+
+  NddlToken::NddlToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName)
+    :Prototype::IntervalToken(planDatabase, 
+			      predicateName,
+			      true,
+			      IntervalIntDomain(),
+			      IntervalIntDomain(),
+			      IntervalIntDomain(1, PLUS_INFINITY),
+			      Prototype::Token::noObject(),
+			      false){}
+
+  NddlToken::NddlToken(const TokenId& master, const LabelStr& predicateName)
+    :Prototype::IntervalToken(master, 
+			      predicateName,
+			      IntervalIntDomain(),
+			      IntervalIntDomain(),
+			      IntervalIntDomain(1, PLUS_INFINITY),
+			      Prototype::Token::noObject(),
+			      false){}
+}
 
 void main(){
   // Initialize constraints
