@@ -9,7 +9,7 @@
 #include "IntervalDomain.hh"
 #include "EnumeratedDomain.hh"
 #include "Domain.hh"
-#include "../TinyXml/tinyxml.h"
+#include "tinyxml.h"
 #include "ConstraintEngine.hh"
 #include <algorithm>
 

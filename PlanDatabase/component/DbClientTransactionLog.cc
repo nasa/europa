@@ -1,7 +1,7 @@
 #include "DbClientTransactionLog.hh"
 #include "Object.hh"
 #include "Token.hh"
-#include "../TinyXml/tinyxml.h"
+#include "tinyxml.h"
 
 namespace Prototype {
 
