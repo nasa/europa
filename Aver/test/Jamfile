@@ -13,6 +13,10 @@ if ! $(PLASMA_READY) {
   LocalDepends aver-module-tests : $(modxml) ;
   LocalDepends run-aver-module-tests : $(modxml) ;
 
+  ModuleMain aver-module-tests : module-tests.cc : Aver ;
+  RunModuleMain run-aver-module-tests : aver-module-tests ;
+  LocalDepends tests : run-aver-module-tests ;
+
   ModuleObjects AverTestAssembly.cc : Aver ;
 
   if $(LIBRARIES) = SHARED {

@@ -78,6 +78,7 @@ namespace EUROPA {
   class AverHelperTest {
   public:
     static bool test() {
+      runTest(testDomainContainer);
       runTest(testEvaluateDomain);
       runTest(testBoolean);
       runTest(testBuildPath);
@@ -101,6 +102,26 @@ namespace EUROPA {
       return true;
     }
   private:
+    static bool testDomainContainer() {
+      IntervalDomain* int1 = new IntervalDomain(0., 1.);
+      IntervalDomain* int2 = new IntervalDomain(0., 1.);
+
+      DomainContainer* d1 = new DomainContainer(int1, false, true);
+      DomainContainer* d2 = new DomainContainer(int2, true, false);
+      
+      assert(d1->earlyDeath());
+      assert(!d2->earlyDeath());
+      
+      assert(*(*d1) == *int1);
+      assert(*(*d2) == *int2);
+      
+      delete d1;
+      delete d2;
+
+      delete int1;
+      return true;
+    }
+
     static bool testEvaluateDomain() {
       std::string strings[4] = {"foo", "bar", "baz", "quux"};
       std::list<double> strs;
@@ -118,9 +139,9 @@ namespace EUROPA {
         stringEnumXml.InsertEndChild(*val);
       }
       
-      AbstractDomain* dom = AverHelper::evaluateDomain(&stringEnumXml);
+      DomainContainer* dom = AverHelper::evaluateDomain(&stringEnumXml);
 
-      assert(stringEnumDom == (*dom));
+      assert(stringEnumDom == *(*dom));
       delete dom;
 
       std::list<double> ints;
@@ -142,7 +163,7 @@ namespace EUROPA {
       
       dom = AverHelper::evaluateDomain(&numEnumXml);
       
-      assert(numEnumDom == (*dom));
+      assert(numEnumDom == *(*dom));
       delete dom;
       
       IntervalDomain intervalDom(1., 2.);
@@ -166,7 +187,7 @@ namespace EUROPA {
       intervalXml.InsertEndChild(ub);
      
       dom = AverHelper::evaluateDomain(&intervalXml);
-      assert(intervalDom == (*dom));
+      assert(intervalDom == *(*dom));
       delete dom;
       
       return true;
@@ -246,14 +267,13 @@ namespace EUROPA {
         tokenIds.push_back((double)tok);
       }
       
-      AbstractDomain* tokDom = AverHelper::tokenSetToDomain(tokens);
+      DomainContainer* tokDom = AverHelper::tokenSetToDomain(tokens);
       std::list<double> resultIds;
-      tokDom->getValues(resultIds);
+      (*tokDom)->getValues(resultIds);
       
       assert(resultIds == tokenIds);
 
-      EnumeratedDomain tempDom(tokenIds, true, 
-                               EnumeratedDomain::getDefaultTypeName().c_str());
+      DomainContainer tempDom(new EnumeratedDomain(tokenIds, true, EnumeratedDomain::getDefaultTypeName().c_str()), true, true);
       TokenSet tokSet = AverHelper::domainToTokenSet(&tempDom);
       
       assert(tokSet == tokens);
@@ -261,28 +281,28 @@ namespace EUROPA {
     }
 
     static bool testBoolOp() {
-      EnumeratedDomain d1(1., true, EnumeratedDomain::getDefaultTypeName().c_str());
-      EnumeratedDomain d2(2., true, EnumeratedDomain::getDefaultTypeName().c_str());
-      EnumeratedDomain d3(2., true, EnumeratedDomain::getDefaultTypeName().c_str());
+      DomainContainer d1(new EnumeratedDomain(1., true, EnumeratedDomain::getDefaultTypeName().c_str()), true, false);
+      DomainContainer d2(new EnumeratedDomain(2., true, EnumeratedDomain::getDefaultTypeName().c_str()), true, false);
+      DomainContainer d3(new EnumeratedDomain(2., true, EnumeratedDomain::getDefaultTypeName().c_str()), true, false);
 
-      EnumeratedDomain d4(true, EnumeratedDomain::getDefaultTypeName().c_str());
-      d4.insert(1.);
-      d4.insert(3.);
-      d4.insert(4.);
+      DomainContainer d4(new EnumeratedDomain(true, EnumeratedDomain::getDefaultTypeName().c_str()), true, false);
+      (*d4).insert(1.);
+      (*d4).insert(3.);
+      (*d4).insert(4.);
 
-      EnumeratedDomain d5(true, EnumeratedDomain::getDefaultTypeName().c_str());
-      d5.insert(1.);
-      d5.insert(3.);
+      DomainContainer d5(new EnumeratedDomain(true, EnumeratedDomain::getDefaultTypeName().c_str()), true, false);
+      (*d5).insert(1.);
+      (*d5).insert(3.);
 
-      EnumeratedDomain d6(true, EnumeratedDomain::getDefaultTypeName().c_str());
-      d6.insert(9.);
-      d6.insert(10.);
+      DomainContainer d6(new EnumeratedDomain(true, EnumeratedDomain::getDefaultTypeName().c_str()), true, false);
+      (*d6).insert(9.);
+      (*d6).insert(10.);
 
-      EnumeratedDomain d7(true, EnumeratedDomain::getDefaultTypeName().c_str());
-      d7.insert(3.);
-      d7.insert(4.);
-      d7.insert(9.);
-      d7.insert(10.);
+      DomainContainer d7(new EnumeratedDomain(true, EnumeratedDomain::getDefaultTypeName().c_str()), true, false);
+      (*d7).insert(3.);
+      (*d7).insert(4.);
+      (*d7).insert(9.);
+      (*d7).insert(10.);
 
       binopPush("=", &d1, &d2);
       assert(!AverHelper::boolOp());
@@ -334,15 +354,15 @@ namespace EUROPA {
       std::list<double> items;
       for(int i = 0; i < 10; i++)
         items.push_back(i);
-      EnumeratedDomain dom(items, true, EnumeratedDomain::getDefaultTypeName().c_str());
+      DomainContainer dom(new EnumeratedDomain(items, true, EnumeratedDomain::getDefaultTypeName().c_str()), true, false);
       
       AverHelper::s_domStack.push(&dom);
       AverHelper::count();
       
-      AbstractDomain *count = AverHelper::s_domStack.top();
+      DomainContainer *count = AverHelper::s_domStack.top();
       AverHelper::s_domStack.pop();
       std::list<double> retnum;
-      count->getValues(retnum);
+      (*count)->getValues(retnum);
       assert(*(retnum.begin()) == items.size());
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
@@ -355,19 +375,19 @@ namespace EUROPA {
       std::list<double> items;
       for(int i = 1; i < 11; i++)
         items.push_back(i);
-      EnumeratedDomain dom(items, true, EnumeratedDomain::getDefaultTypeName().c_str());
+      DomainContainer dom(new EnumeratedDomain(items, true, EnumeratedDomain::getDefaultTypeName().c_str()), true, false);
      
-      EnumeratedDomain index(3, true, EnumeratedDomain::getDefaultTypeName().c_str());
+      DomainContainer index(new EnumeratedDomain(3, true, EnumeratedDomain::getDefaultTypeName().c_str()), true, false);
       
       AverHelper::s_domStack.push(&dom);
       AverHelper::s_domStack.push(&index);
       AverHelper::entity();
 
-      AbstractDomain* entityDom = AverHelper::s_domStack.top();
+      DomainContainer* entityDom = AverHelper::s_domStack.top();
       AverHelper::s_domStack.pop();
       
       std::list<double> entity;
-      entityDom->getValues(entity);
+      (*entityDom)->getValues(entity);
 
       assert(*(entity.begin()) == 4);
       assert(AverHelper::s_domStack.empty());
@@ -391,14 +411,14 @@ namespace EUROPA {
       
       AverHelper::queryTokens();
       
-      AbstractDomain* tokDom = AverHelper::s_domStack.top();
+      DomainContainer* tokDom = AverHelper::s_domStack.top();
       AverHelper::s_domStack.pop();
       
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
 
       std::list<double> ids;
-      tokDom->getValues(ids);
+      (*tokDom)->getValues(ids);
 
       assert(tokenIds == ids);
       
@@ -420,14 +440,14 @@ namespace EUROPA {
 
       AverHelper::queryObjects();
 
-      AbstractDomain* objDom = AverHelper::s_domStack.top();
+      DomainContainer* objDom = AverHelper::s_domStack.top();
       AverHelper::s_domStack.pop();
       
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
 
       std::list<double> objs;
-      objDom->getValues(objs);
+      (*objDom)->getValues(objs);
       
       objs.sort();
       objIds.sort();
@@ -462,8 +482,8 @@ namespace EUROPA {
       Schema::instance()->addPredicate(LabelStr("Foo.bar"));  
       Schema::instance()->addPredicate(LabelStr("Foo.baz"));
 
-      SymbolDomain d1((double) LabelStr("Foo.bar"));
-      SymbolDomain d2((double) LabelStr("Foo.baz"));
+      DomainContainer d1(new SymbolDomain((double) LabelStr("Foo.bar")), true, false);
+      DomainContainer d2(new SymbolDomain((double) LabelStr("Foo.baz")), true, false);
 
       std::list<double> t1;
       t1.push_back((double)(new IntervalToken(assembly.m_db, LabelStr("Foo.bar"), 
@@ -477,13 +497,13 @@ namespace EUROPA {
       AverHelper::s_domStack.push(&d1);
       AverHelper::trimTokensByPredicate();
 
-      AbstractDomain *tokens1 = AverHelper::s_domStack.top();
+      DomainContainer *tokens1 = AverHelper::s_domStack.top();
       AverHelper::s_domStack.pop();
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
       
       std::list<double> ret;
-      tokens1->getValues(ret);
+      (*tokens1)->getValues(ret);
       
       assert(ret == t1);
       delete tokens1;
@@ -499,7 +519,7 @@ namespace EUROPA {
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
       
-      tokens1->getValues(ret);
+      (*tokens1)->getValues(ret);
       
       assert(ret == t2);
       delete tokens1;
@@ -516,8 +536,8 @@ namespace EUROPA {
       Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addObjectType(LabelStr("Bar"));
 
-      SymbolDomain d1((double) LabelStr("foo"));
-      SymbolDomain d2((double) LabelStr("bar"));
+      DomainContainer d1(new SymbolDomain((double) LabelStr("foo")), true, false);
+      DomainContainer d2(new SymbolDomain((double) LabelStr("bar")), true, false);
 
       std::list<double> o1;
       o1.push_back((double)(new Object(assembly.m_db, LabelStr("Foo"), 
@@ -531,13 +551,13 @@ namespace EUROPA {
       AverHelper::s_domStack.push(&d1);
       AverHelper::trimObjectsByName();
       
-      AbstractDomain* objs = AverHelper::s_domStack.top();
+      DomainContainer* objs = AverHelper::s_domStack.top();
       AverHelper::s_domStack.pop();
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
 
       std::list<double> ret;
-      objs->getValues(ret);
+      (*objs)->getValues(ret);
 
       assert(ret == o1);
       delete objs;
@@ -553,7 +573,7 @@ namespace EUROPA {
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
 
-      objs->getValues(ret);
+      (*objs)->getValues(ret);
       
       assert(ret == o2);
       delete objs;
@@ -578,14 +598,13 @@ namespace EUROPA {
       AverHelper::queryTokens();
       
       std::list<double> temp;
-      AbstractDomain* tempD = AverHelper::s_domStack.top();
-      tempD->getValues(temp);
+      DomainContainer* tempD = AverHelper::s_domStack.top();
+      (*tempD)->getValues(temp);
       assert(temp.size() > 1);
       temp.clear();
 
       AverHelper::s_opStack.push("=");
-      AverHelper::s_domStack.
-        push(new EnumeratedDomain(33., true, EnumeratedDomain::getDefaultTypeName().c_str()));
+      AverHelper::s_domStack.push(new DomainContainer(new EnumeratedDomain(33., true, EnumeratedDomain::getDefaultTypeName().c_str()), true, true));
 
       AverHelper::trimTokensByStart();
       
@@ -594,7 +613,7 @@ namespace EUROPA {
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
       
-      tempD->getValues(temp);
+      (*tempD)->getValues(temp);
       assert(temp.size() == 1);
       assert((double)tok == *(temp.begin())); 
 
@@ -617,14 +636,14 @@ namespace EUROPA {
       AverHelper::queryTokens();
       
       std::list<double> temp;
-      AbstractDomain* tempD = AverHelper::s_domStack.top();
-      tempD->getValues(temp);
+      DomainContainer* tempD = AverHelper::s_domStack.top();
+      (*tempD)->getValues(temp);
       assert(temp.size() > 1);
       temp.clear();
 
       AverHelper::s_opStack.push("=");
       AverHelper::s_domStack.
-        push(new EnumeratedDomain(33., true, EnumeratedDomain::getDefaultTypeName().c_str()));
+        push(new DomainContainer(new EnumeratedDomain(33., true, EnumeratedDomain::getDefaultTypeName().c_str()), true, true));
 
       AverHelper::trimTokensByEnd();
       
@@ -633,7 +652,7 @@ namespace EUROPA {
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
       
-      tempD->getValues(temp);
+      (*tempD)->getValues(temp);
       assert(temp.size() == 1);
       assert((double)tok == *(temp.begin())); 
 
@@ -661,14 +680,14 @@ namespace EUROPA {
       AverHelper::queryTokens();
       
       std::list<double> temp;
-      AbstractDomain* tempD = AverHelper::s_domStack.top();
-      tempD->getValues(temp);
+      DomainContainer* tempD = AverHelper::s_domStack.top();
+      (*tempD)->getValues(temp);
       assert(temp.size() > 1);
       temp.clear();
       
       AverHelper::s_opStack.push("=");
-      AverHelper::s_domStack.push(new EnumeratedDomain((double)Token::REJECTED, 
-                                                       true, "States"));
+      AverHelper::s_domStack.push(new DomainContainer(new EnumeratedDomain((double)Token::REJECTED, 
+                                                       false, "TokenStates"), true, true));
 
       AverHelper::trimTokensByStatus();
       
@@ -677,7 +696,7 @@ namespace EUROPA {
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
       
-      tempD->getValues(temp);
+      (*tempD)->getValues(temp);
       assert(temp.size() == 1);
       assert((double)tok == *(temp.begin())); 
 
@@ -719,17 +738,17 @@ namespace EUROPA {
       AverHelper::queryTokens();
       
       std::list<double> temp;
-      AbstractDomain* tempD = AverHelper::s_domStack.top();
-      tempD->getValues(temp);
+      DomainContainer* tempD = AverHelper::s_domStack.top();
+      (*tempD)->getValues(temp);
       assert(temp.size() > 1);
       temp.clear();
       
       AverHelper::s_opStack.push("="); //domain op
       //domain
       AverHelper::s_domStack.
-        push(new EnumeratedDomain(33., true, EnumeratedDomain::getDefaultTypeName().c_str()));
+        push(new DomainContainer(new EnumeratedDomain(33., true, EnumeratedDomain::getDefaultTypeName().c_str()), true, true));
       AverHelper::s_opStack.push("="); //name op
-      AverHelper::s_domStack.push(new SymbolDomain((double)LabelStr("baz"))); //name dom
+      AverHelper::s_domStack.push(new DomainContainer(new SymbolDomain((double)LabelStr("baz")), true, true)); //name dom
 
       AverHelper::trimTokensByVariable();
       
@@ -738,7 +757,7 @@ namespace EUROPA {
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
       
-      tempD->getValues(temp);
+      (*tempD)->getValues(temp);
       assert(temp.size() == 1);
       assert((double)tok == *(temp.begin())); 
 
@@ -774,15 +793,15 @@ namespace EUROPA {
       AverHelper::queryObjects();
       
       std::list<double> temp;
-      AbstractDomain* tempD = AverHelper::s_domStack.top();
-      tempD->getValues(temp);
+      DomainContainer* tempD = AverHelper::s_domStack.top();
+      (*tempD)->getValues(temp);
       assert(temp.size() > 1);
       temp.clear();
       
       AverHelper::s_opStack.push("="); //domain op
-      AverHelper::s_domStack.push(new IntervalDomain(33., 33.)); //domain
+      AverHelper::s_domStack.push(new DomainContainer(new IntervalDomain(33., 33.), true, true)); //domain
       AverHelper::s_opStack.push("="); //name op
-      AverHelper::s_domStack.push(new SymbolDomain((double)LabelStr("baz"))); //name dom
+      AverHelper::s_domStack.push(new DomainContainer(new SymbolDomain((double)LabelStr("baz")), true, true)); //name dom
 
       AverHelper::trimObjectsByVariable();
       
@@ -791,7 +810,7 @@ namespace EUROPA {
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
       
-      tempD->getValues(temp);
+      (*tempD)->getValues(temp);
       assert(temp.size() == 1);
       assert((double)obj == *(temp.begin())); 
 
@@ -822,15 +841,15 @@ namespace EUROPA {
       AverHelper::queryTokens(); //for the moment, 'property' requires that there be only
                                  //one thing to get the property of
       
-      AverHelper::s_domStack.push(new SymbolDomain((double)LabelStr("baz")));
+      AverHelper::s_domStack.push(new DomainContainer(new SymbolDomain((double)LabelStr("baz")), true, true));
       AverHelper::property();
       
-      AbstractDomain* dom = AverHelper::s_domStack.top();
+      DomainContainer* dom = AverHelper::s_domStack.top();
       AverHelper::s_domStack.pop();
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
 
-      assert(*dom == EnumeratedDomain(33., true, 
+      assert(*(*dom) == EnumeratedDomain(33., true, 
                                       EnumeratedDomain::getDefaultTypeName().c_str()));
 
       AverHelper::s_db = PlanDatabaseId::noId();
@@ -854,15 +873,15 @@ namespace EUROPA {
 
       AverHelper::queryObjects(); //for the moment, 'property' requires that there be only
                                   //one thing to get the property of
-      AverHelper::s_domStack.push(new SymbolDomain((double)LabelStr("baz")));
+      AverHelper::s_domStack.push(new DomainContainer(new SymbolDomain((double)LabelStr("baz")), true, true));
       AverHelper::property();
 
-      AbstractDomain* dom = AverHelper::s_domStack.top();
+      DomainContainer* dom = AverHelper::s_domStack.top();
       AverHelper::s_domStack.pop();
       assert(AverHelper::s_domStack.empty());
       assert(AverHelper::s_opStack.empty());
       
-      assert(*dom == IntervalDomain(33., 33.));
+      assert(*(*dom) == IntervalDomain(33., 33.));
 
       AverHelper::s_db = PlanDatabaseId::noId();
       return true;
@@ -872,15 +891,10 @@ namespace EUROPA {
 
 }
 
-bool runAverTest() {
-  return true;
-}
-
 int main(int argc, const char** argv) {
   Schema::instance();
   runTestSuite(EUROPA::FooTest::test);
   runTestSuite(EUROPA::AverHelperTest::test);
-  runTest(runAverTest);
   std::cout << "Finished" << std::endl;
   return 0;
 }
