@@ -35,7 +35,7 @@
 #include <typeinfo>
 
 #ifndef EUROPA_FAST
-#define non_fast_only_assert(T) assert(T)
+#define non_fast_only_assert(T) assertTrue(T)
 #else
 #define non_fast_only_assert(T) //NO-OP
 #endif
@@ -102,7 +102,10 @@ private:
       check_error(var == 1, Error("check_error(var == 1)"));
       checkError(var ==1, "Can add " << 1.09 << " and " << 2.81 << " to get " << 1.09 +2.81);
       condWarning(var == 1, "var is not 1");
-      warn("everything worked in first try() block of main()");
+      std::cout << std::endl;
+      Error::setStream(std::cout);
+      warn("Warning messages working");
+      Error::setStream(std::cerr);
     } 
     catch (Error e) {
       __x__(e);
@@ -212,7 +215,7 @@ private:
     
     debugMsg("main1", "done opening files");
     condDebugMsg(std::cout.good(), "main1a", "std::cout is good");
-    debugStmt("main2a", int s = 0; for (int i = 0; i < 5; i++) { s += i; } std::cerr << "Sum is " << s << '\n'; );
+    debugStmt("main2a", int s = 0; for (int i = 0; i < 5; i++) { s += i; } debugOutput << "Sum is " << s << '\n'; );
     debugMsg("main2", "primary testing done");
     Error::doThrowExceptions();
     Error::doDisplayErrors();
@@ -289,11 +292,11 @@ public:
 };
 
 void overloadFunc(const Id<Bing>& arg) {
-  assert(true);
+  assertTrue(true);
 }
 
 void overloadFunc(const Id<Foo>& arg) {
-  assert(true);
+  assertTrue(true);
 }
 
 class IdTests {
@@ -333,22 +336,22 @@ bool IdTests::testBasicAllocation() {
 #endif
   Foo *fooPtr = new Foo();
   Id<Foo> fId1(fooPtr);
-  assert(Foo::getCount() == 1);
+  assertTrue(Foo::getCount() == 1);
   non_fast_only_assert(IdTable::size() == initialSize + 1);
 
   fId1->increment();
-  assert(Foo::getCount() == 2);
+  assertTrue(Foo::getCount() == 2);
   fId1->decrement();
-  assert(Foo::getCount() == 1);
+  assertTrue(Foo::getCount() == 1);
 
   Id<Foo> fId2 = fId1;
-  assert(Foo::getCount() == 1);
+  assertTrue(Foo::getCount() == 1);
 
-  assert(fId1.isValid() && fId2.isValid());
-  assert(!fId1.isInvalid() && !fId2.isInvalid());
+  assertTrue(fId1.isValid() && fId2.isValid());
+  assertTrue(!fId1.isInvalid() && !fId2.isInvalid());
 
   fId2.release();
-  assert(Foo::getCount() == 0);
+  assertTrue(Foo::getCount() == 0);
   non_fast_only_assert( fId1.isInvalid() &&  fId2.isInvalid());
   return true;
 }
@@ -359,17 +362,17 @@ bool IdTests::testTypicalConversionsAndComparisons()
   Foo* foo1 = new Foo();
   Id<Foo> fId1(foo1);
   Id<Foo> fId2(fId1);
-  assert(fId1 == fId2); // Equality operator
-  assert(&*fId1 == &*fId2); // Dereferencing operator
-  assert(foo1 == &*fId2); // Dereferencing operator
-  assert(foo1 == (Foo*) fId2); // Dereferencing operator
-  assert(foo1 == fId2.operator->());
-  assert( ! (fId1 > fId2));
-  assert( ! (fId1 < fId2));
+  assertTrue(fId1 == fId2); // Equality operator
+  assertTrue(&*fId1 == &*fId2); // Dereferencing operator
+  assertTrue(foo1 == &*fId2); // Dereferencing operator
+  assertTrue(foo1 == (Foo*) fId2); // Dereferencing operator
+  assertTrue(foo1 == fId2.operator->());
+  assertTrue( ! (fId1 > fId2));
+  assertTrue( ! (fId1 < fId2));
 
   Foo* foo2 = new Foo();
   Id<Foo> fId3(foo2);
-  assert(fId1 != fId3);
+  assertTrue(fId1 != fId3);
 
   fId1.release();
   fId3.release();
@@ -380,7 +383,7 @@ bool IdTests::testCollectionSupport()
 {
   // Test inclusion in a collection class - forces compilation test
   std::list< Id<Foo> > fooList;
-  assert(fooList.size() == 0);
+  assertTrue(fooList.size() == 0);
   return true;
 }
 
@@ -389,7 +392,7 @@ bool IdTests::testDoubleConversion()
   Id<Foo> fId(new Foo());
   double fooAsDouble = (double) fId;
   Id<Foo> idFromDbl(fooAsDouble);
-  assert(idFromDbl == fId);
+  assertTrue(idFromDbl == fId);
   fId.release();
   return true;
 }
@@ -399,23 +402,23 @@ bool IdTests::testCastingSupport()
   Foo* foo = new Foo();
   Id<Foo> fId(foo);
   Foo* fooByCast = (Foo*) fId;
-  assert(foo == fooByCast);
+  assertTrue(foo == fooByCast);
 
-  assert(Id<Bar>::convertable(fId) == false);
+  assertTrue(Id<Bar>::convertable(fId) == false);
   fId.release();
 
   Foo* bar = new Bar();
   Id<Bar> bId((Bar*) bar);
   fId = bId;
-  assert(Id<Bar>::convertable(fId) == true);
+  assertTrue(Id<Bar>::convertable(fId) == true);
   bId.release();
 
   bId = Id<Bar>(new Bar());
   double ptrAsDouble = bId; // Cast to double
 
   const Id<Bar>& cbId(ptrAsDouble);
-  assert(cbId.isValid());
-  assert(cbId == bId);
+  assertTrue(cbId.isValid());
+  assertTrue(cbId == bId);
   bId.release();
   non_fast_only_assert(cbId.isInvalid());
 
@@ -427,6 +430,7 @@ bool IdTests::testCastingSupport()
 
 bool IdTests::testBadAllocationErrorHandling()
 {
+  std::cout << std::endl;
   bool success = true;
   // check_error (inside class Id) will not throw the errors when compiled with EUROPA_FAST.
 #ifndef EUROPA_FAST
@@ -443,7 +447,17 @@ bool IdTests::testBadAllocationErrorHandling()
   }
   catch (Error e) {
     Error::doDisplayErrors();
-    __z__(e, Error("ptr != 0", "Cannot generate an Id<3Foo> for 0 pointer.", "Utils/core/Id.hh", 0), success);
+    // Path of Id.hh may vary depending on where test is run from.
+    // Match only the filename and not the full path
+    std::string pathMsg = e.getFile();
+    int end = pathMsg.length();
+    std::string name = "Id.hh";
+    int start = pathMsg.find(name);
+    if (start >= 0) {
+      std::string fileMsg = pathMsg.substr(start, end);
+      e.setFile(fileMsg);
+    }
+    __z__(e, Error("ptr != 0", "Cannot generate an Id<3Foo> for 0 pointer.", "Id.hh", 0), success);
   }
 #endif
   Error::doNotThrowExceptions();
@@ -497,7 +511,7 @@ bool IdTests::testIdConversion()
   Id<Bar> barId3;
   barId3 = fooId3;
   barId3.release();
-  assert(Foo::getCount() == count);
+  assertTrue(Foo::getCount() == count);
   return true;
 }
 
@@ -505,7 +519,7 @@ bool IdTests::testConstId()
 {
   Id<Foo> fooId(new Foo());
   const Id<const Foo> constFooId(fooId);
-  assert(constFooId->doConstFunc());
+  assertTrue(constFooId->doConstFunc());
   fooId->increment();
   fooId.remove();
   return true;
@@ -548,23 +562,23 @@ private:
 
   static bool testElementCounting(){
     LabelStr lbl1("A 1B 1C 1D EFGH");
-    assert(lbl1.countElements("1") == 4);
-    assert(lbl1.countElements(" ") == 5);
-    assert(lbl1.countElements("B") == 2);
-    assert(lbl1.countElements(":") == 1);
+    assertTrue(lbl1.countElements("1") == 4);
+    assertTrue(lbl1.countElements(" ") == 5);
+    assertTrue(lbl1.countElements("B") == 2);
+    assertTrue(lbl1.countElements(":") == 1);
 
     LabelStr lbl2("A:B:C:D:");
-    assert(lbl2.countElements(":") == 4);
+    assertTrue(lbl2.countElements(":") == 4);
     return true;
   }
 
   static bool testElementAccess(){
     LabelStr lbl1("A 1B 1C 1D EFGH");
     LabelStr first(lbl1.getElement(0, " "));
-    assert(first == LabelStr("A"));
+    assertTrue(first == LabelStr("A"));
 
     LabelStr last(lbl1.getElement(3, "1"));
-    assert(last == LabelStr("D EFGH"));
+    assertTrue(last == LabelStr("D EFGH"));
     return true;
   }
 
@@ -573,10 +587,10 @@ private:
     LabelStr lbl2("G");
     LabelStr lbl3("B");
     LabelStr lbl4("B");
-    assert(lbl1 < lbl2);
-    assert(lbl2 > lbl4);
-    assert(lbl2 != lbl4);
-    assert(lbl4 == lbl3);
+    assertTrue(lbl1 < lbl2);
+    assertTrue(lbl2 > lbl4);
+    assertTrue(lbl2 != lbl4);
+    assertTrue(lbl4 == lbl3);
     return true;
   }
 };
@@ -593,7 +607,7 @@ private:
     new ThreadedLockManager(); //ensure that we have a threaded model
     LockManager::instance().connect(LabelStr("Test"));
     LockManager::instance().lock();
-    assert(LockManager::instance().getCurrentUser() == LabelStr("Test"));
+    assertTrue(LockManager::instance().getCurrentUser() == LabelStr("Test"));
     LockManager::instance().unlock();
     pthread_t threads[numthreads];
     for(int i = 0; i < numthreads; i++)
