@@ -1,6 +1,10 @@
+M_23:
+1. Fixed bug in Planner where it was retracting all the way out of the first decision failed. See System/tests/rejection.nddl.
+
+
 M_22:
 1. Added NegationConstraint.
-2. Added support for a PlannerConfig class in NDDL, rtaher than using NddlWorld.
+2. Added support for a PlannerConfig class in NDDL, rather than using NddlWorld.
 3. Completed support for object dynamicity, addressing GNATS 2342.
 4. Decision manager cleans up decisions even if other agents closed
 them, addressing GNATS 2493.
