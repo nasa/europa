@@ -30,13 +30,14 @@ LocalDepends tests : run-hsts-module-tests
 #       roverTests
 #       roverCTTests
 #       merTests
-#       gnats-C3
+        gnats-C3
 #       gnats-NoBranchBug
 #       gnats-P4-C3
 #       gnats-P4-C3eq
+        gnats-SC
         gnats-condasame
         gnats-rover-fixed
-#       gnats-sum
+        gnats-sum
 #       dnp-timeline
 #       dnp-DNP2
 #       dnp-allDSS
