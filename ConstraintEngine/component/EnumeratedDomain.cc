@@ -138,14 +138,21 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::equate(AbstractDomain& dom) {
-    check_error(isOpen() || dom.isOpen() || (!isEmpty() && !dom.isEmpty()));
-    check_error(dom.isNumeric() == isNumeric()); // Confirm they are treated the same way for numbers
-
+    check_error(isOpen() || !isEmpty());
+    check_error(dom.isOpen() || !dom.isEmpty());
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     if (dom.isInterval()) {
       bool changed = intersect(dom);
       if (isEmpty())
         return(true);
-      return(changed || dom.intersect(*this));
+
+      // The changed flag cannot be tested first as
+      // the call to intersect() would be skipped,
+      // leaving dom with its old members even if they
+      // include values outside *this.
+      // --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 22
+      return(dom.intersect(*this) || changed);
+
     } else {
       bool changed_a = false;
       bool changed_b = false;
