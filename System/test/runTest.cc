@@ -42,25 +42,38 @@
 #include "CBPlanner.hh"
 #include "DecisionPoint.hh"
 
+// Support for Temporal Network
+#include "TemporalNetwork.hh"
+#include "TemporalPropagator.hh"
+#include "TemporalAdvisor.hh"
+#include "STNTemporalAdvisor.hh"
+
 int main(){
   REGISTER_NARY(EqualConstraint, "concurrent", "Default");
+  //REGISTER_NARY(EqualConstraint, "concurrent", "Temporal");
   REGISTER_NARY(EqualConstraint, "eq", "Default");
   REGISTER_NARY(NotEqualConstraint, "neq", "Default");
   REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "before", "Default");
-  REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
+  //REGISTER_NARY(LessThanEqualConstraint, "before", "Default");
+  REGISTER_NARY(LessThanEqualConstraint, "before", "Temporal");
+  //REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
+  REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Temporal");
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "precede", "Default");
   REGISTER_NARY(CommonAncestorConstraint, "commonAncestor", "Default");
 
   
   // Allocate the schema
   SchemaId schema = NDDL::schema();
   ConstraintEngine ce;
-  PlanDatabase db(ce.getId(), schema);
 
+  // order here is important.
   new DefaultPropagator(LabelStr("Default"), ce.getId());
+  new TemporalPropagator(LabelStr("Temporal"), ce.getId());
+
+  PlanDatabase db(ce.getId(), schema);
+  db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId());
+
   RulesEngine re(db.getId());
 
   FlawSource source(FlawSource(db.getId()));
