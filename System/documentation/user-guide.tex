@@ -8,21 +8,16 @@
 
 \maketitle
 
-\section{Abstract}
-
 \section{Introduction}
-\subsection{Why, what and how}
-Here we can introduce stuff without much explanation, just giving a sense of things to come later in the document.
-\subsection{Legacy}
-Should clearly identify legacy to EUROPA and HSTS and indicate the projects this 'class of technology' has been used for.
-\subsection{Reader's Guide}
-Should discuss the types of readers we are targeting and then address contents to them.
-\subsection{Acknowledgements}
+PLASMA ({\bf PL}an {\bf S}tate {\bf MA}nagement {\bf A}rchitecture) is a component-based software library for representation and reasoning with plans within a constraint-based paradigm. Our goal in developing PLASMA is to provide a fast, flexible, extensible, reusable technology platform for building planning and scheduling applications suitable for space exploration. PLASMA is derived from EUROPA [] which has been the core planning technology for a variety of NASA research and mission application. A notable example is  MAPGEN [], the ground-based daily activity planning system for the Mars Exploration Rover mission. EUROPA in turn is derived from HSTS [] which was the planner for the Remote Agent[]. PLASMA builds on the legacies of EUROPA and HSTS in its support for constraint-based temporal-planning techniques. However, it provides a richer modeling language, and a highly modular and extendible architecture which has resulted in improved performance and opened the technology to a broader range of planning techniques (e.g. POCL planning). 
+
+The whole philosophy underlying PLASMA is to acknowledge up front that no one size fits all when it comes to which techniques to use, and which capabilities to employ. Consequently, PLASMA is engineered to allow people to take just what they need, discard what they do not, and integrate extensions to suit their particular requirements in a straighforward manner. The design strategy is to focus on a core framework defininig the principal abstractions and interactins induced by our underlying paradigm. We then provide concrete components to allow particular assemblies to be defined. With this component-based framework we have strived to strike a balance between flexibility and efficiency.
+
+The content of this guide is laid out as follows. We begin with an explanation of the concepts underlying PLASMA addressing its role as an embedded technology within a planner, and its underlying paradigms for representation and reasoning. We then switch gears to get the reader up and running with a particular assembly of PLASMA that is included with the distribution. In this section, the reader will solve a prepared planning problem with PLASMA, without really understanding much about how it happened! Following this, we seek to build up some understanding with a tutorial-like exposition of model development, and problem solving with PLASMA's primary modeling language - NDDL. Having spent some effort working on the application of PLASMA, we turn to its underlying architecture. This section gets 'under-the-hood' to provide an understanding of how PLASMA works at the implementation level.  Finally, we address the technical aspects of customization and extension. Detailed reference material is included in the appendices.
 
 \section{Concepts}
-The underlying paradigm of PLASMA is that of constraint-based, temporal planning.
-\subsection{Problems, Plans and Planning}
-Explain that a Plan is a solution to a Problem. We pose the problem in terms of an partial plan. Planning is the process of turning a partial plan into a complete and correct plan. Completeness and correctness are defined with respect to a model and the needs of the planner. Give examples to motivte the specification of the problem, the gap between the initial and final plans, and the elememts if the domain that illustrate completeness and correctness issues.
+\subsection{Plans in Planning, Scheduling and Execution}
+Explain the notion of a {\em Plan} as a central representation of state that is used in planning, scheduling and execution. Give examples. Pose the common problem in terms of a partial plan that must be evolved to be correct and complete for the purposes of the user of the plan. Discuss each type of task in terms of their impact on a Plan.
 \subsection{Plan Representation}
 \subsubsection{Time-dependent state and action}
 Talk about Objects that have state and behavior that are temporally qualified. Object state and behaviour can be described by predicates with temporal Extent. Objects with state that is not temporally qualified is a special case where the extent of the behavior is infinite.
