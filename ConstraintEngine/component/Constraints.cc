@@ -92,7 +92,7 @@ namespace Prototype
     : Constraint(name, propagatorName, constraintEngine, variables), m_lastNotified(0){
     check_error(variables.size() == ARG_COUNT);
 
-    // type check the arguments - only work with enumerations for now
+    // type check the arguments
     check_error(getCurrentDomain(m_variables[X]).getType() == getCurrentDomain(m_variables[Y]).getType());
   }
 
@@ -205,4 +205,57 @@ namespace Prototype
   int SubsetOfConstraint::executionCount() const {return m_executionCount;}
 
   const AbstractDomain& SubsetOfConstraint::getDomain() const {return *m_superSetDomain;}
+
+  LessThanEqualConstraint::LessThanEqualConstraint(const LabelStr& name,
+						   const LabelStr& propagatorName,
+						   const ConstraintEngineId& constraintEngine,
+						   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables){
+    check_error(variables.size() == ARG_COUNT);
+
+    // type check the arguments - no enumerations supported
+    check_error(getCurrentDomain(m_variables[X]).getType() == AbstractDomain::INT_INTERVAL ||
+		getCurrentDomain(m_variables[X]).getType() == AbstractDomain::REAL_INTERVAL);
+
+    check_error(getCurrentDomain(m_variables[Y]).getType() == AbstractDomain::INT_INTERVAL ||
+		getCurrentDomain(m_variables[Y]).getType() == AbstractDomain::REAL_INTERVAL);
+  }
+
+  void LessThanEqualConstraint::handleExecute()
+  {
+    IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
+    IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+
+    // Discontinue if either domain is dynamic
+    if(domx.isDynamic() || domy.isDynamic())
+      return;
+
+    check_error(!domx.isEmpty() && !domy.isEmpty());
+
+    // Discontinue if they are not both finite or infinite
+    if(domx.isFinite() != domy.isFinite()){
+      domx.empty();
+      return;
+    }
+
+    if(domx.intersect(domx.getLowerBound(), domy.getUpperBound()) && domx.isEmpty())
+      return;
+
+    domy.intersect(domx.getLowerBound(), domy.getUpperBound());
+  }
+
+
+  void LessThanEqualConstraint::handleExecute(const ConstrainedVariableId& variable, 
+					      int argIndex, 
+					      const DomainListener::ChangeType& changeType){
+    handleExecute();
+  }
+
+  bool LessThanEqualConstraint::canIgnore(const ConstrainedVariableId& variable, 
+					  int argIndex, 
+					  const DomainListener::ChangeType& changeType) {
+    return((argIndex == X && changeType == DomainListener::UPPER_BOUND_DECREASED) ||
+	   (argIndex == Y && changeType == DomainListener::LOWER_BOUND_INCREASED));
+  }
+
 }

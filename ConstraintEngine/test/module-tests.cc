@@ -439,6 +439,7 @@ public:
     runTest(testAddEqualConstraint, "SubsetOfConstraint");
     runTest(testAddEqualConstraint, "AddEqualConstraint");
     runTest(testEqualConstraint, "EqualConstraint");
+    runTest(testLessThanEqualConstraint, "LessThanEqualConstraint");
     runTest(testBasicPropagation, "BasicPropagation");
     runTest(testForceInconsistency, "ForceInconsistency");
     runTest(testRepropagation, "Repropagation");
@@ -558,6 +559,31 @@ private:
     assert(v3.getDerivedDomain() == v4.getDerivedDomain());
     assert(v3.getDerivedDomain().getSingletonValue() == Prototype::LabelStr("A"));
 
+    return true;
+  }
+
+  static bool testLessThanEqualConstraint()
+  {
+    std::vector<ConstrainedVariableId> variables;
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 100));
+    variables.push_back(v0.getId());
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 100));
+    variables.push_back(v1.getId());
+    LessThanEqualConstraint c0(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, variables);
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(v0.getDerivedDomain() == v1.getDerivedDomain());
+
+    v0.specify(IntervalIntDomain(50, 100));
+    assert(v1.getDerivedDomain().getLowerBound() == 50);
+    IntervalIntDomain copy(v1.getDerivedDomain());
+    v0.specify(IntervalIntDomain(50, 80));
+    assert(v1.getDerivedDomain() == copy);
+    v1.specify(IntervalIntDomain(60, 70));
+    assert(v0.getDerivedDomain() == IntervalIntDomain(50, 70));
+    v1.reset();
+    assert(v0.getDerivedDomain() == IntervalIntDomain(50, 80));
+    assert(v1.getDerivedDomain() == IntervalIntDomain(50, 100));
     return true;
   }
 

@@ -85,5 +85,29 @@ namespace Prototype
     AbstractDomain* m_superSetDomain;
     int m_executionCount;
   };
+
+  class LessThanEqualConstraint: public Constraint
+  {
+  public:
+    LessThanEqualConstraint(const LabelStr& name,
+			    const LabelStr& propagatorName,
+			    const ConstraintEngineId& constraintEngine,
+			    const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+    void handleExecute(const ConstrainedVariableId& variable, 
+		       int argIndex, 
+		       const DomainListener::ChangeType& changeType);
+
+    bool canIgnore(const ConstrainedVariableId& variable, 
+		   int argIndex, 
+		   const DomainListener::ChangeType& changeType);
+  private:
+    static const int X = 0;
+    static const int Y = 1;
+    static const int ARG_COUNT = 2;
+  };
+
 }
 #endif
