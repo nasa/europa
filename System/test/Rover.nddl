@@ -1,11 +1,4 @@
-#include "NddlWorld.nddl"
-
-/**
- * Changes from ROUND 3:
- * 1. Added an Instrument class
- * 2. Changed Commands to delegate to the Instrument
- * 3. Built in the instrument to the rover
- */
+#include "../../NDDL/core/Resources.nddl"
 
 class Location {
  string name;
@@ -52,6 +45,10 @@ Navigator::Going{
  eq(_from.location, from);
  meets(object.At _to);
  eq(_to.location, to);
+
+ // Pull juice from the battery. Should be based on path length.
+ starts(Resource.change tx);
+ eq(tx.quantity, 400);
 }
 
 class Commands{
@@ -103,6 +100,9 @@ Instrument::TakeSample{
 
  // Succeded by stowing the instrument
  meets(Stow c);
+
+ starts(Resource.change tx);
+ eq(tx.quantity, 120);
 }
 
 Instrument::Place{
@@ -114,6 +114,9 @@ Instrument::Place{
  meets(TakeSample a);
  eq(a.rock, rock);
  met_by(Unstow b);
+
+ starts(Resource.change tx);
+ eq(tx.quantity, 20);
 }
 
 Instrument::Unstow{
@@ -123,6 +126,9 @@ Instrument::Unstow{
 
  meets(Place a);
  met_by(Stowed b);
+
+ starts(Resource.change tx);
+ eq(tx.quantity, 20);
 }
 
 Instrument::Stow{
@@ -132,6 +138,9 @@ Instrument::Stow{
 
  meets(Stowed a);
  met_by(TakeSample b);
+
+ starts(Resource.change tx);
+ eq(tx.quantity, 20);
 }
 
 
@@ -145,54 +154,12 @@ class Rover {
  Commands commands; // High-level rover commands
  Navigator navigator; // Handles position control and achievement
  Instrument instrument;
+ Resource mainBattery;
 
- Rover(){
+ Rover(Resource r){
   commands = new Commands();
   navigator = new Navigator();
   instrument = new Instrument();
+  mainBattery = r;
  }
-}
-
-class World extends NddlWorld{
- Location lander;
- Rock rock1;
- Rock rock2;
- Rock rock3;
- Rock rock4;
-
- Rover spirit;
- Rover opportunity;
-
- predicate initialState{}
-
- World(){
-  super(0, 100, 2000);
-  lander = new Location("LANDER", 0, 0);
-  rock1 = new Rock("ROCK1", 9, 9);
-  rock2 = new Rock("ROCK2", 1, 6);
-  rock3 = new Rock("ROCK3", 4, 8);
-  rock4 = new Rock("ROCK4", 3, 9);
-  spirit = new Rover();
-  opportunity = new Rover();
- }
-}
-
-World::initialState{
- // Establish the initial position for spirit
- any(Navigator.At initialPosition);
- eq(initialPosition.start, object.m_horizonStart); // What time - the start of this planmning horizon
- eq(initialPosition.location, object.lander); // What position - the lander
-
- // Establish the goal - to take a sample at a position
- any(Commands.TakeSample sample);
- eq(sample.start, 50);
- eq(sample.rock, object.rock4); // Want to get to rock4
-
- // Establish the initial instrument state
- any(Instrument.Stowed stowed);
- eq(stowed.start, object.m_horizonStart);
-
- // Assign states to Spirit
- commonAncestor(sample.object, initialPosition.object, object.spirit);
- commonAncestor(sample.object, stowed.object, object.spirit);
 }
