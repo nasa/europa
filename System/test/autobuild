@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.39 2003-02-19 19:10:12 wedgingt Exp $
+# $Id: autobuild,v 1.40 2003-03-25 20:45:41 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -22,7 +22,7 @@ trap 'rmdir $startdir/working; rm -f $startdir/.tokens.$$' 0
 email=checkins@postdoc.arc.nasa.gov
 
 # Subdirectories to build in
-subdirs='cvs fast opt optFast profOptFast shareOptFast debug noErr shareOptNoErr'
+subdirs='cvs fast opt optFast profOptFast shareOptFast debug noErr'
 
 # Location of a newer compiler.
 AFS_GNU='/afs/ic-afs.arc.nasa.gov/apps/gcc-3.2.1/'
