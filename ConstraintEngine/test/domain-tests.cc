@@ -180,6 +180,8 @@ namespace Prototype {
       std::string actualString = ss1.str();
       std::string expectedString("INT_INTERVAL:CLOSED[1, 100]");
       assert(actualString == expectedString);
+      std::string anotherActualString = d1.toString();
+      assert(anotherActualString == expectedString);
       return(true);
     }
 
