@@ -48,6 +48,7 @@ namespace Prototype {
   private:
     DbClientId m_client;
     int m_objectCount;
+    std::map<std::string, TokenId> m_named_tokens;
 
   //! string input functions
 
@@ -92,6 +93,11 @@ namespace Prototype {
      * @brief return a variable as represented by an xml element
      */
     ConstrainedVariableId xmlAsVariable(const TiXmlElement & variable);
+
+    /** 
+     * @brief return a token as represented by an xml element
+     */
+    TokenId xmlAsToken(const TiXmlElement & token);
   };
 
 }
