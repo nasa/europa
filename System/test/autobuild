@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.108 2004-11-23 03:38:22 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.109 2004-12-03 01:49:40 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -12,6 +12,8 @@ echo ''
 #   one at a time.  If -m is given, it will be true; otherwise, false.
 coverage=false
 multibuild=false
+performance=false
+warn=true
 if test ! -z "$1"
 then
     case "$1" in
@@ -21,6 +23,24 @@ then
 	    ;;
         -m|--multibuild)
             multibuild=true
+            if "$performance" && "$warn"
+            then
+                echo "$0"': running performance tests with multibuild not advised; use -w first if you really want to.'
+                exit 0
+            fi
+            shift
+            ;;
+        -p|--performance)
+            performance=true
+            if "$multibuild" && "$warn"
+            then
+                echo "$0"': running performance tests with multibuild not advised; use -w first if you really want to.'
+                exit 0
+            fi
+            shift
+            ;;
+        -w)
+            warn=false
             shift
             ;;
         -h|-H|'-?'|--help|--Help|--HELP)
@@ -28,13 +48,16 @@ then
 	    echo '    -c, --coverage: build the COVERAGE variant (which is not fully supported yet)'
             echo '    -h, -H, --help: help (print this message and exit)'
             echo '    -m, --multibuild: multibuild (compile all variants in one run of jam; default off/false)'
+            echo '    -p, --performance: run the performance tests via the run-performance-tests jam target'
+            echo '        (only with VARIANTS=OPTIMIZED and VARIANTS=PROFILE unless also multibuild)'
+            echo '    -w: allow running performance tests with multibuild, which is rarely useful'
             echo '    Any other option (with a leading dash: "-") evokes an error.'
             echo '  Any other single argument should be an email address for status messages;'
             echo '    it defaults to "$USER@email.arc.nasa.gov" ("$USER" is currently "'"$USER"'").'
             exit 0
             ;;
         -*)
-            echo "$0"': unknown flag; only "-h" (help) and "-m" (multibuild: compile all variants in one run of jam) is supported'
+            echo "$0"': unknown flag; see "autobuild -h" for help.'
             exit 20
             ;;
     esac
@@ -176,7 +199,12 @@ then
 	echo "$0"': COVERAGE variant is not supported by multibuild; ignoring -c/--coverage'
 	echo '    (this is one reason that the COVERAGE variant is not fully supported yet)'
     else
-	variants="$variants"' COVERAGE'
+        if $performance
+        then
+            echo "$0"': COVERAGE and PROFILE require incompatible g++ options; skipping COVERAGE'
+        else
+            variants="$variants"' COVERAGE'
+        fi
     fi
 fi
 
@@ -193,9 +221,9 @@ export MALLOC_CHECK_
 
 # Apply limits; some compiles (on SunOS of NewPlan) have run computers out of swap space.
 ulimit -c 300000
-ulimit -d 2000000
-ulimit -s 2000000
-ulimit -v 2000000
+ulimit -d 100000000
+ulimit -s 100000000
+ulimit -v 100000000
 
 # Print the limits so it is obvious what they are when something goes wrong.
 ulimit -a
@@ -244,12 +272,25 @@ function jamCmd() {
   jam "${jam_args[@]}" $1 > "$outFile" 2>&1
   status=$?
   echo 'jam '"${jam_args[*]} $1"' in '"`pwd`"' exited '"$status"
+  case "$1" in
+      *performance*) # Pull out the "important" lines.  The choice in the pattern after 'sys' is space or tab.
+          egrep -i '(node)|(user)|(real)|(sys[	 ])|(RUN_)' "$outFile" > "$outFile".summary
+          ;;
+  esac
   if test $status -ne 0
   then
     (echo "$info";
      echo '';
      echo 'PPW_CONFIG='"$PPW_CONFIG"'; export PPW_CONFIG';
      echo 'jam '"${jam_args[*]} $1"' in '"`pwd`"' exited '"$status";
+     if test -s "$outFile".summary
+         then
+         echo '';
+         echo 'Performance summary '"$outFile"'.summary:';
+         echo '';
+         cat "$outFile".summary;
+         echo '';
+     fi
      more "$outFile" < /dev/null) | \
         Mail -s 'PLASMA Autobuild jam '"${jam_args[*]} $1"' on '"`hostname`"' failed' "$email"
     mkdir "$startdir"/working/failed
@@ -318,6 +359,10 @@ then
     jam_args=(-sVARIANTS='DEV OPTIMIZED PROFILE' -sLIBRARIES="$libmethods")
     PPW_CONFIG=''
     jamCmd run-all-tests run-all-tests
+    if "$performance"
+        then
+        jamCmd run-performance-tests run-performance-tests
+    fi
     if "$removePlasma"
         then
         PPW_CONFIG="$startdir"'/PLASMA/CBPlanner/component/sample-ppw-config'
@@ -335,7 +380,12 @@ then
             Mail -s 'PLASMA Autobuild/multibuild on '"`hostname`"' passed' "$email"
     if "$removePlasma"
         then
-            # Save the output files.
+        # Save the output files.
+        if test -s "$outFile".summary && "$removePlasma"
+            then
+            # Use a "pattern" for the first file in case the other pattern does not match anything due to not profiling
+            mv "$outFile".summar[y] System/test/RUN_satellites-1-*.gprof ..
+        fi
         mv -f jam.* ..
         cd ..
             # Remove everything so that each variant is tested completely independently.
@@ -343,7 +393,6 @@ then
         rm -rf PLASMA
     fi
 else
-    # Now, for the primary purpose: run all the tests of all build variants.
     for var in $variants
       do
       for libmethod in $libmethods
@@ -387,6 +436,10 @@ else
         PPW_CONFIG=''
         jamCmd plasma-all plasma
         jamCmd run-all-tests run-all-tests
+        if "$performance" && test \( "$var" = 'PROFILE' -o "$var" = 'OPTIMIZED' \) -a "$libmethod" = 'STATIC'
+            then
+            jamCmd run-performance-tests run-performance-tests
+        fi
         if "$removePlasma"
             then
             jamCmd clean clean
@@ -401,11 +454,16 @@ else
             jamCmd clean clean
         fi
         (echo "$info"; echo 'PLASMA autobuild and tests of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
-            more jam.*.$var.$libmethod < /dev/null) | \
+            more jam.*.$var.$libmethod.summary jam.*.$var.$libmethod < /dev/null) | \
                 Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
         if "$removePlasma"
             then
             # Save the output files.
+            if test -s "$outFile".summary && "$removePlasma"
+                then
+                # Use a "pattern" for the first file in case the other pattern does not match anything due to not profiling
+                mv "$outFile".summar[y] System/test/RUN_satellites-1-*.gprof ..
+            fi
             mv -f jam.* ..
             cd ..
             # Remove everything so that each variant is tested completely independently.
