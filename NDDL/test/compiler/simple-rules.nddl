@@ -11,7 +11,7 @@ class Rover{
 }
 
 Rover::At{
- meets(Going to);
+ meets(object.Going to);
  eq(to._from, _location);
 
  meets(Going from);
@@ -50,4 +50,9 @@ World::initialState{
  eq(b._location, Rock);
 
  leq(a.end, b.start);
+
+ // Test rule to use local variables
+ Rover r1;
+ Rover r2;
+ eq(r1, r2);
 }

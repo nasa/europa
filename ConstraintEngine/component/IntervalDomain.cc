@@ -263,7 +263,23 @@ namespace Prototype {
 
   void IntervalDomain::operator>>(ostream& os) const {
     AbstractDomain::operator>>(os);
-    os << "[" << m_lb << ", " << m_ub << "]";
+    os << "[";
+    if(m_lb == MINUS_INFINITY)
+      os << "-inf";
+    else if(m_lb == PLUS_INFINITY)
+      os << "+inf";
+    else
+      os << m_lb;
+
+    os << ", ";
+    if(m_ub == MINUS_INFINITY)
+      os << "-inf";
+    else if(m_ub == PLUS_INFINITY)
+      os << "+inf";
+    else
+      os << m_ub;
+
+    os << "]";
   }
 
   void IntervalDomain::testPrecision(const double& value) const {} // A NO-OP FOR REALS

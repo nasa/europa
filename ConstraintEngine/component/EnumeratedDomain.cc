@@ -1,4 +1,6 @@
 #include "EnumeratedDomain.hh"
+#include "LabelStr.hh"
+#include "Entity.hh"
 
 namespace Prototype {
 
@@ -383,7 +385,15 @@ namespace Prototype {
     int size = m_values.size();
     int i=0;
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it,i++){
-      os << *it;
+      double valueAsDouble = *it;
+      if(isNumeric())
+	os << valueAsDouble;
+      else if (LabelStr::isString(valueAsDouble))
+	os << LabelStr(valueAsDouble).toString();
+      else {
+	EntityId entity(valueAsDouble);
+	os << entity->getName().toString();
+      }
       if (i != size-1)
 	os << ",";
     }

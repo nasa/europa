@@ -6,13 +6,14 @@
 #include "../ConstraintEngine/Constraints.hh"
 #include "../ConstraintEngine/EqualityConstraintPropagator.hh"
 #include "../PlanDatabase/ObjectTokenRelation.hh"
-#include "../PlanDatabase/PartialPlanWriter.hh"
+#include "../PlanDatabase/CommonAncestorConstraint.hh"
 
 // Support fro required plan database components
 #include "../PlanDatabase/PlanDatabase.hh"
 #include "../PlanDatabase/Object.hh"
 #include "../PlanDatabase/Schema.hh"
 #include "../ConstraintEngine/ConstraintEngine.hh"
+#include "../PlanDatabase/PartialPlanWriter.hh"
 
 // Rules Engine Components
 #include "../RulesEngine/RulesEngine.hh"
@@ -51,6 +52,7 @@ int main(){
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
   REGISTER_NARY(LessThanEqualConstraint, "precede", "Default");
+  REGISTER_NARY(CommonAncestorConstraint, "commonAncestor", "Default");
 
   
   // Allocate the schema

@@ -7,9 +7,13 @@
 namespace Prototype {
 
   EnumeratedDomain ObjectFilter::constructUnion(const std::list<ObjectId> objects, int fieldIndex){
-    EnumeratedDomain newDomain;
     check_error(!objects.empty());
     check_error(fieldIndex >= 0);
+
+    ConstrainedVariableId var = objects.front()->getVariables()[fieldIndex];
+    bool isNumeric = var->baseDomain().isNumeric();
+
+    EnumeratedDomain newDomain(isNumeric);
 
     for(std::list<ObjectId>::const_iterator it = objects.begin(); it != objects.end(); ++it){
       ObjectId object = *it;
@@ -45,7 +49,7 @@ namespace Prototype {
     m_objectVar.getValues(originalObjects);
 
     // Initialize to the base domain
-    EnumeratedDomain fieldValues;
+    EnumeratedDomain fieldValues(m_filterVar.isNumeric());
 
     // Iterate over the values, getting the field variable each time and making sure it is in the list
     for (std::list<ObjectId>::const_iterator it = originalObjects.begin(); it != originalObjects.end(); ++it){

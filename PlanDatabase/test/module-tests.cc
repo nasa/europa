@@ -7,6 +7,7 @@
 #include "Timeline.hh"
 #include "DbLogger.hh"
 #include "PartialPlanWriter.hh"
+#include "CommonAncestorConstraint.hh"
 
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/Utils.hh"
@@ -74,6 +75,7 @@ public:
     runTest(testObjectSet);
     runTest(testObjectVariables);
     runTest(testObjectTokenRelation);
+    runTest(testCommonAncestorConstraint);
     return true;
   }
 private:
@@ -95,12 +97,21 @@ private:
     ObjectId id3((new Object(id1, LabelStr("AllObjects"), LabelStr("id3")))->getId());
     assert(db.getObjects().size() == 6);
     assert(id3->getName().toString() == "id1.id3");
+
+    // Test ancestor call
+    ObjectId id4((new Object(id3, LabelStr("AllObjects"), LabelStr("id4")))->getId());
+    std::list<ObjectId> ancestors;
+    id4->getAncestors(ancestors);
+    assert(ancestors.front() == id3);
+    assert(ancestors.back() == id1);
+
+    // Force cascaded delete
     delete (Object*) id1;
     assert(db.getObjects().size() == 3);
 
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
-    ObjectId id4 = ((new Object(db.getId(), LabelStr("AllObjects"), LabelStr("id4")))->getId());
-    ObjectId id5 = ((new Object(id4, LabelStr("AllObjects"), LabelStr("id4")))->getId());
+    ObjectId id5 = ((new Object(db.getId(), LabelStr("AllObjects"), LabelStr("id5")))->getId());
+    ObjectId id6 = ((new Object(id5, LabelStr("AllObjects"), LabelStr("id6")))->getId());
     return true;
   }
 
@@ -195,6 +206,91 @@ private:
     // Confirm it is no longer part of the object
     // Confirm not added to the object
     assert(!eventToken.getObject()->getDerivedDomain().isSingleton());
+
+    return true;
+  }
+
+  static bool testCommonAncestorConstraint(){
+    PlanDatabase db(ENGINE, SCHEMA);
+    Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
+    Object o2(o1.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    Object o3(o1.getId(), LabelStr("AllObjects"), LabelStr("o3"));
+    Object o4(o2.getId(), LabelStr("AllObjects"), LabelStr("o4"));
+    Object o5(o2.getId(), LabelStr("AllObjects"), LabelStr("o5"));
+    Object o6(o3.getId(), LabelStr("AllObjects"), LabelStr("o6"));
+    Object o7(o3.getId(), LabelStr("AllObjects"), LabelStr("o7"));
+
+    ObjectSet allObjects;
+    allObjects.insert(o1.getId());
+    allObjects.insert(o2.getId());
+    allObjects.insert(o3.getId());
+    allObjects.insert(o4.getId());
+    allObjects.insert(o5.getId());
+    allObjects.insert(o6.getId());
+    allObjects.insert(o7.getId());
+    allObjects.close();
+
+    // Ensure there they agree on a common root.
+    {
+      Variable<ObjectSet> first(ENGINE, ObjectSet(o4.getId()));
+      Variable<ObjectSet> second(ENGINE, ObjectSet(o7.getId()));
+      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o1.getId()));
+      CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), second.getId(), restrictions.getId()));
+
+      assert(ENGINE->propagate());
+    }
+
+    // Now impose a different set of restrictions which will eliminate all options
+    {
+      Variable<ObjectSet> first(ENGINE, ObjectSet(o4.getId()));
+      Variable<ObjectSet> second(ENGINE, ObjectSet(o7.getId()));
+      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o2.getId()));
+      CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), second.getId(), restrictions.getId()));
+
+      assert(!ENGINE->propagate());
+    }
+
+    // Now try a set of restrictions, which will allow it to pass
+    {
+      Variable<ObjectSet> first(ENGINE, ObjectSet(o4.getId()));
+      Variable<ObjectSet> second(ENGINE, ObjectSet(o7.getId()));
+      Variable<ObjectSet> restrictions(ENGINE, allObjects);
+      CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), second.getId(), restrictions.getId()));
+
+      assert(ENGINE->propagate());
+    }
+
+    // Now try when no variable is a singleton, and then one becomes a singleton
+    {
+      Variable<ObjectSet> first(ENGINE, allObjects);
+      Variable<ObjectSet> second(ENGINE, allObjects);
+      Variable<ObjectSet> restrictions(ENGINE, allObjects);
+      CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), second.getId(), restrictions.getId()));
+
+      assert(ENGINE->propagate()); // All ok so far
+
+      restrictions.specify(o2.getId());
+      assert(ENGINE->propagate()); // Nothing happens yet.
+
+      first.specify(o6.getId()); // Now we should propagate to failure
+      assert(!ENGINE->propagate());
+      first.reset();
+
+      first.specify(o4.getId());
+      assert(ENGINE->propagate());
+    }
 
     return true;
   }

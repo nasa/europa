@@ -8,6 +8,7 @@
 
 namespace Prototype
 {
+
   /**
    * Utility class that might get promoted later
    */
@@ -43,6 +44,10 @@ namespace Prototype
     IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
     IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
     IntervalDomain& domz = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
+
+    check_error(AbstractDomain::canBeCompared(domx, domy));
+    check_error(AbstractDomain::canBeCompared(domx, domz));
+    check_error(AbstractDomain::canBeCompared(domz, domy));
 
     /* Test preconditions for continued execution */
     if(domx.isDynamic() ||
@@ -123,6 +128,8 @@ namespace Prototype
     AbstractDomain& domx = getCurrentDomain(m_variables[X]);
     AbstractDomain& domy = getCurrentDomain(m_variables[Y]);
 
+    check_error(AbstractDomain::canBeCompared(domx, domy));
+
     // Discontinue if either domain is dynamic
     if(domx.isDynamic() || domy.isDynamic())
       return;
@@ -167,6 +174,7 @@ namespace Prototype
   }
 
   void SubsetOfConstraint::handleExecute(){
+    check_error(AbstractDomain::canBeCompared(m_currentDomain, *m_superSetDomain));
     if(m_currentDomain.isEnumerated())
       ((EnumeratedDomain&)m_currentDomain).intersect((const EnumeratedDomain&) *m_superSetDomain);
     else
@@ -199,6 +207,8 @@ namespace Prototype
   {
     IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
     IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+
+    check_error(AbstractDomain::canBeCompared(domx, domy));
 
     // Discontinue if either domain is dynamic
     if(domx.isDynamic() || domy.isDynamic())
@@ -243,6 +253,8 @@ namespace Prototype
   {
     AbstractDomain& domx = getCurrentDomain(m_variables[X]);
     AbstractDomain& domy = getCurrentDomain(m_variables[Y]);
+
+    check_error(AbstractDomain::canBeCompared(domx, domy));
 
     // Discontinue if either domain is dynamic
     if(domx.isDynamic() || domy.isDynamic())
@@ -327,6 +339,10 @@ namespace Prototype
     IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
     IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
     IntervalDomain& domz = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
+
+    check_error(AbstractDomain::canBeCompared(domx, domy));
+    check_error(AbstractDomain::canBeCompared(domx, domz));
+    check_error(AbstractDomain::canBeCompared(domz, domy));
 
     /* Test preconditions for continued execution */
     if(domx.isDynamic() ||
