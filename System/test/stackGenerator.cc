@@ -34,7 +34,7 @@ public:
 
 void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << "#include \"../../NDDL/core/Plasma.nddl\"" << std::endl;
-  out << "#include \"NddlWorld.nddl\"" << std::endl; 
+  out << "#include \"../../NDDL/core/PlannerConfig.nddl\"" << std::endl; 
   out << std::endl;
   out << "enum Target {";  
   for (int i=1; i <= prob.numTargets; ++i) {
@@ -124,7 +124,7 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
 
 void nddloutputInitialState(std::ofstream& out, const Problem& prob) {
   int expectedTokens = prob.numTargets*2;
-  out << "NddlWorld world = new NddlWorld(0," << expectedTokens << ",99999999);" << std::endl;
+  out << "PlannerConfig world = new PlannerConfig(0," << expectedTokens << ",99999999);" << std::endl;
 #ifdef USING_RESOURCE
   out << " MyResource res = new MyResource();" << std::endl;
 #endif
@@ -132,7 +132,6 @@ void nddloutputInitialState(std::ofstream& out, const Problem& prob) {
   for (int i=1; i <= prob.numSatellites; ++i)
     out << "Satellite " << prob.satellites[i] << " = new Satellite();" << std::endl;
   out << "" << std::endl;
-  out << "NddlWorld.close();" << std::endl;
   out << "close();" << std::endl;
 
   for (int i = 1; i <= prob.numSatellites; ++i) {
@@ -170,12 +169,14 @@ void ddloutputModel(std::ofstream& out, const Problem& prob) {
     out << " " << prob.targets[i];
   out << "))" << std::endl;
   out << "" << std::endl;
-  out << "(Define_Label_Set Domain_Label (";
-  for (int i=0; i < prob.numParamChoices; ++i) {
-    out << "\"" << i << "\" ";
-  }
-  out << "\"" << prob.numParamChoices << "\"))" << std::endl;
+  if (prob.numParamChoices > 0) {
+    out << "(Define_Label_Set Domain_Label (";
+    for (int i=0; i < prob.numParamChoices; ++i) {
+      out << "\"" << i << "\" ";
+    }
+    out << "\"" << prob.numParamChoices << "\"))" << std::endl;
   out << "" << std::endl;
+  }
   out << "(Define_Predicate Pointing ((Observation_Label The_Obs)";
   for (int i=1; i<=prob.numParams; ++i)
     out << " (Domain_Label p" << i << ")";
