@@ -78,8 +78,8 @@ LocalDepends run-hsts-planner-tests :
        merTest18-h
         gnats-C3
        gnats-NoBranchBug
-#        gnats-P4-C3  # times out unless finite bounds
-#        gnats-P4-C3eq # times out unless finite bounds
+        gnats-P4-C3 
+        gnats-P4-C3eq 
         gnats-SC
         gnats-condasame
         gnats-rover-fixed
