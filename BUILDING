@@ -2,25 +2,115 @@ Building PLASMA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.8 2004-11-10 20:21:11 wedgingt Exp $
+$Id: BUILDING,v 1.9 2004-12-07 00:11:46 pdaley Exp $
 
 
-- Building Jam
+- Prerequisites:
 
-The build PLASMA you must have Jam installed on your system.  Type
-"jam -v" to test your jam version.  Versions 2.4 and 2.5rc3 are known
-to work.
+1. Jam 2.4 or higher.
+   Jam is open source, and if not already installed on your system, 
+   can be downloaded from: ftp://ftp.perforce.com/pub/jam/
 
-Although version 2.4 works, it is not recommended because using it
-will result in the entire tree being rebuilt even when it is run in a
-subdirectory.
+   Although version 2.4 works, it is not recommended because using it
+   will result in the entire tree being rebuilt even when it is run in a
+   subdirectory.
 
-Jam is open source and can be downloaded from:
-ftp://ftp.perforce.com/pub/jam/
+2. gcc 3.3.3 (Though some prior versions are thought to work, only
+   this one is tested regularly & automatically).
 
-If you are using computers in Code TC (recently Code IC) at NASA's
-Ames Research Center, see Appendix A for the locations of the jam,
-g++, and java versions we use for development and testing.
+3. Java 1.4.2 or higher.
+
+If you are using computers in Code TC at NASA/Ames, the division's
+System Group has likely already installed these programs (and versions
+of them) that you will need to build PLASMA reliably.  
+
+
+- Getting started:
+
+These instructions will allow you to quickly configure your system to
+build Europa2 with the default build variants set to generate unoptimized, 
+unprofiled, debug code using shared libraries.  See the sections 
+'Performing a build', 'Configuring the build: VARIANTS', and 'Configuring 
+the build: LIBRARIES' for details on build commands and configuring the 
+build for different compiler variations and using different types of 
+libraries.
+
+For simplicity, these quickstart instructions assume using gcc-3.3.3, 
+jam 2.5, and java jdk1.5.0. Of course, other versions that meet the 
+above version requirements may be used instead.
+
+1) Setting your PATH:
+
+    PATH should include locations of gcc-3.3.3, Jam 2.4 or higher, and 
+    Java 1.4.2 or higher. 
+
+    On a Linux system set your PATH to the relevant directories for your 
+    particular system. If you don't know the locations of Jam, gcc or 
+    Java on your system, you can use the find commands listed below to 
+    help locate the executables. Then look for the directory the actual 
+    executable is in. Often, but not always, this is a "bin" directory.
+
+       find /usr -name gcc-3.3.3
+       find /usr -name 'j2sdk1.*' -o -name 'jdk1.*'
+       find /usr -name 'jam2.*'
+
+    On the division SPARCs running SunOS 5.8, add the following paths
+    to the head of your PATH environment variable for the locations of 
+    gcc-3.3.3, jam v2.5rc3, and java jdk1.5.0:
+ 
+    /usr/local/beta/gcc-3.3.3/bin
+    /usr/local/beta/bin
+    /usr/local/jdk1.5.0/bin
+
+    e.g. set path = (/usr/local/beta/gcc-3.3.3/bin /usr/local/beta/bin
+                     /usr/local/jdk1.5.0/bin $path)
+
+    Note that the location of the gcc-3.3.3 compiler must come before the 
+    location of Jam since there is an old version of gcc in the same 
+    directory as Jam.
+    
+2)  Setting your LD_LIBRARY_PATH:
+
+    LD_LIBRARY_PATH should include the locations of the gcc-3.3.3 and
+    Europa2 shared libraries. 
+
+    On a Linux system set your LD_LIBRARY_PATH to the location of 
+    gcc-3.3.3/lib for your particular system plus the full path to the 
+    directory PLASMA/lib.
+
+    On the division SPARCs running SunOS 5.8 set your LD_LIBRARY_PATH to:
+    
+    /usr/local/beta/gcc-3.3.3/lib 
+    /home/me/PLASMA/lib
+    Where: 
+      /home/me is the full path to the directory containing PLASMA.
+
+    e.g. setenv LD_LIBRARY_PATH 
+         "$LD_LIBRARY_PATH":/usr/local/beta/gcc-3.3.3/lib:/home/me/PLASMA/lib
+        
+3)  Setting your JAVA_HOME:
+
+    JAVA_HOME should be set to the location of the J2SDK
+
+    On a Linux system set JAVA_HOME to the location of the java sdk
+    for your particular system. See "Setting your PATH" for help 
+    finding this location. 
+
+    On the division SPARCs running SunOS 5.8 set JAVA_HOME to:
+
+      /usr/local/jdk1.5.0
+
+      e.g. setenv JAVA_HOME /usr/local/jdk1.5.0
+
+4)  Verify that gcc, Jam and Java are found on your system.
+    Type "gcc -v", "jam -v", and "java -version" to test for the
+    correct versions.
+
+    If you run into problems, check PLASMA/System/test/autobuild, which is
+    described briefly in Appendix A.
+
+5) Build Europa2 from the directory PLASMA by running 'jam'.
+   See the "Performing a build" section below for more details.
 
 
 - Performing a build
@@ -95,7 +185,7 @@ the DEV variant is identical to the CUSTOM DEBUG variant.
 
 The default variant is DEV.
 
-To build all variants at once, see Appendix B.
+To build all variants at once, see Appendix A.
 
 
 - Configuring the build : LIBRARIES
@@ -146,17 +236,17 @@ path.  The relevant variable depends on your platform,
 and the way to set it depends on your shell.  Here is
 an example for the sh and bash shells:
 
-% LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/user/me/PLASMA/lib
+% LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/home/me/PLASMA/lib
 % export LD_LIBRARY_PATH
 
-... where you should replace '/user/me' with the full path to the
+... where you should replace '/home/me' with the full path to the
 directory containing your PLASMA checkout from CVS.
 
 For csh and tcsh and similar shells:
 
-% setenv LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/user/me/PLASMA/lib
+% setenv LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/home/me/PLASMA/lib
 
-To build all library "styles" at once, see Appendix B.
+To build all library "styles" at once, see Appendix A.
 
 
 - Getting more help
@@ -165,31 +255,7 @@ If you have difficulty with any part of these
 instructions please contact the PLASMA development team
 (see the README file for the address and URL).
 
-
 Appendix A
-
-If you are using computers in Code TC at NASA/Ames, the division's
-System Group has likely already installed the programs (and versions
-of them) that you will need to build PLASMA reliably.  On the
-division SPARCs running SunOS 5.8, they are:
-
-For CVS, /usr/local/bin should be in your $PATH ($path in csh or tcsh).
-For g++ v3.3.3, /usr/local/beta/gcc-3.3.3/bin should be in your $PATH
-	and /usr/local/beta/gcc-3.3.3/lib should be in $LD_LIBRARY_PATH.
-For Jam, /usr/local/beta/bin contains jam v2.5rc3.
-For Java, $JAVA_HOME should be set to /usr/local/j2sdk1.4.2_05.  The bin
-	subdirectory should be in your $PATH and the lib subdirectory
-	should be in $CLASSPATH.
-
-On Token.arc.nasa.gov (RedHat Linux), the relevant directories are
-/usr/bin (for CVS), /usr/local/gcc-3.3.3, /usr/local/jam2.4, and
-/usr/java/j2sdk1.4.2_04.
-
-If you run into problems, check PLASMA/System/test/autobuild, which is
-described briefly in Appendix B.
-
-
-Appendix B
 
 The project tests building and testing PLASMA automatically overnight
 using the shell script in PLASMA/System/test/autobuild via the UNIX &
@@ -197,6 +263,4 @@ Linux cron program.  See:
 
 % System/test/autobuild -h
 
-... for brief usage information.  It has the directories mentioned in
-Appendix A hard-coded into it presently for ease of use via cron by
-the development team.
+... for brief usage information.
