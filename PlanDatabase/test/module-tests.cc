@@ -1198,7 +1198,13 @@ public:
     testCreateSubgoalTokens();
   }
 
-  /** Test that the given token matches the criteria. */
+  /**
+   * Test that the given token matches the criteria.
+   * @note If only used as condition in assertTrue() (or changed to
+   * return void), this could itself use 'assertTrue(cond)' rather
+   * than 'if (!cond) return(false);', making which condition failed
+   * obvious.
+   */
   static bool checkToken(const TokenId& token, const LabelStr& name, const LabelStr& predName,
                          const TokenId& master, const StateDomain& stateDom) {
     if (token.isNoId() || !token.isValid())
@@ -1220,7 +1226,7 @@ public:
     assertTrue(tokens.size() == 1);
     TokenId token = *(tokens.begin());
     assertTrue(checkToken(token, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
-                           TokenId::noId(), s_mandatoryStateDom));
+                          TokenId::noId(), s_mandatoryStateDom));
 
     /* Create a rejectable token. */
     TEST_PLAYING_XML(buildXMLCreateGoalStr("TestClass2.Sample", false, "sample2"));
@@ -1234,8 +1240,7 @@ public:
     }
     assertTrue(checkToken(token2, LabelStr("TestClass2.Sample"), 
 			  LabelStr("TestClass2.Sample"),
-			  TokenId::noId(), s_rejectableStateDom), 
-	       "Domain should include REJECTABLE but does not: " + token2->getState()->lastDomain().toString());
+			  TokenId::noId(), s_rejectableStateDom));
 
     //!!other predicates?
   }
@@ -1255,7 +1260,7 @@ public:
       goal = *(currentTokens.begin());
     }
     assertTrue(checkToken(goal, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
-                           TokenId::noId(), s_mandatoryStateDom));
+                          TokenId::noId(), s_mandatoryStateDom));
     oldTokens.insert(goal);
     /* Create a subgoal for each temporal relation. */
     //!!should do at least two for each temporal relation between master and slave: with and without explicit temporal bounds
@@ -1277,7 +1282,7 @@ public:
       //!!Is that a bug in the player or not?
       //!!  May mean that this is an inappropriate overloading of the '<goal>' XML tag per Tania and I (17 Nov 2004)
       assertTrue(checkToken(subgoal, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
-                             TokenId::noId(), s_mandatoryStateDom));
+                            TokenId::noId(), s_mandatoryStateDom));
       assertTrue(verifyTokenRelation(goal, subgoal, *which));
       /* Update list of old tokens. */
       oldTokens.insert(subgoal);
@@ -1485,7 +1490,7 @@ public:
     }
     /* Check it. */
     assertTrue(checkToken(tok, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
-                           TokenId::noId(), mandatory ? s_mandatoryStateDom : s_rejectableStateDom));
+                          TokenId::noId(), mandatory ? s_mandatoryStateDom : s_rejectableStateDom));
     return(tok);
   }
 
