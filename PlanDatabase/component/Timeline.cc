@@ -13,10 +13,10 @@
 #include "TokenVariable.hh"
 #include "PlanDatabase.hh"
 #include "TemporalAdvisor.hh"
-#include "../ConstraintEngine/ConstraintEngine.hh"
-#include "../ConstraintEngine/Constraint.hh"
-#include "../ConstraintEngine/ConstraintLibrary.hh"
-#include "../ConstraintEngine/IntervalIntDomain.hh"
+#include "ConstraintEngine.hh"
+#include "Constraint.hh"
+#include "ConstraintLibrary.hh"
+#include "IntervalIntDomain.hh"
 
 #include <algorithm>
 

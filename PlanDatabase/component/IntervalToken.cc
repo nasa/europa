@@ -1,8 +1,8 @@
 #include "IntervalToken.hh"
 #include "TokenVariable.hh"
 #include "PlanDatabase.hh"
-#include "../ConstraintEngine/IntervalIntDomain.hh"
-#include "../ConstraintEngine/ConstraintLibrary.hh"
+#include "IntervalIntDomain.hh"
+#include "ConstraintLibrary.hh"
 
 namespace Prototype{
 

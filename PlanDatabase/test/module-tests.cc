@@ -14,12 +14,12 @@
 #include "ObjectFactory.hh"
 #include "TokenFactory.hh"
 
-#include "../ConstraintEngine/TestSupport.hh"
-#include "../ConstraintEngine/Utils.hh"
-#include "../ConstraintEngine/IntervalIntDomain.hh"
-#include "../ConstraintEngine/Domain.hh"
-#include "../ConstraintEngine/DefaultPropagator.hh"
-#include "../ConstraintEngine/EqualityConstraintPropagator.hh"
+#include "TestSupport.hh"
+#include "Utils.hh"
+#include "IntervalIntDomain.hh"
+#include "Domain.hh"
+#include "DefaultPropagator.hh"
+#include "EqualityConstraintPropagator.hh"
 
 #include <iostream>
 #include <string>

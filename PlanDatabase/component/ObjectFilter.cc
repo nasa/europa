@@ -1,7 +1,7 @@
 #include "ObjectFilter.hh"
 #include "Object.hh"
-#include "../ConstraintEngine/EnumeratedDomain.hh"
-#include "../ConstraintEngine/Utils.hh"
+#include "EnumeratedDomain.hh"
+#include "Utils.hh"
 #include <list>
 
 namespace Prototype {

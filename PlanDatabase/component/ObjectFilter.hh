@@ -2,8 +2,8 @@
 #define _H_ObjectFilter
 
 #include "PlanDatabaseDefs.hh"
-#include "../ConstraintEngine/Constraint.hh"
-#include "../ConstraintEngine/EnumeratedDomain.hh"
+#include "Constraint.hh"
+#include "EnumeratedDomain.hh"
 
 namespace Prototype
 {

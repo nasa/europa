@@ -1,7 +1,7 @@
 #ifndef _H_ResourcePropagator
 #define _H_ResourcePropagator
 
-#include "../ConstraintEngine/Propagator.hh"
+#include "Propagator.hh"
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabaseListener.hh"
 #include "ResourceDefs.hh"

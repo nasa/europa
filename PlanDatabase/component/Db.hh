@@ -13,13 +13,13 @@
 #include "ObjectFilter.hh"
 #include "DbLogger.hh"
 
-#include "../ConstraintEngine/ConstraintEngine.hh"
-#include "../ConstraintEngine/IntervalIntDomain.hh"
-#include "../ConstraintEngine/BoolDomain.hh"
-#include "../ConstraintEngine/ConstraintLibrary.hh"
-#include "../ConstraintEngine/Constraint.hh"
-#include "../ConstraintEngine/Constraints.hh"
-#include "../ConstraintEngine/TestSupport.hh"
-#include "../ConstraintEngine/CeLogger.hh"
+#include "ConstraintEngine.hh"
+#include "IntervalIntDomain.hh"
+#include "BoolDomain.hh"
+#include "ConstraintLibrary.hh"
+#include "Constraint.hh"
+#include "Constraints.hh"
+#include "TestSupport.hh"
+#include "CeLogger.hh"
 
 #endif

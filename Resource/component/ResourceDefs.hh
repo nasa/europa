@@ -2,8 +2,8 @@
 #define _H_ResourceDefs
 
 #include "Id.hh"
-#include "../ConstraintEngine/ConstraintEngineDefs.hh"
-#include "../ConstraintEngine/Domain.hh"
+#include "ConstraintEngineDefs.hh"
+#include "Domain.hh"
 
 namespace Prototype
 {

@@ -2,17 +2,17 @@
 #include "TemporalNetwork.hh"
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
-#include "../PlanDatabase/TemporalAdvisor.hh"
-#include "../PlanDatabase/Schema.hh"
-#include "../PlanDatabase/PlanDatabase.hh"
-#include "../PlanDatabase/DbLogger.hh"
-#include "../ConstraintEngine/CeLogger.hh"
+#include "TemporalAdvisor.hh"
+#include "Schema.hh"
+#include "PlanDatabase.hh"
+#include "DbLogger.hh"
+#include "CeLogger.hh"
 #include "ObjectTokenRelation.hh"
 #include "TemporalNetworkLogger.hh"
 #include "IntervalToken.hh"
 #include "Timeline.hh"
 #include "Utils.hh"
-#include "../ConstraintEngine/IntervalIntDomain.hh"
+#include "IntervalIntDomain.hh"
 
 #include <iostream>
 #include <string>

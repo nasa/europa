@@ -10,7 +10,7 @@
 #include "EnumeratedDomain.hh"
 #include "Domain.hh"
 #include "../TinyXml/tinyxml.h"
-#include "../ConstraintEngine/ConstraintEngine.hh"
+#include "ConstraintEngine.hh"
 #include <algorithm>
 
 namespace Prototype {
