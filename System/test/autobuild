@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.57 2003-10-09 17:05:16 wedgingt Exp $
+# $Id: autobuild,v 1.58 2003-10-24 19:11:02 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -114,7 +114,7 @@ do
     statusMakeTar=$?
     echo '"make '"$makeopt"' EuropaDist.tar" in '"`pwd`"' exited '"$statusMakeTar"
 
-    make $makeopt unofficial >> make.tests 2>&1
+    make $makeopt plannerTests unofficial >> make.tests 2>&1
     status=$?
     echo '"make '"$makeopt"' unofficial" in '"`pwd`"' exited '"$status"
 
