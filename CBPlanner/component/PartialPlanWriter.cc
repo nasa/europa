@@ -665,9 +665,9 @@ namespace EUROPA {
         FatalErrno();
       }
 
-      const std::set<ConstraintId, EntityComparator<EntityId> > &constraints = ceId->getConstraints();
+      const ConstraintSet &constraints = ceId->getConstraints();
       numConstraints = constraints.size();
-      for(std::set<ConstraintId>::const_iterator it = constraints.begin(); it != constraints.end(); ++it) {
+      for(ConstraintSet::const_iterator it = constraints.begin(); it != constraints.end(); ++it) {
         outputConstraint(*it, constrOut, cvmOut);
       }
 
@@ -838,7 +838,7 @@ namespace EUROPA {
       numTokens = tokens.size();
       ConstrainedVariableSet variables = ceId->getVariables();
       numVariables = variables.size();
-      const std::set<ConstraintId, EntityComparator<EntityId> > &constraints = ceId->getConstraints();
+      const ConstraintSet &constraints = ceId->getConstraints();
       numConstraints = constraints.size();
     }
 

@@ -14,14 +14,23 @@ namespace EUROPA {
 		 LATEST};
 
     Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
+
     Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open = false);
+
     virtual ~Timeline();
 
-    void getOrderingChoices(const TokenId& token, std::vector< std::pair<TokenId, TokenId> >& results);
+    void getOrderingChoices(const TokenId& token,
+			    std::vector< std::pair<TokenId, TokenId> >& results,
+			    unsigned int limit = PLUS_INFINITY);
+
     void getTokensToOrder(std::vector<TokenId>& results);
+
     bool hasTokensToOrder() const;
+
     const std::list<TokenId>& getTokenSequence() const;
+
     void constrain(const TokenId& predecessor, const TokenId& successor);
+
     void free(const TokenId& predecessor, const TokenId& successor);
   private:
     void remove(const TokenId& token); // Over-ride base class implementation

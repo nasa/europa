@@ -36,9 +36,12 @@ namespace EUROPA {
   Timeline::~Timeline(){
   }
 
-  void Timeline::getOrderingChoices(const TokenId& token, std::vector< std::pair<TokenId, TokenId> >& results){
+  void Timeline::getOrderingChoices(const TokenId& token, 
+				    std::vector< std::pair<TokenId, TokenId> >& results,
+				    unsigned int limit){
     check_error(results.empty());
     check_error(token.isValid());
+    check_error(limit > 0, "Cannot set limit to less than 1.");
 
     // Force propagation and return if inconsistent - leads to no ordering choices.
     if (!getPlanDatabase()->getConstraintEngine()->propagate())
@@ -53,9 +56,11 @@ namespace EUROPA {
                 "Attempted to query for choices to constrain token " + token->getPredicateName().toString() + 
                 " which has already been constrained.");
 
+    unsigned int choiceCount = 0;
     // If the sequence is empty, add the case where both elements of the pair are the given token.
     if (m_tokenSequence.empty()) {
       results.push_back(std::make_pair(token, token));
+      choiceCount++;
       return;
     }
 
@@ -71,16 +76,17 @@ namespace EUROPA {
 
     // If it can precede the first one, we do not have to test for fitting between
     // token in the sequence, thus, we should push it back and move on.
-    if (current == m_tokenSequence.begin()) {
+    if (current == m_tokenSequence.begin() && choiceCount < limit) {
       results.push_back(std::make_pair(token, *current));
       current++;
+      choiceCount++;
     }
 
     std::list<TokenId>::iterator previous = --current; // step back for predecessor
     ++current; // step forward again to current
 
     // Stopping criteria: At the end or at a point where the token cannot come after the current token
-    while (current != m_tokenSequence.end()) {
+    while (current != m_tokenSequence.end() && choiceCount < limit) {
       // Prune if the token cannot fit between tokens
       TokenId predecessor = *previous;
       TokenId successor = *current;
@@ -90,15 +96,17 @@ namespace EUROPA {
       if (!getPlanDatabase()->getTemporalAdvisor()->canPrecede(predecessor,token))
         break;
 
-      if (getPlanDatabase()->getTemporalAdvisor()->canFitBetween(token, predecessor, successor))
+      if (getPlanDatabase()->getTemporalAdvisor()->canFitBetween(token, predecessor, successor)){
         results.push_back(std::make_pair(token, successor));
+	choiceCount++;
+      }
 
       previous = current++;
     }
 
     // Special case, the token could be placed at the end, which can't precede anything. This
     // results in an ordering choice of the noId() i.e. ordering w.r.t. no successor
-    if (getPlanDatabase()->getTemporalAdvisor()->canPrecede(m_tokenSequence.back(),token))
+    if (choiceCount < limit && getPlanDatabase()->getTemporalAdvisor()->canPrecede(m_tokenSequence.back(),token))
       results.push_back(std::make_pair(m_tokenSequence.back(), token));
   }
 
