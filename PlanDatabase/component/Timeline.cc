@@ -54,13 +54,14 @@ namespace Prototype {
 
 
   void Timeline::getOrderingChoices(const TokenId& token, std::vector<TokenId>& results){
-    check_error(isValid());
     check_error(results.empty());
     check_error(token.isValid());
 
     // Force propagation and return if inconsistent - leads to no ordering choices.
     if(!getPlanDatabase()->getConstraintEngine()->propagate())
       return;
+
+    check_error(isValid());
 
     // It makes no sense to query for ordering choices for a Token that has already been inserted. Conseqeuntly,
     // we trap that as an error. We could just return indicating no choices but that might lead caller to conclude
@@ -110,11 +111,12 @@ namespace Prototype {
   }
 
   void Timeline::getTokensToOrder(std::vector<TokenId>& results){
-    check_error(isValid());
     check_error(results.empty());
 
     // Do propagation to update the information
     bool isOk = getPlanDatabase()->getConstraintEngine()->propagate();
+    check_error(isOk);
+    check_error(isValid());
 
     // Should only progress if we are consistent
     check_error(isOk);
@@ -140,13 +142,11 @@ namespace Prototype {
   }
 
   const std::list<TokenId>& Timeline::getTokenSequence() const{
-    check_error(isValid());
     return m_tokenSequence;
   }
 
   void Timeline::constrain(const TokenId& token, const TokenId& successor){
     check_error(token.isValid());
-    check_error(isValid());
     check_error(token->isActive());
     check_error(successor.isNoId() || (successor.isValid() && successor->isActive()));
     check_error(token != successor);
@@ -196,8 +196,6 @@ namespace Prototype {
       first = *pos;
       Object::constrain(first, second);
     }
-
-    check_error(isValid());
   }
 
   void Timeline::remove(const TokenId& token){
@@ -210,7 +208,6 @@ namespace Prototype {
     check_error(token.isValid());
     check_error(token->isActive());
     cleanup(token);
-    Object::free(token);
   }
 
   /**
@@ -224,23 +221,55 @@ namespace Prototype {
     check_error(token.isValid());
     check_error(isValid(CLEANING_UP));
 
-    // Clean up TokenSequence and TokenIndex data structures
+    // If we are freeing a token which is between 2 other tokens, then there may need
+    // to be a new constraint inserted between its successor and predecessor in order to maintain
+    // the temporal relationship. However, such a constraint may not be required, since it may already be present.
     std::map<int, std::list<TokenId>::iterator >::iterator token_it = m_tokenIndex.find(token->getKey());
     if(token_it != m_tokenIndex.end()){
+
+      std::list<TokenId>::iterator token_pos = token_it->second;
+      TokenId predecessor;
+      TokenId successor;
+
+      if(token_pos != m_tokenSequence.begin()){
+	--token_pos;
+	predecessor = *token_pos;
+	++token_pos;
+
+	// Move on to successor
+	++token_pos;
+	if(token_pos != m_tokenSequence.end())
+	  successor = *token_pos;
+      }
+
+      // Clean up the data structures
       m_tokenSequence.erase(token_it->second);
       m_tokenIndex.erase(token_it);
+      Object::free(token);
+
+      // Now, if we have anything to fix up, do so.
+      if(!successor.isNoId() && !predecessor.isNoId() && ! areConstrained(predecessor, successor))
+	Object::constrain(predecessor, successor);
     }
     check_error(isValid(CLEANING_UP));
   }
 
   bool Timeline::isValid(bool cleaningUp) const{
     check_error(m_tokenIndex.size() == m_tokenSequence.size());
+    int latest_time = MINUS_INFINITY - 1;
     std::set<TokenId> allTokens;
     for(std::list<TokenId>::const_iterator it = m_tokenSequence.begin(); it != m_tokenSequence.end(); ++it){
       TokenId token = *it;
       allTokens.insert(token);
       check_error(m_tokenIndex.find(token->getKey()) != m_tokenIndex.end());
       check_error(cleaningUp || token->isActive());
+
+      // Validate that earliset start times are monotonically increasing
+      if(!cleaningUp){
+	int l_time = (int) token->getStart()->lastDomain().getLowerBound();
+	check_error(l_time == MINUS_INFINITY || l_time == PLUS_INFINITY || l_time > latest_time);
+	latest_time = l_time;
+      }
     }
     check_error(allTokens.size() == m_tokenSequence.size()); // No duplicates.
     return true;

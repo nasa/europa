@@ -66,7 +66,7 @@ SchemaId DefaultSchemaAccessor::s_instance;
     if(loggingEnabled()){\
      new CeLogger(std::cout, ce.getId());\
      new DbLogger(std::cout, db.getId());\
-     new PartialPlanWriter(db.getId(), ce.getId());\
+     new PlanWriter::PartialPlanWriter(db.getId(), ce.getId());\
     }\
     RulesEngine re(db.getId()); \
     new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());\
@@ -818,15 +818,28 @@ private:
     assert(timeline.getTokenSequence().size() == 0);
     assert(timeline.hasTokensToOrder());
 
+    int num_constraints = ce.getConstraints().size();
     timeline.constrain(tokenA.getId());
+    num_constraints += 1; // Only object is constrained since sequence should be empty
+    assert(ce.getConstraints().size() == num_constraints);
+
     timeline.constrain(tokenB.getId());
+    num_constraints += 2; // Object variable and a single temporal constraint since placing at the end
+    assert(ce.getConstraints().size() == num_constraints);
+
     timeline.constrain(tokenC.getId(), tokenA.getId());
+    num_constraints += 2; // Object variable and a single temporal constraint since placing at the beginning
+    assert(ce.getConstraints().size() == num_constraints);
 
     assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
     assert(timeline.getTokenSequence().size() == 3);
     assert(!timeline.hasTokensToOrder());
 
     timeline.free(tokenA.getId());
+    num_constraints -= 3; // Object variable and temporal constraints for placement w.r.t B and C.
+    num_constraints += 1; // Should have added a new constraint to preserve temporal relationship between B and C which had been indirect
+    assert(ce.getConstraints().size() == num_constraints);
+
     assert(timeline.getTokenSequence().size() == 2);
     tokens.clear();
     timeline.getTokensToOrder(tokens);
