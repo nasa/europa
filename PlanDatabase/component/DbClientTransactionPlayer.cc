@@ -50,27 +50,30 @@ namespace Prototype {
         continue;
       }
       m_db->getConstraintEngine()->propagate();
-      check_error(m_db->getConstraintEngine()->constraintConsistent());
       is >> element;
       const char * tagname = element.Value();
-      if (strcmp(tagname, "var") == 0) {
+      if (strcmp(tagname, "new") == 0) {
         playNamedObjectCreated(element);
-      } else if (strcmp(tagname, "new") == 0) {
-        playObjectCreated(element);
       } else if (strcmp(tagname, "close") == 0) {
         playClosed(element);
       } else if (strcmp(tagname, "goal") == 0) {
         playTokenCreated(element);
       } else if (strcmp(tagname, "constrain") == 0) {
         playConstrained(element);
+      } else if (strcmp(tagname, "free") == 0) {
+        playFreed(element);
       } else if (strcmp(tagname, "activate") == 0) {
         playActivated(element);
       } else if (strcmp(tagname, "merge") == 0) {
         playMerged(element);
       } else if (strcmp(tagname, "reject") == 0) {
         playRejected(element);
+      } else if (strcmp(tagname, "cancel") == 0) {
+        playCancelled(element);
       } else if (strcmp(tagname, "specify") == 0) {
         playVariableSpecified(element);
+      } else if (strcmp(tagname, "reset") == 0) {
+        playVariableReset(element);
       } else {
         check_error(ALWAYS_FAILS);
       }
@@ -82,15 +85,14 @@ namespace Prototype {
   {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
-    TiXmlElement * child = element.FirstChildElement();
-    check_error(child != NULL);
-    const char * type = child->Attribute("type");
+    const char * type = element.Attribute("type");
     check_error(type != NULL);
     m_client->createObject(LabelStr(type), LabelStr(name));
   }
 
   void DbClientTransactionPlayer::playObjectCreated(const TiXmlElement & element)
   {
+    check_error(ALWAYS_FAILS); // Not ready test test this yet!
     std::stringstream name;
     name << "$OBJECT[" << m_objectCount++ << "]" << std::ends;
     const char * type = element.Attribute("name");
@@ -100,13 +102,7 @@ namespace Prototype {
 
   void DbClientTransactionPlayer::playClosed(const TiXmlElement & element)
   {
-    const char * name = element.Attribute("name");
-    if (name == NULL) {
-      m_client->close();
-    } else {
-      check_error(ALWAYS_FAILS); // close object type not implemented yet
-//      m_client->close(LabelStr(name));
-    }
+    m_client->close();
   }
 
   void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element)
@@ -123,7 +119,7 @@ namespace Prototype {
     TiXmlElement * object_el = element.FirstChildElement();
     check_error(object_el != NULL);
     check_error(strcmp(object_el->Value(), "object") == 0);
-    const char * name = object_el->Attribute("value");
+    const char * name = object_el->Attribute("name");
     check_error(name != NULL);
     ObjectId object = m_db->getObject(LabelStr(name));
     check_error(object.isValid());
@@ -147,6 +143,27 @@ namespace Prototype {
     }
 
     m_client->constrain(object, token, successor);
+  }
+
+  void DbClientTransactionPlayer::playFreed(const TiXmlElement & element)
+  {
+    TiXmlElement * object_el = element.FirstChildElement();
+    check_error(object_el != NULL);
+    check_error(strcmp(object_el->Value(), "object") == 0);
+    const char * name = object_el->Attribute("name");
+    check_error(name != NULL);
+    ObjectId object = m_db->getObject(LabelStr(name));
+    check_error(object.isValid());
+
+    TiXmlElement * token_el = object_el->NextSiblingElement();
+    check_error(token_el != NULL);
+    check_error(strcmp(token_el->Value(), "token") == 0);
+    const char * path = token_el->Attribute("path");
+    check_error(path != NULL);
+    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    check_error(token.isValid());
+
+    m_client->free(object, token);
   }
 
   void DbClientTransactionPlayer::playActivated(const TiXmlElement & element)
@@ -192,6 +209,18 @@ namespace Prototype {
     TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
     check_error(token.isValid());
     m_client->reject(token);    
+  }
+
+  void DbClientTransactionPlayer::playCancelled(const TiXmlElement & element)
+  {
+    TiXmlElement * token_el = element.FirstChildElement();
+    check_error(token_el != NULL);
+    check_error(strcmp(token_el->Value(), "token") == 0);
+    const char * path = token_el->Attribute("path");
+    check_error(path != NULL);
+    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    check_error(token.isValid());
+    m_client->cancel(token);    
   }
 
   void DbClientTransactionPlayer::playVariableSpecified(const TiXmlElement & element)
@@ -247,6 +276,26 @@ namespace Prototype {
       check_error(ALWAYS_FAILS);
     }
     m_client->specify(variable, value);    
+  }
+
+  void DbClientTransactionPlayer::playVariableReset(const TiXmlElement & element)
+  {
+    TiXmlElement * var_el = element.FirstChildElement();
+    check_error(var_el != NULL);
+    check_error(strcmp(var_el->Value(), "variable") == 0);
+
+    const char * path = var_el->Attribute("token");
+    check_error(path != NULL);
+    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    check_error(token.isValid());
+
+    int index;
+    const char * i = var_el->Attribute("index", &index);
+    check_error(i != NULL);
+    check_error(0 <= index);
+    check_error((unsigned)index < token->getVariables().size());
+    ConstrainedVariableId variable = token->getVariables()[index];
+    m_client->reset(variable);    
   }
 
 }

@@ -75,7 +75,10 @@
 
 SchemaId schema;
 
-//#define REPLAY_DECISIONS
+#define REPLAY_DECISIONS
+
+const char* TX_LOG = "TransactionLog.xml";
+const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
 
 class PlanSystem {
 public:
@@ -153,11 +156,10 @@ int main(int argc, const char ** argv){
 
   // Allocate the schema
   schema = NDDL::schema();
+  int start = 0;
+  int end = 0;
 
-  std::string closedDecisions;
-
-  // Compute or load the closed decisions
-  if (argc == 1) {
+  {
     PlanSystem planSystem;
 
     DbClientTransactionLog * transactions = new DbClientTransactionLog(planSystem.planDatabase->getClient(), planSystem.tokenMapper);
@@ -169,8 +171,15 @@ int main(int argc, const char ** argv){
       new FlawQueryLogger(std::cout, planSystem.flawQuery);
       new PlanWriter::PartialPlanWriter(planSystem.planDatabase, planSystem.constraintEngine);
     }
-  
-    NDDL::initialize(planSystem.planDatabase);
+
+    // Generate initial state from the model if necessary
+    if (argc == 1) 
+      NDDL::initialize(planSystem.planDatabase);
+    else { // Generate from a transaction log
+      DbClientTransactionPlayer player(planSystem.planDatabase, planSystem.tokenMapper);
+      std::ifstream in(TX_LOG);
+      player.play(in);
+    }
 
     // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
     std::list<ObjectId> objects;
@@ -181,8 +190,8 @@ int main(int argc, const char ** argv){
     check_error(horizonStart.isValid());
     ConstrainedVariableId horizonEnd = world->getVariable(LabelStr("world.m_horizonEnd"));
     check_error(horizonEnd.isValid());
-    int start = (int) horizonStart->baseDomain().getSingletonValue();
-    int end = (int) horizonEnd->baseDomain().getSingletonValue();
+    start = (int) horizonStart->baseDomain().getSingletonValue();
+    end = (int) horizonEnd->baseDomain().getSingletonValue();
     planSystem.horizon->setHorizon(start, end);
 
     // Create and run the planner
@@ -193,50 +202,31 @@ int main(int argc, const char ** argv){
     EUROPAHeuristicStrategy strategy;
       
     int res = planner.run(strategy.getId(), loggingEnabled());
-    //int res = planner.run(strategy.getId(), true);
+
     check_error(res == 1);
 	
     const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
       
     std::cout << "Nr of Decisions = " << closed.size() << std::endl;
-      
-    // planner decisions
-    std::cout << "Saving Planner Decisions..." << std::endl;
-    PlannerDecisionWriter decisionWriter(planner.getId(), planSystem.tokenMapper);
-    closedDecisions = decisionWriter.closedDecisionsString();
 
-    // save decisions
-    std::string filename(argv[0]);
-    filename += "-decisions.xml";
-    std::ofstream out(filename.c_str());
-    out << closedDecisions.c_str() << std::endl;
+    // Store transactions for recreation of database
+    std::cout << "Saving Transactions.." << std::endl;
+    std::ofstream out(TX_LOG);
+    transactions->flush(out);
     out.close();
 
-    // save transactions
-    std::string filename2(argv[0]);
-    filename2 += "-transactions.xml";
-    std::ofstream out2(filename2.c_str());
-    transactions->flush(out2);
-    out2.close();
+    delete transactions;
 
     std::cout << "Plan Database:" << std::endl;
     PlanDatabaseWriter::write(planSystem.planDatabase, std::cout);
-  } else {
-    // load the planner decisions from the file
-    std::string filename(argv[0]);
-    filename += "-decisions.xml";
-    std::ifstream in(filename.c_str());
-    std::string readbuf;
-    while (in.good()) {
-      getline(in, readbuf);
-      closedDecisions += readbuf;
-    }
   }
 
 #ifdef REPLAY_DECISIONS
   {
     // replay the planner decisions
     PlanSystem planSystem;
+    planSystem.horizon->setHorizon(start, end);
+    DbClientTransactionLog * transactions = new DbClientTransactionLog(planSystem.planDatabase->getClient(), planSystem.tokenMapper);
 
     if (loggingEnabled()) {
       new CeLogger(std::cout, planSystem.constraintEngine);
@@ -245,31 +235,24 @@ int main(int argc, const char ** argv){
       new FlawQueryLogger(std::cout, planSystem.flawQuery);
       new PlanWriter::PartialPlanWriter(planSystem.planDatabase, planSystem.constraintEngine);
     }
-  
-    NDDL::initialize(planSystem.planDatabase);
 
-    // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
-    std::list<ObjectId> objects;
-    planSystem.planDatabase->getObjectsByType(LabelStr("World"), objects);
-    ObjectId world = objects.front();
-    check_error(objects.size() == 1);
-    ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
-    check_error(horizonStart.isValid());
-    ConstrainedVariableId horizonEnd = world->getVariable(LabelStr("world.m_horizonEnd"));
-    check_error(horizonEnd.isValid());
-    int start = (int) horizonStart->baseDomain().getSingletonValue();
-    int end = (int) horizonEnd->baseDomain().getSingletonValue();
-    planSystem.horizon->setHorizon(start, end);
-
-    // planner decisions
+    // Replay everything
     std::cout << "Replaying Planner Decisions..." << std::endl;
+
     DbClientTransactionPlayer player(planSystem.planDatabase, planSystem.tokenMapper);
-    std::stringstream transactions;
-    transactions << closedDecisions << ends;
-    player.play(transactions);
+    std::ifstream in(TX_LOG);
+    player.play(in);
 
     std::cout << "Replay Database:" << std::endl;
     PlanDatabaseWriter::write(planSystem.planDatabase, std::cout);
+
+
+
+    // Store transactions for recreation of database
+    std::cout << "Saving Replayed Transactions.." << std::endl;
+    std::ofstream out(TX_REPLAY_LOG);
+    transactions->flush(out);
+    out.close();
   }
 #endif // REPLAY_DECISIONS
 

@@ -7,7 +7,7 @@
 class TiXmlElement;
 
 /**
- * @file DbClientTransactionLog
+ * @file DbClientTransactionPlayer
  * @brief Main interface for playing transactions. Necessary for copy. replay, and possibly recovery.
  */
 
@@ -29,10 +29,13 @@ namespace Prototype {
     void playClosed(const TiXmlElement & element);
     void playTokenCreated(const TiXmlElement & element);
     void playConstrained(const TiXmlElement & element);
+    void playFreed(const TiXmlElement & element);
     void playActivated(const TiXmlElement & element);
     void playMerged(const TiXmlElement & element);
     void playRejected(const TiXmlElement & element);
+    void playCancelled(const TiXmlElement & element);
     void playVariableSpecified(const TiXmlElement & element);
+    void playVariableReset(const TiXmlElement & element);
 
   private:
     PlanDatabaseId m_db;
