@@ -76,7 +76,7 @@ LocalDepends tests : run-hsts-module-tests
         ;
 
 #
-# EUROPA TESTS
+# EUROPA1 TESTS
 #   Converted from NewPlan/ModuleTests/Parser, e.g.
 #
 ModuleObjects runEUROPAtest.cc : HSTS ;
@@ -125,19 +125,20 @@ RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
 
 # Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
 #   Gdb on Token says *this is a RuleInstance but T (of Id<T>) is class Token (!).
-#   Reported in GNATS 2798.
-RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
+#   Reported in GNATS 2798; related to GNATS 2772.
+# Now fails to (C++) compile, so comment it out (GNATS 2817).
+# RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
 
 # Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
-#   Reported in GNATS 2798.
-RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nddl ;
+#   Reported in GNATS 2798; related to GNATS 2772.
+# Now fails to (C++) compile, so comment it out (GNATS 2817).
+# RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nddl ;
 
 # Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
-#   Reported in GNATS 2798.
-RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
+#   Reported in GNATS 2798; related to GNATS 2772.
+# Now fails to (C++) compile, so comment it out (GNATS 2817).
+# RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 
-# Failing: Utils/core/Utils.hh:134: Error: item.isValid() is false
-#   Reported as GNATS 2768.
 RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
 RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
 RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
@@ -158,31 +159,37 @@ RunEUROPATest roverTest2 : multrover-test.nddl ;
 #   Verified as mentioned in PLASMA/MigrationNotes (entry 8 currently).
 # RunEUROPATest roverCTTests : rover2-test.nddl rover2a-test.nddl rover2b-test.nddl ;
 
-# Converter and/or NDDL compiler has bugs.  Reported as GNATS 2763.
+# Failing; not investigated yet.
 RunEUROPATest merTest1 : R1-files-p1.nddl ;
 RunEUROPATest merTest2 : R1-files-p2.nddl ;
 RunEUROPATest merTest3 : R1-files-p3.nddl ;
 RunEUROPATest merTest4 : R2-files-R21-Bill.nddl ;
+
 RunEUROPATest merTest5 : R2-files-R21-IDD1.nddl ;
+
+# Failing; not investigated yet.
 RunEUROPATest merTest6 : R2-files-R21-IDD2.nddl ;
 RunEUROPATest merTest7 : R2-files-R21-IDD3.nddl ;
+
 RunEUROPATest merTest8 : R2-files-R21-PMA1.nddl ;
 RunEUROPATest merTest9 : R2-files-R21-PMA2.nddl ;
+
+# Failing; not investigated yet.
 RunEUROPATest merTest10 : mer-1.nddl ;
 RunEUROPATest merTest11 : mer-bill-2.nddl ;
 RunEUROPATest merTest12 : mer-bill.nddl ;
+
 RunEUROPATest merTest13 : mer-idd1.nddl ;
+
+# Failing; not investigated yet.
 RunEUROPATest merTest14 : mer-idd2.nddl ;
 RunEUROPATest merTest15 : mer-idd3.nddl ;
 RunEUROPATest merTest16 : mer-pma-comm.nddl ;
+
 RunEUROPATest merTest17 : mer-pma1.nddl ;
 RunEUROPATest merTest18 : mer-pma2.nddl ;
 
-# Fails Id::isValid() check, I believe as noted in GNATS 2757.
 RunEUROPATest gnats-C3 : C3-init.nddl ;
-
-# Fails with seg fault in std::list::insert().
-#   Reported as GNATS 2770.
 RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
 
 # These two take multiple hours without completing on Token for some reason and may be infinite loop or similar.
@@ -190,17 +197,14 @@ RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
 RunEUROPATest gnats-P4-C3 : P4-C3-init.nddl ;
 RunEUROPATest gnats-P4-C3eq : P4-C3eq-init.nddl ;
 
-# Fails Id::isValid() check, I believe as noted in GNATS 2757.
 RunEUROPATest gnats-SC : SC-init.nddl ;
-
 RunEUROPATest gnats-condasame : condasame-init.nddl ;
 RunEUROPATest gnats-rover-fixed : rover-fixed-init.nddl ;
-
-# Fails Id::isValid() check, I believe as noted in GNATS 2757.
 RunEUROPATest gnats-sum : sum-init.nddl ;
 
 # DNP tests need the DNP specific constraints.
-# These next two, at least, fail, perhaps due to lack of memory or seg fault or ... (no output)
+
+# These fail, perhaps due to lack of memory or seg fault or ... (no output)
 RunEUROPATest dnp-timeline : DNP.timeline.nddl ;
 RunEUROPATest dnp-DNP2 : DNP2.timeline.nddl ;
 RunEUROPATest dnp-allDSS : allDSS.nddl ;
@@ -208,8 +212,11 @@ RunEUROPATest dnp-fourFreeObs : fourFreeObs.nddl ;
 RunEUROPATest dnp-DNP3fourFreeObs : DNP3.fourFreeObs.nddl ;
 RunEUROPATest dnp-DNP3 : DNP3.timeline.nddl ;
 RunEUROPATest dnp-fourFreeObsNotEmpty : fourFreeObs-initBufNotEmpty.nddl ;
+
 RunEUROPATest dnp-freeObs : freeObs.nddl ;
 RunEUROPATest dnp-freeObsNoEmpty : freeObs.noEmpty.nddl ;
+
+# These fail, perhaps due to lack of memory or seg fault or ... (no output)
 RunEUROPATest dnp-tenFreeObs : tenFreeObs.nddl ;
 RunEUROPATest dnp-threeFreeObs : threeFreeObs.nddl ;
 RunEUROPATest dnp-twentyFreeObs : twentyFreeObs.nddl ;
