@@ -58,10 +58,18 @@ class Baz {
  }
 
 // This test is negative - it will cause the NddlCompiler to detecte a collision. When we allow negative tests causing failure
-// the n reintroduce this as a test
+// then reintroduce this as a test
 // Baz(Bar _foo){
 //  m_foo = _foo;
 // }
+}
+
+class Bat {
+ Baz m_baz;
+
+ Bat(Foo _foo){
+  m_baz = new Baz(_foo);
+ }
 }
 
 class World {
@@ -70,6 +78,7 @@ class World {
  Foo m_foo3;
  Foo m_foo4;
  Baz m_baz1;
+ Bat m_bat1;
 
  predicate initialState{}
 
@@ -79,5 +88,6 @@ class World {
   m_foo3 = m_foo2;
   m_foo4 = new Foo(this, 100, false);
   m_baz1 = new Baz(m_foo1);
+  m_bat1 = new Bat(m_foo1);
  }
 }
