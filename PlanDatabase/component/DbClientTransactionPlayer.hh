@@ -34,7 +34,6 @@ namespace Prototype {
     void processTransaction(const TiXmlElement & element);
     void playNamedObjectCreated(const TiXmlElement & element);
     void playObjectCreated(const TiXmlElement & element);
-    void playClosed(const TiXmlElement & element);
     void playTokenCreated(const TiXmlElement & element);
     void playConstrained(const TiXmlElement & element);
     void playFreed(const TiXmlElement & element);
@@ -50,7 +49,7 @@ namespace Prototype {
     DbClientId m_client;
     int m_objectCount;
 
-    const AbstractDomain & getAbstractDomain(const TiXmlElement & abstractDomain);
+    AbstractDomain * getAbstractDomain(const TiXmlElement & abstractDomain);
     double getValue(const TiXmlElement & value);
     ConstrainedVariableId getVariable(const TiXmlElement & variable);
   };

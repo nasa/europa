@@ -1,87 +1,10 @@
 #include "DbClientTransactionLog.hh"
 #include "Object.hh"
 #include "Token.hh"
+#include "TransactionXml.hh"
 #include "../TinyXml/tinyxml.h"
 
 namespace Prototype {
-
-  static std::string
-  domainValueAsString(const AbstractDomain * domain, double value)
-  {
-    if (domain->getType() == AbstractDomain::BOOL) {
-      return (value ? "true" : "false");
-    } else if (domain->isNumeric()) {
-      if (domain->getType() == AbstractDomain::INT_INTERVAL) {
-        char s[64];
-        snprintf(s, sizeof(s), "%d", (int)value);
-        return s;
-      } else {
-        char s[64];
-        snprintf(s, sizeof(s), "%16f", (double)value);
-        return s;
-      }
-    } else if (LabelStr::isString(domain->getUpperBound())) {
-      const LabelStr& label = value;
-      return label.toString();
-    } else {
-      ObjectId object = value;
-      check_error(object.isValid());
-      return object->getName().toString();
-    }
-  }
-
-  static std::string
-  domainTypeAsString(const AbstractDomain * domain)
-  {
-    if (domain->getType() == AbstractDomain::BOOL) {
-      return "bool";
-    } else if (domain->isNumeric()) {
-      if (domain->getType() == AbstractDomain::INT_INTERVAL) {
-        return "int";
-      } else {
-        return "float";
-      }
-    } else if (LabelStr::isString(domain->getUpperBound())) {
-      return "string";
-    } else {
-      return "object";
-    }
-  }
-
-  static TiXmlElement *
-  domainValueAsXml(const AbstractDomain * domain, double value)
-  {
-    TiXmlElement * element = new TiXmlElement(domainTypeAsString(domain));
-    element->SetAttribute("value", domainValueAsString(domain, value));
-    return element;
-  }
-
-  static TiXmlElement *
-  abstractDomainAsXml(const AbstractDomain * domain)
-  {
-    check_error(!domain->isEmpty());
-    check_error(!domain->isDynamic());
-    if (domain->isSingleton()) {
-      return domainValueAsXml(domain, domain->getSingletonValue());
-    } else if (domain->isEnumerated()) {
-      TiXmlElement * element = new TiXmlElement("set");
-      std::list<double> values;
-      domain->getValues(values);
-      std::list<double>::const_iterator iter;
-      for (iter = values.begin() ; iter != values.end() ; iter++) {
-        element->LinkEndChild(domainValueAsXml(domain, *iter));
-      }
-      return element;
-    } else if (domain->isInterval()) {
-      TiXmlElement * element = new TiXmlElement("interval");
-      element->SetAttribute("type", domainTypeAsString(domain));
-      element->SetAttribute("min", domainValueAsString(domain, domain->getLowerBound()));
-      element->SetAttribute("max", domainValueAsString(domain, domain->getUpperBound()));
-      return element;
-    }
-    check_error(ALWAYS_FAILS);
-    return NULL;
-  }
 
   DbClientTransactionLog::DbClientTransactionLog(const DbClientId& client)
     : DbClientListener(client){}
@@ -110,20 +33,24 @@ namespace Prototype {
 
     std::vector<ConstructorArgument>::const_iterator iter;
     for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
-      element->LinkEndChild(abstractDomainAsXml(iter->second));
+      element->LinkEndChild(TransactionXml::abstractDomainAsXml(iter->second));
     }
 
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyClosed(){
-    TiXmlElement * element = new TiXmlElement("close");
+    TiXmlElement * element = new TiXmlElement("invoke");
+    element->SetAttribute("name", "close");
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyClosed(const LabelStr& objectType){
-    TiXmlElement * element = new TiXmlElement("close");
-    element->SetAttribute("name", objectType.toString());
+    TiXmlElement * element = new TiXmlElement("invoke");
+    element->SetAttribute("name", "close");
+    TiXmlElement * id_el = new TiXmlElement("id");
+    id_el->SetAttribute("name", objectType.toString());
+    element->LinkEndChild(id_el);
     m_bufferedTransactions.push_back(element);
   }
 
@@ -202,14 +129,14 @@ namespace Prototype {
     const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
     check_error(variables.size() == 1);
     element->LinkEndChild(variableAsXml(variables[0]));
-    element->LinkEndChild(abstractDomainAsXml(&domain));
+    element->LinkEndChild(TransactionXml::abstractDomainAsXml(&domain));
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyVariableSpecified(const ConstrainedVariableId& variable){
     TiXmlElement * element = new TiXmlElement("specify");
     element->LinkEndChild(variableAsXml(variable));
-    element->LinkEndChild(abstractDomainAsXml(&variable->specifiedDomain()));
+    element->LinkEndChild(TransactionXml::abstractDomainAsXml(&variable->specifiedDomain()));
     m_bufferedTransactions.push_back(element);
   }
 

@@ -2,8 +2,11 @@
 #include "DbClientTransactionLog.hh"
 #include "DbClient.hh"
 #include "PlanDatabase.hh"
-#include "Token.hh"
 #include "Object.hh"
+#include "Token.hh"
+#include "TransactionXml.hh"
+#include "EnumeratedDomain.hh"
+#include "IntervalDomain.hh"
 #include "../TinyXml/tinyxml.h"
 #include "../ConstraintEngine/ConstraintEngine.hh"
 
@@ -64,8 +67,6 @@ namespace Prototype {
       const char * tagname = element.Value();
       if (strcmp(tagname, "new") == 0) {
         playNamedObjectCreated(element);
-      } else if (strcmp(tagname, "close") == 0) {
-        playClosed(element);
       } else if (strcmp(tagname, "goal") == 0) {
         playTokenCreated(element);
       } else if (strcmp(tagname, "constrain") == 0) {
@@ -110,11 +111,6 @@ namespace Prototype {
     const char * type = element.Attribute("name");
     check_error(type != NULL);
     m_client->createObject(LabelStr(type), LabelStr(name.str()));
-  }
-
-  void DbClientTransactionPlayer::playClosed(const TiXmlElement & element)
-  {
-    m_client->close();
   }
 
   void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element)
@@ -267,17 +263,19 @@ namespace Prototype {
         // unary constraint
         check_error(variables.size() == 1);
         check_error(child_el->NextSiblingElement() == NULL);
-        const AbstractDomain& domain = getAbstractDomain(*child_el);
-        m_client->createConstraint(LabelStr(name), variables[0], domain);
+        AbstractDomain * domain = TransactionXml::abstractDomain(*child_el);
+        m_client->createConstraint(LabelStr(name), variables[0], *domain);
+        delete domain;
         return;
       }
     }
+    if (strcmp(name, "close") == 0) {
+      // close database special case
+      check_error(variables.size() == 0);
+      m_client->close();
+      return;
+    }
     m_client->createConstraint(LabelStr(name), variables);
-  }
-
-  const AbstractDomain & DbClientTransactionPlayer::getAbstractDomain(const TiXmlElement & abstractDomain)
-  {
-    
   }
 
   double DbClientTransactionPlayer::getValue(const TiXmlElement & value)
@@ -285,23 +283,17 @@ namespace Prototype {
     if (strcmp(value.Value(), "bool") == 0) {
       const char * value_st = value.Attribute("value");
       check_error(value_st != NULL);
-      if (strcmp(value_st, "true") == 0) {
-        return 1;
-      } else if (strcmp(value_st, "false") == 0) {
-        return 0;
-      }
+      return TransactionXml::parseBool(value_st);
     }
     if (strcmp(value.Value(), "int") == 0) {
-      int i;
-      const char * value_st = value.Attribute("value", &i);
+      const char * value_st = value.Attribute("value");
       check_error(value_st != NULL);
-      return i;
+      return TransactionXml::parseInt(value_st);
     }
     if (strcmp(value.Value(), "float") == 0) {
-      double val;
-      const char * value_st = value.Attribute("value", &val);
+      const char * value_st = value.Attribute("value");
       check_error(value_st != NULL);
-      return val;
+      return TransactionXml::parseFloat(value_st);
     }
     if (strcmp(value.Value(), "string") == 0) {
       const char * value_st = value.Attribute("value");
