@@ -3,6 +3,8 @@
 
 namespace Prototype {
 
+  //#define PROTOTYPE_FAST_VERSION
+
   /**
    * @def DECLARE_GLOBAL_CONST(TYPE,NAME)
    * @brief Declare a global constant via a global function to ensure initialization
