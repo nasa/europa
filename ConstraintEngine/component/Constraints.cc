@@ -1262,11 +1262,106 @@ namespace Prototype {
     cNZCScope.reserve(m_variables.size() + 1);
     cNZCScope.push_back(m_nonZeros.getId());
     cNZCScope.insert(cNZCScope.end(), m_variables.begin(), m_variables.end());
-    std::cerr << "OrConstraint: m_variables.size() is " << m_variables.size()
-              << " and cNZCScope.size() is " << cNZCScope.size() << '\n';
     assertTrue(m_variables.size() + 1 == cNZCScope.size());
     m_countNonZerosConstraint = (new CountNonZerosConstraint(LabelStr("Internal:Or:countNonZeros"), propagatorName,
                                                              constraintEngine, cNZCScope))->getId();
+  }
+
+  EqualMinimumConstraint::EqualMinimumConstraint(const LabelStr& name,
+                                                 const LabelStr& propagatorName,
+                                                 const ConstraintEngineId& constraintEngine,
+                                                 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    assertTrue(m_variables.size() > 1);
+    for (unsigned int i = 0; i < m_variables.size(); i++)
+      assertTrue(getCurrentDomain(m_variables[i]).isNumeric());
+  }
+
+  // If EqualMinConstraint::handleExecute's contributors were a class
+  // data member, then EqualMinConstraint::canIgnore() could be quite
+  // specific about events to ignore.  If the event(s) were available
+  // to handleExecute(), it could focus on just the changed vars.
+
+  void EqualMinimumConstraint::handleExecute() {
+    AbstractDomain& minDom = getCurrentDomain(m_variables[0]);
+    AbstractDomain& firstDom = getCurrentDomain(m_variables[1]);
+    double minSoFar = firstDom.getLowerBound();
+    double maxSoFar = firstDom.getUpperBound();
+    std::set<unsigned int> contributors; /**< Set of var indices that "affect" minimum, or are affected by minDom's minimum. */
+    contributors.insert(1);
+    std::vector<ConstrainedVariableId>::iterator it = m_variables.begin();
+    unsigned int i = 2;
+    for (it++, it++; it != m_variables.end(); it++, i++) {
+      AbstractDomain& curDom = getCurrentDomain(*it);
+      if (maxSoFar < curDom.getLowerBound()) {
+        // This variable doesn't "contribute" ...
+        // ... but it might need to be trimmed by minDom; check:
+        if (curDom.getLowerBound() < minDom.getLowerBound())
+          contributors.insert(i);
+        continue;
+      }
+      if (curDom.getUpperBound() < minSoFar) {
+        // This variable completely "dominates" so far.
+        minSoFar = curDom.getLowerBound();
+        maxSoFar = curDom.getUpperBound();
+        contributors.clear();
+        contributors.insert(i);
+        continue;
+      }
+      if (curDom.getUpperBound() < maxSoFar) {
+        // This variable restricts the min's largest value.
+        maxSoFar = curDom.getUpperBound();
+        contributors.insert(i);
+      }
+      if (curDom.getLowerBound() < minSoFar) {
+        // This variable contains the smallest values seen so far.
+        minSoFar = curDom.getLowerBound();
+        contributors.insert(i);
+        continue;
+      }
+      if (curDom.getLowerBound() <= minDom.getUpperBound())
+        contributors.insert(i);
+    }
+    if (minDom.intersect(IntervalDomain(minSoFar, maxSoFar)) && minDom.isEmpty())
+      return;
+    double minimum = minDom.getLowerBound();
+    if (contributors.size() == 1) {
+      // If there is only one other var that has a value in minDom,
+      // it needs to be restricted to minDom to satisfy the constraint.
+      i = *(contributors.begin());
+      assertTrue(i > 0);
+      AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
+      IntervalDomain restriction(minimum, minDom.getUpperBound());
+      curDom.intersect(restriction);
+      return; // No other contributors, so cannot be more to do.
+    }
+    while (!contributors.empty()) {
+      i = *(contributors.begin());
+      assertTrue(i > 0);
+      contributors.erase(contributors.begin());
+      AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
+      if (minimum < curDom.getLowerBound())
+        continue;
+      IntervalDomain restriction(minimum, curDom.getUpperBound());
+      if (curDom.intersect(restriction) && curDom.isEmpty())
+        return;
+    }
+  }
+
+  MinimumEqualConstraint::MinimumEqualConstraint(const LabelStr& name,
+                                                 const LabelStr& propagatorName,
+                                                 const ConstraintEngineId& constraintEngine,
+                                                 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables)
+  {
+    std::vector<ConstrainedVariableId> cEMCScope;
+    cEMCScope.reserve(m_variables.size());
+    cEMCScope.push_back(m_variables[m_variables.size() - 1]);
+    for (unsigned int i = 0; i < m_variables.size() - 1; i++)
+      cEMCScope.push_back(m_variables[i]);
+    assertTrue(m_variables.size() == cEMCScope.size());
+    m_eqMinConstraint = (new EqualMinimumConstraint(LabelStr("Internal:MinEq:EqMin"), propagatorName,
+                                                    constraintEngine, cEMCScope))->getId();
   }
 
 } // end namespace Prototype
