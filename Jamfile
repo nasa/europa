@@ -8,6 +8,7 @@ Module plasma : all System ;
 
 Depends run-tests : tests ;
 Depends run-all-tests : run-tests run-nddl-tests run-nddl-planner-tests ;
+NOCARE run-all-tests run-tests run-nddl-tests run-nddl-planner-tests tests ;
 
 SubInclude PLASMA Utils ;
 SubInclude PLASMA ConstraintEngine ;
@@ -20,5 +21,8 @@ SubInclude PLASMA TemporalNetwork ;
 SubInclude PLASMA NDDL ;
 SubInclude PLASMA AgentDatabase ;
 SubInclude PLASMA System ;
+
+RemoveBinaries clean-all ;
+Depends clean-all : clean clean-nddl-xml ;
 
 } # PLASMA_READY

@@ -1,4 +1,18 @@
 
+rule RemoveBinaries {
+  local target = $(1) ;
+}
+
+actions RemoveBinaries {
+  find . -name '*.o' -exec rm {} \;
+  find . -name '*.so' -exec rm {} \;
+  find . -name '*_g' -exec rm {} \;
+  find . -name '*_o' -exec rm {} \;
+  find . -name '*_p' -exec rm {} \;
+  find . -name '*_rt' -exec rm {} \;
+  find . -name '*_no' -exec rm {} \;
+}
+
 {
   local SUBDIR = $(PLASMA) ;
   include [ FDirName $(SUBDIR) CommonRules ] ;
