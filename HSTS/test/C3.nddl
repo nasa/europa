@@ -22,7 +22,7 @@ class P4C3___Q {
     int dy;
     bool Idle;
 
-    condeq(dx, dy, Idle);
+    condeq(Idle, dx, dy);
     eq(dx, [0 +inf]);
     eq(dy, [-inf 0]);
   }
