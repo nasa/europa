@@ -27,7 +27,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>1</Index>
+   <Index>0</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>Monkey_Class___Location_SV.Going</PredicateName>
@@ -41,7 +41,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>2</Index>
+   <Index>1</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>Monkey_Class___Location_SV.Going</PredicateName>

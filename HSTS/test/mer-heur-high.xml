@@ -164,7 +164,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>9</Index>
+   <Index>8</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
@@ -180,7 +180,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>8</Index>
+   <Index>7</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
@@ -201,7 +201,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>8</Index>
+   <Index>7</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
@@ -222,7 +222,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>4</Index>
+   <Index>3</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
@@ -238,7 +238,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>4</Index>
+   <Index>3</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>PMA_Class___PMA_MT_SV.PMA_MT_Slewing</PredicateName>

@@ -57,8 +57,8 @@ LocalDepends run-hsts-planner-tests :
 #       merTest14
 #       merTest15
 #       merTest16
-        merTest17
-        merTest18
+#       merTest17
+#       merTest18
 #       merTest1-h
 #       merTest2-h
 #       merTest3-h
@@ -95,9 +95,9 @@ LocalDepends run-hsts-planner-tests :
 #       dnp-freeObs
 #       dnp-freeObsNoEmpty
 #       dnp-tenFreeObs
-#       dnp-threeFreeObs
+        dnp-threeFreeObs
 #       dnp-twentyFreeObs
-#       dnp-twoFreeObs
+        dnp-twoFreeObs
 #       dnp-timeline-h
 #       dnp-DNP2-h
 #       dnp-DNP23-h
@@ -257,7 +257,7 @@ RunEUROPATest merTest18 : mer-pma2.nddl ;
 
 # Same set as just above plus the heuristics and no branch files.
 
-# Fails hasParent("HGA_Class___HGA_Mode_SV.HGA_Slew") check
+# Fails: HSTS/core/HSTSHeuristics.cc:149: Error: MIN_PRIORITY <= p is false
 RunEUROPATest merTest1-h : R1-files-p1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 RunEUROPATest merTest2-h : R1-files-p2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 RunEUROPATest merTest3-h : R1-files-p3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
@@ -277,11 +277,10 @@ RunEUROPATest merTest16-h : mer-pma-comm.nddl : mer-heur-high.xml : mer-heur-hig
 RunEUROPATest merTest17-h : mer-pma1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 RunEUROPATest merTest18-h : mer-pma2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 
-# Fails: ConstraintEngine/component/Constraints.cc:789: Error: getCurrentDomain(m_variables[0]).getType() == AbstractDomain::BOOL is false
+# Works now
 RunEUROPATest gnats-C3 : C3-init.nddl ;
 
-# Fails: PlanDatabase/core/Schema.cc:214: Error: hasParent(type) is false
-#        Test___R.V does not have a parent.
+# Now fails with no error message
 RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl : NoBranchBug.xml : NoBranchBug.nobr ;
 
 # These two take multiple hours without completing on Token for some reason and may be infinite loop or similar.
@@ -324,27 +323,34 @@ RunEUROPATest dnp-freeObsNoEmpty : freeObs.noEmpty.nddl ;
 # None are run by NewPlan tests without a heuristics file.
 # Probably fail due to creating huge numbers of ChoiceId's like dnp-timeline.
 RunEUROPATest dnp-tenFreeObs : tenFreeObs.nddl ;
+
+# This one works now
 RunEUROPATest dnp-threeFreeObs : threeFreeObs.nddl ;
+
+# This one fails with no error message
 RunEUROPATest dnp-twentyFreeObs : twentyFreeObs.nddl ;
+
+# This one works now
 RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl ;
 
 # Same set as just prior set plus heuristics and no branch info.
 
-# Fails isString(m_key) safety check
+# Now fails with no error message
 RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
 
 # Fails !enumeration.empty() safety check in HSTSHeuristics::VariableEntry constructor near line 197
 RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
 
-# Fails PlanDatabase/core/Schema.cc:214: Error: hasParent(type) is false
-#   DNP_Data___SSR_Storage_Use.Constant_Storage does not have a parent.
+# Fails with Error: Token Entry SUBGOAL:DNP_Science___Scan_Platform.Mosaic_LO:AFTER:DNP_Science___Scan_Platform.Scan_Idle
+#       matches existing entry SUBGOAL:DNP_Science___Scan_Platform.Mosaic_LO:BEFORE:DNP_Science___Scan_Platform.Scan_Idle
 RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP3heur.xml ;
 
-# Fails hasParent("DNP_Science___Scan_Platform.Scan_Idle") safety check in Schema::getParent() near line 210
+# Fails with HSTS/core/HSTSHeuristics.cc:198: Error: !enumeration.empty() is false
 RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
 RunEUROPATest dnp-fourFreeObs-h : fourFreeObs.nddl : DNP2heur3.xml ;
 
-# Fails hasParent("DNP_Data___SSR_Storage_Use.Constant_Storage") check
+# Fails with Error: Token Entry SUBGOAL:DNP_Science___Scan_Platform.Mosaic_LO:AFTER:DNP_Science___Scan_Platform.Scan_Idle
+#        matches existing entry SUBGOAL:DNP_Science___Scan_Platform.Mosaic_LO:BEFORE:DNP_Science___Scan_Platform.Scan_Idle
 RunEUROPATest dnp-DNP3fourFreeObs-h : DNP3.fourFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 RunEUROPATest dnp-DNP3-h : DNP3.timeline.nddl : DNP3heur.xml : DNP3nobr ;
 RunEUROPATest dnp-fourFreeObsNotEmpty-h : fourFreeObs-initBufNotEmpty.nddl : DNP3heur.xml : DNP3nobr ;

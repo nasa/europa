@@ -5,15 +5,11 @@ enum Location_Label { 'lander', 'rock', 'hill', 'sand', 'martian_city' }
 class Rover_Class___location {
   predicate At {
     Location_Label Loc_Label;
-
-    eq(duration, [1 +inf]);
   }
 
   predicate Going {
     Location_Label From_Loc;
     Location_Label To_Loc;
-
-    neq(From_Loc, To_Loc);
   }
 
   Rover_Class __DDL__object;
@@ -26,9 +22,6 @@ class Rover_Class___charge {
   predicate Maintain {
     int Charge_Value;
     int _0_anon_OR_tag_1;
-
-    eq(Charge_Value, [0 200]);
-    eq(_0_anon_OR_tag_1, [1 2]);
   }
 
   predicate Charge {
@@ -36,13 +29,6 @@ class Rover_Class___charge {
     int Rate_Val;
     int End_Val;
     int _0_anon_OR_tag_1;
-
-    addmuleq(Start_Val, duration, Rate_Val, End_Val);
-    eq(Start_Val, [10 100]);
-    eq(Start_Val, [0 200]);
-    eq(Rate_Val, 20);
-    eq(End_Val, [0 200]);
-    eq(_0_anon_OR_tag_1, [1 2]);
   }
 
   predicate Use {
@@ -51,13 +37,6 @@ class Rover_Class___charge {
     int End_Val;
     int _0_anon_OR_tag_1;
     int _0_anon_OR_tag_2;
-
-    addmuleq(End_Val, duration, Rate_Val, Start_Val);
-    eq(Start_Val, [0 200]);
-    eq(Rate_Val, 20);
-    eq(End_Val, [0 200]);
-    eq(_0_anon_OR_tag_1, [1 2]);
-    eq(_0_anon_OR_tag_2, [1 2]);
   }
 
   Rover_Class __DDL__object;
@@ -76,6 +55,7 @@ class Rover_Class {
 }
 
 Rover_Class___location::At {
+  eq(duration, [1 +inf]);
   met_by(Rover_Class___location.Going s0);
     eq(s0.To_Loc, Loc_Label);
   meets(Rover_Class___location.Going s1);
@@ -83,6 +63,7 @@ Rover_Class___location::At {
 }
 
 Rover_Class___location::Going {
+  neq(From_Loc, To_Loc);
   met_by(Rover_Class___location.At s0);
     eq(s0.Loc_Label, From_Loc);
   equals(Rover_Class___charge.Use s1);
@@ -91,6 +72,8 @@ Rover_Class___location::Going {
 }
 
 Rover_Class___charge::Maintain {
+  eq(Charge_Value, [0 200]);
+  eq(_0_anon_OR_tag_1, [1 2]);
   meets(Rover_Class___charge.Use s0);
     eq(s0.Start_Val, Charge_Value);
   if (_0_anon_OR_tag_1==1) {
@@ -104,6 +87,12 @@ Rover_Class___charge::Maintain {
 }
 
 Rover_Class___charge::Charge {
+  addmuleq(Start_Val, duration, Rate_Val, End_Val);
+  eq(Start_Val, [10 100]);
+  eq(Start_Val, [0 200]);
+  eq(Rate_Val, 20);
+  eq(End_Val, [0 200]);
+  eq(_0_anon_OR_tag_1, [1 2]);
   met_by(Rover_Class___charge.Use s0);
     eq(s0.End_Val, Start_Val);
   if (_0_anon_OR_tag_1==1) {
@@ -117,6 +106,12 @@ Rover_Class___charge::Charge {
 }
 
 Rover_Class___charge::Use {
+  addmuleq(End_Val, duration, Rate_Val, Start_Val);
+  eq(Start_Val, [0 200]);
+  eq(Rate_Val, 20);
+  eq(End_Val, [0 200]);
+  eq(_0_anon_OR_tag_1, [1 2]);
+  eq(_0_anon_OR_tag_2, [1 2]);
   if (_0_anon_OR_tag_1==1) {
     met_by(Rover_Class___charge.Maintain s0);
       eq(s0.Charge_Value, Start_Val);

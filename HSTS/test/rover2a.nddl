@@ -5,16 +5,11 @@ enum Location_Label { 'lander', 'rock', 'hill', 'sand', 'martian_city' }
 class Rover_Class___location {
   predicate At {
     Location_Label Loc_Label;
-
-    eq(duration, [1 +inf]);
   }
 
   predicate Going {
     Location_Label From_Loc;
     Location_Label To_Loc;
-
-    eq(duration, [5 15]);
-    neq(From_Loc, To_Loc);
   }
 
   Rover_Class __DDL__object;
@@ -31,23 +26,9 @@ class Rover_Class___activity {
     bool toLander;
     Location_Label toLocation;
     Location_Label fromLocation;
-
-    eq(duration, [1 +inf]);
-    neq(rover, object.__DDL__object);
-    neq(withArm, false);
-    neq(withArm, false);
-    neq(withArm, false);
-    condadiff(toLander, true, isLander);
-    condadiff(isLander, true, toLander);
-    condadiff(Location_Label.'lander', toLocation, isLander);
-    neq(toLocation, fromLocation);
-    condadiff(true, toLocation, fromLocation);
-    condadiff(true, toLocation, fromLocation);
-    condadiff(true, toLocation, fromLocation);
   }
 
   predicate Idle {
-    eq(duration, [1 +inf]);
   }
 
   Rover_Class __DDL__object;
@@ -63,14 +44,6 @@ class Rover_Class___foo {
     float sum;
     float inf;
     float inf2;
-
-    eq(duration, [1 +inf]);
-    eq(real, [-1 15]);
-    eq(sum, [0 10]);
-    eq(inf, [-10 +inf]);
-    sum(sum, real, [1.5 10], [0 10], inf);
-    sum(real, inf, inf2);
-    eq(inf2, [-inf 20]);
   }
 
   Rover_Class __DDL__object;
@@ -82,14 +55,10 @@ class Rover_Class___foo {
 class Rover_Class___bar {
   predicate DoBar {
     int value;
-
-    eq(duration, [1 +inf]);
   }
 
   predicate NotDoBar {
     int value;
-
-    eq(duration, [1 +inf]);
   }
 
   Rover_Class __DDL__object;
@@ -112,22 +81,43 @@ class Rover_Class {
 }
 
 Rover_Class___location::At {
+  eq(duration, [1 +inf]);
   met_by(Going s0);
+  eq(object,s0.object);
     eq(s0.To_Loc, Loc_Label);
   meets(Going s1);
+  eq(object,s1.object);
     eq(s1.From_Loc, Loc_Label);
 }
 
 Rover_Class___location::Going {
+  eq(duration, [5 15]);
+  neq(From_Loc, To_Loc);
   met_by(At s0);
+  eq(object,s0.object);
     eq(s0.Loc_Label, From_Loc);
   meets(At s1);
+  eq(object,s1.object);
     eq(s1.Loc_Label, To_Loc);
 }
 
 Rover_Class___activity::Wave {
+  eq(duration, [1 +inf]);
+  neq(rover, object.__DDL__object);
+  neq(withArm, false);
+  neq(withArm, false);
+  neq(withArm, false);
+  condadiff(true, isLander, toLander);
+  condadiff(true, toLander, isLander);
+  condadiff(Location_Label.'lander', toLocation, isLander);
+  neq(toLocation, fromLocation);
+  condadiff(toLocation, fromLocation, true);
+  condadiff(toLocation, fromLocation, true);
+  condadiff(toLocation, fromLocation, true);
   met_by(Idle s0);
+  eq(object,s0.object);
   meets(Idle s1);
+  eq(object,s1.object);
   contained_by(Rover_Class___location.At s2);
     eq(object.__DDL__object.location, s2.object);
     eq(s2.Loc_Label, fromLocation);
@@ -136,11 +126,21 @@ Rover_Class___activity::Wave {
 }
 
 Rover_Class___activity::Idle {
+  eq(duration, [1 +inf]);
   met_by(Wave s0);
+  eq(object,s0.object);
   meets(Wave s1);
+  eq(object,s1.object);
 }
 
 Rover_Class___foo::DoFoo {
+  eq(duration, [1 +inf]);
+  eq(real, [-1 15]);
+  eq(sum, [0 10]);
+  eq(inf, [-10 +inf]);
+  sum(sum, real, [1.5 10], [0 10], inf);
+  sum(real, inf, inf2);
+  eq(inf2, [-inf 20]);
   contained_by(Rover_Class___bar.DoBar s0m0, Rover_Class___bar.NotDoBar s0m1);
     eq(object.__DDL__object.bar, s0m0.object);
     eq(object.__DDL__object.bar, s0m1.object);
@@ -149,12 +149,18 @@ Rover_Class___foo::DoFoo {
 }
 
 Rover_Class___bar::DoBar {
+  eq(duration, [1 +inf]);
   met_by(NotDoBar s0);
+  eq(object,s0.object);
   meets(NotDoBar s1);
+  eq(object,s1.object);
 }
 
 Rover_Class___bar::NotDoBar {
+  eq(duration, [1 +inf]);
   met_by(DoBar s0);
+  eq(object,s0.object);
   meets(DoBar s1);
+  eq(object,s1.object);
 }
 

@@ -27,7 +27,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>4</Index>
+   <Index>3</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
@@ -41,7 +41,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>5</Index>
+   <Index>4</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
@@ -59,7 +59,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>8</Index>
+   <Index>7</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
@@ -76,7 +76,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>7</Index>
+   <Index>6</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
@@ -92,7 +92,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>6</Index>
+   <Index>5</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
@@ -110,7 +110,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>4</Index>
+   <Index>3</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Playback</PredicateName>
@@ -126,7 +126,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>8</Index>
+   <Index>7</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Playback</PredicateName>
@@ -140,7 +140,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>7</Index>
+   <Index>6</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Playback</PredicateName>
@@ -156,7 +156,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>4</Index>
+   <Index>3</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Constant_Storage</PredicateName>
@@ -172,7 +172,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>5</Index>
+   <Index>4</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Constant_Storage</PredicateName>
@@ -186,7 +186,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>3</Index>
+   <Index>2</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Constant_Storage</PredicateName>
@@ -202,7 +202,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>1</Index>
+   <Index>0</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Science___Fields_and_Particles.F_and_P_Idle</PredicateName>
@@ -218,7 +218,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>2</Index>
+   <Index>1</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Science___Fields_and_Particles.F_and_P_Idle</PredicateName>
@@ -232,7 +232,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>2</Index>
+   <Index>1</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Science___Fields_and_Particles.F_and_P_Observation_LO</PredicateName>
@@ -246,7 +246,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>2</Index>
+   <Index>1</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Science___Fields_and_Particles.F_and_P_Observation_HI</PredicateName>
@@ -262,7 +262,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>1</Index>
+   <Index>0</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Science___Scan_Platform.Scan_Idle</PredicateName>
@@ -278,7 +278,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>2</Index>
+   <Index>1</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Science___Scan_Platform.Scan_Idle</PredicateName>
@@ -292,7 +292,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>2</Index>
+   <Index>1</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Science___Scan_Platform.Mosaic_HI</PredicateName>
@@ -306,7 +306,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>2</Index>
+   <Index>1</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Science___Scan_Platform.Mosaic_LO</PredicateName>
@@ -320,7 +320,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>4</Index>
+   <Index>3</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DSS_Any___DSS_Availability.Downlink_Window</PredicateName>
@@ -334,7 +334,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>3</Index>
+   <Index>2</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>

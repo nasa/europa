@@ -25,9 +25,6 @@ class Robot___Task {
   predicate Robot_Moving {
     Location From;
     Location To;
-
-    eq(duration, [5 +inf]);
-    neq(From, To);
   }
 
   predicate Doing_Nothing {
@@ -118,6 +115,8 @@ Robot___Task::Recharging {
 }
 
 Robot___Task::Robot_Moving {
+  eq(duration, [5 +inf]);
+  neq(From, To);
   met_by(Robot___At.Robot_Loc s0);
     eq(s0.Loc, From);
   met_by(Robot___Task.Doing_Nothing s1);

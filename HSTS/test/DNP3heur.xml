@@ -29,7 +29,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>6</Index>
+   <Index>5</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
@@ -46,7 +46,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>7</Index>
+   <Index>6</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
@@ -62,7 +62,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>3</Index>
+   <Index>2</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Constant_Storage</PredicateName>
@@ -78,7 +78,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>4</Index>
+   <Index>3</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Constant_Storage</PredicateName>
@@ -99,7 +99,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>5</Index>
+   <Index>4</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Constant_Storage</PredicateName>
@@ -115,7 +115,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>4</Index>
+   <Index>3</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Constant_Storage</PredicateName>
@@ -138,7 +138,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>4</Index>
+   <Index>3</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Playback</PredicateName>
@@ -154,7 +154,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </DomainOrder>
   </Preference>
   <VariableSpec>
-   <Index>8</Index>
+   <Index>7</Index>
   </VariableSpec>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Playback</PredicateName>

@@ -10,9 +10,6 @@ class Rover_Class___location {
   predicate Going {
     Location_Label From_Loc;
     Location_Label To_Loc;
-
-    eq(duration, 5);
-    neq(From_Loc, To_Loc);
   }
 
   Rover_Class __DDL__object;
@@ -36,6 +33,8 @@ Rover_Class___location::At {
 }
 
 Rover_Class___location::Going {
+  eq(duration, 5);
+  neq(From_Loc, To_Loc);
   met_by(Rover_Class___location.At s0);
     eq(s0.Loc_Label, From_Loc);
   meets(Rover_Class___location.At s1);

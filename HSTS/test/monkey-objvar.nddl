@@ -69,8 +69,10 @@ class Monkey_Class {
 Monkey_Class___Location_SV::At {
   eq(duration, [1 +inf]);
   met_by(Going s0);
+  eq(object,s0.object);
     eq(s0.To_Loc, Loc_Label);
   meets(Going s1);
+  eq(object,s1.object);
     eq(s1.From_Loc, Loc_Label);
 }
 
@@ -78,8 +80,10 @@ Monkey_Class___Location_SV::Going {
   eq(duration, [5 +inf]);
   neq(From_Loc, To_Loc);
   met_by(At s0);
+  eq(object,s0.object);
     eq(s0.Loc_Label, From_Loc);
   meets(At s1);
+  eq(object,s1.object);
     eq(s1.Loc_Label, To_Loc);
   contained_by(Monkey_Class___Altitude_SV.LOW s2);
     eq(object.__DDL__object.Altitude_SV, s2.object);
@@ -88,20 +92,26 @@ Monkey_Class___Location_SV::Going {
 Monkey_Class___Altitude_SV::LOW {
   eq(duration, [1 +inf]);
   met_by(CLIMBING_DOWN s0);
+  eq(object,s0.object);
   meets(CLIMBING s1);
+  eq(object,s1.object);
 }
 
 Monkey_Class___Altitude_SV::HIGH {
   eq(duration, [1 +inf]);
   met_by(CLIMBING s0);
+  eq(object,s0.object);
   meets(CLIMBING_DOWN s1);
+  eq(object,s1.object);
 }
 
 Monkey_Class___Altitude_SV::CLIMBING {
   eq(duration, [10 +inf]);
   eq(_0_anon_OR_tag_1, [1 2]);
   met_by(LOW s0);
+  eq(object,s0.object);
   meets(HIGH s1);
+  eq(object,s1.object);
   if (_0_anon_OR_tag_1==1) {
     contained_by(Monkey_Class___Location_SV.At s0);
       eq(object.__DDL__object.Location_SV, s0.object);
@@ -117,25 +127,32 @@ Monkey_Class___Altitude_SV::CLIMBING {
 Monkey_Class___Altitude_SV::CLIMBING_DOWN {
   eq(duration, [1 +inf]);
   met_by(HIGH s0);
+  eq(object,s0.object);
   meets(LOW s1);
+  eq(object,s1.object);
 }
 
 Monkey_Class___Banana_SV::NOT_HAVE_BANANA {
   eq(duration, [1 +inf]);
   meets(GRABBING_BANANA s0);
+  eq(object,s0.object);
   met_by(GRABBING_BANANA s1);
+  eq(object,s1.object);
 }
 
 Monkey_Class___Banana_SV::HAVE_BANANA {
   eq(duration, [1 +inf]);
   eq(Who, object.__DDL__object);
   met_by(GRABBING_BANANA s0);
+  eq(object,s0.object);
 }
 
 Monkey_Class___Banana_SV::GRABBING_BANANA {
   eq(duration, [1 2]);
   met_by(NOT_HAVE_BANANA s0);
+  eq(object,s0.object);
   meets(HAVE_BANANA s1);
+  eq(object,s1.object);
   contained_by(Monkey_Class___Location_SV.At s2);
     eq(object.__DDL__object.Location_SV, s2.object);
     eq(s2.Loc_Label, Location_Label.'Tree');
