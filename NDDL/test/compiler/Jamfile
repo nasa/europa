@@ -20,7 +20,7 @@ for model in
   local exe = $(model:S=) ;
   NddlMain $(exe) : NddlMain.cc : $(model) : NDDL ;
   RunModuleMain run-$(exe) : $(exe) ;
-  LocalDepends nddl-tests : run-$(exe) ;
+  LocalDepends run-nddl-tests : run-$(exe) ;
 }
 
 } # PLASMA_READY
