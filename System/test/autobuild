@@ -1,13 +1,13 @@
 #!/bin/sh
-# $Id: autobuild,v 1.68 2004-08-23 23:06:36 wedgingt Exp $
+# $Id: autobuild,v 1.69 2004-08-24 17:03:52 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
 set -x
 
 # Usually, this is run via cron, which does not use the usual $PATH
-PATH=/usr/java/j2sdk1.4.2/bin:/usr/local/jam2.4:/usr/local/bin:"$PATH"
-JAVA_HOME=/usr/java/j2sdk1.4.2
+PATH=/usr/java/j2sdk1.4.2_04/bin:/usr/local/jam2.4:/usr/local/bin:"$PATH"
+JAVA_HOME=/usr/java/j2sdk1.4.2_04
 export PATH JAVA_HOME
 
 startdir="`dirname $0`"
