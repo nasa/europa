@@ -2,4 +2,8 @@ SubDir PLASMA Utils test ;
 
 if ! $(PLASMA_READY) {
 
+ModuleMain error-test : error-test.cc : Utils ;
+RunModuleMain run-error-test : error-test ;
+LocalDepends tests : run-error-test ;
+
 } # PLASMA_READY

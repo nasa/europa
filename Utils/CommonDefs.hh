@@ -16,24 +16,7 @@
  */
 const bool ALWAYS_FAILS = false;
 
-/**
- * @def check_error
- * @brief If the condition is false, generate an error.
- * @param cond The condition to test.
- * @note Current, preliminary, implementation simply calls assert().
- * @note Once the new error handling support is is use, this will instead
- *   throw an exception when the condition is false.
- * @note Should only be used in 'core' code and in test programs when the
- *   condition cannot be tested when the 'core' code has been compiled 'fast'.
- *   Otherwise - in test programs where the condition can always be checked,
- *   no matter how the code was compiled - use assertTrue(), assertFalse(), etc.
- * @see assertTrue, assertFalse, ALWAYS_FAIL
- */
-#ifndef PROTOTYPE_FAST_VERSION
-#define check_error(cond) assert(cond)
-#else
-#define check_error(cond)
-#endif
+#include <Error.hh>
 
 /**
  * @def assertTrue
