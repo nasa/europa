@@ -188,10 +188,7 @@ namespace Prototype {
     check_error(m_currentDomain.getType() == superset.getType() ||
                 (m_currentDomain.isEnumerated() &&
                  superset.isEnumerated()));
-    if (m_currentDomain.isEnumerated())
-      m_superSetDomain = new EnumeratedDomain((const EnumeratedDomain&) superset);
-    else
-      m_superSetDomain = superset.copy();
+    m_superSetDomain = superset.copy();
     check_error(m_superSetDomain != 0);
     check_error(AbstractDomain::canBeCompared(m_currentDomain, *m_superSetDomain));
   }
