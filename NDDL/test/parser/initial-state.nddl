@@ -16,8 +16,24 @@ predInstName1 contains (otherObjectInst.OtherPredicateName predInstName2);
 
 new [0 1000] timelineObject();
 
+Class instanceName4 = new [0 1000] ClassType(XYZ, 4.5);
+
 eq(start, 0);
 
 eq(end, 1000);
 
 int x = 7;
+
+float y = 3.5;
+
+bool g = true;
+
+string s = "string";
+
+Locations loc1 = Hill;
+
+Locations loc2 = 'Hill';
+
+close(Rover);
+
+close();
