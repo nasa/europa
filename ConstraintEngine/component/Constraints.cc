@@ -113,9 +113,9 @@ namespace Prototype
 
     // By construction, we know the arguments are of the same type. So special case
     // accordingly
-    if(domx.getType() == AbstractDomain::LABEL_SET){
-      LabelSet& dx = dynamic_cast<LabelSet&>(domx);
-      LabelSet& dy = dynamic_cast<LabelSet&>(domy);
+    if(domx.isEnumerated()){
+      EnumeratedDomain& dx = dynamic_cast<EnumeratedDomain&>(domx);
+      EnumeratedDomain& dy = dynamic_cast<EnumeratedDomain&>(domy);
       dx.equate(dy);
     }
     else {
@@ -161,21 +161,13 @@ namespace Prototype
     m_currentDomain(getCurrentDomain(variable)),
     m_executionCount(0){
     check_error(superset.isDynamic() || !superset.isEmpty());
-    check_error(getCurrentDomain(variable).getType() == superset.getType());
+    check_error(getCurrentDomain(variable).getType() == superset.getType() ||
+		(getCurrentDomain(variable).isEnumerated() && getCurrentDomain(variable).isEnumerated()));
 
-    switch(m_currentDomain.getType()){
-    case AbstractDomain::LABEL_SET:
-      m_superSetDomain = new LabelSet((const LabelSet&) superset);
-      break;
-    case AbstractDomain::INT_INTERVAL:
-      m_superSetDomain = new IntervalIntDomain((const IntervalIntDomain&) superset);
-      break;
-    case AbstractDomain::REAL_INTERVAL:
+    if(m_currentDomain.isEnumerated())
+      m_superSetDomain = new EnumeratedDomain((const EnumeratedDomain&) superset);
+    else
       m_superSetDomain = new IntervalRealDomain((const IntervalRealDomain&) superset);
-      break;
-    default:
-      check_error(ALWAYS_FAILS);
-    }
   }
 
   SubsetOfConstraint::~SubsetOfConstraint(){
@@ -183,19 +175,10 @@ namespace Prototype
   }
 
   void SubsetOfConstraint::handleExecute(){
-    switch(m_currentDomain.getType()){
-    case AbstractDomain::LABEL_SET:
-      ((LabelSet&)m_currentDomain).intersect((const LabelSet&) *m_superSetDomain);
-      break;
-    case AbstractDomain::INT_INTERVAL:
-      ((IntervalIntDomain&)m_currentDomain).intersect((const IntervalIntDomain&)*m_superSetDomain);
-      break;
-    case AbstractDomain::REAL_INTERVAL:
-      ((IntervalIntDomain&)m_currentDomain).intersect((const IntervalIntDomain&)*m_superSetDomain);
-      break;
-    default:
-      check_error(ALWAYS_FAILS);
-    }
+    if(m_currentDomain.isEnumerated())
+      ((EnumeratedDomain&)m_currentDomain).intersect((const EnumeratedDomain&) *m_superSetDomain);
+    else
+      ((IntervalDomain&)m_currentDomain).intersect((const IntervalDomain&) *m_superSetDomain);
 
     m_isDirty  = false;
     m_executionCount++;
