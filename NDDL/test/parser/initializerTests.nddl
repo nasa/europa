@@ -1,7 +1,11 @@
-enum Symbols {USR_115}
-
 class Y { int l; }
 Y y;
+
+enum intEnum {1, 2, 3, 4}
+enum intRange [0 40]
+enum floatEnum {1.2}
+enum floatRange1 {2, 3.2}
+enum userValueType1 {USR_115}
 
 class X
 {

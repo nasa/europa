@@ -1,4 +1,4 @@
-enum Places { Martian_City, Lander, BigRock, Valley }
+enum Place { Martian_City, Lander, BigRock, Valley }
 
 class Location {
   predicate At {

@@ -27,7 +27,7 @@ class Integer {
     }
   }
   predicate Subtract {
-    integer subhend;
+    int subhend;
     {
       int oldValue, newValue;
       met_by(Has oldHas);

@@ -1,22 +1,24 @@
+enum LocLabel { here, there, someplace }
+
 class Location
 {
-predicate At { LocLabel loc; }
-predicate Going { LocLabel from, to; }
+  predicate At { LocLabel loc; }
+  predicate Going { LocLabel from, to; }
 }
 
 class Camera
 {
-predicate TakePicture {}
-predicate Idle {}
+  predicate TakePicture {}
+  predicate Idle {}
 }
 
 class SlowCamera extends Camera
 {
-predicate TakePicture {}
-Location loc;
-SlowCamera(Location l = new Location()) {
-  loc = l;
-}
+  predicate TakePicture {}
+  Location loc;
+  SlowCamera(Location l = new Location()) {
+    loc = l;
+  }
 }
 
 SlowCamera::TakePicture {
@@ -36,7 +38,7 @@ class Rover
 class Tripod
 {
   SlowCamera sc;
-  location l;
+  Location l;
   Tripod() {
     sc = new SlowCamera();
     l = sc.loc;
