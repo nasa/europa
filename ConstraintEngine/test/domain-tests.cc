@@ -7,7 +7,13 @@
 #include "Domain.hh"
 #include "domain-tests.hh"
 
+#ifdef __sun
+#include <strstream>
+typedef std::strstream sstream;
+#else
 #include <sstream>
+typedef std::stringstream sstream;
+#endif
 
 namespace Prototype {
 
@@ -162,7 +168,9 @@ namespace Prototype {
 
     static bool testPrinting(){
       IntervalIntDomain d1(1, 100);
-      std::stringstream ss1;
+      //       std::stringstream ss1;
+      //       d1 >> ss1;
+      sstream ss1;
       d1 >> ss1;
       std::string actualString = ss1.str();
       std::string expectedString("INT_INTERVAL:CLOSED[1, 100]");

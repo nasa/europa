@@ -20,9 +20,16 @@
 #include "../ConstraintEngine/EqualityConstraintPropagator.hh"
 
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <cassert>
+
+#ifdef __sun
+#include <strstream>
+typedef std::strstream sstream;
+#else
+#include <sstream>
+typedef std::stringstream sstream;
+#endif
 
 
 class DefaultSchemaAccessor{
@@ -160,7 +167,8 @@ private:
 
     // Allocate objects with 2 field variables
     for (int i=0;i<NUM_OBJECTS;i++){
-      std::stringstream ss;
+      //std::stringstream ss;
+      sstream ss;
       ss << "Object" << i;
       std::string objectName(ss.str());
       ObjectId object = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr(objectName.c_str()), true))->getId();
@@ -220,7 +228,8 @@ private:
 
     // Allocate objects with 2 field variables
     for (int i=0;i<NUM_OBJECTS;i++){
-      std::stringstream ss;
+      //std::stringstream ss;
+      sstream ss;
       ss << "Object" << i;
       std::string objectName(ss.str());
       ObjectId object = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr(objectName.c_str()), true))->getId();
