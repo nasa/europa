@@ -111,7 +111,5 @@ namespace EUROPA {
     }
   };
 }
-#endif
-	    
-	        
-	  
+
+#endif /* #ifndef _H_PlanDatabaseWriter */
