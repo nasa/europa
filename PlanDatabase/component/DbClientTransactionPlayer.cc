@@ -598,9 +598,8 @@ namespace PLASMA {
     static unsigned int sl_counter(0);
     sl_counter++;
     const char * tag = element.Value();
-
-    check_error(strcmp(tag, "ident") != 0,   "ident in transaction xml is deprecated");
-
+    check_error(strcmp(tag, "ident") != 0,
+                "ident in transaction xml is deprecated");
     if (strcmp(tag, "new") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
@@ -815,10 +814,8 @@ namespace PLASMA {
 
   ConstrainedVariableId DbClientTransactionPlayer::xmlAsVariable(const TiXmlElement & variable)
   {
-    if (strcmp(variable.Value(), "ident") == 0) {
-      const char * value = variable.Attribute("value");
-      return parseVariable(value);
-    }
+    check_error(strcmp(variable.Value(), "ident") != 0,
+                "ident in transaction xml is deprecated");
     if (strcmp(variable.Value(), "id") == 0) {
       const char * name = variable.Attribute("name");
       return parseVariable(name);
@@ -856,12 +853,8 @@ namespace PLASMA {
 
   TokenId DbClientTransactionPlayer::xmlAsToken(const TiXmlElement & token)
   {
-    if (strcmp(token.Value(), "ident") == 0) {
-      const char * value = token.Attribute("value");
-      TokenId tok = parseToken(value);
-      check_error(tok.isValid());
-      return tok;
-    }
+    check_error(strcmp(token.Value(), "ident") != 0,
+                "ident in transaction xml is deprecated");
     if (strcmp(token.Value(), "id") == 0) {
       const char * name = token.Attribute("name");
       TokenId tok = parseToken(name);
@@ -902,7 +895,7 @@ namespace PLASMA {
       baseDomain = xmlAsAbstractDomain(*value, name);
       if (type == NULL) {
         type = value->Value();
-        if (strcmp(type, "new") == 0) {
+        if ((strcmp(type, "new") == 0) || (strcmp(type, "symbol") == 0)) {
           type = value->Attribute("type");
         }
       }
