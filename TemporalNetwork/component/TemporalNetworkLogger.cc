@@ -20,9 +20,8 @@ namespace Prototype{
 	 << "TIMEPOINT " << timepoint->getKey() << " DELETED " << std::endl;
   }
   void TemporalNetworkLogger::notifyConstraintAdded(const ConstraintId constraint, const TemporalConstraintId& c, Time lb, Time ub) {
-    LabelStr name = (constraint.isNoId() ? LabelStr("BASE DOMAIN CONSTRAINT") : constraint->getName().toString());
     m_os << s_loggername 
-	 << "Constraint ADDED " << name << "(" <<  constraint->getKey() << ") - [" << c << "] " 
+	 << "Constraint ADDED " << constraint->getName().toString() << "(" <<  constraint->getKey() << ") - [" << c << "] " 
 	 << " --[" << lb << "," << ub << "]--> " << std::endl;
   }
 						    

@@ -465,12 +465,13 @@ namespace Prototype {
       if(!cnetConstraint.isNoId()){
 	cnetConstraint->clearExternalEntity();
 	cnetConstraint->setExternalEntity(newConstraint);
+	publish(notifyConstraintAdded(cnetConstraint, newConstraint,  (Time)lb, (Time)ub));
       }
       else {
 	check_error(target == getTimepoint(var));
 	target->setBaseDomainConstraint(newConstraint);
+	publish(notifyBaseDomainConstraintAdded(var, newConstraint,  (Time)lb, (Time)ub));
       }
-      publish(notifyConstraintAdded(cnetConstraint, newConstraint,  (Time)lb, (Time)ub));
     }
 
     return newConstraint;
