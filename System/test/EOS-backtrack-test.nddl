@@ -182,7 +182,7 @@ GroundStation ground1 = new GroundStation();
 close();
 
 // initial tokens
-rejectable(Satellite.Pointing p);
+goal(Satellite.Pointing p);
 eq(p.m_target, target1);
 p.start.specify(0);
 p.activate();
