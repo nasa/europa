@@ -59,9 +59,13 @@ namespace Prototype
       for(std::list<ResourceId>::const_iterator it = objs.begin(); it != objs.end(); ++it) {
     	double oMin = (*it)->getConsumptionRateMax();
     	double oMax = (*it)->getProductionRateMax();
+	std::cout << oMin << " : " << oMax << std::endl;
+	std::cout << domTQ.getLowerBound() << " : " << domTQ.getUpperBound() << std::endl;
     	IntervalDomain oQty(oMin, oMax);
-    	if (oQty.intersect(domTQ.getLowerBound(), domTQ.getUpperBound()) && oQty.isEmpty())
+    	if (oQty.intersect(domTQ.getLowerBound(), domTQ.getUpperBound()) && oQty.isEmpty()) {
+	  std::cout << "Throwing out an object " << (*it)  << std::endl;
     	  domTO.remove((*it));
+	}
     	else {
     	  if ( oMin > qMin)
     	    qMin = oMin;

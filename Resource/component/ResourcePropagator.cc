@@ -42,6 +42,7 @@ namespace Prototype {
   }
 
   bool ResourcePropagator::checkResourcePropagationRequired(const ConstrainedVariableId& variable) const {
+    check_error(TransactionId::convertable(variable->getParent()));
     TransactionId t(variable->getParent());    
     return(ResourceConstraint::getCurrentDomain(t->getObject()).isSingleton());
   }

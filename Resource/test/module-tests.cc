@@ -427,22 +427,22 @@ private:
     r->free(t1);
     assert(!ce.provenInconsistent());    
 
-    // Now adjust so that it just fits within the spec and ensure it is accepted
     t1->setMin(productionRateMax);
     r->constrain(t1);
-    ce.propagate();
-
+    assert(!ce.provenInconsistent());    
+    r->free(t1);
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 1), consumptionRateMax - 1, consumptionRateMax - 1))->getId();
     r->constrain(t2);
     assert(ce.provenInconsistent());
     r->free(t2);
+    assert(!ce.provenInconsistent());    
 
-    // Now adjust so that it just fits within the spec and ensure it is accepted
     t2->setMax(consumptionRateMax);
     r->constrain(t2);
-    ce.propagate();
+    assert(!ce.provenInconsistent());    
+    r->free(t2);
 
     return(true);
   }

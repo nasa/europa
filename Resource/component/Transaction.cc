@@ -18,11 +18,14 @@ namespace Prototype {
     : EventToken(planDatabase, 
 		 predicateName,
 		 false,
-		 timeBaseDomain)
+		 timeBaseDomain,
+		 Token::noObject(),
+		 false)
     
   {
     m_min = min;
     m_max = max;
+
 
     // for now set m_resource to getObject.  Later remove m_resource as redundant and replace it with refs to getObject.
     //m_resource = getObject();    
@@ -32,10 +35,12 @@ namespace Prototype {
     m_usage = (new TokenVariable<IntervalDomain>(m_id,
 						 m_allVariables.size(),
 						 m_planDatabase->getConstraintEngine(), 
-						 IntervalDomain(min, max),
-						 false,
+						 IntervalDomain(),
+						 true,
 						 LabelStr("Usage")))->getId();
     m_allVariables.push_back(m_usage);
+
+    m_usage->specify(IntervalDomain(m_min, m_max));
 
     // add the resource constraint which will act as a messenger to changes and inform the ResourcePropagator.
     std::vector<ConstrainedVariableId> temp;
@@ -54,6 +59,8 @@ namespace Prototype {
     ConstraintId horizonRelation = 
       ConstraintLibrary::createConstraint(LabelStr("HorizonRelation"), m_planDatabase->getConstraintEngine(), temp1);
     m_standardConstraints.insert(horizonRelation);
+
+    close();
 
     // All transactions as immediately active
     activate();
@@ -140,6 +147,8 @@ namespace Prototype {
   {
     check_error(min <= m_max);
     m_min = min;
+    m_usage->reset();
+    m_usage->specify(IntervalDomain(m_min, m_max));
     if(m_resource != ResourceId::noId())
       m_resource->notifyQuantityChanged(m_id);
     noteChanged();
@@ -148,6 +157,10 @@ namespace Prototype {
   {
     check_error(max >= m_min);
     m_max = max;
+    m_usage->reset();
+    std::cout << m_usage->lastDomain().getUpperBound() << std::endl;
+    m_usage->specify(IntervalDomain(m_min, m_max));
+    std::cout << m_usage->lastDomain().getUpperBound() << std::endl;
     if(m_resource != ResourceId::noId())
       m_resource->notifyQuantityChanged(m_id);
     noteChanged();
