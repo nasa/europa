@@ -32,7 +32,7 @@
 #include <iostream>
 #include <fstream>
 #include <pthread.h>
-
+#include <typeinfo>
 
 #ifndef EUROPA_FAST
 #define non_fast_only_assert(T) assert(T)
@@ -110,38 +110,49 @@ private:
     // check_error will not throw the errors for EUROPA_FAST
 #if !defined(EUROPA_FAST) && !defined(__CYGWIN__)
     assertTrue(Error::throwEnabled());
+    /* Do not print errors that we are provoking on purpose to ensure they are noticed. */
     try {
+      Error::doNotDisplayErrors();
       check_error(var == 2);
       __y__("check_error(var == 2) did not throw an exception");
       success = false;
     } 
     catch (Error e) {
-      __z__(e, Error("var == 2", __FILE__, __LINE__ - 5));
+      Error::doDisplayErrors();
+      __z__(e, Error("var == 2", __FILE__, __LINE__ - 5), success);
     }
     try {
+      Error::doNotDisplayErrors();
       check_error(var == 2, "check_error(var == 2)");
       __y__("check_error(var == 2, blah) did not throw an exception");
       success = false;
     } 
     catch (Error e) {
-      __z__(e, Error("var == 2", "check_error(var == 2)", __FILE__, __LINE__ - 5));
+      Error::doDisplayErrors();
+      __z__(e, Error("var == 2", "check_error(var == 2)", __FILE__, __LINE__ - 5), success);
     }
     try {
+      Error::doNotDisplayErrors();
       check_error(var == 2, Error("check_error(var == 2)"));
       __y__("check_error(var == 2, Error(blah)) did not throw an exception");
       success = false;
     } 
     catch (Error e) {
-      __z__(e, Error("var == 2", "check_error(var == 2)", __FILE__, __LINE__ - 5));
+      Error::doDisplayErrors();
+      __z__(e, Error("var == 2", "check_error(var == 2)", __FILE__, __LINE__ - 5), success);
     }
     try {
+      Error::doNotDisplayErrors();
       check_error(var == 2, "check_error(var == 2)", TestError::BadThing());
       __y__("check_error(var == 2, TestError::BadThing()) did not throw an exception");
       success = false;
     }
-    catch(Error e) {
-      assertTrue(e.getType() == "BadThing");
-      std::cerr << "Caught expected " << e.getType() << std::endl;
+    catch (Error e) {
+      Error::doDisplayErrors();
+      //!!Should, perhaps, be:
+      //__z__(e, Error(TestError::BadThing(), __FILE__, __LINE__ - 7), success);
+      // ... but is actually:
+      __z__(e, Error("var == 2", "check_error(var == 2)", __FILE__, __LINE__ - 9), success);
     }
 #endif
     return(success);
@@ -424,18 +435,14 @@ bool IdTests::testBadAllocationErrorHandling()
 #if !defined(__CYGWIN__)
   // This exception simply isn't being caught on Cygwin for some reason.
   try {
+    Error::doNotDisplayErrors();
     Id<Foo> fId0((Foo*) 0);
     assertTrue(false, "Id<Foo> fId0((Foo*) 0); failed to error out.");
     success = false;
   }
   catch (Error e) {
-    if (e.getType() == "Error")
-      assertTrue(false);
-  }
-  catch (IdErr idErr) {
-    std::cerr << "Caught expected IdErr::IdMgrInvalidItemPtrError" << std::endl;
-    // No operator==() implemented ...
-    // __z__(idErr, IdErr::IdMgrInvalidItemPtrError());
+    Error::doDisplayErrors();
+    __z__(e, Error("ptr != 0", "Cannot generate an Id<3Foo> for 0 pointer.", "Utils/core/Id.hh", 0), success);
   }
 #endif
   Error::doNotThrowExceptions();
@@ -457,18 +464,21 @@ bool IdTests::testBadIdUsage() {
 #if !defined(__CYGWIN__)
   // This exception isn't being caught on Cygwin.
   try {
+    Error::doNotDisplayErrors();
     Id<Bing> bingId = barId;
     assertTrue(false, "Id<Bing> bingId = barId; failed to error out.");
     success = false;
   }
   catch (Error e) {
+    Error::doDisplayErrors();
     if (e.getType() == "Error")
       assertTrue(false);
   }
   catch (IdErr idErr) {
+    Error::doDisplayErrors();
     std::cerr << "Caught expected IdErr::IdMgrInvalidItemPtrError" << std::endl;
     // No operator==() implemented ...
-    // __z__(idErr, IdErr::IdMgrInvalidItemPtrError());
+    // __z__(idErr, IdErr::IdMgrInvalidItemPtrError(), success);
   }
 #endif
   Error::doNotThrowExceptions();
