@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.2 2002-10-24 22:43:20 wedgingt Exp $
+# $Id: autobuild,v 1.3 2002-10-25 00:20:48 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -43,8 +43,8 @@ do
     test ! -d restart || break
     if test -d "$dir"/NewPlan
     then
-        echo "$0"': '"$dir"'/NewPlan already exists; skipping'
-        continue
+        echo "$0"': '"$dir"'/NewPlan already exists; exiting'
+        exit 1
     fi
 
     if test ! -d "$dir"
@@ -69,6 +69,8 @@ do
     make $makeopt tests >> make.tests 2>&1
     status=$?
     echo '"make tests" in '"`pwd`"' exited '"$status"
+
+    test $status = 0 || mkdir working/failed
 
     rmdir working || exit 1
 
