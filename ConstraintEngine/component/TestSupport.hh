@@ -10,7 +10,7 @@
 
 using namespace Prototype;
 
-bool loggingEnabled();
+extern bool loggingEnabled();
 
 class DefaultEngineAccessor {
 public:
@@ -47,8 +47,9 @@ private:
     std::cout << " PASSED." << std::endl; \
   else \
     if (result) { \
-      std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED ID'S:"; \
+      std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED IDs:\n"; \
       IdTable::output(std::cout); \
+      std::cout << "\tWere " << id_count << " IDs before; " << IdTable::size() << " now"; \
       std::cout << std::endl; \
       throw Prototype::generalMemoryError; \
     } else { \
