@@ -14,7 +14,7 @@ namespace Prototype {
 		  const BooleanDomain& rejectabilityBaseDomain = BooleanDomain(),
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
-		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(),
+		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, MAX_INT),
 		  const LabelStr& objectName = Token::noObject(),
 		  bool closed = true);
 
@@ -23,7 +23,7 @@ namespace Prototype {
 		  const BooleanDomain& rejectabilityBaseDomain = BooleanDomain(),
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
-		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(),
+		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, MAX_INT),
 		  const LabelStr& objectName = Token::noObject(),
 		  bool closed = true);
 

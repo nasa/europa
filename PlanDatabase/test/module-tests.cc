@@ -33,15 +33,51 @@ public:
 
   TestRule(const RulesEngineId& rulesEngine, const LabelStr& name): Rule(rulesEngine, name){}
 
+  /**
+   * Initialize the context with some variables form the token and add a local variable for the rule too. This
+   * will test cleanup.
+   */
   void initializeContext(const TokenId& token, std::vector<ConstrainedVariableId>& scope) const{
     check_error(scope.empty());
     scope.push_back(token->getObject());
     scope.push_back(token->getRejectability());
+    ConstrainedVariableId localVariable = 
+      (new Variable<IntervalIntDomain>(getRulesEngine()->getPlanDatabase()->getConstraintEngine(), IntervalIntDomain(1, 1)))->getId();
+    scope.push_back(localVariable);
   }
 
   bool handleSet(const RuleContextId& context, int index, const ConstrainedVariableId& var) const{
     std::vector<TokenId> newTokens;
     std::vector<ConstraintId> newConstraints;
+
+    // Allocate a new slave Token
+    TokenId slave = (new IntervalToken(context->getToken(), 
+				       LabelStr("Predicate"), 
+				       BooleanDomain(false)))->getId();
+    newTokens.push_back(slave);
+
+    // Allocate a new constraint equating the start variable of the new token with the end variable of
+    // the existing token
+    {
+      std::vector<ConstrainedVariableId> constrainedVars;
+      constrainedVars.push_back(context->getToken()->getEnd());
+      constrainedVars.push_back(slave->getStart());
+      ConstraintId meets = ConstraintLibrary::createConstraint(LabelStr("Equal"),
+							       getRulesEngine()->getPlanDatabase()->getConstraintEngine(),
+							       constrainedVars);
+      newConstraints.push_back(meets);
+    }
+
+    // Allocate a constraint restricting the duration of the slave using
+    {
+      std::vector<ConstrainedVariableId> constrainedVars;
+      constrainedVars.push_back(slave->getDuration());
+      constrainedVars.push_back(context->getVariables().back());
+      ConstraintId restrictDuration = ConstraintLibrary::createConstraint(LabelStr("Equal"),
+									  getRulesEngine()->getPlanDatabase()->getConstraintEngine(),
+									  constrainedVars);
+      newConstraints.push_back(restrictDuration);
+    }
     context->execute(newTokens, newConstraints);
     return true;
   }
@@ -553,9 +589,36 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    tokenA.activate();
-    tokenA.getStart()->specify(5);
     check_error(ce.propagate());
+    check_error(db.getTokens().size() == 1);
+
+    tokenA.activate();
+    check_error(ce.propagate());
+    check_error(db.getTokens().size() == 1);
+
+    tokenA.getRejectability()->specify(false);
+    check_error(ce.propagate());
+    check_error(db.getTokens().size() == 2);
+    check_error(tokenA.getSlaves().size() == 1);
+    TokenId slave = *(tokenA.getSlaves().begin());
+    check_error(slave->getDuration()->getDerivedDomain().isSingleton()); // Due to constraint on local variable
+
+    // Test reset which should backtrack the rule
+    tokenA.getRejectability()->reset();
+    check_error(ce.propagate());
+    check_error(db.getTokens().size() == 1);
+
+    // Set again, and deactivate
+    tokenA.getRejectability()->specify(false);
+    check_error(ce.propagate());
+    check_error(db.getTokens().size() == 2);
+    tokenA.deactivate();
+    check_error(db.getTokens().size() == 1);
+
+    // Now repeast to ensure correct automatic cleanup
+    tokenA.activate();
+    check_error(ce.propagate());
+    check_error(db.getTokens().size() == 2); // Rule should fire since specified domain already set!
     return true;
   }
 };
