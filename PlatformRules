@@ -47,10 +47,10 @@ if $(GCC_ROOTDIR) {
 
 # PROFILE_FLAGS = flags for profiling
 
-if $(OS) = BEOS {
-	PROFILE_FLAGS ?= -p ;
-} else {
+if $(OS) = SOLARIS {
 	PROFILE_FLAGS ?= -pg ;
+} else {
+	PROFILE_FLAGS ?= -p ;
 }
 
 # OPTIMIZE_FLAGS = flags for optimization
