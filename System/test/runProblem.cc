@@ -73,7 +73,7 @@ bool copyFromFile(){
 
 int main(int argc, const char** argv) {
 #ifdef STANDALONE
-  char* error_msg;
+  const char* error_msg;
   void* libHandle;
   const char* libPath;
   SchemaId (*fcn_schema)();
