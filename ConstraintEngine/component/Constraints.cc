@@ -108,12 +108,6 @@ namespace Prototype
 
     check_error(!domx.isEmpty() && !domy.isEmpty());
 
-    // Discontinue if they are not both finite or infinite
-    if(domx.isFinite() != domy.isFinite()){
-      domx.empty();
-      return;
-    }
-
     // By construction, we know the arguments are of the same type. So special case
     // accordingly
     if(domx.isEnumerated()){

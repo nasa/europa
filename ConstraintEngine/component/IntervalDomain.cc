@@ -58,10 +58,8 @@ namespace Prototype {
   }
  
   void IntervalDomain::set(const IntervalDomain& dom){
-    if(*this != dom){
-      intersect(dom);
-      notifyChange(DomainListener::SET);
-    }
+    intersect(dom);
+    notifyChange(DomainListener::SET);
   }
  
   void IntervalDomain::set(double value){
@@ -138,7 +136,7 @@ namespace Prototype {
 
   bool IntervalDomain::isMember(double value) const {
     checkPrecision(value);
-    return (value > m_lb && value <= m_ub);
+    return (value >= m_lb && value <= m_ub);
   }
 
   bool IntervalDomain::isEnumerated() const { return false;}
