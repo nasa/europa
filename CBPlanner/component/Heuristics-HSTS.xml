@@ -8,12 +8,12 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Compatibility>
    <Priority>24.5</Priority>
    <PredicateSpec>
-     <PredicateName>Spacecraft.SEP_Thrust_Timer.Max_ThrustTime</PredicateName>
+     <PredicateName>Navigator.At</PredicateName>
      <PredicateParameters/>
    </PredicateSpec>
    <Priority>100.25</Priority>
    <PredicateSpec>
-     <PredicateName>Spacecraft.SEP_Thrust_Timer.Min_ThrustTime</PredicateName>
+     <PredicateName>Navigator.Going</PredicateName>
      <PredicateParameters/>
    </PredicateSpec>
  </Compatibility>
@@ -34,7 +34,9 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  </Token>
  <ConstrainedVariable>
    <Priority>5000.0</Priority>
+   <Preference>
    <ValueOrder>ascending</ValueOrder>
+   </Preference>
  </ConstrainedVariable> 
 </Defaults>
 
@@ -48,7 +50,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <Index>2</Index>
   </VariableSpec>
   <PredicateSpec>
-  <PredicateName>Spacecraft.Arm.Extend</PredicateName>
+  <PredicateName>Commands.TakeSample</PredicateName>
   <PredicateParameters/>
   </PredicateSpec>
 </ConstrainedVariable>
@@ -62,11 +64,11 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <Name>WillNavNext</Name>
   </VariableSpec>
   <PredicateSpec>
-  <PredicateName>Spacecraft.Navigate</PredicateName>
+  <PredicateName>Instrument.Place</PredicateName>
   <PredicateParameters>
    <Parameter>
-     <Index>2</Index>
-     <Value>Target524</Value>
+     <Index>1</Index>
+     <Value>Loc1</Value>
    </Parameter>
   </PredicateParameters>
   </PredicateSpec>
@@ -76,20 +78,20 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <Priority>6000.25</Priority>
   <Preference>
   <DomainOrder>
-    <Value>OBS_INACTIVE_MEETS_OPNAV</Value>
-    <Value>OBS_INACTIVE_MEETS_INACTIVE_BOUNDARY</Value>
-    <Value>OBS_INACTIVE_MEETS_INACTIVE_INACTIVE</Value>
+    <Value>Loc4</Value>
+    <Value>Loc5</Value>
+    <Value>Loc6</Value>
   </DomainOrder>
   </Preference>
   <VariableSpec>
-    <Index>10</Index>
+    <Index>1</Index>
   </VariableSpec>
   <PredicateSpec>
-  <PredicateName>Spacecraft.Instrument.Obs_Window_Inactive</PredicateName>
+  <PredicateName>Instrument.TakeSample</PredicateName>
   <PredicateParameters>
    <Parameter>
-     <Index>4</Index>
-     <Value>STANDBY</Value>
+     <Index>1</Index>
+     <Value>Loc6</Value>
    </Parameter>
   </PredicateParameters>
   </PredicateSpec>
@@ -100,7 +102,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
 <Token>
   <Priority>443.7</Priority>
   <PredicateSpec>
-  <PredicateName>Spacecraft.Thrust_System.Thrust_Fwd</PredicateName>
+  <PredicateName>Commands.PhoneHome</PredicateName>
   <PredicateParameters/>
   </PredicateSpec>
   <Master/>
@@ -109,16 +111,16 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
 <Token>
   <Priority>200.4</Priority>
   <PredicateSpec>
-  <PredicateName>Spacecraft.Thrust_System.Thrust_Left</PredicateName>
+  <PredicateName>Commands.TakeSample</PredicateName>
   <PredicateParameters>
    <Parameter>
-     <Index>2</Index>
-     <Value>NO_RIGHT</Value>
+     <Index>1</Index>
+     <Value>Loc3</Value>
    </Parameter>
   </PredicateParameters>
   </PredicateSpec>
   <Master/>
-  <DecisionPreference>
+   <DecisionPreference>
     <StateOrder>
        <State>activate</State>
        <Order>early</Order>
@@ -128,22 +130,22 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
 <Token>
   <Priority>10000.0</Priority>
   <PredicateSpec>
-  <PredicateName>Thrust_Fwd</PredicateName>
+  <PredicateName>Navigator.Going</PredicateName>
   <PredicateParameters>
     <Parameter>
-     <Index>2</Index>
-     <Value>24.5</Value>
+     <Index>1</Index>
+     <Value>Loc2</Value>
     </Parameter>
     <Parameter>
-     <Index>4</Index>
-     <Value>RES</Value>
+     <Index>2</Index>
+     <Value>Loc3</Value>
     </Parameter>
   </PredicateParameters>
   </PredicateSpec>
   <Master>
     <Relation>after</Relation>
     <PredicateSpec>
-      <PredicateName>Max_Thrust_Time</PredicateName>
+      <PredicateName>Navigator.At</PredicateName>
       <PredicateParameters/>
     </PredicateSpec>
   </Master>
