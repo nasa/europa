@@ -1460,8 +1460,9 @@ namespace Prototype {
             writeCounter = 0;
           }
         }
-        else 
+        else {
           nstep++;
+        }
       }
     }
   
@@ -1630,27 +1631,29 @@ namespace Prototype {
                                                transactionId++, seqId, nstep, SNULL));
         numTransactions++;
       }
-      if(havePlanner) {
-        writeCounter++;
-        if(noFullWrite == 0) {
-          if(writeCounter == stepsPerWrite) {
-            write();
-            nstep++;
-            transactionList->clear();
-            numTransactions = 0;
-            writeCounter = 0;
-          }
-        }
-        else {
-          if(writeStep == 1) {
-            writeStatsAndTransactions();
-            transactionList->clear();
-            numTransactions = 0;
-            writeCounter = 0;
-          }
-          nstep++;
-        }
-      }
+//       if(havePlanner) {
+//         writeCounter++;
+//         if(noFullWrite == 0) {
+//           if(writeCounter == stepsPerWrite) {
+//             write();
+//             nstep++;
+//             std::cerr << "PPW notifyRetractFailed: " << nstep << std::endl;
+//             transactionList->clear();
+//             numTransactions = 0;
+//             writeCounter = 0;
+//           }
+//         }
+//         else {
+//           if(writeStep == 1) {
+//             writeStatsAndTransactions();
+//             transactionList->clear();
+//             numTransactions = 0;
+//             writeCounter = 0;
+//           }
+//           nstep++;
+//           std::cerr << "PPW notifyRetractFailed: " << nstep << std::endl;
+//         }
+//       }
     }
 
     void PartialPlanWriter::notifyRetractSucceeded(const DecisionPointId &dec) {
@@ -1659,27 +1662,29 @@ namespace Prototype {
                                                transactionId++, seqId, nstep, SNULL));
         numTransactions++;
       }
-      if(havePlanner) {
-        writeCounter++;
-        if(noFullWrite == 0) {
-          if(writeCounter == stepsPerWrite) {
-            write();
-            nstep++;
-            transactionList->clear();
-            numTransactions = 0;
-            writeCounter = 0;
-          }
-        }
-        else {
-          if(writeStep == 1) {
-            writeStatsAndTransactions();
-            transactionList->clear();
-            numTransactions = 0;
-            writeCounter = 0;
-          }
-          nstep++;
-        }
-      }
+//       if(havePlanner) {
+//         writeCounter++;
+//         if(noFullWrite == 0) {
+//           if(writeCounter == stepsPerWrite) {
+//             write();
+//             nstep++;
+//             std::cerr << "PPW notifyRetractSucceeded: " << nstep << std::endl;
+//             transactionList->clear();
+//             numTransactions = 0;
+//             writeCounter = 0;
+//           }
+//         }
+//         else {
+//           if(writeStep == 1) {
+//             writeStatsAndTransactions();
+//             transactionList->clear();
+//             numTransactions = 0;
+//             writeCounter = 0;
+//           }
+//           nstep++;
+//           std::cerr << "PPW notifyRetractSucceeded: " << nstep << std::endl;
+//         }
+//       }
     }
 
     void PartialPlanWriter::notifySearchFinished() {
