@@ -23,6 +23,7 @@ LocalDepends tests : run-hsts-module-tests ;
 # Commented out tests are failing for various reasons; see each test for more info.
 LocalDepends run-hsts-planner-tests :
 	xmonkey
+	litaEuropa2
         monkey-timeline
         monkey-timeline-hacked
         monkey-timeline-hacked2
@@ -420,8 +421,8 @@ RunEUROPATest dnp-twoFreeObs-h : twoFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 #RunEUROPATest lita : lita-init.nddl : lita-heur.xml : lita.pi ;
 
 ### LITA - from Vijay
-#EUROPA_NDDL missionExec.init.e2 ; 
-#RunEUROPATest litaEuropa2 : missionExec.init.e2 : missionExec.heuristics.e2 : missionExec.noBranch.e2 ;
+EUROPA_NDDL missionExec.init.e2 ; 
+RunEUROPATest litaEuropa2 : missionExec.init.e2 : missionExec.heuristics.e2 : missionExec.noBranch.e2 ;
 
 ### XMONKEY - from Olga
 EUROPA_NDDL xmonkey-timeline.init.nddl ;
