@@ -58,6 +58,7 @@ namespace EUROPA {
       processTransaction(tx);
       txCounter++;
     }
+    check_error(txCounter > 0, "Failed to find any transactions in stream.");
   }
 
   void DbClientTransactionPlayer::play(const DbClientTransactionLogId& txLog) {
