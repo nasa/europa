@@ -14,7 +14,6 @@ namespace Prototype{
     void notifyRemoved(const ObjectId& object);
     void notifyAdded(const TokenId& token);
     void notifyRemoved(const TokenId& token);
-    void notifyClosed(const TokenId& token);
     void notifyActivated(const TokenId& token);
     void notifyDeactivated(const TokenId& token);
     void notifyMerged(const TokenId& token);

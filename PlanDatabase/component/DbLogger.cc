@@ -23,8 +23,6 @@ namespace Prototype {
 
   void DbLogger::notifyRemoved(const TokenId& token){m_os << "DbLogger: Token Removed " << token->getPredicateName().toString()  << " (" << token->getKey() << ")" << std::endl;}
 
-  void DbLogger::notifyClosed(const TokenId& token){m_os << "DbLogger: Token Closed " << token->getPredicateName().toString()  << " (" << token->getKey() << ")" << std::endl;}
-
   void DbLogger::notifyActivated(const TokenId& token){m_os << "DbLogger: Token Activated " << token->getPredicateName().toString()  << " (" << token->getKey() << ")" << std::endl;}
 
   void DbLogger::notifyDeactivated(const TokenId& token){m_os << "DbLogger: Token Deactivated " << token->getPredicateName().toString()  << " (" << token->getKey() << ")" << std::endl;}
