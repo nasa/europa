@@ -23,7 +23,7 @@ namespace Prototype {
 
   bool IntervalIntDomain::isFinite() const {
     check_error(!isDynamic());
-    return (m_lb > -MAX_INT && m_ub < MAX_INT);
+    return(m_lb > -MAX_INT && m_ub < MAX_INT);
   }
 
   void IntervalIntDomain::testPrecision(const double& value) const {
@@ -32,7 +32,7 @@ namespace Prototype {
     check_error(dblValue == value); // confirms no loss in precision
   }
 
-  double IntervalIntDomain::convert(const double& value) const{
+  double IntervalIntDomain::convert(const double& value) const {
     return((int) value);
   }
 
@@ -97,7 +97,7 @@ namespace Prototype {
   }
 
   double IntervalIntDomain::minDelta() const {
-    return(1);
+    return(1.0);
   }
 
   double IntervalIntDomain::translateNumber(double number, bool asMin) const {
@@ -108,5 +108,11 @@ namespace Prototype {
     if (result != number && asMin && number > 0)
       result = result + 1;
     return(result);
+  }
+
+  IntervalIntDomain *IntervalIntDomain::copy() const {
+    IntervalIntDomain *ptr = new IntervalIntDomain(*this);
+    check_error(ptr != 0);
+    return(ptr);
   }
 }
