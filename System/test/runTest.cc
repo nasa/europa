@@ -16,11 +16,11 @@
 
 SchemaId schema;
 
-#define PERFORMANCE
+//#define PERFORMANCE
 
 const char* TX_LOG = "TransactionLog.xml";
 const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
-bool replay = false;
+bool replay = true;
 
 bool runPlanner(){
     SamplePlanDatabase db1(schema, replay);
