@@ -1,3 +1,8 @@
+*.bb
+*.bbg
+*.da
+run-*.gprof
+run-*.output
 C3-init.cc
 C3-init.hh
 C3-init.xml
