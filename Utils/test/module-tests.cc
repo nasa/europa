@@ -155,16 +155,16 @@ private:
     }
     catch(Error e) {
       __z__(e, Error("s_os != 0", "no debug stream has been assigned",
-                     "Utils/core/Debug.cc", 117));
+                     "Utils/core/Debug.cc", 116));
     }
 #endif
     return(true);
   }
 
   static bool testDebugFiles() {
-    for(int i = 1; i < 7; i++)
+    for (int i = 1; i < 7; i++)
       runDebugTest(i);
-    return true;
+    return(true);
   }
 
   static void runDebugTest(int cfgNum) {
@@ -177,16 +177,16 @@ private:
 
     Error::doNotThrowExceptions();
     Error::doNotDisplayErrors();
-    std::ifstream debugStream(cfgFile.c_str());
-    check_error(debugStream, "could not open debug config file",
-                DebugErr::DebugConfigError());
-    if(!DebugMessage::readConfigFile(debugStream))
-      handle_error(!DebugMessage::readConfigFile(debugStream),
-                   "problems reading debug config file",
-                   DebugErr::DebugConfigError());
     std::ofstream debugOutput(cfgOut.c_str());
     check_error(debugOutput, "could not open debug output file");
     DebugMessage::setStream(debugOutput);
+    std::ifstream debugStream(cfgFile.c_str());
+    check_error(debugStream, "could not open debug config file",
+                DebugErr::DebugConfigError());
+    if (!DebugMessage::readConfigFile(debugStream))
+      handle_error(!DebugMessage::readConfigFile(debugStream),
+                   "problems reading debug config file",
+                   DebugErr::DebugConfigError());
     
     debugMsg("main1", "done opening files");
     condDebugMsg(std::cout.good(), "main1a", "std::cout is good");
@@ -198,6 +198,7 @@ private:
 #endif
   }
 };
+
 /**
  * Support classes to enable testing
  * Foo: Basic allocation and deallocation.
