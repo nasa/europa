@@ -1,6 +1,6 @@
 #include "TokenDecisionPoint.hh"
 #include "Token.hh"
-#include "Choice.hh"
+#include "ValueChoice.hh"
 #include "DbClient.hh"
 
 namespace Prototype {
@@ -14,14 +14,14 @@ namespace Prototype {
     check_error (!choice.isNoId());
     Choice::ChoiceType type = choice->getType();
     check_error(type == Choice::value);
-    Token::State state = (Token::State)choice->getValue();
+    Token::State state = (Token::State)Id<ValueChoice>(choice)->getValue();
     TokenId tok = getToken();
     switch (state) {
     case Token::ACTIVE:
       m_dbClient->activate(tok);
       break;
     case Token::MERGED:
-      m_dbClient->merge(tok, choice->getToken());
+      m_dbClient->merge(tok, Id<ValueChoice>(choice)->getToken());
       break;
     case Token::REJECTED:
       m_dbClient->reject(tok);

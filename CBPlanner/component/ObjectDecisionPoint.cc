@@ -1,5 +1,5 @@
 #include "ObjectDecisionPoint.hh"
-#include "Choice.hh"
+#include "TokenChoice.hh"
 #include "DbClient.hh"
 #include "Token.hh"
 #include "Object.hh"
@@ -16,8 +16,9 @@ namespace Prototype {
   ObjectDecisionPoint::~ObjectDecisionPoint() { }
 
   const bool ObjectDecisionPoint::assign(const ChoiceId& choice) { 
-    check_error (!choice.isNoId());
-    m_dbClient->constrain(m_object, m_token, choice->getToken()); 
+    check_error(!choice.isNoId());
+    check_error(Id<TokenChoice>::convertable(choice));
+    m_dbClient->constrain(m_object, m_token, Id<TokenChoice>(choice)->getToken()); 
     return DecisionPoint::assign(choice);
   }
 

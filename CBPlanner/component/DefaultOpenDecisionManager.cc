@@ -8,6 +8,7 @@
 #include "Object.hh"
 #include "ObjectDecisionPoint.hh"
 #include "Choice.hh"
+#include "ValueChoice.hh"
 #include "DefaultOpenDecisionManager.hh"
 
 namespace Prototype {
@@ -284,7 +285,7 @@ namespace Prototype {
       std::list<ChoiceId>::iterator it = choices.begin();
       for ( ; it != choices.end(); ++it) {
 	check_error((*it)->getType() == Choice::value);
-	Token::State val = (Token::State)(*it)->getValue();
+	Token::State val = (Token::State)Id<ValueChoice>(*it)->getValue();
 	if (merge.isNoId() && val == Token::MERGED) {
 	  merge = (*it);
 	  break; // we'll do this first, no point in assigning the rest.

@@ -1,7 +1,7 @@
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "ConstrainedVariable.hh"
 #include "DbClient.hh"
-#include "Choice.hh"
+#include "ValueChoice.hh"
 #include <iostream>
 
 namespace Prototype {
@@ -13,7 +13,8 @@ namespace Prototype {
 
   const bool ConstrainedVariableDecisionPoint::assign(const ChoiceId& choice) {
     check_error(!choice.isNoId());
-    m_dbClient->specify(m_var, choice->getValue()); 
+    check_error(Id<ValueChoice>::convertable(choice));
+    m_dbClient->specify(m_var, Id<ValueChoice>(choice)->getValue()); 
     return DecisionPoint::assign(choice);
   }
 
