@@ -49,4 +49,7 @@ World::initialState{
  // Test use of binary temporal relation
  b after (Rover.At c);
  a meets c;
+
+ //test use of starts
+ c starts (Rover.At d);
 }
