@@ -28,11 +28,11 @@ namespace Prototype {
     return m_propagator->canFitBetween(token->getStart(), token->getEnd(), predecessor->getEnd(), successor->getStart());
   }
 
+  /**
+   * @brief 2 tokens can be concurrent if the temporal distance between them can be 0
+   */
   bool STNTemporalAdvisor::canBeConcurrent(const TokenId& first, const TokenId& second){
-    if(m_propagator->canBeConcurrent(first->getStart(), second->getStart()) &&
-       m_propagator->canBeConcurrent(first->getEnd(), second->getEnd()))
-      return true;
-    else
-      return false;
+    return (m_propagator->canBeConcurrent(first->getStart(), second->getStart()) &&
+	    m_propagator->canBeConcurrent(first->getEnd(), second->getEnd()));
   }
 }

@@ -11,6 +11,7 @@
 #include "TemporalNetworkLogger.hh"
 #include "IntervalToken.hh"
 #include "Timeline.hh"
+#include "Utils.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
 
 #include <iostream>
@@ -139,6 +140,7 @@ public:
     runTest(testTemporalPropagation);
     runTest(testCanPrecede);
     runTest(testCanFitBetween);
+    runTest(testCanBeConcurrent);
     return true;
   }
 
@@ -326,6 +328,76 @@ private:
     return true;
   }
 
+  static bool testCanBeConcurrent() {
+    DEFAULT_SETUP(ce,db,schema,false);
+
+    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    assert(!timeline.isNoId());
+
+    db.close();
+
+    IntervalToken t0(db.getId(),
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken t1(db.getId(),
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken t2(db.getId(),
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    ce.propagate();
+
+    // Check that they can co-incide, trivially.
+    assert(db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
+
+    // May 1 very tight, but still ok
+    t0.getStart()->specify(1);
+    t0.getEnd()->specify(2);
+    assert(ce.propagate());
+    assert(db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
+
+    // Make it to tight.
+    t1.getEnd()->specify(10);
+    ce.propagate();
+    assert(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
+
+    // Reset, but impose constraints
+    t0.getStart()->reset();
+    t0.getEnd()->reset();
+    t1.getEnd()->reset();
+
+    ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("before"),
+							  ce.getId(), 
+							  makeScope(t0.getEnd(), t1.getStart()));
+
+    ConstraintId c1 = ConstraintLibrary::createConstraint(LabelStr("before"),
+							  ce.getId(),
+							  makeScope(t1.getEnd(), t2.getStart()));
+
+    assert(ce.propagate());
+
+    assert(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
+    assert(!db.getTemporalAdvisor()->canBeConcurrent(t1.getId(), t2.getId()));
+    assert(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t2.getId()));
+
+    delete (Constraint*) c0;
+    delete (Constraint*) c1;
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
 };
 
 int main() {

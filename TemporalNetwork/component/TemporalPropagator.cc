@@ -356,7 +356,11 @@ namespace Prototype {
   }
 
   bool TemporalPropagator::canBeConcurrent(const TempVarId& first, const TempVarId& second) {
-   return canPrecede(first, second) && canPrecede(second, first);
+    const TimepointId& _first = getTimepoint(first);
+    const TimepointId& _second = getTimepoint(second);
+    Time lb, ub;
+    m_tnet->calcDistanceBounds(_first, _second, lb, ub, true);
+    return (lb <= 0 && ub >= 0);
   }
 
   void TemporalPropagator::updateTimepoint(const TempVarId& var){
