@@ -7,7 +7,7 @@
 #include "PlanDatabase.hh"
 #include "RulesEngine.hh"
 #include "Rule.hh"
-#include "RuleContext.hh"
+#include "RuleInstance.hh"
 #include "Schema.hh"
 #include "ObjectTokenRelation.hh"
 #include "ObjectFilter.hh"

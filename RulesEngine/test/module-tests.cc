@@ -7,19 +7,19 @@
 #include "Timeline.hh"
 #include "RulesEngine.hh"
 #include "Rule.hh"
-#include "RuleContext.hh"
+#include "RuleInstance.hh"
 #include "ObjectFilter.hh"
 #include "DbLogger.hh"
-#include "TestRule.hh"
 #include "PartialPlanWriter.hh"
 
-#include "../ConstraintEngine/TestSupport.hh"
-#include "../ConstraintEngine/Utils.hh"
-#include "../ConstraintEngine/IntervalIntDomain.hh"
+#include "TestSupport.hh"
+#include "TestRule.hh"
+#include "Utils.hh"
+#include "IntervalIntDomain.hh"
 #include "TokenTemporalVariable.hh"
-#include "../ConstraintEngine/Domain.hh"
-#include "../ConstraintEngine/DefaultPropagator.hh"
-#include "../ConstraintEngine/EqualityConstraintPropagator.hh"
+#include "Domain.hh"
+#include "DefaultPropagator.hh"
+#include "EqualityConstraintPropagator.hh"
 
 #include <iostream>
 #include <string>
@@ -33,6 +33,135 @@ typedef std::strstream sstream;
 typedef std::stringstream sstream;
 #endif
 
+
+class SimpleSubGoal: public Rule {
+public:
+  SimpleSubGoal(): Rule(LabelStr("Predicate")){}
+
+  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb) const{
+    RuleInstanceId rootInstance = (new RootInstance(m_id, token, planDb))->getId();
+    return rootInstance;
+  }
+
+private:
+  class RootInstance: public RuleInstance{
+  public:
+    RootInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+      : RuleInstance(rule, token, planDb) {}
+
+    void handleExecute(){
+      m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+      addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), m_onlySlave->getStart()));
+    }
+
+    TokenId m_onlySlave;
+  };
+};
+
+class NestedGuards_0: public Rule {
+public:
+  NestedGuards_0();
+  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb) const;
+};
+
+class NestedGuards_0_Root: public RuleInstance{
+public:
+  NestedGuards_0_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb);
+  void handleExecute();
+  TokenId m_onlySlave;
+};
+
+class NestedGuards_0_0: public RuleInstance{
+public:
+  NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, double value);
+  void handleExecute();
+  TokenId m_onlySlave;
+};
+
+class NestedGuards_0_1: public RuleInstance{
+public:
+  NestedGuards_0_1(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard);
+  void handleExecute();
+  TokenId m_onlySlave;
+};
+
+
+NestedGuards_0::NestedGuards_0(): Rule(LabelStr("Predicate")){}
+RuleInstanceId NestedGuards_0::createInstance(const TokenId& token, const PlanDatabaseId& planDb) const{
+  RuleInstanceId rootInstance = (new NestedGuards_0_Root(m_id, token, planDb))->getId();
+  return rootInstance;
+}
+
+NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+  : RuleInstance(rule, token, planDb, token->getObject()) {
+}
+
+void NestedGuards_0_Root::handleExecute(){
+  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+  addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), m_onlySlave->getStart()));
+  addChildRule(new NestedGuards_0_0(m_id, m_token->getStart(), 10)); /*!< Add child context with guards - start == 10 */
+  addChildRule(new NestedGuards_0_1(m_id, m_onlySlave->getObject())); /*!< Add child context with guards - object set to singleton */
+}
+
+NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, double value)
+  : RuleInstance(parentInstance, guard, value){}
+
+void NestedGuards_0_0::handleExecute(){
+  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+  addConstraint(LabelStr("eq"), makeScope(m_token->getStart(), m_onlySlave->getEnd())); // Place before
+}
+
+NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard)
+  : RuleInstance(parentInstance, guard){}
+
+void NestedGuards_0_1::handleExecute(){
+  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+  addConstraint(LabelStr("eq"), makeScope(m_token->getStart(), m_onlySlave->getEnd())); // Place before
+}
+
+class LocalVariableGuard_0: public Rule {
+public:
+  LocalVariableGuard_0();
+  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb) const;
+};
+
+class LocalVariableGuard_0_Root: public RuleInstance{
+public:
+  LocalVariableGuard_0_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb);
+  void handleExecute();
+  static const ConstrainedVariableId& getGuard() {return s_guard;}
+  static ConstrainedVariableId s_guard;
+};
+
+class LocalVariableGuard_0_0: public RuleInstance{
+public:
+  LocalVariableGuard_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, double value)
+    : RuleInstance(parentInstance, guard, value){}
+  void handleExecute();
+};
+
+ConstrainedVariableId LocalVariableGuard_0_Root::s_guard;
+
+LocalVariableGuard_0::LocalVariableGuard_0(): Rule(LabelStr("Predicate")){}
+
+RuleInstanceId LocalVariableGuard_0::createInstance(const TokenId& token, const PlanDatabaseId& planDb) const{
+  RuleInstanceId rootInstance = (new LocalVariableGuard_0_Root(m_id, token, planDb))->getId();
+  return rootInstance;
+}
+
+LocalVariableGuard_0_Root::LocalVariableGuard_0_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+  : RuleInstance(rule, token, planDb){}
+
+void LocalVariableGuard_0_Root::handleExecute(){
+  // Add the guard
+  ConstrainedVariableId guard = addVariable(BoolDomain(), true, LabelStr("b"));
+  s_guard = guard; // To allow it to be set
+  addChildRule(new LocalVariableGuard_0_0(m_id, guard, true));
+}
+
+void LocalVariableGuard_0_0::handleExecute(){
+  addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+}
 
 class DefaultSchemaAccessor{
 public:
@@ -76,211 +205,144 @@ SchemaId DefaultSchemaAccessor::s_instance;
 class RulesEngineTest {
 public:
   static bool test(){
-    runTest(testBasicAllocation);
-    runTest(testActivation);
-    runTest(testRuleFiringAndCleanup);
-    runTest(testObjectFilteringConstraint);
-    runTest(testFilterAndConstrain);
+    runTest(testSimpleSubGoal);
+    runTest(testNestedGuards);
+    runTest(testLocalVariable);
+    runTest(testTestRule);
     return true;
   }
 private:
-  static bool testBasicAllocation(){
+
+  static bool testSimpleSubGoal(){
     DEFAULT_SETUP(ce, db, schema, false);
-    TestRule r(LabelStr("Type::Predicate"));
+    db.close();
+
+    SimpleSubGoal r;
+    // Create a token of an expected type
+
+    IntervalToken t0(db.getId(), 
+		     LabelStr("Predicate"), 
+		     true,
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(1, 1000));
+    // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
+    assert(t0.getSlaves().empty());
+    t0.activate();
+    assert(db.getTokens().size() == 2);
+    assert(t0.getSlaves().size() == 1);
+
+    TokenId slaveToken = *(t0.getSlaves().begin());
+    assert(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
+
     return true;
   }
 
-  static bool testActivation(){
+  static bool testNestedGuards(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
     db.close();
 
-    TestRule r(LabelStr("AllObjects::Predicate"));
+    NestedGuards_0 r;
+    // Create a token of an expected type
 
-    IntervalToken tokenA(db.getId(),
-		     LabelStr("AllObjects::Predicate"), 
+    IntervalToken t0(db.getId(), 
+		     LabelStr("Predicate"), 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
+    // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
+    assert(t0.getSlaves().empty());
+    t0.activate();
+    assert(db.getTokens().size() == 1);
+    t0.getObject()->specify(object.getId());
+    ce.propagate();
+    assert(t0.getSlaves().size() == 1);
+    assert(db.getTokens().size() == 2);
 
-    assert(Rule::getRules().size() == 1);
-    assert(re.getRuleInstances().empty());
+    TokenId slaveToken = *(t0.getSlaves().begin());
 
-    int num_constraints = ce.getConstraints().size();
-    // Activate and confirm the rule instance is created
-    tokenA.activate();
-    assert(re.getRuleInstances().size() == 1);
-    // New constraint added to listen to rule variables
-    assert(ce.getConstraints().size() == (unsigned int) (num_constraints + 1));
+    // Set start time to 10 will trigger another guard
+    t0.getStart()->specify(10); // Will trigger nested guard
+    ce.propagate();
+    assert(t0.getSlaves().size() == 2);
 
-    // Deactivate to ensure the rule instance is removed
-    tokenA.cancel();
-    assert(re.getRuleInstances().empty());
-    assert(ce.getConstraints().size() == (unsigned int) num_constraints);
+    // Now set the object variable of the slaveToken to trigger additional guard
+    slaveToken->getObject()->specify(o2.getId());
+    ce.propagate();
+    assert(t0.getSlaves().size() == 3);
 
-    // Activate again to test deletion through automatic cleanup.
-    tokenA.activate();
-    assert(re.getRuleInstances().size() == 1);
+    // Now retract a decision and confirm the slave is removed
+    t0.getStart()->reset();
+    ce.propagate();
+    assert(t0.getSlaves().size() == 2);
+
+    // Now deactivate the master token and confirm all salves are gone
+    t0.cancel();
+    ce.propagate();
+    assert(t0.getSlaves().empty());
     return true;
   }
 
-  static bool testRuleFiringAndCleanup(){
+  static bool testLocalVariable(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
     db.close();
-    TestRule r(LabelStr("AllObjects::Predicate"));
 
-    IntervalToken tokenA(db.getId(), 
-		     LabelStr("AllObjects::Predicate"), 
+    LocalVariableGuard_0 r;
+
+    IntervalToken t0(db.getId(), 
+		     LabelStr("Predicate"), 
 		     true,
-		     IntervalIntDomain(0, 10),
-		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(1, 1000));
+    // Activate it and confirm we are not sub-goaling yet
+    ConstrainedVariableId guard = LocalVariableGuard_0_Root::getGuard();
+    assert(guard.isNoId());
+
+    t0.activate();
+    ce.propagate();
+    assert(t0.getSlaves().empty());
+
+    guard = LocalVariableGuard_0_Root::getGuard();
+    assert(guard.isValid());
+    guard->specify(false); // Should not succeed
+    ce.propagate();
+    assert(t0.getSlaves().empty());
+
+    guard->reset(); // Reset and try correct value
+    guard->specify(true); // Should succeed
+    ce.propagate();
+    assert(t0.getSlaves().size() == 1);
+
+    return true;
+  }
+
+  static bool testTestRule(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    db.close();
+
+    TestRule r(LabelStr("Predicate"));
+
+    IntervalToken t0(db.getId(), 
+		     LabelStr("Predicate"), 
+		     true,
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
 
-    assert(ce.propagate());
-    assert(db.getTokens().size() == 1);
+    /* Force first level of execution based on object variable being specified to a singleton on activation.
+       second level of execution should also occur through propagation, since by default, the local guard base domain
+       is a singleton */
 
-    tokenA.activate();
-    assert(ce.propagate());
-    assert(db.getTokens().size() == 1);
-
-    tokenA.getObject()->specify(timeline.getId());
-    assert(ce.propagate());
-    // 2 tokens added since fire will trigger twice due to composition
-    assert(db.getTokens().size() == 3);
-    assert(tokenA.getSlaves().size() == 2);
-    TokenId slave = *(tokenA.getSlaves().begin());
-    assert(slave->getDuration()->getDerivedDomain().isSingleton()); // Due to constraint on local variable, propagated through interim constraint
-
-    // Test reset which should backtrack the rule
-    tokenA.getObject()->reset();
-    assert(ce.propagate());
-    assert(db.getTokens().size() == 1);
-
-    // Set again, and deactivate
-    tokenA.getObject()->specify(timeline.getId());
-    assert(ce.propagate());
-    assert(db.getTokens().size() == 3);
-    tokenA.cancel();
-    assert(db.getTokens().size() == 1);
-
-    // Now repeast to ensure correct automatic cleanup
-    tokenA.activate();
-    assert(ce.propagate());
-    assert(db.getTokens().size() == 3); // Rule should fire since specified domain already set!
-    return true;
-  }
-  static bool testObjectFilteringConstraint(){
-    PlanDatabase db(ENGINE, SCHEMA);
-
-    static const int NUM_OBJECTS = 10;
-
-    std::list<ObjectId> objects;
-
-    // Allocate objects with 2 field variables
-    for (int i=0;i<NUM_OBJECTS;i++){
-      //std::stringstream ss;
-      sstream ss;
-      ss << "Object" << i;
-      std::string objectName(ss.str());
-      ObjectId object = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr(objectName.c_str()), true))->getId();
-      object->addVariable(IntervalIntDomain(i, i));
-      object->addVariable(BoolDomain());
-      object->close();
-      objects.push_back(object);
-    }
-
-    // Set up the object variable
-    Variable<ObjectSet> objectVar(db.getConstraintEngine(), objects);
-
-    // Set up the filter variable
-    EnumeratedDomain filterBaseDomain = ObjectFilter::constructUnion(objects, 0);
-    Variable<EnumeratedDomain> filterVar(db.getConstraintEngine(), filterBaseDomain);
-
-    // Construct the filter constraint
-    ObjectFilter filter(LabelStr("Default"), db.getConstraintEngine(), objectVar.getId(), 0, filterVar.getId());
-
-    assert(db.getConstraintEngine()->propagate());
-
-    // Iterate and restrict the filter by 1 each time. It should restrict the object variable by 1 also
-    EnumeratedDomain workingDomain(filterBaseDomain);
-    assert(filterBaseDomain.getSize() == NUM_OBJECTS);
-    assert(workingDomain.getSize() == NUM_OBJECTS);
-    assert(objectVar.getDerivedDomain().getSize() == NUM_OBJECTS);
-
-    for (int i=1; i< NUM_OBJECTS; i++){
-      workingDomain.remove(i);
-      filterVar.specify(workingDomain);
-      int resultingSize = objectVar.getDerivedDomain().getSize();
-      assert(resultingSize == (filterBaseDomain.getSize() - i));
-    }
-
-    filterVar.reset();
-    assert(objectVar.getDerivedDomain().getSize() == filterBaseDomain.getSize());
-
-    objectVar.specify(objects.front());
-    assert(filterVar.getDerivedDomain().isSingleton());
-    return true;
-  }
-
-  /**
-   * This case will emulate the following in nddl
-   * class Fact {
-   *  int p1;
-   *  int p2;
-   * }
-
-   */
-  static bool testFilterAndConstrain(){
-    PlanDatabase db(ENGINE, SCHEMA);
-
-    static const int NUM_OBJECTS = 10;
-
-    std::list<ObjectId> objects;
-
-    // Allocate objects with 2 field variables
-    for (int i=0;i<NUM_OBJECTS;i++){
-      //std::stringstream ss;
-      sstream ss;
-      ss << "Object" << i;
-      std::string objectName(ss.str());
-      ObjectId object = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr(objectName.c_str()), true))->getId();
-      object->addVariable(IntervalIntDomain(i, i)); // p1
-      object->addVariable(IntervalIntDomain(NUM_OBJECTS - i, NUM_OBJECTS - i)); // p2
-      object->close();
-      objects.push_back(object);
-    }
-
-    // Prepare variables
-    Variable<ObjectSet> objectVar(db.getConstraintEngine(), objects);
-
-    EnumeratedDomain filterBaseDomain0 = ObjectFilter::constructUnion(objects, 0);
-    Variable<EnumeratedDomain> filterVar0(db.getConstraintEngine(), filterBaseDomain0);
-    ObjectFilter filter0(LabelStr("Default"), db.getConstraintEngine(), objectVar.getId(), 0, filterVar0.getId());
-
-    EnumeratedDomain filterBaseDomain1 = ObjectFilter::constructUnion(objects, 1);
-    Variable<EnumeratedDomain> filterVar1(db.getConstraintEngine(), filterBaseDomain1);
-    ObjectFilter filter1(LabelStr("Default"), db.getConstraintEngine(), objectVar.getId(), 1, filterVar1.getId());
-
-    // OK - now create 2 variables to constrain against, using the equals constraint
-    Variable<EnumeratedDomain> v0(db.getConstraintEngine(), filterBaseDomain0);
-    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), db.getConstraintEngine(), makeScope(v0.getId(), filterVar0.getId()));
-
-    Variable<EnumeratedDomain> v1(db.getConstraintEngine(), filterBaseDomain1);
-    EqualConstraint c1(LabelStr("eq"), LabelStr("Default"), db.getConstraintEngine(), makeScope(v1.getId(), filterVar1.getId()));
-
-    assert(objectVar.getDerivedDomain().getSize() == NUM_OBJECTS);
-    assert(v0.getDerivedDomain() == filterBaseDomain0);
-    assert(v1.getDerivedDomain() == filterBaseDomain1);
-
-    // Specify one variable to a singleton
-    v0.specify(3);
-    assert(v1.getDerivedDomain().isSingleton());
-    assert(v1.getDerivedDomain().getSingletonValue() == (NUM_OBJECTS - 3 ));
+    t0.activate();
+    ce.propagate();
+    assert(t0.getSlaves().size() == 2);
 
     return true;
   }
+
 };
 
 int main(){

@@ -10,7 +10,9 @@ class Foo{
 
 Foo::pred1{
  if(x==3){
-  before (object.pred2 p);
+  if(y==4){
+   before (object.pred2 p);
+ }
  }
 }
 

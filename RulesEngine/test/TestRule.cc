@@ -1,125 +1,63 @@
 #include "TestRule.hh"
-#include "RuleContext.hh"
 #include "RuleInstance.hh"
 #include "Token.hh"
 #include "Object.hh"
 #include "IntervalToken.hh"
 #include "PlanDatabase.hh"
-#include "../ConstraintEngine/ConstraintLibrary.hh"
-#include "../ConstraintEngine/IntervalIntDomain.hh"
-#include "../ConstraintEngine/Variable.hh"
-#include "../ConstraintEngine/Utils.hh"
+#include "ConstraintLibrary.hh"
+#include "IntervalIntDomain.hh"
+#include "Variable.hh"
+#include "Utils.hh"
 #include "TokenTemporalVariable.hh"
 
 namespace Prototype {
-
   /**
-   * @brief Defines members in addition to containers to aid comprehension
+   * @brief Declaration for rule instance root - guarded by object variable
    */
-  class TestContext: public RuleContext{
+  class TestRule_Root: public RuleInstance{
   public:
-    TestContext(const RuleInstanceId& ruleInstance, const IntervalIntDomain& guardBaseDomain)
-      : RuleContext(ruleInstance), m_guardBaseDomain(guardBaseDomain){}
-
-    /**
-     * @brief Initialize the context with some variables from the token and add a local variable for the rule too. This
-     * will test cleanup.
-     */
-    void initialize(std::vector<ConstrainedVariableId>& guards) {
-      assert(getGuards().empty());
-      assert(guards.empty());
-      guards.push_back(objectGuard = getToken()->getObject());
-      guards.push_back(stateGuard = getToken()->getState());
-
-      localGuard = 
-	(new Variable<IntervalIntDomain>(getPlanDatabase()->getConstraintEngine(), 
-					 m_guardBaseDomain,
-					 true,
-					 LabelStr("RuleGuardLocal"),
-					 m_id))->getId();
-      guards.push_back(localGuard);
-    }
-
-    /**
-     * @brief Fires when all variables are set to sinlgeton.
-     */
-    bool test(int index, const ConstrainedVariableId& var) {
-      return var->specifiedDomain().isSingleton();
-    }
-
-    void fire(std::vector<TokenId>& newTokens,
-	      std::vector<ConstrainedVariableId>& newVariables,
-	      std::vector<ConstraintId>& newConstraints) {
-      // Allocate a new slave Token
-      slave = (new IntervalToken(getToken(),
-				 LabelStr("Predicate")))->getId();
-      newTokens.push_back(slave);
-
-      // Allocate a new constraint equating the start variable of the new token with the end variable of
-      // the existing token
-      ConstraintId meets = ConstraintLibrary::createConstraint(LabelStr("eq"),
-							       getPlanDatabase()->getConstraintEngine(),
-							       makeScope(getToken()->getEnd(), slave->getStart()));
-      newConstraints.push_back(meets);
-
-      // Allocate a bogus intermeidate variable that is not decideable
-      interimVariable = (new Variable<IntervalIntDomain>(getPlanDatabase()->getConstraintEngine(), 
-							 IntervalIntDomain(),
-							 false,
-							 LabelStr("BogusRuleVariable"),
-							 m_id))->getId();
-
-      // Allocate an interim constraint
-      ConstraintId interimConstraint = ConstraintLibrary::createConstraint(LabelStr("eq"),
-									   getPlanDatabase()->getConstraintEngine(),
-									   makeScope(localGuard, interimVariable));
-      newConstraints.push_back(interimConstraint);
-      newVariables.push_back(interimVariable);
-
-      // Allocate a constraint restricting the duration of the slave using the guard variable
-      ConstraintId restrictDuration = ConstraintLibrary::createConstraint(LabelStr("eq"),
-									  getPlanDatabase()->getConstraintEngine(),
-									  makeScope(slave->getDuration(), interimVariable));
-      newConstraints.push_back(restrictDuration);
-
-      if(!getRule()->getChildren().empty())
-	createChild(getRule()->getChildren().front());
-    }
-
-  private:
-    const IntervalIntDomain m_guardBaseDomain;
-
-    /*!< Guard variables */
-    ConstrainedVariableId objectGuard;
-    ConstrainedVariableId stateGuard;
-    ConstrainedVariableId localGuard;
-
-    /*!< Members created from firing the rule */
-    TokenId slave;
-    ConstrainedVariableId interimVariable;
+    TestRule_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+      : RuleInstance(rule, token, planDb, token->getObject()){}
+    void handleExecute();
   };
 
   /**
-   * @brief allocates a special derived class which has explicit member variables in addition to the lists otherwise used.
-   * @see TestContext
+   * @brief First child of root instance
    */
-  RuleContextId TestRule::createContext(const RuleInstanceId& ruleInstance) const{
-    RuleContextId context = (new TestContext(ruleInstance, m_guardBaseDomain))->getId();
-    return context;
-  }
+  class TestRule_0: public RuleInstance{
+  public:
+    TestRule_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard)
+      : RuleInstance(parentInstance, guard), m_localGuard(guard){}
 
-  /**
-   * @brief Constructor as the root has a child rule.
-   */
+    void handleExecute();
+  private:
+    ConstrainedVariableId m_localGuard;
+  };
+
   TestRule::TestRule(const LabelStr& name, const IntervalIntDomain& guardBaseDomain)
-    :Rule(name), m_guardBaseDomain(guardBaseDomain){
-    new TestRule(getId(), m_guardBaseDomain);
+    : Rule(name), m_guardBaseDomain(guardBaseDomain){}
+
+  RuleInstanceId TestRule::createInstance(const TokenId& token, const PlanDatabaseId& planDb) const{
+    RuleInstanceId rootInstance = (new TestRule_Root(m_id, token, planDb))->getId();
+    return rootInstance;
   }
 
   /**
-   * @brief Constructor as a child rule does not have any further children. This allows rule expansion
-   * to terminate after 1 level.
+   * @brief Execution adds a new rule instance, guarded by a local variable
    */
-  TestRule::TestRule(const RuleId& parent, const IntervalIntDomain& guardBaseDomain)\
-  : Rule(parent), m_guardBaseDomain(guardBaseDomain){}
+  void TestRule_Root::handleExecute(){
+    TokenId slave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+    addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), slave->getStart()));
+
+    Id<TestRule> rule = m_rule;
+    addChildRule(new TestRule_0(m_id, addVariable(rule->getGuardBaseDomain(), true, LabelStr("RuleGuardLocal"))));
+  }
+
+  void TestRule_0::handleExecute(){
+    TokenId slave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+    addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), slave->getStart()));
+    ConstrainedVariableId interimVariable = addVariable(IntervalIntDomain(), false, LabelStr("BogusRuleVariable"));
+    addConstraint(LabelStr("eq"), makeScope(interimVariable, m_localGuard));
+    addConstraint(LabelStr("eq"), makeScope(interimVariable, slave->getDuration()));
+  }
 }
