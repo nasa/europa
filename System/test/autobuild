@@ -1,9 +1,19 @@
 #!/bin/sh
-# $Id: autobuild,v 1.34 2003-02-12 00:46:21 wedgingt Exp $
+# $Id: autobuild,v 1.35 2003-02-12 06:47:42 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
-tokens
+# See if we have an AFS token so we can get at the newer compiler.
+tokens > .tokens.$$
+cmp .tokens.$$ .notokens
+status=$?
+if test $status != 0
+then
+	haveAFS=true
+else
+	haveAFS=false
+fi
+echo haveAFS is $haveAFS
 
 # Address to mail exit status messages to
 email=checkins@postdoc.arc.nasa.gov
