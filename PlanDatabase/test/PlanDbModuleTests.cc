@@ -168,15 +168,17 @@ namespace PLASMA {
 
   class IntervalTokenFactory: public ConcreteTokenFactory {
   public:
-    IntervalTokenFactory(): ConcreteTokenFactory(DEFAULT_PREDICATE()){}
+    IntervalTokenFactory()
+      : ConcreteTokenFactory(DEFAULT_PREDICATE()) {
+    }
   private:
-    TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name) const{
-      TokenId token = (new IntervalToken(planDb, name, true))->getId();
-      return token;
+    TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, const bool& mandatory) const {
+      TokenId token = (new IntervalToken(planDb, name, mandatory))->getId();
+      return(token);
     }
     TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const{
       TokenId token = (new IntervalToken(master, relation, name))->getId();
-      return token;
+      return(token);
     }
   };
 
@@ -1273,15 +1275,19 @@ namespace PLASMA {
     compatibleTokens.clear();
     db->getCompatibleTokens(t3.getId(), compatibleTokens);
     assert(compatibleTokens.size() == 1); // Expect a single match
-    return true;
+    return(true);
   }
 
   bool testTokenFactoryImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
-    TokenId master = TokenFactory::createInstance(db, DEFAULT_PREDICATE());
+    TokenId master = TokenFactory::createInstance(db, DEFAULT_PREDICATE(), true);
     master->activate();
-    TokenId slave = TokenFactory::createInstance(master, DEFAULT_PREDICATE(), "any");
+    TokenId slave = TokenFactory::createInstance(master, DEFAULT_PREDICATE(), LabelStr("any"));
     assert(slave->getMaster() == master); 
-    return true;
+    TokenId rejectable = TokenFactory::createInstance(db, DEFAULT_PREDICATE(), false);
+    rejectable->activate();
+    //!!Should try rejecting master and verify inconsistency
+    //!!Should try rejecting rejectable and verify consistency
+    return(true);
   }
 
   bool testCorrectSplit_Gnats2450impl(ConstraintEngineId &ce, PlanDatabaseId &db) {
