@@ -2237,16 +2237,19 @@ private:
     tests.push_back(ConstraintTestCase(constraintName, __FILE__, __LINE__, std::list<AbstractDomain*>(domains)));
 
     // Try reading "test cases" file of NewPlan/ModuleTests/ConstraintLibrary/testCLib,
-    // committed here as CLibTestCases after some minor editing to use '[]' for all
-    // numeric domains since Europa prints some of those using '{}' syntax and
-    // PLASMA treats as intervals all numeric domains that aren't explicitly
-    // identified as enumerations.
+    //   committed here as CLibTestCases after some minor editing to use '[]' for all
+    //   numeric domains since Europa prints some of those using '{}' syntax and
+    //   PLASMA treats as intervals all numeric domains that aren't explicitly
+    //   identified as enumerations.
+    // "NewTestCases" was written while tracking down the bugs in both
+    //    Europa2 (PLASMA) and in Europa (NewPlan) discovered while testing
+    //    "CLibTestCases".
     // For each file, try twice with different relative paths since we don't know what
-    // the current working directory is.
-    assertTrue(readTestCases(std::string("ConstraintEngine/test/NewTestCases"), tests) ||
-               readTestCases(std::string("NewTestCases"), tests));
-    assertTrue(readTestCases(std::string("ConstraintEngine/test/CLibTestCases"), tests) ||
-               readTestCases(std::string("CLibTestCases"), tests));
+    //   the current working directory is.
+    assertTrue(readTestCases(std::string("NewTestCases"), tests) ||
+               readTestCases(std::string("ConstraintEngine/test/NewTestCases"), tests));
+    assertTrue(readTestCases(std::string("CLibTestCases"), tests) ||
+               readTestCases(std::string("ConstraintEngine/test/CLibTestCases"), tests));
 
     // Run each test, in the same order they were read/init'd,
     //   keeping a count of failed test cases.
