@@ -63,7 +63,11 @@ namespace EUROPA {
 
   typedef std::pair<LabelStr, const AbstractDomain*> ConstructorArgument;
 
-  const std::string CLASS_DELIMITER(":");
+  DECLARE_GLOBAL_CONST(std::string, g_ClassDelimiter);
+
+#define CLASS_DELIMITER (EUROPA::g_ClassDelimiter())
+
+
 }
 
 #endif
