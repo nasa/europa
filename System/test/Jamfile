@@ -64,6 +64,22 @@ for model in
   }
 }
 
+local model2 ;
+for model2 in
+	basic-types.nddl
+	Rover-transaction.nddl
+        k9.backtrack.moderate-transaction.nddl
+        rejection.nddl
+        resource-backtrack-test.nddl
+        better-res.nddl
+        constrain-transaction.nddl
+        foreach-transaction.nddl
+        force-object-distribution.nddl
+{
+	local exe = $(model:S=) ;
+	LocalDepends run-checkin-tests : run-problem-$(exe) ;
+}
+
 #
 # PERFORMANCE TESTS
 #
