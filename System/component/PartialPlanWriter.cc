@@ -318,6 +318,8 @@ namespace Prototype {
         for(std::multimap<double, RuleId>::const_iterator it = Rule::getRules().begin(); 
             it != Rule::getRules().end(); ++it) {
           std::string ruleSrc = ((*it).second)->getSource().toString();
+          if(ruleSrc == "noSrc")
+            continue;
           std::string modelPath = ruleSrc.substr(1, ruleSrc.rfind(",")-1);
           std::string lineNumber = ruleSrc.substr(ruleSrc.rfind(","), ruleSrc.size()-1);
           lineNumber.replace(lineNumber.rfind('"'), 1, "\0");
