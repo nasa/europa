@@ -2,7 +2,7 @@ Building EUROPA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.13 2005-01-05 21:36:12 tania Exp $
+$Id: BUILDING,v 1.14 2005-01-15 03:17:26 tania Exp $
 
 
 - Prerequisites:
@@ -33,13 +33,16 @@ of them) that you will need to build EUROPA reliably.
 
 * We have also successfully compiled Europa in the following platforms, but
 we do not support them:
-1. Mac OSX: be sure to set your DYLD_LIBRARY_PATH instead of your
-LD_LIBRARY_PATH as indicated in the instructions below. 
-2. Cygwin: be sure to set your PATH to include the PLASMA/lib directory as
+1. Cygwin: be sure to set your PATH to include the PLASMA/lib directory as
 well as set your LIBRARY_PATH environment variable rather than the
 LD_LIBRARY_PATH as indicated below.
-3. BeOS: be sure to set your LIBRARY_PATH variable instead of
+2. BeOS: be sure to set your LIBRARY_PATH variable instead of
 LD_LIBRARY_PATH  as indicated below.
+1. Mac OSX 10.3: be sure to set your DYLD_LIBRARY_PATH instead of your
+LD_LIBRARY_PATH as indicated in the instructions below.  (OSX 10.2 has been
+shown to work also but you need dlopen hack called dlcompat.)
+In all of these cases, please ensure you have the appropriate versions of
+the requirements above.
 
 - Getting started:
 
