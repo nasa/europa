@@ -25,6 +25,7 @@ namespace Prototype {
     BoolDomain(const DomainListenerId& listener = DomainListenerId::noId());
     BoolDomain(const BoolDomain& org);
     const DomainType& getType() const;
+    const LabelStr& getTypeName() const;
     bool isFinite() const;
     bool isFalse() const;
     bool isTrue() const;

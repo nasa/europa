@@ -35,7 +35,12 @@ namespace Prototype {
 
   const AbstractDomain::DomainType& BoolDomain::getType() const {
     static const AbstractDomain::DomainType s_type = BOOL;
-    return s_type;
+    return(s_type);
+  }
+
+  const LabelStr& BoolDomain::getTypeName() const {
+    static const LabelStr sl_typeName("BOOL");
+    return(sl_typeName);
   }
 
   BoolDomain *BoolDomain::copy() const {
