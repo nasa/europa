@@ -54,12 +54,17 @@ rule RunEUROPATest {
  }
 }
 
-RunEUROPATest monkeyTests : timeline.nddl timeline-hacked.nddl timeline-hacked2.nddl timeline-hacked3.nddl ;
+RunEUROPATest monkey-timeline : timeline.nddl ;
+RunEUROPATest monkey-timeline-hacked : timeline-hacked.nddl ;
+RunEUROPATest monkey-timeline-hacked2 : timeline-hacked2.nddl ;
+RunEUROPATest monkey-timeline-hacked3 : timeline-hacked3.nddl ;
 
 # Failing; see GNATS 2759, 2760, and 2701.
 #RunEUROPATest monkey1Tests : timeline1.nddl timeline-objvar.nddl timeline-twomonkeys-objvar.nddl timeline-twomonkeys.nddl ;
 
-RunEUROPATest monkey2Tests : timeline2.nddl timeline22.nddl timeline23.nddl ;
+RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
+RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
+RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
 
 RunEUROPATest robotTests : req1.nddl ;
 
@@ -80,12 +85,22 @@ RunEUROPATest robotTests : req1.nddl ;
 #         R2-files-R21-IDD2.nddl R2-files-R21-IDD3.nddl R2-files-R21-PMA1.nddl R2-files-R21-PMA2.nddl
 #         mer-1.nddl mer-bill-2.nddl mer-bill.nddl mer-idd1.nddl mer-idd2.nddl mer-idd3.nddl mer-pma-comm.nddl mer-pma1.nddl mer-pma2.nddl ;
 
-RunEUROPATest gnatsTests : C3-init.nddl NoBranchBug-init.nddl P4-C3-init.nddl P4-C3eq-init.nddl SC-init.nddl condasame-init.nddl
-        rover-fixed-init.nddl sum-init.nddl ;
+#RunEUROPATest gnatsTests : C3-init.nddl NoBranchBug-init.nddl
+#P4-C3-init.nddl P4-C3eq-init.nddl SC-init.nddl condasame-init.nddl 
+#        rover-fixed-init.nddl sum-init.nddl ;
+
+RunEUROPATest gnats-C3 : C3-init.nddl ;
+RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
+RunEUROPATest gnats-P4-C3 : P4-C3-init.nddl ;
+RunEUROPATest gnats-P4-C3eq : P4-C3eq-init.nddl ;
+RunEUROPATest gnats-SC : P4-SC-init.nddl ;
+RunEUROPATest gnats-condasame : condasame-init.nddl ;
+RunEUROPATest gnats-rover-fixed : rover-fixed-init.nddl ;
+RunEUROPATest gnats-sum : sum-init.nddl ;
 
 RunEUROPATest dnpTests : DNP.timeline.nddl ;
 
-# Example; not yet converted or committed
+# Example; not yet converted or committed, requires implementation of constraints
 # RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
 
 } # PLASMA_READY

@@ -18,12 +18,12 @@ int main(int argc, const char ** argv){
 
   // read model, initial transactions, heuristic, plan id files
 
-  if (argc < 5) {
+  if (argc < 3) {
     std::cerr << "Error: must provide at least a model and an initial transactions file." << std::endl;
     return -1;
   }
 
-  if (argc > 7) {
+  if (argc > 5) {
     std::cerr << "Error: too many arguments.  Expecting at most 6: initial transactions, heuristics, and plan id files." << std::endl;
     return -1;
   } 
