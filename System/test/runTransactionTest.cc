@@ -135,7 +135,7 @@ int main(int argc, const char ** argv){
 
   // Initialize constraint factories
   SamplePlanDatabase::initialize();
-  schema = NDDL::schema();
+  schema = NDDL::loadSchema();
 
 #ifdef PERFORMANCE
   replay = false;

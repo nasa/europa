@@ -23,7 +23,7 @@ int main(int argc, const char ** argv){
 
   // Allocate the schema with a call to the linked in model function - eventually
   // make this called via dlopen
-  SchemaId schema = NDDL::schema();
+  SchemaId schema = NDDL::loadSchema();
   {  
     // Allocate the assembly
     StandardAssembly assembly(schema);
