@@ -1,0 +1,27 @@
+// ../../../ModuleTests/Parser/gnats/sum.ddl
+
+class Sum___A {
+  predicate V {
+    int sum;
+    int x;
+    int y;
+
+    sum(sum, x, y);
+  }
+
+  Sum __DDL__object;
+  Sum___A(Sum object) {
+    __DDL__object = object;
+  }
+}
+
+class Sum {
+  Sum___A A;
+  Sum() {
+    A = new Sum___A(this);
+  }
+}
+
+Sum___A::V {
+}
+
