@@ -353,6 +353,9 @@ namespace EUROPA {
     if(domy.getLowerBound() <= domx.getLowerBound() &&
        domx.getLowerBound() > MINUS_INFINITY)
       domy.intersect(domx.getLowerBound() + domy.minDelta(), domy.getUpperBound());
+
+    checkError(domy.getLowerBound() > domx.getLowerBound(),
+	       "Failed to restrict correctly." << domx.toString() << " && " << domy.toString()); 
   }
 
   bool LessThanConstraint::canIgnore(const ConstrainedVariableId& variable,
