@@ -1,0 +1,32 @@
+
+class Animal {
+  predicate Alive {
+  }
+  predicate Dead {
+  }
+}
+
+class World {
+  predicate AllAlive {
+  }
+  predicate Dying {
+  }
+  predicate AllDead {
+  }
+}
+
+World::AllAlive {
+  Animal animals;
+  foreach (animal in animals) {
+    contained_by(Animal.Alive a);
+    eq(a.object,animal);
+  }
+}
+
+World::AllDead {
+  Animal animals;
+  foreach (animal in animals) {
+    contained_by(Animal.Dead a);
+    eq(a.object,animal);
+  }
+}
