@@ -2,24 +2,24 @@
 #include "Nddl.hh"
 
 // Support for registered constraints
-#include "ConstraintLibrary.hh"
-#include "Constraints.hh"
-#include "ObjectTokenRelation.hh"
+#include "../ConstraintEngine/ConstraintLibrary.hh"
+#include "../ConstraintEngine/Constraints.hh"
+#include "../PlanDatabase/ObjectTokenRelation.hh"
 
 // Support fro required plan database components
-#include "PlanDatabase.hh"
-#include "RulesEngine.hh"
-#include "Schema.hh"
-#include "ConstraintEngine.hh"
+#include "../PlanDatabase/PlanDatabase.hh"
+#include "../PlanDatabase/RulesEngine.hh"
+#include "../PlanDatabase/Schema.hh"
+#include "../ConstraintEngine/ConstraintEngine.hh"
 
 // Access for registered event loggers for instrumentation
-#include "CeLogger.hh"
-#include "DbLogger.hh"
+#include "../ConstraintEngine/CeLogger.hh"
+#include "../PlanDatabase/DbLogger.hh"
 
 // Utility for obtaining defualt constraint library registration
-#include "TestSupport.hh"
+#include "../ConstraintEngine/TestSupport.hh"
 
-void main(){
+int main(){
   // Initialize constraints
   initConstraintLibrary();
   
@@ -47,5 +47,5 @@ void main(){
   
   NDDL::initialize(db.getId());
 
-  cout << "Finished" << endl;
+  std::cout << "Finished" << std::endl;
 }
