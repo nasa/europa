@@ -5,20 +5,26 @@
 
 namespace Prototype {
 
-  bool isAscending(const std::set<double>& values){
+  bool isAscending(const std::set<double>& values) {
     double greatest = *(values.begin());
-    for(std::set<double>::const_iterator it = values.begin(); it != values.end(); ++it){
+    for (std::set<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
       double current = *it;
-      if(current < greatest)
-	return false;
-      else greatest = current;
+      if (current < greatest)
+        return(false);
+      else
+        greatest = current;
     }
-    return true;
+    return(true);
   }
 
   const AbstractDomain::DomainType& EnumeratedDomain::getType() const {
     static const AbstractDomain::DomainType s_type = AbstractDomain::REAL_ENUMERATION;
     return(s_type);
+  }
+
+  const LabelStr& EnumeratedDomain::getTypeName() const {
+    static const LabelStr sl_typeName("REAL_ENUMERATION");
+    return(sl_typeName);
   }
 
   EnumeratedDomain::EnumeratedDomain(bool isNumeric)
@@ -233,6 +239,7 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::operator==(const AbstractDomain& dom) const {
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     if (!dom.isEnumerated())
       return(dom.isFinite() &&
              getSize() == dom.getSize() &&
@@ -335,14 +342,13 @@ namespace Prototype {
         if (val_a == val_b) { // If they are equal, advance both
           ++it_a;
           ++it_b;
-        } 
-	else if (val_a < val_b) { // A < B, so remove A and advance 
-	  m_values.erase(it_a++);
-	  changed = true;
-	  check_error(!isMember(val_a));
-	} 
-	else
-	  ++it_b; // So just advance B
+        } else
+          if (val_a < val_b) { // A < B, so remove A and advance 
+            m_values.erase(it_a++);
+            changed = true;
+            check_error(!isMember(val_a));
+          } else
+            ++it_b; // So just advance B
       }
 
       if (it_a != m_values.end()) {
@@ -394,7 +400,6 @@ namespace Prototype {
     check_error(dom.isEnumerated());
     check_error(m_listener.isNoId());
     const EnumeratedDomain& e_dom = static_cast<const EnumeratedDomain&>(dom);
-    m_values.clear();
     m_values = e_dom.m_values;
     return(*this);
   }
@@ -424,31 +429,31 @@ namespace Prototype {
   void EnumeratedDomain::operator>>(ostream&os) const {
     // Now commence output
     AbstractDomain::operator>>(os);
-    std::string comma = "";
     os << "{";
 
     // First construct a lexicographic ordering for the set of values.
     std::set<std::string> orderedSet;
 
+    std::string comma = "";
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
       double valueAsDouble = *it;
 
-      if (isNumeric()){
-	os << comma << valueAsDouble;
-	comma = ", ";
-      }
-      else if (LabelStr::isString(valueAsDouble))
-	orderedSet.insert(LabelStr(valueAsDouble).toString());
-      else {
-	EntityId entity(valueAsDouble);
-	orderedSet.insert(entity->getName().toString());
-      }
+      if (isNumeric()) {
+        os << comma << valueAsDouble;
+        comma = ", ";
+      } else
+        if (LabelStr::isString(valueAsDouble))
+          orderedSet.insert(LabelStr(valueAsDouble).toString());
+        else {
+          EntityId entity(valueAsDouble);
+          orderedSet.insert(entity->getName().toString());
+        }
     }
 
     for (std::set<std::string>::const_iterator it = orderedSet.begin(); it != orderedSet.end(); ++it) {
       check_error(!isNumeric());
-      os << comma;
-      os << *it;
+      os << comma
+         << *it;
       comma = ",";
     }
 
