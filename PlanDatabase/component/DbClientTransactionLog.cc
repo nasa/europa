@@ -158,6 +158,7 @@ namespace Prototype {
     }
     TiXmlElement * element = new TiXmlElement("reset");
     element->LinkEndChild(variableAsXml(variable));
+    m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::flush(std::ostream& os){
