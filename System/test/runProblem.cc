@@ -7,8 +7,9 @@
 #include "PlanDatabaseWriter.hh"
 #include "Constraints.hh"
 #include "Debug.hh"
+#include "Pdlfcn.hh"
 
-#include <dlfcn.h>
+//#include <dlfcn.h>
 #include <iostream>
 #include <stdlib.h>
 
@@ -88,21 +89,26 @@ int main(int argc, const char** argv) {
   if(argc == 4)
     averTestFile = argv[3];
 
-  std::cout << "runProblem: dlopen() file: " << libPath << std::endl;
+  std::cout << "runProblem: p_dlopen() file: " << libPath << std::endl;
   std::cout.flush();
   
-  libHandle = dlopen(libPath, RTLD_NOW);
+  libHandle = p_dlopen(libPath, RTLD_NOW);
   
+  std::cout << "runProblem: returned from p_dlopen() file: " << libPath << std::endl;
+  std::cout.flush();
+
   if(!libHandle) {
-    error_msg = dlerror();
-    std::cout << "Error during dlopen() of " << libPath << ":" << std::endl;
+    error_msg = p_dlerror();
+    std::cout << "Error during p_dlopen() of " << libPath << ":" << std::endl;
     check_error(!error_msg, error_msg);
   }
+  std::cout << "runProblem: p_dlsym() symbol: loadSchema" << std::endl;
+  std::cout.flush();
   
-  fcn_schema = (SchemaId (*)())dlsym(libHandle, "loadSchema");
+  fcn_schema = (SchemaId (*)())p_dlsym(libHandle, "loadSchema");
   if(!fcn_schema) {
-    error_msg = dlerror();
-    std::cout << "dlsym: Error locating NDDL::schema:" << std::endl;
+    error_msg = p_dlerror();
+    std::cout << "p_dlsym: Error locating NDDL::schema:" << std::endl;
     check_error(!error_msg, error_msg);
   }
   
@@ -142,9 +148,9 @@ int main(int argc, const char** argv) {
   TestAssembly::terminate();
 
 #ifdef STANDALONE
-  if(dlclose(libHandle)) {
-    error_msg = dlerror();
-    std::cout << "Error during dlclose():" << std::endl;
+  if(p_dlclose(libHandle)) {
+    error_msg = p_dlerror();
+    std::cout << "Error during p_dlclose():" << std::endl;
     check_error(!error_msg, error_msg);
   }
   

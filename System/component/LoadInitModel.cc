@@ -12,11 +12,11 @@
 #include "PlanDatabaseWriter.hh"
 #include "Constraints.hh"
 #include "LoadInitModel.hh"
+#include "Pdlfcn.hh"
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <dlfcn.h>
 
 namespace EUROPA {
   int loadInitModel(const char* libPath, const char* initialStatePath) {
@@ -30,21 +30,21 @@ namespace EUROPA {
     DbClientId client;
 
 
-    //printf("LoadInitModel:dlopen() file %s\n", libPath);
+    //printf("LoadInitModel:p_dlopen() file %s\n", libPath);
     //printf("Initial Transactions file %s\n", initialStatePath);
     //fflush(stdout);
 
     //load model library using full path
     try {
-      libHandle = dlopen(libPath, RTLD_LAZY);
+      libHandle = p_dlopen(libPath, RTLD_NOW);
       if (!libHandle) {
-        error_msg = dlerror();
-        printf("Error during dlopen() of %s:\n", libPath);
+        error_msg = p_dlerror();
+        printf("Error during p_dlopen() of %s:\n", libPath);
         check_always(!error_msg, error_msg); 
       }
     }
     catch (Error e) {
-      printf("Unexpected exception attempting dlopen()\n");
+      printf("Unexpected exception attempting p_dlopen()\n");
       fflush(stdout);
       e.display();
       throw;
@@ -66,16 +66,16 @@ namespace EUROPA {
 
     //locate the NDDL 'loadSchema' function in the library and check for errors
     try {
-      fcn_loadSchema = (SchemaId (*)())dlsym(libHandle, "loadSchema");
-      //printf("Returned from (SchemaId (*)())dlsym(libHandle, loadSchema)\n");
+      fcn_loadSchema = (SchemaId (*)())p_dlsym(libHandle, "loadSchema");
+      //printf("Returned from (SchemaId (*)())p_dlsym(libHandle, loadSchema)\n");
       if (!fcn_loadSchema) {
-        error_msg = dlerror();
-        printf("dlsym: Error locating NDDL::loadSchema:\n");
+        error_msg = p_dlerror();
+        printf("p_dlsym: Error locating NDDL::loadSchema:\n");
         check_always(!error_msg, error_msg); 
       } 
     }
     catch (Error e) {
-      printf("Unexpected exception attempting dlsym()\n");
+      printf("Unexpected exception attempting p_dlsym()\n");
       fflush(stdout);
       e.display();
       throw;
@@ -132,9 +132,9 @@ namespace EUROPA {
     void* modelLibHandle = accessLibHandle();
 
     if (modelLibHandle) {
-      if (dlclose(modelLibHandle)) {
-        error_msg = dlerror();
-        printf("Error during dlclose():\n");
+      if (p_dlclose(modelLibHandle)) {
+        error_msg = p_dlerror();
+        printf("Error during p_dlclose():\n");
         try {
           check_always(!error_msg, error_msg); 
         }

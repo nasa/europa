@@ -9,8 +9,8 @@
 #include "AverInterp.hh"
 #include "EventAggregator.hh"
 #include "AverTestAssembly.hh"
+#include "Pdlfcn.hh"
 
-#include <dlfcn.h>
 #include <iostream>
 #include <stdlib.h>
 
@@ -49,21 +49,21 @@ int main(int argc, const char** argv) {
   libPath = argv[1];
   //initialTransactions = argv[2];
   
-  //std::cerr << argv[0] << ": dlopen() file: " << libPath << std::endl;
+  //std::cerr << argv[0] << ": p_dlopen() file: " << libPath << std::endl;
   //std::cerr.flush();
   
-  libHandle = dlopen(libPath, RTLD_NOW);
+  libHandle = p_dlopen(libPath, RTLD_NOW);
   
   if (!libHandle) {
-    error_msg = dlerror();
-    std::cerr << "Error during dlopen() of " << libPath << ":" << std::endl;
+    error_msg = p_dlerror();
+    std::cerr << "Error during p_dlopen() of " << libPath << ":" << std::endl;
     assertTrue(!error_msg, error_msg);
   }
   
-  fcn_schema = (SchemaId (*)())dlsym(libHandle, "loadSchema");
+  fcn_schema = (SchemaId (*)())p_dlsym(libHandle, "loadSchema");
   if (!fcn_schema) {
-    error_msg = dlerror();
-    std::cerr << "dlsym: Error locating NDDL::schema:" << std::endl;
+    error_msg = p_dlerror();
+    std::cerr << "p_dlsym: Error locating NDDL::schema:" << std::endl;
     assertTrue(!error_msg, error_msg);
   }
   
@@ -85,9 +85,9 @@ int main(int argc, const char** argv) {
   //SamplePlanDatabase::terminate();
 
 #ifdef STANDALONE
-  if (dlclose(libHandle)) {
-    error_msg = dlerror();
-    std::cerr << "Error during dlclose():" << std::endl;
+  if (p_dlclose(libHandle)) {
+    error_msg = p_dlerror();
+    std::cerr << "Error during p_dlclose():" << std::endl;
     assertTrue(!error_msg, error_msg);
   }
   
