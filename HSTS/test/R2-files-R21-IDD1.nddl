@@ -1,0 +1,304 @@
+// ../../../ModuleTests/Parser/mer/mer.model.ddl
+
+#include "../../NDDL/core/Plasma.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
+#include "mer.nddl"
+
+PlannerConfig world = new PlannerConfig(129513607, 129602383, 1000);
+
+SUN_Orient_Class Sun = new SUN_Orient_Class();
+
+Comm_Window_Class CommWindow = new Comm_Window_Class();
+
+HGA_Class HGA = new HGA_Class();
+
+UHF_Class UHF = new UHF_Class();
+
+IDD_Class IDD = new IDD_Class();
+
+PMA_Class PMA = new PMA_Class();
+
+RCam_Class RCam = new RCam_Class();
+
+OPHTR_Class OpHtr = new OPHTR_Class();
+
+close();
+
+goal(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops g170);
+  g170.activate();
+  g170.start.specify(129513607);
+  g170.end.specify(129524407);
+  g170.duration.specify(10800);
+
+goal(SUN_Orient_Class___Sun_Orient_SV.Sunrise g190);
+  g190.activate();
+  g190.start.specify(129524407);
+  g190.end.specify(129524707);
+  g190.duration.specify(300);
+
+goal(SUN_Orient_Class___Sun_Orient_SV.Day_Ops g212);
+  g212.activate();
+  g212.start.specify(129524707);
+  g212.end.specify(129553207);
+  g212.duration.specify(28500);
+
+goal(SUN_Orient_Class___Sun_Orient_SV.Sunset g233);
+  g233.activate();
+  g233.start.specify(129553207);
+  g233.end.specify(129553507);
+  g233.duration.specify(300);
+
+goal(SUN_Orient_Class___Sun_Orient_SV.Nominal_Night_Ops g255);
+  g255.activate();
+  g255.start.specify(129553507);
+  g255.end.specify(129571507);
+  g255.duration.specify(18000);
+
+goal(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops g277);
+  g277.activate();
+  g277.start.specify(129571507);
+  g277.end.specify(129602383);
+  g277.duration.specify(30876);
+
+goal(Comm_Window_Class___Comm_DSN_SV.Comm_DSN_Unavail g300);
+  g300.activate();
+  g300.start.specify(129513607);
+  g300.end.specify(129602383);
+  g300.duration.specify(88776);
+
+goal(Comm_Window_Class___Comm_Orbiter_SV.Comm_Orbiter_Unavail g322);
+  g322.activate();
+  g322.start.specify(129513607);
+  g322.end.specify(129602383);
+  g322.duration.specify(88776);
+
+goal(HGA_Class___HGA_Mode_SV.HGA_Stow g344);
+  g344.activate();
+  g344.start.specify(129513607);
+  g344.end.specify(129602383);
+  g344.duration.specify(88776);
+
+goal(UHF_Class___UHF_Mode_SV.UHF_Idle g366);
+  g366.activate();
+  g366.start.specify(129513607);
+  g366.end.specify(129602383);
+  g366.duration.specify(88776);
+
+goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Idle g388);
+  g388.activate();
+  g388.start.specify(129513607);
+  g388.end.specify(129538387);
+  g388.duration.specify(24780);
+
+goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Active g408);
+  g408.activate();
+  g408.start.specify(129538387);
+  g408.end.specify(129581587);
+  g408.duration.specify(43200);
+  g408.instr.specify(IDD_Instrument.'MB');
+  g408.ddl_duration.specify(43200);
+  g408.power.specify(3);
+  g408.energy.specify(129600);
+  g408.ssr.specify(1000);
+  g408.crit_p.specify(true);
+
+goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Idle g445);
+  g445.activate();
+  g445.start.specify(129581587);
+  g445.end.specify(129602383);
+  g445.duration.specify(20796);
+
+goal(IDD_Class___IDD_IDD_SV.IDD_Stow g468);
+  g468.activate();
+  g468.start.specify(129513607);
+  g468.end.specify([129513608 129601925]);
+  g468.duration.specify([1 88318]);
+
+goal(IDD_Class___IDD_IDD_SV.IDD_Move g488);
+  g488.activate();
+  g488.start.specify([129513608 129601925]);
+  g488.end.specify([129513722 129602039]);
+  g488.duration.specify(114);
+  g488.succ.specify(IDD_Move_succ.'MOVE_MEETS_ROTATE');
+  g488.pred.specify(IDD_Move_pred.'MOVE_METBY_STOW');
+  g488.power.specify(15);
+  g488.energy.specify(1710);
+
+goal(IDD_Class___IDD_IDD_SV.IDD_Rotate g526);
+  g526.activate();
+  g526.start.specify([129513722 129602039]);
+  g526.end.specify([129513836 129602153]);
+  g526.duration.specify(114);
+  g526.tool.specify(IDD_Instrument.'MB');
+  g526.power.specify(15);
+  g526.energy.specify(1710);
+
+goal(IDD_Class___IDD_IDD_SV.IDD_Guarded_Move g559);
+  g559.activate();
+  g559.start.specify([129513836 129602153]);
+  g559.end.specify([129513950 129602267]);
+  g559.duration.specify(114);
+  g559.pred.specify(IDD_Guarded_pred.'GUARDEDMOVE_METBY_ROTATE');
+  g559.power.specify(15);
+  g559.energy.specify(1710);
+
+goal(IDD_Class___IDD_IDD_SV.IDD_In_Contact g593);
+  g593.activate();
+  g593.start.specify([129513950 129602267]);
+  g593.end.specify([129513951 129602268]);
+  g593.duration.specify([1 88318]);
+
+goal(IDD_Class___IDD_IDD_SV.IDD_Move g614);
+  g614.activate();
+  g614.start.specify([129513951 129602268]);
+  g614.end.specify([129514065 129602382]);
+  g614.duration.specify(114);
+  g614.succ.specify(IDD_Move_succ.'MOVE_MEETS_STOW');
+  g614.pred.specify(IDD_Move_pred.'MOVE_METBY_INCONTACT');
+  g614.power.specify(15);
+  g614.energy.specify(1710);
+
+goal(IDD_Class___IDD_IDD_SV.IDD_Stow g652);
+  g652.activate();
+  g652.start.specify([129514065 129602382]);
+  g652.end.specify(129602383);
+  g652.duration.specify([1 88318]);
+
+goal(IDD_Class___IDD_MI_SV.IDD_MI_Idle g675);
+  g675.activate();
+  g675.start.specify(129513607);
+  g675.end.specify(129602383);
+  g675.duration.specify(88776);
+
+goal(IDD_Class___IDD_APXS_SV.IDD_APXS_Idle g699);
+  g699.activate();
+  g699.start.specify(129513607);
+  g699.end.specify(129602383);
+  g699.duration.specify(88776);
+
+goal(IDD_Class___IDD_MB_SV.IDD_MB_Idle g721);
+  g721.activate();
+  g721.start.specify(129513607);
+  g721.end.specify(129538387);
+  g721.duration.specify(24780);
+
+goal(IDD_Class___IDD_MB_SV.IDD_MB_Active g741);
+  g741.activate();
+  g741.start.specify(129538387);
+  g741.end.specify(129581587);
+  g741.duration.specify(43200);
+
+goal(IDD_Class___IDD_MB_SV.IDD_MB_Idle g762);
+  g762.activate();
+  g762.start.specify(129581587);
+  g762.end.specify(129602383);
+  g762.duration.specify(20796);
+
+goal(IDD_Class___IDD_RAT_SV.IDD_RAT_Idle g785);
+  g785.activate();
+  g785.start.specify(129513607);
+  g785.end.specify(129602383);
+  g785.duration.specify(88776);
+
+goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Idle g807);
+  g807.activate();
+  g807.start.specify(129513607);
+  g807.end.specify(129602383);
+  g807.duration.specify(88776);
+
+goal(PMA_Class___PMA_NC_SV.PMA_NC_Idle g829);
+  g829.activate();
+  g829.start.specify(129513607);
+  g829.end.specify(129602383);
+  g829.duration.specify(88776);
+
+goal(PMA_Class___PMA_PC_SV.PMA_PC_Idle g851);
+  g851.activate();
+  g851.start.specify(129513607);
+  g851.end.specify(129602383);
+  g851.duration.specify(88776);
+
+goal(PMA_Class___PMA_MT_SV.PMA_MT_Idle g875);
+  g875.activate();
+  g875.start.specify(129513607);
+  g875.end.specify(129602383);
+  g875.duration.specify(88776);
+
+goal(PMA_Class___PMA_Mount_SV.PMA_Mount_Idle g899);
+  g899.activate();
+  g899.start.specify(129513607);
+  g899.end.specify(129602383);
+  g899.duration.specify(88776);
+
+goal(RCam_Class___HzC_F_SV.HzC_F_Idle g921);
+  g921.activate();
+  g921.start.specify(129513607);
+  g921.end.specify([129513608 +inf]);
+  g921.duration.specify([1 +inf]);
+
+goal(RCam_Class___SunC_SV.SunC_Idle g943);
+  g943.activate();
+  g943.start.specify(129513607);
+  g943.end.specify(129602383);
+  g943.duration.specify(88776);
+
+goal(OPHTR_Class___OPHTR_PMA_SV.OPHTR_PMA_Idle g965);
+  g965.activate();
+  g965.start.specify(129513607);
+  g965.end.specify(129602383);
+  g965.duration.specify(88776);
+
+goal(OPHTR_Class___OPHTR_PC_SV.OPHTR_PC_Idle g987);
+  g987.activate();
+  g987.start.specify(129513607);
+  g987.end.specify(129602383);
+  g987.duration.specify(88776);
+
+goal(OPHTR_Class___OPHTR_IDD_SV.OPHTR_IDD_Idle g1009);
+  g1009.activate();
+  g1009.start.specify(129513607);
+  g1009.end.specify(129602383);
+  g1009.duration.specify(88776);
+
+goal(OPHTR_Class___OPHTR_RAT_SV.OPHTR_RAT_Idle g1031);
+  g1031.activate();
+  g1031.start.specify(129513607);
+  g1031.end.specify(129602383);
+  g1031.duration.specify(88776);
+
+goal(OPHTR_Class___OPHTR_HGA_SV.OPHTR_HGA_Idle g1053);
+  g1053.activate();
+  g1053.start.specify(129513607);
+  g1053.end.specify(129602383);
+  g1053.duration.specify(88776);
+
+g170 meets g190; // key=199
+g170 before g190; // key=208
+g190 meets g212; // key=220
+g190 before g212; // key=229
+g212 meets g233; // key=242
+g212 before g233; // key=251
+g233 meets g255; // key=264
+g233 before g255; // key=273
+g255 meets g277; // key=285
+g255 before g277; // key=295
+g388 meets g408; // key=432
+g388 before g408; // key=441
+g408 meets g445; // key=453
+g408 before g445; // key=463
+g468 meets g488; // key=513
+g468 before g488; // key=522
+g488 meets g526; // key=546
+g488 before g526; // key=555
+g526 meets g559; // key=580
+g526 before g559; // key=589
+g559 meets g593; // key=601
+g559 before g593; // key=610
+g593 meets g614; // key=639
+g593 before g614; // key=648
+g614 meets g652; // key=660
+g614 before g652; // key=670
+g721 meets g741; // key=749
+g721 before g741; // key=758
+g741 meets g762; // key=770
+g741 before g762; // key=780

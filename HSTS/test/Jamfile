@@ -64,15 +64,23 @@ RunEUROPATest monkey2Tests : timeline2.nddl timeline22.nddl timeline23.nddl ;
 RunEUROPATest robotTests : req1.nddl ;
 
 # These fail; converter used explicit bounds on a temporal constraint, which the NDDL compiler does not support.
-#   Also, the NDDL compiler printed the wrong file name for the error: rover.nddl rather than rover-test.nddl,
+#   Reported in GNATS 2762.
+# Also, the NDDL compiler printed the wrong file name for the error: rover.nddl rather than rover-test.nddl,
 #     rover3.nddl rather than rover3-test.nddl, rover4.nddl rather than rover4-test.nddl, and
 #     multrover.nddl rather than multrover-test.nddl.
+#   Reported in GNATS 2761.
 # RunEUROPATest roverTests : rover-test.nddl rover3-test.nddl rover4-test.nddl multrover-test.nddl ;
 
 # These use constraint tokens, which Europa2 (PLASMA) does not support.
+#   Verified as mentioned in PLASMA/MigrationNotes (entry 8 currently).
 # RunEUROPATest roverTests : rover2-test.nddl rover2a-test.nddl rover2b-test.nddl ;
 
 # Example; not yet converted or committed
-#RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
+# RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
+
+# Converter and/or NDDL compiler has bugs.  Reported as GNATS 2763.
+# RunEUROPATest merTests : R1-files-p1.nddl R1-files-p2.nddl R1-files-p3.nddl R2-files-R21-Bill.nddl R2-files-R21-IDD1.nddl
+#         R2-files-R21-IDD2.nddl R2-files-R21-IDD3.nddl R2-files-R21-PMA1.nddl R2-files-R21-PMA2.nddl
+#         mer-1.nddl mer-bill-2.nddl mer-bill.nddl mer-idd1.nddl mer-idd2.nddl mer-idd3.nddl mer-pma-comm.nddl mer-pma1.nddl mer-pma2.nddl ;
 
 } # PLASMA_READY
