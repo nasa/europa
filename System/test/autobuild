@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.116 2005-02-05 22:02:05 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.117 2005-02-08 20:06:49 pdaley Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the EUROPA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -129,7 +129,7 @@ if test "`hostname`" = tara.arc.nasa.gov
 then
     # Linux computer with different setup than others at NASA/Ames Code TC.
     JAVA_HOME=/usr/java/j2sdk1.4.2_05
-    JAM_HOME=/usr/local/bin
+    JAM_HOME=/usr/local/jam-2.5
 fi
 
 for x in "$CVS_HOME"/bin/cvs "$GCC_ROOTDIR"/bin/g++ "$JAM_HOME"/jam "$JAVA_HOME"/bin/javac "$GCC_ROOTDIR"/lib
