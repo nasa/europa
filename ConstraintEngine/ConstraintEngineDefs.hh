@@ -2,7 +2,7 @@
 #define _H_ConstraintEngineDefs
 
 /**
- * Just provide forward declarations of classes
+ * Just provide forward declarations of classes.
  */
 
 #include "CommonDefs.hh"

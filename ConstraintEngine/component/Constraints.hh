@@ -6,10 +6,9 @@
 #include "Variable.hh"
 #include "IntervalDomain.hh"
 
-namespace Prototype
-{
-  class AddEqualConstraint: public Constraint
-  {
+namespace Prototype {
+
+  class AddEqualConstraint: public Constraint {
   public:
     AddEqualConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
@@ -25,8 +24,7 @@ namespace Prototype
     static const int ARG_COUNT = 3;
   };
 
-  class EqualConstraint: public Constraint
-  {
+  class EqualConstraint: public Constraint {
   public:
     EqualConstraint(const LabelStr& name,
 		    const LabelStr& propagatorName,
@@ -34,8 +32,9 @@ namespace Prototype
 		    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
+
     /**
-     * @brief Accessor required for EquilityConstraintPropagator
+     * @brief Accessor required for EquilityConstraintPropagator.
      */
     static AbstractDomain& getCurrentDomain(const ConstrainedVariableId& var);
 
@@ -45,7 +44,7 @@ namespace Prototype
     static const int ARG_COUNT = 2;
   };
 
-  class SubsetOfConstraint: public UnaryConstraint{
+  class SubsetOfConstraint : public UnaryConstraint {
   public:
     SubsetOfConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
@@ -57,13 +56,14 @@ namespace Prototype
 
     void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId& variable, 
-		   int argIndex, 
+    bool canIgnore(const ConstrainedVariableId& variable,
+		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
     int executionCount() const;
 
     const AbstractDomain& getDomain() const;
+
   private:
     bool m_isDirty;
     AbstractDomain& m_currentDomain;
@@ -71,8 +71,7 @@ namespace Prototype
     int m_executionCount;
   };
 
-  class LessThanEqualConstraint: public Constraint
-  {
+  class LessThanEqualConstraint : public Constraint {
   public:
     LessThanEqualConstraint(const LabelStr& name,
 			    const LabelStr& propagatorName,
@@ -81,18 +80,17 @@ namespace Prototype
 
     void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId& variable, 
-		   int argIndex, 
+    bool canIgnore(const ConstrainedVariableId& variable,
+		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
+
   private:
     static const int X = 0;
     static const int Y = 1;
     static const int ARG_COUNT = 2;
   };
 
-
-  class NotEqualConstraint: public Constraint
-  {
+  class NotEqualConstraint: public Constraint {
   public:
     NotEqualConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
@@ -101,17 +99,17 @@ namespace Prototype
 
     void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId& variable, 
-		   int argIndex, 
+    bool canIgnore(const ConstrainedVariableId& variable,
+		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
+
   private:
     static const int X = 0;
     static const int Y = 1;
     static const int ARG_COUNT = 2;
   };
 
-  class MultEqualConstraint: public Constraint
-  {
+  class MultEqualConstraint: public Constraint {
   public:
     MultEqualConstraint(const LabelStr& name,
 			const LabelStr& propagatorName,
@@ -127,8 +125,7 @@ namespace Prototype
     static const int ARG_COUNT = 3;
   };
 
-  class AddMultEqualConstraint: public Constraint
-  {
+  class AddMultEqualConstraint: public Constraint {
   public:
     AddMultEqualConstraint(const LabelStr& name,
 			   const LabelStr& propagatorName,

@@ -142,10 +142,10 @@ namespace Prototype {
     bool validate() const;
 
   protected:
-    DomainType m_baseDomain; /**< The initial (and maximal, unless dynamic) set for the domain of this variable */
-    DomainType m_specifiedDomain; /**< May contain a user specified restriction on the maximum set of the domain */
+    DomainType m_baseDomain; /**< The initial (and maximal, unless dynamic) set for the domain of this variable. */
+    DomainType m_specifiedDomain; /**< May contain a user specified restriction on the maximum set of the domain. */
     DomainType m_derivedDomain; /**< The current domain of the variable based on user specifications and derived from
-                                   constraint propagation */
+                                   constraint propagation. */
   };
 
   template<class DomainType>

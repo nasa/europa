@@ -13,10 +13,12 @@ namespace Prototype{
 
   /**
    * @class IntervalDomain
-   * @brief Abstract base class for all interval domains. Derived classes impose restrictions on the general semantics of this base class.
+   * @brief Abstract base class for all interval domains.
+   * Derived classes impose restrictions on the general semantics of this base class.
    */
   class IntervalDomain: public AbstractDomain {
   public:
+
     /**
      * @brief Override the base class method
      */
@@ -24,12 +26,11 @@ namespace Prototype{
 
     IntervalDomain(const DomainListenerId& listener = DomainListenerId::noId());
 
-    IntervalDomain(double lb, 
-		   double ub,
-		   const DomainListenerId& listener = DomainListenerId::noId());
+    IntervalDomain(double lb, double ub,
+                   const DomainListenerId& listener = DomainListenerId::noId());
 
     IntervalDomain(double value, 
-		   const DomainListenerId& listener = DomainListenerId::noId());
+                   const DomainListenerId& listener = DomainListenerId::noId());
 
     IntervalDomain(const IntervalDomain& org);
 
@@ -55,7 +56,8 @@ namespace Prototype{
     double getLowerBound() const;
 
     /**
-     * @brief Access singleton value. Must be a singleton or this will fail.
+     * @brief Access singleton value.
+     * @note Must be a singleton or this will fail.
      */
     double getSingletonValue() const;
 
@@ -87,14 +89,14 @@ namespace Prototype{
     void reset(const AbstractDomain& dom);
 
     /**
-     * @brief restricts this domain to the intersection of its values with the given domain.
+     * @brief Restricts this domain to the intersection of its values with the given domain.
      * @param dom the domain to intersect with. Must not be empty.
      * @return true if the intersection results in a change to this domain, otherwise false.
      */
     bool intersect(const AbstractDomain& dom);
 
     /**
-     * @brief restricts this domain to the difference of its values with the given domain.
+     * @brief Restricts this domain to the difference of its values with the given domain.
      * @param dom the domain to differ with. Must not be empty.
      * @return true if the operation results in a change to this domain, otherwise false.
      */
@@ -123,23 +125,23 @@ namespace Prototype{
     void empty();
 
     /**
-     * @brief Relax this domain to that of the given domain
-     * @param dom - The domain to relax it to. Must not be empty and must be a superset of this domain.
+     * @brief Relax this domain to that of the given domain.
+     * @param dom The domain to relax it to. Must not be empty and must be a superset of this domain.
      */
     void relax(const AbstractDomain& dom);
 
     /**
      * @brief Convenience method for relaxing a domain.
-     * @param lb the lower bound of domain to relax to. lb must be <= m_lb
-     * @param ub the upper bound of domain to relax to. ub must be >= m_ub
+     * @param lb the lower bound of domain to relax to. lb must be <= m_lb.
+     * @param ub the upper bound of domain to relax to. ub must be >= m_ub.
      * @return true if relaxation causes a change to this domain
      * @see operator=(const AbstractDomain& dom)
      */
     bool relax(double lb, double ub);
 
     /**
-     * @brief test for membership
-     * @param value to test for
+     * @brief test for membership.
+     * @param value Value to test for.
      * @return true if a member of the domain, otherwise false
      */
     bool isMember(double value) const;
@@ -150,12 +152,14 @@ namespace Prototype{
     bool isSingleton() const;
 
     /**
-     * @brief test for empty domain. Only allowed to call this on closed domains.
+     * @brief test for empty domain.
+     * @note Can only call this on closed domains.
      */
     bool isEmpty() const;
 
     /**
-     * @brief return the number of elements in the domain. an only be called on a domain which is finite.
+     * @brief Return the number of elements in the domain.
+     * @note Can only be called on finite domains..
      */
     int getSize() const;
     /**
@@ -176,7 +180,7 @@ namespace Prototype{
     bool isSubsetOf(const AbstractDomain& dom) const;
 
     /**
-     * @brief test if the intersection between this domain and the given domain is empty
+     * @brief test if the intersection between this domain and the given domain is empty.
      * @param dom the domain tested against.
      * @param true if any elements of this domain are in dom. Otherwise false.
      */
@@ -184,40 +188,41 @@ namespace Prototype{
 
     /**
      * @brief Fill the given list with the contents of the set.
-     * 
-     * Should only be called on finite (and thus closed) domains.
+     * @note Should only be called on finite (and thus closed) domains.
      * @param results The target collection to fill with all values in the set.
      */
     void getValues(std::list<double>& results) const;
 
     /**
-     * @brief mutually constraint both domains to their respective intersections
+     * @brief mutually constraint both domains to their respective intersections.
      * @param dom The domain to perform mutual intersection on
      * @return true if the intersection results in a change to either domain, otherwise false. 
      */
     bool equate(AbstractDomain& dom);
 
     /**
-     * @brief Enforces semantics of PLUS?MINUS infinity
+     * @brief Enforces semantics of PLUS or MINUS infinity.
      */
     virtual double translateNumber(double number, bool asMin = true) const;
 
   protected:
 
     /**
-     * @brief Helper method to test if the given value can be considered an integer. Used in derived class.
+     * @brief Helper method to test if the given value can be considered an integer.
+     * @note Used in derived class.
      * @see testPrecision
      */
     double check(const double& value) const;
 
     /**
-     * @brief tests if the given value is of the correct type for the domain type. Mostly used for
-     * restricting values of doubles to int. However, we could restrict it in other ways perhaps.
+     * @brief Tests if the given value is of the correct type for the domain type.
+     * Mostly used for restricting values of doubles to int. However,
+     * we could restrict it in other ways perhaps.
      */
     virtual void testPrecision(const double& value) const;
 
     /**
-     * @brief carries out the conversion of the given double to do appropriate rounding
+     * @brief Carries out the conversion of the given double to do appropriate rounding.
      * @param value The value to be converetd
      * @return The value subject to any rounding required for th sub-type (e.g. int)
      */
