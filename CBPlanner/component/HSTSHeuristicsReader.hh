@@ -27,6 +27,7 @@ namespace Prototype {
     void readConstrainedVariable(const TiXmlElement& element);
     void readPreference(const TiXmlElement& element);
     void readMaster(const TiXmlElement& element);
+    void readToken(const TiXmlElement& element);
   private:
     HSTSHeuristics m_heuristics;
 

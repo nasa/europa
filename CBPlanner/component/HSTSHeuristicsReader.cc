@@ -24,18 +24,15 @@ namespace Prototype {
 
     main_node = doc.FirstChild();
   
-    const char *value = NULL;
     TiXmlElement* element = NULL;
     element = main_node->ToElement();
     const char * tagName = element->Value();    
-    std::cout << "tagName = " << tagName << std::endl;
     check_error(IS_TAG("Heuristics-HSTS"));
 
     element = main_node->FirstChildElement();
 
     while(element) {
       tagName = element->Value();
-      std::cout << "tagName = " << tagName << std::endl;
       check_error(IS_TAG("Defaults") || IS_TAG("VariableSpecification") || IS_TAG("TokenSpecification"));
       readElement(*element);
       element = element->NextSiblingElement();
@@ -54,7 +51,7 @@ namespace Prototype {
   }
 
   void HSTSHeuristicsReader::readDefaults(const TiXmlElement& element) {
-    std::cout << " in ReadDefaults" << std::endl;
+    std::cout << "in ReadDefaults" << std::endl;
 
     for (TiXmlElement* child = element.FirstChildElement(); child;
 	 child = child->NextSiblingElement()) {
@@ -66,7 +63,7 @@ namespace Prototype {
       else if (IS_TAG("Compatibility"))
 	readCompatibility(*child);
       else if (IS_TAG("Token"))
-	readTokenSpecification(*child);
+	readToken(*child);
       else if (IS_TAG("ConstrainedVariable"))
 	readConstrainedVariable(*child);
     }
@@ -78,7 +75,7 @@ namespace Prototype {
   }
 
   void HSTSHeuristicsReader::readPriorityPref(const TiXmlElement& element) {
-    std::cout << " in ReadPriorityPref" << std::endl;
+    std::cout << "in ReadPriorityPref" << std::endl;
 
     std::string tmp = getTextChild(element);
     HSTSHeuristics::PriorityPref pp;
@@ -89,9 +86,8 @@ namespace Prototype {
     else
       check_error(false);
 
-    std::cout << "read PriorityPref = " << tmp << std::endl;
     m_heuristics.setDefaultPriorityPreference(pp);
-    std::cout << "getting PriorityPref = " << m_heuristics.getDefaultPriorityPreference() << std::endl;
+    check_error (m_heuristics.getDefaultPriorityPreference() == 0);
   }
 
   void HSTSHeuristicsReader::readVariableSpecification(const TiXmlElement& element){
@@ -117,6 +113,9 @@ namespace Prototype {
   }
   void HSTSHeuristicsReader::readMaster(const TiXmlElement& element){
     std::cout << "in ReadMaster" << std::endl;
+  }
+  void HSTSHeuristicsReader::readToken(const TiXmlElement& element) {
+    std::cout << "in ReadToken" << std::endl;
   }
 
   GeneratorId HSTSHeuristicsReader::getGeneratorFromName(std::string genName){ return GeneratorId::noId(); }
