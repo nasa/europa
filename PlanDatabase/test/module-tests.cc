@@ -57,17 +57,22 @@ SchemaId DefaultSchemaAccessor::s_instance;
 #define SCHEMA DefaultSchemaAccessor::instance()
 
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
-    ConstraintEngine ce;\
-    Schema schema;\
-    PlanDatabase db(ce.getId(), schema.getId());\
-    new DefaultPropagator(LabelStr("Default"), ce.getId());\
-    if(loggingEnabled()){\
-     new CeLogger(std::cout, ce.getId());\
-     new DbLogger(std::cout, db.getId());\
-    }\
-    new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());\
-    Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")));\
-    if(autoClose) \
+    ConstraintEngine ce; \
+    Schema schema; \
+    PlanDatabase db(ce.getId(), schema.getId()); \
+    { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+      assert(dp != 0); } \
+    if (loggingEnabled()) { \
+      new CeLogger(std::cout, ce.getId()); \
+      new DbLogger(std::cout, db.getId()); \
+    } \
+    { EqualityConstraintPropagator* ecp = new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId()); \
+      assert(ecp != 0); } \
+    Object* objectPtr = new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")); \
+    assert(objectPtr != 0); \
+    Object& object = *objectPtr; \
+    assert(objectPtr->getId() == object.getId()); \
+    if (autoClose) \
       db.close();
 
 class ObjectTest {
@@ -117,6 +122,7 @@ private:
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
     ObjectId id5 = ((new Object(db.getId(), LabelStr("AllObjects"), LabelStr("id5")))->getId());
     ObjectId id6 = ((new Object(id5, LabelStr("AllObjects"), LabelStr("id6")))->getId());
+    assert(id2 != id6);
     return(true);
   }
 
@@ -923,9 +929,7 @@ private:
     assert(timeline.getTokenSequence().size() == 0);
     assert(timeline.hasTokensToOrder());
 
-    // Should be type that matches STL implementation of ce.getConstraints(), not int.
-    // --wedgingt 2004 Feb 27
-    int num_constraints = ce.getConstraints().size();
+    unsigned int num_constraints = ce.getConstraints().size();
 
     timeline.constrain(tokenA.getId());
     num_constraints += 1; // Only object is constrained since sequence should be empty

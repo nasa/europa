@@ -187,17 +187,23 @@ SchemaId DefaultSchemaAccessor::s_instance;
 #define SCHEMA DefaultSchemaAccessor::instance()
 
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
-    ConstraintEngine ce;\
-    Schema schema;\
-    PlanDatabase db(ce.getId(), schema.getId());\
-    new DefaultPropagator(LabelStr("Default"), ce.getId());\
-    if(loggingEnabled()){\
-     new CeLogger(std::cout, ce.getId());\
-     new DbLogger(std::cout, db.getId());\
-    }\
+    ConstraintEngine ce; \
+    Schema schema; \
+    PlanDatabase db(ce.getId(), schema.getId()); \
+    { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+      assert(dp != 0); \
+    } \
+    if (loggingEnabled()) { \
+      new CeLogger(std::cout, ce.getId()); \
+      new DbLogger(std::cout, db.getId()); \
+    } \
     RulesEngine re(db.getId()); \
-    Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")));\
-    if(autoClose) db.close();
+    Object* objectPtr = new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")); \
+    assert(objectPtr != 0); \
+    Object& object = *objectPtr; \
+    assert(objectPtr->getId() == object.getId()); \
+    if (autoClose) \
+      db.close();
 
 class RulesEngineTest {
 public:
