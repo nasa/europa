@@ -1516,7 +1516,7 @@ private:
    * list passed in.
    */
   static bool readTestCases(std::string file, std::list<ConstraintTestCase>& testCases) {
-    ifstream tCS(file.data()); /**< testCaseStream. */
+    ifstream tCS(file.c_str()); /**< testCaseStream. */
     assertTrue(tCS.is_open() && tCS.good());
     unsigned line = 1; /**< Line within file. */
     std::string constraintName; /**< Name of a constraint, from each line of file. */
@@ -1532,7 +1532,7 @@ private:
       assertTrue(strcmp(buf, "test") == 0 && !tCS.eof() && tCS.good());
       tCS >> cnt;
       assert(cnt == line && !tCS.eof() && tCS.good());
-      constraintName.clear();
+      constraintName = "";
       tCS.get(ch);
       assertTrue(ch == ' ' && !tCS.eof() && tCS.good());
       for (tCS.get(ch); ch != ' ' && tCS.good(); tCS.get(ch))
