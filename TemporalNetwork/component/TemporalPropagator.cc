@@ -123,7 +123,7 @@ namespace Prototype {
 
   void TemporalPropagator::execute(){
     check_error(!getConstraintEngine()->provenInconsistent());
-
+    check_error(isValidForPropagation());
     //update the tnet
     updateTnet();
 
@@ -456,4 +456,65 @@ namespace Prototype {
     return sl_durationConstraintName;
   }
 
+  bool TemporalPropagator::isValidForPropagation() const {
+    // The set of active variables should not be empty
+    if(m_activeVariables.empty())
+      return alwaysFalse();
+
+    // All buffers should only contain valid id's
+    if(!allValid(m_activeVariables) ||
+       !allValid(m_changedVariables) ||
+       !allValid(m_changedConstraints) ||
+       !allValid(m_constraintsForDeletion) ||
+       !allValid(m_variablesForDeletion) ||
+       !allValid(m_listeners))
+      return alwaysFalse();
+
+    // For all buffered timepoints for deletion, none should have any dangling external entities. This is because
+    // we will have already deleteed the Constraint for which this Constraint shadows it.
+    for(std::set<TemporalConstraintId>::const_iterator it = m_constraintsForDeletion.begin(); it != m_constraintsForDeletion.end(); ++it){
+      TemporalConstraintId shadow = *it;
+      if(!shadow->getExternalEntity().isNoId())
+	return alwaysFalse();
+    }
+
+    // For all buffered constraints for deletion, none should have any dangling external entities. This is because
+    // we will have already deleteed the TempVar for which this timepoint shadows it.
+    for(std::set<TimepointId>::const_iterator it = m_variablesForDeletion.begin(); it != m_variablesForDeletion.end(); ++it){
+      TimepointId timepoint = *it;
+      if(!timepoint->getExternalEntity().isNoId())
+	return alwaysFalse();
+    }
+
+    // For all buffered TempVar's, it either has an external entity or it doesn't. No invalid one.
+    // Should also ensure that ONLY start and end variables have external entities.
+    for(std::set<TempVarId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
+      TempVarId var = *it;
+      if(!var->getExternalEntity().isNoId()){ // It must be a start or end variable
+
+	if(var->getIndex() == DURATION_VAR_INDEX) // Same for all types of tokens as it is set in the base
+	  return alwaysFalse();
+
+	// Confirm the shadow is linked up coorrectly
+	TimepointWrapperId wrapper = var->getExternalEntity();
+	TimepointId shadow = wrapper->getTimepoint();
+	if(shadow->getExternalEntity() != var)
+	  return alwaysFalse();
+      }
+    }
+
+    // For all bufferec constraints for change, it should have no shadow, or a good shadow. Also, if it has a shadow,
+    // we should ensure that it is linked correctly 
+    for(std::set<ConstraintId>::const_iterator it = m_changedConstraints.begin(); it != m_changedConstraints.end(); ++it){
+      ConstraintId constraint = *it;
+      if(!constraint->getExternalEntity().isNoId()){
+	EntityId shadow = constraint->getExternalEntity();
+	if(shadow->getExternalEntity() != constraint)
+	  return alwaysFalse();
+      }
+    }
+
+    // For all buffered constraints, 
+    return true;
+  }
 } //namespace

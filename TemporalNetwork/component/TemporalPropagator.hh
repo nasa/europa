@@ -99,6 +99,11 @@ namespace Prototype {
      */
     void buffer(const TempVarId& var);
 
+    /**
+     * @brief Test that the buffer status is correct prior to propagation
+     */
+    bool isValidForPropagation() const;
+
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
 
     /*!< Synchronization data structures */
