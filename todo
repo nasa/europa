@@ -34,3 +34,12 @@ Parallel Efforts:
 
 PlanWorks Convergence:
 1. Switch to Jam build system (evaluate at least)
+
+Old Readme Performance Notes:
+Known areas of performance improvement:
+1. Object Filtering.
+2. Deletion of the database.
+3. Update of variables from Temporal Network.
+4. Splitting merged tokens in a non-chronological backtrack.
+5. Improve exchange of data in TemporalPropagator with  direct calculation of duration variables.
+6. Update TemporalNetwork to adjust for deactivated constraints
