@@ -10,7 +10,8 @@ class TiXmlElement;
 
 /**
  * @file DbClientTransactionPlayer
- * @brief Main interface for playing transactions. Necessary for copy. replay, and possibly recovery.
+ * @brief Main interface for playing transactions.
+ * @note Necessary for copy. replay, and possibly recovery.
  */
 
 namespace PLASMA {
@@ -34,8 +35,25 @@ namespace PLASMA {
 
   protected:
     void processTransaction(const TiXmlElement & element);
-    void playDefineClass(const TiXmlElement & element);
-    void playDefineEnumeration(const TiXmlElement & element);
+
+    /** Define a class.
+     * @note Does nothing as the player cannot create classes.
+     */
+    inline void playDefineClass(const TiXmlElement &) {
+    }
+
+    /** Define a compatibility.
+     * @note Does nothing as the player cannot create compatibilities.
+     */
+    inline void playDefineCompat(const TiXmlElement &) {
+    }
+
+    /** Define an enumeration.
+     * @note Does nothing as the player cannot create enumerations.
+     */
+    inline void playDefineEnumeration(const TiXmlElement &) {
+    }
+
     void playVariableCreated(const TiXmlElement & element);
     void playObjectCreated(const TiXmlElement & element);
     void playTokenCreated(const TiXmlElement & element);
