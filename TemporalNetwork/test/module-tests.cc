@@ -73,7 +73,8 @@ private:
     TemporalConstraintId a_before_b = tn.addTemporalConstraint(a_end, b_start, 0, g_infiniteTime());
     TemporalConstraintId start_before_end = tn.addTemporalConstraint(b_start, b_end, 1, g_infiniteTime());
     TemporalConstraintId a_meets_c = tn.addTemporalConstraint(a_end, c_start, 0, 0);
-    check_error(tn.isConsistent());
+    bool res = tn.isConsistent();
+    check_error(res);
 
     Time dist_lb, dist_ub;
     tn.calcDistanceBounds(c_start, b_end, dist_lb, dist_ub);
@@ -81,7 +82,8 @@ private:
 
     // Force failure where b meets c
     TemporalConstraintId b_meets_c = tn.addTemporalConstraint(b_end, c_start, 0, 0);
-    check_error(!tn.isConsistent());
+    res = tn.isConsistent();
+    check_error(!res);
 
     // Cleanup
     tn.removeTemporalConstraint(b_meets_c);
@@ -106,17 +108,22 @@ private:
     TemporalConstraintId fromage = tn.addTemporalConstraint(x, y, (Time)0, g_infiniteTime());
     TemporalConstraintId tango = tn.addTemporalConstraint(y, x, 200, 200);
 
-    check_error(!tn.isConsistent());
+    bool res = tn.isConsistent();
+    check_error(!res);
 
     tn.removeTemporalConstraint(fromage);
     tn.removeTemporalConstraint(tango);
-    check_error(tn.isConsistent()); // Consistency restored
+
+    res = tn.isConsistent();
+    check_error(); // Consistency restored
 
     TemporalConstraintId c0 = tn.addTemporalConstraint(y, x, -200, g_infiniteTime());
     TemporalConstraintId c1 = tn.addTemporalConstraint(x, z, 0, g_infiniteTime());
     TemporalConstraintId c2 = tn.addTemporalConstraint(z, y, (Time)0, g_infiniteTime());
     TemporalConstraintId c3 = tn.addTemporalConstraint(x, y, 200, g_infiniteTime());
-    check_error(tn.isConsistent());
+
+    res = tn.isConsistent();
+    check_error(res);
 
     // Clean up
     tn.removeTemporalConstraint(c0);
@@ -234,7 +241,8 @@ private:
     second.getStart()->specify(dom2);
     second.getEnd()->specify(dom2);
 
-    check_error(ce.propagate());
+    bool res = ce.propagate();
+    check_error(res);
     
     // compute from propagator directly
     check_error (!((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
@@ -259,7 +267,8 @@ private:
 									temp);
     check_error(!beforeConstraint.isNoId());
 
-    check_error(ce.propagate());
+    res = ce.propagate();
+    check_error(res);
     
     // compute from propagator directly
     check_error (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));

@@ -124,7 +124,8 @@ private:
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));
     t0.activate();
-    check_error(ce.propagate());
+    bool prop = ce.propagate();
+    check_error(prop);
     return(true);
   }
 };

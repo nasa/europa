@@ -57,25 +57,25 @@ namespace Prototype {
   private:
     static bool testAllocation(){
       IntervalIntDomain intDomain(10, 20);
-      check_error(intDomain.isFinite());
-      check_error(!intDomain.isDynamic());
+      assert(intDomain.isFinite());
+      assert(!intDomain.isDynamic());
       IntervalIntDomain d1(intDomain);
       d1.empty();
-      check_error(d1.isEmpty());
+      assert(d1.isEmpty());
 
       AbstractDomain& d2 = static_cast<AbstractDomain&>(intDomain);
-      check_error(!d2.isEmpty());
+      assert(!d2.isEmpty());
 
       IntervalIntDomain d3(static_cast<IntervalIntDomain&>(intDomain));
       IntervalIntDomain d4;
 
-      check_error( ! (d3 == d4));
+      assert( ! (d3 == d4));
       d3.relax(d4);
-      check_error(d3 == d4);
+      assert(d3 == d4);
 
-      check_error(d2 != d4);
+      assert(d2 != d4);
       d2.relax(d4);
-      check_error(d2 == d4);
+      assert(d2 == d4);
       return true;
     }
 
@@ -85,17 +85,20 @@ namespace Prototype {
       IntervalIntDomain dom1(-100, 100, l_listener.getId());
       dom1.relax(dom0);
       DomainListener::ChangeType change;
-      check_error(l_listener.checkAndClearChange(change)  && change == DomainListener::RELAXED);
-      check_error(dom1.isSubsetOf(dom0));
-      check_error(dom0.isSubsetOf(dom1));
-      check_error(dom1 == dom0);
+      bool res = l_listener.checkAndClearChange(change);
+      assert(res && change == DomainListener::RELAXED);
+      assert(dom1.isSubsetOf(dom0));
+      assert(dom0.isSubsetOf(dom1));
+      assert(dom1 == dom0);
 
       IntervalIntDomain dom2(-300, 100);
       dom1.intersect(dom2);
-      check_error(l_listener.checkAndClearChange(change));
-      check_error(dom1 == dom2);
+      res = l_listener.checkAndClearChange(change);
+      assert(res);
+      assert(dom1 == dom2);
       dom1.relax(dom2);
-      check_error(!l_listener.checkAndClearChange(change));
+      res = l_listener.checkAndClearChange(change);
+      assert(!res);
       return true;
     }
 
@@ -107,56 +110,60 @@ namespace Prototype {
       IntervalIntDomain dom1(-100, 100);
       dom0.intersect(dom1);
       DomainListener::ChangeType change;
-      check_error(l_listener.checkAndClearChange(change));
-      check_error(dom0 == dom1);
+      bool res = l_listener.checkAndClearChange(change);
+      assert(res);
+      assert(dom0 == dom1);
     
       // verify no change triggered if none should take place.
       dom0.intersect(dom1);
-      check_error(!l_listener.checkAndClearChange(change));
+      res = l_listener.checkAndClearChange(change);
+      assert(!res);
 
       // Verify only the upper bound changes
       IntervalIntDomain dom2(-200, 50);
       dom0.intersect(dom2);
-      check_error(l_listener.checkAndClearChange(change));
-      check_error(dom0.getLowerBound() == dom1.getLowerBound());
-      check_error(dom0.getUpperBound() == dom2.getUpperBound());
+      res = l_listener.checkAndClearChange(change);
+      assert(res);
+      assert(dom0.getLowerBound() == dom1.getLowerBound());
+      assert(dom0.getUpperBound() == dom2.getUpperBound());
     
       // Make an intersection that leads to an empty domain
       IntervalIntDomain dom3(500, 1000);
       dom0.intersect(dom3);
-      check_error(l_listener.checkAndClearChange(change));
-      check_error(dom0.isEmpty());
+      res = l_listener.checkAndClearChange(change);
+      assert(res);
+      assert(dom0.isEmpty());
 
       IntervalDomain dom4(0.98, 101.23);
       IntervalDomain dom5(80, 120.44);
       IntervalDomain dom6(80, 101.23);
       dom4.equate(dom5);
-      check_error(dom4 == dom6);
-      check_error(dom5 == dom6);
+      assert(dom4 == dom6);
+      assert(dom5 == dom6);
       return true;
     }
 
     static bool testSubset(){
       IntervalIntDomain dom0(10, 35);
       IntervalDomain dom1(0, 101);
-      check_error(dom0.isSubsetOf(dom1));
-      check_error(! dom1.isSubsetOf(dom0));
+      assert(dom0.isSubsetOf(dom1));
+      assert(! dom1.isSubsetOf(dom0));
 
       // Handle cases where domains are equal
       IntervalIntDomain dom2(dom0);
-      check_error(dom2 == dom0);
-      check_error(dom0.isSubsetOf(dom2));
-      check_error(dom2.isSubsetOf(dom0));
+      assert(dom2 == dom0);
+      assert(dom0.isSubsetOf(dom2));
+      assert(dom2.isSubsetOf(dom0));
 
       // Handle case with no intersection
       IntervalIntDomain dom3(0, 9);
-      check_error(! dom3.isSubsetOf(dom0));
-      check_error(! dom0.isSubsetOf(dom3));
+      assert(! dom3.isSubsetOf(dom0));
+      assert(! dom0.isSubsetOf(dom3));
 
       // Handle case with partial intersection
       IntervalIntDomain dom4(0, 20);
-      check_error(! dom4.isSubsetOf(dom0));
-      check_error(! dom0.isSubsetOf(dom4));
+      assert(! dom4.isSubsetOf(dom0));
+      assert(! dom0.isSubsetOf(dom4));
 
       return true;
     }
@@ -174,42 +181,48 @@ namespace Prototype {
       d1 >> ss1;
       std::string actualString = ss1.str();
       std::string expectedString("INT_INTERVAL:CLOSED[1, 100]");
-      check_error(actualString == expectedString);
+      assert(actualString == expectedString);
       return true;
     }
 
     static bool testBoolDomain(){
       BoolDomain dom0;
-      check_error(dom0.getSize() == 2);
-      check_error(dom0.getUpperBound() == true);
-      check_error(dom0.getLowerBound() == false);
+      assert(dom0.getSize() == 2);
+      assert(dom0.getUpperBound() == true);
+      assert(dom0.getLowerBound() == false);
 
       IntervalIntDomain dom1(0, 100);
       dom1.intersect(dom0);
-      check_error(dom1 == dom0);
+      assert(dom1 == dom0);
       return true;
     }
 
     static bool testDifference(){
       IntervalDomain dom0(1, 10);
       IntervalDomain dom1(11, 20);
-      check_error(!dom0.difference(dom1));
-      check_error(!dom1.difference(dom0));
+      bool res = dom0.difference(dom1);
+      assert(!res);
+      res = dom1.difference(dom0);
+      assert(!res);
 
       IntervalDomain dom2(dom0);
-      check_error(dom2.difference(dom0));
-      check_error(dom2.isEmpty());
+      res = dom2.difference(dom0);
+      assert(res);
+      assert(dom2.isEmpty());
 
       IntervalIntDomain dom3(5, 100);
-      check_error(dom3.difference(dom0));
-      check_error(dom3.getLowerBound() == 11);
-      check_error(dom3.difference(dom1));
-      check_error(dom3.getLowerBound() == 21);
+      res = dom3.difference(dom0);
+      assert(res);
+      assert(dom3.getLowerBound() == 11);
+      res = dom3.difference(dom1);
+      assert(res);
+      assert(dom3.getLowerBound() == 21);
 
       IntervalDomain dom4(0, 20);
-      check_error(dom4.difference(dom1));
+      res = dom4.difference(dom1);
+      assert(res);
       double newValue = (dom1.getLowerBound() - dom4.minDelta());
-      check_error(dom4.getUpperBound() == newValue);
+      assert(dom4.getUpperBound() == newValue);
       return true;
     }
 
@@ -217,23 +230,23 @@ namespace Prototype {
       IntervalDomain dom0(1, 28);
       IntervalDomain dom1(50, 100);
       dom0 = dom1;
-      check_error(dom0 == dom1);
+      assert(dom0 == dom1);
       return true;
     }
 
     static bool testInfinitesAndInts(){
       IntervalDomain dom0;
-      check_error(dom0.translateNumber(MINUS_INFINITY) == MINUS_INFINITY);
-      check_error(dom0.translateNumber(MINUS_INFINITY - 1) == MINUS_INFINITY);
-      check_error(dom0.translateNumber(MINUS_INFINITY + 1) == MINUS_INFINITY + 1);
-      check_error(dom0.translateNumber(PLUS_INFINITY + 1) == PLUS_INFINITY);
-      check_error(dom0.translateNumber(PLUS_INFINITY - 1) == PLUS_INFINITY - 1);
-      check_error(dom0.translateNumber(2.8) == 2.8);
+      assert(dom0.translateNumber(MINUS_INFINITY) == MINUS_INFINITY);
+      assert(dom0.translateNumber(MINUS_INFINITY - 1) == MINUS_INFINITY);
+      assert(dom0.translateNumber(MINUS_INFINITY + 1) == MINUS_INFINITY + 1);
+      assert(dom0.translateNumber(PLUS_INFINITY + 1) == PLUS_INFINITY);
+      assert(dom0.translateNumber(PLUS_INFINITY - 1) == PLUS_INFINITY - 1);
+      assert(dom0.translateNumber(2.8) == 2.8);
 
       IntervalIntDomain dom1;
-      check_error(dom1.translateNumber(2.8, false) == 2);
-      check_error(dom1.translateNumber(2.8, true) == 3);
-      check_error(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY - 1);
+      assert(dom1.translateNumber(2.8, false) == 2);
+      assert(dom1.translateNumber(2.8, true) == 3);
+      assert(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY - 1);
       return true;
     }
   };
@@ -264,13 +277,13 @@ namespace Prototype {
 
       EnumeratedDomain d0(values);
       EnumeratedDomain d1(values);
-      check_error(d0 == d1);
-      check_error(d0.isSubsetOf(d1));
-      check_error(d0.isMember(-98.67));
+      assert(d0 == d1);
+      assert(d0.isSubsetOf(d1));
+      assert(d0.isMember(-98.67));
       d0.remove(-0.01);
-      check_error(!d0.isMember(-0.01));
-      check_error(d0.isSubsetOf(d1));
-      check_error(!d1.isSubsetOf(d0));
+      assert(!d0.isMember(-0.01));
+      assert(d0.isSubsetOf(d1));
+      assert(!d1.isSubsetOf(d0));
 
       return true;
     }
@@ -280,21 +293,21 @@ namespace Prototype {
       Prototype::LabelStr l1("L1");
       Prototype::LabelStr l2("L2");
       Prototype::LabelStr l3("L3");
-      check_error(l1 < l2 && l2 < l3);
+      assert(l1 < l2 && l2 < l3);
 
       Prototype::LabelStr la("L");
       Prototype::LabelStr l4("L30");
       Prototype::LabelStr lb("L");
 
       Prototype::LabelStr copy1(l1);
-      check_error(l1 == copy1);
-      check_error (l2 != copy1);
+      assert(l1 == copy1);
+      assert (l2 != copy1);
 
-      check_error((Prototype::LabelStr::getSize() - initialCount) == 5);
-      check_error(l1.toString() == "L1");
+      assert((Prototype::LabelStr::getSize() - initialCount) == 5);
+      assert(l1.toString() == "L1");
 
-      check_error(LabelStr::isString(l1.getKey()));
-      check_error(!LabelStr::isString(PLUS_INFINITY+1));
+      assert(LabelStr::isString(l1.getKey()));
+      assert(!LabelStr::isString(PLUS_INFINITY+1));
       return true;
     }
 
@@ -308,24 +321,26 @@ namespace Prototype {
 
       ChangeListener l_listener;
       LabelSet ls0(values, true, l_listener.getId());
-      check_error(!ls0.isDynamic());
+      assert(!ls0.isDynamic());
 
       Prototype::LabelStr l2("L2");
-      check_error(ls0.isMember(l2));
+      assert(ls0.isMember(l2));
       DomainListener::ChangeType change;
       ls0.remove(l2);
-      check_error(l_listener.checkAndClearChange(change) && change == DomainListener::VALUE_REMOVED);
-      check_error(!ls0.isMember(l2));
+      bool res = l_listener.checkAndClearChange(change);
+      assert(res && change == DomainListener::VALUE_REMOVED);
+      assert(!ls0.isMember(l2));
 
       Prototype::LabelStr l3("L3");
       ls0.set(l3);
-      check_error(ls0.isMember(l3));
-      check_error(ls0.getSize() == 1);
+      assert(ls0.isMember(l3));
+      assert(ls0.getSize() == 1);
 
       LabelSet ls1(values, true);
       ls0.relax(ls1);
-      check_error(l_listener.checkAndClearChange(change) && change == DomainListener::RELAXED);
-      check_error(ls0 == ls1);
+      res = l_listener.checkAndClearChange(change);
+      assert(res && change == DomainListener::RELAXED);
+      assert(ls0 == ls1);
       return true;
     }
     static bool testEquate(){
@@ -343,16 +358,18 @@ namespace Prototype {
       LabelSet ls0(baseValues, true, l_listener.getId());
       LabelSet ls1(baseValues, true, l_listener.getId());
 
-      check_error(ls0 == ls1);
-      check_error(ls0.getSize() == 8);
-      check_error(ls0.equate(ls1) == false); // Implying no change occured
+      assert(ls0 == ls1);
+      assert(ls0.getSize() == 8);
+      bool res = ls0.equate(ls1);
+      assert(res == false); // Implying no change occured
 
       Prototype::LabelStr lC("C");
       ls0.remove(lC);
-      check_error(!ls0.isMember(lC));
-      check_error(ls1.isMember(lC));
-      check_error(ls0.equate(ls1)); // It should have changed
-      check_error(!ls1.isMember(lC));
+      assert(!ls0.isMember(lC));
+      assert(ls1.isMember(lC));
+      res = ls0.equate(ls1);
+      assert(res); // It should have changed
+      assert(!ls1.isMember(lC));
 
       LabelSet ls2(baseValues, true, l_listener.getId());
       ls2.remove(Prototype::LabelStr("A"));
@@ -367,8 +384,9 @@ namespace Prototype {
       ls3.remove(lA);
       ls3.remove(lB);
       ls3.remove(lC);
-      check_error(ls2.equate(ls3));
-      check_error(ls2 == ls3);
+      res = ls2.equate(ls3);
+      assert(res);
+      assert(ls2 == ls3);
 
       LabelSet ls4(baseValues, true, l_listener.getId());
       ls4.remove(Prototype::LabelStr("A"));
@@ -384,9 +402,10 @@ namespace Prototype {
 
       DomainListener::ChangeType change;
       ls4.equate(ls5);
-      check_error(l_listener.checkAndClearChange(change) && change == DomainListener::EMPTIED);
-      check_error(ls4.isEmpty() || ls5.isEmpty());
-      check_error(!(ls4.isEmpty() && ls5.isEmpty()));
+      res = l_listener.checkAndClearChange(change);
+      assert(res && change == DomainListener::EMPTIED);
+      assert(ls4.isEmpty() || ls5.isEmpty());
+      assert(!(ls4.isEmpty() && ls5.isEmpty()));
 
       return true;
     }
@@ -405,10 +424,10 @@ namespace Prototype {
 
       LabelSet l2(results, true);
 
-      check_error(l1 == l2);
+      assert(l1 == l2);
       LabelStr lbl("C");
       l1.set(lbl);
-      check_error(lbl == l1.getSingletonValue());
+      assert(lbl == l1.getSingletonValue());
       return true;
     }
 
@@ -429,18 +448,18 @@ namespace Prototype {
       ls2.remove(Prototype::LabelStr("A"));
       ls2.remove(Prototype::LabelStr("C"));
       ls2.remove(Prototype::LabelStr("E"));
-      check_error(ls2.isSubsetOf(ls1));
-      check_error(!ls1.isSubsetOf(ls2));
+      assert(ls2.isSubsetOf(ls1));
+      assert(!ls1.isSubsetOf(ls2));
 
       LabelSet ls3(ls1);
 
       ls1.intersect(ls2);
-      check_error(ls1 == ls2);
-      check_error(ls2.isSubsetOf(ls1));
+      assert(ls1 == ls2);
+      assert(ls2.isSubsetOf(ls1));
 
       ls1.relax(ls3);
-      check_error(ls2.isSubsetOf(ls1));
-      check_error(ls1 == ls3);
+      assert(ls2.isSubsetOf(ls1));
+      assert(ls1 == ls3);
 
       LabelSet ls4(values);
       ls4.remove(Prototype::LabelStr("A"));
@@ -454,7 +473,7 @@ namespace Prototype {
       ls3.remove(Prototype::LabelStr("H"));
       ls3.remove(Prototype::LabelStr("I"));
       ls4.intersect(ls3);
-      check_error(ls4.isEmpty());
+      assert(ls4.isEmpty());
       return true;
     }
 
@@ -470,15 +489,18 @@ namespace Prototype {
       dom0.close();
 
       IntervalIntDomain dom1(11, 100);
-      check_error(!dom0.difference(dom1));
+      bool res = dom0.difference(dom1);
+      assert(!res);
 
       IntervalIntDomain dom2(5, 100);
-      check_error(dom0.difference(dom2));
-      check_error(dom0.getUpperBound() == 3);
+      res = dom0.difference(dom2);
+      assert(res);
+      assert(dom0.getUpperBound() == 3);
 
       IntervalIntDomain dom3(0, 100);
-      check_error(dom0.difference(dom3));
-      check_error(dom0.isEmpty());
+      res = dom0.difference(dom3);
+      assert(res);
+      assert(dom0.isEmpty());
 
       return true;
     }
@@ -501,12 +523,12 @@ namespace Prototype {
 
       EnumeratedDomain dom2(dom0);
 
-      check_error(dom0 != dom1);
+      assert(dom0 != dom1);
       dom0 = dom1;
-      check_error(dom0 == dom1);
+      assert(dom0 == dom1);
 
       dom1 = dom2;
-      check_error(dom1 == dom2);
+      assert(dom1 == dom2);
 
       return true;
     }
@@ -532,15 +554,15 @@ namespace Prototype {
       dom0.set(1.0);
 
       IntervalDomain dom1(1.0);
-      check_error(dom1 == dom0);
-      check_error(dom0 == dom1);
+      assert(dom1 == dom0);
+      assert(dom0 == dom1);
 
       IntervalIntDomain dom2(1);
-      check_error(dom1 == dom2);
+      assert(dom1 == dom2);
 
       dom0.reset(dom);
       IntervalIntDomain dom3(1, 2);
-      check_error(dom0 == dom3);
+      assert(dom0 == dom3);
       return true;
     }
 
@@ -553,21 +575,21 @@ namespace Prototype {
       dom0.insert(2.98);
       dom0.insert(10);
       dom0.close();
-      check_error(dom0.getSize() == 6);
+      assert(dom0.getSize() == 6);
       IntervalIntDomain dom1(1, 8);
       EnumeratedDomain dom2(dom0);
 
       dom0.intersect(dom1);
-      check_error(dom0.getSize() == 1);
-      check_error(dom0.isMember(1.0));
+      assert(dom0.getSize() == 1);
+      assert(dom0.isMember(1.0));
 
       IntervalDomain dom3(1, 8);
       dom2.intersect(dom3);
-      check_error(dom2.getSize() == 3);
+      assert(dom2.getSize() == 3);
 
       BoolDomain dom4;
       dom2.intersect(dom4);
-      check_error(dom2.getSize() == 1);
+      assert(dom2.getSize() == 1);
       return true;
     }
 
@@ -582,18 +604,18 @@ namespace Prototype {
       dom0.close();
 
       IntervalDomain dom1(0, 10);
-      check_error(dom0.isSubsetOf(dom1));
+      assert(dom0.isSubsetOf(dom1));
 
       IntervalIntDomain dom2(0, 10);
-      check_error(!dom0.isSubsetOf(dom2));
+      assert(!dom0.isSubsetOf(dom2));
 
       dom0.remove(0.98);
       dom0.remove(1.89);
       dom0.remove(2.98);
-      check_error(dom0.isSubsetOf(dom2));
+      assert(dom0.isSubsetOf(dom2));
 
-      check_error(dom2.isSubsetOf(dom1));
-      check_error(!dom1.isSubsetOf(dom2));
+      assert(dom2.isSubsetOf(dom1));
+      assert(!dom1.isSubsetOf(dom2));
       return true;
     }
 
@@ -608,11 +630,11 @@ namespace Prototype {
       dom1.insert(9.037);
       dom1.close();
 
-      check_error(dom0 != dom1);
+      assert(dom0 != dom1);
 
       Domain<int> dom2(10);
-      check_error(!dom2.isDynamic());
-      check_error(dom2.isSingleton());
+      assert(!dom2.isDynamic());
+      assert(dom2.isSingleton());
       return true;
     }
   };
