@@ -1,0 +1,103 @@
+#include "NddlWorld.nddl"
+
+class Resource {
+ // Specified resource properties
+ int horizonStart;
+ int horizonEnd;
+ float initialCapacity;
+ float levelLimitMin;
+ float levelLimitMax;
+ float productionRateMax;
+ float productionMax;
+ float consumptionRateMax;
+ float consumptionMax;
+
+ // The only predicate we allow
+ predicate change{
+  float quantity;
+ }
+
+ Resource(int hs, int he, float ic, float ll_min, float ll_max){
+  horizonStart = hs;
+  horizonEnd = he;
+  initialCapacity = ic;
+  levelLimitMin = ll_min;
+  levelLimitMax = ll_max;
+  productionRateMax = 0;
+  productionMax = 0;
+  consumptionRateMax = MINUS_INFINITY;
+  consumptionMax = MINUS_INFINITY;
+ }
+
+ Resource(){}
+}
+
+class Battery extends Resource {
+
+ // The only predicate we allow
+ predicate change{
+  float quantity;
+ }
+
+ Battery(int hs, int he, int ic, int ll_min, int ll_max) {
+  super(hs, he, ic, ll_min, ll_max);
+ }
+}
+
+class DriveSubsystem{
+ predicate Drive{
+  eq(duration, 50);
+ }
+
+ predicate Stroll{
+  eq(duration, 100);
+ }
+}
+
+DriveSubsystem::Drive{
+ any(Resource.change tx);
+ eq(start, tx.start);
+ eq(tx.quantity, -50);
+}
+
+DriveSubsystem::Stroll{
+ any(Resource.change tx);
+ eq(start, tx.start);
+ eq(tx.quantity, -25);
+}
+
+class Rover{
+ DriveSubsystem dss;
+ Battery battery;
+ predicate Move{}
+
+ Rover(Battery b){
+  dss = new DriveSubsystem();
+  battery = b;
+ }
+}
+
+Rover::Move{
+ bool switch_value;
+
+ if(switch_value==false){
+  any(DriveSubsystem.Drive drive);
+  eq(drive.start, start);
+  eq(drive.duration, duration);
+ }
+
+ if(switch_value==true){
+  any(DriveSubsystem.Stroll stroll);
+  eq(stroll.start, start);
+  eq(stroll.duration, duration);
+ }
+}
+
+// Allocation of objects
+NddlWorld world = new NddlWorld(0, 100, 350);
+Battery mainBattery = new Battery(0, 100, 30, 0, 50);
+Rover rover = new Rover(mainBattery);
+close();
+
+any(Rover.Move goal1);
+goal1.start.specify(0);
