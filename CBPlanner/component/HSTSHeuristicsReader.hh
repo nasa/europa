@@ -1,5 +1,5 @@
-#ifndef _H_HeuristicsHSTSReader
-#define _H_HeuristicsHSTSReader
+#ifndef _H_HSTSHeuristicsReader
+#define _H_HSTSHeuristicsReader
 
 #include "CBPlannerDefs.hh"
 #include "HSTSHeuristics.hh"
@@ -9,10 +9,10 @@ class TiXmlElement;
 
 namespace Prototype {
 
-  class HeuristicsHSTSReader {
+  class HSTSHeuristicsReader {
   public:
-    HeuristicsHSTSReader(HSTSHeuristics& heuristics);
-    ~HeuristicsHSTSReader();
+    HSTSHeuristicsReader(HSTSHeuristics& heuristics);
+    virtual ~HSTSHeuristicsReader();
 
     void read(const std::string& fileName);
   protected:

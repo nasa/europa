@@ -1,10 +1,13 @@
 #include "HSTSHeuristicsReader.hh"
+#include <fstream>
+#include "tinyxml.h"
+#include "HSTSHeuristics.hh"
 
 namespace Prototype {
 
   HSTSHeuristicsReader::HSTSHeuristicsReader(HSTSHeuristics& heuristics) : m_heuristics(heuristics) { }
 
-  ~HSTSHeuristicsReader::HSTSHeuristicsReader() { }
+  HSTSHeuristicsReader::~HSTSHeuristicsReader() { }
 
   void HSTSHeuristicsReader::read(const std::string& fileName) {
 
@@ -53,21 +56,29 @@ namespace Prototype {
       else if (strcmp(tagName, "Compatibility") == 0)
 	readCompatibility(*child);
       else if (strcmp(tagName, "Token") == 0)
-	readToken(*child);
+	readTokenSpecification(*child);
       else if (strcmp(tagName, "ConstrainedVariable") == 0)
 	readConstrainedVariable(*child);
     }
   }
 
   const std::string HSTSHeuristicsReader::getTextChild (const TiXmlElement& element) {
-    check_error (element && (element->FirstChild()) && (element->FirstChild()->ToText()) && (element->FirstChild()->ToText()->Value()));
-    return element->FirstChild()->ToText()->Value();
+    check_error (element.FirstChild() && element.FirstChild()->ToText() && element.FirstChild()->ToText()->Value());
+    return element.FirstChild()->ToText()->Value();
   }
 
   void HSTSHeuristicsReader::readPriorityPref(const TiXmlElement& element) {
-    std::string tmp = getNextChild(element);
-    std::cout << "readPriorityPref = " << tmp << std::endl;
-    m_heuristics.setDefaultPriorityPreference(getNextChild(element));
+    std::string tmp = getTextChild(element);
+    HSTSHeuristics::PriorityPref pp;
+    if ((tmp == "low") || (tmp == "LOW"))
+      pp = HSTSHeuristics::LOW;
+    else if ((tmp == "high") || (tmp == "HIGH"))
+      pp = HSTSHeuristics::HIGH;
+    else
+      check_error(false);
+
+    std::cout << "read PriorityPref = " << tmp << std::endl;
+    m_heuristics.setDefaultPriorityPreference(pp);
     std::cout << "getting PriorityPref = " << m_heuristics.getDefaultPriorityPreference() << std::endl;
   }
 
@@ -82,5 +93,3 @@ namespace Prototype {
 
   GeneratorId HSTSHeuristicsReader::getGeneratorFromName(std::string genName){}
 }
-
-#endif

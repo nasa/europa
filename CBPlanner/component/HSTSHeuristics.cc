@@ -17,6 +17,10 @@ namespace Prototype {
 
   TokenType::~TokenType() { check_error(m_id.isValid()); m_id.release(); }
 
+  const TokenTypeId& TokenType::getId() const {
+    return m_id;
+  }
+
   const LabelStr& TokenType::getPredicate() const {
     return m_predicateName;
   }
@@ -188,6 +192,10 @@ namespace Prototype {
     m_defaultPriorityPreference = pp;
   }
 
+  const HSTSHeuristics::PriorityPref HSTSHeuristics::getDefaultPriorityPreference() {
+    return m_defaultPriorityPreference;
+  }
+
   void HSTSHeuristics::setDefaultPriorityForTokenDPsWithParent(const Priority p, const TokenTypeId& tt) {
     check_error(MIN_PRIORITY <= p);
     check_error(MAX_PRIORITY >= p);
@@ -253,6 +261,9 @@ namespace Prototype {
     m_tokenHeuristics.insert(std::make_pair<LabelStr, TokenEntry>(key, entry));
   }
 
+  void HSTSHeuristics::setHeuristicsForTokenDPsWithParent(const Priority p, const TokenTypeId& tt) {
+  }
+
   void HSTSHeuristics::addSuccTokenGenerator(const GeneratorId& generator) {
     check_error(generator.isValid());
     check_error(m_generatorsByName.find(generator->getName().getKey()) == m_generatorsByName.end());
@@ -303,7 +314,8 @@ namespace Prototype {
     TokenId tok = tokDec->getToken();
     TokenTypeId tt = TokenType::createTokenType(tok);
     TokenTypeId mastertt = TokenType::createTokenType(tok->getMaster());
-    Relationship rel = tok->getRelationship(); // once it is implemented on tokens.
+    //    Relationship rel = tok->getRelationship(); // once it is implemented on tokens.
+    Relationship rel = BEFORE;
     Origin orig;
     if (mastertt.isNoId())
       orig = INITIAL;

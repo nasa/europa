@@ -38,7 +38,6 @@ namespace Prototype {
     HSTSOpenDecisionManager(const DecisionManagerId& dm);
     ~HSTSOpenDecisionManager();
 
-    virtual DecisionPointId getNextDecision();
     virtual const ChoiceId getNextChoice();
 
     // order returned is different
@@ -54,14 +53,27 @@ namespace Prototype {
     virtual void deleteAllMatchingObjects(const ObjectId& object, const TokenId& token);
     virtual void add(const ObjectId& object, const TokenId& token);
     virtual void add(const ObjectId& object);
+    virtual void addActive(const TokenId& token);
+    virtual void condAddActive(const TokenId& token);
     virtual void condAdd(const TokenId& token);
     virtual void add(const TokenId& token);
     virtual void condAdd(const ConstrainedVariableId& var, const bool units);
     virtual void add(const ConstrainedVariableId& variable);
 
+    virtual void removeVar(const ConstrainedVariableId& var, const bool deleting);
+    virtual const bool removeVarDP(const ConstrainedVariableId& var, const bool deleting, std::map<int,ConstrainedVariableDecisionPointId>& varMap, VariableDecisionSet& sortedVars);
+    virtual void condRemoveVar(const ConstrainedVariableId& var);
+
+    virtual void removeActive(const TokenId& tok, const bool deleting);
+    virtual void removeToken(const TokenId& tok, const bool deleting);
+    virtual const bool removeTokenDP(const TokenId& tok, const bool deleting, std::map<int,TokenDecisionPointId>& tokMap, TokenDecisionSet& sortedToks);
     // need to add sorted object store
     virtual void removeObject(const ObjectId& object, const TokenId& token, const bool deleting);
 
+    std::map<int,TokenDecisionPointId> m_tokDecs;
+    std::map<int,ConstrainedVariableDecisionPointId> m_nonUnitVarDecs;
+    std::map<int,ConstrainedVariableDecisionPointId> m_unitVarDecs;
+    std::map<int,ObjectDecisionPointId> m_objDecs;
     HSTSVariableDecisionSet m_sortedUnitVarDecs;
     HSTSVariableDecisionSet m_sortedNonUnitVarDecs;
     HSTSTokenDecisionSet m_sortedTokDecs;

@@ -131,6 +131,7 @@ namespace Prototype {
     virtual ~HSTSHeuristics();
 
     void setDefaultPriorityPreference(const PriorityPref pp);
+    const PriorityPref getDefaultPriorityPreference();
     void setDefaultPriorityForTokenDPsWithParent(const Priority p, const TokenTypeId& tt);
     void setDefaultPriorityForTokenDPs(const Priority p);
     void setDefaultPriorityForConstrainedVariableDPs(const Priority p);

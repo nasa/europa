@@ -1,5 +1,9 @@
 #include "DefaultOpenDecisionManager.hh"
 #include "HSTSOpenDecisionManager.hh"
+#include "Object.hh"
+#include "Choice.hh"
+#include "ValueChoice.hh"
+#include "TokenChoice.hh"
 
 namespace Prototype {
 
@@ -19,29 +23,32 @@ namespace Prototype {
     }
   }
 
-  void HSTSOpenDecisionManager::add(const ObjectId& object, const TokenId& token) {
-    DecisionPointId dp = createObjectDecisionPoint(object, token);
-    check_error(dp->getEntityKey() == object->getKey());
+  void HSTSOpenDecisionManager::addActive(const TokenId& token) {
+    DecisionPointId dp = createObjectDecisionPoint(token);
+    check_error(dp->getEntityKey() == token->getKey());
     m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
     publishNewDecision(dp);
   }
 
   void HSTSOpenDecisionManager::add(const ObjectId& object) {
+    /*    
     check_error(object.isValid());
     std::vector<TokenId> tokens;
     object->getTokensToOrder(tokens);
     std::vector<TokenId>::iterator it = tokens.begin();
     for (; it != tokens.end(); ++it) {
-      ObjectDecisionPointId dp = createObjectDecisionPoint(object, *it);
-      check_error(dp->getEntityKey() == object->getKey());
+      ObjectDecisionPointId dp = createObjectDecisionPoint(*it);
+      check_error(dp->getEntityKey() == (*it)->getKey());
       m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
       publishNewDecision(dp);
     }
+    */
     // no need to remove any token decision points because only call path
     // is from recomputeDecisions.
   }
 
   void HSTSOpenDecisionManager::condAdd(const ConstrainedVariableId& var, const bool units) {
+    /*
     check_error(var.isValid());
     check_error(m_curDec.isValid() || m_curDec.isNoId());
     if (ConstrainedVariableDecisionPointId::convertable(m_curDec)) {
@@ -63,6 +70,7 @@ namespace Prototype {
       m_sortedNonUnitVarDecs.insert(dp);
       publishNewDecision(dp);
     }
+    */
   }
 
   void HSTSOpenDecisionManager::add(const ConstrainedVariableId& var) {
@@ -84,10 +92,11 @@ namespace Prototype {
   void HSTSOpenDecisionManager::add(const TokenId& token) {
     // closing is something we only do once, so no need to see if it
     // already exists before adding to open decisions
+    /*
     if (token->getState()->lastDomain().isSingleton()) {
       TokenDecisionPointId dp = createTokenDecisionPoint(token);
       check_error(dp->getEntityKey() == token->getKey());
-      m_unitTokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
+      m_tokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
       m_sortedUnitTokDecs.insert(dp);
       publishNewUnitDecision(dp);
     }
@@ -98,9 +107,11 @@ namespace Prototype {
       m_sortedNonUnitTokDecs.insert(dp);
       publishNewDecision(dp);
     }
+    */
   }
 
   void HSTSOpenDecisionManager::condAdd(const TokenId& token) {
+    /*
     TokenDecisionPointId dp;
     if (token->getState()->lastDomain().isSingleton()) {
       if (m_unitTokDecs.find(token->getKey()) != m_unitTokDecs.end()) return;
@@ -115,6 +126,7 @@ namespace Prototype {
       m_sortedNonUnitTokDecs.insert(dp);
     }
     publishNewDecision(dp);
+    */
   }
 
   void HSTSOpenDecisionManager::removeObject(const ObjectId& object, const TokenId& token, const bool deleting) {
@@ -136,34 +148,18 @@ namespace Prototype {
     }
   }
 
-  DecisionPointId& HSTSOpenDecisionManager::getNextDecision() {
-    if(!m_objDecs.empty())
-      m_curDec = m_objDecs.begin()->second;
-    else if (!m_sortedUnitVarDecs.empty())
-      m_curDec = *m_sortedUnitVarDecs.begin();
-    else if (!m_sortedUnitTokDecs.empty())
-      m_curDec = *m_sortedUnitTokDecs.begin();
-    else if (!m_sortedNonUnitTokDecs.empty()) 
-      m_curDec = *m_sortedNonUnitTokDecs.begin();
-    else if (!m_sortedNonUnitVarDecs.empty()) 
-      m_curDec = *m_sortedNonUnitVarDecs.begin();
-    else m_curDec = DecisionPointId::noId();
-
-    return m_curDec;
-  }
-
   void HSTSOpenDecisionManager::cleanupAllDecisionCaches() {
-    Default::cleanupAllDecisionCaches();
+    DefaultOpenDecisionManager::cleanupAllDecisionCaches();
     m_sortedObjectDecs.clear();
   }
 
   // if there's a merge choice, keep the first one you get and return that one.
   // otherwise prefer to activate
   // finally prefer to reject
-  const ChoiceId& HSTSOpenDecisionManager::getNextChoice() {
+  const ChoiceId HSTSOpenDecisionManager::getNextChoice() {
     check_error(m_curDec.isValid());
     bool assigned(false); 
-    std::list<ChoiceId> choices = m_curDec->getChoices();
+    std::list<ChoiceId> choices = m_curDec->getUpdatedChoices();
     //    std::cout << "getNextChoice:: num choices " << choices.size() << std::endl;
     if (TokenDecisionPointId::convertable(m_curDec)) {
       ChoiceId merge;
@@ -171,16 +167,19 @@ namespace Prototype {
       ChoiceId activate;
       std::list<ChoiceId>::iterator it = choices.begin();
       for ( ; it != choices.end(); ++it) {
-	check_error((*it)->getType() == Choice::VALUE);
+	ChoiceId choice = *it;
+	check_error(choice.isValid());
+	check_error(choice->getType() == Choice::VALUE);
+	check_error(!m_curDec->hasDiscarded(choice));
 	TokenDecisionPoint::State val = (TokenDecisionPoint::State)Id<ValueChoice>(*it)->getValue();
 	if (merge.isNoId() && val == TokenDecisionPoint::MERGED) {
-	  merge = (*it);
+	  merge = choice;
 	  break; // we'll do this first, no point in assigning the rest.
 	}
 	if (val == TokenDecisionPoint::ACTIVE)
-	  activate = (*it);
+	  activate = choice;
 	if (val == TokenDecisionPoint::REJECTED)
-	  reject = (*it);
+	  reject = choice;
 	// we ignore choices for INACTIVE and INCOMPLETE.
       }
       if (!merge.isNoId())
@@ -210,10 +209,8 @@ namespace Prototype {
     std::map<int,ConstrainedVariableDecisionPointId>::iterator vit = m_unitVarDecs.begin();
     for (; vit != m_unitVarDecs.end(); ++vit)
       decisions.push_back(vit->second);
-    std::map<int,TokenDecisionPointId>::iterator it = m_unitTokDecs.begin();
-    for (; it != m_unitTokDecs.end(); ++it)
-      decisions.push_back(it->second);
-    for (it = m_nonUnitTokDecs.begin(); it != m_nonUnitTokDecs.end(); ++it)
+    std::map<int,TokenDecisionPointId>::iterator it = m_tokDecs.begin();
+    for (; it != m_tokDecs.end(); ++it)
       decisions.push_back(it->second);
     for (vit = m_nonUnitVarDecs.begin(); vit != m_nonUnitVarDecs.end(); ++vit)
       decisions.push_back(vit->second);
@@ -226,10 +223,8 @@ namespace Prototype {
     std::map<int,ConstrainedVariableDecisionPointId>::iterator vit = m_unitVarDecs.begin();
     for (; vit != m_unitVarDecs.end(); ++vit)
       os << vit->second << std::endl;
-    std::map<int,TokenDecisionPointId>::iterator it = m_unitTokDecs.begin();
-    for (; it != m_unitTokDecs.end(); ++it)
-      os << it->second << std::endl;
-    for (it = m_nonUnitTokDecs.begin(); it != m_nonUnitTokDecs.end(); ++it)
+    std::map<int,TokenDecisionPointId>::iterator it = m_tokDecs.begin();
+    for (; it != m_tokDecs.end(); ++it)
       os << it->second << std::endl;
     for (vit = m_nonUnitVarDecs.begin(); vit != m_nonUnitVarDecs.end(); ++vit)
       os << vit->second << std::endl;
