@@ -100,6 +100,7 @@ private:
       check_error(var == 1);
       check_error(var == 1, "check_error(var == 1)");
       check_error(var == 1, Error("check_error(var == 1)"));
+      checkError(var ==1, "Can add " << 1.09 << " and " << 2.81 << " to get " << 1.09 +2.81);
       condWarning(var == 1, "var is not 1");
       warn("everything worked in first try() block of main()");
     } 

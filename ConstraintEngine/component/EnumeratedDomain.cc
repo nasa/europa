@@ -292,6 +292,10 @@ namespace EUROPA {
       results.push_back(*it);
   }
 
+  const std::set<double>& EnumeratedDomain::getValues() const{
+    return m_values;
+  }
+
   double EnumeratedDomain::getUpperBound() const {
     double lb, ub;
     getBounds(lb, ub);

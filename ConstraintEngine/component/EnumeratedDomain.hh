@@ -184,6 +184,12 @@ namespace EUROPA {
      */
     void getValues(std::list<double>& results) const;
 
+
+    /**
+     * @brief Retrieve the contents as a set
+     */
+    const std::set<double>& getValues() const;
+
     /**
      * @brief Access upper bound.
      */
