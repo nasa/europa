@@ -45,16 +45,21 @@ const double consumptionRateMax = -8;
 const double consumptionMax = -50;
 
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
-    ConstraintEngine ce;\
-    Schema schema;\
-    PlanDatabase db(ce.getId(), schema.getId());\
-    new DefaultPropagator(LabelStr("Default"), ce.getId());\
-    new ResourcePropagator(LabelStr("Resource"), ce.getId());\
-    if (loggingEnabled()) {\
-    new CeLogger(std::cout, ce.getId());\
-    new DbLogger(std::cout, db.getId());\
-    }\
-    if(autoClose) db.close();
+    ConstraintEngine ce; \
+    Schema schema; \
+    PlanDatabase db(ce.getId(), schema.getId()); \
+    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+    new ResourcePropagator(LabelStr("Resource"), ce.getId()); \
+    Id<DbLogger> dbLId; \
+    if (loggingEnabled()) { \
+      new CeLogger(std::cout, ce.getId()); \
+      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
+    } \
+    if (autoClose) \
+      db.close();
+
+#define DEFAULT_TEARDOWN() \
+    delete (DbLogger*) dbLId;
 
 class DefaultSetupTest {
 public:
@@ -69,6 +74,8 @@ private:
     assert(db.isClosed() == false);
     db.close();
     assert(db.isClosed() == true);
+
+    DEFAULT_TEARDOWN();
     return true;
   }
 };
@@ -122,6 +129,7 @@ private:
     assert(rid->getHorizonEnd() == 1000);
 
     db.close();
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -167,6 +175,7 @@ private:
     ce.propagate();
     r->free(t1);
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -190,6 +199,7 @@ private:
 
     t2->setEarliest(2);
     assert(checkLevelArea(r) == (1*45 + 1*45 + 998*100));
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -259,6 +269,7 @@ private:
     r->free(t1);
     assert(checkSum(r) == (1*0 + 2*0)); 
 
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -312,6 +323,7 @@ private:
     assert(checkSum(r) == (1*1 + 2*2 +3*3 + 4*4 + 5*3 + 6*3 + 7*3 + 8*3 + 9*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
 
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -343,6 +355,7 @@ private:
     ce.propagate();
     assert(checkLevelArea(r) == 5*7 + 5*2);
 
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -399,6 +412,7 @@ private:
     r->free(t2);
     r->free(t5);
 
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -428,6 +442,7 @@ private:
     r->constrain(t3);
     ce.propagate();
     assert(checkLevelArea(r) == 10*1 + 14*3 + 21*1 + 20*3 + 20*2);
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -468,6 +483,7 @@ private:
     assert(!ce.provenInconsistent());    
     r->free(t2);
 
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -502,6 +518,7 @@ private:
     assert(violations.front()->getType() == Violation::ProductionRateExceeded);
     assert(violations.back()->getType() == Violation::ConsumptionRateExceeded);
       
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -544,6 +561,7 @@ private:
     assert(violations.size() == 3);
     assert(violations.front()->getType() == Violation::LevelTooLow);
 
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -574,6 +592,7 @@ private:
     assert(violations.size() == 1);
     assert(violations.front()->getType() == Violation::LevelTooHigh);
 
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -615,6 +634,7 @@ private:
     assert(violations.front()->getType() == Violation::ProductionSumExceeded);
     assert(violations.back()->getType() == Violation::ConsumptionSumExceeded);
 
+    DEFAULT_TEARDOWN();
     return(true);
   }
 

@@ -22,14 +22,18 @@ using namespace NDDL;
     Schema schema; \
     PlanDatabase db(ce.getId(), schema.getId()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+    Id<DbLogger> dbLId; \
     if (loggingEnabled()) { \
       new CeLogger(std::cout, ce.getId()); \
-      new DbLogger(std::cout, db.getId()); \
+      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
     } \
     Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"))); \
     check_error(!object.getId().isNoId()); \
     if (autoClose) \
       db.close();
+
+#define DEFAULT_TEARDOWN() \
+    delete (DbLogger*) dbLId;
 
 class NddlSchemaTest {
 public:
@@ -126,6 +130,7 @@ private:
     t0.activate();
     bool prop = ce.propagate();
     check_error(prop);
+    DEFAULT_TEARDOWN();
     return(true);
   }
 };

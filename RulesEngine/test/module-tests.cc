@@ -193,9 +193,10 @@ SchemaId DefaultSchemaAccessor::s_instance;
     { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce.getId()); \
       assert(dp != 0); \
     } \
+    Id<DbLogger> dbLId; \
     if (loggingEnabled()) { \
       new CeLogger(std::cout, ce.getId()); \
-      new DbLogger(std::cout, db.getId()); \
+      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
     } \
     RulesEngine re(db.getId()); \
     Object* objectPtr = new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")); \
@@ -204,6 +205,9 @@ SchemaId DefaultSchemaAccessor::s_instance;
     assert(objectPtr->getId() == object.getId()); \
     if (autoClose) \
       db.close();
+
+#define DEFAULT_TEARDOWN() \
+    delete (DbLogger*) dbLId;
 
 class RulesEngineTest {
 public:
@@ -239,6 +243,7 @@ private:
     TokenId slaveToken = *(t0.getSlaves().begin());
     check_error(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -286,6 +291,7 @@ private:
     t0.cancel();
     ce.propagate();
     check_error(t0.getSlaves().empty());
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -320,6 +326,7 @@ private:
     ce.propagate();
     check_error(t0.getSlaves().size() == 1);
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -344,6 +351,7 @@ private:
     ce.propagate();
     check_error(t0.getSlaves().size() == 2);
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -355,6 +363,7 @@ private:
 
     Rule::purgeAll();
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 

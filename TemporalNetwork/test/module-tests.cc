@@ -27,18 +27,22 @@ typedef std::stringstream sstream;
 #endif
 
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
-    ConstraintEngine ce;\
-    Schema schema;\
-    PlanDatabase db(ce.getId(), schema.getId());\
-    new DefaultPropagator(LabelStr("Default"), ce.getId());\
-    new TemporalPropagator(LabelStr("Temporal"), ce.getId());\
-    db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId());\
-    if (loggingEnabled()) {\
-    new CeLogger(std::cout, ce.getId());\
-    new DbLogger(std::cout, db.getId());\
-    }\
-    if(autoClose) db.close();
+    ConstraintEngine ce; \
+    Schema schema; \
+    PlanDatabase db(ce.getId(), schema.getId()); \
+    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+    new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
+    db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId()); \
+    Id<DbLogger> dbLId; \
+    if (loggingEnabled()) { \
+      new CeLogger(std::cout, ce.getId()); \
+      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
+    } \
+    if (autoClose) \
+      db.close();
 
+#define DEFAULT_TEARDOWN() \
+    delete (DbLogger*) dbLId;
 
 class TemporalNetworkTest {
 public:
@@ -151,6 +155,7 @@ private:
   static bool testBasicAllocation() {
     DEFAULT_SETUP(ce,db,schema,true);
     ce.propagate();
+    DEFAULT_TEARDOWN();
     return true;
   }
   
@@ -199,6 +204,7 @@ private:
     check_error(t2.getStart()->getDerivedDomain().getUpperBound() == 10);
     check_error(t2.getEnd()->getDerivedDomain().getLowerBound() == 6);
     check_error(t2.getEnd()->getDerivedDomain().getUpperBound() == 20);
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -277,6 +283,7 @@ private:
     // compute from advisor
     check_error (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -313,6 +320,7 @@ private:
     // compute from advisor
     check_error (db.getTemporalAdvisor()->canFitBetween(token.getId(), predecessor.getId(), successor.getId()));
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 

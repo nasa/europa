@@ -62,9 +62,10 @@ SchemaId DefaultSchemaAccessor::s_instance;
     PlanDatabase db(ce.getId(), schema.getId()); \
     { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce.getId()); \
       assert(dp != 0); } \
+    Id<DbLogger> dbLId; \
     if (loggingEnabled()) { \
       new CeLogger(std::cout, ce.getId()); \
-      new DbLogger(std::cout, db.getId()); \
+      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
     } \
     { EqualityConstraintPropagator* ecp = new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId()); \
       assert(ecp != 0); } \
@@ -74,6 +75,9 @@ SchemaId DefaultSchemaAccessor::s_instance;
     assert(objectPtr->getId() == object.getId()); \
     if (autoClose) \
       db.close();
+
+#define DEFAULT_TEARDOWN() \
+    delete (DbLogger*) dbLId;
 
 class ObjectTest {
 public:
@@ -469,6 +473,8 @@ private:
 				       Token::noObject(), true))->getId();
 
     delete (Token*) token; // It is inComplete
+
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -485,6 +491,7 @@ private:
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));                                        
                                                                                          
+    DEFAULT_TEARDOWN();
     return true;                                                                         
   }                            
 
@@ -529,6 +536,7 @@ private:
     t1.cancel();
     assert(t1.isInactive());
     t1.merge(t0.getId());
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -590,6 +598,8 @@ private:
     // Delete master & slaves
     delete (Token*) t1;
     // Should verify correct count of tokens remain. --wedgingt 2004 Feb 27
+
+    DEFAULT_TEARDOWN();
 
     // Remainder should be cleaned up automatically.
     return(true);
@@ -690,6 +700,8 @@ private:
     t1.merge(t0.getId());
     assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 6);
     delete (Constraint*) subsetOfConstraint;
+
+    DEFAULT_TEARDOWN();
 
     // Deletion will now occur and test proper cleanup.
     return true;
@@ -798,6 +810,7 @@ private:
     assert(pdom4.getLowerBound() == pdom2.getLowerBound());
     assert(pdom4.getUpperBound() == pdom2.getUpperBound());
 
+    DEFAULT_TEARDOWN();
     return true;
   }    
 
@@ -876,6 +889,7 @@ private:
     db.getCompatibleTokens(t3.getId(), compatibleTokens);
     assert(compatibleTokens.size() == 1); // Expect a single match
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 };
@@ -972,6 +986,8 @@ private:
 
     assert(timeline.getTokenSequence().size() == 2);
     assert(timeline.hasTokensToOrder());
+
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -1057,6 +1073,7 @@ private:
     timeline.getTokensToOrder(tokensToOrder);
     assert(tokensToOrder.empty());
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -1124,6 +1141,7 @@ private:
     timeline->getOrderingChoices(token, choices);
     assert(choices.empty());
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -1192,6 +1210,7 @@ private:
     bool res = ce.propagate();
     assert(res);
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -1234,6 +1253,8 @@ private:
     timeline.constrain(tokenC.getId(), tokenB.getId());
     assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenC.getStart()->getDerivedDomain().getUpperBound());
     assert(tokenC.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -1278,6 +1299,8 @@ private:
     timeline.constrain(tokenC.getId(), tokenB.getId());
     res = ce.propagate();
     assert(!res);
+
+    DEFAULT_TEARDOWN();
     return(true);
   }
 };
@@ -1514,6 +1537,8 @@ private:
     assert(client->getTokenByPath(path) == TokenId::noId());
 
     delete (DbClient*) client;
+
+    DEFAULT_TEARDOWN();
     return true;
   }
 };
