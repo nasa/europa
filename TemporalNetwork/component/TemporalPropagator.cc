@@ -207,6 +207,9 @@ namespace Prototype {
       lb = 0;
       ub = g_infiniteTime();
     }
+    else {
+      check_error(ALWAYS_FAILS, "Adding an unknown constraint to the temporal propagator.");
+    }
 
     const TimepointId& startTp = getTimepoint(start);
     const TimepointId& endTp = getTimepoint(end);
