@@ -14,28 +14,24 @@
 using namespace Prototype;
 using namespace std;
 
-void testEquate(const LabelSet& a, const LabelSet& b)
-{
+static void testEquate(const LabelSet& a, const LabelSet& b) {
   LabelSet l_a(a);
   LabelSet l_b(b);
   l_a.equate(l_b);
 }
 
-void testIntersection()
-{
+static void testIntersection() {
   IntervalIntDomain dom1(100, 1000);
   IntervalIntDomain dom2(250, 2000);
   dom1.intersect(dom2);
 }
 
-void outerLoopForTestIntersection()
-{
-  for (int i=0;i<1000000;i++)
+static void outerLoopForTestIntersection() {
+  for (int i = 0; i < 1000000; i++)
     testIntersection();
 }
 
-void outerLoopForTestEquate()
-{
+static void outerLoopForTestEquate() {
   std::list<Prototype::LabelStr> values;
   values.push_back(Prototype::LabelStr("A"));
   values.push_back(Prototype::LabelStr("B"));
@@ -59,11 +55,11 @@ void outerLoopForTestEquate()
   values.push_back(Prototype::LabelStr("8"));
   LabelSet ls_b(values);
 
-  for (int i=0;i<1000000;i++)
+  for (int i = 0; i < 1000000; i++)
     testEquate(ls_a, ls_b);
 }
 
-void testLabelSetEqualityPerformance(const ConstraintEngineId& ce){
+static void testLabelSetEqualityPerformance(const ConstraintEngineId& ce) {
   std::list<Prototype::LabelStr> values;
   values.push_back(Prototype::LabelStr("V0"));
   values.push_back(Prototype::LabelStr("V1"));
@@ -161,19 +157,19 @@ void testLabelSetEqualityPerformance(const ConstraintEngineId& ce){
   }
 }
 
-void outerLoopLabelSetEqualConstraint(bool useEquivalenceClasses){
+static void outerLoopLabelSetEqualConstraint(bool useEquivalenceClasses) {
   ConstraintEngine ce;
 
-  if(useEquivalenceClasses)
+  if (useEquivalenceClasses)
     new EqualityConstraintPropagator(LabelStr("Equal"), ce.getId());
   else
     new DefaultPropagator(LabelStr("Equal"), ce.getId());
 
-  for (int i=0;i<1000; i++)
+  for (int i = 0; i < 1000; i++)
     testLabelSetEqualityPerformance(ce.getId());
 }
 
-void testIntervalEqualityPerformance(const ConstraintEngineId& ce){
+static void testIntervalEqualityPerformance(const ConstraintEngineId& ce) {
   IntervalIntDomain intSort(-1000, 1000);
   Variable<IntervalIntDomain> v0(ce, intSort);
   Variable<IntervalIntDomain> v1(ce, intSort);
@@ -249,11 +245,11 @@ void testIntervalEqualityPerformance(const ConstraintEngineId& ce){
   int lb = -1000;
   int ub = 1000;
 
-  for(int i = 10; i > 2; i--){
+  for (int i = 10; i > 2; i--) {
     lb += 100;
     ub -= 100;
     IntervalIntDomain newDomain(lb, ub);
-    Variable<IntervalIntDomain>*  p_v = (Variable<IntervalIntDomain>*) variables[i-1];
+    Variable<IntervalIntDomain>* p_v = (Variable<IntervalIntDomain>*) variables[i-1];
     p_v->specify(newDomain);
     ce->propagate();
     assert(ce->constraintConsistent());
@@ -262,22 +258,350 @@ void testIntervalEqualityPerformance(const ConstraintEngineId& ce){
   }
 }
 
-void outerLoopIntervalEqualConstraint(bool useEquivalenceClasses){
+static void outerLoopIntervalEqualConstraint(bool useEquivalenceClasses) {
   ConstraintEngine ce;
 
-  if(useEquivalenceClasses)
+  if (useEquivalenceClasses)
     new EqualityConstraintPropagator(LabelStr("Equal"), ce.getId());
   else
     new DefaultPropagator(LabelStr("Equal"), ce.getId());
 
-  for (int i=0;i<1000; i++)
+  for (int i = 0; i < 1000; i++)
     testIntervalEqualityPerformance(ce.getId());
 }
-int main()
-{
+
+static void testCopyingBoolDomains() {
+  AbstractDomain *copyPtr;
+  BoolDomain falseDom(false);
+  BoolDomain trueDom(true);
+  BoolDomain both;
+
+  copyPtr = falseDom.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+  assertTrue(copyPtr->isFalse());
+  assertFalse(copyPtr->isTrue());
+  delete copyPtr;
+
+  copyPtr = trueDom.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+  assertTrue(copyPtr->isTrue());
+  assertFalse(copyPtr->isFalse());
+  delete copyPtr;
+
+  copyPtr = both.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+  assertFalse(copyPtr->isFalse());
+  assertFalse(copyPtr->isTrue());
+  delete copyPtr;
+
+  // Cannot check that expected errors are detected until
+  //   new error handling support is in use.
+}
+
+static void testCopyingEnumeratedDomains() {
+  AbstractDomain *copyPtr;
+  EnumeratedDomain emptyOpen;
+  std::list<double> values;
+  values.push_back(0.0);
+  values.push_back(1.1);
+  values.push_back(2.7);
+  values.push_back(3.1);
+  EnumeratedDomain fourDom(values, false); // Open
+  values.push_back(4.2);
+  EnumeratedDomain fiveDom(values); // Closed
+  EnumeratedDomain oneDom(2.7); // Singleton
+
+  copyPtr = emptyOpen.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+  assertTrue(copyPtr->isDynamic());
+  assertTrue(copyPtr->isNumeric());
+  assertTrue(copyPtr->isEnumerated());
+  copyPtr->insert(3.1);
+  //assertFalse(copyPtr->isSingleton()); Or should that provoke an error? wedgingt 2004 Mar 3
+  copyPtr->close();
+  assertTrue(copyPtr->isSingleton());
+  assertFalse(copyPtr->isDynamic());
+  delete copyPtr;
+
+  copyPtr = fourDom.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+  assertTrue(copyPtr->isDynamic());
+  assertTrue(copyPtr->isEnumerated());
+  copyPtr->close();
+  assertTrue(copyPtr->size() == 4);
+  assertTrue(copyPtr->isSubsetOf(fiveDom));
+  delete copyPtr;
+
+  copyPtr = fiveDom.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+  assertFalse(copyPtr->isDynamic());
+  assertTrue(copyPtr->isEnumerated());
+  assertTrue(copyPtr->size() == 5);
+  assertTrue(fourDom.isSubsetOf(*copyPtr));
+  delete copyPtr;
+
+  copyPtr = oneDom.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
+  assertFalse(copyPtr->isDynamic());
+  assertTrue(copyPtr->isEnumerated());
+  assertTrue(copyPtr->isSingleton());
+  assertTrue(copyPtr->isSubsetOf(four));
+  delete copyPtr;
+
+  // Cannot check that expected errors are detected until
+  //   new error handling support is in use.
+}
+
+static void testCopyingIntervalDomains() {
+  AbstractDomain *copyPtr;
+  IntervalDomain empty;
+  IntervalDomain one2ten(1.0, 10.9);
+  IntervalDomain four(4.0);
+  // domains containing infinities should also be tested
+
+  copyPtr = empty.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
+  assertFalse(copyPtr->isDynamic());
+  assertTrue(copyPtr->isNumeric());
+  assertFalse(copyPtr->isEnumerated());
+  assertTrue(copyPtr->isFinite());
+  assertFalse(copyPtr->isMember(0.0));
+  assertFalse(copyPtr->isSingleton());
+  assertTrue(copyPtr->isEmpty());
+  assertTrue(copyPtr->getSize() == 0);
+  assertTrue(*copyPtr == empty);
+  assertFalse(*copyPtr == one2ten);
+  copyPtr->relax(-3.1, 11.0);
+  assertTrue(copyPtr->isMember(0.0));
+  assertFalse(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertTrue(empty.isEmpty());
+  assertFalse(*copyPtr == empty);
+  assertTrue(empty.isSubsetOf(*copyPtr));
+  delete copyPtr;
+
+  copyPtr = one2ten.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
+  assertFalse(copyPtr->isDynamic());
+  assertTrue(copyPtr->isNumeric());
+  assertFalse(copyPtr->isEnumerated());
+  assertFalse(copyPtr->isFinite());
+  assertFalse(copyPtr->isMember(0.0));
+  assertFalse(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertFalse(*copyPtr == empty);
+  assertTrue(*copyPtr == one2ten);
+  copyPtr->relax(-3.1, 11.0);
+  assertTrue(copyPtr->isMember(0.0));
+  assertFalse(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertFalse(*copyPtr == one2ten);
+  assertTrue(one2ten.isSubsetOf(*copyPtr));
+  delete copyPtr;
+
+  copyPtr = four.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
+  assertFalse(copyPtr->isDynamic());
+  assertTrue(copyPtr->isNumeric());
+  assertFalse(copyPtr->isEnumerated());
+  assertTrue(copyPtr->isFinite());
+  assertFalse(copyPtr->isMember(0.0));
+  assertTrue(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertTrue(copyPtr->getSize() == 1);
+  assertFalse(*copyPtr == empty);
+  assertTrue(*copyPtr == four);
+  assertFalse(*copyPtr == one2ten);
+  copyPtr->relax(-3.1, 11.0);
+  assertTrue(copyPtr->isMember(0.0));
+  assertFalse(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertFalse(*copyPtr == empty);
+  assertFalse(*copyPtr == four);
+  assertTrue(four.isSubsetOf(*copyPtr));
+  delete copyPtr;
+
+  // Cannot check that expected errors are detected until
+  //   new error handling support is in use.
+}
+
+static void testCopyingIntervalIntDomains() {
+  AbstractDomain *copyPtr;
+  IntervalIntDomain empty;
+  IntervalIntDomain one2ten(1, 10);
+  IntervalIntDomain four(4);
+  // domains containing infinities should also be tested
+
+  copyPtr = empty.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
+  assertFalse(copyPtr->isDynamic());
+  assertTrue(copyPtr->isNumeric());
+  assertFalse(copyPtr->isEnumerated());
+  assertTrue(copyPtr->isFinite());
+  assertFalse(copyPtr->isMember(0));
+  assertFalse(copyPtr->isSingleton());
+  assertTrue(copyPtr->isEmpty());
+  assertTrue(copyPtr->getSize() == 0);
+  assertTrue(*copyPtr == empty);
+  assertFalse(*copyPtr == one2ten);
+  copyPtr->relax(-3, 11);
+  assertTrue(copyPtr->isMember(0));
+  assertFalse(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertTrue(empty.isEmpty());
+  assertFalse(*copyPtr == empty);
+  assertTrue(empty.isSubsetOf(*copyPtr));
+  delete copyPtr;
+
+  copyPtr = one2ten.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
+  assertFalse(copyPtr->isDynamic());
+  assertTrue(copyPtr->isNumeric());
+  assertFalse(copyPtr->isEnumerated());
+  assertTrue(copyPtr->isFinite());
+  assertFalse(copyPtr->isMember(0));
+  assertFalse(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertTrue(copyPtr->getSize() == 10);
+  assertFalse(*copyPtr == empty);
+  assertTrue(*copyPtr == one2ten);
+  copyPtr->relax(-3, 11);
+  assertTrue(copyPtr->getSize() == 15);
+  assertTrue(copyPtr->isMember(0));
+  assertFalse(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertFalse(*copyPtr == one2ten);
+  assertTrue(one2ten.isSubsetOf(*copyPtr));
+  delete copyPtr;
+
+  copyPtr = four.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
+  assertFalse(copyPtr->isDynamic());
+  assertTrue(copyPtr->isNumeric());
+  assertFalse(copyPtr->isEnumerated());
+  assertTrue(copyPtr->isFinite());
+  assertFalse(copyPtr->isMember(0));
+  assertTrue(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertTrue(copyPtr->getSize() == 1);
+  assertFalse(*copyPtr == empty);
+  assertTrue(*copyPtr == four);
+  assertFalse(*copyPtr == one2ten);
+  copyPtr->relax(-3, 11);
+  assertTrue(copyPtr->getSize() == 15);
+  assertTrue(copyPtr->isMember(0));
+  assertFalse(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertFalse(*copyPtr == empty);
+  assertFalse(*copyPtr == four);
+  assertTrue(four.isSubsetOf(*copyPtr));
+  delete copyPtr;
+
+  // Cannot check that expected errors are detected until
+  //   new error handling support is in use.
+}
+
+static void testCopyingTemplateDomains() {
+  AbstractDomain *copyPtr;
+  typedef enum Fruits { orange, lemon, blueberry, raspberry } Fruits;
+  Domain<Fruits> emptyFruit;
+  Domain<Fruits> orangeOnly(orange);
+  std::list<Fruits> fruitList;
+  fruitList.push_back(lemon);
+  fruitList.push_back(raspberry);
+  fruitList.push_back(orange);
+  Domain<Fruits> fruitDom(fruitList);
+
+  // Should test dynamic domains
+
+  copyPtr = emptyFruit.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
+  assertFalse(copyPtr->isDynamic());
+  assertFalse(copyPtr->isNumeric());
+  assertTrue(copyPtr->isEnumerated());
+  assertFalse(copyPtr->isInterval());
+  assertTrue(copyPtr->isFinite());
+  assertFalse(copyPtr->isMember(orange));
+  assertFalse(copyPtr->isSingleton());
+  assertTrue(copyPtr->isEmpty());
+  assertTrue(copyPtr->getSize() == 0);
+  assertTrue(*copyPtr == emptyFruit);
+  assertFalse(*copyPtr == orangeOnly);
+  assertFalse(*copyPtr == fruitDom);
+  copyPtr->reset(fruitDom);
+  assertFalse(*copyPtr == emptyFruit);
+  assertFalse(*copyPtr == orangeOnly);
+  assertTrue(*copyPtr == fruitDom);
+  delete copyPtr;
+
+  copyPtr = orangeOnly.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
+  assertFalse(copyPtr->isDynamic());
+  assertFalse(copyPtr->isNumeric());
+  assertTrue(copyPtr->isEnumerated());
+  assertTrue(copyPtr->isFinite());
+  assertFalse(copyPtr->isMember(lemon));
+  assertTrue(copyPtr->isMember(orange));
+  assertTrue(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertTrue(copyPtr->getSize() == 1);
+  assertFalse(*copyPtr == emptyFruit);
+  assertTrue(*copyPtr == orangeOnly);
+  assertFalse(*copyPtr == fruitDom);
+  assertFalse(copyPtr->intersect(fruitDom));
+  assertTrue(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertTrue(emptyFruit.isSubsetOf(*copyPtr));
+  assertTrue(orangeOnly.isSubsetOf(*copyPtr));
+  assertFalse(fruitDom.isSubsetOf(*copyPtr));
+  assertTrue(copyPtr->isSubsetOf(orange));
+  assertTrue(copyPtr->isSubsetOf(fruitDom));
+  assertFalse(copyPtr->isSubsetOf(emptyFruit));
+  delete copyPtr;
+
+  copyPtr = fruitDom.copy();
+  assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
+  assertFalse(copyPtr->isDynamic());
+  assertFalse(copyPtr->isNumeric());
+  assertTrue(copyPtr->isEnumerated());
+  assertTrue(copyPtr->isFinite());
+  assertTrue(copyPtr->isMember(lemon));
+  assertTrue(copyPtr->isMember(orange));
+  assertFalse(copyPtr->isMember(blueberry));
+  assertFalse(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertTrue(copyPtr->getSize() == 3);
+  assertFalse(*copyPtr == emptyFruit);
+  assertFalse(*copyPtr == orangeOnly);
+  assertTrue(*copyPtr == fruitDom);
+  assertFalse(copyPtr->intersect(orangeOnly));
+  assertTrue(copyPtr->isSingleton());
+  assertFalse(copyPtr->isEmpty());
+  assertTrue(emptyFruit.isSubsetOf(*copyPtr));
+  assertTrue(orangeOnly.isSubsetOf(*copyPtr));
+  assertFalse(fruitDom.isSubsetOf(*copyPtr));
+  assertTrue(copyPtr->isSubsetOf(orange));
+  assertTrue(copyPtr->isSubsetOf(fruitDom));
+  assertFalse(copyPtr->isSubsetOf(emptyFruit));
+  delete copyPtr;
+
+  // Cannot check that expected errors are detected until
+  //   new error handling support is in use.
+}
+
+static void testCopy() {
+  testCopyingBoolDomains();
+  testCopyingEnumeratedDomains();
+  testCopyingIntervalDomains();
+  testCopyingIntervalIntDomains();
+  testCopyingTemplateDomains();
+}
+
+int main() {
   //outerLoopForTestEquate();
   outerLoopForTestIntersection();
   //outerLoopLabelSetEqualConstraint(true);
   //outerLoopIntervalEqualConstraint(true);
+  testCopy();
   cout << "Finished" << endl;
 }
