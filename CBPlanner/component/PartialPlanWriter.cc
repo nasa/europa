@@ -349,7 +349,7 @@ namespace EUROPA {
         FatalErrno();
       }
 
-      std::cerr << "PPW DEBUG:constructing:configFile; configBuf = " << configBuf << std::endl;
+      //      std::cerr << "PPW DEBUG:constructing:configFile; configBuf = " << configBuf << std::endl;
       std::ifstream configFile(configBuf);
       if (!configFile) {
         std::cerr << "Failed to open config file " << configBuf << std::endl;
@@ -359,7 +359,7 @@ namespace EUROPA {
 
       parseConfigFile(configFile);
 
-      std::cerr << " PPW noFullWrite = " << noFullWrite << std::endl;
+      //      std::cerr << " PPW noFullWrite = " << noFullWrite << std::endl;
 
       /* if user clearly wants to write only the final step,
          stepsPerWrite must be 1 for to enable writing
@@ -573,7 +573,7 @@ namespace EUROPA {
        * cases where the first step is not written.
        */
 
-      std::cerr << " PartialPlanWriter::write() called " << std::endl;
+      //      std::cerr << " PartialPlanWriter::write() called " << std::endl;
 
       if(!destAlreadyInitialized) {
         initOutputDestination();
@@ -1945,13 +1945,13 @@ namespace EUROPA {
       char buf[PATH_MAX];
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
-        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
+	//        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
         if(line.find(AUTO_WRITE) != std::string::npos) {
           std::string autoWrite = line.substr(line.find("=")+1);
-	  std::cerr << " autoWrite " << autoWrite << std::endl;
+	  //	  std::cerr << " autoWrite " << autoWrite << std::endl;
           noFullWrite = (autoWrite.find("1") != std::string::npos ? 0 : 1);
         }
         else if(line.find(STEPS_PER_WRITE) != std::string::npos) {
