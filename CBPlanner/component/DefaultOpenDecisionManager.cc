@@ -17,10 +17,10 @@ namespace Prototype {
   }
 
   DefaultOpenDecisionManager::~DefaultOpenDecisionManager() {
-    cleanup(m_tokDecs);
-    cleanup(m_unitVarDecs);
-    cleanup(m_nonUnitVarDecs);
-    cleanup(m_objDecs);
+    m_tokDecs.clear();
+    m_unitVarDecs.clear();
+    m_nonUnitVarDecs.clear();
+    m_objDecs.clear();
   }
 
   // called when objects are deleted (now it deletes choices, so unless I
