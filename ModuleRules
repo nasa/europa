@@ -125,6 +125,67 @@ rule ModuleObjects {
   }
 }
 
+# ModuleNamedObjects <object name> : <source files> : <modules that these files depend on> ;
+rule ModuleNamedObjects {
+  local output = $(1) ;
+  local files = $(2) ;
+  local modules = $(3) ;
+
+  if $(TRACE_MODULE) = TRUE {
+    Echo ModuleNamedObjects $(output) . $(files) . $(modules) ;
+  }
+
+  local links = [ FLinkModules $(modules) ] ;
+
+  local link ;
+  local headers ;
+  for link in $(links) {
+    local module = $(link:G=module) ;
+    headers += [ on $(module) return $(INCLUDES) ] ;
+  }
+
+  local variant ;
+  for variant in $(ALL_VARIANTS) {
+    local C++FLAGS = $(C++FLAGS) [ FVariantC++Flags $(variant) ] ;
+    local CFLAGS = $(CFLAGS) [ FVariantCFlags $(variant) ] ;
+
+    local use_pic_flags ;
+    if SHARED in $(LIBRARIES) {
+      use_pic_flags += YES ;
+    }
+    if SHARED != $(LIBRARIES) {
+      use_pic_flags += NO ;
+    }
+    for use_pic_flag in $(use_pic_flags) {
+      local C++FLAGS = $(C++FLAGS) ;
+      local CFLAGS = $(CFLAGS) ;
+      if $(use_pic_flag) = YES {
+        C++FLAGS += $(POSITION_INDEPENDENT_CODE_FLAG) ;
+        CFLAGS += $(POSITION_INDEPENDENT_CODE_FLAG) ;
+      }
+
+      local file ;
+      for file in $(files) {
+        if $(file:S) != $(SUFOBJ) {
+          file = [ FGristFiles $(file) ] ;
+          SEARCH on $(file) = $(SEARCH_SOURCE) ;
+
+          local localoutput = [ FVariantName $(output) : $(variant) ] ;
+          #local output = [ FVariantName $(file:S=) : $(variant) ] ;
+          if $(use_pic_flag) = YES {
+            localoutput = $(localoutput)_pic ;
+          }
+          localoutput = $(localoutput)$(SUFOBJ) ;
+          localoutput = [ FGristFiles $(localoutput) ] ; 
+          local HDRS = $(headers) ;
+          ObjectHdrs $(localoutput) : $(headers) ;
+          Object $(localoutput) : $(file) ;
+        }
+      }
+    }
+  }
+}
+
 # ModuleMain <name> : <files for this test> : <modules that this test depends on> : <target to build the exe> ;
 rule ModuleMain {
   local name = $(1) ;
