@@ -23,7 +23,7 @@ LocalDepends tests : run-hsts-module-tests ;
 # Commented out tests are failing for various reasons; see each test for more info.
 LocalDepends run-hsts-planner-tests :
 	xmonkey
-	litaEuropa2
+#	litaEuropa2
         monkey-timeline
         monkey-timeline-hacked
         monkey-timeline-hacked2

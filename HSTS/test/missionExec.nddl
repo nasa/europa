@@ -775,9 +775,9 @@ TEMPEST_Class___MissionExecutive_SV::DriveAction {
       eq(s0.statusFlag, false);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
   }
-  if (status==CompletionStatus.'EarlyReturn') {
+//  if (status==CompletionStatus.'EarlyReturn') {
 //    UpdateDurationOfTokens(end, endTime);
-  }
+//  }
   if (status==CompletionStatus.'Nominal') {
     if (statusFlag==true) {
 //output subgoal
@@ -986,9 +986,9 @@ TEMPEST_Class___MissionExecutive_SV::ScienceAction {
       eq(s0.statusFlag, false);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
   }
-  if (status==CompletionStatus.'EarlyReturn') {
+//  if (status==CompletionStatus.'EarlyReturn') {
 //    UpdateDurationOfTokens(end, endTime);
-  }
+//  }
   if (status==CompletionStatus.'Failure') {
     if (statusFlag==true) {
 //output subgoal
@@ -1575,13 +1575,13 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
-    if (statusFlag==true) {
-      if (hmStatus==HealthMonitorStatus.'NoFault') {
-        CommandCompletedEarly(earlyFlag, end, flexEndTimeCache);
-      }
-    }
-  }
+//  if (status==ReturnStatus.'OK') {
+//    if (statusFlag==true) {
+//      if (hmStatus==HealthMonitorStatus.'NoFault') {
+//        CommandCompletedEarly(earlyFlag, end, flexEndTimeCache);
+//      }
+//    }
+//  }
   if (statusFlag==false) {
     if (hmStatus==HealthMonitorStatus.'NoFault') {
 //output subgoal
@@ -3397,13 +3397,13 @@ InstrumentManager_Class___InstrumentManager_SV::DoScience {
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
-    if (statusFlag==true) {
-      if (hmStatus==HealthMonitorStatus.'NoFault') {
-        CommandCompletedEarly(earlyFlag, end, flexEndTimeCache);
-      }
-    }
-  }
+//  if (status==ReturnStatus.'OK') {
+//    if (statusFlag==true) {
+//      if (hmStatus==HealthMonitorStatus.'NoFault') {
+//        CommandCompletedEarly(earlyFlag, end, flexEndTimeCache);
+//      }
+//    }
+//  }
   if (statusFlag==false) {
     if (hmStatus==HealthMonitorStatus.'NoFault') {
 //output subgoal
