@@ -163,8 +163,6 @@ const char *sourceTypeNames[3] = {"SYSTEM", "USER", "UNKNOWN"};
 
 enum sourceTypes {SYSTEM = 0, USER, UNKNOWN};
 
-const char *tokenStates[5] = {"INCOMPLETE", "INACTIVE", "ACTIVE", "MERGED", "REJECTED"};
-
 const std::string DURATION_VAR("DURATION_VAR");
 const std::string END_VAR("END_VAR");
 const std::string START_VAR("START_VAR");
@@ -964,8 +962,10 @@ namespace EUROPA {
       StateDomain &dom = (StateDomain &) stateVar->lastDomain();
       std::list<double> vals;
       dom.getValues(vals);
-      for(std::list<double>::const_iterator it = vals.begin(); it != vals.end(); ++it)
-        varOut << tokenStates[(int)*it] << " ";
+      for(std::list<double>::const_iterator it = vals.begin(); it != vals.end(); ++it){
+	LabelStr strVal(*it);
+        varOut << strVal.toString() << " ";
+      }
       varOut << TAB;
       varOut << SNULL << TAB << SNULL << TAB << SNULL << TAB;
 
