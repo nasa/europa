@@ -774,6 +774,7 @@ private:
 class TimelineTest {
 public:
   static bool test(){
+    runTest(testFullInsertion);
     runTest(testBasicInsertion);
     runTest(testObjectTokenRelation);
     runTest(testTokenOrderQuery);
@@ -1064,6 +1065,48 @@ private:
     timeline.constrain(et4.getId(), et1.getId());
     assert(ce.propagate());
 
+    return true;
+  }
+
+  static bool testFullInsertion(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    db.close();
+
+    IntervalToken tokenA(db.getId(), 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken tokenB(db.getId(), 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken tokenC(db.getId(), 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    assert(!timeline.hasTokensToOrder());
+    tokenA.activate();
+    tokenB.activate();
+    tokenC.activate();
+
+    timeline.constrain(tokenA.getId()); // Put A on the end.
+    timeline.constrain(tokenB.getId()); // Put B on the end.
+    assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+
+    // Now insert token C in the middle.
+    timeline.constrain(tokenC.getId(), tokenB.getId());
+    assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenC.getStart()->getDerivedDomain().getUpperBound());
+    assert(tokenC.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
     return true;
   }
 };

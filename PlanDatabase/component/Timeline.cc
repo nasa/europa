@@ -155,36 +155,49 @@ namespace Prototype {
       check_error(successor.isNoId());
       m_tokenSequence.push_back(token);
       m_tokenIndex.insert(std::make_pair(token->getKey(), m_tokenSequence.begin()));
-      Object::constrain(token,successor);
+      Object::constrain(token); // No successor given, so will just ensure object variable is constrained
       return;
     }
 
+    // We are potentially considering 3 tokens during insertion in a token sequence.
     TokenId first;
     TokenId second;
+    TokenId third;
+
     std::list<TokenId>::iterator pos;
 
     // If no successor given - place at the end, and set token as taking place after last token
-    if(successor.isNoId()){ 
-      first = m_tokenSequence.back();
+    if(successor.isNoId()){
       second = token;
       pos = m_tokenSequence.end();
     }
     else {
-      first = token;
-      second = successor;
       pos = std::find(m_tokenSequence.begin(), m_tokenSequence.end(), successor);
+      second = token;
+      third = successor;
     }
+
+    // Apply the constraint for second and third, even if third is a noId. We must apply at least one constraint!
+    check_error(second != third);
+    check_error(second.isValid());
 
     // Conduct insertion for token sequence and index
     pos = m_tokenSequence.insert(pos, token);
     m_tokenIndex.insert(std::make_pair(token->getKey(), pos));
-
-    check_error(first != second);
     check_error(*pos == token);
-    check_error(first.isValid());
-    check_error(second.isValid());
+
+    // Must ensure the token has been inserted before delegating to the parent
+    Object::constrain(second,third);
+
+    // If the token is sandwiched bteween first and third, then also constraint against first, should
+    // it exist.
+    if(token == second && pos != m_tokenSequence.begin()){
+      --pos;
+      first = *pos;
+      Object::constrain(first, second);
+    }
+
     check_error(isValid());
-    Object::constrain(first,second);
   }
 
   void Timeline::remove(const TokenId& token){
