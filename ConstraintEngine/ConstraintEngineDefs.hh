@@ -45,6 +45,14 @@ namespace Prototype {
    */
   void initConstraintEngine();
 
+
+  /**
+   * @brief Helper method to cast singleton values
+   */
+  template<class T>
+  Id<T> id(const ConstrainedVariableId& var){
+    return var->baseDomain().getSingletonValue();
+  }
 } /* namespace Prototype */
 
 #endif /* #ifndef _H_ConstraintEngineDefs */

@@ -5,6 +5,7 @@
 #include "IntervalToken.hh"
 #include "SubgoalOnceRule.hh"
 #include "Utils.hh"
+#include "Object.hh"
 
 namespace Prototype {
 

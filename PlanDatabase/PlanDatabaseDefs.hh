@@ -34,7 +34,7 @@ namespace Prototype {
   
   typedef Id< TokenVariable<IntervalIntDomain> > TempVarId;
 
-  typedef Domain<ObjectId>  ObjectDomain;
+  class ObjectDomain;
   typedef Id< TokenVariable<ObjectDomain> > ObjectVarId;
 
   class Schema;

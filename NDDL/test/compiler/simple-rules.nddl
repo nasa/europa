@@ -34,7 +34,7 @@ class World {
 
 World::initialState{
  contains(Rover.At a);
- eq(a._location, "Lander");
+ eq(a._location, Lander);
 
  contains(Rover.At b);
  eq(b._location, Rock);

@@ -1,3 +1,6 @@
+enum ENUM {foo, bar};
+enum ANOTHER {"bing", "baz"};
+
 // Goal is to test generation of constraint code
 class Sample {
  predicate sample{
@@ -37,6 +40,7 @@ class World{
 
 World::initialState{
  any (Sample.sample s);
- eq("foo", "bar");
+ eq(foo, bar);
+ eq("bing", "baz");
 }
 

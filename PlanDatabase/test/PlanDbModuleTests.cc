@@ -235,7 +235,7 @@ namespace Prototype {
     assert(db.getObjects().size() == 2);
     values.push_back(o1.getId());
     values.push_back(o2.getId());
-    ObjectDomain os1(values, true);
+    ObjectDomain os1(values);
     assert(os1.isMember(o1.getId()));
     os1.remove(o1.getId());
     assert(!os1.isMember(o1.getId()));
