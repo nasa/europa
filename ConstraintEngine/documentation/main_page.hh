@@ -79,11 +79,11 @@
  * Results are shown below:
  * @verbatim
 
-TEST                     ConstraintEngine                     Europa         Factor Improvement
+TEST                     ConstraintEngine     Bitset version  Europa         Factor Improvement
 =================================================================================================
-testEquate                   2.82                              7.58              2.7
+testEquate                   2.82             [2.02]           7.58              2.7 [3.75]
 testIntersection             0.35                              2.26              7.5
-testLabelSetPerformance      0.30                              1.48              4.9
+testLabelSetPerformance      0.30             [0.25]           1.48              4.9 [5.92]
 testIntervalPerformance      0.19                              1.03              5.4 @endverbatim
  * 
  * Note that the above results do not explore any possible improvements in algoritms or handling of propagation events.

@@ -22,6 +22,8 @@
 
 #include <iostream>
 #include <cassert>
+#include <bitset>
+#include <vector>
 
 using namespace Prototype;
 using namespace std;
@@ -136,8 +138,8 @@ private:
     values.push_back(Prototype::LabelStr("L3"));
 
     ChangeListener l_listener;
-    LabelSet ls0(values, false, l_listener.getId());
-    assert(ls0.isDynamic());
+    LabelSet ls0(values, true, l_listener.getId());
+    assert(!ls0.isDynamic());
 
     Prototype::LabelStr l2("L2");
     assert(ls0.isMember(l2));
@@ -145,14 +147,10 @@ private:
     ls0.remove(l2);
     assert(l_listener.checkAndClearChange(change) && change == DomainListener::VALUE_REMOVED);
     assert(!ls0.isMember(l2));
-    ls0.insert(l2);
-    assert(l_listener.checkAndClearChange(change) && change == DomainListener::RELAXED);
-    ls0.close();
-    assert(l_listener.checkAndClearChange(change) && change == DomainListener::CLOSED);
-    assert(ls0.isMember(l2));
 
-    ls0.setToSingleton(l2);
-    assert(ls0.isMember(l2));
+    Prototype::LabelStr l3("L3");
+    ls0.setToSingleton(l3);
+    assert(ls0.isMember(l3));
     assert(ls0.getSize() == 1);
 
     LabelSet ls1(values, true);
@@ -162,19 +160,22 @@ private:
     return true;
   }
   static bool testEquate(){
-    std::list<Prototype::LabelStr> values;
-    values.push_back(Prototype::LabelStr("A"));
-    values.push_back(Prototype::LabelStr("B"));
-    values.push_back(Prototype::LabelStr("C"));
-    values.push_back(Prototype::LabelStr("D"));
-    values.push_back(Prototype::LabelStr("E"));
+    std::list<Prototype::LabelStr> baseValues;
+    baseValues.push_back(Prototype::LabelStr("A"));
+    baseValues.push_back(Prototype::LabelStr("B"));
+    baseValues.push_back(Prototype::LabelStr("C"));
+    baseValues.push_back(Prototype::LabelStr("D"));
+    baseValues.push_back(Prototype::LabelStr("E"));
+    baseValues.push_back(Prototype::LabelStr("F"));
+    baseValues.push_back(Prototype::LabelStr("G"));
+    baseValues.push_back(Prototype::LabelStr("H"));
 
     ChangeListener l_listener;
-    LabelSet ls0(values, true, l_listener.getId());
-    LabelSet ls1(values, true, l_listener.getId());
+    LabelSet ls0(baseValues, true, l_listener.getId());
+    LabelSet ls1(baseValues, true, l_listener.getId());
 
     assert(ls0 == ls1);
-    assert(ls0.getSize() == 5);
+    assert(ls0.getSize() == 8);
     assert(ls0.equate(ls1) == false); // Implying no change occured
 
     Prototype::LabelStr lC("C");
@@ -184,11 +185,14 @@ private:
     assert(ls0.equate(ls1)); // It should have changed
     assert(!ls1.isMember(lC));
 
-    LabelSet ls2(values, true, l_listener.getId());
-    values.push_back(Prototype::LabelStr("F"));
-    values.push_back(Prototype::LabelStr("G"));
-    values.push_back(Prototype::LabelStr("H"));
-    LabelSet ls3(values, true, l_listener.getId());
+    LabelSet ls2(baseValues, true, l_listener.getId());
+    ls2.remove(Prototype::LabelStr("A"));
+    ls2.remove(Prototype::LabelStr("B"));
+    ls2.remove(Prototype::LabelStr("C"));
+    ls2.remove(Prototype::LabelStr("D"));
+    ls2.remove(Prototype::LabelStr("E"));
+
+    LabelSet ls3(baseValues, true, l_listener.getId());
     Prototype::LabelStr lA("A");
     Prototype::LabelStr lB("B");
     ls3.remove(lA);
@@ -197,17 +201,17 @@ private:
     assert(ls2.equate(ls3));
     assert(ls2 == ls3);
 
-    values.clear();
-    values.push_back(Prototype::LabelStr("F"));
-    values.push_back(Prototype::LabelStr("G"));
-    values.push_back(Prototype::LabelStr("H"));
-    LabelSet ls4(values, true, l_listener.getId());
+    LabelSet ls4(baseValues, true, l_listener.getId());
+    ls4.remove(Prototype::LabelStr("A"));
+    ls4.remove(Prototype::LabelStr("B"));
+    ls4.remove(Prototype::LabelStr("C"));
+    ls4.remove(Prototype::LabelStr("D"));
+    ls4.remove(Prototype::LabelStr("E"));
 
-    values.clear();
-    values.push_back(Prototype::LabelStr("A"));
-    values.push_back(Prototype::LabelStr("B"));
-    values.push_back(Prototype::LabelStr("C"));
-    LabelSet ls5(values, true, l_listener.getId());
+    LabelSet ls5(baseValues, true, l_listener.getId());
+    ls5.remove(Prototype::LabelStr("F"));
+    ls5.remove(Prototype::LabelStr("G"));
+    ls5.remove(Prototype::LabelStr("H"));
 
     DomainListener::ChangeType change;
     ls4.equate(ls5);
@@ -246,12 +250,16 @@ private:
     values.push_back(Prototype::LabelStr("C"));
     values.push_back(Prototype::LabelStr("D"));
     values.push_back(Prototype::LabelStr("E"));
+    values.push_back(Prototype::LabelStr("F"));
+    values.push_back(Prototype::LabelStr("G"));
+    values.push_back(Prototype::LabelStr("H"));
+    values.push_back(Prototype::LabelStr("I"));
     LabelSet ls1(values);
 
-    values.clear();
-    values.push_back(Prototype::LabelStr("B"));
-    values.push_back(Prototype::LabelStr("D"));
     LabelSet ls2(values);
+    ls2.remove(Prototype::LabelStr("A"));
+    ls2.remove(Prototype::LabelStr("C"));
+    ls2.remove(Prototype::LabelStr("E"));
     assert(ls2.isSubsetOf(ls1));
     assert(!ls1.isSubsetOf(ls2));
 
@@ -260,16 +268,22 @@ private:
     ls1.intersect(ls2);
     assert(ls1 == ls2);
     assert(ls2.isSubsetOf(ls1));
-    assert(ls2.isSubsetOf(ls1));
 
     ls1 = ls3;
     assert(ls2.isSubsetOf(ls1));
     assert(ls1 == ls3);
 
-    values.clear();
-    values.push_back(Prototype::LabelStr("H"));
-    values.push_back(Prototype::LabelStr("I"));
     LabelSet ls4(values);
+    ls4.remove(Prototype::LabelStr("A"));
+    ls4.remove(Prototype::LabelStr("B"));
+    ls4.remove(Prototype::LabelStr("C"));
+    ls4.remove(Prototype::LabelStr("D"));
+    ls4.remove(Prototype::LabelStr("E"));
+    ls4.remove(Prototype::LabelStr("F"));
+    ls4.remove(Prototype::LabelStr("G"));
+
+    ls3.remove(Prototype::LabelStr("H"));
+    ls3.remove(Prototype::LabelStr("I"));
     ls4.intersect(ls3);
     assert(ls4.isEmpty());
     return true;
@@ -888,6 +902,17 @@ private:
   }
 };
 
+void testBitVector(){
+  bitset<20> bitvec;
+  bitvec.set();
+  assert(bitvec.any());
+  bitvec.flip();
+  assert(bitvec.none());
+  bitvec.set(8);
+  assert(bitvec.any());
+  cout << "BitVector Test Passed" << endl;
+}
+
 int main()
 {
   runTestSuite(LabelTest::test, "LabelTests"); 
@@ -895,6 +920,7 @@ int main()
   runTestSuite(VariableTest::test, "VariableTests"); 
   runTestSuite(ConstraintTest::test, "ConstraintTests"); 
   runTestSuite(FactoryTest::test, "FactoryTests");
-  runTestSuite(EquivalenceClassTest::test, "EquivalenceClassTests"); 
+  runTestSuite(EquivalenceClassTest::test, "EquivalenceClassTests");
+  testBitVector();
   cout << "Finished" << endl;
 }
