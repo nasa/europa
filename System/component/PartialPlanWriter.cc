@@ -378,33 +378,33 @@ namespace Prototype {
             objOut << SNULL;
           objOut << std::endl;
         }
-//         else if(ResourceId::convertable(objId)) {
-//           outputObject(objId, O_RESOURCE, objOut, varOut);
+        else if(ResourceId::convertable(objId)) {
+          outputObject(objId, O_RESOURCE, objOut, varOut);
 
-//           ResourceId &rId = (ResourceId &) objId;
+          ResourceId &rId = (ResourceId &) objId;
           
-//           /*ExtraData: resource info*/
-//           objOut << rId->getHorizonStart() << COMMA << rId->getHorizonEnd() << COMMA
-//                  << rId->getInitialCapacity() << COMMA << rId->getLimitMin() << COMMA
-//                  << rId->getLimitMax() << COMMA;
-//           std::list<TransactionId> resTrans;
-//           rId->getTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY);
-//           for(std::list<TransactionId>::iterator transIt = resTrans.begin();
-//               transIt != resTrans.end(); ++transIt) {
-//             TransactionId trans = *transIt;
-//             outputToken(trans, T_TRANSACTION, 0, 1, rId, tokOut, tokRelOut, varOut);
-//             tokens.erase(trans);
-//           }
-//           std::list<InstantId> insts;
-//           rId->getInstants(insts, MINUS_INFINITY, PLUS_INFINITY);
-//           for(std::list<InstantId>::iterator instIt = insts.begin();
-//               instIt != insts.end(); ++instIt) {
-//             InstantId inst = *instIt;
-//             outputInstant(inst, rId->getKey(), instsOut);
-//             objOut << inst->getKey() << COMMA;
-//           }
-//           objOut << std::endl;
-//         }
+          /*ExtraData: resource info*/
+          objOut << rId->getHorizonStart() << COMMA << rId->getHorizonEnd() << COMMA
+                 << rId->getInitialCapacity() << COMMA << rId->getLimitMin() << COMMA
+                 << rId->getLimitMax() << COMMA;
+          std::list<TransactionId> resTrans;
+          rId->getTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY);
+          for(std::list<TransactionId>::iterator transIt = resTrans.begin();
+              transIt != resTrans.end(); ++transIt) {
+            TransactionId trans = *transIt;
+            outputToken(trans, T_TRANSACTION, 0, 1, rId, tokOut, tokRelOut, varOut);
+            tokens.erase(trans);
+          }
+          std::list<InstantId> insts;
+          rId->getInstants(insts, MINUS_INFINITY, PLUS_INFINITY);
+          for(std::list<InstantId>::iterator instIt = insts.begin();
+              instIt != insts.end(); ++instIt) {
+            InstantId inst = *instIt;
+            outputInstant(inst, rId->getKey(), instsOut);
+            objOut << inst->getKey() << COMMA;
+          }
+          objOut << std::endl;
+        }
         else {
           outputObject(objId, O_OBJECT, objOut, varOut);
           /*ExtraData: NULL*/
@@ -542,13 +542,13 @@ namespace Prototype {
 	tokOut << paramVarIds << TAB;
       }
       /*ExtraData: QuantityMin:QuantityMax*/
-//       if(type == T_TRANSACTION) {
-//         TransactionId trans = (TransactionId) token;
-//         tokOut << trans->getMin() << COMMA << trans->getMax();
-//       }
-//       else {
+      if(type == T_TRANSACTION) {
+        TransactionId trans = (TransactionId) token;
+        tokOut << trans->getMin() << COMMA << trans->getMax();
+      }
+      else {
         tokOut << SNULL;
-        //      }
+      }
       tokOut << std::endl;
       numTokens++;
     }
@@ -657,20 +657,18 @@ namespace Prototype {
       }
     }
 
-//     void PartialPlanWriter::outputInstant(const InstantId &instId, const int resId, 
-//                                           std::ofstream &instOut) {
-//       instOut << ppId << TAB << resId << TAB << instId->getKey() << TAB << instId->getTime() 
-//       //CHEESY HACK.  POSSIBLY UNRELIABLE.  FIXME.
-//       //instOut << ppId << TAB << resId << TAB << instId.getKey() << TAB << instId->getTime() 
-//               << TAB << instId->getLevelMin() << TAB << instId->getLevelMax() << TAB;
-//       const TransactionSet &transactions = instId->getTransactions();
-//       for(TransactionSet::const_iterator transIt = transactions.begin();
-//           transIt != transactions.end(); ++transIt) {
-//         TransactionId trans = *transIt;
-//         instOut << trans->getKey() << COMMA;
-//       }
-//       instOut << std::endl;
-//     }
+     void PartialPlanWriter::outputInstant(const InstantId &instId, const int resId, 
+                                           std::ofstream &instOut) {
+       instOut << ppId << TAB << resId << TAB << instId->getKey() << TAB << instId->getTime() 
+               << TAB << instId->getLevelMin() << TAB << instId->getLevelMax() << TAB;
+       const TransactionSet &transactions = instId->getTransactions();
+       for(TransactionSet::const_iterator transIt = transactions.begin();
+           transIt != transactions.end(); ++transIt) {
+         TransactionId trans = *transIt;
+         instOut << trans->getKey() << COMMA;
+       }
+       instOut << std::endl;
+     }
 
     const std::string PartialPlanWriter::getUpperBoundStr(IntervalDomain &dom) const {
       if(dom.isNumeric()) {
