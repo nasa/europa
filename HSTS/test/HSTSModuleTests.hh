@@ -26,6 +26,8 @@ namespace PLASMA {
   bool testHSTSNoBranchConditionImpl(ConstraintEngine &ce, PlanDatabase &db,
 				     DecisionManager &dm);
 
+  bool testTokenTypeImpl(HSTSHeuristics& heuristics);
+
   bool testDefaultInitializationImpl(HSTSHeuristics& heuristics);
 
   bool testTokenInitializationImpl(HSTSHeuristics& heuristics);

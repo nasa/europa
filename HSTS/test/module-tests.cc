@@ -118,6 +118,7 @@ private:
 class HeuristicsTest {
 public:
   static bool test() {
+    runTest(testTokenType);
     runTest(testDefaultInitialization);
     runTest(testTokenInitialization);
     runTest(testVariableInitialization);
@@ -128,6 +129,13 @@ public:
     return(true);
   }
 private:
+  static bool testTokenType() {
+    bool retval = false;
+    DEFAULT_SETUP_HEURISTICS();
+    retval = testTokenTypeImpl(heuristics);
+    DEFAULT_TEARDOWN_HEURISTICS();
+    return retval;
+  }
   static bool testDefaultInitialization() {
     bool retval = false;
     DEFAULT_SETUP_HEURISTICS();
