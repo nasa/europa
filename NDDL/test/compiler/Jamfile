@@ -15,7 +15,7 @@ for model in
 	existential.nddl         plasma-base.nddl       subclass.nddl
 	guards.nddl              simple-class.nddl
 	interval-constants.nddl  simple-predicate.nddl
-	less-basic-model.nddl    simple-resources.nddl
+	less-basic-model.nddl    simple-resources.nddl foreach.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : NddlMain.cc : $(model) : NDDL ;

@@ -1,5 +1,9 @@
-#include "../Plasma.nddl"
+//////////////////////////////////////////////////////////////
+// Want to test explict use of base classes to allow predicates to be placed on
+// objects without imposing the default of a Timeline implementation
+//////////////////////////////////////////////////////////////
 
+#include "../Plasma.nddl"
 
 class BaseTimeline extends Timeline {
  predicate p0{};
@@ -16,5 +20,4 @@ class World extends Object {
 
 }
 
-World::initialState{
-}
+World::initialState{}

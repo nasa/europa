@@ -1,0 +1,67 @@
+//////////////////////////////////////////////////////////////
+// Test introduction of foreach construct. Our motivation is to
+// track all targets that can be acquired on a given path. However,
+// we do not know the targets or the paths at model time. They are
+// added dynamically. It would be too brittle to enumerate specific ones,
+// as well as too cumbersome, even if feasible.
+//////////////////////////////////////////////////////////////
+
+#include "../Plasma.nddl"
+
+enum Location {Hill, Rock, Lander};
+
+class Path {
+ Location from;
+ Location to;
+ Path(Location _from, Location _to){
+  from = _from;
+  to = _to;
+ }
+}
+
+class Target {
+ predicate Tracking{}
+}
+
+// This class provides the many-many relation required between
+// Path and target
+class Trackable {
+ Path path;
+ Target target;
+ Trackable(Path _path, Target _target){
+  path = _path;
+  target = _target;
+ }
+}
+
+class Rover {
+ predicate Navigate{
+  Location from;
+  Location to;
+  neq(from, to);
+ }
+}
+
+Rover::Navigate{
+ Path p: {
+	eq(from, p.from);
+	eq(to, p.to);
+ };
+
+ Trackable trackable : {
+	eq(trackable.path, p);
+ };
+
+ if(p){
+ 	foreach (t in trackable) {
+		contains(Target.Tracking target);
+		eq(target.object, t.target);
+ 	};
+ }
+}
+
+class World {
+ predicate initialState{}
+}
+
+World::initialState{}
