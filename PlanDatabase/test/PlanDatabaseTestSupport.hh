@@ -25,10 +25,10 @@ using namespace EUROPA;
     {
 
 #define DEFAULT_TEARDOWN() \
-    }\
-    Entity::purgeStarted();\
-    delete (PlanDatabase*) db;\
-    delete (ConstraintEngine*) ce;\
+    } \
+    Entity::purgeStarted(); \
+    delete (PlanDatabase*) db; \
+    delete (ConstraintEngine*) ce; \
     Entity::purgeEnded();
 
 #define DEFAULT_TEARDOWN_MULTI(ce, db) \
