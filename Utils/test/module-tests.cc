@@ -129,7 +129,7 @@ private:
       __y__("check_error(var == 2, TestError::BadThing()) did not throw an exception");
     }
     catch(Error e) {
-      assert(e.getType() == "BadThing");
+      assertTrue(e.getType() == "BadThing");
       std::cerr << "Caught expected " << e.getType() << std::endl;
     }
 #endif
@@ -155,7 +155,7 @@ private:
     }
     catch(Error e) {
       __z__(e, Error("s_os != 0", "no debug stream has been assigned",
-                     "Utils/core/Debug.cc", 116));
+                     "Utils/core/Debug.cc", 110));
     }
 #endif
     return(true);
@@ -605,4 +605,5 @@ int main() {
   runTestSuite(MultithreadTest::test);
 
   std::cout << "Finished" << std::endl;
+  exit(0);
 }
