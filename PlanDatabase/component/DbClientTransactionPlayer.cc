@@ -687,7 +687,7 @@ namespace Prototype {
       std::stringstream gen_name;
       if (name == NULL) {
         gen_name << "$OBJECT[" << m_objectCount++ << "]" << std::ends;
-        name = gen_name.str();
+        name = gen_name.str().c_str();
       }
       const char * type = value.Attribute("type");
       check_error(type != NULL);
@@ -807,7 +807,7 @@ namespace Prototype {
     std::stringstream gen_name;
     if (name == NULL) {
       gen_name << "$VAR[" << m_varCount++ << "]" << std::ends;
-      name = gen_name.str();
+      name = gen_name.str().c_str();
     }
     const AbstractDomain * baseDomain = NULL;
     if (value != NULL) {
