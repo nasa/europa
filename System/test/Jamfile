@@ -75,22 +75,25 @@ actions GenerateStack {
   $(2) $(ARGUMENTS) $(1:S=) 
 }
 
-ModuleObjects runTest.cc : System ;
-
 local numSatellites ;
-for numSatellites in 1 10 50 100 {
+#for numSatellites in 1 10 50 100 {
+for numSatellites in 1 {
   local numTargets ;
-  for numTargets in 10 {
+#  for numTargets in 10 {
+  for numTargets in 1000 {
     local numParams ;
-    for numParams in 0 10 {
+#    for numParams in 0 10 {
+     for numParams in 0 {
       local numParamChoices ;
-      for numParamChoices in 0 10 {
+#      for numParamChoices in 0 10 {
+       for numParamChoices in 0 {
         if $(numParamChoices) <= $(numParams) {
           local model = [ FSatelliteModel $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ] ;
           local exe = $(model:S=) ;
+          local xml = $(model:S=.xml) ;
           GenerateStack [ FGristFiles $(model) ] : [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
-          NddlMain $(exe) : runTest.o : $(model) : System : performance-tests ;
-          RunModuleMain run-$(exe) : $(exe) ;
+          NddlMain $(exe) : runTransactionTest.o : $(model) : System : performance-tests ;
+          RunModuleMain run-$(exe) : $(exe) : $(xml) ;
           LocalDepends run-performance-tests : run-$(exe) ;
         }
       }
