@@ -235,17 +235,17 @@ namespace PLASMA {
     }
     else if (ConstrainedVariableDecisionPointId::convertable(m_curDec)) {
       ConstrainedVariableDecisionPointId varDec(m_curDec);
-      std::list<LabelStr> domain;
+      std::list<double> domain;
       m_heur->getOrderedDomainForConstrainedVariableDP(varDec, domain);
       std::list<ChoiceId>::const_iterator it = choices.begin(); 
       bool found(false);
-      for (std::list<LabelStr>::const_iterator sit = domain.begin(); sit != domain.end(); ++ sit) {
+      for (std::list<double>::const_iterator sit = domain.begin(); sit != domain.end(); ++ sit) {
 	for (; it != choices.end(); ++it) {
 	  ChoiceId choice = *it;
 	  check_error(choice.isValid());
 	  check_error(choice->getType() == Choice::VALUE);
 	  check_error(!m_curDec->hasDiscarded(choice));
-	  LabelStr val = Id<ValueChoice>(choice)->getValue();
+	  double val = Id<ValueChoice>(choice)->getValue();
 	  if (val == *sit) {
 	    found = true;
 	    break; // we'll do this first, no point in continuing to iterate
