@@ -35,7 +35,10 @@ rule ExecuteTarget {
 
 actions ExecuteTarget {
   cd `dirname $(2)`
-  $(PREFIX) ./`basename $(2)` $(ARGUMENTS)
+  rm -f gmon.out
+  $(PREFIX) ./`basename $(2)` $(ARGUMENTS) > $(1).output
+  test -s gmon.out && gprof -b `basename $(2)` gmon.out > $(1).gprof
+  rm -f gmon.out
 }
 
 #
