@@ -91,8 +91,7 @@ namespace PLASMA {
   // todo: create generators from names
   HSTSHeuristics::TokenEntry::TokenEntry(const Priority p, 
 					 const std::vector<LabelStr>& states, 
-					 const std::vector<CandidateOrder>& orders, 
-					 const std::vector<LabelStr>& generatorNames) 
+					 const std::vector<CandidateOrder>& orders)
     : m_priority(p), m_states(states), m_orders(orders) { 
     // create generators from names
   }
@@ -105,24 +104,20 @@ namespace PLASMA {
     m_priority = p; 
   }
 
-  const HSTSHeuristics::Priority HSTSHeuristics::TokenEntry::getPriority() { return m_priority; }
+  const HSTSHeuristics::Priority HSTSHeuristics::TokenEntry::getPriority() const { return m_priority; }
 
-  const std::vector<LabelStr>& HSTSHeuristics::TokenEntry::getStates() {
+  const std::vector<LabelStr>& HSTSHeuristics::TokenEntry::getStates() const {
     return m_states;
   }
 
-  const std::vector<HSTSHeuristics::CandidateOrder>& HSTSHeuristics::TokenEntry::getOrders() {
+  const std::vector<HSTSHeuristics::CandidateOrder>& HSTSHeuristics::TokenEntry::getOrders() const {
     return m_orders;
   }
   
-  const std::vector<GeneratorId>& HSTSHeuristics::TokenEntry::getGenerators() {
-    return m_generators;
-  }
-
   HSTSHeuristics::VariableEntry::VariableEntry() {}
 
   // construct the generator according to the generator name
-  HSTSHeuristics::VariableEntry::VariableEntry(const std::list<double>& domain,
+  HSTSHeuristics::VariableEntry::VariableEntry(const std::list<LabelStr>& domain,
 					       const Priority p, 
 					       const DomainOrder order,
 					       const LabelStr& generatorName) 
@@ -143,10 +138,10 @@ namespace PLASMA {
     }
   }
 
-  HSTSHeuristics::VariableEntry::VariableEntry(const std::list<double>& domain,
+  HSTSHeuristics::VariableEntry::VariableEntry(const std::list<LabelStr>& domain,
 					       const Priority p, 
 					       const DomainOrder order,
-					       const std::list<double>& enumeration)
+					       const std::list<LabelStr>& enumeration)
     : m_domain(domain), m_priority(p) {
     check_error(MIN_PRIORITY <= p);
     check_error(MAX_PRIORITY >= p);
@@ -166,11 +161,11 @@ namespace PLASMA {
 
   HSTSHeuristics::VariableEntry::~VariableEntry() {}
 
-  HSTSHeuristics::Priority HSTSHeuristics::VariableEntry::getPriority() { return m_priority; }
+  const HSTSHeuristics::Priority HSTSHeuristics::VariableEntry::getPriority() const { return m_priority; }
   
-  const std::list<double>& HSTSHeuristics::VariableEntry::getDomain() { return m_domain; }
+  const std::list<LabelStr>& HSTSHeuristics::VariableEntry::getDomain() const { return m_domain; }
   
-  const GeneratorId& HSTSHeuristics::VariableEntry::getGenerator() { return m_generator; }
+  const GeneratorId& HSTSHeuristics::VariableEntry::getGenerator() const { return m_generator; }
 
   HSTSHeuristics::HSTSHeuristics() {
     m_defaultPriorityPreference = LOW;
@@ -183,9 +178,9 @@ namespace PLASMA {
     m_defaultCompatibilityPriority.clear();
     m_defaultTokenStates.clear();
     m_defaultCandidateOrders.clear();
-    //    std::map<double,TokenEntry>::iterator it = m_tokenHeuristics.begin();
+    //    std::map<LabelStr,TokenEntry>::iterator it = m_tokenHeuristics.begin();
     m_tokenHeuristics.clear();
-    //    std::map<double,VariableEntry>::iterator it2 = m_variableHeuristics.begin();
+    //    std::map<LabelStr,VariableEntry>::iterator it2 = m_variableHeuristics.begin();
     m_variableHeuristics.clear();
   }
 
@@ -193,7 +188,7 @@ namespace PLASMA {
     m_defaultPriorityPreference = pp;
   }
 
-  const HSTSHeuristics::PriorityPref HSTSHeuristics::getDefaultPriorityPreference() {
+  const HSTSHeuristics::PriorityPref HSTSHeuristics::getDefaultPriorityPreference() const {
     return m_defaultPriorityPreference;
   }
 
@@ -203,7 +198,7 @@ namespace PLASMA {
     m_defaultCompatibilityPriority.insert(std::make_pair<LabelStr,Priority>(TokenType::getIndexKey(tt), p));
   }
 
-  const HSTSHeuristics::Priority HSTSHeuristics::getDefaultPriorityForTokenDPsWithParent(const TokenTypeId& tt) {
+  const HSTSHeuristics::Priority HSTSHeuristics::getDefaultPriorityForTokenDPsWithParent(const TokenTypeId& tt) const {
     check_error(false);
     return 0.0;
   }
@@ -214,10 +209,18 @@ namespace PLASMA {
     m_defaultTokenPriority = p;
   }
 
+  const HSTSHeuristics::Priority HSTSHeuristics::getDefaultPriorityForTokenDPs() const {
+    return m_defaultTokenPriority;
+  }
+
   void HSTSHeuristics::setDefaultPriorityForConstrainedVariableDPs(const Priority p) {
     check_error(MIN_PRIORITY <= p);
     check_error(MAX_PRIORITY >= p);
     m_defaultVariablePriority = p;
+  }
+
+  const HSTSHeuristics::Priority HSTSHeuristics::getDefaultPriorityForConstrainedVariableDPs() const {
+    return m_defaultVariablePriority;
   }
 
   void HSTSHeuristics::setDefaultPreferenceForTokenDPs(const std::vector<LabelStr>& states, 
@@ -236,7 +239,7 @@ namespace PLASMA {
 							     const TokenTypeId& tt, 
 							     const DomainOrder order,
 							     const LabelStr& generatorName, 
-							     const std::list<double>& enumeration) {
+							     const std::vector<LabelStr>& enumeration) {
     LabelStr key("");
     if (!tt.isNoId())
       key = HSTSHeuristics::getIndexKey(variableName,tt);
@@ -257,13 +260,16 @@ namespace PLASMA {
 					       const TokenTypeId& tt, 
 					       const Relationship rel, 
 					       const TokenTypeId& mastertt, 
-					       const Origin o, 
 					       const std::vector<LabelStr>& states, 
-					       const std::vector<CandidateOrder>& orders, 
-					       const std::vector<LabelStr>& generatorNames) {
+					       const std::vector<CandidateOrder>& orders) {
     check_error(states.size() == orders.size());
-    LabelStr key = HSTSHeuristics::getIndexKey(tt, rel, mastertt, o);
-    TokenEntry entry(p, states, orders, generatorNames);
+    Origin orig;
+    if (mastertt.isNoId())
+      orig = INITIAL;
+    else
+      orig = SUBGOAL;
+    LabelStr key = HSTSHeuristics::getIndexKey(tt, rel, mastertt, orig);
+    TokenEntry entry(p, states, orders);
     m_tokenHeuristics.insert(std::make_pair<LabelStr, TokenEntry>(key, entry));
   }
 
@@ -272,20 +278,20 @@ namespace PLASMA {
 
   void HSTSHeuristics::addSuccTokenGenerator(const GeneratorId& generator) {
     check_error(generator.isValid());
-    check_error(m_generatorsByName.find(generator->getName().getKey()) == m_generatorsByName.end());
+    check_error(m_generatorsByName.find(generator->getName()) == m_generatorsByName.end());
     m_succTokenGenerators.insert(generator);
-    m_generatorsByName.insert(std::pair<double,GeneratorId>(generator->getName().getKey(), generator));
+    m_generatorsByName.insert(std::pair<LabelStr,GeneratorId>(generator->getName(), generator));
   }
 
   void HSTSHeuristics::addVariableGenerator(const GeneratorId& generator) {
     check_error(generator.isValid());
-    check_error(m_generatorsByName.find(generator->getName().getKey()) == m_generatorsByName.end());
+    check_error(m_generatorsByName.find(generator->getName()) == m_generatorsByName.end());
     m_variableGenerators.insert(generator);
-    m_generatorsByName.insert(std::pair<double,GeneratorId>(generator->getName().getKey(), generator));
+    m_generatorsByName.insert(std::pair<LabelStr,GeneratorId>(generator->getName(), generator));
   }
 
   const GeneratorId& HSTSHeuristics::getGeneratorByName(const LabelStr& name) const {
-    std::map<double,GeneratorId>::const_iterator pos = m_generatorsByName.find(name.getKey());
+    std::map<LabelStr,GeneratorId>::const_iterator pos = m_generatorsByName.find(name);
     if (pos == m_generatorsByName.end())
       return GeneratorId::noId();
     else
@@ -346,7 +352,7 @@ namespace PLASMA {
   const HSTSHeuristics::Priority HSTSHeuristics::getInternalPriorityForConstrainedVariableDP(const LabelStr variableName, 
 									     const TokenTypeId& tt) {
     LabelStr key = HSTSHeuristics::getIndexKey(variableName,tt);
-    std::map<double, VariableEntry>::iterator pos = m_variableHeuristics.find(key);
+    std::map<LabelStr, VariableEntry>::iterator pos = m_variableHeuristics.find(key);
     if (pos != m_variableHeuristics.end())
       return pos->second.getPriority();
     return m_defaultVariablePriority;
@@ -359,11 +365,11 @@ namespace PLASMA {
     check_error(tt.isValid());
     check_error(mastertt.isValid());
     LabelStr key = HSTSHeuristics::getIndexKey(tt, rel, mastertt, o);
-    std::map<double, TokenEntry>::iterator pos = m_tokenHeuristics.find(key);
+    std::map<LabelStr, TokenEntry>::iterator pos = m_tokenHeuristics.find(key);
     if (pos != m_tokenHeuristics.end())
       return pos->second.getPriority();
     LabelStr key2 = TokenType::getIndexKey(mastertt);
-    std::map<double, Priority>::iterator pos2 =  m_defaultCompatibilityPriority.find(key2);
+    std::map<LabelStr, Priority>::iterator pos2 =  m_defaultCompatibilityPriority.find(key2);
     if (pos2 != m_defaultCompatibilityPriority.end())
       return pos2->second;
     return m_defaultTokenPriority;
@@ -396,54 +402,46 @@ namespace PLASMA {
     return key.str();
   }
 
-
-  /*
-  void HSTSHeuristics::setPriorityForConstrainedVariableDP(const Priority p, 
-							   const LabelStr variableName, 
-							   const TokenTypeId& tt) {
-    check_error(MIN_PRIORITY <= p);
-    check_error(MAX_PRIORITY >= p);
-
-    LabelStr key = HSTSHeuristics::getIndexKey(variableName,tt);
-    VariableEntry entry;
-    entry.setPriority(p);
-    m_variableHeuristics.insert(std::make_pair<LabelStr,VariableEntry>(key, entry));
+  void HSTSHeuristics::write(std::ostream& os) {
+    os << "HSTSHeuristics: " << std::endl;
+    os << " Default Priority Preference: " << getDefaultPriorityPreference() << std::endl;
+    os << " Default Token Priority: " << getDefaultPriorityForTokenDPs() << std::endl;
+    os << " Default Variable Priority: " << getDefaultPriorityForConstrainedVariableDPs() << std::endl;
+    os << " Default Token Orders/States: " << std::endl;
+    std::vector<LabelStr>::const_iterator its(m_defaultTokenStates.begin());
+    std::vector<CandidateOrder>::const_iterator ito(m_defaultCandidateOrders.begin());
+    for (; its != m_defaultTokenStates.end(); ++its, ++ito) {
+      os << "   " << *ito << "/" << (*its).c_str() << std::endl;
+    }
+    os << " Default Compatibility Priority: " << std::endl;
+    std::map<LabelStr, Priority>::const_iterator itc(m_defaultCompatibilityPriority.begin());
+    for (; itc != m_defaultCompatibilityPriority.end(); ++itc) {
+      const LabelStr key = itc->first; 
+      const Priority p = itc->second;
+      std::cout << "   " << key.c_str() << " " << p << std::endl;
+    }
+    std::map<LabelStr, TokenEntry>::const_iterator itt(m_tokenHeuristics.begin());
+    for (; itt != m_tokenHeuristics.end(); ++itt) {
+      const LabelStr key = itt->first;
+      std::cout << "   " << key.c_str() << " " << itt->second.getPriority();
+      const std::vector<LabelStr> states(itt->second.getStates());
+      const std::vector<CandidateOrder> orders(itt->second.getOrders());
+      std::vector<LabelStr>::const_iterator itts(states.begin());
+      std::vector<CandidateOrder>::const_iterator itto(orders.begin());
+      for (; itts != states.end(); ++itts, ++itto) {
+	std::cout << " " << *ito << "/" << (*its).c_str();
+      }
+    }
+    std::map<LabelStr, VariableEntry>::const_iterator itv(m_variableHeuristics.begin());
+    for (; itv != m_variableHeuristics.end(); ++itv) {
+      const LabelStr key = itv->first;
+      std::cout << "   " << key.c_str() << " " << itv->second.getPriority();
+      const std::list<LabelStr> domain = itv->second.getDomain();
+      std::list<LabelStr>::const_iterator itvd(domain.begin());
+      for (; itvd != domain.end(); ++itvd)
+	std::cout << " " << (*itvd).c_str();
+      std::cout << " " << itv->second.getGenerator()->getName().c_str() << std::endl;
+    }
   }
 
-  void HSTSHeuristics::setPriorityForTokenDP(const Priority p, const TokenTypeId& tt, 
-					     const Relationship rel, 
-					     const TokenTypeId& mastertt, const Origin o) {
-    LabelStr key = HSTSHeuristics::getIndexKey(o, tt, mastertt, rel);
-    TokenEntry entry;
-    entry.setPriority(p);
-    m_tokenHeuristics.insert(std::make_pair<LabelStr, TokenEntry>(key, entry));
-  }
-
-  // todo: generators?
-  void setPreferenceForTokenValueChoice(const std::vector<LabelStr>& states, 
-					const std::vector<CandidateOrder>& orders, 
-					const std::vector<LabelStr>& generatorNames,
-					const TokenTypeId& tt, Relationship rel, 
-					const TokenTypeId& mastertt, const Origin o) {
-    LabelStr key = HSTSHeuristics::getIndexKey(o, tt, mastertt, rel);
-    TokenEntry entry;
-    entry.setStates(states);
-    entry.setOrders(orders);
-    // generators
-  }
-
-  void setPreferenceForVariableValueChoice(const DomainOrder order, 
-					   const LabelStr& variableName, 
-					   const TokenTypeId& tt, 
-					   const LabelStr& generatorName, 
-					   const std::list<double>& enumeration) {
-    LabelStr key = HSTSHeuristics::getIndexKey(variableName,tt);
-    // get variable base domain
-    VariableEntry entry(baseDomain, order, generatorName); 
-
-    // convert domain order and enumeration into actual enumeration
-    // insert resulting enumeration
-  }
-
-  */
 }

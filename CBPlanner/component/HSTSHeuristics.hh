@@ -95,34 +95,32 @@ namespace PLASMA {
     class TokenEntry {
     public:
       TokenEntry();
-      TokenEntry(const Priority p, const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders, const std::vector<LabelStr>& generatorNames);
+      TokenEntry(const Priority p, const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders);
       virtual ~TokenEntry();
 
       void setPriority(const Priority p);
-      const Priority getPriority();
-      const std::vector<LabelStr>& getStates();
-      const std::vector<CandidateOrder>& getOrders();
-      const std::vector<GeneratorId>& getGenerators();
+      const Priority getPriority() const;
+      const std::vector<LabelStr>& getStates() const;
+      const std::vector<CandidateOrder>& getOrders() const;
     private:
       Priority m_priority;
       std::vector<LabelStr> m_states;
       std::vector<CandidateOrder> m_orders;
-      std::vector<GeneratorId> m_generators;
     };
 
     class VariableEntry {
     public:
       VariableEntry();
-      VariableEntry(const std::list<double>& domain, const Priority p, const DomainOrder order, const LabelStr& generatorName);
-      VariableEntry(const std::list<double>& domain, const Priority p, const DomainOrder order, const std::list<double>& enumeration);
+      VariableEntry(const std::list<LabelStr>& domain, const Priority p, const DomainOrder order, const LabelStr& generatorName);
+      VariableEntry(const std::list<LabelStr>& domain, const Priority p, const DomainOrder order, const std::list<LabelStr>& enumeration);
       virtual ~VariableEntry();
       void setPriority(const Priority p);
-      void setDomainOrder(const std::list<double>& domain, const DomainOrder order, const LabelStr& generatorName);
-      Priority getPriority();
-      const std::list<double>& getDomain();
-      const GeneratorId& getGenerator();
+      void setDomainOrder(const std::list<LabelStr>& domain, const DomainOrder order, const LabelStr& generatorName);
+      const Priority getPriority() const;
+      const std::list<LabelStr>& getDomain() const;
+      const GeneratorId& getGenerator() const;
     private:
-      std::list<double> m_domain;
+      std::list<LabelStr> m_domain;
       Priority m_priority;
       GeneratorId m_generator;
     };
@@ -131,23 +129,27 @@ namespace PLASMA {
     virtual ~HSTSHeuristics();
 
     void setDefaultPriorityPreference(const PriorityPref pp);
-    const PriorityPref getDefaultPriorityPreference();
+    const PriorityPref getDefaultPriorityPreference() const;
     void setDefaultPriorityForTokenDPsWithParent(const Priority p, const TokenTypeId& tt);
-    const Priority getDefaultPriorityForTokenDPsWithParent(const TokenTypeId& tt);
+    const Priority getDefaultPriorityForTokenDPsWithParent(const TokenTypeId& tt) const;
     void setDefaultPriorityForTokenDPs(const Priority p);
+    const Priority getDefaultPriorityForTokenDPs() const;
     void setDefaultPriorityForConstrainedVariableDPs(const Priority p);
+    const Priority getDefaultPriorityForConstrainedVariableDPs() const;
     void setDefaultPreferenceForTokenDPs(const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders);
     void setDefaultPreferenceForConstrainedVariableDPs(const DomainOrder order);
 
-    void setHeuristicsForConstrainedVariableDP(const Priority p, const LabelStr variableName, const TokenTypeId& tt, const DomainOrder order, const LabelStr& generatorName, const std::list<double>& enumeration);
+    void setHeuristicsForConstrainedVariableDP(const Priority p, const LabelStr variableName, const TokenTypeId& tt, const DomainOrder order, const LabelStr& generatorName, const std::vector<LabelStr>& enumeration);
 
-    void setHeuristicsForTokenDP(const Priority p, const TokenTypeId& tt, const Relationship rel, const TokenTypeId& mastertt, const Origin o, const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders, const std::vector<LabelStr>& generatorNames);
+    void setHeuristicsForTokenDP(const Priority p, const TokenTypeId& tt, const Relationship rel, const TokenTypeId& mastertt, const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders);
 
     void setHeuristicsForTokenDPsWithParent(const Priority p, const TokenTypeId& tt);
 
     const Priority getPriorityForConstrainedVariableDP(const ConstrainedVariableDecisionPointId& varDec);
     const Priority getPriorityForTokenDP(const TokenDecisionPointId& tokDec);
     const Priority getPriorityForObjectDP(const ObjectDecisionPointId& objDec);
+
+    void write(std::ostream& os = std::cout);
 
   private:
     // Generator methods
@@ -166,24 +168,24 @@ namespace PLASMA {
     const std::vector<LabelStr>& getInternalStatePreferenceForTokenValueChoice(const TokenTypeId& tt, Relationship rel, const TokenTypeId& mastertt, const Origin o);
     const std::vector<CandidateOrder>& getInternalOrderPreferenceForTokenValueChoice(const TokenTypeId& tt, const Relationship rel, const TokenTypeId& mastertt, const Origin o);
 
-    const std::list<double>& getInternalPreferenceForVariableValueChoice(const LabelStr& variableName, const TokenTypeId& tt);
+    const std::list<LabelStr>& getInternalPreferenceForVariableValueChoice(const LabelStr& variableName, const TokenTypeId& tt);
     const DomainOrder& getInternalPreferenceForConstrainedVariableDP(const LabelStr& variableName, const TokenTypeId& tt, const LabelStr& generatorName);
 
     PriorityPref m_defaultPriorityPreference;
-    std::map<double, Priority> m_defaultCompatibilityPriority;
+    std::map<LabelStr, Priority> m_defaultCompatibilityPriority;
     Priority m_defaultTokenPriority;
     Priority m_defaultVariablePriority;
     std::vector<LabelStr> m_defaultTokenStates;
     std::vector<CandidateOrder> m_defaultCandidateOrders;
     DomainOrder m_defaultDomainOrder;
 
-    std::map<double, TokenEntry> m_tokenHeuristics;
-    std::map<double, VariableEntry> m_variableHeuristics;
+    std::map<LabelStr, TokenEntry> m_tokenHeuristics;
+    std::map<LabelStr, VariableEntry> m_variableHeuristics;
 
     std::set<GeneratorId> m_succTokenGenerators;
     std::set<GeneratorId> m_variableGenerators;
 
-    std::map<double, GeneratorId> m_generatorsByName;
+    std::map<LabelStr, GeneratorId> m_generatorsByName;
   };
 }
 #endif
