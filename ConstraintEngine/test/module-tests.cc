@@ -159,6 +159,15 @@ private:
 
   static bool testEqualConstraint()
   {
+    // Set up a base domain
+    std::list<Prototype::LabelStr> baseValues;
+    baseValues.push_back(Prototype::LabelStr("A"));
+    baseValues.push_back(Prototype::LabelStr("B"));
+    baseValues.push_back(Prototype::LabelStr("C"));
+    baseValues.push_back(Prototype::LabelStr("D"));
+    baseValues.push_back(Prototype::LabelStr("E"));
+    LabelSet baseDomain(baseValues);
+
     std::vector<ConstrainedVariableId> variables;
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
@@ -170,16 +179,17 @@ private:
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
     assert(v1.getDerivedDomain().getSingletonValue() == 1);
 
+    LabelSet ls0(baseDomain);
+    ls0.empty();
+    ls0.insert(Prototype::LabelStr("A"));
 
-    std::list<Prototype::LabelStr> values;
-    values.push_back(Prototype::LabelStr("A"));
-    LabelSet ls0(values);
-    values.push_back(Prototype::LabelStr("B"));
-    values.push_back(Prototype::LabelStr("C"));
-    values.push_back(Prototype::LabelStr("D"));
-    values.push_back(Prototype::LabelStr("E"));
-    LabelSet ls1(values);
-
+    LabelSet ls1(baseDomain);
+    ls1.empty();
+    ls1.insert(Prototype::LabelStr("A"));
+    ls1.insert(Prototype::LabelStr("B"));
+    ls1.insert(Prototype::LabelStr("C"));
+    ls1.insert(Prototype::LabelStr("D"));
+    ls1.insert(Prototype::LabelStr("E"));
 
     variables.clear();
     Variable<LabelSet> v2(ENGINE, ls1);
@@ -192,8 +202,9 @@ private:
     assert(v2.getDerivedDomain() == v3.getDerivedDomain());
     assert(!v2.getDerivedDomain().isSingleton());
 
-    values.pop_back();
-    LabelSet ls2(values);
+    LabelSet ls2(ls1);
+    ls2.remove(Prototype::LabelStr("E"));
+
     v2.specify(ls2);
     ENGINE->propagate();
     assert(!v3.getDerivedDomain().isMember(Prototype::LabelStr("E")));

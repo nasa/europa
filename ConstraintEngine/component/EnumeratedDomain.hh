@@ -218,7 +218,7 @@ namespace Prototype{
     bool isSubsetOf(const AbstractDomain& dom) const;
   protected:
     int getIndex(double value) const;
-    bool sameBaseSet(const AbstractDomain& dom) const;
+    bool sameBaseSet(const EnumeratedDomain& dom) const;
 
     static const int MAX_SIZE = 32; /*!< Since bitset have to have a fixed size, we allocate one large enough to hold all */
 
