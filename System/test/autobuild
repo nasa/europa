@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.42 2003-04-09 16:43:59 wedgingt Exp $
+# $Id: autobuild,v 1.43 2003-04-10 05:34:17 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -81,7 +81,7 @@ do
     if test -d NewPlan
     then
 	mkdir NewPlan/working || exit 2
-	mkdir NewPlan/working/rerun
+	mkdir NewPlan/working/rerun || exit 2
     else
 	cvs co NewPlan > cvs.co.NewPlan 2>&1
 	status=$?
@@ -92,19 +92,18 @@ do
 	    mkdir NewPlan/working/cvs.co.failed
 	    exit "$status"
 	fi
+	if test -f make.options
+	then
+            # Add to commonMakeOptions.imake
+	    head -2 NewPlan/commonMakeOptions.imake > cMO.new
+	    cat make.options >> cMO.new
+	    echo '' >> cMO.new
+	    tail +3 NewPlan/commonMakeOptions.imake >> cMO.new
+	    mv -f cMO.new NewPlan/commonMakeOptions.imake
+	fi
     fi
 
     cd NewPlan
-
-    if test -f ../make.options
-    then
-        # Add to commonMakeOptions.imake
-        head -2 commonMakeOptions.imake > cMO.new
-        cat ../make.options >> cMO.new
-        echo '' >> cMO.new
-        tail +3 commonMakeOptions.imake >> cMO.new
-        mv -f cMO.new commonMakeOptions.imake
-    fi
 
     test -d "$startdir"/working || exit 2
 
