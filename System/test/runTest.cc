@@ -189,7 +189,7 @@ int main(int argc, const char ** argv){
     ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
     check_error(maxPlannerSteps.isValid());
     int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
-    CBPlanner planner(planSystem.planDatabase, planSystem.flawQuery, steps);
+    CBPlanner planner(planSystem.planDatabase->getClient(), planSystem.flawQuery, steps);
     EUROPAHeuristicStrategy strategy;
       
     int res = planner.run(strategy.getId(), loggingEnabled());
