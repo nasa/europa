@@ -1507,7 +1507,7 @@ namespace Prototype {
 		}
 		void PartialPlanWriter::notifyRetractSucceeded(const DecisionPointId &dec) {
 			if(stepsPerWrite && allowTransaction[RETRACT_SUCCEEDED]) {
-				transactionList->push_back(Transaction(ASSIGN_NEXT_STARTED, dec->getKey(), USER,
+				transactionList->push_back(Transaction(RETRACT_SUCCEEDED, dec->getKey(), USER,
 																							 transactionId++, seqId, nstep, SNULL));
 				numTransactions++;
 			}
