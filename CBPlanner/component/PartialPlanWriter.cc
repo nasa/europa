@@ -551,7 +551,7 @@ namespace Prototype {
         FatalErrno();
       }
 
-      const std::set<ConstraintId> &constraints = (*ceId)->getConstraints();
+      const std::set<ConstraintId, EntityComparator<EntityId> > &constraints = (*ceId)->getConstraints();
       numConstraints = constraints.size();
       for(std::set<ConstraintId>::const_iterator it = constraints.begin();
 					it != constraints.end(); ++it) {
@@ -719,7 +719,7 @@ namespace Prototype {
       numTokens = tokens.size();
       ConstrainedVariableSet variables = (*ceId)->getVariables();
       numVariables = variables.size();
-      const std::set<ConstraintId> &constraints = (*ceId)->getConstraints();
+      const std::set<ConstraintId, EntityComparator<EntityId> > &constraints = (*ceId)->getConstraints();
       numConstraints = constraints.size();
     }
 
