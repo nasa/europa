@@ -13,6 +13,9 @@
 #include "TemporalConstraints.hh"
 #include "LockManager.hh"
 
+#include "RulesEngine.hh"
+#include "TestSubgoalRule.hh"
+
 #include <iostream>
 #include <string>
 #include <list>
@@ -29,6 +32,10 @@
     Schema::instance()->reset();\
     Schema::instance()->addObjectType("Objects"); \
     Schema::instance()->addPredicate("Objects.Predicate"); \
+    Schema::instance()->addPredicate("Objects.PredicateA"); \
+    Schema::instance()->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam"); \
+    Schema::instance()->addPredicate("Objects.PredicateB"); \
+    Schema::instance()->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam"); \
     PlanDatabase db(ce.getId(), Schema::instance());\
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
@@ -37,6 +44,26 @@
       db.close();
 
 #define DEFAULT_TEARDOWN()
+
+
+#define DEFAULT_SETUP_RULES(ce, db,  autoClose) \
+    ConstraintEngine ce; \
+    Schema::instance()->reset();\
+    Schema::instance()->addObjectType("Objects"); \
+    Schema::instance()->addPredicate("Objects.Predicate"); \
+    Schema::instance()->addPredicate("Objects.PredicateA"); \
+    Schema::instance()->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam"); \
+    Schema::instance()->addPredicate("Objects.PredicateB"); \
+    Schema::instance()->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam"); \
+    PlanDatabase db(ce.getId(), Schema::instance());\
+    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+    new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
+    db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId()); \
+    RulesEngine re(db.getId()); \
+    if (autoClose) \
+      db.close();
+
+#define DEFAULT_TEARDOWN_RULES()
 
 class TemporalNetworkTest {
 public:
@@ -160,7 +187,8 @@ public:
     runTest(testCanPrecede);
     runTest(testCanFitBetween);
     runTest(testCanBeConcurrent);
-    runTest(testSynchronization);
+    runTest(testTokenStateChangeSynchronization);
+    runTest(testInconsistencySynchronization);
     return true;
   }
 
@@ -421,7 +449,8 @@ private:
     DEFAULT_TEARDOWN();
     return true;
   }
-  static bool testSynchronization() {
+
+  static bool testTokenStateChangeSynchronization() {
     DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
@@ -468,6 +497,86 @@ private:
     DEFAULT_TEARDOWN();
     return true;
   }
+
+  /*
+    1. Token is activated. It subgoals tokens and places temporal
+    relations between master and slaves.
+    2. Constraints are present which trigger inconsistency prior
+    to execution of the Temporal propagator.
+    3. Retract activation of Token (should delete slaves and related
+    entities).
+  */
+
+  static bool testInconsistencySynchronization() {
+    DEFAULT_SETUP_RULES(ce,db,false);
+
+    ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
+    assert(!timeline.isNoId());
+
+    db.close();
+
+    // create the rule
+    TestSubgoalRule r("Objects.PredicateA");
+
+    // Allocate a token
+    IntervalToken t1(db.getId(),
+    		     "Objects.PredicateA", 
+    		     true,
+    		     IntervalIntDomain(0, 10),
+    		     IntervalIntDomain(0, 20),
+    		     IntervalIntDomain(1, 5),
+		     "o2", false);
+    t1.addParameter(IntervalIntDomain(0,1),"IntervalParam");
+    t1.close();
+
+    assert(ce.propagate());
+
+    // Activate immediately to trigger the rule.
+    t1.activate();
+    assert(t1.getSlaves().size() == 1);
+
+    assert (ce.propagate());
+
+    TokenId slave = *t1.getSlaves().begin();
+
+    assert(t1.getStart()->derivedDomain().getLowerBound() == 0);
+    assert(t1.getStart()->derivedDomain().getUpperBound() == 10);
+    assert(t1.getEnd()->derivedDomain().getLowerBound() == 1);
+    assert(t1.getEnd()->derivedDomain().getUpperBound() == 15);
+    assert(slave->getStart()->derivedDomain().getLowerBound() == 1);
+    assert(slave->getStart()->derivedDomain().getUpperBound() == 15);
+    assert(slave->getEnd()->derivedDomain().getLowerBound() == 2);
+    assert(slave->getEnd()->derivedDomain().getUpperBound() == 100);
+
+    std::vector<ConstrainedVariableId> scope;
+    scope.push_back(slave->getEnd());
+    scope.push_back(t1.getParameters()[0]);
+    ConstraintId culprit = ConstraintLibrary::createConstraint(LabelStr("leq"), ce.getId(), scope);
+
+    assert (!ce.propagate());
+
+    assert(t1.getStart()->derivedDomain().getLowerBound() == 3);
+    assert(t1.getStart()->derivedDomain().getUpperBound() == -2);
+    assert(t1.getEnd()->derivedDomain().getLowerBound() == 3);
+    assert(t1.getEnd()->derivedDomain().getUpperBound() == -2);
+    assert(slave->getStart()->derivedDomain().getLowerBound() == 3);
+    assert(slave->getStart()->derivedDomain().getUpperBound() == -2);
+    assert(slave->getEnd()->derivedDomain().getLowerBound() == 3);
+    assert(slave->getEnd()->derivedDomain().getUpperBound() == -2);
+
+    t1.cancel();
+
+    assert(ce.propagate());
+
+    assert(t1.getStart()->derivedDomain().getLowerBound() == 0);
+    assert(t1.getStart()->derivedDomain().getUpperBound() == 10);
+    assert(t1.getEnd()->derivedDomain().getLowerBound() == 1);
+    assert(t1.getEnd()->derivedDomain().getUpperBound() == 15);
+
+    DEFAULT_TEARDOWN_RULES();
+    return true;
+  }
+
 };
 
 
