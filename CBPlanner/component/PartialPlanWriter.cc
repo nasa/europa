@@ -1088,7 +1088,7 @@ namespace Prototype {
           return NINFINITY;
         else {
           std::stringstream stream;
-          stream << (int) dom.getUpperBound();
+          stream <<  dom.getUpperBound();
           return std::string(stream.str());
         }
       }
@@ -1110,7 +1110,7 @@ namespace Prototype {
         else if((int) dom.getLowerBound() == MINUS_INFINITY)
           return NINFINITY;
         std::stringstream stream;
-        stream << (int) dom.getLowerBound();
+        stream << dom.getLowerBound();
         return std::string(stream.str());
       }
       else if(LabelStr::isString((int)dom.getLowerBound())) {

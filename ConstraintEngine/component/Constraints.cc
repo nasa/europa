@@ -185,10 +185,8 @@ namespace Prototype {
 					 const ConstraintEngineId& constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_isDirty(true),
       m_currentDomain(getCurrentDomain(variables[0])),
-      m_superSetDomain(getCurrentDomain(variables[1])),
-      m_executionCount(0) {
+      m_superSetDomain(getCurrentDomain(variables[1])){
     check_error(variables.size() == 2);
     check_error(AbstractDomain::canBeCompared(m_currentDomain, m_superSetDomain));
   }
@@ -197,19 +195,18 @@ namespace Prototype {
 
   void SubsetOfConstraint::handleExecute() {
     m_currentDomain.intersect(m_superSetDomain);
-    m_isDirty = false;
-    m_executionCount++;
   }
 
   bool SubsetOfConstraint::canIgnore(const ConstrainedVariableId& variable,
 				     int argIndex,
-				     const DomainListener::ChangeType& changeType) {
-    check_error(argIndex == 0);
-    return(changeType != DomainListener::RELAXED);
-  }
-
-  int SubsetOfConstraint::executionCount() const {
-    return(m_executionCount);
+				     const DomainListener::ChangeType& changeType){
+    // If not a relaxation, and if it is the first argument, then we can ignore it as it will already be a subset
+    if(changeType == DomainListener::RESET ||
+       changeType == DomainListener::RELAXED ||
+       argIndex == 1)
+      return false;
+    else
+      return true;
   }
 
   LessThanEqualConstraint::LessThanEqualConstraint(const LabelStr& name,

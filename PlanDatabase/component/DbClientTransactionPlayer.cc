@@ -163,9 +163,24 @@ namespace Prototype {
         std::vector<ConstrainedVariableId> variables;
         variables.push_back(origin_token->getEnd());
         variables.push_back(target_token->getStart());
-        m_client->createConstraint("leq", variables);
+        m_client->createConstraint("precedes", variables);
         return;
       }
+      if (strcmp(relation, "meets") == 0) {
+        std::vector<ConstrainedVariableId> variables;
+        variables.push_back(origin_token->getEnd());
+        variables.push_back(target_token->getStart());
+        m_client->createConstraint("concurrent", variables);
+        return;
+      }
+      if (strcmp(relation, "met_by") == 0) {
+        std::vector<ConstrainedVariableId> variables;
+        variables.push_back(origin_token->getStart());
+        variables.push_back(target_token->getEnd());
+        m_client->createConstraint("concurrent", variables);
+        return;
+      }
+
       // TODO: the others
       check_error(ALWAYS_FAILS);
       return;
@@ -176,11 +191,28 @@ namespace Prototype {
     const char * type = child->Attribute("type");
     check_error(type != NULL);
 
-    TokenId token = m_client->createToken(type);
+    // The type may be qualified with an object name, in which case we should get the
+    // object and specify it. We will also have to generate the appropriate type designation
+    // by extracting the class from the object
+    TokenId token;
+
+    if(Schema::instance()->isPredicate(type))
+       token = m_client->createToken(type);
+    else {
+      LabelStr typeStr(type);
+      LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
+      LabelStr suffix = typeStr.getElement(1, Schema::getDelimiter());
+      ObjectId object = m_client->getObject(prefix.c_str());
+      check_error(object.isValid(), "Failed to find an object named " + prefix.toString());
+      std::string newType(object->getType().toString() + Schema::getDelimiter() + suffix.toString());
+      token = m_client->createToken(newType.c_str());
+      m_client->specify(token->getObject(), object);
+    }
+
     const char * mandatory = element.Attribute("mandatory");
 
     // If mandatory, remove the option to reject it from the base domain
-    if ((mandatory != NULL) && (strcmp(mandatory, "true") == 0)) {
+    if (!token->isActive() && (mandatory != NULL) && (strcmp(mandatory, "true") == 0)) {
       StateDomain allowableStates;
       allowableStates.insert(Token::ACTIVE);
       allowableStates.insert(Token::MERGED);
@@ -466,7 +498,7 @@ namespace Prototype {
       check_error(ALWAYS_FAILS, "Failed to process transaction for " + ident + ":" + name);
     }
     ConstrainedVariableId var = m_variables[ident];
-    check_error(var.isValid());
+    check_error(var.isValid(), "Invalid id for " + ident);
     ObjectId object = var->specifiedDomain().getSingletonValue();
     check_error(object.isValid());
     var = object->getVariable(LabelStr(varString));

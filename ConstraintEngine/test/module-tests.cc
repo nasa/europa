@@ -463,22 +463,24 @@ private:
     SubsetOfConstraint c0(LabelStr("SubsetOf"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
+
     assert(v0.getDerivedDomain() == ls1);
-    assert(c0.executionCount() == 1);
+    v1.specify(LabelStr("B"));
+    assert(v0.getDerivedDomain().getSingletonValue() == LabelStr("B"));
+    v1.reset();
+    assert(v0.getDerivedDomain() == ls1);
 
     values.pop_back();
     LabelSet ls2(values);
     v0.specify(ls2);
     assert(!ENGINE->pending()); // No change expected since it is a restriction.
     assert(!(v0.getDerivedDomain() == ls1));
-    assert(c0.executionCount() == 1);
     assert(ENGINE->constraintConsistent());
     v0.reset();
     assert(ENGINE->pending());
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain() == ls1);
-    assert(c0.executionCount() == 2);
     
     return true;
   }
@@ -495,7 +497,7 @@ private:
       assert(v1.getDerivedDomain().getSingletonValue() == 1);
       assert(v2.getDerivedDomain().getSingletonValue() == 2);
     }
-    /**
+
     // Test to force negative values where A + B == C and C < A. Focus on computation of B
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(9, 29));
@@ -505,22 +507,8 @@ private:
       ENGINE->propagate();
       assert(ENGINE->constraintConsistent());
       assert(v1.getDerivedDomain().getLowerBound() == -21);
-      assert(v1.getDerivedDomain().getUpperBound() == -1);
+      assert(v1.getDerivedDomain().getUpperBound() == 19);
     }
-
-    // Another test to force negative values where A + B == C and C < A. Focus on computation of A and C.
-    {
-      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 30));
-      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(-30, -1));
-      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 27));
-      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
-      ENGINE->propagate();
-      assert(ENGINE->constraintConsistent());
-      assert(v0.getDerivedDomain() == IntervalIntDomain(3, 30));
-      assert(v1.getDerivedDomain() == IntervalDomain(-30, -3));
-      assert(v2.getDerivedDomain() == IntervalIntDomain(0, 27));
-    }
-    **/
 
     // Now test mixed types
     {
@@ -638,6 +626,22 @@ private:
       assert(v0.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
       assert(v1.getDerivedDomain() == IntervalIntDomain(1));
       assert(v2.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
+    }
+
+    // Test that we can use the constraint on a variable that is present in the constraint more than once
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(10, 14));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 1));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v0.getId()));
+      bool res = ENGINE->propagate();
+      assert(res);
+      v1.specify(1);
+      assertFalse(ENGINE->propagate());
+      v1.reset();
+      assertTrue(ENGINE->propagate());
+      v0.specify(11);
+      assertTrue(ENGINE->propagate());
+      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(0));
     }
 
     return true;

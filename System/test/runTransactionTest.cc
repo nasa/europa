@@ -1,7 +1,3 @@
-
-// For performance tests only
-#include "PrototypePerformanceConstraint.hh"
-
 // Include prototypes required to integrate to the NDDL generated model
 #include "Nddl.hh"
 #include "SamplePlanDatabase.hh"
@@ -16,9 +12,6 @@
 #include "PlanDatabaseWriter.hh"
 
 #include "Constraints.hh"
-
-// For resources tests only
-#include "LoraxConstraints.hh"
 
 #include <fstream>
 

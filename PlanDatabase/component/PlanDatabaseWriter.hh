@@ -23,7 +23,7 @@ namespace Prototype {
       for (ObjectSet::const_iterator oit = objs.begin(); oit != objs.end() ; ++oit) {
 	if (TimelineId::convertable((*oit))) {
 	  TimelineId timeline = (*oit);
-	  os << "Timeline: " << timeline->getName().toString() << "*************************" << std::endl;
+	  os << timeline->getType().toString() << ":" << timeline->getName().toString() << "*************************" << std::endl;
 	  std::list<TokenId> toks = timeline->getTokenSequence();
 	  for(std::list<TokenId>::const_iterator tokit = toks.begin(); tokit != toks.end(); ++tokit) {
 	    TokenId t = (*tokit);
@@ -34,7 +34,7 @@ namespace Prototype {
 	}
 	else { // Treat as any object
 	  ObjectId object = *oit;
-	  os << "Object: " << object->getName().toString() << "*************************" << std::endl;
+	  os << object->getType().toString() << ":" << object->getName().toString() << "*************************" << std::endl;
 	  const TokenSet& tokens = object->getTokens();
 	  for(TokenSet::const_iterator tokit = tokens.begin(); tokit != tokens.end(); ++tokit){
 	    TokenId t = *tokit;
@@ -61,7 +61,7 @@ namespace Prototype {
       std::vector<ConstrainedVariableId> vars = t->getParameters();
       for(std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
 	ConstrainedVariableId v = (*varit);
-	os << v->derivedDomain();
+	os << v->getName().toString() << "=" << v->derivedDomain();
       }
       os << ")" <<std::endl;
       os << "\tKey=" << t->getKey() << std::endl;

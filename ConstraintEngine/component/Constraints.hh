@@ -59,13 +59,9 @@ namespace Prototype {
 		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
-    int executionCount() const;
-
   private:
-    bool m_isDirty;
     AbstractDomain& m_currentDomain;
     AbstractDomain& m_superSetDomain;
-    int m_executionCount;
   };
 
   class LockConstraint : public Constraint {
