@@ -771,15 +771,15 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    std::vector<TokenId> tokens;
-    timeline.getTokensToOrder(tokens);
-    assert(tokens.empty());
+    assert(!timeline.hasTokensToOrder());
     tokenA.activate();
     tokenB.activate();
     tokenC.activate();
+    std::vector<TokenId> tokens;
     timeline.getTokensToOrder(tokens);
     assert(tokens.size() == 3);
     assert(timeline.getTokenSequence().size() == 0);
+    assert(timeline.hasTokensToOrder());
 
     timeline.constrain(tokenA.getId());
     timeline.constrain(tokenB.getId());
@@ -787,14 +787,14 @@ private:
 
     assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
     assert(timeline.getTokenSequence().size() == 3);
-    tokens.clear();
-    timeline.getTokensToOrder(tokens);
-    assert(tokens.empty());
+    assert(!timeline.hasTokensToOrder());
 
     timeline.free(tokenA.getId());
     assert(timeline.getTokenSequence().size() == 2);
+    tokens.clear();
     timeline.getTokensToOrder(tokens);
     assert(tokens.size() == 1);
+    assert(timeline.hasTokensToOrder());
 
     // Now force it to be part of this timeline, even though it is not otherwise constrained
     tokenA.getObject()->specify(timeline.getId());
@@ -804,13 +804,12 @@ private:
     assert(tokens.front() == tokenA.getId());
 
     timeline.constrain(tokenA.getId());
-    tokens.clear();
-    timeline.getTokensToOrder(tokens);
-    assert(tokens.empty());
+    assert(!timeline.hasTokensToOrder());
     assert(timeline.getTokenSequence().size() == 3);
     timeline.free(tokenC.getId());
 
     assert(timeline.getTokenSequence().size() == 2);
+    assert(timeline.hasTokensToOrder());
     return true;
   }
 

@@ -131,6 +131,18 @@ namespace Prototype {
     }
   }
 
+  bool Timeline::hasTokensToOrder() const {
+    const std::set<TokenId>& tokensForThisObject = getTokens();
+
+    for(std::set<TokenId>::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it){
+      TokenId token = *it;
+      if(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end() && token->isActive())
+	return true;
+    }
+
+    return false;
+  }
+
   const std::list<TokenId>& Timeline::getTokenSequence() const{
     check_error(isValid());
     return m_tokenSequence;
