@@ -27,14 +27,14 @@ namespace Prototype {
     : AbstractDomain(true, false, DomainListenerId::noId()), m_ub(org.m_ub), m_lb(org.m_lb) { }
 
   bool IntervalDomain::intersect(const AbstractDomain& dom) {
-    check_error(dom.isInterval());
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     check_error(dom.isDynamic() || !dom.isEmpty());
     check_error(isDynamic() || !isEmpty());
     return(intersect(dom.getLowerBound(), dom.getUpperBound()));
   }
 
   bool IntervalDomain::difference(const AbstractDomain& dom) {
-    check_error(dom.isInterval());
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     check_error(dom.isDynamic() || !dom.isEmpty());
     check_error(isDynamic() || !isEmpty());
 
@@ -68,7 +68,7 @@ namespace Prototype {
   }
 
   AbstractDomain& IntervalDomain::operator=(const AbstractDomain& dom) {
-    check_error(dom.isInterval());
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     check_error(m_listener.isNoId());
     m_lb = dom.getUpperBound();
     m_ub = dom.getUpperBound();
@@ -77,7 +77,7 @@ namespace Prototype {
   }
 
   void IntervalDomain::relax(const AbstractDomain& dom) {
-    check_error(dom.isInterval());
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     relax(dom.getLowerBound(), dom.getUpperBound());
   }
 
@@ -108,6 +108,7 @@ namespace Prototype {
   }
 
   bool IntervalDomain::operator==(const AbstractDomain& dom) const {
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     return(fabs(m_ub - dom.getUpperBound()) < minDelta() &&
            fabs(m_lb - dom.getLowerBound()) < minDelta() &&
            AbstractDomain::operator==(dom));
@@ -118,9 +119,9 @@ namespace Prototype {
   }
 
   bool IntervalDomain::isSubsetOf(const AbstractDomain& dom) const {
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     check_error(!isDynamic());
     check_error(!dom.isEmpty());
-    check_error(dom.isInterval());
     bool result = ((isFinite() || dom.isInfinite()) && 
                    (dom.getUpperBound() + minDelta()) >= m_ub && 
                    (dom.getLowerBound() - minDelta()) <= m_lb);
@@ -128,9 +129,9 @@ namespace Prototype {
   }
 
   bool IntervalDomain::intersects(const AbstractDomain& dom) const {
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     check_error(!isDynamic());
     check_error(!dom.isEmpty());
-    check_error(dom.isInterval());
 
     // This could be optimized to avoid the copy if found to be worth it.
     IntervalDomain localDomain;
@@ -144,6 +145,7 @@ namespace Prototype {
   }
 
   bool IntervalDomain::equate(AbstractDomain& dom) {
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     bool result = intersect(dom);
     if (!isEmpty() && dom.intersect(*this))
       result = true;
@@ -170,6 +172,7 @@ namespace Prototype {
   }
  
   void IntervalDomain::set(const AbstractDomain& dom) {
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     check_error(!dom.isSingleton());
     intersect(dom);
     notifyChange(DomainListener::SET);
@@ -187,7 +190,7 @@ namespace Prototype {
   }
 
   void IntervalDomain::reset(const AbstractDomain& dom) {
-    check_error(dom.isInterval());
+    check_error(AbstractDomain::canBeCompared(*this, dom));
     if (*this != dom) {
       relax(dom);
       notifyChange(DomainListener::RESET);

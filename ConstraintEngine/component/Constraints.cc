@@ -1522,7 +1522,7 @@ namespace Prototype {
                                                          const int& rotateCount)
     : Constraint(name, propagatorName, constraintEngine, variables)
   {
-    assertTrue(abs(rotateCount) < m_variables.size());
+    assertTrue((unsigned) abs(rotateCount) < m_variables.size());
     std::vector<ConstrainedVariableId> otherScope;
     otherScope.reserve(m_variables.size());
     unsigned int i;
@@ -1534,9 +1534,9 @@ namespace Prototype {
         otherScope.push_back(m_variables[i]);
     } else {
       // Rotate to left: first var becomes last, pushing others to the left.
-      for (i = abs(rotateCount); i < m_variables.size(); i++)
+      for (i = (unsigned) abs(rotateCount); i < m_variables.size(); i++)
         otherScope.push_back(m_variables[i]);
-      for (i = 0; i < abs(rotateCount); i++)
+      for (i = 0; i < (unsigned) abs(rotateCount); i++)
         otherScope.push_back(m_variables[i]);
     }
     assertTrue(m_variables.size() == otherScope.size());
@@ -1551,8 +1551,8 @@ namespace Prototype {
                                                int firstIndex, int secondIndex)
     : Constraint(name, propagatorName, constraintEngine, variables)
   {
-    assertTrue(abs(firstIndex) < m_variables.size());
-    assertTrue(abs(secondIndex) < m_variables.size());
+    assertTrue((unsigned) abs(firstIndex) < m_variables.size());
+    assertTrue((unsigned) abs(secondIndex) < m_variables.size());
     assertTrue(firstIndex != secondIndex);
     if (firstIndex < 0)
       firstIndex = m_variables.size() - firstIndex;

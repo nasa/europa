@@ -553,6 +553,8 @@ namespace Prototype {
       Prototype::LabelStr la("L");
       Prototype::LabelStr l4("L30");
       Prototype::LabelStr lb("L");
+      assert(la == lb);
+      assert(la < l4);
 
       Prototype::LabelStr copy1(l1);
       assert(l1 == copy1);
