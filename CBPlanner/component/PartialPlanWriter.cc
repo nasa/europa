@@ -7,10 +7,12 @@
 #include "Choice.hh"
 #include "ValueChoice.hh"
 #include "TokenChoice.hh"
+#include "ResourceFlawChoice.hh"
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "DecisionManager.hh"
 #include "ObjectDecisionPoint.hh"
 #include "TokenDecisionPoint.hh"
+#include "ResourceFlawDecisionPoint.hh"
 #include "Constraint.hh"
 #include "ConstraintEngine.hh"
 #include "ConstraintEngineDefs.hh"
@@ -179,7 +181,7 @@ const std::string tokenVarTypes[8] =
 enum varTypes {I_STATE = 0, I_OBJECT, I_DURATION, I_START, I_END, I_PARAMETER, I_MEMBER, I_RULE};
 enum objectTypes {O_OBJECT = 0, O_TIMELINE, O_RESOURCE};
 enum tokenTypes {T_INTERVAL = 0, T_TRANSACTION};
-enum decisionTypes {D_OBJECT = 0, D_TOKEN, D_VARIABLE, D_ERROR};
+enum decisionTypes {D_OBJECT = 0, D_TOKEN, D_VARIABLE, D_RESOURCE, D_ERROR};
 
 #define TAB "\t"
 #define COLON ":"
@@ -1059,6 +1061,8 @@ namespace Prototype {
            !vdp->getVariable()->lastDomain().isSingleton())
           isUnit = 1;
       }
+      else if(ResourceFlawDecisionPointId::convertable(dp))
+	type = D_RESOURCE;
       else
         type = D_ERROR;
 		
@@ -1770,6 +1774,16 @@ namespace Prototype {
             }
             else
               retval << -1;
+          }
+        break;
+        case Choice::RESOURCE:
+          {
+            const TransactionId &bef = Id<ResourceFlawChoice>(choice)->getBefore();
+            const TransactionId &aft = Id<ResourceFlawChoice>(choice)->getAfter();
+            if(!bef.isNoId()) retval << bef->getKey();
+	    else retval << -1;
+	    if(!aft.isNoId()) retval << COMMA << aft->getKey();
+	    else retval << COMMA << -1;
           }
         break;
         case Choice::USER:
