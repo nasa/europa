@@ -143,18 +143,6 @@ rule ModuleMain {
     local variant ;
     for variant in $(VARIANTS) {
       if $(library) != SHARED || $(variant) != PROFILE {
-        local outputs ;
-        local file ;
-        for file in $(files) {
-          file = [ FGristFiles $(file) ] ;
-          local output = [ FVariantName $(file:S=) : $(variant) ] ;
-          if $(library) = SHARED {
-            output = $(output)_pic ;
-          }
-          output = $(output)$(SUFOBJ) ;
-          outputs += $(output) ;
-        }
-
         local target = [ FVariantName $(name) : $(variant) ] ;
         if $(library) = SHARED {
           target = $(target)_rt ;
@@ -190,7 +178,21 @@ rule ModuleMain {
                                      $(LINKER_PASSTHROUGH_FLAG)$(shared_dir) ;
           }
         }
-        MainFromObjects $(target) : $(outputs) : $(build_target) ;
+
+        local outputs ;
+        local file ;
+        for file in $(files) {
+          if ! $(file:G) {
+            file = [ FGristFiles $(file) ] ;
+          }
+          local output = [ FVariantName $(file:S=) : $(variant) ] ;
+          if $(library) = SHARED {
+            output = $(output)_pic ;
+          }
+          output = $(output)$(SUFOBJ) ;
+          outputs += $(output) ;
+        }
+        MainFromObjects $(target) : $(outputs) : $(build_target) : nogrist ;
       }
     }
   }
