@@ -20,8 +20,30 @@ namespace Prototype{
 	   endBaseDomain,
 	   durationBaseDomain,
 	   objectName){
+    commonInit();
+  }
+
+
+  IntervalToken::IntervalToken(const TokenId& m_master, 
+			       const LabelStr& predicateName, 
+			       const BooleanDomain& rejectabilityBaseDomain,
+			       const IntervalIntDomain& startBaseDomain,
+			       const IntervalIntDomain& endBaseDomain,
+			       const IntervalIntDomain& durationBaseDomain,
+			       const LabelStr& objectName)
+    :Token(m_master, 
+	   predicateName, 
+	   rejectabilityBaseDomain,
+	   startBaseDomain,
+	   endBaseDomain,
+	   durationBaseDomain,
+	   objectName){
+    commonInit();
+  }
+
+  void IntervalToken::commonInit(){
     // Ensure non-zero duration for intervals.
-    check_error(durationBaseDomain.getLowerBound() > 0);
+    check_error(m_duration->getBaseDomain().getLowerBound() > 0);
 
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(m_start);

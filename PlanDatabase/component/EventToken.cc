@@ -17,7 +17,24 @@ namespace Prototype{
 	   timeBaseDomain, 
 	   IntervalIntDomain(0, 0), 
 	   objectName){
+    commonInit();
+  }
 
+  EventToken::EventToken(const TokenId& master,
+			 const LabelStr& predicateName,
+			 const BooleanDomain& rejectabilityBaseDomain,
+			 const IntervalIntDomain& timeBaseDomain,
+			 const LabelStr& objectName)
+    :Token(master, predicateName, 
+	   rejectabilityBaseDomain,
+	   timeBaseDomain, 
+	   timeBaseDomain, 
+	   IntervalIntDomain(0, 0), 
+	   objectName){
+    commonInit();
+  }
+
+  void EventToken::commonInit(){
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(m_start);
     temp.push_back(m_end);

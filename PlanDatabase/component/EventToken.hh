@@ -17,6 +17,14 @@ namespace Prototype {
 	       const BooleanDomain& rejectabilityBaseDomain,
 	       const IntervalIntDomain& timeBaseDomain,
 	       const LabelStr& objectName = Token::noObject());
+
+    EventToken(const TokenId& master,
+	       const LabelStr& predicateName,
+	       const BooleanDomain& rejectabilityBaseDomain,
+	       const IntervalIntDomain& timeBaseDomain,
+	       const LabelStr& objectName = Token::noObject());
+  private:
+    void commonInit();
   };
 
 }

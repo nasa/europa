@@ -67,6 +67,7 @@ class TokenTest {
 public:
   static bool test(){
     runTest(testBasicTokenAllocation, "BasicTokenAllocation");
+    runTest(testMasterSlaveRelationship, "MasterSlaveRelationship");
     return true;
   }
 
@@ -116,6 +117,73 @@ private:
     assert(intervalToken.getStart()->getDerivedDomain() == IntervalIntDomain(5, 8));
     assert(intervalToken.getDuration()->getDerivedDomain() == IntervalIntDomain(2, 5));
 
+    return true;
+  }
+
+  static bool testMasterSlaveRelationship(){
+    ConstraintEngine ce;
+    Schema schema;
+    PlanDatabase db(ce.getId(), schema.getId());
+    new DefaultPropagator(LabelStr("Default"), ce.getId());
+
+    Object object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
+    db.close();
+
+    IntervalToken t0(db.getId(), 
+		     LabelStr("Predicate"), 
+		     IntervalIntDomain(1, 1), 
+		     IntervalIntDomain(0, 1),
+		     IntervalIntDomain(0, 1),
+		     IntervalIntDomain(1, 1));
+
+    TokenId t1 = (new IntervalToken(db.getId(), 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(1, 1), 
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(1, 1)))->getId();
+
+
+    TokenId t2 = (new IntervalToken(t0.getId(), 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(1, 1), 
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(1, 1)))->getId();
+
+    TokenId t3 = (new IntervalToken(t0.getId(), 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(1, 1), 
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(1, 1)))->getId();
+
+    TokenId t4 = (new IntervalToken(t0.getId(), 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(1, 1), 
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(1, 1)))->getId();
+
+    TokenId t5 = (new IntervalToken(t1, 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(1, 1), 
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(1, 1)))->getId();
+
+    TokenId t6 = (new EventToken(t0.getId(), 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(1, 1),
+				    IntervalIntDomain(0, 1)))->getId();
+
+    // Delete slave only
+    delete (Token*) t2;
+
+    // Delete master & slaves
+    delete (Token*) t1;
+
+    // Remainder should be cleaned up automatically
     return true;
   }
 };
