@@ -13,12 +13,15 @@ if ! $(PLASMA_READY) {
   LocalDepends aver-module-tests : $(modxml) ;
   LocalDepends run-aver-module-tests : $(modxml) ;
 
-  EXTRA_DEFS = -DSTANDALONE ;
-  ModuleNamedObjects runTransactions_standalone : runTransactions.cc : Aver ;
+  ModuleObjects AverTestAssembly.cc : Aver ;
+
+  if $(LIBRARIES) = SHARED {
+    EXTRA_DEFS = -DSTANDALONE ;
+    ModuleNamedObjects runTransactions_standalone : runTransactions.cc : Aver ;
+    ModuleMain runTransactions : runTransactions_standalone.o AverTestAssembly.o : Aver ;
+  }
   EXTRA_DEFS = ;
   ModuleNamedObjects runTransactions_link : runTransactions.cc : Aver ;
-
-  ModuleMain runTransactions : runTransactions_standalone.o : Aver ;
 
   local model = aver-test-model.nddl ;
   local exe = $(model:S=) ;
@@ -47,12 +50,8 @@ if ! $(PLASMA_READY) {
     }
   }
   else {
-    ModuleMain $(exe) : $(o) runTransactions_link.o : Aver ;
+    ModuleMain $(exe) : $(o) runTransactions_link.o AverTestAssembly.o : Aver System ;
     RunModuleMain run-$(exe) : $(exe) : ;
     LocalDepends run-aver-module-tests : run-$(exe) ;
   }
-  
-  #ModuleMain aver-module-tests : module-tests.cc : Aver ;
-  #RunModuleMain run-aver-module-tests : aver-module-tests ;
-  #LocalDepends tests : run-aver-module-tests ;
 }

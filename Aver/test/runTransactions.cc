@@ -1,6 +1,5 @@
-#include "PLASMAPerformanceConstraint.hh"
 #include "Nddl.hh"
-#include "SamplePlanDatabase.hh"
+
 #include "CBPlanner.hh"
 #include "DecisionPoint.hh"
 #include "ResourceOpenDecisionManager.hh"
@@ -9,6 +8,7 @@
 #include "Debug.hh"
 #include "AverInterp.hh"
 #include "EventAggregator.hh"
+#include "AverTestAssembly.hh"
 
 #include <dlfcn.h>
 #include <iostream>
@@ -20,25 +20,16 @@ static const char* s_tx_log = "TransactionLog.xml";
 static const char* s_aver_test = "modtest.xml";
 
 bool runTransactions() {
-  SamplePlanDatabase db1(schema, false);
-
-  DecisionManagerId local_dm = db1.planner->getDecisionManager();
-  ResourceOpenDecisionManagerId local_rodm = (new ResourceOpenDecisionManager(local_dm))->getId();
-  local_dm->setOpenDecisionManager(local_rodm);
-
-  DbClientId client = db1.planDatabase->getClient();
-  DbClientTransactionPlayer player(client);
+  AverTestAssembly::initialize();
+  AverTestAssembly assembly(schema, s_aver_test);
   
-  //std::ifstream init(s_tx_init);
-  //player.play(init);
-
-  AverInterp::init(s_aver_test, db1.planner->getDecisionManager(), db1.constraintEngine, db1.planDatabase,
-                   db1.rulesEngine);
+  //AverInterp::init(s_aver_test, assembly.getPlanner()->getDecisionManager(), assembly.getPlanDatabase()->getConstraintEngine(), assembly.getPlanDatabase(),
+  //                 assembly.getRulesEngine());
   
-  std::ifstream trans(s_tx_log);
-  player.play(trans);
+  assembly.playTransactions(s_tx_log);
   EventAggregator::instance()->notifyStep();
-  AverInterp::terminate();
+  AverTestAssembly::terminate();
+  //AverInterp::terminate();
   //EventAggregator::remove();
   return(true);
 }
@@ -77,7 +68,7 @@ int main(int argc, const char** argv) {
   }
   
   assert(Schema::instance().isValid());
-  SamplePlanDatabase::initialize();
+  //SamplePlanDatabase::initialize();
   schema = (*fcn_schema)();
 #else //STANDALONE
   if (argc != 1) {
@@ -85,13 +76,13 @@ int main(int argc, const char** argv) {
     exit(1);
   }
   //initialTransactions = argv[1];
-  SamplePlanDatabase::initialize();
+  //SamplePlanDatabase::initialize();
   schema = NDDL::loadSchema();
 #endif //STANDALONE
 
   runTest(runTransactions);
 
-  SamplePlanDatabase::terminate();
+  //SamplePlanDatabase::terminate();
 
 #ifdef STANDALONE
   if (dlclose(libHandle)) {
