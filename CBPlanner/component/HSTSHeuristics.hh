@@ -47,7 +47,6 @@ namespace PLASMA {
     std::vector<std::pair<LabelStr, LabelStr> > m_domainSpecs;
     TokenTypeId m_id;
   };
-  typedef Id<TokenType> TokenTypeId;
 
   class HSTSHeuristics {
   public:
