@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.109 2004-12-03 01:49:40 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.110 2004-12-04 22:23:26 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -436,7 +436,10 @@ else
         PPW_CONFIG=''
         jamCmd plasma-all plasma
         jamCmd run-all-tests run-all-tests
-        if "$performance" && test \( "$var" = 'PROFILE' -o "$var" = 'OPTIMIZED' \) -a "$libmethod" = 'STATIC'
+        # Add this to the next test's arguments for use with valgrind, memcheck, etc.:
+        # -o \( "$var" = 'DEV' -a "$libmethod" = 'SHARED' \)
+        if "$performance" && \
+            test \( \( "$var" = 'PROFILE' -o "$var" = 'OPTIMIZED' \) -a "$libmethod" = 'STATIC' \)
             then
             jamCmd run-performance-tests run-performance-tests
         fi
