@@ -21,7 +21,6 @@
 #include "IntervalIntDomain.hh"
 #include "IntervalRealDomain.hh"
 #include "BoolDomain.hh"
-#include "DomainUtilities.hh"
 #include "domain-tests.hh"
 
 #include <iostream>

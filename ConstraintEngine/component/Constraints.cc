@@ -93,8 +93,8 @@ namespace Prototype
     : Constraint(name, propagatorName, constraintEngine, variables), m_lastNotified(0){
     check_error(variables.size() == ARG_COUNT);
 
-    // type check the arguments
-    check_error(getCurrentDomain(m_variables[X]).getType() == getCurrentDomain(m_variables[Y]).getType());
+    // check the arguments - must both be enumerations or intervals
+    check_error(getCurrentDomain(m_variables[X]).isEnumerated() == getCurrentDomain(m_variables[Y]).isEnumerated());
   }
 
   void EqualConstraint::handleExecute()
@@ -108,23 +108,8 @@ namespace Prototype
 
     check_error(!domx.isEmpty() && !domy.isEmpty());
 
-    // By construction, we know the arguments are of the same type. So special case
-    // accordingly
-    if(domx.isEnumerated()){
-      EnumeratedDomain& dx = static_cast<EnumeratedDomain&>(domx);
-      EnumeratedDomain& dy = static_cast<EnumeratedDomain&>(domy);
-      dx.equate(dy);
-    }
-    else {
-      IntervalDomain& dx = static_cast<IntervalDomain&>(domx);
-      IntervalDomain& dy = static_cast<IntervalDomain&>(domy);
-      if(dx.intersect(dy.getLowerBound(), dy.getUpperBound()) && dx.isEmpty())
-	return;
-
-      dy.intersect(dx.getLowerBound(), dx.getUpperBound());
-    }
+    domx.equate(domy);
   }
-
 
   void EqualConstraint::handleExecute(const ConstrainedVariableId& variable, 
 				      int argIndex, 
@@ -212,13 +197,9 @@ namespace Prototype
 						   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){
     check_error(variables.size() == ARG_COUNT);
-
-    // type check the arguments - no enumerations supported
-    check_error(getCurrentDomain(m_variables[X]).getType() == AbstractDomain::INT_INTERVAL ||
-		getCurrentDomain(m_variables[X]).getType() == AbstractDomain::REAL_INTERVAL);
-
-    check_error(getCurrentDomain(m_variables[Y]).getType() == AbstractDomain::INT_INTERVAL ||
-		getCurrentDomain(m_variables[Y]).getType() == AbstractDomain::REAL_INTERVAL);
+    // Check the arguments - no enumerations supported
+    check_error(getCurrentDomain(m_variables[X]).isInterval());
+    check_error(getCurrentDomain(m_variables[Y]).isInterval());
   }
 
   void LessThanEqualConstraint::handleExecute()
@@ -243,7 +224,6 @@ namespace Prototype
 
     domy.intersect(domx.getLowerBound(), domy.getUpperBound());
   }
-
 
   void LessThanEqualConstraint::handleExecute(const ConstrainedVariableId& variable, 
 					      int argIndex, 

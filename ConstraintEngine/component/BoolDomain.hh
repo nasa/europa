@@ -34,6 +34,13 @@ namespace Prototype{
      * @brief Enforces integer semantics. Will be compiled out for fast version.
      */
     void testPrecision(const double& value) const;
+
+    /**
+     * @brief carries out the conversion of the given double to do appropriate rounding
+     * @param value The value to be converetd
+     * @return The value subject to any rounding required for th sub-type (e.g. int)
+     */
+    double convert(const double& value) const;
   };
 }
 #endif

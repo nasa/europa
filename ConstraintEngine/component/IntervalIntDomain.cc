@@ -22,6 +22,10 @@ namespace Prototype {
     check_error(dblValue == value) // confirms no loss in precision
   }
 
+  double IntervalIntDomain::convert(const double& value) const{
+    return (int) value;
+  }
+
   const AbstractDomain::DomainType& IntervalIntDomain::getType() const{
     static const AbstractDomain::DomainType s_type = INT_INTERVAL;
     return s_type;

@@ -34,6 +34,12 @@ namespace Prototype{
      * @brief Enforces integer semantics. Will be compiled out for fast version.
      */
     void testPrecision(const double& value) const;
+
+    /**
+     * @brief Enforces integer semantics.
+     */
+    double convert(const double& value) const;
+
   };
 }
 #endif

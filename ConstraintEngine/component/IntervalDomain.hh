@@ -181,6 +181,13 @@ namespace Prototype{
      */
     virtual void testPrecision(const double& value) const = 0;
 
+    /**
+     * @brief carries out the conversion of the given double to do appropriate rounding
+     * @param value The value to be converetd
+     * @return The value subject to any rounding required for th sub-type (e.g. int)
+     */
+    virtual double convert(const double& value) const = 0;
+
     double m_ub; /*!< The upper bound of the domain */
     double m_lb; /*!< The lower bound o fthe domain */
   };

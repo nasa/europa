@@ -40,12 +40,16 @@ namespace Prototype {
     check_error(dom.isDynamic() || !dom.isEmpty());
     check_error(!isDynamic());
     check_error(dom.isInterval());
-    bool result = (dom.getUpperBound() >= m_ub && dom.getLowerBound() <= m_lb);
+    bool result = ((isFinite() || dom.isInfinite()) && 
+		   dom.getUpperBound() >= m_ub && dom.getLowerBound() <= m_lb);
     return result;
   }
 
   bool IntervalDomain::equate(AbstractDomain& dom){
-    return (intersect(dom) && dom.intersect(*this));
+    bool result = intersect(dom);
+    if(!isEmpty() && dom.intersect(*this))
+      result = true;
+    return result;
   }
 
   double IntervalDomain::getUpperBound() const {return m_ub;}
@@ -142,8 +146,8 @@ namespace Prototype {
   }
 
   bool IntervalDomain::isMember(double value) const {
-    checkPrecision(value);
-    return (value >= m_lb && value <= m_ub);
+    double converted = convert(value);
+    return ((converted == value) && converted >= m_lb && converted <= m_ub);
   }
 
   bool IntervalDomain::isSingleton() const {

@@ -12,10 +12,12 @@ namespace Prototype {
     :IntervalDomain(org){}
 
   void BoolDomain::testPrecision(const double& value) const {
-    int intValue = (int) value;
-    double dblValue =(double) intValue;
-    check_error(dblValue == value); // confirms no loss in precision
-    check_error(intValue == 0 || intValue == 1);
+    check_error(value == 0 || value == 1);
+  }
+
+
+  double BoolDomain::convert(const double& value) const{
+    return (int) value;
   }
 
   bool BoolDomain::isFinite() const{

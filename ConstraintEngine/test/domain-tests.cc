@@ -401,8 +401,96 @@ private:
   }
 };
 
+class MixedTypeTest{
+public:
+  static bool test() {
+    runTest(testEquality);
+    runTest(testIntersection);
+    runTest(testSubset);
+    return true;
+  }
+private:
+  static bool testEquality(){
+    std::list<double> emptyList;
+    EnumeratedDomain dom(emptyList, false);
+    dom.insert(1.0);
+    dom.insert(2.0);
+    dom.close();
+
+    EnumeratedDomain dom0(dom);
+    dom0.set(1.0);
+
+    IntervalRealDomain dom1(1.0, 1.0);
+    assert(dom1 == dom0);
+    assert(dom0 == dom1);
+
+    IntervalIntDomain dom2(1, 1);
+    assert(dom1 == dom2);
+
+    dom0.reset(dom);
+    IntervalIntDomain dom3(1, 2);
+    assert(dom0 == dom3);
+    return true;
+  }
+
+  static bool testIntersection(){
+    std::list<double> emptyList;
+    EnumeratedDomain dom0(emptyList, false);
+    dom0.insert(0);
+    dom0.insert(0.98);
+    dom0.insert(1.0);
+    dom0.insert(1.89);
+    dom0.insert(2.98);
+    dom0.insert(10);
+    dom0.close();
+    assert(dom0.getSize() == 6);
+    IntervalIntDomain dom1(1, 8);
+    EnumeratedDomain dom2(dom0);
+
+    dom0.intersect(dom1);
+    assert(dom0.getSize() == 1);
+    assert(dom0.isMember(1.0));
+
+    IntervalRealDomain dom3(1, 8);
+    dom2.intersect(dom3);
+    assert(dom2.getSize() == 3);
+
+    BoolDomain dom4;
+    dom2.intersect(dom4);
+    assert(dom2.getSize() == 1);
+    return true;
+  }
+
+  static bool testSubset(){
+    std::list<double> emptyList;
+    EnumeratedDomain dom0(emptyList, false);
+    dom0.insert(0);
+    dom0.insert(0.98);
+    dom0.insert(1.0);
+    dom0.insert(1.89);
+    dom0.insert(2.98);
+    dom0.insert(10);
+    dom0.close();
+
+    IntervalRealDomain dom1(0, 10);
+    assert(dom0.isSubsetOf(dom1));
+
+    IntervalIntDomain dom2(0, 10);
+    assert(!dom0.isSubsetOf(dom2));
+
+    dom0.remove(0.98);
+    dom0.remove(1.89);
+    dom0.remove(2.98);
+    assert(dom0.isSubsetOf(dom2));
+
+    assert(dom2.isSubsetOf(dom1));
+    assert(!dom1.isSubsetOf(dom2));
+    return true;
+  }
+};
 bool DomainTests::test(){
   runTestSuite(IntervalDomainTest::test);
   runTestSuite(EnumeratedDomainTest::test);
+  runTestSuite(MixedTypeTest::test);
   return true;
 }
