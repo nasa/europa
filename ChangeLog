@@ -1,3 +1,15 @@
+EUROPA2_20050404_0
+1. fixes to HSTS heuristics that cause some problems but fix others
+2. fixes to the converter to convert initial states properly and to
+eliminate singleton specifications of heuristics if they correspond to the
+full domain.
+3. fixes to infinite domain treatment
+4. fixes to propagate temporal changes to non-temporal variables
+5. eliminated choices in CBPlanner and optimized to handle large domain sizes
+6. fixed parser to parse strings with "." in them (like filenames)
+7. Bool types are now symbolic and not numeric.
+8. Dynamic linking works on Mac OSX now.
+	
 EUROPA2_20050228_0
 1. fixed HSTS heuristics so all HSTS models either succeed or timeout
 2. added stream version of check_error

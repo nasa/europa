@@ -2,7 +2,7 @@ Warning: Please report any issues you have (with this file or any
 other part of the distribution) using the GNATS issue reporting system 
 mentioned below.
 
-$Id: README,v 1.29 2005-03-01 02:18:59 tania Exp $
+$Id: README,v 1.30 2005-04-04 18:05:33 tania Exp $
 
 A: CVS checkout:
 
@@ -13,7 +13,7 @@ should be in your PATH.
    > cvs co PLASMA or
    > cvs update PLASMA
 2. Latest tagged milestone:
-   > cvs co -r "EUROPA2_20050228_0" PLASMA 
+   > cvs co -r "EUROPA2_20050404_0" PLASMA 
 
 
 B: Getting started:
