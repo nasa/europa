@@ -223,15 +223,15 @@ namespace PLASMA {
   bool EnumeratedDomain::isMember(double value) const {
     std::set<double>::const_iterator it = m_values.lower_bound(value);
 
-    // If we get a hit - the elem <= value
+    // If we get a hit - the elem >= value
     if(it != m_values.end()){
       double elem = *it;
       // Try fast compare first, then epsilon safe version
       if(value == elem || compareEqual(value, elem))
 	return true;
 
-      // Before giving up, see if next position is within epsilon
-      ++it;
+      // Before giving up, see if prior position is within epsilon
+      --it;
       return (it != m_values.end() && compareEqual(value, *it));
     }
 
