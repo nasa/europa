@@ -573,8 +573,6 @@ private:
     assert(t1.getEnd()->derivedDomain().getLowerBound() == 1);
     assert(t1.getEnd()->derivedDomain().getUpperBound() == 15);
 
-    delete (Constraint*) culprit;
-
     DEFAULT_TEARDOWN_RULES();
     return true;
   }
