@@ -90,6 +90,7 @@ namespace EUROPA {
     }
 
     static void writeToken(const TokenId& t, ostream& os) {
+      check_error(t.isValid());
       TempVarId st = t->getStart();
       os << "[ " << st->derivedDomain() << " ]"<< std::endl;
       os << "\t" << t->getPredicateName().toString() << "(" ;

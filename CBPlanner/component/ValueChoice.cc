@@ -13,24 +13,27 @@ namespace EUROPA {
     std::list<double> values;
     domain.getValues(values);
     //    std::cout << " Choice.cc::getChoices() domain size = " << values.size() << std::endl;
-    const AbstractDomain::DomainType& type = domain.getType();
     //    std::cout << " Choice.cc::getChoices() type = " << type << std::endl;
+
     // Create choices for values. Order matters! We want to prefer merging over activation. This should really
     // be handled in a heuristic.
-    std::list<double>::iterator it = values.begin();
-    for ( ; it != values.end(); it++) {
-      if (type == AbstractDomain::REAL_ENUMERATION && TokenDecisionPointId::convertable(decision) && *it == Token::MERGED) {
+
+    static const LabelStr slc_TokenStateStr("TokenStates");
+    const bool isTokenStateDomain =
+      (domain.getTypeName() == slc_TokenStateStr && TokenDecisionPointId::convertable(decision));
+
+    for (std::list<double>::iterator it = values.begin(); it != values.end(); ++it) {
+      if (isTokenStateDomain && *it == Token::MERGED) {
 	TokenDecisionPointId tokDec = decision;
 	TokenId tok = tokDec->getToken();
 	check_error(tok->isInactive());
 	std::vector<TokenId> compats;
 	tok->getPlanDatabase()->getCompatibleTokens(tok, compats);
 	// std::cout << " Choice.cc::getChoices() found " << compats.size() << " compatible tokens" << std::endl;
-	if (!compats.empty()) {
-	  std::vector<TokenId>::iterator it2 = compats.begin();
-	  check_error((*it2)->isActive());
-	  for ( ; it2 != compats.end(); it2++) 
-	    choices.push_back((new ValueChoice(decision, *it, *it2))->getId());
+	for(std::vector<TokenId>::iterator it2 = compats.begin(); it2 != compats.end(); ++it2){
+	  TokenId mergeCandidate = *it2;
+	  check_error(mergeCandidate->isActive());
+	  choices.push_back((new ValueChoice(decision, Token::MERGED, mergeCandidate))->getId());
 	}
       }
       else {
