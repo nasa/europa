@@ -94,7 +94,6 @@ namespace Prototype {
   protected:
     AbstractDomain& internal_specifiedDomain();
     AbstractDomain& internal_baseDomain();
-
   private:
 
     /**
@@ -171,25 +170,30 @@ namespace Prototype {
 
   template<class DomainType>
   AbstractDomain& Variable<DomainType>::getCurrentDomain() {
+    check_error(validate());
     return(m_derivedDomain);
   }
 
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::lastDomain() const {
+    check_error(validate());
     return(m_derivedDomain);
   }
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::derivedDomain() {
+    check_error(validate());
     return(getDerivedDomain());
   }
 
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::specifiedDomain() const {
+    check_error(validate());
     return(m_specifiedDomain);
   }
 
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::baseDomain() const {
+    check_error(validate());
     return(m_baseDomain);
   }
 
@@ -202,6 +206,5 @@ namespace Prototype {
   AbstractDomain& Variable<DomainType>::internal_baseDomain() {
     return(m_baseDomain);
   }
-
 }
 #endif
