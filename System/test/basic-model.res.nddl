@@ -13,7 +13,7 @@ class Rover{
  Battery m_battery;
 
  Rover() {
-  m_battery = new Battery(0, 100, 5, 0, 100);
+  m_battery = new Battery(0, 100, 20, 0, 100);
  }
 
  predicate At{
@@ -29,7 +29,7 @@ class Rover{
 }
 
 Rover::At{
- meets(Resource.change tx);
+ contains(Resource.change tx);
  eq(tx.quantity, 5);
 
  meets(Going to);
@@ -46,7 +46,7 @@ Rover::Going{
   meets(At to);
   eq(m_to, to.m_location);
 
-  meets(Resource.change tx);
+  contains(Resource.change tx);
   eq(tx.quantity, -5);
 }
 
