@@ -3,7 +3,9 @@
 
 namespace PLASMA {
 
-  HSTSNoBranch::HSTSNoBranch(const SchemaId& schema) : m_schema(schema) {}
+  HSTSNoBranch::HSTSNoBranch() { 
+    m_schema = Schema::instance(); // for convenience
+  }
 
   HSTSNoBranch::~HSTSNoBranch() {}
 

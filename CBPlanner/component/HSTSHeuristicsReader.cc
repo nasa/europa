@@ -9,9 +9,11 @@ namespace PLASMA {
 
 #define IS_TAG(x) (strcmp (tagName, x) == 0)
 
-  HSTSHeuristicsReader::HSTSHeuristicsReader(HSTSHeuristicsId& heuristics, const SchemaId& schema) : m_heuristics(heuristics), m_schema(schema) { }
+  HSTSHeuristicsReader::HSTSHeuristicsReader(HSTSHeuristicsId& heuristics) : m_heuristics(heuristics) { 
+    m_schema = Schema::instance(); // for convenience
+  }
 
-  HSTSHeuristicsReader::~HSTSHeuristicsReader() { check_error(m_heuristics.isValid()); m_heuristics.remove();}
+  HSTSHeuristicsReader::~HSTSHeuristicsReader() {}
 
   void HSTSHeuristicsReader::read(const std::string& fileName) {
 
@@ -409,7 +411,7 @@ namespace PLASMA {
       check_error(tagName != NULL, "Expected Preference tag.");
       if (IS_TAG("Generator")) {
 	dorder = HSTSHeuristics::VGENERATOR;
-	LabelStr genName = getTextChild(*child);
+	genName = getTextChild(*child);
       }
       else if (IS_TAG("ValueOrder")) {
 	readValueOrder(*child,dorder);

@@ -8,7 +8,7 @@ namespace PLASMA {
 
   class HSTSNoBranch {
   public:
-    HSTSNoBranch(const SchemaId& schema);
+    HSTSNoBranch();
     virtual ~HSTSNoBranch();
 
     void addNoBranch(const LabelStr& pred, const int index);

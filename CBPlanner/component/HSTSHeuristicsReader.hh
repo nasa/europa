@@ -11,7 +11,7 @@ namespace PLASMA {
 
   class HSTSHeuristicsReader {
   public:
-    HSTSHeuristicsReader(HSTSHeuristicsId& heuristics, const SchemaId& schema);
+    HSTSHeuristicsReader(HSTSHeuristicsId& heuristics);
     virtual ~HSTSHeuristicsReader();
 
     void read(const std::string& fileName);
