@@ -1,8 +1,8 @@
 #ifndef _H_TemporalNetworkDefs
 #define _H_TemporalNetworkDefs
 
-#include "PlanDatabaseDefs.hh"
 #include "Error.hh"
+#include "Id.hh"
 
 /*!< Type definitions to map for th eones we were using in Europa */
 namespace EUROPA {
@@ -59,7 +59,5 @@ namespace EUROPA {
     DECLARE_ERROR(TempNetDeletingOriginError);
     DECLARE_ERROR(TempNetNoInconsistencyError);
   };
-
-
 }
 #endif

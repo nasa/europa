@@ -3,7 +3,7 @@
 
 namespace EUROPA {
 
-  TimepointWrapper::TimepointWrapper(const TemporalPropagatorId& prop, const TempVarId& tempVar, const TimepointId& point) 
+  TimepointWrapper::TimepointWrapper(const TemporalPropagatorId& prop, const ConstrainedVariableId& tempVar, const TimepointId& point) 
     :m_propagator(prop), m_tempVar(tempVar), m_timepoint(point), m_id(this) {}
 
   TimepointWrapper::~TimepointWrapper() {

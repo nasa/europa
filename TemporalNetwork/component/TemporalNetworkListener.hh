@@ -3,6 +3,7 @@
 
 #include "TemporalNetworkDefs.hh"
 #include "TemporalNetwork.hh"
+#include "ConstrainedVariable.hh"
 
 namespace EUROPA{
 
@@ -13,13 +14,13 @@ namespace EUROPA{
   class TemporalNetworkListener{
   public:
     virtual ~TemporalNetworkListener();
-    inline virtual void notifyTimepointAdded(const TempVarId& var, const TimepointId& timepoint) {}
+    inline virtual void notifyTimepointAdded(const ConstrainedVariableId& var, const TimepointId& timepoint) {}
     inline virtual void notifyTimepointDeleted(const TimepointId& timepoint) {}
-    inline virtual void notifyBaseDomainConstraintAdded(const TempVarId& c, const TemporalConstraintId& constraint, Time lb, Time ub) {} ;
+    inline virtual void notifyBaseDomainConstraintAdded(const ConstrainedVariableId& c, const TemporalConstraintId& constraint, Time lb, Time ub) {} ;
     inline virtual void notifyConstraintAdded(const ConstraintId c, const TemporalConstraintId& constraint, Time lb, Time ub) {} ;
     inline virtual void notifyConstraintDeleted(int key, const TemporalConstraintId& constraint) {} ;
-    inline virtual void notifyBoundsRestricted(const TempVarId& v, Time newlb, Time newub) {} ;
-    inline virtual void notifyBoundsSame(const TempVarId& v,  const TimepointId& timepoint) {}
+    inline virtual void notifyBoundsRestricted(const ConstrainedVariableId& v, Time newlb, Time newub) {} ;
+    inline virtual void notifyBoundsSame(const ConstrainedVariableId& v,  const TimepointId& timepoint) {}
 
     const TemporalNetworkListenerId& getId() const;
 

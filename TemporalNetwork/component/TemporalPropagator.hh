@@ -2,10 +2,8 @@
 #define _H_TemporalPropagator
 
 #include "Propagator.hh"
-#include "PlanDatabaseDefs.hh"
 #include "TemporalNetworkDefs.hh"
 #include "TimepointWrapper.hh"
-#include "TokenVariable.hh"
 #include "IntervalIntDomain.hh"
 #include "TemporalConstraints.hh"
 
@@ -24,24 +22,24 @@ namespace EUROPA {
     /**
      * @see TemporalAdvisor
      */
-    bool canPrecede(const TempVarId& first, const TempVarId& second);
+    bool canPrecede(const ConstrainedVariableId& first, const ConstrainedVariableId& second);
 
     /**
      * @see TemporalAdvisor
      */
-    bool canFitBetween(const TempVarId& start, const TempVarId& end,
-		       const TempVarId& predend, const TempVarId& succstart);
+    bool canFitBetween(const ConstrainedVariableId& start, const ConstrainedVariableId& end,
+		       const ConstrainedVariableId& predend, const ConstrainedVariableId& succstart);
 
     /**
      * @see TemporalAdvisor
      */
-    bool canBeConcurrent(const TempVarId& first, const TempVarId& second);
+    bool canBeConcurrent(const ConstrainedVariableId& first, const ConstrainedVariableId& second);
 
     /**
      * @see TemporalAdvisor
      */
-    const IntervalIntDomain getTemporalDistanceDomain(const TempVarId& first, 
-						      const TempVarId& second, const bool exact);
+    const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId& first, 
+						      const ConstrainedVariableId& second, const bool exact);
 
 
     void addListener(const TemporalNetworkListenerId& listener);
@@ -58,12 +56,12 @@ namespace EUROPA {
 
   private:
     friend class TimepointWrapper;
-    void notifyDeleted(const TempVarId& tempVar, const TimepointId& tp);
+    void notifyDeleted(const ConstrainedVariableId& tempVar, const TimepointId& tp);
 
-    void addTimepoint(const TempVarId& var);
+    void addTimepoint(const ConstrainedVariableId& var);
     void addTemporalConstraint(const ConstraintId& constraint);
 
-    inline static const TimepointId& getTimepoint(const TempVarId& var) {
+    inline static const TimepointId& getTimepoint(const ConstrainedVariableId& var) {
       check_error(var->getIndex() != TemporalDistanceConstraint::DISTANCE_VAR_INDEX);
       check_error(var->getExternalEntity().isValid());
       const TimepointWrapperId wrapper(var->getExternalEntity());
@@ -84,14 +82,9 @@ namespace EUROPA {
     void updateTempVar();
 
     /**
-     * @brief Confirm that var is a start or and end temporal variable that needs to be updated
-     */
-    bool isUpdatableVar(const TempVarId& var) const;
-
-    /**
      * @brief Update the time point in the tnet from the given CE variable
      */
-    void updateTimepoint(const TempVarId& var);
+    void updateTimepoint(const ConstrainedVariableId& var);
 
     /**
      * @brief update a constraint in the tnet - before, concurrent, startEndDuration
@@ -116,7 +109,7 @@ namespace EUROPA {
      * @brief Buffer the variable in either the new variable buffer or the change variable buffer
      * depending on its state - i.e. if timepoint already created or not.
      */
-    void buffer(const TempVarId& var);
+    void buffer(const ConstrainedVariableId& var);
 
     /**
      * @brief Test that the buffer status is correct prior to propagation
@@ -126,10 +119,9 @@ namespace EUROPA {
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
 
     /*!< Synchronization data structures */
-    //    std::set<TempVarId, EntityComparator<EntityId> > m_activeVariables; /*!< Maintain the set of active start and end variables. Duration handled in consrinats */
-    std::map<int, TempVarId> m_activeVariables;
-    //    std::set<TempVarId, EntityComparator<EntityId> > m_changedVariables; /*!< Manage the set of changed variables to be synchronized */
-    std::map<int, TempVarId> m_changedVariables;
+    std::map<int, ConstrainedVariableId> m_activeVariables; /**< Maintain the set of active start and end variables. 
+							     Duration handled in constraints */
+    std::map<int, ConstrainedVariableId> m_changedVariables; /*!< Manage the set of changed variables to be synchronized */
     std::set<ConstraintId, EntityComparator<EntityId> > m_changedConstraints; /*!< Constraint Agenda */
     std::set<TemporalConstraintId, EntityComparator<EntityId> > m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */

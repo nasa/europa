@@ -1,6 +1,5 @@
 #include "TemporalNetworkListener.hh"
 #include "TemporalPropagator.hh"
-
 namespace EUROPA{
 
   TemporalNetworkListener::TemporalNetworkListener(const TemporalPropagatorId& prop) : m_propagator(prop), m_id(this) {

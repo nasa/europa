@@ -3,6 +3,7 @@
 
 #include "TemporalNetwork.hh"
 #include "TemporalNetworkDefs.hh"
+#include "ConstrainedVariable.hh"
 
 namespace EUROPA {
 
@@ -12,14 +13,14 @@ namespace EUROPA {
    */
   class TimepointWrapper : public Entity {
   public:
-    TimepointWrapper(const TemporalPropagatorId& prop, const TempVarId& tempVar, const TimepointId& point);
+    TimepointWrapper(const TemporalPropagatorId& prop, const ConstrainedVariableId& tempVar, const TimepointId& point);
     virtual ~TimepointWrapper();
     inline const EntityId& getId() { return m_id; }
     inline const TimepointId& getTimepoint() const {return m_timepoint;}
-    inline const TempVarId& getTempVar() const {return m_tempVar;}
+    inline const ConstrainedVariableId& getTempVar() const {return m_tempVar;}
   private:
     TemporalPropagatorId m_propagator;
-    TempVarId m_tempVar;
+    ConstrainedVariableId m_tempVar;
     TimepointId m_timepoint;
     EntityId m_id;
   };
