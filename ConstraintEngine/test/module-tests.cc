@@ -1195,4 +1195,5 @@ int main() {
   runTestSuite(FactoryTest::test);
   runTestSuite(EquivalenceClassTest::test);
   cout << "Finished" << endl;
+  ConstraintLibrary::purgeAll();
 }

@@ -679,4 +679,5 @@ int main() {
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   std::cout << "Finished" << std::endl;
+  ConstraintLibrary::purgeAll();
 }

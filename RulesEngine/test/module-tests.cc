@@ -372,4 +372,5 @@ int main(){
   SCHEMA;
   runTestSuite(RulesEngineTest::test);
   std::cout << "Finished" << std::endl;
+  ConstraintLibrary::purgeAll();
 }

@@ -145,4 +145,5 @@ int main() {
   runTestSuite(NddlSchemaTest::test);
   runTestSuite(NddlRuleIntergrationTest::test);
   std::cout << "Finished" << std::endl;
+  ConstraintLibrary::purgeAll();
 }

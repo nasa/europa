@@ -330,4 +330,5 @@ int main() {
   runTestSuite(TemporalNetworkTest::test);
   runTestSuite(TemporalPropagatorTest::test);
   std::cout << "Finished" << std::endl;
+  ConstraintLibrary::purgeAll();
 }

@@ -1547,4 +1547,5 @@ int main() {
   Entity::setEntityCollection(&newEntityCollection);
   runTestSuite(DbClientTest::test);
   std::cout << "Finished" << std::endl;
+  ConstraintLibrary::purgeAll();
 }
