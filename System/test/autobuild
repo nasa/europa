@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.58 2003-10-24 19:11:02 wedgingt Exp $
+# $Id: autobuild,v 1.59 2003-10-28 19:40:27 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -114,28 +114,42 @@ do
     statusMakeTar=$?
     echo '"make '"$makeopt"' EuropaDist.tar" in '"`pwd`"' exited '"$statusMakeTar"
 
-    make $makeopt plannerTests unofficial >> make.tests 2>&1
-    status=$?
-    echo '"make '"$makeopt"' unofficial" in '"`pwd`"' exited '"$status"
+    if test $statusMakeTar = 0
+    then
+        make $makeopt plannerTests unofficial >> make.tests 2>&1
+        status=$?
+        echo '"make '"$makeopt"' unofficial" in '"`pwd`"' exited '"$status"
 
-    mkdir ../testDist && cd ../testDist && tar -xpf ../NewPlan/EuropaDist.tar
-    statusTarExtract=$?
-    echo '"tar -xpf EuropaDist.tar" in '"`pwd`"' exited '"$statusTarExtract"
+        if test $status = 0
+        then
+            mkdir ../testDist && cd ../testDist && tar -xpf ../NewPlan/EuropaDist.tar
+            statusTarExtract=$?
+            echo '"tar -xpf EuropaDist.tar" in '"`pwd`"' exited '"$statusTarExtract"
 
-    make $makeopt simple >> make.simple 2>&1
-    statusMakeDist=$?
-    echo '"make '"$makeopt"' simple" in '"`pwd`"' exited '"$statusMakeDist"
+            if test $statusTarExtract = 0
+            then
+                make $makeopt simple >> make.simple 2>&1
+                statusMakeDist=$?
+                echo '"make '"$makeopt"' simple" in '"`pwd`"' exited '"$statusMakeDist"
 
-    make $makeopt clean >> make.simple.clean 2>&1
-    statusMakeDistClean=$?
-    echo '"make '"$makeopt"' clean" in '"`pwd`"' exited '"$statusMakeDistClean"
+                if test $statusMakeDist = 0
+                then
+                    make $makeopt clean >> make.simple.clean 2>&1
+                    statusMakeDistClean=$?
+                    echo '"make '"$makeopt"' clean" in '"`pwd`"' exited '"$statusMakeDistClean"
 
-    cd ../NewPlan
-    make $makeopt clean >> make.clean 2>&1
-    statusMakeClean=$?
-    echo '"make '"$makeopt"' clean" in '"`pwd`"' exited '"$statusMakeClean"
-
-    cd ..
+                    if test $statusMakeDistClean = 0
+                    then
+                        cd ../NewPlan
+                        make $makeopt clean >> make.clean 2>&1
+                        statusMakeClean=$?
+                        echo '"make '"$makeopt"' clean" in '"`pwd`"' exited '"$statusMakeClean"
+                        cd ..
+                    fi
+                fi
+            fi
+        fi
+    fi
 
     if test $statusMakeTar$status$statusTarExtract$statusMakeDist$statusMakeDistClean$statusMakeClean = 000000
     then
