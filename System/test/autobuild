@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.23 2003-01-14 02:21:29 wedgingt Exp $
+# $Id: autobuild,v 1.24 2003-01-15 04:54:02 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -9,12 +9,17 @@ email=checkins@postdoc.arc.nasa.gov
 # Subdirectories to build in
 subdirs='cvs optFast profOptFast shareOptFast debug noErr shareOptNoErr'
 
+# CVS info
+CVS_RSH=ssh
+CVSROOT='copernicus.arc.nasa.gov:/home/cvs/ISG-Repository'
+export CVS_RSH CVSROOT
+
 # Don't try to use X11 (mostly to prevent Purify from doing so)
 DISPLAY=
 export DISPLAY
 
 # Make sure that libstdc++.so is in this
-LD_LIBRARY_PATH=/usr/apps/WS6.0/SUNWspro/lib:/usr/lib:/usr/dt/lib:/usr/openwin/lib:/usr/local/lib
+LD_LIBRARY_PATH='/usr/apps/WS6.0/SUNWspro/lib:/usr/lib:/usr/dt/lib:/usr/openwin/lib:/usr/local/lib'
 export LD_LIBRARY_PATH
 
 # Apply limits; some compiles run out of swap space.
