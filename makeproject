@@ -74,7 +74,7 @@ echo "" >> $DIRECTORY/$NAME-model.nddl
 echo "/**" >> $DIRECTORY/$NAME-model.nddl
 echo " * @brief Place holder class with a single predicate" >> $DIRECTORY/$NAME-model.nddl
 echo " */" >> $DIRECTORY/$NAME-model.nddl
-echo "class YourObject extends Timeline {" >> $DIRECTORY/$NAME-model.nddl
+echo "class YourObject {" >> $DIRECTORY/$NAME-model.nddl
 echo " predicate helloWorld{} /*!< Predicate with no arguments */" >> $DIRECTORY/$NAME-model.nddl
 echo "}" >> $DIRECTORY/$NAME-model.nddl
 echo "" >> $DIRECTORY/$NAME-model.nddl
