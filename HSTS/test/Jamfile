@@ -75,9 +75,6 @@ RunEUROPATest robotTests : req1.nddl ;
 #   Verified as mentioned in PLASMA/MigrationNotes (entry 8 currently).
 # RunEUROPATest roverTests : rover2-test.nddl rover2a-test.nddl rover2b-test.nddl ;
 
-# Example; not yet converted or committed
-# RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
-
 # Converter and/or NDDL compiler has bugs.  Reported as GNATS 2763.
 # RunEUROPATest merTests : R1-files-p1.nddl R1-files-p2.nddl R1-files-p3.nddl R2-files-R21-Bill.nddl R2-files-R21-IDD1.nddl
 #         R2-files-R21-IDD2.nddl R2-files-R21-IDD3.nddl R2-files-R21-PMA1.nddl R2-files-R21-PMA2.nddl
@@ -85,5 +82,10 @@ RunEUROPATest robotTests : req1.nddl ;
 
 RunEUROPATest gnatsTests : C3-init.nddl NoBranchBug-init.nddl P4-C3-init.nddl P4-C3eq-init.nddl SC-init.nddl condasame-init.nddl
         rover-fixed-init.nddl sum-init.nddl ;
+
+RunEUROPATest dnpTests : DNP.timeline.nddl ;
+
+# Example; not yet converted or committed
+# RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
 
 } # PLASMA_READY
