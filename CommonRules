@@ -406,6 +406,26 @@ rule MainFromObjects
 	Link $(_t) : $(_s) ;
 }
 
+rule MakeLocate
+{
+	# MakeLocate targets : directory ;
+
+	# Sets special variable LOCATE on targets, and arranges
+	# with MkDir to create target directory.
+
+	# Note we grist the directory name with 'dir',
+	# so that directory path components and other
+	# targets don't conflict.
+
+	if $(>)
+	{
+		LOCATE on $(<) = $(>) ;
+		Depends $(<) : $(>[1]:G=dir) ;
+		MkDir $(>[1]:G=dir) ;
+	}
+}
+							 
+
 rule MkDir
 {
 	# MkDir directory ;
