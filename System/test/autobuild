@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.31 2003-01-23 17:58:38 wedgingt Exp $
+# $Id: autobuild,v 1.32 2003-01-26 21:39:02 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -7,7 +7,7 @@
 email=checkins@postdoc.arc.nasa.gov
 
 # Subdirectories to build in
-subdirs='cvs optFast profOptFast shareOptFast debug noErr shareOptNoErr'
+subdirs='cvs fast opt optFast profOptFast shareOptFast debug noErr shareOptNoErr'
 
 # CVS info
 CVS_RSH=ssh
