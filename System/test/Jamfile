@@ -24,9 +24,9 @@ for model in
         k9.backtrack.moderate-transaction.nddl k9-transaction.nddl 
         path-filter-transaction.nddl foreach-transaction.nddl force-object-distribution.nddl 
         resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl 
-        parent-predicate.nddl k9-initial.nddl backtr.nddl 
+        parent-predicate.nddl k9-initial.nddl backtr.nddl
         better-res.nddl CAPER.nddl monkey1monkey-transaction.nddl
-	basic-model-backtrack.nddl EOS-backtrack-test.nddl
+        basic-model-backtrack.nddl EOS-backtrack-test.nddl
 {
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
@@ -64,20 +64,22 @@ for model in
   }
 }
 
-local model2 ;
-for model2 in
-	basic-types.nddl
-	Rover-transaction.nddl
-        k9.backtrack.moderate-transaction.nddl
-        rejection.nddl
-        resource-backtrack-test.nddl
-        better-res.nddl
-        constrain-transaction.nddl
-        foreach-transaction.nddl
-        force-object-distribution.nddl
-{
-	local exe = $(model:S=) ;
-	LocalDepends run-checkin-tests : run-problem-$(exe) ;
+if $(LIBRARIES) = SHARED {
+        local model2 ;
+        for model2 in
+	        basic-types.nddl
+        	Rover-transaction.nddl
+                k9.backtrack.moderate-transaction.nddl
+                rejection.nddl
+                resource-backtrack-test.nddl
+                better-res.nddl
+                constrain-transaction.nddl
+                foreach-transaction.nddl
+                force-object-distribution.nddl
+        {
+        	local exe = $(model:S=) ;
+        	LocalDepends run-checkin-tests : run-problem-$(exe) ;
+        }
 }
 
 #
