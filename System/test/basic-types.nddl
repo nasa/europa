@@ -1,0 +1,48 @@
+
+#include "NddlWorld.nddl"
+
+enum Fruit { apple, orange, grape, banana }
+enum Color { red, yellow, green, blue, purple }
+
+bool w;
+bool w1 = true;
+bool w2 = false;
+
+int x;
+// int x0 = {13};
+int x1 = 3;
+int x2 = [3 5];
+int x3 = [-inf 5];
+int x4 = [3 +inf];
+
+float y;
+// float y0 = {1.5};
+float y1 = 3.5;
+float y2 = [3.5 4.5];
+float y3 = [3.5 4];
+float y4 = [3 4.5];
+float y5 = [3 4];
+float y6 = [3 +inf];
+float y7 = [-inf 3];
+
+string z;
+string z1 = "hi";
+
+Fruit f;
+Fruit f0 = apple;
+Fruit f1 = 'apple';
+Fruit f2 = 'orange';
+Fruit f3 = orange;
+Fruit f4 = { orange, grape, banana };
+Fruit f5 = { orange, red, yellow };
+
+Color c;
+Color c0 = apple;
+Color c1 = 'apple';
+Color c2 = 'purple';
+Color c3 = purple;
+Color c4 = { purple, grape, banana };
+Color c5 = { purple, red, yellow };
+
+NddlWorld world = new NddlWorld(0, 10, 100);
+close();
