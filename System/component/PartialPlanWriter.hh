@@ -5,6 +5,9 @@
 
 #include <list>
 
+#include "../CBPlanner/CBPlanner.hh"
+#include "../CBPlanner/DecisionManagerListener.hh"
+#include "../CBPlanner/DecisionPoint.hh"
 #include "../ConstraintEngine/ConstraintEngineListener.hh"
 #include "../ConstraintEngine/DomainListener.hh"
 #include "../ConstraintEngine/Entity.hh"
@@ -42,15 +45,20 @@ namespace Prototype {
       PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &);
       PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &, 
                         const RulesEngineId &);
+			PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &,
+												const RulesEngineId &, const CBPlannerId &);
       ~PartialPlanWriter(void);
-      void notifyPropagationCompleted(void);
+      //void notifyPropagationCompleted(void);
       void write(void);
     private:
+			bool havePlanner;
       long long int seqId, ppId;
       int numTokens, numConstraints, numVariables, numTransactions;
       int stepsPerWrite, transactionId, nstep, tokenRelationId, writeCounter, noWrite;
       ConstraintEngineId *ceId;
       PlanDatabaseId *pdbId;
+			RulesEngineId *reId;
+			CBPlannerId *plId;
       std::list<Transaction> *transactionList;
       std::ofstream *transOut, *statsOut, *ruleMapOut;
       std::string dest;
@@ -70,6 +78,7 @@ namespace Prototype {
 			   std::ofstream &);
       void outputConstraint(const ConstraintId &, std::ofstream &, std::ofstream &);
       void outputInstant(const InstantId &, const int, std::ofstream &);
+			void outputDecision(const DecisionPointId &, std::ofstream &);
       const std::string getUpperBoundStr(IntervalDomain &dom) const;
       const std::string getLowerBoundStr(IntervalDomain &dom) const;
       const std::string getEnumerationStr(EnumeratedDomain &dom) const;
@@ -102,24 +111,40 @@ namespace Prototype {
       void notifyAdded(const ConstrainedVariableId &); //VARIABLE_CREATED
       void notifyRemoved(const ConstrainedVariableId &); //VARIABLE_DELETED
       void notifyChanged(const ConstrainedVariableId &, const DomainListener::ChangeType &);
+			void notifyPropagationCommenced(void);
+			void notifyPropagationPreempted(void);
+			void notifyPropagationCompleted(void);
 
       /****From RulesEngineListener****/
       void notifyExecuted(const RuleInstanceId &);
       void notifyUndone(const RuleInstanceId &);
 
+
+			/****From DecisionManagerListener****/
+			void notifyAssignNextStarted(const DecisionPointId &dec);
+			void notifyAssignNextFailed(const DecisionPointId &dec);
+			void notifyAssignNextSucceeded(const DecisionPointId &dec);
+			void notifyAssignCurrentStarted(const DecisionPointId &dec);
+			void notifyAssignCurrentFailed(const DecisionPointId &dec);
+			void notifyAssignCurrentSucceeded(const DecisionPointId &dec);
+			void notifyRetractStarted(const DecisionPointId &dec);
+			void notifyRetractFailed(const DecisionPointId &dec);
+			void notifyRetractSucceeded(const DecisionPointId &dec);
+
       class PPWPlanDatabaseListener;
       class PPWConstraintEngineListener;
       class PPWRulesEngineListener;
+			class PPWPlannerListener;
 
       friend class PPWPlanDatabaseListener;
       friend class PPWConstraintEngineListener;
       friend class PPWRulesEngineListener;
+			friend class PPWPlannerListener;
 
       class PPWPlanDatabaseListener : public PlanDatabaseListener {
       public:
         PPWPlanDatabaseListener(const PlanDatabaseId &planDb, PartialPlanWriter *planWriter)
           : PlanDatabaseListener(planDb), ppw(planWriter) {
-          std::cout << "PPWPlanDatbaseListener: " << getId() << std::endl;
         }
       protected:
       private:
@@ -148,11 +173,12 @@ namespace Prototype {
         PPWConstraintEngineListener(const ConstraintEngineId &ceId, 
                                     PartialPlanWriter *planWriter) : 
           ConstraintEngineListener(ceId), ppw(planWriter) {
-          std::cout << "PPWConstraintEngineListener: " << getId() << std::endl;
         }
-        void notifyPropagationCompleted(void){ppw->notifyPropagationCompleted();}
       protected:
       private:
+				void notifyPropagationCommenced(void){ppw->notifyPropagationCommenced();}
+				void notifyPropagationPreempted(void){ppw->notifyPropagationPreempted();}
+        void notifyPropagationCompleted(void){ppw->notifyPropagationCompleted();}
         void notifyAdded(const ConstraintId &c){ppw->notifyAdded(c);}
         void notifyRemoved(const ConstraintId &c){ppw->notifyRemoved(c);}
         void notifyExecuted(const ConstraintId &c){ppw->notifyExecuted(c);}
@@ -168,7 +194,6 @@ namespace Prototype {
       public:
         PPWRulesEngineListener(const RulesEngineId &reId, PartialPlanWriter *planWriter) :
           RulesEngineListener(reId), ppw(planWriter) {
-          std::cout << "PPWRulesEngineListener: " << getId() << std::endl;
         }
       protected:
       private:
@@ -176,6 +201,25 @@ namespace Prototype {
         void notifyUndone(const RuleInstanceId &rule) {ppw->notifyUndone(rule);}
         PartialPlanWriter *ppw;
       };
+
+			class PPWPlannerListener : public DecisionManagerListener {
+			public:
+				PPWPlannerListener(const CBPlannerId &plannerId, PartialPlanWriter *planWriter) :
+					DecisionManagerListener(plannerId->getDecisionManager()), ppw(planWriter) {
+				}
+				void notifyAssignNextStarted(const DecisionPointId &dec){ppw->notifyAssignNextStarted(dec);}
+				void notifyAssignNextFailed(const DecisionPointId &dec){ppw->notifyAssignNextFailed(dec);}
+				void notifyAssignNextSucceeded(const DecisionPointId &dec){ppw->notifyAssignNextSucceeded(dec);}
+				void notifyAssignCurrentStarted(const DecisionPointId &dec){ppw->notifyAssignCurrentStarted(dec);}
+				void notifyAssignCurrentFailed(const DecisionPointId &dec){ppw->notifyAssignCurrentFailed(dec);}
+				void notifyAssignCurrentSucceeded(const DecisionPointId &dec){ppw->notifyAssignCurrentSucceeded(dec);}
+				void notifyRetractStarted(const DecisionPointId &dec){ppw->notifyRetractStarted(dec);}
+				void notifyRetractFailed(const DecisionPointId &dec){ppw->notifyRetractFailed(dec);}
+				void notifyRetractSucceeded(const DecisionPointId &dec){ppw->notifyRetractSucceeded(dec);}				
+			protected:
+			private:
+				PartialPlanWriter *ppw;
+			};
     };
   }
 }
