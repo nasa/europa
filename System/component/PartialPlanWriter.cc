@@ -26,8 +26,14 @@
 // #include "../Resource/ResourceDefs.hh"
 // #include "../Resource/Transaction.hh"
 
+#include "../RulesEngine/Rule.hh"
+#include "../RulesEngine/RulesEngineDefs.hh"
+
 #include <exception>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <stdexcept>
 #include <set>
@@ -46,14 +52,14 @@
 
 #define FatalError(s) { std::cerr << "At " << __FILE__ << ":" << __PRETTY_FUNCTION__ << ", line " << __LINE__ << std::endl; std::cerr << (s) << std::endl; exit(-1);}
 #define FatalErrno(){FatalError(strerror(errno))}
-
+#define FatalErr(s) {std::cerr << (s) << std::endl; FatalErrno();}
 const char *envStepsPerWrite = "PPW_WRITE_NSTEPS";
 
 const char *envAltWriteDest = "PPW_WRITE_DEST";
 
 const char *envPPWNoWrite = "PPW_DONT_WRITE";
 
-enum transactionTypes {OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_ADDED_TO_OBJECT, 
+enum transactionNames {OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_ADDED_TO_OBJECT, 
                        TOKEN_CLOSED, TOKEN_ACTIVATED, TOKEN_DEACTIVATED, TOKEN_MERGED, TOKEN_SPLIT,
                        TOKEN_REJECTED, TOKEN_REINSTATED, TOKEN_DELETED, TOKEN_REMOVED, 
                        TOKEN_INSERTED, TOKEN_FREED, CONSTRAINT_CREATED, CONSTRAINT_DELETED,
@@ -62,11 +68,48 @@ enum transactionTypes {OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_
                        VAR_DOMAIN_EMPTIED, VAR_DOMAIN_UPPER_BOUND_DECREASED, 
                        VAR_DOMAIN_LOWER_BOUND_INCREASED, VAR_DOMAIN_BOUNDS_RESTRICTED,
                        VAR_DOMAIN_VALUE_REMOVED, VAR_DOMAIN_RESTRICT_TO_SINGLETON,
-                       VAR_DOMAIN_SET, VAR_DOMAIN_SET_TO_SINGLETON, VAR_DOMAIN_CLOSED, ERROR};
+                       VAR_DOMAIN_SET, VAR_DOMAIN_SET_TO_SINGLETON, VAR_DOMAIN_CLOSED, 
+                       RULE_EXECUTED, RULE_UNDONE, ERROR};
 
 const int transactionTotal = ERROR + 1;
 
-const char *transactionTypeNames[transactionTotal] = { 
+const char *CREATION = "CREATION";
+const char *DELETION = "DELETION";
+const char *ADDITION = "ADDITION";
+const char *REMOVAL = "REMOVAL";
+const char *CLOSURE = "CLOSURE";
+const char *RESTRICTION = "RESTRICTION";
+const char *RELAXATION = "RELAXATION";
+const char *EXECUTION = "EXECUTION";
+const char *SPECIFICATION = "SPECIFICATION";
+const char *UNDO = "UNDO";
+const char *NONE = "";
+
+const char *transactionTypeStrs[transactionTotal] = {
+  //OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_ADDED_TO_OBJECT,
+  CREATION, DELETION, CREATION, ADDITION,
+    // TOKEN_CLOSED, TOKEN_ACTIVATED, TOKEN_DEACTIVATED, TOKEN_MERGED, TOKEN_SPLIT,
+    CLOSURE, NONE, NONE, NONE, NONE,
+    //TOKEN_REJECTED, TOKEN_REINSTATED, TOKEN_DELETED, TOKEN_REMOVED,
+    NONE, NONE, DELETION, REMOVAL, 
+    //TOKEN_INSERTED, TOKEN_FREED, CONSTRAINT_CREATED, CONSTRAINT_DELETED,
+    NONE, NONE, CREATION, DELETION,
+    // CONSTRAINT_EXECUTED, VAR_CREATED, VAR_DELETED, VAR_DOMAIN_RELAXED,
+    EXECUTION, CREATION, DELETION, RELAXATION,
+    //VAR_DOMAIN_RESTRICTED, VAR_DOMAIN_SPECIFIED, VAR_DOMAIN_RESET, 
+    RESTRICTION, SPECIFICATION, RELAXATION, 
+    //VAR_DOMAIN_EMPTIED, VAR_DOMAIN_UPPER_BOUND_DECREASED, 
+    RESTRICTION, RESTRICTION,
+    //VAR_DOMAIN_LOWER_BOUND_INCREASED, VAR_DOMAIN_BOUNDS_RESTRICTED,
+    RESTRICTION, RESTRICTION,
+    //VAR_DOMAIN_VALUE_REMOVED, VAR_DOMAIN_RESTRICT_TO_SINGLETON,
+    RESTRICTION, RESTRICTION,
+    //VAR_DOMAIN_SET, VAR_DOMAIN_SET_TO_SINGLETON, VAR_DOMAIN_CLOSED,
+    SPECIFICATION, SPECIFICATION, CLOSURE, 
+    //RULE_EXECUTED, RULE_UNDONE, ERROR
+    EXECUTION, UNDO, "ERROR"};
+ 
+const char *transactionNameStrs[transactionTotal] = { 
   "OBJECT_CREATED", "OBJECT_DELETED", "TOKEN_CREATED", "TOKEN_ADDED_TO_OBJECT", "TOKEN_CLOSED",
     "TOKEN_ACTIVATED", "TOKEN_DEACTIVATED", "TOKEN_MERGED", "TOKEN_SPLIT", "TOKEN_REJECTED",
     "TOKEN_REINSTATED", "TOKEN_DELETED", "TOKEN_REMOVED", "TOKEN_INSERTED", "TOKEN_FREED",
@@ -76,7 +119,8 @@ const char *transactionTypeNames[transactionTotal] = {
     "VARIABLE_DOMAIN_UPPER_BOUND_DECREASED", "VARIABLE_DOMAIN_LOWER_BOUND_INCREASED", 
     "VARIABLE_DOMAIN_BOUNDS_RESTRICTED", "VARIABLE_DOMAIN_VALUE_REMOVED", 
     "VARIABLE_DOMAIN_RESTRICT_TO_SINGLETON", "VARIABLE_DOMAIN_SET", 
-    "VARIABLE_DOMAIN_SET_TO_SINGLETON", "VARIABLE_DOMAIN_CLOSED", "ERROR"};
+    "VARIABLE_DOMAIN_SET_TO_SINGLETON", "VARIABLE_DOMAIN_CLOSED", "RULE_EXECUTED", "RULE_UNDONE",
+    "ERROR"};
 
 const char *sourceTypeNames[3] = {"SYSTEM", "USER", "UNKNOWN"};
 
@@ -99,6 +143,8 @@ enum tokenTypes {T_INTERVAL = 0, T_TRANSACTION};
 
 #define TAB "\t"
 #define COLON ":"
+#define SEQ_COL_SEP (unsigned char) 0x1e
+#define SEQ_LINE_SEP (unsigned char) 0x1f
 const std::string SNULL("\\N");
 const std::string CONSTRAINT_TOKEN("constraintToken");
 const std::string COMMA(",");
@@ -122,6 +168,8 @@ const std::string STEP("step");
 const std::string PARTIAL_PLAN_STATS("/partialPlanStats");
 const std::string TRANSACTIONS("/transactions");
 const std::string SEQUENCE("/sequence");
+const std::string RULES("/rules");
+const std::string RULES_MAP("/rulesMap");
 const std::string PARTIAL_PLAN(".partialPlan");
 const std::string OBJECTS(".objects");
 const std::string TOKENS(".tokens");
@@ -154,9 +202,24 @@ namespace Prototype {
       return (((long long int) currTime.tv_sec) * 1000) + (currTime.tv_usec / 1000);
     }
 
+    PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb,
+                                         const ConstraintEngineId &ceId2,
+                                         const RulesEngineId &reId) {
+      new PPWPlanDatabaseListener(planDb, this);
+      new PPWConstraintEngineListener(ceId2, this);
+      new PPWRulesEngineListener(reId, this);
+      commonInit(planDb, ceId2);
+    }
+
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb, 
-					 const ConstraintEngineId &ceId2) 
-      : PlanDatabaseListener(planDb), ConstraintEngineListener(ceId2) {
+                                         const ConstraintEngineId &ceId2) {
+      new PPWPlanDatabaseListener(planDb, this);
+      new PPWConstraintEngineListener(ceId2, this);
+      commonInit(planDb, ceId2);
+    }
+
+    void PartialPlanWriter::commonInit(const PlanDatabaseId &planDb,
+                                       const ConstraintEngineId &ceId2) {
       nstep = 0;
       struct timeval currTime;
       if(gettimeofday(&currTime, NULL)) {
@@ -232,15 +295,53 @@ namespace Prototype {
 	}
 	std::string ppStats(dest + PARTIAL_PLAN_STATS);
 	std::string ppTransactions(dest + TRANSACTIONS);
+        std::string ppRulesMap(dest + RULES_MAP);
+        std::string seqRules(dest + RULES);
 	std::string seqStr(dest + SEQUENCE);
 	std::ofstream seqOut(seqStr.c_str());
 	if(!seqOut) {
 	  std::cerr << "Failed to open " << seqStr << std::endl;
 	  FatalErrno();
 	}
-	seqOut << dest << TAB << seqId << std::endl;
-	seqOut.close();
+	seqOut << dest << SEQ_COL_SEP << seqId << SEQ_COL_SEP;// << std::endl;
+	//seqOut.close();
+        
+        std::ofstream rulesOut(seqRules.c_str());
+        if(!rulesOut) {
+          std::cerr << "Failed to open " << seqRules << std::endl;
+          FatalErrno();
+        }
       
+        //const std::multimap<double, RuleId> rules = Rule::getRules();
+        std::set<std::string> modelFiles;
+        char realModelPaths[PATH_MAX];
+        for(std::multimap<double, RuleId>::const_iterator it = Rule::getRules().begin(); 
+            it != Rule::getRules().end(); ++it) {
+          std::string ruleSrc = ((*it).second)->getSource().toString();
+          std::string modelPath = ruleSrc.substr(1, ruleSrc.rfind(",")-1);
+          std::string lineNumber = ruleSrc.substr(ruleSrc.rfind(","), ruleSrc.size()-1);
+          lineNumber.replace(lineNumber.rfind('"'), 1, "\0");
+          if(realpath(modelPath.c_str(), realModelPaths) == NULL)
+            FatalErr(modelPath);
+          modelPath = realModelPaths;
+          modelFiles.insert(modelPath);
+          rulesOut << seqId << TAB << (*it).second->getKey() << TAB << modelPath << lineNumber 
+                   << std::endl;
+        }
+        {
+          std::ostream_iterator<unsigned char> out(seqOut);
+          for(std::set<std::string>::const_iterator it = modelFiles.begin(); 
+              it != modelFiles.end(); ++it) {
+            seqOut << "--begin " << *it << std::endl;
+            std::ifstream modelIn((*it).c_str());
+            modelIn.unsetf(std::ios::skipws);
+            std::copy(std::istream_iterator<unsigned char>(modelIn), 
+                      std::istream_iterator<unsigned char>(), out);
+          }
+        }
+        seqOut << SEQ_LINE_SEP;
+        seqOut.close();
+
 	transOut = new std::ofstream(ppTransactions.c_str());
 	if(!(*transOut)) {
 	  FatalErrno();
@@ -249,6 +350,10 @@ namespace Prototype {
 	if(!(*statsOut)) {
 	  FatalErrno();
 	}
+        ruleMapOut = new std::ofstream(ppRulesMap.c_str());
+        if(!(*ruleMapOut)) {
+          FatalErrno();
+        }
       }
     }
   
@@ -257,8 +362,10 @@ namespace Prototype {
         //write();
 	transOut->close();
 	statsOut->close();
+        ruleMapOut->close();
 	delete transOut;
 	delete statsOut;
+        delete ruleMapOut;
       }
     }
   
@@ -1024,7 +1131,37 @@ namespace Prototype {
 	}
       }
     }
-  
+
+    void PartialPlanWriter::notifyExecuted(const RuleInstanceId &ruleId) {
+      if(stepsPerWrite) {
+        const std::vector<TokenId> slaves = ruleId->getSlaves();
+        int ruleKey = ruleId->getRule()->getKey();
+        int masterKey = ruleId->getToken()->getKey();
+        for(std::vector<TokenId>::const_iterator it = slaves.begin(); it != slaves.end(); ++it) {
+          (*ruleMapOut) << seqId << TAB << nstep << TAB << ruleKey << TAB << masterKey << TAB 
+                        << (*it)->getKey() << std::endl;
+        }
+
+        std::stringstream info;
+        info << ruleKey << COMMA << masterKey;
+        transactionList->push_back(Transaction(RULE_EXECUTED, ruleId->getKey(), SYSTEM,
+                                               transactionId++, seqId, nstep,
+                                               std::string(info.str())));
+        numTransactions++;
+      }
+    }
+    
+    void PartialPlanWriter::notifyUndone(const RuleInstanceId &ruleId) {
+      if(stepsPerWrite) {
+        std::stringstream info;
+        info << ruleId->getRule()->getKey() << COMMA << ruleId->getToken()->getKey();
+        transactionList->push_back(Transaction(RULE_UNDONE, ruleId->getKey(), SYSTEM,
+                                               transactionId++, seqId, nstep,
+                                               std::string(info.str())));
+        numTransactions++;
+      }
+    }
+
     void PartialPlanWriter::notifyPropagationCompleted(void) {
       writeCounter++;
       if(writeCounter == stepsPerWrite && noWrite == 0) {
@@ -1084,9 +1221,9 @@ namespace Prototype {
     }
 
     void Transaction::write(std::ostream &out, long long int ppId) const {
-      out << transactionTypeNames[transactionType] << TAB << objectKey << TAB
-	  << sourceTypeNames[source] << TAB << id << TAB << stepNum << TAB
-	  << sequenceId << TAB << ppId << TAB << info << std::endl;
+      out << transactionNameStrs[transactionType] << TAB << transactionTypeStrs[transactionType]
+          << TAB << objectKey << TAB << sourceTypeNames[source] << TAB << id << TAB << stepNum 
+          << TAB << sequenceId << TAB << ppId << TAB << info << std::endl;
     }
   }
 }

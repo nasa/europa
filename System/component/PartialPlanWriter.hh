@@ -7,12 +7,17 @@
 
 #include "../ConstraintEngine/ConstraintEngineListener.hh"
 #include "../ConstraintEngine/DomainListener.hh"
+#include "../ConstraintEngine/Entity.hh"
 #include "../ConstraintEngine/Id.hh"
 #include "../ConstraintEngine/VariableChangeListener.hh"
 #include "../PlanDatabase/PlanDatabaseListener.hh"
 #include "../Resource/Resource.hh"
 #include "../Resource/ResourceDefs.hh"
 #include "../Resource/Transaction.hh"
+#include "../RulesEngine/RulesEngine.hh"
+#include "../RulesEngine/RulesEngineDefs.hh"
+#include "../RulesEngine/RulesEngineListener.hh"
+#include "../RulesEngine/RuleInstance.hh"
 
 namespace Prototype {
   namespace PlanWriter {
@@ -32,10 +37,11 @@ namespace Prototype {
       std::string info;
     };
 
-    class PartialPlanWriter: public PlanDatabaseListener, public ConstraintEngineListener/*, 
-											   public VariableChangeListener*/ {
+    class PartialPlanWriter {
     public:
       PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &);
+      PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &, 
+                        const RulesEngineId &);
       ~PartialPlanWriter(void);
       void notifyPropagationCompleted(void);
       void write(void);
@@ -46,8 +52,9 @@ namespace Prototype {
       ConstraintEngineId *ceId;
       PlanDatabaseId *pdbId;
       std::list<Transaction> *transactionList;
-      std::ofstream *transOut, *statsOut;
+      std::ofstream *transOut, *statsOut, *ruleMapOut;
       std::string dest;
+      void commonInit(const PlanDatabaseId &, const ConstraintEngineId &);
       void outputObject(const ObjectId &, const int, std::ofstream &, std::ofstream &);
       void outputToken(const TokenId &, const int, const int, const int, const int, 
                        const ObjectId &, std::ofstream &, std::ofstream &, std::ofstream &);
@@ -95,6 +102,76 @@ namespace Prototype {
       void notifyAdded(const ConstrainedVariableId &); //VARIABLE_CREATED
       void notifyRemoved(const ConstrainedVariableId &); //VARIABLE_DELETED
       void notifyChanged(const ConstrainedVariableId &, const DomainListener::ChangeType &);
+
+      /****From RulesEngineListener****/
+      void notifyExecuted(const RuleInstanceId &);
+      void notifyUndone(const RuleInstanceId &);
+
+      friend class PPWPlanDatabaseListener;
+      friend class PPWConstraintEngineListener;
+      friend class PPWRulesEngineListener;
+
+      class PPWPlanDatabaseListener : public PlanDatabaseListener {
+      public:
+        PPWPlanDatabaseListener(const PlanDatabaseId &planDb, PartialPlanWriter *planWriter)
+          : PlanDatabaseListener(planDb), ppw(planWriter) {
+          std::cout << "PPWPlanDatbaseListener: " << getId() << std::endl;
+        }
+      protected:
+      private:
+        void notifyAdded(const ObjectId &o){ppw->notifyAdded(o);}
+        void notifyRemoved(const ObjectId &o){ppw->notifyRemoved(o);}
+        void notifyAdded(const TokenId &t){ppw->notifyAdded(t);}
+        void notifyAdded(const ObjectId &o, const TokenId &t){ppw->notifyAdded(o,t);}
+        void notifyClosed(const TokenId &t){ppw->notifyClosed(t);}
+        void notifyActivated(const TokenId &t){ppw->notifyActivated(t);}
+        void notifyDeactivated(const TokenId &t){ppw->notifyDeactivated(t);}
+        void notifyMerged(const TokenId &t){ppw->notifyMerged(t);}
+        void notifySplit(const TokenId &t){ppw->notifySplit(t);}
+        void notifyRejected(const TokenId &t){ppw->notifyRejected(t);}
+        void notifyReinstated(const TokenId &t){ppw->notifyReinstated(t);}
+        void notifyRemoved(const TokenId &t){ppw->notifyRemoved(t);}
+        void notifyRemoved(const ObjectId &o, const TokenId &t){ppw->notifyRemoved(o,t);}
+        void notifyConstrained(const ObjectId &o, const TokenId &t1, const TokenId &t2)
+        {ppw->notifyConstrained(o,t1,t2);}
+        void notifyFreed(const ObjectId &o, const TokenId &t){ppw->notifyFreed(o,t);}
+
+        PartialPlanWriter *ppw;
+      };
+      
+      class PPWConstraintEngineListener : public ConstraintEngineListener {
+      public:
+        PPWConstraintEngineListener(const ConstraintEngineId &ceId, 
+                                    PartialPlanWriter *planWriter) : 
+          ConstraintEngineListener(ceId), ppw(planWriter) {
+          std::cout << "PPWConstraintEngineListener: " << getId() << std::endl;
+        }
+        void notifyPropagationCompleted(void){ppw->notifyPropagationCompleted();}
+      protected:
+      private:
+        void notifyAdded(const ConstraintId &c){ppw->notifyAdded(c);}
+        void notifyRemoved(const ConstraintId &c){ppw->notifyRemoved(c);}
+        void notifyExecuted(const ConstraintId &c){ppw->notifyExecuted(c);}
+        void notifyAdded(const ConstrainedVariableId &v){ppw->notifyAdded(v);}
+        void notifyRemoved(const ConstrainedVariableId &v){ppw->notifyRemoved(v);}
+        void notifyChanged(const ConstrainedVariableId &v, const DomainListener::ChangeType &t)
+        {ppw->notifyChanged(v,t);}
+
+        PartialPlanWriter *ppw;
+      };
+
+      class PPWRulesEngineListener : public RulesEngineListener {
+      public:
+        PPWRulesEngineListener(const RulesEngineId &reId, PartialPlanWriter *planWriter) :
+          RulesEngineListener(reId), ppw(planWriter) {
+          std::cout << "PPWRulesEngineListener: " << getId() << std::endl;
+        }
+      protected:
+      private:
+        void notifyExecuted(const RuleInstanceId &rule) {ppw->notifyExecuted(rule);}
+        void notifyUndone(const RuleInstanceId &rule) {ppw->notifyUndone(rule);}
+        PartialPlanWriter *ppw;
+      };
     };
   }
 }
