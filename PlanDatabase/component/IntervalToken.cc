@@ -58,6 +58,7 @@ namespace Prototype{
 						    m_allVariables.size(),
 						    m_planDatabase->getConstraintEngine(), 
 						    startBaseDomain,
+						    true,
 						    LabelStr("IntervalTokenStart")))->getId();
     m_allVariables.push_back(m_start);
 
@@ -65,6 +66,7 @@ namespace Prototype{
 						  m_allVariables.size(),
 						  m_planDatabase->getConstraintEngine(), 
 						  endBaseDomain,
+						  true,
 						  LabelStr("IntervalTokenEnd")))->getId();
     m_allVariables.push_back(m_end);
 
