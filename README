@@ -4,9 +4,9 @@ software library for representation and reasoning with plans within a
 constraint-based paradigm. Our goal in developing PLASMA is to provide a
 fast, flexible, extensible, reusable technology platform for building
 planning and scheduling applications suitable for space
-exploration. PLASMA is derived from EUROPA [] which has been the core
+exploration. PLASMA is derived from EUROPA which has been the core
 planning technology for a variety of NASA-relevant research and mission
-application. A notable example is MAPGEN [], the ground-based daily
+application. A notable example is MAPGEN, the ground-based daily
 activity planning system for the Mars Exploration Rover mission. EUROPA
 in turn is derived from HSTS [] which was the planner for the Remote
 Agent[]. PLASMA builds on the legacies of EUROPA and HSTS in its support
