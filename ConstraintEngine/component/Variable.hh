@@ -210,8 +210,7 @@ namespace Prototype
 
   template<class DomainType>
   bool Variable<DomainType>::isCompatible(const ConstrainedVariableId& var) const {
-    Europa::Id<Variable <DomainType> > id(var);
-    return (!var.isNoId());
+    return Europa::Id<Variable <DomainType> >::convertable(var);
   }
 
   template<class DomainType>
