@@ -11,10 +11,15 @@ ModuleObjects $(HSTS_Test_Files:S=.cc) : HSTS ;
 
 ModuleMain hsts-module-tests : $(HSTS_Test_Files:S=$(SUFOBJ)) module-tests.cc : HSTS : CBPlanner ;
 RunModuleMain run-hsts-module-tests : hsts-module-tests ;
+
+# Commented out tests are failing for various reasons; see each test for more info.
 LocalDepends tests : run-hsts-module-tests
         monkey-timeline monkey-timeline-hacked monkey-timeline-hacked2 monkey-timeline-hacked3
-#       monkey1Tests # Failing; see below
-#       monkey2-timeline2 monkey2-timeline22 monkey2-timeline23 # Failing; see below
+        monkey1-timeline1
+#       monkey1-timeline-objvar
+#       monkey1-timeline-twomonkeys-objvar
+#       monkey1-timeline-twomonkeys
+#       monkey2-timeline2 monkey2-timeline22 monkey2-timeline23
         robotTests
 #       roverTests # Failing; see below
 #       roverCTTests # Failing; see below
@@ -76,16 +81,21 @@ RunEUROPATest monkey-timeline-hacked2 : timeline-hacked2.nddl ;
 RunEUROPATest monkey-timeline-hacked3 : timeline-hacked3.nddl ;
 
 # Failing; see GNATS 2759, 2760, and 2701.
-#RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
-#RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
-#RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nddl ;
-#RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
+RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
+
+# Failing: Utils/core/Id.hh:419: Error: Id<T>::convertable(org) is false
+RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
+
+# Failing: ConstraintEngine/core/ConstrainedVariable.cc:192: Error: internal_specifiedDomain().isMember(singletonValue) is false
+RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nddl ;
+
+# Failing: ConstraintEngine/core/ConstrainedVariable.cc:192: Error: internal_specifiedDomain().isMember(singletonValue) is false
+RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 
 # Failing
 # RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
 # RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
 # RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
-
 
 RunEUROPATest robotTests : req1.nddl ;
 
