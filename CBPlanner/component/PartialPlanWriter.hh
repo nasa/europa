@@ -81,10 +81,10 @@ namespace EUROPA {
       PlanDatabaseId *pdbId;
       RulesEngineId *reId;
       CBPlannerId *plId;
-      PPWPlanDatabaseListener* dbl;
-      PPWConstraintEngineListener* cel;
-      PPWRulesEngineListener* rel;
-      PPWPlannerListener* pl;
+      PlanDatabaseListenerId dbl;
+      ConstraintEngineListenerId cel;
+      RulesEngineListenerId rel;
+      DecisionManagerListenerId pl;
       std::ofstream *transOut, *statsOut, *ruleInstanceOut;
       std::list<std::string> sourcePaths;
       void initOutputDestination();
@@ -182,6 +182,7 @@ namespace EUROPA {
         PPWPlanDatabaseListener(const PlanDatabaseId &planDb, PartialPlanWriter *planWriter)
           : PlanDatabaseListener(planDb), ppw(planWriter) {
         }
+       virtual ~PPWPlanDatabaseListener() {}
       protected:
       private:
         void notifyAdded(const ObjectId &o){ppw->notifyAdded(o);}

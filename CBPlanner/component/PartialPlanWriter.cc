@@ -265,10 +265,10 @@ namespace EUROPA {
                                          const RulesEngineId &reId2,
                                          const CBPlannerId &plId2) {
       havePlanner = true;
-      dbl = new PPWPlanDatabaseListener(planDb, this);
-      cel = new PPWConstraintEngineListener(ceId2, this);
-      rel = new PPWRulesEngineListener(reId2, this);
-      pl = new PPWPlannerListener(plId2, this);
+      dbl = (new PPWPlanDatabaseListener(planDb, this))->getId();
+      cel = (new PPWConstraintEngineListener(ceId2, this))->getId();
+      rel = (new PPWRulesEngineListener(reId2, this))->getId();
+      pl = (new PPWPlannerListener(plId2, this))->getId();
       commonInit(planDb, ceId2);
       reId = const_cast<RulesEngineId *> (&reId2);
       plId = const_cast<CBPlannerId *> (&plId2);
@@ -278,10 +278,10 @@ namespace EUROPA {
                                          const ConstraintEngineId &ceId2,
                                          const RulesEngineId &reId2) {
       havePlanner = false;
-      dbl = new PPWPlanDatabaseListener(planDb, this);
-      cel = new PPWConstraintEngineListener(ceId2, this);
-      rel = new PPWRulesEngineListener(reId2, this);
-      pl = NULL;
+      dbl = (new PPWPlanDatabaseListener(planDb, this))->getId();
+      cel = (new PPWConstraintEngineListener(ceId2, this))->getId();
+      rel = (new PPWRulesEngineListener(reId2, this))->getId();
+      pl = DecisionManagerId::noId();
       commonInit(planDb, ceId2);
       reId = const_cast<RulesEngineId *> (&reId2);
       plId = NULL;
@@ -290,10 +290,10 @@ namespace EUROPA {
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb, 
                                          const ConstraintEngineId &ceId2) {
       havePlanner = false;
-      dbl = new PPWPlanDatabaseListener(planDb, this);
-      cel = new PPWConstraintEngineListener(ceId2, this);
-      rel = NULL;
-      pl = NULL;
+      dbl = (new PPWPlanDatabaseListener(planDb, this))->getId();
+      cel = (new PPWConstraintEngineListener(ceId2, this))->getId();
+      rel = RulesEngineListenerId::noId();
+      pl = DecisionManagerId::noId();
       commonInit(planDb, ceId2);
       reId = NULL;
       plId = NULL;
@@ -477,6 +477,14 @@ namespace EUROPA {
     }
   
     PartialPlanWriter::~PartialPlanWriter(void) {
+      check_error(dbl.isValid());
+      delete (PlanDatabaseListener*) dbl;
+      check_error(cel.isValid());
+      delete (ConstraintEngineListener*) cel;
+      if (!rel.isNoId())
+        delete (RulesEngineListener*) rel;
+      if (!pl.isNoId())
+        delete (DecisionManagerListener*) pl;
       if(stepsPerWrite) {
         if(destAlreadyInitialized) {
           transOut->close();
@@ -486,12 +494,6 @@ namespace EUROPA {
         }
         delete transactionList;
       }
-      delete dbl;
-      delete cel;
-      if (rel != NULL)
-         delete rel;
-      if (pl != NULL)
-         delete pl;
     }
 
     // accessor to get output destination full path
