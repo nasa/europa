@@ -6,23 +6,20 @@
  * EUROPA 
  */
 
-#include "Nddl.hh" /*!< Includes protypes required to load a model */
-#include "HSTSAssembly.hh" /*!< For using a standard EUROPA Assembly */
+#include "Nddl.hh" /**< Includes protypes required to load a model */
+#include "HSTSAssembly.hh" /**< For using a standard EUROPA Assembly */
+#include "DNPConstraints.hh" /**< Declares the DNP specific constraints */
 
 using namespace EUROPA;
 
 /**
  * @brief Uses the planner to solve a planning problem
  */
-int main(int argc, const char ** argv){
-
-  // read model, initial transactions, heuristic, plan id files
-
+int main(int argc, const char ** argv) {
   if (argc < 3) {
     std::cerr << "Error: must provide at least an initial transactions file." << std::endl;
     return -1;
   }
-
   if (argc > 5) {
     std::cerr << "Error: too many arguments.  Expecting at most 6: initial transactions, heuristics, and plan id files." << std::endl;
     return -1;
@@ -31,7 +28,6 @@ int main(int argc, const char ** argv){
   const char* txSource = "";
   const char* heurSource = "";
   const char* pidSource = "";
-
   for (int i = 1; i < argc; i++) {
     const char* arg = argv[i];
     if (arg[0] != '-') break;
@@ -69,11 +65,14 @@ int main(int argc, const char ** argv){
   // Initialize Library  
   HSTSAssembly::initialize();
 
+  // Register the DNP specific constraints.
+  registerDNPConstraints();
+
   // Allocate the schema with a call to the linked in model function - eventually
-  // make this called via dlopen
+  //   make this called via dlopen.
   SchemaId schema = NDDL::loadSchema();
 
-  // Enacpsualte allocation so that they go out of scope before calling terminate
+  // Encapsulate allocation so that they go out of scope before calling terminate.
   {  
     std::cerr << "Allocating assembly..." << std::endl;
 
