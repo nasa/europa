@@ -708,6 +708,13 @@ namespace Prototype {
     t1.cancel();
     assert(t1.isInactive());
     t1.merge(t0.getId());
+
+    // Test that we can allocate a token, but if we constrain it with any external entity, then the state variable will be restricted
+    // to exclude the possibility of rejecting the token.
+    {
+
+
+    }
     return true;
   }
 

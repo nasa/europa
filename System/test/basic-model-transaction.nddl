@@ -44,23 +44,5 @@ b.start.specify(100);
 
 a before b;
 
-/*
-World::initialState{
- // Enforce horizon bounds on initialState
- leq(object.m_horizonStart, start);
- leq(end, object.m_horizonEnd);
- 
- any(Rover.At a);
- eq(a.m_location, Lander);
- eq(a.start, 10);
-
- any(Rover.At b);
- eq(b.m_location, Rock);
- eq(b.start, 100);
-
- // This doesn't work because it doesn't hook it up with the temporal network
- //leq(a.end, b.start);
- a before b;
-}
-*/
+close();
 
