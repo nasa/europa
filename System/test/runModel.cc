@@ -14,6 +14,7 @@
 
 #include "Debug.hh"
 
+#include "LockManager.hh"
 //#include "LoadInitModel.hh"
 
 #include <string.h>
@@ -119,6 +120,8 @@ bool copyFromFile(){
 
 
 int main(int argc, const char ** argv) {
+  LockManager::instance().connect();
+  LockManager::instance().lock();
   const char* libPath;
   char* error_msg;
   void* libHandle;

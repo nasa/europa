@@ -14,6 +14,8 @@
 #include "Constraints.hh"
 #include "Debug.hh"
 
+#include "LockManager.hh"
+
 #include <fstream>
 
 // These are only needed for getrusage().
@@ -159,6 +161,9 @@ static void printRUsage(const std::string& when) {
 }
 
 int main(int argc, const char ** argv) {
+  LockManager::instance().connect();
+  LockManager::instance().lock();
+
   printRUsage("just inside main()");
 
   std::cerr << "Just inside main(), IdTable::size() is " << IdTable::size()

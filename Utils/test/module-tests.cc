@@ -26,10 +26,12 @@
 #include "LabelStr.hh"
 #include "TestData.hh"
 #include "Id.hh"
+#include "LockManager.hh"
 #include <list>
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <pthread.h>
 
 
 #ifndef EUROPA_FAST
@@ -288,6 +290,7 @@ private:
 };
 
 bool IdTests::test() {
+  LockManager::instance().lock();
   runTest(testBasicAllocation);
   runTest(testCollectionSupport);
   runTest(testDoubleConversion);
@@ -297,6 +300,7 @@ bool IdTests::test() {
   runTest(testBadIdUsage);
   runTest(testIdConversion);
   runTest(testConstId);
+  LockManager::instance().unlock();
   return true;
 }
 
@@ -537,11 +541,67 @@ private:
   }
 };
 
+class MultithreadTest {
+public:
+  static bool test() {
+    runTest(testConnection);
+    return true;
+  }
+private:
+  static bool testConnection() {
+    const int numthreads = 100;
+    new ThreadedLockManager(); //ensure that we have a threaded model
+    LockManager::instance().connect(LabelStr("Test"));
+    LockManager::instance().lock();
+    assert(LockManager::instance().getCurrentUser() == LabelStr("Test"));
+    LockManager::instance().unlock();
+    pthread_t threads[numthreads];
+    for(int i = 0; i < numthreads; i++)
+      pthread_create(&threads[i], NULL, connectionTestThread, NULL);
+    for(int i = numthreads - 1; i >= 0; i--)
+      pthread_join(threads[i], NULL);
+    new LockManager(); //return to your regularly scheduled threading
+    LockManager::instance().connect();
+    return true;
+  }
+  
+  static void* connectionTestThread(void* arg) {
+    const int numconnects = 100;
+    bool toggle = false;
+ 
+    for(int i = 0; i < numconnects; i++) {
+      if(toggle)
+        LockManager::instance().connect(LabelStr("FIRST_USER"));
+      else
+        LockManager::instance().connect(LabelStr("SECOND_USER"));
+      
+      LockManager::instance().lock();
+
+      if(toggle) {
+        assertTrue(LockManager::instance().getCurrentUser() == LabelStr("FIRST_USER"),
+                   "Failed to get expected user.  Instead got " + LockManager::instance().getCurrentUser().toString());
+      }
+      else {
+        assertTrue(LockManager::instance().getCurrentUser() == LabelStr("SECOND_USER"),
+                   "Failed to get expected user.  Instead got " + LockManager::instance().getCurrentUser().toString());
+      }
+
+      LockManager::instance().unlock();
+      LockManager::instance().disconnect();
+      toggle = !toggle;
+    }
+    pthread_exit(0);
+    return NULL;
+  }
+};
+
 int main() {
+  LockManager::instance().connect();
   runTestSuite(ErrorTest::test);
   runTestSuite(DebugTest::test);
   runTestSuite(IdTests::test);
   runTestSuite(LabelTests::test);
+  runTestSuite(MultithreadTest::test);
 
   std::cout << "Finished" << std::endl;
 }

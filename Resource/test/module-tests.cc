@@ -20,6 +20,8 @@
 #include "ObjectTokenRelation.hh"
 #include "Debug.hh"
 
+#include "LockManager.hh"
+
 #include <iostream>
 #include <string>
 #include <list>
@@ -989,6 +991,9 @@ private:
 
 
 int main() {
+  LockManager::instance().connect();
+  LockManager::instance().lock();
+  
   Schema::instance();
   initConstraintLibrary();
   REGISTER_CONSTRAINT(ResourceConstraint, "ResourceRelation", "Resource");

@@ -26,11 +26,11 @@
 #include "TypeFactory.hh"
 #include "EnumeratedTypeFactory.hh"
 
-#include "ConstraintAllocator.hh"
-
 #include "ConstraintTesting.hh"
 
 #include "module-tests.hh"
+
+#include "LockManager.hh"
 
 #include <iostream>
 #include <vector>
@@ -88,10 +88,10 @@ private:
 };
 
 
-class TestConstraintAllocator: public ConstraintAllocator {
+class TestLockManager: public LockManager {
 public:
-  TestConstraintAllocator()
-    : ConstraintAllocator(), m_currentUser("TEST_HARNESS") {
+  TestLockManager()
+    : LockManager(), m_currentUser("TEST_HARNESS") {
   }
 
   const LabelStr& getCurrentUser() const {
@@ -524,7 +524,7 @@ public:
     runTest(testNegateConstraint);
     runTest(testUnaryQuery);
     runTest(testTestEqConstraint);
-    runTest(testConstraintAllocator);
+    runTest(testLockManager);
     return(true);
   }
 
@@ -2056,18 +2056,18 @@ private:
     return true;
   }
 
-  static bool testConstraintAllocator() {
-    assertTrue(ConstraintAllocator::getInstance().getCurrentUser() == LabelStr("ANONYMOUS"));
+  static bool testLockManager() {
+    assertTrue(LockManager::instance().getCurrentUser() == LabelStr("ANONYMOUS"));
 
     // Ensure new instance overwrites old
     {
-      ConstraintAllocator std_allocator;
-      assertTrue(&std_allocator == &ConstraintAllocator::getInstance());
+      LockManager std_manager;
+      assertTrue(&std_manager == &LockManager::instance());
     }
 
     // Now allocate the test allocator and confirm it is assigned
-    TestConstraintAllocator testAllocator;
-    assertTrue(ConstraintAllocator::getInstance().getCurrentUser() == LabelStr("TEST_HARNESS"));
+    TestLockManager testManager;
+    assertTrue(LockManager::instance().getCurrentUser() == LabelStr("TEST_HARNESS"));
     {
       Variable<LabelSet> v0(ENGINE, LabelSet(LabelStr("C")));
       Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("E")));
@@ -2285,6 +2285,9 @@ private:
 };
 
 int main() {
+  LockManager::instance().connect();
+  LockManager::instance().lock();
+
   initConstraintEngine();
   initConstraintLibrary();
   REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");

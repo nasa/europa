@@ -3,7 +3,11 @@
 #include <stdio.h>
 #include <dlfcn.h>
 
+#include "LockManager.hh"
+
 int main(int argc, const char ** argv) {
+  LockManager::connect();
+  LockManager::lock();
 
   const char* plannerLibPath;
   const char* initialStatePath;

@@ -16,6 +16,8 @@
 #include "EqualityConstraintPropagator.hh"
 #include "StringDomain.hh"
 
+#include "LockManager.hh"
+
 #include <iostream>
 #include <string>
 
@@ -355,6 +357,9 @@ private:
 };
 
 int main() {
+  LockManager::instance().connect();
+  LockManager::instance().lock();
+
   initConstraintLibrary();
   
   // Special designations for temporal relations

@@ -11,6 +11,7 @@
 #include "Utils.hh"
 #include "IntervalIntDomain.hh"
 #include "TemporalConstraints.hh"
+#include "LockManager.hh"
 
 #include <iostream>
 #include <string>
@@ -463,6 +464,9 @@ private:
 };
 
 int main() {
+  LockManager::instance().connect();
+  LockManager::instance().lock();
+
   Schema::instance();
   initConstraintLibrary();
 

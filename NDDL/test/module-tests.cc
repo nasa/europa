@@ -13,6 +13,8 @@
 #include "ObjectTokenRelation.hh"
 #include "PlanDatabaseTestSupport.hh"
 
+#include "LockManager.hh"
+
 using namespace EUROPA;
 using namespace NDDL;
 
@@ -252,6 +254,8 @@ public:
 
 
 int main() {
+  LockManager::instance().connect();
+  LockManager::instance().lock();
   // Special designations for temporal relations
   REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
   REGISTER_CONSTRAINT(LessThanEqualConstraint, "precede", "Default");
