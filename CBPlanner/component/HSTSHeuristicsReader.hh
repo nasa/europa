@@ -22,12 +22,19 @@ namespace PLASMA {
     void readVariableSpecification(const TiXmlElement& element);
     void readTokenSpecification(const TiXmlElement& element);
     void readCompatibility(const TiXmlElement& element);
-    void readPredicateSpec(const TiXmlElement& element);
+    void readPriority(const TiXmlElement& element, HSTSHeuristics::Priority& p);
+    void readPredicateSpec(const TiXmlElement& element, TokenTypeId& tt);
     void readDecisionPreference(const TiXmlElement& element);
     void readConstrainedVariable(const TiXmlElement& element);
     void readPreference(const TiXmlElement& element);
-    void readMaster(const TiXmlElement& element);
     void readToken(const TiXmlElement& element);
+    void readStateOrder(const TiXmlElement& element, LabelStr& state, HSTSHeuristics::CandidateOrder& order);
+    void readState(const TiXmlElement& element, LabelStr& state);
+    void readValueOrder(const TiXmlElement& element, HSTSHeuristics::DomainOrder& order);
+    void readParameter(const TiXmlElement& element, int& index, char* value);
+    void readMaster(const TiXmlElement& element, HSTSHeuristics::Relationship& rel, TokenTypeId& ttm);
+    void readRelation(const TiXmlElement& element, HSTSHeuristics::Relationship& rel);  
+    void readPredicateParameters(const TiXmlElement& element, std::vector<std::pair<LabelStr,LabelStr> >& domainSpecs);
   private:
     HSTSHeuristics m_heuristics;
 
