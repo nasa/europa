@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.117 2005-02-08 20:06:49 pdaley Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.118 2005-02-14 16:03:45 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the EUROPA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -226,12 +226,12 @@ export DISPLAY
 MALLOC_CHECK_=2
 export MALLOC_CHECK_
 
-# Apply limits; some compiles (on SunOS of NewPlan) have run computers out of swap space.
-ulimit -c 300000
-ulimit -d 1000000
-ulimit -s 1000000
+# Apply limits; some planner runs want lots of RAM (>2GB).
+ulimit -c 400000
+ulimit -d 1200000
+ulimit -s 1200000
 ulimit -t 3600
-ulimit -v 1000000
+ulimit -v 1200000
 
 # Print the limits so it is obvious what they are when something goes wrong.
 ulimit -a
