@@ -34,7 +34,7 @@ LocalDepends tests : run-hsts-module-tests
         roverTest3
         roverTest4
 #       roverCTTests # Fails: uses NewPlan's constraint tokens, which Europa2 does not support.
-#       merTest1
+        merTest1
 #       merTest2
 #       merTest3
 #       merTest4
@@ -52,6 +52,24 @@ LocalDepends tests : run-hsts-module-tests
 #       merTest16
         merTest17
         merTest18
+#       merTest1-h
+#       merTest2-h
+#       merTest3-h
+#       merTest4-h
+#       merTest5-h
+#       merTest6-h
+#       merTest7-h
+#       merTest8-h
+#       merTest9-h
+#       merTest10-h
+#       merTest11-h
+#       merTest12-h
+#       merTest13-h
+#       merTest14-h
+#       merTest15-h
+#       merTest16-h
+#       merTest17-h
+#       merTest18-h
         gnats-C3
         gnats-NoBranchBug
 #       gnats-P4-C3
@@ -73,6 +91,19 @@ LocalDepends tests : run-hsts-module-tests
 #       dnp-threeFreeObs
 #       dnp-twentyFreeObs
 #       dnp-twoFreeObs
+#       dnp-timeline-h
+#       dnp-DNP2-h
+#       dnp-allDSS-h
+#       dnp-fourFreeObs-h
+#       dnp-DNP3fourFreeObs-h
+#       dnp-DNP3-h
+#       dnp-fourFreeObsNotEmpty-h
+#       dnp-freeObs-h
+#       dnp-freeObsNoEmpty-h
+#       dnp-tenFreeObs-h
+#       dnp-threeFreeObs-h
+#       dnp-twentyFreeObs-h
+#       dnp-twoFreeObs-h
         ;
 
 #
@@ -98,11 +129,14 @@ rule RunEUROPATest {
   local o = $(cc:S=$(SUFOBJ)) $(other_cc:S=$(SUFOBJ)) ;
   local lib = $(model:S=) ;
   local options = " -i "$(xml) ;
+  local addTarget = "" ;
   if $(heur) {
     options += " -h "$(heur) ;
+    addTarget += "-h" ;
   }
   if ($pid) {
     options += " -p "$(pid) ;
+    addTarget += "-p" ;
   }
 
   # create .hh, .cc, .o, and .xml for a .nddl
@@ -112,8 +146,8 @@ rule RunEUROPATest {
 
   # create planner with linked model
   ModuleMain $(exe) : $(o) : HSTS ;
-  RunModuleMain run-$(exe) : $(exe) : $(options) : : "run-$(exe).output" ;
-  LocalDepends $(target) : run-$(exe) ;
+  RunModuleMain run-$(exe)$(addTarget) : $(exe) : $(options) : : "run-$(exe).output" ;
+  LocalDepends $(target) : run-$(exe)$(addTarget) ;
  }
 }
 
@@ -149,45 +183,70 @@ RunEUROPATest roverTest1 : rover-test.nddl ;
 RunEUROPATest roverTest3 : rover3-test.nddl ;
 RunEUROPATest roverTest4 : rover4-test.nddl ;
 
-# This now fails with:
-#   ConstraintEngine/core/ConstraintLibrary.cc:34: Error: isRegistered(name) is false
-#           Factory for constraint 'MultEqual' is not registered.
-# ... while merging a token during planning.
+# Failing consistency safety check (GNATS 2831)
 RunEUROPATest roverTest2 : multrover-test.nddl ;
 
 # These use constraint tokens, which Europa2 (PLASMA) does not support.
 #   Verified as mentioned in PLASMA/MigrationNotes (entry 8 currently).
 # RunEUROPATest roverCTTests : rover2-test.nddl rover2a-test.nddl rover2b-test.nddl ;
 
-# Failing; not investigated yet.
+# Working
 RunEUROPATest merTest1 : R1-files-p1.nddl ;
+
+# Failing with no error message
 RunEUROPATest merTest2 : R1-files-p2.nddl ;
 RunEUROPATest merTest3 : R1-files-p3.nddl ;
 RunEUROPATest merTest4 : R2-files-R21-Bill.nddl ;
 
+# Working
 RunEUROPATest merTest5 : R2-files-R21-IDD1.nddl ;
 
-# Failing; not investigated yet.
+# Failing with no error message
 RunEUROPATest merTest6 : R2-files-R21-IDD2.nddl ;
 RunEUROPATest merTest7 : R2-files-R21-IDD3.nddl ;
 
+# Working
 RunEUROPATest merTest8 : R2-files-R21-PMA1.nddl ;
 RunEUROPATest merTest9 : R2-files-R21-PMA2.nddl ;
 
-# Failing; not investigated yet.
+# Failing with no error message
 RunEUROPATest merTest10 : mer-1.nddl ;
 RunEUROPATest merTest11 : mer-bill-2.nddl ;
 RunEUROPATest merTest12 : mer-bill.nddl ;
 
+# Working
 RunEUROPATest merTest13 : mer-idd1.nddl ;
 
-# Failing; not investigated yet.
+# Failing with no error message
 RunEUROPATest merTest14 : mer-idd2.nddl ;
 RunEUROPATest merTest15 : mer-idd3.nddl ;
 RunEUROPATest merTest16 : mer-pma-comm.nddl ;
 
+# Working
 RunEUROPATest merTest17 : mer-pma1.nddl ;
 RunEUROPATest merTest18 : mer-pma2.nddl ;
+
+# Same set as just above plus the heuristics and no branch files.
+
+# Fails hasParent("HGA_Class___HGA_Mode_SV.HGA_Slew") check
+# RunEUROPATest merTest1-h : R1-files-p1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+RunEUROPATest merTest2-h : R1-files-p2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+RunEUROPATest merTest3-h : R1-files-p3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+RunEUROPATest merTest4-h : R2-files-R21-Bill.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+# RunEUROPATest merTest5-h : R2-files-R21-IDD1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+RunEUROPATest merTest6-h : R2-files-R21-IDD2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+RunEUROPATest merTest7-h : R2-files-R21-IDD3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+# RunEUROPATest merTest8-h : R2-files-R21-PMA1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+# RunEUROPATest merTest9-h : R2-files-R21-PMA2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+# RunEUROPATest merTest10-h : mer-1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+RunEUROPATest merTest11-h : mer-bill-2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+RunEUROPATest merTest12-h : mer-bill.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+# RunEUROPATest merTest13-h : mer-idd1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+RunEUROPATest merTest14-h : mer-idd2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+RunEUROPATest merTest15-h : mer-idd3.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+RunEUROPATest merTest16-h : mer-pma-comm.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+# RunEUROPATest merTest17-h : mer-pma1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+# RunEUROPATest merTest18-h : mer-pma2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 
 RunEUROPATest gnats-C3 : C3-init.nddl ;
 RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
@@ -204,7 +263,7 @@ RunEUROPATest gnats-sum : sum-init.nddl ;
 
 # DNP tests need the DNP specific constraints.
 
-# These fail, perhaps due to lack of memory or seg fault or ... (no output)
+# Failing with no error message
 RunEUROPATest dnp-timeline : DNP.timeline.nddl ;
 RunEUROPATest dnp-DNP2 : DNP2.timeline.nddl ;
 RunEUROPATest dnp-allDSS : allDSS.nddl ;
@@ -213,16 +272,37 @@ RunEUROPATest dnp-DNP3fourFreeObs : DNP3.fourFreeObs.nddl ;
 RunEUROPATest dnp-DNP3 : DNP3.timeline.nddl ;
 RunEUROPATest dnp-fourFreeObsNotEmpty : fourFreeObs-initBufNotEmpty.nddl ;
 
+# Working
 RunEUROPATest dnp-freeObs : freeObs.nddl ;
 RunEUROPATest dnp-freeObsNoEmpty : freeObs.noEmpty.nddl ;
 
-# These fail, perhaps due to lack of memory or seg fault or ... (no output)
+# Failing with no error message
 RunEUROPATest dnp-tenFreeObs : tenFreeObs.nddl ;
 RunEUROPATest dnp-threeFreeObs : threeFreeObs.nddl ;
 RunEUROPATest dnp-twentyFreeObs : twentyFreeObs.nddl ;
 RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl ;
 
-# Example with converted heuristics and planId files.
-# RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
+# Same set as just prior set plus heuristics and no branch info.
+
+# Fails isString(m_key) safety check
+RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
+
+# Fails !enumeration.empty() safety check in HSTSHeuristics::VariableEntry constructor near line 197
+RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
+
+# Fails hasParent("DNP_Science___Scan_Platform.Scan_Idle") safety check in Schema::getParent() near line 210
+RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
+RunEUROPATest dnp-fourFreeObs-h : fourFreeObs.nddl : DNP2heur3.xml ;
+
+# Fails hasParent("DNP_Data___SSR_Storage_Use.Constant_Storage") check
+RunEUROPATest dnp-DNP3fourFreeObs-h : DNP3.fourFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+RunEUROPATest dnp-DNP3-h : DNP3.timeline.nddl : DNP3heur.xml : DNP3nobr ;
+RunEUROPATest dnp-fourFreeObsNotEmpty-h : fourFreeObs-initBufNotEmpty.nddl : DNP3heur.xml : DNP3nobr ;
+# RunEUROPATest dnp-freeObs-h : freeObs.nddl : DNP3heur.xml : DNP3nobr ;
+# RunEUROPATest dnp-freeObsNoEmpty-h : freeObs.noEmpty.nddl : DNP3heur.xml : DNP3nobr ;
+RunEUROPATest dnp-tenFreeObs-h : tenFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+RunEUROPATest dnp-threeFreeObs-h : threeFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+RunEUROPATest dnp-twentyFreeObs-h : twentyFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+RunEUROPATest dnp-twoFreeObs-h : twoFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 
 } # PLASMA_READY
