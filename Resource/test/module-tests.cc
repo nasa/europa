@@ -61,9 +61,9 @@ private:
   static bool testDefaultSetup() {
     DEFAULT_SETUP(ce,db,false);
     
-    assert(db.isClosed() == false);
+    assertTrue(db.isClosed() == false);
     db.close();
-    assert(db.isClosed() == true);
+    assertTrue(db.isClosed() == true);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -111,7 +111,8 @@ public:
     runTest(testAggregatedConsumtionRateResourceViolation);
     runTest(testAggregatedProductionRateResourceViolation);
 #else
-    #warning CHUNKS is not defined: Skipping rate tests in Resource module tests
+    std::cout << "   Warning: CHUNKS is not defined: Skipping rate tests in Resource module tests"
+              << std::endl;
 #endif	
 
     runTest(testUpperLimitExceededResourceViolation);
@@ -129,7 +130,7 @@ private:
     ResourceId r = (new Resource (db.getId(), LabelStr("Resource"), LabelStr("r1")))->getId();
     std::list<InstantId> instants;
     r->getInstants(instants);
-    assert(instants.size() == 0);
+    assertTrue(instants.size() == 0);
 
     // Construction with argument setting
     new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), 189.34, 0, 1000);
@@ -148,24 +149,24 @@ private:
     //just another resource so that the resource doesnt get bound to singleton and get autoinserted by the propagator
     ResourceId r2 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), 10, 0, 2000))->getId();
 
-    assert(!r.isNoId() && !r2.isNoId() && r != r2);
+    assertTrue(!r.isNoId() && !r2.isNoId() && r != r2);
 
     db.close();
 
     // Test insertion of transaction constructed with defaults
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change")))->getId();
     bool prop = ce.propagate();
-    assert(prop);
+    assertTrue(prop);
     r->constrain(t1, t1);
     ce.propagate();
 
     std::set<TransactionId> transactions;
     r->getTransactions(transactions);
-    assert(transactions.size() == 1);
+    assertTrue(transactions.size() == 1);
     r->free(t1, t1);
     transactions.clear();
     r->getTransactions(transactions);
-    assert(transactions.empty());
+    assertTrue(transactions.empty());
 
     // Test double insertion 
     r->constrain(t1, t1);
@@ -186,35 +187,35 @@ private:
 
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
-    assert(checkLevelArea(r) == 0);
+    assertTrue(checkLevelArea(r) == 0);
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, HORIZON_END), 45, 45))->getId();
     r->constrain(t1);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*1));
-    assert(checkLevelArea(r) == 1000 * 45);
+    assertTrue(checkSum(r) == (1*1 + 2*1));
+    assertTrue(checkLevelArea(r) == 1000 * 45);
 
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, HORIZON_END), 35, 35))->getId();
     r->constrain(t2);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 + 3*2));
-    assert(checkLevelArea(r) == (1*45 + 80*999));
+    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*2));
+    assertTrue(checkLevelArea(r) == (1*45 + 80*999));
 
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, HORIZON_END), 20, 20))->getId();
     r->constrain(t3);
-    assert(ce.propagate());
-    assert(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
-    assert(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
+    assertTrue(ce.propagate());
+    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
+    assertTrue(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
 
     t2->setEarliest(2);
-    assert(ce.propagate());
-    assert(checkSum(r) == (1*1 + 2*3 + 3*3));
-    assert(checkLevelArea(r) == (2*45 + 998*100));
+    assertTrue(ce.propagate());
+    assertTrue(checkSum(r) == (1*1 + 2*3 + 3*3));
+    assertTrue(checkLevelArea(r) == (2*45 + 998*100));
 
     t2->setEarliest(1);
-    assert(ce.propagate());
-    assert(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
-    assert(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
+    assertTrue(ce.propagate());
+    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
+    assertTrue(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
     DEFAULT_TEARDOWN();
     return(true);
   }
@@ -227,52 +228,52 @@ private:
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
-    assert(ce.propagate() && checkSum(r) == 0); 
+    assertTrue(ce.propagate() && checkSum(r) == 0); 
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 6)))->getId();
     r->constrain(t1);
-    assert(ce.propagate() && checkSum(r) == (1*1 + 2*1));
+    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*1));
 
     TransactionId t2  = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(-4, 10)))->getId();
     r->constrain(t2);
-    assert(ce.propagate() && checkSum(r) == (1*1 + 2*2 + 3*2 + 4*1));
+    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*2 + 3*2 + 4*1));
 
     TransactionId t3  = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 3)))->getId();
     r->constrain(t3);
-    assert(ce.propagate() && checkSum(r) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1)); 
+    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1)); 
 
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 2)))->getId();
     r->constrain(t4);
-    assert(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1)); 
+    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1)); 
 
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 7)))->getId();
     r->constrain(t5);
-    assert(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1)); 
+    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1)); 
 
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 7)))->getId();
     r->constrain(t6);
-    assert(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1)); 
+    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1)); 
 
     // Insert for a singleton value
     TransactionId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5,5)))->getId();
     r->constrain(t7);
-    assert(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1)); 
+    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1)); 
 
     // Now free them and check the retractions are working correctly
     r->free(t7);
-    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
+    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
     r->free(t6);
-    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
+    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
     r->free(t5);
-    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
+    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
     r->free(t4);
-    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
+    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
     r->free(t3);
-    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*2 + 3*2 + 4*1));
+    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*2 + 3*2 + 4*1));
     r->free(t2);
-    assert(ce.propagate() && checkSum(r)  == (1*1 + 2*1));
+    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*1));
     r->free(t1);
-    assert(ce.propagate() && checkSum(r) == 0);
+    assertTrue(ce.propagate() && checkSum(r) == 0);
 
     DEFAULT_TEARDOWN();
     return(true);
@@ -289,44 +290,44 @@ private:
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), 1, 1))->getId();
     r->constrain(t1);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*1)); 
-    assert(checkLevelArea(r) == 1);
+    assertTrue(checkSum(r) == (1*1 + 2*1)); 
+    assertTrue(checkLevelArea(r) == 1);
 
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 3), -4, -4))->getId();
     r->constrain(t2);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 + 3*1)); 
-    assert(checkLevelArea(r) == (1 + 4*2));
+    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*1)); 
+    assertTrue(checkLevelArea(r) == (1 + 4*2));
 
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 4), 8, 8))->getId();
     r->constrain(t3);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1)); 
-    assert(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 8*1));
+    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1)); 
+    assertTrue(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 8*1));
 
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 6), 2, 2))->getId();
     r->constrain(t4);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
-    assert(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
+    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
+    assertTrue(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
  
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 10), -6, -6))->getId();  
     r->constrain(t5);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
-    assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
+    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
+    assertTrue(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
 
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 8), 3, 3))->getId();
     r->constrain(t6);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
-    assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
+    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
+    assertTrue(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
 
     TransactionId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(7, 8), -4, -4))->getId();
     r->constrain(t7);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + +7* 3 + 8*3 + 9*1));
-    assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
+    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + +7* 3 + 8*3 + 9*1));
+    assertTrue(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
 
     DEFAULT_TEARDOWN();
     return(true);
@@ -343,22 +344,22 @@ private:
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 10), 10, 10))->getId();
     r->constrain(t1);
     ce.propagate();
-    assert(checkLevelArea(r) == 10*10);
+    assertTrue(checkLevelArea(r) == 10*10);
 
     t1->setEarliest(1);
-    assert(checkLevelArea(r) == 10*9);
+    assertTrue(checkLevelArea(r) == 10*9);
 
     t1->setLatest(6);
-    assert(checkLevelArea(r) == 10*5);
+    assertTrue(checkLevelArea(r) == 10*5);
 
     // Now try some relaxations
     t1->setLatest(8);
-    assert(checkLevelArea(r) == 10*7);
+    assertTrue(checkLevelArea(r) == 10*7);
 
     t1->setMin(-4);
     t1->setMax(1);
     ce.propagate();
-    assert(checkLevelArea(r) == 5*7);
+    assertTrue(checkLevelArea(r) == 5*7);
 
     DEFAULT_TEARDOWN();
     return(true);
@@ -433,20 +434,20 @@ private:
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 10), 5, 10))->getId();
     r->constrain(t1);
     ce.propagate();
-    assert(checkLevelArea(r) == 10*10);
+    assertTrue(checkLevelArea(r) == 10*10);
 
 
     // This tests a transaction that could be a producer or a consumer. We don't know yet!
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 8), -4, 3))->getId();
     r->constrain(t2);
     ce.propagate();
-    assert(checkLevelArea(r) == 10*4 + 17*4 + 17*2);
+    assertTrue(checkLevelArea(r) == 10*4 + 17*4 + 17*2);
 
     // Test consumer
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 5), -4, -1))->getId();
     r->constrain(t3);
     ce.propagate();
-    assert(checkLevelArea(r) == 10*1 + 14*3 + 21*1 + 20*3 + 20*2);
+    assertTrue(checkLevelArea(r) == 10*1 + 14*3 + 21*1 + 20*3 + 20*2);
     DEFAULT_TEARDOWN();
     return(true);
   }
@@ -462,31 +463,31 @@ private:
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), productionRateMax + 1, productionRateMax + 1))->getId();
-    assert(!ce.propagate());
-    //assert(r->getTokens().count(t1) == 0);
+    assertTrue(!ce.propagate());
+    //assertTrue(r->getTokens().count(t1) == 0);
     //    r->constrain(t1);
-    //assert(ce.provenInconsistent());
+    //assertTrue(ce.provenInconsistent());
     //r->free(t1);
-    //assert(!ce.provenInconsistent());    
+    //assertTrue(!ce.provenInconsistent());    
 
     t1->setMin(productionRateMax);
     r->constrain(t1);
-    assert(!ce.provenInconsistent());    
+    assertTrue(!ce.provenInconsistent());    
     r->free(t1);
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), consumptionRateMax - 1, consumptionRateMax - 1))->getId();
-    assert(!ce.propagate());
+    assertTrue(!ce.propagate());
     /*
       r->constrain(t2);
-      assert(ce.provenInconsistent());
+      assertTrue(ce.provenInconsistent());
       r->free(t2);
-      assert(!ce.provenInconsistent());    
+      assertTrue(!ce.provenInconsistent());    
     */
 
     t2->setMax(consumptionRateMax);
     r->constrain(t2);
-    assert(!ce.provenInconsistent());    
+    assertTrue(!ce.provenInconsistent());    
     r->free(t2);
 
     DEFAULT_TEARDOWN();
@@ -511,17 +512,17 @@ private:
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), 1, 1))->getId();
     r->constrain(t3);
 	// no violation because of temporal flexibility
-	assert(ce.propagate());
+	assertTrue(ce.propagate());
 	t1->setEarliest(1);
 	t3->setEarliest(1);
-    assert(!ce.propagate());
+    assertTrue(!ce.propagate());
 
     r->getResourceViolations(violations);
-    assert(violations.size() == 1);
-    assert(violations.front()->getType() == ResourceViolation::ProductionRateExceeded);
+    assertTrue(violations.size() == 1);
+    assertTrue(violations.front()->getType() == ResourceViolation::ProductionRateExceeded);
     r->free(t1);
     r->free(t3);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
 
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), consumptionRateMax -1, consumptionRateMax))->getId();
     r->constrain(t2);
@@ -529,18 +530,18 @@ private:
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), -1, -1))->getId();
     r->constrain(t4);
 	// no violation because of temporal flexibility
-	assert(ce.propagate());
+	assertTrue(ce.propagate());
 	t2->setEarliest(1);
 	t4->setEarliest(1);
-    assert(!ce.propagate());
+    assertTrue(!ce.propagate());
 
     violations.clear();
     r->getResourceViolations(violations);
-    assert(violations.size() == 1);
-    assert(violations.front()->getType() == ResourceViolation::ConsumptionRateExceeded);
+    assertTrue(violations.size() == 1);
+    assertTrue(violations.front()->getType() == ResourceViolation::ConsumptionRateExceeded);
     r->free(t2);
     r->free(t4);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
       
     DEFAULT_TEARDOWN();
     return(true);
@@ -562,27 +563,27 @@ private:
     // production
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
     r->constrain(t1);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
     r->constrain(t2);
-    assert(ce.propagate());    
+    assertTrue(ce.propagate());    
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
     r->constrain(t3);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
     r->constrain(t4);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 6), -8, -8))->getId();
     r->constrain(t5);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     // This will push it over the edge
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(10, 10), -8, -8))->getId(); 
     r->constrain(t6);
-    assert(!ce.propagate());
+    assertTrue(!ce.propagate());
 
-    assert(checkLevelArea(r) == 0);
+    assertTrue(checkLevelArea(r) == 0);
     r->getResourceViolations(violations);
-    assert(violations.front()->getType() == ResourceViolation::LevelTooLow);
+    assertTrue(violations.front()->getType() == ResourceViolation::LevelTooLow);
 
     DEFAULT_TEARDOWN();
     return(true);
@@ -604,30 +605,30 @@ private:
     // production
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
     r->constrain(t1);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
     r->constrain(t2);
-    assert(ce.propagate());    
+    assertTrue(ce.propagate());    
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
     r->constrain(t3);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
     r->constrain(t4);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 6), -8, -8))->getId();
     r->constrain(t5);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(8, 8), -8, -8))->getId(); 
     r->constrain(t6);
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     // This will push it over the edge
     TransactionId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(10, 10), -8, -8))->getId(); 
     r->constrain(t7);
-    assert(!ce.propagate());
+    assertTrue(!ce.propagate());
 
-    assert(checkLevelArea(r) == 0);
+    assertTrue(checkLevelArea(r) == 0);
     r->getResourceViolations(violations);
-    assert(violations.front()->getType() == ResourceViolation::ConsumptionSumExceeded);
+    assertTrue(violations.front()->getType() == ResourceViolation::ConsumptionSumExceeded);
 
     DEFAULT_TEARDOWN();
     return(true);
@@ -648,19 +649,19 @@ private:
 	}                                            
 	// propagate and test 
 	if ( fail ) {
-	  assert( !ce.propagate() ); 
+	  assertTrue( !ce.propagate() ); 
 	  //// printViolationSet(r->getGlobalViolations());
-	  assert( r->getGlobalViolations().size()==1 );
-	  assert( (*r->getGlobalViolations().begin())->getType()==type );
+	  assertTrue( r->getGlobalViolations().size()==1 );
+	  assertTrue( (*r->getGlobalViolations().begin())->getType()==type );
 	} else { 
-	  assert( ce.propagate() ); 
+	  assertTrue( ce.propagate() ); 
 	}
 	// clean up 
 	for ( std::list<TransactionId>::iterator it = txs.begin(); it!=txs.end(); ++it ) {    
 	  r->free(*it); 
 	} 
 	txs.clear(); 
-	assert(ce.propagate());
+	assertTrue(ce.propagate());
 	//// std::cout << "\tDONE---" << std::endl;
   }
 
@@ -825,12 +826,12 @@ private:
       transactions.push_back(t);
     }
 
-    assert(checkLevelArea(r) == 0);
+    assertTrue(checkLevelArea(r) == 0);
 
     std::list<ResourceViolationId> violations;
     r->getResourceViolations(violations);
-    assert(violations.size() == 1);
-    assert(violations.front()->getType() == ResourceViolation::LevelTooHigh);
+    assertTrue(violations.size() == 1);
+    assertTrue(violations.front()->getType() == ResourceViolation::LevelTooHigh);
 
     DEFAULT_TEARDOWN();
     return(true);
@@ -859,22 +860,22 @@ private:
     }
 
     ce.propagate();
-    assert(checkLevelArea(r) == 0);
+    assertTrue(checkLevelArea(r) == 0);
 
     // Ensure the violations remain unchanged
     std::list<ResourceViolationId> violations;     
     r->getResourceViolations(violations);
-    assert(violations.size() > 0);
+    assertTrue(violations.size() > 0);
     /*
     int times[4] = {8,9,10,10}; int i = 0;
     std::list<ResourceViolationId>::iterator it = violations.begin(); 
     for( ; it != violations.end(); ++it){
-      assert((*it)->getInstant()->getTime() == times[i]);
+      assertTrue((*it)->getInstant()->getTime() == times[i]);
       i++;
     }	
-    assert(violations.size() == 4);
-    assert(violations.front()->getType() == ResourceViolation::ProductionSumExceeded);
-    assert(violations.back()->getType() == ResourceViolation::ConsumptionSumExceeded);
+    assertTrue(violations.size() == 4);
+    assertTrue(violations.front()->getType() == ResourceViolation::ProductionSumExceeded);
+    assertTrue(violations.back()->getType() == ResourceViolation::ConsumptionSumExceeded);
     */
     DEFAULT_TEARDOWN();
     return(true);
@@ -916,15 +917,15 @@ private:
     r->constrain(c2);
 
 	// There should be no violations, only flaws
-    assert(ce.propagate());
-	assert(r->hasFlaws());
-	assert(rl->m_flawed);
+    assertTrue(ce.propagate());
+	assertTrue(r->hasFlaws());
+	assertTrue(rl->m_flawed);
 	
 	// Now remove the flaw
 	c2->setEarliest(6);
-    assert(ce.propagate());
-	assert(!r->hasFlaws());
-	assert(!(rl->m_flawed));
+    assertTrue(ce.propagate());
+	assertTrue(!r->hasFlaws());
+	assertTrue(!(rl->m_flawed));
 	
     DEFAULT_TEARDOWN();
     return(true);
@@ -937,7 +938,7 @@ private:
    * Sums the instances of transactions in each instant.
    */
   static int checkSum(ResourceId r) {
-    assert(r != ResourceId::noId());
+    assertTrue(r != ResourceId::noId());
     r->updateTransactionProfile();
     int sum = 0;
     int count = 1;
@@ -957,7 +958,7 @@ private:
    * Sums the instances of transactions in each instant.
   */
   static double checkLevelArea(ResourceId r) {
-    assert(r != ResourceId::noId());
+    assertTrue(r != ResourceId::noId());
     r->updateTransactionProfile();
     const std::map<int, InstantId>& instants = r->getInstants();
     double area = 0;
