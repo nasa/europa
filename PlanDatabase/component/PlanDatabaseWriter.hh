@@ -71,7 +71,7 @@ namespace Prototype {
       for(TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
 	os << "\t\tMerged Key=" << (*mit)->getKey() << std::endl;
 
-      os << "[ " << t->getEnd()->derivedDomain().getLowerBound() << " ]"<< std::endl;
+      os << "[ " << t->getEnd()->derivedDomain() << " ]"<< std::endl;
     }
   };
 }

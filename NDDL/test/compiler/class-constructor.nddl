@@ -112,8 +112,17 @@ Foo f1 = new Foo(world, 1, true, "hello", Hill);
 Foo f2 = new Foo(world, 100, false);
 Bar bar = new Bar(123.45, world);
 Baz baz = new Baz(f0);
-Bat bat = new Bat(f1);
+
+Bar bar1 = new Bar(123.0, world);
+
+// Call to constructor of Bat is passed a derived type. Should still match according
+// to rules of inheritance.
+Bat bat = new Bat(bar1);
+
 Bing bing = new Bing();
+
 Bang bang = new Bang();
+
 Baluga baluga = new Baluga(Rock);
+
 close();
