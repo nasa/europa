@@ -969,7 +969,10 @@ namespace Prototype {
 			
 			decOut << ppId << TAB << dp->getKey() << TAB << type << TAB << dp->getEntityKey() << TAB << 0 << TAB;
 			if((*plId)->getDecisionManager()->getCurrentDecision() == dp) {
-				decOut << getChoiceInfo() << std::endl;
+        std::string choiceInfo = getChoiceInfo();
+        if(choiceInfo == "")
+          choiceInfo = SNULL;
+				decOut << choiceInfo << std::endl;
 			}
 			else {
 				decOut << SNULL << std::endl;
