@@ -621,7 +621,6 @@ private:
     variables.push_back(v1.getId());
     ConstraintId c0((new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables))->getId());
 
-
     // v2 + v3 == v0
     variables.clear();
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 10));
@@ -634,7 +633,7 @@ private:
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
 
-    /* Show that we can simply delete a constraint and confirm that the system is still consistent */
+    /* Show that we can simply delete a constraint and confirm that the system is still consistent. */
     delete (Constraint*) c1;
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
@@ -654,7 +653,7 @@ private:
     assert(v1.getDerivedDomain().getUpperBound() == 10);
 
     /* Add a constraint to force an inconsistency and show that consistency can be restored by removing the
-      constraint */
+     * constraint. */
     variables.clear();
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 0));
     variables.push_back(v0.getId());

@@ -9,7 +9,7 @@
 
 #include "AbstractDomain.hh"
 
-namespace Prototype{
+namespace Prototype {
 
   /**
    * @class IntervalDomain
@@ -20,7 +20,7 @@ namespace Prototype{
    * preferably as new classes rather than impacting the performance of this class.
    * --wedgingt@email.arc.nasa.gov 2004 Feb 26
    */
-  class IntervalDomain: public AbstractDomain {
+  class IntervalDomain : public AbstractDomain {
   public:
 
     /**
@@ -144,6 +144,29 @@ namespace Prototype{
     bool relax(double lb, double ub);
 
     /**
+     * @brief Add an element to the set.
+     * @param value The value to insert. If not currently present it
+     * will be inserted. Otherwise it will be ignored. If inserted
+     * into a non-dynamic domain, this operation constitutes a domain
+     * relaxation and will result in a relaxation event being raised.
+     * @see DomainListener::DOMAIN_RELAXED
+     * @note An error for real intervals unless already in the set or
+     * was empty and now singleton.
+     */
+    virtual void insert(double value);
+
+    /**
+     * @brief Remove the given element form the domain.
+     * @param value. The value to be removed.
+     * @note If the value was in the domain, this call will generate a
+     * value removal event.
+     * @note An error for real intervals unless not in the set or was
+     * singleton and is now empty.
+     * @see DomainListener::VALUE_REMOVED
+     */
+    virtual void remove(double value);
+
+    /**
      * @brief test for membership.
      * @param value Value to test for.
      * @return true if a member of the domain, otherwise false
@@ -166,6 +189,7 @@ namespace Prototype{
      * @note Can only be called on finite domains..
      */
     int getSize() const;
+
     /**
      * @brief test for equality.
      */
@@ -222,8 +246,11 @@ namespace Prototype{
      * @brief Tests if the given value is of the correct type for the domain type.
      * Mostly used for restricting values of doubles to int. However,
      * we could restrict it in other ways perhaps.
+     * @note No-op for real domains.
      */
-    virtual void testPrecision(const double& value) const;
+    virtual void testPrecision(const double& value) const {
+    }
+
 
     /**
      * @brief Carries out the conversion of the given double to do appropriate rounding.

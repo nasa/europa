@@ -38,8 +38,7 @@ namespace Prototype {
     ChangeType m_change;
   };
 
-  class IntervalDomainTest
-  {
+  class IntervalDomainTest {
   public:
     static bool test() {
       runTest(testAllocation); 
@@ -51,11 +50,12 @@ namespace Prototype {
       runTest(testDifference);
       runTest(testOperatorEquals);
       runTest(testInfinitesAndInts);
-      return true;
+      runTest(testInsertAndRemove);
+      return(true);
     }
 
   private:
-    static bool testAllocation(){
+    static bool testAllocation() {
       IntervalIntDomain intDomain(10, 20);
       assert(intDomain.isFinite());
       assert(!intDomain.isDynamic());
@@ -223,6 +223,31 @@ namespace Prototype {
       assert(res);
       double newValue = (dom1.getLowerBound() - dom4.minDelta());
       assert(dom4.getUpperBound() == newValue);
+
+      EnumeratedDomain dom5(3.14159265);
+      assert(dom5.getSize() == 1);
+
+      std::list<double> vals;
+      vals.push_back(dom5.getSingletonValue());
+      vals.push_back(1.2);
+      vals.push_back(2.1);
+      vals.push_back(PLUS_INFINITY);
+      vals.push_back(MINUS_INFINITY);
+      vals.push_back(EPSILON);
+      EnumeratedDomain dom6(vals);
+
+      assert(dom6.getSize() == 6);
+      assert(fabs(dom5.minDelta() - dom6.minDelta()) < EPSILON); // Should be ==, but allow some leeway.
+      assert(dom6.intersects(dom5));
+
+      dom6.difference(dom5);
+      assert(!(dom6.intersects(dom5)));
+      assert(dom6.getSize() == 5);
+
+      dom6.difference(dom5);
+      assert(!(dom6.intersects(dom5)));
+      assert(dom6.getSize() == 5);
+
       return true;
     }
 
@@ -248,6 +273,222 @@ namespace Prototype {
       assert(dom1.translateNumber(2.8, true) == 3);
       assert(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY - 1);
       return true;
+    }
+
+    static bool testEnumDomInsertAndRemove() {
+      // Should add a loop like the one in
+      //   testIntervalDomInsertAndRemove(). --wedgingt 2004 Mar 8
+
+      EnumeratedDomain enumDom1;
+      assert(enumDom1.isDynamic());
+      assert(enumDom1.isNumeric());
+      enumDom1.insert(3.14159265);
+      enumDom1.close();
+      assert(enumDom1.isMember(3.14159265));
+      assert(enumDom1.isSingleton());
+      assert(enumDom1.isFinite());
+      enumDom1.remove(5.0);
+      assert(enumDom1.isMember(3.14159265));
+      assert(enumDom1.isSingleton());
+      assert(enumDom1.isFinite());
+
+      double minDiff = enumDom1.minDelta();
+      assert(minDiff >= EPSILON && EPSILON > 0.0);
+
+      const double onePlus = 1.0 + 2.0*EPSILON;
+
+      enumDom1.remove(3.14159265 - onePlus*minDiff);
+      assert(enumDom1.isMember(3.14159265));
+      assert(enumDom1.isSingleton());
+      assert(enumDom1.isFinite());
+      enumDom1.remove(3.14159265 + onePlus*minDiff);
+      assert(enumDom1.isMember(3.14159265));
+      assert(enumDom1.isSingleton());
+      assert(enumDom1.isFinite());
+      enumDom1.remove(3.14159265 - minDiff/onePlus);
+      assert(enumDom1.isEmpty());
+      enumDom1.insert(3.14159265);
+      assert(enumDom1.isMember(3.14159265));
+      assert(enumDom1.isSingleton());
+      assert(enumDom1.isFinite());
+      enumDom1.remove(3.14159265 + minDiff/onePlus);
+      assert(enumDom1.isEmpty());
+      enumDom1.insert(3.14159265);
+      assert(enumDom1.isMember(3.14159265));
+      assert(enumDom1.isSingleton());
+
+      std::list<double> vals;
+      vals.push_back(enumDom1.getSingletonValue());
+      vals.push_back(1.2);
+      vals.push_back(2.1);
+      vals.push_back(PLUS_INFINITY);
+      vals.push_back(MINUS_INFINITY);
+      vals.push_back(EPSILON);
+      EnumeratedDomain enumDom2(vals);
+
+      assert(!(enumDom2.isDynamic()));
+      assert(enumDom2.isNumeric());
+      assert(enumDom2.isFinite());
+      assert(enumDom2.getSize() == 6);
+
+      double minDiff2 = enumDom2.minDelta();
+      assert(fabs(minDiff - minDiff2) < EPSILON);
+
+      enumDom2.remove(1.2 - minDiff2/onePlus);
+      assert(enumDom2.getSize() == 5);
+
+      enumDom2.remove(MINUS_INFINITY);
+      assert(enumDom2.getSize() == 4);
+
+      // Remove a value near but not "matching" a member and
+      //   verify the domain has not changed.
+      enumDom2.remove(enumDom1.getSingletonValue() - onePlus*minDiff2);
+      assert(enumDom2.intersects(enumDom1));
+      assert(enumDom2.getSize() == 4);
+
+      // Remove a value near but not equal a member and
+      //   verify the member was removed via intersection.
+      enumDom2.remove(enumDom1.getSingletonValue() - minDiff2/onePlus);
+      assert(!(enumDom2.intersects(enumDom1)));
+      assert(enumDom2.getSize() == 3);
+
+      // Add a value near a value from another domain
+      //   verify that the resulting domain intersects the other domain.
+      enumDom2.insert(enumDom1.getSingletonValue() + minDiff2/onePlus);
+      assert(enumDom2.intersects(enumDom1));
+      assert(enumDom2.getSize() == 4);
+
+      // Add the value in the other domain and
+      //   verify the domain is not affected.
+      enumDom2.insert(enumDom1.getSingletonValue());
+      assert(enumDom2.intersects(enumDom1));
+      assert(enumDom2.getSize() == 4);
+
+      // Remove a value that should not be a member but is
+      //   only slightly too large to "match" the new member.
+      enumDom2.remove(enumDom1.getSingletonValue() + minDiff2/onePlus + onePlus*minDiff2);
+      assert(enumDom2.intersects(enumDom1));
+      assert(enumDom2.getSize() == 4);
+
+      // Remove a value "matching" the added value but larger
+      //   and verify the domain no longer intersects the other domain.
+      enumDom2.remove(enumDom1.getSingletonValue() + 2.0*minDiff2/onePlus);
+      assert(enumDom2.getSize() == 3);
+      assert(!(enumDom2.intersects(enumDom1)));
+
+      return(true);
+    }
+
+    static bool testIntervalDomInsertAndRemove() {
+      assert(EPSILON > 0.0); // Otherwise, loop will be infinite.
+
+      // Making this any closer to 1.0 fails first iDom.isEmpty() assert,
+      //   at least on SunOS 5.8 with g++ 2.95.2.
+      const double onePlus = 1.001;
+
+      // For IntervalDomains, insert() and remove() have very
+      // restricted usefulness, since only singleton and empty domains
+      // work with insert and remove unless the value given is already
+      // in (for insert) or already outside (for remove) the domain,
+      // so the tests can be fairly extensive yet "automated".
+
+      // Note, however, that broadening the extent of this loop to
+      // values for which the hardware will not be able to distinguish
+      // between x and x + minDelta will not work and the current
+      // implementation of IntervalDomain does not support such
+      // (member) values.  However, the values used for infinity by
+      // the temporal network implementation is much narrower than
+      // that (presently, at least): 268435455 (CommonDefs.hh).
+
+      for (double val = -2.6e8; val <= 2.6e8; ) {
+        IntervalDomain iDom(val);
+        double minDiff = iDom.minDelta();
+
+        iDom.remove(val + onePlus*minDiff);
+        assert(iDom.isSingleton());
+        assert(iDom.isMember(val));
+        assert(iDom.isMember(val + minDiff/onePlus));
+        assert(iDom.isMember(val - minDiff/onePlus));
+
+        iDom.remove(val + minDiff/onePlus);
+        assert(iDom.isEmpty());
+        assert(!(iDom.isMember(val)));
+
+        iDom.insert(val);
+        assert(iDom.isSingleton());
+        assert(iDom.isMember(val));
+        assert(iDom.isMember(val + minDiff/onePlus));
+        assert(iDom.isMember(val - minDiff/onePlus));
+
+        iDom.remove(val - onePlus*minDiff);
+        assert(iDom.isSingleton());
+        assert(iDom.isMember(val));
+        assert(iDom.isMember(val + minDiff/onePlus));
+        assert(iDom.isMember(val - minDiff/onePlus));
+
+        iDom.remove(val - minDiff/onePlus);
+        assert(iDom.isEmpty());
+        assert(!(iDom.isMember(val)));
+
+        if (val < 0.0)
+          if (val > -EPSILON)
+            val = 0.0;
+          else
+            val /= 3.14159265;
+        else
+          if (val > 0.0)
+            val *= 2.7182818;
+          else
+            val = onePlus*EPSILON;
+      }
+
+      return(true);
+    }
+
+    static bool testIntervalIntDomInsertAndRemove() {
+      IntervalIntDomain iiDom(-5, 10);
+      assert(iiDom.getSize() == 16);
+
+      iiDom.remove(-6);
+      assert(iiDom.getSize() == 16);
+
+      iiDom.remove(11);
+      assert(iiDom.getSize() == 16);
+
+      iiDom.remove(PLUS_INFINITY);
+      assert(iiDom.getSize() == 16);
+
+      iiDom.insert(-5);
+      assert(iiDom.getSize() == 16);
+
+      iiDom.insert(-1);
+      assert(iiDom.getSize() == 16);
+
+      iiDom.insert(10);
+      assert(iiDom.getSize() == 16);
+
+      iiDom.insert(11);
+      assert(iiDom.getSize() == 17);
+
+      iiDom.insert(-6);
+      assert(iiDom.getSize() == 18);
+
+      iiDom.remove(PLUS_INFINITY);
+      assert(iiDom.getSize() == 18);
+
+      iiDom.remove(-7);
+      assert(iiDom.getSize() == 18);
+
+      iiDom.remove(11);
+      assert(iiDom.getSize() == 17);
+
+      return(true);
+    }
+
+    static bool testInsertAndRemove() {
+      return(testEnumDomInsertAndRemove() &&
+             testIntervalDomInsertAndRemove() &&
+             testIntervalIntDomInsertAndRemove());
     }
   };
 

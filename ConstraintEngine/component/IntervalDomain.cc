@@ -79,10 +79,36 @@ namespace Prototype {
     relax(dom.getLowerBound(), dom.getUpperBound());
   }
 
+  void IntervalDomain::insert(double value) {
+    if (isEmpty()) {
+      m_lb = m_ub = value;
+      if (!isDynamic())
+        notifyChange(DomainListener::RELAXED);
+      return;
+    }        
+    if (m_lb <= value && value <= m_ub)
+      return; // Within domain.
+    if (fabs(m_lb - value) < minDelta() || fabs(value - m_ub) < minDelta())
+      return; // Within minDelta() of end points of domain.
+    check_error(ALWAYS_FAILS); // Can't add it without a 'gap' between interval and value.
+  }
+
+  void IntervalDomain::remove(double value) {
+    if (isSingleton() && fabs(m_lb - value) < minDelta()) {
+      empty();
+      notifyChange(DomainListener::EMPTIED);
+      return;
+    }
+    check_error(!(m_lb <= value && value <= m_ub)); // In middle of interval: would require splitting it.
+    check_error(!(fabs(m_lb - value) < minDelta() || fabs(value - m_ub) < minDelta())); // Within minDelta() of end-point: would require open ended interval.
+    // Not in interval, so removing it is no-op.
+    return;
+  }
+
   bool IntervalDomain::operator==(const AbstractDomain& dom) const {
-    return (fabs(m_ub - dom.getUpperBound()) < EPSILON &&
-	    fabs(m_lb - dom.getLowerBound()) < EPSILON &&
-	    AbstractDomain::operator==(dom));
+    return(fabs(m_ub - dom.getUpperBound()) < minDelta() &&
+           fabs(m_lb - dom.getLowerBound()) < minDelta() &&
+           AbstractDomain::operator==(dom));
   }
 
   bool IntervalDomain::operator!=(const AbstractDomain& dom) const {
@@ -94,8 +120,8 @@ namespace Prototype {
     check_error(!dom.isEmpty());
     check_error(dom.isInterval());
     bool result = ((isFinite() || dom.isInfinite()) && 
-		   (dom.getUpperBound() + EPSILON) >= m_ub && 
-		   (dom.getLowerBound() - EPSILON) <= m_lb);
+                   (dom.getUpperBound() + minDelta()) >= m_ub && 
+                   (dom.getLowerBound() - minDelta()) <= m_lb);
     return result;
   }
 
@@ -106,13 +132,13 @@ namespace Prototype {
 
     // This could be optimized to avoid the copy if found to be worth it
     IntervalDomain localDomain;
-    if(dom.isSingleton())
+    if (dom.isSingleton())
       localDomain.set(dom.getSingletonValue());
     else
       localDomain.set(dom);
 
     localDomain.intersect(*this);
-    return !localDomain.isEmpty();
+    return(!localDomain.isEmpty());
   }
 
   bool IntervalDomain::equate(AbstractDomain& dom){
@@ -154,111 +180,114 @@ namespace Prototype {
     notifyChange(DomainListener::SET_TO_SINGLETON);
   }
 
-  void IntervalDomain::reset(const AbstractDomain& dom){
+  void IntervalDomain::reset(const AbstractDomain& dom) {
     check_error(dom.isInterval());
-    if(*this != dom){
+    if (*this != dom) {
       relax(dom);
       notifyChange(DomainListener::RESET);
     }
   }
 
-  bool IntervalDomain::intersect(double lb, double ub){
+  bool IntervalDomain::intersect(double lb, double ub) {
     // test case for empty intersection - accounting for precision/rounding errors
-    if(lb - ub > EPSILON || m_lb - ub > EPSILON || lb - m_ub > EPSILON){
+    if (lb - ub > minDelta() || m_lb - ub >= minDelta() || lb - m_ub >= minDelta()) {
       empty();
-      return true;
+      return(true);
     }
 
     bool ub_decreased(false);
 
-    if(ub < m_ub){
+    if (ub < m_ub) {
       m_ub = safeConversion(ub);
       ub_decreased = true;
     }
 
     bool lb_increased(false);
-    if(lb > m_lb){
+    if (lb > m_lb) {
       m_lb = safeConversion(lb);
       lb_increased = true;
     }
 
     // Select the strongest message available
-    if(isSingleton() && (lb_increased || ub_decreased))
+    if (isSingleton() && (lb_increased || ub_decreased))
       notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
-    else if(lb_increased && ub_decreased)
-      notifyChange(DomainListener::BOUNDS_RESTRICTED);
-    else if(lb_increased)
-      notifyChange(DomainListener::LOWER_BOUND_INCREASED);
-    else if(ub_decreased)
-      notifyChange(DomainListener::UPPER_BOUND_DECREASED);
-
-    return (lb_increased || ub_decreased);
+    else
+      if (lb_increased && ub_decreased)
+        notifyChange(DomainListener::BOUNDS_RESTRICTED);
+      else
+        if (lb_increased)
+          notifyChange(DomainListener::LOWER_BOUND_INCREASED);
+        else
+          if (ub_decreased)
+            notifyChange(DomainListener::UPPER_BOUND_DECREASED);
+    return(lb_increased || ub_decreased);
   }
 
-  bool IntervalDomain::relax(double lb, double ub){
+  bool IntervalDomain::relax(double lb, double ub) {
     // Ensure given bounds are not empty
     check_error(lb <= ub);
 
     // Ensure this domain is a subset of the new bounds for relaxation
-    check_error(isEmpty() || (lb - EPSILON <= m_lb  && ub + EPSILON >= m_ub));
+    check_error(isEmpty() || (lb - minDelta() <= m_lb  && ub + minDelta() >= m_ub));
 
     // Test if really causes a change
     bool relaxed = (ub > m_ub) || (lb < m_lb);
 
-    if(relaxed){
+    if (relaxed) {
       m_lb = safeConversion(lb);
       m_ub = safeConversion(ub);
       notifyChange(DomainListener::RELAXED);
     }
 
-    return relaxed;
+    return(relaxed);
   }
 
   bool IntervalDomain::isMember(double value) const {
     double converted = convert(value);
-    return ((converted == value) && 
-	    converted + EPSILON >= m_lb && 
-	    converted - EPSILON <= m_ub);
+    return((converted == value) && 
+           converted + minDelta() > m_lb && 
+           converted - minDelta() < m_ub);
   }
 
   bool IntervalDomain::isSingleton() const {
     check_error(!isDynamic());
-    return (fabs(m_ub - m_lb) < EPSILON);
+    return(fabs(m_ub - m_lb) < minDelta());
   }
 
   bool IntervalDomain::isEmpty() const {
     check_error(!isDynamic());
-    return (m_lb - m_ub > EPSILON);
+    return (m_lb - m_ub > minDelta());
   }
 
   void IntervalDomain::empty() {
-    m_ub = 1;
-    m_lb = 2;
+    m_ub = -2;
+    m_lb = 2 + minDelta();
     notifyChange(DomainListener::EMPTIED);
   }
 
   int IntervalDomain::getSize() const {
     check_error(!isDynamic() && isFinite());
 
-    if(isEmpty())
-      return 0;
-    else if(isSingleton()) // Need to test separately in case of rounding errors
-      return 1;
+    if (isEmpty())
+      return(0);
     else
-      return (int)(m_ub - m_lb + 1);
+      if (isSingleton()) // Need to test separately in case of rounding errors
+        return(1);
+      else
+        return((int)(m_ub - m_lb + 1));
   }
 
-  void IntervalDomain::getValues(std::list<double>& results) const{
+  void IntervalDomain::getValues(std::list<double>& results) const {
     check_error(isFinite());
     int lb = (int) check(m_lb);
     int ub = (int) check(m_ub);
-    for(int i = lb; i <= ub; i++)
+    for (int i = lb; i <= ub; i++)
       results.push_back(i);
   }
 
   double IntervalDomain::check(const double& value) const {
     testPrecision(value);
-    return value;
+    return(value);
   }
 
   void IntervalDomain::operator>>(ostream& os) const {
@@ -282,33 +311,34 @@ namespace Prototype {
     os << "]";
   }
 
-  void IntervalDomain::testPrecision(const double& value) const {} // A NO-OP FOR REALS
-
-  double IntervalDomain::convert(const double& value) const {return value;} // A NO-OP FOR REALS
+  /**
+   * @brief Convert the value appropriately for the particular Domain class.
+   * @note A no-op for reals.
+   */
+  double IntervalDomain::convert(const double& value) const {return value;}
 
   bool IntervalDomain::isFinite() const {
     check_error(!isDynamic());
-
-    // Reals are only finite if they are singletons!
-    return isSingleton();
+    // Real domains are only finite if they are singleton.
+    return(isSingleton());
   }
 
   /**
    * @brief IntervalDomains are always numeric.
    */
   bool IntervalDomain::isNumeric() const {
-    return true;
+    return(true);
   }
 
   const AbstractDomain::DomainType& IntervalDomain::getType() const{
     static const AbstractDomain::DomainType s_type = REAL_INTERVAL;
-    return s_type;
+    return(s_type);
   }
 
   double IntervalDomain::translateNumber(double number, bool) const {
-    if(number < 0)
-      return (number < MINUS_INFINITY ? MINUS_INFINITY : number);
+    if (number < 0)
+      return(number < MINUS_INFINITY ? MINUS_INFINITY : number);
     else
-      return (number > PLUS_INFINITY ? PLUS_INFINITY : number);
+      return(number > PLUS_INFINITY ? PLUS_INFINITY : number);
   }
 }

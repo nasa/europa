@@ -2,7 +2,7 @@
 #define _H_DomainTests
 
 
-class DomainTests{
+class DomainTests {
 public:
   static bool test();
 };

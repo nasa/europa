@@ -10,7 +10,7 @@
 #include "AbstractDomain.hh"
 #include <set>
 
-namespace Prototype{
+namespace Prototype {
 
   /**
    * @class EnumeratedDomain
@@ -19,7 +19,7 @@ namespace Prototype{
    * The implementation uses a sorted set of doubles which hold all the values possible in the set, and then refines membership using
    * a bit vector.
    */
-  class EnumeratedDomain: public AbstractDomain{
+  class EnumeratedDomain : public AbstractDomain {
   public:
 
     /**
@@ -184,7 +184,6 @@ namespace Prototype{
      */
     double getLowerBound() const;
 
-
     /**
      * @brief Access both bounds in a convenience method, and indicates if the domain is infinite
      * @param lb update this value with the lower bound
@@ -256,6 +255,15 @@ namespace Prototype{
     void operator>>(ostream& os) const;
 
   protected:
+
+    /**
+     * @brief Enforces enumeration semantics.
+     * @note Will be compiled out for fast version.
+     * @note No-op for enumerations.
+     */
+    virtual void testPrecision(const double& value) const {
+    }
+
     std::set<double> m_values; /**< Holds the contents from which the set membership is then derived. */
     bool m_isNumeric;
   };

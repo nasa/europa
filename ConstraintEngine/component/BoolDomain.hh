@@ -6,7 +6,7 @@
  * @author Conor McGann
  * @brief Declares a restriction to semantics of the IntervalDomain for integers only.
  */
-#include "IntervalDomain.hh"
+#include "IntervalIntDomain.hh"
 
 namespace Prototype {
 
@@ -19,7 +19,7 @@ namespace Prototype {
    * @li All modification operations on the bounds must be checked to ensure they are integers.
    * @li Only values of 0 and 1 allowed.
    */
-  class BoolDomain: public IntervalDomain {
+  class BoolDomain : public IntervalIntDomain {
   public:
     BoolDomain(bool singletonValue, const DomainListenerId& listener = DomainListenerId::noId());
     BoolDomain(const DomainListenerId& listener = DomainListenerId::noId());
@@ -28,22 +28,8 @@ namespace Prototype {
     bool isFinite() const;
     bool isFalse() const;
     bool isTrue() const;
-
   private:
-    /**
-     * @brief Enforces integer semantics.
-     * @note Might be compiled out for fast version, depending on the compiler.
-     * Only explicitly inline'ing it can ensure it is always completely compiled out.
-     * --wedgingt 2004 Feb 25
-     */
-    void testPrecision(const double& value) const;
-
-    /**
-     * @brief Carries out the conversion of the given double to do appropriate rounding.
-     * @param value The value to be converted.
-     * @return The value subject to any rounding required for the sub-type (e.g. int).
-     */
-    double convert(const double& value) const;
+    virtual void testPrecision(const double& value) const;
   };
 }
 #endif

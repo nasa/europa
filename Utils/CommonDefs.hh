@@ -36,18 +36,16 @@ namespace Prototype {
     return sl_data; \
   }
 
-  DECLARE_GLOBAL_CONST(int, g_maxFiniteTime);
+  DECLARE_GLOBAL_CONST(int, g_maxFiniteTime); /**< 268435455 */
   DECLARE_GLOBAL_CONST(int, g_infiniteTime);
   DECLARE_GLOBAL_CONST(int, g_noTime);
   DECLARE_GLOBAL_CONST(double, g_epsilon);
   DECLARE_GLOBAL_CONST(int, g_infinity);
   DECLARE_GLOBAL_CONST(int, g_maxInt);
 
-  /*!<  g_maxFiniteTime()  is 268435455 */
-
-  #define MAX_INT g_maxInt()
-  #define PLUS_INFINITY g_infiniteTime()
-  #define MINUS_INFINITY -g_infiniteTime()
-  #define EPSILON g_epsilon() /*!< Used when computing differences on REAL NUMBERS. Smallest increment */
+  #define MAX_INT (g_maxInt())
+  #define PLUS_INFINITY (g_infiniteTime())
+  #define MINUS_INFINITY (-g_infiniteTime())
+  #define EPSILON (g_epsilon()) /**< Used when computing differences and comparing real numbers: smallest recognized increment. */
 }
 #endif

@@ -33,7 +33,28 @@ namespace Prototype{
     IntervalIntDomain(const IntervalIntDomain& org);
 
     bool isFinite() const;
+
     const DomainType& getType() const;
+
+    /**
+     * @brief Add an element to the domain.
+     * @param value The value to insert.
+     * @note Will generate a domain relaxation if value is not already in the domain.
+     * @note Will generate an error if value not within or "next to" the existing interval.
+     * @see DomainListener::DOMAIN_RELAXED, AbstractDomain::insert
+     * @note This implementation might also work in IntervalDomain
+     * since it uses minDelta().
+     */
+    virtual void insert(double value);
+
+    /**
+     * @brief Remove a value from the domain.
+     * @param value The value to remove.
+     * @note Will generate an error if value is in "middle" of interval.
+     * @note This implementation might also work in IntervalDomain
+     * since it uses minDelta().
+     */
+    virtual void remove(double value);
 
     /**
      * @brief Enforces integer semantics by restricting changes to units.
@@ -42,11 +63,12 @@ namespace Prototype{
 
     double translateNumber(double number, bool asMin = true) const;
 
-  private:
+  protected:
     /**
-     * @brief Enforces integer semantics. Will be compiled out for fast version.
+     * @brief Enforces integer semantics.
+     * @note Will be compiled out for fast version.
      */
-    void testPrecision(const double& value) const;
+    virtual void testPrecision(const double& value) const;
 
     /**
      * @brief Enforces integer semantics.

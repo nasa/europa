@@ -3,21 +3,23 @@
 namespace Prototype {
 
   BoolDomain::BoolDomain(bool singletonValue, const DomainListenerId& listener)
-    : IntervalDomain(singletonValue, singletonValue, listener) { }
+    : IntervalIntDomain(singletonValue, singletonValue, listener) {
+    check_value(singletonValue);
+  }
 
   BoolDomain::BoolDomain(const DomainListenerId& listener)
-    : IntervalDomain(0, 1, listener) { }
+    : IntervalIntDomain(0, 1, listener) {
+  }
 
   BoolDomain::BoolDomain(const BoolDomain& org)
-    : IntervalDomain(org) { }
+    : IntervalIntDomain(org) {
+  }
 
   void BoolDomain::testPrecision(const double& value) const {
     check_error(value == 0 || value == 1);
   }
 
-  double BoolDomain::convert(const double& value) const {
-    return(value);
-  }
+  // convert(), insert(), and remove() are inherited from IntervalIntDomain.
 
   bool BoolDomain::isFinite() const{
     return(true);
