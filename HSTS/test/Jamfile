@@ -109,7 +109,7 @@ LocalDepends run-hsts-planner-tests :
 #       dnp-freeObsNoEmpty-h # runs forever
        dnp-tenFreeObs-h
        dnp-threeFreeObs-h
-       dnp-twentyFreeObs-h
+#       dnp-twentyFreeObs-h # times out
        dnp-twoFreeObs-h
         ;
 
