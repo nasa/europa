@@ -113,13 +113,14 @@ namespace PLASMA {
       VariableEntry();
       VariableEntry(const std::set<double>& domain, const Priority p, const DomainOrder order, const LabelStr& generatorName, const std::list<LabelStr>& enumeration);
       virtual ~VariableEntry();
-      void setPriority(const Priority p);
-      void setDomainOrder(const std::set<double>& domain, const DomainOrder order, const LabelStr& generatorName);
+      void setDomain(const std::list<LabelStr>& domain);
       const Priority getPriority() const;
       const std::list<LabelStr>& getDomain() const;
+      const DomainOrder& getDomainOrder() const;
       const GeneratorId& getGenerator() const;
     private:
       std::list<LabelStr> m_domain;
+      DomainOrder m_order;
       Priority m_priority;
       GeneratorId m_generator;
     };

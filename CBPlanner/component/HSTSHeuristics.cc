@@ -130,38 +130,51 @@ namespace PLASMA {
     check_error(MAX_PRIORITY >= p);
     if (!enumeration.empty())
       m_domain = enumeration;
-    else {
-      switch (order) {
-      case VGENERATOR:
-	// create generator from name
-	std::cout << " Generators such as " << generatorName.c_str() << " are not yet supported" << std::endl;
-	break;
-      case ASCENDING:
+    switch (order) {
+    case VGENERATOR:
+      // create generator from name
+      std::cout << " Generators such as " << generatorName.c_str() << " are not yet supported" << std::endl;
+      break;
+    case ASCENDING:
+      if (m_domain.empty()) {
 	for (std::set<double>::const_iterator it(domain.begin()); it != domain.end(); ++it) {
 	  check_error(LabelStr::isString(*it));
 	  LabelStr value(*it);
 	  m_domain.push_back(value);
 	}
-	break;
-      case DESCENDING:
-	for (std::set<double>::const_iterator it(domain.begin()); it != domain.end(); ++it) {
-	  check_error(LabelStr::isString(*it));
-	  LabelStr value(*it);
-	  m_domain.push_back(value);
-	}
-	m_domain.reverse();
-	break;
-      default:
-	check_error(ALWAYS_FAILS);
       }
+      break;
+    case DESCENDING:
+      if (m_domain.empty()) {
+	for (std::set<double>::const_iterator it(domain.begin()); it != domain.end(); ++it) {
+	  check_error(LabelStr::isString(*it));
+	  LabelStr value(*it);
+	  m_domain.push_back(value);
+	}
+      }
+      m_domain.reverse();
+      break;
+    case ENUMERATION: 
+      check_error(!enumeration.empty());
+      check_error(!m_domain.empty());
+      check_error(m_domain.size() == enumeration.size());
+      break;
+    default:
+      check_error(ALWAYS_FAILS);
     }
   }
 
   HSTSHeuristics::VariableEntry::~VariableEntry() {}
 
+  void HSTSHeuristics::VariableEntry::setDomain(const std::list<LabelStr>& domain) {
+    m_domain = domain;
+  }
+
   const HSTSHeuristics::Priority HSTSHeuristics::VariableEntry::getPriority() const { return m_priority; }
   
   const std::list<LabelStr>& HSTSHeuristics::VariableEntry::getDomain() const { return m_domain; }
+
+  const HSTSHeuristics::DomainOrder& HSTSHeuristics::VariableEntry::getDomainOrder() const { return m_order; }
   
   const GeneratorId& HSTSHeuristics::VariableEntry::getGenerator() const { return m_generator; }
 
@@ -248,14 +261,7 @@ namespace PLASMA {
     unsigned int index = Schema::instance()->getIndexFromName(pred, variableName);
     LabelStr varType(Schema::instance()->getParameterType(pred, index));
 
-    std::cout << "**** VAR TYPE = " << varType.c_str() << std::endl;
-    std::set<double> values;
-    if (Schema::instance()->isEnum(varType)) {
-      Schema::instance()->getEnumValues(varType, values);
-    }
-    else {
-      std::cout << " Can't handle values that are not enum, yet" << std::endl;
-    }
+    std::set<double> values; // we instantiate values lazily upon evaluation
     if (generatorName == NO_STRING) {
       VariableEntry entry(values, p, order, NO_STRING, enumeration);
       m_variableHeuristics.insert(std::make_pair<LabelStr,VariableEntry>(key, entry));
@@ -521,9 +527,13 @@ namespace PLASMA {
 	os << " " << entry.getGenerator()->getName().c_str();
       os << " try values:";
       const std::list<LabelStr> domain = entry.getDomain();
-      std::list<LabelStr>::const_iterator itvd(domain.begin());
-      for (; itvd != domain.end(); ++itvd)
-	os << " " << (*itvd).c_str();
+      if (domain.empty())
+	os << " to be computed lazily ";
+      else {
+	std::list<LabelStr>::const_iterator itvd(domain.begin());
+	for (; itvd != domain.end(); ++itvd)
+	  os << " " << (*itvd).c_str();
+      }
       os << std::endl;
     }
   }
