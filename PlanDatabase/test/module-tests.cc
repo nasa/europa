@@ -9,6 +9,7 @@
 #include "DbLogger.hh"
 #include "PartialPlanWriter.hh"
 #include "CommonAncestorConstraint.hh"
+#include "HasAncestorConstraint.hh"
 
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/Utils.hh"
@@ -77,6 +78,7 @@ public:
     runTest(testObjectVariables);
     runTest(testObjectTokenRelation);
     runTest(testCommonAncestorConstraint);
+    runTest(testHasAncestorConstraint);
     return true;
   }
 private:
@@ -295,6 +297,105 @@ private:
 
     return true;
   }
+
+ static bool testHasAncestorConstraint(){
+
+    PlanDatabase db(ENGINE, SCHEMA);
+    Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
+    Object o2(o1.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    Object o3(o1.getId(), LabelStr("AllObjects"), LabelStr("o3"));
+    Object o4(o2.getId(), LabelStr("AllObjects"), LabelStr("o4"));
+    Object o5(o2.getId(), LabelStr("AllObjects"), LabelStr("o5"));
+    Object o6(o3.getId(), LabelStr("AllObjects"), LabelStr("o6"));
+    Object o7(o3.getId(), LabelStr("AllObjects"), LabelStr("o7"));
+    Object o8(db.getId(), LabelStr("AllObjects"), LabelStr("o8"));
+
+
+    // Positive test immediate ancestor
+    {
+      Variable<ObjectSet> first(ENGINE, ObjectSet(o7.getId()));
+      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o3.getId()));
+      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), restrictions.getId()));
+
+      assert(ENGINE->propagate());
+    }
+
+    // negative test immediate ancestor
+    {
+      Variable<ObjectSet> first(ENGINE, ObjectSet(o7.getId()));
+      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o2.getId()));
+      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), restrictions.getId()));
+
+      assert(!ENGINE->propagate());
+    }
+    // Positive test higher up  ancestor
+    {
+      Variable<ObjectSet> first(ENGINE, ObjectSet(o7.getId()));
+      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o1.getId()));
+      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), restrictions.getId()));
+
+      assert(ENGINE->propagate());
+    }
+    // negative test higherup ancestor
+    {
+      Variable<ObjectSet> first(ENGINE, ObjectSet(o7.getId()));
+      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o8.getId()));
+      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), restrictions.getId()));
+
+      assert(!ENGINE->propagate());
+    }
+
+    //positive restriction of the set.
+    {
+      ObjectSet obs;
+      obs.insert(o7.getId());
+      obs.insert(o4.getId());
+      obs.close();
+
+      Variable<ObjectSet> first(ENGINE, obs);
+      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o2.getId()));
+      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), restrictions.getId()));
+
+      assert(ENGINE->propagate());
+      assert(first.getDerivedDomain().isSingleton());
+    }
+
+    //no restriction of the set.
+    {
+      ObjectSet obs1;
+      obs1.insert(o7.getId());
+      obs1.insert(o4.getId());
+      obs1.close();
+
+      Variable<ObjectSet> first(ENGINE, obs1);
+      Variable<ObjectSet> restrictions(ENGINE, ObjectSet(o1.getId()));
+      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), restrictions.getId()));
+
+      assert(ENGINE->propagate());
+      assert(first.getDerivedDomain().getSize() == 2);
+    }
+
+    return true;
+ }
+
 };
 
 class TokenTest {
