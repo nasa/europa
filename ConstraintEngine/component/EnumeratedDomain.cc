@@ -26,35 +26,33 @@ namespace Prototype {
     return(sl_typeName);
   }
 
-  EnumeratedDomain::EnumeratedDomain(bool isNumeric, const LabelStr& typeName)
-    : AbstractDomain(false, true, DomainListenerId::noId(), typeName), m_isNumeric(isNumeric) {
-  }
+  EnumeratedDomain::EnumeratedDomain(bool isNumeric,
+                                     const char* typeName)
+    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric) {}
 
-  EnumeratedDomain::EnumeratedDomain(const std::list<double>& values,
-                                     bool closed,
-                                     const DomainListenerId& listener, 
-                                     bool isNumeric,
-                                     const LabelStr& typeName)
-    : AbstractDomain(false, true, listener, typeName), m_isNumeric(isNumeric) {
+  EnumeratedDomain::EnumeratedDomain(const std::list<double>& values, bool isNumeric,
+                                     const char* typeName)
+    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric) {
     for (std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
       insert(*it);
-    if (closed)
-      close();
+    close();
   }
 
   EnumeratedDomain::EnumeratedDomain(double value,
-                                     const DomainListenerId& listener,
                                      bool isNumeric,
-                                     const LabelStr& typeName)
-    : AbstractDomain(false, true, listener, typeName), m_isNumeric(isNumeric) {
+                                     const char* typeName)
+    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric) {
     insert(value);
     close();
   }
 
-  EnumeratedDomain::EnumeratedDomain(const EnumeratedDomain& org)
-    : AbstractDomain(org.m_closed, true, DomainListenerId::noId(), org.m_typeName) {
-    m_values = org.m_values;
-    m_isNumeric = org.m_isNumeric;
+  EnumeratedDomain::EnumeratedDomain(const AbstractDomain& org)
+    : AbstractDomain(org) {
+    check_error(org.isEnumerated(), 
+		"Invalid source domain " + org.getTypeName().toString() + " for enumeration");
+    const EnumeratedDomain& enumOrg = static_cast<const EnumeratedDomain&>(org);
+    m_values = enumOrg.m_values;
+    m_isNumeric = enumOrg.m_isNumeric;
   }
 
   bool EnumeratedDomain::isFinite() const {
@@ -65,12 +63,10 @@ namespace Prototype {
     return(m_isNumeric);
   }
 
-  // What if it's dynamic? --wedgingt 2004 Mar 3
   bool EnumeratedDomain::isSingleton() const {
     return(m_values.size() == 1);
   }
 
-  // What if it's dynamic? --wedgingt 2004 Mar 3
   bool EnumeratedDomain::isEmpty() const {
     return(m_values.empty());
   }
@@ -102,6 +98,11 @@ namespace Prototype {
     notifyChange(DomainListener::RELAXED);
   }
 
+  void EnumeratedDomain::insert(const std::list<double>& values){
+    for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
+      insert(*it);
+  }
+
   void EnumeratedDomain::remove(double value) {
     check_error(check_value(value));
     std::set<double>::iterator it = m_values.begin();
@@ -123,13 +124,10 @@ namespace Prototype {
   }
 
   void EnumeratedDomain::set(double value) {
-    if (!isMember(value)) {
-      empty();
-      return;
-    }
-
+    check_error(isOpen() || isMember(value), "Can only set a value from the current domain if closed.")
     m_values.clear();
     m_values.insert(value);
+
     notifyChange(DomainListener::SET_TO_SINGLETON);
   }
 
@@ -141,7 +139,8 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::equate(AbstractDomain& dom) {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
+
     if (dom.isInterval()) {
       bool changed = intersect(dom);
       if (isEmpty())
@@ -233,7 +232,7 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::operator==(const AbstractDomain& dom) const {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
     if (!dom.isEnumerated())
       return(dom.isFinite() &&
              getSize() == dom.getSize() &&
@@ -306,7 +305,8 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::intersect(const AbstractDomain& dom) {
-    check_error(isNumeric() == dom.isNumeric());
+    safeComparison(*this, dom);
+
     bool changed = false;
     if (dom.isInterval()) {
       std::set<double>::iterator it = m_values.begin();
@@ -365,7 +365,7 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::difference(const AbstractDomain& dom) {
-    check_error(isNumeric() == dom.isNumeric());
+    safeComparison(*this, dom);
 
     // Trivial implementation, for all members of this domain that
     // are present in dom, remove them.
@@ -390,15 +390,15 @@ namespace Prototype {
   }
 
   AbstractDomain& EnumeratedDomain::operator=(const AbstractDomain& dom) {
-    check_error(dom.isEnumerated());
-    check_error(m_listener.isNoId());
+    safeComparison(*this, dom);
+    check_error(m_listener.isNoId(), "Can onlyu do direct assigment if not registered with a listener");
     const EnumeratedDomain& e_dom = static_cast<const EnumeratedDomain&>(dom);
     m_values = e_dom.m_values;
     return(*this);
   }
 
-  bool EnumeratedDomain::isSubsetOf(const AbstractDomain& dom) const {
-    check_error(isNumeric() == dom.isNumeric());
+  bool EnumeratedDomain::isSubsetOf(const AbstractDomain& dom) const {    
+    safeComparison(*this, dom);
 
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
       if (!dom.isMember(*it))
@@ -407,8 +407,8 @@ namespace Prototype {
     return(true);
   }
 
-  bool EnumeratedDomain::intersects(const AbstractDomain& dom) const {
-    check_error(isNumeric() == dom.isNumeric());
+  bool EnumeratedDomain::intersects(const AbstractDomain& dom) const {  
+    safeComparison(*this, dom);
 
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
       if (dom.isMember(*it))

@@ -1,10 +1,11 @@
 #include "TestSupport.hh"
+#include "LabelStr.hh"
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
 #include "EnumeratedDomain.hh"
-#include "LabelStr.hh"
+#include "StringDomain.hh"
+#include "NumericDomain.hh"
 #include "DomainListener.hh"
-#include "Domain.hh"
 #include "module-tests.hh"
 #include <cmath>
 
@@ -45,6 +46,7 @@ namespace Prototype {
       runTest(testDifference);
       runTest(testOperatorEquals);
       runTest(testInfinitesAndInts);
+      runTest(testEnumSet);
       runTest(testInsertAndRemove);
       runTest(testValidComparisonWithEmpty_gnats2403);
       runTest(testIntervalSingletonValues);
@@ -85,7 +87,8 @@ namespace Prototype {
     static bool testRelaxation() {
       ChangeListener l_listener;
       IntervalIntDomain dom0; // Will have very large default range
-      IntervalIntDomain dom1(-100, 100, l_listener.getId());
+      IntervalIntDomain dom1(-100, 100);
+      dom1.setListener(l_listener.getId());
       dom1.relax(dom0);
       DomainListener::ChangeType change;
       bool res = l_listener.checkAndClearChange(change);
@@ -107,7 +110,8 @@ namespace Prototype {
 
     static bool testIntersection() {
       ChangeListener l_listener;
-      IntervalIntDomain dom0(l_listener.getId()); // Will have very large default range
+      IntervalIntDomain dom0; // Will have very large default range
+      dom0.setListener(l_listener.getId());
 
       // Execute intersection and verify results
       IntervalIntDomain dom1(-100, 100);
@@ -186,7 +190,7 @@ namespace Prototype {
       assert(anotherActualString == expectedString);
 
       std::string integerType = "integer";
-      IntervalIntDomain d2(1, 100, DomainListenerId::noId(), LabelStr(integerType.c_str()));
+      IntervalIntDomain d2(1, 100, integerType.c_str());
       std::stringstream ss2;
       d2 >> ss2;
       std::string actualString2 = ss2.str();
@@ -237,7 +241,7 @@ namespace Prototype {
       double newValue = (dom1.getLowerBound() - dom4.minDelta());
       assert(dom4.getUpperBound() == newValue);
 
-      EnumeratedDomain dom5(3.14159265);
+      NumericDomain dom5(3.14159265);
       assert(dom5.getSize() == 1);
 
       std::list<double> vals;
@@ -247,7 +251,7 @@ namespace Prototype {
       vals.push_back(PLUS_INFINITY);
       vals.push_back(MINUS_INFINITY);
       vals.push_back(EPSILON);
-      EnumeratedDomain dom6(vals);
+      NumericDomain dom6(vals);
 
       assert(dom6.getSize() == 6);
       assert(fabs(dom5.minDelta() - dom6.minDelta()) < EPSILON); // Should be ==, but allow some leeway.
@@ -288,11 +292,19 @@ namespace Prototype {
       return(true);
     }
 
+    static bool testEnumSet(){
+      EnumeratedDomain dom0(true, "Enum"); // Create enum of type 'Enum'
+      assertTrue(dom0.isOpen());
+      dom0.set(10);
+      assertTrue(dom0.isSingleton());
+      return true;
+    }
+
     static bool testEnumDomInsertAndRemove() {
       // Should add a loop like the one in
       //   testIntervalDomInsertAndRemove(). --wedgingt 2004 Mar 8
 
-      EnumeratedDomain enumDom1;
+      NumericDomain enumDom1;
       assert(enumDom1.isOpen());
       assert(enumDom1.isNumeric());
       enumDom1.insert(3.14159265);
@@ -337,7 +349,7 @@ namespace Prototype {
       vals.push_back(PLUS_INFINITY);
       vals.push_back(MINUS_INFINITY);
       vals.push_back(EPSILON);
-      EnumeratedDomain enumDom2(vals);
+      NumericDomain enumDom2(vals);
 
       assert(!(enumDom2.isOpen()));
       assert(enumDom2.isNumeric());
@@ -391,7 +403,7 @@ namespace Prototype {
 
       return(true);
     }
-
+    /* NO LONGER SUPPORT INSERT AND REMOVE ON INTERVAL DOMAINS
     static bool testIntervalDomInsertAndRemove() {
       assert(EPSILON > 0.0); // Otherwise, loop will be infinite.
 
@@ -497,17 +509,16 @@ namespace Prototype {
 
       return(true);
     }
+    */
 
     static bool testInsertAndRemove() {
-      return(testEnumDomInsertAndRemove() &&
-             testIntervalDomInsertAndRemove() &&
-             testIntervalIntDomInsertAndRemove());
+      return(testEnumDomInsertAndRemove());
     }
 
     static bool testValidComparisonWithEmpty_gnats2403(){
       IntervalIntDomain d0;
       IntervalIntDomain d1;
-      EnumeratedDomain d2;
+      NumericDomain d2;
       d2.insert(1);
       d2.close();
 
@@ -519,7 +530,7 @@ namespace Prototype {
 
       assert(AbstractDomain::canBeCompared(d0, d2));
 
-      EnumeratedDomain d3(d2);
+      NumericDomain d3(d2);
       d2.empty();
       assert(AbstractDomain::canBeCompared(d2, d3));
       assert(d3 != d2);
@@ -612,8 +623,8 @@ namespace Prototype {
       values.push_back(10);
       values.push_back(11);
 
-      EnumeratedDomain d0(values);
-      EnumeratedDomain d1(values);
+      NumericDomain d0(values);
+      NumericDomain d1(values);
       assert(d0 == d1);
       assert(d0.isSubsetOf(d1));
       assert(d0.isMember(-98.67));
@@ -651,7 +662,7 @@ namespace Prototype {
     }
 
     static bool testLabelSetAllocations() {
-      std::list<Prototype::LabelStr> values;
+      std::list<double> values;
       values.push_back(Prototype::LabelStr("L1"));
       values.push_back(Prototype::LabelStr("L4"));
       values.push_back(Prototype::LabelStr("L2"));
@@ -659,7 +670,8 @@ namespace Prototype {
       values.push_back(Prototype::LabelStr("L3"));
 
       ChangeListener l_listener;
-      LabelSet ls0(values, true, l_listener.getId());
+      LabelSet ls0(values);
+      ls0.setListener(l_listener.getId());
       assert(!ls0.isOpen());
 
       Prototype::LabelStr l2("L2");
@@ -675,7 +687,7 @@ namespace Prototype {
       assert(ls0.isMember(l3));
       assert(ls0.getSize() == 1);
 
-      LabelSet ls1(values, true);
+      LabelSet ls1(values);
       ls0.relax(ls1);
       res = l_listener.checkAndClearChange(change);
       assert(res && change == DomainListener::RELAXED);
@@ -684,7 +696,7 @@ namespace Prototype {
     }
 
     static bool testEquate() {
-      std::list<Prototype::LabelStr> baseValues;
+      std::list<double> baseValues;
       baseValues.push_back(Prototype::LabelStr("A"));
       baseValues.push_back(Prototype::LabelStr("B"));
       baseValues.push_back(Prototype::LabelStr("C"));
@@ -695,8 +707,10 @@ namespace Prototype {
       baseValues.push_back(Prototype::LabelStr("H"));
 
       ChangeListener l_listener;
-      LabelSet ls0(baseValues, true, l_listener.getId());
-      LabelSet ls1(baseValues, true, l_listener.getId());
+      LabelSet ls0(baseValues);
+      ls0.setListener(l_listener.getId());
+      LabelSet ls1(baseValues);
+      ls1.setListener(l_listener.getId());
 
       assert(ls0 == ls1);
       assert(ls0.getSize() == 8);
@@ -711,14 +725,16 @@ namespace Prototype {
       assert(res); // It should have changed
       assert(!ls1.isMember(lC));
 
-      LabelSet ls2(baseValues, true, l_listener.getId());
+      LabelSet ls2(baseValues);
+      ls2.setListener(l_listener.getId());
       ls2.remove(Prototype::LabelStr("A"));
       ls2.remove(Prototype::LabelStr("B"));
       ls2.remove(Prototype::LabelStr("C"));
       ls2.remove(Prototype::LabelStr("D"));
       ls2.remove(Prototype::LabelStr("E"));
 
-      LabelSet ls3(baseValues, true, l_listener.getId());
+      LabelSet ls3(baseValues);
+      ls3.setListener(l_listener.getId());
       Prototype::LabelStr lA("A");
       Prototype::LabelStr lB("B");
       ls3.remove(lA);
@@ -728,14 +744,16 @@ namespace Prototype {
       assert(res);
       assert(ls2 == ls3);
 
-      LabelSet ls4(baseValues, true, l_listener.getId());
+      LabelSet ls4(baseValues);
+      ls4.setListener(l_listener.getId());
       ls4.remove(Prototype::LabelStr("A"));
       ls4.remove(Prototype::LabelStr("B"));
       ls4.remove(Prototype::LabelStr("C"));
       ls4.remove(Prototype::LabelStr("D"));
       ls4.remove(Prototype::LabelStr("E"));
 
-      LabelSet ls5(baseValues, true, l_listener.getId());
+      LabelSet ls5(baseValues);
+      ls5.setListener(l_listener.getId());
       ls5.remove(Prototype::LabelStr("F"));
       ls5.remove(Prototype::LabelStr("G"));
       ls5.remove(Prototype::LabelStr("H"));
@@ -753,14 +771,14 @@ namespace Prototype {
       enumVals.push_back(-0.25);
       enumVals.push_back(3.375);
       enumVals.push_back(-1.75);
-      EnumeratedDomain ed1(enumVals);
-      EnumeratedDomain ed3(enumVals);
+      NumericDomain ed1(enumVals);
+      NumericDomain ed3(enumVals);
 
       enumVals.clear();
       enumVals.push_back(3.375);
       enumVals.push_back(2.5);
-      EnumeratedDomain ed2(enumVals);
-      EnumeratedDomain ed4(enumVals);
+      NumericDomain ed2(enumVals);
+      NumericDomain ed4(enumVals);
 
       ed1.equate(ed2);
       assertTrue(ed1 == ed2);
@@ -770,7 +788,7 @@ namespace Prototype {
 
       enumVals.clear();
       enumVals.push_back(0.0);
-      EnumeratedDomain ed0(enumVals);
+      NumericDomain ed0(enumVals);
 
       ed1.equate(ed0);
 
@@ -781,14 +799,14 @@ namespace Prototype {
       assertFalse(ed0 == ed1);
       assertTrue(ed1.isEmpty() != ed0.isEmpty());
 
-      ed0 = EnumeratedDomain(enumVals);
+      ed0 = NumericDomain(enumVals);
       assertTrue(!ed0.isEmpty());
 
       ed0.equate(ed2);
       assertTrue(ed2 != ed0 && ed2.isEmpty() != ed0.isEmpty());
 
       enumVals.push_back(20.0); // Now 0.0 and 20.0
-      ed0 = EnumeratedDomain(enumVals);
+      ed0 = NumericDomain(enumVals);
       assertTrue(!ed0.isEmpty() && !ed0.isSingleton());
 
       IntervalDomain id0(-10.0, 10.0);
@@ -797,7 +815,7 @@ namespace Prototype {
       assertTrue(ed0.isSingleton() && ed0.getSingletonValue() == 0.0);
       assertTrue(id0.isSingleton() && id0.getSingletonValue() == 0.0);
 
-      ed0 = EnumeratedDomain(enumVals); // Now 0.0 and 20.0
+      ed0 = NumericDomain(enumVals); // Now 0.0 and 20.0
       assertTrue(!ed0.isEmpty() && !ed0.isSingleton());
 
       IntervalDomain id1(0.0, 5.0);
@@ -810,7 +828,7 @@ namespace Prototype {
       enumVals.push_back(3.375);
       enumVals.push_back(2.5);
       enumVals.push_back(1.5);
-      EnumeratedDomain ed5(enumVals);
+      NumericDomain ed5(enumVals);
       IntervalDomain id2(2.5, 3.0);
 
       ed5.equate(id2);
@@ -822,7 +840,7 @@ namespace Prototype {
       enumVals.push_back(2.5);
       enumVals.push_back(1.5);
       enumVals.push_back(-2.0);
-      EnumeratedDomain ed6(enumVals);
+      NumericDomain ed6(enumVals);
       IntervalDomain id3(-1.0, 3.0);
 
       id3.equate(ed6);
@@ -836,7 +854,7 @@ namespace Prototype {
 
       enumVals.clear();
       enumVals.push_back(1.0);
-      EnumeratedDomain ed7(enumVals);
+      NumericDomain ed7(enumVals);
       IntervalDomain id5(1.125, PLUS_INFINITY);
 
       id5.equate(ed7);
@@ -846,18 +864,18 @@ namespace Prototype {
     }
 
     static bool testValueRetrieval() {
-      std::list<Prototype::LabelStr> values;
+      std::list<double> values;
       values.push_back(Prototype::LabelStr("A"));
       values.push_back(Prototype::LabelStr("B"));
       values.push_back(Prototype::LabelStr("C"));
       values.push_back(Prototype::LabelStr("D"));
       values.push_back(Prototype::LabelStr("E"));
 
-      LabelSet l1(values, true);
-      std::list<Prototype::LabelStr> results;
+      LabelSet l1(values);
+      std::list<double> results;
       l1.getValues(results);
 
-      LabelSet l2(results, true);
+      LabelSet l2(results);
 
       assert(l1 == l2);
       LabelStr lbl("C");
@@ -867,7 +885,7 @@ namespace Prototype {
     }
 
     static bool testIntersection() {
-      std::list<Prototype::LabelStr> values;
+      std::list<double> values;
       values.push_back(Prototype::LabelStr("A"));
       values.push_back(Prototype::LabelStr("B"));
       values.push_back(Prototype::LabelStr("C"));
@@ -911,14 +929,14 @@ namespace Prototype {
       assert(ls4.isEmpty());
 
       {
-	EnumeratedDomain d0;
+	NumericDomain d0;
 	d0.insert(0);
 	d0.insert(1);
 	d0.insert(2);
 	d0.insert(3);
 	d0.close();
 
-	EnumeratedDomain d1;
+	NumericDomain d1;
 	d1.insert(-1);
 	d1.insert(2);
 	d1.insert(4);
@@ -933,7 +951,7 @@ namespace Prototype {
     }
 
     static bool testDifference() {
-      EnumeratedDomain dom0;
+      NumericDomain dom0;
       dom0.insert(1);
       dom0.insert(3);
       dom0.insert(2);
@@ -960,7 +978,7 @@ namespace Prototype {
     }
 
     static bool testOperatorEquals() {
-      EnumeratedDomain dom0;
+      NumericDomain dom0;
       dom0.insert(1);
       dom0.insert(3);
       dom0.insert(2);
@@ -969,13 +987,13 @@ namespace Prototype {
       dom0.insert(6);
       dom0.close();
 
-      EnumeratedDomain dom1;
+      NumericDomain dom1;
       dom1.insert(1);
       dom1.insert(3);
       dom1.insert(2);
       dom1.close();
 
-      EnumeratedDomain dom2(dom0);
+      NumericDomain dom2(dom0);
 
       assert(dom0 != dom1);
       dom0 = dom1;
@@ -988,17 +1006,18 @@ namespace Prototype {
     }
 
     static bool testEmptyOnClosure(){
-      std::list<Prototype::LabelStr> values;
+      std::list<double> values;
       {
 	ChangeListener l_listener;
-	LabelSet ls0(values, true, l_listener.getId());
+	LabelSet ls0(values);
+	ls0.setListener(l_listener.getId());
 	DomainListener::ChangeType change;
 	bool res = l_listener.checkAndClearChange(change);
 	assert(res && change == DomainListener::EMPTIED);
       }
 
       {
-	LabelSet ls0(values, true); // Will be empty on closure, but no listener attached
+	LabelSet ls0(values); // Will be empty on closure, but no listener attached
 	DomainListener::ChangeType change;
 	ChangeListener l_listener;
 	ls0.setListener(l_listener.getId());
@@ -1023,6 +1042,7 @@ namespace Prototype {
       runTest(testIntersection);
       runTest(testSubset);
       runTest(testIntDomain);
+      runTest(testDomainComparatorConfiguration);
       runTest(testCopying);
       return(true);
     }
@@ -1030,12 +1050,12 @@ namespace Prototype {
   private:
 
     static bool testEquality() {
-      EnumeratedDomain dom;
+      NumericDomain dom;
       dom.insert(1.0);
       dom.insert(2.0);
       dom.close();
 
-      EnumeratedDomain dom0(dom);
+      NumericDomain dom0(dom);
       dom0.set(1.0);
 
       IntervalDomain dom1(1.0);
@@ -1052,7 +1072,7 @@ namespace Prototype {
     }
 
     static bool testIntersection() {
-      EnumeratedDomain dom0;
+      NumericDomain dom0;
       dom0.insert(0);
       dom0.insert(0.98);
       dom0.insert(1.0);
@@ -1062,7 +1082,7 @@ namespace Prototype {
       dom0.close();
       assert(dom0.getSize() == 6);
       IntervalIntDomain dom1(1, 8);
-      EnumeratedDomain dom2(dom0);
+      NumericDomain dom2(dom0);
 
       dom0.intersect(dom1);
       assert(dom0.getSize() == 1);
@@ -1079,7 +1099,7 @@ namespace Prototype {
     }
 
     static bool testSubset() {
-      EnumeratedDomain dom0;
+      NumericDomain dom0;
       dom0.insert(0);
       dom0.insert(0.98);
       dom0.insert(1.0);
@@ -1105,28 +1125,17 @@ namespace Prototype {
     }
 
     static bool testIntDomain() {
-      Domain<int> dom0;
+      NumericDomain dom0;
       dom0.insert(10);
       dom0.insert(12);
       dom0.close();
 
-      Domain<float> dom1;
+      NumericDomain dom1;
       dom1.insert(9.98);
       dom1.insert(9.037);
       dom1.close();
 
-      assert(dom0.getType() == AbstractDomain::USER_DEFINED);
-      assert(dom1.getType() == AbstractDomain::USER_DEFINED);
-
-      // These two are correct conceptually, but incorrect
-      // at this level because the Nddl compiler produces
-      // a getTypeName() function in each class for object
-      // domains, which Domain<TYPE> is also used for.
-      //assert(dom0.getTypeName() != dom1.getTypeName());
-      // Last three assert()s imply next one.
-      //assert(!AbstractDomain::canBeCompared(dom0, dom1));
-
-      Domain<int> dom2(10);
+      NumericDomain dom2(10);
       assert(!dom2.isOpen());
       assert(dom2.isSingleton());
 
@@ -1146,8 +1155,7 @@ namespace Prototype {
       BoolDomain falseDom(false);
       BoolDomain trueDom(true);
       BoolDomain both;
-      std::string booleanType = "boolean";
-      BoolDomain customDom(true, DomainListenerId::noId(), LabelStr(booleanType));
+      BoolDomain customDom(true, "boolean");
 
       copyPtr = falseDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
@@ -1183,16 +1191,20 @@ namespace Prototype {
 
     static void testCopyingEnumeratedDomains() {
       AbstractDomain *copyPtr;
-      EnumeratedDomain emptyOpen;
+      NumericDomain emptyOpen;
+      NumericDomain fourDom;
       std::list<double> values;
       values.push_back(0.0);
+      fourDom.insert(0.0);
       values.push_back(1.1);
+      fourDom.insert(1.1);
       values.push_back(2.7);
+      fourDom.insert(2.7);
       values.push_back(3.1);
-      EnumeratedDomain fourDom(values, false); // Open
+      fourDom.insert(3.1);
       values.push_back(4.2);
-      EnumeratedDomain fiveDom(values); // Closed
-      EnumeratedDomain oneDom(2.7); // Singleton
+      NumericDomain fiveDom(values); // Closed
+      NumericDomain oneDom(2.7); // Singleton
 
       copyPtr = emptyOpen.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
@@ -1246,8 +1258,7 @@ namespace Prototype {
     static void testCopyingIntervalDomains() {
       AbstractDomain *copyPtr;
       IntervalDomain one2ten(1.0, 10.9);
-      std::string fourType = "fourType";
-      IntervalDomain four(4.0, DomainListenerId::noId(), LabelStr(fourType.c_str()));
+      IntervalDomain four(4.0, 4.0, "fourType");
       IntervalDomain empty;
       empty.empty();
 
@@ -1325,8 +1336,7 @@ namespace Prototype {
     static void testCopyingIntervalIntDomains() {
       AbstractDomain *copyPtr;
       IntervalIntDomain one2ten(1, 10);
-      std::string fourType = "fourType";
-      IntervalIntDomain four(4, DomainListenerId::noId(), LabelStr(fourType.c_str()));
+      IntervalIntDomain four(4, 4, "fourType");
       IntervalIntDomain empty;
       empty.empty();
       // domains containing infinities should also be tested
@@ -1403,135 +1413,40 @@ namespace Prototype {
       //   new error handling support is in use.
     }
 
-    static void testCopyingTemplateDomains() {
-      AbstractDomain *copyPtr;
-      Domain<Fruits> orangeOnly(orange);
-      Domain<Colors> yellowOnly(yellow);
-      std::list<Fruits> fruitList;
-      Domain<Fruits> emptyFruit(fruitList);
-      fruitList.push_back(lemon);
-      fruitList.push_back(raspberry);
-      Domain<Fruits> noOrange(fruitList);
-      fruitList.push_back(orange);
-      Domain<Fruits> fruitDom(fruitList);
+    class BogusComparator: public DomainComparator {
+    public:
+      BogusComparator(): DomainComparator(){}
 
-      // Should test dynamic domains
+      bool canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const {
+	return false;
+      }
 
-      copyPtr = emptyFruit.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
-      std::cerr << "\nCopy's type name is " << copyPtr->getTypeName().toString() << ".\n";
+    };
 
-      // This assertion is false in the current implementation because
-      // Domain<TYPE>::getTypeName() uses an implementation/compiler
-      // dependent way to get the name of the type that uses the usual
-      // C++ name "mangling" in all the compilers we have.
-      // Skipping this check is probably OK since the type names are
-      // compared within AbstractDomain::canBeCompared().
-      // --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 22
-      // assertTrue(copyPtr->getTypeName() == LabelStr("Fruits"));
+    static bool testDomainComparatorConfiguration() {
+      IntervalIntDomain dom0;
+      IntervalIntDomain dom1;
 
-      // This assertion is also incorrect in the implementation
-      // despite being correct semanticly since this kind of
-      // distinction is being handled in the Nddl compiler by
-      // overriding getTypeName() appropriately.
-      // assertFalse(AbstractDomain::canBeCompared(*copyPtr, yellowOnly));
+      // Using the default comparator - they should be comparable
+      assertTrue(AbstractDomain::canBeCompared(dom0, dom1));
 
-      assertFalse(copyPtr->isOpen());
-      assertFalse(copyPtr->isNumeric());
-      assertTrue(copyPtr->isEnumerated());
-      assertFalse(copyPtr->isInterval());
-      assertTrue(copyPtr->isFinite());
-      assertFalse(copyPtr->isMember(orange));
-      assertFalse(copyPtr->isSingleton());
-      assertTrue(copyPtr->isEmpty());
-      assertTrue(copyPtr->getSize() == 0);
-      assertTrue(*copyPtr == emptyFruit);
-      assertFalse(*copyPtr == orangeOnly);
-      assertFalse(*copyPtr == fruitDom);
-      copyPtr->reset(fruitDom);
-      assertFalse(*copyPtr == emptyFruit);
-      assertFalse(*copyPtr == orangeOnly);
-      assertTrue(*copyPtr == fruitDom);
-      delete copyPtr;
+      // Switch for the bogus one - and make sure it fails as expected
+      new BogusComparator();
+      assertFalse(AbstractDomain::canBeCompared(dom0, dom1));
 
-      copyPtr = orangeOnly.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
+      // Allocate the standard comparator, and ensure it compares once again
+      new DomainComparator();
+      assertTrue(AbstractDomain::canBeCompared(dom0, dom1));
 
-      // See comment above near similar assertion.
-      // assertTrue(copyPtr->getTypeName() == LabelStr("Fruits"));
+      // Now allocate a new one again
+      DomainComparator* dc = new BogusComparator();
+      assertFalse(AbstractDomain::canBeCompared(dom0, dom1));
 
-      // Again, as above.
-      // assertFalse(AbstractDomain::canBeCompared(*copyPtr, yellowOnly));
+      // Deallocate and thus cause revert to standard comparator
+      delete dc;
+      assertTrue(AbstractDomain::canBeCompared(dom0, dom1));
 
-      assertFalse(copyPtr->isOpen());
-      assertFalse(copyPtr->isNumeric());
-      assertTrue(copyPtr->isEnumerated());
-      assertTrue(copyPtr->isFinite());
-      assertFalse(copyPtr->isMember(lemon));
-      assertTrue(copyPtr->isMember(orange));
-      assertTrue(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertTrue(copyPtr->getSize() == 1);
-      assertFalse(*copyPtr == emptyFruit);
-      assertTrue(*copyPtr == orangeOnly);
-      assertFalse(*copyPtr == fruitDom);
-      assertFalse(copyPtr->intersect(fruitDom));
-      assertTrue(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertTrue(emptyFruit.isSubsetOf(*copyPtr));
-      assertTrue(orangeOnly.isSubsetOf(*copyPtr));
-      assertFalse(fruitDom.isSubsetOf(*copyPtr));
-      assertTrue(copyPtr->isSubsetOf(Domain<Fruits>(orange)));
-      assertTrue(copyPtr->isSubsetOf(fruitDom));
-      assertFalse(copyPtr->isSubsetOf(noOrange));
-      delete copyPtr;
-
-      copyPtr = fruitDom.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
-      
-      // See comment above near similar assertion.
-      // assertTrue(copyPtr->getTypeName() == LabelStr("Fruits"));
-
-      // assertFalse(AbstractDomain::canBeCompared(*copyPtr, yellowOnly));
-
-      assertFalse(copyPtr->isOpen());
-      assertFalse(copyPtr->isNumeric());
-      assertTrue(copyPtr->isEnumerated());
-      assertTrue(copyPtr->isFinite());
-      assertTrue(copyPtr->isMember(lemon));
-      assertTrue(copyPtr->isMember(orange));
-      assertFalse(copyPtr->isMember(blueberry));
-      assertFalse(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertTrue(copyPtr->getSize() == 3);
-      assertFalse(*copyPtr == emptyFruit);
-      assertFalse(*copyPtr == orangeOnly);
-      assertTrue(*copyPtr == fruitDom);
-      assertTrue(copyPtr->intersect(orangeOnly));
-      assertTrue(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertTrue(emptyFruit.isSubsetOf(*copyPtr));
-      assertTrue(orangeOnly.isSubsetOf(*copyPtr));
-      assertFalse(fruitDom.isSubsetOf(*copyPtr));
-      assertTrue(copyPtr->isSubsetOf(Domain<Fruits>(orange)));
-      assertTrue(copyPtr->isSubsetOf(fruitDom));
-      assertFalse(copyPtr->isSubsetOf(noOrange));
-      delete copyPtr;
-
-      copyPtr = yellowOnly.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::USER_DEFINED);
-      
-      // See comment above near similar assertion.
-      // assertTrue(copyPtr->getTypeName() == LabelStr("Colors"));
-
-      assertTrue(AbstractDomain::canBeCompared(*copyPtr, yellowOnly));
-
-      //assertFalse(AbstractDomain::canBeCompared(*copyPtr, orangeOnly));
-
-      delete copyPtr;
-
-      // Cannot check that expected errors are detected until
-      //   new error handling support is in use.
+      return true;
     }
 
     static bool testCopying() {
@@ -1543,25 +1458,24 @@ namespace Prototype {
       testCopyingEnumeratedDomains();
       testCopyingIntervalDomains();
       testCopyingIntervalIntDomains();
-      testCopyingTemplateDomains();
 
       BoolDomain boolDom;
       AbstractDomain *copy = boolDom.copy();
       check_error(copy != 0);
       assertTrue(*copy == boolDom && copy != &boolDom);
-      boolDom.remove(true);
+      boolDom.set(false);
       assertTrue(*copy != boolDom);
       delete copy;
       copy = boolDom.copy();
       check_error(copy != 0);
       assertTrue(*copy == boolDom && copy != &boolDom);
-      boolDom.remove(false);
+      boolDom.empty();
       assertTrue(*copy != boolDom);
       delete copy;
       copy = boolDom.copy();
       check_error(copy != 0);
       assertTrue(*copy == boolDom && copy != &boolDom);
-      boolDom.insert(true);
+      boolDom.relax(BoolDomain(true));
       assertTrue(*copy != boolDom);
       delete copy;
       copy = boolDom.copy();
@@ -1575,9 +1489,9 @@ namespace Prototype {
       copy = iiDom.copy();
       check_error(copy != 0);
       assertTrue(*copy == iiDom && copy != &iiDom);
-      iiDom.remove(PLUS_INFINITY);
+      iiDom.set(IntervalIntDomain(-2, PLUS_INFINITY-1));
       assertTrue(*copy != iiDom);
-      copy->remove(PLUS_INFINITY);
+      copy->set(IntervalIntDomain(-2, PLUS_INFINITY-1));
       assertTrue(*copy == iiDom && copy != &iiDom);
       delete copy;
 
@@ -1585,13 +1499,13 @@ namespace Prototype {
       copy = iDom.copy();
       check_error(copy != 0);
       assertTrue(*copy == iDom && copy != &iDom);
-      iDom.remove(MINUS_INFINITY);
+      iDom.empty();
       assertTrue(*copy != iDom);
-      copy->remove(MINUS_INFINITY);
-      assertTrue(*copy == iDom && copy != &iDom);
+      copy->empty();
+      assertTrue(*copy == iDom);
       delete copy;
 
-      EnumeratedDomain eDom(2.7);
+      NumericDomain eDom(2.7);
       copy = eDom.copy();
       check_error(copy != 0);
       assertTrue(*copy == eDom && copy != &eDom);

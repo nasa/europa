@@ -1,12 +1,5 @@
-#include "Constraints.hh"
-#include "Constraint.hh"
-#include "ConstraintEngine.hh"
-#include "ConstrainedVariable.hh"
-#include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
-#include "Domain.hh"
-#include "Utils.hh"
 #include "ResourceConstraint.hh"
+#include "Utils.hh"
 
 namespace Prototype
 {

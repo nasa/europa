@@ -4,6 +4,7 @@
 #include "Test.hh"
 #include "Error.hh"
 #include "AbstractDomain.hh"
+#include "NumericDomain.hh"
 #include "EventAggregator.hh"
 #include "AggregateListener.hh"
 #include "PlanDatabase.hh"
@@ -69,9 +70,9 @@ namespace Prototype {
     static void trimObjectsByName(ObjectSet& objs, DomComp cmp, const AbstractDomain& d);
     static void trimObjectsByVariable(ObjectSet& objs, DomComp nameCmp, const AbstractDomain& nameDom,
                                       DomComp cmp, const AbstractDomain& d);
-    static EnumeratedDomain count(const AbstractDomain& d);
-    static EnumeratedDomain tokenSetToDomain(const TokenSet& tokens);
-    static EnumeratedDomain objectSetToDomain(const ObjectSet& objs);
+    static NumericDomain count(const AbstractDomain& d);
+    static NumericDomain tokenSetToDomain(const TokenSet& tokens);
+    static NumericDomain objectSetToDomain(const ObjectSet& objs);
     PlanDatabaseId m_db;
     std::string m_file;
     int m_lineNo;

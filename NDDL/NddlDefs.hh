@@ -11,9 +11,6 @@ namespace NDDL {
   class NddlToken;
   typedef Id<NddlToken> NddlTokenId;
 
-  class NddlSchema;
-  typedef Id<NddlSchema> NddlSchemaId;
-
   class NddlResource;
   typedef Id<NddlResource> NddlResourceId;
 

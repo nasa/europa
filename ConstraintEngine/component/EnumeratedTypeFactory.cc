@@ -8,12 +8,12 @@ namespace Prototype {
   // EnumeratedTypeFactory
   //
 
-  EnumeratedTypeFactory::EnumeratedTypeFactory(const LabelStr& typeName, const LabelStr& elementName)
+  EnumeratedTypeFactory::EnumeratedTypeFactory(const char* typeName, const char* elementName)
    : ConcreteTypeFactory(typeName), m_elementName(elementName), m_baseDomain(false, typeName)
   {
   }
 
-  EnumeratedTypeFactory::EnumeratedTypeFactory(const LabelStr& typeName, const LabelStr& elementName, const EnumeratedDomain& baseDomain)
+  EnumeratedTypeFactory::EnumeratedTypeFactory(const char* typeName, const char* elementName, const EnumeratedDomain& baseDomain)
    : ConcreteTypeFactory(typeName), m_elementName(elementName), m_baseDomain(baseDomain)
   {
   }
@@ -22,7 +22,7 @@ namespace Prototype {
   EnumeratedTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                   const AbstractDomain& baseDomain,
                                   bool canBeSpecified,
-                                  const LabelStr& name,
+                                  const char* name,
                                   const EntityId& parent,
                                   int index) const
   {
@@ -31,7 +31,7 @@ namespace Prototype {
     Variable<EnumeratedDomain> * variable
       = new Variable<EnumeratedDomain>(constraintEngine, *enumeratedDomain, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
-                "failed to create Variable for EnumeratedDomain with name '" + name.toString() + "'");
+                "failed to create Variable for EnumeratedDomain with name '" + std::string(name) + "'");
     ConstrainedVariableId id = variable->getId();
     check_error(id.isValid());
     return id;
@@ -45,7 +45,10 @@ namespace Prototype {
 
   double EnumeratedTypeFactory::createValue(std::string value) const
   {
-    return TypeFactory::createValue(m_elementName, value);
+    if(m_baseDomain.isNumeric())
+      return atof(value.c_str());
+    else
+      return LabelStr(value);
   }
 
 } // namespace Prototype

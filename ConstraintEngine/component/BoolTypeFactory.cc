@@ -8,8 +8,8 @@ namespace Prototype {
   // BoolTypeFactory
   //
 
-  BoolTypeFactory::BoolTypeFactory(const LabelStr& name)
-   : ConcreteTypeFactory(name), m_baseDomain(DomainListenerId::noId(), name)
+  BoolTypeFactory::BoolTypeFactory(const char* name)
+   : ConcreteTypeFactory(name), m_baseDomain(name)
   {
   }
 
@@ -17,7 +17,7 @@ namespace Prototype {
   BoolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                   const AbstractDomain& baseDomain,
                                   bool canBeSpecified,
-                                  const LabelStr& name,
+                                  const char* name,
                                   const EntityId& parent,
                                   int index) const
   {
@@ -26,7 +26,7 @@ namespace Prototype {
     Variable<BoolDomain> * variable
       = new Variable<BoolDomain>(constraintEngine, *boolDomain, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
-                "failed to create Variable for BoolDomain with name '" + name.toString() + "'");
+                "failed to create Variable for BoolDomain with name '" + std::string(name) + "'");
     ConstrainedVariableId id = variable->getId();
     check_error(id.isValid());
     return id;

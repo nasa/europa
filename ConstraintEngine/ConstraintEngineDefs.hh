@@ -57,6 +57,14 @@ namespace Prototype {
   Id<T> id(const ConstrainedVariableId& var){
     return var->baseDomain().getSingletonValue();
   }
+  
+  class StringDomain;
+  typedef StringDomain LabelSet;
+
+  /** Constants **/
+  DECLARE_GLOBAL_CONST(char*, g_noVarName);
+  #define NO_VAR_NAME (g_noVarName())
+
 } /* namespace Prototype */
 
 #endif /* #ifndef _H_ConstraintEngineDefs */

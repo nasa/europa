@@ -2,19 +2,30 @@
 
 namespace Prototype {
 
-  BoolDomain::BoolDomain(bool singletonValue, const DomainListenerId& listener,
-                         const LabelStr& typeName)
-    : IntervalIntDomain(singletonValue, singletonValue, listener, typeName) {
-    check_value(singletonValue);
+
+  BoolDomain::BoolDomain()
+    : IntervalIntDomain(0, 1, getDefaultTypeName().c_str()) {}
+
+  BoolDomain::BoolDomain(const char* typeName)
+    : IntervalIntDomain(typeName) {
+    m_ub = 1;
+    m_lb = 0;
   }
 
-  BoolDomain::BoolDomain(const DomainListenerId& listener,
-                         const LabelStr& typeName)
-    : IntervalIntDomain(0, 1, listener, typeName) {
+  BoolDomain::BoolDomain(bool value)
+    : IntervalIntDomain(value, value, getDefaultTypeName().c_str()) {
+    check_error(check_value(value), "Invalid value");
   }
 
-  BoolDomain::BoolDomain(const BoolDomain& org)
+  BoolDomain::BoolDomain(bool value, const char* typeName)
+    : IntervalIntDomain(value, value, typeName) {
+    check_error(check_value(value), "Invalid value");
+  }
+
+  BoolDomain::BoolDomain(const AbstractDomain& org)
     : IntervalIntDomain(org) {
+    check_error(check_value(m_lb), "Invalid lower bound");
+    check_error(check_value(m_ub), "Invalid upper bound");
   }
 
   void BoolDomain::testPrecision(const double& value) const {

@@ -8,9 +8,7 @@ namespace Prototype {
   //
 
   intTypeFactory::intTypeFactory()
-  : IntervalIntTypeFactory(getDefaultTypeName(), IntervalIntDomain(DomainListenerId::noId(), getDefaultTypeName()))
-  {
-  }
+    : IntervalIntTypeFactory(getDefaultTypeName().c_str(), getDefaultTypeName().c_str()){}
 
   double intTypeFactory::createValue(std::string value) const
   {

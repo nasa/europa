@@ -8,6 +8,8 @@
 #include "ConditionalRule.hh"
 #include "ObjectDecisionPoint.hh"
 #include "Choice.hh"
+#include "StringDomain.hh"
+#include "NumericDomain.hh"
 #include "Generator.hh"
 #include "HSTSHeuristicsReader.hh"
 
@@ -15,14 +17,47 @@ extern bool loggingEnabled();
 
 namespace Prototype {
 
-  bool testDefaultSetupImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon &hor) {
+  /**
+   * @brief Creates the type specifications required for testing
+   */
+  void initCBPTestSchema(const SchemaId& schema){
+    schema->reset();
+    schema->addObjectType("Objects");
+
+    schema->addPredicate("Objects.PredicateA");
+    schema->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalIntParam");
+
+    schema->addPredicate("Objects.PredicateB");
+    schema->addPredicate("Objects.PredicateC");
+    schema->addPredicate("Objects.PredicateD");
+    schema->addPredicate("Objects.PADDED");
+
+    schema->addPredicate("Objects.P1");
+    schema->addMember("Objects.P1", LabelSet().getTypeName(), "LabelSetParam0");
+    schema->addMember("Objects.P1", LabelSet().getTypeName(), "LabelSetParam1");
+    schema->addMember("Objects.P1", IntervalIntDomain().getTypeName(), "IntervalIntParam");
+
+    schema->addPredicate("Objects.P1True");
+    schema->addMember("Objects.P1True", BoolDomain().getTypeName(), "BoolParam");
+    schema->addPredicate("Objects.P1False");
+  }
+  static void makeTestToken(IntervalToken& token, const std::list<double>& values){
+    token.addParameter(LabelSet(values), "LabelSetParam0");
+    LabelSet leaveOpen;
+    leaveOpen.insert(values);
+    token.addParameter(leaveOpen, "LabelSetParam1");
+    token.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
+    token.close();
+  }
+
+  bool testDefaultSetupImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm, Horizon &hor) {
     assert(db.isClosed() == false);
     db.close();
     assert(db.isClosed() == true);
     return true;
   }
 
-  bool testConditionImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon &hor) {
+  bool testConditionImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm, Horizon &hor) {
     Condition cond(dm.getId());
     assert(!cond.hasChanged());
   
@@ -30,7 +65,7 @@ namespace Prototype {
     return true;  
   }
 
-  bool testHorizonImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon &hor) {
+  bool testHorizonImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm, Horizon &hor) {
     Horizon hor1;
     int start, end;
     hor1.getHorizon(start,end);
@@ -49,7 +84,7 @@ namespace Prototype {
     return true;
   }
 
-  bool testHorizonConditionImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon &hor) {
+  bool testHorizonConditionImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm, Horizon &hor) {
     HorizonCondition cond(hor.getId(), dm.getId());
     assert(cond.isPossiblyOutsideHorizon());
     assert(dm.getConditions().size() == 1);
@@ -57,7 +92,7 @@ namespace Prototype {
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -105,7 +140,7 @@ namespace Prototype {
     return true;
   }
 
-  bool testTemporalVariableConditionImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon &hor) {
+  bool testTemporalVariableConditionImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm, Horizon &hor) {
     TemporalVariableCondition cond(hor.getId(), dm.getId());
     assert(dm.getConditions().size() == 1);
 
@@ -118,7 +153,7 @@ namespace Prototype {
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -176,20 +211,22 @@ namespace Prototype {
   }
 
 
-  bool testDynamicInfiniteRealConditionImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon &hor) {
+  bool testDynamicInfiniteRealConditionImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm, Horizon &hor) {
   
     DynamicInfiniteRealCondition cond(dm.getId());
     assert(dm.getConditions().size() == 1);
 
-    std::list<LabelStr> values;
+    std::list<double> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
 
-    Variable<LabelSet> v0(ce.getId(), LabelSet(values, true));
-    Variable<LabelSet> v1(ce.getId(), LabelSet(values, false));
+    Variable<LabelSet> v0(ce.getId(), LabelSet(values));
+    LabelSet leaveOpen;
+    leaveOpen.insert(values);
+    Variable<LabelSet> v1(ce.getId(), leaveOpen);
     Variable<IntervalDomain> v2(ce.getId(), IntervalDomain(1, 20));
     Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 20));
     Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
@@ -197,7 +234,7 @@ namespace Prototype {
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -218,22 +255,24 @@ namespace Prototype {
     return true;
   }
 
-  bool testForwardDecisionHandlingImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon &hor) {
+  bool testForwardDecisionHandlingImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm, Horizon &hor) {
     HorizonCondition hcond(hor.getId(), dm.getId());
     TemporalVariableCondition tcond(hor.getId(), dm.getId());
     DynamicInfiniteRealCondition dcond(dm.getId());
 
     assert(dm.getConditions().size() == 3);
 
-    std::list<LabelStr> values;
+    std::list<double> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
 
-    Variable<LabelSet> v0(ce.getId(), LabelSet(values, true));
-    Variable<LabelSet> v1(ce.getId(), LabelSet(values, false));
+    Variable<LabelSet> v0(ce.getId(), LabelSet(values));
+    LabelSet leaveOpen;
+    leaveOpen.insert(values);
+    Variable<LabelSet> v1(ce.getId(), leaveOpen);
     Variable<IntervalDomain> v2(ce.getId(), IntervalDomain(1, 20));
     Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 20));
     Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
@@ -241,7 +280,7 @@ namespace Prototype {
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -268,7 +307,7 @@ namespace Prototype {
     assert(dm.getNumberOfDecisions() == 0);
 
     IntervalToken tokenB(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -282,17 +321,19 @@ namespace Prototype {
     return true;
   }
 
-  bool testMakeMoveImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, CBPlanner &planner) {
+  bool testMakeMoveImpl(ConstraintEngine &ce, PlanDatabase &db, CBPlanner &planner) {
   
-    std::list<LabelStr> values;
+    std::list<double> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
 
-    Variable<LabelSet> v0(ce.getId(), LabelSet(values, true));
-    Variable<LabelSet> v1(ce.getId(), LabelSet(values, false));
+    Variable<LabelSet> v0(ce.getId(), LabelSet(values));
+    LabelSet leaveOpen;
+    leaveOpen.insert(values);
+    Variable<LabelSet> v1(ce.getId(), leaveOpen);
     Variable<IntervalDomain> v2(ce.getId(), IntervalDomain(1, 20));
     Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 20));
     Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
@@ -300,14 +341,14 @@ namespace Prototype {
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -330,11 +371,11 @@ namespace Prototype {
     return true;
   }
 
-  bool testCurrentStateImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, CBPlanner &planner) {
+  bool testCurrentStateImpl(ConstraintEngine &ce, PlanDatabase &db, CBPlanner &planner) {
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -356,11 +397,11 @@ namespace Prototype {
   }
 
 
-  bool testRetractMoveImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, CBPlanner &planner) {
+  bool testRetractMoveImpl(ConstraintEngine &ce, PlanDatabase &db, CBPlanner &planner) {
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -377,28 +418,26 @@ namespace Prototype {
     return true;
   }
 
-  bool testNoBacktrackCaseImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, CBPlanner &planner) {
-    Timeline timeline(db.getId(),LabelStr("AllObjects"), LabelStr("t1"));
+  bool testNoBacktrackCaseImpl(ConstraintEngine &ce, PlanDatabase &db, CBPlanner &planner) {
+    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
     db.close();
 
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
+			 LabelStr("Objects.P1"), 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
 
-    std::list<LabelStr> values;
+    std::list<double> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
-    tokenA.addParameter(LabelSet(values, true));
-    tokenA.addParameter(LabelSet(values, false));
-    tokenA.addParameter(IntervalIntDomain(1, 20));
-    tokenA.close();
+
+    makeTestToken(tokenA, values);
     
     CBPlanner::Status res = planner.run();
     assert(res == CBPlanner::PLAN_FOUND);
@@ -413,13 +452,13 @@ namespace Prototype {
 
 
 
-  bool testSubgoalOnceRuleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, CBPlanner &planner) {
-    Timeline timeline(db.getId(),LabelStr("AllObjects"), LabelStr("t1"));
+  bool testSubgoalOnceRuleImpl(ConstraintEngine &ce, PlanDatabase &db, CBPlanner &planner) {
+    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
     db.close();
 
-    SubgoalOnceRule r(LabelStr("P1"), 0);
+    SubgoalOnceRule r("Objects.P1", 0);
 
-    IntervalToken t0(db.getId(), LabelStr("P1"), true, 		     
+    IntervalToken t0(db.getId(), "Objects.P1", true, 		     
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
@@ -443,13 +482,13 @@ namespace Prototype {
     return true;
   }
 
-  bool testBacktrackCaseImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, CBPlanner &planner) {
-    Timeline timeline(db.getId(),LabelStr("AllObjects"), LabelStr("t1"));
+  bool testBacktrackCaseImpl(ConstraintEngine &ce, PlanDatabase &db, CBPlanner &planner) {
+    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
     db.close();
 
-    SubgoalOnceRule r(LabelStr("P1"), 0);
+    SubgoalOnceRule r("Objects.P1", 0);
 
-    std::list<LabelStr> values;
+    std::list<double> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
     values.push_back(LabelStr("L2"));
@@ -457,42 +496,42 @@ namespace Prototype {
     values.push_back(LabelStr("L3"));
 
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
-    tokenA.addParameter(LabelSet(values, true));
+    tokenA.addParameter(LabelSet(values), "LabelSetParam0");
     // can't merge tokens with parameters that are dynamic domains
     //tokenA.addParameter(LabelSet(values, false));
-    tokenA.addParameter(IntervalIntDomain(1, 20));
+    tokenA.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
     tokenA.close();
 
     IntervalToken tokenB(db.getId(), 
-			 LabelStr("P2"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
-    tokenB.addParameter(LabelSet(values, true));
+    tokenB.addParameter(LabelSet(values), "LabelSetParam0");
     // can't merge tokens with parameters that are dynamic domains
     //tokenB.addParameter(LabelSet(values, false));
-    tokenB.addParameter(IntervalIntDomain(1, 20));
+    tokenB.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
     tokenB.close();
-
+    
     IntervalToken tokenC(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
-    tokenC.addParameter(LabelSet(values, true));
+    tokenC.addParameter(LabelSet(values), "LabelSetParam0");
     // can't merge tokens with parameters that are dynamic domains
     //tokenC.addParameter(LabelSet(values, false));
-    tokenC.addParameter(IntervalIntDomain(1, 20));
+    tokenC.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
     tokenC.close();
 
     // an equivalence constraint between the start times will cause the
@@ -511,34 +550,30 @@ namespace Prototype {
     return true;
   }
 
-  bool testTimeoutCaseImpl(ConstraintEngine& ce, PlanDatabase& db, Schema& schema, CBPlanner& planner)  {
-    Timeline t1(db.getId(),LabelStr("AllObjects"), LabelStr("t1"));
-    Timeline t2(db.getId(),LabelStr("AllObjects"), LabelStr("t2"));
-    Object o1(db.getId(),LabelStr("AllObjects"),LabelStr("o1"));
+  bool testTimeoutCaseImpl(ConstraintEngine& ce, PlanDatabase& db, CBPlanner& planner)  {
+    Timeline t1(db.getId(),LabelStr("Objects"), LabelStr("t1"));
+    Timeline t2(db.getId(),LabelStr("Objects"), LabelStr("t2"));
+    Object o1(db.getId(),LabelStr("Objects"),LabelStr("o1"));
     db.close();
 
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
 
-    std::list<LabelStr> values;
+    std::list<double> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
-    tokenA.addParameter(LabelSet(values, true));
-    tokenA.addParameter(LabelSet(values, false));
-    tokenA.addParameter(IntervalIntDomain(1, 20));
-    tokenA.close();
-    
+    makeTestToken(tokenA, values);
 
     IntervalToken tokenB(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -551,14 +586,10 @@ namespace Prototype {
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
-    tokenB.addParameter(LabelSet(values, true));
-    tokenB.addParameter(LabelSet(values, false));
-    tokenB.addParameter(IntervalIntDomain(1, 20));
-    tokenB.close();
-    
+    makeTestToken(tokenB, values);
 
     IntervalToken tokenC(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -571,14 +602,11 @@ namespace Prototype {
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
-    tokenC.addParameter(LabelSet(values, true));
-    tokenC.addParameter(LabelSet(values, false));
-    tokenC.addParameter(IntervalIntDomain(1, 20));
-    tokenC.close();
+    makeTestToken(tokenC, values);
     
 
     IntervalToken tokenD(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -591,14 +619,10 @@ namespace Prototype {
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
-    tokenD.addParameter(LabelSet(values, true));
-    tokenD.addParameter(LabelSet(values, false));
-    tokenD.addParameter(IntervalIntDomain(1, 20));
-    tokenD.close();
-    
+    makeTestToken(tokenD, values);
 
     IntervalToken tokenE(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -611,13 +635,10 @@ namespace Prototype {
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
-    tokenE.addParameter(LabelSet(values, true));
-    tokenE.addParameter(LabelSet(values, false));
-    tokenE.addParameter(IntervalIntDomain(1, 20));
-    tokenE.close();
+    makeTestToken(tokenE, values);
 
     IntervalToken tokenF(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -630,14 +651,10 @@ namespace Prototype {
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
-    tokenF.addParameter(LabelSet(values, true));
-    tokenF.addParameter(LabelSet(values, false));
-    tokenF.addParameter(IntervalIntDomain(1, 20));
-    tokenF.close();
-    
+    makeTestToken(tokenF, values);
 
     IntervalToken tokenG(db.getId(), 
-			 LabelStr("P1"), 
+			 "Objects.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -650,35 +667,34 @@ namespace Prototype {
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
-    tokenG.addParameter(LabelSet(values, true));
-  tokenG.addParameter(LabelSet(values, false));
-  tokenG.addParameter(IntervalIntDomain(1, 20));
-  tokenG.close();
+    makeTestToken(tokenG, values);
     
-  CBPlanner::Status res = planner.run(20);
-  assert(res == CBPlanner::TIMEOUT_REACHED);
+    CBPlanner::Status res = planner.run(20);
+    assert(res == CBPlanner::TIMEOUT_REACHED);
 
-  const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
+    const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
 
-  assert(closed.size() == 20);
-  assert(closed.size() == planner.getTime());
-  assert(planner.getTime() == planner.getDepth());
+    assert(closed.size() == 20);
+    assert(closed.size() == planner.getTime());
+    assert(planner.getTime() == planner.getDepth());
 
-  return true;
+    return true;
   }
 
-  bool testVariableDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, CBPlanner& planner) {
+  bool testVariableDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, CBPlanner& planner) {
 
-    std::list<LabelStr> values;
+    std::list<double> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
 
-    Variable<LabelSet> v0(ce.getId(), LabelSet(values, true));
-    Variable<LabelSet> v1(ce.getId(), LabelSet(values, false));
+    Variable<LabelSet> v0(ce.getId(), LabelSet(values));
+    LabelSet leaveOpen;
+    leaveOpen.insert(values);
+    Variable<LabelSet> v1(ce.getId(), leaveOpen);
     Variable<IntervalDomain> v2(ce.getId(), IntervalDomain(1, 2));
     Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 2));
     Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
-    Variable<EnumeratedDomain> v5(ce.getId(), EnumeratedDomain());
+    Variable<NumericDomain> v5(ce.getId(), NumericDomain());
     v5.insert(5);
     v5.insert(23);
     v5.close();
@@ -720,7 +736,7 @@ namespace Prototype {
     return true;
   }
 
-  bool testTokenDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
+  bool testTokenDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Horizon& hor, CBPlanner& planner) {
 
     hor.setHorizon(300,400);
 
@@ -729,20 +745,20 @@ namespace Prototype {
     Object t3(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
     db.close();
 
-    ConditionalRule r(LabelStr("PredicateA"));
+    ConditionalRule r("Objects.PredicateA");
 
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("PredicateA"), 
+			 "Objects.PredicateA", 
 			 true,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(200, 200),
 			 LabelStr("Timeline1"), false);
-    tokenA.addParameter(IntervalIntDomain(1,2));
+    tokenA.addParameter(IntervalIntDomain(1,2), "IntervalIntParam");
     tokenA.close();
 
     IntervalToken tokenB(db.getId(), 
-			 LabelStr("PredicateB"), 
+			 "Objects.PredicateB", 
 			 false,
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(0, 200),
@@ -773,7 +789,7 @@ namespace Prototype {
     return true;
   }
 
-  bool testObjectDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
+  bool testObjectDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Horizon& hor, CBPlanner& planner) {
 
     hor.setHorizon(10,500);
 
@@ -781,7 +797,7 @@ namespace Prototype {
     db.close();
 
     IntervalToken tokenB(db.getId(), 
-			 LabelStr("PredicateB"), 
+			 "Objects.PredicateB", 
 			 false,
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(0, 200),
@@ -834,7 +850,7 @@ namespace Prototype {
     return true;
   }
 
-  bool testObjectAndObjectVariableImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
+  bool testObjectAndObjectVariableImpl(ConstraintEngine &ce, PlanDatabase &db, Horizon& hor, CBPlanner& planner) {
     hor.setHorizon(10,500);
 
     Object o1(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
@@ -842,7 +858,7 @@ namespace Prototype {
     db.close();
 
     IntervalToken tokenB(db.getId(), 
-			 LabelStr("PredicateB"), 
+			 "Objects.PredicateB", 
 			 false,
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(0, 200),
@@ -896,12 +912,12 @@ namespace Prototype {
     return true;
   }
 
-  bool testObjectHorizonImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
+  bool testObjectHorizonImpl(ConstraintEngine &ce, PlanDatabase &db, Horizon& hor, CBPlanner& planner) {
 
     Object o1(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
     db.close();
 
-    IntervalToken tokenB(db.getId(), LabelStr("PredicateB"), false);
+    IntervalToken tokenB(db.getId(), "Objects.PredicateB", false);
 
     hor.setHorizon(10,100);
 
@@ -918,22 +934,24 @@ namespace Prototype {
     return true;
   }
 
-  bool testMultipleDMsImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon &hor) {
+  bool testMultipleDMsImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm, Horizon &hor) {
     return true;
   }
   
-  bool testFindAnotherPlanImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
+  bool testFindAnotherPlanImpl(ConstraintEngine &ce, PlanDatabase &db, Horizon& hor, CBPlanner& planner) {
     hor.setHorizon(0,100);
-    std::list<LabelStr> values;
+    std::list<double> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
 
-    Variable<LabelSet> v0(ce.getId(), LabelSet(values, true));
-    Variable<LabelSet> v1(ce.getId(), LabelSet(values, false));
+    Variable<LabelSet> v0(ce.getId(), LabelSet(values));
+    LabelSet leaveOpen;
+    leaveOpen.insert(values);
+    Variable<LabelSet> v1(ce.getId(), leaveOpen);
     Variable<IntervalDomain> v2(ce.getId(), IntervalDomain(1, 2));
     Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 2));
     Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
-    Variable<EnumeratedDomain> v5(ce.getId(), EnumeratedDomain());
+    Variable<NumericDomain> v5(ce.getId(), NumericDomain());
     v5.insert(5);
     v5.insert(23);
     v5.close();
@@ -943,21 +961,21 @@ namespace Prototype {
     db.close();
 
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("PredicateA"),
+			 "Objects.PredicateD",
 			 true,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db.getId(), 
-			 LabelStr("PredicateB"),
+			 "Objects.PredicateB",
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db.getId(), 
-			 LabelStr("PredicateC"),
+			 "Objects.PredicateC",
 			 true,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -986,19 +1004,21 @@ namespace Prototype {
     return true;
   }
 
-  bool testAddSubgoalAfterPlanningImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
+  bool testAddSubgoalAfterPlanningImpl(ConstraintEngine &ce, PlanDatabase &db, Horizon& hor, CBPlanner& planner) {
     hor.setHorizon(0,100);
 
-    std::list<LabelStr> values;
+    std::list<double> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
 
-    Variable<LabelSet> v0(ce.getId(), LabelSet(values, true));
-    Variable<LabelSet> v1(ce.getId(), LabelSet(values, false));
+    Variable<LabelSet> v0(ce.getId(), LabelSet(values));
+    LabelSet leaveOpen;
+    leaveOpen.insert(values);
+    Variable<LabelSet> v1(ce.getId(), leaveOpen);
     Variable<IntervalDomain> v2(ce.getId(), IntervalDomain(1, 2));
     Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 2));
     Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
-    Variable<EnumeratedDomain> v5(ce.getId(), EnumeratedDomain());
+    Variable<NumericDomain> v5(ce.getId(), NumericDomain());
     v5.insert(5);
     v5.insert(23);
     v5.close();
@@ -1030,7 +1050,7 @@ namespace Prototype {
 
     Variable<BoolDomain> v6(ce.getId(), BoolDomain());
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("PADDED"),
+			 "Objects.PADDED",
 			 true); 
 
     tokenA.getStart()->specify(IntervalIntDomain(0, 10));

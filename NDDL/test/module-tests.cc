@@ -29,11 +29,11 @@ public:
 
 private:
   static bool testBasicAllocation() {
-    DEFAULT_SETUP(ce, db, schema, false);
+    DEFAULT_SETUP(ce, db, false);
 
     // Allocate an object with fields
     ObjectId object = makeObjectForTesting(db, LabelStr("objectName"), 1, LabelStr("A"), true, 2.1);
-    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(object));
+    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(object, DEFAULT_OBJECT_TYPE().c_str()));
 
     // Allocate a number of filter variables, one for each field
     Variable<LabelSet> v1(ce, makeLabelSetDomain());
@@ -41,8 +41,8 @@ private:
 
     // Create the constraint with filter set up
     std::vector<ObjectFilterCondition*> filter;
-    filter.push_back(new ConcreteObjectFilterCondition<LabelSet>(v1.getId(), 1, ObjectFilterConstraint::eq));
-    filter.push_back(new ConcreteObjectFilterCondition<EnumeratedDomain>(v3.getId(), 3, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(makeLabelSetDomain(), v1.getId(), 1, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(makeEnumeratedDomain(), v3.getId(), 3, ObjectFilterConstraint::eq));
 
     ObjectFilterConstraint c0(LabelStr("ObjectFilter"), 
 			      LabelStr("Default"),
@@ -58,7 +58,7 @@ private:
   }
 
   static bool testPropagation() {
-    DEFAULT_SETUP(ce, db, schema, false);
+    DEFAULT_SETUP(ce, db, false);
     // Allocate a number of objects
     std::list<ObjectId> objects;
     objects.push_back(makeObjectForTesting(db, LabelStr("object0"), 1, LabelStr("A"), true, 1.1));
@@ -73,7 +73,7 @@ private:
     objects.push_back(makeObjectForTesting(db, LabelStr("object9"), 1, LabelStr("A"), true, 0.1));
     db->close();
 
-    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(objects));
+    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(objects, DEFAULT_OBJECT_TYPE().c_str()));
 
     // Allocate a number of filter variables, one for each field    
     Variable<LabelSet> v1(ce, makeLabelSetDomain());
@@ -81,8 +81,8 @@ private:
 
     // Create the constraint with filter set up
     std::vector<ObjectFilterCondition*> filter;
-    filter.push_back(new ConcreteObjectFilterCondition<LabelSet>(v1.getId(), 1, ObjectFilterConstraint::eq));
-    filter.push_back(new ConcreteObjectFilterCondition<EnumeratedDomain>(v3.getId(), 3, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(makeLabelSetDomain(), v1.getId(), 1, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(makeEnumeratedDomain(), v3.getId(), 3, ObjectFilterConstraint::eq));
 
     ObjectFilterConstraint c0(LabelStr("ObjectFilter"), 
 			      LabelStr("Default"),
@@ -133,7 +133,7 @@ private:
 
 
   static bool testFiltering() {
-    DEFAULT_SETUP(ce, db, schema, false);
+    DEFAULT_SETUP(ce, db, false);
     // Allocate a number of objects
     std::list<ObjectId> objects;
     objects.push_back(makeObjectForTesting(db, LabelStr("object0"), 1, LabelStr("A"), true, 1.1));
@@ -148,7 +148,7 @@ private:
     objects.push_back(makeObjectForTesting(db, LabelStr("object9"), 1, LabelStr("A"), true, 8.1));
     db->close();
 
-    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(objects));
+    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(objects, DEFAULT_OBJECT_TYPE().c_str()));
 
     // Allocate a number of filter variables, one for each field    
     Variable<LabelSet> v1(ce, makeLabelSetDomain());
@@ -156,8 +156,8 @@ private:
 
     // Create the constraint with filter set up
     std::vector<ObjectFilterCondition*> filter;
-    filter.push_back(new ConcreteObjectFilterCondition<LabelSet>(v1.getId(), 1, ObjectFilterConstraint::eq));
-    filter.push_back(new ConcreteObjectFilterCondition<EnumeratedDomain>(v3.getId(), 3, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(makeLabelSetDomain(), v1.getId(), 1, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(makeEnumeratedDomain(), v3.getId(), 3, ObjectFilterConstraint::eq));
 
     ObjectFilterConstraint c0(LabelStr("ObjectFilter"), 
 			      LabelStr("Default"),
@@ -185,11 +185,11 @@ private:
 				       const LabelStr& arg1,
 				       bool arg2,
 				       float arg3){
-    ObjectId object = (new Object(db, Schema::ALL_OBJECTS(), name, true))->getId();
-    object->addVariable(IntervalIntDomain(arg0), LabelStr("FIELD_0"));
-    object->addVariable(LabelSet(arg1), LabelStr("FIELD_1"));
-    object->addVariable(BoolDomain(arg2), LabelStr("FIELD_2"));
-    object->addVariable(IntervalDomain(arg3), LabelStr("FIELD_3"));
+    ObjectId object = (new Object(db, DEFAULT_OBJECT_TYPE(), name, true))->getId();
+    object->addVariable(IntervalIntDomain(arg0), "IntervalIntVar");
+    object->addVariable(LabelSet(arg1), "LabelSetVar");
+    object->addVariable(BoolDomain(arg2), "BoolVar");
+    object->addVariable(IntervalDomain(arg3), "IntervalVar");
     object->close();
     return object;
   }
@@ -208,7 +208,7 @@ private:
   }
 
   static const EnumeratedDomain makeEnumeratedDomain(){
-    EnumeratedDomain dom;
+    EnumeratedDomain dom(true, EnumeratedDomain::getDefaultTypeName().c_str());
     dom.insert(0.1);
     dom.insert(1.1);
     dom.insert(2.1);
@@ -225,101 +225,7 @@ private:
 
 };
 
-class NddlSchemaTest {
-public:
-  static bool test() {
-    runTest(testObjectPredicateRelationships);
-    runTest(testPredicateParameterAccessors);
-    runTest(testTypeQueries);
-    return(true);
-  }
 
-private:
-
-  static bool testObjectPredicateRelationships() {
-    NddlSchema schema(LabelStr("TestSchema"));
-    schema.addType(LabelStr("Resource"));
-    schema.addObjectParent(LabelStr("Resource"), LabelStr("NddlResource"));
-    schema.addPredicate(LabelStr("Resource.change"));
-    schema.addType(LabelStr("Battery"));
-    schema.addObjectParent(LabelStr("Battery"), LabelStr("Resource"));
-    schema.addObjectPredicate(LabelStr("Resource"), LabelStr("Resource.change"));
-    schema.addType(LabelStr("World"));
-    schema.addPredicate(LabelStr("World.initialState"));
-    schema.addObjectPredicate(LabelStr("World"), LabelStr("World.initialState"));
-    schema.addPredicateParameter(LabelStr("Resource.change"), LabelStr("quantity"));
-
-    assertTrue(schema.isPredicateDefined(LabelStr("Resource.change")));
-    assertTrue(schema.isPredicateDefined(LabelStr("Battery.change")));
-    assertTrue(schema.isPredicateDefined(LabelStr("World.initialState")));
-    assertTrue(!schema.isPredicateDefined(LabelStr("NOCLASS.NOPREDICATE")));
-    assertTrue(schema.isTypeDefined(LabelStr("Resource")));
-    assertTrue(schema.isTypeDefined(LabelStr("World")));
-    assertTrue(schema.isTypeDefined(LabelStr("Battery")));
-    assertTrue(!schema.isTypeDefined(LabelStr("NOTYPE")));
-    assertTrue(schema.canContain(LabelStr("Resource.change"), LabelStr("quantity")));
-    assertTrue(schema.canContain(LabelStr("Battery.change"), LabelStr("quantity")));
-    assertTrue(!schema.canContain(LabelStr("NddlResource.change"), LabelStr("quantity")));
-
-    assertTrue(schema.canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
-    assertTrue(schema.canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
-    assertTrue(schema.canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
-    assertTrue(!schema.canBeAssigned(LabelStr("World"), LabelStr("Resource.change")));
-
-    assertTrue(!schema.isA(LabelStr("Resource"), LabelStr("Battery")));
-    assertTrue(schema.isA(LabelStr("Battery"), LabelStr("Resource")));
-    assertTrue(schema.isA(LabelStr("Battery"), LabelStr("Battery")));
-    assertTrue(schema.hasParent(LabelStr("Battery")));
-    assertTrue(schema.getParent(LabelStr("Battery")) == LabelStr("Resource"));
-    assertTrue(schema.getObjectType(LabelStr("World.initialState")) == LabelStr("World"));
-    assertTrue(schema.getObjectType(LabelStr("Battery.change")) == LabelStr("Battery"));
-    assertTrue(schema.getObjectType(LabelStr("Battery.change")) != LabelStr("Resource"));
-    return(true);
-  }
-
-  static bool testPredicateParameterAccessors() {
-    NddlSchema schema(LabelStr("TestSchema"));
-    schema.addType(LabelStr("Resource"));
-    schema.addObjectParent(LabelStr("Resource"), LabelStr("NddlResource"));
-    schema.addPredicate(LabelStr("Resource.change"));
-    schema.addType(LabelStr("Battery"));
-    schema.addObjectParent(LabelStr("Battery"), LabelStr("Resource"));
-    schema.addObjectPredicate(LabelStr("Resource"), LabelStr("Resource.change"));
-    schema.addPredicateParameter(LabelStr("Resource.change"), LabelStr("quantity"));
-    schema.addPredicateParameter(LabelStr("Resource.change"), LabelStr("quality"));
-    assertTrue(schema.getIndexFromName(LabelStr("Resource.change"), LabelStr("quality")) == 1);
-    assertTrue(schema.getNameFromIndex(LabelStr("Resource.change"), 0).getKey() == LabelStr("quantity").getKey());
-    return true;
-  }
-
-  static bool testTypeQueries() {
-    NddlSchema schema(LabelStr("TestSchema"));
-    schema.addEnum(LabelStr("FooEnum"));
-    schema.addEnumMember(LabelStr("FooEnum"), LabelStr("FOO"));
-    schema.addEnumMember(LabelStr("FooEnum"), LabelStr("BAR"));
-    schema.addEnumMember(LabelStr("FooEnum"), LabelStr("BAZ"));
-    schema.addEnum(LabelStr("BarEnum"));
-    schema.addEnumMember(LabelStr("BarEnum"), LabelStr("QUUX"));
-    schema.addEnumMember(LabelStr("BarEnum"), LabelStr("QUUUX"));
-    assertTrue(schema.isEnum(LabelStr("FOO")));
-    assertTrue(schema.isEnum(LabelStr("QUUUX")));
-    assertTrue(!schema.isEnum(LabelStr("ARG")));
-
-    schema.addType(LabelStr("Foo"));
-    assertTrue(schema.isClass(LabelStr("Foo")));
-    assertTrue(!schema.isClass(LabelStr("Bar")));
-
-    schema.addPredicate(LabelStr("Argle"));
-    schema.addPredicateParameter(LabelStr("Argle"), LabelStr("bargle"));
-    schema.addParameterType(LabelStr("Argle"), LabelStr("bargle"), LabelStr("Bargle"));
-    schema.addPredicateParameter(LabelStr("Argle"), LabelStr("targle"));
-    schema.addParameterType(LabelStr("Argle"), LabelStr("targle"), LabelStr("Targle"));
-
-    assertTrue(schema.getParameterType(LabelStr("Argle"), LabelStr("bargle")) == LabelStr("Bargle"));
-    assertTrue(schema.getParameterType(LabelStr("Argle"), LabelStr("targle")) == LabelStr("Targle"));
-    return true;
-  }
-};
 
 int main() {
   // Special designations for temporal relations
@@ -332,8 +238,12 @@ int main() {
 
   REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
 
+  // Pre-allocate a schema
+  SCHEMA;
+
+  initNDDL();
+
   runTestSuite(ObjectFilterConstraintTest::test);
-  runTestSuite(NddlSchemaTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
 }

@@ -2,30 +2,22 @@
 
 namespace Prototype {
 
-  StringDomain::StringDomain(const LabelStr& typeName) 
-    : EnumeratedDomain(false, typeName)
-  {
-  }
+  StringDomain::StringDomain()
+    :EnumeratedDomain(false, getDefaultTypeName().c_str()){}
 
+  StringDomain::StringDomain(const char* typeName)
+    :EnumeratedDomain(false, typeName){}
+
+  StringDomain::StringDomain(double value, const char* typeName) 
+    : EnumeratedDomain(value, false, typeName){}
 
   StringDomain::StringDomain(const std::list<double>& values, 
-                             bool closed,
-                             const DomainListenerId& listener,
-                             const LabelStr& typeName)
-    : EnumeratedDomain(values, closed, listener, false, typeName)
+                             const char* typeName)
+    : EnumeratedDomain(values, false, typeName)
   {
   }
 
-
-  StringDomain::StringDomain(double value,
-                             const DomainListenerId& listener,
-                             const LabelStr& typeName)
-    : EnumeratedDomain(value, listener, false, typeName)
-  {
-  }
-
-
-  StringDomain::StringDomain(const StringDomain& org)
+  StringDomain::StringDomain(const AbstractDomain& org)
     : EnumeratedDomain(org)
   {
   }
@@ -54,6 +46,18 @@ namespace Prototype {
     check_error(ptr != NULL);
     return ptr;
   }
-
+  
+  /**
+   * This appears to be necessary, though it should be sufficient to use the
+   * base class method rather than having to delegate to it.
+   */
+  void StringDomain::set(const StringDomain& dom){
+    EnumeratedDomain::set(dom);
+  }
+  
+  void StringDomain::set(double value) {
+    check_error(LabelStr::isString(value));
+    EnumeratedDomain::set(value);
+  }
 
 } // namespace Prototype

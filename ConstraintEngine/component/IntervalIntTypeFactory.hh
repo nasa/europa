@@ -11,12 +11,12 @@ namespace Prototype {
     /**
      * Permit registration by an external name
      */
-    IntervalIntTypeFactory(const LabelStr& name = IntervalIntDomain::getDefaultTypeName());
+    IntervalIntTypeFactory(const char* name = IntervalIntDomain::getDefaultTypeName().c_str());
 
     /**
      * Register with an external name and a base domain
      */
-    IntervalIntTypeFactory(const LabelStr& name, const IntervalIntDomain& baseDomain);
+    IntervalIntTypeFactory(const char* name, const IntervalIntDomain& baseDomain);
 
     /**
      * @brief Create a variable
@@ -24,7 +24,7 @@ namespace Prototype {
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 
                                                  const AbstractDomain& baseDomain,
                                                  bool canBeSpecified = true,
-                                                 const LabelStr& name = ConstrainedVariable::NO_NAME(),
+                                                 const char* name = NO_VAR_NAME,
                                                  const EntityId& parent = EntityId::noId(),
                                                  int index = ConstrainedVariable::NO_INDEX) const;
 

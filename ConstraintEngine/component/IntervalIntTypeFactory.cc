@@ -8,12 +8,12 @@ namespace Prototype {
   // IntervalIntTypeFactory
   //
 
-  IntervalIntTypeFactory::IntervalIntTypeFactory(const LabelStr& name)
-   : ConcreteTypeFactory(name), m_baseDomain(DomainListenerId::noId(), name)
+  IntervalIntTypeFactory::IntervalIntTypeFactory(const char* name)
+   : ConcreteTypeFactory(name), m_baseDomain(name)
   {
   }
 
-  IntervalIntTypeFactory::IntervalIntTypeFactory(const LabelStr& name, const IntervalIntDomain& baseDomain)
+  IntervalIntTypeFactory::IntervalIntTypeFactory(const char* name, const IntervalIntDomain& baseDomain)
    : ConcreteTypeFactory(name), m_baseDomain(baseDomain)
   {
   }
@@ -22,7 +22,7 @@ namespace Prototype {
   IntervalIntTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                          const AbstractDomain& baseDomain,
                                          bool canBeSpecified,
-                                         const LabelStr& name,
+                                         const char* name,
                                          const EntityId& parent,
                                          int index) const
   {
@@ -31,7 +31,7 @@ namespace Prototype {
     Variable<IntervalIntDomain> * variable
       = new Variable<IntervalIntDomain>(constraintEngine, *intervalIntDomain, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
-                "failed to create Variable for IntervalIntDomain with name '" + name.toString() + "'");
+                "failed to create Variable for IntervalIntDomain with name '" + std::string(name) + "'");
     ConstrainedVariableId id = variable->getId();
     check_error(id.isValid());
     return id;

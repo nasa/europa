@@ -4,7 +4,7 @@
 #include "ConstrainedVariable.hh"
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
-#include "Domain.hh"
+#include "EnumeratedDomain.hh"
 #include "Utils.hh"
 #include <cmath>
 
@@ -127,7 +127,9 @@ namespace Prototype {
       requiresEnumeration = requiresEnumeration || (current.isEnumerated() && !current.isSingleton());
       check_error(!requiresEnumeration || current.isEnumerated() || current.isSingleton());
       check_error(AbstractDomain::canBeCompared(first,
-                                                getCurrentDomain(m_variables[i])));
+                                                getCurrentDomain(m_variables[i])),
+		  "cannot equate variables of type " + first.getTypeName().toString() + 
+		  " and " + getCurrentDomain(m_variables[i]).getTypeName().toString());
       // This constraint has problems similar to CondAllSameConstraint's
       // related to minDelta().  @see CondAllSameConstraint::CondAllSameConstraint.
     }
@@ -289,11 +291,26 @@ namespace Prototype {
       return false;
     }
 
-    if(!domy.isEnumerated() && (!domy.isFinite() || domy.getSize() > 2))
-      return false;
+    // If enumerated, remove it and be done with it.
+    if(domy.isEnumerated()){
+      domy.remove(value);
+      return true;
+    }
 
-    // Now exectute the removal based on the data
-    domy.remove(value);
+    // Since it is an interval, and it does contain the value, empty it if a singleton
+    if(domy.isSingleton()){
+	domy.empty();
+	return true;
+    }
+
+    // If it is a Boolean domain then set it to be the alternate
+    if(domy.getType() == AbstractDomain::BOOL){
+      domy.set(!value);
+      return true;
+    }
+
+    /** COULD SPECIAL CASE INTERVAL INT DOMAIN, BUT NOT WORTH IT PROBABLY **/
+    // Otherwise, we would have to split the interval, so do not propagate it
     return false;
   }
 
@@ -981,9 +998,9 @@ namespace Prototype {
         if (it2 == newMembers.end())
           newMembers.push_back(*it);
       }
-      newUnion = new EnumeratedDomain(newMembers, /* closed = */ true,
-                                      (*unionOfDomains)->getListener(),
-                                      (*unionOfDomains)->isNumeric());
+      newUnion = new EnumeratedDomain(newMembers,
+                                      (*unionOfDomains)->isNumeric(),
+				      (*unionOfDomains)->getTypeName().toString().c_str());
       // Could just add to current unionOfDomains rather than failing here, but
       //   very messy to implement using current interface to *Domain classes.
       assertFalse(newUnion == 0);
@@ -1008,12 +1025,10 @@ namespace Prototype {
     if (changing) {
       if (domToAdd.getType() == AbstractDomain::REAL_INTERVAL
           || (*unionOfDomains)->getType() == AbstractDomain::REAL_INTERVAL)
-        newUnion = new IntervalDomain(newMin, newMax,
-                                      (*unionOfDomains)->getListener());
+        newUnion = new IntervalDomain(newMin, newMax);
       if (domToAdd.getType() == AbstractDomain::INT_INTERVAL
           || (*unionOfDomains)->getType() == AbstractDomain::INT_INTERVAL)
-        newUnion = new IntervalIntDomain((int)newMin, (int)newMax,
-                                         (*unionOfDomains)->getListener());
+        newUnion = new IntervalIntDomain((int)newMin, (int)newMax);
       /* BOOL should be not get to here since both are non-singleton
        *   but then unionOfDomains "covers" domToAdd and changing
        *   would be false.

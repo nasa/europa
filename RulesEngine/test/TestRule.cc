@@ -47,7 +47,7 @@ namespace Prototype {
    * @brief Execution adds a new rule instance, guarded by a local variable
    */
   void TestRule_Root::handleExecute(){
-    TokenId slave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+    TokenId slave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
     addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), slave->getStart()));
 
     Id<TestRule> rule = m_rule;
@@ -55,7 +55,7 @@ namespace Prototype {
   }
 
   void TestRule_0::handleExecute(){
-    TokenId slave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+    TokenId slave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
     addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), slave->getStart()));
     ConstrainedVariableId interimVariable = addVariable(IntervalIntDomain(), false, LabelStr("BogusRuleVariable"));
     addConstraint(LabelStr("eq"), makeScope(interimVariable, m_localGuard));

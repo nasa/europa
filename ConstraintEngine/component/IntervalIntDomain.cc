@@ -3,28 +3,34 @@
 
 namespace Prototype {
 
-  IntervalIntDomain::IntervalIntDomain(const DomainListenerId& listener,
-                                       const LabelStr& typeName)
-    : IntervalDomain(listener, typeName) {
+
+  IntervalIntDomain::IntervalIntDomain()
+    : IntervalDomain(getDefaultTypeName().c_str()) {}
+
+  IntervalIntDomain::IntervalIntDomain(const char* typeName)
+    : IntervalDomain(typeName){}
+
+  IntervalIntDomain::IntervalIntDomain(int lb, int ub)
+    : IntervalDomain(lb, ub, getDefaultTypeName().c_str()) {
+    check_error(check_value(m_lb), "Invalid lower bound");
+    check_error(check_value(m_ub), "Invalid upper bound");
   }
 
-  IntervalIntDomain::IntervalIntDomain(int lb, int ub,
-                                       const DomainListenerId& listener,
-                                       const LabelStr& typeName)
-    : IntervalDomain(lb, ub, listener, typeName) {
-    check_value(lb);
-    check_value(ub);
+  IntervalIntDomain::IntervalIntDomain(int value)
+    : IntervalDomain(value, value, getDefaultTypeName().c_str()) {
+    check_error(check_value(value), "Invalid value");
   }
 
-  IntervalIntDomain::IntervalIntDomain(int value,
-                                       const DomainListenerId& listener,
-                                       const LabelStr& typeName)
-    : IntervalDomain(value, listener, typeName) {
-    check_value(value);
+  IntervalIntDomain::IntervalIntDomain(int lb, int ub, const char* typeName)
+    : IntervalDomain(lb, ub, typeName) {
+    check_error(check_value(m_lb), "Invalid lower bound");
+    check_error(check_value(m_ub), "Invalid upper bound");
   }
 
-  IntervalIntDomain::IntervalIntDomain(const IntervalIntDomain& org)
+  IntervalIntDomain::IntervalIntDomain(const AbstractDomain& org)
     : IntervalDomain(org) {
+    check_error(check_value(m_lb), "Invalid lower bound");
+    check_error(check_value(m_ub), "Invalid upper bound");
   }
 
   bool IntervalIntDomain::isFinite() const {

@@ -5,7 +5,7 @@
 #include "Object.hh"
 #include "Token.hh"
 #include "EnumeratedDomain.hh"
-#include "Domain.hh"
+#include "StringDomain.hh"
 #include "tinyxml.h"
 #include "ConstraintEngine.hh"
 #include "TypeFactory.hh"
@@ -32,12 +32,6 @@ namespace Prototype {
     std::string numstr = path.substr(path_back, path_end-path_back);
     result.push_back(atoi(numstr.c_str()));
     return result;
-  }
-
-  static std::string
-  domainTypeString(const AbstractDomain * domain)
-  {
-    return domain->getTypeName().toString();
   }
 
   DbClientTransactionPlayer::DbClientTransactionPlayer(const DbClientId & client) : m_client(client), m_objectCount(0), m_varCount(0){}
@@ -70,6 +64,8 @@ namespace Prototype {
   }
 
   void DbClientTransactionPlayer::processTransaction(const TiXmlElement & element) {
+    static unsigned int sl_txCount(0);
+    sl_txCount++;
       const char * tagname = element.Value();
       if (strcmp(tagname, "class") == 0) {
         playDefineClass(element);
@@ -167,7 +163,7 @@ namespace Prototype {
         std::vector<ConstrainedVariableId> variables;
         variables.push_back(origin_token->getEnd());
         variables.push_back(target_token->getStart());
-        m_client->createConstraint(LabelStr("leq"), variables);
+        m_client->createConstraint("leq", variables);
         return;
       }
       // TODO: the others
@@ -180,7 +176,7 @@ namespace Prototype {
     const char * type = child->Attribute("type");
     check_error(type != NULL);
 
-    TokenId token = m_client->createToken(LabelStr(type));
+    TokenId token = m_client->createToken(type);
     const char * mandatory = element.Attribute("mandatory");
 
     // If mandatory, remove the option to reject it from the base domain
@@ -207,7 +203,7 @@ namespace Prototype {
     check_error(strcmp(object_el->Value(), "object") == 0);
     const char * name = object_el->Attribute("name");
     check_error(name != NULL);
-    ObjectId object = m_client->getObject(LabelStr(name));
+    ObjectId object = m_client->getObject(name);
     check_error(object.isValid());
 
     TiXmlElement * token_el = object_el->NextSiblingElement();
@@ -232,7 +228,7 @@ namespace Prototype {
     check_error(strcmp(object_el->Value(), "object") == 0);
     const char * name = object_el->Attribute("name");
     check_error(name != NULL);
-    ObjectId object = m_client->getObject(LabelStr(name));
+    ObjectId object = m_client->getObject(name);
     check_error(object.isValid());
 
     TiXmlElement * token_el = object_el->NextSiblingElement();
@@ -323,19 +319,18 @@ namespace Prototype {
         return;
       }
       else
-	m_client->close(LabelStr(identifier));
+	m_client->close(identifier);
 
       return;
     }
 
     if (strcmp(name, "constrain") == 0) {
       // constrain token(s) special case
-      const char * identifier = element.Attribute("identifier");
-      std::string object_name = identifier;
-      ObjectId object = m_client->getObject(LabelStr(object_name.c_str()));
+      const char * object_name = element.Attribute("identifier");
+      ObjectId object = m_client->getObject(object_name);
       check_error(object.isValid(),
                   "constrain transaction refers to an undefined object: '"
-                   + object_name + "'");
+                   + std::string(object_name) + "'");
       TiXmlElement * token_el = element.FirstChildElement();
       check_error(token_el != NULL, "missing mandatory token identifier for constrain transaction");
       TokenId token = xmlAsToken(*token_el);
@@ -356,12 +351,11 @@ namespace Prototype {
 
     if (strcmp(name, "free") == 0) {
       // free token special case
-      const char * identifier = element.Attribute("identifier");
-      std::string object_name = identifier;
-      ObjectId object = m_client->getObject(LabelStr(object_name.c_str()));
+      const char * object_name = element.Attribute("identifier");
+      ObjectId object = m_client->getObject(object_name);
       check_error(object.isValid(),
                   "free transaction refers to an undefined object: '"
-                   + object_name + "'");
+                   + std::string(object_name) + "'");
       TiXmlElement * token_el = element.FirstChildElement();
       check_error(token_el != NULL, "missing mandatory token identifier for free transaction");
       TokenId token = xmlAsToken(*token_el);
@@ -433,7 +427,7 @@ namespace Prototype {
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
       variables.push_back(xmlAsVariable(*child_el));
     }
-    m_client->createConstraint(LabelStr(name), variables);
+    m_client->createConstraint(name, variables);
   }
 
   //! string input functions
@@ -493,11 +487,16 @@ namespace Prototype {
   const AbstractDomain * 
   DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element, const char * name)
   {
+    static unsigned int sl_counter(0);
+    sl_counter++;
     const char * tag = element.Value();
+
+    check_error(strcmp(tag, "ident") != 0,   "ident in transaction xml is deprecated");
+
     if (strcmp(tag, "new") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
-      return new ObjectDomain(xmlAsValue(element, name), LabelStr(type));
+      return new ObjectDomain(xmlAsValue(element, name), type);
     }
     if (strcmp(tag, "id") == 0) {
       const char * name = element.Attribute("name");
@@ -517,33 +516,22 @@ namespace Prototype {
         (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) ||
         (strcmp(tag, "float") == 0) || (strcmp(tag, "REAL_INTERVAL") == 0) ||
         (strcmp(tag, "string") == 0) || (strcmp(tag, "STRING_ENUMERATION") == 0)) {
-      AbstractDomain * domain = TypeFactory::baseDomain(LabelStr(tag)).copy();
-      domain->set(TypeFactory::createValue(LabelStr(tag), value_st));
+      AbstractDomain * domain = TypeFactory::baseDomain(tag).copy();
+      domain->set(TypeFactory::createValue(tag, value_st));
       return domain;
     }
     if (strcmp(tag, "symbol") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
-      AbstractDomain * domain = TypeFactory::baseDomain(LabelStr(type)).copy();
-      domain->set(TypeFactory::createValue(LabelStr(tag), value_st));
+      AbstractDomain * domain = TypeFactory::baseDomain(type).copy();
+      domain->set(TypeFactory::createValue(tag, value_st));
       return domain;
     }
-    if (strcmp(tag, "ident") == 0) {
-      std::cerr << "ident in transaction xml is deprecated" << std::endl;
-      const char * value = element.Attribute("value");
-      check_error(value != NULL);
-      std::string std_value = value;
-      ConstrainedVariableId var = m_variables[std_value];
-      if (var != ConstrainedVariableId::noId()) {
-        return var->baseDomain().copy();
-      }
-      // must be an enumerated domain
-      return new LabelSet(LabelStr(value));
-    }
+
     check_error(strcmp(tag, "object") == 0);
-    ObjectId object = m_client->getObject(LabelStr(value_st));
+    ObjectId object = m_client->getObject(value_st);
     check_error(object.isValid());
-    return new ObjectDomain(object, object->getType());
+    return new ObjectDomain(object, object->getType().c_str());
   }
 
   IntervalDomain *
@@ -555,10 +543,10 @@ namespace Prototype {
     check_error(min_st != NULL);
     const char * max_st = element.Attribute("max");
     check_error(max_st != NULL);
-    IntervalDomain * domain = dynamic_cast<IntervalDomain*>(TypeFactory::baseDomain(LabelStr(type_st)).copy());
+    IntervalDomain * domain = dynamic_cast<IntervalDomain*>(TypeFactory::baseDomain(type_st).copy());
     check_error(domain != NULL, "type '" + std::string(type_st) + "' should indicate an interval domain type");
-    double min = TypeFactory::createValue(LabelStr(type_st), min_st);
-    double max = TypeFactory::createValue(LabelStr(type_st), max_st);
+    double min = TypeFactory::createValue(type_st, min_st);
+    double max = TypeFactory::createValue(type_st, max_st);
     domain->intersect(min, max);
     return domain;
   }
@@ -638,11 +626,11 @@ namespace Prototype {
       switch (type) {
       case BOOL: case INT: case FLOAT:
       case STRING: case SYMBOL: {
-        values.push_back(TypeFactory::createValue(LabelStr(typeName), value_st));
+        values.push_back(TypeFactory::createValue(typeName, value_st));
         break;
       }
       case OBJECT: {
-        values.push_back(m_client->getObject(LabelStr(value_st)));
+        values.push_back(m_client->getObject(value_st));
         break;
       }
       default:
@@ -650,11 +638,11 @@ namespace Prototype {
       }
     }
     // return the domain
-    switch (type) { 
+    switch (type) {
     case BOOL: case INT: case FLOAT:
-      return new EnumeratedDomain(values, true, DomainListenerId::noId(), true, LabelStr(typeName));
+      return new EnumeratedDomain(values, true, typeName);
     case STRING: case SYMBOL: case OBJECT:
-      return new EnumeratedDomain(values, true, DomainListenerId::noId(), false, LabelStr(typeName));
+      return new EnumeratedDomain(values, false, typeName);
     default:
       check_error(ALWAYS_FAILS);
       return NULL;
@@ -679,10 +667,9 @@ namespace Prototype {
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
         const AbstractDomain * domain = xmlAsAbstractDomain(*child_el);
 
-        std::string type = domainTypeString(domain);
-        arguments.push_back(ConstructorArgument(LabelStr(type.c_str()), domain));
+        arguments.push_back(ConstructorArgument(domain->getTypeName(), domain));
       }
-      ObjectId object = m_client->createObject(LabelStr(type), LabelStr(name), arguments);
+      ObjectId object = m_client->createObject(type, name, arguments);
       check_error(object.isValid());
 
       // Now deallocate domains created for arguments
@@ -698,19 +685,19 @@ namespace Prototype {
         (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) ||
         (strcmp(tag, "float") == 0) || (strcmp(tag, "REAL_INTERVAL") == 0) ||
         (strcmp(tag, "string") == 0) || (strcmp(tag, "STRING_ENUMERATION") == 0)) {
-      return TypeFactory::createValue(LabelStr(tag), value_st);
+      return TypeFactory::createValue(tag, value_st);
     }
     if (strcmp(tag, "symbol") == 0) {
       const char * type_st = value.Attribute("type");
       check_error(type_st != NULL, "missing type for symbol '" + std::string(value_st) + "' in transaction xml");
-      return TypeFactory::createValue(LabelStr(type_st), value_st);
+      return TypeFactory::createValue(type_st, value_st);
     }
     if (strcmp(tag, "object") == 0) {
-      ObjectId object = m_client->getObject(LabelStr(value_st));
+      ObjectId object = m_client->getObject(value_st);
       check_error(object.isValid());
       return (double)object;
     }
-    ObjectId object = m_client->getObject(LabelStr(value_st));
+    ObjectId object = m_client->getObject(value_st);
     if (object != ObjectId::noId()) {
       return (double)object;
     }
@@ -744,7 +731,7 @@ namespace Prototype {
   
       const char * object_name = variable.Attribute("object");
       if (object_name != NULL) {
-        ObjectId object = m_client->getObject(LabelStr(object_name));
+        ObjectId object = m_client->getObject(object_name);
         check_error(object.isValid());
         check_error((unsigned)index < object->getVariables().size());
         return object->getVariables()[index];
@@ -815,11 +802,11 @@ namespace Prototype {
 
     check_error(type != NULL);
     if (baseDomain != NULL) {
-      ConstrainedVariableId variable = m_client->createVariable(LabelStr(type), *baseDomain, LabelStr(name));
+      ConstrainedVariableId variable = m_client->createVariable(type, *baseDomain, name);
       delete baseDomain;
       return variable;
     }
 
-    return m_client->createVariable(LabelStr(type), LabelStr(name));
+    return m_client->createVariable(type, name);
   }
 }

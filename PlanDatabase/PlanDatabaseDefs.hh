@@ -2,7 +2,6 @@
 #define _H_PlanDatabaseDefs
 
 #include "ConstraintEngineDefs.hh"
-#include "Domain.hh"
 #include "Entity.hh"
 
 namespace Prototype {

@@ -11,6 +11,8 @@
  */
 namespace Prototype {
 
+!THIS IS AN ERROR
+
   template<class ELEMENT_TYPE>
   class Domain : public EnumeratedDomain {
   public:
@@ -18,23 +20,15 @@ namespace Prototype {
     /**
      * @brief Constructor
      * @param labels The initial set of labels to populate the domain.
-     * @param closed Indicate if the set is initially closed.
-     * @param listener Allows connection of a listener to change events on the domain. 
      * @see AbstractDomain::isDynamic()
      */
-    Domain(const std::list< ELEMENT_TYPE >& values, 
-           bool closed = true,
-           const DomainListenerId& listener = DomainListenerId::noId(),
-           const LabelStr& typeName = getDefaultTypeName());
+    Domain(const std::list< ELEMENT_TYPE >& values);
 
     /**
      * @brief Singleton constructor.
      * @param value Singleton value, and then domain is closed.
-     * @param listener Allows connection of a listener to change events on the domain. 
      */
-    Domain(const ELEMENT_TYPE& value,
-           const DomainListenerId& listener = DomainListenerId::noId(),
-           const LabelStr& typeName = getDefaultTypeName());
+    Domain(const ELEMENT_TYPE& value);
 
     /**
      * @brief Copy constructor.
@@ -108,17 +102,14 @@ namespace Prototype {
   }
 
   template <class ELEMENT_TYPE>
-  Domain<ELEMENT_TYPE>::Domain(const std::list<ELEMENT_TYPE>& labels, bool closed,
-                               const DomainListenerId& listener,
-                               const LabelStr& typeName)
-    : EnumeratedDomain(convert(labels), closed, listener, false, typeName) {
+  Domain<ELEMENT_TYPE>::Domain(const std::list<ELEMENT_TYPE>& labels)
+    : EnumeratedDomain(convert(labels), false) {
   }
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain(const ELEMENT_TYPE& value,
-                               const DomainListenerId& listener,
-                               const LabelStr& typeName)
-    : EnumeratedDomain(value, listener, false, typeName) {
+                               const char* typeName)
+    : EnumeratedDomain(value, false, typeName) {
   }
 
   template <class ELEMENT_TYPE>
@@ -199,8 +190,6 @@ namespace Prototype {
     else
       return(value - y < EPSILON);
   }
-
-  typedef Domain<LabelStr> LabelSet;
 }
 
 #endif

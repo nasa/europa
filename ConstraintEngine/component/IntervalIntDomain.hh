@@ -21,18 +21,17 @@ namespace Prototype{
   class IntervalIntDomain: public IntervalDomain {
   public:
 
-    IntervalIntDomain(const DomainListenerId& listener = DomainListenerId::noId(),
-                      const LabelStr& typeName = getDefaultTypeName());
+    IntervalIntDomain();
 
-    IntervalIntDomain(int lb, int ub, 
-                      const DomainListenerId& listener = DomainListenerId::noId(),
-                      const LabelStr& typeName = getDefaultTypeName());
+    IntervalIntDomain(const char* typeName);
 
-    IntervalIntDomain(int value, 
-                      const DomainListenerId& listener = DomainListenerId::noId(),
-                      const LabelStr& typeName = getDefaultTypeName());
+    IntervalIntDomain(int lb, int ub);
 
-    IntervalIntDomain(const IntervalIntDomain& org);
+    IntervalIntDomain(int value);
+
+    IntervalIntDomain(int lb, int ub, const char* typeName);
+
+    IntervalIntDomain(const AbstractDomain& org);
 
     bool isFinite() const;
 

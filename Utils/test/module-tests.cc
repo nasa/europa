@@ -442,9 +442,68 @@ bool IdTests::testConstId()
   return true;
 }
 
+class LabelTests {
+public:
+  static bool test(){
+    runTest(testBasicAllocation);
+    runTest(testElementCounting);
+    runTest(testElementAccess);
+    return true;
+  }
+
+private:
+  static bool compare(const LabelStr& str1, const LabelStr& str2){
+    return str1 == str2;
+  }
+
+  static bool testBasicAllocation(){
+    LabelStr lbl1("");
+    LabelStr lbl2("This is a char*");
+    LabelStr lbl3(lbl2.toString());
+    assertTrue(lbl3 == lbl2);
+    std::string labelStr2("This is another char*");
+    LabelStr lbl4(labelStr2);
+    assertTrue(lbl4 != lbl2);
+
+    double key = lbl2.getKey();
+    LabelStr lbl5(key);
+    assertTrue(lbl5 == lbl2);
+    assertTrue(LabelStr::isString(key));
+    assertFalse(LabelStr::isString(ASSUMED_MINIMUM_MEMORY_ADDRESS + 1));
+
+    assertTrue(compare(lbl3, lbl2));
+    assertTrue(compare("This is another char*", "This is another char*"));
+    return true;
+  }
+
+  static bool testElementCounting(){
+    LabelStr lbl1("A 1B 1C 1D EFGH");
+    assert(lbl1.countElements("1") == 4);
+    assert(lbl1.countElements(" ") == 5);
+    assert(lbl1.countElements("B") == 2);
+    assert(lbl1.countElements(":") == 1);
+
+    LabelStr lbl2("A:B:C:D:");
+    assert(lbl2.countElements(":") == 4);
+    return true;
+  }
+
+  static bool testElementAccess(){
+    LabelStr lbl1("A 1B 1C 1D EFGH");
+    LabelStr first(lbl1.getElement(0, " "));
+    assert(first == LabelStr("A"));
+
+    LabelStr last(lbl1.getElement(3, "1"));
+    assert(last == LabelStr("D EFGH"));
+    return true;
+  }
+};
+
 int main() {
   runTestSuite(ErrorTest::test);
   runTestSuite(DebugTest::test);
   runTestSuite(IdTests::test);
+  runTestSuite(LabelTests::test);
+
   std::cout << "Finished" << std::endl;
 }

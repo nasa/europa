@@ -6,6 +6,7 @@
 #include "SubgoalOnceRule.hh"
 #include "Utils.hh"
 #include "Object.hh"
+#include "StringDomain.hh"
 
 namespace Prototype {
 
@@ -36,19 +37,19 @@ namespace Prototype {
 
   void SubgoalOnceRuleRoot::handleExecute() {
     TokenId tok =  (new IntervalToken(m_token,  
-				      LabelStr("P1"), 
+				      LabelStr("Objects.P1"), 
 				      IntervalIntDomain(0, 10),
 				      IntervalIntDomain(0, 20),
 				      IntervalIntDomain(1, 1000),
 				      Token::noObject(), false))->getId();
-    std::list<Prototype::LabelStr> values;
+    std::list<double> values;
     values.push_back(Prototype::LabelStr("L1"));
     values.push_back(Prototype::LabelStr("L4"));
     values.push_back(Prototype::LabelStr("L2"));
     values.push_back(Prototype::LabelStr("L5"));
     values.push_back(Prototype::LabelStr("L3"));
-    tok->addParameter(LabelSet(values, true));
-    tok->addParameter(IntervalIntDomain(1,20));
+    tok->addParameter(LabelSet(values), "LabelSetParam0");
+    tok->addParameter(IntervalIntDomain(1,20), "IntervalIntParam");
     tok->close();
     TokenId slave = addSlave(tok);
     if (m_count < 2)

@@ -8,8 +8,8 @@ namespace Prototype {
 
   class EnumeratedTypeFactory : public ConcreteTypeFactory {
   public:
-    EnumeratedTypeFactory(const LabelStr& typeName, const LabelStr& elementName);
-    EnumeratedTypeFactory(const LabelStr& typeName, const LabelStr& elementName, const EnumeratedDomain& baseDomain);
+    EnumeratedTypeFactory(const char* typeName, const char* elementName);
+    EnumeratedTypeFactory(const char* typeName, const char* elementName, const EnumeratedDomain& baseDomain);
 
     /**
      * @brief Create a variable
@@ -17,7 +17,7 @@ namespace Prototype {
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 
                                                  const AbstractDomain& baseDomain,
                                                  bool canBeSpecified = true,
-                                                 const LabelStr& name = ConstrainedVariable::NO_NAME(),
+                                                 const char* name = NO_VAR_NAME,
                                                  const EntityId& parent = EntityId::noId(),
                                                  int index = ConstrainedVariable::NO_INDEX) const;
 

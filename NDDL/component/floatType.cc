@@ -8,9 +8,7 @@ namespace Prototype {
   //
 
   floatTypeFactory::floatTypeFactory()
-  : IntervalTypeFactory(getDefaultTypeName(), IntervalDomain(DomainListenerId::noId(), getDefaultTypeName()))
-  {
-  }
+    : IntervalTypeFactory(getDefaultTypeName().c_str(), getDefaultTypeName().c_str()){}
 
   double floatTypeFactory::createValue(std::string value) const
   {

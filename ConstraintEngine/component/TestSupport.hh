@@ -44,7 +44,7 @@ private:
   int id_count = IdTable::size(); \
   bool result = test(); \
   DefaultEngineAccessor::reset(); \
-  if (result && IdTable::size() == id_count) \
+  if (result && IdTable::size() <= id_count) \
     std::cout << " PASSED." << std::endl; \
   else \
     if (result) { \

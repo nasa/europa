@@ -168,26 +168,24 @@ namespace Prototype {
     }
   }
 
-  EnumeratedDomain Assertion::count(const AbstractDomain& d) {
-    EnumeratedDomain retval(true);
-    std::list<double> values;
-    d.getValues(values);
-    retval.insert(values.size());
+  NumericDomain Assertion::count(const AbstractDomain& d) {
+    NumericDomain retval(d.getSize());
+    return retval;
+  }
+
+  NumericDomain Assertion::tokenSetToDomain(const TokenSet& tokens) {
+    NumericDomain retval;
+    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
+      retval.insert((*it)->getKey());
     retval.close();
     return retval;
   }
 
-  EnumeratedDomain Assertion::tokenSetToDomain(const TokenSet& tokens) {
-    EnumeratedDomain retval(false);
-    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
-      retval.insert((*it)->getKey());
-    return retval;
-  }
-
-  EnumeratedDomain Assertion::objectSetToDomain(const ObjectSet& objs) {
-    EnumeratedDomain retval(false);
+  NumericDomain Assertion::objectSetToDomain(const ObjectSet& objs) {
+    NumericDomain retval;
     for(ObjectSet::const_iterator it = objs.begin(); it != objs.end(); ++it)
       retval.insert((*it)->getKey());
+    retval.close();
     return retval;
   }
 

@@ -3,15 +3,9 @@
 
 #include "Id.hh"
 #include "ConstraintEngineDefs.hh"
-#include "Domain.hh"
 
 namespace Prototype
 {
-  // Define constants for default values.
-  //@todo Use EUROPA standard defaults for value and time
-  const std::string NO_NAME("NO_NAME");
-  const int LATEST_TIME = PLUS_INFINITY;
-  const double LARGEST_VALUE = PLUS_INFINITY;
 
   class ResourceViolation;
   typedef Id<ResourceViolation> ResourceViolationId;

@@ -37,9 +37,10 @@
 #include <iostream>
 #include <string>
 
-#define DEFAULT_SETUP(ce, db, schema, autoClose) \
+#define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
     Schema schema; \
+    initCBPTestSchema(schema.getId()); \
     PlanDatabase db(ce.getId(), schema.getId()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     RulesEngine re(db.getId()); \
@@ -58,9 +59,10 @@
     delete (DbLogger*) dbLId;
 
 
-#define DEFAULT_SETUP_PLAN(ce, db, schema, autoClose) \
+#define DEFAULT_SETUP_PLAN(ce, db, autoClose) \
     ConstraintEngine ce; \
     Schema schema; \
+    initCBPTestSchema(schema.getId()); \
     PlanDatabase db(ce.getId(), schema.getId()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     RulesEngine re(db.getId()); \
@@ -94,8 +96,8 @@ public:
 private:
   static bool testDefaultSetup() {
     bool retval = false;
-    DEFAULT_SETUP(ce, db, schema, false);
-    retval = testDefaultSetupImpl(ce, db, schema, dm, hor);
+    DEFAULT_SETUP(ce, db, false);
+    retval = testDefaultSetupImpl(ce, db, dm, hor);
     DEFAULT_TEARDOWN();
     return retval;
   }
@@ -114,40 +116,40 @@ public:
 private:
   static bool testCondition(){
     bool retval = false;
-    DEFAULT_SETUP(ce, db, schema, false);
-    retval = testConditionImpl(ce, db, schema, dm, hor);
+    DEFAULT_SETUP(ce, db, false);
+    retval = testConditionImpl(ce, db, dm, hor);
     DEFAULT_TEARDOWN();
     return retval;
   }
 
   static bool testHorizon() {
     bool retval = false;
-    DEFAULT_SETUP(ce, db, schema, true);
-    retval = testHorizonImpl(ce, db, schema, dm, hor);
+    DEFAULT_SETUP(ce, db, true);
+    retval = testHorizonImpl(ce, db, dm, hor);
     DEFAULT_TEARDOWN();
     return retval;
   }
 
   static bool testHorizonCondition() {
     bool retval = false;
-    DEFAULT_SETUP(ce, db, schema, false);
-    retval = testHorizonConditionImpl(ce, db, schema, dm, hor);
+    DEFAULT_SETUP(ce, db, false);
+    retval = testHorizonConditionImpl(ce, db, dm, hor);
     DEFAULT_TEARDOWN();
     return retval;
   }
 
   static bool testTemporalVariableCondition() {
     bool retval = false;
-    DEFAULT_SETUP(ce, db, schema, false);
-    retval = testTemporalVariableConditionImpl(ce, db, schema, dm, hor);
+    DEFAULT_SETUP(ce, db, false);
+    retval = testTemporalVariableConditionImpl(ce, db, dm, hor);
     DEFAULT_TEARDOWN();
     return retval;
   }
 
   static bool testDynamicInfiniteRealCondition() {
     bool retval = false;
-    DEFAULT_SETUP(ce, db, schema, false);
-    retval = testDynamicInfiniteRealConditionImpl(ce, db, schema, dm, hor);
+    DEFAULT_SETUP(ce, db, false);
+    retval = testDynamicInfiniteRealConditionImpl(ce, db, dm, hor);
     DEFAULT_TEARDOWN();
     return retval;
   }
@@ -164,8 +166,8 @@ public:
 private:
   static bool testForwardDecisionHandling() {
     bool retval = false;
-    DEFAULT_SETUP(ce, db, schema, false);
-    retval = testForwardDecisionHandlingImpl(ce, db, schema, dm, hor);
+    DEFAULT_SETUP(ce, db, false);
+    retval = testForwardDecisionHandlingImpl(ce, db, dm, hor);
     DEFAULT_TEARDOWN();
     return retval;
   }
@@ -186,56 +188,56 @@ public:
 private:
   static bool testMakeMove() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testMakeMoveImpl(ce, db, schema, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testMakeMoveImpl(ce, db, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
 
   static bool testCurrentState() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testCurrentStateImpl(ce, db, schema, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testCurrentStateImpl(ce, db, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
 
   static bool testRetractMove() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testRetractMoveImpl(ce, db, schema, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testRetractMoveImpl(ce, db, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
 
   static bool testNoBacktrackCase() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testNoBacktrackCaseImpl(ce, db, schema, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testNoBacktrackCaseImpl(ce, db, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
 
   static bool testSubgoalOnceRule() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testSubgoalOnceRuleImpl(ce, db, schema, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testSubgoalOnceRuleImpl(ce, db, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
 
   static bool testBacktrackCase() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testBacktrackCaseImpl(ce, db, schema, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testBacktrackCaseImpl(ce, db, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
 
   static bool testTimeoutCase() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testTimeoutCaseImpl(ce, db, schema, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testTimeoutCaseImpl(ce, db, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
@@ -250,8 +252,8 @@ public:
 private:
   static bool testMultipleDMs() {
     bool retval = false;
-    DEFAULT_SETUP(ce, db, schema, false);
-    retval = testMultipleDMsImpl(ce, db, schema, dm, hor);
+    DEFAULT_SETUP(ce, db, false);
+    retval = testMultipleDMsImpl(ce, db, dm, hor);
     DEFAULT_TEARDOWN();
     return retval;
   }
@@ -271,36 +273,36 @@ public:
 private:
   static bool testVariableDecisionCycle() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testVariableDecisionCycleImpl(ce, db, schema, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testVariableDecisionCycleImpl(ce, db, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
   static bool testTokenDecisionCycle() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testTokenDecisionCycleImpl(ce, db, schema, hor, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testTokenDecisionCycleImpl(ce, db, hor, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
   static bool testObjectDecisionCycle() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testObjectDecisionCycleImpl(ce, db, schema, hor, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testObjectDecisionCycleImpl(ce, db, hor, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
   static bool testObjectAndObjectVariable() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testObjectAndObjectVariableImpl(ce, db, schema, hor, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testObjectAndObjectVariableImpl(ce, db, hor, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
   static bool testObjectHorizon() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testObjectHorizonImpl(ce, db, schema, hor, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testObjectHorizonImpl(ce, db, hor, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
@@ -316,15 +318,15 @@ public:
 private:
   static bool testFindAnotherPlan() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testFindAnotherPlanImpl(ce, db, schema, hor, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testFindAnotherPlanImpl(ce, db, hor, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
   static bool testAddSubgoalAfterPlanning() {
     bool retval = false;
-    DEFAULT_SETUP_PLAN(ce, db, schema, false);
-    retval = testAddSubgoalAfterPlanningImpl(ce, db, schema, hor, planner);
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    retval = testAddSubgoalAfterPlanningImpl(ce, db, hor, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }

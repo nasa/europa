@@ -17,7 +17,6 @@
 #include "ConstraintEngine.hh"
 #include "ConstraintEngineDefs.hh"
 #include "ConstrainedVariable.hh"
-#include "Domain.hh"
 #include "EnumeratedDomain.hh"
 #include "IntervalDomain.hh"
 #include "IntervalIntDomain.hh"

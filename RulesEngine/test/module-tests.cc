@@ -9,12 +9,10 @@
 #include "Rule.hh"
 #include "RuleInstance.hh"
 #include "DbLogger.hh"
-
 #include "TestSupport.hh"
 #include "TestRule.hh"
 #include "Utils.hh"
 #include "IntervalIntDomain.hh"
-#include "Domain.hh"
 #include "DefaultPropagator.hh"
 #include "EqualityConstraintPropagator.hh"
 
@@ -23,7 +21,7 @@
 
 class SimpleSubGoal: public Rule {
 public:
-  SimpleSubGoal(): Rule(LabelStr("Predicate")){}
+  SimpleSubGoal(): Rule(LabelStr("AllObjects.Predicate")){}
 
   RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb, 
                                 const RulesEngineId &rulesEngine) const{
@@ -39,7 +37,7 @@ private:
       : RuleInstance(rule, token, planDb) {}
 
     void handleExecute(){
-      m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+      m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
       addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), m_onlySlave->getStart()));
     }
 
@@ -76,7 +74,7 @@ public:
 };
 
 
-NestedGuards_0::NestedGuards_0(): Rule(LabelStr("Predicate")){}
+NestedGuards_0::NestedGuards_0(): Rule(LabelStr("AllObjects.Predicate")){}
 RuleInstanceId NestedGuards_0::createInstance(const TokenId& token, const PlanDatabaseId& planDb,
                                               const RulesEngineId &rulesEngine) const{
   RuleInstanceId rootInstance = (new NestedGuards_0_Root(m_id, token, planDb))->getId();
@@ -90,7 +88,7 @@ NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& toke
 }
 
 void NestedGuards_0_Root::handleExecute(){
-  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
   addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), m_onlySlave->getStart()));
   addChildRule(new NestedGuards_0_0(m_id, m_token->getStart(), 10)); /*!< Add child context with guards - start == 10 */
   addChildRule(new NestedGuards_0_1(m_id, m_onlySlave->getObject())); /*!< Add child context with guards - object set to singleton */
@@ -100,7 +98,7 @@ NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId& parentInstance, const C
   : RuleInstance(parentInstance, guard, value){}
 
 void NestedGuards_0_0::handleExecute(){
-  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
   addConstraint(LabelStr("eq"), makeScope(m_token->getStart(), m_onlySlave->getEnd())); // Place before
 }
 
@@ -108,7 +106,7 @@ NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId& parentInstance, const C
   : RuleInstance(parentInstance, guard){}
 
 void NestedGuards_0_1::handleExecute(){
-  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
   addConstraint(LabelStr("eq"), makeScope(m_token->getStart(), m_onlySlave->getEnd())); // Place before
 }
 
@@ -136,7 +134,7 @@ public:
 
 ConstrainedVariableId LocalVariableGuard_0_Root::s_guard;
 
-LocalVariableGuard_0::LocalVariableGuard_0(): Rule(LabelStr("Predicate")){}
+LocalVariableGuard_0::LocalVariableGuard_0(): Rule(LabelStr("AllObjects.Predicate")){}
 
 RuleInstanceId LocalVariableGuard_0::createInstance(const TokenId& token, 
                                                     const PlanDatabaseId& planDb, 
@@ -158,7 +156,7 @@ void LocalVariableGuard_0_Root::handleExecute(){
 }
 
 void LocalVariableGuard_0_0::handleExecute(){
-  addSlave(new IntervalToken(m_token,  LabelStr("Predicate")));
+  addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
 }
 
 class DefaultSchemaAccessor{
@@ -189,6 +187,8 @@ SchemaId DefaultSchemaAccessor::s_instance;
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
     ConstraintEngine ce; \
     Schema schema; \
+    schema.addObjectType(LabelStr("AllObjects")); \
+    schema.addPredicate(LabelStr("AllObjects.Predicate")); \
     PlanDatabase db(ce.getId(), schema.getId()); \
     { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce.getId()); \
       assert(dp != 0); \
@@ -229,7 +229,7 @@ private:
     // Create a token of an expected type
 
     IntervalToken t0(db.getId(), 
-		     LabelStr("Predicate"), 
+		     LabelStr("AllObjects.Predicate"), 
 		     true,
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(0, 1000),
@@ -256,7 +256,7 @@ private:
     // Create a token of an expected type
 
     IntervalToken t0(db.getId(), 
-		     LabelStr("Predicate"), 
+		     LabelStr("AllObjects.Predicate"), 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
@@ -302,7 +302,7 @@ private:
     LocalVariableGuard_0 r;
 
     IntervalToken t0(db.getId(), 
-		     LabelStr("Predicate"), 
+		     LabelStr("AllObjects.Predicate"), 
 		     true,
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(0, 1000),
@@ -334,10 +334,10 @@ private:
     DEFAULT_SETUP(ce, db, schema, false);
     db.close();
 
-    TestRule r(LabelStr("Predicate"));
+    TestRule r(LabelStr("AllObjects.Predicate"));
 
     IntervalToken t0(db.getId(), 
-		     LabelStr("Predicate"), 
+		     LabelStr("AllObjects.Predicate"), 
 		     true,
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(0, 1000),
@@ -359,7 +359,7 @@ private:
     DEFAULT_SETUP(ce, db, schema, false);
     db.close();
 
-    new TestRule(LabelStr("Predicate"));
+    new TestRule(LabelStr("AllObjects.Predicate"));
 
     Rule::purgeAll();
 

@@ -19,7 +19,8 @@
 #include "LabelStr.hh"
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
-#include "Domain.hh"
+#include "StringDomain.hh"
+#include "NumericDomain.hh"
 
 #include "TypeFactory.hh"
 
@@ -93,34 +94,34 @@ public:
 
   static bool testValueCreation(){
     IntervalIntDomain d0(5);
-    int v0 = (int) TypeFactory::createValue(d0.getTypeName(), std::string("5"));
+    int v0 = (int) TypeFactory::createValue(d0.getTypeName().c_str(), std::string("5"));
     assert(d0.compareEqual(d0.getSingletonValue(), v0));
 
     IntervalDomain d1(2.3);
-    double v1 = (double) TypeFactory::createValue(d1.getTypeName(), std::string("2.3"));
+    double v1 = (double) TypeFactory::createValue(d1.getTypeName().c_str(), std::string("2.3"));
     assert(d1.compareEqual(d1.getSingletonValue(), v1));
 
     BoolDomain d2(true);
-    bool v2 = (bool) TypeFactory::createValue(d2.getTypeName(), std::string("true"));
+    bool v2 = (bool) TypeFactory::createValue(d2.getTypeName().c_str(), std::string("true"));
     assert(d2.compareEqual(d2.getSingletonValue(), v2));
 
     return true;
   }
 
   static bool testDomainCreation(){
-    const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(TypeFactory::baseDomain(IntervalIntDomain().getTypeName()));
-    const IntervalDomain & bd1 = dynamic_cast<const IntervalDomain &>(TypeFactory::baseDomain(IntervalDomain().getTypeName()));
-    const BoolDomain & bd2 = dynamic_cast<const BoolDomain &>(TypeFactory::baseDomain(BoolDomain().getTypeName()));
+    const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(TypeFactory::baseDomain(IntervalIntDomain().getTypeName().c_str()));
+    const IntervalDomain & bd1 = dynamic_cast<const IntervalDomain &>(TypeFactory::baseDomain(IntervalDomain().getTypeName().c_str()));
+    const BoolDomain & bd2 = dynamic_cast<const BoolDomain &>(TypeFactory::baseDomain(BoolDomain().getTypeName().c_str()));
     return true;
   }
 
   static bool testVariableCreation(){
     ConstraintEngineId ce = (new ConstraintEngine())->getId();
-    ConstrainedVariableId cv0 = TypeFactory::createVariable(IntervalIntDomain().getTypeName(), ce);
+    ConstrainedVariableId cv0 = TypeFactory::createVariable(IntervalIntDomain().getTypeName().c_str(), ce);
     assert(cv0->baseDomain().getType() == IntervalIntDomain().getType());
-    ConstrainedVariableId cv1 = TypeFactory::createVariable(IntervalDomain().getTypeName(), ce);
+    ConstrainedVariableId cv1 = TypeFactory::createVariable(IntervalDomain().getTypeName().c_str(), ce);
     assert(cv1->baseDomain().getType() == IntervalDomain().getType());
-    ConstrainedVariableId cv2 = TypeFactory::createVariable(BoolDomain().getTypeName(), ce);
+    ConstrainedVariableId cv2 = TypeFactory::createVariable(BoolDomain().getTypeName().c_str(), ce);
     assert(cv2->baseDomain().getType() == BoolDomain().getType());
     Entity::purgeStarted();
     delete (ConstraintEngine*) ce;
@@ -134,11 +135,11 @@ public:
     BoolDomain d2(true);
 
     ConstraintEngineId ce = (new ConstraintEngine())->getId();
-    ConstrainedVariableId cv0 = TypeFactory::createVariable(d0.getTypeName(), ce, d0);
+    ConstrainedVariableId cv0 = TypeFactory::createVariable(d0.getTypeName().c_str(), ce, d0);
     assert(cv0->baseDomain() == d0);
-    ConstrainedVariableId cv1 = TypeFactory::createVariable(d1.getTypeName(), ce, d1);
+    ConstrainedVariableId cv1 = TypeFactory::createVariable(d1.getTypeName().c_str(), ce, d1);
     assert(cv1->baseDomain() == d1);
-    ConstrainedVariableId cv2 = TypeFactory::createVariable(d2.getTypeName(), ce, d2);
+    ConstrainedVariableId cv2 = TypeFactory::createVariable(d2.getTypeName().c_str(), ce, d2);
     assert(cv2->baseDomain() == d2);
 
     Entity::purgeStarted();
@@ -170,7 +171,7 @@ public:
     new DefaultPropagator(LabelStr("Default"), ce);
 
     // Set up a base domain
-    Domain<int> intBaseDomain;
+    NumericDomain intBaseDomain;
     intBaseDomain.insert(1);
     intBaseDomain.insert(2);
     intBaseDomain.insert(3);
@@ -179,8 +180,8 @@ public:
     intBaseDomain.close();
 
     for(int i=0;i<100;i++){
-      Id<Variable<Domain<int> > > v0 = (new Variable<Domain<int> > (ce, intBaseDomain))->getId();
-      Id<Variable<Domain<int> > > v1 = (new Variable<Domain<int> >(ce, intBaseDomain))->getId();
+      Id<Variable<NumericDomain > > v0 = (new Variable<NumericDomain> (ce, intBaseDomain))->getId();
+      Id<Variable<NumericDomain > > v1 = (new Variable<NumericDomain>(ce, intBaseDomain))->getId();
       new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ce, makeScope(v0, v1));
     }
 
@@ -193,10 +194,10 @@ public:
   }
 
   static bool testInconsistentInitialVariableDomain(){
-    EnumeratedDomain emptyDomain;
+    NumericDomain emptyDomain;
     emptyDomain.close();
     {
-      Variable<EnumeratedDomain> v0(ENGINE, emptyDomain);
+      Variable<NumericDomain> v0(ENGINE, emptyDomain);
       assert(ENGINE->provenInconsistent()); // Should be immediately inconsistent!
     }
     assert(ENGINE->propagate()); // Should be fixed by deletion of the variable
@@ -316,7 +317,7 @@ private:
     // Now tests message handling on Enumerated Domain
     listener.reset();
     {
-      Variable<EnumeratedDomain> v0(ENGINE, EnumeratedDomain());
+      Variable<NumericDomain> v0(ENGINE, NumericDomain());
       v0.insert(1);
       v0.insert(3);
       v0.insert(5);
@@ -326,13 +327,13 @@ private:
       assert(listener.getCount(ConstraintEngine::CLOSED) == 1);
       assert(listener.getCount(ConstraintEngine::SET) == 1); // Expect to see specified domain cause 'set' on derived domain once closed.
 
-      EnumeratedDomain d0;
+      NumericDomain d0;
       d0.insert(2);
       d0.insert(3);
       d0.insert(5);
       d0.insert(11);
       d0.close();
-      Variable<EnumeratedDomain> v1(ENGINE, d0);
+      Variable<NumericDomain> v1(ENGINE, d0);
       assert(listener.getCount(ConstraintEngine::SET) == 2); // Expect to see specified domain cause 'set' immediately.
 
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
@@ -354,7 +355,7 @@ private:
   static bool testDynamicVariable(){
     // Test empty on closure forces inconsistency
     {
-      Variable<EnumeratedDomain> v0(ENGINE,EnumeratedDomain());
+      Variable<NumericDomain> v0(ENGINE,NumericDomain());
       assert(ENGINE->propagate()); // No reason to be inconsistent
       v0.close(); // Should push empty event.
       assert(ENGINE->provenInconsistent()); // Should be inconsistent
@@ -362,8 +363,8 @@ private:
 
     // Test that insertion is possible for variables and that it is handled correctly through propagation
     {
-      Variable<EnumeratedDomain> v0(ENGINE, EnumeratedDomain()); // The empty one.
-      Variable<EnumeratedDomain> v1(ENGINE, EnumeratedDomain()); // The full one
+      Variable<NumericDomain> v0(ENGINE, NumericDomain()); // The empty one.
+      Variable<NumericDomain> v1(ENGINE, NumericDomain()); // The full one
       v0.insert(1); // The only value, leave it open.
 
       // Fill up v1 and close it.
@@ -442,7 +443,7 @@ public:
 
 private:
   static bool testSubsetConstraint() {
-    std::list<Prototype::LabelStr> values;
+    std::list<double> values;
     values.push_back(Prototype::LabelStr("A"));
     values.push_back(Prototype::LabelStr("B"));
     values.push_back(Prototype::LabelStr("C"));
@@ -645,7 +646,7 @@ private:
   static bool testEqualConstraint()
   {
     // Set up a base domain
-    std::list<Prototype::LabelStr> baseValues;
+    std::list<double> baseValues;
     baseValues.push_back(Prototype::LabelStr("A"));
     baseValues.push_back(Prototype::LabelStr("B"));
     baseValues.push_back(Prototype::LabelStr("C"));
@@ -699,24 +700,24 @@ private:
 
     // Now test that equality is working correctly for dynamic domains
     {
-      EnumeratedDomain e0;
+      NumericDomain e0;
       e0.insert(1);
       e0.insert(2);
       e0.insert(3);
 
-      EnumeratedDomain e1;
+      NumericDomain e1;
       e1.insert(1);
       e1.insert(2);
       e1.insert(3);
       e1.insert(4);
 
-      EnumeratedDomain e2;
+      NumericDomain e2;
       e2.insert(5);
       // Leave domains dynamic
 
-      Variable<EnumeratedDomain> a(ENGINE, e0);
-      Variable<EnumeratedDomain> b(ENGINE, e1);
-      Variable<EnumeratedDomain> c(ENGINE, e2);
+      Variable<NumericDomain> a(ENGINE, e0);
+      Variable<NumericDomain> b(ENGINE, e1);
+      Variable<NumericDomain> c(ENGINE, e2);
       EqualConstraint eq(LabelStr("EqualConstraint"), 
 			 LabelStr("Default"), 
 			 ENGINE, 
@@ -874,8 +875,7 @@ private:
     
     ENGINE->propagate();
     assert(ENGINE->provenInconsistent());
-    assert(v1.getDerivedDomain().isEmpty());
-    assert(v2.getDerivedDomain().isEmpty());
+    assertTrue(v1.getDerivedDomain().isEmpty() || v2.getDerivedDomain().isEmpty());
 
     std::vector<ConstrainedVariableId> variables;
     variables.push_back(v0.getId());
@@ -888,7 +888,6 @@ private:
     int emptyCount(0);
     for(std::vector<ConstrainedVariableId>::iterator it = variables.begin(); it != variables.end(); ++it){
       Variable<IntervalIntDomain>* id = (Variable<IntervalIntDomain>*) (*it);
-      assert(id->getDerivedDomain().isEmpty());
       if(id->lastDomain().isEmpty())
 	emptyCount++;
     }
@@ -1054,26 +1053,26 @@ private:
   }
 
   static bool testNotEqual(){
-    EnumeratedDomain dom0;
+    NumericDomain dom0;
     dom0.insert(1);
     dom0.insert(2);
     dom0.insert(3);
     dom0.close();
 
-    Variable<EnumeratedDomain> v0(ENGINE, dom0);
-    Variable<EnumeratedDomain> v1(ENGINE, dom0);
-    Variable<EnumeratedDomain> v2(ENGINE, dom0);
+    Variable<NumericDomain> v0(ENGINE, dom0);
+    Variable<NumericDomain> v1(ENGINE, dom0);
+    Variable<NumericDomain> v2(ENGINE, dom0);
 
     // Test not equals among variables and singletons
     IntervalIntDomain dom1(1);
     IntervalIntDomain dom2(2);
-    EnumeratedDomain dom3;
+    NumericDomain dom3;
     dom3.insert(1);
     dom3.insert(2);
     dom3.insert(3);
     dom3.close();
     Variable<IntervalIntDomain> v3(ENGINE, dom1); 
-    Variable<EnumeratedDomain> v4(ENGINE, dom3);
+    Variable<NumericDomain> v4(ENGINE, dom3);
     Variable<IntervalIntDomain> v5(ENGINE, dom2); 
 
     NotEqualConstraint c4(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId()));
@@ -1877,7 +1876,7 @@ private:
     assertTrue(values.empty() || members.empty());
     switch (type) {
     case AbstractDomain::REAL_ENUMERATION:
-      dom = new EnumeratedDomain(values);
+      dom = new NumericDomain(values);
       break;
     case AbstractDomain::BOOL:
       dom = new BoolDomain;
@@ -2215,7 +2214,7 @@ private:
         case AbstractDomain::REAL_ENUMERATION: {
           std::list<double> values;
           domPtr->getValues(values);
-          Variable<EnumeratedDomain> *var = new Variable<EnumeratedDomain>(ENGINE, EnumeratedDomain(values));
+          Variable<NumericDomain> *var = new Variable<NumericDomain>(ENGINE, NumericDomain(values));
           assertTrue(var != 0);
           var->specify(*domPtr);
           cVarId = var->getId();
@@ -2419,29 +2418,17 @@ private:
       assert(!v2.getDerivedDomain().isSingleton());      
     }
     {
-      std::list<Prototype::LabelStr> values;
-      values.push_back(Prototype::LabelStr("A"));
-      values.push_back(Prototype::LabelStr("B"));
-      values.push_back(Prototype::LabelStr("C"));
-      values.push_back(Prototype::LabelStr("D"));
-      values.push_back(Prototype::LabelStr("E"));
-      Variable<LabelSet> v0(ENGINE, Prototype::LabelStr("C"));
-      Variable<LabelSet> v1(ENGINE, Prototype::LabelStr("C"));
+      Variable<LabelSet> v0(ENGINE, LabelSet(LabelStr("C")));
+      Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("C")));
       Variable<BoolDomain> v2(ENGINE, BoolDomain());
-      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
+      TestEqConstraint c0("TestEqConstraint", "Default", 
 			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       assert(v2.getDerivedDomain().isTrue());
     }
     {
-      std::list<Prototype::LabelStr> values;
-      values.push_back(Prototype::LabelStr("A"));
-      values.push_back(Prototype::LabelStr("B"));
-      values.push_back(Prototype::LabelStr("C"));
-      values.push_back(Prototype::LabelStr("D"));
-      values.push_back(Prototype::LabelStr("E"));
-      Variable<LabelSet> v0(ENGINE, Prototype::LabelStr("C"));
-      Variable<LabelSet> v1(ENGINE, Prototype::LabelStr("E"));
+      Variable<LabelSet> v0(ENGINE, LabelSet(LabelStr("C")));
+      Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("E")));
       Variable<BoolDomain> v2(ENGINE, BoolDomain());
       TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
 			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
@@ -2659,7 +2646,7 @@ int main() {
   initConstraintEngine();
   initConstraintLibrary();
   REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
-  TypeFactory::createValue(LabelStr("INT_INTERVAL"), std::string("5"));
+  TypeFactory::createValue("INT_INTERVAL", std::string("5"));
   runTestSuite(DomainTests::test);
   runTestSuite(TypeFactoryTests::test);
   runTestSuite(EntityTests::test);

@@ -4,7 +4,6 @@
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
 #include "ConstrainedVariable.hh"
-#include "Domain.hh"
 
 namespace Prototype {
 

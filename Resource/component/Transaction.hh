@@ -47,8 +47,8 @@ namespace Prototype {
     Transaction(const PlanDatabaseId& planDatabase,
 		const LabelStr& predicateName,
 		const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
-		double min = -LARGEST_VALUE,
-		double max = LARGEST_VALUE,
+		double min = MINUS_INFINITY,
+		double max = PLUS_INFINITY,
 		bool closed = true);
 
     Transaction(const PlanDatabaseId& planDatabase,

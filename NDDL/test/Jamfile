@@ -4,8 +4,15 @@ if ! $(PLASMA_READY) {
 
 SubInclude PLASMA NDDL test parser ;
 SubInclude PLASMA NDDL test compiler ;
+SubDirHdrs $(PLASMA) PlanDatabase test ;
 
-ModuleMain nddl-module-tests : module-tests.cc : NDDL ;
+local variant ;
+for variant in $(ALL_VARIANTS) {
+  local plandb = [ FVariantName PlanDbModuleTests : $(variant) ] ;
+  MakeLocate [ FGristFiles $(plandb)$(SUFOBJ) ] : [ FDirName $(PLASMA) PlanDatabase test ] ;
+}
+
+ModuleMain nddl-module-tests : module-tests.cc PlanDbModuleTests.o : NDDL ;
 RunModuleMain run-nddl-module-tests : nddl-module-tests ;
 LocalDepends tests : run-nddl-module-tests ;
 

@@ -3,40 +3,51 @@
 
 namespace Prototype {
 
-  IntervalDomain::IntervalDomain(const DomainListenerId& listener, const LabelStr& typeName)
-    : AbstractDomain(true, false, listener, typeName), m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY) {
-  }
+  IntervalDomain::IntervalDomain()
+    : AbstractDomain(true, false, getDefaultTypeName().c_str()), 
+      m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY){}
 
-  IntervalDomain::IntervalDomain(double lb, double ub, const DomainListenerId& listener, const LabelStr& typeName)
-    : AbstractDomain(true, false, listener, typeName), m_ub(ub), m_lb(lb) {
+  IntervalDomain::IntervalDomain(const char* typeName)
+    : AbstractDomain(true, false, typeName), 
+      m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY){}
+
+  IntervalDomain::IntervalDomain(double lb, double ub, const char* typeName)
+    : AbstractDomain(true, false, typeName), m_ub(ub), m_lb(lb) {
     check_error(ub >= lb);
     check_error(ub <= PLUS_INFINITY);
     check_error(lb >= MINUS_INFINITY);
   }
 
-  IntervalDomain::IntervalDomain(double value, const DomainListenerId& listener, const LabelStr& typeName)
-    : AbstractDomain(true, false, listener, typeName), m_ub(value), m_lb(value) {
+  IntervalDomain::IntervalDomain(double lb, double ub)
+    : AbstractDomain(true, false, getDefaultTypeName().c_str()), m_ub(ub), m_lb(lb) {
+    check_error(ub >= lb);
+    check_error(ub <= PLUS_INFINITY);
+    check_error(lb >= MINUS_INFINITY);
+  }
+
+  IntervalDomain::IntervalDomain(double value)
+    : AbstractDomain(true, false, getDefaultTypeName().c_str()), m_ub(value), m_lb(value) {
     check_error(value <= PLUS_INFINITY);
     check_error(value >= MINUS_INFINITY);
   }
 
-  IntervalDomain::~IntervalDomain() {
-  }
+  IntervalDomain::~IntervalDomain() {}
 
-  IntervalDomain::IntervalDomain(const IntervalDomain& org)
-    : AbstractDomain(true, false, DomainListenerId::noId(), org.m_typeName),
-      m_ub(org.m_ub), m_lb(org.m_lb) {
+  IntervalDomain::IntervalDomain(const AbstractDomain& org)
+    : AbstractDomain(org), m_ub(org.getUpperBound()), m_lb(org.getLowerBound()){
+    check_error(org.isInterval(), 
+		"Attempted to create an Interval domain from " + org.getTypeName().toString());
   }
 
   bool IntervalDomain::intersect(const AbstractDomain& dom) {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
     check_error(dom.isOpen() || !dom.isEmpty());
     check_error(isOpen() || !isEmpty());
     return(intersect(dom.getLowerBound(), dom.getUpperBound()));
   }
 
   bool IntervalDomain::difference(const AbstractDomain& dom) {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
     check_error(dom.isOpen() || !dom.isEmpty());
     check_error(isOpen() || !isEmpty());
 
@@ -70,7 +81,7 @@ namespace Prototype {
   }
 
   AbstractDomain& IntervalDomain::operator=(const AbstractDomain& dom) {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
     check_error(m_listener.isNoId());
     m_lb = dom.getUpperBound();
     m_ub = dom.getUpperBound();
@@ -79,11 +90,13 @@ namespace Prototype {
   }
 
   void IntervalDomain::relax(const AbstractDomain& dom) {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
     relax(dom.getLowerBound(), dom.getUpperBound());
   }
 
   void IntervalDomain::insert(double value) {
+    check_error(ALWAYS_FAILS, "Cannot insert to an interval domain");
+    /*
     if (isEmpty()) {
       m_lb = m_ub = value;
       if (!isOpen())
@@ -95,9 +108,16 @@ namespace Prototype {
     if (compareEqual(m_lb, value) || compareEqual(m_ub, value))
       return; // Within minDelta() of end points of domain.
     check_error(ALWAYS_FAILS); // Can't add it without a 'gap' between interval and value.
+    */
+  }
+
+  void IntervalDomain::insert(const std::list<double>& values){
+    check_error(ALWAYS_FAILS, "Cannot insert to an interval domain");
   }
 
   void IntervalDomain::remove(double value) {
+    check_error(ALWAYS_FAILS, "Cannot remove an interval domain");
+    /*
     if(!isMember(value))
       return;
 
@@ -109,10 +129,11 @@ namespace Prototype {
 
     // Not in interval, so removing it is no-op.
     return;
+    */
   }
 
   bool IntervalDomain::operator==(const AbstractDomain& dom) const {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
     return(compareEqual(m_lb, dom.getLowerBound()) &&
            compareEqual(m_ub, dom.getUpperBound()) &&
            AbstractDomain::operator==(dom));
@@ -123,7 +144,7 @@ namespace Prototype {
   }
 
   bool IntervalDomain::isSubsetOf(const AbstractDomain& dom) const {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
     check_error(!isOpen());
     check_error(!dom.isEmpty());
     bool result = ((isFinite() || dom.isInfinite()) && 
@@ -133,7 +154,7 @@ namespace Prototype {
   }
 
   bool IntervalDomain::intersects(const AbstractDomain& dom) const {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
     check_error(!isOpen());
     check_error(!dom.isEmpty());
 
@@ -149,7 +170,7 @@ namespace Prototype {
   }
 
   bool IntervalDomain::equate(AbstractDomain& dom) {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
 
     // Avoid duplicating part of EnumeratedDomain::equate().  Needed for
     // full propagation in cases like equate([0.0 10.0] {5.0 20.0}),
@@ -178,7 +199,7 @@ namespace Prototype {
   }
  
   void IntervalDomain::set(const AbstractDomain& dom) {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
     check_error(!dom.isSingleton());
     intersect(dom);
     notifyChange(DomainListener::SET);
@@ -196,7 +217,7 @@ namespace Prototype {
   }
 
   void IntervalDomain::reset(const AbstractDomain& dom) {
-    check_error(AbstractDomain::canBeCompared(*this, dom));
+    safeComparison(*this, dom);
     if (*this != dom) {
       relax(dom);
       notifyChange(DomainListener::RESET);

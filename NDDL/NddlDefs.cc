@@ -20,9 +20,9 @@ namespace Prototype {
       initConstraintEngine();
 
       /* Allocate NDDL Type Factories */
-      new BoolTypeFactory(LabelStr("bool"));
-      new StringTypeFactory(LabelStr("string"));
-      new SymbolTypeFactory(LabelStr("symbol"));
+      new BoolTypeFactory("bool");
+      new StringTypeFactory("string");
+      new SymbolTypeFactory("symbol");
       new intTypeFactory();
       new floatTypeFactory();
     }

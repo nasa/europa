@@ -55,19 +55,19 @@ bool runPlanner(){
 
   assert(client->propagate());
 
-  ObjectId world = client->getObject(LabelStr("world"));
+  ObjectId world = client->getObject("world");
   check_error(world.isValid());
   // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
-  ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
+  ConstrainedVariableId horizonStart = world->getVariable("world.m_horizonStart");
   check_error(horizonStart.isValid());
-  ConstrainedVariableId horizonEnd = world->getVariable(LabelStr("world.m_horizonEnd"));
+  ConstrainedVariableId horizonEnd = world->getVariable("world.m_horizonEnd");
   check_error(horizonEnd.isValid());
   int start = (int) horizonStart->baseDomain().getSingletonValue();
   int end = (int) horizonEnd->baseDomain().getSingletonValue();
   db1.horizon->setHorizon(start, end);
 
   // Create and run the planner
-  ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
+  ConstrainedVariableId maxPlannerSteps = world->getVariable("world.m_maxPlannerSteps");
   check_error(maxPlannerSteps.isValid());
   int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
 

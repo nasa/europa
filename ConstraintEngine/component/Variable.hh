@@ -30,7 +30,7 @@ namespace Prototype {
      * @param index position in parent collection.
      */
     Variable(const ConstraintEngineId& constraintEngine, 
-             const DomainType& baseDomain,
+             const AbstractDomain& baseDomain,
              bool canBeSpecified = true,
              const LabelStr& name = ConstrainedVariable::NO_NAME(),
              const EntityId& parent = EntityId::noId(),
@@ -126,7 +126,7 @@ namespace Prototype {
 
   template<class DomainType>
   Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine, 
-                                 const DomainType& baseDomain,
+                                 const AbstractDomain& baseDomain,
                                  bool canBeSpecified,
                                  const LabelStr& name,
                                  const EntityId& parent,
@@ -171,14 +171,15 @@ namespace Prototype {
       return(m_derivedDomain);
 
     static bool sl_initialized = false;
-    static DomainType sl_emptyDomain;
+    static DomainType* sl_emptyDomain = 0;
     if (!sl_initialized) {
-      if (sl_emptyDomain.isOpen())
-        sl_emptyDomain.close();
-      sl_emptyDomain.empty();
+      sl_emptyDomain = dynamic_cast<DomainType*>(m_derivedDomain.copy());
+      if (sl_emptyDomain->isOpen())
+        sl_emptyDomain->close();
+      sl_emptyDomain->empty();
       sl_initialized = true;
     }
-    return(sl_emptyDomain);
+    return(*sl_emptyDomain);
   }
 
   template<class DomainType>

@@ -23,40 +23,40 @@ namespace Prototype {
   public:
 
     /**
-     * @brief Constructs an initially empty and open domain
+     * @brief Constructor.
+     * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
+     * @param typeName Indicate the type name to use as a specialization of enumeration types 
+     * @see AbstractDomain::isDynamic()
      */
-    EnumeratedDomain(bool isNumeric = true, const LabelStr& typeName = getDefaultTypeName());
+    EnumeratedDomain(bool isNumeric,
+		     const char* typeName);
 
     /**
      * @brief Constructor.
      * @param values The initial set of values to populate the domain.
-     * @param closed Indicate if the set is initially closed.
      * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
-     * @param listener Allows connection of a listener to change events on the domain. 
+     * @param typeName Indicate the type name to use as a specialization of enumeration types 
      * @see AbstractDomain::isDynamic()
      */
     EnumeratedDomain(const std::list<double>& values, 
-		     bool closed = true,
-		     const DomainListenerId& listener = DomainListenerId::noId(),
-		     bool isNumeric = true,
-		     const LabelStr& typeName = getDefaultTypeName());
+		     bool isNumeric,
+		     const char* typeName);
 
     /**
      * @brief Constructor.
      * @param value Constructs a singleton domain. Closed on construction.
      * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
-     * @param listener Allows connection of a listener to change events on the domain. 
+     * @param typeName Indicate the type name to use as a specialization of enumeration types 
      */
     EnumeratedDomain(double value,
-		     const DomainListenerId& listener = DomainListenerId::noId(), 
-		     bool isNumeric = true,
-		     const LabelStr& typeName = getDefaultTypeName());
+		     bool isNumeric,
+		     const char* typeName);
 
     /**
      * @brief Copy constructor.
      * @param org The source domain.
      */
-    EnumeratedDomain(const EnumeratedDomain& org);
+    EnumeratedDomain(const AbstractDomain& org);
 
     /**
      * @brief Get the type of the domain to aid in type checking.
@@ -118,6 +118,8 @@ namespace Prototype {
      */
     virtual void insert(double value);
 
+    virtual void insert(const std::list<double>& values);
+
     /**
      * @brief Remove the given element form the domain.
      * @param value. The value to be removed. If present, removal will generate a value removal event
@@ -132,7 +134,7 @@ namespace Prototype {
      * @param dom The target domain.
      * @see DomainListener::EMPTIED, DomainListener::SET, intersect()
      */
-    void set(const AbstractDomain& dom);
+    virtual void set(const AbstractDomain& dom);
 
     /**
      * @brief Attempt to set the domain to a singleton.
@@ -142,7 +144,7 @@ namespace Prototype {
      * @param value The target singleton value.
      * @see DomainListener::EMPTIED, DomainListener::SET_TO_SINGLETON
      */
-    void set(double value);
+    virtual void set(double value);
 
     /**
      * @brief Reset the domain to the target value.

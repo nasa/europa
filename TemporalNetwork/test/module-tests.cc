@@ -21,6 +21,8 @@
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
     ConstraintEngine ce; \
     Schema schema; \
+    schema.addObjectType("Objects"); \
+    schema.addPredicate("Objects.Predicate"); \
     PlanDatabase db(ce.getId(), schema.getId()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
@@ -175,13 +177,13 @@ private:
   static bool testTemporalPropagation() {
     DEFAULT_SETUP(ce,db,schema,false);
 
-    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    ObjectId timeline = (new Timeline(db.getId(), "Objects", "o2"))->getId();
     assert(!timeline.isNoId());
 
     db.close();
 
     IntervalToken t1(db.getId(),
-    		     LabelStr("P1"), 
+    		     "Objects.Predicate", 
     		     true,
     		     IntervalIntDomain(0, 10),
     		     IntervalIntDomain(0, 20),
@@ -192,7 +194,7 @@ private:
     assert(t1.getEnd()->getDerivedDomain().getUpperBound() == 17);
 
     IntervalToken t2(db.getId(), 
-    		     LabelStr("P2"), 
+    		     "Objects.Predicate", 
     		     true,
     		     IntervalIntDomain(0, 10),
     		     IntervalIntDomain(0, 20),
@@ -227,20 +229,20 @@ private:
   static bool testCanPrecede() {
     DEFAULT_SETUP(ce,db,schema,false);
 
-    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
 
     db.close();
     
     IntervalToken first(db.getId(),
-			LabelStr("P1"), 
+			"Objects.Predicate", 
 			true,
 			IntervalIntDomain(0, 100),
 			IntervalIntDomain(0, 100),
 			IntervalIntDomain(1, 1000));
     
     IntervalToken second(db.getId(),
-			 LabelStr("P1"), 
+			 "Objects.Predicate", 
 			 true,
 			 IntervalIntDomain(0, 100),
 			 IntervalIntDomain(0, 100),
@@ -312,25 +314,25 @@ private:
   static bool testCanFitBetween() {
     DEFAULT_SETUP(ce,db,schema,false);
 
-    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
 
     db.close();
 
     IntervalToken token(db.getId(),
-			LabelStr("P1"), 
+			"Objects.Predicate", 
 			true,
 			IntervalIntDomain(0, 10),
 			IntervalIntDomain(0, 20),
 			IntervalIntDomain(1, 1000));
     IntervalToken predecessor(db.getId(),
-			      LabelStr("P1"), 
+			      "Objects.Predicate", 
 			      true,
 			      IntervalIntDomain(0, 10),
 			      IntervalIntDomain(0, 20),
 			      IntervalIntDomain(1, 1000));
     IntervalToken successor(db.getId(),
-			    LabelStr("P1"), 
+			    "Objects.Predicate", 
 			    true,
 			    IntervalIntDomain(0, 10),
 			    IntervalIntDomain(0, 20),
@@ -350,27 +352,27 @@ private:
   static bool testCanBeConcurrent() {
     DEFAULT_SETUP(ce,db,schema,false);
 
-    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
 
     db.close();
 
     IntervalToken t0(db.getId(),
-		     LabelStr("P1"), 
+		     "Objects.Predicate", 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken t1(db.getId(),
-		     LabelStr("P1"), 
+		     "Objects.Predicate", 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken t2(db.getId(),
-		     LabelStr("P1"), 
+		     "Objects.Predicate", 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
@@ -420,14 +422,14 @@ private:
   static bool testSynchronization() {
     DEFAULT_SETUP(ce,db,schema,false);
 
-    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
 
     db.close();
 
     // Allocate a token
     IntervalToken t1(db.getId(),
-    		     LabelStr("P1"), 
+    		     "Objects.Predicate", 
     		     true,
     		     IntervalIntDomain(0, 10),
     		     IntervalIntDomain(0, 20),
@@ -438,7 +440,7 @@ private:
 
     // Allocate another
     IntervalToken t2(db.getId(), 
-    		     LabelStr("P1"), 
+    		     "Objects.Predicate", 
     		     true,
     		     IntervalIntDomain(0, 10),
     		     IntervalIntDomain(0, 20),

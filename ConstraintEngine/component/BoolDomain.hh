@@ -21,15 +21,25 @@ namespace Prototype {
    */
   class BoolDomain : public IntervalIntDomain {
   public:
-    BoolDomain(bool singletonValue, const DomainListenerId& listener = DomainListenerId::noId(),
-               const LabelStr& typeName = getDefaultTypeName());
-    BoolDomain(const DomainListenerId& listener = DomainListenerId::noId(),
-               const LabelStr& typeName = getDefaultTypeName());
-    BoolDomain(const BoolDomain& org);
+
+    BoolDomain();
+
+    BoolDomain(const char* typeName);
+
+    BoolDomain(bool value);
+
+    BoolDomain(bool value, const char* typeName);
+
+    BoolDomain(const AbstractDomain& org);
+
     const DomainType& getType() const;
+
     static const LabelStr& getDefaultTypeName();
+
     bool isFinite() const;
+
     bool isFalse() const;
+
     bool isTrue() const;
 
     /**

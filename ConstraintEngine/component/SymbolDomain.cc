@@ -2,33 +2,21 @@
 
 namespace Prototype {
 
-  SymbolDomain::SymbolDomain(const LabelStr& typeName) 
-    : EnumeratedDomain(false, typeName)
-  {
-  }
+  SymbolDomain::SymbolDomain() 
+    : EnumeratedDomain(false, getDefaultTypeName().c_str()){}
 
+  SymbolDomain::SymbolDomain(const char* typeName)
+    : EnumeratedDomain(false, typeName){}
+ 
+  SymbolDomain::SymbolDomain(double value, const char* typeName)
+    : EnumeratedDomain(value, false, typeName){}
 
   SymbolDomain::SymbolDomain(const std::list<double>& values, 
-                             bool closed,
-                             const DomainListenerId& listener,
-                             const LabelStr& typeName)
-    : EnumeratedDomain(values, closed, listener, false, typeName)
-  {
-  }
+                             const char* typeName)
+    : EnumeratedDomain(values, false, typeName){}
 
-
-  SymbolDomain::SymbolDomain(double value,
-                             const DomainListenerId& listener,
-                             const LabelStr& typeName)
-    : EnumeratedDomain(value, listener, false, typeName)
-  {
-  }
-
-
-  SymbolDomain::SymbolDomain(const SymbolDomain& org)
-    : EnumeratedDomain(org)
-  {
-  }
+  SymbolDomain::SymbolDomain(const AbstractDomain& org)
+    : EnumeratedDomain(org) {}
 
 
   const AbstractDomain::DomainType&

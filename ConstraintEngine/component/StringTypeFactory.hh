@@ -8,7 +8,7 @@ namespace Prototype {
 
   class StringTypeFactory : public ConcreteTypeFactory {
   public:
-    StringTypeFactory(const LabelStr& name = StringDomain::getDefaultTypeName());
+    StringTypeFactory(const char* name = StringDomain::getDefaultTypeName().c_str());
 
     /**
      * @brief Create a variable
@@ -16,7 +16,7 @@ namespace Prototype {
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 
                                                  const AbstractDomain& baseDomain,
                                                  bool canBeSpecified = true,
-                                                 const LabelStr& name = ConstrainedVariable::NO_NAME(),
+                                                 const char* name = NO_VAR_NAME,
                                                  const EntityId& parent = EntityId::noId(),
                                                  int index = ConstrainedVariable::NO_INDEX) const;
 

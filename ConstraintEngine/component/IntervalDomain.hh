@@ -28,18 +28,17 @@ namespace Prototype {
      */
     void operator>>(ostream& os) const;
 
-    IntervalDomain(const DomainListenerId& listener = DomainListenerId::noId(),
-                   const LabelStr& typeName = getDefaultTypeName());
+    IntervalDomain();
 
-    IntervalDomain(double lb, double ub,
-                   const DomainListenerId& listener = DomainListenerId::noId(),
-                   const LabelStr& typeName = getDefaultTypeName());
+    IntervalDomain(const char* typeName);
 
-    IntervalDomain(double value, 
-                   const DomainListenerId& listener = DomainListenerId::noId(),
-                   const LabelStr& typeName = getDefaultTypeName());
+    IntervalDomain(double lb, double ub);
 
-    IntervalDomain(const IntervalDomain& org);
+    IntervalDomain(double value);
+
+    IntervalDomain(double lb, double ub, const char* typeName);
+
+    IntervalDomain(const AbstractDomain& org);
 
     /**
      * @brief Destructor.
@@ -180,7 +179,9 @@ namespace Prototype {
      * @note An error for real intervals unless already in the set or
      * was empty and now singleton.
      */
-    virtual void insert(double value);
+    void insert(double value);
+
+    void insert(const std::list<double>& values);
 
     /**
      * @brief Remove the given element form the domain.

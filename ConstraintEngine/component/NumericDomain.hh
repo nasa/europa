@@ -1,37 +1,38 @@
-#ifndef _H_StringDomain
-#define _H_StringDomain
+#ifndef _H_NumericDomain
+#define _H_NumericDomain
 
 /**
- * @file StringDomain.hh
- * @author Andrew Bachmann
- * @brief Declares an enumerated domain of Strings
+ * @file NumericDomain.hh
+ * @author Conor McGann
+ * @brief Declares an enumerated domain of numeric values
  */
+
 #include "EnumeratedDomain.hh"
 #include "LabelStr.hh"
 
 namespace Prototype {
 
   /**
-   * @class StringDomain
-   * @brief an enumerated domain of strings
+   * @class NumericDomain
+   * @brief an enumerated domain of numbers
    */
-  class StringDomain : public EnumeratedDomain {
+  class NumericDomain : public EnumeratedDomain {
   public:
 
     /**
      * @brief Constructs an initially empty and open domain, with a default type name
      */
-    StringDomain();
+    NumericDomain();
 
     /**
-     * @brief Initially empty but open, with special type name
+     * @breif Construct with name, open and empty
      */
-    StringDomain(const char* typeName);
+    NumericDomain(const char* typeName);
 
     /**
      * @brief Constructs an initial singleton domain with the given type name
      */
-    StringDomain(double value, const char* typeName = getDefaultTypeName().toString().c_str());
+    NumericDomain(double value, const char* typeName = getDefaultTypeName().c_str());
 
     /**
      * @brief Constructor.
@@ -39,14 +40,14 @@ namespace Prototype {
      * @param typeName
      * @see AbstractDomain::isDynamic()
      */
-    StringDomain(const std::list<double>& values, 
-                 const char* typeName = getDefaultTypeName().toString().c_str());
+    NumericDomain(const std::list<double>& values, 
+                 const char* typeName = getDefaultTypeName().c_str());
 
     /**
      * @brief Copy constructor.
      * @param org The source domain.
      */
-    StringDomain(const AbstractDomain& org);
+    NumericDomain(const AbstractDomain& org);
 
     /**
      * @brief Get the type of the domain to aid in type checking.
@@ -63,21 +64,15 @@ namespace Prototype {
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
      */
-    virtual StringDomain *copy() const;
+    virtual NumericDomain *copy() const;
 
     /**
      * @brief Sets the domain
      */
-    void set(const StringDomain& dom);
+    void set(const NumericDomain& dom);
 
-    /**
-     * @brief Sets a singleton value.
-     * @param value The value to set. Must be a LabelStr.
-     */
-    void set(double value);
   };
 
 } // namespace Prototype
 
-#endif // _H_StringDomain
-
+#endif

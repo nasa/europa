@@ -1,9 +1,8 @@
-#include "PlanDatabaseDefs.hh"
-#include "ConstraintLibrary.hh"
+#include "ConditionalRule.hh"
 #include "RuleInstance.hh"
 #include "PlanDatabase.hh"
 #include "IntervalToken.hh"
-#include "ConditionalRule.hh"
+#include "BoolDomain.hh"
 #include "Utils.hh"
 #include "Object.hh"
 
@@ -52,12 +51,12 @@ namespace Prototype {
   }
 
   void ConditionalRule_true::handleExecute() {
-    TokenId tok =  (new IntervalToken(m_token, LabelStr("P1True"), 
+    TokenId tok =  (new IntervalToken(m_token, LabelStr("Objects.P1True"), 
 				      IntervalIntDomain(0, 10),
 				      IntervalIntDomain(0, 20),
 				      IntervalIntDomain(1, 1000),
 				      LabelStr("Object1"), false))->getId();
-    tok->addParameter(BoolDomain());
+    tok->addParameter(BoolDomain(), LabelStr("BoolParam"));
     tok->close();
     TokenId slave = addSlave(tok);
 
@@ -65,7 +64,7 @@ namespace Prototype {
   }
 
   void ConditionalRule_false::handleExecute() {
-    TokenId slave = addSlave(new IntervalToken(m_token, LabelStr("P1False"), 
+    TokenId slave = addSlave(new IntervalToken(m_token, LabelStr("Objects.P1False"), 
 					       IntervalIntDomain(0, 10),
 					       IntervalIntDomain(0, 200),
 					       IntervalIntDomain(200, 200),

@@ -18,7 +18,7 @@
 #include "TestSupport.hh"
 #include "Utils.hh"
 #include "IntervalIntDomain.hh"
-#include "Domain.hh"
+#include "StringDomain.hh"
 #include "DefaultPropagator.hh"
 #include "EqualityConstraintPropagator.hh"
 #include "Constraint.hh"
@@ -27,6 +27,59 @@
 #include <string>
 
 namespace Prototype {
+
+
+  const LabelStr& DEFAULT_OBJECT_TYPE(){
+    static const LabelStr sl_local("DEFAULT_OBJECT_TYPE");
+    return sl_local;
+  }
+
+  const LabelStr& DEFAULT_PREDICATE(){
+    static const LabelStr sl_local("DEFAULT_OBJECT_TYPE.DEFAULT_PREDICATE");
+    return sl_local;
+  }
+
+  void initDbTestSchema(const SchemaId& schema) {
+    schema->reset();
+    // Set up object types and compositions for testing - builds a recursive structure
+    schema->addObjectType(DEFAULT_OBJECT_TYPE());
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id0");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id1");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id2");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id3");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id4");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id5");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id6");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id7");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id8");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id9");
+
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "o0");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "o1");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "o2");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "o3");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "o4");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "o5");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "o6");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "o7");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "o8");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "o9");
+
+    // Set up primitive object type member variables for testing
+    schema->addMember(DEFAULT_OBJECT_TYPE(), IntervalDomain::getDefaultTypeName(), "IntervalVar");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), IntervalIntDomain::getDefaultTypeName(), "IntervalIntVar");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), BoolDomain::getDefaultTypeName(), "BoolVar");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), LabelSet::getDefaultTypeName(), "LabelSetVar");
+    schema->addMember(DEFAULT_OBJECT_TYPE(), EnumeratedDomain::getDefaultTypeName(), "EnumeratedVar");
+
+    // Set up predicates for testing
+    schema->addPredicate(DEFAULT_PREDICATE());
+    schema->addMember(DEFAULT_PREDICATE(), IntervalDomain::getDefaultTypeName(), "IntervalParam");
+    schema->addMember(DEFAULT_PREDICATE(), IntervalIntDomain::getDefaultTypeName(), "IntervalIntParam");
+    schema->addMember(DEFAULT_PREDICATE(), BoolDomain::getDefaultTypeName(), "BoolParam");
+    schema->addMember(DEFAULT_PREDICATE(), LabelSet::getDefaultTypeName(), "LabelSetParam");
+    schema->addMember(DEFAULT_PREDICATE(), EnumeratedDomain::getDefaultTypeName(), "EnumeratedParam");
+  }
 
   class Foo;
   typedef Id<Foo> FooId;
@@ -55,24 +108,24 @@ namespace Prototype {
   void Foo::handleDefaults(bool autoClose) {
     if(m_0.isNoId()){
       check_error(!ObjectId::convertable(m_0)); // Object Variables must be explicitly initialized to a singleton
-      m_0 = addVariable(IntervalIntDomain(), LabelStr("m_0"));
+      m_0 = addVariable(IntervalIntDomain(), "IntervalIntVar");
     }
     check_error(!m_1.isNoId()); // string variables must be initialized explicitly
     if(autoClose) close();
   }
 
   void Foo::constructor() {
-    m_1 = addVariable(LabelSet(LabelStr("Hello World")), LabelStr(getName().toString() + "." + "m_1"));
+    m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
 
   void Foo::constructor(int arg0, LabelStr& arg1) {
-    m_0 = addVariable(IntervalIntDomain(arg0), LabelStr(getName().toString() + "." + "m_0"));
-    m_1 = addVariable(LabelSet(LabelStr("Hello World")), LabelStr(getName().toString() + "." + "m_1"));
+    m_0 = addVariable(IntervalIntDomain(arg0), "IntervalIntVar");
+    m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
 
   class StandardFooFactory: public ConcreteObjectFactory {
   public:
-    StandardFooFactory(): ConcreteObjectFactory(LabelStr("Foo")){}
+    StandardFooFactory(): ConcreteObjectFactory(DEFAULT_OBJECT_TYPE()){}
 
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb, 
@@ -89,8 +142,11 @@ namespace Prototype {
 
   class SpecialFooFactory: public ConcreteObjectFactory{
   public:
-    SpecialFooFactory(): ConcreteObjectFactory(LabelStr("Foo:int:string")){}
-
+    SpecialFooFactory(): ConcreteObjectFactory(DEFAULT_OBJECT_TYPE().toString() +
+					       ":" + IntervalIntDomain::getDefaultTypeName().toString() +
+					       ":" + LabelSet::getDefaultTypeName().toString())
+    {}
+    
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb, 
                             const LabelStr& objectType, 
@@ -99,8 +155,8 @@ namespace Prototype {
       FooId foo = (new Foo(planDb, objectType, objectName))->getId();
       // Type check the arguments
       assert(arguments.size() == 2);
-      assert(arguments[0].first == LabelStr("int"));
-      assert(arguments[1].first == LabelStr("string"));
+      assert(arguments[0].first == IntervalIntDomain::getDefaultTypeName());
+      assert(arguments[1].first == LabelSet::getDefaultTypeName());
 
       int arg0((int) arguments[0].second->getSingletonValue());
       LabelStr arg1(arguments[1].second->getSingletonValue());
@@ -112,7 +168,7 @@ namespace Prototype {
 
   class IntervalTokenFactory: public ConcreteTokenFactory {
   public:
-    IntervalTokenFactory(): ConcreteTokenFactory(LabelStr("Foo")){}
+    IntervalTokenFactory(): ConcreteTokenFactory(DEFAULT_PREDICATE()){}
   private:
     TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name) const{
       TokenId token = (new IntervalToken(planDb, name, true))->getId();
@@ -123,33 +179,6 @@ namespace Prototype {
       return token;
     }
   };
-
-
-  class DefaultSchemaAccessor {
-  public:
-  
-    static const SchemaId& instance() {
-      if (s_instance.isNoId())
-        s_instance = (new Schema())->getId();
-      return(s_instance);
-    }
-  
-    static void reset() {
-      if (!s_instance.isNoId()) {
-        delete (Schema*) s_instance;
-        s_instance = SchemaId::noId();
-      }
-    }
-  
-  private:
-    static SchemaId s_instance;
-  };
-  
-  SchemaId DefaultSchemaAccessor::s_instance;
-
-#define SCHEMA Prototype::DefaultSchemaAccessor::instance()
- 
-  const LabelStr ALL_OBJECTS("AllObjects");
 
   /**
    * @brief Declaration and definition for test constraint to force a failure when the domain becomes a singleton
@@ -170,6 +199,7 @@ namespace Prototype {
 
 
   void initDbModuleTests() {
+    initConstraintEngine();
     initConstraintLibrary();
 
     // Special designations for temporal relations
@@ -183,7 +213,8 @@ namespace Prototype {
     
     // Allocate default schema initially so tests don't fail because of ID's
     SCHEMA;
-    
+    initDbTestSchema(SCHEMA);
+
     // Have to register factories for testing.
     new StandardFooFactory();
     new SpecialFooFactory();
@@ -192,11 +223,13 @@ namespace Prototype {
 
   //class Foo;
   bool testBasicObjectAllocationImpl() {
+    initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"));
-    Object o2(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o2"));
-    ObjectId id0((new Object(o1.getId(), Schema::ALL_OBJECTS(), LabelStr("id0")))->getId());
-    Object o3(o2.getId(), Schema::ALL_OBJECTS(), LabelStr("o3"));
+    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Object o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+
+    ObjectId id0((new Object(o1.getId(), DEFAULT_OBJECT_TYPE(), "id0"))->getId());
+    Object o3(o2.getId(), DEFAULT_OBJECT_TYPE(), "o3");
     assert(db.getObjects().size() == 4);
     assert(o1.getComponents().size() == 1);
     assert(o3.getParent() == o2.getId());
@@ -204,14 +237,14 @@ namespace Prototype {
     assert(db.getObjects().size() == 3);
     assert(o1.getComponents().empty());
 
-    ObjectId id1((new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("id1")))->getId());
-    new Object(id1, Schema::ALL_OBJECTS(), LabelStr("id2"));
-    ObjectId id3((new Object(id1, Schema::ALL_OBJECTS(), LabelStr("id3")))->getId());
+    ObjectId id1((new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "id1"))->getId());
+    new Object(id1, DEFAULT_OBJECT_TYPE(), "id2");
+    ObjectId id3((new Object(id1, DEFAULT_OBJECT_TYPE(), "id3"))->getId());
     assert(db.getObjects().size() == 6);
     assert(id3->getName().toString() == "id1.id3");
 
     // Test ancestor call
-    ObjectId id4((new Object(id3, Schema::ALL_OBJECTS(), LabelStr("id4")))->getId());
+    ObjectId id4((new Object(id3, DEFAULT_OBJECT_TYPE(), "id4"))->getId());
     std::list<ObjectId> ancestors;
     id4->getAncestors(ancestors);
     assert(ancestors.front() == id3);
@@ -222,20 +255,21 @@ namespace Prototype {
     assert(db.getObjects().size() == 3);
 
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
-    ObjectId id5 = ((new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("id5")))->getId());
-    new Object(id5, Schema::ALL_OBJECTS(), LabelStr("id6"));
+    ObjectId id5 = ((new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "id5"))->getId());
+    new Object(id5, DEFAULT_OBJECT_TYPE(), "id6");
     return(true);
   }
 
   bool testObjectDomainImpl() {
+    initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
     std::list<ObjectId> values;
-    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"));
-    Object o2(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o2"));
+    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Object o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2");
     assert(db.getObjects().size() == 2);
     values.push_back(o1.getId());
     values.push_back(o2.getId());
-    ObjectDomain os1(values);
+    ObjectDomain os1(values, DEFAULT_OBJECT_TYPE().c_str());
     assert(os1.isMember(o1.getId()));
     os1.remove(o1.getId());
     assert(!os1.isMember(o1.getId()));
@@ -244,24 +278,25 @@ namespace Prototype {
   }
 
   bool testObjectVariablesImpl() {
+    initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"), true);
+    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1", true);
     assert(!o1.isComplete());
-    o1.addVariable(IntervalIntDomain(), LabelStr("VAR1"));
-    o1.addVariable(BoolDomain(), LabelStr("VAR2"));
+    o1.addVariable(IntervalIntDomain(), "IntervalIntVar");
+    o1.addVariable(BoolDomain(), "BoolVar");
     o1.close();
     assert(o1.isComplete());
-    assert(o1.getVariable(LabelStr("VAR21")) != o1.getVariable(LabelStr("VAR2")));
+    assert(o1.getVariable("o1.BoolVar") != o1.getVariable("o1IntervalIntVar"));
 
-    Object o2(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o2"), true);
+    Object o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2", true);
     assert(!o2.isComplete());
-    o2.addVariable(IntervalIntDomain(15, 200), LabelStr("VAR1"));
+    o2.addVariable(IntervalIntDomain(15, 200), "IntervalIntVar");
     o2.close();
 
     // Add a unary constraint
     Variable<IntervalIntDomain> superset(db.getConstraintEngine(), IntervalIntDomain(10, 20));;
 
-    ConstraintId subsetConstraint = ConstraintLibrary::createConstraint(LabelStr("SubsetOf"), 
+    ConstraintId subsetConstraint = ConstraintLibrary::createConstraint("SubsetOf", 
 					db.getConstraintEngine(), 
 					makeScope(o1.getVariables()[0], superset.getId()));
 
@@ -269,7 +304,7 @@ namespace Prototype {
     std::vector<ConstrainedVariableId> constrainedVars;
     constrainedVars.push_back(o1.getVariables()[0]);
     constrainedVars.push_back(o2.getVariables()[0]);
-    ConstraintId constraint = ConstraintLibrary::createConstraint(LabelStr("Equal"),
+    ConstraintId constraint = ConstraintLibrary::createConstraint("Equal",
 								  db.getConstraintEngine(),
 								  constrainedVars);
 
@@ -285,17 +320,17 @@ namespace Prototype {
 
 
   bool testObjectObjectTokenRelationImpl() {
-
+    initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
     // 1. Create 2 objects
-    ObjectId object1 = (new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("O1")))->getId();
-    ObjectId object2 = (new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("O2")))->getId();    
+    ObjectId object1 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "O1"))->getId();
+    ObjectId object2 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "O2"))->getId();    
     db.close();
 
     assert(object1 != object2);
     assert(db.getObjects().size() == 2);
     // 2. Create 1 token.
-    EventToken eventToken(db.getId(), LabelStr("Predicate"), false, IntervalIntDomain(0, 10));
+    EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, IntervalIntDomain(0, 10));
 
     // Confirm not added to the object
     assert(!eventToken.getObject()->getDerivedDomain().isSingleton());
@@ -327,16 +362,17 @@ namespace Prototype {
   }
 
   bool testCommonAncestorConstraintImpl() {
+    initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"));
-    Object o2(o1.getId(), Schema::ALL_OBJECTS(), LabelStr("o2"));
-    Object o3(o1.getId(), Schema::ALL_OBJECTS(), LabelStr("o3"));
-    Object o4(o2.getId(), Schema::ALL_OBJECTS(), LabelStr("o4"));
-    Object o5(o2.getId(), Schema::ALL_OBJECTS(), LabelStr("o5"));
-    Object o6(o3.getId(), Schema::ALL_OBJECTS(), LabelStr("o6"));
-    Object o7(o3.getId(), Schema::ALL_OBJECTS(), LabelStr("o7"));
+    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Object o2(o1.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+    Object o3(o1.getId(), DEFAULT_OBJECT_TYPE(), "o3");
+    Object o4(o2.getId(), DEFAULT_OBJECT_TYPE(), "o4");
+    Object o5(o2.getId(), DEFAULT_OBJECT_TYPE(), "o5");
+    Object o6(o3.getId(), DEFAULT_OBJECT_TYPE(), "o6");
+    Object o7(o3.getId(), DEFAULT_OBJECT_TYPE(), "o7");
 
-    ObjectDomain allObjects;
+    ObjectDomain allObjects(DEFAULT_OBJECT_TYPE().c_str());
     allObjects.insert(o1.getId());
     allObjects.insert(o2.getId());
     allObjects.insert(o3.getId());
@@ -348,11 +384,11 @@ namespace Prototype {
 
     // Ensure there they agree on a common root.
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId()));
-      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId()));
-      CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
-					  LabelStr("Default"), 
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      CommonAncestorConstraint constraint("commonAncestor", 
+					  "Default", 
 					  ENGINE, 
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
@@ -361,11 +397,11 @@ namespace Prototype {
 
     // Now impose a different set of restrictions which will eliminate all options
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId()));
-      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId()));
-      CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
-					  LabelStr("Default"), 
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      CommonAncestorConstraint constraint("commonAncestor", 
+					  "Default", 
 					  ENGINE, 
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
@@ -374,11 +410,11 @@ namespace Prototype {
 
     // Now try a set of restrictions, which will allow it to pass
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId()));
-      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
       Variable<ObjectDomain> restrictions(ENGINE, allObjects);
-      CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
-					  LabelStr("Default"), 
+      CommonAncestorConstraint constraint("commonAncestor", 
+					  "Default", 
 					  ENGINE, 
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
@@ -390,8 +426,8 @@ namespace Prototype {
       Variable<ObjectDomain> first(ENGINE, allObjects);
       Variable<ObjectDomain> second(ENGINE, allObjects);
       Variable<ObjectDomain> restrictions(ENGINE, allObjects);
-      CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
-					  LabelStr("Default"), 
+      CommonAncestorConstraint constraint("commonAncestor", 
+					  "Default", 
 					  ENGINE, 
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
@@ -411,23 +447,24 @@ namespace Prototype {
   }
 
   bool testHasAncestorConstraintImpl() {
+    initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"));
-    Object o2(o1.getId(), Schema::ALL_OBJECTS(), LabelStr("o2"));
-    Object o3(o1.getId(), Schema::ALL_OBJECTS(), LabelStr("o3"));
-    Object o4(o2.getId(), Schema::ALL_OBJECTS(), LabelStr("o4"));
-    Object o5(o2.getId(), Schema::ALL_OBJECTS(), LabelStr("o5"));
-    Object o6(o3.getId(), Schema::ALL_OBJECTS(), LabelStr("o6"));
-    Object o7(o3.getId(), Schema::ALL_OBJECTS(), LabelStr("o7"));
-    Object o8(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o8"));
+    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Object o2(o1.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+    Object o3(o1.getId(), DEFAULT_OBJECT_TYPE(), "o3");
+    Object o4(o2.getId(), DEFAULT_OBJECT_TYPE(), "o4");
+    Object o5(o2.getId(), DEFAULT_OBJECT_TYPE(), "o5");
+    Object o6(o3.getId(), DEFAULT_OBJECT_TYPE(), "o6");
+    Object o7(o3.getId(), DEFAULT_OBJECT_TYPE(), "o7");
+    Object o8(db.getId(), DEFAULT_OBJECT_TYPE(), "o8");
     
     
     // Positive test immediate ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o3.getId()));
-      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
-                                       LabelStr("Default"), 
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o3.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      HasAncestorConstraint constraint("hasAncestor", 
+                                       "Default", 
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
@@ -436,10 +473,10 @@ namespace Prototype {
     
     // negative test immediate ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId()));
-      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
-                                       LabelStr("Default"), 
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      HasAncestorConstraint constraint("hasAncestor", 
+                                       "Default", 
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
@@ -447,10 +484,10 @@ namespace Prototype {
     }
     // Positive test higher up  ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId()));
-      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
-                                       LabelStr("Default"), 
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      HasAncestorConstraint constraint("hasAncestor", 
+                                       "Default", 
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
@@ -458,10 +495,10 @@ namespace Prototype {
     }
     // negative test higherup ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o8.getId()));
-      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
-                                       LabelStr("Default"), 
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o8.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      HasAncestorConstraint constraint("hasAncestor", 
+                                       "Default", 
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
@@ -470,15 +507,15 @@ namespace Prototype {
     
     //positive restriction of the set.
     {
-      ObjectDomain obs;
+      ObjectDomain obs(DEFAULT_OBJECT_TYPE().c_str());
       obs.insert(o7.getId());
       obs.insert(o4.getId());
       obs.close();
       
       Variable<ObjectDomain> first(ENGINE, obs);
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId()));
-      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
-                                       LabelStr("Default"), 
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      HasAncestorConstraint constraint("hasAncestor", 
+                                       "Default", 
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
@@ -488,15 +525,15 @@ namespace Prototype {
     
     //no restriction of the set.
     {
-      ObjectDomain obs1;
+      ObjectDomain obs1(DEFAULT_OBJECT_TYPE().c_str());
       obs1.insert(o7.getId());
       obs1.insert(o4.getId());
       obs1.close();
       
       Variable<ObjectDomain> first(ENGINE, obs1);
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId()));
-      HasAncestorConstraint constraint(LabelStr("hasAncestor"), 
-                                       LabelStr("Default"), 
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      HasAncestorConstraint constraint("hasAncestor", 
+                                       "Default", 
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
@@ -508,17 +545,18 @@ namespace Prototype {
   }
 
   bool testMakeObjectVariableImpl() {
+    initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain()))->getId();
+    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(DEFAULT_OBJECT_TYPE().c_str())))->getId();
     assert(!v0->isClosed());
-    db.makeObjectVariableFromType(Schema::ALL_OBJECTS(), v0);
+    db.makeObjectVariableFromType(DEFAULT_OBJECT_TYPE(), v0);
     assert(!v0->isClosed());
     assert(ENGINE->propagate());
 
     // Now add an object and we should expect the constraint network to be consistent
-    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"));
+    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
     assert(ENGINE->propagate());
-    assert(!db.isClosed(Schema::ALL_OBJECTS()));
+    assert(!db.isClosed(DEFAULT_OBJECT_TYPE().c_str()));
     assert(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
 
     // Now delete the variable. This should remove the listener
@@ -528,11 +566,11 @@ namespace Prototype {
   }
 
   bool testTokenObjectVariableImpl() {
-
+    initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
     // Now add an object and we should expect the constraint network to be consistent
-    ObjectId o1 = (new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1")))->getId();
-    EventToken eventToken(db.getId(), LabelStr("Predicate"), false, IntervalIntDomain(0, 10));
+    ObjectId o1 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "o1"))->getId();
+    EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, IntervalIntDomain(0, 10));
 
     eventToken.activate(); // Must be activate to eventually propagate the objectTokenRelation
     assert(ENGINE->propagate());
@@ -551,7 +589,7 @@ namespace Prototype {
     assert(eventToken.getObject()->baseDomain().isEmpty());
 
     // Insertion of a new object should reecover the situation
-    ObjectId o2 = (new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o2")))->getId();
+    ObjectId o2 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "o2"))->getId();
     assert(ENGINE->constraintConsistent());
     assert(eventToken.getObject()->baseDomain().isSingleton());
 
@@ -560,7 +598,7 @@ namespace Prototype {
 
     // Addition of a new object will update the base domain, but not the spec or derived.
     // Consequently, no further propagation is required
-    ObjectId o3 = (new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o3")))->getId();
+    ObjectId o3 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "o3"))->getId();
     assert(ENGINE->constraintConsistent());
     assert(!eventToken.getObject()->baseDomain().isSingleton());
     assert(eventToken.getObject()->lastDomain().isSingleton());
@@ -572,7 +610,7 @@ namespace Prototype {
     assert(eventToken.getObject()->lastDomain().isMember(o3));
 
     // Finally, close the database for this type, and ensure propagation is triggered, and results in consistency
-    db.close(Schema::ALL_OBJECTS());
+    db.close(DEFAULT_OBJECT_TYPE().c_str());
     assert(ENGINE->pending());
     assert(ENGINE->propagate());
 
@@ -582,14 +620,15 @@ namespace Prototype {
   }
 
   bool testTokenWithNoObjectOnCreationImpl(){
+    initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
     {
       // Leave this class of objects open. So we should be able to create a token and have things consistent
-      EventToken eventToken(db.getId(), LabelStr("Predicate"), false, IntervalIntDomain(0, 10));
+      EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, IntervalIntDomain(0, 10));
       assert(ENGINE->propagate());
 
     // Now close the datbase for this class of objects, and ensure we are inconsistent
-      db.close(Schema::ALL_OBJECTS());
+      db.close(DEFAULT_OBJECT_TYPE().c_str());
       assert(!ENGINE->propagate());
     }
 
@@ -598,32 +637,32 @@ namespace Prototype {
     return true;
   }
 
-  bool testBasicTokenAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
+  bool testBasicTokenAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
     // Event Token
-    EventToken eventToken(db, LabelStr("Predicate"), true, IntervalIntDomain(0, 1000), Token::noObject(), false);
+    EventToken eventToken(db, DEFAULT_PREDICATE(), true, IntervalIntDomain(0, 1000), Token::noObject(), false);
     assert(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
     assert(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.getStart()->specify(IntervalIntDomain(5, 10));
     assert(eventToken.getEnd()->getDerivedDomain() == IntervalIntDomain(5, 10));
-    eventToken.addParameter(IntervalDomain(-1.08, 20.18), LabelStr("TestParam"));
+    eventToken.addParameter(IntervalDomain(-1.08, 20.18), "IntervalParam");
     eventToken.close();
   
     // IntervalToken
     IntervalToken intervalToken(db, 
-                                LabelStr("Predicate"), 
+                                DEFAULT_PREDICATE(), 
                                 true, 
                                 IntervalIntDomain(0, 1000),
                                 IntervalIntDomain(0, 1000),
                                 IntervalIntDomain(2, 10),
                                 Token::noObject(), false);
   
-    std::list<Prototype::LabelStr> values;
+    std::list<double> values;
     values.push_back(Prototype::LabelStr("L1"));
     values.push_back(Prototype::LabelStr("L4"));
     values.push_back(Prototype::LabelStr("L2"));
     values.push_back(Prototype::LabelStr("L5"));
     values.push_back(Prototype::LabelStr("L3"));
-    intervalToken.addParameter(LabelSet(values, true));
+    intervalToken.addParameter(LabelSet(values), "LabelSetParam");
     intervalToken.close();
     assert(intervalToken.getEnd()->getDerivedDomain().getLowerBound() == 2);
     intervalToken.getStart()->specify(IntervalIntDomain(5, 10));
@@ -634,7 +673,7 @@ namespace Prototype {
 
     // Create and delete a Token
     TokenId token = (new IntervalToken(db, 
-                                       LabelStr("Predicate"), 
+                                       DEFAULT_PREDICATE(), 
                                        true, 
                                        IntervalIntDomain(0, 1000),
                                        IntervalIntDomain(0, 1000),
@@ -645,13 +684,13 @@ namespace Prototype {
     return true;
   }
 
-  bool testBasicTokenCreationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    ObjectId timeline = (new Timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2")))->getId();
+  bool testBasicTokenCreationImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    ObjectId timeline = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "o2"))->getId();
     assert(!timeline.isNoId());
     db->close();                                                                          
   
     IntervalToken t1(db,                                                         
-                     LabelStr("P1"),                                                     
+                     DEFAULT_PREDICATE(),                                                     
                      true,                                                               
                      IntervalIntDomain(0, 10),                                           
                      IntervalIntDomain(0, 20),                                           
@@ -659,9 +698,9 @@ namespace Prototype {
     return true;
   }
 
-  bool testStateModelImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
+  bool testStateModelImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
     IntervalToken t0(db, 
-                     LabelStr("Predicate"), 
+                     DEFAULT_PREDICATE(), 
                      true, 
                      IntervalIntDomain(0, 1000),
                      IntervalIntDomain(0, 1000),
@@ -681,7 +720,7 @@ namespace Prototype {
     assert(t0.isInactive());
   
     IntervalToken t1(db, 
-                     LabelStr("Predicate"), 
+                     DEFAULT_PREDICATE(), 
                      true, 
                      IntervalIntDomain(0, 1000),
                      IntervalIntDomain(0, 1000),
@@ -689,7 +728,7 @@ namespace Prototype {
                      Token::noObject(), true);
   
     // Constraint the start variable of both tokens
-    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), ENGINE, makeScope(t0.getStart(), t1.getStart()));
+    EqualConstraint c0("eq", "Default", ENGINE, makeScope(t0.getStart(), t1.getStart()));
   
     assert(t1.isInactive());
     t0.activate();
@@ -708,9 +747,9 @@ namespace Prototype {
     return true;
   }
 
-  bool testMasterSlaveRelationshipImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
+  bool testMasterSlaveRelationshipImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
     IntervalToken t0(db, 
-                     LabelStr("Predicate"), 
+                     DEFAULT_PREDICATE(), 
                      false, 
                      IntervalIntDomain(0, 1),
                      IntervalIntDomain(0, 1),
@@ -718,7 +757,7 @@ namespace Prototype {
     t0.activate();
   
     TokenId t1 = (new IntervalToken(db, 
-                                    LabelStr("Predicate"), 
+                                    DEFAULT_PREDICATE(), 
                                     false,
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
@@ -726,31 +765,31 @@ namespace Prototype {
     t1->activate();
   
     TokenId t2 = (new IntervalToken(t0.getId(), 
-                                    LabelStr("Predicate"), 
+                                    DEFAULT_PREDICATE(), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
     TokenId t3 = (new IntervalToken(t0.getId(), 
-                                    LabelStr("Predicate"), 
+                                    DEFAULT_PREDICATE(), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
     TokenId t4 = (new IntervalToken(t0.getId(), 
-                                    LabelStr("Predicate"), 
+                                    DEFAULT_PREDICATE(), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
     TokenId t5 = (new IntervalToken(t1, 
-                                    LabelStr("Predicate"), 
+                                    DEFAULT_PREDICATE(), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
     TokenId t6 = (new EventToken(t0.getId(), 
-                                 LabelStr("Predicate"), 
+                                 DEFAULT_PREDICATE(), 
                                  IntervalIntDomain(0, 1)))->getId();
   
     // These are mostly to avoid compiler warnings about unused variables.
@@ -768,10 +807,10 @@ namespace Prototype {
     return true;
   }
 
-  bool testBasicMergingImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
+  bool testBasicMergingImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db, 
-                     LabelStr("P1"), 
+                     DEFAULT_PREDICATE(), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
@@ -780,7 +819,7 @@ namespace Prototype {
     assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
   
     IntervalToken t1(db,
-                     LabelStr("P1"), 
+                     DEFAULT_PREDICATE(), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
@@ -811,7 +850,7 @@ namespace Prototype {
   
     // Now post equality constraint between t1 and extra token t2 and remerge
     IntervalToken t2(db, 
-                     LabelStr("P2"), 
+                     DEFAULT_PREDICATE(), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
@@ -822,7 +861,7 @@ namespace Prototype {
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(t1.getEnd());
     temp.push_back(t2.getEnd());
-    ConstraintId equalityConstraint = ConstraintLibrary::createConstraint(LabelStr("concurrent"),
+    ConstraintId equalityConstraint = ConstraintLibrary::createConstraint("concurrent",
                                                                           db->getConstraintEngine(),
                                                                           temp);
     t1.merge(t0.getId());
@@ -856,7 +895,7 @@ namespace Prototype {
     t1.cancel();
     Variable<IntervalIntDomain> superset(db->getConstraintEngine(), IntervalIntDomain(5, 6));
 
-    ConstraintId subsetOfConstraint = ConstraintLibrary::createConstraint(LabelStr("SubsetOf"),
+    ConstraintId subsetOfConstraint = ConstraintLibrary::createConstraint("SubsetOf",
                                                                           db->getConstraintEngine(),
                                                                           makeScope(t1.getDuration(), superset.getId()));
     t1.merge(t0.getId());
@@ -866,21 +905,21 @@ namespace Prototype {
     return true;
   }
 
-  bool testConstraintMigrationDuringMergeImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    ObjectId timeline1 = (new Timeline(db, Schema::ALL_OBJECTS(), LabelStr("timeline1")))->getId();
-    ObjectId timeline2 = (new Timeline(db, Schema::ALL_OBJECTS(), LabelStr("timeline2")))->getId();
+  bool testConstraintMigrationDuringMergeImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    ObjectId timeline1 = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline1"))->getId();
+    ObjectId timeline2 = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline2"))->getId();
     db->close();
 
     // Create two base tokens
     IntervalToken t0(db, 
-                     LabelStr("P1"), 
+                     DEFAULT_PREDICATE(), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
 
     IntervalToken t1(db,
-                     LabelStr("P1"), 
+                     DEFAULT_PREDICATE(), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
@@ -889,21 +928,21 @@ namespace Prototype {
 
     // Create 2 mergeable tokens - predicates, types and base domains match
     IntervalToken t2(db, 
-                     LabelStr("P1"), 
+                     DEFAULT_PREDICATE(), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
 
     IntervalToken t3(db,
-                     LabelStr("P1"), 
+                     DEFAULT_PREDICATE(), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
 
 
-    LessThanEqualConstraint c0(LabelStr("leq"), LabelStr("Default"), db->getConstraintEngine(), makeScope(t1.getStart(), t3.getStart()));
+    LessThanEqualConstraint c0("leq", "Default", db->getConstraintEngine(), makeScope(t1.getStart(), t3.getStart()));
 
     t0.activate();
     t2.activate();
@@ -921,8 +960,8 @@ namespace Prototype {
     return true;
   }
 
-  bool testMergingPerformanceImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    ObjectId timeline = (new Timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2")))->getId();
+  bool testMergingPerformanceImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    ObjectId timeline = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "o2"))->getId();
     db->close();
 
     typedef Id<IntervalToken> IntervalTokenId;
@@ -935,18 +974,22 @@ namespace Prototype {
     //each token variable.  Tokens will have 5 parameter variables.
     std::vector< std::vector<IntervalTokenId> > tokens;
 
+    // Add parameters to schema
+    for(int i=0;i< UNIFIED; i++)
+      SCHEMA->addMember(DEFAULT_PREDICATE(), IntervalIntDomain::getDefaultTypeName(), LabelStr("P" + i).c_str());
+
     for (int i=0; i < NUMTOKS; i++) {
       std::vector<IntervalTokenId> tmp;
       for (int j=0; j < UNIFIED; j++) {
         IntervalTokenId t = (new IntervalToken(db, 
-                                               LabelStr("P1"), 
+                                               DEFAULT_PREDICATE(), 
                                                true,
                                                IntervalIntDomain(0, 210),
                                                IntervalIntDomain(0, 220),
                                                IntervalIntDomain(1, 110),
                                                Token::noObject(), false))->getId();
         for (int k=0; k < NUMPARAMS; k++)
-          t->addParameter(IntervalIntDomain(500+j,1000));
+          t->addParameter(IntervalIntDomain(500+j,1000), LabelStr("P" + k).c_str());
         t->close();
         tmp.push_back(t);
       }
@@ -1024,27 +1067,27 @@ namespace Prototype {
     return true;
   }
 
-  bool testTokenCompatibilityImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
+  bool testTokenCompatibilityImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db, 
-                     LabelStr("P1"), 
+                     LabelStr(DEFAULT_PREDICATE()), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
                      Token::noObject(), false);
-    t0.addParameter(IntervalDomain(1, 20));
+    t0.addParameter(IntervalDomain(1, 20), "IntervalParam");
     t0.close();
 
     // Same predicate and has an intersection
     IntervalToken t1(db,
-                     LabelStr("P1"), 
+                     LabelStr(DEFAULT_PREDICATE()), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
                      Token::noObject(), false);
-    t1.addParameter(IntervalDomain(10, 40)); // There is an intersection - but it is not a subset. Still should match
+    t1.addParameter(IntervalDomain(10, 40), "IntervalParam"); // There is an intersection - but it is not a subset. Still should match
     t1.close();
 
     t0.activate();
@@ -1063,13 +1106,13 @@ namespace Prototype {
     assert(compatibleTokens.empty()); // No match since no tokens are active
 
     IntervalToken t2(db,
-                     LabelStr("P1"), 
+                     LabelStr(DEFAULT_PREDICATE()), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
                      Token::noObject(), false);
-    t2.addParameter(IntervalDomain(0, 0)); // Force no intersection
+    t2.addParameter(IntervalDomain(0, 0), "IntervalParam"); // Force no intersection
     t2.close();
 
     t0.activate();
@@ -1081,17 +1124,17 @@ namespace Prototype {
 
 
     IntervalToken t3(db,
-                     LabelStr("P1"), 
+                     LabelStr(DEFAULT_PREDICATE()), 
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
                      Token::noObject(), false);
-    t3.addParameter(IntervalDomain()); // Force no intersection
+    t3.addParameter(IntervalDomain(), "IntervalParam"); // Force no intersection
     t3.close();
 
     // Post equality constraint between t3 and t0. Should permit a match since it is a binary constraint
-    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), db->getConstraintEngine(), makeScope(t0.getStart(), t3.getStart()));
+    EqualConstraint c0("eq", "Default", db->getConstraintEngine(), makeScope(t0.getStart(), t3.getStart()));
     db->getConstraintEngine()->propagate();
     compatibleTokens.clear();
     db->getCompatibleTokens(t3.getId(), compatibleTokens);
@@ -1099,17 +1142,17 @@ namespace Prototype {
     return true;
   }
 
-  bool testTokenFactoryImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    TokenId master = TokenFactory::createInstance(db, LabelStr("Foo"));
+  bool testTokenFactoryImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    TokenId master = TokenFactory::createInstance(db, DEFAULT_PREDICATE());
     master->activate();
-    TokenId slave = TokenFactory::createInstance(master, LabelStr("Foo"));
+    TokenId slave = TokenFactory::createInstance(master, DEFAULT_PREDICATE());
     assert(slave->getMaster() == master); 
     return true;
   }
 
-  bool testCorrectSplit_Gnats2450impl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
+  bool testCorrectSplit_Gnats2450impl(ConstraintEngineId &ce, PlanDatabaseId &db) {
     IntervalToken tokenA(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
@@ -1123,21 +1166,21 @@ namespace Prototype {
     assert(ce->propagate());
 
     IntervalToken tokenB(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
     // Post a constraint on tokenB so that it will always fail when it gets merged
-    ForceFailureConstraint c0(LabelStr("ForceFailure"), LabelStr("Default"), ce, makeScope(tokenC.getState()));
+    ForceFailureConstraint c0("ForceFailure", "Default", ce, makeScope(tokenC.getState()));
 
     // Propagate and test our specified value
     assert(ce->propagate());
@@ -1159,26 +1202,26 @@ namespace Prototype {
     return true;
   }
 
-  bool testBasicInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Timeline timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2"));
+  bool testBasicInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    Timeline timeline(db, DEFAULT_OBJECT_TYPE(), "o2");
     db->close();
 
     IntervalToken tokenA(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
@@ -1242,26 +1285,26 @@ namespace Prototype {
     return true;
   }
 
-  bool testObjectTokenRelationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Timeline timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2"));
+  bool testObjectTokenRelationImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    Timeline timeline(db, DEFAULT_OBJECT_TYPE(), "o2");
     db->close();
     
     IntervalToken tokenA(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
@@ -1310,7 +1353,7 @@ namespace Prototype {
 
     // Test destruction call path
     Token* tokenD = new IntervalToken(db, 
-                                      LabelStr("P1"), 
+                                      LabelStr(DEFAULT_PREDICATE()), 
                                       true,
                                       IntervalIntDomain(0, 10),
                                       IntervalIntDomain(0, 20),
@@ -1325,8 +1368,8 @@ namespace Prototype {
     return true;
   }
 
-  bool testTokenOrderQueryImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Id<Timeline> timeline = (new Timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2")))->getId();
+  bool testTokenOrderQueryImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    Id<Timeline> timeline = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "o2"))->getId();
     db->close();
 
     const int COUNT = 5;
@@ -1335,7 +1378,7 @@ namespace Prototype {
     for (int i=0;i<COUNT;i++){
       int start = i*DURATION;
       TokenId token = (new IntervalToken(db, 
-                                         LabelStr("P1"),
+                                         LabelStr(DEFAULT_PREDICATE()),
                                          true,
                                          IntervalIntDomain(start, start),
                                          IntervalIntDomain(start+DURATION, start+DURATION),
@@ -1377,7 +1420,7 @@ namespace Prototype {
 
     // Now ensure the query can correctly indicate no options available
     TokenId token = (new IntervalToken(db, 
-                                       LabelStr("P1"),
+                                       LabelStr(DEFAULT_PREDICATE()),
                                        true,
                                        IntervalIntDomain(0, 0),
                                        IntervalIntDomain(),
@@ -1391,12 +1434,12 @@ namespace Prototype {
     return true;
   }
 
-  bool testEventTokenInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Timeline timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2"));
+  bool testEventTokenInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    Timeline timeline(db, DEFAULT_OBJECT_TYPE(), "o2");
     db->close();
 
     IntervalToken it1(db, 
-                      LabelStr("P1"), 
+                      LabelStr(DEFAULT_PREDICATE()), 
                       true,
                       IntervalIntDomain(0, 10),
                       IntervalIntDomain(0, 1000),
@@ -1408,7 +1451,7 @@ namespace Prototype {
 
     // Insert at the end after a token
     EventToken et1(db, 
-                   LabelStr("P2"), 
+                   DEFAULT_PREDICATE(), 
                    true, 
                    IntervalIntDomain(0, 100), 
                    Token::noObject());
@@ -1420,7 +1463,7 @@ namespace Prototype {
 
     // Insert between a token and an event
     EventToken et2(db, 
-                   LabelStr("P2"), 
+                   DEFAULT_PREDICATE(), 
                    true, 
                    IntervalIntDomain(0, 100), 
                    Token::noObject());
@@ -1432,7 +1475,7 @@ namespace Prototype {
 
     // Insert before a token
     EventToken et3(db, 
-                   LabelStr("P2"), 
+                   DEFAULT_PREDICATE(), 
                    true, 
                    IntervalIntDomain(10, 100), 
                    Token::noObject());
@@ -1444,7 +1487,7 @@ namespace Prototype {
 
     // Insert between events
     EventToken et4(db, 
-                   LabelStr("P2"), 
+                   DEFAULT_PREDICATE(), 
                    true, 
                    IntervalIntDomain(0, 100), 
                    Token::noObject());
@@ -1457,26 +1500,26 @@ namespace Prototype {
     return true;
   }
 
-  bool testFullInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Timeline timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2"));
+  bool testFullInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    Timeline timeline(db, DEFAULT_OBJECT_TYPE(), "o2");
     db->close();
 
     IntervalToken tokenA(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
@@ -1498,26 +1541,26 @@ namespace Prototype {
     return true;
   }
 
-  bool testNoChoicesThatFitImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Timeline timeline(db, ALL_OBJECTS , LabelStr("o2"));
+  bool testNoChoicesThatFitImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
     db->close();
 
     IntervalToken tokenA(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(10, 10),
                          IntervalIntDomain(20, 20),
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(100, 100),
                          IntervalIntDomain(120, 120),
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db, 
-                         LabelStr("P1"), 
+                         LabelStr(DEFAULT_PREDICATE()), 
                          true,
                          IntervalIntDomain(9, 9),
                          IntervalIntDomain(11, 11),
@@ -1542,78 +1585,78 @@ namespace Prototype {
     return true;
   }
 
-  bool testBasicAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
+  bool testBasicAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
 
     DbClientId client = db->getClient();
     DbClientTransactionLog* txLog = new DbClientTransactionLog(client);
 
-    FooId foo1 = client->createObject(LabelStr("Foo"), LabelStr("foo1"));
+    FooId foo1 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo1");
     assert(foo1.isValid());
 
     std::vector<ConstructorArgument> arguments;
     IntervalIntDomain arg0(10);
-    LabelSet arg1(LabelStr("Label"));
-    arguments.push_back(ConstructorArgument(LabelStr("int"), &arg0)); 
-    arguments.push_back(ConstructorArgument(LabelStr("string"), &arg1));
-    FooId foo2 = client->createObject(LabelStr("Foo"), LabelStr("foo2"), arguments);
+    LabelSet arg1(LabelSet::getDefaultTypeName(), "Label");
+    arguments.push_back(ConstructorArgument(IntervalIntDomain::getDefaultTypeName(), &arg0)); 
+    arguments.push_back(ConstructorArgument(LabelSet::getDefaultTypeName(), &arg1));
+    FooId foo2 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo2", arguments);
     assert(foo2.isValid());
 
-    TokenId token = client->createToken(LabelStr("Foo"));
+    TokenId token = client->createToken(DEFAULT_PREDICATE().c_str());
     assert(token.isValid());
 
     // Constrain the token duration
     std::vector<ConstrainedVariableId> scope;
     scope.push_back(token->getStart());
     scope.push_back(token->getDuration());
-    client->createConstraint(LabelStr("eq"), scope);
+    client->createConstraint("eq", scope);
 
     delete txLog;
 
     return true;
   }
 
-  bool testPathBasedRetrievalImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    TokenId t0 = db->getClient()->createToken(LabelStr("Foo"));
+  bool testPathBasedRetrievalImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    TokenId t0 = db->getClient()->createToken(DEFAULT_PREDICATE().c_str());
     t0->activate();
 
-    TokenId t1 = db->getClient()->createToken(LabelStr("Foo"));
+    TokenId t1 = db->getClient()->createToken(DEFAULT_PREDICATE().c_str());
     t1->activate();
 
     TokenId t0_0 = (new IntervalToken(t0, 
-                                      LabelStr("Predicate"), 
+                                      DEFAULT_PREDICATE(), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_0->activate();
 
     TokenId t0_1 = (new IntervalToken(t0, 
-                                      LabelStr("Predicate"), 
+                                      DEFAULT_PREDICATE(), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_1->activate();
 
     TokenId t0_2 = (new IntervalToken(t0, 
-                                      LabelStr("Predicate"), 
+                                      DEFAULT_PREDICATE(), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_2->activate();
 
     TokenId t1_0 = (new IntervalToken(t1, 
-                                      LabelStr("Predicate"), 
+                                      DEFAULT_PREDICATE(), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t1_0->activate();
 
     TokenId t0_1_0 = (new EventToken(t0_1, 
-                                     LabelStr("Predicate"), 
+                                     DEFAULT_PREDICATE(), 
                                      IntervalIntDomain(0, 1)))->getId();
     t0_1_0->activate();
 
     TokenId t0_1_1 = (new EventToken(t0_1, 
-                                     LabelStr("Predicate"), 
+                                     DEFAULT_PREDICATE(), 
                                      IntervalIntDomain(0, 1)))->getId();
     t0_1_1->activate();
 

@@ -1,14 +1,12 @@
-#include "Constraints.hh"
-#include "Constraint.hh"
+
+#include "ResourceTransactionConstraint.hh"
 #include "ConstraintEngine.hh"
 #include "ConstrainedVariable.hh"
 #include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
-#include "Domain.hh"
+//#include "BoolDomain.hh"
 #include "Utils.hh"
-#include "ResourceDefs.hh"
+//#include "ResourceDefs.hh"
 #include "Resource.hh"
-#include "ResourceTransactionConstraint.hh"
 
 namespace Prototype
 {
@@ -24,23 +22,23 @@ namespace Prototype
 
   void ResourceTransactionConstraint::handleExecute()
   {
-    Domain<ResourceId>& domTO = static_cast<Domain<ResourceId>&> (getCurrentDomain(m_variables[TO]));
+    ObjectDomain& domTO = static_cast<ObjectDomain&> (getCurrentDomain(m_variables[TO]));
     IntervalIntDomain& domTH = static_cast<IntervalIntDomain&> (getCurrentDomain(m_variables[TH]));
     IntervalDomain& domTQ = static_cast<IntervalDomain&> (getCurrentDomain(m_variables[TQ]));
 
-    std::list<ResourceId> objs;
+    std::list<double> objs;
     domTO.getValues(objs);
 
     // Initialize aggregate horizon bounds to propagate time of resource transaction. Only want the least
     // commitment bounds. This interval will eventually span the max and min bounds for all remaining objects.
-    int hMin = LATEST_TIME;
-    int hMax = -LATEST_TIME;
+    int hMin = PLUS_INFINITY;
+    int hMax = MINUS_INFINITY;
 
     // Initialize quantity bounds
-    double qMin = -LARGEST_VALUE;
-    double qMax = LARGEST_VALUE;
+    double qMin = -MINUS_INFINITY;
+    double qMax = PLUS_INFINITY;
 
-    for(std::list<ResourceId>::const_iterator it = objs.begin(); it != objs.end(); ++it) {
+    for(std::list<double>::const_iterator it = objs.begin(); it != objs.end(); ++it) {
       ResourceId resource = *it;
       check_error(resource.isValid());
       int oMin = resource->getHorizonStart();

@@ -15,6 +15,30 @@
 
 namespace Prototype {
 
+  const LabelStr& DEFAULT_OBJECT_TYPE();
+
+  const LabelStr& DEFAULT_PREDICATE();
+
+  class DefaultSchemaAccessor {
+  public:
+
+    static SchemaId& instance() {
+      static SchemaId sl_instance;
+      if (sl_instance.isNoId()){
+	sl_instance = (new Schema())->getId();
+      }
+      return(sl_instance);
+    }
+
+    static void reset() {
+      SchemaId& schema = instance();
+      schema->reset();
+    }
+  };
+
+  #define SCHEMA DefaultSchemaAccessor::instance()
+
+  void initDbTestSchema(const SchemaId& schema);
   void initDbModuleTests();
 
   bool testBasicObjectAllocationImpl();
@@ -27,25 +51,24 @@ namespace Prototype {
   bool testTokenObjectVariableImpl();
   bool testTokenWithNoObjectOnCreationImpl();
 
-  bool testBasicTokenAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testBasicTokenCreationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testStateModelImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testMasterSlaveRelationshipImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testBasicMergingImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testConstraintMigrationDuringMergeImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testMergingPerformanceImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testTokenCompatibilityImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testTokenFactoryImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testCorrectSplit_Gnats2450impl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testBasicInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testObjectTokenRelationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testTokenOrderQueryImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testEventTokenInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testFullInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testNoChoicesThatFitImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testBasicAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-  bool testPathBasedRetrievalImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
-
+  bool testBasicTokenAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testBasicTokenCreationImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testStateModelImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testMasterSlaveRelationshipImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testBasicMergingImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testConstraintMigrationDuringMergeImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testMergingPerformanceImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testTokenCompatibilityImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testTokenFactoryImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testCorrectSplit_Gnats2450impl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testBasicInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testObjectTokenRelationImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testTokenOrderQueryImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testEventTokenInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testFullInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testNoChoicesThatFitImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testBasicAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testPathBasedRetrievalImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
 }
 
 #endif

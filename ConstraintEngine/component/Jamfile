@@ -20,6 +20,7 @@ ModuleComponent ConstraintEngine
 	StringDomain.cc
 	StringTypeFactory.cc
 	SymbolDomain.cc
+	NumericDomain.cc
 	SymbolTypeFactory.cc
 	test-support.cc
 	;

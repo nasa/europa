@@ -8,8 +8,8 @@ namespace Prototype {
 
   class SymbolTypeFactory : public ConcreteTypeFactory {
   public:
-    SymbolTypeFactory(const LabelStr& name = SymbolDomain::getDefaultTypeName());
-    SymbolTypeFactory(const LabelStr& name, const SymbolDomain& baseDomain);
+    SymbolTypeFactory(const char* name = SymbolDomain::getDefaultTypeName().c_str());
+    SymbolTypeFactory(const char* name, const SymbolDomain& baseDomain);
 
     /**
      * @brief Create a variable
@@ -17,7 +17,7 @@ namespace Prototype {
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 
                                                  const AbstractDomain& baseDomain,
                                                  bool canBeSpecified = true,
-                                                 const LabelStr& name = ConstrainedVariable::NO_NAME(),
+                                                 const char* name = NO_VAR_NAME,
                                                  const EntityId& parent = EntityId::noId(),
                                                  int index = ConstrainedVariable::NO_INDEX) const;
 

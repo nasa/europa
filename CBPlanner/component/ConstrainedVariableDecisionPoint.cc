@@ -2,6 +2,7 @@
 #include "ConstrainedVariable.hh"
 #include "DbClient.hh"
 #include "ValueChoice.hh"
+#include "AbstractDomain.hh"
 #include <iostream>
 
 namespace Prototype {

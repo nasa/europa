@@ -8,12 +8,12 @@ namespace Prototype {
   // SymbolTypeFactory
   //
 
-  SymbolTypeFactory::SymbolTypeFactory(const LabelStr& name)
+  SymbolTypeFactory::SymbolTypeFactory(const char* name)
    : ConcreteTypeFactory(name), m_baseDomain(name)
   {
   }
 
-  SymbolTypeFactory::SymbolTypeFactory(const LabelStr& name, const SymbolDomain& baseDomain)
+  SymbolTypeFactory::SymbolTypeFactory(const char* name, const SymbolDomain& baseDomain)
    : ConcreteTypeFactory(name), m_baseDomain(baseDomain)
   {
   }
@@ -22,7 +22,7 @@ namespace Prototype {
   SymbolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                     const AbstractDomain& baseDomain,
                                     bool canBeSpecified,
-                                    const LabelStr& name,
+                                    const char* name,
                                     const EntityId& parent,
                                     int index) const
   {
@@ -31,7 +31,7 @@ namespace Prototype {
     Variable<SymbolDomain> * variable
       = new Variable<SymbolDomain>(constraintEngine, *stringDomain, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
-                "failed to create Variable for SymbolDomain with name '" + name.toString() + "'");
+                "failed to create Variable for SymbolDomain with name '" + std::string(name) + "'");
     ConstrainedVariableId id = variable->getId();
     check_error(id.isValid());
     return id;

@@ -39,6 +39,9 @@ const double consumptionMax = -50;
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
     ConstraintEngine ce; \
     Schema schema; \
+    schema.addObjectType(LabelStr("Resource")); \
+    schema.addPredicate(LabelStr("Resource.change"));\
+    schema.addMember(LabelStr("Resource.change"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
     PlanDatabase db(ce.getId(), schema.getId()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId()); \
@@ -110,10 +113,10 @@ public:
 	
 #ifdef CHUNKS
     runTest(testRateConstraintResourceViolation);
-	runTest(testAggregatedConsumtionRateResourceViolation);
-	runTest(testAggregatedProductionRateResourceViolation);
+    runTest(testAggregatedConsumtionRateResourceViolation);
+    runTest(testAggregatedProductionRateResourceViolation);
 #else
-#warning CHUNKS is not defined: Skipping rate tests in Resource module tests
+    #warning CHUNKS is not defined: Skipping rate tests in Resource module tests
 #endif	
 
     runTest(testUpperLimitExceededResourceViolation);
@@ -128,13 +131,13 @@ private:
   {
     DEFAULT_SETUP(ce,db,schema,false);
     
-    ResourceId r = (new Resource (db.getId(), LabelStr("AllObjects"), LabelStr("r1")))->getId();
+    ResourceId r = (new Resource (db.getId(), LabelStr("Resource"), LabelStr("r1")))->getId();
     std::list<InstantId> instants;
     r->getInstants(instants);
     assert(instants.size() == 0);
 
     // Construction with argument setting
-    ResourceId rid = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r2"), 189.34, 0, 1000))->getId();
+    ResourceId rid = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), 189.34, 0, 1000))->getId();
     assert(rid->getHorizonStart() == 0);
     assert(rid->getHorizonEnd() == 1000);
 
@@ -147,10 +150,10 @@ private:
   {
     DEFAULT_SETUP(ce,db,schema,false);
     
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 10, 0, 1000))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 10, 0, 1000))->getId();
 
     //just another resource so that the resource doesnt get bound to singleton and get autoinserted by the propagator
-    ResourceId r2 = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r2"), 10, 0, 2000))->getId();
+    ResourceId r2 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), 10, 0, 2000))->getId();
 
     assert(!r.isNoId() && !r2.isNoId() && r != r2);
 
@@ -173,7 +176,7 @@ private:
 
     // Test insertion of t that is outside the horizon of the resource      
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1001, 2000)))->getId();
-    bool res = t2->getObject()->getDerivedDomain().intersects(Domain<ResourceId>(r));
+    bool res = t2->getObject()->getDerivedDomain().isMember(r);
     assert( !res);
 
     // Test double insertion 
@@ -192,23 +195,23 @@ private:
   {
     DEFAULT_SETUP(ce,db,schema,false);
     
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 1000))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
     assert(checkLevelArea(r) == 0);
 
-    TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, LATEST_TIME), 45, 45))->getId();
+    TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, PLUS_INFINITY), 45, 45))->getId();
     r->constrain(t1);
     ce.propagate();
     assert(checkSum(r) == (0*1 + 1000*1));
     assert(checkLevelArea(r) == 1000 * 45);
 
-    TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, LATEST_TIME), 35, 35))->getId();
+    TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, PLUS_INFINITY), 35, 35))->getId();
     r->constrain(t2);
     ce.propagate();
     assert(checkSum(r) == (0*1 + 1*2 + 1000*2));
     assert(checkLevelArea(r) == (1*45 + 80*999));
 
-    TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, LATEST_TIME), 20, 20))->getId();
+    TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, PLUS_INFINITY), 20, 20))->getId();
     r->constrain(t3);
     assert(ce.propagate());
     assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 1000*3));
@@ -233,7 +236,7 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
     
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 1, 7))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 1, 7))->getId();
     db.close();
     assert(ce.propagate() && checkSum(r) == 0); 
 
@@ -291,7 +294,7 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
     
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 10))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), 1, 1))->getId();
@@ -345,7 +348,7 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
     
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 10))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 10), 10, 10))->getId();
@@ -377,7 +380,7 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
     
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 10))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
 
     // Insertion and removal at extremes
@@ -434,7 +437,7 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
     
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 10))->getId();
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
 
     // Test producer
@@ -445,7 +448,7 @@ private:
 
 
     // This tests a transaction that could be a producer or a consumer. We don't know yet!
-    TransactionId t2 = (new Transaction(db.getId(), LabelStr("dontknowyet"), IntervalIntDomain(4, 8), -4, 3))->getId();
+    TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 8), -4, 3))->getId();
     r->constrain(t2);
     ce.propagate();
     assert(checkLevelArea(r) == 10*4 + 17*4 + 17*2);
@@ -464,7 +467,7 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
     
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
@@ -506,7 +509,7 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
     
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
@@ -559,7 +562,7 @@ private:
 
     DEFAULT_SETUP(ce,db,schema,false);
     
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionMax, productionMax, MINUS_INFINITY, MINUS_INFINITY))->getId();
     db.close();
 
@@ -601,7 +604,7 @@ private:
 
     DEFAULT_SETUP(ce,db,schema,false);
     
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, PLUS_INFINITY, PLUS_INFINITY, consumptionMax, consumptionMax))->getId();
     db.close();
 
@@ -675,9 +678,9 @@ private:
     // Define input constrains for the resource spec
     DEFAULT_SETUP(ce,db,schema,false);
     
-    ResourceId r1 = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+    ResourceId r1 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, -consumptionRateMax, -consumptionMax, -productionRateMax, -productionMax))->getId();
-    ResourceId r2 = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r2"), initialCapacity, horizonStart, horizonEnd, 
+    ResourceId r2 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, -consumptionRateMax, -consumptionMax, -productionMax, -productionMax))->getId();
     db.close();
 
@@ -745,9 +748,13 @@ private:
     // Define input constrains for the resource spec
     DEFAULT_SETUP(ce,db,schema,false);
     
-    ResourceId r1 = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+<<<<<<< module-tests.cc
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+=======
+    ResourceId r1 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+>>>>>>> 1.22
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
-    ResourceId r2 = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r2"), initialCapacity, horizonStart, horizonEnd, 
+    ResourceId r2 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
@@ -818,7 +825,7 @@ private:
     // Define input constrains for the resource spec
     DEFAULT_SETUP(ce,db,schema,false);
     
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity + 1, horizonStart, horizonEnd, 
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity + 1, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax + 100, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
@@ -848,7 +855,7 @@ private:
   {
     DEFAULT_SETUP(ce,db,schema,false);
     
-    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
@@ -904,7 +911,7 @@ private:
 	
     // Define input constrains for the resource spec
     DEFAULT_SETUP(ce,db,schema,false);
-    ResourceId r = (new Resource( db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 
+    ResourceId r = (new Resource( db.getId(), LabelStr("Resource"), LabelStr("r1"), 
 								  initialCapacity, horizonStart, horizonEnd, 
 								  limitMax, limitMin, productionRateMax, 5, consumptionRateMax, consumptionMax))->getId();
     db.close();

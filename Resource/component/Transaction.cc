@@ -31,7 +31,7 @@ namespace Prototype {
 						 m_planDatabase->getConstraintEngine(), 
 						 IntervalDomain(),
 						 true,
-						 LabelStr("Usage")))->getId();
+						 LabelStr("quantity")))->getId();
     m_allVariables.push_back(m_usage);
 
     m_usage->specify(IntervalDomain(min, max));
@@ -119,10 +119,10 @@ namespace Prototype {
     check_error(m_id.isValid());
 
     // Do simple limit checking
-    check_error(getMin() >= -LARGEST_VALUE);
-    check_error(getMax() <= LARGEST_VALUE);
-    check_error(getEarliest() >= -LATEST_TIME);
-    check_error(getLatest() <= LATEST_TIME);
+    check_error(getMin() >= MINUS_INFINITY);
+    check_error(getMax() <= PLUS_INFINITY);
+    check_error(getEarliest() >= MINUS_INFINITY);
+    check_error(getLatest() <= PLUS_INFINITY);
     return true;
   }
 
