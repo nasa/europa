@@ -1540,6 +1540,66 @@ that uses resource reasoning, a plan database, a constraint engine with a
 specialized (STN) temporal propagator, and a chronological backtracking
 planner.
 
+When creating your assembly, there are a few things you have to ensure happen
+in the right order.  These of course, depend on the modules you'll be
+using. 
+
+ConstraintEngine:
+\begin{enumerate}
+ \item initialize type factories (new SpecializedTypeFactory)
+ \item initialize constraint factories (REGISTER\_CONSTRAINT(..))
+ \item create constraint engine
+ \item create propagators
+ \item purge all factories (Object, Token, Constraint, Rule, Type)
+ \item call Entity::purgeStarted()
+ \item delete constraint engine
+ \item call Entity::purgeEnded()
+\end{enumerate}
+
+PlanDatabase:
+\begin{itemize}
+ \item create schema 
+ \item create constraint engine (see above)
+ \item create plan database
+ \item create temporal advisor (if using a temporal network)
+ \item create rules engine (if using subgoaling)
+ \item call Entity::purgeStarted()
+ \item delete rules engine
+ \item delete plan database
+ \item delete constraint engine 
+ \item call Entity::purgeEnded()
+\end{itemize}
+
+NDDL:
+\begin{enumerate}
+ \item initialize type factories
+ \item create plan database (see above)
+ \item purge type factories
+\end{enumerate}
+
+CBPlanner:
+\begin{itemize}
+ \item create plan database (or NDDL if using NDDL schema)
+ \item create Horizon
+ \item create planner
+ \item create open decision manager (unless using default provided)
+ \item initialize horizon from planner config object
+ \item run planner with step limitation from planner config object
+ \item delete planner
+ \item delete plan database (or NDDL if using NDDL Schema)
+\end{itemize}
+
+PlanWorks:
+\begin{itemize}
+ \item create planner but also create a PartialPlanWriter with all objects
+that you want to log
+ \item delete the PartialPlanWriter
+\end{itemize}
+
+The particular set of steps will vary depending on your application.  One
+thing to consider is that the Schema and the factories are all static,
+while you can have more than one plan database, constraint engine, etc. As
+a general rule, we enforce the relationships upon construction.
 
 \subsection{Using and extending the CBPlanner}
 
