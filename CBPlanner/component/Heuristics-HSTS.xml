@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+
+<Heuristics-HSTS
+xmlns="HSTS"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="Heuristics-HSTS.xsd">
+
+<Defaults>
+ <Priority>low</Priority>
+ <Compatibility>
+   <MasterList>
+     <PredicateName>Max_ThrustTime</PredicateName>
+     <ValueList/>
+   </MasterList>
+ </Compatibility>
+ <Token>
+   <Priority>10000.0</Priority>
+   <DecisionPreference>
+     <State>merge</State>
+     <Order>early</Order>
+   </DecisionPreference>
+ </Token>
+ <ConstrainedVariable>
+   <Priority>5000.0</Priority>
+   <ValueOrder>ascending</ValueOrder>
+ </ConstrainedVariable> 
+</Defaults>
+
+<VariableSpecification>
+<ConstrainedVariable>
+  <Priority>6000.5</Priority>
+  <Preference>
+  <ValueOrder>descending</ValueOrder>
+  </Preference>
+  <Variable>
+    <Index>2</Index>
+  </Variable>
+  <PredicateName>Rover.Arm.Extend</PredicateName>
+  <ValueList/>
+</ConstrainedVariable>
+
+<ConstrainedVariable>
+  <Priority>6000.25</Priority>
+  <Preference>
+  <Generator>MyCVGenerator</Generator>
+  </Preference>
+  <Variable>
+    <Name>WillNavNext</Name>
+  </Variable>
+  <PredicateName>Rover.Navigate</PredicateName>
+  <ValueList>
+     <Value/>
+     <Value>Target524</Value>
+  </ValueList>
+</ConstrainedVariable>
+
+<ConstrainedVariable>
+  <Priority>6000.25</Priority>
+  <Preference>
+  <DomainOrder>
+    <DomainValue>OBS_INACTIVE_MEETS_OPNAV</DomainValue>
+    <DomainValue>OBS_INACTIVE_MEETS_INACTIVE_BOUNDARY</DomainValue>
+    <DomainValue>OBS_INACTIVE_MEETS_INACTIVE_INACTIVE</DomainValue>
+  </DomainOrder>
+  </Preference>
+  <Variable>
+    <Index>10</Index>
+  </Variable>
+  <PredicateName>Obs_Window_Inactive</PredicateName>
+  <ValueList>
+     <Value/>
+     <Value/>
+     <Value/>
+     <Value>STANDBY</Value>
+  </ValueList>
+</ConstrainedVariable>
+</VariableSpecification>
+
+<TokenSpecification/>
+
+</Heuristics-HSTS>
+
+<!-- possible values: reject,merge,defer,activate -->
+<!-- when merge or activate is specified, it is possible to specify
+ActiveToken or SuccessorToken preference criteria with possible values: 
+close,far,early,late,maxFlexible,minFlexible,leastSpecifiedToken,mostSpecifiedToken,leastSpecifiedObject,mostSpecifiedObject
+or a <Generator></Generator> tag --> 

@@ -1,0 +1,35 @@
+// no generators allowed by default
+// are predicates fully qualified yes!
+// variables in the system are not fully qualified, need to get parent and append name.
+
+Default_Priority High;
+Default_Compatibility_Priority SEP_Thrust_Timer_SV.Max_Thrust_Time 20.3;
+Default_Token_Priority 10000.0;
+Default_Variable_Priority 10000.0;
+Default_Token_Order reject, merge early, defer, activate early;
+Default_Variable_Order ascending;
+
+Compatibility Made_Up_Parent_SV.Made_Up_SV.Thrust_Left 5456.2;
+
+Token Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd assign {reject,merge:close,defer,activate:minFlexible} 334.5 when 
+  m_with = SIN;
+
+Token Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd after Max_Thrust_Time assign {merge:Generator1,activate:late} 6213.7 when 
+  m_with = CON
+  m_sys = RES;
+
+Token Made_Up_Parent_SV.Made_Up_SV.Thrust_Left if any assign {activate:early} 2000.4 when 
+  m_trans = NO_RIGHT;
+
+Token Made_Up_Parent_SV.Made_Up_SV.Thrust_Left 7652.4
+
+Variable Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.m_with assign ascending 443.6
+
+Variable Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.m_with assign {SIN CON SAL PEP} 443.6
+
+Variable Made_Up_Parent_SV.Made_Up_SV.Thrust_Left.m_with assign Generator1 2269.3
+
+Variable Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.m_sys 234.5
+
+Variable Made_Up_Parent_SV.Made_Up_SV.Thrust_Left.m_with assign {CON} 6234.7 when
+  m_sys = ON;
