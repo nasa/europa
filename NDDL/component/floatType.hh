@@ -37,7 +37,7 @@ namespace Prototype {
      * @brief Create a variable
      */
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 
-                                                 const LabelStr& typeName,
+                                                 const AbstractDomain& baseDomain,
                                                  bool canBeSpecified = true,
                                                  const LabelStr& name = ConstrainedVariable::NO_NAME(),
                                                  const EntityId& parent = EntityId::noId(),

@@ -43,15 +43,15 @@ namespace Prototype {
 
   ConstrainedVariableId
   intTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
-                                 const LabelStr& typeName,
+                                 const AbstractDomain& baseDomain,
                                  bool canBeSpecified,
                                  const LabelStr& name,
                                  const EntityId& parent,
                                  int index) const
   {
-    intDomain * baseDomain = static_cast<intDomain*>(createDomain());
+    const intDomain * domain = dynamic_cast<const intDomain*>(&baseDomain);
     Variable<intDomain> * variable
-      = new Variable<intDomain>(constraintEngine, *baseDomain, canBeSpecified, name, parent, index);
+      = new Variable<intDomain>(constraintEngine, *domain, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
                 "failed to create Variable for 'int' with name '" + name.toString() + "'");
     ConstrainedVariableId id = variable->getId();

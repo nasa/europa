@@ -43,15 +43,15 @@ namespace Prototype {
 
   ConstrainedVariableId
   floatTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
-                                   const LabelStr& typeName,
+                                   const AbstractDomain& baseDomain,
                                    bool canBeSpecified,
                                    const LabelStr& name,
                                    const EntityId& parent,
                                    int index) const
   {
-    floatDomain * baseDomain = static_cast<floatDomain*>(createDomain());
+    const floatDomain * domain = dynamic_cast<const floatDomain*>(&baseDomain);
     Variable<floatDomain> * variable
-      = new Variable<floatDomain>(constraintEngine, *baseDomain, canBeSpecified, name, parent, index);
+      = new Variable<floatDomain>(constraintEngine, *domain, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
                 "failed to create Variable for 'float' with name '" + name.toString() + "'");
     ConstrainedVariableId id = variable->getId();

@@ -37,15 +37,15 @@ namespace Prototype {
 
   ConstrainedVariableId
   boolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
-                                  const LabelStr& typeName,
-                                  bool canBeSpecified,
-                                  const LabelStr& name,
-                                  const EntityId& parent,
-                                  int index) const
+                                 const AbstractDomain& baseDomain,
+                                 bool canBeSpecified,
+                                 const LabelStr& name,
+                                 const EntityId& parent,
+                                 int index) const
   {
-    boolDomain * baseDomain = static_cast<boolDomain*>(createDomain());
+    const boolDomain * domain = dynamic_cast<const boolDomain*>(&baseDomain);
     Variable<boolDomain> * variable
-      = new Variable<boolDomain>(constraintEngine, *baseDomain, canBeSpecified, name, parent, index);
+      = new Variable<boolDomain>(constraintEngine, *domain, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
                 "failed to create Variable for 'bool' with name '" + name.toString() + "'");
     ConstrainedVariableId id = variable->getId();
