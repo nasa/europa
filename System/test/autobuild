@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.77 2004-09-17 20:10:49 wedgingt Exp $
+# $Id: autobuild,v 1.78 2004-09-17 20:33:32 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -143,44 +143,29 @@ cvsTagTest
 
 for var in $variants
 do
-
   for libmethod in $libmethods
   do
-  
     cvsCheckOut
-
     cd PLASMA
-
     args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
-
     jamCmd '' build
-
     for target in tests run-nddl-tests run-nddl-planner-tests
     do
       jamCmd $target $target
     done
-
     jamCmd clean clean
-
     PPW_Config="$startdir"'/PLASMA/CBPlanner/component/sample-ppw-config'
     export PPW_Config
-
-    jamCmd run-nddl-planner-tests
-
+    jamCmd run-nddl-planner-tests withPPW
     jamCmd clean clean
-
     (echo "$info"; echo ''; echo 'PLASMA autobuild and tests of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
         more jam.*.$var.$libmethod < /dev/null) | \
       Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
-
     # Save the jam output files.
     mv -f jam.* ..
-
     cd ..
-
     # Remove everything so that each variant is tested completely independently.
     rm -rf PLASMA
-
   done
 done
 
