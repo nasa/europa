@@ -9,6 +9,10 @@ namespace Prototype {
 
   const std::string VARIABLE_INDENT("");
 
+  std::string getName(const ConstrainedVariableId& variable){
+    return variable->getName().toString();
+  }
+
   CeLogger::CeLogger(std::ostream& os, const ConstraintEngineId& ce):ConstraintEngineListener(ce), m_os(os){}
 
   void CeLogger::notifyPropagationCommenced(){m_os << "CeLogger:" << "PROPAGATION COMMENCED" << std::endl;}
@@ -36,15 +40,15 @@ namespace Prototype {
   }
 
   void CeLogger::notifyAdded(const ConstrainedVariableId& variable){
-    m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE ADDED " << variable->getName().toString() << "(" << variable->getKey() <<  ")" << std::endl;
+    m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE ADDED " << getName(variable) << "(" << variable->getKey() <<  ")" << std::endl;
   }
 
   void CeLogger::notifyRemoved(const ConstrainedVariableId& variable){
-    m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE REMOVED " << variable->getName().toString() << "(" << variable->getKey() <<  ")" << std::endl;
+    m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE REMOVED " << getName(variable) << "(" << variable->getKey() <<  ")" << std::endl;
   }
 
   void CeLogger::notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType){
-    m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE " << variable->getName().toString() << " - ";
+    m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE " << getName(variable) << " - ";
     switch (changeType) {
     case DomainListener::UPPER_BOUND_DECREASED:
       m_os << "UPPER_BOUND_DECREASED";

@@ -37,11 +37,9 @@
 #include "DecisionPoint.hh"
 
 int main(){
-  // Initialize constraints
-  initConstraintLibrary();
-  
   REGISTER_NARY(EqualConstraint, "concurrent", "Default");
   REGISTER_NARY(EqualConstraint, "eq", "Default");
+  REGISTER_NARY(NotEqualConstraint, "neq", "Default");
   REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
   REGISTER_NARY(LessThanEqualConstraint, "before", "Default");
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
@@ -69,6 +67,7 @@ int main(){
   conditions.push_back(dcond.getId());
   FilterCriteria filter(conditions);
   FlawQuery query(source.getId(),filter.getId());
+
   if (loggingEnabled()) {
     new CeLogger(std::cout, ce.getId());
     new DbLogger(std::cout, db.getId());

@@ -59,7 +59,7 @@ namespace Prototype{
 						    m_planDatabase->getConstraintEngine(), 
 						    startBaseDomain,
 						    true,
-						    LabelStr("IntervalTokenStart")))->getId();
+						    LabelStr("start")))->getId();
     m_allVariables.push_back(m_start);
 
     m_end = (new TokenVariable<IntervalIntDomain>(m_id,
@@ -67,7 +67,7 @@ namespace Prototype{
 						  m_planDatabase->getConstraintEngine(), 
 						  endBaseDomain,
 						  true,
-						  LabelStr("IntervalTokenEnd")))->getId();
+						  LabelStr("end")))->getId();
     m_allVariables.push_back(m_end);
 
     std::vector<ConstrainedVariableId> temp;

@@ -329,6 +329,30 @@ private:
       assert(v1.getDerivedDomain() == IntervalDomain(0.39, 9.39));
     }
 
+    // Test handling with all infinites
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(MINUS_INFINITY, MINUS_INFINITY));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, PLUS_INFINITY));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(PLUS_INFINITY, PLUS_INFINITY));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      assert(ENGINE->propagate());
+      assert(v0.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, MINUS_INFINITY));
+      assert(v1.getDerivedDomain() == IntervalIntDomain(1, PLUS_INFINITY));
+      assert(v2.getDerivedDomain() == IntervalIntDomain(PLUS_INFINITY, PLUS_INFINITY));
+    }
+
+    // Test handling with infinites and non-infinites
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(10, PLUS_INFINITY));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, PLUS_INFINITY));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, 100));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      assert(ENGINE->propagate());
+      assert(v0.getDerivedDomain() == IntervalIntDomain(10, 99));
+      assert(v1.getDerivedDomain() == IntervalIntDomain(1, 90));
+      assert(v2.getDerivedDomain() == IntervalIntDomain(11, 100));
+    }
+
     return true;
   }
 
@@ -409,6 +433,15 @@ private:
     v1.reset();
     assert(v0.getDerivedDomain() == IntervalIntDomain(50, 80));
     assert(v1.getDerivedDomain() == IntervalIntDomain(50, 100));
+
+    // Handle propagation of infinities
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(2, PLUS_INFINITY));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(MINUS_INFINITY, 100));
+    LessThanEqualConstraint c2(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId()));
+    assert(ENGINE->propagate());
+    assert(v2.getDerivedDomain().getUpperBound() == 100);
+    assert(v3.getDerivedDomain().getLowerBound() == 2);
+
     return true;
   }
 

@@ -8,6 +8,26 @@
 
 namespace Prototype
 {
+  /**
+   * Utility class that might get promoted later
+   */
+  class Infinity{
+  public:
+    static double plus(double n1, double n2, double defaultValue){
+      if(abs((int)n1) == PLUS_INFINITY || abs((int)n2) == PLUS_INFINITY)
+	return defaultValue;
+      else
+	return n1 + n2;
+    }
+
+    static double minus(double n1, double n2, double defaultValue){
+      if(abs((int)n1) == PLUS_INFINITY || abs((int)n2) == PLUS_INFINITY)
+	return defaultValue;
+      else
+	return n1 - n2;
+    }
+  };
+
   AddEqualConstraint::AddEqualConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
 					 const ConstraintEngineId& constraintEngine,
@@ -32,10 +52,6 @@ namespace Prototype
  
     check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
 
-    /* Nothing to be done if all domains are infinite. */
-    if(domx.isInfinite() &&domy.isInfinite() && domz.isInfinite())
-      return;
-
     double xMin;
     double xMax;
     double yMin;
@@ -47,34 +63,47 @@ namespace Prototype
     domy.getBounds(yMin, yMax);
     domz.getBounds(zMin, zMax);
 
+
     // Process Z
-    if(zMax > xMax + yMax)
-      zMax = domz.translateNumber(xMax + yMax, false);
-    if(zMin < xMin + yMin)
-      zMin = domz.translateNumber(xMin + yMin, true);
+    double xMax_plus_yMax = Infinity::plus(xMax, yMax, zMax);
+    if(zMax > xMax_plus_yMax)
+      zMax = domz.translateNumber(xMax_plus_yMax, false);
+
+    double xMin_plus_yMin = Infinity::plus(xMin, yMin, zMin);
+    if(zMin < xMin_plus_yMin)
+      zMin = domz.translateNumber(xMin_plus_yMin, true);
+
     if(domz.intersect(zMin,zMax) && domz.isEmpty())
       return;
 
     // Process X
-    if(xMax > zMax - yMin)
-      xMax = domx.translateNumber(zMax - yMin, false);
-    if(xMin < zMin - yMax)
-      xMin = domx.translateNumber(zMin - yMax, true);
+    double zMax_minus_yMin = Infinity::minus(zMax, yMin, xMax);
+    if(xMax > zMax_minus_yMin)
+      xMax = domx.translateNumber(zMax_minus_yMin, false);
+
+    double zMin_minus_yMax = Infinity::minus(zMin, yMax, xMin);
+    if(xMin < zMin_minus_yMax)
+      xMin = domx.translateNumber(zMin_minus_yMax, true);
+
     if(domx.intersect(xMin,xMax)  && domx.isEmpty())
       return;
 
     // Process Y
-    if(yMax > zMax - xMin)
-      yMax = domy.translateNumber(zMax - xMin, false);
-    if(yMin < zMin - xMax)
-      yMin = domy.translateNumber(zMin - xMax, true);
+    double zMax_minus_xMin = Infinity::minus(zMax, xMin, yMax);
+    if(yMax > zMax_minus_xMin)
+      yMax = domy.translateNumber(zMax_minus_xMin, false);
+
+    double zMin_minus_xMax = Infinity::minus(zMin, xMax, yMin);
+    if(yMin < zMin_minus_xMax)
+      yMin = domy.translateNumber(zMin_minus_xMax, true);
+
     if(domy.intersect(yMin,yMax) && domy.isEmpty())
       return;
 
     // Now, rounding issues from mixed numeric types can lead to the following inconsitency, not yet caught.
     // We handle it here however, by emptying the domain if the invariant post-condition is not satisfied. The
     // motivating case for this: A:Int[0,10] + B:Int[0,10] == C:Real[0.5, 0.5].
-    if(!domz.isMember(yMax + xMin) || !domz.isMember(yMin + xMax))
+    if(!domz.isMember(Infinity::plus(yMax, xMin, zMin)) || !domz.isMember(Infinity::plus(yMin, xMax, zMin)))
       domz.empty();
   }
 
@@ -182,10 +211,6 @@ namespace Prototype
       return;
 
     if (domy.isEnumerated() && !domy.isSingleton())
-      return;
-
-    // Discontinue if they are not both finite or infinite
-    if(domx.isFinite() != domy.isFinite())
       return;
 
     if(domx.intersect(domx.getLowerBound(), domy.getUpperBound()) && domx.isEmpty())
