@@ -47,6 +47,8 @@ namespace Prototype
   typedef Europa::Id<Propagator> PropagatorId;
   class ConstraintEngine;
   typedef Europa::Id<ConstraintEngine> ConstraintEngineId;
+  class ConstraintEngineListener;
+  typedef Europa::Id<ConstraintEngineListener> ConstraintEngineListenerId;
   typedef std::pair<ConstraintId, int> ConstraintEntry;
   typedef std::list<ConstraintEntry> ConstraintList;
 }// End namespace
