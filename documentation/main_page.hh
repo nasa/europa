@@ -55,10 +55,6 @@
  * that replicate the behavior of EUROPA for backwards compatibility.  It
  * also includes a reader of EUROPA heuristics and a translator for EUROPA
  * 2 syntax of HSTS heuristics. 
- * @li @ref AgentDatabase "Agent Database": an extension of the Plan
- * Database that supports multi-threaded access to the plan database by
- * multiple agents.  We provide the capability to connect, disconnect, lock
- * and unloack the database. 
  * @li @ref NDDL "New Domain Description Language (NDDL)": a new domain
  * description language to facilitate describing domains that can be reason
  * with using EUROPA 2.  It includes constructs for Objects, Prediates,
@@ -69,7 +65,11 @@
  * be written as transaction files which can be loaded during
  * initialization. 
  * @li @ref Utils "Utilities": general utilities for memory management,
- * debugging, managing errors, managing regression tests.
+ * debugging, managing errors, managing regression tests, locking and
+ * unlocking, etc.
+ * @li @ref Aver "Aver": contains a test language and interpreter to assert
+ * properties about plans.  It allows you to describe properties about
+ * plans at step numbers or as a whole.
  * @li @ref System "System": includes a standard assembly to illustrate a
  * particular configuration of the system, Aver the test language,
  * system-level regression tests, and other system-level support files. You
