@@ -17,7 +17,7 @@ namespace Prototype {
 
   public:
     static void write(PlanDatabaseId db, std::ostream& os) {
-      check_error(db->getConstraintEngine()->constraintConsistent());
+      check_error(!db->getConstraintEngine()->provenInconsistent());
       ObjectSet objs = db->getObjects();
       TokenSet alltokens = db->getTokens();
       for (ObjectSet::const_iterator oit = objs.begin(); oit != objs.end() ; ++oit) {
