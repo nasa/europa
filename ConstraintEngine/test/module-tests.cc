@@ -20,6 +20,7 @@
 #include "IntervalIntDomain.hh"
 #include "IntervalRealDomain.hh"
 #include "BoolDomain.hh"
+#include "DomainUtilities.hh"
 
 #include <iostream>
 #include <cassert>
@@ -308,7 +309,8 @@ public:
     runTest(testAllocation, "Allocation"); 
     runTest(testAssignment, "Assignment"); 
     runTest(testIntersection, "Intersection");  
-    runTest(testSubset, "Subset");  
+    runTest(testSubset, "Subset");
+    runTest(testUtilities, "Utilities");
     return true;
   }
 
@@ -413,7 +415,13 @@ private:
 
   static bool testListener()
   {
+    return true;
+  }
 
+  static bool testUtilities(){
+    IntervalIntDomain d1(10, 20);
+    IntervalIntDomain d2(11, 20);
+    assert(DomainUtilities::isSubsetOf(d2, d1));
     return true;
   }
 };
