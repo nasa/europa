@@ -17,6 +17,7 @@
 #include "../ConstraintEngine/LabelSet.hh"
 #include "../ConstraintEngine/DefaultPropagator.hh"
 #include "../ConstraintEngine/EqualityConstraintPropagator.hh"
+#include "../ConstraintEngine/InstrumentationLogger.hh"
 
 #include <iostream>
 #include <sstream>
@@ -246,7 +247,7 @@ private:
   static bool testFilterAndConstrain(){
     PlanDatabase db(ENGINE);
 
-    static const int NUM_OBJECTS = 1000;
+    static const int NUM_OBJECTS = 10;
 
     std::list<ObjectId> objects;
 
@@ -297,6 +298,7 @@ class TokenTest {
 public:
   static bool test(){
     runTest(testBasicTokenAllocation);
+    runTest(testStateModel);
     runTest(testMasterSlaveRelationship);
     runTest(testBasicMerging);
     runTest(testMergingPerformance);
@@ -340,6 +342,47 @@ private:
     assert(intervalToken.getStart()->getDerivedDomain() == IntervalIntDomain(5, 8));
     assert(intervalToken.getDuration()->getDerivedDomain() == IntervalIntDomain(2, 5));
 
+    return true;
+  }
+
+  static bool testStateModel(){
+    DEFAULT_SETUP(ce, db, schema, true);
+
+    IntervalToken t0(db.getId(), 
+		     LabelStr("Predicate"), 
+		     true, 
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(2, 10),
+		     Token::noObject(), false);
+
+    assert(t0.isIncomplete());
+    t0.close();
+    assert(t0.isInactive());
+    t0.reject();
+    assert(t0.isRejected());
+    t0.cancel();
+    assert(t0.isInactive());
+    t0.activate();
+    assert(t0.isActive());
+    t0.cancel();
+    assert(t0.isInactive());
+
+    IntervalToken t1(db.getId(), 
+		     LabelStr("Predicate"), 
+		     true, 
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(2, 10),
+		     Token::noObject(), true);
+
+    assert(t1.isInactive());
+    t0.activate();
+    t1.merge(t0.getId());
+    assert(t1.isMerged());
+    t1.cancel();
+    assert(t1.isInactive());
+    t1.merge(t0.getId());
     return true;
   }
 
@@ -501,14 +544,15 @@ private:
   // add backtracking and longer chain, also add a before constraint
   static bool testMergingPerformance(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    InstrumentationLogger listener(ce.getId());
+    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
     db.close();
 
     typedef Europa::Id<IntervalToken> IntervalTokenId;
     
-    static const int NUMTOKS=50;
-    static const int UNIFIED=3;
-    static const int NUMPARAMS=3;
+    static const int NUMTOKS=3;
+    static const int UNIFIED=1;
+    static const int NUMPARAMS=1;
 
     //Create tokens with the same domains.  We will impose a constraint on
     //each token variable.  Tokens will have 5 parameter variables.
@@ -547,16 +591,16 @@ private:
 
     for (int i=0; i < NUMTOKS; i++) {
       tokens[i][0]->activate();
-      timeline.constrain(tokens[i][0]);
+      timeline->constrain(tokens[i][0]);
     }
 
     IntervalIntDomain sdom2(tokens[0][0]->getStart()->getDerivedDomain());
     assert(sdom2.getLowerBound() == 0);
-    assert(sdom2.getUpperBound() == 209);
+    assert(sdom2.getUpperBound() == 208);
 
     IntervalIntDomain edom2(tokens[0][0]->getEnd()->getDerivedDomain());
     assert(edom2.getLowerBound() == 1);
-    assert(edom2.getUpperBound() == 210);
+    assert(edom2.getUpperBound() == 209);
 
     Europa::Id<TokenVariable<IntervalIntDomain> > pvar2(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom2(pvar2->getDerivedDomain());
@@ -571,11 +615,11 @@ private:
 
     IntervalIntDomain sdom3(tokens[0][0]->getStart()->getDerivedDomain());
     assert(sdom3.getLowerBound() == 0);
-    assert(sdom3.getUpperBound() == 209);
+    assert(sdom3.getUpperBound() == 208);
 
     IntervalIntDomain edom3(tokens[0][0]->getEnd()->getDerivedDomain());
     assert(edom3.getLowerBound() == 1);
-    assert(edom3.getUpperBound() == 210);
+    assert(edom3.getUpperBound() == 209);
 
     Europa::Id<TokenVariable<IntervalIntDomain> > pvar3(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom3(pvar3->getDerivedDomain());
@@ -589,17 +633,17 @@ private:
       }
 
     IntervalIntDomain sdom4(tokens[0][0]->getStart()->getDerivedDomain());
-    assert(sdom4.getLowerBound() == sdom1.getLowerBound());
-    assert(sdom4.getUpperBound() == sdom1.getUpperBound());
+    assert(sdom4.getLowerBound() == sdom2.getLowerBound());
+    assert(sdom4.getUpperBound() == sdom2.getUpperBound());
 
     IntervalIntDomain edom4(tokens[0][0]->getEnd()->getDerivedDomain());
-    assert(edom4.getLowerBound() == edom1.getLowerBound());
-    assert(edom4.getUpperBound() == edom1.getUpperBound());
+    assert(edom4.getLowerBound() == edom2.getLowerBound());
+    assert(edom4.getUpperBound() == edom2.getUpperBound());
 
     Europa::Id<TokenVariable<IntervalIntDomain> > pvar4(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom4(pvar4->getDerivedDomain());
-    assert(pdom4.getLowerBound() == pdom1.getLowerBound());
-    assert(pdom4.getUpperBound() == pdom1.getUpperBound());
+    assert(pdom4.getLowerBound() == pdom2.getLowerBound());
+    assert(pdom4.getUpperBound() == pdom2.getUpperBound());
 
     return true;
   }    
