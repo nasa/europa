@@ -18,7 +18,7 @@ class Rover{
  }
 
  predicate AnyPredicate{
-  Locations v0;
+  Locations v0 = Hill;
   StringEnum v1;
   NumericEnum v2;
   int v3;

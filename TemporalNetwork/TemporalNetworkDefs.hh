@@ -9,7 +9,7 @@ namespace EUROPA {
   typedef bool Bool;
   typedef int Int;
   typedef void Void;
-  typedef long Time;        // Temporal distance value.
+  typedef long Time;
 
   class Dnode;
   typedef Id<Dnode> DnodeId;
