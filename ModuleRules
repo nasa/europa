@@ -269,15 +269,16 @@ rule ModuleLibraries {
   LINK_LIBRARIES on $(module) = [ FMergeList [ on $(module) return $(LINK_LIBRARIES) ] : $(libraries) ] ;
 }
 
-# RunModuleMain <target that when built runs this> : <executable> : <arguments> ;
+# RunModuleMain <target that when built runs this> : <executable> : <arguments> : <prefix> : <outputFile> ;
 rule RunModuleMain {
   local tests = $(1) ;
   local executable = $(2) ;
   local arguments = $(3) ;
-  local prefix = $(4) ;
+  local prefix = $(4) ; # E.g., "/usr/bin/time" to run the command under the UNIX/Linux time command.
+  local outputFN = $(5) ;
 
   if $(TRACE_MODULE) = TRUE {
-    Echo RunModuleMain $(tests) . $(executable) . $(arguments) . $(prefix) ;
+    Echo RunModuleMain $(tests) . $(executable) . $(arguments) . $(prefix) . $(outputFN) ;
   }
 
   local variant ;
@@ -293,7 +294,7 @@ rule RunModuleMain {
         } else if $(library) != STATIC {
           Exit RunModuleMain unknown library type: $(library) ;
         }
-        Execute $(tests) : $(exe) : $(arguments) : $(prefix) ;
+        Execute $(tests) : $(exe) : $(arguments) : $(prefix) : $(outputFN) ;
      }
     }
   }
