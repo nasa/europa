@@ -91,7 +91,9 @@ rule ModuleObjects {
 
     local use_pic_flags ;
     if SHARED in $(LIBRARIES) {
-      use_pic_flags += YES ;
+      if $(variant) != PROFILE {
+        use_pic_flags += YES ;
+      }
     }
     if SHARED != $(LIBRARIES) {
       use_pic_flags += NO ;
