@@ -258,6 +258,102 @@ namespace Prototype {
   };
 
   /**
+   * @class GreaterOrEqThanSumConstraint
+   * @brief A >= B + C + ...
+   * Converted into two constraints: A >= temp and temp equal to the sum of the rest.
+   */
+  class GreaterOrEqThanSumConstraint : public Constraint {
+  public:
+    GreaterOrEqThanSumConstraint(const LabelStr& name,
+                                 const LabelStr& propagatorName,
+                                 const ConstraintEngineId& constraintEngine,
+                                 const std::vector<ConstrainedVariableId>& variables);
+
+    ~GreaterOrEqThanSumConstraint() {
+      delete (Constraint*) m_eqSumConstraint;
+    }
+
+    // All the work is done by the member constraints
+    inline void handleExecute() { }
+
+  private:
+    Variable<IntervalDomain> m_interimVariable;
+    LessThanEqualConstraint m_lessOrEqualConstraint;
+    ConstraintId m_eqSumConstraint;
+  };
+
+  /**
+   * @class GreaterThanSumConstraint
+   * @brief A > B + C + ...
+   * Converted into two constraints: A < temp and temp equal to the sum of the rest.
+   */
+  class GreaterThanSumConstraint : public Constraint {
+  public:
+    GreaterThanSumConstraint(const LabelStr& name,
+                             const LabelStr& propagatorName,
+                             const ConstraintEngineId& constraintEngine,
+                             const std::vector<ConstrainedVariableId>& variables);
+
+    ~GreaterThanSumConstraint() {
+      delete (Constraint*) m_eqSumConstraint;
+    }
+
+    // All the work is done by the member constraints
+    inline void handleExecute() { }
+
+  private:
+    Variable<IntervalDomain> m_interimVariable;
+    LessThanConstraint m_lessThanConstraint;
+    ConstraintId m_eqSumConstraint;
+  };
+
+  /**
+   * @class AddLessThanConstraint
+   * @brief A + B < C
+   * Converted into GreaterThanSumConstraint.
+   */
+  class AddLessThanConstraint : public Constraint {
+  public:
+    AddLessThanConstraint(const LabelStr& name,
+                          const LabelStr& propagatorName,
+                          const ConstraintEngineId& constraintEngine,
+                          const std::vector<ConstrainedVariableId>& variables);
+
+    ~AddLessThanConstraint() {
+      delete (Constraint*) m_greaterThanSumConstraint;
+    }
+
+    // All the work is done by the member constraint
+    inline void handleExecute() { }
+
+  private:
+    ConstraintId m_greaterThanSumConstraint;
+  };
+
+  /**
+   * @class AddLessOrEqThanConstraint
+   * @brief A + B <= C
+   * Converted into GreaterOrEqThanSumConstraint.
+   */
+  class AddLessOrEqThanConstraint : public Constraint {
+  public:
+    AddLessOrEqThanConstraint(const LabelStr& name,
+                              const LabelStr& propagatorName,
+                              const ConstraintEngineId& constraintEngine,
+                              const std::vector<ConstrainedVariableId>& variables);
+
+    ~AddLessOrEqThanConstraint() {
+      delete (Constraint*) m_greaterOrEqThanSumConstraint;
+    }
+
+    // All the work is done by the member constraint
+    inline void handleExecute() { }
+
+  private:
+    ConstraintId m_greaterOrEqThanSumConstraint;
+  };
+
+  /**
    * @class CondAllSame
    * @brief If A, then B == C && B == D && C == D && ... ; if not A, then !(B == C && B == D && C == D && ...).
    */

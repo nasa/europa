@@ -724,6 +724,65 @@ namespace Prototype {
     assertTrue(m_eqSumConstraint.isValid());
   }
 
+  GreaterOrEqThanSumConstraint::GreaterOrEqThanSumConstraint(const LabelStr& name,
+                                                       const LabelStr& propagatorName,
+                                                       const ConstraintEngineId& constraintEngine,
+                                                       const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_lessOrEqualConstraint(LabelStr("Internal:GreaterOrEqThanSum:lessThanEqual"), propagatorName, constraintEngine,
+                              makeScope(m_interimVariable.getId(), m_variables[0])) {
+    std::vector<ConstrainedVariableId> eqSumScope = m_variables;
+    eqSumScope[0] = m_interimVariable.getId();
+    m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:greaterOrEqThanSum:eqSum"), propagatorName,
+                                                constraintEngine, eqSumScope))->getId();
+  }
+
+  GreaterThanSumConstraint::GreaterThanSumConstraint(const LabelStr& name,
+                                               const LabelStr& propagatorName,
+                                               const ConstraintEngineId& constraintEngine,
+                                               const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_lessThanConstraint(LabelStr("Internal:lessThanSum:lessOrEq"), propagatorName, constraintEngine,
+                           makeScope(m_interimVariable.getId(), m_variables[0])) {
+    std::vector<ConstrainedVariableId> eqSumScope = m_variables;
+    eqSumScope[0] = m_interimVariable.getId();
+    m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:greaterThanSum:eqSum"), propagatorName,
+                                                constraintEngine, eqSumScope))->getId();
+    assertTrue(m_eqSumConstraint.isValid());
+  }
+
+  AddLessThanConstraint::AddLessThanConstraint(const LabelStr& name,
+                                               const LabelStr& propagatorName,
+                                               const ConstraintEngineId& constraintEngine,
+                                               const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    std::vector<ConstrainedVariableId> gSCScope;
+    gSCScope.reserve(m_variables.size());
+    gSCScope.push_back(m_variables[m_variables.size() - 1]);
+    for (unsigned int i = 0; i < m_variables.size() - 1; i++)
+      gSCScope.push_back(m_variables[i]);
+    assertTrue(m_variables.size() == gSCScope.size());
+    m_greaterThanSumConstraint = (new GreaterThanSumConstraint(LabelStr("Internal:AddLessThan:greaterThanSum"),
+                                                               propagatorName, constraintEngine, gSCScope))->getId();
+  }
+
+  AddLessOrEqThanConstraint::AddLessOrEqThanConstraint(const LabelStr& name,
+                                                       const LabelStr& propagatorName,
+                                                       const ConstraintEngineId& constraintEngine,
+                                                       const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    std::vector<ConstrainedVariableId> gESCScope;
+    gESCScope.reserve(m_variables.size());
+    gESCScope.push_back(m_variables[m_variables.size() - 1]);
+    for (unsigned int i = 0; i < m_variables.size() - 1; i++)
+      gESCScope.push_back(m_variables[i]);
+    assertTrue(m_variables.size() == gESCScope.size());
+    m_greaterOrEqThanSumConstraint = (new GreaterOrEqThanSumConstraint(LabelStr("Internal:AddLessOrEqThan:greaterOrEqThanSum"),
+                                                                       propagatorName, constraintEngine, gESCScope))->getId();
+  }
+
   CondAllSameConstraint::CondAllSameConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
                                                const ConstraintEngineId& constraintEngine,

@@ -22,6 +22,8 @@ void initConstraintLibrary() {
     REGISTER_NARY(EqualMinimumConstraint, "EqualMinimum", "Default");
     REGISTER_NARY(EqualProductConstraint, "EqualProduct", "Default");
     REGISTER_NARY(EqualSumConstraint, "EqualSum", "Default");
+    REGISTER_NARY(GreaterThanSumConstraint, "GreaterThanSum", "Default");
+    REGISTER_NARY(GreaterOrEqThanSumConstraint, "GreaterOrEqThanSum", "Default");
     REGISTER_NARY(LessOrEqThanSumConstraint, "LessOrEqThanSum", "Default");
     REGISTER_NARY(LessThanConstraint, "LessThan", "Default");
     REGISTER_NARY(LessThanEqualConstraint, "LessThanEqual", "Default");
@@ -34,6 +36,8 @@ void initConstraintLibrary() {
     // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
     REGISTER_NARY(AddEqualConstraint, "addeq", "Default");
     REGISTER_NARY(AddMultEqualConstraint, "addmuleq", "Default");
+    REGISTER_NARY(AddLessThanConstraint, "addlt", "Default");
+    REGISTER_NARY(AddLessOrEqThanConstraint, "addleq", "Default");
     REGISTER_NARY(AllDiffConstraint, "adiff", "Default"); // all different
     REGISTER_NARY(EqualConstraint, "asame", "Default"); // all same
     REGISTER_NARY(CardinalityConstraint, "card", "Default"); // cardinality not more than
