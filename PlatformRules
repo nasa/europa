@@ -5,6 +5,10 @@ PlatformRules_INCLUDED = TRUE ;
 # Globals set by platform
 #
 
+# POSITION_INDEPENDENT_CODE_FLAG = Flag to generate position-independent code
+
+POSITION_INDEPENDENT_CODE_FLAG ?= -fPIC ;
+
 # SHARED_FLAG = Flag to generate shared library
 
 if $(OS) = BEOS {
