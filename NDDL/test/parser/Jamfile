@@ -21,7 +21,10 @@ NDDL_PARSER_TESTS =
 	inner-enums.nddl                  transitional-subgoaling.nddl
 	looping.nddl                      intervalTest.nddl
 	use_xml.nddl                      multi_enums.nddl
+	Plasma.nddl
 	;
+
+MakeLocate [ FGristFiles Plasma.nddl ] : [ FDirName $(SUBDIR) .. .. core ] ;
 
 Depends use_xml.xml : rover.xml ;
 
