@@ -31,12 +31,30 @@ class Foo {
   m_6 = 198.65;
   m_7 = w;
  }
+
+ Foo(World w, int a, bool b){
+  m_0 = a;
+  m_2 = b;
+  m_4 = "Default String Value";
+  m_5 = Rock;
+  m_6 = 198.65;
+  m_7 = w;
+ }
+}
+
+class Bar extends Foo {
+ float m_8;
+ Bar(float m8, World w){
+  //Foo(w, 10, true);
+  m_8 = m8;
+ } 
 }
 
 class World {
  Foo m_foo1;
  Foo m_foo2;
  Foo m_foo3;
+ Foo m_foo4;
 
  predicate initialState{}
 
@@ -44,5 +62,6 @@ class World {
   m_foo1 = new Foo(this, 1, true, "This is also a long string", Lander);
   m_foo2 = new Foo(this);
   m_foo3 = m_foo2;
+  m_foo4 = new Foo(this, 100, false);
  }
 }
