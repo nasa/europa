@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.86 2004-09-28 16:26:06 wedgingt Exp $
+# $Id: autobuild,v 1.87 2004-09-28 18:21:06 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -27,12 +27,14 @@ case "$OS" in
 esac
 
 for x in "$CVS_HOME"/bin/cvs "$GCC_HOME"/bin/g++ "$JAM_HOME"/jam "$JAVA_HOME"/bin/javac "$GCC_HOME"/lib
-if test ! -x "$x"
-then
+do
+  if test ! -x "$x"
+  then
     echo ''
     echo "$0"': cannot find '"$x"
     exit 2
-fi
+  fi
+done
 
 PATH="$JAVA_HOME"/bin:"$JAM_HOME":"$GCC_HOME"/bin:"$CVS_HOME"/bin:"$PATH"
 export JAVA_HOME PATH
