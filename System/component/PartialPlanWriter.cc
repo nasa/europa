@@ -34,6 +34,7 @@
 #include "Rule.hh"
 #include "RulesEngineDefs.hh"
 
+#include <algorithm>
 #include <exception>
 #include <fstream>
 #include <iomanip>
