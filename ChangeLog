@@ -2,6 +2,8 @@ M_22:
 1. Added NegationConstraint.
 2. Added support for a PlannerConfig class in NDDL, rtaher than using NddlWorld.
 3. Completed support for object dynamicity, addressing GNATS 2342.
+4. Decision manager cleans up decisions even if other agents closed
+them, addressing GNATS 2493.
 
 M_21:
 1. Changed object decision model to avoid incompleness in search.
