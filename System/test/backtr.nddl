@@ -29,7 +29,7 @@ class Rover{
  Rover( float bat_start, float bat_low, float bat_high,
 	    float prod_max, float prod_Rmax, float cons_max, float cons_Rmax ) {
    m_battery = new Battery( bat_start, bat_low, bat_high, 
-	 		    prod_max, prod_Rmax, cons_max, cons_Rmax);
+	 		     prod_Rmax, prod_max, cons_Rmax, cons_max);
    m_antenna = new Antenna();
    m_memory = new Memory();
  }
