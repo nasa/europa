@@ -818,6 +818,17 @@ private:
       assert(v2.getDerivedDomain().getLowerBound() == -40);
     }
 
+    // Part of test 157 of CLibTestCases, which incorrectly claimed to be
+    // inconsistent during testing of a trial version of MultEqualConstraint.
+    {
+      Variable<IntervalDomain> v0(ENGINE, IntervalDomain(1.0));
+      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(MINUS_INFINITY, PLUS_INFINITY));
+      Variable<IntervalDomain> v2(ENGINE, IntervalDomain(1.0, 2.0));
+      MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(ENGINE->constraintConsistent());
+      assert(v1.getDerivedDomain() == IntervalDomain(1.0, 2.0));
+    }
     return true;
   }
 
@@ -1751,10 +1762,36 @@ private:
         continue;
       }
 
+      // Simple checks that this test case is OK.
+      assertTrue(inputDoms.size() == outputDoms.size() && !tCS.eof() && tCS.good());
+
+      // Some NewPlan constraints are the same as constraints in the
+      //   prototype except for the order of the arguments.
+      // These two move the last argument to the front:
+      /* This is wrong:
+         addleq(x, y, z) is x + y <= z
+         ... but:
+         LessOrEqThanSum(z, x, y) is z <= x + y
+         ... which has the comparison in the opposite direction.
+         --wedgingt 2004 Mar 15
+      if (constraintName == "addleq" ||
+          constraintName == "addlt") {
+        if (constraintName == "addleq")
+          constraintName = "LessOrEqThanSum";
+        if (constraintName == "addlt")
+          constraintName = "LessThanSum";
+        AbstractDomain *moving = inputDoms.back();
+        inputDoms.pop_back();
+        inputDoms.push_front(moving);
+        moving = outputDoms.back();
+        outputDoms.pop_back();
+        outputDoms.push_front(moving);
+      }
+      */
+
       // OK, done with a line, each line being a test, so
       // interleave the input and output domains to make
       // things easier in caller.
-      assertTrue(inputDoms.size() == outputDoms.size() && !tCS.eof() && tCS.good());
       domains.clear();
       while (!inputDoms.empty() && !outputDoms.empty()) {
         domains.push_back(inputDoms.front());
@@ -1820,7 +1857,7 @@ private:
       ConstrainedVariableId cVarId;
       while (!testDomains.empty()) {
         AbstractDomain *domPtr = testDomains.front();
-        assertTrue(domPtr != 0);
+        assertTrue(domPtr != 0 && (domPtr->isDynamic() || !domPtr->isEmpty()));
         testDomains.pop_front();
         AbstractDomain::DomainType domType = domPtr->getType();
 
