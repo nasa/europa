@@ -88,6 +88,10 @@ const  bool ConstrainedVariableDecisionPoint::assign() {
 	double valueAsDouble = getChoiceValue(m_choiceIndex-1);
 	if (m_var->lastDomain().isNumeric()) os << valueAsDouble;
 	else if (LabelStr::isString(valueAsDouble)) os << LabelStr(valueAsDouble).toString();
+	else if (m_var->lastDomain().isBool()) {
+	  if (valueAsDouble == 0) os << "false";
+	  else os << "true";
+	}
 	else {
 	  EntityId entity(valueAsDouble);
 	  os << entity->getName().toString() << " (" << entity->getKey() << ")";

@@ -1202,6 +1202,11 @@ namespace EUROPA {
         LabelStr label((int)dom.getUpperBound());
         return label.toString();
       }
+      else if(dom.isBool()) {
+	if (dom.getUpperBound() == 0)
+	  return std::string("false");
+	return std::string("true");
+      }
       else {
         return ObjectId(dom.getUpperBound())->getName().toString();
       }
@@ -1222,6 +1227,11 @@ namespace EUROPA {
       else if(LabelStr::isString((int)dom.getLowerBound())) {
         LabelStr label((int)dom.getLowerBound());
         return label.toString();
+      }
+      else if(dom.isBool()) {
+	if (dom.getLowerBound() == 0)
+	  return std::string("false");
+	return std::string("true");
       }
       else {
         return ObjectId(dom.getLowerBound())->getName().toString();
@@ -1258,6 +1268,11 @@ namespace EUROPA {
           LabelStr label(*it);
           stream << label.toString() << " ";
         }
+	else if(dom.isBool()) {
+	  if ((*it) == 0)
+	    stream << "false" << " ";
+	  stream << "true" << " ";
+	}
         else {
           stream << ObjectId(*it)->getName().toString() << " ";
         }
