@@ -3,6 +3,7 @@
 
 #include "ConstraintEngineDefs.hh"
 #include "Domain.hh"
+#include "Entity.hh"
 
 namespace Prototype {
   class Object;
@@ -13,6 +14,7 @@ namespace Prototype {
 
   class Token;
   typedef Id<Token> TokenId;
+  typedef std::set<TokenId, EntityComparator<TokenId> > TokenSet;
 
   class UnifyMemento;
   typedef Id<UnifyMemento> UnifyMementoId;
