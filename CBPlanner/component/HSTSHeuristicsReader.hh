@@ -2,6 +2,7 @@
 #define _H_HeuristicsHSTSReader
 
 #include "CBPlannerDefs.hh"
+#include "HSTSHeuristics.hh"
 #include <iostream>
 
 class TiXmlElement;

@@ -23,8 +23,7 @@ namespace Prototype {
   class HSTSConstrainedVariableDecisionPointComparator : ConstrainedVariableDecisionPointComparator {
   public:
     bool operator()(const ConstrainedVariableDecisionPointId& t1, const ConstrainedVariableDecisionPointId& t2) const {
-      //      return t1->getKey() < t2->getKey();
-      
+      return t1->getKey() < t2->getKey();
     }
   };
 
@@ -39,8 +38,8 @@ namespace Prototype {
     HSTSOpenDecisionManager(const DecisionManagerId& dm);
     ~HSTSOpenDecisionManager();
 
-    virtual DecisionPointId& getNextDecision();
-    virtual const ChoiceId& getNextChoice();
+    virtual DecisionPointId getNextDecision();
+    virtual const ChoiceId getNextChoice();
 
     // order returned is different
     virtual void getOpenDecisions(std::list<DecisionPointId>& decisions);

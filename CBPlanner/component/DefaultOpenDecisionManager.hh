@@ -3,6 +3,9 @@
 
 #include "CBPlannerDefs.hh"
 #include "OpenDecisionManager.hh"
+#include "ObjectDecisionPoint.hh"
+#include "TokenDecisionPoint.hh"
+#include "ConstrainedVariableDecisionPoint.hh"
 #include "Token.hh"
 #include "Utils.hh"
 

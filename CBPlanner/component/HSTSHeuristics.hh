@@ -26,6 +26,28 @@ namespace Prototype {
   // note: we assume that token types, if specified, are specified to singleton.
   // Any other domain restrictions are not supported.
 
+  class TokenType {
+  public:
+    TokenType(const LabelStr& predicateName, const std::vector<std::pair<LabelStr,LabelStr> >& domainSpecs);
+    virtual ~TokenType();
+    
+    const TokenTypeId& getId() const;
+    const LabelStr& getPredicate() const;
+    const std::vector<std::pair<LabelStr, LabelStr> >& getDomainSpecs() const;
+
+    static const LabelStr getIndexKey(const TokenTypeId& tt);
+    static const TokenTypeId getTokenType(const LabelStr& indexKey);
+    static const TokenTypeId createTokenType(const TokenId& token);
+    bool matches(const TokenTypeId& tt);
+    bool conflicts(const TokenTypeId& tt);
+  private:
+    static void split(const std::string& str, const char& delim, std::vector<std::string>& strings);
+    LabelStr m_predicateName;
+    std::vector<std::pair<LabelStr, LabelStr> > m_domainSpecs;
+    TokenTypeId m_id;
+  };
+  typedef Id<TokenType> TokenTypeId;
+
   class HSTSHeuristics {
   public:
     enum Origin {
@@ -70,37 +92,17 @@ namespace Prototype {
 
     typedef double Priority;
 
-
-  class TokenType {
-    public:
-      TokenType(const LabelStr& predicateName, const std::vector<std::pair<LabelStr,LabelStr> >& domainSpecs);
-      virtual ~TokenType();
-      const LabelStr& getPredicate() const;
-      const std::vector<std::pair<LabelStr, LabelStr> >& getDomainSpecs() const;
-
-      static const LabelStr getIndexKey(const TokenTypeId& tt);
-      static const TokenTypeId getTokenType(const LabelStr& indexKey);
-      static const TokenTypeId createTokenType(const TokenId& token);
-      bool matches(const TokenTypeId& tt);
-      bool conflicts(const TokenTypeId& tt);
-    private:
-      static void split(const std::string& str, const char& delim, std::vector<std::string>& strings);
-      LabelStr m_predicateName;
-      std::vector<std::pair<LabelStr, LabelStr> > m_domainSpecs;
-      TokenTypeId m_id;
-    };
-    typedef Id<TokenType> TokenTypeId;
-
     class TokenEntry {
     public:
       TokenEntry();
       TokenEntry(const Priority p, const std::vector<TokenDecisionPoint::State>& states, const std::vector<CandidateOrder>& orders, const std::vector<LabelStr>& generatorNames);
       virtual ~TokenEntry();
+
       void setPriority(const Priority p);
       const Priority getPriority();
-      std::vector<TokenDecisionPoint::State>& getStates();
-      std::vector<CandidateOrder>& getOrders();
-      std::vector<GeneratorId>& getGenerators();
+      const std::vector<TokenDecisionPoint::State>& getStates();
+      const std::vector<CandidateOrder>& getOrders();
+      const std::vector<GeneratorId>& getGenerators();
     private:
       Priority m_priority;
       std::vector<TokenDecisionPoint::State> m_states;
@@ -120,8 +122,8 @@ namespace Prototype {
       const std::list<double>& getDomain();
       const GeneratorId& getGenerator();
     private:
-      Priority m_priority;
       std::list<double> m_domain;
+      Priority m_priority;
       GeneratorId m_generator;
     };
 
@@ -155,8 +157,8 @@ namespace Prototype {
 
   private:
     // Generator methods
-    static void addsuccTokenGenerator(const GeneratorId& generator);
-    static void addVariableGenerator(const GeneratorId& generator);
+    void addSuccTokenGenerator(const GeneratorId& generator);
+    void addVariableGenerator(const GeneratorId& generator);
     const GeneratorId& getGeneratorByName(const LabelStr& name) const ;
 
     // Auxiliary methods:
@@ -181,8 +183,8 @@ namespace Prototype {
     std::vector<CandidateOrder> m_defaultCandidateOrders;
     DomainOrder m_defaultDomainOrder;
 
-    std::map<double, Id<TokenEntry> > m_tokenHeuristics;
-    std::map<double, Id<VariableEntry> > m_variableHeuristics;
+    std::map<double, TokenEntry> m_tokenHeuristics;
+    std::map<double, VariableEntry> m_variableHeuristics;
 
     std::set<GeneratorId> m_succTokenGenerators;
     std::set<GeneratorId> m_variableGenerators;

@@ -9,8 +9,12 @@
  * 
  */
 
+#ifndef _H_Generator
+#define _H_Generator
+
 #include "Entity.hh"
 #include "LabelStr.hh"
+#include <list>
 
 namespace Prototype {
 
@@ -29,6 +33,7 @@ namespace Prototype {
     virtual void getNextValue(double next, const double last);
   private:
     GeneratorId m_id;
+    LabelStr m_name;
   };
 
 #define REGISTER_VARIABLE_GENERATOR(GeneratorType, GeneratorName) \
@@ -38,3 +43,5 @@ namespace Prototype {
   (HSTSHeuristics::addSuccTokenGenerator((new GeneratorType(LabelStr(GeneratorName)))->getId()))
 
 }
+
+#endif
