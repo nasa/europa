@@ -139,23 +139,12 @@ namespace Prototype {
      */
     void print(ostream& os);
 
-    /**
-     * @brief Notify the transaction whenever the time or quanitity values change
-     */
-    //void notifyChanged();
-
-    /**
-     * @brief Checks if the transaction values have changed and clears the change status.
-     * @return true if the Transaction data has been modified since the last time this function was called, otherwise false.
-     */
-    //bool checkAndClearChange();
-
     virtual void close();
 
   protected:
+
     static const int USAGE = 4; /**< Position of quantity variable in list of m_variables when constructed as a NddlTransaction. */
     ResVarId m_usage;
-
   private:
     // Resource is only class privy to send notifications.
     friend class Resource;
@@ -171,7 +160,6 @@ namespace Prototype {
      * in derived classes.
      */
     bool isValid() const;
-    //bool m_changed;
   };
 
   /**

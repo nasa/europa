@@ -192,5 +192,4 @@ namespace Prototype {
     os << "RESOURCE: " << (getResource() == ResourceId::noId() ? "UNASSIGNED" : getResource()->getName().toString())
        << "[" << getMin() << ", " << getMax() << ", " << getEarliest() << ", " << getLatest() << "]";
   }
-
 } //namespace prototype

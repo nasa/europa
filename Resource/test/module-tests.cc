@@ -103,21 +103,10 @@ private:
     ResourceId r = (new Resource (db.getId(), LabelStr("AllObjects"), LabelStr("r1")))->getId();
     std::list<InstantId> instants;
     r->getInstants(instants);
-    assert(instants.size() == 2);
-    InstantId id = instants.front();
-    assert(id->getTime() == -LATEST_TIME);
-    id = instants.back();
-    assert(id->getTime() == LATEST_TIME);
+    assert(instants.size() == 0);
 
     // Construction with argument setting
     ResourceId rid = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r2"), 189.34, 0, 1000))->getId();
-    instants.clear();
-    rid->getInstants(instants);
-    assert(instants.size() == 2);
-    id = instants.front();
-    assert(id->getTime() == 0);
-    id = instants.back();
-    assert(id->getTime() == 1000);
     assert(rid->getHorizonStart() == 0);
     assert(rid->getHorizonEnd() == 1000);
 
@@ -146,11 +135,10 @@ private:
     r->constrain(t1);
     ce.propagate();
 
-    std::list<TransactionId> transactions;
+    std::set<TransactionId> transactions;
     r->getTransactions(transactions);
     assert(transactions.size() == 1);
     r->free(t1);
-
     transactions.clear();
     r->getTransactions(transactions);
     assert(transactions.empty());
@@ -178,24 +166,34 @@ private:
     
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
+    assert(checkLevelArea(r) == 0);
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, LATEST_TIME), 45, 45))->getId();
     r->constrain(t1);
     ce.propagate();
+    assert(checkSum(r) == (0*1 + 1000*1));
+    assert(checkLevelArea(r) == 1000 * 45);
+
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, LATEST_TIME), 35, 35))->getId();
     r->constrain(t2);
     ce.propagate();
+    assert(checkSum(r) == (0*1 + 1*2 + 1000*2));
+    assert(checkLevelArea(r) == (1*45 + 80*999));
+
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, LATEST_TIME), 20, 20))->getId();
     r->constrain(t3);
     assert(ce.propagate());
+    assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 1000*3));
     assert(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
 
     t2->setEarliest(2);
     assert(ce.propagate());
-    assert(checkLevelArea(r) == (1*45 + 1*45 + 998*100));
+    assert(checkSum(r) == (0*1 + 2*3 + 1000*3));
+    assert(checkLevelArea(r) == (2*45 + 998*100));
 
     t2->setEarliest(1);
     assert(ce.propagate());
+    assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 1000*3));
     assert(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
     DEFAULT_TEARDOWN();
     return(true);
@@ -724,17 +722,17 @@ private:
   static int checkSum(ResourceId r) {
     assert(r != ResourceId::noId());
     r->updateTransactionProfile();
-    std::list<InstantId> allInstants;
-    r->getInstants(allInstants);
     int sum = 0;
-    std::list<InstantId>::iterator it = allInstants.begin();
-    //std::cout << "\n        Transactions  ";
-    while (it != allInstants.end()) {
-      InstantId current = *it;
-      //std::cout <<  current->getTime() << ":[" << current->getTransactionCount() << "] "; 
+    if(loggingEnabled())
+      std::cout << "\n        Transactions  ";
+    const std::map<int, InstantId>& instants = r->getInstants();
+    for(std::map<int, InstantId>::const_iterator it = instants.begin(); it != instants.end(); ++it){
+      InstantId current = it->second;
+      if(loggingEnabled())
+	std::cout <<  current->getTime() << ":[" << current->getTransactionCount() << "] ";
       sum += current->getTime() * current->getTransactionCount();
-      it++;
     }
+
     return(sum);
   }
 
@@ -744,15 +742,28 @@ private:
   static double checkLevelArea(ResourceId r) {
     assert(r != ResourceId::noId());
     r->updateTransactionProfile();
+    const std::map<int, InstantId>& instants = r->getInstants();
     double area = 0;
-    InstantId current = r->getProfileHead();
-    while(current != r->getProfileTail()){
-      area += ((current->getLevelMax() - current->getLevelMin()) * (current->getNext()->getTime() - current->getTime()));
-      current = current->getNext();
+
+    if(instants.empty())
+      return 0;
+
+    std::map<int, InstantId>::const_iterator it = instants.begin();
+    InstantId current = it->second;
+    ++it;
+
+    while(it != instants.end()){
+      InstantId next = it->second;
+      area += ((current->getLevelMax() - current->getLevelMin()) * (next->getTime() - current->getTime()));
+      current = next;
+      ++it;
     }
 
-    // std::cout << "        Level      ";
-    // r->print(std::cout);
+    // Final update is for the last instant, so use the end of the horizon
+    area += ((current->getLevelMax() - current->getLevelMin()) * (r->getHorizonEnd() - current->getTime()));
+
+    //std::cout << "        Level      ";
+    //r->print(std::cout);
     return area;
   }
 

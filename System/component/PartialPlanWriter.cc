@@ -646,9 +646,8 @@ namespace Prototype {
           objOut << rId->getHorizonStart() << COMMA << rId->getHorizonEnd() << COMMA
                  << rId->getInitialCapacity() << COMMA << rId->getLimitMin() << COMMA
                  << rId->getLimitMax() << COMMA;
-          std::list<TransactionId> resTrans;
-          rId->getCurrentTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY);
-          for(std::list<TransactionId>::iterator transIt = resTrans.begin();
+          const std::set<TransactionId>& resTrans = rId->getTransactions();
+          for(std::set<TransactionId>::iterator transIt = resTrans.begin();
               transIt != resTrans.end(); ++transIt) {
             TransactionId trans = *transIt;
             outputToken(trans, T_TRANSACTION, 0, 1, 0, rId, tokOut, varOut);
