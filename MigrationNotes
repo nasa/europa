@@ -1,6 +1,6 @@
 Brief Migration Notes
 
-$Id: MigrationNotes,v 1.5 2004-12-06 23:55:03 wedgingt Exp $
+$Id: MigrationNotes,v 1.6 2004-12-07 00:39:34 wedgingt Exp $
 
 This file is intended to help users of the prior Europa (in the
 NewPlan CVS tree) planning system migrate their projects to this
@@ -131,3 +131,10 @@ equal                           contains [0 0] [0 0]
 meets                           before [0 0]
 met_by                          after [0 0]
 starts                          starts_before [0 0]
+
+Finally, as an example of a temporal relation with an explicit interval,
+presently only supported in Europa1 (NewPlan):
+
+Europa1 DDL			NDDL Constraints
+-----------			----------------
+after [5 10]			EqualSum(Master.start, [5 10], Slave.end);
