@@ -58,6 +58,9 @@
 // In case we want to print out the plan database
 #include "PlanDatabaseWriter.hh"
 
+// Transactions
+#include "../PlanDatabase/DbClientTransactionLog.hh"
+
 // Support for Temporal Network
 #include "TemporalNetwork.hh"
 #include "TemporalPropagator.hh"
@@ -155,6 +158,8 @@ int main(int argc, const char ** argv){
   if (argc == 1) {
     PlanSystem planSystem;
 
+    DbClientTransactionLog * transactions = new DbClientTransactionLog(planSystem.planDatabase->getClient());
+
     if (loggingEnabled()) {
       new CeLogger(std::cout, planSystem.constraintEngine);
       new DbLogger(std::cout, planSystem.planDatabase);
@@ -198,12 +203,19 @@ int main(int argc, const char ** argv){
     PlannerDecisionWriter decisionWriter(planner.getId(), planSystem.planDatabase);
     closedDecisions = decisionWriter.closedDecisionsString();
 
-    // save to file
+    // save decisions
     std::string filename(argv[0]);
     filename += "-decisions.xml";
     std::ofstream out(filename.c_str());
     out << closedDecisions.c_str() << std::endl;
     out.close();
+
+    // save transactions
+    std::string filename2(argv[0]);
+    filename2 += "-transactions.xml";
+    std::ofstream out2(filename2.c_str());
+    transactions->flush(out2);
+    out2.close();
 
     std::cout << "Plan Database:" << std::endl;
     PlanDatabaseWriter::write(planSystem.planDatabase, std::cout);
