@@ -17,6 +17,13 @@
 #include <string>
 #include <list>
 
+#define DEFAULT_SETUP_CE_ONLY(ce) \
+  ConstraintEngine ce; \
+  new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+  new TemporalPropagator(LabelStr("Temporal"), ce.getId());
+
+#define DEFAULT_TEARDOWN_CE_ONLY()
+
 #define DEFAULT_SETUP(ce, db,  autoClose) \
     ConstraintEngine ce; \
     Schema::instance()->reset();\
@@ -463,6 +470,95 @@ private:
   }
 };
 
+
+class TemporalNetworkConstraintEngineOnlyTest {
+public:
+  static bool test() {
+    runTest(testBasicAllocation);
+    runTest(testTemporalPropagation);
+    return true;
+  }
+private:
+
+  static bool testBasicAllocation() {
+    DEFAULT_SETUP_CE_ONLY(ce);
+    ce.propagate();
+    DEFAULT_TEARDOWN_CE_ONLY();
+    return true;
+  }
+  
+
+  /**  
+   *  duplicates behavior of testTemporalPropagation in the TemporalPropagatorTest.
+  */
+
+  static bool testTemporalPropagation() {
+    DEFAULT_SETUP_CE_ONLY(ce);
+
+    IntervalIntDomain domStart = IntervalIntDomain(0,10);
+    IntervalIntDomain domEnd = IntervalIntDomain(0,20);
+    IntervalIntDomain domDur = IntervalIntDomain(1,1000);
+
+    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain> (ce.getId(), domStart, true, "v1"))->getId();
+    ConstrainedVariableId v2 = (new Variable<IntervalIntDomain> (ce.getId(), domDur, true, "v2"))->getId();
+    ConstrainedVariableId v3 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, true, "v3"))->getId();
+    ConstrainedVariableId v4 = (new Variable<IntervalIntDomain> (ce.getId(), domStart, true, "v4"))->getId();
+    ConstrainedVariableId v5 = (new Variable<IntervalIntDomain> (ce.getId(), domDur, true, "v5"))->getId();
+    ConstrainedVariableId v6 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, true, "v6"))->getId();
+
+    v2->specify(IntervalIntDomain(5, 7));
+
+    std::vector<ConstrainedVariableId> temp;
+    temp.push_back(v1);
+    temp.push_back(v2);
+    temp.push_back(v3);
+    ConstraintId duration1 = 
+      ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"), ce.getId(), temp);
+
+    assert(!duration1.isNoId());
+
+    temp.clear();
+    temp.push_back(v4);
+    temp.push_back(v5);
+    temp.push_back(v6);
+    ConstraintId duration2 = 
+      ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"), ce.getId(), temp);
+
+    assert(!duration2.isNoId());
+
+    temp.clear();
+    temp.push_back(v3);
+    temp.push_back(v4);
+    ConstraintId beforeConstraint = 
+      ConstraintLibrary::createConstraint(LabelStr("precedes"), ce.getId(), temp);
+
+    assert(!beforeConstraint.isNoId());
+
+    assert(v1->derivedDomain().getLowerBound() == 0);
+    assert(v1->derivedDomain().getUpperBound() == 5);
+    assert(v3->derivedDomain().getLowerBound() == 5);
+    assert(v3->derivedDomain().getUpperBound() == 10);
+    assert(v4->derivedDomain().getLowerBound() == 5);
+    assert(v4->derivedDomain().getUpperBound() == 10);
+    assert(v6->derivedDomain().getLowerBound() == 6);
+    assert(v6->derivedDomain().getUpperBound() == 20);
+    
+    delete (Constraint*) beforeConstraint;
+    delete (Constraint*) duration1;
+    delete (Constraint*) duration2;
+    delete (ConstrainedVariable*) v1;
+    delete (ConstrainedVariable*) v2;
+    delete (ConstrainedVariable*) v3;
+    delete (ConstrainedVariable*) v4;
+    delete (ConstrainedVariable*) v5;
+    delete (ConstrainedVariable*) v6;
+
+    DEFAULT_TEARDOWN_CE_ONLY();
+    return true;
+  }
+};
+
+
 int main() {
   LockManager::instance().connect();
   LockManager::instance().lock();
@@ -478,6 +574,7 @@ int main() {
   for(int i=0;i<1;i++){
     runTestSuite(TemporalNetworkTest::test);
     runTestSuite(TemporalPropagatorTest::test);
+    runTestSuite(TemporalNetworkConstraintEngineOnlyTest::test);
   }
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
