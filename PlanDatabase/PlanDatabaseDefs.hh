@@ -30,7 +30,8 @@ namespace Prototype {
   typedef Id<PlanDatabaseListener> PlanDatabaseListenerId;
 
   template<class DomainType> class TokenVariable;
-  typedef Id< TokenVariable<EnumeratedDomain> > StateVarId;
+  class StateDomain;
+  typedef Id< TokenVariable<StateDomain> > StateVarId;
   
   typedef Id< TokenVariable<IntervalIntDomain> > TempVarId;
 
