@@ -13,9 +13,9 @@ namespace Prototype {
 
   TokenType::TokenType(const LabelStr& predicateName, 
 				       const std::vector<std::pair<LabelStr, LabelStr> >& domainSpecs) 
-    : m_predicateName(predicateName), m_domainSpecs(domainSpecs) { }
+    : m_predicateName(predicateName), m_domainSpecs(domainSpecs), m_id(this) { }
 
-  TokenType::~TokenType() { check_error(m_id.isValid()); m_id.release(); }
+  TokenType::~TokenType() { check_error(m_id.isValid()); m_id.remove(); }
 
   const TokenTypeId& TokenType::getId() const {
     return m_id;
@@ -30,6 +30,7 @@ namespace Prototype {
   }
 
   const LabelStr TokenType::getIndexKey(const TokenTypeId& tt) {
+    check_error(tt.isValid());
     std::stringstream key;
     check_error(LabelStr::isString(tt->getPredicate()));
     key << tt->getPredicate().getKey(); 
@@ -182,9 +183,9 @@ namespace Prototype {
     m_defaultCompatibilityPriority.clear();
     m_defaultTokenStates.clear();
     m_defaultCandidateOrders.clear();
-    std::map<double,TokenEntry>::iterator it = m_tokenHeuristics.begin();
+    //    std::map<double,TokenEntry>::iterator it = m_tokenHeuristics.begin();
     m_tokenHeuristics.clear();
-    std::map<double,VariableEntry>::iterator it2 = m_variableHeuristics.begin();
+    //    std::map<double,VariableEntry>::iterator it2 = m_variableHeuristics.begin();
     m_variableHeuristics.clear();
   }
 
@@ -232,7 +233,7 @@ namespace Prototype {
 							     const LabelStr& generatorName, 
 							     const std::list<double>& enumeration) {
     LabelStr key("");
-    if (tt.isNoId())
+    if (!tt.isNoId())
       key = HSTSHeuristics::getIndexKey(variableName,tt);
     else
       key = variableName;
