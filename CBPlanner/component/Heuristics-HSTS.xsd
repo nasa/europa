@@ -3,6 +3,13 @@
 targetNamespace="HSTS"
 xmlns="HSTS" elementFormDefault="qualified">
 
+<xs:simpleType name="PriorityPrefType">
+  <xs:restriction base="xs:token">
+    <xs:enumeration value="low"/>
+    <xs:enumeration value="high"/>
+  </xs:restriction>
+</xs:simpleType>
+
 <xs:simpleType name="ValueOrderType">
   <xs:restriction base="xs:token">
     <xs:enumeration value="ascending"/>
@@ -28,7 +35,7 @@ xmlns="HSTS" elementFormDefault="qualified">
 
 <xs:simpleType name="OrderType">
   <xs:restriction base="xs:token">
-     <xs:enumeration value="close"/>
+     <xs:enumeration value="near"/>
      <xs:enumeration value="far"/>
      <xs:enumeration value="early"/>
      <xs:enumeration value="late"/>
@@ -36,6 +43,7 @@ xmlns="HSTS" elementFormDefault="qualified">
      <xs:enumeration value="minFlexible"/>
      <xs:enumeration value="leastSpecified"/>
      <xs:enumeration value="mostSpecified"/>
+     <xs:enumeration value="none"/>
   </xs:restriction>
 </xs:simpleType>
 
@@ -90,7 +98,7 @@ xmlns="HSTS" elementFormDefault="qualified">
 <xs:element name="Defaults" maxOccurs="1" minOccurs="1">
     <xs:complexType>
       <xs:all>
-      <xs:element name="Priority" type="xs:string"/>
+      <xs:element name="PriorityPref" type="PriorityPrefType"/>
       <xs:element name="Compatibility">
           <xs:complexType>
           <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -134,7 +142,7 @@ xmlns="HSTS" elementFormDefault="qualified">
           <xs:element name="DomainOrder">
             <xs:complexType>
             <xs:sequence minOccurs="0" maxOccurs="unbounded">
-                <xs:element name="DomainValue" type="xs:string"/>
+                <xs:element name="Value" type="xs:string"/>
             </xs:sequence>
             </xs:complexType>
           </xs:element>

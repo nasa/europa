@@ -6,7 +6,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="Heuristics-HSTS.xsd">
 
 <Defaults>
- <Priority>low</Priority>
+ <PriorityPref>low</PriorityPref>
  <Compatibility>
    <Priority>24.5</Priority>
    <PredicateSpec>
@@ -58,7 +58,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
 <ConstrainedVariable>
   <Priority>6000.25</Priority>
   <Preference>
-  <Generator>MyCVGenerator</Generator>
+  <Generator>WillNavNextGenerator</Generator>
   </Preference>
   <VariableSpec>
     <Name>WillNavNext</Name>
@@ -76,9 +76,9 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <Priority>6000.25</Priority>
   <Preference>
   <DomainOrder>
-    <DomainValue>OBS_INACTIVE_MEETS_OPNAV</DomainValue>
-    <DomainValue>OBS_INACTIVE_MEETS_INACTIVE_BOUNDARY</DomainValue>
-    <DomainValue>OBS_INACTIVE_MEETS_INACTIVE_INACTIVE</DomainValue>
+    <Value>OBS_INACTIVE_MEETS_OPNAV</Value>
+    <Value>OBS_INACTIVE_MEETS_INACTIVE_BOUNDARY</Value>
+    <Value>OBS_INACTIVE_MEETS_INACTIVE_INACTIVE</Value>
   </DomainOrder>
   </Preference>
   <VariableSpec>
