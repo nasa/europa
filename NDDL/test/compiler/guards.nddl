@@ -39,15 +39,20 @@ class Foo{
 // by the constrain referencing a field. Expect a single 
 // RuleInstance to be created, which is an object guarded instance
 Foo::impliedObjectGuard{
- eq(object.arg1, 10); // Explicit qualification
- eq(allFoo.arg1, [0 100]);
+ eq(object.arg1, 10); // 0: Guarded by object
+ eq(allFoo.arg1, [0 100]); // 1: Guarded by allFoo
 
- //eq(object.arg1, allFoo.arg1); // Multi-variable implicit guard
- //meets(basicToken g1);
- //eq(g1.object.arg1, object.arg1);
+ eq(object.arg1, allFoo.arg1); // 2: Guarded by object and allFoo
+ meets(basicToken g1);
+ eq(g1.object.arg1, object.arg1); // 3: Guarded by g1.object and object
 
  // Guards implied when used on slaves as shown below
- //any(object.arg2.pred t0);
+ if(object){
+  any(object.arg2.pred t0); // 4: Guarded by object
+ }
+ //if(object.arg1 == allFoo.arg1){ // 5: Guarded by object, allFoo, and the test for equality
+  //any(basicToken);
+ //}
 }
 
 // Guard on local variable of objects is implied
@@ -67,6 +72,7 @@ Foo::singletonGuard{
   }
  }
 }
+
 Foo::tokenWithParameters{
  if(bool_arg == true){
   meets(basicToken t1);
