@@ -234,5 +234,24 @@ namespace Prototype {
   private:
     const unsigned int ARG_COUNT;
   };
+
+  /**
+   * @class MemberImplyConstraint
+   * @brief If A is subset of B, then require that C is subset of D.
+   */
+  class MemberImplyConstraint : public Constraint {
+  public:
+    MemberImplyConstraint(const LabelStr& name,
+                          const LabelStr& propagatorName,
+                          const ConstraintEngineId& constraintEngine,
+                          const std::vector<ConstrainedVariableId>& variables);
+
+    ~MemberImplyConstraint() { }
+
+    void handleExecute();
+
+  private:
+    const unsigned int ARG_COUNT;
+  };
 }
 #endif
