@@ -93,21 +93,21 @@ rule FVariantName
 
   switch $(variant) {
   case DEV :
-    return $(name:B=$(name:B)_g) ;
+    return $(name)_g ;
   case OPTIMIZED :
-    return $(name:B=$(name:B)_o) ;
+    return $(name)_o ;
   case PROFILE :
-    return $(name:B=$(name:B)_p) ;
+    return $(name)_p ;
   case CUSTOM :
     local name = $(name) ;
     if $(DEBUG) {
-      name = $(name:B=$(name:B)_g) ;
+      name = $(name)_g ;
     }
     if $(OPTIMIZE) {
-      name = $(name:B=$(name:B)_o) ;
+      name = $(name)_o ;
     }
     if $(PROFILE) {
-      name = $(name:B=$(name:B)_p) ;
+      name = $(name)_p ;
     }
     return $(name) ;
   case * :

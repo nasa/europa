@@ -105,8 +105,8 @@ rule ModuleMain {
       file = [ FGristFiles $(file) ] ;
       SEARCH on $(file) = $(SEARCH_SOURCE) ;
 
-      local output = [ FVariantName $(file) : $(variant) ] ;
-      output = $(output:S=$(SUFOBJ)) ;
+      local output = [ FVariantName $(file:S=) : $(variant) ] ;
+      output = $(output)$(SUFOBJ) ;
       outputs += $(output) ;
       Object [ FGristFiles $(output) ] : $(file) ;
     }
@@ -214,8 +214,8 @@ rule ModulePart {
     local outputs ;
     local file ;
     for file in $(files) {
-      local output = [ FVariantName $(file) : $(variant) ] ;
-      output = $(output:S=$(SUFOBJ)) ;
+      local output = [ FVariantName $(file:S=) : $(variant) ] ;
+      output = $(output)$(SUFOBJ) ;
       outputs += $(output) ;
       Object [ FGristFiles $(output) ] : $(file) ;
     }
@@ -244,7 +244,9 @@ rule FModuleStaticLibraryName {
   local module = $(1) ;
   local variant = $(2) ;
 
-  return [ FVariantName lib$(module:G=)$(SUFLIB) : $(variant) ] ;
+  local name = $(module:G=) ;
+  local libname = [ FVariantName $(name:S=) : $(variant) ] ;
+  return lib$(libname)$(SUFLIB) ;
 }
 
 rule ModuleStaticLibrary {
@@ -264,7 +266,9 @@ rule FModuleSharedLibraryName {
   local module = $(1) ;
   local variant = $(2) ;
 
-  return [ FVariantName lib$(module:G=)$(SUFSHARE) : $(variant) ] ;
+  local name = $(module:G=) ;
+  local libname = [ FVariantName $(name:S=) : $(variant) ] ;
+  return lib$(libname)$(SUFSHARE) ;
 }
 
 rule ModuleSharedLibrary {
