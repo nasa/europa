@@ -17,7 +17,7 @@
 
 SchemaId schema;
 
-//#define PERFORMANCE
+#define PERFORMANCE
 
 extern void averInit(const PLASMA::PlanDatabaseId& db,
                          const PLASMA::DecisionManagerId& dm,
@@ -64,12 +64,16 @@ bool runPlanner(){
   check_error(maxPlannerSteps.isValid());
   int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
 
+#ifndef PERFORMANCE
   averInit(db1.planDatabase, db1.planner->getDecisionManager(),
            db1.constraintEngine, db1.rulesEngine);
+#endif
 
   int res = db1.planner->run(steps);
 
+#ifndef PERFORMANCE
   averDeinit();
+#endif
 
   assert(res == CBPlanner::PLAN_FOUND);
 
