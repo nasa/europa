@@ -1,12 +1,14 @@
 Warning: This file is totally incomplete.
 
 A: Prerequisites:
+
 1. Jam 2.4 or higher.
 2. Java 1.4.2 or higher.
 3. gcc 3.3.3 (Though some prior versions are thought to work, only
    this one is tested regularly & automatically).
 
 B: Optional 3rd Party Software:
+
 1. PlanWorks - recommended for visualization and debugging.
 
 C: Getting started:
@@ -16,6 +18,7 @@ with PLASMA, and give pointers to more detailed documentation to
 assist in the process.
 
 1. Building PLASMA. 
+
 See the file in this directory 'BUILDING' for more details.
 
 2. Ensuring the system is working correctly.
@@ -47,8 +50,9 @@ E. Additional materials
 
 1. ChangeLog file
 2. PLASMA Users Guide
-3. GNATS (see below for URL)
-4. PLASMA Development Team: plasma-developers@postdoc.arc.nasa.gov
+3. MigrationNotes file
+4. GNATS (see below for URL)
+5. PLASMA Development Team: plasma-developers@postdoc.arc.nasa.gov
 
 F. Known Issues
 
