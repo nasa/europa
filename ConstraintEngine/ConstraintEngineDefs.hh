@@ -8,6 +8,7 @@
 #include "CommonDefs.hh"
 #include "Id.hh"
 #include <list>
+#include <cassert>
 
 const bool ALWAYS_FAILS = false;
 
