@@ -101,7 +101,6 @@
       dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
       new DMLogger(std::cout, planner.getDecisionManager()); \
     } \
-    db.close(); \
     HSTSHeuristics heuristics; 
 
 #define DEFAULT_TEARDOWN_PLAN_HEURISTICS() \
