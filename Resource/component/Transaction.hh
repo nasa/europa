@@ -148,14 +148,16 @@ namespace Prototype {
     virtual void close();
 
   protected:
-    static const int USAGE = 4; /*!< Position of quantity variable in list of m_variables when constructed as a NddlTransaction */
+    static const int USAGE = 4; /**< Position of quantity variable in list of m_variables when constructed as a NddlTransaction. */
     ResVarId m_usage;
 
   private:
     // Resource is only class privy to send notifications.
     friend class Resource;
 
-    /*@todo: Move the code in these notifications to other appropriate notifications inherited from the token or object.*/
+    /**
+     * @todo: Move the code in these notifications to other appropriate notifications inherited from the token or object.
+     */
 
     /**
      * @brief Resource notifies the transaction when it has been inserted on the resource.

@@ -223,8 +223,8 @@ namespace Prototype{
      */
     virtual double convert(const double& value) const;
 
-    double m_ub; /*!< The upper bound of the domain */
-    double m_lb; /*!< The lower bound o fthe domain */
+    double m_ub; /**< The upper bound of the domain */
+    double m_lb; /**< The lower bound o fthe domain */
   };
 }
 #endif

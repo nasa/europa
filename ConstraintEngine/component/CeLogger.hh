@@ -6,7 +6,7 @@
 #include <iostream>
 
 namespace Prototype {
-  class CeLogger: public ConstraintEngineListener{
+  class CeLogger : public ConstraintEngineListener {
   public:
     CeLogger(std::ostream& os, const ConstraintEngineId& ce);
     void notifyPropagationCommenced();
@@ -17,7 +17,8 @@ namespace Prototype {
     void notifyExecuted(const ConstraintId& constraint);
     void notifyAdded(const ConstrainedVariableId& variable);
     void notifyRemoved(const ConstrainedVariableId& variable);
-    void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
+    void notifyChanged(const ConstrainedVariableId& variable,
+                       const DomainListener::ChangeType& changeType);
   private:
     std::ostream& m_os;
   };

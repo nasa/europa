@@ -292,11 +292,11 @@ namespace Prototype
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
   }
 
-  /*!< Simple local utility functions */
+  /**< Simple local utility functions */
   double max(double a, double b){return (a > b ? a : b);}
   double min(double a, double b){return (a < b ? a : b);}
 
-  /*!< Helper method to compute new bounds for both X and Y in X*Y==Z */
+  /**< Helper method to compute new bounds for both X and Y in X*Y==Z */
   bool updateMinAndMax(IntervalDomain& targetDomain, 
 		       double denomMin,
 		       double denomMax,

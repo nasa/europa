@@ -18,27 +18,28 @@ using namespace Prototype;
 using namespace NDDL;
 
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
-    ConstraintEngine ce;\
-    Schema schema;\
-    PlanDatabase db(ce.getId(), schema.getId());\
-    new DefaultPropagator(LabelStr("Default"), ce.getId());\
-    if(loggingEnabled()){\
-     new CeLogger(std::cout, ce.getId());\
-     new DbLogger(std::cout, db.getId());\
-    }\
-    Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")));\
-    if(autoClose) db.close();
+    ConstraintEngine ce; \
+    Schema schema; \
+    PlanDatabase db(ce.getId(), schema.getId()); \
+    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+    if (loggingEnabled()) { \
+      new CeLogger(std::cout, ce.getId()); \
+      new DbLogger(std::cout, db.getId()); \
+    } \
+    Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"))); \
+    if (autoClose) \
+      db.close();
 
 class NddlSchemaTest {
 public:
   static bool test() {
     runTest(testObjectPredicateRelationships);
-    return true;
+    return(true);
   }
 
 private:
 
-  static bool testObjectPredicateRelationships(){
+  static bool testObjectPredicateRelationships() {
     NddlSchema schema(LabelStr("TestSchema"));
     schema.addType(LabelStr("Resource"));
     schema.addObjectParent(LabelStr("Resource"), LabelStr("NddlResource"));
@@ -51,32 +52,32 @@ private:
     schema.addPredicate(LabelStr("World.initialState"));
     schema.addObjectPredicate(LabelStr("World"), LabelStr("World.initialState"));
 
-    assert(schema.isPredicateDefined(LabelStr("Resource.change")));
-    assert(schema.isPredicateDefined(LabelStr("World.initialState")));
-    assert(!schema.isPredicateDefined(LabelStr("NOPREDICATE")));
-    assert(schema.isTypeDefined(LabelStr("Resource")));
-    assert(schema.isTypeDefined(LabelStr("World")));
-    assert(schema.isTypeDefined(LabelStr("Battery")));
-    assert(!schema.isTypeDefined(LabelStr("NOTYPE")));
+    check_error(schema.isPredicateDefined(LabelStr("Resource.change")));
+    check_error(schema.isPredicateDefined(LabelStr("World.initialState")));
+    check_error(!schema.isPredicateDefined(LabelStr("NOPREDICATE")));
+    check_error(schema.isTypeDefined(LabelStr("Resource")));
+    check_error(schema.isTypeDefined(LabelStr("World")));
+    check_error(schema.isTypeDefined(LabelStr("Battery")));
+    check_error(!schema.isTypeDefined(LabelStr("NOTYPE")));
 
-    assert(schema.canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
-    assert(schema.canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
-    assert(schema.canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
+    check_error(schema.canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
+    check_error(schema.canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
+    check_error(schema.canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
 
-    assert(!schema.isA(LabelStr("Resource"), LabelStr("Battery")));
-    assert(schema.isA(LabelStr("Battery"), LabelStr("Resource")));
-    assert(schema.isA(LabelStr("Battery"), LabelStr("Battery")));
+    check_error(!schema.isA(LabelStr("Resource"), LabelStr("Battery")));
+    check_error(schema.isA(LabelStr("Battery"), LabelStr("Resource")));
+    check_error(schema.isA(LabelStr("Battery"), LabelStr("Battery")));
 
-    return true;
+    return(true);
   }
 };
 
-
-class R_Predicate_0_Root: public RuleInstance {
+class R_Predicate_0_Root : public RuleInstance {
 public:
   R_Predicate_0_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
-    : RuleInstance(rule, token, planDb){}
-  void handleExecute(){}
+    : RuleInstance(rule, token, planDb) { }
+
+  void handleExecute() { }
 };
 
 DECLARE_AND_DEFINE_RULE(Predicate_0, Predicate);
@@ -84,8 +85,9 @@ DECLARE_AND_DEFINE_RULE(Predicate_0, Predicate);
 class R_Predicate_1_Root: public RuleInstance {
 public:
   R_Predicate_1_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, const ConstrainedVariableId& guard)
-    : RuleInstance(rule, token, planDb, guard){}
-  void handleExecute(){}
+    : RuleInstance(rule, token, planDb, guard) { }
+
+  void handleExecute() { }
 };
 
 DECLARE_AND_DEFINE_SINGLETON_GUARDED_RULE(Predicate_1, Predicate, object);
@@ -93,20 +95,22 @@ DECLARE_AND_DEFINE_SINGLETON_GUARDED_RULE(Predicate_1, Predicate, object);
 class R_Predicate_2_Root: public RuleInstance {
 public:
   R_Predicate_2_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, const ConstrainedVariableId& guard, double value)
-    : RuleInstance(rule, token, planDb, guard, value){}
-  void handleExecute(){}
+    : RuleInstance(rule, token, planDb, guard, value) { }
+
+  void handleExecute() { }
 };
 
 DECLARE_AND_DEFINE_VALUE_GUARDED_RULE(Predicate_2, Predicate, object, 10);
 
 class NddlRuleIntergrationTest{
 public:
-  static bool test(){
+  static bool test() {
     runTest(testBasicComponents);
-    return true;
+    return(true);
   }
+
 private:
-  static bool testBasicComponents(){
+  static bool testBasicComponents() {
     DEFAULT_SETUP(ce, db, schema, true);
     R_Predicate_0 rule0;
     R_Predicate_1 rule1;
@@ -119,8 +123,8 @@ private:
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));
     t0.activate();
-    assert(ce.propagate());
-    return true;
+    check_error(ce.propagate());
+    return(true);
   }
 };
 

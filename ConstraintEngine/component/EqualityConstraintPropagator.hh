@@ -51,12 +51,12 @@ namespace Prototype{
      */
     void equate(const std::set<ConstrainedVariableId>& scope);
 
-    bool m_fullReprop; /*!< True if a constraint has been removed. Otherwise false. */
-    bool m_active; /*!< True if we are in the execute method. Otherwise false. Used to prevent additions to the agenda
+    bool m_fullReprop; /**< True if a constraint has been removed. Otherwise false. */
+    bool m_active; /**< True if we are in the execute method. Otherwise false. Used to prevent additions to the agenda
 		     while we are actively propagating */
 
-    EquivalenceClassCollection m_eqClassCollection; /*!< Does all the real work of managing Equivalence Classes */
-    std::set<int> m_eqClassAgenda; /*!< Inbound notifications are translated into the affected equivalence class and stored here for
+    EquivalenceClassCollection m_eqClassCollection; /**< Does all the real work of managing Equivalence Classes */
+    std::set<int> m_eqClassAgenda; /**< Inbound notifications are translated into the affected equivalence class and stored here for
 				     processing during execution */
   };
 

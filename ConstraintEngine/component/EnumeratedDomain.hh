@@ -256,7 +256,7 @@ namespace Prototype{
     void operator>>(ostream& os) const;
 
   protected:
-    std::set<double> m_values; /*!< Holds the contents from which the set membership is then derived. */
+    std::set<double> m_values; /**< Holds the contents from which the set membership is then derived. */
     bool m_isNumeric;
   };
 }

@@ -35,8 +35,8 @@ namespace Prototype {
      * 3. All Toiens in the sequence are part of Object::getTokens()
      * 4. All Tokens in the sequence must be active
      */
-    std::list<TokenId> m_tokenSequence; /*!< A list indicating the temporal order of Tokens constrained for this timeline */
-    std::map<int, std::list<TokenId>::iterator > m_tokenIndex; /*!< Index to find position in sequence by Token */
+    std::list<TokenId> m_tokenSequence; /**< A list indicating the temporal order of Tokens constrained for this timeline */
+    std::map<int, std::list<TokenId>::iterator > m_tokenIndex; /**< Index to find position in sequence by Token */
 
     static const bool CLEANING_UP = true;
 

@@ -18,8 +18,7 @@ const bool ALWAYS_FAILS = false;
 #define check_error(cond)
 #endif
 
-namespace Prototype
-{
+namespace Prototype {
   class Entity;
   typedef Id<Entity> EntityId;
 

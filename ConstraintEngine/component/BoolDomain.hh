@@ -8,7 +8,7 @@
  */
 #include "IntervalDomain.hh"
 
-namespace Prototype{
+namespace Prototype {
 
   /**
    * @class BoolDomain
@@ -16,8 +16,8 @@ namespace Prototype{
    *
    * Restrictions are:
    * @li Always closed and so always finite.
-   * @li All modification operations on the bounds must be checked to ensure they are integers
-   * @li Only values of 0 and 1 allowed
+   * @li All modification operations on the bounds must be checked to ensure they are integers.
+   * @li Only values of 0 and 1 allowed.
    */
   class BoolDomain: public IntervalDomain {
   public:
@@ -31,14 +31,17 @@ namespace Prototype{
 
   private:
     /**
-     * @brief Enforces integer semantics. Will be compiled out for fast version.
+     * @brief Enforces integer semantics.
+     * @note Might be compiled out for fast version, depending on the compiler.
+     * Only explicitly inline'ing it can ensure it is always completely compiled out.
+     * --wedgingt 2004 Feb 25
      */
     void testPrecision(const double& value) const;
 
     /**
-     * @brief carries out the conversion of the given double to do appropriate rounding
-     * @param value The value to be converetd
-     * @return The value subject to any rounding required for th sub-type (e.g. int)
+     * @brief Carries out the conversion of the given double to do appropriate rounding.
+     * @param value The value to be converted.
+     * @return The value subject to any rounding required for the sub-type (e.g. int).
      */
     double convert(const double& value) const;
   };
