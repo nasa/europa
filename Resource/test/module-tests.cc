@@ -20,6 +20,7 @@
 #include "../PlanDatabase/TokenVariable.hh"
 #include "../PlanDatabase/ObjectTokenRelation.hh"
 #include "../PlanDatabase/DbLogger.hh"
+#include "../PlanDatabase/PartialPlanWriter.hh"
 
 #include <iostream>
 #include <string>
@@ -54,6 +55,7 @@ const double consumptionMax = -50;
     if (loggingEnabled()) {\
     new CeLogger(std::cout, ce.getId());\
     new DbLogger(std::cout, db.getId());\
+    new PlanWriter::PartialPlanWriter(db.getId(), ce.getId());\
     }\
     if(autoClose) db.close();
 
@@ -66,7 +68,7 @@ public:
 private:
   static bool testDefaultSetup() {
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     assert(db.isClosed() == false);
     db.close();
     assert(db.isClosed() == true);
@@ -100,6 +102,7 @@ private:
   static bool testResourceConstructionAndDestruction()
   {
     DEFAULT_SETUP(ce,db,schema,false);
+    
     ResourceId r = (new Resource (db.getId(), LabelStr("AllObjects"), LabelStr("r1")))->getId();
     std::list<InstantId> instants;
     r->getInstants(instants);
@@ -128,6 +131,7 @@ private:
   static bool testBasicTransactionInsertion()
   {
     DEFAULT_SETUP(ce,db,schema,false);
+    
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 10, 0, 1000))->getId();
     //just another resource so that the resource doesnt get bound to singleton and get autoinserted by the propagator
     ResourceId r2 = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r2"), 10, 0, 2000))->getId();
@@ -165,6 +169,7 @@ private:
   static bool testTransactionChangeHandling()
   {
     DEFAULT_SETUP(ce,db,schema,false);
+    
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
 
@@ -188,7 +193,7 @@ private:
   {
     // Test that the right insertion behaviour (in terms of instants) is occuring
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 1, 7))->getId();
     db.close();
@@ -256,7 +261,7 @@ private:
   static bool testLevelCalculation()
   {
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
@@ -309,7 +314,7 @@ private:
   static bool testTransactionUpdates()
   {
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
@@ -339,7 +344,7 @@ private:
   static bool testTransactionRemoval()
   {
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
@@ -395,7 +400,7 @@ private:
   static bool testIntervalCapacityValues()
   {
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
@@ -424,7 +429,7 @@ private:
   static bool testConstraintCheckOnInsertion()
   {
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
@@ -465,7 +470,7 @@ private:
   static bool testRateConstraintViolation()
   {
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
@@ -500,7 +505,7 @@ private:
     // Define input constrains for the resource spec
 
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
@@ -541,7 +546,7 @@ private:
   {
     // Define input constrains for the resource spec
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity + 1, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax + 100, consumptionRateMax, consumptionMax))->getId();
     db.close();
@@ -570,7 +575,7 @@ private:
   static bool testSummationConstraintViolation()
   {
     DEFAULT_SETUP(ce,db,schema,false);
-
+    
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
