@@ -902,8 +902,16 @@ namespace PLASMA {
     assert(result == CBPlanner::PLAN_FOUND);
 
     assert(planner.getTime() != planner.getDepth());
-    assert(planner.getDepth() == 8);
-    assert(planner.getTime() == 13);
+
+    assert(planner.getDepth() == 9);
+    assert(planner.getTime() == 19);
+
+    tokenA.cancel();
+    tokenA.reject();
+    tokenA.getParameters()[0]->reset();
+
+    result = planner.run();
+    assert(result == CBPlanner::PLAN_FOUND);
 
     return true;
   }
