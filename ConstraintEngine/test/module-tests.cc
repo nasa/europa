@@ -57,7 +57,6 @@ public:
 int DelegationTestConstraint::s_executionCount = 0;
 int DelegationTestConstraint::s_instanceCount = 0;
 
-
 class TestListener: public ConstraintEngineListener{
 public:
   TestListener(const ConstraintEngineId& ce):ConstraintEngineListener(ce){
@@ -1829,13 +1828,15 @@ private:
     // prototype treats as intervals all numeric domains that aren't explicitly
     // identified as enumerations.
     // For each file, try twice with different relative paths since we don't know what
-    // directory we're in.
+    // the current working directory is.
     assertTrue(readTestCases(std::string("ConstraintEngine/NewTestCases"), tests) ||
                readTestCases(std::string("NewTestCases"), tests));
     assertTrue(readTestCases(std::string("ConstraintEngine/CLibTestCases"), tests) ||
                readTestCases(std::string("CLibTestCases"), tests));
 
-    // Run each test, in the same order they were read/init'd.
+    // Run each test, in the same order they were read/init'd,
+    //   keeping a count of failed test cases.
+    unsigned int problemCount = 0;
     for ( ; !tests.empty(); tests.pop_front()) {
       // Warn about unregistered constraint names and otherwise ignore tests using them.
       if (!ConstraintLibrary::isRegistered(LabelStr(tests.front().m_constraintName), false)) {
@@ -1908,7 +1909,6 @@ private:
         outputDoms.push_back(domPtr);
         testDomains.pop_front();
       }
-
       assertTrue(scope.size() == outputDoms.size());
 
       // Create and execute the constraint.
@@ -1957,12 +1957,11 @@ private:
 
       // Finish complaining if a compare failed.
       if (problem) {
-        std::cerr << std::endl;
-        throw Prototype::generalUnknownError;
+        std::cerr << '\n';
+        ++problemCount;
       }
 
       // Print that the test succeeded, count the successes for this constraint function, or whatever.
-
       delete (Constraint*) constraint;
       while (!scope.empty()) {
         cVarId = scope.back();
@@ -1970,9 +1969,15 @@ private:
         delete (ConstrainedVariable*) cVarId;
       }
     }
+    if (problemCount > 0) {
+      std::cerr << __FILE__ << ':' << __LINE__ << ": testArbitraryConstraints() failed "
+                << problemCount << " test cases" << std::endl;
+      throw Prototype::generalUnknownError;
+    }
     return(true);
   }
-};
+
+}; // class ConstraintTest
 
 class FactoryTest
 {
