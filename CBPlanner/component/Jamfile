@@ -12,6 +12,8 @@ ModuleComponent CBPlanner
 	ObjectDecisionPoint.cc
 	TemporalVariableCondition.cc
 	TokenDecisionPoint.cc
+	TokenChoice.cc
+	ValueChoice.cc
 	;
 
 } # PLASMA_READY
