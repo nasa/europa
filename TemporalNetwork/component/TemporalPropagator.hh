@@ -30,6 +30,11 @@ namespace Prototype {
     bool canFitBetween(const TempVarId& start, const TempVarId& end,
 		       const TempVarId& predend, const TempVarId& succstart);
 
+    /**
+     * @see TemporalAdvisor
+     */
+    bool canBeConcurrent(const TempVarId& first, const TempVarId& second);
+
     void addListener(const TemporalNetworkListenerId& listener);
 
   protected:

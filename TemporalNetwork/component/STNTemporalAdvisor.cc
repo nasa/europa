@@ -8,27 +8,31 @@
 
 namespace Prototype {
 
-  STNTemporalAdvisor::STNTemporalAdvisor(const PropagatorId& propagator): m_propagator(propagator) {
-    check_error (TemporalPropagatorId::convertable(propagator));
-    //    std::cout << "STN Advisor being constructed" << m_id << std::endl;
+  STNTemporalAdvisor::STNTemporalAdvisor(const TemporalPropagatorId& propagator): m_propagator(propagator) {
 }
 
   STNTemporalAdvisor::~STNTemporalAdvisor(){
-    //    std::cout << "STN Advisor being destroyed" << m_id << std::endl;
   }
 
   bool STNTemporalAdvisor::canPrecede(const TokenId& first, const TokenId& second){    
     if (!DefaultTemporalAdvisor::canPrecede(first, second))
       return false;
 
-    bool retval = ((TemporalPropagatorId)m_propagator)->canPrecede(first->getEnd(), second->getStart());
+    bool retval = m_propagator->canPrecede(first->getEnd(), second->getStart());
     return (retval);
   }
 
   bool STNTemporalAdvisor::canFitBetween(const TokenId& token, const TokenId& predecessor, const TokenId& successor){
     if (!DefaultTemporalAdvisor::canFitBetween(token, predecessor, successor))
       return false;
-    return ((TemporalPropagatorId)m_propagator)->canFitBetween(token->getStart(), token->getEnd(), predecessor->getEnd(), successor->getStart());
+    return m_propagator->canFitBetween(token->getStart(), token->getEnd(), predecessor->getEnd(), successor->getStart());
   }
 
+  bool STNTemporalAdvisor::canBeConcurrent(const TokenId& first, const TokenId& second){
+    if(m_propagator->canBeConcurrent(first->getStart(), second->getStart()) &&
+       m_propagator->canBeConcurrent(first->getEnd(), second->getEnd()))
+      return true;
+    else
+      return false;
+  }
 }

@@ -2,8 +2,8 @@
 #define _H_STNTemporalAdvisor
 
 #include "PlanDatabaseDefs.hh"
-#include "TemporalAdvisor.hh"
 #include "DefaultTemporalAdvisor.hh"
+#include "TemporalNetworkDefs.hh"
 
 namespace Prototype{
 
@@ -11,15 +11,16 @@ namespace Prototype{
 
   public:
 
-    STNTemporalAdvisor(const PropagatorId& propagator);
+    STNTemporalAdvisor(const TemporalPropagatorId& propagator);
     virtual ~STNTemporalAdvisor();
 
     virtual bool canPrecede(const TokenId& first, const TokenId& second);
     virtual bool canFitBetween(const TokenId& token, const TokenId& predecessor,
 			       const TokenId& successor);
+    virtual bool canBeConcurrent(const TokenId& first, const TokenId& second);
 
   private:
-    PropagatorId m_propagator;
+    TemporalPropagatorId m_propagator;
 
   };
 

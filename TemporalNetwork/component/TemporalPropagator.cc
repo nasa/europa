@@ -355,6 +355,10 @@ namespace Prototype {
     return (!m_tnet->isDistanceLessThan(pend,sstart,minDurationOfToken));
   }
 
+  bool TemporalPropagator::canBeConcurrent(const TempVarId& first, const TempVarId& second) {
+   return canPrecede(first, second) && canPrecede(second, first);
+  }
+
   void TemporalPropagator::updateTimepoint(const TempVarId& var){
     check_error(var.isValid());
     check_error(var->getIndex() != DURATION_VAR_INDEX);
