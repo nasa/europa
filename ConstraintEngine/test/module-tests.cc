@@ -19,6 +19,7 @@
 #include "LabelStr.hh"
 #include "IntervalIntDomain.hh"
 #include "IntervalRealDomain.hh"
+#include "BoolDomain.hh"
 
 #include <iostream>
 #include <cassert>
@@ -328,6 +329,10 @@ private:
     assert( ! (d3 == d4));
     d3 = d4;
     assert(d3 == d4);
+
+    BoolDomain boolDomain;
+    assert(boolDomain.isFinite());
+    assert(boolDomain.getUpperBound() == 1);
     return true;
   }
 
