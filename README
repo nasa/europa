@@ -1,4 +1,6 @@
-Warning: This file is totally incomplete.
+Warning: This file is likely still incomplete.  Please report any
+issues you have (with this file or any other part of the distribution)
+using the GNATS issue reporting system mentioned below.
 
 A: Prerequisites:
 
@@ -14,24 +16,25 @@ B: Optional 3rd Party Software:
 C: Getting started:
 
 In this section we provide brief details on how to get up an running
-with PLASMA, and give pointers to more detailed documentation to
-assist in the process.
+with Europa2 (informally known as PLASMA by the development team), and
+give pointers to more detailed documentation to assist in the process.
 
-1. Building PLASMA. 
+1. Building Europa2
 
 See the file in this directory 'BUILDING' for more details.
 
 2. Ensuring the system is working correctly.
 
-Once you have successfully built PLASMA, run 'jam run-all-tests'.
-This will build and execute a significant number of module tests.
+Once you have successfully built Europa2, run 'jam run-all-tests'.
+This will build and execute a significant number of module and system
+tests.
 
 3. Creating your own project
 
 A script is available to get you started with your own project.  It
 will create a directory for your project as a sibling directory to
 PLASMA and populate it with a build setup, initial model, initial
-state, and a main executable to use a standard PLASMA assembly,
+state, and a main executable to use a standard Europa2 assembly,
 including a planner.  We will illustrate it's use with a sample
 project called SampleProject:
 
@@ -44,18 +47,25 @@ You will observe that an executable is built and executed, resulting
 in a plan.  You may know change the model and initial state and simpy
 retype 'jam SampleProject' to rebuild as necessary and rerun.
 
-D. Troubleshooting
-
-E. Additional materials
+D. Additional materials
 
 1. ChangeLog file
-2. PLASMA Users Guide
+2. Europa2 Users Guide
 3. MigrationNotes file
 4. GNATS (see below for URL)
-5. PLASMA Development Team: plasma-developers@postdoc.arc.nasa.gov
+5. Europa2 Development Team: plasma-developers@postdoc.arc.nasa.gov
 
-F. Known Issues
+E. Known Issues
 
 See GNATS reports filed in the PLASMA category under Query at:
 
 http://ic.arc.nasa.gov/cgi-bin/gnatsweb.pl?database=ic-gnats
+
+The Europa GNATS category is for the "prequel" project, now referred
+to as Europa1 and/or NewPlan (after the CVS repository it is stored
+in).
+
+F. Troubleshooting
+
+Please report any issues or problems using "Create" at the GNATS URL
+just above.  For crashes, gdb backtraces are very helpful.
