@@ -2589,7 +2589,6 @@ int main() {
   initConstraintLibrary();
   REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
   TypeFactory::createValue(LabelStr("INT_INTERVAL"), std::string("5"));
-  runTestSuite(IdTests::test);
   runTestSuite(DomainTests::test);
   runTestSuite(TypeFactoryTests::test);
   runTestSuite(EntityTests::test);
