@@ -6,10 +6,16 @@ if ! $(PLASMA_READY) {
 # Heuristics Tests
 #
 
-HSTS_Test_Files = [ FGristFiles AtSubgoalRule HSTSModuleTests ] ;
+HSTS_Test_Files = [ FGristFiles AtSubgoalRule HSTSModuleTests DNPConstraints ] ;
 ModuleObjects $(HSTS_Test_Files:S=.cc) : HSTS ;
 
-ModuleMain hsts-module-tests : $(HSTS_Test_Files:S=$(SUFOBJ)) module-tests.cc DNPConstraints.cc : HSTS : CBPlanner ;
+CET_Files = <ConstraintEngine!test>ConstraintTesting ;
+
+# ConstraintTesting.hh is in ConstraintEngine/test, not here.
+# !!This doesn't work, however, so I've changed the source to '#include "test/ConstraintingTest.hh"' to see if that works.
+# INCLUDES on module-tests.cc += [ FDirName $($(_top)) ConstraintEngine test ] ;
+
+ModuleMain hsts-module-tests : $(HSTS_Test_Files:S=$(SUFOBJ)) $(CET_Files:S=$(SUFOBJ)) module-tests.cc : HSTS : CBPlanner ;
 RunModuleMain run-hsts-module-tests : hsts-module-tests ;
 
 # Commented out tests are failing for various reasons; see each test for more info.
