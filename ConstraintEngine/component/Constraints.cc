@@ -292,7 +292,7 @@ namespace EUROPA {
     }
     // If it is a Boolean domain then set it to be the alternate
     if (domy.getType() == AbstractDomain::BOOL) {
-      domy.set(!value);
+      domy.intersect(BoolDomain(!value));
       return(true);
     }
     if (domx.compareEqual(domx.getSingletonValue(), domy.getLowerBound())) {
@@ -1249,8 +1249,12 @@ namespace EUROPA {
       // and restrict them to 0.
       for (i = 1; i < m_variables.size(); i++) {
         AbstractDomain& other = getCurrentDomain(m_variables[i]);
-        if (other.isMember(0.0) && !other.isSingleton())
-          other.set(0.0);
+        if (other.isMember(0.0) && !other.isSingleton()) {
+          AbstractDomain* zero = other.copy();
+          zero->set(0.0);
+          other.intersect(*zero);
+          delete zero;
+        }
       }
     }
 
@@ -1638,7 +1642,7 @@ namespace EUROPA {
     yMax = (yMax <= 0 ? yMax : 0);
     yMin = (yMin <= yMax ? yMin : 0);
 
-    if(domx.intersect(-yMax, -yMin) && domx.isEmpty())
+    if (domx.intersect(-yMax, -yMin) && domx.isEmpty())
       return;
 
     domy.intersect(-xMax, -xMin);
@@ -1653,19 +1657,22 @@ namespace EUROPA {
     check_error(AbstractDomain::canBeCompared(getCurrentDomain(variables[X]), getCurrentDomain(variables[Y])));
   }
   
-  void TestEqConstraint::handleExecute(){
+  void TestEqConstraint::handleExecute() {
     AbstractDomain& domX = getCurrentDomain(m_variables[X]);
     AbstractDomain& domY = getCurrentDomain(m_variables[Y]);
     AbstractDomain& domZ = getCurrentDomain(m_variables[Z]);
 
     check_error(!domX.isEmpty() && !domY.isEmpty() && !domZ.isEmpty());
 
-    // If neither one is not a singleton, just ignore. Could do more, perhaps!
-    if(!domX.isSingleton() || !domY.isSingleton())
-      return;
-
-    bool result = (domX == domY);
-    domZ.set(result);
+    bool result;
+    if (domX.isSingleton() && domY.isSingleton())
+      result = (domX == domY);
+    else
+      if (domX.intersects(domY))
+        return;
+      else
+        result = false;
+    domZ.intersect(BoolDomain(result));
   }
 
 
