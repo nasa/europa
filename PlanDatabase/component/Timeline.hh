@@ -27,8 +27,19 @@ namespace Prototype {
     void constrainToSingleton(const TokenId& token, const AbstractDomain& domain, const ConstrainedVariableId& var);
 
     std::list<TokenId> m_tokenSequence;
-    std::map<double, std::list<TokenId>::iterator > m_tokenIndex;
-    std::multimap<double, ConstraintId> m_constraints;
+    std::map<int, std::list<TokenId>::iterator > m_tokenIndex;
+
+    class ConstraintEntry{
+    public:
+      ConstraintEntry(const ConstraintId& constrain, const TokenId& first, const TokenId& second = TokenId::noId());
+      ~ConstraintEntry();
+      bool isValid() const;
+      ConstraintId m_constraint;
+      TokenId m_first;
+      TokenId m_second;
+    };
+
+    std::list<ConstraintEntry*> m_constraints;
   };
 }
 

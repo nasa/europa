@@ -24,7 +24,25 @@
 namespace Prototype {
 
   bool can_precede(const TokenId& first, const TokenId& second){
-    return (first->getEnd()->getDerivedDomain().getLowerBound() <= second->getStart()->getDerivedDomain().getUpperBound());
+    int earliest_end = (int) first->getEnd()->getDerivedDomain().getLowerBound();
+    int latest_start = (int) second->getStart()->getDerivedDomain().getUpperBound();
+    return (earliest_end <= latest_start);
+  }
+
+
+  bool canFitBetween(const TokenId& token, const TokenId& predecessor, const TokenId& successor){
+      check_error(successor != predecessor);
+      check_error(token != successor);
+      check_error(token != predecessor);
+
+      int latest_start = (int) successor->getStart()->getDerivedDomain().getUpperBound();
+      int earliest_end = (int) predecessor->getEnd()->getDerivedDomain().getLowerBound();
+      int min_duration = latest_start - earliest_end;
+
+      if(min_duration >= token->getDuration()->getDerivedDomain().getLowerBound())
+	return true;
+      else
+	return false;
   }
 
   Timeline::Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
@@ -35,14 +53,16 @@ namespace Prototype {
 
   Timeline::~Timeline(){
     // Clean up outstanding constraints
-    for(std::multimap<double, ConstraintId>::const_iterator it = m_constraints.begin(); it != m_constraints.end(); ++it)
-      delete (Constraint*) it->second;
+    for(std::list<ConstraintEntry*>::const_iterator it = m_constraints.begin(); it != m_constraints.end(); ++it)
+      delete *it;
   }
 
 
   void Timeline::getOrderingChoices(const TokenId& token, std::vector<TokenId>& results){
     check_error(results.empty());
     check_error(token.isValid());
+    check_error(getPlanDatabase()->getConstraintEngine()->propagate()); // Must not be inconsistent
+    check_error(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end());
 
     // Special cases, the sequence is empty.
     if(m_tokenSequence.empty()){
@@ -78,12 +98,9 @@ namespace Prototype {
       // Prune if the token cannot fit between tokens
       TokenId predecessor = *previous;
       TokenId successor = *current;
-      check_error(successor != predecessor);
-      int min_duration = 
-	successor->getStart()->getDerivedDomain().getUpperBound() - predecessor->getEnd()->getDerivedDomain().getLowerBound();
 
-      if(min_duration >= token->getDuration()->getDerivedDomain().getLowerBound())
-	results.push_back(token);
+      if(canFitBetween(token, predecessor, successor))
+	results.push_back(successor);
 
       previous = current++;
     }
@@ -98,7 +115,7 @@ namespace Prototype {
     const std::set<TokenId>& tokensForThisObject = getTokens();
     for(std::set<TokenId>::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it){
       TokenId token = *it;
-      if(m_tokenIndex.find(token) == m_tokenIndex.end() && token->isActive())
+      if(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end() && token->isActive())
 	results.push_back(token);
     }
   }
@@ -108,9 +125,10 @@ namespace Prototype {
 
   void Timeline::constrain(const TokenId& token, const TokenId& successor){
     check_error(token.isValid());
-    check_error(m_constraints.find((double)token) == m_constraints.end());
     check_error(isValid());
     check_error(token->isActive());
+    check_error(successor.isNoId() || (successor.isValid() && successor->isActive()));
+    check_error(token != successor);
 
     if(getTokens().count(token) == 0)
       Object::add(token);
@@ -118,13 +136,15 @@ namespace Prototype {
     // Constrain the object variable to a singleton of this object
     std::list<ObjectId> singleton;
     singleton.push_back(getId());
-    constrainToSingleton(token, ObjectSet(singleton), token->getObject());
+    ObjectSet base = token->getObject()->getBaseDomain();
+    base.set(getId());
+    constrainToSingleton(token, base, token->getObject());
     constrainToSingleton(token, BooleanDomain(false), token->getRejectability());
 
     if(m_tokenSequence.empty()){
       check_error(successor.isNoId());
       m_tokenSequence.push_back(token);
-      m_tokenIndex.insert(std::make_pair(token, m_tokenSequence.begin()));
+      m_tokenIndex.insert(std::make_pair(token->getKey(), m_tokenSequence.begin()));
       return;
     }
 
@@ -146,7 +166,7 @@ namespace Prototype {
 
     // Conduct insertion for token sequence and index
     pos = m_tokenSequence.insert(pos, token);
-    m_tokenIndex.insert(std::make_pair(token, pos));
+    m_tokenIndex.insert(std::make_pair(token->getKey(), pos));
 
     check_error(first != second);
     check_error(*pos == token);
@@ -160,7 +180,7 @@ namespace Prototype {
     ConstraintId constraint =  ConstraintLibrary::createConstraint(LabelStr("Before"),
 								   getPlanDatabase()->getConstraintEngine(),
 								   vars);
-    m_constraints.insert(std::make_pair(token, constraint));
+    m_constraints.push_back(new ConstraintEntry(constraint, first, second));
     check_error(isValid());
   }
 
@@ -169,16 +189,20 @@ namespace Prototype {
     check_error(isValid());
   
     // Remove Token's constraints if there are any
-    std::multimap<double, ConstraintId>::const_iterator constraint_it = m_constraints.find(token);
-    while (constraint_it != m_constraints.end() && constraint_it->first == token){
-      delete (Constraint*) constraint_it->second;
-      ++constraint_it;
+    std::list<ConstraintEntry*>::iterator it = m_constraints.begin();
+    while(it != m_constraints.end()){
+      ConstraintEntry* ce = *it;
+      check_error(ce->isValid());
+      if (ce->m_first == token || ce->m_second == token){
+	delete ce;
+	it = m_constraints.erase(it);
+      }
+      else
+	it++;
     }
-    // Now remove from the map
-    m_constraints.erase(token);
 
     // Clean up TokenSequence and TokenIndex data structures
-    std::map<double, std::list<TokenId>::iterator >::iterator token_it = m_tokenIndex.find(token);
+    std::map<int, std::list<TokenId>::iterator >::iterator token_it = m_tokenIndex.find(token->getKey());
     if(token_it != m_tokenIndex.end()){
       m_tokenSequence.erase(token_it->second);
       m_tokenIndex.erase(token_it);
@@ -196,6 +220,20 @@ namespace Prototype {
 								  getPlanDatabase()->getConstraintEngine(),
 								  var,
 								  domain);
-    m_constraints.insert(std::make_pair(token, constraint));
+    m_constraints.push_back(new ConstraintEntry(constraint, token));
+  }
+
+  Timeline::ConstraintEntry::ConstraintEntry(const ConstraintId& constraint, const TokenId& first, const TokenId& second)
+    :m_constraint(constraint), m_first(first), m_second(second){}
+
+  Timeline::ConstraintEntry::~ConstraintEntry(){
+    check_error(m_constraint.isValid());
+    delete (Constraint*) m_constraint;
+  }
+
+  bool Timeline::ConstraintEntry::isValid() const{
+    return (m_constraint.isValid() &&
+	    m_first.isValid() &&
+	    (m_second.isNoId() || m_second.isValid()));
   }
 }
