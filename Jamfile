@@ -20,6 +20,7 @@ SubInclude PLASMA CBPlanner ;
 SubInclude PLASMA TemporalNetwork ;
 SubInclude PLASMA NDDL ;
 SubInclude PLASMA System ;
+SubInclude PLASMA Aver ;
 SubInclude PLASMA HSTS ;
 
 RemoveBinaries clean-all ;
