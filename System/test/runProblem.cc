@@ -30,7 +30,12 @@ bool runPlanner(){
   
   assert(assembly.plan(initialTransactions, averTestFile) == CBPlanner::PLAN_FOUND);
 
+#ifdef PERFORMANCE
+  std::cout << "runProblem found a plan at depth " << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched() << std::endl;
+  //  assembly.write(std::cout);
+#else
   assembly.write(std::cout);
+#endif
 
   // Store transactions for recreation of database
 

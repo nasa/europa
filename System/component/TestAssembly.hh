@@ -51,6 +51,12 @@ namespace EUROPA {
 
     const PlanDatabaseId& getPlanDatabase() const;
 
+    const unsigned int getTotalNodesSearched() const;
+    const unsigned int getDepthReached() const;
+
+  private:
+    unsigned int m_totalNodes;
+    unsigned int m_finalDepth;
   };
 }
 #endif

@@ -178,6 +178,9 @@ namespace EUROPA {
 
     CBPlanner::Status retval = planner.run(steps);
     
+    m_totalNodes = planner.getTime();
+    m_finalDepth = planner.getDepth();
+
     if(averFile != NULL)
       AverInterp::terminate();
     
@@ -201,4 +204,9 @@ namespace EUROPA {
   const PlanDatabaseId& TestAssembly::getPlanDatabase() const {
     return m_planDatabase;
   }
+
+  const unsigned int TestAssembly::getTotalNodesSearched() const { return m_totalNodes; }
+
+  const unsigned int TestAssembly::getDepthReached() const { return m_finalDepth; }
+
 }
