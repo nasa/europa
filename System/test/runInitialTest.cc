@@ -133,7 +133,7 @@ bool runPlanner(){
 
     PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
-    assert(res == 1);
+    assert(res == CBPlanner::PLAN_FOUND);
 
     // Store transactions for recreation of database
     if(replay) {
