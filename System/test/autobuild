@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.73 2004-09-17 05:40:36 wedgingt Exp $
+# $Id: autobuild,v 1.74 2004-09-17 06:12:44 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -17,7 +17,7 @@ cd "$startdir"
 # Don't run this script more than once in the same directory.
 mkdir working || exit 1
 
-trap 'rmdir $startdir/working; rm -f $startdir/.tokens.$$' 0
+trap 'rmdir $startdir/working' 0
 
 rm -rf Old
 test -d Prior && mv Prior Old
@@ -36,6 +36,7 @@ then
      echo '';
      echo 'PLASMA directory already present or configuration botch; aborting autobuild') | \
     Mail -s 'PLASMA Autobuild on '"`hostname`"' in '"`pwd`"' aborted' "$email"
+  mkdir working/aborted
   exit 2
 fi
 
@@ -89,47 +90,56 @@ do
       mkdir PLASMA/cvs.co.failed
       (echo "$info"; echo ''; echo "'cvs co PLASMA' failed; aborting autobuild"; tail cvs.co.PLASMA) | \
           Mail -s 'PLASMA Autobuild cvs checkout on '"`hostname`"' in '"`pwd`"' failed' "$email"
+      mkdir working/failed
       exit "$status"
     fi
 
     cd PLASMA
 
-    jam -sVARIANTS=$var -sLIBRARIES=$libmethod > jam.output.$var.$libmethod 2>&1
-    statusJam=$?
-    echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"' in '"`pwd`"' exited '"$statusJam"
-    if test $statusJam = 0
+    cmd='jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
+
+    $cmd > jam.build.$var.$libmethod 2>&1
+    status=$?
+    echo "$cmd"' in '"`pwd`"' exited '"$status"
+    if test $status -ne 0
     then
-      jam -sVARIANTS=$var -sLIBRARIES=$libmethod tests run-nddl-tests run-nddl-planner-tests > jam.tests.$var.$libmethod 2>&1
-      statusJamTests=$?
-      echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"'tests run-nddl-tests run-nddl-planner-tests " in '"`pwd`"' exited '"$statusJamTests"
-      if test $statusJamTests = 0
+      (echo "$info"; echo ''; echo "$cmd"' in '"`pwd`"' exited '"$status"; more jam.*.$var < /dev/null) | \
+          Mail -s 'PLASMA Autobuild '"$cmd"' (compile) on '"`hostname`"' failed' "$email"
+      mkdir working/failed
+      exit $status
+    fi
+
+    for target in tests run-nddl-tests run-nddl-planner-tests
+    do
+      $cmd $target >> jam.tests.$var.$libmethod 2>&1
+      status=$?
+      echo "$cmd"' in '"`pwd`"' exited '"$status"
+      if test $status -ne 0
       then
-        jam -sVARIANTS=$var -sLIBRARIES=$libmethod clean > jam.clean.$var.$libmethod 2>&1
-        statusJamClean=$?
-        echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"' clean" in '"`pwd`"' exited '"$statusJamClean"
-        if test $statusJamClean = 0
-        then
-          (echo "$info"; echo ''; echo 'PLASMA autobuild, variant '"$var"' and library method '"$libmethod"' in '"`pwd`"' passed.';
-              more jam.*.$var.$libmethod < /dev/null) | \
-            Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
-        else
-          (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"' clean" in '"`pwd`"' exited '"$statusJamClean"; more jam.*.$var < /dev/null) | \
-              Mail -s 'PLASMA Autobuild jam '"$var"' '"$libmethod"' clean on '"`hostname`"' failed' "$email"
-          exit $statusJamClean
-        fi
-      else
-        (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"' tests run-nddl-tests run-nddl-planner-tests" in '"`pwd`"' exited '"$statusJamTests"; more jam.*.$var < /dev/null) | \
-            Mail -s 'PLASMA Autobuild jam '"$var"' '"$libmethod"' tests on '"`hostname`"' failed' "$email"
-        exit $statusJamTests
+        (echo "$info"; echo ''; echo "$cmd"' in '"`pwd`"' exited '"$status"; more jam.*.$var < /dev/null) | \
+          Mail -s 'PLASMA Autobuild '"$cmd"' on '"`hostname`"' failed' "$email"
+        mkdir working/failed
+        exit $status
       fi
+    done
+
+    $cmd clean > jam.clean.$var.$libmethod 2>&1
+    status=$?
+    echo "$cmd"' in '"`pwd`"' exited '"$status"
+    if test $status -ne 0
+    then
+      (echo "$info"; echo ''; echo "$cmd"' in '"`pwd`"' exited '"$status"; more jam.*.$var < /dev/null) | \
+          Mail -s 'PLASMA Autobuild '"$cmd"' on '"`hostname`"' failed' "$email"
+      mkdir working/failed
+      exit $status
     else
-      (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"'" -sLIBRARIES='"$libmethod"' in '"`pwd`"' exited '"$statusJam"; more jam.*.$var < /dev/null) | \
-          Mail -s 'PLASMA Autobuild jam '"$var"' '"$libmethod"' compile on '"`hostname`"' failed' "$email"
-      exit $statusJam
+      (echo "$info"; echo ''; echo 'PLASMA autobuild of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
+          more jam.*.$var.$libmethod < /dev/null) | \
+        Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
     fi
 
     # Save the jam output files.
-    mv -f jam.*.$var ..
+    mv -f jam.* ..
 
     cd ..
 
