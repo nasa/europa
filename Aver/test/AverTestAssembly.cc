@@ -23,7 +23,6 @@
 // Support for Temporal Network
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
-#include "TemporalConstraints.hh"
 
 // Support for registered constraints
 #include "ConstraintLibrary.hh"

@@ -15,7 +15,6 @@
 #include "Schema.hh"
 #include "StandardAssembly.hh"
 #include "SymbolDomain.hh"
-#include "TemporalConstraints.hh"
 #include "TemporalPropagator.hh"
 #include "Test.hh"
 #include "Token.hh"

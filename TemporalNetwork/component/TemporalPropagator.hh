@@ -6,9 +6,12 @@
 #include "TemporalNetworkDefs.hh"
 #include "TimepointWrapper.hh"
 #include "IntervalIntDomain.hh"
-#include "TemporalConstraints.hh"
 
 #include <set>
+
+/**
+ * @author Conor McGann & Sailesh Ramakrishnan
+ */
 
 namespace EUROPA {
 

@@ -10,7 +10,6 @@
 #include "Timeline.hh"
 #include "Utils.hh"
 #include "IntervalIntDomain.hh"
-#include "TemporalConstraints.hh"
 #include "LockManager.hh"
 
 #include "RulesEngine.hh"
@@ -623,7 +622,7 @@ private:
     temp.push_back(v2);
     temp.push_back(v3);
     ConstraintId duration1 = 
-      ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"), ce.getId(), temp);
+      ConstraintLibrary::createConstraint(LabelStr("temporalDistance"), ce.getId(), temp);
 
     assertTrue(!duration1.isNoId());
 
@@ -632,7 +631,7 @@ private:
     temp.push_back(v5);
     temp.push_back(v6);
     ConstraintId duration2 = 
-      ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"), ce.getId(), temp);
+      ConstraintLibrary::createConstraint(LabelStr("temporalDistance"), ce.getId(), temp);
 
     assertTrue(!duration2.isNoId());
 
@@ -685,7 +684,7 @@ private:
     temp.push_back(v2);
     temp.push_back(v3);
     ConstraintId constraint = 
-      ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"),
+      ConstraintLibrary::createConstraint(LabelStr("temporalDistance"),
                                           ce.getId(), temp);
     bool consistent = ce.propagate();
     std::vector<ConstrainedVariableId> fromvars;

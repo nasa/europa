@@ -78,7 +78,7 @@ namespace EUROPA{
     temp.push_back(m_end);
 
     ConstraintId temporalRelation = 
-      ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"), 
+      ConstraintLibrary::createConstraint(LabelStr("temporalDistance"), 
 					  m_planDatabase->getConstraintEngine(), temp);
 
     m_standardConstraints.insert(temporalRelation);

@@ -7,8 +7,11 @@
 #include "ConstrainedVariable.hh"
 #include "Constraint.hh"
 #include "Utils.hh"
-#include "TemporalConstraints.hh"
 #include "Debug.hh"
+
+/**
+ * @author Conor McGann & Sailesh Ramakrishnan
+ */
 
 // @todo: there are cases where we may be able to fail early during the
 // mapping from the constraint engine to the temporal network.  In these
@@ -19,14 +22,14 @@
 
 namespace EUROPA {
 
-  //#ifndef EUROPA_FAST
+#ifndef EUROPA_FAST
 #define  publish(message){\
     for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)\
       (*lit)->message;\
 }
-//#else
-//#define publish(message)
-//#endif
+#else
+#define publish(message)
+#endif
 
   typedef Id<TimepointWrapper> TimepointWrapperId;
 
@@ -43,22 +46,6 @@ namespace EUROPA {
 
   void TemporalPropagator::notifyDeleted(const ConstrainedVariableId& tempVar, const TimepointId& tp) {
     check_error(!Entity::isPurging());
-    ////// std::cout << "deleting from temporal propagator" << tempVar->getKey() << std::endl;
-/*
-    for(std::map<int,ConstrainedVariableId>::iterator it = m_changedVariables.begin();
-	it != m_changedVariables.end(); ++it) {
-      if (!it->second.isValid()) 
-	if (it->second.isNoId()) 
-	  ////// std::cout << "TP::notifyDeleted m_changedVariables contains a bogus entry." << std::endl;
-	else {
-	  //  m_changedVariables.erase(it);
-	  ////// std::cout << "TP::notifyDeleted m_changedVariables contains a non valid entry." << it->second->getKey() << "," << it->first << std::endl;
-	}
-      else
-	if (it->second.isNoId())
-	  //////std::cout << "TP::notifyDeleted m_changedVaraibles contains a valid but noId entry." << std::endl;
-    }
-*/
     m_changedVariables.erase(tempVar->getKey());
     m_activeVariables.erase(tempVar->getKey());
     EntityId tw = tempVar->getExternalEntity();
@@ -71,16 +58,12 @@ namespace EUROPA {
     const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
     m_changedConstraints.insert(constraint);
     if (scope.size() == 3) {//Ternary distance constraint
-      if (ConstrainedVariableId::convertable(scope[TemporalDistanceConstraint::SRC_VAR_INDEX]))
-	buffer(scope[TemporalDistanceConstraint::SRC_VAR_INDEX]);
-      if (ConstrainedVariableId::convertable(scope[TemporalDistanceConstraint::DEST_VAR_INDEX]))
-	buffer(scope[TemporalDistanceConstraint::DEST_VAR_INDEX]);
+      buffer(scope[0]);
+      buffer(scope[2]);
     }
     else { // indexes for precedes and concurrent are the same
-      if (ConstrainedVariableId::convertable(scope[ConcurrentConstraint::SRC_VAR_INDEX]))
-	buffer(scope[ConcurrentConstraint::SRC_VAR_INDEX]);
-      if (ConstrainedVariableId::convertable(scope[ConcurrentConstraint::DEST_VAR_INDEX]))
-	buffer(scope[ConcurrentConstraint::DEST_VAR_INDEX]);
+      buffer(scope[0]);
+      buffer(scope[1]);
     }
   }
 
@@ -103,21 +86,21 @@ namespace EUROPA {
     ConstrainedVariableId var;
     const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
     if (scope.size() == 3) {//Ternary distance constraint
-      var = scope[TemporalDistanceConstraint::SRC_VAR_INDEX];
+      var = scope[0];
       buffer(var);
       m_activeVariables.insert(std::make_pair<int, ConstrainedVariableId>(var->getKey(),var)); 
-      var = scope[TemporalDistanceConstraint::DEST_VAR_INDEX];
+      var = scope[2];
       buffer(var);
       m_activeVariables.insert(std::make_pair<int, ConstrainedVariableId>(var->getKey(),var)); 
 
     }
     else {
-      var = scope[ConcurrentConstraint::SRC_VAR_INDEX];
+      var = scope[0];
       buffer(var);
       m_activeVariables.insert(std::make_pair<int, ConstrainedVariableId>(var->getKey(),var)); 
-      var = scope[ConcurrentConstraint::DEST_VAR_INDEX];
+      var = scope[1];
       buffer(var);
-      var = scope[ConcurrentConstraint::DEST_VAR_INDEX];
+      m_activeVariables.insert(std::make_pair<int, ConstrainedVariableId>(var->getKey(),var)); 
     }
   }
 
@@ -142,13 +125,19 @@ namespace EUROPA {
 					      int argIndex, 
 					      const ConstraintId& constraint, 
 					      const DomainListener::ChangeType& changeType){
-    check_error(constraint->isActive());
+    debugMsg("TemporalPropagator:handleNotification",
+	     variable->toString() << " change through " << constraint->getName().toString());
 
-    if(TemporalDistanceConstraintId::convertable(constraint))
-      m_changedConstraints.insert(constraint);
+    checkError(constraint->isActive(),
+		"Receieved a change notification for inactive constraint " << constraint->getName().toString() <<
+		". Must be a bug in the ConstraintEngine.");
 
-    // Only buffer change for start or end variables
-    if(variable != constraint->getScope()[TemporalDistanceConstraint::DISTANCE_VAR_INDEX]) {
+    m_changedConstraints.insert(constraint);
+
+    // Only buffer variable change for registered active variables
+    if(m_activeVariables.find(variable->getKey()) != m_activeVariables.end()){
+      debugMsg("TemporalPropagator:handleNotification",
+	     variable->toString() << " is buffered for update.");
       m_changedVariables.insert(std::make_pair<int,ConstrainedVariableId>(variable->getKey(),variable));
     }
   }
@@ -222,34 +211,36 @@ namespace EUROPA {
   }
 
   void TemporalPropagator::addTemporalConstraint(const ConstraintId& constraint) {
-    ConstrainedVariableId start;
-    ConstrainedVariableId end;
+    static const LabelStr sl_temporaldistance("temporaldistance");
+    static const LabelStr sl_temporalDistance("temporalDistance");
+    static const LabelStr sl_concurrent("concurrent");
+    static const LabelStr sl_precedes("precedes");
+    static const LabelStr sl_before("before");
+
+    checkError(constraint->getScope().size() == 2 || constraint->getScope().size() == 3,
+	       "Invalid argument count of " << constraint->getScope().size() <<
+	       " for constraint " << constraint->getName().toString());
+
+    checkError(constraint->getName() == sl_temporaldistance ||
+	       constraint->getName() == sl_temporalDistance ||
+	       constraint->getName() == sl_concurrent ||
+	       constraint->getName() == sl_precedes ||
+	       constraint->getName() == sl_before,
+	       "Invalid constraint name " << constraint->getName().toString() << " for temporal propagation.");
+
+    ConstrainedVariableId start = constraint->getScope()[0];
+    ConstrainedVariableId end = constraint->getScope()[1];
     Time lb=0;
     Time ub=0;
 
-    if (TemporalDistanceConstraintId::convertable(constraint)) {
-      start = constraint->getScope()[TemporalDistanceConstraint::SRC_VAR_INDEX];
-      end = constraint->getScope()[TemporalDistanceConstraint::DEST_VAR_INDEX];
-      ConstrainedVariableId distance = constraint->getScope()[TemporalDistanceConstraint::DISTANCE_VAR_INDEX];
-
+    if(constraint->getScope().size() == 3){
+      ConstrainedVariableId distance = end;
+      end = constraint->getScope()[2];
       lb = (Time) distance->lastDomain().getLowerBound();
       ub = (Time) distance->lastDomain().getUpperBound();
     }
-    else if (ConcurrentConstraintId::convertable(constraint)) {
-      start = constraint->getScope()[ConcurrentConstraint::SRC_VAR_INDEX];
-      end = constraint->getScope()[ConcurrentConstraint::DEST_VAR_INDEX];      
-      lb = 0;
-      ub = 0;
-    }
-    else if (constraint->getName() == LabelStr("before") || constraint->getName() == LabelStr("precedes")) {
-      start = constraint->getScope()[0];
-      end = constraint->getScope()[1];      
-      lb = 0;
+    else if (constraint->getName() != sl_concurrent)
       ub = g_infiniteTime();
-    }
-    else {
-      check_error(ALWAYS_FAILS, "Adding an unknown " + constraint->getName().toString() + " constraint to the temporal propagator.");
-    }
 
     const TimepointId& startTp = getTimepoint(start);
     const TimepointId& endTp = getTimepoint(end);
@@ -339,6 +330,7 @@ namespace EUROPA {
       IntervalIntDomain& dom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(var));
 
       check_error(!dom.isEmpty());
+
       checkError(dom.isMember(lb) && dom.isMember(ub), 
 		 "Updated bounds [" << lb << " " << ub << "] are outside of " 
 		 << dom.toString() << " for " << var->toString());
@@ -455,8 +447,8 @@ namespace EUROPA {
     // We should only handle changes for a duration constraint. Note that this may change
     // when we have variable distance constraints in the system. Should generalize the scheme
     // at that time.
-    if(TemporalDistanceConstraintId::convertable(constraint)) {
-      const ConstrainedVariableId& distance = constraint->getScope()[TemporalDistanceConstraint::DISTANCE_VAR_INDEX];
+    if(constraint->getScope().size() == 3) {
+      const ConstrainedVariableId& distance = constraint->getScope()[1];
       check_error(distance->lastDomain().getType() == AbstractDomain::INT_INTERVAL, constraint->getKey() + " is invalid")
       const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
       Time lbt=0, ubt=0;
@@ -536,20 +528,7 @@ namespace EUROPA {
     m_listeners.insert(listener);
   }
 
-//   const LabelStr& TemporalPropagator::durationConstraintName(){
-//     static const LabelStr sl_durationConstraintName("StartEndDurationRelation");
-//     return sl_durationConstraintName;
-//   }
-
   bool TemporalPropagator::isValidForPropagation() const {
-    //The set of all constraints managed by this propagator must only be one of Precedes, Concurrent or TemporalDistance
-    for(std::list<ConstraintId>::const_iterator it = getConstraints().begin(); it != getConstraints().end(); ++it){
-      ConstraintId constraint = *it;
-      if (! TemporalDistanceConstraintId::convertable(constraint) 
-	  && ! PrecedesConstraintId::convertable(constraint) 
-	  && ! ConcurrentConstraintId::convertable(constraint))
-	return false;
-    }
 
     // The set of active variables should not be empty
     if(m_activeVariables.empty()) {

@@ -148,8 +148,8 @@ namespace EUROPA {
       const char * target = element.Attribute("target");
       TokenId origin_token = parseToken(origin);
       TokenId target_token = parseToken(target);
-      check_error(origin_token.isValid());
-      check_error(target_token.isValid());
+      checkError(origin_token.isValid(), "Invalid token for label '" << origin << "'");
+      checkError(target_token.isValid(), "Invalid token for label '" << target << "'");
       if (strcmp(relation, "before") == 0) {
         construct_constraint(precedes, origin, End, target, Start);
         return;
