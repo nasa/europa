@@ -6,6 +6,7 @@
 #include "BinaryCustomConstraint.hh"
 #include "NotFalseConstraint.hh"
 #include "ConditionalRule.hh"
+#include "ObjectDecisionPoint.hh"
 
 extern bool loggingEnabled();
 
@@ -769,7 +770,87 @@ namespace Prototype {
     return true;
   }
 
-  bool testObjectDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, CBPlanner& planner) {
+  bool testObjectDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
+
+    hor.setHorizon(10,500);
+
+    Timeline t1(db.getId(), LabelStr("Objects"), LabelStr("Timeline1"));
+    Object o1(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
+    db.close();
+
+    IntervalToken tokenB(db.getId(), 
+			 LabelStr("PredicateB"), 
+			 false,
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(200, 200),
+			 LabelStr("Timeline1"));
+
+    tokenB.activate();
+
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    std::list<DecisionPointId> decisions;
+    planner.getDecisionManager()->getOpenDecisions(decisions);
+    DecisionPointId dec = decisions.front();
+    assert(ObjectDecisionPointId::convertable(dec));
+
+    tokenB.cancel();
+
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    decisions.clear();
+    planner.getDecisionManager()->getOpenDecisions(decisions);
+    dec = decisions.front();
+    assert(!ObjectDecisionPointId::convertable(dec));
+    assert(TokenDecisionPointId::convertable(dec));
+    
+    tokenB.activate();
+
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    decisions.clear();
+    planner.getDecisionManager()->getOpenDecisions(decisions);
+    dec = decisions.front();
+    assert(ObjectDecisionPointId::convertable(dec));
+
+    tokenB.getStart()->specify(0);
+
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    decisions.clear();
+    planner.getDecisionManager()->getOpenDecisions(decisions);
+    dec = decisions.front();
+    assert(ObjectDecisionPointId::convertable(dec));
+
+    tokenB.cancel();
+
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    decisions.clear();
+    planner.getDecisionManager()->getOpenDecisions(decisions);
+    dec = decisions.front();
+    assert(!ObjectDecisionPointId::convertable(dec));
+
+    assert(tokenB.getStart()->getDerivedDomain().isSingleton());
+    assert(tokenB.getStart()->getDerivedDomain().getSingletonValue() == 0);
+
+    return true;
+  }
+
+  bool testObjectHorizonImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
+
+    Object o1(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
+    db.close();
+
+    IntervalToken tokenB(db.getId(), LabelStr("PredicateB"), false);
+
+    hor.setHorizon(10,100);
+
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 0); 
+
+    tokenB.activate();
+
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 0); 
+
+    tokenB.getStart()->specify(50);
+
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
 
     return true;
   }

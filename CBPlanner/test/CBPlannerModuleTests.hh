@@ -54,7 +54,9 @@ bool testMultipleDMsImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema,
 
   bool testTokenDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner);
 
-  bool testObjectDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, CBPlanner& planner);
+  bool testObjectDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner);
+
+  bool testObjectHorizonImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner);
 
   bool testAddSubgoalAfterPlanningImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner);
 }
