@@ -1,46 +1,133 @@
 #include "DbClientTransactionLog.hh"
+#include "Object.hh"
 #include "Token.hh"
+#include "XmlUtils.hh"
 
 namespace Prototype {
 
   DbClientTransactionLog::DbClientTransactionLog(const DbClientId& client): DbClientListener(client) {}
 
-  DbClientTransactionLog::~DbClientTransactionLog(){}
+  DbClientTransactionLog::~DbClientTransactionLog(){
+    std::list<TiXmlElement*>::const_iterator iter;
+    for (iter = m_bufferedTransactions.begin() ; iter != m_bufferedTransactions.end() ; iter++) {
+      delete *iter;
+    }
+    m_bufferedTransactions.empty();
+  }
 
   void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object){
-
+    TiXmlElement * element = new TiXmlElement("new");
+    check_error(LabelStr::isString(object->getName()));
+    element->SetAttribute("name", object->getName().toString());
+    m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object, const std::vector<ConstructorArgument>& arguments){
-    m_bufferedTransactions += "OBJECT CREATED\n";
+    TiXmlElement * element = new TiXmlElement("new");
+    if (LabelStr::isString(object->getName())) {
+      element->SetAttribute("name", object->getName().toString());
+    }
+    std::vector<ConstructorArgument>::const_iterator iter;
+    for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
+      element->LinkEndChild(abstractDomainAsXml(iter->second));
+    }
+    m_bufferedTransactions.push_back(element);
   }
 
-  void DbClientTransactionLog::notifyClosed(){}
+  void DbClientTransactionLog::notifyClosed(){
+    TiXmlElement * element = new TiXmlElement("close");
+    m_bufferedTransactions.push_back(element);
+  }
 
-  void DbClientTransactionLog::notifyClosed(const LabelStr& objectType){}
+  void DbClientTransactionLog::notifyClosed(const LabelStr& objectType){
+    TiXmlElement * element = new TiXmlElement("close");
+    element->SetAttribute("name", objectType.toString());
+    m_bufferedTransactions.push_back(element);
+  }
 
   void DbClientTransactionLog::notifyTokenCreated(const TokenId& token){
     m_keysOfTokensCreated.push_back(token->getKey());
-    m_bufferedTransactions += "TOKEN CREATED\n";
+    TiXmlElement * element = new TiXmlElement("goal");
+    TiXmlElement instance("predicateinstance");
+    instance.SetAttribute("name", m_keysOfTokensCreated.size());
+    check_error(LabelStr::isString(token->getName()));
+    instance.SetAttribute("type", token->getName().toString());
+    element->InsertEndChild(instance);
+    m_bufferedTransactions.push_back(element);
   }
 
-  void DbClientTransactionLog::notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor){}
+  void DbClientTransactionLog::notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor){
+    TiXmlElement * element = new TiXmlElement("constrain");
+    TiXmlElement path("token");
+    path.SetAttribute("path", pathAsString(getPathByToken(token, m_keysOfTokensCreated)));
+    element->InsertEndChild(path);
+    if (!successor.isNoId()) {
+      TiXmlElement successorPath("token");
+      successorPath.SetAttribute("path", pathAsString(getPathByToken(successor, m_keysOfTokensCreated)));
+      element->InsertEndChild(successorPath);
+    }
+    m_bufferedTransactions.push_back(element);
+  }
 
-  void DbClientTransactionLog::notifyActivated(const TokenId& token){}
+  void DbClientTransactionLog::notifyActivated(const TokenId& token){
+    TiXmlElement * element = new TiXmlElement("activate");
+    TiXmlElement path("token");
+    path.SetAttribute("path", pathAsString(getPathByToken(token, m_keysOfTokensCreated)));
+    element->InsertEndChild(path);
+    m_bufferedTransactions.push_back(element);
+  }
 
-  void DbClientTransactionLog::notifyMerged(const TokenId& token, const TokenId& activeToken){}
+  void DbClientTransactionLog::notifyMerged(const TokenId& token, const TokenId& activeToken){
+    TiXmlElement * element = new TiXmlElement("merge");
+    TiXmlElement path("token");
+    path.SetAttribute("path", pathAsString(getPathByToken(token, m_keysOfTokensCreated)));
+    element->InsertEndChild(path);
+    TiXmlElement activePath("token");
+    activePath.SetAttribute("path", pathAsString(getPathByToken(activeToken, m_keysOfTokensCreated)));
+    element->InsertEndChild(activePath);
+    m_bufferedTransactions.push_back(element);
+  }
 
-  void DbClientTransactionLog::notifyRejected(const TokenId& token){}
+  void DbClientTransactionLog::notifyRejected(const TokenId& token){
+    TiXmlElement * element = new TiXmlElement("reject");
+    TiXmlElement path("token");
+    path.SetAttribute("path", pathAsString(getPathByToken(token, m_keysOfTokensCreated)));
+    element->InsertEndChild(path);
+    m_bufferedTransactions.push_back(element);
+  }
 
   void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint){}
 
   void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint, const AbstractDomain& domain){}
 
-  void DbClientTransactionLog::notifyVariableSpecified(const ConstrainedVariableId& variable){}
+  void DbClientTransactionLog::notifyVariableSpecified(const ConstrainedVariableId& variable){
+    TiXmlElement * element = new TiXmlElement("specify");
+    TiXmlElement var("variable");
+    const EntityId& parent = variable->getParent();
+    if (parent != EntityId::noId()) {
+      if (TokenId::convertable(parent)) {
+        var.SetAttribute("token", pathAsString(getPathByToken(parent, m_keysOfTokensCreated)));
+      } else {
+        check_error(ALWAYS_FAILS);
+      }
+    }
+    if (variable->getIndex() != ConstrainedVariable::NO_INDEX) {
+      var.SetAttribute("index", variable->getIndex());
+    } else {
+      var.SetAttribute("key", variable->getKey());
+    }
+    element->InsertEndChild(var);
+    element->LinkEndChild(abstractDomainAsXml(&variable->specifiedDomain()));
+    m_bufferedTransactions.push_back(element);
+  }
 
   void DbClientTransactionLog::flush(std::ostream& os){
-    os << m_bufferedTransactions;
-    m_bufferedTransactions = "";
+    std::list<TiXmlElement*>::const_iterator iter;
+    for (iter = m_bufferedTransactions.begin() ; iter != m_bufferedTransactions.end() ; iter++) {
+      os << **iter << endl;
+      delete *iter;
+    }
+    m_bufferedTransactions.empty();
   }
 
   void DbClientTransactionLog::play(std::istream& is){}

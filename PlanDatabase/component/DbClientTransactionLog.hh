@@ -2,9 +2,12 @@
 #define _H_DbClientTransactionLog
 
 #include "DbClientListener.hh"
+#include <list>
 #include <vector>
 #include <string>
 #include <iostream>
+
+class TiXmlElement;
 
 /**
  * @file DbClientTransactionLog
@@ -53,7 +56,7 @@ namespace Prototype {
 
   private:
     std::vector<int> m_keysOfTokensCreated;
-    std::string m_bufferedTransactions;
+    std::list<TiXmlElement*> m_bufferedTransactions;
   };
 }
 #endif
