@@ -1,0 +1,18 @@
+Known areas of performance improvement:
+1. Filtered Flaw Caching.
+2. Object Filtering.
+3. Deletion of the database.
+4. Update of variables from Temporal Network.
+5. Splitting merged tokens in a non-chronological backtrack.
+
+M_3: <Under development>
+1. Nddl Compiler Cleanup
+2. Added Factories to NddlCompiler generation.
+3. Added DbClient for playing logged transactions.
+
+M_2:
+1. Working integration of the Temporal Network
+2. Support for nested guards.
+
+M_1:
+1. Baseline TAG.
