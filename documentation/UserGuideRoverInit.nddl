@@ -43,3 +43,10 @@ experiment.destination.specify(rock4); // Want to get to rock4
 goal(Stowable_Instrument.Stowed stowed);
 eq(stowed.object,spirit.rat);
 stowed.start.specify(0);
+
+goal(Camera.StandBy cstandby);
+cstandby.start.specify(0);
+
+goal(Instrument.StandBy istandby);
+eq(istandby.object,spirit.antenna);
+istandby.start.specify(0);

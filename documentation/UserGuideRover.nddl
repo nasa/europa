@@ -57,7 +57,9 @@ class Instrument {
   int position_speed;
   eq(position_speed, duration);
  }
-
+ 
+ predicate StandBy {}
+ 
  predicate Positioned { }
 
 }
@@ -153,6 +155,8 @@ Instrument::Position{
  Rover rovers;
  commonAncestor(at.object, this.object, rovers);
 
+ meets(object.Positioned p); 
+
  starts(Battery.change tx);
  eq(tx.quantity, -20);
 }
@@ -178,7 +182,7 @@ Stowable_Instrument::Stow{
  Rover rovers;
  commonAncestor(at.object, this.object, rovers);
 
- meets(Stowed a);
+// meets(Stowed a);
  met_by(Position b);
 
  starts(Battery.change tx);
@@ -188,12 +192,16 @@ Stowable_Instrument::Stow{
 
 Stowable_Instrument::Stowed {
  met_by(Stow a);
- meets(Unstow b);
+// meets(Unstow b);
 }
 
 Stowable_Instrument::Unstowed {
  met_by(Unstow a);
  meets(Position b);
+}
+
+Stowable_Instrument::StandBy {
+ met_by(Stowed a);
 }
 
 Camera::ShootRequest {
@@ -252,4 +260,18 @@ Navigator::Going {
  // Pull juice from the battery. Should be based on path length.
  starts(Battery.change tx);
  eq(tx.quantity, p.cost);
+
+ // Ensure all instruments are in standby
+
+ Rover myRover;
+ eq(myRover.nav,object);
+ if (myRover) { 
+   Instrument instruments;
+   commonAncestor(instruments,this.object,myRover);
+   foreach (i in instruments) {
+     contained_by(Instrument.StandBy s);
+     eq(s.object,i);
+   };
+ }
+
 }
