@@ -52,10 +52,12 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << "predicate Pointing {" << std::endl;
   out << " Target observation;" << std::endl;
   out << " eq(duration, [1 1]);" << std::endl;
-  out << " Domain " << prob.parameters[1] << ";" << std::endl;
-  out << " Domain " << prob.parameters[2] << ";" << std::endl;
-  out << " perf(" << prob.parameters[1] << ", " << prob.parameters[2] << ");" << std::endl;
-  out << " perf(" << prob.parameters[2] << ", " << prob.parameters[1] << ");" << std::endl;
+  if (prob.numParams >= 2) {
+    out << " Domain " << prob.parameters[1] << ";" << std::endl;
+    out << " Domain " << prob.parameters[2] << ";" << std::endl;
+    out << " perf(" << prob.parameters[1] << ", " << prob.parameters[2] << ");" << std::endl;
+    out << " perf(" << prob.parameters[2] << ", " << prob.parameters[1] << ");" << std::endl;
+  }
   for (int i=3; i <= prob.numParams; ++i) {
     out << " Domain " << prob.parameters[i] << ";" << std::endl;
     out << " perf(" << prob.parameters[i] << ", " << prob.parameters[1] << ");" << std::endl;
@@ -66,10 +68,12 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << " Target to;" << std::endl;
   out << " neq(from, to);" << std::endl;
   out << " eq(duration, [1 1]);" << std::endl;
-  out << " Domain " << prob.parameters[1] << ";" << std::endl;
-  out << " Domain " << prob.parameters[2] << ";" << std::endl;
-  out << " perf(" << prob.parameters[1] << ", " << prob.parameters[2] << ");" << std::endl;
-  out << " perf(" << prob.parameters[2] << ", " << prob.parameters[1] << ");" << std::endl;
+  if (prob.numParams >= 2) {
+    out << " Domain " << prob.parameters[1] << ";" << std::endl;
+    out << " Domain " << prob.parameters[2] << ";" << std::endl;
+    out << " perf(" << prob.parameters[1] << ", " << prob.parameters[2] << ");" << std::endl;
+    out << " perf(" << prob.parameters[2] << ", " << prob.parameters[1] << ");" << std::endl;
+  }
   for (int i=3; i <= prob.numParams; ++i) {
     out << " Domain " << prob.parameters[i] << ";" << std::endl;
     out << " perf(" << prob.parameters[i] << ", " << prob.parameters[1] << ");" << std::endl;
