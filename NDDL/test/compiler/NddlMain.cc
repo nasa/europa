@@ -83,4 +83,5 @@ int main(){
   Rule::purgeAll();
   ObjectFactory::purgeAll();
   TokenFactory::purgeAll();
+  ConstraintLibrary::purgeAll();
 }
