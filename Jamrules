@@ -4,5 +4,6 @@
   include [ FDirName $(SUBDIR) CommonRules ] ;
   include [ FDirName $(SUBDIR) AntlrRules ] ;
   include [ FDirName $(SUBDIR) ModuleRules ] ;
+  include [ FDirName $(SUBDIR) NddlRules ] ;
 }
 

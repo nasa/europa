@@ -156,40 +156,40 @@ cp McGann/java/src/nddl/SharedWriter.java PLASMA/NDDL/core/java/nddl/
 cp McGann/java/src/nddl/VariableWriter.java PLASMA/NDDL/core/java/nddl/
 cp McGann/java/src/nddl/XMLUtil.java PLASMA/NDDL/core/java/nddl/
 
-# McGann/java/tests -> PLASMA/NDDL/test/
+# McGann/java/tests -> PLASMA/NDDL/test/parser/
 
-cp McGann/java/tests/BasicClassDeclarations.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/DNP-transliteration.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/allocationTests.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/attributedTemporalRelations.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/camera.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/constraints.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/constructorTests.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/enumTests.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/existentialQuantification.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/extendQualified.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/globals.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/includer.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/initial-state.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/initializerTests.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/inner-classes.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/inner-enums.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/keyword-example.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/labeledSubgoals.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/local-vars.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/location.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/missionaries.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/multipleSubgoals.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/otherFile.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/pns-conf-test.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/predicatePrototypes.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/rover-camera.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/rover.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/simpleInstantiation.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/structureTests.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/switchTests.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/temporalNumericIntervals.nddl PLASMA/NDDL/test/
-cp McGann/java/tests/transitional-subgoaling.nddl PLASMA/NDDL/test/
+cp McGann/java/tests/BasicClassDeclarations.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/DNP-transliteration.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/allocationTests.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/attributedTemporalRelations.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/camera.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/constraints.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/constructorTests.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/enumTests.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/existentialQuantification.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/extendQualified.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/globals.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/includer.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/initial-state.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/initializerTests.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/inner-classes.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/inner-enums.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/keyword-example.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/labeledSubgoals.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/local-vars.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/location.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/missionaries.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/multipleSubgoals.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/otherFile.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/pns-conf-test.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/predicatePrototypes.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/rover-camera.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/rover.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/simpleInstantiation.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/structureTests.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/switchTests.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/temporalNumericIntervals.nddl PLASMA/NDDL/test/parser/
+cp McGann/java/tests/transitional-subgoaling.nddl PLASMA/NDDL/test/parser/
 
 # McGann/NddlCompiler -> PLASMA/NDDL
 
@@ -198,6 +198,26 @@ cp McGann/NddlCompiler/NddlUtils.cc PLASMA/NDDL/core/
 cp McGann/NddlCompiler/NddlUtils.hh PLASMA/NDDL/core/
 
 cp McGann/NddlCompiler/module-tests.cc PLASMA/NDDL/test/
+
+# temporary
+cp McGann/NddlCompiler/Plasma.nddl PLASMA/NDDL/test/
+cp McGann/NddlCompiler/Resources.nddl PLASMA/NDDL/test/
+
+# McGann/NddlCompiler/test -> PLASMA/NDDL/test/compiler/
+
+cp McGann/NddlCompiler/test/class-constructor.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/existential.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/guards.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/interval-constants.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/less-basic-model.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/multi-resources.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/no-world.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/plasma-base.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/simple-class.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/simple-predicate.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/simple-resources.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/simple-rules.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/subclass.nddl PLASMA/NDDL/test/compiler/
 
 # McGann/PlanDatabase -> PLASMA/Planner/component/
 

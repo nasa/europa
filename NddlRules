@@ -1,0 +1,55 @@
+if ! $(NddlRules_INCLUDED) {
+NddlRules_INCLUDED = TRUE ;
+
+include [ FDirName $(SUBDIR) JavaRules ] ;
+
+# TRACE_NDDL ?= TRUE ;
+
+# NddlCompiler model.hh model.cc : model.xml ;
+rule NddlCompiler {
+  local code = $(1) ;
+  local xml = $(2) ;
+
+  if $(TRACE_NDDL) = TRUE {
+    Echo NddlCompiler $(code) . $(xml) ;
+  }
+
+  SEARCH on $(xml) = $(SEARCH_SOURCE) ;
+  Depends $(code) : nddl.jar ;
+  Depends $(code) : $(xml) ;
+  MakeLocate $(code) : $(LOCATE_TARGET) ;
+  Clean clean : $(code) ;
+}
+
+actions NddlCompiler {
+  $(JAVA) -cp $(CLASSPATH) nddl.NddlCompiler $(2) 
+}
+
+# NddlParser model.xml : model.nddl ;
+rule NddlParser {
+  local xml = $(1) ;
+  local nddl = $(2) ;
+
+  if $(TRACE_NDDL) = TRUE {
+    Echo NddParser $(xml) . $(nddl) ;
+  }
+
+  NddlParser1 $(xml) : [ FGristSourceFiles $(nddl) ] ;
+}
+
+rule NddlParser1 {
+  local xml = $(1) ;
+  local nddl = $(2) ;
+
+  SEARCH on $(nddl) = $(SEARCH_SOURCE) ;
+  Depends $(xml) : nddl.jar ;
+  Depends $(xml) : $(nddl) ;
+  MakeLocate $(xml) : $(LOCATE_TARGET) ;
+  Clean clean-nddl-xml : $(xml) ;
+}
+
+actions NddlParser1 {
+  $(JAVA) -cp $(CLASSPATH) nddl.Parse -q -o $(1) $(2) 
+}
+
+} # NddlRules_INCLUDED

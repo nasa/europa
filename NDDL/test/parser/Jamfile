@@ -1,0 +1,27 @@
+SubDir PLASMA NDDL test parser ;
+
+NDDL_PARSER_TESTS = 
+	BasicClassDeclarations.nddl       keyword-example.nddl
+	DNP-transliteration.nddl          labeledSubgoals.nddl
+	allocationTests.nddl              local-vars.nddl
+	attributedTemporalRelations.nddl  location.nddl
+	camera.nddl                       missionaries.nddl
+	constraints.nddl                  multipleSubgoals.nddl
+	constructorTests.nddl             otherFile.nddl
+	enumTests.nddl                    pns-conf-test.nddl
+	existentialQuantification.nddl    predicatePrototypes.nddl
+	extendQualified.nddl              rover-camera.nddl
+	globals.nddl                      rover.nddl
+	includer.nddl                     simpleInstantiation.nddl
+	initial-state.nddl                structureTests.nddl
+	initializerTests.nddl             switchTests.nddl
+	inner-classes.nddl                temporalNumericIntervals.nddl
+	inner-enums.nddl                  transitional-subgoaling.nddl
+	;
+
+local parser_test ;
+for parser_test in $(NDDL_PARSER_TESTS) {
+  local xml = $(parser_test:S=.xml) ;
+  LocalDepends tests : $(xml) ;
+  NddlParser $(xml) : $(parser_test) ;
+}
