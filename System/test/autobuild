@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.61 2003-12-01 01:51:28 wedgingt Exp $
+# $Id: autobuild,v 1.62 2003-12-13 09:46:10 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -116,9 +116,9 @@ do
 
     if test $statusMakeTar = 0
     then
-        make $makeopt plannerTests unofficial >> make.tests 2>&1
+        make $makeopt plannerTests unofficial timings >> make.tests 2>&1
         status=$?
-        echo '"make '"$makeopt"' unofficial" in '"`pwd`"' exited '"$status"
+        echo '"make '"$makeopt"' plannerTests unofficial timings" in '"`pwd`"' exited '"$status"
 
         if test $status = 0
         then
@@ -153,7 +153,7 @@ do
 
     if test $statusMakeTar$status$statusTarExtract$statusMakeDist$statusMakeDistClean$statusMakeClean = 000000
     then
-        (uname -a; echo ''; cat make.options; echo ''; g++ --version) | \
+        (uname -a; echo ''; cat make.options; echo ''; g++ --version; echo ''; cat NewPlan/SupportFiles/timings) | \
             Mail -s 'Autobuild on '"`hostname`"' in '"`pwd`"' succeeded' "$email"
 
         # If appropriate, look for and save the profiling data
