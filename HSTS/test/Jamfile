@@ -24,12 +24,12 @@ LocalDepends tests : run-hsts-module-tests ;
 LocalDepends run-hsts-planner-tests :
 	monkey-timeline monkey-timeline-hacked monkey-timeline-hacked2 monkey-timeline-hacked3
         monkey1-timeline1
-#       monkey1-timeline-objvar
+        monkey1-timeline-objvar
 #       monkey1-timeline-twomonkeys-objvar
 #       monkey1-timeline-twomonkeys
-        monkey2-timeline2
-        monkey2-timeline22
-        monkey2-timeline23
+#       monkey2-timeline2
+#       monkey2-timeline22
+#       monkey2-timeline23
         robotTests
         roverTest1
 #       roverTest2
@@ -73,7 +73,7 @@ LocalDepends run-hsts-planner-tests :
 #       merTest17-h
 #       merTest18-h
         gnats-C3
-        gnats-NoBranchBug
+#       gnats-NoBranchBug
 #       gnats-P4-C3
 #       gnats-P4-C3eq
         gnats-SC
@@ -87,8 +87,8 @@ LocalDepends run-hsts-planner-tests :
 #       dnp-DNP3fourFreeObs
 #       dnp-DNP3
 #       dnp-fourFreeObsNotEmpty
-        dnp-freeObs
-        dnp-freeObsNoEmpty
+#       dnp-freeObs
+#       dnp-freeObsNoEmpty
 #       dnp-tenFreeObs
 #       dnp-threeFreeObs
 #       dnp-twentyFreeObs
@@ -165,18 +165,19 @@ RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
 #   Gdb on Token says *this is a RuleInstance but T (of Id<T>) is class Token (!).
 #   Reported in GNATS 2798; related to GNATS 2772.
 # Now fails to (C++) compile, so comment it out (GNATS 2817).
-# RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
+RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
 
 # Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
 #   Reported in GNATS 2798; related to GNATS 2772.
 # Now fails to (C++) compile, so comment it out (GNATS 2817).
-# RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nddl ;
+# That (due to a change in the converter) appears to be fixed now, but this still fails:
+# NDDL/core/NddlUtils.cc:40: Error: v->lastDomain().isSingleton() is false
+#         The object variable for object must be a singleton but it is not!
+RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nddl ;
+# Fails just like prior test.
+RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 
-# Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
-#   Reported in GNATS 2798; related to GNATS 2772.
-# Now fails to (C++) compile, so comment it out (GNATS 2817).
-# RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
-
+# These three fail to find a plan in 1000 steps
 RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
 RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
 RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
@@ -198,6 +199,8 @@ RunEUROPATest roverTest2 : multrover-test.nddl ;
 RunEUROPATest merTest1 : R1-files-p1.nddl ;
 
 # Failing with no error message
+#   First wants over 2GB of RAM, so it is likely to be the limits in System/test/autobuild.
+#   Other MER related failures may have similar causes.
 RunEUROPATest merTest2 : R1-files-p2.nddl ;
 RunEUROPATest merTest3 : R1-files-p3.nddl ;
 RunEUROPATest merTest4 : R2-files-R21-Bill.nddl ;
@@ -206,6 +209,7 @@ RunEUROPATest merTest4 : R2-files-R21-Bill.nddl ;
 RunEUROPATest merTest5 : R2-files-R21-IDD1.nddl ;
 
 # Failing with no error message
+#   Next one, at least, wants over 1GB of RAM.
 RunEUROPATest merTest6 : R2-files-R21-IDD2.nddl ;
 RunEUROPATest merTest7 : R2-files-R21-IDD3.nddl ;
 
@@ -214,6 +218,8 @@ RunEUROPATest merTest8 : R2-files-R21-PMA1.nddl ;
 RunEUROPATest merTest9 : R2-files-R21-PMA2.nddl ;
 
 # Failing with no error message
+#   First wanted more than 1GB of RAM at only 63 seconds of CPU time.
+#   Also, the Debug.cfg file was either ignored or cerr's buffer was not flushed.
 RunEUROPATest merTest10 : mer-1.nddl ;
 RunEUROPATest merTest11 : mer-bill-2.nddl ;
 RunEUROPATest merTest12 : mer-bill.nddl ;
@@ -222,6 +228,7 @@ RunEUROPATest merTest12 : mer-bill.nddl ;
 RunEUROPATest merTest13 : mer-idd1.nddl ;
 
 # Failing with no error message
+#   First wanted more than 1GB of RAM at only 26 CPU seconds and also had no output despite Debug.cfg.
 RunEUROPATest merTest14 : mer-idd2.nddl ;
 RunEUROPATest merTest15 : mer-idd3.nddl ;
 RunEUROPATest merTest16 : mer-pma-comm.nddl ;
@@ -234,32 +241,37 @@ RunEUROPATest merTest18 : mer-pma2.nddl ;
 
 # Fails hasParent("HGA_Class___HGA_Mode_SV.HGA_Slew") check
 # RunEUROPATest merTest1-h : R1-files-p1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest2-h : R1-files-p2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest3-h : R1-files-p3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest4-h : R2-files-R21-Bill.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+# RunEUROPATest merTest2-h : R1-files-p2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+# RunEUROPATest merTest3-h : R1-files-p3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+# RunEUROPATest merTest4-h : R2-files-R21-Bill.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 # RunEUROPATest merTest5-h : R2-files-R21-IDD1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest6-h : R2-files-R21-IDD2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest7-h : R2-files-R21-IDD3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+# RunEUROPATest merTest6-h : R2-files-R21-IDD2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+# RunEUROPATest merTest7-h : R2-files-R21-IDD3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 # RunEUROPATest merTest8-h : R2-files-R21-PMA1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 # RunEUROPATest merTest9-h : R2-files-R21-PMA2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 # RunEUROPATest merTest10-h : mer-1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest11-h : mer-bill-2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest12-h : mer-bill.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+# RunEUROPATest merTest11-h : mer-bill-2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+# RunEUROPATest merTest12-h : mer-bill.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 # RunEUROPATest merTest13-h : mer-idd1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest14-h : mer-idd2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest15-h : mer-idd3.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest16-h : mer-pma-comm.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+# RunEUROPATest merTest14-h : mer-idd2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+# RunEUROPATest merTest15-h : mer-idd3.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+# RunEUROPATest merTest16-h : mer-pma-comm.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 # RunEUROPATest merTest17-h : mer-pma1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 # RunEUROPATest merTest18-h : mer-pma2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 
+# Fails: ConstraintEngine/component/Constraints.cc:789: Error: getCurrentDomain(m_variables[0]).getType() == AbstractDomain::BOOL is false
 RunEUROPATest gnats-C3 : C3-init.nddl ;
+
+# No plan in search space.
 RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
 
 # These two take multiple hours without completing on Token for some reason and may be infinite loop or similar.
 #   Reported as GNATS 2796.
+# Now, fails: ConstraintEngine/component/Constraints.cc:789: Error: getCurrentDomain(m_variables[0]).getType() == AbstractDomain::BOOL is false
 RunEUROPATest gnats-P4-C3 : P4-C3-init.nddl ;
 RunEUROPATest gnats-P4-C3eq : P4-C3eq-init.nddl ;
 
+# These four work.
 RunEUROPATest gnats-SC : SC-init.nddl ;
 RunEUROPATest gnats-condasame : condasame-init.nddl ;
 RunEUROPATest gnats-rover-fixed : rover-fixed-init.nddl ;
@@ -268,6 +280,7 @@ RunEUROPATest gnats-sum : sum-init.nddl ;
 # DNP tests need the DNP specific constraints.
 
 # Failing with no error message
+#   Wanted over 1GB of RAM at 16 CPU seconds.
 RunEUROPATest dnp-timeline : DNP.timeline.nddl ;
 
 # These fail; no idea why yet.
@@ -278,7 +291,7 @@ RunEUROPATest dnp-DNP3fourFreeObs : DNP3.fourFreeObs.nddl ;
 RunEUROPATest dnp-DNP3 : DNP3.timeline.nddl ;
 RunEUROPATest dnp-fourFreeObsNotEmpty : fourFreeObs-initBufNotEmpty.nddl ;
 
-# Working
+# These two fail to find plans in 1000 steps.
 RunEUROPATest dnp-freeObs : freeObs.nddl ;
 RunEUROPATest dnp-freeObsNoEmpty : freeObs.noEmpty.nddl ;
 
@@ -291,24 +304,24 @@ RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl ;
 # Same set as just prior set plus heuristics and no branch info.
 
 # Fails isString(m_key) safety check
-RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
+# RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
 
 # Fails !enumeration.empty() safety check in HSTSHeuristics::VariableEntry constructor near line 197
-RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
+# RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
 
 # Fails hasParent("DNP_Science___Scan_Platform.Scan_Idle") safety check in Schema::getParent() near line 210
-RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
-RunEUROPATest dnp-fourFreeObs-h : fourFreeObs.nddl : DNP2heur3.xml ;
+# RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
+# RunEUROPATest dnp-fourFreeObs-h : fourFreeObs.nddl : DNP2heur3.xml ;
 
 # Fails hasParent("DNP_Data___SSR_Storage_Use.Constant_Storage") check
-RunEUROPATest dnp-DNP3fourFreeObs-h : DNP3.fourFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
-RunEUROPATest dnp-DNP3-h : DNP3.timeline.nddl : DNP3heur.xml : DNP3nobr ;
-RunEUROPATest dnp-fourFreeObsNotEmpty-h : fourFreeObs-initBufNotEmpty.nddl : DNP3heur.xml : DNP3nobr ;
+# RunEUROPATest dnp-DNP3fourFreeObs-h : DNP3.fourFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+# RunEUROPATest dnp-DNP3-h : DNP3.timeline.nddl : DNP3heur.xml : DNP3nobr ;
+# RunEUROPATest dnp-fourFreeObsNotEmpty-h : fourFreeObs-initBufNotEmpty.nddl : DNP3heur.xml : DNP3nobr ;
 # RunEUROPATest dnp-freeObs-h : freeObs.nddl : DNP3heur.xml : DNP3nobr ;
 # RunEUROPATest dnp-freeObsNoEmpty-h : freeObs.noEmpty.nddl : DNP3heur.xml : DNP3nobr ;
-RunEUROPATest dnp-tenFreeObs-h : tenFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
-RunEUROPATest dnp-threeFreeObs-h : threeFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
-RunEUROPATest dnp-twentyFreeObs-h : twentyFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
-RunEUROPATest dnp-twoFreeObs-h : twoFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+# RunEUROPATest dnp-tenFreeObs-h : tenFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+# RunEUROPATest dnp-threeFreeObs-h : threeFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+# RunEUROPATest dnp-twentyFreeObs-h : twentyFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+# RunEUROPATest dnp-twoFreeObs-h : twoFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 
 } # PLASMA_READY
