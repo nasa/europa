@@ -5,6 +5,7 @@
 #include "EnumeratedDomain.hh"
 #include "StringDomain.hh"
 #include "NumericDomain.hh"
+#include "SymbolDomain.hh"
 #include "DomainListener.hh"
 #include "module-tests.hh"
 #include <cmath>
@@ -1038,6 +1039,7 @@ namespace Prototype {
   public:
 
     static bool test() {
+      runTest(testInfinityBounds);
       runTest(testEquality);
       runTest(testIntersection);
       runTest(testSubset);
@@ -1048,6 +1050,28 @@ namespace Prototype {
     }
 
   private:
+
+    static bool testInfinityBounds(){
+      IntervalDomain dom0;
+      assertFalse(dom0.areBoundsFinite());
+      IntervalDomain dom1(0, PLUS_INFINITY);
+      assertFalse(dom1.areBoundsFinite());
+      IntervalDomain dom2(0, PLUS_INFINITY-1);
+      assertTrue(dom2.areBoundsFinite());
+      NumericDomain dom3;
+      assertFalse(dom3.areBoundsFinite());
+      SymbolDomain dom4;
+      assertTrue(dom4.areBoundsFinite());
+      NumericDomain dom5;
+      dom5.insert(0);
+      dom5.insert(1);
+      assertFalse(dom5.areBoundsFinite());
+      dom5.close();
+      assertTrue(dom5.areBoundsFinite());
+      NumericDomain dom6(PLUS_INFINITY);
+      assertFalse(dom6.areBoundsFinite());
+      return true;
+    }
 
     static bool testEquality() {
       NumericDomain dom;
