@@ -1,6 +1,6 @@
 Brief Migration Notes
 
-$Id: MigrationNotes,v 1.9 2004-12-22 00:56:07 wedgingt Exp $
+$Id: MigrationNotes,v 1.10 2005-03-11 00:48:20 wedgingt Exp $
 
 This file is intended to help users of the prior Europa (in the
 NewPlan CVS tree) planning system migrate their projects to this
@@ -80,7 +80,9 @@ but does not preclude this problem.
 
 10. The constraint 'condasame' (conditional all same) in Europa1
 (NewPlan) has the boolean controlling the condition last; in Europa2
-(PLASMA), it is first to match the name of the constraint.
+(PLASMA), it is first to match the name of the constraint.  This is
+now dealt with by the DDL to NDDL converter program, convert2 (see #7
+above).
 
 11. In DDL (Europa1, NewPlan), 0 and 1 can be used for false and
 true in certain contexts, notably as arguments to constraint functions.
