@@ -96,11 +96,11 @@ namespace EUROPA {
     rover->addMember("Rover", "Navigator", "navigator");
     rover->addMember("Rover", "Instrument", "instrument");
     rover->addMember("Rover", "Battery", "mainBattery");
-    rover->addObjectType("NddlWorld", "Timeline");
-    rover->addMember("NddlWorld", "int", "m_horizonStart");
-    rover->addMember("NddlWorld", "int", "m_horizonEnd");
-    rover->addMember("NddlWorld", "int", "m_maxPlannerSteps");
-    rover->addPredicate("NddlWorld.initialState");
+    rover->addObjectType("PlannerConfig", "Timeline");
+    rover->addMember("PlannerConfig", "int", "m_horizonStart");
+    rover->addMember("PlannerConfig", "int", "m_horizonEnd");
+    rover->addMember("PlannerConfig", "int", "m_maxPlannerSteps");
+    rover->addPredicate("PlannerConfig.initialState");
     rover->addEnum("TokenStates");
     rover->addValue("TokenStates", LabelStr("INACTIVE"));
     rover->addValue("TokenStates", LabelStr("ACTIVE"));
