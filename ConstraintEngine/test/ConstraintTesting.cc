@@ -316,7 +316,8 @@ namespace EUROPA {
       // Warn about unregistered constraint names and otherwise ignore tests using them.
       if (!ConstraintLibrary::isRegistered(LabelStr(testCases.front().m_constraintName), false)) {
         if (warned.find(testCases.front().m_constraintName) == warned.end()) {
-          std::cerr << testCases.front().m_fileName << ':' << testCases.front().m_line
+          std::cout << "\n    Warning: " 
+                    << testCases.front().m_fileName << ':' << testCases.front().m_line
                     << ": constraint " << testCases.front().m_constraintName
                     << " is unregistered; skipping tests of it.\n";
           warned.insert(testCases.front().m_constraintName);
