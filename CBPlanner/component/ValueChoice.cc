@@ -24,24 +24,33 @@ namespace EUROPA {
       (domain.getTypeName() == slc_TokenStateStr && TokenDecisionPointId::convertable(decision));
 
     for (std::list<double>::iterator it = values.begin(); it != values.end(); ++it) {
-      if (isTokenStateDomain && *it == Token::MERGED) {
+      if (isTokenStateDomain) {
+
+	debugMsg("ValueChoice:makeChoices", "isTokenStateDomain with value = " << *it << " merged = " << Token::MERGED << " active = " << Token::ACTIVE << " rejected = " << Token::REJECTED);
+
 	TokenDecisionPointId tokDec = decision;
 	TokenId tok = tokDec->getToken();
 	check_error(tok->isInactive());
-	std::vector<TokenId> compats;
-	tok->getPlanDatabase()->getCompatibleTokens(tok, compats);
-	debugMsg("ValueChoice:makeChoices", "found " << compats.size() << " compatible tokens for token ("
-		 << tok->getKey() << ") of predicate '" << tok->getName().toString() << "'");
+	if (*it == Token::MERGED) {
+	  std::vector<TokenId> compats;
+	  tok->getPlanDatabase()->getCompatibleTokens(tok, compats, PLUS_INFINITY,true);
+	  debugMsg("ValueChoice:makeChoices", "found " << compats.size() << " compatible tokens for token ("
+		   << tok->getKey() << ") of predicate '" << tok->getName().toString() << "'");
 
-	for(std::vector<TokenId>::iterator it2 = compats.begin(); it2 != compats.end(); ++it2){
-	  TokenId mergeCandidate = *it2;
-	  check_error(mergeCandidate->isActive());
-	  choices.push_back((new ValueChoice(decision, Token::MERGED, mergeCandidate))->getId());
+	  for(std::vector<TokenId>::iterator it2 = compats.begin(); it2 != compats.end(); ++it2){
+	    TokenId mergeCandidate = *it2;
+	    check_error(mergeCandidate->isActive());
+	    choices.push_back((new ValueChoice(decision, Token::MERGED, mergeCandidate))->getId());
+	  }
+	}
+	else {
+	  if (*it == Token::ACTIVE && !tok->getPlanDatabase()->hasOrderingChoice(tok)) continue;
+	  debugMsg("ValueChoice:makeChoices", "found at least one ordering choice for token ("
+		   << tok->getKey() << ") of predicate '" << tok->getName().toString() << "'");
+	  choices.push_back((new ValueChoice(decision, *it))->getId());
 	}
       }
-      else {
-	choices.push_back((new ValueChoice(decision, *it))->getId());
-      }
+      else  choices.push_back((new ValueChoice(decision, *it))->getId());
     }
   }
 
