@@ -41,6 +41,7 @@
 // Support for planner
 #include "CBPlanner.hh"
 #include "DecisionPoint.hh"
+#include "HeuristicStrategy.hh"
 
 // Support for Temporal Network
 #include "TemporalNetwork.hh"
@@ -116,8 +117,9 @@ int main(){
   assert(maxPlannerSteps.isValid());
   int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
   CBPlanner planner(db.getId(),query.getId(),steps);
+  HeuristicStrategyId strategy = (new HeuristicStrategy())->getId();
     
-  assert(planner.run(loggingEnabled()) == 1);
+  assert(planner.run(strategy, loggingEnabled()) == 1);
 
   const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
     
