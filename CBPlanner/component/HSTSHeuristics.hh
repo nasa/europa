@@ -128,6 +128,9 @@ namespace PLASMA {
     HSTSHeuristics();
     virtual ~HSTSHeuristics();
 
+    const HSTSHeuristicsId& getId() const;
+    HSTSHeuristicsId& getNonConstId();
+
     void setDefaultPriorityPreference(const PriorityPref pp);
     const PriorityPref getDefaultPriorityPreference() const;
     void setDefaultPriorityForTokenDPsWithParent(const Priority p, const TokenTypeId& tt);
@@ -192,6 +195,8 @@ namespace PLASMA {
     std::set<GeneratorId> m_variableGenerators;
 
     std::map<LabelStr, GeneratorId> m_generatorsByName;
+
+    HSTSHeuristicsId m_id;
   };
 }
 #endif

@@ -178,7 +178,7 @@ namespace PLASMA {
   
   const GeneratorId& HSTSHeuristics::VariableEntry::getGenerator() const { return m_generator; }
 
-  HSTSHeuristics::HSTSHeuristics() {
+  HSTSHeuristics::HSTSHeuristics() : m_id(this) {
     m_defaultPriorityPreference = LOW;
     m_defaultTokenPriority = 0.0;
     m_defaultVariablePriority = 0.0;
@@ -189,11 +189,15 @@ namespace PLASMA {
     m_defaultCompatibilityPriority.clear();
     m_defaultTokenStates.clear();
     m_defaultCandidateOrders.clear();
-    //    std::map<LabelStr,TokenEntry>::iterator it = m_tokenHeuristics.begin();
     m_tokenHeuristics.clear();
-    //    std::map<LabelStr,VariableEntry>::iterator it2 = m_variableHeuristics.begin();
     m_variableHeuristics.clear();
+
+    check_error(m_id.isValid());
+    m_id.remove();
   }
+
+  const HSTSHeuristicsId& HSTSHeuristics::getId() const { return m_id; }
+  HSTSHeuristicsId& HSTSHeuristics::getNonConstId() { return m_id; }
 
   void HSTSHeuristics::setDefaultPriorityPreference(const PriorityPref pp) {
     check_error(m_defaultPriorityPreference <= 1);
