@@ -190,7 +190,7 @@ RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 # These three fail to find a plan in 1000 steps
 #   The first one, at least, seems to not be enforcing the neq() constraints near line 87 of monkey2.nddl
 #     and still does not find a plan within 3000 steps.
-#   Reported as GNATS ????.
+#   Reported as GNATS 2850.
 RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
 RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
 RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
