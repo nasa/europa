@@ -19,7 +19,9 @@ namespace Prototype {
   TemporalPropagator::TemporalPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
     : Propagator(name, constraintEngine), 
       m_activeConstraint(0),
-      m_updateRequired(false){
+      m_updateRequired(false),
+      m_fullRepropRequired(true)
+  {
     m_tnet = (new TemporalNetwork())->getId();
   }
 
@@ -29,19 +31,19 @@ namespace Prototype {
   }
 
   void TemporalPropagator::handleConstraintAdded(const ConstraintId& constraint){
+    m_fullRepropRequired = true;
     handleTemporalAddition(constraint);
   }
 
   void TemporalPropagator::handleConstraintRemoved(const ConstraintId& constraint){
+    m_fullRepropRequired = true;
     handleTemporalDeletion(constraint);
   }
 
   void TemporalPropagator::handleConstraintActivated(const ConstraintId& constraint){
-    handleTemporalAddition(constraint);
   }
 
   void TemporalPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
-    handleTemporalDeletion(constraint);
   }
 
   void TemporalPropagator::handleNotification(const ConstrainedVariableId& variable, 
@@ -52,6 +54,7 @@ namespace Prototype {
 	(constraint->getName() == LabelStr("StartEndDurationRelation")))
       m_agenda.insert(constraint);
     m_updateRequired = true;
+    m_fullRepropRequired = true;
   }
 
   void TemporalPropagator::execute(){
@@ -222,17 +225,19 @@ namespace Prototype {
       // from the last computation since the temporal network may be made
       // inconsistent in this mapping process.
       m_tnet->getLastTimepointBounds(timepoint, lbt, ubt);
-      if (lb >= lbt && ub <= ubt)
-	m_tnet->narrowTemporalConstraint(varIt->second, lb, ub);
-      else {
-      // think about whether we can do better here, possibly by changing
-      // the condition above.  There are cases
-      // where the temporal network has restricted it further so we're just
-      // thrashing by removing it and adding the original constraint that
-      // was previously restricted by the temporal network.
-	m_tnet->removeTemporalConstraint(varIt->second);
-	TemporalConstraintId c(m_tnet->addTemporalConstraint(m_tnet->getOrigin(), timepoint, (Time)lb, (Time)ub));
-	varIt->second = c;
+      if (lb != lbt || ub != ubt) {
+	if (lb >= lbt && ub <= ubt)
+	  m_tnet->narrowTemporalConstraint(varIt->second, lb, ub);
+	else {
+	  // think about whether we can do better here, possibly by changing
+	  // the condition above.  There are cases
+	  // where the temporal network has restricted it further so we're just
+	  // thrashing by removing it and adding the original constraint that
+	  // was previously restricted by the temporal network.
+	  m_tnet->removeTemporalConstraint(varIt->second);
+	  TemporalConstraintId c(m_tnet->addTemporalConstraint(m_tnet->getOrigin(), timepoint, (Time)lb, (Time)ub));
+	  varIt->second = c;
+	}
       }
     }
   }
@@ -250,7 +255,14 @@ namespace Prototype {
 	check_error(false);
       }
       else {
-      	m_tnet->getVarIdFromTimepoint((*it).second)->specify(IntervalIntDomain(lb, ub));
+	TempVarId var = m_tnet->getVarIdFromTimepoint((*it).second);
+	if (TokenId::convertable(var->getParent())) {
+	  TokenId tok = var->getParent();
+	  if (!tok->isMerged()) // no need to update merged token variables
+	    var->specify(IntervalIntDomain(lb, ub));
+	}
+	else
+	  var->specify(IntervalIntDomain(lb, ub));
       }
     }
   }
@@ -258,11 +270,36 @@ namespace Prototype {
   bool TemporalPropagator::canPrecede(const TempVarId& first, const TempVarId& second) {
     check_error(getTimepoint(first) != TimepointId::noId());
     check_error(getTimepoint(second) != TimepointId::noId());
+
     TimepointId fir = getTimepoint(first);
     TimepointId sec = getTimepoint(second);
-    Time lb, ub;
-    m_tnet->calcDistanceBounds(fir, sec, lb, ub);
-    return(ub >= 0);
+
+    // further propagation in temporal network will only restrict values
+    // further, so if we already are in violation, we will continue to be
+    // in violation.
+    // quick check to see if last time we computed bounds we were in violation
+    Time flb, fub;
+    m_tnet->getLastTimepointBounds(fir, flb, fub);
+
+    Time slb, sub;
+    m_tnet->getLastTimepointBounds(sec, slb, sub);
+
+    //std::cout << "TemporalPropagator::canPrecede testing " << sub << " < " << flb << std::endl;
+
+    if (sub < flb)
+      return false;
+
+    //std::cout << "TemporalPropagator::canPrecede computing distance < 0 {" << sec << "," << fir << "]";
+
+    bool result=m_tnet->isDistanceLessThan(fir,sec,0);
+//     if (result)
+//       std::cout << " false" << std::endl;
+//     else
+//       std::cout << " true" << std::endl;
+
+    return !result;
+    //    return (!m_tnet->isDistanceLessThan(sec,fir,0));
+
   }
 
   bool TemporalPropagator::canFitBetween(const TempVarId& start, const TempVarId& end,
@@ -275,13 +312,45 @@ namespace Prototype {
     TimepointId tend = getTimepoint(end);
     TimepointId pend= getTimepoint(predend);
     TimepointId sstart = getTimepoint(succstart);
+
+    //    std::cout << "TemporalPropagator:: canFitBetween computing if slot duration zero {" << pend << "," << sstart << "}";
+
+    bool result = m_tnet->isDistanceLessThan(pend,sstart,1);
+    if (result) {
+      //      std::cout << " true" << std::endl;
+      return false;
+    }
+    //    else 
+    //      std::cout << " false" << std::endl;
+      
+
+    // is slot duration zero?
+    /*
+    if (m_tnet->isDistanceLessThan(pend,sstart,1))
+      return false;
+    */
+
     Time slb, sub;
+    m_tnet->getLastTimepointBounds(tstart, slb, sub);
+
     Time elb, eub;
-    m_tnet->calcDistanceBounds(pend, tstart, slb, sub);
-    m_tnet->calcDistanceBounds(tend, sstart, elb, eub);
+    m_tnet->getLastTimepointBounds(tend, elb, eub);
 
-    return(sub >=0  && eub >=0);
+    Time minDurationOfToken = elb-sub;
+    
+    //    std::cout << "TemporalPropagator:: canFitBetween computing last computed minDurationOfToken = " << minDurationOfToken << std::endl;
+
+    if (m_tnet->isDistanceLessThan(pend,sstart,minDurationOfToken))
+      return false;
+
+    m_tnet->getTimepointBounds(tstart, slb, sub);
+    m_tnet->getTimepointBounds(tend, elb, eub);
+    minDurationOfToken = elb-sub;
+    
+    //    std::cout << "TemporalPropagator:: canFitBetween computing minDurationOfToken = " << minDurationOfToken << std::endl;
+
+    return (!m_tnet->isDistanceLessThan(pend,sstart,minDurationOfToken));
+
   }
-
     
 } //namespace
