@@ -1,3 +1,5 @@
+RUN_*.gprof
+RUN_*.output
 gmon.out
 tn-module-tests
 tn-module-tests_g
@@ -5,6 +7,8 @@ tn-module-tests_g_no
 tn-module-tests_g_rt
 tn-module-tests_o
 tn-module-tests_o_no
+tn-module-tests_o_p
+tn-module-tests_o_p_no
 tn-module-tests_o_rt
 tn-module-tests_p
 tn-module-tests_p_no
