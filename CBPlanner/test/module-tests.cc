@@ -362,7 +362,7 @@ int main() {
   REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
   REGISTER_CONSTRAINT(NotFalseConstraint, "notfalse", "Default");
   REGISTER_CONSTRAINT(BinaryCustomConstraint, "custom", "Default");
-  for(int i=0;i<1;i++){
+  for (int i = 0; i < 1; i++) {
     runTestSuite(DefaultSetupTest::test);
     runTestSuite(ConditionTest::test);
     runTestSuite(DecisionManagerTest::test);
