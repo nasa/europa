@@ -28,8 +28,10 @@ namespace PLASMA
   class ResourcePropagator;
   typedef Id<ResourcePropagator> ResourcePropagatorId;
 
-  template<class DomainType> class TokenVariable;
-  typedef Id< TokenVariable<IntervalDomain> > ResVarId;
+  //template<class DomainType> class TokenVariable;
+  //typedef Id< TokenVariable<IntervalDomain> > ResVarId;
+
+  typedef ConstrainedVariableId ResVarId;
 
   class ResourceListener;
   typedef Id<ResourceListener> ResourceListenerId;
