@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.24 2003-01-15 04:54:02 wedgingt Exp $
+# $Id: autobuild,v 1.25 2003-01-16 04:29:27 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -11,8 +11,9 @@ subdirs='cvs optFast profOptFast shareOptFast debug noErr shareOptNoErr'
 
 # CVS info
 CVS_RSH=ssh
+export CVS_RSH
 CVSROOT='copernicus.arc.nasa.gov:/home/cvs/ISG-Repository'
-export CVS_RSH CVSROOT
+export CVSROOT
 
 # Don't try to use X11 (mostly to prevent Purify from doing so)
 DISPLAY=
