@@ -8,7 +8,6 @@
 // Support for planner
 #include "CBPlanner.hh"
 #include "DecisionPoint.hh"
-#include "EUROPAHeuristicStrategy.hh"
 
 #include "PlanDatabaseWriter.hh"
 
