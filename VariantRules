@@ -12,14 +12,16 @@ VARIANTS ?= DEV ;
 #   DEV
 #   OPTIMIZED
 #   PROFILE
+#   COVERAGE
 #   CUSTOM
 
 # If CUSTOM variant is set these variables control 
 # whether the corresponding flag is used:
-#     DEBUG
-#     OPTIMIZE
-#     PROFILE
-#     WARN
+#     PLASMA_DEBUG
+#     PLASMA_OPTIMIZED
+#     PLASMA_PROFILE
+#     PLASMA_COVERAGE
+#     PLASMA_WARN
 
 #########
 
@@ -35,18 +37,23 @@ rule FVariantC++Flags
     return $(OPTIMIZE_FLAGS) $(WARNING_FLAGS) ;
   case PROFILE :
     return $(PROFILE_FLAGS) $(WARNING_FLAGS) ;
+  case COVERAGE :
+    return $(COVERAGE_FLAGS) $(WARNING_FLAGS) ;
   case CUSTOM :
     local flags ;
-    if $(DEBUG) {
+    if $(PLASMA_DEBUG) {
       flags += $(DEBUG_FLAGS) ;
     }
-    if $(OPTIMIZE) {
+    if $(PLASMA_OPTIMIZED) {
       flags += $(OPTIMIZE_FLAGS) ;
     }
-    if $(PROFILE) {
+    if $(PLASMA_PROFILE) {
       flags += $(PROFILE_FLAGS) ;
     }
-    if $(WARN) {
+    if $(PLASMA_COVERAGE) {
+      flags += $(COVERAGE_FLAGS) ;
+    }
+    if $(PLASMA_WARN) {
       flags += $(WARNING_FLAGS) ;
     }
     return $(flags) ;
@@ -75,11 +82,17 @@ rule FVariantLinkFlags
     return ;
   case PROFILE :
     return $(PROFILE_FLAGS) ;
+  case COVERAGE :
+    return $(COVERAGE_FLAGS) ;
   case CUSTOM :
-    if $(PROFILE) {
-      return $(PROFILE_FLAGS) ;
+    local flags ;
+    if $(PLASMA_PROFILE) {
+      flags += $(PROFILE_FLAGS) ;
     }
-    return ;
+    if $(PLASMA_COVERAGE) {
+      flags += $(COVERAGE_FLAGS) ;
+    }
+    return $(flags) ;
   case * :
     Exit FVariantLinkFlags unknown variant: $(variant) ;
   }
@@ -98,15 +111,22 @@ rule FVariantName
     return $(name)_o ;
   case PROFILE :
     return $(name)_p ;
+  case COVERAGE :
+    # gcov, at least, requires object files to be named with same "root" as the source ...
+    return $(name) ;
   case CUSTOM :
     local name = $(name) ;
-    if $(DEBUG) {
+    if $(PLASMA_COVERAGE) {
+      # ... so ignore the other variants here:
+      return $(name) ;
+    }
+    if $(PLASMA_DEBUG) {
       name = $(name)_g ;
     }
-    if $(OPTIMIZE) {
+    if $(PLASMA_OPTIMIZED) {
       name = $(name)_o ;
     }
-    if $(PROFILE) {
+    if $(PLASMA_PROFILE) {
       name = $(name)_p ;
     }
     return $(name) ;
@@ -115,17 +135,37 @@ rule FVariantName
   }
 }
 
+# Name of the subdir to store object files.
+#   Should always be passed $(VARIANTS).
+rule ObjectsSubdirName
+{
+  switch $(1) {
+  case COVERAGE :
+    return obj_cov ;
+  case CUSTOM :
+    if $(PLASMA_COVERAGE) {
+      return obj_cov ;
+    }
+    return objects ;
+  case * :
+    return objects ;
+  }
+}
+
 # if the custom variant is the same as one of others,
 # don't replicate its dependencies
 local custom_name = [ FVariantName name : CUSTOM ] ;
 if [ FVariantName name : DEV ] = $(custom_name) {
-  ALL_VARIANTS = DEV OPTIMIZED PROFILE ;
+  ALL_VARIANTS = DEV OPTIMIZED PROFILE COVERAGE ;
 } else if [ FVariantName name : OPTIMIZED ] = $(custom_name) {
-  ALL_VARIANTS = DEV OPTIMIZED PROFILE ;
+  ALL_VARIANTS = DEV OPTIMIZED PROFILE COVERAGE ;
 } else if [ FVariantName name : PROFILE ] = $(custom_name) {
-  ALL_VARIANTS = DEV OPTIMIZED PROFILE ;
+  ALL_VARIANTS = DEV OPTIMIZED PROFILE COVERAGE ;
+} else if [ FVariantName name : COVERAGE ] = $(custom_name) {
+  ALL_VARIANTS = DEV OPTIMIZED PROFILE COVERAGE ;
 } else {
-  ALL_VARIANTS = DEV OPTIMIZED PROFILE CUSTOM ;
+  # Note: this is still incorrect if CUSTOM _includes_ COVERAGE (and some other variant).
+  ALL_VARIANTS = DEV OPTIMIZED PROFILE COVERAGE CUSTOM ;
 }
 
 }

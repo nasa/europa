@@ -27,7 +27,7 @@ rule Module {
 
   LINK_LIBRARIES on $(module) = $(LINKLIBS) ;
   LINK_MODULES on $(module) = $(modules:G=module) ;
-  LOCATE_OBJECTS on $(module) = [ FDirName $(SUBDIR) objects ] ;
+  LOCATE_OBJECTS on $(module) = [ FDirName $(SUBDIR) [ ObjectsSubdirName $(VARIANTS) ] ] ;
   LOCATE_SHARED on $(module) = [ FDirName $($(_top)) lib ] ;
   INCLUDES on $(module) += $(SUBDIR) ;
   INCLUDES on $(module) += [ FDirName $(SUBDIR) core ] ;
