@@ -23,12 +23,11 @@
 
 namespace Prototype {
 
-  bool can_precede(const TokenId& first, const TokenId& second){
+  bool canPrecede(const TokenId& first, const TokenId& second){
     int earliest_end = (int) first->getEnd()->getDerivedDomain().getLowerBound();
     int latest_start = (int) second->getStart()->getDerivedDomain().getUpperBound();
     return (earliest_end <= latest_start);
   }
-
 
   bool canFitBetween(const TokenId& token, const TokenId& predecessor, const TokenId& successor){
       check_error(successor != predecessor);
@@ -72,14 +71,14 @@ namespace Prototype {
 
     // Special case, the token could be placed at the end, which can't precede anything. This
     // results in an ordering choicxe of the noId() i.e. ordering w.r.t. no successor
-    if(can_precede(m_tokenSequence.back(),token))
+    if(canPrecede(m_tokenSequence.back(),token))
        results.push_back(TokenId::noId());
 
     // So now we can go through the sequence till we find something that we can precede.
     std::list<TokenId>::iterator current = m_tokenSequence.begin();
 
     // Move forward until we find a Token we can precede
-    while (current != m_tokenSequence.end() && !can_precede(token, *current))
+    while (current != m_tokenSequence.end() && !canPrecede(token, *current))
       current++;
 
     if (current == m_tokenSequence.end())

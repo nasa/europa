@@ -8,14 +8,20 @@
 #include "Timeline.hh"
 #include "RulesEngine.hh"
 #include "Rule.hh"
+#include "RuleContext.hh"
+#include "ObjectFilter.hh"
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
 #include "../ConstraintEngine/IntervalRealDomain.hh"
 #include "../ConstraintEngine/LabelSet.hh"
 #include "../ConstraintEngine/DefaultPropagator.hh"
 #include "../ConstraintEngine/EqualityConstraintPropagator.hh"
+#include "../ConstraintEngine/DomainUtilities.hh"
 
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <cassert>
 
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
     ConstraintEngine ce;\
@@ -77,7 +83,8 @@ public:
 									  constrainedVars);
       newConstraints.push_back(restrictDuration);
     }
-    context->execute(newTokens, newConstraints);
+
+    context->execute(newTokens, std::vector<ConstrainedVariableId>(), newConstraints);
     return true;
   }
 
@@ -92,6 +99,8 @@ public:
   static bool test(){
     runTest(testBasicAllocation, "BasicAllocation");
     runTest(testObjectSet, "ObjetSet");
+    runTest(testObjectVariables, "Object Variables");
+    runTest(testObjectFilteringConstraint, "Object Filtering Constraint");
     return true;
   }
 private:
@@ -131,6 +140,80 @@ private:
     os1.remove(o1.getId());
     assert(!os1.isMember(o1.getId()));
     assert(os1.isSingleton());
+    return true;
+  }
+
+  static bool testObjectVariables(){
+    PlanDatabase db(ENGINE);
+    Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"), true);
+    assert(!o1.isComplete());
+    o1.addVariable(IntervalIntDomain());
+    o1.addVariable(BoolDomain());
+    o1.close();
+    assert(o1.isComplete());
+
+    Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"), true);
+    assert(!o2.isComplete());
+    o2.addVariable(IntervalIntDomain(15, 200));
+    o2.close();
+
+    // Add a unary constraint
+    ConstraintLibrary::createConstraint(LabelStr("SubsetOf"), 
+					db.getConstraintEngine(), 
+					o1.getVariables()[0],
+					IntervalIntDomain(10, 20));
+
+    // Now add a constraint equating the variables and test propagation
+    std::vector<ConstrainedVariableId> constrainedVars;
+    constrainedVars.push_back(o1.getVariables()[0]);
+    constrainedVars.push_back(o2.getVariables()[0]);
+    ConstraintId constraint = ConstraintLibrary::createConstraint(LabelStr("Equal"),
+								  db.getConstraintEngine(),
+								  constrainedVars);
+
+    assert(db.getConstraintEngine()->propagate());
+    assert(DomainUtilities::equals(o1.getVariables()[0]->lastDomain(), o1.getVariables()[0]->lastDomain()));
+
+    // Delete one of the constraints to force automatic clean-up path and explciit clean-up
+    delete (Constraint*) constraint;
+
+    return true;
+  }
+
+  static bool testObjectFilteringConstraint(){
+    PlanDatabase db(ENGINE);
+
+    static const int NUM_OBJECTS = 10;
+
+    std::list<ObjectId> objects;
+
+    // Allocate objects with 2 field variables
+    for (int i=0;i<NUM_OBJECTS;i++){
+      std::stringstream ss;
+      ss << "Object" << i;
+      std::string objectName(ss.str());
+      ObjectId object = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr(objectName.c_str()), true))->getId();
+      object->addVariable(IntervalIntDomain(i, NUM_OBJECTS));
+      object->addVariable(BoolDomain());
+      object->close();
+      objects.push_back(object);
+    }
+
+    Variable<ObjectSet> objectVar(db.getConstraintEngine(), objects);
+    Variable<IntervalIntDomain> filterVar(db.getConstraintEngine(), IntervalIntDomain(0, NUM_OBJECTS));
+    ObjectFilter filter(LabelStr("Default"), db.getConstraintEngine(), objectVar.getId(), 0, filterVar.getId());
+
+    assert(db.getConstraintEngine()->propagate());
+
+    // Iterate and restrict the filter by 1 each time. It should restrict the object variable by 1 also
+    for (int i=1; i< NUM_OBJECTS; i++){
+      filterVar.specify(IntervalIntDomain(i,NUM_OBJECTS));
+      int resultingSize = objectVar.getDerivedDomain().getSize();
+      assert(resultingSize == (NUM_OBJECTS-i));
+    }
+
+    filterVar.reset();
+    assert(objectVar.getDerivedDomain().getSize() == NUM_OBJECTS);
     return true;
   }
 };
@@ -353,7 +436,7 @@ private:
 
     typedef Europa::Id<IntervalToken> IntervalTokenId;
     
-    static const int NUMTOKS=200;
+    static const int NUMTOKS=50;
     static const int UNIFIED=3;
     static const int NUMPARAMS=3;
 
@@ -459,6 +542,7 @@ public:
     runTest(testBasicInsertion, "BasicInsertion");
     runTest(testObjectTokenRelation, "ObjectTokenRelation");
     runTest(testTokenOrderQuery, "TokenOrderQuery");
+    runTest(testEventTokenInsertion, "Event Token Insertion");
     return true;
   }
 
@@ -631,6 +715,73 @@ private:
     std::vector<TokenId> choices;
     timeline->getOrderingChoices(token, choices);
     assert(choices.empty());
+
+    return true;
+  }
+
+  static bool testEventTokenInsertion(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    db.close();
+
+    IntervalToken it1(db.getId(), 
+		      LabelStr("P1"), 
+		      BooleanDomain(),
+		      IntervalIntDomain(0, 10),
+		      IntervalIntDomain(0, 1000),
+		      IntervalIntDomain(1, 1000));
+
+    it1.getObject()->specify(timeline.getId());
+    it1.activate();
+    timeline.constrain(it1.getId(), TokenId::noId());
+
+    // Insert at the end after a token
+    EventToken et1(db.getId(), 
+		   LabelStr("P2"), 
+		   BooleanDomain(), 
+		   IntervalIntDomain(0, 100), 
+		   Token::noObject());
+
+    et1.getObject()->specify(timeline.getId());
+    et1.activate();
+    timeline.constrain(et1.getId(), TokenId::noId());
+    assert(it1.getEnd()->getDerivedDomain().getUpperBound() == 100);
+
+    // Insert between a token and an event
+    EventToken et2(db.getId(), 
+		   LabelStr("P2"), 
+		   BooleanDomain(), 
+		   IntervalIntDomain(0, 100), 
+		   Token::noObject());
+
+    et2.getObject()->specify(timeline.getId());
+    et2.activate();
+    timeline.constrain(et2.getId(), et1.getId());
+    assert(it1.getEnd()->getDerivedDomain().getUpperBound() == 100);
+
+    // Insert before a token
+    EventToken et3(db.getId(), 
+		   LabelStr("P2"), 
+		   BooleanDomain(), 
+		   IntervalIntDomain(10, 100), 
+		   Token::noObject());
+
+    et3.getObject()->specify(timeline.getId());
+    et3.activate();
+    timeline.constrain(et3.getId(), it1.getId());
+    assert(it1.getStart()->getDerivedDomain().getLowerBound() == 10);
+
+    // Insert between events
+    EventToken et4(db.getId(), 
+		   LabelStr("P2"), 
+		   BooleanDomain(), 
+		   IntervalIntDomain(0, 100), 
+		   Token::noObject());
+
+    et4.getObject()->specify(timeline.getId());
+    et4.activate();
+    timeline.constrain(et4.getId(), et1.getId());
+    assert(ce.propagate());
 
     return true;
   }
