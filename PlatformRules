@@ -119,6 +119,8 @@ if $(JAVA_HOME) {
 
 if $(OS) = CYGWIN {
   CLASSPATH_SEPARATOR = '";"' ;
+  local colon = \: ;
+  CLASSPATH = \"$(CLASSPATH:J=$(colon))\" ;
 } else {
   CLASSPATH_SEPARATOR = ":" ;
 }

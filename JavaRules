@@ -100,8 +100,8 @@ rule JavaThirdPartyJar
 
 rule JavaClassPath
 {
-  CLASSPATH = $(CLASSPATH)$(CLASSPATH_SEPARATOR)$(1) ;
-  CLASSPATH = $(CLASSPATH:E=$(1)) ;
+  local path = $(CLASSPATH) $(1) ;
+  CLASSPATH = $(path:J=$(CLASSPATH_SEPARATOR)) ;
 }
 
 } # JavaRules_INCLUDED
