@@ -721,8 +721,8 @@ public:
     // Borrowed from System/test/backtr.{nddl,cc,hh,xml}
     class Sample : public IntervalToken {
     public:
-      Sample(const PlanDatabaseId& planDb, const LabelStr& name, bool mandatory)
-        : IntervalToken(planDb, name, !mandatory, IntervalIntDomain(), IntervalIntDomain(),
+      Sample(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false)
+        : IntervalToken(planDb, name, rejectable, IntervalIntDomain(), IntervalIntDomain(),
                         IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false) {
         handleDefaults();
       }
@@ -749,8 +749,8 @@ public:
           : ConcreteTokenFactory(LabelStr("TestClass2.Sample")) {
         }
       private:
-        TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool mandatory) const {
-          TokenId token = (new Sample(planDb, name, mandatory))->getId();
+        TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const {
+          TokenId token = (new Sample(planDb, name, rejectable))->getId();
           return(token);
         }
         TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const {
