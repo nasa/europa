@@ -15,7 +15,7 @@ namespace Prototype {
    */
   class TestRule_Root: public RuleInstance{
   public:
-    TestRule_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    TestRule_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb) 
       : RuleInstance(rule, token, planDb, token->getObject()){}
     void handleExecute();
   };
@@ -36,8 +36,10 @@ namespace Prototype {
   TestRule::TestRule(const LabelStr& name, const IntervalIntDomain& guardBaseDomain)
     : Rule(name), m_guardBaseDomain(guardBaseDomain){}
 
-  RuleInstanceId TestRule::createInstance(const TokenId& token, const PlanDatabaseId& planDb) const{
+  RuleInstanceId TestRule::createInstance(const TokenId& token, const PlanDatabaseId& planDb,
+                                          const RulesEngineId &rulesEngine) const{
     RuleInstanceId rootInstance = (new TestRule_Root(m_id, token, planDb))->getId();
+    rootInstance->setRulesEngine(rulesEngine);
     return rootInstance;
   }
 

@@ -26,8 +26,10 @@ class SimpleSubGoal: public Rule {
 public:
   SimpleSubGoal(): Rule(LabelStr("Predicate")){}
 
-  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb) const{
+  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb, 
+                                const RulesEngineId &rulesEngine) const{
     RuleInstanceId rootInstance = (new RootInstance(m_id, token, planDb))->getId();
+    rootInstance->setRulesEngine(rulesEngine);
     return rootInstance;
   }
 
@@ -49,7 +51,8 @@ private:
 class NestedGuards_0: public Rule {
 public:
   NestedGuards_0();
-  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb) const;
+  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb,
+                                const RulesEngineId &rulesEngine) const;
 };
 
 class NestedGuards_0_Root: public RuleInstance{
@@ -75,12 +78,15 @@ public:
 
 
 NestedGuards_0::NestedGuards_0(): Rule(LabelStr("Predicate")){}
-RuleInstanceId NestedGuards_0::createInstance(const TokenId& token, const PlanDatabaseId& planDb) const{
+RuleInstanceId NestedGuards_0::createInstance(const TokenId& token, const PlanDatabaseId& planDb,
+                                              const RulesEngineId &rulesEngine) const{
   RuleInstanceId rootInstance = (new NestedGuards_0_Root(m_id, token, planDb))->getId();
+  rootInstance->setRulesEngine(rulesEngine);
   return rootInstance;
 }
 
-NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& token, 
+                                         const PlanDatabaseId& planDb)
   : RuleInstance(rule, token, planDb, token->getObject()) {
 }
 
@@ -110,7 +116,8 @@ void NestedGuards_0_1::handleExecute(){
 class LocalVariableGuard_0: public Rule {
 public:
   LocalVariableGuard_0();
-  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb) const;
+  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb, 
+                                const RulesEngineId &rulesEngine) const;
 };
 
 class LocalVariableGuard_0_Root: public RuleInstance{
@@ -132,12 +139,16 @@ ConstrainedVariableId LocalVariableGuard_0_Root::s_guard;
 
 LocalVariableGuard_0::LocalVariableGuard_0(): Rule(LabelStr("Predicate")){}
 
-RuleInstanceId LocalVariableGuard_0::createInstance(const TokenId& token, const PlanDatabaseId& planDb) const{
+RuleInstanceId LocalVariableGuard_0::createInstance(const TokenId& token, 
+                                                    const PlanDatabaseId& planDb, 
+                                                    const RulesEngineId &rulesEngine) const{
   RuleInstanceId rootInstance = (new LocalVariableGuard_0_Root(m_id, token, planDb))->getId();
+  rootInstance->setRulesEngine(rulesEngine);
   return rootInstance;
 }
 
-LocalVariableGuard_0_Root::LocalVariableGuard_0_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+LocalVariableGuard_0_Root::LocalVariableGuard_0_Root(const RuleId& rule, const TokenId& token, 
+                                                     const PlanDatabaseId& planDb)
   : RuleInstance(rule, token, planDb){}
 
 void LocalVariableGuard_0_Root::handleExecute(){

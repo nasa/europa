@@ -20,5 +20,8 @@ namespace Prototype {
   class RuleVariableListener;
   typedef Id<RuleVariableListener> RuleVariableListenerId;
 
+  class RulesEngineListener;
+  typedef Id<RulesEngineListener> RulesEngineListenerId;
+
 }
 #endif
