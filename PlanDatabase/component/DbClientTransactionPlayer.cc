@@ -39,16 +39,15 @@ namespace Prototype {
 
   void DbClientTransactionPlayer::play(std::istream& is)
   {
-    TiXmlElement tx("");
     int txCounter = 0;
     while (!is.eof()) {
       if (is.peek() != '<') {
         is.get(); // discard characters up to '<'
         continue;
       }
+      TiXmlElement tx("");
       is >> tx;
       processTransaction(tx);
-      tx.Clear();
       txCounter++;
     }
   }
@@ -107,10 +106,18 @@ namespace Prototype {
     std::vector<ConstructorArgument> arguments;
     for (TiXmlElement * child_el = element.FirstChildElement() ;
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
-      AbstractDomain * domain = TransactionXml::abstractDomain(*child_el);
-      std::string type = TransactionXml::domainTypeAsString(domain);
-      if (type == "object") {
-        type = (((ObjectId)domain->getLowerBound())->getType()).toString();
+      AbstractDomain * domain;
+      std::string type;
+      if (strcmp(child_el->Value(), "object") != 0) {
+        domain = TransactionXml::abstractDomain(*child_el);
+        type = TransactionXml::domainTypeAsString(domain);
+      } else {
+        const char * name = child_el->Attribute("value");
+        check_error(name != NULL);
+        ObjectId object = m_client->getObject(LabelStr(name));
+        check_error(object.isValid());
+        type = object->getType().toString();
+        domain = new ObjectDomain(object);
       }
       arguments.push_back(ConstructorArgument(LabelStr(type.c_str()), domain));
     }
