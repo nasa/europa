@@ -11,9 +11,11 @@
 // Support fro required plan database components
 #include "../PlanDatabase/PlanDatabase.hh"
 #include "../PlanDatabase/Object.hh"
-#include "../PlanDatabase/RulesEngine.hh"
 #include "../PlanDatabase/Schema.hh"
 #include "../ConstraintEngine/ConstraintEngine.hh"
+
+// Rules Engine Components
+#include "../RulesEngine/RulesEngine.hh"
 
 // Access for registered event loggers for instrumentation
 #include "../ConstraintEngine/CeLogger.hh"
