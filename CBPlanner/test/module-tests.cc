@@ -83,7 +83,10 @@
 
 
 #define DEFAULT_SETUP_HEURISTICS() \
-  HSTSHeuristics heuristics; 
+    ConstraintEngine ce; \
+    initCBPTestSchema(); \
+    PlanDatabase db(ce.getId(), Schema::instance()); \
+    HSTSHeuristics heuristics(db.getId()); 
 
 #define DEFAULT_TEARDOWN_HEURISTICS()
 
@@ -101,7 +104,7 @@
       dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
       new DMLogger(std::cout, planner.getDecisionManager()); \
     } \
-    HSTSHeuristics heuristics; 
+    HSTSHeuristics heuristics(db.getId()); 
 
 #define DEFAULT_TEARDOWN_PLAN_HEURISTICS() \
     delete (DbLogger*) dbLId;
