@@ -1,16 +1,11 @@
 Code base management & cleanup:
-1. Break out Europa dependencies
-2. Split out core vs. components in all cases
-3. Split out tests from other aspects in all cases
-4. Split out utilities
-5. Ensure builds can occur at all levels - improved target location
-6. Clean up target list and publish in the root Jam file
-7. Switch to new error handling mechanism, with helpful output on failure.
-8. Add tests to force errors.
-9. Come up with Project Name and build proper CVS database
-10. Add wrapper functions for all constants as required by VxWorks
-11. Clean up the mechanism for registration of constraints for components. They are buried. Possible use a config.xml structure.
-12. Document code
+1. Ensure builds can occur at all levels - improved target location
+2. Clean up target list and publish in the root Jam file
+3. Switch to new error handling mechanism, with helpful output on failure.
+4. Add tests to force errors.
+5. Add wrapper functions for all constants as required by VxWorks
+6. Clean up the mechanism for registration of constraints for components. They are buried. Possible use a config.xml structure.
+7. Document code
 
 NddlCompiler:
 1. Remove error messages printing out enumerations
@@ -28,16 +23,14 @@ Testing support:
 2. Ensure that all models from DDL can be converted to nddl and compiled.
 
 System Tests:
-1. Get a multi-step plan running clean from .nddl file all the way through
-2. Test nominal planning process - sub-goal to completion. no back-tracks.
-3. Test back-tracking
-4. Generate models from DDL samples, and dumn
+1. Test nominal planning process - sub-goal to completion. no back-tracks.
+2. Test back-tracking
+3. Generate models from DDL samples, and dumn
 
 Parallel Efforts:
-1. Port of Nddl parser to Java and extraction from 
-2. Integration of Resources (include changes to NddlCompiler)
-3. Integration of Temporal Network, including incorporation of helper methods to prune token ordering choices.
-4. Add support for serialization.
+1. Integration of Resources (include changes to NddlCompiler)
+2. Integration of Temporal Network, including incorporation of helper methods to prune token ordering choices.
+3. Add support for serialization.
 
 PlanWorks Convergence:
 1. Switch to Jam build system (evaluate at least)
