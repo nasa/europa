@@ -104,7 +104,7 @@ xmlns="HSTS" elementFormDefault="qualified">
 <xs:element name="Defaults" maxOccurs="1" minOccurs="1">
     <xs:complexType>
       <xs:all>
-      <xs:element name="DefaultPriorityPref" type="DefaultPriorityPrefType"/>
+      <xs:element name="DefaultPriorityPref" type="PriorityPrefType"/>
       <xs:element name="DefaultCompatibility">
           <xs:complexType>
           <xs:sequence minOccurs="0" maxOccurs="unbounded">
