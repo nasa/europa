@@ -2,7 +2,7 @@ Building PLASMA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.6 2004-10-28 15:52:11 sailesh Exp $
+$Id: BUILDING,v 1.7 2004-11-09 18:09:31 bachmann Exp $
 
 
 - Building Jam
@@ -88,7 +88,7 @@ environment variables to determine the compilation flags.  These
 environment variables are:
 
 	1. PLASMA_DEBUG - use debugging
-	2. PLASMA_OPTIMIZE - use optimization
+	2. PLASMA_OPTIMIZED - use optimization
 	3. PLASMA_PROFILE - use profiling
 	4. PLASMA_WARN - use additional warnings
 
