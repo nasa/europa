@@ -42,7 +42,8 @@ namespace EUROPA {
 #ifndef EUROPA_FAST
     int intValue = (int) value;
     double dblValue = (double) intValue;
-    check_error(dblValue == value); // confirms no loss in precision
+    checkError(dblValue == value,
+	       value << " must be an integer."); // confirms no loss in precision
 #endif
   }
 

@@ -59,14 +59,14 @@ namespace EUROPA {
                 "Attempted to query for choices to constrain token " + token->getPredicateName().toString() + 
                 " which has already been constrained.");
 
-    unsigned int choiceCount = 0;
     // If the sequence is empty, add the case where both elements of the pair are the given token.
     if (m_tokenSequence.empty()) {
       debugMsg("Timeline:getOrderingChoices:canPrecede"," token sequence is empty, returning a single pair with same token");
       results.push_back(std::make_pair(token, token));
-      choiceCount++;
       return;
     }
+
+    unsigned int choiceCount = 0;
 
     // Alternatively, we can go through the sequence till we find something that we can precede.
     std::list<TokenId>::iterator current = m_tokenSequence.begin();
