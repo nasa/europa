@@ -5,7 +5,8 @@
 #include "StaticToken.hh"
 #include "EventToken.hh"
 #include "TokenVariable.hh"
-#include "TokenVariableListener.hh"
+#include "ObjectTokenRelation.hh"
+#include "Timeline.hh"
 #include "./ConstraintEngine/TestSupport.hh"
 #include "./ConstraintEngine/IntervalIntDomain.hh"
 #include "./ConstraintEngine/IntervalRealDomain.hh"
@@ -15,13 +16,13 @@
 #include <iostream>
 
 
-#define DEFAULT_SETUP(ce, db, schema) \
+#define DEFAULT_SETUP(ce, db, schema, autoClose) \
     ConstraintEngine ce;\
     Schema schema;\
     PlanDatabase db(ce.getId(), schema.getId());\
     new DefaultPropagator(LabelStr("Default"), ce.getId());\
     Object object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));\
-    db.close();
+    if(autoClose) db.close();
 
 class ObjectTest {
 public:
@@ -82,7 +83,7 @@ public:
 
 private:
   static bool testBasicTokenAllocation(){
-    DEFAULT_SETUP(ce, db, schema);
+    DEFAULT_SETUP(ce, db, schema, true);
 
     // Static Token
     StaticToken staticToken(db.getId(), LabelStr("Predicate"), LabelStr("o1"));
@@ -124,7 +125,7 @@ private:
   }
 
   static bool testMasterSlaveRelationship(){
-    DEFAULT_SETUP(ce, db, schema);
+    DEFAULT_SETUP(ce, db, schema, true);
 
     IntervalToken t0(db.getId(), 
 		     LabelStr("Predicate"), 
@@ -186,7 +187,7 @@ private:
   }
 
   static bool testBasicMerging(){
-    DEFAULT_SETUP(ce, db, scema);
+    DEFAULT_SETUP(ce, db, schema, true);
 
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db.getId(), 
@@ -275,15 +276,63 @@ private:
   }
 };
 
+class TimelineTest {
+public:
+  static bool test(){
+    runTest(testBasicInsertion, "BasicInsertion");
+    return true;
+  }
+
+private:
+  static bool testBasicInsertion(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    db.close();
+
+    IntervalToken tokenA(db.getId(), 
+		     LabelStr("P1"), 
+		     BooleanDomain(0, 1),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken tokenB(db.getId(), 
+		     LabelStr("P1"), 
+		     BooleanDomain(0, 1),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken tokenC(db.getId(), 
+		     LabelStr("P1"), 
+		     BooleanDomain(0, 1),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    tokenA.activate();
+    tokenB.activate();
+    tokenC.activate();
+    timeline.constrain(tokenA.getId());
+    timeline.constrain(tokenB.getId());
+    timeline.constrain(tokenC.getId(), tokenA.getId());
+
+    check_error(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+    return true;
+  }
+};
+
 void main(){
   initConstraintLibrary();
   
   REGISTER_NARY(EqualConstraint, "CoTemporal", "Default");
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
-  REGISTER_NARY(TokenVariableListener, "ObjectRelation", "Default");
-  REGISTER_NARY(TokenVariableListener, "ModelRulePropagation", "Default");
+  REGISTER_NARY(LessThanEqualConstraint, "Before", "Default");
+  REGISTER_UNARY(ObjectTokenRelation, "ObjectRelation", "Default");
+  REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
 
   runTestSuite(ObjectTest::test, "Object Tests");
   runTestSuite(TokenTest::test, "Token Tests");
+  runTestSuite(TimelineTest::test, "Timeline Tests");
   cout << "Finished" << endl;
 }
