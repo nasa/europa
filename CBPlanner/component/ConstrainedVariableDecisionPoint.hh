@@ -16,14 +16,14 @@ namespace Prototype {
 
     void print(std::ostream& os) const;
   private:
-    friend class DecisionManager;
+    friend class OpenDecisionManager;
 
     ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId&);
     const bool testIfExhausted();
     ConstrainedVariableId m_var;
   };
 
-std::ostream& operator <<(std::ostream& os, const ConstrainedVariableDecisionPoint&);
+std::ostream& operator <<(std::ostream& os, const Id<ConstrainedVariableDecisionPoint>&);
 
 }
 #endif

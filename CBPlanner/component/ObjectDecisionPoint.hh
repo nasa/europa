@@ -19,7 +19,7 @@ namespace Prototype {
 
     void print(std::ostream& os) const;
   private:
-    friend class DecisionManager;
+    friend class OpenDecisionManager;
 
     ObjectDecisionPoint(const DbClientId& dbClient, const EntityId&, const TokenId&);
     const bool testIfExhausted();

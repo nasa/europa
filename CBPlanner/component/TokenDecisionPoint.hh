@@ -16,7 +16,7 @@ namespace Prototype {
 
     void print(std::ostream& os) const;
   private:
-    friend class DecisionManager;
+    friend class OpenDecisionManager;
     friend class Choice;
 
     TokenDecisionPoint(const DbClientId& dbClient, const TokenId&);
