@@ -20,6 +20,7 @@
 
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabase.hh"
+#include "PlanDatabaseWriter.hh"
 #include "Schema.hh"
 #include "Object.hh"
 #include "EventToken.hh"
@@ -1089,6 +1090,7 @@ public:
   static bool test() {
     runTest(testFindAnotherPlan);
     runTest(testAddSubgoalAfterPlanning);
+    runTest(testPurgeClosedDecisionsBeforeReplanning);
     return(true);
   }
 private:
@@ -1234,6 +1236,64 @@ private:
     }
 
     */
+    DEFAULT_TEARDOWN_PLAN();
+    return true;
+  }
+
+  static bool testPurgeClosedDecisionsBeforeReplanning() {
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    hor.setHorizon(0,100);
+
+    std::list<double> values;
+    values.push_back(LabelStr("L1"));
+    values.push_back(LabelStr("L4"));
+
+    Variable<LabelSet> v0(ce.getId(), LabelSet(values));
+    LabelSet leaveOpen;
+    leaveOpen.insert(values);
+    Variable<LabelSet> v1(ce.getId(), leaveOpen);
+    Variable<IntervalDomain> v2(ce.getId(), IntervalDomain(1, 2));
+    Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 2));
+    Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
+    Variable<NumericDomain> v5(ce.getId(), NumericDomain());
+    v5.insert(5);
+    v5.insert(23);
+    v5.close();
+
+    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    db.close();
+
+    for (;;) { /* Forever: only way out is to return */
+      CBPlanner::Status result = planner.step();
+      if (result != CBPlanner::IN_PROGRESS) {
+	assertTrue(result == CBPlanner::PLAN_FOUND);
+	break;
+      }
+    }
+    assertTrue(planner.getDepth() ==  planner.getTime());
+    assertTrue(planner.getDepth() == 3);
+
+    //    PlanDatabaseWriter::write(db.getId(),std::cout);
+
+    planner.getDecisionManager()->purgeClosedDecisions();
+
+    Variable<BoolDomain> v6(ce.getId(), BoolDomain());
+    IntervalToken tokenA(db.getId(), 
+			 "Objects.PADDED",
+			 true); 
+
+    tokenA.getStart()->specify(IntervalIntDomain(0, 10));
+    tokenA.getEnd()->specify(IntervalIntDomain(0, 200));
+
+    //    std::cout << "AFTER ADDING NEW GOAL TOKEN " << std::endl;
+
+    CBPlanner::Status res = planner.run();
+    assertTrue(res == CBPlanner::PLAN_FOUND);
+    assertTrue(planner.getDepth() ==  planner.getTime());
+    assertTrue(planner.getDepth() == 6);
+
+    //    PlanDatabaseWriter::write(db.getId(),std::cout);
+
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
