@@ -31,8 +31,6 @@
 #include <pthread.h>
 #include <string>
 
-
-
   class Foo;
   typedef Id<Foo> FooId;
 
@@ -891,6 +889,7 @@ public:
     runTest(testNonChronGNATS2439);
     runTest(testMergingPerformance);
     runTest(testTokenCompatibility);
+    runTest(testPredicateInheritance);
     runTest(testTokenFactory);
     runTest(testCorrectSplit_Gnats2450);
     return(true);
@@ -1489,6 +1488,7 @@ private:
 
   static bool testTokenCompatibility(){
     DEFAULT_SETUP(ce, db, true);
+
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db, 
                      LabelStr(DEFAULT_PREDICATE()), 
@@ -1560,6 +1560,165 @@ private:
     compatibleTokens.clear();
     db->getCompatibleTokens(t3.getId(), compatibleTokens);
     assert(compatibleTokens.size() == 1); // Expect a single match
+
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static LabelStr encodePredicateNames(const std::vector<TokenId>& tokens){
+    std::string str;
+    for(std::vector<TokenId>::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
+      TokenId token = *it;
+      str = str + token->getName().toString() + ":";
+    }
+    return str;
+  }
+
+  static bool testPredicateInheritance(){
+    DEFAULT_SETUP(ce, db, false);
+    // Add model elements to test inheritance
+    schema->addObjectType("A");
+    schema->addObjectType("B", "A");
+    schema->addObjectType("C", "B");
+    schema->addObjectType("D", "A");
+    schema->addPredicate("A.a");
+    schema->addPredicate("A.b");
+    schema->addPredicate("B.a");
+    schema->addPredicate("C.a");
+    schema->addPredicate("C.b");
+    schema->addPredicate("C.c");
+    schema->addPredicate("D.a");
+    schema->addPredicate("D.d");
+
+    // Now allocate object instances for each one
+    Object o1(db, "A", "1");
+    Object o2(db, "B", "2");
+    Object o3(db, "C", "3");
+    Object o4(db, "D", "4");
+    db->close();
+
+    // Populate an instance of each predicate type
+    IntervalToken t0(db,
+                     LabelStr("A.a"), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+    t0.close();
+    t0.activate();
+
+    IntervalToken t1(db,
+                     LabelStr("A.b"), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+    t1.close();
+    t1.activate();
+
+    IntervalToken t2(db,
+                     LabelStr("B.a"), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+    t2.close();
+    t2.activate();
+
+    IntervalToken t3(db,
+                     LabelStr("C.a"), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+    t3.close();
+    t3.activate();
+
+    IntervalToken t4(db,
+                     LabelStr("C.b"), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+    t4.close();
+    t4.activate();
+
+    IntervalToken t5(db,
+                     LabelStr("C.c"), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+    t5.close();
+    t5.activate();
+
+    IntervalToken t6(db,
+                     LabelStr("D.a"), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+    t6.close();
+    t6.activate();
+
+    IntervalToken t7(db,
+                     LabelStr("D.b"), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+    t7.close();
+    t7.activate();
+
+    // A.a => B.a, C.a., D.a. This is the case for GNATS 2837
+    {
+      std::vector<TokenId> results;
+      IntervalToken t(db,
+		      LabelStr("A.a"), 
+		      true,
+		      IntervalIntDomain(0, 10),
+		      IntervalIntDomain(0, 20),
+		      IntervalIntDomain(1, 1000),
+		      Token::noObject(), false);
+      t.close();
+
+
+      assert(ce->propagate());
+      db->getCompatibleTokens(t.getId(), results);
+
+      LabelStr encodedNames = encodePredicateNames(results);
+      assertTrue(encodedNames == LabelStr("A.a:B.a:C.a:D.a:"), "Expected = A.a:B.a:C.a:D.a:, Actual =  " + encodedNames.toString());
+    }
+
+    // A.a => A.a, B.a, C.a., D.a. This is the case for GNATS 2837
+    {
+      std::vector<TokenId> results;
+      IntervalToken t(db,
+		      LabelStr("D.b"), 
+		      true,
+		      IntervalIntDomain(0, 10),
+		      IntervalIntDomain(0, 20),
+		      IntervalIntDomain(1, 1000),
+		      Token::noObject(), false);
+      t.close();
+
+
+      assert(ce->propagate());
+      db->getCompatibleTokens(t.getId(), results);
+
+      LabelStr encodedNames = encodePredicateNames(results);
+      assertTrue(encodedNames == LabelStr("D.b:"), "Expected = D.b':, Actual =  " + encodedNames.toString());
+    }
+
     DEFAULT_TEARDOWN();
     return true;
   }

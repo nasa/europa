@@ -2,7 +2,6 @@
 #include "CBPlanner.hh"
 #include "DecisionManager.hh"
 #include "SubgoalOnceRule.hh"
-//#include "CBPlannerModuleTests.hh"
 #include "Condition.hh"
 #include "Horizon.hh"
 #include "HorizonCondition.hh"
