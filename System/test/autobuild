@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.53 2003-08-11 22:36:09 wedgingt Exp $
+# $Id: autobuild,v 1.54 2003-08-11 23:42:17 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -139,27 +139,27 @@ do
             find "$HOME"/europa.profiles -type d -mtime +7 -ls > .autobuild.profFind
             if test -s .autobuild.profFind
             then
-                SupportFiles/gather.gprofs
+                NewPlan/SupportFiles/gather.gprofs
 		cvs tag -F Europa-Auto-Profiled-"`uname -n | sed -e 's/[.].*$//'`"
             fi
             rm -rf .autobuild.profFind
         fi
     else
-        ( uname -a; echo ''; cat make.options; echo ''; g++ --version; echo ''; tail -40 make.tests) | \
+        ( uname -a; echo ''; cat make.options; echo ''; g++ --version; echo ''; tail -40 NewPlan/make.tests) | \
             Mail -s 'Autobuild in '"`pwd`"' failed; exited '"$status" "$email"
-        mkdir working/failed
+        mkdir NewPlan/working/failed
     fi
 
-    # Save the make output
-    mv NewPlan/make.tests .
+    # Save the make output files
+    mv NewPlan/make.tests . || exit 2
+    mv testDist/make.simple . || exit 2
 
     # Would continue with the next one after a failure,
     #   but the disk space might not be available.
     rmdir NewPlan/working || exit 1
 
     # Now, wipe out all that hard work
-    cd "$startdir"/"$dir"
-    rm -rf NewPlan
+    rm -rf NewPlan testDist
 
 done
 exit 0
