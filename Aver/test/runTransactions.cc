@@ -40,7 +40,7 @@ bool runTransactions() {
   EventAggregator::instance()->notifyStep();
   AverInterp::terminate();
   EventAggregator::remove();
-  return true;
+  return(true);
 }
 
 int main(int argc, const char** argv) {
@@ -50,38 +50,38 @@ int main(int argc, const char** argv) {
   const char* libPath;
   SchemaId (*fcn_schema)();
 
-  if(argc != 2) {
-    std::cout << "usage: runProblem <model shared library path>" << std::endl;
+  if (argc != 2) {
+    std::cerr << "usage: " << argv[0] << " <model shared library path>" << std::endl;
     exit(1);
   }
   
   libPath = argv[1];
   //initialTransactions = argv[2];
   
-  std::cout << "runProblem: dlopen() file: " << libPath << std::endl;
-  std::cout.flush();
+  std::cerr << argv[0] << ": dlopen() file: " << libPath << std::endl;
+  std::cerr.flush();
   
   libHandle = dlopen(libPath, RTLD_NOW);
   
-  if(!libHandle) {
+  if (!libHandle) {
     error_msg = dlerror();
-    std::cout << "Error during dlopen() of " << libPath << ":" << std::endl;
-    check_error(!error_msg, error_msg);
+    std::cerr << "Error during dlopen() of " << libPath << ":" << std::endl;
+    assertTrue(!error_msg, error_msg);
   }
   
   fcn_schema = (SchemaId (*)())dlsym(libHandle, "loadSchema");
-  if(!fcn_schema) {
+  if (!fcn_schema) {
     error_msg = dlerror();
-    std::cout << "dlsym: Error locating NDDL::schema:" << std::endl;
-    check_error(!error_msg, error_msg);
+    std::cerr << "dlsym: Error locating NDDL::schema:" << std::endl;
+    assertTrue(!error_msg, error_msg);
   }
   
   assert(Schema::instance().isValid());
   SamplePlanDatabase::initialize();
   schema = (*fcn_schema)();
 #else //STANDALONE
-  if(argc != 1) {
-    std::cout << "usage: runTransactions" << std::endl;
+  if (argc != 1) {
+    std::cerr << "usage: " << argv[0] << std::endl;
     exit(1);
   }
   //initialTransactions = argv[1];
@@ -94,17 +94,17 @@ int main(int argc, const char** argv) {
   SamplePlanDatabase::terminate();
 
 #ifdef STANDALONE
-  if(dlclose(libHandle)) {
+  if (dlclose(libHandle)) {
     error_msg = dlerror();
-    std::cout << "Error during dlclose():" << std::endl;
-    check_error(!error_msg, error_msg);
+    std::cerr << "Error during dlclose():" << std::endl;
+    assertTrue(!error_msg, error_msg);
   }
   
-  std::cout << "Model Library Unloaded" << std::endl;
-  std::cout.flush();
+  std::cerr << "Model Library Unloaded" << std::endl;
+  std::cerr.flush();
 #endif
   
-  std::cout << "Finished" << std::endl;
+  std::cerr << "Finished" << std::endl;
   return 0;
 }
 
