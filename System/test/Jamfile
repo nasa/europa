@@ -39,10 +39,9 @@ for model in
   ModuleSharedLibrary $(lib) : $(o) : NDDL ;
   local variant ;
   for variant in $(VARIANTS) {
-    local variant_name = [ FVariantName $(lib) : $(variant) ] ;
-    local libname = lib$(variant_name)$(SUFSHARE) ;
+    local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
     local run_variant_name = [ FVariantName runModel : $(variant) ] ;
-    run_variant_name = [ FAppendSuffix $(run_variant_name)_rt : $(SUFEXE) ] ;
+    run_variant_name = $(run_variant_name)_rt ;
     local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) ;
     RunModuleMain run-model-$(exe) : runModel : $(arguments) ;
     Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
