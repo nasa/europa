@@ -37,8 +37,8 @@ namespace Prototype {
 	    }
 	    os << ")" <<std::endl;
 	    os << "\tKey=" << t->getKey() << std::endl;
-	    std::set<TokenId> mergedtoks = t->getMergedTokens();
-	    for(std::set<TokenId>::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
+	    TokenSet mergedtoks = t->getMergedTokens();
+	    for(TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
 	      os << "\t\tMerged Key=" << (*mit)->getKey() << std::endl;
 	    os << "[ " << t->getEnd()->getDerivedDomain().getLowerBound() << " " << t->getEnd()->getDerivedDomain().getUpperBound() << " ]"<< std::endl;
 	  }

@@ -1379,6 +1379,7 @@ public:
   static bool test(){
     runTest(testFactoryMethods);
     runTest(testBasicAllocation);
+    runTest(testPathBasedRetrieval);
     return true;
   }
 private:
@@ -1417,6 +1418,96 @@ private:
     key = client->createToken(LabelStr("Foo"));
     TokenId token = client->getEntity(key);
     assert(token.isValid());
+
+    delete (DbClient*) client;
+    return true;
+  }
+
+  static bool testPathBasedRetrieval(){
+    DEFAULT_SETUP(ce, db, schema, true);
+
+    IntervalToken t0(db.getId(), 
+		     LabelStr("Predicate"), 
+		     false, 
+		     IntervalIntDomain(0, 1),
+		     IntervalIntDomain(0, 1),
+		     IntervalIntDomain(1, 1));
+    t0.activate();
+
+    TokenId t1 = (new IntervalToken(db.getId(), 
+				    LabelStr("Predicate"), 
+				    false,
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(1, 1)))->getId();
+    t1->activate();
+
+    TokenId t0_0 = (new IntervalToken(t0.getId(), 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(1, 1)))->getId();
+    t0_0->activate();
+
+    TokenId t0_1 = (new IntervalToken(t0.getId(), 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(1, 1)))->getId();
+    t0_1->activate();
+
+    TokenId t0_2 = (new IntervalToken(t0.getId(), 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(1, 1)))->getId();
+    t0_2->activate();
+
+    TokenId t1_0 = (new IntervalToken(t1, 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(0, 1),
+				    IntervalIntDomain(1, 1)))->getId();
+    t1_0->activate();
+
+    TokenId t0_1_0 = (new EventToken(t0_1, 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(0, 1)))->getId();
+    t0_1_0->activate();
+
+    TokenId t0_1_1 = (new EventToken(t0_1, 
+				    LabelStr("Predicate"), 
+				    IntervalIntDomain(0, 1)))->getId();
+    t0_1_1->activate();
+
+    // Test paths
+    std::vector<int> path;
+    path.push_back(t0.getKey());
+
+    DbClientId client = DbClient::createInstance(db.getId());
+
+    // Base case with just the root
+    assert(client->getTokenByPath(path) == t0.getId());
+    assert(client->getPathByToken(t0.getId()).size() == 1);
+
+    // Now test a more convoluted path
+    path.push_back(1);
+    path.push_back(1);
+    assert(client->getTokenByPath(path) == t0_1_1);
+
+    path.clear();
+    path = client->getPathByToken(t0_1_1);
+    assert(path.size() == 3);
+    assert(path[0] == t0.getKey());
+    assert(path[1] == 1);
+    assert(path[2] == 1);
+
+
+    // Negative tests
+    path.push_back(100);
+    assert(client->getTokenByPath(path) == TokenId::noId());
+    path[0] = 99999;
+    assert(client->getTokenByPath(path) == TokenId::noId());
 
     delete (DbClient*) client;
     return true;
