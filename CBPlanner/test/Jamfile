@@ -2,7 +2,10 @@ SubDir PLASMA CBPlanner test ;
 
 if ! $(PLASMA_READY) {
 
-ModuleMain cbp-module-tests : SubgoalOnceRule.cc CBPlannerModuleTests.cc module-tests.cc : CBPlanner ;
+#ModuleMain nonChrono : nonChrono.cc : CBPlanner ;
+
+ModuleMain cbp-module-tests : NotFalseConstraint.cc BinaryCustomConstraint.cc SubgoalOnceRule.cc CBPlannerModuleTests.cc module-tests.cc : CBPlanner ;
+
 RunModuleMain run-cbp-module-tests : cbp-module-tests ;
 LocalDepends tests : run-cbp-module-tests ;
 
