@@ -33,13 +33,12 @@ namespace PLASMA {
     check_error(tt.isValid());
     std::stringstream key;
     check_error(LabelStr::isString(tt->getPredicate()));
-    key << tt->getPredicate().getKey(); 
+    key << tt->getPredicate().c_str();
     std::vector<std::pair<LabelStr,LabelStr> > ds = tt->getDomainSpecs();
     for (unsigned int i=0; i < ds.size(); ++i) {
       key << DELIMITER;
-      key << ds[i].first << "|" << ds[i].second;
+      key << ds[i].first.c_str() << "|" << ds[i].second.c_str();
     }
-    key << std::endl;
     return key.str();
   }
 
@@ -185,6 +184,8 @@ namespace PLASMA {
   }
 
   void HSTSHeuristics::setDefaultPriorityPreference(const PriorityPref pp) {
+    check_error(m_defaultPriorityPreference <= 1);
+    check_error(m_defaultPriorityPreference >= 0);
     m_defaultPriorityPreference = pp;
   }
 
@@ -379,7 +380,7 @@ namespace PLASMA {
 					     const TokenTypeId& tt) {
     check_error(tt.isValid());
     std::stringstream key;
-    key << variableName << DELIMITER << TokenType::getIndexKey(tt);
+    key << variableName.c_str() << DELIMITER << TokenType::getIndexKey(tt).c_str();
     key << std::endl;
     return key.str();
   }
@@ -391,27 +392,77 @@ namespace PLASMA {
     check_error(tt.isValid());
     check_error(mastertt.isValid() || mastertt.isNoId());
     std::stringstream key;
-    if (o != FREE)
-      key << o << DELIMITER;
-    key << TokenType::getIndexKey(tt);
-    if (!mastertt.isNoId()) {
-      key << DELIMITER << TokenType::getIndexKey(mastertt);
-      key << DELIMITER << rel;
+    if (o != FREE) {
+      LabelStr str(NO_STRING);
+      HSTSHeuristics::originToString(o,str);
+      key << str.toString() << DELIMITER;
     }
-    key << std::endl;
+    key << TokenType::getIndexKey(tt).c_str();
+    if (!mastertt.isNoId()) {
+      key << DELIMITER << TokenType::getIndexKey(mastertt).c_str();
+      LabelStr str(NO_STRING);
+      HSTSHeuristics::relationshipToString(rel,str);
+      key << DELIMITER << str.toString();
+    }
     return key.str();
+  }
+
+  void HSTSHeuristics::relationshipToString(const Relationship& rel, LabelStr& str) {
+    switch(rel) {
+    case 0: str = LabelStr("BEFORE"); break;
+    case 1: str = LabelStr("AFTER"); break;
+    case 2: str = LabelStr("OTHER"); break;
+    case 3: str = LabelStr("ANY"); break;
+    default: check_error(false, "Relationship not recognized.");
+    }
+  }
+
+  void HSTSHeuristics::originToString(const Origin& orig, LabelStr& str) { 
+    switch(orig) {
+    case 0: str = LabelStr("FREE"); break;
+    case 1: str = LabelStr("INITIAL"); break;
+    case 2: str = LabelStr("SUBGOAL"); break;
+    default: check_error(false, "Origin not recognized.");
+    }
+  }
+
+  void HSTSHeuristics::candidateOrderToString(const CandidateOrder& order, LabelStr& str) {
+    switch(order) {
+    case 0: str = LabelStr("TGENERATOR"); break;
+    case 1: str = LabelStr("NEAR"); break;
+    case 2: str = LabelStr("FAR"); break;
+    case 3: str = LabelStr("EARLY"); break;
+    case 4: str = LabelStr("LATE"); break;
+    case 5: str = LabelStr("MAX_FLEXIBLE"); break;
+    case 6: str = LabelStr("MIN_FLEXIBLE"); break;
+    case 7: str = LabelStr("LEAST_SPECIFIED"); break;
+    case 8: str = LabelStr("MOST_SPECIFIED"); break;
+    case 9: str = LabelStr("NONE"); break;
+    default: check_error(false, "Candidate Order value not recognized.");
+    }
   }
 
   void HSTSHeuristics::write(std::ostream& os) {
     os << "HSTSHeuristics: " << std::endl;
-    os << " Default Priority Preference: " << getDefaultPriorityPreference() << std::endl;
+    os << " Default Priority Preference: ";
+    const PriorityPref pp = getDefaultPriorityPreference();
+    if (pp == 0) 
+      os << "LOW" << std::endl;
+    else
+      os << "HIGH" << std::endl;
     os << " Default Token Priority: " << getDefaultPriorityForTokenDPs() << std::endl;
     os << " Default Variable Priority: " << getDefaultPriorityForConstrainedVariableDPs() << std::endl;
-    os << " Default Token Orders/States: " << std::endl;
+    os << " Default Token States/Orders: " << std::endl;
     std::vector<LabelStr>::const_iterator its(m_defaultTokenStates.begin());
     std::vector<CandidateOrder>::const_iterator ito(m_defaultCandidateOrders.begin());
+    LabelStr str(NO_STRING);
     for (; its != m_defaultTokenStates.end(); ++its, ++ito) {
-      os << "   " << *ito << "/" << (*its).c_str() << std::endl;
+      os << "   ";
+      os << (*its).c_str();
+      os << "/";
+      HSTSHeuristics::candidateOrderToString(*ito,str);
+      os << str.c_str();
+      os << std::endl;
     }
     os << " Default Compatibility Priority: " << std::endl;
     std::map<LabelStr, Priority>::const_iterator itc(m_defaultCompatibilityPriority.begin());
@@ -420,8 +471,10 @@ namespace PLASMA {
       const Priority p = itc->second;
       std::cout << "   " << key.c_str() << " " << p << std::endl;
     }
+    os << " Token Heuristics: " << std::endl;
     std::map<LabelStr, TokenEntry>::const_iterator itt(m_tokenHeuristics.begin());
     for (; itt != m_tokenHeuristics.end(); ++itt) {
+      std::cout << " Token: "; 
       const LabelStr key = itt->first;
       std::cout << "   " << key.c_str() << " " << itt->second.getPriority();
       const std::vector<LabelStr> states(itt->second.getStates());
@@ -429,11 +482,16 @@ namespace PLASMA {
       std::vector<LabelStr>::const_iterator itts(states.begin());
       std::vector<CandidateOrder>::const_iterator itto(orders.begin());
       for (; itts != states.end(); ++itts, ++itto) {
-	std::cout << " " << *ito << "/" << (*its).c_str();
+	std::cout << " ";
+	HSTSHeuristics::candidateOrderToString(*itto,str);
+	os << str.c_str();
+	os << "/" << (*itts).c_str();
       }
     }
+    std::cout << " Variable Heuristics: " << std::endl;
     std::map<LabelStr, VariableEntry>::const_iterator itv(m_variableHeuristics.begin());
     for (; itv != m_variableHeuristics.end(); ++itv) {
+      std::cout << " Variable: " << std::endl;
       const LabelStr key = itv->first;
       std::cout << "   " << key.c_str() << " " << itv->second.getPriority();
       const std::list<LabelStr> domain = itv->second.getDomain();

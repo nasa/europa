@@ -171,6 +171,10 @@ namespace PLASMA {
     const std::list<LabelStr>& getInternalPreferenceForVariableValueChoice(const LabelStr& variableName, const TokenTypeId& tt);
     const DomainOrder& getInternalPreferenceForConstrainedVariableDP(const LabelStr& variableName, const TokenTypeId& tt, const LabelStr& generatorName);
 
+    static void candidateOrderToString(const CandidateOrder& order, LabelStr& str);
+    static void relationshipToString(const Relationship& rel, LabelStr& str);
+    static void originToString(const Origin& orig, LabelStr& str);
+
     PriorityPref m_defaultPriorityPreference;
     std::map<LabelStr, Priority> m_defaultCompatibilityPriority;
     Priority m_defaultTokenPriority;
