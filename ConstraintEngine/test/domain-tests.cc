@@ -7,12 +7,22 @@
 #include "Domain.hh"
 #include "domain-tests.hh"
 
-#ifdef __sun
-#include <strstream>
-typedef std::strstream sstream;
-#else
+// These differences have to do with changes to the C++ standard,
+//   not the operating system in use. --wedgingt 15 Mar 2004
+#ifdef __GNUC__
+#if __GNUC__ > 2
 #include <sstream>
-typedef std::stringstream sstream;
+//typedef std::stringstream sstream;
+#define streamIsEmpty(s) (s).str() == ""
+#else
+#include <strstream>
+typedef std::strstream std::stringstream;
+#define streamIsEmpty(s) !(s).str()
+#endif
+#else
+#include <strstream>
+typedef std::strstream std::stringstream;
+#define streamIsEmpty(s) !(s).str()
 #endif
 
 namespace Prototype {
@@ -178,7 +188,7 @@ namespace Prototype {
       IntervalIntDomain d1(1, 100);
       //       std::stringstream ss1;
       //       d1 >> ss1;
-      sstream ss1;
+      std::stringstream ss1;
       d1 >> ss1;
       std::string actualString = ss1.str();
       std::string expectedString("INT_INTERVAL:CLOSED[1, 100]");
