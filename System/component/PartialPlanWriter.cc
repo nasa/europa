@@ -178,6 +178,7 @@ namespace Prototype {
 	  FatalErrno();
 	}
       }
+      dest = "./plans";
       char *altDest = getenv(envAltWriteDest);
       if(altDest != NULL) {
 	dest = std::string(altDest);
@@ -265,6 +266,8 @@ namespace Prototype {
       if(!(*ceId)->constraintConsistent()) {
 	FatalError("Attempted to write inconsistant database.");
       }
+      if(!transOut || !statsOut)
+        return;
 
       ppId = 0LL;
       struct timeval currTime;
