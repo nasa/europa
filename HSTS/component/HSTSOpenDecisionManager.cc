@@ -57,6 +57,7 @@ namespace EUROPA {
   void HSTSOpenDecisionManager::getBestObjectDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
     check_error(bestDec.isNoId());
     if (m_sortedObjectDecs.empty()) return;
+    /*
     unsigned int bestNrChoices=0;
     for (ObjectDecisionSet::iterator it = m_sortedObjectDecs.begin(); it != m_sortedObjectDecs.end(); ++it) {
       TokenId tok = (*it)->getToken();
@@ -75,6 +76,7 @@ namespace EUROPA {
 	}
       }
     }
+    */
     if (bestDec.isNoId() && !m_sortedObjectDecs.empty()) {
       bestDec = *m_sortedObjectDecs.begin();
       bestp = m_heur->getPriorityForObjectDP(bestDec);
@@ -117,34 +119,34 @@ namespace EUROPA {
     }
   }
 
-  void HSTSOpenDecisionManager::getBestVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
+  void HSTSOpenDecisionManager::getBestUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
     check_error(bestDec.isNoId());
-    if (m_sortedUnitVarDecs.empty() && m_sortedNonUnitVarDecs.empty()) return;
+    if (m_sortedUnitVarDecs.empty()) return;
     // these must be compat guards
-    if (!m_sortedUnitVarDecs.empty()) {
-      VariableDecisionSet::iterator it = m_sortedUnitVarDecs.begin();
-      bestDec = *it;
-      check_error(bestDec.isValid());
-      ++it;
-      bestp = m_heur->getPriorityForConstrainedVariableDP(bestDec);
-      for (; it != m_sortedUnitVarDecs.end(); ++it) {
-	// ignore variables of uninserted tokens
-	ConstrainedVariableDecisionPointId vdec(*it);
-	if (TokenId::convertable(vdec->getVariable()->getParent())) {
-	  TokenId parent = vdec->getVariable()->getParent();
-	  if (!parent->isActive()) continue;
-	}
-	const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(vdec);
-	if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
-	    (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
-	  bestDec = vdec;
-	  bestp = priority;
-	}
+    VariableDecisionSet::iterator it = m_sortedUnitVarDecs.begin();
+    bestDec = *it;
+    check_error(bestDec.isValid());
+    ++it;
+    bestp = m_heur->getPriorityForConstrainedVariableDP(bestDec);
+    for (; it != m_sortedUnitVarDecs.end(); ++it) {
+      // ignore variables of uninserted tokens
+      ConstrainedVariableDecisionPointId vdec(*it);
+      if (TokenId::convertable(vdec->getVariable()->getParent())) {
+	TokenId parent = vdec->getVariable()->getParent();
+	if (!parent->isActive()) continue;
       }
-      return; // we know we must have at least one unit var dec
+      const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(vdec);
+      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
+	  (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
+	bestDec = vdec;
+	bestp = priority;
+      }
     }
-    check_error(m_sortedUnitVarDecs.empty(), "Failed to return with unit variable decision even though there are unit variables");
+  }
 
+  void HSTSOpenDecisionManager::getBestNonUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
+    check_error(bestDec.isNoId());
+    if (m_sortedNonUnitVarDecs.empty()) return;
     ConstrainedVariableDecisionPointId bestFloatDec;
     HSTSHeuristics::Priority bestFloatp = bestp;
     VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin();
@@ -254,7 +256,7 @@ namespace EUROPA {
     }
     bool assignedBest(false);
 
-    getBestObjectDecision(bestODec, bestOP);
+    if(!m_sortedObjectDecs.empty())  getBestObjectDecision(bestODec, bestOP);
 
     if (!bestODec.isNoId()) { /* Europa doesn't distinguish between object and token decisions so we make any object decisions */
       ObjectDecisionPointId odec(bestODec);
@@ -265,8 +267,20 @@ namespace EUROPA {
       return m_curDec;
     }
 
-    getBestTokenDecision(bestTDec, bestTP);
-    getBestVariableDecision(bestVDec, bestVP);
+    if (!m_sortedUnitVarDecs.empty()) getBestUnitVariableDecision(bestVDec, bestVP);
+
+    if (!bestVDec.isNoId()) {
+      m_curDec = bestVDec;
+      assignedBest = true;
+
+      ConstrainedVariableDecisionPointId vdec(bestVDec);
+      debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
+
+      return m_curDec;
+    }
+
+    if (!m_sortedTokDecs.empty()) getBestTokenDecision(bestTDec, bestTP);
+    if (!m_sortedNonUnitVarDecs.empty()) getBestNonUnitVariableDecision(bestVDec, bestVP);
 
     if (bestTDec.isNoId() && !bestVDec.isNoId()) {
       m_curDec = bestVDec;
@@ -281,10 +295,10 @@ namespace EUROPA {
     if (bestVDec.isNoId() && !bestTDec.isNoId()) {
       m_curDec = bestTDec;
       assignedBest = true;
-
+	
       TokenDecisionPointId tdec(bestTDec);
       debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Tok Dec = [" << bestTP << "] (" << tdec->getKey() << ") with Token " << tdec->getToken()->getName().c_str() << " with domain " << tdec->getToken()->getState()->lastDomain()) ;
-
+	
       return m_curDec;
     }
 

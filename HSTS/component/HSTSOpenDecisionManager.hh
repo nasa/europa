@@ -30,7 +30,8 @@ namespace EUROPA {
 
     virtual void getBestObjectDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
     virtual void getBestTokenDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
-    virtual void getBestVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
+    virtual void getBestUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
+    virtual void getBestNonUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
 
     virtual void HSTSOpenDecisionManager::initializeNumberToBeat(const HSTSHeuristics::CandidateOrder& order, int& numberToBeat);
 
