@@ -262,7 +262,7 @@ namespace Prototype {
     // This is pointlessly restrictive; shouldn't the Domain class
     // decide whether it splits intervals or not?
     // --wedgingt@ptolemy.arc.nasa.gov 2004 Feb 12
-    check_error(getCurrentDomain(m_variables[X]).isEnumerated() && getCurrentDomain(m_variables[Y]).isEnumerated());
+    //check_error(getCurrentDomain(m_variables[X]).isEnumerated() && getCurrentDomain(m_variables[Y]).isEnumerated());
   }
 
   void NotEqualConstraint::handleExecute() {
@@ -277,10 +277,20 @@ namespace Prototype {
 
     check_error(!domx.isEmpty() && !domy.isEmpty());
 
-    if (domx.isSingleton() && domy.isMember(domx.getSingletonValue()))
+    if (domx.isSingleton() && domy.isMember(domx.getSingletonValue())) {
+      if (domy.isEnumerated() || domy.isSingleton()
+          || (domy.getType() == AbstractDomain::INT_INTERVAL &&
+              (domx.isMember(domy.getLowerBound())
+               || domx.isMember(domy.getUpperBound()))))
       domy.remove(domx.getSingletonValue());
-    else if (domy.isSingleton() && domx.isMember(domy.getSingletonValue()))
-      domx.remove(domy.getSingletonValue());
+    } else
+      if (domy.isSingleton() && domx.isMember(domy.getSingletonValue())) {
+        if (domx.isEnumerated() || domx.isSingleton()
+          || (domx.getType() == AbstractDomain::INT_INTERVAL &&
+              (domy.isMember(domx.getLowerBound())
+               || domy.isMember(domx.getUpperBound()))))
+          domx.remove(domy.getSingletonValue());
+      }
   }
 
   bool NotEqualConstraint::canIgnore(const ConstrainedVariableId& variable,
