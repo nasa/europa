@@ -4,6 +4,18 @@ Known areas of performance improvement:
 3. Deletion of the database.
 4. Update of variables from Temporal Network.
 5. Splitting merged tokens in a non-chronological backtrack.
+6. Improve exchange of data in TemporalPropagator with direct use of IntervalInt domain and direct
+calculation of duration variables.
+
+M_6:
+1. Fixed bug in temporal network propagator execute method. It was masking side-effects which required further
+propagation. Note that executing StartEndDuration may impact and of the start, end or duration variables.
+2. Still have open bug where the Rover model backtracks when it shouldn't, at the direction of the TemporalNetwork,
+and arising out of Merging and Activation decisions.
+3. Still have open bug where transaction logging and replay leads to spurious behavior if done repeatedly. The general
+symptom is that we get the CE in an inconsistent state when trying to constrain token(s) on an object.
+4. Have implemented a write mechanism on the DbClient which gives us a pretty good checksum as a string for comparing
+the copied plan.
 
 M_5:
 1. Principal Transaction Logging and replay infrastructure completed.
