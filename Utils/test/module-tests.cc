@@ -92,6 +92,9 @@ private:
     assertTrue(Error::displayWarnings());
     assertTrue(Error::throwEnabled());
     try {
+      // These are tests of check_error() and should therefore not be changed
+      //   to assertTrue() despite the usual rule for test programs.
+      // --wedgingt@email.arc.nasa.gov 2005 Feb 9
       check_error(Error::printingErrors(), "not printing errors by default!");
       check_error(Error::displayWarnings(), "display warnings off by default!");
       check_error(var == 1);
@@ -185,10 +188,10 @@ private:
     Error::doNotThrowExceptions();
     Error::doNotDisplayErrors();
     std::ofstream debugOutput(cfgOut.c_str());
-    check_error(debugOutput, "could not open debug output file");
+    assertTrue(debugOutput.good(), "could not open debug output file");
     DebugMessage::setStream(debugOutput);
     std::ifstream debugStream(cfgFile.c_str());
-    check_error(debugStream, "could not open debug config file",
+    assertTrue(debugStream.good(), "could not open debug config file",
                 DebugErr::DebugConfigError());
     if (!DebugMessage::readConfigFile(debugStream))
       handle_error(!DebugMessage::readConfigFile(debugStream),
@@ -413,24 +416,23 @@ bool IdTests::testCastingSupport()
 bool IdTests::testBadAllocationErrorHandling()
 {
   bool success = true;
-  // check_error will not throw the errors for EUROPA_FAST
+  // check_error (inside class Id) will not throw the errors when compiled with EUROPA_FAST.
 #ifndef EUROPA_FAST
   // Ensure allocation of a null pointer triggers error
   //LabelStr expectedError = IdErr::IdMgrInvalidItemPtrError();
-
   Error::doThrowExceptions();
 #if !defined(__CYGWIN__)
   // This exception simply isn't being caught on Cygwin for some reason.
   try {
     Id<Foo> fId0((Foo*) 0);
-    check_error(false, "Id<Foo> fId0((Foo*) 0); failed to error out.");
+    assertTrue(false, "Id<Foo> fId0((Foo*) 0); failed to error out.");
     success = false;
   }
-  catch(Error e){
-    if(e.getType() == "Error")
-      assert(false);
+  catch (Error e) {
+    if (e.getType() == "Error")
+      assertTrue(false);
   }
-  catch(IdErr idErr) {
+  catch (IdErr idErr) {
     std::cerr << "Caught expected IdErr::IdMgrInvalidItemPtrError" << std::endl;
     // No operator==() implemented ...
     // __z__(idErr, IdErr::IdMgrInvalidItemPtrError());
@@ -448,8 +450,7 @@ bool IdTests::testBadAllocationErrorHandling()
   return(success);
 }
 
-bool IdTests::testBadIdUsage()
-{
+bool IdTests::testBadIdUsage() {
   bool success = true;
   Id<Root> barId(new Bar());
   Error::doThrowExceptions();
@@ -457,12 +458,17 @@ bool IdTests::testBadIdUsage()
   // This exception isn't being caught on Cygwin.
   try {
     Id<Bing> bingId = barId;
-    check_error(false, "Id<Bing> bingId = barId; failed to error out.");
+    assertTrue(false, "Id<Bing> bingId = barId; failed to error out.");
     success = false;
   }
-  catch(Error e){
-    if(e.getType() == "Error")
-      assert(false);
+  catch (Error e) {
+    if (e.getType() == "Error")
+      assertTrue(false);
+  }
+  catch (IdErr idErr) {
+    std::cerr << "Caught expected IdErr::IdMgrInvalidItemPtrError" << std::endl;
+    // No operator==() implemented ...
+    // __z__(idErr, IdErr::IdMgrInvalidItemPtrError());
   }
 #endif
   Error::doNotThrowExceptions();
