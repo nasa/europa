@@ -37,8 +37,7 @@ namespace Prototype {
 					     int argIndex, 
 					     const ConstraintId& constraint, 
 					     const DomainListener::ChangeType& changeType){
-
-    check_error(variable->getParent()->getName() == LabelStr("Resource.change"));
+    check_error(variable->getParent()->getName().toString().find(".change") > 0);
     //std::cout << "RP: argindex " << argIndex << std::endl;
     //handle change of variables
 

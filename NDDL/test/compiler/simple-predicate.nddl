@@ -20,18 +20,22 @@ Foo::pred1{
  met_by (pred1 p2);
 }
 
+class Bar extends Foo {}
+
 // Declares mandatory world class, with constructor with no arguments.
 class World {
  Foo m_foo1;
+ Bar m_bar1;
  predicate initialState{}
 
  World(){
   m_foo1 = new Foo();
+  m_bar1 = new Bar();
  }
 }
 
 World::initialState
 {
  any(Foo.pred1 a);
- any(Foo.pred1 b);
+ any(Bar.pred1 b);
 }

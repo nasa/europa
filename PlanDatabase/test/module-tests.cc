@@ -512,12 +512,12 @@ class IntervalTokenFactory: public ConcreteTokenFactory {
 public:
   IntervalTokenFactory(): ConcreteTokenFactory(LabelStr("Foo")){}
 private:
-  TokenId createInstance(const PlanDatabaseId& planDb) const{
-    TokenId token = (new IntervalToken(planDb, LabelStr("Foo"), true))->getId();
+  TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name) const{
+    TokenId token = (new IntervalToken(planDb, name, true))->getId();
     return token;
   }
-  TokenId createInstance(const TokenId& master) const{
-    TokenId token = (new IntervalToken(master, LabelStr("Foo")))->getId();
+  TokenId createInstance(const TokenId& master, const LabelStr& name) const{
+    TokenId token = (new IntervalToken(master, name))->getId();
     return token;
   }
 };

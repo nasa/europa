@@ -1,46 +1,15 @@
 #include "NddlWorld.nddl"
-
-class Resource {
- // Specified resource properties
- int horizonStart;
- int horizonEnd;
- float initialCapacity;
- float levelLimitMin;
- float levelLimitMax;
- float productionRateMax;
- float productionMax;
- float consumptionRateMax;
- float consumptionMax;
-
- // The only predicate we allow
- predicate change{
-  float quantity;
- }
-
- Resource(int hs, int he, float ic, float ll_min, float ll_max){
-  horizonStart = hs;
-  horizonEnd = he;
-  initialCapacity = ic;
-  levelLimitMin = ll_min;
-  levelLimitMax = ll_max;
-  productionRateMax = 0;
-  productionMax = 0;
-  consumptionRateMax = MINUS_INFINITY;
-  consumptionMax = MINUS_INFINITY;
- }
-
- Resource(){}
-}
+#include "../../NDDL/core/Resources.nddl"
 
 class Battery extends Resource {
-
- // The only predicate we allow
- predicate change{
-  float quantity;
- }
-
  Battery(int hs, int he, int ic, int ll_min, int ll_max) {
-  super(hs, he, ic, ll_min, ll_max);
+  super(hs, he, ic, ll_min, ll_max, 0, 0, MINUS_INFINITY, MINUS_INFINITY);
+ }
+}
+
+class Disk extends Resource {
+ Disk(){
+  super();
  }
 }
 
@@ -55,13 +24,13 @@ class DriveSubsystem{
 }
 
 DriveSubsystem::Drive{
- any(Resource.change tx);
+ any(Battery.change tx);
  eq(start, tx.start);
  eq(tx.quantity, -50);
 }
 
 DriveSubsystem::Stroll{
- any(Resource.change tx);
+ any(Battery.change tx);
  eq(start, tx.start);
  eq(tx.quantity, -25);
 }
@@ -69,11 +38,14 @@ DriveSubsystem::Stroll{
 class Rover{
  DriveSubsystem dss;
  Battery battery;
+ Disk disk;
+
  predicate Move{}
 
  Rover(Battery b){
   dss = new DriveSubsystem();
   battery = b;
+  disk = new Disk();
  }
 }
 

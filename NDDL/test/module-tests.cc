@@ -50,28 +50,36 @@ private:
     schema.addObjectParent(LabelStr("Resource"), LabelStr("NddlResource"));
     schema.addPredicate(LabelStr("Resource.change"));
     schema.addType(LabelStr("Battery"));
-    schema.addObjectParent(LabelStr("Battery"), LabelStr("NddlResource"));
     schema.addObjectParent(LabelStr("Battery"), LabelStr("Resource"));
     schema.addObjectPredicate(LabelStr("Resource"), LabelStr("Resource.change"));
     schema.addType(LabelStr("World"));
     schema.addPredicate(LabelStr("World.initialState"));
     schema.addObjectPredicate(LabelStr("World"), LabelStr("World.initialState"));
+    schema.addPredicateParameter(LabelStr("Resource.change"), LabelStr("quantity"));
 
     check_error(schema.isPredicateDefined(LabelStr("Resource.change")));
+    check_error(schema.isPredicateDefined(LabelStr("Battery.change")));
     check_error(schema.isPredicateDefined(LabelStr("World.initialState")));
-    check_error(!schema.isPredicateDefined(LabelStr("NOPREDICATE")));
+    check_error(!schema.isPredicateDefined(LabelStr("NOCLASS.NOPREDICATE")));
     check_error(schema.isTypeDefined(LabelStr("Resource")));
     check_error(schema.isTypeDefined(LabelStr("World")));
     check_error(schema.isTypeDefined(LabelStr("Battery")));
     check_error(!schema.isTypeDefined(LabelStr("NOTYPE")));
+    check_error(schema.canContain(LabelStr("Resource.change"), LabelStr("quantity")));
+    check_error(schema.canContain(LabelStr("Battery.change"), LabelStr("quantity")));
+    check_error(!schema.canContain(LabelStr("NddlResource.change"), LabelStr("quantity")));
 
     check_error(schema.canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
     check_error(schema.canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
     check_error(schema.canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
+    check_error(!schema.canBeAssigned(LabelStr("World"), LabelStr("Resource.change")));
 
     check_error(!schema.isA(LabelStr("Resource"), LabelStr("Battery")));
     check_error(schema.isA(LabelStr("Battery"), LabelStr("Resource")));
     check_error(schema.isA(LabelStr("Battery"), LabelStr("Battery")));
+
+    check_error(schema.hasParent(LabelStr("Battery")));
+    check_error(schema.getParent(LabelStr("Battery")) == LabelStr("Resource"));
 
     return(true);
   }
