@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.111 2004-12-27 22:14:14 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.112 2004-12-31 22:14:13 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the EUROPA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -221,9 +221,9 @@ export MALLOC_CHECK_
 
 # Apply limits; some compiles (on SunOS of NewPlan) have run computers out of swap space.
 ulimit -c 300000
-ulimit -d 100000000
-ulimit -s 100000000
-ulimit -v 100000000
+ulimit -d 1000000
+ulimit -s 1000000
+ulimit -v 1000000
 
 # Print the limits so it is obvious what they are when something goes wrong.
 ulimit -a
