@@ -1487,11 +1487,10 @@ private:
   static bool testBasicAllocation(){
     DEFAULT_SETUP(ce, db, schema, false);
 
-    DbClientId client = DbClient::createInstance(db.getId());
+    DbClientId client = db.getClient();
     DbClientTransactionLog* txLog = new DbClientTransactionLog(client);
 
-    int key = client->createObject(LabelStr("Foo"), LabelStr("foo1"));
-    FooId foo1 = client->getEntity(key);
+    FooId foo1 = client->createObject(LabelStr("Foo"), LabelStr("foo1"));
     assert(foo1.isValid());
 
     std::vector<ConstructorArgument> arguments;
@@ -1499,23 +1498,20 @@ private:
     LabelSet arg1(LabelStr("Label"));
     arguments.push_back(ConstructorArgument(LabelStr("int"), &arg0)); 
     arguments.push_back(ConstructorArgument(LabelStr("string"), &arg1));
-    key = client->createObject(LabelStr("Foo"), LabelStr("foo2"), arguments);
-    FooId foo2 = client->getEntity(key);
+    FooId foo2 = client->createObject(LabelStr("Foo"), LabelStr("foo2"), arguments);
     assert(foo2.isValid());
 
-    key = client->createToken(LabelStr("Foo"));
-    TokenId token = client->getEntity(key);
+    TokenId token = client->createToken(LabelStr("Foo"));
     assert(token.isValid());
 
     // Constrain the token duration
-    client->createConstraint(LabelStr("SubsetOf"), token->getDuration()->getKey(), IntervalIntDomain(100));
-    std::vector<int> scope;
-    scope.push_back(token->getStart()->getKey());
-    scope.push_back(token->getDuration()->getKey());
+    client->createConstraint(LabelStr("SubsetOf"), token->getDuration(), IntervalIntDomain(100));
+    std::vector<ConstrainedVariableId> scope;
+    scope.push_back(token->getStart());
+    scope.push_back(token->getDuration());
     client->createConstraint(LabelStr("eq"), scope);
 
     delete txLog;
-    delete (DbClient*) client;
 
     DEFAULT_TEARDOWN();
     return true;
