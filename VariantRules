@@ -5,8 +5,6 @@ include [ FDirName $(SUBDIR) PlatformRules ] ;
 
 VARIANTS ?= DEV ;
 
-ALL_VARIANTS = DEV OPTIMIZED PROFILE CUSTOM ;
-
 #########
 
 # Rules for generating flags based on the variant.
@@ -115,6 +113,19 @@ rule FVariantName
   case * :
     Exit FVariantName unknown variant: $(variant) ;
   }
+}
+
+# if the custom variant is the same as one of others,
+# don't replicate its dependencies
+local custom_name = [ FVariantName name : CUSTOM ] ;
+if [ FVariantName name : DEV ] = $(custom_name) {
+  ALL_VARIANTS = DEV OPTIMIZED PROFILE ;
+} else if [ FVariantName name : OPTIMIZED ] = $(custom_name) {
+  ALL_VARIANTS = DEV OPTIMIZED PROFILE ;
+} else if [ FVariantName name : PROFILE ] = $(custom_name) {
+  ALL_VARIANTS = DEV OPTIMIZED PROFILE ;
+} else {
+  ALL_VARIANTS = DEV OPTIMIZED PROFILE CUSTOM ;
 }
 
 }
