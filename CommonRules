@@ -68,6 +68,56 @@ if ( PROFILE in $(VARIANTS) ) || ( ( CUSTOM in $(VARIANTS) ) && ( $(EUROPA_PROFI
 }
 
 #
+# ExecuteSO run-it : it : it-arg0 it-arg1 it-arg2 : prefix ;
+#    Executable output goes to stdio
+#
+
+rule ExecuteSO {
+  local target = $(1) ;
+  local executable = $(2) ;
+  local arguments = $(3) ;
+  local prefix = $(4) ;
+
+  if $(TRACE_MODULE) = TRUE {
+    Echo ExecuteSO $(target) . $(executable) . $(arguments) . $(prefix) ;
+  }
+
+  local target_exec_arg ;
+  if $(arguments) {
+    target_exec_arg = RUN_$(executable) ;
+    local arg ;
+    for arg in $(arguments) {
+      target_exec_arg = "$(target_exec_arg).$(arg:B)$(arg:S)" ;
+    }
+  } else {
+    target_exec_arg = RUN_$(executable) ;
+  }
+  Depends $(target) : $(target_exec_arg) ;
+  ExecuteTargetSO $(target_exec_arg) : [ FAppendSuffix $(executable) : $(SUFEXE) ] : $(arguments) : $(prefix) ;
+}
+
+rule ExecuteTargetSO {
+  local exec_arg = $(1) ;
+  local executable = $(2) ;
+  local arguments = $(3) ;
+  local prefix = $(4) ; # E.g., "/usr/bin/time"
+
+  if $(TRACE_MODULE) = TRUE {
+    Echo ExecuteTargetSO $(exec_arg) . $(executable) . $(arguments) . $(prefix)  ;
+  }
+
+  Depends $(exec_arg) : $(executable) ;
+  SEARCH on $(executable) += $(SEARCH_SOURCE) ;
+  ARGUMENTS on $(exec_arg) = $(arguments) ;
+  PREFIX on $(exec_arg) = $(prefix) ;
+}
+
+actions ExecuteTargetSO {
+  cd `dirname $(2)`
+  $(PREFIX) ./`basename $(2)` $(ARGUMENTS)
+}
+
+#
 # utilities
 #
 
