@@ -203,6 +203,11 @@ rule ModuleMain {
 
   local library ;
   for library in $(LIBRARIES) {
+    if $(library) = SHARED && $(ENV_VARS_OK) = NO {
+      Echo Fatal build error: ;
+      Echo Env variable $(ENV_VARS_MSG) must be set to build shared libraries. ;
+      Exit ;
+    }
     local variant ;
     for variant in $(VARIANTS) {
       if $(library) != SHARED || $(variant) != PROFILE {
