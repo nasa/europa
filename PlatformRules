@@ -113,16 +113,14 @@ if $(OS) = BEOS {
 # Other miscellaneous platform tweaks
 #
 
-if $(OS) = CYGWIN {
-  NOARSCAN = true ;
-}
-
-if $(OS) = MACOSX {
-  NOARSCAN = true ;
-}
-
 if $(OS) = BEOS {
   LINKLIBS += -lbe ;
 }
+
+# Using ar scan causes problems on MacOS X and Cygwin
+# Without ar scan building static libraries is more
+# compatible with building without libraries.
+
+NOARSCAN = true ;
 
 } # PlatformRules_INCLUDED
