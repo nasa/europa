@@ -7,6 +7,7 @@
 #include "NotFalseConstraint.hh"
 #include "ConditionalRule.hh"
 #include "ObjectDecisionPoint.hh"
+#include "Choice.hh"
 
 extern bool loggingEnabled();
 
@@ -775,7 +776,6 @@ namespace Prototype {
     hor.setHorizon(10,500);
 
     Timeline t1(db.getId(), LabelStr("Objects"), LabelStr("Timeline1"));
-    Object o1(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
     db.close();
 
     IntervalToken tokenB(db.getId(), 
@@ -783,8 +783,7 @@ namespace Prototype {
 			 false,
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(0, 200),
-			 IntervalIntDomain(200, 200),
-			 LabelStr("Timeline1"));
+			 IntervalIntDomain(200, 200));
 
     tokenB.activate();
 
@@ -829,6 +828,68 @@ namespace Prototype {
 
     assert(tokenB.getStart()->getDerivedDomain().isSingleton());
     assert(tokenB.getStart()->getDerivedDomain().getSingletonValue() == 0);
+
+    return true;
+  }
+
+  bool testObjectAndObjectVariableImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
+    hor.setHorizon(10,500);
+
+    Object o1(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
+    Timeline t1(db.getId(), LabelStr("Objects"), LabelStr("Timeline1"));
+    db.close();
+
+    IntervalToken tokenB(db.getId(), 
+			 LabelStr("PredicateB"), 
+			 false,
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(200, 200));
+
+    tokenB.activate();
+    
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 2); 
+    std::list<DecisionPointId> decisions;
+    planner.getDecisionManager()->getOpenDecisions(decisions);
+    DecisionPointId dec = decisions.front();
+    assert(ObjectDecisionPointId::convertable(dec));
+    /*
+    ObjectDecisionPointId odec = dec;
+    std::list<ChoiceId> choices = odec->getUpdatedChoices();
+    check_error(choices.size() == 2);
+    */
+
+    dec = decisions.back();
+    assert(ConstrainedVariableDecisionPointId::convertable(dec));
+    assert(dec->getEntityKey() == tokenB.getObject()->getKey());
+
+    tokenB.getObject()->specify(o1.getId());
+
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    decisions.clear();
+    planner.getDecisionManager()->getOpenDecisions(decisions);
+    dec = decisions.front();
+    assert(ObjectDecisionPointId::convertable(dec));
+    /* getChoices is protected; getUpdatedChoices will return previous set
+       of choices; getCurrentChoices same thing.
+    odec = dec;
+    choices.clear();
+    choices = dec->getChoices();
+    check_error(choices.size() == 1);
+    */
+
+    //    o1.constrain(tokenB.getId(), TokenId::noId());
+    planner.getDecisionManager()->assignDecision();
+
+    assert(planner.getDecisionManager()->getNumberOfDecisions() == 0); 
+    
+    //    o1.free(tokenB.getId());
+    planner.getDecisionManager()->retractDecision();
+
+    check_error(planner.getDecisionManager()->isRetracting());
+    check_error(!planner.getDecisionManager()->hasDecisionToRetract());
+    //it was the only object we could constrain to and we failed, so
+    //there's no more to do.
 
     return true;
   }

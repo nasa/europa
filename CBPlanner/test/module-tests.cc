@@ -258,6 +258,7 @@ public:
     runTest(testVariableDecisionCycle);
     runTest(testTokenDecisionCycle);
     runTest(testObjectDecisionCycle);
+    runTest(testObjectAndObjectVariable);
     runTest(testObjectHorizon);
     return(true);
   }
@@ -280,6 +281,13 @@ private:
     bool retval = false;
     DEFAULT_SETUP_PLAN(ce, db, schema, false);
     retval = testObjectDecisionCycleImpl(ce, db, schema, hor, planner);
+    DEFAULT_TEARDOWN_PLAN();
+    return retval;
+  }
+  static bool testObjectAndObjectVariable() {
+    bool retval = false;
+    DEFAULT_SETUP_PLAN(ce, db, schema, false);
+    retval = testObjectAndObjectVariableImpl(ce, db, schema, hor, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
