@@ -1,7 +1,9 @@
 if ! $(PlatformRules_INCLUDED) {
 PlatformRules_INCLUDED = TRUE ;
 
+#
 # Globals set by platform
+#
 
 # SHARED_FLAG = Flag to generate shared library
 
@@ -33,14 +35,14 @@ if $(OS) = SOLARIS {
 # LINK = C/C++ linker
 
 if $(GCC_ROOTDIR) {
-  CC ?= $(GCC_ROOTDIR)/bin/gcc ;
-  C++ ?= $(GCC_ROOTDIR)/bin/g++ ;
-  LINK ?= $(C++) $(STATIC_LIBRARY_PATH_FLAG) $(GCC_ROOTDIR)/lib
+  CC = $(GCC_ROOTDIR)/bin/gcc ;
+  C++ = $(GCC_ROOTDIR)/bin/g++ ;
+  LINK = $(C++) $(STATIC_LIBRARY_PATH_FLAG) $(GCC_ROOTDIR)/lib
                  $(SHARED_LIBRARY_PATH_FLAG) $(GCC_ROOTDIR)/lib ;
 } else {
-  CC ?= gcc ;
-  C++ ?= g++ ;
-  LINK ?= $(C++) ;
+  CC = gcc ;
+  C++ = g++ ;
+  LINK = $(C++) ;
 }
 
 # PROFILE_FLAGS = flags for profiling
@@ -95,7 +97,9 @@ if $(OS) = CYGWIN {
   CLASSPATH_SEPARATOR = ":" ;
 }
 
+#
 # Other miscellaneous platform tweaks
+#
 
 if $(OS) = CYGWIN {
   NOARSCAN = true ;
