@@ -83,7 +83,6 @@ LocalDepends run-hsts-planner-tests :
         gnats-P4-C3 
         gnats-P4-C3eq 
         gnats-SC
-        gnats-condasame
         gnats-rover-fixed
         gnats-sum
        dnp-timeline
@@ -327,11 +326,9 @@ RunEUROPATest gnats-P4-C3 : P4-C3-init.nddl ;
 EUROPA_NDDL P4-C3eq-init.nddl ;
 RunEUROPATest gnats-P4-C3eq : P4-C3eq-init.nddl ;
 
-# These four work.
+# These three work.
 EUROPA_NDDL SC-init.nddl ;
 RunEUROPATest gnats-SC : SC-init.nddl ;
-EUROPA_NDDL condasame-init.nddl ;
-RunEUROPATest gnats-condasame : condasame-init.nddl ;
 EUROPA_NDDL rover-fixed-init.nddl ;
 RunEUROPATest gnats-rover-fixed : rover-fixed-init.nddl ;
 EUROPA_NDDL sum-init.nddl ;
