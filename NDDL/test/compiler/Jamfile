@@ -25,7 +25,6 @@ for model in
   NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;
   RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
   LocalDepends run-nddl-tests : run-$(exe) ;
-
 }
 
 } # PLASMA_READY
