@@ -4,6 +4,7 @@ if ! $(PLASMA_READY) {
 
 ModuleComponent System
 	:
+  TestAssembly.cc
   EventAggregator.cc
   AggregateListener.cc
   CBPlannerControl.cc
