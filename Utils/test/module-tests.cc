@@ -127,6 +127,7 @@ private:
       assert(e.getType() == "BadThing");
       std::cerr << "Caught expected " << e.getType() << std::endl;
     }
+    Error::doDisplayErrors(); 
     return true;
   }
 };
@@ -168,6 +169,7 @@ private:
     std::string cfgOut(cfgName.str());
 
     Error::doNotThrowExceptions();
+    Error::doNotDisplayErrors();
     std::ifstream debugStream(cfgFile.c_str());
     check_error(debugStream, "could not open debug config file",
                 DebugErr::DebugConfigError());
@@ -183,6 +185,9 @@ private:
     condDebugMsg(std::cout.good(), "main1a", "std::cout is good");
     debugStmt("main2a", int s = 0; for (int i = 0; i < 5; i++) { s += i; } std::cerr << "Sum is " << s << '\n'; );
     debugMsg("main2", "primary testing done");
+    Error::doThrowExceptions();
+    Error::doDisplayErrors();
+    DebugMessage::setStream(std::cerr);
   }
 };
 /**
