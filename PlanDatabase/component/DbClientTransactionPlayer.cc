@@ -684,10 +684,12 @@ namespace Prototype {
   double DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value, const char * name)
   {
     if (strcmp(value.Value(), "new") == 0) {
-      std::stringstream gen_name;
+      std::string gen_name;
       if (name == NULL) {
-        gen_name << "$OBJECT[" << m_objectCount++ << "]" << std::ends;
-        name = gen_name.str().c_str();
+        std::stringstream gen_stream;
+        gen_stream << "$OBJECT[" << m_objectCount++ << "]" << std::ends;
+        gen_name = gen_stream.str();
+        name = gen_name.c_str();
       }
       const char * type = value.Attribute("type");
       check_error(type != NULL);
@@ -804,10 +806,12 @@ namespace Prototype {
   ConstrainedVariableId
   DbClientTransactionPlayer::xmlAsCreateVariable(const char * type, const char * name, const TiXmlElement * value)
   {
-    std::stringstream gen_name;
+    std::string gen_name;
     if (name == NULL) {
-      gen_name << "$VAR[" << m_varCount++ << "]" << std::ends;
-      name = gen_name.str().c_str();
+      std::stringstream gen_stream;
+      gen_stream << "$VAR[" << m_varCount++ << "]" << std::ends;
+      gen_name = gen_stream.str();
+      name = gen_name.c_str();
     }
     const AbstractDomain * baseDomain = NULL;
     if (value != NULL) {
