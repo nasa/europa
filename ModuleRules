@@ -131,7 +131,9 @@ rule ModuleMain {
     }
 
     local exe = [ FVariantName $(name) : $(variant) ] ;
-	LINKFLAGS on $(exe) = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
+    LINKFLAGS on $(exe)_rt = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
+    LINKFLAGS on $(exe) = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
+    LINKFLAGS on $(exe)_no = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
 
     for library in $(LIBRARIES) {
       if $(library) = SHARED {
