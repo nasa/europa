@@ -1,5 +1,4 @@
 #include "DbClientTransactionPlayer.hh"
-#include "DbClientTransactionTokenMapper.hh"
 #include "DbClientTransactionLog.hh"
 #include "DbClient.hh"
 #include "PlanDatabase.hh"
