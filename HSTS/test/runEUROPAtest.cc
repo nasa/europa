@@ -102,8 +102,7 @@ int main(int argc, const char ** argv) {
       break;
     }
     condDebugMsg(!planFound, "EuropaTest:planState", "failed to find a plan at depth " << assembly.getDepthReached()
-                 << " after " << assembly.getTotalNodesSearched() << "; state is:\n");
-    condDebugStmt(!planFound, "EuropaTest:planState", assembly.write(DebugMessage::getStream()));
+                 << " after " << assembly.getTotalNodesSearched() << " nodes; state is:\n" << assembly);
   }
 
   debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr));
