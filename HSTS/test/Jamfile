@@ -29,7 +29,10 @@ LocalDepends tests : run-hsts-module-tests
         monkey2-timeline22
         monkey2-timeline23
         robotTests
-#       roverTests
+        roverTest1
+#       roverTest2
+        roverTest3
+        roverTest4
 #       roverCTTests
 #       merTests
         gnats-C3
@@ -127,7 +130,15 @@ RunEUROPATest robotTests : req1.nddl ;
 #     rover3.nddl rather than rover3-test.nddl, rover4.nddl rather than rover4-test.nddl, and
 #     multrover.nddl rather than multrover-test.nddl.
 #   Reported in GNATS 2761.
-# RunEUROPATest roverTests : rover-test.nddl rover3-test.nddl rover4-test.nddl multrover-test.nddl ;
+RunEUROPATest roverTest1 : rover-test.nddl ;
+RunEUROPATest roverTest3 : rover3-test.nddl ;
+RunEUROPATest roverTest4 : rover4-test.nddl ;
+
+# This now fails with:
+#   ConstraintEngine/core/ConstraintLibrary.cc:34: Error: isRegistered(name) is false
+#           Factory for constraint 'MultEqual' is not registered.
+# ... while merging a token during planning.
+RunEUROPATest roverTest2 : multrover-test.nddl ;
 
 # These use constraint tokens, which Europa2 (PLASMA) does not support.
 #   Verified as mentioned in PLASMA/MigrationNotes (entry 8 currently).
