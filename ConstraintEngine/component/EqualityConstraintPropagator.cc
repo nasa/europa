@@ -124,7 +124,7 @@ namespace Prototype {
     // If we get to here, we have computed the new domain for all
     // variables in the scope and we know that no domain has been
     // emptied (this could be optimized by recording the last change
-    // to dommain).
+    // to domain).
     for (std::set<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it) {
       AbstractDomain& currentDomain = EqualConstraint::getCurrentDomain(*it);
       currentDomain.intersect(domain);
