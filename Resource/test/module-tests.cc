@@ -24,7 +24,6 @@
 #include <iostream>
 #include <string>
 #include <list>
-
 // Useful constants when doing constraint vio9lation tests
 const double initialCapacity = 5;
 const int horizonStart = 0;
@@ -188,11 +187,16 @@ private:
     ce.propagate();
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, LATEST_TIME), 20, 20))->getId();
     r->constrain(t3);
-    ce.propagate();
+    assert(ce.propagate());
     assert(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
 
     t2->setEarliest(2);
+    assert(ce.propagate());
     assert(checkLevelArea(r) == (1*45 + 1*45 + 998*100));
+
+    t2->setEarliest(1);
+    assert(ce.propagate());
+    assert(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
     DEFAULT_TEARDOWN();
     return(true);
   }
@@ -205,63 +209,52 @@ private:
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 0, 1, 7))->getId();
     db.close();
+    assert(ce.propagate() && checkSum(r) == 0); 
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 6)))->getId();
     r->constrain(t1);
-    ce.propagate();
-    assert(checkSum(r) == (1*0 + 2*1 + 3*1 + 4*0)); 
+    assert(ce.propagate() && checkSum(r) == (1*0 + 4*1 + 6*1 + 7*0));
 
     TransactionId t2  = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(-4, 10)))->getId();
     r->constrain(t2);
-    ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*1)); 
+    assert(ce.propagate() && checkSum(r) == (1*1 + 4*2 + 6*2 + 7*1));
 
     TransactionId t3  = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 3)))->getId();
     r->constrain(t3);
-    ce.propagate();
-    assert(checkSum(r) == (1*2 + 2*2 + 3*2 + 4*2 + 5*1)); 
+    assert(ce.propagate() && checkSum(r) == (1*2 + 3*2 + 4*2 + 6*2 + 7*1)); 
 
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 2)))->getId();
     r->constrain(t4);
-    ce.propagate();
-    assert(checkSum(r) == (1*3 + 2*3 + 3*2 + 4*2 + 5*2 + 6*1)); 
+    assert(ce.propagate() && checkSum(r) == (1*3 + 2*3 + 3*2 + 4*2 + 6*2 + 7*1)); 
 
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 7)))->getId();
     r->constrain(t5);
-    ce.propagate();
-    assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*3 + 5*3 + 6*2)); 
+    assert(ce.propagate() && checkSum(r) == (1*3 + 2*3 + 3*3 + 4*3 + 6*3 + 7*2)); 
 
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 7)))->getId();
     r->constrain(t6);
-    ce.propagate();
-    assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 5*4 + 6*3)); 
+    assert(ce.propagate() && checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 6*4 + 7*3)); 
 
     // Insert for a singleton value
     TransactionId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5,5)))->getId();
     r->constrain(t7);
-    ce.propagate();
-    assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 5*5 + 6*4 + 7*3));
+    assert(ce.propagate() && checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 5*5 + 6*4 + 7*3)); 
 
-    // Confirm transaction counts
-    std::list<TransactionId> transactions;
-    r->getTransactions(transactions);
-    assert(transactions.size() == 7);
-
-    // Now do the removal and ensure correctness along the way
+    // Now free them and check the retractions are working correctly
     r->free(t7);
-    assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 5*4 + 6*3)); 
+    assert(ce.propagate() && checkSum(r)  == (1*3 + 2*3 + 3*3 + 4*4 + 6*4 + 7*3)); 
     r->free(t6);
-    assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*3 + 5*3 + 6*2)); 
+    assert(ce.propagate() && checkSum(r)  == (1*3 + 2*3 + 3*3 + 4*3 + 6*3 + 7*2)); 
     r->free(t5);
-    assert(checkSum(r) == (1*3 + 2*3 + 3*2 + 4*2 + 5*2 + 6*1)); 
+    assert(ce.propagate() && checkSum(r)  == (1*3 + 2*3 + 3*2 + 4*2 + 6*2 + 7*1)); 
     r->free(t4);
-    assert(checkSum(r) == (1*2 + 2*2 + 3*2 + 4*2 + 5*1)); 
+    assert(ce.propagate() && checkSum(r)  == (1*2 + 3*2 + 4*2 + 6*2 + 7*1)); 
     r->free(t3);
-    assert(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*1)); 
+    assert(ce.propagate() && checkSum(r)  == (1*1 + 4*2 + 6*2 + 7*1));
     r->free(t2);
-    assert(checkSum(r) == (1*0 + 2*1 + 3*1 + 4*0)); 
+    assert(ce.propagate() && checkSum(r)  == (1*0 + 4*1 + 6*1 + 7*0));
     r->free(t1);
-    assert(checkSum(r) == (1*0 + 2*0)); 
+    assert(ce.propagate() && checkSum(r) == 0); 
 
     DEFAULT_TEARDOWN();
     return(true);
@@ -278,43 +271,43 @@ private:
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), 1, 1))->getId();
     r->constrain(t1);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*1 +3*0)); 
+    assert(checkSum(r) == (0*1 + 1*1 + 10*0)); 
     assert(checkLevelArea(r) == 1);
 
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 3), -4, -4))->getId();
     r->constrain(t2);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 +3*1 +4*0)); 
+    assert(checkSum(r) == (0*1 + 1*2 + 3*1 + 10*0)); 
     assert(checkLevelArea(r) == (1 + 4*2));
 
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 4), 8, 8))->getId();
     r->constrain(t3);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1 + 5*0)); 
+    assert(checkSum(r) == (0*1 + 1*2 + 2*2 + 3*2 + 4*1 + 10*0)); 
     assert(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 8*1));
 
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 6), 2, 2))->getId();
     r->constrain(t4);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 +3*2 + 4*3 + 5*2 + 6*1 + 7*0));
+    assert(checkSum(r) == (0*1 + 1*2 + 2*2 + 3*3 + 4*2 + 6*1 + 10*0));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
  
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 10), -6, -6))->getId();  
     r->constrain(t5);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 +3*3 + 4*4 + 5*3 + 6*2 + 7*1));
+    assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 3*4 + 4*3 + 6*2 + 10*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
 
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 8), 3, 3))->getId();
     r->constrain(t6);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 +3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
+    assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 3*4 + 4*3 + 6*3 + 8*2 + 10*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
 
     TransactionId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(7, 8), -4, -4))->getId();
     r->constrain(t7);
     ce.propagate();
-    assert(checkSum(r) == (1*1 + 2*2 +3*3 + 4*4 + 5*3 + 6*3 + 7*3 + 8*3 + 9*1));
+    assert(checkSum(r) == (0*1 + 1*2 + 2*3 + 3*4 + 4*3 + 6*3 + 7*3 + 8*3 + 10*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
 
     DEFAULT_TEARDOWN();
@@ -729,16 +722,17 @@ private:
    * Sums the instances of transactions in each instant.
    */
   static int checkSum(ResourceId r) {
+    assert(r != ResourceId::noId());
+    r->updateTransactionProfile();
     std::list<InstantId> allInstants;
     r->getInstants(allInstants);
     int sum = 0;
-    int i = 1;
     std::list<InstantId>::iterator it = allInstants.begin();
-    // std::cout << "        Transactions  ";
+    //std::cout << "\n        Transactions  ";
     while (it != allInstants.end()) {
       InstantId current = *it;
-      // std::cout <<  current->getTime() << ":[" << current->getTransactionCount() << "] "; 
-      sum += i++ * current->getTransactionCount();
+      //std::cout <<  current->getTime() << ":[" << current->getTransactionCount() << "] "; 
+      sum += current->getTime() * current->getTransactionCount();
       it++;
     }
     return(sum);

@@ -166,7 +166,7 @@ class World extends NddlWorld{
  predicate initialState{}
 
  World(){
-  super();
+  super(0, 100, 2000);
   lander = new Location(LANDER, 0, 0);
   rock1 = new Rock(ROCK1, 9, 9);
   rock2 = new Rock(ROCK2, 1, 6);

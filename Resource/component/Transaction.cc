@@ -25,12 +25,6 @@ namespace Prototype {
 		 false)
     
   {
-
-
-    // for now set m_resource to getObject.  Later remove m_resource as redundant and replace it with refs to getObject.
-    //m_resource = getObject();    
-
-
     //create the usage variable
     m_usage = (new TokenVariable<IntervalDomain>(m_id,
 						 m_allVariables.size(),
@@ -101,6 +95,13 @@ namespace Prototype {
     activate();
   }
 
+  ResourceId Transaction::getResource() const {
+    if(getObject()->lastDomain().isSingleton())
+      return getObject()->lastDomain().getSingletonValue();
+    else
+      return ResourceId::noId();
+  }
+
   int Transaction::getEarliest() const 
   {
     return((int) getTime()->lastDomain().getLowerBound());
@@ -123,25 +124,6 @@ namespace Prototype {
     return true;
   }
 
-  void Transaction::notifyInserted(ResourceId& resource)
-  {
-    check_error(resource.isValid());
-    check_error(m_resource == ResourceId::noId());
-    m_resource = resource;
-  }
-
-  void Transaction::notifyRemoved(ResourceId& resource)
-  {
-    check_error(m_resource == resource);
-    m_resource = ResourceId::noId();
-  }
-
-  void Transaction::notifyDeleted(ResourceId& resource)
-  {
-    check_error(m_resource == resource);
-    m_resource = ResourceId::noId();
-  }
-
   void Transaction::setEarliest(int earliest)
   {
     int t_earliest = getEarliest();
@@ -151,14 +133,14 @@ namespace Prototype {
     bool isRelaxed = (t_earliest > earliest);
     getTime()->reset();
     getTime()->specify(IntervalIntDomain(earliest, t_latest));
-    if(m_resource != ResourceId::noId()){
+    if(getResource() != ResourceId::noId()){
       if(isRelaxed)
-	m_resource->notifyTimeRelaxed(m_id);
+	getResource()->notifyTimeRelaxed(m_id);
       else
-	m_resource->notifyTimeRestricted(m_id);
+	getResource()->notifyTimeRestricted(m_id);
     }
-    notifyChanged();
   }
+
   void Transaction::setLatest(int latest)
   {
     int t_earliest = getEarliest();
@@ -168,13 +150,12 @@ namespace Prototype {
     bool isRelaxed = (t_latest < latest);
     getTime()->reset();
     getTime()->specify(IntervalIntDomain(t_earliest, latest));
-    if(m_resource != ResourceId::noId()){
+    if(getResource() != ResourceId::noId()){
       if(isRelaxed)
-	m_resource->notifyTimeRelaxed(m_id);
+	getResource()->notifyTimeRelaxed(m_id);
       else
-	m_resource->notifyTimeRestricted(m_id);
+	getResource()->notifyTimeRestricted(m_id);
     }
-    notifyChanged();
   }
 
   double Transaction::getMin() const {
@@ -193,9 +174,8 @@ namespace Prototype {
     if (min < getMin())
       m_usage->reset();
     m_usage->specify(IntervalDomain(min, max));
-    if(m_resource != ResourceId::noId())
-      m_resource->notifyQuantityChanged(m_id);
-    notifyChanged();
+    if(getResource() != ResourceId::noId())
+      getResource()->notifyQuantityChanged(m_id);
   }
   void Transaction::setMax(double max)
   {
@@ -204,26 +184,13 @@ namespace Prototype {
     if (max > getMax())
       m_usage->reset();
     m_usage->specify(IntervalDomain(min, max));
-    if(m_resource != ResourceId::noId())
-      m_resource->notifyQuantityChanged(m_id);
-    notifyChanged();
+    if(getResource() != ResourceId::noId())
+      getResource()->notifyQuantityChanged(m_id);
   }
   void Transaction::print(ostream& os)
   {
-    os << "RESOURCE: " << (m_resource == ResourceId::noId() ? "UNASSIGNED" : m_resource->getName().toString())
+    os << "RESOURCE: " << (getResource() == ResourceId::noId() ? "UNASSIGNED" : getResource()->getName().toString())
        << "[" << getMin() << ", " << getMax() << ", " << getEarliest() << ", " << getLatest() << "]";
   }
 
-  bool Transaction::checkAndClearChange()
-  {
-    bool retVal = m_changed;
-    m_changed = false;
-    return(retVal);
-  }
-
-  void Transaction::notifyChanged()
-  {
-    check_error(isValid());
-    m_changed = true;
-  }
 } //namespace prototype

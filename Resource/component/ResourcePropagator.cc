@@ -31,8 +31,6 @@ namespace Prototype {
   }
 
   ResourcePropagator::~ResourcePropagator() {
-   // check_error(m_planDbListener.isValid());
-   // delete (PlanDatabaseListener*) m_planDbListener;
   }
 
   void ResourcePropagator::handleNotification(const ConstrainedVariableId& variable, 
@@ -43,6 +41,10 @@ namespace Prototype {
     check_error(variable->getParent()->getName() == LabelStr("Resource.change"));
     //std::cout << "RP: argindex " << argIndex << std::endl;
     //handle change of variables
+
+    if(variable->lastDomain().isEmpty())
+      return;
+
     switch(argIndex) {
     case ResourceConstraint::OBJECT: 
       handleObjectChange(variable);
@@ -60,29 +62,30 @@ namespace Prototype {
     check_error(m_resources.size() > 0);
     check_error(!getConstraintEngine()->provenInconsistent());
 
-    while(!m_resources.empty()){
-      std::set<ResourceId>::iterator it = m_resources.begin();
-      (*it)->updateTransactionProfile();
-      if ((*it)->isViolated()) {
-	ResourceConstraint::getCurrentDomain(m_forempty).empty();
-	m_resources.clear();
+    for (std::set<ResourceId>::const_iterator it = m_resources.begin(); it != m_resources.end(); ++it){
+      ResourceId r = *it;
+      r->updateTransactionProfile();
+      if (r->isViolated()) { // Find a variable and empty it. Should be once connected to resource constraints.
+	TokenId tx = *(r->getTokens().begin());
+	check_error(tx.isValid());
+	ConstrainedVariableId varToEmpty = tx->getObject();
+	ResourceConstraint::getCurrentDomain(varToEmpty).empty();
 	break;
-      }
-      m_resources.erase(it);      
+      }  
     }
+    m_resources.clear();
   }
 
   bool ResourcePropagator::updateRequired() const{
-    return (m_resources.size() > 0);
+    return (!m_resources.empty());
   }
 
 
   void ResourcePropagator::handleResourcePropagation(const ResourceId& r, const ConstrainedVariableId& variable) {
     // Buffer this resource for propagation
+    check_error(variable.isValid());
     if (m_resources.find(r) == m_resources.end()) {
       m_resources.insert(r);
-      //store a variable so that its domain can be emptied
-      m_forempty = variable;
     }
   }
 
@@ -110,8 +113,7 @@ namespace Prototype {
 	r->notifyQuantityChanged(t);
 	//buffer for propagation if necessary
 	handleResourcePropagation(r, variable);
-      } 
-      t->notifyChanged();
+      }
     }
   }
 
@@ -124,8 +126,10 @@ namespace Prototype {
     if (TransactionId::convertable(variable->getParent())) {    
       // ConstrainedVariableId objectvar = constraint->getScope().front();
       TransactionId t = variable->getParent();
+      check_error(t.isValid());
       if (t->getResource() != ResourceId::noId()){
 	ResourceId r = t->getResource();
+	check_error(r.isValid());
 	if (changeType == DomainListener::RELAXED)
 	  r->notifyTimeRelaxed(t);
 	else
@@ -133,7 +137,6 @@ namespace Prototype {
 	//buffer for propagation if necessary
 	handleResourcePropagation(r, variable);
       }
-      t->notifyChanged();
     }
   }
 

@@ -14,9 +14,9 @@ namespace Prototype {
 
   ValueChoice::~ValueChoice() {}
 
-  const double ValueChoice::getValue() const { 
+  double ValueChoice::getValue() const { 
     check_error(m_type == VALUE);
-    return m_value; 
+    return m_value;
   }
 
   const TokenId& ValueChoice::getToken() const { 

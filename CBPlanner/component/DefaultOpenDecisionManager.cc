@@ -226,6 +226,9 @@ namespace Prototype {
       m_curDec = *m_sortedNonUnitVarDecs.begin();
     else m_curDec = DecisionPointId::noId();
 
+    /* Shold be able to require that current choices are empty */
+    check_error(m_curDec.isNoId() || m_curDec->getCurrentChoices().empty());
+
     return m_curDec;
   }
 
@@ -250,41 +253,43 @@ namespace Prototype {
   // finally prefer to reject
   const ChoiceId& DefaultOpenDecisionManager::getNextChoice() {
     check_error(m_curDec.isValid());
-    bool assigned(false); 
-    std::list<ChoiceId> choices = m_curDec->getChoices();
+    m_curChoice = ChoiceId::noId();
+    const std::list<ChoiceId>& choices = m_curDec->getUpdatedChoices();
     //    std::cout << "getNextChoice:: num choices " << choices.size() << std::endl;
     if (TokenDecisionPointId::convertable(m_curDec)) {
       ChoiceId merge;
       ChoiceId reject;
       ChoiceId activate;
-      std::list<ChoiceId>::iterator it = choices.begin();
-      for ( ; it != choices.end(); ++it) {
-	check_error((*it)->getType() == Choice::VALUE);
-	TokenDecisionPoint::State val = (TokenDecisionPoint::State)Id<ValueChoice>(*it)->getValue();
+ 
+      for (std::list<ChoiceId>::const_iterator it = choices.begin(); it != choices.end(); ++it) {
+	ChoiceId choice = *it;
+	check_error(choice.isValid());
+	check_error(choice->getType() == Choice::VALUE);
+	check_error(!m_curDec->hasDiscarded(choice));
+
+	TokenDecisionPoint::State val = (TokenDecisionPoint::State)Id<ValueChoice>(choice)->getValue();
 	if (merge.isNoId() && val == TokenDecisionPoint::MERGED) {
-	  merge = (*it);
+	  merge = choice;
 	  break; // we'll do this first, no point in assigning the rest.
 	}
 	if (val == TokenDecisionPoint::ACTIVE)
-	  activate = (*it);
+	  activate = choice;
 	if (val == TokenDecisionPoint::REJECTED)
-	  reject = (*it);
+	  reject = choice;
 	// we ignore choices for INACTIVE and INCOMPLETE.
       }
+
       if (!merge.isNoId())
 	m_curChoice = merge;
       else if (!activate.isNoId())
 	m_curChoice = activate;
       else if (!reject.isNoId()) 
 	m_curChoice = reject;
-      assigned = true;
     }      
-    if (choices.empty())
-      m_curChoice = ChoiceId::noId();
-    else if (!assigned) {
-      //      std::cout << " choices is not empty " << std::endl;
+
+    // If we have no choice selected and there is a choice, pick the first
+    if (!choices.empty() && m_curChoice == ChoiceId::noId())
       m_curChoice = choices.front();
-    }
 
     //    if(m_curChoice.isNoId())
       //      std::cout << "DEBUG: No more choices" << std::endl;

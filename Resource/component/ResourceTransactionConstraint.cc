@@ -51,7 +51,10 @@ namespace Prototype
       // remove the resource.
       if (oHorizon.intersect(domTH.getLowerBound(), domTH.getUpperBound()) && oHorizon.isEmpty()){
 	domTO.remove(resource);
-	continue; // No further processing required for this resource
+	if(domTO.isEmpty())
+	  return;
+	else
+	  continue;
       }
 
       // Now test the quantity to see of the resource is compatible with the transaction
@@ -62,9 +65,12 @@ namespace Prototype
       IntervalDomain oQty(oQtyMin, oQtyMax);
 
       // Intersect the transaction quantity for compliance with rate limits
-      if (oQty.intersect(domTQ.getLowerBound(), domTQ.getUpperBound()) && oQty.isEmpty()) {
+      if (oQty.intersect(domTQ.getLowerBound(), domTQ.getUpperBound()) && oQty.isEmpty()){
 	domTO.remove(resource);
-	continue;
+	if(domTO.isEmpty())
+	  return;
+	else
+	  continue;
       }
 
       // If the resource is still a candidate, Update the horizon bounds using this resurce
@@ -83,7 +89,8 @@ namespace Prototype
     // The new horizon and quantity data is intersected with the transaction. This policy may change based
     // on our future views about controllability of such things
     domTH.intersect(hMin, hMax);
-    domTQ.intersect(qMin, qMax);
+    if(!domTH.isEmpty())
+      domTQ.intersect(qMin, qMax);
   }
 
   bool ResourceTransactionConstraint::canIgnore(const ConstrainedVariableId& variable, 

@@ -2229,6 +2229,8 @@ private:
     v0.specify(Prototype::LabelStr("C"));
     assert(!ENGINE->propagate());
 
+    // Now ensure that we can rty again, without changing anything, and get the same result.
+    assert(!ENGINE->propagate());
 
     // Reset the variable and ensure we can repropagate it correctly
     v0.reset();

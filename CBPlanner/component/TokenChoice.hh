@@ -16,6 +16,7 @@ namespace Prototype {
 
     void print(std::ostream& os) const;
 
+    double getValue() const;
   private:
     friend class Choice;
 

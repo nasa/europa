@@ -362,19 +362,19 @@ private:
 
     assert(dm.getNumberOfDecisions() == 3);
 
-    dm.assignNextDecision();
+    dm.assignDecision();
 
     assert(dm.getNumberOfDecisions() == 3);
 
-    dm.assignNextDecision();
+    dm.assignDecision();
 
     assert(dm.getNumberOfDecisions() == 2);
 
-    dm.assignNextDecision();
+    dm.assignDecision();
 
     assert(dm.getNumberOfDecisions() == 1);
 
-    dm.assignNextDecision();
+    dm.assignDecision();
 
     assert(dm.getNumberOfDecisions() == 0);
 
@@ -387,7 +387,7 @@ private:
 
     assert(ce.propagate());
 
-    dm.assignNextDecision();
+    dm.assignDecision();
 
     assert(dm.getNumberOfDecisions() == 0);
 
@@ -440,8 +440,9 @@ private:
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
+    // Should make all the decisions availabale
     for (int i = 0; i < 5; ++i) {
-      if (!planner.getDecisionManager()->assignNextDecision())
+      if (!planner.getDecisionManager()->assignDecision())
 	return false;
       /*
       std::cout << "\nOpen Decisions:" << std::endl;
@@ -449,9 +450,10 @@ private:
       std::cout << "ClosedDecisions:" << std::endl; 
       planner.getDecisionManager()->printClosedDecisions();
       */
+      
     }    
     
-    assert(!planner.getDecisionManager()->assignNextDecision());
+    assert(!planner.getDecisionManager()->assignDecision());
 
     DEFAULT_TEARDOWN_PLAN();
     return(true);
@@ -471,7 +473,7 @@ private:
 
     assert(planner.getDecisionManager()->getCurrentDecision().isNoId());
 
-    if (!planner.getDecisionManager()->assignNextDecision())
+    if (!planner.getDecisionManager()->assignDecision())
       return false;
 
     assert(TokenDecisionPointId::convertable(planner.getDecisionManager()->getCurrentDecision()));
@@ -498,14 +500,14 @@ private:
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
-    if (!planner.getDecisionManager()->assignNextDecision())
+    if (!planner.getDecisionManager()->assignDecision())
       return false;
 
     assert(planner.getDecisionManager()->getClosedDecisions().size() == 1);
 
     //std::cout << "RETRACTING" << std::endl;
 
-    assert(planner.getDecisionManager()->retractCurrentDecision());
+    assert(planner.getDecisionManager()->retractDecision());
 
     DEFAULT_TEARDOWN_PLAN();
     return(true);

@@ -2,6 +2,7 @@
 #include "Token.hh"
 #include "ValueChoice.hh"
 #include "DbClient.hh"
+#include "Utils.hh"
 
 namespace Prototype {
 
@@ -11,11 +12,11 @@ namespace Prototype {
   TokenDecisionPoint::~TokenDecisionPoint() { }
 
   const bool TokenDecisionPoint::assign(const ChoiceId& choice) { 
-    check_error (!choice.isNoId());
+    check_error (choice.isValid());
     Choice::ChoiceType type = choice->getType();
     check_error(type == Choice::VALUE);
     State state = (State)Id<ValueChoice>(choice)->getValue();
-    TokenId tok = getToken();
+    const TokenId& tok = getToken();
     switch (state) {
     case ACTIVE:
       m_dbClient->activate(tok);
@@ -42,10 +43,7 @@ namespace Prototype {
 
   std::list<ChoiceId>& TokenDecisionPoint::getChoices() {
     check_error(m_id.isValid());
-    std::list<ChoiceId>::iterator cit = m_choices.begin();
-    for(; cit != m_choices.end(); cit++) {
-      delete (Choice*) (*cit);
-    }
+    cleanup(m_choices);
     m_choices.clear();
     const AbstractDomain& dom(m_tok->getState()->lastDomain());
     check_error(!dom.isOpen());

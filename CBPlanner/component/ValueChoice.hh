@@ -10,7 +10,7 @@ namespace Prototype {
   public:
     virtual ~ValueChoice();
     
-    const double getValue() const;
+    double getValue() const;
     const TokenId& getToken() const;
 
     bool operator==(const Choice& choice) const;

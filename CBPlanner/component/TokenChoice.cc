@@ -36,4 +36,8 @@ namespace Prototype {
       os << "Token (noId) ";
   }
 
+  double TokenChoice::getValue() const {
+    check_error(m_token.isNoId() || m_token.isValid());
+    return m_token; /* Get the tokenId encoded as a double */
+  }
 }

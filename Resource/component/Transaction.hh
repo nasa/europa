@@ -119,7 +119,7 @@ namespace Prototype {
      * @brief Accessor
      * @return a reference to the resource to which the transaction is assigned. May return Id::noId() if unassigned.
      */
-    const ResourceId& getResource() const {return m_resource;}
+    ResourceId getResource() const;
 
     /**
      * @brief Accessor
@@ -142,13 +142,13 @@ namespace Prototype {
     /**
      * @brief Notify the transaction whenever the time or quanitity values change
      */
-    void notifyChanged();
+    //void notifyChanged();
 
     /**
      * @brief Checks if the transaction values have changed and clears the change status.
      * @return true if the Transaction data has been modified since the last time this function was called, otherwise false.
      */
-    bool checkAndClearChange();
+    //bool checkAndClearChange();
 
     virtual void close();
 
@@ -161,35 +161,6 @@ namespace Prototype {
     friend class Resource;
 
     /**
-     * @todo: Move the code in these notifications to other appropriate notifications inherited from the token or object.
-     */
-
-    /**
-     * @brief Resource notifies the transaction when it has been inserted on the resource.
-     * @arg resource - the resource to which the transaction has been inserted. Must be a valid Id.
-     * @todo Consider making the implementation call a protected, stubbed out, virtual function to support core behaviour
-     * but allow extension in a derived class.
-     */
-    void notifyInserted(ResourceId& resource);
-
-    /**
-     * @brief Resource notifies the transaction when it has been removed from the resource.
-     * @arg resource - the resource from which the transaction has been removed. Must be a valid Id.
-     * @todo Consider making the implementation call a protected, stubbed out, virtual function to support core behaviour
-     * but allow extension in a derived class.
-     */
-    void notifyRemoved(ResourceId& resource);
-
-    /**
-     * @brief Resource notifies the tx if it is deleted, yet still holds the transaction.
-     * @arg resource - the resource which has been deleted. Must be a valid Id.
-     * @todo Consider making the implementation call a protected, stubbed out, virtual function to support core behaviour
-     * but allow extension in a derived class.
-     */
-    void notifyDeleted(ResourceId& resource);
-
-
-    /**
      * @brief Helper method to verify all the data is correct
      * Checks for:
      * @li All Transaction ID's are valid
@@ -200,11 +171,7 @@ namespace Prototype {
      * in derived classes.
      */
     bool isValid() const;
-    // double m_min;
-    // double m_max;
-    bool m_changed;
-
-    ResourceId m_resource;
+    //bool m_changed;
   };
 
   /**

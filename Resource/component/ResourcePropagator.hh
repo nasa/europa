@@ -60,7 +60,6 @@ namespace Prototype {
     			    const DomainListener::ChangeType& changeType);
 
     std::set<ResourceId> m_resources;
-    ConstrainedVariableId m_forempty;
     const PlanDatabaseId m_planDb;
     PlanDatabaseListenerId m_planDbListener;
   };

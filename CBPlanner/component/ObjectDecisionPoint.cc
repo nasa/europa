@@ -3,6 +3,7 @@
 #include "DbClient.hh"
 #include "Token.hh"
 #include "Object.hh"
+#include "Utils.hh"
 #include <list>
 
 namespace Prototype {
@@ -29,17 +30,15 @@ namespace Prototype {
 
   std::list<ChoiceId>& ObjectDecisionPoint::getChoices() {
     check_error(m_id.isValid());
-    std::list<ChoiceId>::iterator cit = m_choices.begin();
-    for(; cit != m_choices.end(); cit++) {
-      delete (Choice*) (*cit);
-    }
+    cleanup(m_choices);
     m_choices.clear();
     std::vector<TokenId> successors;
     m_object->getOrderingChoices(m_token, successors);
     std::vector<TokenId>::iterator it = successors.begin();
     //std::cout << "Choices for (" << getKey() << "):" << std::endl;
     for (; it != successors.end(); it++) {      
-      ChoiceId choice = Choice::makeChoiceId(m_id, *it);
+      TokenId token = *it;
+      ChoiceId choice = Choice::makeChoiceId(m_id, token);
       //std::cout << choice << std::endl;
       m_choices.push_back(choice);
     }

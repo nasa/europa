@@ -1609,6 +1609,7 @@ namespace Prototype {
 			for(std::list<ChoiceId>::const_iterator cIt = choices.begin(); cIt != choices.end() && numChoices < maxChoices; 
 					++cIt, ++numChoices) {
 				ChoiceId choice = (*cIt);
+				check_error(choice.isNoId() || choice.isValid());
 				if(choice.isNoId())
 					continue;
 				retval << choice->getKey() << COMMA << choice->getType() << COMMA;
@@ -1625,11 +1626,12 @@ namespace Prototype {
 				case Choice::VALUE:
 					{
 					  const TokenId &tId = Id<ValueChoice>(choice)->getToken();
-						if(!tId.isNoId())
-							retval << tId->getKey();
-						else
-							retval << -1;
-						retval << COMMA << Id<ValueChoice>(choice)->getValue();
+					  if(!tId.isNoId()){
+					    retval << tId->getKey();
+					    retval << COMMA << Id<ValueChoice>(choice)->getValue();;
+					  }
+					  else
+					    retval << -1;
 					}
 				break;
 				case Choice::USER:

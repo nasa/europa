@@ -36,7 +36,7 @@ bool runPlanner(){
 
     assert(client->propagate());
 
-	ObjectId world = client->getObject(LabelStr("world"));
+    ObjectId world = client->getObject(LabelStr("world"));
     check_error(world.isValid());
     // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
     ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
