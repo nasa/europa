@@ -145,8 +145,8 @@ namespace Prototype
     static const int ARG_COUNT = 4;
 
     Variable<IntervalDomain> m_interimVariable;
-    AddEqualConstraint m_addEqualConstraint;
     MultEqualConstraint m_multEqualConstraint;
+    AddEqualConstraint m_addEqualConstraint;
   };
 }
 #endif

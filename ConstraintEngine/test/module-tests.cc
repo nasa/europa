@@ -709,19 +709,61 @@ private:
   }
 
   static bool testAddMultEqualConstraint(){
+    // 1 + 2 * 3 == 7
     {
-      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 40));
-      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, 2));
-      Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(-2, 6));
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 1));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 2));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(3, 3));
+      Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(7, 7));
       AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"), 
 				LabelStr("Default"), 
 				ENGINE, 
 				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
-      ENGINE->propagate();
-      assert(ENGINE->constraintConsistent());
-      assert(v2.getDerivedDomain().getLowerBound() == -1);
+      assert(ENGINE->propagate());
     }
+
+    // 1 + 2 * 3 == 8 => empty
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 1));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 2));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(3, 3));
+      Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(8, 8));
+      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"), 
+				LabelStr("Default"), 
+				ENGINE, 
+				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
+      assert(!ENGINE->propagate());
+    }
+
+    // 1 + 1 * [-infty 0] = 1 -> 1 + 1 * 0 = 1
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 1));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, 0));
+      Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
+      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"), 
+				LabelStr("Default"), 
+				ENGINE, 
+				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
+      assert(ENGINE->propagate());
+      assert(v2.getDerivedDomain().getSingletonValue() == 0);
+    }
+
+    // [1.0 10.0] + 1.0 * [1.0 10.0] = 10.0 ->  [1.0 9.0] + 1.0 * [1.0 9.0] = 10.0
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(1.0, 1.0));
+      Variable<IntervalDomain> v2(ENGINE, IntervalDomain(1.0, 10.0));
+      Variable<IntervalDomain> v3(ENGINE, IntervalDomain(10.0, 10.0));
+      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"), 
+				LabelStr("Default"), 
+				ENGINE, 
+				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
+      assert(ENGINE->propagate());
+      assert(v0.getDerivedDomain() == IntervalIntDomain(1, 9));
+      assert(v2.getDerivedDomain() == IntervalDomain(1.0, 9.0));
+    }
+
 
     return true;
   }

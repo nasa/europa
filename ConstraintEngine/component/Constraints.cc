@@ -341,7 +341,7 @@ namespace Prototype
   }
 
   /*************************************************************
-   * AddMultEqualConstraint
+   * AddMultEqualConstraint: A + (B*C) == D
    *************************************************************/
   AddMultEqualConstraint::AddMultEqualConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
@@ -349,14 +349,14 @@ namespace Prototype
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
-      m_addEqualConstraint(LabelStr("Internal:addEqual"), 
-			   propagatorName, 
-			   constraintEngine, 
-			   makeScope(m_variables[A], m_variables[B], m_interimVariable.getId())),
       m_multEqualConstraint(LabelStr("Internal::multEqual"),
 			    propagatorName,
 			    constraintEngine,
-			    makeScope(m_interimVariable.getId(), m_variables[C], m_variables[D])){
+			    makeScope(m_variables[B], m_variables[C], m_interimVariable.getId())),
+      m_addEqualConstraint(LabelStr("Internal:addEqual"), 
+			   propagatorName, 
+			   constraintEngine, 
+			   makeScope(m_interimVariable.getId(), m_variables[A], m_variables[D])){
     check_error(m_variables.size() == ARG_COUNT);
     for(int i=0; i< ARG_COUNT; i++)
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
