@@ -6,7 +6,7 @@
 #include "DMResourceListener.hh"
 #include "ResourceFlawDecisionPoint.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   ResourceOpenDecisionManager::ResourceOpenDecisionManager(const DecisionManagerId& dm) : DefaultOpenDecisionManager(dm) {
   }

@@ -2,7 +2,7 @@
 #include "IntervalIntDomain.hh"
 #include "Variable.hh"
 
-namespace PLASMA {
+namespace EUROPA {
   
   //
   // IntervalIntTypeFactory
@@ -48,4 +48,4 @@ namespace PLASMA {
     return atoi(value.c_str());
   }
 
-} // namespace PLASMA
+} // namespace EUROPA

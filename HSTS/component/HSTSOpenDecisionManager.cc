@@ -6,7 +6,7 @@
 #include "TokenChoice.hh"
 #include "HSTSHeuristics.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   HSTSOpenDecisionManager::HSTSOpenDecisionManager(const DecisionManagerId& dm, const HSTSHeuristicsId& heur)
     : DefaultOpenDecisionManager(dm), m_heur(heur) {

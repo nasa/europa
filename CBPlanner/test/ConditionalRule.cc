@@ -7,7 +7,7 @@
 #include "Object.hh"
 #include "BoolDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class ConditionalRuleRoot : public RuleInstance {
   public:

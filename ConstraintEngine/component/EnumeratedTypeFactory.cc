@@ -2,7 +2,7 @@
 #include "EnumeratedDomain.hh"
 #include "Variable.hh"
 
-namespace PLASMA {
+namespace EUROPA {
   
   //
   // EnumeratedTypeFactory
@@ -51,4 +51,4 @@ namespace PLASMA {
       return LabelStr(value);
   }
 
-} // namespace PLASMA
+} // namespace EUROPA

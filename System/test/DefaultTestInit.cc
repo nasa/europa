@@ -3,7 +3,7 @@
 #include "RulesEngineDefs.hh"
 #include "CBPlannerDefs.hh"
 
-using namespace PLASMA;
+using namespace EUROPA;
 
 void averInit(const PlanDatabaseId& db, 
               const DecisionManagerId& dm = DecisionManagerId::noId(),

@@ -1,7 +1,7 @@
 #include "floatType.hh"
 #include "Variable.hh"
 
-namespace PLASMA {
+namespace EUROPA {
   
   //
   // floatTypeFactory
@@ -26,4 +26,4 @@ namespace PLASMA {
     return(sl_typeName);
   }
 
-} // namespace PLASMA
+} // namespace EUROPA

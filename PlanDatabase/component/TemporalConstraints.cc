@@ -4,7 +4,7 @@
 #include "ConstrainedVariable.hh"
 #include "IntervalIntDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
 
   TemporalDistanceConstraint::TemporalDistanceConstraint(const LabelStr& name,

@@ -9,7 +9,7 @@
 
 #include "AbstractDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   /**
    * @class IntervalDomain

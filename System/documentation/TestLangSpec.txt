@@ -129,11 +129,11 @@ and a set of assertions or other 'Test' directives.
 A quick note about the small utility scripts checked into PLASMA (testlangconvert,
 testlangcompile, and testlanglink):
 testlangconvert is what converts from either a test language script like the one 
-below to xml then to C++ or directly from xml to C++.  It will generate a two 
+below to xml then to C++ or directly from xml to C++.  It will generate two
 files of the name Test_<testfile>.[cc|hh].
 testlangcompile compiles the generated C++ code to an object file for linking.
 It takes one required argument, the .cc file, and one optional argument which is
-passed to the compiler.  This argument is for use when PLASMA has been built 
+passed to the compiler.  This argument is for use when EUROPA has been built 
 optimized.
 testlanglink has 5 arguments: the suffix of the library names (g, o, p, or some 
 combination thereof), the destination executable, the model object, the test

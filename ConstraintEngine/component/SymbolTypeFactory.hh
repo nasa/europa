@@ -4,7 +4,7 @@
 #include "TypeFactory.hh"
 #include "SymbolDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class SymbolTypeFactory : public ConcreteTypeFactory {
   public:
@@ -35,6 +35,6 @@ namespace PLASMA {
     const SymbolDomain m_baseDomain;
   };
 
-} // namespace PLASMA
+} // namespace EUROPA
 
 #endif // _H_SymbolTypeFactory

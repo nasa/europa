@@ -9,7 +9,7 @@
 #include "Variable.hh"
 #include "Utils.hh"
 
-namespace PLASMA {
+namespace EUROPA {
   /**
    * @brief Declaration for rule instance root - guarded by object variable
    */

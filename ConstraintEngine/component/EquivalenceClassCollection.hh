@@ -13,7 +13,7 @@
 #include <set>
 #include <map>
 
-namespace PLASMA{
+namespace EUROPA{
 
   class Node;
   typedef Id<Node> NodeId;

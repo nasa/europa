@@ -3,7 +3,7 @@
 
 #include "Rule.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class AtSubgoalRule : public Rule {
   public:

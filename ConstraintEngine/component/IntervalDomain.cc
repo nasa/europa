@@ -1,7 +1,7 @@
 #include "IntervalDomain.hh"
 #include "DomainListener.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   IntervalDomain::IntervalDomain()
     : AbstractDomain(true, false, getDefaultTypeName().c_str()), 

@@ -1,6 +1,6 @@
 #include "NumericDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
 
   NumericDomain::NumericDomain()

@@ -7,7 +7,7 @@
 
 #include "DNPConstraints.hh"
 
-using namespace PLASMA;
+using namespace EUROPA;
 
 /* These and the DNP constraints are from Europa1 (NewPlan) tests. */
 /* See the NewPlan CVS tree under, e.g., ModuleTests/Parser/dnp. */

@@ -2,7 +2,7 @@
 #include "AbstractDomain.hh"
 #include "ConstrainedVariable.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   DynamicInfiniteRealCondition::DynamicInfiniteRealCondition(const DecisionManagerId& dm): Condition(dm) {
     check_error(m_id.isValid());

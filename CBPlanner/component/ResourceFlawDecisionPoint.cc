@@ -12,7 +12,7 @@
 // Uncomment this to allow "push beyond horizon" option for resolving flaws
 // #define PUSH2HORIZON
 
-namespace PLASMA {
+namespace EUROPA {
 
   ResourceFlawDecisionPoint::ResourceFlawDecisionPoint(const ResourceId& resource) : DecisionPoint(resource->getPlanDatabase()->getClient(), resource), m_resource(resource) {}
 

@@ -4,7 +4,7 @@
 #include "TypeFactory.hh"
 #include "IntervalDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class IntervalTypeFactory : public ConcreteTypeFactory {
   public:
@@ -42,6 +42,6 @@ namespace PLASMA {
     IntervalDomain m_baseDomain;
   };
 
-} // namespace PLASMA
+} // namespace EUROPA
 
 #endif // _H_IntervalTypeFactory

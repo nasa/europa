@@ -7,7 +7,7 @@
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class TemporalDistanceConstraint : public AddEqualConstraint {
   public:

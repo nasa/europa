@@ -2,7 +2,7 @@
 #include "Token.hh"
 #include "ConstrainedVariable.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   HorizonCondition::HorizonCondition(const HorizonId& horizon, const DecisionManagerId& dm) : 
     Condition(dm), m_horizon(horizon), m_possiblyOutside(true) {

@@ -17,11 +17,11 @@ VARIANTS ?= DEV ;
 
 # If CUSTOM variant is set these variables control 
 # whether the corresponding flag is used:
-#     PLASMA_DEBUG
-#     PLASMA_OPTIMIZED
-#     PLASMA_PROFILE
-#     PLASMA_COVERAGE
-#     PLASMA_WARN
+#     EUROPA_DEBUG
+#     EUROPA_OPTIMIZED
+#     EUROPA_PROFILE
+#     EUROPA_COVERAGE
+#     EUROPA_WARN
 
 #########
 
@@ -41,19 +41,19 @@ rule FVariantC++Flags
     return $(COVERAGE_FLAGS) $(WARNING_FLAGS) ;
   case CUSTOM :
     local flags ;
-    if $(PLASMA_DEBUG) {
+    if $(EUROPA_DEBUG) {
       flags += $(DEBUG_FLAGS) ;
     }
-    if $(PLASMA_OPTIMIZED) {
+    if $(EUROPA_OPTIMIZED) {
       flags += $(OPTIMIZE_FLAGS) ;
     }
-    if $(PLASMA_PROFILE) {
+    if $(EUROPA_PROFILE) {
       flags += $(PROFILE_FLAGS) ;
     }
-    if $(PLASMA_COVERAGE) {
+    if $(EUROPA_COVERAGE) {
       flags += $(COVERAGE_FLAGS) ;
     }
-    if $(PLASMA_WARN) {
+    if $(EUROPA_WARN) {
       flags += $(WARNING_FLAGS) ;
     }
     return $(flags) ;
@@ -86,10 +86,10 @@ rule FVariantLinkFlags
     return $(COVERAGE_FLAGS) ;
   case CUSTOM :
     local flags ;
-    if $(PLASMA_PROFILE) {
+    if $(EUROPA_PROFILE) {
       flags += $(PROFILE_FLAGS) ;
     }
-    if $(PLASMA_COVERAGE) {
+    if $(EUROPA_COVERAGE) {
       flags += $(COVERAGE_FLAGS) ;
     }
     return $(flags) ;
@@ -116,17 +116,17 @@ rule FVariantName
     return $(name) ;
   case CUSTOM :
     local name = $(name) ;
-    if $(PLASMA_COVERAGE) {
+    if $(EUROPA_COVERAGE) {
       # ... so ignore the other variants here:
       return $(name) ;
     }
-    if $(PLASMA_DEBUG) {
+    if $(EUROPA_DEBUG) {
       name = $(name)_g ;
     }
-    if $(PLASMA_OPTIMIZED) {
+    if $(EUROPA_OPTIMIZED) {
       name = $(name)_o ;
     }
-    if $(PLASMA_PROFILE) {
+    if $(EUROPA_PROFILE) {
       name = $(name)_p ;
     }
     return $(name) ;
@@ -143,7 +143,7 @@ rule ObjectsSubdirName
   case COVERAGE :
     return obj_cov ;
   case CUSTOM :
-    if $(PLASMA_COVERAGE) {
+    if $(EUROPA_COVERAGE) {
       return obj_cov ;
     }
     return objects ;

@@ -2,7 +2,7 @@
 #include "LabelStr.hh"
 #include "Entity.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   bool isAscending(const std::set<double>& values) {
     double greatest = *(values.begin());
@@ -469,4 +469,4 @@ namespace PLASMA {
     return(ptr);
   }
 
-} /* namespace PLASMA */
+} /* namespace EUROPA */

@@ -9,7 +9,7 @@
 #include "Token.hh"
 #include "Utils.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class ObjectDecisionPointComparator {
   public:

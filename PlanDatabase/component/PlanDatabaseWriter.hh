@@ -11,7 +11,7 @@
 #include "ConstrainedVariable.hh"
 #include "TestSupport.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class PlanDatabaseWriter {
 

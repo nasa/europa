@@ -4,7 +4,7 @@
 #include "Propagator.hh"
 #include <set>
 
-namespace PLASMA {
+namespace EUROPA {
 
   class DefaultPropagator: public Propagator
   {

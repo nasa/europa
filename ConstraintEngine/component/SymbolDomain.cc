@@ -1,6 +1,6 @@
 #include "SymbolDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   SymbolDomain::SymbolDomain() 
     : EnumeratedDomain(false, getDefaultTypeName().c_str()){}
@@ -44,4 +44,4 @@ namespace PLASMA {
   }
 
 
-} // namespace PLASMA
+} // namespace EUROPA

@@ -19,10 +19,10 @@ SchemaId schema;
 
 #define PERFORMANCE
 
-extern void averInit(const PLASMA::PlanDatabaseId& db,
-                     const PLASMA::DecisionManagerId& dm,
-                     const PLASMA::ConstraintEngineId& ce,
-                     const PLASMA::RulesEngineId& re);
+extern void averInit(const EUROPA::PlanDatabaseId& db,
+                     const EUROPA::DecisionManagerId& dm,
+                     const EUROPA::ConstraintEngineId& ce,
+                     const EUROPA::RulesEngineId& re);
 
 extern void averDeinit();
 

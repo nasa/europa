@@ -8,7 +8,7 @@
 }
 
 
-namespace PLASMA {
+namespace EUROPA {
   /*
    * These inline functions are used to allow access 
    * to static variables within a function.

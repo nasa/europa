@@ -10,7 +10,7 @@
 #include "module-tests.hh"
 #include <cmath>
 
-namespace PLASMA {
+namespace EUROPA {
 
   class ChangeListener : public DomainListener {
   public:
@@ -638,23 +638,23 @@ namespace PLASMA {
     }
 
     static bool testBasicLabelOperations() {
-      int initialCount = PLASMA::LabelStr::getSize();
-      PLASMA::LabelStr l1("L1");
-      PLASMA::LabelStr l2("L2");
-      PLASMA::LabelStr l3("L3");
+      int initialCount = EUROPA::LabelStr::getSize();
+      EUROPA::LabelStr l1("L1");
+      EUROPA::LabelStr l2("L2");
+      EUROPA::LabelStr l3("L3");
       assert(l1 < l2 && l2 < l3);
 
-      PLASMA::LabelStr la("L");
-      PLASMA::LabelStr l4("L30");
-      PLASMA::LabelStr lb("L");
+      EUROPA::LabelStr la("L");
+      EUROPA::LabelStr l4("L30");
+      EUROPA::LabelStr lb("L");
       assert(la == lb);
       assert(la < l4);
 
-      PLASMA::LabelStr copy1(l1);
+      EUROPA::LabelStr copy1(l1);
       assert(l1 == copy1);
       assert(l2 != copy1);
 
-      assert((PLASMA::LabelStr::getSize() - initialCount) == 5);
+      assert((EUROPA::LabelStr::getSize() - initialCount) == 5);
       assert(l1.toString() == "L1");
 
       assert(LabelStr::isString(l1.getKey()));
@@ -664,18 +664,18 @@ namespace PLASMA {
 
     static bool testLabelSetAllocations() {
       std::list<double> values;
-      values.push_back(PLASMA::LabelStr("L1"));
-      values.push_back(PLASMA::LabelStr("L4"));
-      values.push_back(PLASMA::LabelStr("L2"));
-      values.push_back(PLASMA::LabelStr("L5"));
-      values.push_back(PLASMA::LabelStr("L3"));
+      values.push_back(EUROPA::LabelStr("L1"));
+      values.push_back(EUROPA::LabelStr("L4"));
+      values.push_back(EUROPA::LabelStr("L2"));
+      values.push_back(EUROPA::LabelStr("L5"));
+      values.push_back(EUROPA::LabelStr("L3"));
 
       ChangeListener l_listener;
       LabelSet ls0(values);
       ls0.setListener(l_listener.getId());
       assert(!ls0.isOpen());
 
-      PLASMA::LabelStr l2("L2");
+      EUROPA::LabelStr l2("L2");
       assert(ls0.isMember(l2));
       DomainListener::ChangeType change;
       ls0.remove(l2);
@@ -683,7 +683,7 @@ namespace PLASMA {
       assert(res && change == DomainListener::VALUE_REMOVED);
       assert(!ls0.isMember(l2));
 
-      PLASMA::LabelStr l3("L3");
+      EUROPA::LabelStr l3("L3");
       ls0.set(l3);
       assert(ls0.isMember(l3));
       assert(ls0.getSize() == 1);
@@ -698,14 +698,14 @@ namespace PLASMA {
 
     static bool testEquate() {
       std::list<double> baseValues;
-      baseValues.push_back(PLASMA::LabelStr("A"));
-      baseValues.push_back(PLASMA::LabelStr("B"));
-      baseValues.push_back(PLASMA::LabelStr("C"));
-      baseValues.push_back(PLASMA::LabelStr("D"));
-      baseValues.push_back(PLASMA::LabelStr("E"));
-      baseValues.push_back(PLASMA::LabelStr("F"));
-      baseValues.push_back(PLASMA::LabelStr("G"));
-      baseValues.push_back(PLASMA::LabelStr("H"));
+      baseValues.push_back(EUROPA::LabelStr("A"));
+      baseValues.push_back(EUROPA::LabelStr("B"));
+      baseValues.push_back(EUROPA::LabelStr("C"));
+      baseValues.push_back(EUROPA::LabelStr("D"));
+      baseValues.push_back(EUROPA::LabelStr("E"));
+      baseValues.push_back(EUROPA::LabelStr("F"));
+      baseValues.push_back(EUROPA::LabelStr("G"));
+      baseValues.push_back(EUROPA::LabelStr("H"));
 
       ChangeListener l_listener;
       LabelSet ls0(baseValues);
@@ -718,7 +718,7 @@ namespace PLASMA {
       bool res = ls0.equate(ls1);
       assert(res == false); // Implying no change occured
 
-      PLASMA::LabelStr lC("C");
+      EUROPA::LabelStr lC("C");
       ls0.remove(lC);
       assert(!ls0.isMember(lC));
       assert(ls1.isMember(lC));
@@ -728,16 +728,16 @@ namespace PLASMA {
 
       LabelSet ls2(baseValues);
       ls2.setListener(l_listener.getId());
-      ls2.remove(PLASMA::LabelStr("A"));
-      ls2.remove(PLASMA::LabelStr("B"));
-      ls2.remove(PLASMA::LabelStr("C"));
-      ls2.remove(PLASMA::LabelStr("D"));
-      ls2.remove(PLASMA::LabelStr("E"));
+      ls2.remove(EUROPA::LabelStr("A"));
+      ls2.remove(EUROPA::LabelStr("B"));
+      ls2.remove(EUROPA::LabelStr("C"));
+      ls2.remove(EUROPA::LabelStr("D"));
+      ls2.remove(EUROPA::LabelStr("E"));
 
       LabelSet ls3(baseValues);
       ls3.setListener(l_listener.getId());
-      PLASMA::LabelStr lA("A");
-      PLASMA::LabelStr lB("B");
+      EUROPA::LabelStr lA("A");
+      EUROPA::LabelStr lB("B");
       ls3.remove(lA);
       ls3.remove(lB);
       ls3.remove(lC);
@@ -747,17 +747,17 @@ namespace PLASMA {
 
       LabelSet ls4(baseValues);
       ls4.setListener(l_listener.getId());
-      ls4.remove(PLASMA::LabelStr("A"));
-      ls4.remove(PLASMA::LabelStr("B"));
-      ls4.remove(PLASMA::LabelStr("C"));
-      ls4.remove(PLASMA::LabelStr("D"));
-      ls4.remove(PLASMA::LabelStr("E"));
+      ls4.remove(EUROPA::LabelStr("A"));
+      ls4.remove(EUROPA::LabelStr("B"));
+      ls4.remove(EUROPA::LabelStr("C"));
+      ls4.remove(EUROPA::LabelStr("D"));
+      ls4.remove(EUROPA::LabelStr("E"));
 
       LabelSet ls5(baseValues);
       ls5.setListener(l_listener.getId());
-      ls5.remove(PLASMA::LabelStr("F"));
-      ls5.remove(PLASMA::LabelStr("G"));
-      ls5.remove(PLASMA::LabelStr("H"));
+      ls5.remove(EUROPA::LabelStr("F"));
+      ls5.remove(EUROPA::LabelStr("G"));
+      ls5.remove(EUROPA::LabelStr("H"));
 
       DomainListener::ChangeType change;
       ls4.equate(ls5);
@@ -866,11 +866,11 @@ namespace PLASMA {
 
     static bool testValueRetrieval() {
       std::list<double> values;
-      values.push_back(PLASMA::LabelStr("A"));
-      values.push_back(PLASMA::LabelStr("B"));
-      values.push_back(PLASMA::LabelStr("C"));
-      values.push_back(PLASMA::LabelStr("D"));
-      values.push_back(PLASMA::LabelStr("E"));
+      values.push_back(EUROPA::LabelStr("A"));
+      values.push_back(EUROPA::LabelStr("B"));
+      values.push_back(EUROPA::LabelStr("C"));
+      values.push_back(EUROPA::LabelStr("D"));
+      values.push_back(EUROPA::LabelStr("E"));
 
       LabelSet l1(values);
       std::list<double> results;
@@ -887,21 +887,21 @@ namespace PLASMA {
 
     static bool testIntersection() {
       std::list<double> values;
-      values.push_back(PLASMA::LabelStr("A"));
-      values.push_back(PLASMA::LabelStr("B"));
-      values.push_back(PLASMA::LabelStr("C"));
-      values.push_back(PLASMA::LabelStr("D"));
-      values.push_back(PLASMA::LabelStr("E"));
-      values.push_back(PLASMA::LabelStr("F"));
-      values.push_back(PLASMA::LabelStr("G"));
-      values.push_back(PLASMA::LabelStr("H"));
-      values.push_back(PLASMA::LabelStr("I"));
+      values.push_back(EUROPA::LabelStr("A"));
+      values.push_back(EUROPA::LabelStr("B"));
+      values.push_back(EUROPA::LabelStr("C"));
+      values.push_back(EUROPA::LabelStr("D"));
+      values.push_back(EUROPA::LabelStr("E"));
+      values.push_back(EUROPA::LabelStr("F"));
+      values.push_back(EUROPA::LabelStr("G"));
+      values.push_back(EUROPA::LabelStr("H"));
+      values.push_back(EUROPA::LabelStr("I"));
       LabelSet ls1(values);
 
       LabelSet ls2(values);
-      ls2.remove(PLASMA::LabelStr("A"));
-      ls2.remove(PLASMA::LabelStr("C"));
-      ls2.remove(PLASMA::LabelStr("E"));
+      ls2.remove(EUROPA::LabelStr("A"));
+      ls2.remove(EUROPA::LabelStr("C"));
+      ls2.remove(EUROPA::LabelStr("E"));
       assert(ls2.isSubsetOf(ls1));
       assert(!ls1.isSubsetOf(ls2));
 
@@ -916,16 +916,16 @@ namespace PLASMA {
       assert(ls1 == ls3);
 
       LabelSet ls4(values);
-      ls4.remove(PLASMA::LabelStr("A"));
-      ls4.remove(PLASMA::LabelStr("B"));
-      ls4.remove(PLASMA::LabelStr("C"));
-      ls4.remove(PLASMA::LabelStr("D"));
-      ls4.remove(PLASMA::LabelStr("E"));
-      ls4.remove(PLASMA::LabelStr("F"));
-      ls4.remove(PLASMA::LabelStr("G"));
+      ls4.remove(EUROPA::LabelStr("A"));
+      ls4.remove(EUROPA::LabelStr("B"));
+      ls4.remove(EUROPA::LabelStr("C"));
+      ls4.remove(EUROPA::LabelStr("D"));
+      ls4.remove(EUROPA::LabelStr("E"));
+      ls4.remove(EUROPA::LabelStr("F"));
+      ls4.remove(EUROPA::LabelStr("G"));
 
-      ls3.remove(PLASMA::LabelStr("H"));
-      ls3.remove(PLASMA::LabelStr("I"));
+      ls3.remove(EUROPA::LabelStr("H"));
+      ls3.remove(EUROPA::LabelStr("I"));
       ls4.intersect(ls3);
       assert(ls4.isEmpty());
 
@@ -1562,8 +1562,8 @@ namespace PLASMA {
 }
 
 bool DomainTests::test() {
-  runTestSuite(PLASMA::IntervalDomainTest::test);
-  runTestSuite(PLASMA::EnumeratedDomainTest::test);
-  runTestSuite(PLASMA::MixedTypeTest::test);
+  runTestSuite(EUROPA::IntervalDomainTest::test);
+  runTestSuite(EUROPA::EnumeratedDomainTest::test);
+  runTestSuite(EUROPA::MixedTypeTest::test);
   return(true);
 }

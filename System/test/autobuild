@@ -1,14 +1,14 @@
 #!/bin/bash
-# $Id: autobuild,v 1.110 2004-12-04 22:23:26 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.111 2004-12-27 22:14:14 wedgingt Exp $ @email.arc.nasa.gov
 #
-# Automatically build most/all variants of the PLASMA planner system.
+# Automatically build most/all variants of the EUROPA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
 
 echo ''
-echo 'PLASMA autobuild script'
+echo 'EUROPA autobuild script'
 echo ''
 
-# $multibuild determines whether all PLASMA variants are built at once or
+# $multibuild determines whether all EUROPA variants are built at once or
 #   one at a time.  If -m is given, it will be true; otherwise, false.
 coverage=false
 multibuild=false

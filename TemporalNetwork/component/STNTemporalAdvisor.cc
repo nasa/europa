@@ -6,7 +6,7 @@
 #include "TemporalNetworkDefs.hh"
 #include "TemporalPropagator.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   STNTemporalAdvisor::STNTemporalAdvisor(const TemporalPropagatorId& propagator): m_propagator(propagator) {
 }

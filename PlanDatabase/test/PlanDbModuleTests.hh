@@ -13,7 +13,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   const LabelStr& DEFAULT_OBJECT_TYPE();
 

@@ -7,7 +7,7 @@
 
 // RODM in comments stands for ResourceOpenDecisionManager
 
-namespace PLASMA {
+namespace EUROPA {
 
   class DMResourceListener : public ResourceListener {
   public:

@@ -10,7 +10,7 @@
 #include "AbstractDomain.hh"
 #include <set>
 
-namespace PLASMA {
+namespace EUROPA {
 
   /**
    * @class EnumeratedDomain

@@ -5,7 +5,7 @@
 #include "DefaultOpenDecisionManager.hh"
 #include "HSTSHeuristics.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   typedef std::set<ObjectDecisionPointId, DefaultObjectDecisionPointComparator> ObjectDecisionSet;
 

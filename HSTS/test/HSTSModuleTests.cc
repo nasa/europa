@@ -15,7 +15,7 @@
 
 extern bool loggingEnabled();
 
-namespace PLASMA {
+namespace EUROPA {
 
   /**
    * @brief Creates the type specifications required for testing

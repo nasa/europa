@@ -5,7 +5,7 @@
 #include "PlanDatabaseDefs.hh"
 #include <cmath>
 
-namespace PLASMA {
+namespace EUROPA {
 
   class Condition;
   typedef Id<Condition> ConditionId;

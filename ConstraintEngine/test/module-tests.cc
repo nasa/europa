@@ -36,7 +36,7 @@
 
 #include <fstream>
 
-using namespace PLASMA;
+using namespace EUROPA;
 using namespace std;
 
 class DelegationTestConstraint : public Constraint {
@@ -89,15 +89,21 @@ private:
 
 class TestConstraintAllocator: public ConstraintAllocator {
 public:
-  TestConstraintAllocator(): ConstraintAllocator(), m_currentUser("TEST_HARNESS") {}
-  const LabelStr getCurrentUser() const { return m_currentUser; }
+  TestConstraintAllocator()
+    : ConstraintAllocator(), m_currentUser("TEST_HARNESS") {
+  }
+
+  const LabelStr& getCurrentUser() const {
+    return(m_currentUser);
+  }
+
 private:
   const LabelStr m_currentUser;
 };
 
 class TypeFactoryTests {
 public:
-  static bool test(){
+  static bool test() {
     runTest(testValueCreation);
 
     // This is needed by the next test and is done outside it to avoid the
@@ -524,11 +530,11 @@ public:
 private:
   static bool testSubsetConstraint() {
     std::list<double> values;
-    values.push_back(PLASMA::LabelStr("A"));
-    values.push_back(PLASMA::LabelStr("B"));
-    values.push_back(PLASMA::LabelStr("C"));
-    values.push_back(PLASMA::LabelStr("D"));
-    values.push_back(PLASMA::LabelStr("E"));
+    values.push_back(EUROPA::LabelStr("A"));
+    values.push_back(EUROPA::LabelStr("B"));
+    values.push_back(EUROPA::LabelStr("C"));
+    values.push_back(EUROPA::LabelStr("D"));
+    values.push_back(EUROPA::LabelStr("E"));
     LabelSet ls0(values);
     values.pop_back();
     values.pop_back();
@@ -731,11 +737,11 @@ private:
   {
     // Set up a base domain
     std::list<double> baseValues;
-    baseValues.push_back(PLASMA::LabelStr("A"));
-    baseValues.push_back(PLASMA::LabelStr("B"));
-    baseValues.push_back(PLASMA::LabelStr("C"));
-    baseValues.push_back(PLASMA::LabelStr("D"));
-    baseValues.push_back(PLASMA::LabelStr("E"));
+    baseValues.push_back(EUROPA::LabelStr("A"));
+    baseValues.push_back(EUROPA::LabelStr("B"));
+    baseValues.push_back(EUROPA::LabelStr("C"));
+    baseValues.push_back(EUROPA::LabelStr("D"));
+    baseValues.push_back(EUROPA::LabelStr("E"));
     LabelSet baseDomain(baseValues);
 
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
@@ -748,15 +754,15 @@ private:
 
     LabelSet ls0(baseDomain);
     ls0.empty();
-    ls0.insert(PLASMA::LabelStr("A"));
+    ls0.insert(EUROPA::LabelStr("A"));
 
     LabelSet ls1(baseDomain);
     ls1.empty();
-    ls1.insert(PLASMA::LabelStr("A"));
-    ls1.insert(PLASMA::LabelStr("B"));
-    ls1.insert(PLASMA::LabelStr("C"));
-    ls1.insert(PLASMA::LabelStr("D"));
-    ls1.insert(PLASMA::LabelStr("E"));
+    ls1.insert(EUROPA::LabelStr("A"));
+    ls1.insert(EUROPA::LabelStr("B"));
+    ls1.insert(EUROPA::LabelStr("C"));
+    ls1.insert(EUROPA::LabelStr("D"));
+    ls1.insert(EUROPA::LabelStr("E"));
 
     Variable<LabelSet> v2(ENGINE, ls1);
     Variable<LabelSet> v3(ENGINE, ls1);
@@ -767,11 +773,11 @@ private:
     assert(!v2.getDerivedDomain().isSingleton());
 
     LabelSet ls2(ls1);
-    ls2.remove(PLASMA::LabelStr("E"));
+    ls2.remove(EUROPA::LabelStr("E"));
 
     v2.specify(ls2);
     ENGINE->propagate();
-    assert(!v3.getDerivedDomain().isMember(PLASMA::LabelStr("E")));
+    assert(!v3.getDerivedDomain().isMember(EUROPA::LabelStr("E")));
 
     Variable<LabelSet> v4(ENGINE, ls0);
     EqualConstraint c2(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v4.getId()));
@@ -780,7 +786,7 @@ private:
     assert(v2.getDerivedDomain() == v3.getDerivedDomain());
     assert(v2.getDerivedDomain() == v4.getDerivedDomain());
     assert(v3.getDerivedDomain() == v4.getDerivedDomain());
-    assert(v3.getDerivedDomain().getSingletonValue() == PLASMA::LabelStr("A"));
+    assert(v3.getDerivedDomain().getSingletonValue() == EUROPA::LabelStr("A"));
 
     // Now test that equality is working correctly for dynamic domains
     {
@@ -2397,18 +2403,18 @@ private:
 
   static bool testLockConstraint() {
     LabelSet lockDomain;
-    lockDomain.insert(PLASMA::LabelStr("A"));
-    lockDomain.insert(PLASMA::LabelStr("B"));
-    lockDomain.insert(PLASMA::LabelStr("C"));
-    lockDomain.insert(PLASMA::LabelStr("D"));
+    lockDomain.insert(EUROPA::LabelStr("A"));
+    lockDomain.insert(EUROPA::LabelStr("B"));
+    lockDomain.insert(EUROPA::LabelStr("C"));
+    lockDomain.insert(EUROPA::LabelStr("D"));
     lockDomain.close();
 
     LabelSet baseDomain;
-    baseDomain.insert(PLASMA::LabelStr("A"));
-    baseDomain.insert(PLASMA::LabelStr("B"));
-    baseDomain.insert(PLASMA::LabelStr("C"));
-    baseDomain.insert(PLASMA::LabelStr("D"));
-    baseDomain.insert(PLASMA::LabelStr("E"));
+    baseDomain.insert(EUROPA::LabelStr("A"));
+    baseDomain.insert(EUROPA::LabelStr("B"));
+    baseDomain.insert(EUROPA::LabelStr("C"));
+    baseDomain.insert(EUROPA::LabelStr("D"));
+    baseDomain.insert(EUROPA::LabelStr("E"));
     baseDomain.close();
 
     // Set up variable with base domain - will exceed lock domain
@@ -2422,7 +2428,7 @@ private:
     assert(v0.getDerivedDomain() == lockDomain);
 
     // Now specify to a restricted value, and ensure an inconsistency
-    v0.specify(PLASMA::LabelStr("C"));
+    v0.specify(EUROPA::LabelStr("C"));
     assert(!ENGINE->propagate());
 
     // Now ensure that we can rty again, without changing anything, and get the same result.

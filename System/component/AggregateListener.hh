@@ -9,7 +9,7 @@
 #include "CBPlannerDefs.hh"
 #include "Object.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
 #define DECLARE_EVENT(name, prototype) virtual void name(prototype) {}
 #define DECLARE_EVENT_ARG(name, prototype1, prototype2) virtual void name(prototype1, prototype2) {}

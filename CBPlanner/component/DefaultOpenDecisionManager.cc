@@ -11,7 +11,7 @@
 #include "ValueChoice.hh"
 #include "DefaultOpenDecisionManager.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   DefaultOpenDecisionManager::DefaultOpenDecisionManager(const DecisionManagerId& dm) : OpenDecisionManager(dm) {
   }

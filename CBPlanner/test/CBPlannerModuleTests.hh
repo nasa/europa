@@ -17,7 +17,7 @@
 #include "DynamicInfiniteRealCondition.hh"
 #include "TokenDecisionPoint.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   void initCBPTestSchema();
 

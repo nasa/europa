@@ -26,7 +26,7 @@
 #include <iostream>
 #include <string>
 
-namespace PLASMA {
+namespace EUROPA {
 
 
   const LabelStr& DEFAULT_OBJECT_TYPE(){
@@ -659,11 +659,11 @@ namespace PLASMA {
                                 Token::noObject(), false);
   
     std::list<double> values;
-    values.push_back(PLASMA::LabelStr("L1"));
-    values.push_back(PLASMA::LabelStr("L4"));
-    values.push_back(PLASMA::LabelStr("L2"));
-    values.push_back(PLASMA::LabelStr("L5"));
-    values.push_back(PLASMA::LabelStr("L3"));
+    values.push_back(EUROPA::LabelStr("L1"));
+    values.push_back(EUROPA::LabelStr("L4"));
+    values.push_back(EUROPA::LabelStr("L2"));
+    values.push_back(EUROPA::LabelStr("L5"));
+    values.push_back(EUROPA::LabelStr("L3"));
     intervalToken.addParameter(LabelSet(values), "LabelSetParam");
     intervalToken.close();
     assert(intervalToken.getEnd()->getDerivedDomain().getLowerBound() == 2);

@@ -11,7 +11,7 @@
 
 #include <set>
 
-namespace PLASMA {
+namespace EUROPA {
 
   class TemporalPropagator: public Propagator
   {

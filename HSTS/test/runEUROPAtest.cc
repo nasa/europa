@@ -3,13 +3,13 @@
  *
  * @brief Provides an executable which will use the HSTS variant of the
  * standard Chronological backtracking planner and a Standard Assembly of
- * PLASMA 
+ * EUROPA 
  */
 
 #include "Nddl.hh" /*!< Includes protypes required to load a model */
-#include "HSTSAssembly.hh" /*!< For using a standard PLASMA Assembly */
+#include "HSTSAssembly.hh" /*!< For using a standard EUROPA Assembly */
 
-using namespace PLASMA;
+using namespace EUROPA;
 
 /**
  * @brief Uses the planner to solve a planning problem

@@ -8,7 +8,7 @@
 #include "Token.hh"
 #include "StringDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class AtSubgoalRuleRoot : public RuleInstance {
   public:

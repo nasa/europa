@@ -1,6 +1,6 @@
 #include "BoolDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
 
   BoolDomain::BoolDomain()

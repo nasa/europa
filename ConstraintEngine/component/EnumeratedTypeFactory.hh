@@ -4,7 +4,7 @@
 #include "TypeFactory.hh"
 #include "EnumeratedDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class EnumeratedTypeFactory : public ConcreteTypeFactory {
   public:
@@ -36,6 +36,6 @@ namespace PLASMA {
     const EnumeratedDomain m_baseDomain;
   };
 
-} // namespace PLASMA
+} // namespace EUROPA
 
 #endif // _H_EnumeratedTypeFactory

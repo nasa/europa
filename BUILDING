@@ -1,8 +1,8 @@
-Building PLASMA
+Building EUROPA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.9 2004-12-07 00:11:46 pdaley Exp $
+$Id: BUILDING,v 1.10 2004-12-27 22:11:52 wedgingt Exp $
 
 
 - Prerequisites:
@@ -22,7 +22,7 @@ $Id: BUILDING,v 1.9 2004-12-07 00:11:46 pdaley Exp $
 
 If you are using computers in Code TC at NASA/Ames, the division's
 System Group has likely already installed these programs (and versions
-of them) that you will need to build PLASMA reliably.  
+of them) that you will need to build EUROPA reliably.  
 
 
 - Getting started:
@@ -82,8 +82,11 @@ above version requirements may be used instead.
     
     /usr/local/beta/gcc-3.3.3/lib 
     /home/me/PLASMA/lib
-    Where: 
-      /home/me is the full path to the directory containing PLASMA.
+
+    where '/home/me' should be replaced by the full path to the
+    directory containing the EUROPA checkout (presently, the CVS
+    module and top level directory is named 'PLASMA', the name used
+    during development).
 
     e.g. setenv LD_LIBRARY_PATH 
          "$LD_LIBRARY_PATH":/usr/local/beta/gcc-3.3.3/lib:/home/me/PLASMA/lib
@@ -130,20 +133,20 @@ remove generated files that are below that subdirectory.  To remove
 generated files in the entire PLASMA tree, run "jam clean" at the
 PLASMA directory.
 
-NOTE: The default PLASMA build variant is DEV SHARED (as in
+NOTE: The default EUROPA build variant is DEV SHARED (as in
 'DEV'elopment and shared libraries).  Please see below for examples of
 how to set the LD_LIBRARY_PATH environment variable so the operating
-system can find the PLASMA shared libraries.  Alternatively, see the
+system can find the EUROPA shared libraries.  Alternatively, see the
 LIBRARIES configuration section.
 
 
 - Configuring the build : VARIANTS
 
-The PLASMA build has a few variations that can be built.  The
-variations and parameters of the build can be configured through
-environment variables or parameters to jam.
+Europa2 can be built using a few variations.  The variations and
+parameters of the build can be configured through environment
+variables or parameters to jam.
 
-PLASMA supports building 1 or more "variants" at the same time.  The
+EUROPA supports building 1 or more "variants" at the same time.  The
 valid variants are:
 
 	1. DEV - unoptimized, unprofiled, debug
@@ -174,10 +177,10 @@ The fourth variant, CUSTOM is a special variant which examines some
 environment variables to determine the compilation flags.  These
 environment variables are:
 
-	1. PLASMA_DEBUG - use debugging
-	2. PLASMA_OPTIMIZED - use optimization
-	3. PLASMA_PROFILE - use profiling
-	4. PLASMA_WARN - use additional warnings
+	1. EUROPA_DEBUG - use debugging
+	2. EUROPA_OPTIMIZED - use optimization
+	3. EUROPA_PROFILE - use profiling
+	4. EUROPA_WARN - use additional warnings
 
 In the case of the CUSTOM variant, the above variables
 are used to construct the name by composition.  Thus,
@@ -190,12 +193,12 @@ To build all variants at once, see Appendix A.
 
 - Configuring the build : LIBRARIES
 
-The PLASMA build supports building modules as different
+The EUROPA build supports building modules as different
 kinds of libraries.  The building of modules as different
 kinds of libraries is also controlled through environment
 variables or parameters to jam.
 
-PLASMA supports building 1 or more library kinds at the
+EUROPA supports building 1 or more library kinds at the
 same time.  The valid library kinds are:
 
 	1. STATIC - using static compile time linking (*.a)
@@ -231,7 +234,7 @@ dependencies exist between modules.  The library kind
 SHARED is often the most space efficient.
 
 When running with SHARED it is required to add the
-PLASMA shared library directory to your library search
+EUROPA shared library directory to your library search
 path.  The relevant variable depends on your platform,
 and the way to set it depends on your shell.  Here is
 an example for the sh and bash shells:
@@ -240,7 +243,7 @@ an example for the sh and bash shells:
 % export LD_LIBRARY_PATH
 
 ... where you should replace '/home/me' with the full path to the
-directory containing your PLASMA checkout from CVS.
+directory containing your EUROPA checkout from CVS.
 
 For csh and tcsh and similar shells:
 
@@ -252,12 +255,12 @@ To build all library "styles" at once, see Appendix A.
 - Getting more help
 
 If you have difficulty with any part of these
-instructions please contact the PLASMA development team
+instructions please contact the EUROPA development team
 (see the README file for the address and URL).
 
 Appendix A
 
-The project tests building and testing PLASMA automatically overnight
+The project tests building and testing EUROPA automatically overnight
 using the shell script in PLASMA/System/test/autobuild via the UNIX &
 Linux cron program.  See:
 

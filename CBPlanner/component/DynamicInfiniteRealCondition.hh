@@ -3,7 +3,7 @@
 
 #include "Condition.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
     class DynamicInfiniteRealCondition : public Condition {
     public:

@@ -4,7 +4,7 @@
 #include "IntervalIntDomain.hh"
 #include "ConstraintLibrary.hh"
 
-namespace PLASMA{
+namespace EUROPA{
 
   EventToken::EventToken(const PlanDatabaseId& planDatabase,
 			 const LabelStr& predicateName,

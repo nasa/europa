@@ -12,7 +12,7 @@
 #include <map>
 #include <set>
 
-namespace PLASMA{
+namespace EUROPA{
 
   /**
    * @class EqualityConstraintPropagator

@@ -4,7 +4,7 @@
 #include "TemporalNetworkDefs.hh"
 #include "TemporalNetwork.hh"
 
-namespace PLASMA{
+namespace EUROPA{
 
   /**
    * @class TemporalNetworkListener

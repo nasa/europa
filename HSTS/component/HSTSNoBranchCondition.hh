@@ -4,7 +4,7 @@
 #include "Condition.hh"
 #include "HSTSNoBranch.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class HSTSNoBranchCondition : public Condition {
   public:

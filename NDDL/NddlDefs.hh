@@ -4,7 +4,7 @@
 #include "RulesEngineDefs.hh"
 #include "ResourceDefs.hh"
 
-using namespace PLASMA;
+using namespace EUROPA;
 
 namespace NDDL {
 
@@ -25,7 +25,7 @@ namespace NDDL {
 
 } // namespace NDDL
 
-namespace PLASMA {
+namespace EUROPA {
 
   /**
    * @brief Initialize all default elements of the module e.g. factories

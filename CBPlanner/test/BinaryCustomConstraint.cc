@@ -1,7 +1,7 @@
 #include "BinaryCustomConstraint.hh"
 #include "BoolDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   BinaryCustomConstraint::BinaryCustomConstraint(const LabelStr& name, const LabelStr& propagatorName, const ConstraintEngineId& constraintEngine, const std::vector<ConstrainedVariableId>& variables) : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error (variables.size() == 2); // temporary while Factories are fixed

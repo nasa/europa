@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cstdlib>
 
-namespace PLASMA {
+namespace EUROPA {
 
   Assertion::FailMode Assertion::s_mode = Assertion::FAIL_FAST;
   std::queue<std::string> Assertion::s_errors = std::queue<std::string>();

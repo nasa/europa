@@ -17,7 +17,7 @@ case "$2" in
 optargs="-g3"
 ;;
 "opt")
-optargs="-O3 -DPLASMA_FAST"
+optargs="-O3 -DEUROPA_FAST"
 ;;
 *)
 optargs="-g3"

@@ -4,7 +4,7 @@
 #include "Id.hh"
 #include "ConstraintEngineDefs.hh"
 
-namespace PLASMA
+namespace EUROPA
 {
 
   class ResourceViolation;

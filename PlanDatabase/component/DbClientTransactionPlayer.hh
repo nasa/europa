@@ -14,7 +14,7 @@ class TiXmlElement;
  * @note Necessary for copy. replay, and possibly recovery.
  */
 
-namespace PLASMA {
+namespace EUROPA {
 
   class DbClientTransactionPlayer {
   public:

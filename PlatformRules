@@ -77,7 +77,7 @@ if $(OS) = SOLARIS {
 
 # OPTIMIZE_FLAGS = flags for optimization
 
-OPTIMIZE_FLAGS ?= -O3 -DPLASMA_FAST ;
+OPTIMIZE_FLAGS ?= -O3 -DEUROPA_FAST ;
 OPTIM = ; # suppress built-in optimization
 
 # COVERAGE_FLAGS = flags for code coverage (e.g., gcov)

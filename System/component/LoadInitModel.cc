@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <dlfcn.h>
 
-namespace PLASMA {
+namespace EUROPA {
   int loadInitModel(const char* libPath, const char* initialStatePath) {
 
     int retStatus;

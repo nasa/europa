@@ -11,7 +11,7 @@
 
 #include <list>
 
-namespace PLASMA {
+namespace EUROPA {
   class AbstractDomain;
   class IntervalDomain;
   class IntervalIntDomain;
@@ -65,6 +65,6 @@ namespace PLASMA {
   DECLARE_GLOBAL_CONST(char*, g_noVarName);
   #define NO_VAR_NAME (g_noVarName())
 
-} /* namespace PLASMA */
+} /* namespace EUROPA */
 
 #endif /* #ifndef _H_ConstraintEngineDefs */

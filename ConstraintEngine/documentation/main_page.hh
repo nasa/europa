@@ -92,14 +92,14 @@ testIntervalPerformance      0.19                              1.03             
  * methods in the Constrainttest class.
  * @li DomainTest.cc shows the performance testing done on the new domains.
  * @li EuropaDomainTests.cc shows the equivalent tests condutced on old Europa domains.
- * @li PLASMA::ConstraintEngine is the core of the framework.
- * @li PLASMA::ConstrainedVariable shows the ConstraintEngines perspective on what a variable is.
- * @li PLASMA::Variable shows the external users view of what a variable is.
- * @li PLASMA::AbstractDomain and derived classes show the alternate domain implementation.
- * @li PLASMA::DomainListener defines the events that can be tracked on a domain.
- * @li PLASMA::Constraint class plays the same role it plays in Europa, though it is integarted to the ConstraintEngine and event model
+ * @li EUROPA::ConstraintEngine is the core of the framework.
+ * @li EUROPA::ConstrainedVariable shows the ConstraintEngines perspective on what a variable is.
+ * @li EUROPA::Variable shows the external users view of what a variable is.
+ * @li EUROPA::AbstractDomain and derived classes show the alternate domain implementation.
+ * @li EUROPA::DomainListener defines the events that can be tracked on a domain.
+ * @li EUROPA::Constraint class plays the same role it plays in Europa, though it is integarted to the ConstraintEngine and event model
  * a little differently.
- * @li PLASMA::Propagator class basically handles agenda management.
+ * @li EUROPA::Propagator class basically handles agenda management.
  *
  * @section build Build Instructions
  * Some of the basics are:
@@ -110,7 +110,7 @@ testIntervalPerformance      0.19                              1.03             
  * To run performance tests:
  * @li first make under NewPlan as follows: make EUROPA_VERSION=_EUROPA_FAST_VERSION_ OPTIMIZE=3.
  * @li with Europa built correctly, change CC_FLAGS in the local makefile to CC_FLAGS=-03.
- * @li define _PLASMA_FAST_VALUE_ in ConstraintEngineDefs.hh
+ * @li define _EUROPA_FAST_VALUE_ in ConstraintEngineDefs.hh
  * @li make domain-tests will execute the new domain version of one of the tests (check the code to see which one.
  * @li make europa-domain-tests wille execute the europa domain version which should be comparable in functionality.
  *

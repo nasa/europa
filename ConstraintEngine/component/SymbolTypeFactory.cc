@@ -2,7 +2,7 @@
 #include "SymbolDomain.hh"
 #include "Variable.hh"
 
-namespace PLASMA {
+namespace EUROPA {
   
   //
   // SymbolTypeFactory
@@ -48,4 +48,4 @@ namespace PLASMA {
     return LabelStr(value);
   }
 
-} // namespace PLASMA
+} // namespace EUROPA

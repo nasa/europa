@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <dlfcn.h>
 
-namespace PLASMA {
+namespace EUROPA {
 
   extern "C"
 
@@ -31,7 +31,7 @@ namespace PLASMA {
      * get full library name from model name parameter
      */
     try {
-      //enable PLASMA exceptions
+      //enable EUROPA exceptions
       Error::doThrowExceptions();
       retStatus = loadInitModel(libPath, initialState);
 

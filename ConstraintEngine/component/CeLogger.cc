@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 
-namespace PLASMA {
+namespace EUROPA {
 
   const std::string VARIABLE_INDENT("");
 

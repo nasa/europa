@@ -2,7 +2,7 @@
 #include "Token.hh"
 #include "Object.hh"
 
-namespace PLASMA {
+namespace EUROPA {
   const std::string CLASS_DELIMITER(":");
 
   DbLogger::DbLogger(std::ostream& os, const PlanDatabaseId& planDatabase): PlanDatabaseListener(planDatabase), m_os(os){}

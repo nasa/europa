@@ -63,7 +63,7 @@ int main(int argc, const char ** argv) {
   fcn_initModel = (int (*)(const char*, const char*, const char*))dlsym(libHandle, "initModel");
   if (!fcn_initModel) {
     error_msg = dlerror();
-    printf("dlsym: Error locating PLASMA::initModel:");
+    printf("dlsym: Error locating EUROPA::initModel:");
     if (error_msg) {
       printf("%s:\n", error_msg);
     } else {
@@ -72,7 +72,7 @@ int main(int argc, const char ** argv) {
     exit(1);
   } 
 
-  // call the PLASMA::initModel function
+  // call the EUROPA::initModel function
   try {
     retStatus = (*fcn_initModel)(modelLibPath, initialStatePath, destPath);
   } 
@@ -89,7 +89,7 @@ int main(int argc, const char ** argv) {
   fcn_completeRun = (int (*)())dlsym(libHandle, "completeRun");
   if (!fcn_completeRun) {
     error_msg = dlerror();
-    printf("dlsym: Error locating PLASMA::completeRun:");
+    printf("dlsym: Error locating EUROPA::completeRun:");
     if (error_msg) {
       printf("%s:\n", error_msg);
     } else {
@@ -112,7 +112,7 @@ int main(int argc, const char ** argv) {
   fcn_getStatus = (int (*)())dlsym(libHandle, "getStatus");
   if (!fcn_getStatus) {
     error_msg = dlerror();
-    printf("dlsym: Error locating PLASMA::completeRun:");
+    printf("dlsym: Error locating EUROPA::completeRun:");
     if (error_msg) {
       printf("%s:\n", error_msg);
     } else {
@@ -152,7 +152,7 @@ int main(int argc, const char ** argv) {
   //printf("Returned from (int (*)())dlsym(libHandle, terminateRun)\n");
   if (!fcn_terminateRun) {
     error_msg = dlerror();
-    printf("dlsym: Error locating PLASMA::terminateRun:");
+    printf("dlsym: Error locating EUROPA::terminateRun:");
     if (error_msg) {
       printf("%s:\n", error_msg);
     } else {

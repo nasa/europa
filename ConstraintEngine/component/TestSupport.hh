@@ -10,7 +10,7 @@
 #include "Error.hh"
 #include "Utils.hh"
 
-using namespace PLASMA;
+using namespace EUROPA;
 
 class DefaultEngineAccessor {
 public:

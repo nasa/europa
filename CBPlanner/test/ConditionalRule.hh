@@ -4,7 +4,7 @@
 #include "Rule.hh"
 #include "IntervalIntDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class ConditionalRule : public Rule {
   public:

@@ -19,7 +19,7 @@
 #include <list>
 #include <vector>
 
-using namespace PLASMA;
+using namespace EUROPA;
 using namespace std;
 
 static void testEquate(const LabelSet& a, const LabelSet& b) {
@@ -40,27 +40,27 @@ static void outerLoopForTestIntersection() {
 }
 
 static void outerLoopForTestEquate() {
-  std::list<PLASMA::LabelStr> values;
-  values.push_back(PLASMA::LabelStr("A"));
-  values.push_back(PLASMA::LabelStr("B"));
-  values.push_back(PLASMA::LabelStr("C"));
-  values.push_back(PLASMA::LabelStr("D"));
-  values.push_back(PLASMA::LabelStr("E"));
-  values.push_back(PLASMA::LabelStr("F"));
-  values.push_back(PLASMA::LabelStr("G"));
-  values.push_back(PLASMA::LabelStr("H"));
+  std::list<EUROPA::LabelStr> values;
+  values.push_back(EUROPA::LabelStr("A"));
+  values.push_back(EUROPA::LabelStr("B"));
+  values.push_back(EUROPA::LabelStr("C"));
+  values.push_back(EUROPA::LabelStr("D"));
+  values.push_back(EUROPA::LabelStr("E"));
+  values.push_back(EUROPA::LabelStr("F"));
+  values.push_back(EUROPA::LabelStr("G"));
+  values.push_back(EUROPA::LabelStr("H"));
   LabelSet ls_a(values);
 
   values.clear();
-  values.push_back(PLASMA::LabelStr("1"));
-  values.push_back(PLASMA::LabelStr("2"));
-  values.push_back(PLASMA::LabelStr("3"));
-  values.push_back(PLASMA::LabelStr("E"));
-  values.push_back(PLASMA::LabelStr("4"));
-  values.push_back(PLASMA::LabelStr("5"));
-  values.push_back(PLASMA::LabelStr("6"));
-  values.push_back(PLASMA::LabelStr("7"));
-  values.push_back(PLASMA::LabelStr("8"));
+  values.push_back(EUROPA::LabelStr("1"));
+  values.push_back(EUROPA::LabelStr("2"));
+  values.push_back(EUROPA::LabelStr("3"));
+  values.push_back(EUROPA::LabelStr("E"));
+  values.push_back(EUROPA::LabelStr("4"));
+  values.push_back(EUROPA::LabelStr("5"));
+  values.push_back(EUROPA::LabelStr("6"));
+  values.push_back(EUROPA::LabelStr("7"));
+  values.push_back(EUROPA::LabelStr("8"));
   LabelSet ls_b(values);
 
   for (int i = 0; i < 1000000; i++)
@@ -68,17 +68,17 @@ static void outerLoopForTestEquate() {
 }
 
 static void testLabelSetEqualityPerformance(const ConstraintEngineId& ce) {
-  std::list<PLASMA::LabelStr> values;
-  values.push_back(PLASMA::LabelStr("V0"));
-  values.push_back(PLASMA::LabelStr("V1"));
-  values.push_back(PLASMA::LabelStr("V2"));
-  values.push_back(PLASMA::LabelStr("V3"));
-  values.push_back(PLASMA::LabelStr("V4"));
-  values.push_back(PLASMA::LabelStr("V5"));
-  values.push_back(PLASMA::LabelStr("V6"));
-  values.push_back(PLASMA::LabelStr("V7"));
-  values.push_back(PLASMA::LabelStr("V8"));
-  values.push_back(PLASMA::LabelStr("V9"));
+  std::list<EUROPA::LabelStr> values;
+  values.push_back(EUROPA::LabelStr("V0"));
+  values.push_back(EUROPA::LabelStr("V1"));
+  values.push_back(EUROPA::LabelStr("V2"));
+  values.push_back(EUROPA::LabelStr("V3"));
+  values.push_back(EUROPA::LabelStr("V4"));
+  values.push_back(EUROPA::LabelStr("V5"));
+  values.push_back(EUROPA::LabelStr("V6"));
+  values.push_back(EUROPA::LabelStr("V7"));
+  values.push_back(EUROPA::LabelStr("V8"));
+  values.push_back(EUROPA::LabelStr("V9"));
   LabelSet labelSet(values);
 
 

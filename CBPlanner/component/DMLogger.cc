@@ -4,7 +4,7 @@
 #include "DecisionManager.hh"
 #include "Choice.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   DMLogger::DMLogger(std::ostream& os, const DecisionManagerId& dm) : DecisionManagerListener(dm), m_os(os) {}
 

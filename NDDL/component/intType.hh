@@ -4,7 +4,7 @@
 #include "IntervalIntDomain.hh"
 #include "IntervalIntTypeFactory.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   /**
    * @class intTypeFactory
@@ -24,6 +24,6 @@ namespace PLASMA {
     static const LabelStr& getDefaultTypeName();
   };
 
-} // namespace PLASMA
+} // namespace EUROPA
 
 #endif // INT_TYPE_HH

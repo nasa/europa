@@ -1,7 +1,7 @@
 #include "HSTSNoBranchCondition.hh"
 #include "ConstrainedVariable.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   HSTSNoBranchCondition::HSTSNoBranchCondition(const DecisionManagerId& dm) : Condition(dm) {
     check_error(m_id.isValid());

@@ -3,7 +3,7 @@
 
 #include "DecisionPoint.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class TokenDecisionPoint : public DecisionPoint {
   public:

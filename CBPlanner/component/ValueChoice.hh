@@ -4,7 +4,7 @@
 #include "CBPlannerDefs.hh"
 #include "Choice.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class ValueChoice : public Choice {
   public:

@@ -248,7 +248,7 @@ static char *realpath(const char *path, char *resolved_path) {
 #endif
 
 
-namespace PLASMA {
+namespace EUROPA {
   namespace PlanWriter {
 		
     inline long long int timeval2Id(const struct timeval &currTime) {

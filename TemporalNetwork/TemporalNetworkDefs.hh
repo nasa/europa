@@ -5,7 +5,7 @@
 #include "Error.hh"
 
 /*!< Type definitions to map for th eones we were using in Europa */
-namespace PLASMA {
+namespace EUROPA {
   typedef bool Bool;
   typedef int Int;
   typedef void Void;

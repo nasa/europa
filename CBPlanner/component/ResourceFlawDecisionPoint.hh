@@ -4,7 +4,7 @@
 #include "ResourceDefs.hh"
 #include "DecisionPoint.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class ResourceFlawDecisionPoint : public DecisionPoint {
   public:

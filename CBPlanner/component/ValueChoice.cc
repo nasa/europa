@@ -5,7 +5,7 @@
 #include "PlanDatabase.hh"
 #include "Object.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   void ValueChoice::makeChoices(const DecisionPointId& decision, const AbstractDomain& domain, std::list<ChoiceId>& choices) {
     check_error(!domain.isEmpty());

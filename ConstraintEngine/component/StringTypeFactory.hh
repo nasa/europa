@@ -4,7 +4,7 @@
 #include "TypeFactory.hh"
 #include "StringDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class StringTypeFactory : public ConcreteTypeFactory {
   public:
@@ -34,6 +34,6 @@ namespace PLASMA {
     StringDomain m_baseDomain;
   };
 
-} // namespace PLASMA
+} // namespace EUROPA
 
 #endif // _H_StringTypeFactory

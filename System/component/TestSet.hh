@@ -5,7 +5,7 @@
 #include "PlanDatabaseDefs.hh"
 #include <vector>
 
-namespace PLASMA {
+namespace EUROPA {
   class TestSet : public Test {
   public:
     TestSet(const PlanDatabaseId&); //no name because it isn't used here

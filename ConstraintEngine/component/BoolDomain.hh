@@ -8,7 +8,7 @@
  */
 #include "IntervalIntDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   /**
    * @class BoolDomain

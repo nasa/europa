@@ -4,7 +4,7 @@
 #include "PlanDatabaseDefs.hh"
 #include "Token.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class IntervalToken: public Token {
   public:

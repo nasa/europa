@@ -4,7 +4,7 @@
 #include "Rule.hh"
 #include "IntervalIntDomain.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   /**
    * @brief Rule designed to test plan database handling and support flaw testing

@@ -1,7 +1,7 @@
 #include "TemporalNetworkListener.hh"
 #include "TemporalPropagator.hh"
 
-namespace PLASMA{
+namespace EUROPA{
 
   TemporalNetworkListener::TemporalNetworkListener(const TemporalPropagatorId& prop) : m_propagator(prop), m_id(this) {
     m_propagator->addListener(m_id);

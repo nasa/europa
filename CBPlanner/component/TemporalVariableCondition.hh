@@ -4,7 +4,7 @@
 #include "Condition.hh"
 #include "Horizon.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   class TemporalVariableCondition : public Condition {
   public:

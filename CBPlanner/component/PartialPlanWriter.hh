@@ -22,7 +22,7 @@
 #include "RulesEngineListener.hh"
 #include "RuleInstance.hh"
 
-namespace PLASMA {
+namespace EUROPA {
   namespace PlanWriter {
     class Transaction {
     public :
@@ -50,7 +50,7 @@ namespace PLASMA {
       virtual ~PartialPlanWriter(void);
       void write(void);
 
-      //PLASMA JNI runtime interface functions
+      //EUROPA JNI runtime interface functions
       std::string getDest(void);
       void setDest(std::string destPath);
       int getNumTransactions(void);

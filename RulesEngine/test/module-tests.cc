@@ -20,7 +20,7 @@
 #include <iostream>
 #include <string>
 
-using namespace PLASMA;
+using namespace EUROPA;
 
 class SimpleSubGoal: public Rule {
 public:

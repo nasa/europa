@@ -19,10 +19,10 @@
 
 SchemaId schema;
 
-extern void averInit(const PLASMA::PlanDatabaseId& db,
-                     const PLASMA::DecisionManagerId& dm,
-                     const PLASMA::ConstraintEngineId& ce,
-                     const PLASMA::RulesEngineId& re);
+extern void averInit(const EUROPA::PlanDatabaseId& db,
+                     const EUROPA::DecisionManagerId& dm,
+                     const EUROPA::ConstraintEngineId& ce,
+                     const EUROPA::RulesEngineId& re);
 extern void averDeinit();
 
 const char* TX_LOG = "TransactionLog.xml";
@@ -1370,7 +1370,7 @@ namespace NDDL {
 
 bool runTestLangTest(){
     SamplePlanDatabase db1(schema, replay);
-    averInit(db1.planDatabase, PLASMA::DecisionManagerId::noId(),
+    averInit(db1.planDatabase, EUROPA::DecisionManagerId::noId(),
                  db1.constraintEngine, db1.rulesEngine);
 
     DbClientId client = db1.planDatabase->getClient();
@@ -1471,7 +1471,7 @@ bool runTestLangTest(){
     db1.horizon->setHorizon(start, end);
 
     PlanDatabaseWriter::write(db1.planDatabase, std::cout);
-    PLASMA::EventAggregator::instance()->notifyAssignNextSucceeded(DecisionPointId::noId());
+    EUROPA::EventAggregator::instance()->notifyAssignNextSucceeded(DecisionPointId::noId());
     //db1.writer->write();
     PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
@@ -1482,7 +1482,7 @@ bool runTestLangTest(){
 int main(int argc, const char ** argv){
   // Initialize constraint factories
   SamplePlanDatabase::initialize();
-  //schema = PLASMA::Schema::instance();
+  //schema = EUROPA::Schema::instance();
   schema = NDDL::schema();
 
   replay = false;

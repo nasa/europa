@@ -12,7 +12,7 @@
 #include "TypeFactory.hh"
 #include <algorithm>
 
-namespace PLASMA {
+namespace EUROPA {
 
   static const std::vector<int> 
   pathAsVector(const std::string & path) {

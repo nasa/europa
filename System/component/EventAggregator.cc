@@ -1,6 +1,6 @@
 #include "EventAggregator.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   EventAggregatorId EventAggregator::s_instance = EventAggregatorId::noId();
 

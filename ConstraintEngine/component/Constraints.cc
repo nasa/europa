@@ -8,7 +8,7 @@
 #include "Utils.hh"
 #include <cmath>
 
-namespace PLASMA {
+namespace EUROPA {
 
   /**
    * Utility class that might get promoted later.
@@ -1750,4 +1750,4 @@ namespace PLASMA {
       s_runAlready = true;
     }
   }
-} // end namespace PLASMA
+} // end namespace EUROPA

@@ -5,7 +5,7 @@
 #include "intType.hh"
 #include "floatType.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   static bool & nddlInitialized() {
     static bool sl_alreadyDone(false);

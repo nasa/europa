@@ -6,7 +6,7 @@
 #include "Utils.hh"
 #include <list>
 
-namespace PLASMA {
+namespace EUROPA {
 
   ObjectDecisionPoint::ObjectDecisionPoint(const DbClientId& dbClient, const TokenId& token)
     : DecisionPoint(dbClient, token) {

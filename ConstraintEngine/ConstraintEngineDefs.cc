@@ -5,7 +5,7 @@
 #include "StringTypeFactory.hh"
 #include "SymbolTypeFactory.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   static bool & constraintEngineInitialized() {
     static bool sl_alreadyDone(false);

@@ -1,13 +1,13 @@
 #include "model.nddl"
 
-// Create a planner configuration instance in PLASMA.
+// Create a planner configuration instance in EUROPA.
 // Horizon Start, Horizon End, MaxPlannerSteps
 PlannerConfig plannerConfiguration = new PlannerConfig(0, 1000, 500);
 
 // Sample object
 YourObject object = new YourObject();
 
-// Close the the PLASMA Database - no more objects can be created.
+// Close the the EUROPA Database - no more objects can be created.
 close();
 
 // Now place your goals here.

@@ -12,7 +12,7 @@
 #include <string>
 #include <queue>
 
-namespace PLASMA {
+namespace EUROPA {
 
   class AssertionErr {
   public:

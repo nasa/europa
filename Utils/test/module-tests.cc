@@ -31,7 +31,7 @@
 #include <fstream>
 
 
-#ifndef PLASMA_FAST
+#ifndef EUROPA_FAST
 #define non_fast_only_assert(T) assert(T)
 #else
 #define non_fast_only_assert(T) //NO-OP
@@ -67,7 +67,7 @@
   }\
   }
 
-using namespace PLASMA;
+using namespace EUROPA;
 
 class TestError {
 public:
@@ -97,8 +97,8 @@ private:
     catch (Error e) {
       __x__(e);
     }
-    // check_error will not throw the errors for PLASMA_FAST
-#ifndef PLASMA_FAST
+    // check_error will not throw the errors for EUROPA_FAST
+#ifndef EUROPA_FAST
     try {
       check_error(argc == 2);
       __y__("check_error(argc == 2) did not throw an exception");
@@ -143,8 +143,8 @@ public:
 private:
 
   static bool testDebugError() {
-    // check_error will not throw the errors for PLASMA_FAST
-#ifndef PLASMA_FAST
+    // check_error will not throw the errors for EUROPA_FAST
+#ifndef EUROPA_FAST
     try {
       DebugMessage::enableAll();
       __y__("enabling all debug messages succeeded despite no debug stream");
@@ -395,8 +395,8 @@ bool IdTests::testCastingSupport()
 
 bool IdTests::testBadAllocationErrorHandling()
 {
-  // check_error will not throw the errors for PLASMA_FAST
-#ifndef PLASMA_FAST
+  // check_error will not throw the errors for EUROPA_FAST
+#ifndef EUROPA_FAST
   // Ensure allocation of a null pointer triggers error
   //LabelStr expectedError = IdErr::IdMgrInvalidItemPtrError();
 

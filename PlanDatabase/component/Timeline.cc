@@ -20,7 +20,7 @@
 
 #include <algorithm>
 
-namespace PLASMA {
+namespace EUROPA {
 
   Timeline::Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
     : Object(planDatabase, type, name, true){ if (!open) close();}

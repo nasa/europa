@@ -2,7 +2,7 @@
 #include "ResourceFlawDecisionPoint.hh"
 #include "Resource.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   ResourceFlawChoice::ResourceFlawChoice(const ResourceFlawDecisionPointId& decision, const TransactionId& before, const TransactionId& after) : Choice(decision), m_before(before), m_after(after) { 
     check_error(before.isValid());

@@ -5,7 +5,7 @@
 #include "AbstractDomain.hh"
 #include <iostream>
 
-namespace PLASMA {
+namespace EUROPA {
 
   ConstrainedVariableDecisionPoint::ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId& var)
     : DecisionPoint(dbClient, var) {  m_var = var; }

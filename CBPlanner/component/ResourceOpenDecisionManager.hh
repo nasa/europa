@@ -13,7 +13,7 @@
  *  Reuse as much of DefaultOpenDecisionManager as possible
  */
 
-namespace PLASMA {
+namespace EUROPA {
 
   class ResourceOpenDecisionManager : public DefaultOpenDecisionManager {
   public:

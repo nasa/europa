@@ -4,7 +4,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "Entity.hh"
 
-namespace PLASMA {
+namespace EUROPA {
   class Object;
   typedef Id<Object> ObjectId;
   typedef std::set<ObjectId, EntityComparator<ObjectId> > ObjectSet;

@@ -1,6 +1,6 @@
 #!/bin/bash
-# Run the Europa1 betaPlan program to compare performance with PLASMA.
-# $Id: runBetaPlan,v 1.1 2004-12-10 21:45:24 wedgingt Exp $
+# Run the Europa1 betaPlan program to compare performance with Europa2 (PLASMA).
+# $Id: runBetaPlan,v 1.2 2004-12-27 22:14:14 wedgingt Exp $
 date
 hostname
 pwd

@@ -3,7 +3,7 @@
 #include "TokenVariable.hh"
 #include "IntervalIntDomain.hh"
 
-namespace PLASMA{
+namespace EUROPA{
 
   std::string TemporalNetworkLogger::s_loggername = std::string("TNLogger :");  
 

@@ -4,7 +4,7 @@
 #include "DecisionManagerListener.hh"
 #include <iostream>
 
-namespace PLASMA{
+namespace EUROPA{
 
   class DMLogger: public DecisionManagerListener {
   public:

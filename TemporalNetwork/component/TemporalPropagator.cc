@@ -17,9 +17,9 @@
 // relaxed in temporal variables we must do the mapping first or we'll run
 // the risk of detecting an inconsistency where there isn't one.
 
-namespace PLASMA {
+namespace EUROPA {
 
-  //#ifndef PLASMA_FAST
+  //#ifndef EUROPA_FAST
 #define  publish(message){\
     for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)\
       (*lit)->message;\

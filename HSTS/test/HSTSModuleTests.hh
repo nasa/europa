@@ -19,7 +19,7 @@
 #include "HSTSHeuristics.hh"
 #include "HSTSOpenDecisionManager.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   void initCBPTestSchema();
 

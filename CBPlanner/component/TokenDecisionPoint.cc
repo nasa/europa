@@ -4,7 +4,7 @@
 #include "DbClient.hh"
 #include "Utils.hh"
 
-namespace PLASMA {
+namespace EUROPA {
 
   TokenDecisionPoint::TokenDecisionPoint(const DbClientId& dbClient, const TokenId& tok)
     : DecisionPoint(dbClient, tok) { m_tok = tok; }

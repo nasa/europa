@@ -6,7 +6,7 @@
 #include <map>
 #include <vector>
 
-namespace PLASMA {
+namespace EUROPA {
 
   class Timeline: public Object {
   public:

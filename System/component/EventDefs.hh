@@ -3,7 +3,7 @@
 
 #include "Id.hh"
 
-namespace PLASMA {
+namespace EUROPA {
   class EventAggregator;
   typedef Id<EventAggregator> EventAggregatorId;
   
