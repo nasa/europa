@@ -332,7 +332,7 @@ namespace Prototype {
 
       std::set<ObjectId> objects((*pdbId)->getObjects());
       std::set<TokenId> tokens((*pdbId)->getTokens());
-      int slotId = 1;
+      int slotId = 1000000;
       for(std::set<ObjectId>::iterator objectIterator = objects.begin();
 	  objectIterator != objects.end(); ++objectIterator) {
 	const ObjectId &objId = *objectIterator;
