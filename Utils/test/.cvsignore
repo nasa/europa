@@ -1,3 +1,6 @@
+*.bb
+*.bbg
+*.da
 debug1.cfg.output
 debug2.cfg.output
 debug3.cfg.output
