@@ -6,6 +6,8 @@
 
 #define MAX_SATELLITES 1000
 
+//#define USING_RESOURCE 1
+
 class Problem {
 public:
   int numSatellites;
@@ -43,12 +45,14 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
   }
   out << "}" << std::endl;
   out << "" << std::endl;
-  out << "enum Domain {";
-  for (int i=0; i < prob.numParamChoices; ++i)
-    out << i << ", ";
-  out << prob.numParamChoices;
-  out << "}" << std::endl;
-  out << "" << std::endl;
+  if (prob.numParamChoices >0)  {
+    out << "enum Domain {";
+    for (int i=0; i < prob.numParamChoices; ++i)
+      out << i << ", ";
+    out << prob.numParamChoices;
+    out << "}" << std::endl;
+    out << "" << std::endl;
+  }
   out << "class Satellite {" << std::endl;
   out << "predicate Pointing {" << std::endl;
   out << " Target observation;" << std::endl;
@@ -82,12 +86,14 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << "}" << std::endl;
   out << "}" << std::endl;
   out << "" << std::endl;
+#ifdef USING_RESOURCE
   out << "class MyResource {" << std::endl;
   out << "predicate Consume {" << std::endl;
   out << " int amount;" << std::endl;
   out << "}" << std::endl;
   out << "}" << std::endl;
   out << "" << std::endl;
+#endif
   out << "Satellite::Pointing {" << std::endl;
   out << " meets(object.slew sl1);" << std::endl;
   out << " eq(observation, sl1.from);" << std::endl;
@@ -95,8 +101,10 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << " met_by(object.slew sl2);" << std::endl;
   out << " eq(observation, sl2.to);" << std::endl;
   out << "" << std::endl;
+#ifdef USING_RESOURCE
   out << " contains(MyResource.Consume r);" << std::endl;
   out << " eq(r.amount, 10);" << std::endl;
+#endif
   out << "}" << std::endl;
   out << "" << std::endl;
   out << "Satellite::slew{" << std::endl;
@@ -106,49 +114,34 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << " met_by(object.Pointing p2);" << std::endl;
   out << " eq(from, p2.observation);" << std::endl;
   out << "" << std::endl;
+#ifdef USING_RESOURCE
   out << " contains(MyResource.Consume r);" << std::endl;
   out << " eq(r.amount, 100);" << std::endl;
+#endif
   out << "}" << std::endl;
   out << "" << std::endl;
 }  
 
 void nddloutputInitialState(std::ofstream& out, const Problem& prob) {
-  out << "NddlWorld world = new NddlWorld();" << std::endl;
-//  out << "class World extends NddlWorld {" << std::endl;
-//  out << " MyResource res;" << std::endl;
-
-//  for (int i=1; i <= prob.numSatellites; ++i) {
-//    out << " Satellite " << prob.satellites[i] << ";" << std::endl;
-//  }
-
-//  out << "" << std::endl;
-//  out << " predicate initialState{}" << std::endl;
-//  out << "" << std::endl;
-//  out << " World() {" << std::endl;
-  //  out << "  super(" << prob.horStart << "," << prob.horEnd << "," << 500*prob.numSatellites*prob.targets << ");" << std::endl;
-//  out << "  super(" << prob.horStart << "," << prob.horEnd << "," << 99999999 << ");" << std::endl;
+  int expectedTokens = prob.numTargets*2;
+  out << "NddlWorld world = new NddlWorld(0," << expectedTokens << ",99999999);" << std::endl;
+#ifdef USING_RESOURCE
   out << " MyResource res = new MyResource();" << std::endl;
+#endif
 
   for (int i=1; i <= prob.numSatellites; ++i)
-    out << " Satellite " << prob.satellites[i] << " = new Satellite();" << std::endl;
-//  out << " }" << std::endl;
-//  out << "}" << std::endl;
+    out << "Satellite " << prob.satellites[i] << " = new Satellite();" << std::endl;
   out << "" << std::endl;
   out << "NddlWorld.close();" << std::endl;
   out << "close();" << std::endl;
-//  out << "World::initialState{" << std::endl;
-//  out << " leq(object.m_horizonStart, start);" << std::endl;
-//  out << " leq(end, object.m_horizonEnd);" << std::endl;
-//  out << "" << std::endl;
 
   for (int i = 1; i <= prob.numSatellites; ++i) {
-    out << " goal(Satellite.Pointing initialPosition" << i << ");" << std::endl;
-    out << " eq(initialPosition" << i << ".object, " << prob.satellites[i] << ");" << std::endl;
-    out << " eq(initialPosition" << i << ".observation, " << prob.targets[1] << ");" << std::endl;
-    out << " eq(initialPosition" << i << ".start, world.m_horizonStart);" << std::endl;
+    out << "goal(Satellite.Pointing initialPosition" << i << ");" << std::endl;
+    out << "eq(initialPosition" << i << ".object, " << prob.satellites[i] << ");" << std::endl;
+    out << "eq(initialPosition" << i << ".observation, " << prob.targets[1] << ");" << std::endl;
+    out << "eq(initialPosition" << i << ".start, world.m_horizonStart);" << std::endl;
     out << "" << std::endl;
   }
-  //  out << "}" << std::endl;
 }
 
 
@@ -158,6 +151,7 @@ void nddloutputInitialState(std::ofstream& out, const Problem& prob) {
 void ddloutputModel(std::ofstream& out, const Problem& prob) {
   //out << "Debugging_Level 1" << std::endl;
   //out << "" << std::endl;
+#ifdef USING_RESOURCE
   out << "(Define_Object_Class MyResource_Class" << std::endl;
   out << "  :state_variables" << std::endl;
   out << "  ((Controllable resource)))" << std::endl;
@@ -166,6 +160,7 @@ void ddloutputModel(std::ofstream& out, const Problem& prob) {
   out << "" << std::endl;
   out << "(Define_Member_Values ((MyResource_Class resource)) (Consume))" << std::endl;
   out << "" << std::endl;
+#endif
   out << "(Define_Object_Class Satellite_Class" << std::endl;
   out << "  :state_variables" << std::endl;
   out << "  ((Controllable satellite)))" << std::endl;
@@ -215,8 +210,10 @@ void ddloutputModel(std::ofstream& out, const Problem& prob) {
   for (int i=1; i<=prob.numParams; ++i)
     out << " ?_any_value_";
   out << ")))))" << std::endl;
+#ifdef USING_RESOURCE
   out << "  (contains (SINGLE ((MyResource_Class resource)) ((Consume (10)))))))" << std::endl;
   out << "" << std::endl;
+#endif
   out << "(Define_Compatibility" << std::endl;
   out << " (SINGLE ((Satellite_Class satellite)) ((Slew (?X ?Y";
   for (int i=1; i<=prob.numParams; ++i)
@@ -238,11 +235,13 @@ void ddloutputModel(std::ofstream& out, const Problem& prob) {
   for (int i=1; i<=prob.numParams; ++i)
     out << " ?_any_value_";
   out << ")))))" << std::endl;
+#ifdef USING_RESOURCE
   out << "  (contains (SINGLE ((MyResource_Class resource)) ((Consume (100)))))))" << std::endl;
   out << "" << std::endl;
   out << "(Define_Compatibility" << std::endl;
   out << " (SINGLE ((MyResource_Class resource)) ((Consume (?X)))))" << std::endl;
   out << "" << std::endl;
+#endif
 }
 
 void ddloutputInitialState(std::ofstream& out, const Problem& prob) {
@@ -250,9 +249,11 @@ void ddloutputInitialState(std::ofstream& out, const Problem& prob) {
   //out << "" << std::endl;
   out << "[" << prob.horStart << " " << prob.horEnd << "]" << std::endl;
   out << "" << std::endl;
+#ifdef USING_RESOURCE
   out << "Object_Timelines MyResource_Class res1 (" << std::endl;
   out << "    resource ( Consume(*) ... Consume(*) ))" << std::endl;
   out << "" << std::endl;
+#endif
   for (int i=1; i<=prob.numSatellites; ++i) {
     out << "Object_Timelines Satellite_Class " << prob.satellites[i] << " (" << std::endl;
     out << "    satellite (" << std::endl;
