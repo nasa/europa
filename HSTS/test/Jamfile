@@ -114,7 +114,8 @@ RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nd
 #   Reported as GNATS 2760.
 RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 
-# Failing
+# Failing: Utils/core/Utils.hh:134: Error: item.isValid() is false
+#   Reported as GNATS 2768.
 RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
 RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
 RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
