@@ -67,6 +67,9 @@ namespace PLASMA {
 
   class HSTSNoBranch;
   typedef Id<HSTSNoBranch> HSTSNoBranchId;
+
+  class HSTSOpenDecisionManager;
+  typedef Id<HSTSOpenDecisionManager> HSTSOpenDecisionManagerId;
 }
 
 #endif
