@@ -66,7 +66,7 @@ namespace Prototype {
   void DbClientTransactionPlayer::processTransaction(const TiXmlElement & element) {
       const char * tagname = element.Value();
       if (strcmp(tagname, "new") == 0) {
-        playNamedObjectCreated(element);
+        playObjectCreated(element);
       } else if (strcmp(tagname, "goal") == 0) {
         playTokenCreated(element);
       } else if (strcmp(tagname, "constrain") == 0) {
@@ -94,23 +94,25 @@ namespace Prototype {
       m_client->propagate();
   }
 
-  void DbClientTransactionPlayer::playNamedObjectCreated(const TiXmlElement & element)
-  {
-    const char * name = element.Attribute("name");
-    check_error(name != NULL);
-    const char * type = element.Attribute("type");
-    check_error(type != NULL);
-    m_client->createObject(LabelStr(type), LabelStr(name));
-  }
-
   void DbClientTransactionPlayer::playObjectCreated(const TiXmlElement & element)
   {
-    check_error(ALWAYS_FAILS); // Not ready test test this yet!
-    std::stringstream name;
-    name << "$OBJECT[" << m_objectCount++ << "]" << std::ends;
-    const char * type = element.Attribute("name");
+    const char * name = element.Attribute("name");
+    std::stringstream gen_name;
+    if (name == NULL) {
+      gen_name << "$OBJECT[" << m_objectCount++ << "]" << std::ends;
+    }
+    const char * type = element.Attribute("type");
     check_error(type != NULL);
-    m_client->createObject(LabelStr(type), LabelStr(name.str()));
+
+    std::vector<ConstructorArgument> arguments;
+    for (TiXmlElement * child_el = element.FirstChildElement() ;
+         child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+      AbstractDomain * domain = TransactionXml::abstractDomain(*child_el);
+      std::string type = TransactionXml::domainTypeAsString(domain);
+      arguments.push_back(ConstructorArgument(LabelStr(type.c_str()), domain));
+    }
+
+    m_client->createObject(LabelStr(type), LabelStr(name != NULL ? name : gen_name.str()), arguments);
   }
 
   void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element)
