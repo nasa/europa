@@ -7,11 +7,17 @@ namespace PLASMA {
 
   ValueChoice::ValueChoice(const DecisionPointId& decision, const double val) : Choice(decision), m_value(val) { 
     m_type = VALUE; 
+    //    std::cout << " creating choice ";
+    //    printValue(std::cout);
+    //    std::cout << std::endl;
   }
 
   ValueChoice::ValueChoice(const DecisionPointId& decision, const double val, const TokenId& tok) : Choice(decision), m_value(val), m_token(tok) { 
     check_error(tok.isValid());
     m_type = VALUE; 
+    //    std::cout << " creating choice ";
+    //    printValue(std::cout);
+    //    std::cout << std::endl;
   }
 
   ValueChoice::~ValueChoice() {}
@@ -42,7 +48,6 @@ namespace PLASMA {
       if (ConstrainedVariableDecisionPointId::convertable(m_decision)) {
 	ConstrainedVariableDecisionPointId cvdec(m_decision);
 	const AbstractDomain& dom = cvdec->getVariable()->specifiedDomain();
-	check_error(dom.isSingleton());
 	if (Schema::instance()->isObjectType(dom.getTypeName())) {
 	  ObjectId obj(m_value);
 	  os << obj->getName().c_str();
