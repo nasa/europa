@@ -206,7 +206,7 @@ namespace Prototype
     if(provenInconsistent()){
       static bool sl_initialized = false;
       static DomainType sl_emptyDomain;
-      if (sl_initialized = false) {
+      if (sl_initialized == false) {
 	if (sl_emptyDomain.isDynamic())
 	  sl_emptyDomain.close();
 	sl_emptyDomain.empty();
