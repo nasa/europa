@@ -340,7 +340,8 @@ namespace Prototype {
         return;
       }
       // close object type special case
-      m_client->close(LabelStr(identifier));
+      check_error(ALWAYS_FAILS); // not yet implemented for dbclient
+//      m_client->close(LabelStr(identifier));
       return;
     }
     if (strcmp(name, "activate") == 0) {
