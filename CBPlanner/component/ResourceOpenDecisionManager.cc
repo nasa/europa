@@ -6,21 +6,13 @@
 #include "DMResourceListener.hh"
 #include "ResourceFlawDecisionPoint.hh"
 
-#define NOISE 0
-
 namespace Prototype {
 
   ResourceOpenDecisionManager::ResourceOpenDecisionManager(const DecisionManagerId& dm) : DefaultOpenDecisionManager(dm) {
-#if (NOISE>10)
-    std::cout << "Create new ResourceOpenDecisionManager" << std::endl;
-#endif
   }
 
   // The destructor is not virtual
   ResourceOpenDecisionManager::~ResourceOpenDecisionManager() {
-#if (NOISE>10)
-    std::cout << "Destructor for ResourceOpenDecisionManager" <<std::endl;
-#endif
     cleanup(m_resDecs);
   }
 
@@ -50,9 +42,8 @@ namespace Prototype {
    * the closed decisions list.
    */
   void ResourceOpenDecisionManager::notifyResourceState( const DMResourceListenerId& rl, bool isFlawed ) {
-#if (NOISE>5)
-    std::cout<<"RODM notified of change of status of resource "<<rl->getResource()<<" to "<<isFlawed<<std::endl;
-#endif
+    if (loggingEnabled())
+      std::cout<<"RODM notified of change of status of resource "<<rl->getResource()->getKey()<<" to "<<isFlawed<<std::endl;
 
     // The current decision point. If it is still in our list, it is open.
     std::map<int,ResourceFlawDecisionPointId>::iterator dp_it = m_resDecs.find( rl->getResource()->getKey() );
@@ -63,17 +54,13 @@ namespace Prototype {
       ResourceFlawDecisionPointId dp = (new ResourceFlawDecisionPoint(rl->getResource()))->getId();
       check_error(dp->getEntityKey() == rl->getResource()->getKey());
       m_resDecs.insert(std::pair<int,ResourceFlawDecisionPointId>(dp->getEntityKey(),dp));
-#if (NOISE>5)
-      std::cout << "Just created a new RFDP ";
-      dp->print( std::cout );
-      std::cout << std::endl;
-#endif
       publishNewDecision(dp);
     } 
 
     // Remove the open DP if we do not need it any more
     if ( !isFlawed && dp_it!=m_resDecs.end() ) {
       // remove the decision point
+      delete (DecisionPoint*) dp_it->second;
       m_resDecs.erase( dp_it );
       // I hope this does not conflict with ObjectDPs. Resource IS an Object.
       publishRemovedDecision( rl->getResource() );
@@ -103,9 +90,7 @@ namespace Prototype {
       // this works IFF getNextDecision is only called to actually 
       // get a decision to work on
       m_resDecs.erase( m_resDecs.begin() );
-#if (NOISE>5)
-      std::cout << "   Picking resource flaw DP "<<m_curDec<<std::endl;
-#endif
+      publishRemovedDecision( m_curDec );
     }
     else m_curDec = DecisionPointId::noId();
 
@@ -116,10 +101,6 @@ namespace Prototype {
   }
 
   void ResourceOpenDecisionManager::getOpenDecisions(std::list<DecisionPointId>& decisions) {
-#if (NOISE>10)
-    std::cout<<"RODM "<<m_id<<" asked getOpenDecisions"<<std::endl;
-#endif
-
     // collect from parent
     DefaultOpenDecisionManager::getOpenDecisions( decisions );
     // add resource flaw DPs
@@ -130,9 +111,6 @@ namespace Prototype {
   }
 
   void ResourceOpenDecisionManager::printOpenDecisions(std::ostream& os) {
-#if (NOISE>5)
-    std::cout<<"RODM "<<m_id<<" asked printOpenDecision"<<std::endl;
-#endif
     DefaultOpenDecisionManager::printOpenDecisions( os );
     std::multimap<int,ResourceFlawDecisionPointId>::iterator oit = m_resDecs.begin();
     for (; oit != m_resDecs.end(); ++oit) {
