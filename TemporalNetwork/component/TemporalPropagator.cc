@@ -110,8 +110,10 @@ namespace Prototype {
 	    Propagator::execute(constraint);
 	  }
 
-	  check_error(!getConstraintEngine()->provenInconsistent());
-	  m_agenda.erase(it);
+	  if (getConstraintEngine()->provenInconsistent())
+	    m_agenda.clear();
+	  else
+	    m_agenda.erase(it);
 	}
       }
     }
