@@ -5,6 +5,7 @@
 #include "Object.hh"
 #include "Token.hh"
 #include "EnumeratedDomain.hh"
+#include "BoolDomain.hh"
 #include "StringDomain.hh"
 #include "tinyxml.h"
 #include "ConstraintEngine.hh"
@@ -14,8 +15,7 @@
 namespace PLASMA {
 
   static const std::vector<int> 
-  pathAsVector(const std::string & path)
-  {
+  pathAsVector(const std::string & path) {
     size_t path_back, path_front, path_end;
     std::vector<int> result;
     path_back = 0;
@@ -34,12 +34,14 @@ namespace PLASMA {
     return result;
   }
 
-  DbClientTransactionPlayer::DbClientTransactionPlayer(const DbClientId & client) : m_client(client), m_objectCount(0), m_varCount(0){}
+  DbClientTransactionPlayer::DbClientTransactionPlayer(const DbClientId & client)
+    : m_client(client), m_objectCount(0), m_varCount(0) {
+  }
 
-  DbClientTransactionPlayer::~DbClientTransactionPlayer(){}
+  DbClientTransactionPlayer::~DbClientTransactionPlayer() {
+  }
 
-  void DbClientTransactionPlayer::play(std::istream& is)
-  {
+  void DbClientTransactionPlayer::play(std::istream& is) {
     int txCounter = 0;
     check_error(is, "Invalid input stream for playing transactions.");
 
@@ -55,11 +57,11 @@ namespace PLASMA {
     }
   }
 
-  void DbClientTransactionPlayer::play(const DbClientTransactionLogId& txLog)
-  {
+  void DbClientTransactionPlayer::play(const DbClientTransactionLogId& txLog) {
     const std::list<TiXmlElement*>& transactions = txLog->getBufferedTransactions();
     for (std::list<TiXmlElement*>::const_iterator it = transactions.begin();
-         it != transactions.end(); ++it) {
+         it != transactions.end();
+         ++it) {
       const TiXmlElement& tx = **it;
       processTransaction(tx);
     }
@@ -68,51 +70,48 @@ namespace PLASMA {
   void DbClientTransactionPlayer::processTransaction(const TiXmlElement & element) {
     static unsigned int sl_txCount(0);
     sl_txCount++;
-      const char * tagname = element.Value();
-      if (strcmp(tagname, "class") == 0) {
-        playDefineClass(element);
-      } else if (strcmp(tagname, "enum") == 0) {
-        playDefineEnumeration(element);
-      } else if (strcmp(tagname, "compat") == 0) {
-//        playDefineCompat(element);
-      } else if (strcmp(tagname, "var") == 0) {
-        playVariableCreated(element);
-      } else if (strcmp(tagname, "new") == 0) {
-        playObjectCreated(element);
-      } else if (strcmp(tagname, "goal") == 0) {
-        playTokenCreated(element);
-      } else if (strcmp(tagname, "constrain") == 0) {
-        playConstrained(element);
-      } else if (strcmp(tagname, "free") == 0) {
-        playFreed(element);
-      } else if (strcmp(tagname, "activate") == 0) {
-        playActivated(element);
-      } else if (strcmp(tagname, "merge") == 0) {
-        playMerged(element);
-      } else if (strcmp(tagname, "reject") == 0) {
-        playRejected(element);
-      } else if (strcmp(tagname, "cancel") == 0) {
-        playCancelled(element);
-      } else if (strcmp(tagname, "specify") == 0) {
-        playVariableSpecified(element);
-      } else if (strcmp(tagname, "reset") == 0) {
-        playVariableReset(element);
-      } else if (strcmp(tagname, "invoke") == 0) {
-        playInvokeConstraint(element);
-      } else if (strcmp(tagname, "nddl") == 0) {
-        for (TiXmlElement * child_el = element.FirstChildElement() ;
-             child_el != NULL ; child_el = child_el->NextSiblingElement()) {
-          processTransaction(*child_el);
-        }
-      } else {
-        check_error(ALWAYS_FAILS);
+    const char * tagname = element.Value();
+    if (strcmp(tagname, "class") == 0) {
+      playDefineClass(element);
+    } else if (strcmp(tagname, "enum") == 0) {
+      playDefineEnumeration(element);
+    } else if (strcmp(tagname, "compat") == 0) {
+      // playDefineCompat(element);
+    } else if (strcmp(tagname, "var") == 0) {
+      playVariableCreated(element);
+    } else if (strcmp(tagname, "new") == 0) {
+      playObjectCreated(element);
+    } else if (strcmp(tagname, "goal") == 0) {
+      playTokenCreated(element);
+    } else if (strcmp(tagname, "constrain") == 0) {
+      playConstrained(element);
+    } else if (strcmp(tagname, "free") == 0) {
+      playFreed(element);
+    } else if (strcmp(tagname, "activate") == 0) {
+      playActivated(element);
+    } else if (strcmp(tagname, "merge") == 0) {
+      playMerged(element);
+    } else if (strcmp(tagname, "reject") == 0) {
+      playRejected(element);
+    } else if (strcmp(tagname, "cancel") == 0) {
+      playCancelled(element);
+    } else if (strcmp(tagname, "specify") == 0) {
+      playVariableSpecified(element);
+    } else if (strcmp(tagname, "reset") == 0) {
+      playVariableReset(element);
+    } else if (strcmp(tagname, "invoke") == 0) {
+      playInvokeConstraint(element);
+    } else if (strcmp(tagname, "nddl") == 0) {
+      for (TiXmlElement * child_el = element.FirstChildElement() ;
+           child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+        processTransaction(*child_el);
       }
-
-      m_client->propagate();
+    } else
+      check_error(ALWAYS_FAILS);
+    m_client->propagate();
   }
 
-  void DbClientTransactionPlayer::playDefineClass(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playDefineClass(const TiXmlElement & element) {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
     
@@ -120,8 +119,7 @@ namespace PLASMA {
     m_classes.push_back(std_name);
   }
 
-  void DbClientTransactionPlayer::playDefineEnumeration(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playDefineEnumeration(const TiXmlElement & element) {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
 
@@ -129,8 +127,7 @@ namespace PLASMA {
     m_enumerations.push_back(std_name);
   }
 
-  void DbClientTransactionPlayer::playVariableCreated(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playVariableCreated(const TiXmlElement & element) {
     const char * type = element.Attribute("type");
     check_error(type != NULL);
     const char * name = element.Attribute("name");
@@ -593,8 +590,7 @@ namespace PLASMA {
   //! XML input functions
 
   const AbstractDomain * 
-  DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element, const char * name)
-  {
+  DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element, const char * name) {
     static unsigned int sl_counter(0);
     sl_counter++;
     const char * tag = element.Value();
@@ -603,47 +599,56 @@ namespace PLASMA {
     if (strcmp(tag, "new") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
-      return new ObjectDomain(xmlAsValue(element, name), type);
+      return(new ObjectDomain(xmlAsValue(element, name), type));
     }
     if (strcmp(tag, "id") == 0) {
       const char * name = element.Attribute("name");
       ConstrainedVariableId var = parseVariable(name);
       check_error(var.isValid());
-      return var->baseDomain().copy();
+      return(var->baseDomain().copy());
     }
-    if (strcmp(tag, "set") == 0) {
-      return xmlAsEnumeratedDomain(element);
-    }
-    if (strcmp(tag, "interval") == 0) {
-      return xmlAsIntervalDomain(element);
+    if (strcmp(tag, "set") == 0)
+      return(xmlAsEnumeratedDomain(element));
+    if (strcmp(tag, "interval") == 0)
+      return(xmlAsIntervalDomain(element));
+    if (strcmp(tag, "value") == 0) {
+      // New XML style for simple types.
+      const char * type = element.Attribute("type");
+      check_error(type != NULL, "missing type for domain in transaction XML");
+      const char * name = element.Attribute("name");
+      check_error(name != NULL, "missing name for domain in transaction XML");
+      AbstractDomain * domain = TypeFactory::baseDomain(type).copy();
+      check_error(domain != 0, "unknown type, lack of memory, or other problem with domain in transaction XML");
+      domain->set(TypeFactory::createValue(type, name));
+      return(domain);
     }
     const char * value_st = element.Attribute("value");
     check_error(value_st != NULL);
-    if ((strcmp(tag, "bool") == 0) || (strcmp(tag, "BOOL") == 0) ||
-        (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) ||
-        (strcmp(tag, "float") == 0) || (strcmp(tag, "REAL_INTERVAL") == 0) ||
-        (strcmp(tag, "string") == 0) || (strcmp(tag, "STRING_ENUMERATION") == 0)) {
+    LabelStr tLS(tag);
+    if ((strcmp(tag, "bool") == 0) || (strcmp(tag, "BOOL") == 0) || (tLS == BoolDomain::getDefaultTypeName()) ||
+        (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) || (tLS == IntervalIntDomain::getDefaultTypeName()) ||
+        (strcmp(tag, "float") == 0) || (strcmp(tag, "REAL_INTERVAL") == 0) || (tLS == IntervalDomain::getDefaultTypeName()) ||
+        (strcmp(tag, "string") == 0) || (strcmp(tag, "STRING_ENUMERATION") == 0) || (tLS == StringDomain::getDefaultTypeName())) {
       AbstractDomain * domain = TypeFactory::baseDomain(tag).copy();
       domain->set(TypeFactory::createValue(tag, value_st));
-      return domain;
+      return(domain);
     }
     if (strcmp(tag, "symbol") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
       AbstractDomain * domain = TypeFactory::baseDomain(type).copy();
       domain->set(TypeFactory::createValue(tag, value_st));
-      return domain;
+      return(domain);
     }
 
     check_error(strcmp(tag, "object") == 0);
     ObjectId object = m_client->getObject(value_st);
     check_error(object.isValid());
-    return new ObjectDomain(object, object->getType().c_str());
+    return(new ObjectDomain(object, object->getType().c_str()));
   }
 
   IntervalDomain *
-  DbClientTransactionPlayer::xmlAsIntervalDomain(const TiXmlElement & element)
-  {
+  DbClientTransactionPlayer::xmlAsIntervalDomain(const TiXmlElement & element) {
     const char * type_st = element.Attribute("type");
     check_error(type_st != NULL);
     const char * min_st = element.Attribute("min");
@@ -659,69 +664,81 @@ namespace PLASMA {
   }
   
   EnumeratedDomain *
-  DbClientTransactionPlayer::xmlAsEnumeratedDomain(const TiXmlElement & element)
-  {
+  DbClientTransactionPlayer::xmlAsEnumeratedDomain(const TiXmlElement & element) {
     enum { ANY, BOOL, INT, FLOAT, STRING, SYMBOL, OBJECT } type = ANY;
-    const char * typeName = NULL;
+    std::string typeName;
     // determine most specific type
     for (TiXmlElement * child_el = element.FirstChildElement() ;
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
-      if (strcmp(child_el->Value(), "bool") == 0) {
+      std::string thisType;
+      if (strcmp(child_el->Value(), "value") == 0)
+        // New style XML for simple types: the type is within and tag is always 'value'
+        thisType = child_el->Attribute("type");
+      else
+        // Non-simple type or old style XML for a simple type: type is the tag and/or within (e.g., specific type is within if symbol even old style)
+        thisType = child_el->Value();
+      check_error(thisType != "", "no type for domain in XML");
+      if (strcmp(thisType.c_str(), "bool") == 0 ||
+          strcmp(thisType.c_str(), "BOOL") == 0 ||
+          strcmp(thisType.c_str(), BoolDomain::getDefaultTypeName().toString().c_str()) == 0) {
         if (type == ANY) {
           type = BOOL;
           typeName = "bool";
         }
-        if (type == BOOL) {
+        if (type == BOOL)
           continue;
-        }
       }
-      if (strcmp(child_el->Value(), "int") == 0) {
+      if (strcmp(thisType.c_str(), "int") == 0 ||
+          strcmp(thisType.c_str(), "INT") == 0 ||
+          strcmp(thisType.c_str(), IntervalIntDomain::getDefaultTypeName().toString().c_str()) == 0) {
         if (type == ANY) {
           type = INT;
           typeName = "int";
         }
-        if ((type == FLOAT) || (type == INT)) {
+        if ((type == FLOAT) || (type == INT))
           continue;
-        }
       }
-      if (strcmp(child_el->Value(), "float") == 0) {
+      if (strcmp(thisType.c_str(), "float") == 0 ||
+          strcmp(thisType.c_str(), "FLOAT") == 0 ||
+          strcmp(thisType.c_str(), IntervalDomain::getDefaultTypeName().toString().c_str()) == 0) {
         if ((type == ANY) || (type == INT)) {
           type = FLOAT;
           typeName = "float";
         }
-        if (type == FLOAT) {
+        if (type == FLOAT)
           continue;
-        }
       }
-      if (strcmp(child_el->Value(), "string") == 0) {
+      if (strcmp(thisType.c_str(), "string") == 0 ||
+          strcmp(thisType.c_str(), "STRING") == 0 ||
+          strcmp(thisType.c_str(), StringDomain::getDefaultTypeName().toString().c_str()) == 0) {
         if (type == ANY) {
           type = STRING;
           typeName = "string";
         }
-        if (type == STRING) {
+        if (type == STRING)
           continue;
-        }
       }
-      if (strcmp(child_el->Value(), "symbol") == 0) {
+      if (strcmp(thisType.c_str(), "symbol") == 0) {
         if (type == ANY) {
           type = SYMBOL;
           typeName = child_el->Attribute("type");
         }
         if (type == SYMBOL) {
-          check_error(strcmp(typeName, child_el->Attribute("type")) == 0,
+          check_error(strcmp(typeName.c_str(), child_el->Attribute("type")) == 0,
                       "symbols from different types in the same enumerated set");
           continue;
         }
       }
-//      if (strcmp(child_el->Value(), "object") == 0) {
+//      if (strcmp(thisType.c_str(), "object") == 0) {
 //        if (type == ANY) {
 //          type = OBJECT;
 //        }
-//        if (type == OBJECT) {
+//        if (type == OBJECT)
+//          //!!This needs a similar type check to SYMBOL, just above (but more complex due to inheritance?)
 //          continue;
-//        }
 //      }
-      check_error(ALWAYS_FAILS, "unknown type for value in an enumerated set");
+      std::cout << __FILE__ << ':' << __LINE__ << ": XML domain info: typeName=\"" << typeName << "\" thisType=\"" << thisType << "\"\n";
+      check_error(ALWAYS_FAILS, "unknown or inappropriately mixed type(s) for value(s) in an enumerated set");
     }
     check_error(type != ANY);
     // gather the values
@@ -729,35 +746,33 @@ namespace PLASMA {
     for (TiXmlElement * child_el = element.FirstChildElement() ;
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
       const char * value_st = child_el->Attribute("value");
+      if (value_st == NULL) // Check for the new style XML for simple types
+        value_st = child_el->Attribute("name");
       check_error(value_st != NULL);
       switch (type) {
-      case BOOL: case INT: case FLOAT:
-      case STRING: case SYMBOL: {
-        values.push_back(TypeFactory::createValue(typeName, value_st));
-        break;
-      }
-      case OBJECT: {
-        values.push_back(m_client->getObject(value_st));
-        break;
-      }
-      default:
-        check_error(ALWAYS_FAILS);
+       case BOOL: case INT: case FLOAT: case STRING: case SYMBOL:
+         values.push_back(TypeFactory::createValue(typeName.c_str(), value_st));
+         break;
+       case OBJECT:
+         values.push_back(m_client->getObject(value_st));
+         break;
+       default:
+         check_error(ALWAYS_FAILS);
       }
     }
     // return the domain
     switch (type) {
     case BOOL: case INT: case FLOAT:
-      return new EnumeratedDomain(values, true, typeName);
+      return(new EnumeratedDomain(values, true, typeName.c_str()));
     case STRING: case SYMBOL: case OBJECT:
-      return new EnumeratedDomain(values, false, typeName);
+      return(new EnumeratedDomain(values, false, typeName.c_str()));
     default:
       check_error(ALWAYS_FAILS);
-      return NULL;
+      return(0);
     }
   }
 
-  double DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value, const char * name)
-  {
+  double DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value, const char * name) {
     const char * tag = value.Value();
     if (strcmp(tag, "new") == 0) {
       std::string gen_name;
@@ -773,43 +788,49 @@ namespace PLASMA {
       for (TiXmlElement * child_el = value.FirstChildElement() ;
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
         const AbstractDomain * domain = xmlAsAbstractDomain(*child_el);
-
         arguments.push_back(ConstructorArgument(domain->getTypeName(), domain));
       }
       ObjectId object = m_client->createObject(type, name, arguments);
       check_error(object.isValid());
 
       // Now deallocate domains created for arguments
-      for(std::vector<ConstructorArgument>::const_iterator it = arguments.begin(); it != arguments.end(); ++it){
+      for (std::vector<ConstructorArgument>::const_iterator it = arguments.begin(); it != arguments.end(); ++it)
         delete it->second;
-      }
-
       return (double)object;
+    }
+    if (strcmp(tag, "value") == 0) {
+      // New style XML for simple types.
+      const char * type_st = value.Attribute("type");
+      check_error(type_st != NULL, "missing type for value in transaction XML");
+      const char * name_st = value.Attribute("name");
+      check_error(name_st != NULL, "missing name for value in transaction XML");
+      return(TypeFactory::createValue(type_st, name_st));
     }
     const char * value_st = value.Attribute("value");
     check_error(value_st != NULL, "missing value in transaction xml");
-    if ((strcmp(tag, "bool") == 0) || (strcmp(tag, "BOOL") == 0) ||
-        (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) ||
-        (strcmp(tag, "float") == 0) || (strcmp(tag, "REAL_INTERVAL") == 0) ||
-        (strcmp(tag, "string") == 0) || (strcmp(tag, "STRING_ENUMERATION") == 0)) {
-      return TypeFactory::createValue(tag, value_st);
+    LabelStr tLS(tag);
+    if ((strcmp(tag, "bool") == 0) || (strcmp(tag, "BOOL") == 0) || (tLS == BoolDomain::getDefaultTypeName()) ||
+        (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) || (tLS == IntervalIntDomain::getDefaultTypeName()) ||
+        (strcmp(tag, "float") == 0) || (strcmp(tag, "REAL_INTERVAL") == 0) || (tLS == IntervalDomain::getDefaultTypeName()) ||
+        (strcmp(tag, "string") == 0) || (strcmp(tag, "STRING_ENUMERATION") == 0) || (tLS == StringDomain::getDefaultTypeName())) {
+      // Old style XML for simple types.
+      return(TypeFactory::createValue(tag, value_st));
     }
     if (strcmp(tag, "symbol") == 0) {
       const char * type_st = value.Attribute("type");
       check_error(type_st != NULL, "missing type for symbol '" + std::string(value_st) + "' in transaction xml");
-      return TypeFactory::createValue(type_st, value_st);
+      return(TypeFactory::createValue(type_st, value_st));
     }
     if (strcmp(tag, "object") == 0) {
       ObjectId object = m_client->getObject(value_st);
       check_error(object.isValid());
-      return (double)object;
+      return((double)object);
     }
     ObjectId object = m_client->getObject(value_st);
-    if (object != ObjectId::noId()) {
-      return (double)object;
-    }
+    if (object != ObjectId::noId())
+      return((double)object);
     check_error(ALWAYS_FAILS);
-    return 0;
+    return(0);
   }
 
   ConstrainedVariableId DbClientTransactionPlayer::xmlAsVariable(const TiXmlElement & variable)
