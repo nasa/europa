@@ -20,7 +20,7 @@ namespace Prototype {
   }
 
   EnumeratedDomain::EnumeratedDomain(double value, 
-				     const DomainListenerId& listener = DomainListenerId::noId())
+				     const DomainListenerId& listener)
     :AbstractDomain(false, true, listener){
     insert(value);
     close();
