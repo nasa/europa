@@ -16,13 +16,14 @@ void initConstraintLibrary() {
     REGISTER_NARY(AddMultEqualConstraint, "AddMultEqual", "Default");
     REGISTER_NARY(EqualSumConstraint, "EqualSum", "Default");
     REGISTER_NARY(LessOrEqThanSumConstraint, "LessOrEqThanSum", "Default");
+    REGISTER_NARY(CondAllSameConstraint, "CondAllSame", "Default");
+    REGISTER_NARY(CondAllDiffConstraint, "CondAllDiff", "Default");
     s_runAlready = true;
   }
 }
 
-bool loggingEnabled(){
-  static const char* TRUE_VALUE = "1";
+bool loggingEnabled() {
   static const char *envStr = getenv("PROTOTYPE_ENABLE_LOGGING");
-  static const bool enabled = (envStr != NULL && strcmp(envStr, TRUE_VALUE) == 0);
-  return enabled;
+  static const bool enabled = (envStr != NULL && atoi(envStr) != 0);
+  return(enabled);
 }
