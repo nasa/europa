@@ -181,6 +181,19 @@ rule RunModuleMain {
 ################
 # internal rules
 
+rule FRemoveItem {
+  local list = $(1) ;
+  local item = $(2) ;
+
+  local result ;
+  for i in $(list) {
+    if $(i) != $(item) {
+      result += $(i) ;
+    }
+  }
+  return $(result) ;
+}
+
 rule FLinkModules {
   local module = $(1) ;
 
@@ -192,13 +205,12 @@ rule FLinkModules {
   local found ;
   while $(modules) {
     local mod = $(modules[1]) ;
-    if ! $(mod) in $(found) {
-      if $(TRACE_MODULE) = TRUE {
-        Echo - $(mod) ;
-      }
-      found += $(mod) ;
-      modules += [ on $(mod:G=module) return $(LINK_MODULES:G=) ] ;
+    if $(TRACE_MODULE) = TRUE {
+      Echo - $(mod) ;
     }
+    found = [ FRemoveItem $(found) : $(mod) ] ;
+    found += $(mod) ;
+    modules += [ on $(mod:G=module) return $(LINK_MODULES:G=) ] ;
     modules = $(modules[2-]) ;
   }
 
