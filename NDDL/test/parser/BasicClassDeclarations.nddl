@@ -6,9 +6,9 @@ enum floatRange1 [1.2 4]
 enum floatRange2 [2 4.2]
 enum floatRange3 [2.3 4.5]
 enum userValueType1 { USR_115,  USR_230 }
-enum userValueType2 {'USR_115', USR_230 }
-enum userValueType3 { USR_115, 'USR_230'}
-enum userValueType4 {'USR_115','USR_230'}
+enum userValueType2 {'USR_116', USR_231 }
+enum userValueType3 { USR_117, 'USR_232'}
+enum userValueType4 {'USR_118','USR_233'}
 
 class SuperClass {
 }
@@ -254,7 +254,7 @@ class Class7 {
 
 class Class8 {
     string y;
-    Class8(string y) {
+    Class8(string x) {
         y = x;
     }
 }
@@ -266,7 +266,7 @@ class Class9 {
 
 class Class10 {
     userValueType1 y;
-    Class10(userValueType1 y) {
+    Class10(userValueType1 x) {
         y = x;
     }
 }
@@ -361,7 +361,7 @@ class Class23 {
 
 class Class24 {
     string y;
-    Class24(string y = "some string") {
+    Class24(string x = "some string") {
         y = x;
     }
 }
@@ -373,7 +373,7 @@ class Class25 {
 
 class Class26 {
     userValueType1 y;
-    Class26(userValueType1 y = USR_115) {
+    Class26(userValueType1 x = USR_115) {
         y = x;
     }
 }
@@ -385,7 +385,7 @@ class Class27 {
 
 class Class28 {
     userValueType1 y;
-    Class28(userValueType1 y = 'USR_115') {
+    Class28(userValueType1 x = 'USR_115') {
         y = x;
     }
 }
