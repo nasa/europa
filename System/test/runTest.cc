@@ -51,14 +51,12 @@
 #include "DecisionPoint.hh"
 #include "EUROPAHeuristicStrategy.hh"
 
-// For testing planner decisions
-#include "PlannerDecisionWriter.hh"
-#include "DecisionReplayer.hh"
-
 // In case we want to print out the plan database
 #include "PlanDatabaseWriter.hh"
 
 // Transactions
+#include "PlannerDecisionWriter.hh"
+#include "../PlanDatabase/DbClientTransactionPlayer.hh"
 #include "../PlanDatabase/DbClientTransactionTokenMapper.hh"
 #include "../PlanDatabase/DbClientTransactionLog.hh"
 
@@ -248,7 +246,7 @@ int main(int argc, const char ** argv){
       new PlanWriter::PartialPlanWriter(planSystem.planDatabase, planSystem.constraintEngine);
     }
   
-    int initial_key = NDDL::initialize(planSystem.planDatabase);
+    NDDL::initialize(planSystem.planDatabase);
 
     // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
     std::list<ObjectId> objects;
@@ -265,8 +263,10 @@ int main(int argc, const char ** argv){
 
     // planner decisions
     std::cout << "Replaying Planner Decisions..." << std::endl;
-    DecisionReplayer replayer(planSystem.planDatabase, planSystem.tokenMapper);
-    replayer.replay(closedDecisions);
+    DbClientTransactionPlayer player(planSystem.planDatabase, planSystem.tokenMapper);
+    std::stringstream transactions;
+    transactions << closedDecisions << ends;
+    player.play(transactions);
 
     std::cout << "Replay Database:" << std::endl;
     PlanDatabaseWriter::write(planSystem.planDatabase, std::cout);

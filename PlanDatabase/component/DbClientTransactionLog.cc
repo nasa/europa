@@ -123,11 +123,13 @@ namespace Prototype {
       } else {
         check_error(ALWAYS_FAILS);
       }
+    } else {
+      check_error(ALWAYS_FAILS);
     }
     if (variable->getIndex() != ConstrainedVariable::NO_INDEX) {
       var.SetAttribute("index", variable->getIndex());
     } else {
-      var.SetAttribute("key", variable->getKey());
+      check_error(ALWAYS_FAILS);
     }
     element->InsertEndChild(var);
     element->LinkEndChild(abstractDomainAsXml(&variable->specifiedDomain()));

@@ -2,6 +2,7 @@
 #include "DbClientTransactionTokenMapper.hh"
 #include "DbClient.hh"
 #include "PlanDatabase.hh"
+#include "Token.hh"
 #include "../TinyXml/tinyxml.h"
 #include "../ConstraintEngine/ConstraintEngine.hh"
 
@@ -44,6 +45,10 @@ namespace Prototype {
   {
     TiXmlElement element("");
     while (!is.eof()) {
+      if (is.peek() != '<') {
+        is.get(); // discard characters up to '<'
+        continue;
+      }
       m_db->getConstraintEngine()->propagate();
       check_error(m_db->getConstraintEngine()->constraintConsistent());
       is >> element;
@@ -69,6 +74,7 @@ namespace Prototype {
       } else {
         check_error(ALWAYS_FAILS);
       }
+      element.Clear();
     }
   }
 
@@ -86,7 +92,7 @@ namespace Prototype {
   void DbClientTransactionPlayer::playObjectCreated(const TiXmlElement & element)
   {
     std::stringstream name;
-    name << "$OBJECT[" << m_objectCount++ << "]" << ends;
+    name << "$OBJECT[" << m_objectCount++ << "]" << std::ends;
     const char * type = element.Attribute("name");
     check_error(type != NULL);
     m_client->createObject(LabelStr(type), LabelStr(name.str()));
@@ -98,7 +104,8 @@ namespace Prototype {
     if (name == NULL) {
       m_client->close();
     } else {
-      m_client->close(LabelStr(name));
+      check_error(ALWAYS_FAILS); // close object type not implemented yet
+//      m_client->close(LabelStr(name));
     }
   }
 
@@ -115,15 +122,15 @@ namespace Prototype {
   {
     TiXmlElement * object_el = element.FirstChildElement();
     check_error(object_el != NULL);
-    check_error(strcmp(object_el->Value(), "object"));
-    const char * name = object_el->Attribute("name");
+    check_error(strcmp(object_el->Value(), "object") == 0);
+    const char * name = object_el->Attribute("value");
     check_error(name != NULL);
     ObjectId object = m_db->getObject(LabelStr(name));
     check_error(object.isValid());
 
     TiXmlElement * token_el = object_el->NextSiblingElement();
     check_error(token_el != NULL);
-    check_error(strcmp(token_el->Value(), "token"));
+    check_error(strcmp(token_el->Value(), "token") == 0);
     const char * path = token_el->Attribute("path");
     check_error(path != NULL);
     TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
@@ -132,7 +139,7 @@ namespace Prototype {
     TiXmlElement * successor_el = token_el->NextSiblingElement();
     TokenId successor = TokenId::noId();
     if (successor_el != NULL) {
-      check_error(strcmp(successor_el->Value(), "token"));
+      check_error(strcmp(successor_el->Value(), "token") == 0);
       const char * successor_path = successor_el->Attribute("path");
       check_error(successor_path != NULL);
       successor = m_tokenMapper->getTokenByPath(pathAsVector(successor_path));
@@ -146,7 +153,7 @@ namespace Prototype {
   {
     TiXmlElement * token_el = element.FirstChildElement();
     check_error(token_el != NULL);
-    check_error(strcmp(token_el->Value(), "token"));
+    check_error(strcmp(token_el->Value(), "token") == 0);
     const char * path = token_el->Attribute("path");
     check_error(path != NULL);
     TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
@@ -158,7 +165,7 @@ namespace Prototype {
   {
     TiXmlElement * token_el = element.FirstChildElement();
     check_error(token_el != NULL);
-    check_error(strcmp(token_el->Value(), "token"));
+    check_error(strcmp(token_el->Value(), "token") == 0);
     const char * path = token_el->Attribute("path");
     check_error(path != NULL);
     TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
@@ -166,7 +173,7 @@ namespace Prototype {
 
     TiXmlElement * active_el = token_el->NextSiblingElement();
     check_error(active_el != NULL);
-    check_error(strcmp(active_el->Value(), "token"));
+    check_error(strcmp(active_el->Value(), "token") == 0);
     const char * active_path = active_el->Attribute("path");
     check_error(active_path != NULL);
     TokenId active_token = m_tokenMapper->getTokenByPath(pathAsVector(active_path));
@@ -179,7 +186,7 @@ namespace Prototype {
   {
     TiXmlElement * token_el = element.FirstChildElement();
     check_error(token_el != NULL);
-    check_error(strcmp(token_el->Value(), "token"));
+    check_error(strcmp(token_el->Value(), "token") == 0);
     const char * path = token_el->Attribute("path");
     check_error(path != NULL);
     TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
@@ -189,6 +196,57 @@ namespace Prototype {
 
   void DbClientTransactionPlayer::playVariableSpecified(const TiXmlElement & element)
   {
+    TiXmlElement * var_el = element.FirstChildElement();
+    check_error(var_el != NULL);
+    check_error(strcmp(var_el->Value(), "variable") == 0);
+
+    const char * path = var_el->Attribute("token");
+    check_error(path != NULL);
+    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    check_error(token.isValid());
+
+    int index;
+    const char * i = var_el->Attribute("index", &index);
+    check_error(i != NULL);
+    check_error(0 <= index);
+    check_error((unsigned)index < token->getVariables().size());
+    ConstrainedVariableId variable = token->getVariables()[index];
+
+    TiXmlElement * value_el = var_el->NextSiblingElement();
+    check_error(value_el != NULL);
+    double value;
+    if (strcmp(value_el->Value(), "bool") == 0) {
+      const char * value_st = value_el->Attribute("value");
+      check_error(value_st != NULL);
+      if (strcmp(value_st, "true") == 0) {
+        value = 1;
+      } else if (strcmp(value_st, "false") == 0) {
+        value = 0;
+      } else {
+        check_error(ALWAYS_FAILS);
+      }
+    } else if (strcmp(value_el->Value(), "int") == 0) {
+      int i;
+      const char * value_st = value_el->Attribute("value", &i);
+      check_error(value_st != NULL);
+      value = i;
+    } else if (strcmp(value_el->Value(), "float") == 0) {
+      const char * value_st = value_el->Attribute("value", &value);
+      check_error(value_st != NULL);
+    } else if (strcmp(value_el->Value(), "string") == 0) {
+      const char * value_st = value_el->Attribute("value");
+      check_error(value_st != NULL);
+      value = LabelStr(value_st);
+    } else if (strcmp(value_el->Value(), "object") == 0) {
+      const char * value_st = value_el->Attribute("value");
+      check_error(value_st != NULL);
+      ObjectId object = m_db->getObject(LabelStr(value_st));
+      check_error(object.isValid());
+      value = (double)object;
+    } else {
+      check_error(ALWAYS_FAILS);
+    }
+    m_client->specify(variable, value);    
   }
 
 }
