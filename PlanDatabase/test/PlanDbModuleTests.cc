@@ -204,7 +204,7 @@ namespace PLASMA {
 
     // Special designations for temporal relations
     REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
-    REGISTER_CONSTRAINT(LessThanEqualConstraint, "before", "Default");
+    REGISTER_CONSTRAINT(LessThanEqualConstraint, "precedes", "Default");
     REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
     
     // Support for Token implementations
@@ -1016,7 +1016,7 @@ namespace PLASMA {
     token3.close();
 
     // create a test constraint between t2 and t3
-    ConstraintLibrary::createConstraint(LabelStr("before"),ce,makeScope(token2.getEnd(),token3.getStart()));
+    ConstraintLibrary::createConstraint(LabelStr("precedes"),ce,makeScope(token2.getEnd(),token3.getStart()));
 
     assert(ce->propagate());
 

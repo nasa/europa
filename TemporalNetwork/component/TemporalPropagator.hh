@@ -7,6 +7,8 @@
 #include "TimepointWrapper.hh"
 #include "TokenVariable.hh"
 #include "IntervalIntDomain.hh"
+#include "TemporalConstraints.hh"
+
 #include <set>
 
 namespace PLASMA {
@@ -62,7 +64,7 @@ namespace PLASMA {
     void addTemporalConstraint(const ConstraintId& constraint);
 
     inline static const TimepointId& getTimepoint(const TempVarId& var) {
-      check_error(var->getIndex() != DURATION_VAR_INDEX);
+      check_error(var->getIndex() != TemporalDistanceConstraint::DISTANCE_VAR_INDEX);
       check_error(var->getExternalEntity().isValid());
       const TimepointWrapperId wrapper(var->getExternalEntity());
       return wrapper->getTimepoint();
@@ -80,6 +82,11 @@ namespace PLASMA {
      * @brief update variables in the constraint engine with changes due to Temporal Propagation
      */
     void updateTempVar();
+
+    /**
+     * @brief Confirm that var is a start or and end temporal variable that needs to be updated
+     */
+    bool isUpdatableVar(const TempVarId& var) const;
 
     /**
      * @brief Update the time point in the tnet from the given CE variable
@@ -100,7 +107,7 @@ namespace PLASMA {
      * @return TemporalConstraintId::noId() if the constrant is not deleted. Otherwise it will return the
      * new replacement constraint.
      */
-    TemporalConstraintId updateConstraint(const TempVarId& var,
+    TemporalConstraintId updateConstraint(const ConstrainedVariableId& var,
 					  const TemporalConstraintId& tnetConstraint, 
 					  Time lb,
 					  Time ub);
@@ -129,8 +136,6 @@ namespace PLASMA {
     std::set<EntityId> m_wrappedTimepoints;
     std::set<TemporalNetworkListenerId> m_listeners;
 
-    static const int DURATION_VAR_INDEX = 2; /*!< Position in token vector of variables */
-    static const LabelStr& durationConstraintName();
   };
 }
 #endif

@@ -8,6 +8,7 @@
 #include "ConstrainedVariable.hh"
 #include "Constraint.hh"
 #include "Utils.hh"
+#include "TemporalConstraints.hh"
 
 // @todo: there are cases where we may be able to fail early during the
 // mapping from the constraint engine to the temporal network.  In these
@@ -69,11 +70,13 @@ namespace PLASMA {
   void TemporalPropagator::handleConstraintAdded(const ConstraintId& constraint){
     const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
     m_changedConstraints.insert(constraint);
-    buffer(scope[0]);
-    if (constraint->getName() == durationConstraintName())
-      buffer(scope[2]);
+    if (scope.size() == 3) {//Ternary distance constraint
+      buffer(scope[TemporalDistanceConstraint::SRC_VAR_INDEX]);
+      buffer(scope[TemporalDistanceConstraint::DEST_VAR_INDEX]);
+    }
     else {
-      buffer(scope[1]);
+      buffer(scope[ConcurrentConstraint::SRC_VAR_INDEX]);
+      buffer(scope[ConcurrentConstraint::DEST_VAR_INDEX]);
     }
   }
 
@@ -93,16 +96,24 @@ namespace PLASMA {
 
   void TemporalPropagator::handleConstraintActivated(const ConstraintId& constraint){
     m_changedConstraints.insert(constraint);
-
+    ConstrainedVariableId var;
     const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
-    for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
-      const ConstrainedVariableId& var = *it;
-      check_error(var.isValid());
+    if (scope.size() == 3) {//Ternary distance constraint
+      var = scope[TemporalDistanceConstraint::SRC_VAR_INDEX];
+      buffer(var);
+      m_activeVariables.insert(std::make_pair<int, TempVarId>(var->getKey(),var)); 
+      var = scope[TemporalDistanceConstraint::DEST_VAR_INDEX];
+      buffer(var);
+      m_activeVariables.insert(std::make_pair<int, TempVarId>(var->getKey(),var)); 
 
-      if(var->getIndex() != DURATION_VAR_INDEX){ // If it is not a duration variable
-	buffer(var); // Buffer to update the Timepoint
-	m_activeVariables.insert(std::make_pair<int, TempVarId>(var->getKey(),var)); // Buffer for update back to the TempVar
-      }
+    }
+    else {
+      var = scope[ConcurrentConstraint::SRC_VAR_INDEX];
+      buffer(var);
+      m_activeVariables.insert(std::make_pair<int, TempVarId>(var->getKey(),var)); 
+      var = scope[ConcurrentConstraint::DEST_VAR_INDEX];
+      buffer(var);
+      var = scope[ConcurrentConstraint::DEST_VAR_INDEX];
     }
   }
 
@@ -133,12 +144,13 @@ namespace PLASMA {
 					      const DomainListener::ChangeType& changeType){
     check_error(constraint->isActive());
 
-    if(constraint->getName() == durationConstraintName())
+    if(TemporalDistanceConstraintId::convertable(constraint))
       m_changedConstraints.insert(constraint);
 
     // Only buffer change for start or end variables
-    if(variable->getIndex() != DURATION_VAR_INDEX)
+    if(variable != constraint->getScope()[TemporalDistanceConstraint::DISTANCE_VAR_INDEX]) {
       m_changedVariables.insert(std::make_pair<int,TempVarId>(variable->getKey(),variable));
+    }
   }
 
   void TemporalPropagator::execute(){
@@ -207,17 +219,17 @@ namespace PLASMA {
     Time lb=0;
     Time ub=0;
 
-    if (constraint->getName() == durationConstraintName()) {    
-      start = constraint->getScope()[0];
-      TempVarId duration = constraint->getScope()[1];
-      end = constraint->getScope()[2];
+    if (TemporalDistanceConstraintId::convertable(constraint)) {
+      start = constraint->getScope()[TemporalDistanceConstraint::SRC_VAR_INDEX];
+      end = constraint->getScope()[TemporalDistanceConstraint::DEST_VAR_INDEX];
+      ConstrainedVariableId distance = constraint->getScope()[TemporalDistanceConstraint::DISTANCE_VAR_INDEX];
 
-      lb = (Time) duration->lastDomain().getLowerBound();
-      ub = (Time) duration->lastDomain().getUpperBound();
+      lb = (Time) distance->lastDomain().getLowerBound();
+      ub = (Time) distance->lastDomain().getUpperBound();
     }
-    else if (constraint->getName() == LabelStr("concurrent")) {
-      start = constraint->getScope()[0];
-      end = constraint->getScope()[1];      
+    else if (ConcurrentConstraintId::convertable(constraint)) {
+      start = constraint->getScope()[ConcurrentConstraint::SRC_VAR_INDEX];
+      end = constraint->getScope()[ConcurrentConstraint::DEST_VAR_INDEX];      
       lb = 0;
       ub = 0;
     }
@@ -228,7 +240,7 @@ namespace PLASMA {
       ub = g_infiniteTime();
     }
     else {
-      check_error(ALWAYS_FAILS, "Adding an unknown constraint to the temporal propagator.");
+      check_error(ALWAYS_FAILS, "Adding an unknown " + constraint->getName().toString() + " constraint to the temporal propagator.");
     }
 
     const TimepointId& startTp = getTimepoint(start);
@@ -289,6 +301,19 @@ namespace PLASMA {
   }
 
 
+    /**
+     * @brief Confirm that var is a start or and end temporal variable that needs to be updated
+     */
+  bool TemporalPropagator::isUpdatableVar(const TempVarId& var) const {
+    if (TokenId::convertable(var->getParent())) {
+      TokenId token = var->getParent();
+      if (var == token->getStart() || var == token->getEnd())
+	return true;
+    }
+    return false;
+  }
+
+
   /**
    * @brief Updates the ConstrainedEngine variable for each active timepoint.
    */
@@ -296,7 +321,7 @@ namespace PLASMA {
     for(std::map<int,TempVarId>::const_iterator it = m_activeVariables.begin(); it != m_activeVariables.end(); ++it){
       TempVarId var = it->second;
       check_error(var.isValid());
-      check_error(var->getIndex() != DURATION_VAR_INDEX, "There is no corresponding timepoint for a duration variable");
+      check_error(isUpdatableVar(var), "There is no corresponding timepoint for a distance variable");
 
       const TimepointId& tp = getTimepoint(var);
       check_error(tp.isValid());
@@ -391,7 +416,7 @@ namespace PLASMA {
 
   void TemporalPropagator::updateTimepoint(const TempVarId& var){
     check_error(var.isValid());
-    check_error(var->getIndex() != DURATION_VAR_INDEX);
+    check_error(isUpdatableVar(var), var->getKey() + " is not a start or and end variable" );
     check_error(!var->getExternalEntity().isNoId());
 
     const TimepointId& tp = getTimepoint(var);
@@ -419,17 +444,18 @@ namespace PLASMA {
     // We should only handle changes for a duration constraint. Note that this may change
     // when we have variable distance constraints in the system. Should generalize the scheme
     // at that time.
-    if(constraint->getName() == durationConstraintName()){
-      const TempVarId& duration = constraint->getScope()[1];
+    if(TemporalDistanceConstraintId::convertable(constraint)) {
+      const ConstrainedVariableId& distance = constraint->getScope()[TemporalDistanceConstraint::DISTANCE_VAR_INDEX];
+      check_error(distance->lastDomain().getType() == AbstractDomain::INT_INTERVAL, constraint->getKey() + " is invalid")
       const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
       Time lbt=0, ubt=0;
       tnetConstraint->getBounds(lbt, ubt);
 
-      updateConstraint(duration, tnetConstraint, lbt, ubt);
+      updateConstraint(distance, tnetConstraint, lbt, ubt);
     }
   }
 
-  TemporalConstraintId TemporalPropagator::updateConstraint(const TempVarId& var, 
+  TemporalConstraintId TemporalPropagator::updateConstraint(const ConstrainedVariableId& var, 
 							    const TemporalConstraintId& tnetConstraint, 
 							    Time lbt,
 							    Time ubt){
@@ -486,15 +512,26 @@ namespace PLASMA {
     m_listeners.insert(listener);
   }
 
-  const LabelStr& TemporalPropagator::durationConstraintName(){
-    static const LabelStr sl_durationConstraintName("StartEndDurationRelation");
-    return sl_durationConstraintName;
-  }
+//   const LabelStr& TemporalPropagator::durationConstraintName(){
+//     static const LabelStr sl_durationConstraintName("StartEndDurationRelation");
+//     return sl_durationConstraintName;
+//   }
 
   bool TemporalPropagator::isValidForPropagation() const {
+    //The set of all constraints managed by this propagator must only be one of Precedes, Concurrent or TemporalDistance
+    for(std::list<ConstraintId>::const_iterator it = getConstraints().begin(); it != getConstraints().end(); ++it){
+      ConstraintId constraint = *it;
+      if (! TemporalDistanceConstraintId::convertable(constraint) 
+	  && ! PrecedesConstraintId::convertable(constraint) 
+	  && ! ConcurrentConstraintId::convertable(constraint))
+	return false;
+    }
+
     // The set of active variables should not be empty
-    if(m_activeVariables.empty())
+    if(m_activeVariables.empty()) {
+      std::cout << "Active variables empty" << std::endl;
       return false;
+    }
 
     // All buffers should only contain valid id's
     if(!allValid(m_activeVariables) ||
@@ -502,39 +539,49 @@ namespace PLASMA {
        !allValid(m_changedConstraints) ||
        !allValid(m_constraintsForDeletion) ||
        !allValid(m_variablesForDeletion) ||
-       !allValid(m_listeners))
+       !allValid(m_listeners)) {
+      std::cout << "buffers have something invalid" << std::endl; 
       return false;
+    }
 
     // For all buffered timepoints for deletion, none should have any dangling external entities. This is because
     // we will have already deleteed the Constraint for which this Constraint shadows it.
     for(std::set<TemporalConstraintId>::const_iterator it = m_constraintsForDeletion.begin(); it != m_constraintsForDeletion.end(); ++it){
       TemporalConstraintId shadow = *it;
-      if(!shadow->getExternalEntity().isNoId())
+      if(!shadow->getExternalEntity().isNoId()) {
+	std::cout << "Shadow is noid for deleted constraints" << std::endl;
 	return false;
+      }
     }
 
     // For all buffered constraints for deletion, none should have any dangling external entities. This is because
     // we will have already deleteed the TempVar for which this timepoint shadows it.
     for(std::set<TimepointId>::const_iterator it = m_variablesForDeletion.begin(); it != m_variablesForDeletion.end(); ++it){
       TimepointId timepoint = *it;
-      if(!timepoint->getExternalEntity().isNoId())
+      if(!timepoint->getExternalEntity().isNoId()) {
+	std::cout << "Shadow is noid for deleted variables" << std::endl;
 	return false;
+      }
     }
 
     // For all buffered TempVar's, it either has an external entity or it doesn't. No invalid one.
     // Should also ensure that ONLY start and end variables have external entities.
     for(std::map<int,TempVarId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
-      TempVarId var = it->second;
+      const TempVarId& var = it->second;
       if(!var->getExternalEntity().isNoId()){ // It must be a start or end variable
 
-	if(var->getIndex() == DURATION_VAR_INDEX) // Same for all types of tokens as it is set in the base
+	if(!isUpdatableVar(var)) { // Same for all types of tokens as it is set in the base
+	  std::cout << "changed variables contains a distance var" << std::endl;
 	  return false;
+	}
 
 	// Confirm the shadow is linked up coorrectly
 	TimepointWrapperId wrapper = var->getExternalEntity();
 	TimepointId shadow = wrapper->getTimepoint();
-	if(shadow->getExternalEntity() != var)
+	if(shadow->getExternalEntity() != var) {
+	  std::cout << "Shadow is not linked up correctly " << std::endl;
 	  return false;
+	}
       }
     }
 
@@ -544,8 +591,10 @@ namespace PLASMA {
       ConstraintId constraint = *it;
       if(!constraint->getExternalEntity().isNoId()){
 	EntityId shadow = constraint->getExternalEntity();
-	if(shadow->getExternalEntity() != constraint)
+	if(shadow->getExternalEntity() != constraint) {
+	  std::cout << "Shadow of constraints is not linked up" << std::endl;
 	  return false;
+	}
       }
     }
 

@@ -35,6 +35,15 @@ namespace PLASMA {
   class TimepointWrapper;
   typedef Id<TimepointWrapper> TimepointWrapperId;
 
+  class TemporalDistanceConstraint;
+  typedef Id<TemporalDistanceConstraint> TemporalDistanceConstraintId;
+
+  class ConcurrentConstraint;
+  typedef Id<ConcurrentConstraint> ConcurrentConstraintId;
+
+  class PrecedesConstraint;
+  typedef Id<PrecedesConstraint> PrecedesConstraintId;
+
   #define noIndex -1;
 
   class TempNetErr {

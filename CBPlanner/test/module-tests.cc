@@ -373,7 +373,7 @@ private:
 int main() {
   Schema::instance();
   REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
-  REGISTER_CONSTRAINT(LessThanEqualConstraint, "before", "Default");
+  REGISTER_CONSTRAINT(LessThanEqualConstraint, "precedes", "Default");
   REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
   REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");

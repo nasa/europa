@@ -9,6 +9,7 @@ ModuleComponent TemporalNetwork
 	TemporalNetworkLogger.cc
 	TemporalPropagator.cc
 	TimepointWrapper.cc
+	TemporalConstraints.cc
 	;
 
 } # PLASMA_READY

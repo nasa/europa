@@ -13,6 +13,7 @@
 #include "Timeline.hh"
 #include "Utils.hh"
 #include "IntervalIntDomain.hh"
+#include "TemporalConstraints.hh"
 
 #include <iostream>
 #include <string>
@@ -205,8 +206,9 @@ private:
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(t1.getEnd());
     temp.push_back(t2.getStart());
+    
 
-    ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("before"),
+    ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("precedes"),
                                                                         db.getConstraintEngine(),
                                                                         temp);
     assert(!beforeConstraint.isNoId());
@@ -221,7 +223,6 @@ private:
     assert(t2.getEnd()->getDerivedDomain().getUpperBound() == 20);
 
     delete (Constraint*) beforeConstraint;
-
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -290,7 +291,7 @@ private:
     temp.push_back(first.getEnd());
     temp.push_back(second.getStart());
 
-    ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("before"),
+    ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("precedes"),
 									db.getConstraintEngine(),
 									temp);
     assert(beforeConstraint.isValid());
@@ -306,7 +307,8 @@ private:
     // compute from advisor
     assert (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     assert (!db.getTemporalAdvisor()->canPrecede(second.getId(), first.getId()));
-    
+
+    delete (Constraint*) beforeConstraint;
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -399,11 +401,13 @@ private:
     t0.getEnd()->reset();
     t1.getEnd()->reset();
 
-    ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("before"),
+
+    ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("precedes"),
 							  ce.getId(), 
 							  makeScope(t0.getEnd(), t1.getStart()));
 
-    ConstraintId c1 = ConstraintLibrary::createConstraint(LabelStr("before"),
+
+    ConstraintId c1 = ConstraintLibrary::createConstraint(LabelStr("precedes"),
 							  ce.getId(),
 							  makeScope(t1.getEnd(), t2.getStart()));
 
@@ -473,8 +477,8 @@ int main() {
   initConstraintLibrary();
 
   // Special designations for temporal relations
-  REGISTER_CONSTRAINT(LessThanEqualConstraint, "before", "Temporal");
-  REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Temporal");
+  REGISTER_CONSTRAINT(PrecedesConstraint, "precedes", "Temporal");
+  REGISTER_CONSTRAINT(TemporalDistanceConstraint, "StartEndDurationRelation", "Temporal");
   REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
   for(int i=0;i<1;i++){
