@@ -2,6 +2,8 @@
 
 ConstraintEngineId DefaultEngineAccessor::s_instance;
 
+// Wouldn't this be useful for planners, e.g., as well?
+// --wedgingt 2004 Mar 10
 void initConstraintLibrary() {
   static bool s_runAlready(false);
 
