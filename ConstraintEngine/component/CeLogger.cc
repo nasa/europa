@@ -40,14 +40,17 @@ namespace Prototype {
   }
 
   void CeLogger::notifyAdded(const ConstrainedVariableId& variable){
-    m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE ADDED " << getName(variable) << "(" << variable->getKey() <<  ")" << std::endl;
+    int key = variable->getKey();
+    m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE ADDED " << getName(variable) << "(" << key <<  ")" << std::endl;
   }
 
   void CeLogger::notifyRemoved(const ConstrainedVariableId& variable){
-    m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE REMOVED " << getName(variable) << "(" << variable->getKey() <<  ")" << std::endl;
+    int key = variable->getKey();
+    m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE REMOVED " << getName(variable) << "(" << key <<  ")" << std::endl;
   }
 
   void CeLogger::notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType){
+    int key = variable->getKey();
     m_os << "CeLogger:" << VARIABLE_INDENT << "VARIABLE " << getName(variable) << " - ";
     switch (changeType) {
     case DomainListener::UPPER_BOUND_DECREASED:
@@ -86,7 +89,7 @@ namespace Prototype {
     default:
       assert(false);
     }
-    m_os << " (" << variable->getKey() << ":";
+    m_os << " (" << key << ":";
     variable->lastDomain() >> m_os;
     m_os << ")" << std::endl;
   }

@@ -10,13 +10,12 @@
 
 namespace Prototype {
 
-  const int USAGE = 4; /*!< Position of quantity variable in list of m_variables when constructed as a NddlTransaction */
-
   Transaction::Transaction(const PlanDatabaseId& planDatabase,
 			   const LabelStr& predicateName,
 			   const IntervalIntDomain& timeBaseDomain,
 			   double min, 
-			   double max) 
+			   double max,
+			   bool closed) 
     : EventToken(planDatabase, 
 		 predicateName,
 		 false,
@@ -44,9 +43,9 @@ namespace Prototype {
     m_allVariables.push_back(m_usage);
 
     m_usage->specify(IntervalDomain(m_min, m_max));
-
-    close();
-
+   
+    if(closed)
+      close();
   }
  
   Transaction::Transaction(const PlanDatabaseId& planDatabase,
@@ -61,7 +60,7 @@ namespace Prototype {
 		 timeBaseDomain,
 		 objectName,
 		 false) {
-    std::cout << "NDDL Constructor executing " << std::endl;
+    // No assignment of variable here. Use close method
   }
 
   Transaction::Transaction(const TokenId& parent,
@@ -74,10 +73,14 @@ namespace Prototype {
 		 timeBaseDomain,
 		 objectName,
 		 closed){
-    std::cout << "NDDL Constructor executing " << std::endl;
+    // No assignment of variable here. Use close method
   }
   
-  void Transaction::commonInit() {
+  void Transaction::close() {
+    EventToken::close();
+
+    check_error(m_usage.isValid());
+
     // add the resource constraint which will act as a messenger to changes and inform the ResourcePropagator.
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(getTime());
@@ -95,6 +98,9 @@ namespace Prototype {
     ConstraintId horizonRelation = 
       ConstraintLibrary::createConstraint(LabelStr("HorizonRelation"), m_planDatabase->getConstraintEngine(), temp1);
     m_standardConstraints.insert(horizonRelation);
+
+    // Now activate the transaction
+    activate();
   }
 
   int Transaction::getEarliest() const 
@@ -210,18 +216,4 @@ namespace Prototype {
     check_error(isValid());
     m_changed = true;
   }
-
-  void Transaction::close() {
-    EventToken::close();
-    check_error(m_allVariables.size() == 5);
-    check_error(m_allVariables[USAGE]->getName().toString().find("quantity") != std::string::npos);
-
-    m_usage = m_allVariables[USAGE];
-    m_min = m_usage->derivedDomain().getLowerBound();
-    m_max = m_usage->derivedDomain().getUpperBound();
-
-    commonInit();
-    activate();    
-  }
-
 } //namespace prototype

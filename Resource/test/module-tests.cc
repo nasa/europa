@@ -136,7 +136,7 @@ private:
     db.close();
     // Test insertion of transaction constructed with defaults
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("consume")))->getId();
-    assert(!ce.provenInconsistent());
+    assert(ce.propagate());
     r->constrain(t1);
     ce.propagate();
     r->free(t1);

@@ -47,8 +47,9 @@ namespace Prototype {
     Transaction(const PlanDatabaseId& planDatabase,
 		const LabelStr& predicateName,
 		const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
-		double min = -LARGEST_VALUE, 
-		double max = LARGEST_VALUE);
+		double min = -LARGEST_VALUE,
+		double max = LARGEST_VALUE,
+		bool closed = true);
 
     Transaction(const PlanDatabaseId& planDatabase,
 		const LabelStr& predicateName,
@@ -62,12 +63,6 @@ namespace Prototype {
 		const IntervalIntDomain& timeBaseDomain,
 		const LabelStr& objectName,
 		bool closed);
-
-    
-    /**
-     * @brief Common Initialization for both NDDL and test based construction
-     */
-    void commonInit();
 
     /**
      * @brief Set the earliest time with a new value.
@@ -150,7 +145,11 @@ namespace Prototype {
      */
     bool checkAndClearChange();
 
-    void close(); //Overidden base class method.
+    virtual void close();
+
+  protected:
+    static const int USAGE = 4; /*!< Position of quantity variable in list of m_variables when constructed as a NddlTransaction */
+    ResVarId m_usage;
 
   private:
     // Resource is only class privy to send notifications.
@@ -201,7 +200,6 @@ namespace Prototype {
     double m_max;
     bool m_changed;
 
-    ResVarId m_usage;
     ResourceId m_resource;
   };
 
