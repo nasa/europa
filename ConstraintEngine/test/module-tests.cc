@@ -60,6 +60,7 @@ public:
   }
 private:
   static bool testBasicLabelOperations() {
+    int initialCount = Prototype::LabelStr::getSize();
     Prototype::LabelStr l1("L1");
     Prototype::LabelStr l2("L2");
     Prototype::LabelStr l3("L3");
@@ -79,7 +80,7 @@ private:
     assert(l1 == copy1);
     assert (l2 != copy1);
 
-    assert(Prototype::LabelStr::getSize() == 5);
+    assert((Prototype::LabelStr::getSize() - initialCount) == 5);
     assert(l1.toString() == "L1");
     return true;
   }
@@ -722,7 +723,7 @@ private:
     variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v1.getId());
-    ConstraintId c0 = ConstraintLibrary::createConstraint("Equal", ENGINE, variables);    
+    ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("Equal"), ENGINE, variables);    
     ENGINE->propagate();
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
     delete (Constraint*) c0;

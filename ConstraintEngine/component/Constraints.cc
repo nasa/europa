@@ -8,8 +8,9 @@
 namespace Prototype
 {
   AddEqualConstraint::AddEqualConstraint(const ConstraintEngineId& constraintEngine,
-					 const std::vector<ConstrainedVariableId>& variables)
-    : Constraint("AddEqual", constraintEngine, variables){
+					 const std::vector<ConstrainedVariableId>& variables,
+					 const LabelStr& name)
+    : Constraint(name, constraintEngine, variables){
     check_error(variables.size() == ARG_COUNT);
     for(int i=0; i< ARG_COUNT; i++)
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
@@ -84,8 +85,9 @@ namespace Prototype
   }
 
   EqualConstraint::EqualConstraint(const ConstraintEngineId& constraintEngine,
-				   const std::vector<ConstrainedVariableId>& variables)
-    : Constraint("Equal", constraintEngine, variables), m_lastNotified(0){
+				   const std::vector<ConstrainedVariableId>& variables,
+				   const LabelStr& name)
+    : Constraint(name, constraintEngine, variables), m_lastNotified(0){
     check_error(variables.size() == ARG_COUNT);
 
     // type check the arguments - only work with enumerations for now
@@ -151,8 +153,10 @@ namespace Prototype
 
   SubsetOfConstraint::SubsetOfConstraint(const ConstraintEngineId& constraintEngine,
 					 const ConstrainedVariableId& variable,
-					 const AbstractDomain& superset)
-    : Constraint("SubsetOf", constraintEngine, variable), 
+					 const AbstractDomain& superset,
+					 const LabelStr& name)
+					 
+    : Constraint(name, constraintEngine, variable), 
     m_isDirty(true),
     m_currentDomain(getCurrentDomain(variable)),
     m_executionCount(0){

@@ -70,7 +70,7 @@ namespace Prototype {
   }
 
   bool EqualityConstraintPropagator::isAcceptable(const ConstraintId& constraint) const {
-    return (constraint->getName() == "Equal");
+    return (constraint->getName() == LabelStr("Equal"));
   }
 
   template<class DomainType>
