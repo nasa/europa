@@ -1,0 +1,6 @@
+satellites*
+stackGenerator
+*.xml
+*_g
+*_o
+*_p
