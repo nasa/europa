@@ -48,7 +48,7 @@ namespace Prototype {
     bool m_updateRequired;
     TemporalNetworkId m_tnet;
     std::map<int, TemporalConstraintId> m_tnetConstraints;
-    std::map<int, TemporalConstraintId> m_tnetVariableConstraints;
+    std::map<TempVarId, TemporalConstraintId> m_tnetVariableConstraints;
     std::map<int, TimepointId> m_tnetVariables;
     std::set<int> m_constraintsForDeletion; //!< Buffer deletions till you have to propagate.
     std::set<int> m_variablesForDeletion;  //!< Buffer deletions till you have to propagate.
