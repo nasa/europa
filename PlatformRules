@@ -20,9 +20,14 @@ LINKER_PASSTHROUGH_FLAG ?= -Wl, ;
 # SHARED_FLAG = Flag to generate shared library
 
 if $(OS) = BEOS {
-  SHARED_FLAG ?= -nostart ;
+    SHARED_FLAG ?= -nostart ;
 } else {
-  SHARED_FLAG ?= -shared ;
+    if $(OS) = MACOSX {
+	SHARED_FLAG ?= -fno-common -dynamiclib ;
+    }
+    else {
+	SHARED_FLAG ?= -shared ;
+    }
 }
 
 # LIBRARY_PATH_SEARCH_FLAG = Library search path flag
@@ -101,7 +106,12 @@ DEBUG_FLAGS ?= -g3 ;
 if $(OS) = CYGWIN {
   SUFSHARE ?= .dll ;
 } else {
-  SUFSHARE ?= .so ;
+	if $(OS) = MACOSX {
+	   SUFSHARE ?= .dylib ;
+	}
+	else {
+         SUFSHARE ?= .so ;
+	}
 }
 
 # JAVA_HOME = java root directory
@@ -152,6 +162,7 @@ if $(OS) = CYGWIN {
 if $(OS) = CYGWIN {
   LINKFLAGS += -Wl,--enable-auto-import ;
 }
+
 
 if $(OS) = BEOS {
   LINKLIBS += -lbe ;
