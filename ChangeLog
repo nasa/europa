@@ -1,3 +1,8 @@
+TUTORIAL_20050210
+1. Improvements to documentation
+2. Improved support for multiple guards
+3. Numerous bug fixes
+	
 EUROPA2_20050114_0
 1. Aver test language and interpreter added to the modules
 2. HSTS planner, constraint semantics, and heuristics and plan id support
