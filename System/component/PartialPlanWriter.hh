@@ -7,6 +7,7 @@
 
 #include "../ConstraintEngine/ConstraintEngineListener.hh"
 #include "../ConstraintEngine/DomainListener.hh"
+#include "../ConstraintEngine/Id.hh"
 #include "../ConstraintEngine/VariableChangeListener.hh"
 #include "../PlanDatabase/PlanDatabaseListener.hh"
 
@@ -44,18 +45,18 @@ namespace Prototype {
       std::list<Transaction> *transactionList;
       std::ofstream *transOut, *statsOut;
       std::string dest;
-      void outputObject(const ObjectId &, const int, std::ofstream &);
-      void outputToken(const TokenId &, const int, const int, const int, const TimelineId *, 
+      void outputObject(const ObjectId &, const int, std::ofstream &, std::ofstream &);
+      void outputToken(const TokenId &, const int, const int, const int, const ObjectId &, 
                        std::ofstream &, std::ofstream &, std::ofstream &);
-      void outputEnumVar(const Id< TokenVariable<EnumeratedDomain> > &, const TokenId &,
+      void outputEnumVar(const Id< TokenVariable<EnumeratedDomain> > &, const int,
 			 const int, std::ofstream &);
-      void outputIntVar(const Id< TokenVariable<IntervalDomain> > &, const TokenId &,
+      void outputIntVar(const Id< TokenVariable<IntervalDomain> > &, const int,
                         const int, std::ofstream &);
-      void outputIntIntVar(const Id< TokenVariable<IntervalIntDomain> >&, const TokenId &,
+      void outputIntIntVar(const Id< TokenVariable<IntervalIntDomain> >&, const int,
 			   const int, std::ofstream &);
-      void outputObjVar(const Id< TokenVariable<ObjectSet> > &, const TokenId &, const int,
+      void outputObjVar(const Id< TokenVariable<ObjectSet> > &, const int, const int,
                         std::ofstream &);
-      void outputConstrVar(const ConstrainedVariableId &, const TokenId &, const int, 
+      void outputConstrVar(const ConstrainedVariableId &, const int, const int, 
 			   std::ofstream &);
       void outputConstraint(const ConstraintId &, std::ofstream &, std::ofstream &);
       const std::string getUpperBoundStr(IntervalDomain &dom) const;

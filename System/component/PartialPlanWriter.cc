@@ -18,6 +18,10 @@
 #include "../PlanDatabase/Token.hh"
 #include "../PlanDatabase/TokenVariable.hh"
 
+#include "../Resource/Resource.hh"
+#include "../Resource/ResourceDefs.hh"
+#include "../Resource/Transaction.hh"
+
 #include <exception>
 #include <iostream>
 #include <list>
@@ -77,16 +81,17 @@ enum sourceTypes {SYSTEM = 0, USER, UNKNOWN};
 const std::string DURATION_VAR("DURATION_VAR");
 const std::string END_VAR("END_VAR");
 const std::string START_VAR("START_VAR");
-const std::string REJECT_VAR("REJECT_VAR");
+const std::string STATE_VAR("STATE_VAR");
 const std::string OBJECT_VAR("OBJECT_VAR");
 const std::string PARAMETER_VAR("PARAMETER_VAR");
+const std::string MEMBER_VAR("MEMBER_VAR");
 
-const std::string tokenVarTypes[6] = 
-{REJECT_VAR, OBJECT_VAR, DURATION_VAR, START_VAR, END_VAR, PARAMETER_VAR};
+const std::string tokenVarTypes[7] = 
+{STATE_VAR, OBJECT_VAR, DURATION_VAR, START_VAR, END_VAR, PARAMETER_VAR, MEMBER_VAR};
 
-enum varTypes {I_REJECT = 0, I_OBJECT, I_DURATION, I_START, I_END, I_PARAMETER};
+enum varTypes {I_STATE = 0, I_OBJECT, I_DURATION, I_START, I_END, I_PARAMETER, I_MEMBER};
 enum objectTypes {O_OBJECT = 0, O_TIMELINE, O_RESOURCE};
-enum tokenTypes {T_INTERVAL = 0, T_RESOURCE};
+enum tokenTypes {T_INTERVAL = 0, T_TRANSACTION};
 
 #define TAB "\t"
 #define COLON ":"
@@ -324,51 +329,67 @@ namespace Prototype {
       for(std::set<ObjectId>::iterator objectIterator = objects.begin();
 	  objectIterator != objects.end(); ++objectIterator) {
 	const ObjectId &objId = *objectIterator;
-	if(! TimelineId::convertable(objId)) {
-          outputObject(objId, O_OBJECT, objOut);
-	  continue;
+        if(TimelineId::convertable(objId)) {
+          outputObject(objId, O_TIMELINE, objOut, varOut);
+          TimelineId &tId = (TimelineId &) objId;
+          const std::list<TokenId>& orderedTokens = tId->getTokenSequence();
+          int slotIndex = 0;
+          int emptySlots = 0;
+          for(std::list<TokenId>::const_iterator tokenIterator = orderedTokens.begin();
+              tokenIterator != orderedTokens.end(); ++tokenIterator) {
+            const TokenId &token = *tokenIterator;
+            outputToken(token, T_INTERVAL, slotId, slotIndex, (ObjectId) tId, tokOut, tokRelOut, 
+                        varOut);
+            tokens.erase(token);
+            std::set<TokenId>::const_iterator mergedTokenIterator = 
+              token->getMergedTokens().begin();
+            for(;mergedTokenIterator != token->getMergedTokens().end(); ++mergedTokenIterator) {
+              outputToken(*mergedTokenIterator, T_INTERVAL, slotId, slotIndex, (ObjectId &) tId, 
+                          tokOut, tokRelOut, varOut);
+              tokens.erase(*mergedTokenIterator);
+            }
+            slotId++;
+            slotIndex++;
+            ++tokenIterator;
+            /*empty slot info*/
+            if(tokenIterator != orderedTokens.end()) {
+              const TokenId &nextToken = *tokenIterator;
+              if(token->getEnd()->lastDomain() != nextToken->getStart()->lastDomain()) {
+                objOut << slotId << COMMA << slotIndex << COLON;
+                emptySlots++;
+                slotId++;
+                slotIndex++;
+              }
+            }
+            --tokenIterator;
+          }
+          if(!emptySlots)
+            objOut << SNULL;
+          objOut << std::endl;
         }
-        else
-          outputObject(objId, O_TIMELINE, objOut);
-	TimelineId &tId = (TimelineId &) objId;
-	const std::list<TokenId>& orderedTokens = tId->getTokenSequence();
-	int slotIndex = 0;
-	int emptySlots = 0;
-	for(std::list<TokenId>::const_iterator tokenIterator = orderedTokens.begin();
-	    tokenIterator != orderedTokens.end(); ++tokenIterator) {
-	  const TokenId &token = *tokenIterator;
-	  outputToken(token, T_INTERVAL, slotId, slotIndex, &tId, tokOut, tokRelOut, varOut);
-	  tokens.erase(token);
-	  std::set<TokenId>::const_iterator mergedTokenIterator = 
-	    token->getMergedTokens().begin();
-	  for(;mergedTokenIterator != token->getMergedTokens().end(); ++mergedTokenIterator) {
-	    outputToken(*mergedTokenIterator, T_INTERVAL, slotId, slotIndex, &tId, tokOut, 
-                        tokRelOut, varOut);
-	    tokens.erase(*mergedTokenIterator);
-	  }
-	  slotId++;
-	  slotIndex++;
-	  ++tokenIterator;
-	  if(tokenIterator != orderedTokens.end()) {
-	    const TokenId &nextToken = *tokenIterator;
-	    if(token->getEnd()->lastDomain() != nextToken->getStart()->lastDomain()) {
-	      objOut << slotId << COMMA << slotIndex << COLON;
-	      emptySlots++;
-	      slotId++;
-	      slotIndex++;
-	    }
-	  }
-	  --tokenIterator;
-	}
-	if(!emptySlots)
-	  objOut << SNULL;
-	objOut << std::endl;
+        //        else if(ResourceId::convertable(objId)) {
+          //          outputObject(objId, O_RESOURCE, objOut, varOut);
+//           ResourceId &rId = (ResourceId &) objId;
+//           std::list<TransactionId> resTrans;
+//           rId->getTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY);
+//           for(std::list<TransactionId>::iterator transIt = resTrans.begin();
+//               transIt != resTrans.end(); ++transIt) {
+//             TransactionId trans = *transIt;
+//             outputToken(trans, T_TRANSACTION, 0, 1, rId, tokOut, tokRelOut, varOut);
+//             tokens.erase(trans);
+//           }
+          //          objOut << SNULL << std::endl;
+        //}
+        else {
+          outputObject(objId, O_OBJECT, objOut, varOut);
+          objOut << SNULL << std::endl;
+        }
       }
       for(std::set<TokenId>::iterator tokenIterator = tokens.begin(); tokenIterator != tokens.end();
 	  ++tokenIterator) {
 	TokenId token = *tokenIterator;
 	check_error(token.isValid());
-	outputToken(token, T_INTERVAL, 0, 0, NULL, tokOut, tokRelOut, varOut);
+	outputToken(token, T_INTERVAL, 0, 0, ObjectId::noId(), tokOut, tokRelOut, varOut);
       }
 
       (*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
@@ -388,23 +409,45 @@ namespace Prototype {
     }
 
     void PartialPlanWriter::outputObject(const ObjectId &objId, const int type,
-                                         std::ofstream &objOut) {
+                                         std::ofstream &objOut, std::ofstream &varOut) {
       int parentKey = -1;
       if(!objId->getParent().isNoId())
         parentKey = objId->getParent()->getKey();
       objOut << objId->getKey() << TAB << type << TAB << parentKey << TAB
              << ppId << TAB << objId->getName().toString() << TAB;
-      for(std::set<ObjectId>::const_iterator childIt = objId->getComponents().begin();
-          childIt != objId->getComponents().end(); ++childIt) {
-        ObjectId child = *childIt;
-        objOut << child->getKey() << COMMA;
+      /*ChildObjectIds*/
+      if(objId->getComponents().empty()) {
+        objOut << SNULL << TAB;
       }
-      objOut << TAB;
+      else {
+        for(std::set<ObjectId>::const_iterator childIt = objId->getComponents().begin();
+            childIt != objId->getComponents().end(); ++childIt) {
+          ObjectId child = *childIt;
+          objOut << child->getKey() << COMMA;
+        }
+        objOut << TAB;
+      }
+      /*end ChildObjectIds*/
+      /*VariableIds*/
+      if(objId->getVariables().empty()) {
+        objOut << SNULL << TAB;
+      }
+      else {
+        for(std::vector<ConstrainedVariableId>::const_iterator varIt = 
+              objId->getVariables().begin(); varIt != objId->getVariables().end(); ++varIt) {
+          ConstrainedVariableId var = *varIt;
+          objOut << var->getKey() << COMMA;
+          outputConstrVar(var, objId->getKey(), I_MEMBER, varOut);
+        }
+        objOut << TAB;
+      }
+      /*end VariableIds*/
+
       //<< SNULL;// << std::endl;
     }
 
     void PartialPlanWriter::outputToken(const TokenId &token, const int type, const int slotId, 
-                                        const int slotIndex, const TimelineId *tId, 
+                                        const int slotIndex, const ObjectId &tId, 
                                         std::ofstream &tokOut, std::ofstream &tokRelOut,
                                         std::ofstream &varOut) {
       check_error(token.isValid());
@@ -412,12 +455,12 @@ namespace Prototype {
 	std::cerr << "Token " << token->getKey() << " is incomplete.  Skipping. " << std::endl;
 	return;
       }
-      if(tId != NULL) {
+      if(!tId.isNoId()) {
 	tokOut << token->getKey() << TAB << type << TAB << slotId << TAB << slotIndex << TAB 
                << ppId << TAB << 0 << TAB << 1 << TAB << token->getStart()->getKey() << TAB 
                << token->getEnd()->getKey() << TAB << token->getDuration()->getKey() << TAB 
                << token->getState()->getKey() << TAB << token->getPredicateName().toString() 
-               << TAB << (*tId)->getKey() << TAB << (*tId)->getName().toString() << TAB 
+               << TAB << tId->getKey() << TAB << tId->getName().toString() << TAB 
                << token->getObject()->getKey() << TAB;
       }
       else {
@@ -437,11 +480,11 @@ namespace Prototype {
 	tokOut << SNULL << TAB;
       }
 
-      outputObjVar(token->getObject(), token, I_OBJECT, varOut);
-      outputIntIntVar(token->getStart(), token, I_START, varOut);
-      outputIntIntVar(token->getEnd(), token, I_END, varOut);
-      outputIntIntVar(token->getDuration(), token, I_DURATION, varOut);
-      outputEnumVar(token->getState(), token, I_REJECT, varOut);
+      outputObjVar(token->getObject(), token->getKey(), I_OBJECT, varOut);
+      outputIntIntVar(token->getStart(), token->getKey(), I_START, varOut);
+      outputIntIntVar(token->getEnd(), token->getKey(), I_END, varOut);
+      outputIntIntVar(token->getDuration(), token->getKey(), I_DURATION, varOut);
+      outputEnumVar(token->getState(), token->getKey(), I_STATE, varOut);
 
       std::string paramVarIds;
       char paramIdStr[NBBY * sizeof(int) * 28/93 + 4];
@@ -450,7 +493,7 @@ namespace Prototype {
 	  paramVarIterator != token->getParameters().end(); ++paramVarIterator) {
 	ConstrainedVariableId varId = *paramVarIterator;
 	check_error(varId.isValid());
-	outputConstrVar(varId, token, I_PARAMETER, varOut);
+	outputConstrVar(varId, token->getKey(), I_PARAMETER, varOut);
 	bzero(paramIdStr, NBBY * sizeof(int) * 28/93 + 4);
 	sprintf(paramIdStr, "%d", varId->getKey());
 	paramVarIds += std::string(paramIdStr) + COLON;
@@ -465,11 +508,12 @@ namespace Prototype {
     }
   
     void PartialPlanWriter::outputEnumVar(const Id<TokenVariable<EnumeratedDomain> >& enumVar, 
-					  const TokenId &tokId, const int type, 
+					  //const TokenId &tokId, const int type, 
+                                          const int parentId, const int type,
 					  std::ofstream &varOut) {
       numVariables++;
 
-      varOut << enumVar->getKey() << TAB << ppId << TAB << tokId->getKey() << TAB 
+      varOut << enumVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
 	     << enumVar->getName().toString() << TAB;
 
       varOut << ENUM_DOMAIN << TAB << getEnumerationStr((EnumeratedDomain &) enumVar->lastDomain()) 
@@ -479,10 +523,11 @@ namespace Prototype {
     }
   
     void PartialPlanWriter::outputIntVar(const Id<TokenVariable<IntervalDomain> >& intVar,
-					 const TokenId &tokId, const int type, 
+					 //const TokenId &tokId, const int type, 
+                                         const int parentId, const int type,
 					 std::ofstream &varOut) {
       numVariables++;
-      varOut << intVar->getKey() << TAB << ppId << TAB << tokId->getKey() << TAB 
+      varOut << intVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
 	     << intVar->getName().toString() << TAB;
 
       varOut << INT_DOMAIN << TAB << SNULL << TAB << REAL_SORT << TAB 
@@ -493,11 +538,12 @@ namespace Prototype {
     }
   
     void PartialPlanWriter::outputIntIntVar(const Id<TokenVariable<IntervalIntDomain> >& intVar,
-					    const TokenId &tokId, const int type, 
+					    //const TokenId &tokId, const int type, 
+                                            const int parentId, const int type,
 					    std::ofstream &varOut) {
       numVariables++;
 
-      varOut << intVar->getKey() << TAB << ppId << TAB << tokId->getKey() << TAB 
+      varOut << intVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
 	     << intVar->getName().toString() << TAB;
     
       varOut << INT_DOMAIN << TAB << SNULL << TAB << INTEGER_SORT << TAB 
@@ -508,11 +554,12 @@ namespace Prototype {
     }
 
     void PartialPlanWriter::outputObjVar(const Id<TokenVariable<ObjectSet> >& objVar,
-					 const TokenId &tokId, const int type, 
+					 //const TokenId &tokId, const int type, 
+                                         const int parentId, const int type,
 					 std::ofstream &varOut) {
       numVariables++;
 
-      varOut << objVar->getKey() << TAB << ppId << TAB << tokId->getKey() << TAB 
+      varOut << objVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
 	     << objVar->getName().toString() << TAB;
 
       varOut << ENUM_DOMAIN << TAB;
@@ -529,11 +576,12 @@ namespace Prototype {
     }
   
     void PartialPlanWriter::outputConstrVar(const ConstrainedVariableId &otherVar, 
-					    const TokenId &tokId, const int type, 
+					    //const TokenId &tokId, const int type, 
+                                            const int parentId, const int type,
 					    std::ofstream &varOut) {
       numVariables++;
 
-      varOut << otherVar->getKey() << TAB << ppId << TAB << tokId->getKey() << TAB 
+      varOut << otherVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
 	     << otherVar->getName().toString() << TAB;
 
       if(otherVar->derivedDomain().isEnumerated()) {
@@ -750,7 +798,7 @@ namespace Prototype {
   
     const std::string PartialPlanWriter::getVarInfo(const ConstrainedVariableId &varId) const {
       std::string type, paramName, predName, retval;
-      if(varId->getIndex() >= I_REJECT && varId->getIndex() <= I_END) {
+      if(varId->getIndex() >= I_STATE && varId->getIndex() <= I_END) {
 	type = tokenVarTypes[varId->getIndex()];
       }
       else {
@@ -759,6 +807,9 @@ namespace Prototype {
       }
       if(TokenId::convertable(varId->getParent())) {
 	predName = ((TokenId &)varId->getParent())->getPredicateName().toString();
+      }
+      else if(ObjectId::convertable(varId->getParent())) {
+        predName = ((ObjectId &)varId->getParent())->getName().toString();
       }
       else {
 	predName = "UNKNOWN VARIABLE PARENT";
