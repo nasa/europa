@@ -10,15 +10,13 @@
 #include "DecisionPoint.hh"
 #include "EUROPAHeuristicStrategy.hh"
 
-#include "TemporalPropagator.hh"
-#include "STNTemporalAdvisor.hh"
 #include "PlanDatabaseWriter.hh"
 
 #include <fstream>
 
 SchemaId schema;
 
-//#define PERFORMANCE
+#define PERFORMANCE
 
 const char* TX_LOG = "TransactionLog.xml";
 const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
@@ -47,10 +45,8 @@ bool runPlanner(){
     ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
     check_error(maxPlannerSteps.isValid());
     int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
-    CBPlanner planner(db1.planDatabase->getClient(), db1.flawSource, steps);
-    EUROPAHeuristicStrategy strategy;
       
-    int res = planner.run(strategy.getId(), loggingEnabled());
+    int res = db1.planner->run(loggingEnabled(), steps);
 
     PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
