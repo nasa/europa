@@ -37,7 +37,7 @@ bool runPlanner(){
   if(replay)
     assembly.replay(txLog);
 
-  debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr); );
+  debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr));
 
   return true;
 }

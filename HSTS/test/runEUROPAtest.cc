@@ -91,7 +91,7 @@ int main(int argc, const char ** argv) {
     // Dump the results
     assembly.write(std::cout);
 
-    debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr); );
+    debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr));
   }
 
   std::cerr << "Terminating the assembly ..." << std::endl;
