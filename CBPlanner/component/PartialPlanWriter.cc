@@ -263,55 +263,34 @@ namespace EUROPA {
                                          const RulesEngineId &reId2,
                                          const CBPlannerId &plId2) {
       havePlanner = true;
-      haveRulesEngine = true;
-      /*
-      dbl = (new PPWPlanDatabaseListener(planDb, this))->getId();
-      cel = (new PPWConstraintEngineListener(ceId2, this))->getId();
-      rel = (new PPWRulesEngineListener(reId2, this))->getId();
-      pl = (new PPWPlannerListener(plId2, this))->getId();
-      */
-      commonInit(planDb, ceId2);
       reId = const_cast<RulesEngineId *> (&reId2);
       plId = const_cast<CBPlannerId *> (&plId2);
+      commonInit(planDb, ceId2);
     }
 
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb,
                                          const ConstraintEngineId &ceId2,
                                          const RulesEngineId &reId2) {
       havePlanner = false;
-      haveRulesEngine = true;
-      /*
-      dbl = (new PPWPlanDatabaseListener(planDb, this))->getId();
-      cel = (new PPWConstraintEngineListener(ceId2, this))->getId();
-      rel = (new PPWRulesEngineListener(reId2, this))->getId();
-      pl = DecisionManagerId::noId();
-      */
-      commonInit(planDb, ceId2);
       reId = const_cast<RulesEngineId *> (&reId2);
       plId = NULL;
+      commonInit(planDb, ceId2);
     }
 
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb, 
                                          const ConstraintEngineId &ceId2) {
       havePlanner = false;
-      haveRulesEngine = false;
-      /*
-      dbl = (new PPWPlanDatabaseListener(planDb, this))->getId();
-      cel = (new PPWConstraintEngineListener(ceId2, this))->getId();
-      rel = RulesEngineListenerId::noId();
-      pl = DecisionManagerId::noId();
-      */
-      commonInit(planDb, ceId2);
       reId = NULL;
       plId = NULL;
+      commonInit(planDb, ceId2);
     }
 
     void PartialPlanWriter::allocateListeners() {
       dbl = (new PPWPlanDatabaseListener(*pdbId, this))->getId();
       cel = (new PPWConstraintEngineListener(*ceId, this))->getId();
-      if (haveRulesEngine)
+      if (!(*reId).isNoId())
 	rel = (new PPWRulesEngineListener(*reId, this))->getId();
-      if (havePlanner)
+      if (!(*plId).isNoId())
 	pl = (new PPWPlannerListener(*plId, this))->getId();
     }
 

@@ -73,7 +73,6 @@ namespace EUROPA {
       class PPWPlannerListener;
 
       bool havePlanner;
-      bool haveRulesEngine;
       bool destAlreadyInitialized;
       long long int seqId;
       int numTokens, numConstraints, numVariables, numTransactions;
