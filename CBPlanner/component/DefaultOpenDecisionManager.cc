@@ -17,8 +17,7 @@ namespace Prototype {
   }
 
   DefaultOpenDecisionManager::~DefaultOpenDecisionManager() {
-    cleanup(m_unitTokDecs);
-    cleanup(m_nonUnitTokDecs);
+    cleanup(m_tokDecs);
     cleanup(m_unitVarDecs);
     cleanup(m_nonUnitVarDecs);
     cleanup(m_objDecs);
@@ -100,36 +99,18 @@ namespace Prototype {
   void DefaultOpenDecisionManager::add(const TokenId& token) {
     // closing is something we only do once, so no need to see if it
     // already exists before adding to open decisions
-    if (token->getState()->lastDomain().isSingleton()) {
-      TokenDecisionPointId dp = createTokenDecisionPoint(token);
-      check_error(dp->getEntityKey() == token->getKey());
-      m_unitTokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedUnitTokDecs.insert(dp);
-      publishNewUnitDecision(dp);
-    }
-    else {
-      TokenDecisionPointId dp = createTokenDecisionPoint(token);
-      check_error(dp->getEntityKey() == token->getKey());
-      m_nonUnitTokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedNonUnitTokDecs.insert(dp);
-      publishNewDecision(dp);
-    }
+    TokenDecisionPointId dp = createTokenDecisionPoint(token);
+    check_error(dp->getEntityKey() == token->getKey());
+    m_tokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
+    m_sortedTokDecs.insert(dp);
+    publishNewDecision(dp);
   }
 
   void DefaultOpenDecisionManager::condAdd(const TokenId& token) {
-    TokenDecisionPointId dp;
-    if (token->getState()->lastDomain().isSingleton()) {
-      if (m_unitTokDecs.find(token->getKey()) != m_unitTokDecs.end()) return;
-      dp = createTokenDecisionPoint(token);
-      m_unitTokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedUnitTokDecs.insert(dp);
-    }
-    else {
-      if (m_nonUnitTokDecs.find(token->getKey()) != m_nonUnitTokDecs.end()) return;
-      dp = createTokenDecisionPoint(token);
-      m_nonUnitTokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedNonUnitTokDecs.insert(dp);
-    }
+    if (m_tokDecs.find(token->getKey()) != m_tokDecs.end()) return;
+    TokenDecisionPointId dp = createTokenDecisionPoint(token);
+    m_tokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
+    m_sortedTokDecs.insert(dp);
     publishNewDecision(dp);
   }
 
@@ -207,8 +188,7 @@ namespace Prototype {
     m_dm->getTokenChangeBuffer().erase(token);
     m_dm->getCancelledBuffer().erase(token);
 
-    if (!removeTokenDP(token, deleting, m_unitTokDecs, m_sortedUnitTokDecs))
-      if (removeTokenDP(token, deleting, m_nonUnitTokDecs, m_sortedNonUnitTokDecs));
+    removeTokenDP(token, deleting, m_tokDecs, m_sortedTokDecs);
 
   }
 
@@ -232,7 +212,7 @@ namespace Prototype {
   }
 
   const int DefaultOpenDecisionManager::getNumberOfDecisions() {
-    return m_objDecs.size() + m_unitVarDecs.size() + m_nonUnitVarDecs.size() + m_unitTokDecs.size() + m_nonUnitTokDecs.size();
+    return m_objDecs.size() + m_unitVarDecs.size() + m_nonUnitVarDecs.size() + m_tokDecs.size();
   }
 
   DecisionPointId& DefaultOpenDecisionManager::getNextDecision() {
@@ -240,10 +220,8 @@ namespace Prototype {
       m_curDec = m_objDecs.begin()->second;
     else if (!m_sortedUnitVarDecs.empty())
       m_curDec = *m_sortedUnitVarDecs.begin();
-    else if (!m_sortedUnitTokDecs.empty())
-      m_curDec = *m_sortedUnitTokDecs.begin();
-    else if (!m_sortedNonUnitTokDecs.empty()) 
-      m_curDec = *m_sortedNonUnitTokDecs.begin();
+    else if (!m_sortedTokDecs.empty()) 
+      m_curDec = *m_sortedTokDecs.begin();
     else if (!m_sortedNonUnitVarDecs.empty()) 
       m_curDec = *m_sortedNonUnitVarDecs.begin();
     else m_curDec = DecisionPointId::noId();
@@ -252,20 +230,17 @@ namespace Prototype {
   }
 
   void DefaultOpenDecisionManager::cleanupAllDecisionCaches() {
-    cleanup(m_unitTokDecs);
-    cleanup(m_nonUnitTokDecs);
+    cleanup(m_tokDecs);
     cleanup(m_unitVarDecs);
     cleanup(m_nonUnitVarDecs);
     cleanup(m_objDecs);
     
-    m_unitTokDecs.clear();
-    m_nonUnitTokDecs.clear();
+    m_tokDecs.clear();
     m_unitVarDecs.clear();
     m_nonUnitVarDecs.clear();
     m_objDecs.clear();
 
-    m_sortedUnitTokDecs.clear();
-    m_sortedNonUnitTokDecs.clear();
+    m_sortedTokDecs.clear();
     m_sortedUnitVarDecs.clear();
     m_sortedNonUnitVarDecs.clear();
   }
@@ -323,10 +298,8 @@ namespace Prototype {
     std::map<int,ConstrainedVariableDecisionPointId>::iterator vit = m_unitVarDecs.begin();
     for (; vit != m_unitVarDecs.end(); ++vit)
       decisions.push_back(vit->second);
-    std::map<int,TokenDecisionPointId>::iterator it = m_unitTokDecs.begin();
-    for (; it != m_unitTokDecs.end(); ++it)
-      decisions.push_back(it->second);
-    for (it = m_nonUnitTokDecs.begin(); it != m_nonUnitTokDecs.end(); ++it)
+    std::map<int,TokenDecisionPointId>::iterator it = m_tokDecs.begin();
+    for (; it != m_tokDecs.end(); ++it)
       decisions.push_back(it->second);
     for (vit = m_nonUnitVarDecs.begin(); vit != m_nonUnitVarDecs.end(); ++vit)
       decisions.push_back(vit->second);
@@ -339,10 +312,8 @@ namespace Prototype {
     std::map<int,ConstrainedVariableDecisionPointId>::iterator vit = m_unitVarDecs.begin();
     for (; vit != m_unitVarDecs.end(); ++vit)
       os << vit->second << std::endl;
-    std::map<int,TokenDecisionPointId>::iterator it = m_unitTokDecs.begin();
-    for (; it != m_unitTokDecs.end(); ++it)
-      os << it->second << std::endl;
-    for (it = m_nonUnitTokDecs.begin(); it != m_nonUnitTokDecs.end(); ++it)
+    std::map<int,TokenDecisionPointId>::iterator it = m_tokDecs.begin();
+    for (; it != m_tokDecs.end(); ++it)
       os << it->second << std::endl;
     for (vit = m_nonUnitVarDecs.begin(); vit != m_nonUnitVarDecs.end(); ++vit)
       os << vit->second << std::endl;

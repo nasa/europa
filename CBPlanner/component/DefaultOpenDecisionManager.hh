@@ -3,8 +3,52 @@
 
 #include "CBPlannerDefs.hh"
 #include "OpenDecisionManager.hh"
+#include "Token.hh"
 
 namespace Prototype {
+
+  class ObjectDecisionPointComparator {
+  public:
+    virtual bool operator()(const ObjectDecisionPointId& o1, const ObjectDecisionPointId& o2) const = 0;
+    bool operator==(const ObjectDecisionPointComparator& c) { return true; }
+  };
+
+  class TokenDecisionPointComparator {
+  public:
+    virtual bool operator()(const TokenDecisionPointId& t1, const TokenDecisionPointId& t2) const = 0;
+    bool operator==(const TokenDecisionPointComparator& c) { return true; }
+  };
+
+  class ConstrainedVariableDecisionPointComparator {
+  public:
+    virtual bool operator()(const ConstrainedVariableDecisionPointId& t1, const ConstrainedVariableDecisionPointId& t2) const =0;
+    bool operator==(const ConstrainedVariableDecisionPointComparator& c) { return true; }
+  };
+
+  class DefaultObjectDecisionPointComparator : ObjectDecisionPointComparator {
+  public:
+    bool operator()(const ObjectDecisionPointId& o1, const ObjectDecisionPointId& o2) const {
+      return o1->getEntityKey() == o2->getEntityKey() && o1->getToken()->getKey() == o2->getToken()->getKey();
+    }
+  };
+
+  class DefaultTokenDecisionPointComparator : TokenDecisionPointComparator {
+  public:
+    bool operator()(const TokenDecisionPointId& t1, const TokenDecisionPointId& t2) const {
+      return t1->getKey() < t2->getKey();
+    }
+  };
+
+  class DefaultConstrainedVariableDecisionPointComparator : ConstrainedVariableDecisionPointComparator {
+  public:
+    bool operator()(const ConstrainedVariableDecisionPointId& t1, const ConstrainedVariableDecisionPointId& t2) const {
+      return t1->getKey() < t2->getKey();
+    }
+  };
+
+  typedef std::set<ObjectDecisionPointId, DefaultObjectDecisionPointComparator> ObjectDecisionSet;
+  typedef std::set<TokenDecisionPointId, DefaultTokenDecisionPointComparator> TokenDecisionSet;
+  typedef std::set<ConstrainedVariableDecisionPointId, DefaultConstrainedVariableDecisionPointComparator> VariableDecisionSet;
 
   class DefaultOpenDecisionManager : public OpenDecisionManager {
   public:
@@ -40,18 +84,17 @@ namespace Prototype {
     virtual void removeObject(const ObjectId& object, const TokenId& token, const bool deleting);
 
     /* the following are the decision caches */
-    std::map<int,TokenDecisionPointId> m_nonUnitTokDecs;
-    std::map<int,TokenDecisionPointId> m_unitTokDecs;
+    std::map<int,TokenDecisionPointId> m_tokDecs;
     std::map<int,ConstrainedVariableDecisionPointId> m_nonUnitVarDecs;
     std::map<int,ConstrainedVariableDecisionPointId> m_unitVarDecs;
     std::multimap<int,ObjectDecisionPointId> m_objDecs;
 
     /* the following are the heuristically ordered sets of decisions */
-    /* note that object decisions are not sorted */
+    /* note that object decisions are not sorted, and we don't handle unit
+       tok decs at the moment. */
     VariableDecisionSet m_sortedUnitVarDecs;
     VariableDecisionSet m_sortedNonUnitVarDecs;
-    TokenDecisionSet m_sortedUnitTokDecs;
-    TokenDecisionSet m_sortedNonUnitTokDecs;
+    TokenDecisionSet m_sortedTokDecs;
   };
 
 }
