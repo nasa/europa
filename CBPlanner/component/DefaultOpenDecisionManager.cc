@@ -228,9 +228,10 @@ namespace EUROPA {
       m_curDec = *m_sortedNonUnitVarDecs.begin();
     else m_curDec = DecisionPointId::noId();
 
-    /* Shold be able to require that current choices are empty */
-    check_error(m_curDec.isNoId() || m_curDec->getCurrentChoices().empty());
+    check_error(m_curDec.isNoId() || m_curDec->getCurrentChoices().empty(),
+		"Require the current decision to have no choices. They will be expanded, just in time.");
 
+    check_error(m_curDec.isNoId() || m_curDec->isOpen(), "Can only return a decision if it is open.");
     return m_curDec;
   }
 

@@ -33,6 +33,7 @@ namespace EUROPA {
   bool testMakeObjectVariableImpl();
   bool testTokenObjectVariableImpl();
   bool testTokenWithNoObjectOnCreationImpl();
+  bool testFreeAndConstrainImpl();
 
   bool testBasicTokenAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
   bool testBasicTokenCreationImpl(ConstraintEngineId &ce, PlanDatabaseId &db);

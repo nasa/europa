@@ -20,8 +20,8 @@ namespace EUROPA{
     void notifySplit(const TokenId& token);
     void notifyRejected(const TokenId& token);
     void notifyReinstated(const TokenId& token);
-    void notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor);
-    void notifyFreed(const ObjectId& object, const TokenId& token);
+    void notifyConstrained(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
+    void notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor );
     void notifyAdded(const ObjectId& object, const TokenId& token);
     void notifyRemoved(const ObjectId& object, const TokenId& token);
   private:

@@ -289,17 +289,17 @@ namespace EUROPA {
 
     TiXmlElement * token_el = object_el->NextSiblingElement();
     check_error(token_el != NULL);
-    TokenId token = xmlAsToken(*token_el);
-    check_error(token.isValid());
+    TokenId predecessor = xmlAsToken(*token_el);
+    check_error(predecessor.isValid());
 
     TiXmlElement * successor_el = token_el->NextSiblingElement();
-    TokenId successor = TokenId::noId();
-    if (successor_el != NULL) {
+    TokenId successor = predecessor;
+    if(successor_el != NULL){
       successor = xmlAsToken(*successor_el);
       check_error(successor.isValid());
     }
 
-    m_client->constrain(object, token, successor);
+    m_client->constrain(object, predecessor, successor);
   }
 
   void DbClientTransactionPlayer::playFreed(const TiXmlElement & element)
@@ -314,10 +314,18 @@ namespace EUROPA {
 
     TiXmlElement * token_el = object_el->NextSiblingElement();
     check_error(token_el != NULL);
-    TokenId token = xmlAsToken(*token_el);
-    check_error(token.isValid());
+    TokenId predecessor = xmlAsToken(*token_el);
+    check_error(predecessor.isValid());
 
-    m_client->free(object, token);
+    TiXmlElement * successor_el = token_el->NextSiblingElement();
+    TokenId successor = predecessor;
+
+    if(successor_el != NULL){
+      successor = xmlAsToken(*successor_el);
+      check_error(successor.isValid());
+    }
+
+    m_client->free(object, predecessor, successor);
   }
 
   void DbClientTransactionPlayer::playActivated(const TiXmlElement & element)
@@ -421,38 +429,46 @@ namespace EUROPA {
       check_error(object.isValid(),
                   "constrain transaction refers to an undefined object: '"
                    + std::string(object_name) + "'");
-      TiXmlElement * token_el = element.FirstChildElement();
-      check_error(token_el != NULL, "missing mandatory token identifier for constrain transaction");
-      TokenId token = xmlAsToken(*token_el);
-      check_error(token.isValid(),
-                  "invalid token identifier for constrain transaction");
+      TiXmlElement * predecessor_el = element.FirstChildElement();
+      check_error(predecessor_el != NULL, "missing mandatory predecessor identifier for constrain transaction");
+      TokenId predecessor = xmlAsToken(*predecessor_el);
+      check_error(predecessor.isValid(),
+                  "invalid predecessor identifier for constrain transaction");
       
-      TiXmlElement * successor_el = token_el->NextSiblingElement();
-      TokenId successor = TokenId::noId();
+      TiXmlElement * successor_el = predecessor_el->NextSiblingElement();
+      TokenId successor = predecessor;
       if (successor_el != NULL) {
         successor = xmlAsToken(*successor_el);
         check_error(successor.isValid(),
                     "invalid successor token identifier for constrain transaction");
       }
 
-      m_client->constrain(object, token, successor);
+      m_client->constrain(object, predecessor, successor);
       return;
     }
 
     if (strcmp(name, "free") == 0) {
-      // free token special case
+      // free token(s) special case
       const char * object_name = identifier;
       ObjectId object = m_client->getObject(object_name);
       check_error(object.isValid(),
                   "free transaction refers to an undefined object: '"
                    + std::string(object_name) + "'");
-      TiXmlElement * token_el = element.FirstChildElement();
-      check_error(token_el != NULL, "missing mandatory token identifier for free transaction");
-      TokenId token = xmlAsToken(*token_el);
-      check_error(token.isValid(),
-                  "invalid token identifier for free transaction");
+      TiXmlElement * predecessor_el = element.FirstChildElement();
+      check_error(predecessor_el != NULL, "missing mandatory predecessor identifier for free transaction");
+      TokenId predecessor = xmlAsToken(*predecessor_el);
+      check_error(predecessor.isValid(),
+                  "invalid predecessor identifier for free transaction");
+      
+      TiXmlElement * successor_el = predecessor_el->NextSiblingElement();
+      TokenId successor = predecessor;
+      if (successor_el != NULL) {
+        successor = xmlAsToken(*successor_el);
+        check_error(successor.isValid(),
+                    "invalid successor token identifier for free transaction");
+      }
 
-      m_client->free(object, token);
+      m_client->free(object, predecessor, successor);
       return;
     }
 
@@ -464,6 +480,7 @@ namespace EUROPA {
       m_client->activate(token);
       return;
     }
+
     if (strcmp(name, "merge") == 0) {
       // merge token special case
       std::string token_name = identifier;
@@ -476,6 +493,7 @@ namespace EUROPA {
       m_client->merge(token, activeToken);
       return;
     }
+
     if (strcmp(name, "reject") == 0) {
       // reject token special case
       std::string token_name = identifier;
@@ -484,6 +502,7 @@ namespace EUROPA {
       m_client->reject(token);
       return;
     }
+
     if (strcmp(name, "cancel") == 0) {
       // cancel token special case
       std::string token_name = identifier;
@@ -492,6 +511,7 @@ namespace EUROPA {
       m_client->cancel(token);
       return;
     }
+
     if (strcmp(name, "specify") == 0) {
       // specify variable special case
       ConstrainedVariableId variable = parseVariable(identifier);
@@ -506,6 +526,7 @@ namespace EUROPA {
       }
       return;
     }
+
     check_error(ALWAYS_FAILS, "unexpected transaction invoked: '" + std::string(name) + "'");
   }
 

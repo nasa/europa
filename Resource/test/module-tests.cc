@@ -159,24 +159,24 @@ private:
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change")))->getId();
     bool prop = ce.propagate();
     assert(prop);
-    r->constrain(t1);
+    r->constrain(t1, t1);
     ce.propagate();
 
     std::set<TransactionId> transactions;
     r->getTransactions(transactions);
     assert(transactions.size() == 1);
-    r->free(t1);
+    r->free(t1, t1);
     transactions.clear();
     r->getTransactions(transactions);
     assert(transactions.empty());
 
     // Test double insertion 
-    r->constrain(t1);
+    r->constrain(t1, t1);
     ce.propagate();
-    r->free(t1);
-    r->constrain(t1);
+    r->free(t1, t1);
+    r->constrain(t1, t1);
     ce.propagate();
-    r->free(t1);
+    r->free(t1, t1);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -465,7 +465,8 @@ private:
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), productionRateMax + 1, productionRateMax + 1))->getId();
-    assert(r->getTokens().count(t1) == 0);
+    assert(!ce.propagate());
+    //assert(r->getTokens().count(t1) == 0);
     //    r->constrain(t1);
     //assert(ce.provenInconsistent());
     //r->free(t1);
@@ -478,7 +479,7 @@ private:
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), consumptionRateMax - 1, consumptionRateMax - 1))->getId();
-    assert(r->getTokens().count(t2) == 0);
+    assert(!ce.propagate());
     /*
       r->constrain(t2);
       assert(ce.provenInconsistent());

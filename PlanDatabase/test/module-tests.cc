@@ -22,6 +22,7 @@
 #include "EnumeratedTypeFactory.hh"
 
 #include "TestSupport.hh"
+#include "Debug.hh"
 #include "PlanDatabaseTestSupport.hh"
 #include "PlanDatabaseWriter.hh"
 
@@ -266,6 +267,7 @@ public:
     runTest(testMakeObjectVariable);
     runTest(testTokenObjectVariable);
     runTest(testTokenWithNoObjectOnCreation);
+    runTest(testFreeAndConstrain);
     return(true);
   }
   
@@ -314,6 +316,10 @@ private:
 
   static bool testTokenWithNoObjectOnCreation(){
     return testTokenWithNoObjectOnCreationImpl();
+  }
+
+  static bool testFreeAndConstrain(){
+    return testFreeAndConstrainImpl();
   }
 };
 
@@ -1327,6 +1333,7 @@ public:
     assertTrue(constrained2->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
     assertTrue(constrained2->getObject()->derivedDomain() == objDom2b, "player did not constrain token to expected object");
     assertTrue(verifyTokenRelation(constrainedToken, constrained2, "before")); //!! "precedes" ?
+    assertTrue(obj2b->getTokens().size() == 2);
     /* Leave them in plan db for testFree(). */
 
     /* Create two rejectable tokens and do the same tests, but with testObj2a. */
@@ -1352,6 +1359,7 @@ public:
     assertTrue(rejectable2->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
     assertTrue(rejectable2->getObject()->derivedDomain() == objDom2a, "player did not constrain token to expected object");
     assertTrue(verifyTokenRelation(rejectable, rejectable2, "before")); //!! "precedes" ?
+    assertTrue(obj2a->getTokens().size() == 2);
     /* Leave them in plan db for testFree(). */
   }
 
@@ -1378,28 +1386,28 @@ public:
     !!*/
     assertTrue(tokens.size() == 2);
     TokenId one = *(tokens.begin());
-    assertTrue(!one.isNoId() && one.isValid());
+    assertTrue(one.isValid());
     assertTrue(one->getObject()->derivedDomain().isSingleton());
     assertTrue(one->getObject()->derivedDomain() == objDom2b);
     TokenId two = *(tokens.rbegin());
-    assertTrue(!two.isNoId() && two.isValid() && one != two);
+    assertTrue(two.isValid() && one != two);
     assertTrue(two->getObject()->derivedDomain().isSingleton());
     assertTrue(two->getObject()->derivedDomain() == objDom2b);
-    TEST_PLAYING_XML(buildXMLObjTokTokStr("free", "testObj2b", "constrainedSample", ""));
-    assertTrue(!one->getObject()->derivedDomain().isSingleton());
-
-    //!!Next fails because the base domain is still open
-    //!!assertTrue(one->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
-
-    assertTrue(two->getObject()->derivedDomain().isSingleton());
-    assertTrue(two->getObject()->derivedDomain() == objDom2b);
-    TEST_PLAYING_XML(buildXMLObjTokTokStr("free", "testObj2b", "constrainedSample2", ""));
-    assertTrue(!one->getObject()->derivedDomain().isSingleton());
+    TEST_PLAYING_XML(buildXMLObjTokTokStr("free", "testObj2b", "constrainedSample2", "constrainedSample"));
+    assertTrue(one->getObject()->derivedDomain().isSingleton());
+    assertTrue(one->getObject()->derivedDomain() == objDom2b);
 
     //!!Next fails because the base domain is still open
     //!!assertTrue(one->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
 
     assertTrue(!two->getObject()->derivedDomain().isSingleton());
+    TEST_PLAYING_XML(buildXMLObjTokTokStr("free", "testObj2b", "constrainedSample", ""));
+    assertTrue(!two->getObject()->derivedDomain().isSingleton());
+
+    //!!Next fails because the base domain is still open
+    //!!assertTrue(one->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
+
+    assertTrue(!one->getObject()->derivedDomain().isSingleton());
 
     //!!Next fails because the base domain is still open
     //!!assertTrue(two->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
@@ -1416,23 +1424,15 @@ public:
     //   not just the tokens that _are_ on the object.
     assertTrue(tokens.size() == 4);
     TokenId three, four;
-    for ( ; !tokens.empty(); tokens.erase(tokens.begin())) {
-      four = *(tokens.begin());
-      if (four == one || four == two)
-        four = TokenId::noId();
-      else
-        if (three.isNoId()) {
-          three = four;
-          four = TokenId::noId();
-        }
-    }
-    assertTrue(!three.isNoId() && three.isValid() && one != three);
-    assertTrue(!four.isNoId() && four.isValid() && one != four);
-    assertTrue(two != three && two != four && three != four);
+    tokens.erase(one);
+    tokens.erase(two);
+    three = *(tokens.begin());
+    tokens.erase(three);
+    four = *(tokens.begin());
     assertTrue(three->getObject()->derivedDomain().isSingleton());
-    assertTrue(three->getObject()->derivedDomain() == objDom2a);
+    assertTrue(four->getObject()->derivedDomain() == objDom2a);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("free", "testObj2a", "rejectableConstrainedSample", ""));
-    assertTrue(!three->getObject()->derivedDomain().isSingleton());
+    assertTrue(three->getObject()->derivedDomain().isSingleton(), "Should still be a singleton, since still required.");
 
     //!!Next fails because the base domain is still open
     //!!assertTrue(three->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
@@ -2141,6 +2141,7 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
 #undef TEST_PLAYING_XML
 
 int main() {
+  initDebug();
   initDbModuleTests();
   for (int i=0;i<1;i++){
     runTestSuite(SchemaTest::test);

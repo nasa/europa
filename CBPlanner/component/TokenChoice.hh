@@ -11,6 +11,7 @@ namespace EUROPA {
     virtual ~TokenChoice();
     
     const ObjectId& getObject() const;
+    const TokenId& getPredecessor() const;
     const TokenId& getSuccessor() const;
 
     bool operator==(const Choice& choice) const;
@@ -21,9 +22,10 @@ namespace EUROPA {
   private:
     friend class ObjectDecisionPoint;
 
-    TokenChoice(const DecisionPointId&, const ObjectId&, const TokenId&);
+    TokenChoice(const DecisionPointId&, const ObjectId&, const TokenId&, const TokenId&);
 
     ObjectId m_object;
+    TokenId m_predecessor;
     TokenId m_successor;
   };
 

@@ -80,30 +80,27 @@ namespace EUROPA {
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor){
+  void DbClientTransactionLog::notifyConstrained(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
     TiXmlElement * element = allocateXmlElement("constrain");
     TiXmlElement * object_el = allocateXmlElement("object");
     object_el->SetAttribute("name", object->getName().toString());
     element->LinkEndChild(object_el);
-    element->LinkEndChild(tokenAsXml(token));
-    if (!successor.isNoId()) {
-      element->LinkEndChild(tokenAsXml(successor));
-    }
+    element->LinkEndChild(tokenAsXml(predecessor));
+    element->LinkEndChild(tokenAsXml(successor));
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyFreed(const ObjectId& object, const TokenId& token){
-    if (m_chronologicalBacktracking) {
-      check_error(strcmp(m_bufferedTransactions.back()->Value(), "constrain") == 0, 
-                  "chronological backtracking assumption violated");
-      popTransaction();
-      return;
-    }
+
+  void DbClientTransactionLog::notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
+    check_error(m_chronologicalBacktracking || strcmp(m_bufferedTransactions.back()->Value(), "constrain") == 0,
+		"Chronological backtracking assumption violated");
+
     TiXmlElement * element = allocateXmlElement("free");
     TiXmlElement * object_el = allocateXmlElement("object");
     object_el->SetAttribute("name", object->getName().toString());
     element->LinkEndChild(object_el);
-    element->LinkEndChild(tokenAsXml(token));
+    element->LinkEndChild(tokenAsXml(predecessor));
+    element->LinkEndChild(tokenAsXml(successor));
     pushTransaction(element);
   }
 

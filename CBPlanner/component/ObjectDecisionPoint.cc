@@ -15,12 +15,12 @@ namespace EUROPA {
 
   ObjectDecisionPoint::~ObjectDecisionPoint() { }
 
-  const bool ObjectDecisionPoint::assign(const ChoiceId& choice) { 
+  const bool ObjectDecisionPoint::assign(const ChoiceId& choice) {
     check_error(choice.isValid());
     check_error(Id<TokenChoice>::convertable(choice));
     const Id<TokenChoice>& tChoice = choice;
     check_error(choice.isValid());
-    m_dbClient->constrain(tChoice->getObject(), m_token, tChoice->getSuccessor()); 
+    m_dbClient->constrain(tChoice->getObject(), tChoice->getPredecessor(), tChoice->getSuccessor());
     check_error(choice.isValid());
     return DecisionPoint::assign(choice);
   }
@@ -28,7 +28,7 @@ namespace EUROPA {
   const bool ObjectDecisionPoint::retract() {
     check_error(Id<TokenChoice>::convertable(m_current));
     Id<TokenChoice> tChoice = m_current;
-    m_dbClient->free(tChoice->getObject(), m_token);
+    m_dbClient->free(tChoice->getObject(), tChoice->getPredecessor(), tChoice->getSuccessor());
     return DecisionPoint::retract();
   }
 
@@ -42,14 +42,16 @@ namespace EUROPA {
     for ( ; it != values.end(); ++it) {
       ObjectId obj = *it;
       check_error(obj.isValid());
-      std::vector<TokenId> successors;
-      obj->getOrderingChoices(m_token, successors);
-      std::vector<TokenId>::iterator it = successors.begin();
+      std::vector<std::pair<TokenId, TokenId> > tuples;
+      obj->getOrderingChoices(m_token, tuples);
+      std::vector<std::pair<TokenId, TokenId> >::iterator it = tuples.begin();
       //std::cout << "Choices for (" << getKey() << "):" << std::endl;
-      for (; it != successors.end(); it++) {      
-	TokenId token = *it;
-	check_error(token.isValid() || token.isNoId());
-	ChoiceId choice = (new TokenChoice(m_id, obj, token))->getId();
+      for (; it != tuples.end(); it++) {
+	TokenId predecessor = it->first;
+	TokenId successor = it->second;
+	check_error(predecessor.isValid());
+	check_error(successor.isValid());
+	ChoiceId choice = (new TokenChoice(m_id, obj, predecessor, successor))->getId();
 	//std::cout << choice << std::endl;
 	m_choices.push_back(choice);
       }
@@ -57,7 +59,7 @@ namespace EUROPA {
     return DecisionPoint::getChoices();
   }
 
-  const TokenId& ObjectDecisionPoint::getToken() const { 
+  const TokenId& ObjectDecisionPoint::getToken() const {
     return m_token;
   }
 
@@ -76,9 +78,8 @@ namespace EUROPA {
   std::ostream& operator <<(std::ostream& os, const Id<ObjectDecisionPoint>& decision) {
     if (decision.isNoId())
       os << " No Decision ";
-    else 
+    else
       decision->print(os);
     return(os);
   }
-
 }

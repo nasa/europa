@@ -12,6 +12,7 @@
 #include "PlanDatabaseWriter.hh"
 
 #include "Constraints.hh"
+#include "Debug.hh"
 
 #include <fstream>
 
@@ -137,6 +138,8 @@ bool copyFromFile() {
 }
 
 int main(int argc, const char ** argv) {
+  initDebug();
+
   std::cout << "Just inside main(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   if (argc < 2) {

@@ -27,8 +27,8 @@ namespace EUROPA {
     void notifyClosed();
     void notifyClosed(const LabelStr& objectType);
     void notifyTokenCreated(const TokenId& token);
-    void notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor);
-    void notifyFreed(const ObjectId& object, const TokenId& token);
+    void notifyConstrained(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
+    void notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
     void notifyActivated(const TokenId& token);
     void notifyMerged(const TokenId& token, const TokenId& activeToken);
     void notifyRejected(const TokenId& token);

@@ -11,6 +11,9 @@
 #include "PlanDatabaseWriter.hh"
 
 #include "Constraints.hh"
+
+#include "Debug.hh"
+
 //#include "LoadInitModel.hh"
 
 #include <string.h>
@@ -119,6 +122,9 @@ int main(int argc, const char ** argv) {
   const char* libPath;
   char* error_msg;
   void* libHandle;
+
+  initDebug();
+
   SchemaId (*fcn_schema)();   //function pointer to NDDL::schema()
 
   switch (argc) {

@@ -40,7 +40,7 @@ private:
 
 #define runTest(test) { \
   try { \
-  std::cout << "      " << #test; \
+  std::cout << "   " << #test << " "; \
   unsigned int id_count = IdTable::size(); \
   bool result = test(); \
   DefaultEngineAccessor::reset(); \
@@ -54,7 +54,7 @@ private:
       std::cout << std::endl; \
       throw Error::GeneralMemoryError(); \
     } else { \
-      std::cout << " FAILED TO PASS UNIT TEST." << std::endl; \
+      std::cout << "      " << " FAILED TO PASS UNIT TEST." << std::endl; \
       throw Error::GeneralUnknownError(); \
     } \
   } \
@@ -65,7 +65,7 @@ private:
 
 #define runTestSuite(test) { \
   try{ \
-  std::cout << #test << "***************" << std::endl; \
+  std::cout << #test << "******************************" << std::endl;\
   if (test()) \
     std::cout << #test << " PASSED." << std::endl; \
   else \

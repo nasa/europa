@@ -35,24 +35,18 @@ namespace EUROPA {
 
   void DbLogger::notifyReinstated(const TokenId& token){m_os << "DbLogger: Token Reinstated" << token->getPredicateName().toString()  << " (" << token->getKey() << ")" << std::endl;}
 
-  void DbLogger::notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor)
+  void DbLogger::notifyConstrained(const ObjectId& object, const TokenId& predecessor, const TokenId& successor)
   {
-    if (successor.isNoId()){
-      m_os << "DbLogger: Token Constrained " << token->getPredicateName().toString()  << " (" << token->getKey() << ") On Object " << 
-	object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << 
-	" (" << object->getKey() << ") Before Token (noId)" << std::endl;
-    }
-    else {
-      m_os << "DbLogger: Token Constrained " << token->getPredicateName().toString()  << " (" << token->getKey() << ") On Object " << 
-	object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " (" 
-	   << object->getKey() << ") Before Token (" << successor->getKey() << ")" << std::endl;
-    }
+    m_os << "DbLogger: Token  " << predecessor->getPredicateName().toString()  << " (" << predecessor->getKey() << ") On Object " << 
+      object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " (" 
+	 << object->getKey() << ") Constrained Before Token (" << successor->getKey() << ")" << std::endl;
   }
 
-  void DbLogger::notifyFreed(const ObjectId& object, const TokenId& token){
-    m_os << "DbLogger: Token Freed " << token->getPredicateName().toString()  << " (" << token->getKey() << ") On Object " << 
-      object->getType().toString() << CLASS_DELIMITER << object->getName().toString() 
-	 << " (" << object->getKey() << ")" << std::endl;}
+  void DbLogger::notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
+    m_os << "DbLogger: Token " << predecessor->getPredicateName().toString()  << " (" << predecessor->getKey() << ") On Object " << 
+      object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " (" 
+	 << object->getKey() << ") Before Token (" << successor->getKey() << ") is Freed" << std::endl;
+  }
 
   void DbLogger::notifyAdded(const ObjectId& object, const TokenId& token){
     m_os << "DbLogger: Token " << token->getPredicateName().toString()  << " (" << token->getKey() << ") Added to Object " 

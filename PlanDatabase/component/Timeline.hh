@@ -17,16 +17,32 @@ namespace EUROPA {
     Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open = false);
     virtual ~Timeline();
 
-    void getOrderingChoices(const TokenId& token, std::vector<TokenId>& results);
+    void getOrderingChoices(const TokenId& token, std::vector< std::pair<TokenId, TokenId> >& results);
     void getTokensToOrder(std::vector<TokenId>& results);
     bool hasTokensToOrder() const;
     const std::list<TokenId>& getTokenSequence() const;
-    void constrain(const TokenId& token, const TokenId& successor = TokenId::noId());
-    void free(const TokenId& token);
+    void constrain(const TokenId& predecessor, const TokenId& successor);
+    void free(const TokenId& predecessor, const TokenId& successor);
   private:
     void remove(const TokenId& token); // Over-ride base class implementation
-    void cleanup(const TokenId& token);
     bool isValid(bool cleaningUp = false) const;
+
+    /**
+     * @brief True iff this token is the first in the sequence
+     */
+    bool atStart(const TokenId& token) const;
+
+    /**
+     * @brief True iff this token is the last in the sequence
+     */
+    bool atEnd(const TokenId& token) const;
+
+    /** Helper methods for the 'free' algorithm */
+    void unlink(const TokenId& token);
+    TokenId removeSuccessor(const TokenId& token);
+    TokenId removePredecessor(const TokenId& token);
+    bool adjacent(const TokenId& x, const TokenId& y) const;
+
 
     /**
      * A list indicating the temporal order of Tokens constrained for this timeline.

@@ -556,6 +556,13 @@ namespace EUROPA {
     Object o1(db.getId(),LabelStr("Objects"),LabelStr("o1"));
     db.close();
 
+    std::list<double> values;
+    values.push_back(LabelStr("L1"));
+    values.push_back(LabelStr("L4"));
+    values.push_back(LabelStr("L2"));
+    values.push_back(LabelStr("L5"));
+    values.push_back(LabelStr("L3"));
+
     IntervalToken tokenA(db.getId(), 
 			 "Objects.P1", 
 			 false,
@@ -563,13 +570,6 @@ namespace EUROPA {
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
-
-    std::list<double> values;
-    values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
-    values.push_back(LabelStr("L2"));
-    values.push_back(LabelStr("L5"));
-    values.push_back(LabelStr("L3"));
     makeTestToken(tokenA, values);
 
     IntervalToken tokenB(db.getId(), 
@@ -580,12 +580,6 @@ namespace EUROPA {
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
 
-    values.clear();
-    values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
-    values.push_back(LabelStr("L2"));
-    values.push_back(LabelStr("L5"));
-    values.push_back(LabelStr("L3"));
     makeTestToken(tokenB, values);
 
     IntervalToken tokenC(db.getId(), 
@@ -596,12 +590,6 @@ namespace EUROPA {
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
 
-    values.clear();
-    values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
-    values.push_back(LabelStr("L2"));
-    values.push_back(LabelStr("L5"));
-    values.push_back(LabelStr("L3"));
     makeTestToken(tokenC, values);
     
 
@@ -613,12 +601,6 @@ namespace EUROPA {
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
 
-    values.clear();
-    values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
-    values.push_back(LabelStr("L2"));
-    values.push_back(LabelStr("L5"));
-    values.push_back(LabelStr("L3"));
     makeTestToken(tokenD, values);
 
     IntervalToken tokenE(db.getId(), 
@@ -629,12 +611,6 @@ namespace EUROPA {
 			 IntervalIntDomain(1, 1000),
 			 LabelStr("o1"), false);
 
-    values.clear();
-    values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
-    values.push_back(LabelStr("L2"));
-    values.push_back(LabelStr("L5"));
-    values.push_back(LabelStr("L3"));
     makeTestToken(tokenE, values);
 
     IntervalToken tokenF(db.getId(), 
@@ -645,12 +621,6 @@ namespace EUROPA {
 			 IntervalIntDomain(1, 1000),
 			 LabelStr("o1"), false);
 
-    values.clear();
-    values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
-    values.push_back(LabelStr("L2"));
-    values.push_back(LabelStr("L5"));
-    values.push_back(LabelStr("L3"));
     makeTestToken(tokenF, values);
 
     IntervalToken tokenG(db.getId(), 
@@ -661,12 +631,6 @@ namespace EUROPA {
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
 
-    values.clear();
-    values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
-    values.push_back(LabelStr("L2"));
-    values.push_back(LabelStr("L5"));
-    values.push_back(LabelStr("L3"));
     makeTestToken(tokenG, values);
     
     CBPlanner::Status res = planner.run(20);
@@ -766,7 +730,7 @@ namespace EUROPA {
 			 LabelStr("Timeline2"));
 
     tokenB.activate();
-    t2.constrain(tokenB.getId(), TokenId::noId());
+    t2.constrain(tokenB.getId(), tokenB.getId());
 
     assert(ce.propagate());
 

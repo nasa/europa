@@ -611,9 +611,12 @@ namespace EUROPA {
     assert(eventToken.getObject()->lastDomain().isMember(o2));
     assert(eventToken.getObject()->lastDomain().isMember(o3));
 
+    // Confirm that since the object type is not closed, no tokens are added to the object
+    assertTrue(o2->getTokens().find(eventToken.getId()) == o2->getTokens().end());
+
     // Finally, close the database for this type, and ensure propagation is triggered, and results in consistency
     db.close(DEFAULT_OBJECT_TYPE().c_str());
-    assert(ENGINE->pending());
+    assertFalse(o2->getTokens().find(eventToken.getId()) == o2->getTokens().end());
     assert(ENGINE->propagate());
 
     // Confirm the object-token relation has propagated
@@ -636,6 +639,66 @@ namespace EUROPA {
 
     // Now the token has gone out of scope so we expect the system to be consistent again
     assert(ENGINE->propagate());
+    return true;
+  }
+
+  bool testFreeAndConstrainImpl(){
+    initDbTestSchema(SCHEMA);
+    PlanDatabase db(ENGINE, SCHEMA);
+    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    db.close();                                                                          
+  
+    IntervalToken t1(db.getId(),  
+                     DEFAULT_PREDICATE(),                                                     
+                     true,                                                               
+                     IntervalIntDomain(0, 10),                                           
+                     IntervalIntDomain(0, 20),                                           
+                     IntervalIntDomain(1, 1000));                                        
+  
+    IntervalToken t2(db.getId(),                                                         
+                     DEFAULT_PREDICATE(),                                                     
+                     true,                                                               
+                     IntervalIntDomain(0, 10),                                           
+                     IntervalIntDomain(0, 20),                                           
+                     IntervalIntDomain(1, 1000));                                        
+  
+    IntervalToken t3(db.getId(),                                                         
+                     DEFAULT_PREDICATE(),                                                     
+                     true,                                                               
+                     IntervalIntDomain(0, 10),                                           
+                     IntervalIntDomain(0, 20),                                           
+                     IntervalIntDomain(1, 1000));
+
+    t1.activate();
+    t2.activate();
+    t3.activate();
+
+    o1.constrain(t1.getId(), t2.getId());
+    o1.constrain(t1.getId(), t3.getId());
+    o1.constrain(t2.getId(), t3.getId());
+
+    o1.free(t1.getId(), t2.getId());
+    o1.free(t1.getId(), t3.getId());
+    o1.free(t2.getId(), t3.getId());
+
+    // Constrain again to leave all cleanup automatic
+    o1.constrain(t1.getId(), t2.getId());
+    o1.constrain(t1.getId(), t3.getId());
+    o1.constrain(t2.getId(), t3.getId());                                    
+
+    // Also use a locally scoped token to force a different deletion path
+    {
+      IntervalToken t4(db.getId(),                                                         
+		       DEFAULT_PREDICATE(),                                                     
+		       true,                                                               
+		       IntervalIntDomain(0, 10),                                           
+		       IntervalIntDomain(0, 20),                                           
+		       IntervalIntDomain(1, 1000));
+      t4.activate();
+      o1.constrain(t3.getId(), t4.getId());   
+    }
+
+    assertTrue(ENGINE->propagate());
     return true;
   }
 
@@ -948,8 +1011,8 @@ namespace EUROPA {
 
     t0.activate();
     t2.activate();
-    timeline1->constrain(t0.getId());
-    timeline2->constrain(t2.getId());
+    // Test base case of insertion into an empty sequence
+    timeline1->constrain(t0.getId(), t2.getId());
 
     db->getConstraintEngine()->propagate();
 
@@ -1145,9 +1208,11 @@ namespace EUROPA {
     assert(pdom1.getLowerBound() == 500);
     assert(pdom1.getUpperBound() == 1000);
 
-    for (int i=0; i < NUMTOKS; i++) {
+    TokenId predecessor = tokens[0][0];
+    predecessor->activate();
+    for (int i=1; i < NUMTOKS; i++) {
       tokens[i][0]->activate();
-      timeline->constrain(tokens[i][0]);
+      timeline->constrain(tokens[i-1][0], tokens[i][0]);
     }
 
     IntervalIntDomain sdom2(tokens[0][0]->getStart()->getDerivedDomain());
@@ -1367,60 +1432,132 @@ namespace EUROPA {
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
+    IntervalToken tokenD(db, 
+                         LabelStr(DEFAULT_PREDICATE()), 
+                         true,
+                         IntervalIntDomain(0, 10),
+                         IntervalIntDomain(0, 20),
+                         IntervalIntDomain(1, 1000));
+
     assert(!timeline.hasTokensToOrder());
     tokenA.activate();
     tokenB.activate();
     tokenC.activate();
+    tokenD.activate();
+
+    // Establish preliminaries
     std::vector<TokenId> tokens;
     timeline.getTokensToOrder(tokens);
-    assert(tokens.size() == 3);
+    assert(tokens.size() == 4);
     assert(timeline.getTokenSequence().size() == 0);
     assert(timeline.hasTokensToOrder());
-
     unsigned int num_constraints = ce->getConstraints().size();
 
-    timeline.constrain(tokenA.getId());
-    num_constraints += 1; // Only object is constrained since sequence should be empty
-    assert(ce->getConstraints().size() == num_constraints);
+    /**
+     * BASE CASE - end insertion and retraction
+     * ========================================
+     * constrain(A,B): A => B; add 2 object constraints and 1 predecessor constraint
+     * constrain(B,C): A => B => C; add 1 object constrainy and 1 predecessor constraint
+     * free(B,C): A => B; Remove 2 constraints
+     * free(A,B): {}; remove 3 constraints
+     */
+    {
+      timeline.constrain(tokenA.getId(), tokenB.getId());
+      num_constraints += 3;
+      assert(ce->getConstraints().size() == num_constraints);
+      assert(timeline.getTokenSequence().size() == 2);
 
-    timeline.constrain(tokenB.getId());
-    num_constraints += 2; // Object variable and a single temporal constraint since placing at the end
-    assert(ce->getConstraints().size() == num_constraints);
+      timeline.constrain(tokenB.getId(), tokenC.getId());
+      num_constraints += 2;
+      assert(ce->getConstraints().size() == num_constraints);
+      assert(timeline.getTokenSequence().size() == 3);
 
-    timeline.constrain(tokenC.getId(), tokenA.getId());
-    num_constraints += 2; // Object variable and a single temporal constraint since placing at the beginning
-    assert(ce->getConstraints().size() == num_constraints);
+      timeline.free(tokenB.getId(), tokenC.getId());
+      num_constraints -= 2;
+      assert(ce->getConstraints().size() == num_constraints);
+      assert(timeline.getTokenSequence().size() == 2);
 
-    assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
-    assert(timeline.getTokenSequence().size() == 3);
-    assert(!timeline.hasTokensToOrder());
+      timeline.free(tokenA.getId(), tokenB.getId());
+      num_constraints -= 3;
+      assert(ce->getConstraints().size() == num_constraints);
+      assert(timeline.getTokenSequence().size() == 0);
+    }
 
-    timeline.free(tokenA.getId());
-    num_constraints -= 3; // Object variable and temporal constraints for placement w.r.t B and C.
-    num_constraints += 1; // Should have added a new constraint to preserve temporal relationship between B and C which had been indirect
-    assert(ce->getConstraints().size() == num_constraints);
 
-    assert(timeline.getTokenSequence().size() == 2);
-    tokens.clear();
-    timeline.getTokensToOrder(tokens);
-    assert(tokens.size() == 1);
-    assert(timeline.hasTokensToOrder());
+    /**
+     * END INSERTION & NON-CHRONOLOGICAL RETRACTION
+     * constrain(A,B): A => B; add 2 object constraints, 1 precedence constraint
+     * constrain(C,A): C => A => B; add 1 object constraint, 1 precedence constraint
+     * free(A,B): C => A; remove one object constraint, 1 precedence constraint
+     */
+    { 
+      timeline.constrain(tokenA.getId(), tokenB.getId());
+      num_constraints += 3; // 2 Object variable constraints and a single temporal constraint
+      assert(ce->getConstraints().size() == num_constraints);
 
-    // Now force it to be part of this timeline, even though it is not otherwise constrained
-    tokenA.getObject()->specify(timeline.getId());
-    tokens.clear();
-    timeline.getTokensToOrder(tokens);
-    assert(tokens.size() == 1); // Won't affect this quantity
-    assert(tokens.front() == tokenA.getId());
+      timeline.constrain(tokenC.getId(), tokenA.getId());
+      num_constraints += 2; // Object variable and a single temporal constraint since placing at the beginning
+      assert(ce->getConstraints().size() == num_constraints);
 
-    timeline.constrain(tokenA.getId());
-    assert(!timeline.hasTokensToOrder());
-    assert(timeline.getTokenSequence().size() == 3);
-    timeline.free(tokenC.getId());
+      assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+      assert(timeline.getTokenSequence().size() == 3);
 
-    assert(timeline.getTokenSequence().size() == 2);
-    assert(timeline.hasTokensToOrder());
+      timeline.free(tokenA.getId(), tokenB.getId());
+      num_constraints -= 2; // Should remove 1 object constraint and 1 temporal constraint
+      assert(ce->getConstraints().size() == num_constraints);
+      assert(timeline.getTokenSequence().size() == 2);
 
+      timeline.free(tokenC.getId(), tokenA.getId());
+      num_constraints -= 3;
+      assert(ce->getConstraints().size() == num_constraints);
+      assert(timeline.getTokenSequence().size() == 0);
+    }
+
+    /**
+     * UNSUPPORTED MIDDLE PAIR
+     */
+    {
+      timeline.constrain(tokenA.getId(), tokenB.getId());
+      timeline.constrain(tokenB.getId(), tokenC.getId());
+      timeline.constrain(tokenC.getId(), tokenD.getId());
+      num_constraints += 7; // 4 object constraints and 3 temporal constraints
+      assert(ce->getConstraints().size() == num_constraints);
+      timeline.free(tokenB.getId(), tokenC.getId());
+      assert(ce->getConstraints().size() == num_constraints); // No change. Middle link unsupported
+      timeline.free(tokenC.getId(), tokenD.getId()); // Should remove C, and D.
+      num_constraints -= 4; // Objects constraints for C, and D, and implict constraint for B->C
+      assert(ce->getConstraints().size() == num_constraints);
+      timeline.free(tokenA.getId(), tokenB.getId());
+      num_constraints -= 3;
+      assert(ce->getConstraints().size() == num_constraints);
+      assert(timeline.getTokenSequence().size() == 0);
+    }
+
+    /**
+     * REMOVAL OF SPANNING CONSTRAINT BETWEEN START AND END
+     */
+    {
+      timeline.constrain(tokenA.getId(), tokenD.getId()); // +3
+      timeline.constrain(tokenC.getId(), tokenD.getId()); // +3
+      timeline.constrain(tokenB.getId(), tokenC.getId()); // +3
+      num_constraints += 9;
+      assert(ce->getConstraints().size() == num_constraints);
+
+      // Remove spanning link.
+      timeline.free(tokenA.getId(), tokenD.getId());
+      num_constraints -= 4; // One object constraint, one explciit constraint, and 2 implicit constraints
+      assert(ce->getConstraints().size() == num_constraints);
+
+      // Remove B,C and expect to get rid of A and B from the sequence
+      timeline.free(tokenB.getId(), tokenC.getId());
+      num_constraints -= 2; // 1 object and 1 temporal constraints
+      assert(ce->getConstraints().size() == num_constraints);
+
+      // Remove B,C and expect to get rid of A and B from the sequence
+      timeline.free(tokenC.getId(), tokenD.getId());
+      num_constraints -= 3; // 2 object and 1 temporal constraints
+      assert(ce->getConstraints().size() == num_constraints);
+    }
 
     return true;
   }
@@ -1475,17 +1612,12 @@ namespace EUROPA {
     assert(tokensToOrder.size() == 3);
 
     // Now incrementally constrain and show reduction in tokens to order
-    timeline.constrain(tokenA.getId());
-    tokensToOrder.clear();
-    timeline.getTokensToOrder(tokensToOrder);
-    assert(tokensToOrder.size() == 2);
-
-    timeline.constrain(tokenB.getId());
+    timeline.constrain(tokenA.getId(), tokenB.getId());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
     assert(tokensToOrder.size() == 1);
 
-    timeline.constrain(tokenC.getId());
+    timeline.constrain(tokenB.getId(), tokenC.getId());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
     assert(tokensToOrder.empty());
@@ -1501,6 +1633,7 @@ namespace EUROPA {
     tokenD->activate();
     timeline.getTokensToOrder(tokensToOrder);
     assert(tokensToOrder.size() == 1);
+    timeline.constrain(tokenC.getId(), tokenD->getId());
     delete tokenD;
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
@@ -1528,8 +1661,8 @@ namespace EUROPA {
       token->activate();
     }
 
-    assert(timeline->getTokens().size() == 0);
-    ce->propagate();
+    assert(timeline->getTokens().size() == (unsigned int) COUNT);
+    ce->propagate(); // Should not alter the count. Relationship updated eagerly
     assert(timeline->getTokens().size() == (unsigned int) COUNT);
 
     int i = 0;
@@ -1539,12 +1672,17 @@ namespace EUROPA {
     while(!tokensToOrder.empty()){
       assert(timeline->getTokenSequence().size() == (unsigned int) i);
       assert(tokensToOrder.size() == (unsigned int) (COUNT - i));
-      std::vector<TokenId> choices;
+      std::vector< std::pair<TokenId, TokenId> > choices;
       TokenId toConstrain = tokensToOrder.front();
       timeline->getOrderingChoices(toConstrain, choices);
       assert(!choices.empty());
-      TokenId successor = choices.front();
-      timeline->constrain(toConstrain, successor);
+      TokenId predecessor = choices.front().first;
+      TokenId successor = choices.front().second;
+
+      assertTrue(toConstrain == predecessor || toConstrain == successor,
+		 "The token from the tokens to order must be a predecessor or a successor.");
+
+      timeline->constrain(predecessor, successor);
       bool res = ce->propagate();
       assert(res);
       tokensToOrder.clear();
@@ -1567,7 +1705,7 @@ namespace EUROPA {
                                        IntervalIntDomain(DURATION, DURATION)))->getId();
     token->getObject()->specify(timeline->getId());
     token->activate();
-    std::vector<TokenId> choices;
+    std::vector<std::pair<TokenId, TokenId> > choices;
     timeline->getOrderingChoices(token, choices);
     assert(choices.empty());
 
@@ -1587,7 +1725,7 @@ namespace EUROPA {
 
     it1.getObject()->specify(timeline.getId());
     it1.activate();
-    timeline.constrain(it1.getId(), TokenId::noId());
+    timeline.constrain(it1.getId(), it1.getId());
 
     // Insert at the end after a token
     EventToken et1(db, 
@@ -1598,7 +1736,7 @@ namespace EUROPA {
 
     et1.getObject()->specify(timeline.getId());
     et1.activate();
-    timeline.constrain(et1.getId(), TokenId::noId());
+    timeline.constrain(it1.getId(), et1.getId());
     assert(it1.getEnd()->getDerivedDomain().getUpperBound() == 100);
 
     // Insert between a token and an event
@@ -1670,8 +1808,7 @@ namespace EUROPA {
     tokenB.activate();
     tokenC.activate();
 
-    timeline.constrain(tokenA.getId()); // Put A on the end.
-    timeline.constrain(tokenB.getId()); // Put B on the end.
+    timeline.constrain(tokenA.getId(), tokenB.getId()); // Insert A and B.
     assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
 
     // Now insert token C in the middle.
@@ -1710,12 +1847,11 @@ namespace EUROPA {
     tokenB.activate();
     tokenC.activate();
 
-    timeline.constrain(tokenA.getId());
-    timeline.constrain(tokenB.getId());
+    timeline.constrain(tokenA.getId(), tokenB.getId());
     bool res = ce->propagate();
     assert(res);
 
-    std::vector<TokenId> choices;
+    std::vector<std::pair<TokenId, TokenId> > choices;
     timeline.getOrderingChoices(tokenC.getId(), choices);
     assert(choices.empty());
     timeline.constrain(tokenC.getId(), tokenB.getId());

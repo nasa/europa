@@ -4,7 +4,11 @@
 
 namespace EUROPA {
 
-  TokenChoice::TokenChoice(const DecisionPointId& decision, const ObjectId& obj, const TokenId& tok) : Choice(decision), m_object(obj), m_successor(tok) { 
+  TokenChoice::TokenChoice(const DecisionPointId& decision, 
+			   const ObjectId& obj, 
+			   const TokenId& predecessor,
+			   const TokenId& successor) 
+    : Choice(decision), m_object(obj), m_predecessor(predecessor), m_successor(successor) { 
     // can't enforce successor.isValid() because decisions to insert at the end
     // include successor::noId() as successor.
     m_type = TOKEN;
@@ -16,6 +20,10 @@ namespace EUROPA {
     check_error(m_type == TOKEN);
     return m_object; 
   }
+  const TokenId& TokenChoice::getPredecessor() const { 
+    check_error(m_type == TOKEN);
+    return m_predecessor; 
+  }
   const TokenId& TokenChoice::getSuccessor() const { 
     check_error(m_type == TOKEN);
     return m_successor; 
@@ -26,12 +34,12 @@ namespace EUROPA {
     const TokenChoice* oChoice = static_cast<const TokenChoice*>(&choice);
     check_error(oChoice != 0);
     check_error(oChoice->getObject().isNoId() || oChoice->getObject().isValid());
+    check_error(oChoice->getPredecessor().isNoId() || oChoice->getPredecessor().isValid());
     check_error(oChoice->getSuccessor().isNoId() || oChoice->getSuccessor().isValid());
-    if (m_decision == oChoice->getDecision() && 
-	((m_successor.isNoId() && oChoice->getSuccessor().isNoId()) || m_successor == oChoice->getSuccessor()) &&
-	((m_object.isNoId() && oChoice->getObject().isNoId()) || m_object == oChoice->getObject()))
-      return true;
-    return false;
+    return (m_decision == oChoice->getDecision() && 
+	    m_predecessor == oChoice->getPredecessor() &&
+	    m_successor == oChoice->getSuccessor() &&
+	    m_object == oChoice->getObject());
   }
 
   void TokenChoice::print(std::ostream& os) const {
