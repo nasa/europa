@@ -1,0 +1,144 @@
+\documentclass[10pt, letterpaper, twoside]{article}
+
+\author{Conor McGann, Tania Bedrax-Weiss, Andrew Bachmann}
+
+\title{PLASMA 1.0: User Guide}
+
+\begin{document}
+
+\maketitle
+
+\section{Abstract}
+
+\section{Introduction}
+
+\section{Concepts}
+The underlying paradigm of PLASMA is that of constraint-based, temporal planning.
+\subsection{Problems, Plans and Planning}
+Explain that a Plan is a solution to a Problem. We pose the problem in terms of an partial plan. Planning is the process of turning a partial plan into a complete and correct plan. Completeness and correctness are defined with respect to a model and the needs of the planner. Give examples to motivte the specification of the problem, the gap between the initial and final plans, and the elememts if the domain that illustrate completeness and correctness issues.
+\subsection{Plan Representation}
+\subsubsection{Time-dependent state and action}
+Talk about Objects that have state and behavior that are temporally qualified. Object state and behaviour can be described by predicates with temporal Extent. Objects with state that is not temporally qualified is a special case where the extent of the behavior is infinite.
+\subsubsection{Flexibility}
+Introduce the notion of flexibility, why it is necessary. This is based on the principle of least commitment and lack of precise knowledge. Then show a mapping to variables.
+\subsection{Plan Entities and Relationships}
+The Entities are first and foremost Object, Token, Variable. Since we have to concern ourselves with relationships among entities in the plan, we need to also introduce the idea of Constraints. Draw a diagram indicating the core entities and their relationships. Indicate how these relationships are encaptured through the use of constraints. We should be sure to have introduced the Token state model.
+\subsection{Plan State Management}
+Now we want to address the desire to assure completeness and correctness. Infrastructure can be built in to leverage the representation in order to assure these properties. We can thus talk about the automated reasonining capabilities that can be used to propagate consequences (changes to variable values, introduction of sub-goals and ocnstraints), as well as test for consistency.
+
+\subsection{Applications of PLASMA}
+\begin{enumerate}
+\item MER Daily Activity Planning. Ground based planning application with input of science goals and rover state. Produces activity sequences to uplink to the rover that have some flexibility in execution.
+\item Planning Agent. An execution system with built in planning capabilities that can execute according to a plan, and use a planner to either replan or refine. An execution agent may be given a plan with varying levels of commitment and simply execute it, as long as it does not fail. This would not require planning, but can still benefit from a Plan, and underlying Plan State Management.
+\end{enumerate}
+
+
+\section{Hello Rover - Getting started with PLASMA}
+Should demonstrate a simple example that takes an initial state, a model, and runs them through the planner. Will generate output and display output in PlanWorks to visualize the plan. This should illustrate the round trip through the process. Will be a fairly brief section, but should address issues of running the planner, point out the particular examples to draw from. Reference PlanWorks if it is available, and indicate how it can be used to visualize the plan. The products of this section when the user is done will be \verb!model.nddl, initial-state.nddl, Jamfile, ppw_config.!
+
+\subsection{Creating a Project}
+This should reference the script, and talk about what is created by the script for your project.
+\subsection{Building a simple model}
+\subsection{Creating an initial state}
+\subsection{Running the planner}
+Include setting up the Jamfile for the planner run, with the model and initial states. Also include setting up the ppw-config file.
+\subsection{Visualization of the plan and planning process in PlanWorks}
+We will not go into all the details. Refer to PlanWorks documentation for setup instructions of use. We may wish to include screen shots.
+
+\section{Model Development}
+For the purposes of this section, we will assume the application is a planning task, and that we can use the built in CBPlanner in PLASMA.
+This is where we get through all the modeling. Should take it through as a tutorial, which will be accompanied by examples that can be run. We can use the example of the K9 model from the Contingent Planning Team to motivate the problem, since they have pushed alot of the modeling features.
+
+\subsection{Rover: The Robotic Geologist}
+Introduction to the motivating problem. Use k9.
+
+\subsection{Defining the classes of the system}
+This should allow us to address:
+\begin{enumerate}
+\item class
+\item enumerations and constants
+\item class variables
+\item class predicates and predicate variables
+\item class constructors
+\item class inheritance and composition
+\end{enumerate}
+End the section by referencing a model and initial state that can be run through the planner and visualized in PlanWorks.
+
+\subsection{Handling relationships between predicates and variables}
+Should address:
+\begin{enumerate}
+\item Constraints among parameters of a predicate.
+\item Rules
+\item Allen Relations
+\end{enumerate}
+End the section by referencing a model and initial state that can be run through the planner and visualized in PlanWorks.
+
+\subsection{Advanced rule writing}
+Should address:
+\begin{enumerate}
+\item local variables
+\item guards
+\item object reference model
+\item existential quantification
+\item universal quantification
+\item macros
+\end{enumerate}
+End the section by referencing a model and initial state that can be run through the planner and visualized in PlanWorks.
+
+\subsection{Incorporating resources}
+Should address:
+\begin{enumerate}
+\item The details of the built in base class. 
+\item How one can define ones own resource. 
+\item Example illustrating use of the constructor.
+\item Example illustrating simple case of production and consumption.
+\item Example illustrating discretization into events.
+\end{enumerate}
+
+End the section by referencing a model and initial state that can be run through the planner and visualized in PlanWorks.
+
+\section{PLASMA System Architecture}
+Picture of overall architecture. Document each component at the level of its main roles and responsibilities. This should be used as an introduction to the API documentation. Ideally, we could directly leverage that documentation.
+\subsection{Plan Database}
+\subsection{Constraint Engine}
+\subsection{Temporal Network}
+\subsection{Rules Engine}
+\subsection{Resources}
+\subsection{NDDL Parser and Compiler}
+\subsection{Utilities}
+\subsection{CBPlanner}
+\subsection{Key use cases}
+Helps to understand the interaction among components. May want to use a simple example model, possibly cut-down from k9.
+\begin{enumerate}
+\item Creating an Object
+\item Token activation
+\item Token deactivation
+\item Constraining a Token
+\item Freeing a Token
+\item Binding a Variable
+\item Freeing a Variable
+\item Copying a plan database
+\end{enumerate}
+
+\section{Customization and Extension}
+\subsection{Configuration and Assembly}
+\subsection{Using and extending the CBPlanner}
+\subsection{Custom constraints}
+\subsection{Custom propagation}
+\subsection{Building model specializations}
+\subsection{Custom rule implementations}
+\subsection{Specialized domains}
+\subsection{External data integration}
+\subsection{Listeners and Loggers}
+\subsection{Integration to PlanWorks}
+
+\section{Bibliography}
+
+\section{Appendices}
+\subsection{Appendix A: NDDL Language Reference}
+\subsection{Appendix B: Constraint Library Reference}
+
+\end{document}
+
+
+
