@@ -296,6 +296,7 @@ namespace EUROPA {
 
     /**
      *@brief Notify listeners that the planner failed to find a plan.
+     */
     DECLARE_EVENT(notifyPlannerTimeout,);
 
     /****From ConstraintEngineListener****/
