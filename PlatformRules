@@ -101,6 +101,14 @@ if $(OS) = CYGWIN {
   CLASSPATH_SEPARATOR = ":" ;
 }
 
+# PTHREADS_LIBRARY = library with pthread related functions
+
+if $(OS) = BEOS {
+  PTHREADS_LIBRARY = condvar ;
+} else {
+  PTHREADS_LIBRARY = pthread ;
+}
+
 #
 # Other miscellaneous platform tweaks
 #
