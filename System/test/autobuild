@@ -1,5 +1,5 @@
-#!/bin/sh
-# $Id: autobuild,v 1.74 2004-09-17 06:12:44 wedgingt Exp $
+#!/bin/bash
+# $Id: autobuild,v 1.75 2004-09-17 17:19:43 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -41,7 +41,7 @@ then
 fi
 
 mkdir Prior
-mv jam.* Prior/
+mv cvs.PLASMA jam.* Prior/
 
 # The (compilation) variants to build and test.
 variants='DEV OPTIMIZED PROFILE'
@@ -76,67 +76,86 @@ ulimit -v 2000000
 # Print the limits so it is obvious what they are when something goes wrong.
 ulimit -a
 
+function cvsCmd() {
+  if test "$1" != 'co' -a "$1" != 'tag'
+  then
+    mkdir PLASMA/autobuild.bug
+    (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments') | \
+        Mail -s 'PLASMA autobuild bug on '"`hostname`"' in '"`pwd`"' failed' "$email"
+    mkdir working/failed
+    exit 22
+  fi
+  echo Calling cvs "$1" "$2" "$3" PLASMA at "`date`" ... >> cvs.PLASMA 2>&1
+  cvs "$1" "$2" "$3" PLASMA >> cvs.PLASMA 2>&1
+  status=$?
+  echo '"cvs '"$1 $2 $3"' PLASMA" in '"`pwd`"' exited '"$status"
+  if test "$status" != 0
+  then
+    mkdir PLASMA/cvs.failed
+    (echo "$info"; echo ''; echo "'cvs '"$1 $2 $3"' PLASMA' failed; aborting autobuild"; tail cvs.PLASMA) | \
+        Mail -s 'PLASMA Autobuild cvs on '"`hostname`"' in '"`pwd`"' failed' "$email"
+    mkdir working/failed
+    exit "$status"
+  fi
+}
+
+function cvsCheckOut() {
+  cvsCmd co -rAutobuildTesting
+}
+
+function cvsTagTest() {
+  cvsCmd tag AutobuildTesting
+}
+
+function cvsRemoveTag() {
+  cvsCmd tag -d AutobuildTesting
+}
+
+function cvsTagPassed() {
+  cvsCmd tag -F $1
+}
+
+function jamCmd() {
+  jam $args $1 > jam.$2.$var.$libmethod 2>&1
+  status=$?
+  echo 'jam '"$args $1"' in '"`pwd`"' exited '"$status"
+  if test $status -ne 0
+  then
+    (echo "$info"; echo ''; echo 'jam '"$args $1"' in '"`pwd`"' exited '"$status"; more jam.$2.$var.$libmethod < /dev/null) | \
+        Mail -s 'PLASMA Autobuild jam '"$args $1"' on '"`hostname`"' failed' "$email"
+    mkdir working/failed
+    exit $status
+  fi
+}
+
+cvsCheckOut
+cvsRemoveTag
+cvsTagTest
+
 for var in $variants
 do
 
   for libmethod in $libmethods
   do
   
-    cvs co PLASMA > cvs.co.PLASMA 2>&1
-    status=$?
-    echo '"cvs co PLASMA" in '"`pwd`"' exited '"$status"
-    if test "$status" != 0
-    then
-      mkdir PLASMA/cvs.co.failed
-      (echo "$info"; echo ''; echo "'cvs co PLASMA' failed; aborting autobuild"; tail cvs.co.PLASMA) | \
-          Mail -s 'PLASMA Autobuild cvs checkout on '"`hostname`"' in '"`pwd`"' failed' "$email"
-      mkdir working/failed
-      exit "$status"
-    fi
+    cvsCheckOut
 
     cd PLASMA
 
-    cmd='jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
+    args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
 
-    $cmd > jam.build.$var.$libmethod 2>&1
-    status=$?
-    echo "$cmd"' in '"`pwd`"' exited '"$status"
-    if test $status -ne 0
-    then
-      (echo "$info"; echo ''; echo "$cmd"' in '"`pwd`"' exited '"$status"; more jam.*.$var < /dev/null) | \
-          Mail -s 'PLASMA Autobuild '"$cmd"' (compile) on '"`hostname`"' failed' "$email"
-      mkdir working/failed
-      exit $status
-    fi
+    jamCmd '' build
 
     for target in tests run-nddl-tests run-nddl-planner-tests
     do
-      $cmd $target >> jam.tests.$var.$libmethod 2>&1
-      status=$?
-      echo "$cmd"' in '"`pwd`"' exited '"$status"
-      if test $status -ne 0
-      then
-        (echo "$info"; echo ''; echo "$cmd"' in '"`pwd`"' exited '"$status"; more jam.*.$var < /dev/null) | \
-          Mail -s 'PLASMA Autobuild '"$cmd"' on '"`hostname`"' failed' "$email"
-        mkdir working/failed
-        exit $status
-      fi
+      jamCmd $target $target
     done
 
-    $cmd clean > jam.clean.$var.$libmethod 2>&1
-    status=$?
-    echo "$cmd"' in '"`pwd`"' exited '"$status"
-    if test $status -ne 0
-    then
-      (echo "$info"; echo ''; echo "$cmd"' in '"`pwd`"' exited '"$status"; more jam.*.$var < /dev/null) | \
-          Mail -s 'PLASMA Autobuild '"$cmd"' on '"`hostname`"' failed' "$email"
-      mkdir working/failed
-      exit $status
-    else
-      (echo "$info"; echo ''; echo 'PLASMA autobuild of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
-          more jam.*.$var.$libmethod < /dev/null) | \
-        Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
-    fi
+    jamCmd clean clean
+
+    (echo "$info"; echo ''; echo 'PLASMA autobuild of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
+        more jam.*.$var.$libmethod < /dev/null) | \
+      Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
 
     # Save the jam output files.
     mv -f jam.* ..
@@ -149,10 +168,15 @@ do
   done
 done
 
+cvsCheckOut
+tag=AutobuildPassed_"`hostname | sed -e 's/[.].*//'`"
+cvsTagPassed $tag
+
 (echo "$info";
     echo '';
     echo "All builds, tests, and cleans passed for each variant (of $variants) and";
-    echo "  each method of building the libraries (of $libmethods).") | \
+    echo "  each method of building the libraries (of $libmethods).";
+    echo "Tagged: 'cvs tag -F '$tag") | \
   Mail -s 'PLASMA Autobuild on '"`hostname`"' passed.' "$email"
 
 date > lastCompleted
