@@ -153,7 +153,7 @@ private:
     }
     catch(Error e) {
       __z__(e, Error("s_os != 0", "no debug stream has been assigned",
-                     "Utils/core/Debug.cc", 118));
+                     "Utils/core/Debug.cc", 117));
     }
 #endif
     return(true);
