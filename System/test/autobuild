@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.72 2004-09-16 23:06:40 wedgingt Exp $
+# $Id: autobuild,v 1.73 2004-09-17 05:40:36 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -111,20 +111,20 @@ do
         then
           (echo "$info"; echo ''; echo 'PLASMA autobuild, variant '"$var"' and library method '"$libmethod"' in '"`pwd`"' passed.';
               more jam.*.$var.$libmethod < /dev/null) | \
-            Mail -s 'PLASMA Autobuild jam clean on '"`hostname`"' in '"`pwd`"' failed' "$email"
+            Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
         else
           (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"' clean" in '"`pwd`"' exited '"$statusJamClean"; more jam.*.$var < /dev/null) | \
-              Mail -s 'PLASMA Autobuild jam clean on '"`hostname`"' in '"`pwd`"' failed' "$email"
+              Mail -s 'PLASMA Autobuild jam '"$var"' '"$libmethod"' clean on '"`hostname`"' failed' "$email"
           exit $statusJamClean
         fi
       else
         (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"' tests run-nddl-tests run-nddl-planner-tests" in '"`pwd`"' exited '"$statusJamTests"; more jam.*.$var < /dev/null) | \
-            Mail -s 'PLASMA Autobuild jam tests on '"`hostname`"' in '"`pwd`"' failed' "$email"
+            Mail -s 'PLASMA Autobuild jam '"$var"' '"$libmethod"' tests on '"`hostname`"' failed' "$email"
         exit $statusJamTests
       fi
     else
       (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"'" -sLIBRARIES='"$libmethod"' in '"`pwd`"' exited '"$statusJam"; more jam.*.$var < /dev/null) | \
-          Mail -s 'PLASMA Autobuild jam compile on '"`hostname`"' in '"`pwd`"' failed' "$email"
+          Mail -s 'PLASMA Autobuild jam '"$var"' '"$libmethod"' compile on '"`hostname`"' failed' "$email"
       exit $statusJam
     fi
 
