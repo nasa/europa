@@ -1,5 +1,6 @@
 #include "Constraints.hh"
 #include "ConstraintEngine.hh"
+#include "ConstraintLibrary.hh"
 #include "ConstrainedVariable.hh"
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
@@ -122,6 +123,8 @@ namespace Prototype {
                   || getCurrentDomain(m_variables[i]).isSingleton());
       check_error(AbstractDomain::canBeCompared(first,
                                                 getCurrentDomain(m_variables[i])));
+      // This constraint has problems similar to CondAllSameConstraint's
+      // related to minDelta().  @see CondAllSameConstraint::CondAllSameConstraint.
     }
   }
 
@@ -254,8 +257,15 @@ namespace Prototype {
     // implement splitting of intervals.
     // This is pointlessly restrictive; shouldn't the Domain class
     // decide whether it splits intervals or not?
+    // But needing to know how a particular Domain class treats
+    // removal of arbitrary members is what makes this class's
+    // handleExecute()'s conditions so involved.
     // --wedgingt@ptolemy.arc.nasa.gov 2004 Feb 12
     //check_error(getCurrentDomain(m_variables[X]).isEnumerated() && getCurrentDomain(m_variables[Y]).isEnumerated());
+
+    // This - and all other constraints that compare values of numeric
+    // domains - has the minDelta() problem noted in CondAllSameConstraint's
+    // constructor.  @see CondAllSameConstraint::CondAllSameConstraint.
   }
 
   void NotEqualConstraint::handleExecute() {
@@ -751,36 +761,6 @@ namespace Prototype {
     m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:greaterThanSum:eqSum"), propagatorName,
                                                 constraintEngine, eqSumScope))->getId();
     assertTrue(m_eqSumConstraint.isValid());
-  }
-
-  AddLessThanConstraint::AddLessThanConstraint(const LabelStr& name,
-                                               const LabelStr& propagatorName,
-                                               const ConstraintEngineId& constraintEngine,
-                                               const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables) {
-    std::vector<ConstrainedVariableId> gSCScope;
-    gSCScope.reserve(m_variables.size());
-    gSCScope.push_back(m_variables[m_variables.size() - 1]);
-    for (unsigned int i = 0; i < m_variables.size() - 1; i++)
-      gSCScope.push_back(m_variables[i]);
-    assertTrue(m_variables.size() == gSCScope.size());
-    m_greaterThanSumConstraint = (new GreaterThanSumConstraint(LabelStr("Internal:AddLessThan:greaterThanSum"),
-                                                               propagatorName, constraintEngine, gSCScope))->getId();
-  }
-
-  AddLessOrEqThanConstraint::AddLessOrEqThanConstraint(const LabelStr& name,
-                                                       const LabelStr& propagatorName,
-                                                       const ConstraintEngineId& constraintEngine,
-                                                       const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables) {
-    std::vector<ConstrainedVariableId> gESCScope;
-    gESCScope.reserve(m_variables.size());
-    gESCScope.push_back(m_variables[m_variables.size() - 1]);
-    for (unsigned int i = 0; i < m_variables.size() - 1; i++)
-      gESCScope.push_back(m_variables[i]);
-    assertTrue(m_variables.size() == gESCScope.size());
-    m_greaterOrEqThanSumConstraint = (new GreaterOrEqThanSumConstraint(LabelStr("Internal:AddLessOrEqThan:greaterOrEqThanSum"),
-                                                                       propagatorName, constraintEngine, gESCScope))->getId();
   }
 
   CondAllSameConstraint::CondAllSameConstraint(const LabelStr& name,
@@ -1424,20 +1404,33 @@ namespace Prototype {
     }
   }
 
-  MinimumEqualConstraint::MinimumEqualConstraint(const LabelStr& name,
-                                                 const LabelStr& propagatorName,
-                                                 const ConstraintEngineId& constraintEngine,
-                                                 const std::vector<ConstrainedVariableId>& variables)
+  RotateScopeRightConstraint::RotateScopeRightConstraint(const LabelStr& name,
+                                                         const LabelStr& propagatorName,
+                                                         const ConstraintEngineId& constraintEngine,
+                                                         const std::vector<ConstrainedVariableId>& variables,
+                                                         const LabelStr& otherName,
+                                                         const int& rotateCount)
     : Constraint(name, propagatorName, constraintEngine, variables)
   {
-    std::vector<ConstrainedVariableId> cEMCScope;
-    cEMCScope.reserve(m_variables.size());
-    cEMCScope.push_back(m_variables[m_variables.size() - 1]);
-    for (unsigned int i = 0; i < m_variables.size() - 1; i++)
-      cEMCScope.push_back(m_variables[i]);
-    assertTrue(m_variables.size() == cEMCScope.size());
-    m_eqMinConstraint = (new EqualMinimumConstraint(LabelStr("Internal:MinEq:EqMin"), propagatorName,
-                                                    constraintEngine, cEMCScope))->getId();
+    assertTrue(abs(rotateCount) < m_variables.size());
+    std::vector<ConstrainedVariableId> otherScope;
+    otherScope.reserve(m_variables.size());
+    unsigned int i;
+    if (rotateCount > 0) {
+      // Rotate to right: last var becomes first, pushing others to the right.
+      for (i = rotateCount; i > 0; i--)
+        otherScope.push_back(m_variables[m_variables.size() - i]);
+      for (i = 0; i < m_variables.size() - rotateCount; i++)
+        otherScope.push_back(m_variables[i]);
+    } else {
+      // Rotate to left: first var becomes last, pushing others to the left.
+      for (i = abs(rotateCount); i < m_variables.size(); i++)
+        otherScope.push_back(m_variables[i]);
+      for (i = 0; i < abs(rotateCount); i++)
+        otherScope.push_back(m_variables[i]);
+    }
+    assertTrue(m_variables.size() == otherScope.size());
+    m_otherConstraint = ConstraintLibrary::createConstraint(otherName, constraintEngine, otherScope);
   }
 
 } // end namespace Prototype
