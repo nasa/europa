@@ -4,7 +4,7 @@ if ! $(PLASMA_READY) {
 
 #ModuleMain nonChrono : nonChrono.cc : CBPlanner ;
 
-CBPlanner_Test_Files = [ FGristFiles NotFalseConstraint BinaryCustomConstraint ConditionalRule SubgoalOnceRule AtSubgoalRule CBPlannerModuleTests ] ;
+CBPlanner_Test_Files = [ FGristFiles NotFalseConstraint BinaryCustomConstraint ConditionalRule SubgoalOnceRule CBPlannerModuleTests ] ;
 ModuleObjects $(CBPlanner_Test_Files:S=.cc) : CBPlanner ;
 
 ModuleMain cbp-module-tests : $(CBPlanner_Test_Files:S=$(SUFOBJ)) module-tests.cc : CBPlanner ;

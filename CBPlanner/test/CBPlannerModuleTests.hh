@@ -16,8 +16,6 @@
 #include "TemporalVariableCondition.hh"
 #include "DynamicInfiniteRealCondition.hh"
 #include "TokenDecisionPoint.hh"
-#include "HSTSHeuristics.hh"
-#include "HSTSOpenDecisionManager.hh"
 
 namespace PLASMA {
 
@@ -35,9 +33,6 @@ namespace PLASMA {
 					 DecisionManager &dm, Horizon &hor);
   bool testDynamicInfiniteRealConditionImpl(ConstraintEngine &ce, PlanDatabase &db,
 					    DecisionManager &dm, Horizon &hor);
-
-  bool testHSTSNoBranchConditionImpl(ConstraintEngine &ce, PlanDatabase &db,
-				     DecisionManager &dm);
 
   bool testForwardDecisionHandlingImpl(ConstraintEngine &ce, PlanDatabase &db,
 				       DecisionManager &dm, Horizon &hor);
@@ -67,21 +62,5 @@ namespace PLASMA {
   bool testFindAnotherPlanImpl(ConstraintEngine &ce, PlanDatabase &db, Horizon& hor, CBPlanner& planner);
 
   bool testAddSubgoalAfterPlanningImpl(ConstraintEngine &ce, PlanDatabase &db, Horizon& hor, CBPlanner& planner);
-
-  bool testDefaultInitializationImpl(HSTSHeuristics& heuristics);
-
-  bool testTokenInitializationImpl(HSTSHeuristics& heuristics);
-
-  bool testVariableInitializationImpl(HSTSHeuristics& heuristics);
-
-  bool testReaderImpl(HSTSHeuristics& heuristics);
-
-  bool testHSTSPlanIdReaderImpl();
-
-  void initHeuristicsSchema();
-
-  bool testHSTSNoBranchImpl(ConstraintEngine &ce, PlanDatabase& db, CBPlanner& planner);
-
-  bool testHSTSHeuristicsAssemblyImpl(ConstraintEngine& ce, PlanDatabase& db, CBPlanner& planner, HSTSHeuristics& heuristics);
 }
 #endif

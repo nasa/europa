@@ -25,13 +25,6 @@ ModuleComponent CBPlanner
 	ResourceFlawDecisionPoint.cc
 	ResourceOpenDecisionManager.cc
 	DMResourceListener.cc
-	Generator.cc
-	HSTSHeuristics.cc
-	HSTSOpenDecisionManager.cc
-	HSTSHeuristicsReader.cc
-	HSTSNoBranch.cc
-	HSTSNoBranchCondition.cc
-	HSTSPlanIdReader.cc
 	;
 
 } # PLASMA_READY
