@@ -1331,6 +1331,8 @@ namespace Prototype {
     assertTrue(m_variables.size() > 1);
     for (unsigned int i = 0; i < m_variables.size(); i++)
       assertTrue(getCurrentDomain(m_variables[i]).isNumeric());
+    // Should probably call AbstractDomain::canBeCompared() and check
+    // minDelta() as well.
   }
 
   // If EqualMinConstraint::handleExecute's contributors were a class
@@ -1400,6 +1402,90 @@ namespace Prototype {
       if (minimum < curDom.getLowerBound())
         continue;
       IntervalDomain restriction(minimum, curDom.getUpperBound());
+      if (curDom.intersect(restriction) && curDom.isEmpty())
+        return;
+    }
+  }
+
+  EqualMaximumConstraint::EqualMaximumConstraint(const LabelStr& name,
+                                                 const LabelStr& propagatorName,
+                                                 const ConstraintEngineId& constraintEngine,
+                                                 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    assertTrue(m_variables.size() > 1);
+    for (unsigned int i = 0; i < m_variables.size(); i++)
+      assertTrue(getCurrentDomain(m_variables[i]).isNumeric());
+    // Should probably call AbstractDomain::canBeCompared() and check
+    // minDelta() as well.
+  }
+
+  // If EqualMaxConstraint::handleExecute's contributors were a class
+  // data member, then EqualMaxConstraint::canIgnore() could be quite
+  // specific about events to ignore.  If the event(s) were also
+  // available to handleExecute(), it could focus on just the changed
+  // vars.
+
+  void EqualMaximumConstraint::handleExecute() {
+    AbstractDomain& maxDom = getCurrentDomain(m_variables[0]);
+    AbstractDomain& firstDom = getCurrentDomain(m_variables[1]);
+    double minSoFar = firstDom.getLowerBound();
+    double maxSoFar = firstDom.getUpperBound();
+    std::set<unsigned int> contributors; /**< Set of var indices that "affect" maximum, or are affected by maxDom's maximum. */
+    contributors.insert(1);
+    std::vector<ConstrainedVariableId>::iterator it = m_variables.begin();
+    unsigned int i = 2;
+    for (it++, it++; it != m_variables.end(); it++, i++) {
+      AbstractDomain& curDom = getCurrentDomain(*it);
+      if (minSoFar > curDom.getUpperBound()) {
+        // This variable doesn't "contribute" ...
+        // ... but it might need to be trimmed by maxDom; check:
+        if (curDom.getUpperBound() > maxDom.getUpperBound())
+          contributors.insert(i);
+        continue;
+      }
+      if (curDom.getLowerBound() > maxSoFar) {
+        // This variable completely "dominates" so far.
+        minSoFar = curDom.getLowerBound();
+        maxSoFar = curDom.getUpperBound();
+        contributors.clear();
+        contributors.insert(i);
+        continue;
+      }
+      if (curDom.getLowerBound() > minSoFar) {
+        // This variable restricts the max's smallest value.
+        minSoFar = curDom.getLowerBound();
+        contributors.insert(i);
+      }
+      if (curDom.getUpperBound() > maxSoFar) {
+        // This variable contains the largest values seen so far.
+        maxSoFar = curDom.getUpperBound();
+        contributors.insert(i);
+        continue;
+      }
+      if (curDom.getUpperBound() >= maxDom.getLowerBound())
+        contributors.insert(i);
+    }
+    if (maxDom.intersect(IntervalDomain(minSoFar, maxSoFar)) && maxDom.isEmpty())
+      return;
+    double maximum = maxDom.getUpperBound();
+    if (contributors.size() == 1) {
+      // If there is only one other var that has a value in maxDom,
+      // it needs to be restricted to maxDom to satisfy the constraint.
+      i = *(contributors.begin());
+      assertTrue(i > 0);
+      AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
+      IntervalDomain restriction(maxDom.getLowerBound(), maximum);
+      curDom.intersect(restriction);
+      return; // No other contributors, so cannot be more to do.
+    }
+    while (!contributors.empty()) {
+      i = *(contributors.begin());
+      assertTrue(i > 0);
+      contributors.erase(contributors.begin());
+      AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
+      if (maximum > curDom.getUpperBound())
+        continue;
+      IntervalDomain restriction(curDom.getLowerBound(), maximum);
       if (curDom.intersect(restriction) && curDom.isEmpty())
         return;
     }
