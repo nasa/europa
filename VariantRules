@@ -31,13 +31,13 @@ rule FVariantC++Flags
 
   switch $(variant) {
   case DEV :
-    return $(DEBUG_FLAGS) -DDEBUG_MESSAGE_SUPPORT $(WARNING_FLAGS) ;
+    return $(DEBUG_FLAGS) -DDEBUG_MESSAGE_SUPPORT $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case OPTIMIZED :
-    return $(OPTIMIZE_FLAGS) $(WARNING_FLAGS) ;
+    return $(OPTIMIZE_FLAGS) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case PROFILE :
-    return $(OPTIMIZE_FLAGS) $(PROFILE_FLAGS) $(WARNING_FLAGS) ;
+    return $(OPTIMIZE_FLAGS) $(PROFILE_FLAGS) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case COVERAGE :
-    return $(COVERAGE_FLAGS) $(WARNING_FLAGS) ;
+    return $(COVERAGE_FLAGS) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case CUSTOM :
     local flags ;
     if $(EUROPA_DEBUG) {
@@ -58,6 +58,7 @@ rule FVariantC++Flags
     if $(EUROPA_WARN) {
       flags += $(WARNING_FLAGS) ;
     }
+    flags += $(EXTRA_DEFS) ;
     return $(flags) ;
   case * :
     Exit FVariantC++Flags unknown variant: $(variant) ;
