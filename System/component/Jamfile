@@ -2,11 +2,6 @@ SubDir PLASMA System component ;
 
 if ! $(PLASMA_READY) {
 
-
-SubDirHdrs $(PLASMA)$(SLASH)Aver ;
-SubDirHdrs $(PLASMA)$(SLASH)Aver$(SLASH)core ;
-SubDirHdrs $(PLASMA)$(SLASH)Aver$(SLASH)component ;
-
 ModuleComponent System
 	:
   TestAssembly.cc
