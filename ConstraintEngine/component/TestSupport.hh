@@ -7,6 +7,7 @@
 #include "ConstraintLibrary.hh"
 #include "Constraints.hh"
 #include "CeLogger.hh"
+#include "Error.hh"
 
 using namespace Prototype;
 
@@ -39,6 +40,7 @@ private:
 #define ENGINE DefaultEngineAccessor::instance()
 
 #define runTest(test) { \
+  try { \
   std::cout << "      " << #test; \
   int id_count = IdTable::size(); \
   bool result = test(); \
@@ -56,14 +58,23 @@ private:
       std::cout << " FAILED TO PASS UNIT TEST." << std::endl; \
       throw Prototype::generalUnknownError; \
     } \
+  } \
+  catch (Error* err){ \
+   err->print(std::cout); \
+  }\
   }
 
 #define runTestSuite(test) { \
+  try{ \
   std::cout << #test << "***************" << std::endl; \
   if (test()) \
     std::cout << #test << " PASSED." << std::endl; \
   else \
     std::cout << #test << " FAILED." << std::endl; \
+  }\
+  catch (Error* err){\
+   err->print(std::cout);\
+  }\
   }
 
 #endif

@@ -88,13 +88,13 @@ namespace Prototype {
       return;
 
     // Process Y
-    double zMax_minus_xMin = Infinity::minus(zMax, xMin, yMax);
-    if (yMax > zMax_minus_xMin)
-      yMax = domy.translateNumber(zMax_minus_xMin, false);
+    double yMaxCandidate = Infinity::minus(zMax, xMin, yMax);
+    if (yMax > yMaxCandidate)
+      yMax = domy.translateNumber(yMaxCandidate, false);
 
-    double zMin_minus_xMax = Infinity::minus(zMin, xMax, yMin);
-    if (yMin < zMin_minus_xMax)
-      yMin = domy.translateNumber(zMin_minus_xMax, true);
+    double yMinCandidate = Infinity::minus(zMin, xMax, yMin);
+    if (yMin < yMinCandidate)
+      yMin = domy.translateNumber(yMinCandidate, true);
 
     if (domy.intersect(yMin,yMax) && domy.isEmpty())
       return;
@@ -1619,13 +1619,48 @@ namespace Prototype {
     return(*m_lockDomain);
   }
 
+  // Enforces X >=0, Y<=0, X+Y==0
+  NegateConstraint::NegateConstraint(const LabelStr& name,
+				   const LabelStr& propagatorName,
+				   const ConstraintEngineId& constraintEngine,
+				   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    check_error(variables.size() == 2);
+    check_error(!variables[0]->baseDomain().isEnumerated());
+    check_error(!variables[1]->baseDomain().isEnumerated());
+  }
+
+  void NegateConstraint::handleExecute() {
+    IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
+    IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+
+    check_error(AbstractDomain::canBeCompared(domx, domy));
+    check_error(!domx.isEmpty() && !domy.isEmpty());
+
+    double xMin, xMax, yMin, yMax;
+    domx.getBounds(xMin, xMax);
+    domy.getBounds(yMin, yMax);
+
+    // Prune immediately to enforce X >= 0 && Y <= 0.
+    xMin = (xMin >= 0 ? xMin : 0);
+    xMax = (xMax >= xMin ? xMax : xMin);
+    yMax = (yMax <= 0 ? yMax : 0);
+    yMin = (yMin <= yMax ? yMin : 0);
+
+    if(domx.intersect(-yMax, -yMin) && domx.isEmpty())
+      return;
+
+    domy.intersect(-xMax, -xMin);
+  }
+
   void initConstraintLibrary() {
     static bool s_runAlready(false);
-
+    
     if (!s_runAlready) {
       // Register constraint Factories
       REGISTER_UNARY(SubsetOfConstraint, "SubsetOf", "Default");
       REGISTER_UNARY(LockConstraint, "Lock", "Default");
+      REGISTER_NARY(EqualConstraint, "Equal", "Default");
       REGISTER_NARY(AddEqualConstraint, "AddEqual", "Default");
       REGISTER_NARY(AddMultEqualConstraint, "AddMultEqual", "Default");
       REGISTER_NARY(AllDiffConstraint, "AllDiff", "Default");
@@ -1635,7 +1670,7 @@ namespace Prototype {
       REGISTER_NARY(CondEqualSumConstraint, "CondEqualSum", "Default");
       REGISTER_NARY(CountNonZerosConstraint, "CountNonZeros", "Default");
       REGISTER_NARY(CountZerosConstraint, "CountZeros", "Default");
-      REGISTER_NARY(EqualConstraint, "Equal", "Default");
+      REGISTER_NARY(OrConstraint, "Or", "Default");
       REGISTER_NARY(EqualMaximumConstraint, "EqualMaximum", "Default");
       REGISTER_NARY(EqualMinimumConstraint, "EqualMinimum", "Default");
       REGISTER_NARY(EqualProductConstraint, "EqualProduct", "Default");
@@ -1649,10 +1684,10 @@ namespace Prototype {
       REGISTER_NARY(MemberImplyConstraint, "MemberImply", "Default");
       REGISTER_NARY(MultEqualConstraint, "MultEqual", "Default");
       REGISTER_NARY(NotEqualConstraint, "NotEqual", "Default");
-      REGISTER_NARY(OrConstraint, "Or", "Default");
 
       // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
       REGISTER_NARY(AddEqualConstraint, "addeq", "Default");
+      REGISTER_NARY(NegateConstraint, "neg", "Default");
       REGISTER_NARY(AddMultEqualConstraint, "addmuleq", "Default");
       REGISTER_NARY(AllDiffConstraint, "adiff", "Default"); // all different
       REGISTER_NARY(EqualConstraint, "asame", "Default"); // all same

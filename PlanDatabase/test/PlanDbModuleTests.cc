@@ -205,45 +205,45 @@ namespace Prototype {
   //class Foo;
   bool testBasicObjectAllocationImpl() {
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"));
-    Object o2(db.getId(), ALL_OBJECTS, LabelStr("o2"));
-    ObjectId id0((new Object(o1.getId(), ALL_OBJECTS, LabelStr("id0")))->getId());
-    Object o3(o2.getId(), ALL_OBJECTS, LabelStr("o3"));
+    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"));
+    Object o2(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o2"));
+    ObjectId id0((new Object(o1.getId(), Schema::ALL_OBJECTS(), LabelStr("id0")))->getId());
+    Object o3(o2.getId(), Schema::ALL_OBJECTS(), LabelStr("o3"));
     assert(db.getObjects().size() == 4);
     assert(o1.getComponents().size() == 1);
     assert(o3.getParent() == o2.getId());
     delete (Object*) id0;
     assert(db.getObjects().size() == 3);
     assert(o1.getComponents().empty());
-    
-    ObjectId id1((new Object(db.getId(), ALL_OBJECTS, LabelStr("id1")))->getId());
-    new Object(id1, ALL_OBJECTS, LabelStr("id2"));
-    ObjectId id3((new Object(id1, ALL_OBJECTS, LabelStr("id3")))->getId());
+
+    ObjectId id1((new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("id1")))->getId());
+    new Object(id1, Schema::ALL_OBJECTS(), LabelStr("id2"));
+    ObjectId id3((new Object(id1, Schema::ALL_OBJECTS(), LabelStr("id3")))->getId());
     assert(db.getObjects().size() == 6);
     assert(id3->getName().toString() == "id1.id3");
-    
+
     // Test ancestor call
-    ObjectId id4((new Object(id3, ALL_OBJECTS, LabelStr("id4")))->getId());
+    ObjectId id4((new Object(id3, Schema::ALL_OBJECTS(), LabelStr("id4")))->getId());
     std::list<ObjectId> ancestors;
     id4->getAncestors(ancestors);
     assert(ancestors.front() == id3);
     assert(ancestors.back() == id1);
-    
+
     // Force cascaded delete
     delete (Object*) id1;
     assert(db.getObjects().size() == 3);
-    
+
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
-    ObjectId id5 = ((new Object(db.getId(), ALL_OBJECTS, LabelStr("id5")))->getId());
-    new Object(id5, ALL_OBJECTS, LabelStr("id6"));
+    ObjectId id5 = ((new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("id5")))->getId());
+    new Object(id5, Schema::ALL_OBJECTS(), LabelStr("id6"));
     return(true);
   }
 
   bool testObjectDomainImpl() {
     PlanDatabase db(ENGINE, SCHEMA);
     std::list<ObjectId> values;
-    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"));
-    Object o2(db.getId(), ALL_OBJECTS, LabelStr("o2"));
+    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"));
+    Object o2(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o2"));
     assert(db.getObjects().size() == 2);
     values.push_back(o1.getId());
     values.push_back(o2.getId());
@@ -256,41 +256,40 @@ namespace Prototype {
   }
 
   bool testObjectVariablesImpl() {
-
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"), true);
+    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"), true);
     assert(!o1.isComplete());
     o1.addVariable(IntervalIntDomain(), LabelStr("VAR1"));
     o1.addVariable(BoolDomain(), LabelStr("VAR2"));
     o1.close();
     assert(o1.isComplete());
     assert(o1.getVariable(LabelStr("VAR21")) != o1.getVariable(LabelStr("VAR2")));
-    
-    Object o2(db.getId(), ALL_OBJECTS, LabelStr("o2"), true);
+
+    Object o2(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o2"), true);
     assert(!o2.isComplete());
     o2.addVariable(IntervalIntDomain(15, 200), LabelStr("VAR1"));
     o2.close();
-    
+
     // Add a unary constraint
     ConstraintLibrary::createConstraint(LabelStr("SubsetOf"), 
-                                        db.getConstraintEngine(), 
-                                        o1.getVariables()[0],
-                                        IntervalIntDomain(10, 20));
-    
+					db.getConstraintEngine(), 
+					o1.getVariables()[0],
+					IntervalIntDomain(10, 20));
+
     // Now add a constraint equating the variables and test propagation
     std::vector<ConstrainedVariableId> constrainedVars;
     constrainedVars.push_back(o1.getVariables()[0]);
     constrainedVars.push_back(o2.getVariables()[0]);
     ConstraintId constraint = ConstraintLibrary::createConstraint(LabelStr("Equal"),
-                                                                  db.getConstraintEngine(),
-                                                                  constrainedVars);
-    
+								  db.getConstraintEngine(),
+								  constrainedVars);
+
     assert(db.getConstraintEngine()->propagate());
     assert(o1.getVariables()[0]->lastDomain() == o1.getVariables()[0]->lastDomain());
-    
+
     // Delete one of the constraints to force automatic clean-up path and explciit clean-up
     delete (Constraint*) constraint;
-    
+
     return(true);
   }
 
@@ -299,54 +298,54 @@ namespace Prototype {
 
     PlanDatabase db(ENGINE, SCHEMA);
     // 1. Create 2 objects
-    ObjectId object1 = (new Object(db.getId(), ALL_OBJECTS, LabelStr("O1")))->getId();
-    ObjectId object2 = (new Object(db.getId(), ALL_OBJECTS, LabelStr("O2")))->getId();    
+    ObjectId object1 = (new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("O1")))->getId();
+    ObjectId object2 = (new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("O2")))->getId();    
     db.close();
-    
+
     assert(object1 != object2);
     assert(db.getObjects().size() == 2);
     // 2. Create 1 token.
     EventToken eventToken(db.getId(), LabelStr("Predicate"), false, IntervalIntDomain(0, 10));
-    
+
     // Confirm not added to the object
     assert(!eventToken.getObject()->getDerivedDomain().isSingleton());
-    
+
     // 3. Activate token. (NO subgoals)
     eventToken.activate();
-    
+
     // Confirm not added to the object
     assert(!eventToken.getObject()->getDerivedDomain().isSingleton());
-    
+
     // 4. Specify tokens object variable to a ingletone
-    
+
     eventToken.getObject()->specify(object1);
-    
+
     // Confirm added to the object
     assert(eventToken.getObject()->getDerivedDomain().isSingleton());
-    
+
     // 5. propagate
     db.getConstraintEngine()->propagate();
-    
+
     // 6. reset object variables domain.
     eventToken.getObject()->reset();
-    
+
     // Confirm it is no longer part of the object
     // Confirm not added to the object
     assert(!eventToken.getObject()->getDerivedDomain().isSingleton());
-    
+
     return true;
   }
 
   bool testCommonAncestorConstraintImpl() {
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"));
-    Object o2(o1.getId(), ALL_OBJECTS, LabelStr("o2"));
-    Object o3(o1.getId(), ALL_OBJECTS, LabelStr("o3"));
-    Object o4(o2.getId(), ALL_OBJECTS, LabelStr("o4"));
-    Object o5(o2.getId(), ALL_OBJECTS, LabelStr("o5"));
-    Object o6(o3.getId(), ALL_OBJECTS, LabelStr("o6"));
-    Object o7(o3.getId(), ALL_OBJECTS, LabelStr("o7"));
-    
+    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"));
+    Object o2(o1.getId(), Schema::ALL_OBJECTS(), LabelStr("o2"));
+    Object o3(o1.getId(), Schema::ALL_OBJECTS(), LabelStr("o3"));
+    Object o4(o2.getId(), Schema::ALL_OBJECTS(), LabelStr("o4"));
+    Object o5(o2.getId(), Schema::ALL_OBJECTS(), LabelStr("o5"));
+    Object o6(o3.getId(), Schema::ALL_OBJECTS(), LabelStr("o6"));
+    Object o7(o3.getId(), Schema::ALL_OBJECTS(), LabelStr("o7"));
+
     ObjectDomain allObjects;
     allObjects.insert(o1.getId());
     allObjects.insert(o2.getId());
@@ -356,83 +355,81 @@ namespace Prototype {
     allObjects.insert(o6.getId());
     allObjects.insert(o7.getId());
     allObjects.close();
-    
+
     // Ensure there they agree on a common root.
     {
       Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId()));
       Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId()));
       Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId()));
       CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
-                                          LabelStr("Default"), 
-                                          ENGINE, 
-                                          makeScope(first.getId(), second.getId(), restrictions.getId()));
-      
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), second.getId(), restrictions.getId()));
+
       assert(ENGINE->propagate());
     }
-    
+
     // Now impose a different set of restrictions which will eliminate all options
     {
       Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId()));
       Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId()));
       Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId()));
       CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
-                                          LabelStr("Default"), 
-                                          ENGINE, 
-                                          makeScope(first.getId(), second.getId(), restrictions.getId()));
-      
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), second.getId(), restrictions.getId()));
+
       assert(!ENGINE->propagate());
     }
-    
+
     // Now try a set of restrictions, which will allow it to pass
     {
       Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId()));
       Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId()));
       Variable<ObjectDomain> restrictions(ENGINE, allObjects);
       CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
-                                          LabelStr("Default"), 
-                                          ENGINE, 
-                                          makeScope(first.getId(), second.getId(), restrictions.getId()));
-      
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), second.getId(), restrictions.getId()));
+
       assert(ENGINE->propagate());
     }
-    
+
     // Now try when no variable is a singleton, and then one becomes a singleton
     {
       Variable<ObjectDomain> first(ENGINE, allObjects);
       Variable<ObjectDomain> second(ENGINE, allObjects);
       Variable<ObjectDomain> restrictions(ENGINE, allObjects);
       CommonAncestorConstraint constraint(LabelStr("commonAncestor"), 
-                                          LabelStr("Default"), 
-                                          ENGINE, 
-                                          makeScope(first.getId(), second.getId(), restrictions.getId()));
-      
+					  LabelStr("Default"), 
+					  ENGINE, 
+					  makeScope(first.getId(), second.getId(), restrictions.getId()));
+
       assert(ENGINE->propagate()); // All ok so far
-      
+
       restrictions.specify(o2.getId());
       assert(ENGINE->propagate()); // Nothing happens yet.
-      
+
       first.specify(o6.getId()); // Now we should propagate to failure
       assert(!ENGINE->propagate());
       first.reset();
-      
+
       first.specify(o4.getId());
       assert(ENGINE->propagate());
-    }
-    
+    }    
     return true;
   }
 
   bool testHasAncestorConstraintImpl() {
-        
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"));
-    Object o2(o1.getId(), ALL_OBJECTS, LabelStr("o2"));
-    Object o3(o1.getId(), ALL_OBJECTS, LabelStr("o3"));
-    Object o4(o2.getId(), ALL_OBJECTS, LabelStr("o4"));
-    Object o5(o2.getId(), ALL_OBJECTS, LabelStr("o5"));
-    Object o6(o3.getId(), ALL_OBJECTS, LabelStr("o6"));
-    Object o7(o3.getId(), ALL_OBJECTS, LabelStr("o7"));
-    Object o8(db.getId(), ALL_OBJECTS, LabelStr("o8"));
+    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"));
+    Object o2(o1.getId(), Schema::ALL_OBJECTS(), LabelStr("o2"));
+    Object o3(o1.getId(), Schema::ALL_OBJECTS(), LabelStr("o3"));
+    Object o4(o2.getId(), Schema::ALL_OBJECTS(), LabelStr("o4"));
+    Object o5(o2.getId(), Schema::ALL_OBJECTS(), LabelStr("o5"));
+    Object o6(o3.getId(), Schema::ALL_OBJECTS(), LabelStr("o6"));
+    Object o7(o3.getId(), Schema::ALL_OBJECTS(), LabelStr("o7"));
+    Object o8(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o8"));
     
     
     // Positive test immediate ancestor
@@ -524,59 +521,91 @@ namespace Prototype {
     PlanDatabase db(ENGINE, SCHEMA);
     ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain()))->getId();
     assert(!v0->isClosed());
-    db.makeObjectVariableFromType(ALL_OBJECTS, v0);
-    assert(v0->isClosed());
-    assert(ENGINE->provenInconsistent());
-    
-    // Now add an object and we should expect the constraint network to be consistent
-    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"));
+    db.makeObjectVariableFromType(Schema::ALL_OBJECTS(), v0);
+    assert(!v0->isClosed());
     assert(ENGINE->propagate());
-    assert(!db.isClosed(ALL_OBJECTS));
-    
+
+    // Now add an object and we should expect the constraint network to be consistent
+    Object o1(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1"));
+    assert(ENGINE->propagate());
+    assert(!db.isClosed(Schema::ALL_OBJECTS()));
+    assert(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
+
     // Now delete the variable. This should remove the listener
     delete (ConstrainedVariable*) v0;
-    
+
     return true;
   }
 
   bool testTokenObjectVariableImpl() {
+
     PlanDatabase db(ENGINE, SCHEMA);
-    
     // Now add an object and we should expect the constraint network to be consistent
-    ObjectId o1 = (new Object(db.getId(), ALL_OBJECTS, LabelStr("o1")))->getId();
+    ObjectId o1 = (new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o1")))->getId();
     EventToken eventToken(db.getId(), LabelStr("Predicate"), false, IntervalIntDomain(0, 10));
+
+    eventToken.activate(); // Must be activate to eventually propagate the objectTokenRelation
     assert(ENGINE->propagate());
-    
-    // Deletion of the object should mean an immediate inconsistency
+
+    // Make sure the object var of the token contains o1.
+    assert(eventToken.getObject()->lastDomain().isMember(o1));
+
+    // Since the object type has not been closed, the object variable will not propagate changes,
+    // so the object token relation will not link up the Token and the object.
+    assert(o1->getTokens().empty());
+
+    // Deletion of the object should result in the domain of the token becoming empty. However,
+    // that will not cause an inconsistency. Nor will it cuase propagation
     delete (Object*) o1;
-    assert(ENGINE->provenInconsistent());
+    assert(ENGINE->constraintConsistent());
     assert(eventToken.getObject()->baseDomain().isEmpty());
-    
+
     // Insertion of a new object should reecover the situation
-    ObjectId o2 = (new Object(db.getId(), ALL_OBJECTS, LabelStr("o2")))->getId();
-    assert(ENGINE->pending());
-    assert(ENGINE->propagate());
+    ObjectId o2 = (new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o2")))->getId();
+    assert(ENGINE->constraintConsistent());
     assert(eventToken.getObject()->baseDomain().isSingleton());
 
     // Now specify it
     eventToken.getObject()->specify(o2);
-    
+
     // Addition of a new object will update the base domain, but not the spec or derived.
     // Consequently, no further propagation is required
-    ObjectId o3 = (new Object(db.getId(), ALL_OBJECTS, LabelStr("o3")))->getId();
+    ObjectId o3 = (new Object(db.getId(), Schema::ALL_OBJECTS(), LabelStr("o3")))->getId();
     assert(ENGINE->constraintConsistent());
     assert(!eventToken.getObject()->baseDomain().isSingleton());
     assert(eventToken.getObject()->lastDomain().isSingleton());
-    
-    // Now resetting the specified domain will reverty the derived domain back completely
+
+    // Now resetting the specified domain will revert the derived domain back completely
     eventToken.getObject()->reset();
-    assert(ENGINE->pending());
-    assert(ENGINE->propagate());
+    assert(ENGINE->constraintConsistent());
     assert(eventToken.getObject()->lastDomain().isMember(o2));
     assert(eventToken.getObject()->lastDomain().isMember(o3));
-    
+
+    // Finally, close the database for this type, and ensure propagation is triggered, and results in consistency
+    db.close(Schema::ALL_OBJECTS());
+    assert(ENGINE->pending());
+    assert(ENGINE->propagate());
+
+    // Confirm the object-token relation has propagated
     return true;
 
+  }
+
+  bool testTokenWithNoObjectOnCreationImpl(){
+    PlanDatabase db(ENGINE, SCHEMA);
+    {
+      // Leave this class of objects open. So we should be able to create a token and have things consistent
+      EventToken eventToken(db.getId(), LabelStr("Predicate"), false, IntervalIntDomain(0, 10));
+      assert(ENGINE->propagate());
+
+    // Now close the datbase for this class of objects, and ensure we are inconsistent
+      db.close(Schema::ALL_OBJECTS());
+      assert(!ENGINE->propagate());
+    }
+
+    // Now the token has gone out of scope so we expect the system to be consistent again
+    assert(ENGINE->propagate());
+    return true;
   }
 
   bool testBasicTokenAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
@@ -627,7 +656,7 @@ namespace Prototype {
   }
 
   bool testBasicTokenCreationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    ObjectId timeline = (new Timeline(db, ALL_OBJECTS, LabelStr("o2")))->getId();
+    ObjectId timeline = (new Timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
     db->close();                                                                          
   
@@ -840,8 +869,8 @@ namespace Prototype {
   }
 
   bool testConstraintMigrationDuringMergeImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    ObjectId timeline1 = (new Timeline(db, ALL_OBJECTS, LabelStr("timeline1")))->getId();
-    ObjectId timeline2 = (new Timeline(db, ALL_OBJECTS, LabelStr("timeline2")))->getId();
+    ObjectId timeline1 = (new Timeline(db, Schema::ALL_OBJECTS(), LabelStr("timeline1")))->getId();
+    ObjectId timeline2 = (new Timeline(db, Schema::ALL_OBJECTS(), LabelStr("timeline2")))->getId();
     db->close();
 
     // Create two base tokens
@@ -895,7 +924,7 @@ namespace Prototype {
   }
 
   bool testMergingPerformanceImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    ObjectId timeline = (new Timeline(db, ALL_OBJECTS, LabelStr("o2")))->getId();
+    ObjectId timeline = (new Timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2")))->getId();
     db->close();
 
     typedef Id<IntervalToken> IntervalTokenId;
@@ -1133,7 +1162,7 @@ namespace Prototype {
   }
 
   bool testBasicInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Timeline timeline(db, ALL_OBJECTS, LabelStr("o2"));
+    Timeline timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2"));
     db->close();
 
     IntervalToken tokenA(db, 
@@ -1216,7 +1245,7 @@ namespace Prototype {
   }
 
   bool testObjectTokenRelationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Timeline timeline(db, ALL_OBJECTS, LabelStr("o2"));
+    Timeline timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2"));
     db->close();
     
     IntervalToken tokenA(db, 
@@ -1299,7 +1328,7 @@ namespace Prototype {
   }
 
   bool testTokenOrderQueryImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Id<Timeline> timeline = (new Timeline(db, ALL_OBJECTS, LabelStr("o2")))->getId();
+    Id<Timeline> timeline = (new Timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2")))->getId();
     db->close();
 
     const int COUNT = 5;
@@ -1365,7 +1394,7 @@ namespace Prototype {
   }
 
   bool testEventTokenInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Timeline timeline(db, ALL_OBJECTS, LabelStr("o2"));
+    Timeline timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2"));
     db->close();
 
     IntervalToken it1(db, 
@@ -1431,7 +1460,7 @@ namespace Prototype {
   }
 
   bool testFullInsertionImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema) {
-    Timeline timeline(db, ALL_OBJECTS, LabelStr("o2"));
+    Timeline timeline(db, Schema::ALL_OBJECTS(), LabelStr("o2"));
     db->close();
 
     IntervalToken tokenA(db, 

@@ -643,6 +643,19 @@ namespace Prototype {
     ConstraintId m_otherConstraint;
   };
 
+  // Enforce X+Y=0. X >=0. Y <=0.
+  class NegateConstraint : public Constraint {
+  public:
+    NegateConstraint(const LabelStr& name,
+		    const LabelStr& propagatorName,
+		    const ConstraintEngineId& constraintEngine,
+		    const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+  private:
+    static const int X=0;
+    static const int Y=1;
+  };
 
   extern void initConstraintLibrary();
 }

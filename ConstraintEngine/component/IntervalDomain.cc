@@ -204,7 +204,7 @@ namespace Prototype {
 
   bool IntervalDomain::intersect(double lb, double ub) {
     // Test for empty intersection while accounting for precision/rounding errors.
-    if (lb - ub > EPSILON || m_lb - ub >= minDelta() || lb - m_ub >= minDelta()) {
+    if ((lb > ub && (lb-ub > EPSILON)) || m_lb - ub >= minDelta() || lb - m_ub >= minDelta()) {
       empty();
       return(true);
     }

@@ -134,4 +134,6 @@ leq(nt_L4_target.end, world.m_horizonEnd);
 eq(nt_L4_target.target, L4_target);
 eq(nt_L4_target.start, 0);
 
+close();
+
 //EOF

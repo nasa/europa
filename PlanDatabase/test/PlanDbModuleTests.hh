@@ -26,6 +26,7 @@ namespace Prototype {
   bool testHasAncestorConstraintImpl();
   bool testMakeObjectVariableImpl();
   bool testTokenObjectVariableImpl();
+  bool testTokenWithNoObjectOnCreationImpl();
 
   bool testBasicTokenAllocationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);
   bool testBasicTokenCreationImpl(ConstraintEngineId &ce, PlanDatabaseId &db, SchemaId &schema);

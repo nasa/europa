@@ -57,7 +57,6 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::isFinite() const {
-    check_error(!isOpen());
     return(true); // Always finite, even if bounds are infinite, since there are always a finite number of values to select.
   }
 
@@ -86,7 +85,6 @@ namespace Prototype {
   }
 
   int EnumeratedDomain::getSize() const {
-    check_error(!isOpen());
     return(m_values.size());
   }
 
@@ -100,9 +98,7 @@ namespace Prototype {
         break;
     }
     m_values.insert(it, value);
-    // We only consider insertion a relaxation if the domain is closed.
-    if (!isOpen())
-      notifyChange(DomainListener::RELAXED);
+    notifyChange(DomainListener::RELAXED);
   }
 
   void EnumeratedDomain::remove(double value) {
@@ -144,8 +140,6 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::equate(AbstractDomain& dom) {
-    check_error(isOpen() || !isEmpty());
-    check_error(dom.isOpen() || !dom.isEmpty());
     check_error(AbstractDomain::canBeCompared(*this, dom));
     if (dom.isInterval()) {
       bool changed = intersect(dom);
@@ -227,7 +221,6 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::isMember(double value) const {
-    check_error(!isOpen());
     std::set<double>::iterator it = m_values.begin();
     for ( ; it != m_values.end(); it++) {
       if (fabs(value - *it) < minDelta())
@@ -265,11 +258,11 @@ namespace Prototype {
   }
 
   void EnumeratedDomain::relax(const AbstractDomain& dom) {
-    if (isOpen())
-      return;
-    check_error(dom.isOpen() || !dom.isEmpty());
     check_error(isSubsetOf(dom));
     check_error(dom.isEnumerated());
+
+    if(dom.isEmpty())
+      return;
 
     if (isEmpty() || !((*this) == dom)) {
       const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
@@ -312,7 +305,6 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::intersect(const AbstractDomain& dom) {
-    check_error(isOpen() || dom.isOpen() || (!isEmpty() && !dom.isEmpty()));
     check_error(isNumeric() == dom.isNumeric());
     bool changed = false;
     if (dom.isInterval()) {
@@ -405,7 +397,6 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::isSubsetOf(const AbstractDomain& dom) const {
-    check_error(dom.isOpen() || !dom.isEmpty());
     check_error(isNumeric() == dom.isNumeric());
 
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
@@ -416,7 +407,6 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::intersects(const AbstractDomain& dom) const {
-    check_error(dom.isOpen() || !dom.isEmpty());
     check_error(isNumeric() == dom.isNumeric());
 
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {

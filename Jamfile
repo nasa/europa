@@ -11,6 +11,7 @@ SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA CBPlanner ;
 SubInclude PLASMA NDDL ;
 SubInclude PLASMA TemporalNetwork ;
+SubInclude PLASMA AgentDatabase ;
 SubInclude PLASMA System ;
 
 } # PLASMA_READY

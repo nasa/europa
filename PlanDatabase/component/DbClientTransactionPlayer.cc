@@ -314,23 +314,27 @@ namespace Prototype {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
     if (strcmp(name, "close") == 0) {
-      const char * identifier = element.Attribute("identifier");
-      if (identifier == NULL) {
+      TiXmlElement * child_el = element.FirstChildElement();
+      if (child_el == NULL) {
         // close database special case
         m_client->close();
         return;
       }
-      // close object type special case
-      check_error(ALWAYS_FAILS); // not yet implemented for dbclient
-//      m_client->close(LabelStr(identifier));
+      else {
+	const char * identifier = child_el->Attribute("value");
+	check_error(identifier != NULL);
+	m_client->close(LabelStr(identifier));
+      }
+
       return;
     }
+
     if (strcmp(name, "activate") == 0) {
       // activate token special case
       const char * identifier = element.Attribute("identifier");
       std::string token_name = identifier;
       TokenId token = m_tokens[token_name];
-      check_error(token.isValid());
+      check_error(token.isValid(), "Invalid token name '" + token_name + "' for activation.");
       m_client->activate(token);
       return;
     }

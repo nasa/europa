@@ -28,7 +28,7 @@ using namespace NDDL;
       dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
     } \
     Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"))); \
-    check_error(!object.getId().isNoId()); \
+    assertTrue(!object.getId().isNoId()); \
     if (autoClose) \
       db.close();
 
@@ -59,29 +59,31 @@ private:
     schema.addObjectPredicate(LabelStr("World"), LabelStr("World.initialState"));
     schema.addPredicateParameter(LabelStr("Resource.change"), LabelStr("quantity"));
 
-    check_error(schema.isPredicateDefined(LabelStr("Resource.change")));
-    check_error(schema.isPredicateDefined(LabelStr("Battery.change")));
-    check_error(schema.isPredicateDefined(LabelStr("World.initialState")));
-    check_error(!schema.isPredicateDefined(LabelStr("NOCLASS.NOPREDICATE")));
-    check_error(schema.isTypeDefined(LabelStr("Resource")));
-    check_error(schema.isTypeDefined(LabelStr("World")));
-    check_error(schema.isTypeDefined(LabelStr("Battery")));
-    check_error(!schema.isTypeDefined(LabelStr("NOTYPE")));
-    check_error(schema.canContain(LabelStr("Resource.change"), LabelStr("quantity")));
-    check_error(schema.canContain(LabelStr("Battery.change"), LabelStr("quantity")));
-    check_error(!schema.canContain(LabelStr("NddlResource.change"), LabelStr("quantity")));
+    assertTrue(schema.isPredicateDefined(LabelStr("Resource.change")));
+    assertTrue(schema.isPredicateDefined(LabelStr("Battery.change")));
+    assertTrue(schema.isPredicateDefined(LabelStr("World.initialState")));
+    assertTrue(!schema.isPredicateDefined(LabelStr("NOCLASS.NOPREDICATE")));
+    assertTrue(schema.isTypeDefined(LabelStr("Resource")));
+    assertTrue(schema.isTypeDefined(LabelStr("World")));
+    assertTrue(schema.isTypeDefined(LabelStr("Battery")));
+    assertTrue(!schema.isTypeDefined(LabelStr("NOTYPE")));
+    assertTrue(schema.canContain(LabelStr("Resource.change"), LabelStr("quantity")));
+    assertTrue(schema.canContain(LabelStr("Battery.change"), LabelStr("quantity")));
+    assertTrue(!schema.canContain(LabelStr("NddlResource.change"), LabelStr("quantity")));
 
-    check_error(schema.canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
-    check_error(schema.canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
-    check_error(schema.canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
-    check_error(!schema.canBeAssigned(LabelStr("World"), LabelStr("Resource.change")));
+    assertTrue(schema.canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
+    assertTrue(schema.canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
+    assertTrue(schema.canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
+    assertTrue(!schema.canBeAssigned(LabelStr("World"), LabelStr("Resource.change")));
 
-    check_error(!schema.isA(LabelStr("Resource"), LabelStr("Battery")));
-    check_error(schema.isA(LabelStr("Battery"), LabelStr("Resource")));
-    check_error(schema.isA(LabelStr("Battery"), LabelStr("Battery")));
-
-    check_error(schema.hasParent(LabelStr("Battery")));
-    check_error(schema.getParent(LabelStr("Battery")) == LabelStr("Resource"));
+    assertTrue(!schema.isA(LabelStr("Resource"), LabelStr("Battery")));
+    assertTrue(schema.isA(LabelStr("Battery"), LabelStr("Resource")));
+    assertTrue(schema.isA(LabelStr("Battery"), LabelStr("Battery")));
+    assertTrue(schema.hasParent(LabelStr("Battery")));
+    assertTrue(schema.getParent(LabelStr("Battery")) == LabelStr("Resource"));
+    assertTrue(schema.getObjectType(LabelStr("World.initialState")) == LabelStr("World"));
+    assertTrue(schema.getObjectType(LabelStr("Battery.change")) == LabelStr("Battery"));
+    assertTrue(schema.getObjectType(LabelStr("Battery.change")) != LabelStr("Resource"));
     return(true);
   }
 
@@ -95,8 +97,8 @@ private:
     schema.addObjectPredicate(LabelStr("Resource"), LabelStr("Resource.change"));
     schema.addPredicateParameter(LabelStr("Resource.change"), LabelStr("quantity"));
     schema.addPredicateParameter(LabelStr("Resource.change"), LabelStr("quality"));
-    check_error(schema.getIndexFromName(LabelStr("Resource.change"), LabelStr("quality")) == 1);
-    check_error(schema.getNameFromIndex(LabelStr("Resource.change"), 0).getKey() == LabelStr("quantity").getKey());
+    assertTrue(schema.getIndexFromName(LabelStr("Resource.change"), LabelStr("quality")) == 1);
+    assertTrue(schema.getNameFromIndex(LabelStr("Resource.change"), 0).getKey() == LabelStr("quantity").getKey());
     return true;
   }
 
@@ -109,13 +111,13 @@ private:
     schema.addEnum(LabelStr("BarEnum"));
     schema.addEnumMember(LabelStr("BarEnum"), LabelStr("QUUX"));
     schema.addEnumMember(LabelStr("BarEnum"), LabelStr("QUUUX"));
-    check_error(schema.isEnum(LabelStr("FOO")));
-    check_error(schema.isEnum(LabelStr("QUUUX")));
-    check_error(!schema.isEnum(LabelStr("ARG")));
+    assertTrue(schema.isEnum(LabelStr("FOO")));
+    assertTrue(schema.isEnum(LabelStr("QUUUX")));
+    assertTrue(!schema.isEnum(LabelStr("ARG")));
 
     schema.addType(LabelStr("Foo"));
-    check_error(schema.isClass(LabelStr("Foo")));
-    check_error(!schema.isClass(LabelStr("Bar")));
+    assertTrue(schema.isClass(LabelStr("Foo")));
+    assertTrue(!schema.isClass(LabelStr("Bar")));
     return true;
   }
 };
@@ -172,7 +174,7 @@ private:
                      IntervalIntDomain(1, 1000));
     t0.activate();
     bool prop = ce.propagate();
-    check_error(prop);
+    assertTrue(prop);
     DEFAULT_TEARDOWN();
     return(true);
   }

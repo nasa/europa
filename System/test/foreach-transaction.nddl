@@ -38,3 +38,5 @@ eq(nav.from, Lander);
 eq(nav.to, Hill);
 eq(nav.start, 0);
 eq(nav.end, 100);
+
+close();

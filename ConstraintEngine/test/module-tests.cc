@@ -360,6 +360,7 @@ public:
     runTest(testConstraintDeletion);
     runTest(testArbitraryConstraints);
     runTest(testLockConstraint);
+    runTest(testNegateConstraint);
     return(true);
   }
 
@@ -416,6 +417,32 @@ private:
       assert(v1.getDerivedDomain().getSingletonValue() == 1);
       assert(v2.getDerivedDomain().getSingletonValue() == 2);
     }
+    /**
+    // Test to force negative values where A + B == C and C < A. Focus on computation of B
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(9, 29));
+      Variable<IntervalDomain> v1(ENGINE, IntervalDomain());
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 28));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(ENGINE->constraintConsistent());
+      assert(v1.getDerivedDomain().getLowerBound() == -21);
+      assert(v1.getDerivedDomain().getUpperBound() == -1);
+    }
+
+    // Another test to force negative values where A + B == C and C < A. Focus on computation of A and C.
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 30));
+      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(-30, -1));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 27));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(ENGINE->constraintConsistent());
+      assert(v0.getDerivedDomain() == IntervalIntDomain(3, 30));
+      assert(v1.getDerivedDomain() == IntervalDomain(-30, -3));
+      assert(v2.getDerivedDomain() == IntervalIntDomain(0, 27));
+    }
+    **/
 
     // Now test mixed types
     {
@@ -2236,6 +2263,27 @@ private:
     v0.reset();
     assert(ENGINE->propagate());
     assert(v0.getDerivedDomain() == lockDomain);
+
+    return true;
+  }
+
+  static bool testNegateConstraint() {
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain());
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain());
+    NegateConstraint c0(LabelStr("NegateConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(v0.getDerivedDomain() == IntervalIntDomain(0, PLUS_INFINITY));
+    assert(v1.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, 0));
+
+    v0.specify(IntervalIntDomain(20, 30));
+    assert(v1.getDerivedDomain() == IntervalIntDomain(-30, -20));
+
+    v1.specify(IntervalIntDomain(-22, -21));
+    assert(v0.getDerivedDomain() == IntervalIntDomain(21, 22));
+
+    v0.specify(21);
+    assert(v1.getDerivedDomain().getSingletonValue() == -21);
 
     return true;
   }

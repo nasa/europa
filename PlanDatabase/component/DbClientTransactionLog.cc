@@ -67,8 +67,8 @@ namespace Prototype {
   void DbClientTransactionLog::notifyClosed(const LabelStr& objectType){
     TiXmlElement * element = new TiXmlElement("invoke");
     element->SetAttribute("name", "close");
-    TiXmlElement * id_el = new TiXmlElement("id");
-    id_el->SetAttribute("name", objectType.toString());
+    TiXmlElement * id_el = new TiXmlElement("ident");
+    id_el->SetAttribute("value", objectType.toString());
     element->LinkEndChild(id_el);
     m_bufferedTransactions.push_back(element);
   }

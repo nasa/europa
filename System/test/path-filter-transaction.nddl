@@ -52,6 +52,8 @@ any(World.Going g);
 eq(g.from, rock);
 eq(g.to, hill);
 
+close();
+
 /*
  Path path : {
   eq(path.from, g.from);

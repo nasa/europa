@@ -31,6 +31,49 @@
 /**
  * Test class for testing client and factory
  */
+class ForceFailureConstraint : public UnaryConstraint {
+public:
+  ForceFailureConstraint(const LabelStr& name,
+			 const LabelStr& propagatorName,
+			 const ConstraintEngineId& constraintEngine,
+			 const ConstrainedVariableId& variable,
+			 const AbstractDomain& domain = IntervalIntDomain())
+  : UnaryConstraint(name, propagatorName, constraintEngine, variable){}
+
+  const AbstractDomain& getDomain() const {
+    static IntervalIntDomain sl_noDomain;
+    return sl_noDomain;
+  }
+
+  void handleExecute(){
+    if(getCurrentDomain(m_variables[0]).isSingleton())
+      getCurrentDomain(m_variables[0]).empty();
+  }
+};
+
+class DefaultSchemaAccessor {
+public:
+
+  static const SchemaId& instance() {
+    if (s_instance.isNoId())
+      s_instance = (new Schema())->getId();
+    return(s_instance);
+  }
+
+  static void reset() {
+    if (!s_instance.isNoId()) {
+      delete (Schema*) s_instance;
+      s_instance = SchemaId::noId();
+    }
+  }
+
+private:
+  static SchemaId s_instance;
+};
+
+SchemaId DefaultSchemaAccessor::s_instance;
+
+#define SCHEMA DefaultSchemaAccessor::instance()
 
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
     ConstraintEngineId ce = (new ConstraintEngine())->getId(); \
@@ -45,7 +88,7 @@
     } \
     { EqualityConstraintPropagator* ecp = new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce); \
       assert(ecp != 0); } \
-    Object* objectPtr = new Object(db, LabelStr("AllObjects"), LabelStr("o1")); \
+    Object* objectPtr = new Object(db, Schema::ALL_OBJECTS(), LabelStr("o1")); \
     assert(objectPtr != 0); \
     Object& object = *objectPtr; \
     assert(objectPtr->getId() == object.getId()); \
@@ -75,6 +118,7 @@ public:
     runTest(testHasAncestorConstraint);
     runTest(testMakeObjectVariable);
     runTest(testTokenObjectVariable);
+    runTest(testTokenWithNoObjectOnCreation);
     return(true);
   }
   
@@ -103,9 +147,8 @@ private:
   static bool testHasAncestorConstraint(){
     return testHasAncestorConstraintImpl();
   }
-  
   /**
-   * The most basic case for dynamic objects is that we can populate the variable correclty
+   * The most basic case for dynamic objects is that we can populate the variable correctly
    * and synchronize its values.
    */
   static bool testMakeObjectVariable(){
@@ -120,6 +163,25 @@ private:
    */
   static bool testTokenObjectVariable(){
     return testTokenObjectVariableImpl();
+  }
+
+  static bool testTokenWithNoObjectOnCreation(){
+    return testTokenWithNoObjectOnCreationImpl();
+  }
+};
+
+
+class IntervalTokenFactory: public ConcreteTokenFactory {
+public:
+  IntervalTokenFactory(): ConcreteTokenFactory(LabelStr("Foo")){}
+private:
+  TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name) const{
+    TokenId token = (new IntervalToken(planDb, name, true))->getId();
+    return token;
+  }
+  TokenId createInstance(const TokenId& master, const LabelStr& name) const{
+    TokenId token = (new IntervalToken(master, name))->getId();
+    return token;
   }
 };
 
@@ -150,7 +212,7 @@ private:
     return retval;
   }
 
-  static bool testBasicTokenCreation() {                                                            
+  static bool testBasicTokenCreation() {           
     bool retval = false;
     DEFAULT_SETUP(ce,db,schema,false);
     retval = testBasicTokenCreationImpl(ce, db, schema);

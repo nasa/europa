@@ -70,6 +70,12 @@ namespace Prototype {
     void getValues(std::list< ELEMENT_TYPE >& results) const;
 
     /**
+     * @brief Fill the given set with the contents of the domain
+     * @param results The set to be filled. Must be empty.
+     */
+    void getValues(std::set< ELEMENT_TYPE>& results) const;
+
+    /**
      * @brief Insert a value into the domain.
      */
     void insert(double value);
@@ -146,8 +152,18 @@ namespace Prototype {
     check_error(results.empty());
     check_error(isFinite());
     for (std::set<double>::iterator it = m_values.begin(); it != m_values.end(); ++it) {
-      double value = *it;;
+      double value = *it;
       results.push_back(ELEMENT_TYPE(value));
+    }
+  }
+
+  template <class ELEMENT_TYPE>
+  void Domain<ELEMENT_TYPE>::getValues(std::set<ELEMENT_TYPE>& results) const {
+    check_error(results.empty());
+    check_error(isFinite());
+    for (std::set<double>::iterator it = m_values.begin(); it != m_values.end(); ++it) {
+      double value = *it;
+      results.insert(ELEMENT_TYPE(value));
     }
   }
 
