@@ -1,3 +1,8 @@
+EUROPA2_20050228_0
+1. fixed HSTS heuristics so all HSTS models either succeed or timeout
+2. added stream version of check_error
+3. added support for queries with cutoffs
+
 TUTORIAL_20050210
 1. Improvements to documentation
 2. Improved support for multiple guards
