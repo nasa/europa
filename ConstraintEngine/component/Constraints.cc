@@ -710,7 +710,7 @@ namespace Prototype {
     eqSumScope[0] = m_interimVariable.getId();
     m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:lessThanSum:eqSum"), propagatorName,
                                                 constraintEngine, eqSumScope))->getId();
-    assertTrue(m_eqSumConstraint != 0);
+    assertTrue(m_eqSumConstraint.isValid());
   }
 
   CondAllSameConstraint::CondAllSameConstraint(const LabelStr& name,
