@@ -22,7 +22,12 @@ LocalDepends tests : run-hsts-module-tests ;
 
 # Commented out tests are failing for various reasons; see each test for more info.
 LocalDepends run-hsts-planner-tests :
-	monkey-timeline monkey-timeline-hacked monkey-timeline-hacked2 monkey-timeline-hacked3
+        monkey-timeline
+        monkey-timeline-hacked
+        monkey-timeline-hacked2
+        monkey-timeline-hacked3
+#       monkey-timeline-newHeur
+#       monkey-timeline-extendedHeur
         monkey1-timeline1
         monkey1-timeline-objvar
 #       monkey1-timeline-twomonkeys-objvar
@@ -159,6 +164,13 @@ RunEUROPATest monkey-timeline : timeline0.nddl ;
 RunEUROPATest monkey-timeline-hacked : timeline-hacked.nddl ;
 RunEUROPATest monkey-timeline-hacked2 : timeline-hacked2.nddl ;
 RunEUROPATest monkey-timeline-hacked3 : timeline-hacked3.nddl ;
+
+# Fails: ConstraintEngine/component/IntervalIntDomain.cc:118: Error: isFinite() is false
+RunEUROPATest monkey-timeline-newHeur : timeline0.nddl : monkeyNewHeur.xml ;
+
+# Fails: HSTS/core/HSTSHeuristics.cc:197: Error: !enumeration.empty() is false
+RunEUROPATest monkey-timeline-extendedHeur : timeline0.nddl : monkeyExtendedHeur.xml ;
+
 RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
 
 # Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
