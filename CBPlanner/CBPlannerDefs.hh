@@ -49,6 +49,18 @@ namespace Prototype {
   class OpenDecisionManager;
   typedef Id<OpenDecisionManager> OpenDecisionManagerId;
 
+
+  class ResourceOpenDecisionManager;
+  typedef Id<ResourceOpenDecisionManager> ResourceOpenDecisionManagerId;
+
+  class ResourceFlawDecisionPoint;
+  typedef Id<ResourceFlawDecisionPoint> ResourceFlawDecisionPointId;
+
+  class ResourceFlawChoice;
+  typedef Id<ResourceFlawChoice> ResourceFlawChoiceId;
+
+  class DMResourceListener;
+  typedef Id<DMResourceListener> DMResourceListenerId;
 }
 
 #endif
