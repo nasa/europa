@@ -558,6 +558,8 @@ namespace Prototype {
       /*ExtraInfo: QuantityMin:QuantityMax*/
       if(type == T_TRANSACTION) {
         TransactionId trans = (TransactionId) token;
+        //std::cerr << "=====>" << trans->getMin() << "->" << trans->getMax() << std::endl;
+        //std::cerr << "=====>" << (double) MINUS_INFINITY << "=>" << (double) PLUS_INFINITY << std::endl;
         tokOut << trans->getMin() << COMMA << trans->getMax();
       }
       /*ExtraInfo: SlotOrder*/
@@ -808,7 +810,7 @@ namespace Prototype {
 
     void PartialPlanWriter::notifyClosed(const TokenId &tokId) {
       if(stepsPerWrite) {
-        transactionList->push_back(Transaction(TOKEN_CREATED, tokId->getKey(), UNKNOWN,
+        transactionList->push_back(Transaction(TOKEN_CLOSED, tokId->getKey(), UNKNOWN,
                                                transactionId++, seqId, nstep,
                                                tokId->getPredicateName().toString()));
         numTransactions++;
