@@ -18,6 +18,8 @@ NddlCompiler:
 4. Support nested guarded expressions
 5. Implement unary constraints
 6. Create configuration file for all concrete instances, at least define them in one place
+7. Complete NDDL Guide
+8. Implement support for existential quanitifier on objects
 
 Testing support:
 1. Find a way to export initial states from Europa and translate them.

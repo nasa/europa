@@ -40,22 +40,20 @@ int main(){
   // Initialize constraints
   initConstraintLibrary();
   
-  REGISTER_NARY(EqualConstraint, "CoTemporal", "Default");
-  REGISTER_NARY(EqualConstraint, "neq", "Default");
+  REGISTER_NARY(EqualConstraint, "concurrent", "Default");
+  REGISTER_NARY(EqualConstraint, "eq", "Default");
   REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
+  REGISTER_NARY(LessThanEqualConstraint, "before", "Default");
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "Before", "Default");
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
-  REGISTER_NARY(EqualConstraint, "EqualConstraint", "EquivalenceClass");
-
+  
   // Allocate the schema
   SchemaId schema = NDDL::schema();
   ConstraintEngine ce;
   PlanDatabase db(ce.getId(), schema);
 
   new DefaultPropagator(LabelStr("Default"), ce.getId());
-  new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());
   RulesEngine re(db.getId());
 
   FlawSource source(FlawSource(db.getId()));
