@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.95 2004-10-06 15:58:19 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.96 2004-10-06 16:05:00 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -224,6 +224,9 @@ else
     : '  related to this script itself being under the PLASMA CVS tree.'
 fi
 
+# Warn if there is a newer version of this script in CVS ?
+warn=true
+
 # Now, for the primary purpose: run all the tests of all build variants.
 for var in $variants
 do
@@ -244,6 +247,18 @@ do
     if "$removePlasma"
     then
         cvsCmd co -r "$testingTag" PLASMA
+        if "$warn"
+        then
+            cmp -s "$0" PLASMA/System/test/autobuild
+            status=$?
+            if test "$status" -ne 0
+            then
+                echo ''
+                echo "$0"': warning: newer autobuild script in CVS'
+                echo ''
+                warn=false
+            fi
+        fi
         cd PLASMA
     fi
     jam_args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
