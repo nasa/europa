@@ -37,7 +37,7 @@ public:
    * will test cleanup.
    */
   void initializeContext(const TokenId& token, std::vector<ConstrainedVariableId>& scope) const{
-    check_error(scope.empty());
+    assert(scope.empty());
     scope.push_back(token->getObject());
     scope.push_back(token->getRejectability());
     ConstrainedVariableId localVariable = 
@@ -258,7 +258,7 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
+    assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
 
     IntervalToken t1(db.getId(),
 		     LabelStr("P1"), 
@@ -270,25 +270,25 @@ private:
     t1.getDuration()->specify(IntervalIntDomain(5, 7));
 
     // Activate & deactivate - ensure proper handling of rejectability variable
-    check_error(!t0.getRejectability()->getDerivedDomain().isSingleton());
+    assert(!t0.getRejectability()->getDerivedDomain().isSingleton());
     t0.activate();
-    check_error(t0.getRejectability()->getDerivedDomain().isSingleton());
-    check_error(t0.getRejectability()->getDerivedDomain().getSingletonValue() == false);
+    assert(t0.getRejectability()->getDerivedDomain().isSingleton());
+    assert(t0.getRejectability()->getDerivedDomain().getSingletonValue() == false);
     t0.deactivate();
-    check_error(!t0.getRejectability()->getDerivedDomain().isSingleton());
+    assert(!t0.getRejectability()->getDerivedDomain().isSingleton());
 
     // Now activate and merge
     t0.activate();
     t1.merge(t0.getId());
 
     // Make sure the necessary restrictions have been imposed due to merging i.e. restruction due to specified domain
-    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 7);
-    check_error(t1.isMerged());
+    assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 7);
+    assert(t1.isMerged());
 
     // Do a split and make sure the old values are reinstated.
     t1.split();
-    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
-    check_error(t1.isInactive());
+    assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
+    assert(t1.isInactive());
 
     // Now post equality constraint between t1 and extra token t2 and remerge
     IntervalToken t2(db.getId(), 
@@ -310,25 +310,25 @@ private:
 
     // Verify that the equality constraint has migrated and original has been deactivated.
     //TBW: when stacking instead of merging tokens, the next check is not true
-    // check_error(!equalityConstraint->isActive());
-    check_error(t0.getEnd()->getDerivedDomain().getLowerBound() == 8);
-    check_error(t0.getEnd()->getDerivedDomain() == t2.getEnd()->getDerivedDomain());
+    // assert(!equalityConstraint->isActive());
+    assert(t0.getEnd()->getDerivedDomain().getLowerBound() == 8);
+    assert(t0.getEnd()->getDerivedDomain() == t2.getEnd()->getDerivedDomain());
 
     // Undo the merge and check for initial conditions being established
     t1.split();
-    check_error(equalityConstraint->isActive());
+    assert(equalityConstraint->isActive());
 
     // Redo the merge
     t1.merge(t0.getId());
 
     // Confirm deletion of the constraint is handled correctly
     delete (Constraint*) equalityConstraint;
-    check_error(t0.getEnd()->getDerivedDomain() != t2.getEnd()->getDerivedDomain());
+    assert(t0.getEnd()->getDerivedDomain() != t2.getEnd()->getDerivedDomain());
 
     // Confirm previous restriction due to specified domain, then reset and note the change
-    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 7);
+    assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 7);
     t1.getDuration()->reset();
-    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
+    assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
 
 
     // Test unary
@@ -338,7 +338,7 @@ private:
 									  t1.getDuration(),
 									  IntervalIntDomain(5, 6));
     t1.merge(t0.getId());
-    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 6);
+    assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 6);
     delete (Constraint*) subsetOfConstraint;
 
     // Deletion will now occur and test proper cleanup.
@@ -353,9 +353,9 @@ private:
 
     typedef Europa::Id<IntervalToken> IntervalTokenId;
     
-    static const int UNIFIED=5;
-    static const int NUMTOKS=100;
-    static const int NUMPARAMS=2;
+    static const int NUMTOKS=200;
+    static const int UNIFIED=3;
+    static const int NUMPARAMS=3;
 
     //Create tokens with the same domains.  We will impose a constraint on
     //each token variable.  Tokens will have 5 parameter variables.
@@ -380,17 +380,17 @@ private:
     }
 
     IntervalIntDomain sdom1(tokens[0][0]->getStart()->getDerivedDomain());
-    check_error(sdom1.getLowerBound() == 0);
-    check_error(sdom1.getUpperBound() == 210);
+    assert(sdom1.getLowerBound() == 0);
+    assert(sdom1.getUpperBound() == 210);
 
     IntervalIntDomain edom1(tokens[0][0]->getEnd()->getDerivedDomain());
-    check_error(edom1.getLowerBound() == 1);
-    check_error(edom1.getUpperBound() == 220);
+    assert(edom1.getLowerBound() == 1);
+    assert(edom1.getUpperBound() == 220);
 
     Europa::Id<TokenVariable<IntervalIntDomain> > pvar1(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom1(pvar1->getDerivedDomain());
-    check_error(pdom1.getLowerBound() == 500);
-    check_error(pdom1.getUpperBound() == 1000);
+    assert(pdom1.getLowerBound() == 500);
+    assert(pdom1.getUpperBound() == 1000);
 
     for (int i=0; i < NUMTOKS; i++) {
       tokens[i][0]->activate();
@@ -398,17 +398,17 @@ private:
     }
 
     IntervalIntDomain sdom2(tokens[0][0]->getStart()->getDerivedDomain());
-    check_error(sdom2.getLowerBound() == 0);
-    check_error(sdom2.getUpperBound() == 209);
+    assert(sdom2.getLowerBound() == 0);
+    assert(sdom2.getUpperBound() == 209);
 
     IntervalIntDomain edom2(tokens[0][0]->getEnd()->getDerivedDomain());
-    check_error(edom2.getLowerBound() == 1);
-    check_error(edom2.getUpperBound() == 210);
+    assert(edom2.getLowerBound() == 1);
+    assert(edom2.getUpperBound() == 210);
 
     Europa::Id<TokenVariable<IntervalIntDomain> > pvar2(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom2(pvar2->getDerivedDomain());
-    check_error(pdom2.getLowerBound() == 500);
-    check_error(pdom2.getUpperBound() == 1000);
+    assert(pdom2.getLowerBound() == 500);
+    assert(pdom2.getUpperBound() == 1000);
 
     for (int i=0; i < NUMTOKS; i++)
       for (int j=1; j < UNIFIED; j++) { 
@@ -417,17 +417,17 @@ private:
       }
 
     IntervalIntDomain sdom3(tokens[0][0]->getStart()->getDerivedDomain());
-    check_error(sdom3.getLowerBound() == 0);
-    check_error(sdom3.getUpperBound() == 209);
+    assert(sdom3.getLowerBound() == 0);
+    assert(sdom3.getUpperBound() == 209);
 
     IntervalIntDomain edom3(tokens[0][0]->getEnd()->getDerivedDomain());
-    check_error(edom3.getLowerBound() == 1);
-    check_error(edom3.getUpperBound() == 210);
+    assert(edom3.getLowerBound() == 1);
+    assert(edom3.getUpperBound() == 210);
 
     Europa::Id<TokenVariable<IntervalIntDomain> > pvar3(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom3(pvar3->getDerivedDomain());
-    check_error(pdom3.getLowerBound() == 500+UNIFIED-1);
-    check_error(pdom3.getUpperBound() == 1000);
+    assert(pdom3.getLowerBound() == 500+UNIFIED-1);
+    assert(pdom3.getUpperBound() == 1000);
 
     for (int i=0; i < NUMTOKS; i++)
       for (int j=1; j < UNIFIED; j++) {
@@ -436,17 +436,17 @@ private:
       }
 
     IntervalIntDomain sdom4(tokens[0][0]->getStart()->getDerivedDomain());
-    check_error(sdom4.getLowerBound() == sdom1.getLowerBound());
-    check_error(sdom4.getUpperBound() == sdom1.getUpperBound());
+    assert(sdom4.getLowerBound() == sdom1.getLowerBound());
+    assert(sdom4.getUpperBound() == sdom1.getUpperBound());
 
     IntervalIntDomain edom4(tokens[0][0]->getEnd()->getDerivedDomain());
-    check_error(edom4.getLowerBound() == edom1.getLowerBound());
-    check_error(edom4.getUpperBound() == edom1.getUpperBound());
+    assert(edom4.getLowerBound() == edom1.getLowerBound());
+    assert(edom4.getUpperBound() == edom1.getUpperBound());
 
     Europa::Id<TokenVariable<IntervalIntDomain> > pvar4(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom4(pvar4->getDerivedDomain());
-    check_error(pdom4.getLowerBound() == pdom1.getLowerBound());
-    check_error(pdom4.getUpperBound() == pdom1.getUpperBound());
+    assert(pdom4.getLowerBound() == pdom1.getLowerBound());
+    assert(pdom4.getUpperBound() == pdom1.getUpperBound());
 
     return true;
   }    
@@ -497,7 +497,7 @@ private:
     timeline.constrain(tokenB.getId());
     timeline.constrain(tokenC.getId(), tokenA.getId());
 
-    check_error(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+    assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
     return true;
   }
 
@@ -530,42 +530,42 @@ private:
     // Object variables are not singletons - so query for tokens to order should return nothing
     std::vector<TokenId> tokensToOrder;
     timeline.getTokensToOrder(tokensToOrder);
-    check_error(tokensToOrder.empty());
+    assert(tokensToOrder.empty());
 
     // Specify the object variable of one - but still should return no tokens since they are all inactive
     tokenA.getObject()->specify(timeline.getId());
     timeline.getTokensToOrder(tokensToOrder);
-    check_error(tokensToOrder.empty());
+    assert(tokensToOrder.empty());
 
     // Now activate all of them - should only get back the one that was specified to a singleton
     tokenA.activate();
     tokenB.activate();
     tokenC.activate();
     timeline.getTokensToOrder(tokensToOrder);
-    check_error(tokensToOrder.size() == 1 && tokensToOrder.front() == tokenA.getId());
+    assert(tokensToOrder.size() == 1 && tokensToOrder.front() == tokenA.getId());
 
     // Set remainders so they are singeltons and get all back
     tokenB.getObject()->specify(timeline.getId());
     tokenC.getObject()->specify(timeline.getId());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
-    check_error(tokensToOrder.size() == 3);
+    assert(tokensToOrder.size() == 3);
 
     // Now incrementally constrain and show reduction in tokens to order
     timeline.constrain(tokenA.getId());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
-    check_error(tokensToOrder.size() == 2);
+    assert(tokensToOrder.size() == 2);
 
     timeline.constrain(tokenB.getId());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
-    check_error(tokensToOrder.size() == 1);
+    assert(tokensToOrder.size() == 1);
 
     timeline.constrain(tokenC.getId());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
-    check_error(tokensToOrder.empty());
+    assert(tokensToOrder.empty());
 
     return true;
   }
@@ -586,38 +586,38 @@ private:
 					 IntervalIntDomain(start, start),
 					 IntervalIntDomain(start+DURATION, start+DURATION),
 					 IntervalIntDomain(DURATION, DURATION)))->getId();
-      check_error(!token->getObject()->getBaseDomain().isSingleton());
+      assert(!token->getObject()->getBaseDomain().isSingleton());
       token->getObject()->specify(timeline->getId());
       token->activate();
     }
 
-    check_error(timeline->getTokens().size() == 0);
+    assert(timeline->getTokens().size() == 0);
     ce.propagate();
-    check_error(timeline->getTokens().size() == COUNT);
+    assert(timeline->getTokens().size() == COUNT);
 
     int i = 0;
     std::vector<TokenId> tokensToOrder;
     timeline->getTokensToOrder(tokensToOrder);
 
     while(!tokensToOrder.empty()){
-      check_error(timeline->getTokenSequence().size() == i);
-      check_error(tokensToOrder.size() == (COUNT - i));
+      assert(timeline->getTokenSequence().size() == i);
+      assert(tokensToOrder.size() == (COUNT - i));
       std::vector<TokenId> choices;
       TokenId toConstrain = tokensToOrder.front();
       timeline->getOrderingChoices(toConstrain, choices);
-      check_error(!choices.empty());
+      assert(!choices.empty());
       TokenId successor = choices.front();
       timeline->constrain(toConstrain, successor);
-      check_error(ce.propagate());
+      assert(ce.propagate());
       tokensToOrder.clear();
       timeline->getTokensToOrder(tokensToOrder);
       i++;
-      check_error(ce.propagate());
+      assert(ce.propagate());
     }
 
     const std::list<TokenId>& tokenSequence = timeline->getTokenSequence();
-    check_error(tokenSequence.front()->getStart()->getDerivedDomain().getSingletonValue() == 0);
-    check_error(tokenSequence.back()->getEnd()->getDerivedDomain().getSingletonValue() == COUNT*DURATION);
+    assert(tokenSequence.front()->getStart()->getDerivedDomain().getSingletonValue() == 0);
+    assert(tokenSequence.back()->getEnd()->getDerivedDomain().getSingletonValue() == COUNT*DURATION);
 
     // Now ensure the query can correctly indicate no options available
     TokenId token = (new IntervalToken(db.getId(), 
@@ -630,7 +630,7 @@ private:
     token->activate();
     std::vector<TokenId> choices;
     timeline->getOrderingChoices(token, choices);
-    check_error(choices.empty());
+    assert(choices.empty());
 
     return true;
   }
@@ -663,24 +663,24 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    check_error(re.getRules().size() == 1);
-    check_error(re.getRuleInstances().empty());
+    assert(re.getRules().size() == 1);
+    assert(re.getRuleInstances().empty());
 
     int num_constraints = ce.getConstraints().size();
     // Activate and confirm the rule instance is created
     tokenA.activate();
-    check_error(re.getRuleInstances().size() == 1);
+    assert(re.getRuleInstances().size() == 1);
     // New constraints added to restrict rejectability and to listen to rule variables
-    check_error(ce.getConstraints().size() == num_constraints + 2);
+    assert(ce.getConstraints().size() == num_constraints + 2);
 
     // Deactivate to ensure the rule instance is removed
     tokenA.deactivate();
-    check_error(re.getRuleInstances().empty());
-    check_error(ce.getConstraints().size() == num_constraints);
+    assert(re.getRuleInstances().empty());
+    assert(ce.getConstraints().size() == num_constraints);
 
     // Activate again to test deletion through automatic cleanup.
     tokenA.activate();
-    check_error(re.getRuleInstances().size() == 1);
+    assert(re.getRuleInstances().size() == 1);
     return true;
   }
 
@@ -696,36 +696,36 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    check_error(ce.propagate());
-    check_error(db.getTokens().size() == 1);
+    assert(ce.propagate());
+    assert(db.getTokens().size() == 1);
 
     tokenA.activate();
-    check_error(ce.propagate());
-    check_error(db.getTokens().size() == 1);
+    assert(ce.propagate());
+    assert(db.getTokens().size() == 1);
 
     tokenA.getRejectability()->specify(false);
-    check_error(ce.propagate());
-    check_error(db.getTokens().size() == 2);
-    check_error(tokenA.getSlaves().size() == 1);
+    assert(ce.propagate());
+    assert(db.getTokens().size() == 2);
+    assert(tokenA.getSlaves().size() == 1);
     TokenId slave = *(tokenA.getSlaves().begin());
-    check_error(slave->getDuration()->getDerivedDomain().isSingleton()); // Due to constraint on local variable
+    assert(slave->getDuration()->getDerivedDomain().isSingleton()); // Due to constraint on local variable
 
     // Test reset which should backtrack the rule
     tokenA.getRejectability()->reset();
-    check_error(ce.propagate());
-    check_error(db.getTokens().size() == 1);
+    assert(ce.propagate());
+    assert(db.getTokens().size() == 1);
 
     // Set again, and deactivate
     tokenA.getRejectability()->specify(false);
-    check_error(ce.propagate());
-    check_error(db.getTokens().size() == 2);
+    assert(ce.propagate());
+    assert(db.getTokens().size() == 2);
     tokenA.deactivate();
-    check_error(db.getTokens().size() == 1);
+    assert(db.getTokens().size() == 1);
 
     // Now repeast to ensure correct automatic cleanup
     tokenA.activate();
-    check_error(ce.propagate());
-    check_error(db.getTokens().size() == 2); // Rule should fire since specified domain already set!
+    assert(ce.propagate());
+    assert(db.getTokens().size() == 2); // Rule should fire since specified domain already set!
     return true;
   }
 };
