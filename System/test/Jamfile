@@ -33,4 +33,6 @@ for model in
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 }
 
+Main stackGenerator : stackGenerator.cc ;
+
 } # PLASMA_READY
