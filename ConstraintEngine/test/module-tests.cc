@@ -1828,8 +1828,10 @@ private:
     // numeric domains since Europa prints some of those using '{}' syntax and the
     // prototype treats as intervals all numeric domains that aren't explicitly
     // identified as enumerations.
-    // Try twice with different relative paths since we don't know what directory
-    // we're in.
+    // For each file, try twice with different relative paths since we don't know what
+    // directory we're in.
+    assertTrue(readTestCases(std::string("ConstraintEngine/NewTestCases"), tests) ||
+               readTestCases(std::string("NewTestCases"), tests));
     assertTrue(readTestCases(std::string("ConstraintEngine/CLibTestCases"), tests) ||
                readTestCases(std::string("CLibTestCases"), tests));
 
