@@ -35,6 +35,9 @@ namespace PLASMA {
     void readMaster(const TiXmlElement& element, HSTSHeuristics::Relationship& rel, TokenTypeId& ttm);
     void readRelation(const TiXmlElement& element, HSTSHeuristics::Relationship& rel);  
     void readPredicateParameters(const TiXmlElement& element, std::vector<std::pair<LabelStr,LabelStr> >& domainSpecs);
+    void readDomainOrder(const TiXmlElement& element, std::vector<LabelStr>& values);
+    void readVariableSpec(const TiXmlElement& element, int& index, LabelStr& name);
+    void readIndex(const TiXmlElement& element, int& index);
   private:
     HSTSHeuristics m_heuristics;
 
