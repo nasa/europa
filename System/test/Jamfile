@@ -50,6 +50,7 @@ for model in
 #
 
 Main stackGenerator : stackGenerator.cc ;
+MakeLocate [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(SUBDIR) ;
 
 rule FSatelliteModel {
   local arguments = $(1) ;
@@ -58,13 +59,15 @@ rule FSatelliteModel {
 
 rule GenerateStack {
   local output = $(1) ;
+  local generator = $(2) ;
   local arguments = $(3) ;
-  Depends $(output) : [ FAppendSuffix stackGenerator : $(SUFEXE) ] ;
+  Depends $(output) : $(generator) ;
   ARGUMENTS on $(output) = $(arguments) ;
+  MakeLocate $(output) : $(SUBDIR) ;
 }
 
 actions GenerateStack {
-  stackGenerator $(ARGUMENTS) $(1:S=) 
+  $(2) $(ARGUMENTS) $(1:S=) 
 }
 
 local numSatellites ;
@@ -78,7 +81,7 @@ for numSatellites in 1 10 50 100 {
         if $(numParamChoices) <= $(numParams) {
           local model = [ FSatelliteModel $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ] ;
           local exe = $(model:S=) ;
-          GenerateStack [ FGristFiles $(model) ] : : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
+          GenerateStack [ FGristFiles $(model) ] : [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
           NddlMain $(exe) : runTest.o : $(model) : System : performance-tests ;
           RunModuleMain run-$(exe) : $(exe) ;
           LocalDepends run-performance-tests : run-$(exe) ;
