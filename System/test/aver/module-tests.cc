@@ -184,13 +184,23 @@ namespace NDDL {
   Location::NotTracked::NotTracked(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlToken(planDatabase, name) {
     handleDefaults();
-    token_constraint(eq, var("object"), var("target"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("object"));
+      vars.push_back(var("target"));
+      token_constraint(eq, vars);
+    }
   }
   
   Location::NotTracked::NotTracked(const TokenId& parent, const LabelStr& name)
    : NddlToken(parent, name) {
     handleDefaults();
-    token_constraint(eq, var("object"), var("target"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("object"));
+      vars.push_back(var("target"));
+      token_constraint(eq, vars);
+    }
   }
   
   // default initialization of member variables
@@ -208,13 +218,23 @@ namespace NDDL {
   Location::trackstart::trackstart(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlToken(planDatabase, name) {
     handleDefaults();
-    token_constraint(eq, var("object"), var("target"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("object"));
+      vars.push_back(var("target"));
+      token_constraint(eq, vars);
+    }
   }
   
   Location::trackstart::trackstart(const TokenId& parent, const LabelStr& name)
    : NddlToken(parent, name) {
     handleDefaults();
-    token_constraint(eq, var("object"), var("target"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("object"));
+      vars.push_back(var("target"));
+      token_constraint(eq, vars);
+    }
   }
   
   // default initialization of member variables
@@ -232,13 +252,23 @@ namespace NDDL {
   Location::Tracked::Tracked(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlToken(planDatabase, name) {
     handleDefaults();
-    token_constraint(eq, var("object"), var("target"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("object"));
+      vars.push_back(var("target"));
+      token_constraint(eq, vars);
+    }
   }
   
   Location::Tracked::Tracked(const TokenId& parent, const LabelStr& name)
    : NddlToken(parent, name) {
     handleDefaults();
-    token_constraint(eq, var("object"), var("target"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("object"));
+      vars.push_back(var("target"));
+      token_constraint(eq, vars);
+    }
   }
   
   // default initialization of member variables
@@ -256,13 +286,23 @@ namespace NDDL {
   Location::trackstop::trackstop(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlToken(planDatabase, name) {
     handleDefaults();
-    token_constraint(eq, var("object"), var("target"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("object"));
+      vars.push_back(var("target"));
+      token_constraint(eq, vars);
+    }
   }
   
   Location::trackstop::trackstop(const TokenId& parent, const LabelStr& name)
    : NddlToken(parent, name) {
     handleDefaults();
-    token_constraint(eq, var("object"), var("target"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("object"));
+      vars.push_back(var("target"));
+      token_constraint(eq, vars);
+    }
   }
   
   // default initialization of member variables
@@ -384,15 +424,35 @@ namespace NDDL {
   Position::navigate::navigate(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlToken(planDatabase, name) {
     handleDefaults();
-    token_constraint(neq, var("from"), var("to"));
-    token_constraint(eq, var("duration"), predicateVariable(IntervalIntDomain(1)));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("from"));
+      vars.push_back(var("to"));
+      token_constraint(neq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("duration"));
+      vars.push_back(predicateVariable(IntervalIntDomain(1)));
+      token_constraint(eq, vars);
+    }
   }
   
   Position::navigate::navigate(const TokenId& parent, const LabelStr& name)
    : NddlToken(parent, name) {
     handleDefaults();
-    token_constraint(neq, var("from"), var("to"));
-    token_constraint(eq, var("duration"), predicateVariable(IntervalIntDomain(1)));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("from"));
+      vars.push_back(var("to"));
+      token_constraint(neq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("duration"));
+      vars.push_back(predicateVariable(IntervalIntDomain(1)));
+      token_constraint(eq, vars);
+    }
   }
   
   // default initialization of member variables
@@ -424,8 +484,18 @@ namespace NDDL {
     meets(this, a);
     slave(Position::navigate, Position.navigate, b);
     met_by(this, b);
-    rule_constraint(eq, var("location"), Position::navigateId(tok("a"))->from);
-    rule_constraint(eq, var("location"), Position::navigateId(tok("b"))->to);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("location"));
+      vars.push_back(Position::navigateId(tok("a"))->from);
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("location"));
+      vars.push_back(Position::navigateId(tok("b"))->to);
+      rule_constraint(eq, vars);
+    }
   }
   
   // k9-initial.nddl:62 navigate
@@ -448,8 +518,18 @@ namespace NDDL {
     allocateFilterCondition(path, Location, var("from"), m_from, eq);
     allocateFilterCondition(path, Location, var("to"), m_to, eq);
     allocateFilterConstraint(path, CONSTRAIN);
-    rule_constraint(eq, var("to"), Position::AtId(tok("a"))->location);
-    rule_constraint(eq, Position::AtId(tok("b"))->location, var("from"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("to"));
+      vars.push_back(Position::AtId(tok("a"))->location);
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(Position::AtId(tok("b"))->location);
+      vars.push_back(var("from"));
+      rule_constraint(eq, vars);
+    }
   }
   
   
@@ -741,13 +821,23 @@ namespace NDDL {
   OpportunisticScience::oppscilooknow::oppscilooknow(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlToken(planDatabase, name) {
     handleDefaults();
-    token_constraint(neq, var("target"), var("at_loc"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("target"));
+      vars.push_back(var("at_loc"));
+      token_constraint(neq, vars);
+    }
   }
   
   OpportunisticScience::oppscilooknow::oppscilooknow(const TokenId& parent, const LabelStr& name)
    : NddlToken(parent, name) {
     handleDefaults();
-    token_constraint(neq, var("target"), var("at_loc"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("target"));
+      vars.push_back(var("at_loc"));
+      token_constraint(neq, vars);
+    }
   }
   
   // default initialization of member variables
@@ -769,13 +859,23 @@ namespace NDDL {
   OpportunisticScience::OppSciDoneLookNow::OppSciDoneLookNow(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlToken(planDatabase, name) {
     handleDefaults();
-    token_constraint(neq, var("target"), var("at_loc"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("target"));
+      vars.push_back(var("at_loc"));
+      token_constraint(neq, vars);
+    }
   }
   
   OpportunisticScience::OppSciDoneLookNow::OppSciDoneLookNow(const TokenId& parent, const LabelStr& name)
    : NddlToken(parent, name) {
     handleDefaults();
-    token_constraint(neq, var("target"), var("at_loc"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("target"));
+      vars.push_back(var("at_loc"));
+      token_constraint(neq, vars);
+    }
   }
   
   // default initialization of member variables
@@ -797,13 +897,23 @@ namespace NDDL {
   OpportunisticScience::oppscigetstatus::oppscigetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlToken(planDatabase, name) {
     handleDefaults();
-    token_constraint(neq, var("target"), var("at_loc"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("target"));
+      vars.push_back(var("at_loc"));
+      token_constraint(neq, vars);
+    }
   }
   
   OpportunisticScience::oppscigetstatus::oppscigetstatus(const TokenId& parent, const LabelStr& name)
    : NddlToken(parent, name) {
     handleDefaults();
-    token_constraint(neq, var("target"), var("at_loc"));
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var("target"));
+      vars.push_back(var("at_loc"));
+      token_constraint(neq, vars);
+    }
   }
   
   // default initialization of member variables
@@ -1105,7 +1215,6 @@ namespace NDDL {
   };
   
 } // namespace NDDL
-
 
 namespace NDDL {
   // Boot-strap code to initialize schema
