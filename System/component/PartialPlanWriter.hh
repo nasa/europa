@@ -54,7 +54,7 @@ namespace Prototype {
 			bool havePlanner;
       long long int seqId, ppId;
       int numTokens, numConstraints, numVariables, numTransactions;
-      int stepsPerWrite, transactionId, nstep, tokenRelationId, writeCounter, noWrite;
+      int stepsPerWrite, transactionId, nstep, tokenRelationId, writeCounter, noWrite, maxChoices;
       ConstraintEngineId *ceId;
       PlanDatabaseId *pdbId;
 			RulesEngineId *reId;
@@ -83,7 +83,7 @@ namespace Prototype {
       const std::string getLowerBoundStr(IntervalDomain &dom) const;
       const std::string getEnumerationStr(EnumeratedDomain &dom) const;
       const std::string getVarInfo(const ConstrainedVariableId &) const;
-      const std::string getLongVarInfo(const ConstrainedVariableId &) const;
+			const std::string getChoiceInfo(void) const;
 
       /****From PlanDatabaseListener****/
     

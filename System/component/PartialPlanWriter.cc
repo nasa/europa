@@ -58,13 +58,19 @@
 #define FatalError(s) { std::cerr << "At " << __FILE__ << ":" << __PRETTY_FUNCTION__ << ", line " << __LINE__ << std::endl; std::cerr << (s) << std::endl; exit(-1);}
 #define FatalErrno(){FatalError(strerror(errno))}
 #define FatalErr(s) {std::cerr << (s) << std::endl; FatalErrno();}
-const char *envStepsPerWrite = "PPW_WRITE_NSTEPS";
+// const char *envStepsPerWrite = "PPW_WRITE_NSTEPS";
 
-const char *envAltWriteDest = "PPW_WRITE_DEST";
+// const char *envAltWriteDest = "PPW_WRITE_DEST";
 
-const char *envPPWNoWrite = "PPW_DONT_WRITE";
+// const char *envPPWNoWrite = "PPW_DONT_WRITE";
 
-const char *envPPWTransactions = "PPW_ALLOW_TRANSACTIONS";
+// const char *envPPWTransactions = "PPW_ALLOW_TRANSACTIONS";
+
+const char *envPPWConfigFile = "PPW_CONFIG";
+
+#define IN_NO_SECTION 0
+#define IN_GENERAL_SECTION 1
+#define IN_TRANSACTION_SECTION 2
 
                      //0                   1               2              3
 enum transactionNames {OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_ADDED_TO_OBJECT, 
@@ -224,6 +230,12 @@ const std::string I_DOMAIN("I");
 const std::string CAUSAL("CAUSAL");
 const std::string ENUM_DOMAIN("EnumeratedDomain");
 const std::string INT_DOMAIN("IntervalDomain");
+const std::string GENERAL_CONFIG_SECTION("GeneralConfigSection:");
+const std::string TRANSACTION_CONFIG_SECTION("TransactionConfigSection:");
+const std::string AUTO_WRITE("AutoWrite");
+const std::string STEPS_PER_WRITE("StepsPerWrite");
+const std::string WRITE_DEST("WriteDest");
+const std::string MAX_CHOICES("MaxChoices");
 
 #ifdef __BEOS__
 #define NBBY 8
@@ -283,6 +295,7 @@ namespace Prototype {
     void PartialPlanWriter::commonInit(const PlanDatabaseId &planDb,
                                        const ConstraintEngineId &ceId2) {
       nstep = 0;
+			maxChoices = INT_MAX;
       struct timeval currTime;
       if(gettimeofday(&currTime, NULL)) {
 				FatalError("Failed to get current time.");
@@ -292,50 +305,95 @@ namespace Prototype {
       ceId = const_cast<ConstraintEngineId *> (&ceId2);
       transactionId = writeCounter = 0;
       transactionList = new std::list<Transaction>();
-    
-      char *spw = getenv(envStepsPerWrite);
-      if(spw == NULL) {
-				stepsPerWrite = 0;
-      }
-      else {
-				stepsPerWrite = (int) strtol(spw, (char **) NULL, 10);
-				if((stepsPerWrite == 0 && errno == EINVAL) || stepsPerWrite == INT_MAX) {
-					FatalErrno();
-				}
-      }
-      dest = "./plans";
-      char *altDest = getenv(envAltWriteDest);
-      if(altDest != NULL) {
-				dest = std::string(altDest);
-      }
+			stepsPerWrite = 0;
+			dest = "./plans";
+			noWrite = 0;
+			for(int i = 0; i < transactionTotal; i++)
+				allowTransaction[i] = false;
 
-      char *dontWrite = getenv(envPPWNoWrite);
-      if(dontWrite == NULL) {
-				noWrite = 0;
-      }
-      else {
-				noWrite = (int) strtol(spw, (char **) NULL, 10);
-				if((noWrite == 0  && errno == EINVAL) || stepsPerWrite == INT_MAX) {
-					FatalErrno();
-				}
-      }
+			char *configPath = getenv(envPPWConfigFile);
+			if(configPath == NULL)
+				FatalError("PPW_CONFIG not set");
+			
+			char *configBuf = new char[PATH_MAX + 100];
+			if(realpath(configPath, configBuf) == NULL) {
+				std::cerr << "Failed to get config file " << configPath << std::endl;
+				FatalErrno();
+			}
 
-			char *transNums = getenv(envPPWTransactions);
-			if(transNums == NULL)
-				for(int i = 0; i < transactionTotal; i++)
-					allowTransaction[i] = true;
-			else {
-				for(int i = 0; i < transactionTotal; i++)
-					allowTransaction[i] = false;
-				char *tok = strtok(transNums, ",");
-				while(tok != NULL) {
-					int temp = (int) strtol(tok, (char **) NULL, 10);
-					if((temp == 0 && errno == EINVAL) || temp < 0 || temp >= transactionTotal) {
-						std::cerr << "Specified allowable transaction " << temp << " nonexistant." << std::endl;
-						FatalErrno();
+			std::ifstream configFile(configBuf);
+			if(!configFile) {
+				std::cerr << "Failed to open config file " << configBuf << std::endl;
+				FatalErrno();
+			}
+			
+			int state = IN_NO_SECTION;
+			std::string buf;
+			int lineno = 0;
+			while(!configFile.eof()) {
+				lineno++;
+				configFile.getline(configBuf, PATH_MAX + 100);
+				buf = configBuf;
+				if(buf[0] == '#' || buf == "")
+					continue;
+				if(buf == GENERAL_CONFIG_SECTION) {
+					state = IN_GENERAL_SECTION;
+					continue;
+				}
+				else if(buf == TRANSACTION_CONFIG_SECTION) {
+					state = IN_TRANSACTION_SECTION;
+					continue;
+				}
+
+				switch(state) {
+				case IN_GENERAL_SECTION:
+					if(buf.find(AUTO_WRITE) != std::string::npos) {
+						std::string autoWrite = buf.substr(buf.find("=")+1);
+						noWrite = (autoWrite.find("1") != std::string::npos ? 0 : 1);
 					}
-					allowTransaction[temp] = true;
-					tok = strtok(NULL, ",");
+					else if(buf.find(STEPS_PER_WRITE) != std::string::npos) {
+						std::string spw = buf.substr(buf.find("=")+1);
+						stepsPerWrite = strtol(spw.c_str(), NULL, 10);
+						if(stepsPerWrite < 0)
+							FatalError("StepsPerWrite must be a non-negative value");
+						if(stepsPerWrite == LONG_MAX || stepsPerWrite == LONG_MIN)
+							FatalErrno();
+					}
+					else if(buf.find(WRITE_DEST) != std::string::npos) {
+						std::string wd = buf.substr(buf.find("=")+1);
+						dest = wd;
+					}
+					else if(buf.find(MAX_CHOICES) != std::string::npos) {
+						std::string mc = buf.substr(buf.find("=")+1);
+						maxChoices = strtol(mc.c_str(), NULL, 10);
+						if(maxChoices < 0)
+							FatalError("MaxChoices must be a non-negative value");
+						if(maxChoices == LONG_MAX || maxChoices == LONG_MIN)
+							FatalErrno();
+					}
+					else {
+						std::string error("Inavlid entry '");
+						error += buf;
+						error += "' in GeneralConfigSection";
+						FatalError(error);
+					}
+					break;
+				case IN_TRANSACTION_SECTION:
+					bool foundTransaction = false;
+					for(int i = 0; i < transactionTotal; i++) {
+						if(buf == transactionNameStrs[i]) {
+							allowTransaction[i] = true;
+							foundTransaction = true;
+							break;
+						}
+					}
+					if(!foundTransaction) {
+						std::string error("Invalid entry '");
+						error += buf;
+						error += "' in TransactionConfigSection";
+						FatalError(error);
+					}
+					break;
 				}
 			}
 
@@ -766,8 +824,6 @@ namespace Prototype {
       /*ExtraInfo: QuantityMin:QuantityMax*/
       if(type == T_TRANSACTION) {
         TransactionId trans = (TransactionId) token;
-        //std::cerr << "=====>" << trans->getMin() << "->" << trans->getMax() << std::endl;
-        //std::cerr << "=====>" << (double) MINUS_INFINITY << "=>" << (double) PLUS_INFINITY << std::endl;
         tokOut << trans->getMin() << COMMA << trans->getMax();
       }
       /*ExtraInfo: SlotOrder*/
@@ -908,46 +964,12 @@ namespace Prototype {
 				type = D_ERROR;
 			
 			decOut << ppId << TAB << dp->getKey() << TAB << type << TAB << dp->getEntityKey() << TAB << 0 << TAB;
-			for(std::list<ChoiceId>::const_iterator cIt = dp->getCurrentChoices().begin(); cIt != dp->getCurrentChoices().end(); ++cIt) {
-				ChoiceId choice = (*cIt);
-				decOut << choice->getKey() << COMMA << choice->getType() << COMMA;
-				switch(choice->getType()) {
-				case Choice::token:
-					{
-						const TokenId &tId = choice->getToken();
-						if(!tId.isNoId())
-							decOut << tId->getKey();
-						else
-							decOut << -1;
-					}
-				break;
-				case Choice::value:
-					{
-						const TokenId &tId = choice->getToken();
-						if(!tId.isNoId())
-							decOut << tId->getKey();
-						decOut << COMMA << choice->getValue();
-					}
-				break;
-				case Choice::domain:
-					{
-						const AbstractDomain &dom = choice->getDomain();
-						if(dom.isEnumerated())
-							decOut << E_DOMAIN << COMMA << getEnumerationStr((EnumeratedDomain &) dom);
-						else if(dom.isInterval()) {
-							decOut << I_DOMAIN << COMMA << getUpperBoundStr((IntervalDomain &) dom) << COMMA 
-												<< getLowerBoundStr((IntervalDomain &) dom);
-						}
-						else
-							FatalError("I don't know what my domain is!");
-					}
-				break;
-				case Choice::close:
-					decOut << "CLOSE";
-				}
-				decOut << SEQ_COL_SEP;
+			if((*plId)->getDecisionManager()->getCurrentDecision() == dp) {
+				decOut << getChoiceInfo() << std::endl;
 			}
-			decOut << std::endl;
+			else {
+				decOut << SNULL << std::endl;
+			}
 		}
 
     const std::string PartialPlanWriter::getUpperBoundStr(IntervalDomain &dom) const {
@@ -1224,70 +1246,70 @@ namespace Prototype {
 					if(allowTransaction[VAR_DOMAIN_RELAXED])
 						transactionList->push_back(Transaction(VAR_DOMAIN_RELAXED, varId->getKey(), SYSTEM,
 																									 transactionId++, seqId, nstep, 
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
 					break;
 				case DomainListener::RESET:
 					if(allowTransaction[VAR_DOMAIN_RESET])
 						transactionList->push_back(Transaction(VAR_DOMAIN_RESET, varId->getKey(), USER,
 																									 transactionId++, seqId, nstep, 
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
 					break;
 				case DomainListener::VALUE_REMOVED:
 					if(allowTransaction[VAR_DOMAIN_VALUE_REMOVED])
 						transactionList->push_back(Transaction(VAR_DOMAIN_VALUE_REMOVED, varId->getKey(), 
 																									 UNKNOWN, transactionId++, seqId, nstep,
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
           break;
 				case DomainListener::BOUNDS_RESTRICTED:
 					if(allowTransaction[VAR_DOMAIN_BOUNDS_RESTRICTED])
 						transactionList->push_back(Transaction(VAR_DOMAIN_BOUNDS_RESTRICTED, varId->getKey(),
 																									 UNKNOWN, transactionId++, seqId, nstep,
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
           break;
 				case DomainListener::LOWER_BOUND_INCREASED:
 					if(allowTransaction[VAR_DOMAIN_LOWER_BOUND_INCREASED])
 						transactionList->push_back(Transaction(VAR_DOMAIN_LOWER_BOUND_INCREASED, varId->getKey(),
 																									 UNKNOWN, transactionId++, seqId, nstep,
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
           break;
 				case DomainListener::UPPER_BOUND_DECREASED:
 					if(allowTransaction[VAR_DOMAIN_UPPER_BOUND_DECREASED])
 						transactionList->push_back(Transaction(VAR_DOMAIN_UPPER_BOUND_DECREASED, varId->getKey(),
 																									 UNKNOWN, transactionId++, seqId, nstep,
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
           break;
 				case DomainListener::RESTRICT_TO_SINGLETON:
 					//VAR_DOMAIN_RESTRICTED
 					if(allowTransaction[VAR_DOMAIN_RESTRICT_TO_SINGLETON])
 						transactionList->push_back(Transaction(VAR_DOMAIN_RESTRICT_TO_SINGLETON, varId->getKey(),
 																									 SYSTEM, transactionId++, seqId, nstep, 
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
 					break;
 				case DomainListener::SET:
 					if(allowTransaction[VAR_DOMAIN_SET])
 						transactionList->push_back(Transaction(VAR_DOMAIN_SET, varId->getKey(), UNKNOWN,
 																									 transactionId++, seqId, nstep,
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
           break;
 				case DomainListener::SET_TO_SINGLETON:
 					//VAR_DOMAIN_SPECIFIED
 					if(allowTransaction[VAR_DOMAIN_SET_TO_SINGLETON])
 						transactionList->push_back(Transaction(VAR_DOMAIN_SET_TO_SINGLETON, varId->getKey(),
 																									 USER, transactionId++, seqId, nstep, 
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
 					break;
 				case DomainListener::EMPTIED:
 					//VAR_DOMAIN_EMPTIED
 					if(allowTransaction[VAR_DOMAIN_EMPTIED])
 						transactionList->push_back(Transaction(VAR_DOMAIN_EMPTIED, varId->getKey(), SYSTEM,
 																									 transactionId++, seqId, nstep, 
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
 					break;
 				case DomainListener::CLOSED:
 					if(allowTransaction[VAR_DOMAIN_CLOSED])
 						transactionList->push_back(Transaction(VAR_DOMAIN_CLOSED, varId->getKey(), SYSTEM,
 																									 transactionId++, seqId, nstep, 
-																									 getLongVarInfo(varId)));
+																									 getVarInfo(varId)));
           break;
 				default:
 					break;
@@ -1374,7 +1396,7 @@ namespace Prototype {
 				if(dec.isValid())
 					key = dec->getKey();
 				transactionList->push_back(Transaction(ASSIGN_NEXT_STARTED, key, USER,
-																							 transactionId++, seqId, nstep, SNULL));
+																							 transactionId++, seqId, nstep, SNULL));//getChoiceInfo()));
 				numTransactions++;
 			}
 		}
@@ -1511,31 +1533,56 @@ namespace Prototype {
       return retval;
     }
 
-    const std::string PartialPlanWriter::getLongVarInfo(const ConstrainedVariableId &varId) const {
-      std::string retval = getVarInfo(varId);
-
-      varId->lastDomain();
-      if(varId->lastDomain().isEnumerated()) {
-				retval += E_DOMAIN + COMMA + 
-					getEnumerationStr((EnumeratedDomain &)varId->lastDomain()) + COMMA;
-      }
-      else if(varId->lastDomain().isInterval()) {
-				retval += I_DOMAIN + COMMA + 
-					getLowerBoundStr((IntervalDomain &)varId->lastDomain()) + SPACE;
-				retval += 
-					getUpperBoundStr((IntervalDomain &)varId->lastDomain()) + COMMA;
-      }
-      if(varId->specifiedDomain().isEnumerated()) {
-				retval += E_DOMAIN + COMMA + 
-					getEnumerationStr((EnumeratedDomain &)varId->specifiedDomain()) + COMMA;
-      }
-      else if(varId->specifiedDomain().isInterval()) {
-				retval += I_DOMAIN + COMMA + getLowerBoundStr((IntervalDomain &)varId->specifiedDomain()) + 
-					SPACE;
-				retval += getUpperBoundStr((IntervalDomain &)varId->specifiedDomain()) + COMMA;
-      }
-      return std::string(retval);
-    }
+		const std::string PartialPlanWriter::getChoiceInfo(void) const {
+			std::stringstream retval;
+			int numChoices = 0;
+			for(std::list<ChoiceId>::const_iterator cIt = (*plId)->getDecisionManager()->getCurrentDecisionChoices().begin(); 
+					cIt != (*plId)->getDecisionManager()->getCurrentDecisionChoices().end() && numChoices < maxChoices; 
+					++cIt, ++numChoices) {
+				ChoiceId choice = (*cIt);
+				if(choice.isNoId())
+					continue;
+				retval << choice->getKey() << COMMA << choice->getType() << COMMA;
+				switch(choice->getType()) {
+				case Choice::token:
+					{
+						const TokenId &tId = choice->getToken();
+						if(!tId.isNoId())
+							retval << tId->getKey();
+						else
+							retval << -1;
+					}
+				break;
+				case Choice::value:
+					{
+						const TokenId &tId = choice->getToken();
+						if(!tId.isNoId())
+							retval << tId->getKey();
+						else
+							retval << -1;
+						retval << COMMA << choice->getValue();
+					}
+				break;
+				case Choice::domain:
+					{
+						const AbstractDomain &dom = choice->getDomain();
+						if(dom.isEnumerated())
+							retval << E_DOMAIN << COMMA << getEnumerationStr((EnumeratedDomain &) dom);
+						else if(dom.isInterval()) {
+							retval << I_DOMAIN << COMMA << getUpperBoundStr((IntervalDomain &) dom) << COMMA 
+												<< getLowerBoundStr((IntervalDomain &) dom);
+						}
+						else
+							FatalError("I don't know what my domain is!");
+					}
+				break;
+				case Choice::close:
+					retval << "CLOSE";
+				}
+				retval << SEQ_COL_SEP;
+			}
+			return std::string(retval.str());
+		}
 
     void Transaction::write(std::ostream &out, long long int ppId) const {
       out << transactionNameStrs[transactionType] << TAB << transactionTypeStrs[transactionType]
