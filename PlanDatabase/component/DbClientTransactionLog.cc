@@ -97,6 +97,8 @@ namespace Prototype {
 
   void DbClientTransactionLog::notifyFreed(const ObjectId& object, const TokenId& token){
     if (m_chronologicalBacktracking) {
+      check_error(strcmp(m_bufferedTransactions.back()->Value(), "constrain") == 0, 
+                  "chronological backtracking assumption violated");
       m_bufferedTransactions.pop_back();
       return;
     }
@@ -129,6 +131,10 @@ namespace Prototype {
 
   void DbClientTransactionLog::notifyCancelled(const TokenId& token){
     if (m_chronologicalBacktracking) {
+      check_error((strcmp(m_bufferedTransactions.back()->Value(), "activate") == 0) ||
+                  (strcmp(m_bufferedTransactions.back()->Value(), "reject") == 0) ||
+                  (strcmp(m_bufferedTransactions.back()->Value(), "merge") == 0),
+                  "chronological backtracking assumption violated");
       m_bufferedTransactions.pop_back();
       return;
     }
@@ -168,6 +174,8 @@ namespace Prototype {
 
   void DbClientTransactionLog::notifyVariableReset(const ConstrainedVariableId& variable){
     if (m_chronologicalBacktracking) {
+      check_error(strcmp(m_bufferedTransactions.back()->Value(), "specify") == 0,
+                  "chronological backtracking assumption violated");
       m_bufferedTransactions.pop_back();
       return;
     }
