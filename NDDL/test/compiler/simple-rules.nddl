@@ -31,10 +31,10 @@ World::initialState{
  meets(Rover.Going g);
 
  any(Rover.At a);
- //eq(a._location, Lander);
+ eq(a._location, Lander);
 
  any(Rover.At b);
- //eq(b._location, Rock);
+ eq(b._location, Rock);
 
  leq(a.end, b.start);
 }

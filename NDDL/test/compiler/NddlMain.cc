@@ -2,22 +2,23 @@
 #include "Nddl.hh"
 
 // Support for registered constraints
-#include "../ConstraintEngine/ConstraintLibrary.hh"
-#include "../ConstraintEngine/Constraints.hh"
-#include "../PlanDatabase/ObjectTokenRelation.hh"
+#include "ConstraintLibrary.hh"
+#include "Constraints.hh"
+#include "ObjectTokenRelation.hh"
 
 // Support fro required plan database components
-#include "../PlanDatabase/PlanDatabase.hh"
-#include "../PlanDatabase/RulesEngine.hh"
-#include "../PlanDatabase/Schema.hh"
-#include "../ConstraintEngine/ConstraintEngine.hh"
+#include "PlanDatabase.hh"
+#include "RulesEngine.hh"
+#include "Schema.hh"
+#include "ConstraintEngine.hh"
 
 // Access for registered event loggers for instrumentation
-#include "../ConstraintEngine/CeLogger.hh"
-#include "../PlanDatabase/DbLogger.hh"
+#include "CeLogger.hh"
+#include "DbLogger.hh"
+
 
 // Utility for obtaining defualt constraint library registration
-#include "../ConstraintEngine/TestSupport.hh"
+#include "TestSupport.hh"
 
 int main(){
   // Constraints with special names to allow mapping to temporal network propagator if necessary
@@ -29,7 +30,6 @@ int main(){
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
 
-
   // Mappings from library to NDDL language
   REGISTER_NARY(EqualConstraint, "eq", "Default");
   REGISTER_NARY(NotEqualConstraint, "neq", "Default");
@@ -37,6 +37,8 @@ int main(){
 
   // Allocate the schema
   SchemaId schema = NDDL::schema();
+
+  // Set up the plan database assembly
   ConstraintEngine ce;
   PlanDatabase db(ce.getId(), schema);
 
@@ -48,6 +50,7 @@ int main(){
     new CeLogger(std::cout, ce.getId());
   }
   
+  // Now kick in the initial state from generated function
   NDDL::initialize(db.getId());
 
   std::cout << "Finished" << std::endl;
