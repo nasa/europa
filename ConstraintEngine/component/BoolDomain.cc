@@ -39,6 +39,14 @@ namespace Prototype {
     check_error(intValue == 0 || intValue == 1);
   }
 
+  bool BoolDomain::isFalse() const {
+    return m_ub == m_lb == 0;
+  }
+
+  bool BoolDomain::isTrue() const {
+    return m_ub == m_lb == 1;
+  }
+
   const AbstractDomain::DomainType& BoolDomain::getType() const{
     static const AbstractDomain::DomainType s_type = BOOL;
     return s_type;

@@ -30,6 +30,8 @@ namespace Prototype{
     bool intersect(const BoolDomain& dom);
     bool isSubsetOf(const BoolDomain& dom) const;
     const DomainType& getType() const;
+    bool isFalse() const;
+    bool isTrue() const;
 
   private:
     /**
