@@ -11,6 +11,7 @@
 #include "ObjectFilter.hh"
 #include "DbLogger.hh"
 #include "TestRule.hh"
+#include "PartialPlanWriter.hh"
 
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/Utils.hh"
@@ -65,6 +66,7 @@ SchemaId DefaultSchemaAccessor::s_instance;
     if(loggingEnabled()){\
      new CeLogger(std::cout, ce.getId());\
      new DbLogger(std::cout, db.getId());\
+     new PartialPlanWriter(db.getId(), ce.getId());\
     }\
     RulesEngine re(db.getId()); \
     new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());\
