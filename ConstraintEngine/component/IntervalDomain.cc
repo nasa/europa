@@ -93,9 +93,14 @@ namespace Prototype {
     check_error(!isDynamic());
     check_error(!dom.isEmpty());
     check_error(dom.isInterval());
+
     // This could be optimized to avoid the copy if found to be worth it
     IntervalDomain localDomain;
-    localDomain.set(dom);
+    if(dom.isSingleton())
+      localDomain.set(dom.getSingletonValue());
+    else
+      localDomain.set(dom);
+
     localDomain.intersect(*this);
     return !localDomain.isEmpty();
   }
