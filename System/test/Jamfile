@@ -80,7 +80,7 @@ local numSatellites ;
 for numSatellites in 1 {
   local numTargets ;
 #  for numTargets in 10 {
-  for numTargets in 1000 {
+  for numTargets in 500 1000 2000 {
     local numParams ;
 #    for numParams in 0 10 {
      for numParams in 0 {
