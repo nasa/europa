@@ -29,7 +29,13 @@ namespace Prototype {
 
   void DbLogger::notifyReinstated(const TokenId& token){m_os << "DbLogger: Token Reinstated(" << token->getKey() << ")" << std::endl;}
 
-  void DbLogger::notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor){m_os << "DbLogger: Token Constrained (" << token->getKey() << ") On Object (" << object->getKey() << ") After Token (" << successor->getKey() << ")" << std::endl;}
+  void DbLogger::notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor)
+  {
+    if (successor.isNoId())
+      m_os << "DbLogger: Token Constrained (" << token->getKey() << ") On Object (" << object->getKey() << ") Before Token (noId)" << std::endl;
+    else
+      m_os << "DbLogger: Token Constrained (" << token->getKey() << ") On Object (" << object->getKey() << ") Before Token (" << successor->getKey() << ")" << std::endl;
+  }
 
   void DbLogger::notifyFreed(const ObjectId& object, const TokenId& token){m_os << "DbLogger: Token Freed (" << token->getKey() << ") On Object (" << object->getKey() << ")" << std::endl;}
 
