@@ -49,8 +49,8 @@
 #include "STNTemporalAdvisor.hh"
 
 int main(){
-  REGISTER_NARY(EqualConstraint, "concurrent", "Default");
-  //REGISTER_NARY(EqualConstraint, "concurrent", "Temporal");
+  //REGISTER_NARY(EqualConstraint, "concurrent", "Default");
+  REGISTER_NARY(EqualConstraint, "concurrent", "Temporal");
   REGISTER_NARY(EqualConstraint, "eq", "Default");
   REGISTER_NARY(NotEqualConstraint, "neq", "Default");
   REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
