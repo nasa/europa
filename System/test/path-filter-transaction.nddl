@@ -1,4 +1,4 @@
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 
 class Location{
  string name;
@@ -15,6 +15,24 @@ class Path{
  }
 }
 
+class Rover{
+ predicate Going{
+  Location from;
+  Location to;
+  neq(from, to);
+ }
+}
+
+Rover::Going{
+ Path path : {
+  eq(path.from, from);
+  eq(path.to, to);
+ };
+}
+
+// Create initial state to allow a plan to be found
+PlannerConfig world = new PlannerConfig();
+
 Location rock = new Location("ROCK");
 Location hill = new Location("HILL");
 Location lander = new Location("LANDER");
@@ -26,37 +44,12 @@ Path p2 = new Path(lander, hill);
 Path p3 = new Path(martianCity, hill);
 Path p4 = new Path(hill, lander);
 
-class World extends NddlWorld{
- predicate Going{
-  Location from;
-  Location to;
-  neq(from, to);
- }
+Rover rover = new Rover();
 
- predicate initialState{}
- World(){
-  super();
- }
-}
-
-World world = new World();
-
-World::Going{
- Path path : {
-  eq(path.from, from);
-  eq(path.to, to);
- };
-}
-
-any(World.Going g);
-eq(g.from, rock);
-eq(g.to, hill);
+any(Rover.Going g);
+g.from.specify(hill);
+g.to.specify(lander);
+eq(g.start, world.m_horizonStart);
+eq(g.end, world.m_horizonEnd);
 
 close();
-
-/*
- Path path : {
-  eq(path.from, g.from);
-  eq(path.to, g.to);
- };
-*/

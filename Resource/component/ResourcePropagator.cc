@@ -70,8 +70,9 @@ namespace Prototype {
 	ConstrainedVariableId varToEmpty = tx->getObject();
 	ResourceConstraint::getCurrentDomain(varToEmpty).empty();
 	break;
-      }  
+      }
     }
+
     m_resources.clear();
   }
 

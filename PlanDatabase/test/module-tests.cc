@@ -15,15 +15,9 @@
 #include "TokenFactory.hh"
 
 #include "TestSupport.hh"
-#include "Utils.hh"
-#include "IntervalIntDomain.hh"
-#include "Domain.hh"
-#include "DefaultPropagator.hh"
-#include "EqualityConstraintPropagator.hh"
-#include "UnaryConstraint.hh"
+#include "PlanDatabaseTestSupport.hh"
 
 #include "PlanDbModuleTests.hh"
-
 
 #include <iostream>
 #include <string>
@@ -31,80 +25,19 @@
 /**
  * Test class for testing client and factory
  */
-class ForceFailureConstraint : public UnaryConstraint {
+class ForceFailureConstraint : public Constraint {
 public:
   ForceFailureConstraint(const LabelStr& name,
 			 const LabelStr& propagatorName,
 			 const ConstraintEngineId& constraintEngine,
-			 const ConstrainedVariableId& variable,
-			 const AbstractDomain& domain = IntervalIntDomain())
-  : UnaryConstraint(name, propagatorName, constraintEngine, variable){}
-
-  const AbstractDomain& getDomain() const {
-    static IntervalIntDomain sl_noDomain;
-    return sl_noDomain;
-  }
+			 const std::vector<ConstrainedVariableId>& variables)
+  : Constraint(name, propagatorName, constraintEngine, variables){}
 
   void handleExecute(){
     if(getCurrentDomain(m_variables[0]).isSingleton())
       getCurrentDomain(m_variables[0]).empty();
   }
 };
-
-class DefaultSchemaAccessor {
-public:
-
-  static const SchemaId& instance() {
-    if (s_instance.isNoId())
-      s_instance = (new Schema())->getId();
-    return(s_instance);
-  }
-
-  static void reset() {
-    if (!s_instance.isNoId()) {
-      delete (Schema*) s_instance;
-      s_instance = SchemaId::noId();
-    }
-  }
-
-private:
-  static SchemaId s_instance;
-};
-
-SchemaId DefaultSchemaAccessor::s_instance;
-
-#define SCHEMA DefaultSchemaAccessor::instance()
-
-#define DEFAULT_SETUP(ce, db, schema, autoClose) \
-    ConstraintEngineId ce = (new ConstraintEngine())->getId(); \
-    SchemaId schema = (new Schema())->getId(); \
-    PlanDatabaseId db = (new PlanDatabase(ce, schema))->getId(); \
-    { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce); \
-      assert(dp != 0); } \
-    Id<DbLogger> dbLId; \
-    if (loggingEnabled()) { \
-      new CeLogger(std::cout, ce); \
-      dbLId = (new DbLogger(std::cout, db))->getId(); \
-    } \
-    { EqualityConstraintPropagator* ecp = new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce); \
-      assert(ecp != 0); } \
-    Object* objectPtr = new Object(db, Schema::ALL_OBJECTS(), LabelStr("o1")); \
-    assert(objectPtr != 0); \
-    Object& object = *objectPtr; \
-    assert(objectPtr->getId() == object.getId()); \
-    if (autoClose) \
-      db->close();\
-    {
-
-#define DEFAULT_TEARDOWN() \
-    }\
-    Entity::purgeStarted();\
-    delete (PlanDatabase*) db;\
-    delete (Schema*) schema;\
-    delete (ConstraintEngine*) ce;\
-    Entity::purgeEnded();
-
-
 
 class ObjectTest {
 public:
@@ -398,10 +331,7 @@ private:
 
 
 int main() {
-  initConstraintLibrary();
-  
   initDbModuleTests();
-  
   runTestSuite(ObjectTest::test);
   runTestSuite(TokenTest::test);
   runTestSuite(TimelineTest::test);

@@ -13,27 +13,230 @@
 #include "Object.hh"
 #include "Constraints.hh"
 #include "ObjectTokenRelation.hh"
+#include "PlanDatabaseTestSupport.hh"
 
 using namespace Prototype;
 using namespace NDDL;
 
-#define DEFAULT_SETUP(ce, db, schema, autoClose) \
-    ConstraintEngine ce; \
-    Schema schema; \
-    PlanDatabase db(ce.getId(), schema.getId()); \
-    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-    Id<DbLogger> dbLId; \
-    if (loggingEnabled()) { \
-      new CeLogger(std::cout, ce.getId()); \
-      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
-    } \
-    Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"))); \
-    assertTrue(!object.getId().isNoId()); \
-    if (autoClose) \
-      db.close();
+class ObjectFilterConstraintTest {
+public:
+  static bool test() {
+    runTest(testBasicAllocation);
+    runTest(testPropagation);
+    runTest(testFiltering);
+    return true;
+  }
 
-#define DEFAULT_TEARDOWN() \
-    delete (DbLogger*) dbLId;
+private:
+  static bool testBasicAllocation() {
+    DEFAULT_SETUP(ce, db, schema, false);
+
+    // Allocate an object with fields
+    ObjectId object = makeObjectForTesting(db, LabelStr("objectName"), 1, LabelStr("A"), true, 99.8);
+
+    // Create variables that will match the field types
+    Variable<ObjectDomain> ovar(ce, ObjectDomain(object));
+    Variable<IntervalIntDomain> v0(ce, IntervalIntDomain(0, 20));
+    Variable<LabelSet> v1(ce, LabelSet(LabelStr("A")));
+
+    // Create the constraint.
+    std::vector<ObjectFilterCondition*> filter;
+    filter.push_back(new ObjectFilterCondition(v0.getId(), 0, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(v1.getId(), 1, ObjectFilterConstraint::eq));
+    ObjectFilterConstraint c0(LabelStr("ObjectFilter"), 
+			      LabelStr("Default"),
+			      ce,
+			      ovar.getId(),
+			      ObjectFilterConstraint::CONSTRAIN,
+			      filter);
+
+    assert(ce->propagate());
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testPropagation() {
+    DEFAULT_SETUP(ce, db, schema, false);
+    // Allocate a number of objects
+    std::list<ObjectId> objects;
+    objects.push_back(makeObjectForTesting(db, LabelStr("object0"), 1, LabelStr("A"), true, 1.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object1"), 1, LabelStr("A"), true, 2.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object2"), 1, LabelStr("B"), true, 3.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object3"), 1, LabelStr("B"), true, 4.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object4"), 1, LabelStr("A"), false,5.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object5"), 2, LabelStr("A"), true, 6.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object6"), 1, LabelStr("B"), false, 7.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object7"), 2, LabelStr("B"), true, 8.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object8"), 1, LabelStr("A"), true, 9.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object9"), 1, LabelStr("A"), true, 0.1));
+    db->close();
+
+    // Set up the variable to filter
+    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(objects));
+
+    // Allocate a number of filter variables, one for each field
+    Variable<IntervalIntDomain> v0(ce, IntervalIntDomain());
+    Variable<LabelSet> v1(ce, makeLabelSetDomain());
+    Variable<BoolDomain> v2(ce, BoolDomain());
+    Variable<IntervalDomain> v3(ce, IntervalDomain());
+
+    // Set uf filter constraint based on a subset of fields
+
+    // Create the constraint with filter set up
+    std::vector<ObjectFilterCondition*> filter;
+    filter.push_back(new ObjectFilterCondition(v0.getId(), 0, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(v1.getId(), 1, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(v2.getId(), 2, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(v3.getId(), 3, ObjectFilterConstraint::eq));
+
+    ObjectFilterConstraint c0(LabelStr("ObjectFilter"), 
+			      LabelStr("Default"),
+			      ce,
+			      filterVariable.getId(),
+			      ObjectFilterConstraint::CONSTRAIN,
+			      filter);
+
+    // Propagate and confirm restrictions
+    assert(ce->propagate());
+    assert(filterVariable.baseDomain() == filterVariable.lastDomain()); // Unchanged
+
+    // Specify the label set to B, and prune accordingly
+    v1.specify(LabelStr("B"));
+    assert(filterVariable.getDerivedDomain().getSize() == 4);
+
+    // Now specify v3 to a tighter interval
+    v3.specify(IntervalDomain(7, 9));
+    assert(filterVariable.getDerivedDomain().getSize() == 2);
+
+    // Specify to prune to a singleton
+    v2.specify(true);
+    assert(filterVariable.getDerivedDomain().isSingleton());
+    assert(filterVariable.getDerivedDomain().getValue()->getName() == LabelStr("object7"));
+
+    // Force an inconsistency
+    v0.specify(1);
+    assert(!ce->propagate());
+    assert(filterVariable.lastDomain().isEmpty());
+
+    // Now retract and retest
+    v0.reset();
+    v2.reset();
+    assert(filterVariable.getDerivedDomain().getSize() == 2);
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  /**
+   * Almost the same as previous test, but now use the filter mode. It will still propagate but
+   * it will not cause a violation if the object domain should be empty.
+   */
+  static bool testFiltering() {
+    DEFAULT_SETUP(ce, db, schema, false);
+    // Allocate a number of objects
+    std::list<ObjectId> objects;
+    objects.push_back(makeObjectForTesting(db, LabelStr("object0"), 1, LabelStr("A"), true, 1.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object1"), 1, LabelStr("A"), true, 2.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object2"), 1, LabelStr("B"), true, 3.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object3"), 1, LabelStr("B"), true, 4.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object4"), 1, LabelStr("A"), false,5.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object5"), 2, LabelStr("A"), true, 6.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object6"), 1, LabelStr("B"), false, 7.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object7"), 2, LabelStr("B"), true, 8.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object8"), 1, LabelStr("A"), true, 9.1));
+    objects.push_back(makeObjectForTesting(db, LabelStr("object9"), 1, LabelStr("A"), true, 0.1));
+    db->close();
+
+    // Set up the variable to filter
+    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(objects));
+
+    // Allocate a number of filter variables, one for each field
+    Variable<IntervalIntDomain> v0(ce, IntervalIntDomain());
+    Variable<LabelSet> v1(ce, makeLabelSetDomain());
+    Variable<BoolDomain> v2(ce, BoolDomain());
+    Variable<IntervalDomain> v3(ce, IntervalDomain());
+
+    // Set uf filter constraint based on a subset of fields
+
+    // Create the constraint with filter set up
+    std::vector<ObjectFilterCondition*> filter;
+    filter.push_back(new ObjectFilterCondition(v0.getId(), 0, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(v1.getId(), 1, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(v2.getId(), 2, ObjectFilterConstraint::eq));
+    filter.push_back(new ObjectFilterCondition(v3.getId(), 3, ObjectFilterConstraint::eq));
+
+    ObjectFilterConstraint c0(LabelStr("ObjectFilter"), 
+			      LabelStr("Default"),
+			      ce,
+			      filterVariable.getId(),
+			      ObjectFilterConstraint::FILTER,
+			      filter);
+
+    // Propagate and confirm restrictions
+    assert(ce->propagate());
+    assert(filterVariable.baseDomain() == filterVariable.lastDomain()); // Unchanged
+
+    // Specify the label set to B, and prune accordingly
+    v1.specify(LabelStr("B"));
+    assert(filterVariable.getDerivedDomain().getSize() == 4);
+
+    // Now specify v3 to a tighter interval
+    v3.specify(IntervalDomain(7, 9));
+    assert(filterVariable.getDerivedDomain().getSize() == 2);
+
+    // Specify to prune to a singleton
+    v2.specify(true);
+    assert(filterVariable.getDerivedDomain().isSingleton());
+    assert(filterVariable.getDerivedDomain().getValue()->getName() == LabelStr("object7"));
+
+    // Force an inconsistency - but this time, we will not get one
+    v0.specify(1);
+    assert(ce->propagate());
+    assert(!filterVariable.lastDomain().isEmpty());
+    assert(c0.getFilteredObjects().isEmpty());
+
+    // Now retract and retest
+    v0.reset();
+    v2.reset();
+    assert(filterVariable.getDerivedDomain().getSize() == 2);
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  /**
+   * @brief Helper method to allocate object with fields to support testing
+   */
+  static ObjectId makeObjectForTesting(const PlanDatabaseId& db, 
+				       const LabelStr& name,
+				       unsigned int arg0,
+				       const LabelStr& arg1,
+				       bool arg2,
+				       float arg3){
+    ObjectId object = (new Object(db, Schema::ALL_OBJECTS(), name, true))->getId();
+    object->addVariable(IntervalIntDomain(arg0), LabelStr("FIELD_0"));
+    object->addVariable(LabelSet(arg1), LabelStr("FIELD_1"));
+    object->addVariable(BoolDomain(arg2), LabelStr("FIELD_2"));
+    object->addVariable(IntervalDomain(arg3), LabelStr("FIELD_3"));
+    object->close();
+    return object;
+  }
+
+  static const LabelSet makeLabelSetDomain(){
+    LabelSet lblSet;
+    lblSet.insert(LabelStr("A"));
+    lblSet.insert(LabelStr("B"));
+    lblSet.insert(LabelStr("C"));
+    lblSet.insert(LabelStr("D"));
+    lblSet.insert(LabelStr("E"));
+    lblSet.insert(LabelStr("F"));
+    lblSet.insert(LabelStr("G"));
+    lblSet.close();
+    return lblSet;
+  }
+
+};
 
 class NddlSchemaTest {
 public:
@@ -166,14 +369,14 @@ private:
     R_Predicate_1 rule1;
     R_Predicate_2 rule2;
 
-    IntervalToken t0(db.getId(),                                                         
+    IntervalToken t0(db, 
                      LabelStr("Predicate"),                                                     
                      true,                                                               
                      IntervalIntDomain(0, 10),                                           
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));
     t0.activate();
-    bool prop = ce.propagate();
+    bool prop = ce->propagate();
     assertTrue(prop);
     DEFAULT_TEARDOWN();
     return(true);
@@ -182,16 +385,16 @@ private:
 
 int main() {
   // Special designations for temporal relations
-  REGISTER_NARY(EqualConstraint, "concurrent", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "precede", "Default");
+  REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
+  REGISTER_CONSTRAINT(LessThanEqualConstraint, "precede", "Default");
 
   // Support for Token implementations
-  REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
-  REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-  REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
+  REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
+  REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
-  REGISTER_NARY(EqualConstraint, "eq", "Default");
+  REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
 
+  runTestSuite(ObjectFilterConstraintTest::test);
   runTestSuite(NddlSchemaTest::test);
   runTestSuite(NddlRuleIntergrationTest::test);
   std::cout << "Finished" << std::endl;

@@ -14,7 +14,6 @@ ModuleComponent ConstraintEngine
 	IntervalDomain.cc
 	IntervalIntDomain.cc
 	test-support.cc
-	UnaryConstraint.cc
 	;
 
 } # PLASMA_READY

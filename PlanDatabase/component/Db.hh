@@ -10,7 +10,6 @@
 #include "RuleInstance.hh"
 #include "Schema.hh"
 #include "ObjectTokenRelation.hh"
-#include "ObjectFilter.hh"
 #include "DbLogger.hh"
 
 #include "ConstraintEngine.hh"

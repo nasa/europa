@@ -6,7 +6,6 @@
 #include "Schema.hh"
 #include "Object.hh"
 #include "Timeline.hh"
-#include "UnaryConstraint.hh"
 #include "IntervalIntDomain.hh"
 #include "ObjectFactory.hh"
 #include "TokenFactory.hh"

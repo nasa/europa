@@ -48,7 +48,6 @@ namespace Prototype {
     void playVariableSpecified(const TiXmlElement & element);
     void playVariableReset(const TiXmlElement & element);
     void playInvokeConstraint(const TiXmlElement & element);
-    void playUnaryConstraint(const TiXmlElement & element);
 
   private:
     DbClientId m_client;

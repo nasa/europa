@@ -99,6 +99,10 @@ namespace Prototype {
     for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
       const ConstrainedVariableId& var = *it;
       check_error(var.isValid());
+
+      if(!TokenId::convertable(var->getParent()))
+	return;
+
       TokenId parentToken = var->getParent();
       if(parentToken->isMerged()){
 	m_changedVariables.erase(var);
@@ -201,7 +205,7 @@ namespace Prototype {
       lb = 0;
       ub = 0;
     }
-    else if (constraint->getName() == LabelStr("before")) {
+    else if (constraint->getName() == LabelStr("before") || constraint->getName() == LabelStr("precedes")) {
       start = constraint->getScope()[0];
       end = constraint->getScope()[1];      
       lb = 0;

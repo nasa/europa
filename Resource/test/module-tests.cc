@@ -780,11 +780,10 @@ private:
 int main() {
 
   initConstraintLibrary();
+  REGISTER_CONSTRAINT(ResourceConstraint, "ResourceRelation", "Resource");
+  REGISTER_CONSTRAINT(ResourceTransactionConstraint, "HorizonRelation", "Default");
+  REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
-  REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-  REGISTER_NARY(ResourceConstraint, "ResourceRelation", "Resource");
-  REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
-  REGISTER_NARY(ResourceTransactionConstraint, "HorizonRelation", "Default");
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   std::cout << "Finished" << std::endl;

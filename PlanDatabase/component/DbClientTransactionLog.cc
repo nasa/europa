@@ -155,16 +155,6 @@ namespace Prototype {
     m_bufferedTransactions.push_back(element);
   }
 
-  void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint, const AbstractDomain& domain){
-    TiXmlElement * element = new TiXmlElement("unary");
-    element->SetAttribute("name", constraint->getName().toString());    
-    const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
-    check_error(variables.size() == 1);
-    element->LinkEndChild(variableAsXml(variables[0]));
-    element->LinkEndChild(abstractDomainAsXml(&domain));
-    m_bufferedTransactions.push_back(element);
-  }
-
   void DbClientTransactionLog::notifyVariableSpecified(const ConstrainedVariableId& variable){
     TiXmlElement * element = new TiXmlElement("specify");
     element->LinkEndChild(variableAsXml(variable));
@@ -248,7 +238,6 @@ namespace Prototype {
   DbClientTransactionLog::abstractDomainAsXml(const AbstractDomain * domain)
   {
     check_error(!domain->isEmpty());
-    check_error(!domain->isOpen());
     if (domain->isSingleton()) {
       return domainValueAsXml(domain, domain->getSingletonValue());
     } else if (domain->isEnumerated()) {

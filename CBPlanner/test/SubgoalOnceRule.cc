@@ -53,10 +53,6 @@ namespace Prototype {
     if (m_count < 2)
       addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), slave->getStart()));
     else {
-      ConstraintId start = ConstraintLibrary::createConstraint(LabelStr("Singleton"), m_planDb->getConstraintEngine(), slave->getStart(), IntervalIntDomain(4,4));
-      ConstraintId end = ConstraintLibrary::createConstraint(LabelStr("Singleton"), m_planDb->getConstraintEngine(), slave->getEnd(), IntervalIntDomain(10,10));
-      addConstraint(start);
-      addConstraint(end);
       addConstraint(LabelStr("lt"), makeScope(slave->getEnd(), slave->getStart()));
     }
   }

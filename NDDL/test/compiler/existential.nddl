@@ -48,14 +48,24 @@ World::Going{
   eq(path.from, from);
   eq(path.to, to);
  };
+
+ Path p1: {};
 }
 
 World::initialState{
  any(Going g);
  eq(g.from, object.rock);
  eq(g.to, object.hill);
- Path path : {
-  eq(path.from, g.from);
-  eq(path.to, g.to);
+
+ Path p1 : {
+  eq(p1.from, g.from);
+  eq(p1.to, g.to);
  };
+
+ Path p2 : {
+  eq(p2.from, g.from);
+  eq(p2.to, g.to);
+ };
+
+ Path p3 : {};
 }

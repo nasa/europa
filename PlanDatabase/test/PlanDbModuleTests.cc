@@ -21,7 +21,7 @@
 #include "Domain.hh"
 #include "DefaultPropagator.hh"
 #include "EqualityConstraintPropagator.hh"
-#include "UnaryConstraint.hh"
+#include "Constraint.hh"
 
 #include <iostream>
 #include <string>
@@ -154,19 +154,13 @@ namespace Prototype {
   /**
    * @brief Declaration and definition for test constraint to force a failure when the domain becomes a singleton
    */
-  class ForceFailureConstraint : public UnaryConstraint {
+  class ForceFailureConstraint : public Constraint {
   public:
     ForceFailureConstraint(const LabelStr& name,
                            const LabelStr& propagatorName,
                            const ConstraintEngineId& constraintEngine,
-                           const ConstrainedVariableId& variable,
-                           const AbstractDomain& domain = IntervalIntDomain())
-      : UnaryConstraint(name, propagatorName, constraintEngine, variable){}
-
-    const AbstractDomain& getDomain() const {
-      static IntervalIntDomain sl_noDomain;
-      return sl_noDomain;
-    }
+			   const std::vector<ConstrainedVariableId>& variables)
+      : Constraint(name, propagatorName, constraintEngine, variables){}
 
     void handleExecute(){
       if(getCurrentDomain(m_variables[0]).isSingleton())
@@ -176,22 +170,16 @@ namespace Prototype {
 
 
   void initDbModuleTests() {
+    initConstraintLibrary();
+
     // Special designations for temporal relations
-    REGISTER_NARY(EqualConstraint, "concurrent", "Default");
-    REGISTER_NARY(LessThanEqualConstraint, "before", "Default");
+    REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
+    REGISTER_CONSTRAINT(LessThanEqualConstraint, "before", "Default");
+    REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
     
     // Support for Token implementations
-    REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
-    REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-    REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
-    REGISTER_UNARY(ForceFailureConstraint, "ForceFailure", "Default");
-
-    // This is now done in ConstraintEngine/test-support.cc::initConstraintLibrary()
-    //   for ConstraintEngine/module-tests.cc::testArbitraryConstraints().
-    // --wedgingt 2004 Mar 11
-    //REGISTER_NARY(EqualConstraint, "eq", "Default");
-    
-    REGISTER_NARY(EqualConstraint, "EqualConstraint", "EquivalenceClass");
+    REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
+    REGISTER_CONSTRAINT(ForceFailureConstraint, "ForceFailure", "Default");
     
     // Allocate default schema initially so tests don't fail because of ID's
     SCHEMA;
@@ -271,10 +259,11 @@ namespace Prototype {
     o2.close();
 
     // Add a unary constraint
-    ConstraintLibrary::createConstraint(LabelStr("SubsetOf"), 
+    Variable<IntervalIntDomain> superset(db.getConstraintEngine(), IntervalIntDomain(10, 20));;
+
+    ConstraintId subsetConstraint = ConstraintLibrary::createConstraint(LabelStr("SubsetOf"), 
 					db.getConstraintEngine(), 
-					o1.getVariables()[0],
-					IntervalIntDomain(10, 20));
+					makeScope(o1.getVariables()[0], superset.getId()));
 
     // Now add a constraint equating the variables and test propagation
     std::vector<ConstrainedVariableId> constrainedVars;
@@ -289,6 +278,7 @@ namespace Prototype {
 
     // Delete one of the constraints to force automatic clean-up path and explciit clean-up
     delete (Constraint*) constraint;
+    delete (Constraint*) subsetConstraint;
 
     return(true);
   }
@@ -862,12 +852,13 @@ namespace Prototype {
     assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
   
   
-    // Test unary
+    // Test subset path
     t1.cancel();
+    Variable<IntervalIntDomain> superset(db->getConstraintEngine(), IntervalIntDomain(5, 6));
+
     ConstraintId subsetOfConstraint = ConstraintLibrary::createConstraint(LabelStr("SubsetOf"),
                                                                           db->getConstraintEngine(),
-                                                                          t1.getDuration(),
-                                                                          IntervalIntDomain(5, 6));
+                                                                          makeScope(t1.getDuration(), superset.getId()));
     t1.merge(t0.getId());
     assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 6);
     delete (Constraint*) subsetOfConstraint;
@@ -1146,7 +1137,7 @@ namespace Prototype {
                          IntervalIntDomain(1, 1000));
 
     // Post a constraint on tokenB so that it will always fail when it gets merged
-    ForceFailureConstraint c0(LabelStr("ForceFailure"), LabelStr("Default"), ce, tokenC.getState());
+    ForceFailureConstraint c0(LabelStr("ForceFailure"), LabelStr("Default"), ce, makeScope(tokenC.getState()));
 
     // Propagate and test our specified value
     assert(ce->propagate());
@@ -1571,7 +1562,6 @@ namespace Prototype {
     assert(token.isValid());
 
     // Constrain the token duration
-    client->createConstraint(LabelStr("SubsetOf"), token->getDuration(), IntervalIntDomain(100));
     std::vector<ConstrainedVariableId> scope;
     scope.push_back(token->getStart());
     scope.push_back(token->getDuration());

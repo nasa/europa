@@ -8,7 +8,6 @@
 #include "RulesEngine.hh"
 #include "Rule.hh"
 #include "RuleInstance.hh"
-#include "ObjectFilter.hh"
 #include "DbLogger.hh"
 
 #include "TestSupport.hh"
@@ -374,18 +373,12 @@ int main() {
   initConstraintLibrary();
   
   // Special designations for temporal relations
-  REGISTER_NARY(EqualConstraint, "concurrent", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "precede", "Default");
+  REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
+  REGISTER_CONSTRAINT(LessThanEqualConstraint, "precede", "Default");
 
   // Support for Token implementations
-  REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
-  REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-  REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
-
-  // This is now done in ConstraintEngine/test-support.cc::initConstraintLibrary()
-  //   for ConstraintEngine/module-tests.cc::testArbitraryConstraints().
-  // --wedgingt 2004 Mar 11
-  //REGISTER_NARY(EqualConstraint, "eq", "Default");
+  REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
+  REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
   // Allocate default schema initially so tests don't fail because of ID's
   SCHEMA;

@@ -250,15 +250,15 @@ private:
 };
 
 int main() {
-  REGISTER_NARY(EqualConstraint, "concurrent", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "before", "Default");
-  REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
-  REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-  REGISTER_NARY(EqualConstraint, "eq", "Default");
-  REGISTER_NARY(EqualConstraint, "Equal", "Default");
-  REGISTER_NARY(LessThanConstraint, "lt", "Default");
-  REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
-  REGISTER_UNARY(SubsetOfConstraint, "SubsetOf", "Default");
+
+  REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
+  REGISTER_CONSTRAINT(LessThanEqualConstraint, "before", "Default");
+  REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
+  REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
+  REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
+  REGISTER_CONSTRAINT(EqualConstraint, "Equal", "Default");
+  REGISTER_CONSTRAINT(LessThanConstraint, "lt", "Default");
+  REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
 
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ConditionTest::test);

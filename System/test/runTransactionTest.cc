@@ -54,9 +54,9 @@ bool runPlanner(){
 
     int res = db1.planner->run(loggingEnabled(), steps);
 
-    PlanDatabaseWriter::write(db1.planDatabase, std::cout);
-
     assert(res == CBPlanner::PLAN_FOUND);
+
+    PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
     // Store transactions for recreation of database
     if(replay) {

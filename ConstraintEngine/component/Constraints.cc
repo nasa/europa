@@ -179,27 +179,20 @@ namespace Prototype {
   SubsetOfConstraint::SubsetOfConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
 					 const ConstraintEngineId& constraintEngine,
-					 const ConstrainedVariableId& variable,
-					 const AbstractDomain& superset)
-    : UnaryConstraint(name, propagatorName, constraintEngine, variable),
+					 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
       m_isDirty(true),
-      m_currentDomain(getCurrentDomain(variable)),
+      m_currentDomain(getCurrentDomain(variables[0])),
+      m_superSetDomain(getCurrentDomain(variables[1])),
       m_executionCount(0) {
-    check_error(superset.isOpen() || !superset.isEmpty());
-    check_error(m_currentDomain.getType() == superset.getType() ||
-                (m_currentDomain.isEnumerated() &&
-                 superset.isEnumerated()));
-    m_superSetDomain = superset.copy();
-    check_error(m_superSetDomain != 0);
-    check_error(AbstractDomain::canBeCompared(m_currentDomain, *m_superSetDomain));
+    check_error(variables.size() == 2);
+    check_error(AbstractDomain::canBeCompared(m_currentDomain, m_superSetDomain));
   }
 
-  SubsetOfConstraint::~SubsetOfConstraint() {
-    delete m_superSetDomain;
-  }
+  SubsetOfConstraint::~SubsetOfConstraint() {}
 
   void SubsetOfConstraint::handleExecute() {
-    m_currentDomain.intersect(*m_superSetDomain);
+    m_currentDomain.intersect(m_superSetDomain);
     m_isDirty = false;
     m_executionCount++;
   }
@@ -213,10 +206,6 @@ namespace Prototype {
 
   int SubsetOfConstraint::executionCount() const {
     return(m_executionCount);
-  }
-
-  const AbstractDomain& SubsetOfConstraint::getDomain() const {
-    return(*m_superSetDomain);
   }
 
   LessThanEqualConstraint::LessThanEqualConstraint(const LabelStr& name,
@@ -289,7 +278,7 @@ namespace Prototype {
     AbstractDomain& domx = getCurrentDomain(m_variables[X]);
     AbstractDomain& domy = getCurrentDomain(m_variables[Y]);
 
-    check_error(AbstractDomain::canBeCompared(domx, domy));
+    check_error(AbstractDomain::canBeCompared(domx, domy), "Cannot compare " + domx.toString() + " and " + domy.toString() + ".");
 
     // Discontinue if either domain is open.
     if (domx.isOpen() || domy.isOpen())
@@ -1301,11 +1290,12 @@ namespace Prototype {
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_zeros(constraintEngine, IntervalDomain(), false, LabelStr("InternalCountNonZerosVar"), getId()),
       m_otherVars(constraintEngine, IntervalDomain(), false, LabelStr("InternalCountNonZerosOtherVars"), getId()),
+      m_superset(constraintEngine, IntervalDomain(variables.size() - 1), false, LabelStr("InternalCountNonZerosSuperset"), getId()),
       m_addEqualConstraint(LabelStr("Internal:CountNonZeros:addEqual"), propagatorName, constraintEngine,
                            makeScope(m_zeros.getId(), m_variables[0], m_otherVars.getId()))
   {
     m_subsetConstraint = (new SubsetOfConstraint(LabelStr("Internal:CountNonZeros:subSet"), propagatorName, constraintEngine,
-                                                 m_otherVars.getId(), IntervalDomain(m_variables.size() - 1)))->getId();
+                                                 makeScope(m_otherVars.getId(), m_superset.getId())))->getId();
     std::vector<ConstrainedVariableId> cZCScope = m_variables;
     cZCScope[0] = m_zeros.getId();
     check_error(m_variables.size() == cZCScope.size());
@@ -1334,10 +1324,11 @@ namespace Prototype {
                              const ConstraintEngineId& constraintEngine,
                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_nonZeros(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), false, LabelStr("InternalVar:Or:nonZeros"), getId())
+      m_nonZeros(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), false, LabelStr("InternalVar:Or:nonZeros"), getId()),
+      m_superset(constraintEngine, IntervalIntDomain(1, variables.size()), false, LabelStr("InternalVar:Or:superset"), getId())
   {
     m_subsetConstraint = (new SubsetOfConstraint(LabelStr("Internal:CountNonZeros:subSet"), propagatorName, constraintEngine,
-                                                 m_nonZeros.getId(), IntervalIntDomain(1, m_variables.size())))->getId();
+                                                 makeScope(m_nonZeros.getId(), m_superset.getId())))->getId();
     std::vector<ConstrainedVariableId> cNZCScope;
     cNZCScope.reserve(m_variables.size() + 1);
     cNZCScope.push_back(m_nonZeros.getId());
@@ -1589,34 +1580,28 @@ namespace Prototype {
 
 
   LockConstraint::LockConstraint(const LabelStr& name,
-					 const LabelStr& propagatorName,
-					 const ConstraintEngineId& constraintEngine,
-					 const ConstrainedVariableId& variable,
-					 const AbstractDomain& lockDomain)
-    : UnaryConstraint(name, propagatorName, constraintEngine, variable), 
-    m_currentDomain(getCurrentDomain(variable)) {
-    m_lockDomain = lockDomain.copy();
-    check_error(m_lockDomain != 0);
+				 const LabelStr& propagatorName,
+				 const ConstraintEngineId& constraintEngine,
+				 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_currentDomain(getCurrentDomain(variables[0])),
+      m_lockDomain(getCurrentDomain(variables[1])){
+    check_error(variables.size() == 2);
   }
 
   LockConstraint::~LockConstraint() {
-    delete m_lockDomain;
   }
 
   void LockConstraint::handleExecute() {
     // Only need to do something if they are not equal. So skip out.
-    if(getDomain() == m_currentDomain)
+    if(m_lockDomain == m_currentDomain)
       return;
 
     // If the current domain is a superset, then restrict it. 
-    if(getDomain().isSubsetOf(m_currentDomain))
-       m_currentDomain.intersect(getDomain());
+    if(m_lockDomain.isSubsetOf(m_currentDomain))
+       m_currentDomain.intersect(m_lockDomain);
     else
       m_currentDomain.empty(); // Otherwise, the lock is enforced by forcing a relaxation
-  }
-
-  const AbstractDomain& LockConstraint::getDomain() const {
-    return(*m_lockDomain);
   }
 
   // Enforces X >=0, Y<=0, X+Y==0
@@ -1658,67 +1643,67 @@ namespace Prototype {
     
     if (!s_runAlready) {
       // Register constraint Factories
-      REGISTER_UNARY(SubsetOfConstraint, "SubsetOf", "Default");
-      REGISTER_UNARY(LockConstraint, "Lock", "Default");
-      REGISTER_NARY(EqualConstraint, "Equal", "Default");
-      REGISTER_NARY(AddEqualConstraint, "AddEqual", "Default");
-      REGISTER_NARY(AddMultEqualConstraint, "AddMultEqual", "Default");
-      REGISTER_NARY(AllDiffConstraint, "AllDiff", "Default");
-      REGISTER_NARY(CardinalityConstraint, "Cardinality", "Default");
-      REGISTER_NARY(CondAllDiffConstraint, "CondAllDiff", "Default");
-      REGISTER_NARY(CondAllSameConstraint, "CondAllSame", "Default");
-      REGISTER_NARY(CondEqualSumConstraint, "CondEqualSum", "Default");
-      REGISTER_NARY(CountNonZerosConstraint, "CountNonZeros", "Default");
-      REGISTER_NARY(CountZerosConstraint, "CountZeros", "Default");
-      REGISTER_NARY(OrConstraint, "Or", "Default");
-      REGISTER_NARY(EqualMaximumConstraint, "EqualMaximum", "Default");
-      REGISTER_NARY(EqualMinimumConstraint, "EqualMinimum", "Default");
-      REGISTER_NARY(EqualProductConstraint, "EqualProduct", "Default");
-      REGISTER_NARY(EqualSumConstraint, "EqualSum", "Default");
-      REGISTER_NARY(GreaterThanSumConstraint, "GreaterThanSum", "Default");
-      REGISTER_NARY(GreaterOrEqThanSumConstraint, "GreaterOrEqThanSum", "Default");
-      REGISTER_NARY(LessOrEqThanSumConstraint, "LessOrEqThanSum", "Default");
-      REGISTER_NARY(LessThanConstraint, "LessThan", "Default");
-      REGISTER_NARY(LessThanEqualConstraint, "LessThanEqual", "Default");
-      REGISTER_NARY(LessThanSumConstraint, "LessThanSum", "Default");
-      REGISTER_NARY(MemberImplyConstraint, "MemberImply", "Default");
-      REGISTER_NARY(MultEqualConstraint, "MultEqual", "Default");
-      REGISTER_NARY(NotEqualConstraint, "NotEqual", "Default");
+      REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
+      REGISTER_CONSTRAINT(LockConstraint, "Lock", "Default");
+      REGISTER_CONSTRAINT(EqualConstraint, "Equal", "Default");
+      REGISTER_CONSTRAINT(AddEqualConstraint, "AddEqual", "Default");
+      REGISTER_CONSTRAINT(AddMultEqualConstraint, "AddMultEqual", "Default");
+      REGISTER_CONSTRAINT(AllDiffConstraint, "AllDiff", "Default");
+      REGISTER_CONSTRAINT(CardinalityConstraint, "Cardinality", "Default");
+      REGISTER_CONSTRAINT(CondAllDiffConstraint, "CondAllDiff", "Default");
+      REGISTER_CONSTRAINT(CondAllSameConstraint, "CondAllSame", "Default");
+      REGISTER_CONSTRAINT(CondEqualSumConstraint, "CondEqualSum", "Default");
+      REGISTER_CONSTRAINT(CountNonZerosConstraint, "CountNonZeros", "Default");
+      REGISTER_CONSTRAINT(CountZerosConstraint, "CountZeros", "Default");
+      REGISTER_CONSTRAINT(OrConstraint, "Or", "Default");
+      REGISTER_CONSTRAINT(EqualMaximumConstraint, "EqualMaximum", "Default");
+      REGISTER_CONSTRAINT(EqualMinimumConstraint, "EqualMinimum", "Default");
+      REGISTER_CONSTRAINT(EqualProductConstraint, "EqualProduct", "Default");
+      REGISTER_CONSTRAINT(EqualSumConstraint, "EqualSum", "Default");
+      REGISTER_CONSTRAINT(GreaterThanSumConstraint, "GreaterThanSum", "Default");
+      REGISTER_CONSTRAINT(GreaterOrEqThanSumConstraint, "GreaterOrEqThanSum", "Default");
+      REGISTER_CONSTRAINT(LessOrEqThanSumConstraint, "LessOrEqThanSum", "Default");
+      REGISTER_CONSTRAINT(LessThanConstraint, "LessThan", "Default");
+      REGISTER_CONSTRAINT(LessThanEqualConstraint, "LessThanEqual", "Default");
+      REGISTER_CONSTRAINT(LessThanSumConstraint, "LessThanSum", "Default");
+      REGISTER_CONSTRAINT(MemberImplyConstraint, "MemberImply", "Default");
+      REGISTER_CONSTRAINT(MultEqualConstraint, "MultEqual", "Default");
+      REGISTER_CONSTRAINT(NotEqualConstraint, "NotEqual", "Default");
 
       // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
-      REGISTER_NARY(AddEqualConstraint, "addeq", "Default");
-      REGISTER_NARY(NegateConstraint, "neg", "Default");
-      REGISTER_NARY(AddMultEqualConstraint, "addmuleq", "Default");
-      REGISTER_NARY(AllDiffConstraint, "adiff", "Default"); // all different
-      REGISTER_NARY(EqualConstraint, "asame", "Default"); // all same
-      REGISTER_NARY(CardinalityConstraint, "card", "Default"); // cardinality not more than
-      REGISTER_NARY(CountNonZerosConstraint, "cardeq", "Default"); // cardinality equals
-      REGISTER_NARY(CondAllSameConstraint, "condeq", "Default");
-      REGISTER_NARY(EqualConstraint, "eq", "Default");
-      REGISTER_NARY(EqualConstraint, "fasame", "Default"); // flexible all same
-      REGISTER_NARY(OrConstraint, "for", "Default"); // flexible or
-      REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
-      REGISTER_NARY(LessOrEqThanSumConstraint, "leqsum", "Default");
-      REGISTER_NARY(LessThanConstraint, "lt", "Default");
-      REGISTER_NARY(MemberImplyConstraint, "memberImply", "Default");
-      REGISTER_NARY(NotEqualConstraint, "neq", "Default");
-      REGISTER_NARY(OrConstraint, "or", "Default");
-      REGISTER_NARY(EqualProductConstraint, "product", "Default");
-      REGISTER_NARY(EqualSumConstraint, "sum", "Default");
+      REGISTER_CONSTRAINT(AddEqualConstraint, "addeq", "Default");
+      REGISTER_CONSTRAINT(NegateConstraint, "neg", "Default");
+      REGISTER_CONSTRAINT(AddMultEqualConstraint, "addmuleq", "Default");
+      REGISTER_CONSTRAINT(AllDiffConstraint, "adiff", "Default"); // all different
+      REGISTER_CONSTRAINT(EqualConstraint, "asame", "Default"); // all same
+      REGISTER_CONSTRAINT(CardinalityConstraint, "card", "Default"); // cardinality not more than
+      REGISTER_CONSTRAINT(CountNonZerosConstraint, "cardeq", "Default"); // cardinality equals
+      REGISTER_CONSTRAINT(CondAllSameConstraint, "condeq", "Default");
+      REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
+      REGISTER_CONSTRAINT(EqualConstraint, "fasame", "Default"); // flexible all same
+      REGISTER_CONSTRAINT(OrConstraint, "for", "Default"); // flexible or
+      REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
+      REGISTER_CONSTRAINT(LessOrEqThanSumConstraint, "leqsum", "Default");
+      REGISTER_CONSTRAINT(LessThanConstraint, "lt", "Default");
+      REGISTER_CONSTRAINT(MemberImplyConstraint, "memberImply", "Default");
+      REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
+      REGISTER_CONSTRAINT(OrConstraint, "or", "Default");
+      REGISTER_CONSTRAINT(EqualProductConstraint, "product", "Default");
+      REGISTER_CONSTRAINT(EqualSumConstraint, "sum", "Default");
 
       // Rotate scope right one (last var moves to front) to ...
       // ... change addleq constraint to GreaterOrEqThan constraint:
-      REGISTER_ROTATED_NARY("addleq", "Default", "GreaterOrEqThanSum", 1);
+      REGISTER_ROTATED_CONSTRAINT("addleq", "Default", "GreaterOrEqThanSum", 1);
       // ... change addlt constraint to GreaterThanSum constraint:
-      REGISTER_ROTATED_NARY("addlt", "Default", "GreaterThanSum", 1);
+      REGISTER_ROTATED_CONSTRAINT("addlt", "Default", "GreaterThanSum", 1);
       // ... change max constraint to EqualMaximum constraint:
-      REGISTER_ROTATED_NARY("max", "Default", "EqualMaximum", 1);
+      REGISTER_ROTATED_CONSTRAINT("max", "Default", "EqualMaximum", 1);
       // ... change min constraint to EqualMinimum constraint:
-      REGISTER_ROTATED_NARY("min", "Default", "EqualMinimum", 1);
+      REGISTER_ROTATED_CONSTRAINT("min", "Default", "EqualMinimum", 1);
 
       // But addeqcond is harder, requiring two "steps":
-      REGISTER_SWAP_TWO_VARS_NARY("eqcondsum", "Default", "CondEqualSum", 0, 1);
-      REGISTER_ROTATED_NARY("addeqcond", "Default", "eqcondsum", 2);
+      REGISTER_SWAP_TWO_VARS_CONSTRAINT("eqcondsum", "Default", "CondEqualSum", 0, 1);
+      REGISTER_ROTATED_CONSTRAINT("addeqcond", "Default", "eqcondsum", 2);
 
       s_runAlready = true;
     }

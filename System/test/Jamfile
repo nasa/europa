@@ -12,7 +12,7 @@ ModuleObjects runTest.cc : System ;
 
 for model in
 	Rover.nddl basic-model.nddl k9.backtrack.moderate.nddl
-	k9.nddl path-filter.nddl
+	k9.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : runTest.o : $(model) : System ;

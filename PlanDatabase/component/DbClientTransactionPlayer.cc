@@ -393,21 +393,6 @@ namespace Prototype {
     m_client->createConstraint(LabelStr(name), variables);
   }
 
-  void DbClientTransactionPlayer::playUnaryConstraint(const TiXmlElement & element)
-  {
-    const char * name = element.Attribute("name");
-    check_error(name != NULL);
-    TiXmlElement * var_el = element.FirstChildElement();
-    check_error(var_el != NULL);
-    ConstrainedVariableId variable = xmlAsVariable(*var_el);
-    check_error(variable.isValid());
-    TiXmlElement * domain_el = var_el->NextSiblingElement();
-    check_error(domain_el != NULL);
-    const AbstractDomain * domain = xmlAsAbstractDomain(*domain_el);
-    m_client->createConstraint(LabelStr(name), variable, *domain);
-    delete domain;
-  }
-
   //! string input functions
 
   double 
@@ -481,7 +466,7 @@ namespace Prototype {
           return variable;
         }        
       }
-      check_error(ALWAYS_FAILS);
+      check_error(ALWAYS_FAILS, "Failed to process transaction for " + ident + ":" + name);
     }
     ConstrainedVariableId var = m_variables[ident];
     check_error(var.isValid());

@@ -3,7 +3,6 @@
 
 #include "ConstraintEngineDefs.hh"
 #include "Constraint.hh"
-#include "UnaryConstraint.hh"
 #include "Variable.hh"
 #include "IntervalDomain.hh"
 #include "IntervalIntDomain.hh"
@@ -45,19 +44,16 @@ namespace Prototype {
     const unsigned int m_argCount;
   };
 
-  class SubsetOfConstraint : public UnaryConstraint {
+  class SubsetOfConstraint : public Constraint {
   public:
     SubsetOfConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
 		       const ConstraintEngineId& constraintEngine,
-		       const ConstrainedVariableId& variable,
-		       const AbstractDomain& superset);
+		       const std::vector<ConstrainedVariableId>& variables);
 
     ~SubsetOfConstraint();
 
     void handleExecute();
-
-    const AbstractDomain& getDomain() const;
 
     bool canIgnore(const ConstrainedVariableId& variable,
 		   int argIndex,
@@ -68,17 +64,16 @@ namespace Prototype {
   private:
     bool m_isDirty;
     AbstractDomain& m_currentDomain;
-    AbstractDomain* m_superSetDomain;
+    AbstractDomain& m_superSetDomain;
     int m_executionCount;
   };
 
-  class LockConstraint : public UnaryConstraint {
+  class LockConstraint : public Constraint {
   public:
     LockConstraint(const LabelStr& name,
 		   const LabelStr& propagatorName,
 		   const ConstraintEngineId& constraintEngine,
-		   const ConstrainedVariableId& variable,
-		   const AbstractDomain& lockDomain);
+		   const std::vector<ConstrainedVariableId>& variables);
 
     ~LockConstraint();
 
@@ -88,7 +83,7 @@ namespace Prototype {
 
   private:
     AbstractDomain& m_currentDomain;
-    AbstractDomain* m_lockDomain;
+    AbstractDomain& m_lockDomain;
   };
 
   class LessThanEqualConstraint : public Constraint {
@@ -449,7 +444,7 @@ namespace Prototype {
     inline void handleExecute() { }
 
   private:
-    Variable<IntervalDomain> m_zeros, m_otherVars;
+    Variable<IntervalDomain> m_zeros, m_otherVars,  m_superset;
     AddEqualConstraint m_addEqualConstraint;
     ConstraintId m_subsetConstraint;
     ConstraintId m_countZerosConstraint;
@@ -507,6 +502,7 @@ namespace Prototype {
 
   private:
     Variable<IntervalIntDomain> m_nonZeros;
+    Variable<IntervalIntDomain> m_superset;
     ConstraintId m_subsetConstraint;
     ConstraintId m_countNonZerosConstraint;
   };

@@ -404,10 +404,9 @@ int main() {
   initConstraintLibrary();
 
   // Special designations for temporal relations
-  // REGISTER_NARY(EqualConstraint, "concurrent", "Temporal");
-  REGISTER_NARY(LessThanEqualConstraint, "before", "Temporal");
-  REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Temporal");
-  REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
+  REGISTER_CONSTRAINT(LessThanEqualConstraint, "before", "Temporal");
+  REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Temporal");
+  REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
   runTestSuite(TemporalNetworkTest::test);
   runTestSuite(TemporalPropagatorTest::test);

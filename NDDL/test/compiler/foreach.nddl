@@ -39,6 +39,14 @@ class Trackable {
  }
 }
 
+
+// Will use this to test that foreach over an empty set will not be a problem
+class NotTrackable extends Trackable {
+ NotTrackable(Path _path, Target _target){
+  super(_path, _target);
+ }
+}
+
 class Rover {
  predicate Navigate{
   Location from;
@@ -57,9 +65,17 @@ Rover::Navigate{
 	eq(trackable.path, p);
  };
 
+ NotTrackable notTrackable : {
+	eq(notTrackable.path, p);
+ };
 
  if(p){
  	foreach (t in trackable) {
+		contains(Target.Tracking target);
+		eq(target.object, t.target);
+ 	};
+
+ 	foreach (t in notTrackable) {
 		contains(Target.Tracking target);
 		eq(target.object, t.target);
  	};
@@ -67,7 +83,17 @@ Rover::Navigate{
 }
 
 class World {
+ Rover rover;
  predicate initialState{}
+ World(){
+  rover = new Rover();
+ }
 }
 
-World::initialState{}
+World::initialState{
+ // Try one without a filter
+ Rover r;
+ foreach (t in r) {
+  contains(Rover.Navigate n);
+ };
+}

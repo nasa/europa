@@ -37,9 +37,8 @@ public:
   DelegationTestConstraint(const LabelStr& name,
 			   const LabelStr& propagatorName,
 			   const ConstraintEngineId& constraintEngine,
-			   const ConstrainedVariableId& variable,
-			   const AbstractDomain&)
-    : Constraint(name, propagatorName, constraintEngine, variable){s_instanceCount++;}
+			   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables){s_instanceCount++;}
   ~DelegationTestConstraint(){s_instanceCount--;}
   void handleExecute(){s_executionCount++;}
   void handleExecute(const ConstrainedVariableId&,int, const DomainListener::ChangeType&){}
@@ -361,6 +360,7 @@ public:
     runTest(testArbitraryConstraints);
     runTest(testLockConstraint);
     runTest(testNegateConstraint);
+    runTest(testUnaryQuery);
     return(true);
   }
 
@@ -382,7 +382,8 @@ private:
     Variable<LabelSet> v0(ENGINE, ls0);
     LabelSet dom = v0.getDerivedDomain();
     assert(dom == ls0 && !(dom == ls1));
-    SubsetOfConstraint c0(LabelStr("SubsetOf"), LabelStr("Default"), ENGINE, v0.getId(), ls1);
+    Variable<LabelSet> v1(ENGINE, ls1);
+    SubsetOfConstraint c0(LabelStr("SubsetOf"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain() == ls1);
@@ -924,11 +925,11 @@ private:
 
   static bool testDelegation(){
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, 1000));
-    ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
-    ConstraintId c1 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
-    ConstraintId c2 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
-    ConstraintId c3 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
-    ConstraintId c4 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
+    ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
+    ConstraintId c1 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
+    ConstraintId c2 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
+    ConstraintId c3 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
+    ConstraintId c4 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(DelegationTestConstraint::s_instanceCount == 5);
@@ -952,7 +953,7 @@ private:
     assert(DelegationTestConstraint::s_executionCount == 10);
 
     // Now create a new instance and mark it for delegation only. Add remaining constraints as delegates
-    ConstraintId c5 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
+    ConstraintId c5 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
     c0->deactivate();
     c2->deactivate();
     c3->deactivate();
@@ -2246,9 +2247,10 @@ private:
     // Set up variable with base domain - will exceed lock domain
     Variable<LabelSet> v0(ENGINE, baseDomain);
     assert(v0.getDerivedDomain() != lockDomain);
+    Variable<LabelSet> v1(ENGINE, lockDomain);
 
     // Post constraint, and ensure it is propagated to equality with lock domain
-    LockConstraint c0(LabelStr("Lock"), LabelStr("Default"), ENGINE, v0.getId(), lockDomain);
+    LockConstraint c0(LabelStr("Lock"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     assert(ENGINE->propagate());
     assert(v0.getDerivedDomain() == lockDomain);
 
@@ -2284,6 +2286,19 @@ private:
 
     v0.specify(21);
     assert(v1.getDerivedDomain().getSingletonValue() == -21);
+
+    return true;
+  }
+
+  static bool testUnaryQuery() {
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain());
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain());
+    NegateConstraint c0(LabelStr("NegateConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
+    assert(!c0.isUnary());
+
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1));
+    NegateConstraint c1(LabelStr("NegateConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v2.getId()));
+    assert(c1.isUnary());
 
     return true;
   }
@@ -2492,7 +2507,7 @@ private:
 
 int main() {
   initConstraintLibrary();
-  REGISTER_UNARY(DelegationTestConstraint, "TestOnly", "Default");
+  REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
   runTestSuite(IdTests::test);
   runTestSuite(DomainTests::test);
   runTestSuite(EntityTests::test);
