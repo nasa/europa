@@ -71,6 +71,63 @@
 
 #include <fstream>
 
+SchemaId schema;
+
+class PlanSystem {
+public:
+  ConstraintEngineId constraintEngine;
+  PlanDatabaseId planDatabase;
+  RulesEngineId rulesEngine;
+  FlawSourceId flawSource;
+
+  HorizonId horizon;
+  ConditionId horizonCondition;
+  ConditionId temporalVariableCondition;
+  ConditionId dynamicInfiniteRealCondition;
+  std::list<ConditionId> conditions;
+  FilterCriteriaId filterCriteria;
+  FlawQueryId flawQuery;
+
+  PlanSystem() {
+    constraintEngine = (new ConstraintEngine())->getId();
+    // order here is important.
+    new DefaultPropagator(LabelStr("Default"), constraintEngine);
+    new TemporalPropagator(LabelStr("Temporal"), constraintEngine);
+    new ResourcePropagator(LabelStr("Resource"), constraintEngine);
+
+    PropagatorId temporalPropagator = constraintEngine->getPropagatorByName(LabelStr("Temporal"));
+
+    planDatabase = (new PlanDatabase(constraintEngine, schema))->getId();
+    planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
+
+    rulesEngine = (new RulesEngine(planDatabase))->getId();
+    flawSource = (new FlawSource(planDatabase))->getId();
+    horizon = (new Horizon())->getId();
+    horizonCondition = (new HorizonCondition(horizon))->getId();
+    temporalVariableCondition = (new TemporalVariableCondition(horizon))->getId();
+    dynamicInfiniteRealCondition = (new DynamicInfiniteRealCondition())->getId();
+    conditions.push_back(horizonCondition);
+    conditions.push_back(temporalVariableCondition);
+    conditions.push_back(dynamicInfiniteRealCondition);
+    filterCriteria = (new FilterCriteria(conditions))->getId();
+    flawQuery = (new FlawQuery(flawSource, filterCriteria))->getId();
+  }
+  ~PlanSystem() {
+    planDatabase->purge();
+    delete &*flawQuery;
+    delete &*filterCriteria;
+    delete &*dynamicInfiniteRealCondition;
+    delete &*temporalVariableCondition;
+    delete &*horizonCondition;
+    delete &*horizon;
+    delete &*flawSource;
+    delete &*rulesEngine;
+    delete &*planDatabase;
+    delete &*constraintEngine;
+  }
+};
+
+
 int main(int argc, const char ** argv){
   //REGISTER_NARY(EqualConstraint, "concurrent", "Default");
   REGISTER_NARY(EqualConstraint, "concurrent", "Temporal");
@@ -88,62 +145,43 @@ int main(int argc, const char ** argv){
   REGISTER_NARY(ResourceConstraint, "ResourceRelation", "Resource");
   REGISTER_NARY(ResourceTransactionConstraint, "HorizonRelation", "Default");
 
-  
   // Allocate the schema
-  SchemaId schema = NDDL::schema();
-  ConstraintEngine ce;
+  schema = NDDL::schema();
 
-  // order here is important.
-  new DefaultPropagator(LabelStr("Default"), ce.getId());
-  new TemporalPropagator(LabelStr("Temporal"), ce.getId());
-  new ResourcePropagator(LabelStr("Resource"), ce.getId());
+  std::string closedDecisions;
 
-  PlanDatabase db(ce.getId(), schema);
-  db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId());
-
-  RulesEngine re(db.getId());
-
-  FlawSource source(FlawSource(db.getId()));
-  Horizon hor;
-  HorizonCondition hcond(hor.getId());
-  TemporalVariableCondition tcond(hor.getId());
-  DynamicInfiniteRealCondition dcond;
-  std::list<ConditionId> conditions;
-  conditions.push_back(hcond.getId());
-  conditions.push_back(tcond.getId());
-  conditions.push_back(dcond.getId());
-  FilterCriteria filter(conditions);
-  FlawQuery query(source.getId(),filter.getId());
-  
-  if (loggingEnabled()) {
-    new CeLogger(std::cout, ce.getId());
-    new DbLogger(std::cout, db.getId());
-    new FlawSourceLogger(std::cout, source.getId());
-    new FlawQueryLogger(std::cout, query.getId());
-    new PlanWriter::PartialPlanWriter(db.getId(), ce.getId());
-  }
-  
-  NDDL::initialize(db.getId());
-
-  // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
-  std::list<ObjectId> objects;
-  db.getObjectsByType(LabelStr("World"), objects);
-  ObjectId world = objects.front();
-  check_error(objects.size() == 1);
-  ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
-  check_error(horizonStart.isValid());
-  ConstrainedVariableId horizonEnd = world->getVariable(LabelStr("world.m_horizonEnd"));
-  check_error(horizonEnd.isValid());
-  int start = (int) horizonStart->baseDomain().getSingletonValue();
-  int end = (int) horizonEnd->baseDomain().getSingletonValue();
-  hor.setHorizon(start, end);
-
+  // Compute or load the closed decisions
   if (argc == 1) {
+    PlanSystem planSystem;
+
+    if (loggingEnabled()) {
+      new CeLogger(std::cout, planSystem.constraintEngine);
+      new DbLogger(std::cout, planSystem.planDatabase);
+      new FlawSourceLogger(std::cout, planSystem.flawSource);
+      new FlawQueryLogger(std::cout, planSystem.flawQuery);
+      new PlanWriter::PartialPlanWriter(planSystem.planDatabase, planSystem.constraintEngine);
+    }
+  
+    NDDL::initialize(planSystem.planDatabase);
+
+    // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
+    std::list<ObjectId> objects;
+    planSystem.planDatabase->getObjectsByType(LabelStr("World"), objects);
+    ObjectId world = objects.front();
+    check_error(objects.size() == 1);
+    ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
+    check_error(horizonStart.isValid());
+    ConstrainedVariableId horizonEnd = world->getVariable(LabelStr("world.m_horizonEnd"));
+    check_error(horizonEnd.isValid());
+    int start = (int) horizonStart->baseDomain().getSingletonValue();
+    int end = (int) horizonEnd->baseDomain().getSingletonValue();
+    planSystem.horizon->setHorizon(start, end);
+
     // Create and run the planner
     ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
     check_error(maxPlannerSteps.isValid());
     int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
-    CBPlanner planner(db.getId(),query.getId(),steps);
+    CBPlanner planner(planSystem.planDatabase, planSystem.flawQuery, steps);
     EUROPAHeuristicStrategy strategy;
       
     int res = planner.run(strategy.getId(), loggingEnabled());
@@ -156,27 +194,68 @@ int main(int argc, const char ** argv){
       
     // planner decisions
     std::cout << "Saving Planner Decisions..." << std::endl;
-    PlannerDecisionWriter decisionWriter(planner.getId(), db.getId());
+    PlannerDecisionWriter decisionWriter(planner.getId(), planSystem.planDatabase);
+    closedDecisions = decisionWriter.closedDecisionsString();
+
+    // save to file
     std::string filename(argv[0]);
     filename += "-decisions.xml";
     std::ofstream out(filename.c_str());
-    out << decisionWriter.closedDecisionsString();
+    out << closedDecisions.c_str() << std::endl;
+    out.close();
+
+    std::cout << "Plan Database:" << std::endl;
+    PlanDatabaseWriter::write(planSystem.planDatabase, std::cout);
   } else {
-    // replay the planner decisions
+    // load the planner decisions from the file
     std::string filename(argv[0]);
     filename += "-decisions.xml";
     std::ifstream in(filename.c_str());
     std::string readbuf;
-    DecisionReplayer replayer(db.getId());
     while (in.good()) {
       getline(in, readbuf);
-      replayer.replay(readbuf);
+      closedDecisions += readbuf;
     }
   }
-  std::cout << "Plan Database:" << std::endl;
-  PlanDatabaseWriter::write(db.getId(), std::cout);
 
-  db.purge();
+#ifdef REPLAY_DECISIONS
+  {
+    // replay the planner decisions
+    PlanSystem planSystem;
+
+    if (loggingEnabled()) {
+      new CeLogger(std::cout, planSystem.constraintEngine);
+      new DbLogger(std::cout, planSystem.planDatabase);
+      new FlawSourceLogger(std::cout, planSystem.flawSource);
+      new FlawQueryLogger(std::cout, planSystem.flawQuery);
+      new PlanWriter::PartialPlanWriter(planSystem.planDatabase, planSystem.constraintEngine);
+    }
+  
+    int initial_key = NDDL::initialize(planSystem.planDatabase);
+
+    // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
+    std::list<ObjectId> objects;
+    planSystem.planDatabase->getObjectsByType(LabelStr("World"), objects);
+    ObjectId world = objects.front();
+    check_error(objects.size() == 1);
+    ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
+    check_error(horizonStart.isValid());
+    ConstrainedVariableId horizonEnd = world->getVariable(LabelStr("world.m_horizonEnd"));
+    check_error(horizonEnd.isValid());
+    int start = (int) horizonStart->baseDomain().getSingletonValue();
+    int end = (int) horizonEnd->baseDomain().getSingletonValue();
+    planSystem.horizon->setHorizon(start, end);
+
+    // planner decisions
+    std::cout << "Replaying Planner Decisions..." << std::endl;
+    DecisionReplayer replayer(planSystem.planDatabase, initial_key);
+    replayer.replay(closedDecisions);
+
+    std::cout << "Replay Database:" << std::endl;
+    PlanDatabaseWriter::write(planSystem.planDatabase, std::cout);
+  }
+#endif // REPLAY_DECISIONS
+
   ObjectFactory::purgeAll();
   TokenFactory::purgeAll();
   ConstraintLibrary::purgeAll();
