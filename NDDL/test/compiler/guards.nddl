@@ -1,8 +1,18 @@
 enum Locations {Hill, Rock, Lander};
 enum StringEnum {'"ONE"', '"TWO"', '"THREE"'};
 
+class Bar{
+ Locations loc;
+ predicate pred{}
+}
+
 class Foo{
  int arg1;
+ Bar arg2;
+
+ Foo(){
+  arg2 = new Bar();
+ }
 
  predicate basicToken{}
  predicate tokenWithParameters{
@@ -16,6 +26,7 @@ class Foo{
  predicate impliedObjectGuard{
   Foo allFoo;
  }
+
  predicate impliedLocalVariableGuard{}
 
  predicate singletonGuard{}
@@ -28,12 +39,14 @@ class Foo{
 // by the constrain referencing a field. Expect a single 
 // RuleInstance to be created, which is an object guarded instance
 Foo::impliedObjectGuard{
- eq(object.arg1, 10);
+ eq(object.arg1, 10); // Explicit qualification
  eq(allFoo.arg1, [0 100]);
 
- // Comments:
- // 1. Should not be allowed to say this in-line! 
- // 2. Should be allowed to apply it to slave tokens too i.e. g.object.x. We do not support nested references yet.
+ //neq(arg1, 12); // Implicit access to class variable
+ //eq(arg2.loc, Hill); // Implict access and implict guard on class variable
+ // Guards also implied when used on salves as shown below
+ //any(arg2.pred t0);
+ //any(object.arg2.pred t1);
 }
 
 // Guard on local variable of objects is implied

@@ -1,4 +1,3 @@
-// From Rover.nddl
 #include "../../NDDL/core/Plasma.nddl"
 
 // From NewPlan/ModuleTests/Parser/monkey1/monkey-compats.objvar.ddl
@@ -150,4 +149,3 @@ Monkey_Class___Banana_SV::GRABBING_BANANA {
   contained_by(Monkey_Class___Altitude_SV.HIGH s3);
     eq(__DDL__object.Altitude_SV, s3.object);
 }
-
