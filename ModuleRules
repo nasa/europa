@@ -82,8 +82,10 @@ rule ModuleMain {
   for link in $(links) {
     switch $(link) {
     case *.core :
+      SubDirHdrs [ FDirName $(PLASMA) $(link:S=) ] ;
       SubDirHdrs [ FDirName $(PLASMA) $(link:S=) core ] ;
     case * :
+      SubDirHdrs [ FDirName $(PLASMA) $(link) ] ;
       SubDirHdrs [ FDirName $(PLASMA) $(link) core ] ;
       SubDirHdrs [ FDirName $(PLASMA) $(link) component ] ;
     }
@@ -194,8 +196,10 @@ rule ModulePart {
   for link in [ FLinkModules $(module) ] {
     switch $(link) {
     case *.core :
+      SubDirHdrs [ FDirName $(PLASMA) $(link:S=) ] ;
       SubDirHdrs [ FDirName $(PLASMA) $(link:S=) core ] ;
     case * :
+      SubDirHdrs [ FDirName $(PLASMA) $(link) ] ;
       SubDirHdrs [ FDirName $(PLASMA) $(link) core ] ;
       SubDirHdrs [ FDirName $(PLASMA) $(link) component ] ;
     }
