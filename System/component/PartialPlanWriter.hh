@@ -86,7 +86,7 @@ namespace Prototype {
 			   std::ofstream &);
       void outputConstraint(const ConstraintId &, std::ofstream &, std::ofstream &);
       void outputInstant(const InstantId &, const int, std::ofstream &);
-      void outputRuleInstance(const RuleInstanceId &, std::ofstream &, std::ofstream &);
+      void outputRuleInstance(const RuleInstanceId &, std::ofstream &, std::ofstream & , std::ofstream &);
       void buildSlaveAndVarSets(std::set<TokenId> &, std::set<ConstrainedVariableId> &, 
                                 const RuleInstanceId &);
       void outputDecision(const DecisionPointId &, std::ofstream &);

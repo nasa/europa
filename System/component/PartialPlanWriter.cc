@@ -213,6 +213,7 @@ const std::string PARTIAL_PLAN(".partialPlan");
 const std::string OBJECTS(".objects");
 const std::string TOKENS(".tokens");
 const std::string RULE_INSTANCES(".ruleInstances");
+const std::string RULE_INSTANCE_SLAVE_MAP(".ruleInstanceSlaveMap");
 const std::string VARIABLES(".variables");
 const std::string CONSTRAINTS(".constraints");
 const std::string CONSTRAINT_VAR_MAP(".constraintVarMap");
@@ -498,6 +499,12 @@ namespace Prototype {
         FatalErrno();
       }
 
+      std::string ppRISM = ppDest + SLASH + stepnum + RULE_INSTANCE_SLAVE_MAP;
+      std::ofstream rismOut(ppRISM.c_str());
+      if(!rismOut) {
+				FatalErrno();
+      }
+
       std::string ppVars = ppDest + SLASH + stepnum + VARIABLES;
       std::ofstream varOut(ppVars.c_str());
       if(!varOut) {
@@ -636,23 +643,24 @@ namespace Prototype {
       for(std::set<RuleInstanceId>::const_iterator it = ruleInst.begin();
           it != ruleInst.end(); ++it) {
         RuleInstanceId ri = *it;
-        outputRuleInstance(ri, ruleInstanceOut, varOut);
+        outputRuleInstance(ri, ruleInstanceOut, varOut, rismOut);
       }
 			
       (*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
-									<< TAB << numConstraints << TAB << numTransactions << std::endl;
+                  << TAB << numConstraints << TAB << numTransactions << std::endl;
       statsOut->flush();
       for(std::list<Transaction>::iterator it = transactionList->begin();
           it != transactionList->end(); ++it) {
-				(*it).write((*transOut), ppId);
+            (*it).write((*transOut), ppId);
       }
       objOut.close();
       tokOut.close();
       ruleInstanceOut.close();
+      rismOut.close();
       varOut.close();
       constrOut.close();
       cvmOut.close();
-			decsOut.close();
+      decsOut.close();
       nstep++;
     }
 
@@ -875,9 +883,10 @@ namespace Prototype {
       }
     }
 
-    void PartialPlanWriter::outputRuleInstance(const RuleInstanceId &ruleId,
-                                               std::ofstream &ruleInstanceOut,
-                                               std::ofstream &varOut) {
+     void PartialPlanWriter::outputRuleInstance(const RuleInstanceId &ruleId,
+                                           std::ofstream &ruleInstanceOut,
+                                           std::ofstream &varOut,
+                                           std::ofstream &rismOut) {
 
       ruleInstanceOut << ruleId->getKey() << TAB << ppId << TAB << seqId
                       << TAB << ruleId->getRule()->getKey()
@@ -896,6 +905,7 @@ namespace Prototype {
           TokenId slaveToken = *it;
           if(slaveToken.isValid())
             ruleInstanceOut << slaveToken->getKey() << COMMA;
+            rismOut << ruleId->getKey() <<TAB << slaveToken->getKey() << TAB << ppId << std::endl;
         }
         ruleInstanceOut << TAB;
       }
