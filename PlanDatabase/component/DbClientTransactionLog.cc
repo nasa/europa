@@ -21,10 +21,8 @@ namespace Prototype {
   }
 
   void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object){
-    TiXmlElement * element = new TiXmlElement("new");
-    check_error(LabelStr::isString(object->getName()));
-    element->SetAttribute("name", object->getName().toString());
-    m_bufferedTransactions.push_back(element);
+    const std::vector<ConstructorArgument> noArguments;
+    notifyObjectCreated(object, noArguments);
   }
 
   void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object, const std::vector<ConstructorArgument>& arguments){
@@ -35,6 +33,13 @@ namespace Prototype {
     std::vector<ConstructorArgument>::const_iterator iter;
     for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
       element->LinkEndChild(abstractDomainAsXml(iter->second));
+    }
+    if (LabelStr::isString(object->getName())) {
+      TiXmlElement * var = new TiXmlElement("var");
+      var->SetAttribute("name", object->getName().toString());
+      var->SetAttribute("type", object->getType().toString());
+      var->LinkEndChild(element);
+      element = var;
     }
     m_bufferedTransactions.push_back(element);
   }
@@ -63,41 +68,44 @@ namespace Prototype {
 
   void DbClientTransactionLog::notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor){
     TiXmlElement * element = new TiXmlElement("constrain");
-    TiXmlElement * path = new TiXmlElement("token");
-    path->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(token)));
-    element->LinkEndChild(path);
+    TiXmlElement * object_el = new TiXmlElement("object");
+    object_el->SetAttribute("name", object->getName().toString());
+    element->LinkEndChild(object_el);
+    TiXmlElement * token_el = new TiXmlElement("token");
+    token_el->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(token)));
+    element->LinkEndChild(token_el);
     if (!successor.isNoId()) {
-      TiXmlElement * successorPath = new TiXmlElement("token");
-      successorPath->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(successor)));
-      element->LinkEndChild(successorPath);
+      TiXmlElement * successor_el = new TiXmlElement("token");
+      successor_el->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(successor)));
+      element->LinkEndChild(successor_el);
     }
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyActivated(const TokenId& token){
     TiXmlElement * element = new TiXmlElement("activate");
-    TiXmlElement * path = new TiXmlElement("token");
-    path->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(token)));
-    element->LinkEndChild(path);
+    TiXmlElement * token_el = new TiXmlElement("token");
+    token_el->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(token)));
+    element->LinkEndChild(token_el);
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyMerged(const TokenId& token, const TokenId& activeToken){
     TiXmlElement * element = new TiXmlElement("merge");
-    TiXmlElement * path = new TiXmlElement("token");
-    path->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(token)));
-    element->LinkEndChild(path);
-    TiXmlElement * activePath = new TiXmlElement("token");
-    activePath->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(activeToken)));
-    element->LinkEndChild(activePath);
+    TiXmlElement * token_el = new TiXmlElement("token");
+    token_el->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(token)));
+    element->LinkEndChild(token_el);
+    TiXmlElement * active_el = new TiXmlElement("token");
+    active_el->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(activeToken)));
+    element->LinkEndChild(active_el);
     m_bufferedTransactions.push_back(element);
   }
 
   void DbClientTransactionLog::notifyRejected(const TokenId& token){
     TiXmlElement * element = new TiXmlElement("reject");
-    TiXmlElement * path = new TiXmlElement("token");
-    path->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(token)));
-    element->LinkEndChild(path);
+    TiXmlElement * path_el = new TiXmlElement("token");
+    path_el->SetAttribute("path", pathAsString(m_tokenMapper->getPathByToken(token)));
+    element->LinkEndChild(path_el);
     m_bufferedTransactions.push_back(element);
   }
 
