@@ -25,6 +25,9 @@ namespace Prototype
   static const int PLUS_INFINITY = MAX_INT;
   static const int MINUS_INFINITY = -PLUS_INFINITY;
 
+  class Entity;
+  typedef Europa::Id<Entity> EntityId;
+
   class AbstractDomain;
   class IntervalIntDomain;
   class IntervalRealDomain;
