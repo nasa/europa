@@ -1,1 +1,4 @@
+*.bb
+*.bbg
+*.da
 lib
