@@ -134,6 +134,7 @@ namespace Prototype
     DomainType m_specifiedDomain; /*!< May contain a user specified restriction on the maximum set of the domain */
     DomainType m_derivedDomain; /*!< The current domain of the variable based on user specifications and derived from
 				  constraint propagation */
+    bool m_isSpecified;
   };
 
 
@@ -142,7 +143,8 @@ namespace Prototype
     : ConstrainedVariable(constraintEngine, index), 
     m_baseDomain(baseDomain),
     m_specifiedDomain(baseDomain),
-    m_derivedDomain(baseDomain){
+    m_derivedDomain(baseDomain),
+    m_isSpecified(false){
     m_derivedDomain.setListener(m_listener);
   }
   
@@ -200,11 +202,13 @@ namespace Prototype
     if(m_specifiedDomain.intersect(domain))
       m_derivedDomain.set(m_specifiedDomain);
     check_error(isValid());
+    m_isSpecified = true;
   }
 
   template<class DomainType>
   void Variable<DomainType>::reset(){
     m_specifiedDomain = m_baseDomain;
+    m_isSpecified = false;
     m_derivedDomain.reset(m_baseDomain);
   }
 
@@ -220,7 +224,7 @@ namespace Prototype
 
   template<class DomainType>
   bool Variable<DomainType>::isSpecified() const {
-    return (m_baseDomain != m_specifiedDomain);
+    return (m_isSpecified || (m_baseDomain != m_specifiedDomain));
   }
 }
 #endif
