@@ -21,6 +21,7 @@ SubInclude PLASMA TemporalNetwork ;
 SubInclude PLASMA NDDL ;
 SubInclude PLASMA AgentDatabase ;
 SubInclude PLASMA System ;
+SubInclude PLASMA HSTS ;
 
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml ;
