@@ -2,7 +2,7 @@ Building EUROPA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.11 2004-12-28 18:59:18 tania Exp $
+$Id: BUILDING,v 1.12 2004-12-30 00:30:57 wedgingt Exp $
 
 
 - Prerequisites:
@@ -187,15 +187,17 @@ environment variables to determine the compilation flags.  These
 environment variables are:
 
 	1. EUROPA_DEBUG - use debugging
-	2. EUROPA_OPTIMIZED - use optimization
-	3. EUROPA_PROFILE - use profiling
-	4. EUROPA_WARN - use additional warnings
+	2. EUROPA_DEBUG_MESSAGE - enable DebugMsg
+	3. EUROPA_OPTIMIZED - use optimization
+	4. EUROPA_PROFILE - use profiling
+	5. EUROPA_WARN - use additional warnings
 
-In the case of the CUSTOM variant, the above variables
-are used to construct the name by composition.  Thus,
-the DEV variant is identical to the CUSTOM DEBUG variant.
+In the case of the CUSTOM variant, the five variables are used to
+construct the name by composition.  E.g., the OPTIMIZED variant is
+identical to the CUSTOM EUROPA_OPTIMIZED variant.  See the
+VariantRules file for details.
 
-The default variant is DEV.
+The default variant is DEV, which includes EUROPA_DEBUG_MESSAGE.
 
 To build all variants at once, see Appendix A.
 
