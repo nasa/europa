@@ -6,6 +6,18 @@ Known areas of performance improvement:
 5. Improve exchange of data in TemporalPropagator with  direct calculation of duration variables.
 6. Update TemporalNetwork to adjust for deactivated constraints
 
+M_12:
+**** Fixed problems creating Object Decision Points from flaws.
+1. Introduced new test cases in Planner module to test backtracking due to
+subgoaling.
+2. ObjectFlaws now maintain the list of tokens involved in the flaw to ease
+decision management.
+3. Introduced a flaw decision map to manage map between flaws and
+decisions, specifically in the case of multiple object decisions per object
+flaw.
+4. Cleaned up planner module tests
+5. Removed redirection to file logging on SamplePlanDatabase.hh
+
 M_11:
 **** Fixed problems integrating the Temporal Network.
 1. Lazy propagation of constraints added is not safe as it is required to obtain the context for returning no-goods.
