@@ -1,0 +1,12 @@
+SubDir PLASMA Aver ;
+
+if ! $(PLASMA_READY) {
+
+Module Aver : PlanDatabase CBPlanner RulesEngine ConstraintEngine TinyXml System ;
+
+SubInclude PLASMA Aver core ;
+SubInclude PLASMA Aver component ;
+SubInclude PLASMA Aver documentation ;
+SubInclude PLASMA Aver test ;
+
+}

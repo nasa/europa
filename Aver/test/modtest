@@ -1,0 +1,165 @@
+Test('ModuleTests',
+  At step == 1 : 1 == 1;
+  Test('TokenTests',
+    Test('BasicTokenCountTest',
+      At step = 1 : Count(Tokens()) = 37 ;
+      At step = 1 : Count(Tokens()) > 5 ;
+      At step = 1 : Count(Tokens()) < 38 ;
+      At step = 1 : Count(Tokens()) >= 6 ;
+      At step = 1 : Count(Tokens()) <= 39;
+      At step = 1 : Count(Tokens()) in [0 40];
+      At step = 1 : Count(Tokens()) < [38 90];
+      At step = 1 : Count(Tokens()) > [0 3];
+      At step = 1 : Count(Tokens()) in {0 3 5 37 6 9};
+      At step = 1 : Count(Tokens()) out [3 5];
+      At step = 1 : Count(Tokens()) out {1 2 3 4 5};
+    );
+
+    Test('AtStyleBasicTokenCountTest',
+      At step = 1 : {
+        Count(Tokens()) = 37 ;
+        Count(Tokens()) > 5 ;
+        Count(Tokens()) < 38 ;
+        Count(Tokens()) >= 6 ;
+        Count(Tokens()) <= 39;
+        Count(Tokens()) in [0 40];
+        Count(Tokens()) < [38 90];
+        Count(Tokens()) > [0 3];
+        Count(Tokens()) in {0 3 5 37 6 9};
+        Count(Tokens()) out [3 5];
+        Count(Tokens()) out {1 2 3 4 5};
+      };
+    );
+
+    Test('PredicateTokenCountTest',
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) = 7;
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) > 1 ;
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) < 12 ;
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) >= 2 ;
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) <= 12;
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) in [0 11];
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) < [12 15];
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) > [0 1];
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) in {0 2 5 7 8 9 11};
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) out [3 5];
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool')) out {1 3 4 5};
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) = 9 ;
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) > 1 ;
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) < 10 ;
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) >= 2 ;
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) <= 10;
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) in [0 9];
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) < [10 15];
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) > [0 1];
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) in {0 2 5 6 9};
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) out [3 5];
+      At step = 1 : Count(Tokens(predicate in {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) out {1 3 4 5};
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) = 28;
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) > 1;
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) < 29;
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) >= 2;
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) <= 28;
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) in [0 50];
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) < [30 40];
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) > [0 1];
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) in {0 2 5 6 9 28};
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) out [3 5];
+      At step = 1 : Count(Tokens(predicate out {'PhysicalStatus.AtSchool', 'EmotionalStatus.Bored'})) out {1 3 4 5};
+    );
+
+    Test('StartTokenCountTest',
+      At step = 1 : Count(Tokens(start = 8)) == 2;
+      At step = 1 : Count(Tokens(start < 16)) == 8;
+      At step = 1 : Count(Tokens(start > 16)) == 19;
+      At step = 1 : Count(Tokens(start intersects [0 30])) == 20;
+      At step = 1 : Count(Tokens(start in [0 100])) = 28;
+      At step = 1 : Count(Tokens(start out [999 10000])) = 37;
+    );
+
+    Test('EndTokenCountTest',
+      At step = 1.0 : Count(Tokens(end = 8)) == 3;
+      At step = 1 : Count(Tokens(end < 100)) == 35;
+      At step = 1 : Count(Tokens(end > 8)) == 31;
+      At step = 1 : Count(Tokens(end intersects [0 30])) == 14;
+      At step = 1 : Count(Tokens(end in [0 100])) = 35;
+      At step = 1 : Count(Tokens(end out [999 10000])) = 37;
+    );
+
+    Test('PathTokenCountTest',
+      At step = 1 : 1 != 0;
+      //At step = 1 : Count(Tokens(path = '69.1')) = 1;
+      //At step = 1 : Count(Tokens(path = '127.0')) = 1;
+      //At step = 1 : Count(Tokens(path = '163.0')) = 0;
+    );
+
+    Test('VariableTokenCountTest',
+      At step = 1 : 1 != 0;
+      //At step = 1 : Count(Tokens(variable(name = 'to' 
+      //                          value = {'l1' 'l2' 'l3' 'l4', 'l6'}))) = 1;
+      //At step = 1 : Count(Tokens(variable(name = 'from' value = {'l5'}))) = 1;
+      //At step = 1 : Count(Tokens(variable(name = 'to' 
+      //                                    value = {'l1' 'l2' 'l3' 'l4', 'l6'})
+      //                           variable(name = 'from' value = {'l5'}))) = 1;
+    );
+
+    Test('PredicateStartTokenCountTest',
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool' start = 16)) = 1;
+    );
+
+    Test('PredicateEndTokenCountTest',
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool' end = 24)) = 2;
+    );
+
+    Test('PredicateVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );
+    
+    Test('StartEndTokenCountTest',
+      At step = 1 : Count(Tokens(start = 0 end = 8)) = 2;
+    );
+
+    Test('StartVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );
+
+    Test('EndVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );
+
+    Test('PredicateStartEndTokenCountTest',
+      At step = 1 : Count(Tokens(predicate = 'PhysicalStatus.AtSchool' start = 16 end = 24)) = 1;
+    );
+
+    Test('StartEndVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );
+    
+    Test('PredicateStartVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );
+ 
+    Test('PredicateEndVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );    
+  );
+
+  Test('ObjectTests',
+    Test('BasicObjectCountTest',
+      At step = 1 : Count(Objects()) = 5 ;
+      At step = 1 : Count(Objects()) > 4 ;
+      At step = 1 : Count(Objects()) < 19 ;
+      At step = 1 : Count(Objects()) >= 2 ;
+      At step = 1 : Count(Objects()) <= 18;
+      At step = 1 : Count(Objects()) in [0 20];
+      At step = 1 : Count(Objects()) < [20 22];
+      At step = 1 : Count(Objects()) > [0 3];
+      At step = 1 : Count(Objects()) in {0 3 5 6 8 9 18};
+      At step = 1 : Count(Objects()) out [7 9];
+      At step = 1 : Count(Objects()) out {1 2 3 4 6};
+    );
+
+    Test('NameObjectCountTest',
+      At step = 1 : Count(Objects(name = 'geek')) == 1;
+    );
+  );
+);
