@@ -1,0 +1,186 @@
+The purpose of the test definition language ("aver", for the moment) is to 
+provide a mechanism by which a developer can define the attributes of and the 
+behaviors during the planning process that constitute correct planning to allow 
+for verification of a planner, a model, or the automatic behavior of a plan
+database.
+The largest unit of the test language is the Test, which amounts to
+a conjunction across the assertions and Tests within the Test.  A single failed 
+assertion results in a failed Test.
+An assertion is a step specification followed by a single boolean statement that
+examines a particular aspect of a plan or the planning behavior and asserts 
+something about it. Assertions are composed of domain- and singleton-valued 
+functions (described below) and a boolean operator.
+The boolean operators given are '<', '>', '>=', '<=', '=', '!=', 'in', 'out', 
+and 'intersects'.  The following table describes the precise semantics (I apologize if 
+you aren't using a fixed-width font) 
+Note 1: a 'Domain' can be either an enumeration or interval.  In the case of a 
+singleton domain, the least value of the domain == the greatest value or the 
+enumeration contains exactly one element.)
+Note 2: any operation or operand combination that is not explicitly stated here is
+undefined and will result in a test exception.
+
+op    LHS          RHS          Semantics
+-------------------------------------------------------------
+<     Domain       Domain       Greatest value (GV) of LHS
+                                is less than least value (LV)
+                                of RHS
+>     Domain       Domain       LV of LHS is greater than GV
+                                of RHS
+=     Interval     Interval     LV of LHS equals LV of RHS
+                                and GV of LHS equals GV of RHS
+      Enumeration  Enumeration  Size of LHS equals size of RHS
+                                and for every element in LHS,
+                                there is an equal element in
+                                RHS
+
+Note: '<=' and '>=' have the same semantics as '<' and '>', with the additional
+allowances of the '=' semantics, '!=' is  simply the negation of '='
+
+in    Enumeration  Enumeration  For every element in LHS, there is
+                                an equal element in RHS
+      Enumeration  Interval     Every element in LHS is greater than
+                                or equal to LV of RHS and less than or
+                                equal to GV of RHS
+      Interval     Interval     LV of LHS is greater than or equal to
+                                LV of RHS and GV of LHS is less than
+                                or equal to GV of RHS
+intersects
+      Enumeration  Enumeration  There exists an element of LHS
+                                which is equal to an element of
+                                RHS
+      Enumeration  Interval     There exists an element of LHS
+                                with is greater than or equal to
+                                LV of RHS and less than or equal
+                                to GV of RHS
+      Interval     Interval     LV or GV of LHS is greater than or equal to
+                                LV of RHS and less than or equal to
+                                GV of RHS or LV of LHS is less than
+                                LV of RHS and GV of LHS is greater
+                                than GV of RHS
+Note: 'intersects' is symmetric
+Note: 'out' is simply the negation of 'in'
+
+The domain-valued functions are 'Tokens()', 'Objects()', and 'Transactions()',
+each of which take a set of predicate assertions and return the set of entities
+for which the predicate assertions hold. The values used in predicate assertions
+can be explicitly defined values or domains or they can be values from other 
+functions.  The type of the predicate (singleton or list) is inferred at run time
+and all boolean operators have the same semantics as above.
+All of the domain-valued functions return enumerated domains.
+
+Note: A Token is essentially a temporally flexible assertion about the state of
+an Object, an Object is something which can have a state, and a Transaction is 
+any logged activity performed by the plan database or planner.
+
+The following predicates are available within the Tokens() domain-valued
+function:
+- start     The start time of a Token  (Domain)
+- end       The end time of a Token (Domain)
+- duration  The duration of a Token (Domain)
+- status    The status of a Token (Domain)
+- predicate The name of the predicate (the state the Token represents)(Singleton)
+- object    The object or objects to which the token can be attached (Domain) 
+(currently unimplemented)
+- variable  The parameter variable with a given name and domain. (Domain)
+Note: the variable statement's syntax is as follows:
+variable(name_statement value_statement)
+where the name_statement is as the name predicate of an 'Objects' or 
+'Transactions' assertion and value_statement is any assertion about the domain
+of the variable.
+
+The following predicates are available within the Objects() domain-valued
+function:
+- name      The name of the Object (Singleton)
+- variable  The member variable with a given name and possibly domain. (Domain)
+
+The following predicates are available within the Transactions() list-valued
+function:
+- name      The name of the Transaction (Singleton)
+- object    The entity that transacted or that was transacted upon 
+           (Singleton) (currently unimplemented)
+- type      The type of Transaction (Singleton)
+
+
+There are two singleton-valued functions, 'Count()' and 'Entity().  'Count' 
+takes an enumerated domain and returns the size of the domain.  'Entity' takes
+an integer index and an enumerated domain, returning the indexth element of the
+domain.
+
+Note: Entity() is currently unimplemented.
+
+Step specifications have the format "At <qualifier>? step (<operator> <domain>)? :"
+That is, the <qualifier> and (<operator> <domain>) group are optional.  There 
+should be no unquoted parentheses in the step specification.
+The <qualifier> can be any one of: first, last, any, each, and all.  "first" and 
+"last" refer the the first and last step of planning and obviate the need for an
+operator/domain group.  "each" implies that the assertion should be 
+checked at every step in the specification.  "any" implies that the assertion 
+need be true for only one step in the specification for the assertion to be 
+considered true.  "all" treats the set of steps in the specification as an
+aggregate whole.
+The operator/domain group is just a boolean operator and some domain specifying
+the steps for which the assertion must be true.  If the group is omitted and
+"first" or "last" are not used, the assumed value will be for any step > -1.
+Note: "all" is currently unimplemented
+
+All assertions must be enclosed by a 'Test' directive, which consists of a name
+and a set of assertions or other 'Test' directives.
+
+A quick note about the small utility scripts checked into PLASMA (testlangconvert,
+testlangcompile, and testlanglink):
+testlangconvert is what converts from either a test language script like the one 
+below to xml then to C++ or directly from xml to C++.  It will generate a two 
+files of the name Test_<testfile>.[cc|hh].
+testlangcompile compiles the generated C++ code to an object file for linking.
+It takes one required argument, the .cc file, and one optional argument which is
+passed to the compiler.  This argument is for use when PLASMA has been built 
+optimized.
+testlanglink has 5 arguments: the suffix of the library names (g, o, p, or some 
+combination thereof), the destination executable, the model object, the test
+object (as generated and compiled by testlanglink and testlangcompile), and the
+runner object (i.e. runTest_g.o).  It produces an executable with the given name
+which will run the tests.
+
+An example test file follows:
+
+Test('Test',
+  At first step : Count(Tokens()) = 11;
+  At any step : Count(Transactions(name = 'RETRACT_FAILED')) > 1;
+  At any step : Count(Transactions(type = 'RETRACTION')) > 1;
+  At any step : Count(Transactions(type = 'ASSIGNMENT')) > 1;
+  At any step : Count(Transactions(type = 'RESTRICTION')) > 1;
+  At step = 87 : Count(Tokens()) = 65;
+  At step = 87 : Count(Tokens(predicate = 'Target.Tracked')) == 4;
+  At step = 87 : Count(Tokens(start >= 3)) > 0;
+  At step = 87 : Count(Tokens(end = [11..500])) = 3;
+  At step = 87 : Count(Tokens(predicate = 'Target.Tracked' variable(name = 'TYPE' value = 'FLUENT'))) = 4;
+  At last step : Count(Tokens()) = 65;
+  Test('SubTest',
+    At step = 88 : Count(Tokens()) = 65;
+    Test('SubSubTest',
+      At step = 34 : Count(Tokens()) != 0;
+    );
+  );
+  Test('SubTest2',
+    At step = 88 : Count(Tokens()) = 65;
+    Test('SubSubTest2',
+      At step = 34 : Count(Tokens()) != 0;
+      Test('SubSubSubTest2',
+        At step = 13 : Count(Tokens()) in [0..10000];
+      );
+    );
+  );
+  Test('DepthTest1',
+    Test('DepthTest2',
+      Test('DepthTest3',
+        Test('DepthTest4',
+          Test('DepthTest5',
+            Test('DepthTest6',
+              At any step : 1 != 0;
+            );
+          );
+        );
+      );
+    );
+  );
+);
