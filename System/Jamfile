@@ -4,7 +4,7 @@ if ! $(PLASMA_READY) {
 
 Module System : NDDL TemporalNetwork CBPlanner ;
 
-ModuleLibraries System : dl ;
+ModuleLibraries System : $(DLOPEN_LIBRARY) ;
 
 SubInclude PLASMA System core ;
 SubInclude PLASMA System component ;

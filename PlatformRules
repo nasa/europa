@@ -7,7 +7,11 @@ PlatformRules_INCLUDED = TRUE ;
 
 # POSITION_INDEPENDENT_CODE_FLAG = Flag to generate position-independent code
 
-POSITION_INDEPENDENT_CODE_FLAG ?= -fPIC ;
+if $(OS) = CYGWIN {
+  POSITION_INDEPENDENT_CODE_FLAG ?= ;
+} else {
+  POSITION_INDEPENDENT_CODE_FLAG ?= -fPIC ;
+}
 
 # LINKER_PASSTHROUGH_FLAG = Flag to pass an argument through to the linker
 
@@ -125,6 +129,14 @@ if $(OS) = BEOS {
   PTHREADS_LIBRARY = condvar ;
 } else {
   PTHREADS_LIBRARY = pthread ;
+}
+
+# DLOPEN_LIBRARY = library with open libraries functions
+
+if $(OS) = CYGWIN {
+  DLOPEN_LIBRARY = ;
+} else {
+  DLOPEN_LIBRARY = dl ;
 }
 
 #

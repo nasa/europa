@@ -103,7 +103,7 @@ for numSatellites in 1 10 50 100 {
 # PLANNER CONTROL TESTS
 #
 ModuleMain runPlannerControlTest : runPlannerControlTest.cc : System : planner-control-tests ;
-LinkSharedLibrariesNoDeps runPlannerControlTest_g_rt : dl ;
+LinkSharedLibrariesNoDeps runPlannerControlTest_g_rt : $(DLOPEN_LIBRARY) ;
 
 #
 # TestLanguage TEST
