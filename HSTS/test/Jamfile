@@ -9,7 +9,7 @@ if ! $(PLASMA_READY) {
 HSTS_Test_Files = [ FGristFiles AtSubgoalRule HSTSModuleTests ] ;
 ModuleObjects $(HSTS_Test_Files:S=.cc) : HSTS ;
 
-ModuleMain hsts-module-tests : $(HSTS_Test_Files:S=$(SUFOBJ)) module-tests.cc : HSTS : CBPlanner ;
+ModuleMain hsts-module-tests : $(HSTS_Test_Files:S=$(SUFOBJ)) module-tests.cc DNPConstraints.cc : HSTS : CBPlanner ;
 RunModuleMain run-hsts-module-tests : hsts-module-tests ;
 
 # Commented out tests are failing for various reasons; see each test for more info.
@@ -46,6 +46,7 @@ rule RunEUROPATest {
  local initialStates = $(2) ;
  local heur = $(3) ;
  local pid = $(4) ;
+ local otherObjects = $(5) ;
 
  local model ;
  for model in $(initialStates) {
@@ -69,13 +70,13 @@ rule RunEUROPATest {
   ModuleObjects $(cc) : NDDL ;
 
   # create planner with linked model
-  ModuleMain $(exe) : $(o) runEUROPAtest.o : HSTS ;
+  ModuleMain $(exe) : $(o) runEUROPAtest.o $(otherObjects) : HSTS ;
   RunModuleMain run-$(exe) : $(exe) : $(options) : : "run-$(exe).output" ;
   LocalDepends $(target) : run-$(exe) ;
  }
 }
 
-RunEUROPATest monkey-timeline : timeline.nddl ;
+RunEUROPATest monkey-timeline : timeline0.nddl ;
 RunEUROPATest monkey-timeline-hacked : timeline-hacked.nddl ;
 RunEUROPATest monkey-timeline-hacked2 : timeline-hacked2.nddl ;
 RunEUROPATest monkey-timeline-hacked3 : timeline-hacked3.nddl ;
@@ -93,9 +94,9 @@ RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nd
 RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 
 # Failing
-# RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
-# RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
-# RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
+RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
+RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
+RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
 
 RunEUROPATest robotTests : req1.nddl ;
 
@@ -117,30 +118,40 @@ RunEUROPATest robotTests : req1.nddl ;
 #         mer-1.nddl mer-bill-2.nddl mer-bill.nddl mer-idd1.nddl mer-idd2.nddl mer-idd3.nddl mer-pma-comm.nddl mer-pma1.nddl mer-pma2.nddl ;
 
 # Fails Id::isValid() check, I believe as noted in GNATS 2757.
-# RunEUROPATest gnats-C3 : C3-init.nddl ;
+RunEUROPATest gnats-C3 : C3-init.nddl ;
 
 # Fails; not sure how or why yet, but no error message
-# RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
+RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
 
 # These two take over an hour on Token for some reason and may be infinite loop or similar
-# RunEUROPATest gnats-P4-C3 : P4-C3-init.nddl ;
-# RunEUROPATest gnats-P4-C3eq : P4-C3eq-init.nddl ;
+RunEUROPATest gnats-P4-C3 : P4-C3-init.nddl ;
+RunEUROPATest gnats-P4-C3eq : P4-C3eq-init.nddl ;
 
 # Fails Id::isValid() check, I believe as noted in GNATS 2757.
-# RunEUROPATest gnats-SC : SC-init.nddl ;
+RunEUROPATest gnats-SC : SC-init.nddl ;
 
 RunEUROPATest gnats-condasame : condasame-init.nddl ;
 RunEUROPATest gnats-rover-fixed : rover-fixed-init.nddl ;
 
 # Fails Id::isValid() check, I believe as noted in GNATS 2757.
-# RunEUROPATest gnats-sum : sum-init.nddl ;
+RunEUROPATest gnats-sum : sum-init.nddl ;
 
 # DNP tests need the DNP specific constraints.
-# RunEUROPATest dnpTests : DNP.timeline.nddl DNP2.timeline.nddl allDSS.nddl fourFreeObs.nddl
-#         DNP3.fourFreeObs.nddl DNP3.timeline.nddl fourFreeObs-initBufNotEmpty.nddl freeObs.nddl freeObs.noEmpty.nddl
-#         tenFreeObs.nddl threeFreeObs.nddl twentyFreeObs.nddl twoFreeObs.nddl ;
+RunEUROPATest dnp-timeline : DNP.timeline.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-DNP2 : DNP2.timeline.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-allDSS : allDSS.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-fourFreeObs : fourFreeObs.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-DNP3fourFreeObs : DNP3.fourFreeObs.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-DNP3 : DNP3.timeline.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-fourFreeObs : fourFreeObs-initBufNotEmpty.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-freeObs : freeObs.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-freeObsNoEmpty : freeObs.noEmpty.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-tenFreeObs : tenFreeObs.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-threeFreeObs : threeFreeObs.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-twentyFreeObs : twentyFreeObs.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl : : : DNPConstraints.o ;
 
-# Example; not yet converted or committed, requires implementation of constraints
+# Example with converted heuristics and planId files.
 # RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
 
 } # PLASMA_READY
