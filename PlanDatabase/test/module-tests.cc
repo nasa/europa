@@ -399,7 +399,6 @@ private:
 
     return true;
  }
-
 };
 
 class TokenTest {

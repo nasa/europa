@@ -195,6 +195,9 @@ private:
     check_error(t2.getStart()->getDerivedDomain().getUpperBound() == 10);
     check_error(t2.getEnd()->getDerivedDomain().getLowerBound() == 6);
     check_error(t2.getEnd()->getDerivedDomain().getUpperBound() == 20);
+
+    delete (Constraint*) beforeConstraint;
+
     DEFAULT_TEARDOWN();
     return true;
   }

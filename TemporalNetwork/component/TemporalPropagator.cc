@@ -332,8 +332,9 @@ namespace Prototype {
       check_error(tp.isValid());
       check_error(tp->getExternalEntity() == var);
 
-      Time lb, ub;
-      m_tnet->getTimepointBounds(tp, lb, ub);
+      const Time& lb = tp->getLowerBound();
+      const Time& ub = tp->getUpperBound();
+
       check_error(lb <= ub);
 
       IntervalIntDomain& dom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(var));
