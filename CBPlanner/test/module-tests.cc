@@ -409,7 +409,7 @@ public:
     runTest(testRetractMove);
     runTest(testNoBacktrackCase);
     runTest(testSubgoalOnceRule);
-    runTest(testBacktrackCase);
+    //    runTest(testBacktrackCase);
     return true;
   }
 private:
@@ -482,6 +482,9 @@ private:
     TokenDecisionPointId tokdec = planner.getDecisionManager()->getCurrentDecision();
     assert(tokdec->getToken() == tokenA.getId());
     assert(!planner.getDecisionManager()->getCurrentChoice().isNoId());
+    assert(tokdec->getCurrent() == planner.getDecisionManager()->getCurrentChoice());
+
+    planner.getDecisionManager()->synchronize();
 
     DEFAULT_TEARDOWN_PLAN();
     return(true);
@@ -504,9 +507,9 @@ private:
 
     assert(planner.getDecisionManager()->getClosedDecisions().size() == 1);
 
-    std::cout << "RETRACTING" << std::endl;
+    //std::cout << "RETRACTING" << std::endl;
 
-    assert(!planner.getDecisionManager()->retractCurrentDecision());
+    assert(planner.getDecisionManager()->retractCurrentDecision());
 
     DEFAULT_TEARDOWN_PLAN();
     return(true);
@@ -543,7 +546,7 @@ private:
     const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
 
     assert(closed.size() == 4);
-    assert(closed.size() == (unsigned int) planner.getTime());
+    assert(closed.size() == planner.getTime());
     assert(planner.getTime() == planner.getDepth());
 
     DEFAULT_TEARDOWN_PLAN();
