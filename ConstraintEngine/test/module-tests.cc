@@ -31,7 +31,7 @@
 using namespace Prototype;
 using namespace std;
 
-class DelegationTestConstraint: public Constraint{
+class DelegationTestConstraint : public Constraint {
 public:
   DelegationTestConstraint(const LabelStr& name,
 			   const LabelStr& propagatorName,
@@ -1467,10 +1467,58 @@ private:
   static AbstractDomain* readSet(std::istream& in) {
     char ch;
     AbstractDomain *dom;
-    for (in.get(ch); ch != '}' && in.good(); in.get(ch)) {
+    bool negative = false;
+    double value;
+    std::list<double> values;
+    std::string member;
+    std::list<std::string> members;
+    for (in.get(ch); ch != '}' && in.good(); ) {
+      switch (ch) {
+      case ' ':
+        negative = false;
+        in.get(ch);
+        continue;
+      case '-':
+        negative = true;
+        in.get(ch);
+        continue;
+      case '0': case '1': case '2': case '3': case '4':
+      case '5': case '6': case '7': case '8': case '9':
+        if (negative)
+          member = "-";
+        member += ch;
+        for (in.get(ch); ch != '}' && ch != ' ' && in.good(); in.get(ch))
+          member += ch;
+        assertTrue(in.good());
+        value = atof(member.c_str());
+        values.push_back(value);
+        member = "";
+        continue;
+      default:
+        if (negative)
+          member = "-";
+        member += ch;
+        for (in.get(ch); ch != '}' && ch != ' ' && in.good(); in.get(ch))
+          member += ch;
+        assertTrue(in.good());
+        if (member == "-Infinity" || member == "-Inf" || member == "-INF")
+          values.push_back(MINUS_INFINITY);
+        else
+          if (member == "Infinity" || member == "Inf" || member == "INF")
+            values.push_back(PLUS_INFINITY);
+          else
+            members.push_back(member);
+        member = "";
+        break;
+      }
     }
-    assert(ch == '}');
-    return(0);
+    assertTrue(in.good() && ch == '}');
+    assertTrue(values.empty() || members.empty());
+    if (values.empty() && !members.empty())
+      return(0); // Cannot support members without knowing how to map them to doubles.
+    dom = new EnumeratedDomain(values);
+    assertTrue(dom != 0);
+    return(dom);
   }
 
   /**
@@ -1480,10 +1528,63 @@ private:
   static AbstractDomain* readInterval(std::istream& in) {
     char ch;
     AbstractDomain *dom;
-    for (in.get(ch); ch != ']' && in.good(); in.get(ch)) {
+    bool negative = false;
+    double endPoints[2];
+    unsigned int which = 0; // 0 for no bounds; 1 for lower bound; 2 for upper bound.
+    for (in.get(ch); ch != ']' && in.good(); ) {
+      switch (ch) {
+      case ' ': case '+':
+        negative = false;
+        in.get(ch);
+        continue;
+      case '-':
+        negative = true;
+        in.get(ch);
+        continue;
+      case 'I': case 'i': // Infinity or a variant thereof.
+        which++;
+        assertTrue(which < 3);
+        if (negative)
+          endPoints[which - 1] = MINUS_INFINITY;
+        else
+          endPoints[which - 1] = PLUS_INFINITY;
+        for (in.get(ch); ch != ' ' && ch != ']' && in.good(); in.get(ch))
+          ;
+        assertTrue(in.good());
+        continue;
+      case '0': case '1': case '2': case '3': case '4':
+      case '5': case '6': case '7': case '8': case '9': {
+        which++;
+        assertTrue(which < 3);
+        std::string number;
+        if (negative)
+          number = "-";
+        number += ch;
+        for (in.get(ch); ch != ']' && ch != ' ' && in.good(); in.get(ch))
+          number += ch;
+        assertTrue(in.good());
+        endPoints[which - 1] = atof(number.c_str());
+      }
+        continue;
+      default:
+        // Unrecognized input.
+        assertTrue(false);
+        break;
+      }
     }
-    assert(ch == ']');
-    return(0);
+    assertTrue(in.good() && ch == ']' && which < 3);
+    // Presume always IntervalDomain (rather than IntervalIntDomain) for now.
+    // To know which will probably require a DomainType argument to this function.
+    if (which == 0) {
+      dom = new IntervalDomain();
+      dom->empty();
+    } else
+      if (which == 1)
+        dom = new IntervalDomain(endPoints[0]);
+      else
+        dom = new IntervalDomain(endPoints[0], endPoints[1]);
+    assertTrue(dom != 0);
+    return(dom);
   }
 
   /**
@@ -1494,7 +1595,7 @@ private:
   public:
 
     /**
-     * @brief Only constructor, requiring all of the info.
+     * @brief Primary constructor, requiring all of the info.
      */
     ConstraintTestCase(std::string cN, std::string fN, unsigned int l,
                        std::list<AbstractDomain*> doms)
@@ -1502,13 +1603,15 @@ private:
         m_domains(doms) {
     }
 
-    std::string m_constraintName; /**< Equal, AddEqual, etc. */
-    std::string m_fileName; /**< File containing the "source" of the test case.  Printed when test fails. */
-    unsigned int m_line; /**< Line within file of test case.  Printed when test fails. */
-    std::list<AbstractDomain*> m_domains; /**< Input and (expected) output domains, interleaved.
-                                           * That is, first is first input domain, second is first output domain,
-                                           * third is second input domain, fourth is second output domain, etc.
-                                           */
+    // Default copy constructor should be fine.
+
+    const std::string m_constraintName; /**< Equal, AddEqual, etc. */
+    const std::string m_fileName; /**< File containing the "source" of the test case.  Printed when test fails. */
+    const unsigned int m_line; /**< Line within file of test case.  Printed when test fails. */
+    const std::list<AbstractDomain*> m_domains; /**< Input and (expected) output domains, interleaved.
+                                                 * That is, first is first input domain, second is first output domain,
+                                                 * third is second input domain, fourth is second output domain, etc.
+                                                 */
   };
 
   /**
@@ -1547,16 +1650,26 @@ private:
       // Details depend on NewPlan/Libraries/Domain.cc::Domain::print() or similar, but
       // this is meant to be fairly flexible so that new tests can be written by hand.
       std::list<AbstractDomain*> domains, inputDoms, outputDoms;
+
+      // Until Europa label sets are supported by readSet(),
+      // we may have to skip some tests:
+      bool skipThisTest = false;
+
       bool readingInputDoms = true;
       for (tCS.get(ch); ch != '\n' && tCS.good(); tCS.get(ch)) {
+        if (skipThisTest)
+          continue;
         switch (ch) {
         case ' ': // Blank between fields; ignore it.
           break;
         case '{': // Singleton or enumeration but could be IntervalDomain or IntervalIntDomain.
           domain = readSet(tCS);
           // This if is temporary, until readSet is fully implemented.
-          if (domain == 0)
-            break;
+          // Presently, it cannot support Europa label sets.
+          if (domain == 0) {
+            skipThisTest = true;
+            continue;
+          }
           assertTrue(domain != 0 && !tCS.eof() && tCS.good());
           if (readingInputDoms)
             inputDoms.push_back(domain);
@@ -1565,9 +1678,6 @@ private:
           break;
         case '[': // Interval, real or integer, but could use 'Infinity' and variations.
           domain = readInterval(tCS);
-          // This if is temporary, until readInterval is fully implemented.
-          if (domain == 0)
-            break;
           assertTrue(domain != 0 && !tCS.eof() && tCS.good());
           if (readingInputDoms)
             inputDoms.push_back(domain);
@@ -1586,8 +1696,7 @@ private:
         } // switch (ch): '{', '[', or 'o'
       } // for tCS.get(ch); ch != '\n' && tCS.good(); tCS.get(ch)
 
-      // If no domains, something above isn't completely implemented yet.
-      if (inputDoms.size() == 0 && outputDoms.size() == 0) {
+      if (skipThisTest) {
         line++; // To preserve comparison to cnt in assertion.
         continue;
       }
@@ -1616,6 +1725,7 @@ private:
   static bool testArbitraryConstraints() {
     // Input to this test: a list of constraint calls and expected output domains.
     std::list<ConstraintTestCase> tests;
+    std::set<std::string> warned; /**< List of unregistered constraints seen so far. */
 
     // This kind of information can also be read from a file, as below.
     std::string constraintName("Equal");
@@ -1635,7 +1745,19 @@ private:
 
     // Run each test, in the same order they were read/init'd.
     for ( ; !tests.empty(); tests.pop_front()) {
+      // Warn about unregistered constraint names and otherwise ignore tests using them.
+      if (!ConstraintLibrary::isRegistered(LabelStr(tests.front().m_constraintName), false)) {
+        if (warned.find(tests.front().m_constraintName) == warned.end()) {
+          std::cerr << tests.front().m_fileName << ':' << tests.front().m_line
+                    << ": constraint " << tests.front().m_constraintName
+                    << " is unregistered; skipping tests of it.\n";
+          warned.insert(tests.front().m_constraintName);
+        }
+        continue;
+      }
+
       std::list<AbstractDomain*> testDomains(tests.front().m_domains);
+      // Each input domain must have a matching output domain.
       assertTrue(testDomains.size() % 2 == 0);
 
       // Build the scope and the list of expected output domains.
@@ -1694,6 +1816,8 @@ private:
         testDomains.pop_front();
       }
 
+      assertTrue(scope.size() == outputDoms.size());
+
       // Create and (fully) execute the constraint.
       ConstraintId constraint = ConstraintLibrary::createConstraint(LabelStr(tests.front().m_constraintName), ENGINE, scope);
       assertTrue(ENGINE->pending());
@@ -1702,15 +1826,46 @@ private:
 
       // Compare derived domains with outputDoms.
       std::vector<ConstrainedVariableId>::iterator scopeIter = scope.begin();
-      for ( ; scopeIter != scope.end() && !outputDoms.empty(); scopeIter++) {
+      unsigned int i = 1;
+      bool problem = false;
+      for ( ; scopeIter != scope.end() && !outputDoms.empty(); scopeIter++, i++) {
         AbstractDomain *domPtr = outputDoms.front();
         outputDoms.pop_front();
-        if ((*scopeIter)->lastDomain() != *domPtr) {
-          std::cerr << tests.front().m_fileName << ":" << tests.front().m_line
-                    << ": unexpected result propagating " << tests.front().m_constraintName;
-          throw Prototype::generalUnknownError;
-        }
+        if (domPtr->isEmpty()) {
+          if (!(*scopeIter)->derivedDomain().isEmpty()) {
+            if (!problem)
+              std::cerr << tests.front().m_fileName << ':' << tests.front().m_line
+                        << ": unexpected result propagating " << tests.front().m_constraintName;
+            std::cerr << ";\n  argument " << i << " is " << (*scopeIter)->derivedDomain()
+                      << "\n     rather than empty";
+            problem = true;
+          }
+        } else
+          if ((*scopeIter)->derivedDomain().isEmpty()) {
+            if (!domPtr->isEmpty()) {
+              if (!problem)
+                std::cerr << tests.front().m_fileName << ':' << tests.front().m_line
+                          << ": unexpected result propagating " << tests.front().m_constraintName;
+              std::cerr << ";\n  argument " << i << " is empty"
+                        << "\n    rather than " << *domPtr;
+              problem = true;
+            }
+          } else
+            if ((*scopeIter)->derivedDomain() != *domPtr) {
+              if (!problem)
+                std::cerr << tests.front().m_fileName << ':' << tests.front().m_line
+                          << ": unexpected result propagating " << tests.front().m_constraintName;
+              std::cerr << ";\n  argument " << i << " is " << (*scopeIter)->derivedDomain()
+                        << "\n    rather than " << *domPtr;
+              problem = true;
+            }
         delete domPtr;
+      } // for ( ; scopeIter != scope.end() && ...
+
+      // Finish complaining if a compare failed.
+      if (problem) {
+        std::cerr << std::endl;
+        throw Prototype::generalUnknownError;
       }
 
       // Print that the test succeeded, count the successes for this constraint function, or whatever.
