@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.17 2002-12-27 21:30:27 wedgingt Exp $
+# $Id: autobuild,v 1.18 2002-12-29 20:18:13 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -12,6 +12,10 @@ subdirs='cvs fast opt optFast prof profOptFast shareOptFast debug noErr shareOpt
 # Don't try to use X11 (mostly to prevent Purify from doing so)
 DISPLAY=
 export DISPLAY
+
+# Make sure that libstdc++.so is in this
+LD_LIBRARY_PATH=/usr/apps/WS6.0/SUNWspro/lib:/usr/lib:/usr/dt/lib:/usr/openwin/lib:/usr/local/lib
+export LD_LIBRARY_PATH
 
 # Apply limits; some compiles run out of swap space.
 ulimit -c 200000
