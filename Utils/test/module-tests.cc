@@ -26,6 +26,7 @@
 #include "LabelStr.hh"
 #include "TestData.hh"
 #include "Id.hh"
+#include <list>
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -144,7 +145,7 @@ private:
 
   static bool testDebugError() {
     // check_error will not throw the errors for EUROPA_FAST
-#ifndef EUROPA_FAST
+#if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
     try {
       DebugMessage::enableAll();
       __y__("enabling all debug messages succeeded despite no debug stream");
@@ -164,6 +165,7 @@ private:
   }
 
   static void runDebugTest(int cfgNum) {
+#if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
     std::stringstream cfgName;
     cfgName << "debug" << cfgNum << ".cfg";
     std::string cfgFile(cfgName.str());
@@ -190,6 +192,7 @@ private:
     Error::doThrowExceptions();
     Error::doDisplayErrors();
     DebugMessage::setStream(std::cerr);
+#endif
   }
 };
 /**
