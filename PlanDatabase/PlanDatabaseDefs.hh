@@ -1,8 +1,8 @@
 #ifndef _H_PlanDatabaseDefs
 #define _H_PlanDatabaseDefs
 
-#include "../ConstraintEngine/ConstraintEngineDefs.hh"
-#include "../ConstraintEngine/Domain.hh"
+#include "ConstraintEngineDefs.hh"
+#include "Domain.hh"
 
 namespace Prototype {
   class Object;
@@ -28,7 +28,6 @@ namespace Prototype {
 
   template<class DomainType> class TokenVariable;
   typedef Id< TokenVariable<EnumeratedDomain> > StateVarId;
-  //  typedef Id< TokenVariable<IntervalIntDomain> > TempVarId;
   
   class TokenTemporalVariable;
   typedef Id< TokenTemporalVariable > TempVarId;
@@ -44,18 +43,6 @@ namespace Prototype {
 
   class TemporalAdvisor;
   typedef Id<TemporalAdvisor> TemporalAdvisorId;
-
-  class RulesEngine;
-  typedef Id<RulesEngine> RulesEngineId;
-
-  class Rule;
-  typedef Id<Rule> RuleId;
-
-  class RuleContext;
-  typedef Id<RuleContext> RuleContextId;
-
-  class RuleInstance;
-  typedef Id<RuleInstance> RuleInstanceId;
 }
 
 #endif

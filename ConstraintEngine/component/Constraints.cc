@@ -120,7 +120,9 @@ namespace Prototype
     check_error(variables.size() == (unsigned int) ARG_COUNT);
 
     // check the arguments - must both be enumerations or intervals
-    check_error(getCurrentDomain(m_variables[X]).isEnumerated() == getCurrentDomain(m_variables[Y]).isEnumerated());
+    check_error(getCurrentDomain(m_variables[X]).isEnumerated() == getCurrentDomain(m_variables[Y]).isEnumerated() || 
+		getCurrentDomain(m_variables[X]).isSingleton() || 
+		getCurrentDomain(m_variables[Y]).isSingleton());
   }
 
   void EqualConstraint::handleExecute()

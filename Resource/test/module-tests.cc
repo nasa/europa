@@ -21,8 +21,6 @@
 #include "../PlanDatabase/ObjectTokenRelation.hh"
 #include "../PlanDatabase/DbLogger.hh"
 
-#include "../RulesEngine/RulesEngine.hh"
-
 #include <iostream>
 #include <string>
 #include <cassert>
@@ -53,7 +51,6 @@ const double consumptionMax = -50;
     PlanDatabase db(ce.getId(), schema.getId());\
     new DefaultPropagator(LabelStr("Default"), ce.getId());\
     new ResourcePropagator(LabelStr("Resource"), ce.getId());\
-    RulesEngine re(db.getId()); \
     if (loggingEnabled()) {\
     new CeLogger(std::cout, ce.getId());\
     new DbLogger(std::cout, db.getId());\

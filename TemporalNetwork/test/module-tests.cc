@@ -4,7 +4,6 @@
 #include "STNTemporalAdvisor.hh"
 #include "../PlanDatabase/TemporalAdvisor.hh"
 #include "../PlanDatabase/Schema.hh"
-#include "../RulesEngine/RulesEngine.hh"
 #include "../PlanDatabase/PlanDatabase.hh"
 #include "../PlanDatabase/DbLogger.hh"
 #include "../ConstraintEngine/CeLogger.hh"
@@ -35,7 +34,6 @@ typedef std::stringstream sstream;
     new DefaultPropagator(LabelStr("Default"), ce.getId());\
     new TemporalPropagator(LabelStr("Temporal"), ce.getId());\
     db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId());\
-    RulesEngine re(db.getId()); \
     if (loggingEnabled()) {\
     new CeLogger(std::cout, ce.getId());\
     new DbLogger(std::cout, db.getId());\

@@ -24,25 +24,15 @@ Rover::Going{
 
 // Defines the initial state for the problem.
 class World {
- // Horizon information
- int m_horizonStart;
- int m_horizonEnd;
  Rover rover;
 
  predicate initialState{}
  World(){
-  // Set up the planning horizon
-  m_horizonStart = 0;
-  m_horizonEnd = 200;
   rover = new Rover();
  }
 }
 
 World::initialState{
- // Enforce horizon bounds on initialState
- leq(object.m_horizonStart, start);
- leq(end, object.m_horizonEnd);
- 
  contains(Rover.At a);
  eq(a._location, "Lander");
 

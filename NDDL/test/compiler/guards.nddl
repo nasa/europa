@@ -1,0 +1,37 @@
+
+class Foo{
+ predicate pred1{
+  int x;
+  bool y;
+ }
+
+ predicate pred2{}
+}
+
+Foo::pred1{
+ if(x==3){
+  before (object.pred2 p);
+ }
+}
+
+Foo::pred2{
+ meets (pred1 p);
+}
+
+// Defines the initial state for the problem.
+class World {
+ Foo foo;
+
+ predicate initialState{}
+ World(){
+  foo = new Foo();
+ }
+}
+
+World::initialState{
+ any(Foo.pred1 f1);
+ eq(f1.x, 3);
+ eq(f1.state, 2);
+ any(Foo.pred1 f2);
+ eq(f2.x, 10);
+}
