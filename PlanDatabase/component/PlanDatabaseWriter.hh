@@ -43,23 +43,55 @@ namespace PLASMA {
 	  }
 	}
       }
-
-      os << "Free Tokens: *************************" << std::endl;
-      for(TokenSet::const_iterator tokit = alltokens.begin(); tokit != alltokens.end(); ++tokit){
-	TokenId t = *tokit;	    
-	writeToken(t, os);
+      if (alltokens.empty())
+        return;
+      TokenSet activeTokens;
+      TokenSet inactiveTokens;
+      TokenSet incompleteTokens;
+      TokenSet mergedTokens;
+      TokenSet rejectedTokens;
+      TokenSet::const_iterator tokit = alltokens.begin();
+      for ( ; tokit != alltokens.end(); tokit++) {
+        TokenId t = *tokit;
+        if (t->isMerged())
+          mergedTokens.insert(t);
+        else if (t->isActive())
+          activeTokens.insert(t);
+        else if (t->isRejected())
+          rejectedTokens.insert(t);
+        else if (t->isInactive())
+          inactiveTokens.insert(t);
+        else if (t->isIncomplete())
+          incompleteTokens.insert(t);
+        else
+          check_error(false, "Token with unknown status");
       }
-
+      printTokensHelper(os, "Active", activeTokens);
+      printTokensHelper(os, "Rejected", rejectedTokens);
+      printTokensHelper(os, "Inactive", inactiveTokens);
+      printTokensHelper(os, "Incomplete", incompleteTokens);
+      printTokensHelper(os, "Merged", mergedTokens);
     }
 
   private:
 
-    static void writeToken(const TokenId& t, ostream& os){
+    static void printTokensHelper(std::ostream& os,
+                                  const std::string& name,
+                                  const TokenSet& tokens) {
+      if (tokens.empty())
+        return;
+      os << name << " Tokens: *************************" << std::endl;
+      TokenSet::const_iterator it = tokens.begin();
+      for ( ; it != tokens.end(); it++)
+        writeToken(*it, os);
+    }
+
+    static void writeToken(const TokenId& t, ostream& os) {
       TempVarId st = t->getStart();
       os << "[ " << st->derivedDomain() << " ]"<< std::endl;
       os << "\t" << t->getPredicateName().toString() << "(" ;
       std::vector<ConstrainedVariableId> vars = t->getParameters();
-      for(std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
+      for (std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
 	ConstrainedVariableId v = (*varit);
 	os << v->getName().toString() << "=" << v->derivedDomain();
       }
@@ -68,7 +100,7 @@ namespace PLASMA {
 
       TokenSet mergedtoks = t->getMergedTokens();
 
-      for(TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
+      for (TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
 	os << "\t\tMerged Key=" << (*mit)->getKey() << std::endl;
 
       os << "[ " << t->getEnd()->derivedDomain() << " ]"<< std::endl;
