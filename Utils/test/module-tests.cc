@@ -82,9 +82,9 @@ public:
   }
 private:
   static bool testExceptions() {
+    Error::doThrowExceptions();
     int argc = 1;
     try {
-      Error::doThrowExceptions();
       check_error(Error::printingErrors());
       check_error(Error::getStream() == std::cerr);
       check_error(Error::displayWarnings());
@@ -97,7 +97,8 @@ private:
     catch (Error e) {
       __x__(e);
     }
-    Error::doNotDisplayErrors(); // don't print purposely provoked errors
+    // check_error will not throw the errors for PLASMA_FAST
+#ifndef PLASMA_FAST
     try {
       check_error(argc == 2);
       __y__("check_error(argc == 2) did not throw an exception");
@@ -121,13 +122,13 @@ private:
     }
     try {
       check_error(argc == 2, "check_error(argc == 2)", TestError::BadThing());
-      __y__("check_eror(argc == 2, TestError::BadThing()) did not throw an exception");
+      __y__("check_error(argc == 2, TestError::BadThing()) did not throw an exception");
     }
     catch(Error e) {
       assert(e.getType() == "BadThing");
       std::cerr << "Caught expected " << e.getType() << std::endl;
     }
-    Error::doDisplayErrors(); 
+#endif
     return true;
   }
 };
@@ -142,7 +143,8 @@ public:
 private:
 
   static bool testDebugError() {
-    Error::doNotDisplayErrors();
+    // check_error will not throw the errors for PLASMA_FAST
+#ifndef PLASMA_FAST
     try {
       DebugMessage::enableAll();
       __y__("enabling all debug messages succeeded despite no debug stream");
@@ -151,7 +153,7 @@ private:
       __z__(e, Error("s_os != 0", "no debug stream has been assigned",
                      "../../Utils/core/Debug.cc", 91));
     }
-    Error::doDisplayErrors();
+#endif
     return true;
   }
 
@@ -373,13 +375,12 @@ bool IdTests::testCastingSupport()
 
 bool IdTests::testBadAllocationErrorHandling()
 {
+  // check_error will not throw the errors for PLASMA_FAST
 #ifndef PLASMA_FAST
-
   // Ensure allocation of a null pointer triggers error
   //LabelStr expectedError = IdErr::IdMgrInvalidItemPtrError();
 
   Error::doThrowExceptions();
-  Error::doNotDisplayErrors();
   try {
     Id<Foo> fId0((Foo*) 0);
     check_error(false, "Id<Foo> fId0((Foo*) 0); failed to error out.");
@@ -389,7 +390,6 @@ bool IdTests::testBadAllocationErrorHandling()
       assert(false);
   }
   Error::doNotThrowExceptions();
-  Error::doDisplayErrors();
 
   Foo* foo = new Foo();
   Id<Foo> fId1(foo);
@@ -405,7 +405,6 @@ bool IdTests::testBadIdUsage()
 {
   Id<Root> barId(new Bar());
   Error::doThrowExceptions();
-  Error::doNotDisplayErrors();
   try {
     Id<Bing> bingId = barId;
     check_error(false, "Id<Bing> bingId = barId; failed to error out.");
@@ -415,7 +414,6 @@ bool IdTests::testBadIdUsage()
       assert(false);
   }
   Error::doNotThrowExceptions();
-  Error::doDisplayErrors();
   barId.release();
   return true;
 }
