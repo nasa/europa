@@ -90,7 +90,7 @@ namespace PLASMA {
 
   // todo: create generators from names
   HSTSHeuristics::TokenEntry::TokenEntry(const Priority p, 
-					 const std::vector<TokenDecisionPoint::State>& states, 
+					 const std::vector<LabelStr>& states, 
 					 const std::vector<CandidateOrder>& orders, 
 					 const std::vector<LabelStr>& generatorNames) 
     : m_priority(p), m_states(states), m_orders(orders) { 
@@ -107,7 +107,7 @@ namespace PLASMA {
 
   const HSTSHeuristics::Priority HSTSHeuristics::TokenEntry::getPriority() { return m_priority; }
 
-  const std::vector<TokenDecisionPoint::State>& HSTSHeuristics::TokenEntry::getStates() {
+  const std::vector<LabelStr>& HSTSHeuristics::TokenEntry::getStates() {
     return m_states;
   }
 
@@ -215,7 +215,7 @@ namespace PLASMA {
     m_defaultVariablePriority = p;
   }
 
-  void HSTSHeuristics::setDefaultPreferenceForTokenDPs(const std::vector<TokenDecisionPoint::State>& states, 
+  void HSTSHeuristics::setDefaultPreferenceForTokenDPs(const std::vector<LabelStr>& states, 
 						       const std::vector<CandidateOrder>& orders) {
     check_error(states.size() == orders.size());
     m_defaultTokenStates = states;
@@ -253,7 +253,7 @@ namespace PLASMA {
 					       const Relationship rel, 
 					       const TokenTypeId& mastertt, 
 					       const Origin o, 
-					       const std::vector<TokenDecisionPoint::State>& states, 
+					       const std::vector<LabelStr>& states, 
 					       const std::vector<CandidateOrder>& orders, 
 					       const std::vector<LabelStr>& generatorNames) {
     check_error(states.size() == orders.size());
@@ -415,7 +415,7 @@ namespace PLASMA {
   }
 
   // todo: generators?
-  void setPreferenceForTokenValueChoice(const std::vector<TokenDecisionPoint::State>& states, 
+  void setPreferenceForTokenValueChoice(const std::vector<LabelStr>& states, 
 					const std::vector<CandidateOrder>& orders, 
 					const std::vector<LabelStr>& generatorNames,
 					const TokenTypeId& tt, Relationship rel, 

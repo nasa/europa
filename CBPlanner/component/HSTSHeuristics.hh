@@ -95,17 +95,17 @@ namespace PLASMA {
     class TokenEntry {
     public:
       TokenEntry();
-      TokenEntry(const Priority p, const std::vector<TokenDecisionPoint::State>& states, const std::vector<CandidateOrder>& orders, const std::vector<LabelStr>& generatorNames);
+      TokenEntry(const Priority p, const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders, const std::vector<LabelStr>& generatorNames);
       virtual ~TokenEntry();
 
       void setPriority(const Priority p);
       const Priority getPriority();
-      const std::vector<TokenDecisionPoint::State>& getStates();
+      const std::vector<LabelStr>& getStates();
       const std::vector<CandidateOrder>& getOrders();
       const std::vector<GeneratorId>& getGenerators();
     private:
       Priority m_priority;
-      std::vector<TokenDecisionPoint::State> m_states;
+      std::vector<LabelStr> m_states;
       std::vector<CandidateOrder> m_orders;
       std::vector<GeneratorId> m_generators;
     };
@@ -135,12 +135,12 @@ namespace PLASMA {
     void setDefaultPriorityForTokenDPsWithParent(const Priority p, const TokenTypeId& tt);
     void setDefaultPriorityForTokenDPs(const Priority p);
     void setDefaultPriorityForConstrainedVariableDPs(const Priority p);
-    void setDefaultPreferenceForTokenDPs(const std::vector<TokenDecisionPoint::State>& states, const std::vector<CandidateOrder>& orders);
+    void setDefaultPreferenceForTokenDPs(const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders);
     void setDefaultPreferenceForConstrainedVariableDPs(const DomainOrder order);
 
     void setHeuristicsForConstrainedVariableDP(const Priority p, const LabelStr variableName, const TokenTypeId& tt, const DomainOrder order, const LabelStr& generatorName, const std::list<double>& enumeration);
 
-    void setHeuristicsForTokenDP(const Priority p, const TokenTypeId& tt, const Relationship rel, const TokenTypeId& mastertt, const Origin o, const std::vector<TokenDecisionPoint::State>& states, const std::vector<CandidateOrder>& orders, const std::vector<LabelStr>& generatorNames);
+    void setHeuristicsForTokenDP(const Priority p, const TokenTypeId& tt, const Relationship rel, const TokenTypeId& mastertt, const Origin o, const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders, const std::vector<LabelStr>& generatorNames);
 
     void setHeuristicsForTokenDPsWithParent(const Priority p, const TokenTypeId& tt);
 
@@ -162,7 +162,7 @@ namespace PLASMA {
     const Priority getInternalPriorityForConstrainedVariableDP(const LabelStr variableName, const TokenTypeId& tt);
     const Priority getInternalPriorityForTokenDP(const TokenTypeId& tt, Relationship rel, const TokenTypeId& mastertt, const Origin o);
 
-    const std::vector<TokenDecisionPoint::State>& getInternalStatePreferenceForTokenValueChoice(const TokenTypeId& tt, Relationship rel, const TokenTypeId& mastertt, const Origin o);
+    const std::vector<LabelStr>& getInternalStatePreferenceForTokenValueChoice(const TokenTypeId& tt, Relationship rel, const TokenTypeId& mastertt, const Origin o);
     const std::vector<CandidateOrder>& getInternalOrderPreferenceForTokenValueChoice(const TokenTypeId& tt, const Relationship rel, const TokenTypeId& mastertt, const Origin o);
 
     const std::list<double>& getInternalPreferenceForVariableValueChoice(const LabelStr& variableName, const TokenTypeId& tt);
@@ -172,7 +172,7 @@ namespace PLASMA {
     std::map<double, Priority> m_defaultCompatibilityPriority;
     Priority m_defaultTokenPriority;
     Priority m_defaultVariablePriority;
-    std::vector<TokenDecisionPoint::State> m_defaultTokenStates;
+    std::vector<LabelStr> m_defaultTokenStates;
     std::vector<CandidateOrder> m_defaultCandidateOrders;
     DomainOrder m_defaultDomainOrder;
 

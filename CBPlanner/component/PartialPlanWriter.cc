@@ -163,7 +163,7 @@ const char *sourceTypeNames[3] = {"SYSTEM", "USER", "UNKNOWN"};
 
 enum sourceTypes {SYSTEM = 0, USER, UNKNOWN};
 
-const char *tokenStates[PLASMA::Token::REJECTED + 1] = {"INCOMPLETE", "INACTIVE", "ACTIVE", "MERGED", "REJECTED"};
+const char *tokenStates[5] = {"INCOMPLETE", "INACTIVE", "ACTIVE", "MERGED", "REJECTED"};
 
 const std::string DURATION_VAR("DURATION_VAR");
 const std::string END_VAR("END_VAR");

@@ -1,5 +1,4 @@
 #include "../../NDDL/core/Plasma.nddl"
-#include "../../NDDL/core/Resources.nddl"
 #include "../../NDDL/core/PlannerConfig.nddl"
 
 enum Location {Hill, Rock, Lander}
@@ -30,15 +29,9 @@ Rover::At{
  met_by (object.Going from);
  eq(from.to, location);
 
- // Allocate resource transaction to consume at the start. Should be using time instead of start for tx!
- any(UnaryResource.change consumer);
- eq(consumer.quantity,-1);
- concurrent(consumer.start, start);
-
- // Allocate resource transaction to produce at the end. Should be using time instead of start for tx!
- any(UnaryResource.change producer);
- eq(producer.quantity, 1);
- concurrent(producer.start, end);
+ // Allocate unary resource transaction to produce at the end and
+ // consume at the start.
+ equals(UnaryResource.uses);
 }
 
 Rover::Going{
@@ -49,15 +42,9 @@ Rover::Going{
  met_by(object.At _from);
  eq(_from.location, from);
 
- // Allocate resource transaction to consume at the start. Should be using time instead of start for tx!
- any(UnaryResource.change consumer);
- eq(consumer.quantity,-1);
- concurrent(consumer.start, start);
-
- // Allocate resource transaction to produce at the end. Should be using time instead of start for tx!
- any(UnaryResource.change producer);
- eq(producer.quantity, 1);
- concurrent(producer.start, end);
+ // Allocate unary resource transaction to produce at the start and
+ // consume at the start.
+ equals(UnaryResource.uses);
 }
 
 // Set up the objects in the system

@@ -1093,12 +1093,12 @@ namespace PLASMA {
     
     heuristics.setDefaultPriorityForConstrainedVariableDPs(10000.0);
 
-    std::vector<TokenDecisionPoint::State> states;
+    std::vector<LabelStr> states;
     std::vector<HSTSHeuristics::CandidateOrder> orders;
-    states.push_back(TokenDecisionPoint::REJECTED);
-    states.push_back(TokenDecisionPoint::MERGED);
-    //    states.push_back(TokenDecisionPoint::DEFER);
-    states.push_back(TokenDecisionPoint::ACTIVE);
+    states.push_back(Token::REJECTED);
+    states.push_back(Token::MERGED);
+    //    states.push_back(Token::DEFER);
+    states.push_back(Token::ACTIVE);
     orders.push_back(HSTSHeuristics::NONE);
     orders.push_back(HSTSHeuristics::EARLY);
     //    orders.push_back(HSTSHeuristics::NONE);
@@ -1118,11 +1118,11 @@ namespace PLASMA {
     std::vector<std::pair<LabelStr,LabelStr> > dsb;
     dsb.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"), LabelStr("SIN")));
     TokenType ttb(LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsb);
-    std::vector<TokenDecisionPoint::State> statesb;
-    statesb.push_back(TokenDecisionPoint::REJECTED);
-    statesb.push_back(TokenDecisionPoint::MERGED);
-    //    statesb.push_back(TokenDecisionPoint::State::DEFER);
-    statesb.push_back(TokenDecisionPoint::ACTIVE);
+    std::vector<LabelStr> statesb;
+    statesb.push_back(Token::REJECTED);
+    statesb.push_back(Token::MERGED);
+    //    statesb.push_back(LabelStr::DEFER);
+    statesb.push_back(Token::ACTIVE);
     std::vector<HSTSHeuristics::CandidateOrder> ordersb;
     ordersb.push_back(HSTSHeuristics::NONE);
     ordersb.push_back(HSTSHeuristics::NEAR);
@@ -1136,10 +1136,10 @@ namespace PLASMA {
     dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("RES")));
     TokenType ttc(LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsc);
     TokenType mttc(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs);
-    std::vector<TokenDecisionPoint::State> statesc;
+    std::vector<LabelStr> statesc;
     std::vector<HSTSHeuristics::CandidateOrder> ordersc;
-    statesc.push_back(TokenDecisionPoint::MERGED);
-    statesc.push_back(TokenDecisionPoint::ACTIVE);
+    statesc.push_back(Token::MERGED);
+    statesc.push_back(Token::ACTIVE);
     ordersc.push_back(HSTSHeuristics::TGENERATOR);
     ordersc.push_back(HSTSHeuristics::LATE);
     std::vector<LabelStr> gensc;
@@ -1151,14 +1151,14 @@ namespace PLASMA {
     TokenType ttd(LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsd);
     TokenType mttd(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs);
 
-    std::vector<TokenDecisionPoint::State> statesd;
+    std::vector<LabelStr> statesd;
     std::vector<HSTSHeuristics::CandidateOrder> ordersd;
-    statesd.push_back(TokenDecisionPoint::ACTIVE);
+    statesd.push_back(Token::ACTIVE);
     ordersd.push_back(HSTSHeuristics::EARLY);
     std::vector<LabelStr> gensd;
     heuristics.setHeuristicsForTokenDP(6213.7, ttd.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), HSTSHeuristics::FREE, statesd, ordersd, gensd);
 
-    std::vector<TokenDecisionPoint::State> statese;
+    std::vector<LabelStr> statese;
     std::vector<HSTSHeuristics::CandidateOrder> orderse;
     std::vector<LabelStr> gense;
     heuristics.setHeuristicsForTokenDP(7652.4, ttd.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), HSTSHeuristics::FREE, statese, orderse, gense);

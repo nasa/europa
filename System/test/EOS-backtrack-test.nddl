@@ -1,6 +1,5 @@
 #include "NddlWorld.nddl"
 #include "../../NDDL/core/Plasma.nddl"
-#include "../../NDDL/core/Resources.nddl"
 
 class Target {
  string m_name;

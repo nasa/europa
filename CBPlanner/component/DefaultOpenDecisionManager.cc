@@ -263,14 +263,14 @@ namespace PLASMA {
 	check_error(choice->getType() == Choice::VALUE);
 	check_error(!m_curDec->hasDiscarded(choice));
 
-	TokenDecisionPoint::State val = (TokenDecisionPoint::State)Id<ValueChoice>(choice)->getValue();
-	if (merge.isNoId() && val == TokenDecisionPoint::MERGED) {
+	LabelStr val = Id<ValueChoice>(choice)->getValue();
+	if (merge.isNoId() && val == Token::MERGED) {
 	  merge = choice;
 	  break; // we'll do this first, no point in assigning the rest.
 	}
-	if (val == TokenDecisionPoint::ACTIVE)
+	if (val == Token::ACTIVE)
 	  activate = choice;
-	if (val == TokenDecisionPoint::REJECTED)
+	if (val == Token::REJECTED)
 	  reject = choice;
 	// we ignore choices for INACTIVE and INCOMPLETE.
       }

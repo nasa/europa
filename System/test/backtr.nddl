@@ -1,5 +1,5 @@
 #include "NddlWorld.nddl"
-#include "../../NDDL/core/Resources.nddl"
+#include "../../NDDL/core/Plasma.nddl"
 
 /*
 	Rover:   Standby, Drive, Sample. Drive and Sample consume at max rate.

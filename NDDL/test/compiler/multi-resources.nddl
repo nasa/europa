@@ -1,4 +1,4 @@
-#include "../../core/Resources.nddl"
+#include "../../core/Plasma.nddl"
 
 class Battery extends Resource {}
 

@@ -7,14 +7,6 @@ namespace PLASMA {
 
   class TokenDecisionPoint : public DecisionPoint {
   public:
-    enum State {
-      INCOMPLETE = 0,
-      INACTIVE,
-      ACTIVE,
-      MERGED,
-      REJECTED
-    };
-
     virtual ~TokenDecisionPoint();
 
     const bool assign(const ChoiceId&);

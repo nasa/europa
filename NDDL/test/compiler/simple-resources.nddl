@@ -1,5 +1,4 @@
 #include "../../core/Plasma.nddl"
-#include "../../core/Resources.nddl"
 
 class Battery extends Resource {}
 
@@ -25,13 +24,7 @@ class Rover extends Object {
 Rover::At{
  meets (object.Going to);
  met_by (object.Going from);
- any(UnaryResource.change consumer);
- eq(consumer.quantity,-1);
- concurrent(consumer.start, start);
-
- any(UnaryResource.change producer);
- eq(producer.quantity, 1);
- concurrent(producer.start, end);
+ equals(UnaryResource.uses);
 }
 
 class World{

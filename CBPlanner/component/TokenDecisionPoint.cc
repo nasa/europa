@@ -15,24 +15,18 @@ namespace PLASMA {
     check_error (choice.isValid());
     Choice::ChoiceType type = choice->getType();
     check_error(type == Choice::VALUE);
-    State state = (State)Id<ValueChoice>(choice)->getValue();
+
     const TokenId& tok = getToken();
-    switch (state) {
-    case ACTIVE:
+    LabelStr state = Id<ValueChoice>(choice)->getValue();
+    if(state == Token::ACTIVE)
       m_dbClient->activate(tok);
-      break;
-    case MERGED:
+    else if(state == Token::MERGED)
       m_dbClient->merge(tok, Id<ValueChoice>(choice)->getToken());
-      break;
-    case REJECTED:
+    else if(state == Token::REJECTED)
       m_dbClient->reject(tok);
-      break;
-    case INACTIVE:
-    case INCOMPLETE: 
-    default:
-      check_error(false);
-      break;
-    }
+    else
+      check_error(ALWAYS_FAILS, "Inavlid choice for token state assignment" + state.toString());
+
     return DecisionPoint::assign(choice);
   }
 

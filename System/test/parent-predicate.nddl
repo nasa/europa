@@ -1,5 +1,5 @@
 #include "NddlWorld.nddl"
-#include "../../NDDL/core/Resources.nddl"
+#include "../../NDDL/core/Plasma.nddl"
 
 /**
  * Test that class hierarchy is checked when searching for predicate definitions.

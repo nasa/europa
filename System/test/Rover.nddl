@@ -1,4 +1,4 @@
-#include "../../NDDL/core/Resources.nddl"
+#include "../../NDDL/core/Plasma.nddl"
 
 class Battery extends Resource {
   Battery(float ic, float ll_min, float ll_max){

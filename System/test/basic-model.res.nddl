@@ -1,5 +1,5 @@
 #include "NddlWorld.nddl"
-#include "../NddlCompiler/Resources.nddl"
+#include "../../NDDL/core/Plasma.nddl"
 
 enum Locations {Hill, Rock, Lander};
 
