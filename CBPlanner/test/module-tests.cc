@@ -172,6 +172,7 @@ public:
     runTest(testNoBacktrackCase);
     runTest(testSubgoalOnceRule);
     runTest(testBacktrackCase);
+    runTest(testTimeoutCase);
     return true;
   }
 private:
@@ -219,6 +220,14 @@ private:
     bool retval = false;
     DEFAULT_SETUP_PLAN(ce, db, schema, false);
     retval = testBacktrackCaseImpl(ce, db, schema, planner);
+    DEFAULT_TEARDOWN_PLAN();
+    return retval;
+  }
+
+  static bool testTimeoutCase() {
+    bool retval = false;
+    DEFAULT_SETUP_PLAN(ce, db, schema, false);
+    retval = testTimeoutCaseImpl(ce, db, schema, planner);
     DEFAULT_TEARDOWN_PLAN();
     return retval;
   }

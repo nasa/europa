@@ -45,6 +45,8 @@ bool testSubgoalOnceRuleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &sch
                              CBPlanner &planner);
 bool testBacktrackCaseImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, 
                            CBPlanner &planner);
+bool testTimeoutCaseImpl(ConstraintEngine& ce, PlanDatabase& db, Schema& schema,  
+		  CBPlanner& planner) ;
 bool testMultipleDMsImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, 
                          DecisionManager &dm, Horizon &hor);
 }

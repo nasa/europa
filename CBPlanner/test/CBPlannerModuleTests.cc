@@ -500,7 +500,163 @@ bool testBacktrackCaseImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schem
   return true;
 }
 
+  bool testTimeoutCaseImpl(ConstraintEngine& ce, PlanDatabase& db, Schema& schema,  CBPlanner& planner)  {
+  Timeline t1(db.getId(),LabelStr("AllObjects"), LabelStr("t1"));
+  Timeline t2(db.getId(),LabelStr("AllObjects"), LabelStr("t2"));
+  Object o1(db.getId(),LabelStr("AllObjects"),LabelStr("o1"));
+  db.close();
+
+  IntervalToken tokenA(db.getId(), 
+                       LabelStr("P1"), 
+                       false,
+                       IntervalIntDomain(0, 10),
+                       IntervalIntDomain(0, 20),
+                       IntervalIntDomain(1, 1000),
+                       Token::noObject(), false);
+
+  std::list<LabelStr> values;
+  values.push_back(LabelStr("L1"));
+  values.push_back(LabelStr("L4"));
+  values.push_back(LabelStr("L2"));
+  values.push_back(LabelStr("L5"));
+  values.push_back(LabelStr("L3"));
+  tokenA.addParameter(LabelSet(values, true));
+  tokenA.addParameter(LabelSet(values, false));
+  tokenA.addParameter(IntervalIntDomain(1, 20));
+  tokenA.close();
+    
+
+  IntervalToken tokenB(db.getId(), 
+                       LabelStr("P1"), 
+                       false,
+                       IntervalIntDomain(0, 10),
+                       IntervalIntDomain(0, 20),
+                       IntervalIntDomain(1, 1000),
+                       Token::noObject(), false);
+
+  values.clear();
+  values.push_back(LabelStr("L1"));
+  values.push_back(LabelStr("L4"));
+  values.push_back(LabelStr("L2"));
+  values.push_back(LabelStr("L5"));
+  values.push_back(LabelStr("L3"));
+  tokenB.addParameter(LabelSet(values, true));
+  tokenB.addParameter(LabelSet(values, false));
+  tokenB.addParameter(IntervalIntDomain(1, 20));
+  tokenB.close();
+    
+
+  IntervalToken tokenC(db.getId(), 
+                       LabelStr("P1"), 
+                       false,
+                       IntervalIntDomain(0, 10),
+                       IntervalIntDomain(0, 20),
+                       IntervalIntDomain(1, 1000),
+                       Token::noObject(), false);
+
+  values.clear();
+  values.push_back(LabelStr("L1"));
+  values.push_back(LabelStr("L4"));
+  values.push_back(LabelStr("L2"));
+  values.push_back(LabelStr("L5"));
+  values.push_back(LabelStr("L3"));
+  tokenC.addParameter(LabelSet(values, true));
+  tokenC.addParameter(LabelSet(values, false));
+  tokenC.addParameter(IntervalIntDomain(1, 20));
+  tokenC.close();
+    
+
+  IntervalToken tokenD(db.getId(), 
+                       LabelStr("P1"), 
+                       false,
+                       IntervalIntDomain(0, 10),
+                       IntervalIntDomain(0, 20),
+                       IntervalIntDomain(1, 1000),
+                       Token::noObject(), false);
+
+  values.clear();
+  values.push_back(LabelStr("L1"));
+  values.push_back(LabelStr("L4"));
+  values.push_back(LabelStr("L2"));
+  values.push_back(LabelStr("L5"));
+  values.push_back(LabelStr("L3"));
+  tokenD.addParameter(LabelSet(values, true));
+  tokenD.addParameter(LabelSet(values, false));
+  tokenD.addParameter(IntervalIntDomain(1, 20));
+  tokenD.close();
+    
+
+  IntervalToken tokenE(db.getId(), 
+                       LabelStr("P1"), 
+                       false,
+                       IntervalIntDomain(0, 10),
+                       IntervalIntDomain(0, 20),
+                       IntervalIntDomain(1, 1000),
+                       LabelStr("o1"), false);
+
+  values.clear();
+  values.push_back(LabelStr("L1"));
+  values.push_back(LabelStr("L4"));
+  values.push_back(LabelStr("L2"));
+  values.push_back(LabelStr("L5"));
+  values.push_back(LabelStr("L3"));
+  tokenE.addParameter(LabelSet(values, true));
+  tokenE.addParameter(LabelSet(values, false));
+  tokenE.addParameter(IntervalIntDomain(1, 20));
+  tokenE.close();
+
+  IntervalToken tokenF(db.getId(), 
+                       LabelStr("P1"), 
+                       false,
+                       IntervalIntDomain(0, 10),
+                       IntervalIntDomain(0, 20),
+                       IntervalIntDomain(1, 1000),
+                       LabelStr("o1"), false);
+
+  values.clear();
+  values.push_back(LabelStr("L1"));
+  values.push_back(LabelStr("L4"));
+  values.push_back(LabelStr("L2"));
+  values.push_back(LabelStr("L5"));
+  values.push_back(LabelStr("L3"));
+  tokenF.addParameter(LabelSet(values, true));
+  tokenF.addParameter(LabelSet(values, false));
+  tokenF.addParameter(IntervalIntDomain(1, 20));
+  tokenF.close();
+    
+
+  IntervalToken tokenG(db.getId(), 
+                       LabelStr("P1"), 
+                       false,
+                       IntervalIntDomain(0, 10),
+                       IntervalIntDomain(0, 20),
+                       IntervalIntDomain(1, 1000),
+                       Token::noObject(), false);
+
+  values.clear();
+  values.push_back(LabelStr("L1"));
+  values.push_back(LabelStr("L4"));
+  values.push_back(LabelStr("L2"));
+  values.push_back(LabelStr("L5"));
+  values.push_back(LabelStr("L3"));
+  tokenG.addParameter(LabelSet(values, true));
+  tokenG.addParameter(LabelSet(values, false));
+  tokenG.addParameter(IntervalIntDomain(1, 20));
+  tokenG.close();
+    
+  CBPlanner::Status res = planner.run(loggingEnabled(),20);
+  assert(res == CBPlanner::TIMEOUT_REACHED);
+
+  const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
+
+  assert(closed.size() == 20);
+  assert(closed.size() == planner.getTime());
+  assert(planner.getTime() == planner.getDepth());
+  return true;
+  }
+
 bool testMultipleDMsImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon &hor) {
   return true;
 }
+
 }
