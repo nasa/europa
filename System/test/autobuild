@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.91 2004-09-29 18:37:16 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.92 2004-09-29 21:52:41 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -207,6 +207,9 @@ then
     cvsCmd rtag -d "$testingTag" PLASMA
     # ... tagging the to-be-tested version:
     cvsCmd rtag -rHEAD "$testingTag" PLASMA
+else
+    # Update once, before running jam.
+    cvsCmd -q update -d -P
 fi
 
 # Now, for the primary purpose: run all the tests of all build variants.
@@ -218,8 +221,6 @@ do
     then
         cvsCmd co -r "$testingTag" PLASMA
         cd PLASMA
-    else
-        cvsCmd -q update -d -P
     fi
     jam_args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
     jamCmd '' build
