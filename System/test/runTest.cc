@@ -49,7 +49,10 @@
 // Support for planner
 #include "CBPlanner.hh"
 #include "DecisionPoint.hh"
-#include "HeuristicStrategy.hh"
+#include "EUROPAHeuristicStrategy.hh"
+
+// In case we want to print out the plan database
+#include "PlanDatabaseWriter.hh"
 
 // Support for Temporal Network
 #include "TemporalNetwork.hh"
@@ -129,13 +132,17 @@ int main(){
   check_error(maxPlannerSteps.isValid());
   int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
   CBPlanner planner(db.getId(),query.getId(),steps);
-  HeuristicStrategy strategy;
+  EUROPAHeuristicStrategy strategy;
     
-  check_error(planner.run(strategy.getId(), loggingEnabled()) == 1);
+  int res = planner.run(strategy.getId(), loggingEnabled());
+  check_error(res == 1);
 
   const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
     
   std::cout << "Nr of Decisions = " << closed.size() << std::endl;
     
   std::cout << "Finished" << std::endl;
+
+  std::cout << "Plan Database:" << std::endl;
+  PlanDatabaseWriter::write(db.getId(), std::cout);
 }
