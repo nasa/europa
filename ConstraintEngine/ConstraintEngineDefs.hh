@@ -9,11 +9,9 @@
 #include <list>
 #include <cassert>
 
-//#define _PROTOTYPE_FAST_VALUE_
-
 const bool ALWAYS_FAILS = false;
 
-#ifndef _PROTOTYPE_FAST_VALUE_
+#ifndef PROTOTYPE_FAST_VERSION
 #define check_error(cond) assert(cond);
 #else
 #define check_error(cond)

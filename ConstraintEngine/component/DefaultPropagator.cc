@@ -42,7 +42,7 @@ namespace Prototype {
       std::set<ConstraintId>::iterator it = m_agenda.begin();
       ConstraintId constraint = *it;
 
-      if(constraint.isValid() && constraint->isActive()){
+      if(constraint->isActive()){
 	m_activeConstraint = constraint->getKey();
 	Propagator::execute(constraint);
       }
