@@ -1,7 +1,7 @@
 #ifndef _H_ObjectDecisionPoint
 #define _H_ObjectDecisionPoint
 
-#include "PlannerDefs.hh"
+#include "CBPlannerDefs.hh"
 #include "DecisionPoint.hh"
 #include "Token.hh" // for the comparator below
 
