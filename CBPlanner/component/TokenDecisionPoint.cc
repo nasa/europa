@@ -40,7 +40,7 @@ namespace PLASMA {
     m_choices.clear();
     const AbstractDomain& dom(m_tok->getState()->lastDomain());
     check_error(!dom.isOpen());
-    Choice::makeChoices(DecisionPoint::getId(), dom, m_choices);
+    ValueChoice::makeChoices(DecisionPoint::getId(), dom, m_choices);
     return DecisionPoint::getChoices();
   }
 

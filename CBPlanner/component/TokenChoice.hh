@@ -19,7 +19,7 @@ namespace PLASMA {
 
     double getValue() const;
   private:
-    friend class Choice;
+    friend class ObjectDecisionPoint;
 
     TokenChoice(const DecisionPointId&, const ObjectId&, const TokenId&);
 

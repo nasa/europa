@@ -31,7 +31,7 @@ namespace PLASMA {
       delete (Choice*) (*cit);
     }
     m_choices.clear();
-    Choice::makeChoices(m_id, m_var->lastDomain(), m_choices);
+    ValueChoice::makeChoices(m_id, m_var->lastDomain(), m_choices);
     return DecisionPoint::getChoices();
   }
 

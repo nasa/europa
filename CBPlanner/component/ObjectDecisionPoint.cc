@@ -49,7 +49,7 @@ namespace PLASMA {
       for (; it != successors.end(); it++) {      
 	TokenId token = *it;
 	check_error(token.isValid() || token.isNoId());
-	ChoiceId choice = Choice::makeChoiceId(m_id, obj, token);
+	ChoiceId choice = (new TokenChoice(m_id, obj, token))->getId();
 	//std::cout << choice << std::endl;
 	m_choices.push_back(choice);
       }

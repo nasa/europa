@@ -18,7 +18,10 @@ namespace PLASMA {
     void print(std::ostream& os) const;
 
   private:
-    friend class Choice;
+    friend class TokenDecisionPoint;
+    friend class ConstrainedVariableDecisionPoint;
+
+    static void makeChoices(const DecisionPointId&, const AbstractDomain&, std::list<ChoiceId>&);
 
     ValueChoice(const DecisionPointId&, const double);
     ValueChoice(const DecisionPointId&, const double, const TokenId&);
