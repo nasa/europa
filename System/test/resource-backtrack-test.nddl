@@ -71,5 +71,5 @@ Battery mainBattery = new Battery(0, 100, 30, 0, 50);
 Rover rover = new Rover(mainBattery);
 close();
 
-any(Rover.Move goal1);
+rejectable(Rover.Move goal1);
 goal1.start.specify(0);

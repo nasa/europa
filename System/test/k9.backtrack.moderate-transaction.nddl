@@ -76,14 +76,14 @@ Path startL1 = new Path(start, L1);
 Path L0start = new Path(L0, start);
 Path startL0 = new Path(start, L0);
 
-any(Position.At a);
+rejectable(Position.At a);
 leq(a.end, world.m_horizonEnd);
 eq(a.location, start);
 eq(a.start, 0);
 
 hasAncestor(a.object, rover);
 
-any(CHAMP.ipgetstatus ipg);
+rejectable(CHAMP.ipgetstatus ipg);
 leq(world.m_horizonStart, ipg.start);
 leq(ipg.end, world.m_horizonEnd);
 
@@ -93,43 +93,43 @@ eq(ipg.target, L4_target);
 
 a before ipg;
 
-any(Tracker.TrackingOff toff);
+rejectable(Tracker.TrackingOff toff);
 leq(toff.end, world.m_horizonEnd);
 eq(toff.start, 0);
 hasAncestor(toff.object, rover);
 
-any(OpportunisticScience.OppSciIdle oidle);
+rejectable(OpportunisticScience.OppSciIdle oidle);
 leq(oidle.end, world.m_horizonEnd);
 eq(oidle.start, 0);
 hasAncestor(oidle.object, rover);
 
-any(CHAMP.IPIdle cidle);
+rejectable(CHAMP.IPIdle cidle);
 leq(cidle.end, world.m_horizonEnd);
 eq(cidle.start, 0);
 hasAncestor(cidle.object, rover);
 
 //target tracking initialization
-any(Target.NotTracked nt_L0_target);
+rejectable(Target.NotTracked nt_L0_target);
 leq(nt_L0_target.end, world.m_horizonEnd);
 eq(nt_L0_target.target, L0_target);
 eq(nt_L0_target.start, 0);
 
-any(Target.NotTracked nt_L1_target);
+rejectable(Target.NotTracked nt_L1_target);
 leq(nt_L1_target.end, world.m_horizonEnd);
 eq(nt_L1_target.target, L1_target);
 eq(nt_L1_target.start, 0);
 
-any(Target.NotTracked nt_L2_target);
+rejectable(Target.NotTracked nt_L2_target);
 leq(nt_L2_target.end, world.m_horizonEnd);
 eq(nt_L2_target.target, L2_target);
 eq(nt_L2_target.start, 0);
 
-any(Target.NotTracked nt_L3_target);
+rejectable(Target.NotTracked nt_L3_target);
 leq(nt_L3_target.end, world.m_horizonEnd);
 eq(nt_L3_target.target, L3_target);
 eq(nt_L3_target.start, 0);
 
-any(Target.NotTracked nt_L4_target);
+rejectable(Target.NotTracked nt_L4_target);
 leq(nt_L4_target.end, world.m_horizonEnd);
 eq(nt_L4_target.target, L4_target);
 eq(nt_L4_target.start, 0);

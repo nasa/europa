@@ -165,7 +165,7 @@ Rock rock3 = new Rock("ROCK3", 4, 8);
 Rock rock4 = new Rock("ROCK4", 3, 9);
 
 // Establish the initial position for spirit
-any(Navigator.At initialPosition);
+rejectable(Navigator.At initialPosition);
 eq(initialPosition.start, world.m_horizonStart); // What time - the start of this planmning horizon
 
 
@@ -174,12 +174,12 @@ eq(initialPosition.location, lander); // What position - the lander
 Location.close();
 
 // Establish the goal - to take a sample at a position
-any(Commands.TakeSample sample);
+rejectable(Commands.TakeSample sample);
 eq(sample.start, 50);
 eq(sample.rock, rock4); // Want to get to rock4
 
 // Establish the initial instrument state
-any(Instrument.Stowed stowed);
+rejectable(Instrument.Stowed stowed);
 eq(stowed.start, world.m_horizonStart);
 
 // Allocate Rovers

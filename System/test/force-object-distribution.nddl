@@ -27,11 +27,11 @@ Battery b3 = new Battery();
 Battery b4 = new Battery();
 close();
 
-any(Rover.Drive d1);
+rejectable(Rover.Drive d1);
 d1.start.specify(0);
-any(Rover.Drive d2);
+rejectable(Rover.Drive d2);
 d2.start.specify(10);
-any(Rover.Drive d3);
+rejectable(Rover.Drive d3);
 d3.start.specify(20);
-any(Rover.Drive d4);
+rejectable(Rover.Drive d4);
 d4.start.specify(30);

@@ -220,11 +220,11 @@ Path p6 = new Path(l2, l3);
 
 close();
 
-any(Position.At a);
+rejectable(Position.At a);
 a.activate();
 a.object.specify(rover.m_position);
 
-any(Position.At b);
+rejectable(Position.At b);
 b.activate();
 b.object.specify(rover.m_position);
 

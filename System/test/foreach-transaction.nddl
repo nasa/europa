@@ -34,7 +34,7 @@ NotTrackable nt1 = new NotTrackable(p3, t6);
 Rover rover = new Rover();
 
 // Alocate goal
-any(Rover.Navigate nav);
+rejectable(Rover.Navigate nav);
 eq(nav.from, Lander);
 eq(nav.to, Hill);
 eq(nav.start, 0);

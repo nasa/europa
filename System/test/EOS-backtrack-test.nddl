@@ -160,15 +160,15 @@ GroundStation ground1 = new GroundStation();
 close();
 
 // initial tokens
-any(Satellite.Pointing p);
+rejectable(Satellite.Pointing p);
 eq(p.m_target, target1);
 p.start.specify(0);
 p.activate();
 
-any(GroundStation.Receive r1);
+rejectable(GroundStation.Receive r1);
 eq(r1.m_data, target1);
 eq(r1.object,ground1);
 
-any(GroundStation.Receive r2);
+rejectable(GroundStation.Receive r2);
 eq(r2.m_data, target2);
 eq(r2.object,ground1);

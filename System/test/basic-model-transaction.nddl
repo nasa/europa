@@ -34,11 +34,11 @@ NddlWorld world = new NddlWorld(10, 101, 350);
 
 Rover rover = new Rover();
 
-any(Rover.At a);
+rejectable(Rover.At a);
 a.m_location.specify(Lander);
 a.start.specify(10);
 
-any(Rover.At b);
+rejectable(Rover.At b);
 b.m_location.specify(Rock);
 b.start.specify(100);
 

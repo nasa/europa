@@ -169,21 +169,21 @@ NddlWorld world = new NddlWorld(10, 101, 1000);
 Rover rover = new Rover();
 
 // Initially Rover stays at the source and does nothing
-any(Rover.Standby roverInit);
+rejectable(Rover.Standby roverInit);
 roverInit.m_x.specify(0);
 roverInit.m_y.specify(0);
 roverInit.start.specify(10);
 ////roverInit.activate();
 
 // Mission goals
-any(Rover.Sample goal1);
+rejectable(Rover.Sample goal1);
 goal1.m_x.specify(3);
 goal1.m_y.specify(0);
 goal1.start.specify([10 100]);
 goal1.end.specify([10 100]);
 ////goal1.activate();
 
-any(Rover.Sample goal2);
+rejectable(Rover.Sample goal2);
 goal2.m_x.specify(3);
 goal2.m_y.specify(4);
 goal2.start.specify([10 100]);
@@ -193,17 +193,17 @@ goal2.end.specify([10 100]);
 leq( goal1.end, goal2.start );
 
 // At the start and at the end Antenna is idle
-any(Antenna.Idle sIdle);
+rejectable(Antenna.Idle sIdle);
 sIdle.start.specify(10);
 
-any(Antenna.Idle eIdle);
+rejectable(Antenna.Idle eIdle);
 eIdle.end.specify(100);
 
 // The memory at the start at the end is empty
-any(Memory.Empty sMem);
+rejectable(Memory.Empty sMem);
 sMem.start.specify(10);
 
-any(Memory.Empty eMem);
+rejectable(Memory.Empty eMem);
 eMem.end.specify(100);
 eMem.activate();
 

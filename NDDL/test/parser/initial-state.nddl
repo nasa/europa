@@ -4,13 +4,13 @@ Class instanceName = new ClassType(XYZ, 4.5);
 
 new ClassType(XYZ, 4.5);
 
-any(timelineObject.PredicateName predInstName);
+goal(timelineObject.PredicateName predInstName);
 
-any(timelineObject.PredicateName);
+goal(timelineObject.PredicateName);
 
-any(TimelineClass.PredicateName predOtherName);
+rejectable(TimelineClass.PredicateName predOtherName);
 
-any(TimelineClass.PredicateName);
+rejectable(TimelineClass.PredicateName);
 
 predInstName1 contains predInstName2;
 

@@ -181,7 +181,12 @@ namespace Prototype {
     check_error(type != NULL);
 
     TokenId token = m_client->createToken(LabelStr(type));
-   
+
+    const char * mandatory = element.Attribute("mandatory");
+    if ((mandatory != NULL) && (strcmp(mandatory, "true"))) {
+      token->getState()->remove(Token::REJECTED);
+    }
+
     const char * name = child->Attribute("name");
     if (name != NULL) {
       std::string std_name = name;

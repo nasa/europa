@@ -46,7 +46,7 @@ Path p4 = new Path(hill, lander);
 
 Rover rover = new Rover();
 
-any(Rover.Going g);
+rejectable(Rover.Going g);
 g.from.specify(hill);
 g.to.specify(lander);
 eq(g.start, world.m_horizonStart);
