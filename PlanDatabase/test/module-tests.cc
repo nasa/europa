@@ -1425,6 +1425,7 @@ int main() {
   // Allocate default schema initially so tests don't fail because of ID's
   SCHEMA;
 
+  // Have to register factories for testing.
   new StandardFooFactory();
   new SpecialFooFactory();
 
