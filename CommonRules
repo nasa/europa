@@ -14,7 +14,12 @@ rule Execute {
 
   local target_exec_arg ;
   if $(arguments) {
-    target_exec_arg = RUN_$(executable).$(arguments:J=.) ;
+    #target_exec_arg = RUN_$(executable).$(arguments:J=.) ;
+    target_exec_arg = RUN_$(executable) ;
+    local arg ;
+    for arg in $(arguments) {
+      target_exec_arg = "$(target_exec_arg).$(arg:B)$(arg:S)" ;
+    }
   } else {
     target_exec_arg = RUN_$(executable) ;
   }
