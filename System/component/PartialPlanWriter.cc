@@ -44,13 +44,10 @@
 #ifdef __sun
 #include <strstream>
 typedef std::strstream std::stringstream;
-#else
-#include <sstream>
-#endif
-
-#ifdef __sun
 #define streamIsEmpty(s) !(s).str()
 #else
+#include <sstream>
+//typedef std::stringstream sstream;
 #define streamIsEmpty(s) (s).str() == ""
 #endif
 
@@ -132,6 +129,7 @@ const std::string TOKEN_RELATIONS(".tokenRelations");
 const std::string VARIABLES(".variables");
 const std::string CONSTRAINTS(".constraints");
 const std::string CONSTRAINT_VAR_MAP(".constraintVarMap");
+const std::string INSTANTS(".instants");
 const std::string E_DOMAIN("E");
 const std::string I_DOMAIN("I");
 const std::string CAUSAL("CAUSAL");
@@ -323,6 +321,12 @@ namespace Prototype {
 	FatalErrno();
       }
 
+      std::string ppInsts = ppDest + SLASH + stepnum + INSTANTS;
+      std::ofstream instsOut(ppInsts.c_str());
+      if(!instsOut) {
+        FatalErrno();
+      }
+
       const std::set<ConstraintId> &constraints = (*ceId)->getConstraints();
       numConstraints = constraints.size();
       for(std::set<ConstraintId>::const_iterator it = constraints.begin();
@@ -358,7 +362,7 @@ namespace Prototype {
             slotId++;
             slotIndex++;
             ++tokenIterator;
-            /*empty slot info*/
+            /*ExtraData: empty slot info*/
             if(tokenIterator != orderedTokens.end()) {
               const TokenId &nextToken = *tokenIterator;
               if(token->getEnd()->lastDomain() != nextToken->getStart()->lastDomain()) {
@@ -374,21 +378,36 @@ namespace Prototype {
             objOut << SNULL;
           objOut << std::endl;
         }
-//           else if(ResourceId::convertable(objId)) {
-//             outputObject(objId, O_RESOURCE, objOut, varOut);
-//             ResourceId &rId = (ResourceId &) objId;
-//             std::list<TransactionId> resTrans;
-//             rId->getTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY);
-//             for(std::list<TransactionId>::iterator transIt = resTrans.begin();
-//                 transIt != resTrans.end(); ++transIt) {
-//               TransactionId trans = *transIt;
-//               outputToken(trans, T_TRANSACTION, 0, 1, rId, tokOut, tokRelOut, varOut);
-//               tokens.erase(trans);
-//             }
-//             objOut << SNULL << std::endl;
-//           }
+        else if(ResourceId::convertable(objId)) {
+          outputObject(objId, O_RESOURCE, objOut, varOut);
+
+          ResourceId &rId = (ResourceId &) objId;
+          
+          /*ExtraData: resource info*/
+          objOut << rId->getHorizonStart() << COMMA << rId->getHorizonEnd() << COMMA
+                 << rId->getInitialCapacity() << COMMA << rId->getLimitMin() << COMMA
+                 << rId->getLimitMax() << COMMA;
+          std::list<TransactionId> resTrans;
+          rId->getTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY);
+          for(std::list<TransactionId>::iterator transIt = resTrans.begin();
+              transIt != resTrans.end(); ++transIt) {
+            TransactionId trans = *transIt;
+            outputToken(trans, T_TRANSACTION, 0, 1, rId, tokOut, tokRelOut, varOut);
+            tokens.erase(trans);
+          }
+          std::list<InstantId> insts;
+          rId->getInstants(insts, MINUS_INFINITY, PLUS_INFINITY);
+          for(std::list<InstantId>::iterator instIt = insts.begin();
+              instIt != insts.end(); ++instIt) {
+            InstantId inst = *instIt;
+            outputInstant(inst, rId->getKey(), instsOut);
+            objOut << inst->getKey() << COMMA;
+          }
+          objOut << std::endl;
+        }
         else {
           outputObject(objId, O_OBJECT, objOut, varOut);
+          /*ExtraData: NULL*/
           objOut << SNULL << std::endl;
         }
       }
@@ -449,8 +468,19 @@ namespace Prototype {
         objOut << TAB;
       }
       /*end VariableIds*/
-
-      //<< SNULL;// << std::endl;
+      /*TokenIds*/
+      if(objId->getTokens().empty()) {
+        objOut << SNULL << TAB;
+      }
+      else {
+        for(std::set<TokenId>::const_iterator tokIt = objId->getTokens().begin();
+            tokIt != objId->getTokens().end(); ++tokIt) {
+          TokenId token = *tokIt;
+          objOut << token->getKey() << COMMA;
+        }
+        objOut << TAB;
+      }
+      /*end TokenIds*/
     }
 
     void PartialPlanWriter::outputToken(const TokenId &token, const int type, const int slotId, 
@@ -506,11 +536,20 @@ namespace Prototype {
 	paramVarIds += std::string(paramIdStr) + COLON;
       }
       if(paramVarIds == "") {
-	tokOut << SNULL << std::endl;
+	tokOut << SNULL << TAB;
       }
       else {
-	tokOut << paramVarIds << std::endl;
+	tokOut << paramVarIds << TAB;
       }
+      /*ExtraData: QuantityMin:QuantityMax*/
+      if(type == T_TRANSACTION) {
+        TransactionId trans = (TransactionId) token;
+        tokOut << trans->getMin() << COMMA << trans->getMax();
+      }
+      else {
+        tokOut << SNULL;
+      }
+      tokOut << std::endl;
       numTokens++;
     }
   
@@ -616,6 +655,21 @@ namespace Prototype {
       for(; it != constrId->getScope().end(); ++it) {
 	cvmOut << constrId->getKey() << TAB << (*it)->getKey() << TAB << ppId << std::endl;
       }
+    }
+
+    void PartialPlanWriter::outputInstant(const InstantId &instId, const int resId, 
+                                          std::ofstream &instOut) {
+      instOut << ppId << TAB << resId << TAB << instId->getKey() << TAB << instId->getTime() 
+      //CHEESY HACK.  POSSIBLY UNRELIABLE.  FIXME.
+      //instOut << ppId << TAB << resId << TAB << instId.getKey() << TAB << instId->getTime() 
+              << TAB << instId->getLevelMin() << TAB << instId->getLevelMax() << TAB;
+      const TransactionSet &transactions = instId->getTransactions();
+      for(TransactionSet::const_iterator transIt = transactions.begin();
+          transIt != transactions.end(); ++transIt) {
+        TransactionId trans = *transIt;
+        instOut << trans->getKey() << COMMA;
+      }
+      instOut << std::endl;
     }
 
     const std::string PartialPlanWriter::getUpperBoundStr(IntervalDomain &dom) const {

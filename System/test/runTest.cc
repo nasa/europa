@@ -38,6 +38,13 @@
 #include "../PlanIdentification/FlawQuery.hh"
 #include "../PlanIdentification/FlawQueryLogger.hh"
 
+#include "../Resource/Resource.hh"
+#include "../Resource/ResourceConstraint.hh"
+#include "../Resource/ResourceDefs.hh"
+#include "../Resource/ResourceTransactionConstraint.hh"
+#include "../Resource/ResourcePropagator.hh"
+#include "../Resource/Transaction.hh"
+
 // Support for planner
 #include "CBPlanner.hh"
 #include "DecisionPoint.hh"
@@ -62,6 +69,8 @@ int main(){
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
   REGISTER_NARY(CommonAncestorConstraint, "commonAncestor", "Default");
+  REGISTER_NARY(ResourceConstraint, "ResourceRelation", "Resource");
+  REGISTER_NARY(ResourceTransactionConstraint, "HorizonRelation", "Default");
 
   
   // Allocate the schema
@@ -71,6 +80,7 @@ int main(){
   // order here is important.
   new DefaultPropagator(LabelStr("Default"), ce.getId());
   new TemporalPropagator(LabelStr("Temporal"), ce.getId());
+  new ResourcePropagator(LabelStr("Resource"), ce.getId());
 
   PlanDatabase db(ce.getId(), schema);
   db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId());

@@ -10,6 +10,9 @@
 #include "../ConstraintEngine/Id.hh"
 #include "../ConstraintEngine/VariableChangeListener.hh"
 #include "../PlanDatabase/PlanDatabaseListener.hh"
+#include "../Resource/Resource.hh"
+#include "../Resource/ResourceDefs.hh"
+#include "../Resource/Transaction.hh"
 
 namespace Prototype {
   namespace PlanWriter {
@@ -59,6 +62,7 @@ namespace Prototype {
       void outputConstrVar(const ConstrainedVariableId &, const int, const int, 
 			   std::ofstream &);
       void outputConstraint(const ConstraintId &, std::ofstream &, std::ofstream &);
+      void outputInstant(const InstantId &, const int, std::ofstream &);
       const std::string getUpperBoundStr(IntervalDomain &dom) const;
       const std::string getLowerBoundStr(IntervalDomain &dom) const;
       const std::string getEnumerationStr(EnumeratedDomain &dom) const;
