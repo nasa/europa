@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.96 2004-10-06 16:05:00 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.97 2004-10-08 18:44:37 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -125,7 +125,7 @@ then
         (echo "$info";
             echo 'PLASMA directory already present or configuration botch; aborting autobuild') | \
                 Mail -s 'PLASMA Autobuild on '"`hostname`"' in '"`pwd`"' aborted' "$email"
-        mkdir working/aborted
+        mkdir "$startdir"/working/aborted
         exit 3
     fi
     mkdir Prior
@@ -162,7 +162,7 @@ function cvsCmd() {
     mkdir PLASMA/autobuild.bug
     (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments: '"$*") | \
         Mail -s 'PLASMA autobuild bug on '"`hostname`"' in '"`pwd`"' failed' "$email"
-    mkdir working/failed
+    mkdir "$startdir"/working/failed
     exit 23
   fi
   if test "$1" != '-q' -a "$2" != 'update' -a "$removePlasma" = 'false'
@@ -170,7 +170,7 @@ function cvsCmd() {
     mkdir PLASMA/autobuild.bug
     (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments: '"$*") | \
         Mail -s 'PLASMA autobuild bug on '"`hostname`"' in '"`pwd`"' failed' "$email"
-    mkdir working/failed
+    mkdir "$startdir"/working/failed
     exit 24
   fi
   echo Calling cvs $* at "`date`" ... >> cvs.PLASMA 2>&1
@@ -182,7 +182,7 @@ function cvsCmd() {
     mkdir PLASMA/cvs.failed
     (echo "$info"; echo ''; echo '"cvs '"$*"' failed; aborting autobuild'; tail cvs.PLASMA) | \
         Mail -s 'PLASMA Autobuild cvs on '"`hostname`"' in '"`pwd`"' failed' "$email"
-    mkdir working/failed
+    mkdir "$startdir"/working/failed
     exit "$status"
   fi
 }
@@ -201,7 +201,7 @@ function jamCmd() {
      echo 'jam '"$jam_args $1"' in '"`pwd`"' exited '"$status";
      more jam.$2.$var.$libmethod < /dev/null) | \
         Mail -s 'PLASMA Autobuild jam '"$jam_args $1"' on '"`hostname`"' failed' "$email"
-    mkdir working/failed
+    mkdir "$startdir"/working/failed
     exit $status
   fi
 }
