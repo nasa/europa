@@ -22,6 +22,25 @@ rule AntlrGrammar
   }
 }
 
+rule AntlrGrammarArg
+{
+  local prefix = $(1) ;
+  local grammar = $(2[1]) ;
+  local grammar.tree = $(2[2]) ;
+  local package = $(3) ;
+  local java_src_dir = $(4) ;
+
+#  Echo AntlrTool . $(prefix) . $(grammar) . $(grammar.tree) . $(package) ;
+
+  local files = $(prefix)Lexer.java $(prefix)Parser.java $(prefix)TokenTypes.java $(prefix)TokenTypes.txt ;
+  local files.tree = $(prefix)TreeParser.java $(prefix)TreeParserTokenTypes.java $(prefix)TreeParserTokenTypes.txt ;
+  AntlrToolArg $(files) : $(grammar) : $(package) : $(java_src_dir) ;
+  if $(files.tree) {
+    Depends $(files.tree) : $(files) ;
+    AntlrToolArg $(files.tree) : $(grammar.tree) : $(package) : $(java_src_dir) ;
+  }
+}
+
 rule AntlrTool
 {
   local files = $(1) ;
@@ -31,6 +50,22 @@ rule AntlrTool
 #  Echo AntlrTool . $(files) . $(grammar) . $(package) ;
 
   local pathname = [ FDirName $(JAVA_SRC_DIR) [ FSplit "\\." : $(package) ] ] ;
+  PATHNAME on $(files) = $(pathname) ;
+  RELPATH on $(files) = [ FRelPath $(pathname) : $(PWD) ] ;
+  SEARCH on $(grammar) += $(SEARCH_SOURCE) ;
+  MakeLocate $(files) : $(pathname) ;
+  RunAntlrTool $(files) : $(grammar) ;
+}
+
+rule AntlrToolArg
+{
+  local files = $(1) ;
+  local grammar = $(2) ;
+  local package = $(3) ;
+  local java_src_dir = $(4) ;
+#  Echo AntlrTool . $(files) . $(grammar) . $(package) ;
+
+  local pathname = [ FDirName $(java_src_dir) [ FSplit "\\." : $(package) ] ] ;
   PATHNAME on $(files) = $(pathname) ;
   RELPATH on $(files) = [ FRelPath $(pathname) : $(PWD) ] ;
   SEARCH on $(grammar) += $(SEARCH_SOURCE) ;
