@@ -20,7 +20,7 @@ actions RemoveBinaries {
   include [ FDirName $(SUBDIR) AntlrRules ] ;
   include [ FDirName $(SUBDIR) ModuleRules ] ;
   include [ FDirName $(SUBDIR) NddlRules ] ;
-  include [ FDirName $(SUBDIR) TestLangRules ] ;
+  include [ FDirName $(SUBDIR) AverRules ] ;
   include [ FDirName $(SUBDIR) Jamfile ] ;
   PLASMA_READY = TRUE ;
 }

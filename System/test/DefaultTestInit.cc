@@ -5,8 +5,8 @@
 
 using namespace PLASMA;
 
-void testLangInit(const PlanDatabaseId& db, 
-                  const DecisionManagerId& dm = DecisionManagerId::noId(),
-                  const ConstraintEngineId& ce = ConstraintEngineId::noId(),
-                  const RulesEngineId& re = RulesEngineId::noId()) {}
-void testLangDeinit(){}
+void averInit(const PlanDatabaseId& db, 
+              const DecisionManagerId& dm = DecisionManagerId::noId(),
+              const ConstraintEngineId& ce = ConstraintEngineId::noId(),
+              const RulesEngineId& re = RulesEngineId::noId()) {}
+void averDeinit(){}

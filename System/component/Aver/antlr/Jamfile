@@ -1,0 +1,7 @@
+SubDir PLASMA System component Aver antlr ;
+
+if ! $(PLASMA_READY) {
+
+AntlrGrammarArg Aver : Aver.g : aver : [ FDirName $(PLASMA) System component Aver java ] ;
+
+} # PLASMA_READY

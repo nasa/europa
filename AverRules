@@ -1,10 +1,10 @@
-if ! $(TestLangRules_INCLUDED) {
-TestLangRules_INCLUDED = TRUE ;
+if ! $(AverRules_INCLUDED) {
+AverRules_INCLUDED = TRUE ;
 
 include [ FDirName $(SUBDIR) JavaRules ] ;
 
-#TestLangMain exec : testfile : foo.o : module
-rule TestLangMainNoNddl {
+#AverMain exec : testfile : foo.o : module
+rule AverMainNoNddl {
   local exe = $(1) ;
   local test = $(2) ;
   local code = $(3) ;
@@ -14,13 +14,13 @@ rule TestLangMainNoNddl {
   local testxml = [ FGristFiles $(test:S=.xml) ] ;
   local testhh = [ FGristFiles $(test:S=.hh) ] ;
   local testcc = [ FGristFiles $(test:S=.cc) ] ;
-  TestLangToCpp $(testcc) : $(test) ;
+  AverToCpp $(testcc) : $(test) ;
   
   ModuleMain $(exe) : $(code) $(testcc) : $(module) : $(build_target) ;
 }
 
-#TestLangMain exec : testfile : foo.o : nddl.nddl : module
-rule TestLangMain {
+#AverMain exec : testfile : foo.o : nddl.nddl : module
+rule AverMain {
   local exe = $(1) ;
   local test = $(2) ;
   local code = $(3) ;
@@ -28,28 +28,29 @@ rule TestLangMain {
   local module = $(5) ;
   local build_target = $(6) ;  
 
-#  Echo TestLangMain $(exe) $(test) $(code) $(nddl) $(module) $(build_target) ;
+#  Echo AverMain $(exe) $(test) $(code) $(nddl) $(module) $(build_target) ;
   
-  local testxml = [ FGristFiles $(test:S=.xml) ] ; #$(test:S=.xml) ;
-  local testhh = [ FGristFiles $(test:S=.hh) ] ; #Test_$(test:S=.hh) ;
+  local testxml = [ FGristFiles $(test:S=.xml) ] ;
+  local testhh = [ FGristFiles $(test:S=.hh) ] ; 
   local testcc = [ FGristFiles $(test:S=.cc) ] ;
-  #Includes $(testcc) : $(testhh) ;
-  TestLangToCpp $(testcc) : $(test) ;
 
-  local hh = [ FGristFiles $(model:S=.hh) ] ; #$(model:S=.hh) ;
+  #Includes $(testcc) : $(testhh) ;
+  AverToCpp $(testcc) : $(test) ;
+
+  local hh = [ FGristFiles $(model:S=.hh) ] ;
   local cc = [ FGristFiles $(model:S=.cc) ] ;
   Includes $(cc) : $(hh) ;
   NddlCompiler $(hh) $(cc) : $(model) ;
   ModuleMain $(exe) : $(cc) $(code) $(testcc) : $(module) : $(build_target) ;
 }
 
-#TestLangToCpp out.cc : test.xml
-#TestLangToCpp out.cc : test
-rule TestLangToCpp {
+#AverToCpp out.cc : test.xml
+#AverToCpp out.cc : test
+rule AverToCpp {
   local code = $(1) ;
   local tl = $(2) ;
 
-#  Echo TestLangToCpp $(code) $(tl) ;
+#  Echo AverToCpp $(code) $(tl) ;
 
   local xml ;
   if $(tl:S) = .xml {
@@ -57,55 +58,58 @@ rule TestLangToCpp {
   }
   else {
     xml = [ FGristFiles $(tl:S=.xml) ] ;
-    TestLangToXml $(xml) : $(tl) ;
+    AverToXml $(xml) : $(tl) ;
   }
-  TestLangToCpp1 $(code) : [ FGristSourceFiles $(xml) ] ;
+  AverToCpp1 $(code) : [ FGristSourceFiles $(xml) ] ;
 }
 
-rule TestLangToCpp1 {
+rule AverToCpp1 {
   local code = $(1) ;
   local xml = $(2) ;
 
-  #Echo TestLangToCpp1 $(code) $(xml) ;
+  #Echo AverToCpp1 $(code) $(xml) ;
 
   SEARCH on $(xml) = $(SEARCH_SOURCE) ;
-  Depends $(code) : testLang.jar ;
+  Depends $(code) : aver.jar ;
   Depends $(code) : $(xml) ;
   MakeLocate $(code) : $(LOCATE_TARGET) ;
   LocalClean clean : $(code) ;
 
 }
 
-actions TestLangToCpp1 {
-  "$(JAVA)" -cp $(CLASSPATH) testLang.TestLangXMLToCpp $(2) ;
+actions AverToCpp1 {
+#  "$(JAVA)" -cp $(CLASSPATH) aver.AverXMLToCpp $(2) ;
+  "$(JAVA)" -cp $(CLASSPATH) -Xmx100m aver.AverXMLToCpp $(2) ;
 }
 
-#TestLangToXML test.xml : test ;
-rule TestLangToXml {
+#AverToXML test.xml : test ;
+rule AverToXml {
   local xml = $(1) ;
   local tl = $(2) ;
 
-  #Echo TestLangToXml $(xml) $(tl) ;
+  #Echo AverToXml $(xml) $(tl) ;
 
-  TestLangToXml1 $(xml) : [ FGristSourceFiles $(tl) ] ;
+  AverToXml1 $(xml) : [ FGristSourceFiles $(tl) ] ;
 }
 
-rule TestLangToXml1 {
+rule AverToXml1 {
   local xml = $(1) ;
   local tl = $(2) ;
   
-  #Echo TestLangToXml1 $(xml) $(tl) ;
+  #Echo AverToXml1 $(xml) $(tl) ;
 
   LocalClean clean : $(xml) ;
   MakeLocate $(xml) : $(LOCATE_TARGET) ;
   SEARCH on $(tl) = $(SEARCH_SOURCE) ;
 
-  Depends $(xml) : testLang.jar ;
+  Depends $(xml) : aver.jar ;
   Depends $(xml) : $(tl) ;
 }
 
-actions TestLangToXml1 {
-  "$(JAVA)" -cp $(CLASSPATH) testLang.TestLangToXML $(2) $(1) ;
+actions AverToXml1 {
+#  "$(JAVA)" -Xprof -agentlib:hprof=cpu=times,verbose=y -cp $(CLASSPATH) aver.AverToXML $(2) $(1) ;
+  "$(JAVA)" -cp $(CLASSPATH) aver.AverToXML $(2) $(1) ;
+#  "$(JAVA)" -cp $(CLASSPATH) -Xmx100m aver.AverToXML $(2) $(1) ;
 }
 
 }

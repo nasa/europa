@@ -1,6 +1,6 @@
 Test('Rangetest',
-  At any step : [0..3] != [99..100];
   At any step : [0 3] != [99 100];
-  At any step : ['a'..'z'] != ['A'..'Z'];
+  At any step : [0 3] != [99 100];
+  At any step : ['a' 'z'] != ['A' 'Z'];
   At any step : ['a' 'z'] != ['A' 'Z'];
 );

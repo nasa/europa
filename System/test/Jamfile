@@ -108,6 +108,6 @@ LinkSharedLibrariesNoDeps runPlannerControlTest_g_rt : $(DLOPEN_LIBRARY) ;
 # TestLanguage TEST
 #
 
-SubInclude PLASMA System test testLang ;
+SubInclude PLASMA System test aver ;
 
 } # PLASMA_READY

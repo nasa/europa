@@ -1,22 +1,20 @@
-header { package testLang;}
+header { package aver;}
 
 
-class TestLangParser extends Parser;
-options{ k=2; buildAST=true; exportVocab=TestLang; defaultErrorHandler=false;}
+class AverParser extends Parser;
+options{ k=2; buildAST=true; exportVocab=Aver; defaultErrorHandler=false;}
 
+explicit_single_value : NUMBER | STRING;
 
-enumeration :  OBRACE^ (single_value (COMMA!)?)+ CBRACE!
-//enumeration : OBRACE^ ((STRING (COMMA!)?)+ | (INTEGER (COMMA!)?)+) CBRACE!
+enumeration : OBRACE^ (explicit_single_value (COMMA!)?)+ CBRACE!
             //{System.err.println("enumeration");System.err.println(currentAST);}
             ;
 
-range : OBRACKET^ single_value (TO!)? single_value CBRACKET!
-//range : OBRACKET^ ((INTEGER (TO!)? INTEGER) | (STRING (TO!)? STRING)) CBRACKET!
+range : OBRACKET^ explicit_single_value explicit_single_value CBRACKET!
       //{System.err.println("range");System.err.println(currentAST);}
       ;
 
-step_statement : //(step_qualifier)? STEP^ (single_boolean_op INTEGER | list_boolean_op list_value)?
-                 ((FIRST | LAST) STEP^ | (ANY | EACH | ALL)? STEP^ (single_boolean_op INTEGER | list_boolean_op list_value)?)
+step_statement : ((FIRST | LAST) STEP^ | (ANY | EACH | ALL)? STEP^ (single_boolean_op NUMBER | list_boolean_op list_value)?)
                //{System.err.println("step_statement");System.err.println(currentAST);}
                ;
 
@@ -44,8 +42,11 @@ variable_statement : VARIABLE^ OPAREN! name_statement (COMMA!)? value_statement 
                     //{System.err.println("variable_statement");System.err.println(currentAST);}
                     ;
 
+path_statement : PATH^ EQ STRING ;
+
 token_function : TOKENS^ OPAREN! (start_statement | end_statement | 
-                                  status_statement | predicate_statement | variable_statement)* CPAREN!
+                                  status_statement | predicate_statement | 
+                                  variable_statement | path_statement)* CPAREN!
                  //{System.err.println("token_function");System.err.println(currentAST);}
                  ;
 
@@ -73,7 +74,7 @@ list_valued_function : token_function | object_function | transaction_function
                      //{System.err.println("list_valued_function");System.err.println(currentAST);}
                      ;
 
-entity_function : ENTITY^ OPAREN! INTEGER (COMMA!)? list_value CPAREN!
+entity_function : ENTITY^ OPAREN! NUMBER (COMMA!)? list_value CPAREN!
                 //{System.err.println("entity_function");System.err.println(currentAST);}
                 ;
 
@@ -94,7 +95,7 @@ list_value : range | enumeration | list_valued_function
            //{System.err.println("list_value");System.err.println(currentAST);}
            ;
 
-single_value : INTEGER | STRING | FIRST | LAST | single_valued_function
+single_value : explicit_single_value | FIRST | LAST | single_valued_function
              //{System.err.println("single_value"); System.err.println(currentAST);}
              ;
 
@@ -128,13 +129,16 @@ assertion_statement : AT^ step_statement COLON! boolean_statement
                     //{System.err.println("assertion_statement");System.err.println(currentAST);}
                     ;
 
-test_set {getASTFactory().setASTNodeClass("testLang.LineNumberAST");}
+general_assertion_statement: AT^ step_statement COLON! (boolean_statement |
+                                OBRACE! (boolean_statement SEMI!)+ CBRACE!);
+
+test_set {getASTFactory().setASTNodeClass("aver.LineNumberAST");}
   : TEST^ OPAREN! STRING COMMA! (test_set | assertion_statement SEMI!)+ CPAREN! SEMI!
            //{System.err.println("test_set");System.err.println(currentAST);}
            ;
 
-class TestLangLexer extends Lexer;
-options {k=11; exportVocab=TestLang; defaultErrorHandler=false;}
+class AverLexer extends Lexer;
+options {k=11; exportVocab=Aver; defaultErrorHandler=false;}
 
 WS :
    (' '
@@ -144,6 +148,10 @@ WS :
    )
    {$setType(Token.SKIP);}
    ;
+
+COMMENT : "//" (~('\n'|'\r'))* ('\n'|'\r'('\n')?)
+        {$setType(Token.SKIP); newline();}
+        ;
 
 STRING : '\'' (ESC|~('\''|'\\'))* '\'';
 ESC : '\\' ( 'n' | 't' | '\'' | '\\') ;
@@ -165,8 +173,7 @@ GT : '>';
 GE : ">=";
 LE : "<=";
 NE : "!=";
-TO : "..";
-INTEGER : (PLUS | MINUS)? ('0'..'9')+;
+NUMBER : (PLUS | MINUS)? ('0'..'9')+ ('.' ('0'..'9')+)?;
 TEST : "Test";
 TOKENS : "Tokens";
 OBJECTS : "Objects";
@@ -187,6 +194,7 @@ PREDICATE : "predicate";
 OBJECT : "object";
 MASTER : "master";
 VARIABLE : "variable";
+PATH : "path";
 VALUE : "value";
 NAME : "name";
 TYPE : "type";

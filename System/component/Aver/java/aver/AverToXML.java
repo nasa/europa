@@ -1,4 +1,4 @@
-package testLang;
+package aver;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,61 +19,61 @@ import antlr.debug.misc.ASTFrame;
 
 import net.n3.nanoxml.*;
 
-public abstract class TestLangToXML extends TestLangHelper implements TestLangTokenTypes {
+public abstract class AverToXML extends AverHelper implements AverTokenTypes {
   private static final boolean tracePrint = false;
   private static String fileName = "";
   private static LineNumberReader lineIn = null;
 
-  public static void main(String [] args) throws TestLangParseException, TestLangRuntimeException {
+  public static void main(String [] args) throws AverParseException, AverRuntimeException {
     if(args.length != 2) {
-      System.err.println("Usage: TestLangToXML <source> <dest>");
+      System.err.println("Usage: AverToXML <source> <dest>");
       System.exit(-1);
     }
     convertFile(args[0], args[1]);
   }
 
-  public static IXMLElement convert(InputStream in) throws TestLangParseException, TestLangRuntimeException {
+  public static IXMLElement convert(InputStream in) throws AverParseException, AverRuntimeException {
     try {
-      TestLangParser parser = new TestLangParser(new TestLangLexer(in));
+      AverParser parser = new AverParser(new AverLexer(in));
       parser.test_set();
       //(new ASTFrame("Foo", parser.getAST())).setVisible(true);
       IXMLElement tests = astToXml((CommonAST)parser.getAST());
       return tests;
     }
     catch(RecognitionException re) {
-      throw new TestLangParseException(re);
+      throw new AverParseException(re);
     }
     catch(TokenStreamException tse) {
-      throw new TestLangParseException(tse);
+      throw new AverParseException(tse);
     }
   }
-  public static void convertFile(String source, String dest) throws TestLangParseException, TestLangRuntimeException {
+  public static void convertFile(String source, String dest) throws AverParseException, AverRuntimeException {
     File sourceFile = new File(source);
     if(!sourceFile.exists())
-      throw new TestLangParseException("Test file '" + source + "' doesn't exist.");
+      throw new AverParseException("Test file '" + source + "' doesn't exist.");
     if(!sourceFile.canRead())
-      throw new TestLangParseException("Can't read test file '" + source + "'.");
+      throw new AverParseException("Can't read test file '" + source + "'.");
 
     fileName = sourceFile.getName();
     
     File destFile = new File(dest);
     try{destFile.createNewFile();}
-    catch(Exception e){throw new TestLangParseException(e);}
+    catch(Exception e){throw new AverParseException(e);}
     if(!destFile.canWrite())
-      throw new TestLangParseException("Can't read test file '" + source + "'.");
+      throw new AverParseException("Can't read test file '" + source + "'.");
 
     try {
       lineIn = new LineNumberReader(new FileReader(source));
       (new XMLWriter(new FileWriter(destFile))).write(convert(new FileInputStream(sourceFile)), true);
     }
     catch(FileNotFoundException fnfe) {
-      throw new TestLangParseException(fnfe);
+      throw new AverParseException(fnfe);
     }
     catch(IOException ioe) {
-      throw new TestLangParseException(ioe);
+      throw new AverParseException(ioe);
     }
   }
-  protected static IXMLElement astToXml(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  protected static IXMLElement astToXml(CommonAST ast) throws AverParseException, AverRuntimeException {
     return test(ast);
   }
 
@@ -83,10 +83,10 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
   private static final Class [] twoArgMethodArgTypes = {CommonAST.class, Object.class};
   
   static {
-    methodNames = new String [TestLangTokenTypes.DUMMY + 1];
+    methodNames = new String [AverTokenTypes.DUMMY + 1];
     methodNames[OBRACE] = "enumeratedDomain";
     methodNames[OBRACKET] = "intervalDomain";
-    methodNames[INTEGER] = "evalInteger";
+    methodNames[NUMBER] = "evalNumber";
     methodNames[IN] = "boolIn";
     methodNames[OUT] = "boolOut";
     methodNames[EQ] = "boolEq";
@@ -109,38 +109,48 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
   }
 
 
-  private static IXMLElement evaluate(CommonAST ast, Object arg) throws TestLangRuntimeException {
+  private static IXMLElement evaluate(CommonAST ast, Object arg) throws AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evalute a null element.");
+      throw new AverRuntimeException("Attempted to evalute a null element.");
     checkValidType(ast.getType(), "Attempted to evaluate invalid type " + ast.getType());
     try {
-      Method evalMethod = TestLangToXML.class.getDeclaredMethod(methodNames[ast.getType()], twoArgMethodArgTypes);
+      Method evalMethod = AverToXML.class.getDeclaredMethod(methodNames[ast.getType()], twoArgMethodArgTypes);
       Object [] args = {ast, arg};
-      return (IXMLElement) evalMethod.invoke(null, args);
+      long t1 = System.currentTimeMillis();
+      IXMLElement retval = (IXMLElement) evalMethod.invoke(null, args);
+      //System.err.println(evalMethod.getName() + ": " + (System.currentTimeMillis() - t1) +
+      //                   "ms");
+      return retval;
+      //return (IXMLElement) evalMethod.invoke(null, args);
     }
     catch(Exception e) {
-      throw new TestLangRuntimeException(e);
+      throw new AverRuntimeException(e);
     }
   }
 
-  private static IXMLElement evaluate(CommonAST ast) throws TestLangRuntimeException {
+  private static IXMLElement evaluate(CommonAST ast) throws AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evalute a null element.");
+      throw new AverRuntimeException("Attempted to evalute a null element.");
     checkValidType(ast.getType(), "Attempted to evaluate invalid type " + ast.getType() +
-                   "\nAt " + ast.toStringList());
+                   "\nAt ", ast);
     try {
-      Method evalMethod = TestLangToXML.class.getDeclaredMethod(methodNames[ast.getType()], methodArgTypes);
+      Method evalMethod = AverToXML.class.getDeclaredMethod(methodNames[ast.getType()], methodArgTypes);
       Object [] args = {ast};
-      return (IXMLElement) evalMethod.invoke(null, args);
+      long t1 = System.currentTimeMillis();
+      IXMLElement retval = (IXMLElement) evalMethod.invoke(null, args);
+      //System.err.println(evalMethod.getName() + ": " + (System.currentTimeMillis() - t1) +
+      //                   "ms");
+      return retval;
+      //return (IXMLElement) evalMethod.invoke(null, args);
     }
     catch(Exception e) {
-      throw new TestLangRuntimeException(e);
+      throw new AverRuntimeException(e);
     }
   }
 
-  private static IXMLElement test(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement test(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null 'Test' element.");
+      throw new AverRuntimeException("Attempted to evaluate null 'Test' element.");
     checkValidType(ast.getType(), TEST, "Attempted to create test element for type " + ast.getType());
     
     IXMLElement retval = new XMLElement("Test");
@@ -154,9 +164,9 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement enumeratedDomain(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement enumeratedDomain(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null enumerated domain.");
+      throw new AverRuntimeException("Attempted to evaluate null enumerated domain.");
     checkValidType(ast.getType(), OBRACE, "Attempted to evaluate an enumerated domain with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("EnumeratedDomain");
@@ -168,9 +178,9 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement intervalDomain(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement intervalDomain(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null interval domain.");
+      throw new AverRuntimeException("Attempted to evaluate null interval domain.");
     checkValidType(ast.getType(), OBRACKET, "Attempted to evaluate an interval domain with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("IntervalDomain");
@@ -185,7 +195,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement [] getBinaryChildren(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement [] getBinaryChildren(CommonAST ast) throws AverParseException, AverRuntimeException {
     IXMLElement [] retval = new XMLElement [2];
     CommonAST child1 = (CommonAST) ast.getFirstChild();
     CommonAST child2 = (CommonAST) child1.getNextSibling();
@@ -194,7 +204,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement assertion(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement assertion(CommonAST ast) throws AverParseException, AverRuntimeException {
     IXMLElement retval = new XMLElement("At");
     retval.setAttribute("file", fileName);
     int lineNo = ((LineNumberAST)ast).getLine();
@@ -209,7 +219,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
       }
     }
     catch(IOException ioe) {
-      throw new TestLangParseException(ioe);
+      throw new AverParseException(ioe);
     }
     retval.setAttribute("lineText", lineText.trim());
     CommonAST step = (CommonAST) ast.getFirstChild();
@@ -219,14 +229,14 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement step(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement step(CommonAST ast) throws AverParseException, AverRuntimeException {
     IXMLElement retval = new XMLElement("step");
     String qualifier = "each";
     String operator = ">";
     IXMLElement domain = new XMLElement("EnumeratedDomain");
     IXMLElement value = new XMLElement("Value");
     domain.addChild(value);
-    value.setAttribute("type", "integer");
+    value.setAttribute("type", "number");
     value.setContent("-1");
 
     CommonAST child = (CommonAST) ast.getFirstChild();
@@ -283,7 +293,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement boolFunc(CommonAST ast, String name) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement boolFunc(CommonAST ast, String name) throws AverParseException, AverRuntimeException {
     IXMLElement retval = new XMLElement(name);
     retval.setAttribute("file", fileName);
     int lineNo = ((LineNumberAST)ast).getLine();
@@ -298,7 +308,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
       }
     }
     catch(IOException ioe) {
-      throw new TestLangParseException(ioe);
+      throw new AverParseException(ioe);
     }
     retval.setAttribute("lineText", lineText);
     IXMLElement [] children = getBinaryChildren(ast);
@@ -307,81 +317,81 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement boolIn(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement boolIn(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null 'in' element.");
+      throw new AverRuntimeException("Attempted to evaluate null 'in' element.");
     checkValidType(ast.getType(), IN, "Attempted to evaluate an 'in' element with invalid type " +
                    ast.getType());
     return boolFunc(ast, "in");
   }
 
-  private static IXMLElement boolOut(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement boolOut(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null 'out' element.");
+      throw new AverRuntimeException("Attempted to evaluate null 'out' element.");
     checkValidType(ast.getType(), OUT, "Attempted to evaluate an 'out' element with invalid type " +
                    ast.getType());
     return boolFunc(ast, "out");
   }
 
-  private static IXMLElement boolEq(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement boolEq(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null '==' element.");
+      throw new AverRuntimeException("Attempted to evaluate null '==' element.");
     checkValidType(ast.getType(), EQ, "Attempted to evaluate an '==' element with invalid type " +
                    ast.getType());
     return boolFunc(ast, "eq");
   }
 
-  private static IXMLElement boolLt(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement boolLt(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null '<' element.");
+      throw new AverRuntimeException("Attempted to evaluate null '<' element.");
     checkValidType(ast.getType(), LT, "Attempted to evaluate an '<' element with invalid type " +
                    ast.getType());
     return boolFunc(ast, "lt");
   }
 
-  private static IXMLElement boolGt(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement boolGt(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null '>' element.");
+      throw new AverRuntimeException("Attempted to evaluate null '>' element.");
     checkValidType(ast.getType(), GT, "Attempted to evaluate an '>' element with invalid type " +
                    ast.getType());
     return boolFunc(ast, "gt");
   }
 
-  private static IXMLElement boolGe(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement boolGe(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null '>=' element.");
+      throw new AverRuntimeException("Attempted to evaluate null '>=' element.");
     checkValidType(ast.getType(), GE, "Attempted to evaluate an '>=' element with invalid type " +
                    ast.getType());
     return boolFunc(ast, "ge");
   }
 
-  private static IXMLElement boolLe(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement boolLe(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null '<=' element.");
+      throw new AverRuntimeException("Attempted to evaluate null '<=' element.");
     checkValidType(ast.getType(), LE, "Attempted to evaluate an '<=' element with invalid type " +
                    ast.getType());
     return boolFunc(ast, "le");
   }
 
-  private static IXMLElement boolNe(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement boolNe(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null '!=' element.");
+      throw new AverRuntimeException("Attempted to evaluate null '!=' element.");
     checkValidType(ast.getType(), NE, "Attempted to evaluate an '!=' element with invalid type " +
                    ast.getType());
     return boolFunc(ast, "ne");
   }
 
-  private static IXMLElement boolIntersects(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement boolIntersects(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null 'intersects' element.");
+      throw new AverRuntimeException("Attempted to evaluate null 'intersects' element.");
     checkValidType(ast.getType(), INTERSECTS, "Attempted to evaluate an 'intersects' element with invalid type " +
                    ast.getType());
     return boolFunc(ast, "intersects");
   }
 
-  private static IXMLElement evalString(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement evalString(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evalute null 'string' element.");
+      throw new AverRuntimeException("Attempted to evalute null 'string' element.");
     checkValidType(ast.getType(), STRING, "Attempted to evaluate a 'string' element with invalid type " +
                    ast.getType());
     
@@ -395,9 +405,9 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
   
-  private static IXMLElement evalString(CommonAST ast, Object arg) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement evalString(CommonAST ast, Object arg) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evalute null 'string' element.");
+      throw new AverRuntimeException("Attempted to evalute null 'string' element.");
     checkValidType(ast.getType(), STRING, "Attempted to evaluate a 'string' element with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("Value");
@@ -407,15 +417,14 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     cont.setContent(ast.getText().substring(1, ast.getText().length() - 1));
     return retval;
   }
-
-  private static IXMLElement evalInteger(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement evalNumber(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evalute null 'integer' element.");
-    checkValidType(ast.getType(), INTEGER, "Attempted to evaluate a 'integer' element with invalid type " +
+      throw new AverRuntimeException("Attempted to evalute null 'number' element.");
+    checkValidType(ast.getType(), NUMBER, "Attempted to evaluate a 'number' element with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("EnumeratedDomain");
     IXMLElement value = new XMLElement("Value");
-    value.setAttribute("type", "integer");
+    value.setAttribute("type", "number");
     retval.addChild(value);
     IXMLElement cont = value.createPCDataElement();
     value.addChild(cont);
@@ -423,22 +432,22 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement evalInteger(CommonAST ast, Object arg) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement evalNumber(CommonAST ast, Object arg) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evalute null 'integer' element.");
-    checkValidType(ast.getType(), INTEGER, "Attempted to evaluate a 'integer' element with invalid type " +
+      throw new AverRuntimeException("Attempted to evalute null 'number' element.");
+    checkValidType(ast.getType(), NUMBER, "Attempted to evaluate a 'number' element with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("Value");
-    retval.setAttribute("type", "integer");
+    retval.setAttribute("type", "number");
     IXMLElement cont = retval.createPCDataElement();
     retval.addChild(cont);
     cont.setContent(ast.getText());
     return retval;
   }
 
-  private static IXMLElement count(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement count(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null 'Count' element.");
+      throw new AverRuntimeException("Attempted to evaluate null 'Count' element.");
     checkValidType(ast.getType(), COUNT, "Attempted to evaluate a 'Count' element with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("Count");
@@ -446,13 +455,13 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement count(CommonAST ast, Object arg) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement count(CommonAST ast, Object arg) throws AverParseException, AverRuntimeException {
     return count(ast);
   }
 
-  private static IXMLElement entity(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement entity(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null 'Entity' element.");
+      throw new AverRuntimeException("Attempted to evaluate null 'Entity' element.");
     checkValidType(ast.getType(), ENTITY, "Attempted to evaluate a 'Entity' element with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("Entity");
@@ -467,12 +476,12 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
   
-  private static IXMLElement entity(CommonAST ast, Object arg) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement entity(CommonAST ast, Object arg) throws AverParseException, AverRuntimeException {
     return entity(ast);
   }
-  private static IXMLElement objects(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement objects(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null 'Objects' element.");
+      throw new AverRuntimeException("Attempted to evaluate null 'Objects' element.");
     checkValidType(ast.getType(), OBJECTS, "Attempted to evaluate a 'Objects' element with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("Objects");
@@ -484,7 +493,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
       switch(child.getType()) {
       case STEP:
         if(foundStep)
-          throw new TestLangParseException("The 'Objects' function can have only one 'step' predicate.");
+          throw new AverParseException("The 'Objects' function can have only one 'step' predicate.");
         foundStep = true;
         childElem = new XMLElement("step");
         CommonAST sub = (CommonAST) child.getFirstChild();
@@ -500,7 +509,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
         break;
       case NAME:
         if(foundName)
-          throw new TestLangParseException("The 'Objects' function can have only one 'name' predicate.");
+          throw new AverParseException("The 'Objects' function can have only one 'name' predicate.");
         foundName = true;
         childElem = new XMLElement("name");
         break;
@@ -526,7 +535,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
         child = (CommonAST) child.getNextSibling();
         continue OBJECT_CHILD_LOOP;
       default:
-        throw new TestLangRuntimeException("Attempted to evaluate 'Objects' function with invalid argument type " +
+        throw new AverRuntimeException("Attempted to evaluate 'Objects' function with invalid argument type " +
                                            child.getType() + " at " + ast.toStringList());
       }
       retval.addChild(childElem);
@@ -539,9 +548,9 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement property(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement property(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null 'Property' element.");
+      throw new AverRuntimeException("Attempted to evaluate null 'Property' element.");
     checkValidType(ast.getType(), PROPERTY, "Attempted to evaluate a 'Property' element with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("Property");
@@ -552,9 +561,9 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement tokens(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement tokens(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null 'Tokens' element.");
+      throw new AverRuntimeException("Attempted to evaluate null 'Tokens' element.");
     checkValidType(ast.getType(), TOKENS, "Attempted to evaluate a 'Tokens' element with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("Tokens");
@@ -564,13 +573,14 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     boolean foundEnd = false;
     boolean foundStatus = false;
     boolean foundPredicate = false;
+    boolean foundPath = false;
     String multipleError = "The 'Tokens' function can have only one ";
     TOKEN_CHILD_LOOP: while(child != null) {
       IXMLElement childElem = null;
       switch(child.getType()) {
       case STEP:
         if(foundStep)
-          throw new TestLangParseException(multipleError + "'step' predicate.");
+          throw new AverParseException(multipleError + "'step' predicate.");
         foundStep = true;
         childElem = new XMLElement("step");
         CommonAST sub = (CommonAST) child.getFirstChild();
@@ -586,28 +596,40 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
         break;
       case START:
         if(foundStart)
-          throw new TestLangParseException(multipleError + "'start' predicate.");
+          throw new AverParseException(multipleError + "'start' predicate.");
         foundStart = true;
         childElem = new XMLElement("start");
         break;
       case END:
         if(foundEnd)
-          throw new TestLangParseException(multipleError + "'end' predicate.");
+          throw new AverParseException(multipleError + "'end' predicate.");
         foundEnd = true;
         childElem = new XMLElement("end");
         break;
       case STATUS:
         if(foundStatus)
-          throw new TestLangParseException(multipleError + "'status' predicate.");
+          throw new AverParseException(multipleError + "'status' predicate.");
         foundStatus = true;
         childElem = new XMLElement("status");
         break;
       case PREDICATE:
         if(foundPredicate)
-          throw new TestLangParseException(multipleError + "'predicate' predicate.");
+          throw new AverParseException(multipleError + "'predicate' predicate.");
         foundPredicate = true;
         childElem = new XMLElement("predicate");
         break;
+      case PATH:
+        throw new AverParseException("Error: 'path' not currently supported.");
+//         if(foundPath)
+//           throw new AverParseException(multipleError + "'path' predicate.");
+//         foundPath = true;
+//         childElem = new XMLElement("path");
+//         retval.addChild(childElem);
+//         CommonAST path = (CommonAST) child.getFirstChild();
+//         path = (CommonAST) path.getNextSibling();
+//         childElem.setAttribute("path", path.getText().replace('\'', ' '));
+//         child = (CommonAST) child.getNextSibling();
+//         continue TOKEN_CHILD_LOOP;
       case VARIABLE:
         childElem = new XMLElement("variable");
         retval.addChild(childElem);
@@ -630,7 +652,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
         child = (CommonAST) child.getNextSibling();
         continue TOKEN_CHILD_LOOP;
       default:
-        throw new TestLangRuntimeException("Attempted to evaluate 'Tokens' function with invalid argument type " + 
+        throw new AverRuntimeException("Attempted to evaluate 'Tokens' function with invalid argument type " + 
                                            child.getType() + "\nAt " + ast.toStringList());
       }
       retval.addChild(childElem);
@@ -643,9 +665,9 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
-  private static IXMLElement transactions(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+  private static IXMLElement transactions(CommonAST ast) throws AverParseException, AverRuntimeException {
     if(ast == null)
-      throw new TestLangRuntimeException("Attempted to evaluate null 'Transactions' element.");
+      throw new AverRuntimeException("Attempted to evaluate null 'Transactions' element.");
     checkValidType(ast.getType(), TRANSACTIONS, "Attempted to evaluate a 'Transactions' element with invalid type " +
                    ast.getType());
     IXMLElement retval = new XMLElement("Transactions");
@@ -659,7 +681,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
       switch(child.getType()) {
       case STEP:
         if(foundStep)
-          throw new TestLangParseException(multipleError + "'step' predicate.");
+          throw new AverParseException(multipleError + "'step' predicate.");
         foundStep = true;
         childElem = new XMLElement("step");
         CommonAST sub = (CommonAST) child.getFirstChild();
@@ -675,18 +697,18 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
         break;
       case NAME:
         if(foundName)
-          throw new TestLangParseException(multipleError + "'name' predicate.");
+          throw new AverParseException(multipleError + "'name' predicate.");
         foundName = true;
         childElem = new XMLElement("name");
         break;
       case TYPE:
         if(foundType)
-          throw new TestLangParseException(multipleError + "'type' predicate.");
+          throw new AverParseException(multipleError + "'type' predicate.");
         foundType = true;
         childElem = new XMLElement("type");
         break;
       default:
-        throw new TestLangRuntimeException("Attempted to evaluate 'Transactions' function with invalid argument type " +
+        throw new AverRuntimeException("Attempted to evaluate 'Transactions' function with invalid argument type " +
                                            child.getType() + "\nAt " + ast.toStringList()); 
       }
       retval.addChild(childElem);

@@ -1,4 +1,4 @@
-package testLang;
+package aver;
 
 import antlr.*;
 import antlr.collections.AST;

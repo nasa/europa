@@ -1,4 +1,4 @@
-package testLang;
+package aver;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,7 +16,7 @@ public class AssertionGenerator {
   }
 
   public static String addAssertion(String testName, IXMLElement xml) 
-    throws TestLangRuntimeException {
+    throws AverRuntimeException {
     Integer suffix = null;
     if(!testNumMap.containsKey(testName))
       testNumMap.put(testName, new Integer(0));

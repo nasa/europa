@@ -19,11 +19,11 @@
 
 SchemaId schema;
 
-extern void testLangInit(const PLASMA::PlanDatabaseId& db,
+extern void averInit(const PLASMA::PlanDatabaseId& db,
                          const PLASMA::DecisionManagerId& dm,
                          const PLASMA::ConstraintEngineId& ce,
                          const PLASMA::RulesEngineId& re);
-extern void testLangDeinit();
+extern void averDeinit();
 
 const char* TX_LOG = "TransactionLog.xml";
 const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
@@ -1260,7 +1260,7 @@ namespace NDDL {
 
 bool runTestLangTest(){
     SamplePlanDatabase db1(schema, replay);
-    testLangInit(db1.planDatabase, PLASMA::DecisionManagerId::noId(),
+    averInit(db1.planDatabase, PLASMA::DecisionManagerId::noId(),
                  db1.constraintEngine, db1.rulesEngine);
 
     DbClientId client = db1.planDatabase->getClient();
@@ -1363,7 +1363,7 @@ bool runTestLangTest(){
     PLASMA::EventAggregator::instance()->notifyAssignNextSucceeded(DecisionPointId::noId());
     //db1.writer->write();
 
-    testLangDeinit();
+    averDeinit();
     return true;
 }
 

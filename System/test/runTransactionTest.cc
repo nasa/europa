@@ -19,11 +19,11 @@ SchemaId schema;
 
 //#define PERFORMANCE
 
-extern void testLangInit(const PLASMA::PlanDatabaseId& db,
+extern void averInit(const PLASMA::PlanDatabaseId& db,
                          const PLASMA::DecisionManagerId& dm,
                          const PLASMA::ConstraintEngineId& ce,
                          const PLASMA::RulesEngineId& re);
-extern void testLangDeinit();
+extern void averDeinit();
 
 const char* TX_LOG = "TransactionLog.xml";
 const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
@@ -64,12 +64,12 @@ bool runPlanner(){
   check_error(maxPlannerSteps.isValid());
   int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
 
-  testLangInit(db1.planDatabase, db1.planner->getDecisionManager(),
-	       db1.constraintEngine, db1.rulesEngine);
+  averInit(db1.planDatabase, db1.planner->getDecisionManager(),
+           db1.constraintEngine, db1.rulesEngine);
 
   int res = db1.planner->run(steps);
 
-  testLangDeinit();
+  averDeinit();
 
   assert(res == CBPlanner::PLAN_FOUND);
 

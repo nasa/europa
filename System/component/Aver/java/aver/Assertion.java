@@ -1,4 +1,4 @@
-package testLang;
+package aver;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -184,7 +184,7 @@ public class Assertion {
     changeTypeMap.put("VAR_DOMAIN_CLOSED", "DomainListener::CLOSED");
   }
 
-  public Assertion(String name, IXMLElement assertion) throws TestLangRuntimeException {
+  public Assertion(String name, IXMLElement assertion) throws AverRuntimeException {
     this.name = name;
     tokensNum = objsNum = propNum = enumDomNum = intDomNum = entNum = 0;
     for(Iterator it = assertion.getChildren().iterator(); it.hasNext();) {
@@ -223,13 +223,13 @@ public class Assertion {
     header.indent();
   }
 
-  private void toImpl() throws TestLangRuntimeException {
+  private void toImpl() throws AverRuntimeException {
     addConstructorImpl();
     addCheckImpl();
     addExecuteImpl();
   }
 
-  private void addConstructorImpl() throws TestLangRuntimeException {
+  private void addConstructorImpl() throws AverRuntimeException {
     String constructorDecl = name + "::" + name + 
       "(const PlanDatabaseId& planDb) : Assertion(planDb, \"" + fileName + "\", " + lineNo +
       ", \"" + lineText + "\"), m_stepDomain(";
@@ -239,8 +239,10 @@ public class Assertion {
     String stepDom = "m_stepDomain = ";
     IXMLElement dom = null;
     if((dom = step.getFirstChildNamed("IntervalDomain")) != null) {
-      stepDom = stepDom + " IntervalIntDomain((int)" + getLowerBound(dom) + ", (int)" + getUpperBound(dom) + ");";
-      header.addLine("IntervalIntDomain m_stepDomain;");
+      //      stepDom = stepDom + " IntervalIntDomain((int)" + getLowerBound(dom) + ", (int)" + getUpperBound(dom) + ");";
+      stepDom = stepDom + " IntervalDomain(" + getLowerBound(dom) + ", " + getUpperBound(dom) + ");";
+      //      header.addLine("IntervalIntDomain m_stepDomain;");
+      header.addLine("IntervalDomain m_stepDomain;");
       constructorDecl = constructorDecl + ") {";
       impl.addLine(constructorDecl);
       impl.indent();
@@ -263,32 +265,32 @@ public class Assertion {
   }
 
   private void addEnumInserts(IXMLElement dom, String domName, CppFile file) 
-    throws TestLangRuntimeException {
+    throws AverRuntimeException {
     for(Iterator it = dom.getChildren().iterator(); it.hasNext();)
       file.addLine(domName + ".insert((double)" + evalValue((IXMLElement)it.next()) + ");");
   }
 
-  private String getLowerBound(IXMLElement intDomain) throws TestLangRuntimeException {
+  private String getLowerBound(IXMLElement intDomain) throws AverRuntimeException {
     return getBound(intDomain, "LowerBound");
   }
 
-  private String getUpperBound(IXMLElement intDomain) throws TestLangRuntimeException {
+  private String getUpperBound(IXMLElement intDomain) throws AverRuntimeException {
     return getBound(intDomain, "UpperBound");
   }
 
   private String getBound(IXMLElement intDomain, String bound) 
-    throws TestLangRuntimeException {
+    throws AverRuntimeException {
     return evalValue(intDomain.getFirstChildNamed(bound).getFirstChildNamed("Value"));
   }
 
-  private String evalValue(IXMLElement value) throws TestLangRuntimeException {
+  private String evalValue(IXMLElement value) throws AverRuntimeException {
     String type = value.getAttribute("type", "");
-    if(type.equals("integer"))
+    if(type.equals("number"))
       return "(double)" + value.getContent().trim();
     else if(type.equals("string"))
       return "LabelStr(\"" + value.getContent().trim() + "\")";
     else
-      throw new TestLangRuntimeException("Invalid value '" + value.getName() + "'");
+      throw new AverRuntimeException("Invalid value '" + value.getName() + "'");
   }
 
   private void addCheckDeclaration() {
@@ -325,7 +327,7 @@ public class Assertion {
     impl.unindent();
     impl.addLine("}");
   }
-  private void addExecuteImpl() throws TestLangRuntimeException {
+  private void addExecuteImpl() throws AverRuntimeException {
     LinkedList funcImpls = new LinkedList();
     impl.addLine("Test::Status " + name + "::execute() {");
     evaluateBoolean(funcImpls);
@@ -334,7 +336,7 @@ public class Assertion {
       impl.add((CppFile)it.next());
   }
 
-  private void evaluateBoolean(LinkedList funcImpls) throws TestLangRuntimeException {
+  private void evaluateBoolean(LinkedList funcImpls) throws AverRuntimeException {
     String Q = step.getAttribute("qualifier", "");
     impl.indent();
     String domStart = "const AbstractDomain& dom";
@@ -402,7 +404,7 @@ public class Assertion {
 
   //assumes singleton.  this should be fixed.
   private String evalProperty(IXMLElement xml, LinkedList funcImpls) 
-    throws TestLangRuntimeException {
+    throws AverRuntimeException {
     String funcName = "property_" + propNum++ + "()";
     header.addLine("const AbstractDomain& " + funcName + ";");
     CppFile propFunc = new CppFile();
@@ -456,10 +458,10 @@ public class Assertion {
         propFunc.addLine("return (ObjectId(id))->getVariable(LabelStr(\"" + xml.getAttribute("index", "") + "\"))->lastDomain();");
       }
       else
-        throw new TestLangRuntimeException("'Entity' functions must contain a call to either 'Objects' or 'Tokens'.");
+        throw new AverRuntimeException("'Entity' functions must contain a call to either 'Objects' or 'Tokens'.");
     }
     else
-      throw new TestLangRuntimeException("'Property' functions must contain a call to either 'Objects' or 'Tokens'.");
+      throw new AverRuntimeException("'Property' functions must contain a call to either 'Objects' or 'Tokens'.");
     propFunc.unindent();
     propFunc.addLine("}");
     funcImpls.add(propFunc);
@@ -467,7 +469,7 @@ public class Assertion {
   }
 
   private String evalEntity(IXMLElement xml, LinkedList funcImpls) 
-    throws TestLangRuntimeException {
+    throws AverRuntimeException {
     String funcName = "entity_" + entNum++ + "()";
     header.addLine("EnumeratedDomain " + funcName + ";");
     CppFile entFunc = new CppFile();
@@ -493,7 +495,7 @@ public class Assertion {
   }
 
   private String evalObjects(IXMLElement xml, LinkedList funcImpls) 
-    throws TestLangRuntimeException {
+    throws AverRuntimeException {
     String funcName = "objects_" + objsNum++ + "()";
     header.addLine("EnumeratedDomain " + funcName + ";");
     CppFile objFunc = new CppFile();
@@ -512,7 +514,7 @@ public class Assertion {
   }
 
   private String evalTokens(IXMLElement xml, LinkedList funcImpls) 
-    throws TestLangRuntimeException {
+    throws AverRuntimeException {
     String funcName = "tokens_" + tokensNum++ + "()";
     header.addLine("EnumeratedDomain " + funcName + ";");
     
@@ -534,14 +536,14 @@ public class Assertion {
   private String enumDomainType(IXMLElement elem) {
     if(!elem.getName().equals("EnumeratedDomain"))
       throw new IllegalArgumentException();
-    if(elem.getFirstChildNamed("Value").getAttribute("type", "").equals("integer"))
+    if(elem.getFirstChildNamed("Value").getAttribute("type", "").equals("number"))
       return "EnumeratedDomain";
     else
       return "StringDomain";
   }
 
   private void addTrimElement(IXMLElement elem, String type, CppFile func, 
-                              LinkedList funcImpls) throws TestLangRuntimeException {
+                              LinkedList funcImpls) throws AverRuntimeException {
     String setType = type.substring(0, 1).toUpperCase() + type.substring(1);
     String trimType = elem.getName().substring(0, 1).toUpperCase() + elem.getName().substring(1);
     if(elem.getName().equals("variable")) {
@@ -556,12 +558,19 @@ public class Assertion {
       String valDomName = getCurrentDomainName(value.getChildAtIndex(0));
       func.addLine(enumDomainType(name.getChildAtIndex(0)) + " " + nameDomName + " = " + nameDomain);
       if(value.getChildAtIndex(0).getName().equals("IntervalDomain"))
-        func.addLine("IntervalIntDomain " + valDomName + " = " + valDomain);
+        func.addLine("IntervalDomain " + valDomName + " = " + valDomain);
       else
         func.addLine(enumDomainType(value.getChildAtIndex(0)) + " " + valDomName + " = " + valDomain);
       func.addLine("trim" + setType + "By" + trimType + "(temp, " +
                    nameOp + ", " + nameDomName + ", " + valOp + ", " +
                    valDomName + ");");
+    }
+    else if(elem.getName().equals("path")) {
+      func.addLine("std::vector<int> path;");
+      String [] elems = elem.getAttribute("path", "").split("\\.");
+      for(int i = 0; i < elems.length; i++)
+        func.addLine("path.push_back(" + elems[i] + ");");
+      func.addLine("trimTokensByPath(temp, path);");
     }
     else {
       String domain = evaluate(elem.getChildAtIndex(0), funcImpls);
@@ -569,7 +578,7 @@ public class Assertion {
         func.addLine(domain);
       else {
         if(elem.getChildAtIndex(0).getName().equals("IntervalDomain"))
-          func.addLine("IntervalIntDomain " + 
+          func.addLine("IntervalDomain " + 
                        getCurrentDomainName(elem.getChildAtIndex(0)) + " = " + domain);
         else
           func.addLine(enumDomainType(elem.getChildAtIndex(0)) + " " + getCurrentDomainName(elem.getChildAtIndex(0)) + " = " + domain);
@@ -581,7 +590,7 @@ public class Assertion {
   }
 
   private String evalEnumDomain(IXMLElement xml, LinkedList funcImpls) 
-    throws TestLangRuntimeException {
+    throws AverRuntimeException {
     if(xml.getChildren().size() == 1) {
       getNextEnumName();
       String val = evalValue(xml.getChildAtIndex(0));
@@ -591,7 +600,7 @@ public class Assertion {
         return "EnumeratedDomain(" + val + ", true, EnumeratedDomain::getDefaultTypeName().c_str());";
     }
     CppFile enumBuild = new CppFile();
-    if(xml.getChildAtIndex(0).getAttribute("type", "").equals("integer"))
+    if(xml.getChildAtIndex(0).getAttribute("type", "").equals("number"))
       enumBuild.addLine("EnumeratedDomain " + getNextEnumName() + "(true, EnumeratedDomain::getDefaultTypeName().c_str());");
     else
       enumBuild.addLine("StringDomain " + getNextEnumName() + ";");
@@ -604,7 +613,7 @@ public class Assertion {
   }
 
   private String evalEnumDomain(IXMLElement xml, LinkedList funcImpls, String type) 
-    throws TestLangRuntimeException {
+    throws AverRuntimeException {
     if(xml.getChildren().size() == 1) {
       getNextEnumName();
       String val = evalValue(xml.getChildAtIndex(0));
@@ -616,7 +625,7 @@ public class Assertion {
         //return "EnumeratedDomain(" + val + ", DomainListenerId::noId(), " + type + ");";
     }
     CppFile enumBuild = new CppFile();
-    if(xml.getChildAtIndex(0).getAttribute("type", "").equals("integer"))
+    if(xml.getChildAtIndex(0).getAttribute("type", "").equals("number"))
       enumBuild.addLine("EnumeratedDomain " + getNextEnumName() + "(" + type + ");");
     else
       enumBuild.addLine("StringDomain " + getNextEnumName() + "(" + type + ");");
@@ -629,11 +638,11 @@ public class Assertion {
   }
 
   private String evalIntDomain(IXMLElement xml, LinkedList funcImpls) 
-    throws TestLangRuntimeException {
+    throws AverRuntimeException {
     String lb = evalValue(xml.getFirstChildNamed("LowerBound").getChildAtIndex(0));
     String ub = evalValue(xml.getFirstChildNamed("UpperBound").getChildAtIndex(0));
     getNextIntName();
-    return "IntervalIntDomain((int)" + lb + ", (int)" + ub + ");";
+    return "IntervalDomain(" + lb + ", " + ub + ");";
   }
 
   private void addTokensDeclaration() {
@@ -667,7 +676,7 @@ public class Assertion {
     header.addLine("void notifyStep(const DecisionPointId& dec) {AggregateListener::notifyStep(dec); if(check()){execute();}};");
   }
 
-  private String evalTransactions(IXMLElement elem, LinkedList funcImpls) throws TestLangRuntimeException {
+  private String evalTransactions(IXMLElement elem, LinkedList funcImpls) throws AverRuntimeException {
     IXMLElement spec = elem.getChildAtIndex(0);
     String info = spec.getFirstChildNamed("EnumeratedDomain").getFirstChildNamed("Value").getContent().trim();
     header.unindent();
@@ -677,7 +686,7 @@ public class Assertion {
       addTransaction(info);
     else if(spec.getName().equals("type")) {
       if(transactionTypeMap.get(info) == null)
-        throw new TestLangRuntimeException("'" + info + "' is not a valid transaction type.");
+        throw new AverRuntimeException("'" + info + "' is not a valid transaction type.");
       List functions = (List) transactionTypeMap.get(info);
       for(Iterator it = functions.iterator(); it.hasNext();)
         addTransaction((String)it.next());
@@ -701,9 +710,9 @@ public class Assertion {
     funcImpls.add(countGenerator);
     return "countGenerator()";
   }
-  private void addTransaction(String info) throws TestLangRuntimeException {
+  private void addTransaction(String info) throws AverRuntimeException {
     if(transactionNameMap.get(info) == null)
-      throw new TestLangRuntimeException("'" + info + "' is not a valid transaction name.");
+      throw new AverRuntimeException("'" + info + "' is not a valid transaction name.");
     String function = (String) transactionNameMap.get(info);
     header.addLine(function + "{if(check()){m_transactionCounter++;}};");
   }

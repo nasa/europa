@@ -1,4 +1,4 @@
-SubDir PLASMA System test testLang converter ;
+SubDir PLASMA System test aver converter ;
 
 if ! $(PLASMA_READY) {
 TL_PARSER_TESTS = tokenstest objectstest transtest steptest booltest depthtest 
@@ -23,21 +23,20 @@ TL_PARSER_TESTS = tokenstest objectstest transtest steptest booltest depthtest
   SubDirHdrs $(PLASMA) System core ;
   SubDirHdrs $(PLASMA) System component ;
 
-
 local parser_test ;
 for parser_test in $(TL_PARSER_TESTS) {
   local cpp = $(parser_test:S=.cc) ;
   local obj = $(parser_test:S=$(SUFOBJ)) ;
-  TestLangToCpp $(cpp) : $(parser_test) ;
+  AverToCpp $(cpp) : $(parser_test) ;
   
   Object $(obj) : $(cpp) ;
   LocalClean $(cpp) ;
   LocalClean $(obj) ;
   LocalClean $(parser_test:S=.xml) ;
-  LocalDepends testlang-build-$(parser_test) : $(cpp) ;
-  LocalDepends testlang-build-$(parser_test) : $(obj) ;
-  LocalDepends testlang-module-tests : testlang-build-$(parser_test) ;
-  LocalDepends run-testlang-module-tests : testlang-build-$(parser_test) ;
-  LocalDepends tests : run-testlang-module-tests ;
+  LocalDepends aver-build-$(parser_test) : $(cpp) ;
+  LocalDepends aver-build-$(parser_test) : $(obj) ;
+  LocalDepends aver-module-tests : aver-build-$(parser_test) ;
+  LocalDepends run-aver-module-tests : aver-build-$(parser_test) ;
+  LocalDepends tests : run-aver-module-tests ;
 }
 }

@@ -1,4 +1,4 @@
-package testLang;
+package aver;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,11 +10,11 @@ import java.util.LinkedList;
 
 import net.n3.nanoxml.*;
 
-public class TestLangXMLToCpp extends TestLangHelper {
+public class AverXMLToCpp extends AverHelper {
 
   public static void main(String [] args) {
     if(args.length == 0)
-      System.err.println("Usage: TestLangXMLToCpp <file>");
+      System.err.println("Usage: AverXMLToCpp <file>");
     try {
       if(args[0].endsWith(".xml"))
         convertFile(args[0]);
@@ -27,26 +27,26 @@ public class TestLangXMLToCpp extends TestLangHelper {
     }
   }
 
-  public static void convertTestFile(String source) throws TestLangParseException, TestLangRuntimeException {
-    TestLangToXML.convertFile(source, source + ".xml");
+  public static void convertTestFile(String source) throws AverParseException, AverRuntimeException {
+    AverToXML.convertFile(source, source + ".xml");
     convertFile(source + ".xml");
   }
 
-  public static void convertFile(String source) throws TestLangParseException, TestLangRuntimeException {
+  public static void convertFile(String source) throws AverParseException, AverRuntimeException {
     File sourceFile = new File(source);
     if(!sourceFile.exists())
-      throw new TestLangParseException("Test XML file '" + source + "' doesn't exist.");
+      throw new AverParseException("Test XML file '" + source + "' doesn't exist.");
     if(!sourceFile.canRead())
-      throw new TestLangParseException("Can't read test XML file '" + source + "'.");
+      throw new AverParseException("Can't read test XML file '" + source + "'.");
     try {
       IXMLParser parser = XMLParserFactory.createDefaultXMLParser();
       IXMLReader reader = StdXMLReader.fileReader(source);
       parser.setReader(reader);
-      (new TestLangXMLToCpp((IXMLElement) parser.parse(), sourceFile.getName(), 
+      (new AverXMLToCpp((IXMLElement) parser.parse(), sourceFile.getName(), 
                             sourceFile.getParent())).convert();
     }
     catch(Exception e) {
-      throw new TestLangParseException(e);
+      throw new AverParseException(e);
     }
   }
 
@@ -59,9 +59,11 @@ public class TestLangXMLToCpp extends TestLangHelper {
   private String rootTestName;
   private String destPath;
 
-  public TestLangXMLToCpp(IXMLElement xml, String sourceName, String destPath) throws TestLangRuntimeException {
+  public AverXMLToCpp(IXMLElement xml, String sourceName, String destPathArg) throws AverRuntimeException {
     checkValidType(xml.getName(), "Test", "Attempted to convert non-test '" + xml.getName() +"'.");
-    this.destPath = destPath;
+    if(destPathArg == null)
+      throw new AverRuntimeException("Destination can't be null.");
+    this.destPath = destPathArg;
     testTree = xml;
     header = new CppFile();
     impl = new CppFile();
@@ -72,7 +74,7 @@ public class TestLangXMLToCpp extends TestLangHelper {
     rootTestName = null;
   }
 
-  public void convert() throws TestLangParseException, TestLangRuntimeException {
+  public void convert() throws AverParseException, AverRuntimeException {
     header.addLine("#ifndef _H_" + headerName.substring(0, headerName.lastIndexOf('.')));
     header.addLine("#define _H_" + headerName.substring(0, headerName.lastIndexOf('.')));
     header.addLine("#include \"EventAggregator.hh\"");
@@ -106,7 +108,7 @@ public class TestLangXMLToCpp extends TestLangHelper {
     header.addLine("static PLASMA::" + rootTestName + "* test;");
     header.unindent();
     header.addLine("}");
-    header.addLine("void testLangInit(const PLASMA::PlanDatabaseId& db, const PLASMA::DecisionManagerId& dm = PLASMA::DecisionManagerId::noId(),");
+    header.addLine("void averInit(const PLASMA::PlanDatabaseId& db, const PLASMA::DecisionManagerId& dm = PLASMA::DecisionManagerId::noId(),");
     header.indent();
     header.addLine("\tconst PLASMA::ConstraintEngineId& ce = PLASMA::ConstraintEngineId::noId(),");
     header.addLine("\tconst PLASMA::RulesEngineId& re = PLASMA::RulesEngineId::noId()) {");
@@ -114,7 +116,7 @@ public class TestLangXMLToCpp extends TestLangHelper {
     header.addLine(rootTestName + "_TestHidden::test = new PLASMA::" + rootTestName + "(db);");
     header.unindent();
     header.addLine("}");
-    header.addLine("void testLangDeinit() {");
+    header.addLine("void averDeinit() {");
     header.indent();
     header.addLine(rootTestName + "_TestHidden::test->dumpResults();");
     header.addLine("delete " + rootTestName + "_TestHidden::test;");
@@ -133,11 +135,11 @@ public class TestLangXMLToCpp extends TestLangHelper {
     catch(IOException ioe){ioe.printStackTrace(); System.exit(-1);}
   }
 
-  private void convertTestSet(IXMLElement xml) throws TestLangParseException, TestLangRuntimeException {
+  private void convertTestSet(IXMLElement xml) throws AverParseException, AverRuntimeException {
     checkValidType(xml.getName(), "Test", "Attempted to convert non-test'" + xml.getName() + "'.");
     String name = xml.getAttribute("name", null);
     if(name == null)
-      throw new TestLangParseException("Test with no name");
+      throw new AverParseException("Test with no name");
     name = TestSetGenerator.addSet(xml.getAttribute("name", null));
     if(rootTestName == null)
       rootTestName = name;
@@ -150,7 +152,7 @@ public class TestLangXMLToCpp extends TestLangHelper {
       else if(elem.getName().equals("At"))
         TestSetGenerator.addAssertion(name, AssertionGenerator.addAssertion(name, elem));
       else
-        throw new TestLangParseException("Invalid child of test: " + elem.getName());
+        throw new AverParseException("Invalid child of test: " + elem.getName());
     }
   }
 }
