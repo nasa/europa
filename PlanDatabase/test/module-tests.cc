@@ -354,8 +354,8 @@ private:
     typedef Europa::Id<IntervalToken> IntervalTokenId;
     
     static const int UNIFIED=5;
-    static const int NUMTOKS=10;
-    static const int NUMPARAMS=5;
+    static const int NUMTOKS=100;
+    static const int NUMPARAMS=2;
 
     //Create tokens with the same domains.  We will impose a constraint on
     //each token variable.  Tokens will have 5 parameter variables.
@@ -364,13 +364,13 @@ private:
     for (int i=0; i < NUMTOKS; i++) {
       std::vector<IntervalTokenId> tmp;
       for (int j=0; j < UNIFIED; j++) {
-	IntervalTokenId t(new IntervalToken(db.getId(), 
-					    LabelStr("P1"), 
-					    BooleanDomain(),
-					    IntervalIntDomain(0, 210),
-					    IntervalIntDomain(0, 220),
-					    IntervalIntDomain(1, 110),
-					    Token::noObject(), false));
+	IntervalTokenId t = (new IntervalToken(db.getId(), 
+					       LabelStr("P1"), 
+					       BooleanDomain(),
+					       IntervalIntDomain(0, 210),
+					       IntervalIntDomain(0, 220),
+					       IntervalIntDomain(1, 110),
+					       Token::noObject(), false))->getId();
 	for (int k=0; k < NUMPARAMS; k++)
 	  t->addParameter(IntervalIntDomain(500+j,1000));
 	t->close();
