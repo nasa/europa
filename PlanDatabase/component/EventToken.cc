@@ -1,6 +1,5 @@
 #include "EventToken.hh"
 #include "TokenVariable.hh"
-#include "TokenTemporalVariable.hh"
 #include "PlanDatabase.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
 #include "../ConstraintEngine/ConstraintLibrary.hh"
@@ -38,12 +37,12 @@ namespace Prototype{
   const TempVarId& EventToken::getTime() const{return m_time;}
 
   void EventToken::commonInit(const IntervalIntDomain& timeBaseDomain){
-    m_time = (new TokenTemporalVariable(m_id,
-					m_allVariables.size(),
-					m_planDatabase->getConstraintEngine(), 
-					timeBaseDomain,
-					true,
-					LabelStr("Time")))->getId();
+    m_time = (new TokenVariable<IntervalIntDomain>(m_id,
+						   m_allVariables.size(),
+						   m_planDatabase->getConstraintEngine(), 
+						   timeBaseDomain,
+						   true,
+						   LabelStr("Time")))->getId();
     m_allVariables.push_back(m_time);
   }
 }

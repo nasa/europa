@@ -2,7 +2,6 @@
 #include "Token.hh"
 #include "Object.hh"
 #include "TokenVariable.hh"
-#include "TokenTemporalVariable.hh"
 #include "PlanDatabase.hh"
 #include "TemporalNetworkDefs.hh"
 #include "TemporalPropagator.hh"

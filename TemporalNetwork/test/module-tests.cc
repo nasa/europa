@@ -12,7 +12,6 @@
 #include "IntervalToken.hh"
 #include "Timeline.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
-#include "TokenTemporalVariable.hh"
 
 #include <iostream>
 #include <string>
@@ -221,7 +220,9 @@ private:
 			 IntervalIntDomain(0, 100),
 			 IntervalIntDomain(0, 100),
 			 IntervalIntDomain(1, 1000));
-    
+
+    ce.propagate();
+
     // check_error from propagator direcly
     check_error (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
     check_error (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(second.getEnd(), first.getStart()));
@@ -305,6 +306,7 @@ private:
 			    IntervalIntDomain(0, 10),
 			    IntervalIntDomain(0, 20),
 			    IntervalIntDomain(1, 1000));
+    ce.propagate();
 
     // compute from propagator directly
     check_error (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canFitBetween(token.getStart(), token.getEnd(), predecessor.getEnd(), successor.getStart()));

@@ -15,7 +15,6 @@
 #include "TestRule.hh"
 #include "Utils.hh"
 #include "IntervalIntDomain.hh"
-#include "TokenTemporalVariable.hh"
 #include "Domain.hh"
 #include "DefaultPropagator.hh"
 #include "EqualityConstraintPropagator.hh"

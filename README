@@ -3,8 +3,16 @@ Known areas of performance improvement:
 2. Deletion of the database.
 3. Update of variables from Temporal Network.
 4. Splitting merged tokens in a non-chronological backtrack.
-5. Improve exchange of data in TemporalPropagator with direct use of
-IntervalInt domain and direct calculation of duration variables.
+5. Improve exchange of data in TemporalPropagator with  direct calculation of duration variables.
+6. Update TemporalNetwork to adjust for deactivated constraints
+
+M_8:
+1. Updated Entity to allow linkage with an external entity. This allows efficient integration with
+shadowed objects. In particular, we use this for Timepoints and TemporalConstraints in the
+TempralNetwork
+2. Removed TokenTemporalVariable
+3. Made significant changes to the TemporalPropagator to avoid looking up links between entities, and
+also to be more selective about restricting updates to active variables only.
 
 M_7:
 **** Removed FlawQuery, FlawQueryListener, FlawQueryLogger files 

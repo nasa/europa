@@ -8,7 +8,6 @@
 #include "IntervalIntDomain.hh"
 #include "Variable.hh"
 #include "Utils.hh"
-#include "TokenTemporalVariable.hh"
 
 namespace Prototype {
   /**

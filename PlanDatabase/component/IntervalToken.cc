@@ -1,6 +1,5 @@
 #include "IntervalToken.hh"
 #include "TokenVariable.hh"
-#include "TokenTemporalVariable.hh"
 #include "PlanDatabase.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
 #include "../ConstraintEngine/ConstraintLibrary.hh"
@@ -55,15 +54,15 @@ namespace Prototype{
     check_error(m_duration->getBaseDomain().getLowerBound() > 0);
 
 
-    m_start = (new TokenTemporalVariable(m_id,
-					 m_allVariables.size(),
-					 m_planDatabase->getConstraintEngine(), 
-					 startBaseDomain,
-					 true,
-					 LabelStr("start")))->getId();
+    m_start = (new TokenVariable<IntervalIntDomain>(m_id,
+						    m_allVariables.size(),
+						    m_planDatabase->getConstraintEngine(), 
+						    startBaseDomain,
+						    true,
+						    LabelStr("start")))->getId();
     m_allVariables.push_back(m_start);
 
-    m_end = (new TokenTemporalVariable(m_id,
+    m_end = (new TokenVariable<IntervalIntDomain>(m_id,
 						  m_allVariables.size(),
 						  m_planDatabase->getConstraintEngine(), 
 						  endBaseDomain,

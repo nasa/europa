@@ -1,12 +1,11 @@
 #include "Transaction.hh"
 #include "Resource.hh"
 #include "ResourceConstraint.hh"
-#include "../PlanDatabase/TokenVariable.hh"
-#include "../PlanDatabase/PlanDatabase.hh"
-#include "../ConstraintEngine/IntervalDomain.hh"
-#include "../ConstraintEngine/Constraint.hh"
-#include "../ConstraintEngine/ConstraintLibrary.hh"
-#include "TokenTemporalVariable.hh"
+#include "TokenVariable.hh"
+#include "PlanDatabase.hh"
+#include "IntervalDomain.hh"
+#include "Constraint.hh"
+#include "ConstraintLibrary.hh"
 #include <vector>
 
 

@@ -63,12 +63,12 @@ bool runPlanner(){
 
     // Store transactions for recreation of database
     {
-      //std::ofstream out(TX_LOG);
-      //db1.txLog->flush(out);
-      //out.close();
+      std::ofstream out(TX_LOG);
+      db1.txLog->flush(out);
+      out.close();
     }
   }
-  /* 
+
   std::stringstream os2;
   {
     SamplePlanDatabase db(schema, true);
@@ -81,7 +81,7 @@ bool runPlanner(){
   std::string s1 = os1.str();
   std::string s2 = os2.str();
   assert(s1 == s2);
-  */
+
   return true;
 }
 
@@ -95,7 +95,6 @@ bool copyFromFile(){
     player.play(in);
     db.planDatabase->getClient()->toStream(os1);
   }
-
   std::stringstream os2;
   {
     SamplePlanDatabase db(schema, true);
@@ -108,6 +107,7 @@ bool copyFromFile(){
   std::string s1 = os1.str();
   std::string s2 = os2.str();
   assert(s1 == s2);
+
   return true;
 }
 
@@ -116,10 +116,8 @@ int main(int argc, const char ** argv){
   SamplePlanDatabase::initialize();
   schema = NDDL::schema();
 
-  for(int i=0;i<1;i++){
-    runTest(runPlanner);
-    //runTest(copyFromFile);
-  }
+  runTest(runPlanner);
+  runTest(copyFromFile);
 
   SamplePlanDatabase::terminate();
 

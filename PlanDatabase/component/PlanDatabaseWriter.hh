@@ -9,7 +9,6 @@
 #include "PlanDatabaseDefs.hh"
 #include "TokenVariable.hh"
 #include "ConstrainedVariable.hh"
-#include "TokenTemporalVariable.hh"
 
 namespace Prototype {
 

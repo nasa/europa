@@ -405,30 +405,37 @@ namespace Prototype {
 
   void EnumeratedDomain::operator>>(ostream&os) const {
 
-    // First construct a lexicographic ordering for the set of values.
-    std::set<std::string> orderedSet;
-    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
-      double valueAsDouble = *it;
-      if (isNumeric())
-        os << valueAsDouble;
-      else
-        if (LabelStr::isString(valueAsDouble))
-	  orderedSet.insert(LabelStr(valueAsDouble).toString());
-        else {
-          EntityId entity(valueAsDouble);
-	  orderedSet.insert(entity->getName().toString());
-        }
-    }
 
     // Now commence output
     AbstractDomain::operator>>(os);
-    os << "{";
     std::string comma = "";
+    os << "{";
+
+    // First construct a lexicographic ordering for the set of values.
+    std::set<std::string> orderedSet;
+
+    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
+      double valueAsDouble = *it;
+
+      if (isNumeric()){
+	os << comma << valueAsDouble;
+	comma = ", ";
+      }
+      else if (LabelStr::isString(valueAsDouble))
+	orderedSet.insert(LabelStr(valueAsDouble).toString());
+      else {
+	EntityId entity(valueAsDouble);
+	orderedSet.insert(entity->getName().toString());
+      }
+    }
+
     for (std::set<std::string>::const_iterator it = orderedSet.begin(); it != orderedSet.end(); ++it) {
+      check_error(!isNumeric());
       os << comma;
       os << *it;
       comma = ",";
     }
+
     os << "}";
   }
 

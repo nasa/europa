@@ -16,6 +16,7 @@ namespace Prototype {
   typedef unsigned Unsigned;
   typedef void Void;
   typedef int Index;
+  typedef Long Time;        // Temporal distance value.
 
   class Tnode;
   typedef Id< Tnode > TimepointId;
