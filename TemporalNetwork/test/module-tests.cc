@@ -427,22 +427,22 @@ private:
     		     IntervalIntDomain(1, 1000));
 
     // Allocate a constraint on the inactive token, to constrain a timepoint
-    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain());
-    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), ENGINE, makeScope(t2.getEnd(), v0.getId()));
+    Variable<IntervalIntDomain> v0(ce.getId(), IntervalIntDomain());
+    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), ce.getId() , makeScope(t2.getEnd(), v0.getId()));
 
     // Conduct the merge.
     t2.merge(t1.getId());
+    assert(!c0.isActive());
     // Now changes on v0 should propagate to the end variable of t1.
     v0.specify(IntervalIntDomain(8, 10));
     assert(t1.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
-
-    assert(ENGINE->propagate());
 
     // If we split again, expect that the restriction now applies to the end-point
     // of the inactive token
     t2.cancel();
 
-    //    assert(t2.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
+    assert(c0.isActive());
+    assert(t2.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
 
     DEFAULT_TEARDOWN();
     return true;
