@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.19 2003-01-07 17:31:38 wedgingt Exp $
+# $Id: autobuild,v 1.20 2003-01-08 23:23:59 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -7,7 +7,7 @@
 email=checkins@postdoc.arc.nasa.gov
 
 # Subdirectories to build in
-subdirs='cvs fast opt optFast prof profOptFast shareOptFast debug noErr shareOptNoErr'
+subdirs='cvs fast opt optFast profOptFast shareOptFast debug noErr shareOptNoErr'
 
 # Don't try to use X11 (mostly to prevent Purify from doing so)
 DISPLAY=
@@ -107,6 +107,17 @@ do
 
     # Save the make output
     mv make.tests ..
+
+    # If appropriate, look for and save the profiling data
+    if egrep PROFILE ../make.options > /dev/null 2>&1
+    then
+	find "$HOME"/europa.profiles -type d -mtime +7 -ls > .autobuild.profFind
+	if test -s .autobuild.profFind
+	then
+	    SupportFiles/gather.gprofs
+	fi
+	rm -rf .autobuild.profFind
+    fi
 
     # Would continue with the next one after a failure,
     #   but the disk space is not available.
