@@ -73,6 +73,11 @@ namespace Prototype
      */
     const AbstractDomain& lastDomain() const;
 
+    /**
+     * @brief Retrieve the specified domain
+     */
+    const AbstractDomain& specifiedDomain() const;
+
   private:
 
     /**
@@ -150,6 +155,11 @@ namespace Prototype
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::lastDomain() const {
     return dynamic_cast<const AbstractDomain&>(m_derivedDomain);
+  }
+
+  template<class DomainType>
+  const AbstractDomain& Variable<DomainType>::specifiedDomain() const {
+    return dynamic_cast<const AbstractDomain&>(m_specifiedDomain);
   }
 
   template<class DomainType>

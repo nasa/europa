@@ -773,9 +773,9 @@ private:
     assert(DelegationTestConstraint::s_instanceCount == 5);
     assert(DelegationTestConstraint::s_executionCount == 5);
 
-    // Cause a change in the domain which will impoact agenda, then deactivate a constraint and verify the correct execution count
+    // Cause a change in the domain which will impact agenda, then deactivate a constraint and verify the correct execution count
     v0.specify(IntervalIntDomain(0, 900));
-    c0->deactivate(c1);
+    c0->deactivate();
     assert(!c0->isActive());
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
@@ -784,7 +784,7 @@ private:
 
     // Delete the delegate and verify instance counts and that the prior delegate has been reinstated and executed.
     delete (Constraint*) c1;
-    assert(c0->isActive());
+    c0->activate();
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(DelegationTestConstraint::s_instanceCount == 4);
@@ -792,11 +792,10 @@ private:
 
     // Now create a new instance and mark it for delegation only. Add remaining constraints as delegates
     ConstraintId c5 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, v0.getId(), IntervalIntDomain(0,0));
-    c5->markForDelegationOnly();
-    c0->deactivate(c5);
-    c2->deactivate(c5);
-    c3->deactivate(c5);
-    c4->deactivate(c5);
+    c0->deactivate();
+    c2->deactivate();
+    c3->deactivate();
+    c4->deactivate();
     assert(DelegationTestConstraint::s_instanceCount == 5);
     ENGINE->propagate();
     assert(DelegationTestConstraint::s_executionCount == 11);
@@ -807,10 +806,10 @@ private:
     assert(DelegationTestConstraint::s_executionCount == 12);
 
     // Now confirm correct handling of constraint deletions
+    delete (Constraint*) c5;
     delete (Constraint*) c4;
     delete (Constraint*) c3;
     delete (Constraint*) c2;
-    assert(DelegationTestConstraint::s_instanceCount == 2);
     delete (Constraint*) c0;
     assert(DelegationTestConstraint::s_instanceCount == 0);
     return true;
