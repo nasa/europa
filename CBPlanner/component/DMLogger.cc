@@ -124,4 +124,10 @@ namespace Prototype {
     check_error(dec.isValid());
     m_os << "DMLogger: Succeeded in retracting current decision (" << dec->getKey() << ")" << std::endl;   
   }
+  void DMLogger::notifySearchFinished() {  
+    m_os << "DMLogger: Search Finished. Plan Complete " << std::endl;   
+  }
+  void DMLogger::notifyPlannerTimeout() {  
+    m_os << "DMLogger: Timeout. Plan Not Complete " << std::endl;   
+  }
 }

@@ -27,6 +27,8 @@ namespace Prototype{
     void notifyRetractStarted(const DecisionPointId& dec); // current dec
     void notifyRetractFailed(const DecisionPointId& dec);  // current dec
     void notifyRetractSucceeded(const DecisionPointId& dec);  // current dec
+    void notifySearchFinished();
+    void notifyPlannerTimeout();
   private:
     std::ostream& m_os;
   };

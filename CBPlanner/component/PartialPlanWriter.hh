@@ -59,7 +59,7 @@ namespace Prototype {
 			bool havePlanner;
       long long int seqId;
       int numTokens, numConstraints, numVariables, numTransactions;
-      int stepsPerWrite, transactionId, nstep, writeCounter, noWrite, maxChoices;
+      int stepsPerWrite, transactionId, nstep, writeCounter, noFullWrite, writeFinalStep, maxChoices;
       ConstraintEngineId *ceId;
       PlanDatabaseId *pdbId;
 			RulesEngineId *reId;
@@ -90,11 +90,14 @@ namespace Prototype {
       void buildSlaveAndVarSets(std::set<TokenId> &, std::set<ConstrainedVariableId> &, 
                                 const RuleInstanceId &);
       void outputDecision(const DecisionPointId &, std::ofstream &);
+      void outputTransactions(std::ofstream *);
+      void writeStatsAndTransactions(void);
+      void collectStats(void);
       const std::string getUpperBoundStr(IntervalDomain &dom) const;
       const std::string getLowerBoundStr(IntervalDomain &dom) const;
       const std::string getEnumerationStr(EnumeratedDomain &dom) const;
       const std::string getVarInfo(const ConstrainedVariableId &) const;
-			const std::string getChoiceInfo(void) const;
+      const std::string getChoiceInfo(const DecisionPointId &) const;
       const bool isCompatGuard(const ConstrainedVariableId &) const;
 
       /****From PlanDatabaseListener****/
@@ -142,6 +145,9 @@ namespace Prototype {
 			void notifyRetractStarted(const DecisionPointId &dec);
 			void notifyRetractFailed(const DecisionPointId &dec);
 			void notifyRetractSucceeded(const DecisionPointId &dec);
+                        void notifySearchFinished();
+                        void notifyPlannerTimeout();
+
 
       class PPWPlanDatabaseListener;
       class PPWConstraintEngineListener;
@@ -227,7 +233,9 @@ namespace Prototype {
 				void notifyAssignCurrentSucceeded(const DecisionPointId &dec){ppw->notifyAssignCurrentSucceeded(dec);}
 				void notifyRetractStarted(const DecisionPointId &dec){ppw->notifyRetractStarted(dec);}
 				void notifyRetractFailed(const DecisionPointId &dec){ppw->notifyRetractFailed(dec);}
-				void notifyRetractSucceeded(const DecisionPointId &dec){ppw->notifyRetractSucceeded(dec);}				
+				void notifyRetractSucceeded(const DecisionPointId &dec){ppw->notifyRetractSucceeded(dec);}
+                                void notifyPlannerTimeout(){ppw->notifyPlannerTimeout();}
+                                void notifySearchFinished(){ppw->notifySearchFinished();}
 			protected:
 			private:
 				PartialPlanWriter *ppw;
