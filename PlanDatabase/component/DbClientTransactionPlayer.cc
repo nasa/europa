@@ -258,7 +258,7 @@ namespace PLASMA {
       b_mandatory = true;
 
     if (Schema::instance()->isPredicate(type))
-       token = m_client->createToken(type, b_mandatory);
+       token = m_client->createToken(type, !b_mandatory);
     else {
       LabelStr typeStr(type);
       LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
@@ -266,7 +266,7 @@ namespace PLASMA {
       ObjectId object = m_client->getObject(prefix.c_str());
       check_error(object.isValid(), "Failed to find an object named " + prefix.toString());
       std::string newType(object->getType().toString() + Schema::getDelimiter() + suffix.toString());
-      token = m_client->createToken(newType.c_str(), b_mandatory);
+      token = m_client->createToken(newType.c_str(), !b_mandatory);
       m_client->specify(token->getObject(), object);
     }
 
