@@ -15,9 +15,9 @@
 #include <stdlib.h>
 
 SchemaId schema;
-//const char* TX_INIT = "aver-test-model.xml";
-const char* TX_LOG = "TransactionLog.xml";
-const char* AVER_TEST = "modtest.xml";
+//static const char* s_tx_init = "aver-test-model.xml";
+static const char* s_tx_log = "TransactionLog.xml";
+static const char* s_aver_test = "modtest.xml";
 
 bool runTransactions() {
   SamplePlanDatabase db1(schema, false);
@@ -29,13 +29,13 @@ bool runTransactions() {
   DbClientId client = db1.planDatabase->getClient();
   DbClientTransactionPlayer player(client);
   
-  //std::ifstream init(TX_INIT);
+  //std::ifstream init(s_tx_init);
   //player.play(init);
 
-  AverInterp::init(AVER_TEST, db1.planner->getDecisionManager(), db1.constraintEngine, db1.planDatabase,
+  AverInterp::init(s_aver_test, db1.planner->getDecisionManager(), db1.constraintEngine, db1.planDatabase,
                    db1.rulesEngine);
   
-  std::ifstream trans(TX_LOG);
+  std::ifstream trans(s_tx_log);
   player.play(trans);
   EventAggregator::instance()->notifyStep();
   AverInterp::terminate();
