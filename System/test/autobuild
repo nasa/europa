@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.106 2004-11-14 00:22:26 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.107 2004-11-14 00:26:55 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -10,18 +10,24 @@ echo ''
 
 # $multibuild determines whether all PLASMA variants are built at once or
 #   one at a time.  If -m is given, it will be true; otherwise, false.
+coverage=false
 multibuild=false
 if test ! -z "$1"
 then
     case "$1" in
-        -m)
+	-c|--coverage)
+	    coverage=true;
+	    shift
+	    ;;
+        -m|--multibuild)
             multibuild=true
             shift
             ;;
-        -h|-H|'-?')
-            echo "$0"': Usage: '"`basename $0`"' [-hm] [email@address.domain]'
-            echo '    -h: help (print this message and exit)'
-            echo '    -m: multibuild (compile all variants in one run of jam; default off/false)'
+        -h|-H|'-?'|--help|--Help|--HELP)
+            echo "$0"': Usage: '"`basename $0`"' [-chm] [email@address.domain]'
+	    echo '    -c, --coverage: build the COVERAGE variant (which is not fully supported yet)'
+            echo '    -h, -H, --help: help (print this message and exit)'
+            echo '    -m, --multibuild: multibuild (compile all variants in one run of jam; default off/false)'
             echo '    Any other option (with a leading dash: "-") evokes an error.'
             echo '  Any other single argument should be an email address for status messages;'
             echo '    it defaults to "$USER@email.arc.nasa.gov" ("$USER" is currently "'"$USER"'").'
@@ -92,7 +98,7 @@ case "$OS" in
         CVS_HOME=/usr/local
         GCC_ROOTDIR=/usr/local/beta/gcc-3.3.3
         JAM_HOME=/usr/local/beta/bin
-        JAVA_HOME=/usr/local/j2sdk1.4.1
+        JAVA_HOME=/usr/local/j2sdk1.4.2_05
         ;;
 esac
 
@@ -162,7 +168,17 @@ then
 fi
 
 # The (compilation) variants to build and test.
-variants='DEV OPTIMIZED PROFILE COVERAGE'
+variants='DEV OPTIMIZED PROFILE'
+if $coverage
+then
+    if $multibuild
+    then
+	echo "$0"': COVERAGE variant is not supported by multibuild; ignoring -c/--coverage'
+	echo '    (this is one reason that the COVERAGE variant is not fully supported yet)'
+    else
+	variants="$variants"' COVERAGE'
+    fi
+fi
 
 # The different ways of building the libraries.
 libmethods='STATIC NONE SHARED'
