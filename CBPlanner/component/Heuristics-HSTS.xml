@@ -8,16 +8,30 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
 <Defaults>
  <Priority>low</Priority>
  <Compatibility>
-   <MasterList>
-     <PredicateName>Max_ThrustTime</PredicateName>
-     <ValueList/>
-   </MasterList>
+   <Priority>24.5</Priority>
+   <PredicateSpec>
+     <PredicateName>Spacecraft.SEP_Thrust_Timer.Max_ThrustTime</PredicateName>
+     <PredicateParameters/>
+   </PredicateSpec>
+   <Priority>100.25</Priority>
+   <PredicateSpec>
+     <PredicateName>Spacecraft.SEP_Thrust_Timer.Min_ThrustTime</PredicateName>
+     <PredicateParameters/>
+   </PredicateSpec>
  </Compatibility>
  <Token>
    <Priority>10000.0</Priority>
    <DecisionPreference>
-     <State>merge</State>
-     <Order>early</Order>
+     <StateOrder>
+        <State>merge</State>
+        <Order>early</Order>
+     </StateOrder>
+     <StateOrder>
+        <State>activate</State>
+        <Order>early</Order>
+     </StateOrder>
+     <State>defer</State>
+     <State>reject</State>
    </DecisionPreference>
  </Token>
  <ConstrainedVariable>
@@ -32,11 +46,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <Preference>
   <ValueOrder>descending</ValueOrder>
   </Preference>
-  <Variable>
+  <VariableSpec>
     <Index>2</Index>
-  </Variable>
-  <PredicateName>Rover.Arm.Extend</PredicateName>
-  <ValueList/>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Spacecraft.Arm.Extend</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
 </ConstrainedVariable>
 
 <ConstrainedVariable>
@@ -44,14 +60,16 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <Preference>
   <Generator>MyCVGenerator</Generator>
   </Preference>
-  <Variable>
+  <VariableSpec>
     <Name>WillNavNext</Name>
-  </Variable>
-  <PredicateName>Rover.Navigate</PredicateName>
-  <ValueList>
-     <Value/>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Spacecraft.Navigate</PredicateName>
+  <PredicateParameters>
+     <Index>2</Index>
      <Value>Target524</Value>
-  </ValueList>
+  </PredicateParameters>
+  </PredicateSpec>
 </ConstrainedVariable>
 
 <ConstrainedVariable>
@@ -63,25 +81,77 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <DomainValue>OBS_INACTIVE_MEETS_INACTIVE_INACTIVE</DomainValue>
   </DomainOrder>
   </Preference>
-  <Variable>
+  <VariableSpec>
     <Index>10</Index>
-  </Variable>
-  <PredicateName>Obs_Window_Inactive</PredicateName>
-  <ValueList>
-     <Value/>
-     <Value/>
-     <Value/>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Spacecraft.Instrument.Obs_Window_Inactive</PredicateName>
+  <PredicateParameters>
+     <Index>4</Index>
      <Value>STANDBY</Value>
-  </ValueList>
+  </PredicateParameters>
+  </PredicateSpec>
 </ConstrainedVariable>
 </VariableSpecification>
 
-<TokenSpecification/>
+<TokenSpecification>
+<Token>
+  <Priority>443.7</Priority>
+  <PredicateSpec>
+  <PredicateName>Spacecraft.Thrust_System.Thrust_Fwd</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
+  <Master/>
+  <DecisionPreference/>
+</Token>
+<Token>
+  <Priority>200.4</Priority>
+  <PredicateSpec>
+  <PredicateName>Spacecraft.Thrust_System.Thrust_Left</PredicateName>
+  <PredicateParameters>
+     <Index>2</Index>
+     <Value>NO_RIGHT</Value>
+  </PredicateParameters>
+  </PredicateSpec>
+  <Master/>
+  <DecisionPreference>
+    <StateOrder>
+       <State>activate</State>
+       <Order>early</Order>
+    </StateOrder>
+  </DecisionPreference>
+</Token>
+<Token>
+  <Priority>10000.0</Priority>
+  <PredicateSpec>
+  <PredicateName>Thrust_Fwd</PredicateName>
+  <PredicateParameters>
+     <Index>2</Index>
+     <Value>24.5</Value>
+     <Index>4</Index>
+     <Value>RES</Value>
+  </PredicateParameters>
+  </PredicateSpec>
+  <Master>
+    <Relation>after</Relation>
+    <PredicateSpec>
+      <PredicateName>Max_Thrust_Time</PredicateName>
+      <PredicateParameters/>
+    </PredicateSpec>
+  </Master>
+  <DecisionPreference>
+    <StateOrder>
+       <State>merge</State>
+       <Order>early</Order>
+    </StateOrder>
+    <StateOrder>
+       <State>activate</State>
+       <Order>minFlexible</Order>
+    </StateOrder>
+    <State>defer</State>
+    <State>reject</State>
+  </DecisionPreference>
+</Token>
+</TokenSpecification>
 
 </Heuristics-HSTS>
-
-<!-- possible values: reject,merge,defer,activate -->
-<!-- when merge or activate is specified, it is possible to specify
-ActiveToken or SuccessorToken preference criteria with possible values: 
-close,far,early,late,maxFlexible,minFlexible,leastSpecifiedToken,mostSpecifiedToken,leastSpecifiedObject,mostSpecifiedObject
-or a <Generator></Generator> tag --> 

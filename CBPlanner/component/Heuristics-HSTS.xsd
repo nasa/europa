@@ -2,6 +2,87 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
 targetNamespace="HSTS"
 xmlns="HSTS" elementFormDefault="qualified">
+
+<xs:simpleType name="ValueOrderType">
+  <xs:restriction base="xs:token">
+    <xs:enumeration value="ascending"/>
+    <xs:enumeration value="descending"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="VariableType">
+  <xs:choice>
+      <xs:element name="Index" type="xs:integer"/>
+      <xs:element name="Name" type="xs:string"/> 
+  </xs:choice>
+</xs:complexType>
+
+<xs:simpleType name="StateType">
+  <xs:restriction base="xs:token">
+    <xs:enumeration value="activate"/>
+    <xs:enumeration value="merge"/>
+    <xs:enumeration value="defer"/>
+    <xs:enumeration value="reject"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="OrderType">
+  <xs:restriction base="xs:token">
+     <xs:enumeration value="close"/>
+     <xs:enumeration value="far"/>
+     <xs:enumeration value="early"/>
+     <xs:enumeration value="late"/>
+     <xs:enumeration value="maxFlexible"/>
+     <xs:enumeration value="minFlexible"/>
+     <xs:enumeration value="leastSpecified"/>
+     <xs:enumeration value="mostSpecified"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="StateOrderType">
+    <xs:all>
+        <xs:element name="State" type="StateType"/>
+        <xs:element name="Order" type="OrderType"/>
+    </xs:all>
+</xs:complexType>
+
+<xs:complexType name="TokenDecisionType">
+    <xs:choice minOccurs="0" maxOccurs="4">
+        <xs:element name="StateOrder" type="StateOrderType"/>
+        <xs:element name="State" type="StateType"/>
+    </xs:choice>
+</xs:complexType>
+
+<xs:complexType name="PredicateParameterType">
+   <xs:sequence minOccurs="0" maxOccurs="unbounded">
+       <xs:element name="Index" type="xs:integer"/>
+       <xs:element name="Value" type="xs:string"/>
+   </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PredicateType">
+  <xs:sequence>
+     <xs:element name="PredicateName" type="xs:string"/>
+     <xs:element name="PredicateParameters" type="PredicateParameterType"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:simpleType name="RelationType">
+  <xs:restriction base="xs:token">
+    <xs:enumeration value="before"/>
+    <xs:enumeration value="after"/>
+    <xs:enumeration value="any"/>
+    <xs:enumeration value="other"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="MasterType">
+  <xs:all minOccurs="0">
+     <xs:element name="Relation" type="RelationType"/>
+     <xs:element name="PredicateSpec" type="PredicateType"/>
+  </xs:all>
+</xs:complexType>
+
 <xs:element name="Heuristics-HSTS">
 <xs:complexType> 
 <xs:all>
@@ -12,36 +93,17 @@ xmlns="HSTS" elementFormDefault="qualified">
       <xs:element name="Priority" type="xs:string"/>
       <xs:element name="Compatibility">
           <xs:complexType>
-	  <xs:all>
-	    <xs:element name="MasterList">
-	      <xs:complexType>
-              <xs:sequence>
-                  <xs:element name="PredicateName" type="xs:string"/>
-                  <xs:element name="ValueList">
-		      <xs:complexType>
-		      <xs:sequence minOccurs="0" maxOccurs="unbounded">
-                        <xs:element name="Value" type="xs:string"/>
-		      </xs:sequence>
-                      </xs:complexType>
-                  </xs:element>
-              </xs:sequence>
-	      </xs:complexType>
-            </xs:element>
-	    </xs:all>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Priority" type="xs:decimal"/>
+            <xs:element name="PredicateSpec" type="PredicateType"/>
+          </xs:sequence>
           </xs:complexType>
       </xs:element>
       <xs:element name="Token">
           <xs:complexType>
 	  <xs:all>
 	   <xs:element name="Priority" type="xs:decimal" default="100000.0"/>
-           <xs:element name="DecisionPreference">
-               <xs:complexType>
-	         <xs:all>
-                 <xs:element name="State" type="xs:string"/>
-                 <xs:element name="Order" type="xs:string"/>
-		 </xs:all>
-               </xs:complexType>
-           </xs:element>
+           <xs:element name="DecisionPreference" type="TokenDecisionType"/>
  	  </xs:all>
           </xs:complexType>
       </xs:element>
@@ -49,7 +111,7 @@ xmlns="HSTS" elementFormDefault="qualified">
           <xs:complexType>
 	    <xs:all>
 	    <xs:element name="Priority" type="xs:decimal" default="100000.0"/>
-	    <xs:element name="ValueOrder" type="xs:string"/>
+	    <xs:element name="ValueOrder" type="ValueOrderType"/>
 	    </xs:all>
           </xs:complexType>
       </xs:element>
@@ -67,7 +129,7 @@ xmlns="HSTS" elementFormDefault="qualified">
       <xs:element name="Preference">
       <xs:complexType>
       <xs:choice>
-          <xs:element name="ValueOrder" type="xs:string"/>
+          <xs:element name="ValueOrder" type="ValueOrderType"/>
           <xs:element name="Generator" type="xs:string"/>
           <xs:element name="DomainOrder">
             <xs:complexType>
@@ -79,22 +141,8 @@ xmlns="HSTS" elementFormDefault="qualified">
       </xs:choice>
       </xs:complexType>
       </xs:element>
-      <xs:element name="Variable">
-      <xs:complexType>
-      <xs:choice>
-          <xs:element name="Index" type="xs:integer"/>
-          <xs:element name="Name" type="xs:string"/> 
-      </xs:choice>
-      </xs:complexType>
-      </xs:element>
-      <xs:element name="PredicateName" type="xs:string"/>  
-      <xs:element name="ValueList">
-          <xs:complexType>
-            <xs:sequence minOccurs="0" maxOccurs="unbounded">
-            <xs:element name="Value" type="xs:string"/>
-            </xs:sequence>
-          </xs:complexType>
-      </xs:element>
+      <xs:element name="VariableSpec" type="VariableType"/>
+      <xs:element name="PredicateSpec" type="PredicateType"/>
     </xs:sequence>
     </xs:complexType>
 </xs:element>
@@ -106,7 +154,14 @@ xmlns="HSTS" elementFormDefault="qualified">
 <xs:complexType>
 <xs:sequence minOccurs="0" maxOccurs="unbounded">
 <xs:element name="Token">
-<!-- predicate (pred,vars), subgoal relation, master (pred, vars), state, order -->
+<xs:complexType>
+<xs:all>
+<xs:element name="Priority" type="xs:decimal"/>
+<xs:element name="PredicateSpec" type="PredicateType"/>
+<xs:element name="Master" type="MasterType"/>
+<xs:element name="DecisionPreference" type="TokenDecisionType"/>
+</xs:all>
+</xs:complexType>
 </xs:element>
 </xs:sequence>
 </xs:complexType>
