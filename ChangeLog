@@ -1,3 +1,7 @@
+M_20:
+1. Main focus has been a re0implementation of internals of resources to simplify it.
+2. GNATS addressed in this milestone: 2477, 2472, 2471, 2470, 2460, 2458, 2457, 2431, 2409, 2480
+	
 M_19:
 1. Fixed some bugs in the planner in order to get new test case working. See
 System/test/resource-backtrack.nddl
