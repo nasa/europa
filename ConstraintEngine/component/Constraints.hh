@@ -5,6 +5,7 @@
 #include "Constraint.hh"
 #include "Variable.hh"
 #include "IntervalDomain.hh"
+#include "IntervalIntDomain.hh"
 
 namespace Prototype {
 
@@ -381,8 +382,36 @@ namespace Prototype {
     inline void handleExecute() { }
 
   private:
-    Variable<IntervalDomain> m_nonZeros;
+    Variable<IntervalIntDomain> m_nonZeros;
     LessThanEqualConstraint m_lessThanEqualConstraint;
+    ConstraintId m_countNonZerosConstraint;
+  };
+
+  /**
+   * @class OrConstraint
+   * @brief At least one of the variables must be true.
+   * @note Supports numeric domains for all the variables with the
+   * usual C/C++ convention of false being zero and true being
+   * any non-zero value.
+   */
+  class OrConstraint : public Constraint {
+  public:
+    OrConstraint(const LabelStr& name,
+                 const LabelStr& propagatorName,
+                 const ConstraintEngineId& constraintEngine,
+                 const std::vector<ConstrainedVariableId>& variables);
+
+    ~OrConstraint() {
+      delete (CountNonZerosConstraint*) m_countNonZerosConstraint;
+      delete (SubsetOfConstraint*) m_subsetConstraint;
+    }
+
+    // All the work is done by the member constraints.
+    inline void handleExecute() { }
+
+  private:
+    Variable<IntervalIntDomain> m_nonZeros;
+    ConstraintId m_subsetConstraint;
     ConstraintId m_countNonZerosConstraint;
   };
 }
