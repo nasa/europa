@@ -1,4 +1,4 @@
-$Id: HELLOWORLD,v 1.1 2004-12-07 00:13:20 pdaley Exp $
+$Id: HELLOWORLD,v 1.2 2005-01-24 22:29:57 tania Exp $
 
 Note: Please first see the file README in this directory for details
       on how to checkout, build, and test Europa2 before attempting
@@ -45,13 +45,13 @@ B. Visualizing a plan in PlanWorks
    to another location as long as PPW_CONFIG is updated.
 
    If you created the SampleProject in section A above, the default
-   configuration file is found at:
+   configuration file is called: 
 
-   /home/me/SampleProject/ppw-config
+   PlanWorks.cfg
 
    Otherwise, a sample PPW configuration file can be found at:
 
-   /home/me/PLASMA/CBPlanner/component/sample-ppw-config
+   /home/me/PLASMA/CBPlanner/component/PlanWorks.cfg
    Where:
      /home/me is the full path to the PLASMA directory.
 

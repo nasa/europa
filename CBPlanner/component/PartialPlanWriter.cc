@@ -349,7 +349,7 @@ namespace EUROPA {
         FatalErrno();
       }
 
-      //std::cerr << "PPW DEBUG:constructing:configFile; configBuf = " << configBuf << std::endl;
+      std::cerr << "PPW DEBUG:constructing:configFile; configBuf = " << configBuf << std::endl;
       std::ifstream configFile(configBuf);
       if (!configFile) {
         std::cerr << "Failed to open config file " << configBuf << std::endl;
@@ -358,6 +358,8 @@ namespace EUROPA {
       std::string buf;
 
       parseConfigFile(configFile);
+
+      std::cerr << " PPW noFullWrite = " << noFullWrite << std::endl;
 
       /* if user clearly wants to write only the final step,
          stepsPerWrite must be 1 for to enable writing
@@ -570,6 +572,9 @@ namespace EUROPA {
        * This is also called in WriteStatsAndTransactions() to cover
        * cases where the first step is not written.
        */
+
+      std::cerr << " PartialPlanWriter::write() called " << std::endl;
+
       if(!destAlreadyInitialized) {
         initOutputDestination();
         destAlreadyInitialized = true;
@@ -1940,15 +1945,14 @@ namespace EUROPA {
       char buf[PATH_MAX];
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
-        //std::cerr << "DEBUG:reading buf: " << buf << std::endl;
+        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
         if(line.find(AUTO_WRITE) != std::string::npos) {
           std::string autoWrite = line.substr(line.find("=")+1);
+	  std::cerr << " autoWrite " << autoWrite << std::endl;
           noFullWrite = (autoWrite.find("1") != std::string::npos ? 0 : 1);
-	  if (noFullWrite)
-	    allocateListeners();
         }
         else if(line.find(STEPS_PER_WRITE) != std::string::npos) {
           std::string spw = line.substr(line.find("=")+1);
@@ -1957,6 +1961,8 @@ namespace EUROPA {
             FatalError("stepsPerWrite < 0", "StepsPerWrite must be a non-negative value");
           if(stepsPerWrite == LONG_MAX || stepsPerWrite == LONG_MIN)
             FatalErrno();
+	  if (stepsPerWrite != 0)
+	    allocateListeners();
         }
         else if(line.find(WRITE_FINAL_STEP) != std::string::npos) {
           std::string wfs = line.substr(line.find("=")+1);
