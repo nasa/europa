@@ -62,7 +62,7 @@
  *
  * @section results Performance Results
  * A number of performance tests have been conducted. There are parallel versions of each test in DomainTest.cc and EuropaDomainTest.cc,
- * reflecting the new constraint engine paradigm and the exiting Europa code respoectively. The tests are ass follows:
+ * reflecting the new constraint engine paradigm and the exiting Europa code respoectively. The tests are as follows:
  * @li testIntersection - compares the cost for domain creation and intersection for numeric intreval domains.
  * @li testEquate - compares the cost of domain creation, and mutual intersection of 2 domains for LabelSet domains.
  * @li testLabelSetPerformance - compares the cost of creation of 10 variables, creation of 9 equality constraints placing all variables in an
