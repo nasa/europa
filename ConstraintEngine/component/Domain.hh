@@ -1,7 +1,9 @@
 #ifndef _H_Domain
 #define _H_Domain
 
-#include "../ConstraintEngine/EnumeratedDomain.hh"
+#include "EnumeratedDomain.hh"
+#include "LabelStr.hh"
+#include <typeinfo>
 
 /**
  * @file Domain.hh
@@ -49,6 +51,18 @@ namespace Prototype {
     ~Domain();
 
     /**
+     * @brief Accessor for the type of Domain.
+     * @return The type of the domain.
+     */
+    virtual const DomainType& getType() const;
+
+    /**
+     * @brief Accessor for the name of the type of Domain.
+     * @return The type of the domain.
+     */
+    virtual const LabelStr& getTypeName() const;
+
+    /**
      * @brief Fill the given list with the contents of the set.
      * @param results The list to be filled. Must be empty.
      * @see EnumeratedDomain::getValues()
@@ -77,7 +91,7 @@ namespace Prototype {
   };
 
   template <class ELEMENT_TYPE>
-  std::list<double> convert(const std::list<ELEMENT_TYPE>& source){
+  std::list<double> convert(const std::list<ELEMENT_TYPE>& source) {
     std::list<double> target;
     typedef typename std::list<ELEMENT_TYPE>::const_iterator ELEMENT_TYPE_ITERATOR;
     for (ELEMENT_TYPE_ITERATOR it = source.begin(); it != source.end(); ++it)
@@ -86,29 +100,47 @@ namespace Prototype {
   }
 
   template <class ELEMENT_TYPE>
-  Domain<ELEMENT_TYPE>::Domain(const std::list<ELEMENT_TYPE>& labels, bool closed, const DomainListenerId& listener)
-    : EnumeratedDomain(convert(labels), closed, listener, false) { }
+  Domain<ELEMENT_TYPE>::Domain(const std::list<ELEMENT_TYPE>& labels, bool closed,
+                               const DomainListenerId& listener)
+    : EnumeratedDomain(convert(labels), closed, listener, false) {
+  }
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain(const ELEMENT_TYPE& value, const DomainListenerId& listener)
-    : EnumeratedDomain(value, listener, false) { }
+    : EnumeratedDomain(value, listener, false) {
+  }
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain(const Domain& org)
-    : EnumeratedDomain(static_cast<const EnumeratedDomain&>(org)) { }
+    : EnumeratedDomain(static_cast<const EnumeratedDomain&>(org)) {
+  }
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain()
-    : EnumeratedDomain(false) { }
+    : EnumeratedDomain(false) {
+  }
 
   template <class ELEMENT_TYPE>
-  Domain<ELEMENT_TYPE>::~Domain() { }
+  Domain<ELEMENT_TYPE>::~Domain() {
+  }
+
+  template <class ELEMENT_TYPE>
+  const AbstractDomain::DomainType& Domain<ELEMENT_TYPE>::getType() const {
+    static const AbstractDomain::DomainType s_type = AbstractDomain::USER_DEFINED;
+    return(s_type);
+  }
+
+  template <class ELEMENT_TYPE>
+  const LabelStr& Domain<ELEMENT_TYPE>::getTypeName() const {
+    static const LabelStr sl_typeName = LabelStr(typeid(Domain<ELEMENT_TYPE>).name());
+    return(sl_typeName);
+  }
 
   template <class ELEMENT_TYPE>
   void Domain<ELEMENT_TYPE>::getValues(std::list<ELEMENT_TYPE>& results) const {
     check_error(results.empty());
     check_error(isFinite());
-    for(std::set<double>::iterator it = m_values.begin(); it != m_values.end(); ++it) {
+    for (std::set<double>::iterator it = m_values.begin(); it != m_values.end(); ++it) {
       double value = *it;;
       results.push_back(ELEMENT_TYPE(value));
     }
@@ -142,7 +174,6 @@ namespace Prototype {
       return(value - y < EPSILON);
   }
 
-  class LabelStr;
   typedef Domain<LabelStr> LabelSet;
 }
 
