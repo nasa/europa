@@ -35,7 +35,7 @@
 
 class TestRule: public Rule {
 public:
-  TestRule(const RulesEngineId& rulesEngine, const LabelStr& name): Rule(rulesEngine, name){
+  TestRule(const LabelStr& name): Rule(name){
     new TestRule(getId());
   }
 
@@ -44,16 +44,16 @@ public:
    * Initialize the context with some variables form the token and add a local variable for the rule too. This
    * will test cleanup.
    */
-  void initialize(const TokenId& token, std::vector<ConstrainedVariableId>& scope) const {
-    assert(scope.empty());
-
-    scope.push_back(token->getObject());
-    scope.push_back(token->getRejectability());
+  void initialize(const RuleContextId& context, std::vector<ConstrainedVariableId>& guards) const {
+    assert(context->getGuards().empty());
+    assert(guards.empty());
+    guards.push_back(context->getToken()->getObject());
+    guards.push_back(context->getToken()->getRejectability());
     
     Europa::Id< Variable<IntervalIntDomain> >  localVariable = 
-      (new Variable<IntervalIntDomain>(getRulesEngine()->getPlanDatabase()->getConstraintEngine(), IntervalIntDomain(1, 1)))->getId();
+      (new Variable<IntervalIntDomain>(context->getPlanDatabase()->getConstraintEngine(), IntervalIntDomain(1, 1)))->getId();
     localVariable->specify(1);
-    scope.push_back(localVariable);
+    guards.push_back(localVariable);
   }
 
   bool test(int index, const ConstrainedVariableId& var) const {
@@ -80,7 +80,7 @@ public:
       constrainedVars.push_back(context->getToken()->getEnd());
       constrainedVars.push_back(slave->getStart());
       ConstraintId meets = ConstraintLibrary::createConstraint(LabelStr("Equal"),
-							       getRulesEngine()->getPlanDatabase()->getConstraintEngine(),
+							       context->getPlanDatabase()->getConstraintEngine(),
 							       constrainedVars);
       newConstraints.push_back(meets);
     }
@@ -91,7 +91,7 @@ public:
       constrainedVars.push_back(slave->getDuration());
       constrainedVars.push_back(context->getGuards().back());
       ConstraintId restrictDuration = ConstraintLibrary::createConstraint(LabelStr("Equal"),
-									  getRulesEngine()->getPlanDatabase()->getConstraintEngine(),
+									  context->getPlanDatabase()->getConstraintEngine(),
 									  constrainedVars);
       newConstraints.push_back(restrictDuration);
     }
@@ -901,16 +901,14 @@ public:
 private:
   static bool testBasicAllocation(){
     DEFAULT_SETUP(ce, db, schema, false);
-    RuleId parent = (new TestRule(re.getId(), LabelStr("AnyType::AnyPredicate")))->getId();
-    new TestRule(parent);
-
+    TestRule r(LabelStr("Type::Predicate"));
     return true;
   }
 
   static bool testActivation(){
     DEFAULT_SETUP(ce, db, schema, false);
     db.close();
-    new TestRule(re.getId(), LabelStr("Type::Predicate"));
+    TestRule r(LabelStr("Type::Predicate"));
 
     IntervalToken tokenA(db.getId(), 
 		     LabelStr("Type::Predicate"), 
@@ -919,7 +917,7 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    assert(re.getRules().size() == 1);
+    assert(Rule::getRules().size() == 1);
     assert(re.getRuleInstances().empty());
 
     int num_constraints = ce.getConstraints().size();
@@ -943,7 +941,7 @@ private:
   static bool testRuleFiringAndCleanup(){
     DEFAULT_SETUP(ce, db, schema, false);
     db.close();
-    new TestRule(re.getId(), LabelStr("Type::Predicate"));
+    TestRule r(LabelStr("Type::Predicate"));
 
     IntervalToken tokenA(db.getId(), 
 		     LabelStr("Type::Predicate"), 
