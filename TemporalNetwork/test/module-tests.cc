@@ -585,6 +585,7 @@ public:
   static bool test() {
     runTest(testBasicAllocation);
     runTest(testTemporalPropagation);
+    runTest(testTemporalNogood);
     return true;
   }
 private:
@@ -663,6 +664,58 @@ private:
     delete (ConstrainedVariable*) v6;
 
     DEFAULT_TEARDOWN_CE_ONLY();
+    return true;
+  }
+
+  static bool testTemporalNogood() {
+    ConstraintEngine ce;
+    TemporalPropagator*
+      tp = new TemporalPropagator(LabelStr("Temporal"), ce.getId());
+
+    IntervalIntDomain domStart = IntervalIntDomain(1,10);
+    IntervalIntDomain domEnd = IntervalIntDomain(0,1);
+    IntervalIntDomain domDur = IntervalIntDomain(1,1);
+
+    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain> (ce.getId(), domStart, true, "v1"))->getId();
+    ConstrainedVariableId v2 = (new Variable<IntervalIntDomain> (ce.getId(), domDur, true, "v2"))->getId();
+    ConstrainedVariableId v3 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, true, "v3"))->getId();
+
+    std::vector<ConstrainedVariableId> temp;
+    temp.push_back(v1);
+    temp.push_back(v2);
+    temp.push_back(v3);
+    ConstraintId constraint = 
+      ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"),
+                                          ce.getId(), temp);
+    bool consistent = ce.propagate();
+    std::vector<ConstrainedVariableId> fromvars;
+    std::vector<ConstrainedVariableId> tovars;
+    std::vector<long> lengths;
+    ConstrainedVariableId origin;
+    tp->getTemporalNogood(origin,fromvars,tovars,lengths);
+
+    assert(!consistent);
+
+    assert(fromvars.size()==3);
+    assert(tovars.size()==3);
+    assert(lengths.size()==3);
+
+    assert(fromvars.at(0)==origin);
+    assert(tovars.at(0)==v3);
+    assert(lengths.at(0)==1);
+
+    assert(fromvars.at(1)==v1);
+    assert(tovars.at(1)==origin);
+    assert(lengths.at(1)==-1);
+
+    assert(fromvars.at(2)==v3);
+    assert(tovars.at(2)==v1);
+    assert(lengths.at(2)==-1);
+
+    delete (Constraint*) constraint;
+    delete (ConstrainedVariable*) v1;
+    delete (ConstrainedVariable*) v2;
+    delete (ConstrainedVariable*) v3;
     return true;
   }
 };
