@@ -1440,7 +1440,11 @@ namespace PLASMA {
     tok4.addParameter(allLocs, LabelStr("to"));
     tok4.close();
 
-    assert(tok4.getParameters().size() == 2);
+    IntervalToken tok5(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,200), IntervalIntDomain(1,300), "nav1", false);
+    tok5.addParameter(allLocs, LabelStr("location"));
+    tok5.close();
+    ConstrainedVariableId vatloc = tok5.getVariable("location");
+    vatloc->specify(db.getObject("Loc3"));
 
     AtSubgoalRule r("Navigator.At");
 
