@@ -114,16 +114,15 @@ public:
   }
   ~PlanSystem() {
     planDatabase->purge();
-    delete &*flawQuery;
-    delete &*filterCriteria;
-    delete &*dynamicInfiniteRealCondition;
-    delete &*temporalVariableCondition;
-    delete &*horizonCondition;
-    delete &*horizon;
-    delete &*flawSource;
-    delete &*rulesEngine;
-    delete &*planDatabase;
-    delete &*constraintEngine;
+    delete (FlawQuery*)flawQuery;
+    delete (FilterCriteria*)filterCriteria;
+    delete (Condition*)dynamicInfiniteRealCondition;
+    delete (Condition*)temporalVariableCondition;
+    delete (Condition*)horizonCondition;
+    delete (Horizon*)horizon;
+    delete (FlawSource*)flawSource;
+    delete (RulesEngine*)rulesEngine;
+    delete (PlanDatabase*)planDatabase;
   }
 };
 
