@@ -57,19 +57,38 @@ namespace Prototype {
 
     void handleExecute();
 
+    const AbstractDomain& getDomain() const;
+
     bool canIgnore(const ConstrainedVariableId& variable,
 		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
     int executionCount() const;
 
-    const AbstractDomain& getDomain() const;
-
   private:
     bool m_isDirty;
     AbstractDomain& m_currentDomain;
     AbstractDomain* m_superSetDomain;
     int m_executionCount;
+  };
+
+  class LockConstraint : public UnaryConstraint {
+  public:
+    LockConstraint(const LabelStr& name,
+		   const LabelStr& propagatorName,
+		   const ConstraintEngineId& constraintEngine,
+		   const ConstrainedVariableId& variable,
+		   const AbstractDomain& lockDomain);
+
+    ~LockConstraint();
+
+    void handleExecute();
+
+    const AbstractDomain& getDomain() const;
+
+  private:
+    AbstractDomain& m_currentDomain;
+    AbstractDomain* m_lockDomain;
   };
 
   class LessThanEqualConstraint : public Constraint {
@@ -623,5 +642,8 @@ namespace Prototype {
   private:
     ConstraintId m_otherConstraint;
   };
+
+
+  extern void initConstraintLibrary();
 }
 #endif

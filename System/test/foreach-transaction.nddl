@@ -1,0 +1,40 @@
+#include "../../NDDL/test/compiler/foreach.nddl"
+#include "NddlWorld.nddl"
+
+// Allocate a world to populate the planner context
+NddlWorld world = new NddlWorld(0, 100, 500);
+
+// Allocate Locations
+Location Hill = new Location("Hill");
+Location Rock = new Location("Rock");
+Location Lander = new Location("Lander");
+
+// Alocate paths
+Path p1 = new Path(Rock, Hill);
+Path p2 = new Path(Lander, Hill);
+Path p3 = new Path(Hill, Lander);
+
+// Allocate targets
+Target t1 = new Target();
+Target t2 = new Target();
+Target t3 = new Target();
+Target t4 = new Target();
+Target t5 = new Target();
+Target t6 = new Target();
+
+// Define which targets are trackable from which paths
+Trackable tr1 = new Trackable(p1, t1);
+Trackable tr2 = new Trackable(p1, t2);
+Trackable tr3 = new Trackable(p2, t3);
+Trackable tr4 = new Trackable(p2, t4);
+Trackable tr5 = new Trackable(p3, t5);
+Trackable tr6 = new Trackable(p3, t6);
+
+Rover rover = new Rover();
+
+// Alocate goal
+any(Rover.Navigate nav);
+eq(nav.from, Lander);
+eq(nav.to, Hill);
+eq(nav.start, 0);
+eq(nav.end, 100);

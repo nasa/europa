@@ -8,7 +8,12 @@
 
 #include "../Plasma.nddl"
 
-enum Location {Hill, Rock, Lander};
+class Location {
+ string description;
+ Location(string _description){
+  description = _description;
+ }
+}
 
 class Path {
  Location from;

@@ -359,6 +359,7 @@ public:
     runTest(testCondAllDiffConstraint);
     runTest(testConstraintDeletion);
     runTest(testArbitraryConstraints);
+    runTest(testLockConstraint);
     return(true);
   }
 
@@ -2197,6 +2198,44 @@ private:
       throw Prototype::generalUnknownError;
     }
     return(true);
+  }
+
+  static bool testLockConstraint() {
+    LabelSet lockDomain;
+    lockDomain.insert(Prototype::LabelStr("A"));
+    lockDomain.insert(Prototype::LabelStr("B"));
+    lockDomain.insert(Prototype::LabelStr("C"));
+    lockDomain.insert(Prototype::LabelStr("D"));
+    lockDomain.close();
+
+    LabelSet baseDomain;
+    baseDomain.insert(Prototype::LabelStr("A"));
+    baseDomain.insert(Prototype::LabelStr("B"));
+    baseDomain.insert(Prototype::LabelStr("C"));
+    baseDomain.insert(Prototype::LabelStr("D"));
+    baseDomain.insert(Prototype::LabelStr("E"));
+    baseDomain.close();
+
+    // Set up variable with base domain - will exceed lock domain
+    Variable<LabelSet> v0(ENGINE, baseDomain);
+    assert(v0.getDerivedDomain() != lockDomain);
+
+    // Post constraint, and ensure it is propagated to equality with lock domain
+    LockConstraint c0(LabelStr("Lock"), LabelStr("Default"), ENGINE, v0.getId(), lockDomain);
+    assert(ENGINE->propagate());
+    assert(v0.getDerivedDomain() == lockDomain);
+
+    // Now specify to a restricted value, and ensure an inconsistency
+    v0.specify(Prototype::LabelStr("C"));
+    assert(!ENGINE->propagate());
+
+
+    // Reset the variable and ensure we can repropagate it correctly
+    v0.reset();
+    assert(ENGINE->propagate());
+    assert(v0.getDerivedDomain() == lockDomain);
+
+    return true;
   }
 
 }; // class ConstraintTest

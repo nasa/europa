@@ -66,6 +66,4 @@ private:
     std::cout << #test << " FAILED." << std::endl; \
   }
 
-extern void initConstraintLibrary();
-
 #endif

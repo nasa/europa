@@ -20,7 +20,7 @@ LocalDepends run-nddl-planner-tests : run-k9-initial ;
 
 for model in
 	Rover-transaction.nddl basic-model-transaction.nddl k9.backtrack.moderate-transaction.nddl
-	k9-transaction.nddl path-filter-transaction.nddl
+	k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : runTransactionTest.cc : $(model) : System ;

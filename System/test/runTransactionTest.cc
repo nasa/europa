@@ -10,6 +10,7 @@
 #include "DecisionPoint.hh"
 
 #include "PlanDatabaseWriter.hh"
+#include "Constraints.hh"
 
 #include <fstream>
 
@@ -107,6 +108,7 @@ bool copyFromFile(){
 }
 
 int main(int argc, const char ** argv){
+
   if (argc < 2) {
     std::cerr << "Must provide initial transactions file." << std::endl;
     return -1;
