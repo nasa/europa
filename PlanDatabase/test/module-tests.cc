@@ -9,6 +9,7 @@
 #include "DbLogger.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
+#include "DbClientTransactionLog.hh"
 
 #include "DbClient.hh"
 #include "ObjectFactory.hh"
@@ -1484,12 +1485,10 @@ private:
   }
 
   static bool testBasicAllocation(){
-    ConstraintEngine ce;
-    new DefaultPropagator(LabelStr("Default"), ce.getId());
-    Schema schema;
-    PlanDatabase db(ce.getId(), schema.getId());
+    DEFAULT_SETUP(ce, db, schema, false);
 
     DbClientId client = DbClient::createInstance(db.getId());
+    DbClientTransactionLog* txLog = new DbClientTransactionLog(client);
 
     int key = client->createObject(LabelStr("Foo"), LabelStr("foo1"));
     FooId foo1 = client->getEntity(key);
@@ -1508,12 +1507,23 @@ private:
     TokenId token = client->getEntity(key);
     assert(token.isValid());
 
+    // Constrain the token duration
+    client->createConstraint(LabelStr("SubsetOf"), token->getDuration()->getKey(), IntervalIntDomain(100));
+    std::vector<int> scope;
+    scope.push_back(token->getStart()->getKey());
+    scope.push_back(token->getDuration()->getKey());
+    client->createConstraint(LabelStr("eq"), scope);
+
+    delete txLog;
     delete (DbClient*) client;
+
+    DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testPathBasedRetrieval(){
     DEFAULT_SETUP(ce, db, schema, true);
+    std::vector<int> tokenKeys; // Hold key for all tokens created as root tokens
 
     IntervalToken t0(db.getId(), 
 		     LabelStr("Predicate"), 
@@ -1522,6 +1532,7 @@ private:
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(1, 1));
     t0.activate();
+    tokenKeys.push_back(t0.getKey());
 
     TokenId t1 = (new IntervalToken(db.getId(), 
 				    LabelStr("Predicate"), 
@@ -1530,6 +1541,7 @@ private:
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
     t1->activate();
+    tokenKeys.push_back(t0.getKey());
 
     TokenId t0_0 = (new IntervalToken(t0.getId(), 
 				    LabelStr("Predicate"), 
@@ -1571,40 +1583,36 @@ private:
 
     // Test paths
     std::vector<int> path;
-    path.push_back(t0.getKey());
+    path.push_back(0); // Start with the index of the token key in the path
 
-    DbClientId client = DbClient::createInstance(db.getId());
 
     // Base case with just the root
-    assert(client->getTokenByPath(path) == t0.getId());
-    assert(client->getPathByToken(t0.getId()).size() == 1);
+    assert(DbClientTransactionLog::getTokenByPath(path, tokenKeys) == t0.getId());
+    assert(DbClientTransactionLog::getPathByToken(t0.getId(), tokenKeys).size() == 1);
 
     // Now test a more convoluted path
     path.push_back(1);
     path.push_back(1);
-    assert(client->getTokenByPath(path) == t0_1_1);
+    assert(DbClientTransactionLog::getTokenByPath(path, tokenKeys) == t0_1_1);
 
     path.clear();
-    path = client->getPathByToken(t0_1_1);
+    path = DbClientTransactionLog::getPathByToken(t0_1_1, tokenKeys);
     assert(path.size() == 3);
-    assert(path[0] == t0.getKey());
+    assert(path[0] == 0);
     assert(path[1] == 1);
     assert(path[2] == 1);
 
 
     // Negative tests
     path.push_back(100);
-    assert(client->getTokenByPath(path) == TokenId::noId());
+    assert(DbClientTransactionLog::getTokenByPath(path, tokenKeys) == TokenId::noId());
     path[0] = 99999;
-    assert(client->getTokenByPath(path) == TokenId::noId());
-
-    delete (DbClient*) client;
+    assert(DbClientTransactionLog::getTokenByPath(path, tokenKeys) == TokenId::noId());
 
     DEFAULT_TEARDOWN();
     return true;
   }
 };
-
 
 int main() {
   initConstraintLibrary();
