@@ -29,7 +29,7 @@ class Rover{
 }
 
 Rover::At{
- contains(Resource.change tx);
+ contains(Battery.change tx);
  eq(tx.quantity, 5);
 
  meets(Going to);
@@ -46,7 +46,7 @@ Rover::Going{
   meets(At to);
   eq(m_to, to.m_location);
 
-  contains(Resource.change tx);
+  contains(Battery.change tx);
   eq(tx.quantity, -5);
 }
 
