@@ -32,8 +32,8 @@ namespace Prototype
 				     int argIndex, 
 				     const DomainListener::ChangeType& changeType){
     // if it is a restriction, but not a singleton, then we can ignore it.
-    if(changeType != DomainListener::RESET && changeType != DomainListener::RELAXED)
-      return !getCurrentDomain(variable).isSingleton();
+    // if(changeType != DomainListener::RESET && changeType != DomainListener::RELAXED)
+    //   return !getCurrentDomain(variable).isSingleton();
     return false;
   }
 
