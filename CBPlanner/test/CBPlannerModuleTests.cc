@@ -401,9 +401,9 @@ namespace Prototype {
 
     const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
 
-    assert(closed.size() == 4);
-    assert(closed.size() == planner.getTime());
     assert(planner.getTime() == planner.getDepth());
+    assert(closed.size() == planner.getTime());
+    assert(closed.size() == 4);
     return true;
   }
 
@@ -501,6 +501,7 @@ namespace Prototype {
     ConstraintLibrary::createConstraint(LabelStr("eq"), ce.getId(), scope);
 
     CBPlanner::Status res = planner.run(loggingEnabled(), 100);
+
     assert(res == CBPlanner::SEARCH_EXHAUSTED);
     assert(planner.getClosedDecisions().empty());
     return true;
@@ -748,8 +749,6 @@ namespace Prototype {
     t2.constrain(tokenB.getId(), TokenId::noId());
 
     assert(ce.propagate());
-
-    std::cout << "nr of decs = " << planner.getDecisionManager()->getNumberOfDecisions() << std::endl;
 
     CBPlanner::Status result = planner.run(loggingEnabled());
     assert(result == CBPlanner::PLAN_FOUND);
