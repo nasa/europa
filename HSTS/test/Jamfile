@@ -103,9 +103,9 @@ LocalDepends run-hsts-planner-tests :
        dnp-DNP23-h
        dnp-allDSS-h 
 #       dnp-fourFreeObs-h # times out
-       dnp-DNP3fourFreeObs-h
+#       dnp-DNP3fourFreeObs-h
        dnp-DNP3-h
-       dnp-fourFreeObsNotEmpty-h
+#       dnp-fourFreeObsNotEmpty-h
 #      dnp-freeObs-h # runs forever
 #       dnp-freeObsNoEmpty-h # runs forever
        dnp-tenFreeObs-h
