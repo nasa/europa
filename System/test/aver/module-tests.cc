@@ -72,13 +72,13 @@ namespace NDDL {
   
   
   // NddlWorld.nddl:9 initialState
-  NddlWorld::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  NddlWorld::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  NddlWorld::initialState::initialState(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  NddlWorld::initialState::initialState(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -181,8 +181,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:7 NotTracked
-  Location::NotTracked::NotTracked(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Location::NotTracked::NotTracked(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -192,8 +192,8 @@ namespace NDDL {
     }
   }
   
-  Location::NotTracked::NotTracked(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Location::NotTracked::NotTracked(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -215,8 +215,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:12 trackstart
-  Location::trackstart::trackstart(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Location::trackstart::trackstart(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -226,8 +226,8 @@ namespace NDDL {
     }
   }
   
-  Location::trackstart::trackstart(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Location::trackstart::trackstart(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -249,8 +249,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:17 Tracked
-  Location::Tracked::Tracked(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Location::Tracked::Tracked(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -260,8 +260,8 @@ namespace NDDL {
     }
   }
   
-  Location::Tracked::Tracked(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Location::Tracked::Tracked(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -283,8 +283,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:22 trackstop
-  Location::trackstop::trackstop(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Location::trackstop::trackstop(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -294,8 +294,8 @@ namespace NDDL {
     }
   }
   
-  Location::trackstop::trackstop(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Location::trackstop::trackstop(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -399,31 +399,32 @@ namespace NDDL {
   
   
   // k9-initial.nddl:40 At
-  Position::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory, const bool& autoClose)
-   : NddlToken(planDatabase, name, mandatory) {
-    handleDefaults();
+  Position::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, false) {
+    handleDefaults(autoClose);
   }
   
   Position::At::At(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
-    : NddlToken(parent, relation, name) {
-    handleDefaults();
+    : NddlToken(parent, relation, name, false) {
+    handleDefaults(autoClose);
   }
   
   // default initialization of member variables
-  void Position::At::handleDefaults() {
+  void Position::At::handleDefaults(const bool& autoClose) {
     if(location.isNoId()){
       location = addParameter(ObjectDomain("Location"), "location");
       completeObjectParam(Location, location);
     }
-    close();
+    if (autoClose)
+      close();
   }
   
   
   
   // k9-initial.nddl:44 navigate
-  Position::navigate::navigate(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory, const bool& autoClose)
-   : NddlToken(planDatabase, name, mandatory) {
-    handleDefaults();
+  Position::navigate::navigate(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, false) {
+    handleDefaults(autoClose);
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("from")));
@@ -439,8 +440,8 @@ namespace NDDL {
   }
   
   Position::navigate::navigate(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
-    : NddlToken(parent, relation, name) {
-    handleDefaults();
+    : NddlToken(parent, relation, name, false) {
+    handleDefaults(autoClose);
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("from")));
@@ -456,7 +457,7 @@ namespace NDDL {
   }
   
   // default initialization of member variables
-  void Position::navigate::handleDefaults() {
+  void Position::navigate::handleDefaults(const bool& autoClose) {
     if(from.isNoId()){
       from = addParameter(ObjectDomain("Location"), "from");
       completeObjectParam(Location, from);
@@ -465,7 +466,8 @@ namespace NDDL {
       to = addParameter(ObjectDomain("Location"), "to");
       completeObjectParam(Location, to);
     }
-    close();
+    if (autoClose)
+      close();
   }
   
   
@@ -559,13 +561,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:79 TrackingOff
-  Tracker::TrackingOff::TrackingOff(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Tracker::TrackingOff::TrackingOff(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  Tracker::TrackingOff::TrackingOff(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Tracker::TrackingOff::TrackingOff(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -577,13 +579,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:82 trackloadgroup
-  Tracker::trackloadgroup::trackloadgroup(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Tracker::trackloadgroup::trackloadgroup(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  Tracker::trackloadgroup::trackloadgroup(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Tracker::trackloadgroup::trackloadgroup(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -595,13 +597,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:85 LandmarksDefined
-  Tracker::LandmarksDefined::LandmarksDefined(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Tracker::LandmarksDefined::LandmarksDefined(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  Tracker::LandmarksDefined::LandmarksDefined(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Tracker::LandmarksDefined::LandmarksDefined(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -613,13 +615,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:88 StartTracking
-  Tracker::StartTracking::StartTracking(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Tracker::StartTracking::StartTracking(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  Tracker::StartTracking::StartTracking(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Tracker::StartTracking::StartTracking(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -631,13 +633,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:91 TrackingOn
-  Tracker::TrackingOn::TrackingOn(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Tracker::TrackingOn::TrackingOn(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  Tracker::TrackingOn::TrackingOn(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Tracker::TrackingOn::TrackingOn(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -649,13 +651,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:94 trackfreeze
-  Tracker::trackfreeze::trackfreeze(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Tracker::trackfreeze::trackfreeze(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  Tracker::trackfreeze::trackfreeze(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Tracker::trackfreeze::trackfreeze(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -667,13 +669,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:97 TrackingFrozen
-  Tracker::TrackingFrozen::TrackingFrozen(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Tracker::TrackingFrozen::TrackingFrozen(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  Tracker::TrackingFrozen::TrackingFrozen(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Tracker::TrackingFrozen::TrackingFrozen(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -685,13 +687,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:100 trackunfreeze
-  Tracker::trackunfreeze::trackunfreeze(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  Tracker::trackunfreeze::trackunfreeze(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  Tracker::trackunfreeze::trackunfreeze(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  Tracker::trackunfreeze::trackunfreeze(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -728,13 +730,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:107 OppSciIdle
-  OpportunisticScience::OppSciIdle::OppSciIdle(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  OpportunisticScience::OppSciIdle::OppSciIdle(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  OpportunisticScience::OppSciIdle::OppSciIdle(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  OpportunisticScience::OppSciIdle::OppSciIdle(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -746,13 +748,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:110 oppscidefineproc
-  OpportunisticScience::oppscidefineproc::oppscidefineproc(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  OpportunisticScience::oppscidefineproc::oppscidefineproc(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  OpportunisticScience::oppscidefineproc::oppscidefineproc(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  OpportunisticScience::oppscidefineproc::oppscidefineproc(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -764,13 +766,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:113 OppSciProcDefined
-  OpportunisticScience::OppSciProcDefined::OppSciProcDefined(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  OpportunisticScience::OppSciProcDefined::OppSciProcDefined(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  OpportunisticScience::OppSciProcDefined::OppSciProcDefined(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  OpportunisticScience::OppSciProcDefined::OppSciProcDefined(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -782,13 +784,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:116 oppscisetparams
-  OpportunisticScience::oppscisetparams::oppscisetparams(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  OpportunisticScience::oppscisetparams::oppscisetparams(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  OpportunisticScience::oppscisetparams::oppscisetparams(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  OpportunisticScience::oppscisetparams::oppscisetparams(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -800,13 +802,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:119 OppSciParamsSet
-  OpportunisticScience::OppSciParamsSet::OppSciParamsSet(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  OpportunisticScience::OppSciParamsSet::OppSciParamsSet(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  OpportunisticScience::OppSciParamsSet::OppSciParamsSet(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  OpportunisticScience::OppSciParamsSet::OppSciParamsSet(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -818,8 +820,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:122 oppscilooknow
-  OpportunisticScience::oppscilooknow::oppscilooknow(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  OpportunisticScience::oppscilooknow::oppscilooknow(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -829,8 +831,8 @@ namespace NDDL {
     }
   }
   
-  OpportunisticScience::oppscilooknow::oppscilooknow(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  OpportunisticScience::oppscilooknow::oppscilooknow(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -856,8 +858,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:128 OppSciDoneLookNow
-  OpportunisticScience::OppSciDoneLookNow::OppSciDoneLookNow(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  OpportunisticScience::OppSciDoneLookNow::OppSciDoneLookNow(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -867,8 +869,8 @@ namespace NDDL {
     }
   }
   
-  OpportunisticScience::OppSciDoneLookNow::OppSciDoneLookNow(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  OpportunisticScience::OppSciDoneLookNow::OppSciDoneLookNow(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -894,8 +896,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:134 oppscigetstatus
-  OpportunisticScience::oppscigetstatus::oppscigetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  OpportunisticScience::oppscigetstatus::oppscigetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -905,8 +907,8 @@ namespace NDDL {
     }
   }
   
-  OpportunisticScience::oppscigetstatus::oppscigetstatus(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  OpportunisticScience::oppscigetstatus::oppscigetstatus(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -957,13 +959,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:142 IPIdle
-  CHAMP::IPIdle::IPIdle(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  CHAMP::IPIdle::IPIdle(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  CHAMP::IPIdle::IPIdle(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  CHAMP::IPIdle::IPIdle(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -975,13 +977,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:145 ipgetname
-  CHAMP::ipgetname::ipgetname(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  CHAMP::ipgetname::ipgetname(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  CHAMP::ipgetname::ipgetname(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  CHAMP::ipgetname::ipgetname(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -1001,13 +1003,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:151 IPHaveName
-  CHAMP::IPHaveName::IPHaveName(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  CHAMP::IPHaveName::IPHaveName(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  CHAMP::IPHaveName::IPHaveName(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  CHAMP::IPHaveName::IPHaveName(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -1027,13 +1029,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:156 ipsettarget
-  CHAMP::ipsettarget::ipsettarget(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  CHAMP::ipsettarget::ipsettarget(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  CHAMP::ipsettarget::ipsettarget(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  CHAMP::ipsettarget::ipsettarget(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -1053,13 +1055,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:162 IPTargetSet
-  CHAMP::IPTargetSet::IPTargetSet(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  CHAMP::IPTargetSet::IPTargetSet(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  CHAMP::IPTargetSet::IPTargetSet(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  CHAMP::IPTargetSet::IPTargetSet(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -1079,13 +1081,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:167 ipplaceinstrument
-  CHAMP::ipplaceinstrument::ipplaceinstrument(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  CHAMP::ipplaceinstrument::ipplaceinstrument(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  CHAMP::ipplaceinstrument::ipplaceinstrument(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  CHAMP::ipplaceinstrument::ipplaceinstrument(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -1105,13 +1107,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:173 IPDonePlaceInstrument
-  CHAMP::IPDonePlaceInstrument::IPDonePlaceInstrument(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  CHAMP::IPDonePlaceInstrument::IPDonePlaceInstrument(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  CHAMP::IPDonePlaceInstrument::IPDonePlaceInstrument(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  CHAMP::IPDonePlaceInstrument::IPDonePlaceInstrument(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
@@ -1131,13 +1133,13 @@ namespace NDDL {
   
   
   // k9-initial.nddl:178 ipgetstatus
-  CHAMP::ipgetstatus::ipgetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
-   : NddlToken(planDatabase, name, mandatory) {
+  CHAMP::ipgetstatus::ipgetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& rejectable, const bool& autoClose)
+   : NddlToken(planDatabase, name, rejectable, autoClose) {
     handleDefaults();
   }
   
-  CHAMP::ipgetstatus::ipgetstatus(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
-    : NddlToken(parent, relation, name) {
+  CHAMP::ipgetstatus::ipgetstatus(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
+    : NddlToken(parent, relation, name, autoClose) {
     handleDefaults();
   }
   
