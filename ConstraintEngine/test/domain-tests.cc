@@ -17,11 +17,13 @@ typedef std::stringstream sstream;
 
 namespace Prototype {
 
-  class ChangeListener: public DomainListener {
+  class ChangeListener : public DomainListener {
   public:
-    ChangeListener(): m_changed(false), m_change(RESET){}
+    ChangeListener()
+      : m_changed(false), m_change(RESET) {
+    }
 
-    void notifyChange(const ChangeType& change){
+    void notifyChange(const ChangeType& change) {
       m_changed = true;
       m_change = change;
     }
@@ -30,7 +32,7 @@ namespace Prototype {
       bool result = m_changed;
       change = m_change;
       m_changed = false;
-      return (result);
+      return(result);
     }
 
   private:
@@ -76,10 +78,10 @@ namespace Prototype {
       assert(d2 != d4);
       d2.relax(d4);
       assert(d2 == d4);
-      return true;
+      return(true);
     }
 
-    static bool testRelaxation(){
+    static bool testRelaxation() {
       ChangeListener l_listener;
       IntervalIntDomain dom0; // Will have very large default range
       IntervalIntDomain dom1(-100, 100, l_listener.getId());
@@ -99,7 +101,7 @@ namespace Prototype {
       dom1.relax(dom2);
       res = l_listener.checkAndClearChange(change);
       assert(!res);
-      return true;
+      return(true);
     }
 
     static bool testIntersection() {
@@ -140,10 +142,10 @@ namespace Prototype {
       dom4.equate(dom5);
       assert(dom4 == dom6);
       assert(dom5 == dom6);
-      return true;
+      return(true);
     }
 
-    static bool testSubset(){
+    static bool testSubset() {
       IntervalIntDomain dom0(10, 35);
       IntervalDomain dom1(0, 101);
       assert(dom0.isSubsetOf(dom1));
@@ -165,15 +167,14 @@ namespace Prototype {
       assert(! dom4.isSubsetOf(dom0));
       assert(! dom0.isSubsetOf(dom4));
 
-      return true;
+      return(true);
     }
 
-    static bool testListener()
-    {
-      return true;
+    static bool testListener() {
+      return(true);
     }
 
-    static bool testPrinting(){
+    static bool testPrinting() {
       IntervalIntDomain d1(1, 100);
       //       std::stringstream ss1;
       //       d1 >> ss1;
@@ -182,10 +183,10 @@ namespace Prototype {
       std::string actualString = ss1.str();
       std::string expectedString("INT_INTERVAL:CLOSED[1, 100]");
       assert(actualString == expectedString);
-      return true;
+      return(true);
     }
 
-    static bool testBoolDomain(){
+    static bool testBoolDomain() {
       BoolDomain dom0;
       assert(dom0.getSize() == 2);
       assert(dom0.getUpperBound() == true);
@@ -194,10 +195,10 @@ namespace Prototype {
       IntervalIntDomain dom1(0, 100);
       dom1.intersect(dom0);
       assert(dom1 == dom0);
-      return true;
+      return(true);
     }
 
-    static bool testDifference(){
+    static bool testDifference() {
       IntervalDomain dom0(1, 10);
       IntervalDomain dom1(11, 20);
       bool res = dom0.difference(dom1);
@@ -248,18 +249,18 @@ namespace Prototype {
       assert(!(dom6.intersects(dom5)));
       assert(dom6.getSize() == 5);
 
-      return true;
+      return(true);
     }
 
-    static bool testOperatorEquals(){
+    static bool testOperatorEquals() {
       IntervalDomain dom0(1, 28);
       IntervalDomain dom1(50, 100);
       dom0 = dom1;
       assert(dom0 == dom1);
-      return true;
+      return(true);
     }
 
-    static bool testInfinitesAndInts(){
+    static bool testInfinitesAndInts() {
       IntervalDomain dom0;
       assert(dom0.translateNumber(MINUS_INFINITY) == MINUS_INFINITY);
       assert(dom0.translateNumber(MINUS_INFINITY - 1) == MINUS_INFINITY);
@@ -272,7 +273,7 @@ namespace Prototype {
       assert(dom1.translateNumber(2.8, false) == 2);
       assert(dom1.translateNumber(2.8, true) == 3);
       assert(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY - 1);
-      return true;
+      return(true);
     }
 
     static bool testEnumDomInsertAndRemove() {
@@ -492,9 +493,10 @@ namespace Prototype {
     }
   };
 
-  class EnumeratedDomainTest{
+  class EnumeratedDomainTest {
   public:
-    static bool test(){
+
+    static bool test() {
       runTest(testEnumerationOnly);
       runTest(testBasicLabelOperations);
       runTest(testLabelSetAllocations);
@@ -503,11 +505,12 @@ namespace Prototype {
       runTest(testIntersection);
       runTest(testDifference);
       runTest(testOperatorEquals);
-      return true;
+      return(true);
     }
+
   private:
 
-    static bool testEnumerationOnly(){
+    static bool testEnumerationOnly() {
       std::list<double> values;
       values.push_back(-98.67);
       values.push_back(-0.01);
@@ -526,7 +529,7 @@ namespace Prototype {
       assert(d0.isSubsetOf(d1));
       assert(!d1.isSubsetOf(d0));
 
-      return true;
+      return(true);
     }
 
     static bool testBasicLabelOperations() {
@@ -542,17 +545,17 @@ namespace Prototype {
 
       Prototype::LabelStr copy1(l1);
       assert(l1 == copy1);
-      assert (l2 != copy1);
+      assert(l2 != copy1);
 
       assert((Prototype::LabelStr::getSize() - initialCount) == 5);
       assert(l1.toString() == "L1");
 
       assert(LabelStr::isString(l1.getKey()));
       assert(!LabelStr::isString(PLUS_INFINITY+1));
-      return true;
+      return(true);
     }
 
-    static bool testLabelSetAllocations(){
+    static bool testLabelSetAllocations() {
       std::list<Prototype::LabelStr> values;
       values.push_back(Prototype::LabelStr("L1"));
       values.push_back(Prototype::LabelStr("L4"));
@@ -582,9 +585,10 @@ namespace Prototype {
       res = l_listener.checkAndClearChange(change);
       assert(res && change == DomainListener::RELAXED);
       assert(ls0 == ls1);
-      return true;
+      return(true);
     }
-    static bool testEquate(){
+
+    static bool testEquate() {
       std::list<Prototype::LabelStr> baseValues;
       baseValues.push_back(Prototype::LabelStr("A"));
       baseValues.push_back(Prototype::LabelStr("B"));
@@ -648,10 +652,10 @@ namespace Prototype {
       assert(ls4.isEmpty() || ls5.isEmpty());
       assert(!(ls4.isEmpty() && ls5.isEmpty()));
 
-      return true;
+      return(true);
     }
 
-    static bool testValueRetrieval(){
+    static bool testValueRetrieval() {
       std::list<Prototype::LabelStr> values;
       values.push_back(Prototype::LabelStr("A"));
       values.push_back(Prototype::LabelStr("B"));
@@ -669,10 +673,10 @@ namespace Prototype {
       LabelStr lbl("C");
       l1.set(lbl);
       assert(lbl == l1.getSingletonValue());
-      return true;
+      return(true);
     }
 
-    static bool testIntersection(){
+    static bool testIntersection() {
       std::list<Prototype::LabelStr> values;
       values.push_back(Prototype::LabelStr("A"));
       values.push_back(Prototype::LabelStr("B"));
@@ -715,11 +719,10 @@ namespace Prototype {
       ls3.remove(Prototype::LabelStr("I"));
       ls4.intersect(ls3);
       assert(ls4.isEmpty());
-      return true;
+      return(true);
     }
 
-    static bool testDifference(){
-
+    static bool testDifference() {
       EnumeratedDomain dom0;
       dom0.insert(1);
       dom0.insert(3);
@@ -743,10 +746,10 @@ namespace Prototype {
       assert(res);
       assert(dom0.isEmpty());
 
-      return true;
+      return(true);
     }
 
-    static bool testOperatorEquals(){
+    static bool testOperatorEquals() {
       EnumeratedDomain dom0;
       dom0.insert(1);
       dom0.insert(3);
@@ -771,21 +774,25 @@ namespace Prototype {
       dom1 = dom2;
       assert(dom1 == dom2);
 
-      return true;
+      return(true);
     }
   };
 
-  class MixedTypeTest{
+  class MixedTypeTest {
   public:
+
     static bool test() {
       runTest(testEquality);
       runTest(testIntersection);
       runTest(testSubset);
       runTest(testIntDomain);
-      return true;
+      runTest(testCopying);
+      return(true);
     }
+
   private:
-    static bool testEquality(){
+
+    static bool testEquality() {
       EnumeratedDomain dom;
       dom.insert(1.0);
       dom.insert(2.0);
@@ -804,10 +811,10 @@ namespace Prototype {
       dom0.reset(dom);
       IntervalIntDomain dom3(1, 2);
       assert(dom0 == dom3);
-      return true;
+      return(true);
     }
 
-    static bool testIntersection(){
+    static bool testIntersection() {
       EnumeratedDomain dom0;
       dom0.insert(0);
       dom0.insert(0.98);
@@ -831,10 +838,10 @@ namespace Prototype {
       BoolDomain dom4;
       dom2.intersect(dom4);
       assert(dom2.getSize() == 1);
-      return true;
+      return(true);
     }
 
-    static bool testSubset(){
+    static bool testSubset() {
       EnumeratedDomain dom0;
       dom0.insert(0);
       dom0.insert(0.98);
@@ -857,10 +864,10 @@ namespace Prototype {
 
       assert(dom2.isSubsetOf(dom1));
       assert(!dom1.isSubsetOf(dom2));
-      return true;
+      return(true);
     }
 
-    static bool testIntDomain(){
+    static bool testIntDomain() {
       Domain<int> dom0;
       dom0.insert(10);
       dom0.insert(12);
@@ -876,16 +883,76 @@ namespace Prototype {
       Domain<int> dom2(10);
       assert(!dom2.isDynamic());
       assert(dom2.isSingleton());
-      return true;
+      return(true);
+    }
+
+    static bool testCopying() {
+      BoolDomain boolDom;
+      AbstractDomain *copy = boolDom.copy();
+      check_error(copy != 0);
+      assertTrue(*copy == boolDom && copy != &boolDom);
+      boolDom.remove(true);
+      assertTrue(*copy != boolDom);
+      delete copy;
+      copy = boolDom.copy();
+      check_error(copy != 0);
+      assertTrue(*copy == boolDom && copy != &boolDom);
+      boolDom.remove(false);
+      assertTrue(*copy != boolDom);
+      delete copy;
+      copy = boolDom.copy();
+      check_error(copy != 0);
+      assertTrue(*copy == boolDom && copy != &boolDom);
+      boolDom.insert(true);
+      assertTrue(*copy != boolDom);
+      delete copy;
+      copy = boolDom.copy();
+      check_error(copy != 0);
+      assertTrue(*copy == boolDom && copy != &boolDom);
+      boolDom.remove(true);
+      assertTrue(*copy != boolDom);
+      delete copy;
+
+      IntervalIntDomain iiDom(-2, PLUS_INFINITY);
+      copy = iiDom.copy();
+      check_error(copy != 0);
+      assertTrue(*copy == iiDom && copy != &iiDom);
+      iiDom.remove(PLUS_INFINITY);
+      assertTrue(*copy != iiDom);
+      copy->remove(PLUS_INFINITY);
+      assertTrue(*copy == iiDom && copy != &iiDom);
+      delete copy;
+
+      IntervalDomain iDom(MINUS_INFINITY);
+      copy = iDom.copy();
+      check_error(copy != 0);
+      assertTrue(*copy == iDom && copy != &iDom);
+      iDom.remove(MINUS_INFINITY);
+      assertTrue(*copy != iDom);
+      copy->remove(MINUS_INFINITY);
+      assertTrue(*copy == iDom && copy != &iDom);
+      delete copy;
+
+      EnumeratedDomain eDom(2.7);
+      copy = eDom.copy();
+      check_error(copy != 0);
+      assertTrue(*copy == eDom && copy != &eDom);
+      eDom.insert(PLUS_INFINITY);
+      assertTrue(*copy != eDom);
+      eDom.remove(PLUS_INFINITY);
+      assertTrue(*copy == eDom && copy != &eDom);
+      delete copy;
+
+      return(true);
     }
   };
 }
 
 using namespace Prototype;
 
-bool DomainTests::test(){
+bool DomainTests::test() {
   runTestSuite(IntervalDomainTest::test);
   runTestSuite(EnumeratedDomainTest::test);
   runTestSuite(MixedTypeTest::test);
-  return true;
+  return(true);
 }
