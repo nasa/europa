@@ -23,7 +23,7 @@ namespace Prototype {
   }
 
   EnumeratedDomain::EnumeratedDomain()
-    : AbstractDomain(true, DomainListenerId::noId()){}
+    : AbstractDomain(false, DomainListenerId::noId()){}
 
   bool EnumeratedDomain::isFinite() const {
     check_error(!isDynamic());
