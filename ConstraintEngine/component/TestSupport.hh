@@ -36,22 +36,22 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
 #define ENGINE DefaultEngineAccessor::instance()
 
 #define runTest(test, name) { \
-  cout << "      " << name; \
+  std::cout << "      " << name; \
   int id_count = Europa::IdTable::size();\
   bool result = test(); \
   DefaultEngineAccessor::reset(); \
   if(result && Europa::IdTable::size() == id_count) \
-    cout << " passed." << endl; \
+    std::cout << " passed." << std::endl; \
   else \
-    cout << " FAILED." << endl; \
+    std::cout << " FAILED." << std::endl; \
 }
 
 #define runTestSuite(test, name) { \
-  cout << name << "***************" << endl; \
+  std::cout << name << "***************" << std::endl; \
   if(test()) \
-    cout << name << " passed." << endl; \
+    std::cout << name << " passed." << std::endl; \
   else \
-    cout << name << " FAILED." << endl; \
+    std::cout << name << " FAILED." << std::endl; \
 }
 
 void initConstraintLibrary(){
