@@ -182,7 +182,7 @@ private:
     									  temp);
 
     assert(t1.getStart()->getDerivedDomain().getLowerBound() == 0);
-    assert(t1.getStart()->getDerivedDomain().getUpperBound()  == 5);
+    assert(t1.getStart()->getDerivedDomain().getUpperBound() == 5);
     assert(t1.getEnd()->getDerivedDomain().getLowerBound() == 5);
     assert(t1.getEnd()->getDerivedDomain().getUpperBound() == 10);
     assert(t2.getStart()->getDerivedDomain().getLowerBound() == 5);
@@ -217,7 +217,7 @@ private:
     //assert (!db.getTemporalAdvisor()->canPrecede(first,second));
 
     // restrict via specifying the domain
-    /*
+
     IntervalIntDomain dom(21, 31);
     first.getStart()->specify(dom);
     first.getEnd()->specify(dom);
@@ -238,7 +238,7 @@ private:
 
     first.getStart()->reset();
     first.getEnd()->reset();
-    */
+
     // restrict via a constraint
 
     std::vector<ConstrainedVariableId> temp;
