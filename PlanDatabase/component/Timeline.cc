@@ -139,7 +139,6 @@ namespace Prototype {
     ObjectSet base = token->getObject()->getBaseDomain();
     base.set(getId());
     constrainToSingleton(token, base, token->getObject());
-    constrainToSingleton(token, BooleanDomain(false), token->getRejectability());
 
     if(m_tokenSequence.empty()){
       check_error(successor.isNoId());
@@ -184,16 +183,35 @@ namespace Prototype {
     check_error(isValid());
   }
 
+  void Timeline::remove(const TokenId& token){
+    check_error(token.isValid());
+    if(token->isActive())
+      cleanupToken(token, true);
+    else
+      cleanupToken(token, false);
+    Object::remove(token);
+  }
+
   void Timeline::free(const TokenId& token){
     check_error(token.isValid());
+    check_error(token->isActive());
+    cleanupToken(token, true);
+  }
+
+  void Timeline::cleanupToken(const TokenId& token, bool deleteConstraints){
+    check_error(token.isValid());
     check_error(isValid());
+    check_error(token->isActive() == deleteConstraints); 
   
     // Remove Token's constraints if there are any
     std::list<ConstraintEntry*>::iterator it = m_constraints.begin();
     while(it != m_constraints.end()){
       ConstraintEntry* ce = *it;
-      check_error(ce->isValid());
       if (ce->m_first == token || ce->m_second == token){
+	if(deleteConstraints){
+	  check_error(ce->isValid());
+	  delete (Constraint*) ce->m_constraint;
+	}
 	delete ce;
 	it = m_constraints.erase(it);
       }
@@ -225,11 +243,6 @@ namespace Prototype {
 
   Timeline::ConstraintEntry::ConstraintEntry(const ConstraintId& constraint, const TokenId& first, const TokenId& second)
     :m_constraint(constraint), m_first(first), m_second(second){}
-
-  Timeline::ConstraintEntry::~ConstraintEntry(){
-    check_error(m_constraint.isValid());
-    delete (Constraint*) m_constraint;
-  }
 
   bool Timeline::ConstraintEntry::isValid() const{
     return (m_constraint.isValid() &&

@@ -67,9 +67,6 @@ namespace Prototype{
     temp.push_back(m_start);
     temp.push_back(m_duration);
     temp.push_back(m_end);
-    ConstraintId enforceTemporalRelation = 
-      ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"), m_planDatabase->getConstraintEngine(), temp);
-
-    m_localConstraints.push_back(enforceTemporalRelation);
+    ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"), m_planDatabase->getConstraintEngine(), temp);
   }
 }

@@ -204,7 +204,15 @@ private:
 
     t1.getDuration()->specify(IntervalIntDomain(5, 7));
 
-    // Activate one and merge the other with it.
+    // Activate & deactivate - ensure proper handling of rejectability variable
+    check_error(!t0.getRejectability()->getDerivedDomain().isSingleton());
+    t0.activate();
+    check_error(t0.getRejectability()->getDerivedDomain().isSingleton());
+    check_error(t0.getRejectability()->getDerivedDomain().getSingletonValue() == false);
+    t0.deactivate();
+    check_error(!t0.getRejectability()->getDerivedDomain().isSingleton());
+
+    // Now activate and merge
     t0.activate();
     t1.merge(t0.getId());
 
@@ -311,6 +319,7 @@ private:
     tokenA.activate();
     tokenB.activate();
     tokenC.activate();
+
     timeline.constrain(tokenA.getId());
     timeline.constrain(tokenB.getId());
     timeline.constrain(tokenC.getId(), tokenA.getId());

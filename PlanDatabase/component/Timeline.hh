@@ -23,6 +23,8 @@ namespace Prototype {
     void constrain(const TokenId& token, const TokenId& successor = TokenId::noId());
     void free(const TokenId& token);
   private:
+    void remove(const TokenId& token); // Over-ride base class implementation
+    void cleanupToken(const TokenId& token, bool deleteConstraints);
     bool isValid() const;
     void constrainToSingleton(const TokenId& token, const AbstractDomain& domain, const ConstrainedVariableId& var);
 
@@ -32,7 +34,6 @@ namespace Prototype {
     class ConstraintEntry{
     public:
       ConstraintEntry(const ConstraintId& constrain, const TokenId& first, const TokenId& second = TokenId::noId());
-      ~ConstraintEntry();
       bool isValid() const;
       ConstraintId m_constraint;
       TokenId m_first;
