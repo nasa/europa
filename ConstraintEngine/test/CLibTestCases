@@ -2794,7 +2794,7 @@ test 2793 asame inputs [0 Infinity] [0 Infinity] [-1 Infinity] [-Infinity 0] out
 test 2794 asame inputs [0 Infinity] [-1 Infinity] [-Infinity 0] [-Infinity 0] outputs [0] [0] [0] [0]
 test 2795 asame inputs [0 Infinity] [0 Infinity] [0 Infinity] [0] outputs [0] [0] [0] [0]
 test 2796 asame inputs [0] [-Infinity Infinity] [-Infinity Infinity] [-Infinity Infinity] outputs [0] [0] [0] [0]
-test 2797 asame inputs [0 Infinity] [-1 Infinity] [-Infinity 0] [0] outputs [] [] [] []
+test 2797 asame inputs [0 Infinity] [-1 Infinity] [-Infinity 0] [0] outputs [0] [0] [0] [0]
 test 2798 asame inputs {red} {red} {red} {red} outputs {red} {red} {red} {red}
 test 2799 asame inputs {blue} {blue} {blue} {blue} outputs {blue} {blue} {blue} {blue}
 test 2800 asame inputs {green} {green} {green} {green} outputs {green} {green} {green} {green}
