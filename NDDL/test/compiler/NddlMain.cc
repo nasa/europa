@@ -10,7 +10,7 @@ using namespace EUROPA;
  * statically, but we will eventually get to dynamically linking to a model as an argumnet.
  * @author Conor McGann
  */
-int main(int argc, const char ** argv){
+int main(int argc, const char ** argv) {
   if (argc != 2) {
     std::cerr << "Must provide initial transactions file." << std::endl;
     return -1;
@@ -35,4 +35,5 @@ int main(int argc, const char ** argv){
   StandardAssembly::terminate();
 
   std::cout << "Finished\n";
+  exit(0);
 }

@@ -13,7 +13,7 @@
 using namespace EUROPA;
 
 /**
- * @brief Uses the planner to solve a planning problem
+ * @brief Uses the planner to solve a planning problem.
  */
 int main(int argc, const char ** argv) {
   if (argc < 3) {
@@ -91,10 +91,11 @@ int main(int argc, const char ** argv) {
     assembly.write(std::cout);
   }
 
-  std::cerr << "Terminating the assembly..." << std::endl;
+  std::cerr << "Terminating the assembly ..." << std::endl;
 
   // Terminate the library
   HSTSAssembly::terminate();
 
-  std::cout << "Finished\n";
+  std::cerr << "Finished" << std::endl;
+  exit(0);
 }

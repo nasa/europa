@@ -2141,14 +2141,16 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
 
 int main() {
   initDbModuleTests();
-  for (int i=0;i<1;i++){
+  for (int i = 0; i < 1; i++) {
     runTestSuite(SchemaTest::test);
     runTestSuite(ObjectTest::test);
     runTestSuite(TokenTest::test);
     runTestSuite(TimelineTest::test);
     runTestSuite(DbClientTest::test);
     runTestSuite(DbTransPlayerTest::test);
-    std::cout << "Finished" << std::endl;
+    std::cout << "Finished #" << i << std::endl;
   } 
   ConstraintLibrary::purgeAll();
+  std::cout << "All done and purged" << std::endl;
+  exit(0);
 }

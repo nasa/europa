@@ -271,4 +271,5 @@ int main() {
   runTestSuite(UtilitiesTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
+  exit(0);
 }

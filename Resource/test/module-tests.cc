@@ -989,7 +989,6 @@ private:
 
 
 int main() {
-
   Schema::instance();
   initConstraintLibrary();
   REGISTER_CONSTRAINT(ResourceConstraint, "ResourceRelation", "Resource");
@@ -999,4 +998,5 @@ int main() {
   runTestSuite(ResourceTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
+  exit(0);
 }

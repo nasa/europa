@@ -1491,6 +1491,7 @@ int main(int argc, const char ** argv){
   SamplePlanDatabase::terminate();
 
   std::cout << "Finished" << std::endl;
+  exit(0);
 }
 
 #ifdef __BEOS__

@@ -370,4 +370,5 @@ int main() {
   runTestSuite(RulesEngineTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
+  exit(0);
 }
