@@ -18,10 +18,14 @@
 
 namespace Prototype {
 
+#ifndef PROTOTYPE_FAST_VERSION
 #define  publish(message){\
     for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)\
       (*lit)->message;\
-  }
+}
+#else
+#define publish(message)
+#endif
 
   typedef Id<TimepointWrapper> TimepointWrapperId;
 
@@ -47,15 +51,20 @@ namespace Prototype {
   }
 
   void TemporalPropagator::handleConstraintAdded(const ConstraintId& constraint){
-    m_constraintsForAddition.insert(constraint);
+    const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
+    m_changedConstraints.insert(constraint);
+    m_changedVariables.insert(scope[0]);
+    if (constraint->getName() == durationConstraintName())
+      m_changedVariables.insert(scope[2]);
+    else {
+      m_changedVariables.insert(scope[1]);
+    }
   }
 
   void TemporalPropagator::handleConstraintRemoved(const ConstraintId& constraint){
     check_error(!Entity::isPurging());
     // Delete constraint from list of pending additions and executions. It may be there if we have not propagated them yet.
-    m_constraintsForAddition.erase(constraint);
-    m_constraintsForExecution.erase(constraint);
-    m_durationChanges.erase(constraint);
+    m_changedConstraints.erase(constraint);
 
     // Buffer temporal network constraint for deletion
     if(!constraint->getExternalEntity().isNoId()){
@@ -67,30 +76,24 @@ namespace Prototype {
   }
 
   void TemporalPropagator::handleConstraintActivated(const ConstraintId& constraint){
-    if(constraint->getName() == LabelStr("StartEndDurationRelation"))
-      m_constraintsForExecution.insert(constraint);
+    m_changedConstraints.insert(constraint);
 
     const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
     for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
       const ConstrainedVariableId& var = *it;
       check_error(var.isValid());
 
-      if(var->getIndex() == DURATION_VAR_INDEX){ // Buffer the duration constraint instead of the variable
-	m_durationChanges.insert(constraint);
-	return;
-      }
-      else {
-	m_changedVariables.insert(var);
-	m_activeVariables.insert(var);
+      if(var->getIndex() != DURATION_VAR_INDEX){ // If it is not a duration variable
+	m_changedVariables.insert(var); // Buffer to update the Timepoint
+	m_activeVariables.insert(var); // Buffer for update back to the TempVar
       }
     }
   }
 
   void TemporalPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
-    // Delete constraint from list of pending additions and executions. It may be there if we have not propagated them yet.
-    m_constraintsForAddition.erase(constraint);
-    m_constraintsForExecution.erase(constraint);
-    m_durationChanges.erase(constraint);
+    // Delete constraint from list of pending additions and executions. 
+    // It may be there if we have not propagated them yet.
+    m_changedConstraints.erase(constraint);
 
     const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
     for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
@@ -110,21 +113,12 @@ namespace Prototype {
 					      const DomainListener::ChangeType& changeType){
     check_error(constraint->isActive());
 
-    // Ignore if this is the active constraint
-    if(constraint == m_activeConstraint)
-      return;
+    if(constraint->getName() == durationConstraintName())
+      m_changedConstraints.insert(constraint);
 
-    if(constraint->getName() == LabelStr("StartEndDurationRelation")){
-      m_constraintsForExecution.insert(constraint);
-      if(variable->getIndex() == DURATION_VAR_INDEX){ // Buffer the duration constraint instead of the variable
-	m_durationChanges.insert(constraint);
-	return;
-      }
-    }
-
-    // Only insert for start or end variables
-    check_error(variable->getIndex() != DURATION_VAR_INDEX);
-    m_changedVariables.insert(variable);
+    // Only buffer change for start or end variables
+    if(variable->getIndex() != DURATION_VAR_INDEX)
+       m_changedVariables.insert(variable);
   }
 
   void TemporalPropagator::execute(){
@@ -147,91 +141,59 @@ namespace Prototype {
       check_error (!var.isNoId());
       Propagator::getCurrentDomain(var).empty();
     }
-    else {  //update the cnet
-      bool validUpdate = updateTempVar();
-      check_error(validUpdate);
-
-      while(!m_constraintsForExecution.empty()){
-	std::set<ConstraintId>::iterator it = m_constraintsForExecution.begin();
-	ConstraintId constraint = *it;
-
-	if(constraint->isActive()){
-	  m_activeConstraint = constraint;
-	  Propagator::execute(constraint);
-	}
-
-	if (getConstraintEngine()->provenInconsistent())
-	  m_constraintsForExecution.clear();
-	else
-	  m_constraintsForExecution.erase(it);
-      }
-    }
-    m_activeConstraint = ConstraintId::noId();
+    else // update the Temp Vars of the CNET.
+      updateTempVar();
   }
 
   bool TemporalPropagator::updateRequired() const{
-    bool fullyPropagated = (m_constraintsForExecution.empty() && 
-			    m_constraintsForDeletion.empty() &&
-			    m_constraintsForAddition.empty() &&
-			    m_changedVariables.empty() &&
-			    m_durationChanges.empty());
+    bool fullyPropagated = (m_constraintsForDeletion.empty() &&
+			    m_variablesForDeletion.empty() &&
+			    m_changedConstraints.empty() &&
+			    m_changedVariables.empty());
 
     return (!fullyPropagated);
   }
 
-  void TemporalPropagator::checkAndAddTnetVariables(const ConstraintId& constraint) {
-    std::vector<TempVarId> vars;
+  void TemporalPropagator::addTimepoint(const TempVarId& var) {
+    check_error(var->getExternalEntity().isNoId());
+    TimepointId timepoint = m_tnet->addTimepoint();
+    EntityId tw = (new TimepointWrapper(getId(), var, timepoint))->getId();
+    var->setExternalEntity(tw);
+    timepoint->setExternalEntity(var);
+    m_wrappedTimepoints.insert(tw);
+    publish(notifyTimepointAdded(var, timepoint));
 
-    if (constraint->getName() == LabelStr("StartEndDurationRelation")) {    
-      vars.push_back(constraint->getScope()[0]);  
-      vars.push_back(constraint->getScope()[2]);
-    }
-    else {
-      vars.push_back(constraint->getScope()[0]);  
-      vars.push_back(constraint->getScope()[1]);      
-    }
+    m_activeVariables.insert(var);
+    m_changedVariables.insert(var);
 
-    // Allocate Timepoints if necessary
-    for(std::vector<TempVarId>::const_iterator it = vars.begin(); it != vars.end(); ++it) {
-      check_error(TempVarId::convertable((*it)));
-      TempVarId var = (*it);
-      if(var->getExternalEntity().isNoId()){
-	TimepointId timepoint = m_tnet->addTimepoint();
-	EntityId tw = (new TimepointWrapper(getId(), var, timepoint))->getId();
-	var->setExternalEntity(tw);
-	timepoint->setExternalEntity(var);
-	m_wrappedTimepoints.insert(tw);
-	publish(notifyTimepointAdded(var, timepoint));
+    // Key domain restriction constrain off derived domain values
+    TemporalConstraintId c = m_tnet->addTemporalConstraint(m_tnet->getOrigin(), 
+							   timepoint,
+							   (Time) var->lastDomain().getLowerBound(),  
+							   (Time) var->lastDomain().getUpperBound());
+    check_error(c.isValid());
 
-	m_activeVariables.insert(var);
-	m_changedVariables.insert(var);
+    timepoint->setBaseDomainConstraint(c);
 
-	TemporalConstraintId c = m_tnet->addTemporalConstraint(m_tnet->getOrigin(), 
-							       timepoint, 
-							       (Time) var->getBaseDomain().getLowerBound(),  
-							       (Time) var->getBaseDomain().getUpperBound());
-	check_error(c.isValid());
-
-	timepoint->setBaseDomainConstraint(c);
-
-	publish(notifyBaseDomainConstraintAdded(var, c, (Time) var->getBaseDomain().getLowerBound(), (Time) var->getBaseDomain().getUpperBound()));
-      }
-    }
+    publish(notifyBaseDomainConstraintAdded(var, 
+					    c, 
+					    (Time) var->getBaseDomain().getLowerBound(), 
+					    (Time) var->getBaseDomain().getUpperBound()));
   }
 
-  void TemporalPropagator::addTnetConstraint(const ConstraintId& constraint) {
+  void TemporalPropagator::addTemporalConstraint(const ConstraintId& constraint) {
     TempVarId start;
     TempVarId end;
     Time lb=0;
     Time ub=0;
 
-    if (constraint->getName() == LabelStr("StartEndDurationRelation")) {    
+    if (constraint->getName() == durationConstraintName()) {    
       start = constraint->getScope()[0];
       TempVarId duration = constraint->getScope()[1];
       end = constraint->getScope()[2];
 
-      lb = (Time) duration->getBaseDomain().getLowerBound();
-      ub = (Time) duration->getBaseDomain().getUpperBound();
+      lb = (Time) duration->lastDomain().getLowerBound();
+      ub = (Time) duration->lastDomain().getUpperBound();
     }
     else if (constraint->getName() == LabelStr("concurrent")) {
       start = constraint->getScope()[0];
@@ -261,13 +223,6 @@ namespace Prototype {
     publish(notifyConstraintAdded(constraint, c, lb,ub));
   }
 
-  void TemporalPropagator::handleTemporalAddition(const ConstraintId& constraint) {
-    checkAndAddTnetVariables(constraint);
-    addTnetConstraint(constraint);
-    if (constraint->getName() == LabelStr("StartEndDurationRelation")) 
-      m_constraintsForExecution.insert(constraint);    
-  }
-
   void TemporalPropagator::updateTnet() {
     // Process constraints for deletion
     for(std::set<TemporalConstraintId>::const_iterator it = m_constraintsForDeletion.begin(); it != m_constraintsForDeletion.end(); ++it) {
@@ -295,13 +250,6 @@ namespace Prototype {
     }
     m_variablesForDeletion.clear();    
 
-    // Process constraints for addition (may also add variables)
-    for(std::set<ConstraintId>::const_iterator it = m_constraintsForAddition.begin(); it != m_constraintsForAddition.end(); ++it){
-      ConstraintId constraint = *it;
-      handleTemporalAddition(constraint);
-    }
-    m_constraintsForAddition.clear();
-
     // Process variables that have changed
     for(std::set<TempVarId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
       TempVarId var = *it;
@@ -309,19 +257,19 @@ namespace Prototype {
     }
     m_changedVariables.clear();
 
-    // Finally, process any changed StartEndDuration constraints to update (narrow) the temporal constraint associated
-    for(std::set<ConstraintId>::const_iterator it = m_durationChanges.begin(); it != m_durationChanges.end(); ++it){
+    // Process constraints that have changed, or been added
+    for(std::set<ConstraintId>::const_iterator it = m_changedConstraints.begin(); it != m_changedConstraints.end(); ++it){
       ConstraintId constraint = *it;
-      updateDurationConstraint(constraint);
+      updateTemporalConstraint(constraint);
     }
-    m_durationChanges.clear();
+    m_changedConstraints.clear();
   }
 
 
   /**
    * @brief Updates the ConstrainedEngine variable for each active timepoint.
    */
-  bool TemporalPropagator::updateTempVar() {
+  void TemporalPropagator::updateTempVar() {
     for(std::set<TempVarId>::const_iterator it = m_activeVariables.begin(); it != m_activeVariables.end(); ++it){
       TempVarId var = *it;
       check_error(var.isValid());
@@ -346,7 +294,6 @@ namespace Prototype {
 	check_error(!dom.isEmpty());
       }
     }
-    return true;
   }
       
   bool TemporalPropagator::canPrecede(const TempVarId& first, const TempVarId& second) {
@@ -412,7 +359,13 @@ namespace Prototype {
     check_error(var.isValid());
     check_error(var->getIndex() != DURATION_VAR_INDEX);
 
+    if(var->getExternalEntity().isNoId()){
+      addTimepoint(var);
+      return;
+    }
+
     const TimepointId& tp = getTimepoint(var);
+
     check_error(tp.isValid());
 
     // Instead of getTimepointBounds here we'd like to get cached values
@@ -426,13 +379,24 @@ namespace Prototype {
       tp->setBaseDomainConstraint(baseDomainConstraint);
   }
 
-  void TemporalPropagator::updateDurationConstraint(const ConstraintId& constraint){
-    check_error(constraint->getName() == LabelStr("StartEndDurationRelation"));
-    const TempVarId& duration = constraint->getScope()[DURATION_VAR_INDEX];
-    Time lb = (Time) duration->lastDomain().getLowerBound();
-    Time ub = (Time) duration->lastDomain().getUpperBound();
-    const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
-    updateConstraint(duration, tnetConstraint, lb, ub);
+  void TemporalPropagator::updateTemporalConstraint(const ConstraintId& constraint){
+    // If the consttraint has no corresponding constraint in the tnet, then add it.
+    if(constraint->getExternalEntity().isNoId()){
+      addTemporalConstraint(constraint);
+      return;
+    }
+
+    // We should only handle changes for a duration constraint. Note that this may change
+    // when we have variable distance constraints in the system. Should generalize the scheme
+    // at that time.
+    if(constraint->getName() == durationConstraintName()){
+      const TempVarId& duration = constraint->getScope()[1];
+      const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
+      Time lbt=0, ubt=0;
+      tnetConstraint->getBounds(lbt, ubt);
+
+      updateConstraint(duration, tnetConstraint, lbt, ubt);
+    }
   }
 
   TemporalConstraintId TemporalPropagator::updateConstraint(const TempVarId& var, 
@@ -440,17 +404,14 @@ namespace Prototype {
 							    Time lbt,
 							    Time ubt){
     TemporalConstraintId newConstraint;
-    int lb = (int)Propagator::getCurrentDomain(var).getLowerBound();
-    int ub = (int)Propagator::getCurrentDomain(var).getUpperBound();
+    const IntervalIntDomain& dom = static_cast<const IntervalIntDomain&>(var->lastDomain());
+    double lb =0, ub=0;
+    dom.getBounds(lb, ub);
 
     check_error(lbt <= ubt);
     check_error(lb <= ub);
 
-    if (lb > lbt || ub < ubt) { // Handle restriction
-      m_tnet->narrowTemporalConstraint(tnetConstraint, lb, ub);
-      publish(notifyBoundsRestricted(var, lb, ub));
-    }
-    else if(lb < lbt || ub > ubt) { // Handle relaxation
+    if(lb < lbt || ub > ubt) { // Handle relaxation
       // think about whether we can do better here, possibly by changing
       // the condition above.  There are cases
       // where the temporal network has restricted it further so we're just
@@ -474,13 +435,21 @@ namespace Prototype {
 	target->setBaseDomainConstraint(newConstraint);
 	publish(notifyBaseDomainConstraintAdded(var, newConstraint,  (Time)lb, (Time)ub));
       }
+    } 
+    else if (lb > lbt || ub < ubt) { // Handle restriction. Retain most restricted values
+      m_tnet->narrowTemporalConstraint(tnetConstraint, (Time)lb, (Time)ub);
+      publish(notifyBoundsRestricted(var, (Time)lb, (Time)ub));
     }
-
     return newConstraint;
   }
 
   void TemporalPropagator::addListener(const TemporalNetworkListenerId& listener) {
     m_listeners.insert(listener);
+  }
+
+  const LabelStr& TemporalPropagator::durationConstraintName(){
+    static const LabelStr sl_durationConstraintName("StartEndDurationRelation");
+    return sl_durationConstraintName;
   }
 
 } //namespace

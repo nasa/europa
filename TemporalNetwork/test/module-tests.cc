@@ -8,7 +8,7 @@
 #include "../PlanDatabase/DbLogger.hh"
 #include "../ConstraintEngine/CeLogger.hh"
 #include "ObjectTokenRelation.hh"
-
+#include "TemporalNetworkLogger.hh"
 #include "IntervalToken.hh"
 #include "Timeline.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
@@ -27,6 +27,7 @@
     Id<DbLogger> dbLId; \
     if (loggingEnabled()) { \
       new CeLogger(std::cout, ce.getId()); \
+      new TemporalNetworkLogger((const TemporalPropagatorId& )ce.getPropagatorByName(LabelStr("Temporal")), std::cout); \
       dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
     } \
     if (autoClose) \
@@ -46,16 +47,16 @@ public:
 
 private:
   static bool testBasicAllocation(){
-    check_error(g_noTime() != g_infiniteTime() && g_noTime() != -g_infiniteTime() && g_infiniteTime() != -g_infiniteTime());
+    assert(g_noTime() != g_infiniteTime() && g_noTime() != -g_infiniteTime() && g_infiniteTime() != -g_infiniteTime());
     TemporalNetwork tn;
     TimepointId origin = tn.getOrigin();
     Time delta = g_noTime();
     Time epsilon = g_noTime();
     tn.getTimepointBounds(origin, delta, epsilon);
-    check_error(delta == 0 && epsilon == 0);
+    assert(delta == 0 && epsilon == 0);
 
     tn.calcDistanceBounds(origin, origin, delta, epsilon);
-    check_error(delta == 0 && epsilon == 0);
+    assert(delta == 0 && epsilon == 0);
     return true;
   }
 
@@ -69,16 +70,16 @@ private:
     TemporalConstraintId start_before_end = tn.addTemporalConstraint(b_start, b_end, 1, g_infiniteTime());
     TemporalConstraintId a_meets_c = tn.addTemporalConstraint(a_end, c_start, 0, 0);
     bool res = tn.isConsistent();
-    check_error(res);
+    assert(res);
 
     Time dist_lb, dist_ub;
     tn.calcDistanceBounds(c_start, b_end, dist_lb, dist_ub);
-    check_error(dist_lb > 0);
+    assert(dist_lb > 0);
 
     // Force failure where b meets c
     TemporalConstraintId b_meets_c = tn.addTemporalConstraint(b_end, c_start, 0, 0);
     res = tn.isConsistent();
-    check_error(!res);
+    assert(!res);
 
     // Cleanup
     tn.removeTemporalConstraint(b_meets_c);
@@ -104,13 +105,13 @@ private:
     TemporalConstraintId tango = tn.addTemporalConstraint(y, x, 200, 200);
 
     bool res = tn.isConsistent();
-    check_error(!res);
+    assert(!res);
 
     tn.removeTemporalConstraint(fromage);
     tn.removeTemporalConstraint(tango);
 
     res = tn.isConsistent();
-    check_error(res); // Consistency restored
+    assert(res); // Consistency restored
 
     TemporalConstraintId c0 = tn.addTemporalConstraint(y, x, -200, g_infiniteTime());
     TemporalConstraintId c1 = tn.addTemporalConstraint(x, z, 0, g_infiniteTime());
@@ -118,7 +119,7 @@ private:
     TemporalConstraintId c3 = tn.addTemporalConstraint(x, y, 200, g_infiniteTime());
 
     res = tn.isConsistent();
-    check_error(res);
+    assert(res);
 
     // Clean up
     tn.removeTemporalConstraint(c0);
@@ -154,7 +155,7 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
 
     ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
-    check_error(!timeline.isNoId());
+    assert(!timeline.isNoId());
 
     db.close();
 
@@ -166,8 +167,8 @@ private:
     		     IntervalIntDomain(1, 1000));
 
     t1.getDuration()->specify(IntervalIntDomain(5, 7));
-    check_error(t1.getEnd()->getDerivedDomain().getLowerBound() == 5);
-    check_error(t1.getEnd()->getDerivedDomain().getUpperBound() == 17);
+    assert(t1.getEnd()->getDerivedDomain().getLowerBound() == 5);
+    assert(t1.getEnd()->getDerivedDomain().getUpperBound() == 17);
 
     IntervalToken t2(db.getId(), 
     		     LabelStr("P2"), 
@@ -185,16 +186,16 @@ private:
     ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("before"),
                                                                         db.getConstraintEngine(),
                                                                         temp);
-    check_error(!beforeConstraint.isNoId());
+    assert(!beforeConstraint.isNoId());
 
-    check_error(t1.getStart()->getDerivedDomain().getLowerBound() == 0);
-    check_error(t1.getStart()->getDerivedDomain().getUpperBound() == 5);
-    check_error(t1.getEnd()->getDerivedDomain().getLowerBound() == 5);
-    check_error(t1.getEnd()->getDerivedDomain().getUpperBound() == 10);
-    check_error(t2.getStart()->getDerivedDomain().getLowerBound() == 5);
-    check_error(t2.getStart()->getDerivedDomain().getUpperBound() == 10);
-    check_error(t2.getEnd()->getDerivedDomain().getLowerBound() == 6);
-    check_error(t2.getEnd()->getDerivedDomain().getUpperBound() == 20);
+    assert(t1.getStart()->getDerivedDomain().getLowerBound() == 0);
+    assert(t1.getStart()->getDerivedDomain().getUpperBound() == 5);
+    assert(t1.getEnd()->getDerivedDomain().getLowerBound() == 5);
+    assert(t1.getEnd()->getDerivedDomain().getUpperBound() == 10);
+    assert(t2.getStart()->getDerivedDomain().getLowerBound() == 5);
+    assert(t2.getStart()->getDerivedDomain().getUpperBound() == 10);
+    assert(t2.getEnd()->getDerivedDomain().getLowerBound() == 6);
+    assert(t2.getEnd()->getDerivedDomain().getUpperBound() == 20);
 
     delete (Constraint*) beforeConstraint;
 
@@ -206,7 +207,7 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
 
     ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
-    check_error(!timeline.isNoId());
+    assert(!timeline.isNoId());
 
     db.close();
     
@@ -226,12 +227,14 @@ private:
 
     ce.propagate();
 
-    // check_error from propagator direcly
-    check_error (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
-    check_error (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(second.getEnd(), first.getStart()));
+    const TemporalPropagatorId& tp = (TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal"));
+
+    // assert from propagator direcly
+    assert (tp->canPrecede(first.getEnd(), second.getStart()));
+    assert (tp->canPrecede(second.getEnd(), first.getStart()));
 
     // compute from advisor
-    check_error (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
+    assert (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
 
     // restrict via specifying the domain
 
@@ -244,13 +247,13 @@ private:
     second.getEnd()->specify(dom2);
 
     bool res = ce.propagate();
-    check_error(res);
+    assert(res);
     
     // compute from propagator directly
-    check_error (!((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
-    check_error (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(second.getEnd(), first.getStart()));
+    assert (!tp->canPrecede(first.getEnd(), second.getStart()));
+    assert (tp->canPrecede(second.getEnd(), first.getStart()));
     // compute from advisor
-    check_error (!db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
+    assert (!db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     
     second.getStart()->reset();
     second.getEnd()->reset();
@@ -267,17 +270,18 @@ private:
     ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("before"),
 									db.getConstraintEngine(),
 									temp);
-    check_error(!beforeConstraint.isNoId());
+    assert(beforeConstraint.isValid());
 
     res = ce.propagate();
-    check_error(res);
+    assert(res);
     
     // compute from propagator directly
-    check_error (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
-    check_error (!((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(second.getEnd(), first.getStart()));
+    res = tp->canPrecede(first.getEnd(), second.getStart());
+    assert (res);
+    assert (!tp->canPrecede(second.getEnd(), first.getStart()));
 
     // compute from advisor
-    check_error (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
+    assert (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     
     DEFAULT_TEARDOWN();
     return true;
@@ -287,7 +291,7 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
 
     ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
-    check_error(!timeline.isNoId());
+    assert(!timeline.isNoId());
 
     db.close();
 
@@ -312,10 +316,10 @@ private:
     ce.propagate();
 
     // compute from propagator directly
-    check_error (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canFitBetween(token.getStart(), token.getEnd(), predecessor.getEnd(), successor.getStart()));
+    assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canFitBetween(token.getStart(), token.getEnd(), predecessor.getEnd(), successor.getStart()));
 
     // compute from advisor
-    check_error (db.getTemporalAdvisor()->canFitBetween(token.getId(), predecessor.getId(), successor.getId()));
+    assert (db.getTemporalAdvisor()->canFitBetween(token.getId(), predecessor.getId(), successor.getId()));
 
     DEFAULT_TEARDOWN();
     return true;

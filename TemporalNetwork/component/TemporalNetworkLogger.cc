@@ -36,12 +36,12 @@ namespace Prototype{
   }
   void TemporalNetworkLogger::notifyBoundsRestricted(const TempVarId& var, Time lb, Time ub) {
         m_os << s_loggername 
-	     <<"Bounds of "  << var->getKey() << "Restructed to -[" << lb << "," << ub << "]-" << std::endl; 
+	     <<"Bounds of "  << var->getKey() << " Restricted to -[" << lb << "," << ub << "]-" << std::endl; 
   }
 
   void TemporalNetworkLogger::notifyBoundsSame(const TempVarId& var,  const TimepointId& timepoint) {
             m_os << s_loggername 
-		 << "Bounds SAME " << timepoint->getKey() << " == " << var->getKey() << std::endl;
+		 << " Bounds SAME " << timepoint->getKey() << " == " << var->getKey() << std::endl;
   }
 
 }

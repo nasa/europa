@@ -46,15 +46,15 @@ namespace Prototype {
     friend class TimepointWrapper;
     void notifyDeleted(const TempVarId& tempVar, const TimepointId& tp);
 
-    inline static const TimepointId& getTimepoint(const TempVarId& var) {
-    check_error(var->getIndex() != DURATION_VAR_INDEX);
-    check_error(var->getExternalEntity().isValid());
-    const TimepointWrapperId wrapper(var->getExternalEntity());
-    return wrapper->getTimepoint();
-    }
+    void addTimepoint(const TempVarId& var);
+    void addTemporalConstraint(const ConstraintId& constraint);
 
-    void checkAndAddTnetVariables(const ConstraintId& constraint);
-    void addTnetConstraint(const ConstraintId& constraint);
+    inline static const TimepointId& getTimepoint(const TempVarId& var) {
+      check_error(var->getIndex() != DURATION_VAR_INDEX);
+      check_error(var->getExternalEntity().isValid());
+      const TimepointWrapperId wrapper(var->getExternalEntity());
+      return wrapper->getTimepoint();
+    }
 
     void handleTemporalAddition(const ConstraintId& constraint);
     void handleTemporalDeletion(const ConstraintId& constraint);
@@ -67,17 +67,17 @@ namespace Prototype {
     /**
      * @brief update variables in the constraint engine with changes due to Temporal Propagation
      */
-    bool updateTempVar();
+    void updateTempVar();
 
-    /*
+    /**
      * @brief Update the time point in the tnet from the given CE variable
      */
     void updateTimepoint(const TempVarId& var);
 
     /**
-     * @brief Update duration constraint in the TNET due to change in duration variable.
+     * @brief update a constraint in the tnet - before, concurrent, startEndDuration
      */
-    void updateDurationConstraint(const ConstraintId& constraint);
+    void updateTemporalConstraint(const ConstraintId& constraint);
 
     /**
      * @brief Shared method to handle update to a constraint in the temporal network.
@@ -94,20 +94,18 @@ namespace Prototype {
 					  Time ub);
 
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
-    ConstraintId m_activeConstraint;
 
     /*!< Synchronization data structures */
     std::set<TempVarId> m_activeVariables; /*!< Maintain the set of active start and end variables. Duration handled in consrinats */
     std::set<TempVarId> m_changedVariables; /*!< Manage the set of changed variables to be synchronized */
-    std::set<ConstraintId> m_constraintsForExecution; /*!< StartEndDurationRelation stored here to allow write-back of duration to CE. */
-    std::set<ConstraintId> m_durationChanges; /*!< StartEndDuration stored here if duration var changed to update TNET constraint */
-    std::set<ConstraintId> m_constraintsForAddition; /*!< Buffer insertions till we have to propagate */
+    std::set<ConstraintId> m_changedConstraints; /*!< Constraint Agenda */
     std::set<TemporalConstraintId> m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */
     std::set<EntityId> m_wrappedTimepoints;
     std::set<TemporalNetworkListenerId> m_listeners;
 
     static const int DURATION_VAR_INDEX = 2; /*!< Position in token vector of variables */
+    static const LabelStr& durationConstraintName();
   };
 }
 #endif
