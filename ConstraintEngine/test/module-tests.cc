@@ -884,6 +884,7 @@ private:
     EquivalenceClassCollection g0;
     g0.addConnection(v0.getId(), v1.getId());
     assert(g0.getGraphCount() == 1);
+    v0.specify(10);
     return true;
   }
 

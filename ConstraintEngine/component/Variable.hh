@@ -43,6 +43,19 @@ namespace Prototype
     virtual void specify(const DomainType& domain);
 
     /**
+     * @brief Special case of specify where we restrict it to a singleton
+     * @param singleTonValue to specify it to
+     * @see specify(const DomainType& domain), reset()
+     */
+    template <class ItemType>
+    void specify(const ItemType& singletonValue){
+      check_error(m_specifiedDomain.isMember(singletonValue));
+      DomainType domain(m_specifiedDomain);
+      domain.set(singletonValue);
+      specify(domain);
+    }
+
+    /**
      * @brief Retract previously specified domain restriction.
      * @see specify()
      */
