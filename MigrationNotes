@@ -1,6 +1,6 @@
 Brief Migration Notes
 
-$Id: MigrationNotes,v 1.4 2004-12-02 01:16:08 wedgingt Exp $
+$Id: MigrationNotes,v 1.5 2004-12-06 23:55:03 wedgingt Exp $
 
 This file is intended to help users of the prior Europa (in the
 NewPlan CVS tree) planning system migrate their projects to this
@@ -47,15 +47,16 @@ of the object.  (see also GNATS 2704).
 
 5. In NewPlan, label sets imply a "default ordering" heuristic based
 on the order they are given when the label set is declared.  This
-behavior is not duplicated in Europa2, for which the "default ordering"
-heuristoc would be lexicographic (based on ASCII code) due to
-internals of how the C++ classes EnumeratedDomain and LabelStr are
-implemented.
+behavior is not duplicated in Europa2, for which the "default
+ordering" heuristic would be order of creation of the corresponding
+LabelStr instance due to internals of how the C++ classes
+EnumeratedDomain and LabelStr are implemented.
 
 6. The number of plan steps for otherwise identical problems will
 almost certainly be larger with Europa2 (PLASMA) than with Europa
 (NewPlan) whenever tokens are involved due to changes in how tokens
-are supported.
+are supported and change from creation to insertion, merge, or
+rejection.
 
 7. NewPlan/ModelLoader/converter/convert2 can be used to read a DDL
 file (including any DDL files that it includes) and produce a single
@@ -75,4 +76,58 @@ PLASMA jam files, so 'jam clean' (with appropriate -s options) needs
 to be run after changing any of the compilers being used (including,
 usually, the version of the compilers).  PLASMA's independent naming
 of files resulting from the different compilation variants mitigates
-but does not remove this problem.
+but does not preclude this problem.
+
+10. In the DDL language used with Europa (CVS module name NewPlan),
+temporal constraints can only be made between master tokens and their
+slave (or subgoal) tokens, but they can also have explicit intervals.
+They are otherwise the same as in Europa2 (which will support
+intervals, but already has other, more explicit, ways of specifying
+temporal - and other - constraints).
+
+Note that these temporal relation names are the same in Europa1
+(NewPlan) and Europa2 (PLASMA); thus, this is not a "translation
+table" from DDL to NDDL, but rather a description of what the relation
+names mean in terms of actual constraints when explicit intervals are
+involved.
+
+Europa Name         Implied Constraints
+-----------         -------------------
+after               slave.end + interval = master.start
+before              master.end + interval = slave.start
+contained_by        slave.start + interval1 = master.start, master.end + interval2 = slave.end
+contains            master.start + interval1 = slave.start, slave.end + interval2 = master.end
+contains_end        master.start + interval1 = slave.end, slave.end + interval2 = master.end
+contains_start      master.start + interval1 = slave.start, slave.start + interval2 = master.end
+ends_after          slave.end + interval = master.end
+ends_after_start    slave.start + interval = master.end
+ends_before         master.end + interval = slave.end
+ends_during         slave.start + interval1 = master.end, master.end + interval2 = slave.end
+paralleled_by       slave.start + interval1 = master.start, slave.end + interval2 = master.end
+parallels           master.start + interval1 = slave.start, master.end + interval2 = slave.end
+starts_after        slave.start + interval = master.start
+starts_before       master.start + interval = slave.start
+starts_before_end   master.start + interval = slave.end
+starts_during       slave.start + interval1 = master.start, master.start + interval2 = slave.end
+
+All the intervals default to [0 +Inf] in DDL models (and presumably in
+NDDL, once it supports explicit intervals).  Thus, if no explicit
+interval is given in a DDL model, the "translation" to NDDL is simply
+to use the same temporal relation name between the token names.
+
+The names are intended to make sense when read as "Master <name> slave"
+(or "Goal <name> subgoal") or, with an explicit interval, "Master <name>
+slave by between 5 and 10 inclusive" (e.g.).
+
+Also, there are several abbreviations of commonly used temporal
+relations that would otherwise require explicit intervals.  As before,
+these have the same meaning in Europa1 and Europa2.
+
+Europa Abbreviation             Expands to
+-------------------             ----------
+any                             parallels [-Inf +Inf] [-Inf +Inf]
+ends                            ends_before [0 0]
+equal                           contains [0 0] [0 0]
+meets                           before [0 0]
+met_by                          after [0 0]
+starts                          starts_before [0 0]
