@@ -333,8 +333,14 @@ namespace Prototype {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
     if (strcmp(name, "close") == 0) {
-      // close database special case
-      m_client->close();
+      const char * identifier = element.Attribute("identifier");
+      if (identifier == NULL) {
+        // close database special case
+        m_client->close();
+        return;
+      }
+      // close object type special case
+      m_client->close(LabelStr(identifier));
       return;
     }
     if (strcmp(name, "activate") == 0) {
