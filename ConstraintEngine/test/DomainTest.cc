@@ -1,10 +1,17 @@
 #include "LabelSet.hh"
 #include "LabelStr.hh"
 #include "IntervalIntDomain.hh"
+#include "ConstraintEngine.hh"
+#include "ConstraintLibrary.hh"
+#include "DefaultPropagator.hh"
+#include "AbstractVar.hh"
+#include "ConstrainedVariable.hh"
+#include "EqualityConstraintPropagator.hh"
 
 #include <iostream>
 #include <cassert>
 #include <list>
+#include <vector>
 
 using namespace Prototype;
 using namespace std;
@@ -58,9 +65,120 @@ void outerLoopForTestEquate()
     testEquate(ls_a, ls_b);
 }
 
+void testLabelSetEqualityPerformance(const ConstraintEngineId& ce){
+  std::list<Prototype::LabelStr> values;
+  values.push_back(Prototype::LabelStr("V0"));
+  values.push_back(Prototype::LabelStr("V1"));
+  values.push_back(Prototype::LabelStr("V2"));
+  values.push_back(Prototype::LabelStr("V3"));
+  values.push_back(Prototype::LabelStr("V4"));
+  values.push_back(Prototype::LabelStr("V5"));
+  values.push_back(Prototype::LabelStr("V6"));
+  values.push_back(Prototype::LabelStr("V7"));
+  values.push_back(Prototype::LabelStr("V8"));
+  values.push_back(Prototype::LabelStr("V9"));
+  LabelSet labelSet(values);
+
+
+  VariableImpl<LabelSet> v0(ce, labelSet);
+  VariableImpl<LabelSet> v1(ce, labelSet);
+  VariableImpl<LabelSet> v2(ce, labelSet);
+  VariableImpl<LabelSet> v3(ce, labelSet);
+  VariableImpl<LabelSet> v4(ce, labelSet);
+  VariableImpl<LabelSet> v5(ce, labelSet);
+  VariableImpl<LabelSet> v6(ce, labelSet);
+  VariableImpl<LabelSet> v7(ce, labelSet);
+  VariableImpl<LabelSet> v8(ce, labelSet);
+  VariableImpl<LabelSet> v9(ce, labelSet);
+
+  std::vector<ConstrainedVariableId> variables;
+
+  variables.push_back(v0.getId());
+  variables.push_back(v1.getId());
+  EqualConstraint c0(ce, variables);
+
+  variables.clear();
+  variables.push_back(v1.getId());
+  variables.push_back(v2.getId());
+  EqualConstraint c1(ce, variables);
+
+  variables.clear();
+  variables.push_back(v2.getId());
+  variables.push_back(v3.getId());
+  EqualConstraint c2(ce, variables);
+
+  variables.clear();
+  variables.push_back(v3.getId());
+  variables.push_back(v4.getId());
+  EqualConstraint c3(ce, variables);
+
+  variables.clear();
+  variables.push_back(v4.getId());
+  variables.push_back(v5.getId());
+  EqualConstraint c4(ce, variables);
+
+  variables.clear();
+  variables.push_back(v5.getId());
+  variables.push_back(v6.getId());
+  EqualConstraint c5(ce, variables);
+
+  variables.clear();
+  variables.push_back(v6.getId());
+  variables.push_back(v7.getId());
+  EqualConstraint c6(ce, variables);
+
+  variables.clear();
+  variables.push_back(v7.getId());
+  variables.push_back(v8.getId());
+  EqualConstraint c7(ce, variables);
+
+  variables.clear();
+  variables.push_back(v8.getId());
+  variables.push_back(v9.getId());
+  EqualConstraint c8(ce, variables);
+
+  variables.clear();
+  variables.push_back(v0.getId());
+  variables.push_back(v1.getId());
+  variables.push_back(v2.getId());
+  variables.push_back(v3.getId());
+  variables.push_back(v4.getId());
+  variables.push_back(v5.getId());
+  variables.push_back(v6.getId());
+  variables.push_back(v7.getId());
+  variables.push_back(v8.getId());
+  variables.push_back(v9.getId());
+
+  VariableImpl<LabelSet>*  p_v0 = (VariableImpl<LabelSet>*) v0.getId();
+
+  for(int i = 10; i > 2; i--){
+    LabelStr label = values.front();
+    values.pop_front();
+    labelSet.remove(label);
+    VariableImpl<LabelSet>*  p_v = (VariableImpl<LabelSet>*) variables[i-1];
+    p_v->specify(labelSet);
+    ce->propagate();
+    assert(ce->constraintConsistent());
+    assert(p_v0->getDerivedDomain().getSize() == i-1);
+  }
+}
+
+void outerLoopLabelSetEqualConstraint(bool useEquivalenceClasses){
+  ConstraintEngine ce;
+
+  if(useEquivalenceClasses)
+    new EqualityConstraintPropagator(ce.getId());
+  else
+    new DefaultPropagator(ce.getId());
+
+  for (int i=0;i<1000; i++)
+    testLabelSetEqualityPerformance(ce.getId());
+}
+
 void main()
 {
-  outerLoopForTestEquate();
-  outerLoopForTestIntersection();
+  //outerLoopForTestEquate();
+  //outerLoopForTestIntersection();
+  outerLoopLabelSetEqualConstraint(true);
   cout << "Finished" << endl;
 }

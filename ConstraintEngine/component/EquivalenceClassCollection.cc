@@ -52,13 +52,19 @@ namespace Prototype{
     const NodeId n2 = getNode(v2);
     n1->addNeighbour(n2);
     n2->addNeighbour(n1);
-    s_nextCycle++;
-    recomputeSingleGraph(n1);
+    if(!recomputeIfNecessary()){ // Most commonly this will be true, meaning no full reprop was required.
+      s_nextCycle++;
+      recomputeSingleGraph(n1);
+    }
   }
 
   void EquivalenceClassCollection::removeConnection(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2){
     NodeId n1 = getNode(v1);
     NodeId n2 = getNode(v2);
+
+    check_error(n1->getGraph() == n2->getGraph());
+    int graph = n1->getGraph();
+    m_graphsByKey.erase(graph);
 
     n1->removeNeighbour(n2);
     n2->removeNeighbour(n1);
@@ -104,9 +110,9 @@ namespace Prototype{
       return it->second;
   }
 
-  void EquivalenceClassCollection::recomputeIfNecessary(){
+  bool EquivalenceClassCollection::recomputeIfNecessary(){
     if(!m_requiresUpdate)
-      return;
+      return false;
 
     // Reset the flag and previously cached results
     m_requiresUpdate = false;
@@ -121,6 +127,8 @@ namespace Prototype{
       if(!node->hasBeenUpdated(s_nextCycle)) // means we have a new graph to build.
 	recomputeSingleGraph(node);
     }
+
+    return true;
   }
 
   void EquivalenceClassCollection::recomputeSingleGraph(const NodeId& node){
@@ -158,6 +166,13 @@ namespace Prototype{
   void EquivalenceClassCollection::removeNode(const ConstrainedVariableId& variable){
     check_error(m_nodesByVar.find(variable) != m_nodesByVar.end());
     m_nodesByVar.erase(variable);
+  }
+
+  bool EquivalenceClassCollection::isValid() const{
+    // Make sure all constrained variables in the map are valid.
+
+    // Make sure all constrained variables in the graphs are valid
+    return true;
   }
 
   int EquivalenceClassCollection::s_nextCycle(0);

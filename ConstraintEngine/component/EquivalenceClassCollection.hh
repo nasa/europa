@@ -105,15 +105,21 @@ namespace Prototype{
 
     /**
      * @brief May recompute the set of graphs if necessary.
+     * @return true if it was necessary to recompute all the graphs again (i..e. fullReprop required). Otherwise false.
      * @see m_requiresUpdate, recomputeSingleGraph
      */
-    void recomputeIfNecessary();
+    bool recomputeIfNecessary();
 
     /**
      * @brief Recompute the graph for this ndoe and all connected nodes. Accomplished by depth first search as in Europa code.
      * @param node The node to start from
      */
     void recomputeSingleGraph(const NodeId& node);
+
+    /**
+     * @brief Helper method to ensure integrity of the data
+     */
+    bool isValid() const;
 
     std::map<ConstrainedVariableId, NodeId> m_nodesByVar; /*!< Table to map constrained variables to their representative node in the graph */
     std::map<int, std::set<ConstrainedVariableId> > m_graphsByKey; /*!< Map of the graph key to the set of constrained variables which are 

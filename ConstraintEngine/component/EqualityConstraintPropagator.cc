@@ -12,6 +12,7 @@ namespace Prototype {
     : Propagator(constraintEngine), m_fullReprop(false), m_active(false){}
 
   EqualityConstraintPropagator::~EqualityConstraintPropagator(){}
+
   void EqualityConstraintPropagator::execute() {
     check_error(!m_active);
     m_active = true;
@@ -35,10 +36,15 @@ namespace Prototype {
   }
 
   void EqualityConstraintPropagator::handleConstraintAdded(const ConstraintId& constraint){
-    check_error(m_fullReprop == false);
     check_error(!m_active);
     const ConstrainedVariableId& x = constraint->getScope()[0];
     const ConstrainedVariableId& y = constraint->getScope()[1];
+
+    // Remove old equivalence classes for these variables from the agenda since they are abut to be merged.
+    m_eqClassAgenda.erase(m_eqClassCollection.getGraphKey(x));
+    m_eqClassAgenda.erase(m_eqClassCollection.getGraphKey(y));
+
+    // Now add the merged equivalence class back to the agenda
     m_eqClassCollection.addConnection(x,y);
     m_eqClassAgenda.insert(m_eqClassCollection.getGraphKey(x));
   }
@@ -57,6 +63,8 @@ namespace Prototype {
 							const DomainListener::ChangeType& changeType){
     if(!m_fullReprop && !m_active){
       int eqClassKey = m_eqClassCollection.getGraphKey(variable);
+      check_error(m_eqClassCollection.getGraphVariables(eqClassKey).size() > 0);
+      check_error(m_eqClassCollection.getGraphVariables(eqClassKey).find(variable) != m_eqClassCollection.getGraphVariables(eqClassKey).end());
       m_eqClassAgenda.insert(eqClassKey);
     }
   }
