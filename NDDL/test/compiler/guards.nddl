@@ -1,5 +1,5 @@
 enum Locations {Hill, Rock, Lander};
-enum StringEnum {'ONE', 'TWO', 'THREE'};
+enum StringEnum {'"ONE"', '"TWO"', '"THREE"'};
 
 class Foo{
  int arg1;
@@ -76,7 +76,7 @@ Foo::tokenWithParameters{
  if(location_arg == {Hill, Lander}){
   meets(basicToken t6);
  }
- if(strEnum_arg == {'ONE', 'THREE'}){
+ if(strEnum_arg == {'"ONE"', '"THREE"'}){
   meets(basicToken t6);
  }
 }
