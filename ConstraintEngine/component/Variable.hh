@@ -65,6 +65,14 @@ namespace Prototype {
     const DomainType& getDerivedDomain();
 
     /**
+     * @brief Return the current domain.
+     * Return the last computed derived domain.
+     * @see getCurrentDomain()
+     */
+    const DomainType& getLastDomain() const;
+
+
+    /**
      * @brief Return the last computed derived domain.
      * @see ConstrainedVariable::lastDomain()
      */
@@ -170,6 +178,12 @@ namespace Prototype {
 
   template<class DomainType>
   AbstractDomain& Variable<DomainType>::getCurrentDomain() {
+    check_error(validate());
+    return(m_derivedDomain);
+  }
+
+  template<class DomainType>
+  const DomainType& Variable<DomainType>::getLastDomain() const {
     check_error(validate());
     return(m_derivedDomain);
   }
