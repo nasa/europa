@@ -43,6 +43,7 @@ class Position {
     Location from;
     Location to;
     neq(from, to);
+    eq(duration, 1);
   }  
 }
 
