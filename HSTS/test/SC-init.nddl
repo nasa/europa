@@ -1,0 +1,32 @@
+// ../../../ModuleTests/Parser/gnats/SC.ddl
+
+#include "../../NDDL/core/Plasma.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
+#include "SC.nddl"
+
+PlannerConfig world = new PlannerConfig(0, 100, 1000);
+
+Te s = new Te();
+
+close();
+
+goal(Te___st.Problem3C g11);
+  g11.activate();
+  g11.start.specify(0);
+  g11.end.specify([1 99]);
+  g11.duration.specify([1 99]);
+  g11.z.specify(-120);
+  g11.a.specify([5 +inf]);
+  g11.b.specify([-inf -125]);
+
+goal(Te___st.Problem3C_Int g38);
+  g38.activate();
+  g38.start.specify([1 99]);
+  g38.end.specify(100);
+  g38.duration.specify([1 99]);
+  g38.z.specify(-120);
+  g38.a.specify([5 +inf]);
+  g38.b.specify([-inf -125]);
+
+g11 meets g38; // key=53
+g11 before g38; // key=63

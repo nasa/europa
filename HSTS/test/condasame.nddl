@@ -1,0 +1,27 @@
+// ../../../ModuleTests/Parser/gnats/condasame.ddl
+
+class Test___Variable {
+  predicate Predicate {
+    int x;
+    int y;
+    bool z;
+
+    condasame(0, x, y, z);
+  }
+
+  Test __DDL__object;
+  Test___Variable(Test object) {
+    __DDL__object = object;
+  }
+}
+
+class Test {
+  Test___Variable Variable;
+  Test() {
+    Variable = new Test___Variable(this);
+  }
+}
+
+Test___Variable::Predicate {
+}
+

@@ -1,0 +1,21 @@
+// ../../../ModuleTests/Parser/gnats/sum.ddl
+
+#include "../../NDDL/core/Plasma.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
+#include "sum.nddl"
+
+PlannerConfig world = new PlannerConfig(-268435455, 268435455, 1000);
+
+Sum S = new Sum();
+
+close();
+
+goal(Sum___A.V g10);
+  g10.activate();
+  g10.start.specify(-268435455);
+  g10.end.specify([0 +inf]);
+  g10.duration.specify([268435455 +inf]);
+  g10.sum.specify(0);
+  g10.x.specify(0);
+  g10.y.specify(0);
+

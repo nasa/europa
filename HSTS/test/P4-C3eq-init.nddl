@@ -1,0 +1,88 @@
+// ../../../ModuleTests/Parser/gnats/P4-C3eq.ddl
+
+#include "../../NDDL/core/Plasma.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
+#include "P4-C3eq.nddl"
+
+PlannerConfig world = new PlannerConfig(0, 100, 1000);
+
+P4C3 T = new P4C3();
+
+close();
+
+goal(P4C3___A.Ia g35);
+  g35.activate();
+  g35.start.specify(0);
+  g35.end.specify([2 96]);
+  g35.duration.specify([2 96]);
+
+goal(P4C3___A.P g56);
+  g56.activate();
+  g56.start.specify([2 96]);
+  g56.end.specify([4 98]);
+  g56.duration.specify([2 96]);
+  g56.d.specify(4);
+
+goal(P4C3___A.Ia g80);
+  g80.activate();
+  g80.start.specify([4 98]);
+  g80.end.specify(100);
+  g80.duration.specify([2 96]);
+
+goal(P4C3___Ap.Wa g104);
+  g104.activate();
+  g104.start.specify(0);
+  g104.end.specify([1 +inf]);
+  g104.duration.specify([1 +inf]);
+  g104.dx.specify([0 +inf]);
+  g104.dy.specify([-inf 0]);
+
+goal(P4C3___B.Ib g133);
+  g133.activate();
+  g133.start.specify(0);
+  g133.end.specify([2 96]);
+  g133.duration.specify([2 96]);
+
+goal(P4C3___B.C g154);
+  g154.activate();
+  g154.start.specify([2 96]);
+  g154.end.specify([4 98]);
+  g154.duration.specify([2 96]);
+  g154.d.specify(-3);
+
+goal(P4C3___B.Ib g178);
+  g178.activate();
+  g178.start.specify([4 98]);
+  g178.end.specify(100);
+  g178.duration.specify([2 96]);
+
+goal(P4C3___Bp.Wb g202);
+  g202.activate();
+  g202.start.specify(0);
+  g202.end.specify([1 +inf]);
+  g202.duration.specify([1 +inf]);
+  g202.dx.specify([0 +inf]);
+  g202.dy.specify([-inf 0]);
+
+goal(P4C3___R.S g231);
+  g231.activate();
+  g231.start.specify(0);
+  g231.end.specify([1 +inf]);
+  g231.duration.specify([1 +inf]);
+  g231.x.specify([0 +inf]);
+  g231.y.specify(0);
+  g231.ox.specify(0);
+  g231.oy.specify(0);
+  g231.adx.specify([0 +inf]);
+  g231.ady.specify(0);
+  g231.bdx.specify([0 +inf]);
+  g231.bdy.specify(0);
+
+g35 meets g56; // key=67
+g35 before g56; // key=76
+g56 meets g80; // key=89
+g56 before g80; // key=99
+g133 meets g154; // key=165
+g133 before g154; // key=174
+g154 meets g178; // key=187
+g154 before g178; // key=197

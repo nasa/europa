@@ -83,4 +83,7 @@ RunEUROPATest robotTests : req1.nddl ;
 #         R2-files-R21-IDD2.nddl R2-files-R21-IDD3.nddl R2-files-R21-PMA1.nddl R2-files-R21-PMA2.nddl
 #         mer-1.nddl mer-bill-2.nddl mer-bill.nddl mer-idd1.nddl mer-idd2.nddl mer-idd3.nddl mer-pma-comm.nddl mer-pma1.nddl mer-pma2.nddl ;
 
+RunEUROPATest gnatsTests : C3-init.nddl NoBranchBug-init.nddl P4-C3-init.nddl P4-C3eq-init.nddl SC-init.nddl condasame-init.nddl
+        rover-fixed-init.nddl sum-init.nddl ;
+
 } # PLASMA_READY
