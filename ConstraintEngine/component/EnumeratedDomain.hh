@@ -28,7 +28,7 @@ namespace Prototype {
     EnumeratedDomain(bool isNumeric = true);
 
     /**
-     * @brief Constructor
+     * @brief Constructor.
      * @param values The initial set of values to populate the domain.
      * @param closed Indicate if the set is initially closed.
      * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
@@ -41,7 +41,7 @@ namespace Prototype {
 		     bool isNumeric = true);
 
     /**
-     * @brief Constructor
+     * @brief Constructor.
      * @param value Constructs a singleton domain. Closed on construction.
      * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
      * @param listener Allows connection of a listener to change events on the domain. 
@@ -51,24 +51,24 @@ namespace Prototype {
 		     bool isNumeric = true);
 
     /**
-     * @brief Copy constructor
+     * @brief Copy constructor.
      * @param org The source domain.
      */
     EnumeratedDomain(const EnumeratedDomain& org);
 
     /**
-     * @brief Get the type of the domain to aid in type checking
+     * @brief Get the type of the domain to aid in type checking.
      * @see AbstractDomain::DomainType
      */
     virtual const DomainType& getType() const;
 
     /**
-     * @brief Determine if the domain is finite
+     * @brief Determine if the domain is finite.
      */
     bool isFinite() const;
 
     /**
-     * @brief Check if the domain is numeric
+     * @brief Check if the domain is numeric.
      */
     bool isNumeric() const;
 
@@ -101,8 +101,7 @@ namespace Prototype {
     int getSize() const;
 
     /**
-     * @brief Add an elemenet to the set. This is only permitted on dynamic domains.
-     *
+     * @brief Add an element to the set.
      * @param value The value to insert. If not currently present it will be inserted. Otherwise it will be
      * ignored. If inserted, this operation constitutes a domain relaxation and will result in a relaxtion event
      * being raised.
@@ -112,7 +111,7 @@ namespace Prototype {
     virtual void insert(double value);
 
     /**
-     * @brief Remove the given elemenet form the domain.
+     * @brief Remove the given element form the domain.
      * @param value. The value to be removed. If present, removal will generate a value removal event
      * @see DomainListener::VALUE_REMOVED
      */
@@ -138,7 +137,7 @@ namespace Prototype {
     void set(double value);
 
     /**
-     * @brief Reset the domain to the target value
+     * @brief Reset the domain to the target value.
      */
     void reset(const AbstractDomain& dom);
 
@@ -161,7 +160,8 @@ namespace Prototype {
     bool equate(AbstractDomain& dom);
 
     /**
-     * @brief Return the singleton value. Only callable when it ius in fact a singleton.
+     * @brief Return the singleton value.
+     * @note Only callable when it is in fact a singleton.
      * @return A copy of the stored (and encoded) singleton value.
      */
     double getSingletonValue() const;
@@ -175,29 +175,28 @@ namespace Prototype {
     void getValues(std::list<double>& results) const;
 
     /**
-     * @brief Access upper bound
+     * @brief Access upper bound.
      */
     double getUpperBound() const;
 
     /**
-     * @brief Access lower bound
+     * @brief Access lower bound.
      */
     double getLowerBound() const;
 
     /**
-     * @brief Access both bounds in a convenience method, and indicates if the domain is infinite
-     * @param lb update this value with the lower bound
-     * @param ub update this value with the upper bound
+     * @brief Access both bounds in a convenience method, and indicates if the domain is infinite.
+     * @param lb update this value with the lower bound.
+     * @param ub update this value with the upper bound.
      * @return true if !isFinite()
      */
     bool getBounds(double& lb, double& ub) const;
 
     /**
      * @brief Test if the given value is a member of the set.
-     *
-     * Not allowed to call this if the domain is empty
      * @param value The value to test
      * @return true if present, otherwise false.
+     * @note Not allowed to call this if the domain is empty
      */
     bool isMember(double value) const;
 
@@ -232,9 +231,10 @@ namespace Prototype {
     bool difference(const AbstractDomain& dom);
 
     /**
-     * @brief Assign the values from the given domain, to this domain. Can only be called
-     * on domains that have no listeners attached, since it will not cause propagation. It is
-     * more of a utility.
+     * @brief Assign the values from the given domain, to this domain.
+     * @note Can only be called on domains that have no listeners
+     * attached, since it will not cause propagation. It is more of a
+     * utility.
      */
     AbstractDomain& operator=(const AbstractDomain& dom);
 
@@ -253,6 +253,11 @@ namespace Prototype {
     bool intersects(const AbstractDomain& dom) const;
 
     void operator>>(ostream& os) const;
+
+    /**
+     * @brief Copy the concrete C++ object into new memory and return a pointer to it.
+     */
+    virtual EnumeratedDomain *copy() const;
 
   protected:
 

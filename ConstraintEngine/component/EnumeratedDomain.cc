@@ -47,10 +47,12 @@ namespace Prototype {
     return(m_isNumeric);
   }
 
+  // What if it's dynamic? --wedgingt 2004 Mar 3
   bool EnumeratedDomain::isSingleton() const {
     return(m_values.size() == 1);
   }
 
+  // What if it's dynamic? --wedgingt 2004 Mar 3
   bool EnumeratedDomain::isEmpty() const {
     return(m_values.empty());
   }
@@ -333,7 +335,7 @@ namespace Prototype {
     if (isEmpty())
       notifyChange(DomainListener::EMPTIED);
     else
-      if(isSingleton())
+      if (isSingleton())
         notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
       else
         notifyChange(DomainListener::VALUE_REMOVED);
@@ -419,6 +421,12 @@ namespace Prototype {
         os << ",";
     }
     os << "}";
+  }
+
+  EnumeratedDomain *EnumeratedDomain::copy() const {
+    EnumeratedDomain *ptr = new EnumeratedDomain(*this);
+    check_error(ptr != 0);
+    return(ptr);
   }
 
 } /* namespace Prototype */
