@@ -19,7 +19,6 @@ SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA CBPlanner ;
 SubInclude PLASMA TemporalNetwork ;
 SubInclude PLASMA NDDL ;
-SubInclude PLASMA AgentDatabase ;
 SubInclude PLASMA System ;
 SubInclude PLASMA HSTS ;
 
