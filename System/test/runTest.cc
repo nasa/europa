@@ -17,6 +17,12 @@ SchemaId schema;
 
 //#define PERFORMANCE
 
+extern void testLangInit(const Prototype::PlanDatabaseId& db,
+                         const Prototype::DecisionManagerId& dm,
+                         const Prototype::ConstraintEngineId& ce,
+                         const Prototype::RulesEngineId& re);
+extern void testLangDeinit();
+
 const char* TX_LOG = "TransactionLog.xml";
 const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
 bool replay = true;
@@ -44,10 +50,15 @@ bool runPlanner(){
     ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
     check_error(maxPlannerSteps.isValid());
     int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
-      
+    
+    testLangInit(db1.planDatabase, db1.planner->getDecisionManager(),
+                 db1.constraintEngine, db1.rulesEngine);
+
     int res = db1.planner->run(steps);
 
     PlanDatabaseWriter::write(db1.planDatabase, std::cout);
+
+    testLangDeinit();
 
     assert(res == CBPlanner::PLAN_FOUND);
 
@@ -70,7 +81,6 @@ bool runPlanner(){
       std::string s2 = os2.str();
       assert(s1 == s2);
     }
-
     return true;
 }
 
