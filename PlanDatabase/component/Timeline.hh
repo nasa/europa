@@ -13,8 +13,8 @@ namespace Prototype {
     enum Policy {EARLIEST = 0,
 		 LATEST};
 
-    Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
-    Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName);
+    Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
+    Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open = false);
     virtual ~Timeline();
 
     void getOrderingChoices(const TokenId& token, std::vector<TokenId>& results);

@@ -44,11 +44,11 @@ namespace Prototype {
 	return false;
   }
 
-  Timeline::Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
-    : Object(planDatabase, type, name){}
+  Timeline::Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+    : Object(planDatabase, type, name, true){ if (!open) close();}
 
-  Timeline::Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName)
-    : Object(parent, type, localName){}
+  Timeline::Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+    : Object(parent, type, localName, true){ if (!open) close();}
 
   Timeline::~Timeline(){
     // Clean up outstanding constraints
