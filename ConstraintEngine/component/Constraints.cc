@@ -152,27 +152,15 @@ namespace Prototype {
       m_currentDomain(getCurrentDomain(variable)),
       m_executionCount(0) {
     check_error(superset.isDynamic() || !superset.isEmpty());
-
-    // Why is this making the last call twice?
-    // And why not use m_currentDomain, which has just been set?
-    // --wedgingt 2004 Feb 24
-    check_error(getCurrentDomain(variable).getType() == superset.getType() ||
-		(getCurrentDomain(variable).isEnumerated() &&
-                 getCurrentDomain(variable).isEnumerated()));
-
+    check_error(m_currentDomain.getType() == superset.getType() ||
+                (m_currentDomain.isEnumerated() &&
+                 superset.isEnumerated()));
     if (m_currentDomain.isEnumerated())
       m_superSetDomain = new EnumeratedDomain((const EnumeratedDomain&) superset);
     else
-      if (superset.getType() == AbstractDomain::INT_INTERVAL)
-        m_superSetDomain = new IntervalIntDomain((const IntervalIntDomain&) superset);
-      else
-        if (superset.getType() == AbstractDomain::REAL_INTERVAL)
-          m_superSetDomain = new IntervalDomain((const IntervalDomain&) superset);
-        else
-          if (superset.getType() == AbstractDomain::BOOL)
-            m_superSetDomain = new BoolDomain((const BoolDomain&) superset);
-          else
-            assertTrue(false);
+      m_superSetDomain = superset.copy();
+    check_error(m_superSetDomain != 0);
+    check_error(AbstractDomain::canBeCompared(m_currentDomain, *m_superSetDomain));
   }
 
   SubsetOfConstraint::~SubsetOfConstraint() {
@@ -180,13 +168,7 @@ namespace Prototype {
   }
 
   void SubsetOfConstraint::handleExecute() {
-    // Why can't this be done in the constructor? --wedgingt 2004 Feb 24
-    check_error(AbstractDomain::canBeCompared(m_currentDomain, *m_superSetDomain));
-
-    if (m_currentDomain.isEnumerated())
-      ((EnumeratedDomain&)m_currentDomain).intersect((const EnumeratedDomain&) *m_superSetDomain);
-    else
-      ((IntervalDomain&)m_currentDomain).intersect((const IntervalDomain&) *m_superSetDomain);
+    m_currentDomain.intersect(*m_superSetDomain);
     m_isDirty = false;
     m_executionCount++;
   }
@@ -279,16 +261,18 @@ namespace Prototype {
 
     if (domx.isSingleton() && domy.isMember(domx.getSingletonValue())) {
       if (domy.isEnumerated() || domy.isSingleton()
-          || (domy.getType() == AbstractDomain::INT_INTERVAL &&
-              (domx.isMember(domy.getLowerBound())
-               || domx.isMember(domy.getUpperBound()))))
-      domy.remove(domx.getSingletonValue());
+          || domy.getType() == AbstractDomain::BOOL
+          || (domy.getType() == AbstractDomain::INT_INTERVAL
+              && (domx.isMember(domy.getLowerBound())
+                  || domx.isMember(domy.getUpperBound()))))
+        domy.remove(domx.getSingletonValue());
     } else
       if (domy.isSingleton() && domx.isMember(domy.getSingletonValue())) {
         if (domx.isEnumerated() || domx.isSingleton()
-          || (domx.getType() == AbstractDomain::INT_INTERVAL &&
-              (domy.isMember(domx.getLowerBound())
-               || domy.isMember(domx.getUpperBound()))))
+            || domx.getType() == AbstractDomain::BOOL
+            || (domx.getType() == AbstractDomain::INT_INTERVAL
+                && (domy.isMember(domx.getLowerBound())
+                    || domy.isMember(domx.getUpperBound()))))
           domx.remove(domy.getSingletonValue());
       }
   }
@@ -602,7 +586,6 @@ namespace Prototype {
   void CondAllSameConstraint::handleExecute() {
     BoolDomain& boolDom = static_cast<BoolDomain&>(getCurrentDomain(m_variables[0]));
     check_error(!boolDom.isDynamic());
-    AbstractDomain& dom1 = getCurrentDomain(m_variables[1]);
 
     if (!boolDom.isSingleton()) {
       // Condition is not singleton, so try to restrict it:
@@ -640,7 +623,7 @@ namespace Prototype {
           if (i == 1)
             single = current.getSingletonValue();
           else
-            if (fabs(single - current.getSingletonValue()) > getCurrentDomain(m_variables[1]).minDelta()) {
+            if (fabs(single - current.getSingletonValue()) >= getCurrentDomain(m_variables[1]).minDelta()) {
               // Two singletons with different values: can't be all same, so:
               canProveTrue = false;
               boolDom.remove(true);
@@ -659,30 +642,61 @@ namespace Prototype {
     // to the other variables in the scope.
     if (boolDom.isSingleton()) {
       if (!boolDom.getSingletonValue()) {
-        // Singleton false: ensure at least one other can be a value
-        // different than another var.  Unlike the singleton true
-        // case, if any are dynamic, we can do nothing.
+        // Singleton false: ensure at least one other var can have a
+        // value different than some third var.  If any are dynamic
+        // or more than one is not singleton, none can be restricted.
 
-        // If there's only one non-singleton variable and all of the
-        // singletons have the same value, that singleton value could
-        // be trimmed from the non-singleton's domain, but that is
-        // relatively expensive to check for and can eliminate at most
-        // one member from one variable's domain.
-
-        AbstractDomain& common = getCurrentDomain(m_variables[1]);
-        if (common.isDynamic() || !common.isSingleton())
+        unsigned int j = 1;
+        while (j < ARG_COUNT - 1 && !getCurrentDomain(m_variables[j]).isDynamic()
+               && !getCurrentDomain(m_variables[j]).isSingleton())
+          ++j;
+        AbstractDomain& domj = getCurrentDomain(m_variables[j]);
+        if (domj.isDynamic() || !domj.isSingleton())
           return; // Can ignore relax events until condition var is relaxed.
-        double single = common.getSingletonValue();
-        for (unsigned int i = 2; i < ARG_COUNT; i++)
-          if (getCurrentDomain(m_variables[i]).isDynamic()
-              || !getCurrentDomain(m_variables[i]).isSingleton()
-              || getCurrentDomain(m_variables[i]).getSingletonValue() != single) {
+        double single = domj.getSingletonValue();
+        unsigned int foundOneToTrim = 0;
+        for (unsigned int i = 1; i < ARG_COUNT; i++) {
+          if (i == j)
+            continue;
+          AbstractDomain& domi = getCurrentDomain(m_variables[i]);
+          if (domi.isDynamic())
             return; // Can ignore relax events until condition var is relaxed.
-          }
-        // All are singleton and identical to single, so provoke an inconsistency:
-        boolDom.remove(false);
+          if (domi.isSingleton() && domi.getSingletonValue() != single)
+            return; // Can ignore relax events until condition var is relaxed.
+          if (domi.isSingleton())
+            continue; // Identical to first singleton.
+          if (!domi.isMember(single))
+            return; // Can ignore relax events until condition var is relaxed.
+          if (foundOneToTrim > 0) // Two that overlap single but aren't singleton, so ...
+            return; // ... either might or might not overlap in the future.
+          foundOneToTrim = i;
+        }
+
+        // No dynamic domains and at most one that is not singleton with member single.
+        if (foundOneToTrim == 0) {
+          // All are singleton with member single, so condition cannot be false,
+          //   provoking an inconsistency:
+          boolDom.remove(false);
+          return;
+        }
+
+        // Exactly one other var is not singleton with lone member single and
+        // even that one var's domain contains single as a member, so remove
+        // single to enforce the constraint.
+        AbstractDomain& domToTrim = getCurrentDomain(m_variables[foundOneToTrim]);
+        // But it can only be trimmed if it is enumerated (including boolean) or
+        // if it is an integer interval with one of the end points equal to
+        // single, which is painful to check.
+        if (domToTrim.isEnumerated() || domToTrim.getType() == AbstractDomain::BOOL
+            || (domToTrim.getType() == AbstractDomain::INT_INTERVAL
+                && (domj.isMember(domToTrim.getLowerBound())
+                    || domj.isMember(domToTrim.getUpperBound()))))
+          domToTrim.remove(single);
+        else
+          ; // Can ignore relax events until condition var is relaxed.
         return;
       } else {
+
         // Singleton true: force all other vars in scope to be equated if _any_ of them are not dynamic.
         unsigned int i = 1;
         for ( ; i < ARG_COUNT; i++)
@@ -690,15 +704,16 @@ namespace Prototype {
             break;
         if (i == ARG_COUNT) // All of them are dynamic; can't reduce any.
           return; // Can ignore relax events until condition var is relaxed.
+        AbstractDomain& dom1 = getCurrentDomain(m_variables[1]);
         for (bool changedOne = true; changedOne; ) {
           changedOne = false;
           for (i = 2; i < ARG_COUNT; i++) {
             changedOne = dom1.equate(getCurrentDomain(m_variables[i])) || changedOne;
             if (dom1.isEmpty())
-              return; // inconsistent: can't all be the same.
+              return; // inconsistent: cannot all be the same but condition var requires they are.
           }
         }
-      }
+      } // else of if (!boolDom.getSingletonValue()): singleton false
     } // else of if (boolDom.isSingleton())
   } // end of CondAllSameConstraint::handleExecute()
 
@@ -933,5 +948,32 @@ namespace Prototype {
       } // for i = firstNonDynamic; i < ARG_COUNT; i++
     } // for changedOne = true; changedOne;
   } // end of CondAllDiffConstraint::handleExecute()
+
+  MemberImplyConstraint::MemberImplyConstraint(const LabelStr& name,
+                                               const LabelStr& propagatorName,
+                                               const ConstraintEngineId& constraintEngine,
+                                               const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      ARG_COUNT(variables.size()) {
+    check_error(ARG_COUNT == 4);
+    check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[0]),
+                                              getCurrentDomain(m_variables[1])));
+    check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[2]),
+                                              getCurrentDomain(m_variables[3])));
+  }
+
+  void MemberImplyConstraint::handleExecute() {
+    AbstractDomain& domA(getCurrentDomain(m_variables[0]));
+    AbstractDomain& domB(getCurrentDomain(m_variables[1]));
+    AbstractDomain& domC(getCurrentDomain(m_variables[2]));
+    AbstractDomain& domD(getCurrentDomain(m_variables[3]));
+
+    assertFalse(domA.isEmpty() || domB.isEmpty() || domC.isEmpty() || domD.isEmpty());
+    
+    if (domA.isDynamic() || domB.isDynamic() || domD.isDynamic())
+      return;
+    if (domA.isSubsetOf(domB))
+      (void)domC.intersect(domD);
+  }
 
 } // end namespace Prototype
