@@ -40,6 +40,8 @@ namespace Prototype{
 
     virtual bool isFinite() const;
 
+    virtual bool isNumeric() const;
+
     virtual const DomainType& getType() const;
 
     /**

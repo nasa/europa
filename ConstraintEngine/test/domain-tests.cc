@@ -465,6 +465,7 @@ namespace Prototype {
     }
 
     static bool testDifference(){
+
       EnumeratedDomain dom0;
       dom0.insert(1);
       dom0.insert(3);
@@ -480,7 +481,6 @@ namespace Prototype {
       IntervalIntDomain dom2(5, 100);
       assert(dom0.difference(dom2));
       assert(dom0.getUpperBound() == 3);
-
 
       IntervalIntDomain dom3(0, 100);
       assert(dom0.difference(dom3));

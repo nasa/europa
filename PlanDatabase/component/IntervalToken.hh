@@ -14,7 +14,7 @@ namespace Prototype {
 		  bool rejectable,
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
-		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, MAX_INT),
+		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, PLUS_INFINITY),
 		  const LabelStr& objectName = Token::noObject(),
 		  bool closed = true);
 
@@ -22,7 +22,7 @@ namespace Prototype {
 		  const LabelStr& predicateName, 
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
-		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, MAX_INT),
+		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, PLUS_INFINITY),
 		  const LabelStr& objectName = Token::noObject(),
 		  bool closed = true);
 

@@ -277,6 +277,13 @@ namespace Prototype {
     return isSingleton();
   }
 
+  /**
+   * @brief IntervalDomains are always numeric.
+   */
+  bool IntervalDomain::isNumeric() const {
+    return true;
+  }
+
   const AbstractDomain::DomainType& IntervalDomain::getType() const{
     static const AbstractDomain::DomainType s_type = REAL_INTERVAL;
     return s_type;

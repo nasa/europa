@@ -84,11 +84,11 @@ namespace Prototype {
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain(const std::list<ELEMENT_TYPE>& labels, bool closed, const DomainListenerId& listener)
-    : EnumeratedDomain(convert(labels), closed, listener){}
+    : EnumeratedDomain(convert(labels), closed, listener, false){}
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain(const ELEMENT_TYPE& value, const DomainListenerId& listener)
-    : EnumeratedDomain(value, listener){}
+    : EnumeratedDomain(value, listener, false){}
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain(const Domain& org)
@@ -96,7 +96,7 @@ namespace Prototype {
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain()
-    : EnumeratedDomain(){}
+    : EnumeratedDomain(false){}
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::~Domain(){}

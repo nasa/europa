@@ -1,5 +1,4 @@
 #include "EnumeratedDomain.hh"
-#include <algorithm>
 
 namespace Prototype {
 
@@ -8,20 +7,24 @@ namespace Prototype {
     return s_type;
   }
 
-  EnumeratedDomain::EnumeratedDomain()
-    :AbstractDomain(false, true, DomainListenerId::noId()){}
+  EnumeratedDomain::EnumeratedDomain(bool isNumeric)
+    :AbstractDomain(false, true, DomainListenerId::noId()), m_isNumeric(isNumeric){}
 
-  EnumeratedDomain::EnumeratedDomain(const std::list<double>& values, bool closed, const DomainListenerId& listener)
-    :AbstractDomain(false, true, listener){
+  EnumeratedDomain::EnumeratedDomain(const std::list<double>& values,
+				     bool closed,
+				     const DomainListenerId& listener, 
+				     bool isNumeric)
+    :AbstractDomain(false, true, listener), m_isNumeric(isNumeric){
     for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
       insert(*it);
     if(closed)
       close();
   }
 
-  EnumeratedDomain::EnumeratedDomain(double value, 
-				     const DomainListenerId& listener)
-    :AbstractDomain(false, true, listener){
+  EnumeratedDomain::EnumeratedDomain(double value,
+				     const DomainListenerId& listener,
+				     bool isNumeric)
+    :AbstractDomain(false, true, listener), m_isNumeric(isNumeric){
     insert(value);
     close();
   }
@@ -29,11 +32,16 @@ namespace Prototype {
   EnumeratedDomain::EnumeratedDomain(const EnumeratedDomain& org)
     : AbstractDomain(org.m_closed, true, DomainListenerId::noId()) {
     m_values = org.m_values;
+    m_isNumeric = org.m_isNumeric;
   }
 
   bool EnumeratedDomain::isFinite() const {
     check_error(!isDynamic());
-    return true;
+    return (true); // Always finite, even if bounds are infinite, since there are always a finite number of values to select.
+  }
+
+  bool EnumeratedDomain::isNumeric() const {
+    return m_isNumeric;
   }
 
   bool EnumeratedDomain::isSingleton() const {return (m_values.size() == 1);}
@@ -56,7 +64,7 @@ namespace Prototype {
   }
 
   void EnumeratedDomain::insert(double value){
-    check_error(value <= PLUS_INFINITY && value >= MINUS_INFINITY);
+    check_error(check_value(value));
     std::pair<std::set<double>::iterator, bool> result = m_values.insert(value);
     check_error(result.second || isDynamic()); // Ensure it has been added - i.e. was not present.
 
@@ -99,7 +107,7 @@ namespace Prototype {
 
   bool EnumeratedDomain::equate(AbstractDomain& dom){
     check_error(isDynamic() || dom.isDynamic() || (!isEmpty() && !dom.isEmpty()));
-    check_error(dom.isEnumerated());
+    check_error(dom.isNumeric() == isNumeric()); // Confirm they are treated the same way for numbers
 
     if(dom.isInterval()){
       bool changed = intersect(dom);
@@ -245,11 +253,12 @@ namespace Prototype {
     lb = *m_values.begin();
     ub = *(--m_values.end());
     check_error(lb <= ub);
-    return false; // ALWAYS FINITE
+    return (!isNumeric() || lb == MINUS_INFINITY || ub == PLUS_INFINITY);
   }
 
   bool EnumeratedDomain::intersect(const AbstractDomain& dom){
     check_error(isDynamic() || dom.isDynamic() || (!isEmpty() && !dom.isEmpty()));
+    check_error(isNumeric() == dom.isNumeric());
 
     bool changed = false;
     if(dom.isInterval()){
@@ -311,6 +320,8 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::difference(const AbstractDomain& dom){
+    check_error(isNumeric() == dom.isNumeric());
+
     // Trivial implementation, for all members of this domain that
     // are present in dom, remove them.
     bool value_removed = false;
@@ -344,6 +355,7 @@ namespace Prototype {
 
   bool EnumeratedDomain::isSubsetOf(const AbstractDomain& dom) const{
     check_error(dom.isDynamic() || !dom.isEmpty());
+    check_error(isNumeric() == dom.isNumeric());
 
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it){
       if(!dom.isMember(*it))
@@ -354,6 +366,7 @@ namespace Prototype {
 
   bool EnumeratedDomain::intersects(const AbstractDomain& dom) const{
     check_error(dom.isDynamic() || !dom.isEmpty());
+    check_error(isNumeric() == dom.isNumeric());
 
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it){
       if(dom.isMember(*it))
@@ -376,4 +389,5 @@ namespace Prototype {
     }
     os << "}";
   }
+
 }

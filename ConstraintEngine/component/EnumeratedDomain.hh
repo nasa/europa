@@ -25,26 +25,30 @@ namespace Prototype{
     /**
      * @brief Constructs an initially empty and open domain
      */
-    EnumeratedDomain();
+    EnumeratedDomain(bool isNumeric = true);
 
     /**
      * @brief Constructor
      * @param values The initial set of values to populate the domain.
      * @param closed Indicate if the set is initially closed.
+     * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
      * @param listener Allows connection of a listener to change events on the domain. 
      * @see AbstractDomain::isDynamic()
      */
     EnumeratedDomain(const std::list<double>& values, 
 		     bool closed = true,
-		     const DomainListenerId& listener = DomainListenerId::noId());
+		     const DomainListenerId& listener = DomainListenerId::noId(),
+		     bool isNumeric = true);
 
     /**
      * @brief Constructor
      * @param value Constructs a singleton domain. Closed on construction.
+     * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
      * @param listener Allows connection of a listener to change events on the domain. 
      */
-    EnumeratedDomain(double value, 
-		     const DomainListenerId& listener = DomainListenerId::noId());
+    EnumeratedDomain(double value,
+		     const DomainListenerId& listener = DomainListenerId::noId(), 
+		     bool isNumeric = true);
 
     /**
      * @brief Copy constructor
@@ -62,6 +66,11 @@ namespace Prototype{
      * @brief Determine if the domain is finite
      */
     bool isFinite() const;
+
+    /**
+     * @brief Check if the domain is numeric
+     */
+    bool isNumeric() const;
 
     /**
      * @see AbstractDomain::isSingleton()
@@ -248,6 +257,7 @@ namespace Prototype{
 
   protected:
     std::set<double> m_values; /*!< Holds the contents from which the set membership is then derived. */
+    bool m_isNumeric;
   };
 }
 #endif

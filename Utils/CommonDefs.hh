@@ -44,8 +44,8 @@ namespace Prototype {
   /*!<  g_maxFiniteTime()  is 268435455 */
 
   #define MAX_INT g_maxInt()
-  #define PLUS_INFINITY g_infinity()
-  #define MINUS_INFINITY -g_infinity()
+  #define PLUS_INFINITY g_infiniteTime()
+  #define MINUS_INFINITY -g_infiniteTime()
   #define EPSILON g_epsilon() /*!< Used when computing differences on REAL NUMBERS. Smallest increment */
 }
 #endif
