@@ -15,6 +15,7 @@
 #include "HSTSNoBranchCondition.hh"
 #include "HSTSPlanIdReader.hh"
 #include "HSTSOpenDecisionManager.hh"
+#include "AtSubgoalRule.hh"
 
 extern bool loggingEnabled();
 
@@ -346,8 +347,8 @@ namespace PLASMA {
     Variable<IntervalIntDomain> var1(ce.getId(), IntervalIntDomain(), true, var1Name);
     Variable<IntervalIntDomain> var2(ce.getId(), IntervalIntDomain(), true, LabelStr("AnObj.APred.Var2"));
 
-    std::cout << " var1 name = " << var1.getName().c_str() << std::endl;
-    std::cout << " var2 name = " << var2.getName().c_str() << std::endl;
+    //std::cout << " var1 name = " << var1.getName().c_str() << std::endl;
+    //    std::cout << " var2 name = " << var2.getName().c_str() << std::endl;
 
     cond.initialize(noBranchSpec);
 
@@ -1349,7 +1350,7 @@ namespace PLASMA {
     initHeuristicsSchema();
     HSTSHeuristicsReader hreader(heuristics.getNonConstId());
     hreader.read("../component/Heuristics-HSTS.xml");
-    heuristics.write();
+    //    heuristics.write();
 
     HSTSNoBranchId noBranchSpec(new HSTSNoBranch());
     HSTSPlanIdReader pireader(noBranchSpec);
@@ -1361,6 +1362,49 @@ namespace PLASMA {
     HSTSOpenDecisionManagerId odm = (new HSTSOpenDecisionManager(dm, heuristics.getId()))->getId();
     dm->setOpenDecisionManager(odm);
 
+    Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
+    Timeline ins(db.getId(),LabelStr("Instrument"),LabelStr("ins1"));
+    Timeline nav(db.getId(),LabelStr("Navigator"),LabelStr("nav1"));
+
+    Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
+    Object loc2(db.getId(),LabelStr("Location"),LabelStr("Loc2"));
+    Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
+    Object loc4(db.getId(),LabelStr("Location"),LabelStr("Loc4"));
+    Object loc5(db.getId(),LabelStr("Location"),LabelStr("Loc5"));
+
+    db.close();
+
+    std::list<ObjectId> results;
+    db.getObjectsByType("Location",results);
+    ObjectDomain allLocs(results,"Location");
+
+    IntervalToken tok1(db.getId(),LabelStr("Commands.TakeSample"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,100), IntervalIntDomain(1,100), "com1", false);
+    tok1.addParameter(allLocs, LabelStr("rock"));
+    tok1.close();
+    ConstrainedVariableId vrock = tok1.getVariable("rock");
+    vrock->specify(db.getObject("Loc3"));
+
+    IntervalToken tok2(db.getId(),LabelStr("Instrument.TakeSample"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,200), IntervalIntDomain(1,300), "ins1", false);
+    tok2.addParameter(allLocs, LabelStr("rock"));
+    tok2.close();
+
+    IntervalToken tok3(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,200), IntervalIntDomain(1,300), "nav1", false);
+    tok3.addParameter(allLocs, LabelStr("location"));
+    tok3.close();
+
+    IntervalToken tok4(db.getId(),LabelStr("Navigator.Going"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,200), IntervalIntDomain(1,300), "nav1", false);
+    tok4.addParameter(allLocs, LabelStr("from"));
+    tok4.addParameter(allLocs, LabelStr("to"));
+    tok4.close();
+
+    assert(tok4.getParameters().size() == 2);
+
+    AtSubgoalRule r("Navigator.At");
+
+    CBPlanner::Status res = planner.run();
+    assert(res == CBPlanner::PLAN_FOUND);
+
     return true;
   }
+
 }
