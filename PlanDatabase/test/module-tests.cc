@@ -81,6 +81,7 @@ public:
     runTest(testObjectVariables);
     runTest(testObjectFilteringConstraint);
     runTest(testFilterAndConstrain);
+    runTest(testObjectTokenRelation);
     return true;
   }
 private:
@@ -272,6 +273,27 @@ private:
     assert(v1.getDerivedDomain().isSingleton());
     assert(v1.getDerivedDomain().getSingletonValue() == (NUM_OBJECTS - 3 ));
 
+    return true;
+  }
+
+  static testObjectTokenRelation(){
+    // 1. Create 2 objects
+
+    // 2. Create 1 token.
+
+    // Confirm not added to the object
+
+    // 3. Activate token. (NO subgoals)
+
+    // 4. Specify tokens object variable to a ingletone
+
+    // Confirm added to the object
+
+    // 5. propagate
+
+    // 6. reset object variables domain.
+
+    // Confirm it is no longer part of the object
     return true;
   }
 };
