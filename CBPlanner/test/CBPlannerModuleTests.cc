@@ -334,11 +334,11 @@ namespace PLASMA {
     HSTSNoBranchCondition cond(dm.getId());
     assert(dm.getConditions().size() == 1);
 
-    HSTSNoBranch noBranchSpec(db.getSchema());
+    HSTSNoBranchId noBranchSpec(new HSTSNoBranch(db.getSchema()));
 
     const LabelStr var1Name("AnObj.APred.Var1");
 
-    noBranchSpec.addNoBranch(var1Name);
+    noBranchSpec->addNoBranch(var1Name);
 
     Variable<IntervalIntDomain> var1(ce.getId(), IntervalIntDomain(), true, var1Name);
     Variable<IntervalIntDomain> var2(ce.getId(), IntervalIntDomain(), true, LabelStr("AnObj.APred.Var2"));
@@ -350,6 +350,8 @@ namespace PLASMA {
 
     assert(!cond.test(var1.getId()));
     assert(cond.test(var2.getId()));
+
+    noBranchSpec.remove();
 
     return true;
   }
@@ -1291,7 +1293,9 @@ namespace PLASMA {
   bool testReaderImpl(HSTSHeuristics& heuristics) {
     initHeuristicsSchema(Schema::instance());
 
-    HSTSHeuristicsReader reader(heuristics, Schema::instance());
+    HSTSHeuristicsId hId(&heuristics); 
+
+    HSTSHeuristicsReader reader(hId, Schema::instance());
 
     reader.read("../component/Heuristics-HSTS.xml");
     
@@ -1304,28 +1308,29 @@ namespace PLASMA {
 
     initHeuristicsSchema(Schema::instance());
 
-    HSTSNoBranch noBranchSpec(Schema::instance());
+    HSTSNoBranchId noBranchSpec(new HSTSNoBranch(Schema::instance()));
     HSTSPlanIdReader reader(noBranchSpec);
     reader.read("../component/NoBranch.pi");
 
     return true;
   }
 
-  bool testHSTSNoBranchImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm) {
+  bool testHSTSNoBranchImpl(ConstraintEngine &ce, PlanDatabase &db, CBPlanner& planner) {
     initHeuristicsSchema(Schema::instance());
 
-    HSTSNoBranch noBranchSpec(Schema::instance());
+    HSTSNoBranchId noBranchSpec(new HSTSNoBranch(Schema::instance()));
     HSTSPlanIdReader reader(noBranchSpec);
     reader.read("../component/NoBranch.pi");
 
-    HSTSNoBranchCondition cond(dm.getId());
-    assert(dm.getConditions().size() == 1);
+    DecisionManagerId dm = planner.getDecisionManager();
+    HSTSNoBranchCondition cond(dm);
+    assert(dm->getConditions().size() == 4);
 
-    Variable<IntervalIntDomain> var1(ce.getId(), IntervalIntDomain(), true, LabelStr("Navigator.Going.2"));
+    Variable<IntervalIntDomain> var1(ce.getId(), IntervalIntDomain(), true, LabelStr("Commands.TakeSample.rock"));
     Variable<IntervalIntDomain> var2(ce.getId(), IntervalIntDomain(), true, LabelStr("AnObj.APred.Var2"));
 
-    std::cout << " var1 name = " << var1.getName().c_str() << std::endl;
-    std::cout << " var2 name = " << var2.getName().c_str() << std::endl;
+    //    std::cout << " var1 name = " << var1.getName().c_str() << std::endl;
+    //    std::cout << " var2 name = " << var2.getName().c_str() << std::endl;
 
     cond.initialize(noBranchSpec);
 

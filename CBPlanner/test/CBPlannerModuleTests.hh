@@ -79,6 +79,7 @@ namespace PLASMA {
 
   void initHeuristicsSchema(const SchemaId& rover);
 
-  bool testHSTSNoBranchImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm);
+  bool testHSTSNoBranchImpl(ConstraintEngine &ce, PlanDatabase& db, CBPlanner& planner);
+
 }
 #endif
