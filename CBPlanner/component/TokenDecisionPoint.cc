@@ -13,8 +13,7 @@ namespace PLASMA {
 
   const bool TokenDecisionPoint::assign(const ChoiceId& choice) { 
     check_error (choice.isValid());
-    Choice::ChoiceType type = choice->getType();
-    check_error(type == Choice::VALUE);
+    check_error(choice->getType() == Choice::VALUE);
 
     const TokenId& tok = getToken();
     LabelStr state = Id<ValueChoice>(choice)->getValue();
