@@ -11,6 +11,8 @@
 
 //#define _PROTOTYPE_FAST_VALUE_
 
+const bool ALWAYS_FAILS = false;
+
 #ifndef _PROTOTYPE_FAST_VALUE_
 #define check_error(cond) assert(cond);
 #else

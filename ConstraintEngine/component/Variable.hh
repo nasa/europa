@@ -30,7 +30,7 @@ namespace Prototype
      */
     Variable(const ConstraintEngineId& constraintEngine, const DomainType& baseDomain);
 
-    ~Variable();
+    virtual ~Variable();
 
 
     /**

@@ -4,6 +4,8 @@
 
 #include "ConstraintEngine.hh"
 #include "DefaultPropagator.hh"
+#include "ConstraintLibrary.hh"
+#include "Constraints.hh"
 
 using namespace Prototype;
 
@@ -35,9 +37,10 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
 
 #define runTest(test, name) { \
   cout << "      " << name; \
+  int id_count = Europa::IdTable::size();\
   bool result = test(); \
   DefaultEngineAccessor::reset(); \
-  if(result && Europa::IdTable::size() == 0) \
+  if(result && Europa::IdTable::size() == id_count) \
     cout << " passed." << endl; \
   else \
     cout << " FAILED." << endl; \
@@ -51,6 +54,9 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
     cout << name << " FAILED." << endl; \
 }
 
-
+// Register constraint Factories
+REGISTER_UNARY(SubsetOfConstraint, "SubsetOf");
+REGISTER_NARY(EqualConstraint, "Equal");
+REGISTER_NARY(AddEqualConstraint, "AddEqual");
 
 #endif

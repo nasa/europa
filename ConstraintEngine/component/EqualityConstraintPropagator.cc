@@ -1,6 +1,6 @@
 #include "EqualityConstraintPropagator.hh"
 #include "Constraint.hh"
-#include "ConstraintLibrary.hh"
+#include "Constraints.hh"
 #include "LabelSet.hh"
 #include "IntervalIntDomain.hh"
 #include "IntervalRealDomain.hh"

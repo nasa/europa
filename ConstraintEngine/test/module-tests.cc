@@ -6,7 +6,7 @@
  */
 #include "TestSupport.hh"
 #include "Variable.hh"
-#include "ConstraintFactory.hh"
+#include "Constraints.hh"
 #include "ConstraintLibrary.hh"
 #include "../Libraries/IdTable.hh"
 #include "EquivalenceClassCollection.hh"
@@ -710,13 +710,22 @@ class FactoryTest
 {
 public:
   static bool test() {
-    runTest(test1, "test1");
+    runTest(testAllocation, "testAllocation");
     return true;
   }
 
 private:
-  static bool test1(){
-    ConstraintFactory factory("sum:3:int:int:double");
+  static bool testAllocation(){
+    std::vector<ConstrainedVariableId> variables;
+    // v0 == v1
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v0.getId());
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
+    variables.push_back(v1.getId());
+    ConstraintId c0 = ConstraintLibrary::createConstraint("Equal", ENGINE, variables);    
+    ENGINE->propagate();
+    assert(v0.getDerivedDomain().getSingletonValue() == 1);
+    delete (Constraint*) c0;
     return true;
   }
 };
