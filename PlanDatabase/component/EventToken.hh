@@ -20,6 +20,7 @@ namespace PLASMA {
 	       bool closed = true);
 
     EventToken(const TokenId& master,
+	       const LabelStr& relation,
 	       const LabelStr& predicateName,
 	       const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 	       const LabelStr& objectName = Token::noObject(),

@@ -24,6 +24,7 @@ namespace PLASMA{
   }
 
   IntervalToken::IntervalToken(const TokenId& m_master, 
+			       const LabelStr& m_relation,
 			       const LabelStr& predicateName,
 			       const IntervalIntDomain& startBaseDomain,
 			       const IntervalIntDomain& endBaseDomain,
@@ -31,6 +32,7 @@ namespace PLASMA{
 			       const LabelStr& objectName,
 			       bool closed)
     :Token(m_master, 
+	   m_relation,
 	   predicateName, 
 	   durationBaseDomain,
 	   objectName,

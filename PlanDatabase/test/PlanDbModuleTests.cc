@@ -174,8 +174,8 @@ namespace PLASMA {
       TokenId token = (new IntervalToken(planDb, name, true))->getId();
       return token;
     }
-    TokenId createInstance(const TokenId& master, const LabelStr& name) const{
-      TokenId token = (new IntervalToken(master, name))->getId();
+    TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const{
+      TokenId token = (new IntervalToken(master, relation, name))->getId();
       return token;
     }
   };
@@ -764,31 +764,31 @@ namespace PLASMA {
                                     IntervalIntDomain(1, 1)))->getId();
     t1->activate();
   
-    TokenId t2 = (new IntervalToken(t0.getId(), 
+    TokenId t2 = (new IntervalToken(t0.getId(), "any",
                                     DEFAULT_PREDICATE(), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
-    TokenId t3 = (new IntervalToken(t0.getId(), 
+    TokenId t3 = (new IntervalToken(t0.getId(), "any",
                                     DEFAULT_PREDICATE(), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
-    TokenId t4 = (new IntervalToken(t0.getId(), 
+    TokenId t4 = (new IntervalToken(t0.getId(), "any", 
                                     DEFAULT_PREDICATE(), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
-    TokenId t5 = (new IntervalToken(t1, 
+    TokenId t5 = (new IntervalToken(t1, "any", 
                                     DEFAULT_PREDICATE(), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
-    TokenId t6 = (new EventToken(t0.getId(), 
+    TokenId t6 = (new EventToken(t0.getId(), "any", 
                                  DEFAULT_PREDICATE(), 
                                  IntervalIntDomain(0, 1)))->getId();
   
@@ -1279,7 +1279,7 @@ namespace PLASMA {
   bool testTokenFactoryImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
     TokenId master = TokenFactory::createInstance(db, DEFAULT_PREDICATE());
     master->activate();
-    TokenId slave = TokenFactory::createInstance(master, DEFAULT_PREDICATE());
+    TokenId slave = TokenFactory::createInstance(master, DEFAULT_PREDICATE(), "any");
     assert(slave->getMaster() == master); 
     return true;
   }
@@ -1756,40 +1756,40 @@ namespace PLASMA {
     TokenId t1 = db->getClient()->createToken(DEFAULT_PREDICATE().c_str());
     t1->activate();
 
-    TokenId t0_0 = (new IntervalToken(t0, 
+    TokenId t0_0 = (new IntervalToken(t0, "any", 
                                       DEFAULT_PREDICATE(), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_0->activate();
 
-    TokenId t0_1 = (new IntervalToken(t0, 
+    TokenId t0_1 = (new IntervalToken(t0, "any",  
                                       DEFAULT_PREDICATE(), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_1->activate();
 
-    TokenId t0_2 = (new IntervalToken(t0, 
+    TokenId t0_2 = (new IntervalToken(t0, "any", 
                                       DEFAULT_PREDICATE(), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_2->activate();
 
-    TokenId t1_0 = (new IntervalToken(t1, 
+    TokenId t1_0 = (new IntervalToken(t1, "any", 
                                       DEFAULT_PREDICATE(), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t1_0->activate();
 
-    TokenId t0_1_0 = (new EventToken(t0_1, 
+    TokenId t0_1_0 = (new EventToken(t0_1, "any", 
                                      DEFAULT_PREDICATE(), 
                                      IntervalIntDomain(0, 1)))->getId();
     t0_1_0->activate();
 
-    TokenId t0_1_1 = (new EventToken(t0_1, 
+    TokenId t0_1_1 = (new EventToken(t0_1, "any", 
                                      DEFAULT_PREDICATE(), 
                                      IntervalIntDomain(0, 1)))->getId();
     t0_1_1->activate();

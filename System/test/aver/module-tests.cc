@@ -77,8 +77,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  NddlWorld::initialState::initialState(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  NddlWorld::initialState::initialState(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -192,8 +192,8 @@ namespace NDDL {
     }
   }
   
-  Location::NotTracked::NotTracked(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Location::NotTracked::NotTracked(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -226,8 +226,8 @@ namespace NDDL {
     }
   }
   
-  Location::trackstart::trackstart(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Location::trackstart::trackstart(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -260,8 +260,8 @@ namespace NDDL {
     }
   }
   
-  Location::Tracked::Tracked(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Location::Tracked::Tracked(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -294,8 +294,8 @@ namespace NDDL {
     }
   }
   
-  Location::trackstop::trackstop(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Location::trackstop::trackstop(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -404,8 +404,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  Position::At::At(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Position::At::At(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -438,8 +438,8 @@ namespace NDDL {
     }
   }
   
-  Position::navigate::navigate(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Position::navigate::navigate(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -480,9 +480,9 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Position$At$0, Position$At$0$0, Position.At, "k9-initial.nddl,52");
   
   void Position$At$0$0::handleExecute() {
-    slave(Position::navigate, Position.navigate, a);
+    slave(Position::navigate, Position.navigate, a, "meets");
     meets(this, a);
-    slave(Position::navigate, Position.navigate, b);
+    slave(Position::navigate, Position.navigate, b, "met_by");
     met_by(this, b);
     {
       std::vector<ConstrainedVariableId> vars;
@@ -510,9 +510,9 @@ namespace NDDL {
   
   void Position$navigate$1$0::handleExecute() {
     objectVar(Path, path, true);
-    slave(Position::At, Position.At, a);
+    slave(Position::At, Position.At, a, "meets");
     meets(this, a);
-    slave(Position::At, Position.At, b);
+    slave(Position::At, Position.At, b, "met_by");
     met_by(this, b);
     declareFilter(Path,path);
     allocateFilterCondition(path, Location, var(getId(),std::string("from")), m_from, eq);
@@ -564,8 +564,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  Tracker::TrackingOff::TrackingOff(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Tracker::TrackingOff::TrackingOff(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -582,8 +582,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  Tracker::trackloadgroup::trackloadgroup(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Tracker::trackloadgroup::trackloadgroup(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -600,8 +600,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  Tracker::LandmarksDefined::LandmarksDefined(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Tracker::LandmarksDefined::LandmarksDefined(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -618,8 +618,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  Tracker::StartTracking::StartTracking(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Tracker::StartTracking::StartTracking(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -636,8 +636,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  Tracker::TrackingOn::TrackingOn(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Tracker::TrackingOn::TrackingOn(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -654,8 +654,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  Tracker::trackfreeze::trackfreeze(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Tracker::trackfreeze::trackfreeze(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -672,8 +672,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  Tracker::TrackingFrozen::TrackingFrozen(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Tracker::TrackingFrozen::TrackingFrozen(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -690,8 +690,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  Tracker::trackunfreeze::trackunfreeze(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  Tracker::trackunfreeze::trackunfreeze(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -733,8 +733,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  OpportunisticScience::OppSciIdle::OppSciIdle(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  OpportunisticScience::OppSciIdle::OppSciIdle(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -751,8 +751,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  OpportunisticScience::oppscidefineproc::oppscidefineproc(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  OpportunisticScience::oppscidefineproc::oppscidefineproc(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -769,8 +769,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  OpportunisticScience::OppSciProcDefined::OppSciProcDefined(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  OpportunisticScience::OppSciProcDefined::OppSciProcDefined(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -787,8 +787,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  OpportunisticScience::oppscisetparams::oppscisetparams(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  OpportunisticScience::oppscisetparams::oppscisetparams(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -805,8 +805,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  OpportunisticScience::OppSciParamsSet::OppSciParamsSet(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  OpportunisticScience::OppSciParamsSet::OppSciParamsSet(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -829,8 +829,8 @@ namespace NDDL {
     }
   }
   
-  OpportunisticScience::oppscilooknow::oppscilooknow(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  OpportunisticScience::oppscilooknow::oppscilooknow(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -867,8 +867,8 @@ namespace NDDL {
     }
   }
   
-  OpportunisticScience::OppSciDoneLookNow::OppSciDoneLookNow(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  OpportunisticScience::OppSciDoneLookNow::OppSciDoneLookNow(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -905,8 +905,8 @@ namespace NDDL {
     }
   }
   
-  OpportunisticScience::oppscigetstatus::oppscigetstatus(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  OpportunisticScience::oppscigetstatus::oppscigetstatus(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -962,8 +962,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  CHAMP::IPIdle::IPIdle(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  CHAMP::IPIdle::IPIdle(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -980,8 +980,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  CHAMP::ipgetname::ipgetname(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  CHAMP::ipgetname::ipgetname(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -1006,8 +1006,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  CHAMP::IPHaveName::IPHaveName(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  CHAMP::IPHaveName::IPHaveName(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -1032,8 +1032,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  CHAMP::ipsettarget::ipsettarget(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  CHAMP::ipsettarget::ipsettarget(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -1058,8 +1058,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  CHAMP::IPTargetSet::IPTargetSet(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  CHAMP::IPTargetSet::IPTargetSet(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -1084,8 +1084,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  CHAMP::ipplaceinstrument::ipplaceinstrument(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  CHAMP::ipplaceinstrument::ipplaceinstrument(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -1110,8 +1110,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  CHAMP::IPDonePlaceInstrument::IPDonePlaceInstrument(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  CHAMP::IPDonePlaceInstrument::IPDonePlaceInstrument(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   
@@ -1136,8 +1136,8 @@ namespace NDDL {
     handleDefaults();
   }
   
-  CHAMP::ipgetstatus::ipgetstatus(const TokenId& parent, const LabelStr& name)
-   : NddlToken(parent, name) {
+  CHAMP::ipgetstatus::ipgetstatus(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+    : NddlToken(parent, relation, name) {
     handleDefaults();
   }
   

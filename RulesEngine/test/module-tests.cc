@@ -39,7 +39,7 @@ private:
       : RuleInstance(rule, token, planDb) {}
 
     void handleExecute(){
-      m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
+      m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
       addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), m_onlySlave->getStart()));
     }
 
@@ -89,7 +89,7 @@ NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& toke
   : RuleInstance(rule, token, planDb, token->getObject()) {}
 
 void NestedGuards_0_Root::handleExecute(){
-  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
+  m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
   addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), m_onlySlave->getStart()));
   addChildRule(new NestedGuards_0_0(m_id, m_token->getStart(), 10)); /*!< Add child context with guards - start == 10 */
   addChildRule(new NestedGuards_0_1(m_id, m_onlySlave->getObject())); /*!< Add child context with guards - object set to singleton */
@@ -99,7 +99,7 @@ NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId& parentInstance, const C
   : RuleInstance(parentInstance, guard, value){}
 
 void NestedGuards_0_0::handleExecute(){
-  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
+  m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
   addConstraint(LabelStr("eq"), makeScope(m_token->getStart(), m_onlySlave->getEnd())); // Place before
 }
 
@@ -107,7 +107,7 @@ NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId& parentInstance, const C
   : RuleInstance(parentInstance, guard){}
 
 void NestedGuards_0_1::handleExecute(){
-  m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
+  m_onlySlave = addSlave(new IntervalToken(m_token, "met_by",  LabelStr("AllObjects.Predicate")));
   addConstraint(LabelStr("eq"), makeScope(m_token->getStart(), m_onlySlave->getEnd())); // Place before
 }
 
@@ -157,7 +157,7 @@ void LocalVariableGuard_0_Root::handleExecute(){
 }
 
 void LocalVariableGuard_0_0::handleExecute(){
-  addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
+  addSlave(new IntervalToken(m_token, "any", LabelStr("AllObjects.Predicate")));
 }
 
 #define DEFAULT_SETUP(ce, db, autoClose) \

@@ -63,7 +63,7 @@ namespace NDDL {
     class initialState : public NddlToken {
     public:
       initialState(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      initialState(const TokenId& parent, const LabelStr& name);
+      initialState(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(NddlWorld::initialState, NddlWorld.initialState);
       
@@ -93,7 +93,7 @@ namespace NDDL {
     class NotTracked : public NddlToken {
     public:
       NotTracked(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      NotTracked(const TokenId& parent, const LabelStr& name);
+      NotTracked(const TokenId& parent, const LabelStr& relation,  const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Location::NotTracked, Location.NotTracked);
       
@@ -104,7 +104,7 @@ namespace NDDL {
     class trackstart : public NddlToken {
     public:
       trackstart(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      trackstart(const TokenId& parent, const LabelStr& name);
+      trackstart(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Location::trackstart, Location.trackstart);
       
@@ -115,7 +115,7 @@ namespace NDDL {
     class Tracked : public NddlToken {
     public:
       Tracked(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      Tracked(const TokenId& parent, const LabelStr& name);
+      Tracked(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Location::Tracked, Location.Tracked);
       
@@ -126,7 +126,7 @@ namespace NDDL {
     class trackstop : public NddlToken {
     public:
       trackstop(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      trackstop(const TokenId& parent, const LabelStr& name);
+      trackstop(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Location::trackstop, Location.trackstop);
       
@@ -169,7 +169,7 @@ namespace NDDL {
     class At : public NddlToken {
     public:
       At(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      At(const TokenId& parent, const LabelStr& name);
+      At(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Position::At, Position.At);
       
@@ -180,7 +180,7 @@ namespace NDDL {
     class navigate : public NddlToken {
     public:
       navigate(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      navigate(const TokenId& parent, const LabelStr& name);
+      navigate(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Position::navigate, Position.navigate);
       
@@ -220,7 +220,7 @@ namespace NDDL {
     class TrackingOff : public NddlToken {
     public:
       TrackingOff(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      TrackingOff(const TokenId& parent, const LabelStr& name);
+      TrackingOff(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Tracker::TrackingOff, Tracker.TrackingOff);
       
@@ -230,7 +230,7 @@ namespace NDDL {
     class trackloadgroup : public NddlToken {
     public:
       trackloadgroup(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      trackloadgroup(const TokenId& parent, const LabelStr& name);
+      trackloadgroup(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Tracker::trackloadgroup, Tracker.trackloadgroup);
       
@@ -240,7 +240,7 @@ namespace NDDL {
     class LandmarksDefined : public NddlToken {
     public:
       LandmarksDefined(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      LandmarksDefined(const TokenId& parent, const LabelStr& name);
+      LandmarksDefined(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Tracker::LandmarksDefined, Tracker.LandmarksDefined);
       
@@ -250,7 +250,7 @@ namespace NDDL {
     class StartTracking : public NddlToken {
     public:
       StartTracking(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      StartTracking(const TokenId& parent, const LabelStr& name);
+      StartTracking(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Tracker::StartTracking, Tracker.StartTracking);
       
@@ -260,7 +260,7 @@ namespace NDDL {
     class TrackingOn : public NddlToken {
     public:
       TrackingOn(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      TrackingOn(const TokenId& parent, const LabelStr& name);
+      TrackingOn(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Tracker::TrackingOn, Tracker.TrackingOn);
       
@@ -270,7 +270,7 @@ namespace NDDL {
     class trackfreeze : public NddlToken {
     public:
       trackfreeze(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      trackfreeze(const TokenId& parent, const LabelStr& name);
+      trackfreeze(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Tracker::trackfreeze, Tracker.trackfreeze);
       
@@ -280,7 +280,7 @@ namespace NDDL {
     class TrackingFrozen : public NddlToken {
     public:
       TrackingFrozen(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      TrackingFrozen(const TokenId& parent, const LabelStr& name);
+      TrackingFrozen(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Tracker::TrackingFrozen, Tracker.TrackingFrozen);
       
@@ -290,7 +290,7 @@ namespace NDDL {
     class trackunfreeze : public NddlToken {
     public:
       trackunfreeze(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      trackunfreeze(const TokenId& parent, const LabelStr& name);
+      trackunfreeze(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(Tracker::trackunfreeze, Tracker.trackunfreeze);
       
@@ -328,7 +328,7 @@ namespace NDDL {
     class OppSciIdle : public NddlToken {
     public:
       OppSciIdle(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      OppSciIdle(const TokenId& parent, const LabelStr& name);
+      OppSciIdle(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(OpportunisticScience::OppSciIdle, OpportunisticScience.OppSciIdle);
       
@@ -338,7 +338,7 @@ namespace NDDL {
     class oppscidefineproc : public NddlToken {
     public:
       oppscidefineproc(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      oppscidefineproc(const TokenId& parent, const LabelStr& name);
+      oppscidefineproc(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(OpportunisticScience::oppscidefineproc, OpportunisticScience.oppscidefineproc);
       
@@ -348,7 +348,7 @@ namespace NDDL {
     class OppSciProcDefined : public NddlToken {
     public:
       OppSciProcDefined(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      OppSciProcDefined(const TokenId& parent, const LabelStr& name);
+      OppSciProcDefined(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(OpportunisticScience::OppSciProcDefined, OpportunisticScience.OppSciProcDefined);
       
@@ -358,7 +358,7 @@ namespace NDDL {
     class oppscisetparams : public NddlToken {
     public:
       oppscisetparams(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      oppscisetparams(const TokenId& parent, const LabelStr& name);
+      oppscisetparams(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(OpportunisticScience::oppscisetparams, OpportunisticScience.oppscisetparams);
       
@@ -368,7 +368,7 @@ namespace NDDL {
     class OppSciParamsSet : public NddlToken {
     public:
       OppSciParamsSet(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      OppSciParamsSet(const TokenId& parent, const LabelStr& name);
+      OppSciParamsSet(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(OpportunisticScience::OppSciParamsSet, OpportunisticScience.OppSciParamsSet);
       
@@ -378,7 +378,7 @@ namespace NDDL {
     class oppscilooknow : public NddlToken {
     public:
       oppscilooknow(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      oppscilooknow(const TokenId& parent, const LabelStr& name);
+      oppscilooknow(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(OpportunisticScience::oppscilooknow, OpportunisticScience.oppscilooknow);
       
@@ -390,7 +390,7 @@ namespace NDDL {
     class OppSciDoneLookNow : public NddlToken {
     public:
       OppSciDoneLookNow(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      OppSciDoneLookNow(const TokenId& parent, const LabelStr& name);
+      OppSciDoneLookNow(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(OpportunisticScience::OppSciDoneLookNow, OpportunisticScience.OppSciDoneLookNow);
       
@@ -402,7 +402,7 @@ namespace NDDL {
     class oppscigetstatus : public NddlToken {
     public:
       oppscigetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      oppscigetstatus(const TokenId& parent, const LabelStr& name);
+      oppscigetstatus(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(OpportunisticScience::oppscigetstatus, OpportunisticScience.oppscigetstatus);
       
@@ -442,7 +442,7 @@ namespace NDDL {
     class IPIdle : public NddlToken {
     public:
       IPIdle(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      IPIdle(const TokenId& parent, const LabelStr& name);
+      IPIdle(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(CHAMP::IPIdle, CHAMP.IPIdle);
       
@@ -452,7 +452,7 @@ namespace NDDL {
     class ipgetname : public NddlToken {
     public:
       ipgetname(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      ipgetname(const TokenId& parent, const LabelStr& name);
+      ipgetname(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(CHAMP::ipgetname, CHAMP.ipgetname);
       
@@ -464,7 +464,7 @@ namespace NDDL {
     class IPHaveName : public NddlToken {
     public:
       IPHaveName(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      IPHaveName(const TokenId& parent, const LabelStr& name);
+      IPHaveName(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(CHAMP::IPHaveName, CHAMP.IPHaveName);
       
@@ -476,7 +476,7 @@ namespace NDDL {
     class ipsettarget : public NddlToken {
     public:
       ipsettarget(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      ipsettarget(const TokenId& parent, const LabelStr& name);
+      ipsettarget(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(CHAMP::ipsettarget, CHAMP.ipsettarget);
       
@@ -488,7 +488,7 @@ namespace NDDL {
     class IPTargetSet : public NddlToken {
     public:
       IPTargetSet(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      IPTargetSet(const TokenId& parent, const LabelStr& name);
+      IPTargetSet(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(CHAMP::IPTargetSet, CHAMP.IPTargetSet);
       
@@ -500,7 +500,7 @@ namespace NDDL {
     class ipplaceinstrument : public NddlToken {
     public:
       ipplaceinstrument(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      ipplaceinstrument(const TokenId& parent, const LabelStr& name);
+      ipplaceinstrument(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(CHAMP::ipplaceinstrument, CHAMP.ipplaceinstrument);
       
@@ -512,7 +512,7 @@ namespace NDDL {
     class IPDonePlaceInstrument : public NddlToken {
     public:
       IPDonePlaceInstrument(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      IPDonePlaceInstrument(const TokenId& parent, const LabelStr& name);
+      IPDonePlaceInstrument(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(CHAMP::IPDonePlaceInstrument, CHAMP.IPDonePlaceInstrument);
       
@@ -524,7 +524,7 @@ namespace NDDL {
     class ipgetstatus : public NddlToken {
     public:
       ipgetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name);
-      ipgetstatus(const TokenId& parent, const LabelStr& name);
+      ipgetstatus(const TokenId& parent, const LabelStr& relation, const LabelStr& name);
       void handleDefaults(); // default variable initialization
       DECLARE_TOKEN_FACTORY(CHAMP::ipgetstatus, CHAMP.ipgetstatus);
       

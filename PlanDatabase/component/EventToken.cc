@@ -21,11 +21,12 @@ namespace PLASMA{
   }
 
   EventToken::EventToken(const TokenId& master,
+			 const LabelStr& relation,
 			 const LabelStr& predicateName,
 			 const IntervalIntDomain& timeBaseDomain,
 			 const LabelStr& objectName,
 			 bool closed)
-    :Token(master, predicateName, 
+    :Token(master, relation, predicateName, 
 	   IntervalIntDomain(0, 0), 
 	   objectName,
 	   closed){

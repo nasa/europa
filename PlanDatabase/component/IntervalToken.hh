@@ -19,6 +19,7 @@ namespace PLASMA {
 		  bool closed = true);
 
     IntervalToken(const TokenId& master, 
+		  const LabelStr& relation,
 		  const LabelStr& predicateName, 
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
