@@ -204,43 +204,63 @@ namespace PLASMA {
     return m_curDec;
   }
 
-  // if there's a merge choice, keep the first one you get and return that one.
-  // otherwise prefer to activate
-  // finally prefer to reject
   const ChoiceId HSTSOpenDecisionManager::getNextChoice() {
     check_error(m_curDec.isValid());
     m_curChoice = ChoiceId::noId();
     const std::list<ChoiceId>& choices = m_curDec->getUpdatedChoices();
     //    std::cout << "getNextChoice:: num choices " << choices.size() << std::endl;
     if (TokenDecisionPointId::convertable(m_curDec)) {
-      ChoiceId merge;
-      ChoiceId reject;
-      ChoiceId activate;
- 
-      for (std::list<ChoiceId>::const_iterator it = choices.begin(); it != choices.end(); ++it) {
-	ChoiceId choice = *it;
-	check_error(choice.isValid());
-	check_error(choice->getType() == Choice::VALUE);
-	check_error(!m_curDec->hasDiscarded(choice));
-
-	LabelStr val = Id<ValueChoice>(choice)->getValue();
-	if (merge.isNoId() && val == Token::MERGED) {
-	  merge = choice;
-	  break; // we'll do this first, no point in assigning the rest.
+      TokenDecisionPointId tokDec(m_curDec);
+      std::list<LabelStr> states;
+      HSTSHeuristics::CandidateOrder order;
+      m_heur->getOrderedStatesForTokenDP(tokDec, states, order);
+      std::list<ChoiceId>::const_iterator it = choices.begin(); 
+      bool found(false);
+      for (std::list<LabelStr>::const_iterator sit = states.begin(); sit != states.end(); ++ sit) {
+	for (; it != choices.end(); ++it) {
+	  ChoiceId choice = *it;
+	  check_error(choice.isValid());
+	  check_error(choice->getType() == Choice::VALUE);
+	  check_error(!m_curDec->hasDiscarded(choice));
+	  LabelStr val = Id<ValueChoice>(choice)->getValue();
+	  if (val == *sit) {
+	    found = true;
+	    break; // we'll do this first, no point in continuing to iterate
+	  }
 	}
-	if (val == Token::ACTIVE)
-	  activate = choice;
-	if (val == Token::REJECTED)
-	  reject = choice;
-	// we ignore choices for INACTIVE and INCOMPLETE.
-      }
-      if (!merge.isNoId())
-	m_curChoice = merge;
-      else if (!activate.isNoId())
-	m_curChoice = activate;
-      else if (!reject.isNoId()) 
-	m_curChoice = reject;
-    }      
+	if (found) break;
+      }      
+      if (found)
+	m_curChoice = *it;
+    }
+    else if (ConstrainedVariableDecisionPointId::convertable(m_curDec)) {
+      ConstrainedVariableDecisionPointId varDec(m_curDec);
+      std::list<LabelStr> domain;
+      m_heur->getOrderedDomainForConstrainedVariableDP(varDec, domain);
+      std::list<ChoiceId>::const_iterator it = choices.begin(); 
+      bool found(false);
+      for (std::list<LabelStr>::const_iterator sit = domain.begin(); sit != domain.end(); ++ sit) {
+	for (; it != choices.end(); ++it) {
+	  ChoiceId choice = *it;
+	  check_error(choice.isValid());
+	  check_error(choice->getType() == Choice::VALUE);
+	  check_error(!m_curDec->hasDiscarded(choice));
+	  LabelStr val = Id<ValueChoice>(choice)->getValue();
+	  if (val == *sit) {
+	    found = true;
+	    break; // we'll do this first, no point in continuing to iterate
+	  }
+	}
+	if (found) break;
+      }      
+      if (found)
+	m_curChoice = *it;
+    }
+    else if (ObjectDecisionPointId::convertable(m_curDec)) {
+      ObjectDecisionPointId objDec(m_curDec);
+      HSTSHeuristics::CandidateOrder order;
+      m_heur->getOrderForObjectDP(objDec, order);
+    }
 
     // If we have no choice selected and there is a choice, pick the first
     if (!choices.empty() && m_curChoice == ChoiceId::noId())

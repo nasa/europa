@@ -386,7 +386,7 @@ namespace PLASMA {
     return m_defaultVariablePriority;
   }
 
-  const HSTSHeuristics::Priority HSTSHeuristics::getInternalPriorityForTokenDP(const TokenId& tok) {
+  const LabelStr HSTSHeuristics::getIndexKeyForToken(const TokenId& tok) {
     TokenTypeId tt;
     TokenType::createTokenType(tok,tt);
     TokenTypeId mastertt;
@@ -413,13 +413,24 @@ namespace PLASMA {
 
     LabelStr key = HSTSHeuristics::getIndexKey(tt, rel, mastertt, orig);
 
+    if (!tt.isNoId()) tt.remove();
+    if (!mastertt.isNoId()) mastertt.remove();
+
+    return key;
+  }
+
+  const HSTSHeuristics::Priority HSTSHeuristics::getInternalPriorityForTokenDP(const TokenId& tok) {
+    LabelStr key(getIndexKeyForToken(tok));
+
     //    std::cout << " got key for token = " << key.c_str() << std::endl;
 
     std::map<LabelStr, TokenEntry>::iterator pos = m_tokenHeuristics.find(key);
     Priority p;
     if (pos != m_tokenHeuristics.end())
       p = pos->second.getPriority();
-    else if (!mastertt.isNoId()) {
+    else if (!tok->getMaster().isNoId()) {
+      TokenTypeId mastertt;
+      TokenType::createTokenType(tok->getMaster(),mastertt);
       LabelStr key2(NO_STRING);
       TokenType::getIndexKey(mastertt,key2);
       std::map<LabelStr, Priority>::iterator pos2 =  m_defaultCompatibilityPriority.find(key2);
@@ -428,8 +439,65 @@ namespace PLASMA {
       mastertt.remove(); // we no longer need it.
     }
     else p = m_defaultTokenPriority;
-    if (!tt.isNoId()) tt.remove();
     return p;
+  }
+
+
+  void HSTSHeuristics::getOrderedDomainForConstrainedVariableDP(const ConstrainedVariableDecisionPointId& varDec, std::list<LabelStr>& domain) {
+    check_error(domain.empty());
+    check_error(varDec.isValid());
+    const ConstrainedVariableId& var = varDec->getVariable();
+    const EntityId& parent = var->getParent();
+    if (!parent.isNoId() && TokenId::convertable(parent)) {
+      TokenTypeId tt;
+      TokenType::createTokenType(parent,tt);
+      LabelStr key = HSTSHeuristics::getIndexKey(var->getName(),tt);
+      std::map<LabelStr, VariableEntry>::iterator pos = m_variableHeuristics.find(key);
+      if (pos != m_variableHeuristics.end())
+	domain = pos->second.getDomain();
+      tt.remove();
+    }
+  }
+
+  void HSTSHeuristics::getOrderedStatesForTokenDP(const TokenDecisionPointId& tokDec, std::list<LabelStr>& states, CandidateOrder& order){
+    check_error(tokDec.isValid());
+    check_error(states.empty());
+    LabelStr key(getIndexKeyForToken(tokDec->getToken()));
+
+    std::map<LabelStr, TokenEntry>::iterator pos = m_tokenHeuristics.find(key);
+    if (pos != m_tokenHeuristics.end()) {
+      std::vector<LabelStr> vs(pos->second.getStates());
+      for (unsigned int i=0; i < vs.size(); ++i) {
+	if (vs[i] == Token::MERGED) {
+	  order = pos->second.getOrders()[i];
+	  break;
+	}
+	states.push_back(vs[i]);
+      }
+    }
+    else { // defaults
+      states.push_back(Token::MERGED);
+      states.push_back(Token::ACTIVE);
+      states.push_back(Token::REJECTED);
+      order = EARLY;
+    }
+  }
+
+  void HSTSHeuristics::getOrderForObjectDP(const ObjectDecisionPointId& objDec, CandidateOrder& order) {
+    check_error(objDec.isValid());
+    LabelStr key(getIndexKeyForToken(objDec->getToken()));
+
+    std::map<LabelStr, TokenEntry>::iterator pos = m_tokenHeuristics.find(key);
+    if (pos != m_tokenHeuristics.end()) {
+      std::vector<LabelStr> states = pos->second.getStates();
+      for (unsigned int i=0; i < states.size(); ++i) {
+	if (states[i] == Token::ACTIVE) {
+	  order = pos->second.getOrders()[i];
+	  break;
+	}
+      }
+    }
+    else order = EARLY; // default
   }
 
   const LabelStr HSTSHeuristics::getIndexKey(const LabelStr& variableName, 

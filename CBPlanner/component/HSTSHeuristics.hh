@@ -153,6 +153,12 @@ namespace PLASMA {
     const Priority getPriorityForTokenDP(const TokenDecisionPointId& tokDec);
     const Priority getPriorityForObjectDP(const ObjectDecisionPointId& objDec);
 
+    void getOrderedDomainForConstrainedVariableDP(const ConstrainedVariableDecisionPointId& varDec, std::list<LabelStr>& domain);
+
+    void getOrderedStatesForTokenDP(const TokenDecisionPointId& tokDec, std::list<LabelStr>& states, CandidateOrder& order);
+
+    void getOrderForObjectDP(const ObjectDecisionPointId& objDec, CandidateOrder& order);
+
     void write(std::ostream& os = std::cout);
 
   private:
@@ -164,6 +170,7 @@ namespace PLASMA {
     // Auxiliary methods:
     static const LabelStr getIndexKey(const LabelStr& variableName, const TokenTypeId& tt);
     static const LabelStr getIndexKey(const TokenTypeId& tt, const Relationship rel, const TokenTypeId& mastertt, const Origin o);
+    const LabelStr getIndexKeyForToken(const TokenId& token);
 
     // Internal Queries:
     const Priority getInternalPriorityForConstrainedVariableDP(const LabelStr variableName, const TokenTypeId& tt);
