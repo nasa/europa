@@ -263,10 +263,13 @@ namespace EUROPA {
                                          const RulesEngineId &reId2,
                                          const CBPlannerId &plId2) {
       havePlanner = true;
+      haveRulesEngine = true;
+      /*
       dbl = (new PPWPlanDatabaseListener(planDb, this))->getId();
       cel = (new PPWConstraintEngineListener(ceId2, this))->getId();
       rel = (new PPWRulesEngineListener(reId2, this))->getId();
       pl = (new PPWPlannerListener(plId2, this))->getId();
+      */
       commonInit(planDb, ceId2);
       reId = const_cast<RulesEngineId *> (&reId2);
       plId = const_cast<CBPlannerId *> (&plId2);
@@ -276,10 +279,13 @@ namespace EUROPA {
                                          const ConstraintEngineId &ceId2,
                                          const RulesEngineId &reId2) {
       havePlanner = false;
+      haveRulesEngine = true;
+      /*
       dbl = (new PPWPlanDatabaseListener(planDb, this))->getId();
       cel = (new PPWConstraintEngineListener(ceId2, this))->getId();
       rel = (new PPWRulesEngineListener(reId2, this))->getId();
       pl = DecisionManagerId::noId();
+      */
       commonInit(planDb, ceId2);
       reId = const_cast<RulesEngineId *> (&reId2);
       plId = NULL;
@@ -288,13 +294,25 @@ namespace EUROPA {
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb, 
                                          const ConstraintEngineId &ceId2) {
       havePlanner = false;
+      haveRulesEngine = false;
+      /*
       dbl = (new PPWPlanDatabaseListener(planDb, this))->getId();
       cel = (new PPWConstraintEngineListener(ceId2, this))->getId();
       rel = RulesEngineListenerId::noId();
       pl = DecisionManagerId::noId();
+      */
       commonInit(planDb, ceId2);
       reId = NULL;
       plId = NULL;
+    }
+
+    void PartialPlanWriter::allocateListeners() {
+      dbl = (new PPWPlanDatabaseListener(*pdbId, this))->getId();
+      cel = (new PPWConstraintEngineListener(*ceId, this))->getId();
+      if (haveRulesEngine)
+	rel = (new PPWRulesEngineListener(*reId, this))->getId();
+      if (havePlanner)
+	pl = (new PPWPlannerListener(*plId, this))->getId();
     }
 
     void PartialPlanWriter::commonInit(const PlanDatabaseId &planDb,
@@ -475,10 +493,10 @@ namespace EUROPA {
     }
   
     PartialPlanWriter::~PartialPlanWriter(void) {
-      check_error(dbl.isValid());
-      delete (PlanDatabaseListener*) dbl;
-      check_error(cel.isValid());
-      delete (ConstraintEngineListener*) cel;
+      if (!dbl.isNoId())
+	delete (PlanDatabaseListener*) dbl;
+      if (!cel.isNoId())
+	delete (ConstraintEngineListener*) cel;
       if (!rel.isNoId())
         delete (RulesEngineListener*) rel;
       if (!pl.isNoId())
@@ -1942,6 +1960,8 @@ namespace EUROPA {
         if(line.find(AUTO_WRITE) != std::string::npos) {
           std::string autoWrite = line.substr(line.find("=")+1);
           noFullWrite = (autoWrite.find("1") != std::string::npos ? 0 : 1);
+	  if (noFullWrite)
+	    allocateListeners();
         }
         else if(line.find(STEPS_PER_WRITE) != std::string::npos) {
           std::string spw = line.substr(line.find("=")+1);

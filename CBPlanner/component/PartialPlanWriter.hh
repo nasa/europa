@@ -73,6 +73,7 @@ namespace EUROPA {
       class PPWPlannerListener;
 
       bool havePlanner;
+      bool haveRulesEngine;
       bool destAlreadyInitialized;
       long long int seqId;
       int numTokens, numConstraints, numVariables, numTransactions;
@@ -87,6 +88,7 @@ namespace EUROPA {
       DecisionManagerListenerId pl;
       std::ofstream *transOut, *statsOut, *ruleInstanceOut;
       std::list<std::string> sourcePaths;
+      void allocateListeners();
       void initOutputDestination();
       void parseConfigFile(std::ifstream &);
       void parseGeneralConfigSection(std::ifstream&);
