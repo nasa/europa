@@ -310,7 +310,7 @@ namespace EUROPA {
       transactionList = new std::list<Transaction>();
       stepsPerWrite = 0;
       dest = "./plans";
-      noFullWrite = 0;
+      noFullWrite = 1;
       writeStep = 0;
       for(int i = 0; i < transactionTotal; i++)
         allowTransaction[i] = false;
@@ -349,7 +349,7 @@ namespace EUROPA {
         FatalErrno();
       }
 
-      //      std::cerr << "PPW DEBUG:constructing:configFile; configBuf = " << configBuf << std::endl;
+      // std::cerr << "PPW DEBUG:constructing:configFile; configBuf = " << configBuf << std::endl;
       std::ifstream configFile(configBuf);
       if (!configFile) {
         std::cerr << "Failed to open config file " << configBuf << std::endl;
@@ -359,17 +359,14 @@ namespace EUROPA {
 
       parseConfigFile(configFile);
 
-      //      std::cerr << " PPW noFullWrite = " << noFullWrite << std::endl;
-
-      /* if user clearly wants to write only the final step,
-         stepsPerWrite must be 1 for to enable writing
-       */
-      if (noFullWrite == 1 && writeStep == 1) {
-        stepsPerWrite = 1;
+      if (stepsPerWrite != 0) {
+        allocateListeners();
       }
+
     }
 
     void PartialPlanWriter::initOutputDestination() {
+
 
       char *destBuf = new char[PATH_MAX];
       if(realpath(dest.c_str(), destBuf) == NULL && stepsPerWrite != 0) {
@@ -519,11 +516,18 @@ namespace EUROPA {
        * specified output destination.
        */
       if(!destAlreadyInitialized) {
+        /*
+         *If stepsPerWrite is still 0 after commonInit has run
+         *then allocateListeners() has not been called yet 
+         *Call now since Planner Control needs them
+         */
+        if (stepsPerWrite == 0) {
+          allocateListeners();
+        }
         dest = destPath;
         noFullWrite = 1;   // do not write every step
         stepsPerWrite = 1; // enable write in one step increments
         writeStep = 1;     // enable one step client control of write
-
         initOutputDestination();
         destAlreadyInitialized = true;
       } else {
@@ -573,7 +577,7 @@ namespace EUROPA {
        * cases where the first step is not written.
        */
 
-      //      std::cerr << " PartialPlanWriter::write() called " << std::endl;
+      // std::cerr << " PartialPlanWriter::write() called " << std::endl;
 
       if(!destAlreadyInitialized) {
         initOutputDestination();
@@ -1961,8 +1965,6 @@ namespace EUROPA {
             FatalError("stepsPerWrite < 0", "StepsPerWrite must be a non-negative value");
           if(stepsPerWrite == LONG_MAX || stepsPerWrite == LONG_MIN)
             FatalErrno();
-	  if (stepsPerWrite != 0)
-	    allocateListeners();
         }
         else if(line.find(WRITE_FINAL_STEP) != std::string::npos) {
           std::string wfs = line.substr(line.find("=")+1);
