@@ -396,7 +396,7 @@ namespace Prototype {
     tokenA.addParameter(IntervalIntDomain(1, 20));
     tokenA.close();
     
-    CBPlanner::Status res = planner.run(loggingEnabled());
+    CBPlanner::Status res = planner.run();
     assert(res == CBPlanner::PLAN_FOUND);
 
     const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
@@ -500,7 +500,7 @@ namespace Prototype {
 
     ConstraintLibrary::createConstraint(LabelStr("eq"), ce.getId(), scope);
 
-    CBPlanner::Status res = planner.run(loggingEnabled(), 100);
+    CBPlanner::Status res = planner.run(100);
 
     assert(res == CBPlanner::SEARCH_EXHAUSTED);
     assert(planner.getClosedDecisions().empty());
@@ -651,7 +651,7 @@ namespace Prototype {
   tokenG.addParameter(IntervalIntDomain(1, 20));
   tokenG.close();
     
-  CBPlanner::Status res = planner.run(loggingEnabled(),20);
+  CBPlanner::Status res = planner.run(20);
   assert(res == CBPlanner::TIMEOUT_REACHED);
 
   const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
@@ -705,7 +705,7 @@ namespace Prototype {
       //      planner.getDecisionManager()->printOpenDecisions();
 
       //      check_error(planner.getDecisionManager()->getNumberOfDecisions() == numDecs--);
-      result = planner.step(0);
+      result = planner.step();
       if (result != CBPlanner::IN_PROGRESS) break;
     }
     assert(result == CBPlanner::PLAN_FOUND);
@@ -750,7 +750,7 @@ namespace Prototype {
 
     assert(ce.propagate());
 
-    CBPlanner::Status result = planner.run(loggingEnabled());
+    CBPlanner::Status result = planner.run();
     assert(result == CBPlanner::PLAN_FOUND);
 
     assert(planner.getTime() == planner.getDepth());
@@ -759,7 +759,7 @@ namespace Prototype {
 
     hor.setHorizon(0,200);
 
-    result = planner.run(loggingEnabled());
+    result = planner.run();
     assert(result == CBPlanner::PLAN_FOUND);
 
     assert(planner.getTime() != planner.getDepth());
@@ -811,7 +811,7 @@ namespace Prototype {
       //planner.getDecisionManager()->printOpenDecisions();
 
       //      check_error(planner.getDecisionManager()->getNumberOfDecisions() == numDecs--);
-      CBPlanner::Status result = planner.step(0);
+      CBPlanner::Status result = planner.step();
       if (result != CBPlanner::IN_PROGRESS) {
 	assert(result == CBPlanner::PLAN_FOUND);
 	break;
@@ -830,7 +830,7 @@ namespace Prototype {
 
     //    std::cout << "AFTER ADDING NEW GOAL TOKEN " << std::endl;
 
-    CBPlanner::Status res = planner.run(loggingEnabled());
+    CBPlanner::Status res = planner.run();
     assert(res == CBPlanner::PLAN_FOUND);
     assert(planner.getDepth() ==  planner.getTime());
     assert(planner.getDepth() == 6);

@@ -129,7 +129,7 @@ bool runPlanner(){
     check_error(maxPlannerSteps.isValid());
     int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
 
-    int res = db1.planner->run(loggingEnabled(), steps);
+    int res = db1.planner->run(steps);
 
     PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
