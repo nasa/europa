@@ -12,7 +12,12 @@ namespace Prototype {
    */
   class boolDomain : public BoolDomain {
   public:
-    boolDomain();
+    boolDomain(const DomainListenerId& listener = DomainListenerId::noId());
+
+    boolDomain(bool value, 
+    	       const DomainListenerId& listener = DomainListenerId::noId());
+
+    boolDomain(const boolDomain& org);
 
     /**
      * @brief Get the name of the type of the domain.
@@ -28,8 +33,12 @@ namespace Prototype {
     /**
      * @brief Create a variable
      */
-    virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constaintEngine, 
-                                                 const LabelStr& variableName) const;
+    virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 
+                                                 const LabelStr& typeName,
+                                                 bool canBeSpecified = true,
+                                                 const LabelStr& name = ConstrainedVariable::NO_NAME(),
+                                                 const EntityId& parent = EntityId::noId(),
+                                                 int index = ConstrainedVariable::NO_INDEX) const;
 
     /**
      * @brief Create a domain

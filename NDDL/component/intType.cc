@@ -7,7 +7,27 @@ namespace Prototype {
   // intDomain
   //
 
-  intDomain::intDomain() : IntervalIntDomain() {}
+  intDomain::intDomain(const DomainListenerId& listener = DomainListenerId::noId())
+   : IntervalIntDomain(listener)
+  {
+  }
+
+  intDomain::intDomain(int lb, int ub, 
+    	               const DomainListenerId& listener = DomainListenerId::noId())
+   : IntervalIntDomain(lb, ub, listener)
+  {
+  }
+
+  intDomain::intDomain(int value, 
+    	               const DomainListenerId& listener = DomainListenerId::noId())
+   : IntervalIntDomain(value, listener)
+  {
+  }
+
+  intDomain::intDomain(const intDomain& org)
+   : IntervalIntDomain(org)
+  {
+  }
 
   const LabelStr& intDomain::getTypeName() const
   {
@@ -23,13 +43,17 @@ namespace Prototype {
 
   ConstrainedVariableId
   intTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
-                                 const LabelStr& variableName) const
+                                 const LabelStr& typeName,
+                                 bool canBeSpecified = true,
+                                 const LabelStr& name = ConstrainedVariable::NO_NAME(),
+                                 const EntityId& parent = EntityId::noId(),
+                                 int index = ConstrainedVariable::NO_INDEX) const
   {
     intDomain * baseDomain = static_cast<intDomain*>(createDomain());
     Variable<intDomain> * variable
-      = new Variable<intDomain>(constraintEngine, *baseDomain, true, variableName);
+      = new Variable<intDomain>(constraintEngine, *baseDomain, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
-                "failed to create Variable for 'int' with name '" + variableName.toString() + "'");
+                "failed to create Variable for 'int' with name '" + name.toString() + "'");
     ConstrainedVariableId id = variable->getId();
     check_error(id.isValid());
     return id;

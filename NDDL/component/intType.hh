@@ -12,7 +12,15 @@ namespace Prototype {
    */
   class intDomain : public IntervalIntDomain {
   public:
-    intDomain();
+    intDomain(const DomainListenerId& listener = DomainListenerId::noId());
+
+    intDomain(int lb, int ub, 
+    	      const DomainListenerId& listener = DomainListenerId::noId());
+
+    intDomain(int value, 
+    	      const DomainListenerId& listener = DomainListenerId::noId());
+
+    intDomain(const intDomain& org);
 
     /**
      * @brief Get the name of the type of the domain.
@@ -29,7 +37,11 @@ namespace Prototype {
      * @brief Create a variable
      */
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 
-                                                 const LabelStr& variableName) const;
+                                                 const LabelStr& typeName,
+                                                 bool canBeSpecified = true,
+                                                 const LabelStr& name = ConstrainedVariable::NO_NAME(),
+                                                 const EntityId& parent = EntityId::noId(),
+                                                 int index = ConstrainedVariable::NO_INDEX) const;
 
     /**
      * @brief Create a domain

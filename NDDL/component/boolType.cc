@@ -7,7 +7,21 @@ namespace Prototype {
   // boolDomain
   //
 
-  boolDomain::boolDomain() : BoolDomain() {}
+  boolDomain::boolDomain(const DomainListenerId& listener = DomainListenerId::noId())
+   : BoolDomain(listener)
+  {
+  }
+
+  boolDomain::boolDomain(bool value, 
+    	                 const DomainListenerId& listener = DomainListenerId::noId())
+   : BoolDomain(value, listener)
+  {
+  }
+
+  boolDomain::boolDomain(const boolDomain& org)
+   : BoolDomain(org)
+  {
+  }
 
   const LabelStr& boolDomain::getTypeName() const
   {
@@ -23,13 +37,17 @@ namespace Prototype {
 
   ConstrainedVariableId
   boolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
-                                  const LabelStr& variableName) const
+                                  const LabelStr& typeName,
+                                  bool canBeSpecified = true,
+                                  const LabelStr& name = ConstrainedVariable::NO_NAME(),
+                                  const EntityId& parent = EntityId::noId(),
+                                  int index = ConstrainedVariable::NO_INDEX) const
   {
     boolDomain * baseDomain = static_cast<boolDomain*>(createDomain());
     Variable<boolDomain> * variable
-      = new Variable<boolDomain>(constraintEngine, *baseDomain, true, variableName);
+      = new Variable<boolDomain>(constraintEngine, *baseDomain, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
-                "failed to create Variable for 'bool' with name '" + variableName.toString() + "'");
+                "failed to create Variable for 'bool' with name '" + name.toString() + "'");
     ConstrainedVariableId id = variable->getId();
     check_error(id.isValid());
     return id;
