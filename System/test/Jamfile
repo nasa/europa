@@ -4,6 +4,10 @@ if ! $(PLASMA_READY) {
 
 local model ;
 
+#
+# BASIC TESTS
+#
+
 ModuleObjects runTest.cc : System ;
 
 for model in
@@ -16,9 +20,17 @@ for model in
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 }
 
+#
+# INITIAL TESTS
+#
+
 NddlMain k9-initial : runInitialTest.cc : k9-initial.nddl : System ;
 RunModuleMain run-k9-initial : k9-initial ;
 LocalDepends run-nddl-planner-tests : run-k9-initial ;
+
+#
+# TRANSACTION TESTS
+#
 
 ModuleObjects runTransactionTest.cc : System ;
 
@@ -33,6 +45,47 @@ for model in
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 }
 
+#
+# PERFORMANCE TESTS
+#
+
 Main stackGenerator : stackGenerator.cc ;
+
+rule FSatelliteModel {
+  local arguments = $(1) ;
+  return satellites-$(arguments:J=-).nddl ;
+}
+
+rule GenerateStack {
+  local output = $(1) ;
+  local arguments = $(3) ;
+  Depends $(output) : [ FAppendSuffix stackGenerator : $(SUFEXE) ] ;
+  ARGUMENTS on $(output) = $(arguments) ;
+}
+
+actions GenerateStack {
+  stackGenerator $(ARGUMENTS) $(1:S=) 
+}
+
+local numSatellites ;
+for numSatellites in 1 10 50 100 {
+  local numTargets ;
+  for numTargets in 10 {
+    local numParams ;
+    for numParams in 0 10 {
+      local numParamChoices ;
+      for numParamChoices in 0 10 {
+        if $(numParamChoices) <= $(numParams) {
+          local model = [ FSatelliteModel $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ] ;
+          local exe = $(model:S=) ;
+          GenerateStack [ FGristFiles $(model) ] : : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
+          NddlMain $(exe) : runTest.o : $(model) : System : performance-tests ;
+          RunModuleMain run-$(exe) : $(exe) ;
+          LocalDepends run-performance-tests : run-$(exe) ;
+        }
+      }
+    }
+  }
+}
 
 } # PLASMA_READY

@@ -333,6 +333,7 @@ rule LibraryFromObjects
 rule MainFromObjects
 {
 	local _s _t ;
+	local build_target = $(3) ;
 
 	# Add grist to file names
 	# Add suffix to exe
@@ -350,7 +351,11 @@ rule MainFromObjects
 
 	# make compiled sources a dependency of target
 
-	LocalDepends exe : $(_t) ;
+	if $(build_target) {
+		LocalDepends $(build_target) : $(_t) ;
+	} else {
+		LocalDepends exe : $(_t) ;
+	}
 	Depends $(_t) : $(_s) ;
 	MakeLocate $(_t) : $(LOCATE_TARGET) ;
 

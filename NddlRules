@@ -11,6 +11,7 @@ rule NddlMain {
   local code = $(2) ;
   local model = $(3) ;
   local module = $(4) ;
+  local build_target = $(5) ;
 
   if $(TRACE_NDDL) = TRUE {
     Echo NddlMain $(exe) . $(code) . $(model) ;
@@ -20,7 +21,7 @@ rule NddlMain {
   local cc = [ FGristFiles $(model:S=.cc) ] ;
   Includes $(cc) : $(hh) ;
   NddlCompiler $(hh) $(cc) : $(model) ;
-  ModuleMain $(exe) : $(cc) $(code) : $(module) ;
+  ModuleMain $(exe) : $(cc) $(code) : $(module) : $(build_target) ;
 }
 
 rule NddlSystemTest {

@@ -108,6 +108,7 @@ rule ModuleMain {
   local name = $(1) ;
   local files = $(2) ;
   local modules = $(3) ;
+  local build_target = $(4) ;
 
   if $(TRACE_MODULE) = TRUE {
     Echo ModuleMain $(name) . $(files) . $(modules) ;
@@ -137,13 +138,13 @@ rule ModuleMain {
         for link in $(links) {
           LinkSharedLibraries $(exe) : [ FModuleSharedLibraryName $(link) : $(variant) ] ;
         }
-        MainFromObjects $(exe)_rt : $(outputs) ;
+        MainFromObjects $(exe)_rt : $(outputs) : $(build_target) ;
       } else if $(library) = STATIC {
         local link ;
         for link in $(links) {
           LinkLibraries $(exe) : [ FModuleStaticLibraryName $(link) : $(variant) ] ;
         }
-        MainFromObjects $(exe) : $(outputs) ;
+        MainFromObjects $(exe) : $(outputs) : $(build_target) ;
       } else {
         Exit ModuleMain unknown library type: $(library) ;
       }
