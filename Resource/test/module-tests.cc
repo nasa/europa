@@ -2,6 +2,7 @@
 #include "Resource.hh"
 #include "Transaction.hh"
 #include "ResourceConstraint.hh"
+#include "ResourceTransactionConstraint.hh"
 #include "ResourcePropagator.hh"
 
 #include "../ConstraintEngine/TestSupport.hh"
@@ -109,7 +110,6 @@ private:
     assert(id->getTime() == -LATEST_TIME);
     id = instants.back();
     assert(id->getTime() == LATEST_TIME);
-    delete (Resource*) r;
 
     // Construction with argument setting
     ResourceId rid = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r2"), 189.34, 0, 1000))->getId();
@@ -132,23 +132,26 @@ private:
     DEFAULT_SETUP(ce,db,schema,false);
     ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), 10, 0, 1000))->getId();
     //just another resource so that the resource doesnt get bound to singleton and get autoinserted by the propagator
-    ResourceId r2 = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r2"), 10, 0, 1000))->getId();
+    ResourceId r2 = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r2"), 10, 0, 2000))->getId();
     db.close();
     // Test insertion of transaction constructed with defaults
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("consume")))->getId();
-    assert(r->insert(t1));
-    r->remove(t1);
+    assert(!ce.provenInconsistent());
+    r->constrain(t1);
+    ce.propagate();
+    r->free(t1);
 
-    // Test insertion of t that is outside the horizon of the resource
-      
+    // Test insertion of t that is outside the horizon of the resource      
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(1001, 2000)))->getId();
-    assert( ! r->insert(t2));
+    assert( !t2->getObject()->getDerivedDomain().intersects(Domain<ResourceId>(r)));
 
     // Test double insertion 
-    assert(r->insert(t1));
-    r->remove(t1);
-    assert(r->insert(t1));
-    r->remove(t1);
+    r->constrain(t1);
+    ce.propagate();
+    r->free(t1);
+    r->constrain(t1);
+    ce.propagate();
+    r->free(t1);
 
     return true;
   }
@@ -160,17 +163,18 @@ private:
     db.close();
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, LATEST_TIME), 45, 45))->getId();
-    assert(r->insert(t1));
+    r->constrain(t1);
+    ce.propagate();
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(1, LATEST_TIME), 35, 35))->getId();
-    assert(r->insert(t2));
+    r->constrain(t2);
+    ce.propagate();
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(2, LATEST_TIME), 20, 20))->getId();
-    assert(r->insert(t3));
-    std::cout << std::endl;
-    r->print(std::cout);
+    r->constrain(t3);
+    ce.propagate();
+    assert(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
 
-    std::cout << std::endl;
     t2->setEarliest(2);
-    r->print(std::cout);
+    assert(checkLevelArea(r) == (1*45 + 1*45 + 998*100));
     return(true);
   }
 
@@ -184,49 +188,56 @@ private:
     db.close();
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(4, 6)))->getId();
-    assert(r->insert(t1));
+    r->constrain(t1);
+    ce.propagate();
     assert(checkSum(r) == (1*0 + 2*1 + 3*1 + 4*0)); 
 
     TransactionId t2  = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(-4, 10)))->getId();
-    assert(r->insert(t2));
+    r->constrain(t2);
+    ce.propagate();
     assert(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*1)); 
 
     TransactionId t3  = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(1, 3)))->getId();
-    assert(r->insert(t3));
+    r->constrain(t3);
+    ce.propagate();
     assert(checkSum(r) == (1*2 + 2*2 + 3*2 + 4*2 + 5*1)); 
 
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(1, 2)))->getId();
-    assert(r->insert(t4));
+    r->constrain(t4);
+    ce.propagate();
     assert(checkSum(r) == (1*3 + 2*3 + 3*2 + 4*2 + 5*2 + 6*1)); 
 
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(3, 7)))->getId();
-    assert(r->insert(t5));
+    r->constrain(t5);
+    ce.propagate();
     assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*3 + 5*3 + 6*2)); 
 
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(4, 7)))->getId();
-    assert(r->insert(t6));
+    r->constrain(t6);
+    ce.propagate();
     assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 5*4 + 6*3)); 
 
     // Insert for a singleton value
     TransactionId t7 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(5,5)))->getId();
-    assert(r->insert(t7));
+    r->constrain(t7);
+    ce.propagate();
     assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 5*5 + 6*4 + 7*3)); 
 
 
     // Now do the removal and ensure correctness along the way
-    r->remove(t7);
+    r->free(t7);
     assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 5*4 + 6*3)); 
-    r->remove(t6);
+    r->free(t6);
     assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*3 + 5*3 + 6*2)); 
-    r->remove(t5);
+    r->free(t5);
     assert(checkSum(r) == (1*3 + 2*3 + 3*2 + 4*2 + 5*2 + 6*1)); 
-    r->remove(t4);
+    r->free(t4);
     assert(checkSum(r) == (1*2 + 2*2 + 3*2 + 4*2 + 5*1)); 
-    r->remove(t3);
+    r->free(t3);
     assert(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*1)); 
-    r->remove(t2);
+    r->free(t2);
     assert(checkSum(r) == (1*0 + 2*1 + 3*1 + 4*0)); 
-    r->remove(t1);
+    r->free(t1);
     assert(checkSum(r) == (1*0 + 2*0)); 
 
     return(true);
@@ -241,37 +252,44 @@ private:
     db.close();
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 1), 1, 1))->getId();
-    r->insert(t1);
+    r->constrain(t1);
+    ce.propagate();
     assert(checkSum(r) == (1*1 + 2*1 +3*0)); 
     assert(checkLevelArea(r) == 1);
 
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(1, 3), -4, -4))->getId();
-    r->insert(t2);
+    r->constrain(t2);
+    ce.propagate();
     assert(checkSum(r) == (1*1 + 2*2 +3*1 +4*0)); 
     assert(checkLevelArea(r) == (1 + 4*2));
 
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(2, 4), 8, 8))->getId();
-    r->insert(t3);
+    r->constrain(t3);
+    ce.propagate();
     assert(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1 + 5*0)); 
     assert(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 8*1));
 
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(3, 6), 2, 2))->getId();
-    r->insert(t4);
+    r->constrain(t4);
+    ce.propagate();
     assert(checkSum(r) == (1*1 + 2*2 +3*2 + 4*3 + 5*2 + 6*1 + 7*0));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
  
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(2, 10), -6, -6))->getId();  
-    r->insert(t5);
+    r->constrain(t5);
+    ce.propagate();
     assert(checkSum(r) == (1*1 + 2*2 +3*3 + 4*4 + 5*3 + 6*2 + 7*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
 
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(6, 8), 3, 3))->getId();
-    r->insert(t6);
+    r->constrain(t6);
+    ce.propagate();
     assert(checkSum(r) == (1*1 + 2*2 +3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
 
     TransactionId t7 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(7, 8), -4, -4))->getId();
-    r->insert(t7);
+    r->constrain(t7);
+    ce.propagate();
     assert(checkSum(r) == (1*1 + 2*2 +3*3 + 4*4 + 5*3 + 6*3 + 7*3 + 8*3 + 9*1));
     assert(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
 
@@ -287,7 +305,8 @@ private:
     db.close();
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 10), 10, 10))->getId();
-    r->insert(t1);
+    r->constrain(t1);
+    ce.propagate();
     assert(checkLevelArea(r) == 10*10);
 
     t1->setEarliest(1);
@@ -317,35 +336,48 @@ private:
 
     // Insertion and removal at extremes
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 0), 10, 10))->getId();
-    r->insert(t1);
-    r->remove(t1);
-    r->insert(t1);
+    r->constrain(t1);
+    ce.propagate();
+    r->free(t1);
+    ce.propagate();
+    r->constrain(t1);
+    ce.propagate();
+
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(10, 10), 10, 10))->getId();
-    r->insert(t2);
-    r->remove(t2);
-    r->insert(t2);
+    r->constrain(t2);
+    ce.propagate();
+    r->free(t2);
+    ce.propagate();
+    r->constrain(t2);
+    ce.propagate();
 
     // Insertion and removal to create and delete an instant
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(5, 5), 10, 10))->getId();
-    r->insert(t3);
-    r->remove(t3);
-    r->insert(t3);
+    r->constrain(t3);
+    ce.propagate();
+    r->free(t3);
+    ce.propagate();
+    r->constrain(t3);
+    ce.propagate();
 
     // Insertion of overlapping spanning transactions, all internal
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(2, 8), 10, 10))->getId();
-    r->insert(t4);
+    r->constrain(t4);
+    ce.propagate();
     TransactionId t5 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(1, 9), 10, 10))->getId();
-    r->insert(t5);
+    r->constrain(t5);
+    ce.propagate();
     TransactionId t6 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(6, 9), 10, 10))->getId();
-    r->insert(t6);
+    r->constrain(t6);
+    ce.propagate();
 
     // Remove transactions in spurious order
-    r->remove(t4);
-    r->remove(t1);
-    r->remove(t3);
-    r->remove(t6);
-    r->remove(t2);
-    r->remove(t5);
+    r->free(t4);
+    r->free(t1);
+    r->free(t3);
+    r->free(t6);
+    r->free(t2);
+    r->free(t5);
 
     return(true);
   }
@@ -360,18 +392,21 @@ private:
 
     // Test producer
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 10), 5, 10))->getId();
-    r->insert(t1);
+    r->constrain(t1);
+    ce.propagate();
     assert(checkLevelArea(r) == 10*10);
 
 
     // This tests a transaction that could be a producer or a consumer. We don't know yet!
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("dontknowyet"), IntervalIntDomain(4, 8), -4, 3))->getId();
-    r->insert(t2);
+    r->constrain(t2);
+    ce.propagate();
     assert(checkLevelArea(r) == 10*4 + 17*4 + 17*2);
 
     // Test consumer
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(1, 5), -4, -1))->getId();
-    r->insert(t3);
+    r->constrain(t3);
+    ce.propagate();
     assert(checkLevelArea(r) == 10*1 + 14*3 + 21*1 + 20*3 + 20*2);
     return(true);
   }
@@ -387,162 +422,176 @@ private:
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 1), productionRateMax + 1, productionRateMax + 1))->getId();
-    assert(!r->insert(t1));
+    r->constrain(t1);
+    assert(ce.provenInconsistent());
+    r->free(t1);
+    assert(!ce.provenInconsistent());    
 
     // Now adjust so that it just fits within the spec and ensure it is accepted
     t1->setMin(productionRateMax);
-    assert(r->insert(t1));
+    r->constrain(t1);
+    ce.propagate();
 
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 1), consumptionRateMax - 1, consumptionRateMax - 1))->getId();
-    assert(!r->insert(t2));
+    r->constrain(t2);
+    assert(ce.provenInconsistent());
+    r->free(t2);
 
     // Now adjust so that it just fits within the spec and ensure it is accepted
     t2->setMax(consumptionRateMax);
-    assert(r->insert(t2));
+    r->constrain(t2);
+    ce.propagate();
 
     return(true);
   }
 
   // Test that a violation can be detected if a concurrent transaction violates a rate constraint
   static bool testRateConstraintViolation()
-    {
-      DEFAULT_SETUP(ce,db,schema,false);
-
-      std::list<InstantId> allInstants;
-      ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
-      db.close();
-
-
-      TransactionId t1 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 1), productionRateMax, productionRateMax + 1))->getId();
-      assert(r->insert(t1));
-      TransactionId t2 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(0, 1), consumptionRateMax -1, consumptionRateMax))->getId();
-      assert(r->insert(t2));
-      TransactionId t3 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 1), 1, 1))->getId();
-      assert(r->insert(t3));
-      TransactionId t4 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(0, 1), -1, -1))->getId();
-      assert(r->insert(t4));
-      
-      std::list<ViolationId> violations;
-      
-      r->getViolations(violations);
-      assert(violations.size() == 2);
-      assert(violations.front()->getType() == Violation::ProductionRateExceeded);
-      assert(violations.back()->getType() == Violation::ConsumptionRateExceeded);
-      
-      return(true);
-    }
-
-    static bool testLowerLimitExceededViolation()
-    {
-      // Define input constrains for the resource spec
-
-      DEFAULT_SETUP(ce,db,schema,false);
-
-      ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
-      db.close();
-
-      std::list<ViolationId> violations;
-
-      // Test that a violation is detected when the excess in the level cannot be overcome by remaining
-      // production
-      TransactionId t1 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(2, 2), -8, -8))->getId();
-      assert(r->insert(t1));
-      TransactionId t2 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(3, 3), -8, -8))->getId();
-      assert(r->insert(t2));
-      TransactionId t3 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(4, 4), -8, -8))->getId();
-      assert(r->insert(t3));
-      TransactionId t4 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(5, 5), -8, -8))->getId();
-      assert(r->insert(t4));
-      TransactionId t5 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(6, 6), -8, -8))->getId();
-      assert(r->insert(t5));
-      TransactionId t6 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(10, 10), -8, -8))->getId(); // This will push it over the edge
-      assert(r->insert(t6));
-
-      assert(checkLevelArea(r) == 0);
-
-      r->getViolations(violations);
-      assert(violations.size() == 3);
-      assert(violations.front()->getType() == Violation::LevelTooLow);
-
-      return(true);
-    }
-
-    static bool testUpperLimitExceededViolation()
-    {
-      // Define input constrains for the resource spec
-      DEFAULT_SETUP(ce,db,schema,false);
-
-      ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity + 1, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionRateMax, productionMax + 100, consumptionRateMax, consumptionMax))->getId();
-      db.close();
-
-
-      // Test that a violation is detected when the excess in the level cannot be overcome by remaining
-      // consumption
-      std::list<TransactionId> transactions;
-      for (int i = 0; i < 11; i++){
-	TransactionId t = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(i, i), productionRateMax, productionRateMax))->getId();
-	assert(r->insert(t));
-	transactions.push_back(t);
-      }
-
-      assert(checkLevelArea(r) == 0);
-
-      std::list<ViolationId> violations;
-      r->getViolations(violations);
-      assert(violations.size() == 1);
-      assert(violations.front()->getType() == Violation::LevelTooHigh);
-
-      return(true);
-    }
-
-    static bool testSummationConstraintViolation()
-    {
-      DEFAULT_SETUP(ce,db,schema,false);
-
-      ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
-      db.close();
-
-      // Set up constraints so that all rate and level constraints are OK - balanced consumption
-      // and production
-      std::list<TransactionId> transactions;
-      for (int i = 0; i < 11; i++){
-	TransactionId t = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(i, i), productionRateMax, productionRateMax))->getId();
-	assert(r->insert(t));
-	transactions.push_back(t);
-      }
-      for (int i = 0; i < 11; i++){
-	TransactionId t = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(i, i), -productionRateMax, -productionRateMax))->getId();
-	assert(r->insert(t));
-	transactions.push_back(t);
-      }
-
-      assert(checkLevelArea(r) == 0);
-
-      // Ensure the violations remain unchanged
-      std::list<ViolationId> violations;
-      r->getViolations(violations);
-      printViolations(violations);
-      assert(violations.size() == 4);
-      assert(violations.front()->getType() == Violation::ProductionSumExceeded);
-      assert(violations.back()->getType() == Violation::ConsumptionSumExceeded);
-
-      return(true);
-    }
-
-  static bool testPropagation()
   {
-      DEFAULT_SETUP(ce,db,schema,false);
-      ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
-      db.close();
-      TransactionId t = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(horizonStart, horizonEnd), productionRateMax, productionRateMax))->getId();
+    DEFAULT_SETUP(ce,db,schema,false);
 
+    std::list<InstantId> allInstants;
+    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
+    db.close();
+
+
+    TransactionId t1 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 1), productionRateMax, productionRateMax + 1))->getId();
+    r->constrain(t1);
+    ce.propagate();
+    TransactionId t2 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(0, 1), consumptionRateMax -1, consumptionRateMax))->getId();
+    r->constrain(t2);
+    ce.propagate();
+    TransactionId t3 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 1), 1, 1))->getId();
+    r->constrain(t3);
+    ce.propagate();
+    TransactionId t4 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(0, 1), -1, -1))->getId();
+    r->constrain(t4);
+    ce.propagate();
+      
+    std::list<ViolationId> violations;
+      
+    r->getViolations(violations);
+    assert(violations.size() == 2);
+    assert(violations.front()->getType() == Violation::ProductionRateExceeded);
+    assert(violations.back()->getType() == Violation::ConsumptionRateExceeded);
+      
+    return(true);
+  }
+
+  static bool testLowerLimitExceededViolation()
+  {
+    // Define input constrains for the resource spec
+
+    DEFAULT_SETUP(ce,db,schema,false);
+
+    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
+    db.close();
+
+    std::list<ViolationId> violations;
+
+    // Test that a violation is detected when the excess in the level cannot be overcome by remaining
+    // production
+    TransactionId t1 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(2, 2), -8, -8))->getId();
+    r->constrain(t1);
+    ce.propagate();
+    TransactionId t2 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(3, 3), -8, -8))->getId();
+    r->constrain(t2);
+    ce.propagate();    
+    TransactionId t3 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(4, 4), -8, -8))->getId();
+    r->constrain(t3);
+    ce.propagate();
+    TransactionId t4 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(5, 5), -8, -8))->getId();
+    r->constrain(t4);
+    ce.propagate();
+    TransactionId t5 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(6, 6), -8, -8))->getId();
+    r->constrain(t5);
+    ce.propagate();
+    TransactionId t6 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(10, 10), -8, -8))->getId(); // This will push it over the edge
+    r->constrain(t6);
+    ce.propagate();
+
+    assert(checkLevelArea(r) == 0);
+
+    r->getViolations(violations);
+    assert(violations.size() == 3);
+    assert(violations.front()->getType() == Violation::LevelTooLow);
+
+    return(true);
+  }
+
+  static bool testUpperLimitExceededViolation()
+  {
+    // Define input constrains for the resource spec
+    DEFAULT_SETUP(ce,db,schema,false);
+
+    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity + 1, horizonStart, horizonEnd, 
+				 limitMax, limitMin, productionRateMax, productionMax + 100, consumptionRateMax, consumptionMax))->getId();
+    db.close();
+
+
+    // Test that a violation is detected when the excess in the level cannot be overcome by remaining
+    // consumption
+    std::list<TransactionId> transactions;
+    for (int i = 0; i < 11; i++){
+      TransactionId t = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(i, i), productionRateMax, productionRateMax))->getId();
+      r->constrain(t);
+      ce.propagate();
+      transactions.push_back(t);
+    }
+
+    assert(checkLevelArea(r) == 0);
+
+    std::list<ViolationId> violations;
+    r->getViolations(violations);
+    assert(violations.size() == 1);
+    assert(violations.front()->getType() == Violation::LevelTooHigh);
+
+    return(true);
+  }
+
+  static bool testSummationConstraintViolation()
+  {
+    DEFAULT_SETUP(ce,db,schema,false);
+
+    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
+    db.close();
+
+    // Set up constraints so that all rate and level constraints are OK - balanced consumption
+    // and production
+    std::list<TransactionId> transactions;
+    for (int i = 0; i < 11; i++){
+      TransactionId t = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(i, i), productionRateMax, productionRateMax))->getId();
+      r->constrain(t);
+      ce.propagate();
+      transactions.push_back(t);
+    }
+    for (int i = 0; i < 11; i++){
+      TransactionId t = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(i, i), -productionRateMax, -productionRateMax))->getId();
+      r->constrain(t);
+      ce.propagate();
+      transactions.push_back(t);
+    }
+
+    assert(checkLevelArea(r) == 0);
+
+    // Ensure the violations remain unchanged
+    std::list<ViolationId> violations;     
+    r->getViolations(violations);
+    int times[4] = {8,9,10,10}; int i = 0;
+    for(std::list<ViolationId>::iterator it = violations.begin(); it != violations.end(); ++it){
+      assert((*it)->getInstant()->getTime() == times[i]);
+      i++;
+    }	
+    assert(violations.size() == 4);
+    assert(violations.front()->getType() == Violation::ProductionSumExceeded);
+    assert(violations.back()->getType() == Violation::ConsumptionSumExceeded);
+
+    return(true);
   }
 
 
@@ -555,15 +604,15 @@ private:
     int sum = 0;
     int i = 1;
     std::list<InstantId>::iterator it = allInstants.begin();
-    std::cout << "        Transactions  ";
+    // std::cout << "        Transactions  ";
     while (it!=allInstants.end()){
       InstantId current = *it;
-      std::cout <<  current->getTime() << ":[" << current->getTransactionCount() << "] "; 
+      // std::cout <<  current->getTime() << ":[" << current->getTransactionCount() << "] "; 
       sum += i++ * current->getTransactionCount();
       it++;
     }
 
-    std::cout << std::endl;
+    // std::cout << std::endl;
     return sum;
   }
   // Sums the instances of transactions in each instant
@@ -577,8 +626,8 @@ private:
       current = current->getNext();
     }
 
-    std::cout << "        Level      ";
-    r->print(std::cout);
+    // std::cout << "        Level      ";
+    // r->print(std::cout);
     return area;
   }
 
@@ -598,7 +647,8 @@ int main() {
 
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_NARY(ResourceConstraint, "ResourceRelation", "Resource");
-
+  REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
+  REGISTER_NARY(ResourceTransactionConstraint, "HorizonRelation", "Default");
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   std::cout << "Finished" << std::endl;
