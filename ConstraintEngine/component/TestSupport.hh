@@ -12,21 +12,21 @@ using namespace Prototype;
 
 bool loggingEnabled();
 
-class DefaultEngineAccessor{
+class DefaultEngineAccessor {
 public:
-  static const ConstraintEngineId& instance(){
-    if (s_instance.isNoId()){
+  static const ConstraintEngineId& instance() {
+    if (s_instance.isNoId()) {
       s_instance = (new ConstraintEngine())->getId();
       new DefaultPropagator(LabelStr("Default"), s_instance);
 
-      if(loggingEnabled())
+      if (loggingEnabled())
 	 new CeLogger(std::cout, s_instance);
     }
     return s_instance;
   }
 
-  static void reset(){
-    if(!s_instance.isNoId()){
+  static void reset() {
+    if (!s_instance.isNoId()) {
       delete (ConstraintEngine*) s_instance;
       s_instance = ConstraintEngineId::noId();
     }
@@ -40,27 +40,30 @@ private:
 
 #define runTest(test) { \
   std::cout << "      " << #test; \
-  int id_count = IdTable::size();\
+  int id_count = IdTable::size(); \
   bool result = test(); \
   DefaultEngineAccessor::reset(); \
-  if(result && IdTable::size() == id_count) \
+  if (result && IdTable::size() == id_count) \
     std::cout << " PASSED." << std::endl; \
-  else if(result){\
-    std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED ID'S:";\
-    IdTable::output(std::cout);\
-    std::cout << std::endl; \
-  }\
   else \
-    std::cout << " FAILED TO PASS UNIT TEST." << std::endl; \
-}
+    if (result) { \
+      std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED ID'S:"; \
+      IdTable::output(std::cout); \
+      std::cout << std::endl; \
+      throw Prototype::generalMemoryError; \
+    } else { \
+      std::cout << " FAILED TO PASS UNIT TEST." << std::endl; \
+      throw Prototype::generalUnknownError; \
+    } \
+  }
 
 #define runTestSuite(test) { \
   std::cout << #test << "***************" << std::endl; \
-  if(test()) \
+  if (test()) \
     std::cout << #test << " PASSED." << std::endl; \
   else \
     std::cout << #test << " FAILED." << std::endl; \
-}
+  }
 
 void initConstraintLibrary();
 
