@@ -3,7 +3,7 @@
 \usepackage{epsfig}
 \usepackage{verbatim}
 
-\author{Conor McGann, Tania Bedrax-Weiss, Andrew Bachmann}
+\author{Conor McGann, Tania Bedrax-Weiss, Andrew Bachmann, Will Edgington}
 
 \title{PLASMA 1.0: User Guide}
 
@@ -12,53 +12,162 @@
 \maketitle
 
 \section{Introduction}
-PLASMA ({\bf PLA}n {\bf S}tate {\bf M}nagement {\bf A}rchitecture) is a component-based software library for representation and reasoning with plans within a constraint-based paradigm. Our goal in developing PLASMA is to provide a fast, flexible, extensible, reusable technology platform for building planning and scheduling applications suitable for space exploration. PLASMA is derived from EUROPA [] which has been the core planning technology for a variety of NASA-relevant research and mission application. A notable example is  MAPGEN [], the ground-based daily activity planning system for the Mars Exploration Rover mission. EUROPA in turn is derived from HSTS [] which was the planner for the Remote Agent[]. PLASMA builds on the legacies of EUROPA and HSTS in its support for constraint-based temporal-planning techniques. However, it provides a richer modeling language, and a highly modular and extendible architecture which has resulted in improved performance and opened the technology to a broader range of planning techniques (e.g. POCL planning). 
+PLASMA ({\bf PLA}n {\bf S}tate {\bf M}nagement {\bf A}rchitecture) is
+a component-based software library for representation and reasoning
+with plans within a constraint-based paradigm. Our goal in developing
+PLASMA is to provide a fast, flexible, extensible, reusable technology
+platform for building planning and scheduling applications suitable
+for space exploration. PLASMA is derived from EUROPA [] which has been
+the core planning technology for a variety of NASA-relevant research
+and mission applications. A notable example is MAPGEN [], the
+ground-based daily activity planning system for the Mars Exploration
+Rover mission. EUROPA in turn is derived from HSTS [] which was the
+planner for the Remote Agent[]. PLASMA builds on the legacies of
+EUROPA and HSTS in its support for constraint-based temporal-planning
+techniques. However, it provides a richer modeling language, and a
+highly modular and extendible architecture which has resulted in
+improved performance and opened the technology to a broader range of
+planning techniques (e.g. POCL planning[]).
 
-The philosophy underlying PLASMA is to acknowledge up front that no one size fits all when it comes to which techniques to use, and which capabilities to employ. Consequently, PLASMA is engineered to allow people to take just what they need, discard what they do not, and integrate extensions to suit their particular requirements in a straighforward manner. The design strategy is to focus on a core framework defininig the principal abstractions and interactins induced by our underlying paradigm. We then provide concrete components to allow particular assemblies to be defined. With this component-based framework we have strived to strike a balance between flexibility and efficiency.
+The philosophy underlying PLASMA is to acknowledge up front that no
+one size fits all when it comes to which techniques to use, and which
+capabilities to employ. Consequently, PLASMA is engineered to allow
+people to take just what they need, discard what they do not, and
+integrate extensions to suit their particular requirements in a
+straighforward manner. The design strategy is to focus on a core
+framework defininig the principal abstractions and interactions
+induced by our underlying paradigm. We then provide concrete
+components to allow particular assemblies to be defined. With this
+component-based framework we have strived to strike a balance between
+flexibility and efficiency.
 
-The content of this guide is laid out as follows. We begin with an explanation of the concepts underlying PLASMA addressing its role as an embedded technology within a planner, and its underlying paradigms for representation and reasoning. We then switch gears to get the reader up and running with a particular assembly of PLASMA that is included with the distribution. In this section, the reader will solve a prepared planning problem with PLASMA, without really understanding much about how it happened! Following this, we seek to build up some understanding with a tutorial-like exposition of model development, and problem solving with PLASMA's primary modeling language - NDDL. Having spent some effort working on the application of PLASMA, we turn to its underlying architecture. This section gets 'under-the-hood' to provide an understanding of how PLASMA works at the implementation level.  Finally, we address the technical aspects of customization and extension. Detailed reference material is included in the appendices.
+The content of this guide is laid out as follows. We begin with an
+explanation of the concepts underlying PLASMA addressing its role as
+an embedded technology within a planner, and its underlying paradigms
+for representation and reasoning. We then switch gears to get the
+reader up and running with a particular assembly of PLASMA that is
+included with the distribution. In this section, the reader will solve
+a prepared planning problem with PLASMA, without really understanding
+much about how it happened! Following this, we seek to build up some
+understanding with a tutorial-like exposition of model development,
+and problem solving with PLASMA's primary modeling language -
+NDDL. Having spent some effort working on the application of PLASMA,
+we turn to its underlying architecture. This section gets
+'under-the-hood' to provide an understanding of how PLASMA works at
+the implementation level.  Finally, we address the technical aspects
+of customization and extension. Detailed reference material is
+included in the appendices.
 
 \section{Concepts}
 \subsection{Plans in Planning, Scheduling and Execution}
-Explain the notion of a {\em Plan} as a central representation of state that is used in planning, scheduling and execution. Give examples. Pose the common problem in terms of a partial plan that must be evolved to be correct and complete for the purposes of the user of the plan. Discuss each type of task in terms of their impact on a Plan.
+Explain the notion of a {\em Plan} as a central representation of
+state that is used in planning, scheduling and execution. Give
+examples. Pose the common problem in terms of a partial plan that must
+be evolved to be correct and complete for the purposes of the user of
+the plan. Discuss each type of task in terms of their impact on a
+Plan.
 \subsection{Plan Representation}
 \subsubsection{Time-dependent state and action}
-Talk about Objects that have state and behavior that are temporally qualified. Object state and behaviour can be described by predicates with temporal Extent. Objects with state that is not temporally qualified is a special case where the extent of the behavior is infinite.
+Talk about Objects that have state and behavior that are temporally
+qualified. Object state and behaviour can be described by predicates
+with temporal Extent. Objects with state that is not temporally
+qualified is a special case where the extent of the behavior is
+infinite.
 \subsubsection{Flexibility}
-Introduce the notion of flexibility, why it is necessary. This is based on the principle of least commitment and lack of precise knowledge. Then show a mapping to variables.
+Introduce the notion of flexibility, why it is necessary. This is
+based on the principle of least commitment and lack of precise
+knowledge. Then show a mapping to variables.
 \subsection{Plan Entities and Relationships}
-The Entities are first and foremost Object, Token, Variable. Since we have to concern ourselves with relationships among entities in the plan, we need to also introduce the idea of Constraints. Draw a diagram indicating the core entities and their relationships. Indicate how these relationships are encaptured through the use of constraints. We should be sure to have introduced the Token state model.
+The Entities are first and foremost Object, Token, Variable. Since we
+have to concern ourselves with relationships among entities in the
+plan, we need to also introduce the idea of Constraints. Draw a
+diagram indicating the core entities and their relationships. Indicate
+how these relationships are encaptured through the use of
+constraints. We should be sure to have introduced the Token state
+model.
 \subsection{Plan State Management}
-Now we want to address the desire to assure completeness and correctness. Infrastructure can be built in to leverage the representation in order to assure these properties. We can thus talk about the automated reasonining capabilities that can be used to propagate consequences (changes to variable values, introduction of sub-goals and ocnstraints), as well as test for consistency.
-
+Now we want to address the desire to assure completeness and
+correctness. Infrastructure can be built in to leverage the
+representation in order to assure these properties. We can thus talk
+about the automated reasonining capabilities that can be used to
+propagate consequences (changes to variable values, introduction of
+sub-goals and ocnstraints), as well as test for consistency.
 \section{Hello Rover - Getting started with PLASMA}
-Should demonstrate a simple example that takes an initial state, a model, and runs them through the planner. Will generate output and display output in PlanWorks to visualize the plan. This should illustrate the round trip through the process. Will be a fairly brief section, but should address issues of running the planner, point out the particular examples to draw from. Reference PlanWorks if it is available, and indicate how it can be used to visualize the plan. The products of this section when the user is done will be \verb!model.nddl, initial-state.nddl, Jamfile, ppw_config.!
+Should demonstrate a simple example that takes an initial state, a
+model, and runs them through the planner. Will generate output and
+display output in PlanWorks to visualize the plan. This should
+illustrate the round trip through the process. Will be a fairly brief
+section, but should address issues of running the planner, point out
+the particular examples to draw from. Reference PlanWorks if it is
+available, and indicate how it can be used to visualize the plan. The
+products of this section when the user is done will be
+\verb!model.nddl, initial-state.nddl, Jamfile, ppw_config.!
 
 \subsection{Creating a Project}
-This should reference the script, and talk about what is created by the script for your project.
+This should reference the script, and talk about what is created by
+the script for your project.
 \subsection{Building a simple model}
 \subsection{Creating an initial state}
 \subsection{Running the planner}
-Include setting up the Jamfile for the planner run, with the model and initial states. Also include setting up the ppw-config file.
+Include setting up the Jamfile for the planner run, with the model and
+initial states. Also include setting up the ppw-config file.
 \subsection{Visualization of the plan and planning process in PlanWorks}
-We will not go into all the details. Refer to PlanWorks documentation for setup instructions of use. We may wish to include screen shots.
+We will not go into all the details. Refer to PlanWorks documentation
+for setup instructions of use. We may wish to include screen shots.
 
 \section{Model Development}
-For the purposes of this section, we will assume the application is a planning task, and that we can use the built in CBPlanner in PLASMA.
-This is where we get through all the modeling. Should take it through as a tutorial, which will be accompanied by examples that can be run. We can use the example of the K9 model from the Contingent Planning Team to motivate the problem, since they have pushed alot of the modeling features.
+For the purposes of this section, we will assume the application is a
+planning task, and that we can use the built in CBPlanner in PLASMA.
+This is where we get through all the modeling. Should take it through
+as a tutorial, which will be accompanied by examples that can be
+run. We can use the example of the K9 model from the Contingent
+Planning Team to motivate the problem, since they have pushed alot of
+the modeling features.
 
 \subsection{Rover: The Robotic Geologist}
-Rover is 6 wheeled robot equiped with a range of instruments to sample and study a geological site. Rover will process goals for taking pictures and rock samples in various locations within a given survey area. It has on board a battery, and can replensih its energy levels using solar power. Rover is also equiped with communication equipment allowing it to send and receive data to and from mission control. Our Rover is a fictitous creature. Our goal in model development is to develop a model of Rover which will allow plans to be developed to meet mission goals expressed in high-level terms, such as:
+Rover is 6 wheeled robot equiped with a range of instruments to sample
+and study a geological site. Rover will process goals for taking
+pictures and rock samples in various locations within a given survey
+area. It has on board a battery, and can replensih its energy levels
+using solar power. Rover is also equiped with communication equipment
+allowing it to send and receive data to and from mission control. Our
+Rover is a fictitous creature. Our goal in model development is to
+develop a model of Rover which will allow plans to be developed to
+meet mission goals expressed in high-level terms, such as:
 \begin{enumerate}
 \item Take a panoramic image at position p, time t, and orientation o.
 \item Take a rock sample of rock r.
 \item Take a soil sample at position p.
 \end{enumerate}
 
-In fulfilling these objectives, goals must be mapped to command sequences to Rover's control subsystem. Rover includes a number of components that can be operating concurrently. For example, the Camera can be tracking targets while Rover is driving. Conversely, Rover may require that certain components are in certain states while other components are in other states. For example, the rock abrasion tool must be stowed while Rover is moving. We must also address sequencing rules within a component. For example, in order to take a sample of a rock, the sampling instrument must be position at a precise location a few millimetres from the rock surface. Prior to being in such a position, the uinstrument must be first unstowed, and then positioned. Our model must include these interactions within a component and among components so that the planning process can devise command sequences to achieve the mission goals and {\em cannot} produce incorrect command sequences.
+In fulfilling these objectives, goals must be mapped to command
+sequences to Rover's control subsystem. Rover includes a number of
+components that can be operating concurrently. For example, the Camera
+can be tracking targets while Rover is driving. Conversely, Rover may
+require that certain components are in certain states while other
+components are in other states. For example, the rock abrasion tool
+must be stowed while Rover is moving. We must also address sequencing
+rules within a component. For example, in order to take a sample of a
+rock, the sampling instrument must be position at a precise location a
+few millimetres from the rock surface. Prior to being in such a
+position, the uinstrument must be first unstowed, and then
+positioned. Our model must include these interactions within a
+component and among components so that the planning process can devise
+command sequences to achieve the mission goals and {\em cannot}
+produce incorrect command sequences.
 
 \subsection{Basic navigation}
-Many of the goals which Rover may be tasked with require mobility. Specifically, Rover must navigate from one location to another in a given site area without bumping into anything, and without getting into other difficulties such as running out of energy. For our purposes, we will start by focussing on a simplified version of the navigation problem. We will assume that the site of operation is represented by a grid of X and Y co-ordinates (integers). A location is thus a position in this grid. Rover may be at a location, or going from one location to another. We will ignore otherwise important details such as obstacle avoidance and resource management.
+Many of the goals which Rover may be tasked with require
+mobility. Specifically, Rover must navigate from one location to
+another in a given site area without bumping into anything, and
+without getting into other difficulties such as running out of
+energy. For our purposes, we will start by focussing on a simplified
+version of the navigation problem. We will assume that the site of
+operation is represented by a grid of X and Y co-ordinates
+(integers). A location is thus a position in this grid. Rover may be
+at a location, or going from one location to another. We will ignore
+otherwise important details such as obstacle avoidance and resource
+management.
 
 \subsubsection{Representing the site}
 
@@ -110,7 +219,8 @@ We should have covered
 \item Rules
 \item Allen Relations
 \end{enumerate}
-End the section by referencing a model and initial state that can be run through the planner and visualized in PlanWorks.
+End the section by referencing a model and initial state that can be
+run through the planner and visualized in PlanWorks.
 
 \subsection{Advanced rule writing}
 \subsubsection{Using existential quantification - filtering and binding}
@@ -127,7 +237,8 @@ We should have covered:
 \item macros
 \item additional allen relations
 \end{enumerate}
-End the section by referencing a model and initial state that can be run through the planner and visualized in PlanWorks.
+End the section by referencing a model and initial state that can be
+run through the planner and visualized in PlanWorks.
 
 \subsection{Incorporating resources}
 \subsubsection{Recap}
@@ -140,8 +251,8 @@ We should have covered:
 \item Example illustrating discretization into events.
 \item Careful explanation of the issue of closure and bounding of the resource.
 \end{enumerate}
-
-End the section by referencing a model and initial state that can be run through the planner and visualized in PlanWorks.
+End the section by referencing a model and initial state that can be
+run through the planner and visualized in PlanWorks.
 
 \section{PLASMA System Architecture}
 
@@ -151,7 +262,10 @@ End the section by referencing a model and initial state that can be run through
 \label{SystemDiagram}
 \end{figure}
 
-Picture of overall architecture. Document each component at the level of its main roles and responsibilities. This should be used as an introduction to the API documentation. Ideally, we could directly leverage that documentation.
+Picture of overall architecture. Document each component at the level
+of its main roles and responsibilities. This should be used as an
+introduction to the API documentation. Ideally, we could directly
+leverage that documentation.
 \subsection{Plan Database}
 \subsection{Constraint Engine}
 \subsection{Temporal Network}
@@ -169,8 +283,8 @@ Picture of overall architecture. Document each component at the level of its mai
 \label{TokenStateModel}
 \end{figure}
 
-
-Helps to understand the interaction among components. May want to use a simple example model, possibly cut-down from k9.
+Helps to understand the interaction among components. May want to use
+a simple example model, possibly cut-down from k9.
 \begin{enumerate}
 \item Creating an Object
 \item Token activation
@@ -198,6 +312,7 @@ Helps to understand the interaction among components. May want to use a simple e
 
 \section{Appendices}
 \subsection{Appendix A: NDDL Language Reference}
+
 class
 predicate
 int
@@ -205,12 +320,6 @@ float
 string
 enum
 extends
-before
-after
-contains
-contained\_by
-meets
-met\_by
 concurrent
 precedes
 object
@@ -219,7 +328,6 @@ end
 duration
 state
 time
-any
 new
 goal
 rejectable
@@ -228,9 +336,112 @@ specify
 constrain
 close
 
-\subsection{Appendix B: Constraint Library Reference}
-\subsection{Appendix C: Test Language Specification and Use}
-\subsection{Appendix D: Coding Guidelines}
+\subsection{Appendix B: Temporal Relations}
+
+In NDDL, two tokens can be constrained in several simple ways,
+including with the following ``abbreviations'' for several commonly
+used constraints.  In the examples, ``A'' and ``B'' are tokens.
+``A.start'' is therefore the time at which token A starts; similarly,
+``B.end'' is the time at which token B ends.
+
+\begin{tabular}{ll}
+NDDL syntax & Constraints created \\
+\cline{1-2} \\
+A after B; & B.end <= A.start \\
+A any B; & (none) \\
+A before B; & A.end <= B.start \\
+A contained\_by B; & B.start <= A.start, A.end <= B.end \\
+A contains B; & A.start <= B.start, B.end <= A.end \\
+A contains\_end B; & A.start <= B.end, B.end <= A.end \\
+A contains\_start B; & A.start <= B.start, B.start <= A.end \\
+A ends B; & A.end = B.end \\
+A ends\_after B; & B.end <= A.end \\
+A ends\_after\_start B; & B.start <= A.end \\
+A ends\_before B; & A.end <= B.end \\
+A ends\_during B; & B.start <= A.end, A.end <= B.end \\
+A equal B; & A.start = B.start, A.end = B.end \\
+A meets B; & A.end = B.start \\
+A met\_by B; & A.start = B.end \\
+A paralleled\_by B; & B.start <= A.start, B.end <= A.end \\
+A parallels B; & A.start <= B.start, A.end <= B.end \\
+A starts B; & A.start = B.start \\
+A starts\_after B; & B.start <= A.start \\
+A starts\_before B; & A.start <= B.start \\
+A starts\_before\_end B; & A.start <= B.end \\
+A starts\_during B; & B.start <= A.start, A.start <= B.end \\
+\end{tabular}
+
+Here are the inverse relations.
+
+\begin{tabular}{ll}
+NDDL syntax & Inverse relation \\
+\cline{1-2} \\
+A after B; & A before B; \\
+A any B; & A any B; \\
+A before B; & A after B; \\
+A contained\_by B; & A contains B; \\
+A contains B; & A contained\_by B; \\
+A contains\_end B; & A ends\_during B; \\
+A contains\_start B; & A starts\_during B; \\
+A ends B; & A ends B; \\
+A ends\_after B; & A ends\_before B; \\
+A ends\_after\_start B; & A starts\_before\_end B; \\
+A ends\_before B; & A ends\_after B; \\
+A ends\_during B; & A contains\_end B; \\
+A equal B; & A equal B; \\
+A meets B; & A met\_by B; \\
+A met\_by B; & A meets B; \\
+A paralleled\_by B; & A parallels B; \\
+A parallels B; & A paralleled\_by B; \\
+A starts B; & A starts B; \\
+A starts\_after B; & A starts\_before B; \\
+A starts\_before B; & A starts\_after B; \\
+A starts\_before\_end B; & A ends\_after\_start B; \\
+A starts\_during B; & A contains\_start B; \\
+\end{tabular}
+
+The names used for the relations as defined in James Allen's original
+paper [] are:
+
+\begin{tabular}{lll}
+Allen Relation & Constraints & Equivalent Europa Relation \\
+\cline{1-3} \\
+A equals B (=) & A.start = B.start, A.end = B.end & A equal B \\
+A precedes B (<) & A.end < B.start & A before [1 +Inf] B \\
+A follows B (>) & A.start > B.end & A after [1 +Inf] B \\
+A meets B (m) & A.end = B.start & A meets B \\
+A inverse-meets B (im) & A.start = B.end & A met\_by B \\
+A during B (d) & A.start > B.start, A.end < B.end & A contained\_by [1 +Inf] [1 +Inf] B \\
+A inverse-during B (id) & A.start < B.start, A.end > B.end & A contains [1 +Inf] [1 +Inf] B \\
+A starts B (s) & A.start = B.start, A.end < B.end & A parallels [0 0] [-Inf -1] B \\
+A inverse-starts B (is) & A.start = B.start, A.end > B.end & A parallels [0 0] [1 +Inf] B \\
+A finishes B (f) & A.start > B.start, A.end = B.end & A parallels [-Inf -1] [0 0] B \\
+A inverse-finishes B (if) & A.start < B.start, A.end = B.end & A parallels [1 +Inf] [0 0] B \\
+A overlaps B (o) & A.start < B.start, A.end > B.start, A.end < B.end & <unsupported as a single relation> \\
+A inverse-overlaps B (io) & A.start < B.end, A.end > B.start, A.end > B.end & <unsupported as a single relation> \\
+\end{tabular}
+
+Note the explicit naming of nearly all of the inverse relations.
+The exceptions are ``equals'' (its own inverse) and ``precedes'' and
+``follows'', which are each other's inverse.
+
+Note also the need for explicit bounds in most of the equivalencies
+due to Europa's relations being based on, e.g., ``before or at the same
+time'' rather than Allen's relations being strictly ``before'' and the
+lack of explicit support for the last two Allen relations.  Europa
+II's additional flexibility does allow them to be expressed, though
+more verbosely, as the constraints themselves.  E.g.:
+
+\begin{tabular}{ll}
+Allen Relation & NDDL Constraints \\
+\cline{1-2} \\
+A overlaps B (o) & LessThan(A.start, B.start); LessThan(B.start, A.end); LessThan(A.end, B.end); \\
+A inverse-overlaps B (io) & LessThan(A.start, B.end); LessThan(B.start, A.end); LessThan(B.end, A.end); \\
+\end{tabular}
+
+\subsection{Appendix C: Constraint Library Reference}
+\subsection{Appendix D: Test Language Specification and Use}
+\subsection{Appendix E: Coding Guidelines}
 
 \begin{itemize}
 \item[] General Practices
@@ -277,7 +488,7 @@ close
 
 \item[] Pointer References
  \begin{itemize}	
-  \item	Direct pointer references are discouraged, use 
+  \item	Direct pointer references are discouraged; use class Id instead.
   \item	When creating a reference, create an m\_id member that holds the id that gets constructed in the constructor initializer, in the destructor the m\_id should be removed.
   \item	When deleting references to ids call delete on the cast operator (e.g. delete (ConstrainedVariable *) ref).
  \end{itemize}
@@ -336,6 +547,3 @@ close
 \end{itemize}
 
 \end{document}
-
-
-
