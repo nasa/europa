@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.66 2004-06-03 17:16:24 wedgingt Exp $
+# $Id: autobuild,v 1.67 2004-06-10 04:09:21 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -24,7 +24,7 @@ email=checkins@postdoc.arc.nasa.gov
 # Subdirectories to build in
 # Profiling and shared in one executable no longer works, it seems
 #subdirs='cvs fast opt optFast profOptFast shareOptFast debug debugOpt noErr shareOptNoErr'
-subdirs='cvs.g++v3.2 cvs opt optFast profOptFast shareOptFast debugOpt'
+subdirs='cvs opt optFast profOptFast shareOptFast debugOpt'
 
 if test -z "$EUROPA_CNET_INCR_REPROP" -o 0"$EUROPA_CNET_INCR_REPROP" = 00
 then
