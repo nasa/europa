@@ -4,7 +4,6 @@
 #include "PlanDatabase.hh"
 #include "Object.hh"
 #include "Token.hh"
-#include "TransactionXml.hh"
 #include "EnumeratedDomain.hh"
 #include "IntervalDomain.hh"
 #include "../TinyXml/tinyxml.h"
