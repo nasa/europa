@@ -70,15 +70,24 @@ rule FSplit
 # Jambase level extensions [thx to OpenBeOS for "local" rules]
 #
 
-# FIsPrefix a : b ;				return whether or not a is a prefix of b
-
-rule FIsPrefix
+# FIsLocal : return whether or not we are in a local directory
+ 
+rule FSubDirLocal
 {
+	local a = $(SUBDIR_UP) ;
+	local b = $(SUBDIR_DOWN) ;
+	if ! $(SUBDIR_UP) {
+		local PATH = [ FSplit $(SLASH) : $(SUBDIR) ] ;
+		if $(PATH[1]) != .. {
+			return true ;
+		} else {
+			return ;
+		}
+	}
+
 	# FIsPrefix <a> : <b> ;
 	# Returns true, if list <a> is a prefix (a proper one or equal) of
 	# list <b>, an empty list otherwise.
-	local a = $(1) ;
-	local b = $(2) ;
 	while $(a) && $(a[1]) = $(b[1]) {
 		a = $(a[2-]) ;
 		b = $(b[2-]) ;
@@ -99,7 +108,7 @@ rule LocalClean
 	# Like Clean, but has only effect in a Jamfile in the
 	# directory or any of its subdirectories where jam has been invoked.
 
-	if [ FIsPrefix $(SUBDIR_UP) : $(SUBDIR_DOWN) ] {
+	if [ FSubDirLocal ] {
 		Clean $(1) : $(2) ;
 	}
 }
@@ -112,7 +121,7 @@ rule LocalDepends
 	# Like Depends, but has only effect in a Jamfile in the
 	# directory or any of its subdirectories where jam has been invoked.
 
-	if [ FIsPrefix $(SUBDIR_UP) : $(SUBDIR_DOWN) ] {
+	if [ FSubDirLocal ] {
 		Depends $(1) : $(2) ;
 	}
 }
