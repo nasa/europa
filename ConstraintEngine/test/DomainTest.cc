@@ -276,9 +276,9 @@ void outerLoopIntervalEqualConstraint(bool useEquivalenceClasses){
 }
 void main()
 {
-  outerLoopForTestEquate();
+  //outerLoopForTestEquate();
   //outerLoopForTestIntersection();
-  //outerLoopLabelSetEqualConstraint(true);
+  outerLoopLabelSetEqualConstraint(true);
   //outerLoopIntervalEqualConstraint(true);
   cout << "Finished" << endl;
 }
