@@ -11,9 +11,6 @@
 #include <list>
 
 namespace Prototype {
-  class Entity;
-  typedef Id<Entity> EntityId;
-
   class AbstractDomain;
   class IntervalDomain;
   class IntervalIntDomain;
