@@ -738,7 +738,7 @@ namespace PLASMA {
 //          //!!This needs a similar type check to SYMBOL, just above (but more complex due to inheritance?)
 //          continue;
 //      }
-      std::cout << __FILE__ << ':' << __LINE__ << ": XML domain info: typeName=\"" << typeName << "\" thisType=\"" << thisType << "\"\n";
+      std::cerr << __FILE__ << ':' << __LINE__ << ": XML domain info: typeName=\"" << typeName << "\" thisType=\"" << thisType << "\"\n";
       check_error(ALWAYS_FAILS, "unknown or inappropriately mixed type(s) for value(s) in an enumerated set");
     }
     check_error(type != ANY);
