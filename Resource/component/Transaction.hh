@@ -135,7 +135,7 @@ namespace Prototype {
     // Resource is only class privy to send notifications.
     friend class Resource;
 
-    /*@todo: Move the code in these notifications to other appropriate notifications inherited from the token or object.
+    /*@todo: Move the code in these notifications to other appropriate notifications inherited from the token or object.*/
 
     /**
      * @brief Resource notifies the transaction when it has been inserted on the resource.

@@ -18,7 +18,7 @@ namespace Prototype
 					 const ConstraintEngineId& constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){
-    check_error(variables.size() == ARG_COUNT);
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
     //@todo add type checking of each variable in the constraint
   }
 
