@@ -26,8 +26,15 @@ namespace Prototype {
 		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(),
 		  const LabelStr& objectName = Token::noObject(),
 		  bool closed = true);
+
+    const TempVarId& getStart() const;
+    const TempVarId& getEnd() const;
+
   private:
-    void commonInit();
+    void commonInit(const IntervalIntDomain& startBaseDomain,
+		    const IntervalIntDomain& endBaseDomain);
+    TempVarId m_start;
+    TempVarId m_end;
   };
 }
 #endif

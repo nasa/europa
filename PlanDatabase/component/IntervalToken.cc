@@ -17,14 +17,11 @@ namespace Prototype{
     :Token(planDatabase, 
 	   predicateName, 
 	   rejectabilityBaseDomain,
-	   startBaseDomain,
-	   endBaseDomain,
 	   durationBaseDomain,
 	   objectName,
 	   closed){
-    commonInit();
+    commonInit(startBaseDomain, endBaseDomain);
   }
-
 
   IntervalToken::IntervalToken(const TokenId& m_master, 
 			       const LabelStr& predicateName, 
@@ -37,17 +34,34 @@ namespace Prototype{
     :Token(m_master, 
 	   predicateName, 
 	   rejectabilityBaseDomain,
-	   startBaseDomain,
-	   endBaseDomain,
 	   durationBaseDomain,
 	   objectName,
 	   closed){
-    commonInit();
+    commonInit(startBaseDomain, endBaseDomain);
   }
 
-  void IntervalToken::commonInit(){
-    // Ensure non-zero duration for intervals.
+  const TempVarId& IntervalToken::getStart() const{return m_start;}
+
+  const TempVarId& IntervalToken::getEnd() const{return m_end;}
+
+  void IntervalToken::commonInit( const IntervalIntDomain& startBaseDomain,
+				  const IntervalIntDomain& endBaseDomain){
+
+    // Ensure non-zero duration for intervals. This is enforced by a base domain rather than a constraint
     check_error(m_duration->getBaseDomain().getLowerBound() > 0);
+
+
+    m_start = (new TokenVariable<IntervalIntDomain>(m_id,
+						    m_allVariables.size(),
+						    m_planDatabase->getConstraintEngine(), 
+						    startBaseDomain))->getId();
+    m_allVariables.push_back(m_start);
+
+    m_end = (new TokenVariable<IntervalIntDomain>(m_id,
+						  m_allVariables.size(),
+						  m_planDatabase->getConstraintEngine(), 
+						  endBaseDomain))->getId();
+    m_allVariables.push_back(m_end);
 
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(m_start);

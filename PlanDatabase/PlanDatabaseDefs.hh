@@ -10,6 +10,9 @@ namespace Prototype {
   class Token;
   typedef Europa::Id<Token> TokenId;
 
+  class MergeMemento;
+  typedef Europa::Id<MergeMemento> MergeMementoId;
+
   class PlanDatabaseListener;
   typedef Europa::Id<PlanDatabaseListener> PlanDatabaseListenerId;
 
@@ -18,6 +21,9 @@ namespace Prototype {
 
   typedef BoolDomain BooleanDomain;
   typedef Europa::Id< TokenVariable<BooleanDomain> > BoolVarId; /*!< Typedef it as just an int domain for now and change later */
+
+  template<class DomainType> class TokenVariable;
+  typedef Europa::Id< TokenVariable<LabelSet> > StateVarId;
 
   class ObjectSet;
   typedef Europa::Id< TokenVariable<ObjectSet> > ObjectVarId;
