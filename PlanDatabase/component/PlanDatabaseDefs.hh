@@ -46,6 +46,8 @@ namespace Prototype {
 
   class DbClient;
   typedef Id<DbClient> DbClientId;
+
+  typedef std::pair<LabelStr, AbstractDomain* > ConstructorArgument; /*!< Defines a pair for names and values of arguments for a constructor */
 }
 
 #endif

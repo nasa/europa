@@ -9,7 +9,9 @@
 #include "DbLogger.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
+
 #include "DbClient.hh"
+#include "ObjectFactory.hh"
 
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/Utils.hh"
@@ -1275,13 +1277,111 @@ private:
   }
 };
 
+/**
+ * Test class for testing client and factory
+ */
+
+class Foo;
+typedef Id<Foo> FooId;
+
+class Foo : public Timeline {
+public:
+  Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+  Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+  void handleDefaults(bool autoClose = true); // default variable initialization
+    
+  // test/simple-predicate.nddl:4 Foo
+  void constructor();
+  void constructor(int arg0, LabelStr& arg1);
+  Id< Variable< IntervalIntDomain > > m_0;
+  Id< Variable< LabelSet > > m_1;
+};
+
+Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+  : Timeline(planDatabase, type, name, true) {
+}
+
+Foo::Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+  : Timeline(parent, type, name, true) {}
+
+// default initialization of member variables
+void Foo::handleDefaults(bool autoClose) {
+  if(m_0.isNoId()){
+    check_error(!ObjectId::convertable(m_0)); // Object Variables must be explicitly initialized to a singleton
+    m_0 = addVariable(IntervalIntDomain(), LabelStr("m_0"));
+  }
+  check_error(!m_1.isNoId()); // string variables must be initialized explicitly
+  if(autoClose) close();
+}
+
+void Foo::constructor() {
+  m_1 = addVariable(LabelSet(LabelStr("Hello World")), LabelStr(getName().toString() + "." + "m_1"));
+}
+
+void Foo::constructor(int arg0, LabelStr& arg1) {
+  m_0 = addVariable(IntervalIntDomain(arg0), LabelStr(getName().toString() + "." + "m_0"));
+  m_1 = addVariable(LabelSet(LabelStr("Hello World")), LabelStr(getName().toString() + "." + "m_1"));
+}
+
+class StandardFooFactory: public ConcreteObjectFactory{
+public:
+  StandardFooFactory(): ConcreteObjectFactory(LabelStr("Foo")){}
+
+private:
+  ObjectId createInstance(const PlanDatabaseId& planDb, 
+			  const LabelStr& objectType, 
+			  const LabelStr& objectName,
+			  const std::vector<ConstructorArgument>& arguments) const {
+    check_error(arguments.empty());
+    FooId foo = (new Foo(planDb, objectType, objectName))->getId();
+    foo->constructor();
+    foo->handleDefaults();
+    return foo;
+  }
+};
+
+class SpecialFooFactory: public ConcreteObjectFactory{
+public:
+  SpecialFooFactory(): ConcreteObjectFactory(LabelStr("Foo:int:string")){}
+
+private:
+  ObjectId createInstance(const PlanDatabaseId& planDb, 
+			  const LabelStr& objectType, 
+			  const LabelStr& objectName,
+			  const std::vector<ConstructorArgument>& arguments) const {
+    FooId foo = (new Foo(planDb, objectType, objectName))->getId();
+    // Type check the arguments
+    assert(arguments.size() == 2);
+    assert(arguments[0].first == LabelStr("int"));
+    assert(arguments[1].first == LabelStr("string"));
+
+    int arg0((int) arguments[0].second->getSingletonValue());
+    LabelStr arg1(arguments[1].second->getSingletonValue());
+    foo->constructor(arg0, arg1);
+    foo->handleDefaults();
+    return foo;
+  }
+};
+
 class DbClientTest {
 public:
   static bool test(){
+    runTest(testFactoryMethods);
     runTest(testBasicAllocation);
     return true;
   }
 private:
+  static bool testFactoryMethods(){
+    std::vector<ConstructorArgument> arguments;
+    IntervalIntDomain arg0(10);
+    LabelSet arg1(LabelStr("Label"));
+    arguments.push_back(ConstructorArgument(LabelStr("int"), &arg0)); 
+    arguments.push_back(ConstructorArgument(LabelStr("string"), &arg1));
+    LabelStr factoryName = ObjectFactory::makeFactoryName(LabelStr("Foo"), arguments);
+    assert(factoryName == LabelStr("Foo:int:string"));
+    return true;
+  }
+
   static bool testBasicAllocation(){
     ConstraintEngine ce;
     new DefaultPropagator(LabelStr("Default"), ce.getId());
@@ -1289,6 +1389,17 @@ private:
     PlanDatabase db(ce.getId(), schema.getId());
 
     DbClientId client = DbClient::createInstance(db.getId());
+
+    int key = client->createObject(LabelStr("Foo"), LabelStr("foo1"));
+    FooId foo1 = client->getEntity(key);
+
+    std::vector<ConstructorArgument> arguments;
+    IntervalIntDomain arg0(10);
+    LabelSet arg1(LabelStr("Label"));
+    arguments.push_back(ConstructorArgument(LabelStr("int"), &arg0)); 
+    arguments.push_back(ConstructorArgument(LabelStr("string"), &arg1));
+    key = client->createObject(LabelStr("Foo"), LabelStr("foo2"), arguments);
+    FooId foo2 = client->getEntity(key);
 
     delete (DbClient*) client;
     return true;
@@ -1313,6 +1424,10 @@ int main() {
 
   // Allocate default schema initially so tests don't fail because of ID's
   SCHEMA;
+
+  new StandardFooFactory();
+  new SpecialFooFactory();
+
   runTestSuite(ObjectTest::test);
   runTestSuite(TokenTest::test);
   runTestSuite(TimelineTest::test);
