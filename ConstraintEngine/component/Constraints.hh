@@ -109,6 +109,21 @@ namespace Prototype {
     static const int ARG_COUNT = 2;
   };
 
+  class LessThanConstraint : public Constraint {
+  public:
+    LessThanConstraint(const LabelStr& name,
+                       const LabelStr& propagatorName,
+                       const ConstraintEngineId& constraintEngine,
+                       const std::vector<ConstrainedVariableId>& variables);
+
+    // All the work is done by the member constraints
+    inline void handleExecute() { }
+
+  private:
+    LessThanEqualConstraint m_lessThanEqualConstraint;
+    NotEqualConstraint m_notEqualConstraint;
+  };
+
   class MultEqualConstraint: public Constraint {
   public:
     MultEqualConstraint(const LabelStr& name,
@@ -148,7 +163,7 @@ namespace Prototype {
   };
 
   /**
-   * @class EqSumConstraint
+   * @class EqualSumConstraint
    * @brief A = B + C where B and C can each be sums.
    * Converted into an AddEqualConstraint and/or two EqSumConstraints with fewer variables.
    */
@@ -172,9 +187,33 @@ namespace Prototype {
   };
 
   /**
-   * @class LessThanSumConstraint
-   * @brief X <= Y + Z.
-   * Converted into two constraints: X <= temp and temp equal to Y + Z.
+   * @class EqualProductConstraint
+   * @brief A = B * C where B and C can each be products.
+   * Converted into an AddEqualConstraint and/or two EqProductConstraints with fewer variables.
+   */
+  class EqualProductConstraint : public Constraint {
+  public:
+    EqualProductConstraint(const LabelStr& name,
+                           const LabelStr& propagatorName,
+                           const ConstraintEngineId& constraintEngine,
+                           const std::vector<ConstrainedVariableId>& variables);
+
+    ~EqualProductConstraint();
+
+    // All the work is done by the member constraints
+    inline void handleExecute() { }
+
+  private:
+    const unsigned int ARG_COUNT;
+
+    ConstraintId m_eqProductC1, m_eqProductC2, m_eqProductC3, m_eqProductC4, m_eqProductC5;
+    Variable<IntervalDomain> m_product1, m_product2, m_product3, m_product4;
+  };
+
+  /**
+   * @class LessOrEqThanSumConstraint
+   * @brief A <= B + C + ...
+   * Converted into two constraints: A <= temp and temp equal to the sum of the rest.
    */
   class LessOrEqThanSumConstraint : public Constraint {
   public:
@@ -183,18 +222,42 @@ namespace Prototype {
                               const ConstraintEngineId& constraintEngine,
                               const std::vector<ConstrainedVariableId>& variables);
 
+    ~LessOrEqThanSumConstraint() {
+      delete (Constraint*) m_eqSumConstraint;
+    }
+
     // All the work is done by the member constraints
     inline void handleExecute() { }
 
   private:
-    static const int X = 0;
-    static const int Y = 1;
-    static const int Z = 2;
-    static const int ARG_COUNT = 3;
-
     Variable<IntervalDomain> m_interimVariable;
-    LessThanEqualConstraint m_lessThanEqualConstraint;
-    AddEqualConstraint m_addEqualConstraint;
+    LessThanEqualConstraint m_lessOrEqualConstraint;
+    ConstraintId m_eqSumConstraint;
+  };
+
+  /**
+   * @class LessThanSumConstraint
+   * @brief A < B + C + ...
+   * Converted into two constraints: A < temp and temp equal to the sum of the rest.
+   */
+  class LessThanSumConstraint : public Constraint {
+  public:
+    LessThanSumConstraint(const LabelStr& name,
+                          const LabelStr& propagatorName,
+                          const ConstraintEngineId& constraintEngine,
+                          const std::vector<ConstrainedVariableId>& variables);
+
+    ~LessThanSumConstraint() {
+      delete (Constraint*) m_eqSumConstraint;
+    }
+
+    // All the work is done by the member constraints
+    inline void handleExecute() { }
+
+  private:
+    Variable<IntervalDomain> m_interimVariable;
+    LessThanConstraint m_lessThanConstraint;
+    ConstraintId m_eqSumConstraint;
   };
 
   /**
