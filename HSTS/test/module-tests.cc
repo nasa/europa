@@ -412,7 +412,7 @@ int main() {
   //Use relaxed domain comparator that allows comparison of members of two different enum types
   WeakDomainComparator* wdc = new WeakDomainComparator();
   DomainComparator::initialize((DomainComparator*)wdc);
-  warn("DomainComaparator relaxed with WeakDomainComparator");
+  warn("DomainComparator relaxed with WeakDomainComparator");
 
   Schema::instance();
 
