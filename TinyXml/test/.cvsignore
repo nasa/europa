@@ -1,3 +1,6 @@
+*.bb
+*.bbg
+*.da
 demotest.xml
 gmon.out
 test5.xml
