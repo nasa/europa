@@ -61,7 +61,7 @@ class Monkey_Class___Banana_SV {
     Monkey_Class Who;
 
     eq(duration, [1 +inf]);
-    eq(Who, this);
+    eq(Who, object.__DDL__object);
   }
 
   predicate GRABBING_BANANA {
