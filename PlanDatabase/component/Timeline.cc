@@ -13,7 +13,7 @@
 #include "TokenVariable.hh"
 #include "TokenTemporalVariable.hh"
 #include "PlanDatabase.hh"
-
+#include "TemporalAdvisor.hh"
 #include "../ConstraintEngine/ConstraintEngine.hh"
 #include "../ConstraintEngine/Constraint.hh"
 #include "../ConstraintEngine/ConstraintLibrary.hh"
@@ -22,27 +22,6 @@
 #include <algorithm>
 
 namespace Prototype {
-
-  bool canPrecede(const TokenId& first, const TokenId& second){
-    int earliest_end = (int) first->getEnd()->getDerivedDomain().getLowerBound();
-    int latest_start = (int) second->getStart()->getDerivedDomain().getUpperBound();
-    return (earliest_end <= latest_start);
-  }
-
-  bool canFitBetween(const TokenId& token, const TokenId& predecessor, const TokenId& successor){
-      check_error(successor != predecessor);
-      check_error(token != successor);
-      check_error(token != predecessor);
-
-      int latest_start = (int) successor->getStart()->getDerivedDomain().getUpperBound();
-      int earliest_end = (int) predecessor->getEnd()->getDerivedDomain().getLowerBound();
-      int min_duration = latest_start - earliest_end;
-
-      if(min_duration >= token->getDuration()->getDerivedDomain().getLowerBound())
-	return true;
-      else
-	return false;
-  }
 
   Timeline::Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
     : Object(planDatabase, type, name, true){ if (!open) close();}
@@ -77,14 +56,14 @@ namespace Prototype {
 
     // Special case, the token could be placed at the end, which can't precede anything. This
     // results in an ordering choicxe of the noId() i.e. ordering w.r.t. no successor
-    if(canPrecede(m_tokenSequence.back(),token))
+    if(getPlanDatabase()->getTemporalAdvisor()->canPrecede(m_tokenSequence.back(),token))
        results.push_back(TokenId::noId());
 
     // So now we can go through the sequence till we find something that we can precede.
     std::list<TokenId>::iterator current = m_tokenSequence.begin();
 
     // Move forward until we find a Token we can precede
-    while (current != m_tokenSequence.end() && !canPrecede(token, *current))
+    while (current != m_tokenSequence.end() && !getPlanDatabase()->getTemporalAdvisor()->canPrecede(token, *current))
       current++;
 
     if (current == m_tokenSequence.end())
@@ -105,10 +84,10 @@ namespace Prototype {
       TokenId successor = *current;
 
       // This is the stopping criteria test where there is nothing more to do
-      if(!canPrecede(predecessor, token))
+      if(!getPlanDatabase()->getTemporalAdvisor()->canPrecede(predecessor, token))
 	break;
 
-      if(canFitBetween(token, predecessor, successor))
+      if(getPlanDatabase()->getTemporalAdvisor()->canFitBetween(token, predecessor, successor))
 	results.push_back(successor);
 
       previous = current++;
