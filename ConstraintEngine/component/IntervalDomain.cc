@@ -132,15 +132,15 @@ namespace PLASMA {
     check_error(!isOpen());
     check_error(!dom.isEmpty());
 
-    // This could be optimized to avoid the copy if found to be worth it.
-    IntervalDomain localDomain;
-    if (dom.isSingleton())
-      localDomain.set(dom.getSingletonValue());
-    else
-      localDomain.set(dom);
+    double ub = dom.getUpperBound();
+    if(ub < m_lb)
+      return false;
 
-    localDomain.intersect(*this);
-    return(!localDomain.isEmpty());
+    double lb = dom.getLowerBound();
+    if(lb > m_ub)
+      return false;
+
+    return true;
   }
 
   bool IntervalDomain::equate(AbstractDomain& dom) {
