@@ -38,9 +38,11 @@ namespace Prototype{
 
   void EventToken::commonInit(const IntervalIntDomain& timeBaseDomain){
     m_time = (new TokenVariable<IntervalIntDomain>(m_id,
-						    m_allVariables.size(),
-						    m_planDatabase->getConstraintEngine(), 
-						    timeBaseDomain))->getId();
+						   m_allVariables.size(),
+						   m_planDatabase->getConstraintEngine(), 
+						   timeBaseDomain,
+						   true,
+						   LabelStr("Time")))->getId();
     m_allVariables.push_back(m_time);
   }
 }
