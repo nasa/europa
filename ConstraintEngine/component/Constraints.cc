@@ -33,7 +33,7 @@ namespace Prototype
 					 const ConstraintEngineId& constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){
-    check_error(variables.size() == ARG_COUNT);
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
     for(int i=0; i< ARG_COUNT; i++)
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
   }
@@ -112,7 +112,7 @@ namespace Prototype
 				   const ConstraintEngineId& constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){
-    check_error(variables.size() == ARG_COUNT);
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
 
     // check the arguments - must both be enumerations or intervals
     check_error(getCurrentDomain(m_variables[X]).isEnumerated() == getCurrentDomain(m_variables[Y]).isEnumerated());
@@ -192,7 +192,7 @@ namespace Prototype
 						   const ConstraintEngineId& constraintEngine,
 						   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){
-    check_error(variables.size() == ARG_COUNT);
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
   }
 
   void LessThanEqualConstraint::handleExecute()
@@ -236,7 +236,7 @@ namespace Prototype
 					 const ConstraintEngineId& constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){
-    check_error(variables.size() == ARG_COUNT);
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
 
     // check the arguments - must both be enumerations, since we don't implement splitting of domains
     check_error(getCurrentDomain(m_variables[X]).isEnumerated() && getCurrentDomain(m_variables[Y]).isEnumerated());
@@ -265,6 +265,7 @@ namespace Prototype
     // if it is a restriction, but not a singleton, then we can ignore it.
     if(changeType != DomainListener::RESET && changeType != DomainListener::RELAXED)
       return !getCurrentDomain(variable).isSingleton();
+    return false;
   }
 
   /*************************************************************
@@ -275,7 +276,7 @@ namespace Prototype
 					 const ConstraintEngineId& constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){
-    check_error(variables.size() == ARG_COUNT);
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
     for(int i=0; i< ARG_COUNT; i++)
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
   }
@@ -387,7 +388,7 @@ namespace Prototype
 			   propagatorName, 
 			   constraintEngine, 
 			   makeScope(m_interimVariable.getId(), m_variables[A], m_variables[D])){
-    check_error(m_variables.size() == ARG_COUNT);
+    check_error(m_variables.size() == (unsigned int) ARG_COUNT);
     for(int i=0; i< ARG_COUNT; i++)
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
   }

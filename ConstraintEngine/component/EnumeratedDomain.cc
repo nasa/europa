@@ -222,7 +222,7 @@ namespace Prototype {
     check_error(results.empty());
     check_error(isFinite());
 
-    int i=0;
+    //int i=0;
     for(std::set<double>::iterator it = m_values.begin(); it != m_values.end(); ++it)
       results.push_back(*it);
   }
