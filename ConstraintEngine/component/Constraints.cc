@@ -1228,6 +1228,7 @@ namespace Prototype {
                                                  m_otherVars.getId(), IntervalDomain(m_variables.size() - 1)))->getId();
     std::vector<ConstrainedVariableId> cZCScope = m_variables;
     cZCScope[0] = m_zeros.getId();
+    assertTrue(m_variables.size() == cZCScope.size());
     m_countZerosConstraint = (new CountZerosConstraint(LabelStr("Internal:CountNonZeros:countZeros"),
                                                        propagatorName, constraintEngine, cZCScope))->getId();
   }
@@ -1237,14 +1238,35 @@ namespace Prototype {
                                                const ConstraintEngineId& constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_nonZeros(constraintEngine, IntervalDomain(), false, LabelStr("InternalCardinalityVar"), getId()),
-      m_lessThanEqualConstraint(LabelStr("Internal:CountNonZeros:lessThanEqual"), propagatorName, constraintEngine,
-                                makeScope(m_nonZeros.getId(), m_variables[0]))
+      m_nonZeros(constraintEngine, IntervalIntDomain(0, PLUS_INFINITY), false, LabelStr("InternalCardinalityVar"), getId()),
+      m_lessThanEqualConstraint(LabelStr("Internal:CountNonZeros:lessThanEqual"), propagatorName,
+                                constraintEngine, makeScope(m_nonZeros.getId(), m_variables[0]))
   {
     std::vector<ConstrainedVariableId> cCScope = m_variables;
     cCScope[0] = m_nonZeros.getId();
+    assertTrue(m_variables.size() == cCScope.size());
     m_countNonZerosConstraint = (new CountNonZerosConstraint(LabelStr("Internal:Cardinality:countNonZeros"),
                                                              propagatorName, constraintEngine, cCScope))->getId();
+  }
+
+  OrConstraint::OrConstraint(const LabelStr& name,
+                             const LabelStr& propagatorName,
+                             const ConstraintEngineId& constraintEngine,
+                             const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_nonZeros(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), false, LabelStr("InternalVar:Or:nonZeros"), getId())
+  {
+    m_subsetConstraint = (new SubsetOfConstraint(LabelStr("Internal:CountNonZeros:subSet"), propagatorName, constraintEngine,
+                                                 m_nonZeros.getId(), IntervalIntDomain(1, m_variables.size())))->getId();
+    std::vector<ConstrainedVariableId> cNZCScope;
+    cNZCScope.reserve(m_variables.size() + 1);
+    cNZCScope.push_back(m_nonZeros.getId());
+    cNZCScope.insert(cNZCScope.end(), m_variables.begin(), m_variables.end());
+    std::cerr << "OrConstraint: m_variables.size() is " << m_variables.size()
+              << " and cNZCScope.size() is " << cNZCScope.size() << '\n';
+    assertTrue(m_variables.size() + 1 == cNZCScope.size());
+    m_countNonZerosConstraint = (new CountNonZerosConstraint(LabelStr("Internal:Or:countNonZeros"), propagatorName,
+                                                             constraintEngine, cNZCScope))->getId();
   }
 
 } // end namespace Prototype
