@@ -68,11 +68,7 @@ if $(OS) = BEOS {
 
 # DEBUG_FLAGS = flags to enable debugging
 
-if $(OS) = BEOS {
-	DEBUG_FLAGS ?= -g3 ;
-} else {
-	DEBUG_FLAGS ?= -g ;
-}
+DEBUG_FLAGS ?= -g3 ;
 
 # SUFSHARE = suffix for shared libraries
 
