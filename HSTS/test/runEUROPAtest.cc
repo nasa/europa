@@ -19,7 +19,7 @@ int main(int argc, const char ** argv){
   // read model, initial transactions, heuristic, plan id files
 
   if (argc < 3) {
-    std::cerr << "Error: must provide at least a model and an initial transactions file." << std::endl;
+    std::cerr << "Error: must provide at least an initial transactions file." << std::endl;
     return -1;
   }
 
