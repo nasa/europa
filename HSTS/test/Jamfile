@@ -55,6 +55,11 @@ rule RunEUROPATest {
 }
 
 RunEUROPATest monkeyTests : timeline.nddl timeline-hacked.nddl timeline-hacked2.nddl timeline-hacked3.nddl ;
+
+# Failing; see GNATS 2759, 2760, and 2701.
+#RunEUROPATest monkey1Tests : timeline1.nddl timeline-objvar.nddl timeline-twomonkeys-objvar.nddl timeline-twomonkeys.nddl ;
+
+# Example; not yet converted or committed
 #RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
 
 } # PLASMA_READY
