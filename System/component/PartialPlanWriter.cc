@@ -166,7 +166,7 @@ namespace Prototype {
     
     char *destBuf = new char[PATH_MAX];
     if(realpath(dest.c_str(), destBuf) == NULL && stepsPerWrite != 0) {
-      if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
+      if(mkdir(destBuf, 0777) && errno != EEXIST) {
         cerr << "Failed to make destination directory " << dest << endl;
         FatalErrno();
       }
@@ -441,6 +441,7 @@ namespace Prototype {
     else {
       tokOut << paramVarIds << endl;
     }
+    numTokens++;
   }
   
   void PartialPlanWriter::outputEnumVar(const Id<TokenVariable<EnumeratedDomain> >& enumVar, 
@@ -544,14 +545,22 @@ namespace Prototype {
 
   const std::string PartialPlanWriter::getUpperBoundStr(IntervalDomain &dom) const {
     std::stringstream stream;
-    stream << dom.getUpperBound();
-    return *(new std::string(stream.str()));
+    if((int) dom.getUpperBound() == PLUS_INFINITY)
+      return PINFINITY;
+    else if((int) dom.getUpperBound() == MINUS_INFINITY)
+      return NINFINITY;
+    stream << (int) dom.getUpperBound();
+    return std::string(stream.str());
   }
 
   const std::string PartialPlanWriter::getLowerBoundStr(IntervalDomain &dom) const {
     std::stringstream stream;
-    stream << dom.getLowerBound();
-    return *(new std::string(stream.str()));
+    if((int)dom.getLowerBound() == PLUS_INFINITY)
+      return PINFINITY;
+    else if((int) dom.getLowerBound() == MINUS_INFINITY)
+      return NINFINITY;
+    stream << (int) dom.getLowerBound();
+    return std::string(stream.str());
   }
   
   const std::string PartialPlanWriter::getEnumerationStr(EnumeratedDomain &edom) const {
@@ -562,15 +571,26 @@ namespace Prototype {
       dom.close();
     }
     if(dom.isInfinite()) {
-      return *(new std::string("-Infinity +Infinity"));
+      return "-Infinity +Infinity";
+    }
+    if(dom.isEmpty()) {
+      return "empty";
     }
     else {
       dom.getValues(enumeration);
     }
     for(std::list<double>::iterator it = enumeration.begin(); it != enumeration.end(); ++it) {
-      stream << *it << " ";
+      if((int) (*it) == PLUS_INFINITY)
+        stream << PINFINITY;
+      else if((int) (*it) == MINUS_INFINITY)
+        stream << NINFINITY;
+      else
+        stream << (int)(*it) << " ";
     }
-    return *(new std::string(stream.str()));
+    if(!stream.str()) {
+      return "bugStr";
+    }
+    return std::string(stream.str());
   }
   
   /****From PlanDatabaseListener****/
@@ -633,7 +653,8 @@ namespace Prototype {
     if(stepsPerWrite) {
        transactionList->push_back(Transaction(VAR_CREATED, varId->getKey(), UNKNOWN,
                                               transactionId++, seqId, nstep, 
-                                              std::string("too early")));
+                                              //std::string("too early")));
+                                              varId->getName().toString()));
     }
   }
 
@@ -641,7 +662,8 @@ namespace Prototype {
     if(stepsPerWrite) {
       transactionList->push_back(Transaction(VAR_DELETED, varId->getKey(), UNKNOWN,
                                              transactionId++, seqId, nstep, 
-                                             std::string("too early")));
+                                             //std::string("too early")));
+                                             varId->getName().toString()));
     }
   }
 
@@ -731,7 +753,7 @@ namespace Prototype {
         SPACE;
       retval += getUpperBoundStr((IntervalDomain &)varId->specifiedDomain()) + COMMA;
     }
-    return *(new std::string(retval));
+    return std::string(retval);
   }
 
   void Transaction::write(std::ostream &out, long long int ppId) const {
