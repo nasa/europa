@@ -1,3 +1,5 @@
+*.dll
+*.so
 *.xml
 *_g
 *_g_no
