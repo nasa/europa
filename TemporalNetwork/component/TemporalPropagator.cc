@@ -97,10 +97,12 @@ namespace Prototype {
     else {
       //update the cnet
       if (!updateTempVar()) {
-	std::cout << " Tnet made Cnet inconsistent " << std::endl;
-	check_error(false);
+	//std::cout << " Tnet made Cnet inconsistent " << std::endl;
+	check_error(ALWAYS_FAILS);
       }
       else {
+	// Begin by clearing update required. It may be set again throough consequences
+	m_updateRequired = false;
 	while(!m_agenda.empty()){
 	  std::set<ConstraintId>::iterator it = m_agenda.begin();
 	  ConstraintId constraint = *it;
@@ -119,7 +121,7 @@ namespace Prototype {
     }
     m_activeConstraint = 0;
     m_agenda.clear();
-    m_updateRequired = getConstraintEngine()->provenInconsistent();
+    m_updateRequired = m_updateRequired || getConstraintEngine()->provenInconsistent();
   }
 
   bool TemporalPropagator::updateRequired() const{
@@ -329,7 +331,10 @@ namespace Prototype {
       Time lb, ub;
       m_tnet->getTimepointBounds((*it).second, lb, ub);
       TempVarId var = m_tnet->getVarIdFromTimepoint((*it).second);
+
+      /* cmcgann NOTE: Can use IntervalIntDomain::intersect(lb, ub) instead. Will be faster. */
       AbstractDomain& dom = Propagator::getCurrentDomain(var);
+
       check_error(!dom.isEmpty());
       if (lb > dom.getLowerBound() || ub < dom.getUpperBound()) {
 
@@ -346,7 +351,7 @@ namespace Prototype {
 	  std::cout << "Error: bounds are a subset of the domain, but intersect returned empty." << std::endl;
 	  std::cout << " Domain = " << dom << std::endl;
 	  std::cout << " Bounds = [" << lb << "," << ub << "]" << std::endl;
-	  check_error(false);
+	  check_error(ALWAYS_FAILS);
 	}
       }
       else { // not necessary to propagate results back to the variables
