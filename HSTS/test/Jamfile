@@ -146,7 +146,7 @@ rule RunEUROPATest {
 
   # create planner with linked model
   ModuleMain $(exe) : $(o) : HSTS ;
-  RunModuleMain run-$(exe)$(addTarget) : $(exe) : $(options) : : "run-$(exe).output" ;
+  RunModuleMain run-$(exe)$(addTarget) : $(exe) : $(options) : : "run-$(exe).output$(addTarget)" ;
   LocalDepends $(target) : run-$(exe)$(addTarget) ;
  }
 }
@@ -265,6 +265,8 @@ RunEUROPATest gnats-sum : sum-init.nddl ;
 
 # Failing with no error message
 RunEUROPATest dnp-timeline : DNP.timeline.nddl ;
+
+# These fail; no idea why yet.
 RunEUROPATest dnp-DNP2 : DNP2.timeline.nddl ;
 RunEUROPATest dnp-allDSS : allDSS.nddl ;
 RunEUROPATest dnp-fourFreeObs : fourFreeObs.nddl ;
