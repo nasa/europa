@@ -153,7 +153,7 @@ int main(int argc, const char** argv) {
 #endif
   
   std::cout << "Finished" << std::endl;
-  return 0;
+  exit(0);
 }
 
 #ifdef __BEOS__
