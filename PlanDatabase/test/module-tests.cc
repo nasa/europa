@@ -1159,7 +1159,7 @@ int main(){
   
   // Special designations for temporal relations
   REGISTER_NARY(EqualConstraint, "concurrent", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "precede", "Default");
+  REGISTER_NARY(LessThanEqualConstraint, "before", "Default");
 
   // Support for Token implementations
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
