@@ -2,7 +2,7 @@ Building EUROPA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.12 2004-12-30 00:30:57 wedgingt Exp $
+$Id: BUILDING,v 1.13 2005-01-05 21:36:12 tania Exp $
 
 
 - Prerequisites:
@@ -26,6 +26,20 @@ If you are using computers in Code TC at NASA/Ames, the division's
 System Group has likely already installed these programs (and versions
 of them) that you will need to build EUROPA reliably.  
 
+- Supported Platforms:
+
+1. i686 Linux 2.4.20-31.9smp
+2. sparc sun4u SunOS 5.8
+
+* We have also successfully compiled Europa in the following platforms, but
+we do not support them:
+1. Mac OSX: be sure to set your DYLD_LIBRARY_PATH instead of your
+LD_LIBRARY_PATH as indicated in the instructions below. 
+2. Cygwin: be sure to set your PATH to include the PLASMA/lib directory as
+well as set your LIBRARY_PATH environment variable rather than the
+LD_LIBRARY_PATH as indicated below.
+3. BeOS: be sure to set your LIBRARY_PATH variable instead of
+LD_LIBRARY_PATH  as indicated below.
 
 - Getting started:
 
