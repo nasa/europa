@@ -380,7 +380,7 @@ namespace Prototype {
       }
       return(false);
     }
-    assertTrue(denomMin != 0.0 && denomMax != 0.0);
+    check_error(denomMin != 0.0 && denomMax != 0.0);
 
     // Otherwise we must examine min and max of all pairings to deal with signs correctly.
     newMax = max(max(numMax / denomMin, numMin / denomMin),
@@ -732,7 +732,7 @@ namespace Prototype {
     eqSumScope[0] = m_interimVariable.getId();
     m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:lessThanSum:eqSum"), propagatorName,
                                                 constraintEngine, eqSumScope))->getId();
-    assertTrue(m_eqSumConstraint.isValid());
+    check_error(m_eqSumConstraint.isValid());
   }
 
   GreaterOrEqThanSumConstraint::GreaterOrEqThanSumConstraint(const LabelStr& name,
@@ -762,7 +762,7 @@ namespace Prototype {
     eqSumScope[0] = m_interimVariable.getId();
     m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:greaterThanSum:eqSum"), propagatorName,
                                                 constraintEngine, eqSumScope))->getId();
-    assertTrue(m_eqSumConstraint.isValid());
+    check_error(m_eqSumConstraint.isValid());
   }
 
   CondAllSameConstraint::CondAllSameConstraint(const LabelStr& name,
@@ -949,9 +949,9 @@ namespace Prototype {
    */
   static void addToUnion(AbstractDomain **unionOfDomains,
                          const AbstractDomain& domToAdd) {
-    assertTrue(unionOfDomains != 0 && *unionOfDomains != 0);
-    assertTrue(!(*unionOfDomains)->isEmpty() && !(*unionOfDomains)->isDynamic());
-    assertTrue(!domToAdd.isEmpty() && !domToAdd.isDynamic());
+    check_error(unionOfDomains != 0 && *unionOfDomains != 0);
+    check_error(!(*unionOfDomains)->isEmpty() && !(*unionOfDomains)->isDynamic());
+    check_error(!domToAdd.isEmpty() && !domToAdd.isDynamic());
     AbstractDomain *newUnion = 0;
     std::list<double> membersToAdd;
     std::list<double> newMembers;
@@ -1163,7 +1163,7 @@ namespace Prototype {
     condAllDiffScope.reserve(m_variables.size() + 1);
     condAllDiffScope.push_back(m_condVar.getId());
     condAllDiffScope.insert(condAllDiffScope.end(), m_variables.begin(), m_variables.end());
-    assertTrue(m_variables.size() + 1 == condAllDiffScope.size());
+    check_error(m_variables.size() + 1 == condAllDiffScope.size());
     m_condAllDiffConstraint = (new CondAllDiffConstraint(LabelStr("Internal:AllDiff:condAllDiff"), propagatorName,
                                                          constraintEngine, condAllDiffScope))->getId();
   }
@@ -1201,7 +1201,7 @@ namespace Prototype {
                                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     for (unsigned int i = 0; i < m_variables.size(); i++)
-      assertTrue(getCurrentDomain(m_variables[i]).isNumeric());
+      check_error(getCurrentDomain(m_variables[i]).isNumeric());
   }
 
   void CountZerosConstraint::handleExecute() {
@@ -1285,7 +1285,7 @@ namespace Prototype {
                                                  m_otherVars.getId(), IntervalDomain(m_variables.size() - 1)))->getId();
     std::vector<ConstrainedVariableId> cZCScope = m_variables;
     cZCScope[0] = m_zeros.getId();
-    assertTrue(m_variables.size() == cZCScope.size());
+    check_error(m_variables.size() == cZCScope.size());
     m_countZerosConstraint = (new CountZerosConstraint(LabelStr("Internal:CountNonZeros:countZeros"),
                                                        propagatorName, constraintEngine, cZCScope))->getId();
   }
@@ -1301,7 +1301,7 @@ namespace Prototype {
   {
     std::vector<ConstrainedVariableId> cCScope = m_variables;
     cCScope[0] = m_nonZeros.getId();
-    assertTrue(m_variables.size() == cCScope.size());
+    check_error(m_variables.size() == cCScope.size());
     m_countNonZerosConstraint = (new CountNonZerosConstraint(LabelStr("Internal:Cardinality:countNonZeros"),
                                                              propagatorName, constraintEngine, cCScope))->getId();
   }
@@ -1319,7 +1319,7 @@ namespace Prototype {
     cNZCScope.reserve(m_variables.size() + 1);
     cNZCScope.push_back(m_nonZeros.getId());
     cNZCScope.insert(cNZCScope.end(), m_variables.begin(), m_variables.end());
-    assertTrue(m_variables.size() + 1 == cNZCScope.size());
+    check_error(m_variables.size() + 1 == cNZCScope.size());
     m_countNonZerosConstraint = (new CountNonZerosConstraint(LabelStr("Internal:Or:countNonZeros"), propagatorName,
                                                              constraintEngine, cNZCScope))->getId();
   }
@@ -1329,9 +1329,9 @@ namespace Prototype {
                                                  const ConstraintEngineId& constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
-    assertTrue(m_variables.size() > 1);
+    check_error(m_variables.size() > 1);
     for (unsigned int i = 0; i < m_variables.size(); i++)
-      assertTrue(getCurrentDomain(m_variables[i]).isNumeric());
+      check_error(getCurrentDomain(m_variables[i]).isNumeric());
     // Should probably call AbstractDomain::canBeCompared() and check
     // minDelta() as well.
   }
@@ -1389,7 +1389,7 @@ namespace Prototype {
       // If there is only one other var that has a value in minDom,
       // it needs to be restricted to minDom to satisfy the constraint.
       i = *(contributors.begin());
-      assertTrue(i > 0);
+      check_error(i > 0);
       AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
       IntervalDomain restriction(minimum, minDom.getUpperBound());
       curDom.intersect(restriction);
@@ -1397,7 +1397,7 @@ namespace Prototype {
     }
     while (!contributors.empty()) {
       i = *(contributors.begin());
-      assertTrue(i > 0);
+      check_error(i > 0);
       contributors.erase(contributors.begin());
       AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
       if (minimum < curDom.getLowerBound())
@@ -1413,9 +1413,9 @@ namespace Prototype {
                                                  const ConstraintEngineId& constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
-    assertTrue(m_variables.size() > 1);
+    check_error(m_variables.size() > 1);
     for (unsigned int i = 0; i < m_variables.size(); i++)
-      assertTrue(getCurrentDomain(m_variables[i]).isNumeric());
+      check_error(getCurrentDomain(m_variables[i]).isNumeric());
     // Should probably call AbstractDomain::canBeCompared() and check
     // minDelta() as well.
   }
@@ -1473,7 +1473,7 @@ namespace Prototype {
       // If there is only one other var that has a value in maxDom,
       // it needs to be restricted to maxDom to satisfy the constraint.
       i = *(contributors.begin());
-      assertTrue(i > 0);
+      check_error(i > 0);
       AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
       IntervalDomain restriction(maxDom.getLowerBound(), maximum);
       curDom.intersect(restriction);
@@ -1481,7 +1481,7 @@ namespace Prototype {
     }
     while (!contributors.empty()) {
       i = *(contributors.begin());
-      assertTrue(i > 0);
+      check_error(i > 0);
       contributors.erase(contributors.begin());
       AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
       if (maximum > curDom.getUpperBound())
@@ -1501,17 +1501,17 @@ namespace Prototype {
       m_condAllSameConstraint(LabelStr("Internal:CondEqualSum:condAllSame"), propagatorName, constraintEngine,
                               makeScope(m_variables[0], m_variables[1], m_sumVar.getId()))
   {
-    assertTrue(m_variables.size() > 2);
+    check_error(m_variables.size() > 2);
     std::vector<ConstrainedVariableId> eqSumScope;
     eqSumScope.reserve(m_variables.size() - 1);
     eqSumScope.push_back(m_sumVar.getId());
     std::vector<ConstrainedVariableId>::iterator it = m_variables.begin();
     ++it; ++it;
     eqSumScope.insert(eqSumScope.end(), it, m_variables.end());
-    assertTrue(m_variables.size() - 1 == eqSumScope.size());
+    check_error(m_variables.size() - 1 == eqSumScope.size());
     m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:CondEqualSum:eqSum"), propagatorName,
                                                 constraintEngine, eqSumScope))->getId();
-    assertTrue(m_eqSumConstraint.isValid());
+    check_error(m_eqSumConstraint.isValid());
   }
 
   RotateScopeRightConstraint::RotateScopeRightConstraint(const LabelStr& name,
@@ -1522,7 +1522,7 @@ namespace Prototype {
                                                          const int& rotateCount)
     : Constraint(name, propagatorName, constraintEngine, variables)
   {
-    assertTrue((unsigned) abs(rotateCount) < m_variables.size());
+    check_error((unsigned) abs(rotateCount) < m_variables.size());
     std::vector<ConstrainedVariableId> otherScope;
     otherScope.reserve(m_variables.size());
     unsigned int i;
@@ -1539,7 +1539,7 @@ namespace Prototype {
       for (i = 0; i < (unsigned) abs(rotateCount); i++)
         otherScope.push_back(m_variables[i]);
     }
-    assertTrue(m_variables.size() == otherScope.size());
+    check_error(m_variables.size() == otherScope.size());
     m_otherConstraint = ConstraintLibrary::createConstraint(otherName, constraintEngine, otherScope);
   }
 
@@ -1551,9 +1551,9 @@ namespace Prototype {
                                                int firstIndex, int secondIndex)
     : Constraint(name, propagatorName, constraintEngine, variables)
   {
-    assertTrue((unsigned) abs(firstIndex) < m_variables.size());
-    assertTrue((unsigned) abs(secondIndex) < m_variables.size());
-    assertTrue(firstIndex != secondIndex);
+    check_error((unsigned) abs(firstIndex) < m_variables.size());
+    check_error((unsigned) abs(secondIndex) < m_variables.size());
+    check_error(firstIndex != secondIndex);
     if (firstIndex < 0)
       firstIndex = m_variables.size() - firstIndex;
     if (secondIndex < 0)
