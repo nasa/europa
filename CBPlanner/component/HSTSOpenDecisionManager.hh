@@ -3,6 +3,7 @@
 
 #include "CBPlannerDefs.hh"
 #include "DefaultOpenDecisionManager.hh"
+#include "HSTSHeuristics.hh"
 
 namespace PLASMA {
 
@@ -35,7 +36,7 @@ namespace PLASMA {
   class HSTSOpenDecisionManager : public DefaultOpenDecisionManager {
   public:
 
-    HSTSOpenDecisionManager(const DecisionManagerId& dm);
+    HSTSOpenDecisionManager(const DecisionManagerId& dm, const HSTSHeuristicsId& heur);
     ~HSTSOpenDecisionManager();
 
     virtual DecisionPointId getNextDecision();
@@ -67,6 +68,8 @@ namespace PLASMA {
     HSTSVariableDecisionSet m_sortedNonUnitVarDecs;
     HSTSTokenDecisionSet m_sortedTokDecs;
     HSTSObjectDecisionSet m_sortedObjectDecs;
+
+    HSTSHeuristicsId m_heur;
   };
 
 }
