@@ -274,11 +274,15 @@ rule LibraryFromObjects
 
 	if $(KEEPOBJS)
 	{
-	    LocalDepends obj : $(_s) ;
+		if ! $(3) {
+		    LocalDepends obj : $(_s) ;
+		}
 	}
 	else
 	{
-	    LocalDepends lib : $(_l) ;
+		if ! $(3) {
+		    LocalDepends lib : $(_l) ;
+		}
 	}
 
 	# Set LOCATE for the library and its contents.  The bound

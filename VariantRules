@@ -5,6 +5,8 @@ include [ FDirName $(SUBDIR) PlatformRules ] ;
 
 VARIANTS ?= DEV ;
 
+ALL_VARIANTS = DEV OPTIMIZED PROFILE CUSTOM ;
+
 #########
 
 # Rules for generating flags based on the variant.

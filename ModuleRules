@@ -83,7 +83,7 @@ rule ModuleObjects {
   }
 
   local variant ;
-  for variant in $(VARIANTS) {
+  for variant in $(ALL_VARIANTS) {
     local C++FLAGS = $(C++FLAGS) [ FVariantC++Flags $(variant) ] ;
     local CFLAGS = $(CFLAGS) [ FVariantCFlags $(variant) ] ;
 
@@ -219,7 +219,7 @@ rule ModulePart {
   ModuleObjects $(files) : $(module) ;
 
   local variant ;
-  for variant in $(VARIANTS) {
+  for variant in $(ALL_VARIANTS) {
     local outputs ;
     local file ;
     for file in $(files) {
@@ -246,12 +246,22 @@ rule ModulePart {
           local name = [ FModuleSharedLibraryLinkName $(link) : $(variant) ] ;
           LINKLIBS on $(libname) += $(SHARED_LIBRARY_PATH_FLAG) $(path) -l$(name) ;                                    
         }
-        ModuleSharedLibrary $(libname) : $(outputs) ;
+        if $(variant) in $(VARIANTS) {
+          ModuleSharedLibrary $(libname) : $(outputs) ;
+        } else {
+          ModuleSharedLibrary $(libname) : $(outputs) : false ;
+        }
       }
       if $(library) = STATIC {
-        ModuleStaticLibrary $(libname) : $(outputs) ;
+        if $(variant) in $(VARIANTS) {
+          ModuleStaticLibrary $(libname) : $(outputs) ;
+        } else {
+          ModuleStaticLibrary $(libname) : $(outputs) : false ;
+        }
       }
-      Depends $(module) : $(libname) ;
+      if $(variant) in $(VARIANTS) {
+        Depends $(module) : $(libname) ;
+      }
     }
   }
 }
@@ -274,7 +284,7 @@ rule ModuleStaticLibrary {
   }
 
   if $(files) {
-    LibraryFromObjects $(1) : $(2) ;
+    LibraryFromObjects $(1) : $(2) : $(3) ;
   }
 }
 
@@ -304,7 +314,7 @@ rule ModuleSharedLibrary {
   }
 
   if $(files) {
-    SharedLibraryFromObjects $(1) : $(2) ;
+    SharedLibraryFromObjects $(1) : $(2) : $(3)  ;
   }
 }
 
