@@ -13,7 +13,6 @@
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/Utils.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
-#include "../ConstraintEngine/IntervalRealDomain.hh"
 #include "../ConstraintEngine/LabelSet.hh"
 #include "../ConstraintEngine/DefaultPropagator.hh"
 #include "../ConstraintEngine/EqualityConstraintPropagator.hh"
@@ -23,6 +22,32 @@
 #include <sstream>
 #include <string>
 #include <cassert>
+
+
+class DefaultSchemaAccessor{
+public:
+  static const SchemaId& instance(){
+    if (s_instance.isNoId()){
+      s_instance = (new Schema())->getId();
+    }
+
+    return s_instance;
+  }
+
+  static void reset(){
+    if(!s_instance.isNoId()){
+      delete (Schema*) s_instance;
+      s_instance = SchemaId::noId();
+    }
+  }
+
+private:
+  static SchemaId s_instance;
+};
+
+SchemaId DefaultSchemaAccessor::s_instance;
+
+#define SCHEMA DefaultSchemaAccessor::instance()
 
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
     ConstraintEngine ce;\
@@ -109,7 +134,7 @@ public:
   }
 private:
   static bool testBasicAllocation(){
-    PlanDatabase db(ENGINE);
+    PlanDatabase db(ENGINE, SCHEMA);
     Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
     Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
     ObjectId id0((new Object(o1.getId(), LabelStr("AllObjects"), LabelStr("id0")))->getId());
@@ -132,7 +157,7 @@ private:
   }
 
   static bool testObjectSet(){
-    PlanDatabase db(ENGINE);
+    PlanDatabase db(ENGINE, SCHEMA);
     std::list<ObjectId> values;
     Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
     Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
@@ -148,7 +173,7 @@ private:
   }
 
   static bool testObjectVariables(){
-    PlanDatabase db(ENGINE);
+    PlanDatabase db(ENGINE, SCHEMA);
     Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"), true);
     assert(!o1.isComplete());
     o1.addVariable(IntervalIntDomain());
@@ -185,7 +210,7 @@ private:
   }
 
   static bool testObjectFilteringConstraint(){
-    PlanDatabase db(ENGINE);
+    PlanDatabase db(ENGINE, SCHEMA);
 
     static const int NUM_OBJECTS = 10;
 
@@ -245,7 +270,7 @@ private:
 
    */
   static bool testFilterAndConstrain(){
-    PlanDatabase db(ENGINE);
+    PlanDatabase db(ENGINE, SCHEMA);
 
     static const int NUM_OBJECTS = 10;
 
@@ -302,6 +327,7 @@ public:
     runTest(testMasterSlaveRelationship);
     runTest(testBasicMerging);
     runTest(testMergingPerformance);
+    runTest(testTokenCompatibility);
     return true;
   }
 
@@ -315,7 +341,7 @@ private:
     assert(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.getStart()->specify(IntervalIntDomain(5, 10));
     assert(eventToken.getEnd()->getDerivedDomain() == IntervalIntDomain(5, 10));
-    eventToken.addParameter(IntervalRealDomain(-1.08, 20.18), LabelStr("TestParam"));
+    eventToken.addParameter(IntervalDomain(-1.08, 20.18), LabelStr("TestParam"));
     eventToken.close();
 
     // IntervalToken
@@ -648,6 +674,61 @@ private:
     return true;
   }    
 
+  static bool testTokenCompatibility(){
+    DEFAULT_SETUP(ce, db, schema, true);
+
+    // Create 2 mergeable tokens - predicates, types and base domaiuns match
+    IntervalToken t0(db.getId(), 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000),
+		     Token::noObject(), false);
+    t0.addParameter(IntervalDomain(1, 20));
+    t0.close();
+
+    // Same predicate and has an intersection
+    IntervalToken t1(db.getId(),
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000),
+		     Token::noObject(), false);
+    t1.addParameter(IntervalDomain(10, 40)); // There is an intersection - but it is not a subset. Still should match
+    t1.close();
+
+    t0.activate();
+    std::vector<TokenId> compatibleTokens;
+    assert(ce.propagate());
+    db.getCompatibleTokens(t1.getId(), compatibleTokens);
+    assert(compatibleTokens.size() == 1);
+    assert(compatibleTokens[0] == t0.getId());
+
+    compatibleTokens.clear();
+    t0.cancel();
+    assert(ce.propagate());
+    db.getCompatibleTokens(t1.getId(), compatibleTokens);
+    assert(compatibleTokens.empty()); // No match since no tokens are active
+
+    IntervalToken t2(db.getId(),
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000),
+		     Token::noObject(), false);
+    t2.addParameter(IntervalDomain(0, 0)); // Force no intersection
+    t2.close();
+
+    t0.activate();
+    assert(ce.propagate());
+    compatibleTokens.clear();
+    db.getCompatibleTokens(t2.getId(), compatibleTokens);
+    assert(compatibleTokens.empty()); // No match since parameter variable has no intersection
+    return true;
+  }
 };
 
 class TimelineTest {
@@ -1032,7 +1113,8 @@ int main(){
   REGISTER_UNARY(ObjectTokenRelation, "ObjectRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
   REGISTER_NARY(EqualConstraint, "EqualConstraint", "EquivalenceClass");
-  
+  // Allocate default schema initially so tests don't fail because of ID's
+  SCHEMA;
   runTestSuite(ObjectTest::test);
   runTestSuite(TokenTest::test);
   runTestSuite(TimelineTest::test);
