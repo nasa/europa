@@ -6,23 +6,26 @@ class Target {
  int m_x;
  int m_y;
  int m_z;
- double m_priority;
+ int m_size;
+ float m_priority;
  bool m_mandatory;
 
- Target(string name, int x, int y, int z, double priority) {
+ Target(string name, int x, int y, int z, int size, float priority) {
   m_name = name;
   m_x = x;
   m_y = y;
   m_z = z;
+  m_size = size;
   m_priority = priority;
   m_mandatory = false;
  }
 
- Target(string name, int x, int y, int z, double priority, bool mandatory) {
+ Target(string name, int x, int y, int z, int size, float priority, bool mandatory) {
   m_name = name;
   m_x = x;
   m_y = y;
   m_z = z;
+  m_size = size;
   m_priority = priority;
   m_mandatory = mandatory;
  }
@@ -40,7 +43,6 @@ class Satellite {
  predicate TakeImg {
    Target m_target;
    int m_duration;
-   int m_size;
    eq(duration, m_duration);
  }
 
@@ -64,14 +66,12 @@ class Satellite {
  }
 }
 
-class GroundStation {
+class GroundStation extends Object {
   Storage m_disk;
 
  GroundStation () {
    m_disk = new Storage (0, 200, 10000000, 1000, 10000000);
  }
-
- predicate Idle {}
 
  predicate Receive {
    Target m_data;
@@ -99,25 +99,84 @@ class Storage extends Resource {
 }
 
 Satellite::TakeImg {
-  metby(object.Pointing p);
+  met_by(Satellite.Pointing p);
+  eq(p.object,object);
   starts(Memory.change tx);
-  eq(tx.quantity,m_size);
+  if (m_target) {
+    eq(tx.quantity,m_target.m_size);
+    eq(duration,m_target.m_size);
+  }
 }
 
+// doesn't calculate exact, but rather, linear distance as a simplification
 Satellite::Slew {
-  metby(object.Pointing pfrom);
-  meets(object.Pointing pto);
-  eq(pfrom.target,m_from);
-  eq(pto.target,m_to);
+  met_by(Satellite.Pointing pfrom);
+  meets(Satellite.Pointing pto);
+  eq(pfrom.object,object);
+  eq(pto.object,object);
+  eq(pfrom.m_target,m_from);
+  eq(pto.m_target,m_to);
+  int dx, dy, dz;
+  addeq(dx,pfrom.m_x,pto.m_target.m_x);
+  addeq(dy,pfrom.m_y,pto.m_target.m_y);
+  addeq(dz,pfrom.m_z,pto.m_target.m_z);
+  addmuleq(dz,dy,dz,m_rate,duration);
 }
 
 Satellite::HaveImg {
-  metby(object.TakeImg t);
+  met_by(Satellite.TakeImg t);
+  eq(t.object,object);
 }
 
 Satellite::Pointing {
+  bool move;
+  if (move == true) {
+    meets(Satellite.Slew s);
+    eq(s.object,object);
+    eq(s.m_from, m_target);
+  }
+  if (move == false) {
+    meets(Satellite.TakeImg ti);
+    eq(ti.object,object);
+    eq(ti.m_target, m_target);
+  }
+  met_by(Satellite.Slew s1);
+  eq(s1.object,object);
+  eq(s1.m_to, m_target);
 }
 
 Satellite::Transmit {
-  metby(object.HaveImg h);
+  eq(duration,m_data.m_size);
+  met_by(object.HaveImg h);
+  starts(Antenna.change tx1);
+  eq(tx1.quantity, m_data.m_size);
+  starts(m_station.Storage.change tx2);
+  eq(tx2.quantity, m_data.m_size);
+  contains(m_station.Receive r);
+  eq(r.duration,duration); 
 }
+
+// create  objects
+NddlWorld world = new NddlWorld(0,100,5000);
+Target target1 = new Target("target1",10,10,10,100,95.0);
+Target target2 = new Target("target2",25,25,25,25,90.0);
+Target target3 = new Target("target3",50,50,50,80,84.0);
+Satellite satellite1 = new Satellite();
+GroundStation ground1 = new GroundStation();
+close();
+
+// initial tokens
+any(Satellite.Pointing p);
+eq(p.m_target, target1);
+p.start.specify(0);
+p.activate();
+
+any(GroundStation.Receive r1);
+eq(r1.m_data, target1);
+eq(r1.object,ground1);
+
+any(GroundStation.Receive r2);
+eq(r2.m_data, target2);
+eq(r2.object,ground1);
+
+
