@@ -42,6 +42,9 @@ namespace Prototype {
   class PlanDatabase;
   typedef Id<PlanDatabase> PlanDatabaseId;
 
+  class TemporalAdvisor;
+  typedef Id<TemporalAdvisor> TemporalAdvisorId;
+
   class RulesEngine;
   typedef Id<RulesEngine> RulesEngineId;
 
