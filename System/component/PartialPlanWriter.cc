@@ -1629,7 +1629,7 @@ namespace Prototype {
 					  const TokenId &tId = Id<ValueChoice>(choice)->getToken();
 					  if(!tId.isNoId()){
 					    retval << tId->getKey();
-					    retval << COMMA << Id<ValueChoice>(choice)->getValue();;
+					    retval << COMMA << Id<ValueChoice>(choice)->getValue();
 					  }
 					  else
 					    retval << -1;
