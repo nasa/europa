@@ -551,8 +551,6 @@ public:
     return(true);
   }
 
-private:
-
   /*
    * For lists of arguments, by type and name (or type and string (even if "1") value).
    * @note This has a different use and purpose than a list or vector of ConstructorArgument.
@@ -891,9 +889,9 @@ private:
     s_db->getSchema()->addMember("TestClass2.Sample", "Locations", "m_closest");
 
     ArgList args;
-    args.push_back(std::make_pair(IntervalIntDomain::getDefaultTypeName().toString(), "int1"));
-    args.push_back(std::make_pair(IntervalDomain::getDefaultTypeName().toString(), "float2"));
-    args.push_back(std::make_pair("Locations", "where"));
+    args.push_back(std::make_pair(IntervalIntDomain::getDefaultTypeName().toString(), std::string("int1")));
+    args.push_back(std::make_pair(IntervalDomain::getDefaultTypeName().toString(), std::string("float2")));
+    args.push_back(std::make_pair(std::string("Locations"), std::string("where")));
     //!!BoolDomain::getDefaultTypeName()
     TEST_PLAYING_XML(buildXMLCreateClassStr("TestClass2", args, __FILE__, __LINE__));
     // Nothing to verify, since the player cannot actually create classes.
