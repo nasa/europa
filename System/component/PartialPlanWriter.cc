@@ -587,7 +587,11 @@ namespace Prototype {
       else
         stream << (int)(*it) << " ";
     }
+#ifdef __sun
     if(!stream.str()) {
+#else
+    if(stream.str() == "") {
+#endif
       return "bugStr";
     }
     return std::string(stream.str());
