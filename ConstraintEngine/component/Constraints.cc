@@ -264,51 +264,50 @@ namespace EUROPA {
   void NotEqualConstraint::handleExecute() {
     AbstractDomain& domx = getCurrentDomain(m_variables[X]);
     AbstractDomain& domy = getCurrentDomain(m_variables[Y]);
-
     check_error(AbstractDomain::canBeCompared(domx, domy), "Cannot compare " + domx.toString() + " and " + domy.toString() + ".");
-
     // Discontinue if either domain is open.
     if (domx.isOpen() || domy.isOpen())
       return;
-
     check_error(!domx.isEmpty() && !domy.isEmpty());
-
-    if(!checkAndRemove(domx, domy))
+    if (!checkAndRemove(domx, domy))
       checkAndRemove(domy, domx);
   }
 
-  bool NotEqualConstraint::checkAndRemove(const AbstractDomain& domx, AbstractDomain& domy){
-    if(!domx.isSingleton())
-      return false;
-
+  bool NotEqualConstraint::checkAndRemove(const AbstractDomain& domx, AbstractDomain& domy) {
+    if (!domx.isSingleton())
+      return(false);
     double value = domx.getSingletonValue();
-
-    // Not present, so nothing to remove
-    if(!domy.isMember(value)){
-      return false;
-    }
-
+    // Not present, so nothing to remove.
+    if (!domy.isMember(value))
+      return(false);
     // If enumerated, remove it and be done with it.
-    if(domy.isEnumerated()){
+    if (domy.isEnumerated()) {
       domy.remove(value);
-      return true;
+      return(true);
     }
-
-    // Since it is an interval, and it does contain the value, empty it if a singleton
-    if(domy.isSingleton()){
+    // Since it is an interval, and it does contain the value, empty it if a singleton.
+    if (domy.isSingleton()) {
 	domy.empty();
-	return true;
+	return(true);
     }
-
     // If it is a Boolean domain then set it to be the alternate
-    if(domy.getType() == AbstractDomain::BOOL){
+    if (domy.getType() == AbstractDomain::BOOL) {
       domy.set(!value);
-      return true;
+      return(true);
     }
-
+    if (domx.compareEqual(domx.getSingletonValue(), domy.getLowerBound())) {
+      double low = domx.getSingletonValue() + domx.minDelta();
+      domy.intersect(IntervalDomain(low, domy.getUpperBound()));
+      return(true);
+    }
+    if (domx.compareEqual(domx.getSingletonValue(), domy.getUpperBound())) {
+      double hi = domx.getSingletonValue() - domx.minDelta();
+      domy.intersect(IntervalDomain(domy.getLowerBound(), hi));
+      return(true);
+    }
     /** COULD SPECIAL CASE INTERVAL INT DOMAIN, BUT NOT WORTH IT PROBABLY **/
     // Otherwise, we would have to split the interval, so do not propagate it
-    return false;
+    return(false);
   }
 
   bool NotEqualConstraint::canIgnore(const ConstrainedVariableId& variable,
