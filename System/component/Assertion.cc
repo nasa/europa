@@ -121,54 +121,68 @@ namespace PLASMA {
     return (cmp)(dom, d);
   }
   void Assertion::trimTokensByPredicate(TokenSet& tokens, DomComp cmp, const AbstractDomain& d) {
-    for(TokenSet::iterator it = tokens.begin(); it != tokens.end(); ++it) {
+    for(TokenSet::iterator it = tokens.begin(); it != tokens.end(); ) {
       TokenId tok = *it;
       if(!boolPredicate(tok, cmp, d))
-        tokens.erase(it);
+        tokens.erase(it++);
+      else
+        ++it;
     }
   }
   void Assertion::trimTokensByStart(TokenSet& tokens, DomComp cmp, const AbstractDomain& d) {
-    for(TokenSet::iterator it = tokens.begin(); it != tokens.end(); ++it) {
+    for(TokenSet::iterator it = tokens.begin(); it != tokens.end(); ) {
       TokenId tok = *it;
       if(!boolStart(tok, cmp, d))
-        tokens.erase(it);
+        tokens.erase(it++);
+      else
+        ++it;
     }
   }
   void Assertion::trimTokensByEnd(TokenSet& tokens, DomComp cmp, const AbstractDomain& d) {
-    for(TokenSet::iterator it = tokens.begin(); it != tokens.end(); ++it) {
+    for(TokenSet::iterator it = tokens.begin(); it != tokens.end(); ) {
       TokenId tok = *it;
       if(!boolEnd(tok, cmp, d))
-        tokens.erase(it);
+        tokens.erase(it++);
+      else
+        ++it;
     }
   }
   void Assertion::trimTokensByStatus(TokenSet& tokens, DomComp cmp, const AbstractDomain& d) {
-    for(TokenSet::iterator it = tokens.begin(); it != tokens.end(); ++it) {
+    for(TokenSet::iterator it = tokens.begin(); it != tokens.end(); ) {
       TokenId tok = *it;
       if(!boolStatus(tok, cmp, d))
-        tokens.erase(it);
+        tokens.erase(it++);
+      else
+        ++it;
     }
   }
   void Assertion::trimTokensByVariable(TokenSet& tokens, DomComp nameComp, const AbstractDomain& nameDom,
                                   DomComp cmp, const AbstractDomain& d) {
-    for(TokenSet::iterator it = tokens.begin(); it != tokens.end(); ++it) {
+    for(TokenSet::iterator it = tokens.begin(); it != tokens.end(); ) {
       TokenId tok = *it;
       if(!boolVar(tok, nameComp, nameDom, cmp, d))
-        tokens.erase(it);
+        tokens.erase(it++);
+      else
+        ++it;
     }
   }
   void Assertion::trimObjectsByName(ObjectSet& objs, DomComp cmp, const AbstractDomain& d) {
-    for(ObjectSet::iterator it = objs.begin(); it != objs.end(); ++it) {
+    for(ObjectSet::iterator it = objs.begin(); it != objs.end(); ) {
       ObjectId obj = *it;
       if(!boolName(obj, cmp, d))
-        objs.erase(it);
+        objs.erase(it++);
+      else
+        ++it;
     }
   }
   void Assertion::trimObjectsByVariable(ObjectSet& objs, DomComp nameCmp, const AbstractDomain& nameDom,
                                    DomComp cmp, const AbstractDomain& d) {
-    for(ObjectSet::iterator it = objs.begin(); it != objs.end(); ++it) {
+    for(ObjectSet::iterator it = objs.begin(); it != objs.end(); ) {
       ObjectId obj = *it;
       if(!boolVar(obj, nameCmp, nameDom, cmp, d))
-        objs.erase(it);
+        objs.erase(it++);
+      else
+        ++it;
     }
   }
 
