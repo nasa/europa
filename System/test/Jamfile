@@ -6,12 +6,14 @@ if ! $(PLASMA_READY) {
 # TRANSACTION TESTS
 #
 
-EXTRA_DEFS = -DSTANDALONE ;
-ModuleNamedObjects runProblem_standalone : runProblem.cc : System ;
+if $(LIBRARIES) = SHARED {
+  EXTRA_DEFS = -DSTANDALONE ;
+  ModuleNamedObjects runProblem_standalone : runProblem.cc : System ;
+  ModuleMain runProblem : runProblem_standalone.o : System ;
+}
+
 EXTRA_DEFS = ;
 ModuleNamedObjects runProblem_link : runProblem.cc : System ;
-
-ModuleMain runProblem : runProblem_standalone.o : System Aver ;
 
 local model ;
 for model in
@@ -33,24 +35,28 @@ for model in
   Includes $(cc) : $(hh) ;
   NddlCompiler $(hh) $(cc) : $(model) ;
   ModuleObjects $(cc) : NDDL ;
+  #ModuleObjects $(cc) : NDDL Aver ;
 
   # create planner with linked model
   ModuleMain $(exe) : $(o) runProblem_link.o : System Aver ;
   RunModuleMain run-$(exe) : $(exe) : $(xml) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 
-  # create planner with dlopen model
-  ModuleSharedLibrary $(lib) : $(o) : NDDL ;
-  local variant ;
-  for variant in $(VARIANTS) {
-    local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
-    local run_variant_name = [ FVariantName runProblem : $(variant) ] ;
-    run_variant_name = $(run_variant_name)_rt ;
-    local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) ;
-    Depends run-problem-$(exe) : $(libname) ;
-    RunModuleMain run-problem-$(exe) : runProblem : $(arguments) ;
-    Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
-    LocalDepends run-model-tests : run-problem-$(exe) ;
+  if $(LIBRARIES) = SHARED {
+    # create planner with dlopen model
+    ModuleSharedLibrary $(lib) : $(o) : NDDL ;
+    local variant ;
+    for variant in $(VARIANTS) {
+      local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
+      local run_variant_name = [ FVariantName runProblem : $(variant) ] ;
+      run_variant_name = $(run_variant_name)_rt ;
+      local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) ;
+      Depends run-problem-$(exe) : $(libname) ;
+      RunModuleMain run-problem-$(exe) : runProblem : $(arguments) ;
+      Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
+      LocalDepends run-model-tests : run-problem-$(exe) ;
+    }
+    Depends run-all-tests : run-model-tests ;
   }
 }
 
