@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.5 2002-11-05 01:54:40 wedgingt Exp $
+# $Id: autobuild,v 1.6 2002-11-05 16:51:41 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -45,7 +45,7 @@ mkdir resubmit || exit 1
 
 rmdir restart resubmit || exit 2
 
-subdirs=cvs opt fast optFast
+subdirs='cvs opt fast optFast'
 
 # Primary compilation loop
 for dir in $subdirs
