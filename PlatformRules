@@ -37,8 +37,8 @@ if $(OS) = SOLARIS {
 if $(GCC_ROOTDIR) {
   CC = $(GCC_ROOTDIR)/bin/gcc ;
   C++ = $(GCC_ROOTDIR)/bin/g++ ;
-  LINK = $(C++) $(STATIC_LIBRARY_PATH_FLAG) $(GCC_ROOTDIR)/lib
-                 $(SHARED_LIBRARY_PATH_FLAG) $(GCC_ROOTDIR)/lib ;
+  LINK = $(C++) $(STATIC_LIBRARY_PATH_FLAG) -W1,$(GCC_ROOTDIR)/lib
+                $(SHARED_LIBRARY_PATH_FLAG) -W1,$(GCC_ROOTDIR)/lib ;
 } else {
   CC = gcc ;
   C++ = g++ ;
