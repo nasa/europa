@@ -1617,10 +1617,13 @@ private:
   /**
    * @brief Read constraint test cases from the given file, adding them to the
    * list passed in.
+   * @return True if tests pass; false only if file cannot be opened; throw an error
+   * if the file can be opened but some test fails.
    */
   static bool readTestCases(std::string file, std::list<ConstraintTestCase>& testCases) {
     ifstream tCS(file.c_str()); /**< testCaseStream. */
-    assertTrue(tCS.is_open() && tCS.good());
+    if (!tCS.is_open() || !tCS.good())
+      return(false);
     unsigned line = 1; /**< Line within file. */
     std::string constraintName; /**< Name of a constraint, from each line of file. */
     char buf[20]; /**< For single "words" of input. */
@@ -1737,17 +1740,21 @@ private:
     tests.push_back(ConstraintTestCase(constraintName, __FILE__, __LINE__, std::list<AbstractDomain*>(domains)));
 
     // Try reading "test cases" file of NewPlan/ModuleTests/ConstraintLibrary/testCLib,
-    //   committed here as CLibTestCases after some minor editing to use '[]' for all
-    //   numeric domains since Europa prints those using '{}' syntax and the prototype
-    //   treats as intervals all numeric domains that aren't explicitly identified as
-    //   enumerations.
-    assertTrue(readTestCases(std::string("ConstraintEngine/CLibTestCases"), tests));
+    // committed here as CLibTestCases after some minor editing to use '[]' for all
+    // numeric domains since Europa prints some of those using '{}' syntax and the
+    // prototype treats as intervals all numeric domains that aren't explicitly
+    // identified as enumerations.
+    // Try twice with different relative paths since we don't know what directory
+    // we're in.
+    assertTrue(readTestCases(std::string("ConstraintEngine/CLibTestCases"), tests) ||
+               readTestCases(std::string("CLibTestCases"), tests));
 
     // Run each test, in the same order they were read/init'd.
     for ( ; !tests.empty(); tests.pop_front()) {
       // Warn about unregistered constraint names and otherwise ignore tests using them.
       if (!ConstraintLibrary::isRegistered(LabelStr(tests.front().m_constraintName), false)) {
-        if (warned.find(tests.front().m_constraintName) == warned.end()) {
+        if (loggingEnabled() &&
+            warned.find(tests.front().m_constraintName) == warned.end()) {
           std::cerr << tests.front().m_fileName << ':' << tests.front().m_line
                     << ": constraint " << tests.front().m_constraintName
                     << " is unregistered; skipping tests of it.\n";
