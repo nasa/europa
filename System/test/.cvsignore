@@ -3,10 +3,15 @@
 *.xml
 *_g
 *_g_no
+*_g_rt
 *_o
 *_o_no
+*_o_rt
 *_p
 *_p_no
+*_p_rt
+CAPER.cc
+CAPER.hh
 EOS-backtrack-test.cc
 EOS-backtrack-test.hh
 Rover-transaction.cc
@@ -40,6 +45,8 @@ k9.backtrack.moderate.cc
 k9.backtrack.moderate.hh
 k9.cc
 k9.hh
+monkey1monkey-transaction.cc
+monkey1monkey-transaction.hh
 parent-predicate.cc
 parent-predicate.hh
 path-filter-transaction.cc
