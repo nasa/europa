@@ -53,11 +53,11 @@ namespace Prototype {
   void TemporalPropagator::handleConstraintAdded(const ConstraintId& constraint){
     const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
     m_changedConstraints.insert(constraint);
-    m_changedVariables.insert(scope[0]);
+    buffer(scope[0]);
     if (constraint->getName() == durationConstraintName())
-      m_changedVariables.insert(scope[2]);
+      buffer(scope[2]);
     else {
-      m_changedVariables.insert(scope[1]);
+      buffer(scope[1]);
     }
   }
 
@@ -84,7 +84,7 @@ namespace Prototype {
       check_error(var.isValid());
 
       if(var->getIndex() != DURATION_VAR_INDEX){ // If it is not a duration variable
-	m_changedVariables.insert(var); // Buffer to update the Timepoint
+	buffer(var); // Buffer to update the Timepoint
 	m_activeVariables.insert(var); // Buffer for update back to the TempVar
       }
     }
@@ -239,7 +239,7 @@ namespace Prototype {
       TimepointId tp = *it;
       TemporalConstraintId baseDomainConstraint = tp->getBaseDomainConstraint();
       check_error(baseDomainConstraint.isValid());
-
+      check_error(tp->getExternalEntity().isNoId()); // Should have cleared its connection to the TempVar
       publish(notifyConstraintDeleted(baseDomainConstraint->getKey(), baseDomainConstraint));
 
       m_tnet->removeTemporalConstraint(baseDomainConstraint);
@@ -248,14 +248,14 @@ namespace Prototype {
 
       m_tnet->deleteTimepoint(tp);
     }
-    m_variablesForDeletion.clear();    
+    m_variablesForDeletion.clear();
 
     // Process variables that have changed
     for(std::set<TempVarId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
       TempVarId var = *it;
       updateTimepoint(var);
     }
-    m_changedVariables.clear();
+    m_changedVariables.clear(); 
 
     // Process constraints that have changed, or been added
     for(std::set<ConstraintId>::const_iterator it = m_changedConstraints.begin(); it != m_changedConstraints.end(); ++it){
@@ -358,11 +358,7 @@ namespace Prototype {
   void TemporalPropagator::updateTimepoint(const TempVarId& var){
     check_error(var.isValid());
     check_error(var->getIndex() != DURATION_VAR_INDEX);
-
-    if(var->getExternalEntity().isNoId()){
-      addTimepoint(var);
-      return;
-    }
+    check_error(!var->getExternalEntity().isNoId());
 
     const TimepointId& tp = getTimepoint(var);
 
@@ -441,6 +437,14 @@ namespace Prototype {
       publish(notifyBoundsRestricted(var, (Time)lb, (Time)ub));
     }
     return newConstraint;
+  }
+
+
+  void TemporalPropagator::buffer(const TempVarId& var){
+    if(var->getExternalEntity().isNoId())
+      addTimepoint(var);
+    else
+      m_changedVariables.insert(var);
   }
 
   void TemporalPropagator::addListener(const TemporalNetworkListenerId& listener) {

@@ -93,6 +93,12 @@ namespace Prototype {
 					  Time lb,
 					  Time ub);
 
+    /**
+     * @brief Buffer the variable in either the new variable buffer or the change variable buffer
+     * depending on its state - i.e. if timepoint already created or not.
+     */
+    void buffer(const TempVarId& var);
+
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
 
     /*!< Synchronization data structures */

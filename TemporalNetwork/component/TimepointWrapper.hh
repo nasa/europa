@@ -14,7 +14,6 @@ namespace Prototype {
   public:
     TimepointWrapper(const TemporalPropagatorId& prop, const TempVarId& tempVar, const TimepointId& point);
     virtual ~TimepointWrapper();
-
     inline const EntityId& getId() { return m_id; }
     inline const TimepointId& getTimepoint() const {return m_timepoint;}
     inline const TempVarId& getTempVar() const {return m_tempVar;}
