@@ -39,7 +39,7 @@ bool runTransactions() {
   player.play(trans);
   EventAggregator::instance()->notifyStep();
   AverInterp::terminate();
-  EventAggregator::remove();
+  //EventAggregator::remove();
   return(true);
 }
 
