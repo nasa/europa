@@ -139,9 +139,9 @@ public:
 private:
   static bool testDefaultSetup() {
     DEFAULT_SETUP(ce, db, false);
-    assert(db.isClosed() == false);
+    assertTrue(db.isClosed() == false);
     db.close();
-    assert(db.isClosed() == true);
+    assertTrue(db.isClosed() == true);
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -161,9 +161,9 @@ private:
   static bool testCondition(){
     DEFAULT_SETUP(ce, db, false);
     Condition cond(dm.getId());
-    assert(!cond.hasChanged());
+    assertTrue(!cond.hasChanged());
   
-    assert(dm.getConditions().size() == 1);
+    assertTrue(dm.getConditions().size() == 1);
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -173,18 +173,18 @@ private:
     Horizon hor1;
     int start, end;
     hor1.getHorizon(start,end);
-    assert(start == -MAX_FINITE_TIME);
-    assert(end == MAX_FINITE_TIME);
+    assertTrue(start == -MAX_FINITE_TIME);
+    assertTrue(end == MAX_FINITE_TIME);
   
     Horizon hor2(0,200);
     hor2.getHorizon(start,end);
-    assert(start == 0);
-    assert(end == 200);
+    assertTrue(start == 0);
+    assertTrue(end == 200);
   
     hor2.setHorizon(0,400);
     hor2.getHorizon(start,end);
-    assert(start == 0);
-    assert(end == 400);
+    assertTrue(start == 0);
+    assertTrue(end == 400);
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -192,8 +192,8 @@ private:
   static bool testHorizonCondition() {
     DEFAULT_SETUP(ce, db, false);
     HorizonCondition cond(hor.getId(), dm.getId());
-    assert(cond.isPossiblyOutsideHorizon());
-    assert(dm.getConditions().size() == 1);
+    assertTrue(cond.isPossiblyOutsideHorizon());
+    assertTrue(dm.getConditions().size() == 1);
 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
@@ -204,45 +204,45 @@ private:
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
-    assert(ce.propagate());
-    assert(cond.test(t.getId()));
-    assert(cond.test(tokenA.getId()));
-    assert(cond.test(tokenA.getStart()));
-    assert(cond.test(tokenA.getEnd()));
-    assert(cond.test(tokenA.getDuration()));
+    assertTrue(ce.propagate());
+    assertTrue(cond.test(t.getId()));
+    assertTrue(cond.test(tokenA.getId()));
+    assertTrue(cond.test(tokenA.getStart()));
+    assertTrue(cond.test(tokenA.getEnd()));
+    assertTrue(cond.test(tokenA.getDuration()));
 
     //std::cout << " Decisions upon creation = 4 " << std::endl;
 
-    assert(dm.getNumberOfDecisions() == 4);
+    assertTrue(dm.getNumberOfDecisions() == 4);
 
     hor.setHorizon(200,400);
-    assert(cond.hasChanged());
-    assert(ce.propagate());
-    assert(cond.test(t.getId()));
-    assert(!cond.test(tokenA.getId()));
-    assert(!cond.test(tokenA.getStart()));
-    assert(!cond.test(tokenA.getEnd()));
-    assert(!cond.test(tokenA.getDuration()));
+    assertTrue(cond.hasChanged());
+    assertTrue(ce.propagate());
+    assertTrue(cond.test(t.getId()));
+    assertTrue(!cond.test(tokenA.getId()));
+    assertTrue(!cond.test(tokenA.getStart()));
+    assertTrue(!cond.test(tokenA.getEnd()));
+    assertTrue(!cond.test(tokenA.getDuration()));
 
     //std::cout << " Decisions after changing horizon = 0 " << std::endl;
 
-    assert(dm.getNumberOfDecisions() == 0);
+    assertTrue(dm.getNumberOfDecisions() == 0);
 
     cond.setNecessarilyOutsideHorizon();
-    assert(cond.isNecessarilyOutsideHorizon());
+    assertTrue(cond.isNecessarilyOutsideHorizon());
     
     hor.setHorizon(0,50);
-    assert(cond.hasChanged());
-    assert(ce.propagate());
-    assert(cond.test(t.getId()));
-    assert(cond.test(tokenA.getId()));
-    assert(cond.test(tokenA.getStart()));
-    assert(cond.test(tokenA.getEnd()));
-    assert(cond.test(tokenA.getDuration()));
+    assertTrue(cond.hasChanged());
+    assertTrue(ce.propagate());
+    assertTrue(cond.test(t.getId()));
+    assertTrue(cond.test(tokenA.getId()));
+    assertTrue(cond.test(tokenA.getStart()));
+    assertTrue(cond.test(tokenA.getEnd()));
+    assertTrue(cond.test(tokenA.getDuration()));
     
     //std::cout << " Decisions after changing horizon = 4" << std::endl;
 
-    assert(dm.getNumberOfDecisions() == 4);
+    assertTrue(dm.getNumberOfDecisions() == 4);
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -250,13 +250,13 @@ private:
   static bool testTemporalVariableCondition() {
     DEFAULT_SETUP(ce, db, false);
     TemporalVariableCondition cond(hor.getId(), dm.getId());
-    assert(dm.getConditions().size() == 1);
+    assertTrue(dm.getConditions().size() == 1);
 
-    assert(cond.isStartIgnored());
-    assert(cond.isEndIgnored());
-    assert(cond.isDurationIgnored());
-    assert(cond.isTemporalIgnored());
-    assert(!cond.isHorizonOverlapAllowed());
+    assertTrue(cond.isStartIgnored());
+    assertTrue(cond.isEndIgnored());
+    assertTrue(cond.isDurationIgnored());
+    assertTrue(cond.isTemporalIgnored());
+    assertTrue(!cond.isHorizonOverlapAllowed());
 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
@@ -267,54 +267,54 @@ private:
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
-    assert(ce.propagate());
-    assert(cond.test(t.getId()));
-    assert(cond.test(tokenA.getId()));
-    assert(!cond.test(tokenA.getStart()));
-    assert(!cond.test(tokenA.getEnd()));
-    assert(!cond.test(tokenA.getDuration()));
+    assertTrue(ce.propagate());
+    assertTrue(cond.test(t.getId()));
+    assertTrue(cond.test(tokenA.getId()));
+    assertTrue(!cond.test(tokenA.getStart()));
+    assertTrue(!cond.test(tokenA.getEnd()));
+    assertTrue(!cond.test(tokenA.getDuration()));
 
-    assert(dm.getNumberOfDecisions() == 1);
+    assertTrue(dm.getNumberOfDecisions() == 1);
     
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     cond.allowHorizonOverlap();
-    assert(cond.isHorizonOverlapAllowed());
+    assertTrue(cond.isHorizonOverlapAllowed());
 
-    assert(cond.test(t.getId()));
-    assert(cond.test(tokenA.getId()));
-    assert(!cond.test(tokenA.getStart()));
-    assert(cond.test(tokenA.getEnd()));
-    assert(!cond.test(tokenA.getDuration()));
+    assertTrue(cond.test(t.getId()));
+    assertTrue(cond.test(tokenA.getId()));
+    assertTrue(!cond.test(tokenA.getStart()));
+    assertTrue(cond.test(tokenA.getEnd()));
+    assertTrue(!cond.test(tokenA.getDuration()));
 
-    assert(dm.getNumberOfDecisions() == 2);
+    assertTrue(dm.getNumberOfDecisions() == 2);
 
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
     cond.disallowHorizonOverlap();
-    assert(!cond.isHorizonOverlapAllowed());
+    assertTrue(!cond.isHorizonOverlapAllowed());
     
-    assert(cond.test(t.getId()));
-    assert(cond.test(tokenA.getId()));
-    assert(!cond.test(tokenA.getStart()));
-    assert(!cond.test(tokenA.getEnd()));
-    assert(!cond.test(tokenA.getDuration()));
+    assertTrue(cond.test(t.getId()));
+    assertTrue(cond.test(tokenA.getId()));
+    assertTrue(!cond.test(tokenA.getStart()));
+    assertTrue(!cond.test(tokenA.getEnd()));
+    assertTrue(!cond.test(tokenA.getDuration()));
 
-    assert(dm.getNumberOfDecisions() == 1);
+    assertTrue(dm.getNumberOfDecisions() == 1);
 
     cond.setIgnoreStart(false);
     cond.setIgnoreEnd(false);
-    assert(!cond.isStartIgnored());
-    assert(!cond.isEndIgnored());
-    assert(cond.isDurationIgnored());
-    assert(!cond.isTemporalIgnored());
-    assert(ce.propagate());
+    assertTrue(!cond.isStartIgnored());
+    assertTrue(!cond.isEndIgnored());
+    assertTrue(cond.isDurationIgnored());
+    assertTrue(!cond.isTemporalIgnored());
+    assertTrue(ce.propagate());
 
-    assert(cond.test(t.getId()));
-    assert(cond.test(tokenA.getId()));
-    assert(cond.test(tokenA.getStart()));
-    assert(cond.test(tokenA.getEnd()));
-    assert(!cond.test(tokenA.getDuration()));
+    assertTrue(cond.test(t.getId()));
+    assertTrue(cond.test(tokenA.getId()));
+    assertTrue(cond.test(tokenA.getStart()));
+    assertTrue(cond.test(tokenA.getEnd()));
+    assertTrue(!cond.test(tokenA.getDuration()));
 
-    assert(dm.getNumberOfDecisions() == 3);
+    assertTrue(dm.getNumberOfDecisions() == 3);
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -322,7 +322,7 @@ private:
   static bool testDynamicInfiniteRealCondition() {
     DEFAULT_SETUP(ce, db, false);
     DynamicInfiniteRealCondition cond(dm.getId());
-    assert(dm.getConditions().size() == 1);
+    assertTrue(dm.getConditions().size() == 1);
 
     std::list<double> values;
     values.push_back(LabelStr("L1"));
@@ -348,18 +348,18 @@ private:
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
 
-    assert(cond.test(t.getId()));
-    assert(cond.test(tokenA.getId()));
-    assert(cond.test(v0.getId()));
-    assert(!cond.test(v1.getId()));
-    assert(!cond.test(v2.getId()));
-    assert(cond.test(v3.getId()));
-    assert(!cond.test(v4.getId()));
-    assert(cond.test(tokenA.getDuration()));
+    assertTrue(cond.test(t.getId()));
+    assertTrue(cond.test(tokenA.getId()));
+    assertTrue(cond.test(v0.getId()));
+    assertTrue(!cond.test(v1.getId()));
+    assertTrue(!cond.test(v2.getId()));
+    assertTrue(cond.test(v3.getId()));
+    assertTrue(!cond.test(v4.getId()));
+    assertTrue(cond.test(tokenA.getDuration()));
 
-    assert(dm.getNumberOfDecisions() == 6);
+    assertTrue(dm.getNumberOfDecisions() == 6);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -381,7 +381,7 @@ private:
     TemporalVariableCondition tcond(hor.getId(), dm.getId());
     DynamicInfiniteRealCondition dcond(dm.getId());
 
-    assert(dm.getConditions().size() == 3);
+    assertTrue(dm.getConditions().size() == 3);
 
     std::list<double> values;
     values.push_back(LabelStr("L1"));
@@ -407,25 +407,25 @@ private:
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
 
-    assert(dm.getNumberOfDecisions() == 3);
-
-    dm.assignDecision();
-
-    assert(dm.getNumberOfDecisions() == 3);
+    assertTrue(dm.getNumberOfDecisions() == 3);
 
     dm.assignDecision();
 
-    assert(dm.getNumberOfDecisions() == 2);
+    assertTrue(dm.getNumberOfDecisions() == 3);
 
     dm.assignDecision();
 
-    assert(dm.getNumberOfDecisions() == 1);
+    assertTrue(dm.getNumberOfDecisions() == 2);
 
     dm.assignDecision();
 
-    assert(dm.getNumberOfDecisions() == 0);
+    assertTrue(dm.getNumberOfDecisions() == 1);
+
+    dm.assignDecision();
+
+    assertTrue(dm.getNumberOfDecisions() == 0);
 
     IntervalToken tokenB(db.getId(), 
 			 "Objects.P1", 
@@ -434,11 +434,11 @@ private:
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
 
     dm.assignDecision();
 
-    assert(dm.getNumberOfDecisions() == 0);
+    assertTrue(dm.getNumberOfDecisions() == 0);
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -503,7 +503,7 @@ private:
       
     }    
     
-    assert(!planner.getDecisionManager()->assignDecision());
+    assertTrue(!planner.getDecisionManager()->assignDecision());
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
@@ -519,16 +519,16 @@ private:
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
-    assert(planner.getDecisionManager()->getCurrentDecision().isNoId());
+    assertTrue(planner.getDecisionManager()->getCurrentDecision().isNoId());
 
     if (!planner.getDecisionManager()->assignDecision())
       return false;
 
-    assert(TokenDecisionPointId::convertable(planner.getDecisionManager()->getCurrentDecision()));
+    assertTrue(TokenDecisionPointId::convertable(planner.getDecisionManager()->getCurrentDecision()));
     TokenDecisionPointId tokdec = planner.getDecisionManager()->getCurrentDecision();
-    assert(tokdec->getToken() == tokenA.getId());
-    assert(!planner.getDecisionManager()->getCurrentChoice().isNoId());
-    assert(tokdec->getCurrent() == planner.getDecisionManager()->getCurrentChoice());
+    assertTrue(tokdec->getToken() == tokenA.getId());
+    assertTrue(!planner.getDecisionManager()->getCurrentChoice().isNoId());
+    assertTrue(tokdec->getCurrent() == planner.getDecisionManager()->getCurrentChoice());
 
     planner.getDecisionManager()->synchronize();
     DEFAULT_TEARDOWN_PLAN();
@@ -549,11 +549,11 @@ private:
     if (!planner.getDecisionManager()->assignDecision())
       return false;
 
-    assert(planner.getDecisionManager()->getClosedDecisions().size() == 1);
+    assertTrue(planner.getDecisionManager()->getClosedDecisions().size() == 1);
 
     //std::cout << "RETRACTING" << std::endl;
 
-    assert(planner.getDecisionManager()->retractDecision());
+    assertTrue(planner.getDecisionManager()->retractDecision());
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
@@ -581,13 +581,13 @@ private:
     makeTestToken(tokenA, values);
     
     CBPlanner::Status res = planner.run();
-    assert(res == CBPlanner::PLAN_FOUND);
+    assertTrue(res == CBPlanner::PLAN_FOUND);
 
     const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
 
-    assert(planner.getTime() == planner.getDepth());
-    assert(closed.size() == planner.getTime());
-    assert(closed.size() == 4);
+    assertTrue(planner.getTime() == planner.getDepth());
+    assertTrue(closed.size() == planner.getTime());
+    assertTrue(closed.size() == 4);
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
@@ -605,21 +605,21 @@ private:
 		     IntervalIntDomain(1, 1000));
     t0.activate();
     bool res(ce.propagate());
-    assert(res);
+    assertTrue(res);
     TokenSet slaves = t0.getSlaves();
-    assert(slaves.size() == 1);
+    assertTrue(slaves.size() == 1);
 
     TokenSet::iterator it = slaves.begin();
     (*it)->activate();
     res = ce.propagate();
-    assert(res);
+    assertTrue(res);
     TokenSet slaves1 = (*it)->getSlaves();
-    assert(slaves1.size() == 1);
+    assertTrue(slaves1.size() == 1);
 
     TokenSet::iterator it1 = slaves1.begin();
     (*it1)->activate();
     res = ce.propagate();
-    assert(!res);
+    assertTrue(!res);
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
@@ -688,8 +688,8 @@ private:
 
     CBPlanner::Status res = planner.run(100);
 
-    assert(res == CBPlanner::SEARCH_EXHAUSTED);
-    assert(planner.getClosedDecisions().empty());
+    assertTrue(res == CBPlanner::SEARCH_EXHAUSTED);
+    assertTrue(planner.getClosedDecisions().empty());
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
@@ -779,13 +779,13 @@ private:
     makeTestToken(tokenG, values);
     
     CBPlanner::Status res = planner.run(20);
-    assert(res == CBPlanner::TIMEOUT_REACHED);
+    assertTrue(res == CBPlanner::TIMEOUT_REACHED);
 
     const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
 
-    assert(closed.size() == 20);
-    assert(closed.size() == planner.getTime());
-    assert(planner.getTime() == planner.getDepth());
+    assertTrue(closed.size() == 20);
+    assertTrue(closed.size() == planner.getTime());
+    assertTrue(planner.getTime() == planner.getDepth());
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
@@ -865,10 +865,10 @@ private:
       result = planner.step();
       if (result != CBPlanner::IN_PROGRESS) break;
     }
-    assert(result == CBPlanner::PLAN_FOUND);
-    assert(planner.getDepth() != planner.getTime());
-    assert(planner.getDepth() == 4);
-    assert(planner.getTime() == 11);
+    assertTrue(result == CBPlanner::PLAN_FOUND);
+    assertTrue(planner.getDepth() != planner.getTime());
+    assertTrue(planner.getDepth() == 4);
+    assertTrue(planner.getTime() == 11);
 
     DEFAULT_TEARDOWN_PLAN();
     return true;
@@ -906,31 +906,31 @@ private:
     tokenB.activate();
     t2.constrain(tokenB.getId(), tokenB.getId());
 
-    assert(ce.propagate());
+    assertTrue(ce.propagate());
 
     CBPlanner::Status result = planner.run();
-    assert(result == CBPlanner::PLAN_FOUND);
+    assertTrue(result == CBPlanner::PLAN_FOUND);
 
-    assert(planner.getTime() == planner.getDepth());
-    assert(planner.getTime() == 0);
-    assert(planner.getClosedDecisions().empty());
+    assertTrue(planner.getTime() == planner.getDepth());
+    assertTrue(planner.getTime() == 0);
+    assertTrue(planner.getClosedDecisions().empty());
 
     hor.setHorizon(0,200);
 
     result = planner.run();
-    assert(result == CBPlanner::PLAN_FOUND);
+    assertTrue(result == CBPlanner::PLAN_FOUND);
 
-    assert(planner.getTime() != planner.getDepth());
+    assertTrue(planner.getTime() != planner.getDepth());
 
-    assert(planner.getDepth() == 9);
-    assert(planner.getTime() == 19);
+    assertTrue(planner.getDepth() == 9);
+    assertTrue(planner.getTime() == 19);
 
     tokenA.cancel();
     tokenA.reject();
     tokenA.getParameters()[0]->reset();
 
     result = planner.run();
-    assert(result == CBPlanner::PLAN_FOUND);
+    assertTrue(result == CBPlanner::PLAN_FOUND);
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
@@ -951,47 +951,47 @@ private:
 
     tokenB.activate();
 
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
     std::list<DecisionPointId> decisions;
     planner.getDecisionManager()->getOpenDecisions(decisions);
     DecisionPointId dec = decisions.front();
-    assert(ObjectDecisionPointId::convertable(dec));
+    assertTrue(ObjectDecisionPointId::convertable(dec));
 
     tokenB.cancel();
 
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
     decisions.clear();
     planner.getDecisionManager()->getOpenDecisions(decisions);
     dec = decisions.front();
-    assert(!ObjectDecisionPointId::convertable(dec));
-    assert(TokenDecisionPointId::convertable(dec));
+    assertTrue(!ObjectDecisionPointId::convertable(dec));
+    assertTrue(TokenDecisionPointId::convertable(dec));
     
     tokenB.activate();
 
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
     decisions.clear();
     planner.getDecisionManager()->getOpenDecisions(decisions);
     dec = decisions.front();
-    assert(ObjectDecisionPointId::convertable(dec));
+    assertTrue(ObjectDecisionPointId::convertable(dec));
 
     tokenB.getStart()->specify(0);
 
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
     decisions.clear();
     planner.getDecisionManager()->getOpenDecisions(decisions);
     dec = decisions.front();
-    assert(ObjectDecisionPointId::convertable(dec));
+    assertTrue(ObjectDecisionPointId::convertable(dec));
 
     tokenB.cancel();
 
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
     decisions.clear();
     planner.getDecisionManager()->getOpenDecisions(decisions);
     dec = decisions.front();
-    assert(!ObjectDecisionPointId::convertable(dec));
+    assertTrue(!ObjectDecisionPointId::convertable(dec));
 
-    assert(tokenB.getStart()->getDerivedDomain().isSingleton());
-    assert(tokenB.getStart()->getDerivedDomain().getSingletonValue() == 0);
+    assertTrue(tokenB.getStart()->getDerivedDomain().isSingleton());
+    assertTrue(tokenB.getStart()->getDerivedDomain().getSingletonValue() == 0);
 
     DEFAULT_TEARDOWN_PLAN();
     return true;
@@ -1013,46 +1013,46 @@ private:
 
     tokenB.activate();
     
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 2); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 2); 
     std::list<DecisionPointId> decisions;
     planner.getDecisionManager()->getOpenDecisions(decisions);
     DecisionPointId dec = decisions.front();
-    assert(ObjectDecisionPointId::convertable(dec));
+    assertTrue(ObjectDecisionPointId::convertable(dec));
     /*
     ObjectDecisionPointId odec = dec;
     std::list<ChoiceId> choices = odec->getUpdatedChoices();
-    check_error(choices.size() == 2);
+    assertTrue(choices.size() == 2);
     */
 
     dec = decisions.back();
-    assert(ConstrainedVariableDecisionPointId::convertable(dec));
-    assert(dec->getEntityKey() == tokenB.getObject()->getKey());
+    assertTrue(ConstrainedVariableDecisionPointId::convertable(dec));
+    assertTrue(dec->getEntityKey() == tokenB.getObject()->getKey());
 
     tokenB.getObject()->specify(o1.getId());
 
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
     decisions.clear();
     planner.getDecisionManager()->getOpenDecisions(decisions);
     dec = decisions.front();
-    assert(ObjectDecisionPointId::convertable(dec));
+    assertTrue(ObjectDecisionPointId::convertable(dec));
     /* getChoices is protected; getUpdatedChoices will return previous set
        of choices; getCurrentChoices same thing.
     odec = dec;
     choices.clear();
     choices = dec->getChoices();
-    check_error(choices.size() == 1);
+    assertTrue(choices.size() == 1);
     */
 
     //    o1.constrain(tokenB.getId(), TokenId::noId());
     planner.getDecisionManager()->assignDecision();
 
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 0); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 0); 
     
     //    o1.free(tokenB.getId());
     planner.getDecisionManager()->retractDecision();
 
-    check_error(planner.getDecisionManager()->isRetracting());
-    check_error(!planner.getDecisionManager()->hasDecisionToRetract());
+    assertTrue(planner.getDecisionManager()->isRetracting());
+    assertTrue(!planner.getDecisionManager()->hasDecisionToRetract());
     //it was the only object we could constrain to and we failed, so
     //there's no more to do.
 
@@ -1069,15 +1069,15 @@ private:
 
     hor.setHorizon(10,100);
 
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 0); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 0); 
 
     tokenB.activate();
 
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 0); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 0); 
 
     tokenB.getStart()->specify(50);
 
-    assert(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
+    assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 1); 
 
     DEFAULT_TEARDOWN_PLAN();
     return true;
@@ -1140,10 +1140,10 @@ private:
     hor.setHorizon(0,200);
 
     CBPlanner::Status result = planner.run();
-    assert(result == CBPlanner::PLAN_FOUND);
+    assertTrue(result == CBPlanner::PLAN_FOUND);
 
-    assert(planner.getTime() == planner.getDepth());
-    assert(planner.getDepth() == 9);
+    assertTrue(planner.getTime() == planner.getDepth());
+    assertTrue(planner.getDepth() == 9);
 
     DecisionManagerId dm = planner.getDecisionManager();
     dm->retractDecision();
@@ -1151,10 +1151,10 @@ private:
       dm->retractDecision();
 
     result = planner.run();
-    assert(result == CBPlanner::PLAN_FOUND);
+    assertTrue(result == CBPlanner::PLAN_FOUND);
 
-    assert(planner.getTime() == planner.getDepth());
-    assert(planner.getDepth() == 10);
+    assertTrue(planner.getTime() == planner.getDepth());
+    assertTrue(planner.getDepth() == 10);
 
     DEFAULT_TEARDOWN_PLAN();
     return true;
@@ -1197,12 +1197,12 @@ private:
       //      check_error(planner.getDecisionManager()->getNumberOfDecisions() == numDecs--);
       CBPlanner::Status result = planner.step();
       if (result != CBPlanner::IN_PROGRESS) {
-	assert(result == CBPlanner::PLAN_FOUND);
+	assertTrue(result == CBPlanner::PLAN_FOUND);
 	break;
       }
     }
-    assert(planner.getDepth() ==  planner.getTime());
-    assert(planner.getDepth() == 3);
+    assertTrue(planner.getDepth() ==  planner.getTime());
+    assertTrue(planner.getDepth() == 3);
 
     Variable<BoolDomain> v6(ce.getId(), BoolDomain());
     IntervalToken tokenA(db.getId(), 
@@ -1215,9 +1215,9 @@ private:
     //    std::cout << "AFTER ADDING NEW GOAL TOKEN " << std::endl;
 
     CBPlanner::Status res = planner.run();
-    assert(res == CBPlanner::PLAN_FOUND);
-    assert(planner.getDepth() ==  planner.getTime());
-    assert(planner.getDepth() == 6);
+    assertTrue(res == CBPlanner::PLAN_FOUND);
+    assertTrue(planner.getDepth() ==  planner.getTime());
+    assertTrue(planner.getDepth() == 6);
 
     /*
     for (;;) {

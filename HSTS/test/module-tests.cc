@@ -174,9 +174,9 @@ private:
     EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, 
                        makeScope(v0.getId(), v1.getId()));
     ENGINE->propagate();
-    assert(ENGINE->constraintConsistent());
-    assert(v0.getDerivedDomain().getSingletonValue() == 1);
-    assert(v1.getDerivedDomain().getSingletonValue() == 1);
+    assertTrue(ENGINE->constraintConsistent());
+    assertTrue(v0.getDerivedDomain().getSingletonValue() == 1);
+    assertTrue(v1.getDerivedDomain().getSingletonValue() == 1);
 
     LabelSet ls0(baseDomain);
     ls0.empty();
@@ -195,26 +195,26 @@ private:
     EqualConstraint c1(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, 
                        makeScope(v2.getId(), v3.getId()));
     ENGINE->propagate();
-    assert(ENGINE->constraintConsistent());
-    assert(v2.getDerivedDomain() == v3.getDerivedDomain());
-    assert(!v2.getDerivedDomain().isSingleton());
+    assertTrue(ENGINE->constraintConsistent());
+    assertTrue(v2.getDerivedDomain() == v3.getDerivedDomain());
+    assertTrue(!v2.getDerivedDomain().isSingleton());
 
     LabelSet ls2(ls1);
     ls2.remove(EUROPA::LabelStr("E"));
 
     v2.specify(ls2);
     ENGINE->propagate();
-    assert(!v3.getDerivedDomain().isMember(EUROPA::LabelStr("E")));
+    assertTrue(!v3.getDerivedDomain().isMember(EUROPA::LabelStr("E")));
 
     Variable<LabelSet> v4(ENGINE, ls0);
     EqualConstraint c2(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, 
                        makeScope(v2.getId(), v4.getId()));
     ENGINE->propagate();
-    assert(ENGINE->constraintConsistent());
-    assert(v2.getDerivedDomain() == v3.getDerivedDomain());
-    assert(v2.getDerivedDomain() == v4.getDerivedDomain());
-    assert(v3.getDerivedDomain() == v4.getDerivedDomain());
-    assert(v3.getDerivedDomain().getSingletonValue() == EUROPA::LabelStr("A"));
+    assertTrue(ENGINE->constraintConsistent());
+    assertTrue(v2.getDerivedDomain() == v3.getDerivedDomain());
+    assertTrue(v2.getDerivedDomain() == v4.getDerivedDomain());
+    assertTrue(v3.getDerivedDomain() == v4.getDerivedDomain());
+    assertTrue(v3.getDerivedDomain().getSingletonValue() == EUROPA::LabelStr("A"));
 
     // Now test that equality is working correctly for dynamic domains
     {
@@ -240,23 +240,23 @@ private:
                          LabelStr("Default"),
                          ENGINE,
                          makeScope(a.getId(), b.getId(), c.getId()));
-      assert(ENGINE->propagate());
+      assertTrue(ENGINE->propagate());
 
       // Now close one only. Should not change anything else.
       b.close();
-      assert(b.lastDomain().getSize() == 4);
-      assert(ENGINE->propagate());
+      assertTrue(b.lastDomain().getSize() == 4);
+      assertTrue(ENGINE->propagate());
 
       // Close another, should see partial restriction
       a.close();
-      assert(a.lastDomain().getSize() == 3);
-      assert(ENGINE->propagate());
-      assert(a.lastDomain().getSize() == 3);
-      assert(b.lastDomain().getSize() == 3);
+      assertTrue(a.lastDomain().getSize() == 3);
+      assertTrue(ENGINE->propagate());
+      assertTrue(a.lastDomain().getSize() == 3);
+      assertTrue(b.lastDomain().getSize() == 3);
 
       // By closing the final variables domain
       c.close();
-      assert(!ENGINE->propagate());
+      assertTrue(!ENGINE->propagate());
     }
 
     // Create a fairly large multi-variable test that will ensure we handle the need for 2 passes.
@@ -274,8 +274,8 @@ private:
                          LabelStr("Default"),
                          ENGINE,
                          scope);
-      assert(ENGINE->propagate());
-      assert(a.lastDomain() == IntervalIntDomain(30, 70));
+      assertTrue(ENGINE->propagate());
+      assertTrue(a.lastDomain() == IntervalIntDomain(30, 70));
     }
 
 
@@ -298,7 +298,7 @@ private:
                          LabelStr("Default"),
                          ENGINE,
                          scope);
-      assert(ENGINE->propagate());
+      assertTrue(ENGINE->propagate());
     }
 
     return true;
@@ -414,7 +414,6 @@ int main() {
   //Use relaxed domain comparator that allows comparison of members of two different enum types
   WeakDomainComparator* wdc = new WeakDomainComparator();
   DomainComparator::initialize((DomainComparator*)wdc);
-  warn("DomainComparator relaxed with WeakDomainComparator");
 
   Schema::instance();
 

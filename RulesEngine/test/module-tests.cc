@@ -31,9 +31,9 @@ public:
                                 const RulesEngineId &rulesEngine) const{
     RuleInstanceId rootInstance = (new RootInstance(m_id, token, planDb))->getId();
     std::vector<ConstrainedVariableId> vars = rootInstance->getVariables("start:end:duration:object:state");
-    assert(vars.size() == 5);
-    assert(vars[0] == token->getStart());
-    assert(vars[4] == token->getState());
+    assertTrue(vars.size() == 5);
+    assertTrue(vars[0] == token->getStart());
+    assertTrue(vars[4] == token->getState());
     rootInstance->setRulesEngine(rulesEngine);
     return rootInstance;
   }
@@ -192,9 +192,9 @@ void LocalVariableGuard_0_0::handleExecute(){
     } \
     RulesEngine re(db.getId()); \
     Object* objectPtr = new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")); \
-    assert(objectPtr != 0); \
+    assertTrue(objectPtr != 0); \
     Object& object = *objectPtr; \
-    assert(objectPtr->getId() == object.getId()); \
+    assertTrue(objectPtr->getId() == object.getId()); \
     if (autoClose) \
       db.close();
 
@@ -226,13 +226,13 @@ private:
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-    check_error(t0.getSlaves().empty());
+    assertTrue(t0.getSlaves().empty());
     t0.activate();
-    check_error(db.getTokens().size() == 2);
-    check_error(t0.getSlaves().size() == 1);
+    assertTrue(db.getTokens().size() == 2);
+    assertTrue(t0.getSlaves().size() == 1);
 
     TokenId slaveToken = *(t0.getSlaves().begin());
-    check_error(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
+    assertTrue(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -253,35 +253,35 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-    check_error(t0.getSlaves().empty());
+    assertTrue(t0.getSlaves().empty());
     t0.activate();
-    check_error(db.getTokens().size() == 1);
+    assertTrue(db.getTokens().size() == 1);
     t0.getObject()->specify(object.getId());
     ce.propagate();
-    check_error(t0.getSlaves().size() == 1);
-    check_error(db.getTokens().size() == 2);
+    assertTrue(t0.getSlaves().size() == 1);
+    assertTrue(db.getTokens().size() == 2);
 
     TokenId slaveToken = *(t0.getSlaves().begin());
 
     // Set start time to 10 will trigger another guard
     t0.getStart()->specify(10); // Will trigger nested guard
     ce.propagate();
-    check_error(t0.getSlaves().size() == 2);
+    assertTrue(t0.getSlaves().size() == 2);
 
     // Now set the object variable of the slaveToken to trigger additional guard
     slaveToken->getObject()->specify(o2.getId());
     ce.propagate();
-    check_error(t0.getSlaves().size() == 3);
+    assertTrue(t0.getSlaves().size() == 3);
 
     // Now retract a decision and confirm the slave is removed
     t0.getStart()->reset();
     ce.propagate();
-    check_error(t0.getSlaves().size() == 2);
+    assertTrue(t0.getSlaves().size() == 2);
 
     // Now deactivate the master token and confirm all salves are gone
     t0.cancel();
     ce.propagate();
-    check_error(t0.getSlaves().empty());
+    assertTrue(t0.getSlaves().empty());
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -300,22 +300,22 @@ private:
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are not sub-goaling yet
     ConstrainedVariableId guard = LocalVariableGuard_0_Root::getGuard();
-    check_error(guard.isNoId());
+    assertTrue(guard.isNoId());
 
     t0.activate();
     ce.propagate();
-    check_error(t0.getSlaves().empty());
+    assertTrue(t0.getSlaves().empty());
 
     guard = LocalVariableGuard_0_Root::getGuard();
-    check_error(guard.isValid());
+    assertTrue(guard.isValid());
     guard->specify(LabelStr("A")); // Should not succeed
     ce.propagate();
-    check_error(t0.getSlaves().empty());
+    assertTrue(t0.getSlaves().empty());
 
     guard->reset(); // Reset and try correct value
     guard->specify(LabelStr("B")); // Should succeed
     ce.propagate();
-    check_error(t0.getSlaves().size() == 1);
+    assertTrue(t0.getSlaves().size() == 1);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -340,7 +340,7 @@ private:
 
     t0.activate();
     ce.propagate();
-    check_error(t0.getSlaves().size() == 2);
+    assertTrue(t0.getSlaves().size() == 2);
 
     DEFAULT_TEARDOWN();
     return true;

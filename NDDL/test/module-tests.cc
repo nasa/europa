@@ -50,7 +50,7 @@ private:
 			      ObjectFilterConstraint::CONSTRAIN,
 			      filter);
 
-    assert(ce->propagate());
+    assertTrue(ce->propagate());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -90,40 +90,40 @@ private:
 			      ObjectFilterConstraint::CONSTRAIN,
 			      filter);
 
-    assert(ce->propagate());
+    assertTrue(ce->propagate());
 
     // Confirm that the object variable has not yet been restricted
-    assert(filterVariable.getDerivedDomain().getSize() == 10);
+    assertTrue(filterVariable.getDerivedDomain().getSize() == 10);
 
     // Confirm that the filter variables have been restricted.
-    assert(v1.getDerivedDomain().getSize() == 2);
-    assert(v1.getDerivedDomain().isMember(LabelStr("A")));
-    assert(v1.getDerivedDomain().isMember(LabelStr("B")));
-    assert(v3.getDerivedDomain().getSize() == 7);
-    assert(!v3.getDerivedDomain().isMember(9.1));
+    assertTrue(v1.getDerivedDomain().getSize() == 2);
+    assertTrue(v1.getDerivedDomain().isMember(LabelStr("A")));
+    assertTrue(v1.getDerivedDomain().isMember(LabelStr("B")));
+    assertTrue(v3.getDerivedDomain().getSize() == 7);
+    assertTrue(!v3.getDerivedDomain().isMember(9.1));
 
     // Now select for one filter and refine objects
     v1.specify(LabelStr("A"));
-    assert(filterVariable.getDerivedDomain().getSize() == 6);
-    assert(v3.getDerivedDomain().getSize() == 5); // Also pruned, as objects are removed
+    assertTrue(filterVariable.getDerivedDomain().getSize() == 6);
+    assertTrue(v3.getDerivedDomain().getSize() == 5); // Also pruned, as objects are removed
 
     // Now select other and confirm again
     v3.specify(8.1);
-    assert(filterVariable.getDerivedDomain().isSingleton());
-    assert(v3.getDerivedDomain().isSingleton());
-    assert(v1.getDerivedDomain().isSingleton());
+    assertTrue(filterVariable.getDerivedDomain().isSingleton());
+    assertTrue(v3.getDerivedDomain().isSingleton());
+    assertTrue(v1.getDerivedDomain().isSingleton());
 
     // Reset and confirm repropagation is correct. Non chronologically.
     v1.reset();
-    assert(filterVariable.getDerivedDomain().getSize() == 2); // @ objects with 8.1
+    assertTrue(filterVariable.getDerivedDomain().getSize() == 2); // @ objects with 8.1
 
     v3.reset();
     // Now specify in a different order. Should get the same results
     v3.specify(8.1);
     v1.specify(LabelStr("A"));
-    assert(filterVariable.getDerivedDomain().isSingleton());
-    assert(v3.getDerivedDomain().isSingleton());
-    assert(v1.getDerivedDomain().isSingleton());
+    assertTrue(filterVariable.getDerivedDomain().isSingleton());
+    assertTrue(v3.getDerivedDomain().isSingleton());
+    assertTrue(v1.getDerivedDomain().isSingleton());
 
     // Propagate and confirm restrictions
     DEFAULT_TEARDOWN();
@@ -168,8 +168,8 @@ private:
     v1.specify(LabelStr("A")); // Fixing A only will still leave the filter var empty
     v3.specify(8.1); // Fixing A only will still leave the filter var empty
 
-    assert(ce->propagate());
-    assert(c0.getFilteredObjects().getSize() == 2);
+    assertTrue(ce->propagate());
+    assertTrue(c0.getFilteredObjects().getSize() == 2);
 
     DEFAULT_TEARDOWN();
     return true;
