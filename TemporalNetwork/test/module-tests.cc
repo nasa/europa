@@ -46,7 +46,7 @@ class TemporalNetworkTest {
 public:
   static bool test(){
     runTest(testBasicAllocation);
-    runTest(testTimlineCanPrecedeTest);
+    runTest(testTemporalConstraints);
     runTest(testFixForReversingEndpoints);
     return true;
   }
@@ -66,7 +66,7 @@ private:
     return true;
   }
 
-  static bool testTimlineCanPrecedeTest(){
+  static bool testTemporalConstraints(){
     TemporalNetwork tn;
     TimepointId a_end = tn.addTimepoint();
     TimepointId b_start = tn.addTimepoint();
@@ -136,6 +136,8 @@ public:
   static bool test(){
     runTest(testBasicAllocation);
     runTest(testTemporalPropagation);
+    runTest(testCanPrecede);
+    runTest(testCanFitBetween);
     return true;
   }
 
@@ -183,10 +185,108 @@ private:
     assert(t1.getStart()->getDerivedDomain().getUpperBound()  == 5);
     assert(t1.getEnd()->getDerivedDomain().getLowerBound() == 5);
     assert(t1.getEnd()->getDerivedDomain().getUpperBound() == 10);
-    assert(t2.getStart()->getDerivedDomain().getLowerBound() == 1);
+    assert(t2.getStart()->getDerivedDomain().getLowerBound() == 5);
     assert(t2.getStart()->getDerivedDomain().getUpperBound() == 10);
-    assert(t2.getEnd()->getDerivedDomain().getLowerBound() == 2);
+    assert(t2.getEnd()->getDerivedDomain().getLowerBound() == 6);
     assert(t2.getEnd()->getDerivedDomain().getUpperBound() == 20);
+    return true;
+  }
+
+  static bool testCanPrecede() {
+    DEFAULT_SETUP(ce,db,schema,false);
+    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    db.close();
+    
+    IntervalToken first(db.getId(),
+			LabelStr("P1"), 
+			true,
+			IntervalIntDomain(0, 100),
+			IntervalIntDomain(0, 100),
+			IntervalIntDomain(1, 1000));
+    
+    IntervalToken second(db.getId(),
+			 LabelStr("P1"), 
+			 true,
+			 IntervalIntDomain(0, 100),
+			 IntervalIntDomain(0, 100),
+			 IntervalIntDomain(1, 1000));
+    
+    // assert from propagator direcly
+    assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
+    // compute from advisor
+    //assert (!db.getTemporalAdvisor()->canPrecede(first,second));
+
+    // restrict via specifying the domain
+    /*
+    IntervalIntDomain dom(21, 31);
+    first.getStart()->specify(dom);
+    first.getEnd()->specify(dom);
+
+    IntervalIntDomain dom2(1, 20);
+    second.getStart()->specify(dom2);
+    second.getEnd()->specify(dom2);
+
+    assert(ce.propagate());
+    
+    // compute from propagator directly
+    assert (!((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
+    // compute from advisor
+    //    assert (!db.getTemporalAdvisor()->canPrecede(first,second));
+    
+    second.getStart()->reset();
+    second.getEnd()->reset();
+
+    first.getStart()->reset();
+    first.getEnd()->reset();
+    */
+    // restrict via a constraint
+
+    std::vector<ConstrainedVariableId> temp;
+    temp.push_back(first.getEnd());
+    temp.push_back(second.getStart());
+    ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("before"),
+									db.getConstraintEngine(),
+									temp);
+    assert(ce.propagate());
+    
+    // compute from propagator directly
+    assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
+    // compute from advisor
+    //    assert (db.getTemporalAdvisor()->canPrecede(first,second));
+    
+    return true;
+  }
+
+  static bool testCanFitBetween() {
+    DEFAULT_SETUP(ce,db,schema,false);
+    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    db.close();
+
+    IntervalToken token(db.getId(),
+			LabelStr("P1"), 
+			true,
+			IntervalIntDomain(0, 10),
+			IntervalIntDomain(0, 20),
+			IntervalIntDomain(1, 1000));
+    IntervalToken predecessor(db.getId(),
+			      LabelStr("P1"), 
+			      true,
+			      IntervalIntDomain(0, 10),
+			      IntervalIntDomain(0, 20),
+			      IntervalIntDomain(1, 1000));
+    IntervalToken successor(db.getId(),
+			    LabelStr("P1"), 
+			    true,
+			    IntervalIntDomain(0, 10),
+			    IntervalIntDomain(0, 20),
+			    IntervalIntDomain(1, 1000));
+
+    // compute from propagator directly
+    assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canFitBetween(token.getStart(), token.getEnd(), predecessor.getEnd(), successor.getStart()));
+
+    // compute from advisor
+    //    assert (db.getTemporalAdvisor()->canFitBetween(token.getStart(), token.getEnd(), predecessor.getEnd(), successor.getStart()));
+
     return true;
   }
 
@@ -199,7 +299,6 @@ int main() {
   // REGISTER_NARY(EqualConstraint, "concurrent", "Temporal");
   REGISTER_NARY(LessThanEqualConstraint, "before", "Temporal");
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Temporal");
-
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
   runTestSuite(TemporalNetworkTest::test);
