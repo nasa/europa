@@ -73,7 +73,7 @@ namespace EUROPA {
     if (m_sortedTokDecs.empty()) return;
     for (TokenDecisionSet::iterator it = m_sortedTokDecs.begin(); it != m_sortedTokDecs.end(); ++it) {
       const HSTSHeuristics::Priority priority = m_heur->getPriorityForTokenDP(*it);
-      //      std::cout << "Comparing priority = " << priority << " to bestp = " << bestp << std::endl;
+      // std::cout << "Comparing priority = " << priority << " to bestp = " << bestp << std::endl;
       if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
 	  (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
 	bestDec = *it;
@@ -87,26 +87,64 @@ namespace EUROPA {
   void HSTSOpenDecisionManager::getBestVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
     check_error(bestDec.isNoId());
     if (m_sortedUnitVarDecs.empty() && m_sortedNonUnitVarDecs.empty()) return;
-    for (VariableDecisionSet::iterator it = m_sortedUnitVarDecs.begin(); it != m_sortedUnitVarDecs.end(); ++it) {
-      const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(*it);
-      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
-	  (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
-	bestDec = *it;
-	bestp = priority;
+    if (!m_sortedUnitVarDecs.empty()) {
+      VariableDecisionSet::iterator it = m_sortedUnitVarDecs.begin();
+      bestDec = *it;
+      check_error(bestDec.isValid());
+      ++it;
+      bestp = m_heur->getPriorityForConstrainedVariableDP(bestDec);
+      for (; it != m_sortedUnitVarDecs.end(); ++it) {
+	// ignore variables of uninserted tokens
+	ConstrainedVariableDecisionPointId vdec(*it);
+	if (TokenId::convertable(vdec->getVariable()->getParent())) {
+	  TokenId parent = vdec->getVariable()->getParent();
+	  if (!parent->isActive()) continue;
+	}
+	const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(vdec);
+	if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
+	    (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
+	  bestDec = vdec;
+	  bestp = priority;
+	}
       }
     }
-    if (bestDec.isNoId()) {
-      if (!m_sortedUnitVarDecs.empty())
-	bestDec = *m_sortedUnitVarDecs.begin();
-      else {
-	for (VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin(); it != m_sortedNonUnitVarDecs.end(); ++it) {
-	  const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(*it);
-	  if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
-	      (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
-	    bestDec = *it;
+    if (bestDec.isNoId() && !m_sortedNonUnitVarDecs.empty()) { // there are no unit vars and some non-unit vars
+      ConstrainedVariableDecisionPointId bestFloatDec;
+      HSTSHeuristics::Priority bestFloatp;
+      VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin();
+      bestDec = *it;
+      check_error(bestDec.isValid());
+      ++it;
+      bestp = m_heur->getPriorityForConstrainedVariableDP(bestDec);
+      for (; it != m_sortedNonUnitVarDecs.end(); ++it) {
+	// ignore variables of uninserted tokens
+	ConstrainedVariableDecisionPointId vdec(*it);
+	check_error(vdec.isValid());
+	if (TokenId::convertable(vdec->getVariable()->getParent())) {
+	  TokenId parent = vdec->getVariable()->getParent();
+	  if (!parent->isActive()) continue;
+	}
+	const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(vdec);
+	if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
+	    (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
+	  if (vdec->getVariable()->lastDomain().isFinite()) {
+	    bestDec = vdec;
 	    bestp = priority;
 	  }
+	  else {
+	    bestFloatDec = vdec;
+	    bestFloatp = priority;
+	  }
 	}
+	else if (priority == bestp) { // secondary heuristic - domain size
+	  ConstrainedVariableDecisionPointId bdec(bestDec); // casting necessary
+	  if (vdec->getVariable()->lastDomain().isFinite() && bdec->getVariable()->lastDomain().getSize() > vdec->getVariable()->lastDomain().getSize())
+	    bestDec = vdec;
+	}
+      }
+      if (bestDec.isNoId()) { // must return the best float dec.
+	bestDec = bestFloatDec;
+	bestp = bestFloatp;
       }
     }
   }
@@ -343,7 +381,6 @@ namespace EUROPA {
     check_error(m_curDec.isValid());
     m_curChoice = ChoiceId::noId();
     const std::list<ChoiceId>& choices = m_curDec->getUpdatedChoices();
-    //    std::cout << "getNextChoice:: num choices " << choices.size() << std::endl;
     if (TokenDecisionPointId::convertable(m_curDec)) {
       TokenDecisionPointId tokDec(m_curDec);
       std::list<LabelStr> states;
@@ -351,28 +388,35 @@ namespace EUROPA {
       m_heur->getOrderedStatesForTokenDP(tokDec, states, order);
       int bestChoiceMeasure;
       initializeNumberToBeat(order, bestChoiceMeasure);
-      std::list<ChoiceId>::const_iterator it = choices.begin(); 
+      std::list<ChoiceId>::const_iterator it;
       bool found(false);
       ChoiceId bestChoice;
       for (std::list<LabelStr>::const_iterator sit = states.begin(); sit != states.end(); ++ sit) {
 	bool evalMerged(false);
-	for (; it != choices.end(); ++it) {
+	for (it = choices.begin(); it != choices.end(); ++it) {
 	  ChoiceId choice = *it;
 	  check_error(choice.isValid());
 	  check_error(choice->getType() == Choice::VALUE);
 	  check_error(!m_curDec->hasDiscarded(choice));
 	  check_error(LabelStr::isString(Id<ValueChoice>(choice)->getValue()));
 	  LabelStr val(Id<ValueChoice>(choice)->getValue());
-	  if (val == *sit) {
-	    if (val == Token::MERGED) {
+	  if (strcmp(val.c_str(),(*sit).c_str()) == 0) {
+	    if (strcmp(val.c_str(), "REJECTED") == 0) {
+	      found = true;
+	      bestChoice = *it;
+	      break; // we'll do this first, no point in continuing to iterate
+	    }
+	    if (strcmp(val.c_str(), "MERGED") == 0) {
 	      LabelStr val = Id<ValueChoice>(choice)->getValue();
 	      const AbstractDomain& startDom = tokDec->getToken()->getStart()->lastDomain();
 	      compareTokensAccordingToOrder(order,choice,bestChoice,(int)startDom.getLowerBound(),(int)startDom.getUpperBound(), bestChoiceMeasure);
 	      evalMerged = true;
 	    }
 	    else {
+	      check_error(strcmp(val.c_str(), "ACTIVE") == 0, "Unexpected token state, expecting ACTIVE, MERGED, REJECTED");
 	      found = true;
-	      bestChoice = *it;
+	      if (!evalMerged)
+		bestChoice = *it;
 	      break; // we'll do this first, no point in continuing to iterate
 	    }
 	  }
@@ -383,10 +427,11 @@ namespace EUROPA {
     }
     else if (ConstrainedVariableDecisionPointId::convertable(m_curDec)) {
       ConstrainedVariableDecisionPointId varDec(m_curDec);
+      bool found(false);
+      check_error(varDec->getVariable()->lastDomain().isFinite());
       std::list<double> domain;
       m_heur->getOrderedDomainForConstrainedVariableDP(varDec, domain);
       std::list<ChoiceId>::const_iterator it = choices.begin(); 
-      bool found(false);
       for (std::list<double>::const_iterator sit = domain.begin(); sit != domain.end(); ++ sit) {
 	for (; it != choices.end(); ++it) {
 	  ChoiceId choice = *it;
