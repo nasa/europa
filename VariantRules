@@ -32,7 +32,7 @@ rule FVariantC++Flags
 
   switch $(variant) {
   case DEV :
-    return $(DEBUG_FLAGS) $(WARNING_FLAGS) ;
+    return $(DEBUG_FLAGS) -DDEBUG_MESSAGE_SUPPORT $(WARNING_FLAGS) ;
   case OPTIMIZED :
     return $(OPTIMIZE_FLAGS) $(WARNING_FLAGS) ;
   case PROFILE :
@@ -43,6 +43,9 @@ rule FVariantC++Flags
     local flags ;
     if $(EUROPA_DEBUG) {
       flags += $(DEBUG_FLAGS) ;
+    }
+    if $(EUROPA_DEBUG_MESSAGE) {
+      flags += -DDEBUG_MESSAGE_SUPPORT ;
     }
     if $(EUROPA_OPTIMIZED) {
       flags += $(OPTIMIZE_FLAGS) ;
