@@ -1,3 +1,11 @@
+M_18:
+1. Agent Database has been added. New module for multi-threaded access. Baseline version.
+2. A number of synchronization problems with Id's in Resources and in the Planner discovered and fixed.
+3. A plethora of gnats fixes.
+4. Support for 'foreach' semantics in NDDL and in the rules engine.
+5. Incorporated temporary fix for accessing active tokens in slaves. This will only work for a chronological backtrack.
+6. Added some code for getting more precise distance relationships from the temporal advisor.
+
 M_17:
 1. First tag in new PLASMA cvs directory.
 2. Minor build patches.
