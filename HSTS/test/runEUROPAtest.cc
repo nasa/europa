@@ -85,7 +85,7 @@ int main(int argc, const char ** argv) {
     // Run the planner
     assembly.plan(txSource, heurSource, pidSource);
 
-    std::cerr << "Printing the plan..." << std::endl;
+    std::cerr << "Finished Planning. Printing the plan..." << std::endl;
 
     // Dump the results
     assembly.write(std::cout);
