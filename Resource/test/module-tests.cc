@@ -139,7 +139,15 @@ private:
     assert(ce.propagate());
     r->constrain(t1);
     ce.propagate();
+
+    std::list<TransactionId> transactions;
+    r->getTransactions(transactions);
+    assert(transactions.size() == 1);
     r->free(t1);
+
+    transactions.clear();
+    r->getTransactions(transactions);
+    assert(transactions.empty());
 
     // Test insertion of t that is outside the horizon of the resource      
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(1001, 2000)))->getId();
@@ -221,8 +229,12 @@ private:
     TransactionId t7 = (new Transaction(db.getId(), LabelStr("consume"), IntervalIntDomain(5,5)))->getId();
     r->constrain(t7);
     ce.propagate();
-    assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 5*5 + 6*4 + 7*3)); 
+    assert(checkSum(r) == (1*3 + 2*3 + 3*3 + 4*4 + 5*5 + 6*4 + 7*3));
 
+    // Confirm transaction counts
+    std::list<TransactionId> transactions;
+    r->getTransactions(transactions);
+    assert(transactions.size() == 7);
 
     // Now do the removal and ensure correctness along the way
     r->free(t7);
