@@ -67,6 +67,11 @@ namespace EUROPA {
       std::list<Transaction> *transactionList;
       std::string dest;
     private:
+      class PPWPlanDatabaseListener;
+      class PPWConstraintEngineListener;
+      class PPWRulesEngineListener;
+      class PPWPlannerListener;
+
       bool havePlanner;
       bool destAlreadyInitialized;
       long long int seqId;
@@ -76,6 +81,10 @@ namespace EUROPA {
       PlanDatabaseId *pdbId;
       RulesEngineId *reId;
       CBPlannerId *plId;
+      PPWPlanDatabaseListener* dbl;
+      PPWConstraintEngineListener* cel;
+      PPWRulesEngineListener* rel;
+      PPWPlannerListener* pl;
       std::ofstream *transOut, *statsOut, *ruleInstanceOut;
       std::list<std::string> sourcePaths;
       void initOutputDestination();
@@ -162,12 +171,6 @@ namespace EUROPA {
       void notifyRetractSucceeded(const DecisionPointId &dec);
       void notifySearchFinished();
       void notifyPlannerTimeout();
-
-
-      class PPWPlanDatabaseListener;
-      class PPWConstraintEngineListener;
-      class PPWRulesEngineListener;
-      class PPWPlannerListener;
 
       friend class PPWPlanDatabaseListener;
       friend class PPWConstraintEngineListener;

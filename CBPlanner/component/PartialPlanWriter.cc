@@ -265,10 +265,10 @@ namespace EUROPA {
                                          const RulesEngineId &reId2,
                                          const CBPlannerId &plId2) {
       havePlanner = true;
-      new PPWPlanDatabaseListener(planDb, this);
-      new PPWConstraintEngineListener(ceId2, this);
-      new PPWRulesEngineListener(reId2, this);
-      new PPWPlannerListener(plId2, this);
+      dbl = new PPWPlanDatabaseListener(planDb, this);
+      cel = new PPWConstraintEngineListener(ceId2, this);
+      rel = new PPWRulesEngineListener(reId2, this);
+      pl = new PPWPlannerListener(plId2, this);
       commonInit(planDb, ceId2);
       reId = const_cast<RulesEngineId *> (&reId2);
       plId = const_cast<CBPlannerId *> (&plId2);
@@ -278,9 +278,10 @@ namespace EUROPA {
                                          const ConstraintEngineId &ceId2,
                                          const RulesEngineId &reId2) {
       havePlanner = false;
-      new PPWPlanDatabaseListener(planDb, this);
-      new PPWConstraintEngineListener(ceId2, this);
-      new PPWRulesEngineListener(reId2, this);
+      dbl = new PPWPlanDatabaseListener(planDb, this);
+      cel = new PPWConstraintEngineListener(ceId2, this);
+      rel = new PPWRulesEngineListener(reId2, this);
+      pl = NULL;
       commonInit(planDb, ceId2);
       reId = const_cast<RulesEngineId *> (&reId2);
       plId = NULL;
@@ -289,8 +290,10 @@ namespace EUROPA {
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb, 
                                          const ConstraintEngineId &ceId2) {
       havePlanner = false;
-      new PPWPlanDatabaseListener(planDb, this);
-      new PPWConstraintEngineListener(ceId2, this);
+      dbl = new PPWPlanDatabaseListener(planDb, this);
+      cel = new PPWConstraintEngineListener(ceId2, this);
+      rel = NULL;
+      pl = NULL;
       commonInit(planDb, ceId2);
       reId = NULL;
       plId = NULL;
@@ -483,6 +486,12 @@ namespace EUROPA {
         }
         delete transactionList;
       }
+      delete dbl;
+      delete cel;
+      if (rel != NULL)
+         delete rel;
+      if (pl != NULL)
+         delete pl;
     }
 
     // accessor to get output destination full path
