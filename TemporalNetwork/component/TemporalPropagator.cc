@@ -25,13 +25,6 @@ namespace Prototype {
 
   typedef Id<TimepointWrapper> TimepointWrapperId;
 
-  const TimepointId& TemporalPropagator::getTimepoint(const TempVarId& var){
-    check_error(var->getIndex() != DURATION_VAR_INDEX);
-    check_error(var->getExternalEntity().isValid());
-    TimepointWrapperId wrapper(var->getExternalEntity());
-    return wrapper->getTimepoint();
-  }
-
   TemporalPropagator::TemporalPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
     : Propagator(name, constraintEngine), m_tnet((new TemporalNetwork())->getId()) {}
 
@@ -346,7 +339,9 @@ namespace Prototype {
       IntervalIntDomain& dom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(var));
 
       check_error(!dom.isEmpty());
-      if (lb > dom.getLowerBound() || ub < dom.getUpperBound()) {
+      double domlb, domub;
+      dom.getBounds(domlb,domub);
+      if (lb > domlb || ub < domub) {
 	dom.intersect(lb, ub);
 	check_error(!dom.isEmpty());
       }
@@ -487,4 +482,5 @@ namespace Prototype {
   void TemporalPropagator::addListener(const TemporalNetworkListenerId& listener) {
     m_listeners.insert(listener);
   }
+
 } //namespace

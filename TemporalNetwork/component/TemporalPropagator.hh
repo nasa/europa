@@ -4,6 +4,9 @@
 #include "Propagator.hh"
 #include "PlanDatabaseDefs.hh"
 #include "TemporalNetworkDefs.hh"
+#include "TimepointWrapper.hh"
+#include "TokenVariable.hh"
+#include "IntervalIntDomain.hh"
 #include <set>
 
 namespace Prototype {
@@ -42,7 +45,13 @@ namespace Prototype {
   private:
     friend class TimepointWrapper;
     void notifyDeleted(const TempVarId& tempVar, const TimepointId& tp);
-    static const TimepointId& getTimepoint(const TempVarId& var);
+
+    inline static const TimepointId& getTimepoint(const TempVarId& var) {
+    check_error(var->getIndex() != DURATION_VAR_INDEX);
+    check_error(var->getExternalEntity().isValid());
+    const TimepointWrapperId wrapper(var->getExternalEntity());
+    return wrapper->getTimepoint();
+    }
 
     void checkAndAddTnetVariables(const ConstraintId& constraint);
     void addTnetConstraint(const ConstraintId& constraint);
