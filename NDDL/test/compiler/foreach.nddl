@@ -74,13 +74,17 @@ Rover::Navigate{
  	};
 
  	foreach (t in trackable) {
+                Trackable t_local_0;
 		contains(Target.Tracking target);
 		eq(target.object, t.target);
+                eq(t, t_local_0);
  	};
 
  	foreach (t in notTrackable) {
+                Trackable t_local_1;
 		contains(Target.Tracking target);
 		eq(target.object, t.target);
+                neq(t, t_local_1);
  	};
  }
 }
