@@ -10,7 +10,6 @@
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
 #include "DbClientTransactionLog.hh"
-#include "DbClientTransactionTokenMapper.hh"
 
 #include "DbClient.hh"
 #include "ObjectFactory.hh"
@@ -1481,8 +1480,7 @@ private:
     DEFAULT_SETUP(ce, db, schema, false);
 
     DbClientId client = db.getClient();
-    DbClientTransactionTokenMapper * tokenMapper = new DbClientTransactionTokenMapper(client);
-    DbClientTransactionLog* txLog = new DbClientTransactionLog(client, tokenMapper->getId());
+    DbClientTransactionLog* txLog = new DbClientTransactionLog(client);
 
     FooId foo1 = client->createObject(LabelStr("Foo"), LabelStr("foo1"));
     assert(foo1.isValid());
@@ -1506,7 +1504,6 @@ private:
     client->createConstraint(LabelStr("eq"), scope);
 
     delete txLog;
-    delete tokenMapper;
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1514,41 +1511,27 @@ private:
 
   static bool testPathBasedRetrieval(){
     DEFAULT_SETUP(ce, db, schema, true);
-    DbClientTransactionTokenMapper * tokenMapper = new DbClientTransactionTokenMapper(db.getClient());
+    TokenId t0 = db.getClient()->createToken(LabelStr("Foo"));
+    t0->activate();
 
-    IntervalToken t0(db.getId(), 
-		     LabelStr("Predicate"), 
-		     false, 
-		     IntervalIntDomain(0, 1),
-		     IntervalIntDomain(0, 1),
-		     IntervalIntDomain(1, 1));
-    tokenMapper->notifyTokenCreated(t0.getId());
-    t0.activate();
-
-    TokenId t1 = (new IntervalToken(db.getId(), 
-				    LabelStr("Predicate"), 
-				    false,
-				    IntervalIntDomain(0, 1),
-				    IntervalIntDomain(0, 1),
-				    IntervalIntDomain(1, 1)))->getId();
-    tokenMapper->notifyTokenCreated(t1);
+    TokenId t1 = db.getClient()->createToken(LabelStr("Foo"));
     t1->activate();
 
-    TokenId t0_0 = (new IntervalToken(t0.getId(), 
+    TokenId t0_0 = (new IntervalToken(t0, 
 				    LabelStr("Predicate"), 
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
     t0_0->activate();
 
-    TokenId t0_1 = (new IntervalToken(t0.getId(), 
+    TokenId t0_1 = (new IntervalToken(t0, 
 				    LabelStr("Predicate"), 
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
     t0_1->activate();
 
-    TokenId t0_2 = (new IntervalToken(t0.getId(), 
+    TokenId t0_2 = (new IntervalToken(t0, 
 				    LabelStr("Predicate"), 
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
@@ -1578,16 +1561,16 @@ private:
 
 
     // Base case with just the root
-    assert(tokenMapper->getTokenByPath(path) == t0.getId());
-    assert(tokenMapper->getPathByToken(t0.getId()).size() == 1);
+    assert(db.getClient()->getTokenByPath(path) == t0);
+    assert(db.getClient()->getPathByToken(t0).size() == 1);
 
     // Now test a more convoluted path
     path.push_back(1);
     path.push_back(1);
-    assert(tokenMapper->getTokenByPath(path) == t0_1_1);
+    assert(db.getClient()->getTokenByPath(path) == t0_1_1);
 
     path.clear();
-    path = tokenMapper->getPathByToken(t0_1_1);
+    path = db.getClient()->getPathByToken(t0_1_1);
     assert(path.size() == 3);
     assert(path[0] == 0);
     assert(path[1] == 1);
@@ -1596,11 +1579,10 @@ private:
 
     // Negative tests
     path.push_back(100);
-    assert(tokenMapper->getTokenByPath(path) == TokenId::noId());
+    assert(db.getClient()->getTokenByPath(path) == TokenId::noId());
     path[0] = 99999;
-    assert(tokenMapper->getTokenByPath(path) == TokenId::noId());
+    assert(db.getClient()->getTokenByPath(path) == TokenId::noId());
 
-    delete tokenMapper;
     DEFAULT_TEARDOWN();
     return true;
   }

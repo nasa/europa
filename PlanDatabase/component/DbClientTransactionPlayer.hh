@@ -15,15 +15,23 @@ namespace Prototype {
 
   class DbClientTransactionPlayer {
   public:
-    DbClientTransactionPlayer(const PlanDatabaseId & db, const DbClientTransactionTokenMapperId & tokenMapper);
+    DbClientTransactionPlayer(const DbClientId & client);
     ~DbClientTransactionPlayer();
 
     /**
      * @brief Play all transactions from an input stream
+     * @param is a stream of xml-based transactions.
      */
     void play(std::istream& is);
 
+    /**
+     * @brief Play all transactions from a given TransactionLog
+     * @param txLog the source log which has all transactions in memory
+     */
+    void play(const DbClientTransactionLogId& txLog);
+
   protected:
+    void processTransaction(const TiXmlElement & element);
     void playNamedObjectCreated(const TiXmlElement & element);
     void playObjectCreated(const TiXmlElement & element);
     void playClosed(const TiXmlElement & element);
@@ -38,9 +46,7 @@ namespace Prototype {
     void playVariableReset(const TiXmlElement & element);
 
   private:
-    PlanDatabaseId m_db;
     DbClientId m_client;
-    DbClientTransactionTokenMapperId m_tokenMapper;
     int m_objectCount;
   };
 

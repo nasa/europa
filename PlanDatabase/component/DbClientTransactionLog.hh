@@ -18,7 +18,7 @@ namespace Prototype {
 
   class DbClientTransactionLog: public DbClientListener {
   public:
-    DbClientTransactionLog(const DbClientId& client, const DbClientTransactionTokenMapperId & tokenMapper);
+    DbClientTransactionLog(const DbClientId& client);
     ~DbClientTransactionLog();
 
     /* Declare DbClient event handlers we will over-ride */
@@ -44,8 +44,10 @@ namespace Prototype {
     void flush(std::ostream& os);
 
   private:
+    friend class DbClientTransactionPlayer;
+    const std::list<TiXmlElement*>& getBufferedTransactions() const;
+
     std::list<TiXmlElement*> m_bufferedTransactions;
-    DbClientTransactionTokenMapperId m_tokenMapper;
   };
 }
 #endif

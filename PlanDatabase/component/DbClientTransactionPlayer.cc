@@ -1,5 +1,6 @@
 #include "DbClientTransactionPlayer.hh"
 #include "DbClientTransactionTokenMapper.hh"
+#include "DbClientTransactionLog.hh"
 #include "DbClient.hh"
 #include "PlanDatabase.hh"
 #include "Token.hh"
@@ -29,28 +30,36 @@ namespace Prototype {
     return result;
   }
 
-  DbClientTransactionPlayer::DbClientTransactionPlayer(const PlanDatabaseId & db, const DbClientTransactionTokenMapperId & tokenMapper)
-  {
-    m_db = db;
-    m_client = db->getClient();
-    m_tokenMapper = tokenMapper;
-    m_objectCount = 0;
-  }
+  DbClientTransactionPlayer::DbClientTransactionPlayer(const DbClientId & client) : m_client(client), m_objectCount(0){}
 
-  DbClientTransactionPlayer::~DbClientTransactionPlayer()
-  {
-  }
+  DbClientTransactionPlayer::~DbClientTransactionPlayer(){}
 
   void DbClientTransactionPlayer::play(std::istream& is)
   {
-    TiXmlElement element("");
+    TiXmlElement tx("");
     while (!is.eof()) {
       if (is.peek() != '<') {
         is.get(); // discard characters up to '<'
         continue;
       }
-      m_db->getConstraintEngine()->propagate();
-      is >> element;
+      is >> tx;
+      processTransaction(tx);
+      tx.Clear();
+    }
+  }
+
+  void DbClientTransactionPlayer::play(const DbClientTransactionLogId& txLog)
+  {
+    const std::list<TiXmlElement*>& transactions = txLog->getBufferedTransactions();
+    for(std::std::list<TiXmlElement*>::const_iterator it = transactions.begin(); it != transactions.end(); ++it){
+      const TiXmlElement& tx = **it;
+      processTransaction(tx);
+    }
+  }
+
+  void DbClientTransactionPlayer::processTransaction(const TiXmlElement & element) {
+      m_client->propagate();
+
       const char * tagname = element.Value();
       if (strcmp(tagname, "new") == 0) {
         playNamedObjectCreated(element);
@@ -77,8 +86,6 @@ namespace Prototype {
       } else {
         check_error(ALWAYS_FAILS);
       }
-      element.Clear();
-    }
   }
 
   void DbClientTransactionPlayer::playNamedObjectCreated(const TiXmlElement & element)
@@ -121,7 +128,7 @@ namespace Prototype {
     check_error(strcmp(object_el->Value(), "object") == 0);
     const char * name = object_el->Attribute("name");
     check_error(name != NULL);
-    ObjectId object = m_db->getObject(LabelStr(name));
+    ObjectId object = m_client->getObject(LabelStr(name));
     check_error(object.isValid());
 
     TiXmlElement * token_el = object_el->NextSiblingElement();
@@ -129,7 +136,7 @@ namespace Prototype {
     check_error(strcmp(token_el->Value(), "token") == 0);
     const char * path = token_el->Attribute("path");
     check_error(path != NULL);
-    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    TokenId token = m_client->getTokenByPath(pathAsVector(path));
     check_error(token.isValid());
 
     TiXmlElement * successor_el = token_el->NextSiblingElement();
@@ -138,7 +145,7 @@ namespace Prototype {
       check_error(strcmp(successor_el->Value(), "token") == 0);
       const char * successor_path = successor_el->Attribute("path");
       check_error(successor_path != NULL);
-      successor = m_tokenMapper->getTokenByPath(pathAsVector(successor_path));
+      successor = m_client->getTokenByPath(pathAsVector(successor_path));
       check_error(successor.isValid());
     }
 
@@ -152,7 +159,7 @@ namespace Prototype {
     check_error(strcmp(object_el->Value(), "object") == 0);
     const char * name = object_el->Attribute("name");
     check_error(name != NULL);
-    ObjectId object = m_db->getObject(LabelStr(name));
+    ObjectId object = m_client->getObject(LabelStr(name));
     check_error(object.isValid());
 
     TiXmlElement * token_el = object_el->NextSiblingElement();
@@ -160,7 +167,7 @@ namespace Prototype {
     check_error(strcmp(token_el->Value(), "token") == 0);
     const char * path = token_el->Attribute("path");
     check_error(path != NULL);
-    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    TokenId token = m_client->getTokenByPath(pathAsVector(path));
     check_error(token.isValid());
 
     m_client->free(object, token);
@@ -173,7 +180,7 @@ namespace Prototype {
     check_error(strcmp(token_el->Value(), "token") == 0);
     const char * path = token_el->Attribute("path");
     check_error(path != NULL);
-    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    TokenId token = m_client->getTokenByPath(pathAsVector(path));
     check_error(token.isValid());
     m_client->activate(token);    
   }
@@ -185,7 +192,7 @@ namespace Prototype {
     check_error(strcmp(token_el->Value(), "token") == 0);
     const char * path = token_el->Attribute("path");
     check_error(path != NULL);
-    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    TokenId token = m_client->getTokenByPath(pathAsVector(path));
     check_error(token.isValid());
 
     TiXmlElement * active_el = token_el->NextSiblingElement();
@@ -193,7 +200,7 @@ namespace Prototype {
     check_error(strcmp(active_el->Value(), "token") == 0);
     const char * active_path = active_el->Attribute("path");
     check_error(active_path != NULL);
-    TokenId active_token = m_tokenMapper->getTokenByPath(pathAsVector(active_path));
+    TokenId active_token = m_client->getTokenByPath(pathAsVector(active_path));
     check_error(active_token.isValid());
 
     m_client->merge(token, active_token);
@@ -206,7 +213,7 @@ namespace Prototype {
     check_error(strcmp(token_el->Value(), "token") == 0);
     const char * path = token_el->Attribute("path");
     check_error(path != NULL);
-    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    TokenId token = m_client->getTokenByPath(pathAsVector(path));
     check_error(token.isValid());
     m_client->reject(token);    
   }
@@ -218,7 +225,7 @@ namespace Prototype {
     check_error(strcmp(token_el->Value(), "token") == 0);
     const char * path = token_el->Attribute("path");
     check_error(path != NULL);
-    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    TokenId token = m_client->getTokenByPath(pathAsVector(path));
     check_error(token.isValid());
     m_client->cancel(token);    
   }
@@ -231,7 +238,7 @@ namespace Prototype {
 
     const char * path = var_el->Attribute("token");
     check_error(path != NULL);
-    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    TokenId token = m_client->getTokenByPath(pathAsVector(path));
     check_error(token.isValid());
 
     int index;
@@ -269,7 +276,7 @@ namespace Prototype {
     } else if (strcmp(value_el->Value(), "object") == 0) {
       const char * value_st = value_el->Attribute("value");
       check_error(value_st != NULL);
-      ObjectId object = m_db->getObject(LabelStr(value_st));
+      ObjectId object = m_client->getObject(LabelStr(value_st));
       check_error(object.isValid());
       value = (double)object;
     } else {
@@ -286,7 +293,7 @@ namespace Prototype {
 
     const char * path = var_el->Attribute("token");
     check_error(path != NULL);
-    TokenId token = m_tokenMapper->getTokenByPath(pathAsVector(path));
+    TokenId token = m_client->getTokenByPath(pathAsVector(path));
     check_error(token.isValid());
 
     int index;
