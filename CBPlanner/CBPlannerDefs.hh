@@ -61,6 +61,12 @@ namespace PLASMA {
 
   class DMResourceListener;
   typedef Id<DMResourceListener> DMResourceListenerId;
+
+  class HSTSHeuristics;
+  typedef Id<HSTSHeuristics> HSTSHeuristicsId;
+
+  class HSTSNoBranch;
+  typedef Id<HSTSNoBranch> HSTSNoBranchId;
 }
 
 #endif
