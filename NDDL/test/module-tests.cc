@@ -72,9 +72,9 @@ private:
   }
 };
 
-class R_Predicate_0_Root : public RuleInstance {
+class R_Predicate_0_0: public RuleInstance {
 public:
-  R_Predicate_0_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+  R_Predicate_0_0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
     : RuleInstance(rule, token, planDb) { }
 
   void handleExecute() { }
@@ -82,22 +82,20 @@ public:
 
 DECLARE_AND_DEFINE_RULE(Predicate_0, Predicate);
 
-class R_Predicate_1_Root: public RuleInstance {
+class R_Predicate_1_0: public RuleInstance {
 public:
-  R_Predicate_1_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, const ConstrainedVariableId& guard)
-    : RuleInstance(rule, token, planDb, guard) { }
-
-  void handleExecute() { }
+  R_Predicate_1_0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, const ConstrainedVariableId& guard)
+    : RuleInstance(rule, token, planDb, guard){}
+  void handleExecute(){}
 };
 
 DECLARE_AND_DEFINE_SINGLETON_GUARDED_RULE(Predicate_1, Predicate, object);
 
-class R_Predicate_2_Root: public RuleInstance {
+class R_Predicate_2_0: public RuleInstance {
 public:
-  R_Predicate_2_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, const ConstrainedVariableId& guard, double value)
-    : RuleInstance(rule, token, planDb, guard, value) { }
-
-  void handleExecute() { }
+  R_Predicate_2_0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, const ConstrainedVariableId& guard, double value)
+    : RuleInstance(rule, token, planDb, guard, value){}
+  void handleExecute(){}
 };
 
 DECLARE_AND_DEFINE_VALUE_GUARDED_RULE(Predicate_2, Predicate, object, 10);

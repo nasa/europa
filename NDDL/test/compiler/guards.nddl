@@ -1,23 +1,98 @@
+enum Locations {Hill, Rock, Lander};
 
 class Foo{
- predicate pred1{
-  int x;
-  bool y;
+ int arg1;
+
+ predicate basicToken{}
+ predicate tokenWithParameters{
+  int int_arg;
+  bool bool_arg;
+  float float_arg;
+  Locations location_arg;
  }
 
- predicate pred2{}
+ predicate impliedObjectGuard{}
+ predicate singletonGuard{}
+ predicate mixGuardedWithUnguarded{}
+ predicate localVariableGuard{}
+ predicate multipleNestedGuards{}
 }
 
-Foo::pred1{
- if(x==3){
-  if(y==4){
-   before (object.pred2 p);
+// Guard on object being a singleton is implied
+// by the constrain referencing a field. Expect a single 
+// RuleInstance to be created, which is an object guarded instance
+Foo::impliedObjectGuard{
+ eq(object.arg1, 10);
+
+ // Comments:
+ // 1. Should not be allowed to say this in-line! 
+ // 2. Should be allowed to apply it to slave tokens too i.e. g.object.x. We do not support nested references yet.
+}
+
+// Singleton guard. Can be variables of tokens too
+Foo::singletonGuard{
+ if(object){
+  meets(basicToken g1);
+  if(g1.object){
+   met_by(basicToken g2);
+   eq(g1.duration, g2.duration); // Should be able to reference the parent scope
+  }
  }
+}
+Foo::tokenWithParameters{
+ if(bool_arg == true){
+  meets(basicToken t1);
+ }
+ if(int_arg == 10){
+  meets(basicToken t2);
+ }
+ if(location_arg == Lander){
+  meets(basicToken t3);
  }
 }
 
-Foo::pred2{
- meets (pred1 p);
+// TODO: Generating a singleton test instead of a value guarded test with default value of true
+Foo::tokenWithParameters{
+ if(this.bool_arg){ 
+  meets(basicToken t1);
+ }
+}
+
+// Mix guarded elements, with unguarded elements
+Foo::mixGuardedWithUnguarded{
+ meets(tokenWithParameters t1);
+ eq(t1.int_arg, 20);
+ if(t1.bool_arg){ // TODO: Generating a singleton test instead of a value guarded test with default value of true
+  meets(basicToken t2);
+ }
+}
+
+// Test guard based on introduction of a local variable
+Foo::localVariableGuard{
+ bool b;
+ if(b){
+  meets(basicToken t);
+ }
+ Locations local_locations;
+ if(local_locations == Hill){
+  met_by(basicToken t2);
+ }
+}
+
+// Test multiple levels of nesting
+Foo::multipleNestedGuards{
+ Locations locs;
+ any(tokenWithParameters t1);
+ if(t1.int_arg == 10){
+  bool OR;
+  if(OR == true){
+   meets(tokenWithParameters t2);
+   eq(locs, t2.location_arg);
+   if(t1.location_arg == Hill){
+    t2 meets (basicToken t3);
+   }
+  }
+ }
 }
 
 // Defines the initial state for the problem.
@@ -31,9 +106,18 @@ class World {
 }
 
 World::initialState{
- any(Foo.pred1 f1);
- eq(f1.x, 3);
- eq(f1.state, 2);
- any(Foo.pred1 f2);
- eq(f2.x, 10);
+ any(Foo.impliedObjectGuard g1);
+ eq(g1.state, 2);
+
+ any(Foo.singletonGuard g2);
+ eq(g2.state, 2);
+
+ any(Foo.mixGuardedWithUnguarded g3);
+ eq(g3.state, 2); 
+
+ any(Foo.tokenWithParameters g4);
+ eq(g4.state, 2); 
+
+ any(Foo.multipleNestedGuards g5);
+ eq(g5.state, 2); 
 }
