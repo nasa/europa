@@ -5,22 +5,22 @@
 
 #include <list>
 
-#include "../CBPlanner/CBPlanner.hh"
-#include "../CBPlanner/DecisionManagerListener.hh"
-#include "../CBPlanner/DecisionPoint.hh"
-#include "../ConstraintEngine/ConstraintEngineListener.hh"
-#include "../ConstraintEngine/DomainListener.hh"
-#include "../ConstraintEngine/Entity.hh"
-#include "../ConstraintEngine/Id.hh"
-#include "../ConstraintEngine/VariableChangeListener.hh"
-#include "../PlanDatabase/PlanDatabaseListener.hh"
-#include "../Resource/Resource.hh"
-#include "../Resource/ResourceDefs.hh"
-#include "../Resource/Transaction.hh"
-#include "../RulesEngine/RulesEngine.hh"
-#include "../RulesEngine/RulesEngineDefs.hh"
-#include "../RulesEngine/RulesEngineListener.hh"
-#include "../RulesEngine/RuleInstance.hh"
+#include "CBPlanner.hh"
+#include "DecisionManagerListener.hh"
+#include "DecisionPoint.hh"
+#include "ConstraintEngineListener.hh"
+#include "DomainListener.hh"
+#include "Entity.hh"
+#include "Id.hh"
+#include "VariableChangeListener.hh"
+#include "PlanDatabaseListener.hh"
+#include "Resource.hh"
+#include "ResourceDefs.hh"
+#include "Transaction.hh"
+#include "RulesEngine.hh"
+#include "RulesEngineDefs.hh"
+#include "RulesEngineListener.hh"
+#include "RuleInstance.hh"
 
 namespace Prototype {
   namespace PlanWriter {
