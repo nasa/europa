@@ -132,7 +132,8 @@ namespace Prototype {
 			   const ConstraintEngineId& constraintEngine,
 			   const std::vector<ConstrainedVariableId>& variables);
 
-    void handleExecute();
+    // All the work is done by the member constraints
+    inline void handleExecute() { }
 
   private:
     static const int A = 0;
@@ -143,6 +144,27 @@ namespace Prototype {
 
     Variable<IntervalDomain> m_interimVariable;
     MultEqualConstraint m_multEqualConstraint;
+    AddEqualConstraint m_addEqualConstraint;
+  };
+
+  class LessOrEqThanSumConstraint : public Constraint {
+  public:
+    LessOrEqThanSumConstraint(const LabelStr& name,
+                              const LabelStr& propagatorName,
+                              const ConstraintEngineId& constraintEngine,
+                              const std::vector<ConstrainedVariableId>& variables);
+
+    // All the work is done by the member constraints
+    inline void handleExecute() { }
+
+  private:
+    static const int X = 0;
+    static const int Y = 1;
+    static const int Z = 2;
+    static const int ARG_COUNT = 3;
+
+    Variable<IntervalDomain> m_interimVariable;
+    LessThanEqualConstraint m_lessThanEqualConstraint;
     AddEqualConstraint m_addEqualConstraint;
   };
 }
