@@ -52,7 +52,7 @@ namespace PLASMA {
   }
 
   void ConditionalRule_true::handleExecute() {
-    TokenId tok =  (new IntervalToken(m_token, LabelStr("Objects.P1True"), 
+    TokenId tok =  (new IntervalToken(m_token, "any", LabelStr("Objects.P1True"), 
 				      IntervalIntDomain(0, 10),
 				      IntervalIntDomain(0, 20),
 				      IntervalIntDomain(1, 1000),
@@ -65,7 +65,7 @@ namespace PLASMA {
   }
 
   void ConditionalRule_false::handleExecute() {
-    TokenId slave = addSlave(new IntervalToken(m_token, LabelStr("Objects.P1False"), 
+    TokenId slave = addSlave(new IntervalToken(m_token, "concurrent", LabelStr("Objects.P1False"), 
 					       IntervalIntDomain(0, 10),
 					       IntervalIntDomain(0, 200),
 					       IntervalIntDomain(200, 200),

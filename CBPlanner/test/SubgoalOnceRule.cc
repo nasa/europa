@@ -37,6 +37,7 @@ namespace PLASMA {
 
   void SubgoalOnceRuleRoot::handleExecute() {
     TokenId tok =  (new IntervalToken(m_token,  
+				      "after",
 				      LabelStr("Objects.P1"), 
 				      IntervalIntDomain(0, 10),
 				      IntervalIntDomain(0, 20),
