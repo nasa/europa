@@ -339,10 +339,14 @@ namespace Prototype {
   }
 
   double IntervalDomain::translateNumber(double number, bool) const {
-    if (number < 0)
+    if (number < 0.0)
       return(number < MINUS_INFINITY ? MINUS_INFINITY : number);
-    else
+    if (number > 0.0)
       return(number > PLUS_INFINITY ? PLUS_INFINITY : number);
+    // This has to be explicitly 0.0 for hardware/OS/compiler
+    // combinations that have a '-0.0' (negative zero) that
+    // equals 0.0 but is also negative.
+    return(0.0);
   }
 
   IntervalDomain *IntervalDomain::copy() const {
