@@ -67,15 +67,27 @@ namespace Prototype {
 
       /****From PlanDatabaseListener****/
     
+      void notifyAdded(const ObjectId &); //OBJECT_CREATED
+      void notifyRemoved(const ObjectId &); //OBJECT_DELETED
       void notifyAdded(const TokenId &); //TOKEN_CREATED
-      //void notifyAdded(const ObjectId &, const TokenId &);  //TOKEN_INSERTED
+      void notifyAdded(const ObjectId &, const TokenId &);  //TOKEN_ADDED_TO_OBJECT
+      void notifyClosed(const TokenId &); //TOKEN_CLOSED
+      void notifyActivated(const TokenId &); //TOKEN_ACTIVATED
+      void notifyDeactivated(const TokenId &); //TOKEN_DEACTIVATED
+      void notifyMerged(const TokenId &); //TOKEN_MERGED
+      void notifySplit(const TokenId &); //TOKEN_SPLIT
+      void notifyRejected(const TokenId &); //TOKEN_REJECTED
+      void notifyReinstated(const TokenId &); //TOKEN_REINSTATED
       void notifyRemoved(const TokenId &); //TOKEN_DELETED
-      void notifyRemoved(const ObjectId &, const TokenId &); //TOKEN_FREED
+      void notifyRemoved(const ObjectId &, const TokenId &); //TOKEN_REMOVED
       void notifyConstrained(const ObjectId &, const TokenId &, const TokenId &); //TOKEN_INSERTED
-    
+      void notifyFreed(const ObjectId &, const TokenId &); //TOKEN_FREED
+      
+
       /****From ConstraintEngineListener****/
       void notifyAdded(const ConstraintId &); //CONSTRAINT_CREATED
       void notifyRemoved(const ConstraintId &); //CONSTRAINT_DELETED
+      void notifyExecuted(const ConstraintId &); //CONSTRAINT_EXECUTED
       void notifyAdded(const ConstrainedVariableId &); //VARIABLE_CREATED
       void notifyRemoved(const ConstrainedVariableId &); //VARIABLE_DELETED
       void notifyChanged(const ConstrainedVariableId &, const DomainListener::ChangeType &);

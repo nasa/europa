@@ -63,17 +63,23 @@ const char *envAltWriteDest = "PPW_WRITE_DEST";
 
 const char *envPPWNoWrite = "PPW_DONT_WRITE";
 
-const char *transactionTypeNames[13] = {"TOKEN_CREATED", "TOKEN_DELETED", "TOKEN_INSERTED",
-                                        "TOKEN_FREED", "VARIABLE_CREATED", "VARIABLE_DELETED",
-                                        "VARIABLE_DOMAIN_RELAXED", "VARIABLE_DOMAIN_RESTRICTED",
-                                        "VARIABLE_DOMAIN_SPECIFIED", "VARIABLE_DOMAIN_RESET",
-                                        "VARIABLE_DOMAIN_EMPTIED", "CONSTRAINT_CREATED",
-                                        "CONSTRAINT_DELETED"};
+enum transactionTypes {OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_ADDED_TO_OBJECT, 
+                       TOKEN_CLOSED, TOKEN_ACTIVATED, TOKEN_DEACTIVATED, TOKEN_MERGED, TOKEN_SPLIT,
+                       TOKEN_REJECTED, TOKEN_REINSTATED, TOKEN_DELETED, TOKEN_REMOVED, 
+                       TOKEN_INSERTED, TOKEN_FREED, CONSTRAINT_CREATED, CONSTRAINT_DELETED,
+                       CONSTRAINT_EXECUTED, VAR_CREATED, VAR_DELETED, VAR_DOMAIN_RELAXED,
+                       VAR_DOMAIN_RESTRICTED, VAR_DOMAIN_SPECIFIED, VAR_DOMAIN_RESET, 
+                       VAR_DOMAIN_EMPTIED, ERROR};
 
-enum transactionTypes {TOKEN_CREATED = 0, TOKEN_DELETED, TOKEN_INSERTED, TOKEN_FREED,
-                             VAR_CREATED, VAR_DELETED, VAR_DOMAIN_RELAXED, VAR_DOMAIN_RESTRICTED,
-                             VAR_DOMAIN_SPECIFIED, VAR_DOMAIN_RESET, VAR_DOMAIN_EMPTIED,
-                             CONSTRAINT_CREATED, CONSTRAINT_DELETED, ERROR};
+const int transactionTotal = ERROR + 1;
+
+const char *transactionTypeNames[transactionTotal] = { 
+  "OBJECT_CREATED", "OBJECT_DELETED", "TOKEN_CREATED", "TOKEN_ADDED_TO_OBJECT", "TOKEN_CLOSED",
+    "TOKEN_ACTIVATED", "TOKEN_DEACTIVATED", "TOKEN_MERGED", "TOKEN_SPLIT", "TOKEN_REJECTED",
+    "TOKEN_REINSTATED", "TOKEN_DELETED", "TOKEN_REMOVED", "TOKEN_INSERTED", "TOKEN_FREED",
+    "CONSTRAINT_CREATED", "CONSTRAINT_DELETED", "CONSTRAINT_EXECUTED", "VARIABLE_CREATED",
+    "VARIABLE_DELETED", "VARIABLE_DOMAIN_RELAXED", "VARIABLE_DOMAIN_RESTRICTED", 
+    "VARIABLE_DOMAIN_SPECIFIED", "VARIABLE_DOMAIN_RESET", "VARIABLE_DOMAIN_EMPTIED", "ERROR"};
 
 const char *sourceTypeNames[3] = {"SYSTEM", "USER", "UNKNOWN"};
 
@@ -368,19 +374,19 @@ namespace Prototype {
             objOut << SNULL;
           objOut << std::endl;
         }
-//          else if(ResourceId::convertable(objId)) {
-//            outputObject(objId, O_RESOURCE, objOut, varOut);
-//            ResourceId &rId = (ResourceId &) objId;
-//            std::list<TransactionId> resTrans;
-//            rId->getTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY);
-//            for(std::list<TransactionId>::iterator transIt = resTrans.begin();
-//                transIt != resTrans.end(); ++transIt) {
-//              TransactionId trans = *transIt;
-//              outputToken(trans, T_TRANSACTION, 0, 1, rId, tokOut, tokRelOut, varOut);
-//              tokens.erase(trans);
-//            }
-//            objOut << SNULL << std::endl;
-//          }
+//           else if(ResourceId::convertable(objId)) {
+//             outputObject(objId, O_RESOURCE, objOut, varOut);
+//             ResourceId &rId = (ResourceId &) objId;
+//             std::list<TransactionId> resTrans;
+//             rId->getTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY);
+//             for(std::list<TransactionId>::iterator transIt = resTrans.begin();
+//                 transIt != resTrans.end(); ++transIt) {
+//               TransactionId trans = *transIt;
+//               outputToken(trans, T_TRANSACTION, 0, 1, rId, tokOut, tokRelOut, varOut);
+//               tokens.erase(trans);
+//             }
+//             objOut << SNULL << std::endl;
+//           }
         else {
           outputObject(objId, O_OBJECT, objOut, varOut);
           objOut << SNULL << std::endl;
@@ -696,6 +702,24 @@ namespace Prototype {
   
     /****From PlanDatabaseListener****/
 
+    void PartialPlanWriter::notifyAdded(const ObjectId &objId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(OBJECT_CREATED, objId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               objId->getName().toString()));
+        numTransactions++;
+      }
+    }
+
+    void PartialPlanWriter::notifyRemoved(const ObjectId &objId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(OBJECT_DELETED, objId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               objId->getName().toString()));
+        numTransactions++;
+      }
+    }
+
     void PartialPlanWriter::notifyAdded(const TokenId &tokId) {
       if(stepsPerWrite) {
 	transactionList->push_back(Transaction(TOKEN_CREATED, tokId->getKey(), UNKNOWN,
@@ -705,14 +729,78 @@ namespace Prototype {
       }
     }
 
-    //    void PartialPlanWriter::notifyAdded(const ObjectId &objId, const TokenId &tokId) {
-//       if(stepsPerWrite) {
-// 	transactionList->push_back(Transaction(TOKEN_INSERTED, tokId->getKey(), UNKNOWN,
-// 					       transactionId++, seqId, nstep, 
-// 					       tokId->getPredicateName().toString()));
-// 	numTransactions++;
-//       }
-    //    }
+    void PartialPlanWriter::notifyAdded(const ObjectId &objId, const TokenId &tokId) {
+      if(stepsPerWrite) {
+ 	transactionList->push_back(Transaction(TOKEN_ADDED_TO_OBJECT, tokId->getKey(), UNKNOWN,
+ 					       transactionId++, seqId, nstep, 
+ 					       tokId->getPredicateName().toString()));
+ 	numTransactions++;
+      }
+    }
+
+    void PartialPlanWriter::notifyClosed(const TokenId &tokId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(TOKEN_CREATED, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               tokId->getPredicateName().toString()));
+        numTransactions++;
+      }
+    }
+
+    void PartialPlanWriter::notifyActivated(const TokenId &tokId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(TOKEN_ACTIVATED, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               tokId->getPredicateName().toString()));
+        numTransactions++;
+      }
+    }
+
+    void PartialPlanWriter::notifyDeactivated(const TokenId &tokId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(TOKEN_DEACTIVATED, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               tokId->getPredicateName().toString()));
+        numTransactions++;
+      }
+    }
+
+    void PartialPlanWriter::notifyMerged(const TokenId &tokId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(TOKEN_MERGED, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               tokId->getPredicateName().toString()));
+        numTransactions++;
+      }
+    }
+
+    void PartialPlanWriter::notifySplit(const TokenId &tokId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(TOKEN_SPLIT, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               tokId->getPredicateName().toString()));
+        numTransactions++;
+      }
+    }
+
+    void PartialPlanWriter::notifyRejected(const TokenId &tokId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(TOKEN_REJECTED, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               tokId->getPredicateName().toString()));
+        numTransactions++;
+      }
+    }
+
+    void PartialPlanWriter::notifyReinstated(const TokenId &tokId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(TOKEN_REINSTATED, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               tokId->getPredicateName().toString()));
+        numTransactions++;
+      }
+    }
+
 
     void PartialPlanWriter::notifyConstrained(const ObjectId &objId, const TokenId &tokId,
                                               const TokenId &successor) {
@@ -725,17 +813,28 @@ namespace Prototype {
 
     void PartialPlanWriter::notifyRemoved(const TokenId &tokId) {
       if(stepsPerWrite) {
-	transactionList->push_back(Transaction(TOKEN_DELETED, tokId->getKey(), UNKNOWN, transactionId++,
-					       seqId, nstep, tokId->getPredicateName().toString()));
+	transactionList->push_back(Transaction(TOKEN_DELETED, tokId->getKey(), UNKNOWN, 
+                                               transactionId++, seqId, nstep, 
+                                               tokId->getPredicateName().toString()));
 	numTransactions++;
       }
     }
 
     void PartialPlanWriter::notifyRemoved(const ObjectId &objId, const TokenId &tokId) {
       if(stepsPerWrite) {
-	transactionList->push_back(Transaction(TOKEN_FREED, tokId->getKey(), UNKNOWN, transactionId++,
-					       seqId, nstep, tokId->getPredicateName().toString()));
+	transactionList->push_back(Transaction(TOKEN_REMOVED, tokId->getKey(), UNKNOWN, 
+                                               transactionId++, seqId, nstep, 
+                                               tokId->getPredicateName().toString()));
 	numTransactions++;
+      }
+    }
+
+    void PartialPlanWriter::notifyFreed(const ObjectId &objId, const TokenId &tokId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(TOKEN_FREED, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               tokId->getPredicateName().toString()));
+        numTransactions++;
       }
     }
 
@@ -756,6 +855,15 @@ namespace Prototype {
 					       transactionId++, seqId, nstep, 
 					       constrId->getName().toString()));
 	numTransactions++;
+      }
+    }
+
+    void PartialPlanWriter::notifyExecuted(const ConstraintId &constrId) {
+      if(stepsPerWrite) {
+        transactionList->push_back(Transaction(CONSTRAINT_EXECUTED, constrId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep,
+                                               constrId->getName().toString()));
+        numTransactions++;
       }
     }
 
