@@ -13,7 +13,8 @@ namespace Prototype {
   }
 
   void DefaultPropagator::handleConstraintRemoved(const ConstraintId& constraint){
-    m_agenda.remove(constraint);
+    // This is a relaxation, so we should be able to simply clear the agenda.
+    m_agenda.clear();
   }
 
   void DefaultPropagator::handleConstraintActivated(const ConstraintId& constraint){
@@ -21,7 +22,7 @@ namespace Prototype {
   }
 
   void DefaultPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
-    m_agenda.remove(constraint);
+    // This is a no-op
   }
 
   void DefaultPropagator::handleNotification(const ConstrainedVariableId& variable, 
@@ -37,13 +38,17 @@ namespace Prototype {
   }
 
   void DefaultPropagator::execute(){
-    while(m_agenda.size() > 0  && !getConstraintEngine()->provenInconsistent()){
-      ConstraintId constraint = m_agenda.front();
-      m_agenda.pop_front();
-      Propagator::execute(constraint);
-    }
+    check_error(m_agenda.size() > 0);
+    check_error(!getConstraintEngine()->provenInconsistent());
 
-    check_error(m_agenda.size() == 0 || getConstraintEngine()->provenInconsistent());
+    for(int i=0;i<m_agenda.size();i++){
+      ConstraintId constraint = m_agenda[i];
+      if(constraint->isActive())
+	Propagator::execute(constraint);
+
+      if(getConstraintEngine()->provenInconsistent())
+	break;
+    }
 
     m_agenda.clear();
   }
