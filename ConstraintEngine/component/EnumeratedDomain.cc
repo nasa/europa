@@ -70,7 +70,11 @@ namespace Prototype {
   void EnumeratedDomain::remove(double value){
     int index = getIndex(value);
     m_membership.reset(index);
-    notifyChange(DomainListener::VALUE_REMOVED);
+
+    if(!isEmpty())
+      notifyChange(DomainListener::VALUE_REMOVED);
+    else
+      notifyChange(DomainListener::EMPTIED);
   }
 
   void EnumeratedDomain::set(const EnumeratedDomain& dom){

@@ -38,8 +38,8 @@ namespace Prototype {
   bool IntervalDomain::isSubsetOf(const IntervalDomain& dom) const{
     check_error(dom.isDynamic() || !dom.isEmpty());
     check_error(!isDynamic());
-
-    return (dom.getUpperBound() >= m_ub && dom.getLowerBound() <= m_lb);
+    bool result = (dom.getUpperBound() >= m_ub && dom.getLowerBound() <= m_lb);
+    return result;
   }
 
   double IntervalDomain::getUpperBound() const {return m_ub;}
@@ -169,5 +169,10 @@ namespace Prototype {
   double IntervalDomain::check(const double& value) const {
     testPrecision(value);
     return value;
+  }
+
+  void IntervalDomain::operator>>(ostream& os) const {
+    AbstractDomain::operator>>(os);
+    os << "[" << m_lb << ", " << m_ub << "]";
   }
 }

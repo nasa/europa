@@ -18,6 +18,11 @@ namespace Prototype{
   class IntervalDomain: public AbstractDomain {
   public:
     /**
+     * @brief Override the base class method
+     */
+    void operator>>(ostream& os) const;
+
+    /**
      * @brief Destructor
      */
     virtual ~IntervalDomain();

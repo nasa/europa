@@ -26,6 +26,8 @@
 #include <cassert>
 #include <bitset>
 #include <vector>
+#include <sstream>
+#include <string>
 
 using namespace Prototype;
 using namespace std;
@@ -312,6 +314,7 @@ public:
     runTest(testIntersection, "Intersection");  
     runTest(testSubset, "Subset");
     runTest(testUtilities, "Utilities");
+    runTest(testPrinting, "Printing");
     return true;
   }
 
@@ -424,6 +427,29 @@ private:
     IntervalIntDomain d2(11, 20);
     assert(DomainUtilities::isSubsetOf(d2, d1));
     assert(!DomainUtilities::equals(d2, d1));
+
+    IntervalIntDomain d3(18, 30);
+    assert(DomainUtilities::intersect(d3, d1));
+    assert(d3.getLowerBound() == 18);
+    assert(d3.getUpperBound() == 20);
+    return true;
+  }
+
+  static bool testPrinting(){
+    IntervalIntDomain d1(1, 100);
+    std::stringstream ss1;
+    d1 >> ss1;
+    std::string actualString = ss1.str();
+    std::string expectedString("INT_INTERVAL:CLOSED[1, 100]");
+    assert(actualString == expectedString);
+
+
+    IntervalRealDomain d2(1, 100);
+    std::stringstream ss2;
+    ss2 << d2;
+    actualString = ss2.str();
+    expectedString = "REAL_INTERVAL:CLOSED[1, 100]";
+    assert(actualString == expectedString);
     return true;
   }
 };
