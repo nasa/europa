@@ -1,10 +1,14 @@
 #!/bin/sh
-# $Id: autobuild,v 1.9 2002-11-06 01:02:54 wedgingt Exp $
+# $Id: autobuild,v 1.10 2002-11-06 22:16:17 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
 # Address to mail exit status messages to
 email=checkins@postdoc.arc.nasa.gov
+
+# Subdirectories to build in
+subdirs='cvs fast optFast'
+# opt and optFast both take hours due to tokenNet test with -O3
 
 # Don't try to use X11 (mostly to prevent Purify from doing so)
 DISPLAY=
@@ -39,9 +43,6 @@ trap 'rmdir $startdir/working' 0
 
 # Don't run this script more than once in the same directory.
 mkdir working || exit 1
-
-#subdirs='cvs opt fast optFast'
-subdirs='cvs fast'
 
 # Primary compilation loop
 for dir in $subdirs
