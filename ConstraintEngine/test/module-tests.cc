@@ -1184,6 +1184,11 @@ private:
 int main() {
   initConstraintLibrary();
   REGISTER_UNARY(DelegationTestConstraint, "TestOnly", "Default");
+
+  // Switch from using the default collection to a specific one
+  EntityCollection newEntityCollection;
+  Entity::setEntityCollection(&newEntityCollection);
+
   DomainTests::test();
   runTestSuite(VariableTest::test); 
   runTestSuite(ConstraintTest::test); 

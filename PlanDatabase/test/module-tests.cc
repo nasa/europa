@@ -1539,8 +1539,12 @@ int main() {
   new IntervalTokenFactory();
 
   runTestSuite(ObjectTest::test);
+  EntityCollection newEntityCollection;
+  Entity::setEntityCollection(&newEntityCollection);
   runTestSuite(TokenTest::test);
+  Entity::setEntityCollection(0); // Back to default
   runTestSuite(TimelineTest::test);
+  Entity::setEntityCollection(&newEntityCollection);
   runTestSuite(DbClientTest::test);
   std::cout << "Finished" << std::endl;
 }
