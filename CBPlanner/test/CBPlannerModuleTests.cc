@@ -967,12 +967,8 @@ namespace Prototype {
     CBPlanner::Status result = planner.run();
     assert(result == CBPlanner::PLAN_FOUND);
 
-    std::cout << "Nodes = " << planner.getTime() << "Depth = " <<  planner.getDepth() << std::endl;
-    /*
-    assert(planner.getTime() != planner.getDepth());
-    assert(planner.getDepth() == 8);
-    assert(planner.getTime() == 13);
-    */
+    assert(planner.getTime() == planner.getDepth());
+    assert(planner.getDepth() == 9);
 
     DecisionManagerId dm = planner.getDecisionManager();
     dm->retractDecision();
@@ -982,7 +978,8 @@ namespace Prototype {
     result = planner.run();
     assert(result == CBPlanner::PLAN_FOUND);
 
-    std::cout << "Nodes = " << planner.getTime() << "Depth = " <<  planner.getDepth() << std::endl;
+    assert(planner.getTime() == planner.getDepth());
+    assert(planner.getDepth() == 10);
 
     return true;
   }
