@@ -2,8 +2,11 @@
 #
 # ppw-gdb-commands
 #
-# This is a gdb command file used to provide canned sequences
+# This is a gdb version 6.X command file used to provide canned sequences
 # of gdb commands for running PLASMA under the control of gdb.
+#
+# NOTE:For gdb version 5.0 use the ppw-gdb5.0-commands command file instead
+#      These command sequences do not work with gdb versions 5.2 and 5.3 
 #
 # usage: gdb -x ppw-gdb-commands executable
 #
@@ -17,34 +20,34 @@
 #####################################################################
 
 define init-run
-tbreak CBPlanner::stepBreakpoint
+tbreak Prototype::CBPlanner::stepBreakpoint
 run
-set PartialPlanWriter::noFullWrite=1
-set PartialPlanWriter::writeStep=1
+set Prototype::PlanWriter::PartialPlanWriter::noFullWrite=1
+set Prototype::PlanWriter::PartialPlanWriter::writeStep=1
 printf "Ready to enable writing of a step with write-step N\n"
 printf "At step %d\n", m_step
 end
 
 define write-step 
-tbreak CBPlanner::stepBreakpoint if m_step == $arg0
+tbreak Prototype::CBPlanner::stepBreakpoint if m_step == $arg0
 cont
 printf "Setting PartialPlanWriter to enable writing step %d\n", m_step
-set PartialPlanWriter::noFullWrite=0
-tbreak CBPlanner::stepBreakpoint
+set Prototype::PlanWriter::PartialPlanWriter::noFullWrite=0
+tbreak Prototype::CBPlanner::stepBreakpoint
 cont
 printf "Finished writing step %d\n", m_step-1
 printf "At step %d\n", m_step
-set PartialPlanWriter::noFullWrite=1
+set Prototype::PlanWriter::PartialPlanWriter::noFullWrite=1
 end
 
 define write-next 
 set $start = m_step
-break CBPlanner::stepBreakpoint if m_step == $start + $arg0
+break Prototype::CBPlanner::stepBreakpoint if m_step == $start + $arg0
 printf "PartialPlanWriter writing steps %d - %d\n", m_step, m_step + $arg0 - 1
-set PartialPlanWriter::noFullWrite=0
+set Prototype::PlanWriter::PartialPlanWriter::noFullWrite=0
 cont 
 printf "Finished writing steps %d - %d\n", $start, m_step-1
 printf "At step %d\n", m_step
-set PartialPlanWriter::noFullWrite=1
-clear CBPlanner::stepBreakpoint
+set Prototype::PlanWriter::PartialPlanWriter::noFullWrite=1
+clear Prototype::CBPlanner::stepBreakpoint
 end
