@@ -12,6 +12,10 @@ namespace Prototype {
     m_agenda.push_back(constraint);
   }
 
+  void DefaultPropagator::handleConstraintRemoved(const ConstraintId& constraint){
+    m_agenda.remove(constraint);
+  }
+
   void DefaultPropagator::handleNotification(const ConstrainedVariableId& variable, 
 					     int argIndex, 
 					     const ConstraintId& constraint, 

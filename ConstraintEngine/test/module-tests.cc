@@ -315,6 +315,7 @@ public:
     runTest(testBasicPropagation, "BasicPropagation");
     runTest(testForceInconsistency, "ForceInconsistency");
     runTest(testRepropagation, "Repropagation");
+    runTest(testConstraintRemoval, "ConstraintRemoval");
     return true;
   }
 
@@ -370,6 +371,7 @@ private:
     variables.push_back(v3.getId());
     variables.push_back(v0.getId());
     AddEqualConstraint c1(ENGINE, variables);
+    assert(!v0.getDerivedDomain().isEmpty());
 
     // v4 + v5 == v1
     variables.clear();
@@ -382,6 +384,7 @@ private:
 
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
+    assert(!v4.getDerivedDomain().isEmpty());
     return true;
   }
 
@@ -414,6 +417,25 @@ private:
     
     ENGINE->propagate();
     assert(ENGINE->provenInconsistent());
+    assert(v1.getDerivedDomain().isEmpty());
+    assert(v2.getDerivedDomain().isEmpty());
+
+    variables.clear();
+    variables.push_back(v0.getId());
+    variables.push_back(v1.getId());
+    variables.push_back(v2.getId());
+    variables.push_back(v3.getId());
+    variables.push_back(v4.getId());
+    variables.push_back(v5.getId());
+
+    int emptyCount(0);
+    for(std::vector<ConstrainedVariableId>::iterator it = variables.begin(); it != variables.end(); ++it){
+      VariableImpl<IntervalIntDomain>* id = (VariableImpl<IntervalIntDomain>*) (*it);
+      assert(id->getDerivedDomain().isEmpty());
+      if(id->lastDomain().isEmpty())
+	emptyCount++;
+    }
+    assert(emptyCount == 1);
     return true;
   }
 
@@ -455,16 +477,78 @@ private:
     ENGINE->propagate();
     assert(ENGINE->provenInconsistent());
 
-    v0.unspecify();
+    v0.reset();
     assert(ENGINE->pending());
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
 
-    /* Call unspecify on a constraint consistent network - not sure one would want to do this*/
-    v1.unspecify();
+    /* Call reset on a constraint consistent network - not sure one would want to do this*/
+    v1.reset();
     assert(ENGINE->pending()); /* Strictly speaking we know it is not inconsistent here since all we have done is relax a previously
 				  consistent network. However, we have to propagate to find the new derived domains based on relaxed
 				  domains.*/
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    return true;
+  }
+
+  static bool testConstraintRemoval()
+  {
+    std::vector<ConstrainedVariableId> variables;
+    // v0 == v1
+    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v0.getId());
+    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v1.getId());
+    ConstraintId c0((new EqualConstraint(ENGINE, variables))->getId());
+
+
+    // v2 + v3 == v0
+    variables.clear();
+    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v2.getId());
+    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v3.getId());
+    variables.push_back(v0.getId());
+    ConstraintId c1((new AddEqualConstraint(ENGINE, variables))->getId());
+
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+
+    /*!< Show that we can simply delete a constraint and confirm that the system is still consistent */
+    delete (Constraint*) c1;
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+
+    variables.clear();
+    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 1));
+    variables.push_back(v0.getId());
+    variables.push_back(v4.getId());
+    ConstraintId c2((new EqualConstraint(ENGINE, variables))->getId());
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(v1.getDerivedDomain().getSingletonValue() == 1);
+
+    delete (Constraint*) c2;
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(v1.getDerivedDomain().getUpperBound() == 10);
+
+    /*!< Add a constraint to force an inconsistency and show that consistency can be restored by removing the
+      constraint */
+    variables.clear();
+    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 0));
+    variables.push_back(v0.getId());
+    variables.push_back(v5.getId());
+    ConstraintId c3((new EqualConstraint(ENGINE, variables))->getId());
+    ENGINE->propagate();
+    assert(ENGINE->provenInconsistent());
+    delete (Constraint*) c3;
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+
+    // Clean up remaining constraint
+    delete (Constraint*) c0;
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     return true;
