@@ -18,6 +18,7 @@ void initConstraintLibrary() {
     REGISTER_NARY(CountNonZerosConstraint, "CountNonZeros", "Default");
     REGISTER_NARY(CountZerosConstraint, "CountZeros", "Default");
     REGISTER_NARY(EqualConstraint, "Equal", "Default");
+    REGISTER_NARY(EqualMinimumConstraint, "EqualMinimum", "Default");
     REGISTER_NARY(EqualProductConstraint, "EqualProduct", "Default");
     REGISTER_NARY(EqualSumConstraint, "EqualSum", "Default");
     REGISTER_NARY(LessOrEqThanSumConstraint, "LessOrEqThanSum", "Default");
@@ -42,6 +43,7 @@ void initConstraintLibrary() {
     REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
     REGISTER_NARY(LessOrEqThanSumConstraint, "leqsum", "Default");
     REGISTER_NARY(LessThanConstraint, "lt", "Default");
+    REGISTER_NARY(MinimumEqualConstraint, "min", "Default");
     REGISTER_NARY(MemberImplyConstraint, "memberImply", "Default");
     REGISTER_NARY(NotEqualConstraint, "neq", "Default");
     REGISTER_NARY(OrConstraint, "or", "Default");

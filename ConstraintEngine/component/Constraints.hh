@@ -414,5 +414,45 @@ namespace Prototype {
     ConstraintId m_subsetConstraint;
     ConstraintId m_countNonZerosConstraint;
   };
+
+  /**
+   * @class EqualMinimumConstraint
+   * @brief First variable is the minimum value of the others.
+   */
+  class EqualMinimumConstraint : public Constraint {
+  public:
+    EqualMinimumConstraint(const LabelStr& name,
+                           const LabelStr& propagatorName,
+                           const ConstraintEngineId& constraintEngine,
+                           const std::vector<ConstrainedVariableId>& variables);
+
+    ~EqualMinimumConstraint() { }
+
+    void handleExecute();
+  };
+
+  /**
+   * @class MinimumEqualConstraint
+   * @brief Last variable is the minimum value of the others.
+   * @note Same as Europa (NewPlan) 'min' constraint.
+   * @note The general "move last var to front" constraint might be fairly
+   * easy to implement using ConstraintLibrary::createConstraint().
+   */
+  class MinimumEqualConstraint : public Constraint {
+  public:
+    MinimumEqualConstraint(const LabelStr& name,
+                           const LabelStr& propagatorName,
+                           const ConstraintEngineId& constraintEngine,
+                           const std::vector<ConstrainedVariableId>& variables);
+
+    ~MinimumEqualConstraint() {
+      delete (EqualMinimumConstraint*) m_eqMinConstraint;
+    }
+
+    void handleExecute() { }
+
+  private:
+    ConstraintId m_eqMinConstraint;
+  };
 }
 #endif
