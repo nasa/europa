@@ -19,15 +19,10 @@ LINKER_PASSTHROUGH_FLAG ?= -Wl, ;
 
 # SHARED_FLAG = Flag to generate shared library
 
-if $(OS) = BEOS {
-    SHARED_FLAG ?= -nostart ;
-} else {
-    if $(OS) = MACOSX {
+if $(OS) = MACOSX {
 	SHARED_FLAG ?= -fno-common -dynamiclib ;
-    }
-    else {
+} else {
 	SHARED_FLAG ?= -shared ;
-    }
 }
 
 # LIBRARY_PATH_SEARCH_FLAG = Library search path flag
