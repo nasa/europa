@@ -50,7 +50,8 @@ namespace Prototype {
   void DbClientTransactionPlayer::play(const DbClientTransactionLogId& txLog)
   {
     const std::list<TiXmlElement*>& transactions = txLog->getBufferedTransactions();
-    for(std::std::list<TiXmlElement*>::const_iterator it = transactions.begin(); it != transactions.end(); ++it){
+    for (std::list<TiXmlElement*>::const_iterator it = transactions.begin();
+         it != transactions.end(); ++it) {
       const TiXmlElement& tx = **it;
       processTransaction(tx);
     }
