@@ -37,3 +37,4 @@ test 36 EqualMinimum inputs [-1 Infinity] [-Infinity -1] [-Infinity -1] outputs 
 test 37 min inputs [-Infinity -1] [-Infinity -1] [-1 Infinity] outputs [-1] [-1] [-1]
 test 38 EqualMinimum inputs [-1 0] [-1 1] [0 1] outputs [-1 0] [-1 1] [0 1]
 test 39 min inputs [-1 1] [0 1] [-1 0] outputs [-1 1] [0 1] [-1 0]
+test 40 Cardinality inputs [-inf inf] [1] [2] [0 1] [-inf inf] outputs [2 inf] [1] [2] [0 1] [-inf inf]
