@@ -9,9 +9,9 @@ namespace PLASMA {
 
 #define IS_TAG(x) (strcmp (tagName, x) == 0)
 
-  HSTSHeuristicsReader::HSTSHeuristicsReader(HSTSHeuristics& heuristics, const SchemaId& schema) : m_heuristics(heuristics), m_schema(schema) { }
+  HSTSHeuristicsReader::HSTSHeuristicsReader(HSTSHeuristicsId& heuristics, const SchemaId& schema) : m_heuristics(heuristics), m_schema(schema) { }
 
-  HSTSHeuristicsReader::~HSTSHeuristicsReader() { }
+  HSTSHeuristicsReader::~HSTSHeuristicsReader() { check_error(m_heuristics.isValid()); m_heuristics.remove();}
 
   void HSTSHeuristicsReader::read(const std::string& fileName) {
 
@@ -94,8 +94,8 @@ namespace PLASMA {
       check_error(false, "Unexpected value for DefaultPriorityPref.");
 
     std::cout << "     priority pref = " << pp << std::endl;
-    m_heuristics.setDefaultPriorityPreference(pp);
-    check_error (m_heuristics.getDefaultPriorityPreference() == 0, "Expected priority preference to be low on Heuristics-HSTS.xml.");
+    m_heuristics->setDefaultPriorityPreference(pp);
+    check_error (m_heuristics->getDefaultPriorityPreference() == 1, "Expected priority preference to be high on Heuristics-HSTS.xml.");
   }
 
   void HSTSHeuristicsReader::readVariableSpecification(const TiXmlElement& element){
@@ -145,7 +145,7 @@ namespace PLASMA {
 	readPredicateSpec(*child, pred, domainSpec);
 	TokenType tt(pred,domainSpec);
 	std::cout << " initialized predicate spec with predicate = " << tt.getPredicate().c_str() << std::endl;
-	m_heuristics.setDefaultPriorityForTokenDPsWithParent(p, tt.getId());
+	m_heuristics->setDefaultPriorityForTokenDPsWithParent(p, tt.getId());
       }
       else
 	check_error(false, "Expected Priority or PredicateSpec tag in compatibility specification.");
@@ -164,7 +164,7 @@ namespace PLASMA {
       check_error(tagName != NULL, "Expected Default Token tag.");
       if (IS_TAG("Priority")) {
 	readPriority(*child,p);
-	m_heuristics.setDefaultPriorityForTokenDPs(p);
+	m_heuristics->setDefaultPriorityForTokenDPs(p);
       }
       else if (IS_TAG("DecisionPreference")) {
 	std::vector<LabelStr> states;
@@ -172,7 +172,7 @@ namespace PLASMA {
 	states.reserve(5); // type allows for at most 5 states and orders
 	orders.reserve(5);
 	readDecisionPreference(*child, states, orders);
-	m_heuristics.setDefaultPreferenceForTokenDPs(states,orders);
+	m_heuristics->setDefaultPreferenceForTokenDPs(states,orders);
       }
     }
   }
@@ -191,13 +191,13 @@ namespace PLASMA {
       check_error(tagName != NULL, "Expected State Order tag");
       if (IS_TAG("Priority")) {
 	readPriority(*child,p);
-	m_heuristics.setDefaultPriorityForConstrainedVariableDPs(p);
+	m_heuristics->setDefaultPriorityForConstrainedVariableDPs(p);
       }
       else if (IS_TAG("Preference")) {
 	readPreference(*child, genName, dorder, values);
 	check_error(genName == NO_STRING, "Expected Generator Name to be empty.");
 	check_error(values.empty(), "Expected values to be empty.");
-	m_heuristics.setDefaultPreferenceForConstrainedVariableDPs(dorder);
+	m_heuristics->setDefaultPreferenceForConstrainedVariableDPs(dorder);
       }
       else
 	check_error(false, "Expected Priority or Preference in DefaultConstrainedVariable.");
@@ -395,7 +395,7 @@ namespace PLASMA {
       check_error(index == -10, "Index should be uninitialized.");
     }
     TokenType tt(pred,domainSpec);
-    m_heuristics.setHeuristicsForConstrainedVariableDP(p, varName, tt.getId(), dorder, genName, values);
+    m_heuristics->setHeuristicsForConstrainedVariableDP(p, varName, tt.getId(), dorder, genName, values);
   }
 
   void HSTSHeuristicsReader::readVariableSpec(const TiXmlElement& element, int& index, LabelStr& varName) {
@@ -510,7 +510,7 @@ namespace PLASMA {
 	readDecisionPreference(*child, states, orders);
     }
     TokenType tt(pred,domainSpec);
-    m_heuristics.setHeuristicsForTokenDP(p, tt.getId(), rel, ttm, states, orders);
+    m_heuristics->setHeuristicsForTokenDP(p, tt.getId(), rel, ttm, states, orders);
   }
 
   void HSTSHeuristicsReader::readMaster(const TiXmlElement& element, HSTSHeuristics::Relationship& rel, TokenTypeId& ttm) {

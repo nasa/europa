@@ -11,7 +11,7 @@ namespace PLASMA {
 
   class HSTSHeuristicsReader {
   public:
-    HSTSHeuristicsReader(HSTSHeuristics& heuristics, const SchemaId& schema);
+    HSTSHeuristicsReader(HSTSHeuristicsId& heuristics, const SchemaId& schema);
     virtual ~HSTSHeuristicsReader();
 
     void read(const std::string& fileName);
@@ -42,17 +42,11 @@ namespace PLASMA {
     void readVariableSpec(const TiXmlElement& element, int& index, LabelStr& name);
     void readIndex(const TiXmlElement& element, int& index);
   private:
-    HSTSHeuristics m_heuristics;
+    HSTSHeuristicsId m_heuristics;
     SchemaId m_schema;
 
     const std::string getTextChild(const TiXmlElement& element);
     GeneratorId getGeneratorFromName(std::string genName);
-
-    /*    
-	  ConstrainedVariableId parseVariable(std::string variable);
-	  ConstrainedVariableId parseToken(std::string token);
-    */
-   
   };
 }
 
