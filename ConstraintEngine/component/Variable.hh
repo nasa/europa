@@ -122,8 +122,11 @@ namespace Prototype {
      */
     const AbstractDomain& baseDomain() const;
 
-    virtual void handleSpecified(const AbstractDomain& specDomain) { }
-    virtual void handleReset() { }
+    virtual void handleSpecified(const AbstractDomain& specDomain) {
+    }
+    
+    virtual void handleReset() {
+    }
 
   private:
     /**
@@ -180,7 +183,8 @@ namespace Prototype {
   }
   
   template<class DomainType>
-  Variable<DomainType>::~Variable() { }
+  Variable<DomainType>::~Variable() {
+  }
 
   template<class DomainType>
   void Variable<DomainType>::insert(double value) {
@@ -255,7 +259,7 @@ namespace Prototype {
     check_error(!m_baseDomain.isDynamic());
     check_error(domain.isSubsetOf(m_specifiedDomain));
 
-    // If this actually changes the domain then propagate the change to the derived domain
+    // If this actually changes the domain then propagate the change to the derived domain.
     if (m_specifiedDomain.intersect(domain)) {
       if (m_specifiedDomain.isSingleton())
         m_derivedDomain.set(m_specifiedDomain.getSingletonValue());
@@ -290,7 +294,7 @@ namespace Prototype {
     m_derivedDomain.close();
 
     // Now we should propagate specified domain to the derived domain as a set operation
-    // since we have closed the domain
+    // since we have closed the domain.
     if (m_specifiedDomain.isSingleton())
       m_derivedDomain.set(m_specifiedDomain.getSingletonValue());
     else
