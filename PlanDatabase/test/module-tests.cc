@@ -70,7 +70,7 @@ SchemaId DefaultSchemaAccessor::s_instance;
     }\
     RulesEngine re(db.getId()); \
     new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());\
-    Object object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));\
+    Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")));\
     if(autoClose) db.close();
 
 class ObjectTest {
@@ -277,23 +277,43 @@ private:
   }
 
   static bool testObjectTokenRelation(){
-    // 1. Create 2 objects
+    PlanDatabase db(ENGINE, SCHEMA);
 
+    // 1. Create 2 objects
+    ObjectId object1 = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr("O1")))->getId();
+    ObjectId object2 = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr("O2")))->getId();    
+    db.close();
+
+    check_error(db.getObjects().size() == 2);
     // 2. Create 1 token.
+    EventToken eventToken(db.getId(), LabelStr("Predicate"), false, IntervalIntDomain(0, 10));
 
     // Confirm not added to the object
+    assert(!eventToken.getObject()->getDerivedDomain().isSingleton());
 
     // 3. Activate token. (NO subgoals)
+    eventToken.activate();
+
+    // Confirm not added to the object
+    assert(!eventToken.getObject()->getDerivedDomain().isSingleton());
 
     // 4. Specify tokens object variable to a ingletone
 
+    eventToken.getObject()->specify(object1);
+
     // Confirm added to the object
+    assert(eventToken.getObject()->getDerivedDomain().isSingleton());
 
     // 5. propagate
+    db.getConstraintEngine()->propagate();
 
     // 6. reset object variables domain.
+    eventToken.getObject()->reset();
 
     // Confirm it is no longer part of the object
+    // Confirm not added to the object
+    assert(!eventToken.getObject()->getDerivedDomain().isSingleton());
+
     return true;
   }
 };
