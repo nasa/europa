@@ -96,6 +96,10 @@ namespace Prototype
      */
     const AbstractDomain& baseDomain() const;
 
+
+    virtual void handleSpecified(const AbstractDomain& specDomain){}
+    virtual void handleReset() {}
+
     virtual bool isCompatible(const ConstrainedVariableId& var) const;
     virtual bool isSpecified() const;
 
@@ -125,6 +129,7 @@ namespace Prototype
      */
     bool validate() const;
 
+  protected:
     const DomainType m_baseDomain; /*!< The initial (and maximal) set for the domain of this variable */
     DomainType m_specifiedDomain; /*!< May contain a user specified restriction on the maximum set of the domain */
     DomainType m_derivedDomain; /*!< The current domain of the variable based on user specifications and derived from
