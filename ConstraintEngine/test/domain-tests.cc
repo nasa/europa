@@ -653,6 +653,101 @@ namespace Prototype {
       assert(ls4.isEmpty() || ls5.isEmpty());
       assert(!(ls4.isEmpty() && ls5.isEmpty()));
 
+      std::list<double> enumVals;
+      enumVals.push_back(1.0);
+      enumVals.push_back(2.5);
+      enumVals.push_back(-0.25);
+      enumVals.push_back(3.375);
+      enumVals.push_back(-1.75);
+      EnumeratedDomain ed1(enumVals);
+      EnumeratedDomain ed3(enumVals);
+
+      enumVals.clear();
+      enumVals.push_back(3.375);
+      enumVals.push_back(2.5);
+      EnumeratedDomain ed2(enumVals);
+      EnumeratedDomain ed4(enumVals);
+
+      ed1.equate(ed2);
+      assertTrue(ed1 == ed2);
+
+      ed1.equate(ed3);
+      assertTrue(ed1 == ed3);
+
+      enumVals.clear();
+      enumVals.push_back(0.0);
+      EnumeratedDomain ed0(enumVals);
+
+      ed1.equate(ed0);
+
+      // This is actually false because equate() only empties
+      // one of the domains when the intersection is empty.
+      // assertTrue(ed0 == ed1);
+
+      assertFalse(ed0 == ed1);
+      assertTrue(ed1.isEmpty() != ed0.isEmpty());
+
+      ed0 = EnumeratedDomain(enumVals);
+      assertTrue(!ed0.isEmpty());
+
+      ed0.equate(ed2);
+      assertTrue(ed2 != ed0 && ed2.isEmpty() != ed0.isEmpty());
+
+      enumVals.push_back(20.0); // Now 0.0 and 20.0
+      ed0 = EnumeratedDomain(enumVals);
+      assertTrue(!ed0.isEmpty() && !ed0.isSingleton());
+
+      IntervalDomain id0(-10.0, 10.0);
+
+      id0.equate(ed0);
+      assertTrue(ed0.isSingleton() && ed0.getSingletonValue() == 0.0);
+      assertTrue(id0.isSingleton() && id0.getSingletonValue() == 0.0);
+
+      ed0 = EnumeratedDomain(enumVals); // Now 0.0 and 20.0
+      assertTrue(!ed0.isEmpty() && !ed0.isSingleton());
+
+      IntervalDomain id1(0.0, 5.0);
+
+      ed0.equate(id1);
+      assertTrue(ed0.isSingleton() && ed0.getSingletonValue() == 0.0);
+      assertTrue(id1.isSingleton() && id1.getSingletonValue() == 0.0);
+
+      enumVals.clear();
+      enumVals.push_back(3.375);
+      enumVals.push_back(2.5);
+      enumVals.push_back(1.5);
+      EnumeratedDomain ed5(enumVals);
+      IntervalDomain id2(2.5, 3.0);
+
+      ed5.equate(id2);
+      assertTrue(ed5.isSingleton() && ed5.getSingletonValue() == 2.5);
+      assertTrue(id2.isSingleton() && id2.getSingletonValue() == 2.5);
+
+      enumVals.clear();
+      enumVals.push_back(3.375);
+      enumVals.push_back(2.5);
+      enumVals.push_back(1.5);
+      enumVals.push_back(-2.0);
+      EnumeratedDomain ed6(enumVals);
+      IntervalDomain id3(-1.0, 3.0);
+
+      id3.equate(ed6);
+      assertTrue(ed6.getSize() == 2);
+      assertTrue(id3 == IntervalDomain(1.5, 2.5));
+
+      IntervalDomain id4(1.0, 1.25);
+
+      ed6.equate(id4);
+      assertTrue(ed6.isEmpty() != id4.isEmpty());
+
+      enumVals.clear();
+      enumVals.push_back(1.0);
+      EnumeratedDomain ed7(enumVals);
+      IntervalDomain id5(1.125, PLUS_INFINITY);
+
+      id5.equate(ed7);
+      assertTrue(ed7.isEmpty() != id5.isEmpty());
+
       return(true);
     }
 
