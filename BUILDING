@@ -2,7 +2,7 @@ Building EUROPA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.10 2004-12-27 22:11:52 wedgingt Exp $
+$Id: BUILDING,v 1.11 2004-12-28 18:59:18 tania Exp $
 
 
 - Prerequisites:
@@ -19,6 +19,8 @@ $Id: BUILDING,v 1.10 2004-12-27 22:11:52 wedgingt Exp $
    this one is tested regularly & automatically).
 
 3. Java 1.4.2 or higher.
+
+4. doxygen 1.2.16 or higher. (to build API documentation)
 
 If you are using computers in Code TC at NASA/Ames, the division's
 System Group has likely already installed these programs (and versions
@@ -41,8 +43,8 @@ above version requirements may be used instead.
 
 1) Setting your PATH:
 
-    PATH should include locations of gcc-3.3.3, Jam 2.4 or higher, and 
-    Java 1.4.2 or higher. 
+    PATH should include locations of gcc-3.3.3, Jam 2.4 or higher, 
+    Java 1.4.2 or higher, and Doxygen 1.2.16 or higher.
 
     On a Linux system set your PATH to the relevant directories for your 
     particular system. If you don't know the locations of Jam, gcc or 
@@ -53,17 +55,19 @@ above version requirements may be used instead.
        find /usr -name gcc-3.3.3
        find /usr -name 'j2sdk1.*' -o -name 'jdk1.*'
        find /usr -name 'jam2.*'
+       find /usr -name 'doxygen*'
 
     On the division SPARCs running SunOS 5.8, add the following paths
     to the head of your PATH environment variable for the locations of 
-    gcc-3.3.3, jam v2.5rc3, and java jdk1.5.0:
+    gcc-3.3.3, jam v2.5rc3, java jdk1.5.0, and doxygen:
  
     /usr/local/beta/gcc-3.3.3/bin
     /usr/local/beta/bin
     /usr/local/jdk1.5.0/bin
+    /usr/local/bin/doxygen
 
     e.g. set path = (/usr/local/beta/gcc-3.3.3/bin /usr/local/beta/bin
-                     /usr/local/jdk1.5.0/bin $path)
+                     /usr/local/jdk1.5.0/bin /usr/local/bin/doxygen $path)
 
     Note that the location of the gcc-3.3.3 compiler must come before the 
     location of Jam since there is an old version of gcc in the same 
@@ -114,6 +118,11 @@ above version requirements may be used instead.
 
 5) Build Europa2 from the directory PLASMA by running 'jam'.
    See the "Performing a build" section below for more details.
+
+6) Build Europa2 API documentation from the directory PLASMA/documentation
+   by running 'jam documentation'.  This target will create an html
+   subdirectory.  To view the documentation of the Europa2 API, bring up a
+   browser on the index.html file in that subdirectory.
 
 
 - Performing a build
