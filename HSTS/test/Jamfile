@@ -76,12 +76,16 @@ RunEUROPATest monkey-timeline-hacked2 : timeline-hacked2.nddl ;
 RunEUROPATest monkey-timeline-hacked3 : timeline-hacked3.nddl ;
 
 # Failing; see GNATS 2759, 2760, and 2701.
-#RunEUROPATest monkey1Tests : timeline1.nddl timeline-objvar.nddl timeline-twomonkeys-objvar.nddl timeline-twomonkeys.nddl ;
+#RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
+#RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
+#RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nddl ;
+#RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 
 # Failing
 # RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
 # RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
 # RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
+
 
 RunEUROPATest robotTests : req1.nddl ;
 
