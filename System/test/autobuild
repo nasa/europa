@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.28 2003-01-22 18:50:58 wedgingt Exp $
+# $Id: autobuild,v 1.29 2003-01-22 18:53:44 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -24,10 +24,10 @@ LD_LIBRARY_PATH='/usr/apps/WS6.0/SUNWspro/lib:/usr/lib:/usr/dt/lib:/usr/openwin/
 export LD_LIBRARY_PATH
 
 # Apply limits; some compiles run out of swap space.
-ulimit -c 200000
-ulimit -d 1100000
-ulimit -s 1100000
-ulimit -v 1100000
+ulimit -c 300000
+ulimit -d 2000000
+ulimit -s 2000000
+ulimit -v 2000000
 
 # Print the limits so it is obvious what they are when something goes
 # wrong.
