@@ -1,6 +1,7 @@
 #ifndef _H_Constraints
 #define _H_Constraints
 
+#include "UnaryConstraint.hh"
 #include "Constraint.hh"
 
 namespace Prototype
@@ -55,7 +56,7 @@ namespace Prototype
     static const int ARG_COUNT = 2;
   };
 
-  class SubsetOfConstraint: public Constraint{
+  class SubsetOfConstraint: public UnaryConstraint{
   public:
     SubsetOfConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
@@ -76,6 +77,8 @@ namespace Prototype
 		   const DomainListener::ChangeType& changeType);
 
     int executionCount() const;
+
+    const AbstractDomain& getDomain() const;
   private:
     bool m_isDirty;
     AbstractDomain& m_currentDomain;

@@ -158,7 +158,7 @@ namespace Prototype
 					 const ConstrainedVariableId& variable,
 					 const AbstractDomain& superset)
 					 
-    : Constraint(name, propagatorName, constraintEngine, variable), 
+    : UnaryConstraint(name, propagatorName, constraintEngine, variable), 
     m_isDirty(true),
     m_currentDomain(getCurrentDomain(variable)),
     m_executionCount(0){
@@ -201,4 +201,6 @@ namespace Prototype
   }
 
   int SubsetOfConstraint::executionCount() const {return m_executionCount;}
+
+  const AbstractDomain& SubsetOfConstraint::getDomain() const {return *m_superSetDomain;}
 }
