@@ -6,8 +6,11 @@
 
 namespace Prototype {
 
-  DbClientTransactionLog::DbClientTransactionLog(const DbClientId& client)
-    : DbClientListener(client){}
+  DbClientTransactionLog::DbClientTransactionLog(const DbClientId& client, bool chronologicalBacktracking)
+    : DbClientListener(client)
+  {
+    m_chronologicalBacktracking = chronologicalBacktracking;
+  }
 
   DbClientTransactionLog::~DbClientTransactionLog(){
     std::list<TiXmlElement*>::const_iterator iter;
@@ -78,6 +81,10 @@ namespace Prototype {
   }
 
   void DbClientTransactionLog::notifyFreed(const ObjectId& object, const TokenId& token){
+    if (m_chronologicalBacktracking) {
+      m_bufferedTransactions.pop_back();
+      return;
+    }
     TiXmlElement * element = new TiXmlElement("free");
     TiXmlElement * object_el = new TiXmlElement("object");
     object_el->SetAttribute("name", object->getName().toString());
@@ -106,6 +113,10 @@ namespace Prototype {
   }
 
   void DbClientTransactionLog::notifyCancelled(const TokenId& token){
+    if (m_chronologicalBacktracking) {
+      m_bufferedTransactions.pop_back();
+      return;
+    }
     TiXmlElement * element = new TiXmlElement("cancel");
     element->LinkEndChild(tokenAsXml(token));
     m_bufferedTransactions.push_back(element);
@@ -141,6 +152,10 @@ namespace Prototype {
   }
 
   void DbClientTransactionLog::notifyVariableReset(const ConstrainedVariableId& variable){
+    if (m_chronologicalBacktracking) {
+      m_bufferedTransactions.pop_back();
+      return;
+    }
     TiXmlElement * element = new TiXmlElement("reset");
     element->LinkEndChild(variableAsXml(variable));
   }
@@ -177,16 +192,18 @@ namespace Prototype {
         check_error(object.isValid());
         var_el->SetAttribute("object", object->getName().toString());
       } else {
-        // rule variables
-        check_error(ALWAYS_FAILS);
+        var_el->SetAttribute("index", m_client->getIndexByVariable(variable));
+        return var_el;
       } 
     } else {
-      check_error(ALWAYS_FAILS);
+      var_el->SetAttribute("index", m_client->getIndexByVariable(variable));
+      return var_el;
     }
     if (variable->getIndex() != ConstrainedVariable::NO_INDEX) {
       var_el->SetAttribute("index", variable->getIndex());
     } else {
-      check_error(ALWAYS_FAILS);
+      var_el->SetAttribute("index", m_client->getIndexByVariable(variable));
+      return var_el;
     }
     return var_el;
   }

@@ -337,8 +337,7 @@ namespace Prototype {
     }
 
     // rule variables
-    check_error(ALWAYS_FAILS);
-    return ConstrainedVariableId::noId();
+    return m_client->getVariableByIndex(index);
   }
 
 }

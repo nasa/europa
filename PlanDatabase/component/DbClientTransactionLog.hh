@@ -18,7 +18,7 @@ namespace Prototype {
 
   class DbClientTransactionLog: public DbClientListener {
   public:
-    DbClientTransactionLog(const DbClientId& client);
+    DbClientTransactionLog(const DbClientId& client, bool chronologicalBacktracking = true);
     ~DbClientTransactionLog();
 
     /* Declare DbClient event handlers we will over-ride */
@@ -48,6 +48,7 @@ namespace Prototype {
     const std::list<TiXmlElement*>& getBufferedTransactions() const;
 
     std::list<TiXmlElement*> m_bufferedTransactions;
+    bool m_chronologicalBacktracking;
 
     TiXmlElement * tokenAsXml(const TokenId& token) const;
     TiXmlElement * variableAsXml(const ConstrainedVariableId& variable) const;
