@@ -299,8 +299,36 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(-10, 10));
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(0.01, 0.99));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
-      ENGINE->propagate();
-      assert(ENGINE->provenInconsistent());
+      assert(!ENGINE->propagate());
+    }
+
+    // Confirm correct result will all singletons
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(-1, -1));
+      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(10.4, 10.4));
+      Variable<IntervalDomain> v2(ENGINE, IntervalDomain(9.4, 9.4));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      assert(ENGINE->propagate());
+    }
+
+    // Confirm inconsistency detected with all singletons
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(-1, -1));
+      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(10.4, 10.4));
+      Variable<IntervalDomain> v2(ENGINE, IntervalDomain(9.39, 9.39));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      assert(!ENGINE->propagate());
+    }
+
+    // Obtain factors correct values for fixed result
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, PLUS_INFINITY));
+      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(0, PLUS_INFINITY));
+      Variable<IntervalDomain> v2(ENGINE, IntervalDomain(9.390, 9.390));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      assert(ENGINE->propagate());
+      assert(v0.getDerivedDomain() == IntervalIntDomain(0, 9));
+      assert(v1.getDerivedDomain() == IntervalDomain(0.39, 9.39));
     }
 
     return true;

@@ -24,7 +24,7 @@ namespace Prototype
   static const int MAX_INT = 1999999999;
   static const int PLUS_INFINITY = MAX_INT;
   static const int MINUS_INFINITY = -PLUS_INFINITY;
-  static const double MIN_DECIMAL = 0.0000001; /*!< Used when computing differences on REAL NUMBERS. Smallest increment */
+  static const double EPSILON = 0.0000001; /*!< Used when computing differences on REAL NUMBERS. Smallest increment */
 
   class Entity;
   typedef Europa::Id<Entity> EntityId;

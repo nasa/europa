@@ -1,5 +1,5 @@
-#include "LabelSet.hh"
 #include "LabelStr.hh"
+#include "Domain.hh"
 #include "IntervalIntDomain.hh"
 #include "ConstraintEngine.hh"
 #include "Constraints.hh"
@@ -277,8 +277,8 @@ void outerLoopIntervalEqualConstraint(bool useEquivalenceClasses){
 void main()
 {
   //outerLoopForTestEquate();
-  //outerLoopForTestIntersection();
-  outerLoopLabelSetEqualConstraint(true);
+  outerLoopForTestIntersection();
+  //outerLoopLabelSetEqualConstraint(true);
   //outerLoopIntervalEqualConstraint(true);
   cout << "Finished" << endl;
 }

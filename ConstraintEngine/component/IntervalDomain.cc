@@ -1,5 +1,6 @@
 #include "IntervalDomain.hh"
 #include "DomainListener.hh"
+#include <math.h>
 
 namespace Prototype {
   IntervalDomain::IntervalDomain(double lb, double ub, const DomainListenerId& listener)
@@ -69,9 +70,9 @@ namespace Prototype {
   }
 
   bool IntervalDomain::operator==(const AbstractDomain& dom) const {
-    return (AbstractDomain::operator==(dom) &&
-	    m_lb == dom.getLowerBound() &&
-	    m_ub == dom.getUpperBound());
+    return (fabs(m_ub - dom.getUpperBound()) < EPSILON &&
+	    fabs(m_lb - dom.getLowerBound()) < EPSILON &&
+	    AbstractDomain::operator==(dom));
   }
 
   bool IntervalDomain::operator!=(const AbstractDomain& dom) const {
@@ -83,7 +84,8 @@ namespace Prototype {
     check_error(!dom.isEmpty());
     check_error(dom.isInterval());
     bool result = ((isFinite() || dom.isInfinite()) && 
-		   dom.getUpperBound() >= m_ub && dom.getLowerBound() <= m_lb);
+		   (dom.getUpperBound() + EPSILON) >= m_ub && 
+		   (dom.getLowerBound() - EPSILON) <= m_lb);
     return result;
   }
 
@@ -146,8 +148,8 @@ namespace Prototype {
   }
 
   bool IntervalDomain::intersect(double lb, double ub){
-    // test case for empty intersection
-    if(lb > ub || ub < m_lb || lb > m_ub){
+    // test case for empty intersection - accounting for precision/rounding errors
+    if(lb - ub > EPSILON || m_lb - ub > EPSILON || lb - m_ub > EPSILON){
       empty();
       return true;
     }
@@ -166,7 +168,7 @@ namespace Prototype {
     }
 
     // Select the strongest message available
-    if(m_ub == m_lb && (lb_increased || ub_decreased))
+    if(isSingleton() && (lb_increased || ub_decreased))
       notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
     else if(lb_increased && ub_decreased)
       notifyChange(DomainListener::BOUNDS_RESTRICTED);
@@ -183,10 +185,10 @@ namespace Prototype {
     check_error(lb <= ub);
 
     // Ensure this domain is a subset of the new bounds for relaxation
-    check_error(isEmpty() || (lb <= m_lb && ub >= m_ub));
+    check_error(isEmpty() || (lb - EPSILON <= m_lb  && ub + EPSILON >= m_ub));
 
     // Test if really causes a change
-    bool relaxed = (ub > m_ub) || ( lb < m_lb);
+    bool relaxed = (ub > m_ub) || (lb < m_lb);
 
     if(relaxed){
       m_lb = safeConversion(lb);
@@ -199,17 +201,19 @@ namespace Prototype {
 
   bool IntervalDomain::isMember(double value) const {
     double converted = convert(value);
-    return ((converted == value) && converted >= m_lb && converted <= m_ub);
+    return ((converted == value) && 
+	    converted + EPSILON >= m_lb && 
+	    converted - EPSILON <= m_ub);
   }
 
   bool IntervalDomain::isSingleton() const {
     check_error(!isDynamic());
-    return m_ub == m_lb;
+    return (fabs(m_ub - m_lb) < EPSILON);
   }
 
   bool IntervalDomain::isEmpty() const {
     check_error(!isDynamic());
-    return (m_ub < m_lb);
+    return (m_lb - m_ub > EPSILON);
   }
 
   void IntervalDomain::empty() {
@@ -223,6 +227,8 @@ namespace Prototype {
 
     if(isEmpty())
       return 0;
+    else if(isSingleton()) // Need to test separately in case of rounding errors
+      return 1;
     else
       return (int)(m_ub - m_lb + 1);
   }
