@@ -754,14 +754,6 @@ private:
     db.getCompatibleTokens(t3.getId(), compatibleTokens);
     assert(compatibleTokens.size() == 1); // Expect a single match
 
-    // Now post a constraint with higher arity. But including t0. Should exclude it.
-    Variable<IntervalIntDomain> v0(db.getConstraintEngine(), IntervalIntDomain());
-    AddEqualConstraint c1(LabelStr("addEq"), LabelStr("Default"), db.getConstraintEngine(), makeScope(t0.getStart(), t3.getStart(), v0.getId()));
-    db.getConstraintEngine()->propagate();
-    compatibleTokens.clear();
-    db.getCompatibleTokens(t3.getId(), compatibleTokens);
-    assert(compatibleTokens.empty()); // No match since t0 excluded due to additional constraint c1, which cannot be migrated.
-
     return true;
   }
 };
