@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.27 2003-01-16 05:02:34 wedgingt Exp $
+# $Id: autobuild,v 1.28 2003-01-22 18:50:58 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -102,7 +102,7 @@ do
     if test $status = 0
     then
         (uname -a; echo ''; cat ../make.options) | \
-        /usr/ucb/Mail -s 'Autobuild on '"`hostname`"' in '"`pwd`"' succeeded' "$email"
+            Mail -s 'Autobuild on '"`hostname`"' in '"`pwd`"' succeeded' "$email"
 
         # If appropriate, look for and save the profiling data
         if egrep PROFILE ../make.options > /dev/null 2>&1
@@ -117,7 +117,7 @@ do
         cvs tag -F Europa-autobuild-profiled
     else
         ( cat ../make.options; echo ''; tail -40 make.tests) | \
-            /usr/ucb/Mail -s 'Autobuild in '"`pwd`"' failed; exited '"$status" "$email"
+            Mail -s 'Autobuild in '"`pwd`"' failed; exited '"$status" "$email"
         mkdir working/failed
     fi
 
