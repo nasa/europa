@@ -1,13 +1,16 @@
 #!/bin/sh
-# $Id: autobuild,v 1.35 2003-02-12 06:47:42 wedgingt Exp $
+# $Id: autobuild,v 1.36 2003-02-14 06:34:39 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
+
+echo cd "$startdir"
+cd "$startdir"
 
 # See if we have an AFS token so we can get at the newer compiler.
 tokens > .tokens.$$
 cmp .tokens.$$ .notokens
 status=$?
-if test $status != 0
+if test $status != 0 -a -f .notokens
 then
 	haveAFS=true
 else
@@ -57,9 +60,6 @@ set -x
 
 startdir="`dirname $0`"
 startdir="`cd $startdir; pwd`"
-
-echo cd "$startdir"
-cd "$startdir"
 
 # Don't run this script more than once in the same directory.
 mkdir working || exit 1
