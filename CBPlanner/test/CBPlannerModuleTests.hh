@@ -20,7 +20,7 @@
 
 namespace PLASMA {
 
-  void initCBPTestSchema(const SchemaId& schema);
+  void initCBPTestSchema();
 
   bool testDefaultSetupImpl(ConstraintEngine &ce, PlanDatabase &db, 
 			    DecisionManager &dm, Horizon &hor);
@@ -77,9 +77,10 @@ namespace PLASMA {
 
   bool testHSTSPlanIdReaderImpl();
 
-  void initHeuristicsSchema(const SchemaId& rover);
+  void initHeuristicsSchema();
 
   bool testHSTSNoBranchImpl(ConstraintEngine &ce, PlanDatabase& db, CBPlanner& planner);
 
+  bool testHSTSHeuristicsAssemblyImpl(ConstraintEngine& ce, PlanDatabase& db, CBPlanner& planner, HSTSHeuristics& heuristics);
 }
 #endif

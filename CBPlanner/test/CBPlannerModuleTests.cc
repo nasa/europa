@@ -14,6 +14,7 @@
 #include "HSTSHeuristicsReader.hh"
 #include "HSTSNoBranchCondition.hh"
 #include "HSTSPlanIdReader.hh"
+#include "HSTSOpenDecisionManager.hh"
 
 extern bool loggingEnabled();
 
@@ -22,7 +23,8 @@ namespace PLASMA {
   /**
    * @brief Creates the type specifications required for testing
    */
-  void initCBPTestSchema(const SchemaId& schema){
+  void initCBPTestSchema(){
+    const SchemaId& schema = Schema::instance();
     schema->reset();
     schema->addObjectType("Objects");
 
@@ -44,7 +46,8 @@ namespace PLASMA {
     schema->addPredicate("Objects.P1False");
   }
 
-  void initHeuristicsSchema(const SchemaId& rover){
+  void initHeuristicsSchema(){
+    const SchemaId& rover = Schema::instance();
     rover->reset();
     rover->addObjectType(LabelStr("Object"));
     rover->addObjectType(LabelStr("Timeline"), LabelStr("Object"));
@@ -334,7 +337,7 @@ namespace PLASMA {
     HSTSNoBranchCondition cond(dm.getId());
     assert(dm.getConditions().size() == 1);
 
-    HSTSNoBranchId noBranchSpec(new HSTSNoBranch(db.getSchema()));
+    HSTSNoBranchId noBranchSpec(new HSTSNoBranch());
 
     const LabelStr var1Name("AnObj.APred.Var1");
 
@@ -1295,24 +1298,22 @@ namespace PLASMA {
   }
 
   bool testReaderImpl(HSTSHeuristics& heuristics) {
-    initHeuristicsSchema(Schema::instance());
+    initHeuristicsSchema();
 
-    HSTSHeuristicsId hId(&heuristics); 
-
-    HSTSHeuristicsReader reader(hId, Schema::instance());
+    HSTSHeuristicsReader reader(heuristics.getNonConstId());
 
     reader.read("../component/Heuristics-HSTS.xml");
     
-    heuristics.write();
+    //    heuristics.write();
 
     return true;
   }
 
   bool testHSTSPlanIdReaderImpl() {
 
-    initHeuristicsSchema(Schema::instance());
+    initHeuristicsSchema();
 
-    HSTSNoBranchId noBranchSpec(new HSTSNoBranch(Schema::instance()));
+    HSTSNoBranchId noBranchSpec(new HSTSNoBranch());
     HSTSPlanIdReader reader(noBranchSpec);
     reader.read("../component/NoBranch.pi");
 
@@ -1320,9 +1321,9 @@ namespace PLASMA {
   }
 
   bool testHSTSNoBranchImpl(ConstraintEngine &ce, PlanDatabase &db, CBPlanner& planner) {
-    initHeuristicsSchema(Schema::instance());
+    initHeuristicsSchema();
 
-    HSTSNoBranchId noBranchSpec(new HSTSNoBranch(Schema::instance()));
+    HSTSNoBranchId noBranchSpec(new HSTSNoBranch());
     HSTSPlanIdReader reader(noBranchSpec);
     reader.read("../component/NoBranch.pi");
 
@@ -1344,4 +1345,22 @@ namespace PLASMA {
     return true;
   }
 
+  bool testHSTSHeuristicsAssemblyImpl(ConstraintEngine& ce, PlanDatabase& db, CBPlanner& planner, HSTSHeuristics& heuristics) {
+    initHeuristicsSchema();
+    HSTSHeuristicsReader hreader(heuristics.getNonConstId());
+    hreader.read("../component/Heuristics-HSTS.xml");
+    heuristics.write();
+
+    HSTSNoBranchId noBranchSpec(new HSTSNoBranch());
+    HSTSPlanIdReader pireader(noBranchSpec);
+    pireader.read("../component/NoBranch.pi");
+
+    DecisionManagerId dm = planner.getDecisionManager();
+    HSTSOpenDecisionManager odm(dm, heuristics.getId());
+    dm->setOpenDecisionManager(odm.getId());
+    HSTSNoBranchCondition cond(dm);
+    cond.initialize(noBranchSpec);
+
+    return true;
+  }
 }
