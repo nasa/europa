@@ -2,6 +2,11 @@
 #include "Object.hh"
 #include "Token.hh"
 #include "Utils.hh"
+#include "Debug.hh"
+#include "EnumeratedDomain.hh"
+#include "BoolDomain.hh"
+#include "StringDomain.hh"
+#include "SymbolDomain.hh"
 #include "tinyxml.h"
 
 namespace EUROPA {
@@ -19,6 +24,18 @@ namespace EUROPA {
 
   const std::list<TiXmlElement*>& DbClientTransactionLog::getBufferedTransactions() const {return m_bufferedTransactions;}
 
+  const bool DbClientTransactionLog::isBool(const std::string& typeName)  {
+    return (strcmp(typeName.c_str(),"bool") == 0 || 
+	strcmp(typeName.c_str(), "BOOL" ) == 0 || 
+              strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
+  }
+
+  const bool DbClientTransactionLog::isInt(const std::string& typeName)  {
+    return (strcmp(typeName.c_str(),"int") == 0 || 
+	strcmp(typeName.c_str(), "INT_INTERVAL" ) == 0 || 
+              strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
+  }
+
   void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable){
     TiXmlElement * element = allocateXmlElement("var");
     const AbstractDomain& baseDomain = variable->baseDomain();
@@ -32,6 +49,8 @@ namespace EUROPA {
     if (LabelStr::isString(variable->getName())) {
       element->SetAttribute("name", variable->getName().toString());
     }
+    debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
+
     if (!baseDomain.isEmpty()) {
       TiXmlElement * value = abstractDomainAsXml(&baseDomain);
       element->LinkEndChild(value);
@@ -182,10 +201,12 @@ namespace EUROPA {
   std::string
   DbClientTransactionLog::domainValueAsString(const AbstractDomain * domain, double value)
   {
-    if (domain->getType() == AbstractDomain::BOOL) {
+    if (isBool(domain->getTypeName().toString())) {
       return (value ? "true" : "false");
-    } else if (domain->isNumeric()) {
-      if (domain->getType() == AbstractDomain::INT_INTERVAL) {
+    }
+   else 
+   if (domain->isNumeric()) {
+      if (isInt(domain->getTypeName().toString())) {
         char s[64];
         snprintf(s, sizeof(s), "%d", (int)value);
         return s;
@@ -213,10 +234,30 @@ namespace EUROPA {
       element->SetAttribute("value", domainValueAsString(domain, value));
       return element;
     }
-    TiXmlElement * element = allocateXmlElement("value");
-    element->SetAttribute("type", typeName.toString());
-    element->SetAttribute("name", domainValueAsString(domain, value));
-    return(element);
+
+    debugMsg("domainValueAsXml"," domain type = " << domain->getTypeName().c_str()  << " domain name = " << typeName.c_str());
+
+    if (isBool(domain->getTypeName().toString())) {
+      TiXmlElement * element = allocateXmlElement("value");
+      element->SetAttribute("type", "bool");
+      element->SetAttribute("name", domainValueAsString(domain, value));
+      return(element);
+    }
+    else {
+    if (domain->isNumeric()) {
+      TiXmlElement * element = allocateXmlElement("value");
+      element->SetAttribute("type", typeName.toString());
+      element->SetAttribute("name", domainValueAsString(domain, value));
+      return(element);
+    }
+    else {
+      TiXmlElement * element = allocateXmlElement("symbol");
+      element->SetAttribute("type", typeName.toString());
+      element->SetAttribute("value", domainValueAsString(domain, value));
+      return(element);
+    }
+    }
+
   }
 
   TiXmlElement *
@@ -227,6 +268,7 @@ namespace EUROPA {
       return domainValueAsXml(domain, domain->getSingletonValue());
     } else if (domain->isEnumerated()) {
       TiXmlElement * element = allocateXmlElement("set");
+      element->SetAttribute("type", domain->getTypeName().toString());
       std::list<double> values;
       domain->getValues(values);
       std::list<double>::const_iterator iter;
@@ -236,7 +278,8 @@ namespace EUROPA {
       return element;
     } else if (domain->isInterval()) {
       TiXmlElement * element = allocateXmlElement("interval");
-      element->SetAttribute("type", domain->getTypeName().toString());
+      std::string typeName = domain->getTypeName().toString();
+      element->SetAttribute("type",typeName);
       element->SetAttribute("min", domainValueAsString(domain, domain->getLowerBound()));
       element->SetAttribute("max", domainValueAsString(domain, domain->getUpperBound()));
       return element;

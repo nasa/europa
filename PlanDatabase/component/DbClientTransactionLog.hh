@@ -51,6 +51,9 @@ namespace EUROPA {
     void pushTransaction(TiXmlElement *);
     void popTransaction();
 
+    const bool isBool(const std::string& typeName);
+    const bool isInt(const std::string& typeName);
+
     std::list<TiXmlElement*> m_bufferedTransactions;
     bool m_chronologicalBacktracking;
     int m_tokensCreated;

@@ -7,9 +7,11 @@
 #include "EnumeratedDomain.hh"
 #include "BoolDomain.hh"
 #include "StringDomain.hh"
+#include "SymbolDomain.hh"
 #include "tinyxml.h"
 #include "ConstraintEngine.hh"
 #include "TypeFactory.hh"
+#include "Debug.hh"
 #include <algorithm>
 
 namespace EUROPA {
@@ -120,8 +122,11 @@ namespace EUROPA {
     check_error(name != NULL);
 
     TiXmlElement * value = element.FirstChildElement();
+
     ConstrainedVariableId variable = xmlAsCreateVariable(type, name, value);
     check_error(variable.isValid());
+
+    debugMsg("playVariableCreated", "after xmlAsCreateVariable var = " << name << " type = " << type << " domain typeName =  " << variable->baseDomain().getTypeName().c_str());
 
     std::string std_name = name;
     m_variables[std_name] = variable;
@@ -662,6 +667,9 @@ namespace EUROPA {
       else
         // Non-simple type or old style XML for a simple type: type is the tag and/or within (e.g., specific type is within if symbol even old style)
         thisType = child_el->Value();
+
+      debugMsg("xmlAsEnumeratedDomain", " thisType= " << thisType);
+
       check_error(thisType != "", "no type for domain in XML");
       if (strcmp(thisType.c_str(), "bool") == 0 ||
           strcmp(thisType.c_str(), "BOOL") == 0 ||
@@ -711,8 +719,10 @@ namespace EUROPA {
         if (type == SYMBOL) {
           check_error(strcmp(typeName.c_str(), child_el->Attribute("type")) == 0,
                       "symbols from different types in the same enumerated set");
+          debugMsg("xmlAsEnumeratedDomain:symbol", " thisType= " << thisType << " typeName = " <<typeName);
           continue;
         }
+        debugMsg("xmlAsEnumeratedDomain:symbol", " thisType= " << thisType << " typeName = " <<typeName);
       }
 //      if (strcmp(thisType.c_str(), "object") == 0) {
 //        if (type == ANY) {
@@ -722,7 +732,6 @@ namespace EUROPA {
 //          //!!This needs a similar type check to SYMBOL, just above (but more complex due to inheritance?)
 //          continue;
 //      }
-      std::cerr << __FILE__ << ':' << __LINE__ << ": XML domain info: typeName=\"" << typeName << "\" thisType=\"" << thisType << "\"\n";
       check_error(ALWAYS_FAILS, "unknown or inappropriately mixed type(s) for value(s) in an enumerated set");
     }
     check_error(type != ANY);
@@ -749,7 +758,11 @@ namespace EUROPA {
     switch (type) {
     case BOOL: case INT: case FLOAT:
       return(new EnumeratedDomain(values, true, typeName.c_str()));
-    case STRING: case SYMBOL: case OBJECT:
+    case STRING: 
+      return(new StringDomain(values, typeName.c_str()));
+    case SYMBOL: 
+      return(new SymbolDomain(values, typeName.c_str()));
+    case OBJECT:
       return(new EnumeratedDomain(values, false, typeName.c_str()));
     default:
       check_error(ALWAYS_FAILS);
@@ -846,6 +859,7 @@ namespace EUROPA {
 
     ConstrainedVariableId var = xmlAsCreateVariable(NULL, NULL, &variable);
     check_error(var.isValid());
+
     return var;
   }
 
@@ -891,6 +905,7 @@ namespace EUROPA {
     const AbstractDomain * baseDomain = NULL;
     if (value != NULL) {
       baseDomain = xmlAsAbstractDomain(*value, name);
+      debugMsg("xmlAsCreateVariable", " type = " << type << " name = " << name << " domain type = " << baseDomain->getTypeName().c_str());
       if (type == NULL) {
         type = value->Value();
         if ((strcmp(type, "value") == 0) || (strcmp(type, "new") == 0) || (strcmp(type, "symbol") == 0) || (strcmp(type, "interval") == 0)) {
