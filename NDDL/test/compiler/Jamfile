@@ -18,6 +18,7 @@ for model in
 	guards.nddl              simple-class.nddl constraints.nddl
 	interval-constants.nddl  simple-predicate.nddl
 	less-basic-model.nddl    simple-resources.nddl foreach.nddl
+	gnats-2537.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;

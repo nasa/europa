@@ -1,0 +1,22 @@
+
+enum Location {Hill, Rock, Lander};
+
+class Hill {}
+
+class Foo {}
+
+class Region{
+ Hill hill;
+ Location location;
+ Foo foo;
+ Region(){
+  hill = new Hill();
+  location = Hill;
+  foo = new Foo();
+ }
+
+ Region(Hill _hill, Foo _foo){
+  hill = _hill;
+  foo = _foo;
+ }
+}
