@@ -360,7 +360,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Science___Scan_Platform.Mosaic_HI</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>any</Relation>
+  <PredicateSpec/>
+   </Master>
   <DecisionPreference>
    <State>merge</State>
    <State>reject</State>
@@ -384,7 +387,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Science___Scan_Platform.Mosaic_LO</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>any</Relation>
+  <PredicateSpec/>
+   </Master>
   <DecisionPreference>
    <State>merge</State>
    <State>reject</State>
@@ -418,7 +424,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Science___Fields_and_Particles.F_and_P_Observation_LO</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>any</Relation>
+  <PredicateSpec/>
+   </Master>
   <DecisionPreference>
    <State>merge</State>
    <State>reject</State>
@@ -442,7 +451,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Science___Fields_and_Particles.F_and_P_Observation_HI</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>any</Relation>
+  <PredicateSpec/>
+   </Master>
   <DecisionPreference>
    <State>merge</State>
    <State>reject</State>
@@ -839,7 +851,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DSS_Any___DSS_Availability.Downlink_Window</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>any</Relation>
+  <PredicateSpec/>
+   </Master>
   <DecisionPreference>
    <StateOrder>
      <State>merge</State>
