@@ -4,6 +4,7 @@
 #include "LabelSet.hh"
 #include "IntervalIntDomain.hh"
 #include "IntervalRealDomain.hh"
+#include "BoolDomain.hh"
 #include "ConstrainedVariable.hh"
 
 namespace Prototype {
@@ -118,6 +119,12 @@ namespace Prototype {
   void EqualityConstraintPropagator::equate(const std::set<ConstrainedVariableId>& scope){
     check_error(!scope.empty());
     switch(EqualConstraint::getCurrentDomain(*(scope.begin())).getType()){
+    case AbstractDomain::REAL_ENUMERATION:
+      processScope<EnumeratedDomain>(scope);
+      break;
+    case AbstractDomain::BOOL:
+      processScope<BoolDomain>(scope);
+      break;
     case AbstractDomain::LABEL_SET:
       processScope<LabelSet>(scope);
       break;
@@ -126,6 +133,9 @@ namespace Prototype {
       break;
     case AbstractDomain::REAL_INTERVAL:
       processScope<IntervalRealDomain>(scope);
+      break;
+    default:
+      check_error(ALWAYS_FAILS);
     }
   }
 }
