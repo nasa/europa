@@ -42,7 +42,7 @@ bool replay = true;
 const char * initialTransactions = NULL;
 
 bool runPlanner() {
-  std::cout << "Just inside runPlanner(), IdTable::size() is " << IdTable::size()
+  std::cerr << "Just inside runPlanner(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   SamplePlanDatabase db1(schema, replay);
 
@@ -59,7 +59,7 @@ bool runPlanner() {
   player.play(in);
 
   assertTrue(client->propagate());
-  std::cout << "Just after propagating initial transactions, IdTable::size() is " << IdTable::size()
+  std::cerr << "Just after propagating initial transactions, IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
 
   ObjectId world = client->getObject("world");
@@ -85,7 +85,7 @@ bool runPlanner() {
 
   int res = db1.planner->run(steps);
   assertTrue(res == CBPlanner::PLAN_FOUND);
-  std::cout << "Just after finding plan, IdTable::size() is " << IdTable::size()
+  std::cerr << "Just after finding plan, IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
 
 #ifndef PERFORMANCE
@@ -112,9 +112,9 @@ bool runPlanner() {
     std::string s2 = os2.str();
     assertTrue(s1 == s2);
   }
-  std::cout << "Just before returning from runPlanner(), IdTable::size() is " << IdTable::size()
+  std::cerr << "Just before returning from runPlanner(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << "\nand ";
-  IdTable::printTypeCnts(std::cout);
+  IdTable::printTypeCnts(std::cerr);
   return(true);
 }
 
@@ -161,7 +161,7 @@ static void printRUsage(const std::string& when) {
 int main(int argc, const char ** argv) {
   printRUsage("just inside main()");
 
-  std::cout << "Just inside main(), IdTable::size() is " << IdTable::size()
+  std::cerr << "Just inside main(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   if (argc < 2) {
     std::cerr << "Must provide initial transactions file." << std::endl;
@@ -171,18 +171,18 @@ int main(int argc, const char ** argv) {
   // Initialize constraint factories
   SamplePlanDatabase::initialize();
   printRUsage("after SPD::initialize()");
-  std::cout << "Just after SPD::init(), IdTable::size() is " << IdTable::size()
+  std::cerr << "Just after SPD::init(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   schema = NDDL::loadSchema();
   printRUsage("after NDDL:loadSchema()");
-  std::cout << "Just after NDDL::loadSchema(), IdTable::size() is " << IdTable::size()
+  std::cerr << "Just after NDDL::loadSchema(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
 #ifdef PERFORMANCE
   replay = false;
   for (int i = 0; i < 1; i++) {
     runTest(runPlanner);
     printRUsage("after runPlanner");
-    std::cout << "Just after replay false runTest(runPlanner) #" << i << ", IdTable::size() is " << IdTable::size()
+    std::cerr << "Just after replay false runTest(runPlanner) #" << i << ", IdTable::size() is " << IdTable::size()
               << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   }
 #else
@@ -190,19 +190,19 @@ int main(int argc, const char ** argv) {
   for (int i = 0; i < 2; i++) {
     runTest(runPlanner);
     printRUsage("after runPlanner");
-    std::cout << "Just after replay true runTest(runPlanner) #" << i << ", IdTable::size() is " << IdTable::size()
+    std::cerr << "Just after replay true runTest(runPlanner) #" << i << ", IdTable::size() is " << IdTable::size()
               << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
     runTest(copyFromFile);
     printRUsage("after copyFromFile i'th time");
-    std::cout << "Just after replay true runTest(copyFromFile) #" << i << ", IdTable::size() is " << IdTable::size()
+    std::cerr << "Just after replay true runTest(copyFromFile) #" << i << ", IdTable::size() is " << IdTable::size()
               << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   }
 #endif
   SamplePlanDatabase::terminate();
   printRUsage("after SPD::terminate()");
-  std::cout << "Just after SPD::terminate(), IdTable::size() is " << IdTable::size()
+  std::cerr << "Just after SPD::terminate(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
-  std::cout << "Finished" << std::endl;
+  std::cerr << "Finished" << std::endl;
   exit(0);
 }
 
