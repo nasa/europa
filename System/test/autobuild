@@ -1,5 +1,5 @@
-#!/bin/sh -x
-# $Id: autobuild,v 1.26 2003-01-16 04:29:55 wedgingt Exp $
+#!/bin/sh
+# $Id: autobuild,v 1.27 2003-01-16 05:02:34 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -36,9 +36,6 @@ ulimit -a
 # Sometimes, this is run via cron, which does not use the usual $PATH
 PATH=/usr/local/bin:/usr/local/teTeX/bin:"$PATH"
 export PATH
-
-CVSROOT=/home/cvs/ISG-Repository
-export CVSROOT
 
 set -x
 
