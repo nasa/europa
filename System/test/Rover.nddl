@@ -167,11 +167,11 @@ class World extends NddlWorld{
 
  World(){
   super(0, 100, 2000);
-  lander = new Location(LANDER, 0, 0);
-  rock1 = new Rock(ROCK1, 9, 9);
-  rock2 = new Rock(ROCK2, 1, 6);
-  rock3 = new Rock(ROCK2, 4, 8);
-  rock4 = new Rock(ROCK2, 3, 9);
+  lander = new Location("LANDER", 0, 0);
+  rock1 = new Rock("ROCK1", 9, 9);
+  rock2 = new Rock("ROCK2", 1, 6);
+  rock3 = new Rock("ROCK3", 4, 8);
+  rock4 = new Rock("ROCK4", 3, 9);
   spirit = new Rover();
   opportunity = new Rover();
  }
