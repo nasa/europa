@@ -39,9 +39,8 @@
 
 #define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
-    Schema schema; \
-    initCBPTestSchema(schema.getId()); \
-    PlanDatabase db(ce.getId(), schema.getId()); \
+    initCBPTestSchema(Schema::instance()); \
+    PlanDatabase db(ce.getId(), Schema::instance()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     RulesEngine re(db.getId()); \
     Horizon hor(0,200); \
@@ -61,9 +60,8 @@
 
 #define DEFAULT_SETUP_PLAN(ce, db, autoClose) \
     ConstraintEngine ce; \
-    Schema schema; \
-    initCBPTestSchema(schema.getId()); \
-    PlanDatabase db(ce.getId(), schema.getId()); \
+    initCBPTestSchema(Schema::instance()); \
+    PlanDatabase db(ce.getId(), Schema::instance()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     RulesEngine re(db.getId()); \
     Horizon hor(0, 200); \
@@ -373,7 +371,7 @@ private:
 };
 
 int main() {
-
+  Schema::instance();
   REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
   REGISTER_CONSTRAINT(LessThanEqualConstraint, "before", "Default");
   REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");

@@ -18,12 +18,12 @@
 #include <string>
 #include <list>
 
-#define DEFAULT_SETUP(ce, db, schema, autoClose) \
+#define DEFAULT_SETUP(ce, db,  autoClose) \
     ConstraintEngine ce; \
-    Schema schema; \
-    schema.addObjectType("Objects"); \
-    schema.addPredicate("Objects.Predicate"); \
-    PlanDatabase db(ce.getId(), schema.getId()); \
+    Schema::instance()->reset();\
+    Schema::instance()->addObjectType("Objects"); \
+    Schema::instance()->addPredicate("Objects.Predicate"); \
+    PlanDatabase db(ce.getId(), Schema::instance());\
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
     db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId()); \
@@ -168,14 +168,14 @@ public:
 private:
 
   static bool testBasicAllocation() {
-    DEFAULT_SETUP(ce,db,schema,true);
+    DEFAULT_SETUP(ce,db,true);
     ce.propagate();
     DEFAULT_TEARDOWN();
     return true;
   }
   
   static bool testTemporalPropagation() {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", "o2"))->getId();
     assert(!timeline.isNoId());
@@ -227,7 +227,7 @@ private:
   }
 
   static bool testCanPrecede() {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
@@ -312,7 +312,7 @@ private:
   }
 
   static bool testCanFitBetween() {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
@@ -350,7 +350,7 @@ private:
   }
 
   static bool testCanBeConcurrent() {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
@@ -420,7 +420,7 @@ private:
     return true;
   }
   static bool testSynchronization() {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
@@ -469,6 +469,7 @@ private:
 };
 
 int main() {
+  Schema::instance();
   initConstraintLibrary();
 
   // Special designations for temporal relations

@@ -38,6 +38,13 @@ Rover::Going{
  neq(_from, _to);
 }
 
+// Introduce a derived class to ensure rules are inherited correctly
+class SuperRover extends Rover {
+ SuperRover(){
+  super();
+ }
+}
+
 // Defines the initial state for the problem.
 class World {
  Rover rover;
@@ -85,6 +92,8 @@ World::initialState{
 
 // Transactions
 World world = new World();
+SuperRover superRover = new SuperRover();
+
 close();
 
 goal(World.initialState t0);
@@ -94,3 +103,6 @@ goal(Rover.Going t1);
 t1.activate();
 goal(Rover.Going t2);
 t2.merge(t1);
+
+goal(SuperRover.Going t3);
+t3.activate();

@@ -19,6 +19,8 @@
 #include <iostream>
 #include <string>
 
+using namespace Prototype;
+
 class SimpleSubGoal: public Rule {
 public:
   SimpleSubGoal(): Rule(LabelStr("AllObjects.Predicate")){}
@@ -159,37 +161,12 @@ void LocalVariableGuard_0_0::handleExecute(){
   addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
 }
 
-class DefaultSchemaAccessor{
-public:
-  static const SchemaId& instance(){
-    if (s_instance.isNoId()){
-      s_instance = (new Schema())->getId();
-    }
-
-    return s_instance;
-  }
-
-  static void reset(){
-    if(!s_instance.isNoId()){
-      delete (Schema*) s_instance;
-      s_instance = SchemaId::noId();
-    }
-  }
-
-private:
-  static SchemaId s_instance;
-};
-
-SchemaId DefaultSchemaAccessor::s_instance;
-
-#define SCHEMA DefaultSchemaAccessor::instance()
-
-#define DEFAULT_SETUP(ce, db, schema, autoClose) \
+#define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
-    Schema schema; \
-    schema.addObjectType(LabelStr("AllObjects")); \
-    schema.addPredicate(LabelStr("AllObjects.Predicate")); \
-    PlanDatabase db(ce.getId(), schema.getId()); \
+    Schema::instance()->reset();\
+    Schema::instance()->addObjectType(LabelStr("AllObjects")); \
+    Schema::instance()->addPredicate(LabelStr("AllObjects.Predicate")); \
+    PlanDatabase db(ce.getId(), Schema::instance()); \
     { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce.getId()); \
       assert(dp != 0); \
     } \
@@ -222,7 +199,7 @@ public:
 private:
 
   static bool testSimpleSubGoal(){
-    DEFAULT_SETUP(ce, db, schema, false);
+    DEFAULT_SETUP(ce, db, false);
     db.close();
 
     SimpleSubGoal r;
@@ -248,7 +225,7 @@ private:
   }
 
   static bool testNestedGuards(){
-    DEFAULT_SETUP(ce, db, schema, false);
+    DEFAULT_SETUP(ce, db, false);
     Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
     db.close();
 
@@ -296,7 +273,7 @@ private:
   }
 
   static bool testLocalVariable(){
-    DEFAULT_SETUP(ce, db, schema, false);
+    DEFAULT_SETUP(ce, db, false);
     db.close();
 
     LocalVariableGuard_0 r;
@@ -331,7 +308,7 @@ private:
   }
 
   static bool testTestRule(){
-    DEFAULT_SETUP(ce, db, schema, false);
+    DEFAULT_SETUP(ce, db, false);
     db.close();
 
     TestRule r(LabelStr("AllObjects.Predicate"));
@@ -356,7 +333,7 @@ private:
   }
 
   static bool testPurge(){
-    DEFAULT_SETUP(ce, db, schema, false);
+    DEFAULT_SETUP(ce, db, false);
     db.close();
 
     new TestRule(LabelStr("AllObjects.Predicate"));
@@ -381,7 +358,7 @@ int main() {
   REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
   // Allocate default schema initially so tests don't fail because of ID's
-  SCHEMA;
+  Schema::instance();
   runTestSuite(RulesEngineTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();

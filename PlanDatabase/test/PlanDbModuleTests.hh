@@ -19,24 +19,7 @@ namespace Prototype {
 
   const LabelStr& DEFAULT_PREDICATE();
 
-  class DefaultSchemaAccessor {
-  public:
-
-    static SchemaId& instance() {
-      static SchemaId sl_instance;
-      if (sl_instance.isNoId()){
-	sl_instance = (new Schema())->getId();
-      }
-      return(sl_instance);
-    }
-
-    static void reset() {
-      SchemaId& schema = instance();
-      schema->reset();
-    }
-  };
-
-  #define SCHEMA DefaultSchemaAccessor::instance()
+  #define SCHEMA Schema::instance()
 
   void initDbTestSchema(const SchemaId& schema);
   void initDbModuleTests();

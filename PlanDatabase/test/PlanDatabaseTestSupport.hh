@@ -11,7 +11,6 @@ using namespace Prototype;
 
 #define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngineId ce = (new ConstraintEngine())->getId(); \
-    DefaultSchemaAccessor::reset(); \
     SchemaId schema = SCHEMA; \
     initDbTestSchema(schema); \
     PlanDatabaseId db = (new PlanDatabase(ce, schema))->getId(); \

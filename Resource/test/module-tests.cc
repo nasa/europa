@@ -36,13 +36,14 @@ const double productionMax = 40;
 const double consumptionRateMax = -8;
 const double consumptionMax = -50;
 
-#define DEFAULT_SETUP(ce, db, schema, autoClose) \
+#define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
-    Schema schema; \
-    schema.addObjectType(LabelStr("Resource")); \
-    schema.addPredicate(LabelStr("Resource.change"));\
-    schema.addMember(LabelStr("Resource.change"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
-    PlanDatabase db(ce.getId(), schema.getId()); \
+    SchemaId schema = Schema::instance();\
+    schema->reset();\
+    schema->addObjectType(LabelStr("Resource")); \
+    schema->addPredicate(LabelStr("Resource.change"));\
+    schema->addMember(LabelStr("Resource.change"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
+    PlanDatabase db(ce.getId(), schema); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId()); \
     Id<DbLogger> dbLId; \
@@ -64,7 +65,7 @@ public:
   }
 private:
   static bool testDefaultSetup() {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     assert(db.isClosed() == false);
     db.close();
@@ -129,7 +130,7 @@ private:
   
   static bool testResourceConstructionAndDestruction()
   {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource (db.getId(), LabelStr("Resource"), LabelStr("r1")))->getId();
     std::list<InstantId> instants;
@@ -148,7 +149,7 @@ private:
 
   static bool testBasicTransactionInsertion()
   {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 10, 0, 1000))->getId();
 
@@ -193,7 +194,7 @@ private:
 
   static bool testTransactionChangeHandling()
   {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
@@ -233,7 +234,7 @@ private:
   static bool testCorrectTransactionAllocation()
   {
     // Test that the right insertion behaviour (in terms of instants) is occuring
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 1, 7))->getId();
@@ -291,7 +292,7 @@ private:
 
   static bool testLevelCalculation()
   {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
@@ -345,7 +346,7 @@ private:
 
   static bool testTransactionUpdates()
   {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
@@ -377,7 +378,7 @@ private:
 
   static bool testTransactionRemoval()
   {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
@@ -434,7 +435,7 @@ private:
 
   static bool testIntervalCapacityValues()
   {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
@@ -464,7 +465,7 @@ private:
 
   static bool testConstraintCheckOnInsertion()
   {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
@@ -506,7 +507,7 @@ private:
   // Test that a violation can be detected if a concurrent transaction violates a rate constraint
   static bool testRateConstraintViolation()
   {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
@@ -560,7 +561,7 @@ private:
   {
     // Define input constrains for the resource spec
 
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionMax, productionMax, MINUS_INFINITY, MINUS_INFINITY))->getId();
@@ -602,7 +603,7 @@ private:
   {
     // Define input constrains for the resource spec
 
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, PLUS_INFINITY, PLUS_INFINITY, consumptionMax, consumptionMax))->getId();
@@ -676,7 +677,7 @@ private:
 
   static bool testAggregatedProductionRateViolation() {
     // Define input constrains for the resource spec
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     ResourceId r1 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, -consumptionRateMax, -consumptionMax, -productionRateMax, -productionMax))->getId();
@@ -746,13 +747,9 @@ private:
   static bool testAggregatedConsumtionRateViolation()
   {
     // Define input constrains for the resource spec
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
-<<<<<<< module-tests.cc
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
-=======
     ResourceId r1 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
->>>>>>> 1.22
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     ResourceId r2 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionMax, productionMax, consumptionRateMax, consumptionMax))->getId();
@@ -803,7 +800,6 @@ private:
 	static const int ends4a[]   = {3,4,4};
 	static const double values4a[] = {-8,-8,-8};
 
-
 	runOneTest( 4, starts1, ends1, values1, true, Violation::NoWayOutConsumption, r1, ce, db );
 	runOneTest( 4, starts2, ends2, values2, false, Violation::NoProblem, r1, ce, db );
 	runOneTest( 5, starts3, ends3, values3, true, Violation::NoWayOutConsumption, r1, ce, db );
@@ -823,7 +819,7 @@ private:
   static bool testUpperLimitExceededResourceViolation()
   {
     // Define input constrains for the resource spec
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity + 1, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax + 100, consumptionRateMax, consumptionMax))->getId();
@@ -853,7 +849,7 @@ private:
 
   static bool testSummationConstraintResourceViolation()
   {
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
@@ -910,7 +906,7 @@ private:
   {
 	
     // Define input constrains for the resource spec
-    DEFAULT_SETUP(ce,db,schema,false);
+    DEFAULT_SETUP(ce,db,false);
     ResourceId r = (new Resource( db.getId(), LabelStr("Resource"), LabelStr("r1"), 
 								  initialCapacity, horizonStart, horizonEnd, 
 								  limitMax, limitMin, productionRateMax, 5, consumptionRateMax, consumptionMax))->getId();
@@ -1011,11 +1007,11 @@ private:
 
 int main() {
 
+  Schema::instance();
   initConstraintLibrary();
   REGISTER_CONSTRAINT(ResourceConstraint, "ResourceRelation", "Resource");
   REGISTER_CONSTRAINT(ResourceTransactionConstraint, "HorizonRelation", "Default");
   REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   std::cout << "Finished" << std::endl;
