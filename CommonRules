@@ -41,6 +41,36 @@ actions ExecuteTarget {
 # utilities
 #
 
+# FRemoveItem <list> : <item> ;
+# return a list without any instances of item in it
+rule FRemoveItem {
+  local list = $(1) ;
+  local item = $(2) ;
+
+  local result ;
+  for i in $(list) {
+    if $(i) != $(item) {
+      result += $(i) ;
+    }
+  }
+  return $(result) ;
+}
+
+# FMergeList <list1> : <list2> ;
+# return a list of list1 + all elements from list2 not in list1
+rule FMergeList {
+  local list1 = $(1) ;
+  local list2 = $(2) ;
+
+  local result = $(list1) ;
+  for i in $(list2) {
+    if ! $(i) in $(result) {
+      result += $(i) ;
+    }
+  }
+  return $(result) ;
+}
+
 # thx to Dag Asheim <dash@linpro.no> from jamming@perforce.com list
 #
 # Return a list consisting of a string split where a regexp matches
@@ -334,11 +364,16 @@ rule MainFromObjects
 {
 	local _s _t ;
 	local build_target = $(3) ;
+	local nogrist = $(4) ;
 
 	# Add grist to file names
 	# Add suffix to exe
 
-	_s = [ FGristFiles $(>) ] ;
+	if $(nogrist) {
+	  _s = $(>) ;
+	} else {
+	  _s = [ FGristFiles $(>) ] ;
+	}
 	_t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
 
 	# so 'jam foo' works when it's really foo.exe
@@ -597,6 +632,16 @@ rule Yacc
 	# a deadly independent target
 
 	Includes $(<) : $(_h) ;
+}
+
+actions together Chmod1
+{
+	$(CHMOD) $(MODE) $(<)
+}
+
+actions together Link bind NEEDLIBS
+{
+	$(LINK) $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS) 
 }
 
 } # CommonRules_INCLUDED

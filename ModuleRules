@@ -24,6 +24,7 @@ rule Module {
   local module = $(name:G=module) ;
   NotFile $(module) ;
 
+  LINK_LIBRARIES on $(module) = $(LINKLIBS) ;
   LINK_MODULES on $(module) = $(modules:G=module) ;
   LOCATE_OBJECTS on $(module) = [ FDirName $(SUBDIR) objects ] ;
   INCLUDES on $(module) += $(SUBDIR) ;
@@ -103,7 +104,7 @@ rule ModuleObjects {
   }
 }
 
-# ModuleMain <name> : <files for this test> : <modules that this test depends on> ;
+# ModuleMain <name> : <files for this test> : <modules that this test depends on> : <target to build the exe> ;
 rule ModuleMain {
   local name = $(1) ;
   local files = $(2) ;
@@ -111,7 +112,7 @@ rule ModuleMain {
   local build_target = $(4) ;
 
   if $(TRACE_MODULE) = TRUE {
-    Echo ModuleMain $(name) . $(files) . $(modules) ;
+    Echo ModuleMain $(name) . $(files) . $(modules) . $(build_target) ;
   }
 
   ModuleObjects $(files) : $(modules) ;
@@ -137,14 +138,27 @@ rule ModuleMain {
         local link ;
         for link in $(links) {
           LinkSharedLibraries $(exe) : [ FModuleSharedLibraryName $(link) : $(variant) ] ;
+          local link_libraries = [ on $(link:G=module) return $(LINK_LIBRARIES) ] ;
+          on $(exe)_rt LINKLIBS = [ FMergeList $(LINKLIBS) : $(link_libraries) ] ;
         }
         MainFromObjects $(exe)_rt : $(outputs) : $(build_target) ;
       } else if $(library) = STATIC {
         local link ;
         for link in $(links) {
           LinkLibraries $(exe) : [ FModuleStaticLibraryName $(link) : $(variant) ] ;
+          local link_libraries = [ on $(link:G=module) return $(LINK_LIBRARIES) ] ;
+          on $(exe) LINKLIBS = [ FMergeList $(LINKLIBS) : $(link_libraries) ] ;
         }
         MainFromObjects $(exe) : $(outputs) : $(build_target) ;
+      } else if $(library) = NONE {
+        local link ;
+        for link in $(links) {
+          local _o = [ on $(link:G=module) return $($(variant)_OBJECTS) ] ;
+          MainFromObjects $(exe)_no : $(_o) : $(build_target) : true ;
+          local link_libraries = [ on $(link:G=module) return $(LINK_LIBRARIES) ] ;
+          on $(exe)_no LINKLIBS = [ FMergeList $(LINKLIBS) : $(link_libraries) ] ;
+        }
+        MainFromObjects $(exe)_no : $(outputs) : $(build_target) ;
       } else {
         Exit ModuleMain unknown library type: $(library) ;
       }
@@ -152,7 +166,20 @@ rule ModuleMain {
   }
 }
 
+# ModuleLibraries <name> : <libraries> ;
+rule ModuleLibraries {
+  local name = $(1) ;
+  local libraries = $(2) ;
 
+  if $(TRACE_MODULE) = TRUE {
+    Echo ModuleLibraries $(name) . $(libraries) ;
+  }
+
+  local module = $(name:G=module) ;
+  LINK_LIBRARIES on $(module) += -l$(libraries) ;
+}
+
+# RunModuleMain <target that when built runs this> : <executable> : <arguments> ;
 rule RunModuleMain {
   local tests = $(1) ;
   local executable = $(2) ;
@@ -171,6 +198,9 @@ rule RunModuleMain {
       } else if $(library) = STATIC {
         local exe = [ FVariantName $(executable) : $(variant) ] ;
         Execute $(tests) : $(exe) : $(arguments) ;
+      } else if $(library) = NONE {
+        local exe = [ FVariantName $(executable) : $(variant) ] ;
+        Execute $(tests) : $(exe)_no : $(arguments) ;
       } else {
         Exit RunModuleMain unknown library type: $(library) ;
       }
@@ -180,32 +210,6 @@ rule RunModuleMain {
 
 ################
 # internal rules
-
-rule FRemoveItem {
-  local list = $(1) ;
-  local item = $(2) ;
-
-  local result ;
-  for i in $(list) {
-    if $(i) != $(item) {
-      result += $(i) ;
-    }
-  }
-  return $(result) ;
-}
-
-rule FMergeList {
-  local list1 = $(1) ;
-  local list2 = $(2) ;
-
-  local result = $(list1) ;
-  for i in $(list2) {
-    if ! $(i) in $(result) {
-      result += $(i) ;
-    }
-  }
-  return $(result) ;
-}
 
 rule CheckForCycle {
   local pushed = $(1) ;
@@ -280,6 +284,8 @@ rule ModulePart {
         libname = [ FModuleSharedLibraryName $(module) : $(variant) ] ;
       } else if $(library) = STATIC {
         libname = [ FModuleStaticLibraryName $(module) : $(variant) ] ;
+      } else if $(library) = NONE {
+        $(variant)_OBJECTS on $(module) += $(outputs) ;
       } else {
         Exit ModulePart unknown library type: $(library) ;
       }
@@ -302,6 +308,12 @@ rule ModulePart {
         } else {
           ModuleStaticLibrary $(libname) : $(outputs) : false ;
         }
+      }
+      if $(library) = NONE {
+        if $(variant) in $(VARIANTS) {
+          Depends $(module) : $(files) ;
+        }
+        continue ;
       }
       if $(variant) in $(VARIANTS) {
         Depends $(module) : $(libname) ;
