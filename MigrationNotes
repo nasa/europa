@@ -1,6 +1,6 @@
 Brief Migration Notes
 
-$Id: MigrationNotes,v 1.6 2004-12-07 00:39:34 wedgingt Exp $
+$Id: MigrationNotes,v 1.7 2004-12-10 19:44:16 wedgingt Exp $
 
 This file is intended to help users of the prior Europa (in the
 NewPlan CVS tree) planning system migrate their projects to this
@@ -47,10 +47,10 @@ of the object.  (see also GNATS 2704).
 
 5. In NewPlan, label sets imply a "default ordering" heuristic based
 on the order they are given when the label set is declared.  This
-behavior is not duplicated in Europa2, for which the "default
-ordering" heuristic would be order of creation of the corresponding
-LabelStr instance due to internals of how the C++ classes
-EnumeratedDomain and LabelStr are implemented.
+behavior is not duplicated in Europa2, for which the "default ordering"
+heuristic would be lexicographic (based on ASCII code) due to
+internals of how the C++ classes EnumeratedDomain and LabelStr are
+implemented.
 
 6. The number of plan steps for otherwise identical problems will
 almost certainly be larger with Europa2 (PLASMA) than with Europa
