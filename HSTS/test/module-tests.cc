@@ -29,6 +29,8 @@
 
 #include "DNPConstraints.hh"
 
+#include "test/ConstraintTesting.hh"
+
 #include <iostream>
 #include <string>
 
@@ -128,6 +130,7 @@ public:
     runTest(testHSTSPlanIdReader);
     runTest(testHSTSNoBranch);
     runTest(testHSTSHeuristicsAssembly);
+    runTest(testDNPConstraints);
     return(true);
   }
 private:
@@ -186,6 +189,20 @@ private:
     retval = testHSTSHeuristicsAssemblyImpl(ce, db, planner, heuristics);
     DEFAULT_TEARDOWN_PLAN_HEURISTICS();
     return retval;
+  }
+
+  /**
+   * Test the DNP specific constraint functions.
+   * @note Almost a copy of ConstraintEngine/test/module-tests.cc's testArbitraryCosntraints().
+   */
+  static bool testDNPConstraints() {
+    DEFAULT_SETUP_PLAN_HEURISTICS();
+    std::list<ConstraintTestCase> tests;
+    assertTrue(readTestCases(std::string("DNPTestCases"), tests) ||
+               readTestCases(std::string("HSTS/test/DNPTestCases"), tests));
+    assertTrue(executeTestCases(ce.getId(), tests));
+    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
+    return(true);
   }
 };
 
