@@ -31,6 +31,10 @@ namespace PLASMA {
   }
 
   bool Assertion::eq(const AbstractDomain&d1, const AbstractDomain& d2) {
+    if(!Schema::instance()->isEnum(d1.getTypeName()) &&
+       !Schema::instance()->isEnum(d2.getTypeName()))
+      return ((const IntervalDomain&) d1).getUpperBound() == ((const IntervalDomain&) d2).getUpperBound() &&
+        ((const IntervalDomain&) d1).getLowerBound() == ((const IntervalDomain&) d2).getLowerBound();
     return d1 == d2;
   }
   bool Assertion::ne(const AbstractDomain&d1, const AbstractDomain& d2) {
