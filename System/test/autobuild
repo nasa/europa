@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.51 2003-08-07 20:01:44 wedgingt Exp $
+# $Id: autobuild,v 1.52 2003-08-11 21:55:15 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -110,11 +110,23 @@ do
 
     test -d "$startdir"/working || exit 2
 
+    make $makeopt EuropaDist.tar >> make.tests 2>&1
+    statusMakeTar=$?
+    echo '"make '"$makeopt"' EuropaDist.tar" in '"`pwd`"' exited '"$statusMakeTar"
+
     make $makeopt unofficial >> make.tests 2>&1
     status=$?
-    echo '"make unofficial" in '"`pwd`"' exited '"$status"
+    echo '"make '"$makeopt"' unofficial" in '"`pwd`"' exited '"$status"
 
-    if test $status = 0
+    mkdir ../testDist && cd ../testDist && tar -xpf ../NewPlan/EuropaDist.tar
+    statusTarExtract=$?
+    echo '"tar -xpf EuropaDist.tar" in '"`pwd`"' exited '"$statusTarExtract"
+
+    make $makeopt simple >> make.simple 2>&1
+    statusMakeDist=$?
+    echo '"make '"$makeopt"' simple" in '"`pwd`"' exited '"$statusMakeDist"
+
+    if test $statusMakeTar$status$statusTarExtract$statusMakeDist = 0000
     then
         (uname -a; echo ''; cat ../make.options; echo ''; g++ --version) | \
             Mail -s 'Autobuild on '"`hostname`"' in '"`pwd`"' succeeded' "$email"
