@@ -43,6 +43,7 @@ public:
     runTest(testBasicAllocation);
     runTest(testTemporalConstraints);
     runTest(testFixForReversingEndpoints);
+    runTest(testMemoryCleanups);
     return true;
   }
 
@@ -128,6 +129,22 @@ private:
     tn.removeTemporalConstraint(c3);
     tn.deleteTimepoint(y);
     tn.deleteTimepoint(z);
+    return true;
+  }
+
+  static bool testMemoryCleanups(){
+    TemporalNetwork tn;
+    TimepointId origin = tn.getOrigin();
+
+    for(int i=0;i<10;i++){
+      TimepointId x = tn.addTimepoint();
+      TimepointId y = tn.addTimepoint();
+      tn.addTemporalConstraint(origin, x, (Time)i, i+1);
+      tn.addTemporalConstraint(x, y, (Time)i, i+1);
+      Time delta = g_noTime();
+      Time epsilon = g_noTime();
+      tn.calcDistanceBounds(x, y, delta, epsilon);
+    }
     return true;
   }
 };
@@ -455,8 +472,10 @@ int main() {
   REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Temporal");
   REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
-  runTestSuite(TemporalNetworkTest::test);
-  runTestSuite(TemporalPropagatorTest::test);
+  for(int i=0;i<1;i++){
+    runTestSuite(TemporalNetworkTest::test);
+    runTestSuite(TemporalPropagatorTest::test);
+  }
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
 }

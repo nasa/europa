@@ -332,10 +332,12 @@ private:
 
 int main() {
   initDbModuleTests();
-  runTestSuite(ObjectTest::test);
-  runTestSuite(TokenTest::test);
-  runTestSuite(TimelineTest::test);
-  runTestSuite(DbClientTest::test);
-  std::cout << "Finished" << std::endl;
+  for (int i=0;i<1;i++){
+    runTestSuite(ObjectTest::test);
+    runTestSuite(TokenTest::test);
+    runTestSuite(TimelineTest::test);
+    runTestSuite(DbClientTest::test);
+    std::cout << "Finished" << std::endl;
+  } 
   ConstraintLibrary::purgeAll();
 }

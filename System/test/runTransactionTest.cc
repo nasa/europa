@@ -124,9 +124,11 @@ int main(int argc, const char ** argv){
   replay = false;
   runTest(runPlanner);
 #else
-  replay = true;
-  runTest(runPlanner);
-  runTest(copyFromFile);
+  for(int i= 0; i<1; i++){
+    replay = true;
+    runTest(runPlanner);
+    runTest(copyFromFile);
+  }
 #endif
 
   SamplePlanDatabase::terminate();

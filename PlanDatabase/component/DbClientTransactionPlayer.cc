@@ -525,7 +525,7 @@ namespace Prototype {
       std::string std_value = value;
       ConstrainedVariableId var = m_variables[std_value];
       if (var != ConstrainedVariableId::noId()) {
-        return &var->baseDomain();
+        return var->baseDomain().copy();
       }
       // must be an enumerated domain
       return new LabelSet(LabelStr(value));
@@ -534,7 +534,7 @@ namespace Prototype {
       const char * name = element.Attribute("name");
       ConstrainedVariableId var = parseVariable(name);
       check_error(var.isValid());
-      return &var->baseDomain();
+      return var->baseDomain().copy();
     }
     if (strcmp(element.Value(), "set") == 0) {
       return xmlAsEnumeratedDomain(element);
@@ -711,6 +711,12 @@ namespace Prototype {
       }
       ObjectId object = m_client->createObject(LabelStr(type), LabelStr(name), arguments);
       check_error(object.isValid());
+
+      // Now deallocate domains created for arguments
+      for(std::vector<ConstructorArgument>::const_iterator it = arguments.begin(); it != arguments.end(); ++it){
+	delete it->second;
+      }
+
       return (double)object;
     }
     const char * value_st = value.Attribute("value");
@@ -812,6 +818,23 @@ namespace Prototype {
     return TokenId::noId();
   }
 
+
+  /**
+   * Helper method for function defined below
+   */
+  template <class DOMAIN_TYPE>
+  ConstrainedVariableId allocateVariable(const DbClientId& client, 
+					 const char* name, 
+					 const AbstractDomain* baseDomain){
+    if(baseDomain != NULL)
+      return client->createVariable(dynamic_cast<const DOMAIN_TYPE&>(*baseDomain), LabelStr(name));
+    
+    const DOMAIN_TYPE * domain = new DOMAIN_TYPE();
+    ConstrainedVariableId newVar = client->createVariable(*domain, LabelStr(name));
+    delete domain;
+    return newVar;
+  }
+
   ConstrainedVariableId
   DbClientTransactionPlayer::xmlAsCreateVariable(const char * type, const char * name, const TiXmlElement * value)
   {
@@ -822,6 +845,7 @@ namespace Prototype {
       gen_name = gen_stream.str();
       name = gen_name.c_str();
     }
+ 
     const AbstractDomain * baseDomain = NULL;
     if (value != NULL) {
       baseDomain = xmlAsAbstractDomain(*value, name);
@@ -832,46 +856,36 @@ namespace Prototype {
         }
       }
     }
+
     check_error(type != NULL);
-    if (strcmp(type, "bool") == 0) {
-      const BoolDomain * domain = (baseDomain ? dynamic_cast<const BoolDomain*>(baseDomain) : new BoolDomain());
-      return m_client->createVariable(*domain, LabelStr(name));
-    }
-    if (strcmp(type, "int") == 0) {
-      const IntervalIntDomain * domain = (baseDomain ? dynamic_cast<const IntervalIntDomain*>(baseDomain) : new IntervalIntDomain());
-      return m_client->createVariable(*domain, LabelStr(name));
-    }
-    if (strcmp(type, "float") == 0) {
-      const IntervalDomain * domain = (baseDomain ? dynamic_cast<const IntervalDomain*>(baseDomain) : new IntervalDomain());
-      return m_client->createVariable(*domain, LabelStr(name));
-    }
-    if (strcmp(type, "string") == 0) {
-      const LabelSet * domain = (baseDomain ? dynamic_cast<const LabelSet*>(baseDomain) : new LabelSet());
-      return m_client->createVariable(*domain, LabelStr(name));
-    }
+
+    if (strcmp(type, "bool") == 0)
+      return allocateVariable<BoolDomain>(m_client, name, baseDomain);
+
+    if (strcmp(type, "int") == 0)
+      return allocateVariable<IntervalIntDomain>(m_client, name, baseDomain);
+
+    if (strcmp(type, "float") == 0)
+      return allocateVariable<IntervalDomain>(m_client, name, baseDomain);
+
+    if (strcmp(type, "string") == 0)
+      return allocateVariable<LabelSet>(m_client, name, baseDomain);
+
     std::string std_type = type;
-    if (std::find(m_enumerations.begin(), m_enumerations.end(), std_type) != m_enumerations.end()) {
-      // enumerations are label sets too
-      const LabelSet * domain = (baseDomain ? dynamic_cast<const LabelSet*>(baseDomain) : new LabelSet());
-      return m_client->createVariable(*domain, LabelStr(name));
-    }
-    if (std::find(m_classes.begin(), m_classes.end(), std_type) != m_classes.end()) {
-      const ObjectDomain * domain = (baseDomain ? dynamic_cast<const ObjectDomain*>(baseDomain) : new ObjectDomain());
-      return m_client->createVariable(*domain, LabelStr(name));
-    }
+    if (std::find(m_enumerations.begin(), m_enumerations.end(), std_type) != m_enumerations.end()) 
+      return allocateVariable<LabelSet>(m_client, name, baseDomain);
+
+    if (std::find(m_classes.begin(), m_classes.end(), std_type) != m_classes.end()) 
+      return allocateVariable<ObjectDomain>(m_client, name, baseDomain);
+
     if (baseDomain) {
-      if (LabelStr::isString(baseDomain->getUpperBound())) {
-        const LabelSet * domain = dynamic_cast<const LabelSet*>(baseDomain);
-        return m_client->createVariable(*domain, LabelStr(name));
-      }
-      ObjectId object = baseDomain->getLowerBound();
-      check_error(object.isValid());
-      const ObjectDomain * domain = dynamic_cast<const ObjectDomain*>(baseDomain);
-      return m_client->createVariable(*domain, LabelStr(name));
+      if (LabelStr::isString(baseDomain->getUpperBound()))
+	return allocateVariable<LabelSet>(m_client, name, baseDomain);
+      else
+	return allocateVariable<ObjectDomain>(m_client, name, baseDomain);
     }
-    // unknown type
-    check_error(ALWAYS_FAILS);
+
+    check_error(ALWAYS_FAILS, std::string(type) + " must be an unknown type.");
     return ConstrainedVariableId::noId();
   }
-
 }

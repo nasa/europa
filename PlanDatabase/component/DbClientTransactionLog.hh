@@ -47,6 +47,10 @@ namespace Prototype {
     friend class DbClientTransactionPlayer;
     const std::list<TiXmlElement*>& getBufferedTransactions() const;
 
+    TiXmlElement * allocateXmlElement(const std::string&) const;
+    void pushTransaction(TiXmlElement *);
+    void popTransaction();
+
     std::list<TiXmlElement*> m_bufferedTransactions;
     bool m_chronologicalBacktracking;
     int m_tokensCreated;
