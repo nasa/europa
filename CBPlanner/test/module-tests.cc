@@ -42,7 +42,7 @@
 
 #define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
-    initCBPTestSchema(Schema::instance()); \
+    initCBPTestSchema(); \
     PlanDatabase db(ce.getId(), Schema::instance()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     RulesEngine re(db.getId()); \
@@ -63,7 +63,7 @@
 
 #define DEFAULT_SETUP_PLAN(ce, db, autoClose) \
     ConstraintEngine ce; \
-    initCBPTestSchema(Schema::instance()); \
+    initCBPTestSchema(); \
     PlanDatabase db(ce.getId(), Schema::instance()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     RulesEngine re(db.getId()); \
@@ -86,6 +86,26 @@
   HSTSHeuristics heuristics; 
 
 #define DEFAULT_TEARDOWN_HEURISTICS()
+
+#define DEFAULT_SETUP_PLAN_HEURISTICS() \
+    ConstraintEngine ce; \
+    initCBPTestSchema(); \
+    PlanDatabase db(ce.getId(), Schema::instance()); \
+    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+    RulesEngine re(db.getId()); \
+    Horizon hor(0, 200); \
+    CBPlanner planner(db.getId(), hor.getId()); \
+    Id<DbLogger> dbLId; \
+    if (loggingEnabled()) { \
+      new CeLogger(std::cout, ce.getId()); \
+      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
+      new DMLogger(std::cout, planner.getDecisionManager()); \
+    } \
+    db.close(); \
+    HSTSHeuristics heuristics; 
+
+#define DEFAULT_TEARDOWN_PLAN_HEURISTICS() \
+    delete (DbLogger*) dbLId;
 
 class DefaultSetupTest {
 public:
@@ -351,6 +371,7 @@ public:
     runTest(testReader);
     runTest(testHSTSPlanIdReader);
     runTest(testHSTSNoBranch);
+    runTest(testHSTSHeuristicsAssembly);
     return(true);
   }
 private:
@@ -394,6 +415,13 @@ private:
     DEFAULT_SETUP_PLAN(ce,db,true);
     retval = testHSTSNoBranchImpl(ce, db, planner);
     DEFAULT_TEARDOWN_PLAN();
+    return retval;
+  }
+  static bool testHSTSHeuristicsAssembly() {
+    bool retval = false;
+    DEFAULT_SETUP_PLAN_HEURISTICS();
+    retval = testHSTSHeuristicsAssemblyImpl(ce, db, planner, heuristics);
+    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
     return retval;
   }
 };
