@@ -37,7 +37,7 @@ ModuleObjects runTransactionTest.cc : System ;
 for model in
 	Rover-transaction.nddl basic-model-transaction.nddl k9.backtrack.moderate-transaction.nddl
 	k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl force-object-distribution.nddl 
-	resource-backtrack-test.nddl rejection.nddl #backtr-long.nddl
+	resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl #backtr-long.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : runTransactionTest.o : $(model) : System ;

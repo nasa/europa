@@ -330,6 +330,31 @@ namespace Prototype {
       return;
     }
 
+    if (strcmp(name, "constrain") == 0) {
+      // constrain token(s) special case
+      const char * identifier = element.Attribute("identifier");
+      std::string object_name = identifier;
+      ObjectId object = m_client->getObject(LabelStr(object_name.c_str()));
+      check_error(object.isValid(),
+                  "constrain transaction refers to an undefined object: '"
+                   + object_name + "'");
+      TiXmlElement * token_el = element.FirstChildElement();
+      check_error(token_el != NULL, "missing mandatory token identifier for constrain transaction");
+      TokenId token = xmlAsToken(*token_el);
+      check_error(token.isValid(),
+                  "invalid token identifier for constrain transaction");
+      
+      TiXmlElement * successor_el = token_el->NextSiblingElement();
+      TokenId successor = TokenId::noId();
+      if (successor_el != NULL) {
+        successor = xmlAsToken(*successor_el);
+        check_error(successor.isValid(),
+                    "invalid successor token identifier for constrain transaction");
+      }
+
+      m_client->constrain(object, token, successor);
+      return;
+    }
     if (strcmp(name, "activate") == 0) {
       // activate token special case
       const char * identifier = element.Attribute("identifier");
