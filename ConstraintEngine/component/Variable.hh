@@ -40,13 +40,13 @@ namespace Prototype
      * @param domain - the domain to restrict to. Note that the domain must be a subset of the current domain.
      * @see reset()
      */
-    void specify(const DomainType& domain);
+    virtual void specify(const DomainType& domain);
 
     /**
      * @brief Retract previously specified domain restriction.
      * @see specify()
      */
-    void reset();
+    virtual void reset();
     
     /**
      * @brief return the domain first used in initialization
@@ -77,6 +77,14 @@ namespace Prototype
      * @brief Retrieve the specified domain
      */
     const AbstractDomain& specifiedDomain() const;
+
+    /**
+     * @brief Retrieve the specified domain
+     */
+    const AbstractDomain& baseDomain() const;
+
+    virtual bool isCompatible(const ConstrainedVariableId& var) const;
+    virtual bool isSpecified() const;
 
   private:
 
@@ -163,6 +171,11 @@ namespace Prototype
   }
 
   template<class DomainType>
+  const AbstractDomain& Variable<DomainType>::baseDomain() const {
+    return dynamic_cast<const AbstractDomain&>(m_baseDomain);
+  }
+
+  template<class DomainType>
   void Variable<DomainType>::specify(const DomainType& domain){
     check_error(!domain.isDynamic() && !domain.isEmpty());
     check_error(domain.isSubsetOf(m_specifiedDomain));
@@ -180,6 +193,17 @@ namespace Prototype
   template<class DomainType>
   void Variable<DomainType>::relax(){
     m_derivedDomain = m_specifiedDomain;
+  }
+
+  template<class DomainType>
+  bool Variable<DomainType>::isCompatible(const ConstrainedVariableId& var) const {
+    Europa::Id<Variable <DomainType> > id(var);
+    return (!var.isNoId());
+  }
+
+  template<class DomainType>
+  bool Variable<DomainType>::isSpecified() const {
+    return (m_baseDomain != m_specifiedDomain);
   }
 }
 #endif
