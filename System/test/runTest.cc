@@ -75,7 +75,7 @@ int main(){
     new DbLogger(std::cout, db.getId());
     new FlawSourceLogger(std::cout, source.getId());
     new FlawQueryLogger(std::cout, query.getId());
-    new PartialPlanWriter(db.getId(), ce.getId());
+    new PlanWriter::PartialPlanWriter(db.getId(), ce.getId());
   }
   
   NDDL::initialize(db.getId());

@@ -353,6 +353,18 @@ private:
       assert(v2.getDerivedDomain() == IntervalIntDomain(11, 100));
     }
 
+    // Test propagating infinites: start + duration == end.
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      assert(ENGINE->propagate());
+      assert(v0.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
+      assert(v1.getDerivedDomain() == IntervalIntDomain(1));
+      assert(v2.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
+    }
+
     return true;
   }
 
