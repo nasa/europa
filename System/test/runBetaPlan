@@ -1,0 +1,24 @@
+#!/bin/bash
+# Run the Europa1 betaPlan program to compare performance with PLASMA.
+# $Id: runBetaPlan,v 1.1 2004-12-10 21:45:24 wedgingt Exp $
+date
+hostname
+pwd
+betaPlan=../../../NewPlan/Planners/BetaPlanner/betaPlan
+EUROPA_TIMINGS_RUN=2
+export EUROPA_TIMINGS_RUN
+if test ! -x "$betaPlan"
+then
+    echo 'Cannot find '"$betaPlan"
+    exit 1
+fi
+ls -l satellites-*-*-*-*.ddl
+for model in satellites-*-*-*-*.ddl
+do
+  init="`basename $model .ddl`".init
+  test -s "$init" || continue
+  date
+  time "$betaPlan" -o none -m "$model" -i "$init"
+  echo time "$betaPlan" -o none -m "$model" -i "$init" exited $?
+done
+date
