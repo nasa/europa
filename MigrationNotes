@@ -1,6 +1,6 @@
 Brief Migration Notes
 
-$Id: MigrationNotes,v 1.7 2004-12-10 19:44:16 wedgingt Exp $
+$Id: MigrationNotes,v 1.8 2004-12-22 00:43:14 wedgingt Exp $
 
 This file is intended to help users of the prior Europa (in the
 NewPlan CVS tree) planning system migrate their projects to this
@@ -78,7 +78,11 @@ usually, the version of the compilers).  PLASMA's independent naming
 of files resulting from the different compilation variants mitigates
 but does not preclude this problem.
 
-10. In the DDL language used with Europa (CVS module name NewPlan),
+10. The constraint 'condasame' (conditional all same) in Europa1
+(NewPlan) has the boolean controlling the condition last; in Europa2
+(PLASMA), it is first to match the name of the constraint.
+
+11. In the DDL language used with Europa (CVS module name NewPlan),
 temporal constraints can only be made between master tokens and their
 slave (or subgoal) tokens, but they can also have explicit intervals.
 They are otherwise the same as in Europa2 (which will support
