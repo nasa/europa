@@ -50,6 +50,9 @@ namespace Prototype {
   class DecisionManagerListener;
   typedef Id<DecisionManagerListener> DecisionManagerListenerId;
 
+  class OpenDecisionManager;
+  typedef Id<OpenDecisionManager> OpenDecisionManagerId;
+
 }
 
 #endif
