@@ -27,10 +27,12 @@ namespace Prototype {
     bool canIgnore(const ConstrainedVariableId& variable, 
 		   int argIndex, 
 		   const DomainListener::ChangeType& changeType);
+
+    static const int OBJECT = 0;
+    static const int TIME = 1;
+    static const int USAGE = 2;
+
   private:
-    static const int X = 0;
-    static const int Y = 1;
-    static const int Z = 2;
     static const int ARG_COUNT = 3;
   };
 
