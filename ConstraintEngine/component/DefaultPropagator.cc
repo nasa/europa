@@ -6,10 +6,10 @@
 namespace Prototype {
 
   DefaultPropagator::DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
-    : Propagator(name, constraintEngine){}
+    : Propagator(name, constraintEngine), m_activeConstraint(0){}
 
   void DefaultPropagator::handleConstraintAdded(const ConstraintId& constraint){
-    m_agenda.push_back(constraint);
+    m_agenda.insert(constraint);
   }
 
   void DefaultPropagator::handleConstraintRemoved(const ConstraintId& constraint){
@@ -18,7 +18,7 @@ namespace Prototype {
   }
 
   void DefaultPropagator::handleConstraintActivated(const ConstraintId& constraint){
-    m_agenda.push_back(constraint);
+    m_agenda.insert(constraint);
   }
 
   void DefaultPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
@@ -29,7 +29,8 @@ namespace Prototype {
 					     int argIndex, 
 					     const ConstraintId& constraint, 
 					     const DomainListener::ChangeType& changeType){
-    m_agenda.push_back(constraint);
+    if(constraint->getKey() != m_activeConstraint)
+      m_agenda.insert(constraint);
   }
 
   bool DefaultPropagator::isAcceptable(const ConstraintId& constraint) const {
@@ -40,17 +41,37 @@ namespace Prototype {
   void DefaultPropagator::execute(){
     check_error(m_agenda.size() > 0);
     check_error(!getConstraintEngine()->provenInconsistent());
+    check_error(m_activeConstraint == 0);
 
+    while(!m_agenda.empty()){
+      std::set<ConstraintId>::iterator it = m_agenda.begin();
+      ConstraintId constraint = *it;
+
+      if(constraint->isActive()){
+	m_activeConstraint = constraint->getKey();
+	Propagator::execute(constraint);
+      }
+
+      if(getConstraintEngine()->provenInconsistent()){
+	m_agenda.clear();
+	break;
+      }
+      else
+	m_agenda.erase(it);
+    }
+      /*
     for(int i=0;i<m_agenda.size();i++){
       ConstraintId constraint = m_agenda[i];
-      if(constraint->isActive())
+      if(constraint->isActive()){
+	m_activeConstraint = constraint->getKey();
 	Propagator::execute(constraint);
+      }
 
       if(getConstraintEngine()->provenInconsistent())
 	break;
     }
-
-    m_agenda.clear();
+      */
+    m_activeConstraint = 0;
   }
 
   bool DefaultPropagator::updateRequired() const{

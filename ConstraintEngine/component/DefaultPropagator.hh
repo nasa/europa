@@ -2,7 +2,7 @@
 #define _H_DefaultPropagator
 
 #include "Propagator.hh"
-#include <vector>
+#include <set>
 
 namespace Prototype {
 
@@ -24,7 +24,8 @@ namespace Prototype {
     bool isAcceptable(const ConstraintId& constraint) const;
 
   private:
-    std::vector<ConstraintId> m_agenda;
+    std::set<ConstraintId> m_agenda;
+    int m_activeConstraint;
   };
 }
 #endif

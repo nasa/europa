@@ -197,8 +197,8 @@ namespace Prototype
   void Variable<DomainType>::specify(const DomainType& domain){
     check_error(!domain.isDynamic() && !domain.isEmpty());
     check_error(domain.isSubsetOf(m_specifiedDomain));
-    m_specifiedDomain.intersect(domain);
-    m_derivedDomain.set(m_specifiedDomain);
+    if(m_specifiedDomain.intersect(domain))
+      m_derivedDomain.set(m_specifiedDomain);
     check_error(isValid());
   }
 
