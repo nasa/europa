@@ -5,6 +5,7 @@ if ! $(PLASMA_READY) {
 ModuleComponent ConstraintEngine
 	:
 	BoolDomain.cc
+	BoolTypeFactory.cc
 	CeLogger.cc
 	Constraints.cc
 	DefaultPropagator.cc
@@ -13,6 +14,12 @@ ModuleComponent ConstraintEngine
 	EquivalenceClassCollection.cc
 	IntervalDomain.cc
 	IntervalIntDomain.cc
+	IntervalIntTypeFactory.cc
+	IntervalTypeFactory.cc
+	StringDomain.cc
+	StringTypeFactory.cc
+	SymbolDomain.cc
+	SymbolTypeFactory.cc
 	test-support.cc
 	;
 
