@@ -7,6 +7,9 @@ namespace Prototype {
   class Object;
   typedef Europa::Id<Object> ObjectId;
 
+  class Timeline;
+  typedef Europa::Id<Timeline> TimelineId;
+
   class Token;
   typedef Europa::Id<Token> TokenId;
 
