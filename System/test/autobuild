@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.41 2003-04-01 18:05:42 wedgingt Exp $
+# $Id: autobuild,v 1.42 2003-04-09 16:43:59 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -69,11 +69,6 @@ for dir in $subdirs
 do
 
     cd "$startdir"
-    if test -d "$dir"/NewPlan
-    then
-        echo "$0"': '"$dir"'/NewPlan already exists; exiting'
-        exit 1
-    fi
 
     if test ! -d "$dir"
     then
@@ -83,19 +78,23 @@ do
 
     cd "$dir"
 
-    cvs co NewPlan > cvs.co.NewPlan 2>&1
-    status=$?
-    echo '"cvs co NewPlan" in '"`pwd`"' exited '"$status"
+    if test -d NewPlan
+    then
+	mkdir NewPlan/working || exit 2
+	mkdir NewPlan/working/rerun
+    else
+	cvs co NewPlan > cvs.co.NewPlan 2>&1
+	status=$?
+	echo '"cvs co NewPlan" in '"`pwd`"' exited '"$status"
+	mkdir NewPlan/working || exit 2
+	if test "$status" != 0
+	then
+	    mkdir NewPlan/working/cvs.co.failed
+	    exit "$status"
+	fi
+    fi
 
     cd NewPlan
-
-    mkdir working || continue
-
-    if test "$status" != 0
-    then
-        mkdir working/cvs.co.failed
-        exit "$status"
-    fi
 
     if test -f ../make.options
     then
