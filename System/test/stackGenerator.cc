@@ -211,9 +211,9 @@ void ddloutputModel(std::ofstream& out, const Problem& prob) {
     out << " ?_any_value_";
   out << ")))))" << std::endl;
 #ifdef USING_RESOURCE
-  out << "  (contains (SINGLE ((MyResource_Class resource)) ((Consume (10)))))))" << std::endl;
-  out << "" << std::endl;
+  out << "  (contains (SINGLE ((MyResource_Class resource)) ((Consume (10)))))" << std::endl;
 #endif
+  out << "))\n" << std::endl;
   out << "(Define_Compatibility" << std::endl;
   out << " (SINGLE ((Satellite_Class satellite)) ((Slew (?X ?Y";
   for (int i=1; i<=prob.numParams; ++i)
@@ -236,8 +236,10 @@ void ddloutputModel(std::ofstream& out, const Problem& prob) {
     out << " ?_any_value_";
   out << ")))))" << std::endl;
 #ifdef USING_RESOURCE
-  out << "  (contains (SINGLE ((MyResource_Class resource)) ((Consume (100)))))))" << std::endl;
-  out << "" << std::endl;
+  out << "  (contains (SINGLE ((MyResource_Class resource)) ((Consume (100)))))" << std::endl;
+#endif
+  out << "))\n" << std::endl;
+#ifdef USING_RESOURCE
   out << "(Define_Compatibility" << std::endl;
   out << " (SINGLE ((MyResource_Class resource)) ((Consume (?X)))))" << std::endl;
   out << "" << std::endl;
