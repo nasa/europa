@@ -439,9 +439,12 @@ namespace EUROPA {
       Schema::instance()->addObjectType(LabelStr("Foo"));
 
       std::list<double> objIds;
-      for(int i = 0; i < 10; i++)
+      for(int i = 0; i < 10; i++) {
+        std::stringstream n;
+        n << "Foo" << i;
         objIds.push_back((double)(new Object(assembly.m_db, LabelStr("Foo"),
-                                             LabelStr("Foo" + i)))->getId());
+                                             LabelStr(n.str())))->getId());
+      }
 
       AverHelper::queryObjects();
 
