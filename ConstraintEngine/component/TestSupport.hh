@@ -41,7 +41,7 @@ private:
 #define runTest(test) { \
   try { \
   std::cout << "      " << #test; \
-  int id_count = IdTable::size(); \
+  unsigned int id_count = IdTable::size(); \
   bool result = test(); \
   DefaultEngineAccessor::reset(); \
   if (result && IdTable::size() <= id_count) \

@@ -298,7 +298,7 @@ bool IdTests::test(){
 
 bool IdTests::testBasicAllocation()
 {
-  int initialSize = IdTable::size();
+  unsigned int initialSize = IdTable::size();
   Foo *fooPtr = new Foo();
   Id<Foo> fId1(fooPtr);
   assert(Foo::getCount() == 1);
@@ -468,6 +468,7 @@ public:
     runTest(testBasicAllocation);
     runTest(testElementCounting);
     runTest(testElementAccess);
+    runTest(testComparisons);
     return true;
   }
 
@@ -489,7 +490,7 @@ private:
     LabelStr lbl5(key);
     assertTrue(lbl5 == lbl2);
     assertTrue(LabelStr::isString(key));
-    assertFalse(LabelStr::isString(ASSUMED_MINIMUM_MEMORY_ADDRESS + 1));
+    assertFalse(LabelStr::isString(1));
 
     assertTrue(compare(lbl3, lbl2));
     assertTrue(compare("This is another char*", "This is another char*"));
@@ -515,6 +516,18 @@ private:
 
     LabelStr last(lbl1.getElement(3, "1"));
     assert(last == LabelStr("D EFGH"));
+    return true;
+  }
+
+  static bool testComparisons(){
+    LabelStr lbl1("A");
+    LabelStr lbl2("G");
+    LabelStr lbl3("B");
+    LabelStr lbl4("B");
+    assert(lbl1 < lbl2);
+    assert(lbl2 > lbl4);
+    assert(lbl2 != lbl4);
+    assert(lbl4 == lbl3);
     return true;
   }
 };
