@@ -3,6 +3,9 @@
 
 #include <cassert>
 
+#ifdef __BEOS__
+#include <debugger.h>
+#endif
 
 //#define PROTOTYPE_FAST_VERSION
 
