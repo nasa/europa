@@ -6,13 +6,34 @@
 #include "ConstrainedVariable.hh"
 #include "Variable.hh"
 #include "Constraint.hh"
-
+#include "PlanDatabaseListener.hh"
 
 namespace Prototype {
 
-  ResourcePropagator::ResourcePropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
-    : Propagator(name, constraintEngine){}
+  namespace ResourceProp {
+    DbResourceConnector::DbResourceConnector(const PlanDatabaseId& planDatabase, const ResourcePropagatorId& resourcePropagator)
+      : PlanDatabaseListener(planDatabase), m_resourcePropagator(resourcePropagator){}
 
+    void DbResourceConnector::notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor) {
+      if (TransactionId::convertable(token)) {
+	check_error(ResourceId::convertable(object));
+	m_resourcePropagator->handleResourcePropagation(ResourceId(object), token->getObject());
+      }
+    }
+  }
+
+  using namespace ResourceProp;
+		      
+
+  ResourcePropagator::ResourcePropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine, const PlanDatabaseId& planDatabase)
+    : Propagator(name, constraintEngine), m_planDb(planDatabase){
+    m_planDbListener = (new DbResourceConnector(m_planDb, getId()))->getId();
+  }
+
+  ResourcePropagator::~ResourcePropagator() {
+   // check_error(m_planDbListener.isValid());
+   // delete (PlanDatabaseListener*) m_planDbListener;
+  }
 
   void ResourcePropagator::handleNotification(const ConstrainedVariableId& variable, 
 					     int argIndex, 

@@ -28,6 +28,9 @@ namespace Prototype
   class ResourceConstraint;
   typedef Id<ResourceConstraint> ResourceConstraintId;
 
+  class ResourcePropagator;
+  typedef Id<ResourcePropagator> ResourcePropagatorId;
+
   template<class DomainType> class TokenVariable;
   typedef Id< TokenVariable<IntervalDomain> > ResVarId;
   

@@ -41,7 +41,7 @@ const double consumptionMax = -50;
     Schema schema; \
     PlanDatabase db(ce.getId(), schema.getId()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-    new ResourcePropagator(LabelStr("Resource"), ce.getId()); \
+    new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId()); \
     Id<DbLogger> dbLId; \
     if (loggingEnabled()) { \
       new CeLogger(std::cout, ce.getId()); \
@@ -87,7 +87,9 @@ public:
     runTest(testIntervalCapacityValues);
     runTest(testConstraintCheckOnInsertion);
     runTest(testRateConstraintViolation);
-    runTest(testLowerLimitExceededViolation);
+    runTest(testLowerTotalProductionExceededViolation);
+    runTest(testLowerTotalConsumptionExceededViolation);
+    runTest(testLowerProductionRateExceededViolation);
     runTest(testUpperLimitExceededViolation);
     runTest(testSummationConstraintViolation);
     return true;
@@ -489,32 +491,130 @@ private:
 				 limitMax, limitMin, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
+    std::list<ViolationId> violations;
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), productionRateMax, productionRateMax + 1))->getId();
     r->constrain(t1);
     ce.propagate();
+    TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), 1, 1))->getId();
+    r->constrain(t3);
+    assert(!ce.propagate());
+
+    r->getViolations(violations);
+    assert(violations.size() == 1);
+    assert(violations.front()->getType() == Violation::ProductionRateExceeded);
+    r->free(t1);
+    r->free(t3);
+    assert(ce.propagate());
+
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), consumptionRateMax -1, consumptionRateMax))->getId();
     r->constrain(t2);
     ce.propagate();
-    TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), 1, 1))->getId();
-    r->constrain(t3);
-    ce.propagate();
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), -1, -1))->getId();
     r->constrain(t4);
-    ce.propagate();
-      
-    std::list<ViolationId> violations;
-      
+    assert(!ce.propagate());
+
+    violations.clear();
     r->getViolations(violations);
-    assert(violations.size() == 2);
-    assert(violations.front()->getType() == Violation::ProductionRateExceeded);
-    assert(violations.back()->getType() == Violation::ConsumptionRateExceeded);
+    assert(violations.size() == 1);
+    assert(violations.front()->getType() == Violation::ConsumptionRateExceeded);
+    r->free(t2);
+    r->free(t4);
+    assert(ce.propagate());
       
     DEFAULT_TEARDOWN();
     return(true);
   }
 
-  static bool testLowerLimitExceededViolation()
+  static bool testLowerTotalProductionExceededViolation()
+  {
+    // Define input constrains for the resource spec
+
+    DEFAULT_SETUP(ce,db,schema,false);
+    
+    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+				 limitMax, limitMin, productionMax, productionMax, MINUS_INFINITY, MINUS_INFINITY))->getId();
+    db.close();
+
+    std::list<ViolationId> violations;
+
+    // Test that a violation is detected when the excess in the level cannot be overcome by remaining
+    // production
+    TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
+    r->constrain(t1);
+    assert(ce.propagate());
+    TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
+    r->constrain(t2);
+    assert(ce.propagate());    
+    TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
+    r->constrain(t3);
+    assert(ce.propagate());
+    TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
+    r->constrain(t4);
+    assert(ce.propagate());
+    TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 6), -8, -8))->getId();
+    r->constrain(t5);
+    assert(ce.propagate());
+    // This will push it over the edge
+    TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(10, 10), -8, -8))->getId(); 
+    r->constrain(t6);
+    assert(!ce.propagate());
+
+    assert(checkLevelArea(r) == 0);
+    r->getViolations(violations);
+    assert(violations.front()->getType() == Violation::LevelTooLow);
+
+    DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testLowerTotalConsumptionExceededViolation()
+  {
+    // Define input constrains for the resource spec
+
+    DEFAULT_SETUP(ce,db,schema,false);
+    
+    ResourceId r = (new Resource(db.getId(), LabelStr("AllObjects"), LabelStr("r1"), initialCapacity, horizonStart, horizonEnd, 
+				 limitMax, limitMin, PLUS_INFINITY, PLUS_INFINITY, consumptionMax, consumptionMax))->getId();
+    db.close();
+
+    std::list<ViolationId> violations;
+
+    // Test that a violation is detected when the excess in the level cannot be overcome by remaining
+    // production
+    TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
+    r->constrain(t1);
+    assert(ce.propagate());
+    TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
+    r->constrain(t2);
+    assert(ce.propagate());    
+    TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
+    r->constrain(t3);
+    assert(ce.propagate());
+    TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
+    r->constrain(t4);
+    assert(ce.propagate());
+    TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 6), -8, -8))->getId();
+    r->constrain(t5);
+    assert(ce.propagate());
+    TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(8, 8), -8, -8))->getId(); 
+    r->constrain(t6);
+    assert(ce.propagate());
+    // This will push it over the edge
+    TransactionId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(10, 10), -8, -8))->getId(); 
+    r->constrain(t7);
+    assert(!ce.propagate());
+
+
+    assert(checkLevelArea(r) == 0);
+    r->getViolations(violations);
+    assert(violations.front()->getType() == Violation::ConsumptionSumExceeded);
+
+    DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testLowerProductionRateExceededViolation()
   {
     // Define input constrains for the resource spec
 
@@ -530,32 +630,25 @@ private:
     // production
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
     r->constrain(t1);
-    ce.propagate();
+    assert(ce.propagate());
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
     r->constrain(t2);
-    ce.propagate();    
+    assert(ce.propagate());    
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
     r->constrain(t3);
-    ce.propagate();
+    assert(ce.propagate());
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
     r->constrain(t4);
-    ce.propagate();
-    TransactionId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 6), -8, -8))->getId();
-    r->constrain(t5);
-    ce.propagate();
-    TransactionId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(10, 10), -8, -8))->getId(); // This will push it over the edge
-    r->constrain(t6);
-    ce.propagate();
+    assert(!ce.propagate());
 
     assert(checkLevelArea(r) == 0);
-
     r->getViolations(violations);
-    assert(violations.size() == 3);
     assert(violations.front()->getType() == Violation::LevelTooLow);
 
     DEFAULT_TEARDOWN();
     return(true);
   }
+
 
   static bool testUpperLimitExceededViolation()
   {
@@ -602,16 +695,15 @@ private:
     for (int i = 0; i < 11; i++){
       TransactionId t = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(i, i), productionRateMax, productionRateMax))->getId();
       r->constrain(t);
-      ce.propagate();
       transactions.push_back(t);
     }
     for (int i = 0; i < 11; i++){
       TransactionId t = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(i, i), -productionRateMax, -productionRateMax))->getId();
       r->constrain(t);
-      ce.propagate();
       transactions.push_back(t);
     }
 
+    ce.propagate();
     assert(checkLevelArea(r) == 0);
 
     // Ensure the violations remain unchanged
