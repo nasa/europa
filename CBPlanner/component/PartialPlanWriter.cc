@@ -65,7 +65,7 @@ const char *envPPWConfigFile = "PPW_CONFIG";
 #define IN_GENERAL_SECTION 1
 #define IN_TRANSACTION_SECTION 2
 
-//0                   1               2              3
+                       //0                   1               2              3
 enum transactionNames {OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_ADDED_TO_OBJECT, 
                        //4             5                6                  7             8
                        TOKEN_CLOSED, TOKEN_ACTIVATED, TOKEN_DEACTIVATED, TOKEN_MERGED, TOKEN_SPLIT,
@@ -88,11 +88,11 @@ enum transactionNames {OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_
                        //33             34           35                   36                  37
                        RULE_EXECUTED, RULE_UNDONE, ASSIGN_NEXT_STARTED, ASSIGN_NEXT_FAILED, ASSIGN_NEXT_SUCCEEDED,
                        //38                      39                     40
-											 ASSIGN_CURRENT_STARTED, ASSIGN_CURRENT_FAILED, ASSIGN_CURRENT_SUCCEEDED,
+                       ASSIGN_CURRENT_STARTED, ASSIGN_CURRENT_FAILED, ASSIGN_CURRENT_SUCCEEDED,
                        //41               42              43               
-											 RETRACT_STARTED, RETRACT_FAILED, RETRACT_SUCCEEDED, 
+                       RETRACT_STARTED, RETRACT_FAILED, RETRACT_SUCCEEDED, 
                        //44                     45                     46                     47
-											 PROPAGATION_COMMENCED, PROPAGATION_COMPLETED, PROPAGATION_PREEMPTED, ERROR};
+                       PROPAGATION_COMMENCED, PROPAGATION_COMPLETED, PROPAGATION_PREEMPTED, ERROR};
 
 const int transactionTotal = ERROR + 1;
 
@@ -113,49 +113,49 @@ const char *NONE = "";
 const char *transactionTypeStrs[transactionTotal] = {
   //OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_ADDED_TO_OBJECT,
   CREATION, DELETION, CREATION, ADDITION,
-	// TOKEN_CLOSED, TOKEN_ACTIVATED, TOKEN_DEACTIVATED, TOKEN_MERGED, TOKEN_SPLIT,
-	CLOSURE, NONE, NONE, NONE, NONE,
-	//TOKEN_REJECTED, TOKEN_REINSTATED, TOKEN_DELETED, TOKEN_REMOVED,
-	NONE, NONE, DELETION, REMOVAL, 
-	//TOKEN_INSERTED, TOKEN_FREED, CONSTRAINT_CREATED, CONSTRAINT_DELETED,
-	NONE, NONE, CREATION, DELETION,
-	// CONSTRAINT_EXECUTED, VAR_CREATED, VAR_DELETED, VAR_DOMAIN_RELAXED,
-	EXECUTION, CREATION, DELETION, RELAXATION,
-	//VAR_DOMAIN_RESTRICTED, VAR_DOMAIN_SPECIFIED, VAR_DOMAIN_RESET, 
-	RESTRICTION, SPECIFICATION, RELAXATION, 
-	//VAR_DOMAIN_EMPTIED, VAR_DOMAIN_UPPER_BOUND_DECREASED, 
-	RESTRICTION, RESTRICTION,
-	//VAR_DOMAIN_LOWER_BOUND_INCREASED, VAR_DOMAIN_BOUNDS_RESTRICTED,
-	RESTRICTION, RESTRICTION,
-	//VAR_DOMAIN_VALUE_REMOVED, VAR_DOMAIN_RESTRICT_TO_SINGLETON,
-	RESTRICTION, RESTRICTION,
-	//VAR_DOMAIN_SET, VAR_DOMAIN_SET_TO_SINGLETON, VAR_DOMAIN_CLOSED,
-	SPECIFICATION, SPECIFICATION, CLOSURE, 
-	//RULE_EXECUTED, RULE_UNDONE, ASSIGN_NEXT_STARTED, ASSIGN_NEXT_FAILED, ASSIGN_NEXT_SUCCEEDED,
-	EXECUTION, UNDO, ASSIGNMENT, ASSIGNMENT, ASSIGNMENT,
-	//ASSIGN_CURRENT_STARTED, ASSIGN_CURRENT_FAILED, ASSIGN_CURRENT_SUCCEEDED,
-	ASSIGNMENT, ASSIGNMENT, ASSIGNMENT,
-	//RETRACT_STARTED, RETRACT_FAILED, RETRACT_SUCCEEDED,
-	RETRACTION, RETRACTION, RETRACTION,
-	//PROPAGATION_COMMENCED, PROPAGATION_COMPLETED, PROPAGATION_PREEMPTED, ERROR
-	NONE, NONE, NONE, "ERROR"};
+  // TOKEN_CLOSED, TOKEN_ACTIVATED, TOKEN_DEACTIVATED, TOKEN_MERGED, TOKEN_SPLIT,
+  CLOSURE, NONE, NONE, NONE, NONE,
+  //TOKEN_REJECTED, TOKEN_REINSTATED, TOKEN_DELETED, TOKEN_REMOVED,
+  NONE, NONE, DELETION, REMOVAL, 
+  //TOKEN_INSERTED, TOKEN_FREED, CONSTRAINT_CREATED, CONSTRAINT_DELETED,
+  NONE, NONE, CREATION, DELETION,
+  // CONSTRAINT_EXECUTED, VAR_CREATED, VAR_DELETED, VAR_DOMAIN_RELAXED,
+  EXECUTION, CREATION, DELETION, RELAXATION,
+  //VAR_DOMAIN_RESTRICTED, VAR_DOMAIN_SPECIFIED, VAR_DOMAIN_RESET, 
+  RESTRICTION, SPECIFICATION, RELAXATION, 
+  //VAR_DOMAIN_EMPTIED, VAR_DOMAIN_UPPER_BOUND_DECREASED, 
+  RESTRICTION, RESTRICTION,
+  //VAR_DOMAIN_LOWER_BOUND_INCREASED, VAR_DOMAIN_BOUNDS_RESTRICTED,
+  RESTRICTION, RESTRICTION,
+  //VAR_DOMAIN_VALUE_REMOVED, VAR_DOMAIN_RESTRICT_TO_SINGLETON,
+  RESTRICTION, RESTRICTION,
+  //VAR_DOMAIN_SET, VAR_DOMAIN_SET_TO_SINGLETON, VAR_DOMAIN_CLOSED,
+  SPECIFICATION, SPECIFICATION, CLOSURE, 
+  //RULE_EXECUTED, RULE_UNDONE, ASSIGN_NEXT_STARTED, ASSIGN_NEXT_FAILED, ASSIGN_NEXT_SUCCEEDED,
+  EXECUTION, UNDO, ASSIGNMENT, ASSIGNMENT, ASSIGNMENT,
+  //ASSIGN_CURRENT_STARTED, ASSIGN_CURRENT_FAILED, ASSIGN_CURRENT_SUCCEEDED,
+  ASSIGNMENT, ASSIGNMENT, ASSIGNMENT,
+  //RETRACT_STARTED, RETRACT_FAILED, RETRACT_SUCCEEDED,
+  RETRACTION, RETRACTION, RETRACTION,
+  //PROPAGATION_COMMENCED, PROPAGATION_COMPLETED, PROPAGATION_PREEMPTED, ERROR
+  NONE, NONE, NONE, "ERROR"};
  
 const char *transactionNameStrs[transactionTotal] = { 
   "OBJECT_CREATED", "OBJECT_DELETED", "TOKEN_CREATED", "TOKEN_ADDED_TO_OBJECT", "TOKEN_CLOSED",
-	"TOKEN_ACTIVATED", "TOKEN_DEACTIVATED", "TOKEN_MERGED", "TOKEN_SPLIT", "TOKEN_REJECTED",
-	"TOKEN_REINSTATED", "TOKEN_DELETED", "TOKEN_REMOVED", "TOKEN_INSERTED", "TOKEN_FREED",
-	"CONSTRAINT_CREATED", "CONSTRAINT_DELETED", "CONSTRAINT_EXECUTED", "VARIABLE_CREATED",
-	"VARIABLE_DELETED", "VARIABLE_DOMAIN_RELAXED", "VARIABLE_DOMAIN_RESTRICTED", 
-	"VARIABLE_DOMAIN_SPECIFIED", "VARIABLE_DOMAIN_RESET", "VARIABLE_DOMAIN_EMPTIED", 
-	"VARIABLE_DOMAIN_UPPER_BOUND_DECREASED", "VARIABLE_DOMAIN_LOWER_BOUND_INCREASED", 
-	"VARIABLE_DOMAIN_BOUNDS_RESTRICTED", "VARIABLE_DOMAIN_VALUE_REMOVED", 
-	"VARIABLE_DOMAIN_RESTRICT_TO_SINGLETON", "VARIABLE_DOMAIN_SET", 
-	"VARIABLE_DOMAIN_SET_TO_SINGLETON", "VARIABLE_DOMAIN_CLOSED", "RULE_EXECUTED", "RULE_UNDONE",
-	"ASSIGN_NEXT_DECISION_STARTED", "ASSIGN_NEXT_DECISION_FAILED", "ASSIGN_NEXT_DECISION_SUCCEEDED", 
-	"ASSIGN_CURRENT_DECISION_STARTED", "ASSIGN_CURRENT_DECISION_FAILED","ASSIGN_CURRENT_DECISION_SUCCEEDED",
-	"RETRACT_DECISION_STARTED", "RETRACT_DECISION_FAILED", "RETRACT_DECISION_SUCCEEDED",
-	"PROPAGATION_COMMENCED", "PROPAGATION_COMPLETED", "PROPAGATION_PREEMPTED",
-	"ERROR"};
+  "TOKEN_ACTIVATED", "TOKEN_DEACTIVATED", "TOKEN_MERGED", "TOKEN_SPLIT", "TOKEN_REJECTED",
+  "TOKEN_REINSTATED", "TOKEN_DELETED", "TOKEN_REMOVED", "TOKEN_INSERTED", "TOKEN_FREED",
+  "CONSTRAINT_CREATED", "CONSTRAINT_DELETED", "CONSTRAINT_EXECUTED", "VARIABLE_CREATED",
+  "VARIABLE_DELETED", "VARIABLE_DOMAIN_RELAXED", "VARIABLE_DOMAIN_RESTRICTED", 
+  "VARIABLE_DOMAIN_SPECIFIED", "VARIABLE_DOMAIN_RESET", "VARIABLE_DOMAIN_EMPTIED", 
+  "VARIABLE_DOMAIN_UPPER_BOUND_DECREASED", "VARIABLE_DOMAIN_LOWER_BOUND_INCREASED", 
+  "VARIABLE_DOMAIN_BOUNDS_RESTRICTED", "VARIABLE_DOMAIN_VALUE_REMOVED", 
+  "VARIABLE_DOMAIN_RESTRICT_TO_SINGLETON", "VARIABLE_DOMAIN_SET", 
+  "VARIABLE_DOMAIN_SET_TO_SINGLETON", "VARIABLE_DOMAIN_CLOSED", "RULE_EXECUTED", "RULE_UNDONE",
+  "ASSIGN_NEXT_DECISION_STARTED", "ASSIGN_NEXT_DECISION_FAILED", "ASSIGN_NEXT_DECISION_SUCCEEDED", 
+  "ASSIGN_CURRENT_DECISION_STARTED", "ASSIGN_CURRENT_DECISION_FAILED","ASSIGN_CURRENT_DECISION_SUCCEEDED",
+  "RETRACT_DECISION_STARTED", "RETRACT_DECISION_FAILED", "RETRACT_DECISION_SUCCEEDED",
+  "PROPAGATION_COMMENCED", "PROPAGATION_COMPLETED", "PROPAGATION_PREEMPTED",
+  "ERROR"};
 
 bool allowTransaction[transactionTotal];
 
@@ -175,7 +175,7 @@ const std::string MEMBER_VAR("MEMBER_VAR");
 const std::string RULE_VAR("RULE_VAR");
 
 const std::string tokenVarTypes[8] = 
-	{STATE_VAR, OBJECT_VAR, DURATION_VAR, START_VAR, END_VAR, PARAMETER_VAR, MEMBER_VAR, RULE_VAR};
+  {STATE_VAR, OBJECT_VAR, DURATION_VAR, START_VAR, END_VAR, PARAMETER_VAR, MEMBER_VAR, RULE_VAR};
 
 enum varTypes {I_STATE = 0, I_OBJECT, I_DURATION, I_START, I_END, I_PARAMETER, I_MEMBER, I_RULE};
 enum objectTypes {O_OBJECT = 0, O_TIMELINE, O_RESOURCE};
@@ -238,12 +238,12 @@ const std::string MAX_CHOICES("MaxChoices");
 #ifdef __BEOS__
 #define NBBY 8
 static char *realpath(const char *path, char *resolved_path) {
-	BPath tempPath(path,NULL,true);
-	if (tempPath.Path() == NULL) {
-		return NULL;
-	}
-	strcpy(resolved_path,tempPath.Path());
-	return resolved_path;
+  BPath tempPath(path,NULL,true);
+  if (tempPath.Path() == NULL) {
+    return NULL;
+  }
+  strcpy(resolved_path,tempPath.Path());
+  return resolved_path;
 }
 #endif
 
@@ -251,7 +251,7 @@ static char *realpath(const char *path, char *resolved_path) {
 namespace PLASMA {
   namespace PlanWriter {
 		
-		inline long long int timeval2Id(const struct timeval &currTime) {
+    inline long long int timeval2Id(const struct timeval &currTime) {
       return (((long long int) currTime.tv_sec) * 1000) + (currTime.tv_usec / 1000);
     }
 
@@ -263,43 +263,44 @@ namespace PLASMA {
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb,
                                          const ConstraintEngineId &ceId2,
                                          const RulesEngineId &reId2,
-																				 const CBPlannerId &plId2) {
-			havePlanner = true;
+                                         const CBPlannerId &plId2) {
+      havePlanner = true;
       new PPWPlanDatabaseListener(planDb, this);
       new PPWConstraintEngineListener(ceId2, this);
       new PPWRulesEngineListener(reId2, this);
-			new PPWPlannerListener(plId2, this);
+      new PPWPlannerListener(plId2, this);
       commonInit(planDb, ceId2);
-			reId = const_cast<RulesEngineId *> (&reId2);
-			plId = const_cast<CBPlannerId *> (&plId2);
-		}
+      reId = const_cast<RulesEngineId *> (&reId2);
+      plId = const_cast<CBPlannerId *> (&plId2);
+    }
 
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb,
                                          const ConstraintEngineId &ceId2,
                                          const RulesEngineId &reId2) {
-			havePlanner = false;
+      havePlanner = false;
       new PPWPlanDatabaseListener(planDb, this);
       new PPWConstraintEngineListener(ceId2, this);
       new PPWRulesEngineListener(reId2, this);
       commonInit(planDb, ceId2);
-			reId = const_cast<RulesEngineId *> (&reId2);
-			plId = NULL;
+      reId = const_cast<RulesEngineId *> (&reId2);
+      plId = NULL;
     }
 
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb, 
                                          const ConstraintEngineId &ceId2) {
-			havePlanner = false;
+      havePlanner = false;
       new PPWPlanDatabaseListener(planDb, this);
       new PPWConstraintEngineListener(ceId2, this);
       commonInit(planDb, ceId2);
-			reId = NULL;
-			plId = NULL;
+      reId = NULL;
+      plId = NULL;
     }
 
     void PartialPlanWriter::commonInit(const PlanDatabaseId &planDb,
                                        const ConstraintEngineId &ceId2) {
       nstep = 0;
-			maxChoices = INT_MAX;
+      maxChoices = INT_MAX;
+      destAlreadyInitialized = false;
       struct timeval currTime;
       if(gettimeofday(&currTime, NULL)) {
         FatalError("gettimeofday()", "Failed to get current time.");
@@ -319,30 +320,36 @@ namespace PLASMA {
       //add default directories to search for model files
       sourcePaths.push_back(".");
       sourcePaths.push_back("..");
-			char *configPath = getenv(envPPWConfigFile);
-			if (configPath == NULL || configPath[0] == '\0') {
-                          std::cerr << "Warning: PPW_CONFIG not set or is empty; PartialPlanWriter will not write." << std::endl;
-                          stepsPerWrite = 0;
-                          noFullWrite = 1;
-                          writeStep = 0;
-                          return;
-			}
+      char *configPath = getenv(envPPWConfigFile);
+      if (configPath == NULL || configPath[0] == '\0') {
+        std::cerr << "Warning: PPW_CONFIG not set or is empty." << std::endl;
+        std::cerr << "   PartialPlanWriter will not write." << std::endl;
+        std::cerr << "   Under client control, some step 0 transactions will not be logged." << std::endl;
+        stepsPerWrite = 0;
+        noFullWrite = 1;
+        writeStep = 0;
+        //initialize as enabled in case under client control
+        //does not affect normal operation since stepsPerWrite = 0
+        for(int i = 0; i < transactionTotal; i++)
+          allowTransaction[i] = true;
+        return;
+      }
 			
-			char *configBuf = new char[PATH_MAX + 100];
-                        if (configBuf == 0)
-                          FatalErr("No memory for PPW_CONFIG");
-			if (realpath(configPath, configBuf) == NULL) {
-                          std::cerr << "Failed to get config file " << configPath << std::endl;
-                          FatalErrno();
-			}
+      char *configBuf = new char[PATH_MAX + 100];
+      if (configBuf == 0)
+        FatalErr("No memory for PPW_CONFIG");
+      if (realpath(configPath, configBuf) == NULL) {
+        std::cerr << "Failed to get config file " << configPath << std::endl;
+        FatalErrno();
+      }
 
-                        //std::cerr << "PPW DEBUG:constructing:configFile; configBuf = " << configBuf << std::endl;
-			std::ifstream configFile(configBuf);
-			if (!configFile) {
-                          std::cerr << "Failed to open config file " << configBuf << std::endl;
-                          FatalErrno();
-			}
-			std::string buf;
+      //std::cerr << "PPW DEBUG:constructing:configFile; configBuf = " << configBuf << std::endl;
+      std::ifstream configFile(configBuf);
+      if (!configFile) {
+        std::cerr << "Failed to open config file " << configBuf << std::endl;
+        FatalErrno();
+      }
+      std::string buf;
 
       parseConfigFile(configFile);
 
@@ -352,13 +359,16 @@ namespace PLASMA {
       if (noFullWrite == 1 && writeStep == 1) {
         stepsPerWrite = 1;
       }
+    }
+
+    void PartialPlanWriter::initOutputDestination() {
 
       char *destBuf = new char[PATH_MAX];
       if(realpath(dest.c_str(), destBuf) == NULL && stepsPerWrite != 0) {
-				if(mkdir(destBuf, 0777) && errno != EEXIST) {
-					std::cerr << "Failed to make destination directory " << dest << std::endl;
-					FatalErrno();
-				}
+        if(mkdir(destBuf, 0777) && errno != EEXIST) {
+          std::cerr << "Failed to make destination directory " << dest << std::endl;
+          FatalErrno();
+        }
       }
       realpath(dest.c_str(), destBuf);
       dest = destBuf;
@@ -368,10 +378,10 @@ namespace PLASMA {
       sprintf(timestr, "%lld", seqId);
       std::string modelName = (*pdbId)->getSchema()->getName().toString();
       {
-				std::string::size_type tempIndex = modelName.rfind('/');
-				if(tempIndex > 0 && tempIndex < modelName.length()) {
-					modelName = modelName.substr(tempIndex);
-				}
+        std::string::size_type tempIndex = modelName.rfind('/');
+        if(tempIndex > 0 && tempIndex < modelName.length()) {
+          modelName = modelName.substr(tempIndex);
+        }
       }
 
       std::string seqName = modelName;
@@ -392,23 +402,23 @@ namespace PLASMA {
         }
         if(seqName[0] != '/')
           dest += "/";
-				dest += seqName;
-				dest += timestr;
+        dest += seqName;
+        dest += timestr;
 
-				if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
-					std::cerr << "Failed to make directory " << dest << std::endl;
-					FatalErrno();
-				}
-				std::string ppStats(dest + PARTIAL_PLAN_STATS);
-				std::string ppTransactions(dest + TRANSACTIONS);
+        if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
+          std::cerr << "Failed to make directory " << dest << std::endl;
+          FatalErrno();
+        }
+        std::string ppStats(dest + PARTIAL_PLAN_STATS);
+        std::string ppTransactions(dest + TRANSACTIONS);
         std::string seqRules(dest + RULES);
-				std::string seqStr(dest + SEQUENCE);
-				std::ofstream seqOut(seqStr.c_str());
-				if(!seqOut) {
-					std::cerr << "Failed to open " << seqStr << std::endl;
-					FatalErrno();
-				}
-				seqOut << dest << SEQ_COL_SEP << seqId << SEQ_COL_SEP;// << std::endl;
+        std::string seqStr(dest + SEQUENCE);
+        std::ofstream seqOut(seqStr.c_str());
+        if(!seqOut) {
+          std::cerr << "Failed to open " << seqStr << std::endl;
+          FatalErrno();
+        }
+        seqOut << dest << SEQ_COL_SEP << seqId << SEQ_COL_SEP;// << std::endl;
         
         std::ofstream rulesOut(seqRules.c_str());
         if(!rulesOut) {
@@ -465,26 +475,46 @@ namespace PLASMA {
   
     PartialPlanWriter::~PartialPlanWriter(void) {
       if(stepsPerWrite) {
-        //write();
-        transOut->close();
-        statsOut->close();
-        delete transOut;
-        delete statsOut;
+        if(destAlreadyInitialized) {
+          transOut->close();
+          statsOut->close();
+          delete transOut;
+          delete statsOut;
+        }
         delete transactionList;
       }
     }
 
-    // accessor to output destination full path
+    // accessor to get output destination full path
     std::string PartialPlanWriter::getDest(void) {
        return dest;
     }
 
+    /*
+     * accessor to set and init output destination path and files
+     *
+     * This should only be called before calling write() or
+     * writeStatsAndTransactions()
+     */
     void PartialPlanWriter::setDest(std::string destPath) {
-       dest = destPath;
-       /*
-        * TBD - need to change the way PPW is initialized before
-        * this can be implemented.
-        */
+      /*
+       * initialize write controls
+       * initialize the directories and files for the
+       * specified output destination.
+       */
+      if(!destAlreadyInitialized) {
+        dest = destPath;
+        noFullWrite = 1;   // do not write every step
+        stepsPerWrite = 1; // enable write in one step increments
+        writeStep = 1;     // enable one step client control of write
+
+        initOutputDestination();
+        destAlreadyInitialized = true;
+      } else {
+        std::cerr << "Destination directory already initialized to " << dest << std::endl; 
+        std::cerr << "Failed to initialize destination directory to " << destPath << std::endl;
+        FatalErrno();
+      }
     }
 
     int PartialPlanWriter::getNumTransactions() {
@@ -520,9 +550,18 @@ namespace PLASMA {
     }
 
     void PartialPlanWriter::write(void) {
+
+      /*
+       * init output destination files if this has not been done
+       * This is also called in WriteStatsAndTransactions() to cover
+       * cases where the first step is not written.
+       */
+      if(!destAlreadyInitialized) {
+        initOutputDestination();
+        destAlreadyInitialized = true;
+      }
       if(!transOut || !statsOut)
         return;
-
       ppId = 0LL;
       struct timeval currTime;
       if(gettimeofday(&currTime, NULL)) {
@@ -539,14 +578,14 @@ namespace PLASMA {
 
       std::string ppDest = dest + SLASH + stepnum;
       if(mkdir(ppDest.c_str(), 0777) && errno != EEXIST) {
-				std::cerr << "Failed to create " << ppDest << std::endl;
-				FatalErrno();
+        std::cerr << "Failed to create " << ppDest << std::endl;
+        FatalErrno();
       }
 
       std::string ppPartialPlan = ppDest + SLASH + stepnum + PARTIAL_PLAN;
       std::ofstream ppOut(ppPartialPlan.c_str());
       if(!ppOut) {
-				FatalErrno();
+        FatalErrno();
       }
 
       ppOut << stepnum << TAB << ppId << TAB << (*pdbId)->getSchema()->getName().toString()
@@ -556,13 +595,13 @@ namespace PLASMA {
       std::string ppObj = ppDest + SLASH + stepnum + OBJECTS;
       std::ofstream objOut(ppObj.c_str());
       if(!objOut) {
-				FatalErrno();
+        FatalErrno();
       }
 
       std::string ppTok = ppDest + SLASH + stepnum + TOKENS;
       std::ofstream tokOut(ppTok.c_str());
       if(!tokOut) {
-				FatalErrno();
+        FatalErrno();
       }
 
       std::string ppRuleInstances = ppDest + SLASH + stepnum + RULE_INSTANCES;
@@ -574,25 +613,25 @@ namespace PLASMA {
       std::string ppRISM = ppDest + SLASH + stepnum + RULE_INSTANCE_SLAVE_MAP;
       std::ofstream rismOut(ppRISM.c_str());
       if(!rismOut) {
-				FatalErrno();
+        FatalErrno();
       }
 
       std::string ppVars = ppDest + SLASH + stepnum + VARIABLES;
       std::ofstream varOut(ppVars.c_str());
       if(!varOut) {
-				FatalErrno();
+        FatalErrno();
       }
 
       std::string ppConstrs = ppDest + SLASH + stepnum + CONSTRAINTS;
       std::ofstream constrOut(ppConstrs.c_str());
       if(!constrOut) {
-				FatalErrno();
+        FatalErrno();
       }
 
       std::string ppCVM = ppDest + SLASH + stepnum + CONSTRAINT_VAR_MAP;
       std::ofstream cvmOut(ppCVM.c_str());
       if(!cvmOut) {
-				FatalErrno();
+        FatalErrno();
       }
 
       std::string ppInsts = ppDest + SLASH + stepnum + INSTANTS;
@@ -609,17 +648,16 @@ namespace PLASMA {
 
       const std::set<ConstraintId, EntityComparator<EntityId> > &constraints = (*ceId)->getConstraints();
       numConstraints = constraints.size();
-      for(std::set<ConstraintId>::const_iterator it = constraints.begin();
-					it != constraints.end(); ++it) {
-				outputConstraint(*it, constrOut, cvmOut);
+      for(std::set<ConstraintId>::const_iterator it = constraints.begin(); it != constraints.end(); ++it) {
+        outputConstraint(*it, constrOut, cvmOut);
       }
 
       ObjectSet objects((*pdbId)->getObjects());
       TokenSet tokens((*pdbId)->getTokens());
       int slotId = 1000000;
       for(ObjectSet::iterator objectIterator = objects.begin();
-					objectIterator != objects.end(); ++objectIterator) {
-				const ObjectId &objId = *objectIterator;
+          objectIterator != objects.end(); ++objectIterator) {
+        const ObjectId &objId = *objectIterator;
         if(TimelineId::convertable(objId)) {
           outputObject(objId, O_TIMELINE, objOut, varOut);
           TimelineId &tId = (TimelineId &) objId;
@@ -750,6 +788,10 @@ namespace PLASMA {
        is written for all steps.
      */
     void PartialPlanWriter::writeStatsAndTransactions(void) {
+      if(!destAlreadyInitialized) {
+        initOutputDestination();
+        destAlreadyInitialized = true;
+      }
       if(!transOut)
         return;
 
@@ -843,8 +885,8 @@ namespace PLASMA {
                                         std::ofstream &varOut) {
       check_error(token.isValid());
       if(token->isIncomplete()) {
-				std::cerr << "Token " << token->getKey() << " is incomplete.  Skipping. " << std::endl;
-				return;
+        std::cerr << "Token " << token->getKey() << " is incomplete.  Skipping. " << std::endl;
+        return;
       }
       if(!tId.isNoId()) {
         tokOut << token->getKey() << TAB << type << TAB << slotId << TAB << slotIndex << TAB 
@@ -871,20 +913,20 @@ namespace PLASMA {
       std::string paramVarIds;
       char paramIdStr[NBBY * sizeof(int) * 28/93 + 4];
       for(std::vector<ConstrainedVariableId>::const_iterator paramVarIterator = 
-						token->getParameters().begin();
-					paramVarIterator != token->getParameters().end(); ++paramVarIterator) {
-				ConstrainedVariableId varId = *paramVarIterator;
-				check_error(varId.isValid());
-				outputConstrVar(varId, token->getKey(), I_PARAMETER, varOut);
-				memset(paramIdStr, '\0', NBBY * sizeof(int) * 28/93 + 4);
-				sprintf(paramIdStr, "%d", varId->getKey());
-				paramVarIds += std::string(paramIdStr) + COLON;
+          token->getParameters().begin();
+          paramVarIterator != token->getParameters().end(); ++paramVarIterator) {
+        ConstrainedVariableId varId = *paramVarIterator;
+        check_error(varId.isValid());
+        outputConstrVar(varId, token->getKey(), I_PARAMETER, varOut);
+        memset(paramIdStr, '\0', NBBY * sizeof(int) * 28/93 + 4);
+        sprintf(paramIdStr, "%d", varId->getKey());
+        paramVarIds += std::string(paramIdStr) + COLON;
       }
       if(paramVarIds == "") {
-				tokOut << SNULL << TAB;
+        tokOut << SNULL << TAB;
       }
       else {
-				tokOut << paramVarIds << TAB;
+        tokOut << paramVarIds << TAB;
       }
       /*ExtraInfo: QuantityMin:QuantityMax*/
       if(type == T_TRANSACTION) {
@@ -1083,18 +1125,18 @@ namespace PLASMA {
       }
     }
 
-		void PartialPlanWriter::outputInstant(const InstantId &instId, const int resId, 
-																					std::ofstream &instOut) {
-			instOut << ppId << TAB << resId << TAB << instId->getKey() << TAB << instId->getTime() 
-							<< TAB << instId->getLevelMin() << TAB << instId->getLevelMax() << TAB;
-			const TransactionSet &transactions = instId->getTransactions();
-			for(TransactionSet::const_iterator transIt = transactions.begin();
-					transIt != transactions.end(); ++transIt) {
-				TransactionId trans = *transIt;
-				instOut << trans->getKey() << COMMA;
-			}
-			instOut << std::endl;
-		}
+    void PartialPlanWriter::outputInstant(const InstantId &instId, const int resId, 
+                                          std::ofstream &instOut) {
+      instOut << ppId << TAB << resId << TAB << instId->getKey() << TAB << instId->getTime() 
+              << TAB << instId->getLevelMin() << TAB << instId->getLevelMax() << TAB;
+      const TransactionSet &transactions = instId->getTransactions();
+      for(TransactionSet::const_iterator transIt = transactions.begin();
+          transIt != transactions.end(); ++transIt) {
+        TransactionId trans = *transIt;
+        instOut << trans->getKey() << COMMA;
+      }
+      instOut << std::endl;
+    }
 
     void PartialPlanWriter::outputDecision(const DecisionPointId &dp, std::ofstream &decOut) {
       int type = 0;
@@ -1182,16 +1224,16 @@ namespace PLASMA {
       std::list<double> enumeration;
       EnumeratedDomain dom(edom);
       if(dom.isOpen()) {
-				dom.close();
+        dom.close();
       }
       if(dom.isInfinite()) {
-				return "-Infinity +Infinity";
+        return "-Infinity +Infinity";
       }
       if(dom.isEmpty()) {
-				return "empty";
+        return "empty";
       }
       else {
-				dom.getValues(enumeration);
+        dom.getValues(enumeration);
       }
       for(std::list<double>::iterator it = enumeration.begin(); it != enumeration.end(); ++it) {
         if(dom.isNumeric()) {
@@ -1248,19 +1290,19 @@ namespace PLASMA {
 
     void PartialPlanWriter::notifyAdded(const TokenId &tokId) {
       if(stepsPerWrite && allowTransaction[TOKEN_CREATED]) {
-				transactionList->push_back(Transaction(TOKEN_CREATED, tokId->getKey(), UNKNOWN,
-																							 transactionId++, seqId, nstep, 
-																							 tokId->getPredicateName().toString()));
-				numTransactions++;
+        transactionList->push_back(Transaction(TOKEN_CREATED, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep, 
+                                               tokId->getPredicateName().toString()));
+        numTransactions++;
       }
     }
 
     void PartialPlanWriter::notifyAdded(const ObjectId &objId, const TokenId &tokId) {
       if(stepsPerWrite && allowTransaction[TOKEN_ADDED_TO_OBJECT]) {
-				transactionList->push_back(Transaction(TOKEN_ADDED_TO_OBJECT, tokId->getKey(), UNKNOWN,
-																							 transactionId++, seqId, nstep, 
-																							 tokId->getPredicateName().toString()));
-				numTransactions++;
+        transactionList->push_back(Transaction(TOKEN_ADDED_TO_OBJECT, tokId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep, 
+                                               tokId->getPredicateName().toString()));
+        numTransactions++;
       }
     }
 
@@ -1368,19 +1410,19 @@ namespace PLASMA {
   
     void PartialPlanWriter::notifyAdded(const ConstraintId &constrId) {
       if(stepsPerWrite && allowTransaction[CONSTRAINT_CREATED]) {
-				transactionList->push_back(Transaction(CONSTRAINT_CREATED, constrId->getKey(), UNKNOWN,
-																							 transactionId++, seqId, nstep, 
-																							 constrId->getName().toString()));
-				numTransactions++;
+        transactionList->push_back(Transaction(CONSTRAINT_CREATED, constrId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep, 
+                                               constrId->getName().toString()));
+        numTransactions++;
       }
     }
 
     void PartialPlanWriter::notifyRemoved(const ConstraintId &constrId) {
       if(stepsPerWrite && allowTransaction[CONSTRAINT_DELETED]) {
-				transactionList->push_back(Transaction(CONSTRAINT_DELETED, constrId->getKey(), UNKNOWN,
-																							 transactionId++, seqId, nstep, 
-																							 constrId->getName().toString()));
-				numTransactions++;
+        transactionList->push_back(Transaction(CONSTRAINT_DELETED, constrId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep, 
+                                               constrId->getName().toString()));
+        numTransactions++;
       }
     }
 
@@ -1395,93 +1437,87 @@ namespace PLASMA {
 
     void PartialPlanWriter::notifyAdded(const ConstrainedVariableId &varId) {
       if(stepsPerWrite && allowTransaction[VAR_CREATED]) {
-				transactionList->push_back(Transaction(VAR_CREATED, varId->getKey(), UNKNOWN,
-																							 transactionId++, seqId, nstep, 
-																							 getVarInfo(varId)));
+        transactionList->push_back(Transaction(VAR_CREATED, varId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep, 
+                                               getVarInfo(varId)));
       }
     }
 
     void PartialPlanWriter::notifyRemoved(const ConstrainedVariableId &varId) {
       if(stepsPerWrite && allowTransaction[VAR_DELETED]) {
-				transactionList->push_back(Transaction(VAR_DELETED, varId->getKey(), UNKNOWN,
-																							 transactionId++, seqId, nstep, 
-																							 getVarInfo(varId)));
+        transactionList->push_back(Transaction(VAR_DELETED, varId->getKey(), UNKNOWN,
+                                               transactionId++, seqId, nstep, 
+                                               getVarInfo(varId)));
       }
     }
 
     void PartialPlanWriter::notifyChanged(const ConstrainedVariableId &varId, 
-																					const DomainListener::ChangeType &changeType) {
+                                          const DomainListener::ChangeType &changeType) {
       if(stepsPerWrite) {
-				switch(changeType) {
-				case DomainListener::RELAXED:
-					if(allowTransaction[VAR_DOMAIN_RELAXED])
-						transactionList->push_back(Transaction(VAR_DOMAIN_RELAXED, varId->getKey(), SYSTEM,
-																									 transactionId++, seqId, nstep, 
-																									 getVarInfo(varId)));
-					break;
-				case DomainListener::RESET:
-					if(allowTransaction[VAR_DOMAIN_RESET])
-						transactionList->push_back(Transaction(VAR_DOMAIN_RESET, varId->getKey(), USER,
-																									 transactionId++, seqId, nstep, 
-																									 getVarInfo(varId)));
-					break;
-				case DomainListener::VALUE_REMOVED:
-					if(allowTransaction[VAR_DOMAIN_VALUE_REMOVED])
-						transactionList->push_back(Transaction(VAR_DOMAIN_VALUE_REMOVED, varId->getKey(), 
-																									 UNKNOWN, transactionId++, seqId, nstep,
-																									 getVarInfo(varId)));
+        switch(changeType) {
+        case DomainListener::RELAXED:
+          if(allowTransaction[VAR_DOMAIN_RELAXED])
+            transactionList->push_back(Transaction(VAR_DOMAIN_RELAXED, varId->getKey(), SYSTEM,
+                                                   transactionId++, seqId, nstep, getVarInfo(varId)));
           break;
-				case DomainListener::BOUNDS_RESTRICTED:
-					if(allowTransaction[VAR_DOMAIN_BOUNDS_RESTRICTED])
-						transactionList->push_back(Transaction(VAR_DOMAIN_BOUNDS_RESTRICTED, varId->getKey(),
-																									 UNKNOWN, transactionId++, seqId, nstep,
-																									 getVarInfo(varId)));
+        case DomainListener::RESET:
+          if(allowTransaction[VAR_DOMAIN_RESET])
+            transactionList->push_back(Transaction(VAR_DOMAIN_RESET, varId->getKey(), USER,
+                                                   transactionId++, seqId, nstep, getVarInfo(varId)));
           break;
-				case DomainListener::LOWER_BOUND_INCREASED:
-					if(allowTransaction[VAR_DOMAIN_LOWER_BOUND_INCREASED])
-						transactionList->push_back(Transaction(VAR_DOMAIN_LOWER_BOUND_INCREASED, varId->getKey(),
-																									 UNKNOWN, transactionId++, seqId, nstep,
-																									 getVarInfo(varId)));
+        case DomainListener::VALUE_REMOVED:
+          if(allowTransaction[VAR_DOMAIN_VALUE_REMOVED])
+            transactionList->push_back(Transaction(VAR_DOMAIN_VALUE_REMOVED, varId->getKey(), 
+                                                   UNKNOWN, transactionId++, seqId, nstep, 
+                                                   getVarInfo(varId)));
           break;
-				case DomainListener::UPPER_BOUND_DECREASED:
-					if(allowTransaction[VAR_DOMAIN_UPPER_BOUND_DECREASED])
-						transactionList->push_back(Transaction(VAR_DOMAIN_UPPER_BOUND_DECREASED, varId->getKey(),
-																									 UNKNOWN, transactionId++, seqId, nstep,
-																									 getVarInfo(varId)));
+        case DomainListener::BOUNDS_RESTRICTED:
+          if(allowTransaction[VAR_DOMAIN_BOUNDS_RESTRICTED])
+            transactionList->push_back(Transaction(VAR_DOMAIN_BOUNDS_RESTRICTED, varId->getKey(),
+                                                   UNKNOWN, transactionId++, seqId, nstep, 
+                                                   getVarInfo(varId)));
           break;
-				case DomainListener::RESTRICT_TO_SINGLETON:
-					if(allowTransaction[VAR_DOMAIN_RESTRICT_TO_SINGLETON])
-						transactionList->push_back(Transaction(VAR_DOMAIN_RESTRICT_TO_SINGLETON, varId->getKey(),
-																									 SYSTEM, transactionId++, seqId, nstep, 
-																									 getVarInfo(varId)));
-					break;
-				case DomainListener::SET:
-					if(allowTransaction[VAR_DOMAIN_SET])
-						transactionList->push_back(Transaction(VAR_DOMAIN_SET, varId->getKey(), UNKNOWN,
-																									 transactionId++, seqId, nstep,
-																									 getVarInfo(varId)));
+        case DomainListener::LOWER_BOUND_INCREASED:
+          if(allowTransaction[VAR_DOMAIN_LOWER_BOUND_INCREASED])
+            transactionList->push_back(Transaction(VAR_DOMAIN_LOWER_BOUND_INCREASED, varId->getKey(),
+                                                   UNKNOWN, transactionId++, seqId, nstep, 
+                                                   getVarInfo(varId)));
           break;
-				case DomainListener::SET_TO_SINGLETON:
-					if(allowTransaction[VAR_DOMAIN_SET_TO_SINGLETON])
-						transactionList->push_back(Transaction(VAR_DOMAIN_SET_TO_SINGLETON, varId->getKey(),
-																									 USER, transactionId++, seqId, nstep, 
-																									 getVarInfo(varId)));
-					break;
-				case DomainListener::EMPTIED:
-					if(allowTransaction[VAR_DOMAIN_EMPTIED])
-						transactionList->push_back(Transaction(VAR_DOMAIN_EMPTIED, varId->getKey(), SYSTEM,
-																									 transactionId++, seqId, nstep, 
-																									 getVarInfo(varId)));
-					break;
-				case DomainListener::CLOSED:
-					if(allowTransaction[VAR_DOMAIN_CLOSED])
-						transactionList->push_back(Transaction(VAR_DOMAIN_CLOSED, varId->getKey(), SYSTEM,
-																									 transactionId++, seqId, nstep, 
-																									 getVarInfo(varId)));
+        case DomainListener::UPPER_BOUND_DECREASED:
+          if(allowTransaction[VAR_DOMAIN_UPPER_BOUND_DECREASED])
+            transactionList->push_back(Transaction(VAR_DOMAIN_UPPER_BOUND_DECREASED, varId->getKey(),
+                                                   UNKNOWN, transactionId++, seqId, nstep, 
+                                                   getVarInfo(varId)));
           break;
-				default:
-					break;
-				}
+        case DomainListener::RESTRICT_TO_SINGLETON:
+          if(allowTransaction[VAR_DOMAIN_RESTRICT_TO_SINGLETON])
+            transactionList->push_back(Transaction(VAR_DOMAIN_RESTRICT_TO_SINGLETON, varId->getKey(),
+                                                   SYSTEM, transactionId++, seqId, nstep, 
+                                                   getVarInfo(varId)));
+          break;
+        case DomainListener::SET:
+          if(allowTransaction[VAR_DOMAIN_SET])
+            transactionList->push_back(Transaction(VAR_DOMAIN_SET, varId->getKey(), UNKNOWN,
+                                                   transactionId++, seqId, nstep, getVarInfo(varId)));
+          break;
+        case DomainListener::SET_TO_SINGLETON:
+          if(allowTransaction[VAR_DOMAIN_SET_TO_SINGLETON])
+            transactionList->push_back(Transaction(VAR_DOMAIN_SET_TO_SINGLETON, varId->getKey(),
+                                                  USER, transactionId++, seqId, nstep, getVarInfo(varId)));
+          break;
+        case DomainListener::EMPTIED:
+          if(allowTransaction[VAR_DOMAIN_EMPTIED])
+            transactionList->push_back(Transaction(VAR_DOMAIN_EMPTIED, varId->getKey(), SYSTEM,
+                                                   transactionId++, seqId, nstep, getVarInfo(varId)));
+          break;
+        case DomainListener::CLOSED:
+          if(allowTransaction[VAR_DOMAIN_CLOSED])
+            transactionList->push_back(Transaction(VAR_DOMAIN_CLOSED, varId->getKey(), SYSTEM,
+                                                   transactionId++, seqId, nstep, getVarInfo(varId)));
+          break;
+        default:
+          break;
+	}
       }
     }
 

@@ -23,7 +23,7 @@ namespace PLASMA {
 
   const char* SPDstr = "SamplePlanDatabase not initialized";
 
-  int initModel(const char* libPath, const char* initialState) {
+  int initModel(const char* libPath, const char* initialState, const char* destPath) {
 
     int retStatus;
 
@@ -34,6 +34,13 @@ namespace PLASMA {
       //enable PLASMA exceptions
       Error::doThrowExceptions();
       retStatus = loadInitModel(libPath, initialState);
+
+      /*
+       * now that PPW is initialized set the output destination path 
+       */
+      SamplePlanDatabase *db1 = accessSamplePlanDB();
+      check_always(db1, SPDstr);
+      db1->writer->setDest(destPath);
     }
     catch (Error e) {
       printf("Exception in CBPlannerControl.cc:initModel()\n");

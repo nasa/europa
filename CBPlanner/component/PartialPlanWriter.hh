@@ -27,12 +27,12 @@ namespace PLASMA {
     class Transaction {
     public :
       Transaction(int type, int key, int source2, int id2, long long int seqid, int nstep,
-		  const std::string &info2)
-	: transactionType(type), objectKey(key), source(source2), id(id2), stepNum(nstep),
-	  sequenceId(seqid), info(info2) {}
+                  const std::string &info2)
+        : transactionType(type), objectKey(key), source(source2), id(id2), stepNum(nstep),
+           sequenceId(seqid), info(info2) {}
       Transaction(const Transaction &other) : transactionType(other.transactionType), 
-	objectKey(other.objectKey), source(other.source), id(other.id), stepNum(other.stepNum),
-	sequenceId(other.sequenceId), info(other.info) {}
+        objectKey(other.objectKey), source(other.source), id(other.id), stepNum(other.stepNum),
+        sequenceId(other.sequenceId), info(other.info) {}
       void write(std::ostream &out, long long int ppId) const;
     private:
       int transactionType, objectKey, source, id, stepNum;
@@ -45,7 +45,7 @@ namespace PLASMA {
       PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &);
       PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &, 
                         const RulesEngineId &);
-			PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &,
+      PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &,
                         const RulesEngineId &, const CBPlannerId &);
       virtual ~PartialPlanWriter(void);
       void write(void);
@@ -67,16 +67,18 @@ namespace PLASMA {
       std::list<Transaction> *transactionList;
       std::string dest;
     private:
-			bool havePlanner;
+      bool havePlanner;
+      bool destAlreadyInitialized;
       long long int seqId;
       int numTokens, numConstraints, numVariables, numTransactions;
       int stepsPerWrite, transactionId, nstep, writeCounter, maxChoices;
       ConstraintEngineId *ceId;
       PlanDatabaseId *pdbId;
-			RulesEngineId *reId;
-			CBPlannerId *plId;
+      RulesEngineId *reId;
+      CBPlannerId *plId;
       std::ofstream *transOut, *statsOut, *ruleInstanceOut;
       std::list<std::string> sourcePaths;
+      void initOutputDestination();
       void parseConfigFile(std::ifstream &);
       void parseGeneralConfigSection(std::ifstream&);
       void parseTransactionConfigSection(std::ifstream&);
@@ -88,15 +90,15 @@ namespace PLASMA {
       void outputStateVar(const Id<TokenVariable<StateDomain> >&, const int, const int,
                           std::ofstream &varOut);
       void outputEnumVar(const Id< TokenVariable<EnumeratedDomain> > &, const int,
-			 const int, std::ofstream &);
+                         const int, std::ofstream &);
       void outputIntVar(const Id< TokenVariable<IntervalDomain> > &, const int,
                         const int, std::ofstream &);
       void outputIntIntVar(const Id< TokenVariable<IntervalIntDomain> >&, const int,
-			   const int, std::ofstream &);
+                           const int, std::ofstream &);
       void outputObjVar(const ObjectVarId &, const int, const int,
                         std::ofstream &);
       void outputConstrVar(const ConstrainedVariableId &, const int, const int, 
-			   std::ofstream &);
+                           std::ofstream &);
       void outputConstraint(const ConstraintId &, std::ofstream &, std::ofstream &);
       void outputInstant(const InstantId &, const int, std::ofstream &);
       void outputRuleInstance(const RuleInstanceId &, std::ofstream &, std::ofstream & , std::ofstream &);
@@ -139,38 +141,38 @@ namespace PLASMA {
       void notifyAdded(const ConstrainedVariableId &); //VARIABLE_CREATED
       void notifyRemoved(const ConstrainedVariableId &); //VARIABLE_DELETED
       void notifyChanged(const ConstrainedVariableId &, const DomainListener::ChangeType &);
-			void notifyPropagationCommenced(void);
-			void notifyPropagationPreempted(void);
-			void notifyPropagationCompleted(void);
+      void notifyPropagationCommenced(void);
+      void notifyPropagationPreempted(void);
+      void notifyPropagationCompleted(void);
 
       /****From RulesEngineListener****/
       void notifyExecuted(const RuleInstanceId &);
       void notifyUndone(const RuleInstanceId &);
 
 
-			/****From DecisionManagerListener****/
-			void notifyAssignNextStarted(const DecisionPointId &dec);
-			void notifyAssignNextFailed(const DecisionPointId &dec);
-			void notifyAssignNextSucceeded(const DecisionPointId &dec);
-			void notifyAssignCurrentStarted(const DecisionPointId &dec);
-			void notifyAssignCurrentFailed(const DecisionPointId &dec);
-			void notifyAssignCurrentSucceeded(const DecisionPointId &dec);
-			void notifyRetractStarted(const DecisionPointId &dec);
-			void notifyRetractFailed(const DecisionPointId &dec);
-			void notifyRetractSucceeded(const DecisionPointId &dec);
-                        void notifySearchFinished();
-                        void notifyPlannerTimeout();
+      /****From DecisionManagerListener****/
+      void notifyAssignNextStarted(const DecisionPointId &dec);
+      void notifyAssignNextFailed(const DecisionPointId &dec);
+      void notifyAssignNextSucceeded(const DecisionPointId &dec);
+      void notifyAssignCurrentStarted(const DecisionPointId &dec);
+      void notifyAssignCurrentFailed(const DecisionPointId &dec);
+      void notifyAssignCurrentSucceeded(const DecisionPointId &dec);
+      void notifyRetractStarted(const DecisionPointId &dec);
+      void notifyRetractFailed(const DecisionPointId &dec);
+      void notifyRetractSucceeded(const DecisionPointId &dec);
+      void notifySearchFinished();
+      void notifyPlannerTimeout();
 
 
       class PPWPlanDatabaseListener;
       class PPWConstraintEngineListener;
       class PPWRulesEngineListener;
-			class PPWPlannerListener;
+      class PPWPlannerListener;
 
       friend class PPWPlanDatabaseListener;
       friend class PPWConstraintEngineListener;
       friend class PPWRulesEngineListener;
-			friend class PPWPlannerListener;
+      friend class PPWPlannerListener;
 
       class PPWPlanDatabaseListener : public PlanDatabaseListener {
       public:
@@ -207,8 +209,8 @@ namespace PLASMA {
         }
       protected:
       private:
-				void notifyPropagationCommenced(void){ppw->notifyPropagationCommenced();}
-				void notifyPropagationPreempted(void){ppw->notifyPropagationPreempted();}
+        void notifyPropagationCommenced(void){ppw->notifyPropagationCommenced();}
+        void notifyPropagationPreempted(void){ppw->notifyPropagationPreempted();}
         void notifyPropagationCompleted(void){ppw->notifyPropagationCompleted();}
         void notifyAdded(const ConstraintId &c){ppw->notifyAdded(c);}
         void notifyRemoved(const ConstraintId &c){ppw->notifyRemoved(c);}
@@ -233,26 +235,26 @@ namespace PLASMA {
         PartialPlanWriter *ppw;
       };
 
-			class PPWPlannerListener : public DecisionManagerListener {
-			public:
-				PPWPlannerListener(const CBPlannerId &plannerId, PartialPlanWriter *planWriter) :
-					DecisionManagerListener(plannerId->getDecisionManager()), ppw(planWriter) {
-				}
-				void notifyAssignNextStarted(const DecisionPointId &dec){ppw->notifyAssignNextStarted(dec);}
-				void notifyAssignNextFailed(const DecisionPointId &dec){ppw->notifyAssignNextFailed(dec);}
-				void notifyAssignNextSucceeded(const DecisionPointId &dec){ppw->notifyAssignNextSucceeded(dec);}
-				void notifyAssignCurrentStarted(const DecisionPointId &dec){ppw->notifyAssignCurrentStarted(dec);}
-				void notifyAssignCurrentFailed(const DecisionPointId &dec){ppw->notifyAssignCurrentFailed(dec);}
-				void notifyAssignCurrentSucceeded(const DecisionPointId &dec){ppw->notifyAssignCurrentSucceeded(dec);}
-				void notifyRetractStarted(const DecisionPointId &dec){ppw->notifyRetractStarted(dec);}
-				void notifyRetractFailed(const DecisionPointId &dec){ppw->notifyRetractFailed(dec);}
-				void notifyRetractSucceeded(const DecisionPointId &dec){ppw->notifyRetractSucceeded(dec);}
+      class PPWPlannerListener : public DecisionManagerListener {
+      public:
+        PPWPlannerListener(const CBPlannerId &plannerId, PartialPlanWriter *planWriter) :
+          DecisionManagerListener(plannerId->getDecisionManager()), ppw(planWriter) {
+        }
+        void notifyAssignNextStarted(const DecisionPointId &dec){ppw->notifyAssignNextStarted(dec);}
+        void notifyAssignNextFailed(const DecisionPointId &dec){ppw->notifyAssignNextFailed(dec);}
+        void notifyAssignNextSucceeded(const DecisionPointId &dec){ppw->notifyAssignNextSucceeded(dec);}
+        void notifyAssignCurrentStarted(const DecisionPointId &dec){ppw->notifyAssignCurrentStarted(dec);}
+        void notifyAssignCurrentFailed(const DecisionPointId &dec){ppw->notifyAssignCurrentFailed(dec);}
+        void notifyAssignCurrentSucceeded(const DecisionPointId &dec){ppw->notifyAssignCurrentSucceeded(dec);}
+        void notifyRetractStarted(const DecisionPointId &dec){ppw->notifyRetractStarted(dec);}
+        void notifyRetractFailed(const DecisionPointId &dec){ppw->notifyRetractFailed(dec);}
+        void notifyRetractSucceeded(const DecisionPointId &dec){ppw->notifyRetractSucceeded(dec);}
         void notifyPlannerTimeout(){ppw->notifyPlannerTimeout();}
         void notifySearchFinished(){ppw->notifySearchFinished();}
-			protected:
-			private:
-				PartialPlanWriter *ppw;
-			};
+      protected:
+      private:
+        PartialPlanWriter *ppw;
+      };
     };
   }
 }
