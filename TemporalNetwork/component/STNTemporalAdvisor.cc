@@ -35,4 +35,15 @@ namespace Prototype {
     return (m_propagator->canBeConcurrent(first->getStart(), second->getStart()) &&
 	    m_propagator->canBeConcurrent(first->getEnd(), second->getEnd()));
   }
+
+  /**
+   * @brief Gets the temporal distance between two temporal variables. 
+   * @param exact if set to true makes this distance calculation exact.
+   */
+
+
+  const IntervalIntDomain STNTemporalAdvisor::getTemporalDistanceDomain(const TempVarId& first, const TempVarId& second, const bool exact) {
+    return (m_propagator->getTemporalDistanceDomain(first, second, exact));
+  }
+
 }

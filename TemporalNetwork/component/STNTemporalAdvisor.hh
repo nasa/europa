@@ -18,6 +18,9 @@ namespace Prototype{
     virtual bool canFitBetween(const TokenId& token, const TokenId& predecessor,
 			       const TokenId& successor);
     virtual bool canBeConcurrent(const TokenId& first, const TokenId& second);
+    virtual const IntervalIntDomain getTemporalDistanceDomain(const TempVarId& first, 
+							      const TempVarId& second,
+							      const bool exact);
 
   private:
     TemporalPropagatorId m_propagator;

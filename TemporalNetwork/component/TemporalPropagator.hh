@@ -35,6 +35,13 @@ namespace Prototype {
      */
     bool canBeConcurrent(const TempVarId& first, const TempVarId& second);
 
+    /**
+     * @see TemporalAdvisor
+     */
+    const IntervalIntDomain getTemporalDistanceDomain(const TempVarId& first, 
+						      const TempVarId& second, const bool exact);
+
+
     void addListener(const TemporalNetworkListenerId& listener);
 
   protected:

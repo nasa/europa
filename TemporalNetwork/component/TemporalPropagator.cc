@@ -526,4 +526,16 @@ namespace Prototype {
     // For all buffered constraints, 
     return true;
   }
+
+  const IntervalIntDomain TemporalPropagator::getTemporalDistanceDomain(const TempVarId& first, 
+									const TempVarId& second, 
+									const bool exact) {
+    TimepointId tstart = getTimepoint(first);
+    TimepointId tend = getTimepoint(second);
+    Time lb, ub;
+    m_tnet->calcDistanceBounds(tstart, tend, lb, ub, exact);
+    return(IntervalIntDomain(lb,ub));
+  }
+
+
 } //namespace
