@@ -242,7 +242,9 @@ namespace Prototype {
 
   void ResourceFlawDecisionPoint::print(std::ostream& os) const {
     check_error(m_id.isValid());
-    os << "RFDP "<<getKey()<<" for resource "<<m_resource;
+    os << "(" << getKey() << ") Resource (" << m_entityKey << ") ";
+    os << " Current Choice: " << m_current;
+    os << " Discarded: " << m_discarded.size();
   }
 
   std::ostream& operator <<(std::ostream& os, const Id<ResourceFlawDecisionPoint>& decision) {
