@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.64 2003-12-17 19:09:23 wedgingt Exp $
+# $Id: autobuild,v 1.65 2004-05-20 06:09:33 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -25,6 +25,13 @@ email=checkins@postdoc.arc.nasa.gov
 # Profiling and shared in one executable no longer works, it seems
 #subdirs='cvs fast opt optFast profOptFast shareOptFast debug debugOpt noErr shareOptNoErr'
 subdirs='cvs opt optFast profOptFast shareOptFast debugOpt'
+
+if test -z "$EUROPA_CNET_INCR_REPROP" -o 0"$EUROPA_CNET_INCR_REPROP" = 00
+then
+    echo Full repropagation will be used.
+else
+    echo Incremental repropagation will be used.
+fi
 
 # CVS info
 CVS_RSH=ssh
