@@ -9,13 +9,14 @@ local model ;
 #
 
 ModuleObjects runTest.cc : System ;
+ModuleObjects DefaultTestInit.cc : System ;
 
 for model in
 	Rover.nddl basic-model.nddl k9.backtrack.moderate.nddl
 	k9.nddl
 {
   local exe = $(model:S=) ;
-  NddlMain $(exe) : runTest.o : $(model) : System ;
+  NddlMain $(exe) : runTest.o DefaultTestInit.o : $(model) : System ;
   RunModuleMain run-$(exe) : $(exe) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 }
@@ -40,7 +41,7 @@ for model in
 	resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl parent-predicate.nddl #backtr-long.nddl
 {
   local exe = $(model:S=) ;
-  NddlMain $(exe) : runTransactionTest.o : $(model) : System ;
+  NddlMain $(exe) : runTransactionTest.o DefaultTestInit.o : $(model) : System ;
   RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 }
@@ -91,5 +92,11 @@ for numSatellites in 1 10 50 100 {
     }
   }
 }
+
+#
+# TestLanguage TEST
+#
+
+
 
 } # PLASMA_READY
