@@ -25,7 +25,9 @@ LocalDepends tests : run-hsts-module-tests
 #       monkey1-timeline-objvar
 #       monkey1-timeline-twomonkeys-objvar
 #       monkey1-timeline-twomonkeys
-#       monkey2-timeline2 monkey2-timeline22 monkey2-timeline23
+        monkey2-timeline2
+        monkey2-timeline22
+        monkey2-timeline23
         robotTests
 #       roverTests
 #       roverCTTests
@@ -99,20 +101,16 @@ RunEUROPATest monkey-timeline : timeline0.nddl ;
 RunEUROPATest monkey-timeline-hacked : timeline-hacked.nddl ;
 RunEUROPATest monkey-timeline-hacked2 : timeline-hacked2.nddl ;
 RunEUROPATest monkey-timeline-hacked3 : timeline-hacked3.nddl ;
-
-# Failing; see GNATS 2759, 2760, and 2701.
 RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
 
-# Failing: Utils/core/Id.hh:419: Error: Id<T>::convertable(org) is false
+# Failing: Utils/core/Id.hh:401: Error: Id<T>::convertable(org) is false
 #   Gdb on Token says *this is a RuleInstance but T (of Id<T>) is class Token (!).
 RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
 
-# Failing: ConstraintEngine/core/ConstrainedVariable.cc:192: Error: internal_specifiedDomain().isMember(singletonValue) is false
-#   Reported as GNATS 2760.
+# Failing: Utils/core/Id.hh:401: Error: Id<T>::convertable(org) is false
 RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nddl ;
 
-# Failing: ConstraintEngine/core/ConstrainedVariable.cc:192: Error: internal_specifiedDomain().isMember(singletonValue) is false
-#   Reported as GNATS 2760.
+# Failing: Utils/core/Id.hh:401: Error: Id<T>::convertable(org) is false
 RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 
 # Failing: Utils/core/Utils.hh:134: Error: item.isValid() is false
