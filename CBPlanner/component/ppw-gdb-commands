@@ -1,0 +1,36 @@
+#####################################################################
+#
+# ppw-gdb-commands
+#
+# This is a gdb command file used to provide canned sequences
+# of gdb commands for running PLASMA under the control of gdb.
+#
+# usage: gdb -x ppw-gdb-commands executable
+#
+# This file currently provides two commands:
+#   1) init-run          - run once two init PLASMA debug session
+#   2) write-step N      - run to enable PPW writing of one step
+#                             where: N is the step number to write
+#
+#####################################################################
+
+define init-run
+tbreak CBPlanner::stepBreakpoint
+run
+set PartialPlanWriter::noFullWrite=1
+set PartialPlanWriter::writeStep=1
+printf "Ready to enable writing of a step with write-step N\n"
+printf "At step %d\n", m_step
+end
+
+define write-step 
+tbreak CBPlanner::stepBreakpoint if m_step == $arg0
+cont
+printf "Setting PartialPlanWriter to enable writing step %d\n", m_step
+set PartialPlanWriter::noFullWrite=0
+tbreak CBPlanner::stepBreakpoint
+cont
+printf "Finished writing step %d\n", m_step-1
+printf "At step %d\n", m_step
+set PartialPlanWriter::noFullWrite=1
+end

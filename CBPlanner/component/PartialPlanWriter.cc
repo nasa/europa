@@ -246,12 +246,18 @@ static char *realpath(const char *path, char *resolved_path) {
 }
 #endif
 
+
 namespace Prototype {
   namespace PlanWriter {
 		
 		inline long long int timeval2Id(const struct timeval &currTime) {
       return (((long long int) currTime.tv_sec) * 1000) + (currTime.tv_usec / 1000);
     }
+
+    /* These are static to make them visible in GDB out of their normal scope.
+     */
+    int PartialPlanWriter::noFullWrite(0);
+    int PartialPlanWriter::writeStep(0);
 
     PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb,
                                          const ConstraintEngineId &ceId2,
@@ -305,7 +311,7 @@ namespace Prototype {
       stepsPerWrite = 0;
       dest = "./plans";
       noFullWrite = 0;
-      writeFinalStep = 0;
+      writeStep = 0;
       for(int i = 0; i < transactionTotal; i++)
         allowTransaction[i] = false;
 
@@ -317,7 +323,7 @@ namespace Prototype {
 				std::cerr << "Warning: PPW_CONFIG not set.  PartialPlanWriter will not write." << std::endl;
 				stepsPerWrite = 0;
 				noFullWrite = 1;
-                                writeFinalStep = 0;
+                                writeStep = 0;
 				return;
 			}
 			
@@ -340,7 +346,7 @@ namespace Prototype {
       /* if user clearly wants to write only the final step,
          stepsPerWrite must be 1 for to enable writing
        */
-      if (noFullWrite == 1 && writeFinalStep == 1) {
+      if (noFullWrite == 1 && writeStep == 1) {
         stepsPerWrite = 1;
       }
 
@@ -675,7 +681,7 @@ namespace Prototype {
 
     /* writeStatsAndTransactions() is called at the end of each step 
        instead of write() when step data is written for only the 
-       final step. this ensures that transaction and statics info
+       final step. this ensures that transaction and statistics info
        is written for all steps.
      */
     void PartialPlanWriter::writeStatsAndTransactions(void) {
@@ -1497,10 +1503,11 @@ namespace Prototype {
           }
         }
         else {
-          if(writeFinalStep == 1) {
+          if(writeStep == 1) {
             writeStatsAndTransactions();
             transactionList->clear();
             numTransactions = 0;
+            writeCounter = 0;
           }
           nstep++;
         }
@@ -1525,10 +1532,11 @@ namespace Prototype {
           }
         }
         else {
-          if(writeFinalStep == 1) {
+          if(writeStep == 1) {
             writeStatsAndTransactions();
             transactionList->clear();
             numTransactions = 0;
+            writeCounter = 0;
           }
           nstep++;
         }
@@ -1561,10 +1569,11 @@ namespace Prototype {
           }
         }
         else {
-          if(writeFinalStep == 1) {
+          if(writeStep == 1) {
             writeStatsAndTransactions();
             transactionList->clear();
             numTransactions = 0;
+            writeCounter = 0;
           }
           nstep++;
         }
@@ -1589,10 +1598,11 @@ namespace Prototype {
           }
         }
         else {
-          if(writeFinalStep == 1) {
+          if(writeStep == 1) {
             writeStatsAndTransactions();
             transactionList->clear();
             numTransactions = 0;
+            writeCounter = 0;
           }
           nstep++;
         }
@@ -1625,10 +1635,11 @@ namespace Prototype {
           }
         }
         else {
-          if(writeFinalStep == 1) {
+          if(writeStep == 1) {
             writeStatsAndTransactions();
             transactionList->clear();
             numTransactions = 0;
+            writeCounter = 0;
           }
           nstep++;
         }
@@ -1653,10 +1664,11 @@ namespace Prototype {
           }
         }
         else {
-          if(writeFinalStep == 1) {
+          if(writeStep == 1) {
             writeStatsAndTransactions();
             transactionList->clear();
             numTransactions = 0;
+            writeCounter = 0;
           }
           nstep++;
         }
@@ -1666,7 +1678,7 @@ namespace Prototype {
     void PartialPlanWriter::notifySearchFinished() {
       if(havePlanner) {
         //if auto write is enabled ignore writing final step again
-        if(writeFinalStep == 1 && noFullWrite == 1) {
+        if(writeStep == 1 && noFullWrite == 1) {
           write();
         }
       }
@@ -1675,7 +1687,7 @@ namespace Prototype {
     void PartialPlanWriter::notifyPlannerTimeout() {
       if(havePlanner) {
         //if auto write is enabled ignore writing final step again
-        if(writeFinalStep == 1 && noFullWrite == 1) {
+        if(writeStep == 1 && noFullWrite == 1) {
           write();
         }
       }
@@ -1801,7 +1813,7 @@ namespace Prototype {
         }
         else if(line.find(WRITE_FINAL_STEP) != std::string::npos) {
           std::string wfs = line.substr(line.find("=")+1);
-          writeFinalStep = (wfs.find("0") != std::string::npos ? 0 : 1);
+          writeStep = (wfs.find("0") != std::string::npos ? 0 : 1);
         }
         else if(line.find(WRITE_DEST) != std::string::npos) {
           std::string wd = line.substr(line.find("=")+1);

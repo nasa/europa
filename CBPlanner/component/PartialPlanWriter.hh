@@ -49,6 +49,7 @@ namespace Prototype {
                         const RulesEngineId &, const CBPlannerId &);
       virtual ~PartialPlanWriter(void);
       void write(void);
+      static int noFullWrite, writeStep;
     protected:
       virtual bool parseSection(std::ifstream& configFile);
       inline long long int getPPId(void){return ppId;}
@@ -59,7 +60,7 @@ namespace Prototype {
 			bool havePlanner;
       long long int seqId;
       int numTokens, numConstraints, numVariables, numTransactions;
-      int stepsPerWrite, transactionId, nstep, writeCounter, noFullWrite, writeFinalStep, maxChoices;
+      int stepsPerWrite, transactionId, nstep, writeCounter, maxChoices;
       ConstraintEngineId *ceId;
       PlanDatabaseId *pdbId;
 			RulesEngineId *reId;
