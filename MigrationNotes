@@ -1,6 +1,6 @@
 Brief Migration Notes
 
-$Id: MigrationNotes,v 1.10 2005-03-11 00:48:20 wedgingt Exp $
+$Id: MigrationNotes,v 1.11 2005-03-31 01:36:54 tania Exp $
 
 This file is intended to help users of the prior Europa (in the
 NewPlan CVS tree) planning system migrate their projects to this
@@ -148,3 +148,7 @@ presently only supported in Europa1 (NewPlan):
 Europa1 DDL			NDDL Constraints
 -----------			----------------
 after [5 10]			EqualSum(Master.start, [5 10], Slave.end);
+
+13. In EUROPA Boolean variables are comparable with numeric variables, in
+PLASMA, Boolean variables are symbolic and no longer comparable with
+numeric variables.
