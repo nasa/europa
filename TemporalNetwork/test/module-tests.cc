@@ -212,6 +212,8 @@ private:
     
     // assert from propagator direcly
     assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
+    assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(second.getEnd(), first.getStart()));
+
     // compute from advisor
     assert (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
 
@@ -229,6 +231,7 @@ private:
     
     // compute from propagator directly
     assert (!((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
+    assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(second.getEnd(), first.getStart()));
     // compute from advisor
     assert (!db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     
@@ -250,6 +253,8 @@ private:
     
     // compute from propagator directly
     assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
+    assert (!((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(second.getEnd(), first.getStart()));
+
     // compute from advisor
     assert (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     
