@@ -573,6 +573,8 @@ private:
     assert(t1.getEnd()->derivedDomain().getLowerBound() == 1);
     assert(t1.getEnd()->derivedDomain().getUpperBound() == 15);
 
+    delete (Constraint*) culprit;
+
     DEFAULT_TEARDOWN_RULES();
     return true;
   }
@@ -677,8 +679,8 @@ int main() {
 
   for(int i=0;i<1;i++){
     runTestSuite(TemporalNetworkTest::test);
-    runTestSuite(TemporalPropagatorTest::test);
     runTestSuite(TemporalNetworkConstraintEngineOnlyTest::test);
+    runTestSuite(TemporalPropagatorTest::test);
   }
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
