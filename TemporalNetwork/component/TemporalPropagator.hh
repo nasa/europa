@@ -119,10 +119,12 @@ namespace Prototype {
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
 
     /*!< Synchronization data structures */
-    std::set<TempVarId> m_activeVariables; /*!< Maintain the set of active start and end variables. Duration handled in consrinats */
-    std::set<TempVarId> m_changedVariables; /*!< Manage the set of changed variables to be synchronized */
-    std::set<ConstraintId> m_changedConstraints; /*!< Constraint Agenda */
-    std::set<TemporalConstraintId> m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
+    //    std::set<TempVarId, EntityComparator<EntityId> > m_activeVariables; /*!< Maintain the set of active start and end variables. Duration handled in consrinats */
+    std::map<int, TempVarId> m_activeVariables;
+    //    std::set<TempVarId, EntityComparator<EntityId> > m_changedVariables; /*!< Manage the set of changed variables to be synchronized */
+    std::map<int, TempVarId> m_changedVariables;
+    std::set<ConstraintId, EntityComparator<EntityId> > m_changedConstraints; /*!< Constraint Agenda */
+    std::set<TemporalConstraintId, EntityComparator<EntityId> > m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */
     std::set<EntityId> m_wrappedTimepoints;
     std::set<TemporalNetworkListenerId> m_listeners;

@@ -18,14 +18,14 @@
 
 namespace Prototype {
 
-#ifndef PLASMA_FAST
+  //#ifndef PLASMA_FAST
 #define  publish(message){\
     for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)\
       (*lit)->message;\
 }
-#else
-#define publish(message)
-#endif
+//#else
+//#define publish(message)
+//#endif
 
   typedef Id<TimepointWrapper> TimepointWrapperId;
 
@@ -42,8 +42,24 @@ namespace Prototype {
 
   void TemporalPropagator::notifyDeleted(const TempVarId& tempVar, const TimepointId& tp) {
     check_error(!Entity::isPurging());
-    m_changedVariables.erase(tempVar);
-    m_activeVariables.erase(tempVar);
+    ////// std::cout << "deleting from temporal propagator" << tempVar->getKey() << std::endl;
+/*
+    for(std::map<int,TempVarId>::iterator it = m_changedVariables.begin();
+	it != m_changedVariables.end(); ++it) {
+      if (!it->second.isValid()) 
+	if (it->second.isNoId()) 
+	  ////// std::cout << "TP::notifyDeleted m_changedVariables contains a bogus entry." << std::endl;
+	else {
+	  //  m_changedVariables.erase(it);
+	  ////// std::cout << "TP::notifyDeleted m_changedVariables contains a non valid entry." << it->second->getKey() << "," << it->first << std::endl;
+	}
+      else
+	if (it->second.isNoId())
+	  //////std::cout << "TP::notifyDeleted m_changedVaraibles contains a valid but noId entry." << std::endl;
+    }
+*/
+    m_changedVariables.erase(tempVar->getKey());
+    m_activeVariables.erase(tempVar->getKey());
     EntityId tw = tempVar->getExternalEntity();
     tp->clearExternalEntity(); // Breaks link to original
     m_wrappedTimepoints.erase(tw);
@@ -85,7 +101,7 @@ namespace Prototype {
 
       if(var->getIndex() != DURATION_VAR_INDEX){ // If it is not a duration variable
 	buffer(var); // Buffer to update the Timepoint
-	m_activeVariables.insert(var); // Buffer for update back to the TempVar
+	m_activeVariables.insert(std::make_pair<int, TempVarId>(var->getKey(),var)); // Buffer for update back to the TempVar
       }
     }
   }
@@ -105,8 +121,8 @@ namespace Prototype {
 
       TokenId parentToken = var->getParent();
       if(parentToken->isMerged()){
-	m_changedVariables.erase(var);
-	m_activeVariables.erase(var);
+	m_changedVariables.erase(var->getKey());
+	m_activeVariables.erase(var->getKey());
       }
     }
   }
@@ -122,7 +138,7 @@ namespace Prototype {
 
     // Only buffer change for start or end variables
     if(variable->getIndex() != DURATION_VAR_INDEX)
-       m_changedVariables.insert(variable);
+      m_changedVariables.insert(std::make_pair<int,TempVarId>(variable->getKey(),variable));
   }
 
   void TemporalPropagator::execute(){
@@ -167,8 +183,8 @@ namespace Prototype {
     m_wrappedTimepoints.insert(tw);
     publish(notifyTimepointAdded(var, timepoint));
 
-    m_activeVariables.insert(var);
-    m_changedVariables.insert(var);
+    m_activeVariables.insert(std::make_pair<int, TempVarId>(var->getKey(), var));
+    m_changedVariables.insert(std::make_pair<int, TempVarId>(var->getKey(), var));
 
     // Key domain restriction constrain off derived domain values
     TemporalConstraintId c = m_tnet->addTemporalConstraint(m_tnet->getOrigin(), 
@@ -258,8 +274,8 @@ namespace Prototype {
     m_variablesForDeletion.clear();
 
     // Process variables that have changed
-    for(std::set<TempVarId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
-      TempVarId var = *it;
+    for(std::map<int,TempVarId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
+      TempVarId var = it->second;
       updateTimepoint(var);
     }
     m_changedVariables.clear(); 
@@ -277,8 +293,8 @@ namespace Prototype {
    * @brief Updates the ConstrainedEngine variable for each active timepoint.
    */
   void TemporalPropagator::updateTempVar() {
-    for(std::set<TempVarId>::const_iterator it = m_activeVariables.begin(); it != m_activeVariables.end(); ++it){
-      TempVarId var = *it;
+    for(std::map<int,TempVarId>::const_iterator it = m_activeVariables.begin(); it != m_activeVariables.end(); ++it){
+      TempVarId var = it->second;
       check_error(var.isValid());
       check_error(var->getIndex() != DURATION_VAR_INDEX, "There is no corresponding timepoint for a duration variable");
 
@@ -463,7 +479,7 @@ namespace Prototype {
     if(var->getExternalEntity().isNoId())
       addTimepoint(var);
     else
-      m_changedVariables.insert(var);
+      m_changedVariables.insert(std::make_pair<int,TempVarId>(var->getKey(),var));
   }
 
   void TemporalPropagator::addListener(const TemporalNetworkListenerId& listener) {
@@ -507,8 +523,8 @@ namespace Prototype {
 
     // For all buffered TempVar's, it either has an external entity or it doesn't. No invalid one.
     // Should also ensure that ONLY start and end variables have external entities.
-    for(std::set<TempVarId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
-      TempVarId var = *it;
+    for(std::map<int,TempVarId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
+      TempVarId var = it->second;
       if(!var->getExternalEntity().isNoId()){ // It must be a start or end variable
 
 	if(var->getIndex() == DURATION_VAR_INDEX) // Same for all types of tokens as it is set in the base
