@@ -271,7 +271,7 @@ namespace Prototype {
     check_error(isSubsetOf(dom));
     check_error(dom.isEnumerated());
 
-    if (!((*this) == dom)) {
+    if (isEmpty() || !((*this) == dom)) {
       const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
       m_values = l_dom.m_values;
       notifyChange(DomainListener::RELAXED);
