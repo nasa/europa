@@ -10,6 +10,8 @@
 #include "ConstraintFactory.hh"
 #include "ConstraintLibrary.hh"
 #include "../Libraries/IdTable.hh"
+#include "LabelSet.hh"
+#include "LabelStr.hh"
 
 #include <iostream>
 #include <cassert>
@@ -86,6 +88,8 @@ public:
     runTest(testBasicLabelOperations, "BasicLabelOperations");
     runTest(testLabelSetAllocations, "LabelSetAllocations");
     runTest(testEquate, "LabelSet::equate");
+    runTest(testValueRetrieval, "ValueRetrieval");
+    runTest(testIntersection, "Intersection");
     return true;
   }
 private:
@@ -93,14 +97,14 @@ private:
     Prototype::LabelStr l1("L1");
     Prototype::LabelStr l2("L2");
     Prototype::LabelStr l3("L3");
-    assert(l1.getKey() < l2.getKey() && l2.getKey() < l3.getKey());
+    assert(l1 < l2 && l2 < l3);
 
     Prototype::LabelStr la("L");
     Prototype::LabelStr l4("L30");
     Prototype::LabelStr lb("L");
-    assert(la.getKey() == lb.getKey());
-    assert(la.getKey() < l1.getKey());
-    assert(l4.getKey() > l3.getKey());
+    assert(la == lb);
+    assert(la < l1);
+    assert(l4 > l3);
 
     assert(l1 < l2);
     assert(la == lb);
@@ -110,7 +114,6 @@ private:
     assert (l2 != copy1);
 
     assert(Prototype::LabelStr::getSize() == 5);
-
     assert(l1.toString() == "L1");
     return true;
   }
@@ -124,8 +127,8 @@ private:
     values.push_back(Prototype::LabelStr("L3"));
 
     ChangeListener l_listener;
-    LabelSet ls0(values, true, l_listener.getId());
-    assert(ls0.getSize() == 5);
+    LabelSet ls0(values, false, l_listener.getId());
+    assert(ls0.isDynamic());
 
     Prototype::LabelStr l2("L2");
     assert(ls0.isMember(l2));
@@ -135,11 +138,18 @@ private:
     assert(!ls0.isMember(l2));
     ls0.insert(l2);
     assert(l_listener.checkAndClearChange(change) && change == DomainListener::RELAXED);
+    ls0.close();
+    assert(l_listener.checkAndClearChange(change) && change == DomainListener::CLOSED);
     assert(ls0.isMember(l2));
 
     ls0.setToSingleton(l2);
     assert(ls0.isMember(l2));
     assert(ls0.getSize() == 1);
+
+    LabelSet ls1(values, true);
+    ls0 = ls1;
+    assert(l_listener.checkAndClearChange(change) && change == DomainListener::RELAXED);
+    assert(ls0 == ls1);
     return true;
   }
   static bool testEquate(){
@@ -165,7 +175,6 @@ private:
     assert(ls0.equate(ls1)); // It should have changed
     assert(!ls1.isMember(lC));
 
-
     LabelSet ls2(values, true, l_listener.getId());
     values.push_back(Prototype::LabelStr("F"));
     values.push_back(Prototype::LabelStr("G"));
@@ -178,6 +187,82 @@ private:
     ls3.remove(lC);
     assert(ls2.equate(ls3));
     assert(ls2 == ls3);
+
+    values.clear();
+    values.push_back(Prototype::LabelStr("F"));
+    values.push_back(Prototype::LabelStr("G"));
+    values.push_back(Prototype::LabelStr("H"));
+    LabelSet ls4(values, true, l_listener.getId());
+
+    values.clear();
+    values.push_back(Prototype::LabelStr("A"));
+    values.push_back(Prototype::LabelStr("B"));
+    values.push_back(Prototype::LabelStr("C"));
+    LabelSet ls5(values, true, l_listener.getId());
+
+    DomainListener::ChangeType change;
+    ls4.equate(ls5);
+    assert(l_listener.checkAndClearChange(change) && change == DomainListener::EMPTIED);
+    assert(ls4.isEmpty() || ls5.isEmpty());
+    assert(!(ls4.isEmpty() && ls5.isEmpty()));
+
+    return true;
+  }
+
+  static bool testValueRetrieval(){
+    std::list<Prototype::LabelStr> values;
+    values.push_back(Prototype::LabelStr("A"));
+    values.push_back(Prototype::LabelStr("B"));
+    values.push_back(Prototype::LabelStr("C"));
+    values.push_back(Prototype::LabelStr("D"));
+    values.push_back(Prototype::LabelStr("E"));
+
+    LabelSet l1(values, true);
+    std::list<Prototype::LabelStr> results;
+    l1.getValues(results);
+
+    LabelSet l2(results, true);
+
+    assert(l1 == l2);
+    LabelStr lbl("C");
+    l1.setToSingleton(lbl);
+    assert(lbl == l1.getSingletonValue());
+    return true;
+  }
+
+  static bool testIntersection(){
+    std::list<Prototype::LabelStr> values;
+    values.push_back(Prototype::LabelStr("A"));
+    values.push_back(Prototype::LabelStr("B"));
+    values.push_back(Prototype::LabelStr("C"));
+    values.push_back(Prototype::LabelStr("D"));
+    values.push_back(Prototype::LabelStr("E"));
+    LabelSet ls1(values);
+
+    values.clear();
+    values.push_back(Prototype::LabelStr("B"));
+    values.push_back(Prototype::LabelStr("D"));
+    LabelSet ls2(values);
+    assert(ls2.isSubsetOf(ls1));
+    assert(!ls1.isSubsetOf(ls2));
+
+    LabelSet ls3(ls1);
+
+    ls1.intersect(ls2);
+    assert(ls1 == ls2);
+    assert(ls2.isSubsetOf(ls1));
+    assert(ls2.isSubsetOf(ls1));
+
+    ls1 = ls3;
+    assert(ls2.isSubsetOf(ls1));
+    assert(ls1 == ls3);
+
+    values.clear();
+    values.push_back(Prototype::LabelStr("H"));
+    values.push_back(Prototype::LabelStr("I"));
+    LabelSet ls4(values);
+    ls4.intersect(ls3);
+    assert(ls4.isEmpty());
     return true;
   }
 };
@@ -198,30 +283,38 @@ private:
     IntervalIntDomain intDomain(10, 20);
     assert(intDomain.isFinite());
     assert(!intDomain.isDynamic());
-    intDomain.empty();
-    assert(intDomain.isEmpty());
+    IntervalIntDomain d1(intDomain);
+    d1.empty();
+    assert(d1.isEmpty());
 
-    AbstractDomain& dom = static_cast<AbstractDomain&>(intDomain);
-    assert(dom.isEmpty());
+    AbstractDomain& d2 = static_cast<AbstractDomain&>(intDomain);
+    assert(!d2.isEmpty());
 
-    IntervalIntDomain copied(static_cast<IntervalIntDomain&>(dom));
-    IntervalIntDomain dom1;
-    assert( ! (dom1 == copied));
-    dom1 = copied;
-    assert(dom1 == copied);
+    IntervalIntDomain d3(static_cast<IntervalIntDomain&>(intDomain));
+    IntervalIntDomain d4;
+    assert( ! (d3 == d4));
+    d3 = d4;
+    assert(d3 == d4);
     return true;
   }
 
   static bool testAssignment(){
     ChangeListener l_listener;
-    IntervalIntDomain dom0(l_listener.getId()); // Will have very large default range
-    IntervalIntDomain dom1(-100, 100);
-    dom0 = dom1;
+    IntervalIntDomain dom0; // Will have very large default range
+    IntervalIntDomain dom1(-100, 100, true, true, l_listener.getId());
+    dom1 = dom0;
     DomainListener::ChangeType change;
-    assert(!l_listener.checkAndClearChange(change)); // No change event generated
+    assert(l_listener.checkAndClearChange(change)  && change == DomainListener::RELAXED);
+    assert(dom1.isSubsetOf(dom0));
+    assert(dom0.isSubsetOf(dom1));
+    assert(dom1 == dom0);
+
     IntervalIntDomain dom2(-300, 100);
-    dom0 = dom2;
-    assert(l_listener.checkAndClearChange(change) && change == DomainListener::RELAXED);
+    dom1.intersect(dom2);
+    assert(l_listener.checkAndClearChange(change));
+    assert(dom1 == dom2);
+    dom1 = dom2;
+    assert(!l_listener.checkAndClearChange(change));
     return true;
   }
 

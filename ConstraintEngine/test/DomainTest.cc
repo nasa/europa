@@ -1,4 +1,6 @@
-#include "AbstractDomain.hh"
+#include "LabelSet.hh"
+#include "LabelStr.hh"
+
 #include <iostream>
 #include <cassert>
 #include <list>
@@ -57,7 +59,7 @@ void outerLoopForTestEquate()
 
 void main()
 {
-  //outerLoopForTestEquate();
+  outerLoopForTestEquate();
   outerLoopForTestIntersection();
   cout << "Finished" << endl;
 }
