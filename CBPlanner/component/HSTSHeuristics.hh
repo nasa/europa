@@ -5,6 +5,7 @@
 #include "LabelStr.hh"
 #include "TokenDecisionPoint.hh"
 #include "Generator.hh"
+#include "PlanDatabase.hh"
 
 #include <vector>
 
@@ -111,7 +112,7 @@ namespace PLASMA {
     class VariableEntry {
     public:
       VariableEntry();
-      VariableEntry(const std::set<double>& domain, const Priority p, const DomainOrder order, const LabelStr& generatorName, const std::list<LabelStr>& enumeration);
+      VariableEntry(const std::set<LabelStr>& domain, const Priority p, const DomainOrder order, const LabelStr& generatorName, const std::list<LabelStr>& enumeration);
       virtual ~VariableEntry();
       void setDomain(const std::list<LabelStr>& domain);
       const Priority getPriority() const;
@@ -125,7 +126,7 @@ namespace PLASMA {
       GeneratorId m_generator;
     };
 
-    HSTSHeuristics();
+    HSTSHeuristics(const PlanDatabaseId& planDatabase);
     virtual ~HSTSHeuristics();
 
     const HSTSHeuristicsId& getId() const;
@@ -153,7 +154,7 @@ namespace PLASMA {
     const Priority getPriorityForTokenDP(const TokenDecisionPointId& tokDec);
     const Priority getPriorityForObjectDP(const ObjectDecisionPointId& objDec);
 
-    void getOrderedDomainForConstrainedVariableDP(const ConstrainedVariableDecisionPointId& varDec, std::list<LabelStr>& domain);
+    void getOrderedDomainForConstrainedVariableDP(const ConstrainedVariableDecisionPointId& varDec, std::list<double>& domain);
 
     void getOrderedStatesForTokenDP(const TokenDecisionPointId& tokDec, std::list<LabelStr>& states, CandidateOrder& order);
 
@@ -204,6 +205,7 @@ namespace PLASMA {
     std::map<LabelStr, GeneratorId> m_generatorsByName;
 
     HSTSHeuristicsId m_id;
+    PlanDatabaseId m_pdb;
   };
 }
 #endif
