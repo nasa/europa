@@ -78,16 +78,17 @@ rule ModuleMain {
 
   local links = [ FLinkModules $(module) ] ;
 
+  local headers ;
   local link ;
   for link in $(links) {
     switch $(link) {
     case *.core :
-      SubDirHdrs [ FDirName $(PLASMA) $(link:S=) ] ;
-      SubDirHdrs [ FDirName $(PLASMA) $(link:S=) core ] ;
+      headers += [ FDirName $(PLASMA) $(link:S=) ] ;
+      headers += [ FDirName $(PLASMA) $(link:S=) core ] ;
     case * :
-      SubDirHdrs [ FDirName $(PLASMA) $(link) ] ;
-      SubDirHdrs [ FDirName $(PLASMA) $(link) core ] ;
-      SubDirHdrs [ FDirName $(PLASMA) $(link) component ] ;
+      headers += [ FDirName $(PLASMA) $(link) ] ;
+      headers += [ FDirName $(PLASMA) $(link) component ] ;
+      headers += [ FDirName $(PLASMA) $(link) core ] ;
     }
   }
 
@@ -109,6 +110,7 @@ rule ModuleMain {
       output = $(output)$(SUFOBJ) ;
       outputs += $(output) ;
       Object [ FGristFiles $(output) ] : $(file) ;
+      ObjectHdrs $(output) : $(headers) ;
     }
 
     for library in $(LIBRARIES) {
