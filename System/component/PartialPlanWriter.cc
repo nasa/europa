@@ -8,6 +8,7 @@
 #include "../ConstraintEngine/EnumeratedDomain.hh"
 #include "../ConstraintEngine/IntervalDomain.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
+#include "../ConstraintEngine/LabelStr.hh"
 #include "../ConstraintEngine/Variable.hh"
 
 #include "../PlanDatabase/PlanDatabase.hh"
@@ -40,6 +41,12 @@
 typedef std::strstream std::stringstream;
 #else
 #include <sstream>
+#endif
+
+#ifdef __sun
+#define streamIsEmpty(s) !(s).str()
+#else
+#define streamIsEmpty(s) (s).str() == ""
 #endif
 
 #define FatalError(s) { std::cerr << "At " << __FILE__ << ":" << __PRETTY_FUNCTION__ << ", line " << __LINE__ << std::endl; std::cerr << (s) << std::endl; exit(-1);}
@@ -210,6 +217,7 @@ namespace Prototype {
         std::cerr << "Failed to open " << seqStr << std::endl;
         FatalErrno();
       }
+      //cerr << "=====>" << dest << endl;
       seqOut << dest << TAB << seqId << std::endl;
       seqOut.close();
       
@@ -322,37 +330,44 @@ namespace Prototype {
 
       if(! TimelineId::convertable(*objectIterator))
 	continue;
-
-      try {
-        TimelineId &tId = (TimelineId &) objId;
-        const std::list<TokenId>& orderedTokens = tId->getTokenSequence();
-        int slotIndex = 0;
-        for(std::list<TokenId>::const_iterator tokenIterator = orderedTokens.begin();
-            tokenIterator != orderedTokens.end(); ++tokenIterator) {
-          const TokenId &token = *tokenIterator;
-          if(token->isActive()) {
-            outputToken(token, slotId, slotIndex, &tId, tokOut, tokRelOut, varOut);
-            tokens.erase(token);
-            std::set<TokenId>::const_iterator mergedTokenIterator = 
-              token->getMergedTokens().begin();
-            for(;mergedTokenIterator != token->getMergedTokens().end(); ++mergedTokenIterator) {
-              outputToken(*mergedTokenIterator, slotId, slotIndex, &tId, tokOut, tokRelOut, varOut);
-              tokens.erase(*mergedTokenIterator);
-            }
+      TimelineId &tId = (TimelineId &) objId;
+      const std::list<TokenId>& orderedTokens = tId->getTokenSequence();
+      int slotIndex = 0;
+      int emptySlots = 0;
+      for(std::list<TokenId>::const_iterator tokenIterator = orderedTokens.begin();
+          tokenIterator != orderedTokens.end(); ++tokenIterator) {
+        const TokenId &token = *tokenIterator;
+        outputToken(token, slotId, slotIndex, &tId, tokOut, tokRelOut, varOut);
+        tokens.erase(token);
+        std::set<TokenId>::const_iterator mergedTokenIterator = 
+          token->getMergedTokens().begin();
+        for(;mergedTokenIterator != token->getMergedTokens().end(); ++mergedTokenIterator) {
+          outputToken(*mergedTokenIterator, slotId, slotIndex, &tId, tokOut, tokRelOut, varOut);
+          tokens.erase(*mergedTokenIterator);
+        }
+        slotId++;
+        slotIndex++;
+        ++tokenIterator;
+        if(tokenIterator != orderedTokens.end()) {
+          const TokenId &nextToken = *tokenIterator;
+          if(token->getEnd()->lastDomain() != nextToken->getStart()->lastDomain()) {
+            objOut << tId->getKey() << COMMA << slotId << COMMA << slotIndex << COLON;
+            emptySlots++;
             slotId++;
             slotIndex++;
           }
         }
+        --tokenIterator;
       }
-      catch(std::exception &e) {
-        std::cerr << "Can't cast it to a timeline..." << std::endl;
-      }
+      if(!emptySlots)
+        objOut << SNULL;
+      objOut << endl;
     }
     for(std::set<TokenId>::iterator tokenIterator = tokens.begin(); tokenIterator != tokens.end();
         ++tokenIterator) {
       TokenId token = *tokenIterator;
       check_error(token.isValid());
-      outputToken(/**tokenIterator*/token, 0, 0, NULL, tokOut, tokRelOut, varOut);
+      outputToken(token, 0, 0, NULL, tokOut, tokRelOut, varOut);
     }
 
     (*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
@@ -372,8 +387,8 @@ namespace Prototype {
   }
 
   void PartialPlanWriter::outputObject(const ObjectId &objId, std::ofstream &objOut) {
-    objOut << objId->getKey() << TAB << ppId << TAB << objId->getName().toString() << TAB
-           << SNULL << std::endl;
+    objOut << objId->getKey() << TAB << ppId << TAB << objId->getName().toString() << TAB;
+      //<< SNULL;// << std::endl;
   }
 
   void PartialPlanWriter::outputToken(const TokenId &token, const int slotId, const int slotIndex,
@@ -584,14 +599,17 @@ namespace Prototype {
         stream << PINFINITY;
       else if((int) (*it) == MINUS_INFINITY)
         stream << NINFINITY;
-      else
-        stream << (int)(*it) << " ";
+      else {
+        if(LabelStr::isString(*it)) {
+          LabelStr label(*it);
+          stream << label.toString() << " ";
+        }
+        else {
+           stream << (int)(*it) << " ";
+        }
+      }
     }
-#ifdef __sun
-    if(!stream.str()) {
-#else
-    if(stream.str() == "") {
-#endif
+    if(streamIsEmpty(stream)) {
       return "bugStr";
     }
     return std::string(stream.str());
@@ -657,8 +675,7 @@ namespace Prototype {
     if(stepsPerWrite) {
        transactionList->push_back(Transaction(VAR_CREATED, varId->getKey(), UNKNOWN,
                                               transactionId++, seqId, nstep, 
-                                              //std::string("too early")));
-                                              varId->getName().toString()));
+                                              getVarInfo(varId)));
     }
   }
 
@@ -666,8 +683,7 @@ namespace Prototype {
     if(stepsPerWrite) {
       transactionList->push_back(Transaction(VAR_DELETED, varId->getKey(), UNKNOWN,
                                              transactionId++, seqId, nstep, 
-                                             //std::string("too early")));
-                                             varId->getName().toString()));
+                                             getVarInfo(varId)));
     }
   }
 
@@ -678,11 +694,13 @@ namespace Prototype {
       case DomainListener::RELAXED:
         //VAR_DOMAIN_RELAXED
         transactionList->push_back(Transaction(VAR_DOMAIN_RELAXED, varId->getKey(), SYSTEM,
-                                               transactionId++, seqId, nstep, getVarInfo(varId)));
+                                               transactionId++, seqId, nstep, 
+                                               getLongVarInfo(varId)));
         break;
       case DomainListener::RESET:
         transactionList->push_back(Transaction(VAR_DOMAIN_RESET, varId->getKey(), USER,
-                                               transactionId++, seqId, nstep, getVarInfo(varId)));
+                                               transactionId++, seqId, nstep, 
+                                               getLongVarInfo(varId)));
         break;
       case DomainListener::VALUE_REMOVED:
       case DomainListener::BOUNDS_RESTRICTED:
@@ -691,18 +709,21 @@ namespace Prototype {
       case DomainListener::RESTRICT_TO_SINGLETON:
         //VAR_DOMAIN_RESTRICTED
         transactionList->push_back(Transaction(VAR_DOMAIN_RESTRICTED, varId->getKey(), SYSTEM,
-                                               transactionId++, seqId, nstep, getVarInfo(varId)));
+                                               transactionId++, seqId, nstep, 
+                                               getLongVarInfo(varId)));
         break;
       case DomainListener::SET:
       case DomainListener::SET_TO_SINGLETON:
         //VAR_DOMAIN_SPECIFIED
         transactionList->push_back(Transaction(VAR_DOMAIN_SPECIFIED, varId->getKey(), USER,
-                                               transactionId++, seqId, nstep, getVarInfo(varId)));
+                                               transactionId++, seqId, nstep, 
+                                               getLongVarInfo(varId)));
         break;
       case DomainListener::EMPTIED:
         //VAR_DOMAIN_EMPTIED
         transactionList->push_back(Transaction(VAR_DOMAIN_EMPTIED, varId->getKey(), SYSTEM,
-                                               transactionId++, seqId, nstep, getVarInfo(varId)));
+                                               transactionId++, seqId, nstep, 
+                                               getLongVarInfo(varId)));
         break;
       case DomainListener::CLOSED:
         break;
@@ -723,19 +744,26 @@ namespace Prototype {
   }
   
   const std::string PartialPlanWriter::getVarInfo(const ConstrainedVariableId &varId) const {
-    if(!TokenId::convertable(varId->getParent()))
-      return "UNKNOWN VARIABLE PARENT";
-
     std::string type, paramName, predName, retval;
-    if(varId->getIndex() >= 0 && varId->getIndex() <= 4) {
+    if(varId->getIndex() >= I_REJECT && varId->getIndex() <= I_END) {
       type = tokenVarTypes[varId->getIndex()];
     }
     else {
       type = PARAMETER_VAR;
       paramName = varId->getName().toString();
     }
-    retval = type + COMMA + ((TokenId &)varId->getParent())->getPredicateName().toString();
-    retval += COMMA + paramName + COMMA;
+    if(TokenId::convertable(varId->getParent())) {
+      predName = ((TokenId &)varId->getParent())->getPredicateName().toString();
+    }
+    else {
+      predName = "UNKNOWN VARIABLE PARENT";
+    }
+    retval = type + COMMA + predName + COMMA + paramName + COMMA;
+    return retval;
+  }
+
+  const std::string PartialPlanWriter::getLongVarInfo(const ConstrainedVariableId &varId) const {
+    std::string retval = getVarInfo(varId);
 
     varId->lastDomain();
     if(varId->lastDomain().isEnumerated()) {

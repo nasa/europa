@@ -62,6 +62,7 @@ namespace Prototype {
     const std::string getLowerBoundStr(IntervalDomain &dom) const;
     const std::string getEnumerationStr(EnumeratedDomain &dom) const;
     const std::string getVarInfo(const ConstrainedVariableId &) const;
+    const std::string getLongVarInfo(const ConstrainedVariableId &) const;
 
 
     /****From PlanDatabaseListener****/

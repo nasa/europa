@@ -278,7 +278,6 @@ private:
 
   static bool testObjectTokenRelation(){
     PlanDatabase db(ENGINE, SCHEMA);
-
     // 1. Create 2 objects
     ObjectId object1 = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr("O1")))->getId();
     ObjectId object2 = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr("O2")))->getId();    
@@ -959,15 +958,15 @@ private:
 
     assert(timeline->getTokens().size() == 0);
     ce.propagate();
-    assert(timeline->getTokens().size() == COUNT);
+    assert(timeline->getTokens().size() == (unsigned int) COUNT);
 
     int i = 0;
     std::vector<TokenId> tokensToOrder;
     timeline->getTokensToOrder(tokensToOrder);
 
     while(!tokensToOrder.empty()){
-      assert(timeline->getTokenSequence().size() == i);
-      assert(tokensToOrder.size() == (COUNT - i));
+      assert(timeline->getTokenSequence().size() == (unsigned int) i);
+      assert(tokensToOrder.size() == (unsigned int) (COUNT - i));
       std::vector<TokenId> choices;
       TokenId toConstrain = tokensToOrder.front();
       timeline->getOrderingChoices(toConstrain, choices);
@@ -1148,12 +1147,12 @@ private:
     tokenA.activate();
     assert(re.getRuleInstances().size() == 1);
     // New constraint added to listen to rule variables
-    assert(ce.getConstraints().size() == num_constraints + 1);
+    assert(ce.getConstraints().size() == (unsigned int) (num_constraints + 1));
 
     // Deactivate to ensure the rule instance is removed
     tokenA.cancel();
     assert(re.getRuleInstances().empty());
-    assert(ce.getConstraints().size() == num_constraints);
+    assert(ce.getConstraints().size() == (unsigned int) num_constraints);
 
     // Activate again to test deletion through automatic cleanup.
     tokenA.activate();
