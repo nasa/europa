@@ -1,4 +1,5 @@
 #include "IntervalIntDomain.hh"
+#include <cmath>
 
 namespace Prototype {
 

@@ -1,6 +1,7 @@
 #include "EnumeratedDomain.hh"
 #include "LabelStr.hh"
 #include "Entity.hh"
+#include <cmath>
 
 namespace Prototype {
 

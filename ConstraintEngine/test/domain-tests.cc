@@ -6,6 +6,7 @@
 #include "DomainListener.hh"
 #include "Domain.hh"
 #include "domain-tests.hh"
+#include <cmath>
 
 // These differences have to do with changes to the C++ standard,
 //   not the operating system in use. --wedgingt 15 Mar 2004

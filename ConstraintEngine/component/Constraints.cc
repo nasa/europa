@@ -6,6 +6,7 @@
 #include "BoolDomain.hh"
 #include "Domain.hh"
 #include "Utils.hh"
+#include <cmath>
 
 namespace Prototype {
 
