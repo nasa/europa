@@ -13,3 +13,4 @@ NddlWorld world = new NddlWorld(0, 10, 100);
 rejection r = new rejection();
 any(rejection.unsatisfiable a);
 a.start.specify(2);
+close();
