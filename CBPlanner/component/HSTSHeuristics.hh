@@ -35,9 +35,9 @@ namespace PLASMA {
     const LabelStr& getPredicate() const;
     const std::vector<std::pair<LabelStr, LabelStr> >& getDomainSpecs() const;
 
-    static const LabelStr getIndexKey(const TokenTypeId& tt);
-    static const TokenTypeId getTokenType(const LabelStr& indexKey);
-    static const TokenTypeId createTokenType(const TokenId& token);
+    static void getIndexKey(const TokenTypeId& tt, LabelStr& indexKey);
+    static void getTokenType(const LabelStr& indexKey, TokenTypeId& tt);
+    static void createTokenType(const TokenId& token, TokenTypeId& tt);
     bool matches(const TokenTypeId& tt);
     bool conflicts(const TokenTypeId& tt);
   private:
@@ -167,7 +167,7 @@ namespace PLASMA {
 
     // Internal Queries:
     const Priority getInternalPriorityForConstrainedVariableDP(const LabelStr variableName, const TokenTypeId& tt);
-    const Priority getInternalPriorityForTokenDP(const TokenTypeId& tt, Relationship rel, const TokenTypeId& mastertt, const Origin o);
+    const Priority getInternalPriorityForTokenDP(const TokenId& tok);
 
     const std::vector<LabelStr>& getInternalStatePreferenceForTokenValueChoice(const TokenTypeId& tt, Relationship rel, const TokenTypeId& mastertt, const Origin o);
     const std::vector<CandidateOrder>& getInternalOrderPreferenceForTokenValueChoice(const TokenTypeId& tt, const Relationship rel, const TokenTypeId& mastertt, const Origin o);

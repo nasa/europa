@@ -5,6 +5,7 @@
 #include "ObjectDecisionPoint.hh"
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "Schema.hh"
+#include "Utils.hh"
 #include <sstream>
 
 namespace PLASMA {
@@ -33,7 +34,7 @@ namespace PLASMA {
     return m_domainSpecs;
   }
 
-  const LabelStr TokenType::getIndexKey(const TokenTypeId& tt) {
+  void TokenType::getIndexKey(const TokenTypeId& tt, LabelStr& indexKey) {
     check_error(tt.isValid());
     std::stringstream key;
     check_error(LabelStr::isString(tt->getPredicate()));
@@ -44,7 +45,7 @@ namespace PLASMA {
       key << DELIMITER;
       key << ds[i].first.c_str() << "|" << ds[i].second.c_str();
     }
-    return key.str();
+    indexKey = key.str();
   }
 
   void TokenType::split(const std::string& str, const char& delim, std::vector<std::string>& strings) {
@@ -66,7 +67,7 @@ namespace PLASMA {
   // todo: get base domain?  Alternatively, could cache it once it is
   // computed for the first time on a variable instance of the same type
   // todo: if domain is too large, create generator.
-  const TokenTypeId TokenType::getTokenType(const LabelStr& indexKey) {
+  void TokenType::getTokenType(const LabelStr& indexKey, TokenTypeId& tt) {
     std::vector<std::string> strings;
     split(indexKey.toString(),DELIMITER,strings);
     check_error(strings.size() >= 1);
@@ -77,12 +78,14 @@ namespace PLASMA {
       check_error(domstr.size() == 2);
       domainSpec.push_back(std::make_pair<LabelStr,LabelStr>(domstr[0],domstr[1]));
     }
-    return (new TokenType(LabelStr(strings[0]),domainSpec))->getId();
+    tt = (new TokenType(LabelStr(strings[0]),domainSpec))->getId();
   }
 
   bool TokenType::matches(const TokenTypeId& tt) {
-    LabelStr myIndexKey(TokenType::getIndexKey(getId()));
-    LabelStr indexKey(TokenType::getIndexKey(tt));
+    LabelStr myIndexKey(NO_STRING);
+    TokenType::getIndexKey(getId(),myIndexKey);
+    LabelStr indexKey(NO_STRING);
+    TokenType::getIndexKey(tt, indexKey);
     return (myIndexKey.getKey() == indexKey.getKey());
   }
 
@@ -133,7 +136,7 @@ namespace PLASMA {
     switch (order) {
     case VGENERATOR:
       // create generator from name
-      std::cout << " Generators such as " << generatorName.c_str() << " are not yet supported" << std::endl;
+      //      std::cout << " Generators such as " << generatorName.c_str() << " are not yet supported" << std::endl;
       break;
     case ASCENDING:
       if (m_domain.empty()) {
@@ -186,11 +189,14 @@ namespace PLASMA {
   }
 
   HSTSHeuristics::~HSTSHeuristics() {
-    m_defaultCompatibilityPriority.clear();
-    m_defaultTokenStates.clear();
-    m_defaultCandidateOrders.clear();
-    m_tokenHeuristics.clear();
-    m_variableHeuristics.clear();
+    //cleanup(m_defaultCompatibilityPriority);
+    //    cleanup(m_defaultTokenStates);
+    //    cleanup(m_defaultCandidateOrders);
+    //    for (std::map<LabelStr,TokenEntry>::iterator it = m_tokenHeuristics.begin();
+    //	 it != m_tokenHeuristics.end(); ++it) 
+    //      delete &it->second;
+    //    cleanup(m_tokenHeuristics);
+    //    cleanup(m_variableHeuristics);
 
     check_error(m_id.isValid());
     m_id.remove();
@@ -212,7 +218,9 @@ namespace PLASMA {
   void HSTSHeuristics::setDefaultPriorityForTokenDPsWithParent(const Priority p, const TokenTypeId& tt) {
     check_error(MIN_PRIORITY <= p);
     check_error(MAX_PRIORITY >= p);
-    m_defaultCompatibilityPriority.insert(std::make_pair<LabelStr,Priority>(TokenType::getIndexKey(tt), p));
+    LabelStr indexKey(NO_STRING);
+    TokenType::getIndexKey(tt,indexKey);
+    m_defaultCompatibilityPriority.insert(std::make_pair<LabelStr,Priority>(indexKey, p));
   }
 
   const HSTSHeuristics::Priority HSTSHeuristics::getDefaultPriorityForTokenDPsWithParent(const TokenTypeId& tt) const {
@@ -318,8 +326,11 @@ namespace PLASMA {
       return (pos->second);
   }
 
-  const TokenTypeId TokenType::createTokenType(const TokenId& token) {
-    if (token.isNoId()) return TokenTypeId::noId();
+  void TokenType::createTokenType(const TokenId& token, TokenTypeId& tt) {
+    if (token.isNoId()) {
+      tt = TokenTypeId::noId();
+      return;
+    }
     std::vector<std::pair<LabelStr,LabelStr> > domains;
     const std::vector<ConstrainedVariableId>& variables(token->getParameters());
     for (unsigned int i = 0; i < variables.size(); ++i) {
@@ -339,34 +350,31 @@ namespace PLASMA {
 	}
       }
     }
-    return (new TokenType(token->getName(), domains))->getId();
+    tt = (new TokenType(token->getName(), domains))->getId();
   }
 
   const HSTSHeuristics::Priority HSTSHeuristics::getPriorityForTokenDP(const TokenDecisionPointId& tokDec) {
-    TokenId tok = tokDec->getToken();
-    TokenTypeId tt = TokenType::createTokenType(tok);
-    TokenTypeId mastertt = TokenType::createTokenType(tok->getMaster());
-    //    Relationship rel = tok->getRelationship(); // once it is implemented on tokens.
-    Relationship rel = BEFORE;
-    Origin orig;
-    if (mastertt.isNoId())
-      orig = INITIAL;
-    else
-      orig = SUBGOAL;
-    return getInternalPriorityForTokenDP(tt, rel, mastertt, orig);
+    //    std::cout << "In getPriorityForTokenDP" << std::endl;
+    check_error(tokDec.isValid());
+    return getInternalPriorityForTokenDP(tokDec->getToken());
   }
 
   const HSTSHeuristics::Priority HSTSHeuristics::getPriorityForObjectDP(const ObjectDecisionPointId& objDec) {
-    return getPriorityForTokenDP(objDec->getToken());
+    check_error(objDec.isValid());
+    return getInternalPriorityForTokenDP(objDec->getToken());
   }
 
   const HSTSHeuristics::Priority HSTSHeuristics::getPriorityForConstrainedVariableDP(const ConstrainedVariableDecisionPointId& varDec) {
+    check_error(varDec.isValid());
     const ConstrainedVariableId& var = varDec->getVariable();
     const EntityId& parent = var->getParent();
     if (parent.isNoId() || !TokenId::convertable(parent)) 
       return m_defaultVariablePriority;
-    TokenTypeId tt = TokenType::createTokenType(parent);
-    return getInternalPriorityForConstrainedVariableDP(var->getName(), tt);
+    TokenTypeId tt;
+    TokenType::createTokenType(parent,tt);
+    Priority p = getInternalPriorityForConstrainedVariableDP(var->getName(), tt);
+    if (!tt.isNoId()) tt.remove(); // we really don't need it
+    return p;
   }
 
   const HSTSHeuristics::Priority HSTSHeuristics::getInternalPriorityForConstrainedVariableDP(const LabelStr variableName, 
@@ -378,28 +386,59 @@ namespace PLASMA {
     return m_defaultVariablePriority;
   }
 
-  const HSTSHeuristics::Priority HSTSHeuristics::getInternalPriorityForTokenDP(const TokenTypeId& tt, 
-							       const Relationship rel, 
-							       const TokenTypeId& mastertt, 
-							       const Origin o) {
+  const HSTSHeuristics::Priority HSTSHeuristics::getInternalPriorityForTokenDP(const TokenId& tok) {
+    TokenTypeId tt;
+    TokenType::createTokenType(tok,tt);
+    TokenTypeId mastertt;
+    TokenType::createTokenType(tok->getMaster(),mastertt);
+    LabelStr relName = tok->getRelation();
+    Relationship rel;
+    if (relName == LabelStr("before")) 
+      rel = HSTSHeuristics::BEFORE;
+    else if (relName == LabelStr("after"))
+      rel = HSTSHeuristics::AFTER;
+    else if (relName == LabelStr("any"))
+      rel = HSTSHeuristics::ANY;
+    else rel = HSTSHeuristics::OTHER;
+    
+    Origin orig;
+    if (mastertt.isNoId())
+      orig = INITIAL;
+    else
+      orig = SUBGOAL;
+
     check_error(tt.isValid());
-    check_error(mastertt.isValid());
-    LabelStr key = HSTSHeuristics::getIndexKey(tt, rel, mastertt, o);
+
+    //    std::cout << "In getInternalPriorityForTokenDP" << std::endl;
+
+    LabelStr key = HSTSHeuristics::getIndexKey(tt, rel, mastertt, orig);
+
+    //    std::cout << " got key for token = " << key.c_str() << std::endl;
+
     std::map<LabelStr, TokenEntry>::iterator pos = m_tokenHeuristics.find(key);
+    Priority p;
     if (pos != m_tokenHeuristics.end())
-      return pos->second.getPriority();
-    LabelStr key2 = TokenType::getIndexKey(mastertt);
-    std::map<LabelStr, Priority>::iterator pos2 =  m_defaultCompatibilityPriority.find(key2);
-    if (pos2 != m_defaultCompatibilityPriority.end())
-      return pos2->second;
-    return m_defaultTokenPriority;
+      p = pos->second.getPriority();
+    else if (!mastertt.isNoId()) {
+      LabelStr key2(NO_STRING);
+      TokenType::getIndexKey(mastertt,key2);
+      std::map<LabelStr, Priority>::iterator pos2 =  m_defaultCompatibilityPriority.find(key2);
+      if (pos2 != m_defaultCompatibilityPriority.end())
+	p = pos2->second;
+      mastertt.remove(); // we no longer need it.
+    }
+    else p = m_defaultTokenPriority;
+    if (!tt.isNoId()) tt.remove();
+    return p;
   }
 
   const LabelStr HSTSHeuristics::getIndexKey(const LabelStr& variableName, 
 					     const TokenTypeId& tt) {
     check_error(tt.isValid());
     std::stringstream key;
-    key << variableName.c_str() << DELIMITER << TokenType::getIndexKey(tt).c_str();
+    LabelStr indexKey(NO_STRING);
+    TokenType::getIndexKey(tt,indexKey);
+    key << variableName.c_str() << DELIMITER << indexKey.c_str();
     return key.str();
   }
 
@@ -415,12 +454,16 @@ namespace PLASMA {
       HSTSHeuristics::originToString(o,str);
       key << str.toString() << DELIMITER;
     }
-    key << TokenType::getIndexKey(tt).c_str();
+    LabelStr indexKey(NO_STRING);
+    TokenType::getIndexKey(tt,indexKey);
+    key << indexKey.c_str();
     if (!mastertt.isNoId()) {
       LabelStr str(NO_STRING);
       HSTSHeuristics::relationshipToString(rel,str);
       key << DELIMITER << str.toString();
-      key << DELIMITER << TokenType::getIndexKey(mastertt).c_str();
+      LabelStr iKey(NO_STRING);
+      TokenType::getIndexKey(mastertt,iKey);
+      key << DELIMITER << iKey.c_str();
     }
     return key.str();
   }
