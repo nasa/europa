@@ -4,6 +4,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "ConstraintEngine.hh"
 #include "ConstrainedVariable.hh"
+#include "Variable.hh"
 #include "Constraint.hh"
 
 
@@ -18,6 +19,21 @@ namespace Prototype {
 					     const ConstraintId& constraint, 
 					     const DomainListener::ChangeType& changeType){
 
+    check_error(variable->getParent()->getName() == LabelStr("Resource.change"));
+
+    //handle change of variables
+    switch(argIndex) {
+    case ResourceConstraint::OBJECT: 
+      handleObjectChange(variable, changeType);
+      break;
+    case ResourceConstraint::TIME: 
+      handleTimeChange(variable, argIndex, constraint, changeType);
+      break;    
+    case ResourceConstraint::USAGE: 
+      handleQuantityChange(variable, argIndex, constraint, changeType);
+      break;
+    }
+    //buffer for propagation if necessary
     handleResourcePropagation(constraint);
   }
 
@@ -41,31 +57,72 @@ namespace Prototype {
     return (m_resources.size() > 0);
   }
 
-  bool ResourcePropagator::checkResourcePropagationRequired(const ConstrainedVariableId& variable) const {
-    /*
-    check_error(TransactionId::convertable(variable->getParent()));
-    TransactionId t(variable->getParent());    
-    return(ResourceConstraint::getCurrentDomain(t->getObject()).isSingleton());
-    */
-    check_error(TokenId::convertable(variable->getParent()));
-    TokenId t(variable->getParent());
-    return(ResourceConstraint::getCurrentDomain(t->getObject()).isSingleton());
-
-  }
 
   void ResourcePropagator::handleResourcePropagation(const ConstraintId constraint) {
     check_error(ResourceConstraintId::convertable(constraint));
-    ConstrainedVariableId variable = constraint->getScope().front();
-    if (checkResourcePropagationRequired(variable)) {
-      TokenId t(variable->getParent());
-      ResourceId r = ResourceConstraint::getCurrentDomain(t->getObject()).getSingletonValue();
-
+    ConstrainedVariableId objectvar = constraint->getScope().front();
+    //delay propagation of resource until the transaction has been assigned to a resource
+    if (objectvar->specifiedDomain().isSingleton()) {
+      ResourceId r = ResourceConstraint::getCurrentDomain(objectvar).getSingletonValue();
       // Buffer this resource for propagation
       if (m_resources.find(r) == m_resources.end())
 	m_resources.insert(r);
-
       //store a variable so that its domain can be emptied
-      m_forempty = variable;
+      m_forempty = objectvar;
+    }
+  }
+
+  void ResourcePropagator::handleObjectChange(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType) {
+    if (variable->specifiedDomain().isSingleton()) {
+      TransactionId t = variable->getParent();
+      //if the spec domain is a singleton and this transaction has not yet been assigned to a resource, then assign it.
+      if(t->getResource() == ResourceId::noId()) {
+	ResourceId r = ResourceConstraint::getCurrentDomain(variable).getSingletonValue();	
+	  r->insert(t);
+	}
+      }
+      //else if the spec domain is no longer a singleton and this transaction is still assigned this resource, then remove it. 
+      else if (!variable->specifiedDomain().isSingleton() && (changeType == DomainListener::RESET) ) {
+	TransactionId t = variable->getParent();
+	if ( t->getResource() != ResourceId::noId()) {
+	  ResourceId r = t->getResource();
+	  r->remove(t);
+	}
+      }
+  }
+  void ResourcePropagator::handleQuantityChange(const ConstrainedVariableId& variable, 
+						int argIndex, 
+						const ConstraintId& constraint, 
+						const DomainListener::ChangeType& changeType) {
+    check_error(ResourceConstraintId::convertable(constraint));
+    ConstrainedVariableId objectvar = constraint->getScope().front();
+    if (TransactionId::convertable(variable->getParent())) {    
+      TransactionId t = variable->getParent();
+      if (t->getResource() != ResourceId::noId()){
+	ResourceId r = t->getResource();
+	r->notifyQuantityChanged(t);
+      } 
+      t->notifyChanged();
+    }
+  }
+
+  void ResourcePropagator::handleTimeChange(const ConstrainedVariableId& variable, 
+					    int argIndex, 
+					    const ConstraintId& constraint, 
+					    const DomainListener::ChangeType& changeType){
+
+    check_error(ResourceConstraintId::convertable(constraint));
+    if (TransactionId::convertable(variable->getParent())) {    
+      ConstrainedVariableId objectvar = constraint->getScope().front();
+      TransactionId t = variable->getParent();
+      if (t->getResource() != ResourceId::noId()){
+	ResourceId r = t->getResource();
+	if (changeType == DomainListener::RELAXED)
+	  r->notifyTimeRelaxed(t);
+	else
+	  r->notifyTimeRestricted(t);
+      }
+      t->notifyChanged();
     }
   }
 

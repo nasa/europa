@@ -25,11 +25,20 @@ namespace Prototype {
 
   private:
     
-    bool checkResourcePropagationRequired(const ConstrainedVariableId& variable) const;
+    void handleObjectChange(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
+    void handleQuantityChange(const ConstrainedVariableId& variable, 
+    			    int argIndex, 
+    			    const ConstraintId& constraint, 
+    			    const DomainListener::ChangeType& changeType);
+    void handleTimeChange(const ConstrainedVariableId& variable, 
+    			    int argIndex, 
+    			    const ConstraintId& constraint, 
+    			    const DomainListener::ChangeType& changeType);
     void handleResourcePropagation(const ConstraintId constraint);
 
     std::set<ResourceId> m_resources;
     ConstrainedVariableId m_forempty;
+
 
   };
 }
