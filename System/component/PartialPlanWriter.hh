@@ -107,6 +107,10 @@ namespace Prototype {
       void notifyExecuted(const RuleInstanceId &);
       void notifyUndone(const RuleInstanceId &);
 
+      class PPWPlanDatabaseListener;
+      class PPWConstraintEngineListener;
+      class PPWRulesEngineListener;
+
       friend class PPWPlanDatabaseListener;
       friend class PPWConstraintEngineListener;
       friend class PPWRulesEngineListener;
