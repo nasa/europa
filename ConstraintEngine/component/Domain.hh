@@ -132,7 +132,12 @@ namespace Prototype {
 
   template <class ELEMENT_TYPE>
   const LabelStr& Domain<ELEMENT_TYPE>::getTypeName() const {
-    static const LabelStr sl_typeName = LabelStr(typeid(Domain<ELEMENT_TYPE>).name());
+    // Would do:
+    // static const LabelStr sl_typeName = LabelStr(typeid(Domain<ELEMENT_TYPE>).name());
+    // ... but that is only correct for label sets, and not
+    // for object domains, which are also implemented using
+    // this template class.  So:
+    static const LabelStr sl_typeName("USER_DEFINED");
     return(sl_typeName);
   }
 
