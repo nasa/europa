@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.8 2002-11-06 00:58:17 wedgingt Exp $
+# $Id: autobuild,v 1.9 2002-11-06 01:02:54 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -35,18 +35,10 @@ startdir="`cd $startdir; pwd`"
 echo cd "$startdir"
 cd "$startdir"
 
-trap 'rmdir $startdir/working $startdir/restart $startdir/resubmit' 0
+trap 'rmdir $startdir/working' 0
 
 # Don't run this script more than once in the same directory.
 mkdir working || exit 1
-
-# Create this directory during a run to have this script restart via at.
-mkdir restart || exit 1
-
-# Create this directory during a run to stop before the long tests and restart via at.
-mkdir resubmit || exit 1
-
-rmdir restart resubmit || exit 2
 
 #subdirs='cvs opt fast optFast'
 subdirs='cvs fast'
@@ -56,7 +48,6 @@ for dir in $subdirs
 do
 
     cd "$startdir"
-    test ! -d restart || break
     if test -d "$dir"/NewPlan
     then
         echo "$0"': '"$dir"'/NewPlan already exists; exiting'
@@ -96,7 +87,6 @@ do
     fi
 
     test -d "$startdir"/working || exit 2
-    test ! -d "$startdir"/restart || break
 
     make $makeopt tests >> make.tests 2>&1
     status=$?
@@ -119,10 +109,4 @@ do
     rm -rf NewPlan
 
 done
-
-test -d resubmit -a ! -d restart && mv resubmit restart
-
-cd "$startdir"
-test ! -d restart -a ! -d resubmit && exit 0
-
-echo "echo 'Europa autobuild failed: at read commands from stdin despite -f flag'" | at -q b -s -f autobuild
+exit 0
