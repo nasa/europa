@@ -6,6 +6,7 @@
 #include "Utils.hh"
 #include "Object.hh"
 
+
 namespace PLASMA {
 
   class ConditionalRuleRoot : public RuleInstance {
@@ -46,8 +47,8 @@ namespace PLASMA {
 
   void ConditionalRuleRoot::handleExecute() {
     addVariable(BoolDomain(), true, LabelStr("OR"));
-    addChildRule(new ConditionalRule_true(m_id, var("OR"), true));
-    addChildRule(new ConditionalRule_false(m_id, var("OR"), false));
+    addChildRule(new ConditionalRule_true(m_id, getVariable(LabelStr("OR")), true));
+    addChildRule(new ConditionalRule_false(m_id, getVariable(LabelStr("OR")), false));
   }
 
   void ConditionalRule_true::handleExecute() {

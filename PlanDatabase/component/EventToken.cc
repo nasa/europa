@@ -42,7 +42,7 @@ namespace PLASMA{
 						   m_planDatabase->getConstraintEngine(), 
 						   timeBaseDomain,
 						   true,
-						   LabelStr("Time")))->getId();
+						   LabelStr("time")))->getId();
     m_allVariables.push_back(m_time);
   }
 }

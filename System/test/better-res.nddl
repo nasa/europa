@@ -21,7 +21,7 @@ class Wind{
 
 Wind::Velocity{
   any(Battery.change ch);
-  eq(ch.end, end);
+  eq(ch.time, end);
   windPower(ch.quantity, m_velocity);
 }
 
@@ -73,7 +73,7 @@ class Rover{
 Rover::Sample{
   // we care that it consumes the battery
   any(Battery.change bc);
-  eq(bc.start, start);
+  eq(bc.time, start);
   // battery consumption and duration depend on work
   // should we pass coordinates here?
   sampleBattery( bc.quantity, m_x, m_y );
@@ -96,7 +96,7 @@ Rover::Sample{
 Rover::Drive{
   // we care that it consumes the battery
   any(Battery.change bc);
-  eq(bc.start, start);
+  eq(bc.time, start);
   // to begin with, the charge is always negative
   // it is also never more than the battery's level (TBD as an argument)
   eq(bc.quantity, [-50 0]);

@@ -17,6 +17,7 @@
 
 #include "TestSupport.hh"
 #include "PlanDatabaseTestSupport.hh"
+#include "PlanDatabaseWriter.hh"
 
 #include <iostream>
 #include <string>

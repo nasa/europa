@@ -19,6 +19,7 @@ for model in
 	interval-constants.nddl  simple-predicate.nddl
 	less-basic-model.nddl    foreach-exec.nddl
 	gnats-2537.nddl simple-resources.nddl multi-resources.nddl
+	multidot.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;

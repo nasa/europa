@@ -25,13 +25,13 @@ class DriveSubsystem{
 
 DriveSubsystem::Drive{
  any(Battery.change tx);
- eq(start, tx.start);
+ eq(start, tx.time);
  eq(tx.quantity, -50);
 }
 
 DriveSubsystem::Stroll{
  any(Battery.change tx);
- eq(start, tx.start);
+ eq(start, tx.time);
  eq(tx.quantity, -25);
 }
 

@@ -186,8 +186,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("object"));
-      vars.push_back(var("target"));
+      vars.push_back(var(getId(),std::string("object")));
+      vars.push_back(var(getId(),std::string("target")));
       token_constraint(eq, vars);
     }
   }
@@ -197,8 +197,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("object"));
-      vars.push_back(var("target"));
+      vars.push_back(var(getId(),std::string("object")));
+      vars.push_back(var(getId(),std::string("target")));
       token_constraint(eq, vars);
     }
   }
@@ -220,8 +220,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("object"));
-      vars.push_back(var("target"));
+      vars.push_back(var(getId(),std::string("object")));
+      vars.push_back(var(getId(),std::string("target")));
       token_constraint(eq, vars);
     }
   }
@@ -231,8 +231,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("object"));
-      vars.push_back(var("target"));
+      vars.push_back(var(getId(),std::string("object")));
+      vars.push_back(var(getId(),std::string("target")));
       token_constraint(eq, vars);
     }
   }
@@ -254,8 +254,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("object"));
-      vars.push_back(var("target"));
+      vars.push_back(var(getId(),std::string("object")));
+      vars.push_back(var(getId(),std::string("target")));
       token_constraint(eq, vars);
     }
   }
@@ -265,8 +265,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("object"));
-      vars.push_back(var("target"));
+      vars.push_back(var(getId(),std::string("object")));
+      vars.push_back(var(getId(),std::string("target")));
       token_constraint(eq, vars);
     }
   }
@@ -288,8 +288,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("object"));
-      vars.push_back(var("target"));
+      vars.push_back(var(getId(),std::string("object")));
+      vars.push_back(var(getId(),std::string("target")));
       token_constraint(eq, vars);
     }
   }
@@ -299,8 +299,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("object"));
-      vars.push_back(var("target"));
+      vars.push_back(var(getId(),std::string("object")));
+      vars.push_back(var(getId(),std::string("target")));
       token_constraint(eq, vars);
     }
   }
@@ -426,13 +426,13 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("from"));
-      vars.push_back(var("to"));
+      vars.push_back(var(getId(),std::string("from")));
+      vars.push_back(var(getId(),std::string("to")));
       token_constraint(neq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("duration"));
+      vars.push_back(var(getId(),std::string("duration")));
       vars.push_back(predicateVariable(IntervalIntDomain(1)));
       token_constraint(eq, vars);
     }
@@ -443,13 +443,13 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("from"));
-      vars.push_back(var("to"));
+      vars.push_back(var(getId(),std::string("from")));
+      vars.push_back(var(getId(),std::string("to")));
       token_constraint(neq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("duration"));
+      vars.push_back(var(getId(),std::string("duration")));
       vars.push_back(predicateVariable(IntervalIntDomain(1)));
       token_constraint(eq, vars);
     }
@@ -470,64 +470,64 @@ namespace NDDL {
   
   
   // k9-initial.nddl:52 At
-  class Position_At_0_0: public RuleInstance {
+  class Position$At$0$0: public RuleInstance {
   public:
-    Position_At_0_0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    Position$At$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
     : RuleInstance(rule, token, planDb){}
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule_Position_At_0, Position_At_0_0, Position.At, "k9-initial.nddl,52");
+  DECLARE_AND_DEFINE_RULE(Rule$Position$At$0, Position$At$0$0, Position.At, "k9-initial.nddl,52");
   
-  void Position_At_0_0::handleExecute() {
+  void Position$At$0$0::handleExecute() {
     slave(Position::navigate, Position.navigate, a);
     meets(this, a);
     slave(Position::navigate, Position.navigate, b);
     met_by(this, b);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("location"));
-      vars.push_back(Position::navigateId(tok("a"))->from);
+      vars.push_back(var(getId(),std::string("location")));
+      vars.push_back(varfromtok(tok(getId(), std::string("a")), std::string("from")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("location"));
-      vars.push_back(Position::navigateId(tok("b"))->to);
+      vars.push_back(var(getId(),std::string("location")));
+      vars.push_back(varfromtok(tok(getId(), std::string("b")), std::string("to")));
       rule_constraint(eq, vars);
     }
   }
   
   // k9-initial.nddl:62 navigate
-  class Position_navigate_1_0: public RuleInstance {
+  class Position$navigate$1$0: public RuleInstance {
   public:
-    Position_navigate_1_0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    Position$navigate$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
     : RuleInstance(rule, token, planDb){}
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule_Position_navigate_1, Position_navigate_1_0, Position.navigate, "k9-initial.nddl,62");
+  DECLARE_AND_DEFINE_RULE(Rule$Position$navigate$1, Position$navigate$1$0, Position.navigate, "k9-initial.nddl,62");
   
-  void Position_navigate_1_0::handleExecute() {
+  void Position$navigate$1$0::handleExecute() {
     objectVar(Path, path, true);
     slave(Position::At, Position.At, a);
     meets(this, a);
     slave(Position::At, Position.At, b);
     met_by(this, b);
     declareFilter(Path,path);
-    allocateFilterCondition(path, Location, var("from"), m_from, eq);
-    allocateFilterCondition(path, Location, var("to"), m_to, eq);
+    allocateFilterCondition(path, Location, var(getId(),std::string("from")), m_from, eq);
+    allocateFilterCondition(path, Location, var(getId(),std::string("to")), m_to, eq);
     allocateFilterConstraint(path, CONSTRAIN);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("to"));
-      vars.push_back(Position::AtId(tok("a"))->location);
+      vars.push_back(var(getId(),std::string("to")));
+      vars.push_back(varfromtok(tok(getId(), std::string("a")), std::string("location")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(Position::AtId(tok("b"))->location);
-      vars.push_back(var("from"));
+      vars.push_back(varfromtok(tok(getId(), std::string("b")), std::string("location")));
+      vars.push_back(var(getId(),std::string("from")));
       rule_constraint(eq, vars);
     }
   }
@@ -823,8 +823,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("target"));
-      vars.push_back(var("at_loc"));
+      vars.push_back(var(getId(),std::string("target")));
+      vars.push_back(var(getId(),std::string("at_loc")));
       token_constraint(neq, vars);
     }
   }
@@ -834,8 +834,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("target"));
-      vars.push_back(var("at_loc"));
+      vars.push_back(var(getId(),std::string("target")));
+      vars.push_back(var(getId(),std::string("at_loc")));
       token_constraint(neq, vars);
     }
   }
@@ -861,8 +861,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("target"));
-      vars.push_back(var("at_loc"));
+      vars.push_back(var(getId(),std::string("target")));
+      vars.push_back(var(getId(),std::string("at_loc")));
       token_constraint(neq, vars);
     }
   }
@@ -872,8 +872,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("target"));
-      vars.push_back(var("at_loc"));
+      vars.push_back(var(getId(),std::string("target")));
+      vars.push_back(var(getId(),std::string("at_loc")));
       token_constraint(neq, vars);
     }
   }
@@ -899,8 +899,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("target"));
-      vars.push_back(var("at_loc"));
+      vars.push_back(var(getId(),std::string("target")));
+      vars.push_back(var(getId(),std::string("at_loc")));
       token_constraint(neq, vars);
     }
   }
@@ -910,8 +910,8 @@ namespace NDDL {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var("target"));
-      vars.push_back(var("at_loc"));
+      vars.push_back(var(getId(),std::string("target")));
+      vars.push_back(var(getId(),std::string("at_loc")));
       token_constraint(neq, vars);
     }
   }
@@ -1216,10 +1216,11 @@ namespace NDDL {
   
 } // namespace NDDL
 
+
 namespace NDDL {
-  // Boot-strap code to initialize schema
   SchemaId schema(){
     Id<Schema> id = Schema::instance("System/test/k9-initial");
+
     
     // Invoke commands to populate schema with type definitions
     id->addObjectType(LabelStr("Object"));
@@ -1301,9 +1302,7 @@ namespace NDDL {
     id->addMember("Rover", "OpportunisticScience", "m_oppsci");
     id->addMember("Rover", "CHAMP", "m_champ");
     id->addMember("Position.navigate", "Path", "path");
-    // Force allocation of type factories at this point
-    initNDDL();
-    
+    // Force allocation of model specific type factories
     // REGISTER FACTORIES
     
     // REGISTER FACTORIES
@@ -1360,8 +1359,8 @@ namespace NDDL {
     REGISTER_OBJECT_FACTORY(RoverFactory8, Rover);
     
     // Allocate rules
-    new Rule_Position_At_0();
-    new Rule_Position_navigate_1();
+    new Rule$Position$navigate$1();
+    new Rule$Position$At$0();
     return id;
   }
   
@@ -1469,8 +1468,10 @@ bool runTestLangTest(){
     int end = (int) horizonEnd->baseDomain().getSingletonValue();
     db1.horizon->setHorizon(start, end);
 
+    PlanDatabaseWriter::write(db1.planDatabase, std::cout);
     PLASMA::EventAggregator::instance()->notifyAssignNextSucceeded(DecisionPointId::noId());
     //db1.writer->write();
+    PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
     averDeinit();
     return true;

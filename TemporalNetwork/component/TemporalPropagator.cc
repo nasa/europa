@@ -71,12 +71,16 @@ namespace PLASMA {
     const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
     m_changedConstraints.insert(constraint);
     if (scope.size() == 3) {//Ternary distance constraint
-      buffer(scope[TemporalDistanceConstraint::SRC_VAR_INDEX]);
-      buffer(scope[TemporalDistanceConstraint::DEST_VAR_INDEX]);
+      if (TempVarId::convertable(scope[TemporalDistanceConstraint::SRC_VAR_INDEX]))
+	buffer(scope[TemporalDistanceConstraint::SRC_VAR_INDEX]);
+      if (TempVarId::convertable(scope[TemporalDistanceConstraint::DEST_VAR_INDEX]))
+	buffer(scope[TemporalDistanceConstraint::DEST_VAR_INDEX]);
     }
-    else {
-      buffer(scope[ConcurrentConstraint::SRC_VAR_INDEX]);
-      buffer(scope[ConcurrentConstraint::DEST_VAR_INDEX]);
+    else { // indexes for precedes and concurrent are the same
+      if (TempVarId::convertable(scope[ConcurrentConstraint::SRC_VAR_INDEX]))
+	buffer(scope[ConcurrentConstraint::SRC_VAR_INDEX]);
+      if (TempVarId::convertable(scope[ConcurrentConstraint::DEST_VAR_INDEX]))
+	buffer(scope[ConcurrentConstraint::DEST_VAR_INDEX]);
     }
   }
 

@@ -23,8 +23,8 @@ namespace PLASMA {
 				   const ConstraintEngineId& constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
     : LessThanEqualConstraint(name, propagatorName, constraintEngine, variables) {
-    check_error(TempVarId::convertable(variables[SRC_VAR_INDEX]));
-    check_error(TempVarId::convertable(variables[DEST_VAR_INDEX]));
+    // atleast one of the variables must be a tempvar
+    check_error(TempVarId::convertable(variables[SRC_VAR_INDEX]) || (TempVarId::convertable(variables[DEST_VAR_INDEX])));
   }
 
   ConcurrentConstraint::ConcurrentConstraint(const LabelStr& name,
@@ -32,8 +32,8 @@ namespace PLASMA {
 				   const ConstraintEngineId& constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
     : EqualConstraint(name, propagatorName, constraintEngine, variables) {
-    check_error(TempVarId::convertable(variables[SRC_VAR_INDEX]));
-    check_error(TempVarId::convertable(variables[DEST_VAR_INDEX]));
+    // atleast one of the variables must be a tempvar
+    check_error(TempVarId::convertable(variables[SRC_VAR_INDEX]) || (TempVarId::convertable(variables[DEST_VAR_INDEX])));
   }
 
 }
