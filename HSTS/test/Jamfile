@@ -64,15 +64,15 @@ rule RunEUROPATest {
  local initialStates = $(2) ;
  local heur = $(3) ;
  local pid = $(4) ;
- local otherObjects = $(5) ;
 
  local model ;
  for model in $(initialStates) {
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
   local cc = [ FGristFiles $(model:S=.cc) ] ;
+  local other_cc = runEUROPAtest.cc DNPConstraints.cc ;
   local xml = $(model:S=.xml) ;
-  local o = $(cc:S=.o) ;
+  local o = $(cc:S=$(SUFOBJ)) $(other_cc:S=$(SUFOBJ)) ;
   local lib = $(model:S=) ;
   local options = " -i "$(xml) ;
   if $(heur) {
@@ -88,7 +88,7 @@ rule RunEUROPATest {
   ModuleObjects $(cc) : NDDL ;
 
   # create planner with linked model
-  ModuleMain $(exe) : $(o) runEUROPAtest.o $(otherObjects) : HSTS ;
+  ModuleMain $(exe) : $(o) : HSTS ;
   RunModuleMain run-$(exe) : $(exe) : $(options) : : "run-$(exe).output" ;
   LocalDepends $(target) : run-$(exe) ;
  }
@@ -160,19 +160,21 @@ RunEUROPATest gnats-rover-fixed : rover-fixed-init.nddl ;
 RunEUROPATest gnats-sum : sum-init.nddl ;
 
 # DNP tests need the DNP specific constraints.
-RunEUROPATest dnp-timeline : DNP.timeline.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-DNP2 : DNP2.timeline.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-allDSS : allDSS.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-fourFreeObs : fourFreeObs.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-DNP3fourFreeObs : DNP3.fourFreeObs.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-DNP3 : DNP3.timeline.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-fourFreeObsNotEmpty : fourFreeObs-initBufNotEmpty.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-freeObs : freeObs.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-freeObsNoEmpty : freeObs.noEmpty.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-tenFreeObs : tenFreeObs.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-threeFreeObs : threeFreeObs.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-twentyFreeObs : twentyFreeObs.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl : : : DNPConstraints.o ;
+# These next two, at least, fail, perhaps due to lack of memory or seg fault or ... (no output)
+RunEUROPATest dnp-timeline : DNP.timeline.nddl ;
+RunEUROPATest dnp-DNP2 : DNP2.timeline.nddl ;
+
+RunEUROPATest dnp-allDSS : allDSS.nddl ;
+RunEUROPATest dnp-fourFreeObs : fourFreeObs.nddl ;
+RunEUROPATest dnp-DNP3fourFreeObs : DNP3.fourFreeObs.nddl ;
+RunEUROPATest dnp-DNP3 : DNP3.timeline.nddl ;
+RunEUROPATest dnp-fourFreeObsNotEmpty : fourFreeObs-initBufNotEmpty.nddl ;
+RunEUROPATest dnp-freeObs : freeObs.nddl ;
+RunEUROPATest dnp-freeObsNoEmpty : freeObs.noEmpty.nddl ;
+RunEUROPATest dnp-tenFreeObs : tenFreeObs.nddl ;
+RunEUROPATest dnp-threeFreeObs : threeFreeObs.nddl ;
+RunEUROPATest dnp-twentyFreeObs : twentyFreeObs.nddl ;
+RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl ;
 
 # Example with converted heuristics and planId files.
 # RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
