@@ -19,7 +19,7 @@ namespace Prototype {
    * @brief Template class to provide concrete variables of specific domain types.
    */
   template<class DomainType>
-  class Variable: public ConstrainedVariable {
+  class Variable : public ConstrainedVariable {
   public:
 
     /**
@@ -36,10 +36,17 @@ namespace Prototype {
              const EntityId& parent = EntityId::noId(),
              int index = ConstrainedVariable::NO_INDEX);
 
+    /* Do we want to allow the compiler-created copy constructor?
+       -- wedgingt 2004 Mar 3
+    */
+
+    /**
+     * Destructor.
+     */
     virtual ~Variable();
 
     /**
-     * @brief Adds an element to a dynamic domain. The domain must be closed.
+     * @brief Adds an element to a dynamic domain.
      * @param value The value to be inserted to the various domains of the variable.
      */
     virtual void insert(double value);
