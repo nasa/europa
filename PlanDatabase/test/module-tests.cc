@@ -259,6 +259,17 @@ private:
     t1.getDuration()->reset();
     check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
 
+
+    // Test unary
+    t1.split();
+    ConstraintId subsetOfConstraint = ConstraintLibrary::createConstraint(LabelStr("SubsetOf"),
+									  db.getConstraintEngine(),
+									  t1.getDuration(),
+									  IntervalIntDomain(5, 6));
+    t1.merge(t0.getId());
+    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 6);
+    delete (Constraint*) subsetOfConstraint;
+
     // Deletion will now occur and test proper cleanup.
     return true;
   }
