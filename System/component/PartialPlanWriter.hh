@@ -47,21 +47,27 @@ namespace Prototype {
                         const RulesEngineId &);
 			PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &,
                         const RulesEngineId &, const CBPlannerId &);
-      ~PartialPlanWriter(void);
-      //void notifyPropagationCompleted(void);
+      virtual ~PartialPlanWriter(void);
       void write(void);
+    protected:
+      virtual bool parseSection(std::ifstream& configFile);
+      inline long long int getPPId(void){return ppId;}
+      long long int ppId;
+      std::list<Transaction> *transactionList;
+      std::string dest;
     private:
 			bool havePlanner;
-      long long int seqId, ppId;
+      long long int seqId;
       int numTokens, numConstraints, numVariables, numTransactions;
       int stepsPerWrite, transactionId, nstep, writeCounter, noWrite, maxChoices;
       ConstraintEngineId *ceId;
       PlanDatabaseId *pdbId;
 			RulesEngineId *reId;
 			CBPlannerId *plId;
-      std::list<Transaction> *transactionList;
       std::ofstream *transOut, *statsOut, *ruleInstanceOut;
-      std::string dest;
+      void parseConfigFile(std::ifstream &);
+      void parseGeneralConfigSection(std::ifstream&);
+      void parseTransactionConfigSection(std::ifstream&);
       void commonInit(const PlanDatabaseId &, const ConstraintEngineId &);
       void outputObject(const ObjectId &, const int, std::ofstream &, std::ofstream &);
       void outputToken(const TokenId &, const int, const int, const int, const int, 
@@ -81,7 +87,6 @@ namespace Prototype {
       void outputRuleInstance(const RuleInstanceId &, std::ofstream &, std::ofstream &);
       void buildSlaveAndVarSets(std::set<TokenId> &, std::set<ConstrainedVariableId> &, 
                                 const RuleInstanceId &);
-      //void buildVarSet(std::set<ConstrainedVariableId> &, const RuleInstanceId &);
       void outputDecision(const DecisionPointId &, std::ofstream &);
       const std::string getUpperBoundStr(IntervalDomain &dom) const;
       const std::string getLowerBoundStr(IntervalDomain &dom) const;

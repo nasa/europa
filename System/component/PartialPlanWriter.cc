@@ -64,33 +64,33 @@ const char *envPPWConfigFile = "PPW_CONFIG";
 #define IN_GENERAL_SECTION 1
 #define IN_TRANSACTION_SECTION 2
 
-                     //0                   1               2              3
+//0                   1               2              3
 enum transactionNames {OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_ADDED_TO_OBJECT, 
-										 //4             5                6                  7             8
+                       //4             5                6                  7             8
                        TOKEN_CLOSED, TOKEN_ACTIVATED, TOKEN_DEACTIVATED, TOKEN_MERGED, TOKEN_SPLIT,
-										 //9               10                11             12
+                       //9               10                11             12
                        TOKEN_REJECTED, TOKEN_REINSTATED, TOKEN_DELETED, TOKEN_REMOVED, 
-										 //13              14           15                  16
+                       //13              14           15                  16
                        TOKEN_INSERTED, TOKEN_FREED, CONSTRAINT_CREATED, CONSTRAINT_DELETED,
-										 //17                   18           19           20
+                       //17                   18           19           20
                        CONSTRAINT_EXECUTED, VAR_CREATED, VAR_DELETED, VAR_DOMAIN_RELAXED,
-										 //21                     22                    23
+                       //21                     22                    23
                        VAR_DOMAIN_RESTRICTED, VAR_DOMAIN_SPECIFIED, VAR_DOMAIN_RESET, 
-										 //24                  25                    
+                       //24                  25                    
                        VAR_DOMAIN_EMPTIED, VAR_DOMAIN_UPPER_BOUND_DECREASED, 
-										 //26                                27
+                       //26                                27
                        VAR_DOMAIN_LOWER_BOUND_INCREASED, VAR_DOMAIN_BOUNDS_RESTRICTED,
-										 //28                        29
+                       //28                        29
                        VAR_DOMAIN_VALUE_REMOVED, VAR_DOMAIN_RESTRICT_TO_SINGLETON,
-										 //30              31                           32
+                       //30              31                           32
                        VAR_DOMAIN_SET, VAR_DOMAIN_SET_TO_SINGLETON, VAR_DOMAIN_CLOSED, 
-										 //33             34           35                   36                  37
+                       //33             34           35                   36                  37
                        RULE_EXECUTED, RULE_UNDONE, ASSIGN_NEXT_STARTED, ASSIGN_NEXT_FAILED, ASSIGN_NEXT_SUCCEEDED,
-										 //38                      39                     40
+                       //38                      39                     40
 											 ASSIGN_CURRENT_STARTED, ASSIGN_CURRENT_FAILED, ASSIGN_CURRENT_SUCCEEDED,
-										 //41               42              43               
+                       //41               42              43               
 											 RETRACT_STARTED, RETRACT_FAILED, RETRACT_SUCCEEDED, 
-										 //44                     45                     46                     47
+                       //44                     45                     46                     47
 											 PROPAGATION_COMMENCED, PROPAGATION_COMPLETED, PROPAGATION_PREEMPTED, ERROR};
 
 const int transactionTotal = ERROR + 1;
@@ -324,75 +324,9 @@ namespace Prototype {
 				FatalErrno();
 			}
 			
-			int state = IN_NO_SECTION;
 			std::string buf;
-			int lineno = 0;
-			while(!configFile.eof()) {
-				lineno++;
-				configFile.getline(configBuf, PATH_MAX + 100);
-				buf = configBuf;
-				if(buf[0] == '#' || buf == "")
-					continue;
-				if(buf == GENERAL_CONFIG_SECTION) {
-					state = IN_GENERAL_SECTION;
-					continue;
-				}
-				else if(buf == TRANSACTION_CONFIG_SECTION) {
-					state = IN_TRANSACTION_SECTION;
-					continue;
-				}
 
-				switch(state) {
-				case IN_GENERAL_SECTION:
-					if(buf.find(AUTO_WRITE) != std::string::npos) {
-						std::string autoWrite = buf.substr(buf.find("=")+1);
-						noWrite = (autoWrite.find("1") != std::string::npos ? 0 : 1);
-					}
-					else if(buf.find(STEPS_PER_WRITE) != std::string::npos) {
-						std::string spw = buf.substr(buf.find("=")+1);
-						stepsPerWrite = strtol(spw.c_str(), NULL, 10);
-						if(stepsPerWrite < 0)
-							FatalError("StepsPerWrite must be a non-negative value");
-						if(stepsPerWrite == LONG_MAX || stepsPerWrite == LONG_MIN)
-							FatalErrno();
-					}
-					else if(buf.find(WRITE_DEST) != std::string::npos) {
-						std::string wd = buf.substr(buf.find("=")+1);
-						dest = wd;
-					}
-					else if(buf.find(MAX_CHOICES) != std::string::npos) {
-						std::string mc = buf.substr(buf.find("=")+1);
-						maxChoices = strtol(mc.c_str(), NULL, 10);
-						if(maxChoices < 0)
-							FatalError("MaxChoices must be a non-negative value");
-						if(maxChoices == LONG_MAX || maxChoices == LONG_MIN)
-							FatalErrno();
-					}
-					else {
-						std::string error("Inavlid entry '");
-						error += buf;
-						error += "' in GeneralConfigSection";
-						FatalError(error);
-					}
-					break;
-				case IN_TRANSACTION_SECTION:
-					bool foundTransaction = false;
-					for(int i = 0; i < transactionTotal; i++) {
-						if(buf == transactionNameStrs[i]) {
-							allowTransaction[i] = true;
-							foundTransaction = true;
-							break;
-						}
-					}
-					if(!foundTransaction) {
-						std::string error("Invalid entry '");
-						error += buf;
-						error += "' in TransactionConfigSection";
-						FatalError(error);
-					}
-					break;
-				}
-			}
+      parseConfigFile(configFile);
 
       char *destBuf = new char[PATH_MAX];
       if(realpath(dest.c_str(), destBuf) == NULL && stepsPerWrite != 0) {
@@ -481,24 +415,24 @@ namespace Prototype {
         seqOut << SEQ_LINE_SEP;
         seqOut.close();
 
-	transOut = new std::ofstream(ppTransactions.c_str());
-	if(!(*transOut)) {
-		FatalErrno();
-	}
-	statsOut = new std::ofstream(ppStats.c_str());
-	if(!(*statsOut)) {
-		FatalErrno();
-	}
+        transOut = new std::ofstream(ppTransactions.c_str());
+        if(!(*transOut)) {
+          FatalErrno();
+        }
+        statsOut = new std::ofstream(ppStats.c_str());
+        if(!(*statsOut)) {
+          FatalErrno();
+        }
       }
     }
   
     PartialPlanWriter::~PartialPlanWriter(void) {
       if(stepsPerWrite) {
         //write();
-	transOut->close();
-	statsOut->close();
-	delete transOut;
-	delete statsOut;
+        transOut->close();
+        statsOut->close();
+        delete transOut;
+        delete statsOut;
       }
     }
   
@@ -578,11 +512,11 @@ namespace Prototype {
         FatalErrno();
       }
 
-			std::string ppDecs = ppDest + SLASH + stepnum + DECISIONS;
-			std::ofstream decsOut(ppDecs.c_str());
-			if(!decsOut) {
-				FatalErrno();
-			}
+      std::string ppDecs = ppDest + SLASH + stepnum + DECISIONS;
+      std::ofstream decsOut(ppDecs.c_str());
+      if(!decsOut) {
+        FatalErrno();
+      }
 
       const std::set<ConstraintId> &constraints = (*ceId)->getConstraints();
       numConstraints = constraints.size();
@@ -676,17 +610,17 @@ namespace Prototype {
 				outputToken(token, T_INTERVAL, 0, 0, 0, ObjectId::noId(), tokOut, varOut);
       }
 
-			if(plId != NULL) {
-				DecisionManagerId &dm = (*plId)->getDecisionManager();
-				std::list<DecisionPointId> decs;
-				dm->getOpenDecisions(decs);
-				for(std::list<DecisionPointId>::iterator it = decs.begin(); it != decs.end(); ++it)
-					outputDecision(*it, decsOut);
+      if(plId != NULL) {
+        DecisionManagerId &dm = (*plId)->getDecisionManager();
+        std::list<DecisionPointId> decs;
+        dm->getOpenDecisions(decs);
+        for(std::list<DecisionPointId>::iterator it = decs.begin(); it != decs.end(); ++it)
+          outputDecision(*it, decsOut);
         const DecisionPointId &currDec = dm->getCurrentDecision();
         std::list<DecisionPointId>::iterator loc = std::find(decs.begin(), decs.end(), currDec);
         if(loc == decs.end())
           outputDecision(currDec, decsOut);
-			}
+      }
 
       std::set<RuleInstanceId> ruleInst = (*reId)->getRuleInstances();
       for(std::set<RuleInstanceId>::const_iterator it = ruleInst.begin();
@@ -931,45 +865,45 @@ namespace Prototype {
       }
     }
 
-     void PartialPlanWriter::outputRuleInstance(const RuleInstanceId &ruleId,
-                                           std::ofstream &ruleInstanceOut,
-                                           std::ofstream &varOut) {
+    void PartialPlanWriter::outputRuleInstance(const RuleInstanceId &ruleId,
+                                               std::ofstream &ruleInstanceOut,
+                                               std::ofstream &varOut) {
 
-       ruleInstanceOut << ruleId->getKey() << TAB << ppId << TAB << seqId
-                       << TAB << ruleId->getRule()->getKey()
-                       << TAB << ruleId->getToken()->getKey() << TAB;
+      ruleInstanceOut << ruleId->getKey() << TAB << ppId << TAB << seqId
+                      << TAB << ruleId->getRule()->getKey()
+                      << TAB << ruleId->getToken()->getKey() << TAB;
 
-       /*SlaveTokenIds*/
-       std::set<TokenId> slaves;
-       std::set<ConstrainedVariableId> vars;
-       buildSlaveAndVarSets(slaves, vars, ruleId);
-       if(slaves.empty()) {
-         ruleInstanceOut << SNULL << TAB;
-       }
-       else {
-         for(std::set<TokenId>::const_iterator it = slaves.begin();
-             it != slaves.end(); ++it) {
-           TokenId slaveToken = *it;
-           if(slaveToken.isValid())
-             ruleInstanceOut << slaveToken->getKey() << COMMA;
-         }
-         ruleInstanceOut << TAB;
-       }
+      /*SlaveTokenIds*/
+      std::set<TokenId> slaves;
+      std::set<ConstrainedVariableId> vars;
+      buildSlaveAndVarSets(slaves, vars, ruleId);
+      if(slaves.empty()) {
+        ruleInstanceOut << SNULL << TAB;
+      }
+      else {
+        for(std::set<TokenId>::const_iterator it = slaves.begin();
+            it != slaves.end(); ++it) {
+          TokenId slaveToken = *it;
+          if(slaveToken.isValid())
+            ruleInstanceOut << slaveToken->getKey() << COMMA;
+        }
+        ruleInstanceOut << TAB;
+      }
 
-       /* gaurd and local variables */
-       if(vars.empty()) {
-         ruleInstanceOut << SNULL;
-       }
-       else {
-         for(std::set<ConstrainedVariableId>::const_iterator it = vars.begin();
-             it != vars.end(); ++it) {
-           ConstrainedVariableId localVar = *it;
-           ruleInstanceOut << localVar->getKey() << COMMA;
-           outputConstrVar(localVar, ruleId->getKey(), I_RULE, varOut);
-         }
-       }
-       ruleInstanceOut << std::endl;
-     }
+      /* gaurd and local variables */
+      if(vars.empty()) {
+        ruleInstanceOut << SNULL;
+      }
+      else {
+        for(std::set<ConstrainedVariableId>::const_iterator it = vars.begin();
+            it != vars.end(); ++it) {
+          ConstrainedVariableId localVar = *it;
+          ruleInstanceOut << localVar->getKey() << COMMA;
+          outputConstrVar(localVar, ruleId->getKey(), I_RULE, varOut);
+        }
+      }
+      ruleInstanceOut << std::endl;
+    }
 
     void PartialPlanWriter::buildSlaveAndVarSets(std::set<TokenId> &tokSet,
                                                  std::set<ConstrainedVariableId> &varSet,
@@ -1006,39 +940,39 @@ namespace Prototype {
 			instOut << std::endl;
 		}
 
-		void PartialPlanWriter::outputDecision(const DecisionPointId &dp, std::ofstream &decOut) {
-			int type = 0;
+    void PartialPlanWriter::outputDecision(const DecisionPointId &dp, std::ofstream &decOut) {
+      int type = 0;
       int isUnit = 0;
-			if(ObjectDecisionPointId::convertable(dp))
-				type = D_OBJECT;
-			else if(TokenDecisionPointId::convertable(dp)) {
-				type = D_TOKEN;
+      if(ObjectDecisionPointId::convertable(dp))
+        type = D_OBJECT;
+      else if(TokenDecisionPointId::convertable(dp)) {
+        type = D_TOKEN;
         TokenDecisionPointId &tdp = (TokenDecisionPointId &) dp;
         if(tdp->getToken()->getState()->lastDomain().isSingleton())
           isUnit = 1;
       }
-			else if(ConstrainedVariableDecisionPointId::convertable(dp)) {
-				type = D_VARIABLE;
+      else if(ConstrainedVariableDecisionPointId::convertable(dp)) {
+        type = D_VARIABLE;
         ConstrainedVariableDecisionPointId &vdp = (ConstrainedVariableDecisionPointId &)dp;
         if((isCompatGuard(vdp->getVariable()) &&
             !vdp->getVariable()->specifiedDomain().isSingleton()) ||
            !vdp->getVariable()->lastDomain().isSingleton())
           isUnit = 1;
       }
-			else
-				type = D_ERROR;
-			
-			decOut << ppId << TAB << dp->getKey() << TAB << type << TAB << dp->getEntityKey() << TAB << isUnit << TAB;
-			if((*plId)->getDecisionManager()->getCurrentDecision() == dp) {
+      else
+        type = D_ERROR;
+		
+      decOut << ppId << TAB << dp->getKey() << TAB << type << TAB << dp->getEntityKey() << TAB << isUnit << TAB;
+      if((*plId)->getDecisionManager()->getCurrentDecision() == dp) {
         std::string choiceInfo = getChoiceInfo();
         if(choiceInfo == "")
           choiceInfo = SNULL;
-				decOut << choiceInfo << std::endl;
-			}
-			else {
-				decOut << SNULL << std::endl;
-			}
-		}
+        decOut << choiceInfo << std::endl;
+      }
+      else {
+        decOut << SNULL << std::endl;
+      }
+    }
 
     const std::string PartialPlanWriter::getUpperBoundStr(IntervalDomain &dom) const {
       if(dom.isNumeric()) {
@@ -1456,126 +1390,126 @@ namespace Prototype {
 		}
 
 		
-		void PartialPlanWriter::notifyAssignNextStarted(const DecisionPointId &dec) {
-			if(stepsPerWrite && allowTransaction[ASSIGN_NEXT_STARTED]) {
-				int key = -1;
-				if(dec.isValid())
-					key = dec->getKey();
-				transactionList->push_back(Transaction(ASSIGN_NEXT_STARTED, key, USER,
-																							 transactionId++, seqId, nstep, SNULL));
-				numTransactions++;
-			}
-		}
-		void PartialPlanWriter::notifyAssignNextFailed(const DecisionPointId &dec) {
-			if(stepsPerWrite && allowTransaction[ASSIGN_NEXT_FAILED]) {
-				transactionList->push_back(Transaction(ASSIGN_NEXT_FAILED, dec->getKey(), USER,
-																							 transactionId++, seqId, nstep, SNULL));
-				numTransactions++;
-			}
-			if(havePlanner) {
-				writeCounter++;
-				if(writeCounter == stepsPerWrite && noWrite == 0) {
-					write();
-					transactionList->clear();
-					numTransactions = 0;
-					writeCounter = 0;
-				}
-			}
-		}
-		void PartialPlanWriter::notifyAssignNextSucceeded(const DecisionPointId &dec) {
-			if(stepsPerWrite && allowTransaction[ASSIGN_NEXT_SUCCEEDED]) {
-				transactionList->push_back(Transaction(ASSIGN_NEXT_SUCCEEDED, dec->getKey(), USER,
-																							 transactionId++, seqId, nstep, SNULL));
-				numTransactions++;
-			}
-			if(havePlanner) {
-				writeCounter++;
-				if(writeCounter == stepsPerWrite && noWrite == 0) {
-					write();
-					transactionList->clear();
-					numTransactions = 0;
-					writeCounter = 0;
-				}
-			}
-		}
-		void PartialPlanWriter::notifyAssignCurrentStarted(const DecisionPointId &dec) {
-			if(stepsPerWrite && allowTransaction[ASSIGN_CURRENT_STARTED]) {
-				transactionList->push_back(Transaction(ASSIGN_CURRENT_STARTED, dec->getKey(), USER,
-																							 transactionId++, seqId, nstep, SNULL));
-				numTransactions++;
-			}
-		}
-		void PartialPlanWriter::notifyAssignCurrentFailed(const DecisionPointId &dec) {
-			if(stepsPerWrite && allowTransaction[ASSIGN_CURRENT_FAILED]) {
-				transactionList->push_back(Transaction(ASSIGN_CURRENT_FAILED, dec->getKey(), USER,
-																							 transactionId++, seqId, nstep, SNULL));
-				numTransactions++;
-			}
-			if(havePlanner) {
-				writeCounter++;
-				if(writeCounter == stepsPerWrite && noWrite == 0) {
-					write();
-					transactionList->clear();
-					numTransactions = 0;
-					writeCounter = 0;
-				}
-			}
-		}
-		void PartialPlanWriter::notifyAssignCurrentSucceeded(const DecisionPointId &dec) {
-			if(stepsPerWrite && allowTransaction[ASSIGN_CURRENT_SUCCEEDED]) {
-				transactionList->push_back(Transaction(ASSIGN_CURRENT_SUCCEEDED, dec->getKey(), USER,
-																							 transactionId++, seqId, nstep, SNULL));
-				numTransactions++;
-			}
-			if(havePlanner) {
-				writeCounter++;
-				if(writeCounter == stepsPerWrite && noWrite == 0) {
-					write();
-					transactionList->clear();
-					numTransactions = 0;
-					writeCounter = 0;
-				}
-			}
-		}
-		void PartialPlanWriter::notifyRetractStarted(const DecisionPointId &dec) {
-			if(stepsPerWrite && allowTransaction[RETRACT_STARTED]) {
-				transactionList->push_back(Transaction(RETRACT_STARTED, dec->getKey(), USER,
-																							 transactionId++, seqId, nstep, SNULL));
-				numTransactions++;
-			}
-		}
-		void PartialPlanWriter::notifyRetractFailed(const DecisionPointId &dec) {
-			if(stepsPerWrite && allowTransaction[RETRACT_FAILED]) {
-				transactionList->push_back(Transaction(RETRACT_FAILED, dec->getKey(), USER,
-																							 transactionId++, seqId, nstep, SNULL));
-				numTransactions++;
-			}
-			if(havePlanner) {
-				writeCounter++;
-				if(writeCounter == stepsPerWrite && noWrite == 0) {
-					write();
-					transactionList->clear();
-					numTransactions = 0;
-					writeCounter = 0;
-				}
-			}
-		}
-		void PartialPlanWriter::notifyRetractSucceeded(const DecisionPointId &dec) {
-			if(stepsPerWrite && allowTransaction[RETRACT_SUCCEEDED]) {
-				transactionList->push_back(Transaction(RETRACT_SUCCEEDED, dec->getKey(), USER,
-																							 transactionId++, seqId, nstep, SNULL));
-				numTransactions++;
-			}
-			if(havePlanner) {
-				writeCounter++;
-				if(writeCounter == stepsPerWrite && noWrite == 0) {
-					write();
-					transactionList->clear();
-					numTransactions = 0;
-					writeCounter = 0;
-				}
-			}
-		}
+    void PartialPlanWriter::notifyAssignNextStarted(const DecisionPointId &dec) {
+      if(stepsPerWrite && allowTransaction[ASSIGN_NEXT_STARTED]) {
+        int key = -1;
+        if(dec.isValid())
+          key = dec->getKey();
+        transactionList->push_back(Transaction(ASSIGN_NEXT_STARTED, key, USER,
+                                               transactionId++, seqId, nstep, SNULL));
+        numTransactions++;
+      }
+    }
+    void PartialPlanWriter::notifyAssignNextFailed(const DecisionPointId &dec) {
+      if(stepsPerWrite && allowTransaction[ASSIGN_NEXT_FAILED]) {
+        transactionList->push_back(Transaction(ASSIGN_NEXT_FAILED, dec->getKey(), USER,
+                                               transactionId++, seqId, nstep, SNULL));
+        numTransactions++;
+      }
+      if(havePlanner) {
+        writeCounter++;
+        if(writeCounter == stepsPerWrite && noWrite == 0) {
+          write();
+          transactionList->clear();
+          numTransactions = 0;
+          writeCounter = 0;
+        }
+      }
+    }
+    void PartialPlanWriter::notifyAssignNextSucceeded(const DecisionPointId &dec) {
+      if(stepsPerWrite && allowTransaction[ASSIGN_NEXT_SUCCEEDED]) {
+        transactionList->push_back(Transaction(ASSIGN_NEXT_SUCCEEDED, dec->getKey(), USER,
+                                               transactionId++, seqId, nstep, SNULL));
+        numTransactions++;
+      }
+      if(havePlanner) {
+        writeCounter++;
+        if(writeCounter == stepsPerWrite && noWrite == 0) {
+          write();
+          transactionList->clear();
+          numTransactions = 0;
+          writeCounter = 0;
+        }
+      }
+    }
+    void PartialPlanWriter::notifyAssignCurrentStarted(const DecisionPointId &dec) {
+      if(stepsPerWrite && allowTransaction[ASSIGN_CURRENT_STARTED]) {
+        transactionList->push_back(Transaction(ASSIGN_CURRENT_STARTED, dec->getKey(), USER,
+                                               transactionId++, seqId, nstep, SNULL));
+        numTransactions++;
+      }
+    }
+    void PartialPlanWriter::notifyAssignCurrentFailed(const DecisionPointId &dec) {
+      if(stepsPerWrite && allowTransaction[ASSIGN_CURRENT_FAILED]) {
+        transactionList->push_back(Transaction(ASSIGN_CURRENT_FAILED, dec->getKey(), USER,
+                                               transactionId++, seqId, nstep, SNULL));
+        numTransactions++;
+      }
+      if(havePlanner) {
+        writeCounter++;
+        if(writeCounter == stepsPerWrite && noWrite == 0) {
+          write();
+          transactionList->clear();
+          numTransactions = 0;
+          writeCounter = 0;
+        }
+      }
+    }
+    void PartialPlanWriter::notifyAssignCurrentSucceeded(const DecisionPointId &dec) {
+      if(stepsPerWrite && allowTransaction[ASSIGN_CURRENT_SUCCEEDED]) {
+        transactionList->push_back(Transaction(ASSIGN_CURRENT_SUCCEEDED, dec->getKey(), USER,
+                                               transactionId++, seqId, nstep, SNULL));
+        numTransactions++;
+      }
+      if(havePlanner) {
+        writeCounter++;
+        if(writeCounter == stepsPerWrite && noWrite == 0) {
+          write();
+          transactionList->clear();
+          numTransactions = 0;
+          writeCounter = 0;
+        }
+      }
+    }
+    void PartialPlanWriter::notifyRetractStarted(const DecisionPointId &dec) {
+      if(stepsPerWrite && allowTransaction[RETRACT_STARTED]) {
+        transactionList->push_back(Transaction(RETRACT_STARTED, dec->getKey(), USER,
+                                               transactionId++, seqId, nstep, SNULL));
+        numTransactions++;
+      }
+    }
+    void PartialPlanWriter::notifyRetractFailed(const DecisionPointId &dec) {
+      if(stepsPerWrite && allowTransaction[RETRACT_FAILED]) {
+        transactionList->push_back(Transaction(RETRACT_FAILED, dec->getKey(), USER,
+                                               transactionId++, seqId, nstep, SNULL));
+        numTransactions++;
+      }
+      if(havePlanner) {
+        writeCounter++;
+        if(writeCounter == stepsPerWrite && noWrite == 0) {
+          write();
+          transactionList->clear();
+          numTransactions = 0;
+          writeCounter = 0;
+        }
+      }
+    }
+    void PartialPlanWriter::notifyRetractSucceeded(const DecisionPointId &dec) {
+      if(stepsPerWrite && allowTransaction[RETRACT_SUCCEEDED]) {
+        transactionList->push_back(Transaction(RETRACT_SUCCEEDED, dec->getKey(), USER,
+                                               transactionId++, seqId, nstep, SNULL));
+        numTransactions++;
+      }
+      if(havePlanner) {
+        writeCounter++;
+        if(writeCounter == stepsPerWrite && noWrite == 0) {
+          write();
+          transactionList->clear();
+          numTransactions = 0;
+          writeCounter = 0;
+        }
+      }
+    }
 
     const std::string PartialPlanWriter::getVarInfo(const ConstrainedVariableId &varId) const {
       std::string type, paramName, predName, retval;
@@ -1599,49 +1533,131 @@ namespace Prototype {
       return retval;
     }
 
-		const std::string PartialPlanWriter::getChoiceInfo(void) const {
-			std::stringstream retval;
-			int numChoices = 0;
+    const std::string PartialPlanWriter::getChoiceInfo(void) const {
+      std::stringstream retval;
+      int numChoices = 0;
       std::list<ChoiceId> choices = (*plId)->getDecisionManager()->getCurrentDecisionChoices();
       choices.push_back((*plId)->getDecisionManager()->getCurrentChoice());
 
-			for(std::list<ChoiceId>::const_iterator cIt = choices.begin(); cIt != choices.end() && numChoices < maxChoices; 
-					++cIt, ++numChoices) {
-				ChoiceId choice = (*cIt);
-				check_error(choice.isNoId() || choice.isValid());
-				if(choice.isNoId())
-					continue;
-				retval << choice->getKey() << COMMA << choice->getType() << COMMA;
-				switch(choice->getType()) {
-				case Choice::TOKEN:
-					{
-					  const ObjectId &oId = Id<TokenChoice>(choice)->getObject();
-					  const TokenId &tId = Id<TokenChoice>(choice)->getSuccessor();
-					  check_error(oId.isValid());
-					  if(!tId.isNoId())
-					    retval << oId->getKey() << COMMA << tId->getKey();
-					  else
-					    retval << oId->getKey() << COMMA << -1;
-					}
-				break;
-				case Choice::VALUE:
-					{
-					  const TokenId &tId = Id<ValueChoice>(choice)->getToken();
-					  if(!tId.isNoId()){
-					    retval << tId->getKey();
-					    retval << COMMA << Id<ValueChoice>(choice)->getValue();
-					  }
-					  else
-					    retval << -1;
-					}
-				break;
-				case Choice::USER:
-					retval << "USER";
-				}
-				retval << SEQ_COL_SEP;
-			}
-			return std::string(retval.str());
-		}
+      for(std::list<ChoiceId>::const_iterator cIt = choices.begin(); cIt != choices.end() && numChoices < maxChoices; 
+          ++cIt, ++numChoices) {
+        ChoiceId choice = (*cIt);
+        check_error(choice.isNoId() || choice.isValid());
+        if(choice.isNoId())
+          continue;
+        retval << choice->getKey() << COMMA << choice->getType() << COMMA;
+        switch(choice->getType()) {
+        case Choice::TOKEN:
+          {
+            const ObjectId &oId = Id<TokenChoice>(choice)->getObject();
+            const TokenId &tId = Id<TokenChoice>(choice)->getSuccessor();
+            check_error(oId.isValid());
+            if(!tId.isNoId())
+              retval << oId->getKey() << COMMA << tId->getKey();
+            else
+              retval << oId->getKey() << COMMA << -1;
+          }
+        break;
+        case Choice::VALUE:
+          {
+            const TokenId &tId = Id<ValueChoice>(choice)->getToken();
+            if(!tId.isNoId()){
+              retval << tId->getKey();
+              retval << COMMA << Id<ValueChoice>(choice)->getValue();
+            }
+            else
+              retval << -1;
+          }
+        break;
+        case Choice::USER:
+          retval << "USER";
+        }
+        retval << SEQ_COL_SEP;
+      }
+      return std::string(retval.str());
+    }
+
+    void PartialPlanWriter::parseConfigFile(std::ifstream& configFile) {
+      while(parseSection(configFile)){}
+      if(!configFile.eof())
+        FatalError("Error parsing config file.");
+    }
+
+    bool PartialPlanWriter::parseSection(std::ifstream& configFile) {
+      char buf[PATH_MAX];
+      bool retval = false;
+      while(!configFile.eof()) {
+        configFile.getline(buf, PATH_MAX);
+        if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
+          continue;
+        std::string line = buf;
+        if(line == GENERAL_CONFIG_SECTION) {
+          parseGeneralConfigSection(configFile);
+          retval = true;
+        }
+        else if(line == TRANSACTION_CONFIG_SECTION) {
+          parseTransactionConfigSection(configFile);
+          retval = true;
+        }
+        else
+          return false;
+      }
+      return retval;
+    }
+
+    void PartialPlanWriter::parseGeneralConfigSection(std::ifstream& configFile) {
+      char buf[PATH_MAX];
+      while(!configFile.eof()) {
+        configFile.getline(buf, PATH_MAX);
+        if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
+          continue;
+        std::string line = buf;
+        if(line.find(AUTO_WRITE) != std::string::npos) {
+          std::string autoWrite = line.substr(line.find("=")+1);
+          noWrite = (autoWrite.find("1") != std::string::npos ? 0 : 1);
+        }
+        else if(line.find(STEPS_PER_WRITE) != std::string::npos) {
+          std::string spw = line.substr(line.find("=")+1);
+          stepsPerWrite = strtol(spw.c_str(), NULL, 10);
+          if(stepsPerWrite < 0)
+            FatalError("StepsPerWrite must be a non-negative value");
+          if(stepsPerWrite == LONG_MAX || stepsPerWrite == LONG_MIN)
+            FatalErrno();
+        }
+        else if(line.find(WRITE_DEST) != std::string::npos) {
+          std::string wd = line.substr(line.find("=")+1);
+          dest = wd;
+        }
+        else {
+          for(int i = strlen(buf); i >= 0; i--)
+            configFile.putback(buf[i]);
+          return;
+        }
+      }
+    }
+
+    void PartialPlanWriter::parseTransactionConfigSection(std::ifstream& configFile) {
+      char buf[PATH_MAX];
+      while(!configFile.eof()) {
+        configFile.getline(buf, PATH_MAX);
+        if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
+          continue;
+        std::string line = buf;
+        bool foundTransaction = false;
+        for(int i = 0; i < transactionTotal; i++) {
+          if(line == transactionNameStrs[i]) {
+            allowTransaction[i] = true;
+            foundTransaction = true;
+            break;
+          }
+        }
+        if(!foundTransaction) {
+          for(int i = strlen(buf); i >= 0; i--)
+            configFile.putback(buf[i]);
+          return;
+        }
+      }
+    }
 
     void Transaction::write(std::ostream &out, long long int ppId) const {
       out << transactionNameStrs[transactionType] << TAB << transactionTypeStrs[transactionType]
