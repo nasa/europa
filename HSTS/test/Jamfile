@@ -93,7 +93,7 @@ RunEUROPATest gnats-C3 : C3-init.nddl ;
 RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
 RunEUROPATest gnats-P4-C3 : P4-C3-init.nddl ;
 RunEUROPATest gnats-P4-C3eq : P4-C3eq-init.nddl ;
-RunEUROPATest gnats-SC : P4-SC-init.nddl ;
+RunEUROPATest gnats-SC : SC-init.nddl ;
 RunEUROPATest gnats-condasame : condasame-init.nddl ;
 RunEUROPATest gnats-rover-fixed : rover-fixed-init.nddl ;
 RunEUROPATest gnats-sum : sum-init.nddl ;
