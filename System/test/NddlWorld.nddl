@@ -1,0 +1,22 @@
+// Base class for what the client expects
+class NddlWorld
+{
+ // Horizon information
+ int m_horizonStart;
+ int m_horizonEnd;
+ int m_maxPlannerSteps;
+
+ predicate initialState{}
+
+ NddlWorld(int start, int end, int maxPlannerSteps){
+  m_horizonStart = start;
+  m_horizonEnd = end;
+  m_maxPlannerSteps = maxPlannerSteps;
+ }
+
+ NddlWorld(){
+  m_horizonStart = 0;
+  m_horizonEnd = 100;
+  m_maxPlannerSteps = 200;
+ }
+}

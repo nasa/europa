@@ -132,14 +132,15 @@ private:
     PlanDatabase db(ENGINE, SCHEMA);
     Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"), true);
     assert(!o1.isComplete());
-    o1.addVariable(IntervalIntDomain());
-    o1.addVariable(BoolDomain());
+    o1.addVariable(IntervalIntDomain(), LabelStr("VAR1"));
+    o1.addVariable(BoolDomain(), LabelStr("VAR2"));
     o1.close();
     assert(o1.isComplete());
+    assert(o1.getVariable(LabelStr("VAR21")) != o1.getVariable(LabelStr("VAR2")));
 
     Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"), true);
     assert(!o2.isComplete());
-    o2.addVariable(IntervalIntDomain(15, 200));
+    o2.addVariable(IntervalIntDomain(15, 200), LabelStr("VAR1"));
     o2.close();
 
     // Add a unary constraint

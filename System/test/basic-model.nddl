@@ -1,3 +1,5 @@
+#include "NddlWorld.nddl"
+
 enum Locations {Hill, Rock, Lander};
 
 class Rover{
@@ -8,7 +10,7 @@ class Rover{
 
  predicate Going{
   Locations m_from, m_to;
-  eq(duration, 4);
+  eq(duration, 1);
   neq(m_from, m_to);
  }
 }
@@ -22,7 +24,6 @@ Rover::At{
 }
 
 Rover::Going{
-  neq(m_from, m_to);
   met_by(At from);
   eq(m_from, from.m_location);
   meets(At to);
@@ -30,17 +31,13 @@ Rover::Going{
 }
 
 // Defines the initial state for the problem.
-class World {
- // Horizon information
- int m_horizonStart;
- int m_horizonEnd;
+class World extends NddlWorld {
  Rover m_rover;
 
  predicate initialState{}
+
  World(){
-  // Set up the planning horizon
-  m_horizonStart = 10;
-  m_horizonEnd = 100;
+  super(10, 101, 350);
   m_rover = new Rover();
  }
 }
@@ -50,13 +47,13 @@ World::initialState{
  leq(object.m_horizonStart, start);
  leq(end, object.m_horizonEnd);
  
- contains(Rover.At a);
+ any(Rover.At a);
  eq(a.m_location, Lander);
  eq(a.start, 10);
 
- contains(Rover.At b);
+ any(Rover.At b);
  eq(b.m_location, Rock);
- eq(b.end, 100);
+ eq(b.start, 100);
 
  leq(a.end, b.start);
 }

@@ -10,6 +10,7 @@
 
 // Support fro required plan database components
 #include "../PlanDatabase/PlanDatabase.hh"
+#include "../PlanDatabase/Object.hh"
 #include "../PlanDatabase/RulesEngine.hh"
 #include "../PlanDatabase/Schema.hh"
 #include "../ConstraintEngine/ConstraintEngine.hh"
@@ -59,7 +60,7 @@ int main(){
   RulesEngine re(db.getId());
 
   FlawSource source(FlawSource(db.getId()));
-  Horizon hor(0,200);
+  Horizon hor;
   HorizonCondition hcond(hor.getId());
   TemporalVariableCondition tcond(hor.getId());
   DynamicInfiniteRealCondition dcond;
@@ -80,7 +81,24 @@ int main(){
   
   NDDL::initialize(db.getId());
 
-  CBPlanner planner(db.getId(),query.getId(),100);
+  // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
+  std::list<ObjectId> objects;
+  db.getObjectsByType(LabelStr("World"), objects);
+  ObjectId world = objects.front();
+  assert(objects.size() == 1);
+  ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
+  assert(horizonStart.isValid());
+  ConstrainedVariableId horizonEnd = world->getVariable(LabelStr("world.m_horizonEnd"));
+  assert(horizonEnd.isValid());
+  int start = (int) horizonStart->baseDomain().getSingletonValue();
+  int end = (int) horizonEnd->baseDomain().getSingletonValue();
+  hor.setHorizon(start, end);
+
+  // Create and run the planner
+  ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
+  assert(maxPlannerSteps.isValid());
+  int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
+  CBPlanner planner(db.getId(),query.getId(),steps);
     
   assert(planner.run(loggingEnabled()) == 1);
 
