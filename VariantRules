@@ -36,7 +36,7 @@ rule FVariantC++Flags
   case OPTIMIZED :
     return $(OPTIMIZE_FLAGS) $(WARNING_FLAGS) ;
   case PROFILE :
-    return $(PROFILE_FLAGS) $(WARNING_FLAGS) ;
+    return $(OPTIMIZE_FLAGS) $(PROFILE_FLAGS) $(WARNING_FLAGS) ;
   case COVERAGE :
     return $(COVERAGE_FLAGS) $(WARNING_FLAGS) ;
   case CUSTOM :
@@ -110,7 +110,7 @@ rule FVariantName
   case OPTIMIZED :
     return $(name)_o ;
   case PROFILE :
-    return $(name)_p ;
+    return $(name)_o_p ;
   case COVERAGE :
     # gcov, at least, requires object files to be named with same "root" as the source ...
     return $(name) ;
