@@ -19,7 +19,7 @@ namespace Prototype {
 
     void getOrderingChoices(const TokenId& token, std::vector<TokenId>& results);
     void getTokensToOrder(std::vector<TokenId>& results);
-
+    const std::list<TokenId>& getTokenSequence() const;
     void constrain(const TokenId& token, const TokenId& successor = TokenId::noId());
     void free(const TokenId& token);
   private:

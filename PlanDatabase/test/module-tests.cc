@@ -277,6 +277,7 @@ public:
   static bool test(){
     runTest(testBasicInsertion, "BasicInsertion");
     runTest(testObjectTokenRelation, "ObjectTokenRelation");
+    runTest(testTokenOrderQuery, "TokenOrderQuery");
     return true;
   }
 
@@ -383,6 +384,60 @@ private:
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
     check_error(tokensToOrder.empty());
+
+    return true;
+  }
+
+  static bool testTokenOrderQuery(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    db.close();
+
+    const int COUNT = 100;
+    const int DURATION = 10;
+    
+    for (int i=0;i<COUNT;i++){
+      int start = i*DURATION;
+      TokenId token = (new IntervalToken(db.getId(), 
+					 LabelStr("P1"),
+					 BooleanDomain(0, 1),
+					 IntervalIntDomain(start, start),
+					 IntervalIntDomain(start+DURATION, start+DURATION),
+					 IntervalIntDomain(DURATION, DURATION)))->getId();
+      token->getObject()->specify(timeline.getId());
+      token->activate();
+    }
+
+    std::vector<TokenId> tokensToOrder;
+    timeline.getTokensToOrder(tokensToOrder);
+    while(!tokensToOrder.empty()){
+      std::vector<TokenId> choices;
+      TokenId toConstrain = tokensToOrder.front();
+      timeline.getOrderingChoices(toConstrain, choices);
+      check_error(!choices.empty());
+      TokenId successor = choices.front();
+      timeline.constrain(toConstrain, successor);
+      tokensToOrder.clear();
+      timeline.getTokensToOrder(tokensToOrder);
+    }
+
+    check_error(timeline.getTokens().size() == COUNT);
+    const std::list<TokenId>& tokenSequence = timeline.getTokenSequence();
+    check_error(tokenSequence.front()->getStart()->getDerivedDomain().getSingletonValue() == 0);
+    check_error(tokenSequence.back()->getEnd()->getDerivedDomain().getSingletonValue() == COUNT*DURATION);
+
+    // Now ensure the query can correctly indicate no options available
+    TokenId token = (new IntervalToken(db.getId(), 
+				       LabelStr("P1"),
+				       BooleanDomain(0, 1),
+				       IntervalIntDomain(0, 0),
+				       IntervalIntDomain(),
+				       IntervalIntDomain(DURATION, DURATION)))->getId();
+    token->getObject()->specify(timeline.getId());
+    token->activate();
+    std::vector<TokenId> choices;
+    timeline.getOrderingChoices(token, choices);
+    check_error(choices.empty());
 
     return true;
   }

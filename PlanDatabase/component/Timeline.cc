@@ -1,3 +1,12 @@
+
+/**
+ * @file Timeline.cc
+ * @brief Implementation for a Timeline - key use cases only.
+ * @todo Could consider propagating when we get assigned a singleton. If a Token has no candidate successors then we could
+ * empty the object variable.
+ * @todo Figure out how to integrate the zig zag checks in getOrderingChoices
+ */
+
 #include "Timeline.hh"
 #include "Token.hh"
 #include "Object.hh"
@@ -32,7 +41,52 @@ namespace Prototype {
 
 
   void Timeline::getOrderingChoices(const TokenId& token, std::vector<TokenId>& results){
+    check_error(results.empty());
+    check_error(token.isValid());
 
+    // Special cases, the sequence is empty.
+    if(m_tokenSequence.empty()){
+       results.push_back(TokenId::noId());
+       return;
+    }
+
+    // Special case, the token could be placed at the end, which can't precede anything. This
+    // results in an ordering choicxe of the noId() i.e. ordering w.r.t. no successor
+    if(can_precede(m_tokenSequence.back(),token))
+       results.push_back(TokenId::noId());
+
+    // So now we can go through the sequence till we find something that we can precede.
+    std::list<TokenId>::iterator current = m_tokenSequence.begin();
+
+    // Move forward until we find a Token we can precede
+    while (current != m_tokenSequence.end() && !can_precede(token, *current))
+      current++;
+
+    if (current == m_tokenSequence.end())
+      return; // No additional choices
+
+    if(current == m_tokenSequence.begin()){ // Can add current and return - only one token sequenced.
+      results.push_back(*current);
+      return;
+    }
+
+    std::list<TokenId>::iterator previous = --current; // step back for predecessor
+    ++current; // step forward again to current
+
+    // Stopping criteria: At the end or at a point where the token cannot come after the current token
+    while (current != m_tokenSequence.end()){
+      // Prune if the token cannot fit between tokens
+      TokenId predecessor = *previous;
+      TokenId successor = *current;
+      check_error(successor != predecessor);
+      int min_duration = 
+	successor->getStart()->getDerivedDomain().getUpperBound() - predecessor->getEnd()->getDerivedDomain().getLowerBound();
+
+      if(min_duration >= token->getDuration()->getDerivedDomain().getLowerBound())
+	results.push_back(token);
+
+      previous = current++;
+    }
   }
 
   void Timeline::getTokensToOrder(std::vector<TokenId>& results){
@@ -48,6 +102,9 @@ namespace Prototype {
 	results.push_back(token);
     }
   }
+
+
+  const std::list<TokenId>& Timeline::getTokenSequence() const{return m_tokenSequence;}
 
   void Timeline::constrain(const TokenId& token, const TokenId& successor){
     check_error(token.isValid());
