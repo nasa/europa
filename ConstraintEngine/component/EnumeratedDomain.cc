@@ -200,6 +200,8 @@ namespace Prototype {
   }
 
   void EnumeratedDomain::relax(const AbstractDomain& dom) {
+    if(isDynamic())
+      return;
     check_error(dom.isDynamic() || !dom.isEmpty());
     check_error(isSubsetOf(dom));
     check_error(dom.isEnumerated());

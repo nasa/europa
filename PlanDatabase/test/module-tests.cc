@@ -99,7 +99,7 @@ private:
     ObjectId id2((new Object(id1, LabelStr("AllObjects"), LabelStr("id2")))->getId());
     ObjectId id3((new Object(id1, LabelStr("AllObjects"), LabelStr("id3")))->getId());
     assert(db.getObjects().size() == 6);
-    assert(id3->getName().toString() == "id1:id3");
+    assert(id3->getName().toString() == "id1.id3");
     delete (Object*) id1;
     assert(db.getObjects().size() == 3);
 

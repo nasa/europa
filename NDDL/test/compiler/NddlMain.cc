@@ -25,6 +25,7 @@ void main(){
   
   REGISTER_NARY(EqualConstraint, "CoTemporal", "Default");
   REGISTER_NARY(EqualConstraint, "neq", "Default");
+  REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
   REGISTER_NARY(LessThanEqualConstraint, "Before", "Default");
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");

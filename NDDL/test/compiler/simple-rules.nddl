@@ -1,0 +1,40 @@
+enum Locations {Hill, Rock, Lander};
+
+class Rover{
+ predicate At{
+  Locations _location;
+ }
+
+ predicate Going{
+  Locations _from, _to;
+  neq(_from, _to);
+ }
+}
+
+Rover::At{
+ meets(Going to);
+ eq(to._from, _location);
+
+ meets(Going from);
+ eq(from._to, _location);
+}
+
+class World {
+ Rover rover;
+ predicate initialState{}
+ World(){
+  rover = new Rover();
+ }
+}
+
+World::initialState{
+ meets(Rover.Going g);
+
+ any(Rover.At a);
+ //eq(a._location, Lander);
+
+ any(Rover.At b);
+ //eq(b._location, Rock);
+
+ leq(a.end, b.start);
+}
