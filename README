@@ -1,19 +1,22 @@
-Warning: This file is likely still incomplete.  Please report any
-issues you have (with this file or any other part of the distribution)
-using the GNATS issue reporting system mentioned below.
+Warning: Please report any issues you have (with this file or any 
+other part of the distribution) using the GNATS issue reporting system 
+mentioned below.
 
-A: Prerequisites:
+$Id: README,v 1.26 2004-12-07 00:09:56 pdaley Exp $
 
-1. Jam 2.4 or higher.
-2. Java 1.4.2 or higher.
-3. gcc 3.3.3 (Though some prior versions are thought to work, only
-   this one is tested regularly & automatically).
+A: CVS checkout:
 
-B: Optional 3rd Party Software:
+For CVS, /usr/local/bin (Code TC SPARCs) or /usr/bin (Linux) 
+should be in your PATH.
+  
+1. Latest development state:
+   > cvs co PLASMA or
+   > cvs update PLASMA
+2. Latest tagged milestone:
+   > cvs co -r M_25 PLASMA 
 
-1. PlanWorks - recommended for visualization and debugging.
 
-C: Getting started:
+B: Getting started:
 
 In this section we provide brief details on how to get up an running
 with Europa2 (informally known as PLASMA by the development team), and
@@ -21,7 +24,14 @@ give pointers to more detailed documentation to assist in the process.
 
 1. Building Europa2
 
-See the file in this directory 'BUILDING' for more details.
+See the file 'BUILDING', also in the PLASMA directory, for instructions on 
+how to build Europa2. The 'BUILDING' file includes:
+
+    - a list of prerequisite programs and their locations
+    - a procedure to quickly build Europa2 with default variant and 
+      libraries
+    - a list of required environment variable settings 
+    - detailed explanations of build variant and library options
 
 2. Ensuring the system is working correctly.
 
@@ -29,23 +39,57 @@ Once you have successfully built Europa2, run 'jam run-all-tests'.
 This will build and execute a significant number of module and system
 tests.
 
+Ignore messages from the PartialPlanWiter warning that PPW_CONFIG is
+not set or is empty.
+
 3. Creating your own project
 
-A script is available to get you started with your own project.  It
-will create a directory for your project as a sibling directory to
-PLASMA and populate it with a build setup, initial model, initial
-state, and a main executable to use a standard Europa2 assembly,
-including a planner.  We will illustrate it's use with a sample
-project called SampleProject:
+See file 'HELLOWORLD' in the PLASMA directory to get started on your own
+project. The 'HELLOWORLD' file includes:
 
-	cd PLASMA
-	makeproject SampleProject
-	cd ../SampleProject
-	jam SampleProject
+    - step by step instructions to execute a script that will create a
+      project directory and and populate it with a build setup, 
+      initial model, initial state.
+    - an executable that is built and executed, resulting in a plan.
+    - instructions on how to configure the Europa2 transaction logger
+      for use by the visualization software.
+    - instruction to create a PlanWorks project that includes
+      the resulting plan (See section C, PlanWorks, below for how 
+      to get started with PlanWorks).
+    - instructions on how to visualize your plan with PlanWorks.
 
-You will observe that an executable is built and executed, resulting
-in a plan.  You may know change the model and initial state and simpy
-retype 'jam SampleProject' to rebuild as necessary and rerun.
+
+C. PlanWorks - recommended for visualization and debugging.
+
+   Once you have built a plan using Europa2, you will want to visualize
+   your plan. You may want to search for errors in your model or in
+   the initial state and goals. PlanWorks visualizes the relationships 
+   between entities such as variables, rules, and activities. It can
+   visualize plans with thousands of steps, variables, and constraints.
+   PlanWorks is implemented in Java and MySQL and uses a transaction 
+   logger called the PartialPlanWriter supplied in the standard Europa2
+   build.
+
+   Getting started with PlanWorks:
+   
+   - CVS Checkout
+
+   1. Latest development state:
+   > cvs co PlanWorks or
+   > cvs update PlanWorks
+   2. Latest tagged milestone:
+   > cvs co -r PW_M_18 PlanWorks
+
+   - Installing and using PlanWorks
+
+   Follow the directions in the PlanWorks README and GETTING_STARTED
+   files, found in the PlanWorks directory, to install and use PlanWorks.
+
+   Follow directions in the file 'HELLOWORLD' to create a sample
+   PlanWorks project and add a project sequence. Some configuration is 
+   required to enable the PartialPlanWriter logger. This is also detailed
+   in the file 'HELLOWORLD'.
+
 
 D. Additional materials
 
