@@ -602,12 +602,39 @@ class MultithreadTest {
 public:
   static bool test() {
     runTest(testConnection);
+    runTest(testRecursiveLock);
     return true;
   }
 private:
+  static bool testRecursiveLock() {
+    new RecursiveLockManager();
+    LockManager::instance().connect(LabelStr("Test"));
+    assert(!LockManager::instance().hasLock());
+    LockManager::instance().lock();
+    assert(LockManager::instance().hasLock());
+    LockManager::instance().lock();
+    assert(LockManager::instance().hasLock());
+    LockManager::instance().unlock();
+    assert(LockManager::instance().hasLock());
+    LockManager::instance().unlock();
+    assert(!LockManager::instance().hasLock());
+    assert(runConnectionTest());
+    new LockManager();
+    LockManager::instance().connect();
+    return true;
+  }
+
   static bool testConnection() {
-    const int numthreads = 100;
+   
     new ThreadedLockManager(); //ensure that we have a threaded model
+    assert(runConnectionTest());
+    new LockManager(); //return to your regularly scheduled threading
+    LockManager::instance().connect();
+    return true;
+  }
+  
+  static bool runConnectionTest() {
+    const int numthreads = 100;
     LockManager::instance().connect(LabelStr("Test"));
     LockManager::instance().lock();
     assertTrue(LockManager::instance().getCurrentUser() == LabelStr("Test"));
@@ -617,11 +644,9 @@ private:
       pthread_create(&threads[i], NULL, connectionTestThread, NULL);
     for(int i = numthreads - 1; i >= 0; i--)
       pthread_join(threads[i], NULL);
-    new LockManager(); //return to your regularly scheduled threading
-    LockManager::instance().connect();
     return true;
   }
-  
+
   static void* connectionTestThread(void* arg) {
     const int numconnects = 100;
     bool toggle = false;
