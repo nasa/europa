@@ -1651,9 +1651,7 @@ namespace EUROPA {
 				     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() == (unsigned int) ARG_COUNT);
-    AbstractDomain& domX = getCurrentDomain(variables[X]);
-    AbstractDomain& domY = getCurrentDomain(variables[Y]);
-    check_error(AbstractDomain::canBeCompared(domX, domY));                                                
+    check_error(AbstractDomain::canBeCompared(getCurrentDomain(variables[X]), getCurrentDomain(variables[Y])));
   }
   
   void TestEqConstraint::handleExecute(){

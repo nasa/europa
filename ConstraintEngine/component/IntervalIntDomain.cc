@@ -39,9 +39,11 @@ namespace EUROPA {
   }
 
   void IntervalIntDomain::testPrecision(const double& value) const {
+#ifndef EUROPA_FAST
     int intValue = (int) value;
     double dblValue = (double) intValue;
     check_error(dblValue == value); // confirms no loss in precision
+#endif
   }
 
   double IntervalIntDomain::convert(const double& value) const {
