@@ -42,7 +42,7 @@ typedef std::strstream std::stringstream;
 #include <sstream>
 #endif
 
-#define FatalError(s) { cerr << "At " << __FILE__ << ":" << __PRETTY_FUNCTION__ << ", line " << __LINE__ << endl; cerr << (s) << endl; exit(-1);}
+#define FatalError(s) { std::cerr << "At " << __FILE__ << ":" << __PRETTY_FUNCTION__ << ", line " << __LINE__ << std::endl; std::cerr << (s) << std::endl; exit(-1);}
 #define FatalErrno(){FatalError(strerror(errno))}
 
 const char *envStepsPerWrite = "PPW_WRITE_NSTEPS";
@@ -167,7 +167,7 @@ namespace Prototype {
     char *destBuf = new char[PATH_MAX];
     if(realpath(dest.c_str(), destBuf) == NULL && stepsPerWrite != 0) {
       if(mkdir(destBuf, 0777) && errno != EEXIST) {
-        cerr << "Failed to make destination directory " << dest << endl;
+        std::cerr << "Failed to make destination directory " << dest << std::endl;
         FatalErrno();
       }
     }
@@ -193,24 +193,24 @@ namespace Prototype {
     seqName = seqName.substr(0, extStart);
     if(stepsPerWrite) {
       if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
-        cerr << "Failed to make directory " << dest << endl;
+        std::cerr << "Failed to make directory " << dest << std::endl;
         FatalErrno();
       }
       dest += seqName;
       dest += timestr;
       if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
-        cerr << "Failed to make directory " << dest << endl;
+        std::cerr << "Failed to make directory " << dest << std::endl;
         FatalErrno();
       }
       std::string ppStats(dest + PARTIAL_PLAN_STATS);
       std::string ppTransactions(dest + TRANSACTIONS);
       std::string seqStr(dest + SEQUENCE);
-      ofstream seqOut(seqStr.c_str());
+      std::ofstream seqOut(seqStr.c_str());
       if(!seqOut) {
-        cerr << "Failed to open " << seqStr << endl;
+        std::cerr << "Failed to open " << seqStr << std::endl;
         FatalErrno();
       }
-      seqOut << dest << TAB << seqId << endl;
+      seqOut << dest << TAB << seqId << std::endl;
       seqOut.close();
       
       transOut = new std::ofstream(ppTransactions.c_str());
@@ -255,18 +255,18 @@ namespace Prototype {
 
     std::string ppDest = dest + SLASH + stepnum;
     if(mkdir(ppDest.c_str(), 0777) && errno != EEXIST) {
-      cerr << "Failed to create " << ppDest << endl;
+      std::cerr << "Failed to create " << ppDest << std::endl;
       FatalErrno();
     }
 
     std::string ppPartialPlan = ppDest + SLASH + stepnum + PARTIAL_PLAN;
-    ofstream ppOut(ppPartialPlan.c_str());
+    std::ofstream ppOut(ppPartialPlan.c_str());
     if(!ppOut) {
       FatalErrno();
     }
 
     ppOut << stepnum << TAB << ppId << TAB << (*pdbId)->getSchema()->getName().toString()
-          << TAB << seqId << endl;
+          << TAB << seqId << std::endl;
     ppOut.close();
 
     std::string ppObj = ppDest + SLASH + stepnum + OBJECTS;
@@ -345,7 +345,7 @@ namespace Prototype {
         }
       }
       catch(std::exception &e) {
-        cerr << "Can't cast it to a timeline..." << endl;
+        std::cerr << "Can't cast it to a timeline..." << std::endl;
       }
     }
     for(std::set<TokenId>::iterator tokenIterator = tokens.begin(); tokenIterator != tokens.end();
@@ -356,7 +356,7 @@ namespace Prototype {
     }
 
     (*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
-                << TAB << numConstraints << TAB << numTransactions << endl;
+                << TAB << numConstraints << TAB << numTransactions << std::endl;
     statsOut->flush();
     for(std::list<Transaction>::iterator it = transactionList->begin();
           it != transactionList->end(); ++it) {
@@ -373,7 +373,7 @@ namespace Prototype {
 
   void PartialPlanWriter::outputObject(const ObjectId &objId, std::ofstream &objOut) {
     objOut << objId->getKey() << TAB << ppId << TAB << objId->getName().toString() << TAB
-           << SNULL << endl;
+           << SNULL << std::endl;
   }
 
   void PartialPlanWriter::outputToken(const TokenId &token, const int slotId, const int slotIndex,
@@ -381,7 +381,7 @@ namespace Prototype {
                                       std::ofstream &tokRelOut, std::ofstream &varOut) {
     check_error(token.isValid());
     if(token->isIncomplete()) {
-      cerr << "Token " << token->getKey() << " is incomplete.  Skipping. " << endl;
+      std::cerr << "Token " << token->getKey() << " is incomplete.  Skipping. " << std::endl;
       return;
     }
     if(tId != NULL) {
@@ -409,7 +409,7 @@ namespace Prototype {
     }
     if(token->getMaster().isValid()) {
       tokRelOut << ppId << TAB << token->getMaster()->getKey() << TAB 
-                << token->getKey() << TAB << CAUSAL << TAB << tokenRelationId << endl;
+                << token->getKey() << TAB << CAUSAL << TAB << tokenRelationId << std::endl;
       tokOut << tokenRelationId << TAB;
       tokenRelationId++;
     }
@@ -436,10 +436,10 @@ namespace Prototype {
       paramVarIds += std::string(paramIdStr) + COLON;
     }
     if(paramVarIds == "") {
-      tokOut << SNULL << endl;
+      tokOut << SNULL << std::endl;
     }
     else {
-      tokOut << paramVarIds << endl;
+      tokOut << paramVarIds << std::endl;
     }
     numTokens++;
   }
@@ -455,7 +455,7 @@ namespace Prototype {
     varOut << ENUM_DOMAIN << TAB << getEnumerationStr((EnumeratedDomain &) enumVar->lastDomain()) 
            << TAB << SNULL << TAB << SNULL << TAB << SNULL << TAB;
 
-    varOut << tokenVarTypes[type] << endl;
+    varOut << tokenVarTypes[type] << std::endl;
   }
   
   void PartialPlanWriter::outputIntVar(const Id<TokenVariable<IntervalDomain> >& intVar,
@@ -469,7 +469,7 @@ namespace Prototype {
            << getLowerBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB
            << getUpperBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB;
 
-    varOut << tokenVarTypes[type] << endl;
+    varOut << tokenVarTypes[type] << std::endl;
   }
   
   void PartialPlanWriter::outputIntIntVar(const Id<TokenVariable<IntervalIntDomain> >& intVar,
@@ -484,7 +484,7 @@ namespace Prototype {
            << getLowerBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB
            << getUpperBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB;
     
-    varOut << tokenVarTypes[type] << endl;
+    varOut << tokenVarTypes[type] << std::endl;
   }
 
   void PartialPlanWriter::outputObjVar(const Id<TokenVariable<ObjectSet> >& objVar,
@@ -505,7 +505,7 @@ namespace Prototype {
 
     varOut << TAB << SNULL << TAB << SNULL << TAB << SNULL << TAB;
 
-    varOut << tokenVarTypes[type] << endl;
+    varOut << tokenVarTypes[type] << std::endl;
   }
   
   void PartialPlanWriter::outputConstrVar(const ConstrainedVariableId &otherVar, 
@@ -526,20 +526,20 @@ namespace Prototype {
              << getUpperBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB;
     }
     else {
-      cerr << " I don't know what my domain is!" << endl;
+      std::cerr << " I don't know what my domain is!" << std::endl;
       exit(-1);
     }
-    varOut << tokenVarTypes[type] << endl;
+    varOut << tokenVarTypes[type] << std::endl;
   }
 
   void PartialPlanWriter::outputConstraint(const ConstraintId &constrId, std::ofstream &constrOut, 
                         std::ofstream &cvmOut) {
     constrOut << constrId->getKey() << TAB << ppId << TAB << constrId->getName().toString() 
-              << TAB << ATEMPORAL << endl;
+              << TAB << ATEMPORAL << std::endl;
     std::vector<ConstrainedVariableId>::const_iterator it =
       constrId->getScope().begin();
     for(; it != constrId->getScope().end(); ++it) {
-      cvmOut << constrId->getKey() << TAB << (*it)->getKey() << TAB << ppId << endl;
+      cvmOut << constrId->getKey() << TAB << (*it)->getKey() << TAB << ppId << std::endl;
     }
   }
 
@@ -759,6 +759,6 @@ namespace Prototype {
   void Transaction::write(std::ostream &out, long long int ppId) const {
     out << transactionTypeNames[transactionType] << TAB << objectKey << TAB
         << sourceTypeNames[source] << TAB << id << TAB << stepNum << TAB
-        << sequenceId << TAB << ppId << TAB << info << endl;
+        << sequenceId << TAB << ppId << TAB << info << std::endl;
   }
 }
