@@ -2,6 +2,8 @@ Building PLASMA
 by Andrew Bachmann
 2004-07-13
 
+$Id: BUILDING,v 1.4 2004-10-22 20:45:10 wedgingt Exp $
+
 
 - Building Jam
 
@@ -74,15 +76,14 @@ patterns for each of the main variants:
 	OPTIMIZED = <filename>_o<ext>
 	PROFILE = <filename>_p<ext>
 
-The fourth variant, CUSTOM is a special variant which
-examines some additional environment variables to
-determine the compilation flags.  These additional
-variables are:
+The fourth variant, CUSTOM is a special variant which examines some
+environment variables to determine the compilation flags.  These
+environment variables are:
 
-	1. DEBUG - use debugging
-	2. OPTIMIZE - use optimization
-	3. PROFILE - use profiling
-	4. WARN - use additional warnings
+	1. PLASMA_DEBUG - use debugging
+	2. PLASMA_OPTIMIZE - use optimization
+	3. PLASMA_PROFILE - use profiling
+	4. PLASMA_WARN - use additional warnings
 
 In the case of the CUSTOM variant, the above variables
 are used to construct the name by composition.  Thus,
