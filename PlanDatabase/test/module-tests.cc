@@ -419,6 +419,7 @@ public:
     runTest(testStateModel);
     runTest(testMasterSlaveRelationship);
     runTest(testBasicMerging);
+    runTest(testConstraintMigrationDuringMerge);
     runTest(testMergingPerformance);
     runTest(testTokenCompatibility);
     return(true);
@@ -703,6 +704,68 @@ private:
     DEFAULT_TEARDOWN();
 
     // Deletion will now occur and test proper cleanup.
+    return true;
+  }
+
+  // This test has been fixed by line 56 in MergeMemento.cc.
+  // If we invert the order of the splits at the end of this test, the code
+  // will error out.
+
+  static bool testConstraintMigrationDuringMerge() {
+    DEFAULT_SETUP(ce, db, schema, false);
+    ObjectId timeline1 = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("timeline1")))->getId();
+    ObjectId timeline2 = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("timeline2")))->getId();
+    db.close();
+
+    // Create two base tokens
+    IntervalToken t0(db.getId(), 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken t1(db.getId(),
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+
+    // Create 2 mergeable tokens - predicates, types and base domains match
+    IntervalToken t2(db.getId(), 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken t3(db.getId(),
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+
+    LessThanEqualConstraint c0(LabelStr("leq"), LabelStr("Default"), db.getConstraintEngine(), makeScope(t1.getStart(), t3.getStart()));
+
+    t0.activate();
+    t2.activate();
+    timeline1->constrain(t0.getId());
+    timeline2->constrain(t2.getId());
+
+    db.getConstraintEngine()->propagate();
+
+    t1.merge(t0.getId());
+    t3.merge(t2.getId());
+
+    t3.cancel();
+    t1.cancel();
+
+    DEFAULT_TEARDOWN();
+
     return true;
   }
 
