@@ -91,8 +91,10 @@ namespace Prototype {
       ConstraintLibrary::createConstraint(LabelStr("HorizonRelation"), m_planDatabase->getConstraintEngine(), temp1);
     m_standardConstraints.insert(horizonRelation);
 
-    // Now activate the transaction
-    activate();
+    // Now activate the transaction, since resource transactions should not be merged.
+    // Note that we do not use 'activate' from the super class since that can lead to a cycle
+    // when a transaction is created via subgoaling.
+    activateInternal();
   }
 
   ResourceId Transaction::getResource() const {
