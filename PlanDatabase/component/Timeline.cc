@@ -1,4 +1,3 @@
-
 /**
  * @file Timeline.cc
  * @brief Implementation for a Timeline - key use cases only.
@@ -23,21 +22,26 @@
 namespace EUROPA {
 
   Timeline::Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
-    : Object(planDatabase, type, name, true){ if (!open) close();}
+    : Object(planDatabase, type, name, true) {
+    if (!open)
+      close();
+  }
 
   Timeline::Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
-    : Object(parent, type, localName, true){ if (!open) close();}
+    : Object(parent, type, localName, true) {
+    if (!open)
+      close();
+  }
 
   Timeline::~Timeline(){
   }
-
 
   void Timeline::getOrderingChoices(const TokenId& token, std::vector< std::pair<TokenId, TokenId> >& results){
     check_error(results.empty());
     check_error(token.isValid());
 
     // Force propagation and return if inconsistent - leads to no ordering choices.
-    if(!getPlanDatabase()->getConstraintEngine()->propagate())
+    if (!getPlanDatabase()->getConstraintEngine()->propagate())
       return;
 
     check_error(isValid());
@@ -46,11 +50,11 @@ namespace EUROPA {
     // we trap that as an error. We could just return indicating no choices but that might lead caller to conclude
     // there is simply an inconsistency rather than force them to write code to ensure this does not happen.
     check_error(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end(),
-		"Attempted to query for choices to constrain token " + token->getPredicateName().toString() + 
-		" which has already been constrained.");
+                "Attempted to query for choices to constrain token " + token->getPredicateName().toString() + 
+                " which has already been constrained.");
 
     // If the sequence is empty, add the case where both elements of the pair are the given token.
-    if(m_tokenSequence.empty()){
+    if (m_tokenSequence.empty()) {
       results.push_back(std::make_pair(token, token));
       return;
     }
@@ -61,13 +65,13 @@ namespace EUROPA {
     // Move forward until we find a Token we can precede
     while (current != m_tokenSequence.end()) {
       if (getPlanDatabase()->getTemporalAdvisor()->canPrecede(token, *current))
-	break;
+        break;
       current++;
     }
 
     // If it can precede the first one, we do not have to test for fitting between
     // token in the sequence, thus, we should push it back and move on.
-    if(current == m_tokenSequence.begin()){
+    if (current == m_tokenSequence.begin()) {
       results.push_back(std::make_pair(token, *current));
       current++;
     }
@@ -76,7 +80,7 @@ namespace EUROPA {
     ++current; // step forward again to current
 
     // Stopping criteria: At the end or at a point where the token cannot come after the current token
-    while (current != m_tokenSequence.end()){
+    while (current != m_tokenSequence.end()) {
       // Prune if the token cannot fit between tokens
       TokenId predecessor = *previous;
       TokenId successor = *current;
@@ -84,21 +88,21 @@ namespace EUROPA {
       // we still need to check that the predecessor can precede the token,
       // otherwise we'll return bogus successors (see PlanDatabse::module-tests::testNoChoicesThatFit
       if (!getPlanDatabase()->getTemporalAdvisor()->canPrecede(predecessor,token))
-	  break;
+        break;
 
-      if(getPlanDatabase()->getTemporalAdvisor()->canFitBetween(token, predecessor, successor))
-	results.push_back(std::make_pair(token, successor));
+      if (getPlanDatabase()->getTemporalAdvisor()->canFitBetween(token, predecessor, successor))
+        results.push_back(std::make_pair(token, successor));
 
       previous = current++;
     }
 
     // Special case, the token could be placed at the end, which can't precede anything. This
     // results in an ordering choice of the noId() i.e. ordering w.r.t. no successor
-    if(getPlanDatabase()->getTemporalAdvisor()->canPrecede(m_tokenSequence.back(),token))
+    if (getPlanDatabase()->getTemporalAdvisor()->canPrecede(m_tokenSequence.back(),token))
       results.push_back(std::make_pair(m_tokenSequence.back(), token));
   }
 
-  void Timeline::getTokensToOrder(std::vector<TokenId>& results){
+  void Timeline::getTokensToOrder(std::vector<TokenId>& results) {
     check_error(results.empty());
 
     // Do propagation to update the information
@@ -110,10 +114,10 @@ namespace EUROPA {
     check_error(isOk);
 
     const TokenSet& tokensForThisObject = getTokens();
-    for(TokenSet::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it){
+    for (TokenSet::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it) {
       TokenId token = *it;
-      if(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end() && token->isActive())
-	results.push_back(token); // We should now have an active token that has not been constrained
+      if (m_tokenIndex.find(token->getKey()) == m_tokenIndex.end() && token->isActive())
+        results.push_back(token); // We should now have an active token that has not been constrained
     }
   }
 
@@ -121,17 +125,16 @@ namespace EUROPA {
     const TokenSet& tokensForThisObject = getTokens();
 
     // Quits on the first token that is active and not yet sequenced
-    for(TokenSet::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it){
+    for (TokenSet::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it) {
       TokenId token = *it;
-      if(token->isActive() && m_tokenIndex.find(token->getKey()) == m_tokenIndex.end())
-	return true;
+      if (token->isActive() && m_tokenIndex.find(token->getKey()) == m_tokenIndex.end())
+        return(true);
     }
-
-    return false;
+    return(false);
   }
 
-  const std::list<TokenId>& Timeline::getTokenSequence() const{
-    return m_tokenSequence;
+  const std::list<TokenId>& Timeline::getTokenSequence() const {
+    return(m_tokenSequence);
   }
 
   /**
@@ -139,32 +142,32 @@ namespace EUROPA {
    * @todo Consider deactivating redundant constraints. If we do this, we would also have to
    * activate them when freeing.
    */
-  void Timeline::constrain(const TokenId& predecessor, const TokenId& successor){
+  void Timeline::constrain(const TokenId& predecessor, const TokenId& successor) {
     // Delegate to base class.
     Object::constrain(predecessor, successor, true);
 
     // Additional tests for a Timeline
     check_error(m_tokenIndex.find(predecessor->getKey()) == m_tokenIndex.end() ||
-		m_tokenIndex.find(successor->getKey()) == m_tokenIndex.end(),
-		"At least one of predecessor and successor should not be sequenced yet.");
+                m_tokenIndex.find(successor->getKey()) == m_tokenIndex.end(),
+                "At least one of predecessor and successor should not be sequenced yet.");
 
     check_error(m_tokenSequence.empty() || 
-		m_tokenIndex.find(predecessor->getKey()) != m_tokenIndex.end() ||
-		m_tokenIndex.find(successor->getKey()) != m_tokenIndex.end(),
-		"At least one of predecessor or successor should be already sequenced in a non empty sequence.");
+                m_tokenIndex.find(predecessor->getKey()) != m_tokenIndex.end() ||
+                m_tokenIndex.find(successor->getKey()) != m_tokenIndex.end(),
+                "At least one of predecessor or successor should be already sequenced in a non empty sequence.");
 
     check_error(m_tokenSequence.empty() || predecessor != successor,
-		"Can only constrain with respect to yourself on an empty timeline.");
+                "Can only constrain with respect to yourself on an empty timeline.");
 
     // CASE 0: No tokens are sequenced yet
-    if(m_tokenSequence.empty()){
+    if (m_tokenSequence.empty()) {
       // Insert the successor and store its position
       m_tokenSequence.push_back(successor);
       m_tokenIndex.insert(std::make_pair(successor->getKey(), m_tokenSequence.begin()));
 
-      if(predecessor != successor){ // Insert the predecessor and store its position
-	m_tokenSequence.push_front(predecessor);
-	m_tokenIndex.insert(std::make_pair(predecessor->getKey(), m_tokenSequence.begin()));
+      if (predecessor != successor) { // Insert the predecessor and store its position
+        m_tokenSequence.push_front(predecessor);
+        m_tokenIndex.insert(std::make_pair(predecessor->getKey(), m_tokenSequence.begin()));
       }
       return;
     }
@@ -174,7 +177,7 @@ namespace EUROPA {
     std::map<int, std::list<TokenId>::iterator >::const_iterator indexPos = m_tokenIndex.find(successor->getKey());
 
     // CASE 1: Successor already sequenced, so insert predecessor before it
-    if(indexPos != m_tokenIndex.end()){
+    if (indexPos != m_tokenIndex.end()) {
       std::list<TokenId>::iterator sequencePos = indexPos->second;
 
       // Insert into sequence and index
@@ -182,13 +185,12 @@ namespace EUROPA {
       m_tokenIndex.insert(std::make_pair(predecessor->getKey(), sequencePos));
 
       // If we are not at the beginning of the list, constrain prdecessor to succeed prior predecessor
-      if(sequencePos != m_tokenSequence.begin()){
-	sequencePos--;
-	TokenId oldPredecessor = *sequencePos;
-	Object::constrain(oldPredecessor, predecessor, false);
+      if (sequencePos != m_tokenSequence.begin()) {
+        sequencePos--;
+        TokenId oldPredecessor = *sequencePos;
+        Object::constrain(oldPredecessor, predecessor, false);
       }
-    }
-    else {  // CASE 2: Predecessor already sequenced, so insert successor after it. Thus is a given if we get here.
+    } else {  // CASE 2: Predecessor already sequenced, so insert successor after it. Thus is a given if we get here.
       indexPos = m_tokenIndex.find(predecessor->getKey());
       std::list<TokenId>::iterator sequencePos = indexPos->second;
 
@@ -197,20 +199,20 @@ namespace EUROPA {
       m_tokenIndex.insert(std::make_pair(successor->getKey(), sequencePos));
 
       // If we are not at the end of the list, constrain successor to precede prior successor
-      if(++sequencePos != m_tokenSequence.end()){
-	TokenId oldSuccessor = *sequencePos;
-	Object::constrain(successor, oldSuccessor, false);
+      if (++sequencePos != m_tokenSequence.end()) {
+        TokenId oldSuccessor = *sequencePos;
+        Object::constrain(successor, oldSuccessor, false);
       }
     }
   }
 
-  void Timeline::remove(const TokenId& token){
+  void Timeline::remove(const TokenId& token) {
     check_error(token.isValid());
     check_error(isValid(CLEANING_UP));
 
     // CASE 0: It is not sequenced, so can ignore it
     std::map<int, std::list<TokenId>::iterator >::iterator token_it = m_tokenIndex.find(token->getKey());
-    if(token_it == m_tokenIndex.end()){
+    if (token_it == m_tokenIndex.end()) {
       Object::remove(token);
       return;
     }
@@ -219,20 +221,20 @@ namespace EUROPA {
     TokenId later;
     std::list<TokenId>::iterator token_pos = token_it->second;
 
-    if(token_pos != m_tokenSequence.begin()){
+    if (token_pos != m_tokenSequence.begin()) {
       --token_pos;
       earlier = *token_pos;
       ++token_pos;
     }
 
     ++token_pos;
-    if(token_pos != m_tokenSequence.end())
+    if (token_pos != m_tokenSequence.end())
       later = *token_pos;
     --token_pos;
 
     // May have to post a constraint between earlier and later if none exists already in the case
     // where the token is surrounded
-    if(!earlier.isNoId() && !later.isNoId() && getPrecedenceConstraint(earlier, later).isNoId())
+    if (!earlier.isNoId() && !later.isNoId() && getPrecedenceConstraint(earlier, later).isNoId())
       constrain(earlier, later);
 
     std::map<int, std::list<TokenId>::iterator >::iterator it = m_tokenIndex.find(token->getKey());
@@ -249,11 +251,10 @@ namespace EUROPA {
    * what tokens to remove from the sequence, and what constraints should correctly
    * be removed.
    */
-  void Timeline::free(const TokenId& predecessor, const TokenId& successor){
-
+  void Timeline::free(const TokenId& predecessor, const TokenId& successor) {
     check_error(m_tokenIndex.find(predecessor->getKey()) != m_tokenIndex.end() &&
-		m_tokenIndex.find(successor->getKey()) != m_tokenIndex.end(),
-		"Predecessor and successor must both be sequenced if they are to be freed");
+                m_tokenIndex.find(successor->getKey()) != m_tokenIndex.end(),
+                "Predecessor and successor must both be sequenced if they are to be freed");
 
     check_error(isValid());
 
@@ -268,14 +269,14 @@ namespace EUROPA {
 
     // If both are still required, return without removing necessary constraint, although it is no longer
     // an explicit constraint
-    if(predecessorRequired && successorRequired)
+    if (predecessorRequired && successorRequired)
       return;
 
     // We free the constraint now, and adjust as necessary
     Object::free(predecessor, successor, false); // Since no longer explict
 
     // In the event we are freeing based on a single token, unlink it and get out
-    if(predecessor == successor){
+    if (predecessor == successor) {
       unlink(predecessor);
       return;
     }
@@ -284,15 +285,15 @@ namespace EUROPA {
     TokenId endTok(successor);
 
     // If successor is not required, remove it. Update the end token.
-    if(!successorRequired)
+    if (!successorRequired)
       endTok = removeSuccessor(successor);
 
     // If predecessor is not required, remove it and update the start token
-    if(!predecessorRequired)
+    if (!predecessorRequired)
       startTok = removePredecessor(predecessor);
 
     // If valid start and end tokens, currently unconstrained, and adjacemt
-    if(adjacent(startTok, endTok) && !isConstrainedToPrecede(startTok, endTok))
+    if (adjacent(startTok, endTok) && !isConstrainedToPrecede(startTok, endTok))
       Object::constrain(startTok, endTok, false); // Add an implied constraint
  
     check_error(isValid());
@@ -320,14 +321,14 @@ namespace EUROPA {
       // Also ensure x.end <= (x+1).start.
       if (!cleaningUp && getPlanDatabase()->getConstraintEngine()->constraintConsistent()) {
         check_error(predecessor.isNoId() || isConstrainedToPrecede(predecessor, token));
-	int earliest_start = (int) token->getStart()->lastDomain().getLowerBound();
-	int latest_start = (int) token->getStart()->lastDomain().getUpperBound();
-	check_error(earliest_start == MINUS_INFINITY || earliest_start == PLUS_INFINITY || earliest_start > prior_earliest_start);
-	check_error(prior_earliest_end <= earliest_start);
-	check_error(prior_latest_end <= latest_start);
-	prior_earliest_end = (int) token->getEnd()->lastDomain().getLowerBound();
-	prior_latest_end = (int) token->getEnd()->lastDomain().getLowerBound();
-	prior_earliest_start = earliest_start;
+        int earliest_start = (int) token->getStart()->lastDomain().getLowerBound();
+        int latest_start = (int) token->getStart()->lastDomain().getUpperBound();
+        check_error(earliest_start == MINUS_INFINITY || earliest_start == PLUS_INFINITY || earliest_start > prior_earliest_start);
+        check_error(prior_earliest_end <= earliest_start);
+        check_error(prior_latest_end <= latest_start);
+        prior_earliest_end = (int) token->getEnd()->lastDomain().getLowerBound();
+        prior_latest_end = (int) token->getEnd()->lastDomain().getLowerBound();
+        prior_earliest_start = earliest_start;
       }
       predecessor = token;
     }
@@ -337,11 +338,11 @@ namespace EUROPA {
   }
 
   bool Timeline::atStart(const TokenId& token) const {
-    return (!m_tokenSequence.empty() && token == m_tokenSequence.front());
+    return(!m_tokenSequence.empty() && token == m_tokenSequence.front());
   }
 
   bool Timeline::atEnd(const TokenId& token) const {
-    return (!m_tokenSequence.empty() && token == m_tokenSequence.back());
+    return(!m_tokenSequence.empty() && token == m_tokenSequence.back());
   }
 
   TokenId Timeline::removeSuccessor(const TokenId& token) {
@@ -349,12 +350,12 @@ namespace EUROPA {
     std::list<TokenId>::iterator pos = m_tokenIndex.find(token->getKey())->second;
     m_tokenIndex.erase(token->getKey());
 
-    if(m_tokenIndex.empty()){
+    if (m_tokenIndex.empty()) {
       m_tokenSequence.clear();
       return TokenId::noId();
     }
 
-    if(atEnd(token)){
+    if (atEnd(token)) {
       m_tokenSequence.pop_back();
       return m_tokenSequence.back();
     }
@@ -368,47 +369,45 @@ namespace EUROPA {
     std::list<TokenId>::iterator pos = m_tokenIndex.find(token->getKey())->second;
     m_tokenIndex.erase(token->getKey());
 
-
-    if(m_tokenIndex.empty()){
+    if (m_tokenIndex.empty()) {
       m_tokenSequence.clear();
       return TokenId::noId();
     }
 
-    if(atStart(token)){
+    if (atStart(token)) {
       m_tokenSequence.pop_front();
       return m_tokenSequence.front();
     }
 
     m_tokenSequence.erase(pos--);
-    return *pos;
+    return(*pos);
   }
 
-  bool Timeline::adjacent(const TokenId& x, const TokenId& y) const{
-    if(x.isNoId() || y.isNoId())
-      return false;
-
+  bool Timeline::adjacent(const TokenId& x, const TokenId& y) const {
+    if (x.isNoId() || y.isNoId())
+      return(false);
     std::list<TokenId>::const_iterator pos = m_tokenIndex.find(x->getKey())->second;
     ++pos;
-    return (pos != m_tokenSequence.end() && y == *pos);
+    return(pos != m_tokenSequence.end() && y == *pos);
   }
 
   void Timeline::unlink(const TokenId& token) {
     freeImplicitConstraints(token);
     std::list<TokenId>::iterator pos = m_tokenIndex.find(token->getKey())->second;
     m_tokenIndex.erase(token->getKey());
-    if(atStart(token))
+    if (atStart(token))
       m_tokenSequence.pop_front();
-    else if(atEnd(token))
-      m_tokenSequence.pop_back();
-    else { // Have to handle removal in the middle and re-linking if necessary
-      m_tokenSequence.erase(pos--);
-      TokenId startTok = *pos;
-      ++pos;
-      TokenId endTok = *pos;
-      if(!isConstrainedToPrecede(startTok, endTok))
-	Object::constrain(startTok, endTok, false);
-    }
-
+    else
+      if (atEnd(token))
+        m_tokenSequence.pop_back();
+      else { // Have to handle removal in the middle and re-linking if necessary
+        m_tokenSequence.erase(pos--);
+        TokenId startTok = *pos;
+        ++pos;
+        TokenId endTok = *pos;
+        if (!isConstrainedToPrecede(startTok, endTok))
+          Object::constrain(startTok, endTok, false);
+      }
     return;
   }
 }
