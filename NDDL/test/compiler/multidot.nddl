@@ -61,12 +61,9 @@ Mumble m1 = new Mumble(bz);
 close();
 
 goal(Mumble.mumbPred mp);
-mp.activate();
 
 goal(Baz.apred ap);
-ap.activate();
 
 goal(Baz.bpred bp);
-bp.activate();
 
 //eq(bp.predBar.m_foo, f1);

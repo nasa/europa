@@ -58,6 +58,4 @@ World::initialState{
 World world = new World();
 close();
 goal(World.initialState g0);
-g0.activate();
 goal(Rover.Drive g1);
-g1.activate();

@@ -55,6 +55,4 @@ World world = new World();
 Rover rover = new Rover();
 close();
 goal(World.initialState g0);
-g0.activate();
 goal(Rover.At g1);
-g1.activate();

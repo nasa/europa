@@ -132,15 +132,13 @@ SuperRover superRover = new SuperRover();
 close();
 
 goal(World.initialState t0);
-t0.activate();
 
 goal(Rover.At t1);
-t1.activate();
-goal(Rover.At t2);
+
+rejectable(Rover.At t2);
 t2.merge(t1);
 
 goal(SuperRover.At t3);
-t3.activate();
 
 goal(Rover.At a1);
 
@@ -205,4 +203,3 @@ goal(Rover.At a20);
 a1 equals a20;
 
 goal(Rover.AnyPredicate a21);
-a21.activate();
