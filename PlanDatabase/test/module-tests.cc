@@ -10,6 +10,7 @@
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
 #include "DbClientTransactionLog.hh"
+#include "DbClientTransactionTokenMapper.hh"
 
 #include "DbClient.hh"
 #include "ObjectFactory.hh"
@@ -1480,7 +1481,8 @@ private:
     DEFAULT_SETUP(ce, db, schema, false);
 
     DbClientId client = db.getClient();
-    DbClientTransactionLog* txLog = new DbClientTransactionLog(client);
+    DbClientTransactionTokenMapper * tokenMapper = new DbClientTransactionTokenMapper(client);
+    DbClientTransactionLog* txLog = new DbClientTransactionLog(client, tokenMapper->getId());
 
     FooId foo1 = client->createObject(LabelStr("Foo"), LabelStr("foo1"));
     assert(foo1.isValid());
@@ -1504,6 +1506,7 @@ private:
     client->createConstraint(LabelStr("eq"), scope);
 
     delete txLog;
+    delete tokenMapper;
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1511,7 +1514,7 @@ private:
 
   static bool testPathBasedRetrieval(){
     DEFAULT_SETUP(ce, db, schema, true);
-    std::vector<int> tokenKeys; // Hold key for all tokens created as root tokens
+    DbClientTransactionTokenMapper * tokenMapper = new DbClientTransactionTokenMapper(db.getClient());
 
     IntervalToken t0(db.getId(), 
 		     LabelStr("Predicate"), 
@@ -1519,8 +1522,8 @@ private:
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(1, 1));
+    tokenMapper->notifyTokenCreated(t0.getId());
     t0.activate();
-    tokenKeys.push_back(t0.getKey());
 
     TokenId t1 = (new IntervalToken(db.getId(), 
 				    LabelStr("Predicate"), 
@@ -1528,8 +1531,8 @@ private:
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
+    tokenMapper->notifyTokenCreated(t1);
     t1->activate();
-    tokenKeys.push_back(t0.getKey());
 
     TokenId t0_0 = (new IntervalToken(t0.getId(), 
 				    LabelStr("Predicate"), 
@@ -1575,16 +1578,16 @@ private:
 
 
     // Base case with just the root
-    assert(DbClientTransactionLog::getTokenByPath(path, tokenKeys) == t0.getId());
-    assert(DbClientTransactionLog::getPathByToken(t0.getId(), tokenKeys).size() == 1);
+    assert(tokenMapper->getTokenByPath(path) == t0.getId());
+    assert(tokenMapper->getPathByToken(t0.getId()).size() == 1);
 
     // Now test a more convoluted path
     path.push_back(1);
     path.push_back(1);
-    assert(DbClientTransactionLog::getTokenByPath(path, tokenKeys) == t0_1_1);
+    assert(tokenMapper->getTokenByPath(path) == t0_1_1);
 
     path.clear();
-    path = DbClientTransactionLog::getPathByToken(t0_1_1, tokenKeys);
+    path = tokenMapper->getPathByToken(t0_1_1);
     assert(path.size() == 3);
     assert(path[0] == 0);
     assert(path[1] == 1);
@@ -1593,10 +1596,11 @@ private:
 
     // Negative tests
     path.push_back(100);
-    assert(DbClientTransactionLog::getTokenByPath(path, tokenKeys) == TokenId::noId());
+    assert(tokenMapper->getTokenByPath(path) == TokenId::noId());
     path[0] = 99999;
-    assert(DbClientTransactionLog::getTokenByPath(path, tokenKeys) == TokenId::noId());
+    assert(tokenMapper->getTokenByPath(path) == TokenId::noId());
 
+    delete tokenMapper;
     DEFAULT_TEARDOWN();
     return true;
   }

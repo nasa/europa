@@ -11,14 +11,14 @@ class TiXmlElement;
 
 /**
  * @file DbClientTransactionLog
- * @brief Main interface for logging and playing transactions. Necessary for copy. replay, and possibly recovery.
+ * @brief Main interface for logging transactions. Necessary for copy. replay, and possibly recovery.
  */
 
 namespace Prototype {
 
   class DbClientTransactionLog: public DbClientListener {
   public:
-    DbClientTransactionLog(const DbClientId& client);
+    DbClientTransactionLog(const DbClientId& client, const DbClientTransactionTokenMapperId & tokenMapper);
     ~DbClientTransactionLog();
 
     /* Declare DbClient event handlers we will over-ride */
@@ -40,23 +40,9 @@ namespace Prototype {
      */
     void flush(std::ostream& os);
 
-    /**
-     * @brief Play all transactions from an input stream
-     */
-    void play(std::istream& is);
-
-    /**
-     * @brief Retrieve the vector of token keys. Essential for path based retrieval
-     */
-    const std::vector<int>& getKeysOfTokensCreated() const;
-
-    static TokenId getTokenByPath(const std::vector<int>& relativePath, const std::vector<int>& tokenKeysByIndex);
-
-    static std::vector<int> getPathByToken(const TokenId& targetToken, const std::vector<int>& tokenKeysByIndex);
-
   private:
-    std::vector<int> m_keysOfTokensCreated;
     std::list<TiXmlElement*> m_bufferedTransactions;
+    DbClientTransactionTokenMapperId m_tokenMapper;
   };
 }
 #endif

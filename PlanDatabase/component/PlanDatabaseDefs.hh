@@ -52,6 +52,15 @@ namespace Prototype {
   class DbClientListener;
   typedef Id<DbClientListener> DbClientListenerId;
 
+  class DbClientTransactionLog;
+  typedef Id<DbClientTransactionLog> DbClientTransactionLogId;
+
+  class DbClientTransactionPlayer;
+  typedef Id<DbClientTransactionPlayer> DbClientTransactionPlayerId;
+
+  class DbClientTransactionTokenMapper;
+  typedef Id<DbClientTransactionTokenMapper> DbClientTransactionTokenMapperId;
+
   typedef std::pair<LabelStr, AbstractDomain* > ConstructorArgument; /*!< Defines a pair for names and values of arguments for a constructor */
 }
 

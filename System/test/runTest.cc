@@ -59,6 +59,7 @@
 #include "PlanDatabaseWriter.hh"
 
 // Transactions
+#include "../PlanDatabase/DbClientTransactionTokenMapper.hh"
 #include "../PlanDatabase/DbClientTransactionLog.hh"
 
 // Support for Temporal Network
@@ -92,6 +93,7 @@ public:
   std::list<ConditionId> conditions;
   FilterCriteriaId filterCriteria;
   FlawQueryId flawQuery;
+  DbClientTransactionTokenMapperId tokenMapper;
 
   PlanSystem() {
     constraintEngine = (new ConstraintEngine())->getId();
@@ -116,6 +118,8 @@ public:
     conditions.push_back(dynamicInfiniteRealCondition);
     filterCriteria = (new FilterCriteria(conditions))->getId();
     flawQuery = (new FlawQuery(flawSource, filterCriteria))->getId();
+
+    tokenMapper = (new DbClientTransactionTokenMapper(planDatabase->getClient()))->getId();
   }
   ~PlanSystem() {
     planDatabase->purge();
@@ -158,7 +162,7 @@ int main(int argc, const char ** argv){
   if (argc == 1) {
     PlanSystem planSystem;
 
-    DbClientTransactionLog * transactions = new DbClientTransactionLog(planSystem.planDatabase->getClient());
+    DbClientTransactionLog * transactions = new DbClientTransactionLog(planSystem.planDatabase->getClient(), planSystem.tokenMapper);
 
     if (loggingEnabled()) {
       new CeLogger(std::cout, planSystem.constraintEngine);
@@ -200,7 +204,7 @@ int main(int argc, const char ** argv){
       
     // planner decisions
     std::cout << "Saving Planner Decisions..." << std::endl;
-    PlannerDecisionWriter decisionWriter(planner.getId(), planSystem.planDatabase);
+    PlannerDecisionWriter decisionWriter(planner.getId(), planSystem.tokenMapper);
     closedDecisions = decisionWriter.closedDecisionsString();
 
     // save decisions
@@ -261,7 +265,7 @@ int main(int argc, const char ** argv){
 
     // planner decisions
     std::cout << "Replaying Planner Decisions..." << std::endl;
-    DecisionReplayer replayer(planSystem.planDatabase, initial_key);
+    DecisionReplayer replayer(planSystem.planDatabase, planSystem.tokenMapper);
     replayer.replay(closedDecisions);
 
     std::cout << "Replay Database:" << std::endl;
