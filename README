@@ -5,6 +5,9 @@ Known areas of performance improvement:
 4. Update of variables from Temporal Network.
 5. Splitting merged tokens in a non-chronological backtrack.
 
+M_5:
+1. Principal Transaction Logging and replay infrastructure completed.
+
 M_4:
 1. Working version of DecisionPlay and Replay
 2. Some minor fixes to the NddlCompiler
