@@ -1,6 +1,6 @@
 Brief Migration Notes
 
-$Id: MigrationNotes,v 1.1 2004-11-22 22:13:39 wedgingt Exp $
+$Id: MigrationNotes,v 1.2 2004-11-22 22:41:48 wedgingt Exp $
 
 This file is intended to help users of the prior Europa (in the
 NewPlan CVS tree) planning system migrate their projects to this
@@ -39,4 +39,22 @@ singleton, then asking any of the objects in that domain for the list
 of associated tokens will include the token.  This is very different
 from the behavior of NewPlan, for which such queries only return the
 tokens that have already been inserted onto a timeline of the object.
-(see also GNATS #?).
+(see also GNATS 2704).
+
+5. In NewPlan, label sets imply a "default ordering" heuristic based
+on the order they are given when the label set is declared.  This
+behavior is not duplicated in PLASMA, for which the "default ordering"
+heuristoc would be lexicographic (based on ASCII code) due to
+internals of how the C++ classes EnumeratedDomain and LabelStr are
+implemented.
+
+6. The number of plan steps for otherwise identical problems will
+almost certainly increase whenever tokens are involved.
+
+7. NewPlan/ModelLoader/converter/convert2 can be used to read a DDL
+file (including any that it includes) and produce a single NDDL file
+for use with PLASMA.
+
+8. NewPlan ConstraintTokens are not supported by PLASMA, though the
+convert2 program will not complain about them (the NDDL compiler
+will).
