@@ -683,6 +683,33 @@ private:
     compatibleTokens.clear();
     db.getCompatibleTokens(t2.getId(), compatibleTokens);
     assert(compatibleTokens.empty()); // No match since parameter variable has no intersection
+
+
+    IntervalToken t3(db.getId(),
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000),
+		     Token::noObject(), false);
+    t3.addParameter(IntervalDomain()); // Force no intersection
+    t3.close();
+
+    // Post equality constraint between t3 and t0. Should permit a match since it is a binary constraint
+    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), db.getConstraintEngine(), makeScope(t0.getStart(), t3.getStart()));
+    db.getConstraintEngine()->propagate();
+    compatibleTokens.clear();
+    db.getCompatibleTokens(t3.getId(), compatibleTokens);
+    assert(compatibleTokens.size() == 1); // Expect a single match
+
+    // Now post a constraint with higher arity. But including t0. Should exclude it.
+    Variable<IntervalIntDomain> v0(db.getConstraintEngine(), IntervalIntDomain());
+    AddEqualConstraint c1(LabelStr("addEq"), LabelStr("Default"), db.getConstraintEngine(), makeScope(t0.getStart(), t3.getStart(), v0.getId()));
+    db.getConstraintEngine()->propagate();
+    compatibleTokens.clear();
+    db.getCompatibleTokens(t3.getId(), compatibleTokens);
+    assert(compatibleTokens.empty()); // No match since t0 excluded due to additional constraint c1, which cannot be migrated.
+
     return true;
   }
 };
