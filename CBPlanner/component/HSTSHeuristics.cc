@@ -1,6 +1,7 @@
 #include "HSTSHeuristics.hh"
 #include "PlanDatabaseDefs.hh"
 #include "Token.hh"
+#include "Object.hh"
 #include "TokenDecisionPoint.hh"
 #include "ObjectDecisionPoint.hh"
 #include "ConstrainedVariableDecisionPoint.hh"
@@ -170,7 +171,14 @@ namespace PLASMA {
       m_domain.reverse();
       break;
     case ENUMERATION: 
-      //      std::cout << "Enumeration" << std::endl;
+      /*
+      std::cout << "Enumeration" << std::endl;
+      for (std::list<LabelStr>::const_iterator it(m_domain.begin()); it != m_domain.end(); ++it) {
+	std::cout << " ";
+	std::cout << (*it).c_str();
+      }
+      std::cout << std::endl;
+      */
       check_error(!enumeration.empty());
       check_error(!m_domain.empty());
       check_error(m_domain.size() == enumeration.size());
@@ -465,13 +473,19 @@ namespace PLASMA {
 	    check_error(ALWAYS_FAIL, "Numeric domain not yet handled");
 	  }
 	  else if (var->baseDomain().isEnumerated()) {
-	    if(LabelStr::isString(*it))
+	    if (Schema::instance()->isObjectType(var->baseDomain().getTypeName())) {
+	      ObjectId obj(m_pdb->getObject(*it));
+	      std::stringstream msg;
+	      msg << "Object with label " << (*it).c_str() << " not found.";
+	      check_error(obj.isValid(), msg.str());
+	      domain.push_back(obj);
+	    }
+	    else if(LabelStr::isString(*it))
 	      domain.push_back((*it).getKey());
-	    else
-	      domain.push_back(m_pdb->getObject(*it));
+	    else check_error(ALWAYS_FAIL, "Expected enumerated domain to be of either object or string/symbol type");
 	  }
 	}	  
-	//	std::cout << "Found domain for variable decision point with variable " << var->getName().c_str() << " and token type " << key.c_str() << std::endl;
+	//	std::cout << "\nFound domain for variable decision point with variable " << var->getName().c_str() << " and token type " << key.c_str() << std::endl;
       }
       else {
 	//	std::cout << "DIDN'T find domain for variable decision point with variable " << var->getName().c_str() << " and token type " << key.c_str() << std::endl;
