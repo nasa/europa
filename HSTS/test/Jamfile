@@ -60,20 +60,20 @@ LocalDepends run-hsts-planner-tests :
         merTest18
         merTest1-h
         merTest2-h
-#       merTest3-h #runs forever never reaching cutoff
-#       merTest4-h #runs forever never reaching cutoff
+       merTest3-h
+       merTest4-h
        merTest5-h
-#       merTest6-h # runs forever never reaching cutoff
-#       merTest7-h # runs forever never reaching cutoff
+       merTest6-h
+       merTest7-h
        merTest8-h
        merTest9-h
-#       merTest10-h # runs forever never reaching cutoff
-#       merTest11-h # runs forever never reaching cutoff
-#       merTest12-h # runs forever never reaching cutoff
+       merTest10-h
+       merTest11-h
+       merTest12-h
        merTest13-h
-#       merTest14-h # runs forever never reaching cutoff
+       merTest14-h
        merTest15-h
-#       merTest16-h # runs forever never reaching cutoff
+       merTest16-h
        merTest17-h
        merTest18-h
         gnats-C3
@@ -97,7 +97,7 @@ LocalDepends run-hsts-planner-tests :
 #        dnp-threeFreeObs # runs forever
 #       dnp-twentyFreeObs # runs forever
         dnp-twoFreeObs 
-#       dnp-timeline-h # runs forever
+       dnp-timeline-h
        dnp-DNP2-h 
        dnp-DNP23-h
        dnp-allDSS-h 
@@ -252,48 +252,25 @@ RunEUROPATest merTest18 : mer-pma2.nddl ;
 #Working
 RunEUROPATest merTest1-h : R1-files-p1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 RunEUROPATest merTest2-h : R1-files-p2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-
-# Runs forever without reaching cutoff of 1000 nodes, so it must be caught
-# up in a  loop in propagation.  Should investigate, however.
 RunEUROPATest merTest3-h : R1-files-p3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 RunEUROPATest merTest4-h : R2-files-R21-Bill.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-
-# Working
 RunEUROPATest merTest5-h : R2-files-R21-IDD1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-
-# Runs forever
 RunEUROPATest merTest6-h : R2-files-R21-IDD2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 RunEUROPATest merTest7-h : R2-files-R21-IDD3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-
-# Working
 RunEUROPATest merTest8-h : R2-files-R21-PMA1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 RunEUROPATest merTest9-h : R2-files-R21-PMA2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-
-# Runs forever
 RunEUROPATest merTest10-h : mer-1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 RunEUROPATest merTest11-h : mer-bill-2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 RunEUROPATest merTest12-h : mer-bill.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-
-# Working
 RunEUROPATest merTest13-h : mer-idd1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-
-# Runs forever
 RunEUROPATest merTest14-h : mer-idd2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-
-# Working
 RunEUROPATest merTest15-h : mer-idd3.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-
-# Runs forever
 RunEUROPATest merTest16-h : mer-pma-comm.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-
-# Working
 RunEUROPATest merTest17-h : mer-pma1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 RunEUROPATest merTest18-h : mer-pma2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 
 # Working
 RunEUROPATest gnats-C3 : C3-init.nddl ;
-
-# Exhausted the search
 RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl : NoBranchBug.xml : NoBranchBug.nobr ;
 
 # These two take multiple hours without completing on Token for some reason and may be infinite loop or similar.
@@ -348,10 +325,8 @@ RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl ;
 
 # Same set as just prior set plus heuristics and no branch info.
 
-# Runs for a while
-RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
-
 # Working
+RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
 RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
 RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP3heur.xml ;
 RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
