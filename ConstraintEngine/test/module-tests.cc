@@ -6,12 +6,16 @@
  */
 #include "ConstraintEngine.hh"
 #include "AbstractVar.hh"
-#include "AbstractDomain.hh"
 #include "ConstraintFactory.hh"
 #include "ConstraintLibrary.hh"
 #include "../Libraries/IdTable.hh"
+
+/* Include for domain management */
+#include "AbstractDomain.hh"
 #include "LabelSet.hh"
 #include "LabelStr.hh"
+#include "IntervalIntDomain.hh"
+#include "IntervalRealDomain.hh"
 
 #include <iostream>
 #include <cassert>
