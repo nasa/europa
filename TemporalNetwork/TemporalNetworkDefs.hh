@@ -1,7 +1,6 @@
 #ifndef _H_TemporalNetworkDefs
 #define _H_TemporalNetworkDefs
 
-#include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
 
 /*!< Type definitions to map for th eones we were using in Europa */
