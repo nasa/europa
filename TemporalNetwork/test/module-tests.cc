@@ -1,5 +1,17 @@
 #include "TestSupport.hh"
 #include "TemporalNetwork.hh"
+#include "TemporalPropagator.hh"
+#include "../PlanDatabase/Schema.hh"
+#include "../RulesEngine/RulesEngine.hh"
+#include "../PlanDatabase/PlanDatabase.hh"
+#include "../PlanDatabase/DbLogger.hh"
+#include "../ConstraintEngine/CeLogger.hh"
+#include "ObjectTokenRelation.hh"
+
+#include "IntervalToken.hh"
+#include "Timeline.hh"
+#include "../ConstraintEngine/IntervalIntDomain.hh"
+#include "TokenTemporalVariable.hh"
 
 #include <iostream>
 #include <string>
@@ -13,6 +25,20 @@ typedef std::strstream sstream;
 #include <sstream>
 typedef std::stringstream sstream;
 #endif
+
+#define DEFAULT_SETUP(ce, db, schema, autoClose) \
+    ConstraintEngine ce;\
+    Schema schema;\
+    PlanDatabase db(ce.getId(), schema.getId());\
+    new DefaultPropagator(LabelStr("Default"), ce.getId());\
+    new TemporalPropagator(LabelStr("Temporal"), ce.getId());\
+    RulesEngine re(db.getId()); \
+    if (loggingEnabled()) {\
+    new CeLogger(std::cout, ce.getId());\
+    new DbLogger(std::cout, db.getId());\
+    }\
+    if(autoClose) db.close();
+
 
 class TemporalNetworkTest {
 public:
@@ -102,8 +128,72 @@ private:
     return true;
   }
 };
+
+class TemporalPropagatorTest {
+public:
+  static bool test(){
+    runTest(testBasicAllocation);
+    runTest(testTimeline);
+  }
+
+private:
+
+  static bool testBasicAllocation() {
+    DEFAULT_SETUP(ce,db,schema,true);
+    ce.propagate();
+    return true;
+  }
+  
+  static bool testTimeline() {
+    DEFAULT_SETUP(ce,db,schema,false);
+    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    db.close();
+
+    IntervalToken t1(db.getId(),
+    		     LabelStr("P1"), 
+    		     true,
+    		     IntervalIntDomain(0, 10),
+    		     IntervalIntDomain(0, 20),
+    		     IntervalIntDomain(1, 1000));
+
+    // t1.getDuration()->specify(IntervalIntDomain(5, 7));
+    // assert(t1.getEnd()->getDerivedDomain().getLowerBound() == 5);
+    // assert(t1.getEnd()->getDerivedDomain().getUpperBound() == 17);
+
+    // IntervalToken t2(db.getId(), 
+    // 		     LabelStr("P2"), 
+    // 		     true,
+    // 		     IntervalIntDomain(0, 10),
+    // 		     IntervalIntDomain(0, 20),
+    // 		     IntervalIntDomain(1, 1000));
+
+    // //t2.getEnd()->specify(IntervalIntDomain(8, 10));
+
+    // std::vector<ConstrainedVariableId> temp;
+    // temp.push_back(t1.getEnd());
+    // temp.push_back(t2.getStart());
+    // ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("before"),
+    // 									  db.getConstraintEngine(),
+    // 									  temp);
+
+    // std::cout << t1.getEnd()->getDerivedDomain().getLowerBound() << std::endl;
+    // std::cout << t1.getEnd()->getDerivedDomain().getUpperBound() << std::endl;
+    return true;
+  }
+
+};
+
 int main() {
-  //initConstraintLibrary();
+  initConstraintLibrary();
+
+  // Special designations for temporal relations
+  // REGISTER_NARY(EqualConstraint, "concurrent", "Temporal");
+   REGISTER_NARY(LessThanEqualConstraint, "before", "Temporal");
+  REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Temporal");
+
+  REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
+
   runTestSuite(TemporalNetworkTest::test);
+  runTestSuite(TemporalPropagatorTest::test);
   std::cout << "Finished" << std::endl;
 }
