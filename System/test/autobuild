@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.100 2004-10-20 20:58:45 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.101 2004-10-21 19:18:19 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -135,7 +135,7 @@ then
 fi
 
 # The (compilation) variants to build and test.
-variants='DEV OPTIMIZED PROFILE'
+variants='DEV OPTIMIZED PROFILE COVERAGE'
 
 # The different ways of building the libraries.
 libmethods='STATIC NONE SHARED'
@@ -234,7 +234,9 @@ for var in $variants
 do
   for libmethod in $libmethods
   do
-    if test "$var $libmethod" = 'PROFILE SHARED'
+    if test "$var $libmethod" = 'PROFILE SHARED' \
+         -o "$var $libmethod" = 'COVERAGE SHARED' \
+         -o "$var $libmethod" = 'COVERAGE NONE'
     then
         continue
     fi
@@ -268,7 +270,7 @@ do
         cd PLASMA
     fi
     jam_args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
-    jamCmd '' build
+    jamCmd plasma plasma
     jamCmd run-all-tests run-all-tests
     if "$removePlasma"
     then
