@@ -329,8 +329,8 @@ namespace Prototype {
 
   bool IntervalDomain::isFinite() const {
     check_error(!isDynamic());
-    // Real domains are only finite if they are singleton.
-    return(isSingleton());
+    // Real domains are only finite if they are singleton or empty.
+    return(isSingleton() || isEmpty());
   }
 
   const AbstractDomain::DomainType& IntervalDomain::getType() const{
