@@ -46,6 +46,7 @@ namespace Prototype {
     int m_activeConstraint;
 
     bool m_updateRequired;
+    bool m_fullRepropRequired;
     TemporalNetworkId m_tnet;
     std::map<int, TemporalConstraintId> m_tnetConstraints;
     std::map<TempVarId, TemporalConstraintId> m_tnetVariableConstraints;
