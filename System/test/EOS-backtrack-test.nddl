@@ -153,10 +153,7 @@ Satellite::Transmit {
   met_by(object.HaveImg h);
   starts(Antenna.change tx1);
   eq(tx1.quantity, m_data.m_size);
-// workaround while NDDL compiler support for contains(m_station.Receive r);
-  contains(GroundStation.Receive r);
-  eq(r.object,m_station);
-//  contains(m_station.Receive r);
+  contains(m_station.Receive r);
   eq(r.duration,duration); 
 }
 
@@ -167,9 +164,7 @@ GroundStation::Receive {
 //  starts(g.m_disk.change tx2);
   Storage d;
   eq(d,g.m_disk);
-//  starts(d.change tx2);
-  starts(Storage.change tx2);
-  eq(tx2.object,d);
+  starts(d.change tx2);
   eq(tx2.quantity, m_data.m_size);
 // this is what we'd like to write
 //  starts(Storage.change tx2);
