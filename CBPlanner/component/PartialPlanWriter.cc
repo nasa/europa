@@ -464,6 +464,7 @@ namespace Prototype {
         statsOut->close();
         delete transOut;
         delete statsOut;
+        delete transactionList;
       }
     }
   
