@@ -3,10 +3,11 @@
 
 #include "PlanDatabaseDefs.hh"
 #include "TemporalAdvisor.hh"
+#include "DefaultTemporalAdvisor.hh"
 
 namespace Prototype{
 
-  class STNTemporalAdvisor: public TemporalAdvisor {
+  class STNTemporalAdvisor: public DefaultTemporalAdvisor {
 
   public:
 
@@ -17,9 +18,7 @@ namespace Prototype{
     virtual bool canFitBetween(const TokenId& token, const TokenId& predecessor,
 			       const TokenId& successor);
 
-    const TemporalAdvisorId& getId() const;
   private:
-    TemporalAdvisorId m_id;
     PropagatorId m_propagator;
 
   };
