@@ -704,7 +704,7 @@ namespace EUROPA {
     }
   }
 
-  EqualProductConstraint::~EqualProductConstraint() {
+  EqualProductConstraint::~EqualProductConstraint(){
     // Have to remove these before the variables they refer to
     //   and there's no other way to force the compiler to do
     //   these first. --wedgingt 2004 Feb 27
@@ -718,7 +718,7 @@ namespace EUROPA {
       delete (Constraint*) m_eqProductC2;
     if (!m_eqProductC1.isNoId())
       delete (Constraint*) m_eqProductC1;
-  }
+}
 
   LessOrEqThanSumConstraint::LessOrEqThanSumConstraint(const LabelStr& name,
                                                        const LabelStr& propagatorName,
