@@ -171,21 +171,21 @@ namespace Prototype
   }
 
   template<class DomainType>
-  AbstractDomain& Variable<DomainType>::getCurrentDomain() {return dynamic_cast<AbstractDomain&>(m_derivedDomain);}
+  AbstractDomain& Variable<DomainType>::getCurrentDomain() {return m_derivedDomain;}
 
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::lastDomain() const {
-    return dynamic_cast<const AbstractDomain&>(m_derivedDomain);
+    return m_derivedDomain;
   }
 
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::specifiedDomain() const {
-    return dynamic_cast<const AbstractDomain&>(m_specifiedDomain);
+    return m_specifiedDomain;
   }
 
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::baseDomain() const {
-    return dynamic_cast<const AbstractDomain&>(m_baseDomain);
+    return m_baseDomain;
   }
 
   template<class DomainType>

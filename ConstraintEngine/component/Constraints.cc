@@ -20,9 +20,9 @@ namespace Prototype
 
   void AddEqualConstraint::handleExecute()
   {
-    IntervalDomain& domx = dynamic_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
-    IntervalDomain& domy = dynamic_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
-    IntervalDomain& domz = dynamic_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
+    IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
+    IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+    IntervalDomain& domz = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
 
     /* Test preconditions for continued execution */
     if(domx.isDynamic() ||
@@ -117,13 +117,13 @@ namespace Prototype
     // By construction, we know the arguments are of the same type. So special case
     // accordingly
     if(domx.isEnumerated()){
-      EnumeratedDomain& dx = dynamic_cast<EnumeratedDomain&>(domx);
-      EnumeratedDomain& dy = dynamic_cast<EnumeratedDomain&>(domy);
+      EnumeratedDomain& dx = static_cast<EnumeratedDomain&>(domx);
+      EnumeratedDomain& dy = static_cast<EnumeratedDomain&>(domy);
       dx.equate(dy);
     }
     else {
-      IntervalDomain& dx = dynamic_cast<IntervalDomain&>(domx);
-      IntervalDomain& dy = dynamic_cast<IntervalDomain&>(domy);
+      IntervalDomain& dx = static_cast<IntervalDomain&>(domx);
+      IntervalDomain& dy = static_cast<IntervalDomain&>(domy);
       if(dx.intersect(dy.getLowerBound(), dy.getUpperBound()) && dx.isEmpty())
 	return;
 

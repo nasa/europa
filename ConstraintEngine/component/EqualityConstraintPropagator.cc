@@ -83,7 +83,7 @@ namespace Prototype {
 
   template<class DomainType>
   void processScope(const std::set<ConstrainedVariableId>& scope){
-    DomainType domain(dynamic_cast<const DomainType&>(EqualConstraint::getCurrentDomain(*(scope.begin()))));
+    DomainType domain(static_cast<const DomainType&>(EqualConstraint::getCurrentDomain(*(scope.begin()))));
 
     if(domain.isDynamic())
       return;
@@ -94,7 +94,7 @@ namespace Prototype {
 
     // Iterate over, restricting domain as we go
     for(std::set<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
-      DomainType& currentDomain = dynamic_cast<DomainType&>(EqualConstraint::getCurrentDomain(*it));
+      DomainType& currentDomain = static_cast<DomainType&>(EqualConstraint::getCurrentDomain(*it));
       check_error(currentDomain.getType() == domainType);
 
       if(currentDomain.isDynamic())
@@ -110,7 +110,7 @@ namespace Prototype {
     // If we get to here, we have computed the new domain for all variables in the scope and we know that no
     // domain has been emptied
     for(std::set<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
-      DomainType& currentDomain = dynamic_cast<DomainType&>(EqualConstraint::getCurrentDomain(*it));
+      DomainType& currentDomain = static_cast<DomainType&>(EqualConstraint::getCurrentDomain(*it));
       currentDomain.intersect(domain);
     }
   }
