@@ -755,7 +755,8 @@ namespace Prototype {
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessThanConstraint(LabelStr("Internal:lessThanSum:lessOrEq"), propagatorName, constraintEngine,
-                           makeScope(m_interimVariable.getId(), m_variables[0])) {
+                           makeScope(m_interimVariable.getId(), m_variables[0]))
+  {
     std::vector<ConstrainedVariableId> eqSumScope = m_variables;
     eqSumScope[0] = m_interimVariable.getId();
     m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:greaterThanSum:eqSum"), propagatorName,
@@ -1404,6 +1405,28 @@ namespace Prototype {
     }
   }
 
+  CondEqualSumConstraint::CondEqualSumConstraint(const LabelStr& name,
+                                                 const LabelStr& propagatorName,
+                                                 const ConstraintEngineId& constraintEngine,
+                                                 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_sumVar(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_condAllSameConstraint(LabelStr("Internal:CondEqualSum:condAllSame"), propagatorName, constraintEngine,
+                              makeScope(m_variables[0], m_variables[1], m_sumVar.getId()))
+  {
+    assertTrue(m_variables.size() > 2);
+    std::vector<ConstrainedVariableId> eqSumScope;
+    eqSumScope.reserve(m_variables.size() - 1);
+    eqSumScope.push_back(m_sumVar.getId());
+    std::vector<ConstrainedVariableId>::iterator it = m_variables.begin();
+    ++it; ++it;
+    eqSumScope.insert(eqSumScope.end(), it, m_variables.end());
+    assertTrue(m_variables.size() - 1 == eqSumScope.size());
+    m_eqSumConstraint = (new EqualSumConstraint(LabelStr("Internal:CondEqualSum:eqSum"), propagatorName,
+                                                constraintEngine, eqSumScope))->getId();
+    assertTrue(m_eqSumConstraint.isValid());
+  }
+
   RotateScopeRightConstraint::RotateScopeRightConstraint(const LabelStr& name,
                                                          const LabelStr& propagatorName,
                                                          const ConstraintEngineId& constraintEngine,
@@ -1430,6 +1453,27 @@ namespace Prototype {
         otherScope.push_back(m_variables[i]);
     }
     assertTrue(m_variables.size() == otherScope.size());
+    m_otherConstraint = ConstraintLibrary::createConstraint(otherName, constraintEngine, otherScope);
+  }
+
+  SwapTwoVarsConstraint::SwapTwoVarsConstraint(const LabelStr& name,
+                                               const LabelStr& propagatorName,
+                                               const ConstraintEngineId& constraintEngine,
+                                               const std::vector<ConstrainedVariableId>& variables,
+                                               const LabelStr& otherName,
+                                               int firstIndex, int secondIndex)
+    : Constraint(name, propagatorName, constraintEngine, variables)
+  {
+    assertTrue(abs(firstIndex) < m_variables.size());
+    assertTrue(abs(secondIndex) < m_variables.size());
+    assertTrue(firstIndex != secondIndex);
+    if (firstIndex < 0)
+      firstIndex = m_variables.size() - firstIndex;
+    if (secondIndex < 0)
+      secondIndex = m_variables.size() - secondIndex;
+    std::vector<ConstrainedVariableId> otherScope(m_variables);
+    otherScope[firstIndex] = m_variables[secondIndex];
+    otherScope[secondIndex] = m_variables[firstIndex];
     m_otherConstraint = ConstraintLibrary::createConstraint(otherName, constraintEngine, otherScope);
   }
 

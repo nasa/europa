@@ -16,6 +16,7 @@ void initConstraintLibrary() {
     REGISTER_NARY(CardinalityConstraint, "Cardinality", "Default");
     REGISTER_NARY(CondAllDiffConstraint, "CondAllDiff", "Default");
     REGISTER_NARY(CondAllSameConstraint, "CondAllSame", "Default");
+    REGISTER_NARY(CondEqualSumConstraint, "CondEqualSum", "Default");
     REGISTER_NARY(CountNonZerosConstraint, "CountNonZeros", "Default");
     REGISTER_NARY(CountZerosConstraint, "CountZeros", "Default");
     REGISTER_NARY(EqualConstraint, "Equal", "Default");
@@ -47,20 +48,23 @@ void initConstraintLibrary() {
     REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
     REGISTER_NARY(LessOrEqThanSumConstraint, "leqsum", "Default");
     REGISTER_NARY(LessThanConstraint, "lt", "Default");
-
-    // Rotate scope right one (last var moves to front) to ...
-    // ... change min constraint to EqualMinimum constraint:
-    REGISTER_ROTATED_NARY("min", "Default", "EqualMinimum", 1);
-    // ... change addlt constraint to GreaterThanSum constraint:
-    REGISTER_ROTATED_NARY("addlt", "Default", "GreaterThanSum", 1);
-    // ... change addleq constraint to GreaterOrEqThan constraint:
-    REGISTER_ROTATED_NARY("addleq", "Default", "GreaterOrEqThanSum", 1);
-
     REGISTER_NARY(MemberImplyConstraint, "memberImply", "Default");
     REGISTER_NARY(NotEqualConstraint, "neq", "Default");
     REGISTER_NARY(OrConstraint, "or", "Default");
     REGISTER_NARY(EqualProductConstraint, "product", "Default");
     REGISTER_NARY(EqualSumConstraint, "sum", "Default");
+
+    // Rotate scope right one (last var moves to front) to ...
+    // ... change addleq constraint to GreaterOrEqThan constraint:
+    REGISTER_ROTATED_NARY("addleq", "Default", "GreaterOrEqThanSum", 1);
+    // ... change addlt constraint to GreaterThanSum constraint:
+    REGISTER_ROTATED_NARY("addlt", "Default", "GreaterThanSum", 1);
+    // ... change min constraint to EqualMinimum constraint:
+    REGISTER_ROTATED_NARY("min", "Default", "EqualMinimum", 1);
+
+    // But addeqcond is harder, requiring two "steps":
+    REGISTER_SWAP_TWO_VARS_NARY("eqcondsum", "Default", "CondEqualSum", 0, 1);
+    REGISTER_ROTATED_NARY("addeqcond", "Default", "eqcondsum", 2);
 
     s_runAlready = true;
   }
