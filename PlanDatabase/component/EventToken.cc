@@ -42,6 +42,6 @@ namespace Prototype{
     ConstraintId enforceEquality = 
       ConstraintLibrary::createConstraint(LabelStr("CoTemporal"), m_planDatabase->getConstraintEngine(), temp);
 
-    m_localConstraints.insert(enforceEquality);
+    m_localConstraints.push_back(enforceEquality);
   }
 }

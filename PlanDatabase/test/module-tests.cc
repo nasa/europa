@@ -15,6 +15,14 @@
 #include <iostream>
 
 
+#define DEFAULT_SETUP(ce, db, schema) \
+    ConstraintEngine ce;\
+    Schema schema;\
+    PlanDatabase db(ce.getId(), schema.getId());\
+    new DefaultPropagator(LabelStr("Default"), ce.getId());\
+    Object object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));\
+    db.close();
+
 class ObjectTest {
 public:
   static bool test(){
@@ -68,22 +76,17 @@ public:
   static bool test(){
     runTest(testBasicTokenAllocation, "BasicTokenAllocation");
     runTest(testMasterSlaveRelationship, "MasterSlaveRelationship");
+    runTest(testBasicMerging, "BasicMerging");
     return true;
   }
 
 private:
   static bool testBasicTokenAllocation(){
-    ConstraintEngine ce;
-    Schema schema;
-    PlanDatabase db(ce.getId(), schema.getId());
-    new DefaultPropagator(LabelStr("Default"), ce.getId());
-
-    Object staticObject(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
-    db.close();
+    DEFAULT_SETUP(ce, db, schema);
 
     // Static Token
     StaticToken staticToken(db.getId(), LabelStr("Predicate"), LabelStr("o1"));
-    assert(getParent(staticToken.getStart()) == staticToken.getId());
+    assert(staticToken.getStart()->getParent() == staticToken.getId());
     staticToken.addParameter(IntervalIntDomain(-1000, 2000));
 
     // Event Token
@@ -121,13 +124,7 @@ private:
   }
 
   static bool testMasterSlaveRelationship(){
-    ConstraintEngine ce;
-    Schema schema;
-    PlanDatabase db(ce.getId(), schema.getId());
-    new DefaultPropagator(LabelStr("Default"), ce.getId());
-
-    Object object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
-    db.close();
+    DEFAULT_SETUP(ce, db, schema);
 
     IntervalToken t0(db.getId(), 
 		     LabelStr("Predicate"), 
@@ -135,6 +132,7 @@ private:
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(1, 1));
+    t0.activate();
 
     TokenId t1 = (new IntervalToken(db.getId(), 
 				    LabelStr("Predicate"), 
@@ -142,7 +140,7 @@ private:
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
-
+    t1->activate();
 
     TokenId t2 = (new IntervalToken(t0.getId(), 
 				    LabelStr("Predicate"), 
@@ -184,6 +182,84 @@ private:
     delete (Token*) t1;
 
     // Remainder should be cleaned up automatically
+    return true;
+  }
+
+  static bool testBasicMerging(){
+    DEFAULT_SETUP(ce, db, scema);
+
+    // Create 2 mergeable tokens - predicates, types and base domaiuns match
+    IntervalToken t0(db.getId(), 
+		     LabelStr("P1"), 
+		     BooleanDomain(0, 1),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
+
+    IntervalToken t1(db.getId(),
+		     LabelStr("P1"), 
+		     BooleanDomain(0, 1),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    t1.getDuration()->specify(IntervalIntDomain(5, 7));
+
+    // Activate one and merge the other with it.
+    t0.activate();
+    t1.merge(t0.getId());
+
+    // Make sure the necessary restrictions have been imposed due to merging i.e. restruction due to specified domain
+    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 7);
+    check_error(t1.isMerged());
+
+    // Do a split and make sure the old values are reinstated.
+    t1.split();
+    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
+    check_error(t1.isInactive());
+
+    // Now post equality constraint between t1 and extra token t2 and remerge
+    IntervalToken t2(db.getId(), 
+		     LabelStr("P2"), 
+		     BooleanDomain(0, 1),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    t2.getEnd()->specify(IntervalIntDomain(8, 10));
+
+    std::vector<ConstrainedVariableId> temp;
+    temp.push_back(t1.getEnd());
+    temp.push_back(t2.getEnd());
+    ConstraintId equalityConstraint = ConstraintLibrary::createConstraint(LabelStr("CoTemporal"),
+									  db.getConstraintEngine(),
+									  temp);
+    t1.merge(t0.getId());
+
+    // Verify that the equality constraint has migrated and original has been deactivated.
+    check_error(!equalityConstraint->isActive());
+    check_error(t0.getEnd()->getDerivedDomain().getLowerBound() == 8);
+    check_error(t0.getEnd()->getDerivedDomain() == t2.getEnd()->getDerivedDomain());
+
+    // Undo the merge and check for initial conditions being established
+    t1.split();
+    check_error(equalityConstraint->isActive());
+
+    // Redo the merge
+    t1.merge(t0.getId());
+
+    // Confirm deletion of the constraint is handled correctly
+    delete (Constraint*) equalityConstraint;
+    check_error(t0.getEnd()->getDerivedDomain() != t2.getEnd()->getDerivedDomain());
+
+    // Confirm previous restriction due to specified domain, then reset and note the change
+    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 7);
+    t1.getDuration()->reset();
+    check_error(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
+
+    // Deletion will now occur and test proper cleanup.
     return true;
   }
 };
