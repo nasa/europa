@@ -125,8 +125,16 @@ cp ./NDDL/test/project/Main.cc $DIRECTORY/$NAME-Main.cc
 
 if [ -e $DIRECTORY/PlanWorks.cfg ]
 then
-  echo "error: "$DIRECTORY"/ppw-config already exists"
+  echo "error: "$DIRECTORY"/PlanWorks.cfg already exists"
   exit -1
 fi
 echo "Adding PlanWorks.cfg"
 cp ./NDDL/test/project/ppw-config $DIRECTORY/PlanWorks.cfg
+
+if [ -e $DIRECTORY/Debug.cfg ]
+then
+  echo "error: "$DIRECTORY"/Debug.cfg already exists"
+  exit -1
+fi
+echo "Adding Debug.cfg"
+cp ./NDDL/test/project/Debug.cfg $DIRECTORY/Debug.cfg
