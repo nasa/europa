@@ -33,37 +33,46 @@ public:
 void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << "#include \"NddlWorld.nddl\"" << std::endl;
   out << std::endl;
+  out << "enum Target {";  
+  for (int i=1; i <= prob.numTargets; ++i) {
+    if (i == prob.numTargets)
+      out << prob.targets[i];
+    else 
+      out << prob.targets[i] << ", ";
+  }
+  out << "}" << std::endl;
+  out << "" << std::endl;
+  out << "enum Domain {";
+  for (int i=0; i < prob.numParamChoices; ++i)
+    out << i << ", ";
+  out << prob.numParamChoices;
+  out << "}" << std::endl;
+  out << "" << std::endl;
   out << "class Satellite {" << std::endl;
   out << "predicate Pointing {" << std::endl;
   out << " Target observation;" << std::endl;
+  out << " eq(duration, [1 1]);" << std::endl;
   for (int i=1; i <= prob.numParams; ++i) {
-    out << " int " << prob.parameters[i] << ";" << std::endl;
-    out << " leq(" << prob.parameters[i] << "," << prob.numParamChoices << ");" << std::endl;
-    out << " leq(0," << prob.parameters[i] << ");" << std::endl;
+    out << " Domain " << prob.parameters[i] << ";" << std::endl;
+    if (i == 1)
+      out << " perf(" << prob.parameters[i] << ", " << prob.parameters[2] << ");" << std::endl;
+    else
+      out << " perf(" << prob.parameters[i] << ", " << prob.parameters[1] << ");" << std::endl;
   }
   out << "}" << std::endl;
   out << "predicate slew {" << std::endl;
   out << " Target from;" << std::endl;
   out << " Target to;" << std::endl;
   out << " neq(from, to);" << std::endl;
-  out << " eq(duration, [1 10]);" << std::endl;
+  out << " eq(duration, [1 1]);" << std::endl;
   for (int i=1; i <= prob.numParams; ++i) {
-    out << " int " << prob.parameters[i] << ";" << std::endl;
-    out << " leq(" << prob.parameters[i] << "," << prob.numParamChoices << ");" << std::endl;
-    out << " leq(0," << prob.parameters[i] << ");" << std::endl;
+    out << " Domain " << prob.parameters[i] << ";" << std::endl;
+    if (i == 1)
+      out << " perf(" << prob.parameters[i] << ", " << prob.parameters[2] << ");" << std::endl;
+    else
+      out << " perf(" << prob.parameters[i] << ", " << prob.parameters[1] << ");" << std::endl;
   }
   out << "}" << std::endl;
-  out << "}" << std::endl;
-  out << "" << std::endl;
-  out << "class Target {" << std::endl;
-  out << " string name;" << std::endl;
-  out << " int x;" << std::endl;
-  out << " int y;" << std::endl;
-  out << " Target(string _name, int _x, int _y) {" << std::endl;
-  out << "  name = _name;" << std::endl;
-  out << "  x = _x;" << std::endl;
-  out << "  y = _y;" << std::endl;
-  out << " }" << std::endl;
   out << "}" << std::endl;
   out << "" << std::endl;
   out << "class MyResource {" << std::endl;
@@ -81,9 +90,6 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << "" << std::endl;
   out << " contains(MyResource.Consume r);" << std::endl;
   out << " eq(r.amount, 10);" << std::endl;
-  for (int i=1; i <= prob.numParams; ++i)
-    for (int j=0; j<prob.numParamChoices; ++j)
-      out << " neq(" << prob.parameters[i] << "," << j << ");" << std::endl;
   out << "}" << std::endl;
   out << "" << std::endl;
   out << "Satellite::slew{" << std::endl;
@@ -95,14 +101,6 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
   out << "" << std::endl;
   out << " contains(MyResource.Consume r);" << std::endl;
   out << " eq(r.amount, 100);" << std::endl;
-  for (int i=1; i <= prob.numParams; ++i)
-    for (int j=0; j<prob.numParamChoices; ++j)
-      out << " neq(" << prob.parameters[i] << "," << j << ");" << std::endl;
-  out << "}" << std::endl;
-  out << "" << std::endl;
-  out << "MyResource::Consume{" << std::endl;
-  out << " meets(Consume c1);" << std::endl;
-  out << " met_by(Consume c2);" << std::endl;
   out << "}" << std::endl;
   out << "" << std::endl;
 }  
@@ -115,27 +113,16 @@ void nddloutputInitialState(std::ofstream& out, const Problem& prob) {
     out << " Satellite " << prob.satellites[i] << ";" << std::endl;
   }
 
-  for (int j=1; j <= prob.numSatellites; ++j) 
-    for (int i=1; i <= prob.numTargets; ++i)
-      out << " Target " << prob.targets[j*MAX_SATELLITES+i] << ";" << std::endl;
-
   out << "" << std::endl;
   out << " predicate initialState{}" << std::endl;
   out << "" << std::endl;
   out << " World() {" << std::endl;
-  out << "  super(" << prob.horStart << "," << prob.horEnd << "," << 500*prob.numSatellites << ");" << std::endl;
+  //  out << "  super(" << prob.horStart << "," << prob.horEnd << "," << 500*prob.numSatellites*prob.targets << ");" << std::endl;
+  out << "  super(" << prob.horStart << "," << prob.horEnd << "," << 99999999 << ");" << std::endl;
   out << "  res = new MyResource();" << std::endl;
 
   for (int i=1; i <= prob.numSatellites; ++i)
     out << "  " << prob.satellites[i] << " = new Satellite();" << std::endl;
-
-  for (int j=1; j <= prob.numSatellites; ++j) 
-    for (int i=1; i <= prob.numTargets; ++i) {
-      int rnd1 = rand()%100;
-      int rnd2 = rand()%100;
-      out << "  " << prob.targets[j*MAX_SATELLITES+i] << " = new Target(TARGET" << j*MAX_SATELLITES+i << ", " << rnd1 << "," << rnd2 << ");" << std::endl;
-    }
-
   out << " }" << std::endl;
   out << "}" << std::endl;
   out << "" << std::endl;
@@ -147,29 +134,11 @@ void nddloutputInitialState(std::ofstream& out, const Problem& prob) {
   for (int i = 1; i <= prob.numSatellites; ++i) {
     out << " contains(Satellite.Pointing initialPosition" << i << ");" << std::endl;
     out << " eq(initialPosition" << i << ".object, object." << prob.satellites[i] << ");" << std::endl;
-    out << " eq(initialPosition" << i << ".observation, object." << prob.targets[i*MAX_SATELLITES+1] << ");" << std::endl;
+    out << " eq(initialPosition" << i << ".observation, " << prob.targets[1] << ");" << std::endl;
     out << " eq(initialPosition" << i << ".start, object.m_horizonStart);" << std::endl;
     out << "" << std::endl;
-    out << " contains(Satellite.Pointing finalPosition" << i << ");" << std::endl;
-    out << " eq(finalPosition" << i << ".object, object." << prob.satellites[i] << ");" << std::endl;
-    out << " eq(finalPosition" << i << ".observation, object." << prob.targets[i*MAX_SATELLITES+prob.numTargets] << ");" << std::endl;
-    out << " eq(finalPosition" << i << ".end, object.m_horizonEnd);" << std::endl;
-    out << "" << std::endl;
   }
-
-  for (int j=1; j <= prob.numSatellites; ++j) 
-    for (int i=1; i <= prob.numTargets; ++i) {
-      std::ostringstream targetName;
-      targetName << "target" << j << "_" << i;
-      out << " any(Satellite.Pointing " << targetName.str() << ");" << std::endl;
-      out << " eq(" << targetName.str() << ".observation, object." << prob.targets[j*MAX_SATELLITES+i] << ");" << std::endl;
-      out << " eq(" << targetName.str() << ".object, object." << prob.satellites[j] << ");" << std::endl;
-      out << " leq(object.m_horizonStart, " << targetName.str() << ".start);" << std::endl;
-      out << " leq(" << targetName.str() << ".end, object.m_horizonEnd);" << std::endl;
-      out << std::endl;
-    }
   out << "}" << std::endl;
-  out << "" << std::endl;
 }
 
 
@@ -191,77 +160,74 @@ void ddloutputModel(std::ofstream& out, const Problem& prob) {
   out << "  :state_variables" << std::endl;
   out << "  ((Controllable satellite)))" << std::endl;
   out << "" << std::endl;
-  out << "(Define_Object_Class Observation_Class" << std::endl;
-  out << "  :state_variables" << std::endl;
-  out << "  ((Controllable target)))" << std::endl;
-  out << "" << std::endl;
-  out << "(Define_Predicate CanObserve ((Satellite_Class Sat) (Observation_Class Obs)))" << std::endl;
-  out << "" << std::endl;
-  out << "(Define_Predicate Pointing ((Observation_Class The_Obs) (Satellite_Class The_Sat)";
-  for (int i=1; i<=prob.numParams; ++i)
-    out << " (Integer [0 " << prob.numParamChoices << "] p" << i << ")";
+  out << "(Define_Label_Set Observation_Label (";
+  for (int i=1; i <= prob.numTargets; ++i)
+    out << " " << prob.targets[i];
   out << "))" << std::endl;
   out << "" << std::endl;
-  out << "(Define_Predicate Slew ((Observation_Class From_Obs) (Observation_Class To_Obs) (Satellite_Class Sat)";
+  out << "(Define_Label_Set Domain_Label (";
+  for (int i=0; i < prob.numParamChoices; ++i) {
+    out << "\"" << i << "\" ";
+  }
+  out << "\"" << prob.numParamChoices << "\"))" << std::endl;
+  out << "" << std::endl;
+  out << "(Define_Predicate Pointing ((Observation_Label The_Obs)";
   for (int i=1; i<=prob.numParams; ++i)
-    out << " (Integer [0 " << prob.numParamChoices << "] p" << i << ")";
+    out << " (Domain_Label p" << i << ")";
+  out << "))" << std::endl;
+  out << "" << std::endl;
+  out << "(Define_Predicate Slew ((Observation_Label From_Obs) (Observation_Label To_Obs)";
+  for (int i=1; i<=prob.numParams; ++i)
+    out << " (Domain_Label p" << i << ")";
   out << "))" << std::endl;
   out << "" << std::endl;
   out << "(Define_Member_Values ((Satellite_Class satellite)) (Pointing Slew))" << std::endl;
   out << "" << std::endl;
-  out << "(Define_Member_Values ((Observation_Class target)) (CanObserve))" << std::endl;
-  out << "" << std::endl;
   out << "(Define_Compatibility" << std::endl;
-  out << " (SINGLE ((Observation_Class target)) ((CanObserve (?S ?O))))" << std::endl;
-  out << " :parameter_functions ((?_object_ <- eq (?O))))" << std::endl;
-  out << "" << std::endl;
-  out << "(Define_Compatibility" << std::endl;
-  out << " (SINGLE ((Satellite_Class satellite)) ((Pointing (?X ?S";
+  out << " (SINGLE ((Satellite_Class satellite)) ((Pointing (?X";
   for (int i=1; i<=prob.numParams; ++i)
     out << " ?" << prob.parameters[i];
   out << "))))" << std::endl;
-  out << " :duration_bounds [1 _plus_infinity_]" << std::endl;
-  out << " :parameter_functions (" << std::endl;
-  for (int i=1; i<=prob.numParams; ++i)
-    for (int j=0; j < prob.numParamChoices; ++j)
-      out << "   (?" << prob.parameters[i] << " <- neq(" << j << "))" << std::endl;
-  out << "  )" << std::endl;
+  out << " :duration_bounds [1 1]" << std::endl;
+  if (prob.numParams > 0)
+    out << " :parameter_functions (" << std::endl;
+  for (int i=1; i <= prob.numParams; ++i) 
+    out << "                       (perf(?" << prob.parameters[i] << "))" << std::endl;
+  if (prob.numParams > 0)
+    out << ")" << std::endl;
   out << " :compatibility_spec" << std::endl;
   out << " (AND" << std::endl;
-  out << "  (met_by (SINGLE ((?_object_ satellite)) ((Slew (?_any_value_ ?X ?S";
+  out << "  (met_by (SINGLE ((?_object_ satellite)) ((Slew (?_any_value_ ?X";
   for (int i=1; i<=prob.numParams; ++i)
     out << " ?_any_value_";
   out << ")))))" << std::endl;
-  out << "  (meets (SINGLE ((?_object_ satellite)) ((Slew (?X ?_any_value_ ?S";
+  out << "  (meets (SINGLE ((?_object_ satellite)) ((Slew (?X ?_any_value_";
   for (int i=1; i<=prob.numParams; ++i)
     out << " ?_any_value_";
   out << ")))))" << std::endl;
-  out << "  (contained_by (SINGLE ((Observation_Class target)) ((CanObserve (?S ?X)))))" << std::endl;
   out << "  (contains (SINGLE ((MyResource_Class resource)) ((Consume (10)))))))" << std::endl;
   out << "" << std::endl;
   out << "(Define_Compatibility" << std::endl;
-  out << " (SINGLE ((Satellite_Class satellite)) ((Slew (?X ?Y ?S";
+  out << " (SINGLE ((Satellite_Class satellite)) ((Slew (?X ?Y";
   for (int i=1; i<=prob.numParams; ++i)
     out << " ?" << prob.parameters[i];
   out << "))))" << std::endl;
-  out << " :duration_bounds [1 10]" << std::endl;
-  out << " :parameter_functions ((?X <- neq ( ?Y ))" << std::endl;
-  for (int i=1; i<=prob.numParams; ++i)
-    for (int j=0; j < prob.numParamChoices; ++j)
-      out << "   (?" << prob.parameters[i] << " <- neq(" << j << "))" << std::endl;
-  out << "  )" << std::endl;
+  out << " :duration_bounds [1 1]" << std::endl;
+  out << " :parameter_functions ((?X <- neq ( ?Y )) " << std::endl;
+  for (int i=1; i <= prob.numParams; ++i) 
+    out << "                       (perf(?" << prob.parameters[i] << "))" << std::endl;
+  out << ")" << std::endl;
+  out << "" << std::endl;
   out << " :compatibility_spec" << std::endl;
   out << " (AND" << std::endl;
-  out << "  (met_by (SINGLE ((?_object_ satellite)) ((Pointing (?X ?S";
+  out << "  (met_by (SINGLE ((?_object_ satellite)) ((Pointing (?X";
   for (int i=1; i<=prob.numParams; ++i)
     out << " ?_any_value_";
   out << ")))))" << std::endl;
-  out << "  (meets (SINGLE ((?_object_ satellite)) ((Pointing (?Y ?S";
+  out << "  (meets (SINGLE ((?_object_ satellite)) ((Pointing (?Y";
   for (int i=1; i<=prob.numParams; ++i)
     out << " ?_any_value_";
   out << ")))))" << std::endl;
-  out << "  (contained_by (SINGLE ((Observation_Class target)) ((CanObserve (?S ?X)))))" << std::endl;
-  out << "  (contained_by (SINGLE ((Observation_Class target)) ((CanObserve (?S ?Y)))))" << std::endl;
   out << "  (contains (SINGLE ((MyResource_Class resource)) ((Consume (100)))))))" << std::endl;
   out << "" << std::endl;
   out << "(Define_Compatibility" << std::endl;
@@ -280,40 +246,16 @@ void ddloutputInitialState(std::ofstream& out, const Problem& prob) {
   for (int i=1; i<=prob.numSatellites; ++i) {
     out << "Object_Timelines Satellite_Class " << prob.satellites[i] << " (" << std::endl;
     out << "    satellite (" << std::endl;
-    out << "        Pointing(" << prob.targets[i*MAX_SATELLITES+1];
+    out << "        Pointing(" << prob.targets[1];
     for (int k=1; k <= prob.numParams; ++k) {
       out << " *";
     }
     out << ")" << std::endl;
     out << "		... 	" << std::endl;
-    out << "        Pointing(" << prob.targets[i*MAX_SATELLITES+prob.numTargets];
-    for (int k=1; k <= prob.numParams; ++k) {
-      out << " *";
-    }
-    out << ")" << std::endl;
     out << "    ))" << std::endl;
     out << "" << std::endl;
   }
 
-  for (int j=1; j <= prob.numSatellites; ++j) 
-    for (int i=1; i <= prob.numTargets; ++i) {
-      out << " Object_Timelines Observation_Class " << prob.targets[j*MAX_SATELLITES+i] << " (" << std::endl;
-      out << "    target ( CanObserve(" << prob.satellites[j] << " " << prob.targets[j*MAX_SATELLITES+i] << ") ))" << std::endl;
-    }
-
-  for (int j=1; j <= prob.numSatellites; ++j) 
-    for (int i=1; i <= prob.numTargets; ++i) {
-      out << " Free_Token Satellite_Class satellite" << " (" << std::endl;
-      out << " [" << prob.horStart << " " << prob.horEnd << "]" << std::endl;
-      out << "     Pointing(" << prob.targets[j*MAX_SATELLITES+i];
-      for (int k=1; k <= prob.numParams; ++k) {
-      	out << " *";
-      }
-      out << ")" << std::endl;
-      out << " [" << prob.horStart << " " << prob.horEnd << "])" << std::endl;
-      out << std::endl;
-    }
-  out << "" << std::endl;
 }
 
 int main (int argc, const char** argv) {
@@ -354,14 +296,13 @@ int main (int argc, const char** argv) {
     prob.satellites[i] = os.str();
   }
 
-  prob.targets.resize(prob.numSatellites*MAX_SATELLITES+prob.numTargets+10, "");
+  prob.targets.resize(prob.numTargets+10, "");
 
-  for (int j=1; j <= prob.numSatellites; ++j) 
-    for (int i=1; i <= prob.numTargets; ++i) {
-      std::ostringstream os;
-      os << "obs" << j << "_" << i;
-      prob.targets[j*MAX_SATELLITES+i] = os.str();
-    }
+  for (int i=1; i <= prob.numTargets; ++i) {
+    std::ostringstream os;
+    os << "obs" << i;
+    prob.targets[i] = os.str();
+  }
 
   prob.parameters.resize(prob.numParams+10, "");
   for (int i=1; i <= prob.numParams; ++i) {
