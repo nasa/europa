@@ -158,9 +158,7 @@ namespace Prototype {
     check_error(max >= m_min);
     m_max = max;
     m_usage->reset();
-    std::cout << m_usage->lastDomain().getUpperBound() << std::endl;
     m_usage->specify(IntervalDomain(m_min, m_max));
-    std::cout << m_usage->lastDomain().getUpperBound() << std::endl;
     if(m_resource != ResourceId::noId())
       m_resource->notifyQuantityChanged(m_id);
     noteChanged();

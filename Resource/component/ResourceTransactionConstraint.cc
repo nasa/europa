@@ -45,10 +45,8 @@ namespace Prototype
 	  hMin = oMin;
 	if (hMax < oMax)
 	  hMax = oMax;
-	//std::cout << hMin << " : " << hMax << std::endl;
       }
     }
-    //std::cout << hMin << " : " << hMax << std::endl;
     domTH.intersect(hMin, hMax);
 
     if (!domTO.isEmpty()) {      
@@ -59,11 +57,8 @@ namespace Prototype
       for(std::list<ResourceId>::const_iterator it = objs.begin(); it != objs.end(); ++it) {
     	double oMin = (*it)->getConsumptionRateMax();
     	double oMax = (*it)->getProductionRateMax();
-	std::cout << oMin << " : " << oMax << std::endl;
-	std::cout << domTQ.getLowerBound() << " : " << domTQ.getUpperBound() << std::endl;
     	IntervalDomain oQty(oMin, oMax);
     	if (oQty.intersect(domTQ.getLowerBound(), domTQ.getUpperBound()) && oQty.isEmpty()) {
-	  std::cout << "Throwing out an object " << (*it)  << std::endl;
     	  domTO.remove((*it));
 	}
     	else {
@@ -71,10 +66,8 @@ namespace Prototype
     	    qMin = oMin;
     	  if (qMax > oMax)
     	    qMax = oMax;
-	  //  std::cout << qMin << " : " << qMax << std::endl;
     	}
       }
-      //      std::cout << qMin << " : " << qMax << std::endl;
       domTQ.intersect(qMin, qMax);
     }
       

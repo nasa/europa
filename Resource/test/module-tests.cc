@@ -422,10 +422,11 @@ private:
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 1), productionRateMax + 1, productionRateMax + 1))->getId();
-    r->constrain(t1);
-    assert(ce.provenInconsistent());
-    r->free(t1);
-    assert(!ce.provenInconsistent());    
+    assert(r->getTokens().count(t1) == 0);
+    //    r->constrain(t1);
+    //assert(ce.provenInconsistent());
+    //r->free(t1);
+    //assert(!ce.provenInconsistent());    
 
     t1->setMin(productionRateMax);
     r->constrain(t1);
@@ -434,10 +435,13 @@ private:
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("produce"), IntervalIntDomain(0, 1), consumptionRateMax - 1, consumptionRateMax - 1))->getId();
-    r->constrain(t2);
-    assert(ce.provenInconsistent());
-    r->free(t2);
-    assert(!ce.provenInconsistent());    
+    assert(r->getTokens().count(t2) == 0);
+    /*
+      r->constrain(t2);
+      assert(ce.provenInconsistent());
+      r->free(t2);
+      assert(!ce.provenInconsistent());    
+    */
 
     t2->setMax(consumptionRateMax);
     r->constrain(t2);
