@@ -1,8 +1,15 @@
+#the GeneralConfigSection is for the properties of writing
 GeneralConfigSection:
 AutoWrite=1
 StepsPerWrite=1
 WriteDest=./plans
 #MaxChoices=1
+#the RuleConfigSection is for specifying where the PPW looks
+#for model files
+#RuleConfigSection:
+#SourcePath=/home/miatauro/workspace/PLASMA/System/test
+#the TransactionConfigSection is for specifying which transactions
+#are written
 TransactionConfigSection:
 OBJECT_CREATED
 OBJECT_DELETED

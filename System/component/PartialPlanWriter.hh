@@ -65,9 +65,11 @@ namespace Prototype {
 			RulesEngineId *reId;
 			CBPlannerId *plId;
       std::ofstream *transOut, *statsOut, *ruleInstanceOut;
+      std::list<std::string> sourcePaths;
       void parseConfigFile(std::ifstream &);
       void parseGeneralConfigSection(std::ifstream&);
       void parseTransactionConfigSection(std::ifstream&);
+      void parseRuleConfigSection(std::ifstream&);
       void commonInit(const PlanDatabaseId &, const ConstraintEngineId &);
       void outputObject(const ObjectId &, const int, std::ofstream &, std::ofstream &);
       void outputToken(const TokenId &, const int, const int, const int, const int, 

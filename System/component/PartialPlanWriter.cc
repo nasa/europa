@@ -225,6 +225,8 @@ const std::string ENUM_DOMAIN("EnumeratedDomain");
 const std::string INT_DOMAIN("IntervalDomain");
 const std::string GENERAL_CONFIG_SECTION("GeneralConfigSection:");
 const std::string TRANSACTION_CONFIG_SECTION("TransactionConfigSection:");
+const std::string RULE_CONFIG_SECTION("RuleConfigSection:");
+const std::string SOURCE_PATH("SourcePath");
 const std::string AUTO_WRITE("AutoWrite");
 const std::string STEPS_PER_WRITE("StepsPerWrite");
 const std::string WRITE_DEST("WriteDest");
@@ -304,6 +306,9 @@ namespace Prototype {
 			for(int i = 0; i < transactionTotal; i++)
 				allowTransaction[i] = false;
 
+      //add default directories to search for model files
+      sourcePaths.push_back(".");
+      sourcePaths.push_back("..");
 			char *configPath = getenv(envPPWConfigFile);
 			if(configPath == NULL) {
 				std::cerr << "Warning: PPW_CONFIG not set.  PartialPlanWriter will not write." << std::endl;
@@ -391,15 +396,20 @@ namespace Prototype {
           std::string ruleSrc = ((*it).second)->getSource().toString();
           if(ruleSrc == "noSrc")
             continue;
-          std::string modelPath = ruleSrc.substr(1, ruleSrc.rfind(",")-1);
+          std::string modelFile = ruleSrc.substr(1, ruleSrc.rfind(",")-1);
           std::string lineNumber = ruleSrc.substr(ruleSrc.rfind(","), ruleSrc.size()-1);
           lineNumber.replace(lineNumber.rfind('"'), 1, "\0");
-          if(realpath(modelPath.c_str(), realModelPaths) == NULL)
-            FatalErr(modelPath);
-          modelPath = realModelPaths;
-          modelFiles.insert(modelPath);
-          rulesOut << seqId << TAB << (*it).second->getKey() << TAB << modelPath << lineNumber 
-                   << std::endl;
+          for(std::list<std::string>::iterator pathIt = sourcePaths.begin();
+              pathIt != sourcePaths.end(); ++pathIt) {
+            std::string modelPath = (*pathIt) + "/" + modelFile;
+            if(realpath(modelPath.c_str(), realModelPaths) == NULL)
+              continue;
+            modelPath = realModelPaths;
+            modelFiles.insert(modelPath);
+            rulesOut << seqId << TAB << (*it).second->getKey() << TAB << modelPath << lineNumber 
+                     << std::endl;
+            break;
+          }
         }
         {
           std::ostream_iterator<unsigned char> out(seqOut);
@@ -1599,6 +1609,10 @@ namespace Prototype {
           parseTransactionConfigSection(configFile);
           retval = true;
         }
+        else if(line == RULE_CONFIG_SECTION) {
+          parseRuleConfigSection(configFile);
+          retval = true;
+        }
         else
           return false;
       }
@@ -1652,6 +1666,25 @@ namespace Prototype {
           }
         }
         if(!foundTransaction) {
+          for(int i = strlen(buf); i >= 0; i--)
+            configFile.putback(buf[i]);
+          return;
+        }
+      }
+    }
+
+    void PartialPlanWriter::parseRuleConfigSection(std::ifstream& configFile) {
+      char buf[PATH_MAX];
+      while(!configFile.eof()) {
+        configFile.getline(buf, PATH_MAX);
+        if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
+          continue;
+        std::string line = buf;
+        if(line.find(SOURCE_PATH) != std::string::npos) {
+          std::string path = line.substr(line.find("=")+1);
+          sourcePaths.push_back(path);
+        }
+        else {
           for(int i = strlen(buf); i >= 0; i--)
             configFile.putback(buf[i]);
           return;
