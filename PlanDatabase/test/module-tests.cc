@@ -107,7 +107,7 @@ private:
     assert(o1.getComponents().empty());
 
     ObjectId id1((new Object(db.getId(), LabelStr("AllObjects"), LabelStr("id1")))->getId());
-    ObjectId id2((new Object(id1, LabelStr("AllObjects"), LabelStr("id2")))->getId());
+    new Object(id1, LabelStr("AllObjects"), LabelStr("id2"));
     ObjectId id3((new Object(id1, LabelStr("AllObjects"), LabelStr("id3")))->getId());
     assert(db.getObjects().size() == 6);
     assert(id3->getName().toString() == "id1.id3");
@@ -125,7 +125,7 @@ private:
 
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
     ObjectId id5 = ((new Object(db.getId(), LabelStr("AllObjects"), LabelStr("id5")))->getId());
-    ObjectId id6 = ((new Object(id5, LabelStr("AllObjects"), LabelStr("id6")))->getId());
+    new Object(id5, LabelStr("AllObjects"), LabelStr("id6"));
     return(true);
   }
 
@@ -1634,12 +1634,8 @@ int main() {
   new IntervalTokenFactory();
 
   runTestSuite(ObjectTest::test);
-  EntityCollection newEntityCollection;
-  Entity::setEntityCollection(&newEntityCollection);
   runTestSuite(TokenTest::test);
-  Entity::setEntityCollection(0); // Back to default
   runTestSuite(TimelineTest::test);
-  Entity::setEntityCollection(&newEntityCollection);
   runTestSuite(DbClientTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();

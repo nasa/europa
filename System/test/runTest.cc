@@ -73,6 +73,8 @@
 
 SchemaId schema;
 
+//#define REPLAY_DECISIONS
+
 class PlanSystem {
 public:
   ConstraintEngineId constraintEngine;
