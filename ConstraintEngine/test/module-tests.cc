@@ -1877,7 +1877,7 @@ private:
    */
   static AbstractDomain* readSet(std::istream& in) {
     char ch;
-    AbstractDomain *dom;
+    AbstractDomain *dom = 0;
     AbstractDomain::DomainType type = AbstractDomain::REAL_ENUMERATION;
     bool negative = false;
     double value;
