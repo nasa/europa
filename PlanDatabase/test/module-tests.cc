@@ -1092,7 +1092,11 @@ private:
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
-    tokenA.getStart()->specify(5);
+
+    // Change to base class to excercise problem with wrong signature on TokenVariable
+    ConstrainedVariableId start = tokenA.getStart();
+    start->specify(5);
+
     tokenA.activate();
     assert(ce->propagate());
 
