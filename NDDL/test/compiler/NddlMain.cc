@@ -62,7 +62,7 @@ int main(){
   PlanDatabase db(ce.getId(), schema);
 
   new DefaultPropagator(LabelStr("Default"), ce.getId());
-  new ResourcePropagator(LabelStr("Resource"), ce.getId());
+  new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId());
 
   RulesEngine re(db.getId());
 
