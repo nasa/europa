@@ -1,13 +1,14 @@
 #ifndef _H_CeLogger
 #define _H_CeLogger
 
+#include "ConstraintEngineDefs.hh"
 #include "ConstraintEngineListener.hh"
 #include <iostream>
 
 namespace Prototype {
   class CeLogger: public ConstraintEngineListener{
   public:
-    CeLogger(ostream& os, const ConstraintEngineId& ce);
+    CeLogger(std::ostream& os, const ConstraintEngineId& ce);
     void notifyPropagationCommenced();
     void notifyPropagationCompleted();
     void notifyPropagationPreempted();
@@ -18,7 +19,7 @@ namespace Prototype {
     void notifyRemoved(const ConstrainedVariableId& variable);
     void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
   private:
-    ostream& m_os;
+    std::ostream& m_os;
   };
 }
 #endif

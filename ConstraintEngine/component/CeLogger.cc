@@ -9,7 +9,7 @@ namespace Prototype {
 
   const std::string VARIABLE_INDENT("");
 
-  CeLogger::CeLogger(ostream& os, const ConstraintEngineId& ce):ConstraintEngineListener(ce), m_os(os){}
+  CeLogger::CeLogger(std::ostream& os, const ConstraintEngineId& ce):ConstraintEngineListener(ce), m_os(os){}
 
   void CeLogger::notifyPropagationCommenced(){m_os << "CeLogger:" << "PROPAGATION COMMENCED" << std::endl;}
 

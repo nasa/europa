@@ -20,7 +20,7 @@ public:
       new DefaultPropagator(LabelStr("Default"), s_instance);
 
       if(loggingEnabled())
-	 new CeLogger(cout, s_instance);
+	 new CeLogger(std::cout, s_instance);
     }
     return s_instance;
   }
