@@ -145,4 +145,5 @@ int main(){
 
   std::cout << "Plan Database:" << std::endl;
   PlanDatabaseWriter::write(db.getId(), std::cout);
+  db.purge();
 }

@@ -79,6 +79,7 @@ int main(){
 
   std::cout << "Finished" << std::endl;
 
+  db.purge();
   Rule::purgeAll();
   ObjectFactory::purgeAll();
   TokenFactory::purgeAll();
