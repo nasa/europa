@@ -58,7 +58,8 @@ namespace Prototype {
   template <class ELEMENT_TYPE>
   std::list<double> convert(const std::list<ELEMENT_TYPE>& source){
     std::list<double> target;
-    for(std::list<ELEMENT_TYPE>::const_iterator it = source.begin(); it != source.end(); ++it)
+    typedef typename std::list<ELEMENT_TYPE>::const_iterator ELEMENT_TYPE_ITERATOR;
+    for(ELEMENT_TYPE_ITERATOR it = source.begin(); it != source.end(); ++it)
       target.push_back((double) *it);
     return(target);
   }
