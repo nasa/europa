@@ -15,7 +15,7 @@ local model ;
 for model in
 	class-constructor.nddl   simple-rules.nddl guards.nddl
 	existential.nddl         plasma-base.nddl       subclass.nddl
-	simple-class.nddl constraints.nddl
+	simple-class.nddl constraint-test.nddl
 	interval-constants.nddl  simple-predicate.nddl
 	less-basic-model.nddl    foreach.nddl
 	gnats-2537.nddl simple-resources.nddl multi-resources.nddl
