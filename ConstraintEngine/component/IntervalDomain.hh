@@ -128,7 +128,7 @@ namespace Prototype{
     bool isSubsetOf(const IntervalDomain& dom) const;
 
   protected:
-    IntervalDomain(double lb, double ub, bool finite, bool closed, const DomainListenerId& listener);
+    IntervalDomain(double lb, double ub, bool closed, const DomainListenerId& listener);
     IntervalDomain(const IntervalDomain& org);
 
     /**

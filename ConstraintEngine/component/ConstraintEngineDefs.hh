@@ -9,7 +9,7 @@
 #include <list>
 #include <cassert>
 
-#define _PROTOTYPE_FAST_VALUE_
+//#define _PROTOTYPE_FAST_VALUE_
 
 #ifndef _PROTOTYPE_FAST_VALUE_
 #define check_error(cond) assert(cond);
@@ -24,12 +24,17 @@ namespace Prototype
   static const int MINUS_INFINITY = -PLUS_INFINITY;
 
   class AbstractDomain;
+  class IntervalIntDomain;
+  class IntervalRealDomain;
+  class LabelSet;
+
   class DomainListener;
   typedef Europa::Id<DomainListener> DomainListenerId;
   class ConstrainedVariable;
   typedef Europa::Id<ConstrainedVariable> ConstrainedVariableId;
   class VariableChangeListener;
   typedef Europa::Id<VariableChangeListener> VariableChangeListenerId;
+
   class Constraint;
   typedef Europa::Id<Constraint> ConstraintId;
   class Propagator;

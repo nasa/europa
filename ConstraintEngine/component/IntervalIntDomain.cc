@@ -2,11 +2,11 @@
 
 namespace Prototype {
 
-  IntervalIntDomain::IntervalIntDomain(int lb, int ub, bool finite, bool closed, const DomainListenerId& listener)
-    :IntervalDomain(lb, ub, finite, closed, listener){}
+  IntervalIntDomain::IntervalIntDomain(int lb, int ub, bool closed, const DomainListenerId& listener)
+    :IntervalDomain(lb, ub, closed, listener){}
 
   IntervalIntDomain::IntervalIntDomain(const DomainListenerId& listener)
-    :IntervalDomain(-MAX_INT, MAX_INT, true, true, listener){}
+    :IntervalDomain(-MAX_INT, MAX_INT, true, listener){}
 
   IntervalIntDomain::IntervalIntDomain(const IntervalIntDomain& org)
     :IntervalDomain(org){}
@@ -14,6 +14,11 @@ namespace Prototype {
   IntervalIntDomain& IntervalIntDomain::operator=(const IntervalIntDomain& org){
     IntervalDomain::operator=(org);
     return(*this);
+  }
+
+  bool IntervalIntDomain::isFinite() const {
+    check_error(!isDynamic());
+    return (m_lb > -MAX_INT && m_ub < MAX_INT);
   }
 
   bool IntervalIntDomain::operator==(const IntervalIntDomain& dom) const{

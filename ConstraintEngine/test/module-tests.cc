@@ -4,8 +4,7 @@
  * @date August, 2003
  * @brief Read the source for details
  */
-#include "ConstraintEngine.hh"
-#include "DefaultPropagator.hh"
+#include "TestSupport.hh"
 #include "Variable.hh"
 #include "ConstraintFactory.hh"
 #include "ConstraintLibrary.hh"
@@ -27,50 +26,6 @@
 
 using namespace Prototype;
 using namespace std;
-
-class DefaultEngineAccessor{
-public:
-  static const ConstraintEngineId& instance(){
-    if (s_instance.isNoId()){
-      s_instance = (new ConstraintEngine())->getId();
-      new DefaultPropagator(s_instance);
-    }
-
-    return s_instance;
-  }
-
-  static void reset(){
-    if(!s_instance.isNoId()){
-      delete (ConstraintEngine*) s_instance;
-      s_instance = ConstraintEngineId::noId();
-    }
-  }
-
-private:
-  static ConstraintEngineId s_instance;
-};
-
-ConstraintEngineId DefaultEngineAccessor::s_instance;
-
-#define ENGINE DefaultEngineAccessor::instance()
-
-#define runTest(test, name) { \
-  cout << "      " << name; \
-  bool result = test(); \
-  DefaultEngineAccessor::reset(); \
-  if(result && Europa::IdTable::size() == 0) \
-    cout << " passed." << endl; \
-  else \
-    cout << " FAILED." << endl; \
-}
-
-#define runTestSuite(test, name) { \
-  cout << name << "***************" << endl; \
-  if(test()) \
-    cout << name << " passed." << endl; \
-  else \
-    cout << name << " FAILED." << endl; \
-}
 
 
 class ChangeListener: public DomainListener {
@@ -324,7 +279,7 @@ private:
   static bool testAssignment(){
     ChangeListener l_listener;
     IntervalIntDomain dom0; // Will have very large default range
-    IntervalIntDomain dom1(-100, 100, true, true, l_listener.getId());
+    IntervalIntDomain dom1(-100, 100, true, l_listener.getId());
     dom1 = dom0;
     DomainListener::ChangeType change;
     assert(l_listener.checkAndClearChange(change)  && change == DomainListener::RELAXED);
@@ -426,6 +381,7 @@ class ConstraintTest
 {
 public:
   static bool test() {
+    runTest(testAddEqualConstraint, "SubsetOfConstraint");
     runTest(testAddEqualConstraint, "AddEqualConstraint");
     runTest(testEqualConstraint, "EqualConstraint");
     runTest(testBasicPropagation, "BasicPropagation");
@@ -437,6 +393,44 @@ public:
 
 private:
 
+  static bool testSubsetConstraint(){
+    std::list<Prototype::LabelStr> values;
+    values.push_back(Prototype::LabelStr("A"));
+    values.push_back(Prototype::LabelStr("B"));
+    values.push_back(Prototype::LabelStr("C"));
+    values.push_back(Prototype::LabelStr("D"));
+    values.push_back(Prototype::LabelStr("E"));
+    LabelSet ls0(values);
+    values.pop_back();
+    values.pop_back();
+    LabelSet ls1(values);
+    assert(ls1.isSubsetOf(ls0));
+    assert(!(ls1 == ls0));
+
+    Variable<LabelSet> v0(ENGINE, ls0);
+    assert(! (v0.getDerivedDomain() == ls1));
+    SubsetOfConstraint c0(ENGINE, v0.getId(), ls1);
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(v0.getDerivedDomain() == ls1);
+    assert(c0.executionCount() == 1);
+
+    values.pop_back();
+    LabelSet ls2(values);
+    v0.specify(ls2);
+    assert(ENGINE->pending());
+    assert(!(v0.getDerivedDomain() == ls1));
+    assert(c0.executionCount() == 1);
+    assert(ENGINE->constraintConsistent());
+    v0.reset();
+    assert(ENGINE->pending());
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(v0.getDerivedDomain() == ls1);
+    assert(c0.executionCount() == 2);
+    
+    return true;
+  }
   static bool testAddEqualConstraint()
   {
     std::vector<ConstrainedVariableId> variables;

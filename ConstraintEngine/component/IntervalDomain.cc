@@ -2,9 +2,9 @@
 #include "DomainListener.hh"
 
 namespace Prototype {
-  IntervalDomain::IntervalDomain(double lb, double ub, bool finite, bool closed, const DomainListenerId& listener)
-    : AbstractDomain(finite, closed, listener), m_ub(ub), m_lb(lb){
-    check_error(ub >= lb)
+  IntervalDomain::IntervalDomain(double lb, double ub, bool closed, const DomainListenerId& listener)
+    : AbstractDomain(closed, listener), m_ub(ub), m_lb(lb){
+    check_error(ub >= lb);
   }
 
   bool IntervalDomain::intersect(const IntervalDomain& dom) {
@@ -16,7 +16,7 @@ namespace Prototype {
   IntervalDomain::~IntervalDomain(){}
 
   IntervalDomain::IntervalDomain(const IntervalDomain& org)
-    : AbstractDomain(org.m_finite, org.m_closed, DomainListenerId::noId()), m_ub(org.m_ub), m_lb(org.m_lb){}
+    : AbstractDomain(org.m_closed, DomainListenerId::noId()), m_ub(org.m_ub), m_lb(org.m_lb){}
 
 
   IntervalDomain& IntervalDomain::operator=(const IntervalDomain& org){

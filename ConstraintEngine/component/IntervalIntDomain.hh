@@ -22,11 +22,11 @@ namespace Prototype{
   public:
     IntervalIntDomain(int lb = -MAX_INT, 
 		      int ub = MAX_INT, 
-		      bool finite = true, 
 		      bool closed = true, 
 		      const DomainListenerId& listener = DomainListenerId::noId());
     IntervalIntDomain(const DomainListenerId& listener);
     IntervalIntDomain(const IntervalIntDomain& org);
+    bool isFinite() const;
     IntervalIntDomain& operator=(const IntervalIntDomain& org);
     bool operator==(const IntervalIntDomain& dom) const;
     bool intersect(const IntervalIntDomain& dom);
