@@ -3,6 +3,7 @@
 #include "Object.hh"
 #include "EventToken.hh"
 #include "TokenVariable.hh"
+#include "TokenTemporalVariable.hh"
 #include "ObjectTokenRelation.hh"
 #include "Timeline.hh"
 #include "DbLogger.hh"
@@ -300,6 +301,7 @@ class TokenTest {
 public:
   static bool test(){
     runTest(testBasicTokenAllocation);
+    runTest(testBasicTokenCreation);
     runTest(testStateModel);
     runTest(testMasterSlaveRelationship);
     runTest(testBasicMerging);
@@ -357,6 +359,21 @@ private:
     delete (Token*) token; // It is inComplete
     return true;
   }
+
+  static bool testBasicTokenCreation() {                                                            
+    DEFAULT_SETUP(ce,db,schema,false);                                                   
+    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();                                                               
+    db.close();                                                                          
+    
+    IntervalToken t1(db.getId(),                                                         
+                     LabelStr("P1"),                                                     
+                     true,                                                               
+                     IntervalIntDomain(0, 10),                                           
+                     IntervalIntDomain(0, 20),                                           
+                     IntervalIntDomain(1, 1000));                                        
+                                                                                         
+    return true;                                                                         
+  }                            
 
   static bool testStateModel(){
     DEFAULT_SETUP(ce, db, schema, true);

@@ -6,7 +6,9 @@
 #include "../ConstraintEngine/IntervalDomain.hh"
 #include "../ConstraintEngine/Constraint.hh"
 #include "../ConstraintEngine/ConstraintLibrary.hh"
+#include "TokenTemporalVariable.hh"
 #include <vector>
+
 
 namespace Prototype {
 

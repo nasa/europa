@@ -28,7 +28,10 @@ namespace Prototype {
 
   template<class DomainType> class TokenVariable;
   typedef Id< TokenVariable<EnumeratedDomain> > StateVarId;
-  typedef Id< TokenVariable<IntervalIntDomain> > TempVarId;
+  //  typedef Id< TokenVariable<IntervalIntDomain> > TempVarId;
+  
+  class TokenTemporalVariable;
+  typedef Id< TokenTemporalVariable > TempVarId;
 
   typedef Domain<ObjectId>  ObjectSet;
   typedef Id< TokenVariable<ObjectSet> > ObjectVarId;

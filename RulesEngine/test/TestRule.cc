@@ -9,6 +9,7 @@
 #include "../ConstraintEngine/IntervalIntDomain.hh"
 #include "../ConstraintEngine/Variable.hh"
 #include "../ConstraintEngine/Utils.hh"
+#include "TokenTemporalVariable.hh"
 
 namespace Prototype {
 
