@@ -50,11 +50,20 @@ class Bar extends Foo {
  } 
 }
 
+class Baz {
+ Foo m_foo;
+
+ Baz(Foo _foo){
+  m_foo = _foo;
+ }
+}
+
 class World {
  Foo m_foo1;
  Foo m_foo2;
  Foo m_foo3;
  Foo m_foo4;
+ Baz m_baz1;
 
  predicate initialState{}
 
@@ -63,5 +72,6 @@ class World {
   m_foo2 = new Foo(this);
   m_foo3 = m_foo2;
   m_foo4 = new Foo(this, 100, false);
+  m_baz1 = new Baz(m_foo1);
  }
 }
