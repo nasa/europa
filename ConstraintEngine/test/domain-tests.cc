@@ -46,6 +46,7 @@ namespace Prototype {
       runTest(testOperatorEquals);
       runTest(testInfinitesAndInts);
       runTest(testInsertAndRemove);
+      runTest(testValidComparisonWithEmpty_gnats2403);
       return(true);
     }
 
@@ -486,6 +487,29 @@ namespace Prototype {
       return(testEnumDomInsertAndRemove() &&
              testIntervalDomInsertAndRemove() &&
              testIntervalIntDomInsertAndRemove());
+    }
+
+    static bool testValidComparisonWithEmpty_gnats2403(){
+      IntervalIntDomain d0;
+      IntervalIntDomain d1;
+      EnumeratedDomain d2;
+      d2.insert(1);
+      d2.close();
+
+      assert(d0 == d1);
+      assert(d1 != d2);
+      d0.empty();
+      assert(d0 != d1);
+      assert(d0 != d2);
+
+      assert(AbstractDomain::canBeCompared(d0, d2));
+
+      EnumeratedDomain d3(d2);
+      d2.empty();
+      assert(AbstractDomain::canBeCompared(d2, d3));
+      assert(d3 != d2);
+
+      return true;
     }
   };
 
