@@ -2,7 +2,7 @@ Building EUROPA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.14 2005-01-15 03:17:26 tania Exp $
+$Id: BUILDING,v 1.15 2005-01-28 00:02:09 pdaley Exp $
 
 
 - Prerequisites:
@@ -20,7 +20,9 @@ $Id: BUILDING,v 1.14 2005-01-15 03:17:26 tania Exp $
 
 3. Java 1.4.2 or higher.
 
-4. doxygen 1.2.16 or higher. (to build API documentation)
+4. doxygen 1.2.x or higher should be OK (to build API documentation)
+   doxygen 1.2.16 or higher is recommended. Older versions may
+   not support all options.
 
 If you are using computers in Code TC at NASA/Ames, the division's
 System Group has likely already installed these programs (and versions
@@ -72,7 +74,7 @@ above version requirements may be used instead.
        find /usr -name gcc-3.3.3
        find /usr -name 'j2sdk1.*' -o -name 'jdk1.*'
        find /usr -name 'jam2.*'
-       find /usr -name 'doxygen*'
+       find /usr -name doxygen
 
     On the division SPARCs running SunOS 5.8, add the following paths
     to the head of your PATH environment variable for the locations of 
@@ -81,10 +83,10 @@ above version requirements may be used instead.
     /usr/local/beta/gcc-3.3.3/bin
     /usr/local/beta/bin
     /usr/local/jdk1.5.0/bin
-    /usr/local/bin/doxygen
+    /usr/local/bin
 
     e.g. set path = (/usr/local/beta/gcc-3.3.3/bin /usr/local/beta/bin
-                     /usr/local/jdk1.5.0/bin /usr/local/bin/doxygen $path)
+                     /usr/local/jdk1.5.0/bin /usr/local/bin $path)
 
     Note that the location of the gcc-3.3.3 compiler must come before the 
     location of Jam since there is an old version of gcc in the same 
