@@ -73,7 +73,7 @@ World::initialState{
 
  any(Rover.At b);
  eq(b.m_location, Rock);
- eq(b.start, 98);
+ eq(b.start, 100);
 
- leq(a.end, b.start);
+ a before b;
 }
