@@ -201,7 +201,7 @@ namespace Prototype {
     std::vector<ConstrainedVariableId> vars;
     vars.push_back(first->getEnd());
     vars.push_back(second->getStart());
-    ConstraintId constraint =  ConstraintLibrary::createConstraint(LabelStr("Before"),
+    ConstraintId constraint =  ConstraintLibrary::createConstraint(LabelStr("precede"),
 								   getPlanDatabase()->getConstraintEngine(),
 								   vars);
     m_constraints.push_back(new ConstraintEntry(constraint, first, second));

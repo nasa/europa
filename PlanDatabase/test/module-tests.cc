@@ -368,7 +368,7 @@ private:
 		     Token::noObject(), true);
 
     // Constraint the start variable of both tokens
-    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(t0.getStart(), t1.getStart()));
+    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), ENGINE, makeScope(t0.getStart(), t1.getStart()));
 
     assert(t1.isInactive());
     t0.activate();
@@ -493,7 +493,7 @@ private:
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(t1.getEnd());
     temp.push_back(t2.getEnd());
-    ConstraintId equalityConstraint = ConstraintLibrary::createConstraint(LabelStr("CoTemporal"),
+    ConstraintId equalityConstraint = ConstraintLibrary::createConstraint(LabelStr("concurrent"),
 									  db.getConstraintEngine(),
 									  temp);
     t1.merge(t0.getId());
@@ -1125,12 +1125,17 @@ private:
 int main(){
   initConstraintLibrary();
   
-  REGISTER_NARY(EqualConstraint, "CoTemporal", "Default");
+  // Special designations for temporal relations
+  REGISTER_NARY(EqualConstraint, "concurrent", "Default");
+  REGISTER_NARY(LessThanEqualConstraint, "precede", "Default");
+
+  // Support for Token implementations
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "Before", "Default");
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
-  REGISTER_NARY(EqualConstraint, "EqualConstraint", "EquivalenceClass");
+
+  REGISTER_NARY(EqualConstraint, "eq", "EquivalenceClass");
+
   // Allocate default schema initially so tests don't fail because of ID's
   SCHEMA;
   runTestSuite(ObjectTest::test);

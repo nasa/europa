@@ -20,17 +20,20 @@
 #include "../ConstraintEngine/TestSupport.hh"
 
 int main(){
-  // Initialize constraints
-  initConstraintLibrary();
-  
-  REGISTER_NARY(EqualConstraint, "CoTemporal", "Default");
-  REGISTER_NARY(EqualConstraint, "neq", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
+  // Constraints with special names to allow mapping to temporal network propagator if necessary
+  REGISTER_NARY(EqualConstraint, "concurrent", "Default");
+  REGISTER_NARY(LessThanEqualConstraint, "precede", "Default");
+
+  // Constraints used in Token implementations
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
-  REGISTER_NARY(LessThanEqualConstraint, "Before", "Default");
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
-  REGISTER_NARY(EqualConstraint, "EqualConstraint", "EquivalenceClass");
+
+
+  // Mappings from library to NDDL language
+  REGISTER_NARY(EqualConstraint, "eq", "Default");
+  REGISTER_NARY(NotEqualConstraint, "neq", "Default");
+  REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
 
   // Allocate the schema
   SchemaId schema = NDDL::schema();
