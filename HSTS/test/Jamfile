@@ -162,7 +162,7 @@ rule RunEUROPATest {
 
   # create planner with linked model
   ModuleMain $(exe) : $(o) : HSTS ;
-  RunModuleMain "run-$(exe)$(addTarget)" : $(exe) : $(options) : : "$(output)" ;
+  RunModuleMain "run-$(exe)$(addTarget)" : $(exe) : $(options) : time : "$(output)" ;
   LocalDepends $(target) : run-$(exe)$(addTarget) ;
  }
 }
@@ -426,6 +426,6 @@ RunEUROPATest litaEuropa2 : missionExec.init.e2 : missionExec.heuristics.e2 : mi
 
 ### XMONKEY - from Olga
 EUROPA_NDDL xmonkey-timeline.init.nddl ;
-RunEUROPATest xmonkey : xmonkey-timeline.init.nddl : deliberative.heuristics.xml : xmonkey.noBr ;
+RunEUROPATest xmonkey : xmonkey-timeline.init.nddl : deliberative.heuristics.xml : xmonkey.nobr ;
 
 } # PLASMA_READY
