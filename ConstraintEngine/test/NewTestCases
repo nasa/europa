@@ -1,0 +1,31 @@
+test 1 CountZeros inputs [0] [0] [0] outputs [] [] []
+test 2 CountZeros inputs [0] [0 1] [0 1] outputs [0] [0 1] [0 1]
+test 3 CountZeros inputs [0] {false true} outputs [0] {true}
+test 4 CountZeros inputs [1] [0] [0] outputs [] [] []
+test 5 CountZeros inputs [1] [0] {false true} outputs [1] [0] {true}
+test 6 CountZeros inputs [2 Inf] [0] {false true} outputs [2] [0] {false}
+test 7 CountZeros inputs [0 1] [0] {false true} outputs [1] [0] {true}
+test 8 CountZeros inputs [0 Inf] [0] {false true} outputs [1 2] [0] {false true}
+test 9 CountZeros inputs [1 Inf] [-Inf Inf] {true} [5 10] outputs [1] [0] {true} [5 10]
+test 10 CountZeros inputs [1 Inf] [-Inf -1] {true} [5 10] outputs [] [] {} []
+test 11 CountZeros inputs [2] [0] [0] outputs [2] [0] [0]
+test 12 AddEqual inputs [0 2] [0] [2] outputs [2] [0] [2]
+test 13 CountNonZeros inputs [0] [0] [0] outputs [0] [0] [0]
+test 14 CountNonZeros inputs [0] [-Inf Inf] [-Inf Inf] outputs [0] [0] [0]
+test 15 CountNonZeros inputs [0] {false true} outputs [0] {false}
+test 16 CountNonZeros inputs [1] [0] [0] outputs [] [] []
+test 17 CountNonZeros inputs [1] [0] {false true} outputs [1] [0] {true}
+test 18 CountNonZeros inputs [2 Inf] [0] {false true} outputs [] [] {}
+test 19 CountNonZeros inputs [0 1] [0] {false true} outputs [0 1] [0] {false true}
+test 20 CountNonZeros inputs [0 Inf] [0] {false true} outputs [0 1] [0] {false true}
+test 21 CountNonZeros inputs [1 Inf] [-Inf Inf] {true} [5 10] outputs [2 3] [-Inf Inf] {true} [5 10]
+test 22 CountNonZeros inputs [1 Inf] [-Inf -1] {true} [5 10] outputs [3] [-Inf -1] {true} [5 10]
+test 23 CountNonZeros inputs [2] [0] [0] outputs [] [] []
+test 24 CountZeros inputs [-Inf Inf] [0] [0] [0] [0.000001 Inf] outputs [3 4] [0] [0] [0] [0.000001 Inf]
+test 25 CountNonZeros inputs [-Inf Inf] [0] [0] [0] [0.000001 Inf] outputs [0 1] [0] [0] [0] [0.000001 Inf]
+test 26 CountZeros inputs [-Inf Inf] [0 1] [0] [0] [0.000001 Inf] outputs [2 4] [0 1] [0] [0] [0.000001 Inf]
+test 27 CountNonZeros inputs [-Inf Inf] [0 1] [0] [0] [0.000001 Inf] outputs [0 2] [0 1] [0] [0] [0.000001 Inf]
+test 28 CountZeros inputs [-Inf Inf] [0] [0] [0] [0.0001 Inf] outputs [3] [0] [0] [0] [0.0001 Inf]
+test 29 CountNonZeros inputs [-Inf Inf] [0] [0] [0] [0.0001 Inf] outputs [1] [0] [0] [0] [0.0001 Inf]
+test 30 CountZeros inputs [-Inf Inf] [0 1] [0] [0] [0.0001 Inf] outputs [2 3] [0 1] [0] [0] [0.0001 Inf]
+test 31 CountNonZeros inputs [-Inf Inf] [0 1] [0] [0] [0.0001 Inf] outputs [1 2] [0 1] [0] [0] [0.0001 Inf]
