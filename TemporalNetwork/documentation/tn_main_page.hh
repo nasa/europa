@@ -27,7 +27,7 @@
  * @li TemporalPropagator from Propagator
  * @li TemporalDistanceConstraint from AddEqualConstraint
  *
- * <A NAME="tn_entry"><H4>API</H></A>
+ * <A NAME="tn_entry"><H4>API</H4></A>
  *
  * The main class in the temporal network is the 
  * TemporalPropagator.  Instantiating the TemporalPropagator
@@ -46,7 +46,7 @@
  * These need to be registered using REGISTER_CONSTRAINT,
  * before usage.
  *
- * <A NAME="tn_use"><H3>Using the Temporal Network API</H3></A>
+ * <A NAME="tn_use"><H4>Using the Temporal Network API</H4></A>
  *
  * In the TemporalNetwork module tests "testTemporalPropagation"
  * is a good example of how to instantiate and use the

@@ -96,12 +96,11 @@
  *
  * A very important class for use outside of the NDDL module
  * is the StandardAssembly, which provides a facade for the
- * major system components.  Also important are the nddl
- * files that are defined here:
+ * major system components.  Also important are these nddl
+ * files that need to be included in your model to get the
+ * basic NDDL functionality:
  * @li PlannerConfig.nddl
  * @li Plasma.nddl
- * These need to be included in your model to get the basic
- * NDDL functionality.
  *
  * The C++ code in this module shows a number of examples
  * of how to augment system behavior through inheritance.
