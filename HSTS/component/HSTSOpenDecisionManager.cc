@@ -456,28 +456,33 @@ namespace EUROPA {
     check_error(vdp.isValid());
     check_error(vdp->getVariable()->lastDomain().isFinite());
     check_error(vdp->m_choices.empty());
-    std::list<double> values;
-    vdp->m_var->lastDomain().getValues(values);
-
-    if (values.empty()) return;
-
-    std::list<double> domain;
-    m_heur->getOrderedDomainForConstrainedVariableDP(vdp, domain);
-    if (domain.empty() || values.size() == 1) {
-      for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
-	double value = (*it);
-	vdp->m_choices.push_back(value);
-      }
+    if (vdp->m_var->lastDomain().isNumeric() && vdp->m_var->lastDomain().getSize() > 50) {
+      vdp->m_choices.push_back(vdp->m_var->lastDomain().getLowerBound());
+      vdp->m_choices.push_back(vdp->m_var->lastDomain().getUpperBound()); // we'll keep the initial lb and ub for reference
     }
     else {
-      std::cout << " domain.size = " << domain.size() << " values.size = " << values.size() << std::endl;
-      for (std::list<double>::const_iterator sit = domain.begin(); sit != domain.end(); ++ sit)
-	if (vdp->m_var->lastDomain().isMember((*sit)))
-	  vdp->m_choices.push_back((*sit));
-    }
-    debugMsg("HSTS:OpenDecisionManager:initializeChoices", "Variable Decision Point (" << vdp->getKey() << ") for Variable (" << vdp->getVariable()->getKey() << ") has " << vdp->m_choices.size() << " choices.");
-    debugMsg("HSTS:OpenDecisionManager:initializeChoices", "Variable Decision Point (" << vdp->getKey() << ") for Variable (" << vdp->getVariable()->getKey() << ") has best choice = " << vdp->m_choices[0]);
+      std::list<double> values;
+      vdp->m_var->lastDomain().getValues(values);
 
+      if (values.empty()) return;
+      
+      std::list<double> domain;
+      m_heur->getOrderedDomainForConstrainedVariableDP(vdp, domain);
+      if (domain.empty() || values.size() == 1) {
+	for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
+	  double value = (*it);
+	  vdp->m_choices.push_back(value);
+	}
+      }
+      else {
+	std::cout << " domain.size = " << domain.size() << " values.size = " << values.size() << std::endl;
+	for (std::list<double>::const_iterator sit = domain.begin(); sit != domain.end(); ++ sit)
+	  if (vdp->m_var->lastDomain().isMember((*sit)))
+	    vdp->m_choices.push_back((*sit));
+      }
+      debugMsg("HSTS:OpenDecisionManager:initializeChoices", "Variable Decision Point (" << vdp->getKey() << ") for Variable (" << vdp->getVariable()->getKey() << ") has " << vdp->m_choices.size() << " choices.");
+      debugMsg("HSTS:OpenDecisionManager:initializeChoices", "Variable Decision Point (" << vdp->getKey() << ") for Variable (" << vdp->getVariable()->getKey() << ") has best choice = " << vdp->m_choices[0]);
+    } 
   }
 
   void HSTSOpenDecisionManager::initializeObjectChoices(ObjectDecisionPointId& odp) {
