@@ -35,8 +35,8 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
 
 #define ENGINE DefaultEngineAccessor::instance()
 
-#define runTest(test, name) { \
-  std::cout << "      " << name; \
+#define runTest(test) { \
+  std::cout << "      " << #test; \
   int id_count = Europa::IdTable::size();\
   bool result = test(); \
   DefaultEngineAccessor::reset(); \
@@ -48,12 +48,12 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
     std::cout << " FAILED TO PASS UNIT TEST." << std::endl; \
 }
 
-#define runTestSuite(test, name) { \
-  std::cout << name << "***************" << std::endl; \
+#define runTestSuite(test) { \
+  std::cout << #test << "***************" << std::endl; \
   if(test()) \
-    std::cout << name << " PASSED." << std::endl; \
+    std::cout << #test << " PASSED." << std::endl; \
   else \
-    std::cout << name << " FAILED." << std::endl; \
+    std::cout << #test << " FAILED." << std::endl; \
 }
 
 void initConstraintLibrary(){

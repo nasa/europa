@@ -84,12 +84,12 @@ class EnumerationTest
 {
 public:
   static bool test(){
-    runTest(testBasicLabelOperations, "BasicLabelOperations");
-    runTest(testLabelSetAllocations, "LabelSetAllocations");
-    runTest(testEquate, "LabelSet::equate");
-    runTest(testValueRetrieval, "ValueRetrieval");
-    runTest(testIntersection, "Intersection");
-    runTest(testEnumerationOnly, "EnumerationOnly");
+    runTest(testBasicLabelOperations);
+    runTest(testLabelSetAllocations);
+    runTest(testEquate);
+    runTest(testValueRetrieval);
+    runTest(testIntersection);
+    runTest(testEnumerationOnly);
     return true;
   }
 private:
@@ -309,12 +309,12 @@ class DomainTest
 {
 public:
   static bool test() {
-    runTest(testAllocation, "Allocation"); 
-    runTest(testAssignment, "Assignment"); 
-    runTest(testIntersection, "Intersection");  
-    runTest(testSubset, "Subset");
-    runTest(testUtilities, "Utilities");
-    runTest(testPrinting, "Printing");
+    runTest(testAllocation); 
+    runTest(testAssignment); 
+    runTest(testIntersection);  
+    runTest(testSubset);
+    runTest(testUtilities);
+    runTest(testPrinting);
     return true;
   }
 
@@ -443,7 +443,6 @@ private:
     std::string expectedString("INT_INTERVAL:CLOSED[1, 100]");
     assert(actualString == expectedString);
 
-
     IntervalRealDomain d2(1, 100);
     std::stringstream ss2;
     ss2 << d2;
@@ -458,7 +457,7 @@ class VariableTest
 {
 public:
   static bool test() {
-    runTest(testAllocation, "Allocation");
+    runTest(testAllocation);
     return true;
   }
 
@@ -477,15 +476,15 @@ class ConstraintTest
 {
 public:
   static bool test() {
-    runTest(testAddEqualConstraint, "SubsetOfConstraint");
-    runTest(testAddEqualConstraint, "AddEqualConstraint");
-    runTest(testEqualConstraint, "EqualConstraint");
-    runTest(testLessThanEqualConstraint, "LessThanEqualConstraint");
-    runTest(testBasicPropagation, "BasicPropagation");
-    runTest(testForceInconsistency, "ForceInconsistency");
-    runTest(testRepropagation, "Repropagation");
-    runTest(testConstraintRemoval, "ConstraintRemoval");
-    runTest(testDelegation, "TestDelegation");
+    runTest(testAddEqualConstraint);
+    runTest(testAddEqualConstraint);
+    runTest(testEqualConstraint);
+    runTest(testLessThanEqualConstraint);
+    runTest(testBasicPropagation);
+    runTest(testForceInconsistency);
+    runTest(testRepropagation);
+    runTest(testConstraintRemoval);
+    runTest(testDelegation);
     return true;
   }
 
@@ -887,7 +886,7 @@ class FactoryTest
 {
 public:
   static bool test() {
-    runTest(testAllocation, "testAllocation");
+    runTest(testAllocation);
     return true;
   }
 
@@ -910,11 +909,11 @@ private:
 class EquivalenceClassTest{
 public:
   static bool test() {
-    runTest(testBasicAllocation, "BasicAllocation");
-    runTest(testConstructionOfSingleGraph, "ConstructionOfSingleGraph");
-    runTest(testSplittingOfSingleGraph, "SplittingOfSingleGraph");
-    runTest(testMultiGraphMerging, "MultiGraphMerging");
-    runTest(testEqualityConstraintPropagator, "EqualityConstraintPropagator");
+    runTest(testBasicAllocation);
+    runTest(testConstructionOfSingleGraph);
+    runTest(testSplittingOfSingleGraph);
+    runTest(testMultiGraphMerging);
+    runTest(testEqualityConstraintPropagator);
     return true;
   }
 
@@ -1098,12 +1097,12 @@ int main()
 {
   initConstraintLibrary();
   REGISTER_UNARY(DelegationTestConstraint, "TestOnly", "Default");
-  runTestSuite(EnumerationTest::test, "LabelTests"); 
-  runTestSuite(DomainTest::test, "DomainTests");  
-  runTestSuite(VariableTest::test, "VariableTests"); 
-  runTestSuite(ConstraintTest::test, "ConstraintTests"); 
-  runTestSuite(FactoryTest::test, "FactoryTests");
-  runTestSuite(EquivalenceClassTest::test, "EquivalenceClassTests");
+  runTestSuite(EnumerationTest::test); 
+  runTestSuite(DomainTest::test);  
+  runTestSuite(VariableTest::test); 
+  runTestSuite(ConstraintTest::test); 
+  runTestSuite(FactoryTest::test);
+  runTestSuite(EquivalenceClassTest::test);
   testBitVector();
   cout << "Finished" << endl;
 }

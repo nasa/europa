@@ -101,10 +101,10 @@ public:
 class ObjectTest {
 public:
   static bool test(){
-    runTest(testBasicAllocation, "BasicAllocation");
-    runTest(testObjectSet, "ObjetSet");
-    runTest(testObjectVariables, "Object Variables");
-    runTest(testObjectFilteringConstraint, "Object Filtering Constraint");
+    runTest(testBasicAllocation);
+    runTest(testObjectSet);
+    runTest(testObjectVariables);
+    runTest(testObjectFilteringConstraint);
     return true;
   }
 private:
@@ -225,10 +225,10 @@ private:
 class TokenTest {
 public:
   static bool test(){
-    runTest(testBasicTokenAllocation, "BasicTokenAllocation");
-    runTest(testMasterSlaveRelationship, "MasterSlaveRelationship");
-    runTest(testBasicMerging, "BasicMerging");
-    runTest(testMergingPerformance, "MergingPerformance");
+    runTest(testBasicTokenAllocation);
+    runTest(testMasterSlaveRelationship);
+    runTest(testBasicMerging);
+    runTest(testMergingPerformance);
     return true;
   }
 
@@ -543,10 +543,10 @@ private:
 class TimelineTest {
 public:
   static bool test(){
-    runTest(testBasicInsertion, "BasicInsertion");
-    runTest(testObjectTokenRelation, "ObjectTokenRelation");
-    runTest(testTokenOrderQuery, "TokenOrderQuery");
-    runTest(testEventTokenInsertion, "Event Token Insertion");
+    runTest(testBasicInsertion);
+    runTest(testObjectTokenRelation);
+    runTest(testTokenOrderQuery);
+    runTest(testEventTokenInsertion);
     return true;
   }
 
@@ -794,9 +794,9 @@ private:
 class RulesEngineTest {
 public:
   static bool test(){
-    runTest(testBasicAllocation, "BasicAllocation");
-    runTest(testActivation, "Activation");
-    runTest(testRuleFiringAndCleanup, "RuleFiringAndCleanup");
+    runTest(testBasicAllocation);
+    runTest(testActivation);
+    runTest(testRuleFiringAndCleanup);
     return true;
   }
 private:
@@ -895,9 +895,9 @@ int main(){
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
   REGISTER_NARY(EqualConstraint, "EqualConstraint", "EquivalenceClass");
   
-  runTestSuite(ObjectTest::test, "Object Tests");
-  runTestSuite(TokenTest::test, "Token Tests");
-  runTestSuite(TimelineTest::test, "Timeline Tests");
-  runTestSuite(RulesEngineTest::test, "RulesEngine Tests");
+  runTestSuite(ObjectTest::test);
+  runTestSuite(TokenTest::test);
+  runTestSuite(TimelineTest::test);
+  runTestSuite(RulesEngineTest::test);
   std::cout << "Finished" << std::endl;
 }
