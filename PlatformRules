@@ -68,7 +68,11 @@ if $(GCC_ROOTDIR) {
 if $(OS) = SOLARIS {
 	PROFILE_FLAGS ?= -pg ;
 } else {
-	PROFILE_FLAGS ?= -p ;
+        if $(OS) = LINUX {
+	        PROFILE_FLAGS ?= -pg ;
+        } else {
+        	PROFILE_FLAGS ?= -p ;
+        }
 }
 
 # OPTIMIZE_FLAGS = flags for optimization
