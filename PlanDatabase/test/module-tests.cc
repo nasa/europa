@@ -25,6 +25,7 @@
 class SchemaTest {
 public:
   static bool test() {
+    runTest(testPrimitives);
     runTest(testEnumerations);
     runTest(testObjectTypeRelationships);
     runTest(testObjectPredicateRelationships);
@@ -33,6 +34,21 @@ public:
   }
 
 private:
+
+  static bool testPrimitives(){
+    SCHEMA->reset();
+    SCHEMA->addPrimitive("int");
+    SCHEMA->addPrimitive("float");
+    SCHEMA->addPrimitive("bool");
+    SCHEMA->addPrimitive("string");
+    assertTrue(SCHEMA->isPrimitive("int"));
+    assertTrue(SCHEMA->isPrimitive("float"));
+    assertTrue(SCHEMA->isPrimitive("bool"));
+    assertTrue(SCHEMA->isPrimitive("string"));
+    assertTrue(SCHEMA->isType("int"));
+    assertFalse(SCHEMA->isPrimitive("strong"));
+    return true;
+  }
 
   static bool testEnumerations(){
     SCHEMA->reset();

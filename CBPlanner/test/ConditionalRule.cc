@@ -5,7 +5,7 @@
 #include "BoolDomain.hh"
 #include "Utils.hh"
 #include "Object.hh"
-
+#include "BoolDomain.hh"
 
 namespace PLASMA {
 
@@ -17,8 +17,8 @@ namespace PLASMA {
 
   class ConditionalRule_true: public RuleInstance{
   public:
-    ConditionalRule_true(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, bool val)
-      : RuleInstance(parentInstance, guard, val), m_localGuard(guard){}
+    ConditionalRule_true(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard)
+      : RuleInstance(parentInstance, guard, BoolDomain(true)), m_localGuard(guard){}
 
     void handleExecute();
   private:
@@ -27,8 +27,8 @@ namespace PLASMA {
 
   class ConditionalRule_false: public RuleInstance{
   public:
-    ConditionalRule_false(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, bool val)
-      : RuleInstance(parentInstance, guard, val), m_localGuard(guard){}
+    ConditionalRule_false(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard)
+      : RuleInstance(parentInstance, guard, BoolDomain(false)), m_localGuard(guard){}
 
     void handleExecute();
   private:
@@ -47,8 +47,8 @@ namespace PLASMA {
 
   void ConditionalRuleRoot::handleExecute() {
     addVariable(BoolDomain(), true, LabelStr("OR"));
-    addChildRule(new ConditionalRule_true(m_id, getVariable(LabelStr("OR")), true));
-    addChildRule(new ConditionalRule_false(m_id, getVariable(LabelStr("OR")), false));
+    addChildRule(new ConditionalRule_true(m_id, getVariable(LabelStr("OR"))));
+    addChildRule(new ConditionalRule_false(m_id, getVariable(LabelStr("OR"))));
   }
 
   void ConditionalRule_true::handleExecute() {

@@ -15,6 +15,7 @@
 #include "IntervalIntDomain.hh"
 #include "DefaultPropagator.hh"
 #include "EqualityConstraintPropagator.hh"
+#include "StringDomain.hh"
 
 #include <iostream>
 #include <string>
@@ -63,7 +64,7 @@ public:
 
 class NestedGuards_0_0: public RuleInstance{
 public:
-  NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, double value);
+  NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const AbstractDomain& domain);
   void handleExecute();
   TokenId m_onlySlave;
 };
@@ -91,12 +92,12 @@ NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& toke
 void NestedGuards_0_Root::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
   addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), m_onlySlave->getStart()));
-  addChildRule(new NestedGuards_0_0(m_id, m_token->getStart(), 10)); /*!< Add child context with guards - start == 10 */
+  addChildRule(new NestedGuards_0_0(m_id, m_token->getStart(), IntervalIntDomain(8, 12))); /*!< Add child context with guards - start == 10 */
   addChildRule(new NestedGuards_0_1(m_id, m_onlySlave->getObject())); /*!< Add child context with guards - object set to singleton */
 }
 
-NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, double value)
-  : RuleInstance(parentInstance, guard, value){}
+NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const AbstractDomain& domain)
+  : RuleInstance(parentInstance, guard, domain){}
 
 void NestedGuards_0_0::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
@@ -128,8 +129,8 @@ public:
 
 class LocalVariableGuard_0_0: public RuleInstance{
 public:
-  LocalVariableGuard_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, double value)
-    : RuleInstance(parentInstance, guard, value){}
+  LocalVariableGuard_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const AbstractDomain& domain)
+    : RuleInstance(parentInstance, guard, domain){}
   void handleExecute();
 };
 
@@ -151,9 +152,24 @@ LocalVariableGuard_0_Root::LocalVariableGuard_0_Root(const RuleId& rule, const T
 
 void LocalVariableGuard_0_Root::handleExecute(){
   // Add the guard
-  ConstrainedVariableId guard = addVariable(BoolDomain(), true, LabelStr("b"));
+  StringDomain baseDomain("TestDomainType");
+  baseDomain.insert(LabelStr("A"));
+  baseDomain.insert(LabelStr("B"));
+  baseDomain.insert(LabelStr("C"));
+  baseDomain.insert(LabelStr("D"));
+  baseDomain.insert(LabelStr("E"));
+  baseDomain.close();
+  ConstrainedVariableId guard = addVariable(baseDomain, true, LabelStr("b"));
   s_guard = guard; // To allow it to be set
-  addChildRule(new LocalVariableGuard_0_0(m_id, guard, true));
+
+  // Now allocate the guard domain.
+  StringDomain guardDomain("TestDomainType");
+  guardDomain.insert(LabelStr("B"));
+  guardDomain.insert(LabelStr("C"));
+  guardDomain.insert(LabelStr("E"));
+  guardDomain.close();
+
+  addChildRule(new LocalVariableGuard_0_0(m_id, guard, guardDomain));
 }
 
 void LocalVariableGuard_0_0::handleExecute(){
@@ -293,12 +309,12 @@ private:
 
     guard = LocalVariableGuard_0_Root::getGuard();
     check_error(guard.isValid());
-    guard->specify(false); // Should not succeed
+    guard->specify(LabelStr("A")); // Should not succeed
     ce.propagate();
     check_error(t0.getSlaves().empty());
 
     guard->reset(); // Reset and try correct value
-    guard->specify(true); // Should succeed
+    guard->specify(LabelStr("B")); // Should succeed
     ce.propagate();
     check_error(t0.getSlaves().size() == 1);
 

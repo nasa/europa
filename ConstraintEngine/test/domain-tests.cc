@@ -1470,6 +1470,23 @@ namespace PLASMA {
       delete dc;
       assertTrue(AbstractDomain::canBeCompared(dom0, dom1));
 
+      // 2 numeric enumerations should be comparable, even if type names differ
+      {
+	NumericDomain d0("NumberDomain0");
+	NumericDomain d1("NumberDomain1");
+	IntervalIntDomain d2;
+	assertTrue(AbstractDomain::canBeCompared(d0, d1));
+	assertTrue(AbstractDomain::canBeCompared(d0, d2));
+      }
+
+      // 2 non numeric enumerations can only be compared if they are of the same type
+      {
+	SymbolDomain d0("SymbolicDomain");
+	StringDomain d1("SymbolicDomain");
+	SymbolDomain d2("OtherDomainType");
+	assertTrue(AbstractDomain::canBeCompared(d0, d1));
+	assertFalse(AbstractDomain::canBeCompared(d0, d2));
+      }
       return true;
     }
 

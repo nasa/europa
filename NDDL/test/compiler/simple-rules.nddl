@@ -1,4 +1,6 @@
 enum Locations {Hill, Rock, Lander};
+enum StringEnum {'s1', 's2', 's3'};
+enum NumericEnum {1, 3, 4, 10.4};
 
 class Foo {
  predicate Bar{}
@@ -13,6 +15,23 @@ class Rover{
 
  predicate Going{
   Locations _from, _to;
+ }
+
+ predicate AnyPredicate{
+  Locations v0;
+  StringEnum v1;
+  NumericEnum v2;
+  int v3;
+  float v4;
+
+  eq(v0, {Hill, Lander});
+  eq(v1, {'s1', 's2'});
+  eq(v2, {1, 4, 10.4});
+  eq(v3, [0 12]);
+  eq(v4, [-1.98 2.67]);
+  eq(v3, 8);
+  //neq(v3, +inf);
+  //neq(v4, [-inf -100]);
  }
 
  Rover(){
@@ -88,9 +107,10 @@ World::initialState{
  eq(a._location, Lander);
 
  contains(Rover.At b);
- eq(b._location, Rock);
+ eq(b._location, {Rock, Hill});
 
  leq(a.end, b.start);
+ eq(a.start, [-10000 10000]);
 
  // Test rule to use local variables
  Rover r1;
@@ -183,3 +203,6 @@ a1 starts_after a19;
 
 goal(Rover.At a20);
 a1 equals a20;
+
+goal(Rover.AnyPredicate a21);
+a21.activate();
