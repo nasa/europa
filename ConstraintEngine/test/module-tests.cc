@@ -7,7 +7,6 @@
 #include "TestSupport.hh"
 #include "Utils.hh"
 #include "Variable.hh"
-#include "InternalVariable.hh"
 #include "Constraints.hh"
 #include "ConstraintLibrary.hh"
 #include "../Libraries/IdTable.hh"
@@ -26,7 +25,6 @@
 
 #include <iostream>
 #include <cassert>
-#include <bitset>
 #include <vector>
 #include <sstream>
 #include <string>
@@ -96,12 +94,14 @@ public:
 private:
   static bool testAllocation(){
     IntervalIntDomain dom0(0, 1000);
+    const AbstractDomain& tempDomain = dom0;
+    tempDomain >> std::cout;
     Variable<IntervalIntDomain> v0(ENGINE, dom0);
     const IntervalIntDomain& dom1 = v0.getBaseDomain();
     assert (dom0 == dom1);
     assert(v0.isValid());
     assert(v0.canBeSpecified());
-    InternalVariable<IntervalIntDomain> v1(ENGINE, dom1);
+    Variable<IntervalIntDomain> v1(ENGINE, dom1, false);
     assert(!v1.canBeSpecified());
     assert(v1.isValid());
     return true;
@@ -769,20 +769,6 @@ private:
   }
 };
 
-/**
- * Keep this around for posterity
- */
-void testBitVector(){
-  bitset<20> bitvec;
-  bitvec.set();
-  assert(bitvec.any());
-  bitvec.flip();
-  assert(bitvec.none());
-  bitvec.set(8);
-  assert(bitvec.any());
-  cout << "BitVector Test PASSED" << endl;
-}
-
 int main()
 {
   initConstraintLibrary();
@@ -792,6 +778,5 @@ int main()
   runTestSuite(ConstraintTest::test); 
   runTestSuite(FactoryTest::test);
   runTestSuite(EquivalenceClassTest::test);
-  testBitVector();
   cout << "Finished" << endl;
 }
