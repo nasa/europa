@@ -48,6 +48,7 @@ namespace PLASMA {
     void playVariableSpecified(const TiXmlElement & element);
     void playVariableReset(const TiXmlElement & element);
     void playInvokeConstraint(const TiXmlElement & element);
+    void playInvokeTransaction(const TiXmlElement & element);
 
   private:
     DbClientId m_client;

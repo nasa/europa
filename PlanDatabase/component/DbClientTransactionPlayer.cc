@@ -163,92 +163,92 @@ namespace PLASMA {
       check_error(origin_token.isValid());
       check_error(target_token.isValid());
       if (strcmp(relation, "before") == 0) {
-	construct_constraint(precedes, origin, End, target, Start);
-	return;
+        construct_constraint(precedes, origin, End, target, Start);
+        return;
       }
       else if (strcmp(relation, "after") == 0) {
-	construct_constraint(precedes, target, End, origin, Start);
-	return;
+        construct_constraint(precedes, target, End, origin, Start);
+        return;
       }
       else if (strcmp(relation, "starts") == 0) {
-	construct_constraint(concurrent, origin, Start, target, Start);
-	return;
+        construct_constraint(concurrent, origin, Start, target, Start);
+        return;
       }
       else if (strcmp(relation, "ends") == 0) {
-	construct_constraint(concurrent, origin, End, target, End);
-	return;
+        construct_constraint(concurrent, origin, End, target, End);
+        return;
       }
       else if (strcmp(relation, "ends_after") == 0) {
-	construct_constraint(precedes, target, Start, origin, End);
-	return;
+        construct_constraint(precedes, target, Start, origin, End);
+        return;
       }
       else if (strcmp(relation, "ends_before") == 0) {
-	construct_constraint(precedes, origin, End, target, Start);
-	return;
+        construct_constraint(precedes, origin, End, target, Start);
+        return;
       }
       else if (strcmp(relation, "ends_after_start") == 0) {
-	construct_constraint(precedes, target, Start, origin, End);
-	return;
+        construct_constraint(precedes, target, Start, origin, End);
+        return;
       }
       else if (strcmp(relation, "starts_before_end") == 0) {
-	construct_constraint(precedes, origin, Start, target, End);
-	return;
+        construct_constraint(precedes, origin, Start, target, End);
+        return;
       }
       else if (strcmp(relation, "starts_during") == 0) {
-	construct_constraint(precedes, target, Start, origin, Start);
-	construct_constraint(precedes, origin, Start, target, End);
-	return;
+        construct_constraint(precedes, target, Start, origin, Start);
+        construct_constraint(precedes, origin, Start, target, End);
+        return;
       }
       else if (strcmp(relation, "contains_start") == 0) {
-	construct_constraint(precedes, origin, Start, target, Start);
-	construct_constraint(precedes, target, Start, origin, End);
-	return;
+        construct_constraint(precedes, origin, Start, target, Start);
+        construct_constraint(precedes, target, Start, origin, End);
+        return;
       }
       else if (strcmp(relation, "ends_during") == 0) {
-	construct_constraint(precedes, target, Start, origin, End);
-	construct_constraint(precedes, origin, End, target, End);
-	return;
+        construct_constraint(precedes, target, Start, origin, End);
+        construct_constraint(precedes, origin, End, target, End);
+        return;
       }
       else if (strcmp(relation, "contains_end") == 0) {
-	construct_constraint(precedes, origin, Start, target, End);
-	construct_constraint(precedes, target, End, origin, End);
-	return;
+        construct_constraint(precedes, origin, Start, target, End);
+        construct_constraint(precedes, target, End, origin, End);
+        return;
       }
       else if (strcmp(relation, "contains") == 0) {
-	construct_constraint(precedes, origin, Start, target, Start);
-	construct_constraint(precedes, target, End, origin, End);
-	return;
+        construct_constraint(precedes, origin, Start, target, Start);
+        construct_constraint(precedes, target, End, origin, End);
+        return;
       }
       else if (strcmp(relation, "contained_by") == 0) {
-	construct_constraint(precedes, target, Start, origin, Start);
-	construct_constraint(precedes, origin, End, target, End);
-	return;
+        construct_constraint(precedes, target, Start, origin, Start);
+        construct_constraint(precedes, origin, End, target, End);
+        return;
       }
       else if (strcmp(relation, "starts_after") == 0) {
-	construct_constraint(precedes, target, Start, origin, Start);
-	return;
+        construct_constraint(precedes, target, Start, origin, Start);
+        return;
       }
       else if (strcmp(relation, "starts_before") == 0) {
-	construct_constraint(precedes, origin, Start, target, Start);
-	return;
+        construct_constraint(precedes, origin, Start, target, Start);
+        return;
       }
       else if (strcmp(relation, "meets") == 0) {
-	construct_constraint(concurrent, origin, End, target, Start);
-	return;
+        construct_constraint(concurrent, origin, End, target, Start);
+        return;
       }
       else if (strcmp(relation, "met_by") == 0) {
-	construct_constraint(concurrent, origin, Start, target, End);
+        construct_constraint(concurrent, origin, Start, target, End);
         return;
       }
       else if ((strcmp(relation, "equal") == 0) || 
-	       (strcmp(relation, "equals") == 0)) {
-	construct_constraint(concurrent, origin, Start, target, Start);
-	construct_constraint(concurrent, origin, End, target, End);
-	return;
+               (strcmp(relation, "equals") == 0)) {
+        construct_constraint(concurrent, origin, Start, target, Start);
+        construct_constraint(concurrent, origin, End, target, End);
+        return;
       }
       else if (strcmp(relation, "any") == 0) {
-	//do nothing just create the token
-	return;
+        //do nothing just create the token
+        return;
       }
 
       // TODO: the others
@@ -413,22 +413,39 @@ namespace PLASMA {
   {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
+    const char * identifier = element.Attribute("identifier");
+    if ((identifier != NULL) || (element.FirstChildElement() == NULL)) {
+      // it's a transaction, not a constraint
+      playInvokeTransaction(element);
+      return;
+    }
+    // normal constraints
+    std::vector<ConstrainedVariableId> variables;
+    for (TiXmlElement * child_el = element.FirstChildElement() ;
+         child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+      variables.push_back(xmlAsVariable(*child_el));
+    }
+    m_client->createConstraint(name, variables);
+  }
+
+  void DbClientTransactionPlayer::playInvokeTransaction(const TiXmlElement & element)
+  {
+    const char * name = element.Attribute("name");
+    check_error(name != NULL);
+    const char * identifier = element.Attribute("identifier");
     if (strcmp(name, "close") == 0) {
-      const char * identifier = element.Attribute("identifier");
       if (identifier == NULL) {
         // close database special case
         m_client->close();
         return;
       }
-      else
-	m_client->close(identifier);
-
+      m_client->close(identifier);
       return;
     }
 
     if (strcmp(name, "constrain") == 0) {
       // constrain token(s) special case
-      const char * object_name = element.Attribute("identifier");
+      const char * object_name = identifier;
       ObjectId object = m_client->getObject(object_name);
       check_error(object.isValid(),
                   "constrain transaction refers to an undefined object: '"
@@ -453,7 +470,7 @@ namespace PLASMA {
 
     if (strcmp(name, "free") == 0) {
       // free token special case
-      const char * object_name = element.Attribute("identifier");
+      const char * object_name = identifier;
       ObjectId object = m_client->getObject(object_name);
       check_error(object.isValid(),
                   "free transaction refers to an undefined object: '"
@@ -470,7 +487,6 @@ namespace PLASMA {
 
     if (strcmp(name, "activate") == 0) {
       // activate token special case
-      const char * identifier = element.Attribute("identifier");
       std::string token_name = identifier;
       TokenId token = m_tokens[token_name];
       check_error(token.isValid(), "Invalid token name '" + token_name + "' for activation.");
@@ -479,7 +495,6 @@ namespace PLASMA {
     }
     if (strcmp(name, "merge") == 0) {
       // merge token special case
-      const char * identifier = element.Attribute("identifier");
       std::string token_name = identifier;
       TokenId token = m_tokens[token_name];
       check_error(token.isValid());
@@ -492,7 +507,6 @@ namespace PLASMA {
     }
     if (strcmp(name, "reject") == 0) {
       // reject token special case
-      const char * identifier = element.Attribute("identifier");
       std::string token_name = identifier;
       TokenId token = m_tokens[token_name];
       check_error(token.isValid());
@@ -501,7 +515,6 @@ namespace PLASMA {
     }
     if (strcmp(name, "cancel") == 0) {
       // cancel token special case
-      const char * identifier = element.Attribute("identifier");
       std::string token_name = identifier;
       TokenId token = m_tokens[token_name];
       check_error(token.isValid());
@@ -510,7 +523,6 @@ namespace PLASMA {
     }
     if (strcmp(name, "specify") == 0) {
       // specify variable special case
-      const char * identifier = element.Attribute("identifier");
       ConstrainedVariableId variable = parseVariable(identifier);
       TiXmlElement * value_el = element.FirstChildElement();
       check_error(value_el != NULL);
@@ -523,13 +535,7 @@ namespace PLASMA {
       }
       return;
     }
-    // normal constraints
-    std::vector<ConstrainedVariableId> variables;
-    for (TiXmlElement * child_el = element.FirstChildElement() ;
-         child_el != NULL ; child_el = child_el->NextSiblingElement()) {
-      variables.push_back(xmlAsVariable(*child_el));
-    }
-    m_client->createConstraint(name, variables);
+    check_error(ALWAYS_FAILS, "unexpected transaction invoked: '" + std::string(name) + "'");
   }
 
   //! string input functions
