@@ -26,6 +26,8 @@
 #include <vector>
 #include <string>
 
+#include <fstream>
+
 using namespace Prototype;
 using namespace std;
 
@@ -1458,34 +1460,192 @@ private:
     return true;
   }
 
+  /**
+   * @brief Create a new EnumeratedDomain from data read from the stream.
+   * @note Incomplete, but should allow tests to pass.
+   */
+  static AbstractDomain* readSet(std::istream& in) {
+    char ch;
+    AbstractDomain *dom;
+    for (in.get(ch); ch != '}' && in.good(); in.get(ch)) {
+    }
+    assert(ch == '}');
+    return(0);
+  }
+
+  /**
+   * @brief Create a new IntervalDomain from data read from the stream.
+   * @note Incomplete, but should allow tests to pass.
+   */
+  static AbstractDomain* readInterval(std::istream& in) {
+    char ch;
+    AbstractDomain *dom;
+    for (in.get(ch); ch != ']' && in.good(); in.get(ch)) {
+    }
+    assert(ch == ']');
+    return(0);
+  }
+
+  /**
+   * @brief Describes one constraint function test case for testArbitraryConstraints().
+   * @see testArbitraryConstraints
+   */
+  class ConstraintTestCase {
+  public:
+
+    /**
+     * @brief Only constructor, requiring all of the info.
+     */
+    ConstraintTestCase(std::string cN, std::string fN, unsigned int l,
+                       std::list<AbstractDomain*> doms)
+      : m_constraintName(cN), m_fileName(fN), m_line(l),
+        m_domains(doms) {
+    }
+
+    std::string m_constraintName; /**< Equal, AddEqual, etc. */
+    std::string m_fileName; /**< File containing the "source" of the test case.  Printed when test fails. */
+    unsigned int m_line; /**< Line within file of test case.  Printed when test fails. */
+    std::list<AbstractDomain*> m_domains; /**< Input and (expected) output domains, interleaved.
+                                           * That is, first is first input domain, second is first output domain,
+                                           * third is second input domain, fourth is second output domain, etc.
+                                           */
+  };
+
+  /**
+   * @brief Read constraint test cases from the given file, adding them to the
+   * list passed in.
+   */
+  static bool readTestCases(std::string file, std::list<ConstraintTestCase>& testCases) {
+    ifstream tCS(file.data()); /**< testCaseStream. */
+    assertTrue(tCS.is_open() && tCS.good());
+    unsigned line = 1; /**< Line within file. */
+    std::string constraintName; /**< Name of a constraint, from each line of file. */
+    char buf[20]; /**< For single "words" of input. */
+    unsigned int cnt; /**< For test number. */
+    char ch; /**< For braces, brackets, and other miscellany. */
+    AbstractDomain *domain = 0;
+    while (tCS.good() && !tCS.eof()) {
+      tCS.width(5);
+      tCS >> buf;
+      if (tCS.eof())
+        break;
+      assertTrue(strcmp(buf, "test") == 0 && !tCS.eof() && tCS.good());
+      tCS >> cnt;
+      assert(cnt == line && !tCS.eof() && tCS.good());
+      constraintName.clear();
+      tCS.get(ch);
+      assertTrue(ch == ' ' && !tCS.eof() && tCS.good());
+      for (tCS.get(ch); ch != ' ' && tCS.good(); tCS.get(ch))
+        constraintName += ch;
+      assertTrue(constraintName.size() > 0 && !tCS.eof() && tCS.good());
+      tCS.width(7);
+      tCS >> buf;
+      assertTrue(strcmp(buf, "inputs") == 0 && !tCS.eof() && tCS.good());
+      tCS.get(ch);
+      assertTrue(ch == ' ' && !tCS.eof() && tCS.good());
+      // Build input domains until 'o'utputs is seen, then output domains until end of line.
+      // Details depend on NewPlan/Libraries/Domain.cc::Domain::print() or similar, but
+      // this is meant to be fairly flexible so that new tests can be written by hand.
+      std::list<AbstractDomain*> domains, inputDoms, outputDoms;
+      bool readingInputDoms = true;
+      for (tCS.get(ch); ch != '\n' && tCS.good(); tCS.get(ch)) {
+        switch (ch) {
+        case ' ': // Blank between fields; ignore it.
+          break;
+        case '{': // Singleton or enumeration but could be IntervalDomain or IntervalIntDomain.
+          domain = readSet(tCS);
+          // This if is temporary, until readSet is fully implemented.
+          if (domain == 0)
+            break;
+          assertTrue(domain != 0 && !tCS.eof() && tCS.good());
+          if (readingInputDoms)
+            inputDoms.push_back(domain);
+          else
+            outputDoms.push_back(domain);
+          break;
+        case '[': // Interval, real or integer, but could use 'Infinity' and variations.
+          domain = readInterval(tCS);
+          // This if is temporary, until readInterval is fully implemented.
+          if (domain == 0)
+            break;
+          assertTrue(domain != 0 && !tCS.eof() && tCS.good());
+          if (readingInputDoms)
+            inputDoms.push_back(domain);
+          else
+            outputDoms.push_back(domain);
+          break;
+        case 'o':
+          tCS.width(7);
+          tCS >> buf;
+          assertTrue(strcmp(buf, "utputs") == 0 && !tCS.eof() && tCS.good());
+          readingInputDoms = false;
+          break;
+        default:
+          assertTrue(false);
+          break;
+        } // switch (ch): '{', '[', or 'o'
+      } // for tCS.get(ch); ch != '\n' && tCS.good(); tCS.get(ch)
+
+      // If no domains, something above isn't completely implemented yet.
+      if (inputDoms.size() == 0 && outputDoms.size() == 0) {
+        line++; // To preserve comparison to cnt in assertion.
+        continue;
+      }
+
+      // OK, done with a line, each line being a test, so
+      // interleave the input and output domains to make
+      // things easier below ...
+      assertTrue(inputDoms.size() == outputDoms.size() && !tCS.eof() && tCS.good());
+      domains.clear();
+      while (!inputDoms.empty() && !outputDoms.empty()) {
+        domains.push_back(inputDoms.front());
+        inputDoms.pop_front();
+        domains.push_back(outputDoms.front());
+        outputDoms.pop_front();
+      }
+      // ... and add this test to the list:
+      testCases.push_back(ConstraintTestCase(constraintName, file, line++, domains));
+    } // while tCS.good() && !tCS.eof()
+    return(tCS.eof());
+  }
+
+  /**
+   * @brief Run arbtrary constraints with arbitrary input domains,
+   * comparing the propagated domains with the expected output domains.
+   */
   static bool testArbitraryConstraints() {
     // Input to this test: a list of constraint calls and expected output domains.
-    std::list<std::pair<LabelStr, std::list<AbstractDomain*> > > tests;
+    std::list<ConstraintTestCase> tests;
 
-    // In the long run, this information will be read from an input file.
-    // For now, just initialize it in a similar form. --wedgingt 2004 Mar 10
+    // This kind of information can also be read from a file, as below.
+    std::string constraintName("Equal");
     std::list<AbstractDomain*> domains;
     domains.push_back(new IntervalIntDomain(1, 10)); // first input domain
     domains.push_back(new IntervalIntDomain(2, 10)); // expected value of first output domain
     domains.push_back(new IntervalIntDomain(2, 11)); // second input domain
     domains.push_back(new IntervalIntDomain(2, 10)); // expected value of second output domain
-    std::pair<LabelStr, std::list<AbstractDomain*> > oneTest(LabelStr("Equal"), domains);
-    tests.push_back(oneTest);
+    tests.push_back(ConstraintTestCase(constraintName, __FILE__, __LINE__, std::list<AbstractDomain*>(domains)));
+
+    // Try reading "test cases" file of NewPlan/ModuleTests/ConstraintLibrary/testCLib,
+    //   committed here as CLibTestCases after some minor editing to use '[]' for all
+    //   numeric domains since Europa prints those using '{}' syntax and the prototype
+    //   treats as intervals all numeric domains that aren't explicitly identified as
+    //   enumerations.
+    assertTrue(readTestCases(std::string("ConstraintEngine/CLibTestCases"), tests));
 
     // Run each test, in the same order they were read/init'd.
-    while (!tests.empty()) {
-      oneTest = tests.front();
-      assertTrue(oneTest.second.size() % 2 == 0);
-      tests.pop_front();
+    for ( ; !tests.empty(); tests.pop_front()) {
+      std::list<AbstractDomain*> testDomains(tests.front().m_domains);
+      assertTrue(testDomains.size() % 2 == 0);
 
       // Build the scope and the list of expected output domains.
       std::vector<ConstrainedVariableId> scope;
       std::list<AbstractDomain*> outputDoms;
       ConstrainedVariableId cVarId;
-      while (!oneTest.second.empty()) {
-        AbstractDomain *domPtr = oneTest.second.front();
+      while (!testDomains.empty()) {
+        AbstractDomain *domPtr = testDomains.front();
         assertTrue(domPtr != 0);
-        oneTest.second.pop_front();
+        testDomains.pop_front();
         AbstractDomain::DomainType domType = domPtr->getType();
 
         // This is ugly and precludes support for USER_DEFINED domains
@@ -1528,25 +1688,28 @@ private:
 
         delete domPtr;
         scope.push_back(cVarId);
-        domPtr = oneTest.second.front();
+        domPtr = testDomains.front();
         assertTrue(domPtr != 0);
         outputDoms.push_back(domPtr);
-        oneTest.second.pop_front();
+        testDomains.pop_front();
       }
 
       // Create and (fully) execute the constraint.
-      ConstraintId constraint = ConstraintLibrary::createConstraint(oneTest.first, ENGINE, scope);
+      ConstraintId constraint = ConstraintLibrary::createConstraint(LabelStr(tests.front().m_constraintName), ENGINE, scope);
       assertTrue(ENGINE->pending());
       while (ENGINE->pending())
         ENGINE->propagate();
 
-      // compare derived domains with domains remaining in oneTest.second.
+      // Compare derived domains with outputDoms.
       std::vector<ConstrainedVariableId>::iterator scopeIter = scope.begin();
       for ( ; scopeIter != scope.end() && !outputDoms.empty(); scopeIter++) {
         AbstractDomain *domPtr = outputDoms.front();
         outputDoms.pop_front();
-        if ((*scopeIter)->lastDomain() != *domPtr)
+        if ((*scopeIter)->lastDomain() != *domPtr) {
+          std::cerr << tests.front().m_fileName << ":" << tests.front().m_line
+                    << ": unexpected result propagating " << tests.front().m_constraintName;
           throw Prototype::generalUnknownError;
+        }
         delete domPtr;
       }
 
