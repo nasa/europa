@@ -26,8 +26,6 @@ namespace Prototype
   class AbstractDomain;
   class DomainListener;
   typedef Europa::Id<DomainListener> DomainListenerId;
-  class Variable;
-  typedef Europa::Id<Variable> VariableId;
   class ConstrainedVariable;
   typedef Europa::Id<ConstrainedVariable> ConstrainedVariableId;
   class VariableChangeListener;

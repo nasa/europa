@@ -4,8 +4,7 @@
 #include "ConstraintEngine.hh"
 #include "ConstraintLibrary.hh"
 #include "DefaultPropagator.hh"
-#include "AbstractVar.hh"
-#include "ConstrainedVariable.hh"
+#include "Variable.hh"
 #include "EqualityConstraintPropagator.hh"
 
 #include <iostream>
@@ -80,16 +79,16 @@ void testLabelSetEqualityPerformance(const ConstraintEngineId& ce){
   LabelSet labelSet(values);
 
 
-  VariableImpl<LabelSet> v0(ce, labelSet);
-  VariableImpl<LabelSet> v1(ce, labelSet);
-  VariableImpl<LabelSet> v2(ce, labelSet);
-  VariableImpl<LabelSet> v3(ce, labelSet);
-  VariableImpl<LabelSet> v4(ce, labelSet);
-  VariableImpl<LabelSet> v5(ce, labelSet);
-  VariableImpl<LabelSet> v6(ce, labelSet);
-  VariableImpl<LabelSet> v7(ce, labelSet);
-  VariableImpl<LabelSet> v8(ce, labelSet);
-  VariableImpl<LabelSet> v9(ce, labelSet);
+  Variable<LabelSet> v0(ce, labelSet);
+  Variable<LabelSet> v1(ce, labelSet);
+  Variable<LabelSet> v2(ce, labelSet);
+  Variable<LabelSet> v3(ce, labelSet);
+  Variable<LabelSet> v4(ce, labelSet);
+  Variable<LabelSet> v5(ce, labelSet);
+  Variable<LabelSet> v6(ce, labelSet);
+  Variable<LabelSet> v7(ce, labelSet);
+  Variable<LabelSet> v8(ce, labelSet);
+  Variable<LabelSet> v9(ce, labelSet);
 
   std::vector<ConstrainedVariableId> variables;
 
@@ -149,13 +148,13 @@ void testLabelSetEqualityPerformance(const ConstraintEngineId& ce){
   variables.push_back(v8.getId());
   variables.push_back(v9.getId());
 
-  VariableImpl<LabelSet>*  p_v0 = (VariableImpl<LabelSet>*) v0.getId();
+  Variable<LabelSet>*  p_v0 = (Variable<LabelSet>*) v0.getId();
 
 
   for(int i = 10; i > 2; i--){
     values.pop_back();
     LabelSet newDomain(values);
-    VariableImpl<LabelSet>*  p_v = (VariableImpl<LabelSet>*) variables[i-1];
+    Variable<LabelSet>*  p_v = (Variable<LabelSet>*) variables[i-1];
     p_v->specify(newDomain);
     ce->propagate();
     assert(ce->constraintConsistent());
@@ -177,16 +176,16 @@ void outerLoopLabelSetEqualConstraint(bool useEquivalenceClasses){
 
 void testIntervalEqualityPerformance(const ConstraintEngineId& ce){
   IntervalIntDomain intSort(-1000, 1000);
-  VariableImpl<IntervalIntDomain> v0(ce, intSort);
-  VariableImpl<IntervalIntDomain> v1(ce, intSort);
-  VariableImpl<IntervalIntDomain> v2(ce, intSort);
-  VariableImpl<IntervalIntDomain> v3(ce, intSort);
-  VariableImpl<IntervalIntDomain> v4(ce, intSort);
-  VariableImpl<IntervalIntDomain> v5(ce, intSort);
-  VariableImpl<IntervalIntDomain> v6(ce, intSort);
-  VariableImpl<IntervalIntDomain> v7(ce, intSort);
-  VariableImpl<IntervalIntDomain> v8(ce, intSort);
-  VariableImpl<IntervalIntDomain> v9(ce, intSort);
+  Variable<IntervalIntDomain> v0(ce, intSort);
+  Variable<IntervalIntDomain> v1(ce, intSort);
+  Variable<IntervalIntDomain> v2(ce, intSort);
+  Variable<IntervalIntDomain> v3(ce, intSort);
+  Variable<IntervalIntDomain> v4(ce, intSort);
+  Variable<IntervalIntDomain> v5(ce, intSort);
+  Variable<IntervalIntDomain> v6(ce, intSort);
+  Variable<IntervalIntDomain> v7(ce, intSort);
+  Variable<IntervalIntDomain> v8(ce, intSort);
+  Variable<IntervalIntDomain> v9(ce, intSort);
 
   std::vector<ConstrainedVariableId> variables;
 
@@ -246,7 +245,7 @@ void testIntervalEqualityPerformance(const ConstraintEngineId& ce){
   variables.push_back(v8.getId());
   variables.push_back(v9.getId());
 
-  VariableImpl<IntervalIntDomain>*  p_v0 = (VariableImpl<IntervalIntDomain>*) v0.getId();
+  Variable<IntervalIntDomain>*  p_v0 = (Variable<IntervalIntDomain>*) v0.getId();
 
   int lb = -1000;
   int ub = 1000;
@@ -255,7 +254,7 @@ void testIntervalEqualityPerformance(const ConstraintEngineId& ce){
     lb += 100;
     ub -= 100;
     IntervalIntDomain newDomain(lb, ub);
-    VariableImpl<IntervalIntDomain>*  p_v = (VariableImpl<IntervalIntDomain>*) variables[i-1];
+    Variable<IntervalIntDomain>*  p_v = (Variable<IntervalIntDomain>*) variables[i-1];
     p_v->specify(newDomain);
     ce->propagate();
     assert(ce->constraintConsistent());

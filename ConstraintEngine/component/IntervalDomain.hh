@@ -130,7 +130,6 @@ namespace Prototype{
   protected:
     IntervalDomain(double lb, double ub, bool finite, bool closed, const DomainListenerId& listener);
     IntervalDomain(const IntervalDomain& org);
-    IntervalDomain(Europa::Domain& org);
 
     /**
      * @brief Helper method to test if the given value can be considered an integer. Used in derived class.

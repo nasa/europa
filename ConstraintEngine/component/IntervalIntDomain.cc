@@ -11,11 +11,6 @@ namespace Prototype {
   IntervalIntDomain::IntervalIntDomain(const IntervalIntDomain& org)
     :IntervalDomain(org){}
 
-  IntervalIntDomain::IntervalIntDomain(Europa::Domain& org)
-    : IntervalDomain(org) {
-    check_error(org.getSort() == Europa::intSort);
-  }
-
   IntervalIntDomain& IntervalIntDomain::operator=(const IntervalIntDomain& org){
     IntervalDomain::operator=(org);
     return(*this);
@@ -37,10 +32,6 @@ namespace Prototype {
     int intValue = (int) value;
     double dblValue =(double) intValue;
     check_error(dblValue == value) // confirms no loss in precision
-  }
-
-  const Europa::Domain IntervalIntDomain::makeDomain() const {
-    return Europa::Domain(Europa::intSort, (int) m_lb, (int) m_ub);
   }
 
   const AbstractDomain::DomainType& IntervalIntDomain::getType() const{

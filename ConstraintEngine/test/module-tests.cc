@@ -6,7 +6,7 @@
  */
 #include "ConstraintEngine.hh"
 #include "DefaultPropagator.hh"
-#include "AbstractVar.hh"
+#include "Variable.hh"
 #include "ConstraintFactory.hh"
 #include "ConstraintLibrary.hh"
 #include "../Libraries/IdTable.hh"
@@ -400,7 +400,7 @@ public:
 private:
   static bool testAllocation(){
     IntervalIntDomain dom0(0, 1000);
-    VariableImpl<IntervalIntDomain> v0(ENGINE, dom0);
+    Variable<IntervalIntDomain> v0(ENGINE, dom0);
     const IntervalIntDomain& dom1 = v0.getBaseDomain();
     assert (dom0 == dom1);
     assert(v0.isValid());
@@ -426,11 +426,11 @@ private:
   static bool testAddEqualConstraint()
   {
     std::vector<ConstrainedVariableId> variables;
-    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
-    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v1.getId());
-    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
     variables.push_back(v2.getId());
     AddEqualConstraint c0(ENGINE, variables);
     ENGINE->propagate();
@@ -444,9 +444,9 @@ private:
   static bool testEqualConstraint()
   {
     std::vector<ConstrainedVariableId> variables;
-    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
-    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(-100, 1));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(-100, 1));
     variables.push_back(v1.getId());
     EqualConstraint c0(ENGINE, variables);
     ENGINE->propagate();
@@ -466,9 +466,9 @@ private:
 
 
     variables.clear();
-    VariableImpl<LabelSet> v2(ENGINE, ls1);
+    Variable<LabelSet> v2(ENGINE, ls1);
     variables.push_back(v2.getId());
-    VariableImpl<LabelSet> v3(ENGINE, ls1);
+    Variable<LabelSet> v3(ENGINE, ls1);
     variables.push_back(v3.getId());
     EqualConstraint c1(ENGINE, variables);
     ENGINE->propagate();
@@ -483,7 +483,7 @@ private:
     assert(!v3.getDerivedDomain().isMember(Prototype::LabelStr("E")));
 
     variables.clear();
-    VariableImpl<LabelSet> v4(ENGINE, ls0);
+    Variable<LabelSet> v4(ENGINE, ls0);
     variables.push_back(v2.getId());
     variables.push_back(v4.getId());
     EqualConstraint c2(ENGINE, variables);
@@ -500,17 +500,17 @@ private:
   static bool testBasicPropagation(){
     std::vector<ConstrainedVariableId> variables;
     // v0 == v1
-    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
-    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v1.getId());
     EqualConstraint c0(ENGINE, variables);
 
     // v2 + v3 == v0
     variables.clear();
-    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 4));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 4));
     variables.push_back(v2.getId());
-    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v3.getId());
     variables.push_back(v0.getId());
     AddEqualConstraint c1(ENGINE, variables);
@@ -518,9 +518,9 @@ private:
 
     // v4 + v5 == v1
     variables.clear();
-    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v4.getId());
-    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(1, 1000));
+    Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(1, 1000));
     variables.push_back(v5.getId());
     variables.push_back(v1.getId());
     AddEqualConstraint c2(ENGINE, variables);
@@ -534,26 +534,26 @@ private:
   static bool testForceInconsistency(){
     std::vector<ConstrainedVariableId> variables;
     // v0 == v1
-    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
-    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v1.getId());
     EqualConstraint c0(ENGINE, variables);
     
     // v2 + v3 == v0
     variables.clear();
-    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 1));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v2.getId());
-    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v3.getId());
     variables.push_back(v0.getId());
     AddEqualConstraint c1(ENGINE, variables);
 
     // v4 + v5 == v1
     variables.clear();
-    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(2, 2));
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(2, 2));
     variables.push_back(v4.getId());
-    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(2, 2));
+    Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(2, 2));
     variables.push_back(v5.getId());
     variables.push_back(v1.getId());
     AddEqualConstraint c2(ENGINE, variables);
@@ -573,7 +573,7 @@ private:
 
     int emptyCount(0);
     for(std::vector<ConstrainedVariableId>::iterator it = variables.begin(); it != variables.end(); ++it){
-      VariableImpl<IntervalIntDomain>* id = (VariableImpl<IntervalIntDomain>*) (*it);
+      Variable<IntervalIntDomain>* id = (Variable<IntervalIntDomain>*) (*it);
       assert(id->getDerivedDomain().isEmpty());
       if(id->lastDomain().isEmpty())
 	emptyCount++;
@@ -586,27 +586,27 @@ private:
   {
     std::vector<ConstrainedVariableId> variables;
     // v0 == v1
-    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
-    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v1.getId());
     EqualConstraint c0(ENGINE, variables);
 
 
     // v2 + v3 == v0
     variables.clear();
-    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v2.getId());
-    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v3.getId());
     variables.push_back(v0.getId());
     AddEqualConstraint c1(ENGINE, variables);
 
     // v4 + v5 == v1
     variables.clear();
-    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v4.getId());
-    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v5.getId());
     variables.push_back(v1.getId());
     AddEqualConstraint c2(ENGINE, variables);
@@ -639,18 +639,18 @@ private:
   {
     std::vector<ConstrainedVariableId> variables;
     // v0 == v1
-    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
-    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v1.getId());
     ConstraintId c0((new EqualConstraint(ENGINE, variables))->getId());
 
 
     // v2 + v3 == v0
     variables.clear();
-    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v2.getId());
-    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v3.getId());
     variables.push_back(v0.getId());
     ConstraintId c1((new AddEqualConstraint(ENGINE, variables))->getId());
@@ -664,7 +664,7 @@ private:
     assert(ENGINE->constraintConsistent());
 
     variables.clear();
-    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 1));
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v0.getId());
     variables.push_back(v4.getId());
     ConstraintId c2((new EqualConstraint(ENGINE, variables))->getId());
@@ -680,7 +680,7 @@ private:
     /* Add a constraint to force an inconsistency and show that consistency can be restored by removing the
       constraint */
     variables.clear();
-    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 0));
+    Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 0));
     variables.push_back(v0.getId());
     variables.push_back(v5.getId());
     ConstraintId c3((new EqualConstraint(ENGINE, variables))->getId());
@@ -726,8 +726,8 @@ public:
 
 private:
   static bool testBasicAllocation(){
-    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
     EquivalenceClassCollection g0;
     g0.addConnection(v0.getId(), v1.getId());
     assert(g0.getGraphCount() == 1);
@@ -736,9 +736,9 @@ private:
 
   static bool testConstructionOfSingleGraph(){
     EquivalenceClassCollection g0;
-    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
-    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
     g0.addConnection(v0.getId(), v1.getId());
     g0.addConnection(v1.getId(), v2.getId());
     assert(g0.getGraphCount() == 1);
@@ -746,8 +746,8 @@ private:
     assert(g0.getGraphKey(v1.getId()) == graphKey);
     assert(g0.getGraphKey(v2.getId()) == graphKey);
 
-    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 100));
-    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(-100, 100));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 100));
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(-100, 100));
     g0.addConnection(v2.getId(), v3.getId());
     g0.addConnection(v3.getId(), v4.getId());
     assert(g0.getGraphCount() == 1);
@@ -757,15 +757,15 @@ private:
 
   static bool testSplittingOfSingleGraph(){
     EquivalenceClassCollection g0;
-    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
-    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
-    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 100));
-    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(-100, 100));
-    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(-100, 1000));
-    VariableImpl<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(-100, 100));
-    VariableImpl<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(-100, 100));
-    VariableImpl<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(-100, 100));
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 100));
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(-100, 100));
+    Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(-100, 1000));
+    Variable<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(-100, 100));
+    Variable<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(-100, 100));
+    Variable<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(-100, 100));
     g0.addConnection(v0.getId(), v1.getId());
     g0.addConnection(v1.getId(), v2.getId());
     g0.addConnection(v2.getId(), v3.getId());
@@ -794,15 +794,15 @@ private:
 
   static bool testMultiGraphMerging(){
     EquivalenceClassCollection g0;
-    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
-    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
-    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 100));
-    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(-100, 100));
-    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(-100, 1000));
-    VariableImpl<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(-100, 100));
-    VariableImpl<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(-100, 100));
-    VariableImpl<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(-100, 100));
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 100));
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(-100, 100));
+    Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(-100, 1000));
+    Variable<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(-100, 100));
+    Variable<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(-100, 100));
+    Variable<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(-100, 100));
     // First group
     g0.addConnection(v0.getId(), v1.getId());
     g0.addConnection(v1.getId(), v2.getId());
@@ -842,17 +842,17 @@ private:
     {
       std::vector<ConstrainedVariableId> variables;
       // v0 == v1
-      VariableImpl<IntervalIntDomain> v0(ce, IntervalIntDomain(1, 10));
+      Variable<IntervalIntDomain> v0(ce, IntervalIntDomain(1, 10));
       variables.push_back(v0.getId());
-      VariableImpl<IntervalIntDomain> v1(ce, IntervalIntDomain(-100, 100));
+      Variable<IntervalIntDomain> v1(ce, IntervalIntDomain(-100, 100));
       variables.push_back(v1.getId());
       EqualConstraint c0(ce, variables);
       ce->propagate();
 
       variables.clear();
-      VariableImpl<IntervalIntDomain> v2(ce, IntervalIntDomain(8, 10));
+      Variable<IntervalIntDomain> v2(ce, IntervalIntDomain(8, 10));
       variables.push_back(v2.getId());
-      VariableImpl<IntervalIntDomain> v3(ce, IntervalIntDomain(10, 200));
+      Variable<IntervalIntDomain> v3(ce, IntervalIntDomain(10, 200));
       variables.push_back(v3.getId());
       EqualConstraint c1(ce, variables);
       ce->propagate();
@@ -870,7 +870,7 @@ private:
       assert(v0.getDerivedDomain().getSingletonValue() == 10);
 
       variables.clear();
-      VariableImpl<IntervalIntDomain> v4(ce, IntervalIntDomain(1, 9));
+      Variable<IntervalIntDomain> v4(ce, IntervalIntDomain(1, 9));
       variables.push_back(v3.getId());
       variables.push_back(v4.getId());
       ConstraintId c3((new EqualConstraint(ce, variables))->getId());
@@ -888,35 +888,13 @@ private:
   }
 };
 
-class IntegrationTest
-{
-public:
-  static bool test() {
-    runTest(domainConversion, "domainConversion");
-    return true;
-  }
-
-private:
-  static bool domainConversion(){
-    Europa::Domain intDomain(Europa::intSort, 10, 20);
-    IntervalIntDomain dom0(intDomain);
-    Europa::Domain intDomain2 = dom0.makeDomain();
-    assert(intDomain == intDomain2);
-    assert(intDomain.isFinite());
-    IntervalIntDomain dom1(intDomain2);
-    assert(dom0 == dom1);
-    return true;
-  }
-};
-
 int main()
 {
   runTestSuite(LabelTest::test, "LabelTests"); 
   runTestSuite(DomainTest::test, "DomainTests");  
   runTestSuite(VariableTest::test, "VariableTests"); 
   runTestSuite(ConstraintTest::test, "ConstraintTests"); 
-  runTestSuite(FactoryTest::test, "FactoryTests");  
-  runTestSuite(IntegrationTest::test, "IntegrationTests"); 
+  runTestSuite(FactoryTest::test, "FactoryTests");
   runTestSuite(EquivalenceClassTest::test, "EquivalenceClassTests"); 
   cout << "Finished" << endl;
 }

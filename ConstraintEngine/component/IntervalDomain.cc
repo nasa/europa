@@ -19,13 +19,6 @@ namespace Prototype {
     : AbstractDomain(org.m_finite, org.m_closed, DomainListenerId::noId()), m_ub(org.m_ub), m_lb(org.m_lb){}
 
 
-  IntervalDomain::IntervalDomain(Europa::Domain& org)
-    : AbstractDomain(org){
-    check_error(org.isInterval());
-    m_ub = org.getUpperBound().getRealValue();
-    m_lb = org.getLowerBound().getRealValue();
-  }
-
   IntervalDomain& IntervalDomain::operator=(const IntervalDomain& org){
     AbstractDomain::operator=(org);
     relax(org.m_lb, org.m_ub);
