@@ -672,13 +672,11 @@ namespace Prototype {
       }
       const char * type = value.Attribute("type");
       check_error(type != NULL);
-           std::cout << " DEBUG type == " << type << std::endl;
       std::vector<ConstructorArgument> arguments;
       for (TiXmlElement * child_el = value.FirstChildElement() ;
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
         const AbstractDomain * domain = xmlAsAbstractDomain(*child_el);
 
-   	    std::cout << " DEBUG looping over arguments - domain type == " << domain->getType() << std::endl;
         std::string type = domainTypeString(domain);
         arguments.push_back(ConstructorArgument(LabelStr(type.c_str()), domain));
       }
@@ -693,7 +691,6 @@ namespace Prototype {
       return (double)object;
     }
     const char * value_st = value.Attribute("value");
-         std::cout << "DEBUG value_st == " << value_st << std::endl;
     check_error(value_st != NULL, "missing value in transaction xml");
     if ((strcmp(tag, "bool") == 0) || (strcmp(tag, "BOOL") == 0) ||
         (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) ||
