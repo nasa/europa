@@ -249,7 +249,8 @@ namespace Prototype {
     
     for(std::set<int>::const_iterator it = m_variablesForDeletion.begin(); it != m_variablesForDeletion.end(); ++it) {
       check_error(m_tnetVariables.find((*it)) != m_tnetVariables.end());
-      for (std::map<int, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) {
+      std::map<int, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin();
+      while (varIt != m_tnetVariableConstraints.end()) {
 
 	if (varIt->first == *it) {
 
@@ -257,7 +258,9 @@ namespace Prototype {
 	    (*lit)->notifyConstraintDeleted(varIt->first, varIt->second);
 
 	  m_tnet->removeTemporalConstraint(varIt->second);
-	  m_tnetVariableConstraints.erase(varIt);
+	  m_tnetVariableConstraints.erase(varIt++);
+	} else {
+	  ++varIt;
 	}
       }
 

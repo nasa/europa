@@ -274,9 +274,10 @@ namespace Prototype {
 	    break;
 	  }
 	  else
-	    m_values.erase(it);
+	    m_values.erase(it++);
+	} else {
+	  ++it;
 	}
-	++it;
       }
     }
     else {
