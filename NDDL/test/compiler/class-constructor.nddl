@@ -45,7 +45,7 @@ class Foo {
 class Bar extends Foo {
  float m_8;
  Bar(float m8, World w){
-  //Foo(w, 10, true);
+  super(w, 10, true);
   m_8 = m8;
  } 
 }
