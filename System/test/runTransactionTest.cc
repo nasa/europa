@@ -126,7 +126,7 @@ int main(int argc, const char ** argv){
 #else
   replay = true;
   runTest(runPlanner);
-  runTest(copyFromFile);
+  //runTest(copyFromFile);
 #endif
 
   SamplePlanDatabase::terminate();

@@ -29,7 +29,7 @@ namespace Prototype {
       ObjectDecisionPointId dec = it->second;
       check_error(dec.isValid());
       m_objDecs.erase(it++);
-      delete (ObjectDecisionPoint*) dec;
+      m_dm->deleteDecision(dec);
       publishRemovedDecision(object);
     }
   }
@@ -121,10 +121,9 @@ namespace Prototype {
       if (deleting) {
 	ConstrainedVariableDecisionPointId dec = it->second;
 	check_error(dec.isValid());
-	m_dm->getRetractedBuffer().erase(dec);
 	sortedVars.erase(dec);
 	varMap.erase(it);
-	delete (DecisionPoint*) dec;
+	m_dm->deleteDecision(dec);
       } else {
 	sortedVars.erase(it->second);
 	varMap.erase(it);
@@ -166,11 +165,10 @@ namespace Prototype {
     if (it != tokMap.end()) {
       if (deleting) {
 	TokenDecisionPointId dec = it->second;
-	m_dm->getRetractedBuffer().erase(dec);
 	sortedToks.erase(dec);
 	check_error(dec.isValid());
 	tokMap.erase(it);
-	delete (TokenDecisionPoint*) dec;
+	m_dm->deleteDecision(dec);
       }
       else {
 	sortedToks.erase(it->second);
@@ -198,10 +196,9 @@ namespace Prototype {
       if (it->second->getToken()->getKey() == token->getKey()) {
 	if (deleting) {
 	  DecisionPointId dec = it->second;
-	  m_dm->getRetractedBuffer().erase(dec);
 	  check_error(dec.isValid());
 	  m_objDecs.erase(it++);
-	  delete (DecisionPoint*) dec;
+	  m_dm->deleteDecision(dec);
 	}
 	else m_objDecs.erase(it++);
 	publishRemovedDecision(object);

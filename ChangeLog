@@ -1,3 +1,8 @@
+M_19:
+1. Fixed some bugs in the planner in order to get new test case working. See
+System/test/resource-backtrack.nddl
+2. Include foreach example in system tests. Still have to get it working with file based copy.
+
 M_18:
 1. Agent Database has been added. New module for multi-threaded access. Baseline version.
 2. A number of synchronization problems with Id's in Resources and in the Planner discovered and fixed.
