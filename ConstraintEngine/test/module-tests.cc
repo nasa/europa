@@ -453,6 +453,47 @@ private:
     assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
     assert(v1.getDerivedDomain().getSingletonValue() == 1);
+
+
+    std::list<Prototype::LabelStr> values;
+    values.push_back(Prototype::LabelStr("A"));
+    LabelSet ls0(values);
+    values.push_back(Prototype::LabelStr("B"));
+    values.push_back(Prototype::LabelStr("C"));
+    values.push_back(Prototype::LabelStr("D"));
+    values.push_back(Prototype::LabelStr("E"));
+    LabelSet ls1(values);
+
+
+    variables.clear();
+    VariableImpl<LabelSet> v2(ENGINE, ls1);
+    variables.push_back(v2.getId());
+    VariableImpl<LabelSet> v3(ENGINE, ls1);
+    variables.push_back(v3.getId());
+    EqualConstraint c1(ENGINE, variables);
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(v2.getDerivedDomain() == v3.getDerivedDomain());
+    assert(!v2.getDerivedDomain().isSingleton());
+
+    values.pop_back();
+    LabelSet ls2(values);
+    v2.specify(ls2);
+    ENGINE->propagate();
+    assert(!v3.getDerivedDomain().isMember(Prototype::LabelStr("E")));
+
+    variables.clear();
+    VariableImpl<LabelSet> v4(ENGINE, ls0);
+    variables.push_back(v2.getId());
+    variables.push_back(v4.getId());
+    EqualConstraint c2(ENGINE, variables);
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    assert(v2.getDerivedDomain() == v3.getDerivedDomain());
+    assert(v2.getDerivedDomain() == v4.getDerivedDomain());
+    assert(v3.getDerivedDomain() == v4.getDerivedDomain());
+    assert(v3.getDerivedDomain().getSingletonValue() == Prototype::LabelStr("A"));
+
     return true;
   }
 
