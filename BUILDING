@@ -2,7 +2,7 @@ Building EUROPA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.15 2005-01-28 00:02:09 pdaley Exp $
+$Id: BUILDING,v 1.16 2005-02-01 20:16:47 pdaley Exp $
 
 
 - Prerequisites:
@@ -128,12 +128,12 @@ above version requirements may be used instead.
 
       e.g. setenv JAVA_HOME /usr/local/jdk1.5.0
 
-4)  Verify that gcc, Jam and Java are found on your system.
-    Type "gcc -v", "jam -v", and "java -version" to test for the
-    correct versions.
-
-    If you run into problems, check PLASMA/System/test/autobuild, which is
-    described briefly in Appendix A.
+4)  Verify that gcc, Jam, Java and Doxygen are found on your system.
+    Type "checkreqs" from the PLASMA directory to test for the
+    correct versions. The script will offer some suggestions if the
+    correct versions are not found.  Also, if you run into problems, 
+    check PLASMA/System/test/autobuild, which is described briefly 
+    in Appendix A.
 
 5) Build Europa2 from the directory PLASMA by running 'jam'.
    See the "Performing a build" section below for more details.
