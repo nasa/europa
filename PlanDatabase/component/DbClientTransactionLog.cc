@@ -139,7 +139,7 @@ namespace Prototype {
   void DbClientTransactionLog::flush(std::ostream& os){
     std::list<TiXmlElement*>::const_iterator iter;
     for (iter = m_bufferedTransactions.begin() ; iter != m_bufferedTransactions.end() ; iter++) {
-      os << **iter << endl;
+      os << **iter << std::endl;
       delete *iter;
     }
     m_bufferedTransactions.clear();
