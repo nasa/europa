@@ -8,8 +8,6 @@
 #include "RulesEngine.hh"
 #include "Schema.hh"
 #include "DefaultPropagator.hh"
-#include "CeLogger.hh"
-#include "DbLogger.hh"
 #include "Object.hh"
 #include "Constraints.hh"
 #include "ObjectTokenRelation.hh"

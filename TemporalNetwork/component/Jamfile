@@ -6,7 +6,6 @@ ModuleComponent TemporalNetwork
 	:
 	STNTemporalAdvisor.cc
 	TemporalNetworkListener.cc
-	TemporalNetworkLogger.cc
 	TemporalPropagator.cc
 	TimepointWrapper.cc
 	;

@@ -5,6 +5,7 @@
 #include "Resource.hh"
 #include "DMResourceListener.hh"
 #include "ResourceFlawDecisionPoint.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -42,8 +43,8 @@ namespace EUROPA {
    * the closed decisions list.
    */
   void ResourceOpenDecisionManager::notifyResourceState( const DMResourceListenerId& rl, bool isFlawed ) {
-    if (loggingEnabled())
-      std::cout<<"RODM notified of change of status of resource "<<rl->getResource()->getKey()<<" to "<<isFlawed<<std::endl;
+    debugMsg("ResourceOpenDecisionManager:notifyResourceState",
+	     "RODM notified of change of status of resource "<<rl->getResource()->getKey()<<" to "<< isFlawed);
 
     // The current decision point. If it is still in our list, it is open.
     std::map<int,ResourceFlawDecisionPointId>::iterator dp_it = m_resDecs.find( rl->getResource()->getKey() );

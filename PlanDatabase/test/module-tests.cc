@@ -6,7 +6,6 @@
 #include "TokenVariable.hh"
 #include "ObjectTokenRelation.hh"
 #include "Timeline.hh"
-#include "DbLogger.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
 #include "DbClientTransactionLog.hh"
@@ -2141,7 +2140,6 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
 #undef TEST_PLAYING_XML
 
 int main() {
-  initDebug();
   initDbModuleTests();
   for (int i=0;i<1;i++){
     runTestSuite(SchemaTest::test);

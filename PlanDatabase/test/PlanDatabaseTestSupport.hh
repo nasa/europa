@@ -16,11 +16,6 @@ using namespace EUROPA;
     PlanDatabaseId db = (new PlanDatabase(ce, schema))->getId(); \
     { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce); \
       assert(dp != 0); } \
-    Id<DbLogger> dbLId; \
-    if (loggingEnabled()) { \
-      new CeLogger(std::cout, ce); \
-      dbLId = (new DbLogger(std::cout, db))->getId(); \
-    } \
     Object* objectPtr = new Object(db, DEFAULT_OBJECT_TYPE(), LabelStr("o1")); \
     assert(objectPtr != 0); \
     Object& object = *objectPtr; \

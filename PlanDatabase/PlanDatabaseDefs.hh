@@ -62,6 +62,8 @@ namespace EUROPA {
   typedef Id<DbClientTransactionTokenMapper> DbClientTransactionTokenMapperId;
 
   typedef std::pair<LabelStr, const AbstractDomain*> ConstructorArgument;
+
+  const std::string CLASS_DELIMITER(":");
 }
 
 #endif

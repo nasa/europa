@@ -161,8 +161,6 @@ static void printRUsage(const std::string& when) {
 int main(int argc, const char ** argv) {
   printRUsage("just inside main()");
 
-  initDebug();
-
   std::cout << "Just inside main(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   if (argc < 2) {

@@ -1,6 +1,5 @@
 #include "HSTSModuleTests.hh"
 #include "CBPlannerDefs.hh"
-#include "DMLogger.hh"
 #include "Horizon.hh"
 #include "DecisionManager.hh"
 #include "Utils.hh"
@@ -12,7 +11,6 @@
 #include "DefaultPropagator.hh"
 #include "ConstraintEngine.hh"
 #include "Constraint.hh"
-#include "CeLogger.hh"
 
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabase.hh"
@@ -22,7 +20,6 @@
 #include "TokenVariable.hh"
 #include "ObjectTokenRelation.hh"
 #include "Timeline.hh"
-#include "DbLogger.hh"
 
 #include "RulesEngine.hh"
 #include "Rule.hh"
@@ -42,17 +39,10 @@
     RulesEngine re(db.getId()); \
     Horizon hor(0,200); \
     DecisionManager dm(db.getId()); \
-    Id<DbLogger> dbLId; \
-    if (loggingEnabled()) { \
-      new CeLogger(std::cout, ce.getId()); \
-      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
-      new DMLogger(std::cout, dm.getId()); \
-    } \
     if (autoClose) \
       db.close();
 
-#define DEFAULT_TEARDOWN()			\
-  delete (DbLogger*) dbLId;
+#define DEFAULT_TEARDOWN()
 
 #define DEFAULT_SETUP_PLAN(ce, db, autoClose)			\
   ConstraintEngine ce;						\
@@ -62,17 +52,10 @@
   RulesEngine re(db.getId());					\
   Horizon hor(0, 200);						\
   CBPlanner planner(db.getId(), hor.getId());			\
-  Id<DbLogger> dbLId;						\
-  if (loggingEnabled()) {					\
-    new CeLogger(std::cout, ce.getId());			\
-    dbLId = (new DbLogger(std::cout, db.getId()))->getId();	\
-    new DMLogger(std::cout, planner.getDecisionManager());	\
-  }								\
   if (autoClose)						\
     db.close();
 
-#define DEFAULT_TEARDOWN_PLAN()			\
-  delete (DbLogger*) dbLId;
+#define DEFAULT_TEARDOWN_PLAN()
 
 #define DEFAULT_SETUP_HEURISTICS()			\
   ConstraintEngine ce;					\
@@ -90,17 +73,9 @@
   RulesEngine re(db.getId());					\
   Horizon hor(0, 200);						\
   CBPlanner planner(db.getId(), hor.getId());			\
-  Id<DbLogger> dbLId;						\
-  if (loggingEnabled()) {					\
-    new CeLogger(std::cout, ce.getId());			\
-    dbLId = (new DbLogger(std::cout, db.getId()))->getId();	\
-    new DMLogger(std::cout, planner.getDecisionManager());	\
-  }								\
   HSTSHeuristics heuristics(db.getId()); 
 
-#define DEFAULT_TEARDOWN_PLAN_HEURISTICS()	\
-  delete (DbLogger*) dbLId;
-
+#define DEFAULT_TEARDOWN_PLAN_HEURISTICS()
 
 class ConditionTest {
 public:

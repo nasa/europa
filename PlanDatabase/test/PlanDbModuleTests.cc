@@ -6,7 +6,6 @@
 #include "TokenVariable.hh"
 #include "ObjectTokenRelation.hh"
 #include "Timeline.hh"
-#include "DbLogger.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
 #include "DbClientTransactionLog.hh"

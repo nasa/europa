@@ -6,7 +6,6 @@
 #include "DefaultPropagator.hh"
 #include "ConstraintLibrary.hh"
 #include "Constraints.hh"
-#include "CeLogger.hh"
 #include "Error.hh"
 #include "Utils.hh"
 
@@ -18,9 +17,6 @@ public:
     if (s_instance.isNoId()) {
       s_instance = (new ConstraintEngine())->getId();
       new DefaultPropagator(LabelStr("Default"), s_instance);
-
-      if (loggingEnabled())
-	 new CeLogger(std::cout, s_instance);
     }
     return s_instance;
   }

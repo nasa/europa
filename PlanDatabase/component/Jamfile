@@ -8,7 +8,6 @@ ModuleComponent PlanDatabase
 	:
 	DbClientTransactionLog.cc
 	DbClientTransactionPlayer.cc
-	DbLogger.cc
 	EventToken.cc
 	IntervalToken.cc
 	Timeline.cc

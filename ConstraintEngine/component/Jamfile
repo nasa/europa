@@ -6,7 +6,6 @@ ModuleComponent ConstraintEngine
 	:
 	BoolDomain.cc
 	BoolTypeFactory.cc
-	CeLogger.cc
 	Constraints.cc
 	DefaultPropagator.cc
 	EnumeratedDomain.cc

@@ -8,7 +8,6 @@
 #include "RulesEngine.hh"
 #include "Rule.hh"
 #include "RuleInstance.hh"
-#include "DbLogger.hh"
 #include "TestSupport.hh"
 #include "TestRule.hh"
 #include "Utils.hh"
@@ -185,11 +184,6 @@ void LocalVariableGuard_0_0::handleExecute(){
     { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce.getId()); \
       assert(dp != 0); \
     } \
-    Id<DbLogger> dbLId; \
-    if (loggingEnabled()) { \
-      new CeLogger(std::cout, ce.getId()); \
-      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
-    } \
     RulesEngine re(db.getId()); \
     Object* objectPtr = new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")); \
     assert(objectPtr != 0); \
@@ -198,8 +192,7 @@ void LocalVariableGuard_0_0::handleExecute(){
     if (autoClose) \
       db.close();
 
-#define DEFAULT_TEARDOWN() \
-    delete (DbLogger*) dbLId;
+#define DEFAULT_TEARDOWN()
 
 class RulesEngineTest {
 public:

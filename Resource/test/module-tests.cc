@@ -10,7 +10,6 @@
 #include "IntervalDomain.hh"
 #include "DefaultPropagator.hh"
 #include "Constraint.hh"
-#include "CeLogger.hh"
 #include "Utils.hh"
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabase.hh"
@@ -19,11 +18,12 @@
 #include "EventToken.hh"
 #include "TokenVariable.hh"
 #include "ObjectTokenRelation.hh"
-#include "DbLogger.hh"
+#include "Debug.hh"
 
 #include <iostream>
 #include <string>
 #include <list>
+
 // Useful constants when doing constraint vio9lation tests
 const double initialCapacity = 5;
 const double limitMin = 0;
@@ -43,16 +43,10 @@ const double consumptionMax = -50;
     PlanDatabase db(ce.getId(), schema); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId()); \
-    Id<DbLogger> dbLId; \
-    if (loggingEnabled()) { \
-      new CeLogger(std::cout, ce.getId()); \
-      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
-    } \
     if (autoClose) \
       db.close();
 
-#define DEFAULT_TEARDOWN() \
-    delete (DbLogger*) dbLId;
+#define DEFAULT_TEARDOWN()
 
 class DefaultSetupTest {
 public:
@@ -944,19 +938,14 @@ private:
     r->updateTransactionProfile();
     int sum = 0;
     int count = 1;
-    if(loggingEnabled())
-      std::cout << "\n        Transactions  ";
+    debugMsg("ResourceTest:checkSum","        Transactions");
     const std::map<int, InstantId>& instants = r->getInstants();
     for(std::map<int, InstantId>::const_iterator it = instants.begin(); it != instants.end(); ++it){
       InstantId current = it->second;
-      if(loggingEnabled())
-	std::cout <<  current->getTime() << ":[" << current->getTransactionCount() << "] ";
+      debugMsg("ResourceTest:checkSum", "           " << current->getTime() << ":[" << current->getTransactionCount() << "] ");
       sum += count * current->getTransactionCount();
       count++;
     }
-
-    if(loggingEnabled())
-      std::cout << "\n";
 
     return(sum);
   }

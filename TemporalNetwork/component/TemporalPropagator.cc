@@ -9,6 +9,7 @@
 #include "Constraint.hh"
 #include "Utils.hh"
 #include "TemporalConstraints.hh"
+#include "Debug.hh"
 
 // @todo: there are cases where we may be able to fail early during the
 // mapping from the constraint engine to the temporal network.  In these
@@ -197,7 +198,11 @@ namespace EUROPA {
     var->setExternalEntity(tw);
     timepoint->setExternalEntity(var);
     m_wrappedTimepoints.insert(tw);
+
     publish(notifyTimepointAdded(var, timepoint));
+
+    debugMsg("TemporalPropagator:addTimepoint",
+	     "TIMEPOINT " << timepoint->getKey() << " ADDED for variable " << var->getKey());
 
     m_activeVariables.insert(std::make_pair<int, TempVarId>(var->getKey(), var));
     m_changedVariables.insert(std::make_pair<int, TempVarId>(var->getKey(), var));
@@ -215,6 +220,10 @@ namespace EUROPA {
 					    c, 
 					    (Time) var->getBaseDomain().getLowerBound(), 
 					    (Time) var->getBaseDomain().getUpperBound()));
+
+    debugMsg("TemporalPropagator:addTimepoint",
+	     "Constraint ADDED Base Domain for Variable " << var->getKey() <<  "(" <<  c << ") "
+	     << " -[" << var->getBaseDomain().getLowerBound() << "," << var->getBaseDomain().getUpperBound() << "]-");
   }
 
   void TemporalPropagator::addTemporalConstraint(const ConstraintId& constraint) {
@@ -260,6 +269,10 @@ namespace EUROPA {
     constraint->setExternalEntity(c);
     c->setExternalEntity(constraint);
     publish(notifyConstraintAdded(constraint, c, lb,ub));
+
+    debugMsg("TemporalPropagator:addTemporalConstraint",
+	     "Constraint ADDED " << constraint->getName().toString() << "(" <<  constraint->getKey() << ") - [" << c << "] " 
+	     << " --[" << lb << "," << ub << "]--> ");
   }
 
   void TemporalPropagator::updateTnet() {
@@ -268,6 +281,8 @@ namespace EUROPA {
       TemporalConstraintId constraint = *it;
 
       publish(notifyConstraintDeleted(constraint->getKey(), constraint));
+
+      debugMsg("TemporalPropagator:updateTnet",	"Constraint " << constraint->getKey() << " DELETED");
 
       m_tnet->removeTemporalConstraint(constraint);
     }
@@ -283,7 +298,11 @@ namespace EUROPA {
 
       m_tnet->removeTemporalConstraint(baseDomainConstraint);
 
+      debugMsg("TemporalPropagator:updateTnet",	"Base Domain Constraint " << baseDomainConstraint->getKey() << " DELETED");
+
       publish(notifyTimepointDeleted(tp));
+
+      debugMsg("TemporalPropagator:updateTnet", "TIMEPOINT " << tp->getKey() << " DELETED");
 
       m_tnet->deleteTimepoint(tp);
     }
@@ -478,6 +497,8 @@ namespace EUROPA {
       // thrashing by removing it and adding the original constraint that
       // was previously restricted by the temporal network.
       publish(notifyConstraintDeleted(tnetConstraint->getKey(), tnetConstraint));
+      debugMsg("TemporalPropagator:updateTemporalConstraint", "Constraint " << tnetConstraint->getKey() << " DELETED");
+
       // Now switch it out
       TimepointId source, target;
       m_tnet->getConstraintScope(tnetConstraint, source, target); // Pull old timepoints.
@@ -490,17 +511,28 @@ namespace EUROPA {
 	cnetConstraint->clearExternalEntity();
 	cnetConstraint->setExternalEntity(newConstraint);
 	publish(notifyConstraintAdded(cnetConstraint, newConstraint,  (Time)lb, (Time)ub));
+
+	debugMsg("TemporalPropagator:updateTemporalConstraint", 
+		 "Constraint " << newConstraint->getKey() << " added for " << cnetConstraint->getKey());
       }
       else {
 	check_error(target == getTimepoint(var));
 	target->setBaseDomainConstraint(newConstraint);
 	publish(notifyBaseDomainConstraintAdded(var, newConstraint,  (Time)lb, (Time)ub));
+
+	debugMsg("TemporalPropagator:updateTemporalConstraint", 
+		 "Added Base Domain Constraint for Variable " << var->getKey() <<  "(" <<  newConstraint << ") "
+		 << " -[" << lb << "," << ub << "]-");
       }
     } 
     else if (lb > lbt || ub < ubt) { // Handle restriction. Retain most restricted values
       m_tnet->narrowTemporalConstraint(tnetConstraint, (Time)lb, (Time)ub);
       publish(notifyBoundsRestricted(var, (Time)lb, (Time)ub));
+
+      debugMsg("TemporalPropagator:updateTemporalConstraint",
+	       "Bounds of "  << var->getKey() << " Restricted to -[" << lb << "," << ub << "]-");
     }
+
     return newConstraint;
   }
 

@@ -5,10 +5,7 @@
 #include "TemporalAdvisor.hh"
 #include "Schema.hh"
 #include "PlanDatabase.hh"
-#include "DbLogger.hh"
-#include "CeLogger.hh"
 #include "ObjectTokenRelation.hh"
-#include "TemporalNetworkLogger.hh"
 #include "IntervalToken.hh"
 #include "Timeline.hh"
 #include "Utils.hh"
@@ -28,17 +25,10 @@
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
     db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId()); \
-    Id<DbLogger> dbLId; \
-    if (loggingEnabled()) { \
-      new CeLogger(std::cout, ce.getId()); \
-      new TemporalNetworkLogger((const TemporalPropagatorId& )ce.getPropagatorByName(LabelStr("Temporal")), std::cout); \
-      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
-    } \
     if (autoClose) \
       db.close();
 
-#define DEFAULT_TEARDOWN() \
-    delete (DbLogger*) dbLId;
+#define DEFAULT_TEARDOWN()
 
 class TemporalNetworkTest {
 public:
