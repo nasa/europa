@@ -81,7 +81,7 @@ class Boat {
       // find out where we are
       Bank bank;
       equals(location.At a);
-      eq(a.place,bank);
+      eq(a.b,bank);
       
       // add to our cannibals and remove from theirs
       equals(cannibals.Add ac);

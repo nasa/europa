@@ -4,6 +4,10 @@ int y;
 class Timeline {
 	predicate Z14 {
 	}
+	predicate P {
+		int a14;
+		int b14;
+	}
 }
 
 Timeline::Z14 {

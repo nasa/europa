@@ -10,8 +10,9 @@ predicate TakePicture {}
 predicate Idle {}
 }
 
-class SlowCamera
+class SlowCamera extends Camera
 {
+predicate TakePicture {}
 Location loc;
 SlowCamera(Location l = new Location()) {
   loc = l;

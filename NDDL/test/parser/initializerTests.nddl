@@ -1,5 +1,8 @@
 enum Symbols {USR_115}
 
+class Y { int l; }
+Y y;
+
 class X
 {
             int INT_SINGLE = 7;

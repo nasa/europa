@@ -1,5 +1,11 @@
 enum Symbols { HELLO, FIVE }
 
+class D {
+  int l;
+}
+
+D y;
+
 class Contained {
   int x;
   Contained(int _x) {
