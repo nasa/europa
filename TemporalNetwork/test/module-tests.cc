@@ -115,7 +115,7 @@ private:
     tn.removeTemporalConstraint(tango);
 
     res = tn.isConsistent();
-    check_error(); // Consistency restored
+    check_error(res); // Consistency restored
 
     TemporalConstraintId c0 = tn.addTemporalConstraint(y, x, -200, g_infiniteTime());
     TemporalConstraintId c1 = tn.addTemporalConstraint(x, z, 0, g_infiniteTime());
