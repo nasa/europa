@@ -350,6 +350,7 @@ public:
     runTest(testVariableInitialization);
     runTest(testReader);
     runTest(testHSTSPlanIdReader);
+    runTest(testHSTSNoBranch);
     return(true);
   }
 private:
@@ -388,11 +389,11 @@ private:
     DEFAULT_TEARDOWN_HEURISTICS();
     return retval;
   }
-  static bool testHSTSNoBranch(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm) {
+  static bool testHSTSNoBranch() {
     bool retval = false;
-    DEFAULT_SETUP_HEURISTICS();
-    retval = testHSTSNoBranchImpl(ce, db, dm);
-    DEFAULT_TEARDOWN_HEURISTICS();
+    DEFAULT_SETUP_PLAN(ce,db,true);
+    retval = testHSTSNoBranchImpl(ce, db, planner);
+    DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
 };
