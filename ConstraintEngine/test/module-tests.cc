@@ -86,6 +86,7 @@ public:
   static bool test(){
     runTest(testDeallocationWithPurging);
     runTest(testInconsistentInitialVariableDomain);
+    runTest(testVariableLookupByIndex);
     return true;
   }
 
@@ -125,6 +126,20 @@ public:
     }
     assert(ENGINE->propagate()); // Should be fixed by deletion of the variable
 
+    return true;
+  }
+
+  static bool testVariableLookupByIndex(){
+    std::vector<ConstrainedVariableId> vars;
+
+    for(unsigned int i=0;i<10;i++){
+      ConstrainedVariableId var = (new Variable<IntervalIntDomain> (ENGINE, IntervalIntDomain()))->getId();
+      assert(var == ENGINE->getVariable(i));
+      assert(ENGINE->getIndex(var) == i);
+      vars.push_back(var);
+    }
+
+    cleanup(vars);
     return true;
   }
 };

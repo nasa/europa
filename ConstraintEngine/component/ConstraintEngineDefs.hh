@@ -7,6 +7,7 @@
 
 #include "CommonDefs.hh"
 #include "Id.hh"
+
 #include <list>
 
 namespace Prototype {
@@ -21,8 +22,10 @@ namespace Prototype {
 
   class DomainListener;
   typedef Id<DomainListener> DomainListenerId;
+
   class ConstrainedVariable;
   typedef Id<ConstrainedVariable> ConstrainedVariableId;
+
   class VariableChangeListener;
   typedef Id<VariableChangeListener> VariableChangeListenerId;
 
