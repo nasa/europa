@@ -206,6 +206,7 @@ public:
     runTest(testNestedGuards);
     runTest(testLocalVariable);
     runTest(testTestRule);
+    runTest(testPurge);
     return true;
   }
 private:
@@ -336,6 +337,17 @@ private:
     t0.activate();
     ce.propagate();
     check_error(t0.getSlaves().size() == 2);
+
+    return true;
+  }
+
+  static bool testPurge(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    db.close();
+
+    new TestRule(LabelStr("Predicate"));
+
+    Rule::purgeAll();
 
     return true;
   }
