@@ -1,0 +1,10 @@
+SubDir PLASMA RulesEngine ;
+
+if ! $(RulesEngine_INCLUDED) {
+RulesEngine_INCLUDED = TRUE ;
+
+SubInclude PLASMA PlanDatabase ;
+
+Module RulesEngine : PlanDatabase ;
+
+} # RulesEngine_INCLUDED

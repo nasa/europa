@@ -1,0 +1,11 @@
+SubDir PLASMA NDDL ;
+
+if ! $(NDDL_INCLUDED) {
+NDDL_INCLUDED = TRUE ;
+
+SubInclude PLASMA RulesEngine ;
+SubInclude PLASMA Resource ;
+
+Module NDDL : RulesEngine.core Resource ;
+
+} # NDDL_INCLUDED

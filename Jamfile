@@ -1,0 +1,11 @@
+SubDir PLASMA ;
+
+SubInclude PLASMA CBPlanner ;
+SubInclude PLASMA ConstraintEngine ;
+SubInclude PLASMA NDDL ;
+SubInclude PLASMA PlanDatabase ;
+SubInclude PLASMA Resource ;
+SubInclude PLASMA RulesEngine ;
+SubInclude PLASMA System ;
+SubInclude PLASMA TemporalNetwork ;
+SubInclude PLASMA Utils ;

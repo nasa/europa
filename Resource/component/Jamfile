@@ -1,0 +1,9 @@
+SubDir PLASMA Resource component ;
+
+ModuleComponent Resource
+	:
+	ResourceConstraint.cc
+	ResourcePropagator.cc
+	ResourceTransactionConstraint.cc
+	Transaction.cc
+	;

@@ -1,0 +1,3 @@
+SubDir PLASMA ConstraintEngine test ;
+
+ModuleTest ConstraintEngine ;

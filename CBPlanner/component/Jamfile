@@ -1,0 +1,12 @@
+SubDir PLASMA CBPlanner component ;
+
+ModuleComponent CBPlanner
+	:
+	ConstrainedVariableDecisionPoint.cc
+	DMLogger.cc
+	DynamicInfiniteRealCondition.cc
+	HorizonCondition.cc
+	ObjectDecisionPoint.cc
+	TemporalVariableCondition.cc
+	TokenDecisionPoint.cc
+	;

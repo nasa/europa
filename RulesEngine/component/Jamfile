@@ -1,0 +1,6 @@
+SubDir PLASMA RulesEngine component ;
+
+ModuleComponent RulesEngine
+	:
+	TestRule.cc
+	;

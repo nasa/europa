@@ -1,0 +1,8 @@
+
+{
+  local SUBDIR = $(PLASMA) ;
+  include [ FDirName $(SUBDIR) AntlrRules ] ;
+  include [ FDirName $(SUBDIR) CommonRules ] ;
+  include [ FDirName $(SUBDIR) ModuleRules ] ;
+}
+

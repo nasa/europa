@@ -1,0 +1,3 @@
+SubDir PLASMA CBPlanner test ;
+
+ModuleTest CBPlanner ;

@@ -1,0 +1,13 @@
+SubDir PLASMA PlanDatabase component ;
+
+ModuleComponent PlanDatabase
+	:
+#	DbClientTransactionLog.cc
+#	DbClientTransactionPlayer.cc
+	DbLogger.cc
+	EventToken.cc
+	IntervalToken.cc
+	ObjectFilter.cc
+#	PartialPlanWriter.cc
+	Timeline.cc
+	;

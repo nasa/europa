@@ -1,0 +1,8 @@
+SubDir PLASMA TemporalNetwork ;
+
+if ! $(TemporalNetwork_INCLUDED) {
+TemporalNetwork_INCLUDED = TRUE ;
+
+Module TemporalNetwork : PlanDatabase.core ;
+
+} # TemporalNetwork_INCLUDED

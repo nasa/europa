@@ -1,0 +1,8 @@
+SubDir PLASMA System ;
+
+if ! $(System_INCLUDED) {
+System_INCLUDED = TRUE ;
+
+Module System : ConstraintEngine ;
+
+} # System_INCLUDED

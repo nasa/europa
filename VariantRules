@@ -1,0 +1,118 @@
+if ! $(VariantRules_INCLUDED) {
+VariantRules_INCLUDED = TRUE ;
+
+include [ FDirName $(SUBDIR) PlatformRules ] ;
+
+VARIANTS ?= DEV ;
+
+#########
+
+# Rules for generating flags based on the variant.
+# The valid variants are:
+#   DEV
+#   OPTIMIZED
+#   PROFILE
+#   CUSTOM
+
+# If CUSTOM variant is set these variables control 
+# whether the corresponding flag is used:
+#     DEBUG
+#     OPTIMIZE
+#     PROFILE
+#     WARN
+
+#########
+
+# C++Flags for the variant
+rule FVariantC++Flags
+{
+  local variant = $(1) ;
+
+  switch $(variant) {
+  case DEV :
+    return $(DEBUG_FLAGS) $(WARNING_FLAGS) ;
+  case OPTIMIZED :
+    return $(OPTIMIZE_FLAGS) $(WARNING_FLAGS) ;
+  case PROFILE :
+    return $(PROFILE_FLAGS) $(WARNING_FLAGS) ;
+  case CUSTOM :
+    local flags ;
+    if $(DEBUG) {
+      flags += $(DEBUG_FLAGS) ;
+    }
+    if $(OPTIMIZE) {
+      flags += $(OPTIMIZE_FLAGS) ;
+    }
+    if $(PROFILE) {
+      flags += $(PROFILE_FLAGS) ;
+    }
+    if $(WARN) {
+      flags += $(WARNING_FLAGS) ;
+    }
+    return $(flags) ;
+  case * :
+    Exit FVariantC++Flags unknown variant: $(variant) ;
+  }
+}
+
+# CFlags for the variant
+rule FVariantCFlags
+{
+  local variant = $(1) ;
+
+  return [ FVariantC++Flags $(variant) ] ;
+}
+
+# LinkFlags for the variant
+rule FVariantLinkFlags
+{
+  local variant = $(1) ;
+
+  switch $(variant) {
+  case DEV :
+    return ;
+  case OPTIMIZED :
+    return ;
+  case PROFILE :
+    return $(PROFILE_FLAGS) ;
+  case CUSTOM :
+    if $(PROFILE) {
+      return $(PROFILE_FLAGS) ;
+    }
+    return ;
+  case * :
+    Exit FVariantLinkFlags unknown variant: $(variant) ;
+  }
+}
+
+# Modify the name for the variant
+rule FVariantName
+{
+  local name = $(1) ;
+  local variant = $(2) ;
+
+  switch $(variant) {
+  case DEV :
+    return $(name:B=$(name:B)_g) ;
+  case OPTIMIZED :
+    return $(name:B=$(name:B)_o) ;
+  case PROFILE :
+    return $(name:B=$(name:B)_p) ;
+  case CUSTOM :
+    local name = $(name) ;
+    if $(DEBUG) {
+      name = $(name:B=$(name:B)_g) ;
+    }
+    if $(OPTIMIZE) {
+      name = $(name:B=$(name:B)_o) ;
+    }
+    if $(PROFILE) {
+      name = $(name:B=$(name:B)_p) ;
+    }
+    return $(name) ;
+  case * :
+    Exit FVariantName unknown variant: $(variant) ;
+  }
+}
+
+}

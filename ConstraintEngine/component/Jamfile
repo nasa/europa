@@ -1,0 +1,16 @@
+SubDir PLASMA ConstraintEngine component ;
+
+ModuleComponent ConstraintEngine
+	:
+	BoolDomain.cc
+	CeLogger.cc
+	Constraints.cc
+	DefaultPropagator.cc
+	EnumeratedDomain.cc
+	EqualityConstraintPropagator.cc
+	EquivalenceClassCollection.cc
+	IntervalDomain.cc
+	IntervalIntDomain.cc
+	test-support.cc
+	UnaryConstraint.cc
+	;

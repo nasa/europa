@@ -1,0 +1,8 @@
+SubDir PLASMA Resource ;
+
+if ! $(Resource_INCLUDED) {
+Resource_INCLUDED = TRUE ;
+
+Module Resource : PlanDatabase ;
+
+} # Resource_INCLUDED

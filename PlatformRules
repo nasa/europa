@@ -1,0 +1,104 @@
+if ! $(PlatformRules_INCLUDED) {
+PlatformRules_INCLUDED = TRUE ;
+
+# Globals set by platform
+
+# SHARED_FLAG = Flag to generate shared library
+
+if $(OS) = BEOS {
+  SHARED_FLAG ?= -nostart ;
+} else {
+  SHARED_FLAG ?= -shared ;
+}
+
+# SHARED_LIBRARY_PATH_FLAG = Runtime library path flag
+
+if $(OS) = SOLARIS {
+  SHARED_LIBRARY_PATH_FLAG ?= -R ;
+} else {
+  SHARED_LIBRARY_PATH_FLAG ?= -W1,--rpath ;
+}
+
+# STATIC_LIBRARY_PATH_FLAG = Linktime library path flag
+
+if $(OS) = SOLARIS {
+  STATIC_LIBRARY_PATH_FLAG ?= -L ;
+} else {
+  STATIC_LIBRARY_PATH_FLAG ?= -W1,--rpath-link ;
+}
+
+# GCC_ROOTDIR = GCC root directory
+# CC = C compiler
+# C++ = C++ compiler
+# LINK = C/C++ linker
+
+if $(GCC_ROOTDIR) {
+  CC ?= $(GCC_ROOTDIR)/bin/gcc ;
+  C++ ?= $(GCC_ROOTDIR)/bin/g++ ;
+  LINK ?= $(C++) $(STATIC_LIBRARY_PATH_FLAG) $(GCC_ROOTDIR)/lib
+                 $(SHARED_LIBRARY_PATH_FLAG) $(GCC_ROOTDIR)/lib ;
+} else {
+  CC ?= gcc ;
+  C++ ?= g++ ;
+  LINK ?= $(C++) ;
+}
+
+# PROFILE_FLAGS = flags for profiling
+
+PROFILE_FLAGS ?= -pg ;
+
+# OPTIMIZE_FLAGS = flags for optimization
+
+OPTIMIZE_FLAGS ?= -O3 ;
+OPTIM = ; # suppress built-in optimization
+
+# WARNING_FLAGS = flags for warnings
+
+if $(OS) = BEOS {
+  WARNING_FLAGS ?= -Wall -Wno-unused -Wno-sign-promo -Wno-multichar ;
+} else {
+  WARNING_FLAGS ?= -Wall ;
+}
+
+# DEBUG_FLAGS = flags to enable debugging
+
+DEBUG_FLAGS ?= -g ;
+
+# SUFSHARE = suffix for shared libraries
+
+if $(OS) = CYGWIN {
+  SUFSHARE ?= .dll ;
+} else {
+  SUFSHARE ?= .so ;
+}
+
+# JAVA_HOME = java root directory
+# JAVA = java virtual machine
+# JAVAC = java compiler
+# JAR = java archiver
+
+if $(JAVA_HOME) {
+  JAVA ?= [ FDirName $(JAVA_HOME) bin java ] ;
+  JAVAC ?= [ FDirName $(JAVA_HOME) bin javac ] ;
+  JAR ?= [ FDirName $(JAVA_HOME) bin jar ] ;
+} else {
+  JAVA ?= java ;
+  JAVAC ?= javac ;
+  JAR ?= jar ;
+}
+
+# CLASSPATH_SEPARATOR = separator for java class path
+
+if $(OS) = CYGWIN {
+  CLASSPATH_SEPARATOR = '";"' ;
+} else {
+  CLASSPATH_SEPARATOR = ":" ;
+}
+
+# Other miscellaneous platform tweaks
+
+if $(OS) = CYGWIN {
+  NOARSCAN = true ;
+}
+
+}

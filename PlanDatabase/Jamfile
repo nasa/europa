@@ -1,0 +1,10 @@
+SubDir PLASMA PlanDatabase ;
+
+if ! $(PlanDatabase_INCLUDED) {
+PlanDatabase_INCLUDED = TRUE ;
+
+SubInclude PLASMA ConstraintEngine ;
+
+Module PlanDatabase : ConstraintEngine ;
+
+} # PlanDatabase_INCLUDED

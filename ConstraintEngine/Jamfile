@@ -1,0 +1,10 @@
+SubDir PLASMA ConstraintEngine ;
+
+if ! $(ConstraintEngine_INCLUDED) {
+ConstraintEngine_INCLUDED = TRUE ;
+
+SubInclude PLASMA Utils ;
+
+Module ConstraintEngine : Utils.core ;
+
+} # ConstraintEngine_INCLUDED
