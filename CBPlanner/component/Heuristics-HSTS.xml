@@ -58,13 +58,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
 <ConstrainedVariable>
   <Priority>6000.25</Priority>
   <Preference>
-  <Generator>WillNavNextGenerator</Generator>
+  <Generator>DestinationGenerator</Generator>
   </Preference>
   <VariableSpec>
-    <Name>WillNavNext</Name>
+    <Name>to</Name>
   </VariableSpec>
   <PredicateSpec>
-  <PredicateName>Instrument.Place</PredicateName>
+  <PredicateName>Navigator.Going</PredicateName>
   <PredicateParameters>
    <Parameter>
      <Index>1</Index>
@@ -88,12 +88,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </VariableSpec>
   <PredicateSpec>
   <PredicateName>Instrument.TakeSample</PredicateName>
-  <PredicateParameters>
-   <Parameter>
-     <Index>1</Index>
-     <Value>Loc6</Value>
-   </Parameter>
-  </PredicateParameters>
+  <PredicateParameters/>
   </PredicateSpec>
 </ConstrainedVariable>
 </VariableSpecification>
