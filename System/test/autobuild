@@ -1,16 +1,28 @@
 #!/bin/sh
-# $Id: autobuild,v 1.36 2003-02-14 06:34:39 wedgingt Exp $
+# $Id: autobuild,v 1.37 2003-02-15 07:55:58 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
-echo cd "$startdir"
+set -x
+
+# Usually, this is run via cron, which does not use the usual $PATH
+PATH=/usr/local/bin:"$PATH"
+export PATH
+
+startdir="`dirname $0`"
+startdir="`cd $startdir; pwd`"
 cd "$startdir"
+
+# Don't run this script more than once in the same directory.
+mkdir working || exit 1
+
+trap 'rmdir $startdir/working' 0
 
 # See if we have an AFS token so we can get at the newer compiler.
 tokens > .tokens.$$
 cmp .tokens.$$ .notokens
 status=$?
-if test $status != 0 -a -f .notokens
+if test $status != 0 -a -f .notokens -a -f .tokens.$$
 then
 	haveAFS=true
 else
@@ -35,7 +47,7 @@ DISPLAY=
 export DISPLAY
 
 # Make sure that libstdc++.so is in this
-LD_LIBRARY_PATH='/usr/apps/WS6.0/SUNWspro/lib:/usr/lib:/usr/dt/lib:/usr/openwin/lib:/usr/local/lib'
+LD_LIBRARY_PATH='/usr/lib'
 export LD_LIBRARY_PATH
 
 # Debug memory allocation; one variant fails in allocation presently here on Slayton
@@ -48,23 +60,8 @@ ulimit -d 2000000
 ulimit -s 2000000
 ulimit -v 2000000
 
-# Print the limits so it is obvious what they are when something goes
-# wrong.
+# Print the limits so it is obvious what they are when something goes wrong.
 ulimit -a
-
-# Sometimes, this is run via cron, which does not use the usual $PATH
-PATH=/usr/local/bin:/usr/local/teTeX/bin:"$PATH"
-export PATH
-
-set -x
-
-startdir="`dirname $0`"
-startdir="`cd $startdir; pwd`"
-
-# Don't run this script more than once in the same directory.
-mkdir working || exit 1
-
-trap 'rmdir $startdir/working' 0
 
 # Primary compilation loop
 for dir in $subdirs
