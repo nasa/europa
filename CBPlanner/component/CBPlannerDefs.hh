@@ -33,16 +33,12 @@ namespace Prototype {
 
   class TokenDecisionPoint;
   typedef Id<TokenDecisionPoint> TokenDecisionPointId;
-  typedef std::set<TokenDecisionPointId, EntityComparator<TokenDecisionPointId> > TokenDecisionSet;
 
   class ObjectDecisionPoint;
   typedef Id<ObjectDecisionPoint> ObjectDecisionPointId;
-  class ObjectDecisionPointComparator;
-  typedef std::set<ObjectDecisionPointId, ObjectDecisionPointComparator> ObjectDecisionSet;
 
   class ConstrainedVariableDecisionPoint;
   typedef Id<ConstrainedVariableDecisionPoint> ConstrainedVariableDecisionPointId;
-  typedef std::set<ConstrainedVariableDecisionPointId, EntityComparator<ConstrainedVariableDecisionPointId> > VariableDecisionSet;
 
   class CBPlanner;
   typedef Id<CBPlanner> CBPlannerId;
