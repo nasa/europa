@@ -2,7 +2,7 @@ SubDir PLASMA Resource ;
 
 if ! $(PLASMA_READY) {
 
-Module Resource : PlanDatabase ;
+Module Resource : PlanDatabase Utils ;
 
 SubInclude PLASMA Resource core ;
 SubInclude PLASMA Resource component ;
