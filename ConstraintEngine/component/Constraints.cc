@@ -1138,4 +1138,113 @@ namespace Prototype {
       (void)domC.intersect(domD);
   }
 
+  CountZerosConstraint::CountZerosConstraint(const LabelStr& name,
+                                             const LabelStr& propagatorName,
+                                             const ConstraintEngineId& constraintEngine,
+                                             const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    for (unsigned int i = 0; i < m_variables.size(); i++)
+      assertTrue(getCurrentDomain(m_variables[i]).isNumeric());
+  }
+
+  void CountZerosConstraint::handleExecute() {
+    unsigned int i = 1;
+
+    // Count the other vars that must be zero ...
+    unsigned int minZeros = 0;
+    // ... and that could be zero.
+    unsigned int maxZeros = 0;
+    for ( ; i < m_variables.size(); i++) {
+      AbstractDomain& other = getCurrentDomain(m_variables[i]);
+      if (other.isMember(0.0)) {
+        ++maxZeros;
+        if (other.isSingleton())
+          ++minZeros;
+      }
+    }
+
+    // The count of zeros is the first variable.
+    AbstractDomain& countDom = getCurrentDomain(m_variables[0]);
+
+    // If all that could be zero must be zero to get the count high
+    // enough, set all that could be zero to zero.
+    if (minZeros < countDom.getLowerBound() &&
+        maxZeros == countDom.getLowerBound()) {
+      // Find those that could be zero but might not be
+      // and restrict them to 0.
+      for (i = 1; i < m_variables.size(); i++) {
+        AbstractDomain& other = getCurrentDomain(m_variables[i]);
+        if (other.isMember(0.0) && !other.isSingleton())
+          other.set(0.0);
+      }
+    }
+
+    // If all that might be zero are needed to be non-zero to get the
+    // count low enough, restrict all that might be zero to not be
+    // zero.
+    if (maxZeros > countDom.getUpperBound() &&
+        minZeros == countDom.getUpperBound()) {
+      // Find those that could be zero but might not be and restrict
+      // them to not be 0.
+      for (i = 1; i < m_variables.size(); i++) {
+        AbstractDomain& other = getCurrentDomain(m_variables[i]);
+        if (other.isMember(0.0) && !other.isSingleton()) {
+          // Can only remove 0.0 from integer interval domains if it
+          // is an endpoint and can only remove 0.0 from real interval
+          // domains if it is singleton ... which it can't be to get
+          // here.
+          if (other.isEnumerated())
+            other.remove(0.0);
+          else
+            if (other.getType() != AbstractDomain::REAL_INTERVAL) {
+              // Unfortunately, the easiest way to test correctly (due
+              // to IntervalIntDomain::minDelta()) is rather messy:
+              const IntervalDomain zeroDom(0.0);
+              if (zeroDom.isMember(other.getLowerBound()) ||
+                  zeroDom.isMember(other.getUpperBound()))
+                other.remove(0.0);
+            }
+        }
+      }
+    }
+
+    // If the counts seen restrict the count variable, do so.
+    if (minZeros > countDom.getLowerBound() ||
+        countDom.getUpperBound() > maxZeros)
+      countDom.intersect(IntervalIntDomain(minZeros, maxZeros));
+  }
+
+  CountNonZerosConstraint::CountNonZerosConstraint(const LabelStr& name,
+                                                   const LabelStr& propagatorName,
+                                                   const ConstraintEngineId& constraintEngine,
+                                                   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_zeros(constraintEngine, IntervalDomain(), false, LabelStr("InternalCountNonZerosVar"), getId()),
+      m_otherVars(constraintEngine, IntervalDomain(), false, LabelStr("InternalCountNonZerosOtherVars"), getId()),
+      m_addEqualConstraint(LabelStr("Internal:CountNonZeros:addEqual"), propagatorName, constraintEngine,
+                           makeScope(m_zeros.getId(), m_variables[0], m_otherVars.getId()))
+  {
+    m_subsetConstraint = (new SubsetOfConstraint(LabelStr("Internal:CountNonZeros:subSet"), propagatorName, constraintEngine,
+                                                 m_otherVars.getId(), IntervalDomain(m_variables.size() - 1)))->getId();
+    std::vector<ConstrainedVariableId> cZCScope = m_variables;
+    cZCScope[0] = m_zeros.getId();
+    m_countZerosConstraint = (new CountZerosConstraint(LabelStr("Internal:CountNonZeros:countZeros"),
+                                                       propagatorName, constraintEngine, cZCScope))->getId();
+  }
+
+  CardinalityConstraint::CardinalityConstraint(const LabelStr& name,
+                                               const LabelStr& propagatorName,
+                                               const ConstraintEngineId& constraintEngine,
+                                               const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_nonZeros(constraintEngine, IntervalDomain(), false, LabelStr("InternalCardinalityVar"), getId()),
+      m_lessThanEqualConstraint(LabelStr("Internal:CountNonZeros:lessThanEqual"), propagatorName, constraintEngine,
+                                makeScope(m_nonZeros.getId(), m_variables[0]))
+  {
+    std::vector<ConstrainedVariableId> cCScope = m_variables;
+    cCScope[0] = m_nonZeros.getId();
+    m_countNonZerosConstraint = (new CountNonZerosConstraint(LabelStr("Internal:Cardinality:countNonZeros"),
+                                                             propagatorName, constraintEngine, cCScope))->getId();
+  }
+
 } // end namespace Prototype

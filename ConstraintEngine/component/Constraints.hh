@@ -311,5 +311,79 @@ namespace Prototype {
   private:
     const unsigned int ARG_COUNT;
   };
+
+  /**
+   * @class CountZerosConstraint
+   * @brief First variable is the count of the rest that can be zero.
+   * @note Supports boolean domains with the usual C/C++ convention of false
+   * being zero and true being non-zero.
+   */
+  class CountZerosConstraint : public Constraint {
+  public:
+    CountZerosConstraint(const LabelStr& name,
+                         const LabelStr& propagatorName,
+                         const ConstraintEngineId& constraintEngine,
+                         const std::vector<ConstrainedVariableId>& variables);
+
+    ~CountZerosConstraint() { }
+
+    void handleExecute();
+  };
+
+  /**
+   * @class CountNonZerosConstraint
+   * @brief First variable is the count of the rest that can be non-zero.
+   * @note Supports boolean domains with the usual C/C++ convention of false
+   * being zero and true being non-zero.
+   */
+  class CountNonZerosConstraint : public Constraint {
+  public:
+    CountNonZerosConstraint(const LabelStr& name,
+                            const LabelStr& propagatorName,
+                            const ConstraintEngineId& constraintEngine,
+                            const std::vector<ConstrainedVariableId>& variables);
+
+    ~CountNonZerosConstraint() {
+      delete (CountZerosConstraint*) m_countZerosConstraint;
+      delete (SubsetOfConstraint*) m_subsetConstraint;
+    }
+
+    // All the work is done by the member constraints.
+    inline void handleExecute() { }
+
+  private:
+    Variable<IntervalDomain> m_zeros, m_otherVars;
+    AddEqualConstraint m_addEqualConstraint;
+    ConstraintId m_subsetConstraint;
+    ConstraintId m_countZerosConstraint;
+  };
+
+  /**
+   * @class CardinalityConstraint
+   * @brief First variable must be greater than or equal the count of the
+   * other variables that are true.
+   * @note Supports numeric domains for the other variables with the
+   * usual C/C++ convention of false being zero and true being
+   * any non-zero value.
+   */
+  class CardinalityConstraint : public Constraint {
+  public:
+    CardinalityConstraint(const LabelStr& name,
+                          const LabelStr& propagatorName,
+                          const ConstraintEngineId& constraintEngine,
+                          const std::vector<ConstrainedVariableId>& variables);
+
+    ~CardinalityConstraint() {
+      delete (CountNonZerosConstraint*) m_countNonZerosConstraint;
+    }
+
+    // All the work is done by the member constraints.
+    inline void handleExecute() { }
+
+  private:
+    Variable<IntervalDomain> m_nonZeros;
+    LessThanEqualConstraint m_lessThanEqualConstraint;
+    ConstraintId m_countNonZerosConstraint;
+  };
 }
 #endif
