@@ -15,6 +15,10 @@ namespace Prototype{
    * @class IntervalDomain
    * @brief Abstract base class for all interval domains.
    * Derived classes impose restrictions on the general semantics of this base class.
+   *
+   * @todo Possible additions: support for open ended intervals and multiple intervals,
+   * preferably as new classes rather than impacting the performance of this class.
+   * --wedgingt@email.arc.nasa.gov 2004 Feb 26
    */
   class IntervalDomain: public AbstractDomain {
   public:
