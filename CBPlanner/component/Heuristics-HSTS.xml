@@ -6,7 +6,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
 <Defaults>
  <DefaultPriorityPref>high</DefaultPriorityPref>
  <DefaultCompatibility>
-   <Priority>24.5</Priority>
+   <Priority>1024.5</Priority>
    <PredicateSpec>
      <PredicateName>Navigator.At</PredicateName>
      <PredicateParameters/>
@@ -18,7 +18,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </PredicateSpec>
  </DefaultCompatibility>
  <DefaultToken>
-   <Priority>10000.0</Priority>
+   <Priority>10.0</Priority>
    <DecisionPreference>
      <StateOrder>
         <State>merge</State>
@@ -97,7 +97,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
 <Token>
   <Priority>443.7</Priority>
   <PredicateSpec>
-  <PredicateName>Commands.PhoneHome</PredicateName>
+  <PredicateName>Navigator.At</PredicateName>
   <PredicateParameters/>
   </PredicateSpec>
   <Master/>
