@@ -20,7 +20,10 @@ NDDL_PARSER_TESTS =
 	inner-classes.nddl                temporalNumericIntervals.nddl
 	inner-enums.nddl                  transitional-subgoaling.nddl
 	looping.nddl                      intervalTest.nddl
+	use_xml.nddl
 	;
+
+Depends use_xml.xml : rover.xml ;
 
 local parser_test ;
 for parser_test in $(NDDL_PARSER_TESTS) {
