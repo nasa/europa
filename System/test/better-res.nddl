@@ -1,4 +1,4 @@
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 #include "../../NDDL/core/Plasma.nddl"
 
 //*****************************************************************
@@ -145,7 +145,7 @@ Rover::Standby{
   }
 }
 
-NddlWorld world = new NddlWorld(10, 101, 350);
+PlannerConfig world = new PlannerConfig(10, 101, 350);
 
 Rover rover = new Rover(0.0, 0.0, 100.0, 70.0, -70.0);
 Wind wind = new Wind();

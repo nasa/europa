@@ -1,6 +1,6 @@
 // /home/sailesh/work/EXPERIMENTS/CPlan1.5/model/k9.ddl
 
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 
 class Location {
 
@@ -199,7 +199,7 @@ class Rover {
 }
 
 // Now establish the initai state
-NddlWorld world = new NddlWorld(0, 100, 500);
+PlannerConfig world = new PlannerConfig(0, 100, 500);
 Rover rover = new Rover();
 Location l1 = new Location();
 Location l2 = new Location();

@@ -1,4 +1,4 @@
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 
 class rejection {
   predicate unsatisfiable {
@@ -9,7 +9,7 @@ rejection::unsatisfiable {
     eq(start, end);
 }
 
-NddlWorld world = new NddlWorld(0, 10, 100);
+PlannerConfig world = new PlannerConfig(0, 10, 100);
 rejection r = new rejection();
 rejectable(rejection.unsatisfiable a);
 a.start.specify(2);

@@ -1,4 +1,4 @@
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 #include "../../NDDL/core/Plasma.nddl"
 
 class Target {
@@ -172,7 +172,7 @@ GroundStation::Receive {
 }
 
 // create  objects
-NddlWorld world = new NddlWorld(0,100,5000);
+PlannerConfig world = new PlannerConfig(0,100,5000);
 Target target1 = new Target("target1",10,10,10,100,95.0);
 Target target2 = new Target("target2",25,25,25,25,90.0);
 Target target3 = new Target("target3",50,50,50,80,84.0);

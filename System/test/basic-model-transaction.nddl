@@ -1,4 +1,4 @@
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 
 enum Locations {Hill, Rock, Lander};
 
@@ -30,7 +30,7 @@ Rover::Going{
   eq(m_to, to.m_location);
 }
 
-NddlWorld world = new NddlWorld(10, 101, 350);
+PlannerConfig world = new PlannerConfig(10, 101, 350);
 
 Rover rover = new Rover();
 

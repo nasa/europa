@@ -1,5 +1,5 @@
 
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 
 enum Fruit { apple, orange, grape, banana }
 enum Color { red, yellow, green, blue, purple }
@@ -56,7 +56,7 @@ class B{
   }
 }
 
-NddlWorld world = new NddlWorld(0, 10, 100);
+PlannerConfig world = new PlannerConfig(0, 10, 100);
 A a1 = new A(apple);
 A a2 = new A('apple');
 B b3 = new B(purple);

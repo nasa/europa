@@ -2,9 +2,9 @@
 //   monkey1monkey.init, which is a copy of NewPlan/ModuleTests/Parser/monkey1/timeline.init.
 
 #include "monkey1monkey.nddl"
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 
-NddlWorld world = new NddlWorld(0, 200, 145);
+PlannerConfig world = new PlannerConfig(0, 200, 145);
 
 Monkey_Class Monkey1 = new Monkey_Class();
 

@@ -1,8 +1,8 @@
 #include "../../NDDL/test/compiler/foreach.nddl"
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 
 // Allocate a world to populate the planner context
-NddlWorld world = new NddlWorld(0, 100, 500);
+PlannerConfig world = new PlannerConfig(0, 100, 500);
 
 // Allocate Locations
 Location Hill = new Location("Hill");

@@ -1,4 +1,4 @@
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 
 class Foo {
   predicate bar { }
@@ -11,7 +11,7 @@ Foo::bar {
 Foo::baz {
 }
 
-NddlWorld world = new NddlWorld(0, 5, 10);
+PlannerConfig world = new PlannerConfig(0, 5, 10);
 Foo f1 = new Foo();
 Foo f2 = new Foo();
 close();

@@ -1,4 +1,4 @@
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 
 class Battery {
  predicate uses{
@@ -18,7 +18,7 @@ Rover::Drive{
  eq(start, tx.start);
 }
 
-NddlWorld world = new NddlWorld(0, 100, 350);
+PlannerConfig world = new PlannerConfig(0, 100, 350);
 
 Rover rover = new Rover();
 Battery b1 = new Battery();
