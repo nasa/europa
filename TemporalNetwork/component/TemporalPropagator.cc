@@ -359,6 +359,8 @@ namespace Prototype {
     TimepointId fir = getTimepoint(first);
     TimepointId sec = getTimepoint(second);
 
+    //std::cout << "TemporalPropagator canPrecede" << std::endl;
+
     // further propagation in temporal network will only restrict values
     // further, so if we already are in violation, we will continue to be
     // in violation.
@@ -369,7 +371,7 @@ namespace Prototype {
     Time slb, sub;
     m_tnet->getLastTimepointBounds(sec, slb, sub);
 
-    //std::cout << "TemporalPropagator::canPrecede testing [" << flb << "," << fub << "] --> [" << slb << "," << sub << "]" << std::endl;
+    // std::cout << "TemporalPropagator::canPrecede testing first bounds [" << flb << "," << fub << "]  second bounds [" << slb << "," << sub << "]" << std::endl;
 
     if (sub < flb)
       return false;
@@ -377,6 +379,11 @@ namespace Prototype {
     //std::cout << "TemporalPropagator::canPrecede computing distance < 0 {" << fir << "," << sec << "]";
 
     bool result=m_tnet->isDistanceLessThan(fir,sec,0);
+
+//     if (!result)
+//       std::cout << "TemporalPropagator::canPrecede " << sec->getKey() << " is less than " << fir->getKey() << std::endl;
+//     else 
+//       std::cout << "TemporalPropagator::canPrecede " << sec->getKey() << " is greater than or equal to " << fir->getKey() << std::endl;
 
     return !result;
     //    return (!m_tnet->isDistanceLessThan(sec,fir,0));
