@@ -90,11 +90,18 @@ rule ModuleTest {
 
   local variant ;
   for variant in $(VARIANTS) {
+    local C++FLAGS = $(C++FLAGS) [ FVariantC++Flags $(variant) ] ;
+    local CFLAGS = $(CFLAGS) [ FVariantCFlags $(variant) ] ;
+    local LINKFLAGS = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
+
     local exe = [ FVariantName $(name) : $(variant) ] ;
 
     local outputs ;
     local file ;
     for file in $(files) {
+      file = [ FGristFiles $(file) ] ;
+      SEARCH on $(file) = $(SEARCH_SOURCE) ;
+
       local output = [ FVariantName $(file) : $(variant) ] ;
       output = $(output:S=$(SUFOBJ)) ;
       outputs += $(output) ;

@@ -3,6 +3,6 @@ SubDir PLASMA TemporalNetwork ;
 if ! $(TemporalNetwork_INCLUDED) {
 TemporalNetwork_INCLUDED = TRUE ;
 
-Module TemporalNetwork : PlanDatabase.core ;
+Module TemporalNetwork : PlanDatabase ;
 
 } # TemporalNetwork_INCLUDED

@@ -1,3 +1,3 @@
 SubDir PLASMA RulesEngine test ;
 
-ModuleTest RulesEngine ;
+ModuleTest re-module-tests : module-tests.cc TestRule.cc : RulesEngine ;

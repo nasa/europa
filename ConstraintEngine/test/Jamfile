@@ -1,3 +1,11 @@
 SubDir PLASMA ConstraintEngine test ;
 
-ModuleTest ConstraintEngine ;
+ModuleTest ce-module-tests
+	:
+	module-tests.cc
+	domain-tests.cc
+	id-tests.cc
+	:
+	ConstraintEngine
+	;
+
