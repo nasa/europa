@@ -63,15 +63,21 @@ namespace Prototype{
 
     double translateNumber(double number, bool asMin = true) const;
 
-  protected:
     /**
-     * @brief Enforces integer semantics.
+     * @brief Copy the concrete C++ object into new memory and return a pointer to it.
+     */
+    virtual IntervalIntDomain *copy() const;
+
+  protected:
+
+    /**
+     * @brief Enforce integer semantics.
      * @note Will be compiled out for fast version.
      */
     virtual void testPrecision(const double& value) const;
 
     /**
-     * @brief Enforces integer semantics.
+     * @brief Enforce integer semantics.
      */
     double convert(const double& value) const;
   };

@@ -10,8 +10,9 @@
 namespace Prototype {
 
   template<class ELEMENT_TYPE>
-  class Domain: public EnumeratedDomain {
+  class Domain : public EnumeratedDomain {
   public:
+
     /**
      * @brief Constructor
      * @param labels The initial set of labels to populate the domain.
@@ -20,11 +21,11 @@ namespace Prototype {
      * @see AbstractDomain::isDynamic()
      */
     Domain(const std::list< ELEMENT_TYPE >& values, 
-	     bool closed = true,
-	     const DomainListenerId& listener = DomainListenerId::noId());
+           bool closed = true,
+           const DomainListenerId& listener = DomainListenerId::noId());
 
     /**
-     * @brief Constructor.
+     * @brief Singleton constructor.
      * @param value Singleton value, and then domain is closed.
      * @param listener Allows connection of a listener to change events on the domain. 
      */
@@ -63,6 +64,11 @@ namespace Prototype {
      * @brief Obtain the singleton value for this domain. It must be a singleton.
      */
     ELEMENT_TYPE getValue() const;
+
+    /**
+     * @brief Copy the concrete C++ object into new memory and return a pointer to it.
+     */
+    Domain<ELEMENT_TYPE> *copy() const;
 
     /**
      * @brief Validates the mapping to and from a double does not violate precision.
@@ -117,6 +123,13 @@ namespace Prototype {
   void Domain<ELEMENT_TYPE>::insert(double value) {
     check_error(testValue(value));
     EnumeratedDomain::insert(value);
+  }
+
+  template <class ELEMENT_TYPE>
+  Domain<ELEMENT_TYPE> *Domain<ELEMENT_TYPE>::copy() const {
+    Domain<ELEMENT_TYPE> *ptr = new Domain<ELEMENT_TYPE>(*this);
+    check_error(ptr != 0);
+    return(ptr);
   }
 
   template <class ELEMENT_TYPE>
