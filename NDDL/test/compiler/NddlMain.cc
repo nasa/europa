@@ -75,7 +75,7 @@ void main(){
     new DbLogger(std::cout, db.getId());
     new CeLogger(std::cout, ce.getId());
   }
-
+  
   NDDL::initialize(db.getId());
 
   cout << "Finished" << endl;

@@ -1,0 +1,31 @@
+// Declares a class of the raw types. No World in this model.
+class Foo {
+ int m_0;
+ float m_1;
+ bool m_2;
+ string m_3;
+ predicate p1{}
+}
+
+class Bar extends Foo {
+ int m_4;
+ predicate p2{}
+}
+
+class World {
+ Foo m_foo;
+ Bar m_bar;
+
+ predicate initialState{}
+
+ World() {
+  m_foo = new Foo();
+  m_bar = new Bar();
+ }
+}
+
+World::initialState{
+ any(Foo.p1 p1);
+ any(Bar.p1 p2);
+ any(Bar.p2 p3);
+}

@@ -38,6 +38,8 @@ class World {
  Foo m_foo2;
  Foo m_foo3;
 
+ predicate initialState{}
+
  World(){
   m_foo1 = new Foo(this, 1, true, "This is also a long string", Lander);
   m_foo2 = new Foo(this);
