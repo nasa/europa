@@ -35,18 +35,11 @@ leq(image.start,49);
 leq(0,image.start);
 
 // Establish a goal - to position an instrument at a location
-goal(Stowable_Instrument.Position experiment);
-experiment.start.specify(50);
+goal(Stowable_Instrument.Positioned experiment);
 experiment.destination.specify(rock4); // Want to get to rock4
+eq(experiment.end,100);
 
 // Establish the initial instrument state
 goal(Stowable_Instrument.Stowed stowed);
 eq(stowed.object,spirit.rat);
 stowed.start.specify(0);
-
-goal(Camera.StandBy cstandby);
-cstandby.start.specify(0);
-
-goal(Instrument.StandBy istandby);
-eq(istandby.object,spirit.antenna);
-istandby.start.specify(0);

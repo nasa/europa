@@ -60,7 +60,9 @@ class Instrument {
  
  predicate StandBy {}
  
- predicate Positioned { }
+ predicate Positioned { 
+  Location destination; 
+ } 
 
 }
 
@@ -156,9 +158,23 @@ Instrument::Position{
  commonAncestor(at.object, this.object, rovers);
 
  meets(object.Positioned p); 
+ eq(p.destination,destination);
 
  starts(Battery.change tx);
  eq(tx.quantity, -20);
+}
+
+Instrument::Positioned {
+ met_by(object.Position p);
+ eq(p.destination, destination);
+}
+
+Stowable_Instrument::Position {
+ met_by(object.Unstowed u);
+}
+
+Stowable_Instrument::Positioned {
+ meets(object.Stow u);
 }
 
 Stowable_Instrument::Unstow{
@@ -168,8 +184,8 @@ Stowable_Instrument::Unstow{
  Rover rovers;
  commonAncestor(at.object, this.object, rovers);
 
- meets(Unstowed a);
- met_by(Stowed b);
+ meets(object.Unstowed a);
+ met_by(object.StandBy b);
 
  starts(Battery.change tx);
  eq(tx.quantity, -20);
@@ -182,26 +198,28 @@ Stowable_Instrument::Stow{
  Rover rovers;
  commonAncestor(at.object, this.object, rovers);
 
-// meets(Stowed a);
- met_by(Position b);
+ meets(object.Stowed a);
+ met_by(Instrument.Positioned b);
+ eq(b.object,object);
 
  starts(Battery.change tx);
  eq(tx.quantity, -20);
 }
 
-
 Stowable_Instrument::Stowed {
- met_by(Stow a);
-// meets(Unstow b);
+ met_by(object.Stow a);
+ meets(object.StandBy b);
 }
 
 Stowable_Instrument::Unstowed {
- met_by(Unstow a);
- meets(Position b);
+ met_by(object.Unstow a);
+ meets(Instrument.Position b);
+ eq(b.object,object);
 }
 
 Stowable_Instrument::StandBy {
- met_by(Stowed a);
+ met_by(object.Stowed a);
+ meets(object.Unstow b);
 }
 
 Camera::ShootRequest {
