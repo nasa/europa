@@ -86,10 +86,10 @@ namespace PLASMA {
     HSTSHeuristics::PriorityPref pp;
     if ((tmp == "low") || (tmp == "LOW"))
       pp = HSTSHeuristics::LOW;
-    else if ((tmp == "high") || (tmp == "HIGH"))
+    else {
+      check_error((tmp == "high") || (tmp == "HIGH"), "default heuristics priority preference must be 'low' or 'high'");
       pp = HSTSHeuristics::HIGH;
-    else
-      check_error(false, "Unexpected value for DefaultPriorityPref.");
+    }
 
     m_heuristics->setDefaultPriorityPreference(pp);
     check_error (m_heuristics->getDefaultPriorityPreference() == 1, "Expected priority preference to be high on Heuristics-HSTS.xml.");

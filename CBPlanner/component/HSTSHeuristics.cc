@@ -437,7 +437,7 @@ namespace PLASMA {
     //    std::cout << " got key for token = " << key.c_str() << std::endl;
 
     std::map<LabelStr, TokenEntry>::iterator pos = m_tokenHeuristics.find(key);
-    Priority p;
+    Priority p = m_defaultTokenPriority;
     if (pos != m_tokenHeuristics.end())
       p = pos->second.getPriority();
     else if (!tok->getMaster().isNoId()) {
@@ -450,8 +450,7 @@ namespace PLASMA {
 	p = pos2->second;
       mastertt.remove(); // we no longer need it.
     }
-    else p = m_defaultTokenPriority;
-    return p;
+    return(p);
   }
 
   void HSTSHeuristics::getOrderedDomainForConstrainedVariableDP(const ConstrainedVariableDecisionPointId& varDec, std::list<double>& domain) {
