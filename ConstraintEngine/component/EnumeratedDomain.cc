@@ -203,9 +203,12 @@ namespace Prototype {
   bool EnumeratedDomain::isMember(double value) const {
     check_error(!isDynamic());
     std::set<double>::iterator it = m_values.begin();
-    for ( ; it != m_values.end(); it++)
+    for ( ; it != m_values.end(); it++) {
       if (fabs(value - *it) < minDelta())
         return(true);
+      if (value < *it) // Since members are sorted, value should be before *it.
+        break;
+    }
     return(false);
   }
 
@@ -225,7 +228,7 @@ namespace Prototype {
       if (!l_dom.isMember(*it))
         return(false);
     for (it = l_dom.m_values.begin(); it != l_dom.m_values.end(); it++)
-      if (!(this->isMember(*it)))
+      if (!isMember(*it))
         return(false);
     return(true);
   }
