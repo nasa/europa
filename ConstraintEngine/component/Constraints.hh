@@ -1,8 +1,9 @@
 #ifndef _H_Constraints
 #define _H_Constraints
 
-#include "UnaryConstraint.hh"
+#include "ConstraintEngineDefs.hh"
 #include "Constraint.hh"
+#include "UnaryConstraint.hh"
 #include "Variable.hh"
 #include "IntervalDomain.hh"
 #include "IntervalIntDomain.hh"
@@ -308,52 +309,6 @@ namespace Prototype {
   };
 
   /**
-   * @class AddLessThanConstraint
-   * @brief A + B < C
-   * Converted into GreaterThanSumConstraint.
-   */
-  class AddLessThanConstraint : public Constraint {
-  public:
-    AddLessThanConstraint(const LabelStr& name,
-                          const LabelStr& propagatorName,
-                          const ConstraintEngineId& constraintEngine,
-                          const std::vector<ConstrainedVariableId>& variables);
-
-    ~AddLessThanConstraint() {
-      delete (Constraint*) m_greaterThanSumConstraint;
-    }
-
-    // All the work is done by the member constraint
-    inline void handleExecute() { }
-
-  private:
-    ConstraintId m_greaterThanSumConstraint;
-  };
-
-  /**
-   * @class AddLessOrEqThanConstraint
-   * @brief A + B <= C
-   * Converted into GreaterOrEqThanSumConstraint.
-   */
-  class AddLessOrEqThanConstraint : public Constraint {
-  public:
-    AddLessOrEqThanConstraint(const LabelStr& name,
-                              const LabelStr& propagatorName,
-                              const ConstraintEngineId& constraintEngine,
-                              const std::vector<ConstrainedVariableId>& variables);
-
-    ~AddLessOrEqThanConstraint() {
-      delete (Constraint*) m_greaterOrEqThanSumConstraint;
-    }
-
-    // All the work is done by the member constraint
-    inline void handleExecute() { }
-
-  private:
-    ConstraintId m_greaterOrEqThanSumConstraint;
-  };
-
-  /**
    * @class CondAllSame
    * @brief If A, then B == C && B == D && C == D && ... ; if not A, then !(B == C && B == D && C == D && ...).
    */
@@ -551,27 +506,44 @@ namespace Prototype {
   };
 
   /**
-   * @class MinimumEqualConstraint
-   * @brief Last variable is the minimum value of the others.
-   * @note Same as Europa (NewPlan) 'min' constraint.
-   * @note The general "move last var to front" constraint might be fairly
-   * easy to implement using ConstraintLibrary::createConstraint().
+   * @class RotateScopeRightConstraint
+   * @brief Rotate the scope right rotateCount places and call the otherName
+   * constraint.
+   * @note "Rotating right" comes from last variable moving to the start,
+   * "pushing" all of the other variables to the right.
+   * @note Negative and zero values for rotateCount are supported.
    */
-  class MinimumEqualConstraint : public Constraint {
+  class RotateScopeRightConstraint : public Constraint {
   public:
-    MinimumEqualConstraint(const LabelStr& name,
-                           const LabelStr& propagatorName,
-                           const ConstraintEngineId& constraintEngine,
-                           const std::vector<ConstrainedVariableId>& variables);
+    RotateScopeRightConstraint(const LabelStr& name,
+                               const LabelStr& propagatorName,
+                               const ConstraintEngineId& constraintEngine,
+                               const std::vector<ConstrainedVariableId>& variables)
+      : Constraint(name, propagatorName, constraintEngine, variables) {
+      // Called via REGISTER_NARY() macro's factory rather than via the
+      //   REGISTER_ROTATED_NARY() macro's factory: not enough information
+      //   to create the constraint.
+      assertTrue(false);
+    }
 
-    ~MinimumEqualConstraint() {
-      delete (EqualMinimumConstraint*) m_eqMinConstraint;
+    RotateScopeRightConstraint(const LabelStr& name,
+                               const LabelStr& propagatorName,
+                               const ConstraintEngineId& constraintEngine,
+                               const std::vector<ConstrainedVariableId>& variables,
+                               const LabelStr& otherName,
+                               const int& rotateCount);
+
+    ~RotateScopeRightConstraint() {
+      assertTrue(m_otherConstraint.isValid());
+      // const std::vector<ConstrainedVariableId> scope = m_otherConstraint->getScope();
+      // m_otherConstraint.release();
+      delete (Constraint*) m_otherConstraint;
     }
 
     void handleExecute() { }
 
   private:
-    ConstraintId m_eqMinConstraint;
+    ConstraintId m_otherConstraint;
   };
 }
 #endif
