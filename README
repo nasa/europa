@@ -6,6 +6,14 @@ Known areas of performance improvement:
 5. Improve exchange of data in TemporalPropagator with  direct calculation of duration variables.
 6. Update TemporalNetwork to adjust for deactivated constraints
 
+M_10:
+**** Performance improvement: beat betaPlanner by 66% up to 2 orders of magnitude on satellite problems.
+1. Miscellaneous inlining
+2. Added a cache from flaws to decisions to expedite decision processing in
+synchronize flaws.
+3. Added purging of entities, constraint engine, plan database, etc.
+4. Hooked up FlawSynchConnector
+
 M_9:
 **** Performance milestone: beat betaPlanner by 30% up to 2 orders of magnitude on satellite problems.
 1. Buffered addition of constraints to temporal network.
