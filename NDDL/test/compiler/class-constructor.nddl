@@ -73,20 +73,24 @@ class Bat {
 }
 
 class World {
+ string m_str1;
  Foo m_foo1;
  Foo m_foo2;
  Foo m_foo3;
  Foo m_foo4;
  Baz m_baz1;
  Bat m_bat1;
+ int m_int1;
 
  predicate initialState{}
 
  World(){
-  m_foo1 = new Foo(this, 1, true, "This is also a long string", Lander);
+  m_str1 = "This is also a long string";
+  m_foo1 = new Foo(this, 1, true, m_str1, Lander);
   m_foo2 = new Foo(this);
   m_foo3 = m_foo2;
-  m_foo4 = new Foo(this, 100, false);
+  m_int1 = 100;
+  m_foo4 = new Foo(this, m_int1, false);
   m_baz1 = new Baz(m_foo1);
   m_bat1 = new Bat(m_foo1);
  }
