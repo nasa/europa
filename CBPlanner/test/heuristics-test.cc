@@ -28,6 +28,7 @@ private:
 
     std::vector<std::pair<LabelStr,LabelStr> > domainSpecs;
     TokenType tt(LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs);
+
     heuristics.setDefaultPriorityForTokenDPsWithParent(20.3, tt.getId());
 
     heuristics.setDefaultPriorityForTokenDPs(10000.0);
@@ -42,13 +43,14 @@ private:
     states.push_back(TokenDecisionPoint::ACTIVE);
     orders.push_back(HSTSHeuristics::NONE);
     orders.push_back(HSTSHeuristics::EARLY);
-    orders.push_back(HSTSHeuristics::NONE);
+    //    orders.push_back(HSTSHeuristics::NONE);
     orders.push_back(HSTSHeuristics::EARLY);
     heuristics.setDefaultPreferenceForTokenDPs(states,orders);
 
     heuristics.setDefaultPreferenceForConstrainedVariableDPs(HSTSHeuristics::ASCENDING);
 
     DEFAULT_TEARDOWN();
+
     return true;
   }
   static bool testTokenHeuristics() {
@@ -68,7 +70,7 @@ private:
     std::vector<HSTSHeuristics::CandidateOrder> ordersb;
     ordersb.push_back(HSTSHeuristics::NONE);
     ordersb.push_back(HSTSHeuristics::NEAR);
-    ordersb.push_back(HSTSHeuristics::NONE);
+    //    ordersb.push_back(HSTSHeuristics::NONE);
     ordersb.push_back(HSTSHeuristics::MIN_FLEXIBLE);
     std::vector<LabelStr> gensb;
     heuristics.setHeuristicsForTokenDP(334.5, ttb.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), HSTSHeuristics::FREE, statesb, ordersb, gensb);
@@ -150,7 +152,7 @@ private:
   static bool testReader() {
     DEFAULT_SETUP();
     HSTSHeuristicsReader reader(heuristics);
-    reader.read("Heuristics-HSTS.xml");
+    reader.read("../component/Heuristics-HSTS.xml");
     DEFAULT_TEARDOWN();
     return true;
   }
