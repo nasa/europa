@@ -312,8 +312,12 @@ namespace Prototype {
 				allowTransaction[i] = false;
 
 			char *configPath = getenv(envPPWConfigFile);
-			if(configPath == NULL)
-				FatalError("PPW_CONFIG not set");
+			if(configPath == NULL) {
+				std::cerr << "Warning: PPW_CONFIG not set.  PartialPlanWriter will not write." << std::endl;
+				stepsPerWrite = 0;
+				noWrite = 1;
+				return;
+			}
 			
 			char *configBuf = new char[PATH_MAX + 100];
 			if(realpath(configPath, configBuf) == NULL) {
