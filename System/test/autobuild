@@ -1,7 +1,7 @@
 #!/bin/bash
-# $Id: autobuild,v 1.87 2004-09-28 18:21:06 wedgingt Exp $
+# $Id: autobuild,v 1.88 2004-09-29 17:52:17 wedgingt Exp $ @email.arc.nasa.gov
 #
-# Automatically build some variants of the PLASMA planner system
+# Automatically build most/all variants of the PLASMA planner system.
 
 echo ''
 echo 'PLASMA autobuild script'
@@ -9,24 +9,25 @@ echo ''
 info=`uname -a; echo ''; g++ --version ; hostname ; pwd`
 echo "$info"
 
-# Usually, this is run via cron, which does not use the usual $PATH
+# "Guess" where the programs that we need are, based on the operating system.
+#   Almost certainly only works at NASA/Ames in Code IC.
 OS="`uname -s`"
 case "$OS" in
-    Linux)
+    [Ll][Ii][Nn][Uu][Xx])
         CVS_HOME=/usr
-        GCC_HOME=/usr
+        GCC_ROOTDIR=/usr
         JAM_HOME=/usr/local/jam2.4
         JAVA_HOME=/usr/java/j2sdk1.4.2_04
         ;;
-    SunOS)
+    [Ss][Uu][Nn][Oo][Ss])
         CVS_HOME=/usr/local
-        GCC_HOME=/usr/local/beta/gcc-3.2.2
-        JAM_HOME=/usr/local/bin
+        GCC_ROOTDIR=/usr/local/beta/gcc-3.2.2
+        JAM_HOME=/usr/local/beta
         JAVA_HOME=/usr/local/j2sdk1.4.1
         ;;
 esac
 
-for x in "$CVS_HOME"/bin/cvs "$GCC_HOME"/bin/g++ "$JAM_HOME"/jam "$JAVA_HOME"/bin/javac "$GCC_HOME"/lib
+for x in "$CVS_HOME"/bin/cvs "$GCC_ROOTDIR"/bin/g++ "$JAM_HOME"/bin/jam "$JAVA_HOME"/bin/javac "$GCC_ROOTDIR"/lib
 do
   if test ! -x "$x"
   then
@@ -36,18 +37,20 @@ do
   fi
 done
 
-PATH="$JAVA_HOME"/bin:"$JAM_HOME":"$GCC_HOME"/bin:"$CVS_HOME"/bin:"$PATH"
-export JAVA_HOME PATH
+# Usually, this is run via cron, which does not use the usual $PATH
+PATH="$JAVA_HOME"/bin:"$JAM_HOME"/bin:"$GCC_ROOTDIR"/bin:"$CVS_HOME"/bin:"$PATH"
+export GCC_ROOTDIR JAVA_HOME PATH
 
 # Make sure that libstdc++.so is in this.
-#   Cannot test for it since some installs don't create libstdc++.so
-#     itself, but only with a version appended.
-#   In general, may have to ask the compiler where the libraries are.
+#   Cannot easily test for it since some installs don't create libstdc++.so per se,
+#     but only with a version number appended.
+#   In general, may have to ask the compiler where the libraries are, which
+#     only gcc/g++ supports (to my knowledge).
 if test -z "$LD_LIBRARY_PATH"
 then
-    LD_LIBRARY_PATH="$GCC_HOME"/lib
+    LD_LIBRARY_PATH="$GCC_ROOTDIR"/lib
 else
-    LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$GCC_HOME"/lib
+    LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$GCC_ROOTDIR"/lib
 fi
 export LD_LIBRARY_PATH
 
@@ -145,17 +148,17 @@ function cvsCmd() {
 # Run jam with the given arguments, saving the output in a specific file
 #   and complaining via email if something fails.
 function jamCmd() {
-  jam $args $1 > jam.$2.$var.$libmethod 2>&1
+  jam $jam_args $1 > jam.$2.$var.$libmethod 2>&1
   status=$?
-  echo 'jam '"$args $1"' in '"`pwd`"' exited '"$status"
+  echo 'jam '"$jam_args $1"' in '"`pwd`"' exited '"$status"
   if test $status -ne 0
   then
     (echo "$info";
      echo '';
      echo 'PPW_Config='"$PPW_Config"'; export PPW_Config';
-     echo 'jam '"$args $1"' in '"`pwd`"' exited '"$status";
+     echo 'jam '"$jam_args $1"' in '"`pwd`"' exited '"$status";
      more jam.$2.$var.$libmethod < /dev/null) | \
-        Mail -s 'PLASMA Autobuild jam '"$args $1"' on '"`hostname`"' failed' "$email"
+        Mail -s 'PLASMA Autobuild jam '"$jam_args $1"' on '"`hostname`"' failed' "$email"
     mkdir working/failed
     exit $status
   fi
@@ -180,7 +183,7 @@ do
   do
     cvsCmd co -r "$testingTag" PLASMA
     cd PLASMA
-    args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
+    jam_args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
     jamCmd '' build
     for target in run-all-tests clean
     do
