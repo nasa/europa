@@ -17,6 +17,7 @@
 // Access for registered event loggers for instrumentation
 #include "../ConstraintEngine/CeLogger.hh"
 #include "../PlanDatabase/DbLogger.hh"
+#include "../PlanDatabase/PartialPlanWriter.hh"
 
 // Utility for obtaining defualt constraint library registration
 #include "../ConstraintEngine/TestSupport.hh"
