@@ -11,9 +11,9 @@ rule TestLangMainNoNddl {
   local module = $(4) ;
   local build_target = $(5) ;
   
-  local testxml = [ FGristFiles Test_$(test:S=.xml) ] ;
-  local testhh = [ FGristFiles Test_$(test:S=.hh) ] ;
-  local testcc = [ FGristFiles Test_$(test:S=.cc) ] ;
+  local testxml = [ FGristFiles $(test:S=.xml) ] ;
+  local testhh = [ FGristFiles $(test:S=.hh) ] ;
+  local testcc = [ FGristFiles $(test:S=.cc) ] ;
   TestLangToCpp $(testcc) : $(test) ;
   
   ModuleMain $(exe) : $(code) $(testcc) : $(module) : $(build_target) ;
@@ -30,9 +30,9 @@ rule TestLangMain {
 
 #  Echo TestLangMain $(exe) $(test) $(code) $(nddl) $(module) $(build_target) ;
   
-  local testxml = [ FGristFiles Test_$(test:S=.xml) ] ; #$(test:S=.xml) ;
-  local testhh = [ FGristFiles Test_$(test:S=.hh) ] ; #Test_$(test:S=.hh) ;
-  local testcc = [ FGristFiles Test_$(test:S=.cc) ] ;
+  local testxml = [ FGristFiles $(test:S=.xml) ] ; #$(test:S=.xml) ;
+  local testhh = [ FGristFiles $(test:S=.hh) ] ; #Test_$(test:S=.hh) ;
+  local testcc = [ FGristFiles $(test:S=.cc) ] ;
   #Includes $(testcc) : $(testhh) ;
   TestLangToCpp $(testcc) : $(test) ;
 

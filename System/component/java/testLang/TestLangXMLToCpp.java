@@ -67,8 +67,8 @@ public class TestLangXMLToCpp extends TestLangHelper {
     impl = new CppFile();
     uniqueName = 0;
     String nonXmlName = sourceName.substring(0, sourceName.lastIndexOf('.'));
-    headerName = "Test_" + nonXmlName + ".hh";
-    implName = "Test_" + nonXmlName + ".cc";
+    headerName = nonXmlName + ".hh";
+    implName = nonXmlName + ".cc";
     rootTestName = null;
   }
 
@@ -127,7 +127,7 @@ public class TestLangXMLToCpp extends TestLangHelper {
     try {
       System.err.println("Writing header '" + (new File(destPath + System.getProperty("file.separator") + headerName)).getAbsolutePath() + "'");
       header.write(new FileOutputStream(new File(destPath + System.getProperty("file.separator") + headerName)));
-      System.err.println("Writing header '" + (new File(destPath + System.getProperty("file.separator") + implName)).getAbsolutePath() + "'");
+      System.err.println("Writing implementation '" + (new File(destPath + System.getProperty("file.separator") + implName)).getAbsolutePath() + "'");
       impl.write(new FileOutputStream(new File(destPath + System.getProperty("file.separator") + implName)));
     }
     catch(IOException ioe){ioe.printStackTrace(); System.exit(-1);}

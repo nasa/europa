@@ -27,10 +27,10 @@ TL_PARSER_TESTS = tokenstest objectstest transtest steptest booltest depthtest
 local parser_test ;
 for parser_test in $(TL_PARSER_TESTS) {
   local cpp = $(parser_test:S=.cc) ;
-  local obj = Test_$(parser_test:S=$(SUFOBJ)) ;
+  local obj = $(parser_test:S=$(SUFOBJ)) ;
   TestLangToCpp $(cpp) : $(parser_test) ;
   
-  Object $(obj) : Test_$(cpp) ;
+  Object $(obj) : $(cpp) ;
   LocalClean $(cpp) ;
   LocalClean $(obj) ;
   LocalClean $(parser_test:S=.xml) ;
