@@ -10,6 +10,7 @@ rule Execute {
   local executable = $(2) ;
   local arguments = $(3) ;
   local prefix = $(4) ;
+  local outputFN = $(5) ;
 
   local target_exec_arg ;
   if $(arguments) {
@@ -18,7 +19,7 @@ rule Execute {
     target_exec_arg = RUN_$(executable) ;
   }
   Depends $(target) : $(target_exec_arg) ;
-  ExecuteTarget $(target_exec_arg) : [ FAppendSuffix $(executable) : $(SUFEXE) ] : $(arguments) : $(prefix) ;
+  ExecuteTarget $(target_exec_arg) : [ FAppendSuffix $(executable) : $(SUFEXE) ] : $(arguments) : $(prefix) : $(outputFN) ;
 }
 
 rule ExecuteTarget {
@@ -42,8 +43,8 @@ rule ExecuteTarget {
 actions ExecuteTarget {
   cd `dirname $(2)`
   rm -f gmon.out
-  $(PREFIX) ./`basename $(2)` $(ARGUMENTS) > "$(OUTPUTFN)" && \
-  ( ( test -s gmon.out && gprof -b `basename $(2)` gmon.out > "`basename $(OUTPUTFN) .output`.gprof" ) || true ) && \
+  $(PREFIX) ./`basename "$(2)"` $(ARGUMENTS) > "$(OUTPUTFN)" && \
+  ( ( test -s gmon.out && gprof -b `basename "$(2)"` gmon.out > "`basename "$(OUTPUTFN)" .output`.gprof" ) || true ) && \
   rm -f gmon.out
 }
 
