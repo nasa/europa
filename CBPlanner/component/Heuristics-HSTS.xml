@@ -28,15 +28,12 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
         <State>activate</State>
         <Order>early</Order>
      </StateOrder>
-     <State>defer</State>
      <State>reject</State>
    </DecisionPreference>
  </DefaultToken>
  <DefaultConstrainedVariable>
    <Priority>5000.0</Priority>
-   <Preference>
-   <ValueOrder>ascending</ValueOrder>
-   </Preference>
+   <ValueOrder>descending</ValueOrder>
  </DefaultConstrainedVariable> 
 </Defaults>
 
@@ -91,6 +88,40 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <PredicateParameters/>
   </PredicateSpec>
 </ConstrainedVariable>
+
+<ConstrainedVariable>
+  <Priority>9000</Priority>
+  <Preference>
+  <ValueOrder>ascending</ValueOrder>
+  </Preference>
+  <VariableSpec>
+    <Name>minutes</Name>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Telemetry.Communicate</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
+</ConstrainedVariable>
+
+<ConstrainedVariable>
+  <Priority>9000</Priority>
+  <Preference>
+  <DomainOrder>
+    <Value>low</Value>
+    <Value>medium</Value>
+    <Value>high</Value>
+    <Value>medium-high</Value>
+    <Value>medium-low</Value>
+  </DomainOrder>
+  </Preference>
+  <VariableSpec>
+    <Name>mode</Name>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Telemetry.Communicate</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
+</ConstrainedVariable>
 </VariableSpecification>
 
 <TokenSpecification>
@@ -129,7 +160,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <PredicateParameters>
     <Parameter>
      <Index>0</Index>
-     <Value>Loc2</Value>
+     <Value>Loc1</Value>
     </Parameter>
     <Parameter>
      <Index>1</Index>
@@ -153,7 +184,6 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
        <State>activate</State>
        <Order>minFlexible</Order>
     </StateOrder>
-    <State>defer</State>
     <State>reject</State>
   </DecisionPreference>
 </Token>
