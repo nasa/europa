@@ -2,62 +2,59 @@ Building PLASMA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.7 2004-11-09 18:09:31 bachmann Exp $
+$Id: BUILDING,v 1.8 2004-11-10 20:21:11 wedgingt Exp $
 
 
 - Building Jam
 
-The build PLASMA you must have Jam installed on your
-system.  If you are building on a solaris box the
-systems group may have already installed jam.  Type
-"jam -v" to test your jam version.  Versions 2.4 and
-versions 2.5rc3 are known to work.  
+The build PLASMA you must have Jam installed on your system.  Type
+"jam -v" to test your jam version.  Versions 2.4 and 2.5rc3 are known
+to work.
 
-Although version 2.4 works, it is not recommended
-because using it will result in the entire tree being
-rebuilt even when it is run in a subdirectory.
+Although version 2.4 works, it is not recommended because using it
+will result in the entire tree being rebuilt even when it is run in a
+subdirectory.
 
 Jam is open source and can be downloaded from:
 ftp://ftp.perforce.com/pub/jam/
 
+If you are using computers in Code TC (recently Code IC) at NASA's
+Ames Research Center, see Appendix A for the locations of the jam,
+g++, and java versions we use for development and testing.
+
 
 - Performing a build
 
-If you run "jam" in a directory of the PLASMA tree, it
-will build all files below that subdirectory, and any
-files in the rest of the tree that the files in that
-subdirectory depend on.  This includes libraries and
-test executables.
+If you run "jam" in a directory of the PLASMA tree, it will build all
+files below that subdirectory, and any files in the rest of the tree
+that the files in that subdirectory depend on.  This includes
+libraries and test executables.
 
-If you run "jam tests" in a directory of the PLASMA
-tree, it will build and run all the tests below that
-subdirectory.  To build and run all tests in the
-entire PLASMA tree, run "jam tests" at the PLASMA
+If you run "jam tests" in a directory of the PLASMA tree, it will
+build and run all the tests below that subdirectory.  To build and run
+all tests in the entire PLASMA tree, run "jam tests" at the PLASMA
 directory.
 
-If you run "jam clean" in a directory of the PLASMA
-tree, it will remove generated files that are below
-that subdirectory.  To remove generated files in the
-entire PLASMA tree, run "jam clean" at the PLASMA
-directory.
+If you run "jam clean" in a directory of the PLASMA tree, it will
+remove generated files that are below that subdirectory.  To remove
+generated files in the entire PLASMA tree, run "jam clean" at the
+PLASMA directory.
 
-NOTE: The default PLASMA build variant is DEV SHARED.  So you will
-need to set the LD_LIBRARY_PATH variable as follows:
+NOTE: The default PLASMA build variant is DEV SHARED (as in
+'DEV'elopment and shared libraries).  Please see below for examples of
+how to set the LD_LIBRARY_PATH environment variable so the operating
+system can find the PLASMA shared libraries.  Alternatively, see the
+LIBRARIES configuration section.
 
-% LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/user/me/PLASMA/lib
-% export LD_LIBRARY_PATH
-
-Please see the next section for details.
 
 - Configuring the build : VARIANTS
 
-The PLASMA build has a few variations that can be
-built.  The variations and parameters of the build
-can be configured through environment variables or
-parameters to jam.
+The PLASMA build has a few variations that can be built.  The
+variations and parameters of the build can be configured through
+environment variables or parameters to jam.
 
-PLASMA supports building 1 or more "variants" at the
-same time.  The valid variants are:
+PLASMA supports building 1 or more "variants" at the same time.  The
+valid variants are:
 
 	1. DEV - unoptimized, unprofiled, debug
 	2. OPTIMIZED - optimized, unprofiled, no debug
@@ -97,6 +94,8 @@ are used to construct the name by composition.  Thus,
 the DEV variant is identical to the CUSTOM DEBUG variant.
 
 The default variant is DEV.
+
+To build all variants at once, see Appendix B.
 
 
 - Configuring the build : LIBRARIES
@@ -150,7 +149,54 @@ an example for the sh and bash shells:
 % LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/user/me/PLASMA/lib
 % export LD_LIBRARY_PATH
 
+... where you should replace '/user/me' with the full path to the
+directory containing your PLASMA checkout from CVS.
+
+For csh and tcsh and similar shells:
+
+% setenv LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/user/me/PLASMA/lib
+
+To build all library "styles" at once, see Appendix B.
+
+
 - Getting more help
 
 If you have difficulty with any part of these
-instructions please contact the PLASMA development team.
+instructions please contact the PLASMA development team
+(see the README file for the address and URL).
+
+
+Appendix A
+
+If you are using computers in Code TC at NASA/Ames, the division's
+System Group has likely already installed the programs (and versions
+of them) that you will need to build PLASMA reliably.  On the
+division SPARCs running SunOS 5.8, they are:
+
+For CVS, /usr/local/bin should be in your $PATH ($path in csh or tcsh).
+For g++ v3.3.3, /usr/local/beta/gcc-3.3.3/bin should be in your $PATH
+	and /usr/local/beta/gcc-3.3.3/lib should be in $LD_LIBRARY_PATH.
+For Jam, /usr/local/beta/bin contains jam v2.5rc3.
+For Java, $JAVA_HOME should be set to /usr/local/j2sdk1.4.2_05.  The bin
+	subdirectory should be in your $PATH and the lib subdirectory
+	should be in $CLASSPATH.
+
+On Token.arc.nasa.gov (RedHat Linux), the relevant directories are
+/usr/bin (for CVS), /usr/local/gcc-3.3.3, /usr/local/jam2.4, and
+/usr/java/j2sdk1.4.2_04.
+
+If you run into problems, check PLASMA/System/test/autobuild, which is
+described briefly in Appendix B.
+
+
+Appendix B
+
+The project tests building and testing PLASMA automatically overnight
+using the shell script in PLASMA/System/test/autobuild via the UNIX &
+Linux cron program.  See:
+
+% System/test/autobuild -h
+
+... for brief usage information.  It has the directories mentioned in
+Appendix A hard-coded into it presently for ease of use via cron by
+the development team.
