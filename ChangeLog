@@ -1,3 +1,6 @@
+DEV_20040819_0
+1. Cleaned up destructors in planner and decision managers.
+
 DEV_20040817_0
 1. Changed logic for handling retracted decisions, we now ensure that
 decisions are deleted when there are no more choices left and new ones are
