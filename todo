@@ -10,6 +10,7 @@ Code base management & cleanup:
 9. Come up with Project Name and build proper CVS database
 10. Add wrapper functions for all constants as required by VxWorks
 11. Clean up the mechanism for registration of constraints for components. They are buried. Possible use a config.xml structure.
+12. Document code
 
 NddlCompiler:
 1. Remove error messages printing out enumerations
@@ -20,6 +21,7 @@ NddlCompiler:
 6. Create configuration file for all concrete instances, at least define them in one place
 7. Complete NDDL Guide
 8. Implement support for existential quanitifier on objects
+9. Complete support for all temporal relations
 
 Testing support:
 1. Find a way to export initial states from Europa and translate them.
