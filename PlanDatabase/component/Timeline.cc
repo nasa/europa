@@ -298,40 +298,42 @@ namespace EUROPA {
     check_error(isValid());
   }
 
-  bool Timeline::isValid(bool cleaningUp) const{
+  bool Timeline::isValid(bool cleaningUp) const {
+#ifdef EUROPA_FAST
+    assertTrue(ALWAYS_FAIL, "Timeline::isValid() should never be called when compiling #define EUROPA_FAST");
+#else
     check_error(Object::isValid());
     check_error(m_tokenIndex.size() == m_tokenSequence.size());
-    int prior_earlist_start = MINUS_INFINITY - 1;
-    int prior_earliest_end = MINUS_INFINITY-1;
+    int prior_earliest_start = MINUS_INFINITY - 1;
+    int prior_earliest_end = MINUS_INFINITY - 1;
     int prior_latest_end = MINUS_INFINITY;
     TokenId predecessor;
 
     std::set<TokenId> allTokens;
-    for(std::list<TokenId>::const_iterator it = m_tokenSequence.begin(); it != m_tokenSequence.end(); ++it){
+    for (std::list<TokenId>::const_iterator it = m_tokenSequence.begin(); it != m_tokenSequence.end(); ++it) {
       TokenId token = *it;
       allTokens.insert(token);
       check_error(m_tokenIndex.find(token->getKey()) != m_tokenIndex.end());
       check_error(cleaningUp || token->isActive());
 
-      // Validate that earliset start times are monotonically increasing, as long as we are constraint consistent at any rate!
+      // Validate that earliest start times are monotonically increasing, as long as we are constraint consistent at any rate!
       // Also ensure x.end <= (x+1).start.
-      if(!cleaningUp && getPlanDatabase()->getConstraintEngine()->constraintConsistent()){
-	if(!predecessor.isNoId())
-	  check_error(isConstrainedToPrecede(predecessor, token));
+      if (!cleaningUp && getPlanDatabase()->getConstraintEngine()->constraintConsistent()) {
+        check_error(predecessor.isNoId() || isConstrainedToPrecede(predecessor, token));
 	int earliest_start = (int) token->getStart()->lastDomain().getLowerBound();
 	int latest_start = (int) token->getStart()->lastDomain().getUpperBound();
-	check_error(earliest_start == MINUS_INFINITY || earliest_start == PLUS_INFINITY || earliest_start > prior_earlist_start);
+	check_error(earliest_start == MINUS_INFINITY || earliest_start == PLUS_INFINITY || earliest_start > prior_earliest_start);
 	check_error(prior_earliest_end <= earliest_start);
 	check_error(prior_latest_end <= latest_start);
 	prior_earliest_end = (int) token->getEnd()->lastDomain().getLowerBound();
 	prior_latest_end = (int) token->getEnd()->lastDomain().getLowerBound();
-	prior_earlist_start = earliest_start;
+	prior_earliest_start = earliest_start;
       }
-
       predecessor = token;
     }
     check_error(allTokens.size() == m_tokenSequence.size()); // No duplicates.
-    return true;
+#endif
+    return(true);
   }
 
   bool Timeline::atStart(const TokenId& token) const {
