@@ -30,8 +30,8 @@ namespace Prototype {
     Horizon hor1;
     int start, end;
     hor1.getHorizon(start,end);
-    assert(start == -g_maxFiniteTime());
-    assert(end == g_maxFiniteTime());
+    assert(start == -MAX_FINITE_TIME);
+    assert(end == MAX_FINITE_TIME);
   
     Horizon hor2(0,200);
     hor2.getHorizon(start,end);

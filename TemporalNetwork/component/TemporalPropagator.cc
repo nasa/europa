@@ -478,7 +478,7 @@ namespace Prototype {
   bool TemporalPropagator::isValidForPropagation() const {
     // The set of active variables should not be empty
     if(m_activeVariables.empty())
-      return alwaysFalse();
+      return false;
 
     // All buffers should only contain valid id's
     if(!allValid(m_activeVariables) ||
@@ -487,14 +487,14 @@ namespace Prototype {
        !allValid(m_constraintsForDeletion) ||
        !allValid(m_variablesForDeletion) ||
        !allValid(m_listeners))
-      return alwaysFalse();
+      return false;
 
     // For all buffered timepoints for deletion, none should have any dangling external entities. This is because
     // we will have already deleteed the Constraint for which this Constraint shadows it.
     for(std::set<TemporalConstraintId>::const_iterator it = m_constraintsForDeletion.begin(); it != m_constraintsForDeletion.end(); ++it){
       TemporalConstraintId shadow = *it;
       if(!shadow->getExternalEntity().isNoId())
-	return alwaysFalse();
+	return false;
     }
 
     // For all buffered constraints for deletion, none should have any dangling external entities. This is because
@@ -502,7 +502,7 @@ namespace Prototype {
     for(std::set<TimepointId>::const_iterator it = m_variablesForDeletion.begin(); it != m_variablesForDeletion.end(); ++it){
       TimepointId timepoint = *it;
       if(!timepoint->getExternalEntity().isNoId())
-	return alwaysFalse();
+	return false;
     }
 
     // For all buffered TempVar's, it either has an external entity or it doesn't. No invalid one.
@@ -512,13 +512,13 @@ namespace Prototype {
       if(!var->getExternalEntity().isNoId()){ // It must be a start or end variable
 
 	if(var->getIndex() == DURATION_VAR_INDEX) // Same for all types of tokens as it is set in the base
-	  return alwaysFalse();
+	  return false;
 
 	// Confirm the shadow is linked up coorrectly
 	TimepointWrapperId wrapper = var->getExternalEntity();
 	TimepointId shadow = wrapper->getTimepoint();
 	if(shadow->getExternalEntity() != var)
-	  return alwaysFalse();
+	  return false;
       }
     }
 
@@ -529,7 +529,7 @@ namespace Prototype {
       if(!constraint->getExternalEntity().isNoId()){
 	EntityId shadow = constraint->getExternalEntity();
 	if(shadow->getExternalEntity() != constraint)
-	  return alwaysFalse();
+	  return false;
       }
     }
 

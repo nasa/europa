@@ -48,7 +48,6 @@ public:
 
 private:
   static bool testBasicAllocation(){
-    assert(g_noTime() != g_infiniteTime() && g_noTime() != -g_infiniteTime() && g_infiniteTime() != -g_infiniteTime());
     TemporalNetwork tn;
     TimepointId origin = tn.getOrigin();
     Time delta = g_noTime();

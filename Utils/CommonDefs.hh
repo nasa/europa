@@ -7,17 +7,9 @@
 #include <debugger.h>
 #endif
 
-/**
- * @brief Condition indicating the surrounding call to check_error() or similar should always fail.
- * @note Should only be used as an argument to check_error(), assert(), assertTrue(), etc.
- * @note Note also that assert() should only be used in test programs and not even there in the long term,
- *   since some compilers implement it using a #define, which prevents setting a break point in it.
- * --wedgingt 2004 Mar 3
- * @note Why is this a C++ variable rather than a #define? --wedgingt 2004 Mar 3
- */
-const bool ALWAYS_FAILS = false;
+#include <sstream>
 
-#include <Error.hh>
+#include "Error.hh"
 
 /**
  * @def assertTrue
@@ -35,10 +27,7 @@ const bool ALWAYS_FAILS = false;
  */
 #define assertFalse(cond) assert(!(cond))
 
-#include <sstream>
 #define streamIsEmpty(s) (s).str() == ""
-
-namespace Prototype {
 
   /**
    * @def DECLARE_GLOBAL_CONST(TYPE,NAME)
@@ -71,34 +60,41 @@ namespace Prototype {
     return sl_data; \
   }
 
-  DECLARE_GLOBAL_CONST(int, g_maxFiniteTime); /**< 268435455 */
+
+DECLARE_GLOBAL_CONST(bool, g_alwaysFails);
+#define ALWAYS_FAILS g_alwaysFails()
+
+namespace Prototype {
+  DECLARE_GLOBAL_CONST(int, g_maxInt);
   DECLARE_GLOBAL_CONST(int, g_infiniteTime);
   DECLARE_GLOBAL_CONST(int, g_noTime);
   DECLARE_GLOBAL_CONST(double, g_epsilon);
-  DECLARE_GLOBAL_CONST(int, g_infinity);
-  DECLARE_GLOBAL_CONST(int, g_maxInt);
+  DECLARE_GLOBAL_CONST(unsigned int, g_assumedMinMemoryAddress);
+}
 
-#define MAX_INT (g_maxInt())
+#define MAX_INT (Prototype::g_maxInt())
 
-#define PLUS_INFINITY (g_infiniteTime())
+#define MAX_FINITE_TIME MAX_INT
 
-#define MINUS_INFINITY (-g_infiniteTime())
+#define MIN_FINITE_TIME -MAX_INT
+
+#define PLUS_INFINITY (Prototype::g_infiniteTime())
+
+#define MINUS_INFINITY (-Prototype::g_infiniteTime())
 
   /**
    * @def EPSILON
    * Used when computing differences and comparing real numbers:
    * smallest recognized increment.
    */
-#define EPSILON (g_epsilon())
+#define EPSILON (Prototype::g_epsilon())
 
   /**
    * @def ASSUMED_MINIMUM_MEMORY_ADDRESS
    * Magic number to enforce assumption that memory addresses and string keys will never collide.
    */
-#define ASSUMED_MINIMUM_MEMORY_ADDRESS (1000000)
+#define ASSUMED_MINIMUM_MEMORY_ADDRESS (Prototype::g_assumedMinMemoryAddress())
 
-#define MAXIMUM_STRING_COUNT ASSUMED_MINIMUM_MEMORY_ADDRESS 
-
-}
+#define MAXIMUM_STRING_COUNT (Prototype::g_assumedMinMemoryAddress())
 
 #endif
