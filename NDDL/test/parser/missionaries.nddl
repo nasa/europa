@@ -20,7 +20,7 @@ class Integer {
     {
       int oldValue, newValue;
       met_by(Has oldHas);
-      eq(oldHas.amount,oldvalue);
+      eq(oldHas.amount,oldValue);
       meets(Has newHas);
       eq(newHas.amount,newValue);
       addeq(oldValue,addend,newValue);

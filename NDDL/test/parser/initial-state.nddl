@@ -1,3 +1,5 @@
+enum Symbols {XYZ, Hill}
+
 Class instanceName = new ClassType(XYZ, 4.5);
 
 new ClassType(XYZ, 4.5);

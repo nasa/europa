@@ -269,20 +269,20 @@ Scan_Platform_Timeline::Scan_Idle {
 
 SSR_Storage_Use_Timeline::Record {
     eq(duration,[1 +inf]);
-    BOUNDS_RECORD_END_STORAGE(end_storage,start_storage,req_FP_rate,req_mos_rate,Length);
-    BOUNDS_RECORD_START_STORAGE(start_storage,end_storage,req_FP_rate,req_mos_rate,Length);
-    eq(prior,{CS_Bef_Rec,Rec_Bef_Rec});
-    switch (prior) {
+    BOUNDS_RECORD_END_STORAGE(End_Storage,Start_Storage,ReqFPRate,ReqMosRate,Length);
+    BOUNDS_RECORD_START_STORAGE(Start_Storage,End_Storage,ReqFPRate,ReqMosRate,Length);
+    eq(Rec_Prior,{CS_Bef_Rec,Rec_Bef_Rec});
+    switch (Rec_Prior) {
     case CS_Bef_Rec:
         DNP_Data DNP_Data_0;
         met_by(DNP_Data_0.SSR_Storage_Use.Constant_Storage cs);
-        eq(cs.SSR_Storage,start_storage);
+        eq(cs.SSR_Storage,Start_Storage);
         eq(cs.DSS_Opp_Num,DSS_Opp_Num);
         eq(cs.CS_Post,Rec_Aft_CS);
     case Rec_Bef_Rec:
         DNP_Data DNP_Data_1;
         met_by(DNP_Data_1.SSR_Storage_Use.Record r);
-        eq(r.End_Storage,start_storage);
+        eq(r.End_Storage,Start_Storage);
         eq(r.Rec_Post,Rec_Aft_Rec);
         eq(r.DSS_Opp_Num,DSS_Opp_Num);
     }
@@ -290,52 +290,52 @@ SSR_Storage_Use_Timeline::Record {
     case Rec_Aft_Rec:
         DNP_Data DNP_Data_2;
         meets(DNP_Data_2.SSR_Storage_Use.Record r);
-        eq(r.Start_Storage,end_storage);
+        eq(r.Start_Storage,End_Storage);
         eq(r.Rec_Prior,Rec_Bef_Rec);
     case PB_Aft_Rec:
         DNP_Data DNP_Data_3;
         meets(DNP_Data_3.SSR_Storage_Use.Playback p);
-        eq(p.Start_Storage,end_storage);
+        eq(p.Start_Storage,End_Storage);
         eq(p.PB_Prior,Rec_Bef_PB);
     case CS_Aft_Rec:
         DNP_Data DNP_Data_4;
         meets(DNP_Data_4.SSR_Storage_Use.Constant_Storage cs);
-        eq(cs.SSR_Storage,end_storage);
+        eq(cs.SSR_Storage,End_Storage);
         eq(cs.CS_Prior,Rec_Bef_CS);
     }
 }
 
 SSR_Storage_Use_Timeline::Playback {
     eq(duration,[100 +inf]);
-    COMPUTE_PLAYBACK_DURATION(duration,start_storage,end_storage,data_rate,start,end);
-    BOUNDS_PLAYBACK_START_STORAGE(start_storage,end_storage,data_rate,duration);
-    BOUNDS_PLAYBACK_END_STORAGE(end_storage,start_storage,data_rate,duration);
-    FIGURE_EARLIER_OP_IDS(allow_earlier_id,DSS_Opp_Num);
-    switch (prior) {
+    COMPUTE_PLAYBACK_DURATION(duration,Start_Storage,End_Storage,Playback_Rate,start,end);
+    BOUNDS_PLAYBACK_START_STORAGE(Start_Storage,End_Storage,Playback_Rate,duration);
+    BOUNDS_PLAYBACK_END_STORAGE(End_Storage,Start_Storage,Playback_Rate,duration);
+    FIGURE_EARLIER_OP_IDS(Allowed_Earlier_Opps,DSS_Opp_Num);
+    switch (Rec_Prior) {
     case CS_Bef_PB:
         DNP_Data DNP_Data_0;
         met_by(DNP_Data_0.SSR_Storage_Use.Constant_Storage cs);
-        eq(cs.SSR_Storage,start_storage);
-        eq(cs.DSS_Opp_Num,allow_earlier_id);
+        eq(cs.SSR_Storage,Start_Storage);
+        eq(cs.DSS_Opp_Num,Allowed_Earlier_Opps);
         eq(cs.Flagged_End,Flagged_End);
         eq(cs.CS_Post,PB_Aft_CS);
     case Rec_Bef_PB:
         DNP_Data DNP_Data_1;
         met_by(DNP_Data_1.SSR_Storage_Use.Record r);
-        eq(r.End_Storage,start_storage);
+        eq(r.End_Storage,Start_Storage);
         eq(r.Rec_Prior,PB_Aft_Rec);
-        eq(r.DSS_Opp_Num,allow_earlier_id);
+        eq(r.DSS_Opp_Num,Allowed_Earlier_Opps);
     }
     // DNP_Data constant storage
     DNP_Data DNP_Data_2;
     meets(DNP_Data_2.SSR_Storage_Use.Constant_Storage cs);
-    eq(cs.SSR_Storage,end_storage);
+    eq(cs.SSR_Storage,End_Storage);
     eq(cs.CS_Prior,PB_Bef_CS);
     // DNP_Comm communicate
     DNP_Comm DNP_Comm_0;
     equals(DNP_Comm_0.Comm_Activity.Communicate c);
-    eq(c.Location,dss_location);
-    eq(c.Playback_Rate,data_rate);
+    eq(c.Location,Location);
+    eq(c.Playback_Rate,Playback_Rate);
     eq(c.Flagged_End,Flagged_End);
 
     DNP_Science DNP_Science_0;
@@ -344,7 +344,7 @@ SSR_Storage_Use_Timeline::Playback {
     contained_by(DNP_Science_1.Fields_and_Particles.F_and_P_Idle);
     DSS_Any DNP_Any_0;
     contained_by(DNP_Any_0.Dss_Availability.Downlink_Window dw);
-    eq(dw.Downlink_Rate,data_rate);
+    eq(dw.Downlink_Rate,Playback_Rate);
     eq(dw.loc,Location);
     eq(dw.Opp_Number,DSS_Opp_Num);
 }
@@ -352,7 +352,7 @@ SSR_Storage_Use_Timeline::Playback {
 SSR_Storage_Use_Timeline::Constant_Storage {
     eq(duration,[1 +inf]);
 
-    switch (prior) {
+    switch (Rec_Prior) {
     case PB_Bef_CS:
         DNP_Data DNP_Data_0;
         met_by(DNP_Data_0.SSR_Storage_Use.Playback p);
