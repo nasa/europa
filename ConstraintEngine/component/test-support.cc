@@ -20,6 +20,7 @@ void initConstraintLibrary() {
     REGISTER_NARY(CountNonZerosConstraint, "CountNonZeros", "Default");
     REGISTER_NARY(CountZerosConstraint, "CountZeros", "Default");
     REGISTER_NARY(EqualConstraint, "Equal", "Default");
+    REGISTER_NARY(EqualMaximumConstraint, "EqualMaximum", "Default");
     REGISTER_NARY(EqualMinimumConstraint, "EqualMinimum", "Default");
     REGISTER_NARY(EqualProductConstraint, "EqualProduct", "Default");
     REGISTER_NARY(EqualSumConstraint, "EqualSum", "Default");
@@ -59,6 +60,8 @@ void initConstraintLibrary() {
     REGISTER_ROTATED_NARY("addleq", "Default", "GreaterOrEqThanSum", 1);
     // ... change addlt constraint to GreaterThanSum constraint:
     REGISTER_ROTATED_NARY("addlt", "Default", "GreaterThanSum", 1);
+    // ... change max constraint to EqualMaximum constraint:
+    REGISTER_ROTATED_NARY("max", "Default", "EqualMaximum", 1);
     // ... change min constraint to EqualMinimum constraint:
     REGISTER_ROTATED_NARY("min", "Default", "EqualMinimum", 1);
 
