@@ -14,7 +14,8 @@ namespace Prototype {
 
   void DefaultPropagator::handleConstraintRemoved(const ConstraintId& constraint){
     // This is a relaxation, so we should be able to simply clear the agenda.
-    m_agenda.clear();
+    //std::cout << "Constraint removed, clearing agenda" << std::endl;
+    //m_agenda.clear();
   }
 
   void DefaultPropagator::handleConstraintActivated(const ConstraintId& constraint){
@@ -42,7 +43,7 @@ namespace Prototype {
       std::set<ConstraintId>::iterator it = m_agenda.begin();
       ConstraintId constraint = *it;
 
-      if(constraint->isActive()){
+      if(constraint.isValid() && constraint->isActive()){
 	m_activeConstraint = constraint->getKey();
 	Propagator::execute(constraint);
       }
