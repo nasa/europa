@@ -1,6 +1,38 @@
+#include "../../core/Plasma.nddl"
 #include "../../core/Resources.nddl"
 
 class Battery extends Resource {}
+
+enum Location {Hill, Rock, Lander}
+
+class Rover extends Object {
+ predicate At{
+  Location location;
+ }
+
+ predicate Going{
+  Location from;
+  Location to;
+ }
+
+ UnaryResource mutex;
+
+ Rover(){
+  mutex = new UnaryResource();
+ }
+}
+
+Rover::At{
+ meets (object.Going to);
+ met_by (object.Going from);
+ any(UnaryResource.change consumer);
+ eq(consumer.quantity,-1);
+ concurrent(consumer.start, start);
+
+ any(UnaryResource.change producer);
+ eq(producer.quantity, 1);
+ concurrent(producer.start, end);
+}
 
 class World{
  Battery mainBattery;
@@ -20,6 +52,9 @@ World::initialState{
 }
 
 World world = new World();
+Rover rover = new Rover();
 close();
 goal(World.initialState g0);
 g0.activate();
+goal(Rover.At g1);
+g1.activate();

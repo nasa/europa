@@ -1,0 +1,79 @@
+#include "../../NDDL/core/Plasma.nddl"
+#include "../../NDDL/core/Resources.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
+
+enum Location {Hill, Rock, Lander}
+
+// Declare a class Rover such that it does not imply a mutex by extending a timeline.
+class Rover extends Object {
+ predicate At{
+  Location location;
+ }
+
+ predicate Going{
+  Location from;
+  Location to;
+ }
+
+ UnaryResource mutex; // Embed a mutex as a Unary Resource
+
+ // Constructor allocates embedded mutex
+ Rover(){
+  mutex = new UnaryResource();
+ }
+}
+
+Rover::At{
+ // Here are the usual rules we would expect to see
+ meets (object.Going to);
+ eq(to.from, location);
+ met_by (object.Going from);
+ eq(from.to, location);
+
+ // Allocate resource transaction to consume at the start. Should be using time instead of start for tx!
+ any(UnaryResource.change consumer);
+ eq(consumer.quantity,-1);
+ concurrent(consumer.start, start);
+
+ // Allocate resource transaction to produce at the end. Should be using time instead of start for tx!
+ any(UnaryResource.change producer);
+ eq(producer.quantity, 1);
+ concurrent(producer.start, end);
+}
+
+Rover::Going{
+ // Usual rules you expect to see
+ neq(from, to);
+ meets(object.At _to);
+ eq(to, _to.location);
+ met_by(object.At _from);
+ eq(_from.location, from);
+
+ // Allocate resource transaction to consume at the start. Should be using time instead of start for tx!
+ any(UnaryResource.change consumer);
+ eq(consumer.quantity,-1);
+ concurrent(consumer.start, start);
+
+ // Allocate resource transaction to produce at the end. Should be using time instead of start for tx!
+ any(UnaryResource.change producer);
+ eq(producer.quantity, 1);
+ concurrent(producer.start, end);
+}
+
+// Set up the objects in the system
+PlannerConfig world = new PlannerConfig(0, 100, 50);
+Rover rover = new Rover();
+close();
+
+// First position
+goal(Rover.At g0);
+g0.start.specify(0);
+g0.location.specify(Hill);
+g0.activate();
+
+// Second position
+goal(Rover.At g1);
+g1.start.specify(99);
+g1.location.specify(Lander);
+g1.activate();
+
