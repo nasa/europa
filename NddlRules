@@ -87,11 +87,18 @@ rule NddlParser1 {
   local xml = $(1) ;
   local nddl = $(2) ;
 
+  LocalClean clean-nddl-xml : $(xml) ;
+  MakeLocate $(xml) : $(LOCATE_TARGET) ;
   SEARCH on $(nddl) = $(SEARCH_SOURCE) ;
+
   Depends $(xml) : nddl.jar ;
   Depends $(xml) : $(nddl) ;
-  MakeLocate $(xml) : $(LOCATE_TARGET) ;
-  LocalClean clean-nddl-xml : $(xml) ;
+
+  HDRS on $(<) = $(SEARCH_SOURCE) $(SUBDIRHDRS) $(HDRS) ;
+  HDRRULE on $(>) = HdrRule ;
+  HDRSCAN on $(>) = $(HDRPATTERN) ;
+  HDRSEARCH on $(>) = $(SEARCH_SOURCE:E) $(SUBDIRHDRS) $(HDRS) $(STDHDRS) ;
+  HDRGRIST on $(>) = $(HDRGRIST) ;
 }
 
 actions NddlParser1 {
