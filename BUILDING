@@ -2,7 +2,7 @@ Building PLASMA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.5 2004-10-27 21:50:17 bachmann Exp $
+$Id: BUILDING,v 1.6 2004-10-28 15:52:11 sailesh Exp $
 
 
 - Building Jam
@@ -41,6 +41,13 @@ that subdirectory.  To remove generated files in the
 entire PLASMA tree, run "jam clean" at the PLASMA
 directory.
 
+NOTE: The default PLASMA build variant is DEV SHARED.  So you will
+need to set the LD_LIBRARY_PATH variable as follows:
+
+% LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/user/me/PLASMA/lib
+% export LD_LIBRARY_PATH
+
+Please see the next section for details.
 
 - Configuring the build : VARIANTS
 
