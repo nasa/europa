@@ -5,9 +5,11 @@
 #include "StaticToken.hh"
 #include "EventToken.hh"
 #include "TokenVariable.hh"
-#include "ObjectTokenRelationPropagator.hh"
+#include "TokenVariableListener.hh"
 #include "./ConstraintEngine/TestSupport.hh"
 #include "./ConstraintEngine/IntervalIntDomain.hh"
+#include "./ConstraintEngine/IntervalRealDomain.hh"
+#include "./ConstraintEngine/LabelSet.hh"
 #include "./ConstraintEngine/DefaultPropagator.hh"
 
 #include <iostream>
@@ -74,21 +76,22 @@ private:
     Schema schema;
     PlanDatabase db(ce.getId(), schema.getId());
     new DefaultPropagator(LabelStr("Default"), ce.getId());
-    new ObjectTokenRelationPropagator(LabelStr("ObjectTokenRelation"), db.getId());
 
     Object staticObject(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
-    std::vector<ConstrainedVariableId> noParameters;
+    db.close();
 
     // Static Token
-    StaticToken staticToken(db.getId(), LabelStr("Predicate"), noParameters, LabelStr("o1"));
+    StaticToken staticToken(db.getId(), LabelStr("Predicate"), LabelStr("o1"));
     assert(getParent(staticToken.getStart()) == staticToken.getId());
+    staticToken.addParameter(IntervalIntDomain(-1000, 2000));
 
     // Event Token
-    EventToken eventToken(db.getId(), LabelStr("Predicate"), IntervalIntDomain(0, 1), noParameters, IntervalIntDomain(0, 1000));
+    EventToken eventToken(db.getId(), LabelStr("Predicate"), IntervalIntDomain(0, 1), IntervalIntDomain(0, 1000));
     assert(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
     assert(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.getStart()->specify(IntervalIntDomain(5, 10));
     assert(eventToken.getEnd()->getDerivedDomain() == IntervalIntDomain(5, 10));
+    eventToken.addParameter(IntervalRealDomain(-1.08, 20.18));
 
     // IntervalToken
     IntervalToken intervalToken(db.getId(), 
@@ -98,12 +101,21 @@ private:
 				IntervalIntDomain(0, 1000),
 				IntervalIntDomain(2, 10));
 
+    std::list<Prototype::LabelStr> values;
+    values.push_back(Prototype::LabelStr("L1"));
+    values.push_back(Prototype::LabelStr("L4"));
+    values.push_back(Prototype::LabelStr("L2"));
+    values.push_back(Prototype::LabelStr("L5"));
+    values.push_back(Prototype::LabelStr("L3"));
+    intervalToken.addParameter(LabelSet(values, true));
+
     assert(intervalToken.getEnd()->getDerivedDomain().getLowerBound() == 2);
     intervalToken.getStart()->specify(IntervalIntDomain(5, 10));
     assert(intervalToken.getEnd()->getDerivedDomain() == IntervalIntDomain(7, 20));
     intervalToken.getEnd()->specify(IntervalIntDomain(9, 10));
     assert(intervalToken.getStart()->getDerivedDomain() == IntervalIntDomain(5, 8));
     assert(intervalToken.getDuration()->getDerivedDomain() == IntervalIntDomain(2, 5));
+
     return true;
   }
 };
@@ -113,6 +125,8 @@ void main(){
   
   REGISTER_NARY(EqualConstraint, "CoTemporal", "Default");
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
+  REGISTER_NARY(TokenVariableListener, "ObjectRelation", "Default");
+  REGISTER_NARY(TokenVariableListener, "ModelRulePropagation", "Default");
 
   runTestSuite(ObjectTest::test, "Object Tests");
   runTestSuite(TokenTest::test, "Token Tests");
