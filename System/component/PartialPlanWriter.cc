@@ -1,3 +1,7 @@
+#ifdef __BEOS__
+#include <Path.h>
+#endif
+
 #include "PartialPlanWriter.hh"
 
 #include "../ConstraintEngine/Constraint.hh"
@@ -136,6 +140,14 @@ const std::string CAUSAL("CAUSAL");
 const std::string ENUM_DOMAIN("EnumeratedDomain");
 const std::string INT_DOMAIN("IntervalDomain");
 
+#ifdef __BEOS__
+#define NBBY 8
+static char *realpath(const char *path, char *resolved_path) {
+    BPath tempPath(path,NULL,true);
+    strcpy(resolved_path,tempPath.Path());
+    return resolved_path;
+}
+#endif
 
 namespace Prototype {
   namespace PlanWriter {
@@ -533,7 +545,7 @@ namespace Prototype {
 	ConstrainedVariableId varId = *paramVarIterator;
 	check_error(varId.isValid());
 	outputConstrVar(varId, token->getKey(), I_PARAMETER, varOut);
-	bzero(paramIdStr, NBBY * sizeof(int) * 28/93 + 4);
+	memset(paramIdStr, '\0', NBBY * sizeof(int) * 28/93 + 4);
 	sprintf(paramIdStr, "%d", varId->getKey());
 	paramVarIds += std::string(paramIdStr) + COLON;
       }
