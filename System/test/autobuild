@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.6 2002-11-05 16:51:41 wedgingt Exp $
+# $Id: autobuild,v 1.7 2002-11-05 19:33:46 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -75,7 +75,7 @@ do
 
     mkdir working || continue
 
-    if test "$status" = 0
+    if test "$status" != 0
     then
 	mkdir working/cvs.co.failed
 	exit "$status"
