@@ -52,12 +52,19 @@ rule ExecuteTarget {
   }
 }
 
-actions ExecuteTarget {
-  cd `dirname $(2)`
-  rm -f gmon.out
-  $(PREFIX) ./`basename "$(2)"` $(ARGUMENTS) > "$(OUTPUTFN)" && \
-  ( ( test -s gmon.out && gprof -b `basename "$(2)"` gmon.out > "`basename "$(OUTPUTFN)" .output`.gprof" ) || true ) && \
-  rm -f gmon.out
+if ( PROFILE in $(VARIANTS) ) || ( ( CUSTOM in $(VARIANTS) ) && ( $(EUROPA_PROFILE) ) ) {
+  actions ExecuteTarget {
+    cd `dirname $(2)`
+    rm -f gmon.out
+    $(PREFIX) ./`basename "$(2)"` $(ARGUMENTS) > "$(OUTPUTFN)" && \
+    ( ( test -s gmon.out && gprof -b `basename "$(2)"` gmon.out > "`basename "$(OUTPUTFN)" .output`.gprof" ) || true ) && \
+    rm -f gmon.out
+  }
+} else {
+  actions ExecuteTarget {
+    cd `dirname $(2)`
+    $(PREFIX) ./`basename "$(2)"` $(ARGUMENTS) > "$(OUTPUTFN)"
+  }
 }
 
 #
