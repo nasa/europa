@@ -32,10 +32,10 @@ eq(initialPosition.start, world.m_horizonStart); // What time - the start of thi
 eq(initialPosition.location, lander); // What position - the lander
 
 // Establish the goal - to take a sample at a position
-rejectable(Commands.TakeSample sample);
+goal(Commands.TakeSample sample);
 sample.start.specify(50);
 sample.rock.specify(rock4); // Want to get to rock4
 
 // Establish the initial instrument state
-rejectable(Instrument.Stowed stowed);
+goal(Instrument.Stowed stowed);
 eq(stowed.start, world.m_horizonStart);

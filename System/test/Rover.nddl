@@ -77,6 +77,13 @@ class Commands{
   Location rock;
   eq(duration, [20 25]); // Flexible durations for taking a sample
  }
+
+ // Communicate material back to earth
+ predicate PhoneHome{}
+
+ // Communicate material back to lander
+ predicate PhoneLander{}
+
 }
 
 Commands::TakeSample{
@@ -84,6 +91,27 @@ Commands::TakeSample{
  eq(a.rock, rock);
  Rover rovers;
  commonAncestor(a.object, this.object, rovers);
+
+ // Make contact with results. Prefer to phone home, but
+ // also allow contact to lander instead as a relay
+ bool OR;
+
+ if(OR == false){
+  meets(object.PhoneHome t0);
+ }
+ if(OR == true){
+  meets(object.PhoneLander t1);
+ }
+}
+
+Commands::PhoneHome{
+ starts(Battery.change tx);
+ eq(tx.quantity, -600);
+}
+
+Commands::PhoneLander{
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
 }
 
 class Instrument{

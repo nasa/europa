@@ -85,6 +85,13 @@ Foo::localVariableGuard{
  if(b){
   meets(basicToken t);
  }
+ if(b == true){
+  meets(basicToken t);
+ }
+ if(b == false){
+  meets(basicToken t);
+ }
+
  Locations local_locations;
  if(local_locations == Hill){
   met_by(basicToken t2);

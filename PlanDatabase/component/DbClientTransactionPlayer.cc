@@ -181,13 +181,19 @@ namespace Prototype {
     check_error(type != NULL);
 
     TokenId token = m_client->createToken(LabelStr(type));
-
     const char * mandatory = element.Attribute("mandatory");
-    if ((mandatory != NULL) && (strcmp(mandatory, "true"))) {
-      token->getState()->remove(Token::REJECTED);
+
+    // If mandatory, remove the option to reject it from the base domain
+    if ((mandatory != NULL) && (strcmp(mandatory, "true") == 0)) {
+      StateDomain allowableStates;
+      allowableStates.insert(Token::ACTIVE);
+      allowableStates.insert(Token::MERGED);
+      allowableStates.close();
+      token->getState()->restrictBaseDomain(allowableStates);
     }
 
     const char * name = child->Attribute("name");
+
     if (name != NULL) {
       std::string std_name = name;
       m_tokens[std_name] = token;

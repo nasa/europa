@@ -95,6 +95,11 @@ namespace Prototype {
      */
     const AbstractDomain& baseDomain() const;
 
+    /**
+     * @brief Restrict the base domain. This cannot be reversed. It is a special update operation
+     */
+    virtual void restrictBaseDomain(const AbstractDomain& baseDomain);
+
     virtual void handleSpecified(const AbstractDomain& specDomain) {}
     
     virtual void handleReset() {}
@@ -209,6 +214,13 @@ namespace Prototype {
   const AbstractDomain& Variable<DomainType>::baseDomain() const {
     check_error(validate());
     return(m_baseDomain);
+  }
+
+  template<class DomainType>
+  void Variable<DomainType>::restrictBaseDomain(const AbstractDomain& newBaseDomain) {
+    check_error(validate());
+    m_baseDomain.intersect(newBaseDomain);
+    internalSpecify(newBaseDomain);
   }
  
   template<class DomainType>

@@ -249,6 +249,12 @@ private:
     assert(dom0 == dom1);
     assert(v0.isValid());
     assert(v0.canBeSpecified());
+
+    // Now restrict the base domain
+    IntervalIntDomain dom2(3, 10);
+    v0.restrictBaseDomain(dom2);
+    assert(v0.getDerivedDomain() == dom2);
+
     Variable<IntervalIntDomain> v1(ENGINE, dom1, false, LabelStr("TEST VARIABLE"));
     assert(!v1.canBeSpecified());
     assert(v1.getName() == LabelStr("TEST VARIABLE"));
