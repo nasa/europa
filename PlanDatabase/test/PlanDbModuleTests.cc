@@ -172,8 +172,8 @@ namespace PLASMA {
       : ConcreteTokenFactory(DEFAULT_PREDICATE()) {
     }
   private:
-    TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, const bool& mandatory) const {
-      TokenId token = (new IntervalToken(planDb, name, mandatory))->getId();
+    TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool mandatory) const {
+      TokenId token = (new IntervalToken(planDb, name, !mandatory))->getId();
       return(token);
     }
     TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const{

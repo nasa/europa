@@ -252,8 +252,13 @@ namespace PLASMA {
     // by extracting the class from the object
     TokenId token;
 
+    const char * mandatory = element.Attribute("mandatory");
+    bool b_mandatory = false;
+    if(mandatory != NULL && (strcmp(mandatory, "true") == 0))
+      b_mandatory = true;
+
     if (Schema::instance()->isPredicate(type))
-       token = m_client->createToken(type);
+       token = m_client->createToken(type, b_mandatory);
     else {
       LabelStr typeStr(type);
       LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
@@ -261,19 +266,8 @@ namespace PLASMA {
       ObjectId object = m_client->getObject(prefix.c_str());
       check_error(object.isValid(), "Failed to find an object named " + prefix.toString());
       std::string newType(object->getType().toString() + Schema::getDelimiter() + suffix.toString());
-      token = m_client->createToken(newType.c_str());
+      token = m_client->createToken(newType.c_str(), b_mandatory);
       m_client->specify(token->getObject(), object);
-    }
-
-    const char * mandatory = element.Attribute("mandatory");
-
-    // If mandatory, remove the option to reject it from the base domain
-    if (!token->isActive() && (mandatory != NULL) && (strcmp(mandatory, "true") == 0)) {
-      StateDomain allowableStates;
-      allowableStates.insert(Token::ACTIVE);
-      allowableStates.insert(Token::MERGED);
-      allowableStates.close();
-      token->getState()->restrictBaseDomain(allowableStates);
     }
 
     const char * name = child->Attribute("name");

@@ -11,22 +11,6 @@
 
 #include "Error.hh"
 
-/**
- * @def assertTrue
- * @brief Require the condition to be true, aborting the program otherwise.
- * @note Should only be used in test programs.
- * @note Likely precursor to new error handling support.
- */
-#define assertTrue(cond) (assert(cond))
-
-/**
- * @def assertFalse
- * @brief Require the condition to be false, aborting the program otherwise.
- * @note Should only be used in test programs.
- * @note Likely precursor to new error handling support.
- */
-#define assertFalse(cond) (assert(!(cond)))
-
 #define streamIsEmpty(s) ((s).str() == "")
 
 /**
