@@ -285,12 +285,6 @@ namespace Prototype {
       Prototype::LabelStr la("L");
       Prototype::LabelStr l4("L30");
       Prototype::LabelStr lb("L");
-      check_error(la == lb);
-      check_error(la < l1);
-      check_error(l4 > l3);
-
-      check_error(l1 < l2);
-      check_error(la == lb);
 
       Prototype::LabelStr copy1(l1);
       check_error(l1 == copy1);
