@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.84 2004-09-22 17:33:22 wedgingt Exp $
+# $Id: autobuild,v 1.85 2004-09-28 15:53:56 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -169,13 +169,13 @@ done
 tag=AutobuildPassed_"`hostname | sed -e 's/[.].*//'`"
 prior="$tag"'_old'
 # Make sure the prior tag is in CVS:
-cvsCmd rtag "$prior" PLASMA/README
+cvsCmd rtag -F "$prior" PLASMA/README
 # ... before removing it:
 cvsCmd rtag -d "$prior" PLASMA
 # ... and changing it to the previous successful tag,
 #   again after making sure that tag is in CVS:
 cvsCmd rtag -rHEAD "$tag" PLASMA/README
-cvsCmd rtag -r "$tag" "$prior" PLASMA
+cvsCmd rtag -F -r "$tag" "$prior" PLASMA
 # ... and removing "$tag" so that any files that are later 'cvs remove'd are no longer tagged:
 cvsCmd rtag -d "$tag" PLASMA
 
