@@ -31,7 +31,8 @@ namespace Prototype {
 
   private:
     void commonInit(const IntervalIntDomain& startBaseDomain,
-		    const IntervalIntDomain& endBaseDomain);
+		    const IntervalIntDomain& endBaseDomain,
+		    bool closed);
     TempVarId m_start;
     TempVarId m_end;
   };

@@ -19,8 +19,8 @@ namespace Prototype{
 	   rejectable,
 	   durationBaseDomain,
 	   objectName,
-	   closed){
-    commonInit(startBaseDomain, endBaseDomain);
+	   false){
+    commonInit(startBaseDomain, endBaseDomain, closed);
   }
 
   IntervalToken::IntervalToken(const TokenId& m_master, 
@@ -34,8 +34,8 @@ namespace Prototype{
 	   predicateName, 
 	   durationBaseDomain,
 	   objectName,
-	   closed){
-    commonInit(startBaseDomain, endBaseDomain);
+	   false){
+    commonInit(startBaseDomain, endBaseDomain, closed);
   }
 
   const TempVarId& IntervalToken::getStart() const{
@@ -47,7 +47,8 @@ namespace Prototype{
     return m_end;}
 
   void IntervalToken::commonInit( const IntervalIntDomain& startBaseDomain,
-				  const IntervalIntDomain& endBaseDomain){
+				  const IntervalIntDomain& endBaseDomain,
+				  bool closed){
 
     // Ensure non-zero duration for intervals. This is enforced by a base domain rather than a constraint
     check_error(m_duration->getBaseDomain().getLowerBound() > 0);
@@ -72,5 +73,7 @@ namespace Prototype{
     ConstraintId temporalRelation = 
       ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"), m_planDatabase->getConstraintEngine(), temp);
     m_standardConstraints.insert(temporalRelation);
+    if (closed)
+      close();
   }
 }
