@@ -156,7 +156,8 @@ hasAncestor(a.object, object.m_rover);
 
  contains(CHAMP.ipgetstatus ipg);
   eq(ipg.target, object.L4_target);
-  leq(a.end, ipg.start);
+//  leq(a.end, ipg.start);
+  a before ipg;
 
 contains(Tracker.TrackingOff toff);
 eq(toff.start, 0);

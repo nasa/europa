@@ -247,7 +247,10 @@ World::initialState{
 
  contains(Position.At b);
  eq(b.location, object.l3);
- leq(a.end, b.start);
+
+ // This doesn't work because it doesn't hook it up with the temporal network
+ //leq(a.end, b.start);
+ a before b;
   
 }
 
