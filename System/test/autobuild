@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.32 2003-01-26 21:39:02 wedgingt Exp $
+# $Id: autobuild,v 1.33 2003-01-28 16:27:30 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -120,7 +120,7 @@ do
             rm -rf .autobuild.profFind
         fi
     else
-        ( cat ../make.options; echo ''; tail -40 make.tests) | \
+        ( uname -a; echo ''; cat ../make.options; echo ''; tail -40 make.tests) | \
             Mail -s 'Autobuild in '"`pwd`"' failed; exited '"$status" "$email"
         mkdir working/failed
     fi
