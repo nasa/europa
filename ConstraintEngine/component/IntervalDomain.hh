@@ -71,7 +71,7 @@ namespace Prototype {
     double getSingletonValue() const;
 
     /**
-     * @brief Access both bounds in a convenience method, and indicates if the domain is infinite.
+     * @brief Access both bounds in a convenience method, and indicate if the domain is infinite.
      * @param lb update this value with the lower bound.
      * @param ub update this value with the upper bound.
      * @return true if !isFinite()
