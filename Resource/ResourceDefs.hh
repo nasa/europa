@@ -13,8 +13,11 @@ namespace Prototype
   const int LATEST_TIME = PLUS_INFINITY;
   const double LARGEST_VALUE = PLUS_INFINITY;
 
-  class Violation;
-  typedef Id<Violation> ViolationId;
+  class ResourceViolation;
+  typedef Id<ResourceViolation> ResourceViolationId;
+
+  class ResourceFlaw;
+  typedef Id<ResourceFlaw> ResourceFlawId;
 
   class Instant;
   typedef Id<Instant> InstantId;
@@ -33,6 +36,9 @@ namespace Prototype
 
   template<class DomainType> class TokenVariable;
   typedef Id< TokenVariable<IntervalDomain> > ResVarId;
+
+  class ResourceListener;
+  typedef Id<ResourceListener> ResourceListenerId;
   
 }
 #endif
