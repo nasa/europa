@@ -7,16 +7,21 @@ class Rover{
 
  predicate Going{
   Locations m_from, m_to;
-  neq(m_from, m_to);
  }
 }
 
 Rover::At{
+ eq(duration, 1);
  meets(Going to);
  eq(to.m_from, m_location);
 
  meets(Going from);
  eq(from.m_to, m_location);
+}
+
+Rover::Going{
+  neq(m_from, m_to);
+  eq(duration, 4);
 }
 
 // Defines the initial state for the problem.

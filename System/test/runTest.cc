@@ -6,6 +6,7 @@
 #include "../ConstraintEngine/Constraints.hh"
 #include "../ConstraintEngine/EqualityConstraintPropagator.hh"
 #include "../PlanDatabase/ObjectTokenRelation.hh"
+#include "../PlanDatabase/PartialPlanWriter.hh"
 
 // Support fro required plan database components
 #include "../PlanDatabase/PlanDatabase.hh"
@@ -67,12 +68,13 @@ int main(){
   conditions.push_back(dcond.getId());
   FilterCriteria filter(conditions);
   FlawQuery query(source.getId(),filter.getId());
-
+  
   if (loggingEnabled()) {
     new CeLogger(std::cout, ce.getId());
     new DbLogger(std::cout, db.getId());
     new FlawSourceLogger(std::cout, source.getId());
     new FlawQueryLogger(std::cout, query.getId());
+    new PartialPlanWriter(db.getId(), ce.getId());
   }
   
   NDDL::initialize(db.getId());

@@ -7,7 +7,6 @@ class Rover{
 
  predicate Going{
   Locations _from, _to;
-  neq(_from, _to);
  }
 }
 
@@ -17,6 +16,10 @@ Rover::At{
 
  meets(Going from);
  eq(from._to, _location);
+}
+
+Rover::Going{
+ neq(_from, _to);
 }
 
 // Defines the initial state for the problem.
@@ -41,7 +44,7 @@ World::initialState{
  leq(end, object.m_horizonEnd);
  
  contains(Rover.At a);
- eq(a._location, Lander);
+ eq(a._location, "Lander");
 
  contains(Rover.At b);
  eq(b._location, Rock);
