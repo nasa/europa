@@ -39,23 +39,28 @@ namespace Prototype {
     IntervalDomain(const IntervalDomain& org);
 
     /**
-     * @brief Destructor
+     * @brief Destructor.
      */
     virtual ~IntervalDomain();
 
     virtual bool isFinite() const;
 
-    virtual bool isNumeric() const;
+    /**
+     * @brief IntervalDomains are always numeric.
+     */
+    virtual bool isNumeric() const {
+      return(true);
+    }
 
     virtual const DomainType& getType() const;
 
     /**
-     * @brief Access upper bound
+     * @brief Access upper bound.
      */
     double getUpperBound() const;
 
     /**
-     * @brief Access lower bound
+     * @brief Access lower bound.
      */
     double getLowerBound() const;
 
@@ -66,21 +71,23 @@ namespace Prototype {
     double getSingletonValue() const;
 
     /**
-     * @brief Access both bounds in a convenience method, and indicates if the domain is infinite
-     * @param lb update this value with the lower bound
-     * @param ub update this value with the upper bound
+     * @brief Access both bounds in a convenience method, and indicates if the domain is infinite.
+     * @param lb update this value with the lower bound.
+     * @param ub update this value with the upper bound.
      * @return true if !isFinite()
      */
     bool getBounds(double& lb, double& ub) const;
 
     /**
-     * @brief Set to the specified domain. May empty the domain if target does not intersect the current domain.
+     * @brief Set to the specified domain.
+     * @note May empty the domain if target does not intersect the current domain.
      * @param value the target singleton value.
      */
     void set(const AbstractDomain& dom);
 
     /**
-     * @brief Set to a singleton. May empty the domain if value is not a member of the current domain.
+     * @brief Set to a singleton.
+     * @note May empty the domain if value is not a member of the current domain.
      * @param value the target singleton value.
      */
     void set(double value);
@@ -94,31 +101,31 @@ namespace Prototype {
 
     /**
      * @brief Restricts this domain to the intersection of its values with the given domain.
-     * @param dom the domain to intersect with. Must not be empty.
+     * @param dom the domain to intersect with, which cannot be empty.
      * @return true if the intersection results in a change to this domain, otherwise false.
      */
     bool intersect(const AbstractDomain& dom);
 
     /**
      * @brief Restricts this domain to the difference of its values with the given domain.
-     * @param dom the domain to differ with. Must not be empty.
+     * @param dom the domain to differ with, which cannot be empty.
      * @return true if the operation results in a change to this domain, otherwise false.
      */
     bool difference(const AbstractDomain& dom);
 
     /**
-     * @brief Assign the values from the given domain, to this domain. Can only be called
-     * on domains that have no listeners attached, since it will not cause propagation. It is
-     * more of a utility.
+     * @brief Assign the values from the given domain, to this domain.
+     * @note Can only be called on domains that have no listeners
+     * attached, since it will not cause propagation.
      */
     AbstractDomain& operator=(const AbstractDomain& dom);
 
     /**
      * @brief Convenience version of intersect.
-     * @param lb the lower bound of domain to intersect with
-     * @param ub the upper bound of domain to intersect with. ub must be >= lb.
+     * @param lb the lower bound of domain to intersect with.
+     * @param ub the upper bound of domain to intersect with.
      * @return true if the intersection results in a change to this domain, otherwise false.
-     * @see (const AbstractDomain& dom
+     * @note ub must be >= lb.
      */
     bool intersect(double lb, double ub);
 
@@ -130,15 +137,16 @@ namespace Prototype {
 
     /**
      * @brief Relax this domain to that of the given domain.
-     * @param dom The domain to relax it to. Must not be empty and must be a superset of this domain.
+     * @param dom The domain to relax it to, which cannot be empty and
+     * must be a superset of this domain.
      */
     void relax(const AbstractDomain& dom);
 
     /**
      * @brief Convenience method for relaxing a domain.
-     * @param lb the lower bound of domain to relax to. lb must be <= m_lb.
-     * @param ub the upper bound of domain to relax to. ub must be >= m_ub.
-     * @return true if relaxation causes a change to this domain
+     * @param lb the lower bound of domain to relax to, which must be <= m_lb.
+     * @param ub the upper bound of domain to relax to, which must be >= m_ub.
+     * @return true if relaxation causes a change to this domain.
      * @see operator=(const AbstractDomain& dom)
      */
     bool relax(double lb, double ub);
@@ -169,48 +177,49 @@ namespace Prototype {
     /**
      * @brief test for membership.
      * @param value Value to test for.
-     * @return true if a member of the domain, otherwise false
+     * @return true if a member of the domain, otherwise false.
+     * @note Ought to be called 'hasMember()': 'domain.hasMember(value)'.
      */
     bool isMember(double value) const;
 
     /**
-     * @brief test for single valued domain.
+     * @brief Test for single valued domain.
      */
     bool isSingleton() const;
 
     /**
-     * @brief test for empty domain.
+     * @brief Test for empty domain.
      * @note Can only call this on closed domains.
      */
     bool isEmpty() const;
 
     /**
      * @brief Return the number of elements in the domain.
-     * @note Can only be called on finite domains..
+     * @note Can only be called on finite domains.
      */
     int getSize() const;
 
     /**
-     * @brief test for equality.
+     * @brief Test for equality.
      */
     bool operator==(const AbstractDomain& dom) const;
 
     /**
-     * @brief test for inequality.
+     * @brief Test for inequality.
      */
     bool operator!=(const AbstractDomain& dom) const;
 
     /**
-     * @brief test if this domain is a subset of dom.
+     * @brief Test if this domain is a subset of dom.
      * @param dom the domain tested against.
-     * @param true if all elements of this domain are in dom. Otherwise false.
+     * @param true if all elements of this domain are in dom, otherwise false.
      */
     bool isSubsetOf(const AbstractDomain& dom) const;
 
     /**
-     * @brief test if the intersection between this domain and the given domain is empty.
+     * @brief Test if the intersection between this domain and the given domain is empty.
      * @param dom the domain tested against.
-     * @param true if any elements of this domain are in dom. Otherwise false.
+     * @param true if any elements of this domain are in dom, otherwise false.
      */
     bool intersects(const AbstractDomain& dom) const;
 
@@ -223,7 +232,7 @@ namespace Prototype {
 
     /**
      * @brief mutually constraint both domains to their respective intersections.
-     * @param dom The domain to perform mutual intersection on
+     * @param dom The domain to perform mutual intersection with.
      * @return true if the intersection results in a change to either domain, otherwise false. 
      */
     bool equate(AbstractDomain& dom);
@@ -232,6 +241,11 @@ namespace Prototype {
      * @brief Enforces semantics of PLUS or MINUS infinity.
      */
     virtual double translateNumber(double number, bool asMin = true) const;
+
+    /**
+     * @brief Copy the concrete C++ object into new memory and return a pointer to it.
+     */
+    virtual IntervalDomain *copy() const;
 
   protected:
 
