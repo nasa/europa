@@ -3,9 +3,12 @@ gmon.out
 test5.xml
 test6.xml
 textfile.txt
+xmltest
 xmltest_g
 xmltest_g_no
+xmltest_g_rt
 xmltest_o
 xmltest_o_no
+xmltest_o_rt
 xmltest_p
 xmltest_p_no
