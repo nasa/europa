@@ -20,9 +20,11 @@
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
 #include "StringDomain.hh"
+#include "SymbolDomain.hh"
 #include "NumericDomain.hh"
 
 #include "TypeFactory.hh"
+#include "EnumeratedTypeFactory.hh"
 
 #include "module-tests.hh"
 
@@ -86,7 +88,12 @@ class TypeFactoryTests {
 public:
   static bool test(){
     runTest(testValueCreation);
+
+    // This is needed by the next test and is done outside it to avoid the
+    // need to purge the type factories, which might affect other tests.
+    new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain());
     runTest(testDomainCreation);
+
     runTest(testVariableCreation);
     runTest(testVariableWithDomainCreation);
     return true; 
@@ -108,10 +115,71 @@ public:
     return true;
   }
 
-  static bool testDomainCreation(){
+  typedef SymbolDomain Locations;
+
+  /**
+   * Locations enumeration's base domain, as required by class TypeFactory.
+   * @note Copied from System/test/basic-model-transaction.cc
+   * as created from basic-model-transaction.nddl v1.3 with the NDDL compiler.
+   */
+  static const Locations& LocationsBaseDomain() {
+    static Locations sl_enum("Locations");
+    if (sl_enum.isOpen()) {
+      sl_enum.insert(LabelStr("Hill"));
+      sl_enum.insert(LabelStr("Rock"));
+      sl_enum.insert(LabelStr("Lander"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+
+  static bool testDomainCreation() {
     const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(TypeFactory::baseDomain(IntervalIntDomain().getTypeName().c_str()));
+    check_error(bd0.isMember(0));
     const IntervalDomain & bd1 = dynamic_cast<const IntervalDomain &>(TypeFactory::baseDomain(IntervalDomain().getTypeName().c_str()));
+    check_error(bd1.isMember(0.1));
     const BoolDomain & bd2 = dynamic_cast<const BoolDomain &>(TypeFactory::baseDomain(BoolDomain().getTypeName().c_str()));
+    check_error(bd2.isMember(false));
+    check_error(bd2.isMember(true));
+    check_error(LocationsBaseDomain().isMember(LabelStr("Hill")));
+    check_error(LocationsBaseDomain().isMember(LabelStr("Rock")));
+    check_error(LocationsBaseDomain().isMember(LabelStr("Lander")));
+    check_error(!LocationsBaseDomain().isMember(LabelStr("true")));
+    //!!This (and SymbolDomain) die with complaints of a "bad cast"
+    //!!const Locations & loc0 = dynamic_cast<const Locations&>(TypeFactory::baseDomain("Locations"));
+    const EnumeratedDomain & loc0 = dynamic_cast<const EnumeratedDomain &>(TypeFactory::baseDomain("Locations"));
+    check_error(loc0.isMember(LabelStr("Hill")));
+    check_error(loc0.isMember(LabelStr("Rock")));
+    check_error(loc0.isMember(LabelStr("Lander")));
+    check_error(!loc0.isMember(LabelStr("true")));
+    //!!The compiler complains about using Locations here when EnumeratedDomain is used above.
+    //!!Locations *loc1 = loc0.copy();
+    EnumeratedDomain *loc1 = loc0.copy();
+    loc1->remove(LabelStr("Hill"));
+    check_error(!loc1->isMember(LabelStr("Hill")));
+    check_error(loc1->isMember(LabelStr("Rock")));
+    check_error(loc1->isMember(LabelStr("Lander")));
+    loc1->remove(LabelStr("Rock"));
+    check_error(!loc1->isMember(LabelStr("Hill")));
+    check_error(!loc1->isMember(LabelStr("Rock")));
+    check_error(loc1->isMember(LabelStr("Lander")));
+    loc1->insert(LabelStr("Hill"));
+    check_error(loc1->isMember(LabelStr("Hill")));
+    check_error(!loc1->isMember(LabelStr("Rock")));
+    check_error(loc1->isMember(LabelStr("Lander")));
+    loc1->remove(LabelStr("Lander"));
+    check_error(loc1->isMember(LabelStr("Hill")));
+    check_error(!loc1->isMember(LabelStr("Rock")));
+    check_error(!loc1->isMember(LabelStr("Lander")));
+    loc1->insert(LabelStr("Rock"));
+    check_error(loc1->isMember(LabelStr("Hill")));
+    check_error(loc1->isMember(LabelStr("Rock")));
+    check_error(!loc1->isMember(LabelStr("Lander")));
+    loc1->remove(LabelStr("Hill"));
+    check_error(!loc1->isMember(LabelStr("Hill")));
+    check_error(loc1->isMember(LabelStr("Rock")));
+    check_error(!loc1->isMember(LabelStr("Lander")));
+    delete loc1;
     return true;
   }
 
@@ -2163,9 +2231,9 @@ private:
     // identified as enumerations.
     // For each file, try twice with different relative paths since we don't know what
     // the current working directory is.
-    assertTrue(readTestCases(std::string("ConstraintEngine/NewTestCases"), tests) ||
+    assertTrue(readTestCases(std::string("ConstraintEngine/test/NewTestCases"), tests) ||
                readTestCases(std::string("NewTestCases"), tests));
-    assertTrue(readTestCases(std::string("ConstraintEngine/CLibTestCases"), tests) ||
+    assertTrue(readTestCases(std::string("ConstraintEngine/test/CLibTestCases"), tests) ||
                readTestCases(std::string("CLibTestCases"), tests));
 
     // Run each test, in the same order they were read/init'd,
