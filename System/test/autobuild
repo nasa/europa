@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.46 2003-06-11 20:41:38 wedgingt Exp $
+# $Id: autobuild,v 1.47 2003-06-18 17:59:37 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -107,9 +107,9 @@ do
 
     test -d "$startdir"/working || exit 2
 
-    make $makeopt unofficial >> make.tests 2>&1
+    make $makeopt unofficial plannerTests >> make.tests 2>&1
     status=$?
-    echo '"make unofficial" in '"`pwd`"' exited '"$status"
+    echo '"make unofficial plannerTests" in '"`pwd`"' exited '"$status"
 
     if test $status = 0
     then
