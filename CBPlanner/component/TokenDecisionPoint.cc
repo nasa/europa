@@ -13,21 +13,21 @@ namespace Prototype {
   const bool TokenDecisionPoint::assign(const ChoiceId& choice) { 
     check_error (!choice.isNoId());
     Choice::ChoiceType type = choice->getType();
-    check_error(type == Choice::value);
-    Token::State state = (Token::State)Id<ValueChoice>(choice)->getValue();
+    check_error(type == Choice::VALUE);
+    State state = (State)Id<ValueChoice>(choice)->getValue();
     TokenId tok = getToken();
     switch (state) {
-    case Token::ACTIVE:
+    case ACTIVE:
       m_dbClient->activate(tok);
       break;
-    case Token::MERGED:
+    case MERGED:
       m_dbClient->merge(tok, Id<ValueChoice>(choice)->getToken());
       break;
-    case Token::REJECTED:
+    case REJECTED:
       m_dbClient->reject(tok);
       break;
-    case Token::INACTIVE:
-    case Token::INCOMPLETE: 
+    case INACTIVE:
+    case INCOMPLETE: 
     default:
       check_error(false);
       break;

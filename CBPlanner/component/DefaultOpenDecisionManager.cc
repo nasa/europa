@@ -284,16 +284,17 @@ namespace Prototype {
       ChoiceId activate;
       std::list<ChoiceId>::iterator it = choices.begin();
       for ( ; it != choices.end(); ++it) {
-	check_error((*it)->getType() == Choice::value);
-	Token::State val = (Token::State)Id<ValueChoice>(*it)->getValue();
-	if (merge.isNoId() && val == Token::MERGED) {
+	check_error((*it)->getType() == Choice::VALUE);
+	TokenDecisionPoint::State val = (TokenDecisionPoint::State)Id<ValueChoice>(*it)->getValue();
+	if (merge.isNoId() && val == TokenDecisionPoint::MERGED) {
 	  merge = (*it);
 	  break; // we'll do this first, no point in assigning the rest.
 	}
-	if (val == Token::ACTIVE)
+	if (val == TokenDecisionPoint::ACTIVE)
 	  activate = (*it);
-	if (val == Token::REJECTED)
+	if (val == TokenDecisionPoint::REJECTED)
 	  reject = (*it);
+	// we ignore choices for INACTIVE and INCOMPLETE.
       }
       if (!merge.isNoId())
 	m_curChoice = merge;
