@@ -81,9 +81,8 @@ namespace Prototype {
     return (constraint->getName() == LabelStr("Equal"));
   }
 
-  template<class DomainType>
   void processScope(const std::set<ConstrainedVariableId>& scope){
-    DomainType domain(static_cast<const DomainType&>(EqualConstraint::getCurrentDomain(*(scope.begin()))));
+    AbstractDomain& domain(EqualConstraint::getCurrentDomain(* (scope.begin())));
 
     if(domain.isDynamic())
       return;
@@ -94,7 +93,7 @@ namespace Prototype {
 
     // Iterate over, restricting domain as we go
     for(std::set<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
-      DomainType& currentDomain = static_cast<DomainType&>(EqualConstraint::getCurrentDomain(*it));
+      AbstractDomain& currentDomain = EqualConstraint::getCurrentDomain(*it);
       check_error(currentDomain.getType() == domainType);
 
       if(currentDomain.isDynamic())
@@ -108,30 +107,15 @@ namespace Prototype {
     }
 
     // If we get to here, we have computed the new domain for all variables in the scope and we know that no
-    // domain has been emptied
+    // domain has been emptied (this could be optimized by recording the last change to dommain)
     for(std::set<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
-      DomainType& currentDomain = static_cast<DomainType&>(EqualConstraint::getCurrentDomain(*it));
+      AbstractDomain& currentDomain = EqualConstraint::getCurrentDomain(*it);
       currentDomain.intersect(domain);
     }
   }
 
   void EqualityConstraintPropagator::equate(const std::set<ConstrainedVariableId>& scope){
     check_error(!scope.empty());
-    switch(EqualConstraint::getCurrentDomain(*(scope.begin())).getType()){
-    case AbstractDomain::REAL_ENUMERATION:
-      processScope<EnumeratedDomain>(scope);
-      break;
-    case AbstractDomain::BOOL:
-      processScope<BoolDomain>(scope);
-      break;
-    case AbstractDomain::INT_INTERVAL:
-      processScope<IntervalIntDomain>(scope);
-      break;
-    case AbstractDomain::REAL_INTERVAL:
-      processScope<IntervalDomain>(scope);
-      break;
-    default:
-      check_error(ALWAYS_FAILS);
-    }
+    processScope(scope);
   }
 }

@@ -200,7 +200,7 @@ class ConstraintTest
 {
 public:
   static bool test() {
-    runTest(testAddEqualConstraint);
+    runTest(testSubsetConstraint);
     runTest(testAddEqualConstraint);
     runTest(testEqualConstraint);
     runTest(testLessThanEqualConstraint);
@@ -209,6 +209,7 @@ public:
     runTest(testRepropagation);
     runTest(testConstraintRemoval);
     runTest(testDelegation);
+    runTest(testNotEqual);
     return true;
   }
 
@@ -239,7 +240,7 @@ private:
     values.pop_back();
     LabelSet ls2(values);
     v0.specify(ls2);
-    assert(ENGINE->pending());
+    assert(!ENGINE->pending()); // No change expected since it is a restriction
     assert(!(v0.getDerivedDomain() == ls1));
     assert(c0.executionCount() == 1);
     assert(ENGINE->constraintConsistent());
@@ -252,6 +253,7 @@ private:
     
     return true;
   }
+
   static bool testAddEqualConstraint()
   {
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
@@ -564,6 +566,40 @@ private:
     delete (Constraint*) c2;
     delete (Constraint*) c0;
     assert(DelegationTestConstraint::s_instanceCount == 0);
+    return true;
+  }
+
+  static bool testNotEqual(){
+    EnumeratedDomain dom0;
+    dom0.insert(1);
+    dom0.insert(2);
+    dom0.insert(3);
+    dom0.close();
+
+    Variable<EnumeratedDomain> v0(ENGINE, dom0);
+    Variable<EnumeratedDomain> v1(ENGINE, dom0);
+    Variable<EnumeratedDomain> v2(ENGINE, dom0);
+
+    NotEqualConstraint c0(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
+    NotEqualConstraint c1(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v1.getId(), v2.getId()));
+    NotEqualConstraint c2(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v2.getId()));
+    assert(ENGINE->pending());
+    assert(ENGINE->propagate());
+
+    dom0.remove(2);
+    v0.specify(dom0);
+    assert(!ENGINE->pending()); // No propagation required
+
+    v1.specify(3);
+    assert(ENGINE->pending());
+    assert(ENGINE->propagate());
+    assert(v0.getDerivedDomain().getSingletonValue() == 1);
+    assert(v2.getDerivedDomain().getSingletonValue() == 2);
+
+    v0.reset();
+    assert(ENGINE->pending());
+    assert(ENGINE->propagate());
+    assert(v0.getDerivedDomain() == v2.getDerivedDomain());
     return true;
   }
 };

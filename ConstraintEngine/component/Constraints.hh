@@ -16,10 +16,6 @@ namespace Prototype
 
     void handleExecute();
 
-    void handleExecute(const ConstrainedVariableId& variable, 
-		       int argIndex, 
-		       const DomainListener::ChangeType& changeType);
-
   private:
     static const int X = 0;
     static const int Y = 1;
@@ -36,21 +32,12 @@ namespace Prototype
 		    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
-
-    void handleExecute(const ConstrainedVariableId& variable, 
-		       int argIndex, 
-		       const DomainListener::ChangeType& changeType);
-
-    bool canIgnore(const ConstrainedVariableId& variable, 
-		   int argIndex, 
-		   const DomainListener::ChangeType& changeType);
     /**
      * @brief Accessor required for EquilityConstraintPropagator
      */
     static AbstractDomain& getCurrentDomain(const ConstrainedVariableId& var);
 
   private:
-    int m_lastNotified;
     static const int X = 0;
     static const int Y = 1;
     static const int ARG_COUNT = 2;
@@ -67,10 +54,6 @@ namespace Prototype
     ~SubsetOfConstraint();
 
     void handleExecute();
-
-    void handleExecute(const ConstrainedVariableId& variable, 
-		       int argIndex,
-		       const DomainListener::ChangeType& changeType);
 
     bool canIgnore(const ConstrainedVariableId& variable, 
 		   int argIndex, 
@@ -96,10 +79,6 @@ namespace Prototype
 
     void handleExecute();
 
-    void handleExecute(const ConstrainedVariableId& variable, 
-		       int argIndex, 
-		       const DomainListener::ChangeType& changeType);
-
     bool canIgnore(const ConstrainedVariableId& variable, 
 		   int argIndex, 
 		   const DomainListener::ChangeType& changeType);
@@ -109,5 +88,24 @@ namespace Prototype
     static const int ARG_COUNT = 2;
   };
 
+
+  class NotEqualConstraint: public Constraint
+  {
+  public:
+    NotEqualConstraint(const LabelStr& name,
+		       const LabelStr& propagatorName,
+		       const ConstraintEngineId& constraintEngine,
+		       const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+    bool canIgnore(const ConstrainedVariableId& variable, 
+		   int argIndex, 
+		   const DomainListener::ChangeType& changeType);
+  private:
+    static const int X = 0;
+    static const int Y = 1;
+    static const int ARG_COUNT = 2;
+  };
 }
 #endif

@@ -49,47 +49,40 @@ namespace Prototype
       return;
 
     if (!(xIsInfinite || yIsInfinite)) {
-        if (zMin < xMin + yMin)
-            zMin = xMin + yMin;
-        if (zMax > xMax + yMax)
-            zMax = xMax + yMax;
+      if (zMin < xMin + yMin)
+	zMin = xMin + yMin;
+      if (zMax > xMax + yMax)
+	zMax = xMax + yMax;
     }
 
     if(domz.intersect(zMin,zMax) && domz.isEmpty())
       return;
     
     if (!(zIsInfinite || yIsInfinite)) {
-        if (xMax > zMax - yMin)
-            xMax = zMax - yMin;
-        if (xMin < zMin - yMax)
-            xMin = zMin - yMax;
+      if (xMax > zMax - yMin)
+	xMax = zMax - yMin;
+      if (xMin < zMin - yMax)
+	xMin = zMin - yMax;
     }
 
     if(domx.intersect(xMin,xMax)  && domx.isEmpty())
       return;
     
     if (!(xIsInfinite || zIsInfinite)) {
-        if (yMax > zMax - xMin)
-            yMax = zMax - xMin;
-        if (yMin < zMin - xMax)
-            yMin = zMin - xMax;
+      if (yMax > zMax - xMin)
+	yMax = zMax - xMin;
+      if (yMin < zMin - xMax)
+	yMin = zMin - xMax;
     }
 
     domy.intersect(yMin,yMax);
-  }
-
-
-  void AddEqualConstraint::handleExecute(const ConstrainedVariableId& variable, 
-					 int argIndex, 
-					 const DomainListener::ChangeType& changeType){
-    handleExecute();
   }
 
   EqualConstraint::EqualConstraint(const LabelStr& name,
 				   const LabelStr& propagatorName,
 				   const ConstraintEngineId& constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables), m_lastNotified(0){
+    : Constraint(name, propagatorName, constraintEngine, variables){
     check_error(variables.size() == ARG_COUNT);
 
     // check the arguments - must both be enumerations or intervals
@@ -110,25 +103,6 @@ namespace Prototype
     domx.equate(domy);
 
     check_error(domx.isEmpty() || domy.isEmpty() || domx == domy);
-  }
-
-  void EqualConstraint::handleExecute(const ConstrainedVariableId& variable, 
-				      int argIndex, 
-				      const DomainListener::ChangeType& changeType){
-    handleExecute();
-  }
-
-
-  bool EqualConstraint::canIgnore(const ConstrainedVariableId& variable, 
-				     int argIndex, 
-				  const DomainListener::ChangeType& changeType) {
-
-    if(m_lastNotified != m_constraintEngine->cycleCount()){
-      m_lastNotified = m_constraintEngine->cycleCount();
-      return false;
-    }
-    else
-      return true;
   }
 
   AbstractDomain&  EqualConstraint::getCurrentDomain(const ConstrainedVariableId& var){
@@ -171,13 +145,6 @@ namespace Prototype
 
     m_isDirty  = false;
     m_executionCount++;
-  }
-
-  void SubsetOfConstraint::handleExecute(const ConstrainedVariableId& variable, 
-					 int argIndex, 
-					 const DomainListener::ChangeType& changeType){
-    check_error(argIndex == 0);
-    handleExecute();
   }
 
   bool SubsetOfConstraint::canIgnore(const ConstrainedVariableId& variable, 
@@ -225,12 +192,6 @@ namespace Prototype
     domy.intersect(domx.getLowerBound(), domy.getUpperBound());
   }
 
-  void LessThanEqualConstraint::handleExecute(const ConstrainedVariableId& variable, 
-					      int argIndex, 
-					      const DomainListener::ChangeType& changeType){
-    handleExecute();
-  }
-
   bool LessThanEqualConstraint::canIgnore(const ConstrainedVariableId& variable, 
 					  int argIndex, 
 					  const DomainListener::ChangeType& changeType) {
@@ -241,5 +202,41 @@ namespace Prototype
 	   (argIndex == Y && 
 	    (changeType == DomainListener::LOWER_BOUND_INCREASED ||
 	     changeType == DomainListener::RESTRICT_TO_SINGLETON)));
+  }
+
+  NotEqualConstraint::NotEqualConstraint(const LabelStr& name,
+					 const LabelStr& propagatorName,
+					 const ConstraintEngineId& constraintEngine,
+					 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables){
+    check_error(variables.size() == ARG_COUNT);
+
+    // check the arguments - must both be enumerations, since we don't implement splitting of domains
+    check_error(getCurrentDomain(m_variables[X]).isEnumerated() && getCurrentDomain(m_variables[Y]).isEnumerated());
+  }
+
+  void NotEqualConstraint::handleExecute()
+  {
+    AbstractDomain& domx = getCurrentDomain(m_variables[X]);
+    AbstractDomain& domy = getCurrentDomain(m_variables[Y]);
+
+    // Discontinue if either domain is dynamic
+    if(domx.isDynamic() || domy.isDynamic())
+      return;
+
+    check_error(!domx.isEmpty() && !domy.isEmpty());
+
+    if(domx.isSingleton() && domy.isMember(domx.getSingletonValue()))
+      domy.remove(domx.getSingletonValue());
+    else if (domy.isSingleton() && domx.isMember(domy.getSingletonValue()))
+      domx.remove(domy.getSingletonValue());
+  }
+
+  bool NotEqualConstraint::canIgnore(const ConstrainedVariableId& variable, 
+				     int argIndex, 
+				     const DomainListener::ChangeType& changeType){
+    // if it is a restriction, but not a singleton, then we can ignore it.
+    if(changeType != DomainListener::RESET && changeType != DomainListener::RELAXED)
+      return !getCurrentDomain(variable).isSingleton();
   }
 }
