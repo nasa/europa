@@ -1,7 +1,11 @@
 #!/bin/bash
-# $Id: autobuild,v 1.94 2004-10-05 18:29:50 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.95 2004-10-06 15:58:19 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
+
+echo ''
+echo 'PLASMA autobuild script'
+echo ''
 
 # $email is the address to mail messages to.
 # If a user name or email address is given as an argument, send email to that
@@ -20,12 +24,6 @@ else
         removePlasma=true
     fi
 fi
-
-echo ''
-echo 'PLASMA autobuild script'
-echo ''
-info="Emailing to $email; removePlasma is $removePlasma`echo ''; uname -a; echo ''; g++ --version ; pwd ; echo ''`"
-echo "$info"
 
 # "Guess" where the programs that we need are, based on the operating system.
 #   Almost certainly only works at NASA/Ames in Code IC.
@@ -58,6 +56,9 @@ done
 # Usually, this is run via cron, which does not use the usual $PATH
 PATH="$JAVA_HOME"/bin:"$JAM_HOME":"$GCC_ROOTDIR"/bin:"$CVS_HOME"/bin:"$PATH"
 export GCC_ROOTDIR JAVA_HOME PATH
+
+info="Emailing to $email; removePlasma is $removePlasma`echo ''; uname -a; echo ''; g++ --version ; pwd ; echo ''`"
+echo "$info"
 
 # Make sure that libstdc++.so is in this.
 #   Cannot easily test for it since some installs don't create libstdc++.so per se,
@@ -219,8 +220,8 @@ then
     # ... tagging the to-be-tested version:
     cvsCmd rtag -rHEAD "$testingTag" PLASMA
 else
-    # Update once, before running jam.
-    cvsCmd -q update -d -P
+    : 'Would update once, before running jam, but that introduces problems'
+    : '  related to this script itself being under the PLASMA CVS tree.'
 fi
 
 # Now, for the primary purpose: run all the tests of all build variants.
