@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.30 2003-01-23 17:53:16 wedgingt Exp $
+# $Id: autobuild,v 1.31 2003-01-23 17:58:38 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -22,6 +22,10 @@ export DISPLAY
 # Make sure that libstdc++.so is in this
 LD_LIBRARY_PATH='/usr/apps/WS6.0/SUNWspro/lib:/usr/lib:/usr/dt/lib:/usr/openwin/lib:/usr/local/lib'
 export LD_LIBRARY_PATH
+
+# Debug memory allocation; one variant fails in allocation presently here on Slayton
+MALLOC_CHECK_=2
+export MALLOC_CHECK_
 
 # Apply limits; some compiles run out of swap space.
 ulimit -c 300000
