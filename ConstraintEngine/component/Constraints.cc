@@ -256,8 +256,11 @@ namespace Prototype {
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() == (unsigned int) ARG_COUNT);
 
-    // Check the arguments - must both be enumerations, since we don't implement splitting of intervals.
-    // This is pointlessly restrictive. --wedgingt@ptolemy.arc.nasa.gov 2004 Feb 12
+    // Check the arguments - must both be enumerations, since we don't
+    // implement splitting of intervals.
+    // This is pointlessly restrictive; shouldn't the Domain class
+    // decide whether it splits intervals or not?
+    // --wedgingt@ptolemy.arc.nasa.gov 2004 Feb 12
     check_error(getCurrentDomain(m_variables[X]).isEnumerated() && getCurrentDomain(m_variables[Y]).isEnumerated());
   }
 
@@ -302,7 +305,7 @@ namespace Prototype {
   /**
    * @brief Return larger argument.
    * @note Shouldn't be here, but in a generic "arithmetic" class or system library.
-   * @note max() is a macro in some compiler implementations.
+   * @note max() is a macro in some compiler implementations. --wedgingt 2004 Feb 26
    */
   double max(double a, double b) {
     return (a > b ? a : b);
@@ -311,7 +314,7 @@ namespace Prototype {
   /**
    * @brief Return smaller argument.
    * @note Shouldn't be here, but in a generic "arithmetic" class or system library.
-   * @note min() is a macro in some compiler implementations.
+   * @note min() is a macro in some compiler implementations. --wedgingt 2004 Feb 26
    */
   double min(double a, double b) {
     return(a < b ? a : b);
@@ -422,10 +425,23 @@ namespace Prototype {
       m_addEqualConstraint(LabelStr("Internal:addEqual"), propagatorName, constraintEngine,
 			   makeScope(m_interimVariable.getId(), m_variables[A], m_variables[D])) {
     check_error(m_variables.size() == (unsigned int) ARG_COUNT);
-    for (int i = 0; i < ARG_COUNT; i++)
-      check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
   }
 
-  // All the work is done by the composite constraints
-  void AddMultEqualConstraint::handleExecute() { }
+  /**
+   * @class LessThanSumConstraint
+   * @brief X <= Y + Z.
+   * Converted into two constraints: X <= temp and temp equal to Y + Z.
+   */
+  LessOrEqThanSumConstraint::LessOrEqThanSumConstraint(const LabelStr& name,
+                                                       const LabelStr& propagatorName,
+                                                       const ConstraintEngineId& constraintEngine,
+                                                       const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_lessThanEqualConstraint(LabelStr("Internal::lessThanEqual"), propagatorName, constraintEngine,
+                                makeScope(m_variables[X], m_interimVariable.getId())),
+      m_addEqualConstraint(LabelStr("Internal:addEqual"), propagatorName, constraintEngine,
+			   makeScope(m_variables[Y], m_variables[Z], m_interimVariable.getId())) {
+    check_error(m_variables.size() == (unsigned int) ARG_COUNT);
+  }
 }
