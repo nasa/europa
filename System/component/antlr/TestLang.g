@@ -6,10 +6,12 @@ options{ k=2; buildAST=true; exportVocab=TestLang; defaultErrorHandler=false;}
 
 
 enumeration :  OBRACE^ (single_value (COMMA!)?)+ CBRACE!
+//enumeration : OBRACE^ ((STRING (COMMA!)?)+ | (INTEGER (COMMA!)?)+) CBRACE!
             //{System.err.println("enumeration");System.err.println(currentAST);}
             ;
 
-range : OBRACKET^ single_value TO! single_value CBRACKET!
+range : OBRACKET^ single_value (TO!)? single_value CBRACKET!
+//range : OBRACKET^ ((INTEGER (TO!)? INTEGER) | (STRING (TO!)? STRING)) CBRACKET!
       //{System.err.println("range");System.err.println(currentAST);}
       ;
 

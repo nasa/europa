@@ -1,0 +1,7 @@
+Test('Objectstest',
+At step = 0 : Count(Objects( )) > 0;
+At step = 0 : Count(Objects(  name = 'Foo'  )) > 0;
+At step = 0 : Count(Objects(  variable(name='Foo' value=0)  )) > 0;
+At step = 0 : Count(Objects(  name = 'Foo'   variable(name='Foo' value=0)  )) > 0;
+At step = 0 : Count(Objects(  variable(name='Foo' value=0)   name = 'Foo'  )) > 0;
+);

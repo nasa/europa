@@ -1,0 +1,136 @@
+Test('ModuleTests',
+  At step == 1 : 1 == 1;
+  Test('TokenTests',
+    Test('BasicTokenCountTest',
+      At step = 1 : Count(Tokens()) = 6 ;
+      At step = 1 : Count(Tokens()) > 5 ;
+      At step = 1 : Count(Tokens()) < 7 ;
+      At step = 1 : Count(Tokens()) >= 6 ;
+      At step = 1 : Count(Tokens()) <= 6;
+      At step = 1 : Count(Tokens()) in [0 9];
+      At step = 1 : Count(Tokens()) < [7..9];
+      At step = 1 : Count(Tokens()) > [0..3];
+      At step = 1 : Count(Tokens()) in {0 3 5 6 9};
+      At step = 1 : Count(Tokens()) out [3 5];
+      At step = 1 : Count(Tokens()) out {1 2 3 4 5};
+    );
+
+    Test('PredicateTokenCountTest',
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) = 2 ;
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) > 1 ;
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) < 3 ;
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) >= 2 ;
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) <= 2;
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) in [0 9];
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) < [7..9];
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) > [0..1];
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) in {0 2 5 6 9};
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) out [3 5];
+      At step = 1 : Count(Tokens(predicate = 'Position.At')) out {1 3 4 5};
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) = 2 ;
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) > 1 ;
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) < 3 ;
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) >= 2 ;
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) <= 2;
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) in [0 9];
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) < [7..9];
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) > [0..1];
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) in {0 2 5 6 9};
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) out [3 5];
+      At step = 1 : Count(Tokens(predicate in {'Position.At', 'Foo'})) out {1 3 4 5};
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) = 2;
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) > 1;
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) < 3;
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) >= 2;
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) <= 2;
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) in [0 9];
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) < [7..9];
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) > [0..1];
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) in {0 2 5 6 9};
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) out [3 5];
+      At step = 1 : Count(Tokens(predicate out {'Position.navigate', 'Foo'})) out {1 3 4 5};
+    );
+
+    Test('StartTokenCountTest',
+      At step = 1 : Count(Tokens(start = [1 99])) == 2;
+      At step = 1 : Count(Tokens(start < 100)) == 5;
+      At step = 1 : Count(Tokens(start > 1)) == 1;
+      At step = 1 : Count(Tokens(start intersects [0 30])) == 6;
+      At step = 1 : Count(Tokens(start in [0..100])) = 6;
+      At step = 1 : Count(Tokens(start out [999 10000])) = 6;
+    );
+
+    Test('EndTokenCountTest',
+      At step = 1 : Count(Tokens(end = [2 100])) == 2;
+      At step = 1 : Count(Tokens(end < 100)) == 3;
+      At step = 1 : Count(Tokens(end > 2)) == 1;
+      At step = 1 : Count(Tokens(end intersects [0 30])) == 6;
+      At step = 1 : Count(Tokens(end in [0..100])) = 6;
+      At step = 1 : Count(Tokens(end out [999 10000])) = 6;
+    );
+
+    Test('VariableTokenCountTest',
+      At any step : 1 != 0;
+    );
+
+    Test('PredicateStartTokenCountTest',
+      At step = 1 : Count(Tokens(predicate = 'Position.At' start = [1 99])) = 1;
+    );
+
+    Test('PredicateEndTokenCountTest',
+      At step = 1 : Count(Tokens(predicate = 'Position.At' end = [2 100])) = 1;
+    );
+
+    Test('PredicateVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );
+    
+    Test('StartEndTokenCountTest',
+      At step = 1 : Count(Tokens(start = [1 99] end = [2 100])) = 2;
+    );
+
+    Test('StartVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );
+
+    Test('EndVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );
+
+    Test('PredicateStartEndTokenCountTest',
+      At step = 1 : Count(Tokens(predicate = 'Position.At' start = [1 99] end = [2 100])) = 1;
+    );
+
+    Test('StartEndVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );
+    
+    Test('PredicateStartVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );
+ 
+    Test('PredicateEndVariableTokenCountTest',
+      At step = 1 : 1 != 0;
+    );    
+  );
+
+  Test('ObjectTests',
+    Test('BasicObjectCountTest',
+      At step = 1 : Count(Objects()) = 18 ;
+      At step = 1 : Count(Objects()) > 5 ;
+      At step = 1 : Count(Objects()) < 19 ;
+      At step = 1 : Count(Objects()) >= 18 ;
+      At step = 1 : Count(Objects()) <= 18;
+      At step = 1 : Count(Objects()) in [0 20];
+      At step = 1 : Count(Objects()) < [20..22];
+      At step = 1 : Count(Objects()) > [0..3];
+      At step = 1 : Count(Objects()) in {0 3 5 6 8 9 18};
+      At step = 1 : Count(Objects()) out [3 5];
+      At step = 1 : Count(Objects()) out {1 2 3 4 5};
+    );
+
+    Test('NameObjectCountTest',
+      At step = 1 : Count(Objects(name = 'rover')) == 1;
+    );
+  );
+);

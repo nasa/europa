@@ -15,7 +15,8 @@ public class AssertionGenerator {
     testNumMap = new HashMap();
   }
 
-  public static String addAssertion(String testName, IXMLElement xml) {
+  public static String addAssertion(String testName, IXMLElement xml) 
+    throws TestLangRuntimeException {
     Integer suffix = null;
     if(!testNumMap.containsKey(testName))
       testNumMap.put(testName, new Integer(0));

@@ -15,6 +15,7 @@ namespace Prototype {
   class TestErr {
   public:
     DECLARE_ERROR(IndeterminateStateError);
+    DECLARE_ERROR(LanguageError);
   };
   
   class Test {

@@ -1,0 +1,13 @@
+SubDir PLASMA System test testLang ;
+
+if ! $(PLASMA_READY) {
+  #SubInclude PLASMA System test testLang converter ;
+
+  local modtest = modtest ;
+
+  TestLangToCpp $(modtest:S=.cc) : $(modtest) ;
+
+  TestLangMainNoNddl testlang-module-tests : modtest : module-tests.cc : System ;
+  RunModuleMain run-testlang-module-tests : testlang-module-tests ;
+  LocalDepends tests : run-testlang-module-tests ;
+}

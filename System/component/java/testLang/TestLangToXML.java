@@ -105,6 +105,7 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     methodNames[INTERSECTS] = "boolIntersects";
     methodNames[AT] = "assertion";
     methodNames[STEP] = "step";
+    methodNames[PROPERTY] = "property";
   }
 
 
@@ -445,6 +446,10 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
 
+  private static IXMLElement count(CommonAST ast, Object arg) throws TestLangParseException, TestLangRuntimeException {
+    return count(ast);
+  }
+
   private static IXMLElement entity(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
     if(ast == null)
       throw new TestLangRuntimeException("Attempted to evaluate null 'Entity' element.");
@@ -462,6 +467,9 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
     return retval;
   }
   
+  private static IXMLElement entity(CommonAST ast, Object arg) throws TestLangParseException, TestLangRuntimeException {
+    return entity(ast);
+  }
   private static IXMLElement objects(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
     if(ast == null)
       throw new TestLangRuntimeException("Attempted to evaluate null 'Objects' element.");
@@ -528,6 +536,19 @@ public abstract class TestLangToXML extends TestLangHelper implements TestLangTo
       childElem.addChild(evaluate(sub));
       child = (CommonAST) child.getNextSibling();
     }
+    return retval;
+  }
+
+  private static IXMLElement property(CommonAST ast) throws TestLangParseException, TestLangRuntimeException {
+    if(ast == null)
+      throw new TestLangRuntimeException("Attempted to evaluate null 'Property' element.");
+    checkValidType(ast.getType(), PROPERTY, "Attempted to evaluate a 'Property' element with invalid type " +
+                   ast.getType());
+    IXMLElement retval = new XMLElement("Property");
+    CommonAST child = (CommonAST) ast.getFirstChild();
+    retval.setAttribute("index", child.getText());
+    child = (CommonAST) child.getNextSibling();
+    retval.addChild(evaluate(child));
     return retval;
   }
 

@@ -1,0 +1,43 @@
+SubDir PLASMA System test testLang converter ;
+
+if ! $(PLASMA_READY) {
+TL_PARSER_TESTS = tokenstest objectstest transtest steptest booltest depthtest 
+                  rangetest enumtest proptest ;
+
+  SubDirHdrs $(PLASMA) ConstraintEngine ;
+  SubDirHdrs $(PLASMA) ConstraintEngine core ;
+  SubDirHdrs $(PLASMA) ConstraintEngine component ;
+  SubDirHdrs $(PLASMA) CBPlanner ;
+  SubDirHdrs $(PLASMA) CBPlanner core ;
+  SubDirHdrs $(PLASMA) CBPLanner component ;
+  SubDirHdrs $(PLASMA) PlanDatabase ;
+  SubDirHdrs $(PLASMA) PlanDatabase core ;  
+  SubDirHdrs $(PLASMA) PlanDatabase component ;
+  SubDirHdrs $(PLASMA) RulesEngine ;
+  SubDirHdrs $(PLASMA) RulesEngine core ;
+  SubDirHdrs $(PLASMA) RulesEngine component ;
+  SubDirHdrs $(PLASMA) Utils ;
+  SubDirHdrs $(PLASMA) Utils core ;
+  SubDirHdrs $(PLASMA) Utils component ;
+  SubDirHdrs $(PLASMA) System ;
+  SubDirHdrs $(PLASMA) System core ;
+  SubDirHdrs $(PLASMA) System component ;
+
+
+local parser_test ;
+for parser_test in $(TL_PARSER_TESTS) {
+  local cpp = $(parser_test:S=.cc) ;
+  local obj = Test_$(parser_test:S=$(SUFOBJ)) ;
+  TestLangToCpp $(cpp) : $(parser_test) ;
+  
+  Object $(obj) : Test_$(cpp) ;
+  LocalClean $(cpp) ;
+  LocalClean $(obj) ;
+  LocalClean $(parser_test:S=.xml) ;
+  LocalDepends testlang-build-$(parser_test) : $(cpp) ;
+  LocalDepends testlang-build-$(parser_test) : $(obj) ;
+  LocalDepends testlang-module-tests : testlang-build-$(parser_test) ;
+  LocalDepends run-testlang-module-tests : testlang-build-$(parser_test) ;
+  LocalDepends tests : run-testlang-module-tests ;
+}
+}
