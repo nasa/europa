@@ -240,6 +240,7 @@ namespace Prototype {
      * @brief mutually constraint both domains to their respective intersections.
      * @param dom The domain to perform mutual intersection with.
      * @return true if the intersection results in a change to either domain, otherwise false. 
+     * @note If the intersection is empty, only one domain is actually emptied.
      */
     bool equate(AbstractDomain& dom);
 
