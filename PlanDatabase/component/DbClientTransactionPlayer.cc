@@ -93,6 +93,24 @@ namespace Prototype {
       m_client->propagate();
   }
 
+  static std::string
+  domainTypeString(const AbstractDomain * domain)
+  {
+    if (domain->getType() == AbstractDomain::BOOL) {
+      return "bool";
+    } else if (domain->isNumeric()) {
+      if (domain->getType() == AbstractDomain::INT_INTERVAL) {
+        return "int";
+      } else {
+        return "float";
+      }
+    } else if (LabelStr::isString(domain->getUpperBound())) {
+      return "string";
+    } else {
+      return "object";
+    }
+  }
+
   void DbClientTransactionPlayer::playObjectCreated(const TiXmlElement & element)
   {
     const char * name = element.Attribute("name");
@@ -109,8 +127,8 @@ namespace Prototype {
       AbstractDomain * domain;
       std::string type;
       if (strcmp(child_el->Value(), "object") != 0) {
-        domain = TransactionXml::abstractDomain(*child_el);
-        type = TransactionXml::domainTypeAsString(domain);
+        domain = xmlAsAbstractDomain(*child_el);
+        type = domainTypeString(domain);
       } else {
         const char * name = child_el->Attribute("value");
         check_error(name != NULL);
@@ -247,11 +265,11 @@ namespace Prototype {
   {
     TiXmlElement * var_el = element.FirstChildElement();
     check_error(var_el != NULL);
-    ConstrainedVariableId variable = getVariable(*var_el);
+    ConstrainedVariableId variable = xmlAsVariable(*var_el);
 
     TiXmlElement * value_el = var_el->NextSiblingElement();
     check_error(value_el != NULL);
-    double value = getValue(*value_el);
+    double value = xmlAsValue(*value_el);
     m_client->specify(variable, value);    
   }
 
@@ -259,7 +277,7 @@ namespace Prototype {
   {
     TiXmlElement * var_el = element.FirstChildElement();
     check_error(var_el != NULL);
-    m_client->reset(getVariable(*var_el));
+    m_client->reset(xmlAsVariable(*var_el));
   }
 
   void DbClientTransactionPlayer::playInvokeConstraint(const TiXmlElement & element)
@@ -270,12 +288,12 @@ namespace Prototype {
     for (TiXmlElement * child_el = element.FirstChildElement() ;
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
       if (strcmp(child_el->Value(), "variable") == 0) {
-        variables.push_back(getVariable(*child_el));
+        variables.push_back(xmlAsVariable(*child_el));
       } else {
         // unary constraint
         check_error(variables.size() == 1);
         check_error(child_el->NextSiblingElement() == NULL);
-        AbstractDomain * domain = TransactionXml::abstractDomain(*child_el);
+        AbstractDomain * domain = xmlAsAbstractDomain(*child_el);
         m_client->createConstraint(LabelStr(name), variables[0], *domain);
         delete domain;
         return;
@@ -290,31 +308,222 @@ namespace Prototype {
     m_client->createConstraint(LabelStr(name), variables);
   }
 
-  double DbClientTransactionPlayer::getValue(const TiXmlElement & value)
+  //! string input functions
+
+  double 
+  DbClientTransactionPlayer::parseFloat(const char * floatString)
   {
-    if (strcmp(value.Value(), "bool") == 0) {
-      const char * value_st = value.Attribute("value");
+    check_error(floatString != NULL);
+    if (strcmp(floatString, "-inf") == 0) {
+      return MINUS_INFINITY;
+    }
+    if (strcmp(floatString, "+inf") == 0) {
+      return PLUS_INFINITY;
+    }
+    return atof(floatString);
+  }
+  
+  int
+  DbClientTransactionPlayer::parseInt(const char * intString)
+  {
+    check_error(intString != NULL);
+    if (strcmp(intString, "-inf") == 0) {
+      return MINUS_INFINITY;
+    }
+    if (strcmp(intString, "+inf") == 0) {
+      return PLUS_INFINITY;
+    }
+    return atoi(intString);
+  }
+  
+  bool
+  DbClientTransactionPlayer::parseBool(const char * boolString)
+  {
+    check_error(boolString != NULL);
+    if (strcmp(boolString, "true") == 0) {
+      return true;
+    }
+    if (strcmp(boolString, "false") == 0) {
+      return false;
+    }
+    check_error(ALWAYS_FAILS);
+    return false;
+  }
+
+  //! XML input functions
+
+  AbstractDomain * 
+  DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element)
+  {
+    if (strcmp(element.Value(), "set") == 0) {
+      return xmlAsEnumeratedDomain(element);
+    }
+    if (strcmp(element.Value(), "interval") == 0) {
+      return xmlAsIntervalDomain(element);
+    }
+    const char * value_st = element.Attribute("value");
+    check_error(value_st != NULL);
+    if (strcmp(element.Value(), "bool") == 0) {
+      return new BoolDomain(parseBool(value_st));
+    }
+    if (strcmp(element.Value(), "int") == 0) {
+      return new IntervalIntDomain(parseInt(value_st));
+    }
+    if (strcmp(element.Value(), "float") == 0) {
+      return new IntervalDomain(parseFloat(value_st));
+    }
+    if (strcmp(element.Value(), "string") == 0) {
+      return new LabelSet(LabelStr(value_st));
+    }
+    if (strcmp(element.Value(), "object") == 0) {
+      return new EnumeratedDomain(m_client->getObject(LabelStr(value_st)));
+    }
+    check_error(ALWAYS_FAILS);
+    return NULL;
+  }
+
+  IntervalDomain *
+  DbClientTransactionPlayer::xmlAsIntervalDomain(const TiXmlElement & element)
+  {
+    const char * type_st = element.Attribute("type");
+    check_error(type_st != NULL);
+    const char * min_st = element.Attribute("min");
+    check_error(min_st != NULL);
+    const char * max_st = element.Attribute("max");
+    check_error(max_st != NULL);
+    if (strcmp(type_st, "float") == 0) {
+      double min = parseFloat(min_st);
+      double max = parseFloat(max_st);
+      return new IntervalDomain(min, max);
+    }
+    if (strcmp(type_st, "int") == 0) {
+      int min = parseInt(min_st);
+      int max = parseInt(max_st);
+      return new IntervalIntDomain(min, max);
+    }
+    check_error(ALWAYS_FAILS);
+    return NULL;
+  }
+  
+  EnumeratedDomain *
+  DbClientTransactionPlayer::xmlAsEnumeratedDomain(const TiXmlElement & element)
+  {
+    enum { ANY, BOOL, INT, FLOAT, STRING, SYMBOL, OBJECT } type = ANY;
+    // determine most specific type
+    for (TiXmlElement * child_el = element.FirstChildElement() ;
+         child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+      if (strcmp(child_el->Value(), "bool") == 0) {
+        if (type == ANY) {
+          type = BOOL;
+        }
+        if (type == BOOL) {
+          continue;
+        }
+      }
+      if (strcmp(child_el->Value(), "int") == 0) {
+        if (type == ANY) {
+          type = INT;
+        }
+        if ((type == FLOAT) || (type == INT)) {
+          continue;
+        }
+      }
+      if (strcmp(child_el->Value(), "float") == 0) {
+        if ((type == ANY) || (type == INT)) {
+          type = FLOAT;
+        }
+        if (type == FLOAT) {
+          continue;
+        }
+      }
+      if (strcmp(child_el->Value(), "string") == 0) {
+        if (type == ANY) {
+          type = STRING;
+        }
+        if (type == STRING) {
+          continue;
+        }
+      }
+      if (strcmp(child_el->Value(), "symbol") == 0) {
+        if (type == ANY) {
+          type = SYMBOL;
+        }
+        if (type == SYMBOL) {
+          continue;
+        }
+      }
+      if (strcmp(child_el->Value(), "object") == 0) {
+        if (type == ANY) {
+          type = OBJECT;
+        }
+        if (type == OBJECT) {
+          continue;
+        }
+      }
+      check_error(ALWAYS_FAILS);
+    }
+    check_error(type != ANY);
+    // gather the values
+    std::list<double> values;
+    for (TiXmlElement * child_el = element.FirstChildElement() ;
+         child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+      const char * value_st = child_el->Attribute("value");
       check_error(value_st != NULL);
-      return TransactionXml::parseBool(value_st);
+      switch (type) {
+      case BOOL: {
+        values.push_back(parseBool(value_st));
+        break;
+      }
+      case INT: {
+        values.push_back(parseInt(value_st));
+        break;
+      }
+      case FLOAT: {
+        values.push_back(parseFloat(value_st));
+        break;
+      }
+      case STRING: 
+      case SYMBOL: {
+        values.push_back(LabelStr(value_st));
+        break;
+      }
+      case OBJECT: {
+        values.push_back(m_client->getObject(LabelStr(value_st)));
+        break;
+      }
+      default:
+        check_error(ALWAYS_FAILS);
+      }
+    }
+    // return the domain
+    switch (type) {
+    case BOOL: case INT: case FLOAT:
+      return new EnumeratedDomain(values);
+    case STRING: case SYMBOL: case OBJECT:
+      return new EnumeratedDomain(values, true, DomainListenerId::noId(), false);
+    default:
+      check_error(ALWAYS_FAILS);
+      return NULL;
+    }
+  }
+
+  double DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value)
+  {
+    const char * value_st = value.Attribute("value");
+    check_error(value_st != NULL);
+    if (strcmp(value.Value(), "bool") == 0) {
+      return parseBool(value_st);
     }
     if (strcmp(value.Value(), "int") == 0) {
-      const char * value_st = value.Attribute("value");
-      check_error(value_st != NULL);
-      return TransactionXml::parseInt(value_st);
+      return parseInt(value_st);
     }
     if (strcmp(value.Value(), "float") == 0) {
-      const char * value_st = value.Attribute("value");
-      check_error(value_st != NULL);
-      return TransactionXml::parseFloat(value_st);
+      return parseFloat(value_st);
     }
     if (strcmp(value.Value(), "string") == 0) {
-      const char * value_st = value.Attribute("value");
-      check_error(value_st != NULL);
       return LabelStr(value_st);
     }
     if (strcmp(value.Value(), "object") == 0) {
-      const char * value_st = value.Attribute("value");
-      check_error(value_st != NULL);
       ObjectId object = m_client->getObject(LabelStr(value_st));
       check_error(object.isValid());
       return (double)object;
@@ -323,7 +532,7 @@ namespace Prototype {
     return 0;
   }
 
-  ConstrainedVariableId DbClientTransactionPlayer::getVariable(const TiXmlElement & variable)
+  ConstrainedVariableId DbClientTransactionPlayer::xmlAsVariable(const TiXmlElement & variable)
   {
     check_error(strcmp(variable.Value(), "variable") == 0);
 

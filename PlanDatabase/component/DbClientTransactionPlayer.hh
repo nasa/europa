@@ -49,9 +49,49 @@ namespace Prototype {
     DbClientId m_client;
     int m_objectCount;
 
-    AbstractDomain * getAbstractDomain(const TiXmlElement & abstractDomain);
-    double getValue(const TiXmlElement & value);
-    ConstrainedVariableId getVariable(const TiXmlElement & variable);
+  //! string input functions
+
+    /** 
+     * @brief read a value string as a float type
+     */
+    double parseFloat(const char * floatString);
+
+    /** 
+     * @brief read a value string as an int type
+     */
+    int parseInt(const char * intString);
+
+    /** 
+     * @brief read a value string as a bool type
+     */
+    bool parseBool(const char * boolString);
+
+  //! XML input functions
+
+    /** 
+     * @brief create an abstract domain as represented by an xml element
+     */
+    AbstractDomain * xmlAsAbstractDomain(const TiXmlElement & element);
+
+    /** 
+     * @brief create an interval domain as represented by an xml element
+     */
+    IntervalDomain * xmlAsIntervalDomain(const TiXmlElement & element);
+
+    /** 
+     * @brief create an enumerated domain as represented by an xml element
+     */
+    EnumeratedDomain * xmlAsEnumeratedDomain(const TiXmlElement & element);
+
+    /** 
+     * @brief return a value as represented by an xml element
+     */
+    double xmlAsValue(const TiXmlElement & value);
+
+    /** 
+     * @brief return a variable as represented by an xml element
+     */
+    ConstrainedVariableId xmlAsVariable(const TiXmlElement & variable);
   };
 
 }

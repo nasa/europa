@@ -51,7 +51,38 @@ namespace Prototype {
     bool m_chronologicalBacktracking;
     int m_tokensCreated;
 
+  //! string output functions
+
+    /** 
+     * @brief create a string to describe a value, given its domain
+     */
+    std::string domainValueAsString(const AbstractDomain * domain, double value);
+
+    /** 
+     * @brief create a string to describe a domain type
+     */
+    std::string domainTypeAsString(const AbstractDomain * domain);
+
+  //! XML output functions
+
+    /** 
+     * @brief create an xml element to represent a value, given its domain
+     */
+    TiXmlElement * domainValueAsXml(const AbstractDomain * domain, double value);
+
+    /** 
+     * @brief create an xml element to represent a domain
+     */
+    TiXmlElement * abstractDomainAsXml(const AbstractDomain * domain);
+
+    /** 
+     * @brief create an xml element to represent a token
+     */
     TiXmlElement * tokenAsXml(const TokenId& token) const;
+
+    /** 
+     * @brief create an xml element to represent a variable
+     */
     TiXmlElement * variableAsXml(const ConstrainedVariableId& variable) const;
   };
 }
