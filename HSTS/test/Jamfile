@@ -26,92 +26,91 @@ LocalDepends run-hsts-planner-tests :
         monkey-timeline-hacked
         monkey-timeline-hacked2
         monkey-timeline-hacked3
-#       monkey-timeline-newHeur
-#       monkey-timeline-extendedHeur
+        monkey-timeline-newHeur
+        monkey-timeline-extendedHeur
         monkey1-timeline1
         monkey1-timeline-objvar
 #       monkey1-timeline-twomonkeys-objvar
 #       monkey1-timeline-twomonkeys
 #       monkey2-timeline2
 #       monkey2-timeline22
-#       monkey2-timeline23
+        monkey2-timeline23
         robotTests
         roverTest1
-#       roverTest2
+        roverTest2
         roverTest3
         roverTest4
-#       roverCTTests # Fails: uses NewPlan's constraint tokens, which Europa2 does not support.
         merTest1
-#       merTest2
-#       merTest3
-#       merTest4
+        merTest2
+#       merTest3  # needs heuristics?!
+#       merTest4  # never run by NewPlan?!
         merTest5
-#       merTest6
-#       merTest7
+#       merTest6  # never run by NewPlan?!
+#       merTest7 # never run by NewPlan?!
         merTest8
         merTest9
-#       merTest10
-#       merTest11
-#       merTest12
+#       merTest10 # needs heuristics?!
+#       merTest11 # needs heuristics?!
+#       merTest12 # needs heuristics?!
         merTest13
-#       merTest14
-#       merTest15
-#       merTest16
-#       merTest17
-#       merTest18
-#       merTest1-h
-#       merTest2-h
-#       merTest3-h
-#       merTest4-h
-#       merTest5-h
-#       merTest6-h
-#       merTest7-h
-#       merTest8-h
-#       merTest9-h
-#       merTest10-h
-#       merTest11-h
-#       merTest12-h
-#       merTest13-h
-#       merTest14-h
-#       merTest15-h
-#       merTest16-h
-#       merTest17-h
-#       merTest18-h
+#       merTest14 # needs heuristics?!
+#       merTest15 # needs heuristics?!
+#       merTest16 # needs heuristics?!
+        merTest17
+        merTest18
+        merTest1-h
+        merTest2-h
+#       merTest3-h #runs forever never reaching cutoff
+#       merTest4-h #runs forever never reaching cutoff
+       merTest5-h
+#       merTest6-h # runs forever never reaching cutoff
+#       merTest7-h # runs forever never reaching cutoff
+       merTest8-h
+       merTest9-h
+#       merTest10-h # runs forever never reaching cutoff
+#       merTest11-h # runs forever never reaching cutoff
+#       merTest12-h # runs forever never reaching cutoff
+       merTest13-h
+#       merTest14-h # runs forever never reaching cutoff
+       merTest15-h
+#       merTest16-h # runs forever never reaching cutoff
+       merTest17-h
+       merTest18-h
         gnats-C3
-#       gnats-NoBranchBug
-        gnats-P4-C3
-        gnats-P4-C3eq
+       gnats-NoBranchBug
+#        gnats-P4-C3  # times out unless finite bounds
+#        gnats-P4-C3eq # times out unless finite bounds
         gnats-SC
         gnats-condasame
         gnats-rover-fixed
         gnats-sum
-#       dnp-timeline
-#       dnp-DNP2
-#       dnp-allDSS
-#       dnp-fourFreeObs
-#       dnp-DNP3fourFreeObs
-#       dnp-DNP3
-#       dnp-fourFreeObsNotEmpty
-#       dnp-freeObs
-#       dnp-freeObsNoEmpty
-#       dnp-tenFreeObs
-        dnp-threeFreeObs
-#       dnp-twentyFreeObs
-        dnp-twoFreeObs
-#       dnp-timeline-h
-#       dnp-DNP2-h
-#       dnp-DNP23-h
-#       dnp-allDSS-h
-#       dnp-fourFreeObs-h
-#       dnp-DNP3fourFreeObs-h
-#       dnp-DNP3-h
-#       dnp-fourFreeObsNotEmpty-h
-#       dnp-freeObs-h
-#       dnp-freeObsNoEmpty-h
-#       dnp-tenFreeObs-h
-#       dnp-threeFreeObs-h
-#       dnp-twentyFreeObs-h
-#       dnp-twoFreeObs-h
+#       dnp-timeline # runs forever
+#       dnp-DNP2 # runs forever
+#       dnp-allDSS # runs forever
+#       dnp-fourFreeObs # runs forever
+#       dnp-DNP3fourFreeObs # runs forever
+#       dnp-DNP3 # runs forever
+#       dnp-fourFreeObsNotEmpty # runs forever
+#       dnp-freeObs # needs heursitics?!
+#       dnp-freeObsNoEmpty # needs heuristics?!
+#       dnp-tenFreeObs # needs heuristics?!
+#        dnp-threeFreeObs # runs forever
+#       dnp-twentyFreeObs # runs forever
+        dnp-twoFreeObs 
+#       dnp-timeline-h # runs forever
+       dnp-DNP2-h 
+#       dnp-DNP23-h # fails with heuristics error
+       dnp-allDSS-h 
+#       dnp-fourFreeObs-h # fails with heuristics error
+#       dnp-DNP3fourFreeObs-h # runs forever
+       dnp-DNP3-h
+#       dnp-fourFreeObsNotEmpty-h # runs forever
+#      dnp-freeObs-h # runs forever
+#       dnp-freeObsNoEmpty-h # runs forever
+#       dnp-tenFreeObs-h # runs forever
+#       dnp-threeFreeObs-h # runs forever
+#       dnp-twentyFreeObs-h # runs forever
+       dnp-twoFreeObs-h
         ;
 
 #
@@ -193,6 +192,8 @@ RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 #   Reported as GNATS 2850.
 RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
 RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
+
+# Working
 RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
 
 RunEUROPATest robotTests : req1.nddl ;
@@ -201,7 +202,7 @@ RunEUROPATest roverTest1 : rover-test.nddl ;
 RunEUROPATest roverTest3 : rover3-test.nddl ;
 RunEUROPATest roverTest4 : rover4-test.nddl ;
 
-# Fails to find a plan, similar to GNATS 2849.
+# Working
 RunEUROPATest roverTest2 : multrover-test.nddl ;
 
 # These use constraint tokens, which Europa2 (PLASMA) does not support.
@@ -211,11 +212,13 @@ RunEUROPATest roverTest2 : multrover-test.nddl ;
 # Working
 RunEUROPATest merTest1 : R1-files-p1.nddl ;
 
+# Working
+RunEUROPATest merTest2 : R1-files-p2.nddl ;
+
 # Failing with no error message
 #   First wants over 2GB of RAM, so it is likely to be the limits in System/test/autobuild.
 #   Other MER related failures may have similar causes.
 # First two were never run by NewPlan tests without heuristics files.
-RunEUROPATest merTest2 : R1-files-p2.nddl ;
 RunEUROPATest merTest3 : R1-files-p3.nddl ;
 # Third was not being run by NewPlan tests at all.
 RunEUROPATest merTest4 : R2-files-R21-Bill.nddl ;
@@ -257,30 +260,51 @@ RunEUROPATest merTest18 : mer-pma2.nddl ;
 
 # Same set as just above plus the heuristics and no branch files.
 
-# Fails: HSTS/core/HSTSHeuristics.cc:149: Error: MIN_PRIORITY <= p is false
+#Working
 RunEUROPATest merTest1-h : R1-files-p1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 RunEUROPATest merTest2-h : R1-files-p2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+
+# Runs forever without reaching cutoff of 1000 nodes, so it must be caught
+# up in a  loop in propagation.  Should investigate, however.
 RunEUROPATest merTest3-h : R1-files-p3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 RunEUROPATest merTest4-h : R2-files-R21-Bill.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+
+# Working
 RunEUROPATest merTest5-h : R2-files-R21-IDD1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+
+# Runs forever
 RunEUROPATest merTest6-h : R2-files-R21-IDD2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 RunEUROPATest merTest7-h : R2-files-R21-IDD3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+
+# Working
 RunEUROPATest merTest8-h : R2-files-R21-PMA1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
 RunEUROPATest merTest9-h : R2-files-R21-PMA2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+
+# Runs forever
 RunEUROPATest merTest10-h : mer-1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 RunEUROPATest merTest11-h : mer-bill-2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 RunEUROPATest merTest12-h : mer-bill.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+
+# Working
 RunEUROPATest merTest13-h : mer-idd1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+
+# Runs forever
 RunEUROPATest merTest14-h : mer-idd2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+
+# Working
 RunEUROPATest merTest15-h : mer-idd3.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+
+# Runs forever
 RunEUROPATest merTest16-h : mer-pma-comm.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+
+# Working
 RunEUROPATest merTest17-h : mer-pma1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 RunEUROPATest merTest18-h : mer-pma2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
 
-# Works now
+# Working
 RunEUROPATest gnats-C3 : C3-init.nddl ;
 
-# Now fails with no error message
+# Exhausted the search
 RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl : NoBranchBug.xml : NoBranchBug.nobr ;
 
 # These two take multiple hours without completing on Token for some reason and may be infinite loop or similar.
@@ -324,41 +348,45 @@ RunEUROPATest dnp-freeObsNoEmpty : freeObs.noEmpty.nddl ;
 # Probably fail due to creating huge numbers of ChoiceId's like dnp-timeline.
 RunEUROPATest dnp-tenFreeObs : tenFreeObs.nddl ;
 
-# This one works now
+# Running for a while - not sure if it fails or not
 RunEUROPATest dnp-threeFreeObs : threeFreeObs.nddl ;
 
 # This one fails with no error message
 RunEUROPATest dnp-twentyFreeObs : twentyFreeObs.nddl ;
 
-# This one works now
+# Working
 RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl ;
 
 # Same set as just prior set plus heuristics and no branch info.
 
-# Now fails with no error message
+# Runs for a while
 RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
 
-# Fails !enumeration.empty() safety check in HSTSHeuristics::VariableEntry constructor near line 197
+# Working
 RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
 
-# Fails with Error: Token Entry SUBGOAL:DNP_Science___Scan_Platform.Mosaic_LO:AFTER:DNP_Science___Scan_Platform.Scan_Idle
-#       matches existing entry SUBGOAL:DNP_Science___Scan_Platform.Mosaic_LO:BEFORE:DNP_Science___Scan_Platform.Scan_Idle
+# Fails with !domain.empty() is false HSTSHeuristics.cc:667
 RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP3heur.xml ;
 
-# Fails with HSTS/core/HSTSHeuristics.cc:198: Error: !enumeration.empty() is false
+# Working
 RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
 RunEUROPATest dnp-fourFreeObs-h : fourFreeObs.nddl : DNP2heur3.xml ;
 
-# Fails with Error: Token Entry SUBGOAL:DNP_Science___Scan_Platform.Mosaic_LO:AFTER:DNP_Science___Scan_Platform.Scan_Idle
-#        matches existing entry SUBGOAL:DNP_Science___Scan_Platform.Mosaic_LO:BEFORE:DNP_Science___Scan_Platform.Scan_Idle
+# Runs for a while
 RunEUROPATest dnp-DNP3fourFreeObs-h : DNP3.fourFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+
+# Working
 RunEUROPATest dnp-DNP3-h : DNP3.timeline.nddl : DNP3heur.xml : DNP3nobr ;
+
+# Runs for a while
 RunEUROPATest dnp-fourFreeObsNotEmpty-h : fourFreeObs-initBufNotEmpty.nddl : DNP3heur.xml : DNP3nobr ;
 RunEUROPATest dnp-freeObs-h : freeObs.nddl : DNP3heur.xml : DNP3nobr ;
 RunEUROPATest dnp-freeObsNoEmpty-h : freeObs.noEmpty.nddl : DNP3heur.xml : DNP3nobr ;
 RunEUROPATest dnp-tenFreeObs-h : tenFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 RunEUROPATest dnp-threeFreeObs-h : threeFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 RunEUROPATest dnp-twentyFreeObs-h : twentyFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+
+# Working
 RunEUROPATest dnp-twoFreeObs-h : twoFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 
 } # PLASMA_READY
