@@ -18,14 +18,6 @@
 #include <string>
 #include <list>
 
-#ifdef __sun
-#include <strstream>
-typedef std::strstream sstream;
-#else
-#include <sstream>
-typedef std::stringstream sstream;
-#endif
-
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
     ConstraintEngine ce; \
     Schema schema; \

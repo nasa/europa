@@ -23,15 +23,6 @@
 #include <iostream>
 #include <string>
 
-#ifdef __sun
-#include <strstream>
-typedef std::strstream sstream;
-#else
-#include <sstream>
-typedef std::stringstream sstream;
-#endif
-
-
 class SimpleSubGoal: public Rule {
 public:
   SimpleSubGoal(): Rule(LabelStr("Predicate")){}

@@ -25,14 +25,6 @@
 #include <string>
 #include <list>
 
-#ifdef __sun
-#include <strstream>
-typedef std::strstream sstream;
-#else
-#include <sstream>
-typedef std::stringstream sstream;
-#endif
-
 // Useful constants when doing constraint vio9lation tests
 const double initialCapacity = 5;
 const int horizonStart = 0;

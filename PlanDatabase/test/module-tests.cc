@@ -25,14 +25,6 @@
 #include <iostream>
 #include <string>
 
-#ifdef __sun
-#include <strstream>
-typedef std::strstream sstream;
-#else
-#include <sstream>
-typedef std::stringstream sstream;
-#endif
-
 class DefaultSchemaAccessor {
 public:
 

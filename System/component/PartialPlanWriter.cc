@@ -45,24 +45,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// These differences have to do with changes to the C++ standard,
-//   not the operating system in use. --wedgingt 15 Mar 2004
-#ifdef __GNUC__
-#if __GNUC__ > 2
-#include <sstream>
-//typedef std::stringstream sstream;
-#define streamIsEmpty(s) (s).str() == ""
-#else
-#include <strstream>
-typedef std::strstream std::stringstream;
-#define streamIsEmpty(s) !(s).str()
-#endif
-#else
-#include <strstream>
-typedef std::strstream std::stringstream;
-#define streamIsEmpty(s) !(s).str()
-#endif
-
 #define FatalError(s) { std::cerr << "At " << __FILE__ << ":" << __PRETTY_FUNCTION__ << ", line " << __LINE__ << std::endl; std::cerr << (s) << std::endl; exit(-1);}
 #define FatalErrno(){FatalError(strerror(errno))}
 

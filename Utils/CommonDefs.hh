@@ -51,6 +51,24 @@ const bool ALWAYS_FAILS = false;
  */
 #define assertFalse(cond) assert(!(cond))
 
+// The C++ standard changed; use std::stringstream and streamIsEmpty()
+// to be compatible with compilers that are compliant to different versions.
+#ifdef __GNUC__
+#if __GNUC__ > 2
+#include <sstream>
+//typedef std::stringstream sstream;
+#define streamIsEmpty(s) (s).str() == ""
+#else
+#include <strstream>
+typedef std::strstream std::stringstream;
+#define streamIsEmpty(s) !(s).str()
+#endif
+#else
+#include <strstream>
+typedef std::strstream std::stringstream;
+#define streamIsEmpty(s) !(s).str()
+#endif
+
 namespace Prototype {
 
   /**
