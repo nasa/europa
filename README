@@ -1,11 +1,23 @@
 Known areas of performance improvement:
-1. Filtered Flaw Caching.
-2. Object Filtering.
-3. Deletion of the database.
-4. Update of variables from Temporal Network.
-5. Splitting merged tokens in a non-chronological backtrack.
-6. Improve exchange of data in TemporalPropagator with direct use of IntervalInt domain and direct
-calculation of duration variables.
+1. Object Filtering.
+2. Deletion of the database.
+3. Update of variables from Temporal Network.
+4. Splitting merged tokens in a non-chronological backtrack.
+5. Improve exchange of data in TemporalPropagator with direct use of
+IntervalInt domain and direct calculation of duration variables.
+
+M_7:
+**** Removed FlawQuery, FlawQueryListener, FlawQueryLogger files 
+1. Fixed bugs and cleaned up code in EUROPAHeuristicStrategy and Decision
+handling.
+2. Implemented Incremental flaw change synchronization.  Moved FlawQuery
+functionality into FlawSource, removed FlawQuery and associated files.
+Imposed correspondance between conditions, filters, and FlawSource.
+Changed implementation of FlawSource to listen to messages to decide when
+to evaluate flaws for possible change.
+3. Tweaked TemporalPropagator to avoid adding and removing constraints
+unnecessarily.
+4. Added performance test framework to SystemTests
 
 M_6:
 1. Fixed bug in temporal network propagator execute method. It was masking side-effects which required further
