@@ -1652,7 +1652,7 @@ namespace Prototype {
     check_error(!domX.isEmpty() && !domY.isEmpty() && !domZ.isEmpty());
 
     // If neither one is not a singleton, just ignore. Could do more, perhaps!
-    if(!domX.isSingleton() && !domY.isSingleton())
+    if(!domX.isSingleton() || !domY.isSingleton())
       return;
 
     bool result = (domX == domY);

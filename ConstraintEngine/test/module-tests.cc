@@ -2410,6 +2410,13 @@ private:
 			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       assert(!v2.getDerivedDomain().isSingleton());
+      v0.specify(7);
+      v1.specify(7);
+      ENGINE->propagate();
+      assert(v2.getDerivedDomain().isTrue());
+      v0.reset();
+      ENGINE->propagate();
+      assert(!v2.getDerivedDomain().isSingleton());      
     }
     {
       std::list<Prototype::LabelStr> values;
