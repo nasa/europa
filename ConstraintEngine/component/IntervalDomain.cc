@@ -146,10 +146,8 @@ namespace Prototype {
   }
 
   bool IntervalDomain::intersect(double lb, double ub){
-    check_error(lb <= ub)
-
     // test case for empty intersection
-    if(ub < m_lb || lb > m_ub){
+    if(lb > ub || ub < m_lb || lb > m_ub){
       empty();
       return true;
     }

@@ -3,6 +3,8 @@
 
 #include "UnaryConstraint.hh"
 #include "Constraint.hh"
+#include "Variable.hh"
+#include "IntervalDomain.hh"
 
 namespace Prototype
 {
@@ -135,15 +137,16 @@ namespace Prototype
 
     void handleExecute();
 
-    bool canIgnore(const ConstrainedVariableId& variable, 
-		   int argIndex, 
-		   const DomainListener::ChangeType& changeType);
   private:
     static const int A = 0;
     static const int B = 1;
     static const int C = 2;
     static const int D = 3;
     static const int ARG_COUNT = 4;
+
+    Variable<IntervalDomain> m_interimVariable;
+    AddEqualConstraint m_addEqualConstraint;
+    MultEqualConstraint m_multEqualConstraint;
   };
 }
 #endif

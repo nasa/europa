@@ -4,6 +4,7 @@
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
 #include "Domain.hh"
+#include "Utils.hh"
 
 namespace Prototype
 {
@@ -64,7 +65,14 @@ namespace Prototype
       yMax = domy.translateNumber(zMax - xMin, false);
     if(yMin < zMin - xMax)
       yMin = domy.translateNumber(zMin - xMax, true);
-    domy.intersect(yMin,yMax);
+    if(domy.intersect(yMin,yMax) && domy.isEmpty())
+      return;
+
+    // Now, rounding issues from mixed numeric types can lead to the following inconsitency, not yet caught.
+    // We handle it here however, by emptying the domain if the invariant post-condition is not satisfied. The
+    // motivating case for this: A:Int[0,10] + B:Int[0,10] == C:Real[0.5, 0.5].
+    if(!domz.isMember(yMax + xMin) || !domz.isMember(yMin + xMax))
+      domz.empty();
   }
 
   EqualConstraint::EqualConstraint(const LabelStr& name,
@@ -242,6 +250,50 @@ namespace Prototype
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
   }
 
+  /*!< Simple local utility functions */
+  double max(double a, double b){return (a > b ? a : b);}
+  double min(double a, double b){return (a < b ? a : b);}
+
+  /*!< Helper method to compute new bounds for both X and Y in X*Y==Z */
+  bool updateMinAndMax(IntervalDomain& targetDomain, 
+		       double denomMin,
+		       double denomMax,
+		       double numMin,
+		       double numMax){
+    double xMax = targetDomain.getUpperBound();
+    double xMin = targetDomain.getLowerBound();
+    double newMin = xMax;
+    double newMax = xMin;
+
+    if(denomMin == 0 || denomMax == 0){ // If the denominators are 0, we know the results are infinite
+      if(numMax > 0)
+	newMax = PLUS_INFINITY;
+      if(numMin < 0)
+	newMin = MINUS_INFINITY;
+    }
+    else { // Otherwise we must examine min and max of various permutations in order to handle signs correctly
+      if(denomMin != 0){
+	newMax = max(newMax, max(numMax / denomMin, numMin / denomMin));
+	newMin = min(newMin, min(numMax / denomMin, numMin / denomMin));
+      }
+
+      if(denomMax != 0){
+	newMax = max(newMax, max(numMax / denomMax, numMin/ denomMax));
+	newMin = min(newMin, min(numMax / denomMax, numMin/ denomMax));
+      }
+    }
+
+    if(xMax > newMax)
+      xMax = targetDomain.translateNumber(newMax, false);
+    if(xMin < newMin)
+      xMin = targetDomain.translateNumber(newMin, true);
+
+    if(targetDomain.intersect(xMin,xMax)  && targetDomain.isEmpty())
+      return false;
+    else
+      return true;
+  }
+
   void MultEqualConstraint::handleExecute()
   {
     IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
@@ -269,26 +321,48 @@ namespace Prototype
     domz.getBounds(zMin, zMax);
 
     // Process Z
-    if(zMax > xMax * yMax)
-      zMax = domz.translateNumber(xMax * yMax, false);
-    if(zMin < xMin * yMin)
-      zMin = domz.translateNumber(xMin * yMin, true);
+    double max_z = max(xMax * yMax, max(xMin * yMin, max(xMin * yMax, xMax * yMin)));
+    if(zMax > max_z)
+      zMax = domz.translateNumber(max_z, false);
+
+    double min_z = min(xMax * yMax, min(xMin * yMin, min(xMin * yMax, xMax * yMin)));
+    if(zMin < min_z)
+      zMin = domz.translateNumber(min_z, true);
+
     if(domz.intersect(zMin,zMax) && domz.isEmpty())
       return;
 
     // Process X
-    if(yMin != 0 && xMax > zMax / yMin)
-      xMax = domx.translateNumber(zMax / yMin, false);
-    if(yMax != 0 && xMin < zMin / yMax)
-      xMin = domx.translateNumber(zMin / yMax, true);
-    if(domx.intersect(xMin,xMax)  && domx.isEmpty())
+    if(!updateMinAndMax(domx, yMin, yMax, zMin, zMax))
       return;
 
     // Process Y
-    if(xMin != 0 && yMax > zMax / xMin)
-      yMax = domy.translateNumber(zMax / xMin, false);
-    if(xMax != 0 && yMin < zMin / xMax)
-      yMin = domy.translateNumber(zMin / xMax, true);
-    domy.intersect(yMin,yMax);
+    updateMinAndMax(domy, xMin, xMax, zMin, zMax);
   }
+
+  /*************************************************************
+   * AddMultEqualConstraint
+   *************************************************************/
+  AddMultEqualConstraint::AddMultEqualConstraint(const LabelStr& name,
+					 const LabelStr& propagatorName,
+					 const ConstraintEngineId& constraintEngine,
+					 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_addEqualConstraint(LabelStr("Internal:addEqual"), 
+			   propagatorName, 
+			   constraintEngine, 
+			   makeScope(m_variables[A], m_variables[B], m_interimVariable.getId())),
+      m_multEqualConstraint(LabelStr("Internal::multEqual"),
+			    propagatorName,
+			    constraintEngine,
+			    makeScope(m_interimVariable.getId(), m_variables[C], m_variables[D])){
+    check_error(m_variables.size() == ARG_COUNT);
+    for(int i=0; i< ARG_COUNT; i++)
+      check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
+  }
+
+  // All the work is done by the composite constraints
+  void AddMultEqualConstraint::handleExecute(){}
+
 }
