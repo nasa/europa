@@ -436,6 +436,7 @@ public:
     runTest(testLockConstraint);
     runTest(testNegateConstraint);
     runTest(testUnaryQuery);
+    runTest(testTestEqConstraint);
     return(true);
   }
 
@@ -2381,6 +2382,69 @@ private:
 
     return true;
   }
+
+  static bool testTestEqConstraint() {
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(5));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
+      Variable<BoolDomain> v2(ENGINE, BoolDomain());
+      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
+			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(v2.getDerivedDomain().isTrue());
+    }
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(5));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(6));
+      Variable<BoolDomain> v2(ENGINE, BoolDomain());
+      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
+			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(v2.getDerivedDomain().isFalse());
+    }
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(5,10));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5, 20));
+      Variable<BoolDomain> v2(ENGINE, BoolDomain());
+      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
+			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(!v2.getDerivedDomain().isSingleton());
+    }
+    {
+      std::list<Prototype::LabelStr> values;
+      values.push_back(Prototype::LabelStr("A"));
+      values.push_back(Prototype::LabelStr("B"));
+      values.push_back(Prototype::LabelStr("C"));
+      values.push_back(Prototype::LabelStr("D"));
+      values.push_back(Prototype::LabelStr("E"));
+      Variable<LabelSet> v0(ENGINE, Prototype::LabelStr("C"));
+      Variable<LabelSet> v1(ENGINE, Prototype::LabelStr("C"));
+      Variable<BoolDomain> v2(ENGINE, BoolDomain());
+      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
+			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(v2.getDerivedDomain().isTrue());
+    }
+    {
+      std::list<Prototype::LabelStr> values;
+      values.push_back(Prototype::LabelStr("A"));
+      values.push_back(Prototype::LabelStr("B"));
+      values.push_back(Prototype::LabelStr("C"));
+      values.push_back(Prototype::LabelStr("D"));
+      values.push_back(Prototype::LabelStr("E"));
+      Variable<LabelSet> v0(ENGINE, Prototype::LabelStr("C"));
+      Variable<LabelSet> v1(ENGINE, Prototype::LabelStr("E"));
+      Variable<BoolDomain> v2(ENGINE, BoolDomain());
+      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
+			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(v2.getDerivedDomain().isFalse());
+    }
+    return true;
+  }
+
+
 
 }; // class ConstraintTest
 

@@ -1633,6 +1633,33 @@ namespace Prototype {
     domy.intersect(-xMax, -xMin);
   }
 
+  TestEqConstraint::TestEqConstraint(const LabelStr& name,
+				     const LabelStr& propagatorName,
+				     const ConstraintEngineId& constraintEngine,
+				     const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
+    AbstractDomain& domX = getCurrentDomain(variables[X]);
+    AbstractDomain& domY = getCurrentDomain(variables[Y]);
+    check_error(AbstractDomain::canBeCompared(domX, domY));                                                
+  }
+  
+  void TestEqConstraint::handleExecute(){
+    AbstractDomain& domX = getCurrentDomain(m_variables[X]);
+    AbstractDomain& domY = getCurrentDomain(m_variables[Y]);
+    AbstractDomain& domZ = getCurrentDomain(m_variables[Z]);
+
+    check_error(!domX.isEmpty() && !domY.isEmpty() && !domZ.isEmpty());
+
+    // If neither one is not a singleton, just ignore. Could do more, perhaps!
+    if(!domX.isSingleton() && !domY.isSingleton())
+      return;
+
+    bool result = (domX == domY);
+    domZ.set(result);
+  }
+
+
   void initConstraintLibrary() {
     static bool s_runAlready(false);
     
@@ -1664,6 +1691,7 @@ namespace Prototype {
       REGISTER_CONSTRAINT(MemberImplyConstraint, "MemberImply", "Default");
       REGISTER_CONSTRAINT(MultEqualConstraint, "MultEqual", "Default");
       REGISTER_CONSTRAINT(NotEqualConstraint, "NotEqual", "Default");
+      REGISTER_CONSTRAINT(TestEqConstraint, "TestEqual", "Default");
 
       // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
       REGISTER_CONSTRAINT(AddEqualConstraint, "addeq", "Default");

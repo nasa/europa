@@ -657,6 +657,24 @@ namespace Prototype {
     static const int Y=1;
   };
 
+  //Test if X==Y and return the result in Z
+  class TestEqConstraint: public Constraint
+  {
+  public:
+
+    TestEqConstraint(const LabelStr& name,
+			const LabelStr& propagatorName,
+			const ConstraintEngineId& constraintEngine,
+			const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+  private:
+    static const int X = 0;
+    static const int Y = 1;
+    static const int Z = 2;
+    static const int ARG_COUNT = 3;
+  };
+
   extern void initConstraintLibrary();
 }
 #endif
