@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.79 2004-09-18 02:47:26 wedgingt Exp $
+# $Id: autobuild,v 1.80 2004-09-19 03:21:01 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -85,14 +85,14 @@ function cvsCmd() {
     mkdir working/failed
     exit 22
   fi
-  echo Calling cvs $* PLASMA at "`date`" ... >> cvs.PLASMA 2>&1
-  cvs $* PLASMA >> cvs.PLASMA 2>&1
+  echo Calling cvs $* at "`date`" ... >> cvs.PLASMA 2>&1
+  cvs $* >> cvs.PLASMA 2>&1
   status=$?
-  echo '"cvs '"$*"' PLASMA" in '"`pwd`"' exited '"$status"
+  echo '"cvs '"$*"' in '"`pwd`"' exited '"$status"
   if test "$status" != 0
   then
     mkdir PLASMA/cvs.failed
-    (echo "$info"; echo ''; echo "'cvs '"$*"' PLASMA' failed; aborting autobuild"; tail cvs.PLASMA) | \
+    (echo "$info"; echo ''; echo '"cvs '"$*"' failed; aborting autobuild'; tail cvs.PLASMA) | \
         Mail -s 'PLASMA Autobuild cvs on '"`hostname`"' in '"`pwd`"' failed' "$email"
     mkdir working/failed
     exit "$status"
@@ -100,23 +100,23 @@ function cvsCmd() {
 }
 
 function cvsCheckOut() {
-  cvsCmd co -r AutobuildTesting
+  cvsCmd co -r AutobuildTesting PLASMA
 }
 
 function cvsTagTest() {
-  cvsCmd tag AutobuildTesting
+  cvsCmd tag AutobuildTesting PLASMA
 }
 
 function cvsRemoveTag() {
-  cvsCmd tag -d AutobuildTesting
+  cvsCmd tag -d AutobuildTesting PLASMA
 }
 
 function cvsUpdate() {
-  cvsCmd update -d -P -A
+  cvsCmd update -d -P -A PLASMA
 }
 
 function cvsTagPassed() {
-  cvsCmd tag -F $1
+  cvsCmd tag -F $1 PLASMA
 }
 
 function jamCmd() {
@@ -135,6 +135,10 @@ function jamCmd() {
     exit $status
   fi
 }
+
+# These first two are needed if nothing has the AutobuildTesting tag.
+cvsCmd co PLASMA/README
+cvsCmd tag -F AutobuildTesting PLASMA/README
 
 cvsCheckOut
 cvsRemoveTag
