@@ -25,7 +25,8 @@ namespace Prototype {
 
   class ConstrainedVariable;
   typedef Id<ConstrainedVariable> ConstrainedVariableId;
-
+  class ConstrainedVariableListener;
+  typedef Id<ConstrainedVariableListener> ConstrainedVariableListenerId;
   class VariableChangeListener;
   typedef Id<VariableChangeListener> VariableChangeListenerId;
 

@@ -44,6 +44,8 @@ private:
   static SchemaId s_instance;
 };
 
+const LabelStr ALL_OBJECTS("AllObjects");
+
 SchemaId DefaultSchemaAccessor::s_instance;
 
 #define SCHEMA DefaultSchemaAccessor::instance()
@@ -61,7 +63,7 @@ SchemaId DefaultSchemaAccessor::s_instance;
     } \
     { EqualityConstraintPropagator* ecp = new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce); \
       assert(ecp != 0); } \
-    Object* objectPtr = new Object(db, LabelStr("AllObjects"), LabelStr("o1")); \
+    Object* objectPtr = new Object(db, ALL_OBJECTS, LabelStr("o1")); \
     assert(objectPtr != 0); \
     Object& object = *objectPtr; \
     assert(objectPtr->getId() == object.getId()); \
@@ -89,16 +91,18 @@ public:
     runTest(testObjectTokenRelation);
     runTest(testCommonAncestorConstraint);
     runTest(testHasAncestorConstraint);
+    runTest(testMakeObjectVariable);
+    runTest(testTokenObjectVariable);
     return(true);
   }
 
 private:
   static bool testBasicAllocation() {
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
-    Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
-    ObjectId id0((new Object(o1.getId(), LabelStr("AllObjects"), LabelStr("id0")))->getId());
-    Object o3(o2.getId(), LabelStr("AllObjects"), LabelStr("o3"));
+    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"));
+    Object o2(db.getId(), ALL_OBJECTS, LabelStr("o2"));
+    ObjectId id0((new Object(o1.getId(), ALL_OBJECTS, LabelStr("id0")))->getId());
+    Object o3(o2.getId(), ALL_OBJECTS, LabelStr("o3"));
     assert(db.getObjects().size() == 4);
     assert(o1.getComponents().size() == 1);
     assert(o3.getParent() == o2.getId());
@@ -106,14 +110,14 @@ private:
     assert(db.getObjects().size() == 3);
     assert(o1.getComponents().empty());
 
-    ObjectId id1((new Object(db.getId(), LabelStr("AllObjects"), LabelStr("id1")))->getId());
-    new Object(id1, LabelStr("AllObjects"), LabelStr("id2"));
-    ObjectId id3((new Object(id1, LabelStr("AllObjects"), LabelStr("id3")))->getId());
+    ObjectId id1((new Object(db.getId(), ALL_OBJECTS, LabelStr("id1")))->getId());
+    new Object(id1, ALL_OBJECTS, LabelStr("id2"));
+    ObjectId id3((new Object(id1, ALL_OBJECTS, LabelStr("id3")))->getId());
     assert(db.getObjects().size() == 6);
     assert(id3->getName().toString() == "id1.id3");
 
     // Test ancestor call
-    ObjectId id4((new Object(id3, LabelStr("AllObjects"), LabelStr("id4")))->getId());
+    ObjectId id4((new Object(id3, ALL_OBJECTS, LabelStr("id4")))->getId());
     std::list<ObjectId> ancestors;
     id4->getAncestors(ancestors);
     assert(ancestors.front() == id3);
@@ -124,16 +128,16 @@ private:
     assert(db.getObjects().size() == 3);
 
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
-    ObjectId id5 = ((new Object(db.getId(), LabelStr("AllObjects"), LabelStr("id5")))->getId());
-    new Object(id5, LabelStr("AllObjects"), LabelStr("id6"));
+    ObjectId id5 = ((new Object(db.getId(), ALL_OBJECTS, LabelStr("id5")))->getId());
+    new Object(id5, ALL_OBJECTS, LabelStr("id6"));
     return(true);
   }
 
   static bool testObjectDomain(){
     PlanDatabase db(ENGINE, SCHEMA);
     std::list<ObjectId> values;
-    Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
-    Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"));
+    Object o2(db.getId(), ALL_OBJECTS, LabelStr("o2"));
     assert(db.getObjects().size() == 2);
     values.push_back(o1.getId());
     values.push_back(o2.getId());
@@ -147,7 +151,7 @@ private:
 
   static bool testObjectVariables(){
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"), true);
+    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"), true);
     assert(!o1.isComplete());
     o1.addVariable(IntervalIntDomain(), LabelStr("VAR1"));
     o1.addVariable(BoolDomain(), LabelStr("VAR2"));
@@ -155,7 +159,7 @@ private:
     assert(o1.isComplete());
     assert(o1.getVariable(LabelStr("VAR21")) != o1.getVariable(LabelStr("VAR2")));
 
-    Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"), true);
+    Object o2(db.getId(), ALL_OBJECTS, LabelStr("o2"), true);
     assert(!o2.isComplete());
     o2.addVariable(IntervalIntDomain(15, 200), LabelStr("VAR1"));
     o2.close();
@@ -187,8 +191,8 @@ private:
   static bool testObjectTokenRelation(){
     PlanDatabase db(ENGINE, SCHEMA);
     // 1. Create 2 objects
-    ObjectId object1 = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr("O1")))->getId();
-    ObjectId object2 = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr("O2")))->getId();    
+    ObjectId object1 = (new Object(db.getId(), ALL_OBJECTS, LabelStr("O1")))->getId();
+    ObjectId object2 = (new Object(db.getId(), ALL_OBJECTS, LabelStr("O2")))->getId();    
     db.close();
 
     assert(object1 != object2);
@@ -227,13 +231,13 @@ private:
 
   static bool testCommonAncestorConstraint(){
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
-    Object o2(o1.getId(), LabelStr("AllObjects"), LabelStr("o2"));
-    Object o3(o1.getId(), LabelStr("AllObjects"), LabelStr("o3"));
-    Object o4(o2.getId(), LabelStr("AllObjects"), LabelStr("o4"));
-    Object o5(o2.getId(), LabelStr("AllObjects"), LabelStr("o5"));
-    Object o6(o3.getId(), LabelStr("AllObjects"), LabelStr("o6"));
-    Object o7(o3.getId(), LabelStr("AllObjects"), LabelStr("o7"));
+    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"));
+    Object o2(o1.getId(), ALL_OBJECTS, LabelStr("o2"));
+    Object o3(o1.getId(), ALL_OBJECTS, LabelStr("o3"));
+    Object o4(o2.getId(), ALL_OBJECTS, LabelStr("o4"));
+    Object o5(o2.getId(), ALL_OBJECTS, LabelStr("o5"));
+    Object o6(o3.getId(), ALL_OBJECTS, LabelStr("o6"));
+    Object o7(o3.getId(), ALL_OBJECTS, LabelStr("o7"));
 
     ObjectDomain allObjects;
     allObjects.insert(o1.getId());
@@ -313,14 +317,14 @@ private:
  static bool testHasAncestorConstraint(){
 
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
-    Object o2(o1.getId(), LabelStr("AllObjects"), LabelStr("o2"));
-    Object o3(o1.getId(), LabelStr("AllObjects"), LabelStr("o3"));
-    Object o4(o2.getId(), LabelStr("AllObjects"), LabelStr("o4"));
-    Object o5(o2.getId(), LabelStr("AllObjects"), LabelStr("o5"));
-    Object o6(o3.getId(), LabelStr("AllObjects"), LabelStr("o6"));
-    Object o7(o3.getId(), LabelStr("AllObjects"), LabelStr("o7"));
-    Object o8(db.getId(), LabelStr("AllObjects"), LabelStr("o8"));
+    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"));
+    Object o2(o1.getId(), ALL_OBJECTS, LabelStr("o2"));
+    Object o3(o1.getId(), ALL_OBJECTS, LabelStr("o3"));
+    Object o4(o2.getId(), ALL_OBJECTS, LabelStr("o4"));
+    Object o5(o2.getId(), ALL_OBJECTS, LabelStr("o5"));
+    Object o6(o3.getId(), ALL_OBJECTS, LabelStr("o6"));
+    Object o7(o3.getId(), ALL_OBJECTS, LabelStr("o7"));
+    Object o8(db.getId(), ALL_OBJECTS, LabelStr("o8"));
 
 
     // Positive test immediate ancestor
@@ -407,6 +411,74 @@ private:
 
     return true;
  }
+
+  /**
+   * The most basic case for dynamic objects is that we can populate the variable correclty
+   * and synchronize its values.
+   */
+  static bool testMakeObjectVariable(){
+    PlanDatabase db(ENGINE, SCHEMA);
+    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain()))->getId();
+    assert(!v0->isClosed());
+    db.makeObjectVariableFromType(ALL_OBJECTS, v0);
+    assert(v0->isClosed());
+    assert(ENGINE->provenInconsistent());
+
+    // Now add an object and we should expect the constraint network to be consistent
+    Object o1(db.getId(), ALL_OBJECTS, LabelStr("o1"));
+    assert(ENGINE->propagate());
+    assert(!db.isClosed(ALL_OBJECTS));
+
+    // Now delete the variable. This should remove the listener
+    delete (ConstrainedVariable*) v0;
+
+    return true;
+  }
+
+  /**
+   * Have ate least one object in the system prior to creating a token. Then show how
+   * removal triggers an inconsistency, and insertion of another object fixes it. Also
+   * show that specifiying the object prevents propagation if we add another object, but
+   * relaxing it will populate the object variable to include the new object.
+   */
+  static bool testTokenObjectVariable(){
+    PlanDatabase db(ENGINE, SCHEMA);
+
+    // Now add an object and we should expect the constraint network to be consistent
+    ObjectId o1 = (new Object(db.getId(), ALL_OBJECTS, LabelStr("o1")))->getId();
+    EventToken eventToken(db.getId(), LabelStr("Predicate"), false, IntervalIntDomain(0, 10));
+    assert(ENGINE->propagate());
+
+    // Deletion of the object should mean an immediate inconsistency
+    delete (Object*) o1;
+    assert(ENGINE->provenInconsistent());
+    assert(eventToken.getObject()->baseDomain().isEmpty());
+
+    // Insertion of a new object should reecover the situation
+    ObjectId o2 = (new Object(db.getId(), ALL_OBJECTS, LabelStr("o2")))->getId();
+    assert(ENGINE->pending());
+    assert(ENGINE->propagate());
+    assert(eventToken.getObject()->baseDomain().isSingleton());
+
+    // Now specify it
+    eventToken.getObject()->specify(o2);
+
+    // Addition of a new object will update the base domain, but not the spec or derived.
+    // Consequently, no further propagation is required
+    ObjectId o3 = (new Object(db.getId(), ALL_OBJECTS, LabelStr("o3")))->getId();
+    assert(ENGINE->constraintConsistent());
+    assert(!eventToken.getObject()->baseDomain().isSingleton());
+    assert(eventToken.getObject()->lastDomain().isSingleton());
+
+    // Now resetting the specified domain will reverty the derived domain back completely
+    eventToken.getObject()->reset();
+    assert(ENGINE->pending());
+    assert(ENGINE->propagate());
+    assert(eventToken.getObject()->lastDomain().isMember(o2));
+    assert(eventToken.getObject()->lastDomain().isMember(o3));
+
+    return true;
+  }
 };
 
 
@@ -497,7 +569,7 @@ private:
 
   static bool testBasicTokenCreation() {                                                            
     DEFAULT_SETUP(ce,db,schema,false);                                                   
-    ObjectId timeline = (new Timeline(db, LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    ObjectId timeline = (new Timeline(db, ALL_OBJECTS, LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
     db->close();                                                                          
     
@@ -730,8 +802,8 @@ private:
 
   static bool testConstraintMigrationDuringMerge() {
     DEFAULT_SETUP(ce, db, schema, false);
-    ObjectId timeline1 = (new Timeline(db, LabelStr("AllObjects"), LabelStr("timeline1")))->getId();
-    ObjectId timeline2 = (new Timeline(db, LabelStr("AllObjects"), LabelStr("timeline2")))->getId();
+    ObjectId timeline1 = (new Timeline(db, ALL_OBJECTS, LabelStr("timeline1")))->getId();
+    ObjectId timeline2 = (new Timeline(db, ALL_OBJECTS, LabelStr("timeline2")))->getId();
     db->close();
 
     // Create two base tokens
@@ -789,7 +861,7 @@ private:
   // add backtracking and longer chain, also add a before constraint
   static bool testMergingPerformance(){
     DEFAULT_SETUP(ce, db, schema, false);
-    ObjectId timeline = (new Timeline(db, LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    ObjectId timeline = (new Timeline(db, ALL_OBJECTS, LabelStr("o2")))->getId();
     db->close();
 
     typedef Id<IntervalToken> IntervalTokenId;
@@ -998,7 +1070,7 @@ public:
 private:
   static bool testBasicInsertion(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db, LabelStr("AllObjects"), LabelStr("o2"));
+    Timeline timeline(db, ALL_OBJECTS, LabelStr("o2"));
     db->close();
 
     IntervalToken tokenA(db, 
@@ -1082,7 +1154,7 @@ private:
 
   static bool testObjectTokenRelation(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db, LabelStr("AllObjects"), LabelStr("o2"));
+    Timeline timeline(db, ALL_OBJECTS, LabelStr("o2"));
     db->close();
 
     IntervalToken tokenA(db, 
@@ -1168,7 +1240,7 @@ private:
 
   static bool testTokenOrderQuery(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Id<Timeline> timeline = (new Timeline(db, LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    Id<Timeline> timeline = (new Timeline(db, ALL_OBJECTS, LabelStr("o2")))->getId();
     db->close();
 
     const int COUNT = 5;
@@ -1236,7 +1308,7 @@ private:
 
   static bool testEventTokenInsertion(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db, LabelStr("AllObjects"), LabelStr("o2"));
+    Timeline timeline(db, ALL_OBJECTS, LabelStr("o2"));
     db->close();
 
     IntervalToken it1(db, 
@@ -1305,7 +1377,7 @@ private:
 
   static bool testFullInsertion(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db, LabelStr("AllObjects"), LabelStr("o2"));
+    Timeline timeline(db, ALL_OBJECTS, LabelStr("o2"));
     db->close();
 
     IntervalToken tokenA(db, 
@@ -1349,7 +1421,7 @@ private:
 
   static bool testNoChoicesThatFit(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db, LabelStr("AllObjects"), LabelStr("o2"));
+    Timeline timeline(db, ALL_OBJECTS , LabelStr("o2"));
     db->close();
 
     IntervalToken tokenA(db, 

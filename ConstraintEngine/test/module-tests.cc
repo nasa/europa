@@ -80,6 +80,13 @@ private:
   int m_events[ConstraintEngine::EVENT_COUNT];
 };
 
+class EntityTests {
+public:
+  static bool test(){
+    return true;
+  }
+};
+
 class ConstraintEngineTest
 {
 public:
@@ -144,12 +151,25 @@ public:
   }
 };
 
+class TestVariableListener: public ConstrainedVariableListener{
+public:
+  TestVariableListener(const ConstrainedVariableId& observedVar, const ConstrainedVariableId& managedVar)
+    : ConstrainedVariableListener(observedVar), m_managedVar(managedVar){}
+  ~TestVariableListener(){
+    delete (ConstrainedVariable*) m_managedVar;
+  }
+private:
+  ConstrainedVariableId m_managedVar;
+};
+
 class VariableTest
 {
 public:
   static bool test() {
     runTest(testAllocation);
     runTest(testMessaging);
+    runTest(testDynamicVariable);
+    runTest(testListener);
     return true;
   }
 
@@ -254,6 +274,65 @@ private:
       assert(listener.getCount(ConstraintEngine::RELAXED) == 2);
     }
 
+    return true;
+  }
+
+  static bool testDynamicVariable(){
+    // Test empty on closure forces inconsistency
+    {
+      Variable<EnumeratedDomain> v0(ENGINE,EnumeratedDomain());
+      assert(ENGINE->propagate()); // No reason to be inconsistent
+      v0.close(); // Should push empty event.
+      assert(ENGINE->provenInconsistent()); // Should be inconsistent
+    }
+
+    // Test that insertion is possible for variables and that it is handled correctly through propagation
+    {
+      Variable<EnumeratedDomain> v0(ENGINE, EnumeratedDomain()); // The empty one.
+      Variable<EnumeratedDomain> v1(ENGINE, EnumeratedDomain()); // The full one
+      v0.insert(1); // The only value, leave it open.
+
+      // Fill up v1 and close it.
+      v1.insert(1);
+      v1.insert(2);
+      v1.insert(3);
+      v1.close();
+
+      // Post equality constraint between v0 and v1. It should not cause any restriction yet
+      // since v0 has not been closed      
+      EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
+      assert(ENGINE->propagate());
+
+      // Now close v0, and we should see a restriction on v1
+      v0.close();
+      assert(v1.getDerivedDomain().isSingleton());
+
+      // insert further, and propagate again, the domain should grow by one
+      v0.insert(2);
+      assert(v1.getDerivedDomain().getSize() == 2);
+
+      // specify v0 to a singleton
+      v0.specify(2);
+      assert(v1.getDerivedDomain().isSingleton());
+
+      // Now insert and confirm it does not affect v1.
+      v0.insert(3);
+      assert(v1.getDerivedDomain().isSingleton());
+
+      // Now if we reset, the base domain will have 3 elements in it, so derived domain of v1 will also have 3 elements
+      // in it since v0 should be relaxed to the base domain.
+      v0.reset();
+      assert(v1.getDerivedDomain().getSize() == 3);
+    }
+
+    return true;
+  }
+
+  static bool testListener(){
+    ConstrainedVariableId v0 = (new Variable<IntervalIntDomain>(ENGINE, IntervalIntDomain()))->getId();
+    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain>(ENGINE, IntervalIntDomain()))->getId();
+    new TestVariableListener(v0, v1);
+    delete (ConstrainedVariable*) v0; // Should force deletion of all
     return true;
   }
 };
@@ -2327,6 +2406,7 @@ int main() {
   REGISTER_UNARY(DelegationTestConstraint, "TestOnly", "Default");
   runTestSuite(IdTests::test);
   runTestSuite(DomainTests::test);
+  runTestSuite(EntityTests::test);
   runTestSuite(ConstraintEngineTest::test);
   runTestSuite(VariableTest::test); 
   runTestSuite(ConstraintTest::test); 
