@@ -1,6 +1,7 @@
 #ifndef _H_TemporalPropagator
 #define _H_TemporalPropagator
 
+#include "ConstrainedVariable.hh"
 #include "Propagator.hh"
 #include "TemporalNetworkDefs.hh"
 #include "TimepointWrapper.hh"
@@ -62,7 +63,6 @@ namespace EUROPA {
     void addTemporalConstraint(const ConstraintId& constraint);
 
     inline static const TimepointId& getTimepoint(const ConstrainedVariableId& var) {
-      check_error(var->getIndex() != TemporalDistanceConstraint::DISTANCE_VAR_INDEX);
       check_error(var->getExternalEntity().isValid());
       const TimepointWrapperId wrapper(var->getExternalEntity());
       return wrapper->getTimepoint();
