@@ -221,14 +221,26 @@ namespace PLASMA {
   }
 
   bool EnumeratedDomain::isMember(double value) const {
-    std::set<double>::iterator it = m_values.begin();
-    for ( ; it != m_values.end(); it++) {
-      if (compareEqual(value, *it))
-        return(true);
-      if (value < *it) // Since members are sorted, value should be before *it.
-        break;
+    std::set<double>::const_iterator it = m_values.lower_bound(value);
+
+    // If we get a hit - the elem <= value
+    if(it != m_values.end()){
+      double elem = *it;
+      // Try fast compare first, then epsilon safe version
+      if(value == elem || compareEqual(value, elem))
+	return true;
+
+      // Before giving up, see if next position is within epsilon
+      ++it;
+      return (it != m_values.end() && compareEqual(value, *it));
     }
-    return(false);
+
+    if(m_values.empty())
+      return false;
+
+    // Otherwise, double check by looking at prior value with epsilon safe check
+    --it;
+    return(compareEqual(value, *it));
   }
 
   bool EnumeratedDomain::operator==(const AbstractDomain& dom) const {
