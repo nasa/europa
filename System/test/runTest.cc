@@ -127,9 +127,9 @@ int main(){
   assert(maxPlannerSteps.isValid());
   int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
   CBPlanner planner(db.getId(),query.getId(),steps);
-  HeuristicStrategyId strategy = (new HeuristicStrategy())->getId();
+  HeuristicStrategy strategy;
     
-  assert(planner.run(strategy, loggingEnabled()) == 1);
+  assert(planner.run(strategy.getId(), loggingEnabled()) == 1);
 
   const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
     
