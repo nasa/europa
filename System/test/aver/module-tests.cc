@@ -20,9 +20,9 @@
 SchemaId schema;
 
 extern void averInit(const PLASMA::PlanDatabaseId& db,
-                         const PLASMA::DecisionManagerId& dm,
-                         const PLASMA::ConstraintEngineId& ce,
-                         const PLASMA::RulesEngineId& re);
+                     const PLASMA::DecisionManagerId& dm,
+                     const PLASMA::ConstraintEngineId& ce,
+                     const PLASMA::RulesEngineId& re);
 extern void averDeinit();
 
 const char* TX_LOG = "TransactionLog.xml";
@@ -72,8 +72,8 @@ namespace NDDL {
   
   
   // NddlWorld.nddl:9 initialState
-  NddlWorld::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  NddlWorld::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -181,8 +181,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:7 NotTracked
-  Location::NotTracked::NotTracked(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Location::NotTracked::NotTracked(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -215,8 +215,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:12 trackstart
-  Location::trackstart::trackstart(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Location::trackstart::trackstart(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -249,8 +249,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:17 Tracked
-  Location::Tracked::Tracked(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Location::Tracked::Tracked(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -283,8 +283,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:22 trackstop
-  Location::trackstop::trackstop(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Location::trackstop::trackstop(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -399,12 +399,12 @@ namespace NDDL {
   
   
   // k9-initial.nddl:40 At
-  Position::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Position::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory, const bool& autoClose)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
-  Position::At::At(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+  Position::At::At(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
     : NddlToken(parent, relation, name) {
     handleDefaults();
   }
@@ -421,8 +421,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:44 navigate
-  Position::navigate::navigate(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Position::navigate::navigate(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory, const bool& autoClose)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -438,7 +438,7 @@ namespace NDDL {
     }
   }
   
-  Position::navigate::navigate(const TokenId& parent, const LabelStr& relation, const LabelStr& name)
+  Position::navigate::navigate(const TokenId& parent, const LabelStr& relation, const LabelStr& name, const bool& autoClose)
     : NddlToken(parent, relation, name) {
     handleDefaults();
     {
@@ -480,9 +480,9 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Position$At$0, Position$At$0$0, Position.At, "k9-initial.nddl,52");
   
   void Position$At$0$0::handleExecute() {
-    slave(Position::navigate, Position.navigate, a, "meets");
+    slave(Position::navigate, Position.navigate, a, LabelStr("meets"));
     meets(this, a);
-    slave(Position::navigate, Position.navigate, b, "met_by");
+    slave(Position::navigate, Position.navigate, b, LabelStr("met_by"));
     met_by(this, b);
     {
       std::vector<ConstrainedVariableId> vars;
@@ -510,9 +510,9 @@ namespace NDDL {
   
   void Position$navigate$1$0::handleExecute() {
     objectVar(Path, path, true);
-    slave(Position::At, Position.At, a, "meets");
+    slave(Position::At, Position.At, a, LabelStr("meets"));
     meets(this, a);
-    slave(Position::At, Position.At, b, "met_by");
+    slave(Position::At, Position.At, b, LabelStr("met_by"));
     met_by(this, b);
     declareFilter(Path,path);
     allocateFilterCondition(path, Location, var(getId(),std::string("from")), m_from, eq);
@@ -559,8 +559,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:79 TrackingOff
-  Tracker::TrackingOff::TrackingOff(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Tracker::TrackingOff::TrackingOff(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -577,8 +577,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:82 trackloadgroup
-  Tracker::trackloadgroup::trackloadgroup(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Tracker::trackloadgroup::trackloadgroup(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -595,8 +595,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:85 LandmarksDefined
-  Tracker::LandmarksDefined::LandmarksDefined(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Tracker::LandmarksDefined::LandmarksDefined(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -613,8 +613,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:88 StartTracking
-  Tracker::StartTracking::StartTracking(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Tracker::StartTracking::StartTracking(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -631,8 +631,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:91 TrackingOn
-  Tracker::TrackingOn::TrackingOn(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Tracker::TrackingOn::TrackingOn(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -649,8 +649,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:94 trackfreeze
-  Tracker::trackfreeze::trackfreeze(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Tracker::trackfreeze::trackfreeze(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -667,8 +667,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:97 TrackingFrozen
-  Tracker::TrackingFrozen::TrackingFrozen(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Tracker::TrackingFrozen::TrackingFrozen(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -685,8 +685,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:100 trackunfreeze
-  Tracker::trackunfreeze::trackunfreeze(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  Tracker::trackunfreeze::trackunfreeze(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -728,8 +728,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:107 OppSciIdle
-  OpportunisticScience::OppSciIdle::OppSciIdle(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  OpportunisticScience::OppSciIdle::OppSciIdle(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -746,8 +746,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:110 oppscidefineproc
-  OpportunisticScience::oppscidefineproc::oppscidefineproc(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  OpportunisticScience::oppscidefineproc::oppscidefineproc(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -764,8 +764,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:113 OppSciProcDefined
-  OpportunisticScience::OppSciProcDefined::OppSciProcDefined(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  OpportunisticScience::OppSciProcDefined::OppSciProcDefined(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -782,8 +782,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:116 oppscisetparams
-  OpportunisticScience::oppscisetparams::oppscisetparams(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  OpportunisticScience::oppscisetparams::oppscisetparams(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -800,8 +800,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:119 OppSciParamsSet
-  OpportunisticScience::OppSciParamsSet::OppSciParamsSet(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  OpportunisticScience::OppSciParamsSet::OppSciParamsSet(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -818,8 +818,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:122 oppscilooknow
-  OpportunisticScience::oppscilooknow::oppscilooknow(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  OpportunisticScience::oppscilooknow::oppscilooknow(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -856,8 +856,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:128 OppSciDoneLookNow
-  OpportunisticScience::OppSciDoneLookNow::OppSciDoneLookNow(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  OpportunisticScience::OppSciDoneLookNow::OppSciDoneLookNow(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -894,8 +894,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:134 oppscigetstatus
-  OpportunisticScience::oppscigetstatus::oppscigetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  OpportunisticScience::oppscigetstatus::oppscigetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
     {
       std::vector<ConstrainedVariableId> vars;
@@ -957,8 +957,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:142 IPIdle
-  CHAMP::IPIdle::IPIdle(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  CHAMP::IPIdle::IPIdle(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -975,8 +975,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:145 ipgetname
-  CHAMP::ipgetname::ipgetname(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  CHAMP::ipgetname::ipgetname(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -1001,8 +1001,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:151 IPHaveName
-  CHAMP::IPHaveName::IPHaveName(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  CHAMP::IPHaveName::IPHaveName(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -1027,8 +1027,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:156 ipsettarget
-  CHAMP::ipsettarget::ipsettarget(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  CHAMP::ipsettarget::ipsettarget(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -1053,8 +1053,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:162 IPTargetSet
-  CHAMP::IPTargetSet::IPTargetSet(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  CHAMP::IPTargetSet::IPTargetSet(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -1079,8 +1079,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:167 ipplaceinstrument
-  CHAMP::ipplaceinstrument::ipplaceinstrument(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  CHAMP::ipplaceinstrument::ipplaceinstrument(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -1105,8 +1105,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:173 IPDonePlaceInstrument
-  CHAMP::IPDonePlaceInstrument::IPDonePlaceInstrument(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  CHAMP::IPDonePlaceInstrument::IPDonePlaceInstrument(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
@@ -1131,8 +1131,8 @@ namespace NDDL {
   
   
   // k9-initial.nddl:178 ipgetstatus
-  CHAMP::ipgetstatus::ipgetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlToken(planDatabase, name) {
+  CHAMP::ipgetstatus::ipgetstatus(const PlanDatabaseId& planDatabase, const LabelStr& name, const bool& mandatory)
+   : NddlToken(planDatabase, name, mandatory) {
     handleDefaults();
   }
   
