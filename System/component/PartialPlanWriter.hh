@@ -46,7 +46,7 @@ namespace Prototype {
       PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &, 
                         const RulesEngineId &);
 			PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &,
-												const RulesEngineId &, const CBPlannerId &);
+                                          const RulesEngineId &, const CBPlannerId &);
       ~PartialPlanWriter(void);
       //void notifyPropagationCompleted(void);
       void write(void);
@@ -54,18 +54,18 @@ namespace Prototype {
 			bool havePlanner;
       long long int seqId, ppId;
       int numTokens, numConstraints, numVariables, numTransactions;
-      int stepsPerWrite, transactionId, nstep, tokenRelationId, writeCounter, noWrite, maxChoices;
+      int stepsPerWrite, transactionId, nstep, writeCounter, noWrite, maxChoices;
       ConstraintEngineId *ceId;
       PlanDatabaseId *pdbId;
 			RulesEngineId *reId;
 			CBPlannerId *plId;
       std::list<Transaction> *transactionList;
-      std::ofstream *transOut, *statsOut, *ruleMapOut;
+      std::ofstream *transOut, *statsOut, *ruleInstanceOut;
       std::string dest;
       void commonInit(const PlanDatabaseId &, const ConstraintEngineId &);
       void outputObject(const ObjectId &, const int, std::ofstream &, std::ofstream &);
       void outputToken(const TokenId &, const int, const int, const int, const int, 
-                       const ObjectId &, std::ofstream &, std::ofstream &, std::ofstream &);
+                       const ObjectId &, std::ofstream &, std::ofstream &);
       void outputEnumVar(const Id< TokenVariable<EnumeratedDomain> > &, const int,
 			 const int, std::ofstream &);
       void outputIntVar(const Id< TokenVariable<IntervalDomain> > &, const int,
@@ -78,7 +78,9 @@ namespace Prototype {
 			   std::ofstream &);
       void outputConstraint(const ConstraintId &, std::ofstream &, std::ofstream &);
       void outputInstant(const InstantId &, const int, std::ofstream &);
-			void outputDecision(const DecisionPointId &, std::ofstream &);
+      void outputRuleInstance(const RuleInstanceId &, std::ofstream &, std::ofstream &);
+      void buildVarSet(std::set<ConstrainedVariableId> &, const RuleInstanceId &);
+      void outputDecision(const DecisionPointId &, std::ofstream &);
       const std::string getUpperBoundStr(IntervalDomain &dom) const;
       const std::string getLowerBoundStr(IntervalDomain &dom) const;
       const std::string getEnumerationStr(EnumeratedDomain &dom) const;

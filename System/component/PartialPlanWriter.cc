@@ -178,11 +178,12 @@ const std::string STATE_VAR("STATE_VAR");
 const std::string OBJECT_VAR("OBJECT_VAR");
 const std::string PARAMETER_VAR("PARAMETER_VAR");
 const std::string MEMBER_VAR("MEMBER_VAR");
+const std::string RULE_VAR("RULE_VAR");
 
-const std::string tokenVarTypes[7] = 
-	{STATE_VAR, OBJECT_VAR, DURATION_VAR, START_VAR, END_VAR, PARAMETER_VAR, MEMBER_VAR};
+const std::string tokenVarTypes[8] = 
+	{STATE_VAR, OBJECT_VAR, DURATION_VAR, START_VAR, END_VAR, PARAMETER_VAR, MEMBER_VAR, RULE_VAR};
 
-enum varTypes {I_STATE = 0, I_OBJECT, I_DURATION, I_START, I_END, I_PARAMETER, I_MEMBER};
+enum varTypes {I_STATE = 0, I_OBJECT, I_DURATION, I_START, I_END, I_PARAMETER, I_MEMBER, I_RULE};
 enum objectTypes {O_OBJECT = 0, O_TIMELINE, O_RESOURCE};
 enum tokenTypes {T_INTERVAL = 0, T_TRANSACTION};
 enum decisionTypes {D_OBJECT = 0, D_TOKEN, D_VARIABLE, D_ERROR};
@@ -215,11 +216,10 @@ const std::string PARTIAL_PLAN_STATS("/partialPlanStats");
 const std::string TRANSACTIONS("/transactions");
 const std::string SEQUENCE("/sequence");
 const std::string RULES("/rules");
-const std::string RULES_MAP("/rulesMap");
 const std::string PARTIAL_PLAN(".partialPlan");
 const std::string OBJECTS(".objects");
 const std::string TOKENS(".tokens");
-const std::string TOKEN_RELATIONS(".tokenRelations");
+const std::string RULE_INSTANCES(".ruleInstances");
 const std::string VARIABLES(".variables");
 const std::string CONSTRAINTS(".constraints");
 const std::string CONSTRAINT_VAR_MAP(".constraintVarMap");
@@ -443,7 +443,6 @@ namespace Prototype {
 				}
 				std::string ppStats(dest + PARTIAL_PLAN_STATS);
 				std::string ppTransactions(dest + TRANSACTIONS);
-        std::string ppRulesMap(dest + RULES_MAP);
         std::string seqRules(dest + RULES);
 				std::string seqStr(dest + SEQUENCE);
 				std::ofstream seqOut(seqStr.c_str());
@@ -492,30 +491,24 @@ namespace Prototype {
         seqOut << SEQ_LINE_SEP;
         seqOut.close();
 
-				transOut = new std::ofstream(ppTransactions.c_str());
-				if(!(*transOut)) {
-					FatalErrno();
-				}
-				statsOut = new std::ofstream(ppStats.c_str());
-				if(!(*statsOut)) {
-					FatalErrno();
-				}
-        ruleMapOut = new std::ofstream(ppRulesMap.c_str());
-        if(!(*ruleMapOut)) {
-          FatalErrno();
-        }
+	transOut = new std::ofstream(ppTransactions.c_str());
+	if(!(*transOut)) {
+		FatalErrno();
+	}
+	statsOut = new std::ofstream(ppStats.c_str());
+	if(!(*statsOut)) {
+		FatalErrno();
+	}
       }
     }
   
     PartialPlanWriter::~PartialPlanWriter(void) {
       if(stepsPerWrite) {
         //write();
-				transOut->close();
-				statsOut->close();
-        ruleMapOut->close();
-				delete transOut;
-				delete statsOut;
-        delete ruleMapOut;
+	transOut->close();
+	statsOut->close();
+	delete transOut;
+	delete statsOut;
       }
     }
   
@@ -534,7 +527,6 @@ namespace Prototype {
       ppId = timeval2Id(currTime);
 
       numTokens = numVariables = numConstraints = numTransactions = 0;
-      tokenRelationId = 1;
 
       char stepstr[NBBY * sizeof(nstep) * 28/93 + 4];
       sprintf(stepstr, "%d", nstep);
@@ -569,10 +561,10 @@ namespace Prototype {
 				FatalErrno();
       }
 
-      std::string ppTokRel = ppDest + SLASH + stepnum + TOKEN_RELATIONS;
-      std::ofstream tokRelOut(ppTokRel.c_str());
-      if(!tokRelOut) {
-				FatalErrno();
+      std::string ppRuleInstances = ppDest + SLASH + stepnum + RULE_INSTANCES;
+      std::ofstream ruleInstanceOut(ppRuleInstances.c_str());
+      if(!ruleInstanceOut) {
+        FatalErrno();
       }
 
       std::string ppVars = ppDest + SLASH + stepnum + VARIABLES;
@@ -629,14 +621,14 @@ namespace Prototype {
             int slotOrder = 0;
             const TokenId &token = *tokenIterator;
             outputToken(token, T_INTERVAL, slotId, slotIndex, slotOrder, (ObjectId) tId, tokOut,
-                        tokRelOut, varOut);
+                        varOut);
             tokens.erase(token);
             TokenSet::const_iterator mergedTokenIterator = 
               token->getMergedTokens().begin();
             for(;mergedTokenIterator != token->getMergedTokens().end(); ++mergedTokenIterator) {
               slotOrder++;
               outputToken(*mergedTokenIterator, T_INTERVAL, slotId, slotIndex, slotOrder,
-                          (ObjectId &) tId, tokOut, tokRelOut, varOut);
+                          (ObjectId &) tId, tokOut, varOut);
               tokens.erase(*mergedTokenIterator);
             }
             slotId++;
@@ -672,7 +664,7 @@ namespace Prototype {
           for(std::list<TransactionId>::iterator transIt = resTrans.begin();
               transIt != resTrans.end(); ++transIt) {
             TransactionId trans = *transIt;
-            outputToken(trans, T_TRANSACTION, 0, 1, 0, rId, tokOut, tokRelOut, varOut);
+            outputToken(trans, T_TRANSACTION, 0, 1, 0, rId, tokOut, varOut);
             tokens.erase(trans);
           }
           std::list<InstantId> insts;
@@ -695,7 +687,7 @@ namespace Prototype {
           tokenIterator != tokens.end(); ++tokenIterator) {
 				TokenId token = *tokenIterator;
 				check_error(token.isValid());
-				outputToken(token, T_INTERVAL, 0, 0, 0, ObjectId::noId(), tokOut, tokRelOut, varOut);
+				outputToken(token, T_INTERVAL, 0, 0, 0, ObjectId::noId(), tokOut, varOut);
       }
 
 			if(plId != NULL) {
@@ -709,6 +701,13 @@ namespace Prototype {
         if(loc == decs.end())
           outputDecision(currDec, decsOut);
 			}
+
+      std::set<RuleInstanceId> ruleInst = (*reId)->getRuleInstances();
+      for(std::set<RuleInstanceId>::const_iterator it = ruleInst.begin();
+          it != ruleInst.end(); ++it) {
+        RuleInstanceId ri = *it;
+        outputRuleInstance(ri, ruleInstanceOut, varOut);
+      }
 			
       (*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
 									<< TAB << numConstraints << TAB << numTransactions << std::endl;
@@ -719,7 +718,7 @@ namespace Prototype {
       }
       objOut.close();
       tokOut.close();
-      tokRelOut.close();
+      ruleInstanceOut.close();
       varOut.close();
       constrOut.close();
       cvmOut.close();
@@ -779,14 +778,14 @@ namespace Prototype {
     void PartialPlanWriter::outputToken(const TokenId &token, const int type, const int slotId, 
                                         const int slotIndex, const int slotOrder, 
                                         const ObjectId &tId, std::ofstream &tokOut, 
-                                        std::ofstream &tokRelOut, std::ofstream &varOut) {
+                                        std::ofstream &varOut) {
       check_error(token.isValid());
       if(token->isIncomplete()) {
 				std::cerr << "Token " << token->getKey() << " is incomplete.  Skipping. " << std::endl;
 				return;
       }
       if(!tId.isNoId()) {
-				tokOut << token->getKey() << TAB << type << TAB << slotId << TAB << slotIndex << TAB 
+        tokOut << token->getKey() << TAB << type << TAB << slotId << TAB << slotIndex << TAB 
                << ppId << TAB << 0 << TAB << 1 << TAB << token->getStart()->getKey() << TAB 
                << token->getEnd()->getKey() << TAB << token->getDuration()->getKey() << TAB 
                << token->getState()->getKey() << TAB << token->getPredicateName().toString() 
@@ -794,22 +793,12 @@ namespace Prototype {
                << token->getObject()->getKey() << TAB;
       }
       else {
-				tokOut << token->getKey() << TAB << type << TAB << SNULL << TAB << SNULL << TAB << ppId 
+        tokOut << token->getKey() << TAB << type << TAB << SNULL << TAB << SNULL << TAB << ppId 
                << TAB << 1 << TAB << 1 << TAB << token->getStart()->getKey() << TAB 
                << token->getEnd()->getKey() << TAB << token->getDuration()->getKey() << TAB 
                << token->getState()->getKey() << TAB << token->getPredicateName().toString() 
                << TAB << SNULL << TAB << SNULL << TAB << token->getObject()->getKey() << TAB;
       }
-      if(token->getMaster().isValid()) {
-				tokRelOut << ppId << TAB << token->getMaster()->getKey() << TAB 
-									<< token->getKey() << TAB << CAUSAL << TAB << tokenRelationId << std::endl;
-				tokOut << tokenRelationId << TAB;
-				tokenRelationId++;
-      }
-      else {
-				tokOut << SNULL << TAB;
-      }
-
       outputObjVar(token->getObject(), token->getKey(), I_OBJECT, varOut);
       outputIntIntVar(token->getStart(), token->getKey(), I_START, varOut);
       outputIntIntVar(token->getEnd(), token->getKey(), I_END, varOut);
@@ -951,6 +940,62 @@ namespace Prototype {
 				cvmOut << constrId->getKey() << TAB << (*it)->getKey() << TAB << ppId << std::endl;
       }
     }
+
+     void PartialPlanWriter::outputRuleInstance(const RuleInstanceId &ruleId,
+                                           std::ofstream &ruleInstanceOut,
+                                           std::ofstream &varOut) {
+
+       ruleInstanceOut << ruleId->getKey() << TAB << ppId << TAB << seqId
+                       << TAB << ruleId->getRule()->getKey()
+                       << TAB << ruleId->getToken()->getKey() << TAB;
+
+       /*SlaveTokenIds*/
+       const std::vector<TokenId> slaves = ruleId->getSlaves();
+       if(slaves.empty()) {
+         ruleInstanceOut << SNULL << TAB;
+       }
+       else {
+         for(std::vector<TokenId>::const_iterator it = slaves.begin();
+             it != slaves.end(); ++it) {
+           TokenId slaveToken = *it;
+           ruleInstanceOut << slaveToken->getKey() << COMMA;
+         }
+         ruleInstanceOut << TAB;
+       }
+
+       /* gaurd and local variables */
+       std::set<ConstrainedVariableId> vars;
+       buildVarSet(vars, ruleId);
+       if(vars.empty()) {
+         ruleInstanceOut << SNULL;
+       }
+       else {
+         for(std::set<ConstrainedVariableId>::const_iterator it = vars.begin();
+             it != vars.end(); ++it) {
+           ConstrainedVariableId localVar = *it;
+           ruleInstanceOut << localVar->getKey() << COMMA;
+           outputConstrVar(localVar, ruleId->getKey(), I_RULE, varOut);
+         }
+       }
+       ruleInstanceOut << std::endl;
+     }
+
+
+     void PartialPlanWriter::buildVarSet(std::set<ConstrainedVariableId>& varSet,
+                                         const RuleInstanceId &ruleId) {
+       for(std::vector<ConstrainedVariableId>::const_iterator varIt = ruleId->getVariables().begin();
+      varIt != ruleId->getVariables().end(); ++varIt) {
+         ConstrainedVariableId var = *varIt;
+         if(RuleInstanceId::convertable(var->getParent())) {
+           varSet.insert(var);
+         }
+       }
+       for(std::vector<RuleInstanceId>::const_iterator ruleIt = ruleId->getChildRules().begin();
+           ruleIt != ruleId->getChildRules().end(); ++ruleIt) {
+         RuleInstanceId rid = *ruleIt;
+         buildVarSet(varSet, rid);
+       }
+     }
 
 		void PartialPlanWriter::outputInstant(const InstantId &instId, const int resId, 
 																					std::ofstream &instOut) {
@@ -1335,16 +1380,8 @@ namespace Prototype {
 
     void PartialPlanWriter::notifyExecuted(const RuleInstanceId &ruleId) {
       if(stepsPerWrite && allowTransaction[RULE_EXECUTED]) {
-				const std::vector<TokenId> slaves = ruleId->getSlaves();
-				int ruleKey = ruleId->getRule()->getKey();
-				int masterKey = ruleId->getToken()->getKey();
-				for(std::vector<TokenId>::const_iterator it = slaves.begin(); it != slaves.end(); ++it) {
-					(*ruleMapOut) << seqId << TAB << nstep << TAB << ruleKey << TAB << masterKey << TAB 
-												<< (*it)->getKey() << std::endl;
-				}
-				
         std::stringstream info;
-				info << ruleId->getRule()->getKey() << COMMA << ruleId->getToken()->getKey();
+        info << ruleId->getRule()->getKey() << COMMA << ruleId->getToken()->getKey();
         transactionList->push_back(Transaction(RULE_EXECUTED, ruleId->getKey(), SYSTEM,
                                                transactionId++, seqId, nstep,
                                                std::string(info.str())));
