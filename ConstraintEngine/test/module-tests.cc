@@ -1,5 +1,12 @@
-#include "ConstraintNetwork.hh"
+/**
+ * @file module-tests.cc
+ * @author Conor McGann
+ * @date August, 2003
+ * @brief Read the source for details
+ */
+#include "ConstraintEngine.hh"
 #include "AbstractVar.hh"
+#include "AbstractDomain.hh"
 #include "ConstraintFactory.hh"
 #include "ConstraintLibrary.hh"
 #include "../Libraries/IdTable.hh"
@@ -10,9 +17,35 @@
 using namespace Prototype;
 using namespace std;
 
+class DefaultEngineAccessor{
+public:
+  static const ConstraintEngineId& instance(){
+    if (s_instance.isNoId())
+      s_instance = (new ConstraintEngine())->getId();
+
+    return s_instance;
+  }
+
+  static void reset(){
+    if(!s_instance.isNoId()){
+      delete (ConstraintEngine*) s_instance;
+      s_instance = ConstraintEngineId::noId();
+    }
+  }
+
+private:
+  static ConstraintEngineId s_instance;
+};
+
+ConstraintEngineId DefaultEngineAccessor::s_instance;
+
+#define ENGINE DefaultEngineAccessor::instance()
+
 #define runTest(test, name) { \
-  cout << name; \
-  if(test() && Europa::IdTable::size() == 0) \
+  cout << "      " << name; \
+  bool result = test(); \
+  DefaultEngineAccessor::reset(); \
+  if(result && Europa::IdTable::size() == 0) \
     cout << " passed." << endl; \
   else \
     cout << " FAILED." << endl; \
@@ -23,7 +56,7 @@ using namespace std;
   if(test()) \
     cout << name << " passed." << endl; \
   else \
-    cout << name << " failed." << endl; \
+    cout << name << " FAILED." << endl; \
 }
 
 
@@ -50,8 +83,7 @@ class LabelTest
 {
 public:
   static bool test(){
-    testBasicLabelOperations();
-    //runTest(testBasicLabelOperations, "BasicLabelOperations");
+    runTest(testBasicLabelOperations, "BasicLabelOperations");
     runTest(testLabelSetAllocations, "LabelSetAllocations");
     runTest(testEquate, "LabelSet::equate");
     return true;
@@ -266,7 +298,7 @@ public:
 private:
   static bool testAllocation(){
     IntervalIntDomain dom0(0, 1000);
-    VariableImpl<IntervalIntDomain> v0(dom0);
+    VariableImpl<IntervalIntDomain> v0(ENGINE, dom0);
     const IntervalIntDomain& dom1 = v0.getBaseDomain();
     assert (dom0 == dom1);
     assert(v0.isValid());
@@ -281,6 +313,8 @@ public:
     runTest(testAddEqualConstraint, "AddEqualConstraint");
     runTest(testEqualConstraint, "EqualConstraint");
     runTest(testBasicPropagation, "BasicPropagation");
+    runTest(testForceInconsistency, "ForceInconsistency");
+    runTest(testRepropagation, "Repropagation");
     return true;
   }
 
@@ -289,14 +323,15 @@ private:
   static bool testAddEqualConstraint()
   {
     std::vector<ConstrainedVariableId> variables;
-    VariableImpl<IntervalIntDomain> v0(IntervalIntDomain(1, 10));
+    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
-    VariableImpl<IntervalIntDomain> v1(IntervalIntDomain(1, 1));
+    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v1.getId());
-    VariableImpl<IntervalIntDomain> v2(IntervalIntDomain(0, 2));
+    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
     variables.push_back(v2.getId());
-    AddEqualConstraint c0(variables);
-    assert(c0.execute());
+    AddEqualConstraint c0(ENGINE, variables);
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
     assert(v1.getDerivedDomain().getSingletonValue() == 1);
     assert(v2.getDerivedDomain().getSingletonValue() == 2);
@@ -306,55 +341,132 @@ private:
   static bool testEqualConstraint()
   {
     std::vector<ConstrainedVariableId> variables;
-    VariableImpl<IntervalIntDomain> v0(IntervalIntDomain(1, 10));
+    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
-    VariableImpl<IntervalIntDomain> v1(IntervalIntDomain(-100, 1));
+    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(-100, 1));
     variables.push_back(v1.getId());
-    EqualConstraint c0(variables);
-    assert(c0.execute());
+    EqualConstraint c0(ENGINE, variables);
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
     assert(v1.getDerivedDomain().getSingletonValue() == 1);
     return true;
   }
 
-
   static bool testBasicPropagation(){
     std::vector<ConstrainedVariableId> variables;
     // v0 == v1
-    VariableImpl<IntervalIntDomain> v0(IntervalIntDomain(1, 10));
+    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
-    VariableImpl<IntervalIntDomain> v1(IntervalIntDomain(1, 10));
+    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v1.getId());
-    EqualConstraint c0(variables);
+    EqualConstraint c0(ENGINE, variables);
 
     // v2 + v3 == v0
     variables.clear();
-    VariableImpl<IntervalIntDomain> v2(IntervalIntDomain(1, 4));
+    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 4));
     variables.push_back(v2.getId());
-    VariableImpl<IntervalIntDomain> v3(IntervalIntDomain(1, 1));
+    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v3.getId());
     variables.push_back(v0.getId());
-    AddEqualConstraint c1(variables);
+    AddEqualConstraint c1(ENGINE, variables);
 
     // v4 + v5 == v1
     variables.clear();
-    VariableImpl<IntervalIntDomain> v4(IntervalIntDomain(1, 10));
+    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v4.getId());
-    VariableImpl<IntervalIntDomain> v5(IntervalIntDomain(1, 1000));
+    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(1, 1000));
     variables.push_back(v5.getId());
     variables.push_back(v1.getId());
-    AddEqualConstraint c2(variables);
+    AddEqualConstraint c2(ENGINE, variables);
 
-    ConstraintEngineId engine(new ConstraintEngine());
-    ProceduralConstraintPropagator p(engine);
-    p.addConstraint(c0.getId());
-    p.addConstraint(c1.getId());
-    p.addConstraint(c2.getId());
-    p.execute();
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    return true;
+  }
 
-    cout << "v5.ub = " << v5.getDerivedDomain().getUpperBound() << endl;
+  static bool testForceInconsistency(){
+    std::vector<ConstrainedVariableId> variables;
+    // v0 == v1
+    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v0.getId());
+    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v1.getId());
+    EqualConstraint c0(ENGINE, variables);
+    
+    // v2 + v3 == v0
+    variables.clear();
+    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 1));
+    variables.push_back(v2.getId());
+    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
+    variables.push_back(v3.getId());
+    variables.push_back(v0.getId());
+    AddEqualConstraint c1(ENGINE, variables);
 
-    engine.release();
+    // v4 + v5 == v1
+    variables.clear();
+    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(2, 2));
+    variables.push_back(v4.getId());
+    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(2, 2));
+    variables.push_back(v5.getId());
+    variables.push_back(v1.getId());
+    AddEqualConstraint c2(ENGINE, variables);
+    
+    ENGINE->propagate();
+    assert(ENGINE->provenInconsistent());
+    return true;
+  }
+
+  static bool testRepropagation()
+  {
+    std::vector<ConstrainedVariableId> variables;
+    // v0 == v1
+    VariableImpl<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v0.getId());
+    VariableImpl<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v1.getId());
+    EqualConstraint c0(ENGINE, variables);
+
+
+    // v2 + v3 == v0
+    variables.clear();
+    VariableImpl<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v2.getId());
+    VariableImpl<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v3.getId());
+    variables.push_back(v0.getId());
+    AddEqualConstraint c1(ENGINE, variables);
+
+    // v4 + v5 == v1
+    variables.clear();
+    VariableImpl<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v4.getId());
+    VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(1, 10));
+    variables.push_back(v5.getId());
+    variables.push_back(v1.getId());
+    AddEqualConstraint c2(ENGINE, variables);
+
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+    v0.specify(IntervalIntDomain(8, 10));
+    v1.specify(IntervalIntDomain(2, 7));
+    assert(ENGINE->pending());
+
+    ENGINE->propagate();
+    assert(ENGINE->provenInconsistent());
+
+    v0.unspecify();
+    assert(ENGINE->pending());
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
+
+    /* Call unspecify on a constraint consistent network - not sure one would want to do this*/
+    v1.unspecify();
+    assert(ENGINE->pending()); /* Strictly speaking we know it is not inconsistent here since all we have done is relax a previously
+				  consistent network. However, we have to propagate to find the new derived domains based on relaxed
+				  domains.*/
+    ENGINE->propagate();
+    assert(ENGINE->constraintConsistent());
     return true;
   }
 };

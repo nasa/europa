@@ -57,6 +57,7 @@ void outerLoopForTestEquate()
 
 void main()
 {
-  outerLoopForTestEquate();
+  //outerLoopForTestEquate();
+  outerLoopForTestIntersection();
   cout << "Finished" << endl;
 }
