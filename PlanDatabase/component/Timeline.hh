@@ -28,15 +28,17 @@ namespace PLASMA {
     void cleanup(const TokenId& token);
     bool isValid(bool cleaningUp = false) const;
 
-
     /**
-     * 1. All Tokens in the sequence == all Tokens in the index.
-     * 2. Each Token appears in the sequence at most once.
-     * 3. All Toiens in the sequence are part of Object::getTokens()
-     * 4. All Tokens in the sequence must be active
+     * A list indicating the temporal order of Tokens constrained for this timeline.
+     * @note All Tokens in the sequence == all Tokens in the index.
+     * @note Each Token appears in the sequence at most once.
+     * @note All Tokens in the sequence are part of Object::getTokens().
+     * @note All Tokens in the sequence must be active.
      */
-    std::list<TokenId> m_tokenSequence; /**< A list indicating the temporal order of Tokens constrained for this timeline */
-    std::map<int, std::list<TokenId>::iterator > m_tokenIndex; /**< Index to find position in sequence by Token */
+    std::list<TokenId> m_tokenSequence;
+
+    /** Index to find position in sequence by Token */
+    std::map<int, std::list<TokenId>::iterator > m_tokenIndex;
 
     static const bool CLEANING_UP = true;
 
