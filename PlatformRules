@@ -25,6 +25,23 @@ if $(OS) = MACOSX {
 	SHARED_FLAG ?= -shared ;
 }
 
+# ENV_VARS_OK = Required to build shared library.
+#
+# Inhibits building shared library on MAC OS X if
+# user has not set DYLD_BIND_AT_LAUNCH=YES environment 
+# variable that tells loader to do early binding.
+
+if $(OS) = MACOSX {
+  if $(DYLD_BIND_AT_LAUNCH) = YES {
+     ENV_VARS_OK ?= YES ;
+  } else {
+     ENV_VARS_OK ?= NO ;
+     ENV_VARS_MSG ?= DYLD_BIND_AT_LAUNCH=YES ;
+  }
+} else {
+     ENV_VARS_OK ?= YES ;
+}
+  
 # LIBRARY_PATH_SEARCH_FLAG = Library search path flag
 
 LIBRARY_PATH_SEARCH_FLAG ?= -L ;
