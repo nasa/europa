@@ -16,6 +16,14 @@
 
 #include <fstream>
 
+// These are only needed for getrusage().
+//   If nothing #defines RUSAGE_SELF, getrusage() still won't be called.
+#if defined(__linux__) || defined(__sun__)
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <unistd.h>
+#endif
+
 SchemaId schema;
 
 #define PERFORMANCE
@@ -46,28 +54,28 @@ bool runPlanner() {
   DbClientId client = db1.planDatabase->getClient();
 
   DbClientTransactionPlayer player(client);
-  check_error(initialTransactions != NULL);
+  assertTrue(initialTransactions != NULL);
   std::ifstream in(initialTransactions);
   player.play(in);
 
-  assert(client->propagate());
+  assertTrue(client->propagate());
   std::cout << "Just after propagating initial transactions, IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
 
   ObjectId world = client->getObject("world");
-  check_error(world.isValid());
+  assertTrue(world.isValid());
   // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
   ConstrainedVariableId horizonStart = world->getVariable("world.m_horizonStart");
-  check_error(horizonStart.isValid());
+  assertTrue(horizonStart.isValid());
   ConstrainedVariableId horizonEnd = world->getVariable("world.m_horizonEnd");
-  check_error(horizonEnd.isValid());
+  assertTrue(horizonEnd.isValid());
   int start = (int) horizonStart->baseDomain().getSingletonValue();
   int end = (int) horizonEnd->baseDomain().getSingletonValue();
   db1.horizon->setHorizon(start, end);
 
   // Create and run the planner
   ConstrainedVariableId maxPlannerSteps = world->getVariable("world.m_maxPlannerSteps");
-  check_error(maxPlannerSteps.isValid());
+  assertTrue(maxPlannerSteps.isValid());
   int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
 
 #ifndef PERFORMANCE
@@ -76,16 +84,14 @@ bool runPlanner() {
 #endif
 
   int res = db1.planner->run(steps);
+  assertTrue(res == CBPlanner::PLAN_FOUND);
   std::cout << "Just after finding plan, IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
 
 #ifndef PERFORMANCE
   averDeinit();
-#endif
-
-  assert(res == CBPlanner::PLAN_FOUND);
-
   PlanDatabaseWriter::write(db1.planDatabase, std::cout);
+#endif
 
   // Store transactions for recreation of database
   if (replay) {
@@ -104,7 +110,7 @@ bool runPlanner() {
 
     std::string s1 = os1.str();
     std::string s2 = os2.str();
-    assert(s1 == s2);
+    assertTrue(s1 == s2);
   }
   std::cout << "Just before returning from runPlanner(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << "\nand ";
@@ -133,31 +139,51 @@ bool copyFromFile() {
 
   std::string s1 = os1.str();
   std::string s2 = os2.str();
-  assert(s1 == s2);
+  assertTrue(s1 == s2);
   return(true);
 }
 
+static void printRUsage(const std::string& when) {
+#ifdef RUSAGE_SELF
+  static struct rusage used;
+  if (getrusage(RUSAGE_SELF, &used) != 0)
+    return; //!!Ignore failure, at least for now.
+  std::cout << "Resource usage " << when
+            << ":\n  user time   " << ((double)used.ru_utime.tv_sec + ((double)used.ru_utime.tv_usec)/1000.0)
+            << "\n  system time " << ((double)used.ru_stime.tv_sec + ((double)used.ru_stime.tv_usec)/1000.0)
+            << "\n  maximum RSS " << used.ru_maxrss << " bytes"
+            << "\n  Ishared RSS " << used.ru_ixrss << " bytes"
+            << "\n  IunsharedDS " << used.ru_idrss << " bytes"
+            << "\n  IunsharedSS " << used.ru_isrss << " bytes\n";
+#endif
+}
+
 int main(int argc, const char ** argv) {
+  printRUsage("just inside main()");
+
   initDebug();
 
   std::cout << "Just inside main(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   if (argc < 2) {
     std::cerr << "Must provide initial transactions file." << std::endl;
-    return -1;
+    return(-1);
   }
   initialTransactions = argv[1];
   // Initialize constraint factories
   SamplePlanDatabase::initialize();
+  printRUsage("after SPD::initialize()");
   std::cout << "Just after SPD::init(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   schema = NDDL::loadSchema();
+  printRUsage("after NDDL:loadSchema()");
   std::cout << "Just after NDDL::loadSchema(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
 #ifdef PERFORMANCE
   replay = false;
   for (int i = 0; i < 1; i++) {
     runTest(runPlanner);
+    printRUsage("after runPlanner");
     std::cout << "Just after replay false runTest(runPlanner) #" << i << ", IdTable::size() is " << IdTable::size()
               << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   }
@@ -165,17 +191,21 @@ int main(int argc, const char ** argv) {
   replay = true;
   for (int i = 0; i < 2; i++) {
     runTest(runPlanner);
+    printRUsage("after runPlanner");
     std::cout << "Just after replay true runTest(runPlanner) #" << i << ", IdTable::size() is " << IdTable::size()
               << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
     runTest(copyFromFile);
+    printRUsage("after copyFromFile i'th time");
     std::cout << "Just after replay true runTest(copyFromFile) #" << i << ", IdTable::size() is " << IdTable::size()
               << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   }
 #endif
   SamplePlanDatabase::terminate();
+  printRUsage("after SPD::terminate()");
   std::cout << "Just after SPD::terminate(), IdTable::size() is " << IdTable::size()
             << " and LabelStr::getSize() is " << LabelStr::getSize() << '\n';
   std::cout << "Finished" << std::endl;
+  exit(0);
 }
 
 #ifdef __BEOS__
