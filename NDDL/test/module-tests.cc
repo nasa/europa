@@ -15,7 +15,7 @@ public:
 private:
 
   static bool testObjectPredicateRelationships(){
-    NddlSchema schema(Labelstr("TestSchema"));
+    NddlSchema schema(LabelStr("TestSchema"));
     schema.addType(LabelStr("Resource"));
     schema.addObjectParent(LabelStr("Resource"), LabelStr("NddlResource"));
     schema.addPredicate(LabelStr("Resource.change"));
