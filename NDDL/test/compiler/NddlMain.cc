@@ -12,6 +12,11 @@
 #include "Schema.hh"
 #include "ConstraintEngine.hh"
 
+// Support for resources
+#include "ResourceConstraint.hh"
+#include "ResourceTransactionConstraint.hh"
+#include "ResourcePropagator.hh"
+
 // Access for registered event loggers for instrumentation
 #include "CeLogger.hh"
 #include "DbLogger.hh"
@@ -42,6 +47,10 @@ int main(){
   REGISTER_NARY(NotEqualConstraint, "neq", "Default");
   REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
 
+  // Register Reosurce Constraints
+  REGISTER_NARY(ResourceConstraint, "ResourceRelation", "Resource");
+  REGISTER_NARY(ResourceTransactionConstraint, "HorizonRelation", "Default");
+
   // Allocate the schema
   SchemaId schema = NDDL::schema();
 
@@ -50,6 +59,8 @@ int main(){
   PlanDatabase db(ce.getId(), schema);
 
   new DefaultPropagator(LabelStr("Default"), ce.getId());
+  new ResourcePropagator(LabelStr("Resource"), ce.getId());
+
   RulesEngine re(db.getId());
 
   if(loggingEnabled()){

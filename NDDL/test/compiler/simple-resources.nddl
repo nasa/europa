@@ -73,6 +73,6 @@ World::initialState{
  // First drive first!
  leq(a.end, b.start);
 
- any(Resource.change tx);
+ any(Battery.change tx);
  eq(tx.quantity, 4);
 }

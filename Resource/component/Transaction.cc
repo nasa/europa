@@ -10,6 +10,8 @@
 
 namespace Prototype {
 
+  const int USAGE = 4; /*!< Position of quantity variable in list of m_variables when constructed as a NddlTransaction */
+
   Transaction::Transaction(const PlanDatabaseId& planDatabase,
 			   const LabelStr& predicateName,
 			   const IntervalIntDomain& timeBaseDomain,
@@ -211,10 +213,10 @@ namespace Prototype {
 
   void Transaction::close() {
     EventToken::close();
-    assert(m_allVariables.size() == 5);
-    assert(m_allVariables[4]->getName().toString().find("quantity") == std::string::npos);
+    check_error(m_allVariables.size() == 5);
+    check_error(m_allVariables[USAGE]->getName().toString().find("quantity") != std::string::npos);
 
-    m_usage = m_allVariables[4];
+    m_usage = m_allVariables[USAGE];
     m_min = m_usage->derivedDomain().getLowerBound();
     m_max = m_usage->derivedDomain().getUpperBound();
 

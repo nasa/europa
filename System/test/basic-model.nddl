@@ -3,15 +3,16 @@ enum Locations {Hill, Rock, Lander};
 class Rover{
  predicate At{
   Locations m_location;
+  eq(duration, 1);
  }
 
  predicate Going{
   Locations m_from, m_to;
+  eq(duration, 4);
  }
 }
 
 Rover::At{
- eq(duration, 1);
  meets(Going to);
  eq(to.m_from, m_location);
 
@@ -21,7 +22,8 @@ Rover::At{
 
 Rover::Going{
   neq(m_from, m_to);
-  eq(duration, 4);
+  met_by(At from);
+  meets(At to);
 }
 
 // Defines the initial state for the problem.
