@@ -12,139 +12,91 @@ namespace Prototype {
 
   HSTSOpenDecisionManager::~HSTSOpenDecisionManager() { }
 
-  void HSTSOpenDecisionManager::deleteAllMatchingObjects(const ObjectId& object, const TokenId& token) {
-    std::multimap<int,ObjectDecisionPointId>::iterator it = m_objDecs.lower_bound(object->getKey());
-    while(it != m_objDecs.upper_bound(object->getKey())) {
-      ObjectDecisionPointId dec = it->second;
-      check_error(dec.isValid());
-      m_objDecs.erase(it++);
-      delete (ObjectDecisionPoint*) dec;
-      publishRemovedDecision(object);
-    }
-  }
-
   void HSTSOpenDecisionManager::addActive(const TokenId& token) {
+    check_error(token.isValid());
+    check_error(m_objDecs.find(token->getKey()) == m_objDecs.end());
     DecisionPointId dp = createObjectDecisionPoint(token);
     check_error(dp->getEntityKey() == token->getKey());
     m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
+    m_sortedObjectDecs.insert(dp);
     publishNewDecision(dp);
   }
 
-  void HSTSOpenDecisionManager::add(const ObjectId& object) {
-    /*    
-    check_error(object.isValid());
-    std::vector<TokenId> tokens;
-    object->getTokensToOrder(tokens);
-    std::vector<TokenId>::iterator it = tokens.begin();
-    for (; it != tokens.end(); ++it) {
-      ObjectDecisionPointId dp = createObjectDecisionPoint(*it);
-      check_error(dp->getEntityKey() == (*it)->getKey());
+  void HSTSOpenDecisionManager::condAddActive(const TokenId& token) {
+    check_error(token.isValid());
+    if (m_objDecs.find(token->getKey()) == m_objDecs.end()) {
+      DecisionPointId dp = createObjectDecisionPoint(token);
+      check_error(dp->getEntityKey() == token->getKey());
       m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
+      m_sortedObjectDecs.insert(dp);
       publishNewDecision(dp);
     }
-    */
-    // no need to remove any token decision points because only call path
-    // is from recomputeDecisions.
   }
 
-  void HSTSOpenDecisionManager::condAdd(const ConstrainedVariableId& var, const bool units) {
+  const bool HSTSOpenDecisionManager::removeVarDP(const ConstrainedVariableId& var, const bool deleting, std::map<int,ConstrainedVariableDecisionPointId>& varMap, HSTSVariableDecisionSet& sortedVars) {
+
+    std::map<int,ConstrainedVariableDecisionPointId>::iterator it = varMap.find(var->getKey());
+    if (it != varMap.end()) {
+      if (deleting) {
+	ConstrainedVariableDecisionPointId dec = it->second;
+	check_error(dec.isValid());
+	sortedVars.erase(dec);
+	varMap.erase(it);
+	m_dm->deleteDecision(dec);
+      } else {
+	sortedVars.erase(it->second);
+	varMap.erase(it);
+      }
+      publishRemovedDecision(var);
+    }
+    else return false;
+
+    return true;
+  }
+
+  const bool HSTSOpenDecisionManager::removeTokenDP(const TokenId& token, const bool deleting, std::map<int,TokenDecisionPointId>& tokMap, HSTSTokenDecisionSet& sortedToks) {
+    std::map<int,TokenDecisionPointId>::iterator it = tokMap.find(token->getKey());
+    if (it != tokMap.end()) {
+      //      if (deleting) {
+      if (it->second->isOpen() || deleting) {
+	TokenDecisionPointId dec = it->second;
+	sortedToks.erase(dec);
+	check_error(dec.isValid());
+	tokMap.erase(it);
+	m_dm->deleteDecision(dec);
+      }
+      else {
+	sortedToks.erase(it->second);
+	tokMap.erase(it);
+      }
+      publishRemovedDecision(token);
+      return true;
+    }
+    return false;
+  }
+
+  void HSTSOpenDecisionManager::removeActive(const TokenId& token, const bool deleting) {
     /*
-    check_error(var.isValid());
-    check_error(m_curDec.isValid() || m_curDec.isNoId());
-    if (ConstrainedVariableDecisionPointId::convertable(m_curDec)) {
-      ConstrainedVariableDecisionPointId vdp = m_curDec;
-      if (vdp->getVariable()->getKey() == var->getKey())
+    if (ObjectDecisionPointId::convertable(m_curDec)) {
+      ObjectDecisionPointId objdec = m_curDec;
+      if (objdec->getToken()->getKey() == token->getKey())
 	return;
     }
-    if (units && m_unitVarDecs.find(var->getKey()) == m_unitVarDecs.end()) {
-      ConstrainedVariableDecisionPointId dp = createConstrainedVariableDecisionPoint(var);
-      check_error(dp->getEntityKey() == var->getKey());
-      m_unitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedUnitVarDecs.insert(dp);
-      publishNewDecision(dp);
-    }
-    else if (m_nonUnitVarDecs.find(var->getKey()) == m_nonUnitVarDecs.end()) {
-      ConstrainedVariableDecisionPointId dp = createConstrainedVariableDecisionPoint(var);
-      check_error(dp->getEntityKey() == var->getKey());
-      m_nonUnitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedNonUnitVarDecs.insert(dp);
-      publishNewDecision(dp);
-    }
     */
-  }
-
-  void HSTSOpenDecisionManager::add(const ConstrainedVariableId& var) {
-    ConstrainedVariableDecisionPointId dp;
-    dp = createConstrainedVariableDecisionPoint(var);
-    check_error(dp->getEntityKey() == var->getKey());
-    if (var->lastDomain().isSingleton()) {
-      m_unitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedUnitVarDecs.insert(dp);
-      publishNewUnitDecision(dp);
-    }
-    else {
-      m_nonUnitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedNonUnitVarDecs.insert(dp);
-      publishNewDecision(dp);
-    }
-  }
-
-  void HSTSOpenDecisionManager::add(const TokenId& token) {
-    // closing is something we only do once, so no need to see if it
-    // already exists before adding to open decisions
-    /*
-    if (token->getState()->lastDomain().isSingleton()) {
-      TokenDecisionPointId dp = createTokenDecisionPoint(token);
-      check_error(dp->getEntityKey() == token->getKey());
-      m_tokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedUnitTokDecs.insert(dp);
-      publishNewUnitDecision(dp);
-    }
-    else {
-      TokenDecisionPointId dp = createTokenDecisionPoint(token);
-      check_error(dp->getEntityKey() == token->getKey());
-      m_nonUnitTokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedNonUnitTokDecs.insert(dp);
-      publishNewDecision(dp);
-    }
-    */
-  }
-
-  void HSTSOpenDecisionManager::condAdd(const TokenId& token) {
-    /*
-    TokenDecisionPointId dp;
-    if (token->getState()->lastDomain().isSingleton()) {
-      if (m_unitTokDecs.find(token->getKey()) != m_unitTokDecs.end()) return;
-      dp = createTokenDecisionPoint(token);
-      m_unitTokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedUnitTokDecs.insert(dp);
-    }
-    else {
-      if (m_nonUnitTokDecs.find(token->getKey()) != m_nonUnitTokDecs.end()) return;
-      dp = createTokenDecisionPoint(token);
-      m_nonUnitTokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedNonUnitTokDecs.insert(dp);
-    }
-    publishNewDecision(dp);
-    */
-  }
-
-  void HSTSOpenDecisionManager::removeObject(const ObjectId& object, const TokenId& token, const bool deleting) {
-    std::multimap<int,ObjectDecisionPointId>::iterator it = m_objDecs.lower_bound(object->getKey());
-    while(it != m_objDecs.upper_bound(object->getKey())) {
-      if (it->second->getToken()->getKey() == token->getKey()) {
-	if (deleting) {
-	  DecisionPointId dec = it->second;
-	  m_dm->getRetractedBuffer().erase(dec);
-	  check_error(dec.isValid());
-	  m_objDecs.erase(it++);
-	  delete (DecisionPoint*) dec;
-	}
-	else m_objDecs.erase(it++);
-	publishRemovedDecision(object);
-	break;
+    std::map<int,ObjectDecisionPointId>::iterator it = m_objDecs.find(token->getKey());
+    if (it != m_objDecs.end()) {
+      if (it->second->isOpen() || deleting) {
+	ObjectDecisionPointId dec = it->second;
+	check_error(dec.isValid());
+	m_objDecs.erase(it);
+	m_sortedObjectDecs.erase(dec);
+	m_dm->deleteDecision(dec);
       }
-      else ++it;
+      else {
+	m_objDecs.erase(it);
+	m_sortedObjectDecs.erase(it->second);
+      }
+      publishRemovedDecision(token);
     }
   }
 

@@ -148,14 +148,6 @@ namespace Prototype {
     const Priority getPriorityForTokenDP(const TokenDecisionPointId& tokDec);
     const Priority getPriorityForObjectDP(const ObjectDecisionPointId& objDec);
 
-  /*
-    void setPriorityForConstrainedVariableDP(const Priority p, const LabelStr variableName, const TokenTypeId& tt);
-    void setPriorityForTokenDP(const Priority p, const TokenTypeId& tt, const Relationship rel, const TokenTypeId& mastertt, const Origin o);
-
-    void setPreferenceForTokenValueChoice(const std::vector<TokenDecisionPoint::State>& states, const std::vector<CandidateOrder>& orders, const std::vector<LabelStr>& generatorNames, const TokenTypeId& tt, Relationship rel, const TokenTypeId& mastertt, const Origin o);
-    void setPreferenceForVariableValueChoice(const DomainOrder do, const LabelStr& variableName, const TokenTypeId& parenttt, const LabelStr& generatorName, const list<double>& enumeration);
-    */
-
   private:
     // Generator methods
     void addSuccTokenGenerator(const GeneratorId& generator);
