@@ -755,11 +755,29 @@ private:
     Variable<EnumeratedDomain> v1(ENGINE, dom0);
     Variable<EnumeratedDomain> v2(ENGINE, dom0);
 
+    // Test not equals among variables and singletons
+    IntervalIntDomain dom1(1);
+    IntervalIntDomain dom2(2);
+    IntervalIntDomain dom3(1,3);
+    Variable<IntervalIntDomain> v3(ENGINE, dom1); 
+    Variable<IntervalIntDomain> v5(ENGINE, dom2); 
+    Variable<IntervalIntDomain> v4(ENGINE, dom3);
+
+    NotEqualConstraint c4(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId()));
+    NotEqualConstraint c3(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v3.getId()));
+    assert(ENGINE->pending());
+    bool res = ENGINE->propagate();
+    assert(res);
+    assert(v4.getDerivedDomain().isSingleton());
+    assert(v4.getDerivedDomain().getSingletonValue() == 3);
+
+    // Test not equals among variables which are not singletons
+
     NotEqualConstraint c0(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     NotEqualConstraint c1(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v1.getId(), v2.getId()));
     NotEqualConstraint c2(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v2.getId()));
     assert(ENGINE->pending());
-    bool res = ENGINE->propagate();
+    res = ENGINE->propagate();
     assert(res);
 
     dom0.remove(2);
