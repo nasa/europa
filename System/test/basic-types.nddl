@@ -34,14 +34,12 @@ Fruit f1 = 'apple';
 Fruit f2 = 'orange';
 Fruit f3 = orange;
 Fruit f4 = { orange, grape, banana };
-Fruit f5 = { orange, red, yellow };
 
 Color c;
 Color c0 = apple;
 Color c1 = 'apple';
 Color c2 = 'purple';
 Color c3 = purple;
-Color c4 = { purple, grape, banana };
 Color c5 = { purple, red, yellow };
 
 class A {
