@@ -34,6 +34,18 @@ namespace PLASMA {
          << constraint->getKey() << ')' << std::endl;
   }
 
+  void CeLogger::notifyActivated(const ConstraintId& constraint) {
+    m_os << "CeLogger: CONSTRAINT ACTIVATED "
+         << constraint->getName().toString() << '('
+         << constraint->getKey() << ')' << std::endl;
+  }
+
+  void CeLogger::notifyDeactivated(const ConstraintId& constraint) {
+    m_os << "CeLogger: CONSTRAINT DEACTIVATED "
+         << constraint->getName().toString() << '('
+         << constraint->getKey() << ')' << std::endl;
+  }
+
   void CeLogger::notifyRemoved(const ConstraintId& constraint) {
     m_os << "CeLogger: CONSTRAINT REMOVED "
          << constraint->getName().toString() << '('
