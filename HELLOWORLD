@@ -1,4 +1,4 @@
-$Id: HELLOWORLD,v 1.3 2005-01-26 21:26:40 pdaley Exp $
+$Id: HELLOWORLD,v 1.4 2005-01-27 23:40:31 pdaley Exp $
 
 Note: Please first see the file README in this directory for details
       on how to checkout, build, and test Europa2 before attempting
@@ -168,9 +168,11 @@ C. Running a plan from PlanWorks
 
 2. Selecting a PlanWorks Project 
 
-   Return to your PlanWorks directory and start PlanWorks:
+   Return to your PlanWorks directory. NOTE: If you did not run "ant createJNI"
+   when you first built PlanWorks, run it now before starting PlanWorks. 
 
         cd ../PlanWorks
+        ant createJNI
         ant
 
    Once in PlanWorks select "Project--->Open" from the top level menu bar.
