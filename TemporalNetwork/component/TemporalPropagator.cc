@@ -18,7 +18,7 @@
 
 namespace Prototype {
 
-#ifndef PROTOTYPE_FAST_VERSION
+#ifndef PLASMA_FAST
 #define  publish(message){\
     for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)\
       (*lit)->message;\

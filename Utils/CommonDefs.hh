@@ -7,8 +7,6 @@
 #include <debugger.h>
 #endif
 
-//#define PROTOTYPE_FAST_VERSION
-
 /**
  * @brief Condition indicating the surrounding call to check_error() or similar should always fail.
  * @note Should only be used as an argument to check_error(), assert(), assertTrue(), etc.

@@ -7,7 +7,7 @@
 
 using namespace Prototype;
 
-#ifndef PROTOTYPE_FAST_VERSION
+#ifndef PLASMA_FAST
 #define non_fast_only_assert(T) assert(T)
 #else
 #define non_fast_only_assert(T) //NO-OP
@@ -179,7 +179,7 @@ bool IdTests::testCastingSupport()
 
 bool IdTests::testBadAllocationErrorHandling()
 {
-#ifndef PROTOTYPE_FAST_VERSION
+#ifndef PLASMA_FAST
 
   // Ensure allocation of a null pointer triggers error
   //LabelStr expectedError = IdErr::IdMgrInvalidItemPtrError();
