@@ -2,7 +2,7 @@ Building EUROPA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.16 2005-02-01 20:16:47 pdaley Exp $
+$Id: BUILDING,v 1.17 2005-03-11 00:17:51 pdaley Exp $
 
 
 - Prerequisites:
@@ -40,11 +40,14 @@ well as set your LIBRARY_PATH environment variable rather than the
 LD_LIBRARY_PATH as indicated below.
 2. BeOS: be sure to set your LIBRARY_PATH variable instead of
 LD_LIBRARY_PATH  as indicated below.
-1. Mac OSX 10.3: be sure to set your DYLD_LIBRARY_PATH instead of your
-LD_LIBRARY_PATH as indicated in the instructions below.  (OSX 10.2 has been
-shown to work also but you need dlopen hack called dlcompat.)
-In all of these cases, please ensure you have the appropriate versions of
-the requirements above.
+3. Mac OSX 10.3: be sure to set your DYLD_LIBRARY_PATH instead of your
+LD_LIBRARY_PATH as indicated in the instructions below.  Also set
+DYLD_BIND_AT_LAUNCH=YES. (OSX 10.2 has been shown to work with static
+libraries. But for shared libraries you will need a dlopen hack called
+dlcompat. dlcompat does not support unloading libraries so some errors
+will occur when this is attempted. PlanWorks Planner Control software
+will not work with dlcompat.) In all of these cases, please ensure you 
+have the appropriate versions of the requirements above.
 
 - Getting started:
 
