@@ -298,6 +298,9 @@ namespace Prototype {
 
       assert((Prototype::LabelStr::getSize() - initialCount) == 5);
       assert(l1.toString() == "L1");
+
+      assert(LabelStr::isString(l1.getKey()));
+      assert(!LabelStr::isString(PLUS_INFINITY+1));
       return true;
     }
 
