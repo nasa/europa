@@ -11,6 +11,9 @@
 #include "RulesEngine.hh"
 #include "Schema.hh"
 #include "ConstraintEngine.hh"
+#include "Rule.hh"
+#include "ObjectFactory.hh"
+#include "TokenFactory.hh"
 
 // Support for resources
 #include "ResourceConstraint.hh"
@@ -75,4 +78,8 @@ int main(){
   NDDL::validate(db.getId());
 
   std::cout << "Finished" << std::endl;
+
+  Rule::purgeAll();
+  ObjectFactory::purgeAll();
+  TokenFactory::purgeAll();
 }
