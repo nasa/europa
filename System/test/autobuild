@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.82 2004-09-21 01:54:14 wedgingt Exp $
+# $Id: autobuild,v 1.83 2004-09-21 23:11:12 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -10,13 +10,25 @@ PATH=/usr/java/j2sdk1.4.2_04/bin:/usr/local/jam2.4:/usr/local/bin:"$PATH"
 JAVA_HOME=/usr/java/j2sdk1.4.2_04
 export PATH JAVA_HOME
 
+# Address to mail messages to.
+email=checkins@postdoc.arc.nasa.gov
+
+# CVS info
+CVS_RSH=ssh
+CVSROOT='copernicus.arc.nasa.gov:/home/cvs/ISG-Repository'
+export CVS_RSH CVSROOT
+
+# For this to work, this script must always be called by its full path name.
 startdir="`dirname $0`"
 startdir="`cd $startdir; pwd`"
 cd "$startdir"
 
 # Don't run this script more than once in the same directory.
+#   Should figure out a way to require at most run on a computer at once,
+#     as that's the real requirement (related to the CVS tagging scheme).
 mkdir working || exit 1
 
+# Remove the "lock" when this shell process exits.
 trap 'rmdir $startdir/working' 0
 
 rm -rf Old
@@ -25,9 +37,6 @@ test -d Prior && mv Prior Old
 info=`uname -a; echo ''; g++ --version ; hostname ; pwd`
 
 echo "$info"
-
-# Address to mail exit status messages to.
-email=checkins@postdoc.arc.nasa.gov
 
 # Refuse to run if a prior check out is present.
 if test -d PLASMA -o -d Prior
@@ -49,25 +58,20 @@ variants='DEV OPTIMIZED PROFILE'
 # The different ways of building the libraries.
 libmethods='STATIC NONE'
 
-# CVS info
-CVS_RSH=ssh
-export CVS_RSH
-CVSROOT='copernicus.arc.nasa.gov:/home/cvs/ISG-Repository'
-export CVSROOT
-
 # Don't try to use X11 (mostly to prevent Purify from doing so)
 DISPLAY=
 export DISPLAY
 
-# Make sure that libstdc++.so is in this
+# Make sure that libstdc++.so is in this.
+#   In general, may have to ask the compiler where the libraries are.
 LD_LIBRARY_PATH='/usr/lib'
 export LD_LIBRARY_PATH
 
-# Debug memory allocation; one variant fails in allocation presently here on Slayton
+# On Linux, debug memory allocation.
 MALLOC_CHECK_=2
 export MALLOC_CHECK_
 
-# Apply limits; some compiles run out of swap space.
+# Apply limits; some compiles (on SunOS of NewPlan) have run computers out of swap space.
 ulimit -c 300000
 ulimit -d 2000000
 ulimit -s 2000000
@@ -76,8 +80,9 @@ ulimit -v 2000000
 # Print the limits so it is obvious what they are when something goes wrong.
 ulimit -a
 
+# Perform a cvs command, checking that it succeeds, etc., and send email if something goes wrong.
 function cvsCmd() {
-  if test "$1" != 'co' -a "$1" != 'tag' -a "$1" != 'update'
+  if test "$1" != 'co' -a "$1" != 'rtag'
   then
     mkdir PLASMA/autobuild.bug
     (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments: '"$*") | \
@@ -99,26 +104,8 @@ function cvsCmd() {
   fi
 }
 
-function cvsCheckOut() {
-  cvsCmd co -r AutobuildTesting PLASMA
-}
-
-function cvsTagTest() {
-  cvsCmd tag AutobuildTesting PLASMA
-}
-
-function cvsRemoveTag() {
-  cvsCmd tag -d AutobuildTesting PLASMA
-}
-
-function cvsUpdate() {
-  cvsCmd update -d -P -A PLASMA
-}
-
-function cvsTagPassed() {
-  cvsCmd tag -F $1 PLASMA
-}
-
+# Run jam with the given arguments, saving the output in a specific file
+#   and complaining via email if something fails.
 function jamCmd() {
   jam $args $1 > jam.$2.$var.$libmethod 2>&1
   status=$?
@@ -129,35 +116,38 @@ function jamCmd() {
      echo '';
      echo 'PPW_Config='"$PPW_Config"'; export PPW_Config';
      echo 'jam '"$args $1"' in '"`pwd`"' exited '"$status";
-      more jam.$2.$var.$libmethod < /dev/null) | \
+     more jam.$2.$var.$libmethod < /dev/null) | \
         Mail -s 'PLASMA Autobuild jam '"$args $1"' on '"`hostname`"' failed' "$email"
     mkdir working/failed
     exit $status
   fi
 }
 
-# These first two are needed if nothing has the AutobuildTesting tag.
-cvsCmd co PLASMA/README
-cvsCmd tag -F AutobuildTesting PLASMA/README
+# This tag - and all others used by this script - must be unique to
+#   this computer, or two autobuild scripts running on different hosts
+#   are likely to interfere with each other.
+testingTag=AutobuildTesting_"`hostname | sed -e 's/[.].*//'`"
 
-cvsCheckOut
-cvsRemoveTag
-cvsUpdate
-cvsTagTest
+# This is needed if nothing under PLASMA has "$testingTag".
+cvsCmd rtag -F "$testingTag" PLASMA/README
+# Remove the prior testing tag before ...
+cvsCmd rtag -d "$testingTag" PLASMA
+# ... tagging the to-be-tested version:
+cvsCmd rtag -rHEAD "$testingTag" PLASMA
 
+# Now, for the primary purpose: run all the tests of all build variants.
 for var in $variants
 do
   for libmethod in $libmethods
   do
-    cvsCheckOut
+    cvsCmd co -r "$testingTag" PLASMA
     cd PLASMA
     args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
     jamCmd '' build
-    for target in tests run-nddl-tests run-nddl-planner-tests
+    for target in run-all-tests clean
     do
       jamCmd $target $target
     done
-    jamCmd clean clean
     PPW_Config="$startdir"'/PLASMA/CBPlanner/component/sample-ppw-config'
     export PPW_Config
     jamCmd run-nddl-planner-tests withPPW
@@ -165,25 +155,39 @@ do
     (echo "$info"; echo ''; echo 'PLASMA autobuild and tests of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
         more jam.*.$var.$libmethod < /dev/null) | \
       Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
-    # Save the jam output files.
+    # Save the output files.
     mv -f jam.* ..
     cd ..
     # Remove everything so that each variant is tested completely independently.
+    #   Should probably test everything without removing in between as well, but ...
     rm -rf PLASMA
   done
 done
 
-cvsCheckOut
+# All the tests have passed (or jamCmd would have exit'd this script)
+
 tag=AutobuildPassed_"`hostname | sed -e 's/[.].*//'`"
-cvsTagPassed $tag
-rm -rf PLASMA
+prior="$tag"'_old'
+# Make sure the prior tag is in CVS:
+cvsCmd rtag "$prior" PLASMA/README
+# ... before removing it:
+cvsCmd rtag -d "$prior" PLASMA
+# ... and changing it to the previous successful tag,
+#   again after making sure that tag is in CVS:
+cvsCmd rtag -rHEAD "$tag" PLASMA/README
+cvsCmd rtag -r "$tag" "$prior" PLASMA
+# ... and removing "$tag" so that any files that are later 'cvs remove'd are no longer tagged:
+cvsCmd rtag -d "$tag" PLASMA
+
+# Finally, tag the tested version to indicate it passed the tests:
+cvsCmd rtag -r "$testTag" "$tag" PLASMA
 
 (echo "$info";
     echo '';
     echo "All builds, tests, and cleans passed for each variant (of $variants) and";
     echo "  each method of building the libraries (of $libmethods).";
-    echo "Tagged: 'cvs tag -F $tag'") | \
-  Mail -s 'PLASMA Autobuild on '"`hostname`"' passed.' "$email"
+    echo "Tagged: 'cvs rtag $tag'") | \
+  Mail -s 'PLASMA Autobuild on '"`hostname`"' passed' "$email"
 
 date > lastCompleted
 
