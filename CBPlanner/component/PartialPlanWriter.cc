@@ -1908,7 +1908,7 @@ namespace EUROPA {
       bool retval = false;
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
-        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
+        //std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
@@ -1935,7 +1935,7 @@ namespace EUROPA {
       char buf[PATH_MAX];
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
-        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
+        //std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
@@ -1979,7 +1979,7 @@ namespace EUROPA {
       char buf[PATH_MAX];
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
-        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
+        //std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
@@ -2003,7 +2003,7 @@ namespace EUROPA {
       char buf[PATH_MAX];
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
-        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
+        //std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
