@@ -204,8 +204,14 @@ namespace EUROPA {
   TiXmlElement *
   DbClientTransactionLog::domainValueAsXml(const AbstractDomain * domain, double value)
   {
+    LabelStr typeName = domain->getTypeName();
+    if (Schema::instance()->isObjectType(typeName)) {
+      TiXmlElement * element = allocateXmlElement("object");
+      element->SetAttribute("value", domainValueAsString(domain, value));
+      return element;
+    }
     TiXmlElement * element = allocateXmlElement("value");
-    element->SetAttribute("type", domain->getTypeName().toString());
+    element->SetAttribute("type", typeName.toString());
     element->SetAttribute("name", domainValueAsString(domain, value));
     return(element);
   }
