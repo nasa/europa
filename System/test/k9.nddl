@@ -1,0 +1,615 @@
+// /home/sailesh/work/EXPERIMENTS/CPlan1.5/model/k9.ddl
+
+class Location {
+
+    predicate NotTracked {
+      Location target;
+      eq(object, target);
+    }
+
+    predicate trackstart {
+      Location target;
+      eq(object, target);
+    }
+
+    predicate Tracked {
+      Location target;
+      eq(object, target);
+    }
+
+    predicate trackstop {
+      Location target;
+      eq(object, target);
+    }
+}
+
+
+
+class Path {
+  Location m_from, m_to;
+
+  Path(Location from, Location to) {
+    m_from = from;
+    m_to = to;
+  }  
+}
+
+class Position {  
+  predicate At {
+    Location location;
+  }
+  
+  predicate navigate {
+    Location from;
+    Location to;
+    neq(from, to);
+  }  
+}
+
+Position::At{
+  meets(navigate a);
+  eq(location , a.from);
+  
+  met_by(navigate b);
+  eq(location, b.to);
+}
+
+    
+
+Position::navigate{
+
+  Path path : {
+    eq(path.m_from, from);
+    eq(path.m_to, to);
+  };
+
+  meets(At a);
+  eq(to , a.location);
+  
+  met_by(At b);
+  eq(b.location, from);
+
+}
+
+class Tracker{
+
+  predicate TrackingOff {
+  }
+
+  predicate trackloadgroup {
+  }
+
+  predicate LandmarksDefined {
+  }
+
+  predicate StartTracking {    
+  }
+
+  predicate TrackingOn {
+  }
+
+  predicate trackfreeze {
+  }
+
+  predicate TrackingFrozen {
+  }
+
+  predicate trackunfreeze {
+  }
+
+}
+
+class OpportunisticScience {
+
+  predicate OppSciIdle {   
+  }
+
+  predicate oppscidefineproc {
+  }
+
+  predicate OppSciProcDefined {
+  }
+
+  predicate oppscisetparams {
+  }
+
+  predicate OppSciParamsSet {
+  }
+
+  predicate oppscilooknow {
+    Location target;
+    Location at_loc;
+    neq(target, at_loc);
+  }
+
+  predicate OppSciDoneLookNow {
+    Location  target;
+    Location at_loc;
+    neq(target, at_loc);
+  }
+
+  predicate oppscigetstatus {
+    Location  target;
+    Location at_loc;
+    neq(target, at_loc);
+  }
+}
+
+class CHAMP {
+  predicate IPIdle {
+  }
+  
+  predicate ipgetname {
+    Location target;
+    Location at_loc;
+    ////eq(duration,[1 +inf]);
+  }
+
+  predicate IPHaveName {
+    Location target;
+    Location at_loc;
+  }
+
+  predicate ipsettarget {
+    Location target;
+    Location at_loc;
+    //eq(duration,[1 +inf]);
+  }
+  
+  predicate IPTargetSet {
+    Location target;
+    Location at_loc;
+  }
+
+  predicate ipplaceinstrument {
+    Location target;
+    Location at_loc;
+    //eq(duration,[1 +inf]);
+  }
+
+  predicate IPDonePlaceInstrument {
+    Location target;
+    Location at_loc;
+  }
+
+  predicate ipgetstatus {
+    Location target;
+    Location at_loc;
+    //eq(duration,[1 +inf]);
+  }
+}
+
+class Rover {
+
+  Position m_position;
+  Tracker m_tracker;
+  OpportunisticScience m_oppsci;
+  CHAMP m_champ;
+
+  Rover() {    
+    m_position = new Position() ;
+    m_tracker = new Tracker() ;
+    m_oppsci = new OpportunisticScience ();
+    m_champ = new CHAMP ();
+  }
+
+}
+
+// Defines the initial state for the problem.
+class World {
+  // Horizon information
+  int m_horizonStart;
+  int m_horizonEnd;
+  Rover m_rover;
+  Location l1;
+  Location l2;
+  Location l3;
+  Location l4;
+  Location l5;
+  Location l6;
+
+  Path p1;
+  Path p2;
+  Path p3;
+  Path p4;
+  Path p5;
+  Path p6;
+
+
+ predicate initialState{}
+ World(){
+  // Set up the planning horizon
+  m_horizonStart = 10;
+  m_horizonEnd = 100;
+  m_rover = new Rover();
+  l1 = new Location();
+  l2 = new Location();
+  l3 = new Location();
+  l4 = new Location();
+  l5 = new Location();
+  l6 = new Location();
+
+  p1 = new Path(l1, l2);
+  p2 = new Path(l1, l3);
+  p3 = new Path(l2, l5);
+  p4 = new Path(l5, l6);
+  p5 = new Path(l3, l6);
+  p6 = new Path(l2, l3);
+
+ }
+}
+
+World::initialState{
+ // Enforce horizon bounds on initialState
+ leq(object.m_horizonStart, start);
+ leq(end, object.m_horizonEnd);
+
+ contains(Position.At a);
+ eq(a.location, object.l1);
+
+ contains(Position.At b);
+ eq(b.location, object.l3);
+ leq(a.end, b.start);
+  
+}
+
+
+/*
+
+Location_Class.Tracking_SV_Class::NotTracked {
+  // subgoals:
+  met_by(trackstop s0);
+    eq(s0.target,Location_Class.this);
+    eq(s0.success,true);
+  meets(trackstart s1);
+    eq(s1.target,Location_Class.this);
+    eq(s1.success,true);
+}
+
+Location_Class.Tracking_SV_Class::trackstart {
+  // parameter constraints:
+  // subgoals:
+  met_by(?tar.Tracking_SV.NotTracked s0);
+    eq(s0.target,Location_Class.this);
+  meets(?tar.Tracking_SV.Tracked s1);
+    eq(s1.target,target);
+  contained_by(Rover_Class.TrackingControl_SV.LandmarksDefined s2);
+}
+
+Location_Class.Tracking_SV_Class::Tracked {
+  // subgoals:
+  met_by(trackstart s0);
+    eq(s0.target,Location_Class.this);
+    eq(s0.success,true);
+  meets(trackstop s1);
+    eq(s1.target,Location_Class.this);
+    eq(s1.success,true);
+}
+
+Location_Class.Tracking_SV_Class::trackstop {
+  // parameter constraints:
+  // subgoals:
+  met_by(?tar.Tracking_SV.Tracked s0);
+    eq(s0.target,target);
+  meets(?tar.Tracking_SV.NotTracked s1);
+    eq(s1.target,target);
+
+}
+
+Location_Class.OppScience_Access_SV_Class::OppScience_AccessibleFrom {
+  // parameter constraints:
+}
+
+Location_Class.OppScience_Access_SV_Class::OppScience_NotAccessible {
+  // parameter constraints:
+}
+
+Location_Class.CHAMP_Access_SV_Class::CHAMP_AccessibleFrom {
+  // parameter constraints:
+}
+
+Location_Class.CHAMP_Access_SV_Class::CHAMP_NotAccessible {
+  // parameter constraints:
+}
+
+Path_Class.Path_SV_Class::Path {
+  // parameter constraints:
+}
+
+Rover_Class.Location_SV_Class::At {
+  // parameter constraints:
+  // subgoals:
+  met_by(navigate s0);
+    eq(s0.to,location);
+    eq(s0.success,true);
+  meets(navigate s1);
+    eq(s1.from,location);
+    eq(s1.success,true);
+}
+
+Rover_Class.Location_SV_Class::navigate {
+  // parameter constraints:
+  neq(from,to);
+  // subgoals:
+  met_by(At s0);
+    eq(s0.location,from);
+  meets(At s1);
+    eq(s1.location,to);
+  contained_by(Path_Class.Path_SV.Path s2);
+    eq(s2.From,from);
+    eq(s2.To,to);
+  contained_by(TrackingControl_SV.TrackingOn s3);
+  contained_by(OppScience_SV.OppSciIdle s4);
+  contained_by(CHAMP_SV.IPIdle s5);
+
+}
+
+Rover_Class.TrackingControl_SV_Class::TrackingOff {
+  // subgoals:
+  meets(trackloadgroup s0);
+    eq(s0.success,true);
+}
+
+Rover_Class.TrackingControl_SV_Class::trackloadgroup {
+  // parameter constraints:
+  // subgoals:
+  met_by(TrackingOff s0);
+  meets(LandmarksDefined s1);
+
+}
+
+Rover_Class.TrackingControl_SV_Class::LandmarksDefined {
+  // subgoals:
+  met_by(trackloadgroup s0);
+    eq(s0.success,true);
+  meets(StartTracking s1);
+    eq(s1.success,true);
+}
+
+Rover_Class.TrackingControl_SV_Class::StartTracking {
+  // parameter constraints:
+  // subgoals:
+  met_by(LandmarksDefined s0);
+  meets(TrackingOn s1);
+
+}
+
+Rover_Class.TrackingControl_SV_Class::TrackingOn {
+  // parameter constraints:
+  // subgoals:
+  meets(trackfreeze s0);
+    eq(s0.success,true);
+  // branches:
+  if (_0_anon_OR_tag_1==1) {
+    // subgoals:
+    met_by(StartTracking s0);
+      eq(s0.success,true);
+  }
+  if (_0_anon_OR_tag_1==2) {
+    // subgoals:
+    met_by(trackunfreeze s0);
+      eq(s0.success,true);
+  }
+}
+
+Rover_Class.TrackingControl_SV_Class::trackfreeze {
+  // parameter constraints:
+  // subgoals:
+  met_by(TrackingOn s0);
+  meets(TrackingFrozen s1);
+
+}
+
+Rover_Class.TrackingControl_SV_Class::TrackingFrozen {
+  // subgoals:
+  met_by(trackfreeze s0);
+    eq(s0.success,true);
+  meets(trackunfreeze s1);
+    eq(s1.success,true);
+}
+
+Rover_Class.TrackingControl_SV_Class::trackunfreeze {
+  // parameter constraints:
+  // subgoals:
+  met_by(TrackingFrozen s0);
+  meets(TrackingOn s1);
+
+}
+
+Rover_Class.OppScience_SV_Class::OppSciIdle {
+}
+
+Rover_Class.OppScience_SV_Class::oppscidefineproc {
+  // parameter constraints:
+  // subgoals:
+  met_by(OppSciIdle s0);
+  meets(OppSciProcDefined s1);
+
+}
+
+Rover_Class.OppScience_SV_Class::OppSciProcDefined {
+  // subgoals:
+  met_by(oppscidefineproc s0);
+    eq(s0.success,true);
+  meets(oppscisetparams s1);
+    eq(s1.success,true);
+}
+
+Rover_Class.OppScience_SV_Class::oppscisetparams {
+  // parameter constraints:
+  // subgoals:
+  met_by(OppSciProcDefined s0);
+  meets(OppSciParamsSet s1);
+
+}
+
+Rover_Class.OppScience_SV_Class::OppSciParamsSet {
+  // subgoals:
+  met_by(oppscisetparams s0);
+    eq(s0.success,true);
+  meets(oppscilooknow s1);
+    eq(s1.success,true);
+}
+
+Rover_Class.OppScience_SV_Class::oppscilooknow {
+  // parameter constraints:
+  // subgoals:
+  met_by(OppSciParamsSet s0);
+  meets(OppSciDoneLookNow s1);
+    eq(s1.target,target);
+    eq(s1.at_loc,at_loc);
+  contained_by(Location_SV.At s2);
+    eq(s2.location,at_loc);
+  contained_by(?tar.Tracking_SV.Tracked s3);
+    eq(s3.target,target);
+  contained_by(?tar.OppScience_Access_SV.OppScience_AccessibleFrom s4);
+    eq(s4.location,at_loc);
+  contained_by(TrackingControl_SV.TrackingFrozen s5);
+  contained_by(CHAMP_SV.IPIdle s6);
+
+}
+
+Rover_Class.OppScience_SV_Class::OppSciDoneLookNow {
+  // subgoals:
+  met_by(oppscilooknow s0);
+    eq(s0.target,target);
+    eq(s0.at_loc,at_loc);
+    eq(s0.success,true);
+  meets(oppscigetstatus s1);
+    eq(s1.target,target);
+    eq(s1.at_loc,at_loc);
+    eq(s1.success,true);
+}
+
+Rover_Class.OppScience_SV_Class::oppscigetstatus {
+  // parameter constraints:
+  // subgoals:
+  met_by(OppSciDoneLookNow s0);
+    eq(s0.target,target);
+    eq(s0.at_loc,at_loc);
+  meets(OppSciIdle s1);
+  contained_by(Location_SV.At s2);
+    eq(s2.location,at_loc);
+  contained_by(?tar.Tracking_SV.Tracked s3);
+    eq(s3.target,target);
+  contained_by(?tar.OppScience_Access_SV.OppScience_AccessibleFrom s4);
+    eq(s4.location,at_loc);
+  contained_by(TrackingControl_SV.TrackingFrozen s5);
+  contained_by(CHAMP_SV.IPIdle s6);
+
+}
+
+Rover_Class.CHAMP_SV_Class::IPIdle {
+}
+
+Rover_Class.CHAMP_SV_Class::ipgetname {
+  // parameter constraints:
+  // subgoals:
+  met_by(IPIdle s0);
+  meets(IPHaveName s1);
+    eq(s1.target,target);
+    eq(s1.at_loc,at_loc);
+  contained_by(Location_SV.At s2);
+    eq(s2.location,at_loc);
+  contained_by(TrackingControl_SV.TrackingOn s3);
+  contained_by(?tar.Tracking_SV.Tracked s4);
+    eq(s4.target,target);
+  contained_by(?tar.CHAMP_Access_SV.CHAMP_AccessibleFrom s5);
+    eq(s5.location,at_loc);
+  contained_by(OppScience_SV.OppSciIdle s6);
+
+}
+
+Rover_Class.CHAMP_SV_Class::IPHaveName {
+  // subgoals:
+  met_by(ipgetname s0);
+    eq(s0.target,target);
+    eq(s0.at_loc,at_loc);
+    eq(s0.success,true);
+  meets(ipsettarget s1);
+    eq(s1.target,target);
+    eq(s1.at_loc,at_loc);
+    eq(s1.success,true);
+}
+
+Rover_Class.CHAMP_SV_Class::ipsettarget {
+  // parameter constraints:
+  // subgoals:
+  met_by(IPHaveName s0);
+    eq(s0.target,target);
+    eq(s0.at_loc,at_loc);
+  meets(IPTargetSet s1);
+    eq(s1.target,target);
+    eq(s1.at_loc,at_loc);
+  contained_by(Location_SV.At s2);
+    eq(s2.location,at_loc);
+  contained_by(TrackingControl_SV.TrackingOn s3);
+  contained_by(?tar.Tracking_SV.Tracked s4);
+    eq(s4.target,target);
+  contained_by(?tar.CHAMP_Access_SV.CHAMP_AccessibleFrom s5);
+    eq(s5.location,at_loc);
+  contained_by(OppScience_SV.OppSciIdle s6);
+
+}
+
+Rover_Class.CHAMP_SV_Class::IPTargetSet {
+  // subgoals:
+  met_by(ipsettarget s0);
+    eq(s0.target,target);
+    eq(s0.at_loc,at_loc);
+    eq(s0.success,true);
+  meets(ipplaceinstrument s1);
+    eq(s1.target,target);
+    eq(s1.at_loc,at_loc);
+    eq(s1.success,true);
+}
+
+Rover_Class.CHAMP_SV_Class::ipplaceinstrument {
+  // parameter constraints:
+  // subgoals:
+  met_by(IPTargetSet s0);
+    eq(s0.target,target);
+    eq(s0.at_loc,at_loc);
+  meets(IPDonePlaceInstrument s1);
+    eq(s1.target,target);
+    eq(s1.at_loc,at_loc);
+  contained_by(Location_SV.At s2);
+    eq(s2.location,at_loc);
+  contained_by(TrackingControl_SV.TrackingOn s3);
+  contained_by(?tar.Tracking_SV.Tracked s4);
+    eq(s4.target,target);
+  contained_by(?tar.CHAMP_Access_SV.CHAMP_AccessibleFrom s5);
+    eq(s5.location,at_loc);
+  contained_by(OppScience_SV.OppSciIdle s6);
+
+}
+
+Rover_Class.CHAMP_SV_Class::IPDonePlaceInstrument {
+  // subgoals:
+  met_by(ipplaceinstrument s0);
+    eq(s0.target,target);
+    eq(s0.at_loc,at_loc);
+    eq(s0.success,true);
+  meets(ipgetstatus s1);
+    eq(s1.target,target);
+    eq(s1.at_loc,at_loc);
+    eq(s1.success,true);
+}
+
+Rover_Class.CHAMP_SV_Class::ipgetstatus {
+  // parameter constraints:
+  // subgoals:
+  met_by(IPDonePlaceInstrument s0);
+    eq(s0.target,target);
+    eq(s0.at_loc,at_loc);
+  meets(IPIdle s1);
+  contained_by(Location_SV.At s2);
+    eq(s2.location,at_loc);
+  contained_by(TrackingControl_SV.TrackingOn s3);
+  contained_by(?tar.Tracking_SV.Tracked s4);
+    eq(s4.target,target);
+  contained_by(?tar.CHAMP_Access_SV.CHAMP_AccessibleFrom s5);
+    eq(s5.location,at_loc);
+  contained_by(OppScience_SV.OppSciIdle s6);
+}
+*/
