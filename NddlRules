@@ -63,7 +63,7 @@ rule NddlCompiler1 {
   Depends $(code) : nddl.jar ;
   Depends $(code) : $(xml) ;
   MakeLocate $(code) : $(LOCATE_TARGET) ;
-  Clean clean : $(code) ;
+  LocalClean clean : $(code) ;
 }
 
 actions NddlCompiler1 {
@@ -90,7 +90,7 @@ rule NddlParser1 {
   Depends $(xml) : nddl.jar ;
   Depends $(xml) : $(nddl) ;
   MakeLocate $(xml) : $(LOCATE_TARGET) ;
-  Clean clean-nddl-xml : $(xml) ;
+  LocalClean clean-nddl-xml : $(xml) ;
 }
 
 actions NddlParser1 {
