@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.99 2004-10-19 19:57:21 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.100 2004-10-20 20:58:45 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -32,6 +32,7 @@ then
     startdir="`dirname $0`"
     startdir="`cd $startdir; pwd`"
     cd "$startdir"
+    PLASMA_DIR="$startdir"/PLASMA
 else
     startdir="`pwd`"
     case "$startdir" in
@@ -41,6 +42,7 @@ else
                 echo "$0"': must be run inside existing PLASMA checkout when giving email address other than checkins@postdoc.arc.nasa.gov'
                 exit 21
             fi
+            PLASMA_DIR="$startdir"
             ;;
     *)
             echo "$0"': must be run inside existing PLASMA checkout when giving email address other than checkins@postdoc.arc.nasa.gov'
@@ -109,9 +111,9 @@ fi
 #     only gcc/g++ supports (to my knowledge).
 if test -z "$LD_LIBRARY_PATH"
 then
-    LD_LIBRARY_PATH="$GCC_ROOTDIR"/lib:"$startdir"/lib
+    LD_LIBRARY_PATH="$GCC_ROOTDIR"/lib:"$PLASMA_DIR"/lib
 else
-    LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$GCC_ROOTDIR"/lib:"$startdir"/lib
+    LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$GCC_ROOTDIR"/lib:"$PLASMA_DIR"/lib
 fi
 export LD_LIBRARY_PATH
 
