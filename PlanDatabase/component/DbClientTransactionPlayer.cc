@@ -315,17 +315,14 @@ namespace Prototype {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
     if (strcmp(name, "close") == 0) {
-      TiXmlElement * child_el = element.FirstChildElement();
-      if (child_el == NULL) {
+      const char * identifier = element.Attribute("identifier");
+      if (identifier == NULL) {
         // close database special case
         m_client->close();
         return;
       }
-      else {
-	const char * identifier = child_el->Attribute("value");
-	check_error(identifier != NULL);
+      else
 	m_client->close(LabelStr(identifier));
-      }
 
       return;
     }
@@ -554,6 +551,9 @@ namespace Prototype {
       return new IntervalDomain(parseFloat(value_st));
     }
     if (strcmp(element.Value(), "string") == 0) {
+      return new LabelSet(LabelStr(value_st));
+    }
+    if (strcmp(element.Value(), "symbol") == 0) {
       return new LabelSet(LabelStr(value_st));
     }
     if (strcmp(element.Value(), "object") == 0) {

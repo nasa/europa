@@ -1,4 +1,5 @@
 enum Locations {Hill, Rock, Lander};
+enum Strings {'A1', 'B1', 'Martian City'};
 enum Speeds {1, 10, 35, 100 };
 enum Frequencies {1.9, 2.67, 3.78};
 
@@ -13,6 +14,7 @@ class Foo {
  Frequencies m_6;
  enum ClassScopedEnum {A, B, C};
  ClassScopedEnum m_7;
+ Strings m_8;
  Foo(){
   m_3 = "This string must be initialized";
  }

@@ -13,12 +13,12 @@ ModuleObjects NddlMain.cc : NDDL ;
 local model ;
 
 for model in
-	class-constructor.nddl   multi-resources.nddl   simple-rules.nddl
+	class-constructor.nddl   simple-rules.nddl guards.nddl
 	existential.nddl         plasma-base.nddl       subclass.nddl
-	guards.nddl              simple-class.nddl constraints.nddl
+	simple-class.nddl constraints.nddl
 	interval-constants.nddl  simple-predicate.nddl
-	less-basic-model.nddl    simple-resources.nddl foreach.nddl
-	gnats-2537.nddl
+	less-basic-model.nddl    foreach.nddl
+	gnats-2537.nddl simple-resources.nddl multi-resources.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;

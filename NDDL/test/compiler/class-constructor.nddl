@@ -72,7 +72,9 @@ class Bat {
  }
 }
 
+// Implicit constructors for base and derived
 class Bing {}
+class Bang extends Bing {}
 
 class Baluga{
  Locations location;

@@ -155,13 +155,14 @@ class Rover {
 
 NddlWorld world = new NddlWorld();
 
-close(NddlWorld);
+Location lander = new Location("LANDER", 0, 0);
 
-Location lander = new Location(LANDER, 0, 0);
-Rock rock1 = new Rock(ROCK1, 9, 9);
-Rock rock2 = new Rock(ROCK2, 1, 6);
-Rock rock3 = new Rock(ROCK2, 4, 8);
-Rock rock4 = new Rock(ROCK2, 3, 9);
+NddlWorld.close();
+
+Rock rock1 = new Rock("ROCK1", 9, 9);
+Rock rock2 = new Rock("ROCK2", 1, 6);
+Rock rock3 = new Rock("ROCK3", 4, 8);
+Rock rock4 = new Rock("ROCK4", 3, 9);
 
 // Establish the initial position for spirit
 any(Navigator.At initialPosition);
@@ -170,7 +171,7 @@ eq(initialPosition.start, world.m_horizonStart); // What time - the start of thi
 
 eq(initialPosition.location, lander); // What position - the lander
 
-close(Location);
+Location.close();
 
 // Establish the goal - to take a sample at a position
 any(Commands.TakeSample sample);
@@ -189,7 +190,7 @@ Rover opportunity = new Rover();
 commonAncestor(sample.object, initialPosition.object, spirit);
 commonAncestor(sample.object, stowed.object, spirit);
 
-close(Rover);
+Rover.close();
 
 // Can always close everything at the end too
 close();
