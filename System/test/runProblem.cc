@@ -7,6 +7,8 @@
 #include "PlanDatabaseWriter.hh"
 #include "Constraints.hh"
 #include "Debug.hh"
+//#include "AverInterp.hh"
+//#include "EventAggregator.hh"
 
 #include <dlfcn.h>
 #include <iostream>
@@ -14,6 +16,7 @@
 
 SchemaId schema;
 const char* initialTransactions = NULL;
+const char* averTestFile = NULL;
 bool replay = false;
 extern const char* TX_LOG;
 
@@ -26,8 +29,8 @@ bool runPlanner(){
   DbClientTransactionLogId txLog;
   if(replay)
     txLog = (new DbClientTransactionLog(assembly.getPlanDatabase()->getClient()))->getId();
-
-  assert(assembly.plan(initialTransactions) == CBPlanner::PLAN_FOUND);
+  
+  assert(assembly.plan(initialTransactions, averTestFile) == CBPlanner::PLAN_FOUND);
 
   assembly.write(std::cout);
 
@@ -73,14 +76,17 @@ int main(int argc, const char** argv) {
   const char* libPath;
   SchemaId (*fcn_schema)();
 
-  if(argc != 3) {
-    std::cout << "usage: runProblem <model shared library path> <initial transaction file>" << std::endl;
+  if(argc != 3 && argc != 4) {
+    std::cout << "usage: runProblem <model shared library path> <initial transaction file> [Aver test file]" << std::endl;
     exit(1);
   }
   
   libPath = argv[1];
   initialTransactions = argv[2];
   
+  if(argc == 4)
+    averTestFile = argv[3];
+
   std::cout << "runProblem: dlopen() file: " << libPath << std::endl;
   std::cout.flush();
   
@@ -103,11 +109,15 @@ int main(int argc, const char** argv) {
   TestAssembly::initialize();
   schema = (*fcn_schema)();
 #else //STANDALONE
-  if(argc != 2) {
-    std::cout << "usage: runProblem <initial transaction file>" << std::endl;
+  if(argc != 2 && argc != 3) {
+    std::cout << "usage: runProblem <initial transaction file> [Aver test file]" << std::endl;
     exit(1);
   }
   initialTransactions = argv[1];
+
+  if(argc == 3)
+    averTestFile = argv[2];
+
   TestAssembly::initialize();
   schema = NDDL::loadSchema();
 #endif //STANDALONE
