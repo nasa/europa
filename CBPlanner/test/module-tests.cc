@@ -923,7 +923,7 @@ private:
     assertTrue(planner.getTime() != planner.getDepth());
 
     assertTrue(planner.getDepth() == 9);
-    assertTrue(planner.getTime() == 19);
+    assertTrue(planner.getTime() == 17);
 
     tokenA.cancel();
     tokenA.reject();
