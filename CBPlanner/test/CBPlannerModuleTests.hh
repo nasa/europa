@@ -34,6 +34,10 @@ namespace PLASMA {
 					 DecisionManager &dm, Horizon &hor);
   bool testDynamicInfiniteRealConditionImpl(ConstraintEngine &ce, PlanDatabase &db,
 					    DecisionManager &dm, Horizon &hor);
+
+  bool testHSTSNoBranchConditionImpl(ConstraintEngine &ce, PlanDatabase &db,
+				     DecisionManager &dm);
+
   bool testForwardDecisionHandlingImpl(ConstraintEngine &ce, PlanDatabase &db,
 				       DecisionManager &dm, Horizon &hor);
   bool testMakeMoveImpl(ConstraintEngine &ce, PlanDatabase &db,
@@ -70,5 +74,11 @@ namespace PLASMA {
   bool testVariableInitializationImpl(HSTSHeuristics& heuristics);
 
   bool testReaderImpl(HSTSHeuristics& heuristics);
+
+  bool testHSTSPlanIdReaderImpl();
+
+  void initHeuristicsSchema(const SchemaId& rover);
+
+  bool testHSTSNoBranchImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm);
 }
 #endif

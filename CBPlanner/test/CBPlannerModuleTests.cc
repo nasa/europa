@@ -12,6 +12,8 @@
 #include "NumericDomain.hh"
 #include "Generator.hh"
 #include "HSTSHeuristicsReader.hh"
+#include "HSTSNoBranchCondition.hh"
+#include "HSTSPlanIdReader.hh"
 
 extern bool loggingEnabled();
 
@@ -41,6 +43,78 @@ namespace PLASMA {
     schema->addMember("Objects.P1True", BoolDomain().getTypeName(), "BoolParam");
     schema->addPredicate("Objects.P1False");
   }
+
+  void initHeuristicsSchema(const SchemaId& rover){
+    rover->reset();
+    rover->addObjectType(LabelStr("Object"));
+    rover->addObjectType(LabelStr("Timeline"), LabelStr("Object"));
+    rover->addObjectType(LabelStr("NddlResource"));
+    rover->addObjectType("Resource", "NddlResource");
+    rover->addMember("Resource", "float", "initialCapacity");
+    rover->addMember("Resource", "float", "levelLimitMin");
+    rover->addMember("Resource", "float", "levelLimitMax");
+    rover->addMember("Resource", "float", "productionRateMax");
+    rover->addMember("Resource", "float", "productionMax");
+    rover->addMember("Resource", "float", "consumptionRateMax");
+    rover->addMember("Resource", "float", "consumptionMax");
+    rover->addPredicate("Resource.change");
+    rover->addMember("Resource.change", "float", "quantity");
+    rover->addObjectType("UnaryResource", "Timeline");
+    rover->addPredicate("UnaryResource.uses");
+    rover->addObjectType("Battery", "Resource");
+    rover->addObjectType("Location", "Object");
+    // rover->isObjectType("Location");
+    rover->addMember("Location", "string", "name");
+    rover->addMember("Location", "int", "x");
+    rover->addMember("Location", "int", "y");
+    rover->addObjectType("Path", "Object");
+    rover->addMember("Path", "string", "name");
+    rover->addMember("Path", "Location", "from");
+    rover->addMember("Path", "Location", "to");
+    rover->addMember("Path", "float", "cost");
+    rover->addObjectType("Navigator", "Timeline");
+    rover->addPredicate("Navigator.At");
+    rover->addMember("Navigator.At", "Location", "location");
+    rover->addPredicate("Navigator.Going");
+    rover->addMember("Navigator.Going", "Location", "from");
+    rover->addMember("Navigator.Going", "Location", "to");
+    rover->addObjectType("Commands", "Timeline");
+    rover->addPredicate("Commands.TakeSample");
+    rover->addMember("Commands.TakeSample", "Location", "rock");
+    rover->addPredicate("Commands.PhoneHome");
+    rover->addPredicate("Commands.PhoneLander");
+    rover->addObjectType("Instrument", "Timeline");
+    rover->addPredicate("Instrument.TakeSample");
+    rover->addMember("Instrument.TakeSample", "Location", "rock");
+    rover->addPredicate("Instrument.Place");
+    rover->addMember("Instrument.Place", "Location", "rock");
+    rover->addPredicate("Instrument.Stow");
+    rover->addPredicate("Instrument.Unstow");
+    rover->addPredicate("Instrument.Stowed");
+    rover->addObjectType("Rover", "Object");
+    rover->addMember("Rover", "Commands", "commands");
+    rover->addMember("Rover", "Navigator", "navigator");
+    rover->addMember("Rover", "Instrument", "instrument");
+    rover->addMember("Rover", "Battery", "mainBattery");
+    rover->addObjectType("NddlWorld", "Timeline");
+    rover->addMember("NddlWorld", "int", "m_horizonStart");
+    rover->addMember("NddlWorld", "int", "m_horizonEnd");
+    rover->addMember("NddlWorld", "int", "m_maxPlannerSteps");
+    rover->addPredicate("NddlWorld.initialState");
+    rover->addEnum("TokenStates");
+    rover->addValue("TokenStates", LabelStr("INACTIVE"));
+    rover->addValue("TokenStates", LabelStr("ACTIVE"));
+    rover->addValue("TokenStates", LabelStr("MERGED"));
+    rover->addValue("TokenStates", LabelStr("REJECTED"));
+    rover->addMember("Navigator.Going", "Path", "p");
+    rover->addMember("Commands.TakeSample", "Rover", "rovers");
+    rover->addMember("Commands.TakeSample", "bool", "OR");
+    rover->addMember("Instrument.TakeSample", "Rover", "rovers");
+    rover->addMember("Instrument.Place", "Rover", "rovers");
+    rover->addMember("Instrument.Unstow", "Rover", "rovers");
+    rover->addMember("Instrument.Stow", "Rover", "rovers");
+  }
+
   static void makeTestToken(IntervalToken& token, const std::list<double>& values){
     token.addParameter(LabelSet(values), "LabelSetParam0");
     LabelSet leaveOpen;
@@ -252,6 +326,31 @@ namespace PLASMA {
     assert(cond.test(tokenA.getDuration()));
 
     assert(dm.getNumberOfDecisions() == 6);
+    return true;
+  }
+
+  bool testHSTSNoBranchConditionImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm) {
+
+    HSTSNoBranchCondition cond(dm.getId());
+    assert(dm.getConditions().size() == 1);
+
+    HSTSNoBranch noBranchSpec(db.getSchema());
+
+    const LabelStr var1Name("AnObj.APred.Var1");
+
+    noBranchSpec.addNoBranch(var1Name);
+
+    Variable<IntervalIntDomain> var1(ce.getId(), IntervalIntDomain(), true, var1Name);
+    Variable<IntervalIntDomain> var2(ce.getId(), IntervalIntDomain(), true, LabelStr("AnObj.APred.Var2"));
+
+    std::cout << " var1 name = " << var1.getName().c_str() << std::endl;
+    std::cout << " var2 name = " << var2.getName().c_str() << std::endl;
+
+    cond.initialize(noBranchSpec);
+
+    assert(!cond.test(var1.getId()));
+    assert(cond.test(var2.getId()));
+
     return true;
   }
 
@@ -1197,6 +1296,41 @@ namespace PLASMA {
   bool testReaderImpl(HSTSHeuristics& heuristics) {
     HSTSHeuristicsReader reader(heuristics);
     reader.read("../component/Heuristics-HSTS.xml");
+    return true;
+  }
+
+  bool testHSTSPlanIdReaderImpl() {
+
+    initHeuristicsSchema(Schema::instance());
+
+    HSTSNoBranch noBranchSpec(Schema::instance());
+    HSTSPlanIdReader reader(noBranchSpec);
+    reader.read("../component/NoBranch.pi");
+
+    return true;
+  }
+
+  bool testHSTSNoBranchImpl(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm) {
+    initHeuristicsSchema(Schema::instance());
+
+    HSTSNoBranch noBranchSpec(Schema::instance());
+    HSTSPlanIdReader reader(noBranchSpec);
+    reader.read("../component/NoBranch.pi");
+
+    HSTSNoBranchCondition cond(dm.getId());
+    assert(dm.getConditions().size() == 1);
+
+    Variable<IntervalIntDomain> var1(ce.getId(), IntervalIntDomain(), true, LabelStr("Navigator.Going.2"));
+    Variable<IntervalIntDomain> var2(ce.getId(), IntervalIntDomain(), true, LabelStr("AnObj.APred.Var2"));
+
+    std::cout << " var1 name = " << var1.getName().c_str() << std::endl;
+    std::cout << " var2 name = " << var2.getName().c_str() << std::endl;
+
+    cond.initialize(noBranchSpec);
+
+    assert(!cond.test(var1.getId()));
+    assert(cond.test(var2.getId()));
+
     return true;
   }
 
