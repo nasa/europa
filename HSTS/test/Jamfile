@@ -100,6 +100,7 @@ LocalDepends run-hsts-planner-tests :
 #       dnp-twoFreeObs
 #       dnp-timeline-h
 #       dnp-DNP2-h
+#       dnp-DNP23-h
 #       dnp-allDSS-h
 #       dnp-fourFreeObs-h
 #       dnp-DNP3fourFreeObs-h
@@ -186,6 +187,7 @@ RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nd
 RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 
 # These three fail to find a plan in 1000 steps
+#   The first one, at least, seems to not be enforcing the neq() constraints near line 87 of monkey2.nddl.
 RunEUROPATest monkey2-timeline2 : timeline2.nddl ; 
 RunEUROPATest monkey2-timeline22 : timeline22.nddl ;
 RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
@@ -209,8 +211,10 @@ RunEUROPATest merTest1 : R1-files-p1.nddl ;
 # Failing with no error message
 #   First wants over 2GB of RAM, so it is likely to be the limits in System/test/autobuild.
 #   Other MER related failures may have similar causes.
+# First two were never run by NewPlan tests without heuristics files.
 RunEUROPATest merTest2 : R1-files-p2.nddl ;
 RunEUROPATest merTest3 : R1-files-p3.nddl ;
+# Third was not being run by NewPlan tests at all.
 RunEUROPATest merTest4 : R2-files-R21-Bill.nddl ;
 
 # Working
@@ -218,6 +222,7 @@ RunEUROPATest merTest5 : R2-files-R21-IDD1.nddl ;
 
 # Failing with no error message
 #   Next one, at least, wants over 1GB of RAM.
+# These two were also not being run by any NewPlan tests.
 RunEUROPATest merTest6 : R2-files-R21-IDD2.nddl ;
 RunEUROPATest merTest7 : R2-files-R21-IDD3.nddl ;
 
@@ -228,6 +233,7 @@ RunEUROPATest merTest9 : R2-files-R21-PMA2.nddl ;
 # Failing with no error message
 #   First wanted more than 1GB of RAM at only 63 seconds of CPU time.
 #   Also, the Debug.cfg file was either ignored or cerr's buffer was not flushed.
+# All three were never run by NewPlan tests without the heuristics file.
 RunEUROPATest merTest10 : mer-1.nddl ;
 RunEUROPATest merTest11 : mer-bill-2.nddl ;
 RunEUROPATest merTest12 : mer-bill.nddl ;
@@ -237,6 +243,7 @@ RunEUROPATest merTest13 : mer-idd1.nddl ;
 
 # Failing with no error message
 #   First wanted more than 1GB of RAM at only 26 CPU seconds and also had no output despite Debug.cfg.
+# All three were never run by NewPlan tests without the heuristics file.
 RunEUROPATest merTest14 : mer-idd2.nddl ;
 RunEUROPATest merTest15 : mer-idd3.nddl ;
 RunEUROPATest merTest16 : mer-pma-comm.nddl ;
@@ -270,8 +277,7 @@ RunEUROPATest merTest18 : mer-pma2.nddl ;
 # Fails: ConstraintEngine/component/Constraints.cc:789: Error: getCurrentDomain(m_variables[0]).getType() == AbstractDomain::BOOL is false
 RunEUROPATest gnats-C3 : C3-init.nddl ;
 
-# No plan in search space.
-RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
+RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl : NoBranchBug.xml : NoBranchBug.nobr ;
 
 # These two take multiple hours without completing on Token for some reason and may be infinite loop or similar.
 #   Reported as GNATS 2796.
@@ -289,9 +295,11 @@ RunEUROPATest gnats-sum : sum-init.nddl ;
 
 # Failing with no error message
 #   Wanted over 1GB of RAM at 16 CPU seconds.
+# NewPlan's simplePlan finds a plan at depth 56 after 70 nodes of search.
 RunEUROPATest dnp-timeline : DNP.timeline.nddl ;
 
 # These fail; no idea why yet.
+# None are run by NewPlan tests without a heuristics file.
 RunEUROPATest dnp-DNP2 : DNP2.timeline.nddl ;
 RunEUROPATest dnp-allDSS : allDSS.nddl ;
 RunEUROPATest dnp-fourFreeObs : fourFreeObs.nddl ;
@@ -300,10 +308,12 @@ RunEUROPATest dnp-DNP3 : DNP3.timeline.nddl ;
 RunEUROPATest dnp-fourFreeObsNotEmpty : fourFreeObs-initBufNotEmpty.nddl ;
 
 # These two fail to find plans in 1000 steps.
+# None are run by NewPlan tests without a heuristics file.
 RunEUROPATest dnp-freeObs : freeObs.nddl ;
 RunEUROPATest dnp-freeObsNoEmpty : freeObs.noEmpty.nddl ;
 
 # Failing with no error message
+# None are run by NewPlan tests without a heuristics file.
 RunEUROPATest dnp-tenFreeObs : tenFreeObs.nddl ;
 RunEUROPATest dnp-threeFreeObs : threeFreeObs.nddl ;
 RunEUROPATest dnp-twentyFreeObs : twentyFreeObs.nddl ;
@@ -316,6 +326,10 @@ RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl ;
 
 # Fails !enumeration.empty() safety check in HSTSHeuristics::VariableEntry constructor near line 197
 # RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
+
+# Fails PlanDatabase/core/Schema.cc:214: Error: hasParent(type) is false
+#   DNP_Data___SSR_Storage_Use.Constant_Storage does not have a parent.
+RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP3heur.xml ;
 
 # Fails hasParent("DNP_Science___Scan_Platform.Scan_Idle") safety check in Schema::getParent() near line 210
 # RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
