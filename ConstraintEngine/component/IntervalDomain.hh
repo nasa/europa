@@ -47,6 +47,8 @@ namespace Prototype {
 
     /**
      * @brief IntervalDomains are always numeric.
+     * @note Even if they are a BoolDomain, which presently inherits from
+     * this class via class IntervalIntDomain.
      */
     virtual bool isNumeric() const {
       return(true);
