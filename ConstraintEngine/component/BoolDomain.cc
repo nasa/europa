@@ -37,4 +37,10 @@ namespace Prototype {
     static const AbstractDomain::DomainType s_type = BOOL;
     return s_type;
   }
+
+  BoolDomain *BoolDomain::copy() const {
+    BoolDomain *ptr = new BoolDomain(*this);
+    check_error(ptr != 0);
+    return(ptr);
+  }
 }

@@ -28,6 +28,12 @@ namespace Prototype {
     bool isFinite() const;
     bool isFalse() const;
     bool isTrue() const;
+
+    /**
+     * @brief Copy the concrete C++ object into new memory and return a pointer to it.
+     */
+    virtual BoolDomain *copy() const;
+
   private:
     virtual void testPrecision(const double& value) const;
   };
