@@ -2,6 +2,7 @@
 #define _H_TemporalNetworkDefs
 
 #include "ConstraintEngineDefs.hh"
+#include "PlanDatabaseDefs.hh"
 
 /*!< Type definitions to map for th eones we were using in Europa */
 namespace Prototype {
@@ -17,7 +18,16 @@ namespace Prototype {
   typedef void Void;
   typedef int Index;
 
+  class Tnode;
+  typedef Id< Tnode > TimepointId;
+
+  class Tspec;
+  typedef Id<Tspec> TemporalConstraintId;
+
+  class TemporalNetwork;
+  typedef Id<TemporalNetwork> TemporalNetworkId; 
+
   #define noIndex -1;
-  //#define checkError(test, error, msg, errorClass, returnValue) check_error(! (test) )
+
 }
 #endif
