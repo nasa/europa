@@ -29,20 +29,20 @@ namespace Prototype {
   }
 
   void CeLogger::notifyAdded(const ConstraintId& constraint) {
-    m_os << "CeLogger: CONSTRAINT ADDED ("
-         << constraint->getName().toString() << ':'
+    m_os << "CeLogger: CONSTRAINT ADDED "
+         << constraint->getName().toString() << '('
          << constraint->getKey() << ')' << std::endl;
   }
 
   void CeLogger::notifyRemoved(const ConstraintId& constraint) {
-    m_os << "CeLogger: CONSTRAINT REMOVED ("
-         << constraint->getName().toString() << ':'
+    m_os << "CeLogger: CONSTRAINT REMOVED "
+         << constraint->getName().toString() << '('
          << constraint->getKey() << ')' << std::endl;
   }
 
   void CeLogger::notifyExecuted(const ConstraintId& constraint) {
-    m_os << "CeLogger:  CONSTRAINT EXECUTED ("
-         << constraint->getName().toString() << ':'
+    m_os << "CeLogger:  CONSTRAINT EXECUTED "
+         << constraint->getName().toString() << '('
          << constraint->getKey() << ')' << std::endl;
   }
 
