@@ -13,9 +13,8 @@ namespace Prototype {
   }
 
   void DefaultPropagator::handleConstraintRemoved(const ConstraintId& constraint){
-    // This is a relaxation, so we should be able to simply clear the agenda.
-    //std::cout << "Constraint removed, clearing agenda" << std::endl;
-    //m_agenda.clear();
+    // Remove from agenda
+    m_agenda.erase(constraint);
   }
 
   void DefaultPropagator::handleConstraintActivated(const ConstraintId& constraint){

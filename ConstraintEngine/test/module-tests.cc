@@ -210,6 +210,7 @@ public:
     runTest(testNotEqual);
     runTest(testMultEqualConstraint);
     runTest(testAddMultEqualConstraint);
+    runTest(testConstraintDeletion);
     return true;
   }
 
@@ -808,6 +809,33 @@ private:
     }
 
 
+    return true;
+  }
+
+  static bool testConstraintDeletion(){
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 100));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(10, 100));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain());
+
+    ConstraintId c0 = (new EqualConstraint(LabelStr("eq"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId())))->getId();
+    ConstraintId c1 = (new EqualConstraint(LabelStr("eq"), LabelStr("Default"), ENGINE, makeScope(v1.getId(), v2.getId())))->getId();
+    ConstraintId c2 = (new EqualConstraint(LabelStr("eq"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId())))->getId();
+
+    // Force an inconsistency
+    v0.specify(1);
+    v1.specify(1);
+    assert(!ENGINE->propagate());
+
+    // Reset, and delete constraint, but it should not matter
+    v1.reset();
+    delete (Constraint*) c2;
+
+    // Confirm still inconsistent
+    assert(!ENGINE->propagate());
+
+    delete (Constraint*) c0;
+    delete (Constraint*) c1;
     return true;
   }
 };
