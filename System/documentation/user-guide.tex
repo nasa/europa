@@ -13,7 +13,7 @@ Moffett Field, CA 94034-1000 \\
 \{tania,mcgann,bachmann,wedignt,miatauro\}@email.arc.nasa.gov
 }
 
-\title{\ET: User Guide}
+\title{\ET: User and Contributor Guide}
 
 \begin{document}
 
@@ -24,6 +24,7 @@ Moffett Field, CA 94034-1000 \\
 \tableofcontents
 
 \section{Introduction}
+\label{intro}
 \ET\, is the next generation of the Extensible Universal Remote
 Operations Architecture.  Like the CLARATy robotics control architecture
 \cite{kn:Ne}, MDS \cite{MDS}, or ILOG \cite{ILOG}, \ET\, is a
@@ -43,6 +44,7 @@ extensibility, and modularity which has opened the technology to a broader
 range of planning techniques (e.g. POCL planning).
 
 \subsection{Plan Services}
+\label{services}
 \ET\, provides the following services:
 \begin{itemize}
 \item Domain modeling: for describing planning domains
@@ -59,7 +61,7 @@ substantially from DDL in that it provides an object oriented syntax.  It
 is also compiled, instead of interpreted.  NDDL provides syntax for
 describing objects, timelines, resources, predicates, rules, variables, and
 constraints. It also provides facilities like inheritance and containment
-to describe complex objects.  Please see Section~\ref{nddl} for more
+to describe complex objects.  Please see Section~\ref{modeling} for more
 information on NDDL. 
 
 Plan representation is a service provided by the Plan Database, much as it
@@ -88,6 +90,7 @@ induced by our underlying paradigm. We then provide concrete
 components to allow particular assemblies to be defined. 
 
 \subsection{\ET\, Design Goals}
+\label{goals}
 To meet the needs of missions and research projects, the design of 
 \ET\, must be: 1. Efficient to ensure low latency for operations and
 queries; 2. Flexibile to ensure services can be selected and flexibly
@@ -144,8 +147,10 @@ of customization and extension. Detailed reference material is
 included in the appendices.
 
 \section{Concepts}
+\label{concepts}
 
 \subsection{Plans in Planning, Scheduling and Execution}
+\label{plan-sched-exec}
 Consider the scenarios illustrated in Figure \ref{Applications}. The first
 is an application of automated planning where the input planning problem is
 solved by a {\em Planner} to produce an acceptable partial plan. The role
@@ -172,6 +177,7 @@ leverage the services of a common {\em server}, the {\em Plan Database}.
 \end{figure*}
 
 \subsection{Model-Based Planning}
+\label{mb-plan}
 A {\em Model} expresses laws that govern a particular domain of interest.
 A model for \ET\, usually contains descriptions of entities in the system
 and relationships between them, that allow a planner/scheduler to infer
@@ -185,6 +191,7 @@ represent relationships between state descriptions that must hold (the laws
 of the domain). 
 
 \subsection{Partial Plans: States and Relationships}
+\label{partial}
 A {\em Partial Plan} represents a set of networks of states typically
 ordered by time, though it can be ordered by precedence constraints or
 completely unordered (e.g. a bag of states) in planning, scheduling, and
@@ -206,8 +213,9 @@ subgoaling relationships) expressed as constraints between variables of
 tokens.
 
 \subsection{Token State Model}
+\label{token-state}
 A token in \ET\, evolves as decisions are made.  Initially a token may be
-{\em active} or {\em inactive.  A token is {\em active} if commitment to
+{\em active} or {\em inactive}.  A token is {\em active} if commitment to
 the token being in the plan is made.  A token is {\em inactive} otherwise. 
 All token flaws that can be inferred from the partial plan and the model
 via configuration rules are represented as {\em Inactive Tokens}. Figure
@@ -230,6 +238,7 @@ satisfy the configuration rule.
 \end{figure}
 
 \subsection{Planning/Scheduling Decisions}
+\label{decisions}
 Planning/scheduling decisions arise from flaws in the partial plan.  Flaws
 can be either unsatisfied configuration rules, unordered tokens in objects
 (if they have specific ordering requirements), or unbound variable
@@ -251,6 +260,7 @@ conditions that flaws must satisfy.  Thus, a plan is not complete until all
 flaws that satisfy all conditions are resolved.
 
 \subsection{Early vs. Delayed Commitment}
+\label{commitment}
 \ET\, provides at ways of controlling early vs. delayed commitment through
 controlling variable assignments.  One example is how \ET\, handles
 temporal assignments.  \ET\, allows representation and reasoning over
@@ -271,7 +281,7 @@ be used to determine when such variable assignments should be made, and
 when subgoaling can occur.
 
 \section{Hello Rover - Getting started with PLASMA}
-
+\label{started}
 This section will demonstrate a simple example that takes an initial state
 and a model and runs a planner on them to produce a plan.  \ET\, does not
 include a GUI.  However, you can use an adjunct project called PlanWorks to
@@ -279,6 +289,7 @@ visualize a plan and step through the planning process once the planner has
 produced a plan.  This section will illustrate how to get started with \ET.
 
 \subsection{Creating a Project}
+\label{project}
 After successfully building \ET\, by following the instructions in the
 README and BUILDING files located in the PLASMA root directory, you can
 create your own project by invoking ``makeproject'' with the name of your
@@ -300,6 +311,7 @@ assembly (configuration of \ET\, components) and plans based on the given
 initial state and model files.
 
 \subsection{Building a simple model}
+\label{building}
 In this section we'll go through the model file and explain it in detail.
 Your model file should look like this:
 
@@ -343,13 +355,15 @@ it ``meets'' another predicate of the same time and that it is ``met\_by''
 another predicate of the same type.  Meets and met\_by are taken from the
 Allen Relations \cite{allen} and they are inverse of each other and mean
 that one predicate must be immediately followed by another and vice-versa.
+You can see all temporal relations that \ET\, supports in Appendix~\ref{allen}.
 
 \subsection{Creating an initial state}
+\label{initial}
 In this section we'll go through the initial state file and explain it in
 detail. Your initial state file should look like this:
 
 \begin{verbatim}
-#include "MyIDEA-model.nddl"
+#include "<Project>-model.nddl"
 
 // Create a planner configuration instance in PLASMA.
 // Horizon Start, Horizon End, MaxPlannerSteps
@@ -398,6 +412,7 @@ only one ``object'').  We also specify that it must start at time 0 via the
 assembly. 
 
 \subsection{Running the planner}
+\label{execution}
 Now that you understand the model and the initial state, can you guess what
 the plan should look like?  Let's see, the planner should plan for a
 horizon betwen 0 and 1000.  The initial state specifies that there's a
@@ -415,7 +430,8 @@ main program. You'll see a target called <Project>\_g\_rt, and a file with
 the output plan called
 RUN\_<Project>-planner\_g\_rt.<Project>-initial-state.xml.output.
 Your output file should show the ``object'' with a sequence of
-``helloWorld'' tokens lying between 0 and 1000.
+``helloWorld'' tokens lying between 0 and 1000. Your output file
+should look like this (we've replaced some of the output by ...): 
 
 \begin{verbatim}
 Found a plan at depth 299 after 299 nodes.
@@ -435,477 +451,7 @@ YourObject:object*************************
 	YourObject.helloWorld()
 	Key=85
 		Merged Key=200
-[ INT_INTERVAL:CLOSED[30, 30] ]
-[ INT_INTERVAL:CLOSED[30, 30] ]
-	YourObject.helloWorld()
-	Key=132
-		Merged Key=252
-[ INT_INTERVAL:CLOSED[40, 40] ]
-[ INT_INTERVAL:CLOSED[40, 40] ]
-	YourObject.helloWorld()
-	Key=184
-		Merged Key=304
-[ INT_INTERVAL:CLOSED[50, 50] ]
-[ INT_INTERVAL:CLOSED[50, 50] ]
-	YourObject.helloWorld()
-	Key=236
-		Merged Key=356
-[ INT_INTERVAL:CLOSED[60, 60] ]
-[ INT_INTERVAL:CLOSED[60, 60] ]
-	YourObject.helloWorld()
-	Key=288
-		Merged Key=408
-[ INT_INTERVAL:CLOSED[70, 70] ]
-[ INT_INTERVAL:CLOSED[70, 70] ]
-	YourObject.helloWorld()
-	Key=340
-		Merged Key=460
-[ INT_INTERVAL:CLOSED[80, 80] ]
-[ INT_INTERVAL:CLOSED[80, 80] ]
-	YourObject.helloWorld()
-	Key=392
-		Merged Key=512
-[ INT_INTERVAL:CLOSED[90, 90] ]
-[ INT_INTERVAL:CLOSED[90, 90] ]
-	YourObject.helloWorld()
-	Key=444
-		Merged Key=564
-[ INT_INTERVAL:CLOSED[100, 100] ]
-[ INT_INTERVAL:CLOSED[100, 100] ]
-	YourObject.helloWorld()
-	Key=496
-		Merged Key=616
-[ INT_INTERVAL:CLOSED[110, 110] ]
-[ INT_INTERVAL:CLOSED[110, 110] ]
-	YourObject.helloWorld()
-	Key=548
-		Merged Key=668
-[ INT_INTERVAL:CLOSED[120, 120] ]
-[ INT_INTERVAL:CLOSED[120, 120] ]
-	YourObject.helloWorld()
-	Key=600
-		Merged Key=720
-[ INT_INTERVAL:CLOSED[130, 130] ]
-[ INT_INTERVAL:CLOSED[130, 130] ]
-	YourObject.helloWorld()
-	Key=652
-		Merged Key=772
-[ INT_INTERVAL:CLOSED[140, 140] ]
-[ INT_INTERVAL:CLOSED[140, 140] ]
-	YourObject.helloWorld()
-	Key=704
-		Merged Key=824
-[ INT_INTERVAL:CLOSED[150, 150] ]
-[ INT_INTERVAL:CLOSED[150, 150] ]
-	YourObject.helloWorld()
-	Key=756
-		Merged Key=876
-[ INT_INTERVAL:CLOSED[160, 160] ]
-[ INT_INTERVAL:CLOSED[160, 160] ]
-	YourObject.helloWorld()
-	Key=808
-		Merged Key=928
-[ INT_INTERVAL:CLOSED[170, 170] ]
-[ INT_INTERVAL:CLOSED[170, 170] ]
-	YourObject.helloWorld()
-	Key=860
-		Merged Key=980
-[ INT_INTERVAL:CLOSED[180, 180] ]
-[ INT_INTERVAL:CLOSED[180, 180] ]
-	YourObject.helloWorld()
-	Key=912
-		Merged Key=1032
-[ INT_INTERVAL:CLOSED[190, 190] ]
-[ INT_INTERVAL:CLOSED[190, 190] ]
-	YourObject.helloWorld()
-	Key=964
-		Merged Key=1084
-[ INT_INTERVAL:CLOSED[200, 200] ]
-[ INT_INTERVAL:CLOSED[200, 200] ]
-	YourObject.helloWorld()
-	Key=1016
-		Merged Key=1136
-[ INT_INTERVAL:CLOSED[210, 210] ]
-[ INT_INTERVAL:CLOSED[210, 210] ]
-	YourObject.helloWorld()
-	Key=1068
-		Merged Key=1188
-[ INT_INTERVAL:CLOSED[220, 220] ]
-[ INT_INTERVAL:CLOSED[220, 220] ]
-	YourObject.helloWorld()
-	Key=1120
-		Merged Key=1240
-[ INT_INTERVAL:CLOSED[230, 230] ]
-[ INT_INTERVAL:CLOSED[230, 230] ]
-	YourObject.helloWorld()
-	Key=1172
-		Merged Key=1292
-[ INT_INTERVAL:CLOSED[240, 240] ]
-[ INT_INTERVAL:CLOSED[240, 240] ]
-	YourObject.helloWorld()
-	Key=1224
-		Merged Key=1344
-[ INT_INTERVAL:CLOSED[250, 250] ]
-[ INT_INTERVAL:CLOSED[250, 250] ]
-	YourObject.helloWorld()
-	Key=1276
-		Merged Key=1396
-[ INT_INTERVAL:CLOSED[260, 260] ]
-[ INT_INTERVAL:CLOSED[260, 260] ]
-	YourObject.helloWorld()
-	Key=1328
-		Merged Key=1448
-[ INT_INTERVAL:CLOSED[270, 270] ]
-[ INT_INTERVAL:CLOSED[270, 270] ]
-	YourObject.helloWorld()
-	Key=1380
-		Merged Key=1500
-[ INT_INTERVAL:CLOSED[280, 280] ]
-[ INT_INTERVAL:CLOSED[280, 280] ]
-	YourObject.helloWorld()
-	Key=1432
-		Merged Key=1552
-[ INT_INTERVAL:CLOSED[290, 290] ]
-[ INT_INTERVAL:CLOSED[290, 290] ]
-	YourObject.helloWorld()
-	Key=1484
-		Merged Key=1604
-[ INT_INTERVAL:CLOSED[300, 300] ]
-[ INT_INTERVAL:CLOSED[300, 300] ]
-	YourObject.helloWorld()
-	Key=1536
-		Merged Key=1656
-[ INT_INTERVAL:CLOSED[310, 310] ]
-[ INT_INTERVAL:CLOSED[310, 310] ]
-	YourObject.helloWorld()
-	Key=1588
-		Merged Key=1708
-[ INT_INTERVAL:CLOSED[320, 320] ]
-[ INT_INTERVAL:CLOSED[320, 320] ]
-	YourObject.helloWorld()
-	Key=1640
-		Merged Key=1760
-[ INT_INTERVAL:CLOSED[330, 330] ]
-[ INT_INTERVAL:CLOSED[330, 330] ]
-	YourObject.helloWorld()
-	Key=1692
-		Merged Key=1812
-[ INT_INTERVAL:CLOSED[340, 340] ]
-[ INT_INTERVAL:CLOSED[340, 340] ]
-	YourObject.helloWorld()
-	Key=1744
-		Merged Key=1864
-[ INT_INTERVAL:CLOSED[350, 350] ]
-[ INT_INTERVAL:CLOSED[350, 350] ]
-	YourObject.helloWorld()
-	Key=1796
-		Merged Key=1916
-[ INT_INTERVAL:CLOSED[360, 360] ]
-[ INT_INTERVAL:CLOSED[360, 360] ]
-	YourObject.helloWorld()
-	Key=1848
-		Merged Key=1968
-[ INT_INTERVAL:CLOSED[370, 370] ]
-[ INT_INTERVAL:CLOSED[370, 370] ]
-	YourObject.helloWorld()
-	Key=1900
-		Merged Key=2020
-[ INT_INTERVAL:CLOSED[380, 380] ]
-[ INT_INTERVAL:CLOSED[380, 380] ]
-	YourObject.helloWorld()
-	Key=1952
-		Merged Key=2072
-[ INT_INTERVAL:CLOSED[390, 390] ]
-[ INT_INTERVAL:CLOSED[390, 390] ]
-	YourObject.helloWorld()
-	Key=2004
-		Merged Key=2124
-[ INT_INTERVAL:CLOSED[400, 400] ]
-[ INT_INTERVAL:CLOSED[400, 400] ]
-	YourObject.helloWorld()
-	Key=2056
-		Merged Key=2176
-[ INT_INTERVAL:CLOSED[410, 410] ]
-[ INT_INTERVAL:CLOSED[410, 410] ]
-	YourObject.helloWorld()
-	Key=2108
-		Merged Key=2228
-[ INT_INTERVAL:CLOSED[420, 420] ]
-[ INT_INTERVAL:CLOSED[420, 420] ]
-	YourObject.helloWorld()
-	Key=2160
-		Merged Key=2280
-[ INT_INTERVAL:CLOSED[430, 430] ]
-[ INT_INTERVAL:CLOSED[430, 430] ]
-	YourObject.helloWorld()
-	Key=2212
-		Merged Key=2332
-[ INT_INTERVAL:CLOSED[440, 440] ]
-[ INT_INTERVAL:CLOSED[440, 440] ]
-	YourObject.helloWorld()
-	Key=2264
-		Merged Key=2384
-[ INT_INTERVAL:CLOSED[450, 450] ]
-[ INT_INTERVAL:CLOSED[450, 450] ]
-	YourObject.helloWorld()
-	Key=2316
-		Merged Key=2436
-[ INT_INTERVAL:CLOSED[460, 460] ]
-[ INT_INTERVAL:CLOSED[460, 460] ]
-	YourObject.helloWorld()
-	Key=2368
-		Merged Key=2488
-[ INT_INTERVAL:CLOSED[470, 470] ]
-[ INT_INTERVAL:CLOSED[470, 470] ]
-	YourObject.helloWorld()
-	Key=2420
-		Merged Key=2540
-[ INT_INTERVAL:CLOSED[480, 480] ]
-[ INT_INTERVAL:CLOSED[480, 480] ]
-	YourObject.helloWorld()
-	Key=2472
-		Merged Key=2592
-[ INT_INTERVAL:CLOSED[490, 490] ]
-[ INT_INTERVAL:CLOSED[490, 490] ]
-	YourObject.helloWorld()
-	Key=2524
-		Merged Key=2644
-[ INT_INTERVAL:CLOSED[500, 500] ]
-[ INT_INTERVAL:CLOSED[500, 500] ]
-	YourObject.helloWorld()
-	Key=2576
-		Merged Key=2696
-[ INT_INTERVAL:CLOSED[510, 510] ]
-[ INT_INTERVAL:CLOSED[510, 510] ]
-	YourObject.helloWorld()
-	Key=2628
-		Merged Key=2748
-[ INT_INTERVAL:CLOSED[520, 520] ]
-[ INT_INTERVAL:CLOSED[520, 520] ]
-	YourObject.helloWorld()
-	Key=2680
-		Merged Key=2800
-[ INT_INTERVAL:CLOSED[530, 530] ]
-[ INT_INTERVAL:CLOSED[530, 530] ]
-	YourObject.helloWorld()
-	Key=2732
-		Merged Key=2852
-[ INT_INTERVAL:CLOSED[540, 540] ]
-[ INT_INTERVAL:CLOSED[540, 540] ]
-	YourObject.helloWorld()
-	Key=2784
-		Merged Key=2904
-[ INT_INTERVAL:CLOSED[550, 550] ]
-[ INT_INTERVAL:CLOSED[550, 550] ]
-	YourObject.helloWorld()
-	Key=2836
-		Merged Key=2956
-[ INT_INTERVAL:CLOSED[560, 560] ]
-[ INT_INTERVAL:CLOSED[560, 560] ]
-	YourObject.helloWorld()
-	Key=2888
-		Merged Key=3008
-[ INT_INTERVAL:CLOSED[570, 570] ]
-[ INT_INTERVAL:CLOSED[570, 570] ]
-	YourObject.helloWorld()
-	Key=2940
-		Merged Key=3060
-[ INT_INTERVAL:CLOSED[580, 580] ]
-[ INT_INTERVAL:CLOSED[580, 580] ]
-	YourObject.helloWorld()
-	Key=2992
-		Merged Key=3112
-[ INT_INTERVAL:CLOSED[590, 590] ]
-[ INT_INTERVAL:CLOSED[590, 590] ]
-	YourObject.helloWorld()
-	Key=3044
-		Merged Key=3164
-[ INT_INTERVAL:CLOSED[600, 600] ]
-[ INT_INTERVAL:CLOSED[600, 600] ]
-	YourObject.helloWorld()
-	Key=3096
-		Merged Key=3216
-[ INT_INTERVAL:CLOSED[610, 610] ]
-[ INT_INTERVAL:CLOSED[610, 610] ]
-	YourObject.helloWorld()
-	Key=3148
-		Merged Key=3268
-[ INT_INTERVAL:CLOSED[620, 620] ]
-[ INT_INTERVAL:CLOSED[620, 620] ]
-	YourObject.helloWorld()
-	Key=3200
-		Merged Key=3320
-[ INT_INTERVAL:CLOSED[630, 630] ]
-[ INT_INTERVAL:CLOSED[630, 630] ]
-	YourObject.helloWorld()
-	Key=3252
-		Merged Key=3372
-[ INT_INTERVAL:CLOSED[640, 640] ]
-[ INT_INTERVAL:CLOSED[640, 640] ]
-	YourObject.helloWorld()
-	Key=3304
-		Merged Key=3424
-[ INT_INTERVAL:CLOSED[650, 650] ]
-[ INT_INTERVAL:CLOSED[650, 650] ]
-	YourObject.helloWorld()
-	Key=3356
-		Merged Key=3476
-[ INT_INTERVAL:CLOSED[660, 660] ]
-[ INT_INTERVAL:CLOSED[660, 660] ]
-	YourObject.helloWorld()
-	Key=3408
-		Merged Key=3528
-[ INT_INTERVAL:CLOSED[670, 670] ]
-[ INT_INTERVAL:CLOSED[670, 670] ]
-	YourObject.helloWorld()
-	Key=3460
-		Merged Key=3580
-[ INT_INTERVAL:CLOSED[680, 680] ]
-[ INT_INTERVAL:CLOSED[680, 680] ]
-	YourObject.helloWorld()
-	Key=3512
-		Merged Key=3632
-[ INT_INTERVAL:CLOSED[690, 690] ]
-[ INT_INTERVAL:CLOSED[690, 690] ]
-	YourObject.helloWorld()
-	Key=3564
-		Merged Key=3684
-[ INT_INTERVAL:CLOSED[700, 700] ]
-[ INT_INTERVAL:CLOSED[700, 700] ]
-	YourObject.helloWorld()
-	Key=3616
-		Merged Key=3736
-[ INT_INTERVAL:CLOSED[710, 710] ]
-[ INT_INTERVAL:CLOSED[710, 710] ]
-	YourObject.helloWorld()
-	Key=3668
-		Merged Key=3788
-[ INT_INTERVAL:CLOSED[720, 720] ]
-[ INT_INTERVAL:CLOSED[720, 720] ]
-	YourObject.helloWorld()
-	Key=3720
-		Merged Key=3840
-[ INT_INTERVAL:CLOSED[730, 730] ]
-[ INT_INTERVAL:CLOSED[730, 730] ]
-	YourObject.helloWorld()
-	Key=3772
-		Merged Key=3892
-[ INT_INTERVAL:CLOSED[740, 740] ]
-[ INT_INTERVAL:CLOSED[740, 740] ]
-	YourObject.helloWorld()
-	Key=3824
-		Merged Key=3944
-[ INT_INTERVAL:CLOSED[750, 750] ]
-[ INT_INTERVAL:CLOSED[750, 750] ]
-	YourObject.helloWorld()
-	Key=3876
-		Merged Key=3996
-[ INT_INTERVAL:CLOSED[760, 760] ]
-[ INT_INTERVAL:CLOSED[760, 760] ]
-	YourObject.helloWorld()
-	Key=3928
-		Merged Key=4048
-[ INT_INTERVAL:CLOSED[770, 770] ]
-[ INT_INTERVAL:CLOSED[770, 770] ]
-	YourObject.helloWorld()
-	Key=3980
-		Merged Key=4100
-[ INT_INTERVAL:CLOSED[780, 780] ]
-[ INT_INTERVAL:CLOSED[780, 780] ]
-	YourObject.helloWorld()
-	Key=4032
-		Merged Key=4152
-[ INT_INTERVAL:CLOSED[790, 790] ]
-[ INT_INTERVAL:CLOSED[790, 790] ]
-	YourObject.helloWorld()
-	Key=4084
-		Merged Key=4204
-[ INT_INTERVAL:CLOSED[800, 800] ]
-[ INT_INTERVAL:CLOSED[800, 800] ]
-	YourObject.helloWorld()
-	Key=4136
-		Merged Key=4256
-[ INT_INTERVAL:CLOSED[810, 810] ]
-[ INT_INTERVAL:CLOSED[810, 810] ]
-	YourObject.helloWorld()
-	Key=4188
-		Merged Key=4308
-[ INT_INTERVAL:CLOSED[820, 820] ]
-[ INT_INTERVAL:CLOSED[820, 820] ]
-	YourObject.helloWorld()
-	Key=4240
-		Merged Key=4360
-[ INT_INTERVAL:CLOSED[830, 830] ]
-[ INT_INTERVAL:CLOSED[830, 830] ]
-	YourObject.helloWorld()
-	Key=4292
-		Merged Key=4412
-[ INT_INTERVAL:CLOSED[840, 840] ]
-[ INT_INTERVAL:CLOSED[840, 840] ]
-	YourObject.helloWorld()
-	Key=4344
-		Merged Key=4464
-[ INT_INTERVAL:CLOSED[850, 850] ]
-[ INT_INTERVAL:CLOSED[850, 850] ]
-	YourObject.helloWorld()
-	Key=4396
-		Merged Key=4516
-[ INT_INTERVAL:CLOSED[860, 860] ]
-[ INT_INTERVAL:CLOSED[860, 860] ]
-	YourObject.helloWorld()
-	Key=4448
-		Merged Key=4568
-[ INT_INTERVAL:CLOSED[870, 870] ]
-[ INT_INTERVAL:CLOSED[870, 870] ]
-	YourObject.helloWorld()
-	Key=4500
-		Merged Key=4620
-[ INT_INTERVAL:CLOSED[880, 880] ]
-[ INT_INTERVAL:CLOSED[880, 880] ]
-	YourObject.helloWorld()
-	Key=4552
-		Merged Key=4672
-[ INT_INTERVAL:CLOSED[890, 890] ]
-[ INT_INTERVAL:CLOSED[890, 890] ]
-	YourObject.helloWorld()
-	Key=4604
-		Merged Key=4724
-[ INT_INTERVAL:CLOSED[900, 900] ]
-[ INT_INTERVAL:CLOSED[900, 900] ]
-	YourObject.helloWorld()
-	Key=4656
-		Merged Key=4776
-[ INT_INTERVAL:CLOSED[910, 910] ]
-[ INT_INTERVAL:CLOSED[910, 910] ]
-	YourObject.helloWorld()
-	Key=4708
-		Merged Key=4828
-[ INT_INTERVAL:CLOSED[920, 920] ]
-[ INT_INTERVAL:CLOSED[920, 920] ]
-	YourObject.helloWorld()
-	Key=4760
-		Merged Key=4880
-[ INT_INTERVAL:CLOSED[930, 930] ]
-[ INT_INTERVAL:CLOSED[930, 930] ]
-	YourObject.helloWorld()
-	Key=4812
-		Merged Key=4932
-[ INT_INTERVAL:CLOSED[940, 940] ]
-[ INT_INTERVAL:CLOSED[940, 940] ]
-	YourObject.helloWorld()
-	Key=4864
-		Merged Key=4984
-[ INT_INTERVAL:CLOSED[950, 950] ]
-[ INT_INTERVAL:CLOSED[950, 950] ]
-	YourObject.helloWorld()
-	Key=4916
-		Merged Key=5036
-[ INT_INTERVAL:CLOSED[960, 960] ]
-[ INT_INTERVAL:CLOSED[960, 960] ]
-	YourObject.helloWorld()
-	Key=4968
-		Merged Key=5088
-[ INT_INTERVAL:CLOSED[970, 970] ]
+...
 [ INT_INTERVAL:CLOSED[970, 970] ]
 	YourObject.helloWorld()
 	Key=5020
@@ -939,386 +485,7 @@ Merged Tokens: *************************
 	YourObject.helloWorld()
 	Key=148
 [ INT_INTERVAL:CLOSED[20, 20] ]
-[ INT_INTERVAL:CLOSED[-inf, 29] ]
-	YourObject.helloWorld()
-	Key=200
-[ INT_INTERVAL:CLOSED[30, 30] ]
-[ INT_INTERVAL:CLOSED[-inf, 39] ]
-	YourObject.helloWorld()
-	Key=252
-[ INT_INTERVAL:CLOSED[40, 40] ]
-[ INT_INTERVAL:CLOSED[-inf, 49] ]
-	YourObject.helloWorld()
-	Key=304
-[ INT_INTERVAL:CLOSED[50, 50] ]
-[ INT_INTERVAL:CLOSED[-inf, 59] ]
-	YourObject.helloWorld()
-	Key=356
-[ INT_INTERVAL:CLOSED[60, 60] ]
-[ INT_INTERVAL:CLOSED[-inf, 69] ]
-	YourObject.helloWorld()
-	Key=408
-[ INT_INTERVAL:CLOSED[70, 70] ]
-[ INT_INTERVAL:CLOSED[-inf, 79] ]
-	YourObject.helloWorld()
-	Key=460
-[ INT_INTERVAL:CLOSED[80, 80] ]
-[ INT_INTERVAL:CLOSED[-inf, 89] ]
-	YourObject.helloWorld()
-	Key=512
-[ INT_INTERVAL:CLOSED[90, 90] ]
-[ INT_INTERVAL:CLOSED[-inf, 99] ]
-	YourObject.helloWorld()
-	Key=564
-[ INT_INTERVAL:CLOSED[100, 100] ]
-[ INT_INTERVAL:CLOSED[-inf, 109] ]
-	YourObject.helloWorld()
-	Key=616
-[ INT_INTERVAL:CLOSED[110, 110] ]
-[ INT_INTERVAL:CLOSED[-inf, 119] ]
-	YourObject.helloWorld()
-	Key=668
-[ INT_INTERVAL:CLOSED[120, 120] ]
-[ INT_INTERVAL:CLOSED[-inf, 129] ]
-	YourObject.helloWorld()
-	Key=720
-[ INT_INTERVAL:CLOSED[130, 130] ]
-[ INT_INTERVAL:CLOSED[-inf, 139] ]
-	YourObject.helloWorld()
-	Key=772
-[ INT_INTERVAL:CLOSED[140, 140] ]
-[ INT_INTERVAL:CLOSED[-inf, 149] ]
-	YourObject.helloWorld()
-	Key=824
-[ INT_INTERVAL:CLOSED[150, 150] ]
-[ INT_INTERVAL:CLOSED[-inf, 159] ]
-	YourObject.helloWorld()
-	Key=876
-[ INT_INTERVAL:CLOSED[160, 160] ]
-[ INT_INTERVAL:CLOSED[-inf, 169] ]
-	YourObject.helloWorld()
-	Key=928
-[ INT_INTERVAL:CLOSED[170, 170] ]
-[ INT_INTERVAL:CLOSED[-inf, 179] ]
-	YourObject.helloWorld()
-	Key=980
-[ INT_INTERVAL:CLOSED[180, 180] ]
-[ INT_INTERVAL:CLOSED[-inf, 189] ]
-	YourObject.helloWorld()
-	Key=1032
-[ INT_INTERVAL:CLOSED[190, 190] ]
-[ INT_INTERVAL:CLOSED[-inf, 199] ]
-	YourObject.helloWorld()
-	Key=1084
-[ INT_INTERVAL:CLOSED[200, 200] ]
-[ INT_INTERVAL:CLOSED[-inf, 209] ]
-	YourObject.helloWorld()
-	Key=1136
-[ INT_INTERVAL:CLOSED[210, 210] ]
-[ INT_INTERVAL:CLOSED[-inf, 219] ]
-	YourObject.helloWorld()
-	Key=1188
-[ INT_INTERVAL:CLOSED[220, 220] ]
-[ INT_INTERVAL:CLOSED[-inf, 229] ]
-	YourObject.helloWorld()
-	Key=1240
-[ INT_INTERVAL:CLOSED[230, 230] ]
-[ INT_INTERVAL:CLOSED[-inf, 239] ]
-	YourObject.helloWorld()
-	Key=1292
-[ INT_INTERVAL:CLOSED[240, 240] ]
-[ INT_INTERVAL:CLOSED[-inf, 249] ]
-	YourObject.helloWorld()
-	Key=1344
-[ INT_INTERVAL:CLOSED[250, 250] ]
-[ INT_INTERVAL:CLOSED[-inf, 259] ]
-	YourObject.helloWorld()
-	Key=1396
-[ INT_INTERVAL:CLOSED[260, 260] ]
-[ INT_INTERVAL:CLOSED[-inf, 269] ]
-	YourObject.helloWorld()
-	Key=1448
-[ INT_INTERVAL:CLOSED[270, 270] ]
-[ INT_INTERVAL:CLOSED[-inf, 279] ]
-	YourObject.helloWorld()
-	Key=1500
-[ INT_INTERVAL:CLOSED[280, 280] ]
-[ INT_INTERVAL:CLOSED[-inf, 289] ]
-	YourObject.helloWorld()
-	Key=1552
-[ INT_INTERVAL:CLOSED[290, 290] ]
-[ INT_INTERVAL:CLOSED[-inf, 299] ]
-	YourObject.helloWorld()
-	Key=1604
-[ INT_INTERVAL:CLOSED[300, 300] ]
-[ INT_INTERVAL:CLOSED[-inf, 309] ]
-	YourObject.helloWorld()
-	Key=1656
-[ INT_INTERVAL:CLOSED[310, 310] ]
-[ INT_INTERVAL:CLOSED[-inf, 319] ]
-	YourObject.helloWorld()
-	Key=1708
-[ INT_INTERVAL:CLOSED[320, 320] ]
-[ INT_INTERVAL:CLOSED[-inf, 329] ]
-	YourObject.helloWorld()
-	Key=1760
-[ INT_INTERVAL:CLOSED[330, 330] ]
-[ INT_INTERVAL:CLOSED[-inf, 339] ]
-	YourObject.helloWorld()
-	Key=1812
-[ INT_INTERVAL:CLOSED[340, 340] ]
-[ INT_INTERVAL:CLOSED[-inf, 349] ]
-	YourObject.helloWorld()
-	Key=1864
-[ INT_INTERVAL:CLOSED[350, 350] ]
-[ INT_INTERVAL:CLOSED[-inf, 359] ]
-	YourObject.helloWorld()
-	Key=1916
-[ INT_INTERVAL:CLOSED[360, 360] ]
-[ INT_INTERVAL:CLOSED[-inf, 369] ]
-	YourObject.helloWorld()
-	Key=1968
-[ INT_INTERVAL:CLOSED[370, 370] ]
-[ INT_INTERVAL:CLOSED[-inf, 379] ]
-	YourObject.helloWorld()
-	Key=2020
-[ INT_INTERVAL:CLOSED[380, 380] ]
-[ INT_INTERVAL:CLOSED[-inf, 389] ]
-	YourObject.helloWorld()
-	Key=2072
-[ INT_INTERVAL:CLOSED[390, 390] ]
-[ INT_INTERVAL:CLOSED[-inf, 399] ]
-	YourObject.helloWorld()
-	Key=2124
-[ INT_INTERVAL:CLOSED[400, 400] ]
-[ INT_INTERVAL:CLOSED[-inf, 409] ]
-	YourObject.helloWorld()
-	Key=2176
-[ INT_INTERVAL:CLOSED[410, 410] ]
-[ INT_INTERVAL:CLOSED[-inf, 419] ]
-	YourObject.helloWorld()
-	Key=2228
-[ INT_INTERVAL:CLOSED[420, 420] ]
-[ INT_INTERVAL:CLOSED[-inf, 429] ]
-	YourObject.helloWorld()
-	Key=2280
-[ INT_INTERVAL:CLOSED[430, 430] ]
-[ INT_INTERVAL:CLOSED[-inf, 439] ]
-	YourObject.helloWorld()
-	Key=2332
-[ INT_INTERVAL:CLOSED[440, 440] ]
-[ INT_INTERVAL:CLOSED[-inf, 449] ]
-	YourObject.helloWorld()
-	Key=2384
-[ INT_INTERVAL:CLOSED[450, 450] ]
-[ INT_INTERVAL:CLOSED[-inf, 459] ]
-	YourObject.helloWorld()
-	Key=2436
-[ INT_INTERVAL:CLOSED[460, 460] ]
-[ INT_INTERVAL:CLOSED[-inf, 469] ]
-	YourObject.helloWorld()
-	Key=2488
-[ INT_INTERVAL:CLOSED[470, 470] ]
-[ INT_INTERVAL:CLOSED[-inf, 479] ]
-	YourObject.helloWorld()
-	Key=2540
-[ INT_INTERVAL:CLOSED[480, 480] ]
-[ INT_INTERVAL:CLOSED[-inf, 489] ]
-	YourObject.helloWorld()
-	Key=2592
-[ INT_INTERVAL:CLOSED[490, 490] ]
-[ INT_INTERVAL:CLOSED[-inf, 499] ]
-	YourObject.helloWorld()
-	Key=2644
-[ INT_INTERVAL:CLOSED[500, 500] ]
-[ INT_INTERVAL:CLOSED[-inf, 509] ]
-	YourObject.helloWorld()
-	Key=2696
-[ INT_INTERVAL:CLOSED[510, 510] ]
-[ INT_INTERVAL:CLOSED[-inf, 519] ]
-	YourObject.helloWorld()
-	Key=2748
-[ INT_INTERVAL:CLOSED[520, 520] ]
-[ INT_INTERVAL:CLOSED[-inf, 529] ]
-	YourObject.helloWorld()
-	Key=2800
-[ INT_INTERVAL:CLOSED[530, 530] ]
-[ INT_INTERVAL:CLOSED[-inf, 539] ]
-	YourObject.helloWorld()
-	Key=2852
-[ INT_INTERVAL:CLOSED[540, 540] ]
-[ INT_INTERVAL:CLOSED[-inf, 549] ]
-	YourObject.helloWorld()
-	Key=2904
-[ INT_INTERVAL:CLOSED[550, 550] ]
-[ INT_INTERVAL:CLOSED[-inf, 559] ]
-	YourObject.helloWorld()
-	Key=2956
-[ INT_INTERVAL:CLOSED[560, 560] ]
-[ INT_INTERVAL:CLOSED[-inf, 569] ]
-	YourObject.helloWorld()
-	Key=3008
-[ INT_INTERVAL:CLOSED[570, 570] ]
-[ INT_INTERVAL:CLOSED[-inf, 579] ]
-	YourObject.helloWorld()
-	Key=3060
-[ INT_INTERVAL:CLOSED[580, 580] ]
-[ INT_INTERVAL:CLOSED[-inf, 589] ]
-	YourObject.helloWorld()
-	Key=3112
-[ INT_INTERVAL:CLOSED[590, 590] ]
-[ INT_INTERVAL:CLOSED[-inf, 599] ]
-	YourObject.helloWorld()
-	Key=3164
-[ INT_INTERVAL:CLOSED[600, 600] ]
-[ INT_INTERVAL:CLOSED[-inf, 609] ]
-	YourObject.helloWorld()
-	Key=3216
-[ INT_INTERVAL:CLOSED[610, 610] ]
-[ INT_INTERVAL:CLOSED[-inf, 619] ]
-	YourObject.helloWorld()
-	Key=3268
-[ INT_INTERVAL:CLOSED[620, 620] ]
-[ INT_INTERVAL:CLOSED[-inf, 629] ]
-	YourObject.helloWorld()
-	Key=3320
-[ INT_INTERVAL:CLOSED[630, 630] ]
-[ INT_INTERVAL:CLOSED[-inf, 639] ]
-	YourObject.helloWorld()
-	Key=3372
-[ INT_INTERVAL:CLOSED[640, 640] ]
-[ INT_INTERVAL:CLOSED[-inf, 649] ]
-	YourObject.helloWorld()
-	Key=3424
-[ INT_INTERVAL:CLOSED[650, 650] ]
-[ INT_INTERVAL:CLOSED[-inf, 659] ]
-	YourObject.helloWorld()
-	Key=3476
-[ INT_INTERVAL:CLOSED[660, 660] ]
-[ INT_INTERVAL:CLOSED[-inf, 669] ]
-	YourObject.helloWorld()
-	Key=3528
-[ INT_INTERVAL:CLOSED[670, 670] ]
-[ INT_INTERVAL:CLOSED[-inf, 679] ]
-	YourObject.helloWorld()
-	Key=3580
-[ INT_INTERVAL:CLOSED[680, 680] ]
-[ INT_INTERVAL:CLOSED[-inf, 689] ]
-	YourObject.helloWorld()
-	Key=3632
-[ INT_INTERVAL:CLOSED[690, 690] ]
-[ INT_INTERVAL:CLOSED[-inf, 699] ]
-	YourObject.helloWorld()
-	Key=3684
-[ INT_INTERVAL:CLOSED[700, 700] ]
-[ INT_INTERVAL:CLOSED[-inf, 709] ]
-	YourObject.helloWorld()
-	Key=3736
-[ INT_INTERVAL:CLOSED[710, 710] ]
-[ INT_INTERVAL:CLOSED[-inf, 719] ]
-	YourObject.helloWorld()
-	Key=3788
-[ INT_INTERVAL:CLOSED[720, 720] ]
-[ INT_INTERVAL:CLOSED[-inf, 729] ]
-	YourObject.helloWorld()
-	Key=3840
-[ INT_INTERVAL:CLOSED[730, 730] ]
-[ INT_INTERVAL:CLOSED[-inf, 739] ]
-	YourObject.helloWorld()
-	Key=3892
-[ INT_INTERVAL:CLOSED[740, 740] ]
-[ INT_INTERVAL:CLOSED[-inf, 749] ]
-	YourObject.helloWorld()
-	Key=3944
-[ INT_INTERVAL:CLOSED[750, 750] ]
-[ INT_INTERVAL:CLOSED[-inf, 759] ]
-	YourObject.helloWorld()
-	Key=3996
-[ INT_INTERVAL:CLOSED[760, 760] ]
-[ INT_INTERVAL:CLOSED[-inf, 769] ]
-	YourObject.helloWorld()
-	Key=4048
-[ INT_INTERVAL:CLOSED[770, 770] ]
-[ INT_INTERVAL:CLOSED[-inf, 779] ]
-	YourObject.helloWorld()
-	Key=4100
-[ INT_INTERVAL:CLOSED[780, 780] ]
-[ INT_INTERVAL:CLOSED[-inf, 789] ]
-	YourObject.helloWorld()
-	Key=4152
-[ INT_INTERVAL:CLOSED[790, 790] ]
-[ INT_INTERVAL:CLOSED[-inf, 799] ]
-	YourObject.helloWorld()
-	Key=4204
-[ INT_INTERVAL:CLOSED[800, 800] ]
-[ INT_INTERVAL:CLOSED[-inf, 809] ]
-	YourObject.helloWorld()
-	Key=4256
-[ INT_INTERVAL:CLOSED[810, 810] ]
-[ INT_INTERVAL:CLOSED[-inf, 819] ]
-	YourObject.helloWorld()
-	Key=4308
-[ INT_INTERVAL:CLOSED[820, 820] ]
-[ INT_INTERVAL:CLOSED[-inf, 829] ]
-	YourObject.helloWorld()
-	Key=4360
-[ INT_INTERVAL:CLOSED[830, 830] ]
-[ INT_INTERVAL:CLOSED[-inf, 839] ]
-	YourObject.helloWorld()
-	Key=4412
-[ INT_INTERVAL:CLOSED[840, 840] ]
-[ INT_INTERVAL:CLOSED[-inf, 849] ]
-	YourObject.helloWorld()
-	Key=4464
-[ INT_INTERVAL:CLOSED[850, 850] ]
-[ INT_INTERVAL:CLOSED[-inf, 859] ]
-	YourObject.helloWorld()
-	Key=4516
-[ INT_INTERVAL:CLOSED[860, 860] ]
-[ INT_INTERVAL:CLOSED[-inf, 869] ]
-	YourObject.helloWorld()
-	Key=4568
-[ INT_INTERVAL:CLOSED[870, 870] ]
-[ INT_INTERVAL:CLOSED[-inf, 879] ]
-	YourObject.helloWorld()
-	Key=4620
-[ INT_INTERVAL:CLOSED[880, 880] ]
-[ INT_INTERVAL:CLOSED[-inf, 889] ]
-	YourObject.helloWorld()
-	Key=4672
-[ INT_INTERVAL:CLOSED[890, 890] ]
-[ INT_INTERVAL:CLOSED[-inf, 899] ]
-	YourObject.helloWorld()
-	Key=4724
-[ INT_INTERVAL:CLOSED[900, 900] ]
-[ INT_INTERVAL:CLOSED[-inf, 909] ]
-	YourObject.helloWorld()
-	Key=4776
-[ INT_INTERVAL:CLOSED[910, 910] ]
-[ INT_INTERVAL:CLOSED[-inf, 919] ]
-	YourObject.helloWorld()
-	Key=4828
-[ INT_INTERVAL:CLOSED[920, 920] ]
-[ INT_INTERVAL:CLOSED[-inf, 929] ]
-	YourObject.helloWorld()
-	Key=4880
-[ INT_INTERVAL:CLOSED[930, 930] ]
-[ INT_INTERVAL:CLOSED[-inf, 939] ]
-	YourObject.helloWorld()
-	Key=4932
-[ INT_INTERVAL:CLOSED[940, 940] ]
-[ INT_INTERVAL:CLOSED[-inf, 949] ]
-	YourObject.helloWorld()
-	Key=4984
-[ INT_INTERVAL:CLOSED[950, 950] ]
-[ INT_INTERVAL:CLOSED[-inf, 959] ]
-	YourObject.helloWorld()
-	Key=5036
-[ INT_INTERVAL:CLOSED[960, 960] ]
-[ INT_INTERVAL:CLOSED[-inf, 969] ]
-	YourObject.helloWorld()
-	Key=5088
-[ INT_INTERVAL:CLOSED[970, 970] ]
+...
 [ INT_INTERVAL:CLOSED[-inf, 979] ]
 	YourObject.helloWorld()
 	Key=5140
@@ -1330,79 +497,363 @@ Merged Tokens: *************************
 Finished
 \end{verbatim}
 
+You'll notice that the file shows the resulting state of the objects
+declared in the initial state.  You'll notice also that there are two
+inactive tokens, one that falls before the first token in ``object'' and
+another that falls after the last token in ``object''.  These are tokens
+that fall outside of the horizon and are therefore, not flaws of the plan,
+which is why they remain inactive.  Notice also that there's a list of
+merged tokens.  Some of these tokens have unbound variables.  These are
+variables that were not decided before the planner decided to merge the
+token.  Once a token is merged, its variables are no longer affected by
+propagation, for efficiency reasons.
 
-%%% TBW
+%%% TBW TODO: get screenshots and develop this section
 
 \subsection{Visualization of the plan and planning process in PlanWorks}
+\label{visualization}
 We will not go into all the details. Refer to PlanWorks documentation
 for setup instructions of use. We may wish to include screen shots.
 
-\section{Model Development}
-For the purposes of this section, we will assume the application is a
-planning task, and that we can use the built in CBPlanner in PLASMA.
-This is where we get through all the modeling. Should take it through
-as a tutorial, which will be accompanied by examples that can be
-run. We can use the example of the K9 model from the Contingent
-Planning Team to motivate the problem, since they have pushed alot of
-the modeling features.
+%%% TBW
+
+\section{Developing Your Own Model In NDDL}
+\label{modeling}
+In this section you will learn how to develop your own model in NDDL.  We
+will show most of the NDDL constructs but please refer to
+Appendix~\ref{nddl} for the complete list.
 
 \subsection{Rover: The Robotic Geologist}
-Rover is 6 wheeled robot equiped with a range of instruments to sample
-and study a geological site. Rover will process goals for taking
-pictures and rock samples in various locations within a given survey
-area. It has on board a battery, and can replensih its energy levels
-using solar power. Rover is also equiped with communication equipment
-allowing it to send and receive data to and from mission control. Our
-Rover is a fictitous creature. Our goal in model development is to
-develop a model of Rover which will allow plans to be developed to
-meet mission goals expressed in high-level terms, such as:
+
+We use a planning domain loosely based on the MER mission to show the
+services provided by \ET.  We assume the application in question is one of
+producing daily activity plans for operation of a robotic planetary surface
+geologist we call {\em Rover}. {\em Rover} is a mobile robot equiped with a
+range of instruments to sample and study a geological site.  We will focus
+on the panoramic imager {\em PanCam}. A {\em Rover} has a battery on board, and can
+replenish its energy levels using solar power.  A {\em Rover} will be given
+activities to travel to a specific location, deploy an instrument at that
+location, and perform an experiment.  It will also be given information from
+the terrain.  For simplicity purposes we assume that the terrain is
+represented by a euclidean grid and that locations are indentified with two
+coordinates.  We also assume that paths between locations are fixed and
+that the Rover can only move between locations if there is a path
+between them.  Furthermore, the Rover can only access those locations
+that it can reach without draining the battery.
+
+The Rover includes a number of components that can be operating
+concurrently. For example, the {\em PanCam} can be tracking targets while
+the Rover is driving. The Rover also imposes mutual exclusion constraints
+on components, for instace, the rock abrasion tool {\em RAT}
+must be stowed while Rover is moving. Furthermore, given a command to
+deploy a particular instrument at a specific location, the Rover needs to
+insure the following occurs in order: The instrument must be first
+unstowed, and then positioned. Then, if it decides not to
+perform another experiment with the same instrument, it must stow the
+instrument. 
+
+The model must be carefully crafted so that all component interactions are
+modeled so that correct command sequences can be inferred from this model.
+
+In the next few sections we will show how to model each of the following
+model components: locations and paths, instruments, batteries, and rovers.
+Then, we'll show you how to connect all of these components and describe
+rules that govern the components and interactions.  Finally, we'll create a
+small initial state that you'll be able to run with your new model.
+
+\subsection{Locations and Paths}
+
+When we model locations we're faced with a choice of modeling locations as
+an enumerated set and not representing the coordinates, or to model
+locations as objects with coordinates as properties that are static with
+respect to time.   We will show both ways of modeling locations.
+
+If we decided to choose to ignore properties of locations and instead
+enumerate all possible locations we would include the following in the
+model: 
+\texttt{\begin{tabbing}
+enum Location \{ loc1, loc2, loc3 \}; 
+\end{tabbing}}
+\ET\, would interpret this as a new user-defined type with values ``loc1'',
+``loc2'' and ``loc3''.
+
+Alternatively, we can use a class to define locations and annotate
+locations with their properties.  Furthermore, we don't have to express
+in the model how many locations we'll have, it can be specified in a
+problem instance.  In this case, we would write the following:
+\texttt{\begin{tabbing}
+cl\=ass  Location \{ \\
+ \> int x; \\
+ \> int y; \\
+ \> string label; \\
+ \> Lo\=cation(int \_x, int \_y)\{ \\
+ \> \>  x = \_x; \\
+ \> \>  y = \_y; \\
+ \> \>  label = ``anonymous''; \\
+ \> \} \\
+ \> Lo\=cation(int \_x, int \_y, string \_label)\{ \\
+ \> \>  x = \_x; \\
+ \> \>  y = \_y; \\
+ \> \>  label = \_label; \\
+ \> \} \\
+\}
+\end{tabbing}}
+
+Notice that a location has three static properties: x coordinate, y
+coordinate, and a label.  Notice there are two constructors, one that takes
+in a label on construction and the other that assigns ``anonymous'' to the
+label. It is often useful to assign arbitrary data to domain elements.
+Domain elements that are described with static data only are called static
+and don't evolve over time.  Locations are examples of static data.
+
+Paths are also static domain elements.  Let's assume that paths have a name
+to identify them, a cost, and the two locations it links.  We can describe
+paths in the model in the following way:
+\texttt{\begin{tabbing}
+cl\=ass Path \{ \\
+\>  string name; \\
+\>  Location from; \\
+\>  Location to; \\
+\>  float cost; \\
+\>  Pa\=th(string \_name, Location \_from, Location \_to, float \_cost) \{ \\
+\> \>   name = \_name; \\
+\> \>   from = \_from; \\
+\> \>   to = \_to; \\
+\> \>  cost = \_cost; \\
+\> \} \\
+\}
+\end{tabbing}}
+Notice that this class is composed not only of primitive types but also of
+user-defined types (i.e., Location).  So far, we have introduced the
+following primitive types: int, float, string.  We have also introduced
+enumerations.  Any class can contain a member of an enumerated type.  Say
+that paths were classified into difficulty levels depending on the
+obstructions along the way.  Let's say that we have a total of 5 difficulty
+levels: low, low-medium, medium, medium-high, and high.  We would modify
+the description above to include the category in the following way:
+
+\texttt{\begin{tabbing}
+{\em enum Category \{ low, low-medium, medium, medium-high, high \} }\\
+cl\=ass Path \{ \\
+\>  string name; \\
+\>  Location from; \\
+\>  Location to; \\
+\>  float cost; \\
+\>  {\em Category level;} \\
+\>  Pa\=th(string \_name, Location \_from, Location \_to, float \_cost,
+{\em Category \_level} ) \{ \\
+\> \>   name = \_name; \\
+\> \>   from = \_from; \\
+\> \>   to = \_to; \\
+\> \>  cost = \_cost; \\
+\> \>  {\em Category level = \_level;} \\ 
+\> \} \\
+\}
+\end{tabbing}}
+
+\subsection{Instruments}
+
+Instruments have state that can evolve over time.  There are two classes of
+instruments.  Instruments that can be stowed for protection from the
+elements and instruments that are permanently exposed.  This example shows
+how we can aggregate the common properties of all instruments into a class
+and then use inheritance to derive the more specific class of stowable
+instruments. All instruments can be positioned, but only stowable
+instruments can be stowed and unstowed.  Furthermore, we will assume that
+the speed that an instrument can be stowed and unstowed with varies
+depending on the kind of instrument.  The speed of placement will depend on
+the location.  In the model, we would write the following:
+
+\texttt{\begin{tabbing}
+cl\=ass Instrument \{ \\
+\> pr\=edicate Position \{ \\
+\> \> Location rock; \\
+\> \> int position\_speed; \\
+\> \> eq(position\_speed, duration); \\
+\> \} \\
+\> predicate Positioned \{ \} \\
+\} \\
+\\
+cl\=ass Stowable\_Instrument extends Instrument \{ \\
+\> int stow\_speed; \\
+\> int unstow\_speed; \\
+\> St\=owable\_Instrument(int \_stow\_spd, int \_unstow\_spd) \{ \\
+\> \> stow\_speed = \_stow\_spd; \\
+\> \> unstow\_speed = \_unstow\_spd; \\
+\> \} \\
+\> pr\=edicate Stow \{ \\
+\> \> eq(stow\_speed, duration); \\
+\> \} \\
+\> pr\=edicate Unstow \{ \\
+\> \> eq(unstow\_speed, duration); \\
+\> \} \\
+\> predicate Stowed \{ \} \\
+\> predicate Unstowed \{ \} \\
+\} 
+\end{tabbing}}
+Stowable instruments will inherit the predicates ``Position'' and ``Positioned''
+from ``Instrument'', since these are the only members of the class.  Note that
+predicates can have argument variables such as ``position\_speed'' from the
+``Position'' predicate.  Predicates can also impose constraints by
+definition on its arguments whether they're implicit, such as duration, or
+explicit, such as ``position\_speed''. In this case, we equal the
+corresponding speeds to the duration of each of the ``Position'', ``Stow'',
+or ``Unstow'' predicates. 
+
+\subsection{Batteries}
+The Rover has a main battery that is solar-powered.  A battery has state
+that is represented by numerical quantities and as such is represented in
+NDDL as a resource type.  In NDDL one can represent resources with
+different properties.  If we assume that the battery cannot be replenished,
+we say that the battery is a consumable resource \cite{res}.  Resources
+have a default constructor and can be initialized with the following
+parameters (for full treatment of resources representation see \cite{res}): 
 \begin{enumerate}
-\item Take a panoramic image at position p, time t, and orientation o.
-\item Take a rock sample of rock r.
-\item Take a soil sample at position p.
+ \item ``initial capacity'': the initial capacity of the resource
+ \item ``level limit min'': the minimum level that the resource
+is allowed to reach
+ \item ``level limit max'': the maximum level that the resource
+is allowed to reach
+ \item ``production rate max'': the maximum production rate per unit of time
+ \item ``production max'': the maximum production overall
+ \item ``consumption rate max'': the maximum consumption rate per unit of time
+ \item ``consumption max'': the maximum consumption overall
 \end{enumerate}
+When creating a specific type of resource, one can call the constructor of
+a resource ``super'' with specific values for these parameters to set the
+type of resource.  For example, if Battery is a consumable resource we
+would write the following in the model:
+\texttt{\begin{tabbing}
+cl\=ass Battery extends Resource \{ \\
+\>  Ba\=ttery(float initial\_capacity, float level\_limit\_min, float level\_limit\_max) \{ \\
+\> \>  super(\=initial\_capacity, level\_limit\_min, level\_limit\_max, 0.0, 0.0,\\
+\> \> \> MINUS\_INFINITY, MINUS\_INFINITY); \\
+\>  \} \\
+\}
+\end{tabbing}}
+Note that we use the special constants ``MINUS\_INFINITY'' and
+``PLUS\_INFINITY'' to indicate that there are no restrictions on the amount
+that is consumed overall or the rate at which it is consumed.
 
-In fulfilling these objectives, goals must be mapped to command
-sequences to Rover's control subsystem. Rover includes a number of
-components that can be operating concurrently. For example, the Camera
-can be tracking targets while Rover is driving. Conversely, Rover may
-require that certain components are in certain states while other
-components are in other states. For example, the rock abrasion tool
-must be stowed while Rover is moving. We must also address sequencing
-rules within a component. For example, in order to take a sample of a
-rock, the sampling instrument must be position at a precise location a
-few millimetres from the rock surface. Prior to being in such a
-position, the uinstrument must be first unstowed, and then
-positioned. Our model must include these interactions within a
-component and among components so that the planning process can devise
-command sequences to achieve the mission goals and {\em cannot}
-produce incorrect command sequences.
+\subsection{Rovers}
+Rovers are composed of two kinds of instruments, a {\em PanCam} which is an
+instrument, and a {\em RAT} which is a stowable instrument.  A rover must
+move between locations.  In order to track the rover's position, we chose
+to model the navigation component separately.  The navigation component
+will be modeled in NDDL as follows:
+\texttt{\begin{tabbing}
+cl\=ass Navigator \{ \\
+\> pr\=edicate At \{ \\
+\>  \> Location location; \\
+\> \} \\
+\> pr\=edicate Going\{ \\
+\> \>  Location from; \\
+\> \>  Location to; \\
+\> \>  neq(from, to); \\
+\> \} \\
+\}
+\end{tabbing}}
+The ``Navigator'' component indicates that the Rover can either be ``At'' a
+location or ``Going'' from one location to another.  Furthermore, a Rover
+can only move between different locations as indicated by the constraint
+``neq(from, to);''.
 
-\subsection{Basic navigation}
-Many of the goals which Rover may be tasked with require
-mobility. Specifically, Rover must navigate from one location to
-another in a given site area without bumping into anything, and
-without getting into other difficulties such as running out of
-energy. For our purposes, we will start by focussing on a simplified
-version of the navigation problem. We will assume that the site of
-operation is represented by a grid of X and Y co-ordinates
-(integers). A location is thus a position in this grid. Rover may be
-at a location, or going from one location to another. We will ignore
-otherwise important details such as obstacle avoidance and resource
-management.
+Finally, we can describe a Rover in the following way:
 
-\subsubsection{Representing the site}
+\texttt{\begin{tabbing}
+cl\=ass Rover \{ \\
+\> Navigator nav; \\
+\> Instrument pancam; \\
+\> Stowable\_Instrument rat; \\
+\> Battery battery; \\
+\> Ro\=ver(Battery r) \{ \\
+\> \>  commands = new Commands(); \\
+\> \>  navigator = new Navigator(); \\
+\> \>  instrument = new Instrument(); \\
+\> \>  mainBattery = r; \\ 
+\> \} \\
+\}
+\end{tabbing}}
 
-\subsubsection{Rover state and action}
+\subsection{Rules}
 
-\subsubsection{Constraining interactions}
+We are now in a position to write the rules governing the state transitions
+for Instruments, Navigators, and Batteries.
 
-\subsubsection{Going from Lander to Rock}
+\begin{verbatim}
+Navigator::At{
+ met_by(object.Going go_before);
+ eq(go_before.to, location);
+ meets(object.Going go_after);
+ eq(go_after.from, location);
+}
 
-\subsubsection{Formulate and solve the planning problem}
+Navigator::Going{
+ met_by(object.At at_before);
+ eq(at_before.location, from);
+ meets(object.At at_after);
+ eq(at_after.location, to);
 
-\subsubsection{Recap}
-We should have covered:
+ // Select a path from those available between the 2 points
+ Path p : {
+  eq(p.from, from);
+  eq(p.to, to);
+ };
+
+ // Pull juice from the battery. Should be based on path length.
+ starts(Battery.change tx);
+ eq(tx.quantity, p.cost);
+}
+
+Instrument::Position{
+ contained_by(Navigator.At at);
+ eq(at.location, destination);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
+}
+
+Stowable_Instrument::Unstow{
+ contained_by(Navigator.At at);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ meets(Unstowed a);
+ met_by(Stowed b);
+
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
+}
+
+Stowable_Instrument::Stow{
+ contained_by(Navigator.At at);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ meets(Stowed a);
+ met_by(Position b);
+
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
+}
+
+Stowable_Instrument::Stowed{
+ met_by(Stow a);
+ meets(Unstow b);
+}
+
+Stowable_Instrument::Unstowed{
+ met_by(Unstow a);
+ meets(Position b);
+}
+\end{verbatim}
+
+\subsection{Recap}
+The entire model described above can be found under UserGuideRover.nddl
+in the same directory as this user guide. We have introduced the following
+concepts and illustrated them with examples in the UserGuideRover model: 
 \begin{enumerate}
 \item class
 \item enum
@@ -1413,66 +864,19 @@ We should have covered:
 \item basic rules - meets and met\_by
 \item instantiation
 \item assigment
-\end{enumerate}
-
-\subsection{Turning goals into reality - taking a picture}
-
-\subsubsection{Recap}
-We should have covered:
-\begin{enumerate}
 \item composition
 \item contains/containedBy
-\item enum
-\item float, int, string
-\item composition
-\item inheritance
-\item predicates
-\item predicate parameter constraints
-\item basic rules - meets and met\_by
-\item instantiation
-\item assigment
-\end{enumerate}
-
-\subsection{Handling relationships between predicates and variables}
-\subsubsection{Recap}
-We should have covered
-\begin{enumerate}
-\item Constraints among parameters of a predicate.
-\item Rules
+\item constraints among parameters of a predicate.
+\item rules
 \item Allen Relations
-\end{enumerate}
-End the section by referencing a model and initial state that can be
-run through the planner and visualized in PlanWorks.
-
-\subsection{Advanced rule writing}
-\subsubsection{Using existential quantification - filtering and binding}
-\subsubsection{Using universal quanitifcation - iteration over objects}
-
-\subsubsection{Recap}
-We should have covered:
-\begin{enumerate}
 \item local variables
 \item guards
-\item object reference model
-\item existential quantification
-\item iteration over objects
-\item macros
-\item additional allen relations
+\item Using existential quantification - filtering and binding
+\item Using universal quanitifcation - iteration over objects
 \end{enumerate}
-End the section by referencing a model and initial state that can be
-run through the planner and visualized in PlanWorks.
 
-\subsection{Incorporating resources}
-\subsubsection{Recap}
-We should have covered:
-\begin{enumerate}
-\item The details of the built in base class. 
-\item How one can define ones own resource.
-\item Example illustrating use of the constructor.
-\item Example illustrating simple case of production and consumption.
-\item Example illustrating discretization into events.
-\item Careful explanation of the issue of closure and bounding of the resource.
-\end{enumerate}
+\subsection{Formulate and solve a planning problem}
+
 End the section by referencing a model and initial state that can be
 run through the planner and visualized in PlanWorks.
 
@@ -1496,7 +900,7 @@ applications develop their own clients. The {\em Decision Manager} uses a
 view specification to manage the set of flaws for a client.
 \begin{figure}[t]
 \centering\epsfig{file=SystemDiagram.eps, width = 3.25in}
-\caption{EUROPA System Architecture Diagram}
+\caption{\ET\, System Architecture Diagram}
 \label{SystemDiagram}
 \end{figure}
 
@@ -1546,10 +950,18 @@ a simple example model, possibly cut-down from k9.
 \subsection{Listeners and Loggers}
 \subsection{Integration to PlanWorks}
 
-\section{Bibliography}
+\section{Contributing to \ET}
+
+This section should have guidelines for how to contribute to the code
+base.  Where to submit it to, how to contact the primes, how to ask for
+help, etc.  It should also reference the coding guidelines appendix.
+
+\bibliographystyle{plain}
+\bibliography{user-guide}
 
 \section{Appendices}
 \subsection{Appendix A: NDDL Language Reference}
+\label{nddl}
 
 class
 predicate
@@ -1575,6 +987,7 @@ constrain
 close
 
 \subsection{Appendix B: Temporal Relations}
+\label{allen}
 
 In NDDL, two tokens can be constrained in several simple ways,
 including with the following ``abbreviations'' for several commonly
@@ -1678,9 +1091,13 @@ A inverse-overlaps B (io) & LessThan(A.start, B.end); LessThan(B.start, A.end); 
 \end{tabular}
 
 \subsection{Appendix C: Constraint Library Reference}
-\subsection{Appendix D: Test Language Specification and Use}
-\subsection{Appendix E: Coding Guidelines}
+\label{constraints}
 
+\subsection{Appendix D: Test Language Specification and Use}
+\label{aver}
+
+\subsection{Appendix E: Coding Guidelines}
+\label{coding}
 \begin{itemize}
 \item[] General Practices
  \begin{itemize}
@@ -1785,7 +1202,7 @@ A inverse-overlaps B (io) & LessThan(A.start, B.end); LessThan(B.start, A.end); 
 \end{itemize}
 
 \section{Acknowledgements}
-
+\label{ack}
 This research was supported by NASA Ames Research Center and the NASA
 Intelligent Systems program. 
 
