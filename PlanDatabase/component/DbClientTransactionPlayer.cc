@@ -71,61 +71,46 @@ namespace PLASMA {
     static unsigned int sl_txCount(0);
     sl_txCount++;
     const char * tagname = element.Value();
-    if (strcmp(tagname, "class") == 0) {
+    if (strcmp(tagname, "class") == 0)
       playDefineClass(element);
-    } else if (strcmp(tagname, "enum") == 0) {
+    else if (strcmp(tagname, "enum") == 0)
       playDefineEnumeration(element);
-    } else if (strcmp(tagname, "compat") == 0) {
-      // playDefineCompat(element);
-    } else if (strcmp(tagname, "var") == 0) {
+    else if (strcmp(tagname, "compat") == 0)
+      playDefineCompat(element);
+    else if (strcmp(tagname, "var") == 0)
       playVariableCreated(element);
-    } else if (strcmp(tagname, "new") == 0) {
+    else if (strcmp(tagname, "new") == 0)
       playObjectCreated(element);
-    } else if (strcmp(tagname, "goal") == 0) {
+    else if (strcmp(tagname, "goal") == 0)
       playTokenCreated(element);
-    } else if (strcmp(tagname, "constrain") == 0) {
+    else if (strcmp(tagname, "constrain") == 0)
       playConstrained(element);
-    } else if (strcmp(tagname, "free") == 0) {
+    else if (strcmp(tagname, "free") == 0)
       playFreed(element);
-    } else if (strcmp(tagname, "activate") == 0) {
+    else if (strcmp(tagname, "activate") == 0)
       playActivated(element);
-    } else if (strcmp(tagname, "merge") == 0) {
+    else if (strcmp(tagname, "merge") == 0)
       playMerged(element);
-    } else if (strcmp(tagname, "reject") == 0) {
+    else if (strcmp(tagname, "reject") == 0)
       playRejected(element);
-    } else if (strcmp(tagname, "cancel") == 0) {
+    else if (strcmp(tagname, "cancel") == 0)
       playCancelled(element);
-    } else if (strcmp(tagname, "specify") == 0) {
+    else if (strcmp(tagname, "specify") == 0)
       playVariableSpecified(element);
-    } else if (strcmp(tagname, "reset") == 0) {
+    else if (strcmp(tagname, "reset") == 0)
       playVariableReset(element);
-    } else if (strcmp(tagname, "invoke") == 0) {
+    else if (strcmp(tagname, "invoke") == 0)
       playInvokeConstraint(element);
-    } else if (strcmp(tagname, "nddl") == 0) {
+    else {
+      check_error(strcmp(tagname, "nddl") == 0, "Unknown tag name");
       for (TiXmlElement * child_el = element.FirstChildElement() ;
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
         processTransaction(*child_el);
-	if(!m_client->propagate())
+	if (!m_client->propagate())
 	  return;
       }
-    } else
-      check_error(ALWAYS_FAILS);
-  }
-
-  void DbClientTransactionPlayer::playDefineClass(const TiXmlElement & element) {
-    const char * name = element.Attribute("name");
-    check_error(name != NULL);
-    
-    std::string std_name = name;
-    m_classes.push_back(std_name);
-  }
-
-  void DbClientTransactionPlayer::playDefineEnumeration(const TiXmlElement & element) {
-    const char * name = element.Attribute("name");
-    check_error(name != NULL);
-
-    std::string std_name = name;
-    m_enumerations.push_back(std_name);
+    }
+    m_client->propagate();
   }
 
   void DbClientTransactionPlayer::playVariableCreated(const TiXmlElement & element) {
@@ -142,15 +127,12 @@ namespace PLASMA {
     m_variables[std_name] = variable;
   }
 
-  void DbClientTransactionPlayer::playObjectCreated(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playObjectCreated(const TiXmlElement & element) {
     const char * name = element.Attribute("name");
     xmlAsValue(element, name);
   }
 
-
-  void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
     const char * relation = element.Attribute("relation");
     if (relation != NULL) {
       // inter-token temporal relation
@@ -166,6 +148,40 @@ namespace PLASMA {
       }
       else if (strcmp(relation, "after") == 0) {
         construct_constraint(precedes, target, End, origin, Start);
+        return;
+      }
+      else if (strcmp(relation, "meets") == 0) {
+        construct_constraint(concurrent, origin, End, target, Start);
+        return;
+      }
+      else if (strcmp(relation, "met_by") == 0) {
+        construct_constraint(concurrent, origin, Start, target, End);
+        return;
+      }
+      else if ((strcmp(relation, "equal") == 0) || 
+               (strcmp(relation, "equals") == 0)) {
+        construct_constraint(concurrent, origin, Start, target, Start);
+        construct_constraint(concurrent, origin, End, target, End);
+        return;
+      }
+      else if (strcmp(relation, "contains") == 0) {
+        construct_constraint(precedes, origin, Start, target, Start);
+        construct_constraint(precedes, target, End, origin, End);
+        return;
+      }
+      else if (strcmp(relation, "contained_by") == 0) {
+        construct_constraint(precedes, target, Start, origin, Start);
+        construct_constraint(precedes, origin, End, target, End);
+        return;
+      }
+      else if (strcmp(relation, "paralleled_by") == 0) {
+        construct_constraint(precedes, target, Start, origin, Start);
+        construct_constraint(precedes, target, End, origin, End);
+        return;
+      }
+      else if (strcmp(relation, "parallels") == 0) {
+        construct_constraint(precedes, origin, Start, target, Start);
+        construct_constraint(precedes, origin, End, target, End);
         return;
       }
       else if (strcmp(relation, "starts") == 0) {
@@ -212,16 +228,6 @@ namespace PLASMA {
         construct_constraint(precedes, target, End, origin, End);
         return;
       }
-      else if (strcmp(relation, "contains") == 0) {
-        construct_constraint(precedes, origin, Start, target, Start);
-        construct_constraint(precedes, target, End, origin, End);
-        return;
-      }
-      else if (strcmp(relation, "contained_by") == 0) {
-        construct_constraint(precedes, target, Start, origin, Start);
-        construct_constraint(precedes, origin, End, target, End);
-        return;
-      }
       else if (strcmp(relation, "starts_after") == 0) {
         construct_constraint(precedes, target, Start, origin, Start);
         return;
@@ -230,27 +236,9 @@ namespace PLASMA {
         construct_constraint(precedes, origin, Start, target, Start);
         return;
       }
-      else if (strcmp(relation, "meets") == 0) {
-        construct_constraint(concurrent, origin, End, target, Start);
-        return;
-      }
-      else if (strcmp(relation, "met_by") == 0) {
-        construct_constraint(concurrent, origin, Start, target, End);
-        return;
-      }
-      else if ((strcmp(relation, "equal") == 0) || 
-               (strcmp(relation, "equals") == 0)) {
-        construct_constraint(concurrent, origin, Start, target, Start);
-        construct_constraint(concurrent, origin, End, target, End);
-        return;
-      }
-      else if (strcmp(relation, "any") == 0) {
-        //do nothing just create the token
-        return;
-      }
-
-      // TODO: the others
-      check_error(ALWAYS_FAILS);
+      check_error(strcmp(relation, "any") == 0,
+                  std::string("unknown temporal relation name ") + std::string(relation));
+      // The "any" relation is not an actual constraint, so don't create one.
       return;
     }
     // simple token creation
@@ -264,7 +252,7 @@ namespace PLASMA {
     // by extracting the class from the object
     TokenId token;
 
-    if(Schema::instance()->isPredicate(type))
+    if (Schema::instance()->isPredicate(type))
        token = m_client->createToken(type);
     else {
       LabelStr typeStr(type);
@@ -296,8 +284,7 @@ namespace PLASMA {
     }
   }
 
-  void DbClientTransactionPlayer::playConstrained(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playConstrained(const TiXmlElement & element) {
     TiXmlElement * object_el = element.FirstChildElement();
     check_error(object_el != NULL);
     check_error(strcmp(object_el->Value(), "object") == 0);
@@ -380,8 +367,7 @@ namespace PLASMA {
     m_client->cancel(token);    
   }
 
-  void DbClientTransactionPlayer::playVariableSpecified(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playVariableSpecified(const TiXmlElement & element) {
     TiXmlElement * var_el = element.FirstChildElement();
     check_error(var_el != NULL);
     ConstrainedVariableId variable = xmlAsVariable(*var_el);
@@ -389,26 +375,21 @@ namespace PLASMA {
 
     TiXmlElement * value_el = var_el->NextSiblingElement();
     check_error(value_el != NULL);
-      const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
-      if (value->isSingleton()) {
-        double v = value->getSingletonValue();
-        m_client->specify(variable, v);
-      } else {
-        m_client->specify(variable, *value);
-      }
-      //    double value = xmlAsValue(*value_el);
-      //    m_client->specify(variable, value);    
+    const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+    if (value->isSingleton()) {
+      double v = value->getSingletonValue();
+      m_client->specify(variable, v);
+    } else
+      m_client->specify(variable, *value);
   }
 
-  void DbClientTransactionPlayer::playVariableReset(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playVariableReset(const TiXmlElement & element) {
     TiXmlElement * var_el = element.FirstChildElement();
     check_error(var_el != NULL);
     m_client->reset(xmlAsVariable(*var_el));
   }
 
-  void DbClientTransactionPlayer::playInvokeConstraint(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playInvokeConstraint(const TiXmlElement & element) {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
     const char * identifier = element.Attribute("identifier");
@@ -420,14 +401,12 @@ namespace PLASMA {
     // normal constraints
     std::vector<ConstrainedVariableId> variables;
     for (TiXmlElement * child_el = element.FirstChildElement() ;
-         child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+         child_el != NULL ; child_el = child_el->NextSiblingElement())
       variables.push_back(xmlAsVariable(*child_el));
-    }
     m_client->createConstraint(name, variables);
   }
 
-  void DbClientTransactionPlayer::playInvokeTransaction(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playInvokeTransaction(const TiXmlElement & element) {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
     const char * identifier = element.Attribute("identifier");
