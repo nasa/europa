@@ -620,14 +620,21 @@ namespace Prototype {
             outputToken(trans, T_TRANSACTION, 0, 1, 0, rId, tokOut, varOut);
             tokens.erase(trans);
           }
-          std::list<InstantId> insts;
-          rId->getInstants(insts, MINUS_INFINITY, PLUS_INFINITY);
-          for(std::list<InstantId>::iterator instIt = insts.begin();
+          const std::map<int, InstantId>& insts = rId->getInstants();
+          for(std::map<int,InstantId>::const_iterator instIt = insts.begin();
               instIt != insts.end(); ++instIt) {
-            InstantId inst = *instIt;
+            InstantId inst = (*instIt).second;
             outputInstant(inst, rId->getKey(), instsOut);
             objOut << inst->getKey() << COMMA;
           }
+//           std::list<InstantId> insts;
+//           rId->getInstants(insts, MINUS_INFINITY, PLUS_INFINITY);
+//           for(std::list<InstantId>::iterator instIt = insts.begin();
+//               instIt != insts.end(); ++instIt) {
+//             InstantId inst = *instIt;
+//             outputInstant(inst, rId->getKey(), instsOut);
+//             objOut << inst->getKey() << COMMA;
+//           }
           objOut << std::endl;
         }
         else {
