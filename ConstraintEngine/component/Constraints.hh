@@ -8,7 +8,7 @@
 
 namespace Prototype {
 
-  class AddEqualConstraint: public Constraint {
+  class AddEqualConstraint : public Constraint {
   public:
     AddEqualConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
@@ -24,7 +24,7 @@ namespace Prototype {
     static const int ARG_COUNT = 3;
   };
 
-  class EqualConstraint: public Constraint {
+  class EqualConstraint : public Constraint {
   public:
     EqualConstraint(const LabelStr& name,
 		    const LabelStr& propagatorName,
@@ -34,14 +34,9 @@ namespace Prototype {
     void handleExecute();
 
     /**
-     * @brief Accessor required for EquilityConstraintPropagator.
+     * @brief Accessor required for EqualityConstraintPropagator.
      */
     static AbstractDomain& getCurrentDomain(const ConstrainedVariableId& var);
-
-  private:
-    static const int X = 0;
-    static const int Y = 1;
-    static const int ARG_COUNT = 2;
   };
 
   class SubsetOfConstraint : public UnaryConstraint {
@@ -90,7 +85,7 @@ namespace Prototype {
     static const int ARG_COUNT = 2;
   };
 
-  class NotEqualConstraint: public Constraint {
+  class NotEqualConstraint : public Constraint {
   public:
     NotEqualConstraint(const LabelStr& name,
 		       const LabelStr& propagatorName,
@@ -124,7 +119,7 @@ namespace Prototype {
     NotEqualConstraint m_notEqualConstraint;
   };
 
-  class MultEqualConstraint: public Constraint {
+  class MultEqualConstraint : public Constraint {
   public:
     MultEqualConstraint(const LabelStr& name,
 			const LabelStr& propagatorName,
@@ -140,7 +135,7 @@ namespace Prototype {
     static const int ARG_COUNT = 3;
   };
 
-  class AddMultEqualConstraint: public Constraint {
+  class AddMultEqualConstraint : public Constraint {
   public:
     AddMultEqualConstraint(const LabelStr& name,
 			   const LabelStr& propagatorName,
