@@ -1,14 +1,53 @@
 #!/bin/bash
-# $Id: autobuild,v 1.85 2004-09-28 15:53:56 wedgingt Exp $
+# $Id: autobuild,v 1.86 2004-09-28 16:26:06 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
-# set -x
+echo ''
+echo 'PLASMA autobuild script'
+echo ''
+info=`uname -a; echo ''; g++ --version ; hostname ; pwd`
+echo "$info"
 
 # Usually, this is run via cron, which does not use the usual $PATH
-PATH=/usr/java/j2sdk1.4.2_04/bin:/usr/local/jam2.4:/usr/local/bin:"$PATH"
-JAVA_HOME=/usr/java/j2sdk1.4.2_04
-export PATH JAVA_HOME
+OS="`uname -s`"
+case "$OS" in
+    Linux)
+        CVS_HOME=/usr
+        GCC_HOME=/usr
+        JAM_HOME=/usr/local/jam2.4
+        JAVA_HOME=/usr/java/j2sdk1.4.2_04
+        ;;
+    SunOS)
+        CVS_HOME=/usr/local
+        GCC_HOME=/usr/local/beta/gcc-3.2.2
+        JAM_HOME=/usr/local/bin
+        JAVA_HOME=/usr/local/j2sdk1.4.1
+        ;;
+esac
+
+for x in "$CVS_HOME"/bin/cvs "$GCC_HOME"/bin/g++ "$JAM_HOME"/jam "$JAVA_HOME"/bin/javac "$GCC_HOME"/lib
+if test ! -x "$x"
+then
+    echo ''
+    echo "$0"': cannot find '"$x"
+    exit 2
+fi
+
+PATH="$JAVA_HOME"/bin:"$JAM_HOME":"$GCC_HOME"/bin:"$CVS_HOME"/bin:"$PATH"
+export JAVA_HOME PATH
+
+# Make sure that libstdc++.so is in this.
+#   Cannot test for it since some installs don't create libstdc++.so
+#     itself, but only with a version appended.
+#   In general, may have to ask the compiler where the libraries are.
+if test -z "$LD_LIBRARY_PATH"
+then
+    LD_LIBRARY_PATH="$GCC_HOME"/lib
+else
+    LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$GCC_HOME"/lib
+fi
+export LD_LIBRARY_PATH
 
 # Address to mail messages to.
 email=checkins@postdoc.arc.nasa.gov
@@ -24,19 +63,21 @@ startdir="`cd $startdir; pwd`"
 cd "$startdir"
 
 # Don't run this script more than once in the same directory.
-#   Should figure out a way to require at most run on a computer at once,
+#   Should figure out a way to require at most one run on a computer at a time,
 #     as that's the real requirement (related to the CVS tagging scheme).
-mkdir working || exit 1
+if mkdir working
+then
+    # Remove the "lock" when this shell process exits.
+    trap 'rmdir $startdir/working' 0
+else
+    echo ''
+    echo "$0"': could not create lock directory; already running?'
+    exit 1
+fi
 
-# Remove the "lock" when this shell process exits.
-trap 'rmdir $startdir/working' 0
 
 rm -rf Old
 test -d Prior && mv Prior Old
-
-info=`uname -a; echo ''; g++ --version ; hostname ; pwd`
-
-echo "$info"
 
 # Refuse to run if a prior check out is present.
 if test -d PLASMA -o -d Prior
@@ -46,7 +87,7 @@ then
      echo 'PLASMA directory already present or configuration botch; aborting autobuild') | \
     Mail -s 'PLASMA Autobuild on '"`hostname`"' in '"`pwd`"' aborted' "$email"
   mkdir working/aborted
-  exit 2
+  exit 1
 fi
 
 mkdir Prior
@@ -61,11 +102,6 @@ libmethods='STATIC NONE'
 # Don't try to use X11 (mostly to prevent Purify from doing so)
 DISPLAY=
 export DISPLAY
-
-# Make sure that libstdc++.so is in this.
-#   In general, may have to ask the compiler where the libraries are.
-LD_LIBRARY_PATH='/usr/lib'
-export LD_LIBRARY_PATH
 
 # On Linux, debug memory allocation.
 MALLOC_CHECK_=2
