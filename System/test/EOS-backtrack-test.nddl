@@ -101,10 +101,8 @@ class Storage extends Resource {
 Satellite::TakeImg {
   met_by(object.Pointing p);
   starts(Memory.change tx);
-  if (m_target) {
-    eq(tx.quantity,m_target.m_size);
-    eq(duration,m_target.m_size);
-  }
+  eq(tx.quantity,m_target.m_size);
+  eq(duration,m_target.m_size);
 }
 
 // doesn't calculate exact, but rather, linear distance as a simplification
