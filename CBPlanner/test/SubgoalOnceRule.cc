@@ -10,7 +10,8 @@ namespace Prototype {
 
   class SubgoalOnceRuleRoot : public RuleInstance {
   public:
-    SubgoalOnceRuleRoot(const RuleId& rule, const TokenId& token, const PlanDatabaseId& pdb, int count) : RuleInstance(rule, token, pdb, token->getObject()) { 
+    SubgoalOnceRuleRoot(const RuleId& rule, const TokenId& token, const PlanDatabaseId& pdb, 
+                        int count) : RuleInstance(rule, token, pdb, token->getObject()) { 
       m_count = count;
     }
     void handleExecute();
@@ -20,8 +21,10 @@ namespace Prototype {
 
   int SubgoalOnceRule::m_count = 0;
 
-  RuleInstanceId SubgoalOnceRule::createInstance(const TokenId& token, const PlanDatabaseId& pdb) const {
+  RuleInstanceId SubgoalOnceRule::createInstance(const TokenId& token, const PlanDatabaseId& pdb,
+                                                 const RulesEngineId &rulesEngine) const {
     RuleInstanceId rootInstance = (new SubgoalOnceRuleRoot(m_id, token, pdb, m_count))->getId();
+    rootInstance->setRulesEngine(rulesEngine);
     m_count++; 
     return rootInstance;
   }

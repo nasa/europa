@@ -7,7 +7,7 @@ namespace Prototype {
 
   class SubgoalOnceRule : public Rule {
   public:
-    RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& pdb) const;
+    RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& pdb, const RulesEngineId &rulesEngine) const;
     SubgoalOnceRule(const LabelStr& name, int count);
     virtual ~SubgoalOnceRule();
   private:
