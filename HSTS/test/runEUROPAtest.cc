@@ -84,15 +84,32 @@ int main(int argc, const char ** argv) {
     std::cerr << "Assembly planning..." << std::endl;
 
     // Run the planner
-    assembly.plan(txSource, heurSource, pidSource);
+    CBPlanner::Status result = assembly.plan(txSource, heurSource, pidSource);
 
-    std::cerr << "Finished Planning. Printing the plan..." << std::endl;
+    switch(result) {
+    case CBPlanner::PLAN_FOUND: 
+      std::cerr << "Finished Planning. Printing the plan..." << std::endl;
+      std::cout << "runEUROPAtest found a plan at depth " << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched() << std::endl;
+      // Dump the results
+      assembly.write(std::cout);
+      break;
+    case CBPlanner::TIMEOUT_REACHED:
+      std::cout << "runEUROPAtest reached time alloted [" << assembly.getTotalNodesSearched() << "] without finding a plan." << std::endl;
+      break;
+    case CBPlanner::SEARCH_EXHAUSTED:
+      std::cout << "runEUROPAtest exhausted the search without finding a plan" << std::endl;
+      break;
+    case CBPlanner::INITIALLY_INCONSISTENT:
+      std::cout << "runEUROPAtest found the initial plan is inconsistent" << std::endl;
+      break;
+    default:
+      assert(false);
+      break;
+    }
 
-    // Dump the results
-    assembly.write(std::cout);
-
-    debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr));
   }
+
+  debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr));
 
   std::cerr << "Terminating the assembly ..." << std::endl;
 
