@@ -205,7 +205,7 @@ private:
       objects.push_back(object);
     }
 
-    Variable<ObjectSet> objectVar(db.getConstraintEngine(), objects);
+    InternalVariable<ObjectSet> objectVar(db.getConstraintEngine(), objects);
     Variable<IntervalIntDomain> filterVar(db.getConstraintEngine(), IntervalIntDomain(0, NUM_OBJECTS));
     ObjectFilter filter(LabelStr("Default"), db.getConstraintEngine(), objectVar.getId(), 0, filterVar.getId());
 
