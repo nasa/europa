@@ -34,4 +34,16 @@ namespace Prototype {
   double IntervalIntDomain::minDelta() const {
     return 1;
   }
+
+  double IntervalIntDomain::translateNumber(double number, bool asMin) const {
+    double result = IntervalDomain::translateNumber(int(number), asMin);
+
+    // If there has been no rounding, return result
+    if(result == number)
+      return result;
+    else if (asMin && number > 0) // increment result for rounding up, instead of down
+      result = result +1;
+
+    return result;
+  }
 }

@@ -195,6 +195,11 @@ namespace Prototype{
      */
     bool equate(AbstractDomain& dom);
 
+    /**
+     * @brief Enforces semantics of PLUS?MINUS infinity
+     */
+    virtual double translateNumber(double number, bool asMin = true) const;
+
   protected:
 
     /**

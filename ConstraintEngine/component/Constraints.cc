@@ -39,42 +39,31 @@ namespace Prototype
     double zMin;
     double zMax;
 
-    bool xIsInfinite = domx.getBounds(xMin, xMax);
-    bool yIsInfinite = domy.getBounds(yMin, yMax);
-    bool zIsInfinite = domz.getBounds(zMin, zMax);
+    domx.getBounds(xMin, xMax);
+    domy.getBounds(yMin, yMax);
+    domz.getBounds(zMin, zMax);
 
-    /* Bomb out if 2 or more domains are infinite */
-    if((xIsInfinite && (yIsInfinite || zIsInfinite)) ||
-       (yIsInfinite && zIsInfinite))
-      return;
-
-    if (!(xIsInfinite || yIsInfinite)) {
-      if (zMin < xMin + yMin)
-	zMin = xMin + yMin;
-      if (zMax > xMax + yMax)
-	zMax = xMax + yMax;
-    }
-
+    // Process Z
+    if(zMax > xMax + yMax)
+      zMax = domz.translateNumber(xMax + yMax, false);
+    if(zMin < xMin + yMin)
+      zMin = domz.translateNumber(xMin + yMin, true);
     if(domz.intersect(zMin,zMax) && domz.isEmpty())
       return;
-    
-    if (!(zIsInfinite || yIsInfinite)) {
-      if (xMax > zMax - yMin)
-	xMax = zMax - yMin;
-      if (xMin < zMin - yMax)
-	xMin = zMin - yMax;
-    }
 
+    // Process X
+    if(xMax > zMax - yMin)
+      xMax = domx.translateNumber(zMax - yMin, false);
+    if(xMin < zMin - yMax)
+      xMin = domx.translateNumber(zMin - yMax, true);
     if(domx.intersect(xMin,xMax)  && domx.isEmpty())
       return;
-    
-    if (!(xIsInfinite || zIsInfinite)) {
-      if (yMax > zMax - xMin)
-	yMax = zMax - xMin;
-      if (yMin < zMin - xMax)
-	yMin = zMin - xMax;
-    }
 
+    // Process Y
+    if(yMax > zMax - xMin)
+      yMax = domy.translateNumber(zMax - xMin, false);
+    if(yMin < zMin - xMax)
+      yMin = domy.translateNumber(zMin - xMax, true);
     domy.intersect(yMin,yMax);
   }
 
@@ -238,5 +227,68 @@ namespace Prototype
     // if it is a restriction, but not a singleton, then we can ignore it.
     if(changeType != DomainListener::RESET && changeType != DomainListener::RELAXED)
       return !getCurrentDomain(variable).isSingleton();
+  }
+
+  /*************************************************************
+   * MultEqualConstraint
+   *************************************************************/
+  MultEqualConstraint::MultEqualConstraint(const LabelStr& name,
+					 const LabelStr& propagatorName,
+					 const ConstraintEngineId& constraintEngine,
+					 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables){
+    check_error(variables.size() == ARG_COUNT);
+    for(int i=0; i< ARG_COUNT; i++)
+      check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
+  }
+
+  void MultEqualConstraint::handleExecute()
+  {
+    IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
+    IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+    IntervalDomain& domz = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
+
+    /* Test preconditions for continued execution */
+    if(domx.isDynamic() ||
+       domy.isDynamic() ||
+       domz.isDynamic())
+      return;
+ 
+
+    check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
+
+    double xMin;
+    double xMax;
+    double yMin;
+    double yMax;
+    double zMin;
+    double zMax;
+
+    domx.getBounds(xMin, xMax);
+    domy.getBounds(yMin, yMax);
+    domz.getBounds(zMin, zMax);
+
+    // Process Z
+    if(zMax > xMax * yMax)
+      zMax = domz.translateNumber(xMax * yMax, false);
+    if(zMin < xMin * yMin)
+      zMin = domz.translateNumber(xMin * yMin, true);
+    if(domz.intersect(zMin,zMax) && domz.isEmpty())
+      return;
+
+    // Process X
+    if(yMin != 0 && xMax > zMax / yMin)
+      xMax = domx.translateNumber(zMax / yMin, false);
+    if(yMax != 0 && xMin < zMin / yMax)
+      xMin = domx.translateNumber(zMin / yMax, true);
+    if(domx.intersect(xMin,xMax)  && domx.isEmpty())
+      return;
+
+    // Process Y
+    if(xMin != 0 && yMax > zMax / xMin)
+      yMax = domy.translateNumber(zMax / xMin, false);
+    if(xMax != 0 && yMin < zMin / xMax)
+      yMin = domy.translateNumber(zMin / xMax, true);
+    domy.intersect(yMin,yMax);
   }
 }

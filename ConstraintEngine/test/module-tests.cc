@@ -210,6 +210,7 @@ public:
     runTest(testConstraintRemoval);
     runTest(testDelegation);
     runTest(testNotEqual);
+    runTest(testMultEqualConstraint);
     return true;
   }
 
@@ -256,15 +257,31 @@ private:
 
   static bool testAddEqualConstraint()
   {
-    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
-    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
-    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
-    AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
-    ENGINE->propagate();
-    assert(ENGINE->constraintConsistent());
-    assert(v0.getDerivedDomain().getSingletonValue() == 1);
-    assert(v1.getDerivedDomain().getSingletonValue() == 1);
-    assert(v2.getDerivedDomain().getSingletonValue() == 2);
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(ENGINE->constraintConsistent());
+      assert(v0.getDerivedDomain().getSingletonValue() == 1);
+      assert(v1.getDerivedDomain().getSingletonValue() == 1);
+      assert(v2.getDerivedDomain().getSingletonValue() == 2);
+    }
+
+    // Now test mixed types
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(1.2, 2.8));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 3));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(ENGINE->constraintConsistent());
+      assert(v0.getDerivedDomain().getSingletonValue() == 1);
+      assert(v1.getDerivedDomain().getSingletonValue() == 2);
+      assert(v2.getDerivedDomain().getSingletonValue() == 3);
+    }
+
     return true;
   }
 
@@ -600,6 +617,33 @@ private:
     assert(ENGINE->pending());
     assert(ENGINE->propagate());
     assert(v0.getDerivedDomain() == v2.getDerivedDomain());
+    return true;
+  }
+
+  static bool testMultEqualConstraint(){
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
+      MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(ENGINE->constraintConsistent());
+      assert(v0.getDerivedDomain() == v2.getDerivedDomain());
+    }
+
+    // Now test with 0 valued denominators and infinites
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, PLUS_INFINITY));
+      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(1, PLUS_INFINITY));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, 6));
+      MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assert(ENGINE->constraintConsistent());
+      assert(v0.getDerivedDomain().getUpperBound() == 6);
+      assert(v1.getDerivedDomain().getUpperBound() == PLUS_INFINITY);
+      assert(v2.getDerivedDomain().getLowerBound() == 0);
+    }
+
     return true;
   }
 };

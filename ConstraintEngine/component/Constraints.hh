@@ -107,5 +107,43 @@ namespace Prototype
     static const int Y = 1;
     static const int ARG_COUNT = 2;
   };
+
+  class MultEqualConstraint: public Constraint
+  {
+  public:
+    MultEqualConstraint(const LabelStr& name,
+			const LabelStr& propagatorName,
+			const ConstraintEngineId& constraintEngine,
+			const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+    static const int X = 0;
+    static const int Y = 1;
+    static const int Z = 2;
+    static const int ARG_COUNT = 3;
+  };
+
+  class AddMultEqualConstraint: public Constraint
+  {
+  public:
+    AddMultEqualConstraint(const LabelStr& name,
+			   const LabelStr& propagatorName,
+			   const ConstraintEngineId& constraintEngine,
+			   const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+    bool canIgnore(const ConstrainedVariableId& variable, 
+		   int argIndex, 
+		   const DomainListener::ChangeType& changeType);
+  private:
+    static const int A = 0;
+    static const int B = 1;
+    static const int C = 2;
+    static const int D = 3;
+    static const int ARG_COUNT = 4;
+  };
 }
 #endif

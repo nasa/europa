@@ -34,6 +34,8 @@ namespace Prototype{
      */
     double minDelta() const;
 
+    double translateNumber(double number, bool asMin = true) const;
+
   private:
     /**
      * @brief Enforces integer semantics. Will be compiled out for fast version.

@@ -44,6 +44,7 @@ namespace Prototype {
       runTest(testBoolDomain);
       runTest(testDifference);
       runTest(testOperatorEquals);
+      runTest(testInfinitesAndInts);
       return true;
     }
 
@@ -209,6 +210,22 @@ namespace Prototype {
       IntervalDomain dom1(50, 100);
       dom0 = dom1;
       assert(dom0 == dom1);
+      return true;
+    }
+
+    static bool testInfinitesAndInts(){
+      IntervalDomain dom0;
+      assert(dom0.translateNumber(MINUS_INFINITY) == MINUS_INFINITY);
+      assert(dom0.translateNumber(MINUS_INFINITY - 1) == MINUS_INFINITY);
+      assert(dom0.translateNumber(MINUS_INFINITY + 1) == MINUS_INFINITY + 1);
+      assert(dom0.translateNumber(PLUS_INFINITY + 1) == PLUS_INFINITY);
+      assert(dom0.translateNumber(PLUS_INFINITY - 1) == PLUS_INFINITY - 1);
+      assert(dom0.translateNumber(2.8) == 2.8);
+
+      IntervalIntDomain dom1;
+      assert(dom1.translateNumber(2.8, false) == 2);
+      assert(dom1.translateNumber(2.8, true) == 3);
+      assert(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY - 1);
       return true;
     }
   };

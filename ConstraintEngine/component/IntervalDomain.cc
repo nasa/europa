@@ -112,7 +112,7 @@ namespace Prototype {
   bool IntervalDomain::getBounds(double& lb, double& ub) const{
     lb = m_lb;
     ub = m_ub;
-    return isInfinite();
+    return (m_ub == PLUS_INFINITY || m_lb == MINUS_INFINITY);
   }
 
   double IntervalDomain::getSingletonValue() const {
@@ -261,5 +261,12 @@ namespace Prototype {
   const AbstractDomain::DomainType& IntervalDomain::getType() const{
     static const AbstractDomain::DomainType s_type = REAL_INTERVAL;
     return s_type;
+  }
+
+  double IntervalDomain::translateNumber(double number, bool) const {
+    if(number < 0)
+      return (number < MINUS_INFINITY ? MINUS_INFINITY : number);
+    else
+      return (number > PLUS_INFINITY ? PLUS_INFINITY : number);
   }
 }
