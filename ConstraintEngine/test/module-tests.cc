@@ -358,7 +358,7 @@ public:
     runTest(testCondAllSameConstraint);
     runTest(testCondAllDiffConstraint);
     runTest(testConstraintDeletion);
-    //runTest(testArbitraryConstraints);
+    runTest(testArbitraryConstraints);
     return(true);
   }
 
