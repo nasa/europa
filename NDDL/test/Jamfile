@@ -8,8 +8,9 @@ SubDirHdrs $(PLASMA) PlanDatabase test ;
 
 local variant ;
 for variant in $(ALL_VARIANTS) {
-  local plandb = [ FVariantName PlanDbModuleTests : $(variant) ] ;
-  MakeLocate [ FGristFiles $(plandb)$(SUFOBJ) ] : [ FDirName $(PLASMA) PlanDatabase test ] ;
+  local object = [ FVariantName PlanDbModuleTests : $(variant) ] ;
+  MakeLocate [ FGristFiles $(object)$(SUFOBJ) ] : [ FDirName $(PLASMA) PlanDatabase test ] ;
+  MakeLocate [ FGristFiles $(object)_pic$(SUFOBJ) ] : [ FDirName $(PLASMA) PlanDatabase test ] ;
 }
 
 ModuleMain nddl-module-tests : module-tests.cc PlanDbModuleTests.o : NDDL ;
