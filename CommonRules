@@ -544,11 +544,15 @@ rule SharedLibraryFromObjects
 
 	if $(KEEPOBJS)
 	{
-	    LocalDepends obj : $(_s) ;
+		if ! $(3) {
+		    LocalDepends obj : $(_s) ;
+		}
 	}
 	else
 	{
-	    LocalDepends lib : $(_l) ;
+		if ! $(3) {
+		    LocalDepends lib : $(_l) ;
+		}
 	}
 
 	# Set LOCATE for the library and its contents.  The bound
@@ -561,35 +565,15 @@ rule SharedLibraryFromObjects
 	    MakeLocate $(_l) $(_l)($(_s:BS)) : $(LOCATE_TARGET) ;
 	}
 
-	if $(NOARSCAN) 
-	{ 
-	    # If we can't scan the library to timestamp its contents,
-	    # we have to just make the library depend directly on the
-	    # on-disk object files.  
+    # If we can't scan the library to timestamp its contents,
+    # we have to just make the library depend directly on the
+    # on-disk object files.  
 
-	    Depends $(_l) : $(_s) ;
-	}
-	else
-	{
-	    # If we can scan the library, we make the library depend
-	    # on its members and each member depend on the on-disk
-	    # object file.
-
-	    Depends $(_l) : $(_l)($(_s:BS)) ;
-
-	    for _i in $(_s)
-	    {
-		Depends $(_l)($(_i:BS)) : $(_i) ;
-	    }
-	}
+    Depends $(_l) : $(_s) ;
 
 	LocalClean clean : $(_l) ;
 
 	SharedArchive $(_l) : $(_s) ;
-
-	# If we can't scan the library, we have to leave the .o's around.
-
-	if ! ( $(NOARSCAN) || $(NOARUPDATE) ) { RmTemps $(_l) : $(_s) ; }
 }
 
 rule Shell
