@@ -209,6 +209,7 @@ public:
     runTest(testNotEqual);
     runTest(testMultEqualConstraint);
     runTest(testAddMultEqualConstraint);
+    runTest(testEqualSumConstraint);
     runTest(testConstraintDeletion);
     return(true);
   }
@@ -787,7 +788,7 @@ private:
     return true;
   }
 
-  static bool testAddMultEqualConstraint(){
+  static bool testAddMultEqualConstraint() {
     // 1 + 2 * 3 == 7
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 1));
@@ -847,7 +848,91 @@ private:
     return true;
   }
 
-  static bool testConstraintDeletion(){
+  static bool testEqualSumConstraint() {
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v9(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> vA(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> vB(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> vC(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> vD(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> vE(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> vF(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> vG(ENGINE, IntervalIntDomain(0, 27));
+    { // Duplicate first test case in testAddEqualConstraint(),
+      //   but note args are in different order in scope to get same result
+      EqualSumConstraint c0(LabelStr("EqualSumConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v0.getId(), v1.getId()));
+      ENGINE->propagate();
+      check_error(ENGINE->constraintConsistent());
+      check_error(v0.getDerivedDomain().getSingletonValue() == 1);
+      check_error(v1.getDerivedDomain().getSingletonValue() == 1);
+      check_error(v2.getDerivedDomain().getSingletonValue() == 2);
+    }
+    { // Same, but add another variable that will be constrained to 0
+      std::vector<ConstrainedVariableId> scope;
+      scope.push_back(v2.getId());
+      scope.push_back(v0.getId());
+      scope.push_back(v1.getId());
+      scope.push_back(v3.getId());
+      EqualSumConstraint c0(LabelStr("EqualSumConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      check_error(ENGINE->constraintConsistent());
+      check_error(v0.getDerivedDomain().getSingletonValue() == 1);
+      check_error(v1.getDerivedDomain().getSingletonValue() == 1);
+      check_error(v2.getDerivedDomain().getSingletonValue() == 2);
+      check_error(v3.getDerivedDomain().getSingletonValue() == 0);
+    }
+    { // Same, but add more variables that will be constrained to 0
+      std::vector<ConstrainedVariableId> scope;
+      scope.push_back(v2.getId());
+      scope.push_back(v0.getId());
+      scope.push_back(v1.getId());
+      scope.push_back(v3.getId());
+      scope.push_back(v4.getId());
+      scope.push_back(v5.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v7.getId());
+      scope.push_back(v8.getId());
+      scope.push_back(v9.getId());
+      scope.push_back(vA.getId());
+      scope.push_back(vB.getId());
+      scope.push_back(vC.getId());
+      scope.push_back(vD.getId());
+      scope.push_back(vE.getId());
+      scope.push_back(vF.getId());
+      scope.push_back(vG.getId());
+      EqualSumConstraint c0(LabelStr("EqualSumConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      check_error(ENGINE->constraintConsistent());
+      check_error(v0.getDerivedDomain().getSingletonValue() == 1);
+      check_error(v1.getDerivedDomain().getSingletonValue() == 1);
+      check_error(v2.getDerivedDomain().getSingletonValue() == 2);
+      check_error(v3.getDerivedDomain().getSingletonValue() == 0);
+      check_error(v4.getDerivedDomain().getSingletonValue() == 0);
+      check_error(v5.getDerivedDomain().getSingletonValue() == 0);
+      check_error(v6.getDerivedDomain().getSingletonValue() == 0);
+      check_error(v7.getDerivedDomain().getSingletonValue() == 0);
+      check_error(v8.getDerivedDomain().getSingletonValue() == 0);
+      check_error(v9.getDerivedDomain().getSingletonValue() == 0);
+      check_error(vA.getDerivedDomain().getSingletonValue() == 0);
+      check_error(vB.getDerivedDomain().getSingletonValue() == 0);
+      check_error(vC.getDerivedDomain().getSingletonValue() == 0);
+      check_error(vD.getDerivedDomain().getSingletonValue() == 0);
+      check_error(vE.getDerivedDomain().getSingletonValue() == 0);
+      check_error(vF.getDerivedDomain().getSingletonValue() == 0);
+      check_error(vG.getDerivedDomain().getSingletonValue() == 0);
+    }
+    return(true);
+  }
+
+  static bool testConstraintDeletion() {
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 100));
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(10, 100));

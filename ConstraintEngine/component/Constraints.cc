@@ -428,6 +428,130 @@ namespace Prototype {
   }
 
   /**
+   * @class EqSumConstraint
+   * @brief A = B + C where B and C can each be sums.
+   * Converted into an AddEqualConstraint and/or two EqSumConstraints with fewer variables.
+   */
+  EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
+                                         const LabelStr& propagatorName,
+                                         const ConstraintEngineId& constraintEngine,
+                                         const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      ARG_COUNT(variables.size()),
+      m_sum1(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()),
+      m_sum2(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()),
+      m_sum3(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()),
+      m_sum4(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()) {
+    check_error(ARG_COUNT > 2 && ARG_COUNT == m_variables.size());
+    std::vector<ConstrainedVariableId> scope;
+    // B is always first and C is always second for the first set, so:
+    scope.push_back(m_variables[1]); // B + ...
+    scope.push_back(m_variables[2]); // ... C ...
+    switch (ARG_COUNT) {
+    case 3: // A = B + C
+      scope.push_back(m_variables[0]); // ... = A
+      m_eqSumC1 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+      break;
+    case 4: // A = (B + C) + D
+      scope.push_back(m_sum1.getId()); // ... = (B + C)
+      m_eqSumC1 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+      scope.clear();
+      scope.push_back(m_sum1.getId()); // (B + C) ...
+      scope.push_back(m_variables[3]); // ... + D = ...
+      scope.push_back(m_variables[0]); // ... A
+      m_eqSumC2 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+      break;
+    case 5: case 6: case 7:
+      // 5: A = (B + C) + (D + E)
+      // 6: A = (B + C) + (D + E + F)
+      // 7: A = (B + C) + (D + E + F + G)
+      // So, do (B + C) and (D + E ...) for all three:
+      scope.push_back(m_sum1.getId()); // (B + C)
+      m_eqSumC1 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+      scope.clear();
+      scope.push_back(m_sum1.getId()); // (B + C) + ...
+      scope.push_back(m_sum2.getId()); // (D + E ...) = ...
+      scope.push_back(m_variables[0]); // A
+      m_eqSumC2 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+      scope.clear();
+      scope.push_back(m_variables[3]); // D + ...
+      scope.push_back(m_variables[4]); // E ...
+      switch (ARG_COUNT) {
+      case 5:
+        scope.push_back(m_sum2.getId()); // ... = (D + E)
+        m_eqSumC3 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+        break;
+      case 6:
+        scope.push_back(m_sum3.getId()); // ... = (D + E)
+        m_eqSumC3 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+        scope.clear();
+        scope.push_back(m_sum3.getId()); // (D + E) + ...
+        scope.push_back(m_variables[5]); // ... F = ...
+        scope.push_back(m_sum2.getId()); // ... (D + E + F)
+        m_eqSumC4 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+        break;
+      case 7:
+        scope.push_back(m_sum3.getId()); // ... = (D + E)
+        m_eqSumC3 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+        scope.clear();
+        scope.push_back(m_sum3.getId()); // (D + E) + ...
+        scope.push_back(m_sum4.getId()); // ... (F + G) = ...
+        scope.push_back(m_sum2.getId()); // (D + E + F + G)
+        m_eqSumC4 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+        scope.clear();
+        scope.push_back(m_variables[5]); // F + ...
+        scope.push_back(m_variables[6]); // ... G = ...
+        scope.push_back(m_sum4.getId()); // ... (F + G)
+        m_eqSumC5 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+        break;
+      default:
+        check_error(ALWAYS_FAILS);
+        break;
+      } /* switch (ARGCOUNT) 5, 6, 7 */
+      break;
+    default:
+      { // A = first_half + second_half, recursively
+        check_error(ARG_COUNT > 7);
+        scope.clear(); // Was B + C for first set: those that only call AddEqual
+        scope.push_back(m_sum1.getId()); // first_half + ...
+        scope.push_back(m_sum2.getId()); // ... second_half = ...
+        scope.push_back(m_variables[0]); // ... A
+        m_eqSumC1 = (new AddEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine, scope))->getId();
+        scope.clear();
+        scope.push_back(m_sum1.getId()); // first_half = ...
+        int half = ARG_COUNT/2;
+        int i = 1;
+        for ( ; i <= half; i++)
+          scope.push_back(m_variables[i]); // ... X + ...
+        m_eqSumC2 = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName, constraintEngine, scope))->getId();
+        scope.clear();
+        scope.push_back(m_sum2.getId()); // second_half = ...
+        for ( ; i < ARG_COUNT; i++)
+          scope.push_back(m_variables[i]); // ... Y + ...
+        m_eqSumC3 = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName, constraintEngine, scope))->getId();
+        break;
+      }
+      break;
+    }
+  }
+
+  EqualSumConstraint::~EqualSumConstraint() {
+    // Have to remove these before the variables they refer to
+    //   and there's no other way to force the compiler to do
+    //   these first. --wedgingt 2004 Feb 27
+    if (!m_eqSumC5.isNoId())
+      delete (Constraint*) m_eqSumC5;
+    if (!m_eqSumC4.isNoId())
+      delete (Constraint*) m_eqSumC4;
+    if (!m_eqSumC3.isNoId())
+      delete (Constraint*) m_eqSumC3;
+    if (!m_eqSumC2.isNoId())
+      delete (Constraint*) m_eqSumC2;
+    if (!m_eqSumC1.isNoId())
+      delete (Constraint*) m_eqSumC1;
+  }
+
+  /**
    * @class LessThanSumConstraint
    * @brief X <= Y + Z.
    * Converted into two constraints: X <= temp and temp equal to Y + Z.

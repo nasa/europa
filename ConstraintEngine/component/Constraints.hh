@@ -147,6 +147,30 @@ namespace Prototype {
     AddEqualConstraint m_addEqualConstraint;
   };
 
+  /**
+   * @class EqSumConstraint
+   * @brief A = B + C where B and C can each be sums.
+   * Converted into an AddEqualConstraint and/or two EqSumConstraints with fewer variables.
+   */
+  class EqualSumConstraint : public Constraint {
+  public:
+    EqualSumConstraint(const LabelStr& name,
+                       const LabelStr& propagatorName,
+                       const ConstraintEngineId& constraintEngine,
+                       const std::vector<ConstrainedVariableId>& variables);
+
+    ~EqualSumConstraint();
+
+    // All the work is done by the member constraints
+    inline void handleExecute() { }
+
+  private:
+    const int ARG_COUNT;
+
+    ConstraintId m_eqSumC1, m_eqSumC2, m_eqSumC3, m_eqSumC4, m_eqSumC5;
+    Variable<IntervalDomain> m_sum1, m_sum2, m_sum3, m_sum4;
+  };
+
   class LessOrEqThanSumConstraint : public Constraint {
   public:
     LessOrEqThanSumConstraint(const LabelStr& name,
