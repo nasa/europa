@@ -1,0 +1,51 @@
+SubDir PLASMA HSTS test ;
+
+if ! $(PLASMA_READY) {
+
+#
+# Heuristics Tests
+#
+
+HSTS_Test_Files = [ FGristFiles AtSubgoalRule HSTSModuleTests ] ;
+ModuleObjects $(HSTS_Test_Files:S=.cc) : HSTS ;
+
+ModuleMain hsts-module-tests : $(HSTS_Test_Files:S=$(SUFOBJ)) module-tests.cc : HSTS : CBPlanner ;
+RunModuleMain run-hsts-module-tests : hsts-module-tests ;
+LocalDepends tests : run-hsts-module-tests ;
+
+#
+# EUROPA TESTS
+#
+ModuleObjects runEUROPAtest.cc : HSTS ;
+
+rule RunEUROPATest {
+
+ local target = $(1) ;
+ local initialStates = $(2) ;
+ local heur = $(3) ;
+ local pid = $(4) ;
+
+ local model ;
+ for model in $(initialStates) {
+  local exe = $(model:S=) ;
+  local hh = $(model:S=.hh) ;
+  local cc = [ FGristFiles $(model:S=.cc) ] ;
+  local xml = $(model:S=.xml) ;
+  local o = $(cc:S=.o) ;
+  local lib = $(model:S=) ;
+
+  # create .hh, .cc, .o, and .xml for a .nddl
+  Includes $(cc) : $(hh) ;
+  NddlCompiler $(hh) $(cc) : $(model) ;
+  ModuleObjects $(cc) : NDDL ;
+
+  # create planner with linked model
+  ModuleMain $(exe) : $(o) runEUROPAtest.o : HSTS ;
+  RunModuleMain run-$(exe) : $(exe) : -i $(xml) "-h "$(heur) "-p "$(pid) ;
+  LocalDepends $(target) : run-$(exe) ;
+}
+}
+
+#RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
+
+} # PLASMA_READY
