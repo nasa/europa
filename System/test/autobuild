@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.89 2004-09-29 18:28:45 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.90 2004-09-29 18:34:16 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -35,12 +35,12 @@ case "$OS" in
     [Ss][Uu][Nn][Oo][Ss])
         CVS_HOME=/usr/local
         GCC_ROOTDIR=/usr/local/beta/gcc-3.2.2
-        JAM_HOME=/usr/local/beta
+        JAM_HOME=/usr/local/beta/bin
         JAVA_HOME=/usr/local/j2sdk1.4.1
         ;;
 esac
 
-for x in "$CVS_HOME"/bin/cvs "$GCC_ROOTDIR"/bin/g++ "$JAM_HOME"/bin/jam "$JAVA_HOME"/bin/javac "$GCC_ROOTDIR"/lib
+for x in "$CVS_HOME"/bin/cvs "$GCC_ROOTDIR"/bin/g++ "$JAM_HOME"/jam "$JAVA_HOME"/bin/javac "$GCC_ROOTDIR"/lib
 do
   if test ! -x "$x"
   then
@@ -51,7 +51,7 @@ do
 done
 
 # Usually, this is run via cron, which does not use the usual $PATH
-PATH="$JAVA_HOME"/bin:"$JAM_HOME"/bin:"$GCC_ROOTDIR"/bin:"$CVS_HOME"/bin:"$PATH"
+PATH="$JAVA_HOME"/bin:"$JAM_HOME":"$GCC_ROOTDIR"/bin:"$CVS_HOME"/bin:"$PATH"
 export GCC_ROOTDIR JAVA_HOME PATH
 
 # Make sure that libstdc++.so is in this.
