@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.92 2004-09-29 21:52:41 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.93 2004-10-05 00:51:04 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -114,7 +114,7 @@ then
             echo 'PLASMA directory already present or configuration botch; aborting autobuild') | \
                 Mail -s 'PLASMA Autobuild on '"`hostname`"' in '"`pwd`"' aborted' "$email"
         mkdir working/aborted
-        exit 1
+        exit 3
     fi
     mkdir Prior
     mv cvs.PLASMA jam.* Prior/
@@ -151,7 +151,7 @@ function cvsCmd() {
     (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments: '"$*") | \
         Mail -s 'PLASMA autobuild bug on '"`hostname`"' in '"`pwd`"' failed' "$email"
     mkdir working/failed
-    exit 22
+    exit 23
   fi
   if test "$1" != '-q' -a "$2" != 'update' -a "$removePlasma" = 'false'
   then
@@ -159,7 +159,7 @@ function cvsCmd() {
     (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments: '"$*") | \
         Mail -s 'PLASMA autobuild bug on '"`hostname`"' in '"`pwd`"' failed' "$email"
     mkdir working/failed
-    exit 22
+    exit 24
   fi
   echo Calling cvs $* at "`date`" ... >> cvs.PLASMA 2>&1
   cvs $* >> cvs.PLASMA 2>&1
@@ -217,6 +217,18 @@ for var in $variants
 do
   for libmethod in $libmethods
   do
+    if test ! -d "$startdir"/working
+    then
+        echo ''
+        echo "$0"': lock directory '"$startdir"'/working removed externally; exiting early'
+        exit 4
+    fi
+    if test -d "$startdir"/working/stop
+    then
+        echo ''
+        echo "$0"': directory '"$startdir"'/working/stop created externally; exiting early'
+        exit 5
+    fi
     if "$removePlasma"
     then
         cvsCmd co -r "$testingTag" PLASMA
