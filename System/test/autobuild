@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.11 2002-11-08 15:19:51 wedgingt Exp $
+# $Id: autobuild,v 1.12 2002-11-12 15:59:01 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -39,10 +39,10 @@ startdir="`cd $startdir; pwd`"
 echo cd "$startdir"
 cd "$startdir"
 
-trap 'rmdir $startdir/working' 0
-
 # Don't run this script more than once in the same directory.
 mkdir working || exit 1
+
+trap 'rmdir $startdir/working' 0
 
 # Primary compilation loop
 for dir in $subdirs
