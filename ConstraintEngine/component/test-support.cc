@@ -12,6 +12,7 @@ void initConstraintLibrary() {
     REGISTER_UNARY(SubsetOfConstraint, "SubsetOf", "Default");
     REGISTER_NARY(AddEqualConstraint, "AddEqual", "Default");
     REGISTER_NARY(AddMultEqualConstraint, "AddMultEqual", "Default");
+    REGISTER_NARY(AllDiffConstraint, "AllDiff", "Default");
     REGISTER_NARY(CardinalityConstraint, "Cardinality", "Default");
     REGISTER_NARY(CondAllDiffConstraint, "CondAllDiff", "Default");
     REGISTER_NARY(CondAllSameConstraint, "CondAllSame", "Default");
@@ -33,6 +34,7 @@ void initConstraintLibrary() {
     // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
     REGISTER_NARY(AddEqualConstraint, "addeq", "Default");
     REGISTER_NARY(AddMultEqualConstraint, "addmuleq", "Default");
+    REGISTER_NARY(AllDiffConstraint, "adiff", "Default"); // all different
     REGISTER_NARY(EqualConstraint, "asame", "Default"); // all same
     REGISTER_NARY(CardinalityConstraint, "card", "Default"); // cardinality not more than
     REGISTER_NARY(CountNonZerosConstraint, "cardeq", "Default"); // cardinality equals
