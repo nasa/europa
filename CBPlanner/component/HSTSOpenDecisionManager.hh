@@ -40,7 +40,6 @@ namespace Prototype {
 
     virtual DecisionPointId getNextDecision();
     virtual const ChoiceId getNextChoice();
-    virtual const int getNumberOfDecisions();
 
     // order returned is different
     virtual void getOpenDecisions(std::list<DecisionPointId>& decisions);

@@ -105,6 +105,23 @@ namespace Prototype {
     m_sortedObjectDecs.clear();
   }
 
+  DecisionPointId HSTSOpenDecisionManager::getNextDecision() {
+    if(!m_sortedObjectDecs.empty())
+      m_curDec = *m_sortedObjectDecs.begin();
+    else if (!m_sortedUnitVarDecs.empty())
+      m_curDec = *m_sortedUnitVarDecs.begin();
+    else if (!m_sortedTokDecs.empty()) 
+      m_curDec = *m_sortedTokDecs.begin();
+    else if (!m_sortedNonUnitVarDecs.empty()) 
+      m_curDec = *m_sortedNonUnitVarDecs.begin();
+    else m_curDec = DecisionPointId::noId();
+
+    /* Shold be able to require that current choices are empty */
+    check_error(m_curDec.isNoId() || m_curDec->getCurrentChoices().empty());
+
+    return m_curDec;
+  }
+
   // if there's a merge choice, keep the first one you get and return that one.
   // otherwise prefer to activate
   // finally prefer to reject
