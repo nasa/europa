@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.76 2004-09-17 17:51:24 wedgingt Exp $
+# $Id: autobuild,v 1.77 2004-09-17 20:10:49 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -125,7 +125,11 @@ function jamCmd() {
   echo 'jam '"$args $1"' in '"`pwd`"' exited '"$status"
   if test $status -ne 0
   then
-    (echo "$info"; echo ''; echo 'jam '"$args $1"' in '"`pwd`"' exited '"$status"; more jam.$2.$var.$libmethod < /dev/null) | \
+    (echo "$info";
+     echo '';
+     echo 'PPW_Config='"$PPW_Config"'; export PPW_Config';
+     echo 'jam '"$args $1"' in '"`pwd`"' exited '"$status";
+      more jam.$2.$var.$libmethod < /dev/null) | \
         Mail -s 'PLASMA Autobuild jam '"$args $1"' on '"`hostname`"' failed' "$email"
     mkdir working/failed
     exit $status
@@ -158,7 +162,14 @@ do
 
     jamCmd clean clean
 
-    (echo "$info"; echo ''; echo 'PLASMA autobuild of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
+    PPW_Config="$startdir"'/PLASMA/CBPlanner/component/sample-ppw-config'
+    export PPW_Config
+
+    jamCmd run-nddl-planner-tests
+
+    jamCmd clean clean
+
+    (echo "$info"; echo ''; echo 'PLASMA autobuild and tests of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
         more jam.*.$var.$libmethod < /dev/null) | \
       Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
 
