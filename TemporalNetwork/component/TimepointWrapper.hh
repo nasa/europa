@@ -1,3 +1,6 @@
+#ifndef _H_TimePointWrapper
+#define _H_TimePointWrapper
+
 #include "TemporalNetwork.hh"
 #include "TemporalNetworkDefs.hh"
 
@@ -12,9 +15,9 @@ namespace Prototype {
     TimepointWrapper(const TemporalPropagatorId& prop, const TempVarId& tempVar, const TimepointId& point);
     virtual ~TimepointWrapper();
 
-    const EntityId& getId() { return m_id; }
-    const TimepointId& getTimepoint() const {return m_timepoint;}
-    const TempVarId& getTempVar() const {return m_tempVar;}
+    inline const EntityId& getId() { return m_id; }
+    inline const TimepointId& getTimepoint() const {return m_timepoint;}
+    inline const TempVarId& getTempVar() const {return m_tempVar;}
   private:
     TemporalPropagatorId m_propagator;
     TempVarId m_tempVar;
@@ -22,3 +25,5 @@ namespace Prototype {
     EntityId m_id;
   };
 }
+
+#endif
