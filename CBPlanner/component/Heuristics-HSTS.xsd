@@ -61,10 +61,16 @@ xmlns="HSTS" elementFormDefault="qualified">
     </xs:choice>
 </xs:complexType>
 
-<xs:complexType name="PredicateParameterType">
+<xs:complexType name="ParameterType">
    <xs:sequence minOccurs="0" maxOccurs="unbounded">
        <xs:element name="Index" type="xs:integer"/>
        <xs:element name="Value" type="xs:string"/>
+   </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PredicateParameterType">
+   <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="Parameter" type="ParameterType"/>
    </xs:sequence>
 </xs:complexType>
 

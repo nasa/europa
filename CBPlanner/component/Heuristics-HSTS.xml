@@ -64,8 +64,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <PredicateSpec>
   <PredicateName>Spacecraft.Navigate</PredicateName>
   <PredicateParameters>
+   <Parameter>
      <Index>2</Index>
      <Value>Target524</Value>
+   </Parameter>
   </PredicateParameters>
   </PredicateSpec>
 </ConstrainedVariable>
@@ -85,8 +87,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <PredicateSpec>
   <PredicateName>Spacecraft.Instrument.Obs_Window_Inactive</PredicateName>
   <PredicateParameters>
+   <Parameter>
      <Index>4</Index>
      <Value>STANDBY</Value>
+   </Parameter>
   </PredicateParameters>
   </PredicateSpec>
 </ConstrainedVariable>
@@ -107,8 +111,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <PredicateSpec>
   <PredicateName>Spacecraft.Thrust_System.Thrust_Left</PredicateName>
   <PredicateParameters>
+   <Parameter>
      <Index>2</Index>
      <Value>NO_RIGHT</Value>
+   </Parameter>
   </PredicateParameters>
   </PredicateSpec>
   <Master/>
@@ -124,10 +130,14 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <PredicateSpec>
   <PredicateName>Thrust_Fwd</PredicateName>
   <PredicateParameters>
+    <Parameter>
      <Index>2</Index>
      <Value>24.5</Value>
+    </Parameter>
+    <Parameter>
      <Index>4</Index>
      <Value>RES</Value>
+    </Parameter>
   </PredicateParameters>
   </PredicateSpec>
   <Master>
