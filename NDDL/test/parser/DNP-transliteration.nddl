@@ -22,19 +22,17 @@ class Scan_Platform_Timeline {
         int ID;
         Observation_Level Data_Rate;
         int Length;
-        {
-            eq(ID,[0 +inf]);
-            eq(Length,[0 +inf]);
-        }
+
+        eq(ID,[0 +inf]);
+        eq(Length,[0 +inf]);
     }
     predicate Mosaic_HI {
         int ID;
         Observation_Level Data_Rate;
         int Length;
-        {
-            eq(ID,[0 +inf]);
-            eq(Length,[0 +inf]);
-        }
+
+        eq(ID,[0 +inf]);
+        eq(Length,[0 +inf]);
     }
     predicate Scan_Idle {}
 }
@@ -44,19 +42,17 @@ class Fields_and_Particles_Timeline {
         int ID;
         Observation_Level Data_Rate;
         int Length;
-        {
-            eq(ID,[0 +inf]);
-            eq(Length,[0 +inf]);
-        }
+
+        eq(ID,[0 +inf]);
+        eq(Length,[0 +inf]);
     }
     predicate F_and_P_Observation_HI {
         int ID;
         Observation_Level Data_Rate;
         int Length;
-        {
-            eq(ID,[0 +inf]);
-            eq(Length,[0 +inf]);
-        }
+
+        eq(ID,[0 +inf]);
+        eq(Length,[0 +inf]);
     }
     predicate F_and_P_Idle {}
 }
@@ -74,12 +70,11 @@ class SSR_Storage_Use_Timeline {
         REC_Future Rec_Post;
         Record_Obs What_obs;
         int DSS_Opp_Num;
-        {
-            eq(Start_Storage,[0 9000000]);
-            eq(End_Storage,[0 9000000]);
-            eq(Length,[0 +inf]);
-            eq(DSS_Opp_Num,[0 +inf]);
-        }
+
+        eq(Start_Storage,[0 9000000]);
+        eq(End_Storage,[0 9000000]);
+        eq(Length,[0 +inf]);
+        eq(DSS_Opp_Num,[0 +inf]);
     }
     predicate Playback {
         int Start_Storage, End_Storage, Playback_Rate;
@@ -88,13 +83,12 @@ class SSR_Storage_Use_Timeline {
         int Allowed_Earlier_Opps;
         End_Flag Flagged_End;
         PB_Past PB_Prior;
-        {
-            eq(Start_Storage,[0 9000000]);
-            eq(End_Storage,[0 9000000]);
-            eq(DSS_Opp_Num,[0 +inf]);
-            eq(Playback_Rate,[0 +inf]);
-            eq(Allowed_Earlier_Opps,[0 +inf]);
-        }
+
+        eq(Start_Storage,[0 9000000]);
+        eq(End_Storage,[0 9000000]);
+        eq(DSS_Opp_Num,[0 +inf]);
+        eq(Playback_Rate,[0 +inf]);
+        eq(Allowed_Earlier_Opps,[0 +inf]);
     }
     predicate Constant_Storage {
         int SSR_Storage;
@@ -102,10 +96,9 @@ class SSR_Storage_Use_Timeline {
         End_Flag Flagged_End;
         CS_Past CS_Prior;
         CS_Future CS_Post;
-        {
-            eq(SSR_Storage,[0 9000000]);
-            eq(DSS_Opp_Num,[0 +inf]);
-        }
+
+        eq(SSR_Storage,[0 9000000]);
+        eq(DSS_Opp_Num,[0 +inf]);
     }
 }
 
@@ -128,9 +121,8 @@ class Comm_Activity_Timeline {
         DSS_Id Location;
         int Playback_Rate;
         End_Flag Flagged_End;
-        {
-            eq(Playback_Rate,[0 +inf]);
-        }
+
+        eq(Playback_Rate,[0 +inf]);
     }
     predicate Comm_Idle {}
 }
@@ -144,10 +136,9 @@ class DSS_Availability_Timeline {
         int Downlink_Rate, Pre_Cal_Time, Post_Cal_Time;
         DSS_Id loc;
         int Opp_Number;
-        {
-            eq(Downlink_Rate,[0 +inf]);
-            eq(Opp_Number,[0 +inf]);
-        }
+
+        eq(Downlink_Rate,[0 +inf]);
+        eq(Opp_Number,[0 +inf]);
     }
     predicate No_Window {}
 }

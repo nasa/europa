@@ -7,23 +7,24 @@ class D {
 class Switcheroo {
   predicate Dummy {
     int x;
-    {
-      switch (x) {
-      case 3:
-      case 4:
-        meets(Dummy d);
-        eq(d.x,5);
-      case d.x:
-      case {4, 5, 6}:
-        meets(Dummy d);
-        eq(d.x,7);
-      case 'ab':
-      case [8 10]:
-      case id:
-        meets(Dummy d);
-        eq(d.x,9);
-      }
-    }
+  }
+}
+
+Switcheroo::Dummy {
+  switch (x) {
+  case 3:
+  case 4:
+    meets(Dummy d);
+    eq(d.x,5);
+  case d.x:
+  case {4, 5, 6}:
+    meets(Dummy d);
+    eq(d.x,7);
+  case 'ab':
+  case [8 10]:
+  case id:
+    meets(Dummy d);
+    eq(d.x,9);
   }
 }
 

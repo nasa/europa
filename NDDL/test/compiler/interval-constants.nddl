@@ -17,12 +17,15 @@ Foo::pred1{
 class World {
  Foo obj1;
  predicate initialState{
-  any(Foo.pred1 foo);
  }
 
  World(){
   obj1 = new Foo();
  }
+}
+
+World::initialState{
+ any(Foo.pred1 foo);
 }
 
 World world = new World();

@@ -5,43 +5,51 @@ enum allFruits [-inf +inf]
 
 class T {
   predicate Apple {
-    {
-      starts_before [0 10] (Orange);
-    }
   }
   predicate Orange {
-    {
-      contained_by [0 5] [2 3] (Apple);
-    }
   }
   predicate Grape {
-    {
-      starts_before [-inf 10] (Orange);
-    }
   }
   predicate Banana {
-    {
-      contained_by [-inf +inf] [2 +inf] (Apple);
-    }
   }
   predicate FloatingApple {
-    {
-      starts_before [0. 10] (Orange);
-    }
   }
   predicate FloatingOrange {
-    {
-      contained_by [0 5.] [2 3] (Apple);
-    }
   }
   predicate FloatingGrape {
-    {
-      starts_before [-inf 10.] (Orange);
-    }
   }
   predicate FloatingBanana {
-    {
-      contained_by [-inf +inf] [2. +inf] (Apple);
-    }
   }
+}
+
+T::Apple {
+  starts_before [0 10] (Orange);
+}
+
+T::Orange {
+  contained_by [0 5] [2 3] (Apple);
+}
+
+T::Grape {
+  starts_before [-inf 10] (Orange);
+}
+
+T::Banana {
+  contained_by [-inf +inf] [2 +inf] (Apple);
+}
+
+T::FloatingApple {
+  starts_before [0. 10] (Orange);
+}
+
+T::FloatingOrange {
+  contained_by [0 5.] [2 3] (Apple);
+}
+
+T::FloatingGrape {
+  starts_before [-inf 10.] (Orange);
+}
+
+T::FloatingBanana {
+  contained_by [-inf +inf] [2. +inf] (Apple);
 }

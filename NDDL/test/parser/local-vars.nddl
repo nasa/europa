@@ -2,15 +2,17 @@ enum Place { Martian_City, Lander, BigRock, Valley }
 
 class Location {
   predicate At {
-      Place x;
-      {
-        Place w = Martian_City, y = Lander;
-    }
+    Place x;
   }
   predicate Going {
     Place from, to;
-    {
-      Place z;
-    }
   }
+}
+
+Location::At {
+  Place w = Martian_City, y = Lander;
+}
+
+Location::Going {
+  Place z;
 }
