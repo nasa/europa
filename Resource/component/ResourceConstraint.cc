@@ -1,4 +1,5 @@
 #include "Constraints.hh"
+#include "Constraint.hh"
 #include "ConstraintEngine.hh"
 #include "ConstrainedVariable.hh"
 #include "IntervalIntDomain.hh"
@@ -17,6 +18,10 @@ namespace Prototype
     : Constraint(name, propagatorName, constraintEngine, variables){
     check_error(variables.size() == ARG_COUNT);
     //@todo add type checking of each variable in the constraint
+  }
+
+  AbstractDomain&  ResourceConstraint::getCurrentDomain(const ConstrainedVariableId& var){
+    return Constraint::getCurrentDomain(var);
   }
 
   void ResourceConstraint::handleExecute()

@@ -17,6 +17,13 @@ namespace Prototype {
 
     void handleExecute();
 
+    /**
+     * @brief Accessor required for ResourcePropagator so that it can
+     * set a domain to empty when there are resource violations.
+     */
+    static AbstractDomain& getCurrentDomain(const ConstrainedVariableId& var);
+
+
     bool canIgnore(const ConstrainedVariableId& variable, 
 		   int argIndex, 
 		   const DomainListener::ChangeType& changeType);

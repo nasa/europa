@@ -23,7 +23,12 @@ namespace Prototype {
   {
     m_min = min;
     m_max = max;
-    
+
+    // for now set m_resource to getObject.  Later remove m_resource as redundant and replace it with refs to getObject.
+    //m_resource = getObject();    
+
+
+    //create the usage variable
     m_usage = (new TokenVariable<IntervalDomain>(m_id,
 						 m_allVariables.size(),
 						 m_planDatabase->getConstraintEngine(), 
@@ -32,6 +37,7 @@ namespace Prototype {
 						 LabelStr("Usage")))->getId();
     m_allVariables.push_back(m_usage);
 
+    // add the resource constraint which will act as a messenger to changes and inform the ResourcePropagator.
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(getTime());
     temp.push_back(getObject());
@@ -39,17 +45,30 @@ namespace Prototype {
     ConstraintId usageRelation = 
       ConstraintLibrary::createConstraint(LabelStr("ResourceRelation"), m_planDatabase->getConstraintEngine(), temp);
     m_standardConstraints.insert(usageRelation);
+
+    // add the resource constraint which will act as a messenger to changes and inform the ResourcePropagator.
+    std::vector<ConstrainedVariableId> temp1;
+    temp1.push_back(getObject());
+    temp1.push_back(getTime());
+    temp1.push_back(m_usage);
+    ConstraintId horizonRelation = 
+      ConstraintLibrary::createConstraint(LabelStr("HorizonRelation"), m_planDatabase->getConstraintEngine(), temp1);
+    m_standardConstraints.insert(horizonRelation);
+
+    // All transactions as immediately active
+    activate();
+
   }
     
 
   int Transaction::getEarliest() const 
   {
-    return((int) getTime()->getDerivedDomain().getLowerBound());
+    return((int) getTime()->lastDomain().getLowerBound());
   }
 
   int Transaction::getLatest() const 
   {
-    return((int) getTime()->getDerivedDomain().getUpperBound());
+    return((int) getTime()->lastDomain().getUpperBound());
   }
 
   bool Transaction::isValid() const

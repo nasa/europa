@@ -14,17 +14,22 @@ namespace Prototype {
     void execute();
     bool updateRequired() const;
   protected:
-    void handleConstraintAdded(const ConstraintId& constraint){}
-    void handleConstraintRemoved(const ConstraintId& constraint){}
-    void handleConstraintActivated(const ConstraintId& constrain){}
-    void handleConstraintDeactivated(const ConstraintId& constraint){}
+    void handleConstraintAdded(const ConstraintId& constraint) {}
+    void handleConstraintRemoved(const ConstraintId& constraint) {}
+    void handleConstraintActivated(const ConstraintId& constrain) {}
+    void handleConstraintDeactivated(const ConstraintId& constraint) {}
     void handleNotification(const ConstrainedVariableId& variable, 
     			    int argIndex, 
     			    const ConstraintId& constraint, 
     			    const DomainListener::ChangeType& changeType);
 
   private:
+    
+    bool checkResourcePropagationRequired(const ConstrainedVariableId& variable) const;
+    void handleResourcePropagation(const ConstraintId constraint);
+
     std::set<ResourceId> m_resources;
+    ConstrainedVariableId m_forempty;
 
   };
 }

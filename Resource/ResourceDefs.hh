@@ -10,8 +10,8 @@ namespace Prototype
   // Define constants for default values.
   //@todo Use EUROPA standard defaults for value and time
   const std::string NO_NAME("NO_NAME");
-  const int LATEST_TIME = 999999;
-  const double LARGEST_VALUE = 99999999;
+  const int LATEST_TIME = PLUS_INFINITY;
+  const double LARGEST_VALUE = PLUS_INFINITY;
 
   class Violation;
   typedef Id<Violation> ViolationId;

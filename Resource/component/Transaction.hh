@@ -47,8 +47,8 @@ namespace Prototype {
     Transaction(const PlanDatabaseId& planDatabase,
 		const LabelStr& predicateName,
 		const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
-		double min = 0, 
-		double max = 0);
+		double min = -LARGEST_VALUE, 
+		double max = LARGEST_VALUE);
 
     /**
      * @brief Set the earliest time with a new value.
