@@ -354,6 +354,9 @@ private:
 		     IntervalIntDomain(2, 10),
 		     Token::noObject(), true);
 
+    // Constraint the start variable of both tokens
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(t0.getStart(), t1.getStart()));
+
     assert(t1.isInactive());
     t0.activate();
     t1.merge(t0.getId());
