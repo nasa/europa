@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.98 2004-10-13 21:48:04 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.99 2004-10-19 19:57:21 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -25,8 +25,32 @@ else
     fi
 fi
 
+if "$removePlasma"
+then
+    # For this to work, this script must be called by its full path name
+    #   when emailing to checkins@postdoc.arc.nasa.gov.
+    startdir="`dirname $0`"
+    startdir="`cd $startdir; pwd`"
+    cd "$startdir"
+else
+    startdir="`pwd`"
+    case "$startdir" in
+    *PLASMA)
+            if test ! -d CVS
+            then
+                echo "$0"': must be run inside existing PLASMA checkout when giving email address other than checkins@postdoc.arc.nasa.gov'
+                exit 21
+            fi
+            ;;
+    *)
+            echo "$0"': must be run inside existing PLASMA checkout when giving email address other than checkins@postdoc.arc.nasa.gov'
+            exit 22
+            ;;
+    esac
+fi
+
 # "Guess" where the programs that we need are, based on the operating system.
-#   Almost certainly only works at NASA/Ames in Code IC.
+#   Almost certainly only works at NASA/Ames in Code TC.
 OS="`uname -s`"
 case "$OS" in
     [Ll][Ii][Nn][Uu][Xx])
@@ -60,47 +84,10 @@ export GCC_ROOTDIR JAVA_HOME PATH
 info="Emailing to $email; removePlasma is $removePlasma`echo ''; uname -a; echo ''; g++ --version ; pwd ; echo ''`"
 echo "$info"
 
-# Make sure that libstdc++.so is in this.
-#   Cannot easily test for it since some installs don't create libstdc++.so per se,
-#     but only with a version number appended.
-#   In general, may have to ask the compiler where the libraries are, which
-#     only gcc/g++ supports (to my knowledge).
-if test -z "$LD_LIBRARY_PATH"
-then
-    LD_LIBRARY_PATH="$GCC_ROOTDIR"/lib
-else
-    LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$GCC_ROOTDIR"/lib
-fi
-export LD_LIBRARY_PATH
-
 # CVS info
 CVS_RSH=ssh
 CVSROOT='copernicus.arc.nasa.gov:/home/cvs/ISG-Repository'
 export CVS_RSH CVSROOT
-
-if "$removePlasma"
-then
-    # For this to work, this script must be called by its full path name
-    #   when emailing to checkins@postdoc.arc.nasa.gov.
-    startdir="`dirname $0`"
-    startdir="`cd $startdir; pwd`"
-    cd "$startdir"
-else
-    startdir="`pwd`"
-    case "$startdir" in
-    *PLASMA)
-            if test ! -d CVS
-            then
-                echo "$0"': must be run inside existing PLASMA checkout when giving email address other than checkins@postdoc.arc.nasa.gov'
-                exit 21
-            fi
-            ;;
-    *)
-            echo "$0"': must be run inside existing PLASMA checkout when giving email address other than checkins@postdoc.arc.nasa.gov'
-            exit 22
-            ;;
-    esac
-fi
 
 # Don't run this script more than once in the same directory.
 #   Should figure out a way to require at most one run on a computer at a time,
@@ -114,6 +101,19 @@ else
     echo "$0"': could not create lock directory; already running?'
     exit 1
 fi
+
+# Make sure that libstdc++.so is in this.
+#   Cannot easily test for it since some installs don't create libstdc++.so per se,
+#     but only with a version number appended.
+#   In general, may have to ask the compiler where the libraries are, which
+#     only gcc/g++ supports (to my knowledge).
+if test -z "$LD_LIBRARY_PATH"
+then
+    LD_LIBRARY_PATH="$GCC_ROOTDIR"/lib:"$startdir"/lib
+else
+    LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$GCC_ROOTDIR"/lib:"$startdir"/lib
+fi
+export LD_LIBRARY_PATH
 
 if "$removePlasma"
 then
@@ -136,7 +136,7 @@ fi
 variants='DEV OPTIMIZED PROFILE'
 
 # The different ways of building the libraries.
-libmethods='STATIC NONE'
+libmethods='STATIC NONE SHARED'
 
 # Don't try to use X11 (mostly to prevent Purify from doing so)
 DISPLAY=
@@ -232,6 +232,10 @@ for var in $variants
 do
   for libmethod in $libmethods
   do
+    if test "$var $libmethod" = 'PROFILE SHARED'
+    then
+        continue
+    fi
     if test ! -d "$startdir"/working
     then
         echo ''
