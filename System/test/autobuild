@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.13 2002-11-15 17:00:33 wedgingt Exp $
+# $Id: autobuild,v 1.14 2002-12-11 01:12:03 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -8,8 +8,8 @@ email=checkins@postdoc.arc.nasa.gov
 
 # Subdirectories to build in
 #   Note that optimized variants take hours due to tokenNet test with -O3
-#subdirs='cvs fast opt optFast prof profOptFast shareOptFast shareOptNoErr'
-subdirs='cvs fast opt optFast prof profOptFast'
+#subdirs='cvs fast opt optFast prof profOptFast shareOptFast shareOptNoErr noErr'
+subdirs='cvs fast opt optFast prof profOptFast noErr'
 
 # Don't try to use X11 (mostly to prevent Purify from doing so)
 DISPLAY=
