@@ -168,7 +168,9 @@ namespace Prototype
 
     if(m_currentDomain.isEnumerated())
       m_superSetDomain = new EnumeratedDomain((const EnumeratedDomain&) superset);
-    else
+    else if (superset.getType() == AbstractDomain::INT_INTERVAL)
+      m_superSetDomain = new IntervalIntDomain((const IntervalIntDomain&) superset);
+    else if (superset.getType() == AbstractDomain::REAL_INTERVAL)
       m_superSetDomain = new IntervalRealDomain((const IntervalRealDomain&) superset);
   }
 
