@@ -1,0 +1,5 @@
+constraint Bar (X.z y, Y l) native;
+
+class Y {
+  constraint Baz (Place x) native;
+}

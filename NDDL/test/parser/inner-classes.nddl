@@ -1,0 +1,13 @@
+#include "rover.nddl"
+#include "camera.nddl"
+
+class RoverWithCamera
+extends Rover {
+  class RoverCamera extends Camera {
+  }
+  RoverCamera camera;
+}
+
+RoverWithCamera.RoverCamera::TakePicture {
+  contained_by(loc.At);
+}

@@ -1,0 +1,19 @@
+class Timeline {
+  predicate Pred1 {}
+  predicate Pred2 {
+    {
+      after(Pred1);
+      after{Pred1 p2};
+      after{Pred2, Pred1 p3};
+      after{Pred2 p2, Pred1};
+      after{Pred2 p2, Pred1 p3};
+      after{Pred1 p2} t1;
+      after{Pred2, Pred1 p3} t2;
+      after{Pred2 p2, Pred1} t3;
+      after{Pred2 p2, Pred1 p3} t4;
+      p1 before p2;
+      p1 before {p2, p3};
+      p1 before {p2, p3} t5;
+    }
+  }
+}

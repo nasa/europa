@@ -1,0 +1,23 @@
+constraint neq (Place x, Place y) native;
+
+class Location {
+    predicate At {
+        Place place;
+        {
+            meets(Going g);
+            eq(g.from,place);
+            met_by(Going g2);
+            eq(g2.to,place);
+        }
+    }
+    predicate Going {
+        Place from, to;
+        {
+            neq(from,to);
+            meets(At a);
+            eq(a.place,from);
+            met_by(At a2);
+            eq(a2.place,to);
+        }
+    }
+}

@@ -1,0 +1,43 @@
+class Location
+{
+predicate At { LocLabel loc; }
+predicate Going { LocLabel from, to; }
+}
+
+class Camera
+{
+predicate TakePicture {}
+predicate Idle {}
+}
+
+class SlowCamera
+{
+Location loc;
+SlowCamera(Location l = new Location()) {
+  loc = l;
+}
+}
+
+SlowCamera::TakePicture {
+  contained_by(loc.At);
+}
+
+class Rover
+{
+  Location l;
+  SlowCamera sc;
+  Rover() {
+    l = new Location();
+    sc = new SlowCamera(l);
+  }
+}
+
+class Tripod
+{
+  SlowCamera sc;
+  location l;
+  Tripod() {
+    sc = new SlowCamera();
+    l = sc.loc;
+  }
+}

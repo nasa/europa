@@ -1,0 +1,28 @@
+enum Dummy {one, two}
+
+class Test
+{
+    predicate A { Dummy dum; }
+    predicate B {}
+    predicate C {}
+}
+
+Test::A {
+    if (dum == 'one') {
+        meets(B);
+    }
+}
+
+Test::A {
+    if (dum != 'one') {
+        met_by(C);
+    }
+}
+
+Test::B {
+    met_by(A a);
+    eq(a.dum,one);
+}
+
+Test::C {
+}

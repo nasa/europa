@@ -1,0 +1,6 @@
+
+enum x {1, 2, 3}
+
+#include "otherFile.nddl"
+
+enum z {7, 8, 9}

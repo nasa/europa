@@ -1,0 +1,146 @@
+
+constraint addeq(int addend1, int addend2, int sum) native;
+
+constraint leq(int x, int y) native;
+
+constraint neq(int x, int y) native;
+
+constraint addleq(int addend1, int addend2, int max) {
+  int total;
+  addeq(addend1,addend2,total);
+  leq(total,max);
+}
+
+class Integer {
+  predicate Has {
+    int amount;
+  }
+  predicate Add {
+    int addend;
+    {
+      int oldValue, newValue;
+      met_by(Has oldHas);
+      eq(oldHas.amount,oldvalue);
+      meets(Has newHas);
+      eq(newHas.amount,newValue);
+      addeq(oldValue,addend,newValue);
+    }
+  }
+  predicate Subtract {
+    integer subhend;
+    {
+      int oldValue, newValue;
+      met_by(Has oldHas);
+      eq(oldHas.amount,oldValue);
+      meets(Has newHas);
+      eq(newHas.amount,newValue);
+      addeq(newValue,subhend,oldValue);
+    }
+  }
+}
+
+class PositiveInteger extends Integer {
+  predicate Has extends Has {
+    int amount;
+    {
+      leq(0,amount);
+    }
+  }
+}
+
+class Bank {
+  PositiveInteger cannibals = new PositiveInteger();
+  PositiveInteger missionaries = new PositiveInteger();
+  predicate Safe {
+    {
+      met_by(Safe);
+      int numCannibals;
+      contained_by(cannibals.Has c);
+      eq(c.amount,numCannibals);
+      int numMissionaries;
+      contained_by(missionaries.Has m);
+      eq(m.amount,numMissionaries);
+      leq(numCannibals,numMissionaries);
+      meets(Safe);
+    }
+  }
+}
+
+class Boat {
+  int capacity;
+  PositiveInteger cannibals = new PositiveInteger();
+  PositiveInteger missionaries = new PositiveInteger();
+  Location location = new Location();
+  Boat(int _capacity) {
+    capacity = _capacity;
+  }
+  predicate Loading {
+    int numCannibals, numMissionaries;
+    {
+      met_by(Sailing);
+      // find out where we are
+      Bank bank;
+      equals(location.At a);
+      eq(a.place,bank);
+      
+      // add to our cannibals and remove from theirs
+      equals(cannibals.Add ac);
+      eq(ac.addend,numCannibals);
+      equals(bank.cannibals.Subtract bcs);
+      eq(bcs.subhend,numCannibals);
+      
+      // add to our missionaries and remove from theirs
+      equals(missionaries.Add am);
+      eq(am.addend,numMissionaries);
+      equals(bank.missionaries.Subtract bms);
+      eq(bms.subhend,numMissionaries);
+      meets(Sailing);
+    }
+  }
+  predicate Sailing {
+    {
+      met_by(Loading);
+      equals(location.Going);
+      int numCannibals;
+      equals(cannibals.Has c);
+      eq(c.amount,numCannibals);
+      int numMissionaries;
+      equals(missionaries.Has m);
+      eq(m.amount,numMissionaries);
+      leq(numCannibals,numMissionaries);
+      addleq(numCannibals,numMissionaries,capacity);
+      meets(Loading);
+    }
+  }
+}
+
+class Location {
+  predicate At {
+    Bank b;
+    {
+      met_by(Going g1);
+      eq(g1.to,b);
+      meets(Going g2);
+      eq(g2.from,b);
+    }
+  }
+  predicate Going {
+    Bank from, to;
+    {
+      met_by(At a1);
+      eq(a1.b,from);
+      neq(from,to);
+      meets(At a2);
+      eq(a2.b,to);
+    }
+  }
+}
+
+class ClassicMissionariesAndCannibalsProblem {
+  Bank west = new Bank();
+  Bank east = new Bank();
+  Boat boat = new Boat();
+  ClassicMissionariesAndCannibalsProblem() {
+  
+  }
+}

@@ -1,0 +1,4 @@
+class Camera {
+  predicate TakePicture {}
+  predicate Idle {}
+}
