@@ -1,6 +1,6 @@
 #include "PLASMAPerformanceConstraint.hh"
 #include "Nddl.hh"
-#include "SamplePlanDatabase.hh"
+#include "TestAssembly.hh"
 #include "CBPlanner.hh"
 #include "DecisionPoint.hh"
 #include "ResourceOpenDecisionManager.hh"
@@ -14,71 +14,30 @@
 
 SchemaId schema;
 const char* initialTransactions = NULL;
-const char* TX_LOG = "TransactionLog.xml";
-const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
 bool replay = false;
+extern const char* TX_LOG;
 
 #define PERFORMANCE
 
-bool runPlanner() {
-  SamplePlanDatabase db1(schema, replay);
+bool runPlanner(){
 
-  // Set ResourceOpenDecisionManager
-  DecisionManagerId local_dm = db1.planner->getDecisionManager();
-  ResourceOpenDecisionManagerId local_rodm = (new ResourceOpenDecisionManager(local_dm))->getId();
-  local_dm->setOpenDecisionManager( local_rodm );
+  TestAssembly assembly(schema);
 
-  DbClientId client = db1.planDatabase->getClient();
+  DbClientTransactionLogId txLog;
+  if(replay)
+    txLog = (new DbClientTransactionLog(assembly.getPlanDatabase()->getClient()))->getId();
 
-  DbClientTransactionPlayer player(client);
-  check_error(initialTransactions != NULL);
-  std::ifstream in(initialTransactions);
-  player.play(in);
+  assert(assembly.plan(initialTransactions) == CBPlanner::PLAN_FOUND);
 
-  assert(client->propagate());
-
-  ObjectId world = client->getObject("world");
-  check_error(world.isValid());
-  // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
-  ConstrainedVariableId horizonStart = world->getVariable("world.m_horizonStart");
-  check_error(horizonStart.isValid());
-  ConstrainedVariableId horizonEnd = world->getVariable("world.m_horizonEnd");
-  check_error(horizonEnd.isValid());
-  int start = (int) horizonStart->baseDomain().getSingletonValue();
-  int end = (int) horizonEnd->baseDomain().getSingletonValue();
-  db1.horizon->setHorizon(start, end);
-
-  // Create and run the planner
-  ConstrainedVariableId maxPlannerSteps = world->getVariable("world.m_maxPlannerSteps");
-  check_error(maxPlannerSteps.isValid());
-  int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
-
-  int res = db1.planner->run(steps);
-
-  assert(res == CBPlanner::PLAN_FOUND);
-
-  PlanDatabaseWriter::write(db1.planDatabase, std::cout);
+  assembly.write(std::cout);
 
   // Store transactions for recreation of database
-  if (replay) {
-    std::stringstream os1;
-    db1.planDatabase->getClient()->toStream(os1);
-    std::ofstream out(TX_LOG);
-    db1.txLog->flush(out);
-    out.close();
 
-    std::stringstream os2;
-    SamplePlanDatabase db(schema, true);
-    DbClientTransactionPlayer player(db.planDatabase->getClient());
-    std::ifstream in(TX_LOG);
-    player.play(in);
-    db.planDatabase->getClient()->toStream(os2);
+  if(replay)
+    assembly.replay(txLog);
 
-    std::string s1 = os1.str();
-    std::string s2 = os2.str();
-    assert(s1 == s2);
-  }
   debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr); );
+
   return true;
 }
 
@@ -87,19 +46,15 @@ bool copyFromFile(){
   // Populate plan database from transaction log
   std::stringstream os1;
   {
-    SamplePlanDatabase db(schema, true);
-    DbClientTransactionPlayer player(db.planDatabase->getClient());
-    std::ifstream in(TX_LOG);
-    player.play(in);
-    db.planDatabase->getClient()->toStream(os1);
+    TestAssembly assembly(schema);
+    assembly.playTransactions(TX_LOG);
+    assembly.getPlanDatabase()->getClient()->toStream(os1);
   }
   std::stringstream os2;
   {
-    SamplePlanDatabase db(schema, true);
-    DbClientTransactionPlayer player(db.planDatabase->getClient());
-    std::ifstream in(TX_LOG);
-    player.play(in);
-    db.planDatabase->getClient()->toStream(os2);
+    TestAssembly assembly(schema);
+    assembly.playTransactions(TX_LOG);
+    assembly.getPlanDatabase()->getClient()->toStream(os1);
   }
 
   std::string s1 = os1.str();
@@ -145,7 +100,7 @@ int main(int argc, const char** argv) {
   }
   
   assert(Schema::instance().isValid());
-  SamplePlanDatabase::initialize();
+  TestAssembly::initialize();
   schema = (*fcn_schema)();
 #else //STANDALONE
   if(argc != 2) {
@@ -153,7 +108,7 @@ int main(int argc, const char** argv) {
     exit(1);
   }
   initialTransactions = argv[1];
-  SamplePlanDatabase::initialize();
+  TestAssembly::initialize();
   schema = NDDL::loadSchema();
 #endif //STANDALONE
 
@@ -170,7 +125,7 @@ int main(int argc, const char** argv) {
   }
 #endif
 
-  SamplePlanDatabase::terminate();
+  TestAssembly::terminate();
 
 #ifdef STANDALONE
   if(dlclose(libHandle)) {
