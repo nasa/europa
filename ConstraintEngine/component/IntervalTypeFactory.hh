@@ -14,6 +14,11 @@ namespace Prototype {
     IntervalTypeFactory(const LabelStr& name = IntervalDomain::getDefaultTypeName());
 
     /**
+     * Register with an external name and a base domain
+     */
+    IntervalTypeFactory(const LabelStr& name, const IntervalDomain& baseDomain);
+
+    /**
      * @brief Create a variable
      */
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 

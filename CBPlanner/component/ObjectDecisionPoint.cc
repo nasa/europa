@@ -36,9 +36,9 @@ namespace Prototype {
     check_error(m_id.isValid());
     cleanup(m_choices);
     m_choices.clear();
-    std::list<ObjectId> values;
+    std::list<double> values;
     m_token->getObject()->getLastDomain().getValues(values);
-    std::list<ObjectId>::iterator it = values.begin();
+    std::list<double>::iterator it = values.begin();
     for ( ; it != values.end(); ++it) {
       ObjectId obj = *it;
       check_error(obj.isValid());

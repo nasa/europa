@@ -30,9 +30,9 @@ bool runPlanner(){
     DbClientId client = db1.planDatabase->getClient();
 
     std::vector<ConstructorArgument> arguments;
-    arguments.push_back(ConstructorArgument(LabelStr("int"), new IntervalIntDomain(0)));
-    arguments.push_back(ConstructorArgument(LabelStr("int"), new IntervalIntDomain(100)));
-    arguments.push_back(ConstructorArgument(LabelStr("int"), new IntervalIntDomain(500)));
+    arguments.push_back(ConstructorArgument(LabelStr("int"), new IntervalIntDomain(0, DomainListenerId::noId(), LabelStr("int"))));
+    arguments.push_back(ConstructorArgument(LabelStr("int"), new IntervalIntDomain(100, DomainListenerId::noId(), LabelStr("int"))));
+    arguments.push_back(ConstructorArgument(LabelStr("int"), new IntervalIntDomain(500, DomainListenerId::noId(), LabelStr("int"))));
     NDDL::NddlWorldId world = client->createObject(LabelStr("NddlWorld"), LabelStr("world"), arguments);
 
     NDDL::RoverId rover = client->createObject(LabelStr("Rover"), LabelStr("rover"));

@@ -51,6 +51,7 @@ namespace Prototype {
     DECLARE_ERROR(NotInstantiatedError);
   };
   
+
   class EventAggregator {
   public:
     
@@ -81,6 +82,7 @@ namespace Prototype {
     ~EventAggregator();
     EventAggregatorId getId(){return m_id;}
 
+  public:
     /****From DecisionManagerListener****/
     DECLARE_EVENT(notifyConditionAdded, const ConditionId& cond, cond);
     DECLARE_EVENT(notifyConditionRemoved, const ConditionId& cond, cond);
@@ -174,13 +176,6 @@ namespace Prototype {
 //       publish(notifyBoundsRestricted(v, newlb, newub));
 //     }
 //     DECLARE_EVENT_ARG(notifyBoundsSame, const TempVarId& v, const TimepointId& timepoint, v, timepoint);
-
-    friend class DMListener;
-    friend class CEListener;
-    friend class DBCListener;
-    friend class PDListner;
-    friend class REListener;
-//    friend class TNListener;
 
     class DMListener : public DecisionManagerListener {
     public:

@@ -28,4 +28,13 @@ namespace NDDL {
 
 } // namespace NDDL
 
+namespace Prototype {
+
+  /**
+   * @brief Initialize all default elements of the module e.g. factories
+   */
+  void initNDDL();
+
+}
+
 #endif // NDDL_DEFS_HH

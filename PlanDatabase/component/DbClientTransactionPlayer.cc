@@ -4,9 +4,6 @@
 #include "PlanDatabase.hh"
 #include "Object.hh"
 #include "Token.hh"
-#include "BoolDomain.hh"
-#include "IntervalIntDomain.hh"
-#include "IntervalDomain.hh"
 #include "EnumeratedDomain.hh"
 #include "Domain.hh"
 #include "tinyxml.h"
@@ -40,21 +37,7 @@ namespace Prototype {
   static std::string
   domainTypeString(const AbstractDomain * domain)
   {
-    if (domain->getType() == AbstractDomain::BOOL) {
-      return "bool";
-    } else if (domain->isNumeric()) {
-      if (domain->getType() == AbstractDomain::INT_INTERVAL) {
-        return "int";
-      } else {
-        return "float";
-      }
-    } else if (LabelStr::isString(domain->getUpperBound())) {
-      return "string";
-    } else {
-      ObjectId object = domain->getLowerBound();
-      check_error(object.isValid());
-      return object->getType().toString();
-    }
+    return domain->getTypeName().toString();
   }
 
   DbClientTransactionPlayer::DbClientTransactionPlayer(const DbClientId & client) : m_client(client), m_objectCount(0), m_varCount(0){}
@@ -418,46 +401,6 @@ namespace Prototype {
 
   //! string input functions
 
-  double 
-  DbClientTransactionPlayer::parseFloat(const char * floatString)
-  {
-    check_error(floatString != NULL);
-    if (strcmp(floatString, "-inf") == 0) {
-      return MINUS_INFINITY;
-    }
-    if (strcmp(floatString, "+inf") == 0) {
-      return PLUS_INFINITY;
-    }
-    return atof(floatString);
-  }
-  
-  int
-  DbClientTransactionPlayer::parseInt(const char * intString)
-  {
-    check_error(intString != NULL);
-    if (strcmp(intString, "-inf") == 0) {
-      return MINUS_INFINITY;
-    }
-    if (strcmp(intString, "+inf") == 0) {
-      return PLUS_INFINITY;
-    }
-    return atoi(intString);
-  }
-  
-  bool
-  DbClientTransactionPlayer::parseBool(const char * boolString)
-  {
-    check_error(boolString != NULL);
-    if (strcmp(boolString, "true") == 0) {
-      return true;
-    }
-    if (strcmp(boolString, "false") == 0) {
-      return false;
-    }
-    check_error(ALWAYS_FAILS);
-    return false;
-  }
-
   ConstrainedVariableId
   DbClientTransactionPlayer::parseVariable(const char * varString)
   {
@@ -513,10 +456,43 @@ namespace Prototype {
   const AbstractDomain * 
   DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element, const char * name)
   {
-    if (strcmp(element.Value(), "new") == 0) {
-      return new ObjectDomain(xmlAsValue(element, name));
+    const char * tag = element.Value();
+    if (strcmp(tag, "new") == 0) {
+      const char * type = element.Attribute("type");
+      check_error(type != NULL);
+      return new ObjectDomain(xmlAsValue(element, name), LabelStr(type));
     }
-    if (strcmp(element.Value(), "ident") == 0) {
+    if (strcmp(tag, "id") == 0) {
+      const char * name = element.Attribute("name");
+      ConstrainedVariableId var = parseVariable(name);
+      check_error(var.isValid());
+      return var->baseDomain().copy();
+    }
+    if (strcmp(tag, "set") == 0) {
+      return xmlAsEnumeratedDomain(element);
+    }
+    if (strcmp(tag, "interval") == 0) {
+      return xmlAsIntervalDomain(element);
+    }
+    const char * value_st = element.Attribute("value");
+    check_error(value_st != NULL);
+    if ((strcmp(tag, "bool") == 0) || (strcmp(tag, "BOOL") == 0) ||
+        (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) ||
+        (strcmp(tag, "float") == 0) || (strcmp(tag, "REAL_INTERVAL") == 0) ||
+        (strcmp(tag, "string") == 0) || (strcmp(tag, "STRING_ENUMERATION") == 0)) {
+      AbstractDomain * domain = TypeFactory::baseDomain(LabelStr(tag)).copy();
+      domain->set(TypeFactory::createValue(LabelStr(tag), value_st));
+      return domain;
+    }
+    if (strcmp(tag, "symbol") == 0) {
+      const char * type = element.Attribute("type");
+      check_error(type != NULL);
+      AbstractDomain * domain = TypeFactory::baseDomain(LabelStr(type)).copy();
+      domain->set(TypeFactory::createValue(LabelStr(tag), value_st));
+      return domain;
+    }
+    if (strcmp(tag, "ident") == 0) {
+      std::cerr << "ident in transaction xml is deprecated" << std::endl;
       const char * value = element.Attribute("value");
       check_error(value != NULL);
       std::string std_value = value;
@@ -527,48 +503,10 @@ namespace Prototype {
       // must be an enumerated domain
       return new LabelSet(LabelStr(value));
     }
-    if (strcmp(element.Value(), "id") == 0) {
-      const char * name = element.Attribute("name");
-      ConstrainedVariableId var = parseVariable(name);
-      check_error(var.isValid());
-      return var->baseDomain().copy();
-    }
-    if (strcmp(element.Value(), "set") == 0) {
-      return xmlAsEnumeratedDomain(element);
-    }
-    if (strcmp(element.Value(), "interval") == 0) {
-      return xmlAsIntervalDomain(element);
-    }
-    const char * value_st = element.Attribute("value");
-    check_error(value_st != NULL);
-    if (strcmp(element.Value(), "bool") == 0) {
-      return new BoolDomain(parseBool(value_st));
-    }
-    if (strcmp(element.Value(), "int") == 0) {
-      return new IntervalIntDomain(parseInt(value_st));
-    }
-    if (strcmp(element.Value(), "float") == 0) {
-      return new IntervalDomain(parseFloat(value_st));
-    }
-    if (strcmp(element.Value(), "string") == 0) {
-      return new LabelSet(LabelStr(value_st));
-    }
-    if (strcmp(element.Value(), "symbol") == 0) {
-      return new LabelSet(LabelStr(value_st));
-    }
-    if (strcmp(element.Value(), "object") == 0) {
-      return new ObjectDomain(m_client->getObject(LabelStr(value_st)));
-    }
-    std::string klass = element.Value();
-    if (std::find(m_classes.begin(), m_classes.end(), klass) != m_classes.end()) {
-      return new ObjectDomain(m_client->getObject(LabelStr(value_st)));
-    }
+    check_error(strcmp(tag, "object") == 0);
     ObjectId object = m_client->getObject(LabelStr(value_st));
-    if (object != ObjectId::noId()) {
-      return new ObjectDomain(object);
-    }
-    check_error(ALWAYS_FAILS);
-    return NULL;
+    check_error(object.isValid());
+    return new ObjectDomain(object, object->getType());
   }
 
   IntervalDomain *
@@ -592,12 +530,14 @@ namespace Prototype {
   DbClientTransactionPlayer::xmlAsEnumeratedDomain(const TiXmlElement & element)
   {
     enum { ANY, BOOL, INT, FLOAT, STRING, SYMBOL, OBJECT } type = ANY;
+    const char * typeName = NULL;
     // determine most specific type
     for (TiXmlElement * child_el = element.FirstChildElement() ;
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
       if (strcmp(child_el->Value(), "bool") == 0) {
         if (type == ANY) {
           type = BOOL;
+          typeName = "bool";
         }
         if (type == BOOL) {
           continue;
@@ -606,6 +546,7 @@ namespace Prototype {
       if (strcmp(child_el->Value(), "int") == 0) {
         if (type == ANY) {
           type = INT;
+          typeName = "int";
         }
         if ((type == FLOAT) || (type == INT)) {
           continue;
@@ -614,6 +555,7 @@ namespace Prototype {
       if (strcmp(child_el->Value(), "float") == 0) {
         if ((type == ANY) || (type == INT)) {
           type = FLOAT;
+          typeName = "float";
         }
         if (type == FLOAT) {
           continue;
@@ -622,6 +564,7 @@ namespace Prototype {
       if (strcmp(child_el->Value(), "string") == 0) {
         if (type == ANY) {
           type = STRING;
+          typeName = "string";
         }
         if (type == STRING) {
           continue;
@@ -630,19 +573,20 @@ namespace Prototype {
       if (strcmp(child_el->Value(), "symbol") == 0) {
         if (type == ANY) {
           type = SYMBOL;
+          typeName = child_el->Attribute("type");
         }
         if (type == SYMBOL) {
           continue;
         }
       }
-      if (strcmp(child_el->Value(), "object") == 0) {
-        if (type == ANY) {
-          type = OBJECT;
-        }
-        if (type == OBJECT) {
-          continue;
-        }
-      }
+//      if (strcmp(child_el->Value(), "object") == 0) {
+//        if (type == ANY) {
+//          type = OBJECT;
+//        }
+//        if (type == OBJECT) {
+//          continue;
+//        }
+//      }
       check_error(ALWAYS_FAILS);
     }
     check_error(type != ANY);
@@ -653,21 +597,9 @@ namespace Prototype {
       const char * value_st = child_el->Attribute("value");
       check_error(value_st != NULL);
       switch (type) {
-      case BOOL: {
-        values.push_back(parseBool(value_st));
-        break;
-      }
-      case INT: {
-        values.push_back(parseInt(value_st));
-        break;
-      }
-      case FLOAT: {
-        values.push_back(parseFloat(value_st));
-        break;
-      }
-      case STRING: 
-      case SYMBOL: {
-        values.push_back(LabelStr(value_st));
+      case BOOL: case INT: case FLOAT:
+      case STRING: case SYMBOL: {
+        values.push_back(TypeFactory::createValue(LabelStr(typeName), value_st));
         break;
       }
       case OBJECT: {
@@ -679,11 +611,11 @@ namespace Prototype {
       }
     }
     // return the domain
-    switch (type) {
+    switch (type) { 
     case BOOL: case INT: case FLOAT:
-      return new EnumeratedDomain(values);
+      return new EnumeratedDomain(values, true, DomainListenerId::noId(), true, LabelStr(typeName));
     case STRING: case SYMBOL: case OBJECT:
-      return new EnumeratedDomain(values, true, DomainListenerId::noId(), false);
+      return new EnumeratedDomain(values, true, DomainListenerId::noId(), false, LabelStr(typeName));
     default:
       check_error(ALWAYS_FAILS);
       return NULL;
@@ -692,7 +624,8 @@ namespace Prototype {
 
   double DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value, const char * name)
   {
-    if (strcmp(value.Value(), "new") == 0) {
+    const char * tag = value.Value();
+    if (strcmp(tag, "new") == 0) {
       std::string gen_name;
       if (name == NULL) {
         std::stringstream gen_stream;
@@ -714,26 +647,25 @@ namespace Prototype {
 
       // Now deallocate domains created for arguments
       for(std::vector<ConstructorArgument>::const_iterator it = arguments.begin(); it != arguments.end(); ++it){
-	delete it->second;
+        delete it->second;
       }
 
       return (double)object;
     }
     const char * value_st = value.Attribute("value");
-    check_error(value_st != NULL);
-    if (strcmp(value.Value(), "bool") == 0) {
-      return parseBool(value_st);
+    check_error(value_st != NULL, "missing value in transaction xml");
+    if ((strcmp(tag, "bool") == 0) || (strcmp(tag, "BOOL") == 0) ||
+        (strcmp(tag, "int") == 0) || (strcmp(tag, "INT_INTERVAL") == 0) ||
+        (strcmp(tag, "float") == 0) || (strcmp(tag, "REAL_INTERVAL") == 0) ||
+        (strcmp(tag, "string") == 0) || (strcmp(tag, "STRING_ENUMERATION") == 0)) {
+      return TypeFactory::createValue(LabelStr(tag), value_st);
     }
-    if (strcmp(value.Value(), "int") == 0) {
-      return parseInt(value_st);
+    if (strcmp(tag, "symbol") == 0) {
+      const char * type_st = value.Attribute("type");
+      check_error(type_st != NULL, "missing type for symbol '" + std::string(value_st) + "' in transaction xml");
+      return TypeFactory::createValue(LabelStr(type_st), value_st);
     }
-    if (strcmp(value.Value(), "float") == 0) {
-      return parseFloat(value_st);
-    }
-    if (strcmp(value.Value(), "string") == 0) {
-      return LabelStr(value_st);
-    }
-    if (strcmp(value.Value(), "object") == 0) {
+    if (strcmp(tag, "object") == 0) {
       ObjectId object = m_client->getObject(LabelStr(value_st));
       check_error(object.isValid());
       return (double)object;
@@ -819,22 +751,6 @@ namespace Prototype {
   }
 
 
-  /**
-   * Helper method for function defined below
-   */
-  template <class DOMAIN_TYPE>
-  ConstrainedVariableId allocateVariable(const DbClientId& client, 
-					 const char* name, 
-					 const AbstractDomain* baseDomain){
-    if(baseDomain != NULL)
-      return client->createVariable(dynamic_cast<const DOMAIN_TYPE&>(*baseDomain), LabelStr(name));
-    
-    const DOMAIN_TYPE * domain = new DOMAIN_TYPE();
-    ConstrainedVariableId newVar = client->createVariable(*domain, LabelStr(name));
-    delete domain;
-    return newVar;
-  }
-
   ConstrainedVariableId
   DbClientTransactionPlayer::xmlAsCreateVariable(const char * type, const char * name, const TiXmlElement * value)
   {
@@ -858,34 +774,12 @@ namespace Prototype {
     }
 
     check_error(type != NULL);
-
-    if (strcmp(type, "bool") == 0)
-      return allocateVariable<BoolDomain>(m_client, name, baseDomain);
-
-    if (strcmp(type, "int") == 0)
-      return allocateVariable<IntervalIntDomain>(m_client, name, baseDomain);
-
-    if (strcmp(type, "float") == 0)
-      return allocateVariable<IntervalDomain>(m_client, name, baseDomain);
-
-    if (strcmp(type, "string") == 0)
-      return allocateVariable<LabelSet>(m_client, name, baseDomain);
-
-    std::string std_type = type;
-    if (std::find(m_enumerations.begin(), m_enumerations.end(), std_type) != m_enumerations.end()) 
-      return allocateVariable<LabelSet>(m_client, name, baseDomain);
-
-    if (std::find(m_classes.begin(), m_classes.end(), std_type) != m_classes.end()) 
-      return allocateVariable<ObjectDomain>(m_client, name, baseDomain);
-
-    if (baseDomain) {
-      if (LabelStr::isString(baseDomain->getUpperBound()))
-	return allocateVariable<LabelSet>(m_client, name, baseDomain);
-      else
-	return allocateVariable<ObjectDomain>(m_client, name, baseDomain);
+    if (baseDomain != NULL) {
+      ConstrainedVariableId variable = m_client->createVariable(LabelStr(type), *baseDomain, LabelStr(name));
+      delete baseDomain;
+      return variable;
     }
 
-    check_error(ALWAYS_FAILS, std::string(type) + " must be an unknown type.");
-    return ConstrainedVariableId::noId();
+    return m_client->createVariable(LabelStr(type), LabelStr(name));
   }
 }

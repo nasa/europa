@@ -903,10 +903,10 @@ namespace Prototype {
 
       varOut << ENUM_DOMAIN << TAB;
 
-      std::list<ObjectId> objects;
+      std::list<double> objects;
       ((ObjectDomain &)objVar->lastDomain()).getValues(objects);
-      for(std::list<ObjectId>::iterator it = objects.begin(); it != objects.end(); ++it) {
-				varOut << (*it)->getName().toString() << " ";
+      for(std::list<double>::iterator it = objects.begin(); it != objects.end(); ++it) {
+				varOut << ((ObjectId)(*it))->getName().toString() << " ";
       }
 
       varOut << TAB << SNULL << TAB << SNULL << TAB << SNULL << TAB;

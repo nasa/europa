@@ -13,6 +13,11 @@ namespace Prototype {
   {
   }
 
+  IntervalTypeFactory::IntervalTypeFactory(const LabelStr& name, const IntervalDomain& baseDomain)
+   : ConcreteTypeFactory(name), m_baseDomain(baseDomain)
+  {
+  }
+
   ConstrainedVariableId
   IntervalTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                       const AbstractDomain& baseDomain,

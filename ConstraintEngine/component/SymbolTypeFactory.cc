@@ -13,6 +13,11 @@ namespace Prototype {
   {
   }
 
+  SymbolTypeFactory::SymbolTypeFactory(const LabelStr& name, const SymbolDomain& baseDomain)
+   : ConcreteTypeFactory(name), m_baseDomain(baseDomain)
+  {
+  }
+
   ConstrainedVariableId
   SymbolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                     const AbstractDomain& baseDomain,

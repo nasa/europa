@@ -7,7 +7,10 @@ namespace Prototype {
   // floatTypeFactory
   //
 
-  floatTypeFactory::floatTypeFactory() : IntervalTypeFactory(getDefaultTypeName()) {}
+  floatTypeFactory::floatTypeFactory()
+  : IntervalTypeFactory(getDefaultTypeName(), IntervalDomain(DomainListenerId::noId(), getDefaultTypeName()))
+  {
+  }
 
   double floatTypeFactory::createValue(std::string value) const
   {

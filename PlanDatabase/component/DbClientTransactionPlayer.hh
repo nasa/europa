@@ -61,21 +61,6 @@ namespace Prototype {
   //! string input functions
 
     /** 
-     * @brief read a value string as a float type
-     */
-    double parseFloat(const char * floatString);
-
-    /** 
-     * @brief read a value string as an int type
-     */
-    int parseInt(const char * intString);
-
-    /** 
-     * @brief read a value string as a bool type
-     */
-    bool parseBool(const char * boolString);
-
-    /** 
      * @brief read a value string as a variable identifier
      */
     ConstrainedVariableId parseVariable(const char * varString);

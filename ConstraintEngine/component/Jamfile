@@ -10,6 +10,7 @@ ModuleComponent ConstraintEngine
 	Constraints.cc
 	DefaultPropagator.cc
 	EnumeratedDomain.cc
+	EnumeratedTypeFactory.cc
 	EqualityConstraintPropagator.cc
 	EquivalenceClassCollection.cc
 	IntervalDomain.cc

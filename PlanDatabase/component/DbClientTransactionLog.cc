@@ -22,7 +22,7 @@ namespace Prototype {
   void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable){
     TiXmlElement * element = allocateXmlElement("var");
     const AbstractDomain& baseDomain = variable->baseDomain();
-    std::string type = domainTypeAsString(&baseDomain);
+    std::string type = baseDomain.getTypeName().toString();
     if (type == "object") {
       ObjectId object = baseDomain.getLowerBound();
       check_error(object.isValid());
@@ -32,8 +32,10 @@ namespace Prototype {
     if (LabelStr::isString(variable->getName())) {
       element->SetAttribute("name", variable->getName().toString());
     }
-    TiXmlElement * value = abstractDomainAsXml(&baseDomain);
-    element->LinkEndChild(value);
+    if (!baseDomain.isEmpty()) {
+      TiXmlElement * value = abstractDomainAsXml(&baseDomain);
+      element->LinkEndChild(value);
+    }
     pushTransaction(element);
   }
 
@@ -202,28 +204,22 @@ namespace Prototype {
     }
   }
 
-  std::string
-  DbClientTransactionLog::domainTypeAsString(const AbstractDomain * domain)
-  {
-    if (domain->getType() == AbstractDomain::BOOL) {
-      return "bool";
-    } else if (domain->isNumeric()) {
-      if (domain->getType() == AbstractDomain::INT_INTERVAL) {
-        return "int";
-      } else {
-        return "float";
-      }
-    } else if (LabelStr::isString(domain->getUpperBound())) {
-      return "string";
-    } else {
-      return "object";
-    }
-  }
-
   TiXmlElement *
   DbClientTransactionLog::domainValueAsXml(const AbstractDomain * domain, double value)
   {
-    TiXmlElement * element = allocateXmlElement(domainTypeAsString(domain));
+    TiXmlElement * element = NULL;
+    if (domain->isNumeric()) {
+      element = allocateXmlElement(domain->getTypeName().toString());
+    } else if (LabelStr::isString(value)) {
+      if (domain->getTypeName() == LabelStr("string")) {
+        element = allocateXmlElement("string");
+      } else {
+        element = allocateXmlElement("symbol");
+        element->SetAttribute("type", domain->getTypeName().toString());
+      }
+    } else {
+      element = allocateXmlElement("object");
+    }
     element->SetAttribute("value", domainValueAsString(domain, value));
     return element;
   }
@@ -245,7 +241,7 @@ namespace Prototype {
       return element;
     } else if (domain->isInterval()) {
       TiXmlElement * element = allocateXmlElement("interval");
-      element->SetAttribute("type", domainTypeAsString(domain));
+      element->SetAttribute("type", domain->getTypeName().toString());
       element->SetAttribute("min", domainValueAsString(domain, domain->getLowerBound()));
       element->SetAttribute("max", domainValueAsString(domain, domain->getUpperBound()));
       return element;

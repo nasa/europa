@@ -69,6 +69,25 @@ namespace Prototype {
      */
     virtual StringDomain *copy() const;
 
+    void set(const AbstractDomain& dom) {
+      std::list<double> values;
+      dom.getValues(values);
+      m_values.clear();
+      std::list<double>::iterator it = values.begin();
+      while (it != values.end()) {
+        double value = *it++;
+        check_error(LabelStr::isString(value));
+        m_values.insert(value);
+      }
+      notifyChange(DomainListener::SET);
+    }
+
+    void set(double value) {
+      check_error(LabelStr::isString(value));
+      m_values.clear();
+      m_values.insert(value);
+      notifyChange(DomainListener::SET_TO_SINGLETON);
+    }
   };
 
 } // namespace Prototype

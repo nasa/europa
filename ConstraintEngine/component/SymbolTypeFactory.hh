@@ -9,6 +9,7 @@ namespace Prototype {
   class SymbolTypeFactory : public ConcreteTypeFactory {
   public:
     SymbolTypeFactory(const LabelStr& name = SymbolDomain::getDefaultTypeName());
+    SymbolTypeFactory(const LabelStr& name, const SymbolDomain& baseDomain);
 
     /**
      * @brief Create a variable
@@ -31,7 +32,7 @@ namespace Prototype {
     virtual double createValue(std::string value) const;
 
   private:
-    SymbolDomain m_baseDomain;
+    const SymbolDomain m_baseDomain;
   };
 
 } // namespace Prototype

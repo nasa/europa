@@ -62,11 +62,6 @@ namespace Prototype {
      */
     std::string domainValueAsString(const AbstractDomain * domain, double value);
 
-    /** 
-     * @brief create a string to describe a domain type
-     */
-    std::string domainTypeAsString(const AbstractDomain * domain);
-
   //! XML output functions
 
     /** 
