@@ -103,14 +103,27 @@ namespace Prototype {
   DECLARE_GLOBAL_CONST(int, g_infinity);
   DECLARE_GLOBAL_CONST(int, g_maxInt);
 
-  #define MAX_INT (g_maxInt())
-  #define PLUS_INFINITY (g_infiniteTime())
-  #define MINUS_INFINITY (-g_infiniteTime())
-  #define EPSILON (g_epsilon()) /*!< Used when computing differences and comparing real numbers: smallest recognized increment. */
+#define MAX_INT (g_maxInt())
 
-  /*!< Magic number to enforce assumption that memory addresses and string keys will never collide */
-  #define ASSUMED_MINIMUM_MEMORY_ADDRESS 1000000 
-  #define MAXIMUM_STRING_COUNT ASSUMED_MINIMUM_MEMORY_ADDRESS 
+#define PLUS_INFINITY (g_infiniteTime())
+
+#define MINUS_INFINITY (-g_infiniteTime())
+
+  /**
+   * @def EPSILON
+   * Used when computing differences and comparing real numbers:
+   * smallest recognized increment.
+   */
+#define EPSILON (g_epsilon())
+
+  /**
+   * @def ASSUMED_MINIMUM_MEMORY_ADDRESS
+   * Magic number to enforce assumption that memory addresses and string keys will never collide.
+   */
+#define ASSUMED_MINIMUM_MEMORY_ADDRESS (1000000)
+
+#define MAXIMUM_STRING_COUNT ASSUMED_MINIMUM_MEMORY_ADDRESS 
+
 }
 
 #endif
