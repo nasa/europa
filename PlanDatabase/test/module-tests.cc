@@ -198,27 +198,46 @@ private:
       ss << "Object" << i;
       std::string objectName(ss.str());
       ObjectId object = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr(objectName.c_str()), true))->getId();
-      object->addVariable(IntervalIntDomain(i, NUM_OBJECTS));
+      object->addVariable(IntervalIntDomain(i, i));
       object->addVariable(BoolDomain());
       object->close();
       objects.push_back(object);
     }
 
-    InternalVariable<ObjectSet> objectVar(db.getConstraintEngine(), objects);
-    Variable<IntervalIntDomain> filterVar(db.getConstraintEngine(), IntervalIntDomain(0, NUM_OBJECTS));
+    // Set up the object variable
+    Variable<ObjectSet> objectVar(db.getConstraintEngine(), objects);
+
+    // Set up the filter variable
+    std::list<double> emptyList;
+    EnumeratedDomain filterBaseDomain(emptyList, false);
+    for (int i=0; i<NUM_OBJECTS;i++)
+      filterBaseDomain.insert(i);
+    filterBaseDomain.close();
+    Variable<EnumeratedDomain> filterVar(db.getConstraintEngine(), filterBaseDomain);
+
+    // Construct the filter constraint
     ObjectFilter filter(LabelStr("Default"), db.getConstraintEngine(), objectVar.getId(), 0, filterVar.getId());
 
     assert(db.getConstraintEngine()->propagate());
 
     // Iterate and restrict the filter by 1 each time. It should restrict the object variable by 1 also
+    EnumeratedDomain workingDomain(filterBaseDomain);
+    assert(filterBaseDomain.getSize() == NUM_OBJECTS);
+    assert(workingDomain.getSize() == NUM_OBJECTS);
+    assert(objectVar.getDerivedDomain().getSize() == NUM_OBJECTS);
+
     for (int i=1; i< NUM_OBJECTS; i++){
-      filterVar.specify(IntervalIntDomain(i,NUM_OBJECTS));
+      workingDomain.remove(i);
+      filterVar.specify(workingDomain);
       int resultingSize = objectVar.getDerivedDomain().getSize();
-      assert(resultingSize == (NUM_OBJECTS-i));
+      assert(resultingSize == (filterBaseDomain.getSize() - i));
     }
 
     filterVar.reset();
-    assert(objectVar.getDerivedDomain().getSize() == NUM_OBJECTS);
+    assert(objectVar.getDerivedDomain().getSize() == filterBaseDomain.getSize());
+
+    objectVar.specify(objects.front());
+    assert(filterVar.getDerivedDomain().isSingleton());
     return true;
   }
 };
