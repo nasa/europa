@@ -6,13 +6,12 @@ if ! $(PLASMA_READY) {
 # TRANSACTION TESTS
 #
 
-
 EXTRA_DEFS = -DSTANDALONE ;
 ModuleNamedObjects runProblem_standalone : runProblem.cc : System ;
 EXTRA_DEFS = ;
 ModuleNamedObjects runProblem_link : runProblem.cc : System ;
 
-ModuleMain runProblem : runProblem_standalone.o : System ;
+ModuleMain runProblem : runProblem_standalone.o : System Aver ;
 
 local model ;
 for model in
@@ -36,7 +35,7 @@ for model in
   ModuleObjects $(cc) : NDDL ;
 
   # create planner with linked model
-  ModuleMain $(exe) : $(o) runProblem_link.o : System ;
+  ModuleMain $(exe) : $(o) runProblem_link.o : System Aver ;
   RunModuleMain run-$(exe) : $(exe) : $(xml) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 
