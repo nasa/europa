@@ -6,18 +6,22 @@ if ! $(PLASMA_READY) {
 # TRANSACTION TESTS
 #
 
-ModuleObjects DefaultTestInit.cc : System ;
-ModuleObjects runTransactionTest.cc : System ;
-ModuleMain runModel : runModel.cc : System ;
+
+EXTRA_DEFS = -DSTANDALONE ;
+ModuleNamedObjects runProblem_standalone : runProblem.cc : System ;
+EXTRA_DEFS = ;
+ModuleNamedObjects runProblem_link : runProblem.cc : System ;
+
+ModuleMain runProblem : runProblem_standalone.o : System ;
 
 local model ;
 for model in
-        basic-types.nddl Rover-transaction.nddl basic-model-transaction.nddl k9.backtrack.moderate-transaction.nddl
-        k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl force-object-distribution.nddl 
-        resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl parent-predicate.nddl
-        EOS-backtrack-test.nddl k9-initial.nddl
-        backtr.nddl better-res.nddl CAPER.nddl
-        monkey1monkey-transaction.nddl
+        basic-types.nddl Rover-transaction.nddl basic-model-transaction.nddl 
+        k9.backtrack.moderate-transaction.nddl k9-transaction.nddl 
+        path-filter-transaction.nddl foreach-transaction.nddl force-object-distribution.nddl 
+        resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl 
+        parent-predicate.nddl EOS-backtrack-test.nddl k9-initial.nddl backtr.nddl 
+        better-res.nddl CAPER.nddl monkey1monkey-transaction.nddl
 {
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
@@ -32,7 +36,7 @@ for model in
   ModuleObjects $(cc) : NDDL ;
 
   # create planner with linked model
-  ModuleMain $(exe) : $(o) runTransactionTest.o DefaultTestInit.o : System ;
+  ModuleMain $(exe) : $(o) runProblem_link.o : System ;
   RunModuleMain run-$(exe) : $(exe) : $(xml) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 
@@ -41,12 +45,13 @@ for model in
   local variant ;
   for variant in $(VARIANTS) {
     local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
-    local run_variant_name = [ FVariantName runModel : $(variant) ] ;
+    local run_variant_name = [ FVariantName runProblem : $(variant) ] ;
     run_variant_name = $(run_variant_name)_rt ;
     local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) ;
-    RunModuleMain run-model-$(exe) : runModel : $(arguments) ;
+    Depends run-problem-$(exe) : $(libname) ;
+    RunModuleMain run-problem-$(exe) : runProblem : $(arguments) ;
     Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
-    LocalDepends run-model-tests : run-model-$(exe) ;
+    LocalDepends run-model-tests : run-problem-$(exe) ;
   }
 }
 
@@ -95,7 +100,7 @@ for numSatellites in 1 {
           local exe = $(model:S=) ;
           local xml = $(model:S=.xml) ;
           GenerateStack [ FGristFiles $(model) ] : [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
-          NddlMain $(exe) : runTransactionTest.o : $(model) : System : performance-tests ;
+          NddlMain $(exe) : runProblem_link.o : $(model) : System : performance-tests ;
           RunModuleMain run-$(exe) : $(exe) : $(xml) : time ;
           LocalDepends run-performance-tests : run-$(exe) ;
         }
@@ -110,10 +115,5 @@ for numSatellites in 1 {
 ModuleMain runPlannerControlTest : runPlannerControlTest.cc : System : planner-control-tests ;
 LinkSharedLibrariesNoDeps runPlannerControlTest_g_rt : $(DLOPEN_LIBRARY) ;
 
-#
-# TestLanguage TEST
-#
-
-SubInclude PLASMA System test aver ;
 
 } # PLASMA_READY
