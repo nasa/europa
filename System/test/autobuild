@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.52 2003-08-11 21:55:15 wedgingt Exp $
+# $Id: autobuild,v 1.53 2003-08-11 22:36:09 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -126,13 +126,15 @@ do
     statusMakeDist=$?
     echo '"make '"$makeopt"' simple" in '"`pwd`"' exited '"$statusMakeDist"
 
+    cd ..
+
     if test $statusMakeTar$status$statusTarExtract$statusMakeDist = 0000
     then
-        (uname -a; echo ''; cat ../make.options; echo ''; g++ --version) | \
+        (uname -a; echo ''; cat make.options; echo ''; g++ --version) | \
             Mail -s 'Autobuild on '"`hostname`"' in '"`pwd`"' succeeded' "$email"
 
         # If appropriate, look for and save the profiling data
-        if egrep PROFILE ../make.options > /dev/null 2>&1
+        if egrep PROFILE make.options > /dev/null 2>&1
         then
             find "$HOME"/europa.profiles -type d -mtime +7 -ls > .autobuild.profFind
             if test -s .autobuild.profFind
@@ -143,17 +145,17 @@ do
             rm -rf .autobuild.profFind
         fi
     else
-        ( uname -a; echo ''; cat ../make.options; echo ''; g++ --version; echo ''; tail -40 make.tests) | \
+        ( uname -a; echo ''; cat make.options; echo ''; g++ --version; echo ''; tail -40 make.tests) | \
             Mail -s 'Autobuild in '"`pwd`"' failed; exited '"$status" "$email"
         mkdir working/failed
     fi
 
     # Save the make output
-    mv make.tests ..
+    mv NewPlan/make.tests .
 
     # Would continue with the next one after a failure,
     #   but the disk space might not be available.
-    rmdir working || exit 1
+    rmdir NewPlan/working || exit 1
 
     # Now, wipe out all that hard work
     cd "$startdir"/"$dir"
