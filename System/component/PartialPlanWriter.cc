@@ -881,7 +881,7 @@ namespace Prototype {
 
       varOut << intVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
 						 << intVar->getName().toString() << TAB;
-    
+
       varOut << INT_DOMAIN << TAB << SNULL << TAB << INTEGER_SORT << TAB 
 						 << getLowerBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB
 						 << getUpperBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB;
@@ -1392,7 +1392,7 @@ namespace Prototype {
 																							 SNULL));
 				numTransactions++;
 			}
-			if(noWrite == 0) {
+			if(noWrite == 0 && !havePlanner) {
 				write();
 				transactionList->clear();
 				numTransactions = 0;
