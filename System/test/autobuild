@@ -1,13 +1,14 @@
 #!/bin/sh
-# $Id: autobuild,v 1.67 2004-06-10 04:09:21 wedgingt Exp $
+# $Id: autobuild,v 1.68 2004-08-23 23:06:36 wedgingt Exp $
 #
-# Automatically build some variants of the Europa planner system
+# Automatically build some variants of the PLASMA planner system
 
 set -x
 
 # Usually, this is run via cron, which does not use the usual $PATH
-PATH=/usr/local/bin:"$PATH"
-export PATH
+PATH=/usr/java/j2sdk1.4.2/bin:/usr/local/jam2.4:/usr/local/bin:"$PATH"
+JAVA_HOME=/usr/java/j2sdk1.4.2
+export PATH JAVA_HOME
 
 startdir="`dirname $0`"
 startdir="`cd $startdir; pwd`"
@@ -18,20 +19,14 @@ mkdir working || exit 1
 
 trap 'rmdir $startdir/working; rm -f $startdir/.tokens.$$' 0
 
-# Address to mail exit status messages to
+# Refuse to run if a prior check out is present.
+test ! -d PLASMA || exit 2
+
+# Address to mail exit status messages to.
 email=checkins@postdoc.arc.nasa.gov
 
-# Subdirectories to build in
-# Profiling and shared in one executable no longer works, it seems
-#subdirs='cvs fast opt optFast profOptFast shareOptFast debug debugOpt noErr shareOptNoErr'
-subdirs='cvs opt optFast profOptFast shareOptFast debugOpt'
-
-if test -z "$EUROPA_CNET_INCR_REPROP" -o 0"$EUROPA_CNET_INCR_REPROP" = 00
-then
-    echo Full repropagation will be used.
-else
-    echo Incremental repropagation will be used.
-fi
+# The (compilation) variants to build and test.
+variants='DEV OPTIMIZED PROFILE'
 
 # CVS info
 CVS_RSH=ssh
@@ -60,125 +55,59 @@ ulimit -v 2000000
 # Print the limits so it is obvious what they are when something goes wrong.
 ulimit -a
 
-# Primary compilation loop
-for dir in $subdirs
+for var in $variants
 do
 
-    cd "$startdir"
+  cvs co PLASMA > cvs.co.PLASMA 2>&1
+  status=$?
+  echo '"cvs co PLASMA" in '"`pwd`"' exited '"$status"
+  if test "$status" != 0
+      then
+      mkdir PLASMA/cvs.co.failed
+      exit "$status"
+  fi
 
-    if test ! -d "$dir"
-    then
-        mkdir "$dir"
-        test $? = 0 || exit $?
-    fi
+  cd PLASMA
 
-    cd "$dir"
+  jam -sVARIANTS=$var > jam.output.$var 2>&1
+  statusJam=$?
+  echo '"jam -sVARIANTS='"$var"'" in '"`pwd`"' exited '"$statusJam"
+  if test $statusJam = 0
+  then
+      jam -sVARIANTS=$var tests > jam.tests.$var 2>&1
+      statusJamTests=$?
+      echo '"jam -sVARIANTS='"$var"' tests" in '"`pwd`"' exited '"$statusJamTests"
+      if test $statusJamTests = 0
+      then
+          jam -sVARIANTS=$var clean > jam.clean.$var 2>&1
+          statusJamClean=$?
+          echo '"jam -sVARIANTS='"$var"' tests" in '"`pwd`"' exited '"$statusJamTests"
+          if test $statusJamClean = 0
+          then
+              :
+          else
+              tail -40 jam.clean.$var
+              exit $statusJamClean
+          fi
+      else
+          tail -40 jam.tests.$var
+          exit $statusJamTests
+      fi
+  else
+      tail -40 jam.output.$var
+      exit $statusJam
+  fi
 
-    if test -d NewPlan
-    then
-	mkdir NewPlan/working || exit 2
-	mkdir NewPlan/working/rerun || exit 2
-    else
-	cvs co NewPlan > cvs.co.NewPlan 2>&1
-	status=$?
-	echo '"cvs co NewPlan" in '"`pwd`"' exited '"$status"
-	mkdir NewPlan/working || exit 2
-	if test "$status" != 0
-	then
-	    mkdir NewPlan/working/cvs.co.failed
-	    exit "$status"
-	fi
-	if test -f make.options
-	then
-            # Add to commonMakeOptions.imake
-	    head -2 NewPlan/commonMakeOptions.imake > cMO.new
-	    cat make.options >> cMO.new
-	    echo '' >> cMO.new
-	    tail +3 NewPlan/commonMakeOptions.imake >> cMO.new
-	    mv -f cMO.new NewPlan/commonMakeOptions.imake
-	fi
-    fi
+  # Save the jam output files.
+  mv -f jam.*.$var ..
 
-    cd NewPlan
+  cd ..
 
-    test -d "$startdir"/working || exit 2
-
-    make $makeopt EuropaDist.tar >> make.tests 2>&1
-    statusMakeTar=$?
-    echo '"make '"$makeopt"' EuropaDist.tar" in '"`pwd`"' exited '"$statusMakeTar"
-
-    if test $statusMakeTar = 0
-    then
-        make $makeopt plannerTests unofficial timings >> make.tests 2>&1
-        status=$?
-        echo '"make '"$makeopt"' plannerTests unofficial timings" in '"`pwd`"' exited '"$status"
-
-        if test $status = 0
-        then
-            mkdir ../testDist && cd ../testDist && tar -xpf ../NewPlan/EuropaDist.tar
-            statusTarExtract=$?
-            echo '"tar -xpf EuropaDist.tar" in '"`pwd`"' exited '"$statusTarExtract"
-
-            if test $statusTarExtract = 0
-            then
-                make $makeopt simple >> make.simple 2>&1
-                statusMakeDist=$?
-                echo '"make '"$makeopt"' simple" in '"`pwd`"' exited '"$statusMakeDist"
-
-                if test $statusMakeDist = 0
-                then
-                    make $makeopt clean >> make.simple.clean 2>&1
-                    statusMakeDistClean=$?
-                    echo '"make '"$makeopt"' clean" in '"`pwd`"' exited '"$statusMakeDistClean"
-
-                    if test $statusMakeDistClean = 0
-                    then
-                        cd ../NewPlan
-                        make $makeopt clean >> make.clean 2>&1
-                        statusMakeClean=$?
-                        echo '"make '"$makeopt"' clean" in '"`pwd`"' exited '"$statusMakeClean"
-                        cd ..
-                    fi
-                fi
-            fi
-        fi
-    fi
-
-    if test $statusMakeTar$status$statusTarExtract$statusMakeDist$statusMakeDistClean$statusMakeClean = 000000
-    then
-        (uname -a; echo ''; cat make.options; echo ''; g++ --version; echo ''; cat NewPlan/SupportFiles/timings) | \
-            Mail -s 'Autobuild on '"`hostname`"' in '"`pwd`"' succeeded' "$email"
-
-        # If appropriate, look for and save the profiling data
-        if egrep PROFILE make.options > /dev/null 2>&1
-        then
-            find "$HOME"/europa.profiles -type d -mtime +7 -ls > .autobuild.profFind
-            if test -s .autobuild.profFind
-            then
-                NewPlan/SupportFiles/gather.gprofs
-		cvs tag -F Europa-Auto-Profiled-"`uname -n | sed -e 's/[.].*$//'`"
-            fi
-            rm -rf .autobuild.profFind
-        fi
-    else
-        ( uname -a; echo ''; cat make.options; echo ''; g++ --version; echo ''; tail -40 NewPlan/make.tests) | \
-            Mail -s 'Autobuild in '"`pwd`"' failed; exited '"$status" "$email"
-        mkdir NewPlan/working/failed
-    fi
-
-    # Save the make output files and the timings data
-    mv NewPlan/make.tests . || exit 2
-    mv testDist/make.simple . || exit 2
-    mv testDist/make.simple.clean . || exit 2
-    mv NewPlan/make.clean . || exit 2
-    mv NewPlan/SupportFiles/timings* . || exit 2
-
-    # Would continue with the next one after a failure,
-    #   but the disk space might not be available.
-    rmdir NewPlan/working || exit 1
-
-    # Now, wipe out all that hard work
-    rm -rf NewPlan testDist
+  # Remove everything so that each variant is tested completely independently.
+  rm -rf PLASMA
 
 done
+
+echo "All builds, tests, and cleans passed for each variant: $variants."
+
 exit 0
