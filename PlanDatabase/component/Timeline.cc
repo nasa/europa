@@ -54,25 +54,39 @@ namespace Prototype {
        return;
     }
 
-    // Special case, the token could be placed at the end, which can't precede anything. This
-    // results in an ordering choicxe of the noId() i.e. ordering w.r.t. no successor
-    if(getPlanDatabase()->getTemporalAdvisor()->canPrecede(m_tokenSequence.back(),token))
-       results.push_back(TokenId::noId());
-
     // So now we can go through the sequence till we find something that we can precede.
     std::list<TokenId>::iterator current = m_tokenSequence.begin();
 
     // Move forward until we find a Token we can precede
-    while (current != m_tokenSequence.end() && !getPlanDatabase()->getTemporalAdvisor()->canPrecede(token, *current))
+    while (current != m_tokenSequence.end()) {
+      if (getPlanDatabase()->getTemporalAdvisor()->canPrecede(token, *current))
+	break;
+
       current++;
-
-    if (current == m_tokenSequence.end())
-      return; // No additional choices
-
-    if(current == m_tokenSequence.begin()){ // Can add current and return - only one token sequenced.
-      results.push_back(*current);
-      return;
     }
+
+     // the token can precede every token in m_tokenSequence.
+    if (current == m_tokenSequence.end()) {
+      // std::cout << " Reached last token " << std::endl;
+      // Special case, the token could be placed at the end, which can't precede anything. This
+      // results in an ordering choice of the noId() i.e. ordering w.r.t. no successor
+      //std::cout << "Testing if token can go at the end " << std::endl;
+
+      if(getPlanDatabase()->getTemporalAdvisor()->canPrecede(m_tokenSequence.back(),token))
+	results.push_back(TokenId::noId());
+
+      return; // No additional choices
+    }
+
+    // TBW: if it can precede the first one, it can precede every other
+    // token in the sequence, thus, we should push it back and move on to
+    // see whether it can fit between the following tokens.
+
+     if(current == m_tokenSequence.begin()){ // Can add current and increment
+       results.push_back(*current);
+       //       return;
+       current++;
+     }
 
     std::list<TokenId>::iterator previous = --current; // step back for predecessor
     ++current; // step forward again to current
@@ -83,15 +97,27 @@ namespace Prototype {
       TokenId predecessor = *previous;
       TokenId successor = *current;
 
-      // This is the stopping criteria test where there is nothing more to do
-      if(!getPlanDatabase()->getTemporalAdvisor()->canPrecede(predecessor, token))
-	break;
+      //      std::cout << " Checking between tokens " << predecessor->getKey() << " and " << successor->getKey() << std::endl;
 
-      if(getPlanDatabase()->getTemporalAdvisor()->canFitBetween(token, predecessor, successor))
+      // we still need to check that the predecessor can precede the token,
+      // otherwise we'll return bogus successors (see PlanDatabse::module-tests::testNoChoicesThatFit
+      if (!getPlanDatabase()->getTemporalAdvisor()->canPrecede(predecessor,token))
+	  break;
+
+      if(getPlanDatabase()->getTemporalAdvisor()->canFitBetween(token, predecessor, successor)) {
+	//	std::cout << "can fit between returned true " << std::endl;
 	results.push_back(successor);
+      }
 
       previous = current++;
     }
+
+    // Special case, the token could be placed at the end, which can't precede anything. This
+    // results in an ordering choice of the noId() i.e. ordering w.r.t. no successor
+
+    if(getPlanDatabase()->getTemporalAdvisor()->canPrecede(m_tokenSequence.back(),token))
+      results.push_back(TokenId::noId());
+
   }
 
   void Timeline::getTokensToOrder(std::vector<TokenId>& results){
