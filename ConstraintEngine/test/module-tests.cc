@@ -2003,7 +2003,7 @@ private:
       ConstrainedVariableId cVarId;
       while (!testDomains.empty()) {
         AbstractDomain *domPtr = testDomains.front();
-        assertTrue(domPtr != 0 && (domPtr->isDynamic() || !domPtr->isEmpty()));
+        assertTrue(domPtr != 0 && (domPtr->isOpen() || !domPtr->isEmpty()));
         testDomains.pop_front();
         AbstractDomain::DomainType domType = domPtr->getType();
 

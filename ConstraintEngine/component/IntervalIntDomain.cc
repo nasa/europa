@@ -23,7 +23,7 @@ namespace Prototype {
   }
 
   bool IntervalIntDomain::isFinite() const {
-    check_error(!isDynamic());
+    check_error(!isOpen());
     return(m_lb > -MAX_INT && m_ub < MAX_INT);
   }
 
@@ -49,21 +49,21 @@ namespace Prototype {
     if (isEmpty()) {
       m_lb = convert(value);
       m_ub = m_lb;
-      if (!isDynamic())
+      if (!isOpen())
         notifyChange(DomainListener::RELAXED);
       return;
     }
     // If just outside and low, reduce lower bound:
     if (m_lb - minDelta() <= value && value < m_lb) {
       m_lb = convert(value);
-      if (!isDynamic())
+      if (!isOpen())
         notifyChange(DomainListener::RELAXED);
       return;
     }
     // If just outside and high, increase upper bound:
     if (m_ub < value && value <= m_ub + minDelta()) {
       m_ub = convert(value);
-      if (!isDynamic())
+      if (!isOpen())
         notifyChange(DomainListener::RELAXED);
       return;
     }

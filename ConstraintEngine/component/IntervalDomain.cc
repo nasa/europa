@@ -28,15 +28,15 @@ namespace Prototype {
 
   bool IntervalDomain::intersect(const AbstractDomain& dom) {
     check_error(AbstractDomain::canBeCompared(*this, dom));
-    check_error(dom.isDynamic() || !dom.isEmpty());
-    check_error(isDynamic() || !isEmpty());
+    check_error(dom.isOpen() || !dom.isEmpty());
+    check_error(isOpen() || !isEmpty());
     return(intersect(dom.getLowerBound(), dom.getUpperBound()));
   }
 
   bool IntervalDomain::difference(const AbstractDomain& dom) {
     check_error(AbstractDomain::canBeCompared(*this, dom));
-    check_error(dom.isDynamic() || !dom.isEmpty());
-    check_error(isDynamic() || !isEmpty());
+    check_error(dom.isOpen() || !dom.isEmpty());
+    check_error(isOpen() || !isEmpty());
 
     // Check for case where difference could cause a split in the interval;
     //   don't handle it in this implementation.
@@ -84,7 +84,7 @@ namespace Prototype {
   void IntervalDomain::insert(double value) {
     if (isEmpty()) {
       m_lb = m_ub = value;
-      if (!isDynamic())
+      if (!isOpen())
         notifyChange(DomainListener::RELAXED);
       return;
     }        
@@ -120,7 +120,7 @@ namespace Prototype {
 
   bool IntervalDomain::isSubsetOf(const AbstractDomain& dom) const {
     check_error(AbstractDomain::canBeCompared(*this, dom));
-    check_error(!isDynamic());
+    check_error(!isOpen());
     check_error(!dom.isEmpty());
     bool result = ((isFinite() || dom.isInfinite()) && 
                    (dom.getUpperBound() + minDelta()) >= m_ub && 
@@ -130,7 +130,7 @@ namespace Prototype {
 
   bool IntervalDomain::intersects(const AbstractDomain& dom) const {
     check_error(AbstractDomain::canBeCompared(*this, dom));
-    check_error(!isDynamic());
+    check_error(!isOpen());
     check_error(!dom.isEmpty());
 
     // This could be optimized to avoid the copy if found to be worth it.
@@ -255,12 +255,12 @@ namespace Prototype {
   }
 
   bool IntervalDomain::isSingleton() const {
-    check_error(!isDynamic());
+    check_error(!isOpen());
     return(fabs(m_ub - m_lb) < minDelta());
   }
 
   bool IntervalDomain::isEmpty() const {
-    check_error(!isDynamic());
+    check_error(!isOpen());
     return(m_lb - m_ub > EPSILON);
   }
 
@@ -271,7 +271,7 @@ namespace Prototype {
   }
 
   int IntervalDomain::getSize() const {
-    check_error(!isDynamic() && isFinite());
+    check_error(!isOpen() && isFinite());
 
     if (isEmpty())
       return(0);
@@ -325,7 +325,7 @@ namespace Prototype {
   double IntervalDomain::convert(const double& value) const {return value;}
 
   bool IntervalDomain::isFinite() const {
-    check_error(!isDynamic());
+    check_error(!isOpen());
     // Real domains are only finite if they are singleton or empty.
     return(isSingleton() || isEmpty());
   }

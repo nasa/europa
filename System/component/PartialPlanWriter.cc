@@ -735,7 +735,7 @@ namespace Prototype {
       std::stringstream stream;
       std::list<double> enumeration;
       EnumeratedDomain dom(edom);
-      if(dom.isDynamic()) {
+      if(dom.isOpen()) {
 	dom.close();
       }
       if(dom.isInfinite()) {

@@ -19,7 +19,12 @@ using namespace Prototype;
  * Bar: Casting behaviour
  * EmbeddedClass: Error handling and checking for release and alloction patterns with embedded id's.
  */
-class Foo
+class Root {
+public:
+  Root(){}
+};
+
+class Foo: public Root
 {
 public:
   Foo() {counter++;}
@@ -45,8 +50,22 @@ public:
   Bar(){}
 };
 
+class Baz: public Foo
+{
+public:
+  Baz(){}
+};
+
+class Bing: public Root 
+{
+public:
+  Bing(){}
+};
+
 int Foo::counter(0);
 
+void overloadFunc(const Id<Bing>& arg){assert(true);}
+void overloadFunc(const Id<Foo>& arg){assert(true);}
 
 bool IdTests::test(){
   runTest(testBasicAllocation);
@@ -151,6 +170,10 @@ bool IdTests::testCastingSupport()
   assert(cbId == bId);
   bId.release();
   non_fast_only_assert(cbId.isInvalid());
+
+  Id<Baz> fId1(new Baz());
+  // DOES NOT COMPILE: overloadFunc(fId1);
+  fId1.release();
   return true;
 }
 

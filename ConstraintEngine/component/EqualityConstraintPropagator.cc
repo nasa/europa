@@ -82,7 +82,7 @@ namespace Prototype {
   void processScope(const std::set<ConstrainedVariableId>& scope){
     AbstractDomain& domain(EqualConstraint::getCurrentDomain(* (scope.begin())));
 
-    if(domain.isDynamic())
+    if(domain.isOpen())
       return;
 
     // Set up the initial values to match others against
@@ -94,7 +94,7 @@ namespace Prototype {
       AbstractDomain& currentDomain = EqualConstraint::getCurrentDomain(*it);
       check_error(currentDomain.getType() == domainType);
 
-      if(currentDomain.isDynamic())
+      if(currentDomain.isOpen())
 	return;
 
       if((currentDomain.isFinite() != isFinite) || 

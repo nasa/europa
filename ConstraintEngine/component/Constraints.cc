@@ -51,9 +51,9 @@ namespace Prototype {
 
     // Test preconditions for continued execution.
     // Should this be part of canIgnore() instead? --wedgingt 2004 Feb 24
-    if (domx.isDynamic() ||
-        domy.isDynamic() ||
-        domz.isDynamic())
+    if (domx.isOpen() ||
+        domy.isOpen() ||
+        domz.isOpen())
       return;
 
     check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
@@ -136,7 +136,7 @@ namespace Prototype {
   void EqualConstraint::handleExecute() {
     unsigned int i = 0;
     for ( ; i < m_argCount; i++)
-      if (!getCurrentDomain(m_variables[i]).isDynamic())
+      if (!getCurrentDomain(m_variables[i]).isOpen())
         break;
     if (i >= m_argCount)
       return;
@@ -148,7 +148,7 @@ namespace Prototype {
     bool changedOne = false;
     for (unsigned int j = i+1; j < m_argCount; j++){
 	AbstractDomain& otherDom = getCurrentDomain(m_variables[j]);
-        if (!otherDom.isDynamic() && nonDynDom.equate(otherDom)) {
+        if (!otherDom.isOpen() && nonDynDom.equate(otherDom)) {
           if (nonDynDom.isEmpty() || otherDom.isEmpty())
             return;
 	  changedOne=true;
@@ -160,7 +160,7 @@ namespace Prototype {
     if(changedOne)
       for (unsigned int j = i+2; j < m_argCount; j++){
 	AbstractDomain& otherDom = getCurrentDomain(m_variables[j]);
-        if (!otherDom.isDynamic() && nonDynDom.equate(otherDom)) {
+        if (!otherDom.isOpen() && nonDynDom.equate(otherDom)) {
           if (nonDynDom.isEmpty() || otherDom.isEmpty())
             return;
 	  changedOne=true;
@@ -181,7 +181,7 @@ namespace Prototype {
       m_isDirty(true),
       m_currentDomain(getCurrentDomain(variable)),
       m_executionCount(0) {
-    check_error(superset.isDynamic() || !superset.isEmpty());
+    check_error(superset.isOpen() || !superset.isEmpty());
     check_error(m_currentDomain.getType() == superset.getType() ||
                 (m_currentDomain.isEnumerated() &&
                  superset.isEnumerated()));
@@ -233,7 +233,7 @@ namespace Prototype {
     check_error(AbstractDomain::canBeCompared(domx, domy));
 
     // Discontinue if either domain is dynamic.
-    if (domx.isDynamic() || domy.isDynamic())
+    if (domx.isOpen() || domy.isOpen())
       return;
 
     check_error(!domx.isEmpty() && !domy.isEmpty());
@@ -291,7 +291,7 @@ namespace Prototype {
     check_error(AbstractDomain::canBeCompared(domx, domy));
 
     // Discontinue if either domain is dynamic
-    if (domx.isDynamic() || domy.isDynamic())
+    if (domx.isOpen() || domy.isOpen())
       return;
 
     check_error(!domx.isEmpty() && !domy.isEmpty());
@@ -422,9 +422,9 @@ namespace Prototype {
 
     /* Test preconditions for continued execution. */
     /* Could support one dynamic domain, but only very messily due to REAL_ENUMERATED case. */
-    if (domx.isDynamic() ||
-        domy.isDynamic() ||
-        domz.isDynamic())
+    if (domx.isOpen() ||
+        domy.isOpen() ||
+        domz.isOpen())
       return;
 
     check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
@@ -803,7 +803,7 @@ namespace Prototype {
 
   void CondAllSameConstraint::handleExecute() {
     BoolDomain& boolDom = static_cast<BoolDomain&>(getCurrentDomain(m_variables[0]));
-    check_error(!boolDom.isDynamic());
+    check_error(!boolDom.isOpen());
 
     if (!boolDom.isSingleton()) {
       // Condition is not singleton, so try to restrict it:
@@ -815,7 +815,7 @@ namespace Prototype {
       double single = 0.0;
       for (unsigned int i = 1; !boolDom.isSingleton() && i < ARG_COUNT; i++) {
         AbstractDomain& current(getCurrentDomain(m_variables[i]));
-        if (current.isDynamic()) {
+        if (current.isOpen()) {
           canProveTrue = false;
           continue;
         }
@@ -865,11 +865,11 @@ namespace Prototype {
         // or more than one is not singleton, none can be restricted.
 
         unsigned int j = 1;
-        while (j < ARG_COUNT - 1 && !getCurrentDomain(m_variables[j]).isDynamic()
+        while (j < ARG_COUNT - 1 && !getCurrentDomain(m_variables[j]).isOpen()
                && !getCurrentDomain(m_variables[j]).isSingleton())
           ++j;
         AbstractDomain& domj = getCurrentDomain(m_variables[j]);
-        if (domj.isDynamic() || !domj.isSingleton())
+        if (domj.isOpen() || !domj.isSingleton())
           return; // Can ignore relax events until condition var is relaxed.
         double single = domj.getSingletonValue();
         unsigned int foundOneToTrim = 0;
@@ -877,7 +877,7 @@ namespace Prototype {
           if (i == j)
             continue;
           AbstractDomain& domi = getCurrentDomain(m_variables[i]);
-          if (domi.isDynamic())
+          if (domi.isOpen())
             return; // Can ignore relax events until condition var is relaxed.
           if (domi.isSingleton() && domi.getSingletonValue() != single)
             return; // Can ignore relax events until condition var is relaxed.
@@ -918,7 +918,7 @@ namespace Prototype {
         // Singleton true: force all other vars in scope to be equated if _any_ of them are not dynamic.
         unsigned int i = 1;
         for ( ; i < ARG_COUNT; i++)
-          if (!getCurrentDomain(m_variables[i]).isDynamic())
+          if (!getCurrentDomain(m_variables[i]).isOpen())
             break;
         if (i == ARG_COUNT) // All of them are dynamic; can't reduce any.
           return; // Can ignore relax events until condition var is relaxed.
@@ -965,8 +965,8 @@ namespace Prototype {
   static void addToUnion(AbstractDomain **unionOfDomains,
                          const AbstractDomain& domToAdd) {
     check_error(unionOfDomains != 0 && *unionOfDomains != 0);
-    check_error(!(*unionOfDomains)->isEmpty() && !(*unionOfDomains)->isDynamic());
-    check_error(!domToAdd.isEmpty() && !domToAdd.isDynamic());
+    check_error(!(*unionOfDomains)->isEmpty() && !(*unionOfDomains)->isOpen());
+    check_error(!domToAdd.isEmpty() && !domToAdd.isOpen());
     AbstractDomain *newUnion = 0;
     std::list<double> membersToAdd;
     std::list<double> newMembers;
@@ -1040,7 +1040,7 @@ namespace Prototype {
 
   void CondAllDiffConstraint::handleExecute() {
     BoolDomain& boolDom = static_cast<BoolDomain&>(getCurrentDomain(m_variables[0]));
-    check_error(!boolDom.isDynamic());
+    check_error(!boolDom.isOpen());
 
     /* Whether the condition is singleton or not, try to restrict it:
      * A. If all pairs of the other's domains are disjoint, the
@@ -1055,7 +1055,7 @@ namespace Prototype {
     AbstractDomain* unionOfOthers = 0;
     for ( ; i < ARG_COUNT; i++) {
       AbstractDomain& current(getCurrentDomain(m_variables[i]));
-      if (current.isDynamic()) {
+      if (current.isOpen()) {
         canProveTrue = false;
         if (firstDynamic == 0)
           firstDynamic = i;
@@ -1138,7 +1138,7 @@ namespace Prototype {
       // For each var ...
       for (i = firstNonDynamic; i < ARG_COUNT; i++) {
         // ... that has a singleton domain ...
-        if (getCurrentDomain(m_variables[i]).isDynamic() ||
+        if (getCurrentDomain(m_variables[i]).isOpen() ||
             !getCurrentDomain(m_variables[i]).isSingleton())
           continue;
         AbstractDomain& singletonDom = getCurrentDomain(m_variables[i]);
@@ -1148,7 +1148,7 @@ namespace Prototype {
             continue;
           AbstractDomain& jDom = getCurrentDomain(m_variables[j]);
           // ... that have non-dynamic and finite domains ...
-          if (!jDom.isDynamic() && jDom.isFinite() &&
+          if (!jDom.isOpen() && jDom.isFinite() &&
               // ... looking for one that contains singletonDom's value.
               // In an enumeration, any member can be removed:
               ((jDom.isEnumerated() && jDom.isMember(singletonDom.getSingletonValue()))
@@ -1161,7 +1161,7 @@ namespace Prototype {
               return;
             // No point in going thru again if we're just starting.
             changedOne = (i > firstNonDynamic);
-          } // if !jDom.isDynamic ...
+          } // if !jDom.isOpen ...
         } // for unsigned int j = firstNonDynamic; ...
       } // for i = firstNonDynamic; i < ARG_COUNT; i++
     } // for changedOne = true; changedOne;
@@ -1204,7 +1204,7 @@ namespace Prototype {
 
     assertFalse(domA.isEmpty() || domB.isEmpty() || domC.isEmpty() || domD.isEmpty());
     
-    if (domA.isDynamic() || domB.isDynamic() || domD.isDynamic())
+    if (domA.isOpen() || domB.isOpen() || domD.isOpen())
       return;
     if (domA.isSubsetOf(domB))
       (void)domC.intersect(domD);

@@ -58,7 +58,7 @@ namespace Prototype {
       intDomain.getBounds(lb,ub);
       assert(lb<ub);
 
-      assert(!intDomain.isDynamic());
+      assert(!intDomain.isOpen());
       IntervalIntDomain d1(intDomain);
       d1.empty();
       assert(d1.isEmpty());
@@ -279,7 +279,7 @@ namespace Prototype {
       //   testIntervalDomInsertAndRemove(). --wedgingt 2004 Mar 8
 
       EnumeratedDomain enumDom1;
-      assert(enumDom1.isDynamic());
+      assert(enumDom1.isOpen());
       assert(enumDom1.isNumeric());
       enumDom1.insert(3.14159265);
       enumDom1.close();
@@ -325,7 +325,7 @@ namespace Prototype {
       vals.push_back(EPSILON);
       EnumeratedDomain enumDom2(vals);
 
-      assert(!(enumDom2.isDynamic()));
+      assert(!(enumDom2.isOpen()));
       assert(enumDom2.isNumeric());
       assert(enumDom2.isFinite());
       assert(enumDom2.getSize() == 6);
@@ -566,7 +566,7 @@ namespace Prototype {
 
       ChangeListener l_listener;
       LabelSet ls0(values, true, l_listener.getId());
-      assert(!ls0.isDynamic());
+      assert(!ls0.isOpen());
 
       Prototype::LabelStr l2("L2");
       assert(ls0.isMember(l2));
@@ -927,7 +927,7 @@ namespace Prototype {
       assert(dom0 != dom1);
 
       Domain<int> dom2(10);
-      assert(!dom2.isDynamic());
+      assert(!dom2.isOpen());
       assert(dom2.isSingleton());
       return(true);
     }
@@ -975,19 +975,19 @@ namespace Prototype {
 
       copyPtr = emptyOpen.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
-      assertTrue(copyPtr->isDynamic());
+      assertTrue(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertTrue(copyPtr->isEnumerated());
       copyPtr->insert(3.1);
       //assertFalse(copyPtr->isSingleton()); Or should that provoke an error? wedgingt 2004 Mar 3
       copyPtr->close();
       assertTrue(copyPtr->isSingleton());
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       delete copyPtr;
 
       copyPtr = fourDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
-      assertTrue(copyPtr->isDynamic());
+      assertTrue(copyPtr->isOpen());
       assertTrue(copyPtr->isEnumerated());
       copyPtr->close();
       assertTrue(copyPtr->getSize() == 4);
@@ -996,7 +996,7 @@ namespace Prototype {
 
       copyPtr = fiveDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isEnumerated());
       assertTrue(copyPtr->getSize() == 5);
       assertTrue(fourDom.isSubsetOf(*copyPtr));
@@ -1004,7 +1004,7 @@ namespace Prototype {
 
       copyPtr = oneDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isEnumerated());
       assertTrue(copyPtr->isSingleton());
 
@@ -1029,7 +1029,7 @@ namespace Prototype {
 
       copyPtr = empty.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
       assertTrue(copyPtr->isFinite());
@@ -1050,7 +1050,7 @@ namespace Prototype {
 
       copyPtr = one2ten.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
       assertFalse(copyPtr->isFinite());
@@ -1069,7 +1069,7 @@ namespace Prototype {
 
       copyPtr = four.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
       assertTrue(copyPtr->isFinite());
@@ -1103,7 +1103,7 @@ namespace Prototype {
 
       copyPtr = empty.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
       assertTrue(copyPtr->isFinite());
@@ -1124,7 +1124,7 @@ namespace Prototype {
 
       copyPtr = one2ten.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
       assertTrue(copyPtr->isFinite());
@@ -1145,7 +1145,7 @@ namespace Prototype {
 
       copyPtr = four.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
       assertTrue(copyPtr->isFinite());
@@ -1186,7 +1186,7 @@ namespace Prototype {
 
       copyPtr = emptyFruit.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertFalse(copyPtr->isNumeric());
       assertTrue(copyPtr->isEnumerated());
       assertFalse(copyPtr->isInterval());
@@ -1206,7 +1206,7 @@ namespace Prototype {
 
       copyPtr = orangeOnly.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertFalse(copyPtr->isNumeric());
       assertTrue(copyPtr->isEnumerated());
       assertTrue(copyPtr->isFinite());
@@ -1231,7 +1231,7 @@ namespace Prototype {
 
       copyPtr = fruitDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
-      assertFalse(copyPtr->isDynamic());
+      assertFalse(copyPtr->isOpen());
       assertFalse(copyPtr->isNumeric());
       assertTrue(copyPtr->isEnumerated());
       assertTrue(copyPtr->isFinite());

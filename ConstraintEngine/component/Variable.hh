@@ -46,41 +46,6 @@ namespace Prototype {
     virtual ~Variable();
 
     /**
-     * @brief Adds an element to a dynamic domain.
-     * @param value The value to be inserted to the various domains of the variable.
-     */
-    virtual void insert(double value);
-
-    /**
-     * @brief Restricts the domain of the variable to be a subset of the given domain.
-     *
-     * This operation is only valid if the ConstraintEngine does not have an empty domain.
-     * @param domain - the domain to restrict to. Note that the domain must be a subset of the current domain.
-     * @see reset()
-     */
-    virtual void specify(const AbstractDomain& domain);
-
-    /**
-     * @brief Special case of specify where we restrict it to a singleton.
-     * @param singleTonValue to specify it to.
-     * @see specify(const DomainType& domain), reset()
-     */
-    virtual void specify(const double& singletonValue);
-
-    /**
-     * @brief Retract previously specified domain restriction.
-     * @see specify()
-     */
-    virtual void reset();
-    
-
-    /**
-     * @brief Allows a client to close a variables domain.
-     * @note The variable must be dynamic.
-     */
-    virtual void close();
-
-    /**
      * @brief Return the domain first used in initialization.
      */
     const DomainType& getBaseDomain() const;
@@ -122,18 +87,15 @@ namespace Prototype {
      */
     const AbstractDomain& baseDomain() const;
 
-    virtual void handleSpecified(const AbstractDomain& specDomain) {
-    }
+    virtual void handleSpecified(const AbstractDomain& specDomain) {}
     
-    virtual void handleReset() {
-    }
+    virtual void handleReset() {}
+
+  protected:
+    AbstractDomain& internal_specifiedDomain();
+    AbstractDomain& internal_baseDomain();
 
   private:
-    /**
-     * @brief Relaxes the derived domain to the current specified domain.
-     * This method implements the required behaviour to relax variables in the ConstraintEngine.
-     */
-    void relax();
 
     /**
      * @brief returns the current domain without checking for pending propagation first.
@@ -142,14 +104,6 @@ namespace Prototype {
      * @see lastDomain(), Constraint
      */
     AbstractDomain& getCurrentDomain();
-
-
-    /**
-     * @brief Called by the parent class function isValid().
-     * @return true of the derived domain is a subset of the specified domain and the specified domain is a
-     * subset of the base domain. Otherwise false.
-     */
-    bool validate() const;
 
   protected:
     DomainType m_baseDomain; /**< The initial (and maximal, unless dynamic) set for the domain of this variable. */
@@ -173,7 +127,7 @@ namespace Prototype {
     m_derivedDomain.setListener(m_listener);
 
     // Don't propagate set operations on dynamic or empty domains.
-    if (baseDomain.isDynamic() || baseDomain.isEmpty())
+    if (baseDomain.isOpen() || baseDomain.isEmpty())
       return;
 
     if (baseDomain.isSingleton())
@@ -184,20 +138,6 @@ namespace Prototype {
   
   template<class DomainType>
   Variable<DomainType>::~Variable() {
-  }
-
-  template<class DomainType>
-  void Variable<DomainType>::insert(double value) {
-    check_error(m_baseDomain.isDynamic());
-    m_baseDomain.insert(value);
-    m_specifiedDomain.insert(value);
-    m_derivedDomain.insert(value);
-  }
-
-  template<class DomainType>
-  bool Variable<DomainType>::validate() const {
-    return(m_derivedDomain.isSubsetOf(m_specifiedDomain) &&
-           m_specifiedDomain.isSubsetOf(m_baseDomain));
   }
 
   template<class DomainType>
@@ -221,7 +161,7 @@ namespace Prototype {
     static bool sl_initialized = false;
     static DomainType sl_emptyDomain;
     if (!sl_initialized) {
-      if (sl_emptyDomain.isDynamic())
+      if (sl_emptyDomain.isOpen())
         sl_emptyDomain.close();
       sl_emptyDomain.empty();
       sl_initialized = true;
@@ -254,56 +194,14 @@ namespace Prototype {
   }
 
   template<class DomainType>
-  void Variable<DomainType>::specify(const AbstractDomain& domain) {
-    check_error(!domain.isDynamic() && !domain.isEmpty());
-    check_error(!m_baseDomain.isDynamic());
-    check_error(domain.isSubsetOf(m_specifiedDomain));
-
-    // If this actually changes the domain then propagate the change to the derived domain.
-    if (m_specifiedDomain.intersect(domain)) {
-      if (m_specifiedDomain.isSingleton())
-        m_derivedDomain.set(m_specifiedDomain.getSingletonValue());
-      else
-        m_derivedDomain.set(m_specifiedDomain);
-    }
-    check_error(isValid());
-  }
-
-  template <class DomainType>
-  void Variable<DomainType>::specify(const double& singletonValue) {
-    check_error(!m_baseDomain.isDynamic());
-    check_error(m_specifiedDomain.isMember(singletonValue));
-    if (!m_specifiedDomain.isSingleton()) {
-      m_specifiedDomain.set(singletonValue);
-      m_derivedDomain.set(singletonValue);
-    }
-    check_error(isValid());
+  AbstractDomain& Variable<DomainType>::internal_specifiedDomain() {
+    return(m_specifiedDomain);
   }
 
   template<class DomainType>
-  void Variable<DomainType>::reset() {
-    m_specifiedDomain.relax(m_baseDomain);
-    m_derivedDomain.reset(m_baseDomain);
+  AbstractDomain& Variable<DomainType>::internal_baseDomain() {
+    return(m_baseDomain);
   }
 
-  template<class DomainType>
-  void Variable<DomainType>::close() {
-    check_error(m_baseDomain.isDynamic());
-    m_baseDomain.close();
-    m_specifiedDomain.close();
-    m_derivedDomain.close();
-
-    // Now we should propagate specified domain to the derived domain as a set operation
-    // since we have closed the domain.
-    if (m_specifiedDomain.isSingleton())
-      m_derivedDomain.set(m_specifiedDomain.getSingletonValue());
-    else
-      m_derivedDomain.set(m_specifiedDomain);
-  }
-
-  template<class DomainType>
-  void Variable<DomainType>::relax() {
-    m_derivedDomain.relax(m_specifiedDomain);
-  }
 }
 #endif
