@@ -20,11 +20,11 @@ namespace Prototype {
 					     const DomainListener::ChangeType& changeType){
 
     check_error(variable->getParent()->getName() == LabelStr("Resource.change"));
-
+    //std::cout << "RP: argindex " << argIndex << std::endl;
     //handle change of variables
     switch(argIndex) {
     case ResourceConstraint::OBJECT: 
-      handleObjectChange(variable, changeType);
+      //handleObjectChange(variable, changeType);
       break;
     case ResourceConstraint::TIME: 
       handleTimeChange(variable, argIndex, constraint, changeType);
@@ -78,6 +78,7 @@ namespace Prototype {
       //if the spec domain is a singleton and this transaction has not yet been assigned to a resource, then assign it.
       if(t->getResource() == ResourceId::noId()) {
 	ResourceId r = ResourceConstraint::getCurrentDomain(variable).getSingletonValue();	
+	std::cout << "Inserting " << t << " on " << r << std::endl;
 	  r->insert(t);
 	}
       }
