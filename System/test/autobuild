@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.75 2004-09-17 17:19:43 wedgingt Exp $
+# $Id: autobuild,v 1.76 2004-09-17 17:51:24 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -77,7 +77,7 @@ ulimit -v 2000000
 ulimit -a
 
 function cvsCmd() {
-  if test "$1" != 'co' -a "$1" != 'tag'
+  if test "$1" != 'co' -a "$1" != 'tag' -a "$1" != 'update'
   then
     mkdir PLASMA/autobuild.bug
     (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments') | \
@@ -85,14 +85,14 @@ function cvsCmd() {
     mkdir working/failed
     exit 22
   fi
-  echo Calling cvs "$1" "$2" "$3" PLASMA at "`date`" ... >> cvs.PLASMA 2>&1
-  cvs "$1" "$2" "$3" PLASMA >> cvs.PLASMA 2>&1
+  echo Calling cvs "$1" "$2" "$3" "$4" PLASMA at "`date`" ... >> cvs.PLASMA 2>&1
+  cvs "$1" "$2" "$3" "$4" PLASMA >> cvs.PLASMA 2>&1
   status=$?
-  echo '"cvs '"$1 $2 $3"' PLASMA" in '"`pwd`"' exited '"$status"
+  echo '"cvs '"$1 $2 $3 $4"' PLASMA" in '"`pwd`"' exited '"$status"
   if test "$status" != 0
   then
     mkdir PLASMA/cvs.failed
-    (echo "$info"; echo ''; echo "'cvs '"$1 $2 $3"' PLASMA' failed; aborting autobuild"; tail cvs.PLASMA) | \
+    (echo "$info"; echo ''; echo "'cvs '"$1 $2 $3 $4"' PLASMA' failed; aborting autobuild"; tail cvs.PLASMA) | \
         Mail -s 'PLASMA Autobuild cvs on '"`hostname`"' in '"`pwd`"' failed' "$email"
     mkdir working/failed
     exit "$status"
@@ -100,7 +100,7 @@ function cvsCmd() {
 }
 
 function cvsCheckOut() {
-  cvsCmd co -rAutobuildTesting
+  cvsCmd co -r AutobuildTesting
 }
 
 function cvsTagTest() {
@@ -109,6 +109,10 @@ function cvsTagTest() {
 
 function cvsRemoveTag() {
   cvsCmd tag -d AutobuildTesting
+}
+
+function cvsUpdate() {
+  cvsCmd update -d -P -A
 }
 
 function cvsTagPassed() {
@@ -130,6 +134,7 @@ function jamCmd() {
 
 cvsCheckOut
 cvsRemoveTag
+cvsUpdate
 cvsTagTest
 
 for var in $variants
