@@ -106,7 +106,7 @@ namespace Prototype {
 							       timepoint, 
 							       (Time) var->getBaseDomain().getLowerBound(),  
 							       (Time) var->getBaseDomain().getUpperBound());
-	m_tnetVariableConstraints.insert(std::make_pair(var->getKey(), c));
+	m_tnetVariableConstraints.insert(std::make_pair(var, c));
       }
     }
   }
@@ -183,11 +183,43 @@ namespace Prototype {
     for(std::set<int>::const_iterator it = m_variablesForDeletion.begin(); it != m_variablesForDeletion.end(); ++it) {
       check_error(m_tnetVariables.find((*it)) != m_tnetVariables.end());
       m_tnet->deleteTimepoint((* m_tnetVariables.find((*it))).second);
-      m_tnet->removeTemporalConstraint((* m_tnetVariableConstraints.find((*it))).second);
-      m_tnetVariables.erase((*it));
-      m_tnetVariableConstraints.erase((*it));
+      for (std::map<TempVarId, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) {
+	if (varIt->first->getKey() == *it) {
+	  m_tnet->removeTemporalConstraint(varIt->second);
+	  m_tnetVariables.erase(*it);
+	  m_tnetVariableConstraints.erase(varIt->first);
+	  break;
+	}
+      }
     }
     m_variablesForDeletion.clear();    
+
+    // mirror bounds into the temporal network variables.
+
+    for (std::map<TempVarId, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) {
+      TempVarId var = varIt->first;
+      int lb = (int)var->lastDomain().getLowerBound();
+      int ub = (int)var->lastDomain().getUpperBound();
+      TimepointId timepoint = m_tnetVariables.find(var->getKey())->second;
+      Time lbt, ubt;
+
+      // Instead of getTimepointBounds here we'd like to get cached values
+      // from the last computation since the temporal network may be made
+      // inconsistent in this mapping process.
+      m_tnet->getTimepointBounds(timepoint, lbt, ubt);
+      if (lb >= lbt && ub <= ubt)
+	m_tnet->narrowTemporalConstraint(varIt->second, lb, ub);
+      else {
+      // think about whether we can do better here, possibly by changing
+      // the condition above.  There are cases
+      // where the temporal network has restricted it further so we're just
+      // thrashing by removing it and adding the original constraint that
+      // was previously restricted by the temporal network.
+	m_tnet->removeTemporalConstraint(varIt->second);
+	TemporalConstraintId c(m_tnet->addTemporalConstraint(m_tnet->getOrigin(), timepoint, (Time)lb, (Time)ub));
+	varIt->second = c;
+      }
+    }
   }
 
   void TemporalPropagator::updateTempVar() {
@@ -195,9 +227,16 @@ namespace Prototype {
       Time lb, ub;
       m_tnet->getTimepointBounds((*it).second, lb, ub);
       
-      if (m_tnet->getVarIdFromTimepoint((*it).second)->lastDomain().getLowerBound() != lb ||
-      	  m_tnet->getVarIdFromTimepoint((*it).second)->lastDomain().getUpperBound() != ub) 
+      if (m_tnet->getVarIdFromTimepoint((*it).second)->lastDomain().getLowerBound() > lb ||
+      	  m_tnet->getVarIdFromTimepoint((*it).second)->lastDomain().getUpperBound() < ub) {
+	std::cout << "Warning: bounds retrieved are  not a subset of the domain." << std::endl;
+	std::cout << " Domain = " << m_tnet->getVarIdFromTimepoint((*it).second)->lastDomain() << std::endl;
+	std::cout << " Bounds = [" << lb << "," << ub << "]" << std::endl;
+	check_error(false);
+      }
+      else {
       	m_tnet->getVarIdFromTimepoint((*it).second)->specify(IntervalIntDomain(lb, ub));
+      }
     }
   }
 
@@ -224,9 +263,9 @@ namespace Prototype {
     Time slb, sub;
     Time elb, eub;
     m_tnet->calcDistanceBounds(pend, tstart, slb, sub);
-    m_tnet->calcDistanceBounds(tend, succstart, elb, eub);
+    m_tnet->calcDistanceBounds(tend, sstart, elb, eub);
 
-    return(sub >=0  && elb >=0);
+    return(sub >=0  && eub >=0);
   }
 
     
