@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.81 2004-09-21 01:41:18 wedgingt Exp $
+# $Id: autobuild,v 1.82 2004-09-21 01:54:14 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -176,6 +176,7 @@ done
 cvsCheckOut
 tag=AutobuildPassed_"`hostname | sed -e 's/[.].*//'`"
 cvsTagPassed $tag
+rm -rf PLASMA
 
 (echo "$info";
     echo '';
