@@ -339,8 +339,9 @@ namespace EUROPA {
       IntervalIntDomain& dom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(var));
 
       check_error(!dom.isEmpty());
-      check_error(dom.isMember(lb) && dom.isMember(ub), 
-		  "Updated bounds must be a subset but are not for variable: " + var->getKey());
+      checkError(dom.isMember(lb) && dom.isMember(ub), 
+		 "Updated bounds [" << lb << " " << ub << "] are outside of " 
+		 << dom.toString() << " for " << var->toString());
 
       double domlb, domub;
       dom.getBounds(domlb,domub);
