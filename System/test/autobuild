@@ -1,9 +1,9 @@
 #!/bin/sh
-# $Id: autobuild,v 1.69 2004-08-24 17:03:52 wedgingt Exp $
+# $Id: autobuild,v 1.70 2004-08-24 18:17:12 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
-set -x
+# set -x
 
 # Usually, this is run via cron, which does not use the usual $PATH
 PATH=/usr/java/j2sdk1.4.2_04/bin:/usr/local/jam2.4:/usr/local/bin:"$PATH"
