@@ -96,6 +96,18 @@ if $(OS) = BEOS {
 
 DEBUG_FLAGS ?= -g3 ;
 
+# PTHREADS_LIBRARY = library with pthread related functions
+
+if $(OS) = BEOS {
+  PTHREADS_LIBRARY = condvar ;
+} else {
+  PTHREADS_LIBRARY = pthread ;
+}
+
+# THREADED_LINK_FLAGS = flags to enable multi-threaded execution
+
+THREADED_LINK_FLAGS ?= -l$(PTHREADS_LIBRARY) ;
+
 # SUFSHARE = suffix for shared libraries
 
 if $(OS) = CYGWIN {
@@ -132,14 +144,6 @@ if $(OS) = CYGWIN {
   CLASSPATH = \"$(CLASSPATH:J=$(colon))\" ;
 } else {
   CLASSPATH_SEPARATOR = ":" ;
-}
-
-# PTHREADS_LIBRARY = library with pthread related functions
-
-if $(OS) = BEOS {
-  PTHREADS_LIBRARY = condvar ;
-} else {
-  PTHREADS_LIBRARY = pthread ;
 }
 
 # DLOPEN_LIBRARY = library with open libraries functions

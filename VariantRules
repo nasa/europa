@@ -22,7 +22,6 @@ VARIANTS ?= DEV ;
 #     EUROPA_PROFILE
 #     EUROPA_COVERAGE
 #     EUROPA_WARN
-
 #########
 
 # C++Flags for the variant
@@ -80,15 +79,15 @@ rule FVariantLinkFlags
 
   switch $(variant) {
   case DEV :
-    return ;
+    return $(THREADED_LINK_FLAGS) ;
   case OPTIMIZED :
-    return ;
+    return $(THREADED_LINK_FLAGS) ;
   case PROFILE :
-    return $(PROFILE_FLAGS) ;
+    return $(PROFILE_FLAGS) $(THREADED_LINK_FLAGS) ;
   case COVERAGE :
-    return $(COVERAGE_FLAGS) ;
+    return $(COVERAGE_FLAGS) $(THREADED_LINK_FLAGS) ;
   case CUSTOM :
-    local flags ;
+    local flags = $(THREADED_LINK_FLAGS) ;
     if $(EUROPA_PROFILE) {
       flags += $(PROFILE_FLAGS) ;
     }
