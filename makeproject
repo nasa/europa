@@ -121,10 +121,10 @@ echo "Adding "$NAME"-Main.cc"
 cp ./NDDL/test/project/Main.cc $DIRECTORY/$NAME-Main.cc
 
 
-if [ -e $DIRECTORY/ppw-config ]
+if [ -e $DIRECTORY/PlanWorks.cfg ]
 then
   echo "error: "$DIRECTORY"/ppw-config already exists"
   exit -1
 fi
-echo "Adding ppw-config"
-cp ./NDDL/test/project/ppw-config $DIRECTORY
+echo "Adding PlanWorks.cfg"
+cp ./NDDL/test/project/ppw-config $DIRECTORY/PlanWorks.cfg
