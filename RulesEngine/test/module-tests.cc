@@ -23,7 +23,6 @@
 
 #include <iostream>
 #include <string>
-#include <cassert>
 
 #ifdef __sun
 #include <strstream>
@@ -227,13 +226,13 @@ private:
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-    assert(t0.getSlaves().empty());
+    check_error(t0.getSlaves().empty());
     t0.activate();
-    assert(db.getTokens().size() == 2);
-    assert(t0.getSlaves().size() == 1);
+    check_error(db.getTokens().size() == 2);
+    check_error(t0.getSlaves().size() == 1);
 
     TokenId slaveToken = *(t0.getSlaves().begin());
-    assert(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
+    check_error(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
 
     return true;
   }
@@ -253,35 +252,35 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-    assert(t0.getSlaves().empty());
+    check_error(t0.getSlaves().empty());
     t0.activate();
-    assert(db.getTokens().size() == 1);
+    check_error(db.getTokens().size() == 1);
     t0.getObject()->specify(object.getId());
     ce.propagate();
-    assert(t0.getSlaves().size() == 1);
-    assert(db.getTokens().size() == 2);
+    check_error(t0.getSlaves().size() == 1);
+    check_error(db.getTokens().size() == 2);
 
     TokenId slaveToken = *(t0.getSlaves().begin());
 
     // Set start time to 10 will trigger another guard
     t0.getStart()->specify(10); // Will trigger nested guard
     ce.propagate();
-    assert(t0.getSlaves().size() == 2);
+    check_error(t0.getSlaves().size() == 2);
 
     // Now set the object variable of the slaveToken to trigger additional guard
     slaveToken->getObject()->specify(o2.getId());
     ce.propagate();
-    assert(t0.getSlaves().size() == 3);
+    check_error(t0.getSlaves().size() == 3);
 
     // Now retract a decision and confirm the slave is removed
     t0.getStart()->reset();
     ce.propagate();
-    assert(t0.getSlaves().size() == 2);
+    check_error(t0.getSlaves().size() == 2);
 
     // Now deactivate the master token and confirm all salves are gone
     t0.cancel();
     ce.propagate();
-    assert(t0.getSlaves().empty());
+    check_error(t0.getSlaves().empty());
     return true;
   }
 
@@ -299,22 +298,22 @@ private:
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are not sub-goaling yet
     ConstrainedVariableId guard = LocalVariableGuard_0_Root::getGuard();
-    assert(guard.isNoId());
+    check_error(guard.isNoId());
 
     t0.activate();
     ce.propagate();
-    assert(t0.getSlaves().empty());
+    check_error(t0.getSlaves().empty());
 
     guard = LocalVariableGuard_0_Root::getGuard();
-    assert(guard.isValid());
+    check_error(guard.isValid());
     guard->specify(false); // Should not succeed
     ce.propagate();
-    assert(t0.getSlaves().empty());
+    check_error(t0.getSlaves().empty());
 
     guard->reset(); // Reset and try correct value
     guard->specify(true); // Should succeed
     ce.propagate();
-    assert(t0.getSlaves().size() == 1);
+    check_error(t0.getSlaves().size() == 1);
 
     return true;
   }
@@ -338,7 +337,7 @@ private:
 
     t0.activate();
     ce.propagate();
-    assert(t0.getSlaves().size() == 2);
+    check_error(t0.getSlaves().size() == 2);
 
     return true;
   }

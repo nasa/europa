@@ -27,6 +27,7 @@ using namespace NDDL;
       new DbLogger(std::cout, db.getId()); \
     } \
     Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"))); \
+    check_error(!object.getId().isNoId()); \
     if (autoClose) \
       db.close();
 
@@ -100,14 +101,16 @@ public:
 
 DECLARE_AND_DEFINE_VALUE_GUARDED_RULE(Predicate_2, Predicate, object, 10);
 
-class NddlRuleIntergrationTest{
+class NddlRuleIntergrationTest {
 public:
+
   static bool test() {
     runTest(testBasicComponents);
     return(true);
   }
 
 private:
+
   static bool testBasicComponents() {
     DEFAULT_SETUP(ce, db, schema, true);
     R_Predicate_0 rule0;

@@ -228,7 +228,7 @@ namespace Prototype {
 
     static bool in_process = false;
 
-    assert(!in_process);
+    check_error(!in_process);
     in_process = true;
 
     // for (std::map<int, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) 
@@ -276,6 +276,7 @@ namespace Prototype {
     //std::cout << "m_tnetConstraints size = " << m_tnetVariableConstraints.size() << std::endl;
     for (std::map<int, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) {
       TemporalConstraintId tc = varIt->second;
+      check_error(!tc.isNoId());
       check_error(m_tnetVariables.find(varIt->first) != m_tnetVariables.end());
       TimepointId tp = (m_tnetVariables.find(varIt->first))->second;      
       TempVarId var =  m_tnet->getVarIdFromTimepoint(tp);

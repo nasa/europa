@@ -113,23 +113,23 @@ int main(){
   std::list<ObjectId> objects;
   db.getObjectsByType(LabelStr("World"), objects);
   ObjectId world = objects.front();
-  assert(objects.size() == 1);
+  check_error(objects.size() == 1);
   ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
-  assert(horizonStart.isValid());
+  check_error(horizonStart.isValid());
   ConstrainedVariableId horizonEnd = world->getVariable(LabelStr("world.m_horizonEnd"));
-  assert(horizonEnd.isValid());
+  check_error(horizonEnd.isValid());
   int start = (int) horizonStart->baseDomain().getSingletonValue();
   int end = (int) horizonEnd->baseDomain().getSingletonValue();
   hor.setHorizon(start, end);
 
   // Create and run the planner
   ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
-  assert(maxPlannerSteps.isValid());
+  check_error(maxPlannerSteps.isValid());
   int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
   CBPlanner planner(db.getId(),query.getId(),steps);
   HeuristicStrategy strategy;
     
-  assert(planner.run(strategy.getId(), loggingEnabled()) == 1);
+  check_error(planner.run(strategy.getId(), loggingEnabled()) == 1);
 
   const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
     
