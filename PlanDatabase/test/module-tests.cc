@@ -8,12 +8,12 @@
 #include "Timeline.hh"
 #include "RulesEngine.hh"
 #include "Rule.hh"
-#include "./ConstraintEngine/TestSupport.hh"
-#include "./ConstraintEngine/IntervalIntDomain.hh"
-#include "./ConstraintEngine/IntervalRealDomain.hh"
-#include "./ConstraintEngine/LabelSet.hh"
-#include "./ConstraintEngine/DefaultPropagator.hh"
-#include "./ConstraintEngine/EqualityConstraintPropagator.hh"
+#include "../ConstraintEngine/TestSupport.hh"
+#include "../ConstraintEngine/IntervalIntDomain.hh"
+#include "../ConstraintEngine/IntervalRealDomain.hh"
+#include "../ConstraintEngine/LabelSet.hh"
+#include "../ConstraintEngine/DefaultPropagator.hh"
+#include "../ConstraintEngine/EqualityConstraintPropagator.hh"
 
 #include <iostream>
 

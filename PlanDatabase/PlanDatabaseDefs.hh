@@ -1,7 +1,7 @@
 #ifndef _H_PlanDatabaseDefs
 #define _H_PlanDatabaseDefs
 
-#include "./ConstraintEngine/ConstraintEngineDefs.hh"
+#include "../ConstraintEngine/ConstraintEngineDefs.hh"
 
 namespace Prototype {
   class Object;

@@ -1,8 +1,8 @@
 #include "EventToken.hh"
 #include "TokenVariable.hh"
 #include "PlanDatabase.hh"
-#include "./ConstraintEngine/IntervalIntDomain.hh"
-#include "./ConstraintEngine/ConstraintLibrary.hh"
+#include "../ConstraintEngine/IntervalIntDomain.hh"
+#include "../ConstraintEngine/ConstraintLibrary.hh"
 
 namespace Prototype{
 
