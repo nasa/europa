@@ -171,12 +171,8 @@ RunEUROPATest monkey-timeline-newHeur : timeline0.nddl : monkeyNewHeur.xml ;
 # Fails: HSTS/core/HSTSHeuristics.cc:197: Error: !enumeration.empty() is false
 RunEUROPATest monkey-timeline-extendedHeur : timeline0.nddl : monkeyExtendedHeur.xml ;
 
+# These two work.
 RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
-
-# Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
-#   Gdb on Token says *this is a RuleInstance but T (of Id<T>) is class Token (!).
-#   Reported in GNATS 2798; related to GNATS 2772.
-# Now fails to (C++) compile, so comment it out (GNATS 2817).
 RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
 
 # Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
