@@ -10,7 +10,7 @@ QSS Group Inc. \\
 Computational Sciences Division \\
 NASA Ames Research Center \\
 Moffett Field, CA 94034-1000 \\
-\{tania,mcgann,bachmann,wedgingt,miatauro\}@email.arc.nasa.gov
+\{tania,cmcgann,bachmann,wedgingt,miatauro\}@email.arc.nasa.gov
 }
 
 \title{\ET: User and Contributor Guide}
@@ -512,21 +512,6 @@ variables that were not decided before the planner decided to merge the
 token.  Once a token is merged, its variables are no longer affected by
 propagation, for efficiency reasons.
 
-%%% TBW TODO: get screenshots and develop this section
-
-\subsection{Visualization of the plan and planning process in PlanWorks}
-\label{visualization}
-We will not go into all the details. Refer to PlanWorks documentation
-for setup instructions of use. We may wish to include screen shots.
-
-\subsection{Debugging}
-
-We should mention Debug.cfg and explain how it works.  We should also
-mention Aver and how to include checks to help verify planner and plan
-database behavior. 
-
-%%% TBW
-
 \section{Developing Your Own Model In NDDL}
 \label{modeling}
 In this section you will learn how to develop your own model in NDDL.  We
@@ -786,7 +771,7 @@ cl\=ass Rover \{ \\
 \}
 \end{tabbing}}
 
-\subsection{Rules}
+\subsection{Basic Rules}
 \label{rules}
 
 We are now in a position to write the rules governing the state transitions
@@ -820,8 +805,6 @@ p between the to and the from.
 \end{enumerate}
 Rules that apply to the same predicate can be aggregated into the same
 rule.  For instance, the rules above in the model would appear as:
-
-\subsubsection{Basic Rules}
 
 \begin{verbatim}
 // Rules for Instrument
@@ -900,6 +883,8 @@ Navigator::Going{
  eq(at_after.location, to);
 
  // Select a path from those available between the 2 points
+ // we create a local variable p to contain all paths that match the from
+ // and to. 
  Path p : {
   eq(p.from, from);
   eq(p.to, to);
@@ -919,10 +904,11 @@ In the the previous section we covered:
 \item constraints among parameters of predicates
 \item commonAncestor constraint that is used when traversal of the object
 hierarchy is required
+\item local rule variables
 \item existential quantification by creating a filter
 \end{enumerate}
 In this section we will cover other more advanced concepts such as
-conditional rules, rule local variables and universal quantification.
+conditional rules and universal quantification.
 
 Assume now that we want to model a rover that can accept requests to shoot 
 images and shoot them either with a filter or without any filters.  Whether
@@ -988,6 +974,44 @@ Camera::Shoot {
 }
 \end{verbatim}
 
+Finally, we illustrate the use of universal quantification by showing how
+it is possible to quantify over all objects (assuming there's a fixed
+number of it that is known at start time).  Assume the navigator has
+numerous instruments and you want to impose a constraint that says that all
+instruments must be in state StandBy whenever the navigator is in state
+Going. You can either enumerate all instruments and impose the constraint
+on each one, or you can say so with a shorthand rule as follows:
+
+\begin{verbatim}
+Navigator::Going {
+ met_by(object.At at_before);
+ eq(at_before.location, from);
+ meets(object.At at_after);
+ eq(at_after.location, to);
+
+ // Select a path from those available between the 2 points
+ Path p : {
+  eq(p.from, from);
+  eq(p.to, to);
+ };
+ // Pull juice from the battery. Should be based on path length.
+ starts(Battery.change tx);
+ eq(tx.quantity, p.cost);
+
+ // Ensure all instruments are in standby
+ Rover myRover;
+ eq(myRover.nav,object);
+ if (myRover) { // ensure that the object has been bound to a singleton
+   Instrument instruments;
+   commonAncestor(instruments,this.object,myRover); // instrument on rover
+   foreach (i in instruments) {
+     contained_by(Instrument.StandBy s); // impose constraint between Going
+					 // and Standby
+     eq(s.object,i);
+   };
+ }
+\end{verbatim}
+
 \subsection{Recap}
 The entire model described above can be found under UserGuideRover.nddl
 in the same directory as this user guide. We have introduced the following
@@ -1000,23 +1024,245 @@ concepts and illustrated them with examples in the UserGuideRover model:
 \item predicates
 \item predicate parameter constraints
 \item basic rules - meets, met\_by, contained\_by, starts
-\item constraints among parameters of a predicate.
+\item constraints among parameters of a predicate
 \item commonAncestor constraint that is used when traversal of the object
 hierarchy is required
 \item composition
 \item rules
 \item guards
-\item Using existential quantification - filtering and binding
 \item local variables
-\item instantiation (not introduced)
-\item assigment (in initial state)
-\item Using universal quanitifcation - iteration over objects (not introduced)
+\item Using existential quantification - filtering and binding
+\item Using universal quanitifcation - iteration over objects
 \end{enumerate}
 
 \subsection{Formulate and solve a planning problem}
 
-End the section by referencing a model and initial state that can be
-run through the planner and visualized in PlanWorks.
+Let us assume we're given a problem with a lander and four rocks with their
+corresponding coordinates.  Furthermore, let's assume we're given three
+paths, a very long path, a moderately long path and a short cut.  Let's
+assume that there is a single rover called spirit that carries a battery
+and the default instruments.
+
+We're interested in finding a plan where spirit is initially at the lander
+and it has to take an image of rock4 and place an instrument at rock4.
+Furthermore, assume that our planning horizon is 0 to 1000 and that we're
+hoping to find a plan within 500 steps.
+
+The initial state would look something like the following:
+\begin{verbatim}
+#include "UserGuideRover.nddl"
+
+PlannerConfig plannerConfiguration = new PlannerConfig(0,1000,500);
+
+Location lander = new Location(0, 0, "lander");
+Location rock1 = new Location(9, 9, "rock1");
+Location rock2 = new Location(1, 6, "rock2");
+Location rock3 = new Location(4, 8, "rock3");
+Location rock4 = new Location(3, 9, "rock4");
+
+// Allocate paths
+Path p1 = new Path("Very Long Way", lander, rock4, -2000.0, Category.'low');
+Path p2 = new Path("Moderately Long Way", lander, rock4, -1500.0, Category.'medium');
+Path p3 = new Path("Short Cut", lander, rock4, -400.0, Category.'high');
+
+// Allocate Rover
+Battery battery = new Battery(1000.0, 0.0, 1000.0);
+Rover spirit = new Rover(battery);
+
+close();
+
+// Establish the initial position for spirit
+goal(Navigator.At initialPosition);
+initialPosition.start.specify(0); // Starts at the beginning of the horizon
+initialPosition.location.specify(lander); // Initial position is lander
+
+// Establish a goal - to shoot an image at a location sometime before the
+// experiment that follows
+goal(Camera.ShootRequest image);
+image.filtering.specify(true);
+image.view.specify(rock4);
+image.length.specify(10);
+leq(image.start,49);
+leq(0,image.start);
+
+// Establish a goal - to position an instrument at a location
+goal(Stowable_Instrument.Position experiment);
+experiment.start.specify(50);
+experiment.destination.specify(rock4); // Want to get to rock4
+\end{verbatim}
+
+The plan we're looking for will contain the steps required to get the
+stowable instrument from the stand by state to the positioned state.
+Furthermore, spirit's navigator will move from the lander to rock4, and its
+camera will take a picture of rock4 with a filter.
+
+%%% TBW TODO: get the plan and show that it is exactly what happens
+
+
+\subsection{Visualization of the plan and planning process in PlanWorks}
+\label{visualization}
+\ET\, includes logging facility to transfer data about the planning process
+to a visualization tool called PlanWorks.  PlanWorks reads the data into a
+set of mysql tables and then produces a visualization of each of the
+planning steps. PlanWorks can be configured to load all steps at once or
+only a subset of the steps.  A subset is useful when debugging large
+problems. Furthermore, PlanWorks can be used in planner control mode which
+allows a user to load steps during the planner execution.  Each set of
+steps is called a sequence.  Each sequence can be queried and viewed
+differently depending on the menu options.  We will walk you through some
+of the steps that we have found useful when visualizing \ET\, plans.
+
+For instructions on how to build PlanWorks please refer to the PlanWorks
+documentation (PlanWorks/README).  For detailed instructions on how to
+operate PlanWorks please refer to PlanWorks/GETTING\_STARTED.  More
+detailed instructions on how to visualize your plan can also be found in
+PLASMA/HELLOWORLD. 
+
+Once you have installed PlanWorks, run it using ant.  This should bring the
+following screen:
+
+\begin{figure}[htb]
+\centering\epsfig{file=PlanWorks-initial.eps, width = 5in}
+\caption{\ET\, PlanWorks Initial Screen}
+\label{PlanWorksInitial}
+\end{figure}
+
+You'll see the screen with the following menus: File Project PlugIn
+and Help (the Windows menu will be disabled since there are no windows
+inside your PlanWorks workspace).  Click on Project and create a new
+project. Then, select your planning sequence which should be under your
+plans directory and will be a long name with a sequence number encoded in
+the name.  The planning sequence screen should look like this:
+
+\begin{figure}[h]
+\centering\epsfig{file=PlanWorks-planningSequence.eps, width = 5in}
+\caption{\ET\, PlanWorks Planning Sequence}
+\label{PlanningSequence}
+\end{figure}
+
+Once you have loaded a sequence, you'll see a histogram of each of the
+planning steps.  The first bar indicates the first step of the plan and
+the last bar, the last step of the plan.  A yellow dot above the bar
+indicates that data is available for this step.  A red dot means that no
+data is available for this step.  The green dot means that the data is
+available and loaded.  The color of the dot changes when you decide to log
+only some steps or when you use the planner control.
+
+\begin{figure}[h]
+\centering\epsfig{file=PlanWorks-stepMenu.eps, width = 5in}
+\caption{\ET\, PlanWorks Step Menu}
+\label{StepMenu}
+\end{figure}
+
+Now, let's get some information from the plan.  Let's focus on a Going
+token that takes spirit from the lander to rock4.  Let's click on the last
+step and bring up the timeline view.
+
+%% TBW: TODO: replace with the timeline view of the last step.
+
+\begin{figure}[h]
+\centering\epsfig{file=PlanWorks-timelineView.eps, width = 5in}
+\caption{\ET\, PlanWorks Timeline View}
+\label{TimelineView}
+\end{figure}
+
+Since there's too much information and we are looking for the Going token,
+why don't we limit the view to show only Going tokens.  We can do this by
+using the Content Filter.  Type Going on the first Predicate line and then
+click Apply Filter.  You should see a new timeline view showing only the
+tokens of interest.
+
+\begin{figure}[h]
+\centering\epsfig{file=PlanWorks-timelineViewGoingFiltered.eps, width = 5in}
+\caption{\ET\, PlanWorks Timeline View with Going only}
+\label{TimelineViewFiltered}
+\end{figure}
+
+Now, let's identify the Going token that we want to find out more
+information about.  The way to do this is to query for the token events
+that affected the token.  This will give us an idea of what happen
+throughout the lifetime of that token.  To do this, identify token 145 in
+the spirit.nav timeline.  Then bring up the token query results by entering
+the token key 145 in the Sequence Query window.  Identify first the Sequence
+Query window.  It should be long and thin and near the top of your
+workspace.  The options on the window should show: Steps ... Where
+Constraint Transacted ... Key ... CONSTRAINT\_ALL. Instead of ``Where
+Constarint Transacted'' select ``Where Token Transacted'' and enter the key
+145 in the key field, then press Apply Query.  This will bring a window
+with the set of transactions that apply to the Going token 145.  It will
+look something like this:
+
+\begin{figure}[htb]
+\centering\epsfig{file=PlanWorks-tokenQuery.eps, width = 5in}
+\caption{\ET\, PlanWorks Token Query}
+\label{TokenQuery}
+\end{figure}
+
+Notice that this window shows that the token was created in step 0 and
+activated in step 14 and inserted in step 15.  Notice that in step 14 it is
+also added to an object.  There is only one object that could accept the
+Going since our model has a single rover so there is a single
+``Token\_Added\_to\_Object'' transaction.
+
+Let's find out next who mandated the creation of the Going token and what
+subgoal rules are acting upon it.  In order to do so, we should bring up
+the Token Network View.  Right-click on Step 14 and select TokenNetwork
+View. Double click on the Going token to expand and follow the expansion
+one level up and one level down.  This will give you an idea of its parent
+and its subgoals.  Then, right-click on Battery.Change token and select the
+RuleInstance View.  This will bring up the rule code in a separate window.
+This is useful when you're debugging your model as well as your planner.
+The window should look like this:
+
+\begin{figure}[htb]
+\centering\epsfig{file=PlanWorks-tokenNetworkFiltered-ruleInstance-withBattery.eps, width = 5in}
+\caption{\ET\, PlanWorks Token Network View with Going only with Rule Instance}
+\label{TokenNetwork-RuleInstance}
+\end{figure}
+
+%% TBW: TODO: Get the resource view with the correct profile!
+
+If you have questions about the resource levels and want to view the
+resource profile, you can click on Step 16 which should show the effect of
+the Battery.change as a consequence of the Going token. 
+
+\begin{figure}[h]
+\centering\epsfig{file=PlanWorks-constraintNetwork-overview.eps, width = 5in}
+\caption{\ET\, PlanWorks Constraint Network View with Overview}
+\label{ConstraintNetworkOverview}
+\end{figure}
+
+Finally, if you want to focus your attention in the timepoints at which
+events happen, you may bring up the Temporal Extent View.
+\begin{figure}[h]
+\centering\epsfig{file=PlanWorks-temporalExtent-timeScaleLine.eps, width = 5in}
+\caption{\ET\, PlanWorks Temporal Extent View}
+\label{TemporalExtentView}
+\end{figure}
+
+\subsection{Debugging}
+
+Another useful tool for debugging your models and planners is logging. We
+have extensive logging that you can configure through a file called
+Debug.cfg.  This file must exist in the same directory as the executable or
+the debug information will not be logged.  Debug information is by default
+redirected to std::cout.  
+
+%% TBW: include redirect to std::cerr comment
+%% TBW: waiting for Debug.cfg spec from Will.
+
+Aver is a language for automatically verifying planners, models and plan
+databases. It allows the description of partial or complete plans and
+events that occur during planning that constitute expected behavior.  An
+assertion is a boolean statement that examines a particular aspect of a
+plan (how many "Foo" tokens exist) or the planning behavior (whether or not
+a "backtrack" message occurred) and asserts something about it. Assertions
+are preceeded by a specification of when the assertion must be true. They
+are grouped into tests that can be further organized into
+super-tests. Files containing collections of tests and assertions are
+converted into XML and then compiled into Aver instructions which are
+executed at run-time.  See the API documentation for further information on
+Aver.  See also the Aver specification in Section~\ref{aver}.
 
 \section{PLASMA System Architecture}
 
@@ -1099,8 +1345,6 @@ that uses resource reasoning, a plan database, a constraint engine with a
 specialized (STN) temporal propagator, and a chronological backtracking
 planner.
 
-
-\ET\, also provides 
 
 \subsection{Using and extending the CBPlanner}
 
