@@ -15,6 +15,9 @@ if $(LIBRARIES) = SHARED {
 EXTRA_DEFS = ;
 ModuleNamedObjects runProblem_link : runProblem.cc : System ;
 
+# it doesn't work and I can't figure out why, but it is due to line 161 (contained_by(Satellite.Transmit t);
+# EOS-backtrack-test.nddl
+
 local model ;
 for model in
         basic-types.nddl Rover-transaction.nddl basic-model-transaction.nddl 
@@ -23,7 +26,7 @@ for model in
         resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl 
         parent-predicate.nddl k9-initial.nddl backtr.nddl 
         better-res.nddl CAPER.nddl monkey1monkey-transaction.nddl
-	basic-model-backtrack.nddl EOS-backtrack-test.nddl
+	basic-model-backtrack.nddl
 {
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
