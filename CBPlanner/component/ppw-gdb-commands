@@ -11,6 +11,8 @@
 #   1) init-run          - run once two init PLASMA debug session
 #   2) write-step N      - run to enable PPW writing of one step
 #                             where: N is the step number to write
+#   3) write-next N      - write next N steps, 
+#                             where: N is number of steps
 #
 #####################################################################
 
@@ -33,4 +35,16 @@ cont
 printf "Finished writing step %d\n", m_step-1
 printf "At step %d\n", m_step
 set PartialPlanWriter::noFullWrite=1
+end
+
+define write-next 
+set $start = m_step
+break CBPlanner::stepBreakpoint if m_step == $start + $arg0
+printf "PartialPlanWriter writing steps %d - %d\n", m_step, m_step + $arg0 - 1
+set PartialPlanWriter::noFullWrite=0
+cont 
+printf "Finished writing steps %d - %d\n", $start, m_step-1
+printf "At step %d\n", m_step
+set PartialPlanWriter::noFullWrite=1
+clear CBPlanner::stepBreakpoint
 end
