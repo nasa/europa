@@ -14,8 +14,8 @@ namespace EUROPA {
    * to static variables within a function.
    */
 
-  inline StandardAssembly* &accessAssembly() {
-    static StandardAssembly *asmbly;
+  inline PlannerControlAssembly* &accessAssembly() {
+    static PlannerControlAssembly *asmbly;
     return asmbly;
   }
 

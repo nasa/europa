@@ -3,9 +3,10 @@
 
 // Include prototypes required to integrate to the NDDL generated model
 #include "Nddl.hh"
-#include "StandardAssembly.hh"
+#include "PlannerControlAssembly.hh"
 
 // Support for planner
+#include "Horizon.hh"
 #include "CBPlanner.hh"
 #include "DecisionPoint.hh"
 
@@ -21,7 +22,7 @@ namespace EUROPA {
 
   extern "C"
 
-  const char* SAstr = "StandardAssembly not initialized";
+  const char* SAstr = "PlannerControlAssembly not initialized";
 
   int initModel(const char* libPath, const char* initialState, const char* destPath) {
 
@@ -38,7 +39,7 @@ namespace EUROPA {
       /*
        * now that PPW is initialized set the output destination path 
        */
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       db1->getWriter()->setDest(destPath);
     }
@@ -55,7 +56,7 @@ namespace EUROPA {
     int retStatus;
 
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       retStatus = db1->getPlanner()->getStatus();
     }
@@ -73,7 +74,7 @@ namespace EUROPA {
     int nextPlannerStep;
 
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       nextPlannerStep = db1->getPlanner()->writeStep(step_num);
     }
@@ -92,7 +93,7 @@ namespace EUROPA {
     int nextPlannerStep;
 
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       nextPlannerStep = db1->getPlanner()->writeNext(num_steps);
     }
@@ -111,7 +112,7 @@ namespace EUROPA {
     int lastStepCompleted;
 
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       lastStepCompleted = db1->getPlanner()->completeRun();
 
@@ -129,10 +130,18 @@ namespace EUROPA {
   }
 
   int terminateRun(void) {
-
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       if (db1) {
+        if (db1->getWriter()) {
+          delete(db1->getWriter());
+        }
+        if (db1->getPlanner()) {
+          delete((CBPlanner*) db1->getPlanner());
+        }
+        if (db1->getHorizon()) {
+          delete((Horizon*) db1->getHorizon());
+        }
         db1->terminate();
         delete(db1);
       }
@@ -157,7 +166,7 @@ namespace EUROPA {
     const char* dPath;
 
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       dest = db1->getWriter()->getDest();
     }
@@ -176,7 +185,7 @@ namespace EUROPA {
     int numTypes;
 
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       numTypes = db1->getWriter()->getNumTransactions();
     }
@@ -194,7 +203,7 @@ namespace EUROPA {
     int typeLength;
 
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       typeLength = db1->getWriter()->getMaxLengthTransactions();
     }
@@ -212,7 +221,7 @@ namespace EUROPA {
     const char** types;
 
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       types = db1->getWriter()->getTransactionNameStrs();
     }
@@ -230,7 +239,7 @@ namespace EUROPA {
     bool* filterState;
 
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       filterState = db1->getWriter()->getTransactionFilterStates();
     }
@@ -250,7 +259,7 @@ namespace EUROPA {
     bool* filterState;
 
     try {
-      StandardAssembly *db1 = accessAssembly();
+      PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
       filterState = new bool[numTypes];
       for (int i = 0; i < numTypes; i++) {

@@ -7,6 +7,7 @@ ModuleComponent System
   TestAssembly.cc
   #EventAggregator.cc
   #AggregateListener.cc
+  PlannerControlAssembly.cc
   CBPlannerControl.cc
   LoadInitModel.cc
 	;

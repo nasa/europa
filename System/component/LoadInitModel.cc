@@ -2,7 +2,7 @@
 
 // Include prototypes required to integrate to the NDDL generated model
 #include "Nddl.hh"
-#include "StandardAssembly.hh"
+#include "PlannerControlAssembly.hh"
 
 // Support for planner
 #include "CBPlanner.hh"
@@ -26,7 +26,7 @@ namespace EUROPA {
     void* libHandle;
     SchemaId (*fcn_loadSchema)();   //function pointer to NDDL::loadSchema()
     SchemaId schema;
-    StandardAssembly *db1;
+    PlannerControlAssembly *db1;
     DbClientId client;
 
 
@@ -55,7 +55,7 @@ namespace EUROPA {
 
     // initialize constraint factories
     try {
-      StandardAssembly::initialize();
+      PlannerControlAssembly::initialize();
     }
     catch (Error e) {
       printf("Unexpected exception initializing constraint factories\n");
@@ -95,10 +95,10 @@ namespace EUROPA {
     //fflush(stdout);
 
     try {
-      db1 = new StandardAssembly(schema);
+      db1 = new PlannerControlAssembly(schema);
     }
     catch (Error e) {
-      printf("Unexpected exception creating StandardAssembly \n");
+      printf("Unexpected exception creating PlannerControlAssembly \n");
       fflush(stdout);
       e.display();
       throw;
@@ -106,12 +106,12 @@ namespace EUROPA {
     //save pointer for all functions that access the assembly
     accessAssembly() = db1;
 
-    printf("StandardAssembly created\n");
+    printf("PlannerControlAssembly created\n");
     fflush(stdout);
 
-    // Plan given the transactions in initialStatePath.
+    // Initialize plan given the transactions in initialStatePath.
     try {
-      retStatus = db1->plan(initialStatePath);
+      retStatus = db1->initPlan(initialStatePath);
     }
     catch (Error e) {
       printf("Unexpected exception initializing planner\n");
@@ -120,7 +120,7 @@ namespace EUROPA {
       throw;
     }
 
-    printf("CB Planner initRun() completed. Planner ready to step. Staus is %d\n", retStatus);
+    printf("initPlan() completed. Planner ready to step. Staus is %d\n", retStatus);
     fflush(stdout);
 
     return retStatus;
