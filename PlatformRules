@@ -9,6 +9,10 @@ PlatformRules_INCLUDED = TRUE ;
 
 POSITION_INDEPENDENT_CODE_FLAG ?= -fPIC ;
 
+# LINKER_PASSTHROUGH_FLAG = Flag to pass an argument through to the linker
+
+LINKER_PASSTHROUGH_FLAG ?= -Wl, ;
+
 # SHARED_FLAG = Flag to generate shared library
 
 if $(OS) = BEOS {
@@ -17,20 +21,24 @@ if $(OS) = BEOS {
   SHARED_FLAG ?= -shared ;
 }
 
-# SHARED_LIBRARY_PATH_FLAG = Runtime library path flag
+# LIBRARY_PATH_SEARCH_FLAG = Library search path flag
+
+LIBRARY_PATH_SEARCH_FLAG ?= -L ;
+
+# RUNTIME_SHARED_LIBRARY_PATH_FLAG = Runtime shared library search path flag
 
 if $(OS) = SOLARIS {
-  SHARED_LIBRARY_PATH_FLAG ?= -R ;
+  RUNTIME_SHARED_LIBRARY_PATH_FLAG ?= -R ;
 } else {
-  SHARED_LIBRARY_PATH_FLAG ?= -W1,--rpath ;
+  RUNTIME_SHARED_LIBRARY_PATH_FLAG ?= -rpath ;
 }
 
-# STATIC_LIBRARY_PATH_FLAG = Linktime library path flag
+# LINKTIME_SHARED_LIBRARY_PATH_FLAG = Linktime shared library search path flag
 
 if $(OS) = SOLARIS {
   STATIC_LIBRARY_PATH_FLAG ?= -L ;
 } else {
-  STATIC_LIBRARY_PATH_FLAG ?= -W1,--rpath-link ;
+  STATIC_LIBRARY_PATH_FLAG ?= -rpath-link ;
 }
 
 # GCC_ROOTDIR = GCC root directory
@@ -41,8 +49,10 @@ if $(OS) = SOLARIS {
 if $(GCC_ROOTDIR) {
   CC = $(GCC_ROOTDIR)/bin/gcc ;
   C++ = $(GCC_ROOTDIR)/bin/g++ ;
-  LINK = $(C++) $(STATIC_LIBRARY_PATH_FLAG) -W1,$(GCC_ROOTDIR)/lib
-                $(SHARED_LIBRARY_PATH_FLAG) -W1,$(GCC_ROOTDIR)/lib ;
+  LINK = $(C++) $(LINKER_PASSTHROUGH_FLAG)$(RUNTIME_SHARED_LIBRARY_PATH_FLAG)
+                $(LINKER_PASSTHROUGH_FLAG)$(GCC_ROOTDIR)/lib
+                $(LINKER_PASSTHROUGH_FLAG)$(STATIC_LIBRARY_PATH_FLAG)
+                $(LINKER_PASSTHROUGH_FLAG)$(GCC_ROOTDIR)/lib ;
 } else {
   CC = gcc ;
   C++ = g++ ;
