@@ -1,0 +1,42 @@
+Brief Migration Notes
+
+$Id: MigrationNotes,v 1.1 2004-11-22 22:13:39 wedgingt Exp $
+
+This file is intended to help users of the prior Europa (in the
+NewPlan CVS tree) planning system migrate their projects to this
+version, Europa 2 (informally known as PLASMA during its initial
+development, which is still in progress at this time).
+
+This is a draft document likely to be modified fairly often as issues
+are noticed.  New issues are likely to be simply appended to the end
+without regard to importance or any other criteria, at least until the
+first official release of Europa 2 (PLASMA).
+
+1. Explicit bounds on timepoints of tokens (whether between two tokens
+or to absolute time values) are not supported in XML transaction
+files.  This may be an issue when translating NewPlan style initial
+state files to NDDL or XML transaction files.
+
+2. In NewPlan, there is only one class Domain.  In PLASMA, there are
+many: EnumeratedDomain, StringDomain, SymbolDomain, ObjectDomain,
+IntervalDomain, IntervalIntDomain, etc.  Also, each enumeration (label
+set, in NewPlan terms) will have its own C++ class for its domains.
+
+3. For several reasons, re-using (C++) domain variables is not as
+simple as in NewPlan.  First, assigning or specifying a domain will
+error out if it is not a subset of the previously specified domain;
+the domain must be reset (member function "reset()") in between such
+specifications.  Second, open domains can be closed but cannot be
+re-opened.  That, in turn, implies that propagation does not restrict
+variables with open domains, because backtracking the closures is not
+supported.  Third, changing the type of a C++ domain variable is, of
+course, not possible during run time but could be "simulated" in
+NewPlan because all C++ domain variables were of the single C++ class
+Domain.
+
+4. When the domain of the object variable of a token is closed but not
+singleton, then asking any of the objects in that domain for the list
+of associated tokens will include the token.  This is very different
+from the behavior of NewPlan, for which such queries only return the
+tokens that have already been inserted onto a timeline of the object.
+(see also GNATS #?).
