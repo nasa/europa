@@ -108,15 +108,9 @@ public:
   }
 
   static bool testDomainCreation(){
-    AbstractDomain * cd0 = TypeFactory::createDomain(IntervalIntDomain().getTypeName());
-    assert(dynamic_cast<IntervalIntDomain *>(cd0) != NULL);
-
-    AbstractDomain * cd1 = TypeFactory::createDomain(IntervalDomain().getTypeName());
-    assert(dynamic_cast<IntervalDomain *>(cd1) != NULL);
-
-    AbstractDomain * cd2 = TypeFactory::createDomain(BoolDomain().getTypeName());
-    assert(dynamic_cast<BoolDomain *>(cd2) != NULL);
-
+    const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(TypeFactory::baseDomain(IntervalIntDomain().getTypeName()));
+    const IntervalDomain & bd1 = dynamic_cast<const IntervalDomain &>(TypeFactory::baseDomain(IntervalDomain().getTypeName()));
+    const BoolDomain & bd2 = dynamic_cast<const BoolDomain &>(TypeFactory::baseDomain(BoolDomain().getTypeName()));
     return true;
   }
 

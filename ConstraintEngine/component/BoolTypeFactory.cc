@@ -8,7 +8,10 @@ namespace Prototype {
   // BoolTypeFactory
   //
 
-  BoolTypeFactory::BoolTypeFactory() : ConcreteTypeFactory(BoolDomain().getTypeName()) {}
+  BoolTypeFactory::BoolTypeFactory(const LabelStr& name)
+   : ConcreteTypeFactory(name), m_baseDomain(name)
+  {
+  }
 
   ConstrainedVariableId
   BoolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
@@ -29,12 +32,10 @@ namespace Prototype {
     return id;
   }
 
-  AbstractDomain *
-  BoolTypeFactory::createDomain() const
+  const AbstractDomain &
+  BoolTypeFactory::baseDomain() const
   {
-    BoolDomain * domain = new BoolDomain();
-    check_error(domain != NULL, "failed to create BoolDomain");
-    return domain;
+    return m_baseDomain;
   }
 
   double BoolTypeFactory::createValue(std::string value) const

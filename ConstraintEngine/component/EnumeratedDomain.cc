@@ -21,20 +21,21 @@ namespace Prototype {
     return(s_type);
   }
 
-  const LabelStr& EnumeratedDomain::getTypeName() const {
+  const LabelStr& EnumeratedDomain::getDefaultTypeName() {
     static const LabelStr sl_typeName("REAL_ENUMERATION");
     return(sl_typeName);
   }
 
-  EnumeratedDomain::EnumeratedDomain(bool isNumeric)
-    : AbstractDomain(false, true, DomainListenerId::noId()), m_isNumeric(isNumeric) {
+  EnumeratedDomain::EnumeratedDomain(bool isNumeric, const LabelStr& typeName)
+    : AbstractDomain(false, true, DomainListenerId::noId(), typeName), m_isNumeric(isNumeric) {
   }
 
   EnumeratedDomain::EnumeratedDomain(const std::list<double>& values,
                                      bool closed,
                                      const DomainListenerId& listener, 
-                                     bool isNumeric)
-    : AbstractDomain(false, true, listener), m_isNumeric(isNumeric) {
+                                     bool isNumeric,
+                                     const LabelStr& typeName)
+    : AbstractDomain(false, true, listener, typeName), m_isNumeric(isNumeric) {
     for (std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
       insert(*it);
     if (closed)
@@ -43,14 +44,15 @@ namespace Prototype {
 
   EnumeratedDomain::EnumeratedDomain(double value,
                                      const DomainListenerId& listener,
-                                     bool isNumeric)
-    : AbstractDomain(false, true, listener), m_isNumeric(isNumeric) {
+                                     bool isNumeric,
+                                     const LabelStr& typeName)
+    : AbstractDomain(false, true, listener, typeName), m_isNumeric(isNumeric) {
     insert(value);
     close();
   }
 
   EnumeratedDomain::EnumeratedDomain(const EnumeratedDomain& org)
-    : AbstractDomain(org.m_closed, true, DomainListenerId::noId()) {
+    : AbstractDomain(org.m_closed, true, DomainListenerId::noId(), org.m_typeName) {
     m_values = org.m_values;
     m_isNumeric = org.m_isNumeric;
   }

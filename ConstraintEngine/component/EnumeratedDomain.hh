@@ -25,7 +25,7 @@ namespace Prototype {
     /**
      * @brief Constructs an initially empty and open domain
      */
-    EnumeratedDomain(bool isNumeric = true);
+    EnumeratedDomain(bool isNumeric = true, const LabelStr& typeName = getDefaultTypeName());
 
     /**
      * @brief Constructor.
@@ -38,7 +38,8 @@ namespace Prototype {
     EnumeratedDomain(const std::list<double>& values, 
 		     bool closed = true,
 		     const DomainListenerId& listener = DomainListenerId::noId(),
-		     bool isNumeric = true);
+		     bool isNumeric = true,
+		     const LabelStr& typeName = getDefaultTypeName());
 
     /**
      * @brief Constructor.
@@ -48,7 +49,8 @@ namespace Prototype {
      */
     EnumeratedDomain(double value,
 		     const DomainListenerId& listener = DomainListenerId::noId(), 
-		     bool isNumeric = true);
+		     bool isNumeric = true,
+		     const LabelStr& typeName = getDefaultTypeName());
 
     /**
      * @brief Copy constructor.
@@ -63,10 +65,10 @@ namespace Prototype {
     virtual const DomainType& getType() const;
 
     /**
-     * @brief Get the name of the type of the domain.
+     * @brief Get the default name of the type of the domain.
      * @see AbstractDomain::getTypeName
      */
-    virtual const LabelStr& getTypeName() const;
+    static const LabelStr& getDefaultTypeName();
 
     /**
      * @brief Determine if the domain is finite.

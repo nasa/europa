@@ -8,7 +8,10 @@ namespace Prototype {
   // IntervalTypeFactory
   //
 
-  IntervalTypeFactory::IntervalTypeFactory() : ConcreteTypeFactory(IntervalDomain().getTypeName()) {}
+  IntervalTypeFactory::IntervalTypeFactory(const LabelStr& name)
+   : ConcreteTypeFactory(name), m_baseDomain(name)
+  {
+  }
 
   ConstrainedVariableId
   IntervalTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
@@ -29,12 +32,10 @@ namespace Prototype {
     return id;
   }
 
-  AbstractDomain *
-  IntervalTypeFactory::createDomain() const
+  const AbstractDomain &
+  IntervalTypeFactory::baseDomain() const
   {
-    IntervalDomain * domain = new IntervalDomain();
-    check_error(domain != NULL, "failed to create IntervalDomain");
-    return domain;
+    return m_baseDomain;
   }
 
   double IntervalTypeFactory::createValue(std::string value) const

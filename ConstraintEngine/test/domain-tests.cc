@@ -184,6 +184,17 @@ namespace Prototype {
       assert(actualString == expectedString);
       std::string anotherActualString = d1.toString();
       assert(anotherActualString == expectedString);
+
+      std::string integerType = "integer";
+      IntervalIntDomain d2(1, 100, DomainListenerId::noId(), LabelStr(integerType.c_str()));
+      std::stringstream ss2;
+      d2 >> ss2;
+      std::string actualString2 = ss2.str();
+      std::string expectedString2("integer:CLOSED[1, 100]");
+      assert(actualString2 == expectedString2);
+      std::string anotherActualString2 = d2.toString();
+      assert(anotherActualString2 == expectedString2);
+
       return(true);
     }
 
@@ -1135,6 +1146,8 @@ namespace Prototype {
       BoolDomain falseDom(false);
       BoolDomain trueDom(true);
       BoolDomain both;
+      std::string booleanType = "boolean";
+      BoolDomain customDom(true, DomainListenerId::noId(), LabelStr(booleanType));
 
       copyPtr = falseDom.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
@@ -1155,6 +1168,13 @@ namespace Prototype {
       assertTrue(copyPtr->getTypeName() == LabelStr("BOOL"));
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
+      delete copyPtr;
+
+      copyPtr = customDom.copy();
+      assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+      assertTrue(copyPtr->getTypeName() == LabelStr("boolean"));
+      assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
+      assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       delete copyPtr;
 
       // Cannot check that expected errors are detected until
@@ -1226,7 +1246,8 @@ namespace Prototype {
     static void testCopyingIntervalDomains() {
       AbstractDomain *copyPtr;
       IntervalDomain one2ten(1.0, 10.9);
-      IntervalDomain four(4.0);
+      std::string fourType = "fourType";
+      IntervalDomain four(4.0, DomainListenerId::noId(), LabelStr(fourType.c_str()));
       IntervalDomain empty;
       empty.empty();
 
@@ -1276,7 +1297,7 @@ namespace Prototype {
 
       copyPtr = four.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
-      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
+      assertTrue(copyPtr->getTypeName() == LabelStr("fourType"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());
@@ -1304,7 +1325,8 @@ namespace Prototype {
     static void testCopyingIntervalIntDomains() {
       AbstractDomain *copyPtr;
       IntervalIntDomain one2ten(1, 10);
-      IntervalIntDomain four(4);
+      std::string fourType = "fourType";
+      IntervalIntDomain four(4, DomainListenerId::noId(), LabelStr(fourType.c_str()));
       IntervalIntDomain empty;
       empty.empty();
       // domains containing infinities should also be tested
@@ -1355,7 +1377,7 @@ namespace Prototype {
 
       copyPtr = four.copy();
       assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
-      assertTrue(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
+      assertTrue(copyPtr->getTypeName() == LabelStr("fourType"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
       assertFalse(copyPtr->isEnumerated());

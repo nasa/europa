@@ -3,19 +3,19 @@
 
 namespace Prototype {
 
-  IntervalDomain::IntervalDomain(const DomainListenerId& listener)
-    : AbstractDomain(true, false, listener), m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY) {
+  IntervalDomain::IntervalDomain(const DomainListenerId& listener, const LabelStr& typeName)
+    : AbstractDomain(true, false, listener, typeName), m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY) {
   }
 
-  IntervalDomain::IntervalDomain(double lb, double ub, const DomainListenerId& listener)
-    : AbstractDomain(true, false, listener), m_ub(ub), m_lb(lb) {
+  IntervalDomain::IntervalDomain(double lb, double ub, const DomainListenerId& listener, const LabelStr& typeName)
+    : AbstractDomain(true, false, listener, typeName), m_ub(ub), m_lb(lb) {
     check_error(ub >= lb);
     check_error(ub <= PLUS_INFINITY);
     check_error(lb >= MINUS_INFINITY);
   }
 
-  IntervalDomain::IntervalDomain(double value, const DomainListenerId& listener)
-    : AbstractDomain(true, false, listener), m_ub(value), m_lb(value) {
+  IntervalDomain::IntervalDomain(double value, const DomainListenerId& listener, const LabelStr& typeName)
+    : AbstractDomain(true, false, listener, typeName), m_ub(value), m_lb(value) {
     check_error(value <= PLUS_INFINITY);
     check_error(value >= MINUS_INFINITY);
   }
@@ -24,7 +24,7 @@ namespace Prototype {
   }
 
   IntervalDomain::IntervalDomain(const IntervalDomain& org)
-    : AbstractDomain(true, false, DomainListenerId::noId()),
+    : AbstractDomain(true, false, DomainListenerId::noId(), org.m_typeName),
       m_ub(org.m_ub), m_lb(org.m_lb) {
   }
 
@@ -347,7 +347,7 @@ namespace Prototype {
     return(s_type);
   }
 
-  const LabelStr& IntervalDomain::getTypeName() const {
+  const LabelStr& IntervalDomain::getDefaultTypeName() {
     static const LabelStr sl_typeName("REAL_INTERVAL");
     return(sl_typeName);
   }

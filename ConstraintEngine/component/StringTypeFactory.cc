@@ -8,7 +8,10 @@ namespace Prototype {
   // StringTypeFactory
   //
 
-  StringTypeFactory::StringTypeFactory() : ConcreteTypeFactory(StringDomain().getTypeName()) {}
+  StringTypeFactory::StringTypeFactory(const LabelStr& name)
+   : ConcreteTypeFactory(name), m_baseDomain(name)
+  {
+  }
 
   ConstrainedVariableId
   StringTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
@@ -29,12 +32,10 @@ namespace Prototype {
     return id;
   }
 
-  AbstractDomain *
-  StringTypeFactory::createDomain() const
+  const AbstractDomain &
+  StringTypeFactory::baseDomain() const
   {
-    StringDomain * domain = new StringDomain();
-    check_error(domain != NULL, "failed to create StringDomain");
-    return domain;
+    return m_baseDomain;
   }
 
   double StringTypeFactory::createValue(std::string value) const

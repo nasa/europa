@@ -2,13 +2,15 @@
 
 namespace Prototype {
 
-  BoolDomain::BoolDomain(bool singletonValue, const DomainListenerId& listener)
-    : IntervalIntDomain(singletonValue, singletonValue, listener) {
+  BoolDomain::BoolDomain(bool singletonValue, const DomainListenerId& listener,
+                         const LabelStr& typeName)
+    : IntervalIntDomain(singletonValue, singletonValue, listener, typeName) {
     check_value(singletonValue);
   }
 
-  BoolDomain::BoolDomain(const DomainListenerId& listener)
-    : IntervalIntDomain(0, 1, listener) {
+  BoolDomain::BoolDomain(const DomainListenerId& listener,
+                         const LabelStr& typeName)
+    : IntervalIntDomain(0, 1, listener, typeName) {
   }
 
   BoolDomain::BoolDomain(const BoolDomain& org)
@@ -38,7 +40,7 @@ namespace Prototype {
     return(s_type);
   }
 
-  const LabelStr& BoolDomain::getTypeName() const {
+  const LabelStr& BoolDomain::getDefaultTypeName() {
     static const LabelStr sl_typeName("BOOL");
     return(sl_typeName);
   }

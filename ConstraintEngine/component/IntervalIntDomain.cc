@@ -3,18 +3,23 @@
 
 namespace Prototype {
 
-  IntervalIntDomain::IntervalIntDomain(const DomainListenerId& listener)
-    : IntervalDomain(listener) {
+  IntervalIntDomain::IntervalIntDomain(const DomainListenerId& listener,
+                                       const LabelStr& typeName)
+    : IntervalDomain(listener, typeName) {
   }
 
-  IntervalIntDomain::IntervalIntDomain(int lb, int ub, const DomainListenerId& listener)
-    : IntervalDomain(lb, ub, listener) {
+  IntervalIntDomain::IntervalIntDomain(int lb, int ub,
+                                       const DomainListenerId& listener,
+                                       const LabelStr& typeName)
+    : IntervalDomain(lb, ub, listener, typeName) {
     check_value(lb);
     check_value(ub);
   }
 
-  IntervalIntDomain::IntervalIntDomain(int value, const DomainListenerId& listener)
-    : IntervalDomain(value, listener) {
+  IntervalIntDomain::IntervalIntDomain(int value,
+                                       const DomainListenerId& listener,
+                                       const LabelStr& typeName)
+    : IntervalDomain(value, listener, typeName) {
     check_value(value);
   }
 
@@ -42,7 +47,7 @@ namespace Prototype {
     return(s_type);
   }
 
-  const LabelStr& IntervalIntDomain::getTypeName() const {
+  const LabelStr& IntervalIntDomain::getDefaultTypeName() {
     static const LabelStr sl_typeName("INT_INTERVAL");
     return(sl_typeName);
   }

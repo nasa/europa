@@ -21,7 +21,7 @@ namespace Prototype {
     /**
      * @brief Constructs an initially empty and open domain
      */
-    SymbolDomain();
+    SymbolDomain(const LabelStr& typeName = getDefaultTypeName());
 
     /**
      * @brief Constructor.
@@ -33,7 +33,8 @@ namespace Prototype {
      */
     SymbolDomain(const std::list<double>& values, 
                  bool closed = true,
-                 const DomainListenerId& listener = DomainListenerId::noId());
+                 const DomainListenerId& listener = DomainListenerId::noId(),
+                 const LabelStr& typeName = getDefaultTypeName());
 
     /**
      * @brief Constructor.
@@ -42,7 +43,8 @@ namespace Prototype {
      * @param listener Allows connection of a listener to change events on the domain. 
      */
     SymbolDomain(double value,
-                 const DomainListenerId& listener = DomainListenerId::noId());
+                 const DomainListenerId& listener = DomainListenerId::noId(),
+                 const LabelStr& typeName = getDefaultTypeName());
 
     /**
      * @brief Copy constructor.
@@ -57,10 +59,10 @@ namespace Prototype {
     const DomainType& getType() const;
 
     /**
-     * @brief Get the name of the type of the domain.
+     * @brief Get the default name of the type of the domain.
      * @see AbstractDomain::getTypeName
      */
-    const LabelStr& getTypeName() const;
+    static const LabelStr& getDefaultTypeName();
 
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.

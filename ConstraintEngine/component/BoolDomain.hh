@@ -21,11 +21,13 @@ namespace Prototype {
    */
   class BoolDomain : public IntervalIntDomain {
   public:
-    BoolDomain(bool singletonValue, const DomainListenerId& listener = DomainListenerId::noId());
-    BoolDomain(const DomainListenerId& listener = DomainListenerId::noId());
+    BoolDomain(bool singletonValue, const DomainListenerId& listener = DomainListenerId::noId(),
+               const LabelStr& typeName = getDefaultTypeName());
+    BoolDomain(const DomainListenerId& listener = DomainListenerId::noId(),
+               const LabelStr& typeName = getDefaultTypeName());
     BoolDomain(const BoolDomain& org);
     const DomainType& getType() const;
-    const LabelStr& getTypeName() const;
+    static const LabelStr& getDefaultTypeName();
     bool isFinite() const;
     bool isFalse() const;
     bool isTrue() const;

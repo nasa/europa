@@ -2,17 +2,16 @@
 #define _H_IntervalIntTypeFactory
 
 #include "TypeFactory.hh"
+#include "IntervalIntDomain.hh"
 
 namespace Prototype {
 
   class IntervalIntTypeFactory : public ConcreteTypeFactory {
   public:
-    IntervalIntTypeFactory();
-
     /**
      * Permit registration by an external name
      */
-    IntervalIntTypeFactory(const LabelStr& typeName);
+    IntervalIntTypeFactory(const LabelStr& name = IntervalIntDomain::getDefaultTypeName());
 
     /**
      * @brief Create a variable
@@ -25,15 +24,17 @@ namespace Prototype {
                                                  int index = ConstrainedVariable::NO_INDEX) const;
 
     /**
-     * @brief Create a domain
+     * @brief Return the base domain
      */
-    virtual AbstractDomain * createDomain() const;
+    virtual const AbstractDomain & baseDomain() const;
 
     /**
      * @brief Create a value for a string
      */
     virtual double createValue(std::string value) const;
 
+  private:
+    IntervalIntDomain m_baseDomain;
   };
 
 } // namespace Prototype

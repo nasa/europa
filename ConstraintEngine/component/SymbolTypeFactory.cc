@@ -8,7 +8,10 @@ namespace Prototype {
   // SymbolTypeFactory
   //
 
-  SymbolTypeFactory::SymbolTypeFactory() : ConcreteTypeFactory(SymbolDomain().getTypeName()) {}
+  SymbolTypeFactory::SymbolTypeFactory(const LabelStr& name)
+   : ConcreteTypeFactory(name), m_baseDomain(name)
+  {
+  }
 
   ConstrainedVariableId
   SymbolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
@@ -29,12 +32,10 @@ namespace Prototype {
     return id;
   }
 
-  AbstractDomain *
-  SymbolTypeFactory::createDomain() const
+  const AbstractDomain &
+  SymbolTypeFactory::baseDomain() const
   {
-    SymbolDomain * domain = new SymbolDomain();
-    check_error(domain != NULL, "failed to create SymbolDomain");
-    return domain;
+    return m_baseDomain;
   }
 
   double SymbolTypeFactory::createValue(std::string value) const

@@ -2,23 +2,25 @@
 
 namespace Prototype {
 
-  SymbolDomain::SymbolDomain() 
-    : EnumeratedDomain(false)
+  SymbolDomain::SymbolDomain(const LabelStr& typeName) 
+    : EnumeratedDomain(false, typeName)
   {
   }
 
 
   SymbolDomain::SymbolDomain(const std::list<double>& values, 
                              bool closed,
-                             const DomainListenerId& listener)
-    : EnumeratedDomain(values, closed, listener, false)
+                             const DomainListenerId& listener,
+                             const LabelStr& typeName)
+    : EnumeratedDomain(values, closed, listener, false, typeName)
   {
   }
 
 
   SymbolDomain::SymbolDomain(double value,
-                             const DomainListenerId& listener)
-    : EnumeratedDomain(value, listener, false)
+                             const DomainListenerId& listener,
+                             const LabelStr& typeName)
+    : EnumeratedDomain(value, listener, false, typeName)
   {
   }
 
@@ -38,7 +40,7 @@ namespace Prototype {
 
 
   const LabelStr&
-  SymbolDomain::getTypeName() const
+  SymbolDomain::getDefaultTypeName()
   {
     static const LabelStr sl_typeName("SYMBOL_ENUMERATION");
     return(sl_typeName);

@@ -4,68 +4,10 @@
 namespace Prototype {
   
   //
-  // floatDomain
-  //
-
-  floatDomain::floatDomain(const DomainListenerId& listener)
-   : IntervalDomain(listener)
-  {
-  }
-
-  floatDomain::floatDomain(double lb, double ub, 
-    	                   const DomainListenerId& listener)
-   : IntervalDomain(lb, ub, listener)
-  {
-  }
-
-  floatDomain::floatDomain(double value, 
-    	                   const DomainListenerId& listener)
-   : IntervalDomain(value, listener)
-  {
-  }
-
-  floatDomain::floatDomain(const floatDomain& org)
-   : IntervalDomain(org)
-  {
-  }
-
-  const LabelStr& floatDomain::getTypeName() const
-  {
-    static const LabelStr sl_typeName("float");
-    return(sl_typeName);
-  }
-
-  //
   // floatTypeFactory
   //
 
-  floatTypeFactory::floatTypeFactory() : ConcreteTypeFactory(LabelStr("float")) {}
-
-  ConstrainedVariableId
-  floatTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
-                                   const AbstractDomain& baseDomain,
-                                   bool canBeSpecified,
-                                   const LabelStr& name,
-                                   const EntityId& parent,
-                                   int index) const
-  {
-    const floatDomain * domain = dynamic_cast<const floatDomain*>(&baseDomain);
-    Variable<floatDomain> * variable
-      = new Variable<floatDomain>(constraintEngine, *domain, canBeSpecified, name, parent, index);
-    check_error(variable != NULL,
-                "failed to create Variable for 'float' with name '" + name.toString() + "'");
-    ConstrainedVariableId id = variable->getId();
-    check_error(id.isValid());
-    return id;
-  }
-
-  AbstractDomain *
-  floatTypeFactory::createDomain() const
-  {
-    floatDomain * domain = new floatDomain();
-    check_error(domain != NULL, "failed to create 'float' domain");
-    return domain;
-  }
+  floatTypeFactory::floatTypeFactory() : IntervalTypeFactory(getDefaultTypeName()) {}
 
   double floatTypeFactory::createValue(std::string value) const
   {
@@ -76,6 +18,11 @@ namespace Prototype {
       return PLUS_INFINITY;
     }
     return atof(value.c_str());
+  }
+
+  const LabelStr& floatTypeFactory::getDefaultTypeName() {
+    static const LabelStr sl_typeName("float");
+    return(sl_typeName);
   }
 
 } // namespace Prototype

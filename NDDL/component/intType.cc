@@ -4,68 +4,10 @@
 namespace Prototype {
   
   //
-  // intDomain
-  //
-
-  intDomain::intDomain(const DomainListenerId& listener)
-   : IntervalIntDomain(listener)
-  {
-  }
-
-  intDomain::intDomain(int lb, int ub, 
-    	               const DomainListenerId& listener)
-   : IntervalIntDomain(lb, ub, listener)
-  {
-  }
-
-  intDomain::intDomain(int value, 
-    	               const DomainListenerId& listener)
-   : IntervalIntDomain(value, listener)
-  {
-  }
-
-  intDomain::intDomain(const intDomain& org)
-   : IntervalIntDomain(org)
-  {
-  }
-
-  const LabelStr& intDomain::getTypeName() const
-  {
-    static const LabelStr sl_typeName("int");
-    return(sl_typeName);
-  }
-
-  //
   // intTypeFactory
   //
 
-  intTypeFactory::intTypeFactory() : ConcreteTypeFactory(LabelStr("int")) {}
-
-  ConstrainedVariableId
-  intTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
-                                 const AbstractDomain& baseDomain,
-                                 bool canBeSpecified,
-                                 const LabelStr& name,
-                                 const EntityId& parent,
-                                 int index) const
-  {
-    const intDomain * domain = dynamic_cast<const intDomain*>(&baseDomain);
-    Variable<intDomain> * variable
-      = new Variable<intDomain>(constraintEngine, *domain, canBeSpecified, name, parent, index);
-    check_error(variable != NULL,
-                "failed to create Variable for 'int' with name '" + name.toString() + "'");
-    ConstrainedVariableId id = variable->getId();
-    check_error(id.isValid());
-    return id;
-  }
-
-  AbstractDomain *
-  intTypeFactory::createDomain() const
-  {
-    intDomain * domain = new intDomain();
-    check_error(domain != NULL, "failed to create 'int' domain");
-    return domain;
-  }
+  intTypeFactory::intTypeFactory() : IntervalIntTypeFactory(getDefaultTypeName()) {}
 
   double intTypeFactory::createValue(std::string value) const
   {
@@ -76,6 +18,11 @@ namespace Prototype {
       return PLUS_INFINITY;
     }
     return atoi(value.c_str());
+  }
+
+  const LabelStr& intTypeFactory::getDefaultTypeName() {
+    static const LabelStr sl_typeName("int");
+    return(sl_typeName);
   }
 
 } // namespace Prototype

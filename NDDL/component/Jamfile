@@ -4,7 +4,6 @@ if ! $(PLASMA_READY) {
 
 ModuleComponent NDDL
 	:
-	boolType.cc
 	floatType.cc
 	intType.cc
 	;

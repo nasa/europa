@@ -21,14 +21,16 @@ namespace Prototype{
   class IntervalIntDomain: public IntervalDomain {
   public:
 
-    IntervalIntDomain(const DomainListenerId& listener = DomainListenerId::noId());
+    IntervalIntDomain(const DomainListenerId& listener = DomainListenerId::noId(),
+                      const LabelStr& typeName = getDefaultTypeName());
 
-    IntervalIntDomain(int lb, 
-		      int ub, 
-		      const DomainListenerId& listener = DomainListenerId::noId());
+    IntervalIntDomain(int lb, int ub, 
+                      const DomainListenerId& listener = DomainListenerId::noId(),
+                      const LabelStr& typeName = getDefaultTypeName());
 
     IntervalIntDomain(int value, 
-		      const DomainListenerId& listener = DomainListenerId::noId());
+                      const DomainListenerId& listener = DomainListenerId::noId(),
+                      const LabelStr& typeName = getDefaultTypeName());
 
     IntervalIntDomain(const IntervalIntDomain& org);
 
@@ -41,10 +43,10 @@ namespace Prototype{
     virtual const DomainType& getType() const;
 
     /**
-     * @brief Get the name of the type of the domain.
+     * @brief Get the default name of the type of the domain.
      * @see AbstractDomain::getTypeName
      */
-    virtual const LabelStr& getTypeName() const;
+    static const LabelStr& getDefaultTypeName();
 
     /**
      * @brief Add an element to the domain.

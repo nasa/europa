@@ -2,23 +2,25 @@
 
 namespace Prototype {
 
-  StringDomain::StringDomain() 
-    : EnumeratedDomain(false)
+  StringDomain::StringDomain(const LabelStr& typeName) 
+    : EnumeratedDomain(false, typeName)
   {
   }
 
 
   StringDomain::StringDomain(const std::list<double>& values, 
                              bool closed,
-                             const DomainListenerId& listener)
-    : EnumeratedDomain(values, closed, listener, false)
+                             const DomainListenerId& listener,
+                             const LabelStr& typeName)
+    : EnumeratedDomain(values, closed, listener, false, typeName)
   {
   }
 
 
   StringDomain::StringDomain(double value,
-                             const DomainListenerId& listener)
-    : EnumeratedDomain(value, listener, false)
+                             const DomainListenerId& listener,
+                             const LabelStr& typeName)
+    : EnumeratedDomain(value, listener, false, typeName)
   {
   }
 
@@ -38,7 +40,7 @@ namespace Prototype {
 
 
   const LabelStr&
-  StringDomain::getTypeName() const
+  StringDomain::getDefaultTypeName()
   {
     static const LabelStr sl_typeName("STRING_ENUMERATION");
     return(sl_typeName);

@@ -28,13 +28,16 @@ namespace Prototype {
      */
     void operator>>(ostream& os) const;
 
-    IntervalDomain(const DomainListenerId& listener = DomainListenerId::noId());
+    IntervalDomain(const DomainListenerId& listener = DomainListenerId::noId(),
+                   const LabelStr& typeName = getDefaultTypeName());
 
     IntervalDomain(double lb, double ub,
-                   const DomainListenerId& listener = DomainListenerId::noId());
+                   const DomainListenerId& listener = DomainListenerId::noId(),
+                   const LabelStr& typeName = getDefaultTypeName());
 
     IntervalDomain(double value, 
-                   const DomainListenerId& listener = DomainListenerId::noId());
+                   const DomainListenerId& listener = DomainListenerId::noId(),
+                   const LabelStr& typeName = getDefaultTypeName());
 
     IntervalDomain(const IntervalDomain& org);
 
@@ -61,10 +64,10 @@ namespace Prototype {
     virtual const DomainType& getType() const;
 
     /**
-     * @brief Get the name of the type of the domain.
+     * @brief Get the default name of the type of the domain.
      * @see AbstractDomain::getTypeName
      */
-    virtual const LabelStr& getTypeName() const;
+    static const LabelStr& getDefaultTypeName();
 
     /**
      * @brief Access upper bound.

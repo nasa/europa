@@ -24,7 +24,8 @@ namespace Prototype {
      */
     Domain(const std::list< ELEMENT_TYPE >& values, 
            bool closed = true,
-           const DomainListenerId& listener = DomainListenerId::noId());
+           const DomainListenerId& listener = DomainListenerId::noId(),
+           const LabelStr& typeName = getDefaultTypeName());
 
     /**
      * @brief Singleton constructor.
@@ -32,7 +33,8 @@ namespace Prototype {
      * @param listener Allows connection of a listener to change events on the domain. 
      */
     Domain(const ELEMENT_TYPE& value,
-           const DomainListenerId& listener = DomainListenerId::noId());
+           const DomainListenerId& listener = DomainListenerId::noId(),
+           const LabelStr& typeName = getDefaultTypeName());
 
     /**
      * @brief Copy constructor.
@@ -57,10 +59,10 @@ namespace Prototype {
     virtual const DomainType& getType() const;
 
     /**
-     * @brief Accessor for the name of the type of Domain.
+     * @brief Accessor for the default name of the type of Domain.
      * @return The type of the domain.
      */
-    virtual const LabelStr& getTypeName() const;
+    static const LabelStr& getDefaultTypeName();
 
     /**
      * @brief Fill the given list with the contents of the set.
@@ -107,13 +109,16 @@ namespace Prototype {
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain(const std::list<ELEMENT_TYPE>& labels, bool closed,
-                               const DomainListenerId& listener)
-    : EnumeratedDomain(convert(labels), closed, listener, false) {
+                               const DomainListenerId& listener,
+                               const LabelStr& typeName)
+    : EnumeratedDomain(convert(labels), closed, listener, false, typeName) {
   }
 
   template <class ELEMENT_TYPE>
-  Domain<ELEMENT_TYPE>::Domain(const ELEMENT_TYPE& value, const DomainListenerId& listener)
-    : EnumeratedDomain(value, listener, false) {
+  Domain<ELEMENT_TYPE>::Domain(const ELEMENT_TYPE& value,
+                               const DomainListenerId& listener,
+                               const LabelStr& typeName)
+    : EnumeratedDomain(value, listener, false, typeName) {
   }
 
   template <class ELEMENT_TYPE>
@@ -123,7 +128,7 @@ namespace Prototype {
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain()
-    : EnumeratedDomain(false) {
+    : EnumeratedDomain(false, getDefaultTypeName()) {
   }
 
   template <class ELEMENT_TYPE>
@@ -137,7 +142,7 @@ namespace Prototype {
   }
 
   template <class ELEMENT_TYPE>
-  const LabelStr& Domain<ELEMENT_TYPE>::getTypeName() const {
+  const LabelStr& Domain<ELEMENT_TYPE>::getDefaultTypeName() {
     // Would do:
     // static const LabelStr sl_typeName = LabelStr(typeid(Domain<ELEMENT_TYPE>).name());
     // ... but that is only correct for label sets, and not

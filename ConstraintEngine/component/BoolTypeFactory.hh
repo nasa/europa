@@ -2,12 +2,13 @@
 #define _H_BoolTypeFactory
 
 #include "TypeFactory.hh"
+#include "BoolDomain.hh"
 
 namespace Prototype {
 
   class BoolTypeFactory : public ConcreteTypeFactory {
   public:
-    BoolTypeFactory();
+    BoolTypeFactory(const LabelStr& name = BoolDomain::getDefaultTypeName());
 
     /**
      * @brief Create a variable
@@ -20,15 +21,17 @@ namespace Prototype {
                                                  int index = ConstrainedVariable::NO_INDEX) const;
 
     /**
-     * @brief Create a domain
+     * @brief Return the base domain
      */
-    virtual AbstractDomain * createDomain() const;
+    virtual const AbstractDomain & baseDomain() const;
 
     /**
      * @brief Create a value for a string
      */
     virtual double createValue(std::string value) const;
 
+  private:
+    BoolDomain m_baseDomain;
   };
 
 } // namespace Prototype

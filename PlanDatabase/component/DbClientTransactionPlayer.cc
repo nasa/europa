@@ -580,7 +580,7 @@ namespace Prototype {
     check_error(min_st != NULL);
     const char * max_st = element.Attribute("max");
     check_error(max_st != NULL);
-    IntervalDomain * domain = dynamic_cast<IntervalDomain*>(TypeFactory::createDomain(LabelStr(type_st)));
+    IntervalDomain * domain = dynamic_cast<IntervalDomain*>(TypeFactory::baseDomain(LabelStr(type_st)).copy());
     check_error(domain != NULL, "type '" + std::string(type_st) + "' should indicate an interval domain type");
     double min = TypeFactory::createValue(LabelStr(type_st), min_st);
     double max = TypeFactory::createValue(LabelStr(type_st), max_st);
