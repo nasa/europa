@@ -20,6 +20,7 @@ void initConstraintLibrary() {
     REGISTER_NARY(LessOrEqThanSumConstraint, "LessOrEqThanSum", "Default");
     REGISTER_NARY(CondAllSameConstraint, "CondAllSame", "Default");
     REGISTER_NARY(CondAllDiffConstraint, "CondAllDiff", "Default");
+    REGISTER_NARY(MemberImplyConstraint, "MemberImply", "Default");
 
     // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
     REGISTER_NARY(AddMultEqualConstraint, "addmuleq", "Default");
@@ -28,6 +29,8 @@ void initConstraintLibrary() {
     REGISTER_NARY(EqualConstraint, "eq", "Default");
     REGISTER_NARY(NotEqualConstraint, "neq", "Default");
     REGISTER_NARY(AddEqualConstraint, "addeq", "Default");
+    REGISTER_NARY(MemberImplyConstraint, "memberImply", "Default");
+    REGISTER_NARY(CondAllSameConstraint, "condeq", "Default");
 
     s_runAlready = true;
   }
