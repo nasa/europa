@@ -114,7 +114,6 @@ rule ModuleMain {
     }
 
     for library in $(LIBRARIES) {
-      local flags ;
       if $(library) = SHARED {
         for link in $(links) {
           LinkSharedLibraries $(exe) : [ FModuleSharedLibraryName $(link:S=) : $(variant) ] ;

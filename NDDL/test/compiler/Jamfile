@@ -17,7 +17,9 @@ for model in
 	interval-constants.nddl  simple-predicate.nddl
 	less-basic-model.nddl    simple-resources.nddl
 {
-  NddlSystemTest nddl-tests : NddlMain.cc : $(model) : NDDL ;
+  local exe = $(model:S=) ;
+  NddlMain $(exe) : NddlMain.cc : $(model) : NDDL ;
+  RunModuleMain nddl-tests : $(exe) ;
 }
 
 } # PLASMA_READY

@@ -5,22 +5,32 @@ include [ FDirName $(SUBDIR) JavaRules ] ;
 
 # TRACE_NDDL ?= TRUE ;
 
+# NddlMain run : code.cc : model.nddl : System ;
+rule NddlMain {
+  local exe = $(1) ;
+  local code = $(2) ;
+  local model = $(3) ;
+  local module = $(4) ;
+
+  if $(TRACE_NDDL) = TRUE {
+    Echo NddlMain $(exe) . $(code) . $(model) ;
+  }
+
+  local hh = $(model:S=.hh) ;
+  local cc = [ FGristFiles $(model:S=.cc) ] ;
+  Includes $(cc) : $(hh) ;
+  NddlCompiler $(hh) $(cc) : $(model) ;
+  ModuleMain $(exe) : $(cc) $(code) : $(module) ;
+}
+
 rule NddlSystemTest {
   local target = $(1) ;
   local code = $(2) ;
   local model = $(3) ;
   local module = $(4) ;
 
-  if $(TRACE_NDDL) = TRUE {
-    Echo NddlSystemTest $(target) . $(code) . $(model) ;
-  }
-
-  local hh = $(model:S=.hh) ;
-  local cc = [ FGristFiles $(model:S=.cc) ] ;
   local exe = $(model:S=) ;
-  Includes $(cc) : $(hh) ;
-  NddlCompiler $(hh) $(cc) : $(model:S=.nddl) ;
-  ModuleMain $(exe) : $(cc) $(code) : $(module) ;
+  NddlMain $(exe) : $(code) : $(model) : $(module) ;
   RunModuleMain $(target) : $(exe) : $(model:S=.xml) ;
 }
 

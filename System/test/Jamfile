@@ -8,16 +8,21 @@ for model in
 	Rover.nddl basic-model.nddl k9.backtrack.moderate.nddl
 	k9.nddl path-filter.nddl
 {
-  NddlSystemTest nddl-planner-tests : runTest.cc : $(model) : System ;
+  local exe = $(model:S=) ;
+  NddlMain $(exe) : runTest.cc : $(model) : System ;
+  RunModuleMain nddl-planner-tests : $(exe) ;
 }
 
-NddlSystemTest nddl-planner-tests : runInitialTest.cc : k9-initial.nddl : System ;
+NddlMain k9-initial : runInitialTest.cc : k9-initial.nddl : System ;
+RunModuleMain nddl-planner-tests : k9-initial ;
 
 for model in
 	Rover-transaction.nddl basic-model-transaction.nddl k9.backtrack.moderate-transaction.nddl
 	k9-transaction.nddl path-filter-transaction.nddl
 {
-  NddlSystemTest nddl-planner-tests : runTransactionTest.cc : $(model) : System ;
+  local exe = $(model:S=) ;
+  NddlMain $(exe) : runTransactionTest.cc : $(model) : System ;
+  RunModuleMain nddl-planner-tests : $(exe) : $(model:S=.xml) ;
 }
 
 } # PLASMA_READY
