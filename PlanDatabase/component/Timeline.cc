@@ -114,12 +114,16 @@ namespace EUROPA {
     check_error(results.empty());
 
     // Do propagation to update the information
+#ifdef EUROPA_FAST
+    getPlanDatabase()->getConstraintEngine()->propagate();
+#else
     bool isOk = getPlanDatabase()->getConstraintEngine()->propagate();
     check_error(isOk);
     check_error(isValid());
 
     // Should only progress if we are consistent
     check_error(isOk);
+#endif
 
     const TokenSet& tokensForThisObject = getTokens();
     for (TokenSet::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it) {
