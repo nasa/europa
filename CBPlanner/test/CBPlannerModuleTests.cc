@@ -1227,8 +1227,7 @@ namespace PLASMA {
     ordersb.push_back(HSTSHeuristics::NEAR);
     //    ordersb.push_back(HSTSHeuristics::NONE);
     ordersb.push_back(HSTSHeuristics::MIN_FLEXIBLE);
-    std::vector<LabelStr> gensb;
-    heuristics.setHeuristicsForTokenDP(334.5, ttb.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), HSTSHeuristics::FREE, statesb, ordersb, gensb);
+    heuristics.setHeuristicsForTokenDP(334.5, ttb.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), statesb, ordersb);
 
     std::vector<std::pair<LabelStr,LabelStr> > dsc;
     dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"),LabelStr("CON")));
@@ -1241,9 +1240,7 @@ namespace PLASMA {
     statesc.push_back(Token::ACTIVE);
     ordersc.push_back(HSTSHeuristics::TGENERATOR);
     ordersc.push_back(HSTSHeuristics::LATE);
-    std::vector<LabelStr> gensc;
-    gensc.push_back(LabelStr("Generator1"));
-    heuristics.setHeuristicsForTokenDP(6213.7, ttc.getId(), HSTSHeuristics::AFTER, mttc.getId(), HSTSHeuristics::FREE, statesc, ordersc, gensc);
+    heuristics.setHeuristicsForTokenDP(6213.7, ttc.getId(), HSTSHeuristics::AFTER, mttc.getId(), statesc, ordersc);
 
     std::vector<std::pair<LabelStr,LabelStr> > dsd;
     dsd.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_trans"),LabelStr("NO_RIGHT")));
@@ -1254,19 +1251,17 @@ namespace PLASMA {
     std::vector<HSTSHeuristics::CandidateOrder> ordersd;
     statesd.push_back(Token::ACTIVE);
     ordersd.push_back(HSTSHeuristics::EARLY);
-    std::vector<LabelStr> gensd;
-    heuristics.setHeuristicsForTokenDP(6213.7, ttd.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), HSTSHeuristics::FREE, statesd, ordersd, gensd);
+    heuristics.setHeuristicsForTokenDP(6213.7, ttd.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), statesd, ordersd);
 
     std::vector<LabelStr> statese;
     std::vector<HSTSHeuristics::CandidateOrder> orderse;
-    std::vector<LabelStr> gense;
-    heuristics.setHeuristicsForTokenDP(7652.4, ttd.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), HSTSHeuristics::FREE, statese, orderse, gense);
+    heuristics.setHeuristicsForTokenDP(7652.4, ttd.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), statese, orderse);
 
     return true;
   }
 
   bool testVariableInitializationImpl(HSTSHeuristics& heuristics) {
-    std::list<double> aenums;
+    std::vector<LabelStr> aenums;
     heuristics.setHeuristicsForConstrainedVariableDP(443.6, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.with"), TokenTypeId::noId(), HSTSHeuristics::ASCENDING, NO_STRING, aenums);
 
     aenums.push_back(LabelStr("SIN"));
@@ -1275,13 +1270,13 @@ namespace PLASMA {
     aenums.push_back(LabelStr("PEP"));
     heuristics.setHeuristicsForConstrainedVariableDP(443.6, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.with"), TokenTypeId::noId(), HSTSHeuristics::ENUMERATION, NO_STRING, aenums);
 
-    std::list<double> emptyList;
+    std::vector<LabelStr> emptyList;
     heuristics.setHeuristicsForConstrainedVariableDP(2269.3, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Left.m_with"), TokenTypeId::noId(), HSTSHeuristics::VGENERATOR, LabelStr("Generator1"),emptyList);
 
-    std::list<double> benums;
+    std::vector<LabelStr> benums;
     heuristics.setHeuristicsForConstrainedVariableDP(234.5, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.m_sys"), TokenTypeId::noId(), HSTSHeuristics::ENUMERATION, NO_STRING, benums);
 
-    std::list<double> cenums;
+    std::vector<LabelStr> cenums;
     cenums.push_back(LabelStr("CON"));
     //    LabelStr parentName = stripVariableName("Made_Up_Parent_SV.Made_Up_SV.Thrust_Left.m_with");
     LabelStr parentName = LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Left");
@@ -1294,8 +1289,14 @@ namespace PLASMA {
   }
 
   bool testReaderImpl(HSTSHeuristics& heuristics) {
-    HSTSHeuristicsReader reader(heuristics);
+    initHeuristicsSchema(Schema::instance());
+
+    HSTSHeuristicsReader reader(heuristics, Schema::instance());
+
     reader.read("../component/Heuristics-HSTS.xml");
+    
+    heuristics.write();
+
     return true;
   }
 
