@@ -20,7 +20,7 @@ bool replay = false;
 
 #define PERFORMANCE
 
-bool runPlanner(){
+bool runPlanner() {
   SamplePlanDatabase db1(schema, replay);
 
   // Set ResourceOpenDecisionManager
@@ -60,7 +60,7 @@ bool runPlanner(){
   PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
   // Store transactions for recreation of database
-  if(replay) {
+  if (replay) {
     std::stringstream os1;
     db1.planDatabase->getClient()->toStream(os1);
     std::ofstream out(TX_LOG);
@@ -78,7 +78,7 @@ bool runPlanner(){
     std::string s2 = os2.str();
     assert(s1 == s2);
   }
-
+  debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr); );
   return true;
 }
 
