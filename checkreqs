@@ -32,7 +32,7 @@ echo "Checking for required software versions:"
 
 #Check for minimum Jam version
 JAMVER=`jam -v | egrep "Jam [0-9]\.[0-9]+" | cut -d" " -f2`
-if [ -n $JAMVER ]
+if [ -n "$JAMVER" ]
 then
   i=`echo $JAMVER | cut -d. -f1`
   j=`echo $JAMVER | cut -d. -f2`
@@ -63,7 +63,7 @@ fi
 
 #Check for minimum gcc version
 GCCVER=`gcc -v 2>&1 | egrep 'gcc version [0-9]\.[0-9]+\.[0-9]+' | cut -d" " -f3`
-if [ -n $GCCVER ]
+if [ -n "$GCCVER" ]
 then
   i=`echo $GCCVER | cut -d. -f1`
   j=`echo $GCCVER | cut -d. -f2`
@@ -100,7 +100,7 @@ fi
 
 #Check for minimum Java version
 JAVAVER=`java -version 2>&1 | egrep 'java version .[0-9]\.[0-9]+\.[0-9]+' | cut -d"\"" -f2`
-if [ -n $JAVAVER ]
+if [ -n "$JAVAVER" ]
 then
   i=`echo $JAVAVER | cut -d. -f1`
   j=`echo $JAVAVER | cut -d. -f2`
@@ -138,7 +138,7 @@ fi
 
 #Check for minimum Doxygen version
 DOXVER=`doxygen -h 2>&1 | egrep 'Doxygen version [0-9]\.[0-9]+\.[0-9]+' | cut -d" " -f3`
-if [ -n $DOXVER ]
+if [ -n "$DOXVER" ]
 then
   i=`echo $DOXVER | cut -d. -f1`
   j=`echo $DOXVER | cut -d. -f2`
