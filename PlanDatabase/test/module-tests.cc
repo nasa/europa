@@ -543,7 +543,7 @@ private:
     ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
     db.close();
 
-    typedef Europa::Id<IntervalToken> IntervalTokenId;
+    typedef Id<IntervalToken> IntervalTokenId;
     
     static const int NUMTOKS=3;
     static const int UNIFIED=1;
@@ -579,7 +579,7 @@ private:
     assert(edom1.getLowerBound() == 1);
     assert(edom1.getUpperBound() == 220);
 
-    Europa::Id<TokenVariable<IntervalIntDomain> > pvar1(tokens[0][0]->getParameters()[0]);
+    Id<TokenVariable<IntervalIntDomain> > pvar1(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom1(pvar1->getDerivedDomain());
     assert(pdom1.getLowerBound() == 500);
     assert(pdom1.getUpperBound() == 1000);
@@ -597,7 +597,7 @@ private:
     assert(edom2.getLowerBound() == 1);
     assert(edom2.getUpperBound() == 209);
 
-    Europa::Id<TokenVariable<IntervalIntDomain> > pvar2(tokens[0][0]->getParameters()[0]);
+    Id<TokenVariable<IntervalIntDomain> > pvar2(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom2(pvar2->getDerivedDomain());
     assert(pdom2.getLowerBound() == 500);
     assert(pdom2.getUpperBound() == 1000);
@@ -616,7 +616,7 @@ private:
     assert(edom3.getLowerBound() == 1);
     assert(edom3.getUpperBound() == 209);
 
-    Europa::Id<TokenVariable<IntervalIntDomain> > pvar3(tokens[0][0]->getParameters()[0]);
+    Id<TokenVariable<IntervalIntDomain> > pvar3(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom3(pvar3->getDerivedDomain());
     assert(pdom3.getLowerBound() == 500+UNIFIED-1);
     assert(pdom3.getUpperBound() == 1000);
@@ -635,7 +635,7 @@ private:
     assert(edom4.getLowerBound() == edom2.getLowerBound());
     assert(edom4.getUpperBound() == edom2.getUpperBound());
 
-    Europa::Id<TokenVariable<IntervalIntDomain> > pvar4(tokens[0][0]->getParameters()[0]);
+    Id<TokenVariable<IntervalIntDomain> > pvar4(tokens[0][0]->getParameters()[0]);
     IntervalIntDomain pdom4(pvar4->getDerivedDomain());
     assert(pdom4.getLowerBound() == pdom2.getLowerBound());
     assert(pdom4.getUpperBound() == pdom2.getUpperBound());
@@ -893,7 +893,7 @@ private:
 
   static bool testTokenOrderQuery(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Europa::Id<Timeline> timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    Id<Timeline> timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
     db.close();
 
     const int COUNT = 5;

@@ -6,50 +6,50 @@
 
 namespace Prototype {
   class Object;
-  typedef Europa::Id<Object> ObjectId;
+  typedef Id<Object> ObjectId;
 
   class Timeline;
-  typedef Europa::Id<Timeline> TimelineId;
+  typedef Id<Timeline> TimelineId;
 
   class Token;
-  typedef Europa::Id<Token> TokenId;
+  typedef Id<Token> TokenId;
 
   class UnifyMemento;
-  typedef Europa::Id<UnifyMemento> UnifyMementoId;
+  typedef Id<UnifyMemento> UnifyMementoId;
 
   class MergeMemento;
-  typedef Europa::Id<MergeMemento> MergeMementoId;
+  typedef Id<MergeMemento> MergeMementoId;
 
   class StackMemento;
-  typedef Europa::Id<StackMemento> StackMementoId;
+  typedef Id<StackMemento> StackMementoId;
 
   class PlanDatabaseListener;
-  typedef Europa::Id<PlanDatabaseListener> PlanDatabaseListenerId;
+  typedef Id<PlanDatabaseListener> PlanDatabaseListenerId;
 
   template<class DomainType> class TokenVariable;
-  typedef Europa::Id< TokenVariable<EnumeratedDomain> > StateVarId;
-  typedef Europa::Id< TokenVariable<IntervalIntDomain> > TempVarId;
+  typedef Id< TokenVariable<EnumeratedDomain> > StateVarId;
+  typedef Id< TokenVariable<IntervalIntDomain> > TempVarId;
 
   typedef Domain<ObjectId>  ObjectSet;
-  typedef Europa::Id< TokenVariable<ObjectSet> > ObjectVarId;
+  typedef Id< TokenVariable<ObjectSet> > ObjectVarId;
 
   class Schema;
-  typedef Europa::Id<Schema> SchemaId;
+  typedef Id<Schema> SchemaId;
 
   class PlanDatabase;
-  typedef Europa::Id<PlanDatabase> PlanDatabaseId;
+  typedef Id<PlanDatabase> PlanDatabaseId;
 
   class RulesEngine;
-  typedef Europa::Id<RulesEngine> RulesEngineId;
+  typedef Id<RulesEngine> RulesEngineId;
 
   class Rule;
-  typedef Europa::Id<Rule> RuleId;
+  typedef Id<Rule> RuleId;
 
   class RuleContext;
-  typedef Europa::Id<RuleContext> RuleContextId;
+  typedef Id<RuleContext> RuleContextId;
 
   class RuleInstance;
-  typedef Europa::Id<RuleInstance> RuleInstanceId;
+  typedef Id<RuleInstance> RuleInstanceId;
 }
 
 #endif
