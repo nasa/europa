@@ -14,23 +14,29 @@ void initConstraintLibrary() {
     REGISTER_NARY(AddEqualConstraint, "AddEqual", "Default");
     REGISTER_NARY(LessThanEqualConstraint, "LessThanEqual", "Default");
     REGISTER_NARY(NotEqualConstraint, "NotEqual", "Default");
+    REGISTER_NARY(LessThanConstraint, "LessThan", "Default");
+    REGISTER_NARY(LessThanSumConstraint, "LessThanSum", "Default");
     REGISTER_NARY(MultEqualConstraint, "MultEqual", "Default");
     REGISTER_NARY(AddMultEqualConstraint, "AddMultEqual", "Default");
     REGISTER_NARY(EqualSumConstraint, "EqualSum", "Default");
+    REGISTER_NARY(EqualProductConstraint, "EqualProduct", "Default");
     REGISTER_NARY(LessOrEqThanSumConstraint, "LessOrEqThanSum", "Default");
     REGISTER_NARY(CondAllSameConstraint, "CondAllSame", "Default");
     REGISTER_NARY(CondAllDiffConstraint, "CondAllDiff", "Default");
     REGISTER_NARY(MemberImplyConstraint, "MemberImply", "Default");
 
     // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
-    REGISTER_NARY(AddMultEqualConstraint, "addmuleq", "Default");
-    REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
-    REGISTER_NARY(EqualSumConstraint, "sum", "Default");
-    REGISTER_NARY(EqualConstraint, "eq", "Default");
-    REGISTER_NARY(NotEqualConstraint, "neq", "Default");
     REGISTER_NARY(AddEqualConstraint, "addeq", "Default");
-    REGISTER_NARY(MemberImplyConstraint, "memberImply", "Default");
+    REGISTER_NARY(AddMultEqualConstraint, "addmuleq", "Default");
     REGISTER_NARY(CondAllSameConstraint, "condeq", "Default");
+    REGISTER_NARY(EqualConstraint, "eq", "Default");
+    REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
+    REGISTER_NARY(LessOrEqThanSumConstraint, "leqsum", "Default");
+    REGISTER_NARY(LessThanConstraint, "lt", "Default");
+    REGISTER_NARY(MemberImplyConstraint, "memberImply", "Default");
+    REGISTER_NARY(NotEqualConstraint, "neq", "Default");
+    REGISTER_NARY(EqualProductConstraint, "product", "Default");
+    REGISTER_NARY(EqualSumConstraint, "sum", "Default");
 
     s_runAlready = true;
   }
