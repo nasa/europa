@@ -22,7 +22,7 @@ namespace PLASMA {
     ~DbClientTransactionLog();
 
     /* Declare DbClient event handlers we will over-ride */
-    void notifyObjectCreated(const ObjectId& object) ;
+    void notifyObjectCreated(const ObjectId& object);
     void notifyObjectCreated(const ObjectId& object, const std::vector<ConstructorArgument>& arguments);
     void notifyClosed();
     void notifyClosed(const LabelStr& objectType);
