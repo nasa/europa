@@ -21,6 +21,48 @@ namespace Prototype {
     return intersect(dom.getLowerBound(), dom.getUpperBound());
   }
 
+  bool IntervalDomain::difference(const AbstractDomain& dom){
+    check_error(dom.isInterval());
+    check_error(dom.isDynamic() || !dom.isEmpty());
+    check_error(isDynamic() || !isEmpty());
+
+    // check for case where difference could cause a split in the interval. Don't handle it in this implementation.
+    check_error(! (dom.getLowerBound() > m_lb && dom.getUpperBound() < m_ub));
+
+    // Nothing to be done if the lower bound > dom.upper bound, or the upper bound < dom.lowerbound
+    if(m_lb > dom.getUpperBound() || m_ub < dom.getLowerBound())
+      return false;
+
+    // If it is contained by dom then it will be emptied
+    if(m_lb >= dom.getLowerBound() && m_ub <= dom.getUpperBound()){
+      empty();
+      return true;
+    }
+
+    // If lower bound > dom.lower bound then we must increment it to exceed the upper bound
+    if(m_lb >= dom.getLowerBound()){
+      m_lb = dom.getUpperBound() + minDelta();
+      notifyChange(DomainListener::LOWER_BOUND_INCREASED);
+    }
+
+    // Similarly for the upper bound
+    if(m_ub <= dom.getUpperBound()){
+      m_ub = dom.getLowerBound() - minDelta();
+      notifyChange(DomainListener::UPPER_BOUND_DECREASED);
+    }
+
+    return true;
+  }
+
+  AbstractDomain& IntervalDomain::operator=(const AbstractDomain& dom){
+    check_error(dom.isInterval());
+    check_error(m_listener.isNoId());
+    m_lb = dom.getUpperBound();
+    m_ub = dom.getUpperBound();
+    m_closed = dom.isFinite();
+    return *this;
+  }
+
   void IntervalDomain::relax(const AbstractDomain& dom){
     check_error(dom.isInterval());
     relax(dom.getLowerBound(), dom.getUpperBound());

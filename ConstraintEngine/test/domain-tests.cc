@@ -40,6 +40,8 @@ public:
     runTest(testSubset);
     runTest(testPrinting);
     runTest(testBoolDomain);
+    runTest(testDifference);
+    runTest(testOperatorEquals);
     return true;
   }
 
@@ -176,6 +178,37 @@ private:
     assert(dom1 == dom0);
     return true;
   }
+
+  static bool testDifference(){
+    IntervalDomain dom0(1, 10);
+    IntervalDomain dom1(11, 20);
+    assert(!dom0.difference(dom1));
+    assert(!dom1.difference(dom0));
+
+    IntervalDomain dom2(dom0);
+    assert(dom2.difference(dom0));
+    assert(dom2.isEmpty());
+
+    IntervalIntDomain dom3(5, 100);
+    assert(dom3.difference(dom0));
+    assert(dom3.getLowerBound() == 11);
+    assert(dom3.difference(dom1));
+    assert(dom3.getLowerBound() == 21);
+
+    IntervalDomain dom4(0, 20);
+    assert(dom4.difference(dom1));
+    double newValue = (dom1.getLowerBound() - dom4.minDelta());
+    assert(dom4.getUpperBound() == newValue);
+    return true;
+  }
+
+  static bool testOperatorEquals(){
+    IntervalDomain dom0(1, 28);
+    IntervalDomain dom1(50, 100);
+    dom0 = dom1;
+    assert(dom0 == dom1);
+    return true;
+  }
 };
 
 class EnumeratedDomainTest{
@@ -187,6 +220,8 @@ public:
     runTest(testEquate);
     runTest(testValueRetrieval);
     runTest(testIntersection);
+    runTest(testDifference);
+    runTest(testOperatorEquals);
     return true;
   }
 private:
@@ -396,6 +431,59 @@ private:
     ls3.remove(Prototype::LabelStr("I"));
     ls4.intersect(ls3);
     assert(ls4.isEmpty());
+    return true;
+  }
+
+  static bool testDifference(){
+    EnumeratedDomain dom0;
+    dom0.insert(1);
+    dom0.insert(3);
+    dom0.insert(2);
+    dom0.insert(8);
+    dom0.insert(10);
+    dom0.insert(6);
+    dom0.close();
+
+    IntervalIntDomain dom1(11, 100);
+    assert(!dom0.difference(dom1));
+
+    IntervalIntDomain dom2(5, 100);
+    assert(dom0.difference(dom2));
+    assert(dom0.getUpperBound() == 3);
+
+
+    IntervalIntDomain dom3(0, 100);
+    assert(dom0.difference(dom3));
+    assert(dom0.isEmpty());
+
+    return true;
+  }
+
+  static bool testOperatorEquals(){
+    EnumeratedDomain dom0;
+    dom0.insert(1);
+    dom0.insert(3);
+    dom0.insert(2);
+    dom0.insert(8);
+    dom0.insert(10);
+    dom0.insert(6);
+    dom0.close();
+
+    EnumeratedDomain dom1;
+    dom1.insert(1);
+    dom1.insert(3);
+    dom1.insert(2);
+    dom1.close();
+
+    EnumeratedDomain dom2(dom0);
+
+    assert(dom0 != dom1);
+    dom0 = dom1;
+    assert(dom0 == dom1);
+
+    dom1 = dom2;
+    assert(dom1 == dom2);
+
     return true;
   }
 };

@@ -301,6 +301,38 @@ namespace Prototype {
     return true;
   }
 
+  bool EnumeratedDomain::difference(const AbstractDomain& dom){
+    // Trivial implementation, for all members of this domain that
+    // are present in dom, remove them.
+    bool value_removed = false;
+
+    for(std::set<double>::iterator it = m_values.begin(); it != m_values.end();){
+      double value = *it;
+      if(dom.isMember(value)){
+	m_values.erase(it++);
+	value_removed = true;
+      }
+      else
+	++it;
+    }
+
+    if(m_values.empty())
+      notifyChange(DomainListener::EMPTIED);
+    else if(value_removed)
+      notifyChange(DomainListener::VALUE_REMOVED);
+
+    return value_removed;
+  }
+
+  AbstractDomain& EnumeratedDomain::operator=(const AbstractDomain& dom){
+    check_error(dom.isEnumerated());
+    check_error(m_listener.isNoId());
+    const EnumeratedDomain& e_dom = static_cast<const EnumeratedDomain&>(dom);
+    m_values.clear();
+    m_values = e_dom.m_values;
+    return *this;
+  }
+
   bool EnumeratedDomain::isSubsetOf(const AbstractDomain& dom) const{
     check_error(dom.isDynamic() || !dom.isEmpty());
 

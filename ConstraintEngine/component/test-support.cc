@@ -13,3 +13,10 @@ void initConstraintLibrary(){
     s_runAlready = true;
   }
 }
+
+bool loggingEnabled(){
+  static const char* TRUE_VALUE = "1";
+  static const char *envStr = getenv("PROTOTYPE_ENABLE_LOGGING");
+  static const bool enabled = (envStr != NULL && strcmp(envStr, TRUE_VALUE) == 0);
+  return enabled;
+}

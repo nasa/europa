@@ -30,4 +30,8 @@ namespace Prototype {
     static const AbstractDomain::DomainType s_type = INT_INTERVAL;
     return s_type;
   }
+
+  double IntervalIntDomain::minDelta() const {
+    return 1;
+  }
 }

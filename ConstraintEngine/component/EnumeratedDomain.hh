@@ -208,6 +208,19 @@ namespace Prototype{
      */
     bool intersect(const AbstractDomain& dom);
 
+    /**
+     * @brief restricts this domain to the difference of its values with the given domain.
+     * @param dom the domain to differ with. Must not be empty.
+     * @return true if the operation results in a change to this domain, otherwise false.
+     */
+    bool difference(const AbstractDomain& dom);
+
+    /**
+     * @brief Assign the values from the given domain, to this domain. Can only be called
+     * on domains that have no listeners attached, since it will not cause propagation. It is
+     * more of a utility.
+     */
+    AbstractDomain& operator=(const AbstractDomain& dom);
 
     /**
      * @brief Tests if this object is a subset of the given domain.

@@ -29,6 +29,11 @@ namespace Prototype{
     bool isFinite() const;
     const DomainType& getType() const;
 
+    /**
+     * @brief Enforces integer semantics by restricting changes to units.
+     */
+    double minDelta() const;
+
   private:
     /**
      * @brief Enforces integer semantics. Will be compiled out for fast version.
@@ -39,7 +44,6 @@ namespace Prototype{
      * @brief Enforces integer semantics.
      */
     double convert(const double& value) const;
-
   };
 }
 #endif
