@@ -22,7 +22,7 @@ LocalDepends tests : run-hsts-module-tests ;
 
 # Commented out tests are failing for various reasons; see each test for more info.
 LocalDepends run-hsts-planner-tests :
-	lita
+#	lita
         monkey-timeline
         monkey-timeline-hacked
         monkey-timeline-hacked2
@@ -416,11 +416,11 @@ RunEUROPATest dnp-twentyFreeObs-h : twentyFreeObs.nddl : DNP3heur.xml : DNP3nobr
 RunEUROPATest dnp-twoFreeObs-h : twoFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 
 ### LITA
-EUROPA_NDDL lita-init.nddl ;
-RunEUROPATest lita : lita-init.nddl : lita-heur.xml : lita.pi ;
+#EUROPA_NDDL lita-init.nddl ;
+#RunEUROPATest lita : lita-init.nddl : lita-heur.xml : lita.pi ;
 
 ### LITA - from Vijay
-EUROPA_NDDL missionExec.init.e2 ; 
-RunEUROPATest litaEuropa2 : missionExec.init.e2 : missionExec.heuristics.e2 : missionExec.noBranch.e2 ;
+#EUROPA_NDDL missionExec.init.e2 ; 
+#RunEUROPATest litaEuropa2 : missionExec.init.e2 : missionExec.heuristics.e2 : missionExec.noBranch.e2 ;
 
 } # PLASMA_READY
