@@ -1884,7 +1884,8 @@ private:
   }
 
   /**
-   * @brief Create a new EnumeratedDomain or BoolDomain from data read from the stream.
+   * @brief Create a new concrete *Domain from data read from the stream.
+   * @param in Stream to read from.
    * @note Incomplete, but should allow tests to pass.
    */
   static AbstractDomain* readSet(std::istream& in) {
@@ -2242,8 +2243,8 @@ private:
     //   PLASMA treats as intervals all numeric domains that aren't explicitly
     //   identified as enumerations.
     // "NewTestCases" was written while tracking down the bugs in both
-    //    Europa2 (PLASMA) and in Europa (NewPlan) discovered while testing
-    //    "CLibTestCases".
+    //   Europa2 (PLASMA) and in Europa1 (NewPlan) discovered while testing
+    //   "CLibTestCases".
     // For each file, try twice with different relative paths since we don't know what
     //   the current working directory is.
     assertTrue(readTestCases(std::string("NewTestCases"), tests) ||
