@@ -309,6 +309,7 @@ namespace Prototype {
   void IntervalDomain::operator>>(ostream& os) const {
     AbstractDomain::operator>>(os);
     os << "[";
+
     if (m_lb == MINUS_INFINITY)
       os << "-inf";
     else
@@ -344,6 +345,11 @@ namespace Prototype {
   const AbstractDomain::DomainType& IntervalDomain::getType() const{
     static const AbstractDomain::DomainType s_type = REAL_INTERVAL;
     return(s_type);
+  }
+
+  const LabelStr& IntervalDomain::getTypeName() const {
+    static const LabelStr sl_typeName("REAL_INTERVAL");
+    return(sl_typeName);
   }
 
   double IntervalDomain::translateNumber(double number, bool) const {

@@ -63,6 +63,12 @@ namespace Prototype {
     virtual const DomainType& getType() const;
 
     /**
+     * @brief Get the name of the type of the domain.
+     * @see AbstractDomain::getTypeName
+     */
+    virtual const LabelStr& getTypeName() const;
+
+    /**
      * @brief Determine if the domain is finite.
      */
     bool isFinite() const;

@@ -42,6 +42,11 @@ namespace Prototype {
     return(s_type);
   }
 
+  const LabelStr& IntervalIntDomain::getTypeName() const {
+    static const LabelStr sl_typeName("INT_INTERVAL");
+    return(sl_typeName);
+  }
+
   void IntervalIntDomain::insert(double value) {
     check_error(check_value(value));
     if (isMember(value))
