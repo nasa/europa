@@ -42,6 +42,11 @@ namespace EUROPA {
     const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId& first, 
 						      const ConstrainedVariableId& second, const bool exact);
 
+    void getTemporalNogood(const ConstrainedVariableId& useAsOrigin,
+                           std::vector<ConstrainedVariableId>& fromvars,
+                           std::vector<ConstrainedVariableId>& tovars,
+                           std::vector<long>& lengths
+                           );
 
     void addListener(const TemporalNetworkListenerId& listener);
 

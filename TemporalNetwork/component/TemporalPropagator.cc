@@ -623,4 +623,35 @@ namespace EUROPA {
   }
 
 
+  void TemporalPropagator::getTemporalNogood
+  (const ConstrainedVariableId& useAsOrigin,
+   std::vector<ConstrainedVariableId>& fromvars,
+   std::vector<ConstrainedVariableId>& tovars,
+   std::vector<long>& lengths)
+  {
+    std::list<DedgeId> edgeNogoodList = m_tnet->getEdgeNogoodList();
+    TimepointId origin = m_tnet->getOrigin();
+    ConstrainedVariableId originvar(useAsOrigin);
+    for (std::list<DedgeId>::const_iterator it = edgeNogoodList.begin();
+         it != edgeNogoodList.end(); it++) {
+      DedgeId edge = *it;
+      TimepointId from = (TimepointId) edge->from;
+      TimepointId to = (TimepointId) edge->to;
+      Time length = edge->length;
+      ConstrainedVariableId fromvar,tovar;
+      if (from == origin)
+        fromvar = originvar;
+      else
+        fromvar = from->getExternalEntity();
+      if (to == origin)
+        tovar = originvar;
+      else
+        tovar = to->getExternalEntity();
+      fromvars.push_back(fromvar);
+      tovars.push_back(tovar);
+      lengths.push_back(length);
+    }
+  }
+
+
 } //namespace
