@@ -44,5 +44,23 @@ Color c3 = purple;
 Color c4 = { purple, grape, banana };
 Color c5 = { purple, red, yellow };
 
+class A {
+  Fruit m_f;
+  A(Fruit f) {
+   m_f = f;
+  }
+}
+
+class B{
+  Color m_c;
+  B(Color c) {
+   m_c = c;
+  }
+}
+
 NddlWorld world = new NddlWorld(0, 10, 100);
+A a1 = new A(apple);
+A a2 = new A('apple');
+B b3 = new B(purple);
+B b4 = new B('purple');
 close();
