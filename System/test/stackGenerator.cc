@@ -31,7 +31,8 @@ public:
 };
 
 void nddloutputModel(std::ofstream& out, const Problem& prob) {
-  out << "#include \"NddlWorld.nddl\"" << std::endl;
+  out << "#include \"../../NDDL/core/Plasma.nddl\"" << std::endl;
+  out << "#include \"NddlWorld.nddl\"" << std::endl; 
   out << std::endl;
   out << "enum Target {";  
   for (int i=1; i <= prob.numTargets; ++i) {
@@ -112,39 +113,42 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
 }  
 
 void nddloutputInitialState(std::ofstream& out, const Problem& prob) {
-  out << "class World extends NddlWorld {" << std::endl;
-  out << " MyResource res;" << std::endl;
+  out << "NddlWorld world = new NddlWorld();" << std::endl;
+//  out << "class World extends NddlWorld {" << std::endl;
+//  out << " MyResource res;" << std::endl;
 
-  for (int i=1; i <= prob.numSatellites; ++i) {
-    out << " Satellite " << prob.satellites[i] << ";" << std::endl;
-  }
+//  for (int i=1; i <= prob.numSatellites; ++i) {
+//    out << " Satellite " << prob.satellites[i] << ";" << std::endl;
+//  }
 
-  out << "" << std::endl;
-  out << " predicate initialState{}" << std::endl;
-  out << "" << std::endl;
-  out << " World() {" << std::endl;
+//  out << "" << std::endl;
+//  out << " predicate initialState{}" << std::endl;
+//  out << "" << std::endl;
+//  out << " World() {" << std::endl;
   //  out << "  super(" << prob.horStart << "," << prob.horEnd << "," << 500*prob.numSatellites*prob.targets << ");" << std::endl;
-  out << "  super(" << prob.horStart << "," << prob.horEnd << "," << 99999999 << ");" << std::endl;
-  out << "  res = new MyResource();" << std::endl;
+//  out << "  super(" << prob.horStart << "," << prob.horEnd << "," << 99999999 << ");" << std::endl;
+  out << " MyResource res = new MyResource();" << std::endl;
 
   for (int i=1; i <= prob.numSatellites; ++i)
-    out << "  " << prob.satellites[i] << " = new Satellite();" << std::endl;
-  out << " }" << std::endl;
-  out << "}" << std::endl;
+    out << " Satellite " << prob.satellites[i] << " = new Satellite();" << std::endl;
+//  out << " }" << std::endl;
+//  out << "}" << std::endl;
   out << "" << std::endl;
-  out << "World::initialState{" << std::endl;
-  out << " leq(object.m_horizonStart, start);" << std::endl;
-  out << " leq(end, object.m_horizonEnd);" << std::endl;
-  out << "" << std::endl;
+  out << "NddlWorld.close();" << std::endl;
+  out << "close();" << std::endl;
+//  out << "World::initialState{" << std::endl;
+//  out << " leq(object.m_horizonStart, start);" << std::endl;
+//  out << " leq(end, object.m_horizonEnd);" << std::endl;
+//  out << "" << std::endl;
 
   for (int i = 1; i <= prob.numSatellites; ++i) {
-    out << " contains(Satellite.Pointing initialPosition" << i << ");" << std::endl;
-    out << " eq(initialPosition" << i << ".object, object." << prob.satellites[i] << ");" << std::endl;
+    out << " goal(Satellite.Pointing initialPosition" << i << ");" << std::endl;
+    out << " eq(initialPosition" << i << ".object, " << prob.satellites[i] << ");" << std::endl;
     out << " eq(initialPosition" << i << ".observation, " << prob.targets[1] << ");" << std::endl;
-    out << " eq(initialPosition" << i << ".start, object.m_horizonStart);" << std::endl;
+    out << " eq(initialPosition" << i << ".start, world.m_horizonStart);" << std::endl;
     out << "" << std::endl;
   }
-  out << "}" << std::endl;
+  //  out << "}" << std::endl;
 }
 
 
