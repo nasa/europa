@@ -31,6 +31,8 @@ namespace EUROPA {
 
     if (m_choiceIndex == 0) initializeChoices();
 
+    debugMsg("CBPlanner:ObjectDecisionPoint", "nr of choices = " << m_choices.size());
+
     if (m_choices.empty()) return false; // unable to find any choices
 
     m_open = false;
