@@ -40,9 +40,13 @@ namespace Prototype{
     commonInit(startBaseDomain, endBaseDomain);
   }
 
-  const TempVarId& IntervalToken::getStart() const{return m_start;}
+  const TempVarId& IntervalToken::getStart() const{
+    check_error(m_start.isValid());
+    return m_start;}
 
-  const TempVarId& IntervalToken::getEnd() const{return m_end;}
+  const TempVarId& IntervalToken::getEnd() const{
+    check_error(m_end.isValid());
+    return m_end;}
 
   void IntervalToken::commonInit( const IntervalIntDomain& startBaseDomain,
 				  const IntervalIntDomain& endBaseDomain){

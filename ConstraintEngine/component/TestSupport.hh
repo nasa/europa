@@ -44,8 +44,11 @@ private:
   DefaultEngineAccessor::reset(); \
   if(result && Europa::IdTable::size() == id_count) \
     std::cout << " PASSED." << std::endl; \
-  else if(result)\
-    std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED ID'S." << std::endl; \
+  else if(result){\
+    std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED ID'S:";\
+    Europa::IdTable::output(std::cout);\
+    cout << std::endl; \
+  }\
   else \
     std::cout << " FAILED TO PASS UNIT TEST." << std::endl; \
 }
