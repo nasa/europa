@@ -46,11 +46,14 @@ Foo::impliedObjectGuard{
  meets(basicToken g1);
  eq(g1.object.arg1, object.arg1); // 3: Guarded by g1.object and object
 
+ Bar bar;
+ eq(object.arg2, bar); // 4: Guarded by first, second ungaurded. Order changed.
+
  // Guards implied when used on slaves as shown below
  if(object){
-  any(object.arg2.pred t0); // 4: Guarded by object
+  any(object.arg2.pred t0); // 5: Guarded by object
  }
- //if(object.arg1 == allFoo.arg1){ // 5: Guarded by object, allFoo, and the test for equality
+ //if(object.arg1 == allFoo.arg1){ // 6: Guarded by object, allFoo, and the test for equality
   //any(basicToken);
  //}
 }
