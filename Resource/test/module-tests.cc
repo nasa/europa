@@ -20,7 +20,6 @@
 #include "../PlanDatabase/TokenVariable.hh"
 #include "../PlanDatabase/ObjectTokenRelation.hh"
 #include "../PlanDatabase/DbLogger.hh"
-#include "../PlanDatabase/PartialPlanWriter.hh"
 
 #include <iostream>
 #include <string>
@@ -54,7 +53,6 @@ const double consumptionMax = -50;
     if (loggingEnabled()) {\
     new CeLogger(std::cout, ce.getId());\
     new DbLogger(std::cout, db.getId());\
-    new PlanWriter::PartialPlanWriter(db.getId(), ce.getId());\
     }\
     if(autoClose) db.close();
 

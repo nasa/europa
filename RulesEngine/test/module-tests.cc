@@ -10,7 +10,6 @@
 #include "RuleInstance.hh"
 #include "ObjectFilter.hh"
 #include "DbLogger.hh"
-#include "PartialPlanWriter.hh"
 
 #include "TestSupport.hh"
 #include "TestRule.hh"
@@ -195,7 +194,6 @@ SchemaId DefaultSchemaAccessor::s_instance;
     if(loggingEnabled()){\
      new CeLogger(std::cout, ce.getId());\
      new DbLogger(std::cout, db.getId());\
-     new PlanWriter::PartialPlanWriter(db.getId(), ce.getId());\
     }\
     RulesEngine re(db.getId()); \
     Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")));\

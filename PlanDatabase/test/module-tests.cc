@@ -7,7 +7,6 @@
 #include "ObjectTokenRelation.hh"
 #include "Timeline.hh"
 #include "DbLogger.hh"
-#include "PartialPlanWriter.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
 
@@ -54,19 +53,17 @@ SchemaId DefaultSchemaAccessor::s_instance;
 #define SCHEMA DefaultSchemaAccessor::instance()
 
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
-    ConstraintEngine ce; \
-    Schema schema; \
-    PlanDatabase db(ce.getId(), schema.getId()); \
-    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-    if (loggingEnabled()) { \
-      new CeLogger(std::cout, ce.getId()); \
-      new DbLogger(std::cout, db.getId()); \
-      new PlanWriter::PartialPlanWriter(db.getId(), ce.getId()); \
-    } \
-    new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId()); \
-    Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"))); \
-    check_error(!object.getId().isNoId()); \
-    if (autoClose) \
+    ConstraintEngine ce;\
+    Schema schema;\
+    PlanDatabase db(ce.getId(), schema.getId());\
+    new DefaultPropagator(LabelStr("Default"), ce.getId());\
+    if(loggingEnabled()){\
+     new CeLogger(std::cout, ce.getId());\
+     new DbLogger(std::cout, db.getId());\
+    }\
+    new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());\
+    Object& object = *(new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")));\
+    if(autoClose) \
       db.close();
 
 class ObjectTest {
