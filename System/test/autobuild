@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.37 2003-02-15 07:55:58 wedgingt Exp $
+# $Id: autobuild,v 1.38 2003-02-17 16:00:20 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -16,25 +16,26 @@ cd "$startdir"
 # Don't run this script more than once in the same directory.
 mkdir working || exit 1
 
-trap 'rmdir $startdir/working' 0
-
-# See if we have an AFS token so we can get at the newer compiler.
-tokens > .tokens.$$
-cmp .tokens.$$ .notokens
-status=$?
-if test $status != 0 -a -f .notokens -a -f .tokens.$$
-then
-	haveAFS=true
-else
-	haveAFS=false
-fi
-echo haveAFS is $haveAFS
+trap 'rmdir $startdir/working; rm -f $startdir/.tokens.$$' 0
 
 # Address to mail exit status messages to
 email=checkins@postdoc.arc.nasa.gov
 
 # Subdirectories to build in
 subdirs='cvs fast opt optFast profOptFast shareOptFast debug noErr shareOptNoErr'
+
+# Location of a newer compiler.
+AFS_GNU='/afs/ic-afs.arc.nasa.gov/apps/gcc-3.2.1/'
+# See if we have an AFS token so we can get at the newer compiler.
+tokens > .tokens.$$
+cmp .tokens.$$ .notokens
+status=$?
+if test $status != 0 -a -f .notokens -a -f .tokens.$$ -a -d "$AFS_GNU" -a -x "$AFS_GNU"/bin/g++
+then
+	haveAFS=true
+else
+	haveAFS=false
+fi
 
 # CVS info
 CVS_RSH=ssh
