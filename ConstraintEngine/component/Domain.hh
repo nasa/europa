@@ -30,7 +30,7 @@ namespace Prototype {
      * @param listener Allows connection of a listener to change events on the domain. 
      */
     Domain(const ELEMENT_TYPE& value,
-	   const DomainListenerId& listener = DomainListenerId::noId());
+           const DomainListenerId& listener = DomainListenerId::noId());
 
     /**
      * @brief Copy constructor.
