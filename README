@@ -6,6 +6,18 @@ Known areas of performance improvement:
 5. Improve exchange of data in TemporalPropagator with  direct calculation of duration variables.
 6. Update TemporalNetwork to adjust for deactivated constraints
 
+M_11:
+**** Fixed problems integrating the Temporal Network.
+1. Lazy propagation of constraints added is not safe as it is required to obtain the context for returning no-goods.
+2. Was allowing paths through incremental propagation even when the TNET was inconsistent.
+3. Was allowing immediate execution of StartEndDuration relations in the propagator's execute method since consequences
+of propagation could cause new constraints to be inserted on the agenda of constraints to execute, while we were executingthem. This meant they would execute before the tnet had a change to be updated and propagated. Consequently, we would see
+side-effects from executing the constraint. It turns out we do not need to update the duration variable anyway, so we knowskip this constraint execution altogether.
+4. Have greatly simplified the buffering model in the TemporalPropagator.
+5. Added k9.backtrack.moderate to the system tests. This was breaking and is now fixed.
+6. k9.huge also runs.
+7. We appear to now have good memory performance. k9.huge completes in 18M.
+
 M_10:
 **** Performance improvement: beat betaPlanner by 66% up to 2 orders of magnitude on satellite problems.
 1. Miscellaneous inlining
