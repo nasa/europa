@@ -53,16 +53,10 @@ const bool ALWAYS_FAILS = false;
 
 // The C++ standard changed; use std::stringstream and streamIsEmpty()
 // to be compatible with compilers that are compliant to different versions.
-#ifdef __GNUC__
-#if __GNUC__ > 2
+#if defined(__GNUC__) && (__GNUC__ > 2)
 #include <sstream>
 //typedef std::stringstream sstream;
 #define streamIsEmpty(s) (s).str() == ""
-#else
-#include <strstream>
-typedef std::strstream std::stringstream;
-#define streamIsEmpty(s) !(s).str()
-#endif
 #else
 #include <strstream>
 typedef std::strstream std::stringstream;
@@ -118,4 +112,5 @@ namespace Prototype {
   #define ASSUMED_MINIMUM_MEMORY_ADDRESS 1000000 
   #define MAXIMUM_STRING_COUNT ASSUMED_MINIMUM_MEMORY_ADDRESS 
 }
+
 #endif
