@@ -111,11 +111,10 @@ namespace PLASMA {
     class VariableEntry {
     public:
       VariableEntry();
-      VariableEntry(const std::list<LabelStr>& domain, const Priority p, const DomainOrder order, const LabelStr& generatorName);
-      VariableEntry(const std::list<LabelStr>& domain, const Priority p, const DomainOrder order, const std::list<LabelStr>& enumeration);
+      VariableEntry(const std::set<double>& domain, const Priority p, const DomainOrder order, const LabelStr& generatorName, const std::list<LabelStr>& enumeration);
       virtual ~VariableEntry();
       void setPriority(const Priority p);
-      void setDomainOrder(const std::list<LabelStr>& domain, const DomainOrder order, const LabelStr& generatorName);
+      void setDomainOrder(const std::set<double>& domain, const DomainOrder order, const LabelStr& generatorName);
       const Priority getPriority() const;
       const std::list<LabelStr>& getDomain() const;
       const GeneratorId& getGenerator() const;
@@ -138,8 +137,9 @@ namespace PLASMA {
     const Priority getDefaultPriorityForConstrainedVariableDPs() const;
     void setDefaultPreferenceForTokenDPs(const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders);
     void setDefaultPreferenceForConstrainedVariableDPs(const DomainOrder order);
+    const DomainOrder getDefaultPreferenceForConstrainedVariableDPs() const;
 
-    void setHeuristicsForConstrainedVariableDP(const Priority p, const LabelStr variableName, const TokenTypeId& tt, const DomainOrder order, const LabelStr& generatorName, const std::vector<LabelStr>& enumeration);
+    void setHeuristicsForConstrainedVariableDP(const Priority p, const LabelStr variableName, const TokenTypeId& tt, const DomainOrder order, const LabelStr& generatorName, const std::list<LabelStr>& enumeration);
 
     void setHeuristicsForTokenDP(const Priority p, const TokenTypeId& tt, const Relationship rel, const TokenTypeId& mastertt, const std::vector<LabelStr>& states, const std::vector<CandidateOrder>& orders);
 
@@ -174,6 +174,7 @@ namespace PLASMA {
     static void candidateOrderToString(const CandidateOrder& order, LabelStr& str);
     static void relationshipToString(const Relationship& rel, LabelStr& str);
     static void originToString(const Origin& orig, LabelStr& str);
+    static void domainOrderToString(const DomainOrder dorder, LabelStr& str);
 
     PriorityPref m_defaultPriorityPreference;
     std::map<LabelStr, Priority> m_defaultCompatibilityPriority;

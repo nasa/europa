@@ -4,6 +4,7 @@
 #include "TokenDecisionPoint.hh"
 #include "ObjectDecisionPoint.hh"
 #include "ConstrainedVariableDecisionPoint.hh"
+#include "Schema.hh"
 #include <sstream>
 
 namespace PLASMA {
@@ -12,8 +13,10 @@ namespace PLASMA {
   // there
 
   TokenType::TokenType(const LabelStr& predicateName, 
-				       const std::vector<std::pair<LabelStr, LabelStr> >& domainSpecs) 
-    : m_predicateName(predicateName), m_domainSpecs(domainSpecs), m_id(this) { }
+		       const std::vector<std::pair<LabelStr, LabelStr> >& domainSpecs) 
+    : m_predicateName(predicateName), m_domainSpecs(domainSpecs), m_id(this) { 
+    //    std::cout << "Constructing a token type with predicate " << predicateName.c_str() << " and number of variables " << m_domainSpecs.size() << std::endl;
+  }
 
   TokenType::~TokenType() { check_error(m_id.isValid()); m_id.remove(); }
 
@@ -26,6 +29,7 @@ namespace PLASMA {
   }
 
   const std::vector<std::pair<LabelStr,LabelStr> >& TokenType::getDomainSpecs() const {
+    //    std::cout << " Get DomainSpecs for predicate " << m_predicateName.c_str() << " with size = " << m_domainSpecs.size() << std::endl;
     return m_domainSpecs;
   }
 
@@ -35,6 +39,7 @@ namespace PLASMA {
     check_error(LabelStr::isString(tt->getPredicate()));
     key << tt->getPredicate().c_str();
     std::vector<std::pair<LabelStr,LabelStr> > ds = tt->getDomainSpecs();
+    //    std::cout << " getIndexKey for token type with  predicate = " << tt->getPredicate().c_str() << " and domain spec size = " << ds.size() << std::endl;
     for (unsigned int i=0; i < ds.size(); ++i) {
       key << DELIMITER;
       key << ds[i].first.c_str() << "|" << ds[i].second.c_str();
@@ -115,46 +120,40 @@ namespace PLASMA {
   
   HSTSHeuristics::VariableEntry::VariableEntry() {}
 
-  // construct the generator according to the generator name
-  HSTSHeuristics::VariableEntry::VariableEntry(const std::list<LabelStr>& domain,
-					       const Priority p, 
-					       const DomainOrder order,
-					       const LabelStr& generatorName) 
-    : m_domain(domain), m_priority(p) {
+  HSTSHeuristics::VariableEntry::VariableEntry( const std::set<double>& domain,
+						const Priority p, 
+						const DomainOrder order,
+						const LabelStr& generatorName,
+						const std::list<LabelStr>& enumeration)
+    : m_priority(p) {
     check_error(MIN_PRIORITY <= p);
     check_error(MAX_PRIORITY >= p);
-    switch (order) {
-    case VGENERATOR:
-      // create generator from name
-      break;
-    case ASCENDING:
-      break;
-    case DESCENDING:
-      m_domain.reverse();
-      break;
-    default:
-      check_error(ALWAYS_FAILS);
-    }
-  }
-
-  HSTSHeuristics::VariableEntry::VariableEntry(const std::list<LabelStr>& domain,
-					       const Priority p, 
-					       const DomainOrder order,
-					       const std::list<LabelStr>& enumeration)
-    : m_domain(domain), m_priority(p) {
-    check_error(MIN_PRIORITY <= p);
-    check_error(MAX_PRIORITY >= p);
-    switch (order) {
-    case VGENERATOR:
-      // create generator from name
-      break;
-    case ASCENDING:
-      break;
-    case DESCENDING:
-      m_domain.reverse();
-      break;
-    default:
-      check_error(ALWAYS_FAILS);
+    if (!enumeration.empty())
+      m_domain = enumeration;
+    else {
+      switch (order) {
+      case VGENERATOR:
+	// create generator from name
+	std::cout << " Generators such as " << generatorName.c_str() << " are not yet supported" << std::endl;
+	break;
+      case ASCENDING:
+	for (std::set<double>::const_iterator it(domain.begin()); it != domain.end(); ++it) {
+	  check_error(LabelStr::isString(*it));
+	  LabelStr value(*it);
+	  m_domain.push_back(value);
+	}
+	break;
+      case DESCENDING:
+	for (std::set<double>::const_iterator it(domain.begin()); it != domain.end(); ++it) {
+	  check_error(LabelStr::isString(*it));
+	  LabelStr value(*it);
+	  m_domain.push_back(value);
+	}
+	m_domain.reverse();
+	break;
+      default:
+	check_error(ALWAYS_FAILS);
+      }
     }
   }
 
@@ -235,26 +234,36 @@ namespace PLASMA {
     m_defaultDomainOrder = order;
   }
 
+  const HSTSHeuristics::DomainOrder HSTSHeuristics::getDefaultPreferenceForConstrainedVariableDPs() const { return m_defaultDomainOrder; }
+
   void HSTSHeuristics::setHeuristicsForConstrainedVariableDP(const Priority p, 
 							     const LabelStr variableName, 
 							     const TokenTypeId& tt, 
 							     const DomainOrder order,
 							     const LabelStr& generatorName, 
-							     const std::vector<LabelStr>& enumeration) {
-    LabelStr key("");
-    if (!tt.isNoId())
-      key = HSTSHeuristics::getIndexKey(variableName,tt);
-    else
-      key = variableName;
-    // get varId from variableName and tt
-    // get baseDomain
-    // if (generatorName == NO_STRING) {
-    //  VariableEntry entry(baseDomain.getValues(), p, order, enumeration);
-    // }
-    // else  {
-    //   VariableEntry entry(baseDomain.getValues(), p, order, generatorName);
-    // }
-    //m_variableHeuristics.insert(std::make_pair<LabelStr,VariableEntry>(key, entry));
+							     const std::list<LabelStr>& enumeration) {
+    LabelStr key(HSTSHeuristics::getIndexKey(variableName,tt));
+    check_error(tt.isValid());
+    LabelStr pred(tt->getPredicate());
+    unsigned int index = Schema::instance()->getIndexFromName(pred, variableName);
+    LabelStr varType(Schema::instance()->getParameterType(pred, index));
+
+    std::cout << "**** VAR TYPE = " << varType.c_str() << std::endl;
+    std::set<double> values;
+    if (Schema::instance()->isEnum(varType)) {
+      Schema::instance()->getEnumValues(varType, values);
+    }
+    else {
+      std::cout << " Can't handle values that are not enum, yet" << std::endl;
+    }
+    if (generatorName == NO_STRING) {
+      VariableEntry entry(values, p, order, NO_STRING, enumeration);
+      m_variableHeuristics.insert(std::make_pair<LabelStr,VariableEntry>(key, entry));
+    }
+    else  {
+      VariableEntry entry(values, p, order, generatorName, enumeration);
+      m_variableHeuristics.insert(std::make_pair<LabelStr,VariableEntry>(key, entry));
+    }
   }
 
   void HSTSHeuristics::setHeuristicsForTokenDP(const Priority p,
@@ -381,7 +390,6 @@ namespace PLASMA {
     check_error(tt.isValid());
     std::stringstream key;
     key << variableName.c_str() << DELIMITER << TokenType::getIndexKey(tt).c_str();
-    key << std::endl;
     return key.str();
   }
 
@@ -442,6 +450,16 @@ namespace PLASMA {
     }
   }
 
+  void HSTSHeuristics::domainOrderToString(const DomainOrder dorder, LabelStr& str) {
+    switch(dorder) {
+    case 0: str = LabelStr("VGENERATOR"); break;
+    case 1: str = LabelStr("ASCENDING"); break;
+    case 2: str = LabelStr("DESCENDING"); break;
+    case 3: str = LabelStr("ENUMERATION"); break;
+    default: check_error(false, "Domain Order value not recognized.");
+    }
+  }
+
   void HSTSHeuristics::write(std::ostream& os) {
     os << "HSTSHeuristics: " << std::endl;
     os << " Default Priority Preference: ";
@@ -450,12 +468,15 @@ namespace PLASMA {
       os << "LOW" << std::endl;
     else
       os << "HIGH" << std::endl;
-    os << " Default Token Priority: " << getDefaultPriorityForTokenDPs() << std::endl;
     os << " Default Variable Priority: " << getDefaultPriorityForConstrainedVariableDPs() << std::endl;
+    const DomainOrder dorder = getDefaultPreferenceForConstrainedVariableDPs();
+    LabelStr str(NO_STRING);
+    domainOrderToString(dorder, str);
+    os << " Default Variable Value Order: " << str.c_str() << std::endl;
+    os << " Default Token Priority: " << getDefaultPriorityForTokenDPs() << std::endl;
     os << " Default Token States/Orders: " << std::endl;
     std::vector<LabelStr>::const_iterator its(m_defaultTokenStates.begin());
     std::vector<CandidateOrder>::const_iterator ito(m_defaultCandidateOrders.begin());
-    LabelStr str(NO_STRING);
     for (; its != m_defaultTokenStates.end(); ++its, ++ito) {
       os << "   ";
       os << (*its).c_str();
@@ -469,36 +490,41 @@ namespace PLASMA {
     for (; itc != m_defaultCompatibilityPriority.end(); ++itc) {
       const LabelStr key = itc->first; 
       const Priority p = itc->second;
-      std::cout << "   " << key.c_str() << " " << p << std::endl;
+      os << "   " << key.c_str() << " " << p << std::endl;
     }
     os << " Token Heuristics: " << std::endl;
     std::map<LabelStr, TokenEntry>::const_iterator itt(m_tokenHeuristics.begin());
     for (; itt != m_tokenHeuristics.end(); ++itt) {
-      std::cout << " Token: "; 
+      os << " Token: "; 
       const LabelStr key = itt->first;
-      std::cout << "   " << key.c_str() << " " << itt->second.getPriority();
+      os << "   " << key.c_str() << " " << itt->second.getPriority();
       const std::vector<LabelStr> states(itt->second.getStates());
       const std::vector<CandidateOrder> orders(itt->second.getOrders());
       std::vector<LabelStr>::const_iterator itts(states.begin());
       std::vector<CandidateOrder>::const_iterator itto(orders.begin());
       for (; itts != states.end(); ++itts, ++itto) {
-	std::cout << " ";
+	os << " ";
 	HSTSHeuristics::candidateOrderToString(*itto,str);
 	os << str.c_str();
 	os << "/" << (*itts).c_str();
       }
+      os << std::endl;
     }
-    std::cout << " Variable Heuristics: " << std::endl;
+    os << " Variable Heuristics: " << std::endl;
     std::map<LabelStr, VariableEntry>::const_iterator itv(m_variableHeuristics.begin());
     for (; itv != m_variableHeuristics.end(); ++itv) {
-      std::cout << " Variable: " << std::endl;
-      const LabelStr key = itv->first;
-      std::cout << "   " << key.c_str() << " " << itv->second.getPriority();
-      const std::list<LabelStr> domain = itv->second.getDomain();
+      os << " Variable: ";
+      const LabelStr key(itv->first);
+      VariableEntry entry(itv->second);
+      os << "   " << key.c_str() << " " << entry.getPriority();
+      if (!entry.getGenerator().isNoId()) 
+	os << " " << entry.getGenerator()->getName().c_str();
+      os << " try values:";
+      const std::list<LabelStr> domain = entry.getDomain();
       std::list<LabelStr>::const_iterator itvd(domain.begin());
       for (; itvd != domain.end(); ++itvd)
-	std::cout << " " << (*itvd).c_str();
-      std::cout << " " << itv->second.getGenerator()->getName().c_str() << std::endl;
+	os << " " << (*itvd).c_str();
+      os << std::endl;
     }
   }
 

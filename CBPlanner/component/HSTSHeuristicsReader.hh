@@ -29,16 +29,16 @@ namespace PLASMA {
     void readPredicateSpec(const TiXmlElement& element, LabelStr& pred, std::vector<std::pair<LabelStr,LabelStr> >& domainSpec);
     void readDecisionPreference(const TiXmlElement& element, std::vector<LabelStr>& states, std::vector<HSTSHeuristics::CandidateOrder>& orders);
     void readConstrainedVariable(const TiXmlElement& element);
-    void readPreference(const TiXmlElement& element, LabelStr& genName, HSTSHeuristics::DomainOrder& dorder, std::vector<LabelStr>& values); 
+    void readPreference(const TiXmlElement& element, LabelStr& genName, HSTSHeuristics::DomainOrder& dorder, std::list<LabelStr>& values); 
     void readToken(const TiXmlElement& element);
     void readStateOrder(const TiXmlElement& element, LabelStr& state, HSTSHeuristics::CandidateOrder& order);
     void readState(const TiXmlElement& element, LabelStr& state);
     void readValueOrder(const TiXmlElement& element, HSTSHeuristics::DomainOrder& order);
-    void readParameter(const TiXmlElement& element, int& index, char* value);
-    void readMaster(const TiXmlElement& element, HSTSHeuristics::Relationship& rel, TokenTypeId& ttm);
+    void readParameter(const TiXmlElement& element, int& index, char*& value);
+    void readMaster(const TiXmlElement& element, HSTSHeuristics::Relationship& rel, LabelStr& pred, std::vector<std::pair<LabelStr,LabelStr> >& domainSpecs);
     void readRelation(const TiXmlElement& element, HSTSHeuristics::Relationship& rel);  
-    void readPredicateParameters(const TiXmlElement& element, std::vector<std::pair<LabelStr,LabelStr> >& domainSpecs);
-    void readDomainOrder(const TiXmlElement& element, std::vector<LabelStr>& values);
+    void readPredicateParameters(const TiXmlElement& element, const LabelStr pred, std::vector<std::pair<LabelStr,LabelStr> >& domainSpecs);
+    void readDomainOrder(const TiXmlElement& element, std::list<LabelStr>& values);
     void readVariableSpec(const TiXmlElement& element, int& index, LabelStr& name);
     void readIndex(const TiXmlElement& element, int& index);
   private:
