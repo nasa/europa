@@ -1009,16 +1009,27 @@ namespace Prototype {
 
 		void PartialPlanWriter::outputDecision(const DecisionPointId &dp, std::ofstream &decOut) {
 			int type = 0;
+      int isUnit = 0;
 			if(ObjectDecisionPointId::convertable(dp))
 				type = D_OBJECT;
-			else if(TokenDecisionPointId::convertable(dp))
+			else if(TokenDecisionPointId::convertable(dp)) {
 				type = D_TOKEN;
-			else if(ConstrainedVariableDecisionPointId::convertable(dp))
+        TokenDecisionPointId &tdp = (TokenDecisionPointId &) dp;
+        if(tdp->getToken()->getState()->lastDomain().isSingleton())
+          isUnit = 1;
+      }
+			else if(ConstrainedVariableDecisionPointId::convertable(dp)) {
 				type = D_VARIABLE;
+        ConstrainedVariableDecisionPointId &vdp = (ConstrainedVariableDecisionPointId &)dp;
+        if((isCompatGuard(vdp->getVariable()) &&
+            !vdp->getVariable()->specifiedDomain().isSingleton()) ||
+           !vdp->getVariable()->lastDomain().isSingleton())
+          isUnit = 1;
+      }
 			else
 				type = D_ERROR;
 			
-			decOut << ppId << TAB << dp->getKey() << TAB << type << TAB << dp->getEntityKey() << TAB << 0 << TAB;
+			decOut << ppId << TAB << dp->getKey() << TAB << type << TAB << dp->getEntityKey() << TAB << isUnit << TAB;
 			if((*plId)->getDecisionManager()->getCurrentDecision() == dp) {
         std::string choiceInfo = getChoiceInfo();
         if(choiceInfo == "")
@@ -1110,6 +1121,16 @@ namespace Prototype {
 				return "bugStr";
       }
       return std::string(stream.str());
+    }
+
+    const bool PartialPlanWriter::isCompatGuard(const ConstrainedVariableId &var) const {
+      std::set<ConstraintId> constrs;
+      var->constraints(constrs);
+      for(std::set<ConstraintId>::const_iterator it = constrs.begin();
+          it != constrs.end(); ++it)
+        if((*it)->getName() == LabelStr("RuleVariableListener"))
+          return true;
+      return false;
     }
   
     /****From PlanDatabaseListener****/

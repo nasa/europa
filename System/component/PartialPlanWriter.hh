@@ -88,6 +88,7 @@ namespace Prototype {
       const std::string getEnumerationStr(EnumeratedDomain &dom) const;
       const std::string getVarInfo(const ConstrainedVariableId &) const;
 			const std::string getChoiceInfo(void) const;
+      const bool isCompatGuard(const ConstrainedVariableId &) const;
 
       /****From PlanDatabaseListener****/
     
