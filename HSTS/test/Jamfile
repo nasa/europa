@@ -18,9 +18,11 @@ CET_Files = <ConstraintEngine!test>ConstraintTesting ;
 ModuleMain hsts-module-tests : $(HSTS_Test_Files:S=$(SUFOBJ)) $(CET_Files:S=$(SUFOBJ)) module-tests.cc : HSTS : CBPlanner ;
 RunModuleMain run-hsts-module-tests : hsts-module-tests ;
 
+LocalDepends tests : run-hsts-module-tests ;
+
 # Commented out tests are failing for various reasons; see each test for more info.
-LocalDepends tests : run-hsts-module-tests
-        monkey-timeline monkey-timeline-hacked monkey-timeline-hacked2 monkey-timeline-hacked3
+LocalDepends run-hsts-planner-tests :
+	monkey-timeline monkey-timeline-hacked monkey-timeline-hacked2 monkey-timeline-hacked3
         monkey1-timeline1
 #       monkey1-timeline-objvar
 #       monkey1-timeline-twomonkeys-objvar
@@ -117,7 +119,7 @@ rule RunEUROPATest {
  local target = $(1) ;
  local initialStates = $(2) ;
  local heur = $(3) ;
- local pid = $(4) ;
+ local planId = $(4) ;
 
  local model ;
  for model in $(initialStates) {
@@ -132,12 +134,14 @@ rule RunEUROPATest {
   local addTarget = "" ;
   if $(heur) {
     options += " -h "$(heur) ;
-    addTarget += "-h" ;
+    addTarget = "-h" ;
   }
-  if ($pid) {
-    options += " -p "$(pid) ;
-    addTarget += "-p" ;
+  if ($planId) {
+    options += " -p "$(planId) ;
+# All current tests that have a plan id file also have a heuristics file, so this isn't need and is messy to do correctly
+#   output = ?? ;
   }
+  local output = "run-$(exe).output$(addTarget)" ;
 
   # create .hh, .cc, .o, and .xml for a .nddl
   Includes $(cc) : $(hh) ;
@@ -146,7 +150,7 @@ rule RunEUROPATest {
 
   # create planner with linked model
   ModuleMain $(exe) : $(o) : HSTS ;
-  RunModuleMain run-$(exe)$(addTarget) : $(exe) : $(options) : : "run-$(exe).output$(addTarget)" ;
+  RunModuleMain "run-$(exe)$(addTarget)" : $(exe) : $(options) : : "$(output)" ;
   LocalDepends $(target) : run-$(exe)$(addTarget) ;
  }
 }
