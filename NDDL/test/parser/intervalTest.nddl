@@ -1,0 +1,14 @@
+int x1 = [-inf +inf];
+int x2 = [-inf 50];
+int x3 = [-50 +inf];
+int x4 = [-50 50];
+
+class Klass {
+  int y1, y2, y3, y4;
+  Klass () {
+    y1 = [-inf +inf];
+    y2 = [-inf 50];
+    y3 = [-50 +inf];
+    y4 = [-50 50];
+  }
+}

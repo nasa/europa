@@ -19,7 +19,7 @@ NDDL_PARSER_TESTS =
 	initializerTests.nddl             switchTests.nddl
 	inner-classes.nddl                temporalNumericIntervals.nddl
 	inner-enums.nddl                  transitional-subgoaling.nddl
-	looping.nddl
+	looping.nddl                      intervalTest.nddl
 	;
 
 local parser_test ;
