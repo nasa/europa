@@ -52,7 +52,10 @@ namespace Prototype {
     check_error(value <= PLUS_INFINITY && value >= MINUS_INFINITY);
     std::pair<std::set<double>::iterator, bool> result = m_values.insert(value);
     check_error(result.second || isDynamic()); // Ensure it has been added - i.e. was not present.
-    notifyChange(DomainListener::RELAXED);
+
+    // We only consider insertion a relaxation if  the domain is closed
+    if(!isDynamic())
+      notifyChange(DomainListener::RELAXED);
   }
 
   void EnumeratedDomain::remove(double value){
@@ -115,14 +118,14 @@ namespace Prototype {
 	  ++it_b;
 	}
 	else if(val_a < val_b){
-	  std::set<double>::iterator target = m_values.find(val_b);
+	  std::set<double>::iterator target = m_values.lower_bound(val_b);
 	  m_values.erase(it_a, target);
 	  it_a = target;
 	  changed_a = true;
 	  check_error(!isMember(val_a));
 	}
 	else {
-	  std::set<double>::iterator target = l_dom.m_values.find(val_a);
+	  std::set<double>::iterator target = l_dom.m_values.lower_bound(val_a);
 	  l_dom.m_values.erase(it_b, target);
 	  it_b = target;
 	  changed_b = true;

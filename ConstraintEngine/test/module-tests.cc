@@ -78,7 +78,7 @@ public:
   void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType){increment(changeType);}
 
   int getCount(ConstraintEngine::Event event){return m_events[event];}
-
+  void reset() {for(int i=0; i<ConstraintEngine::EVENT_COUNT;i++) m_events[i] = 0;}
 private:
   void increment(int event){m_events[event] = m_events[event] + 1;}
   int m_events[ConstraintEngine::EVENT_COUNT];
@@ -109,6 +109,8 @@ private:
 
   static bool testMessaging(){
     TestListener listener(ENGINE);
+
+    // Add, Specify, Remove
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, 100));
       assert(listener.getCount(ConstraintEngine::SET) == 1);
@@ -120,6 +122,77 @@ private:
       assert(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 1);
     }
     assert(listener.getCount(ConstraintEngine::VARIABLE_REMOVED) == 1);
+
+    // Bounds restriction messages for derived domain
+    listener.reset();
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, 100));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 10));
+      EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
+      ENGINE->propagate();
+      assert(listener.getCount(ConstraintEngine::UPPER_BOUND_DECREASED) == 1);
+
+      v0.specify(IntervalIntDomain(5, 10)); // Expect lower-bound-increased message
+      assert(listener.getCount(ConstraintEngine::LOWER_BOUND_INCREASED) == 1);
+
+      ENGINE->propagate(); // Expect another through propagation
+      assert(listener.getCount(ConstraintEngine::LOWER_BOUND_INCREASED) == 2);
+
+      v1.specify(IntervalIntDomain(6, 8)); // 
+      assert(listener.getCount(ConstraintEngine::BOUNDS_RESTRICTED) == 1);
+
+      ENGINE->propagate(); // Expect another through propagation
+      assert(listener.getCount(ConstraintEngine::BOUNDS_RESTRICTED) == 2);
+
+      v0.specify(7);
+      ENGINE->propagate(); // Expect a RESTRICT_TO_SINGLETON event through propagation
+      assert(listener.getCount(ConstraintEngine::RESTRICT_TO_SINGLETON) == 1);
+
+      v0.reset(); // Expect a RESET message for v0 and a RELAXATION message for both variables
+      assert(listener.getCount(ConstraintEngine::RESET) == 1);
+      assert(listener.getCount(ConstraintEngine::RELAXED) == 2);
+      assert(ENGINE->pending());
+
+      v0.specify(0); // Expect EMPTIED
+      ENGINE->propagate();
+      assert(listener.getCount(ConstraintEngine::EMPTIED) == 1);
+    }
+
+    // Now tests message handling on Enumerated Domain
+    listener.reset();
+    {
+      Variable<EnumeratedDomain> v0(ENGINE, EnumeratedDomain());
+      v0.insert(1);
+      v0.insert(3);
+      v0.insert(5);
+      v0.insert(10);
+      assert(listener.getCount(ConstraintEngine::RELAXED) == 0); // Should not generate any of these messages while not closed
+      v0.close();
+      assert(listener.getCount(ConstraintEngine::CLOSED) == 1);
+      assert(listener.getCount(ConstraintEngine::SET) == 1); // Expect to see specified domain cause 'set' on derived domain once closed.
+
+      EnumeratedDomain d0;
+      d0.insert(2);
+      d0.insert(3);
+      d0.insert(5);
+      d0.insert(11);
+      d0.close();
+      Variable<EnumeratedDomain> v1(ENGINE, d0);
+      assert(listener.getCount(ConstraintEngine::SET) == 2); // Expect to see specified domain cause 'set' immediately.
+
+      EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
+      ENGINE->propagate(); // Should see values removed from both variables domains. 
+      assert(listener.getCount(ConstraintEngine::VALUE_REMOVED) == 2);
+      v0.specify(3);
+      assert(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 1);
+      v1.specify(5);
+      assert(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 2);
+      ENGINE->propagate(); // Expect to see exactly one domain emptied
+      assert(listener.getCount(ConstraintEngine::EMPTIED) == 1);
+      v1.reset(); // Should now see 2 domains relaxed.
+      assert(listener.getCount(ConstraintEngine::RELAXED) == 2);
+    }
+
     return true;
   }
 };

@@ -72,7 +72,7 @@ private:
   static bool testRelaxation(){
     ChangeListener l_listener;
     IntervalIntDomain dom0; // Will have very large default range
-    IntervalIntDomain dom1(-100, 100, true, l_listener.getId());
+    IntervalIntDomain dom1(-100, 100, l_listener.getId());
     dom1.relax(dom0);
     DomainListener::ChangeType change;
     assert(l_listener.checkAndClearChange(change)  && change == DomainListener::RELAXED);

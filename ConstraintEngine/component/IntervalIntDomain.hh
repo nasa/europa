@@ -22,7 +22,6 @@ namespace Prototype{
   public:
     IntervalIntDomain(int lb = -MAX_INT, 
 		      int ub = MAX_INT, 
-		      bool closed = true, 
 		      const DomainListenerId& listener = DomainListenerId::noId());
     IntervalIntDomain(const DomainListenerId& listener);
     IntervalIntDomain(const IntervalIntDomain& org);

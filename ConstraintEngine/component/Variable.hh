@@ -38,6 +38,12 @@ namespace Prototype
     virtual ~Variable();
 
     /**
+     * @brief Adds an element to a dynamic domain. The domain must be closed.
+     * @param value The value to be inserted to the various domains of the variable.
+     */
+    virtual void insert(double value);
+
+    /**
      * @brief Restricts the domain of the variable to be a subset of the given domain.
      *
      * This operation is only valid if the ConstraintEngine does not have an empty domain.
@@ -155,6 +161,10 @@ namespace Prototype
     check_error(m_derivedDomain.isDynamic() || !m_derivedDomain.isEmpty());
     m_derivedDomain.setListener(m_listener);
 
+    // Don't propagate set operations on domains.
+    if(baseDomain.isDynamic())
+      return;
+
     if(baseDomain.isSingleton())
       m_derivedDomain.set(m_specifiedDomain.getSingletonValue());
     else
@@ -163,6 +173,14 @@ namespace Prototype
   
   template<class DomainType>
   Variable<DomainType>::~Variable(){}
+
+  template<class DomainType>
+  void Variable<DomainType>::insert(double value) {
+    check_error(m_baseDomain.isDynamic());
+    m_baseDomain.insert(value);
+    m_specifiedDomain.insert(value);
+    m_derivedDomain.insert(value);
+  }
 
   template<class DomainType>
   bool Variable<DomainType>::validate() const{
@@ -248,6 +266,13 @@ namespace Prototype
     m_baseDomain.close();
     m_specifiedDomain.close();
     m_derivedDomain.close();
+
+    // Now we should propagate specified domain to the derived domain as a set operation
+    // since we have closed the domain
+    if(m_specifiedDomain.isSingleton())
+      m_derivedDomain.set(m_specifiedDomain.getSingletonValue());
+    else
+      m_derivedDomain.set(m_specifiedDomain);
   }
 
   template<class DomainType>

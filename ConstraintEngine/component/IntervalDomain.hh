@@ -166,7 +166,7 @@ namespace Prototype{
     bool equate(AbstractDomain& dom);
 
   protected:
-    IntervalDomain(double lb, double ub, bool closed, const DomainListenerId& listener);
+    IntervalDomain(double lb, double ub, const DomainListenerId& listener);
     IntervalDomain(const IntervalDomain& org);
 
     /**

@@ -2,8 +2,8 @@
 #include "DomainListener.hh"
 
 namespace Prototype {
-  IntervalDomain::IntervalDomain(double lb, double ub, bool closed, const DomainListenerId& listener)
-    : AbstractDomain(closed, false, listener), m_ub(ub), m_lb(lb){
+  IntervalDomain::IntervalDomain(double lb, double ub, const DomainListenerId& listener)
+    : AbstractDomain(true, false, listener), m_ub(ub), m_lb(lb){
     check_error(ub >= lb);
     check_error(ub <= PLUS_INFINITY);
     check_error(lb >= MINUS_INFINITY);
@@ -12,7 +12,7 @@ namespace Prototype {
   IntervalDomain::~IntervalDomain(){}
 
   IntervalDomain::IntervalDomain(const IntervalDomain& org)
-    : AbstractDomain(org.m_closed, false, DomainListenerId::noId()), m_ub(org.m_ub), m_lb(org.m_lb){}
+    : AbstractDomain(true, false, DomainListenerId::noId()), m_ub(org.m_ub), m_lb(org.m_lb){}
 
   bool IntervalDomain::intersect(const AbstractDomain& dom) {
     check_error(dom.isInterval());
@@ -122,7 +122,7 @@ namespace Prototype {
     else if(lb_increased)
       notifyChange(DomainListener::LOWER_BOUND_INCREASED);
     else if(ub_decreased)
-      notifyChange(DomainListener::LOWER_BOUND_INCREASED);
+      notifyChange(DomainListener::UPPER_BOUND_DECREASED);
 
     return (lb_increased || ub_decreased);
   }
