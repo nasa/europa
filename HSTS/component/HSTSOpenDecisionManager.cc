@@ -153,12 +153,17 @@ namespace EUROPA {
     DecisionPointId bestODec;
     DecisionPointId bestTDec;
     DecisionPointId bestVDec;
-    HSTSHeuristics::Priority bestOP=MIN_PRIORITY;
-    HSTSHeuristics::Priority bestTP=MIN_PRIORITY;
-    HSTSHeuristics::Priority bestVP=MIN_PRIORITY;
-    getBestObjectDecision(bestODec,bestOP);
-    getBestTokenDecision(bestTDec,bestTP);
-    getBestVariableDecision(bestVDec,bestVP);
+    HSTSHeuristics::Priority bestOP = MIN_PRIORITY - 1;
+    HSTSHeuristics::Priority bestTP = MIN_PRIORITY - 1;
+    HSTSHeuristics::Priority bestVP = MIN_PRIORITY - 1;
+    getBestObjectDecision(bestODec, bestOP);
+    getBestTokenDecision(bestTDec, bestTP);
+    getBestVariableDecision(bestVDec, bestVP);
+    if (m_heur->getDefaultPriorityPreference() != HSTSHeuristics::HIGH) {
+      bestOP = MAX_PRIORITY + 1;
+      bestTP = MAX_PRIORITY + 1;
+      bestVP = MAX_PRIORITY + 1;
+    }
 
     if (!bestODec.isNoId()) {
       ObjectDecisionPointId odec(bestODec);
