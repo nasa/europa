@@ -20,7 +20,7 @@ class Foo {
  }
 
  Foo(int _m_0, float _m_1){
-  m_0 = _m_1;
+  m_0 = _m_0;
   m_1 = _m_1;
   // Forces failure: m_1 = 10;
   m_2 = false;
