@@ -7,7 +7,7 @@
 #include "Utils.hh"
 #include <list>
 
-#define NOISE 10
+//#define NOISE 10
 
 // Uncomment this to allow "push beyond horizon" option for resolving flaws
 // #define PUSH2HORIZON
