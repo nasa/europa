@@ -30,6 +30,10 @@ public:
   RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb, 
                                 const RulesEngineId &rulesEngine) const{
     RuleInstanceId rootInstance = (new RootInstance(m_id, token, planDb))->getId();
+    std::vector<ConstrainedVariableId> vars = rootInstance->getVariables("start:end:duration:object:state");
+    assert(vars.size() == 5);
+    assert(vars[0] == token->getStart());
+    assert(vars[4] == token->getState());
     rootInstance->setRulesEngine(rulesEngine);
     return rootInstance;
   }
@@ -72,7 +76,7 @@ public:
 
 class NestedGuards_0_1: public RuleInstance{
 public:
-  NestedGuards_0_1(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard);
+  NestedGuards_0_1(const RuleInstanceId& parentInstance, const std::vector<ConstrainedVariableId>& guards);
   void handleExecute();
   TokenId m_onlySlave;
 };
@@ -88,13 +92,13 @@ RuleInstanceId NestedGuards_0::createInstance(const TokenId& token, const PlanDa
 
 NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& token, 
                                          const PlanDatabaseId& planDb)
-  : RuleInstance(rule, token, planDb, token->getObject()) {}
+  : RuleInstance(rule, token, planDb, makeScope(token->getObject())) {}
 
 void NestedGuards_0_Root::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
   addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), m_onlySlave->getStart()));
   addChildRule(new NestedGuards_0_0(m_id, m_token->getStart(), IntervalIntDomain(8, 12))); /*!< Add child context with guards - start == 10 */
-  addChildRule(new NestedGuards_0_1(m_id, m_onlySlave->getObject())); /*!< Add child context with guards - object set to singleton */
+  addChildRule(new NestedGuards_0_1(m_id, makeScope(m_onlySlave->getObject()))); /*!< Add child context with guards - object set to singleton */
 }
 
 NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const AbstractDomain& domain)
@@ -105,8 +109,8 @@ void NestedGuards_0_0::handleExecute(){
   addConstraint(LabelStr("eq"), makeScope(m_token->getStart(), m_onlySlave->getEnd())); // Place before
 }
 
-NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard)
-  : RuleInstance(parentInstance, guard){}
+NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId& parentInstance, const std::vector<ConstrainedVariableId>& guards)
+  : RuleInstance(parentInstance, guards){}
 
 void NestedGuards_0_1::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token, "met_by",  LabelStr("AllObjects.Predicate")));

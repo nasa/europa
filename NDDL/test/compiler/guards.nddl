@@ -42,11 +42,12 @@ Foo::impliedObjectGuard{
  eq(object.arg1, 10); // Explicit qualification
  eq(allFoo.arg1, [0 100]);
 
- //neq(arg1, 12); // Implicit access to class variable
- //eq(arg2.loc, Hill); // Implict access and implict guard on class variable
- // Guards also implied when used on salves as shown below
- //any(arg2.pred t0);
- //any(object.arg2.pred t1);
+ //eq(object.arg1, allFoo.arg1); // Multi-variable implicit guard
+ //meets(basicToken g1);
+ //eq(g1.object.arg1, object.arg1);
+
+ // Guards implied when used on slaves as shown below
+ //any(object.arg2.pred t0);
 }
 
 // Guard on local variable of objects is implied
@@ -156,6 +157,7 @@ close();
 
 goal(Foo.impliedObjectGuard g1);
 g1.allFoo.specify(foo1);
+g1.object.specify(foo1);
 
 goal(Foo.singletonGuard g2);
 g2.object.specify(foo2);
