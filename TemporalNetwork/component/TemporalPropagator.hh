@@ -18,6 +18,8 @@ namespace Prototype {
     bool canPrecede(const TempVarId& first, const TempVarId& second);
     bool canFitBetween(const TempVarId& start, const TempVarId& end,
 		       const TempVarId& predend, const TempVarId& succstart);
+    void notifyDeleted(const TimepointId& tp);
+    void addListener(const TemporalNetworkListenerId& listener);
 
   protected:
     void handleConstraintAdded(const ConstraintId& constraint);
@@ -38,7 +40,7 @@ namespace Prototype {
     void handleTemporalDeletion(const ConstraintId& constraint);
 
     void updateTnet();
-    void updateTempVar();
+    bool updateTempVar();
 
     TimepointId getTimepoint(const TempVarId& var);
 
@@ -48,11 +50,13 @@ namespace Prototype {
     bool m_updateRequired;
     bool m_fullRepropRequired;
     TemporalNetworkId m_tnet;
-    std::map<int, TemporalConstraintId> m_tnetConstraints;
-    std::map<TempVarId, TemporalConstraintId> m_tnetVariableConstraints;
-    std::map<int, TimepointId> m_tnetVariables;
+    std::map<int, TemporalConstraintId> m_tnetConstraints; // int denotes constraint key
+    std::map<int, TemporalConstraintId> m_tnetVariableConstraints;
+    std::map<int, TimepointId> m_tnetVariables; // int denotes tempvar key
     std::set<int> m_constraintsForDeletion; //!< Buffer deletions till you have to propagate.
     std::set<int> m_variablesForDeletion;  //!< Buffer deletions till you have to propagate.
+    std::set<TemporalNetworkListenerId> m_listeners;
+
   };
 }
 #endif
