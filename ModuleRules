@@ -274,9 +274,10 @@ rule RunModuleMain {
   local tests = $(1) ;
   local executable = $(2) ;
   local arguments = $(3) ;
+  local prefix = $(4) ;
 
   if $(TRACE_MODULE) = TRUE {
-    Echo RunModuleMain $(tests) . $(executable) . $(arguments) ;
+    Echo RunModuleMain $(tests) . $(executable) . $(arguments) . $(prefix) ;
   }
 
   local variant ;
@@ -292,7 +293,7 @@ rule RunModuleMain {
         } else if $(library) != STATIC {
           Exit RunModuleMain unknown library type: $(library) ;
         }
-        Execute $(tests) : $(exe) : $(arguments) ;
+        Execute $(tests) : $(exe) : $(arguments) : $(prefix) ;
      }
     }
   }

@@ -2,13 +2,14 @@ if ! $(CommonRules_INCLUDED) {
 CommonRules_INCLUDED = TRUE ;
 
 #
-# Execute run-it : it : it-arg0 it-arg1 it-arg2 ;
+# Execute run-it : it : it-arg0 it-arg1 it-arg2 : prefix ;
 #
 
 rule Execute {
   local target = $(1) ;
   local executable = $(2) ;
   local arguments = $(3) ;
+  local prefix = $(4) ;
 
   local target_exec_arg ;
   if $(arguments) {
@@ -17,22 +18,24 @@ rule Execute {
     target_exec_arg = RUN_$(executable) ;
   }
   Depends $(target) : $(target_exec_arg) ;
-  ExecuteTarget $(target_exec_arg) : [ FAppendSuffix $(executable) : $(SUFEXE) ] : $(arguments) ;
+  ExecuteTarget $(target_exec_arg) : [ FAppendSuffix $(executable) : $(SUFEXE) ] : $(arguments) : $(prefix) ;
 }
 
 rule ExecuteTarget {
   local exec_arg = $(1) ;
   local executable = $(2) ;
   local arguments = $(3) ;
+  local prefix = $(4) ;
 
   Depends $(exec_arg) : $(executable) ;
   SEARCH on $(executable) += $(SEARCH_SOURCE) ;
   ARGUMENTS on $(exec_arg) = $(arguments) ;
+  PREFIX on $(exec_arg) = $(prefix) ;
 }
 
 actions ExecuteTarget {
   cd `dirname $(2)`
-  ./`basename $(2)` $(ARGUMENTS)
+  $(PREFIX) ./`basename $(2)` $(ARGUMENTS)
 }
 
 #

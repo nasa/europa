@@ -94,7 +94,7 @@ for numSatellites in 1 {
           local xml = $(model:S=.xml) ;
           GenerateStack [ FGristFiles $(model) ] : [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
           NddlMain $(exe) : runTransactionTest.o : $(model) : System : performance-tests ;
-          RunModuleMain run-$(exe) : $(exe) : $(xml) ;
+          RunModuleMain run-$(exe) : $(exe) : $(xml) : time ;
           LocalDepends run-performance-tests : run-$(exe) ;
         }
       }
