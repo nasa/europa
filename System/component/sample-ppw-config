@@ -1,7 +1,7 @@
 #the GeneralConfigSection is for the properties of writing
 GeneralConfigSection:
-AutoWrite=0
-StepsPerWrite=0
+AutoWrite=1
+StepsPerWrite=1
 WriteDest=./plans
 #MaxChoices=1
 #the RuleConfigSection is for specifying where the PPW looks
