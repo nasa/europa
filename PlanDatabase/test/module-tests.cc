@@ -42,25 +42,33 @@ public:
    * Initialize the context with some variables form the token and add a local variable for the rule too. This
    * will test cleanup.
    */
-  void initializeContext(const RuleContextId& context) const {
-    const TokenId& token = context->getToken();
-    std::vector<ConstrainedVariableId>& scope = context->getVariables();
-
+  void initialize(const TokenId& token, std::vector<ConstrainedVariableId>& scope) const {
     assert(scope.empty());
 
     scope.push_back(token->getObject());
     scope.push_back(token->getRejectability());
-    ConstrainedVariableId localVariable = 
+    
+    Europa::Id< Variable<IntervalIntDomain> >  localVariable = 
       (new Variable<IntervalIntDomain>(getRulesEngine()->getPlanDatabase()->getConstraintEngine(), IntervalIntDomain(1, 1)))->getId();
+    localVariable->specify(1);
     scope.push_back(localVariable);
   }
 
-  bool handleSet(const RuleContextId& context, int index, const ConstrainedVariableId& var) const {
-    std::vector<TokenId> newTokens;
-    std::vector<ConstraintId> newConstraints;
+  bool test(int index, const ConstrainedVariableId& var) const {
+    if(index == 1)
+      return var->specifiedDomain().isSingleton();
+    else 
+      return true;
+  }
+
+  void fire(const TokenId& token,
+	    const std::vector<ConstrainedVariableId>& scope,
+	    std::vector<TokenId>& newTokens,
+	    std::vector<ConstrainedVariableId>& newVariables,
+	    std::vector<ConstraintId>& newConstraints) const {
 
     // Allocate a new slave Token
-    TokenId slave = (new IntervalToken(context->getToken(), 
+    TokenId slave = (new IntervalToken(token, 
 				       LabelStr("Predicate"), 
 				       BooleanDomain(false)))->getId();
     newTokens.push_back(slave);
@@ -69,7 +77,7 @@ public:
     // the existing token
     {
       std::vector<ConstrainedVariableId> constrainedVars;
-      constrainedVars.push_back(context->getToken()->getEnd());
+      constrainedVars.push_back(token->getEnd());
       constrainedVars.push_back(slave->getStart());
       ConstraintId meets = ConstraintLibrary::createConstraint(LabelStr("Equal"),
 							       getRulesEngine()->getPlanDatabase()->getConstraintEngine(),
@@ -81,20 +89,12 @@ public:
     {
       std::vector<ConstrainedVariableId> constrainedVars;
       constrainedVars.push_back(slave->getDuration());
-      constrainedVars.push_back(context->getVariables().back());
+      constrainedVars.push_back(scope.back());
       ConstraintId restrictDuration = ConstraintLibrary::createConstraint(LabelStr("Equal"),
 									  getRulesEngine()->getPlanDatabase()->getConstraintEngine(),
 									  constrainedVars);
       newConstraints.push_back(restrictDuration);
     }
-
-    context->execute(newTokens, std::vector<ConstrainedVariableId>(), newConstraints);
-    return true;
-  }
-
-  bool handleReset(const RuleContextId& context, int index, const ConstrainedVariableId& var) const{
-    context->undo();
-    return true;
   }
 };
 
@@ -858,6 +858,7 @@ private:
     assert(ce.propagate());
     assert(db.getTokens().size() == 1);
 
+    tokenA.getObject()->specify(object.getId());
     tokenA.getRejectability()->specify(false);
     assert(ce.propagate());
     assert(db.getTokens().size() == 2);
