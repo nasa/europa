@@ -1,6 +1,7 @@
 \documentclass[10pt, letterpaper, twoside]{article}
 
 \usepackage{epsfig}
+%\usepackage{graphicx}
 \usepackage{verbatim}
 
 \pagestyle{headings}     
@@ -1239,11 +1240,19 @@ This is useful when you're debugging your model as well as your planner.
 Figure~\ref{TokenNetwork-RuleInstance} shows the Token Network View
 just described.
 
-%\begin{figure}[htb]
-%\centering\epsfig{file=PlanWorks-tokenNetworkFiltered-ruleInstance-withBattery.eps, width = 5in}
+%\DeclareGraphicsRule{.eps.gz}{eps}{.eps.bb}{'gunzip -c #1}
+
+%\begin{figure}
+%\centering\includegraphics[width=5in]{PlanWorks-tokenNetworkFiltered-ruleInstance-withBattery.eps.gz}
 %\caption{\ET\, PlanWorks Token Network View with Going only with Rule Instance}
 %\label{TokenNetwork-RuleInstance}
 %\end{figure}
+
+\begin{figure}[htb]
+\centering\epsfig{file=PlanWorks-tokenNetworkFiltered-ruleInstance-withBattery.eps, width = 5in}
+\caption{\ET\, PlanWorks Token Network View with Going only with Rule Instance}
+\label{TokenNetwork-RuleInstance}
+\end{figure}
 
 If you have questions about the resource levels and want to view the
 resource profile, you can click on Step 34 which should show the effect of
