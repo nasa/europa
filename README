@@ -6,6 +6,15 @@ Known areas of performance improvement:
 5. Improve exchange of data in TemporalPropagator with  direct calculation of duration variables.
 6. Update TemporalNetwork to adjust for deactivated constraints
 
+M_15:
+1. Changed CBPlanner so that responsibilities for maintaining open
+decisions in sorted order relies on the OpenDecisionManager rather than the
+DecisionManager.  The DecisionManager manages events and processes them in
+the order they should be processed.   This shouldn't have to change as long
+as the planner is a backtracking planner.
+2. Measured performance and there has been no degradation and no
+perceptible improvement.
+
 M_14:
 **** Major Performance Milestone
 1. Introduced CBPlanner which responds to PlanDatabase and ConstraintEngine
