@@ -182,7 +182,8 @@ namespace Prototype {
   const bool DefaultOpenDecisionManager::removeTokenDP(const TokenId& token, const bool deleting, std::map<int,TokenDecisionPointId>& tokMap, TokenDecisionSet& sortedToks) {
     std::map<int,TokenDecisionPointId>::iterator it = tokMap.find(token->getKey());
     if (it != tokMap.end()) {
-      if (deleting) {
+      //      if (deleting) {
+      if (it->second->isOpen() || deleting) {
 	TokenDecisionPointId dec = it->second;
 	sortedToks.erase(dec);
 	check_error(dec.isValid());
@@ -219,7 +220,7 @@ namespace Prototype {
     */
     std::map<int,ObjectDecisionPointId>::iterator it = m_objDecs.find(token->getKey());
     if (it != m_objDecs.end()) {
-      if (deleting) {
+      if (it->second->isOpen() || deleting) {
 	ObjectDecisionPointId dec = it->second;
 	check_error(dec.isValid());
 	m_objDecs.erase(it);
