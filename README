@@ -2,7 +2,7 @@ Warning: Please report any issues you have (with this file or any
 other part of the distribution) using the GNATS issue reporting system 
 mentioned below.
 
-$Id: README,v 1.26 2004-12-07 00:09:56 pdaley Exp $
+$Id: README,v 1.27 2005-01-26 21:26:54 pdaley Exp $
 
 A: CVS checkout:
 
@@ -57,6 +57,7 @@ project. The 'HELLOWORLD' file includes:
       the resulting plan (See section C, PlanWorks, below for how 
       to get started with PlanWorks).
     - instructions on how to visualize your plan with PlanWorks.
+    - instructions on how to control running the CBPlanner from PlanWorks.
 
 
 C. PlanWorks - recommended for visualization and debugging.
