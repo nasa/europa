@@ -114,12 +114,12 @@ namespace Prototype {
 				   const LabelStr& propagatorName,
 				   const ConstraintEngineId& constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables) {
+    : Constraint(name, propagatorName, constraintEngine, variables), m_argCount(variables.size()) {
     // Check the arguments.  Any that are not singleton must all be
     //   enumerations or must all be intervals.
     AbstractDomain& first = getCurrentDomain(m_variables[0]);
     bool enumerated = first.isEnumerated();
-    for (unsigned int i = 1; i < m_variables.size(); i++) {
+    for (unsigned int i = 1; i < m_argCount; i++) {
       check_error(enumerated == getCurrentDomain(m_variables[i]).isEnumerated()
                   || getCurrentDomain(m_variables[i]).isSingleton());
       check_error(AbstractDomain::canBeCompared(first,
@@ -129,28 +129,43 @@ namespace Prototype {
     }
   }
 
+  /**
+   * @brief Will only performa restrictions on non-dynamic domains. In the worst case, this algorithm
+   * requires 2 passes over the variables.
+   */
   void EqualConstraint::handleExecute() {
-    // Discontinue if all domains are dynamic.
     unsigned int i = 0;
-    for ( ; i < m_variables.size(); i++)
+    for ( ; i < m_argCount; i++)
       if (!getCurrentDomain(m_variables[i]).isDynamic())
         break;
-    if (i >= m_variables.size())
+    if (i >= m_argCount)
       return;
 
+    // Start from the first non dynamic domain.
     AbstractDomain& nonDynDom = getCurrentDomain(m_variables[i]);
     check_error(!nonDynDom.isEmpty());
-    bool changedOne = true;
-    while (changedOne) {
-      changedOne = false;
-      for (unsigned int j = 0; j < m_variables.size(); j++)
-        if (i != j &&
-            nonDynDom.equate(getCurrentDomain(m_variables[j]))) {
-          if (nonDynDom.isEmpty())
+
+    bool changedOne = false;
+    for (unsigned int j = i+1; j < m_argCount; j++){
+	AbstractDomain& otherDom = getCurrentDomain(m_variables[j]);
+        if (!otherDom.isDynamic() && nonDynDom.equate(otherDom)) {
+          if (nonDynDom.isEmpty() || otherDom.isEmpty())
             return;
-          changedOne = true;
+	  changedOne=true;
         }
     }
+
+    // May require another pass - only if a restriction has been made later than the variable
+    // adjacent to the first one. For binary constraints this will never happen
+    if(changedOne)
+      for (unsigned int j = i+2; j < m_argCount; j++){
+	AbstractDomain& otherDom = getCurrentDomain(m_variables[j]);
+        if (!otherDom.isDynamic() && nonDynDom.equate(otherDom)) {
+          if (nonDynDom.isEmpty() || otherDom.isEmpty())
+            return;
+	  changedOne=true;
+        }
+      }
   }
 
   AbstractDomain& EqualConstraint::getCurrentDomain(const ConstrainedVariableId& var) {

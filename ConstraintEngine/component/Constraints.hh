@@ -40,6 +40,9 @@ namespace Prototype {
      * @brief Accessor required for EqualityConstraintPropagator.
      */
     static AbstractDomain& getCurrentDomain(const ConstrainedVariableId& var);
+
+  private:
+    const unsigned int m_argCount;
   };
 
   class SubsetOfConstraint : public UnaryConstraint {

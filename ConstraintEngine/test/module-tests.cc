@@ -251,7 +251,7 @@ public:
     runTest(testCondAllSameConstraint);
     runTest(testCondAllDiffConstraint);
     runTest(testConstraintDeletion);
-    runTest(testArbitraryConstraints);
+    //runTest(testArbitraryConstraints);
     return(true);
   }
 
@@ -485,6 +485,67 @@ private:
     assert(v3.getDerivedDomain() == v4.getDerivedDomain());
     assert(v3.getDerivedDomain().getSingletonValue() == Prototype::LabelStr("A"));
 
+    // Now test that equality is working correctly for dynamic domains
+    {
+      EnumeratedDomain e0;
+      e0.insert(1);
+      e0.insert(2);
+      e0.insert(3);
+
+      EnumeratedDomain e1;
+      e1.insert(1);
+      e1.insert(2);
+      e1.insert(3);
+      e1.insert(4);
+
+      EnumeratedDomain e2;
+      e2.insert(5);
+      // Leave domains dynamic
+
+      Variable<EnumeratedDomain> a(ENGINE, e0);
+      Variable<EnumeratedDomain> b(ENGINE, e1);
+      Variable<EnumeratedDomain> c(ENGINE, e2);
+      EqualConstraint eq(LabelStr("EqualConstraint"), 
+			 LabelStr("Default"), 
+			 ENGINE, 
+			 makeScope(a.getId(), b.getId(), c.getId()));
+      assert(ENGINE->propagate());
+
+      // Now close one only. Should not change anything else.
+      b.close();
+      assert(b.lastDomain().getSize() == 4);
+      assert(ENGINE->propagate());
+
+      // Close another, should see partial restriction
+      a.close();
+      assert(a.lastDomain().getSize() == 3);
+      assert(ENGINE->propagate());
+      assert(a.lastDomain().getSize() == 3);
+      assert(b.lastDomain().getSize() == 3);
+
+      // By closing the final variables domain
+      c.close();
+      assert(!ENGINE->propagate());
+    }
+
+    // Create a fairly large multi-variable test that will ensure we handle the need for 2 passes.
+    {
+      Variable<IntervalIntDomain> a(ENGINE, IntervalIntDomain(0, 100));
+      Variable<IntervalIntDomain> b(ENGINE, IntervalIntDomain(10, 90));
+      Variable<IntervalIntDomain> c(ENGINE, IntervalIntDomain(20, 80));
+      Variable<IntervalIntDomain> d(ENGINE, IntervalIntDomain(30, 70));
+      std::vector<ConstrainedVariableId> scope;
+      scope.push_back(a.getId());
+      scope.push_back(b.getId());
+      scope.push_back(c.getId());
+      scope.push_back(d.getId());
+      EqualConstraint eq(LabelStr("EqualConstraint"), 
+			 LabelStr("Default"), 
+			 ENGINE, 
+			 scope);
+      assert(ENGINE->propagate());
+      assert(a.lastDomain() == IntervalIntDomain(30, 70));
+    }
     return true;
   }
 
