@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.29 2003-01-22 18:53:44 wedgingt Exp $
+# $Id: autobuild,v 1.30 2003-01-23 17:53:16 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -111,10 +111,10 @@ do
             if test -s .autobuild.profFind
             then
                 SupportFiles/gather.gprofs
+		cvs tag -F Europa-autobuild-profiled
             fi
             rm -rf .autobuild.profFind
         fi
-        cvs tag -F Europa-autobuild-profiled
     else
         ( cat ../make.options; echo ''; tail -40 make.tests) | \
             Mail -s 'Autobuild in '"`pwd`"' failed; exited '"$status" "$email"
