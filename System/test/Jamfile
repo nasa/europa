@@ -18,6 +18,7 @@ for model in
         EOS-backtrack-test.nddl k9-initial.nddl
         backtr.nddl better-res.nddl CAPER.nddl
         monkey1monkey-transaction.nddl
+#        sum-init.nddl
 {
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
