@@ -2,6 +2,7 @@
 #include "AbstractVar.hh"
 #include "ConstraintFactory.hh"
 #include "ConstraintLibrary.hh"
+#include "../Libraries/IdTable.hh"
 
 #include <iostream>
 #include <cassert>
@@ -11,10 +12,10 @@ using namespace std;
 
 #define runTest(test, name) { \
   cout << name; \
-  if(test()) \
+  if(test() && Europa::IdTable::size() == 0) \
     cout << " passed." << endl; \
   else \
-    cout << " failed." << endl; \
+    cout << " FAILED." << endl; \
 }
 
 #define runTestSuite(test, name) { \
@@ -289,11 +290,11 @@ private:
   {
     std::vector<ConstrainedVariableId> variables;
     VariableImpl<IntervalIntDomain> v0(IntervalIntDomain(1, 10));
-    variables.push_back(v0.forConstraint());
+    variables.push_back(v0.getId());
     VariableImpl<IntervalIntDomain> v1(IntervalIntDomain(1, 1));
-    variables.push_back(v1.forConstraint());
+    variables.push_back(v1.getId());
     VariableImpl<IntervalIntDomain> v2(IntervalIntDomain(0, 2));
-    variables.push_back(v2.forConstraint());
+    variables.push_back(v2.getId());
     AddEqualConstraint c0(variables);
     assert(c0.execute());
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
@@ -306,9 +307,9 @@ private:
   {
     std::vector<ConstrainedVariableId> variables;
     VariableImpl<IntervalIntDomain> v0(IntervalIntDomain(1, 10));
-    variables.push_back(v0.forConstraint());
+    variables.push_back(v0.getId());
     VariableImpl<IntervalIntDomain> v1(IntervalIntDomain(-100, 1));
-    variables.push_back(v1.forConstraint());
+    variables.push_back(v1.getId());
     EqualConstraint c0(variables);
     assert(c0.execute());
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
@@ -321,36 +322,39 @@ private:
     std::vector<ConstrainedVariableId> variables;
     // v0 == v1
     VariableImpl<IntervalIntDomain> v0(IntervalIntDomain(1, 10));
-    variables.push_back(v0.forConstraint());
+    variables.push_back(v0.getId());
     VariableImpl<IntervalIntDomain> v1(IntervalIntDomain(1, 10));
-    variables.push_back(v1.forConstraint());
+    variables.push_back(v1.getId());
     EqualConstraint c0(variables);
 
     // v2 + v3 == v0
     variables.clear();
     VariableImpl<IntervalIntDomain> v2(IntervalIntDomain(1, 4));
-    variables.push_back(v2.forConstraint());
+    variables.push_back(v2.getId());
     VariableImpl<IntervalIntDomain> v3(IntervalIntDomain(1, 1));
-    variables.push_back(v3.forConstraint());
-    variables.push_back(v0.forConstraint());
+    variables.push_back(v3.getId());
+    variables.push_back(v0.getId());
     AddEqualConstraint c1(variables);
 
     // v4 + v5 == v1
     variables.clear();
     VariableImpl<IntervalIntDomain> v4(IntervalIntDomain(1, 10));
-    variables.push_back(v4.forConstraint());
+    variables.push_back(v4.getId());
     VariableImpl<IntervalIntDomain> v5(IntervalIntDomain(1, 1000));
-    variables.push_back(v5.forConstraint());
-    variables.push_back(v1.forConstraint());
+    variables.push_back(v5.getId());
+    variables.push_back(v1.getId());
     AddEqualConstraint c2(variables);
 
-    ProceduralConstraintPropagator p;
+    ConstraintEngineId engine(new ConstraintEngine());
+    ProceduralConstraintPropagator p(engine);
     p.addConstraint(c0.getId());
     p.addConstraint(c1.getId());
     p.addConstraint(c2.getId());
     p.execute();
 
     cout << "v5.ub = " << v5.getDerivedDomain().getUpperBound() << endl;
+
+    engine.release();
     return true;
   }
 };
