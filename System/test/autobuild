@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.21 2003-01-08 23:31:55 wedgingt Exp $
+# $Id: autobuild,v 1.22 2003-01-10 22:08:46 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -98,19 +98,20 @@ do
 
     if test $status = 0
     then
-        /usr/ucb/Mail -s 'Autobuild in '"`pwd`"' succeeded' "$email" < ../make.options
+        (uname -a; echo ''; cat ../make.options) | \
+        /usr/ucb/Mail -s 'Autobuild on '"`hostname`"' in '"`pwd`"' succeeded' "$email"
 
-	# If appropriate, look for and save the profiling data
-	if egrep PROFILE ../make.options > /dev/null 2>&1
-	then
-	    find "$HOME"/europa.profiles -type d -mtime +7 -ls > .autobuild.profFind
-	    if test -s .autobuild.profFind
-	    then
-		SupportFiles/gather.gprofs
-	    fi
-	    rm -rf .autobuild.profFind
-	fi
-	cvs tag -F Europa-autobuild-profiled
+        # If appropriate, look for and save the profiling data
+        if egrep PROFILE ../make.options > /dev/null 2>&1
+        then
+            find "$HOME"/europa.profiles -type d -mtime +7 -ls > .autobuild.profFind
+            if test -s .autobuild.profFind
+            then
+                SupportFiles/gather.gprofs
+            fi
+            rm -rf .autobuild.profFind
+        fi
+        cvs tag -F Europa-autobuild-profiled
     else
         ( cat ../make.options; echo ''; tail -40 make.tests) | \
             /usr/ucb/Mail -s 'Autobuild in '"`pwd`"' failed; exited '"$status" "$email"
