@@ -9,7 +9,7 @@
 #include <list>
 #include <cassert>
 
-//#define _PROTOTYPE_FAST_VALUE_
+#define _PROTOTYPE_FAST_VALUE_
 
 #ifndef _PROTOTYPE_FAST_VALUE_
 #define check_error(cond) assert(cond);

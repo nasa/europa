@@ -151,12 +151,12 @@ void testLabelSetEqualityPerformance(const ConstraintEngineId& ce){
 
   VariableImpl<LabelSet>*  p_v0 = (VariableImpl<LabelSet>*) v0.getId();
 
+
   for(int i = 10; i > 2; i--){
-    LabelStr label = values.front();
-    values.pop_front();
-    labelSet.remove(label);
+    values.pop_back();
+    LabelSet newDomain(values);
     VariableImpl<LabelSet>*  p_v = (VariableImpl<LabelSet>*) variables[i-1];
-    p_v->specify(labelSet);
+    p_v->specify(newDomain);
     ce->propagate();
     assert(ce->constraintConsistent());
     assert(p_v0->getDerivedDomain().getSize() == i-1);
@@ -175,10 +175,111 @@ void outerLoopLabelSetEqualConstraint(bool useEquivalenceClasses){
     testLabelSetEqualityPerformance(ce.getId());
 }
 
+void testIntervalEqualityPerformance(const ConstraintEngineId& ce){
+  IntervalIntDomain intSort(-1000, 1000);
+  VariableImpl<IntervalIntDomain> v0(ce, intSort);
+  VariableImpl<IntervalIntDomain> v1(ce, intSort);
+  VariableImpl<IntervalIntDomain> v2(ce, intSort);
+  VariableImpl<IntervalIntDomain> v3(ce, intSort);
+  VariableImpl<IntervalIntDomain> v4(ce, intSort);
+  VariableImpl<IntervalIntDomain> v5(ce, intSort);
+  VariableImpl<IntervalIntDomain> v6(ce, intSort);
+  VariableImpl<IntervalIntDomain> v7(ce, intSort);
+  VariableImpl<IntervalIntDomain> v8(ce, intSort);
+  VariableImpl<IntervalIntDomain> v9(ce, intSort);
+
+  std::vector<ConstrainedVariableId> variables;
+
+  variables.push_back(v0.getId());
+  variables.push_back(v1.getId());
+  EqualConstraint c0(ce, variables);
+
+  variables.clear();
+  variables.push_back(v1.getId());
+  variables.push_back(v2.getId());
+  EqualConstraint c1(ce, variables);
+
+  variables.clear();
+  variables.push_back(v2.getId());
+  variables.push_back(v3.getId());
+  EqualConstraint c2(ce, variables);
+
+  variables.clear();
+  variables.push_back(v3.getId());
+  variables.push_back(v4.getId());
+  EqualConstraint c3(ce, variables);
+
+  variables.clear();
+  variables.push_back(v4.getId());
+  variables.push_back(v5.getId());
+  EqualConstraint c4(ce, variables);
+
+  variables.clear();
+  variables.push_back(v5.getId());
+  variables.push_back(v6.getId());
+  EqualConstraint c5(ce, variables);
+
+  variables.clear();
+  variables.push_back(v6.getId());
+  variables.push_back(v7.getId());
+  EqualConstraint c6(ce, variables);
+
+  variables.clear();
+  variables.push_back(v7.getId());
+  variables.push_back(v8.getId());
+  EqualConstraint c7(ce, variables);
+
+  variables.clear();
+  variables.push_back(v8.getId());
+  variables.push_back(v9.getId());
+  EqualConstraint c8(ce, variables);
+
+  variables.clear();
+  variables.push_back(v0.getId());
+  variables.push_back(v1.getId());
+  variables.push_back(v2.getId());
+  variables.push_back(v3.getId());
+  variables.push_back(v4.getId());
+  variables.push_back(v5.getId());
+  variables.push_back(v6.getId());
+  variables.push_back(v7.getId());
+  variables.push_back(v8.getId());
+  variables.push_back(v9.getId());
+
+  VariableImpl<IntervalIntDomain>*  p_v0 = (VariableImpl<IntervalIntDomain>*) v0.getId();
+
+  int lb = -1000;
+  int ub = 1000;
+
+  for(int i = 10; i > 2; i--){
+    lb += 100;
+    ub -= 100;
+    IntervalIntDomain newDomain(lb, ub);
+    VariableImpl<IntervalIntDomain>*  p_v = (VariableImpl<IntervalIntDomain>*) variables[i-1];
+    p_v->specify(newDomain);
+    ce->propagate();
+    assert(ce->constraintConsistent());
+    assert(p_v0->getDerivedDomain().getUpperBound() == ub);
+    assert(p_v0->getDerivedDomain().getLowerBound() == lb);
+  }
+}
+
+void outerLoopIntervalEqualConstraint(bool useEquivalenceClasses){
+  ConstraintEngine ce;
+
+  if(useEquivalenceClasses)
+    new EqualityConstraintPropagator(ce.getId());
+  else
+    new DefaultPropagator(ce.getId());
+
+  for (int i=0;i<1000; i++)
+    testIntervalEqualityPerformance(ce.getId());
+}
 void main()
 {
   //outerLoopForTestEquate();
   //outerLoopForTestIntersection();
-  outerLoopLabelSetEqualConstraint(true);
+  //outerLoopLabelSetEqualConstraint(true);
+  //outerLoopIntervalEqualConstraint(true);
   cout << "Finished" << endl;
 }
