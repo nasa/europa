@@ -6,17 +6,9 @@
 /*!< Type definitions to map for th eones we were using in Europa */
 namespace Prototype {
   typedef bool Bool;
-  typedef Bool Boolean;
   typedef int Int;
-  typedef char Char;
-  typedef short Short;
-  typedef double Double;
-  typedef float Float;
-  typedef long Long;
-  typedef unsigned Unsigned;
   typedef void Void;
-  typedef int Index;
-  typedef Long Time;        // Temporal distance value.
+  typedef long Time;        // Temporal distance value.
 
   class Tnode;
   typedef Id< Tnode > TimepointId;
