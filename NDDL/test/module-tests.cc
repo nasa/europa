@@ -308,6 +308,15 @@ private:
     schema.addType(LabelStr("Foo"));
     assertTrue(schema.isClass(LabelStr("Foo")));
     assertTrue(!schema.isClass(LabelStr("Bar")));
+
+    schema.addPredicate(LabelStr("Argle"));
+    schema.addPredicateParameter(LabelStr("Argle"), LabelStr("bargle"));
+    schema.addParameterType(LabelStr("Argle"), LabelStr("bargle"), LabelStr("Bargle"));
+    schema.addPredicateParameter(LabelStr("Argle"), LabelStr("targle"));
+    schema.addParameterType(LabelStr("Argle"), LabelStr("targle"), LabelStr("Targle"));
+
+    assertTrue(schema.getParameterType(LabelStr("Argle"), LabelStr("bargle")) == LabelStr("Bargle"));
+    assertTrue(schema.getParameterType(LabelStr("Argle"), LabelStr("targle")) == LabelStr("Targle"));
     return true;
   }
 };
