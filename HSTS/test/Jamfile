@@ -33,8 +33,25 @@ LocalDepends tests : run-hsts-module-tests
 #       roverTest2
         roverTest3
         roverTest4
-#       roverCTTests
-#       merTests
+#       roverCTTests # Fails: uses NewPlan's constraint tokens, which Europa2 does not support.
+#       merTest1
+#       merTest2
+#       merTest3
+#       merTest4
+        merTest5
+#       merTest6
+#       merTest7
+        merTest8
+        merTest9
+#       merTest10
+#       merTest11
+#       merTest12
+        merTest13
+#       merTest14
+#       merTest15
+#       merTest16
+        merTest17
+        merTest18
         gnats-C3
         gnats-NoBranchBug
 #       gnats-P4-C3
@@ -50,8 +67,8 @@ LocalDepends tests : run-hsts-module-tests
 #       dnp-DNP3fourFreeObs
 #       dnp-DNP3
 #       dnp-fourFreeObsNotEmpty
-#       dnp-freeObs
-#       dnp-freeObsNoEmpty
+        dnp-freeObs
+        dnp-freeObsNoEmpty
 #       dnp-tenFreeObs
 #       dnp-threeFreeObs
 #       dnp-twentyFreeObs
@@ -106,14 +123,17 @@ RunEUROPATest monkey-timeline-hacked2 : timeline-hacked2.nddl ;
 RunEUROPATest monkey-timeline-hacked3 : timeline-hacked3.nddl ;
 RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
 
-# Failing: Utils/core/Id.hh:401: Error: Id<T>::convertable(org) is false
+# Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
 #   Gdb on Token says *this is a RuleInstance but T (of Id<T>) is class Token (!).
+#   Reported in GNATS 2798.
 RunEUROPATest monkey1-timeline-objvar : timeline-objvar.nddl ;
 
-# Failing: Utils/core/Id.hh:401: Error: Id<T>::convertable(org) is false
+# Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
+#   Reported in GNATS 2798.
 RunEUROPATest monkey1-timeline-twomonkeys-objvar : timeline-twomonkeys-objvar.nddl ;
 
-# Failing: Utils/core/Id.hh:401: Error: Id<T>::convertable(org) is false
+# Failing: Utils/core/Id.hh:423: Error: Id<T>::convertable(org) is false
+#   Reported in GNATS 2798.
 RunEUROPATest monkey1-timeline-twomonkeys : timeline-twomonkeys.nddl ;
 
 # Failing: Utils/core/Utils.hh:134: Error: item.isValid() is false
@@ -124,12 +144,6 @@ RunEUROPATest monkey2-timeline23 : timeline23.nddl ;
 
 RunEUROPATest robotTests : req1.nddl ;
 
-# These fail; converter used explicit bounds on a temporal constraint, which the NDDL compiler does not support.
-#   Reported in GNATS 2762.
-# Also, the NDDL compiler printed the wrong file name for the error: rover.nddl rather than rover-test.nddl,
-#     rover3.nddl rather than rover3-test.nddl, rover4.nddl rather than rover4-test.nddl, and
-#     multrover.nddl rather than multrover-test.nddl.
-#   Reported in GNATS 2761.
 RunEUROPATest roverTest1 : rover-test.nddl ;
 RunEUROPATest roverTest3 : rover3-test.nddl ;
 RunEUROPATest roverTest4 : rover4-test.nddl ;
@@ -145,9 +159,24 @@ RunEUROPATest roverTest2 : multrover-test.nddl ;
 # RunEUROPATest roverCTTests : rover2-test.nddl rover2a-test.nddl rover2b-test.nddl ;
 
 # Converter and/or NDDL compiler has bugs.  Reported as GNATS 2763.
-# RunEUROPATest merTests : R1-files-p1.nddl R1-files-p2.nddl R1-files-p3.nddl R2-files-R21-Bill.nddl R2-files-R21-IDD1.nddl
-#         R2-files-R21-IDD2.nddl R2-files-R21-IDD3.nddl R2-files-R21-PMA1.nddl R2-files-R21-PMA2.nddl
-#         mer-1.nddl mer-bill-2.nddl mer-bill.nddl mer-idd1.nddl mer-idd2.nddl mer-idd3.nddl mer-pma-comm.nddl mer-pma1.nddl mer-pma2.nddl ;
+RunEUROPATest merTest1 : R1-files-p1.nddl ;
+RunEUROPATest merTest2 : R1-files-p2.nddl ;
+RunEUROPATest merTest3 : R1-files-p3.nddl ;
+RunEUROPATest merTest4 : R2-files-R21-Bill.nddl ;
+RunEUROPATest merTest5 : R2-files-R21-IDD1.nddl ;
+RunEUROPATest merTest6 : R2-files-R21-IDD2.nddl ;
+RunEUROPATest merTest7 : R2-files-R21-IDD3.nddl ;
+RunEUROPATest merTest8 : R2-files-R21-PMA1.nddl ;
+RunEUROPATest merTest9 : R2-files-R21-PMA2.nddl ;
+RunEUROPATest merTest10 : mer-1.nddl ;
+RunEUROPATest merTest11 : mer-bill-2.nddl ;
+RunEUROPATest merTest12 : mer-bill.nddl ;
+RunEUROPATest merTest13 : mer-idd1.nddl ;
+RunEUROPATest merTest14 : mer-idd2.nddl ;
+RunEUROPATest merTest15 : mer-idd3.nddl ;
+RunEUROPATest merTest16 : mer-pma-comm.nddl ;
+RunEUROPATest merTest17 : mer-pma1.nddl ;
+RunEUROPATest merTest18 : mer-pma2.nddl ;
 
 # Fails Id::isValid() check, I believe as noted in GNATS 2757.
 RunEUROPATest gnats-C3 : C3-init.nddl ;
@@ -156,7 +185,8 @@ RunEUROPATest gnats-C3 : C3-init.nddl ;
 #   Reported as GNATS 2770.
 RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl ;
 
-# These two take over an hour on Token for some reason and may be infinite loop or similar
+# These two take multiple hours without completing on Token for some reason and may be infinite loop or similar.
+#   Reported as GNATS 2796.
 RunEUROPATest gnats-P4-C3 : P4-C3-init.nddl ;
 RunEUROPATest gnats-P4-C3eq : P4-C3eq-init.nddl ;
 
@@ -173,7 +203,6 @@ RunEUROPATest gnats-sum : sum-init.nddl ;
 # These next two, at least, fail, perhaps due to lack of memory or seg fault or ... (no output)
 RunEUROPATest dnp-timeline : DNP.timeline.nddl ;
 RunEUROPATest dnp-DNP2 : DNP2.timeline.nddl ;
-
 RunEUROPATest dnp-allDSS : allDSS.nddl ;
 RunEUROPATest dnp-fourFreeObs : fourFreeObs.nddl ;
 RunEUROPATest dnp-DNP3fourFreeObs : DNP3.fourFreeObs.nddl ;
