@@ -1,3 +1,6 @@
+*.bb
+*.bbg
+*.da
 RUN_*.gprof
 RUN_*.output
 gmon.out
