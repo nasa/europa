@@ -807,7 +807,8 @@ namespace Prototype {
       outputIntIntVar(token->getStart(), token->getKey(), I_START, varOut);
       outputIntIntVar(token->getEnd(), token->getKey(), I_END, varOut);
       outputIntIntVar(token->getDuration(), token->getKey(), I_DURATION, varOut);
-      outputEnumVar(token->getState(), token->getKey(), I_STATE, varOut);
+      //outputEnumVar(token->getState(), token->getKey(), I_STATE, varOut);
+      outputStateVar(token->getState(), token->getKey(), I_STATE, varOut);
 
       std::string paramVarIds;
       char paramIdStr[NBBY * sizeof(int) * 28/93 + 4];
@@ -841,6 +842,25 @@ namespace Prototype {
       numTokens++;
     }
   
+    void PartialPlanWriter::outputStateVar(const Id<TokenVariable<StateDomain> >& stateVar,
+                                           const int parentId, const int type,
+                                           std::ofstream &varOut) {
+      numVariables++;
+      varOut << stateVar->getKey() << TAB << ppId << TAB << parentId << TAB 
+						 << stateVar->getName().toString() << TAB;
+
+      varOut << ENUM_DOMAIN << TAB;
+      StateDomain &dom = (StateDomain &) stateVar->lastDomain();
+      std::list<double> vals;
+      dom.getValues(vals);
+      for(std::list<double>::const_iterator it = vals.begin(); it != vals.end(); ++it)
+        varOut << tokenStates[(int)*it] << " ";
+      varOut << TAB;
+      varOut << SNULL << TAB << SNULL << TAB << SNULL << TAB;
+
+      varOut << tokenVarTypes[type] << std::endl;
+    }
+
     void PartialPlanWriter::outputEnumVar(const Id<TokenVariable<EnumeratedDomain> >& enumVar, 
                                           const int parentId, const int type,
 																					std::ofstream &varOut) {
@@ -849,16 +869,8 @@ namespace Prototype {
 						 << enumVar->getName().toString() << TAB;
 
       varOut << ENUM_DOMAIN << TAB;
-      if(type == I_STATE) {
-        EnumeratedDomain &dom = (EnumeratedDomain &) enumVar->lastDomain();
-        std::list<double> vals;
-        dom.getValues(vals);
-        for(std::list<double>::const_iterator it = vals.begin(); it != vals.end(); ++it)
-          varOut << tokenStates[(int)*it] << " ";
-        varOut << TAB;
-      }
-      else
-        varOut << getEnumerationStr((EnumeratedDomain &)enumVar->lastDomain()) << TAB;
+
+      varOut << getEnumerationStr((EnumeratedDomain &)enumVar->lastDomain()) << TAB;
       varOut << SNULL << TAB << SNULL << TAB << SNULL << TAB;
 
       varOut << tokenVarTypes[type] << std::endl;
@@ -1637,7 +1649,6 @@ namespace Prototype {
 //           if(writeCounter == stepsPerWrite) {
 //             write();
 //             nstep++;
-//             std::cerr << "PPW notifyRetractFailed: " << nstep << std::endl;
 //             transactionList->clear();
 //             numTransactions = 0;
 //             writeCounter = 0;
@@ -1651,7 +1662,6 @@ namespace Prototype {
 //             writeCounter = 0;
 //           }
 //           nstep++;
-//           std::cerr << "PPW notifyRetractFailed: " << nstep << std::endl;
 //         }
 //       }
     }
@@ -1668,7 +1678,6 @@ namespace Prototype {
 //           if(writeCounter == stepsPerWrite) {
 //             write();
 //             nstep++;
-//             std::cerr << "PPW notifyRetractSucceeded: " << nstep << std::endl;
 //             transactionList->clear();
 //             numTransactions = 0;
 //             writeCounter = 0;
@@ -1682,7 +1691,6 @@ namespace Prototype {
 //             writeCounter = 0;
 //           }
 //           nstep++;
-//           std::cerr << "PPW notifyRetractSucceeded: " << nstep << std::endl;
 //         }
 //       }
     }

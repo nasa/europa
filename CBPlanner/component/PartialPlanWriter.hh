@@ -75,6 +75,8 @@ namespace Prototype {
       void outputObject(const ObjectId &, const int, std::ofstream &, std::ofstream &);
       void outputToken(const TokenId &, const int, const int, const int, const int, 
                        const ObjectId &, std::ofstream &, std::ofstream &);
+      void outputStateVar(const Id<TokenVariable<StateDomain> >&, const int, const int,
+                          std::ofstream &varOut);
       void outputEnumVar(const Id< TokenVariable<EnumeratedDomain> > &, const int,
 			 const int, std::ofstream &);
       void outputIntVar(const Id< TokenVariable<IntervalDomain> > &, const int,
@@ -235,8 +237,8 @@ namespace Prototype {
 				void notifyRetractStarted(const DecisionPointId &dec){ppw->notifyRetractStarted(dec);}
 				void notifyRetractFailed(const DecisionPointId &dec){ppw->notifyRetractFailed(dec);}
 				void notifyRetractSucceeded(const DecisionPointId &dec){ppw->notifyRetractSucceeded(dec);}
-                                void notifyPlannerTimeout(){ppw->notifyPlannerTimeout();}
-                                void notifySearchFinished(){ppw->notifySearchFinished();}
+        void notifyPlannerTimeout(){ppw->notifyPlannerTimeout();}
+        void notifySearchFinished(){ppw->notifySearchFinished();}
 			protected:
 			private:
 				PartialPlanWriter *ppw;
