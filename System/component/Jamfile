@@ -4,6 +4,35 @@ if ! $(PLASMA_READY) {
 
 ModuleComponent System
 	:
+  EventAggregator.cc
+  AggregateListener.cc
+  Assertion.cc
+  TestSet.cc
 	;
+
+local java_src_dir = [ FDirName $(SUBDIR) java ] ;
+local java_classes_dir = [ FDirName $(SUBDIR) classes ] ;
+local java_jars_dir = [ FDirName $(SUBDIR) jars ] ;
+
+JavaJarArgs testLang.jar :
+  testLang.LineNumberAST
+  testLang.TestLangParseException
+  testLang.TestLangRuntimeException
+  testLang.TestLangLexer
+  testLang.TestLangParser
+  testLang.TestLangTokenTypes
+  testLang.CppFile
+  testLang.TestLangHelper
+  testLang.TestLangToXML
+  testLang.Assertion
+  testLang.TestSet
+  testLang.AssertionGenerator
+  testLang.TestSetGenerator
+  testLang.TestLangXMLToCpp
+  : $(java_jars_dir) : $(java_classes_dir) : $(java_src_dir) 
+  ;
+
+SubInclude PLASMA System component antlr ;
+SubInclude PLASMA NDDL core libraries ;
 
 } # PLASMA_READY

@@ -1,0 +1,7 @@
+SubDir PLASMA System component antlr ;
+
+if ! $(PLASMA_READY) {
+
+AntlrGrammarArg TestLang : TestLang.g : testLang : [ FDirName $(PLASMA) System component java ] ;
+
+} # PLASMA_READY
