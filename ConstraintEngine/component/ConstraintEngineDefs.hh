@@ -27,7 +27,7 @@ namespace Prototype
   static const double EPSILON = 0.00001; /*!< Used when computing differences on REAL NUMBERS. Smallest increment */
 
   class Entity;
-  typedef Europa::Id<Entity> EntityId;
+  typedef Id<Entity> EntityId;
 
   class AbstractDomain;
   class IntervalDomain;
@@ -36,22 +36,22 @@ namespace Prototype
   class EnumeratedDomain;
 
   class DomainListener;
-  typedef Europa::Id<DomainListener> DomainListenerId;
+  typedef Id<DomainListener> DomainListenerId;
   class ConstrainedVariable;
-  typedef Europa::Id<ConstrainedVariable> ConstrainedVariableId;
+  typedef Id<ConstrainedVariable> ConstrainedVariableId;
   class VariableChangeListener;
-  typedef Europa::Id<VariableChangeListener> VariableChangeListenerId;
+  typedef Id<VariableChangeListener> VariableChangeListenerId;
 
   class Constraint;
-  typedef Europa::Id<Constraint> ConstraintId;
+  typedef Id<Constraint> ConstraintId;
   class UnaryConstraint;
-  typedef Europa::Id<UnaryConstraint> UnaryConstraintId;
+  typedef Id<UnaryConstraint> UnaryConstraintId;
   class Propagator;
-  typedef Europa::Id<Propagator> PropagatorId;
+  typedef Id<Propagator> PropagatorId;
   class ConstraintEngine;
-  typedef Europa::Id<ConstraintEngine> ConstraintEngineId;
+  typedef Id<ConstraintEngine> ConstraintEngineId;
   class ConstraintEngineListener;
-  typedef Europa::Id<ConstraintEngineListener> ConstraintEngineListenerId;
+  typedef Id<ConstraintEngineListener> ConstraintEngineListenerId;
   typedef std::pair<ConstraintId, int> ConstraintEntry;
   typedef std::list<ConstraintEntry> ConstraintList;
 }// End namespace

@@ -9,7 +9,7 @@
 #include "Variable.hh"
 #include "Constraints.hh"
 #include "ConstraintLibrary.hh"
-#include "../Libraries/IdTable.hh"
+#include "IdTable.hh"
 #include "EquivalenceClassCollection.hh"
 #include "EqualityConstraintPropagator.hh"
 

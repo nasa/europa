@@ -16,7 +16,7 @@
 namespace Prototype{
 
   class Node;
-  typedef Europa::Id<Node> NodeId;
+  typedef Id<Node> NodeId;
 
   /**
    * @class Node

@@ -40,14 +40,14 @@ private:
 
 #define runTest(test) { \
   std::cout << "      " << #test; \
-  int id_count = Europa::IdTable::size();\
+  int id_count = IdTable::size();\
   bool result = test(); \
   DefaultEngineAccessor::reset(); \
-  if(result && Europa::IdTable::size() == id_count) \
+  if(result && IdTable::size() == id_count) \
     std::cout << " PASSED." << std::endl; \
   else if(result){\
     std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED ID'S:";\
-    Europa::IdTable::output(std::cout);\
+    IdTable::output(std::cout);\
     std::cout << std::endl; \
   }\
   else \
