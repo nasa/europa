@@ -23,8 +23,12 @@ namespace Prototype {
     cleanup(m_objDecs);
   }
 
+  // called when objects are deleted (now it deletes choices, so unless I
+  // do caching of choices, I don't need it)
   void DefaultOpenDecisionManager::deleteAllMatchingObjects(const ObjectId& object, const TokenId& token) {
-    std::multimap<int,ObjectDecisionPointId>::iterator it = m_objDecs.lower_bound(object->getKey());
+    check_error(ALWAYS_FAILS);
+    /*
+    std::map<int,ObjectDecisionPointId>::iterator it = m_objDecs.begin();
     while(it != m_objDecs.upper_bound(object->getKey())) {
       ObjectDecisionPointId dec = it->second;
       check_error(dec.isValid());
@@ -32,16 +36,22 @@ namespace Prototype {
       m_dm->deleteDecision(dec);
       publishRemovedDecision(object);
     }
+    */
   }
 
   void DefaultOpenDecisionManager::add(const ObjectId& object, const TokenId& token) {
+    check_error(ALWAYS_FAILS);
+    /*
     DecisionPointId dp = createObjectDecisionPoint(object, token);
     check_error(dp->getEntityKey() == object->getKey());
     m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
     publishNewDecision(dp);
+    */
   }
 
   void DefaultOpenDecisionManager::add(const ObjectId& object) {
+    check_error(ALWAYS_FAILS);
+    /*
     check_error(object.isValid());
     std::vector<TokenId> tokens;
     object->getTokensToOrder(tokens);
@@ -54,6 +64,15 @@ namespace Prototype {
     }
     // no need to remove any token decision points because only call path
     // is from recomputeDecisions.
+    */
+  }
+
+  void DefaultOpenDecisionManager::addActive(const TokenId& token) {
+    check_error(token.isValid());
+    DecisionPointId dp = createObjectDecisionPoint(token);
+    check_error(dp->getEntityKey() == token->getKey());
+    m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
+    publishNewDecision(dp);
   }
 
   void DefaultOpenDecisionManager::condAdd(const ConstrainedVariableId& var, const bool units) {
@@ -190,7 +209,33 @@ namespace Prototype {
 
   }
 
+  void DefaultOpenDecisionManager::removeActive(const TokenId& token, const bool deleting) {
+    /*
+    if (ObjectDecisionPointId::convertable(m_curDec)) {
+      ObjectDecisionPointId objdec = m_curDec;
+      if (objdec->getToken()->getKey() == token->getKey())
+	return;
+    }
+    */
+    std::map<int,ObjectDecisionPointId>::iterator it = m_objDecs.find(token->getKey());
+    if (it != m_objDecs.end()) {
+      if (deleting) {
+	ObjectDecisionPointId dec = it->second;
+	check_error(dec.isValid());
+	m_objDecs.erase(it);
+	m_dm->deleteDecision(dec);
+      }
+      else {
+	m_objDecs.erase(it);
+      }
+      publishRemovedDecision(token);
+    }
+  }
+
+  // needs to change, called when token constrained or removed from object
   void DefaultOpenDecisionManager::removeObject(const ObjectId& object, const TokenId& token, const bool deleting) {
+    check_error(ALWAYS_FAILS);
+    /*
     std::multimap<int,ObjectDecisionPointId>::iterator it = m_objDecs.lower_bound(object->getKey());
     while(it != m_objDecs.upper_bound(object->getKey())) {
       if (it->second->getToken()->getKey() == token->getKey()) {
@@ -206,6 +251,7 @@ namespace Prototype {
       }
       else ++it;
     }
+    */
   }
 
   const int DefaultOpenDecisionManager::getNumberOfDecisions() {
@@ -293,8 +339,9 @@ namespace Prototype {
     return m_curChoice;
   }
 
+
   void DefaultOpenDecisionManager::getOpenDecisions(std::list<DecisionPointId>& decisions) {
-    std::multimap<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
+    std::map<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
     for (; oit != m_objDecs.end(); ++oit)
       decisions.push_back(oit->second);
     std::map<int,ConstrainedVariableDecisionPointId>::iterator vit = m_unitVarDecs.begin();
@@ -308,7 +355,7 @@ namespace Prototype {
   }
 
   void DefaultOpenDecisionManager::printOpenDecisions(std::ostream& os) {
-    std::multimap<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
+    std::map<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
     for (; oit != m_objDecs.end(); ++oit)
       os << oit->second << std::endl;
     std::map<int,ConstrainedVariableDecisionPointId>::iterator vit = m_unitVarDecs.begin();

@@ -28,7 +28,7 @@ namespace Prototype {
   class DefaultObjectDecisionPointComparator : ObjectDecisionPointComparator {
   public:
     bool operator()(const ObjectDecisionPointId& o1, const ObjectDecisionPointId& o2) const {
-      return o1->getEntityKey() == o2->getEntityKey() && o1->getToken()->getKey() == o2->getToken()->getKey();
+      return o1->getKey() < o2->getKey();
     }
   };
 
@@ -70,6 +70,7 @@ namespace Prototype {
     virtual void deleteAllMatchingObjects(const ObjectId& object, const TokenId& token);
     virtual void add(const ObjectId& object, const TokenId& token);
     virtual void add(const ObjectId& object);
+    virtual void addActive(const TokenId& token);
     virtual void condAdd(const TokenId& token);
     virtual void add(const TokenId& token);
     virtual void condAdd(const ConstrainedVariableId& var, const bool units);
@@ -79,6 +80,7 @@ namespace Prototype {
     virtual const bool removeVarDP(const ConstrainedVariableId& var, const bool deleting, std::map<int,ConstrainedVariableDecisionPointId>& varMap, VariableDecisionSet& sortedVars);
     virtual void condRemoveVar(const ConstrainedVariableId& var);
 
+    virtual void removeActive(const TokenId& tok, const bool deleting);
     virtual void removeToken(const TokenId& tok, const bool deleting);
     virtual const bool removeTokenDP(const TokenId& tok, const bool deleting, std::map<int,TokenDecisionPointId>& tokMap, TokenDecisionSet& sortedToks);
     virtual void removeObject(const ObjectId& object, const TokenId& token, const bool deleting);
@@ -87,7 +89,7 @@ namespace Prototype {
     std::map<int,TokenDecisionPointId> m_tokDecs;
     std::map<int,ConstrainedVariableDecisionPointId> m_nonUnitVarDecs;
     std::map<int,ConstrainedVariableDecisionPointId> m_unitVarDecs;
-    std::multimap<int,ObjectDecisionPointId> m_objDecs;
+    std::map<int,ObjectDecisionPointId> m_objDecs;
 
     /* the following are the heuristically ordered sets of decisions */
     /* note that object decisions are not sorted, and we don't handle unit
