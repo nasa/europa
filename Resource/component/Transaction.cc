@@ -27,9 +27,6 @@ namespace Prototype {
     
   {
 
-    m_min = min;
-    m_max = max;
-
 
     // for now set m_resource to getObject.  Later remove m_resource as redundant and replace it with refs to getObject.
     //m_resource = getObject();    
@@ -44,7 +41,7 @@ namespace Prototype {
 						 LabelStr("Usage")))->getId();
     m_allVariables.push_back(m_usage);
 
-    m_usage->specify(IntervalDomain(m_min, m_max));
+    m_usage->specify(IntervalDomain(min, max));
    
     if(closed)
       close();
@@ -85,8 +82,8 @@ namespace Prototype {
 
     // add the resource constraint which will act as a messenger to changes and inform the ResourcePropagator.
     std::vector<ConstrainedVariableId> temp;
-    temp.push_back(getTime());
     temp.push_back(getObject());
+    temp.push_back(getTime());
     temp.push_back(m_usage);
     ConstraintId usageRelation = 
       ConstraintLibrary::createConstraint(LabelStr("ResourceRelation"), m_planDatabase->getConstraintEngine(), temp);
@@ -117,11 +114,11 @@ namespace Prototype {
 
   bool Transaction::isValid() const
   {
-    check_error(m_min >= -LARGEST_VALUE);
-    check_error(m_max <= LARGEST_VALUE);
+    check_error(getMin() >= -LARGEST_VALUE);
+    check_error(getMax() <= LARGEST_VALUE);
     check_error(getEarliest() >= -LATEST_TIME);
     check_error(getLatest() <= LATEST_TIME);
-    check_error(m_min <= m_max);
+    check_error(getMin() <= getMax());
     check_error(getEarliest() <= getLatest());
     check_error(m_id.isValid());
     return true;
@@ -161,7 +158,7 @@ namespace Prototype {
       else
 	m_resource->notifyTimeRestricted(m_id);
     }
-    noteChanged();
+    notifyChanged();
   }
   void Transaction::setLatest(int latest)
   {
@@ -178,32 +175,44 @@ namespace Prototype {
       else
 	m_resource->notifyTimeRestricted(m_id);
     }
-    noteChanged();
+    notifyChanged();
   }
+
+  double Transaction::getMin() const {
+    return m_usage->lastDomain().getLowerBound();
+  }
+
+  double Transaction::getMax() const {
+    return m_usage->lastDomain().getUpperBound();
+  }
+
+
   void Transaction::setMin(double min)
   {
-    check_error(min <= m_max);
-    m_min = min;
-    m_usage->reset();
-    m_usage->specify(IntervalDomain(m_min, m_max));
+    check_error(min <= getMax());
+    double max = getMax();
+    if (min < getMin())
+      m_usage->reset();
+    m_usage->specify(IntervalDomain(min, max));
     if(m_resource != ResourceId::noId())
       m_resource->notifyQuantityChanged(m_id);
-    noteChanged();
+    notifyChanged();
   }
   void Transaction::setMax(double max)
   {
-    check_error(max >= m_min);
-    m_max = max;
-    m_usage->reset();
-    m_usage->specify(IntervalDomain(m_min, m_max));
+    check_error(max >= getMin());
+    double min = getMin();
+    if (max > getMax())
+      m_usage->reset();
+    m_usage->specify(IntervalDomain(min, max));
     if(m_resource != ResourceId::noId())
       m_resource->notifyQuantityChanged(m_id);
-    noteChanged();
+    notifyChanged();
   }
   void Transaction::print(ostream& os)
   {
     os << "RESOURCE: " << (m_resource == ResourceId::noId() ? "UNASSIGNED" : m_resource->getName().toString())
-       << "[" << m_min << ", " << m_max << ", " << getEarliest() << ", " << getLatest() << "]";
+       << "[" << getMin() << ", " << getMax() << ", " << getEarliest() << ", " << getLatest() << "]";
   }
 
   bool Transaction::checkAndClearChange()
@@ -213,7 +222,7 @@ namespace Prototype {
     return(retVal);
   }
 
-  void Transaction::noteChanged()
+  void Transaction::notifyChanged()
   {
     check_error(isValid());
     m_changed = true;

@@ -101,7 +101,7 @@ namespace Prototype {
     /**
      * @brief Accessor
      */
-    double getMin() const {return m_min;}
+    double getMin() const ;
 
     /**
      * @brief Set the minimu quanityt of change allowed for this transaction.
@@ -113,7 +113,7 @@ namespace Prototype {
     /**
      * @brief Accessor
      */
-    double getMax() const {return m_max;}
+    double getMax() const ;
 
     /**
      * @brief Accessor
@@ -125,19 +125,24 @@ namespace Prototype {
      * @brief Accessor
      * @return true if getMax() > 0, false otherwise.
      */
-    bool canProduce() const {return m_max > 0;}
+    bool canProduce() const {return m_usage->lastDomain().getUpperBound() > 0;}
 
     /**
      * @brief Accessor
      * @return true if getMin() > 0, false otherwise.
      */
-    bool canConsume() const {return m_min < 0;}
+    bool canConsume() const {return m_usage->lastDomain().getLowerBound() < 0;}
 
     /**
      * @brief Output details. Primarily for debugging.
      * @arg The target output stream
      */
     void print(ostream& os);
+
+    /**
+     * @brief Notify the transaction whenever the time or quanitity values change
+     */
+    void notifyChanged();
 
     /**
      * @brief Checks if the transaction values have changed and clears the change status.
@@ -183,10 +188,7 @@ namespace Prototype {
      */
     void notifyDeleted(ResourceId& resource);
 
-    /**
-     * @brief Helper method used internally whenevr the time or quanitity values change
-     */
-    void noteChanged();
+
     /**
      * @brief Helper method to verify all the data is correct
      * Checks for:
@@ -198,8 +200,8 @@ namespace Prototype {
      * in derived classes.
      */
     bool isValid() const;
-    double m_min;
-    double m_max;
+    // double m_min;
+    // double m_max;
     bool m_changed;
 
     ResourceId m_resource;
