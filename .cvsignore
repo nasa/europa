@@ -1,4 +1,7 @@
 *.bb
 *.bbg
 *.da
+jam.plasma.*
+jam.run-all-tests.*
+jam.withPPW.*
 lib
