@@ -17,7 +17,7 @@ namespace Prototype {
 	       const BooleanDomain& rejectabilityBaseDomain,
 	       const std::vector<ConstrainedVariableId> parameters,
 	       const IntervalIntDomain& timeBaseDomain,
-	       const LabelStr& objectName = Token::s_noObject);
+	       const LabelStr& objectName = Token::noObject());
   };
 
 }

@@ -5,8 +5,10 @@
 #include "StaticToken.hh"
 #include "EventToken.hh"
 #include "TokenVariable.hh"
+#include "ObjectTokenRelationPropagator.hh"
 #include "./ConstraintEngine/TestSupport.hh"
 #include "./ConstraintEngine/IntervalIntDomain.hh"
+#include "./ConstraintEngine/DefaultPropagator.hh"
 
 #include <iostream>
 
@@ -68,13 +70,18 @@ public:
 
 private:
   static bool testBasicTokenAllocation(){
+    ConstraintEngine ce;
     Schema schema;
-    PlanDatabase db(ENGINE, schema.getId());
+    PlanDatabase db(ce.getId(), schema.getId());
+    new DefaultPropagator(LabelStr("Default"), ce.getId());
+    new ObjectTokenRelationPropagator(LabelStr("ObjectTokenRelation"), db.getId());
+
     Object staticObject(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
     std::vector<ConstrainedVariableId> noParameters;
 
     // Static Token
     StaticToken staticToken(db.getId(), LabelStr("Predicate"), noParameters, LabelStr("o1"));
+    assert(getParent(staticToken.getStart()) == staticToken.getId());
 
     // Event Token
     EventToken eventToken(db.getId(), LabelStr("Predicate"), IntervalIntDomain(0, 1), noParameters, IntervalIntDomain(0, 1000));
@@ -104,10 +111,10 @@ private:
 void main(){
   initConstraintLibrary();
   
-  REGISTER_NARY(EqualConstraint, "CoTemporal");
-  REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation");
+  REGISTER_NARY(EqualConstraint, "CoTemporal", "Default");
+  REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
 
-  runTestSuite(ObjectTest::test, "Token Tests");
+  runTestSuite(ObjectTest::test, "Object Tests");
   runTestSuite(TokenTest::test, "Token Tests");
   cout << "Finished" << endl;
 }

@@ -16,7 +16,7 @@ namespace Prototype {
 		  const IntervalIntDomain& endBaseDomain,
 		  const IntervalIntDomain& durationBaseDomain,
 		  const std::vector<ConstrainedVariableId> parameters = std::vector<ConstrainedVariableId>(),
-		  const LabelStr& objectName = Token::s_noObject);
+		  const LabelStr& objectName = Token::noObject());
 
     virtual ~IntervalToken();
 
