@@ -123,7 +123,7 @@ namespace PLASMA {
   
   HSTSHeuristics::VariableEntry::VariableEntry() {}
 
-  HSTSHeuristics::VariableEntry::VariableEntry( const std::set<double>& domain,
+  HSTSHeuristics::VariableEntry::VariableEntry( const std::set<LabelStr>& domain,
 						const Priority p, 
 						const DomainOrder order,
 						const LabelStr& generatorName,
@@ -140,24 +140,37 @@ namespace PLASMA {
       break;
     case ASCENDING:
       if (m_domain.empty()) {
-	for (std::set<double>::const_iterator it(domain.begin()); it != domain.end(); ++it) {
-	  check_error(LabelStr::isString(*it));
-	  LabelStr value(*it);
-	  m_domain.push_back(value);
+	for (std::set<LabelStr>::const_iterator it(domain.begin()); it != domain.end(); ++it)
+	  m_domain.push_back(*it);
+	m_domain.sort();
+	/*
+	std::cout << " ASCENDING domain =";
+	for (std::list<LabelStr>::const_iterator it(m_domain.begin()); it != m_domain.end(); ++it) {
+	  std::cout << " "; 
+	  std::cout << "value[//]"; //(*it).c_str();
 	}
+	std::cout << std::endl;
+	*/
       }
       break;
     case DESCENDING:
       if (m_domain.empty()) {
-	for (std::set<double>::const_iterator it(domain.begin()); it != domain.end(); ++it) {
-	  check_error(LabelStr::isString(*it));
-	  LabelStr value(*it);
-	  m_domain.push_back(value);
+	for (std::set<LabelStr>::const_iterator it(domain.begin()); it != domain.end(); ++it)
+	  m_domain.push_back(*it);
+	m_domain.sort();
+	/*
+	std::cout << " DESCENDING domain =";
+	for (std::list<LabelStr>::const_iterator it(m_domain.begin()); it != m_domain.end(); ++it) {
+	  std::cout << " ";
+	  std::cout << "value[\\]"; //<< (*it).c_str();
 	}
+	std::cout << std::endl;
+	*/
       }
       m_domain.reverse();
       break;
     case ENUMERATION: 
+      //      std::cout << "Enumeration" << std::endl;
       check_error(!enumeration.empty());
       check_error(!m_domain.empty());
       check_error(m_domain.size() == enumeration.size());
@@ -181,7 +194,7 @@ namespace PLASMA {
   
   const GeneratorId& HSTSHeuristics::VariableEntry::getGenerator() const { return m_generator; }
 
-  HSTSHeuristics::HSTSHeuristics() : m_id(this) {
+  HSTSHeuristics::HSTSHeuristics(const PlanDatabaseId& planDatabase) : m_id(this), m_pdb(planDatabase) {
     m_defaultPriorityPreference = LOW;
     m_defaultTokenPriority = 0.0;
     m_defaultVariablePriority = 0.0;
@@ -189,15 +202,6 @@ namespace PLASMA {
   }
 
   HSTSHeuristics::~HSTSHeuristics() {
-    //cleanup(m_defaultCompatibilityPriority);
-    //    cleanup(m_defaultTokenStates);
-    //    cleanup(m_defaultCandidateOrders);
-    //    for (std::map<LabelStr,TokenEntry>::iterator it = m_tokenHeuristics.begin();
-    //	 it != m_tokenHeuristics.end(); ++it) 
-    //      delete &it->second;
-    //    cleanup(m_tokenHeuristics);
-    //    cleanup(m_variableHeuristics);
-
     check_error(m_id.isValid());
     m_id.remove();
   }
@@ -273,7 +277,7 @@ namespace PLASMA {
     unsigned int index = Schema::instance()->getIndexFromName(pred, variableName);
     LabelStr varType(Schema::instance()->getParameterType(pred, index));
 
-    std::set<double> values; // we instantiate values lazily upon evaluation
+    std::set<LabelStr> values; // we instantiate values lazily upon evaluation
     if (generatorName == NO_STRING) {
       VariableEntry entry(values, p, order, NO_STRING, enumeration);
       m_variableHeuristics.insert(std::make_pair<LabelStr,VariableEntry>(key, entry));
@@ -442,8 +446,7 @@ namespace PLASMA {
     return p;
   }
 
-
-  void HSTSHeuristics::getOrderedDomainForConstrainedVariableDP(const ConstrainedVariableDecisionPointId& varDec, std::list<LabelStr>& domain) {
+  void HSTSHeuristics::getOrderedDomainForConstrainedVariableDP(const ConstrainedVariableDecisionPointId& varDec, std::list<double>& domain) {
     check_error(domain.empty());
     check_error(varDec.isValid());
     const ConstrainedVariableId& var = varDec->getVariable();
@@ -453,8 +456,31 @@ namespace PLASMA {
       TokenType::createTokenType(parent,tt);
       LabelStr key = HSTSHeuristics::getIndexKey(var->getName(),tt);
       std::map<LabelStr, VariableEntry>::iterator pos = m_variableHeuristics.find(key);
-      if (pos != m_variableHeuristics.end())
-	domain = pos->second.getDomain();
+      if (pos != m_variableHeuristics.end()) {
+	std::list<LabelStr> values(pos->second.getDomain()); 
+	for (std::list<LabelStr>::const_iterator it(values.begin()); it != values.end(); ++it) {
+	  if (var->baseDomain().isNumeric()) {
+	    std::string str((*it).c_str());
+	    //	    domain.push_back(strtod(str, str.end()));
+	    check_error(ALWAYS_FAIL, "Numeric domain not yet handled");
+	  }
+	  else if (var->baseDomain().isEnumerated()) {
+	    if(LabelStr::isString(*it))
+	      domain.push_back((*it).getKey());
+	    else
+	      domain.push_back(m_pdb->getObject(*it));
+	  }
+	}	  
+	//	std::cout << "Found domain for variable decision point with variable " << var->getName().c_str() << " and token type " << key.c_str() << std::endl;
+      }
+      else {
+	//	std::cout << "DIDN'T find domain for variable decision point with variable " << var->getName().c_str() << " and token type " << key.c_str() << std::endl;
+	var->baseDomain().getValues(domain);
+	domain.sort();
+	if (var->baseDomain().isEnumerated())
+	  domain.reverse(); // hack because enumerated domains are backwards
+      }
+      check_error(!domain.empty());
       tt.remove();
     }
   }
@@ -466,16 +492,24 @@ namespace PLASMA {
 
     std::map<LabelStr, TokenEntry>::iterator pos = m_tokenHeuristics.find(key);
     if (pos != m_tokenHeuristics.end()) {
+      //      std::cout << "Found token entry for token decision point with token type " << key.c_str() << std::endl;
       std::vector<LabelStr> vs(pos->second.getStates());
       for (unsigned int i=0; i < vs.size(); ++i) {
-	if (vs[i] == Token::MERGED) {
-	  order = pos->second.getOrders()[i];
-	  break;
-	}
+	//	std::cout << " considering state " << vs[i].c_str() << std::endl;
 	states.push_back(vs[i]);
+	if (vs[i] == Token::MERGED)
+	  order = pos->second.getOrders()[i];
+      }
+      if (vs.empty()) {
+	//	std::cout << "No states specified, falling back on defaults" << std::endl;
+	states.push_back(Token::MERGED);
+	states.push_back(Token::ACTIVE);
+	states.push_back(Token::REJECTED);
+	order = EARLY;
       }
     }
     else { // defaults
+      //      std::cout << "DIDN'T find entry, falling back on defaults for token entry for token decision point with token type " << key.c_str() << std::endl;
       states.push_back(Token::MERGED);
       states.push_back(Token::ACTIVE);
       states.push_back(Token::REJECTED);
@@ -489,6 +523,7 @@ namespace PLASMA {
 
     std::map<LabelStr, TokenEntry>::iterator pos = m_tokenHeuristics.find(key);
     if (pos != m_tokenHeuristics.end()) {
+      //      std::cout << "Found token entry for object decision point with token type " << key.c_str() << std::endl;
       std::vector<LabelStr> states = pos->second.getStates();
       for (unsigned int i=0; i < states.size(); ++i) {
 	if (states[i] == Token::ACTIVE) {
@@ -497,7 +532,10 @@ namespace PLASMA {
 	}
       }
     }
-    else order = EARLY; // default
+    else {
+      //      std::cout << "DIDN'T find token entry for object decision point with token type " << key.c_str() << std::endl;
+      order = EARLY; // default
+    }
   }
 
   const LabelStr HSTSHeuristics::getIndexKey(const LabelStr& variableName, 
