@@ -1,0 +1,20 @@
+#include "../Plasma.nddl"
+
+
+class BaseTimeline extends Timeline {
+ predicate p0{};
+}
+
+class World extends Object {
+ BaseTimeline _o1;
+
+ predicate initialState{}
+
+ World(){
+ 	_o1 = new BaseTimeline();
+ }
+
+}
+
+World::initialState{
+}

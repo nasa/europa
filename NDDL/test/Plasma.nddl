@@ -1,0 +1,14 @@
+///////////////////////////////////////////////////////////
+// Defines a framework in Nddl for integration with PLASMA.
+// Author: Conor McGann
+// Date: April, 2004
+///////////////////////////////////////////////////////////
+
+// Declare a marker class to indicate the base class, even if it
+// is going to include predicates.
+class Object {}
+
+// Declare a marker class to indicate the base class should be a Timeline
+// which enforces a total order. This should only arise where we
+// have predicates!
+class Timeline {}
