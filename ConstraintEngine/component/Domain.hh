@@ -47,6 +47,11 @@ namespace Prototype {
     void getValues(std::list< ELEMENT_TYPE >& results) const;
 
     /**
+     * @brief Insert a value into the domain.
+     */
+    void insert(const ELEMENT_TYPE& value);
+
+    /**
      * @brief Obtain the singleton value for this domain. It must be a singleton.
      */
     ELEMENT_TYPE getValue() const;
@@ -91,6 +96,11 @@ namespace Prototype {
 
   template <class ELEMENT_TYPE>
   ELEMENT_TYPE Domain<ELEMENT_TYPE>::getValue() const {return EnumeratedDomain::getValue();}
+
+  template <class ELEMENT_TYPE>
+  void Domain<ELEMENT_TYPE>::insert(const ELEMENT_TYPE& value){
+    EnumeratedDomain::insert(double(value));
+  }
 
   class LabelStr;
   typedef Domain<LabelStr> LabelSet;

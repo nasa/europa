@@ -521,6 +521,7 @@ namespace Prototype {
       runTest(testEquality);
       runTest(testIntersection);
       runTest(testSubset);
+      runTest(testIntDomain);
       return true;
     }
   private:
@@ -596,6 +597,22 @@ namespace Prototype {
 
       assert(dom2.isSubsetOf(dom1));
       assert(!dom1.isSubsetOf(dom2));
+      return true;
+    }
+
+    static bool testIntDomain(){
+      Domain<int> dom0;
+      dom0.insert(10);
+      dom0.insert(12);
+      dom0.close();
+
+      Domain<float> dom1;
+      dom1.insert(9.98);
+      dom1.insert(9.037);
+      dom1.close();
+
+      assert(dom0 != dom1);
+
       return true;
     }
   };
