@@ -411,7 +411,6 @@ namespace Prototype {
       realpath(dest.c_str(), destBuf);
       dest = destBuf;
       delete [] destBuf;
-      dest += "/";
 
       char timestr[NBBY * sizeof(seqId) * 28/93 + 4];
       sprintf(timestr, "%lld", seqId);
@@ -422,16 +421,21 @@ namespace Prototype {
 					modelName = modelName.substr(tempIndex);
 				}
       }
+
       std::string seqName = modelName;
       std::string::size_type extStart = seqName.find('.');
       seqName = seqName.substr(0, extStart);
+
       if(stepsPerWrite) {
 				if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
 					std::cerr << "Failed to make directory " << dest << std::endl;
 					FatalErrno();
 				}
+        if(seqName[0] != '/')
+          dest += "/";
 				dest += seqName;
 				dest += timestr;
+
 				if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
 					std::cerr << "Failed to make directory " << dest << std::endl;
 					FatalErrno();
