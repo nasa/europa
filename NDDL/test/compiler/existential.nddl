@@ -1,0 +1,54 @@
+class Location{
+ string name;
+ Location(string _name){
+  name = _name;
+ }
+}
+
+class Path{
+ Location from, to;
+ Path(Location _from, Location _to){
+  from = _from;
+  to = _to;
+ }
+}
+
+class World{
+ Location rock;
+ Location hill;
+ Location lander;
+ Location martianCity;
+
+ Path p1;
+ Path p2;
+ Path p3;
+ Path p4;
+
+ predicate Going{
+  Location from;
+  Location to;
+  neq(from, to);
+ }
+
+ predicate initialState{}
+ World(){
+  rock = new Location("ROCK");
+  hill = new Location("HILL");
+  lander = new Location("LANDER");
+  martianCity = new Location("MARTIAN_CITY");
+  p1 = new Path(rock, hill);
+  p2 = new Path(lander, hill);
+  p3 = new Path(martianCity, hill);
+  p4 = new Path(hill, lander);
+ }
+}
+
+World::initialState{
+ any(Going g);
+ eq(g.from, object.rock);
+ eq(g.to, object.hill);
+ Path p : {
+  eq(p.from, g.from);
+  eq(p.to, g.to);
+ };
+}
