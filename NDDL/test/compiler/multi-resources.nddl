@@ -18,7 +18,7 @@ Rover::Drive{
  meets(Battery.change battery);
 
  // Compiler BUG not to trap error on name usage
- eq(battery.quantity, expected_fuel_used);
+ eq(battery.quantity, expected_energy_used);
 }
 
 class World{
