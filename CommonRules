@@ -473,6 +473,72 @@ rule Objects
 	}
 }
 
+actions together SharedArchive
+{
+	$(LINK) $(LINKFLAGS) $(SHARED_FLAG) -o $(<) $(UNDEFS) $(>) $(NEEDSLIBS) $(LINKLIBS)
+}
+
+rule SharedLibraryFromObjects
+{
+	local _i _l _s ;
+
+	# Add grist to file names
+
+	_s = [ FGristFiles $(>) ] ;
+	_l = $(<:S=$(SUFSHARE)) ;
+
+	# library depends on its member objects
+
+	if $(KEEPOBJS)
+	{
+	    LocalDepends obj : $(_s) ;
+	}
+	else
+	{
+	    LocalDepends lib : $(_l) ;
+	}
+
+	# Set LOCATE for the library and its contents.  The bound
+	# value shows up as $(NEEDLIBS) on the Link actions.
+	# For compatibility, we only do this if the library doesn't
+	# already have a path.
+
+	if ! $(_l:D)
+	{
+	    MakeLocate $(_l) $(_l)($(_s:BS)) : $(LOCATE_TARGET) ;
+	}
+
+	if $(NOARSCAN) 
+	{ 
+	    # If we can't scan the library to timestamp its contents,
+	    # we have to just make the library depend directly on the
+	    # on-disk object files.  
+
+	    Depends $(_l) : $(_s) ;
+	}
+	else
+	{
+	    # If we can scan the library, we make the library depend
+	    # on its members and each member depend on the on-disk
+	    # object file.
+
+	    Depends $(_l) : $(_l)($(_s:BS)) ;
+
+	    for _i in $(_s)
+	    {
+		Depends $(_l)($(_i:BS)) : $(_i) ;
+	    }
+	}
+
+	LocalClean clean : $(_l) ;
+
+	SharedArchive $(_l) : $(_s) ;
+
+	# If we can't scan the library, we have to leave the .o's around.
+
+	if ! ( $(NOARSCAN) || $(NOARUPDATE) ) { RmTemps $(_l) : $(_s) ; }
+}
+
 rule Shell
 {
 	LocalDepends shell : $(<) ;

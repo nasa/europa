@@ -26,11 +26,9 @@ rule Module {
 
   LINK_MODULES on $(module) = $(modules:G=module) ;
   LOCATE_OBJECTS on $(module) = [ FDirName $(SUBDIR) objects ] ;
-
-  SubInclude PLASMA $(name) component ;
-  SubInclude PLASMA $(name) core ;
-  SubInclude PLASMA $(name) documentation ;
-  SubInclude PLASMA $(name) test ;
+  INCLUDES on $(module) += $(SUBDIR) ;
+  INCLUDES on $(module) += [ FDirName $(SUBDIR) core ] ;
+  INCLUDES on $(module) += [ FDirName $(SUBDIR) component ] ;
 }
 
 # ModuleFiles <name> : <files for this module> ;
@@ -43,7 +41,7 @@ rule ModuleFiles {
   }
 
   local module = $(name:G=module) ;
-  local LOCATE_TARGET = [ on $(module) return $(LOCATE_OBJECTS) ] ;
+  INCLUDES on $(module) += $(SUBDIR) ;
   ModulePart $(module) : $(files) ;
 }
 
@@ -66,30 +64,22 @@ rule ModuleDocumentation {
   }
 }
 
-# ModuleMain <name> : <files for this test> : <modules that this test depends on> ;
-rule ModuleMain {
-  local name = $(1) ;
-  local files = $(2) ;
-  local modules = (3) ;
+# ModuleObjects <source files> : <modules that these files depend on> ;
+rule ModuleObjects {
+  local files = $(1) ;
+  local modules = $(2) ;
 
   if $(TRACE_MODULE) = TRUE {
-    Echo ModuleMain $(name) . $(files) . $(modules) ;
+    Echo ModuleObject $(files) . $(modules) ;
   }
 
-  local links = [ FLinkModules $(module) ] ;
+  local links = [ FLinkModules $(modules) ] ;
 
-  local headers ;
   local link ;
+  local headers ;
   for link in $(links) {
-    switch $(link) {
-    case *.core :
-      headers += [ FDirName $(PLASMA) $(link:S=) ] ;
-      headers += [ FDirName $(PLASMA) $(link:S=) core ] ;
-    case * :
-      headers += [ FDirName $(PLASMA) $(link) ] ;
-      headers += [ FDirName $(PLASMA) $(link) component ] ;
-      headers += [ FDirName $(PLASMA) $(link) core ] ;
-    }
+    local module = $(link:G=module) ;
+    headers += [ on $(module) return $(INCLUDES) ] ;
   }
 
   local variant ;
@@ -97,31 +87,60 @@ rule ModuleMain {
     local C++FLAGS = $(C++FLAGS) [ FVariantC++Flags $(variant) ] ;
     local CFLAGS = $(CFLAGS) [ FVariantCFlags $(variant) ] ;
 
-    local exe = [ FVariantName $(name) : $(variant) ] ;
-	LINKFLAGS on $(exe) = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
+    local file ;
+    for file in $(files) {
+      if $(file:S) != $(SUFOBJ) {
+        file = [ FGristFiles $(file) ] ;
+        SEARCH on $(file) = $(SEARCH_SOURCE) ;
 
+        local output = [ FVariantName $(file:S=) : $(variant) ] ;
+        output = $(output)$(SUFOBJ) ;
+        Object $(output) : $(file) ;
+        ObjectHdrs $(output) : $(headers) ;
+      }
+    }
+  }
+}
+
+# ModuleMain <name> : <files for this test> : <modules that this test depends on> ;
+rule ModuleMain {
+  local name = $(1) ;
+  local files = $(2) ;
+  local modules = $(3) ;
+
+  if $(TRACE_MODULE) = TRUE {
+    Echo ModuleMain $(name) . $(files) . $(modules) ;
+  }
+
+  ModuleObjects $(files) : $(modules) ;
+
+  local links = [ FLinkModules $(modules) ] ;
+
+  local variant ;
+  for variant in $(VARIANTS) {
     local outputs ;
     local file ;
     for file in $(files) {
       file = [ FGristFiles $(file) ] ;
-      SEARCH on $(file) = $(SEARCH_SOURCE) ;
-
       local output = [ FVariantName $(file:S=) : $(variant) ] ;
       output = $(output)$(SUFOBJ) ;
       outputs += $(output) ;
-      Object [ FGristFiles $(output) ] : $(file) ;
-      ObjectHdrs $(output) : $(headers) ;
     }
+
+    local exe = [ FVariantName $(name) : $(variant) ] ;
+	LINKFLAGS on $(exe) = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
 
     for library in $(LIBRARIES) {
       if $(library) = SHARED {
+        local link ;
         for link in $(links) {
-          LinkSharedLibraries $(exe) : [ FModuleSharedLibraryName $(link:S=) : $(variant) ] ;
+          LinkSharedLibraries $(exe) : [ FModuleSharedLibraryName $(link) : $(variant) ] ;
         }
         MainFromObjects $(exe)_rt : $(outputs) ;
       } else if $(library) = STATIC {
+        local link ;
         for link in $(links) {
-          LinkLibraries $(exe) : [ FModuleStaticLibraryName $(link:S=) : $(variant) ] ;
+          LinkLibraries $(exe) : [ FModuleStaticLibraryName $(link) : $(variant) ] ;
         }
         MainFromObjects $(exe) : $(outputs) ;
       } else {
@@ -130,6 +149,7 @@ rule ModuleMain {
     }
   }
 }
+
 
 rule RunModuleMain {
   local tests = $(1) ;
@@ -175,11 +195,13 @@ rule FLinkModules {
         Echo - $(mod) ;
       }
       found += $(mod) ;
-      mod = $(mod:S=) ;
-      mod = $(mod:G=module) ;
-      modules += [ on $(mod) return $(LINK_MODULES:G=) ] ;
+      modules += [ on $(mod:G=module) return $(LINK_MODULES:G=) ] ;
     }
     modules = $(modules[2-]) ;
+  }
+
+  if $(TRACE_MODULE) = TRUE {
+    Echo FLinkModules . $(found) ;
   }
 
   return $(found) ;
@@ -193,34 +215,21 @@ rule ModulePart {
     Echo ModulePart $(module) . $(files) ;
   }
 
-  local link ;
-  for link in [ FLinkModules $(module) ] {
-    switch $(link) {
-    case *.core :
-      SubDirHdrs [ FDirName $(PLASMA) $(link:S=) ] ;
-      SubDirHdrs [ FDirName $(PLASMA) $(link:S=) core ] ;
-    case * :
-      SubDirHdrs [ FDirName $(PLASMA) $(link) ] ;
-      SubDirHdrs [ FDirName $(PLASMA) $(link) core ] ;
-      SubDirHdrs [ FDirName $(PLASMA) $(link) component ] ;
-    }
-  }
+  local LOCATE_TARGET = [ on $(module) return $(LOCATE_OBJECTS) ] ;
+  ModuleObjects $(files) : $(module) ;
 
   local variant ;
   for variant in $(VARIANTS) {
-    local C++FLAGS = $(C++FLAGS) [ FVariantC++Flags $(variant) ] ;
-    local CFLAGS = $(CFLAGS) [ FVariantCFlags $(variant) ] ;
-    local LINKFLAGS = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
-
     local outputs ;
     local file ;
     for file in $(files) {
+	  file = [ FGristFiles $(file) ] ;
       local output = [ FVariantName $(file:S=) : $(variant) ] ;
       output = $(output)$(SUFOBJ) ;
       outputs += $(output) ;
-      Object [ FGristFiles $(output) ] : $(file) ;
     }
 
+    local LINKFLAGS = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
     for library in $(LIBRARIES) {
       local libname ;
       if $(library) = SHARED {
@@ -231,6 +240,12 @@ rule ModulePart {
         Exit ModulePart unknown library type: $(library) ;
       }
       if $(library) = SHARED {
+        local link ;
+        for link in [ FLinkModules [ on $(module) return $(LINK_MODULES) ] ] {
+          local path = [ on $(link:G=module) return $(LOCATE_OBJECTS) ] ;
+          local name = [ FModuleSharedLibraryLinkName $(link) : $(variant) ] ;
+          LINKLIBS on $(libname) += $(SHARED_LIBRARY_PATH_FLAG) $(path) -l$(name) ;                                    
+        }
         ModuleSharedLibrary $(libname) : $(outputs) ;
       }
       if $(library) = STATIC {
@@ -263,12 +278,20 @@ rule ModuleStaticLibrary {
   }
 }
 
-rule FModuleSharedLibraryName {
+rule FModuleSharedLibraryLinkName {
   local module = $(1) ;
   local variant = $(2) ;
 
   local name = $(module:G=) ;
   local libname = [ FVariantName $(name:S=) : $(variant) ] ;
+  return $(libname) ;
+}
+
+rule FModuleSharedLibraryName {
+  local module = $(1) ;
+  local variant = $(2) ;
+
+  local libname = [ FModuleSharedLibraryLinkName $(module) : $(variant) ] ;
   return lib$(libname)$(SUFSHARE) ;
 }
 
@@ -281,7 +304,7 @@ rule ModuleSharedLibrary {
   }
 
   if $(files) {
-    
+    SharedLibraryFromObjects $(1) : $(2) ;
   }
 }
 

@@ -8,6 +8,8 @@ local cc = $(compiler_test:S=.cc) ;
 LocalDepends nddl-tests : $(hh) $(cc) ;
 NddlCompiler $(hh) $(cc) : $(compiler_test) ;
 
+ModuleObjects NddlMain.cc : NDDL ;
+
 local model ;
 
 for model in
@@ -18,7 +20,7 @@ for model in
 	less-basic-model.nddl    simple-resources.nddl foreach.nddl
 {
   local exe = $(model:S=) ;
-  NddlMain $(exe) : NddlMain.cc : $(model) : NDDL ;
+  NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;
   RunModuleMain run-$(exe) : $(exe) ;
   LocalDepends run-nddl-tests : run-$(exe) ;
 }

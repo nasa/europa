@@ -2,6 +2,11 @@ SubDir PLASMA CBPlanner ;
 
 if ! $(PLASMA_READY) {
 
-Module CBPlanner : RulesEngine.core ;
+Module CBPlanner : RulesEngine ;
+
+SubInclude PLASMA CBPlanner core ;
+SubInclude PLASMA CBPlanner component ;
+SubInclude PLASMA CBPlanner documentation ;
+SubInclude PLASMA CBPlanner test ;
 
 } # PLASMA_READY

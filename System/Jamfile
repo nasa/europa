@@ -4,4 +4,9 @@ if ! $(PLASMA_READY) {
 
 Module System : ConstraintEngine NDDL TemporalNetwork CBPlanner ;
 
+SubInclude PLASMA System core ;
+SubInclude PLASMA System component ;
+SubInclude PLASMA System documentation ;
+SubInclude PLASMA System test ;
+
 } # PLASMA_READY

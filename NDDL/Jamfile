@@ -2,6 +2,11 @@ SubDir PLASMA NDDL ;
 
 if ! $(PLASMA_READY) {
 
-Module NDDL : RulesEngine.core Resource ;
+Module NDDL : RulesEngine Resource ;
+
+SubInclude PLASMA NDDL core ;
+SubInclude PLASMA NDDL component ;
+SubInclude PLASMA NDDL documentation ;
+SubInclude PLASMA NDDL test ;
 
 } # PLASMA_READY

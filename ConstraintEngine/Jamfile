@@ -2,6 +2,11 @@ SubDir PLASMA ConstraintEngine ;
 
 if ! $(PLASMA_READY) {
 
-Module ConstraintEngine : Utils.core ;
+Module ConstraintEngine : Utils ;
+
+SubInclude PLASMA ConstraintEngine core ;
+SubInclude PLASMA ConstraintEngine component ;
+SubInclude PLASMA ConstraintEngine documentation ;
+SubInclude PLASMA ConstraintEngine test ;
 
 } # PLASMA_READY

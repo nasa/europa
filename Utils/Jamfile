@@ -4,4 +4,9 @@ if ! $(PLASMA_READY) {
 
 Module Utils ;
 
+SubInclude PLASMA Utils core ;
+SubInclude PLASMA Utils component ;
+SubInclude PLASMA Utils documentation ;
+SubInclude PLASMA Utils test ;
+
 } # PLASMA_READY

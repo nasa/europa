@@ -4,4 +4,9 @@ if ! $(PLASMA_READY) {
 
 Module Resource : PlanDatabase ;
 
+SubInclude PLASMA Resource core ;
+SubInclude PLASMA Resource component ;
+SubInclude PLASMA Resource documentation ;
+SubInclude PLASMA Resource test ;
+
 } # PLASMA_READY
