@@ -29,6 +29,9 @@ namespace Prototype {
   class TemporalPropagator;
   typedef Id<TemporalPropagator> TemporalPropagatorId;
 
+  class TemporalNetworkListener;
+  typedef Id<TemporalNetworkListener> TemporalNetworkListenerId;
+
   #define noIndex -1;
 
 }
