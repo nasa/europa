@@ -16,7 +16,6 @@
 #include "../ConstraintEngine/LabelSet.hh"
 #include "../ConstraintEngine/DefaultPropagator.hh"
 #include "../ConstraintEngine/EqualityConstraintPropagator.hh"
-#include "../ConstraintEngine/DomainUtilities.hh"
 
 #include <iostream>
 #include <sstream>
@@ -178,7 +177,7 @@ private:
 								  constrainedVars);
 
     assert(db.getConstraintEngine()->propagate());
-    assert(DomainUtilities::equals(o1.getVariables()[0]->lastDomain(), o1.getVariables()[0]->lastDomain()));
+    assert(o1.getVariables()[0]->lastDomain() == o1.getVariables()[0]->lastDomain());
 
     // Delete one of the constraints to force automatic clean-up path and explciit clean-up
     delete (Constraint*) constraint;
