@@ -213,6 +213,7 @@ public:
     runTest(testCondAllSameConstraint);
     runTest(testCondAllDiffConstraint);
     runTest(testConstraintDeletion);
+    runTest(testArbitraryConstraints);
     return(true);
   }
 
@@ -234,7 +235,7 @@ private:
 
     Variable<LabelSet> v0(ENGINE, ls0);
     LabelSet dom = v0.getDerivedDomain();
-    assert(! (dom == ls1));
+    assert(dom == ls0 && !(dom == ls1));
     SubsetOfConstraint c0(LabelStr("SubsetOf"), LabelStr("Default"), ENGINE, v0.getId(), ls1);
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
@@ -244,7 +245,7 @@ private:
     values.pop_back();
     LabelSet ls2(values);
     v0.specify(ls2);
-    assert(!ENGINE->pending()); // No change expected since it is a restriction
+    assert(!ENGINE->pending()); // No change expected since it is a restriction.
     assert(!(v0.getDerivedDomain() == ls1));
     assert(c0.executionCount() == 1);
     assert(ENGINE->constraintConsistent());
@@ -1455,6 +1456,110 @@ private:
     delete (Constraint*) c0;
     delete (Constraint*) c1;
     return true;
+  }
+
+  static bool testArbitraryConstraints() {
+    // Input to this test: a list of constraint calls and expected output domains.
+    std::list<std::pair<LabelStr, std::list<AbstractDomain*> > > tests;
+
+    // In the long run, this information will be read from an input file.
+    // For now, just initialize it in a similar form. --wedgingt 2004 Mar 10
+    std::list<AbstractDomain*> domains;
+    domains.push_back(new IntervalIntDomain(1, 10)); // first input domain
+    domains.push_back(new IntervalIntDomain(2, 10)); // expected value of first output domain
+    domains.push_back(new IntervalIntDomain(2, 11)); // second input domain
+    domains.push_back(new IntervalIntDomain(2, 10)); // expected value of second output domain
+    std::pair<LabelStr, std::list<AbstractDomain*> > oneTest(LabelStr("Equal"), domains);
+    tests.push_back(oneTest);
+
+    // Run each test, in the same order they were read/init'd.
+    while (!tests.empty()) {
+      oneTest = tests.front();
+      assertTrue(oneTest.second.size() % 2 == 0);
+      tests.pop_front();
+
+      // Build the scope and the list of expected output domains.
+      std::vector<ConstrainedVariableId> scope;
+      std::list<AbstractDomain*> outputDoms;
+      ConstrainedVariableId cVarId;
+      while (!oneTest.second.empty()) {
+        AbstractDomain *domPtr = oneTest.second.front();
+        assertTrue(domPtr != 0);
+        oneTest.second.pop_front();
+        AbstractDomain::DomainType domType = domPtr->getType();
+
+        // This is ugly and precludes support for USER_DEFINED domains
+        // since the corresponding C++ class is unknown. --wedgingt 2004 Mar 10
+        switch (domType) {
+        case AbstractDomain::INT_INTERVAL: {
+          Variable<IntervalIntDomain> *var = new Variable<IntervalIntDomain>(ENGINE, IntervalIntDomain());
+          assertTrue(var != 0);
+          var->specify(*domPtr);
+          cVarId = var->getId();
+        }
+          break;
+        case AbstractDomain::REAL_INTERVAL: {
+          Variable<IntervalDomain> *var = new Variable<IntervalDomain>(ENGINE, IntervalDomain());
+          assertTrue(var != 0);
+          var->specify(*domPtr);
+          cVarId = var->getId();
+        }
+          break;
+        case AbstractDomain::REAL_ENUMERATION: {
+          std::list<double> values;
+          domPtr->getValues(values);
+          Variable<EnumeratedDomain> *var = new Variable<EnumeratedDomain>(ENGINE, EnumeratedDomain(values));
+          assertTrue(var != 0);
+          var->specify(*domPtr);
+          cVarId = var->getId();
+        }
+          break;
+        case AbstractDomain::BOOL: {
+          Variable<BoolDomain> *var = new Variable<BoolDomain>(ENGINE, BoolDomain());
+          assertTrue(var != 0);
+          var->specify(*domPtr);
+          cVarId = var->getId();
+        }
+          break;
+        default:
+          assertTrue(false);
+          break;
+        }
+
+        delete domPtr;
+        scope.push_back(cVarId);
+        domPtr = oneTest.second.front();
+        assertTrue(domPtr != 0);
+        outputDoms.push_back(domPtr);
+        oneTest.second.pop_front();
+      }
+
+      // Create and (fully) execute the constraint.
+      ConstraintId constraint = ConstraintLibrary::createConstraint(oneTest.first, ENGINE, scope);
+      assertTrue(ENGINE->pending());
+      while (ENGINE->pending())
+        ENGINE->propagate();
+
+      // compare derived domains with domains remaining in oneTest.second.
+      std::vector<ConstrainedVariableId>::iterator scopeIter = scope.begin();
+      for ( ; scopeIter != scope.end() && !outputDoms.empty(); scopeIter++) {
+        AbstractDomain *domPtr = outputDoms.front();
+        outputDoms.pop_front();
+        if ((*scopeIter)->lastDomain() != *domPtr)
+          throw Prototype::generalUnknownError;
+        delete domPtr;
+      }
+
+      // Print that the test succeeded, count the successes for this constraint function, or whatever.
+
+      delete (Constraint*) constraint;
+      while (!scope.empty()) {
+        cVarId = scope.back();
+        scope.pop_back();
+        delete (ConstrainedVariable*) cVarId;
+      }
+    }
+    return(true);
   }
 };
 
