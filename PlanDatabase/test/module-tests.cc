@@ -270,6 +270,7 @@ public:
     runTest(testMasterSlaveRelationship);
     runTest(testBasicMerging);
     runTest(testConstraintMigrationDuringMerge);
+    runTest(testNonChronGNATS2439);
     runTest(testMergingPerformance);
     runTest(testTokenCompatibility);
     runTest(testTokenFactory);
@@ -329,6 +330,14 @@ private:
     bool retval = false;
     DEFAULT_SETUP(ce, db, false);
     retval = testConstraintMigrationDuringMergeImpl(ce, db);
+    DEFAULT_TEARDOWN();
+    return retval;
+  }
+
+  static bool testNonChronGNATS2439() {
+    bool retval = false;
+    DEFAULT_SETUP(ce, db, false);
+    retval = testNonChronGNATS2439Impl(ce, db);
     DEFAULT_TEARDOWN();
     return retval;
   }

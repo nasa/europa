@@ -40,6 +40,7 @@ namespace PLASMA {
   bool testMasterSlaveRelationshipImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
   bool testBasicMergingImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
   bool testConstraintMigrationDuringMergeImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
+  bool testNonChronGNATS2439Impl(ConstraintEngineId &ce, PlanDatabaseId &db);
   bool testMergingPerformanceImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
   bool testTokenCompatibilityImpl(ConstraintEngineId &ce, PlanDatabaseId &db);
   bool testTokenFactoryImpl(ConstraintEngineId &ce, PlanDatabaseId &db);

@@ -960,6 +960,140 @@ namespace PLASMA {
     return true;
   }
 
+  bool testNonChronGNATS2439Impl(ConstraintEngineId &ce, PlanDatabaseId &db) {
+    ObjectId timeline1 = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline1"))->getId();
+    db->close();
+
+    std::list<double> values;
+    values.push_back(LabelStr("L1"));
+    values.push_back(LabelStr("L4"));
+    values.push_back(LabelStr("L2"));
+    values.push_back(LabelStr("L5"));
+    values.push_back(LabelStr("L3"));
+
+    IntervalToken token0(db, 
+			 DEFAULT_PREDICATE(), 
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(1, 1000),
+			 Token::noObject(), false);
+    token0.addParameter(LabelSet(values), "LabelSetParam");
+    token0.close();
+
+    IntervalToken token1(db, 
+			 DEFAULT_PREDICATE(), 
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(1, 1000),
+			 Token::noObject(), false);
+    token1.addParameter(LabelSet(values), "LabelSetParam");
+    token1.close();
+
+    IntervalToken token2(db, 
+			 DEFAULT_PREDICATE(), 
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(1, 1000),
+			 Token::noObject(), false);
+    std::list<double> values2;
+    values2.push_back(LabelStr("L2"));
+    token2.addParameter(LabelSet(values2), "LabelSetParam");
+    token2.close();
+
+    IntervalToken token3(db, 
+			 DEFAULT_PREDICATE(), 
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(1, 1000),
+			 Token::noObject(), false);
+    values2.clear();
+    values2.push_back(LabelStr("L3"));
+    token3.addParameter(LabelSet(values2), "LabelSetParam");
+    token3.close();
+
+    // create a test constraint between t2 and t3
+    ConstraintLibrary::createConstraint(LabelStr("before"),ce,makeScope(token2.getEnd(),token3.getStart()));
+
+    assert(ce->propagate());
+
+    // after constraining t2 to come before t3, only t2 and t3 start and
+    // end domains should've changed.
+
+    assert(token0.getStart()->lastDomain().getLowerBound() == 0);
+    assert(token0.getStart()->lastDomain().getUpperBound() == 10);
+    assert(token0.getEnd()->lastDomain().getLowerBound() == 1);
+    assert(token0.getEnd()->lastDomain().getUpperBound() == 200);
+
+    assert(token1.getStart()->lastDomain().getLowerBound() == 0);
+    assert(token1.getStart()->lastDomain().getUpperBound() == 10);
+    assert(token1.getEnd()->lastDomain().getLowerBound() == 1);
+    assert(token1.getEnd()->lastDomain().getUpperBound() == 200);
+
+    assert(token2.getStart()->lastDomain().getLowerBound() == 0);
+    assert(token2.getStart()->lastDomain().getUpperBound() == 9);
+    assert(token2.getEnd()->lastDomain().getLowerBound() == 1);
+    assert(token2.getEnd()->lastDomain().getUpperBound() == 10);
+
+    assert(token3.getStart()->lastDomain().getLowerBound() == 1);
+    assert(token3.getStart()->lastDomain().getUpperBound() == 10);
+    assert(token3.getEnd()->lastDomain().getLowerBound() == 2);
+    assert(token3.getEnd()->lastDomain().getUpperBound() == 200);
+
+    token0.activate();
+    token2.merge(token0.getId());
+    assert(ce->propagate());
+    token1.activate();
+    token3.merge(token1.getId());
+    assert(ce->propagate());
+
+    // after merging t2->t0 and t3->t1, all parameters should be
+    // singletons. Also, t0 should now be before t1 (inheriting the
+    // relation between t2 and t3).
+
+
+    assert(token0.getParameters()[0]->lastDomain().isSingleton());
+    assert(token1.getParameters()[0]->lastDomain().isSingleton());
+    assert(token2.getParameters()[0]->lastDomain().isSingleton());
+    assert(token3.getParameters()[0]->lastDomain().isSingleton());
+
+    assert(token0.getStart()->lastDomain().getLowerBound() == 0);
+    assert(token0.getStart()->lastDomain().getUpperBound() == 9);
+    assert(token0.getEnd()->lastDomain().getLowerBound() == 1);
+    assert(token0.getEnd()->lastDomain().getUpperBound() == 10);
+
+    assert(token1.getStart()->lastDomain().getLowerBound() == 1);
+    assert(token1.getStart()->lastDomain().getUpperBound() == 10);
+    assert(token1.getEnd()->lastDomain().getLowerBound() == 2);
+    assert(token1.getEnd()->lastDomain().getUpperBound() == 200);
+
+    token2.cancel();
+    assert(ce->propagate());
+
+    // after cancelling t2->t0, all parameters remain singleton except for
+    // t0's since it no longer inherits the singleton domain from t2.
+    // Furthermore, t0 should no longer be constrained to be before t1.
+    // However, t1 should remain constrained to be before t2 since it still
+    // inherits the before constraint between t2 and t3.
+
+    assert(!token0.getParameters()[0]->lastDomain().isSingleton());
+    assert(!token1.getParameters()[0]->lastDomain().isSingleton());
+    assert(token2.getParameters()[0]->lastDomain().isSingleton());
+    assert(token3.getParameters()[0]->lastDomain().isSingleton());
+
+    assert(token0.getStart()->lastDomain().getLowerBound() == 0);
+    assert(token0.getStart()->lastDomain().getUpperBound() == 10);
+    assert(token0.getEnd()->lastDomain().getLowerBound() == 1);
+    assert(token0.getEnd()->lastDomain().getUpperBound() == 200);
+
+    assert(!token3.isMerged());
+
+    return true;
+  }
+
   bool testMergingPerformanceImpl(ConstraintEngineId &ce, PlanDatabaseId &db) {
     ObjectId timeline = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "o2"))->getId();
     db->close();
