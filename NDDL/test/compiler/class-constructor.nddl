@@ -56,6 +56,12 @@ class Baz {
  Baz(Foo _foo){
   m_foo = _foo;
  }
+
+// This test is negative - it will cause the NddlCompiler to detecte a collision. When we allow negative tests causing failure
+// the n reintroduce this as a test
+// Baz(Bar _foo){
+//  m_foo = _foo;
+// }
 }
 
 class World {
