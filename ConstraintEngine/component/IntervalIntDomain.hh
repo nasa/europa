@@ -34,7 +34,17 @@ namespace Prototype{
 
     bool isFinite() const;
 
-    const DomainType& getType() const;
+    /**
+     * @brief Get the type of the domain to aid in type checking.
+     * @see AbstractDomain::DomainType
+     */
+    virtual const DomainType& getType() const;
+
+    /**
+     * @brief Get the name of the type of the domain.
+     * @see AbstractDomain::getTypeName
+     */
+    virtual const LabelStr& getTypeName() const;
 
     /**
      * @brief Add an element to the domain.
