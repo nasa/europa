@@ -103,6 +103,10 @@ namespace Prototype {
       TokenId predecessor = *previous;
       TokenId successor = *current;
 
+      // This is the stopping criteria test where there is nothing more to do
+      if(!canPrecede(predecessor, token))
+	break;
+
       if(canFitBetween(token, predecessor, successor))
 	results.push_back(successor);
 
@@ -264,8 +268,8 @@ namespace Prototype {
       check_error(m_tokenIndex.find(token->getKey()) != m_tokenIndex.end());
       check_error(cleaningUp || token->isActive());
 
-      // Validate that earliset start times are monotonically increasing
-      if(!cleaningUp){
+      // Validate that earliset start times are monotonically increasing, as long as we are constraint consistent at any rate!
+      if(!cleaningUp && getPlanDatabase()->getConstraintEngine()->constraintConsistent()){
 	int l_time = (int) token->getStart()->lastDomain().getLowerBound();
 	check_error(l_time == MINUS_INFINITY || l_time == PLUS_INFINITY || l_time > latest_time);
 	latest_time = l_time;

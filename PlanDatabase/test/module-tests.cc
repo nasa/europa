@@ -778,6 +778,7 @@ public:
     runTest(testObjectTokenRelation);
     runTest(testTokenOrderQuery);
     runTest(testEventTokenInsertion);
+    runTest(testNoChoicesThatFit);
     return true;
   }
 
@@ -1119,6 +1120,48 @@ private:
     timeline.constrain(tokenC.getId(), tokenB.getId());
     assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenC.getStart()->getDerivedDomain().getUpperBound());
     assert(tokenC.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+    return true;
+  }
+
+  static bool testNoChoicesThatFit(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    db.close();
+
+    IntervalToken tokenA(db.getId(), 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(10, 10),
+		     IntervalIntDomain(20, 20),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken tokenB(db.getId(), 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(100, 100),
+		     IntervalIntDomain(120, 120),
+		     IntervalIntDomain(1, 1000));
+
+    IntervalToken tokenC(db.getId(), 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(9, 9),
+		     IntervalIntDomain(11, 11),
+		     IntervalIntDomain(1, 1000));
+
+    tokenA.activate();
+    tokenB.activate();
+    tokenC.activate();
+
+    timeline.constrain(tokenA.getId());
+    timeline.constrain(tokenB.getId());
+    assert(ce.propagate());
+
+    std::vector<TokenId> choices;
+    timeline.getOrderingChoices(tokenC.getId(), choices);
+    assert(choices.empty());
+    timeline.constrain(tokenC.getId(), tokenB.getId());
+    assert(!ce.propagate());
     return true;
   }
 };
