@@ -15,6 +15,10 @@ namespace Prototype {
     virtual ~TemporalPropagator();
     void execute();
     bool updateRequired() const;
+    bool canPrecede(const TempVarId& first, const TempVarId& second);
+    bool canFitBetween(const TempVarId& start, const TempVarId& end,
+		       const TempVarId& predend, const TempVarId& succstart);
+
   protected:
     void handleConstraintAdded(const ConstraintId& constraint);
     void handleConstraintRemoved(const ConstraintId& constraint);

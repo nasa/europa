@@ -17,6 +17,7 @@ namespace Prototype {
   }
 
   TemporalPropagator::~TemporalPropagator() {
+    //std::cout << "Calling temporal prp destructor " << std::endl;
     delete (TemporalNetwork*) m_tnet;
   }
 
@@ -199,5 +200,34 @@ namespace Prototype {
       	m_tnet->getVarIdFromTimepoint((*it).second)->specify(IntervalIntDomain(lb, ub));
     }
   }
+
+  bool TemporalPropagator::canPrecede(const TempVarId& first, const TempVarId& second) {
+    check_error(getTimepoint(first) != TimepointId::noId());
+    check_error(getTimepoint(second) != TimepointId::noId());
+    TimepointId fir = getTimepoint(first);
+    TimepointId sec = getTimepoint(second);
+    Time lb, ub;
+    m_tnet->calcDistanceBounds(fir, sec, lb, ub);
+    return(ub >= 0);
+  }
+
+  bool TemporalPropagator::canFitBetween(const TempVarId& start, const TempVarId& end,
+					 const TempVarId& predend, const TempVarId& succstart) {
+    check_error(getTimepoint(start) != TimepointId::noId());
+    check_error(getTimepoint(end) != TimepointId::noId());
+    check_error(getTimepoint(predend) != TimepointId::noId());
+    check_error(getTimepoint(succstart) != TimepointId::noId());
+    TimepointId tstart = getTimepoint(start);
+    TimepointId tend = getTimepoint(end);
+    TimepointId pend= getTimepoint(predend);
+    TimepointId sstart = getTimepoint(succstart);
+    Time slb, sub;
+    Time elb, eub;
+    m_tnet->calcDistanceBounds(pend, tstart, slb, sub);
+    m_tnet->calcDistanceBounds(tend, succstart, elb, eub);
+
+    return(sub >=0  && elb >=0);
+  }
+
     
 } //namespace
