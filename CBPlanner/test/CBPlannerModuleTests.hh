@@ -17,6 +17,7 @@
 #include "DynamicInfiniteRealCondition.hh"
 #include "TokenDecisionPoint.hh"
 #include "HSTSHeuristics.hh"
+#include "HSTSOpenDecisionManager.hh"
 
 namespace PLASMA {
 
