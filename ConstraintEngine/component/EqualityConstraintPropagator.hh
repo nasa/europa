@@ -30,16 +30,25 @@ namespace Prototype{
    */
   class EqualityConstraintPropagator: public Propagator {
   public:
+
     EqualityConstraintPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine);
+
     ~EqualityConstraintPropagator();
+
     void execute();
+
     bool updateRequired() const;
 
   private:
+
     void handleConstraintAdded(const ConstraintId& constraint);
+
     void handleConstraintRemoved(const ConstraintId& constraint);
+
     void handleConstraintActivated(const ConstraintId& constrain);
+
     void handleConstraintDeactivated(const ConstraintId& constraint);
+
     void handleNotification(const ConstrainedVariableId& variable, 
 			    int argIndex, 
 			    const ConstraintId& constraint, 
@@ -48,14 +57,17 @@ namespace Prototype{
     /**
      * Does the real work of propagating an equivalence class
      * @param scope the scope of variables to be equated
+     * @note If the intersection is empty, only one domain is actually emptied.
      */
     void equate(const std::set<ConstrainedVariableId>& scope);
 
     bool m_fullReprop; /**< True if a constraint has been removed. Otherwise false. */
+
     bool m_active; /**< True if we are in the execute method. Otherwise false. Used to prevent additions to the agenda
 		     while we are actively propagating */
 
     EquivalenceClassCollection m_eqClassCollection; /**< Does all the real work of managing Equivalence Classes */
+
     std::set<int> m_eqClassAgenda; /**< Inbound notifications are translated into the affected equivalence class and stored here for
 				     processing during execution */
   };
