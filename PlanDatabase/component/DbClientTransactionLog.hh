@@ -49,6 +49,7 @@ namespace Prototype {
 
     std::list<TiXmlElement*> m_bufferedTransactions;
     bool m_chronologicalBacktracking;
+    int m_tokensCreated;
 
     TiXmlElement * tokenAsXml(const TokenId& token) const;
     TiXmlElement * variableAsXml(const ConstrainedVariableId& variable) const;

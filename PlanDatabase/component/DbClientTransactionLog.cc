@@ -10,6 +10,7 @@ namespace Prototype {
     : DbClientListener(client)
   {
     m_chronologicalBacktracking = chronologicalBacktracking;
+    m_tokensCreated = 0;
   }
 
   DbClientTransactionLog::~DbClientTransactionLog(){
@@ -58,10 +59,9 @@ namespace Prototype {
   }
 
   void DbClientTransactionLog::notifyTokenCreated(const TokenId& token){
-    static int index = 0;
     TiXmlElement * element = new TiXmlElement("goal");
     TiXmlElement * instance = new TiXmlElement("predicateinstance");
-    instance->SetAttribute("name", index++);
+    instance->SetAttribute("name", m_tokensCreated++);
     check_error(LabelStr::isString(token->getName()));
     instance->SetAttribute("type", token->getName().toString());
     element->LinkEndChild(instance);
