@@ -259,7 +259,7 @@ namespace Prototype {
     return m_objDecs.size() + m_unitVarDecs.size() + m_nonUnitVarDecs.size() + m_tokDecs.size();
   }
 
-  DecisionPointId& DefaultOpenDecisionManager::getNextDecision() {
+  DecisionPointId DefaultOpenDecisionManager::getNextDecision() {
     if(!m_objDecs.empty())
       m_curDec = m_objDecs.begin()->second;
     else if (!m_sortedUnitVarDecs.empty())
@@ -295,7 +295,7 @@ namespace Prototype {
   // if there's a merge choice, keep the first one you get and return that one.
   // otherwise prefer to activate
   // finally prefer to reject
-  const ChoiceId& DefaultOpenDecisionManager::getNextChoice() {
+  const ChoiceId DefaultOpenDecisionManager::getNextChoice() {
     check_error(m_curDec.isValid());
     m_curChoice = ChoiceId::noId();
     const std::list<ChoiceId>& choices = m_curDec->getUpdatedChoices();

@@ -57,8 +57,8 @@ namespace Prototype {
     DefaultOpenDecisionManager(const DecisionManagerId& dm);
     ~DefaultOpenDecisionManager();
 
-    virtual DecisionPointId& getNextDecision();
-    virtual const ChoiceId& getNextChoice();
+    virtual DecisionPointId getNextDecision();
+    virtual const ChoiceId getNextChoice();
     virtual const int getNumberOfDecisions();
 
 	virtual bool hasOpenDecisions() {
