@@ -1,16 +1,13 @@
 #!/bin/sh
-# $Id: autobuild,v 1.1 2002-10-24 22:19:10 wedgingt Exp $
+# $Id: autobuild,v 1.2 2002-10-24 22:43:20 wedgingt Exp $
 #
-# Build in all the subdirs containing variants of the Europa planner system
-
-# All current subdirs and $aradirs will be checked for copies of the planner source tree.
-subdirs=`ls -d */.`
+# Automatically build some variants of the Europa planner system
 
 # Don't try to use X11 (mostly to prevent Purify from doing so)
 DISPLAY=
 export DISPLAY
 
-# Apply limits; some compiles are presently running Freya out of swap space.
+# Apply limits; some compiles run out of swap space.
 ulimit -c 200000
 ulimit -d 1100000
 ulimit -s 1100000
@@ -34,94 +31,57 @@ mkdir restart || exit 1
 # Create this directory during a run to stop before the long tests and restart via at.
 mkdir resubmit || exit 1
 
-# Create this directory to cause 'make clean' to be run first.
-if test -d cleanAll
-then
-    rmdir cleanAll
-    clean=true
-else
-    clean=false
-fi
-
-aradirs=''
-for d in "$HOME"/ara.cvs.*
-do
-    test -d "$d" || continue
-    # Only go into these directories when running on Freya
-    test "`hostname`" = freya.arc.nasa.gov || continue
-    aradirs="$aradirs"' '"`basename $d`"
-    test ! -d `basename $d` || continue
-    ln -s "$d" .
-done
-
-test -d noUpdate || ./update.all || exit 2
-test -d cvs/NewPlan || exit 2
 rmdir restart resubmit || exit 2
 
+subdirs=cvs
+
 # Primary compilation loop
-for dir in $subdirs $aradirs
+for dir in $subdirs
 do
 
     cd "$startdir"
     test ! -d restart || break
-    test -d $dir/NewPlan || continue
-    cd $dir/NewPlan
+    if test -d "$dir"/NewPlan
+    then
+        echo "$0"': '"$dir"'/NewPlan already exists; skipping'
+        continue
+    fi
+
+    if test ! -d "$dir"
+    then
+        mkdir "$dir"
+        test $? = 0 || exit $?
+    fi
+
+    cd "$dir"
+
+    cvs co NewPlan
+
+    cd NewPlan
+
     mkdir working || continue
 
-    mv make.everything make.everything.prior
+    # Edit commonMakeOptions.imake via some config file in ..
 
-    for target in all tests
-    do
+    test -d "$startdir"/working || exit 2
+    test ! -d "$startdir"/restart || break
 
-        test -d "$startdir"/working || exit 2
-        test ! -d "$startdir"/restart || break
-
-        $clean && make clean > make.clean 2>&1
-
-        make $makeopt $target >> make.everything 2>&1
-        status=$?
-        echo make $target in `pwd` exited $status
-
-    done
+    make $makeopt tests >> make.tests 2>&1
+    status=$?
+    echo '"make tests" in '"`pwd`"' exited '"$status"
 
     rmdir working || exit 1
+
+    # Now, wipe out all that hard work
+    cd "$startdir"/"$dir"
+
+    rm -rf NewPlan
+
 done
 
 test -d resubmit -a ! -d restart && mv resubmit restart
 
-# Final loop: longer running tests of Europa
-for dir in $subdirs $aradirs
-do
-    cd "$startdir"
-    test -d working || exit 2
-    test ! -d restart || break
-    test ! -d resubmit || break
-    test -d $dir/NewPlan || continue
-    cd $dir/NewPlan
-    mkdir working || continue
-
-    test -s .rax.daemons && rm -f .rax.daemons
-
-    if test -d "$startdir"/"$dir"/rax
-    then
-        SupportFiles/startRAXdaemons
-        status=$?
-        if test "$status" != 0
-        then
-            echo "$0":132: startRAXdaemons in `pwd` exited $status, not 0
-        fi
-    fi
-
-    make everything > make.everything 2>&1
-    status=$?
-    echo make everything in `pwd` exited $status
-
-    test -s .rax.daemons && kill "`cat .rax.daemons`" && rm -f .rax.daemons
-
-    rmdir working || exit 1
-done
-
 cd "$startdir"
 test ! -d restart -a ! -d resubmit && exit 0
 
-echo "echo 'Europa build.all failed: at read commands from stdin despite -f flag'" | at -q b -s -f build.all
+echo "echo 'Europa autobuild failed: at read commands from stdin despite -f flag'" | at -q b -s -f autobuild
