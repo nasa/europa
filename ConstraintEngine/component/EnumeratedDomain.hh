@@ -215,6 +215,14 @@ namespace Prototype{
      * @return true if all elements in this domain are present in dom, otherwise false.
      */
     bool isSubsetOf(const AbstractDomain& dom) const;
+
+    /**
+     * @brief test if the intersection between this domain and the given domain is empty
+     * @param dom the domain tested against.
+     * @param true if any elements of this domain are in dom. Otherwise false.
+     */
+    bool intersects(const AbstractDomain& dom) const;
+
   protected:
     std::set<double> m_values; /*!< Holds the contents from which the set membership is then derived. */
   };

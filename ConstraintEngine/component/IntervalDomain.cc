@@ -37,12 +37,23 @@ namespace Prototype {
   }
 
   bool IntervalDomain::isSubsetOf(const AbstractDomain& dom) const{
-    check_error(dom.isDynamic() || !dom.isEmpty());
     check_error(!isDynamic());
+    check_error(!dom.isEmpty());
     check_error(dom.isInterval());
     bool result = ((isFinite() || dom.isInfinite()) && 
 		   dom.getUpperBound() >= m_ub && dom.getLowerBound() <= m_lb);
     return result;
+  }
+
+  bool IntervalDomain::intersects(const AbstractDomain& dom) const{
+    check_error(!isDynamic());
+    check_error(!dom.isEmpty());
+    check_error(dom.isInterval());
+    // This could be optimized to avoid the copy if found to be worth it
+    IntervalDomain localDomain;
+    localDomain.set(dom);
+    localDomain.intersect(*this);
+    return !localDomain.isEmpty();
   }
 
   bool IntervalDomain::equate(AbstractDomain& dom){
@@ -192,5 +203,21 @@ namespace Prototype {
   void IntervalDomain::operator>>(ostream& os) const {
     AbstractDomain::operator>>(os);
     os << "[" << m_lb << ", " << m_ub << "]";
+  }
+
+  void IntervalDomain::testPrecision(const double& value) const {} // A NO-OP FOR REALS
+
+  double IntervalDomain::convert(const double& value) const {return value;} // A NO-OP FOR REALS
+
+  bool IntervalDomain::isFinite() const {
+    check_error(!isDynamic());
+
+    // Reals are only finite if they are singletons!
+    return isSingleton();
+  }
+
+  const AbstractDomain::DomainType& IntervalDomain::getType() const{
+    static const AbstractDomain::DomainType s_type = REAL_INTERVAL;
+    return s_type;
   }
 }

@@ -29,11 +29,11 @@ namespace Prototype
   typedef Europa::Id<Entity> EntityId;
 
   class AbstractDomain;
+  class IntervalDomain;
   class IntervalIntDomain;
-  class IntervalRealDomain;
+  class BoolDomain;
   class EnumeratedDomain;
   class LabelSet;
-  class BoolDomain;
 
   class DomainListener;
   typedef Europa::Id<DomainListener> DomainListenerId;

@@ -25,6 +25,7 @@ namespace Prototype{
 		      const DomainListenerId& listener = DomainListenerId::noId());
     IntervalIntDomain(const DomainListenerId& listener);
     IntervalIntDomain(const IntervalIntDomain& org);
+
     bool isFinite() const;
     const DomainType& getType() const;
 

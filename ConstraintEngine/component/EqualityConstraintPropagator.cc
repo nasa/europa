@@ -3,7 +3,6 @@
 #include "Constraints.hh"
 #include "LabelSet.hh"
 #include "IntervalIntDomain.hh"
-#include "IntervalRealDomain.hh"
 #include "BoolDomain.hh"
 #include "ConstrainedVariable.hh"
 
@@ -132,7 +131,7 @@ namespace Prototype {
       processScope<IntervalIntDomain>(scope);
       break;
     case AbstractDomain::REAL_INTERVAL:
-      processScope<IntervalRealDomain>(scope);
+      processScope<IntervalDomain>(scope);
       break;
     default:
       check_error(ALWAYS_FAILS);

@@ -310,4 +310,16 @@ namespace Prototype {
     }
     return true;
   }
+
+  bool EnumeratedDomain::intersects(const AbstractDomain& dom) const{
+    check_error(dom.isDynamic() || !dom.isEmpty());
+
+    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it){
+      if(dom.isMember(*it))
+	return true;
+    }
+
+    return false;
+  }
+
 }

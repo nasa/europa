@@ -1,6 +1,5 @@
 #include "TestSupport.hh"
 #include "IntervalIntDomain.hh"
-#include "IntervalRealDomain.hh"
 #include "BoolDomain.hh"
 #include "EnumeratedDomain.hh"
 #include "LabelSet.hh"
@@ -117,9 +116,9 @@ private:
     assert(l_listener.checkAndClearChange(change));
     assert(dom0.isEmpty());
 
-    IntervalRealDomain dom4(0.98, 101.23);
-    IntervalRealDomain dom5(80, 120.44);
-    IntervalRealDomain dom6(80, 101.23);
+    IntervalDomain dom4(0.98, 101.23);
+    IntervalDomain dom5(80, 120.44);
+    IntervalDomain dom6(80, 101.23);
     dom4.equate(dom5);
     assert(dom4 == dom6);
     assert(dom5 == dom6);
@@ -128,7 +127,7 @@ private:
 
   static bool testSubset(){
     IntervalIntDomain dom0(10, 35);
-    IntervalRealDomain dom1(0, 101);
+    IntervalDomain dom1(0, 101);
     assert(dom0.isSubsetOf(dom1));
     assert(! dom1.isSubsetOf(dom0));
 
@@ -419,7 +418,7 @@ private:
     EnumeratedDomain dom0(dom);
     dom0.set(1.0);
 
-    IntervalRealDomain dom1(1.0, 1.0);
+    IntervalDomain dom1(1.0, 1.0);
     assert(dom1 == dom0);
     assert(dom0 == dom1);
 
@@ -449,7 +448,7 @@ private:
     assert(dom0.getSize() == 1);
     assert(dom0.isMember(1.0));
 
-    IntervalRealDomain dom3(1, 8);
+    IntervalDomain dom3(1, 8);
     dom2.intersect(dom3);
     assert(dom2.getSize() == 3);
 
@@ -469,7 +468,7 @@ private:
     dom0.insert(10);
     dom0.close();
 
-    IntervalRealDomain dom1(0, 10);
+    IntervalDomain dom1(0, 10);
     assert(dom0.isSubsetOf(dom1));
 
     IntervalIntDomain dom2(0, 10);

@@ -22,10 +22,20 @@ namespace Prototype{
      */
     void operator>>(ostream& os) const;
 
+    IntervalDomain(double lb = -MAX_INT, 
+		   double ub = MAX_INT, 
+		   const DomainListenerId& listener = DomainListenerId::noId());
+
+    IntervalDomain(const IntervalDomain& org);
+
     /**
      * @brief Destructor
      */
     virtual ~IntervalDomain();
+
+    virtual bool isFinite() const;
+
+    virtual const DomainType& getType() const;
 
     /**
      * @brief Access upper bound
@@ -132,7 +142,6 @@ namespace Prototype{
      * @brief return the number of elements in the domain. an only be called on a domain which is finite.
      */
     int getSize() const;
-
     /**
      * @brief test for equality.
      */
@@ -151,6 +160,13 @@ namespace Prototype{
     bool isSubsetOf(const AbstractDomain& dom) const;
 
     /**
+     * @brief test if the intersection between this domain and the given domain is empty
+     * @param dom the domain tested against.
+     * @param true if any elements of this domain are in dom. Otherwise false.
+     */
+    bool intersects(const AbstractDomain& dom) const;
+
+    /**
      * @brief Fill the given list with the contents of the set.
      * 
      * Should only be called on finite (and thus closed) domains.
@@ -166,8 +182,6 @@ namespace Prototype{
     bool equate(AbstractDomain& dom);
 
   protected:
-    IntervalDomain(double lb, double ub, const DomainListenerId& listener);
-    IntervalDomain(const IntervalDomain& org);
 
     /**
      * @brief Helper method to test if the given value can be considered an integer. Used in derived class.
@@ -179,14 +193,14 @@ namespace Prototype{
      * @brief tests if the given value is of the correct type for the domain type. Mostly used for
      * restricting values of doubles to int. However, we could restrict it in other ways perhaps.
      */
-    virtual void testPrecision(const double& value) const = 0;
+    virtual void testPrecision(const double& value) const;
 
     /**
      * @brief carries out the conversion of the given double to do appropriate rounding
      * @param value The value to be converetd
      * @return The value subject to any rounding required for th sub-type (e.g. int)
      */
-    virtual double convert(const double& value) const = 0;
+    virtual double convert(const double& value) const;
 
     double m_ub; /*!< The upper bound of the domain */
     double m_lb; /*!< The lower bound o fthe domain */

@@ -19,7 +19,6 @@
 #include "LabelSet.hh"
 #include "LabelStr.hh"
 #include "IntervalIntDomain.hh"
-#include "IntervalRealDomain.hh"
 #include "BoolDomain.hh"
 #include "domain-tests.hh"
 

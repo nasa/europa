@@ -2,7 +2,6 @@
 #include "ConstraintEngine.hh"
 #include "ConstrainedVariable.hh"
 #include "IntervalIntDomain.hh"
-#include "IntervalRealDomain.hh"
 #include "BoolDomain.hh"
 #include "LabelSet.hh"
 
@@ -155,7 +154,7 @@ namespace Prototype
     else if (superset.getType() == AbstractDomain::INT_INTERVAL)
       m_superSetDomain = new IntervalIntDomain((const IntervalIntDomain&) superset);
     else if (superset.getType() == AbstractDomain::REAL_INTERVAL)
-      m_superSetDomain = new IntervalRealDomain((const IntervalRealDomain&) superset);
+      m_superSetDomain = new IntervalDomain((const IntervalDomain&) superset);
     else if (superset.getType() == AbstractDomain::BOOL)
       m_superSetDomain = new BoolDomain((const BoolDomain&) superset);
   }
