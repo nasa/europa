@@ -57,6 +57,7 @@ Rover::Navigate{
 	eq(trackable.path, p);
  };
 
+
  if(p){
  	foreach (t in trackable) {
 		contains(Target.Tracking target);

@@ -113,13 +113,13 @@ namespace Prototype {
 
   bool Transaction::isValid() const
   {
+    check_error(m_id.isValid());
+
+    // Do simple limit checking
     check_error(getMin() >= -LARGEST_VALUE);
     check_error(getMax() <= LARGEST_VALUE);
     check_error(getEarliest() >= -LATEST_TIME);
     check_error(getLatest() <= LATEST_TIME);
-    check_error(getMin() <= getMax());
-    check_error(getEarliest() <= getLatest());
-    check_error(m_id.isValid());
     return true;
   }
 
