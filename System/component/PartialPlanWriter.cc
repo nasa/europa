@@ -152,6 +152,9 @@ const std::string INT_DOMAIN("IntervalDomain");
 #define NBBY 8
 static char *realpath(const char *path, char *resolved_path) {
     BPath tempPath(path,NULL,true);
+    if (tempPath.Path() == NULL) {
+        return NULL;
+    }
     strcpy(resolved_path,tempPath.Path());
     return resolved_path;
 }
