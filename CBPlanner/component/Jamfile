@@ -1,5 +1,7 @@
 SubDir PLASMA CBPlanner component ;
 
+if ! $(PLASMA_READY) {
+
 ModuleComponent CBPlanner
 	:
 	ConstrainedVariableDecisionPoint.cc
@@ -10,3 +12,5 @@ ModuleComponent CBPlanner
 	TemporalVariableCondition.cc
 	TokenDecisionPoint.cc
 	;
+
+} # PLASMA_READY

@@ -1,5 +1,7 @@
 SubDir PLASMA NDDL test parser ;
 
+if ! $(PLASMA_READY) {
+
 NDDL_PARSER_TESTS = 
 	BasicClassDeclarations.nddl       keyword-example.nddl
 	DNP-transliteration.nddl          labeledSubgoals.nddl
@@ -25,3 +27,5 @@ for parser_test in $(NDDL_PARSER_TESTS) {
   LocalDepends tests : $(xml) ;
   NddlParser $(xml) : $(parser_test) ;
 }
+
+} # PLASMA_READY

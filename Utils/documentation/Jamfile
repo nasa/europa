@@ -1,3 +1,7 @@
 SubDir PLASMA Utils ;
 
+if ! $(PLASMA_READY) {
+
 ModuleDocumentation Utils ;
+
+} # PLASMA_READY

@@ -1,5 +1,7 @@
 SubDir PLASMA TemporalNetwork component ;
 
+if ! $(PLASMA_READY) {
+
 ModuleComponent TemporalNetwork
 	:
 	STNTemporalAdvisor.cc
@@ -8,3 +10,5 @@ ModuleComponent TemporalNetwork
 	TemporalPropagator.cc
 	TimepointWrapper.cc
 	;
+
+} # PLASMA_READY

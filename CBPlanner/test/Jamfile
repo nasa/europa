@@ -1,5 +1,9 @@
 SubDir PLASMA CBPlanner test ;
 
+if ! $(PLASMA_READY) {
+
 ModuleMain cbp-module-tests : SubgoalOnceRule.cc module-tests.cc : CBPlanner ;
 
 RunModuleMain tests : cbp-module-tests ;
+
+} # PLASMA_READY

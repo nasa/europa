@@ -1,5 +1,7 @@
 SubDir PLASMA Resource component ;
 
+if ! $(PLASMA_READY) {
+
 ModuleComponent Resource
 	:
 	ResourceConstraint.cc
@@ -7,3 +9,5 @@ ModuleComponent Resource
 	ResourceTransactionConstraint.cc
 	Transaction.cc
 	;
+
+} # PLASMA_READY

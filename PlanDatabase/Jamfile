@@ -1,11 +1,7 @@
 SubDir PLASMA PlanDatabase ;
 
-if ! $(PlanDatabase_INCLUDED) {
-PlanDatabase_INCLUDED = TRUE ;
-
-SubInclude PLASMA ConstraintEngine ;
-SubInclude PLASMA TinyXml ;
+if ! $(PLASMA_READY) {
 
 Module PlanDatabase : ConstraintEngine TinyXml ;
 
-} # PlanDatabase_INCLUDED
+} # PLASMA_READY

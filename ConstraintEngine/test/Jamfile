@@ -1,5 +1,7 @@
 SubDir PLASMA ConstraintEngine test ;
 
+if ! $(PLASMA_READY) {
+
 ModuleMain ce-module-tests
 	:
 	module-tests.cc
@@ -10,3 +12,5 @@ ModuleMain ce-module-tests
 	;
 
 RunModuleMain tests : ce-module-tests ;
+
+} # PLASMA_READY

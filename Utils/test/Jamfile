@@ -1,2 +1,5 @@
 SubDir PLASMA Utils test ;
 
+if ! $(PLASMA_READY) {
+
+} # PLASMA_READY

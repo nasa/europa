@@ -1,8 +1,7 @@
 SubDir PLASMA Utils ;
 
-if ! $(Utils_INCLUDED) {
-Utils_INCLUDED = TRUE ;
+if ! $(PLASMA_READY) {
 
 Module Utils ;
 
-}
+} # PLASMA_READY

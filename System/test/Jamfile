@@ -1,5 +1,7 @@
 SubDir PLASMA System test ;
 
+if ! $(PLASMA_READY) {
+
 local model ;
 
 for model in
@@ -17,3 +19,5 @@ for model in
 {
   NddlSystemTest nddl-planner-tests : runTransactionTest.cc : $(model) : System ;
 }
+
+} # PLASMA_READY

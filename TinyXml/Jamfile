@@ -1,8 +1,7 @@
 SubDir PLASMA TinyXml ;
 
-if ! $(TinyXml_INCLUDED) {
-TinyXml_INCLUDED = TRUE ;
+if ! $(PLASMA_READY) {
 
 Module TinyXml ;
 
-}
+} # PLASMA_READY

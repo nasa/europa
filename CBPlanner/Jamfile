@@ -1,10 +1,7 @@
 SubDir PLASMA CBPlanner ;
 
-if ! $(CBPlanner_INCLUDED) {
-CBPlanner_INCLUDED = TRUE ;
-
-SubInclude PLASMA RulesEngine ;
+if ! $(PLASMA_READY) {
 
 Module CBPlanner : RulesEngine.core ;
 
-} # CBPlanner_INCLUDED
+} # PLASMA_READY

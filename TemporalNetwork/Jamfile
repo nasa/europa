@@ -1,8 +1,7 @@
 SubDir PLASMA TemporalNetwork ;
 
-if ! $(TemporalNetwork_INCLUDED) {
-TemporalNetwork_INCLUDED = TRUE ;
+if ! $(PLASMA_READY) {
 
 Module TemporalNetwork : PlanDatabase ;
 
-} # TemporalNetwork_INCLUDED
+} # PLASMA_READY

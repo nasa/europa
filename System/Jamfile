@@ -1,13 +1,7 @@
 SubDir PLASMA System ;
 
-if ! $(System_INCLUDED) {
-System_INCLUDED = TRUE ;
-
-SubInclude PLASMA ConstraintEngine ;
-SubInclude PLASMA NDDL ;
-SubInclude PLASMA TemporalNetwork ;
-SubInclude PLASMA CBPlanner ;
+if ! $(PLASMA_READY) {
 
 Module System : ConstraintEngine NDDL TemporalNetwork CBPlanner ;
 
-} # System_INCLUDED
+} # PLASMA_READY

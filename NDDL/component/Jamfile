@@ -1,3 +1,7 @@
 SubDir PLASMA NDDL component ;
 
+if ! $(PLASMA_READY) {
+
 ModuleComponent NDDL ;
+
+} # PLASMA_READY

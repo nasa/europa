@@ -1,5 +1,7 @@
 SubDir PLASMA NDDL test compiler ;
 
+if ! $(PLASMA_READY) {
+
 local compiler_test = no-world.nddl ;
 local hh = $(compiler_test:S=.hh) ;
 local cc = $(compiler_test:S=.cc) ;
@@ -17,3 +19,5 @@ for model in
 {
   NddlSystemTest nddl-tests : NddlMain.cc : $(model) : NDDL ;
 }
+
+} # PLASMA_READY

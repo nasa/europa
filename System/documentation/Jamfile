@@ -1,3 +1,7 @@
 SubDir PLASMA System documentation ;
 
+if ! $(PLASMA_READY) {
+
 ModuleDocumentation System ;
+
+} # PLASMA_READY

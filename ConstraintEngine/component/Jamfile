@@ -1,5 +1,7 @@
 SubDir PLASMA ConstraintEngine component ;
 
+if ! $(PLASMA_READY) {
+
 ModuleComponent ConstraintEngine
 	:
 	BoolDomain.cc
@@ -14,3 +16,5 @@ ModuleComponent ConstraintEngine
 	test-support.cc
 	UnaryConstraint.cc
 	;
+
+} # PLASMA_READY

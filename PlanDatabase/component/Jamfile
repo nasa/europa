@@ -1,5 +1,7 @@
 SubDir PLASMA PlanDatabase component ;
 
+if ! $(PLASMA_READY) {
+
 SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
 
 ModuleComponent PlanDatabase
@@ -12,3 +14,5 @@ ModuleComponent PlanDatabase
 	ObjectFilter.cc
 	Timeline.cc
 	;
+
+} # PLASMA_READY

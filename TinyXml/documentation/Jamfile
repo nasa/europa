@@ -1,3 +1,7 @@
 SubDir PLASMA TinyXml ;
 
+if ! $(PLASMA_READY) {
+
 ModuleDocumentation TinyXml ;
+
+} # PLASMA_READY

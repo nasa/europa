@@ -1,6 +1,10 @@
 SubDir PLASMA System component ;
 
+if ! $(PLASMA_READY) {
+
 ModuleComponent System
 	:
 	PartialPlanWriter.cc
 	;
+
+} # PLASMA_READY

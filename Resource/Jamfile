@@ -1,8 +1,7 @@
 SubDir PLASMA Resource ;
 
-if ! $(Resource_INCLUDED) {
-Resource_INCLUDED = TRUE ;
+if ! $(PLASMA_READY) {
 
 Module Resource : PlanDatabase ;
 
-} # Resource_INCLUDED
+} # PLASMA_READY

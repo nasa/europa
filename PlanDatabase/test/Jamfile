@@ -1,6 +1,9 @@
 SubDir PLASMA PlanDatabase test ;
 
+if ! $(PLASMA_READY) {
+
 ModuleMain db-module-tests : module-tests.cc : PlanDatabase ;
 
 RunModuleMain tests : db-module-tests ;
 
+} # PLASMA_READY
