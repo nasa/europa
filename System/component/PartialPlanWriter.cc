@@ -29,10 +29,6 @@
 #include "Token.hh"
 #include "TokenVariable.hh"
 
-// #include "Resource.hh"
-// #include "ResourceDefs.hh"
-// #include "Transaction.hh"
-
 #include "Rule.hh"
 #include "RulesEngineDefs.hh"
 
@@ -61,13 +57,6 @@
 #define FatalError(s) { std::cerr << "At " << __FILE__ << ":" << __PRETTY_FUNCTION__ << ", line " << __LINE__ << std::endl; std::cerr << (s) << std::endl; exit(-1);}
 #define FatalErrno(){FatalError(strerror(errno))}
 #define FatalErr(s) {std::cerr << (s) << std::endl; FatalErrno();}
-// const char *envStepsPerWrite = "PPW_WRITE_NSTEPS";
-
-// const char *envAltWriteDest = "PPW_WRITE_DEST";
-
-// const char *envPPWNoWrite = "PPW_DONT_WRITE";
-
-// const char *envPPWTransactions = "PPW_ALLOW_TRANSACTIONS";
 
 const char *envPPWConfigFile = "PPW_CONFIG";
 
@@ -173,6 +162,8 @@ const char *sourceTypeNames[3] = {"SYSTEM", "USER", "UNKNOWN"};
 
 enum sourceTypes {SYSTEM = 0, USER, UNKNOWN};
 
+const char *tokenStates[Prototype::Token::REJECTED + 1] = {"INCOMPLETE", "INACTIVE", "ACTIVE", "MERGED", "REJECTED"};
+
 const std::string DURATION_VAR("DURATION_VAR");
 const std::string END_VAR("END_VAR");
 const std::string START_VAR("START_VAR");
@@ -227,7 +218,6 @@ const std::string CONSTRAINTS(".constraints");
 const std::string CONSTRAINT_VAR_MAP(".constraintVarMap");
 const std::string INSTANTS(".instants");
 const std::string DECISIONS(".decisions");
-//const std::string CHOICES(".choices");
 const std::string E_DOMAIN("E");
 const std::string I_DOMAIN("I");
 const std::string CAUSAL("CAUSAL");
@@ -453,7 +443,6 @@ namespace Prototype {
 					FatalErrno();
 				}
 				seqOut << dest << SEQ_COL_SEP << seqId << SEQ_COL_SEP;// << std::endl;
-				//seqOut.close();
         
         std::ofstream rulesOut(seqRules.c_str());
         if(!rulesOut) {
@@ -461,7 +450,6 @@ namespace Prototype {
           FatalErrno();
         }
       
-        //const std::multimap<double, RuleId> rules = Rule::getRules();
         std::set<std::string> modelFiles;
         char realModelPaths[PATH_MAX];
         for(std::multimap<double, RuleId>::const_iterator it = Rule::getRules().begin(); 
@@ -515,9 +503,6 @@ namespace Prototype {
     }
   
     void PartialPlanWriter::write(void) {
-      //if(!(*ceId)->constraintConsistent()) {
-			//	FatalError("Attempted to write inconsistant database.");
-			//}
       if(!transOut || !statsOut)
         return;
 
@@ -840,26 +825,33 @@ namespace Prototype {
     }
   
     void PartialPlanWriter::outputEnumVar(const Id<TokenVariable<EnumeratedDomain> >& enumVar, 
-																					//const TokenId &tokId, const int type, 
                                           const int parentId, const int type,
 																					std::ofstream &varOut) {
       numVariables++;
-
-      varOut << enumVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
+      varOut << enumVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 						 << enumVar->getName().toString() << TAB;
 
-      varOut << ENUM_DOMAIN << TAB << getEnumerationStr((EnumeratedDomain &) enumVar->lastDomain()) 
-						 << TAB << SNULL << TAB << SNULL << TAB << SNULL << TAB;
+      varOut << ENUM_DOMAIN << TAB;
+      if(type == I_STATE) {
+        EnumeratedDomain &dom = (EnumeratedDomain &) enumVar->lastDomain();
+        std::list<double> vals;
+        dom.getValues(vals);
+        for(std::list<double>::const_iterator it = vals.begin(); it != vals.end(); ++it)
+          varOut << tokenStates[(int)*it] << " ";
+        varOut << TAB;
+      }
+      else
+        varOut << getEnumerationStr((EnumeratedDomain &)enumVar->lastDomain()) << TAB;
+      varOut << SNULL << TAB << SNULL << TAB << SNULL << TAB;
 
       varOut << tokenVarTypes[type] << std::endl;
     }
   
     void PartialPlanWriter::outputIntVar(const Id<TokenVariable<IntervalDomain> >& intVar,
-																				 //const TokenId &tokId, const int type, 
                                          const int parentId, const int type,
 																				 std::ofstream &varOut) {
       numVariables++;
-      varOut << intVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
+      varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 						 << intVar->getName().toString() << TAB;
 
       varOut << INT_DOMAIN << TAB << SNULL << TAB << REAL_SORT << TAB 
@@ -870,12 +862,11 @@ namespace Prototype {
     }
   
     void PartialPlanWriter::outputIntIntVar(const Id<TokenVariable<IntervalIntDomain> >& intVar,
-																						//const TokenId &tokId, const int type, 
                                             const int parentId, const int type,
 																						std::ofstream &varOut) {
       numVariables++;
 
-      varOut << intVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
+      varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 						 << intVar->getName().toString() << TAB;
 
       varOut << INT_DOMAIN << TAB << SNULL << TAB << INTEGER_SORT << TAB 
@@ -886,12 +877,11 @@ namespace Prototype {
     }
 
     void PartialPlanWriter::outputObjVar(const ObjectVarId& objVar,
-																				 //const TokenId &tokId, const int type, 
                                          const int parentId, const int type,
 																				 std::ofstream &varOut) {
       numVariables++;
 
-      varOut << objVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
+      varOut << objVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 						 << objVar->getName().toString() << TAB;
 
       varOut << ENUM_DOMAIN << TAB;
@@ -908,12 +898,11 @@ namespace Prototype {
     }
   
     void PartialPlanWriter::outputConstrVar(const ConstrainedVariableId &otherVar, 
-																						//const TokenId &tokId, const int type, 
                                             const int parentId, const int type,
 																						std::ofstream &varOut) {
       numVariables++;
 
-      varOut << otherVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
+      varOut << otherVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 						 << otherVar->getName().toString() << TAB;
 
       if(otherVar->lastDomain().isEnumerated()) {
@@ -952,7 +941,6 @@ namespace Prototype {
                        << TAB << ruleId->getToken()->getKey() << TAB;
 
        /*SlaveTokenIds*/
-       //const std::vector<TokenId> slaves;// = ruleId->getSlaves();
        std::set<TokenId> slaves;
        std::set<ConstrainedVariableId> vars;
        buildSlaveAndVarSets(slaves, vars, ruleId);
@@ -970,8 +958,6 @@ namespace Prototype {
        }
 
        /* gaurd and local variables */
-       //std::set<ConstrainedVariableId> vars;
-       //buildVarSet(vars, ruleId);
        if(vars.empty()) {
          ruleInstanceOut << SNULL;
        }
@@ -1314,7 +1300,6 @@ namespace Prototype {
       if(stepsPerWrite) {
 				switch(changeType) {
 				case DomainListener::RELAXED:
-					//VAR_DOMAIN_RELAXED
 					if(allowTransaction[VAR_DOMAIN_RELAXED])
 						transactionList->push_back(Transaction(VAR_DOMAIN_RELAXED, varId->getKey(), SYSTEM,
 																									 transactionId++, seqId, nstep, 
@@ -1351,7 +1336,6 @@ namespace Prototype {
 																									 getVarInfo(varId)));
           break;
 				case DomainListener::RESTRICT_TO_SINGLETON:
-					//VAR_DOMAIN_RESTRICTED
 					if(allowTransaction[VAR_DOMAIN_RESTRICT_TO_SINGLETON])
 						transactionList->push_back(Transaction(VAR_DOMAIN_RESTRICT_TO_SINGLETON, varId->getKey(),
 																									 SYSTEM, transactionId++, seqId, nstep, 
@@ -1364,14 +1348,12 @@ namespace Prototype {
 																									 getVarInfo(varId)));
           break;
 				case DomainListener::SET_TO_SINGLETON:
-					//VAR_DOMAIN_SPECIFIED
 					if(allowTransaction[VAR_DOMAIN_SET_TO_SINGLETON])
 						transactionList->push_back(Transaction(VAR_DOMAIN_SET_TO_SINGLETON, varId->getKey(),
 																									 USER, transactionId++, seqId, nstep, 
 																									 getVarInfo(varId)));
 					break;
 				case DomainListener::EMPTIED:
-					//VAR_DOMAIN_EMPTIED
 					if(allowTransaction[VAR_DOMAIN_EMPTIED])
 						transactionList->push_back(Transaction(VAR_DOMAIN_EMPTIED, varId->getKey(), SYSTEM,
 																									 transactionId++, seqId, nstep, 
@@ -1460,7 +1442,7 @@ namespace Prototype {
 				if(dec.isValid())
 					key = dec->getKey();
 				transactionList->push_back(Transaction(ASSIGN_NEXT_STARTED, key, USER,
-																							 transactionId++, seqId, nstep, SNULL));//getChoiceInfo()));
+																							 transactionId++, seqId, nstep, SNULL));
 				numTransactions++;
 			}
 		}
@@ -1600,8 +1582,10 @@ namespace Prototype {
 		const std::string PartialPlanWriter::getChoiceInfo(void) const {
 			std::stringstream retval;
 			int numChoices = 0;
-			for(std::list<ChoiceId>::const_iterator cIt = (*plId)->getDecisionManager()->getCurrentDecisionChoices().begin(); 
-					cIt != (*plId)->getDecisionManager()->getCurrentDecisionChoices().end() && numChoices < maxChoices; 
+      std::list<ChoiceId> choices = (*plId)->getDecisionManager()->getCurrentDecisionChoices();
+      choices.push_back((*plId)->getDecisionManager()->getCurrentChoice());
+
+			for(std::list<ChoiceId>::const_iterator cIt = choices.begin(); cIt != choices.end() && numChoices < maxChoices; 
 					++cIt, ++numChoices) {
 				ChoiceId choice = (*cIt);
 				if(choice.isNoId())

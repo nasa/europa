@@ -46,7 +46,7 @@ namespace Prototype {
       PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &, 
                         const RulesEngineId &);
 			PartialPlanWriter(const PlanDatabaseId &, const ConstraintEngineId &,
-                                          const RulesEngineId &, const CBPlannerId &);
+                        const RulesEngineId &, const CBPlannerId &);
       ~PartialPlanWriter(void);
       //void notifyPropagationCompleted(void);
       void write(void);
