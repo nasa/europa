@@ -7,6 +7,7 @@
 #include "../ConstraintEngine/EqualityConstraintPropagator.hh"
 #include "../PlanDatabase/ObjectTokenRelation.hh"
 #include "../PlanDatabase/CommonAncestorConstraint.hh"
+#include "../PlanDatabase/HasAncestorConstraint.hh"
 
 // Support fro required plan database components
 #include "../PlanDatabase/PlanDatabase.hh"
@@ -69,6 +70,7 @@ int main(){
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
   REGISTER_NARY(CommonAncestorConstraint, "commonAncestor", "Default");
+  REGISTER_NARY(HasAncestorConstraint, "hasAncestor", "Default");
   REGISTER_NARY(ResourceConstraint, "ResourceRelation", "Resource");
   REGISTER_NARY(ResourceTransactionConstraint, "HorizonRelation", "Default");
 
