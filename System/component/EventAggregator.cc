@@ -62,40 +62,40 @@ namespace EUROPA {
 
   void EventAggregator::notifyChanged(const ConstrainedVariableId& var, 
                                       const DomainListener::ChangeType& changeType) {
-    publish(notifyChanged(var, changeType));
+    publishMessage(notifyChanged(var, changeType));
     switch(changeType) {
     case DomainListener::RELAXED:
-      publish(notifyRelaxed(var));
+      publishMessage(notifyRelaxed(var));
       break;
     case DomainListener::RESET:
-      publish(notifyReset(var));
+      publishMessage(notifyReset(var));
       break;
     case DomainListener::VALUE_REMOVED:
-      publish(notifyValueRemoved(var));
+      publishMessage(notifyValueRemoved(var));
       break;
     case DomainListener::BOUNDS_RESTRICTED:
-      publish(notifyBoundsRestricted(var));
+      publishMessage(notifyBoundsRestricted(var));
       break;
     case DomainListener::LOWER_BOUND_INCREASED:
-      publish(notifyLowerBoundIncreased(var));
+      publishMessage(notifyLowerBoundIncreased(var));
       break;
     case DomainListener::UPPER_BOUND_DECREASED:
-      publish(notifyUpperBoundDecreased(var));
+      publishMessage(notifyUpperBoundDecreased(var));
       break;
     case DomainListener::RESTRICT_TO_SINGLETON:
-      publish(notifyRestrictToSingleton(var));
+      publishMessage(notifyRestrictToSingleton(var));
       break;
     case DomainListener::SET:
-      publish(notifySet(var));
+      publishMessage(notifySet(var));
       break;
     case DomainListener::SET_TO_SINGLETON:
-      publish(notifySetToSingleton(var));
+      publishMessage(notifySetToSingleton(var));
       break;
     case DomainListener::EMPTIED:
-      publish(notifyEmptied(var));
+      publishMessage(notifyEmptied(var));
       break;
     case DomainListener::CLOSED:
-      publish(notifyClosed(var));
+      publishMessage(notifyClosed(var));
       break;
     default:
       break;

@@ -18,6 +18,8 @@ namespace EUROPA {
   public:
     AggregateListener();
     virtual ~AggregateListener();
+
+    AggregateListenerId getId() const {return m_id;}
     
     /****Utility methods****/
     virtual void notifyStep(const DecisionPointId& dec) {m_step++;}

@@ -23,8 +23,8 @@
 #include <set>
 
 namespace EUROPA {
-  
-#define publish(message) { \
+
+#define publishMessage(message) { \
   for(std::set<AggregateListenerId>::iterator it = m_listeners.begin(); \
       it != m_listeners.end(); ++it) { \
     if((*it).isValid()) {(*it)->message;} \
@@ -40,9 +40,9 @@ namespace EUROPA {
   } \
 }
   
-#define DECLARE_EVENT(name, prototype, args...) void name(prototype) {publish(name(args))}
-#define DECLARE_EVENT_TWO(name1, name2, prototype, args...) void name1(prototype) {publish(name1(args)) publish(name2(args))}
-#define DECLARE_EVENT_ARG(name, prototype1, prototype2, args...) void name(prototype1, prototype2) {publish(name(args))}
+#define DECLARE_EVENT(name, prototype, args...) void name(prototype) {publishMessage(name(args))}
+#define DECLARE_EVENT_TWO(name1, name2, prototype, args...) void name1(prototype) {publishMessage(name1(args)) publishMessage(name2(args))}
+#define DECLARE_EVENT_ARG(name, prototype1, prototype2, args...) void name(prototype1, prototype2) {publishMessage(name(args))}
   
   
   
@@ -83,6 +83,8 @@ namespace EUROPA {
     EventAggregatorId getId(){return m_id;}
 
   public:
+    DECLARE_EVENT(notifyStep, const DecisionPointId& dp = DecisionPointId::noId(), dp);
+
     /****From DecisionManagerListener****/
     DECLARE_EVENT(notifyConditionAdded, const ConditionId& cond, cond);
     DECLARE_EVENT(notifyConditionRemoved, const ConditionId& cond, cond);
@@ -126,7 +128,7 @@ namespace EUROPA {
     DECLARE_EVENT(notifyClosed, const LabelStr& objType, objType);
     DECLARE_EVENT(notifyTokenCreated, const TokenId& tok, tok);
     //void notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor)
-    //{publish(notifyConstrained(object,token,successor));}
+    //{publishMessage(notifyConstrained(object,token,successor));}
     //DECLARE_EVENT_ARG(notifyFreed, const ObjectId& obj, const TokenId& tok, obj, tok);
     //    DECLARE_EVENT(notifyActivated, const TokenId& tok, tok);
     DECLARE_EVENT_ARG(notifyMerged, const TokenId& tok, const TokenId& actTok, tok, actTok);
@@ -151,7 +153,7 @@ namespace EUROPA {
     DECLARE_EVENT(notifyRejected, const TokenId& tok, tok);
     DECLARE_EVENT(notifyReinstated, const TokenId& tok, tok);
     void notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor) {
-      publish(notifyConstrained(object, token, successor));
+      publishMessage(notifyConstrained(object, token, successor));
     }
     DECLARE_EVENT_ARG(notifyFreed, const ObjectId& obj, const TokenId& tok, obj, tok);
     DECLARE_EVENT_ARG(notifyAdded, const ObjectId& obj, const TokenId& tok, obj, tok);
@@ -166,14 +168,14 @@ namespace EUROPA {
 //                       var, timepoint);
 //     DECLARE_EVENT(notifyTimepointDeleted, const TimepointId& timepoint, timepoint);
 //     void notifyBaseDomainConstraintAdded(const TempVarId& c, const TemporalConstraintId& constraint, Time lb, Time ub) {
-//       publish(notifyBaseDomainConstraintAdded(c, constraint, lb, ub));
+//       publishMessage(notifyBaseDomainConstraintAdded(c, constraint, lb, ub));
 //     }
 //     void notifyConstraintAdded(const ConstraintId c, const TemporalConstraintId& constraint, Time lb, Time ub) {
-//       publish(notifyConstraintAdded(c, constraint, lb, ub));
+//       publishMessage(notifyConstraintAdded(c, constraint, lb, ub));
 //     }
 //     DECLARE_EVENT_ARG(notifyConstraintDeleted, int key, const TemporalConstraintId& constraint, key, constraint);
 //     void notifyBoundsRestricted(const TempVarId& v, Time newlb, Time newub) {
-//       publish(notifyBoundsRestricted(v, newlb, newub));
+//       publishMessage(notifyBoundsRestricted(v, newlb, newub));
 //     }
 //     DECLARE_EVENT_ARG(notifyBoundsSame, const TempVarId& v, const TimepointId& timepoint, v, timepoint);
 

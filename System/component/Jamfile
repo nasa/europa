@@ -2,16 +2,12 @@ SubDir PLASMA System component ;
 
 if ! $(PLASMA_READY) {
 
-SubInclude PLASMA System component Aver ;
-
 ModuleComponent System
 	:
   EventAggregator.cc
   AggregateListener.cc
   CBPlannerControl.cc
   LoadInitModel.cc
-  Assertion.cc
-  TestSet.cc
 	;
 
 SubInclude PLASMA NDDL core libraries ;
