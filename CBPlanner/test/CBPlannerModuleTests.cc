@@ -117,6 +117,20 @@ namespace PLASMA {
     rover->addMember("Instrument.Place", "Rover", "rovers");
     rover->addMember("Instrument.Unstow", "Rover", "rovers");
     rover->addMember("Instrument.Stow", "Rover", "rovers");
+
+    // extra stuff to test
+    rover->addObjectType("Telemetry", "Object");
+    rover->addPredicate("Telemetry.Communicate");
+    rover->addMember("Telemetry.Communicate", "int", "minutes");
+    rover->addMember("Telemetry.Communicate", "float", "bandwidth");
+    rover->addMember("Telemetry.Communicate", "bool", "encoded");
+    rover->addMember("Telemetry.Communicate", "Mode", "mode");
+    rover->addEnum("Mode");
+    rover->addValue("Mode", LabelStr("high"));
+    rover->addValue("Mode", LabelStr("medium-high"));
+    rover->addValue("Mode", LabelStr("medium"));
+    rover->addValue("Mode", LabelStr("medium-low"));
+    rover->addValue("Mode", LabelStr("low"));
   }
 
   static void makeTestToken(IntervalToken& token, const std::list<double>& values){
@@ -1365,6 +1379,7 @@ namespace PLASMA {
     Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
     Timeline ins(db.getId(),LabelStr("Instrument"),LabelStr("ins1"));
     Timeline nav(db.getId(),LabelStr("Navigator"),LabelStr("nav1"));
+    Timeline tel(db.getId(),LabelStr("Telemetry"),LabelStr("tel1"));
 
     Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
     Object loc2(db.getId(),LabelStr("Location"),LabelStr("Loc2"));
@@ -1377,6 +1392,26 @@ namespace PLASMA {
     std::list<ObjectId> results;
     db.getObjectsByType("Location",results);
     ObjectDomain allLocs(results,"Location");
+
+    std::list<double> values;
+    values.push_back(LabelStr("high"));
+    values.push_back(LabelStr("medium-high"));
+    values.push_back(LabelStr("medium"));
+    values.push_back(LabelStr("medium-low"));
+    values.push_back(LabelStr("low"));
+    EnumeratedDomain allModes(values,false,"Mode");
+
+    IntervalToken tok0(db.getId(),LabelStr("Telemetry.Communicate"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,100), IntervalIntDomain(1,100), "tel1", false);
+    tok0.addParameter(IntervalDomain("int"), LabelStr("minutes"));
+    ConstrainedVariableId vmin = tok0.getVariable("minutes");
+    vmin->specify(IntervalIntDomain(60,120));
+    tok0.addParameter(IntervalDomain("float"), LabelStr("bandwidth"));
+    ConstrainedVariableId vband = tok0.getVariable("bandwidth");
+    vband->specify(IntervalDomain(500.3,1200.4));
+    //    tok0.addParameter(BoolDomain(), LabelStr("encoded"));  token
+    //    fails to recognize BoolDomain().
+    tok0.addParameter(allModes, LabelStr("mode"));
+    tok0.close();
 
     IntervalToken tok1(db.getId(),LabelStr("Commands.TakeSample"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,100), IntervalIntDomain(1,100), "com1", false);
     tok1.addParameter(allLocs, LabelStr("rock"));
