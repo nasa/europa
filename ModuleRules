@@ -98,6 +98,8 @@ rule ModuleObjects {
       use_pic_flags += NO ;
     }
     for use_pic_flag in $(use_pic_flags) {
+      local C++FLAGS = $(C++FLAGS) ;
+      local CFLAGS = $(CFLAGS) ;
       if $(use_pic_flag) = YES {
         C++FLAGS += $(POSITION_INDEPENDENT_CODE_FLAG) ;
         CFLAGS += $(POSITION_INDEPENDENT_CODE_FLAG) ;
@@ -176,8 +178,8 @@ rule ModuleMain {
         }
         if $(library) = SHARED {
           for shared_dir in $(shared_dirs) {
-            LINKLIBS on $(target) += $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)
-                                     $(LINKER_PASSTHROUGH_FLAG)$(shared_dir) ;
+            LINKFLAGS on $(target) += $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)
+                                      $(LINKER_PASSTHROUGH_FLAG)$(shared_dir) ;
           }
         }
 
@@ -242,8 +244,8 @@ rule ModuleSharedLibrary {
           shared_dirs = [ FMergeList $(shared_dirs) : $(locate_shared) ] ;
         }
         for shared_dir in $(shared_dirs) {
-          LINKLIBS on $(target) += $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)
-                                   $(LINKER_PASSTHROUGH_FLAG)$(shared_dir) ;
+          LINKFLAGS on $(target) += $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)
+                                    $(LINKER_PASSTHROUGH_FLAG)$(shared_dir) ;
         }
         if $(build_target) {
           SharedLibraryFromObjects $(target) : $(outputs) : true : true ;
