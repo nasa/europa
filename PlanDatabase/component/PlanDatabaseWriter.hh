@@ -100,7 +100,11 @@ namespace EUROPA {
 	os << v->getName().toString() << "=" << v->derivedDomain();
       }
       os << ")" <<std::endl;
-      os << "\tKey=" << t->getKey() << std::endl;
+      os << "\tKey=" << t->getKey();
+      if (t->getMaster().isNoId())
+	os << "  Master=NONE" << std::endl;
+      else
+	os << "  Master=" << t->getMaster()->getKey() << std::endl;
 
       TokenSet mergedtoks = t->getMergedTokens();
 
