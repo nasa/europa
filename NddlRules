@@ -14,7 +14,7 @@ rule NddlMain {
   local build_target = $(5) ;
 
   if $(TRACE_NDDL) = TRUE {
-    Echo NddlMain $(exe) . $(code) . $(model) ;
+    Echo NddlMain $(exe) . $(code) . $(model) . $(module) . $(build_target) ;
   }
 
   local hh = $(model:S=.hh) ;
@@ -22,6 +22,24 @@ rule NddlMain {
   Includes $(cc) : $(hh) ;
   NddlCompiler $(hh) $(cc) : $(model) ;
   ModuleMain $(exe) : $(cc) $(code) : $(module) : $(build_target) ;
+}
+
+# NddlModel model.nddl : System ;
+rule NddlModel {
+  local model = $(1) ;
+  local modules = $(2) ;
+  local build_target = $(3) ;
+
+  if $(TRACE_NDDL) = TRUE {
+    Echo NddlModel $(model) . $(module) . $(build_target) ;
+  }
+
+  local hh = $(model:S=.hh) ;
+  local cc = [ FGristFiles $(model:S=.cc) ] ;
+  local lib = $(model:S=) ;
+  Includes $(cc) : $(hh) ;
+  NddlCompiler $(hh) $(cc) : $(model) ;
+  ModuleSharedLibrary $(lib) : $(cc) : $(modules) : $(build_target) ;
 }
 
 rule NddlSystemTest {

@@ -161,7 +161,7 @@ rule LocalDepends
 rule LinkSharedLibraries
 {
 	# make library dependencies of target
-    # set NEEDLIBS variable used by 'actions Main'
+    # set NEEDSHARES variable used by 'actions Link'
 
     local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
 
@@ -526,31 +526,37 @@ rule Objects
 	}
 }
 
-actions together SharedArchive
+actions together SharedArchive bind NEEDLIBS
 {
-	$(LINK) $(LINKFLAGS) $(SHARED_FLAG) -o $(<) $(UNDEFS) $(>) $(NEEDSLIBS) $(LINKLIBS)
+	$(LINK) $(LINKFLAGS) $(SHARED_FLAG) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS) -l$(NEEDSHARES)
 }
 
 rule SharedLibraryFromObjects
 {
 	local _i _l _s ;
+	local suppress_global_dependencies = $(3) ;
+	local nogrist = $(4) ;
 
 	# Add grist to file names
 
-	_s = [ FGristFiles $(>) ] ;
+	if $(nogrist) {
+	  _s = $(>) ;
+	} else {
+	  _s = [ FGristFiles $(>) ] ;
+	}
 	_l = $(<:S=$(SUFSHARE)) ;
 
 	# library depends on its member objects
 
 	if $(KEEPOBJS)
 	{
-		if ! $(3) {
+		if ! $(suppress_global_dependencies) {
 		    LocalDepends obj : $(_s) ;
 		}
 	}
 	else
 	{
-		if ! $(3) {
+		if ! $(suppress_global_dependencies) {
 		    LocalDepends lib : $(_l) ;
 		}
 	}

@@ -2,30 +2,14 @@ SubDir PLASMA System test ;
 
 if ! $(PLASMA_READY) {
 
-local model ;
-
-#
-# BASIC TESTS
-#
-
-ModuleObjects runTest.cc : System ;
-ModuleObjects DefaultTestInit.cc : System ;
-
-for model in
-	# Rover.nddl basic-model.nddl k9.backtrack.moderate.nddl k9.nddl
-{
-  local exe = $(model:S=) ;
-  NddlMain $(exe) : runTest.o DefaultTestInit.o : $(model) : System ;
-  RunModuleMain run-$(exe) : $(exe) ;
-  LocalDepends run-nddl-planner-tests : run-$(exe) ;
-}
-
 #
 # TRANSACTION TESTS
 #
 
+ModuleObjects DefaultTestInit.cc : System ;
 ModuleObjects runTransactionTest.cc : System ;
 
+local model ;
 for model in
 	basic-types.nddl Rover-transaction.nddl basic-model-transaction.nddl k9.backtrack.moderate-transaction.nddl
 	k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl force-object-distribution.nddl 
@@ -34,7 +18,13 @@ for model in
 	backtr.nddl better-res.nddl
 {
   local exe = $(model:S=) ;
-  NddlMain $(exe) : runTransactionTest.o DefaultTestInit.o : $(model) : System ;
+  local hh = $(model:S=.hh) ;
+  local cc = [ FGristFiles $(model:S=.cc) ] ;
+  local lib = $(model:S=) ;
+  Includes $(cc) : $(hh) ;
+  NddlCompiler $(hh) $(cc) : $(model) ;
+  ModuleMain $(exe) : $(cc) runTransactionTest.o DefaultTestInit.o : System ;
+  ModuleSharedLibrary $(lib) : $(cc) : NDDL : model-libraries ;
   RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 }
@@ -64,6 +54,8 @@ rule GenerateStack {
 actions GenerateStack {
   $(2) $(ARGUMENTS) $(1:S=) 
 }
+
+ModuleObjects runTest.cc : System ;
 
 local numSatellites ;
 for numSatellites in 1 10 50 100 {
