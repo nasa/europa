@@ -39,32 +39,34 @@ BOUNDS_RECORD_END_STORAGE::BOUNDS_RECORD_END_STORAGE(const LabelStr& name,
   check_error(m_variables.size() == 5);
   check_error(getCurrentDomain(m_variables[0]).isNumeric());
   check_error(getCurrentDomain(m_variables[1]).isNumeric());
-  check_error(getCurrentDomain(m_variables[2]).isNumeric()); //!!Should be Observation_Level
-  check_error(getCurrentDomain(m_variables[3]).isNumeric()); //!!Should be Observation_Level
+  check_error(getCurrentDomain(m_variables[2]).isEnumerated());
+  check_error(getCurrentDomain(m_variables[3]).isEnumerated());
+  check_error(getCurrentDomain(m_variables[2]).getTypeName() == LabelStr("Observation_Level"))
+  check_error(getCurrentDomain(m_variables[3]).getTypeName() == LabelStr("Observation_Level"))
   check_error(getCurrentDomain(m_variables[4]).isNumeric());
 }
 
 void BOUNDS_RECORD_END_STORAGE::handleExecute() {
   IntervalIntDomain& outDom = static_cast<IntervalIntDomain&>(getCurrentDomain(m_variables[0]));
   IntervalIntDomain& startDom = static_cast<IntervalIntDomain&>(getCurrentDomain(m_variables[1]));
-  IntervalIntDomain& rfpDom = static_cast<IntervalIntDomain&>(getCurrentDomain(m_variables[2]));
-  IntervalIntDomain& rmosDom = static_cast<IntervalIntDomain&>(getCurrentDomain(m_variables[3]));
+  SymbolDomain& rfpDom = static_cast<SymbolDomain&>(getCurrentDomain(m_variables[2]));
+  SymbolDomain& rmosDom = static_cast<SymbolDomain&>(getCurrentDomain(m_variables[3]));
   IntervalIntDomain& durDom = static_cast<IntervalIntDomain&>(getCurrentDomain(m_variables[4]));
   if (!rfpDom.isSingleton() || !rmosDom.isSingleton())
     return;
-  int rfpVal = (int)rfpDom.getSingletonValue();
-  int rmosVal = (int)rmosDom.getSingletonValue();
+  LabelStr rfpVal = rfpDom.getSingletonValue();
+  LabelStr rmosVal = rmosDom.getSingletonValue();
   int minRate;
-  if (rfpVal == 0.0) /*!!ObsLo */
+  if (rfpVal == LabelStr("ObsLo"))
     minRate = RFPLO;
   else
-    if (rfpVal == 1.0) /*!!ObsHi */
+    if (rfpVal == LabelStr("ObsHi"))
       minRate = RFPHI;
     else
-      if (rmosVal == 0.0) /*!!ObsLo */
+      if (rmosVal == LabelStr("ObsLo"))
         minRate = RMOSLO;
       else
-        if (rmosVal == 1.0) /*!!ObsHi */
+        if (rmosVal == LabelStr("ObsHi"))
           minRate = RMOSHI;
         else /* rfpVal == ObsNo && rmosVal == ObsNo */
           minRate = 0;
@@ -101,32 +103,34 @@ BOUNDS_RECORD_START_STORAGE::BOUNDS_RECORD_START_STORAGE(const LabelStr& name,
   check_error(m_variables.size() == 5);
   check_error(getCurrentDomain(m_variables[0]).isNumeric());
   check_error(getCurrentDomain(m_variables[1]).isNumeric());
-  check_error(getCurrentDomain(m_variables[2]).isNumeric()); //!!Should be Observation_Level
-  check_error(getCurrentDomain(m_variables[3]).isNumeric()); //!!Should be Observation_Level
+  check_error(getCurrentDomain(m_variables[2]).isEnumerated());
+  check_error(getCurrentDomain(m_variables[3]).isEnumerated());
+  check_error(getCurrentDomain(m_variables[2]).getTypeName() == LabelStr("Observation_Level"))
+  check_error(getCurrentDomain(m_variables[3]).getTypeName() == LabelStr("Observation_Level"))
   check_error(getCurrentDomain(m_variables[4]).isNumeric());
 }
 
 void BOUNDS_RECORD_START_STORAGE::handleExecute() {
   IntervalIntDomain& outDom = static_cast<IntervalIntDomain&>(getCurrentDomain(m_variables[0]));
   IntervalIntDomain& endDom = static_cast<IntervalIntDomain&>(getCurrentDomain(m_variables[1]));
-  IntervalIntDomain& rfpDom = static_cast<IntervalIntDomain&>(getCurrentDomain(m_variables[2]));
-  IntervalIntDomain& rmosDom = static_cast<IntervalIntDomain&>(getCurrentDomain(m_variables[3]));
+  SymbolDomain& rfpDom = static_cast<SymbolDomain&>(getCurrentDomain(m_variables[2]));
+  SymbolDomain& rmosDom = static_cast<SymbolDomain&>(getCurrentDomain(m_variables[3]));
   IntervalIntDomain& durDom = static_cast<IntervalIntDomain&>(getCurrentDomain(m_variables[4]));
   if (!rfpDom.isSingleton() || !rmosDom.isSingleton())
     return;
   int rfpVal = (int)rfpDom.getSingletonValue();
   int rmosVal = (int)rmosDom.getSingletonValue();
   int minRate;
-  if (rfpVal == 0.0) /*!!ObsLo */
+  if (rfpVal == LabelStr("ObsLo"))
     minRate = RFPLO;
   else
-    if (rfpVal == 1.0) /*!!ObsHi */
+    if (rfpVal == LabelStr("ObsHi"))
       minRate = RFPHI;
     else
-      if (rmosVal == 0.0) /*!!ObsLo */
+      if (rmosVal == LabelStr("ObsLo"))
         minRate = RMOSLO;
       else
-        if (rmosVal == 1.0) /*!!ObsHi */
+        if (rmosVal == LabelStr("ObsHi"))
           minRate = RMOSHI;
         else /* rfpVal == ObsNo && rmosVal == ObsNo */
           //!!minRate = 0;
