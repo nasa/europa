@@ -4,6 +4,7 @@
 #include "Choice.hh"
 #include "ValueChoice.hh"
 #include "TokenChoice.hh"
+#include "HSTSHeuristics.hh"
 
 namespace PLASMA {
 
@@ -16,6 +17,7 @@ namespace PLASMA {
     DefaultOpenDecisionManager::addActive(token);
     std::map<int,ObjectDecisionPointId>::iterator pos = m_objDecs.find(token->getKey());
     check_error(pos != m_objDecs.end());
+    check_error(pos->second.isValid());
     m_sortedObjectDecs.insert(pos->second);
   }
 
@@ -23,59 +25,11 @@ namespace PLASMA {
     DefaultOpenDecisionManager::condAddActive(token);
     std::map<int,ObjectDecisionPointId>::iterator pos = m_objDecs.find(token->getKey());
     check_error(pos != m_objDecs.end());
+    check_error(pos->second.isValid());
     m_sortedObjectDecs.insert(pos->second);
   }
 
-  const bool HSTSOpenDecisionManager::removeVarDP(const ConstrainedVariableId& var, const bool deleting, std::map<int,ConstrainedVariableDecisionPointId>& varMap, HSTSVariableDecisionSet& sortedVars) {
-
-    std::map<int,ConstrainedVariableDecisionPointId>::iterator it = varMap.find(var->getKey());
-    if (it != varMap.end()) {
-      if (deleting) {
-	ConstrainedVariableDecisionPointId dec = it->second;
-	check_error(dec.isValid());
-	sortedVars.erase(dec);
-	varMap.erase(it);
-	m_dm->deleteDecision(dec);
-      } else {
-	sortedVars.erase(it->second);
-	varMap.erase(it);
-      }
-      publishRemovedDecision(var);
-    }
-    else return false;
-
-    return true;
-  }
-
-  const bool HSTSOpenDecisionManager::removeTokenDP(const TokenId& token, const bool deleting, std::map<int,TokenDecisionPointId>& tokMap, HSTSTokenDecisionSet& sortedToks) {
-    std::map<int,TokenDecisionPointId>::iterator it = tokMap.find(token->getKey());
-    if (it != tokMap.end()) {
-      //      if (deleting) {
-      if (it->second->isOpen() || deleting) {
-	TokenDecisionPointId dec = it->second;
-	sortedToks.erase(dec);
-	check_error(dec.isValid());
-	tokMap.erase(it);
-	m_dm->deleteDecision(dec);
-      }
-      else {
-	sortedToks.erase(it->second);
-	tokMap.erase(it);
-      }
-      publishRemovedDecision(token);
-      return true;
-    }
-    return false;
-  }
-
   void HSTSOpenDecisionManager::removeActive(const TokenId& token, const bool deleting) {
-    /*
-    if (ObjectDecisionPointId::convertable(m_curDec)) {
-      ObjectDecisionPointId objdec = m_curDec;
-      if (objdec->getToken()->getKey() == token->getKey())
-	return;
-    }
-    */
     std::map<int,ObjectDecisionPointId>::iterator it = m_objDecs.find(token->getKey());
     if (it != m_objDecs.end()) {
       if (it->second->isOpen() || deleting) {
@@ -98,17 +52,152 @@ namespace PLASMA {
     m_sortedObjectDecs.clear();
   }
 
-  DecisionPointId HSTSOpenDecisionManager::getNextDecision() {
-    if(!m_sortedObjectDecs.empty())
-      m_curDec = *m_sortedObjectDecs.begin();
-    else if (!m_sortedUnitVarDecs.empty())
-      m_curDec = *m_sortedUnitVarDecs.begin();
-    else if (!m_sortedTokDecs.empty()) 
-      m_curDec = *m_sortedTokDecs.begin();
-    else if (!m_sortedNonUnitVarDecs.empty()) 
-      m_curDec = *m_sortedNonUnitVarDecs.begin();
-    else m_curDec = DecisionPointId::noId();
+  void HSTSOpenDecisionManager::getBestObjectDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
+    check_error(bestDec.isNoId());
+    if (m_sortedObjectDecs.empty()) return;
+    for (ObjectDecisionSet::iterator it = m_sortedObjectDecs.begin(); it != m_sortedObjectDecs.end(); ++it) {
+      const HSTSHeuristics::Priority priority = m_heur->getPriorityForObjectDP(*it);
+      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
+	  (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
+	bestDec = *it;
+	bestp = priority;
+      }
+    }
+    if (bestDec.isNoId() && !m_sortedObjectDecs.empty())
+      bestDec = *m_sortedObjectDecs.begin();
+  }
 
+  void HSTSOpenDecisionManager::getBestTokenDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
+    check_error(bestDec.isNoId());
+    if (m_sortedTokDecs.empty()) return;
+    for (TokenDecisionSet::iterator it = m_sortedTokDecs.begin(); it != m_sortedTokDecs.end(); ++it) {
+      const HSTSHeuristics::Priority priority = m_heur->getPriorityForTokenDP(*it);
+      //      std::cout << "Comparing priority = " << priority << " to bestp = " << bestp << std::endl;
+      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
+	  (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
+	bestDec = *it;
+	bestp = priority;
+      }
+    }
+    if (bestDec.isNoId() && !m_sortedTokDecs.empty())
+      bestDec = *m_sortedTokDecs.begin();
+  }
+
+  void HSTSOpenDecisionManager::getBestVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
+    check_error(bestDec.isNoId());
+    if (m_sortedUnitVarDecs.empty() && m_sortedNonUnitVarDecs.empty()) return;
+    for (VariableDecisionSet::iterator it = m_sortedUnitVarDecs.begin(); it != m_sortedUnitVarDecs.end(); ++it) {
+      const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(*it);
+      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
+	  (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
+	bestDec = *it;
+	bestp = priority;
+      }
+    }
+    if (bestDec.isNoId()) {
+      if (!m_sortedUnitVarDecs.empty())
+	bestDec = *m_sortedUnitVarDecs.begin();
+      else {
+	for (VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin(); it != m_sortedNonUnitVarDecs.end(); ++it) {
+	  const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(*it);
+	  if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
+	      (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
+	    bestDec = *it;
+	    bestp = priority;
+	  }
+	}
+      }
+    }
+  }
+
+  DecisionPointId HSTSOpenDecisionManager::getNextDecision() {
+    DecisionPointId bestODec;
+    DecisionPointId bestTDec;
+    DecisionPointId bestVDec;
+    HSTSHeuristics::Priority bestOP=MIN_PRIORITY;
+    HSTSHeuristics::Priority bestTP=MIN_PRIORITY;
+    HSTSHeuristics::Priority bestVP=MIN_PRIORITY;
+    getBestObjectDecision(bestODec,bestOP);
+    getBestTokenDecision(bestTDec,bestTP);
+    getBestVariableDecision(bestVDec,bestVP);
+
+    if (!bestODec.isNoId()) {
+      ObjectDecisionPointId odec(bestODec);
+      //      std::cout << " Best Object Decision = " << odec->getToken()->getName().c_str() << std::endl; 
+    }
+    //    else
+    //      std::cout << " No Best Object Decision " << std::endl;
+
+    if (!bestTDec.isNoId()) {
+      TokenDecisionPointId tdec(bestTDec);
+      //      std::cout << " Best Token Decision = " << tdec->getToken()->getName().c_str() << std::endl; 
+    }
+    //    else
+    //      std::cout << " No Best Token Decision " << std::endl;
+
+    if (!bestVDec.isNoId()) {
+      ConstrainedVariableDecisionPointId vdec(bestVDec);
+      //      std::cout << " Best Variable Decision = " << vdec->getVariable()->getName().c_str() << std::endl; 
+    }
+    //    else
+    //      std::cout << " No Best Variable Decision " << std::endl;
+
+    bool assignedBest(false);
+    if (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH) {
+      if (bestOP > bestTP) {
+	if (bestOP > bestVP) {
+	  m_curDec = bestODec;
+	  assignedBest = true;
+	}
+	else if (bestVP > bestOP) {
+	  m_curDec = bestVDec;
+	  assignedBest = true;
+	}
+      }
+      else {
+	if (bestTP > bestVP) {
+	  m_curDec = bestTDec;
+	  assignedBest = true;
+	}
+	else if (bestVP > bestTP) {
+	  m_curDec = bestVDec;
+	  assignedBest = true;
+	}
+      }
+    } else {
+      if (bestOP < bestTP) {
+	if (bestOP < bestVP) {
+	  m_curDec = bestODec;
+	  assignedBest = true;
+	}
+	else if (bestVP < bestOP) {
+	  m_curDec = bestVDec;
+	  assignedBest = true;
+	}
+      }
+      else {
+	if (bestTP < bestVP) {
+	  m_curDec = bestTDec;
+	  assignedBest = true;
+	}
+	else if (bestVP < bestTP) {
+	  m_curDec = bestVDec;
+	  assignedBest = true;
+	}
+      }
+    }
+
+    if (!assignedBest) { // default to the key orderings
+      if(!m_sortedObjectDecs.empty())
+	m_curDec = *m_sortedObjectDecs.begin();
+      else if (!m_sortedUnitVarDecs.empty())
+	m_curDec = *m_sortedUnitVarDecs.begin();
+      else if (!m_sortedTokDecs.empty()) 
+	m_curDec = *m_sortedTokDecs.begin();
+      else if (!m_sortedNonUnitVarDecs.empty()) 
+	m_curDec = *m_sortedNonUnitVarDecs.begin();
+      else m_curDec = DecisionPointId::noId();
+    }
     /* Shold be able to require that current choices are empty */
     check_error(m_curDec.isNoId() || m_curDec->getCurrentChoices().empty());
 
@@ -160,34 +249,6 @@ namespace PLASMA {
     //    if(m_curChoice.isNoId())
       //      std::cout << "DEBUG: No more choices" << std::endl;
     return m_curChoice;
-  }
-
-  void HSTSOpenDecisionManager::getOpenDecisions(std::list<DecisionPointId>& decisions) {
-    std::map<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
-    for (; oit != m_objDecs.end(); ++oit)
-      decisions.push_back(oit->second);
-    std::map<int,ConstrainedVariableDecisionPointId>::iterator vit = m_unitVarDecs.begin();
-    for (; vit != m_unitVarDecs.end(); ++vit)
-      decisions.push_back(vit->second);
-    std::map<int,TokenDecisionPointId>::iterator it = m_tokDecs.begin();
-    for (; it != m_tokDecs.end(); ++it)
-      decisions.push_back(it->second);
-    for (vit = m_nonUnitVarDecs.begin(); vit != m_nonUnitVarDecs.end(); ++vit)
-      decisions.push_back(vit->second);
-  }
-
-  void HSTSOpenDecisionManager::printOpenDecisions(std::ostream& os) {
-    std::map<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
-    for (; oit != m_objDecs.end(); ++oit)
-      os << oit->second << std::endl;
-    std::map<int,ConstrainedVariableDecisionPointId>::iterator vit = m_unitVarDecs.begin();
-    for (; vit != m_unitVarDecs.end(); ++vit)
-      os << vit->second << std::endl;
-    std::map<int,TokenDecisionPointId>::iterator it = m_tokDecs.begin();
-    for (; it != m_tokDecs.end(); ++it)
-      os << it->second << std::endl;
-    for (vit = m_nonUnitVarDecs.begin(); vit != m_nonUnitVarDecs.end(); ++vit)
-      os << vit->second << std::endl;
   }
 
 }
