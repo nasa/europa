@@ -21,10 +21,13 @@ namespace Prototype {
     check_error(value >= MINUS_INFINITY);
   }
 
-  IntervalDomain::~IntervalDomain() { }
+  IntervalDomain::~IntervalDomain() {
+  }
 
   IntervalDomain::IntervalDomain(const IntervalDomain& org)
-    : AbstractDomain(true, false, DomainListenerId::noId()), m_ub(org.m_ub), m_lb(org.m_lb) { }
+    : AbstractDomain(true, false, DomainListenerId::noId()),
+      m_ub(org.m_ub), m_lb(org.m_lb) {
+  }
 
   bool IntervalDomain::intersect(const AbstractDomain& dom) {
     check_error(AbstractDomain::canBeCompared(*this, dom));
@@ -146,6 +149,14 @@ namespace Prototype {
 
   bool IntervalDomain::equate(AbstractDomain& dom) {
     check_error(AbstractDomain::canBeCompared(*this, dom));
+
+    // Avoid duplicating part of EnumeratedDomain::equate().  Needed for
+    // full propagation in cases like equate([0.0 10.0] {5.0 20.0}),
+    // which would otherwise only trim to [5.0 10.0] {5.0} unless two
+    // passes are made.  --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 22
+    if (dom.isEnumerated())
+      return(dom.equate(*this));
+
     bool result = intersect(dom);
     if (!isEmpty() && dom.intersect(*this))
       result = true;
