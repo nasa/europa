@@ -9,15 +9,15 @@ namespace Prototype {
 
 
   StringDomain::StringDomain(const std::list<double>& values, 
-                             bool closed = true,
-                             const DomainListenerId& listener = DomainListenerId::noId())
+                             bool closed,
+                             const DomainListenerId& listener)
     : EnumeratedDomain(values, closed, listener, false)
   {
   }
 
 
   StringDomain::StringDomain(double value,
-                             const DomainListenerId& listener = DomainListenerId::noId())
+                             const DomainListenerId& listener)
     : EnumeratedDomain(value, listener, false)
   {
   }

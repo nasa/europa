@@ -7,13 +7,13 @@ namespace Prototype {
   // boolDomain
   //
 
-  boolDomain::boolDomain(const DomainListenerId& listener = DomainListenerId::noId())
+  boolDomain::boolDomain(const DomainListenerId& listener)
    : BoolDomain(listener)
   {
   }
 
   boolDomain::boolDomain(bool value, 
-    	                 const DomainListenerId& listener = DomainListenerId::noId())
+                         const DomainListenerId& listener)
    : BoolDomain(value, listener)
   {
   }
@@ -38,10 +38,10 @@ namespace Prototype {
   ConstrainedVariableId
   boolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                   const LabelStr& typeName,
-                                  bool canBeSpecified = true,
-                                  const LabelStr& name = ConstrainedVariable::NO_NAME(),
-                                  const EntityId& parent = EntityId::noId(),
-                                  int index = ConstrainedVariable::NO_INDEX) const
+                                  bool canBeSpecified,
+                                  const LabelStr& name,
+                                  const EntityId& parent,
+                                  int index) const
   {
     boolDomain * baseDomain = static_cast<boolDomain*>(createDomain());
     Variable<boolDomain> * variable

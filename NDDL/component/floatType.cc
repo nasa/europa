@@ -7,19 +7,19 @@ namespace Prototype {
   // floatDomain
   //
 
-  floatDomain::floatDomain(const DomainListenerId& listener = DomainListenerId::noId())
+  floatDomain::floatDomain(const DomainListenerId& listener)
    : IntervalDomain(listener)
   {
   }
 
   floatDomain::floatDomain(double lb, double ub, 
-    	                   const DomainListenerId& listener = DomainListenerId::noId())
+    	                   const DomainListenerId& listener)
    : IntervalDomain(lb, ub, listener)
   {
   }
 
   floatDomain::floatDomain(double value, 
-    	                   const DomainListenerId& listener = DomainListenerId::noId())
+    	                   const DomainListenerId& listener)
    : IntervalDomain(value, listener)
   {
   }
@@ -44,10 +44,10 @@ namespace Prototype {
   ConstrainedVariableId
   floatTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                    const LabelStr& typeName,
-                                   bool canBeSpecified = true,
-                                   const LabelStr& name = ConstrainedVariable::NO_NAME(),
-                                   const EntityId& parent = EntityId::noId(),
-                                   int index = ConstrainedVariable::NO_INDEX) const
+                                   bool canBeSpecified,
+                                   const LabelStr& name,
+                                   const EntityId& parent,
+                                   int index) const
   {
     floatDomain * baseDomain = static_cast<floatDomain*>(createDomain());
     Variable<floatDomain> * variable

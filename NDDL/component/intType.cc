@@ -7,19 +7,19 @@ namespace Prototype {
   // intDomain
   //
 
-  intDomain::intDomain(const DomainListenerId& listener = DomainListenerId::noId())
+  intDomain::intDomain(const DomainListenerId& listener)
    : IntervalIntDomain(listener)
   {
   }
 
   intDomain::intDomain(int lb, int ub, 
-    	               const DomainListenerId& listener = DomainListenerId::noId())
+    	               const DomainListenerId& listener)
    : IntervalIntDomain(lb, ub, listener)
   {
   }
 
   intDomain::intDomain(int value, 
-    	               const DomainListenerId& listener = DomainListenerId::noId())
+    	               const DomainListenerId& listener)
    : IntervalIntDomain(value, listener)
   {
   }
@@ -44,10 +44,10 @@ namespace Prototype {
   ConstrainedVariableId
   intTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                  const LabelStr& typeName,
-                                 bool canBeSpecified = true,
-                                 const LabelStr& name = ConstrainedVariable::NO_NAME(),
-                                 const EntityId& parent = EntityId::noId(),
-                                 int index = ConstrainedVariable::NO_INDEX) const
+                                 bool canBeSpecified,
+                                 const LabelStr& name,
+                                 const EntityId& parent,
+                                 int index) const
   {
     intDomain * baseDomain = static_cast<intDomain*>(createDomain());
     Variable<intDomain> * variable

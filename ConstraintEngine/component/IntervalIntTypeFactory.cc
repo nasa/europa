@@ -13,10 +13,10 @@ namespace Prototype {
   ConstrainedVariableId
   IntervalIntTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                          const AbstractDomain& baseDomain,
-                                         bool canBeSpecified = true,
-                                         const LabelStr& name = ConstrainedVariable::NO_NAME(),
-                                         const EntityId& parent = EntityId::noId(),
-                                         int index = ConstrainedVariable::NO_INDEX) const
+                                         bool canBeSpecified,
+                                         const LabelStr& name,
+                                         const EntityId& parent,
+                                         int index) const
   {
     const IntervalIntDomain * intervalIntDomain = dynamic_cast<const IntervalIntDomain*>(&baseDomain);
     check_error(intervalIntDomain != NULL, "tried to create an IntervalIntDomain variable with a different kind of base domain");

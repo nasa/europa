@@ -13,10 +13,10 @@ namespace Prototype {
   ConstrainedVariableId
   SymbolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                     const AbstractDomain& baseDomain,
-                                    bool canBeSpecified = true,
-                                    const LabelStr& name = ConstrainedVariable::NO_NAME(),
-                                    const EntityId& parent = EntityId::noId(),
-                                    int index = ConstrainedVariable::NO_INDEX) const
+                                    bool canBeSpecified,
+                                    const LabelStr& name,
+                                    const EntityId& parent,
+                                    int index) const
   {
     const SymbolDomain * stringDomain = dynamic_cast<const SymbolDomain*>(&baseDomain);
     check_error(stringDomain != NULL, "tried to create a SymbolDomain variable with a different kind of base domain");
