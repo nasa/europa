@@ -703,6 +703,10 @@ namespace Prototype {
 				dm->getOpenDecisions(decs);
 				for(std::list<DecisionPointId>::iterator it = decs.begin(); it != decs.end(); ++it)
 					outputDecision(*it, decsOut);
+        const DecisionPointId &currDec = dm->getCurrentDecision();
+        std::list<DecisionPointId>::iterator loc = std::find(decs.begin(), decs.end(), currDec);
+        if(loc == decs.end())
+          outputDecision(currDec, decsOut);
 			}
 			
       (*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
