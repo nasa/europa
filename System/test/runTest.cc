@@ -51,6 +51,10 @@
 #include "DecisionPoint.hh"
 #include "EUROPAHeuristicStrategy.hh"
 
+// For testing planner decisions
+#include "PlannerDecisionWriter.hh"
+#include "DecisionReplayer.hh"
+
 // In case we want to print out the plan database
 #include "PlanDatabaseWriter.hh"
 
@@ -60,7 +64,14 @@
 #include "TemporalAdvisor.hh"
 #include "STNTemporalAdvisor.hh"
 
-int main(){
+// For cleanup purging
+#include "../PlanDatabase/TokenFactory.hh"
+#include "../PlanDatabase/ObjectFactory.hh"
+#include "../RulesEngine/Rule.hh"
+
+#include <fstream>
+
+int main(int argc, const char ** argv){
   //REGISTER_NARY(EqualConstraint, "concurrent", "Default");
   REGISTER_NARY(EqualConstraint, "concurrent", "Temporal");
   REGISTER_NARY(EqualConstraint, "eq", "Default");
@@ -127,23 +138,47 @@ int main(){
   int end = (int) horizonEnd->baseDomain().getSingletonValue();
   hor.setHorizon(start, end);
 
-  // Create and run the planner
-  ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
-  check_error(maxPlannerSteps.isValid());
-  int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
-  CBPlanner planner(db.getId(),query.getId(),steps);
-  EUROPAHeuristicStrategy strategy;
-    
-  int res = planner.run(strategy.getId(), loggingEnabled());
-  check_error(res == 1);
-
-  const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
-    
-  std::cout << "Nr of Decisions = " << closed.size() << std::endl;
-    
-  std::cout << "Finished" << std::endl;
-
+  if (argc == 1) {
+    // Create and run the planner
+    ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
+    check_error(maxPlannerSteps.isValid());
+    int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
+    CBPlanner planner(db.getId(),query.getId(),steps);
+    EUROPAHeuristicStrategy strategy;
+      
+    int res = planner.run(strategy.getId(), loggingEnabled());
+    check_error(res == 1);
+	
+    const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
+      
+    std::cout << "Nr of Decisions = " << closed.size() << std::endl;
+      
+    // planner decisions
+    std::cout << "Saving Planner Decisions..." << std::endl;
+    PlannerDecisionWriter decisionWriter(planner.getId(), db.getId());
+    std::string filename(argv[0]);
+    filename += "-decisions.xml";
+    std::ofstream out(filename.c_str());
+    out << decisionWriter.closedDecisionsString();
+  } else {
+    // replay the planner decisions
+    std::string filename(argv[0]);
+    filename += "-decisions.xml";
+    std::ifstream in(filename.c_str());
+    std::string readbuf;
+    DecisionReplayer replayer(db.getId());
+    while (in.good()) {
+      getline(in, readbuf);
+      replayer.replay(readbuf);
+    }
+  }
   std::cout << "Plan Database:" << std::endl;
   PlanDatabaseWriter::write(db.getId(), std::cout);
+
+  ConstraintLibrary::purgeAll();
+  TokenFactory::purgeAll();
+  ObjectFactory::purgeAll();
   db.purge();
+	
+  std::cout << "Finished" << std::endl;
 }
