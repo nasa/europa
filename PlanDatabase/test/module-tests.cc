@@ -35,8 +35,11 @@
 
 class TestRule: public Rule {
 public:
-  TestRule(const RulesEngineId& rulesEngine, const LabelStr& name): Rule(rulesEngine, name){}
+  TestRule(const RulesEngineId& rulesEngine, const LabelStr& name): Rule(rulesEngine, name){
+    new TestRule(getId());
+  }
 
+  TestRule(const RuleId& parent): Rule(parent){}
   /**
    * Initialize the context with some variables form the token and add a local variable for the rule too. This
    * will test cleanup.
@@ -60,14 +63,12 @@ public:
       return true;
   }
 
-  void fire(const TokenId& token,
-	    const std::vector<ConstrainedVariableId>& scope,
+  void fire(const RuleContextId& context,
 	    std::vector<TokenId>& newTokens,
 	    std::vector<ConstrainedVariableId>& newVariables,
 	    std::vector<ConstraintId>& newConstraints) const {
-
     // Allocate a new slave Token
-    TokenId slave = (new IntervalToken(token, 
+    TokenId slave = (new IntervalToken(context->getToken(), 
 				       LabelStr("Predicate"), 
 				       BooleanDomain(false)))->getId();
     newTokens.push_back(slave);
@@ -76,7 +77,7 @@ public:
     // the existing token
     {
       std::vector<ConstrainedVariableId> constrainedVars;
-      constrainedVars.push_back(token->getEnd());
+      constrainedVars.push_back(context->getToken()->getEnd());
       constrainedVars.push_back(slave->getStart());
       ConstraintId meets = ConstraintLibrary::createConstraint(LabelStr("Equal"),
 							       getRulesEngine()->getPlanDatabase()->getConstraintEngine(),
@@ -88,12 +89,14 @@ public:
     {
       std::vector<ConstrainedVariableId> constrainedVars;
       constrainedVars.push_back(slave->getDuration());
-      constrainedVars.push_back(scope.back());
+      constrainedVars.push_back(context->getScope().back());
       ConstraintId restrictDuration = ConstraintLibrary::createConstraint(LabelStr("Equal"),
 									  getRulesEngine()->getPlanDatabase()->getConstraintEngine(),
 									  constrainedVars);
       newConstraints.push_back(restrictDuration);
     }
+    if(!getChildren().empty())
+      context->createChild(getChildren().front());
   }
 };
 
@@ -801,7 +804,9 @@ public:
 private:
   static bool testBasicAllocation(){
     DEFAULT_SETUP(ce, db, schema, false);
-    new TestRule(re.getId(), LabelStr("AnyType::AnyPredicate"));
+    RuleId parent = (new TestRule(re.getId(), LabelStr("AnyType::AnyPredicate")))->getId();
+    new TestRule(parent);
+
     return true;
   }
 
@@ -860,8 +865,9 @@ private:
     tokenA.getObject()->specify(object.getId());
     tokenA.getRejectability()->specify(false);
     assert(ce.propagate());
-    assert(db.getTokens().size() == 2);
-    assert(tokenA.getSlaves().size() == 1);
+    // 2 tokens added since fire will trigger twice due to composition
+    assert(db.getTokens().size() == 3);
+    assert(tokenA.getSlaves().size() == 2);
     TokenId slave = *(tokenA.getSlaves().begin());
     assert(slave->getDuration()->getDerivedDomain().isSingleton()); // Due to constraint on local variable
 
@@ -873,14 +879,14 @@ private:
     // Set again, and deactivate
     tokenA.getRejectability()->specify(false);
     assert(ce.propagate());
-    assert(db.getTokens().size() == 2);
+    assert(db.getTokens().size() == 3);
     tokenA.deactivate();
     assert(db.getTokens().size() == 1);
 
     // Now repeast to ensure correct automatic cleanup
     tokenA.activate();
     assert(ce.propagate());
-    assert(db.getTokens().size() == 2); // Rule should fire since specified domain already set!
+    assert(db.getTokens().size() == 3); // Rule should fire since specified domain already set!
     return true;
   }
 };
