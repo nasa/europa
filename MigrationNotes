@@ -1,24 +1,28 @@
 Brief Migration Notes
 
-$Id: MigrationNotes,v 1.2 2004-11-22 22:41:48 wedgingt Exp $
+$Id: MigrationNotes,v 1.3 2004-11-26 20:40:33 wedgingt Exp $
 
 This file is intended to help users of the prior Europa (in the
 NewPlan CVS tree) planning system migrate their projects to this
-version, Europa 2 (informally known as PLASMA during its initial
+version, Europa2 (informally known as PLASMA during its initial
 development, which is still in progress at this time).
 
 This is a draft document likely to be modified fairly often as issues
 are noticed.  New issues are likely to be simply appended to the end
 without regard to importance or any other criteria, at least until the
-first official release of Europa 2 (PLASMA).
+first official release of Europa2.
+
+There are several references to GNATS below; see the README file for
+the URL of the GNATS database.
 
 1. Explicit bounds on timepoints of tokens (whether between two tokens
-or to absolute time values) are not supported in XML transaction
-files.  This may be an issue when translating NewPlan style initial
-state files to NDDL or XML transaction files.
+or to absolute time values) are not supported by Europa2 in XML
+transaction files.  This may be an issue when translating NewPlan
+style initial state files to NDDL or to XML transaction files.  See
+also GNATS 2708.
 
-2. In NewPlan, there is only one class Domain.  In PLASMA, there are
-many: EnumeratedDomain, StringDomain, SymbolDomain, ObjectDomain,
+2. In NewPlan, there is only one (C++) class Domain.  In Europa2, there
+are many: EnumeratedDomain, StringDomain, SymbolDomain, ObjectDomain,
 IntervalDomain, IntervalIntDomain, etc.  Also, each enumeration (label
 set, in NewPlan terms) will have its own C++ class for its domains.
 
@@ -34,27 +38,30 @@ course, not possible during run time but could be "simulated" in
 NewPlan because all C++ domain variables were of the single C++ class
 Domain.
 
-4. When the domain of the object variable of a token is closed but not
-singleton, then asking any of the objects in that domain for the list
-of associated tokens will include the token.  This is very different
-from the behavior of NewPlan, for which such queries only return the
-tokens that have already been inserted onto a timeline of the object.
-(see also GNATS 2704).
+4. In Europa2, when the domain of the object variable of a token is
+closed but not singleton, then asking any of the objects in that
+domain for the list of associated tokens will include the token.  This
+is very different from the behavior of NewPlan, for which such queries
+only return the tokens that have already been inserted onto a timeline
+of the object.  (see also GNATS 2704).
 
 5. In NewPlan, label sets imply a "default ordering" heuristic based
 on the order they are given when the label set is declared.  This
-behavior is not duplicated in PLASMA, for which the "default ordering"
+behavior is not duplicated in Europa2, for which the "default ordering"
 heuristoc would be lexicographic (based on ASCII code) due to
 internals of how the C++ classes EnumeratedDomain and LabelStr are
 implemented.
 
 6. The number of plan steps for otherwise identical problems will
-almost certainly increase whenever tokens are involved.
+almost certainly be larger with Europa2 (PLASMA) than with Europa
+(NewPlan) whenever tokens are involved due to changes in how tokens
+are supported.
 
 7. NewPlan/ModelLoader/converter/convert2 can be used to read a DDL
-file (including any that it includes) and produce a single NDDL file
-for use with PLASMA.
+file (including any DDL files that it includes) and produce a single
+NDDL file for use with Europa2.
 
-8. NewPlan ConstraintTokens are not supported by PLASMA, though the
-convert2 program will not complain about them (the NDDL compiler
-will).
+8. NewPlan's ConstraintTokens are not supported by Europa2, though the
+convert2 program will not complain about them (the NDDL compiler will,
+at least whenever there is a choice between two or more predicates
+because it is a ConstraintToken rather than a ValueToken).
