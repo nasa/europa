@@ -86,8 +86,7 @@ RuleInstanceId NestedGuards_0::createInstance(const TokenId& token, const PlanDa
 
 NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& token, 
                                          const PlanDatabaseId& planDb)
-  : RuleInstance(rule, token, planDb, token->getObject()) {
-}
+  : RuleInstance(rule, token, planDb, token->getObject()) {}
 
 void NestedGuards_0_Root::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token,  LabelStr("AllObjects.Predicate")));
