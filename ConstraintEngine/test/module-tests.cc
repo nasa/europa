@@ -1120,8 +1120,7 @@ private:
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
       assertTrue(ENGINE->constraintConsistent());
-      // Could be restricted to [1 27], but current implementation doesn't do that much checking.
-      assertTrue(v3.getDerivedDomain().isSubsetOf(IntervalIntDomain(0, 27)));
+      assertTrue(v3.getDerivedDomain().isSubsetOf(IntervalIntDomain(1, 27)));
     }
     scope.clear();
     {
@@ -1461,12 +1460,13 @@ private:
   }
 
   /**
-   * @brief Create a new EnumeratedDomain from data read from the stream.
+   * @brief Create a new EnumeratedDomain or BoolDomain from data read from the stream.
    * @note Incomplete, but should allow tests to pass.
    */
   static AbstractDomain* readSet(std::istream& in) {
     char ch;
     AbstractDomain *dom;
+    AbstractDomain::DomainType type = AbstractDomain::REAL_ENUMERATION;
     bool negative = false;
     double value;
     std::list<double> values;
@@ -1479,11 +1479,13 @@ private:
         in.get(ch);
         continue;
       case '-':
+        assertTrue(members.empty() && type == AbstractDomain::REAL_ENUMERATION);
         negative = true;
         in.get(ch);
         continue;
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
+        assertTrue(members.empty() && type == AbstractDomain::REAL_ENUMERATION);
         if (negative)
           member = "-";
         member += ch;
@@ -1501,22 +1503,63 @@ private:
         for (in.get(ch); ch != '}' && ch != ' ' && in.good(); in.get(ch))
           member += ch;
         assertTrue(in.good());
-        if (member == "-Infinity" || member == "-Inf" || member == "-INF")
+        if (member == "-Infinity" || member == "-Inf" || member == "-INF") {
+          assertTrue(type == AbstractDomain::REAL_ENUMERATION);
           values.push_back(MINUS_INFINITY);
-        else
-          if (member == "Infinity" || member == "Inf" || member == "INF")
+        } else
+          if (member == "Infinity" || member == "Inf" || member == "INF") {
+            assertTrue(type == AbstractDomain::REAL_ENUMERATION);
             values.push_back(PLUS_INFINITY);
-          else
-            members.push_back(member);
+          } else
+            if (member == "false" || member == "False" || member == "FALSE") {
+              members.push_back("false");
+              // Allow "false" - but not "False"! - to be a member of a user defined type.
+              // Need to know expected type of this arg of constraint to do better.
+              if (type == AbstractDomain::REAL_ENUMERATION)
+                type = AbstractDomain::BOOL;
+            } else
+              if (member == "true" || member == "True" || member == "TRUE") {
+                members.push_back("true");
+                // Allow "true" - but not "True"! - to be a member of a user defined type.
+                // Need to know expected type of this arg of constraint to do better.
+                if (type == AbstractDomain::REAL_ENUMERATION)
+                  type = AbstractDomain::BOOL;
+              } else {
+                members.push_back(member);
+                type = AbstractDomain::USER_DEFINED;
+              }
         member = "";
         break;
       }
     }
     assertTrue(in.good() && ch == '}');
     assertTrue(values.empty() || members.empty());
-    if (values.empty() && !members.empty())
-      return(0); // Cannot support members without knowing how to map them to doubles.
-    dom = new EnumeratedDomain(values);
+    switch (type) {
+    case AbstractDomain::REAL_ENUMERATION:
+      dom = new EnumeratedDomain(values);
+      break;
+    case AbstractDomain::BOOL:
+      dom = new BoolDomain;
+      dom->empty();
+      for (std::list<std::string>::iterator it = members.begin();
+           it != members.end(); it++)
+        if (*it == "false")
+          dom->insert(false);
+        else
+          if (*it == "true")
+            dom->insert(true);
+          else
+            assertTrue(false);
+      break;
+    case AbstractDomain::USER_DEFINED:
+      // Cannot support members without knowing how to map them to doubles.
+      // For now, caller will have to skip this test.
+      return(0);
+      break;
+    default: // Unsupported or unimplemented type.
+      assertTrue(false);
+      break;
+    }
     assertTrue(dom != 0);
     return(dom);
   }
@@ -1637,7 +1680,11 @@ private:
         break;
       assertTrue(strcmp(buf, "test") == 0 && !tCS.eof() && tCS.good());
       tCS >> cnt;
+
+      // This requirement that cnt == line is probably overkill and should be dropped.
+      // If nothing else, it makes it harder to insert tests in the middle of files.
       assert(cnt == line && !tCS.eof() && tCS.good());
+
       constraintName = "";
       tCS.get(ch);
       assertTrue(ch == ' ' && !tCS.eof() && tCS.good());
@@ -1665,7 +1712,7 @@ private:
         switch (ch) {
         case ' ': // Blank between fields; ignore it.
           break;
-        case '{': // Singleton or enumeration but could be IntervalDomain or IntervalIntDomain.
+        case '{': // Singleton, enumeration, or boolean but could be IntervalDomain, IntervalIntDomain, or BoolDomain.
           domain = readSet(tCS);
           // This if is temporary, until readSet is fully implemented.
           // Presently, it cannot support Europa label sets.
@@ -1706,7 +1753,7 @@ private:
 
       // OK, done with a line, each line being a test, so
       // interleave the input and output domains to make
-      // things easier below ...
+      // things easier in caller.
       assertTrue(inputDoms.size() == outputDoms.size() && !tCS.eof() && tCS.good());
       domains.clear();
       while (!inputDoms.empty() && !outputDoms.empty()) {
@@ -1755,7 +1802,7 @@ private:
       if (!ConstraintLibrary::isRegistered(LabelStr(tests.front().m_constraintName), false)) {
         if (loggingEnabled() &&
             warned.find(tests.front().m_constraintName) == warned.end()) {
-          std::cerr << tests.front().m_fileName << ':' << tests.front().m_line
+          std::cout << tests.front().m_fileName << ':' << tests.front().m_line
                     << ": constraint " << tests.front().m_constraintName
                     << " is unregistered; skipping tests of it.\n";
           warned.insert(tests.front().m_constraintName);
@@ -1825,11 +1872,11 @@ private:
 
       assertTrue(scope.size() == outputDoms.size());
 
-      // Create and (fully) execute the constraint.
+      // Create and execute the constraint.
       ConstraintId constraint = ConstraintLibrary::createConstraint(LabelStr(tests.front().m_constraintName), ENGINE, scope);
       assertTrue(ENGINE->pending());
-      while (ENGINE->pending())
-        ENGINE->propagate();
+      ENGINE->propagate();
+      assertFalse(ENGINE->pending());
 
       // Compare derived domains with outputDoms.
       std::vector<ConstrainedVariableId>::iterator scopeIter = scope.begin();
