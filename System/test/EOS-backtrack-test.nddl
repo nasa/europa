@@ -34,10 +34,12 @@ class Target {
 class Satellite {
  Antenna m_antenna;
  Memory m_memory;
+ int m_slewRate;
 
- Satellite () {
+ Satellite (int slewRate) {
   m_antenna = new Antenna (10000, 0, 10000);
   m_memory = new Memory (100000, 10, 100000);
+  m_slewRate = slewRate;
  }
 
  predicate TakeImg {
@@ -112,6 +114,7 @@ Satellite::TakeImg {
 
 // doesn't calculate exact, but rather, linear distance as a simplification
 Satellite::Slew {
+  eq(object.m_slewRate,m_rate);
   met_by(object.Pointing pfrom);
   meets(object.Pointing pto);
   eq(pfrom.m_target,m_from);
@@ -120,7 +123,10 @@ Satellite::Slew {
   addEq(dx,pfrom.m_target.m_x,pto.m_target.m_x);
   addEq(dy,pfrom.m_target.m_y,pto.m_target.m_y);
   addEq(dz,pfrom.m_target.m_z,pto.m_target.m_z);
-  // Wrong number of arguments: addMulEq(dz,dy,dz,m_rate,duration);
+  int tmp, tmp2;
+  addEq(dx,dy,tmp);
+  addEq(tmp,dz,tmp2);
+  mulEq(duration,tmp2,m_rate);
 }
 
 Satellite::HaveImg {
@@ -171,7 +177,7 @@ PlannerConfig world = new PlannerConfig(0,100,5000);
 Target target1 = new Target("target1",10,10,10,100,95.0);
 Target target2 = new Target("target2",25,25,25,25,90.0);
 Target target3 = new Target("target3",50,50,50,80,84.0);
-Satellite satellite1 = new Satellite();
+Satellite satellite1 = new Satellite(10);
 GroundStation ground1 = new GroundStation();
 close();
 
