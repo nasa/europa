@@ -4,7 +4,7 @@
 #include "ResourceDefs.hh"
 #include "DecisionPoint.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class ResourceFlawDecisionPoint : public DecisionPoint {
   public:

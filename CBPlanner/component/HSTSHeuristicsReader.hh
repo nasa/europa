@@ -7,7 +7,7 @@
 
 class TiXmlElement;
 
-namespace Prototype {
+namespace PLASMA {
 
   class HSTSHeuristicsReader {
   public:

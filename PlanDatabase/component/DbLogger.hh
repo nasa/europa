@@ -4,7 +4,7 @@
 #include "PlanDatabaseListener.hh"
 #include <iostream>
 
-namespace Prototype{
+namespace PLASMA{
 
   class DbLogger: public PlanDatabaseListener {
   public:

@@ -2,7 +2,7 @@
 #include "SymbolDomain.hh"
 #include "Variable.hh"
 
-namespace Prototype {
+namespace PLASMA {
   
   //
   // SymbolTypeFactory
@@ -48,4 +48,4 @@ namespace Prototype {
     return LabelStr(value);
   }
 
-} // namespace Prototype
+} // namespace PLASMA

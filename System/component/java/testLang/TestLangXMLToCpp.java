@@ -81,12 +81,12 @@ public class TestLangXMLToCpp extends TestLangHelper {
     header.addLine("#include \"TestSet.hh\"");
     header.addLine("#include \"Assertion.hh\"");
     header.addLine("#include \"StringDomain.hh\"");
-    header.addLine("namespace Prototype {");
+    header.addLine("namespace PLASMA {");
     header.indent();
 
     impl.addLine("#include \"" + headerName + "\"");
     impl.addLine("#include <iostream>");
-    impl.addLine("namespace Prototype {");
+    impl.addLine("namespace PLASMA {");
     impl.indent();
 
     convertTestSet(testTree);
@@ -103,22 +103,22 @@ public class TestLangXMLToCpp extends TestLangHelper {
 
     header.addLine("namespace " + rootTestName + "_TestHidden {");
     header.indent();
-    header.addLine("static Prototype::" + rootTestName + "* test;");
+    header.addLine("static PLASMA::" + rootTestName + "* test;");
     header.unindent();
     header.addLine("}");
-    header.addLine("void testLangInit(const Prototype::PlanDatabaseId& db, const Prototype::DecisionManagerId& dm = Prototype::DecisionManagerId::noId(),");
+    header.addLine("void testLangInit(const PLASMA::PlanDatabaseId& db, const PLASMA::DecisionManagerId& dm = PLASMA::DecisionManagerId::noId(),");
     header.indent();
-    header.addLine("\tconst Prototype::ConstraintEngineId& ce = Prototype::ConstraintEngineId::noId(),");
-    header.addLine("\tconst Prototype::RulesEngineId& re = Prototype::RulesEngineId::noId()) {");
-    header.addLine("Prototype::EventAggregator::instance(dm, ce, db, re);");
-    header.addLine(rootTestName + "_TestHidden::test = new Prototype::" + rootTestName + "(db);");
+    header.addLine("\tconst PLASMA::ConstraintEngineId& ce = PLASMA::ConstraintEngineId::noId(),");
+    header.addLine("\tconst PLASMA::RulesEngineId& re = PLASMA::RulesEngineId::noId()) {");
+    header.addLine("PLASMA::EventAggregator::instance(dm, ce, db, re);");
+    header.addLine(rootTestName + "_TestHidden::test = new PLASMA::" + rootTestName + "(db);");
     header.unindent();
     header.addLine("}");
     header.addLine("void testLangDeinit() {");
     header.indent();
     header.addLine(rootTestName + "_TestHidden::test->dumpResults();");
     header.addLine("delete " + rootTestName + "_TestHidden::test;");
-    header.addLine("Prototype::EventAggregator::remove();");
+    header.addLine("PLASMA::EventAggregator::remove();");
     header.unindent();
     header.addLine("}");
 

@@ -1,5 +1,5 @@
 /**
- * @mainpage Constraint Engine Prototype
+ * @mainpage Constraint Engine
  * @section intro Introduction
  * This module is a prototype for a new Constraint Engine Framework. A framework is a set of interfaces and components for
  * building a range of particular constraint engines instances. Please use this page as a guide for reviewing the prototype
@@ -23,7 +23,7 @@
  * during execution of a constraint.
  *
  * @section goals Imperatives for new Design
- * The prototype must address the deficincies outlined above. Some concrete design directions seem clear:
+ * The prototype must address the deficiencies outlined above. Some concrete design directions seem clear:
  * @li Restrict interfaces to allow required behaviour and prohibit unacceptable behavior.
  * @li Allow flexible configuration/control of the Propagation Scheduling
  * @li Allow registration of external constraints without requiring static linking. Have not put much effort into this, but would investigate
@@ -73,7 +73,7 @@
  * All results are based on the following:
  * @li run on murphys (linux box)
  * @li Europa is compiled with: make EUROPA_VERSION=_EUROPA_FAST_VERSION_ OPTIMIZE=3
- * @li ConstraintEngineDefs.hh includes: #define #define _PROTOTYPE_FAST_VALUE_
+ * @li ConstraintEngineDefs.hh includes: #define #define _PLASMA_FAST_VALUE_
  * @li ConstraintEngine makefile has: CC_FLAGS=-O3
  * 
  * Results are shown below:
@@ -92,14 +92,14 @@ testIntervalPerformance      0.19                              1.03             
  * methods in the Constrainttest class.
  * @li DomainTest.cc shows the performance testing done on the new domains.
  * @li EuropaDomainTests.cc shows the equivalent tests condutced on old Europa domains.
- * @li Prototype::ConstraintEngine is the core of the framework.
- * @li Prototype::ConstrainedVariable shows the ConstraintEngines perspective on what a variable is.
- * @li Prototype::Variable shows the external users view of what a variable is.
- * @li Prototype::AbstractDomain and derived classes show the alternate domain implementation.
- * @li Prototype::DomainListener defines the events that can be tracked on a domain.
- * @li Prototype::Constraint class plays the same role it plays in Europa, though it is integarted to the ConstraintEngine and event model
+ * @li PLASMA::ConstraintEngine is the core of the framework.
+ * @li PLASMA::ConstrainedVariable shows the ConstraintEngines perspective on what a variable is.
+ * @li PLASMA::Variable shows the external users view of what a variable is.
+ * @li PLASMA::AbstractDomain and derived classes show the alternate domain implementation.
+ * @li PLASMA::DomainListener defines the events that can be tracked on a domain.
+ * @li PLASMA::Constraint class plays the same role it plays in Europa, though it is integarted to the ConstraintEngine and event model
  * a little differently.
- * @li Prototype::Propagator class basically handles agenda management.
+ * @li PLASMA::Propagator class basically handles agenda management.
  *
  * @section build Build Instructions
  * Some of the basics are:
@@ -110,7 +110,7 @@ testIntervalPerformance      0.19                              1.03             
  * To run performance tests:
  * @li first make under NewPlan as follows: make EUROPA_VERSION=_EUROPA_FAST_VERSION_ OPTIMIZE=3.
  * @li with Europa built correctly, change CC_FLAGS in the local makefile to CC_FLAGS=-03.
- * @li define _PROTOTYPE_FAST_VALUE_ in ConstraintEngineDefs.hh
+ * @li define _PLASMA_FAST_VALUE_ in ConstraintEngineDefs.hh
  * @li make domain-tests will execute the new domain version of one of the tests (check the code to see which one.
  * @li make europa-domain-tests wille execute the europa domain version which should be comparable in functionality.
  *

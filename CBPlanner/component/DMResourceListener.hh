@@ -7,7 +7,7 @@
 
 // RODM in comments stands for ResourceOpenDecisionManager
 
-namespace Prototype {
+namespace PLASMA {
 
   class DMResourceListener : public ResourceListener {
   public:

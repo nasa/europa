@@ -6,7 +6,7 @@
 #include "Utils.hh"
 #include <list>
 
-namespace Prototype {
+namespace PLASMA {
 
   ObjectDecisionPoint::ObjectDecisionPoint(const DbClientId& dbClient, const TokenId& token)
     : DecisionPoint(dbClient, token) {

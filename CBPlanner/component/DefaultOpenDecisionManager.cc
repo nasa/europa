@@ -11,7 +11,7 @@
 #include "ValueChoice.hh"
 #include "DefaultOpenDecisionManager.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   DefaultOpenDecisionManager::DefaultOpenDecisionManager(const DecisionManagerId& dm) : OpenDecisionManager(dm) {
   }

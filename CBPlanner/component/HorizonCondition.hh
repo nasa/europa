@@ -6,7 +6,7 @@
 #include <map>
 #include <set>
 
-namespace Prototype {
+namespace PLASMA {
 
   class HorizonCondition : public Condition {
   public:

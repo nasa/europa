@@ -15,7 +15,7 @@
 #include "ObjectTokenRelation.hh"
 #include "PlanDatabaseTestSupport.hh"
 
-using namespace Prototype;
+using namespace PLASMA;
 using namespace NDDL;
 
 class ObjectFilterConstraintTest {

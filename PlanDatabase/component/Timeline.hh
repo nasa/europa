@@ -6,7 +6,7 @@
 #include <map>
 #include <vector>
 
-namespace Prototype {
+namespace PLASMA {
 
   class Timeline: public Object {
   public:

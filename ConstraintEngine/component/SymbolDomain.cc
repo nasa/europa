@@ -1,6 +1,6 @@
 #include "SymbolDomain.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   SymbolDomain::SymbolDomain() 
     : EnumeratedDomain(false, getDefaultTypeName().c_str()){}
@@ -44,4 +44,4 @@ namespace Prototype {
   }
 
 
-} // namespace Prototype
+} // namespace PLASMA

@@ -1,6 +1,6 @@
 #include "NumericDomain.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
 
   NumericDomain::NumericDomain()

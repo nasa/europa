@@ -4,7 +4,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "Entity.hh"
 
-namespace Prototype {
+namespace PLASMA {
   class Object;
   typedef Id<Object> ObjectId;
   typedef std::set<ObjectId, EntityComparator<ObjectId> > ObjectSet;

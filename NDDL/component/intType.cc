@@ -1,7 +1,7 @@
 #include "intType.hh"
 #include "Variable.hh"
 
-namespace Prototype {
+namespace PLASMA {
   
   //
   // intTypeFactory
@@ -26,4 +26,4 @@ namespace Prototype {
     return(sl_typeName);
   }
 
-} // namespace Prototype
+} // namespace PLASMA

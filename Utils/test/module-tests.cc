@@ -67,7 +67,7 @@
   }\
   }
 
-using namespace Prototype;
+using namespace PLASMA;
 
 class TestError {
 public:

@@ -1,6 +1,6 @@
 #include "Generator.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   Generator::Generator(const LabelStr& name) : Entity(), m_id(this), m_name(name) { }
 

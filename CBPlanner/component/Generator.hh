@@ -16,7 +16,7 @@
 #include "LabelStr.hh"
 #include <list>
 
-namespace Prototype {
+namespace PLASMA {
 
   class Generator;
   typedef Id<Generator> GeneratorId;

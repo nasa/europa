@@ -1,6 +1,6 @@
 #include "BoolDomain.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
 
   BoolDomain::BoolDomain()

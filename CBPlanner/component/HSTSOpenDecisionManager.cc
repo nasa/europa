@@ -5,7 +5,7 @@
 #include "ValueChoice.hh"
 #include "TokenChoice.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   HSTSOpenDecisionManager::HSTSOpenDecisionManager(const DecisionManagerId& dm) : DefaultOpenDecisionManager(dm) {
   }

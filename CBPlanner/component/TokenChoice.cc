@@ -2,7 +2,7 @@
 #include "Token.hh"
 #include "Object.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   TokenChoice::TokenChoice(const DecisionPointId& decision, const ObjectId& obj, const TokenId& tok) : Choice(decision), m_object(obj), m_successor(tok) { 
     // can't enforce successor.isValid() because decisions to insert at the end

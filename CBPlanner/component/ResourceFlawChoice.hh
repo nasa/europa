@@ -6,7 +6,7 @@
 #include "CBPlannerDefs.hh"
 #include "Choice.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class ResourceFlawChoice : public Choice {
   public:

@@ -1,4 +1,4 @@
-#include "PrototypePerformanceConstraint.hh"
+#include "PLASMAPerformanceConstraint.hh"
 
 // Include prototypes required to integrate to the NDDL generated model
 #include "Nddl.hh"

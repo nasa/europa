@@ -5,7 +5,7 @@
 #include "BoolDomain.hh"
 #include "ConstrainedVariable.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   EqualityConstraintPropagator::EqualityConstraintPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
     : Propagator(name, constraintEngine), m_fullReprop(false), m_active(false){}

@@ -7,7 +7,7 @@
 #define ADD_TEST(test) m_tests.push_back((new test(planDb))->getId())
 #define ADD_ASSERTION(assertion) m_tests.push_back((new assertion(planDb))->getId())
 
-namespace Prototype {
+namespace PLASMA {
   class Test;
   typedef Id<Test> TestId;
   

@@ -4,7 +4,7 @@
 #include "TypeFactory.hh"
 #include "BoolDomain.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class BoolTypeFactory : public ConcreteTypeFactory {
   public:
@@ -34,6 +34,6 @@ namespace Prototype {
     BoolDomain m_baseDomain;
   };
 
-} // namespace Prototype
+} // namespace PLASMA
 
 #endif // _H_BoolTypeFactory

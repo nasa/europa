@@ -7,7 +7,7 @@
 #include "DefaultPropagator.hh"
 #include "PlanDbModuleTests.hh"
 
-using namespace Prototype;
+using namespace PLASMA;
 
 #define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngineId ce = (new ConstraintEngine())->getId(); \

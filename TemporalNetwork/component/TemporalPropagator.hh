@@ -9,7 +9,7 @@
 #include "IntervalIntDomain.hh"
 #include <set>
 
-namespace Prototype {
+namespace PLASMA {
 
   class TemporalPropagator: public Propagator
   {

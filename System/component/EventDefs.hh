@@ -3,7 +3,7 @@
 
 #include "Id.hh"
 
-namespace Prototype {
+namespace PLASMA {
   class EventAggregator;
   typedef Id<EventAggregator> EventAggregatorId;
   

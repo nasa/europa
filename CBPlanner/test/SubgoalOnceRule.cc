@@ -8,7 +8,7 @@
 #include "Object.hh"
 #include "StringDomain.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class SubgoalOnceRuleRoot : public RuleInstance {
   public:
@@ -43,11 +43,11 @@ namespace Prototype {
 				      IntervalIntDomain(1, 1000),
 				      Token::noObject(), false))->getId();
     std::list<double> values;
-    values.push_back(Prototype::LabelStr("L1"));
-    values.push_back(Prototype::LabelStr("L4"));
-    values.push_back(Prototype::LabelStr("L2"));
-    values.push_back(Prototype::LabelStr("L5"));
-    values.push_back(Prototype::LabelStr("L3"));
+    values.push_back(PLASMA::LabelStr("L1"));
+    values.push_back(PLASMA::LabelStr("L4"));
+    values.push_back(PLASMA::LabelStr("L2"));
+    values.push_back(PLASMA::LabelStr("L5"));
+    values.push_back(PLASMA::LabelStr("L3"));
     tok->addParameter(LabelSet(values), "LabelSetParam0");
     tok->addParameter(IntervalIntDomain(1,20), "IntervalIntParam");
     tok->close();

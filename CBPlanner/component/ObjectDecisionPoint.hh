@@ -4,7 +4,7 @@
 #include "CBPlannerDefs.hh"
 #include "DecisionPoint.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class ObjectDecisionPoint : public DecisionPoint {
   public:

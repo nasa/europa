@@ -1,5 +1,5 @@
 #include "PlannerControlIntf.hh"
-#include "PrototypePerformanceConstraint.hh"
+#include "PLASMAPerformanceConstraint.hh"
 
 // Include prototypes required to integrate to the NDDL generated model
 #include "Nddl.hh"
@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <dlfcn.h>
 
-namespace Prototype {
+namespace PLASMA {
 
   extern "C"
 

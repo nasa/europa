@@ -1,6 +1,6 @@
 #include "EventAggregator.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   EventAggregatorId EventAggregator::s_instance = EventAggregatorId::noId();
 

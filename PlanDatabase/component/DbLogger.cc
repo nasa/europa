@@ -2,7 +2,7 @@
 #include "Token.hh"
 #include "Object.hh"
 
-namespace Prototype {
+namespace PLASMA {
   const std::string CLASS_DELIMITER(":");
 
   DbLogger::DbLogger(std::ostream& os, const PlanDatabaseId& planDatabase): PlanDatabaseListener(planDatabase), m_os(os){}

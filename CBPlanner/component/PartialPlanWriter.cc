@@ -163,7 +163,7 @@ const char *sourceTypeNames[3] = {"SYSTEM", "USER", "UNKNOWN"};
 
 enum sourceTypes {SYSTEM = 0, USER, UNKNOWN};
 
-const char *tokenStates[Prototype::Token::REJECTED + 1] = {"INCOMPLETE", "INACTIVE", "ACTIVE", "MERGED", "REJECTED"};
+const char *tokenStates[PLASMA::Token::REJECTED + 1] = {"INCOMPLETE", "INACTIVE", "ACTIVE", "MERGED", "REJECTED"};
 
 const std::string DURATION_VAR("DURATION_VAR");
 const std::string END_VAR("END_VAR");
@@ -248,7 +248,7 @@ static char *realpath(const char *path, char *resolved_path) {
 #endif
 
 
-namespace Prototype {
+namespace PLASMA {
   namespace PlanWriter {
 		
 		inline long long int timeval2Id(const struct timeval &currTime) {

@@ -8,7 +8,7 @@
 #include "Utils.hh"
 #include <cmath>
 
-namespace Prototype {
+namespace PLASMA {
 
   /**
    * Utility class that might get promoted later.
@@ -1749,4 +1749,4 @@ namespace Prototype {
       s_runAlready = true;
     }
   }
-} // end namespace Prototype
+} // end namespace PLASMA

@@ -1,5 +1,5 @@
 // For performance tests only
-#include "PrototypePerformanceConstraint.hh"
+#include "PLASMAPerformanceConstraint.hh"
 
 // Include prototypes required to integrate to the NDDL generated model
 #include "Nddl.hh"
@@ -19,10 +19,10 @@
 
 SchemaId schema;
 
-extern void testLangInit(const Prototype::PlanDatabaseId& db,
-                         const Prototype::DecisionManagerId& dm,
-                         const Prototype::ConstraintEngineId& ce,
-                         const Prototype::RulesEngineId& re);
+extern void testLangInit(const PLASMA::PlanDatabaseId& db,
+                         const PLASMA::DecisionManagerId& dm,
+                         const PLASMA::ConstraintEngineId& ce,
+                         const PLASMA::RulesEngineId& re);
 extern void testLangDeinit();
 
 const char* TX_LOG = "TransactionLog.xml";
@@ -1260,7 +1260,7 @@ namespace NDDL {
 
 bool runTestLangTest(){
     SamplePlanDatabase db1(schema, replay);
-    testLangInit(db1.planDatabase, Prototype::DecisionManagerId::noId(),
+    testLangInit(db1.planDatabase, PLASMA::DecisionManagerId::noId(),
                  db1.constraintEngine, db1.rulesEngine);
 
     DbClientId client = db1.planDatabase->getClient();
@@ -1360,7 +1360,7 @@ bool runTestLangTest(){
     int end = (int) horizonEnd->baseDomain().getSingletonValue();
     db1.horizon->setHorizon(start, end);
 
-    Prototype::EventAggregator::instance()->notifyAssignNextSucceeded(DecisionPointId::noId());
+    PLASMA::EventAggregator::instance()->notifyAssignNextSucceeded(DecisionPointId::noId());
     //db1.writer->write();
 
     testLangDeinit();
@@ -1370,7 +1370,7 @@ bool runTestLangTest(){
 int main(int argc, const char ** argv){
   // Initialize constraint factories
   SamplePlanDatabase::initialize();
-  //schema = Prototype::Schema::instance();
+  //schema = PLASMA::Schema::instance();
   schema = NDDL::schema();
 
   replay = false;

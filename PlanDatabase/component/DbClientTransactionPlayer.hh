@@ -13,7 +13,7 @@ class TiXmlElement;
  * @brief Main interface for playing transactions. Necessary for copy. replay, and possibly recovery.
  */
 
-namespace Prototype {
+namespace PLASMA {
 
   class DbClientTransactionPlayer {
   public:

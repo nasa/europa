@@ -8,7 +8,7 @@
 
 #include <vector>
 
-namespace Prototype {
+namespace PLASMA {
 
 #define MAX_PRIORITY 1000000000.0 
 #define MIN_PRIORITY 0.0 

@@ -3,7 +3,7 @@
 #include "tinyxml.h"
 #include "HSTSHeuristics.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
 #define IS_TAG(x) (strcmp (tagName, x) == 0)
 

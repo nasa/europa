@@ -9,7 +9,7 @@
 #include "EnumeratedDomain.hh"
 #include "LabelStr.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   /**
    * @class StringDomain
@@ -77,7 +77,7 @@ namespace Prototype {
     void set(double value);
   };
 
-} // namespace Prototype
+} // namespace PLASMA
 
 #endif // _H_StringDomain
 

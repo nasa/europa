@@ -32,7 +32,7 @@
 
 #include <fstream>
 
-using namespace Prototype;
+using namespace PLASMA;
 using namespace std;
 
 class DelegationTestConstraint : public Constraint {
@@ -444,11 +444,11 @@ public:
 private:
   static bool testSubsetConstraint() {
     std::list<double> values;
-    values.push_back(Prototype::LabelStr("A"));
-    values.push_back(Prototype::LabelStr("B"));
-    values.push_back(Prototype::LabelStr("C"));
-    values.push_back(Prototype::LabelStr("D"));
-    values.push_back(Prototype::LabelStr("E"));
+    values.push_back(PLASMA::LabelStr("A"));
+    values.push_back(PLASMA::LabelStr("B"));
+    values.push_back(PLASMA::LabelStr("C"));
+    values.push_back(PLASMA::LabelStr("D"));
+    values.push_back(PLASMA::LabelStr("E"));
     LabelSet ls0(values);
     values.pop_back();
     values.pop_back();
@@ -651,11 +651,11 @@ private:
   {
     // Set up a base domain
     std::list<double> baseValues;
-    baseValues.push_back(Prototype::LabelStr("A"));
-    baseValues.push_back(Prototype::LabelStr("B"));
-    baseValues.push_back(Prototype::LabelStr("C"));
-    baseValues.push_back(Prototype::LabelStr("D"));
-    baseValues.push_back(Prototype::LabelStr("E"));
+    baseValues.push_back(PLASMA::LabelStr("A"));
+    baseValues.push_back(PLASMA::LabelStr("B"));
+    baseValues.push_back(PLASMA::LabelStr("C"));
+    baseValues.push_back(PLASMA::LabelStr("D"));
+    baseValues.push_back(PLASMA::LabelStr("E"));
     LabelSet baseDomain(baseValues);
 
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
@@ -668,15 +668,15 @@ private:
 
     LabelSet ls0(baseDomain);
     ls0.empty();
-    ls0.insert(Prototype::LabelStr("A"));
+    ls0.insert(PLASMA::LabelStr("A"));
 
     LabelSet ls1(baseDomain);
     ls1.empty();
-    ls1.insert(Prototype::LabelStr("A"));
-    ls1.insert(Prototype::LabelStr("B"));
-    ls1.insert(Prototype::LabelStr("C"));
-    ls1.insert(Prototype::LabelStr("D"));
-    ls1.insert(Prototype::LabelStr("E"));
+    ls1.insert(PLASMA::LabelStr("A"));
+    ls1.insert(PLASMA::LabelStr("B"));
+    ls1.insert(PLASMA::LabelStr("C"));
+    ls1.insert(PLASMA::LabelStr("D"));
+    ls1.insert(PLASMA::LabelStr("E"));
 
     Variable<LabelSet> v2(ENGINE, ls1);
     Variable<LabelSet> v3(ENGINE, ls1);
@@ -687,11 +687,11 @@ private:
     assert(!v2.getDerivedDomain().isSingleton());
 
     LabelSet ls2(ls1);
-    ls2.remove(Prototype::LabelStr("E"));
+    ls2.remove(PLASMA::LabelStr("E"));
 
     v2.specify(ls2);
     ENGINE->propagate();
-    assert(!v3.getDerivedDomain().isMember(Prototype::LabelStr("E")));
+    assert(!v3.getDerivedDomain().isMember(PLASMA::LabelStr("E")));
 
     Variable<LabelSet> v4(ENGINE, ls0);
     EqualConstraint c2(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v4.getId()));
@@ -700,7 +700,7 @@ private:
     assert(v2.getDerivedDomain() == v3.getDerivedDomain());
     assert(v2.getDerivedDomain() == v4.getDerivedDomain());
     assert(v3.getDerivedDomain() == v4.getDerivedDomain());
-    assert(v3.getDerivedDomain().getSingletonValue() == Prototype::LabelStr("A"));
+    assert(v3.getDerivedDomain().getSingletonValue() == PLASMA::LabelStr("A"));
 
     // Now test that equality is working correctly for dynamic domains
     {
@@ -2098,8 +2098,8 @@ private:
       // Simple checks that this test case is OK.
       assertTrue(inputDoms.size() == outputDoms.size() && !tCS.eof() && tCS.good());
 
-      // Some NewPlan constraints are the same as constraints in the
-      //   prototype except for the order of the arguments.
+      // Some NewPlan constraints are the same as constraints in
+      //   PLASMA except for the order of the arguments.
       // These two move the last argument to the front:
       /* This is wrong:
          addleq(x, y, z) is x + y <= z
@@ -2158,8 +2158,8 @@ private:
 
     // Try reading "test cases" file of NewPlan/ModuleTests/ConstraintLibrary/testCLib,
     // committed here as CLibTestCases after some minor editing to use '[]' for all
-    // numeric domains since Europa prints some of those using '{}' syntax and the
-    // prototype treats as intervals all numeric domains that aren't explicitly
+    // numeric domains since Europa prints some of those using '{}' syntax and
+    // PLASMA treats as intervals all numeric domains that aren't explicitly
     // identified as enumerations.
     // For each file, try twice with different relative paths since we don't know what
     // the current working directory is.
@@ -2313,18 +2313,18 @@ private:
 
   static bool testLockConstraint() {
     LabelSet lockDomain;
-    lockDomain.insert(Prototype::LabelStr("A"));
-    lockDomain.insert(Prototype::LabelStr("B"));
-    lockDomain.insert(Prototype::LabelStr("C"));
-    lockDomain.insert(Prototype::LabelStr("D"));
+    lockDomain.insert(PLASMA::LabelStr("A"));
+    lockDomain.insert(PLASMA::LabelStr("B"));
+    lockDomain.insert(PLASMA::LabelStr("C"));
+    lockDomain.insert(PLASMA::LabelStr("D"));
     lockDomain.close();
 
     LabelSet baseDomain;
-    baseDomain.insert(Prototype::LabelStr("A"));
-    baseDomain.insert(Prototype::LabelStr("B"));
-    baseDomain.insert(Prototype::LabelStr("C"));
-    baseDomain.insert(Prototype::LabelStr("D"));
-    baseDomain.insert(Prototype::LabelStr("E"));
+    baseDomain.insert(PLASMA::LabelStr("A"));
+    baseDomain.insert(PLASMA::LabelStr("B"));
+    baseDomain.insert(PLASMA::LabelStr("C"));
+    baseDomain.insert(PLASMA::LabelStr("D"));
+    baseDomain.insert(PLASMA::LabelStr("E"));
     baseDomain.close();
 
     // Set up variable with base domain - will exceed lock domain
@@ -2338,7 +2338,7 @@ private:
     assert(v0.getDerivedDomain() == lockDomain);
 
     // Now specify to a restricted value, and ensure an inconsistency
-    v0.specify(Prototype::LabelStr("C"));
+    v0.specify(PLASMA::LabelStr("C"));
     assert(!ENGINE->propagate());
 
     // Now ensure that we can rty again, without changing anything, and get the same result.

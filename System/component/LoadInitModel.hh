@@ -8,7 +8,7 @@
 }
 
 
-namespace Prototype {
+namespace PLASMA {
   /*
    * These inline functions are used to allow access 
    * to static variables within a function.

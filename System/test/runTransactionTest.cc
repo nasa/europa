@@ -19,10 +19,10 @@ SchemaId schema;
 
 //#define PERFORMANCE
 
-extern void testLangInit(const Prototype::PlanDatabaseId& db,
-                         const Prototype::DecisionManagerId& dm,
-                         const Prototype::ConstraintEngineId& ce,
-                         const Prototype::RulesEngineId& re);
+extern void testLangInit(const PLASMA::PlanDatabaseId& db,
+                         const PLASMA::DecisionManagerId& dm,
+                         const PLASMA::ConstraintEngineId& ce,
+                         const PLASMA::RulesEngineId& re);
 extern void testLangDeinit();
 
 const char* TX_LOG = "TransactionLog.xml";

@@ -2,7 +2,7 @@
 #include "BoolDomain.hh"
 #include "Variable.hh"
 
-namespace Prototype {
+namespace PLASMA {
   
   //
   // BoolTypeFactory
@@ -50,4 +50,4 @@ namespace Prototype {
     return -1;
   }
 
-} // namespace Prototype
+} // namespace PLASMA

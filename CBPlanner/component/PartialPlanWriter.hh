@@ -22,7 +22,7 @@
 #include "RulesEngineListener.hh"
 #include "RuleInstance.hh"
 
-namespace Prototype {
+namespace PLASMA {
   namespace PlanWriter {
     class Transaction {
     public :

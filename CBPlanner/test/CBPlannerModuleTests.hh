@@ -18,7 +18,7 @@
 #include "TokenDecisionPoint.hh"
 #include "HSTSHeuristics.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   void initCBPTestSchema(const SchemaId& schema);
 

@@ -2,7 +2,7 @@
 #include "StringDomain.hh"
 #include "Variable.hh"
 
-namespace Prototype {
+namespace PLASMA {
   
   //
   // StringTypeFactory
@@ -39,4 +39,4 @@ namespace Prototype {
     return LabelStr(value);
   }
 
-} // namespace Prototype
+} // namespace PLASMA

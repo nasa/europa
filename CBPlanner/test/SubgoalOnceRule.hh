@@ -3,7 +3,7 @@
 
 #include "Rule.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class SubgoalOnceRule : public Rule {
   public:

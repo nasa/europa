@@ -4,7 +4,7 @@
 #include "CBPlannerDefs.hh"
 #include "Choice.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class TokenChoice : public Choice {
   public:

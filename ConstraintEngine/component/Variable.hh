@@ -13,7 +13,7 @@
  * of a variable and also implement the contract required by the ConstrainedVariable class. Handy for testing.
  * @see ConstrainedVariable
  */
-namespace Prototype {
+namespace PLASMA {
   /**
    * @class Variable
    * @brief Template class to provide concrete variables of specific domain types.

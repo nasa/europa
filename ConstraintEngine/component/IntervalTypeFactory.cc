@@ -2,7 +2,7 @@
 #include "IntervalDomain.hh"
 #include "Variable.hh"
 
-namespace Prototype {
+namespace PLASMA {
   
   //
   // IntervalTypeFactory
@@ -48,4 +48,4 @@ namespace Prototype {
     return atof(value.c_str());
   }
 
-} // namespace Prototype
+} // namespace PLASMA

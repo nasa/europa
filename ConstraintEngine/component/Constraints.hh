@@ -8,7 +8,7 @@
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class AddEqualConstraint : public Constraint {
   public:

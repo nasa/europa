@@ -3,7 +3,7 @@
 
 #include "DecisionPoint.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class ConstrainedVariableDecisionPoint : public DecisionPoint {
   public:

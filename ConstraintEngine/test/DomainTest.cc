@@ -19,7 +19,7 @@
 #include <list>
 #include <vector>
 
-using namespace Prototype;
+using namespace PLASMA;
 using namespace std;
 
 static void testEquate(const LabelSet& a, const LabelSet& b) {
@@ -40,27 +40,27 @@ static void outerLoopForTestIntersection() {
 }
 
 static void outerLoopForTestEquate() {
-  std::list<Prototype::LabelStr> values;
-  values.push_back(Prototype::LabelStr("A"));
-  values.push_back(Prototype::LabelStr("B"));
-  values.push_back(Prototype::LabelStr("C"));
-  values.push_back(Prototype::LabelStr("D"));
-  values.push_back(Prototype::LabelStr("E"));
-  values.push_back(Prototype::LabelStr("F"));
-  values.push_back(Prototype::LabelStr("G"));
-  values.push_back(Prototype::LabelStr("H"));
+  std::list<PLASMA::LabelStr> values;
+  values.push_back(PLASMA::LabelStr("A"));
+  values.push_back(PLASMA::LabelStr("B"));
+  values.push_back(PLASMA::LabelStr("C"));
+  values.push_back(PLASMA::LabelStr("D"));
+  values.push_back(PLASMA::LabelStr("E"));
+  values.push_back(PLASMA::LabelStr("F"));
+  values.push_back(PLASMA::LabelStr("G"));
+  values.push_back(PLASMA::LabelStr("H"));
   LabelSet ls_a(values);
 
   values.clear();
-  values.push_back(Prototype::LabelStr("1"));
-  values.push_back(Prototype::LabelStr("2"));
-  values.push_back(Prototype::LabelStr("3"));
-  values.push_back(Prototype::LabelStr("E"));
-  values.push_back(Prototype::LabelStr("4"));
-  values.push_back(Prototype::LabelStr("5"));
-  values.push_back(Prototype::LabelStr("6"));
-  values.push_back(Prototype::LabelStr("7"));
-  values.push_back(Prototype::LabelStr("8"));
+  values.push_back(PLASMA::LabelStr("1"));
+  values.push_back(PLASMA::LabelStr("2"));
+  values.push_back(PLASMA::LabelStr("3"));
+  values.push_back(PLASMA::LabelStr("E"));
+  values.push_back(PLASMA::LabelStr("4"));
+  values.push_back(PLASMA::LabelStr("5"));
+  values.push_back(PLASMA::LabelStr("6"));
+  values.push_back(PLASMA::LabelStr("7"));
+  values.push_back(PLASMA::LabelStr("8"));
   LabelSet ls_b(values);
 
   for (int i = 0; i < 1000000; i++)
@@ -68,17 +68,17 @@ static void outerLoopForTestEquate() {
 }
 
 static void testLabelSetEqualityPerformance(const ConstraintEngineId& ce) {
-  std::list<Prototype::LabelStr> values;
-  values.push_back(Prototype::LabelStr("V0"));
-  values.push_back(Prototype::LabelStr("V1"));
-  values.push_back(Prototype::LabelStr("V2"));
-  values.push_back(Prototype::LabelStr("V3"));
-  values.push_back(Prototype::LabelStr("V4"));
-  values.push_back(Prototype::LabelStr("V5"));
-  values.push_back(Prototype::LabelStr("V6"));
-  values.push_back(Prototype::LabelStr("V7"));
-  values.push_back(Prototype::LabelStr("V8"));
-  values.push_back(Prototype::LabelStr("V9"));
+  std::list<PLASMA::LabelStr> values;
+  values.push_back(PLASMA::LabelStr("V0"));
+  values.push_back(PLASMA::LabelStr("V1"));
+  values.push_back(PLASMA::LabelStr("V2"));
+  values.push_back(PLASMA::LabelStr("V3"));
+  values.push_back(PLASMA::LabelStr("V4"));
+  values.push_back(PLASMA::LabelStr("V5"));
+  values.push_back(PLASMA::LabelStr("V6"));
+  values.push_back(PLASMA::LabelStr("V7"));
+  values.push_back(PLASMA::LabelStr("V8"));
+  values.push_back(PLASMA::LabelStr("V9"));
   LabelSet labelSet(values);
 
 

@@ -5,7 +5,7 @@
 
 #define NOISE 1
 
-namespace Prototype {
+namespace PLASMA {
 
   DMResourceListener::DMResourceListener( const ResourceOpenDecisionManagerId& rodm,
 										  const ResourceId& resource ) :

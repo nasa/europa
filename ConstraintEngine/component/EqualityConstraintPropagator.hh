@@ -12,7 +12,7 @@
 #include <map>
 #include <set>
 
-namespace Prototype{
+namespace PLASMA{
 
   /**
    * @class EqualityConstraintPropagator

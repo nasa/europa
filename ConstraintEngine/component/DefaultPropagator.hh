@@ -4,7 +4,7 @@
 #include "Propagator.hh"
 #include <set>
 
-namespace Prototype {
+namespace PLASMA {
 
   class DefaultPropagator: public Propagator
   {

@@ -3,7 +3,7 @@
 #include "RulesEngineDefs.hh"
 #include "CBPlannerDefs.hh"
 
-using namespace Prototype;
+using namespace PLASMA;
 
 void testLangInit(const PlanDatabaseId& db, 
                   const DecisionManagerId& dm = DecisionManagerId::noId(),

@@ -7,7 +7,7 @@
 #include "IntervalDomain.hh"
 #include "IntervalIntDomain.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class BinaryCustomConstraint : public Constraint {
   public:

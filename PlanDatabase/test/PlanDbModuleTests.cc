@@ -26,7 +26,7 @@
 #include <iostream>
 #include <string>
 
-namespace Prototype {
+namespace PLASMA {
 
 
   const LabelStr& DEFAULT_OBJECT_TYPE(){
@@ -657,11 +657,11 @@ namespace Prototype {
                                 Token::noObject(), false);
   
     std::list<double> values;
-    values.push_back(Prototype::LabelStr("L1"));
-    values.push_back(Prototype::LabelStr("L4"));
-    values.push_back(Prototype::LabelStr("L2"));
-    values.push_back(Prototype::LabelStr("L5"));
-    values.push_back(Prototype::LabelStr("L3"));
+    values.push_back(PLASMA::LabelStr("L1"));
+    values.push_back(PLASMA::LabelStr("L4"));
+    values.push_back(PLASMA::LabelStr("L2"));
+    values.push_back(PLASMA::LabelStr("L5"));
+    values.push_back(PLASMA::LabelStr("L3"));
     intervalToken.addParameter(LabelSet(values), "LabelSetParam");
     intervalToken.close();
     assert(intervalToken.getEnd()->getDerivedDomain().getLowerBound() == 2);

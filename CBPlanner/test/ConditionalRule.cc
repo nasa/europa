@@ -6,7 +6,7 @@
 #include "Utils.hh"
 #include "Object.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class ConditionalRuleRoot : public RuleInstance {
   public:

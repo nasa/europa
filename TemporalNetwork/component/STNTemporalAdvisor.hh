@@ -5,7 +5,7 @@
 #include "DefaultTemporalAdvisor.hh"
 #include "TemporalNetworkDefs.hh"
 
-namespace Prototype{
+namespace PLASMA{
 
   class STNTemporalAdvisor: public DefaultTemporalAdvisor {
 

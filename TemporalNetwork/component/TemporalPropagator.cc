@@ -16,7 +16,7 @@
 // relaxed in temporal variables we must do the mapping first or we'll run
 // the risk of detecting an inconsistency where there isn't one.
 
-namespace Prototype {
+namespace PLASMA {
 
   //#ifndef PLASMA_FAST
 #define  publish(message){\

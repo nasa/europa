@@ -4,7 +4,7 @@
 #include "PlanDatabaseDefs.hh"
 #include "IntervalToken.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   /**
    * @class EventToken 

@@ -4,7 +4,7 @@
 #include "IntervalIntDomain.hh"
 #include "ConstraintLibrary.hh"
 
-namespace Prototype{
+namespace PLASMA{
 
   IntervalToken::IntervalToken(const PlanDatabaseId& planDatabase, 
 			       const LabelStr& predicateName,

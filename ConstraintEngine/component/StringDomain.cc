@@ -1,6 +1,6 @@
 #include "StringDomain.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   StringDomain::StringDomain()
     :EnumeratedDomain(false, getDefaultTypeName().c_str()){}
@@ -60,4 +60,4 @@ namespace Prototype {
     EnumeratedDomain::set(value);
   }
 
-} // namespace Prototype
+} // namespace PLASMA

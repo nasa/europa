@@ -3,7 +3,7 @@
 #include "ConstrainedVariable.hh"
 #include "Constraint.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   DefaultPropagator::DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
     : Propagator(name, constraintEngine), m_activeConstraint(0){}

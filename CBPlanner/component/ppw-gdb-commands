@@ -20,34 +20,34 @@
 #####################################################################
 
 define init-run
-tbreak Prototype::CBPlanner::stepBreakpoint
+tbreak PLASMA::CBPlanner::stepBreakpoint
 run
-set Prototype::PlanWriter::PartialPlanWriter::noFullWrite=1
-set Prototype::PlanWriter::PartialPlanWriter::writeStep=1
+set PLASMA::PlanWriter::PartialPlanWriter::noFullWrite=1
+set PLASMA::PlanWriter::PartialPlanWriter::writeStep=1
 printf "Ready to enable writing of a step with write-step N\n"
 printf "At step %d\n", m_step
 end
 
 define write-step 
-tbreak Prototype::CBPlanner::stepBreakpoint if m_step == $arg0
+tbreak PLASMA::CBPlanner::stepBreakpoint if m_step == $arg0
 cont
 printf "Setting PartialPlanWriter to enable writing step %d\n", m_step
-set Prototype::PlanWriter::PartialPlanWriter::noFullWrite=0
-tbreak Prototype::CBPlanner::stepBreakpoint
+set PLASMA::PlanWriter::PartialPlanWriter::noFullWrite=0
+tbreak PLASMA::CBPlanner::stepBreakpoint
 cont
 printf "Finished writing step %d\n", m_step-1
 printf "At step %d\n", m_step
-set Prototype::PlanWriter::PartialPlanWriter::noFullWrite=1
+set PLASMA::PlanWriter::PartialPlanWriter::noFullWrite=1
 end
 
 define write-next 
 set $start = m_step
-break Prototype::CBPlanner::stepBreakpoint if m_step == $start + $arg0
+break PLASMA::CBPlanner::stepBreakpoint if m_step == $start + $arg0
 printf "PartialPlanWriter writing steps %d - %d\n", m_step, m_step + $arg0 - 1
-set Prototype::PlanWriter::PartialPlanWriter::noFullWrite=0
+set PLASMA::PlanWriter::PartialPlanWriter::noFullWrite=0
 cont 
 printf "Finished writing steps %d - %d\n", $start, m_step-1
 printf "At step %d\n", m_step
-set Prototype::PlanWriter::PartialPlanWriter::noFullWrite=1
-clear Prototype::CBPlanner::stepBreakpoint
+set PLASMA::PlanWriter::PartialPlanWriter::noFullWrite=1
+clear PLASMA::CBPlanner::stepBreakpoint
 end

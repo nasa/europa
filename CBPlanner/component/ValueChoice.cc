@@ -1,7 +1,7 @@
 #include "ValueChoice.hh"
 #include "Token.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   ValueChoice::ValueChoice(const DecisionPointId& decision, const double val) : Choice(decision), m_value(val) { 
     m_type = VALUE; 

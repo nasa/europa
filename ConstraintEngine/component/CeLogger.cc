@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 
-namespace Prototype {
+namespace PLASMA {
 
   const std::string VARIABLE_INDENT("");
 

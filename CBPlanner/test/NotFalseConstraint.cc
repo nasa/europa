@@ -1,7 +1,7 @@
 #include "NotFalseConstraint.hh"
 #include "BoolDomain.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   NotFalseConstraint::NotFalseConstraint(const LabelStr& name, const LabelStr& propagatorName, const ConstraintEngineId& constraintEngine, const std::vector<ConstrainedVariableId>& variables) : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error (variables.size() == 1); // temporary while Factories are fixed

@@ -2,7 +2,7 @@
 #include "Nddl.hh"
 #include "StandardAssembly.hh"
 
-using namespace Prototype;
+using namespace PLASMA;
 
 /**
  * @file Provides main execution program to run a test which plays transactions

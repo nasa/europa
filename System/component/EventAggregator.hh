@@ -22,7 +22,7 @@
 
 #include <set>
 
-namespace Prototype {
+namespace PLASMA {
   
 #define publish(message) { \
   for(std::set<AggregateListenerId>::iterator it = m_listeners.begin(); \

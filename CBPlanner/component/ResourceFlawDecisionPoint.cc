@@ -12,7 +12,7 @@
 // Uncomment this to allow "push beyond horizon" option for resolving flaws
 // #define PUSH2HORIZON
 
-namespace Prototype {
+namespace PLASMA {
 
   ResourceFlawDecisionPoint::ResourceFlawDecisionPoint(const ResourceId& resource) : DecisionPoint(resource->getPlanDatabase()->getClient(), resource), m_resource(resource) {}
 

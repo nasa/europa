@@ -7,7 +7,7 @@
 #include "IntervalDomain.hh"
 #include "IntervalIntDomain.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class NotFalseConstraint : public Constraint {
   public:

@@ -10,7 +10,7 @@
 #include "module-tests.hh"
 #include <cmath>
 
-namespace Prototype {
+namespace PLASMA {
 
   class ChangeListener : public DomainListener {
   public:
@@ -638,23 +638,23 @@ namespace Prototype {
     }
 
     static bool testBasicLabelOperations() {
-      int initialCount = Prototype::LabelStr::getSize();
-      Prototype::LabelStr l1("L1");
-      Prototype::LabelStr l2("L2");
-      Prototype::LabelStr l3("L3");
+      int initialCount = PLASMA::LabelStr::getSize();
+      PLASMA::LabelStr l1("L1");
+      PLASMA::LabelStr l2("L2");
+      PLASMA::LabelStr l3("L3");
       assert(l1 < l2 && l2 < l3);
 
-      Prototype::LabelStr la("L");
-      Prototype::LabelStr l4("L30");
-      Prototype::LabelStr lb("L");
+      PLASMA::LabelStr la("L");
+      PLASMA::LabelStr l4("L30");
+      PLASMA::LabelStr lb("L");
       assert(la == lb);
       assert(la < l4);
 
-      Prototype::LabelStr copy1(l1);
+      PLASMA::LabelStr copy1(l1);
       assert(l1 == copy1);
       assert(l2 != copy1);
 
-      assert((Prototype::LabelStr::getSize() - initialCount) == 5);
+      assert((PLASMA::LabelStr::getSize() - initialCount) == 5);
       assert(l1.toString() == "L1");
 
       assert(LabelStr::isString(l1.getKey()));
@@ -664,18 +664,18 @@ namespace Prototype {
 
     static bool testLabelSetAllocations() {
       std::list<double> values;
-      values.push_back(Prototype::LabelStr("L1"));
-      values.push_back(Prototype::LabelStr("L4"));
-      values.push_back(Prototype::LabelStr("L2"));
-      values.push_back(Prototype::LabelStr("L5"));
-      values.push_back(Prototype::LabelStr("L3"));
+      values.push_back(PLASMA::LabelStr("L1"));
+      values.push_back(PLASMA::LabelStr("L4"));
+      values.push_back(PLASMA::LabelStr("L2"));
+      values.push_back(PLASMA::LabelStr("L5"));
+      values.push_back(PLASMA::LabelStr("L3"));
 
       ChangeListener l_listener;
       LabelSet ls0(values);
       ls0.setListener(l_listener.getId());
       assert(!ls0.isOpen());
 
-      Prototype::LabelStr l2("L2");
+      PLASMA::LabelStr l2("L2");
       assert(ls0.isMember(l2));
       DomainListener::ChangeType change;
       ls0.remove(l2);
@@ -683,7 +683,7 @@ namespace Prototype {
       assert(res && change == DomainListener::VALUE_REMOVED);
       assert(!ls0.isMember(l2));
 
-      Prototype::LabelStr l3("L3");
+      PLASMA::LabelStr l3("L3");
       ls0.set(l3);
       assert(ls0.isMember(l3));
       assert(ls0.getSize() == 1);
@@ -698,14 +698,14 @@ namespace Prototype {
 
     static bool testEquate() {
       std::list<double> baseValues;
-      baseValues.push_back(Prototype::LabelStr("A"));
-      baseValues.push_back(Prototype::LabelStr("B"));
-      baseValues.push_back(Prototype::LabelStr("C"));
-      baseValues.push_back(Prototype::LabelStr("D"));
-      baseValues.push_back(Prototype::LabelStr("E"));
-      baseValues.push_back(Prototype::LabelStr("F"));
-      baseValues.push_back(Prototype::LabelStr("G"));
-      baseValues.push_back(Prototype::LabelStr("H"));
+      baseValues.push_back(PLASMA::LabelStr("A"));
+      baseValues.push_back(PLASMA::LabelStr("B"));
+      baseValues.push_back(PLASMA::LabelStr("C"));
+      baseValues.push_back(PLASMA::LabelStr("D"));
+      baseValues.push_back(PLASMA::LabelStr("E"));
+      baseValues.push_back(PLASMA::LabelStr("F"));
+      baseValues.push_back(PLASMA::LabelStr("G"));
+      baseValues.push_back(PLASMA::LabelStr("H"));
 
       ChangeListener l_listener;
       LabelSet ls0(baseValues);
@@ -718,7 +718,7 @@ namespace Prototype {
       bool res = ls0.equate(ls1);
       assert(res == false); // Implying no change occured
 
-      Prototype::LabelStr lC("C");
+      PLASMA::LabelStr lC("C");
       ls0.remove(lC);
       assert(!ls0.isMember(lC));
       assert(ls1.isMember(lC));
@@ -728,16 +728,16 @@ namespace Prototype {
 
       LabelSet ls2(baseValues);
       ls2.setListener(l_listener.getId());
-      ls2.remove(Prototype::LabelStr("A"));
-      ls2.remove(Prototype::LabelStr("B"));
-      ls2.remove(Prototype::LabelStr("C"));
-      ls2.remove(Prototype::LabelStr("D"));
-      ls2.remove(Prototype::LabelStr("E"));
+      ls2.remove(PLASMA::LabelStr("A"));
+      ls2.remove(PLASMA::LabelStr("B"));
+      ls2.remove(PLASMA::LabelStr("C"));
+      ls2.remove(PLASMA::LabelStr("D"));
+      ls2.remove(PLASMA::LabelStr("E"));
 
       LabelSet ls3(baseValues);
       ls3.setListener(l_listener.getId());
-      Prototype::LabelStr lA("A");
-      Prototype::LabelStr lB("B");
+      PLASMA::LabelStr lA("A");
+      PLASMA::LabelStr lB("B");
       ls3.remove(lA);
       ls3.remove(lB);
       ls3.remove(lC);
@@ -747,17 +747,17 @@ namespace Prototype {
 
       LabelSet ls4(baseValues);
       ls4.setListener(l_listener.getId());
-      ls4.remove(Prototype::LabelStr("A"));
-      ls4.remove(Prototype::LabelStr("B"));
-      ls4.remove(Prototype::LabelStr("C"));
-      ls4.remove(Prototype::LabelStr("D"));
-      ls4.remove(Prototype::LabelStr("E"));
+      ls4.remove(PLASMA::LabelStr("A"));
+      ls4.remove(PLASMA::LabelStr("B"));
+      ls4.remove(PLASMA::LabelStr("C"));
+      ls4.remove(PLASMA::LabelStr("D"));
+      ls4.remove(PLASMA::LabelStr("E"));
 
       LabelSet ls5(baseValues);
       ls5.setListener(l_listener.getId());
-      ls5.remove(Prototype::LabelStr("F"));
-      ls5.remove(Prototype::LabelStr("G"));
-      ls5.remove(Prototype::LabelStr("H"));
+      ls5.remove(PLASMA::LabelStr("F"));
+      ls5.remove(PLASMA::LabelStr("G"));
+      ls5.remove(PLASMA::LabelStr("H"));
 
       DomainListener::ChangeType change;
       ls4.equate(ls5);
@@ -866,11 +866,11 @@ namespace Prototype {
 
     static bool testValueRetrieval() {
       std::list<double> values;
-      values.push_back(Prototype::LabelStr("A"));
-      values.push_back(Prototype::LabelStr("B"));
-      values.push_back(Prototype::LabelStr("C"));
-      values.push_back(Prototype::LabelStr("D"));
-      values.push_back(Prototype::LabelStr("E"));
+      values.push_back(PLASMA::LabelStr("A"));
+      values.push_back(PLASMA::LabelStr("B"));
+      values.push_back(PLASMA::LabelStr("C"));
+      values.push_back(PLASMA::LabelStr("D"));
+      values.push_back(PLASMA::LabelStr("E"));
 
       LabelSet l1(values);
       std::list<double> results;
@@ -887,21 +887,21 @@ namespace Prototype {
 
     static bool testIntersection() {
       std::list<double> values;
-      values.push_back(Prototype::LabelStr("A"));
-      values.push_back(Prototype::LabelStr("B"));
-      values.push_back(Prototype::LabelStr("C"));
-      values.push_back(Prototype::LabelStr("D"));
-      values.push_back(Prototype::LabelStr("E"));
-      values.push_back(Prototype::LabelStr("F"));
-      values.push_back(Prototype::LabelStr("G"));
-      values.push_back(Prototype::LabelStr("H"));
-      values.push_back(Prototype::LabelStr("I"));
+      values.push_back(PLASMA::LabelStr("A"));
+      values.push_back(PLASMA::LabelStr("B"));
+      values.push_back(PLASMA::LabelStr("C"));
+      values.push_back(PLASMA::LabelStr("D"));
+      values.push_back(PLASMA::LabelStr("E"));
+      values.push_back(PLASMA::LabelStr("F"));
+      values.push_back(PLASMA::LabelStr("G"));
+      values.push_back(PLASMA::LabelStr("H"));
+      values.push_back(PLASMA::LabelStr("I"));
       LabelSet ls1(values);
 
       LabelSet ls2(values);
-      ls2.remove(Prototype::LabelStr("A"));
-      ls2.remove(Prototype::LabelStr("C"));
-      ls2.remove(Prototype::LabelStr("E"));
+      ls2.remove(PLASMA::LabelStr("A"));
+      ls2.remove(PLASMA::LabelStr("C"));
+      ls2.remove(PLASMA::LabelStr("E"));
       assert(ls2.isSubsetOf(ls1));
       assert(!ls1.isSubsetOf(ls2));
 
@@ -916,16 +916,16 @@ namespace Prototype {
       assert(ls1 == ls3);
 
       LabelSet ls4(values);
-      ls4.remove(Prototype::LabelStr("A"));
-      ls4.remove(Prototype::LabelStr("B"));
-      ls4.remove(Prototype::LabelStr("C"));
-      ls4.remove(Prototype::LabelStr("D"));
-      ls4.remove(Prototype::LabelStr("E"));
-      ls4.remove(Prototype::LabelStr("F"));
-      ls4.remove(Prototype::LabelStr("G"));
+      ls4.remove(PLASMA::LabelStr("A"));
+      ls4.remove(PLASMA::LabelStr("B"));
+      ls4.remove(PLASMA::LabelStr("C"));
+      ls4.remove(PLASMA::LabelStr("D"));
+      ls4.remove(PLASMA::LabelStr("E"));
+      ls4.remove(PLASMA::LabelStr("F"));
+      ls4.remove(PLASMA::LabelStr("G"));
 
-      ls3.remove(Prototype::LabelStr("H"));
-      ls3.remove(Prototype::LabelStr("I"));
+      ls3.remove(PLASMA::LabelStr("H"));
+      ls3.remove(PLASMA::LabelStr("I"));
       ls4.intersect(ls3);
       assert(ls4.isEmpty());
 
@@ -1545,8 +1545,8 @@ namespace Prototype {
 }
 
 bool DomainTests::test() {
-  runTestSuite(Prototype::IntervalDomainTest::test);
-  runTestSuite(Prototype::EnumeratedDomainTest::test);
-  runTestSuite(Prototype::MixedTypeTest::test);
+  runTestSuite(PLASMA::IntervalDomainTest::test);
+  runTestSuite(PLASMA::EnumeratedDomainTest::test);
+  runTestSuite(PLASMA::MixedTypeTest::test);
   return(true);
 }

@@ -11,7 +11,7 @@
 #include "TypeFactory.hh"
 #include <algorithm>
 
-namespace Prototype {
+namespace PLASMA {
 
   static const std::vector<int> 
   pathAsVector(const std::string & path)

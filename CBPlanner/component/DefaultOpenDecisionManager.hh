@@ -9,7 +9,7 @@
 #include "Token.hh"
 #include "Utils.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class ObjectDecisionPointComparator {
   public:

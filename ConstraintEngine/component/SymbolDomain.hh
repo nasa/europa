@@ -9,7 +9,7 @@
 #include "EnumeratedDomain.hh"
 #include "LabelStr.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   /**
    * @class SymbolDomain
@@ -67,7 +67,7 @@ namespace Prototype {
 
   };
 
-} // namespace Prototype
+} // namespace PLASMA
 
 #endif // _H_SymbolDomain
 

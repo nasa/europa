@@ -13,7 +13,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   const LabelStr& DEFAULT_OBJECT_TYPE();
 

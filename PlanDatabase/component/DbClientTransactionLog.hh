@@ -14,7 +14,7 @@ class TiXmlElement;
  * @brief Main interface for logging transactions. Necessary for copy. replay, and possibly recovery.
  */
 
-namespace Prototype {
+namespace PLASMA {
 
   class DbClientTransactionLog: public DbClientListener {
   public:

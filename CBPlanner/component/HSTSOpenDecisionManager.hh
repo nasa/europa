@@ -4,7 +4,7 @@
 #include "CBPlannerDefs.hh"
 #include "DefaultOpenDecisionManager.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class HSTSObjectDecisionPointComparator : ObjectDecisionPointComparator {
   public:

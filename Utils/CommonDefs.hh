@@ -63,28 +63,28 @@
 DECLARE_GLOBAL_CONST(bool, g_alwaysFails);
 #define ALWAYS_FAILS (g_alwaysFails())
 
-namespace Prototype {
+namespace PLASMA {
   DECLARE_GLOBAL_CONST(int, g_maxInt);
   DECLARE_GLOBAL_CONST(int, g_infiniteTime);
   DECLARE_GLOBAL_CONST(int, g_noTime);
   DECLARE_GLOBAL_CONST(double, g_epsilon);
 }
 
-#define MAX_INT (Prototype::g_maxInt())
+#define MAX_INT (PLASMA::g_maxInt())
 
 #define MAX_FINITE_TIME (MAX_INT)
 
 #define MIN_FINITE_TIME (-MAX_INT)
 
-#define PLUS_INFINITY (Prototype::g_infiniteTime())
+#define PLUS_INFINITY (PLASMA::g_infiniteTime())
 
-#define MINUS_INFINITY (-Prototype::g_infiniteTime())
+#define MINUS_INFINITY (-PLASMA::g_infiniteTime())
 
 /**
  * @def EPSILON
  * Used when computing differences and comparing real numbers:
  * smallest recognized increment.
  */
-#define EPSILON (Prototype::g_epsilon())
+#define EPSILON (PLASMA::g_epsilon())
 
 #endif

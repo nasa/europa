@@ -3,7 +3,7 @@
 
 #include "PlanDatabaseDefs.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   class Rule;
   typedef Id<Rule> RuleId;

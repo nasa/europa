@@ -10,7 +10,7 @@
 #include "EnumeratedDomain.hh"
 #include "LabelStr.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   /**
    * @class NumericDomain
@@ -73,6 +73,6 @@ namespace Prototype {
 
   };
 
-} // namespace Prototype
+} // namespace PLASMA
 
 #endif

@@ -5,7 +5,7 @@
 #include "ConstraintEngineListener.hh"
 #include <iostream>
 
-namespace Prototype {
+namespace PLASMA {
   class CeLogger : public ConstraintEngineListener {
   public:
     CeLogger(std::ostream& os, const ConstraintEngineId& ce);

@@ -4,7 +4,7 @@
 #include "Utils.hh"
 #include "tinyxml.h"
 
-namespace Prototype {
+namespace PLASMA {
 
   DbClientTransactionLog::DbClientTransactionLog(const DbClientId& client, bool chronologicalBacktracking)
     : DbClientListener(client)

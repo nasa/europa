@@ -4,7 +4,7 @@
 #include "IntervalIntDomain.hh"
 #include "ConstrainedVariable.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   TemporalVariableCondition::TemporalVariableCondition(const HorizonId& horizon, const DecisionManagerId& dm): Condition(dm),
     m_start(true), m_end(true), m_duration(true),m_allowOverlap(false), m_horizon(horizon) {

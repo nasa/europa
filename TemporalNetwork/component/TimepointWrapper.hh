@@ -4,7 +4,7 @@
 #include "TemporalNetwork.hh"
 #include "TemporalNetworkDefs.hh"
 
-namespace Prototype {
+namespace PLASMA {
 
   /**
    * @brief Wraps a timepoint to manage deallocation in a staged manner that can be

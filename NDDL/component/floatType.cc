@@ -1,7 +1,7 @@
 #include "floatType.hh"
 #include "Variable.hh"
 
-namespace Prototype {
+namespace PLASMA {
   
   //
   // floatTypeFactory
@@ -26,4 +26,4 @@ namespace Prototype {
     return(sl_typeName);
   }
 
-} // namespace Prototype
+} // namespace PLASMA

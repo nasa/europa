@@ -11,7 +11,7 @@
 
 #include <list>
 
-namespace Prototype {
+namespace PLASMA {
   class AbstractDomain;
   class IntervalDomain;
   class IntervalIntDomain;
@@ -65,6 +65,6 @@ namespace Prototype {
   DECLARE_GLOBAL_CONST(char*, g_noVarName);
   #define NO_VAR_NAME (g_noVarName())
 
-} /* namespace Prototype */
+} /* namespace PLASMA */
 
 #endif /* #ifndef _H_ConstraintEngineDefs */

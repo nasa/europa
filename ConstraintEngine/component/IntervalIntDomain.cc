@@ -1,7 +1,7 @@
 #include "IntervalIntDomain.hh"
 #include <cmath>
 
-namespace Prototype {
+namespace PLASMA {
 
 
   IntervalIntDomain::IntervalIntDomain()

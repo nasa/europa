@@ -1,6 +1,6 @@
 #include "TestSet.hh"
 
-namespace Prototype {
+namespace PLASMA {
   TestSet::TestSet(const PlanDatabaseId&) : Test::Test() {}
 
   TestSet::~TestSet() {

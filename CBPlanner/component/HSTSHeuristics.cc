@@ -6,7 +6,7 @@
 #include "ConstrainedVariableDecisionPoint.hh"
 #include <sstream>
 
-namespace Prototype {
+namespace PLASMA {
 
   // todo: check bounds on priority, if inserting, make sure it wasn't
   // there

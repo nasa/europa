@@ -1,7 +1,7 @@
 #include "EquivalenceClassCollection.hh"
 #include "ConstrainedVariable.hh"
 
-namespace Prototype{
+namespace PLASMA{
 
   Node::Node(const ConstrainedVariableId& variable)
     : m_variable(variable), m_graph(0), m_lastUpdated(0){}
