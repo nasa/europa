@@ -6,6 +6,8 @@ SubDirHdrs $(PLASMA) Resource ;
 SubDirHdrs $(PLASMA) Resource core ;
 SubDirHdrs $(PLASMA) Resource component ;
 
+SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
+
 ModuleComponent CBPlanner
 	:
 	ConstrainedVariableDecisionPoint.cc
@@ -19,6 +21,11 @@ ModuleComponent CBPlanner
 	TokenChoice.cc
 	ValueChoice.cc
 	PartialPlanWriter.cc
+	Generator.cc
+	HSTSHeuristics.cc
+	HSTSOpenDecisionManager.cc
+	HSTSHeuristicsReader.cc
 	;
 
 } # PLASMA_READY
+
