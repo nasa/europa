@@ -22,8 +22,7 @@ namespace Prototype {
   TemporalPropagator::TemporalPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
     : Propagator(name, constraintEngine), 
       m_activeConstraint(0),
-      m_updateRequired(false),
-      m_fullRepropRequired(true)
+      m_updateRequired(false)
   {
     m_tnet = (new TemporalNetwork())->getId(); 
   }
@@ -47,12 +46,10 @@ namespace Prototype {
   }
 
   void TemporalPropagator::handleConstraintAdded(const ConstraintId& constraint){
-    m_fullRepropRequired = true;
     handleTemporalAddition(constraint);
   }
 
   void TemporalPropagator::handleConstraintRemoved(const ConstraintId& constraint){
-    m_fullRepropRequired = true;
     handleTemporalDeletion(constraint);
   }
 
@@ -70,7 +67,6 @@ namespace Prototype {
 	(constraint->getName() == LabelStr("StartEndDurationRelation")))
       m_agenda.insert(constraint);
     m_updateRequired = true;
-    m_fullRepropRequired = true;
   }
 
   void TemporalPropagator::execute(){
@@ -285,6 +281,7 @@ namespace Prototype {
       TemporalConstraintId tc = varIt->second;
       check_error(!tc.isNoId());
       check_error(m_tnetVariables.find(varIt->first) != m_tnetVariables.end());
+
       TimepointId tp = (m_tnetVariables.find(varIt->first))->second;      
       TempVarId var =  m_tnet->getVarIdFromTimepoint(tp);
       int lb = (int)Propagator::getCurrentDomain(var).getLowerBound();
@@ -296,14 +293,16 @@ namespace Prototype {
       // from the last computation since the temporal network may be made
       // inconsistent in this mapping process.
       m_tnet->getLastTimepointBounds(timepoint, lbt, ubt);
-      if (lb != lbt || ub != ubt) {
+      check_error(lb <= ub);
+      check_error(lbt <= ubt);
 
-	if (lb > lbt && ub < ubt) {
-	  m_tnet->narrowTemporalConstraint(varIt->second, lb, ub);
-	  for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
-	    (*lit)->notifyBoundsRestricted(var, lb, ub);
-	}
-	else {
+      if (lb > lbt || ub < ubt) {
+	m_tnet->narrowTemporalConstraint(varIt->second, lb, ub);
+	for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	  (*lit)->notifyBoundsRestricted(var, lb, ub);
+      }
+      else 
+	if (lb < lbt || ub > ubt) {
 	  // think about whether we can do better here, possibly by changing
 	  // the condition above.  There are cases
 	  // where the temporal network has restricted it further so we're just
@@ -317,11 +316,11 @@ namespace Prototype {
 	    (*lit)->notifyBaseDomainConstraintAdded(var, c,  (Time)lb, (Time)ub);
 	  varIt->second = c;
 	}
-      }
-      else {
+	else {
+	  check_error(lb == lbt && ub == ubt);
 	  for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
 	    (*lit)->notifyBoundsSame(var, tp);
-      }
+	}
     }
     in_process = false;
   }
