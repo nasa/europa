@@ -6,6 +6,7 @@ ModuleMain ce-module-tests
 	:
 	module-tests.cc
 	domain-tests.cc
+	ConstraintTesting.cc
 	:
 	ConstraintEngine
 	;
