@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.50 2003-08-04 23:12:58 wedgingt Exp $
+# $Id: autobuild,v 1.51 2003-08-07 20:01:44 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -22,6 +22,7 @@ trap 'rmdir $startdir/working; rm -f $startdir/.tokens.$$' 0
 email=checkins@postdoc.arc.nasa.gov
 
 # Subdirectories to build in
+# Profiling and shared in one executable no longer works, it seems
 #subdirs='cvs fast opt optFast profOptFast shareOptFast debug debugOpt noErr shareOptNoErr'
 subdirs='cvs fast opt optFast profOptFast shareOptFast debug debugOpt noErr'
 
