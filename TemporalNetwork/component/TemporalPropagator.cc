@@ -1,11 +1,14 @@
 #include "TemporalPropagator.hh"
 #include "TemporalNetworkDefs.hh"
 #include "TokenTemporalVariable.hh"
+#include "TimepointWrapper.hh"
 #include "Token.hh"
 #include "TemporalNetwork.hh"
+#include "TemporalNetworkListener.hh"
 #include "ConstraintEngine.hh"
 #include "ConstrainedVariable.hh"
 #include "Constraint.hh"
+#include "Utils.hh"
 
 // @todo: there are cases where we may be able to fail early during the
 // mapping from the constraint engine to the temporal network.  In these
@@ -22,12 +25,25 @@ namespace Prototype {
       m_updateRequired(false),
       m_fullRepropRequired(true)
   {
-    m_tnet = (new TemporalNetwork())->getId();
+    m_tnet = (new TemporalNetwork())->getId(); 
   }
 
-  TemporalPropagator::~TemporalPropagator() {
-    //std::cout << "Calling temporal prp destructor " << std::endl;
-    delete (TemporalNetwork*) m_tnet;
+  TemporalPropagator::~TemporalPropagator() { 
+    cleanup(m_listeners);
+    if (!m_tnet.isNoId())
+      delete (TemporalNetwork*) m_tnet;
+  }
+
+  void TemporalPropagator::notifyDeleted(const TimepointId& tp) {
+    int key = m_tnet->getVarIdFromTimepoint(tp)->getKey();
+    std::map<int, TimepointId>::iterator pos = m_tnetVariables.find(key);
+    if (pos == m_tnetVariables.end()) {
+      std::cout<< "deleting a variable that doesn't exist in the temporal network" << std::endl;
+      check_error(false);
+    }
+    else {
+      m_variablesForDeletion.insert(key);
+    }
   }
 
   void TemporalPropagator::handleConstraintAdded(const ConstraintId& constraint){
@@ -66,34 +82,42 @@ namespace Prototype {
 
     //propagate the tnet
     if (!m_tnet->isConsistent()) {
+      //std::cout << " Tnet is inconsistent " << std::endl;
       std::list<TimepointId> results(m_tnet->getInconsistencyReason());
+      check_error(!results.empty());
       std::list<TimepointId>::iterator it = results.begin();
-      Propagator::getCurrentDomain(m_tnet->getVarIdFromTimepoint(*it)).empty();
-      m_agenda.clear();
+      if (*it == m_tnet->getOrigin()) {
+	check_error (results.size()>1);
+	++it;
+      }
+      TempVarId var = m_tnet->getVarIdFromTimepoint(*it);
+      check_error (!var.isNoId());
+      Propagator::getCurrentDomain(var).empty();
     }
     else {
       //update the cnet
-      updateTempVar();
-
-      while(!m_agenda.empty()){
-	std::set<ConstraintId>::iterator it = m_agenda.begin();
-	ConstraintId constraint = *it;
-
-	if(constraint->isActive()){
-	  m_activeConstraint = constraint->getKey();
-	  Propagator::execute(constraint);
-	}
-
-	if(getConstraintEngine()->provenInconsistent()){
-	  m_agenda.clear();
-	  break;
-	}
-	else
-	  m_agenda.erase(it);
+      if (!updateTempVar()) {
+	std::cout << " Tnet made Cnet inconsistent " << std::endl;
+	check_error(false);
       }
-      m_activeConstraint = 0;
-      m_updateRequired = false;
+      else {
+	while(!m_agenda.empty()){
+	  std::set<ConstraintId>::iterator it = m_agenda.begin();
+	  ConstraintId constraint = *it;
+
+	  if(constraint->isActive()){
+	    m_activeConstraint = constraint->getKey();
+	    Propagator::execute(constraint);
+	  }
+
+	  check_error(!getConstraintEngine()->provenInconsistent());
+	  m_agenda.erase(it);
+	}
+      }
     }
+    m_activeConstraint = 0;
+    m_agenda.clear();
+    m_updateRequired = getConstraintEngine()->provenInconsistent();
   }
 
   bool TemporalPropagator::updateRequired() const{
@@ -118,13 +142,20 @@ namespace Prototype {
       TempVarId var = (*it);
       if (m_tnetVariables.find(var->getKey()) == m_tnetVariables.end()) {
 	TimepointId timepoint = m_tnet->addTimepoint(var);
-	var->setTnetVariable(timepoint);
+	for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	  (*lit)->notifyTimepointAdded(var, timepoint);
+	EntityId tw = (new TimepointWrapper(getId(), timepoint))->getId();
+	var->setTnetVariable(tw);
 	m_tnetVariables.insert(std::make_pair(var->getKey(), timepoint));
 	TemporalConstraintId c = m_tnet->addTemporalConstraint(m_tnet->getOrigin(), 
 							       timepoint, 
 							       (Time) var->getBaseDomain().getLowerBound(),  
 							       (Time) var->getBaseDomain().getUpperBound());
-	m_tnetVariableConstraints.insert(std::make_pair(var, c));
+
+
+	for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	  (*lit)->notifyBaseDomainConstraintAdded(var, c, (Time) var->getBaseDomain().getLowerBound(), (Time) var->getBaseDomain().getUpperBound());
+	m_tnetVariableConstraints.insert(std::make_pair(var->getKey(), c));
       }
     }
   }
@@ -133,6 +164,7 @@ namespace Prototype {
     TempVarId start;
     TempVarId end;
     Time lb, ub;
+
 
     if (constraint->getName() == LabelStr("StartEndDurationRelation")) {    
       start = constraint->getScope()[0];
@@ -164,6 +196,8 @@ namespace Prototype {
 							   lb,  
 							   ub);
     m_tnetConstraints.insert(std::make_pair(constraint->getKey(), c));
+    for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	  (*lit)->notifyConstraintAdded(constraint, c, lb,ub);
 
   }
 
@@ -187,35 +221,64 @@ namespace Prototype {
     m_constraintsForDeletion.insert(constraint->getKey());
     // Remove from agenda
     m_agenda.erase(constraint);
+    m_updateRequired = true;
   }
 
   void TemporalPropagator::updateTnet() {
 
+    static bool in_process = false;
+
+    assert(!in_process);
+    in_process = true;
+
+    // for (std::map<int, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) 
+    //std::cout << "Var " << varIt->first << " constraint " << varIt->second << std::endl;
+
     for(std::set<int>::const_iterator it = m_constraintsForDeletion.begin(); it != m_constraintsForDeletion.end(); ++it) {
       check_error(m_tnetConstraints.find((*it)) != m_tnetConstraints.end());
-      m_tnet->removeTemporalConstraint((* m_tnetConstraints.find((*it))).second);
+
+      TemporalConstraintId constraint = m_tnetConstraints.find((*it))->second;
+
+      for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	(*lit)->notifyConstraintDeleted(*it, constraint);
+
+      m_tnet->removeTemporalConstraint(constraint);
       m_tnetConstraints.erase((*it));
     }
     m_constraintsForDeletion.clear();
     
     for(std::set<int>::const_iterator it = m_variablesForDeletion.begin(); it != m_variablesForDeletion.end(); ++it) {
       check_error(m_tnetVariables.find((*it)) != m_tnetVariables.end());
-      m_tnet->deleteTimepoint((* m_tnetVariables.find((*it))).second);
-      for (std::map<TempVarId, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) {
-	if (varIt->first->getKey() == *it) {
+      for (std::map<int, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) {
+
+	if (varIt->first == *it) {
+
+	  for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	    (*lit)->notifyConstraintDeleted(varIt->first, varIt->second);
+
 	  m_tnet->removeTemporalConstraint(varIt->second);
-	  m_tnetVariables.erase(*it);
-	  m_tnetVariableConstraints.erase(varIt->first);
-	  break;
+	  m_tnetVariableConstraints.erase(varIt);
 	}
       }
+
+      TimepointId timepoint = m_tnetVariables.find((*it))->second;
+
+      for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	(*lit)->notifyTimepointDeleted(timepoint);
+
+      m_tnet->deleteTimepoint(timepoint);
+      m_tnetVariables.erase(*it);
     }
     m_variablesForDeletion.clear();    
 
     // mirror bounds into the temporal network variables.
 
-    for (std::map<TempVarId, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) {
-      TempVarId var = varIt->first;
+    //std::cout << "m_tnetConstraints size = " << m_tnetVariableConstraints.size() << std::endl;
+    for (std::map<int, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) {
+      TemporalConstraintId tc = varIt->second;
+      check_error(m_tnetVariables.find(varIt->first) != m_tnetVariables.end());
+      TimepointId tp = (m_tnetVariables.find(varIt->first))->second;      
+      TempVarId var =  m_tnet->getVarIdFromTimepoint(tp);
       int lb = (int)Propagator::getCurrentDomain(var).getLowerBound();
       int ub = (int)Propagator::getCurrentDomain(var).getUpperBound();
       TimepointId timepoint = m_tnetVariables.find(var->getKey())->second;
@@ -226,8 +289,12 @@ namespace Prototype {
       // inconsistent in this mapping process.
       m_tnet->getLastTimepointBounds(timepoint, lbt, ubt);
       if (lb != lbt || ub != ubt) {
-	if (lb >= lbt && ub <= ubt)
+
+	if (lb > lbt && ub < ubt) {
 	  m_tnet->narrowTemporalConstraint(varIt->second, lb, ub);
+	  for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	    (*lit)->notifyBoundsRestricted(var, lb, ub);
+	}
 	else {
 	  // think about whether we can do better here, possibly by changing
 	  // the condition above.  There are cases
@@ -235,38 +302,56 @@ namespace Prototype {
 	  // thrashing by removing it and adding the original constraint that
 	  // was previously restricted by the temporal network.
 	  m_tnet->removeTemporalConstraint(varIt->second);
+	  for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	    (*lit)->notifyConstraintDeleted(varIt->first, varIt->second);
 	  TemporalConstraintId c(m_tnet->addTemporalConstraint(m_tnet->getOrigin(), timepoint, (Time)lb, (Time)ub));
+	  for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	    (*lit)->notifyBaseDomainConstraintAdded(var, c,  (Time)lb, (Time)ub);
 	  varIt->second = c;
 	}
       }
+      else {
+	  for(std::set<TemporalNetworkListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit)
+	    (*lit)->notifyBoundsSame(var, tp);
+      }
     }
+    in_process = false;
   }
 
-  void TemporalPropagator::updateTempVar() {
+  bool TemporalPropagator::updateTempVar() {
     for(std::map<int, TimepointId>::const_iterator it = m_tnetVariables.begin(); it != m_tnetVariables.end(); ++it) {
       Time lb, ub;
       m_tnet->getTimepointBounds((*it).second, lb, ub);
-      
-      if (Propagator::getCurrentDomain(m_tnet->getVarIdFromTimepoint((*it).second)).getLowerBound() > lb ||
-      	  Propagator::getCurrentDomain(m_tnet->getVarIdFromTimepoint((*it).second)).getUpperBound() < ub) {
-	std::cout << "Warning: bounds retrieved are  not a subset of the domain." << std::endl;
-	std::cout << " Domain = " << Propagator::getCurrentDomain(m_tnet->getVarIdFromTimepoint((*it).second)) << std::endl;
-	std::cout << " Bounds = [" << lb << "," << ub << "]" << std::endl;
-	check_error(false);
-      }
-      else {
-	TempVarId var = m_tnet->getVarIdFromTimepoint((*it).second);
+      TempVarId var = m_tnet->getVarIdFromTimepoint((*it).second);
+      AbstractDomain& dom = Propagator::getCurrentDomain(var);
+      check_error(!dom.isEmpty());
+      if (lb > dom.getLowerBound() || ub < dom.getUpperBound()) {
+
+	//std::cout << " updateCnet (" << var->getKey() << ") [" << lb << "," << ub << "]"  << std::endl;
+
 	if (TokenId::convertable(var->getParent())) {
 	  TokenId tok = var->getParent();
 	  if (!tok->isMerged()) // no need to update merged token variables
-	    var->specify(IntervalIntDomain(lb, ub));
+	    dom.intersect(IntervalIntDomain(lb, ub));
 	}
 	else
-	  var->specify(IntervalIntDomain(lb, ub));
+	  dom.intersect(IntervalIntDomain(lb, ub)); 
+	if (dom.isEmpty()) {
+	  std::cout << "Error: bounds are a subset of the domain, but intersect returned empty." << std::endl;
+	  std::cout << " Domain = " << dom << std::endl;
+	  std::cout << " Bounds = [" << lb << "," << ub << "]" << std::endl;
+	  check_error(false);
+	}
+      }
+      else { // not necessary to propagate results back to the variables
+	     // since we know the temporal network is consistent and the
+	     // domains must not have changed or otherwise it would be
+	     // smaller, which is already covered.
       }
     }
+    return true;
   }
-
+      
   bool TemporalPropagator::canPrecede(const TempVarId& first, const TempVarId& second) {
     check_error(getTimepoint(first) != TimepointId::noId());
     check_error(getTimepoint(second) != TimepointId::noId());
@@ -284,18 +369,14 @@ namespace Prototype {
     Time slb, sub;
     m_tnet->getLastTimepointBounds(sec, slb, sub);
 
-    //std::cout << "TemporalPropagator::canPrecede testing " << sub << " < " << flb << std::endl;
+    //std::cout << "TemporalPropagator::canPrecede testing [" << flb << "," << fub << "] --> [" << slb << "," << sub << "]" << std::endl;
 
     if (sub < flb)
       return false;
 
-    //std::cout << "TemporalPropagator::canPrecede computing distance < 0 {" << sec << "," << fir << "]";
+    //std::cout << "TemporalPropagator::canPrecede computing distance < 0 {" << fir << "," << sec << "]";
 
     bool result=m_tnet->isDistanceLessThan(fir,sec,0);
-//     if (result)
-//       std::cout << " false" << std::endl;
-//     else
-//       std::cout << " true" << std::endl;
 
     return !result;
     //    return (!m_tnet->isDistanceLessThan(sec,fir,0));
@@ -351,6 +432,10 @@ namespace Prototype {
 
     return (!m_tnet->isDistanceLessThan(pend,sstart,minDurationOfToken));
 
+  }
+
+  void TemporalPropagator::addListener(const TemporalNetworkListenerId& listener) {
+    m_listeners.insert(listener);
   }
     
 } //namespace
