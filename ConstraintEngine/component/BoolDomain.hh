@@ -21,6 +21,7 @@ namespace Prototype{
    */
   class BoolDomain: public IntervalDomain {
   public:
+    BoolDomain(bool singletonValue, const DomainListenerId& listener = DomainListenerId::noId());
     BoolDomain(const DomainListenerId& listener = DomainListenerId::noId());
     BoolDomain(const BoolDomain& org);
     bool isFinite() const;

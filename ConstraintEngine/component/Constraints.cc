@@ -3,6 +3,7 @@
 #include "ConstrainedVariable.hh"
 #include "IntervalIntDomain.hh"
 #include "IntervalRealDomain.hh"
+#include "BoolDomain.hh"
 #include "LabelSet.hh"
 
 namespace Prototype
@@ -172,6 +173,8 @@ namespace Prototype
       m_superSetDomain = new IntervalIntDomain((const IntervalIntDomain&) superset);
     else if (superset.getType() == AbstractDomain::REAL_INTERVAL)
       m_superSetDomain = new IntervalRealDomain((const IntervalRealDomain&) superset);
+    else if (superset.getType() == AbstractDomain::BOOL)
+      m_superSetDomain = new BoolDomain((const BoolDomain&) superset);
   }
 
   SubsetOfConstraint::~SubsetOfConstraint(){

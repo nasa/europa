@@ -30,6 +30,7 @@ namespace Prototype
   class IntervalIntDomain;
   class IntervalRealDomain;
   class LabelSet;
+  class BoolDomain;
 
   class DomainListener;
   typedef Europa::Id<DomainListener> DomainListenerId;

@@ -2,6 +2,9 @@
 
 namespace Prototype {
 
+  BoolDomain::BoolDomain(bool singletonValue, const DomainListenerId& listener)
+    :IntervalDomain(singletonValue, singletonValue, true, listener){}
+
   BoolDomain::BoolDomain(const DomainListenerId& listener)
     :IntervalDomain(0, 1, true, listener){}
 
