@@ -6,7 +6,7 @@ Known areas of performance improvement:
 5. Improve exchange of data in TemporalPropagator with  direct calculation of duration variables.
 6. Update TemporalNetwork to adjust for deactivated constraints
 
-M_13:
+M_14:
 **** Major Performance Milestone
 1. Introduced CBPlanner which responds to PlanDatabase and ConstraintEngine
 events to manage decisions directly without Flaws.
