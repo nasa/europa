@@ -78,7 +78,11 @@ namespace Prototype {
      * @param ub update this value with the upper bound.
      * @return true if !isFinite()
      */
-    bool getBounds(double& lb, double& ub) const;
+    inline bool getBounds(double& lb, double& ub) const {
+      lb = m_lb;
+      ub = m_ub;
+      return(m_ub == PLUS_INFINITY || m_lb == MINUS_INFINITY);
+    }
 
     /**
      * @brief Set to the specified domain.

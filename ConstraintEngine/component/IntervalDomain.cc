@@ -160,12 +160,6 @@ namespace Prototype {
     return(m_lb);
   }
 
-  bool IntervalDomain::getBounds(double& lb, double& ub) const {
-    lb = m_lb;
-    ub = m_ub;
-    return(m_ub == PLUS_INFINITY || m_lb == MINUS_INFINITY);
-  }
-
   double IntervalDomain::getSingletonValue() const {
     check_error(isSingleton());
     return(m_ub);
