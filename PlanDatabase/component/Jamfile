@@ -8,6 +8,5 @@ ModuleComponent PlanDatabase
 	EventToken.cc
 	IntervalToken.cc
 	ObjectFilter.cc
-#	PartialPlanWriter.cc
 	Timeline.cc
 	;
