@@ -2,7 +2,7 @@ Building PLASMA
 by Andrew Bachmann
 2004-07-13
 
-$Id: BUILDING,v 1.4 2004-10-22 20:45:10 wedgingt Exp $
+$Id: BUILDING,v 1.5 2004-10-27 21:50:17 bachmann Exp $
 
 
 - Building Jam
@@ -129,7 +129,7 @@ target executable names are also different.
   NONE = <filename>_no[.exe]
   SHARED = <filename>_rt[.exe]
 
-The default library kind is STATIC.  The library kind
+The default library kind is SHARED.  The library kind
 NONE is only recommended for situations where cyclic
 dependencies exist between modules.  The library kind
 SHARED is often the most space efficient.
