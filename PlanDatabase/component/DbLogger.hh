@@ -8,7 +8,7 @@ namespace Prototype{
 
   class DbLogger: public PlanDatabaseListener {
   public:
-    DbLogger(ostream& os, const PlanDatabaseId& planDatabase);
+    DbLogger(std::ostream& os, const PlanDatabaseId& planDatabase);
     ~DbLogger();
     void notifyAdded(const ObjectId& object);
     void notifyRemoved(const ObjectId& object);
@@ -24,7 +24,7 @@ namespace Prototype{
     void notifyAdded(const ObjectId& object, const TokenId& token);
     void notifyRemoved(const ObjectId& object, const TokenId& token);
   private:
-    ostream& m_os;
+    std::ostream& m_os;
   };
 
 }

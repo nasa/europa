@@ -55,8 +55,8 @@ SchemaId DefaultSchemaAccessor::s_instance;
     PlanDatabase db(ce.getId(), schema.getId());\
     new DefaultPropagator(LabelStr("Default"), ce.getId());\
     if(loggingEnabled()){\
-     new CeLogger(cout, ce.getId());\
-     new DbLogger(cout, db.getId());\
+     new CeLogger(std::cout, ce.getId());\
+     new DbLogger(std::cout, db.getId());\
     }\
     RulesEngine re(db.getId()); \
     new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());\
