@@ -109,6 +109,16 @@ namespace Prototype{
      */
     void remove(double value);
 
+
+    /**
+     * @brief Attempt to set the domain to the target.
+     *
+     * Indicates an external call to set the domain to the given target.
+     * @param dom The target domain.
+     * @see DomainListener::EMPTIED, DomainListener::SET, intersect()
+     */
+    void set(const EnumeratedDomain& dom);
+
     /**
      * @brief Attempt to set the domain to a singleton.
      *
@@ -117,8 +127,12 @@ namespace Prototype{
      * @param value The target singleton value.
      * @see DomainListener::EMPTIED, DomainListener::SET_TO_SINGLETON
      */
-    void setToSingleton(double value);
+    void set(double value);
 
+    /**
+     * @brief Reset the domain to the target value
+     */
+    void reset(const EnumeratedDomain& dom);
     /**
      * @brief Construct a mutual restriction of the 2 domains to the intersection between them.
      *

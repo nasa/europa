@@ -73,8 +73,14 @@ namespace Prototype {
     notifyChange(DomainListener::VALUE_REMOVED);
   }
 
-  void EnumeratedDomain::setToSingleton(double value){
-   
+  void EnumeratedDomain::set(const EnumeratedDomain& dom){
+    if(*this != dom){
+      intersect(dom);
+      notifyChange(DomainListener::SET);
+    }
+  }
+
+  void EnumeratedDomain::set(double value){
     // Find the value in the current set.
     int index = getIndex(value);
 
@@ -84,6 +90,13 @@ namespace Prototype {
       m_membership.reset();
       m_membership.set(index);
       notifyChange(DomainListener::SET_TO_SINGLETON);
+    }
+  }
+
+  void EnumeratedDomain::reset(const EnumeratedDomain& dom){
+    if(*this != dom){
+      *this = dom;
+      notifyChange(DomainListener::RESET);
     }
   }
 

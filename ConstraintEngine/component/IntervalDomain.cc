@@ -26,12 +26,13 @@ namespace Prototype {
   }
 
   bool IntervalDomain::operator==(const IntervalDomain& dom) const {
-    check_error(dom.isDynamic() || !dom.isEmpty());
-    check_error(isDynamic() || !isEmpty());
-
     return (AbstractDomain::operator==(dom) &&
 	    m_lb == dom.getLowerBound() &&
 	    m_ub == dom.getUpperBound());
+  }
+
+  bool IntervalDomain::operator!=(const IntervalDomain& dom) const {
+    return (! operator==(dom));
   }
 
   bool IntervalDomain::isSubsetOf(const IntervalDomain& dom) const{
@@ -56,7 +57,14 @@ namespace Prototype {
     return m_ub;
   }
  
-  void IntervalDomain::setToSingleton(double value){
+  void IntervalDomain::set(const IntervalDomain& dom){
+    if(*this != dom){
+      intersect(dom);
+      notifyChange(DomainListener::SET);
+    }
+  }
+ 
+  void IntervalDomain::set(double value){
     if(!isMember(value)){
       empty();
       return;
@@ -65,6 +73,13 @@ namespace Prototype {
     m_lb = value;
     m_ub = value;
     notifyChange(DomainListener::SET_TO_SINGLETON);
+  }
+
+  void IntervalDomain::reset(const IntervalDomain& dom){
+    if(*this != dom){
+      *this = dom;
+      notifyChange(DomainListener::RESET);
+    }
   }
 
   bool IntervalDomain::intersect(double lb, double ub){

@@ -44,6 +44,7 @@ namespace Prototype
 
     /**
      * @brief Retract previously specified domain restriction.
+     * @see specify()
      */
     void reset();
 
@@ -156,14 +157,14 @@ namespace Prototype
     check_error(!domain.isDynamic() && !domain.isEmpty());
     check_error(domain.isSubsetOf(m_specifiedDomain));
     m_specifiedDomain.intersect(domain);
-    m_derivedDomain.intersect(m_specifiedDomain);
+    m_derivedDomain.set(m_specifiedDomain);
     check_error(isValid());
   }
 
   template<class DomainType>
   void Variable<DomainType>::reset(){
     m_specifiedDomain = m_baseDomain;
-    m_derivedDomain = m_baseDomain;
+    m_derivedDomain.reset(m_baseDomain);
   }
 
   template<class DomainType>

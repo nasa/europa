@@ -40,6 +40,14 @@ public:
   ~DelegationTestConstraint(){s_instanceCount--;}
   void handleExecute(){s_executionCount++;}
   void handleExecute(const ConstrainedVariableId&,int, const DomainListener::ChangeType&){}
+  bool canIgnore(const ConstrainedVariableId& variable, 
+		 int argIndex, 
+		 const DomainListener::ChangeType& changeType){
+    if(changeType == DomainListener::SET)
+      return true;
+    return false;
+  }
+
   static int s_executionCount;
   static int s_instanceCount;
 };
@@ -61,6 +69,7 @@ public:
     m_change = NO_CHANGE;
     return (change != NO_CHANGE);
   }
+
 private:
   bool m_changed;
   ChangeType m_change;
@@ -125,7 +134,7 @@ private:
     assert(!ls0.isMember(l2));
 
     Prototype::LabelStr l3("L3");
-    ls0.setToSingleton(l3);
+    ls0.set(l3);
     assert(ls0.isMember(l3));
     assert(ls0.getSize() == 1);
 
@@ -214,7 +223,7 @@ private:
 
     assert(l1 == l2);
     LabelStr lbl("C");
-    l1.setToSingleton(lbl);
+    l1.set(lbl);
     assert(lbl == l1.getSingletonValue());
     return true;
   }

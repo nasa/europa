@@ -46,10 +46,23 @@ namespace Prototype{
     bool getBounds(double& lb, double& ub);
 
     /**
+     * @brief Set to the specified domain. May empty the domain if target does not intersect the current domain.
+     * @param value the target singleton value.
+     */
+    void set(const IntervalDomain& dom);
+
+    /**
      * @brief Set to a singleton. May empty the domain if value is not a member of the current domain.
      * @param value the target singleton value.
      */
-    void setToSingleton(double value);
+    void set(double value);
+
+    /**
+     * @brief Indicates assigment to the target domain as a relaxation triggered externally.
+     * @param value the target singleton value.
+     * @see relax
+     */
+    void reset(const IntervalDomain& dom);
 
     /**
      * @brief restricts this domain to the intersection of its values with the given domain.
@@ -119,6 +132,11 @@ namespace Prototype{
      * @brief test for equality.
      */
     bool operator==(const IntervalDomain& dom) const;
+
+    /**
+     * @brief test for inequality.
+     */
+    bool operator!=(const IntervalDomain& dom) const;
 
     /**
      * @brief test if this domain is a subset of dom.
