@@ -12,6 +12,7 @@
 
 #include "DbClient.hh"
 #include "ObjectFactory.hh"
+#include "TokenFactory.hh"
 
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/Utils.hh"
@@ -1363,6 +1364,16 @@ private:
   }
 };
 
+class IntervalTokenFactory: public ConcreteTokenFactory {
+public:
+  IntervalTokenFactory(): ConcreteTokenFactory(LabelStr("Foo")){}
+private:
+  TokenId createInstance(const PlanDatabaseId& planDb) const{
+    TokenId token = (new IntervalToken(planDb, LabelStr("Foo"), true))->getId();
+    return token;
+  }
+};
+
 class DbClientTest {
 public:
   static bool test(){
@@ -1392,6 +1403,7 @@ private:
 
     int key = client->createObject(LabelStr("Foo"), LabelStr("foo1"));
     FooId foo1 = client->getEntity(key);
+    assert(foo1.isValid());
 
     std::vector<ConstructorArgument> arguments;
     IntervalIntDomain arg0(10);
@@ -1400,6 +1412,11 @@ private:
     arguments.push_back(ConstructorArgument(LabelStr("string"), &arg1));
     key = client->createObject(LabelStr("Foo"), LabelStr("foo2"), arguments);
     FooId foo2 = client->getEntity(key);
+    assert(foo2.isValid());
+
+    key = client->createToken(LabelStr("Foo"));
+    TokenId token = client->getEntity(key);
+    assert(token.isValid());
 
     delete (DbClient*) client;
     return true;
@@ -1428,6 +1445,7 @@ int main() {
   // Have to register factories for testing.
   new StandardFooFactory();
   new SpecialFooFactory();
+  new IntervalTokenFactory();
 
   runTestSuite(ObjectTest::test);
   runTestSuite(TokenTest::test);
