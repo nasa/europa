@@ -21,6 +21,8 @@
 #include "BoolDomain.hh"
 #include "Domain.hh"
 
+#include "TypeFactory.hh"
+
 #include "module-tests.hh"
 
 #include <iostream>
@@ -77,6 +79,79 @@ public:
 private:
   void increment(int event){m_events[event] = m_events[event] + 1;}
   int m_events[ConstraintEngine::EVENT_COUNT];
+};
+
+class TypeFactoryTests {
+public:
+  static bool test(){
+    runTest(testValueCreation);
+    runTest(testDomainCreation);
+    runTest(testVariableCreation);
+    runTest(testVariableWithDomainCreation);
+    return true; 
+  }
+
+  static bool testValueCreation(){
+    IntervalIntDomain d0(5);
+    int v0 = (int) TypeFactory::createValue(d0.getTypeName(), std::string("5"));
+    assert(d0.compareEqual(d0.getSingletonValue(), v0));
+
+    IntervalDomain d1(2.3);
+    double v1 = (double) TypeFactory::createValue(d1.getTypeName(), std::string("2.3"));
+    assert(d1.compareEqual(d1.getSingletonValue(), v1));
+
+    BoolDomain d2(true);
+    bool v2 = (bool) TypeFactory::createValue(d2.getTypeName(), std::string("true"));
+    assert(d2.compareEqual(d2.getSingletonValue(), v2));
+
+    return true;
+  }
+
+  static bool testDomainCreation(){
+    AbstractDomain * cd0 = TypeFactory::createDomain(IntervalIntDomain().getTypeName());
+    assert(dynamic_cast<IntervalIntDomain *>(cd0) != NULL);
+
+    AbstractDomain * cd1 = TypeFactory::createDomain(IntervalDomain().getTypeName());
+    assert(dynamic_cast<IntervalDomain *>(cd1) != NULL);
+
+    AbstractDomain * cd2 = TypeFactory::createDomain(BoolDomain().getTypeName());
+    assert(dynamic_cast<BoolDomain *>(cd2) != NULL);
+
+    return true;
+  }
+
+  static bool testVariableCreation(){
+    ConstraintEngineId ce = (new ConstraintEngine())->getId();
+    ConstrainedVariableId cv0 = TypeFactory::createVariable(IntervalIntDomain().getTypeName(), ce);
+    assert(cv0->baseDomain().getType() == IntervalIntDomain().getType());
+    ConstrainedVariableId cv1 = TypeFactory::createVariable(IntervalDomain().getTypeName(), ce);
+    assert(cv1->baseDomain().getType() == IntervalDomain().getType());
+    ConstrainedVariableId cv2 = TypeFactory::createVariable(BoolDomain().getTypeName(), ce);
+    assert(cv2->baseDomain().getType() == BoolDomain().getType());
+    Entity::purgeStarted();
+    delete (ConstraintEngine*) ce;
+    Entity::purgeEnded();
+    return true;
+  }
+
+  static bool testVariableWithDomainCreation(){
+    IntervalIntDomain d0(5);
+    IntervalDomain d1(2.3);
+    BoolDomain d2(true);
+
+    ConstraintEngineId ce = (new ConstraintEngine())->getId();
+    ConstrainedVariableId cv0 = TypeFactory::createVariable(d0.getTypeName(), ce, d0);
+    assert(cv0->baseDomain() == d0);
+    ConstrainedVariableId cv1 = TypeFactory::createVariable(d1.getTypeName(), ce, d1);
+    assert(cv1->baseDomain() == d1);
+    ConstrainedVariableId cv2 = TypeFactory::createVariable(d2.getTypeName(), ce, d2);
+    assert(cv2->baseDomain() == d2);
+
+    Entity::purgeStarted();
+    delete (ConstraintEngine*) ce;
+    Entity::purgeEnded();
+    return true;
+  }
 };
 
 class EntityTests {
@@ -2309,7 +2384,7 @@ private:
 
 }; // class ConstraintTest
 
-class FactoryTest
+class ConstraintFactoryTest
 {
 public:
   static bool test() {
@@ -2512,13 +2587,15 @@ private:
 int main() {
   initConstraintLibrary();
   REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
+  TypeFactory::createValue(LabelStr("INT_INTERVAL"), std::string("5"));
   runTestSuite(IdTests::test);
   runTestSuite(DomainTests::test);
+  runTestSuite(TypeFactoryTests::test);
   runTestSuite(EntityTests::test);
   runTestSuite(ConstraintEngineTest::test);
   runTestSuite(VariableTest::test); 
   runTestSuite(ConstraintTest::test); 
-  runTestSuite(FactoryTest::test);
+  runTestSuite(ConstraintFactoryTest::test);
   runTestSuite(EquivalenceClassTest::test);
   cout << "Finished" << endl;
   ConstraintLibrary::purgeAll();

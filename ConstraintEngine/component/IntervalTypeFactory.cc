@@ -39,7 +39,7 @@ namespace Prototype {
 
   double IntervalTypeFactory::createValue(std::string value) const
   {
-    return atoi(value.c_str());
+    return atof(value.c_str());
   }
 
 } // namespace Prototype
