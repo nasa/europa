@@ -33,6 +33,9 @@ namespace Prototype {
   class TemporalNetworkListener;
   typedef Id<TemporalNetworkListener> TemporalNetworkListenerId;
 
+  class TimepointWrapper;
+  typedef Id<TimepointWrapper> TimepointWrapperId;
+
   #define noIndex -1;
 
 }
