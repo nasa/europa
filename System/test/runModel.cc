@@ -117,13 +117,9 @@ bool copyFromFile(){
 
 int main(int argc, const char ** argv) {
   const char* libPath;
-  int retStatus;
   char* error_msg;
-  char* status_msg;
   void* libHandle;
-  void  (*fcn_initialize)(const PlanDatabaseId&); 
   SchemaId (*fcn_schema)();   //function pointer to NDDL::schema()
-  SamplePlanDatabase *db1;
 
   switch (argc) {
     case 1:
@@ -157,6 +153,8 @@ int main(int argc, const char ** argv) {
     printf("dlsym: Error locating NDDL::schema:\n");
     check_error(!error_msg, error_msg); 
   } 
+
+  assert(Schema::instance().isValid());
 
   // Initialize constraint factories
   SamplePlanDatabase::initialize();

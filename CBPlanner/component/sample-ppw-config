@@ -1,6 +1,7 @@
 #the GeneralConfigSection is for the properties of writing
 GeneralConfigSection:
-AutoWrite=1
+# Set autowrite = 1 to enable logging
+AutoWrite=0
 StepsPerWrite=1
 WriteDest=./plans
 #WriteFinalStep=1
