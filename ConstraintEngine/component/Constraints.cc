@@ -135,8 +135,11 @@ namespace Prototype
 
   bool EqualConstraint::canIgnore(const ConstrainedVariableId& variable, 
 				     int argIndex, 
-				     const DomainListener::ChangeType& changeType) {
-    if(m_lastNotified == m_constraintEngine->cycleCount())
+				  const DomainListener::ChangeType& changeType) {
+
+    if(m_lastNotified == m_constraintEngine->cycleCount() ||
+       changeType == DomainListener::SET ||
+       changeType == DomainListener::SET_TO_SINGLETON)
       return true;
 
     m_lastNotified = m_constraintEngine->cycleCount();
@@ -251,8 +254,12 @@ namespace Prototype
   bool LessThanEqualConstraint::canIgnore(const ConstrainedVariableId& variable, 
 					  int argIndex, 
 					  const DomainListener::ChangeType& changeType) {
-    return((argIndex == X && changeType == DomainListener::UPPER_BOUND_DECREASED) ||
-	   (argIndex == Y && changeType == DomainListener::LOWER_BOUND_INCREASED));
+    return(changeType == DomainListener::SET ||
+	   changeType == DomainListener::SET_TO_SINGLETON ||
+	   (argIndex == X && 
+	    (changeType == DomainListener::UPPER_BOUND_DECREASED)) ||
+	   (argIndex == Y && 
+	    (changeType == DomainListener::LOWER_BOUND_INCREASED ||
+	     changeType == DomainListener::RESTRICT_TO_SINGLETON)));
   }
-
 }
