@@ -117,6 +117,9 @@ namespace Prototype {
     : Constraint(name, propagatorName, constraintEngine, variables), m_argCount(variables.size()) {
     // Check the arguments.  Any that are not singleton must all be
     //   enumerations or must all be intervals.
+    // Could support a mix of enumerations and intervals.  Not doing
+    //   so might permit arbitrary and pointless search during planning
+    //   in some problem domains. --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 21
     AbstractDomain& first = getCurrentDomain(m_variables[0]);
     bool enumerated = first.isEnumerated();
     for (unsigned int i = 1; i < m_argCount; i++) {
@@ -130,8 +133,15 @@ namespace Prototype {
   }
 
   /**
-   * @brief Will only performa restrictions on non-dynamic domains. In the worst case, this algorithm
-   * requires 2 passes over the variables.
+   * @brief Restrict all variables to the intersection of their domains.
+   * @note Will only restrict closed domains.
+   * @note In the worst case, this algorithm requires 2 passes over
+   * the variables.
+   * @note Should also restrict open domains (closing them and copying
+   * the members of the intersection of the closed domains) if there
+   * are any closed domains, but that is not supported elsewhere
+   * presently, it seems.
+   * --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 22
    */
   void EqualConstraint::handleExecute() {
     unsigned int i = 0;
@@ -141,31 +151,24 @@ namespace Prototype {
     if (i >= m_argCount)
       return;
 
-    // Start from the first non dynamic domain.
-    AbstractDomain& nonDynDom = getCurrentDomain(m_variables[i]);
-    check_error(!nonDynDom.isEmpty());
+    // Start from the first closed domain.
+    AbstractDomain& closedDom = getCurrentDomain(m_variables[i]);
+    check_error(!closedDom.isEmpty());
+    bool changedOne = true;
 
-    bool changedOne = false;
-    for (unsigned int j = i+1; j < m_argCount; j++){
-	AbstractDomain& otherDom = getCurrentDomain(m_variables[j]);
-        if (!otherDom.isOpen() && nonDynDom.equate(otherDom)) {
-          if (nonDynDom.isEmpty() || otherDom.isEmpty())
+    // This loop will run at most twice.
+    while (changedOne) {
+      changedOne = false;
+      for (unsigned int j = i + 1; j < m_argCount; j++) {
+        AbstractDomain& otherDom(getCurrentDomain(m_variables[j]));
+        if (!otherDom.isOpen() && closedDom.equate(otherDom)) {
+          if (closedDom.isEmpty() || otherDom.isEmpty())
             return;
-	  changedOne=true;
-        }
-    }
-
-    // May require another pass - only if a restriction has been made later than the variable
-    // adjacent to the first one. For binary constraints this will never happen
-    if(changedOne)
-      for (unsigned int j = i+2; j < m_argCount; j++){
-	AbstractDomain& otherDom = getCurrentDomain(m_variables[j]);
-        if (!otherDom.isOpen() && nonDynDom.equate(otherDom)) {
-          if (nonDynDom.isEmpty() || otherDom.isEmpty())
-            return;
-	  changedOne=true;
+          changedOne = true;
         }
       }
+    }
+
   }
 
   AbstractDomain& EqualConstraint::getCurrentDomain(const ConstrainedVariableId& var) {
@@ -232,7 +235,7 @@ namespace Prototype {
 
     check_error(AbstractDomain::canBeCompared(domx, domy));
 
-    // Discontinue if either domain is dynamic.
+    // Discontinue if either domain is open.
     if (domx.isOpen() || domy.isOpen())
       return;
 
@@ -274,8 +277,8 @@ namespace Prototype {
     // This is pointlessly restrictive; shouldn't the Domain class
     // decide whether it splits intervals or not?
     // But needing to know how a particular Domain class treats
-    // removal of arbitrary members is what makes this class's
-    // handleExecute()'s conditions so involved.
+    // removal of arbitrary members is what makes the conditions
+    // so involved in this class's handleExecute().
     // --wedgingt@ptolemy.arc.nasa.gov 2004 Feb 12
     //check_error(getCurrentDomain(m_variables[X]).isEnumerated() && getCurrentDomain(m_variables[Y]).isEnumerated());
 
@@ -290,7 +293,7 @@ namespace Prototype {
 
     check_error(AbstractDomain::canBeCompared(domx, domy));
 
-    // Discontinue if either domain is dynamic
+    // Discontinue if either domain is open.
     if (domx.isOpen() || domy.isOpen())
       return;
 
@@ -421,7 +424,7 @@ namespace Prototype {
     check_error(AbstractDomain::canBeCompared(domz, domy));
 
     /* Test preconditions for continued execution. */
-    /* Could support one dynamic domain, but only very messily due to REAL_ENUMERATED case. */
+    /* Could support one open domain, but only very messily due to REAL_ENUMERATED case. */
     if (domx.isOpen() ||
         domy.isOpen() ||
         domz.isOpen())
@@ -791,13 +794,20 @@ namespace Prototype {
     for (unsigned int i = 2; i < ARG_COUNT; i++) {
       check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[1]),
                                                 getCurrentDomain(m_variables[i])));
+
       // If this second condition is not enforced, the value used for
       // minDelta() in handleExecute() depends on the order of the
       // variables within the scope.  It should, in fact, probably be
       // enforced by AbstractDomain::canBeCompared().  Another
       // possibility would be to change the '==' here to '<=' ...
+      // Or permit any pairing of numeric domains here since we're
+      // doing equality tests, which don't really care about minDelta().
+      // Presently, e.g., this precludes real and integer intervals
+      // from appearing in the same constraint, which isn't really a problem.
+      // --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 21
       check_error(getCurrentDomain(m_variables[1]).minDelta() ==
                   getCurrentDomain(m_variables[i]).minDelta());
+
     }
   }
 
@@ -809,7 +819,7 @@ namespace Prototype {
       // Condition is not singleton, so try to restrict it:
       // A. If all of the others are singleton and equal, the condition is true.
       // B. If the others have an empty intersection, the condition is false.
-      // As with singleton false case, we can do nothing if any are dynamic.
+      // As with singleton false case, we can do nothing if any are open.
       bool canProveTrue = true;
       AbstractDomain* common = 0;
       double single = 0.0;
@@ -861,7 +871,7 @@ namespace Prototype {
     if (boolDom.isSingleton()) {
       if (!boolDom.getSingletonValue()) {
         // Singleton false: ensure at least one other var can have a
-        // value different than some third var.  If any are dynamic
+        // value different than some third var.  If any are open
         // or more than one is not singleton, none can be restricted.
 
         unsigned int j = 1;
@@ -890,7 +900,7 @@ namespace Prototype {
           foundOneToTrim = i;
         }
 
-        // No dynamic domains and at most one that is not singleton with member single.
+        // No open domains and at most one that is not singleton with member single.
         if (foundOneToTrim == 0) {
           // All are singleton with member single, so condition cannot be false,
           //   provoking an inconsistency:
@@ -915,12 +925,12 @@ namespace Prototype {
         return;
       } else {
 
-        // Singleton true: force all other vars in scope to be equated if _any_ of them are not dynamic.
+        // Singleton true: force all other vars in scope to be equated if _any_ of them are closed..
         unsigned int i = 1;
         for ( ; i < ARG_COUNT; i++)
           if (!getCurrentDomain(m_variables[i]).isOpen())
             break;
-        if (i == ARG_COUNT) // All of them are dynamic; can't reduce any.
+        if (i == ARG_COUNT) // All of them are open; can't reduce any.
           return; // Can ignore relax events until condition var is relaxed.
         AbstractDomain& dom1 = getCurrentDomain(m_variables[1]);
         for (bool changedOne = true; changedOne; ) {
