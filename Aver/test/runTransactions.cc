@@ -49,8 +49,8 @@ int main(int argc, const char** argv) {
   libPath = argv[1];
   //initialTransactions = argv[2];
   
-  std::cerr << argv[0] << ": dlopen() file: " << libPath << std::endl;
-  std::cerr.flush();
+  //std::cerr << argv[0] << ": dlopen() file: " << libPath << std::endl;
+  //std::cerr.flush();
   
   libHandle = dlopen(libPath, RTLD_NOW);
   
@@ -91,11 +91,11 @@ int main(int argc, const char** argv) {
     assertTrue(!error_msg, error_msg);
   }
   
-  std::cerr << "Model Library Unloaded" << std::endl;
-  std::cerr.flush();
+  //std::cerr << "Model Library Unloaded" << std::endl;
+  //std::cerr.flush();
 #endif
   
-  std::cerr << "Finished" << std::endl;
+  //std::cerr << "Finished" << std::endl;
   return 0;
 }
 
