@@ -113,29 +113,40 @@ namespace Prototype {
 				   const ConstraintEngineId& constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
-
-    // check the arguments - must both be enumerations or intervals.
-    check_error((getCurrentDomain(m_variables[X]).isEnumerated()
-                 == getCurrentDomain(m_variables[Y]).isEnumerated())
-                || getCurrentDomain(m_variables[X]).isSingleton()
-		|| getCurrentDomain(m_variables[Y]).isSingleton());
+    // Check the arguments.  Any that are not singleton must all be
+    //   enumerations or must all be intervals.
+    AbstractDomain& first = getCurrentDomain(m_variables[0]);
+    bool enumerated = first.isEnumerated();
+    for (unsigned int i = 1; i < m_variables.size(); i++) {
+      check_error(enumerated == getCurrentDomain(m_variables[i]).isEnumerated()
+                  || getCurrentDomain(m_variables[i]).isSingleton());
+      check_error(AbstractDomain::canBeCompared(first,
+                                                getCurrentDomain(m_variables[i])));
+    }
   }
 
   void EqualConstraint::handleExecute() {
-    AbstractDomain& domx = getCurrentDomain(m_variables[X]);
-    AbstractDomain& domy = getCurrentDomain(m_variables[Y]);
-
-    // Why can't this be done in the constructor? --wedgingt 2004 Feb 23
-    check_error(AbstractDomain::canBeCompared(domx, domy));
-
-    // Discontinue if both domains are dynamic.
-    if (domx.isDynamic() && domy.isDynamic())
+    // Discontinue if all domains are dynamic.
+    unsigned int i = 0;
+    for ( ; i < m_variables.size(); i++)
+      if (!getCurrentDomain(m_variables[i]).isDynamic())
+        break;
+    if (i >= m_variables.size())
       return;
 
-    check_error(!domx.isEmpty() && !domy.isEmpty());
-    domx.equate(domy);
-    check_error(domx.isEmpty() || domy.isEmpty() || domx == domy);
+    AbstractDomain& nonDynDom = getCurrentDomain(m_variables[i]);
+    check_error(!nonDynDom.isEmpty());
+    bool changedOne = true;
+    while (changedOne) {
+      changedOne = false;
+      for (unsigned int j = 0; j < m_variables.size(); j++)
+        if (i != j &&
+            nonDynDom.equate(getCurrentDomain(m_variables[j]))) {
+          if (nonDynDom.isEmpty())
+            return;
+          changedOne = true;
+        }
+    }
   }
 
   AbstractDomain& EqualConstraint::getCurrentDomain(const ConstrainedVariableId& var) {
