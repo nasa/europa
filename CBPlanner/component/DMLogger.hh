@@ -18,6 +18,15 @@ namespace Prototype{
     void notifyNewUnitDecision(const DecisionPointId& dec);
     void notifyNewDecision(const DecisionPointId& dec);
     void notifyRemovedDecision(const EntityId& entity);
+    void notifyAssignNextStarted(const DecisionPointId& dec); // previous dec
+    void notifyAssignNextFailed(const DecisionPointId& dec); // current dec
+    void notifyAssignNextSucceeded(const DecisionPointId& dec); // current dec
+    void notifyAssignCurrentStarted(const DecisionPointId& dec); // current dec
+    void notifyAssignCurrentFailed(const DecisionPointId& dec); // current dec
+    void notifyAssignCurrentSucceeded(const DecisionPointId& dec); // current dec
+    void notifyRetractStarted(const DecisionPointId& dec); // current dec
+    void notifyRetractFailed(const DecisionPointId& dec);  // current dec
+    void notifyRetractSucceeded(const DecisionPointId& dec);  // current dec
   private:
     std::ostream& m_os;
   };

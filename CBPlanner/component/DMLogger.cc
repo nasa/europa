@@ -1,6 +1,8 @@
 #include "DMLogger.hh"
 #include "Condition.hh"
 #include "DecisionPoint.hh"
+#include "DecisionManager.hh"
+#include "Choice.hh"
 
 namespace Prototype {
 
@@ -45,7 +47,81 @@ namespace Prototype {
     m_os << std::endl;
   }
   void DMLogger::notifyRemovedDecision(const EntityId& entity) {
-    m_os << "DMLogger: Removed Decision corresponding to (" << entity->getKey() << ") " << std::endl;
+    m_os << "DMLogger: Removed Decision corresponding to (" << entity->getKey() << ")" << std::endl;
   }
 
+  void DMLogger::notifyAssignNextStarted(const DecisionPointId& dec) { // previous dec
+    if (dec.isNoId())
+      m_os << "DMLogger: Deciding to assign next decision with current decision noId" << std::endl;       
+    else {
+      m_os << "DMLogger: Deciding to assign next decision with current decision ";
+      dec->print(m_os);
+      m_os << std::endl; 
+    }
+    m_os << "DMLogger: Open Decisions [" << m_dm->getNumberOfDecisions() << "]:" << std::endl;
+    m_dm->printOpenDecisions(m_os);
+    m_os << "DMLogger: Closed Decisions [" << m_dm->getClosedDecisions().size() << "]:" << std::endl;
+    m_dm->printClosedDecisions(m_os);
+  }
+  void DMLogger::notifyAssignNextFailed(const DecisionPointId& dec) { // current dec
+    if (dec.isNoId())
+      m_os << "DMLogger: Failed to assign next decision noId" << std::endl;   
+    else {
+      m_os << "DMLogger: Failed to assign " << dec->getCurrent() << " next decision (" << dec->getKey() << ") from the following choices ";
+      std::list<ChoiceId>::const_iterator it = m_dm->getCurrentDecisionChoices().begin();
+      for ( ; it != m_dm->getCurrentDecisionChoices().end(); ++it) {
+	(*it)->print(m_os);
+      }
+      m_os << std::endl;   
+    }
+  }
+  void DMLogger::notifyAssignNextSucceeded(const DecisionPointId& dec) { // current dec
+    check_error(dec.isValid());
+    m_os << "DMLogger: Succeeded in assigning " << dec->getCurrent() << " next decision (" << dec->getKey() << ") from the following choices "; 
+    std::list<ChoiceId>::const_iterator it = m_dm->getCurrentDecisionChoices().begin();
+    for ( ; it != m_dm->getCurrentDecisionChoices().end(); ++it)
+       (*it)->print(m_os);
+    m_os << std::endl;   
+
+  }
+  void DMLogger::notifyAssignCurrentStarted(const DecisionPointId& dec) { // current dec
+    check_error(dec.isValid());
+    m_os << "DMLogger: Deciding to assign current decision ";
+    dec->print(m_os);
+    m_os << std::endl;   
+  }
+  void DMLogger::notifyAssignCurrentFailed(const DecisionPointId& dec) { // current dec
+    check_error(dec.isValid());
+    m_os << "DMLogger: Failed to assign " << dec->getCurrent() << " current decision (" << dec->getKey() << ") from the following choices ";   
+    std::list<ChoiceId>::const_iterator it = m_dm->getCurrentDecisionChoices().begin();
+    for ( ; it != m_dm->getCurrentDecisionChoices().end(); ++it)
+      (*it)->print(m_os);
+    m_os << std::endl;   
+  }
+  void DMLogger::notifyAssignCurrentSucceeded(const DecisionPointId& dec) { // current dec
+    check_error(dec.isValid());
+    m_os << "DMLogger: Succeeded in assigning " << dec->getCurrent() << " current decision (" << dec->getKey() << ") from the following choices ";   
+    std::list<ChoiceId>::const_iterator it = m_dm->getCurrentDecisionChoices().begin();
+    for ( ; it != m_dm->getCurrentDecisionChoices().end(); ++it)
+      (*it)->print(m_os);
+    m_os << std::endl;   
+  }
+  void DMLogger::notifyRetractStarted(const DecisionPointId& dec) { // current dec
+    check_error(dec.isValid());
+    m_os << "DMLogger: Deciding to retract current decision ";
+    dec->print(m_os);
+    m_os << std::endl;   
+    m_os << "DMLogger: Closed Decisions [" << m_dm->getClosedDecisions().size() << "]:" << std::endl;
+    m_dm->printClosedDecisions(m_os);
+  }
+  void DMLogger::notifyRetractFailed(const DecisionPointId& dec) {  // current dec
+    if (dec.isNoId())
+      m_os << "DMLogger: Failed to retract current decision noId" << std::endl;   
+    else
+      m_os << "DMLogger: Failed to retract current decision (" << dec->getKey() << ")" << std::endl;   
+  }
+  void DMLogger::notifyRetractSucceeded(const DecisionPointId& dec) {  // current dec
+    check_error(dec.isValid());
+    m_os << "DMLogger: Succeeded in retracting current decision (" << dec->getKey() << ")" << std::endl;   
+  }
 }
