@@ -20,6 +20,9 @@
 #include "Utils.hh"
 #include "BinaryCustomConstraint.hh"
 #include "NotFalseConstraint.hh"
+#include "HSTSNoBranch.hh"
+#include "HSTSNoBranchCondition.hh"
+#include "HSTSPlanIdReader.hh"
 
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabase.hh"
@@ -109,6 +112,7 @@ public:
     runTest(testHorizonCondition);
     runTest(testTemporalVariableCondition);
     runTest(testDynamicInfiniteRealCondition);
+    runTest(testHSTSNoBranchCondition);
     return(true);
   }
 private:
@@ -148,6 +152,14 @@ private:
     bool retval = false;
     DEFAULT_SETUP(ce, db, false);
     retval = testDynamicInfiniteRealConditionImpl(ce, db, dm, hor);
+    DEFAULT_TEARDOWN();
+    return retval;
+  }
+
+  static bool testHSTSNoBranchCondition() {
+    bool retval = false;
+    DEFAULT_SETUP(ce,db,false);
+    retval = testHSTSNoBranchConditionImpl(ce,db,dm);
     DEFAULT_TEARDOWN();
     return retval;
   }
@@ -337,6 +349,7 @@ public:
     runTest(testTokenInitialization);
     runTest(testVariableInitialization);
     runTest(testReader);
+    runTest(testHSTSPlanIdReader);
     return(true);
   }
 private:
@@ -365,6 +378,20 @@ private:
     bool retval = false;
     DEFAULT_SETUP_HEURISTICS();
     retval = testReaderImpl(heuristics);
+    DEFAULT_TEARDOWN_HEURISTICS();
+    return retval;
+  }
+  static bool testHSTSPlanIdReader() {
+    bool retval = false;
+    DEFAULT_SETUP_HEURISTICS();
+    retval = testHSTSPlanIdReaderImpl();
+    DEFAULT_TEARDOWN_HEURISTICS();
+    return retval;
+  }
+  static bool testHSTSNoBranch(ConstraintEngine &ce, PlanDatabase &db, DecisionManager &dm) {
+    bool retval = false;
+    DEFAULT_SETUP_HEURISTICS();
+    retval = testHSTSNoBranchImpl(ce, db, dm);
     DEFAULT_TEARDOWN_HEURISTICS();
     return retval;
   }
