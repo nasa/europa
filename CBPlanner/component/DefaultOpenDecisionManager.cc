@@ -19,10 +19,12 @@ namespace EUROPA {
   DefaultOpenDecisionManager::~DefaultOpenDecisionManager() {
     std::list<DecisionPointId> openDecs;
     getOpenDecisions(openDecs);
-    std::map<int,DecisionPointId> alldecs;
-    for (std::list<DecisionPointId>::iterator it = openDecs.begin(); it != openDecs.end(); ++it)
-      alldecs.insert(std::make_pair((*it)->getKey(), *it));
-    cleanup(alldecs);
+
+    for (std::list<DecisionPointId>::iterator it = openDecs.begin(); it != openDecs.end(); ++it){
+      DecisionPointId decision = *it;
+      m_dm->deleteDecision(decision);
+    }
+
     m_tokDecs.clear();
     m_unitVarDecs.clear();
     m_nonUnitVarDecs.clear();
