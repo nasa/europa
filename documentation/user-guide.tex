@@ -26,18 +26,18 @@ Moffett Field, CA 94034-1000 \\
 \section{Introduction}
 \label{intro}
 \ET\, is the next generation of the Extensible Universal Remote
-Operations Architecture.  Like the CLARATy robotics control architecture
-\cite{kn:Ne}, MDS \cite{MDS}, or ILOG \cite{ILOG}, \ET\, is a
+Operations Architecture.  Like the CLARATy robotics control
+architecture~\cite{kn:Ne}, MDS~\cite{MDS}, or ILOG~\cite{ILOG}, \ET\, is a 
 component-based software library for representation and reasoning with
 plans and schedules. Our goal in developing \ET\, is to provide a fast,
 flexible, extensible, reusable technology platform for building planning
 and scheduling applications suitable for space exploration.
 
-EUROPA \cite{caip,plan} which has been the core planning technology for a
+EUROPA~\cite{caip,interplanetary} which has been the core planning technology for a
 variety of NASA-relevant research and mission applications. A notable
-example is MAPGEN \cite{mapgen}, the ground-based daily activity planning
+example is MAPGEN~\cite{mapgen}, the ground-based daily activity planning
 system for the Mars Exploration Rover mission. EUROPA in turn is derived
-from HSTS which was the planner for the Remote Agent\cite{ra}. \ET\,
+from HSTS which was the planner for the Remote Agent~\cite{rax}. \ET\,
 builds on the legacies of EUROPA and HSTS and provides improvements in
 performance, expressivity, reasoning capabilities, flexibility,
 extensibility, and modularity which has opened the technology to a broader
@@ -80,8 +80,8 @@ plan modification operations.
 Flaw definition, decision management, and plan assesment services are
 provided by the CBPlanner module. The CBPlanner module implements a
 chronological backtracking planner that resolves all flaws in the partial
-plan except for temporal variable assignments as described in
-\cite{planid,e2}. 
+plan except for temporal variable assignments as described in the
+literature~\cite{planid,europa2}.  
 
 The philosophy underlying \ET\, is to acknowledge up front that no
 one size fits all when it comes to which techniques to use, and which
@@ -228,7 +228,7 @@ in \ET. A token is {\em Active} immediately when introduced by an actor
 external to the plan database, as is the case with a goal $G$ specified in
 an initial partial plan. A token is initially {\em Inactive} when
 introduced by a configuration rule of the predicate of an {\em Active
-Token}.  As prescribed by CAPR \cite{e2}, an inactive token corresponds to
+Token}.  As prescribed by CAPR~\cite{europa2}, an inactive token corresponds to
 a token flaw which can be resolved by either {\em merging} with a matching
 {\em Active Token} or by choosing to use the resolver $\top$ via {\em
 activation}. Merging is chosen to represent that the configuration rule is
@@ -258,7 +258,7 @@ horizon is [-INFINITY, +INFINITY], but the horizon may be specified in the
 initial state. Another caveat is that we provide a mechanism for specifying
 precisely the set of flaws that should be resolved before the planner
 finishes ``completing'' the partial plan.  This mechanism is explained in
-full in a paper \cite{planid}, however, we mention that flaws can be
+full in a paper~\cite{planid}, however, we mention that flaws can be
 included in the set that need to be resolved via the specification of
 conditions that flaws must satisfy.  Thus, a plan is not complete until all
 flaws that satisfy all conditions are resolved.
@@ -272,7 +272,7 @@ temporal intervals.  This flexibility turns out to be very useful when
 there's lack of knowledge on precisely when states will hold.  Temporal
 variable assignments can be delayed indefinitely by excluding them from the
 set of flaws.  This can be done via a mechanism we call Plan
-Identification \cite{planid}.  In brief, \ET\, provides a set of standard
+Identification~\cite{planid}.  In brief, \ET\, provides a set of standard
 conditions that candidate flaws have to pass in order to become flaws that
 must be resolved for planning to complete.  One of these conditions is a
 temporal variable condition that filters out all temporal variables, thus,
@@ -357,7 +357,7 @@ Finally, the model contains a single rule for the predicate
 ``helloWorld''.  It specifies that the predicate has a duration 10 and that
 it ``meets'' another predicate of the same time and that it is ``met\_by''
 another predicate of the same type.  Meets and met\_by are taken from the
-Allen Relations \cite{allen} and they are inverse of each other and mean
+Allen Relations~\cite{allen} and they are inverse of each other and mean
 that one predicate must be immediately followed by another and vice-versa.
 You can see all temporal relations that \ET\, supports in Appendix~\ref{allen}.
 
@@ -696,9 +696,9 @@ The Rover has a main battery that is solar-powered.  A battery has state
 that is represented by numerical quantities and as such is represented in
 NDDL as a resource type.  In NDDL one can represent resources with
 different properties.  If we assume that the battery cannot be replenished,
-we say that the battery is a consumable resource \cite{res}.  Resources
+we say that the battery is a consumable resource~\cite{res}.  Resources
 have a default constructor and can be initialized with the following
-parameters (for full treatment of resources representation see \cite{res}): 
+parameters (for full treatment of resources representation see~\cite{res}): 
 \begin{enumerate}
  \item ``initial capacity'': the initial capacity of the resource
  \item ``level limit min'': the minimum level that the resource
@@ -1418,7 +1418,7 @@ Aver.  See also the Aver specification in Section~\ref{aver}.
 
 \section{PLASMA System Architecture}
 
-Figure \ref{System Diagram} describes the internals of the \ET\, Plan
+Figure \ref{SystemDiagram} describes the internals of the \ET\, Plan
 Database operating as a server to one or more clients. The server is an
 assembly of \ET\, components integrated for the needs of the particular
 application. The {\em Plan Database} provides a set of plan services of the
@@ -1807,9 +1807,5 @@ A inverse-overlaps B (io) & LessThan(A.start, B.end); LessThan(B.start, A.end); 
 \label{ack}
 This research was supported by NASA Ames Research Center and the NASA
 Intelligent Systems program. 
-
-\bibliography{user-guide}
-
-
 
 \end{document}
