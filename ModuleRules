@@ -32,44 +32,28 @@ rule Module {
   SubInclude PLASMA $(name) test ;
 }
 
-# ModuleCore <name> : <files for this module > ;
-rule ModuleCore {
+# ModuleFiles <name> : <files for this module> ;
+rule ModuleFiles {
   local name = $(1) ;
   local files = $(2) ;
 
   if $(TRACE_MODULE) = TRUE {
-    Echo ModuleCore $(name) . $(files) ;
+    Echo ModuleFiles $(name) . $(files) ;
   }
 
   local module = $(name:G=module) ;
   local LOCATE_TARGET = [ on $(module) return $(LOCATE_OBJECTS) ] ;
+  ModulePart $(module) : $(files) ;
+}
 
-  local core = $(module).core ;
-  ModulePart $(module) : $(core) : $(files) ;
-
-  LocalDepends core : $(core) ;
-  NotFile core ;
+# ModuleCore <name> : <files for this module > ;
+rule ModuleCore {
+  ModuleFiles $(1) : $(2) ;
 }
 
 # ModuleComponent <name> : <files for this module > ;
 rule ModuleComponent {
-  local name = $(1) ;
-  local files = $(2) ;
-
-  if $(TRACE_MODULE) = TRUE {
-    Echo ModuleComponent $(name) . $(files) ;
-  }
-
-  local module = $(name:G=module) ;
-  local LOCATE_TARGET = [ on $(module) return $(LOCATE_OBJECTS) ] ;
-
-  SubDirHdrs [ FDirName $(PLASMA) $(name) core ] ;
-
-  local component = $(module).component ;
-  ModulePart $(module) : $(component) : $(files) ;
-
-  LocalDepends component : $(component) ;
-  NotFile component ;
+  ModuleFiles $(1) : $(2) ;
 }
 
 rule ModuleDocumentation {
@@ -81,28 +65,57 @@ rule ModuleDocumentation {
   }
 }
 
+# ModuleTest <name> : <files for this test> : <modules that this test depends on> ;
 rule ModuleTest {
   local name = $(1) ;
   local files = $(2) ;
+  local modules = (3) ;
 
   if $(TRACE_MODULE) = TRUE {
-    Echo ModuleTest $(name) . $(files) ;
+    Echo ModuleTest $(name) . $(files) . $(modules) ;
   }
 
-  local module = $(name:G=module) ;
-  local LOCATE_TARGET = [ on $(module) return $(LOCATE_OBJECTS) ] ;
+  local links = [ FLinkModules $(module) ] ;
 
-  SubDirHdrs [ FDirName $(PLASMA) $(name) component ] ;
-  SubDirHdrs [ FDirName $(PLASMA) $(name) core ] ;
+  local link ;
+  for link in $(links) {
+    switch $(link) {
+    case *.core :
+      SubDirHdrs [ FDirName $(PLASMA) $(link:S=) core ] ;
+    case * :
+      SubDirHdrs [ FDirName $(PLASMA) $(link) core ] ;
+      SubDirHdrs [ FDirName $(PLASMA) $(link) component ] ;
+    }
+  }
 
-  local outputs ;
   local variant ;
   for variant in $(VARIANTS) {
+    local exe = [ FVariantName $(name) : $(variant) ] ;
+
+    local outputs ;
     local file ;
     for file in $(files) {
       local output = [ FVariantName $(file) : $(variant) ] ;
+      output = $(output:S=$(SUFOBJ)) ;
       outputs += $(output) ;
-      Object $(output) : $(file) ;
+      Object [ FGristFiles $(output) ] : $(file) ;
+    }
+
+    for library in $(LIBRARIES) {
+      local flags ;
+      if $(library) = SHARED {
+        for link in $(links) {
+          LinkSharedLibraries $(exe) : [ FModuleSharedLibraryName $(link:S=) : $(variant) ] ;
+        }
+        MainFromObjects $(exe)_rt : $(outputs) ;
+      } else if $(library) = STATIC {
+        for link in $(links) {
+          LinkLibraries $(exe) : [ FModuleStaticLibraryName $(link:S=) : $(variant) ] ;
+        }
+        MainFromObjects $(exe) : $(outputs) ;
+      } else {
+        Exit ModuleTest unknown library type: $(library) ;
+      }
     }
   }
 }
@@ -138,24 +151,17 @@ rule FLinkModules {
 
 rule ModulePart {
   local module = $(1) ;
-  local part = $(2) ;
-  local files = $(3) ;
+  local files = $(2) ;
 
   if $(TRACE_MODULE) = TRUE {
-    Echo ModulePart $(module) . $(part) . $(files) ;
+    Echo ModulePart $(module) . $(files) ;
   }
-
-  Depends $(module) : $(part) ;
-  NotFile $(part) ;
 
   local link ;
   for link in [ FLinkModules $(module) ] {
     switch $(link) {
     case *.core :
       SubDirHdrs [ FDirName $(PLASMA) $(link:S=) core ] ;
-    case *.component :
-      SubDirHdrs [ FDirName $(PLASMA) $(link:S=) core ] ;
-      SubDirHdrs [ FDirName $(PLASMA) $(link:S=) component ] ;
     case * :
       SubDirHdrs [ FDirName $(PLASMA) $(link) core ] ;
       SubDirHdrs [ FDirName $(PLASMA) $(link) component ] ;
@@ -180,9 +186,9 @@ rule ModulePart {
     for library in $(LIBRARIES) {
       local libname ;
       if $(library) = SHARED {
-        libname = [ FVariantName lib$(part:G=)$(SUFSHARE) : $(variant) ] ;
+        libname = [ FModuleSharedLibraryName $(module) : $(variant) ] ;
       } else if $(library) = STATIC {
-        libname = [ FVariantName lib$(part:G=)$(SUFLIB) : $(variant) ] ;
+        libname = [ FModuleStaticLibraryName $(module) : $(variant) ] ;
       } else {
         Exit ModulePart unknown library type: $(library) ;
       }
@@ -192,9 +198,16 @@ rule ModulePart {
       if $(library) = STATIC {
         ModuleStaticLibrary $(libname) : $(outputs) ;
       }
-      Depends $(part) : $(libname) ;
+      Depends $(module) : $(libname) ;
     }
   }
+}
+
+rule FModuleStaticLibraryName {
+  local module = $(1) ;
+  local variant = $(2) ;
+
+  return [ FVariantName lib$(module:G=)$(SUFLIB) : $(variant) ] ;
 }
 
 rule ModuleStaticLibrary {
@@ -208,6 +221,13 @@ rule ModuleStaticLibrary {
   if $(files) {
     LibraryFromObjects $(1) : $(2) ;
   }
+}
+
+rule FModuleSharedLibraryName {
+  local module = $(1) ;
+  local variant = $(2) ;
+
+  return [ FVariantName lib$(module:G=)$(SUFSHARE) : $(variant) ] ;
 }
 
 rule ModuleSharedLibrary {
