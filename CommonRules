@@ -30,6 +30,10 @@ rule FSplit
   }
 }
 
+#
+# Jambase level extensions [thx to OpenBeOS for "local" rules]
+#
+
 # FIsPrefix a : b ;				return whether or not a is a prefix of b
 
 rule FIsPrefix
@@ -75,6 +79,19 @@ rule LocalDepends
 	if [ FIsPrefix $(SUBDIR_UP) : $(SUBDIR_DOWN) ] {
 		Depends $(1) : $(2) ;
 	}
+}
+
+# 
+
+rule LinkSharedLibraries
+{
+	# make library dependencies of target
+    # set NEEDLIBS variable used by 'actions Main'
+
+    local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+
+    Depends $(_t) : $(>:S=$(SUFSHARE)) ;
+    NEEDSHARES on $(_t) += $(>:S=$(SUFSHARE)) ;
 }
 
 #
