@@ -7,10 +7,14 @@
 
 namespace Prototype {
 
-  void initNDDL(){
+  static bool & nddlInitialized() {
     static bool sl_alreadyDone(false);
-    if(!sl_alreadyDone){
-      sl_alreadyDone = true;
+    return sl_alreadyDone;
+  }
+
+  void initNDDL(){
+    if(!nddlInitialized()){
+      nddlInitialized() = true;
 
       /* Initialize dependendent module */
       initConstraintEngine();
@@ -23,4 +27,13 @@ namespace Prototype {
       new floatTypeFactory();
     }
   }
+
+  void uninitNDDL(){
+    if(nddlInitialized()){
+      uninitConstraintEngine();
+      TypeFactory::purgeAll();
+      nddlInitialized() = false;
+    }
+  }
+
 }

@@ -45,6 +45,10 @@ namespace Prototype {
    */
   void initConstraintEngine();
 
+  /**
+   * @brief Uninitialize all default elements of the module e.g. factories
+   */
+  void uninitConstraintEngine();
 
   /**
    * @brief Helper method to cast singleton values

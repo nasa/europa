@@ -35,6 +35,11 @@ namespace Prototype {
    */
   void initNDDL();
 
+  /**
+   * @brief Uninitialize all default elements of the module e.g. factories
+   */
+  void uninitNDDL();
+
 }
 
 #endif // NDDL_DEFS_HH

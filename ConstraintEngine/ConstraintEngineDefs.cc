@@ -7,10 +7,14 @@
 
 namespace Prototype {
 
-  void initConstraintEngine(){
+  static bool & constraintEngineInitialized() {
     static bool sl_alreadyDone(false);
-    if(!sl_alreadyDone){
-      sl_alreadyDone = true;
+    return sl_alreadyDone;
+  }
+
+  void initConstraintEngine(){
+    if(!constraintEngineInitialized()){
+      constraintEngineInitialized() = true;
 
       /* Allocate Standard Type Factories */
       new BoolTypeFactory();
@@ -20,4 +24,12 @@ namespace Prototype {
       new SymbolTypeFactory();
     }
   }
+
+  void uninitConstraintEngine(){
+    if(constraintEngineInitialized()){
+      TypeFactory::purgeAll();
+      constraintEngineInitialized() = false;
+    }
+  }
+
 }
