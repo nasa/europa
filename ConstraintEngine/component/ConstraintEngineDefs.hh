@@ -41,6 +41,8 @@ namespace Prototype
 
   class Constraint;
   typedef Europa::Id<Constraint> ConstraintId;
+  class UnaryConstraint;
+  typedef Europa::Id<UnaryConstraint> UnaryConstraintId;
   class Propagator;
   typedef Europa::Id<Propagator> PropagatorId;
   class ConstraintEngine;

@@ -41,15 +41,17 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
   bool result = test(); \
   DefaultEngineAccessor::reset(); \
   if(result && Europa::IdTable::size() == id_count) \
-    std::cout << " passed." << std::endl; \
+    std::cout << " PASSED." << std::endl; \
+  else if(result)\
+    std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED ID'S." << std::endl; \
   else \
-    std::cout << " FAILED." << std::endl; \
+    std::cout << " FAILED TO PASS UNIT TEST." << std::endl; \
 }
 
 #define runTestSuite(test, name) { \
   std::cout << name << "***************" << std::endl; \
   if(test()) \
-    std::cout << name << " passed." << std::endl; \
+    std::cout << name << " PASSED." << std::endl; \
   else \
     std::cout << name << " FAILED." << std::endl; \
 }
