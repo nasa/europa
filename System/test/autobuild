@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.70 2004-08-24 18:17:12 wedgingt Exp $
+# $Id: autobuild,v 1.71 2004-08-31 17:36:30 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -19,11 +19,20 @@ mkdir working || exit 1
 
 trap 'rmdir $startdir/working; rm -f $startdir/.tokens.$$' 0
 
-# Refuse to run if a prior check out is present.
-test ! -d PLASMA || exit 2
+info=`uname -a; echo ''; g++ --version ; hostname ; pwd`
+
+echo "$info"
 
 # Address to mail exit status messages to.
 email=checkins@postdoc.arc.nasa.gov
+
+# Refuse to run if a prior check out is present.
+if test -d PLASMA
+then
+    (echo "$info"; echo ''; echo 'PLASMA directory already present, aborting autobuild') | \
+        Mail -s 'PLASMA Autobuild on '"`hostname`"' in '"`pwd`"' aborted' "$email"
+    exit 2
+fi
 
 # The (compilation) variants to build and test.
 variants='DEV OPTIMIZED PROFILE'
@@ -62,8 +71,10 @@ do
   status=$?
   echo '"cvs co PLASMA" in '"`pwd`"' exited '"$status"
   if test "$status" != 0
-      then
+  then
       mkdir PLASMA/cvs.co.failed
+      (echo "$info"; echo ''; echo "'cvs co PLASMA' failed; aborting autobuild"; tail cvs.co.PLASMA) | \
+          Mail -s 'PLASMA Autobuild cvs checkout on '"`hostname`"' in '"`pwd`"' failed' "$email"
       exit "$status"
   fi
 
@@ -81,20 +92,23 @@ do
       then
           jam -sVARIANTS=$var clean > jam.clean.$var 2>&1
           statusJamClean=$?
-          echo '"jam -sVARIANTS='"$var"' tests" in '"`pwd`"' exited '"$statusJamTests"
+          echo '"jam -sVARIANTS='"$var"' clean" in '"`pwd`"' exited '"$statusJamClean"
           if test $statusJamClean = 0
           then
               :
           else
-              tail -40 jam.clean.$var
+              (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"' clean" in '"`pwd`"' exited '"$statusJamClean"; tail -40 jam.clean.$var) | \
+                  Mail -s 'PLASMA Autobuild jam clean on '"`hostname`"' in '"`pwd`"' failed' "$email"
               exit $statusJamClean
           fi
       else
-          tail -40 jam.tests.$var
+          (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"' tests" in '"`pwd`"' exited '"$statusJamTests"; tail -40 jam.tests.$var) | \
+              Mail -s 'PLASMA Autobuild jam tests on '"`hostname`"' in '"`pwd`"' failed' "$email"
           exit $statusJamTests
       fi
   else
-      tail -40 jam.output.$var
+      (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"'" in '"`pwd`"' exited '"$statusJam"; tail -40 jam.output.$var) | \
+          Mail -s 'PLASMA Autobuild jam compile on '"`hostname`"' in '"`pwd`"' failed' "$email"
       exit $statusJam
   fi
 
@@ -107,6 +121,9 @@ do
   rm -rf PLASMA
 
 done
+
+(echo "$info"; echo ''; echo "All builds, tests, and cleans passed for each variant: $variants.") | \
+    Mail -s 'PLASMA Autobuild on '"`hostname`"' passed.' "$email"
 
 echo "All builds, tests, and cleans passed for each variant: $variants."
 
