@@ -63,6 +63,7 @@ rule FMergeList {
   local list2 = $(2) ;
 
   local result = $(list1) ;
+  local i ;
   for i in $(list2) {
     if ! $(i) in $(result) {
       result += $(i) ;
@@ -160,13 +161,13 @@ rule LocalDepends
 
 rule LinkSharedLibraries
 {
+#	Echo LinkSharedLibraries $(<) . $(>) . [ on $(<) return $(NEEDSHARES) ] ;
 	# make library dependencies of target
     # set NEEDSHARES variable used by 'actions Link'
 
     local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-
     Depends $(_t) : lib$(>:S=$(SUFSHARE)) ;
-    NEEDSHARES on $(_t) += $(>) ;
+	NEEDSHARES on $(_t) = [ FMergeList [ on $(_t) return $(NEEDSHARES) ] : $(>) ] ;
 }
 
 rule LinkSharedLibrariesNoDeps
@@ -174,8 +175,7 @@ rule LinkSharedLibrariesNoDeps
     # set NEEDSHARES variable used by 'actions Link'
 
     local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-
-    NEEDSHARES on $(_t) += $(>) ;
+	NEEDSHARES on $(_t) = [ FMergeList [ on $(_t) return $(NEEDSHARES) ] : $(>) ] ;
 }
 
 #

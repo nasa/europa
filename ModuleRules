@@ -11,7 +11,7 @@ include [ FDirName $(SUBDIR) VariantRules ] ;
 #   SHARED
 #   NONE
 
-LIBRARIES ?= STATIC ;
+LIBRARIES ?= SHARED ;
 
 # Module <name> : <modules this module depends on> ;
 rule Module {
@@ -25,7 +25,7 @@ rule Module {
   local module = $(name:G=module) ;
   NotFile $(module) ;
 
-  LINK_LIBRARIES on $(module) = $(LINKLIBS) ;
+  LINK_LIBRARIES on $(module) = $(NEEDSHARES) ;
   LINK_MODULES on $(module) = $(modules:G=module) ;
   LOCATE_OBJECTS on $(module) = [ FDirName $(SUBDIR) [ ObjectsSubdirName $(VARIANTS) ] ] ;
   LOCATE_SHARED on $(module) = [ FDirName $($(_top)) lib ] ;
@@ -152,7 +152,9 @@ rule ModuleMain {
           Exit ModuleMain unknown library type: $(library) ;
         }
         LINKFLAGS on $(target) = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
-
+		LINKLIBS on $(target) = $(LINKLIBS) ;
+        NEEDSHARES on $(target) = ;
+		LinkSharedLibrariesNoDeps $(target) : [ on $(name:G=module) return $(LINK_LIBRARIES) ] ;
         local shared_dirs ;
         local link ;
         for link in $(links) {
@@ -166,7 +168,7 @@ rule ModuleMain {
             MainFromObjects $(target) : $(_o) : $(build_target) : true ;
           }
           local link_libraries = [ on $(link:G=module) return $(LINK_LIBRARIES) ] ;
-          on $(target) LINKLIBS = [ FMergeList $(LINKLIBS) : $(link_libraries) ] ;
+          LinkSharedLibrariesNoDeps $(target) : $(link_libraries) ;
           if $(library) = SHARED {
             local locate_shared = [ on $(link:G=module) return $(LOCATE_SHARED) ] ;
             shared_dirs = [ FMergeList $(shared_dirs) : $(locate_shared) ] ;
@@ -212,61 +214,36 @@ rule ModuleSharedLibrary {
 
   local links = [ FLinkModules $(modules) ] ;
 
-  local library ;
-  for library in $(LIBRARIES) {
+  if SHARED in $(LIBRARIES) {
     local variant ;
     for variant in $(VARIANTS) {
-      if $(library) != SHARED || $(variant) != PROFILE {
+      if $(variant) != PROFILE {
         local outputs ;
         local file ;
         for file in $(files) {
           file = [ FGristFiles $(file) ] ;
           local output = [ FVariantName $(file:S=) : $(variant) ] ;
-          if $(library) = SHARED {
-            output = $(output)_pic ;
-          }
+          output = $(output)_pic ;
           output = $(output)$(SUFOBJ) ;
           outputs += $(output) ;
         }
 
-        local target = $(name) ;
-        if $(library) = SHARED {
-          target = $(target)_rt ;
-        } else if $(library) = NONE {
-          target = $(target)_no ;
-        } else if $(library) != STATIC {
-          Exit ModuleMain unknown library type: $(library) ;
-        }
-        target = [ FModuleSharedLibraryName $(target) : $(variant) ] ;
+        local target = [ FModuleSharedLibraryName $(name) : $(variant) ] ;
         LINKFLAGS on $(target) = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
 
         local shared_dirs ;
         local link ;
         for link in $(links) {
-          if $(library) = SHARED {
-            local variant_name = [ FVariantName $(link) : $(variant) ] ;
-            Depends $(target) : lib$(variant_name:S=$(SUFSHARE)) ;
-            NEEDSHARES on $(target) += $(variant_name) ;
-          } else if $(library) = STATIC {
-            local variant_name = [ FModuleStaticLibraryName $(link) : $(variant) ] ;
-            Depends $(target) : $(variant_name:S=$(SUFLIB)) ;
-            NEEDLIBS on $(target) += $(variant_name:S=$(SUFLIB)) ;
-          } else if $(library) = NONE {
-            local _o = [ on $(link:G=module) return $($(variant)_OBJECTS) ] ;
-            SharedLibraryFromObjects $(target) : $(_o) : true : true ;
-          }
+          local variant_name = [ FVariantName $(link) : $(variant) ] ;
+          LinkSharedLibraries $(target) : $(variant_name) ;
           local link_libraries = [ on $(link:G=module) return $(LINK_LIBRARIES) ] ;
-          on $(target) LINKLIBS = [ FMergeList $(LINKLIBS) : $(link_libraries) ] ;
-          if $(library) = SHARED {
-            local locate_shared = [ on $(link:G=module) return $(LOCATE_SHARED) ] ;
-            shared_dirs = [ FMergeList $(shared_dirs) : $(locate_shared) ] ;
-          }
+          LinkSharedLibrariesNoDeps $(target) : $(link_libraries) ;
+          local locate_shared = [ on $(link:G=module) return $(LOCATE_SHARED) ] ;
+          shared_dirs = [ FMergeList $(shared_dirs) : $(locate_shared) ] ;
         }
-        if $(library) = SHARED {
-          for shared_dir in $(shared_dirs) {
-            LINKLIBS on $(target) += $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)
-                                     $(LINKER_PASSTHROUGH_FLAG)$(shared_dir) ;
-          }
+        for shared_dir in $(shared_dirs) {
+          LINKLIBS on $(target) += $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)
+                                   $(LINKER_PASSTHROUGH_FLAG)$(shared_dir) ;
         }
         if $(build_target) {
           SharedLibraryFromObjects $(target) : $(outputs) : true : true ;
@@ -285,11 +262,11 @@ rule ModuleLibraries {
   local libraries = $(2) ;
 
   if $(TRACE_MODULE) = TRUE {
-    Echo ModuleLibraries $(name) . $(libraries) ;
+    Echo ModuleLibraries $(name) . $(libraries) . [ on $(module) return $(LINK_LIBRARIES) ] ;
   }
 
   local module = $(name:G=module) ;
-  LINK_LIBRARIES on $(module) += -l$(libraries) ;
+  LINK_LIBRARIES on $(module) = [ FMergeList [ on $(module) return $(LINK_LIBRARIES) ] : $(libraries) ] ;
 }
 
 # RunModuleMain <target that when built runs this> : <executable> : <arguments> ;
@@ -409,14 +386,16 @@ rule ModulePart {
           LINKFLAGS on $(libname) = $(LINKFLAGS)
                                     $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)
                                     $(LINKER_PASSTHROUGH_FLAG)$(LOCATE_TARGET) ;
-          LINKLIBS on $(libname) = $(LINKLIBS) [ on $(module) return $(LINK_LIBRARIES) ] ;
+          LINKLIBS on $(libname) = $(LINKLIBS) ;
+          local need_shares = [ on $(module) return $(LINK_LIBRARIES) ] ;
           local link ;
           for link in [ FLinkModules [ on $(module) return $(LINK_MODULES) ] ] {
             local variant_name = [ FModuleSharedLibraryLinkName $(link) : $(variant) ] ;
-            Depends $(libname) : lib$(variant_name:S=$(SUFSHARE)) ;
-            NEEDSHARES on $(libname) += $(variant_name) ;
-            LINKLIBS on $(libname) += [ on $(link:G=module) return $(LINK_LIBRARIES) ] ;
+            Depends $(libname) : lib$(variant_name)$(SUFSHARE) ;
+            need_shares = [ FMergeList $(need_shares) : $(variant_name) ] ;
+            need_shares = [ FMergeList $(need_shares) : [ on $(link:G=module) return $(LINK_LIBRARIES) ] ] ;
           }
+          NEEDSHARES on $(libname) = $(need_shares) ;
           if $(variant) in $(VARIANTS) {
             ModuleSharedLibraryFromObjects $(libname) : $(outputs) ;
           } else {
@@ -448,7 +427,7 @@ rule FModuleStaticLibraryName {
   local variant = $(2) ;
 
   local name = $(module:G=) ;
-  local libname = [ FVariantName $(name:S=) : $(variant) ] ;
+  local libname = [ FVariantName $(name) : $(variant) ] ;
   return lib$(libname)$(SUFLIB) ;
 }
 
@@ -471,7 +450,7 @@ rule FModuleSharedLibraryLinkName {
   local variant = $(2) ;
 
   local name = $(module:G=) ;
-  local libname = [ FVariantName $(name:S=) : $(variant) ] ;
+  local libname = [ FVariantName $(name) : $(variant) ] ;
   return $(libname) ;
 }
 

@@ -8,6 +8,7 @@ if ! $(PLASMA_READY) {
 
 ModuleObjects DefaultTestInit.cc : System ;
 ModuleObjects runTransactionTest.cc : System ;
+ModuleMain runModel : runModel.cc : System ;
 
 local model ;
 for model in
@@ -20,15 +21,33 @@ for model in
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
   local cc = [ FGristFiles $(model:S=.cc) ] ;
+  local xml = $(model:S=.xml) ;
   local o = $(cc:S=.o) ;
   local lib = $(model:S=) ;
+
+  # create .hh, .cc, .o, and .xml for a .nddl
   Includes $(cc) : $(hh) ;
   NddlCompiler $(hh) $(cc) : $(model) ;
   ModuleObjects $(cc) : NDDL ;
+
+  # create planner with linked model
   ModuleMain $(exe) : $(o) runTransactionTest.o DefaultTestInit.o : System ;
-  ModuleSharedLibrary $(lib) : $(o) : NDDL : model-libraries ;
-  RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
+  RunModuleMain run-$(exe) : $(exe) : $(xml) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
+
+  # create planner with dlopen model
+  ModuleSharedLibrary $(lib) : $(o) : NDDL ;
+  local variant ;
+  for variant in $(VARIANTS) {
+    local variant_name = [ FVariantName $(lib) : $(variant) ] ;
+    local libname = lib$(variant_name)$(SUFSHARE) ;
+    local run_variant_name = [ FVariantName runModel : $(variant) ] ;
+    run_variant_name = [ FAppendSuffix $(run_variant_name)_rt : $(SUFEXE) ] ;
+    local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) ;
+    RunModuleMain run-model-$(exe) : runModel : $(arguments) ;
+    Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
+    LocalDepends run-model-tests : run-model-$(exe) ;
+  }
 }
 
 #
