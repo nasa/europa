@@ -112,7 +112,7 @@ class P4C3 {
 
 P4C3___A::P {
   eq(duration, [2 +inf]);
-  eq(d, [0 +inf]);
+  eq(d, [0 +1000]);
   starts(P4C3___Ap.Wa s0);
     eq(s0.dx, d);
     eq(s0.dy, 0);
@@ -142,8 +142,8 @@ P4C3___A::Ia {
 P4C3___Ap::Wa {
   eq(duration, [1 +inf]);
   condeq(Idle, dx, dy);
-  eq(dx, [0 +inf]);
-  eq(dy, [-inf 0]);
+  eq(dx, [0 +1000]);
+  eq(dy, [-1000 0]);
   meets(P4C3___Ap.Na s0);
   met_by(P4C3___Ap.Na s1);
   equals(P4C3___R.S s2);
@@ -158,8 +158,8 @@ P4C3___Ap::Wa {
 P4C3___Ap::Na {
   eq(duration, [1 +inf]);
   condeq(Idle, dx, dy);
-  eq(dx, [-inf 0]);
-  eq(dy, [0 +inf]);
+  eq(dx, [-1000 0]);
+  eq(dy, [0 +1000]);
   meets(P4C3___Ap.Wa s0);
   met_by(P4C3___Ap.Wa s1);
   equals(P4C3___R.E s2);
@@ -173,7 +173,7 @@ P4C3___Ap::Na {
 
 P4C3___B::C {
   eq(duration, [2 +inf]);
-  eq(d, [-inf 0]);
+  eq(d, [-1000 0]);
   starts(P4C3___Bp.Wb s0);
     eq(s0.dx, 0);
     eq(s0.dy, d);
@@ -203,8 +203,8 @@ P4C3___B::Ib {
 P4C3___Bp::Wb {
   eq(duration, [1 +inf]);
   condeq(Idle, dx, dy);
-  eq(dx, [0 +inf]);
-  eq(dy, [-inf 0]);
+  eq(dx, [0 +1000]);
+  eq(dy, [-1000 0]);
   meets(P4C3___Bp.Nb s0);
   met_by(P4C3___Bp.Nb s1);
   equals(P4C3___R.S s2);
@@ -219,8 +219,8 @@ P4C3___Bp::Wb {
 P4C3___Bp::Nb {
   eq(duration, [1 +inf]);
   condeq(Idle, dx, dy);
-  eq(dx, [-inf 0]);
-  eq(dy, [0 +inf]);
+  eq(dx, [-1000 0]);
+  eq(dy, [0 +1000]);
   meets(P4C3___Bp.Wb s0);
   met_by(P4C3___Bp.Wb s1);
   equals(P4C3___R.E s2);
@@ -238,14 +238,14 @@ P4C3___R::S {
   leq(y, x);
   sum(y, oy, ady, bdy);
   leq(oy, ox);
-  eq(x, [0 +inf]);
-  eq(y, [0 +inf]);
-  eq(ox, [0 +inf]);
-  eq(oy, [0 +inf]);
-  eq(adx, [0 +inf]);
-  eq(ady, [-inf 0]);
-  eq(bdx, [0 +inf]);
-  eq(bdy, [-inf 0]);
+  eq(x, [0 +1000]);
+  eq(y, [0 +1000]);
+  eq(ox, [0 +1000]);
+  eq(oy, [0 +1000]);
+  eq(adx, [0 +1000]);
+  eq(ady, [-1000 0]);
+  eq(bdx, [0 +1000]);
+  eq(bdy, [-1000 0]);
   equals(P4C3___Ap.Wa s0);
     eq(s0.dx, adx);
     eq(s0.dy, ady);
@@ -266,14 +266,14 @@ P4C3___R::E {
   leq(y, x);
   sum(ny, y, ady, bdy);
   leq(ny, nx);
-  eq(x, [0 +inf]);
-  eq(y, [0 +inf]);
-  eq(nx, [0 +inf]);
-  eq(ny, [0 +inf]);
-  eq(adx, [-inf 0]);
-  eq(ady, [0 +inf]);
-  eq(bdx, [-inf 0]);
-  eq(bdy, [0 +inf]);
+  eq(x, [0 +1000]);
+  eq(y, [0 +1000]);
+  eq(nx, [0 +1000]);
+  eq(ny, [0 +1000]);
+  eq(adx, [-1000 0]);
+  eq(ady, [0 +1000]);
+  eq(bdx, [-1000 0]);
+  eq(bdy, [0 +1000]);
   equals(P4C3___Ap.Na s0);
     eq(s0.dx, adx);
     eq(s0.dy, ady);

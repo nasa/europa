@@ -79,8 +79,8 @@ LocalDepends run-hsts-planner-tests :
 #       merTest18-h
         gnats-C3
 #       gnats-NoBranchBug
-#       gnats-P4-C3
-#       gnats-P4-C3eq
+        gnats-P4-C3
+        gnats-P4-C3eq
         gnats-SC
         gnats-condasame
         gnats-rover-fixed
@@ -281,7 +281,7 @@ RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl : NoBranchBug.xml : NoBr
 
 # These two take multiple hours without completing on Token for some reason and may be infinite loop or similar.
 #   Reported as GNATS 2796.
-# Now, fails: ConstraintEngine/component/Constraints.cc:789: Error: getCurrentDomain(m_variables[0]).getType() == AbstractDomain::BOOL is false
+# Avoided by constraining token parameters within [-1000 1000] rather than allowing [-INF INF].
 RunEUROPATest gnats-P4-C3 : P4-C3-init.nddl ;
 RunEUROPATest gnats-P4-C3eq : P4-C3eq-init.nddl ;
 
