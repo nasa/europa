@@ -23,49 +23,6 @@ namespace Prototype {
     m_objDecs.clear();
   }
 
-  // called when objects are deleted (now it deletes choices, so unless I
-  // do caching of choices, I don't need it)
-  void DefaultOpenDecisionManager::deleteAllMatchingObjects(const ObjectId& object, const TokenId& token) {
-    check_error(ALWAYS_FAILS);
-    /*
-    std::map<int,ObjectDecisionPointId>::iterator it = m_objDecs.begin();
-    while(it != m_objDecs.upper_bound(object->getKey())) {
-      ObjectDecisionPointId dec = it->second;
-      check_error(dec.isValid());
-      m_objDecs.erase(it++);
-      m_dm->deleteDecision(dec);
-      publishRemovedDecision(object);
-    }
-    */
-  }
-
-  void DefaultOpenDecisionManager::add(const ObjectId& object, const TokenId& token) {
-    check_error(ALWAYS_FAILS);
-    /*
-    DecisionPointId dp = createObjectDecisionPoint(object, token);
-    check_error(dp->getEntityKey() == object->getKey());
-    m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
-    publishNewDecision(dp);
-    */
-  }
-
-  void DefaultOpenDecisionManager::add(const ObjectId& object) {
-    // check_error(ALWAYS_FAILS);
-    /*
-    check_error(object.isValid());
-    std::vector<TokenId> tokens;
-    object->getTokensToOrder(tokens);
-    std::vector<TokenId>::iterator it = tokens.begin();
-    for (; it != tokens.end(); ++it) {
-      ObjectDecisionPointId dp = createObjectDecisionPoint(object, *it);
-      check_error(dp->getEntityKey() == object->getKey());
-      m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
-      publishNewDecision(dp);
-    }
-    // no need to remove any token decision points because only call path
-    // is from recomputeDecisions.
-    */
-  }
 
   void DefaultOpenDecisionManager::addActive(const TokenId& token) {
     check_error(token.isValid());
@@ -134,6 +91,12 @@ namespace Prototype {
     m_tokDecs.insert(std::pair<int,TokenDecisionPointId>(dp->getEntityKey(),dp));
     m_sortedTokDecs.insert(dp);
     publishNewDecision(dp);
+  }
+
+  // needs to be here because this may trigger custom object decisions to
+  // be created. However, we don't trigger these decisions in the default
+  // decision model. 
+  void DefaultOpenDecisionManager::add(const ObjectId& object) {
   }
 
   void DefaultOpenDecisionManager::condAdd(const TokenId& token) {
@@ -242,28 +205,6 @@ namespace Prototype {
       }
       publishRemovedDecision(token);
     }
-  }
-
-  // needs to change, called when token constrained or removed from object
-  void DefaultOpenDecisionManager::removeObject(const ObjectId& object, const TokenId& token, const bool deleting) {
-    check_error(ALWAYS_FAILS);
-    /*
-    std::multimap<int,ObjectDecisionPointId>::iterator it = m_objDecs.lower_bound(object->getKey());
-    while(it != m_objDecs.upper_bound(object->getKey())) {
-      if (it->second->getToken()->getKey() == token->getKey()) {
-	if (deleting) {
-	  DecisionPointId dec = it->second;
-	  check_error(dec.isValid());
-	  m_objDecs.erase(it++);
-	  m_dm->deleteDecision(dec);
-	}
-	else m_objDecs.erase(it++);
-	publishRemovedDecision(object);
-	break;
-      }
-      else ++it;
-    }
-    */
   }
 
   const int DefaultOpenDecisionManager::getNumberOfDecisions() {

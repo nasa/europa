@@ -38,11 +38,13 @@ namespace Prototype {
     HSTSOpenDecisionManager(const DecisionManagerId& dm);
     ~HSTSOpenDecisionManager();
 
+    virtual DecisionPointId getNextDecision();
     virtual const ChoiceId getNextChoice();
+    virtual const int getNumberOfDecisions();
 
     // order returned is different
     virtual void getOpenDecisions(std::list<DecisionPointId>& decisions);
-    virtual void printOpenDecisions(std::ostream& os);
+    virtual void printOpenDecisions(std::ostream& os = std::cout);
   protected:
     friend class DecisionManager;
 

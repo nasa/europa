@@ -64,9 +64,9 @@ namespace Prototype {
     virtual const ChoiceId getNextChoice();
     virtual const int getNumberOfDecisions();
 
-	virtual bool hasOpenDecisions() {
-	  return (getNumberOfDecisions()>0);
-	}
+    virtual bool hasOpenDecisions() {
+      return (getNumberOfDecisions()>0);
+    }
     virtual void getOpenDecisions(std::list<DecisionPointId>& decisions);
     virtual void printOpenDecisions(std::ostream& os = std::cout);
   protected:
@@ -74,15 +74,13 @@ namespace Prototype {
 
     virtual void cleanupAllDecisionCaches();
 
-    virtual void deleteAllMatchingObjects(const ObjectId& object, const TokenId& token);
-    virtual void add(const ObjectId& object, const TokenId& token);
-    virtual void add(const ObjectId& object);
     virtual void addActive(const TokenId& token);
     virtual void condAddActive(const TokenId& token);
     virtual void condAdd(const TokenId& token);
     virtual void add(const TokenId& token);
     virtual void condAdd(const ConstrainedVariableId& var, const bool units);
     virtual void add(const ConstrainedVariableId& variable);
+    virtual void add(const ObjectId& object);
 
     virtual void removeVar(const ConstrainedVariableId& var, const bool deleting);
     virtual const bool removeVarDP(const ConstrainedVariableId& var, const bool deleting, std::map<int,ConstrainedVariableDecisionPointId>& varMap, VariableDecisionSet& sortedVars);
@@ -91,7 +89,6 @@ namespace Prototype {
     virtual void removeActive(const TokenId& tok, const bool deleting);
     virtual void removeToken(const TokenId& tok, const bool deleting);
     virtual const bool removeTokenDP(const TokenId& tok, const bool deleting, std::map<int,TokenDecisionPointId>& tokMap, TokenDecisionSet& sortedToks);
-    virtual void removeObject(const ObjectId& object, const TokenId& token, const bool deleting);
 
     /* the following are the decision caches */
     std::map<int,TokenDecisionPointId> m_tokDecs;
