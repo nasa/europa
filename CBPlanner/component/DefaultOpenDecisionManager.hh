@@ -4,6 +4,7 @@
 #include "CBPlannerDefs.hh"
 #include "OpenDecisionManager.hh"
 #include "Token.hh"
+#include "Utils.hh"
 
 namespace Prototype {
 
