@@ -50,6 +50,7 @@ for model in
 #
 
 Main stackGenerator : stackGenerator.cc ;
+ObjectHdrs stackGenerator.cc : [ FDirName $(PLASMA) Utils core ] ;
 MakeLocate [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(SUBDIR) ;
 
 rule FSatelliteModel {
