@@ -147,6 +147,7 @@ int main(int argc, const char ** argv){
     EUROPAHeuristicStrategy strategy;
       
     int res = planner.run(strategy.getId(), loggingEnabled());
+    //int res = planner.run(strategy.getId(), true);
     check_error(res == 1);
 	
     const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
@@ -175,10 +176,10 @@ int main(int argc, const char ** argv){
   std::cout << "Plan Database:" << std::endl;
   PlanDatabaseWriter::write(db.getId(), std::cout);
 
-  ConstraintLibrary::purgeAll();
-  TokenFactory::purgeAll();
-  ObjectFactory::purgeAll();
   db.purge();
+  ObjectFactory::purgeAll();
+  TokenFactory::purgeAll();
+  ConstraintLibrary::purgeAll();
 	
   std::cout << "Finished" << std::endl;
 }
