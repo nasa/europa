@@ -10,8 +10,6 @@
 #include "DecisionPoint.hh"
 #include "EUROPAHeuristicStrategy.hh"
 
-#include "TemporalPropagator.hh"
-#include "STNTemporalAdvisor.hh"
 #include "PlanDatabaseWriter.hh"
 
 #include <fstream>
@@ -131,10 +129,8 @@ bool runPlanner(){
     ConstrainedVariableId maxPlannerSteps = world->getVariable(LabelStr("world.m_maxPlannerSteps"));
     check_error(maxPlannerSteps.isValid());
     int steps = (int) maxPlannerSteps->baseDomain().getSingletonValue();
-    CBPlanner planner(db1.planDatabase->getClient(), db1.flawSource, steps);
-    EUROPAHeuristicStrategy strategy;
 
-    int res = planner.run(strategy.getId(), true);
+    int res = db1.planner->run(loggingEnabled(), steps);
 
     PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
