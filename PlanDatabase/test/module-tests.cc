@@ -9,6 +9,7 @@
 #include "DbLogger.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
+#include "DbClient.hh"
 
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/Utils.hh"
@@ -171,7 +172,8 @@ private:
     return(true);
   }
 
-  static bool testObjectTokenRelation() {
+
+  static bool testObjectTokenRelation(){
     PlanDatabase db(ENGINE, SCHEMA);
     // 1. Create 2 objects
     ObjectId object1 = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr("O1")))->getId();
@@ -1266,6 +1268,27 @@ private:
   }
 };
 
+class DbClientTest {
+public:
+  static bool test(){
+    runTest(testBasicAllocation);
+    return true;
+  }
+private:
+  static bool testBasicAllocation(){
+    ConstraintEngine ce;
+    new DefaultPropagator(LabelStr("Default"), ce.getId());
+    Schema schema;
+    PlanDatabase db(ce.getId(), schema.getId());
+
+    DbClientId client = DbClient::createInstance(db.getId());
+
+    delete (DbClient*) client;
+    return true;
+  }
+};
+
+
 int main() {
   initConstraintLibrary();
   
@@ -1286,5 +1309,6 @@ int main() {
   runTestSuite(ObjectTest::test);
   runTestSuite(TokenTest::test);
   runTestSuite(TimelineTest::test);
+  runTestSuite(DbClientTest::test);
   std::cout << "Finished" << std::endl;
 }
