@@ -32,7 +32,7 @@ rule ExecuteTarget {
 
 actions ExecuteTarget {
   cd `dirname $(2)`
-  `basename $(2)` $(ARGUMENTS)
+  ./`basename $(2)` $(ARGUMENTS)
 }
 
 #
