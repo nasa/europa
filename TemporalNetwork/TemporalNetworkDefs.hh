@@ -18,6 +18,6 @@ namespace Prototype {
   typedef int Index;
 
   #define noIndex -1;
-  #define checkError(test, error, msg, errorClass, returnValue) check_error(! (test) )
+  //#define checkError(test, error, msg, errorClass, returnValue) check_error(! (test) )
 }
 #endif
