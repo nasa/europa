@@ -10,7 +10,7 @@ QSS Group Inc. \\
 Computational Sciences Division \\
 NASA Ames Research Center \\
 Moffett Field, CA 94034-1000 \\
-\{tania,mcgann,bachmann,wedignt,miatauro\}@email.arc.nasa.gov
+\{tania,mcgann,bachmann,wedgingt,miatauro\}@email.arc.nasa.gov
 }
 
 \title{\ET: User and Contributor Guide}
@@ -685,24 +685,20 @@ cl\=ass Stowable\_Instrument extends Instrument \{ \\
 \> \> stow\_speed = \_stow\_spd; \\
 \> \> unstow\_speed = \_unstow\_spd; \\
 \> \} \\
-\> pr\=edicate Stow \{ \\
-\> \> eq(stow\_speed, duration); \\
-\> \} \\
-\> pr\=edicate Unstow \{ \\
-\> \> eq(unstow\_speed, duration); \\
-\> \} \\
+\> predicate Stow \{ \} \\
+\> predicate Unstow \{ \} \\
 \> predicate Stowed \{ \} \\
 \> predicate Unstowed \{ \} \\
 \} 
 \end{tabbing}}
-Stowable instruments will inherit the predicates ``Position'' and ``Positioned''
-from ``Instrument'', since these are the only members of the class.  Note that
-predicates can have argument variables such as ``position\_speed'' from the
-``Position'' predicate.  Predicates can also impose constraints by
-definition on its arguments whether they're implicit, such as duration, or
-explicit, such as ``position\_speed''. In this case, we equal the
-corresponding speeds to the duration of each of the ``Position'', ``Stow'',
-or ``Unstow'' predicates. 
+Stowable instruments will inherit the predicates ``Position'' and
+``Positioned'' from ``Instrument'', since these are the only members of the
+class.  Note that predicates can have argument variables such as
+``position\_speed'' from the ``Position'' predicate.  Predicates can also
+impose constraints by definition on its arguments whether they're implicit,
+such as duration, or explicit, such as ``position\_speed''. In this case,
+we equal the corresponding speeds to the duration of each of the
+``Position'', ``Stow'', or ``Unstow'' predicates. 
 
 \subsection{Batteries}
 The Rover has a main battery that is solar-powered.  A battery has state
@@ -760,7 +756,12 @@ cl\=ass Navigator \{ \\
 The ``Navigator'' component indicates that the Rover can either be ``At'' a
 location or ``Going'' from one location to another.  Furthermore, a Rover
 can only move between different locations as indicated by the constraint
-``neq(from, to);''.
+``neq(from, to);''.  This constraint can appear in the predicate definition
+because it references only variables that are members of the predicate.
+If you want to include constraints between things other than predicate
+arguments (whether explicit or implicit such as duration or object) you
+must do so in a rule.  We'll show how when we describe rules in
+Section~\ref{rules}. 
 
 Finally, we can describe a Rover in the following way:
 
@@ -771,30 +772,124 @@ cl\=ass Rover \{ \\
 \> Stowable\_Instrument rat; \\
 \> Battery battery; \\
 \> Ro\=ver(Battery r) \{ \\
-\> \>  commands = new Commands(); \\
-\> \>  navigator = new Navigator(); \\
-\> \>  instrument = new Instrument(); \\
-\> \>  mainBattery = r; \\ 
+\> \>  nav = new Navigator(); \\
+\> \>  pancam = new Instrument(); \\
+\> \>  rat = new Stowable\_Instrument(); \\
+\> \>  battery = r; \\ 
 \> \} \\
 \}
 \end{tabbing}}
 
 \subsection{Rules}
+\label{rules}
 
 We are now in a position to write the rules governing the state transitions
-for Instruments, Navigators, and Batteries.
+for Instruments and Navigators.  Let's first go through the rules:
+\begin{enumerate}
+ \item In order to position an instrument, the navigator has to be at the
+destination. 
+ \item Placing an instrument consumes 20 units of the battery.
+ \item In order to unstow an instrument, the navigator cannot be moving,
+thus, it has to be At some location.
+ \item Unstowing is possible only if the instrument was stowed and after
+unstowing the instrument will be unstowed.
+ \item Unstowing consumes 20 units of battery.
+ \item In order to stow an instrument, the navigator cannot be moving,
+thus, it has to be At some location.
+ \item Stowing is possible only if the instrument was positioned (we don't
+want to allow unstowing and stowing for no reason) and after stowing the
+instrument will be stowed.
+ \item Stowing consumes 20 units of battery.
+ \item Stowed is preceeded by a Stow and followed by an Unstow.
+ \item Unstowed is preceeded by an Unstow and followed by a Position.
+ \item At is preceeded and followed by a Going such that the preceeding
+Going's destination is the source of At and the successor Going token's
+source is the source of At.
+ \item Going is preceeded by an At such that the location of at is the from
+of Going, and Going is also succeeded by an At such that the location of at
+is the to of the Going.
+ \item Going between a to and a from is only allowed if there exists a path
+p between the to and the from.
+ \item Going consumes as much battery as the cost of the path.
+\end{enumerate}
+Rules that apply to the same predicate can be aggregated into the same
+rule.  For instance, the rules above in the model would appear as:
+
+\subsubsection{Basic Rules}
 
 \begin{verbatim}
+// Rules for Instrument
+
+Instrument::Position{
+ // make sure it is at the destination during the execution of Position
+ contained_by(Navigator.At at);
+ eq(at.location, destination);
+ // ensure that both at and position refer to the same object.
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+ // consume battery
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
+}
+
+// Rules for Stowable_Instrument
+
+Stowable_Instrument::Unstow{
+ // make sure it is at some location during the execution of Position
+ contained_by(Navigator.At at);
+ // ensure that both at and unstow refer to the same object.
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+ // unstow is followed by unstowed and preceeded by stowed.
+ meets(Unstowed a);
+ met_by(Stowed b);
+ // consume battery
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
+}
+
+Stowable_Instrument::Stow{
+ // make sure it is at some location during the execution of Position
+ contained_by(Navigator.At at);
+ // ensure that both at and stow refer to the same object.
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+ // unstow is followed by stowed and preceeded by position.
+ meets(Stowed a);
+ met_by(Position b);
+ // consume battery
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
+}
+
+Stowable_Instrument::Stowed{
+ // stowed is followed by unstow and preceeded by stow.
+ met_by(Stow a);
+ meets(Unstow b);
+}
+
+Stowable_Instrument::Unstowed{
+ // unstowed is followed by position and preceeded by unstow.
+ met_by(Unstow a);
+ meets(Position b);
+}
+
+// Rules for Navigator
+
 Navigator::At{
+ // at is preceeded by a Going whose destination is location.
  met_by(object.Going go_before);
  eq(go_before.to, location);
+ // at is followed by a Going whose source is location.
  meets(object.Going go_after);
  eq(go_after.from, location);
 }
 
 Navigator::Going{
+ // going is preceeded by an At whose location is from
  met_by(object.At at_before);
  eq(at_before.location, from);
+ // going is followed by an At whose location is to
  meets(object.At at_after);
  eq(at_after.location, to);
 
@@ -804,53 +899,86 @@ Navigator::Going{
   eq(p.to, to);
  };
 
- // Pull juice from the battery. Should be based on path length.
+ // Consume units of battery (assuming p.cost is negative). Should be based
+ // on path length. 
  starts(Battery.change tx);
  eq(tx.quantity, p.cost);
 }
+\end{verbatim}
 
-Instrument::Position{
- contained_by(Navigator.At at);
- eq(at.location, destination);
- Rover rovers;
- commonAncestor(at.object, this.object, rovers);
+\subsection{Advanced Rules}
+In the the previous section we covered:
+\begin{enumerate}
+\item basic rules - meets, met\_by, contained\_by, starts
+\item constraints among parameters of predicates
+\item commonAncestor constraint that is used when traversal of the object
+hierarchy is required
+\item existential quantification by creating a filter
+\end{enumerate}
+In this section we will cover other more advanced concepts such as
+conditional rules, rule local variables and universal quantification.
 
+Assume now that we want to model a rover that can accept requests to shoot 
+images and shoot them either with a filter or without any filters.  Whether
+to use a filter or not is determined by the image request.  Let us first
+model a camera. We can take advantage of the Instrument class and extend it
+with the properties we want cameras to have.  In NDDL we would write:
+\texttt{\begin{tabbing}
+cl\=ass Camera extends Instrument \{ \\
+\> pr\=edicate ShootRequest \{ \\ 
+\> \>  bool filtering; \\
+\> \>  Location view; \\
+\> \>  int length; \\
+\> \} \\
+\> pr\=edicate PlaceFilter \{ \\ 
+\> \>  Location view; \\
+\> \} \\
+\> pr\=edicate Shoot \{ \\ 
+\> \>  Location view; \\
+\> \} \\
+\}
+\end{tabbing}}
+Notice that an image request requires that we specify whether or not to use
+a filter while shooting.  Furthermore, each of the predicates keeps track
+of the location of the image that is to be taken. We will need the
+navigator component to be at the location and remain at that location
+through the shoot. The ``Location'' parameter of all predicates allows us
+ensure that we stay at the location through the entire shoot.  Here are the
+corresponding rules:
+\begin{verbatim}
+Camera::ShootRequest {
+ eq(length,duration);
+ contained_by(Navigator.At atc);
+ eq(atc.location, view);
+ if (filtering == true) {
+   meets(object.PlaceFilter s0);
+   eq(s0.view,view);
+ }
+ if (filtering == false) {
+   meets(object.Shoot s1);
+   eq(s1.view,view);
+ }
+}
+
+Camera::PlaceFilter {
+ eq(duration,5);
+ contained_by(Navigator.At atc);
+ eq(atc.location, view);
+ met_by(object.ShootRequest s0);
+ eq(s0.view,view);
+ meets(object.Shoot s1);
+ eq(s1.view,view);
  starts(Battery.change tx);
  eq(tx.quantity, -20);
 }
 
-Stowable_Instrument::Unstow{
- contained_by(Navigator.At at);
- Rover rovers;
- commonAncestor(at.object, this.object, rovers);
-
- meets(Unstowed a);
- met_by(Stowed b);
-
+Camera::Shoot {
+ contained_by(Navigator.At atc);
+ eq(atc.location, view);
+ meets(object.ShootRequest s0);
+ eq(s0.view,view);
  starts(Battery.change tx);
- eq(tx.quantity, -20);
-}
-
-Stowable_Instrument::Stow{
- contained_by(Navigator.At at);
- Rover rovers;
- commonAncestor(at.object, this.object, rovers);
-
- meets(Stowed a);
- met_by(Position b);
-
- starts(Battery.change tx);
- eq(tx.quantity, -20);
-}
-
-Stowable_Instrument::Stowed{
- met_by(Stow a);
- meets(Unstow b);
-}
-
-Stowable_Instrument::Unstowed{
- met_by(Unstow a);
- meets(Position b);
+ eq(tx.quantity, -100);
 }
 \end{verbatim}
 
@@ -865,18 +993,18 @@ concepts and illustrated them with examples in the UserGuideRover model:
 \item inheritance
 \item predicates
 \item predicate parameter constraints
-\item basic rules - meets and met\_by
-\item instantiation
-\item assigment
-\item composition
-\item contains/containedBy
+\item basic rules - meets, met\_by, contained\_by, starts
 \item constraints among parameters of a predicate.
+\item commonAncestor constraint that is used when traversal of the object
+hierarchy is required
+\item composition
 \item rules
-\item Allen Relations
-\item local variables
 \item guards
 \item Using existential quantification - filtering and binding
-\item Using universal quanitifcation - iteration over objects
+\item local variables
+\item instantiation (not introduced)
+\item assigment (in initial state)
+\item Using universal quanitifcation - iteration over objects (not introduced)
 \end{enumerate}
 
 \subsection{Formulate and solve a planning problem}
