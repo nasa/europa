@@ -42,8 +42,12 @@ public:
    * Initialize the context with some variables form the token and add a local variable for the rule too. This
    * will test cleanup.
    */
-  void initializeContext(const TokenId& token, std::vector<ConstrainedVariableId>& scope) const{
+  void initializeContext(const RuleContextId& context) const {
+    const TokenId& token = context->getToken();
+    std::vector<ConstrainedVariableId>& scope = context->getVariables();
+
     assert(scope.empty());
+
     scope.push_back(token->getObject());
     scope.push_back(token->getRejectability());
     ConstrainedVariableId localVariable = 
@@ -51,7 +55,7 @@ public:
     scope.push_back(localVariable);
   }
 
-  bool handleSet(const RuleContextId& context, int index, const ConstrainedVariableId& var) const{
+  bool handleSet(const RuleContextId& context, int index, const ConstrainedVariableId& var) const {
     std::vector<TokenId> newTokens;
     std::vector<ConstraintId> newConstraints;
 
