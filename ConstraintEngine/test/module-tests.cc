@@ -918,6 +918,7 @@ void testBitVector(){
 
 int main()
 {
+  initConstraintLibrary();
   runTestSuite(LabelTest::test, "LabelTests"); 
   runTestSuite(DomainTest::test, "DomainTests");  
   runTestSuite(VariableTest::test, "VariableTests"); 

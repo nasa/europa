@@ -1,4 +1,5 @@
 #include "Constraints.hh"
+#include "ConstraintEngine.hh"
 #include "ConstrainedVariable.hh"
 #include "IntervalIntDomain.hh"
 #include "IntervalRealDomain.hh"
@@ -84,7 +85,7 @@ namespace Prototype
 
   EqualConstraint::EqualConstraint(const ConstraintEngineId& constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
-    : Constraint("Equal", constraintEngine, variables){
+    : Constraint("Equal", constraintEngine, variables), m_lastNotified(0){
     check_error(variables.size() == ARG_COUNT);
 
     // type check the arguments - only work with enumerations for now
@@ -130,6 +131,17 @@ namespace Prototype
 				      int argIndex, 
 				      const DomainListener::ChangeType& changeType){
     handleExecute();
+  }
+
+
+  bool EqualConstraint::canIgnore(const ConstrainedVariableId& variable, 
+				     int argIndex, 
+				     const DomainListener::ChangeType& changeType) {
+    if(m_lastNotified == m_constraintEngine->cycleCount())
+      return true;
+
+    m_lastNotified = m_constraintEngine->cycleCount();
+    return false;
   }
 
   AbstractDomain&  EqualConstraint::getCurrentDomain(const ConstrainedVariableId& var){
@@ -194,7 +206,7 @@ namespace Prototype
 
   bool SubsetOfConstraint::canIgnore(const ConstrainedVariableId& variable, 
 				     int argIndex, 
-				     const DomainListener::ChangeType& changeType) const {
+				     const DomainListener::ChangeType& changeType) {
     check_error(argIndex == 0);
     return(changeType != DomainListener::RELAXED);
   }

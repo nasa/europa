@@ -54,9 +54,16 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
     cout << name << " FAILED." << endl; \
 }
 
-// Register constraint Factories
-REGISTER_UNARY(SubsetOfConstraint, "SubsetOf");
-REGISTER_NARY(EqualConstraint, "Equal");
-REGISTER_NARY(AddEqualConstraint, "AddEqual");
+void initConstraintLibrary(){
+  static bool s_runAlready(false);
+
+  if(!s_runAlready){
+    // Register constraint Factories
+    REGISTER_UNARY(SubsetOfConstraint, "SubsetOf");
+    REGISTER_NARY(EqualConstraint, "Equal");
+    REGISTER_NARY(AddEqualConstraint, "AddEqual");
+    s_runAlready = true;
+  }
+}
 
 #endif
