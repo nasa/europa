@@ -40,20 +40,14 @@ namespace Prototype
      * @param domain - the domain to restrict to. Note that the domain must be a subset of the current domain.
      * @see reset()
      */
-    virtual void specify(const DomainType& domain);
+    virtual void specify(const AbstractDomain& domain);
 
     /**
      * @brief Special case of specify where we restrict it to a singleton
      * @param singleTonValue to specify it to
      * @see specify(const DomainType& domain), reset()
      */
-    template <class ItemType>
-    void specify(const ItemType& singletonValue){
-      check_error(m_specifiedDomain.isMember(singletonValue));
-      DomainType domain(m_specifiedDomain);
-      domain.set(singletonValue);
-      specify(domain);
-    }
+    virtual void specify(const double& singletonValue);
 
     /**
      * @brief Retract previously specified domain restriction.
@@ -194,13 +188,21 @@ namespace Prototype
   }
 
   template<class DomainType>
-  void Variable<DomainType>::specify(const DomainType& domain){
+  void Variable<DomainType>::specify(const AbstractDomain& domain){
     check_error(!domain.isDynamic() && !domain.isEmpty());
     check_error(domain.isSubsetOf(m_specifiedDomain));
     if(m_specifiedDomain.intersect(domain))
       m_derivedDomain.set(m_specifiedDomain);
     check_error(isValid());
     m_isSpecified = true;
+  }
+
+  template <class DomainType>
+  void Variable<DomainType>::specify(const double& singletonValue){
+    check_error(m_specifiedDomain.isMember(singletonValue));
+    DomainType domain(m_specifiedDomain);
+    domain.set(singletonValue);
+    specify(domain);
   }
 
   template<class DomainType>
