@@ -2223,7 +2223,7 @@ private:
     if (problemCount > 0) {
       std::cerr << __FILE__ << ':' << __LINE__ << ": testArbitraryConstraints() failed "
                 << problemCount << " test cases" << std::endl;
-      throw Prototype::generalUnknownError;
+      throw Error::GeneralUnknownError();
     }
     return(true);
   }

@@ -53,14 +53,14 @@ private:
       IdTable::output(std::cout); \
       std::cout << "\tWere " << id_count << " IDs before; " << IdTable::size() << " now"; \
       std::cout << std::endl; \
-      throw Prototype::generalMemoryError; \
+      throw Error::GeneralMemoryError(); \
     } else { \
       std::cout << " FAILED TO PASS UNIT TEST." << std::endl; \
-      throw Prototype::generalUnknownError; \
+      throw Error::GeneralUnknownError(); \
     } \
   } \
-  catch (Error* err){ \
-   err->print(std::cout); \
+  catch (Error err){ \
+   err.print(std::cout); \
   }\
   }
 
@@ -72,8 +72,8 @@ private:
   else \
     std::cout << #test << " FAILED." << std::endl; \
   }\
-  catch (Error* err){\
-   err->print(std::cout);\
+  catch (Error err){\
+   err.print(std::cout);\
   }\
   }
 

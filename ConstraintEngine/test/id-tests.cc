@@ -182,10 +182,20 @@ bool IdTests::testBadAllocationErrorHandling()
 #ifndef PROTOTYPE_FAST_VERSION
 
   // Ensure allocation of a null pointer triggers error
-  expectedError = idMgrInvalidItemPtrError;
+  //LabelStr expectedError = IdErr::IdMgrInvalidItemPtrError();
 
-  Id<Foo> fId0((Foo*) 0);
-  assert(fId0.isInvalid());
+  Error::doThrowExceptions();
+  Error::doNotDisplayErrors();
+  try {
+    Id<Foo> fId0((Foo*) 0);
+    check_error(false, "Id<Foo> fId0((Foo*) 0); failed to error out.");
+  }
+  catch(Error e){
+    if(e.getType() == "Error")
+      assert(false);
+  }
+  Error::doNotThrowExceptions();
+  Error::doDisplayErrors();
 
   Foo* foo = new Foo();
   Id<Foo> fId1(foo);

@@ -20,10 +20,17 @@
 */
 
 #include "Error.hh"
+#include "LabelStr.hh"
 #include "TestData.hh"
+
+class TestError {
+public:
+  DECLARE_ERROR(BadThing);
+};
 
 int main(int argc, char **argv) {
   try {
+    Error::doThrowExceptions();
     check_error(Error::printingErrors());
     std::cerr << "Error::printErrors() is true\n";
     check_error(Error::getStream() == std::cerr);
@@ -60,5 +67,16 @@ int main(int argc, char **argv) {
   } catch (Error e) {
     __z__(e, Error("argc == 2", "check_error(argc == 2)", __FILE__, __LINE__ - 3));
   }
+  try {
+    check_error(argc == 2, "check_error(argc == 2)", TestError::BadThing());
+    __y__("check_eror(argc == 2, TestError::BadThing()) did not throw an exception");
+  }
+  catch(Error e) {
+    assert(e.getType() == "BadThing");
+    std::cerr << "Caught expected " << e.getType() << std::endl;
+  }
+  //Error::doNotThrowExceptions();
+  //std::cerr << "Next check_error should exit..." << std::endl;
+  //check_error(argc == 2, "this should die");
   exit(0);
 }
