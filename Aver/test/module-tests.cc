@@ -270,7 +270,10 @@ namespace EUROPA {
       DomainContainer* tokDom = AverHelper::tokenSetToDomain(tokens);
       std::list<double> resultIds;
       (*tokDom)->getValues(resultIds);
+
       
+      resultIds.sort();
+      tokenIds.sort();
       assert(resultIds == tokenIds);
 
       DomainContainer tempDom(new EnumeratedDomain(tokenIds, true, EnumeratedDomain::getDefaultTypeName().c_str()), true, true);
@@ -420,6 +423,8 @@ namespace EUROPA {
       std::list<double> ids;
       (*tokDom)->getValues(ids);
 
+      tokenIds.sort();
+      ids.sort();
       assert(tokenIds == ids);
       
       delete tokDom;
@@ -505,6 +510,8 @@ namespace EUROPA {
       std::list<double> ret;
       (*tokens1)->getValues(ret);
       
+      ret.sort();
+      t1.sort();
       assert(ret == t1);
       delete tokens1;
       ret.clear();
@@ -521,6 +528,8 @@ namespace EUROPA {
       
       (*tokens1)->getValues(ret);
       
+      ret.sort();
+      t2.sort();
       assert(ret == t2);
       delete tokens1;
       ret.clear();
@@ -559,6 +568,8 @@ namespace EUROPA {
       std::list<double> ret;
       (*objs)->getValues(ret);
 
+      ret.sort();
+      o1.sort();
       assert(ret == o1);
       delete objs;
       ret.clear();
@@ -575,6 +586,8 @@ namespace EUROPA {
 
       (*objs)->getValues(ret);
       
+      ret.sort();
+      o2.sort();
       assert(ret == o2);
       delete objs;
       ret.clear();
