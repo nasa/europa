@@ -32,6 +32,10 @@ Rover::At{
  meets(_foo.Bar bar);
  Foo localFoo;
  meets(localFoo.Bar baz);
+
+ // Constrain common ancestor
+ Rover r; // All rovers
+ commonAncestor(from.object, to.object, r);
 }
 
 Rover::Going{

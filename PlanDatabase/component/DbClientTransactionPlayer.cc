@@ -105,10 +105,11 @@ namespace PLASMA {
       for (TiXmlElement * child_el = element.FirstChildElement() ;
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
         processTransaction(*child_el);
+	if(!m_client->propagate())
+	  return;
       }
     } else
       check_error(ALWAYS_FAILS);
-    m_client->propagate();
   }
 
   void DbClientTransactionPlayer::playDefineClass(const TiXmlElement & element) {
