@@ -9,6 +9,7 @@
 #include "PlanDatabaseDefs.hh"
 #include "TokenVariable.hh"
 #include "ConstrainedVariable.hh"
+#include "TestSupport.hh"
 
 namespace Prototype {
 
@@ -42,10 +43,12 @@ namespace Prototype {
 	  }
 	}
       }
-      os << "Free Tokens: *************************" << std::endl;
-      for(TokenSet::const_iterator tokit = alltokens.begin(); tokit != alltokens.end(); ++tokit){
-	TokenId t = *tokit;	    
-	writeToken(t, os);
+      if (loggingEnabled()) {
+	os << "Free Tokens: *************************" << std::endl;
+	for(TokenSet::const_iterator tokit = alltokens.begin(); tokit != alltokens.end(); ++tokit){
+	  TokenId t = *tokit;	    
+	  writeToken(t, os);
+	}
       }
     }
 
