@@ -10,8 +10,14 @@ namespace Prototype {
   class Token;
   typedef Europa::Id<Token> TokenId;
 
+  class UnifyMemento;
+  typedef Europa::Id<UnifyMemento> UnifyMementoId;
+
   class MergeMemento;
   typedef Europa::Id<MergeMemento> MergeMementoId;
+
+  class StackMemento;
+  typedef Europa::Id<StackMemento> StackMementoId;
 
   class PlanDatabaseListener;
   typedef Europa::Id<PlanDatabaseListener> PlanDatabaseListenerId;
