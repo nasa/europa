@@ -1,5 +1,7 @@
 // /home/sailesh/work/EXPERIMENTS/CPlan1.5/model/k9.ddl
 
+#include "NddlWorld.nddl"
+
 class Location {
 
     predicate NotTracked {
@@ -197,10 +199,7 @@ class Rover {
 }
 
 // Defines the initial state for the problem.
-class World {
-  // Horizon information
-  int m_horizonStart;
-  int m_horizonEnd;
+class World extends NddlWorld {
   Rover m_rover;
   Location l1;
   Location l2;
@@ -219,9 +218,7 @@ class World {
 
  predicate initialState{}
  World(){
-  // Set up the planning horizon
-  m_horizonStart = 10;
-  m_horizonEnd = 100;
+  super(0,100,500);
   m_rover = new Rover();
   l1 = new Location();
   l2 = new Location();
