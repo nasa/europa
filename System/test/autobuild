@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.83 2004-09-21 23:11:12 wedgingt Exp $
+# $Id: autobuild,v 1.84 2004-09-22 17:33:22 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -180,7 +180,7 @@ cvsCmd rtag -r "$tag" "$prior" PLASMA
 cvsCmd rtag -d "$tag" PLASMA
 
 # Finally, tag the tested version to indicate it passed the tests:
-cvsCmd rtag -r "$testTag" "$tag" PLASMA
+cvsCmd rtag -r "$testingTag" "$tag" PLASMA
 
 (echo "$info";
     echo '';
