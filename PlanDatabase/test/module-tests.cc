@@ -276,7 +276,7 @@ private:
     return true;
   }
 
-  static testObjectTokenRelation(){
+  static bool testObjectTokenRelation(){
     // 1. Create 2 objects
 
     // 2. Create 1 token.
