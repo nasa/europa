@@ -5,8 +5,6 @@ class Sum___A {
     int sum;
     int x;
     int y;
-
-    sum(sum, x, y);
   }
 
   Sum __DDL__object;
@@ -23,5 +21,6 @@ class Sum {
 }
 
 Sum___A::V {
+  sum(sum, x, y);
 }
 

@@ -5,22 +5,12 @@ class Te___st {
     float z;
     float a;
     float b;
-
-    sum(z, a, b);
-    eq(z, -120);
-    eq(a, [5 +inf]);
-    eq(b, [-inf -5]);
   }
 
   predicate Problem3C_Int {
     int z;
     int a;
     int b;
-
-    sum(z, a, b);
-    eq(z, -120);
-    eq(a, [5 +inf]);
-    eq(b, [-inf -5]);
   }
 
   Te __DDL__object;
@@ -37,8 +27,16 @@ class Te {
 }
 
 Te___st::Problem3C {
+  sum(z, a, b);
+  eq(z, -120);
+  eq(a, [5 +inf]);
+  eq(b, [-inf -5]);
 }
 
 Te___st::Problem3C_Int {
+  sum(z, a, b);
+  eq(z, -120);
+  eq(a, [5 +inf]);
+  eq(b, [-inf -5]);
 }
 

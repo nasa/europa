@@ -5,8 +5,6 @@ enum Locations { 'X0', 'X1', 'X2', 'X3' }
 class Rover_Class___Location_SV {
   predicate At {
     Locations location;
-
-    eq(duration, [1 +inf]);
   }
 
   predicate PilotMove {
@@ -14,10 +12,6 @@ class Rover_Class___Location_SV {
     Locations to;
     bool success;
     float energyConsumed;
-
-    eq(duration, [1 +inf]);
-    neq(from, to);
-    eq(energyConsumed, [0 518400]);
   }
 
   Rover_Class __DDL__object;
@@ -34,9 +28,6 @@ class Rover_Class___CHAMP_SV {
     Locations at_loc;
     bool success;
     float energyConsumed;
-
-    eq(duration, [1 +inf]);
-    eq(energyConsumed, [0 518400]);
   }
 
   Rover_Class __DDL__object;
@@ -53,9 +44,6 @@ class Rover_Class___Hazcam_SV {
     Locations at_loc;
     bool success;
     float energyConsumed;
-
-    eq(duration, [1 +inf]);
-    eq(energyConsumed, [0 518400]);
   }
 
   Rover_Class __DDL__object;
@@ -76,6 +64,7 @@ class Rover_Class {
 }
 
 Rover_Class___Location_SV::At {
+  eq(duration, [1 +inf]);
   met_by(Rover_Class___Location_SV.PilotMove s0);
     eq(s0.to, location);
     eq(s0.success, true);
@@ -84,6 +73,9 @@ Rover_Class___Location_SV::At {
 }
 
 Rover_Class___Location_SV::PilotMove {
+  eq(duration, [1 +inf]);
+  neq(from, to);
+  eq(energyConsumed, [0 518400]);
   met_by(Rover_Class___Location_SV.At s0);
     eq(s0.location, from);
   meets(Rover_Class___Location_SV.At s1);
@@ -96,6 +88,8 @@ Rover_Class___CHAMP_SV::CHAMP_Idle {
 }
 
 Rover_Class___CHAMP_SV::IPPlaceInstrument {
+  eq(duration, [1 +inf]);
+  eq(energyConsumed, [0 518400]);
   met_by(Rover_Class___CHAMP_SV.CHAMP_Idle s0);
   meets(Rover_Class___CHAMP_SV.CHAMP_Idle s1);
   contained_by(Rover_Class___Location_SV.At s2);
@@ -107,6 +101,8 @@ Rover_Class___Hazcam_SV::Hazcam_Idle {
 }
 
 Rover_Class___Hazcam_SV::ImageAcquire {
+  eq(duration, [1 +inf]);
+  eq(energyConsumed, [0 518400]);
   met_by(Rover_Class___Hazcam_SV.Hazcam_Idle s0);
   meets(Rover_Class___Hazcam_SV.Hazcam_Idle s1);
   contained_by(Rover_Class___Location_SV.At s2);

@@ -33,22 +33,15 @@ class DNP_Science___Scan_Platform {
     int ID;
     Observation_Level Data_Rate;
     int Length;
-
-    eq(ID, [0 +inf]);
-    eq(Length, [0 +inf]);
   }
 
   predicate Mosaic_HI {
     int ID;
     Observation_Level Data_Rate;
     int Length;
-
-    eq(ID, [0 +inf]);
-    eq(Length, [0 +inf]);
   }
 
   predicate Scan_Idle {
-    eq(duration, [1 +inf]);
   }
 
   DNP_Science __DDL__object;
@@ -62,22 +55,15 @@ class DNP_Science___Fields_and_Particles {
     int ID;
     Observation_Level Data_Rate;
     int Length;
-
-    eq(ID, [0 +inf]);
-    eq(Length, [0 +inf]);
   }
 
   predicate F_and_P_Observation_HI {
     int ID;
     Observation_Level Data_Rate;
     int Length;
-
-    eq(ID, [0 +inf]);
-    eq(Length, [0 +inf]);
   }
 
   predicate F_and_P_Idle {
-    eq(duration, [1 +inf]);
   }
 
   DNP_Science __DDL__object;
@@ -106,15 +92,6 @@ class DNP_Data___SSR_Storage_Use {
     REC_Future Rec_Post;
     Record_Obs What_obs;
     int DSS_Opp_Num;
-
-    eq(duration, [1 +inf]);
-    BOUNDS_RECORD_END_STORAGE(End_Storage, Start_Storage, ReqFPRate, ReqMosRate, Length);
-    BOUNDS_RECORD_START_STORAGE(Start_Storage, End_Storage, ReqFPRate, ReqMosRate, Length);
-    eq(Rec_Prior, {REC_Past.'CS_Bef_Rec', REC_Past.'Rec_Bef_Rec'});
-    eq(Start_Storage, [0 9000000]);
-    eq(End_Storage, [0 9000000]);
-    eq(Length, [0 +inf]);
-    eq(DSS_Opp_Num, [0 +inf]);
   }
 
   predicate Playback {
@@ -126,17 +103,6 @@ class DNP_Data___SSR_Storage_Use {
     int Allowed_Earlier_Opps;
     End_Flag Flagged_End;
     PB_Past PB_Prior;
-
-    eq(duration, [100 +inf]);
-    COMPUTE_PLAYBACK_DURATION(duration, Start_Storage, End_Storage, Playback_Rate, start, end);
-    BOUNDS_PLAYBACK_START_STORAGE(Start_Storage, End_Storage, Playback_Rate, duration);
-    BOUNDS_PLAYBACK_END_STORAGE(End_Storage, Start_Storage, Playback_Rate, duration);
-    FIGURE_EARLIER_OP_IDS(Allowed_Earlier_Opps, DSS_Opp_Num);
-    eq(Start_Storage, [0 9000000]);
-    eq(End_Storage, [0 9000000]);
-    eq(Playback_Rate, [0 +inf]);
-    eq(DSS_Opp_Num, [0 +inf]);
-    eq(Allowed_Earlier_Opps, [0 +inf]);
   }
 
   predicate Constant_Storage {
@@ -145,10 +111,6 @@ class DNP_Data___SSR_Storage_Use {
     End_Flag Flagged_End;
     CS_Past CS_Prior;
     CS_Future CS_Post;
-
-    eq(duration, [1 +inf]);
-    eq(SSR_Storage, [0 9000000]);
-    eq(DSS_Opp_Num, [0 +inf]);
   }
 
   DNP_Data __DDL__object;
@@ -168,15 +130,11 @@ class DNP_Comm___Comm_Activity {
   predicate Pre_Cal {
     int Duration;
     End_Flag Flagged_End;
-
-    eq(duration, Duration);
   }
 
   predicate Post_Cal {
     int Duration;
     End_Flag Flagged_End;
-
-    eq(duration, Duration);
   }
 
   predicate Communicate {
@@ -185,12 +143,9 @@ class DNP_Comm___Comm_Activity {
     DSS_Id Location;
     int Playback_Rate;
     End_Flag Flagged_End;
-
-    eq(Playback_Rate, [0 +inf]);
   }
 
   predicate Comm_Idle {
-    eq(duration, [1 +inf]);
   }
 
   DNP_Comm __DDL__object;
@@ -213,9 +168,6 @@ class DSS_Any___DSS_Availability {
     int Post_Cal_Time;
     DSS_Id loc;
     int Opp_Number;
-
-    eq(Downlink_Rate, [0 +inf]);
-    eq(Opp_Number, [0 +inf]);
   }
 
   predicate No_Window {
@@ -235,6 +187,8 @@ class DSS_Any {
 }
 
 DNP_Science___Scan_Platform::Mosaic_LO {
+  eq(ID, [0 +inf]);
+  eq(Length, [0 +inf]);
   met_by(DNP_Science___Scan_Platform.Scan_Idle s0);
   meets(DNP_Science___Scan_Platform.Scan_Idle s1);
   starts(DNP_Data___SSR_Storage_Use.Record s2);
@@ -245,6 +199,8 @@ DNP_Science___Scan_Platform::Mosaic_LO {
 }
 
 DNP_Science___Scan_Platform::Mosaic_HI {
+  eq(ID, [0 +inf]);
+  eq(Length, [0 +inf]);
   met_by(DNP_Science___Scan_Platform.Scan_Idle s0);
   meets(DNP_Science___Scan_Platform.Scan_Idle s1);
   starts(DNP_Data___SSR_Storage_Use.Record s2);
@@ -255,9 +211,12 @@ DNP_Science___Scan_Platform::Mosaic_HI {
 }
 
 DNP_Science___Scan_Platform::Scan_Idle {
+  eq(duration, [1 +inf]);
 }
 
 DNP_Science___Fields_and_Particles::F_and_P_Observation_LO {
+  eq(ID, [0 +inf]);
+  eq(Length, [0 +inf]);
   met_by(DNP_Science___Fields_and_Particles.F_and_P_Idle s0);
   meets(DNP_Science___Fields_and_Particles.F_and_P_Idle s1);
   starts(DNP_Data___SSR_Storage_Use.Record s2);
@@ -268,6 +227,8 @@ DNP_Science___Fields_and_Particles::F_and_P_Observation_LO {
 }
 
 DNP_Science___Fields_and_Particles::F_and_P_Observation_HI {
+  eq(ID, [0 +inf]);
+  eq(Length, [0 +inf]);
   met_by(DNP_Science___Fields_and_Particles.F_and_P_Idle s0);
   meets(DNP_Science___Fields_and_Particles.F_and_P_Idle s1);
   starts(DNP_Data___SSR_Storage_Use.Record s2);
@@ -278,9 +239,18 @@ DNP_Science___Fields_and_Particles::F_and_P_Observation_HI {
 }
 
 DNP_Science___Fields_and_Particles::F_and_P_Idle {
+  eq(duration, [1 +inf]);
 }
 
 DNP_Data___SSR_Storage_Use::Record {
+  eq(duration, [1 +inf]);
+  BOUNDS_RECORD_END_STORAGE(End_Storage, Start_Storage, ReqFPRate, ReqMosRate, Length);
+  BOUNDS_RECORD_START_STORAGE(Start_Storage, End_Storage, ReqFPRate, ReqMosRate, Length);
+  eq(Rec_Prior, {REC_Past.'CS_Bef_Rec', REC_Past.'Rec_Bef_Rec'});
+  eq(Start_Storage, [0 9000000]);
+  eq(End_Storage, [0 9000000]);
+  eq(Length, [0 +inf]);
+  eq(DSS_Opp_Num, [0 +inf]);
   if (Rec_Prior==REC_Past.'CS_Bef_Rec') {
     met_by(DNP_Data___SSR_Storage_Use.Constant_Storage s0);
       eq(s0.SSR_Storage, Start_Storage);
@@ -311,6 +281,16 @@ DNP_Data___SSR_Storage_Use::Record {
 }
 
 DNP_Data___SSR_Storage_Use::Playback {
+  eq(duration, [100 +inf]);
+  COMPUTE_PLAYBACK_DURATION(duration, Start_Storage, End_Storage, Playback_Rate, start, end);
+  BOUNDS_PLAYBACK_START_STORAGE(Start_Storage, End_Storage, Playback_Rate, duration);
+  BOUNDS_PLAYBACK_END_STORAGE(End_Storage, Start_Storage, Playback_Rate, duration);
+  FIGURE_EARLIER_OP_IDS(Allowed_Earlier_Opps, DSS_Opp_Num);
+  eq(Start_Storage, [0 9000000]);
+  eq(End_Storage, [0 9000000]);
+  eq(Playback_Rate, [0 +inf]);
+  eq(DSS_Opp_Num, [0 +inf]);
+  eq(Allowed_Earlier_Opps, [0 +inf]);
   meets(DNP_Data___SSR_Storage_Use.Constant_Storage s0);
     eq(s0.SSR_Storage, End_Storage);
     eq(s0.CS_Prior, CS_Past.'PB_Bef_CS');
@@ -340,6 +320,9 @@ DNP_Data___SSR_Storage_Use::Playback {
 }
 
 DNP_Data___SSR_Storage_Use::Constant_Storage {
+  eq(duration, [1 +inf]);
+  eq(SSR_Storage, [0 9000000]);
+  eq(DSS_Opp_Num, [0 +inf]);
   if (CS_Prior==CS_Past.'PB_Bef_CS') {
     met_by(DNP_Data___SSR_Storage_Use.Playback s0);
       eq(s0.End_Storage, SSR_Storage);
@@ -365,6 +348,7 @@ DNP_Data___SSR_Storage_Use::Constant_Storage {
 }
 
 DNP_Comm___Comm_Activity::Pre_Cal {
+  eq(duration, Duration);
   met_by(DNP_Comm___Comm_Activity.Comm_Idle s0);
   meets(DNP_Comm___Comm_Activity.Communicate s1);
     eq(s1.Pre_Cal_Duration, Duration);
@@ -372,6 +356,7 @@ DNP_Comm___Comm_Activity::Pre_Cal {
 }
 
 DNP_Comm___Comm_Activity::Post_Cal {
+  eq(duration, Duration);
   meets(DNP_Comm___Comm_Activity.Comm_Idle s0);
   met_by(DNP_Comm___Comm_Activity.Communicate s1);
     eq(s1.Post_Cal_Duration, Duration);
@@ -379,6 +364,7 @@ DNP_Comm___Comm_Activity::Post_Cal {
 }
 
 DNP_Comm___Comm_Activity::Communicate {
+  eq(Playback_Rate, [0 +inf]);
   contained_by(DSS_Any___DSS_Availability.Downlink_Window s0);
     eq(s0.Downlink_Rate, Playback_Rate);
     eq(s0.Pre_Cal_Time, Pre_Cal_Duration);
@@ -393,9 +379,12 @@ DNP_Comm___Comm_Activity::Communicate {
 }
 
 DNP_Comm___Comm_Activity::Comm_Idle {
+  eq(duration, [1 +inf]);
 }
 
 DSS_Any___DSS_Availability::Downlink_Window {
+  eq(Downlink_Rate, [0 +inf]);
+  eq(Opp_Number, [0 +inf]);
   meets(DSS_Any___DSS_Availability.No_Window s0);
   met_by(DSS_Any___DSS_Availability.No_Window s1);
 }

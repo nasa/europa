@@ -5,16 +5,11 @@ enum Location_Label { 'Rock', 'Tree' }
 class Monkey_Class___Location_SV {
   predicate At {
     Location_Label Loc_Label;
-
-    eq(duration, [1 +inf]);
   }
 
   predicate Going {
     Location_Label From_Loc;
     Location_Label To_Loc;
-
-    eq(duration, [5 +inf]);
-    neq(From_Loc, To_Loc);
   }
 
   Monkey_Class __DDL__object;
@@ -25,22 +20,16 @@ class Monkey_Class___Location_SV {
 
 class Monkey_Class___Altitude_SV {
   predicate LOW {
-    eq(duration, [1 +inf]);
   }
 
   predicate HIGH {
-    eq(duration, [1 +inf]);
   }
 
   predicate CLIMBING {
     int _0_anon_OR_tag_1;
-
-    eq(duration, [10 +inf]);
-    eq(_0_anon_OR_tag_1, [1 2]);
   }
 
   predicate CLIMBING_DOWN {
-    eq(duration, [1 +inf]);
   }
 
   Monkey_Class __DDL__object;
@@ -51,18 +40,13 @@ class Monkey_Class___Altitude_SV {
 
 class Monkey_Class___Banana_SV {
   predicate NOT_HAVE_BANANA {
-    eq(duration, [1 +inf]);
   }
 
   predicate HAVE_BANANA {
     Monkey_Class Who;
-
-    eq(duration, [1 +inf]);
-    eq(Who, object.__DDL__object);
   }
 
   predicate GRABBING_BANANA {
-    eq(duration, [1 2]);
   }
 
   Monkey_Class __DDL__object;
@@ -83,6 +67,7 @@ class Monkey_Class {
 }
 
 Monkey_Class___Location_SV::At {
+  eq(duration, [1 +inf]);
   met_by(Going s0);
     eq(s0.To_Loc, Loc_Label);
   meets(Going s1);
@@ -90,6 +75,8 @@ Monkey_Class___Location_SV::At {
 }
 
 Monkey_Class___Location_SV::Going {
+  eq(duration, [5 +inf]);
+  neq(From_Loc, To_Loc);
   met_by(At s0);
     eq(s0.Loc_Label, From_Loc);
   meets(At s1);
@@ -99,16 +86,20 @@ Monkey_Class___Location_SV::Going {
 }
 
 Monkey_Class___Altitude_SV::LOW {
+  eq(duration, [1 +inf]);
   met_by(CLIMBING_DOWN s0);
   meets(CLIMBING s1);
 }
 
 Monkey_Class___Altitude_SV::HIGH {
+  eq(duration, [1 +inf]);
   met_by(CLIMBING s0);
   meets(CLIMBING_DOWN s1);
 }
 
 Monkey_Class___Altitude_SV::CLIMBING {
+  eq(duration, [10 +inf]);
+  eq(_0_anon_OR_tag_1, [1 2]);
   met_by(LOW s0);
   meets(HIGH s1);
   if (_0_anon_OR_tag_1==1) {
@@ -124,20 +115,25 @@ Monkey_Class___Altitude_SV::CLIMBING {
 }
 
 Monkey_Class___Altitude_SV::CLIMBING_DOWN {
+  eq(duration, [1 +inf]);
   met_by(HIGH s0);
   meets(LOW s1);
 }
 
 Monkey_Class___Banana_SV::NOT_HAVE_BANANA {
+  eq(duration, [1 +inf]);
   meets(GRABBING_BANANA s0);
   met_by(GRABBING_BANANA s1);
 }
 
 Monkey_Class___Banana_SV::HAVE_BANANA {
+  eq(duration, [1 +inf]);
+  eq(Who, object.__DDL__object);
   met_by(GRABBING_BANANA s0);
 }
 
 Monkey_Class___Banana_SV::GRABBING_BANANA {
+  eq(duration, [1 2]);
   met_by(NOT_HAVE_BANANA s0);
   meets(HAVE_BANANA s1);
   contained_by(Monkey_Class___Location_SV.At s2);

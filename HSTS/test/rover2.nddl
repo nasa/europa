@@ -33,15 +33,14 @@ class Rover_Class___activity {
     Location_Label fromLocation;
 
     eq(duration, [1 +inf]);
-    neq(rover, object.__DDL__object);
     neq(withArm, false);
     neq(withArm, false);
     neq(withArm, false);
-    condadiff(Location_Label.'lander', toLocation, isLander);
+    condadiff(isLander, Location_Label.'lander', toLocation);
     neq(toLocation, fromLocation);
-    condadiff(toLocation, fromLocation, true);
-    condadiff(toLocation, fromLocation, true);
-    condadiff(toLocation, fromLocation, true);
+    condadiff(true, toLocation, fromLocation);
+    condadiff(true, toLocation, fromLocation);
+    condadiff(true, toLocation, fromLocation);
   }
 
   predicate Idle {
@@ -124,6 +123,7 @@ Rover_Class___location::Going {
 }
 
 Rover_Class___activity::Wave {
+  neq(rover, object.__DDL__object);
   met_by(Idle s0);
   meets(Idle s1);
   contained_by(Rover_Class___location.At s2);

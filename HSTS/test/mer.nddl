@@ -46,8 +46,6 @@ class Comm_Window_Class___Comm_DSN_SV {
     Comm_Dir dir;
     int ddl_duration;
     int rate;
-
-    eq(duration, ddl_duration);
   }
 
   predicate Comm_DSN_Unavail {
@@ -64,8 +62,6 @@ class Comm_Window_Class___Comm_Orbiter_SV {
     Comm_Dir dir;
     int ddl_duration;
     int rate;
-
-    eq(duration, ddl_duration);
   }
 
   predicate Comm_Orbiter_Unavail {
@@ -95,10 +91,6 @@ class HGA_Class___HGA_Mode_SV {
     int negpower;
     int energy;
     SurvivalHtr_Use priorto_survival;
-
-    eq(duration, 300);
-    eq(power, 18);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate HGA_Comm {
@@ -112,9 +104,6 @@ class HGA_Class___HGA_Mode_SV {
     Comm_succ succ;
     Comm_pred pred;
     int negdata;
-
-    eq(data, [0 50000000]);
-    eq(negdata, [-50000000 0]);
   }
 
   HGA_Class __DDL__object;
@@ -141,10 +130,6 @@ class IDD_Class___IDD_IDD_SV {
     int power;
     int negpower;
     int energy;
-
-    eq(duration, 114);
-    eq(power, 15);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate IDD_Rotate {
@@ -152,10 +137,6 @@ class IDD_Class___IDD_IDD_SV {
     int power;
     int negpower;
     int energy;
-
-    eq(duration, 114);
-    eq(power, 15);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate IDD_Guarded_Move {
@@ -163,10 +144,6 @@ class IDD_Class___IDD_IDD_SV {
     int power;
     int negpower;
     int energy;
-
-    eq(duration, 114);
-    eq(power, 15);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate IDD_In_Contact {
@@ -191,9 +168,6 @@ class IDD_Class___IDD_MI_SV {
     int power;
     int negpower;
     int energy;
-
-    eq(power, 3);
-    addmuleq(0, power, duration, energy);
   }
 
   IDD_Class __DDL__object;
@@ -250,8 +224,6 @@ class IDD_Class___IDD_Goal_SV {
     int energy;
     int ssr;
     bool crit_p;
-
-    eq(duration, ddl_duration);
   }
 
   predicate IDD_Goal_Idle {
@@ -288,8 +260,6 @@ class PMA_Class___PMA_MT_SV {
 
   predicate PMA_MT_Active {
     int _0_anon_OR_tag_1;
-
-    eq(_0_anon_OR_tag_1, [1 3]);
   }
 
   predicate PMA_MT_Slewing {
@@ -297,19 +267,12 @@ class PMA_Class___PMA_MT_SV {
     int negpower;
     int energy;
     Slew_Within within;
-
-    eq(duration, 120);
-    eq(power, 14);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate PMA_MT_Survive {
     int power;
     int negpower;
     int energy;
-
-    eq(power, 3);
-    addmuleq(0, power, duration, energy);
   }
 
   PMA_Class __DDL__object;
@@ -328,10 +291,6 @@ class PMA_Class___PMA_Mount_SV {
     int energy;
     PMA_Mount_Slewing_succ succ;
     PMA_Mount_Slewing_pred pred;
-
-    eq(power, 14);
-    eq(duration, 120);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate PMA_Mount_Parked {
@@ -353,19 +312,12 @@ class PMA_Class___PMA_PC_SV {
     int _0_anon_OR_tag_1;
     int _0_anon_OR_tag_2;
     int _0_anon_OR_tag_3;
-
-    eq(_0_anon_OR_tag_1, [1 2]);
-    eq(_0_anon_OR_tag_2, [1 2]);
-    eq(_0_anon_OR_tag_3, [1 2]);
   }
 
   predicate PMA_PC_Survive {
     int power;
     int negpower;
     int energy;
-
-    eq(power, 3);
-    addmuleq(0, power, duration, energy);
   }
 
   PMA_Class __DDL__object;
@@ -380,8 +332,6 @@ class PMA_Class___PMA_NC_SV {
 
   predicate PMA_NC_Active {
     int _0_anon_OR_tag_1;
-
-    eq(_0_anon_OR_tag_1, [1 3]);
   }
 
   PMA_Class __DDL__object;
@@ -399,8 +349,6 @@ class PMA_Class___PMA_Goal_SV {
     int energy;
     int ssr;
     bool crit_p;
-
-    eq(duration, ddl_duration);
   }
 
   predicate PMA_Goal_Idle {
@@ -436,11 +384,6 @@ class RCam_Class___HzC_F_SV {
     int negpower;
     int energy;
     int ssr;
-
-    eq(ssr, 1400);
-    eq(power, 13);
-    eq(duration, 108);
-    addmuleq(0, power, duration, energy);
   }
 
   RCam_Class __DDL__object;
@@ -473,18 +416,15 @@ class RCam_Class {
 
 class SUN_Orient_Class___Sun_Orient_SV {
   predicate Sunrise {
-    eq(duration, 300);
   }
 
   predicate Sunset {
-    eq(duration, 300);
   }
 
   predicate Day_Ops {
   }
 
   predicate Nominal_Night_Ops {
-    eq(duration, 18000);
   }
 
   predicate Survival_Night_Ops {
@@ -518,8 +458,6 @@ class UHF_Class___UHF_Mode_SV {
     int negpower;
     int energy;
     int data;
-
-    eq(duration, ddl_duration);
   }
 
   UHF_Class __DDL__object;
@@ -540,9 +478,6 @@ class OPHTR_Class___OPHTR_PMA_SV {
     int power;
     int negpower;
     int energy;
-
-    eq(power, 13);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate OPHTR_PMA_Idle {
@@ -559,9 +494,6 @@ class OPHTR_Class___OPHTR_PC_SV {
     int power;
     int negpower;
     int energy;
-
-    eq(power, 3);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate OPHTR_PC_Idle {
@@ -578,9 +510,6 @@ class OPHTR_Class___OPHTR_IDD_SV {
     int power;
     int negpower;
     int energy;
-
-    eq(power, 22);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate OPHTR_IDD_Idle {
@@ -597,9 +526,6 @@ class OPHTR_Class___OPHTR_RAT_SV {
     int power;
     int negpower;
     int energy;
-
-    eq(power, 18);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate OPHTR_RAT_Idle {
@@ -616,9 +542,6 @@ class OPHTR_Class___OPHTR_HGA_SV {
     int power;
     int negpower;
     int energy;
-
-    eq(power, 21);
-    addmuleq(0, power, duration, energy);
   }
 
   predicate OPHTR_HGA_Idle {
@@ -646,6 +569,7 @@ class OPHTR_Class {
 }
 
 Comm_Window_Class___Comm_DSN_SV::Comm_DSN_Available {
+  eq(duration, ddl_duration);
   if (dsn_ant==DSN_Antenna.'HGA') {
     contains(HGA_Class___HGA_Mode_SV.HGA_Comm s0);
       eq(s0.dir, dir);
@@ -659,6 +583,7 @@ Comm_Window_Class___Comm_DSN_SV::Comm_DSN_Unavail {
 }
 
 Comm_Window_Class___Comm_Orbiter_SV::Comm_Orbiter_Available {
+  eq(duration, ddl_duration);
   if (dir==Comm_Dir.'DOWNLINK') {
     equals(UHF_Class___UHF_Mode_SV.UHF_Xmit s0);
       eq(s0.dir, Comm_Dir.'DOWNLINK');
@@ -678,6 +603,9 @@ HGA_Class___HGA_Mode_SV::HGA_Stow {
 }
 
 HGA_Class___HGA_Mode_SV::HGA_Slew {
+  eq(duration, 300);
+  eq(power, 18);
+  addmuleq(0, power, duration, energy);
   met_by(HGA_Class___HGA_Mode_SV.HGA_Stow s0);
   meets(HGA_Class___HGA_Mode_SV.HGA_Comm s1);
     eq(s1.pred, Comm_pred.'COMM_METBY_SLEW');
@@ -691,6 +619,8 @@ HGA_Class___HGA_Mode_SV::HGA_Slew {
 }
 
 HGA_Class___HGA_Mode_SV::HGA_Comm {
+  eq(data, [0 50000000]);
+  eq(negdata, [-50000000 0]);
   if (pred==Comm_pred.'COMM_METBY_COMM') {
     met_by(HGA_Class___HGA_Mode_SV.HGA_Comm s0);
   }
@@ -744,6 +674,9 @@ IDD_Class___IDD_IDD_SV::IDD_Stow {
 }
 
 IDD_Class___IDD_IDD_SV::IDD_Move {
+  eq(duration, 114);
+  eq(power, 15);
+  addmuleq(0, power, duration, energy);
   after(RCam_Class___HzC_F_SV.HzC_F_Active s0);
   if (succ==IDD_Move_succ.'MOVE_MEETS_ROTATE') {
     meets(IDD_Class___IDD_IDD_SV.IDD_Rotate s0);
@@ -771,6 +704,9 @@ IDD_Class___IDD_IDD_SV::IDD_Move {
 }
 
 IDD_Class___IDD_IDD_SV::IDD_Rotate {
+  eq(duration, 114);
+  eq(power, 15);
+  addmuleq(0, power, duration, energy);
   met_by(IDD_Class___IDD_IDD_SV.IDD_Move s0);
     eq(s0.succ, IDD_Move_succ.'MOVE_MEETS_ROTATE');
   meets(IDD_Class___IDD_IDD_SV.IDD_Guarded_Move s1);
@@ -778,6 +714,9 @@ IDD_Class___IDD_IDD_SV::IDD_Rotate {
 }
 
 IDD_Class___IDD_IDD_SV::IDD_Guarded_Move {
+  eq(duration, 114);
+  eq(power, 15);
+  addmuleq(0, power, duration, energy);
   meets(IDD_Class___IDD_IDD_SV.IDD_In_Contact s0);
   after(RCam_Class___HzC_F_SV.HzC_F_Active s1);
   if (pred==IDD_Guarded_pred.'GUARDEDMOVE_METBY_MOVE') {
@@ -809,6 +748,8 @@ IDD_Class___IDD_MI_SV::IDD_MI_Active {
 }
 
 IDD_Class___IDD_MI_SV::IDD_MI_SURVIVE {
+  eq(power, 3);
+  addmuleq(0, power, duration, energy);
   meets(IDD_Class___IDD_MI_SV.IDD_MI_Active s0);
   met_by(IDD_Class___IDD_MI_SV.IDD_MI_Active s1);
   contained_by(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s2);
@@ -842,6 +783,7 @@ IDD_Class___IDD_APXS_SV::IDD_APXS_Active {
 }
 
 IDD_Class___IDD_Goal_SV::IDD_Goal_Active {
+  eq(duration, ddl_duration);
   if (instr==IDD_Instrument.'MI') {
     equals(IDD_Class___IDD_MI_SV.IDD_MI_Active s0);
   }
@@ -891,6 +833,7 @@ PMA_Class___PMA_MT_SV::PMA_MT_Idle {
 }
 
 PMA_Class___PMA_MT_SV::PMA_MT_Active {
+  eq(_0_anon_OR_tag_1, [1 3]);
   met_by(PMA_Class___PMA_MT_SV.PMA_MT_Slewing s0);
   if (_0_anon_OR_tag_1==1) {
     starts_before(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
@@ -905,6 +848,9 @@ PMA_Class___PMA_MT_SV::PMA_MT_Active {
 }
 
 PMA_Class___PMA_MT_SV::PMA_MT_Slewing {
+  eq(duration, 120);
+  eq(power, 14);
+  addmuleq(0, power, duration, energy);
   meets(PMA_Class___PMA_MT_SV.PMA_MT_Active s0);
   if (within==Slew_Within.'MT_SLEW_WITHIN_IDLE') {
     contained_by(PMA_Class___PMA_Mount_SV.PMA_Mount_Idle s0);
@@ -915,6 +861,8 @@ PMA_Class___PMA_MT_SV::PMA_MT_Slewing {
 }
 
 PMA_Class___PMA_MT_SV::PMA_MT_Survive {
+  eq(power, 3);
+  addmuleq(0, power, duration, energy);
   contained_by(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
 }
 
@@ -922,6 +870,9 @@ PMA_Class___PMA_Mount_SV::PMA_Mount_Idle {
 }
 
 PMA_Class___PMA_Mount_SV::PMA_Mount_Slewing {
+  eq(power, 14);
+  eq(duration, 120);
+  addmuleq(0, power, duration, energy);
   contained_by(PMA_Class___PMA_MT_SV.PMA_MT_Idle s0);
 }
 
@@ -936,6 +887,9 @@ PMA_Class___PMA_PC_SV::PMA_PC_Idle {
 }
 
 PMA_Class___PMA_PC_SV::PMA_PC_Active {
+  eq(_0_anon_OR_tag_1, [1 2]);
+  eq(_0_anon_OR_tag_2, [1 2]);
+  eq(_0_anon_OR_tag_3, [1 2]);
   met_by(PMA_Class___PMA_Mount_SV.PMA_Mount_Slewing s0);
   contained_by(PMA_Class___PMA_Mount_SV.PMA_Mount_Idle s1);
   contained_by(PMA_Class___PMA_NC_SV.PMA_NC_Idle s2);
@@ -967,6 +921,8 @@ PMA_Class___PMA_PC_SV::PMA_PC_Active {
 }
 
 PMA_Class___PMA_PC_SV::PMA_PC_Survive {
+  eq(power, 3);
+  addmuleq(0, power, duration, energy);
   contained_by(PMA_Class___PMA_Mount_SV.PMA_Mount_Parked s0);
   contained_by(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s1);
 }
@@ -975,6 +931,7 @@ PMA_Class___PMA_NC_SV::PMA_NC_Idle {
 }
 
 PMA_Class___PMA_NC_SV::PMA_NC_Active {
+  eq(_0_anon_OR_tag_1, [1 3]);
   met_by(PMA_Class___PMA_Mount_SV.PMA_Mount_Slewing s0);
   contained_by(PMA_Class___PMA_Mount_SV.PMA_Mount_Idle s1);
   contained_by(PMA_Class___PMA_PC_SV.PMA_PC_Idle s2);
@@ -992,6 +949,7 @@ PMA_Class___PMA_NC_SV::PMA_NC_Active {
 }
 
 PMA_Class___PMA_Goal_SV::PMA_Goal_Active {
+  eq(duration, ddl_duration);
   if (instr==PMA_Instrument.'PC') {
     equals(PMA_Class___PMA_PC_SV.PMA_PC_Active s0);
   }
@@ -1034,6 +992,10 @@ RCam_Class___HzC_F_SV::HzC_F_Idle {
 }
 
 RCam_Class___HzC_F_SV::HzC_F_Active {
+  eq(ssr, 1400);
+  eq(power, 13);
+  eq(duration, 108);
+  addmuleq(0, power, duration, energy);
 }
 
 RCam_Class___SunC_SV::SunC_Idle {
@@ -1043,11 +1005,13 @@ RCam_Class___SunC_SV::SunC_Active {
 }
 
 SUN_Orient_Class___Sun_Orient_SV::Sunrise {
+  eq(duration, 300);
   meets(SUN_Orient_Class___Sun_Orient_SV.Day_Ops s0);
   met_by(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s1);
 }
 
 SUN_Orient_Class___Sun_Orient_SV::Sunset {
+  eq(duration, 300);
   met_by(SUN_Orient_Class___Sun_Orient_SV.Day_Ops s0);
   meets(SUN_Orient_Class___Sun_Orient_SV.Nominal_Night_Ops s1);
 }
@@ -1058,6 +1022,7 @@ SUN_Orient_Class___Sun_Orient_SV::Day_Ops {
 }
 
 SUN_Orient_Class___Sun_Orient_SV::Nominal_Night_Ops {
+  eq(duration, 18000);
   met_by(SUN_Orient_Class___Sun_Orient_SV.Sunset s0);
   meets(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s1);
 }
@@ -1076,11 +1041,14 @@ UHF_Class___UHF_Mode_SV::UHF_Standby {
 }
 
 UHF_Class___UHF_Mode_SV::UHF_Xmit {
+  eq(duration, ddl_duration);
   met_by(UHF_Class___UHF_Mode_SV.UHF_Standby s0);
   meets(UHF_Class___UHF_Mode_SV.UHF_Idle s1);
 }
 
 OPHTR_Class___OPHTR_PMA_SV::OPHTR_PMA_Active {
+  eq(power, 13);
+  addmuleq(0, power, duration, energy);
   contained_by(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
 }
 
@@ -1088,6 +1056,8 @@ OPHTR_Class___OPHTR_PMA_SV::OPHTR_PMA_Idle {
 }
 
 OPHTR_Class___OPHTR_PC_SV::OPHTR_PC_Active {
+  eq(power, 3);
+  addmuleq(0, power, duration, energy);
   contained_by(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
 }
 
@@ -1095,6 +1065,8 @@ OPHTR_Class___OPHTR_PC_SV::OPHTR_PC_Idle {
 }
 
 OPHTR_Class___OPHTR_IDD_SV::OPHTR_IDD_Active {
+  eq(power, 22);
+  addmuleq(0, power, duration, energy);
   contained_by(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
 }
 
@@ -1102,6 +1074,8 @@ OPHTR_Class___OPHTR_IDD_SV::OPHTR_IDD_Idle {
 }
 
 OPHTR_Class___OPHTR_RAT_SV::OPHTR_RAT_Active {
+  eq(power, 18);
+  addmuleq(0, power, duration, energy);
   contained_by(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
 }
 
@@ -1109,6 +1083,8 @@ OPHTR_Class___OPHTR_RAT_SV::OPHTR_RAT_Idle {
 }
 
 OPHTR_Class___OPHTR_HGA_SV::OPHTR_HGA_Active {
+  eq(power, 21);
+  addmuleq(0, power, duration, energy);
   contained_by(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops s0);
 }
 

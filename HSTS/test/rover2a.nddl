@@ -37,13 +37,13 @@ class Rover_Class___activity {
     neq(withArm, false);
     neq(withArm, false);
     neq(withArm, false);
-    condadiff(true, isLander, toLander);
-    condadiff(true, toLander, isLander);
+    condadiff(toLander, true, isLander);
+    condadiff(isLander, true, toLander);
     condadiff(Location_Label.'lander', toLocation, isLander);
     neq(toLocation, fromLocation);
-    condadiff(toLocation, fromLocation, true);
-    condadiff(toLocation, fromLocation, true);
-    condadiff(toLocation, fromLocation, true);
+    condadiff(true, toLocation, fromLocation);
+    condadiff(true, toLocation, fromLocation);
+    condadiff(true, toLocation, fromLocation);
   }
 
   predicate Idle {
