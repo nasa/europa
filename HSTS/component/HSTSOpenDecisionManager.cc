@@ -141,12 +141,62 @@ namespace EUROPA {
 	  bestp = priority;
 	}
       }
+      return; // we know we must have at least one unit var dec
     }
-    check_error(m_sortedUnitVarDecs.empty() || bestDec.isNoId(), "Failed to assign best decision even though there are unit variable decisions");
-    if (bestDec.isNoId() && !m_sortedNonUnitVarDecs.empty()) { // there are no unit vars and some non-unit vars
+    check_error(m_sortedUnitVarDecs.empty(), "Failed to return with unit variable decision even though there are unit variables");
+
+    ConstrainedVariableDecisionPointId bestFloatDec;
+    HSTSHeuristics::Priority bestFloatp = bestp;
+    VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin();
+    for ( ; it != m_sortedNonUnitVarDecs.end(); ++it) {
+      // Ignore variables of inactive tokens.
+      ConstrainedVariableDecisionPointId vdec(*it);
+      check_error(vdec.isValid());
+      if (TokenId::convertable(vdec->getVariable()->getParent())) {
+        TokenId parent = vdec->getVariable()->getParent();
+        if (!parent->isActive())
+          continue;
+      }
+      const HSTSHeuristics::Priority& priority = m_heur->getPriorityForConstrainedVariableDP(vdec);
+      if (vdec->getVariable()->lastDomain().isFinite()) {
+        if (bestDec.isNoId() ||
+            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp ||
+            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp) {
+          bestDec = vdec;
+          bestp = priority;
+        } else
+          if (priority == bestp) { // secondary heuristic - domain size
+	  ConstrainedVariableDecisionPointId bdec(bestDec); // casting necessary
+	  ConstrainedVariableId  bdecVar(bdec->getVariable());
+	  ConstrainedVariableId vdecVar(vdec->getVariable());
+	  if (!m_dm->isCompatGuard(bdecVar->getKey()) && m_dm->isCompatGuard(vdecVar->getKey()))
+	    bestDec = vdec;
+	  else // terciary heuristic - domain size
+	    if (bdec->getVariable()->lastDomain().getSize() > vdec->getVariable()->lastDomain().getSize())
+	      bestDec = vdec;
+          }
+      } else {
+        if (bestFloatDec.isNoId() ||
+            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestFloatp ||
+            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestFloatp) {
+          bestFloatDec = vdec;
+          bestFloatp = priority;
+        } // else ... messy to compare sizes of infinite domains, but it could be done if needed
+      }
+    }
+    if (bestDec.isNoId() && !bestFloatDec.isNoId()) {
+      bestDec = bestFloatDec;
+      bestp = bestFloatp;
+    }
+
+
+    /*
+    if (!m_sortedNonUnitVarDecs.empty()) { // there are no unit vars and some non-unit vars
       ConstrainedVariableDecisionPointId bestFloatDec;
       HSTSHeuristics::Priority bestFloatp;
       VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin();
+      if ((*it)->getVariable()->lastDomain().isFinite())
+      
       bestDec = *it;
       check_error(bestDec.isValid());
       ++it;
@@ -187,6 +237,7 @@ namespace EUROPA {
 	bestp = bestFloatp;
       }
     }
+    */
   }
 
   DecisionPointId HSTSOpenDecisionManager::getNextDecision() {
