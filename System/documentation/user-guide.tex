@@ -11,6 +11,13 @@
 \section{Abstract}
 
 \section{Introduction}
+\subsection{Why, what and how}
+Here we can introduce stuff without much explanation, just giving a sense of things to come later in the document.
+\subsection{Legacy}
+Should clearly identify legacy to EUROPA and HSTS and indicate the projects this 'class of technology' has been used for.
+\subsection{Reader's Guide}
+Should discuss the types of readers we are targeting and then address contents to them.
+\subsection{Acknowledgements}
 
 \section{Concepts}
 The underlying paradigm of PLASMA is that of constraint-based, temporal planning.
@@ -25,13 +32,6 @@ Introduce the notion of flexibility, why it is necessary. This is based on the p
 The Entities are first and foremost Object, Token, Variable. Since we have to concern ourselves with relationships among entities in the plan, we need to also introduce the idea of Constraints. Draw a diagram indicating the core entities and their relationships. Indicate how these relationships are encaptured through the use of constraints. We should be sure to have introduced the Token state model.
 \subsection{Plan State Management}
 Now we want to address the desire to assure completeness and correctness. Infrastructure can be built in to leverage the representation in order to assure these properties. We can thus talk about the automated reasonining capabilities that can be used to propagate consequences (changes to variable values, introduction of sub-goals and ocnstraints), as well as test for consistency.
-
-\subsection{Applications of PLASMA}
-\begin{enumerate}
-\item MER Daily Activity Planning. Ground based planning application with input of science goals and rover state. Produces activity sequences to uplink to the rover that have some flexibility in execution.
-\item Planning Agent. An execution system with built in planning capabilities that can execute according to a plan, and use a planner to either replan or refine. An execution agent may be given a plan with varying levels of commitment and simply execute it, as long as it does not fail. This would not require planning, but can still benefit from a Plan, and underlying Plan State Management.
-\end{enumerate}
-
 
 \section{Hello Rover - Getting started with PLASMA}
 Should demonstrate a simple example that takes an initial state, a model, and runs them through the planner. Will generate output and display output in PlanWorks to visualize the plan. This should illustrate the round trip through the process. Will be a fairly brief section, but should address issues of running the planner, point out the particular examples to draw from. Reference PlanWorks if it is available, and indicate how it can be used to visualize the plan. The products of this section when the user is done will be \verb!model.nddl, initial-state.nddl, Jamfile, ppw_config.!
