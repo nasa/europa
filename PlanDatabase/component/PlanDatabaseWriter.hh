@@ -18,6 +18,7 @@ namespace Prototype {
     static void write(PlanDatabaseId db, std::ostream& os) {
       check_error(db->getConstraintEngine()->constraintConsistent());
       ObjectSet objs = db->getObjects();
+      TokenSet alltokens = db->getTokens();
       for (ObjectSet::const_iterator oit = objs.begin(); oit != objs.end() ; ++oit) {
 	if (TimelineId::convertable((*oit))) {
 	  TimelineId timeline = (*oit);
@@ -25,6 +26,7 @@ namespace Prototype {
 	  std::list<TokenId> toks = timeline->getTokenSequence();
 	  for(std::list<TokenId>::const_iterator tokit = toks.begin(); tokit != toks.end(); ++tokit) {
 	    TokenId t = (*tokit);
+	    alltokens.erase(t);
 	    writeToken(t, os);
 	  }
 	  os << "End Timeline: " << timeline->getName().toString() << "*************************" << std::endl;
@@ -35,9 +37,15 @@ namespace Prototype {
 	  const TokenSet& tokens = object->getTokens();
 	  for(TokenSet::const_iterator tokit = tokens.begin(); tokit != tokens.end(); ++tokit){
 	    TokenId t = *tokit;
+	    alltokens.erase(t);
 	    writeToken(t, os);
 	  }
 	}
+      }
+      os << "Free Tokens: *************************" << std::endl;
+      for(TokenSet::const_iterator tokit = alltokens.begin(); tokit != alltokens.end(); ++tokit){
+	TokenId t = *tokit;	    
+	writeToken(t, os);
       }
     }
 
