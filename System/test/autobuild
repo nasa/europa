@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.54 2003-08-11 23:42:17 wedgingt Exp $
+# $Id: autobuild,v 1.55 2003-09-10 03:45:47 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -24,7 +24,7 @@ email=checkins@postdoc.arc.nasa.gov
 # Subdirectories to build in
 # Profiling and shared in one executable no longer works, it seems
 #subdirs='cvs fast opt optFast profOptFast shareOptFast debug debugOpt noErr shareOptNoErr'
-subdirs='cvs fast opt optFast profOptFast shareOptFast debug debugOpt noErr'
+subdirs='cvs optFast profOptFast shareOptFast debug debugOpt noErr'
 
 # Token (.arc.nasa.gov) does not have AFS nor a second compiler, so comment this out for now
 # Location of a newer compiler.
