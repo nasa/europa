@@ -47,7 +47,7 @@ private:
   else if(result){\
     std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED ID'S:";\
     Europa::IdTable::output(std::cout);\
-    cout << std::endl; \
+    std::cout << std::endl; \
   }\
   else \
     std::cout << " FAILED TO PASS UNIT TEST." << std::endl; \
