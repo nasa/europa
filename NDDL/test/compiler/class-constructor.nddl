@@ -1,0 +1,16 @@
+// Declares a class, a consructor with arguments, and member variables initialized
+// via constructor as well as in the class declaration.
+class Foo {
+ int m_0;
+ // NOT SUPPORTED int m_1 = 10;
+ int m_1;
+ bool m_2;
+ // NOT SUPPORTED bool m_3 = true;
+ bool m_3;
+
+ Foo(int a, bool b, bool c){
+  m_0 = a;
+  m_2 = b;
+  m_3 = c;
+ }
+}

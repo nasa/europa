@@ -112,7 +112,7 @@ namespace Prototype {
   }
 
   template <class ELEMENT_TYPE>
-  ELEMENT_TYPE Domain<ELEMENT_TYPE>::getValue() const {return EnumeratedDomain::getValue();}
+  ELEMENT_TYPE Domain<ELEMENT_TYPE>::getValue() const {return EnumeratedDomain::getSingletonValue();}
 
   template <class ELEMENT_TYPE>
   void Domain<ELEMENT_TYPE>::insert(double value){
