@@ -6,12 +6,15 @@ Known areas of performance improvement:
 5. Improve exchange of data in TemporalPropagator with  direct calculation of duration variables.
 6. Update TemporalNetwork to adjust for deactivated constraints
 
-M_16:
+M_17:
 1. First tag in new PLASMA cvs directory.
 2. Minor build patches.
 
 MIGRATED:
 1. Migrated to PLASMA build structure and cvs directory.
+
+M_16:
+?
 
 M_15:
 1. Changed CBPlanner so that responsibilities for maintaining open
