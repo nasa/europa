@@ -18,6 +18,8 @@
 #include "Constraint.hh"
 #include "CeLogger.hh"
 #include "Utils.hh"
+#include "BinaryCustomConstraint.hh"
+#include "NotFalseConstraint.hh"
 
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabase.hh"
@@ -249,6 +251,55 @@ private:
   }
 };
 
+
+class DecisionPointTest {
+public:
+  static bool test() {
+    runTest(testVariableDecisionCycle);
+    runTest(testTokenDecisionCycle);
+    runTest(testObjectDecisionCycle);
+    return(true);
+  }
+private:
+  static bool testVariableDecisionCycle() {
+    bool retval = false;
+    DEFAULT_SETUP_PLAN(ce, db, schema, false);
+    retval = testVariableDecisionCycleImpl(ce, db, schema, planner);
+    DEFAULT_TEARDOWN_PLAN();
+    return retval;
+  }
+  static bool testTokenDecisionCycle() {
+    bool retval = false;
+    DEFAULT_SETUP(ce, db, schema, false);
+    retval = testTokenDecisionCycleImpl(ce, db, schema, dm, hor);
+    DEFAULT_TEARDOWN();
+    return retval;
+  }
+  static bool testObjectDecisionCycle() {
+    bool retval = false;
+    DEFAULT_SETUP(ce, db, schema, false);
+    retval = testObjectDecisionCycleImpl(ce, db, schema, dm, hor);
+    DEFAULT_TEARDOWN();
+    return retval;
+  }
+};
+
+class TwoCyclePlanningTest {
+public:
+  static bool test() {
+    runTest(testAddSubgoalAfterPlanning);
+    return(true);
+  }
+private:
+  static bool testAddSubgoalAfterPlanning() {
+    bool retval = false;
+    DEFAULT_SETUP_PLAN(ce, db, schema, false);
+    retval = testAddSubgoalAfterPlanningImpl(ce, db, schema, hor, planner);
+    DEFAULT_TEARDOWN_PLAN();
+    return retval;
+  }
+};
+
 int main() {
 
   REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
@@ -259,12 +310,16 @@ int main() {
   REGISTER_CONSTRAINT(EqualConstraint, "Equal", "Default");
   REGISTER_CONSTRAINT(LessThanConstraint, "lt", "Default");
   REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
+  REGISTER_CONSTRAINT(NotFalseConstraint, "notfalse", "Default");
+  REGISTER_CONSTRAINT(BinaryCustomConstraint, "custom", "Default");
 
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ConditionTest::test);
   runTestSuite(DecisionManagerTest::test);
   runTestSuite(CBPlannerTest::test);
   runTestSuite(MultipleDecisionManagerTest::test);
+  runTestSuite(DecisionPointTest::test);
+  runTestSuite(TwoCyclePlanningTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
 }
