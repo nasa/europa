@@ -39,7 +39,7 @@ namespace EUROPA {
      * @return The result of planning
      * @see CBPlanner::Status
      */
-    CBPlanner::Status plan(const char* txSource);
+    CBPlanner::Status plan(const char* txSource, const char* averFile = NULL);
 
     /** 
      * @brief Replays the transaction log and verifies that the outputs are

@@ -58,6 +58,8 @@
 #include <string>
 #include <fstream>
 
+#include "AverInterp.hh"
+
 #define PPW_WITH_PLANNER
 
 const char* TX_LOG = "TransactionLog.xml";
@@ -124,7 +126,7 @@ namespace EUROPA {
     isInitialized() = true;
   }
 
-  CBPlanner::Status TestAssembly::plan(const char* txSource){
+  CBPlanner::Status TestAssembly::plan(const char* txSource, const char* averFile){
     Horizon horizon;
     CBPlanner planner(m_planDatabase, horizon.getId());
 
@@ -133,6 +135,11 @@ namespace EUROPA {
 #else
     PlanWriter::PartialPlanWriter ppw(m_planDatabase, m_constraintEngine, m_rulesEngine);
 #endif
+
+    if(averFile != NULL) {
+      AverInterp::init(std::string(averFile), planner.getDecisionManager(), 
+                       m_planDatabase->getConstraintEngine(), m_planDatabase, m_rulesEngine);
+    }
 
     // Set up Resource Decision Manager
     DecisionManagerId local_dm = planner.getDecisionManager();
@@ -169,8 +176,12 @@ namespace EUROPA {
     // Now get planner step max
     int steps = (int) plannerSteps->baseDomain().getSingletonValue();
 
-    // Now run it
-    return planner.run(steps);
+    CBPlanner::Status retval = planner.run(steps);
+    
+    if(averFile != NULL)
+      AverInterp::terminate();
+    
+    return retval;
   }
 
   void TestAssembly::replay(const DbClientTransactionLogId& txLog) {
