@@ -6,6 +6,7 @@
 #include "Variable.hh"
 #include "IntervalDomain.hh"
 #include "IntervalIntDomain.hh"
+#include "BoolDomain.hh"
 
 namespace Prototype {
 
@@ -292,6 +293,28 @@ namespace Prototype {
 
   private:
     const unsigned int ARG_COUNT;
+  };
+
+  /**
+   * @class AllDiff
+   * @brief A != B && A != C && B != C && A != D && B != D && ...
+   */
+  class AllDiffConstraint : public Constraint {
+  public:
+    AllDiffConstraint(const LabelStr& name,
+                      const LabelStr& propagatorName,
+                      const ConstraintEngineId& constraintEngine,
+                      const std::vector<ConstrainedVariableId>& variables);
+
+    ~AllDiffConstraint() {
+      delete (CondAllDiffConstraint *) m_condAllDiffConstraint;
+    }
+
+    void handleExecute() { }
+
+  private:
+    Variable<BoolDomain> m_condVar;
+    ConstraintId m_condAllDiffConstraint;
   };
 
   /**
