@@ -7,6 +7,13 @@
 #include "ConstrainedVariable.hh"
 #include "Constraint.hh"
 
+// @todo: there are cases where we may be able to fail early during the
+// mapping from the constraint engine to the temporal network.  In these
+// cases we could propagate the temporal netowrk as we're doing the mapping
+// and detect inconsistencies at that point.  In cases where domains were
+// relaxed in temporal variables we must do the mapping first or we'll run
+// the risk of detecting an inconsistency where there isn't one.
+
 namespace Prototype {
 
   TemporalPropagator::TemporalPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
@@ -53,29 +60,37 @@ namespace Prototype {
 
     //update the tnet
     updateTnet();
+
     //propagate the tnet
-    m_tnet->isConsistent();
-    //update the cnet
-    updateTempVar();
-
-    while(!m_agenda.empty()){
-      std::set<ConstraintId>::iterator it = m_agenda.begin();
-      ConstraintId constraint = *it;
-
-      if(constraint->isActive()){
-	m_activeConstraint = constraint->getKey();
-	Propagator::execute(constraint);
-      }
-
-      if(getConstraintEngine()->provenInconsistent()){
-	m_agenda.clear();
-	break;
-      }
-      else
-	m_agenda.erase(it);
+    if (!m_tnet->isConsistent()) {
+      std::list<TimepointId> results(m_tnet->getInconsistencyReason());
+      std::list<TimepointId>::iterator it = results.begin();
+      Propagator::getCurrentDomain(m_tnet->getVarIdFromTimepoint(*it)).empty();
+      m_agenda.clear();
     }
-    m_activeConstraint = 0;
-    m_updateRequired = false;
+    else {
+      //update the cnet
+      updateTempVar();
+
+      while(!m_agenda.empty()){
+	std::set<ConstraintId>::iterator it = m_agenda.begin();
+	ConstraintId constraint = *it;
+
+	if(constraint->isActive()){
+	  m_activeConstraint = constraint->getKey();
+	  Propagator::execute(constraint);
+	}
+
+	if(getConstraintEngine()->provenInconsistent()){
+	  m_agenda.clear();
+	  break;
+	}
+	else
+	  m_agenda.erase(it);
+      }
+      m_activeConstraint = 0;
+      m_updateRequired = false;
+    }
   }
 
   bool TemporalPropagator::updateRequired() const{
@@ -198,15 +213,15 @@ namespace Prototype {
 
     for (std::map<TempVarId, TemporalConstraintId>::iterator varIt = m_tnetVariableConstraints.begin(); varIt != m_tnetVariableConstraints.end(); ++varIt) {
       TempVarId var = varIt->first;
-      int lb = (int)var->lastDomain().getLowerBound();
-      int ub = (int)var->lastDomain().getUpperBound();
+      int lb = (int)Propagator::getCurrentDomain(var).getLowerBound();
+      int ub = (int)Propagator::getCurrentDomain(var).getUpperBound();
       TimepointId timepoint = m_tnetVariables.find(var->getKey())->second;
       Time lbt, ubt;
 
       // Instead of getTimepointBounds here we'd like to get cached values
       // from the last computation since the temporal network may be made
       // inconsistent in this mapping process.
-      m_tnet->getTimepointBounds(timepoint, lbt, ubt);
+      m_tnet->getLastTimepointBounds(timepoint, lbt, ubt);
       if (lb >= lbt && ub <= ubt)
 	m_tnet->narrowTemporalConstraint(varIt->second, lb, ub);
       else {
@@ -227,10 +242,10 @@ namespace Prototype {
       Time lb, ub;
       m_tnet->getTimepointBounds((*it).second, lb, ub);
       
-      if (m_tnet->getVarIdFromTimepoint((*it).second)->lastDomain().getLowerBound() > lb ||
-      	  m_tnet->getVarIdFromTimepoint((*it).second)->lastDomain().getUpperBound() < ub) {
+      if (Propagator::getCurrentDomain(m_tnet->getVarIdFromTimepoint((*it).second)).getLowerBound() > lb ||
+      	  Propagator::getCurrentDomain(m_tnet->getVarIdFromTimepoint((*it).second)).getUpperBound() < ub) {
 	std::cout << "Warning: bounds retrieved are  not a subset of the domain." << std::endl;
-	std::cout << " Domain = " << m_tnet->getVarIdFromTimepoint((*it).second)->lastDomain() << std::endl;
+	std::cout << " Domain = " << Propagator::getCurrentDomain(m_tnet->getVarIdFromTimepoint((*it).second)) << std::endl;
 	std::cout << " Bounds = [" << lb << "," << ub << "]" << std::endl;
 	check_error(false);
       }
