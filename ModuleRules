@@ -27,7 +27,7 @@ rule Module {
   LINK_LIBRARIES on $(module) = $(LINKLIBS) ;
   LINK_MODULES on $(module) = $(modules:G=module) ;
   LOCATE_OBJECTS on $(module) = [ FDirName $(SUBDIR) objects ] ;
-  LOCATE_SHARED on $(module) = [ FDirName $($(TOP)) lib ] ;
+  LOCATE_SHARED on $(module) = [ FDirName $($(_top)) lib ] ;
   INCLUDES on $(module) += $(SUBDIR) ;
   INCLUDES on $(module) += [ FDirName $(SUBDIR) core ] ;
   INCLUDES on $(module) += [ FDirName $(SUBDIR) component ] ;
@@ -354,7 +354,7 @@ rule ModulePart {
           Exit ModulePart unknown library type: $(library) ;
         }
         if $(library) = SHARED {
-          local LOCATE_TARGET = [ FDirName $($(TOP)) lib ] ;
+          local LOCATE_TARGET = [ FDirName $($(_top)) lib ] ;
           LINKFLAGS on $(libname) = $(LINKFLAGS)
                                     $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)
                                     $(LINKER_PASSTHROUGH_FLAG)$(LOCATE_TARGET) ;
