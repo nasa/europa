@@ -207,21 +207,10 @@ namespace PLASMA {
   TiXmlElement *
   DbClientTransactionLog::domainValueAsXml(const AbstractDomain * domain, double value)
   {
-    TiXmlElement * element = NULL;
-    if (domain->isNumeric()) {
-      element = allocateXmlElement(domain->getTypeName().toString());
-    } else if (LabelStr::isString(value)) {
-      if (domain->getTypeName() == LabelStr("string")) {
-        element = allocateXmlElement("string");
-      } else {
-        element = allocateXmlElement("symbol");
-        element->SetAttribute("type", domain->getTypeName().toString());
-      }
-    } else {
-      element = allocateXmlElement("object");
-    }
-    element->SetAttribute("value", domainValueAsString(domain, value));
-    return element;
+    TiXmlElement * element = allocateXmlElement("value");
+    element->SetAttribute("type", domain->getTypeName().toString());
+    element->SetAttribute("name", domainValueAsString(domain, value));
+    return(element);
   }
 
   TiXmlElement *
