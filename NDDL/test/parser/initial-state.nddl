@@ -8,7 +8,7 @@ any(timelineObject.PredicateName predInstName);
 
 any(timelineObject.PredicateName);
 
-any(TimelineClass.PredicateName predInstName);
+any(TimelineClass.PredicateName predOtherName);
 
 any(TimelineClass.PredicateName);
 
@@ -20,9 +20,9 @@ new [0 1000] timelineObject();
 
 Class instanceName4 = new [0 1000] ClassType(XYZ, 4.5);
 
-eq(start, 0);
+eq(predInstName.start, 0);
 
-eq(end, 1000);
+eq(predInstName.end, 1000);
 
 int x = 7;
 

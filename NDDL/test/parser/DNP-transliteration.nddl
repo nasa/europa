@@ -258,7 +258,7 @@ Scan_Platform_Timeline::Mosaic_LO {
     eq(r.Length,Length);
     eq(r.ReqFPRate,ObsNo);
     eq(r.ReqMosRate,Data_Rate);
-    eq(What_obs,Mos_LO);
+    eq(r.What_obs,Mos_LO);
 }
 
 Scan_Platform_Timeline::Scan_Idle {
