@@ -409,7 +409,7 @@ public:
     runTest(testRetractMove);
     runTest(testNoBacktrackCase);
     runTest(testSubgoalOnceRule);
-    //    runTest(testBacktrackCase);
+    runTest(testBacktrackCase);
     return true;
   }
 private:
