@@ -29,6 +29,9 @@ ModuleComponent CBPlanner
 	HSTSHeuristics.cc
 	HSTSOpenDecisionManager.cc
 	HSTSHeuristicsReader.cc
+	HSTSNoBranch.cc
+	HSTSNoBranchCondition.cc
+	HSTSPlanIdReader.cc
 	;
 
 } # PLASMA_READY
