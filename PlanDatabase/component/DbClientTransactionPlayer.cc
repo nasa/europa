@@ -911,7 +911,7 @@ namespace EUROPA {
       baseDomain = xmlAsAbstractDomain(*value, name);
       if (type == NULL) {
         type = value->Value();
-        if ((strcmp(type, "value") == 0) || (strcmp(type, "new") == 0) || (strcmp(type, "symbol") == 0)) {
+        if ((strcmp(type, "value") == 0) || (strcmp(type, "new") == 0) || (strcmp(type, "symbol") == 0) || (strcmp(type, "interval") == 0)) {
           type = value->Attribute("type");
         }
       }
