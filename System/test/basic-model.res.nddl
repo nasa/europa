@@ -57,7 +57,7 @@ class World extends NddlWorld {
  predicate initialState{}
 
  World(){
-  super(10, 101, 350);
+  super(10, 101, 500);
   m_rover = new Rover();
  }
 }
