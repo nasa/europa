@@ -12,9 +12,9 @@ rule Execute {
 
   local target_exec_arg ;
   if $(arguments) {
-    target_exec_arg = $(executable).$(arguments:J=.) ;
+    target_exec_arg = RUN_$(executable).$(arguments:J=.) ;
   } else {
-    target_exec_arg = $(executable:G=$(target)) ;
+    target_exec_arg = RUN_$(executable) ;
   }
   LocalDepends $(target) : $(target_exec_arg) ;
   ExecuteTarget $(target_exec_arg) : [ FAppendSuffix $(executable) : $(SUFEXE) ] : $(arguments) ;
@@ -24,6 +24,8 @@ rule ExecuteTarget {
   local exec_arg = $(1) ;
   local executable = $(2) ;
   local arguments = $(3) ;
+
+#  Echo ExecuteTarget $(exec_arg) . $(executable) . $(arguments) ;
 
   Depends $(exec_arg) : $(executable) ;
   SEARCH on $(executable) += $(SEARCH_SOURCE) ;
