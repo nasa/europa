@@ -2,6 +2,7 @@
 #define _H_ResourceFlawChoice
 
 #include "ResourceDefs.hh"
+#include "ResourceFlawDecisionPoint.hh"
 #include "CBPlannerDefs.hh"
 #include "Choice.hh"
 

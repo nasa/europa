@@ -1,9 +1,8 @@
 #ifndef _H_ResourceFlawDecisionPoint
 #define _H_ResourceFlawDecisionPoint
 
-#include "CBPlannerDefs.hh"
-#include "DecisionPoint.hh"
 #include "ResourceDefs.hh"
+#include "DecisionPoint.hh"
 
 namespace Prototype {
 
