@@ -340,7 +340,7 @@ public:
 
 DECLARE_AND_DEFINE_VALUE_GUARDED_RULE(Predicate_2, Predicate, object, 10);
 
-class NddlRuleIntergrationTest {
+class NddlRuleIntegrationTest {
 public:
 
   static bool test() {
@@ -383,7 +383,7 @@ int main() {
 
   runTestSuite(ObjectFilterConstraintTest::test);
   runTestSuite(NddlSchemaTest::test);
-  runTestSuite(NddlRuleIntergrationTest::test);
+  runTestSuite(NddlRuleIntegrationTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
 }
