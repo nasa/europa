@@ -6,6 +6,7 @@
  * EUROPA 
  */
 
+#include "Debug.hh"
 #include "Nddl.hh" /**< Includes protypes required to load a model */
 #include "HSTSAssembly.hh" /**< For using a standard EUROPA Assembly */
 #include "DNPConstraints.hh" /**< Declares the DNP specific constraints */
@@ -89,6 +90,8 @@ int main(int argc, const char ** argv) {
 
     // Dump the results
     assembly.write(std::cout);
+
+    debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr); );
   }
 
   std::cerr << "Terminating the assembly ..." << std::endl;
