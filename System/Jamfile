@@ -2,7 +2,7 @@ SubDir PLASMA System ;
 
 if ! $(PLASMA_READY) {
 
-Module System : ConstraintEngine NDDL TemporalNetwork CBPlanner ;
+Module System : NDDL TemporalNetwork CBPlanner ;
 
 SubInclude PLASMA System core ;
 SubInclude PLASMA System component ;
