@@ -5,7 +5,7 @@
 #include "LabelStr.hh"
 #include "DomainListener.hh"
 #include "Domain.hh"
-#include "domain-tests.hh"
+#include "module-tests.hh"
 #include <cmath>
 
 namespace Prototype {

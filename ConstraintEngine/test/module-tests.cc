@@ -20,7 +20,8 @@
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
 #include "Domain.hh"
-#include "domain-tests.hh"
+
+#include "module-tests.hh"
 
 #include <iostream>
 #include <vector>
@@ -2235,8 +2236,8 @@ private:
 int main() {
   initConstraintLibrary();
   REGISTER_UNARY(DelegationTestConstraint, "TestOnly", "Default");
-
-  DomainTests::test();
+  runTestSuite(IdTests::test);
+  runTestSuite(DomainTests::test);
   runTestSuite(ConstraintEngineTest::test);
   runTestSuite(VariableTest::test); 
   runTestSuite(ConstraintTest::test); 
