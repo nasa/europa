@@ -15,8 +15,17 @@ if $(LIBRARIES) = SHARED {
 EXTRA_DEFS = ;
 ModuleNamedObjects runProblem_link : runProblem.cc : System ;
 
-# it doesn't work and I can't figure out why, but it is due to line 161 (contained_by(Satellite.Transmit t);
-# EOS-backtrack-test.nddl
+local checkin-tests ;
+checkin-tests = basic-types
+        Rover-transaction
+        k9.backtrack.moderate-transaction
+        rejection
+        resource-backtrack-test
+        better-res
+        constrain-transaction
+        foreach-transaction
+        force-object-distribution
+        ;
 
 local model ;
 for model in
@@ -59,27 +68,12 @@ for model in
       RunModuleMain run-problem-$(exe) : runProblem : $(arguments) ;
       Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
       LocalDepends run-model-tests : run-problem-$(exe) ;
+      if $(exe) in $(checkin-tests) {
+        LocalDepends run-checkin-tests : run-problem-$(exe) ;
+      }
     }
     Depends run-all-tests : run-model-tests ;
   }
-}
-
-if $(LIBRARIES) = SHARED {
-        local model2 ;
-        for model2 in
-	        basic-types.nddl
-        	Rover-transaction.nddl
-                k9.backtrack.moderate-transaction.nddl
-                rejection.nddl
-                resource-backtrack-test.nddl
-                better-res.nddl
-                constrain-transaction.nddl
-                foreach-transaction.nddl
-                force-object-distribution.nddl
-        {
-        	local exe = $(model:S=) ;
-        	LocalDepends run-checkin-tests : run-problem-$(exe) ;
-        }
 }
 
 #
