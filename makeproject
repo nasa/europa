@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# the makeproject script creates a directory adjacent to PLASMA
+# with the name NAME.  it populates this directory with basic
+# project files that use PLASMA.
+#
+PLASMA=`dirname "$0"`
+if [ "$1" == "" ]
+then
+  echo "makeproject version 1.0"
+  echo "Usage: makeproject NAME"
+  echo ""
+  echo "Example: makeproject IDEA"
+  exit -1
+fi
+NAME="$1"
+
+DIRECTORY="$PLASMA/../$NAME"
+if [ -e $DIRECTORY ]
+then
+  echo "error: "$DIRECTORY" already exists"
+  exit -1
+fi
+echo "Creating directory: $DIRECTORY"
+mkdir $DIRECTORY
+
+if [ -e $DIRECTORY/Jamrules ]
+then
+  echo "error: "$DIRECTORY"/Jamrules already exists"
+  exit -1
+fi
+echo "Adding Jamrules"
+touch $DIRECTORY/Jamrules
+echo "{"                                                     >> $DIRECTORY/Jamrules
+echo "  local SUBDIR = \$("$NAME") ;"                        >> $DIRECTORY/Jamrules
+echo "  local PLASMA = [ FDirName \$("$NAME") .. PLASMA ] ;" >> $DIRECTORY/Jamrules
+echo "  include [ FDirName \$(PLASMA) Jamrules ] ;"          >> $DIRECTORY/Jamrules
+echo "  include [ FDirName \$(SUBDIR) Jamfile ] ;"           >> $DIRECTORY/Jamrules
+echo "  "$NAME"_READY = TRUE ;"                              >> $DIRECTORY/Jamrules
+echo "}"                                                     >> $DIRECTORY/Jamrules
+
+if [ -e $DIRECTORY/Jamfile ]
+then
+  echo "error: "$DIRECTORY"/Jamfile already exists"
+  exit -1
+fi
+echo "Adding Jamfile"
+touch $DIRECTORY/Jamfile
+echo "SubDir "$NAME" ;"                                        >> $DIRECTORY/Jamfile
+echo ""                                                        >> $DIRECTORY/Jamfile
+echo "if ! \$("$NAME"_READY) {"                                >> $DIRECTORY/Jamfile
+echo ""                                                        >> $DIRECTORY/Jamfile
+echo "Echo No project rules defined yet. ;"                    >> $DIRECTORY/Jamfile
+echo "# Put your project rules here.  Usually you will put a"  >> $DIRECTORY/Jamfile
+echo "# SubInclude command here and create your modules, etc." >> $DIRECTORY/Jamfile
+echo "# in directories below this one.  See the Jamfile in"    >> $DIRECTORY/Jamfile
+echo "# the PLASMA directory for examples."                    >> $DIRECTORY/Jamfile
+echo ""                                                        >> $DIRECTORY/Jamfile
+echo "} # "$NAME"_READY"                                       >> $DIRECTORY/Jamfile
