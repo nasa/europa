@@ -5,8 +5,8 @@
 
 namespace Prototype {
 
-  DefaultPropagator::DefaultPropagator(const ConstraintEngineId& constraintEngine)
-    : Propagator(constraintEngine){}
+  DefaultPropagator::DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
+    : Propagator(name, constraintEngine){}
 
   void DefaultPropagator::handleConstraintAdded(const ConstraintId& constraint){
     m_agenda.push_back(constraint);

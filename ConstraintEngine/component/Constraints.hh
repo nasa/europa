@@ -8,9 +8,10 @@ namespace Prototype
   class AddEqualConstraint: public Constraint
   {
   public:
-    AddEqualConstraint(const ConstraintEngineId& constraintEngine,
-		       const std::vector<ConstrainedVariableId>& variables,
-		       const LabelStr& name = LabelStr("AddEqual"));
+    AddEqualConstraint(const LabelStr& name,
+		       const LabelStr& propagatorName,
+		       const ConstraintEngineId& constraintEngine,
+		       const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
 
@@ -28,9 +29,10 @@ namespace Prototype
   class EqualConstraint: public Constraint
   {
   public:
-    EqualConstraint(const ConstraintEngineId& constraintEngine,
-		    const std::vector<ConstrainedVariableId>& variables,
-		    const LabelStr& name = LabelStr("Equal"));
+    EqualConstraint(const LabelStr& name,
+		    const LabelStr& propagatorName,
+		    const ConstraintEngineId& constraintEngine,
+		    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
 
@@ -55,10 +57,11 @@ namespace Prototype
 
   class SubsetOfConstraint: public Constraint{
   public:
-    SubsetOfConstraint(const ConstraintEngineId& constraintEngine,
+    SubsetOfConstraint(const LabelStr& name,
+		       const LabelStr& propagatorName,
+		       const ConstraintEngineId& constraintEngine,
 		       const ConstrainedVariableId& variable,
-		       const AbstractDomain& superset,
-		       const LabelStr& name = LabelStr("SubsetOf"));
+		       const AbstractDomain& superset);
 
     ~SubsetOfConstraint();
 

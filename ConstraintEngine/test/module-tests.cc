@@ -31,11 +31,12 @@ using namespace std;
 
 class DelegationTestConstraint: public Constraint{
 public:
-  DelegationTestConstraint(const ConstraintEngineId& constraintEngine,
+  DelegationTestConstraint(const LabelStr& name,
+			   const LabelStr& propagatorName,
+			   const ConstraintEngineId& constraintEngine,
 			   const ConstrainedVariableId& variable,
-			   const AbstractDomain&,
-			   const LabelStr& name = LabelStr("TestOnly"))
-    : Constraint(name, constraintEngine, variable){s_instanceCount++;}
+			   const AbstractDomain&)
+    : Constraint(name, propagatorName, constraintEngine, variable){s_instanceCount++;}
   ~DelegationTestConstraint(){s_instanceCount--;}
   void handleExecute(){s_executionCount++;}
   void handleExecute(const ConstrainedVariableId&,int, const DomainListener::ChangeType&){}
@@ -455,7 +456,7 @@ private:
 
     Variable<LabelSet> v0(ENGINE, ls0);
     assert(! (v0.getDerivedDomain() == ls1));
-    SubsetOfConstraint c0(ENGINE, v0.getId(), ls1);
+    SubsetOfConstraint c0(LabelStr("SubsetOf"), LabelStr("Default"), ENGINE, v0.getId(), ls1);
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain() == ls1);
@@ -486,7 +487,7 @@ private:
     variables.push_back(v1.getId());
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
     variables.push_back(v2.getId());
-    AddEqualConstraint c0(ENGINE, variables);
+    AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
@@ -502,7 +503,7 @@ private:
     variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(-100, 1));
     variables.push_back(v1.getId());
-    EqualConstraint c0(ENGINE, variables);
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v0.getDerivedDomain().getSingletonValue() == 1);
@@ -524,7 +525,7 @@ private:
     variables.push_back(v2.getId());
     Variable<LabelSet> v3(ENGINE, ls1);
     variables.push_back(v3.getId());
-    EqualConstraint c1(ENGINE, variables);
+    EqualConstraint c1(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v2.getDerivedDomain() == v3.getDerivedDomain());
@@ -540,7 +541,7 @@ private:
     Variable<LabelSet> v4(ENGINE, ls0);
     variables.push_back(v2.getId());
     variables.push_back(v4.getId());
-    EqualConstraint c2(ENGINE, variables);
+    EqualConstraint c2(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v2.getDerivedDomain() == v3.getDerivedDomain());
@@ -558,7 +559,7 @@ private:
     variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v1.getId());
-    EqualConstraint c0(ENGINE, variables);
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
 
     // v2 + v3 == v0
     variables.clear();
@@ -567,7 +568,7 @@ private:
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v3.getId());
     variables.push_back(v0.getId());
-    AddEqualConstraint c1(ENGINE, variables);
+    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
     assert(!v0.getDerivedDomain().isEmpty());
 
     // v4 + v5 == v1
@@ -577,7 +578,7 @@ private:
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(1, 1000));
     variables.push_back(v5.getId());
     variables.push_back(v1.getId());
-    AddEqualConstraint c2(ENGINE, variables);
+    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
 
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
@@ -592,7 +593,7 @@ private:
     variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v1.getId());
-    EqualConstraint c0(ENGINE, variables);
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
     
     // v2 + v3 == v0
     variables.clear();
@@ -601,7 +602,7 @@ private:
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v3.getId());
     variables.push_back(v0.getId());
-    AddEqualConstraint c1(ENGINE, variables);
+    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
 
     // v4 + v5 == v1
     variables.clear();
@@ -610,7 +611,7 @@ private:
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(2, 2));
     variables.push_back(v5.getId());
     variables.push_back(v1.getId());
-    AddEqualConstraint c2(ENGINE, variables);
+    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
     
     ENGINE->propagate();
     assert(ENGINE->provenInconsistent());
@@ -644,7 +645,7 @@ private:
     variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v1.getId());
-    EqualConstraint c0(ENGINE, variables);
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables);
 
 
     // v2 + v3 == v0
@@ -654,7 +655,7 @@ private:
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v3.getId());
     variables.push_back(v0.getId());
-    AddEqualConstraint c1(ENGINE, variables);
+    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
 
     // v4 + v5 == v1
     variables.clear();
@@ -663,7 +664,7 @@ private:
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v5.getId());
     variables.push_back(v1.getId());
-    AddEqualConstraint c2(ENGINE, variables);
+    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables);
 
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
@@ -697,7 +698,7 @@ private:
     variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v1.getId());
-    ConstraintId c0((new EqualConstraint(ENGINE, variables))->getId());
+    ConstraintId c0((new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables))->getId());
 
 
     // v2 + v3 == v0
@@ -707,7 +708,7 @@ private:
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
     variables.push_back(v3.getId());
     variables.push_back(v0.getId());
-    ConstraintId c1((new AddEqualConstraint(ENGINE, variables))->getId());
+    ConstraintId c1((new AddEqualConstraint(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables))->getId());
 
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
@@ -721,7 +722,7 @@ private:
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 1));
     variables.push_back(v0.getId());
     variables.push_back(v4.getId());
-    ConstraintId c2((new EqualConstraint(ENGINE, variables))->getId());
+    ConstraintId c2((new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables))->getId());
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     assert(v1.getDerivedDomain().getSingletonValue() == 1);
@@ -737,7 +738,7 @@ private:
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 0));
     variables.push_back(v0.getId());
     variables.push_back(v5.getId());
-    ConstraintId c3((new EqualConstraint(ENGINE, variables))->getId());
+    ConstraintId c3((new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables))->getId());
     ENGINE->propagate();
     assert(ENGINE->provenInconsistent());
     delete (Constraint*) c3;
@@ -956,7 +957,7 @@ private:
 
   static bool testEqualityConstraintPropagator(){
     ConstraintEngineId ce((new ConstraintEngine())->getId());
-    new EqualityConstraintPropagator(ce);
+    new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce);
     {
       std::vector<ConstrainedVariableId> variables;
       // v0 == v1
@@ -964,7 +965,7 @@ private:
       variables.push_back(v0.getId());
       Variable<IntervalIntDomain> v1(ce, IntervalIntDomain(-100, 100));
       variables.push_back(v1.getId());
-      EqualConstraint c0(ce, variables);
+      EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("EquivalenceClass"), ce, variables);
       ce->propagate();
 
       variables.clear();
@@ -972,7 +973,7 @@ private:
       variables.push_back(v2.getId());
       Variable<IntervalIntDomain> v3(ce, IntervalIntDomain(10, 200));
       variables.push_back(v3.getId());
-      EqualConstraint c1(ce, variables);
+      EqualConstraint c1(LabelStr("EqualConstraint"), LabelStr("EquivalenceClass"), ce, variables);
       ce->propagate();
 
       assert(v0.getDerivedDomain().getUpperBound() == 10);
@@ -981,7 +982,7 @@ private:
       variables.clear();
       variables.push_back(v3.getId());
       variables.push_back(v1.getId());
-      EqualConstraint c2(ce, variables);
+      EqualConstraint c2(LabelStr("EqualConstraint"), LabelStr("EquivalenceClass"), ce, variables);
 
       ce->propagate();
       assert(ce->constraintConsistent());
@@ -991,7 +992,7 @@ private:
       Variable<IntervalIntDomain> v4(ce, IntervalIntDomain(1, 9));
       variables.push_back(v3.getId());
       variables.push_back(v4.getId());
-      ConstraintId c3((new EqualConstraint(ce, variables))->getId());
+      ConstraintId c3((new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("EquivalenceClass"), ce, variables))->getId());
       ce->propagate();
       assert(ce->provenInconsistent());
 
@@ -1020,7 +1021,7 @@ void testBitVector(){
 int main()
 {
   initConstraintLibrary();
-  REGISTER_UNARY(DelegationTestConstraint, "TestOnly");
+  REGISTER_UNARY(DelegationTestConstraint, "TestOnly", "Default");
   runTestSuite(EnumerationTest::test, "LabelTests"); 
   runTestSuite(DomainTest::test, "DomainTests");  
   runTestSuite(VariableTest::test, "VariableTests"); 

@@ -9,8 +9,8 @@
  * @date August, 2003
  * @brief Provides the Users (Planners) perspective for Variable Definition.
  *
- * This file introduces classes derived from ConstrainedVariable which provide the external view
- * of a variable and also implement the contract required by the ConstrainedVariable class.
+ * This file introduces classes derived from ConstrainedVariable which provide an external view
+ * of a variable and also implement the contract required by the ConstrainedVariable class. Handy for testing.
  * @see ConstrainedVariable
  */
 namespace Prototype

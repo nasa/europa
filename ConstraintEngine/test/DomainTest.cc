@@ -2,7 +2,7 @@
 #include "LabelStr.hh"
 #include "IntervalIntDomain.hh"
 #include "ConstraintEngine.hh"
-#include "ConstraintLibrary.hh"
+#include "Constraints.hh"
 #include "DefaultPropagator.hh"
 #include "Variable.hh"
 #include "EqualityConstraintPropagator.hh"
@@ -94,47 +94,47 @@ void testLabelSetEqualityPerformance(const ConstraintEngineId& ce){
 
   variables.push_back(v0.getId());
   variables.push_back(v1.getId());
-  EqualConstraint c0(ce, variables);
+  EqualConstraint c0(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v1.getId());
   variables.push_back(v2.getId());
-  EqualConstraint c1(ce, variables);
+  EqualConstraint c1(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v2.getId());
   variables.push_back(v3.getId());
-  EqualConstraint c2(ce, variables);
+  EqualConstraint c2(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v3.getId());
   variables.push_back(v4.getId());
-  EqualConstraint c3(ce, variables);
+  EqualConstraint c3(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v4.getId());
   variables.push_back(v5.getId());
-  EqualConstraint c4(ce, variables);
+  EqualConstraint c4(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v5.getId());
   variables.push_back(v6.getId());
-  EqualConstraint c5(ce, variables);
+  EqualConstraint c5(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v6.getId());
   variables.push_back(v7.getId());
-  EqualConstraint c6(ce, variables);
+  EqualConstraint c6(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v7.getId());
   variables.push_back(v8.getId());
-  EqualConstraint c7(ce, variables);
+  EqualConstraint c7(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v8.getId());
   variables.push_back(v9.getId());
-  EqualConstraint c8(ce, variables);
+  EqualConstraint c8(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v0.getId());
@@ -166,9 +166,9 @@ void outerLoopLabelSetEqualConstraint(bool useEquivalenceClasses){
   ConstraintEngine ce;
 
   if(useEquivalenceClasses)
-    new EqualityConstraintPropagator(ce.getId());
+    new EqualityConstraintPropagator(LabelStr("Equal"), ce.getId());
   else
-    new DefaultPropagator(ce.getId());
+    new DefaultPropagator(LabelStr("Equal"), ce.getId());
 
   for (int i=0;i<1000; i++)
     testLabelSetEqualityPerformance(ce.getId());
@@ -191,47 +191,47 @@ void testIntervalEqualityPerformance(const ConstraintEngineId& ce){
 
   variables.push_back(v0.getId());
   variables.push_back(v1.getId());
-  EqualConstraint c0(ce, variables);
+  EqualConstraint c0(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v1.getId());
   variables.push_back(v2.getId());
-  EqualConstraint c1(ce, variables);
+  EqualConstraint c1(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v2.getId());
   variables.push_back(v3.getId());
-  EqualConstraint c2(ce, variables);
+  EqualConstraint c2(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v3.getId());
   variables.push_back(v4.getId());
-  EqualConstraint c3(ce, variables);
+  EqualConstraint c3(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v4.getId());
   variables.push_back(v5.getId());
-  EqualConstraint c4(ce, variables);
+  EqualConstraint c4(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v5.getId());
   variables.push_back(v6.getId());
-  EqualConstraint c5(ce, variables);
+  EqualConstraint c5(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v6.getId());
   variables.push_back(v7.getId());
-  EqualConstraint c6(ce, variables);
+  EqualConstraint c6(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v7.getId());
   variables.push_back(v8.getId());
-  EqualConstraint c7(ce, variables);
+  EqualConstraint c7(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v8.getId());
   variables.push_back(v9.getId());
-  EqualConstraint c8(ce, variables);
+  EqualConstraint c8(LabelStr("Equal"), LabelStr("Equal"), ce, variables);
 
   variables.clear();
   variables.push_back(v0.getId());
@@ -267,9 +267,9 @@ void outerLoopIntervalEqualConstraint(bool useEquivalenceClasses){
   ConstraintEngine ce;
 
   if(useEquivalenceClasses)
-    new EqualityConstraintPropagator(ce.getId());
+    new EqualityConstraintPropagator(LabelStr("Equal"), ce.getId());
   else
-    new DefaultPropagator(ce.getId());
+    new DefaultPropagator(LabelStr("Equal"), ce.getId());
 
   for (int i=0;i<1000; i++)
     testIntervalEqualityPerformance(ce.getId());

@@ -30,7 +30,7 @@ namespace Prototype{
    */
   class EqualityConstraintPropagator: public Propagator {
   public:
-    EqualityConstraintPropagator(const ConstraintEngineId& constraintEngine);
+    EqualityConstraintPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine);
     ~EqualityConstraintPropagator();
     void execute();
     bool updateRequired() const;

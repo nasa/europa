@@ -7,10 +7,11 @@
 
 namespace Prototype
 {
-  AddEqualConstraint::AddEqualConstraint(const ConstraintEngineId& constraintEngine,
-					 const std::vector<ConstrainedVariableId>& variables,
-					 const LabelStr& name)
-    : Constraint(name, constraintEngine, variables){
+  AddEqualConstraint::AddEqualConstraint(const LabelStr& name,
+					 const LabelStr& propagatorName,
+					 const ConstraintEngineId& constraintEngine,
+					 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables){
     check_error(variables.size() == ARG_COUNT);
     for(int i=0; i< ARG_COUNT; i++)
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
@@ -84,10 +85,11 @@ namespace Prototype
     handleExecute();
   }
 
-  EqualConstraint::EqualConstraint(const ConstraintEngineId& constraintEngine,
-				   const std::vector<ConstrainedVariableId>& variables,
-				   const LabelStr& name)
-    : Constraint(name, constraintEngine, variables), m_lastNotified(0){
+  EqualConstraint::EqualConstraint(const LabelStr& name,
+				   const LabelStr& propagatorName,
+				   const ConstraintEngineId& constraintEngine,
+				   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables), m_lastNotified(0){
     check_error(variables.size() == ARG_COUNT);
 
     // type check the arguments - only work with enumerations for now
@@ -150,13 +152,13 @@ namespace Prototype
     return Constraint::getCurrentDomain(var);
   }
 
-
-  SubsetOfConstraint::SubsetOfConstraint(const ConstraintEngineId& constraintEngine,
+  SubsetOfConstraint::SubsetOfConstraint(const LabelStr& name,
+					 const LabelStr& propagatorName,
+					 const ConstraintEngineId& constraintEngine,
 					 const ConstrainedVariableId& variable,
-					 const AbstractDomain& superset,
-					 const LabelStr& name)
+					 const AbstractDomain& superset)
 					 
-    : Constraint(name, constraintEngine, variable), 
+    : Constraint(name, propagatorName, constraintEngine, variable), 
     m_isDirty(true),
     m_currentDomain(getCurrentDomain(variable)),
     m_executionCount(0){

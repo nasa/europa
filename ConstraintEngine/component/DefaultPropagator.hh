@@ -9,7 +9,7 @@ namespace Prototype {
   class DefaultPropagator: public Propagator
   {
   public:
-    DefaultPropagator(const ConstraintEngineId& constraintEngine);
+    DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine);
     void execute();
     bool updateRequired() const;
   protected:

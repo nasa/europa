@@ -14,7 +14,7 @@ public:
   static const ConstraintEngineId& instance(){
     if (s_instance.isNoId()){
       s_instance = (new ConstraintEngine())->getId();
-      new DefaultPropagator(s_instance);
+      new DefaultPropagator(LabelStr("Default"), s_instance);
     }
 
     return s_instance;
@@ -59,9 +59,9 @@ void initConstraintLibrary(){
 
   if(!s_runAlready){
     // Register constraint Factories
-    REGISTER_UNARY(SubsetOfConstraint, "SubsetOf");
-    REGISTER_NARY(EqualConstraint, "Equal");
-    REGISTER_NARY(AddEqualConstraint, "AddEqual");
+    REGISTER_UNARY(SubsetOfConstraint, "SubsetOf", "Default");
+    REGISTER_NARY(EqualConstraint, "Equal", "Default");
+    REGISTER_NARY(AddEqualConstraint, "AddEqual", "Default");\
     s_runAlready = true;
   }
 }

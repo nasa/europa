@@ -8,8 +8,8 @@
 
 namespace Prototype {
 
-  EqualityConstraintPropagator::EqualityConstraintPropagator(const ConstraintEngineId& constraintEngine)
-    : Propagator(constraintEngine), m_fullReprop(false), m_active(false){}
+  EqualityConstraintPropagator::EqualityConstraintPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
+    : Propagator(name, constraintEngine), m_fullReprop(false), m_active(false){}
 
   EqualityConstraintPropagator::~EqualityConstraintPropagator(){}
 
