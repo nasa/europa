@@ -12,7 +12,7 @@ namespace EUROPA {
 
   class AtSubgoalRuleRoot : public RuleInstance {
   public:
-    AtSubgoalRuleRoot(const RuleId& rule, const TokenId& token, const PlanDatabaseId& pdb) : RuleInstance(rule, token, pdb, token->getObject()) { 
+    AtSubgoalRuleRoot(const RuleId& rule, const TokenId& token, const PlanDatabaseId& pdb) : RuleInstance(rule, token, pdb) { 
     }
     void handleExecute();
   }; 
