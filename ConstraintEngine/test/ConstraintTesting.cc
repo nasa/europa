@@ -114,11 +114,10 @@ namespace EUROPA {
            it != members.end(); it++)
         if (*it == "false")
           dom->insert(false);
-        else
-          if (*it == "true")
-            dom->insert(true);
-          else
-            assertTrue(false);
+        else {
+          assertTrue(*it == "true", "Only 'false' and 'true' are supported for boolean values");
+          dom->insert(true);
+        }
       break;
     case AbstractDomain::USER_DEFINED:
       // Cannot support members without knowing how to map them to doubles.
