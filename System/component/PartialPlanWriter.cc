@@ -59,7 +59,10 @@ enum transactionTypes {OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_
                        TOKEN_INSERTED, TOKEN_FREED, CONSTRAINT_CREATED, CONSTRAINT_DELETED,
                        CONSTRAINT_EXECUTED, VAR_CREATED, VAR_DELETED, VAR_DOMAIN_RELAXED,
                        VAR_DOMAIN_RESTRICTED, VAR_DOMAIN_SPECIFIED, VAR_DOMAIN_RESET, 
-                       VAR_DOMAIN_EMPTIED, ERROR};
+                       VAR_DOMAIN_EMPTIED, VAR_DOMAIN_UPPER_BOUND_DECREASED, 
+                       VAR_DOMAIN_LOWER_BOUND_INCREASED, VAR_DOMAIN_BOUNDS_RESTRICTED,
+                       VAR_DOMAIN_VALUE_REMOVED, VAR_DOMAIN_RESTRICT_TO_SINGLETON,
+                       VAR_DOMAIN_SET, VAR_DOMAIN_SET_TO_SINGLETON, VAR_DOMAIN_CLOSED, ERROR};
 
 const int transactionTotal = ERROR + 1;
 
@@ -69,7 +72,11 @@ const char *transactionTypeNames[transactionTotal] = {
     "TOKEN_REINSTATED", "TOKEN_DELETED", "TOKEN_REMOVED", "TOKEN_INSERTED", "TOKEN_FREED",
     "CONSTRAINT_CREATED", "CONSTRAINT_DELETED", "CONSTRAINT_EXECUTED", "VARIABLE_CREATED",
     "VARIABLE_DELETED", "VARIABLE_DOMAIN_RELAXED", "VARIABLE_DOMAIN_RESTRICTED", 
-    "VARIABLE_DOMAIN_SPECIFIED", "VARIABLE_DOMAIN_RESET", "VARIABLE_DOMAIN_EMPTIED", "ERROR"};
+    "VARIABLE_DOMAIN_SPECIFIED", "VARIABLE_DOMAIN_RESET", "VARIABLE_DOMAIN_EMPTIED", 
+    "VARIABLE_DOMAIN_UPPER_BOUND_DECREASED", "VARIABLE_DOMAIN_LOWER_BOUND_INCREASED", 
+    "VARIABLE_DOMAIN_BOUNDS_RESTRICTED", "VARIABLE_DOMAIN_VALUE_REMOVED", 
+    "VARIABLE_DOMAIN_RESTRICT_TO_SINGLETON", "VARIABLE_DOMAIN_SET", 
+    "VARIABLE_DOMAIN_SET_TO_SINGLETON", "VARIABLE_DOMAIN_CLOSED", "ERROR"};
 
 const char *sourceTypeNames[3] = {"SYSTEM", "USER", "UNKNOWN"};
 
@@ -246,6 +253,7 @@ namespace Prototype {
   
     PartialPlanWriter::~PartialPlanWriter(void) {
       if(stepsPerWrite) {
+        //write();
 	transOut->close();
 	statsOut->close();
 	delete transOut;
@@ -640,11 +648,11 @@ namespace Prototype {
       varOut << otherVar->getKey() << TAB << ppId << TAB << /*tokId->getKey()*/parentId << TAB 
 	     << otherVar->getName().toString() << TAB;
 
-      if(otherVar->derivedDomain().isEnumerated()) {
+      if(otherVar->lastDomain().isEnumerated()) {
 	varOut << ENUM_DOMAIN << TAB << getEnumerationStr((EnumeratedDomain &)otherVar->lastDomain()) 
 	       << TAB << SNULL << TAB << SNULL << TAB << SNULL << TAB;
       }
-      else if(otherVar->derivedDomain().isInterval()) {
+      else if(otherVar->lastDomain().isInterval()) {
 	varOut << INT_DOMAIN << TAB << SNULL << TAB << REAL_SORT << TAB 
 	       << getLowerBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB 
 	       << getUpperBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB;
@@ -961,20 +969,40 @@ namespace Prototype {
 						 getLongVarInfo(varId)));
 	  break;
 	case DomainListener::VALUE_REMOVED:
+          transactionList->push_back(Transaction(VAR_DOMAIN_VALUE_REMOVED, varId->getKey(), 
+                                                 UNKNOWN, transactionId++, seqId, nstep,
+                                                 getLongVarInfo(varId)));
+          break;
 	case DomainListener::BOUNDS_RESTRICTED:
+          transactionList->push_back(Transaction(VAR_DOMAIN_BOUNDS_RESTRICTED, varId->getKey(),
+                                                 UNKNOWN, transactionId++, seqId, nstep,
+                                                 getLongVarInfo(varId)));
+          break;
 	case DomainListener::LOWER_BOUND_INCREASED:
+          transactionList->push_back(Transaction(VAR_DOMAIN_LOWER_BOUND_INCREASED, varId->getKey(),
+                                                 UNKNOWN, transactionId++, seqId, nstep,
+                                                 getLongVarInfo(varId)));
+          break;
 	case DomainListener::UPPER_BOUND_DECREASED:
+          transactionList->push_back(Transaction(VAR_DOMAIN_UPPER_BOUND_DECREASED, varId->getKey(),
+                                                 UNKNOWN, transactionId++, seqId, nstep,
+                                                 getLongVarInfo(varId)));
+          break;
 	case DomainListener::RESTRICT_TO_SINGLETON:
 	  //VAR_DOMAIN_RESTRICTED
-	  transactionList->push_back(Transaction(VAR_DOMAIN_RESTRICTED, varId->getKey(), SYSTEM,
-						 transactionId++, seqId, nstep, 
+	  transactionList->push_back(Transaction(VAR_DOMAIN_RESTRICT_TO_SINGLETON, varId->getKey(),
+                                                 SYSTEM, transactionId++, seqId, nstep, 
 						 getLongVarInfo(varId)));
 	  break;
 	case DomainListener::SET:
+          transactionList->push_back(Transaction(VAR_DOMAIN_SET, varId->getKey(), UNKNOWN,
+                                                 transactionId++, seqId, nstep,
+                                                 getLongVarInfo(varId)));
+          break;
 	case DomainListener::SET_TO_SINGLETON:
 	  //VAR_DOMAIN_SPECIFIED
-	  transactionList->push_back(Transaction(VAR_DOMAIN_SPECIFIED, varId->getKey(), USER,
-						 transactionId++, seqId, nstep, 
+	  transactionList->push_back(Transaction(VAR_DOMAIN_SET_TO_SINGLETON, varId->getKey(),
+                                                 USER, transactionId++, seqId, nstep, 
 						 getLongVarInfo(varId)));
 	  break;
 	case DomainListener::EMPTIED:
@@ -984,7 +1012,10 @@ namespace Prototype {
 						 getLongVarInfo(varId)));
 	  break;
 	case DomainListener::CLOSED:
-	  break;
+          transactionList->push_back(Transaction(VAR_DOMAIN_CLOSED, varId->getKey(), SYSTEM,
+                                                 transactionId++, seqId, nstep, 
+                                                 getLongVarInfo(varId)));
+          break;
 	default:
 	  break;
 	}
