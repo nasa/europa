@@ -27,6 +27,7 @@
 #include "LockManager.hh"
 
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 #include <pthread.h>
 #include <string>
@@ -446,6 +447,23 @@ private:
     os1.remove(o1.getId());
     assertTrue(!os1.isMember(o1.getId()));
     assertTrue(os1.isSingleton());
+
+    {
+      std::stringstream str;
+      str << o2.getKey();
+      double value(0);
+      assertTrue(os1.convertToMemberValue(str.str(), value));
+      assertTrue(value == o2.getId());
+    }
+
+    {
+      std::stringstream str;
+      str << o1.getKey();
+      double value(0);
+      assertFalse(os1.convertToMemberValue(str.str(), value));
+      assertTrue(value == 0);
+    }
+
     return true;
   }
   

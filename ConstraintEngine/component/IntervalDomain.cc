@@ -190,6 +190,16 @@ namespace EUROPA {
     notifyChange(DomainListener::SET_TO_SINGLETON);
   }
 
+  bool IntervalDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const {
+    double value = atof(strValue.c_str());
+    if(isMember(value)){
+      dblValue = value;
+      return true;
+    }
+
+    return false;
+  }
+
   void IntervalDomain::reset(const AbstractDomain& dom) {
     safeComparison(*this, dom);
     if (*this != dom) {

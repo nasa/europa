@@ -8,6 +8,7 @@
 #include "SymbolDomain.hh"
 #include "DomainListener.hh"
 #include "module-tests.hh"
+#include <sstream>
 #include <cmath>
 
 namespace EUROPA {
@@ -627,6 +628,24 @@ namespace EUROPA {
       NumericDomain d0(values);
       NumericDomain d1(values);
       assertTrue(d0 == d1);
+
+
+      {
+	double value(0);
+	std::stringstream sstr;
+	sstr << -0.01;
+	assertTrue(d0.convertToMemberValue(sstr.str(), value));
+	assertTrue(value == -0.01);
+      }
+
+      {
+	double value(0);
+	std::stringstream sstr;
+	sstr << 88.46;
+	assertFalse(d0.convertToMemberValue(sstr.str(), value));
+	assertTrue(value == 0);
+      }
+
       assertTrue(d0.isSubsetOf(d1));
       assertTrue(d0.isMember(-98.67));
       d0.remove(-0.01);
@@ -898,6 +917,11 @@ namespace EUROPA {
       values.push_back(EUROPA::LabelStr("I"));
       LabelSet ls1(values);
 
+      double value(0);
+      assertTrue(ls1.convertToMemberValue(std::string("H"), value));
+      assertTrue(value == LabelStr("H"));
+      assertFalse(ls1.convertToMemberValue(std::string("LMN"), value));
+
       LabelSet ls2(values);
       ls2.remove(EUROPA::LabelStr("A"));
       ls2.remove(EUROPA::LabelStr("C"));
@@ -906,7 +930,6 @@ namespace EUROPA {
       assertTrue(!ls1.isSubsetOf(ls2));
 
       LabelSet ls3(ls1);
-
       ls1.intersect(ls2);
       assertTrue(ls1 == ls2);
       assertTrue(ls2.isSubsetOf(ls1));

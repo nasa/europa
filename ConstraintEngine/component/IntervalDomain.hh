@@ -203,6 +203,11 @@ namespace EUROPA {
     bool isMember(double value) const;
 
     /**
+     * @brief Convert to member value from string encoding.
+     */
+    bool convertToMemberValue(const std::string& strValue, double& dblValue) const;
+
+    /**
      * @brief Test for single valued domain.
      */
     bool isSingleton() const;

@@ -336,6 +336,7 @@ bool IdTests::testBasicAllocation() {
 #endif
   Foo *fooPtr = new Foo();
   Id<Foo> fId1(fooPtr);
+  assert(fId1.isId());
   assertTrue(Foo::getCount() == 1);
   non_fast_only_assert(IdTable::size() == initialSize + 1);
 
@@ -546,7 +547,9 @@ private:
     LabelStr lbl3(lbl2.toString());
     assertTrue(lbl3 == lbl2);
     std::string labelStr2("This is another char*");
+    assertFalse(LabelStr::isString(labelStr2));
     LabelStr lbl4(labelStr2);
+    assertTrue(LabelStr::isString(labelStr2));
     assertTrue(lbl4 != lbl2);
 
     double key = lbl2.getKey();

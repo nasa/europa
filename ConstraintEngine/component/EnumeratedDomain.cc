@@ -239,6 +239,22 @@ namespace EUROPA {
     return(compareEqual(value, *it));
   }
 
+
+  bool EnumeratedDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const {
+    double value = dblValue;
+
+    if(isNumeric())
+      value = atof(strValue.c_str());
+    else
+      value = LabelStr(strValue);
+    if(isMember(value)){
+      dblValue = value;
+      return true;
+    }
+
+    return false;
+  }
+
   bool EnumeratedDomain::operator==(const AbstractDomain& dom) const {
     safeComparison(*this, dom);
     if (!dom.isEnumerated())

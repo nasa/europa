@@ -217,6 +217,11 @@ namespace EUROPA {
     bool isMember(double value) const;
 
     /**
+     * @brief Obtain the double encoded value from the string if it is a member.
+     */
+    virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const;
+
+    /**
      * @brief Test that the domains are exactly equal.
      * @param dom The domain to test against
      * @return true if the values in each are the same and they are equal according to the base class.
