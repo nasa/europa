@@ -17,10 +17,7 @@ ModuleComponent CBPlanner
 	ObjectDecisionPoint.cc
 	TemporalVariableCondition.cc
 	TokenDecisionPoint.cc
-	TokenChoice.cc
-	ValueChoice.cc
 	PartialPlanWriter.cc
-	ResourceFlawChoice.cc
 	ResourceFlawDecisionPoint.cc
 	ResourceOpenDecisionManager.cc
 	DMResourceListener.cc

@@ -3,6 +3,8 @@
 
 #include "ResourceDefs.hh"
 #include "DecisionPoint.hh"
+#include "Resource.hh"
+#include <vector>
 
 namespace EUROPA {
 
@@ -10,15 +12,19 @@ namespace EUROPA {
   public:
     virtual ~ResourceFlawDecisionPoint();
 
-    const bool assign(const ChoiceId&);
+    const bool assign();
     const bool retract();
-    virtual std::list<ChoiceId>& getChoices();
-    virtual std::list<ChoiceId>& getUpdatedChoices();
+    const bool hasRemainingChoices();
+    void initializeChoices(); 
+
     const ResourceId& getResource() const { return m_resource; }
 
     void print(std::ostream& os) const;
   private:
     friend class ResourceOpenDecisionManager;
+    
+    std::vector<std::pair<TransactionId, TransactionId> > m_choices;
+    unsigned int m_choiceIndex;
 
     ResourceFlawDecisionPoint(const ResourceId&);
 

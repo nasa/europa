@@ -2,6 +2,8 @@
 #define _H_ConstrainedVariableDecisionPoint
 
 #include "DecisionPoint.hh"
+#include "ConstrainedVariable.hh"
+#include <vector>
 
 namespace EUROPA {
 
@@ -9,18 +11,27 @@ namespace EUROPA {
   public:
     virtual ~ConstrainedVariableDecisionPoint();
 
-    const bool assign(const ChoiceId&);
+    const bool assign();
     const bool retract();
-    std::list<ChoiceId>& getChoices();
+    const bool hasRemainingChoices();
+    void initializeChoices();
+
     const ConstrainedVariableId& getVariable() const;
 
     void print(std::ostream& os) const;
   private:
     friend class OpenDecisionManager;
+    friend class DefaultOpenDecisionManager;
+    friend class HSTSOpenDecisionManager;
 
-    ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId&);
-    const bool testIfExhausted();
+    ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId&, const OpenDecisionManagerId& odm);
+    unsigned int getNrChoices();
+    const double getChoiceValue(const unsigned int index) const;
+    
+    std::vector<double> m_choices;
+    unsigned int m_choiceIndex;
     ConstrainedVariableId m_var;
+    OpenDecisionManagerId m_odm;
   };
 
 std::ostream& operator <<(std::ostream& os, const Id<ConstrainedVariableDecisionPoint>&);

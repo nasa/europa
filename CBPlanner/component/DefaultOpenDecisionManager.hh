@@ -61,7 +61,6 @@ namespace EUROPA {
     ~DefaultOpenDecisionManager();
 
     virtual DecisionPointId getNextDecision();
-    virtual const ChoiceId getNextChoice();
     virtual const int getNumberOfDecisions();
 
     virtual bool hasOpenDecisions() {
@@ -69,6 +68,11 @@ namespace EUROPA {
     }
     virtual void getOpenDecisions(std::list<DecisionPointId>& decisions);
     virtual void printOpenDecisions(std::ostream& os = std::cout);
+    
+    virtual void initializeTokenChoices(TokenDecisionPointId& tdp);
+    virtual void initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp);
+    virtual void initializeObjectChoices(ObjectDecisionPointId& odp);
+
   protected:
     friend class DecisionManager;
 

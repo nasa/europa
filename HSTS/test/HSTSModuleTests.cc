@@ -3,7 +3,6 @@
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "Variable.hh"
 #include "ObjectDecisionPoint.hh"
-#include "Choice.hh"
 #include "StringDomain.hh"
 #include "NumericDomain.hh"
 #include "Generator.hh"

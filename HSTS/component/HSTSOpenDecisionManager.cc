@@ -1,9 +1,6 @@
 #include "DefaultOpenDecisionManager.hh"
 #include "HSTSOpenDecisionManager.hh"
 #include "Object.hh"
-#include "Choice.hh"
-#include "ValueChoice.hh"
-#include "TokenChoice.hh"
 #include "HSTSHeuristics.hh"
 #include "Debug.hh"
 
@@ -32,7 +29,7 @@ namespace EUROPA {
   }
 
   void HSTSOpenDecisionManager::removeActive(const TokenId& token, const bool deleting) {
-    std::map<int,ObjectDecisionPointId>::iterator it = m_objDecs.find(token->getKey());
+    std::map<int, ObjectDecisionPointId>::iterator it = m_objDecs.find(token->getKey());
     if (it != m_objDecs.end()) {
       if (it->second->isOpen() || deleting) {
 	ObjectDecisionPointId dec = it->second;
@@ -341,263 +338,241 @@ namespace EUROPA {
       }
     }
 
-    //    check_error(assignedBest || m_curDec.isNoId() || m_curDec->getCurrentChoices.empty());
+    //check_error(assignedBest || m_curDec.isNoId() || m_curDec->hasRemainingChoices());
 
     return m_curDec;
   } /* we have found a best */
 
+  void HSTSOpenDecisionManager::initializeTokenChoices(TokenDecisionPointId& tdp) {
+    check_error(tdp.isValid());
+    check_error(tdp->m_choices.empty());
+    DefaultOpenDecisionManager::initializeTokenChoices(tdp);
 
-  void HSTSOpenDecisionManager::initializeNumberToBeat(const HSTSHeuristics::CandidateOrder& order, int& numberToBeat) {
-    switch (order) {
-    case HSTSHeuristics::TGENERATOR:
-      check_error(ALWAYS_FAIL, "Successor Token Generators not yet supported");
-      break;
-    case HSTSHeuristics::NEAR: 
-      numberToBeat=MAX_FINITE_TIME;
-      break;
-    case HSTSHeuristics::FAR:
-      numberToBeat=MIN_FINITE_TIME;
-      break;
-    case HSTSHeuristics::EARLY:
-      numberToBeat = MAX_FINITE_TIME;
-      break;
-    case HSTSHeuristics::LATE:
-      numberToBeat = MIN_FINITE_TIME;
-      break;
-    case HSTSHeuristics::MAX_FLEXIBLE:
-      check_error(ALWAYS_FAIL, "MAX_FLEXIBLE is not yet implemented.");
-      break;
-    case HSTSHeuristics::MIN_FLEXIBLE:
-      check_error(ALWAYS_FAIL, "MIN_FLEXIBLE is not yet implemented.");
-      break;
-    case HSTSHeuristics::LEAST_SPECIFIED:
-      check_error(ALWAYS_FAIL, "LEAST_SPECIFIED is not yet implemented.");
-      break;
-    case HSTSHeuristics::MOST_SPECIFIED:
-      check_error(ALWAYS_FAIL, "MOST_SPECIFIED is not yet implemented.");
-      break;
-    case HSTSHeuristics::NONE:
-      break;
-    case HSTSHeuristics::UNKNOWN:
-      check_error(ALWAYS_FAIL, "Unknown/uninitialized heuristics order given.");
-      break;
+    if (tdp->m_choices.empty()) return;
+
+    std::list<LabelStr> states;
+    HSTSHeuristics::CandidateOrder order = HSTSHeuristics::UNKNOWN;
+    m_heur->getOrderedStatesForTokenDP(tdp, states, order);
+
+    check_error (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::FAR || order == HSTSHeuristics::EARLY || order == HSTSHeuristics::LATE || order == HSTSHeuristics::NONE, "Unable to handle cases other than late, early, near, far.");
+    
+    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tdp->getKey() << ") for Token (" << tdp->getToken()->getKey() << ") has " << tdp->m_choices.size() + tdp->m_compatibleTokens.size() << " choices.");
+    
+    if (order == HSTSHeuristics::NONE) {
+      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tdp->getKey() << ") for Token (" << tdp->getToken()->getKey() << ") has best choice =  " << LabelStr(tdp->m_choices[0]).toString());
+    return;
     }
-  }
 
-  void HSTSOpenDecisionManager::compareTokensAccordingToOrder(const HSTSHeuristics::CandidateOrder& order, const ChoiceId& choice,
-                                                              ChoiceId& bestChoice, const int est, const int lst, int& numberToBeat) {
-    TokenId succ;
-    if (Id<TokenChoice>::convertable(choice))
-      succ = Id<TokenChoice>(choice)->getSuccessor();
-    else
-      succ = Id<ValueChoice>(choice)->getToken();
-    switch (order) {
-     case HSTSHeuristics::TGENERATOR:
-       check_error(ALWAYS_FAIL, "Successor Token Generators not yet supported");
-       break;
-     case HSTSHeuristics::NEAR: 
-       {
-         //	std::cout << "NEAR" << std::endl;
-         //	int diff=999999999;
-         if (!succ.isNoId()) { // for successors other than the end 
-           int estdiff = abs((int)succ->getStart()->lastDomain().getLowerBound() - est);
-           int lstdiff = abs((int)succ->getStart()->lastDomain().getUpperBound() - lst);
-           if (estdiff+lstdiff < numberToBeat) {
-             bestChoice = choice;
-             numberToBeat = estdiff+lstdiff;
-             //	    std::cout << " best succ so far (" << succ->getKey() << ") [" << succ->getStart()->lastDomain().getLowerBound() << "," <<  succ->getStart()->lastDomain().getUpperBound() << "]" << std::endl;
-           }
-         }
-       }
-       break;
-     case HSTSHeuristics::FAR:
-       {
-         //	  std::cout << "FAR" << std::endl;
-         //	  int diff=0;
-         if (succ.isNoId()) { 
-           bestChoice = choice;
-           return;
-         }
-         else {
-           int estdiff = abs((int)succ->getStart()->lastDomain().getLowerBound() - (int)est);
-           int lstdiff = abs((int)succ->getStart()->lastDomain().getUpperBound() - (int)lst);
-           if (estdiff+lstdiff > numberToBeat) {
-             bestChoice = choice;
-             numberToBeat = estdiff+lstdiff;
-             //	      std::cout << " best succ so far (" << succ->getKey() << ") [" << succ->getStart()->lastDomain().getLowerBound() << "," <<  succ->getStart()->lastDomain().getUpperBound() << "]" << std::endl;
-           }
-         }
-       }
-       break;
-     case HSTSHeuristics::EARLY:
-       {
-         //	  std::cout << "EARLY" << std::endl;
-         //	  double start = 99999999999.9;
-         if (!succ.isNoId()) { // for successors other than the end 
-           int sest = (int)succ->getStart()->lastDomain().getLowerBound();
-           if (sest < numberToBeat) {
-             bestChoice = choice;
-             numberToBeat = sest;
-             //	      std::cout << " best succ so far (" << succ->getKey() << ") [" << succ->getStart()->lastDomain().getLowerBound() << "," <<  succ->getStart()->lastDomain().getUpperBound() << "]" << std::endl;
-           }
-         }
-       }
-       break;
-     case HSTSHeuristics::LATE:
-       {
-         //	  std::cout << "LATE" << std::endl;
-         //	  double start = 0.0;
-         if (succ.isNoId()) { 
-           bestChoice = choice;
-           return;
-         }
-         else {
-           int sest = (int)succ->getStart()->lastDomain().getLowerBound();
-           if (sest > numberToBeat) {
-             bestChoice = choice;
-             numberToBeat = sest;
-             //	      std::cout << " best succ so far (" << succ->getKey() << ") [" << succ->getStart()->lastDomain().getLowerBound() << "," <<  succ->getStart()->lastDomain().getUpperBound() << "]" << std::endl;
-           }
-         }
-       }
-       break;
-     case HSTSHeuristics::MAX_FLEXIBLE:
-       check_error(ALWAYS_FAIL, "MAX_FLEXIBLE is not yet implemented.");
-       break;
-     case HSTSHeuristics::MIN_FLEXIBLE:
-       check_error(ALWAYS_FAIL, "MIN_FLEXIBLE is not yet implemented.");
-       break;
-     case HSTSHeuristics::LEAST_SPECIFIED:
-       check_error(ALWAYS_FAIL, "LEAST_SPECIFIED is not yet implemented.");
-       break;
-     case HSTSHeuristics::MOST_SPECIFIED:
-       check_error(ALWAYS_FAIL, "MOST_SPECIFIED is not yet implemented.");
-       break;
-     case HSTSHeuristics::NONE:
-       break;
-     case HSTSHeuristics::UNKNOWN:
-       check_error(ALWAYS_FAIL, "Unknown/uninitialized heuristics order given.");
-       break;
-    }
-  }
+    // First, order the states
+    unsigned int current = 0;
+    LabelStr tmpChoice;
+    for (std::list<LabelStr>::const_iterator sit = states.begin(); sit != states.end(); ++ sit) {
+      for (unsigned int i = current; i != tdp->m_choices.size(); ++i) {
+	LabelStr val(tdp->m_choices[i]);
+	
+	debugMsg("HSTS:OpenDecisionManager:getNextChoice","comparing " << val.c_str() << " with " << (*sit).c_str());
 
-  const ChoiceId HSTSOpenDecisionManager::getNextChoice() {
-    check_error(m_curDec.isValid());
-    m_curChoice = ChoiceId::noId();
-    const std::list<ChoiceId>& choices = m_curDec->getUpdatedChoices();
-
-    debugMsg("HSTS:OpenDecisionManager:getNextChoice","UpdatedChoices for decision point (" << m_curDec->getKey() << ") = " << choices.size());
-
-    if (choices.empty()) return m_curChoice;
-
-    if (TokenDecisionPointId::convertable(m_curDec)) {
-      TokenDecisionPointId tokDec(m_curDec);
-      std::list<LabelStr> states;
-      HSTSHeuristics::CandidateOrder order = HSTSHeuristics::UNKNOWN;
-      m_heur->getOrderedStatesForTokenDP(tokDec, states, order);
-      int bestChoiceMeasure;
-      initializeNumberToBeat(order, bestChoiceMeasure);
-      std::list<ChoiceId>::const_iterator it;
-      bool found(false);
-      ChoiceId bestChoice;
-
-      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tokDec->getKey() << ") for Token (" << tokDec->getToken()->getKey() << ") has " << choices.size() << " choices.");
-
-      for (std::list<LabelStr>::const_iterator sit = states.begin(); sit != states.end(); ++ sit) {
-	bool evalMerged(false);
-	for (it = choices.begin(); it != choices.end(); ++it) {
-	  ChoiceId choice = *it;
-	  check_error(choice.isValid());
-	  check_error(choice->getType() == Choice::VALUE);
-	  check_error(!m_curDec->hasDiscarded(choice));
-	  check_error(LabelStr::isString(Id<ValueChoice>(choice)->getValue()));
-	  LabelStr val(Id<ValueChoice>(choice)->getValue());
-
-	  debugMsg("HSTS:OpenDecisionManager:getNextChoice","comparing " << val.c_str() << " with " << (*sit).c_str());
-
-	  if (strcmp(val.c_str(),(*sit).c_str()) == 0) {
-	    if (strcmp(val.c_str(), "REJECTED") == 0) {
-	      found = true;
-	      bestChoice = *it;
-	      break; // we'll do this first, no point in continuing to iterate
-	    }
-	    if (strcmp(val.c_str(), "MERGED") == 0) {
-	      LabelStr val = Id<ValueChoice>(choice)->getValue();
-	      const AbstractDomain& startDom = tokDec->getToken()->getStart()->lastDomain();
-	      compareTokensAccordingToOrder(order,choice,bestChoice,(int)startDom.getLowerBound(),(int)startDom.getUpperBound(), bestChoiceMeasure);
-	      evalMerged = true;
-	    }
-	    else {
-	      check_error(strcmp(val.c_str(), "ACTIVE") == 0, "Unexpected token state, expecting ACTIVE, MERGED, REJECTED");
-	      found = true;
-	      if (!evalMerged)
-		bestChoice = *it;
-	      break; // we'll do this first, no point in continuing to iterate
-	    }
+	if (strcmp(val.c_str(),(*sit).c_str()) == 0) {
+	  if (i != current) {
+	    tmpChoice = tdp->m_choices[current];
+	    tdp->m_choices[current] = tdp->m_choices[i];
+	    tdp->m_choices[i] = tmpChoice;
 	  }
+	  current++;
 	}
-	if (found || evalMerged) break;
-      }      
-      m_curChoice = bestChoice;
-      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tokDec->getKey() << ") for Token (" << tokDec->getToken()->getKey() << ") best choice =  " << bestChoice);
-    }
-    else if (ConstrainedVariableDecisionPointId::convertable(m_curDec)) {
-      ConstrainedVariableDecisionPointId varDec(m_curDec);
-      bool found(false);
-      check_error(varDec->getVariable()->lastDomain().isFinite());
-      std::list<double> domain;
-      m_heur->getOrderedDomainForConstrainedVariableDP(varDec, domain);
-      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Variable Decision Point (" << varDec->getKey() << ") for Variable (" << varDec->getVariable()->getKey() << ") has " << choices.size() << " choices.");
-      std::list<ChoiceId>::const_iterator it = choices.begin(); 
-      for (std::list<double>::const_iterator sit = domain.begin(); sit != domain.end(); ++ sit) {
-	for (; it != choices.end(); ++it) {
-	  ChoiceId choice = *it;
-	  check_error(choice.isValid());
-	  check_error(choice->getType() == Choice::VALUE);
-	  check_error(!m_curDec->hasDiscarded(choice));
-	  double val = Id<ValueChoice>(choice)->getValue();
-	  if (val == *sit) {
-	    found = true;
-	    break; // we'll do this first, no point in continuing to iterate
-	  }
-	}
-	if (found) break;
-      }      
-      if (found)
-	m_curChoice = *it;
-      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Variable Decision Point (" << varDec->getKey() << ") for Variable (" << varDec->getVariable()->getKey() << ") bestChoice = " << m_curChoice);
-    }
-    else if (ObjectDecisionPointId::convertable(m_curDec)) {
-      ObjectDecisionPointId objDec(m_curDec);
-      HSTSHeuristics::CandidateOrder order = HSTSHeuristics::UNKNOWN;
-      m_heur->getOrderForObjectDP(objDec, order);
-      int bestChoiceMeasure;
-      initializeNumberToBeat(order, bestChoiceMeasure);
-      TokenId thisToken(objDec->getToken());
-      double est(thisToken->getStart()->lastDomain().getLowerBound());
-      double lst(thisToken->getStart()->lastDomain().getUpperBound());
-      ChoiceId bestChoice;
-      
-      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << objDec->getKey() << ") for Token (" << thisToken->getKey() << ") has " << choices.size() << " choices.");
-
-      for (std::list<ChoiceId>::const_iterator it = choices.begin(); it != choices.end(); ++it) {
-	ChoiceId choice(*it);
-	check_error(choice.isValid());
-	check_error(choice->getType() == Choice::TOKEN);
-	check_error(!m_curDec->hasDiscarded(choice));
-	compareTokensAccordingToOrder(order,choice,bestChoice,(int)est, (int)lst, bestChoiceMeasure);
       }
-      m_curChoice = bestChoice;
-      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "bestChoice = " << bestChoice);
     }
 
-    // If we have no choice selected and there is a choice, pick the first
-    if (!choices.empty() && m_curChoice == ChoiceId::noId())
-      m_curChoice = choices.front();
+    // Next, order the compatibleTokens
 
-    //    if(m_curChoice.isNoId())
-      //      std::cout << "DEBUG: No more choices" << std::endl;
-    return m_curChoice;
+    TokenId tmpCompatibleToken;
+    int numberToBeat;
+    int number;
+    current = 0;
+
+    if (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::EARLY) {
+      numberToBeat = MAX_FINITE_TIME;
+      for (unsigned int i = current; i != tdp->m_compatibleTokens.size(); ++i) {
+	TokenId token = tdp->m_compatibleTokens[i];
+	if (token.isNoId()) 
+	  number = MAX_FINITE_TIME;
+	else {
+	  if (order == HSTSHeuristics::NEAR) {
+	    //	  std::cout << "NEAR" << std::endl;
+	    number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)tdp->getToken()->getStart()->lastDomain().getLowerBound()) +
+	      abs((int)token->getStart()->lastDomain().getUpperBound() - (int)tdp->getToken()->getStart()->lastDomain().getUpperBound());
+	  }
+	  else {
+	    //	  std::cout << "EARLY" << std::endl;
+	    number = (int)token->getStart()->lastDomain().getLowerBound();
+	  }
+	}
+	if (number < numberToBeat) {
+	  if (current != i) {
+	    tmpCompatibleToken = tdp->m_compatibleTokens[current];
+	    tdp->m_compatibleTokens[current] = token;
+	    tdp->m_compatibleTokens[i] = tmpCompatibleToken;
+	  }
+	  numberToBeat = number;
+	  current++;
+	  //	      std::cout << " best token so far (" << token->getKey() << ") [" << token->getStart()->lastDomain().getLowerBound() << "," <<  token->getStart()->lastDomain().getUpperBound() << "]" << std::endl;
+	}
+      }
+    }
+    else { // LATE or FAR
+      numberToBeat = MIN_FINITE_TIME;
+      for (unsigned int i = current; i != tdp->m_compatibleTokens.size(); ++i) {
+	TokenId token = tdp->m_compatibleTokens[i];
+	if (token.isNoId()) 
+	  number = MAX_FINITE_TIME;
+	else {
+	  if (order == HSTSHeuristics::FAR) {
+	    //	  std::cout << "FAR" << std::endl;
+	    number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)tdp->getToken()->getStart()->lastDomain().getLowerBound()) +
+	      abs((int)token->getStart()->lastDomain().getUpperBound() - (int)tdp->getToken()->getStart()->lastDomain().getUpperBound());
+	  }
+	  else {
+	    //	  std::cout << "LATE" << std::endl;
+	    number = (int)token->getStart()->lastDomain().getLowerBound();
+	  }
+	}
+	if (number > numberToBeat) {
+	  if (current != i) {
+	    tmpCompatibleToken = tdp->m_compatibleTokens[current];
+	    tdp->m_compatibleTokens[current] = token;
+	    tdp->m_compatibleTokens[i] = tmpCompatibleToken;
+	  }
+	  numberToBeat = number;
+	  current++;
+	  //	      std::cout << " best token so far (" << token->getKey() << ") [" << token->getStart()->lastDomain().getLowerBound() << "," <<  token->getStart()->lastDomain().getUpperBound() << "]" << std::endl;
+	}
+      }
+    }
+
+    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tdp->getKey() << ") for Token (" << tdp->getToken()->getKey() << ") has best choice =  " << tdp->m_choices[0]);
+  }
+
+  void HSTSOpenDecisionManager::initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp) {
+    check_error(vdp.isValid());
+    check_error(vdp->getVariable()->lastDomain().isFinite());
+    check_error(vdp->m_choices.empty());
+    std::list<double> values;
+    vdp->m_var->lastDomain().getValues(values);
+
+    if (values.empty()) return;
+
+    std::list<double> domain;
+    m_heur->getOrderedDomainForConstrainedVariableDP(vdp, domain);
+    if (domain.empty() || values.size() == 1) {
+      for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
+	double value = (*it);
+	vdp->m_choices.push_back(value);
+      }
+    }
+    else {
+      std::cout << " domain.size = " << domain.size() << " values.size = " << values.size() << std::endl;
+      for (std::list<double>::const_iterator sit = domain.begin(); sit != domain.end(); ++ sit)
+	if (vdp->m_var->lastDomain().isMember((*sit)))
+	  vdp->m_choices.push_back((*sit));
+    }
+    debugMsg("HSTS:OpenDecisionManager:initializeChoices", "Variable Decision Point (" << vdp->getKey() << ") for Variable (" << vdp->getVariable()->getKey() << ") has " << vdp->m_choices.size() << " choices.");
+    debugMsg("HSTS:OpenDecisionManager:initializeChoices", "Variable Decision Point (" << vdp->getKey() << ") for Variable (" << vdp->getVariable()->getKey() << ") has best choice = " << vdp->m_choices[0]);
+
+  }
+
+  void HSTSOpenDecisionManager::initializeObjectChoices(ObjectDecisionPointId& odp) {
+    check_error(odp.isValid());
+    check_error(odp->m_choices.empty());
+    DefaultOpenDecisionManager::initializeObjectChoices(odp);
+
+    if (odp->m_choices.empty()) return;
+
+    HSTSHeuristics::CandidateOrder order = HSTSHeuristics::UNKNOWN;
+    m_heur->getOrderForObjectDP(odp, order);
+
+    check_error (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::FAR || order == HSTSHeuristics::EARLY || order == HSTSHeuristics::LATE || order == HSTSHeuristics::NONE, "Unable to handle cases other than late, early, near, far.");
+    
+    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << odp->getKey() << ") sorting choices according to order = " << order);
+
+    if (order == HSTSHeuristics::NONE) {
+      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << odp->getKey()  << ") with Token (" << odp->getToken()->getKey() << ") has best choice =  Obj (" << odp->m_choices[0].first->getKey() << ") Pred (" << odp->m_choices[0].second.first->getKey() << ") Succ (" << odp->m_choices[0].second.second->getKey() << ")");
+      return;
+    }
+    
+    // Order the successors
+    unsigned int current = 0;
+    std::pair< ObjectId, std::pair<TokenId, TokenId> > tmpChoice;
+    int numberToBeat;
+    int number;
+
+    if (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::EARLY) {
+      numberToBeat = MAX_FINITE_TIME;
+      for (unsigned int i = current; i != odp->m_choices.size(); ++i) {
+	TokenId token;
+	if (odp->m_choices[i].second.first == odp->m_token)
+	  token = odp->m_choices[i].second.second;
+	else
+	  token = odp->m_choices[i].second.first;
+	if (token.isNoId()) 
+	  number = MAX_FINITE_TIME;
+	else {
+	  if (order == HSTSHeuristics::NEAR) {
+	    //	  std::cout << "NEAR" << std::endl;
+	    number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)odp->m_token->getStart()->lastDomain().getLowerBound()) +
+	      abs((int)token->getStart()->lastDomain().getUpperBound() - (int)odp->m_token->getStart()->lastDomain().getUpperBound());
+	  }
+	  else {
+	    //	  std::cout << "EARLY" << std::endl;
+	    number = (int)token->getStart()->lastDomain().getLowerBound();
+	  }
+	}
+	if (number < numberToBeat) {
+	  if (current != i) {
+	    tmpChoice = odp->m_choices[current];
+	    odp->m_choices[current] = odp->m_choices[i];
+	    odp->m_choices[i] = tmpChoice;
+	  }
+	  numberToBeat = number;
+	  current++;
+	  //	      std::cout << " best token so far (" << token->getKey() << ") [" << token->getStart()->lastDomain().getLowerBound() << "," <<  token->getStart()->lastDomain().getUpperBound() << "]" << std::endl;
+	}
+      }
+    }
+    else { // LATE or FAR
+      numberToBeat = MIN_FINITE_TIME;
+      for (unsigned int i = current; i != odp->m_choices.size(); ++i) {
+	TokenId token;
+	if (odp->m_choices[i].second.first == odp->m_token)
+	  token = odp->m_choices[i].second.second;
+	else
+	  token = odp->m_choices[i].second.first;
+	if (token.isNoId()) 
+	  number = MAX_FINITE_TIME;
+	else {
+	  if (order == HSTSHeuristics::FAR) {
+	    //	  std::cout << "FAR" << std::endl;
+	    number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)odp->m_token->getStart()->lastDomain().getLowerBound()) +
+	      abs((int)token->getStart()->lastDomain().getUpperBound() - (int)odp->m_token->getStart()->lastDomain().getUpperBound());
+	  }
+	  else {
+	    //	  std::cout << "LATE" << std::endl;
+	    number = (int)token->getStart()->lastDomain().getLowerBound();
+	  }
+	}
+	if (number > numberToBeat) {
+	  if (current != i) {
+	    tmpChoice = odp->m_choices[current];
+	    odp->m_choices[current] = odp->m_choices[i];
+	    odp->m_choices[i] = tmpChoice;
+	  }
+	  numberToBeat = number;
+	  current++;
+	  //	      std::cout << " best token so far (" << token->getKey() << ") [" << token->getStart()->lastDomain().getLowerBound() << "," <<  token->getStart()->lastDomain().getUpperBound() << "]" << std::endl;
+	}
+      }
+    }
+
+    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << odp->getKey()  << ") with Token (" << odp->getToken()->getKey() << ") has best choice =  Obj (" << odp->m_choices[0].first->getKey() << ") Pred (" << odp->m_choices[0].second.first->getKey() << ") Succ (" << odp->m_choices[0].second.second->getKey() << ")");
   }
 
 }

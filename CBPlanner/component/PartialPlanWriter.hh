@@ -122,7 +122,6 @@ namespace EUROPA {
       const std::string getLowerBoundStr(IntervalDomain &dom) const;
       const std::string getEnumerationStr(EnumeratedDomain &dom) const;
       const std::string getVarInfo(const ConstrainedVariableId &) const;
-      const std::string getChoiceInfo(const DecisionPointId &) const;
       const bool isCompatGuard(const ConstrainedVariableId &) const;
 
       /****From PlanDatabaseListener****/

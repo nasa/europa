@@ -4,10 +4,6 @@
 
 #include "PartialPlanWriter.hh"
 
-#include "Choice.hh"
-#include "ValueChoice.hh"
-#include "TokenChoice.hh"
-#include "ResourceFlawChoice.hh"
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "DecisionManager.hh"
 #include "ObjectDecisionPoint.hh"
@@ -1186,15 +1182,8 @@ namespace EUROPA {
         type = D_ERROR;
 		
       decOut << ppId << TAB << dp->getKey() << TAB << type << TAB << dp->getEntityKey() << TAB << isUnit << TAB;
-      if(plId->getDecisionManager()->getCurrentDecision() == dp) {
-        std::string choiceInfo = getChoiceInfo(dp);
-        if(choiceInfo == "")
-          choiceInfo = SNULL;
-        decOut << choiceInfo << std::endl;
-      }
-      else {
-        decOut << SNULL << std::endl;
-      }
+
+      decOut << std::endl;
     }
 
     const std::string PartialPlanWriter::getUpperBoundStr(IntervalDomain &dom) const {
@@ -1851,60 +1840,6 @@ namespace EUROPA {
       }
       retval = type + COMMA + predName + COMMA + paramName + COMMA;
       return retval;
-    }
-
-    const std::string PartialPlanWriter::getChoiceInfo(const DecisionPointId &dp) const {
-      std::stringstream retval;
-      int numChoices = 0;
-      std::list<ChoiceId> choices = dp->getCurrentChoices();
-      choices.push_back(dp->getCurrent());
-
-      for(std::list<ChoiceId>::const_iterator cIt = choices.begin(); cIt != choices.end() && numChoices < maxChoices; 
-          ++cIt, ++numChoices) {
-        ChoiceId choice = (*cIt);
-        check_error(choice.isNoId() || choice.isValid());
-        if(choice.isNoId())
-          continue;
-        retval << choice->getKey() << COMMA << choice->getType() << COMMA;
-        switch(choice->getType()) {
-        case Choice::TOKEN:
-          {
-            const ObjectId &oId = Id<TokenChoice>(choice)->getObject();
-            const TokenId &tId = Id<TokenChoice>(choice)->getSuccessor();
-            check_error(oId.isValid());
-            if(!tId.isNoId())
-              retval << oId->getKey() << COMMA << tId->getKey();
-            else
-              retval << oId->getKey() << COMMA << -1;
-          }
-        break;
-        case Choice::VALUE:
-          {
-            const TokenId &tId = Id<ValueChoice>(choice)->getToken();
-            if(!tId.isNoId()){
-              retval << tId->getKey();
-              retval << COMMA << Id<ValueChoice>(choice)->getValue();
-            }
-            else
-              retval << -1;
-          }
-        break;
-        case Choice::RESOURCE:
-          {
-            const TransactionId &bef = Id<ResourceFlawChoice>(choice)->getBefore();
-            const TransactionId &aft = Id<ResourceFlawChoice>(choice)->getAfter();
-            if(!bef.isNoId()) retval << bef->getKey();
-	    else retval << -1;
-	    if(!aft.isNoId()) retval << COMMA << aft->getKey();
-	    else retval << COMMA << -1;
-          }
-        break;
-        case Choice::USER:
-          retval << "USER";
-        }
-        retval << SEQ_COL_SEP;
-      }
-      return std::string(retval.str());
     }
 
     void PartialPlanWriter::parseConfigFile(std::ifstream& configFile) {

@@ -2,6 +2,8 @@
 #define _H_TokenDecisionPoint
 
 #include "DecisionPoint.hh"
+#include "Token.hh"
+#include <vector>
 
 namespace EUROPA {
 
@@ -9,18 +11,26 @@ namespace EUROPA {
   public:
     virtual ~TokenDecisionPoint();
 
-    const bool assign(const ChoiceId&);
+    const bool assign();
     const bool retract();
-    std::list<ChoiceId>& getChoices();
+    const bool hasRemainingChoices();
     const TokenId& getToken() const;
 
     void print(std::ostream& os) const;
   private:
     friend class OpenDecisionManager;
-    friend class Choice;
+    friend class DefaultOpenDecisionManager;
+    friend class HSTSOpenDecisionManager;
 
-    TokenDecisionPoint(const DbClientId& dbClient, const TokenId&);
+    TokenDecisionPoint(const DbClientId& dbClient, const TokenId&, const OpenDecisionManagerId& odm);
+    void initializeChoices();
+
     TokenId m_tok; /**< cached for efficiency */
+    std::vector<LabelStr> m_choices;
+    unsigned int m_choiceIndex; /*< keeps a pointer to current choice */
+    std::vector<TokenId> m_compatibleTokens; 
+    unsigned int m_mergeIndex; /*< keeps a pointer to current compatible token */
+    OpenDecisionManagerId m_odm; /*< to reference the algorithm for initializing choices */
   };
 
 std::ostream& operator <<(std::ostream& os, const Id<TokenDecisionPoint>&);

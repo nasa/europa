@@ -1,38 +1,70 @@
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "ConstrainedVariable.hh"
+#include "OpenDecisionManager.hh"
 #include "DbClient.hh"
-#include "ValueChoice.hh"
 #include "AbstractDomain.hh"
 #include <iostream>
 
 namespace EUROPA {
 
-  ConstrainedVariableDecisionPoint::ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId& var)
-    : DecisionPoint(dbClient, var) {  m_var = var; }
+  ConstrainedVariableDecisionPoint::ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId& var, const OpenDecisionManagerId& odm)
+    : DecisionPoint(dbClient, var) {  
+      m_var = var; 
+      m_choiceIndex = 0;
+      m_odm = odm;
+    }
 
   ConstrainedVariableDecisionPoint::~ConstrainedVariableDecisionPoint() { }
 
-  const bool ConstrainedVariableDecisionPoint::assign(const ChoiceId& choice) {
-    check_error(!choice.isNoId());
-    check_error(Id<ValueChoice>::convertable(choice));
-    m_dbClient->specify(m_var, Id<ValueChoice>(choice)->getValue()); 
-    return DecisionPoint::assign(choice);
+  void ConstrainedVariableDecisionPoint::initializeChoices() {
+    check_error(m_odm.isValid());
+    ConstrainedVariableDecisionPointId dp(m_id);
+    m_odm->initializeVariableChoices(dp);
+  }
+
+  unsigned int ConstrainedVariableDecisionPoint::getNrChoices() {
+    check_error(m_var.isValid());
+    if (m_var->lastDomain().isNumeric()) 
+      if (!m_var->lastDomain().isFinite() || m_var->lastDomain().getSize() > 50) 
+	return m_choices[1] - m_choices[0];
+    return m_choices.size();
+  }
+
+  const double ConstrainedVariableDecisionPoint::getChoiceValue(const unsigned int index) const {
+    if (m_var->lastDomain().isNumeric() && m_var->lastDomain().getSize() > 50) 
+      return m_choices[0]+index;
+    else
+      return m_choices[index];
+  }
+
+const  bool ConstrainedVariableDecisionPoint::assign() {
+    if (m_choiceIndex && m_choiceIndex >= getNrChoices()) return false;
+    check_error(m_var.isValid());
+    check_error(!m_var->lastDomain().isOpen() && m_var->lastDomain().isFinite(), " Cannot assign a variable with open or infinite domain");
+    if (m_choiceIndex == 0) initializeChoices();
+
+    if (m_choices.empty()) return false; // unable to find any choices
+
+    m_open = false;
+
+    m_dbClient->specify(m_var, getChoiceValue(m_choiceIndex)); 
+    m_choiceIndex++;
+    return true;
   }
 
   const bool ConstrainedVariableDecisionPoint::retract() {
     m_dbClient->reset(m_var);
-    return DecisionPoint::retract();
+
+    m_open = true;
+
+    if (!hasRemainingChoices()) 
+      return false;
+    return true;
   }
 
-  std::list<ChoiceId>& ConstrainedVariableDecisionPoint::getChoices() {
-    check_error(m_id.isValid());
-    std::list<ChoiceId>::iterator cit = m_choices.begin();
-    for(; cit != m_choices.end(); cit++) {
-      delete (Choice*) (*cit);
-    }
-    m_choices.clear();
-    ValueChoice::makeChoices(m_id, m_var->lastDomain(), m_choices);
-    return DecisionPoint::getChoices();
+  const bool ConstrainedVariableDecisionPoint::hasRemainingChoices() {
+    if (m_choiceIndex == 0) return true; // we have never assigned this decision  or initialized choices
+    return m_choiceIndex < getNrChoices();
   }
 
   const ConstrainedVariableId& ConstrainedVariableDecisionPoint::getVariable() const { return m_var;  }
@@ -50,11 +82,21 @@ namespace EUROPA {
 	os << " DerivedDomain size: Infinity";
       else
 	os << " DerivedDomain: " << m_var->lastDomain();
+      os << " Current Choice: ";
+      if (m_choiceIndex == 0) os << " No Choice ";
+      else {
+	double valueAsDouble = getChoiceValue(m_choiceIndex-1);
+	if (m_var->lastDomain().isNumeric()) os << valueAsDouble;
+	else if (LabelStr::isString(valueAsDouble)) os << LabelStr(valueAsDouble).toString();
+	else {
+	  EntityId entity(valueAsDouble);
+	  os << entity->getName().toString() << " (" << entity->getKey() << ")";
+	}
+      }
+      os << " Discarded: " << m_choiceIndex;
     }
     else 
-      os << "(" << getKey() << ") Variable (" << m_entityKey << ") [deleted] ";
-    os << " Current Choice: " << m_current;
-    os << " Discarded: " << m_discarded.size();
+      os << "(" << getKey() << ") Variable (" << m_entityKey << ") [deleted]  ";
   }
 
   std::ostream& operator <<(std::ostream& os, const Id<ConstrainedVariableDecisionPoint>& decision) {

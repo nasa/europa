@@ -16,7 +16,10 @@ namespace EUROPA {
     ~HSTSOpenDecisionManager();
 
     virtual DecisionPointId getNextDecision();
-    virtual const ChoiceId getNextChoice();
+
+    virtual void initializeTokenChoices(TokenDecisionPointId& tdp);
+    virtual void initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp);
+    virtual void initializeObjectChoices(ObjectDecisionPointId& odp);
 
   protected:
     friend class DecisionManager;
@@ -32,10 +35,6 @@ namespace EUROPA {
     virtual void getBestTokenDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
     virtual void getBestUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
     virtual void getBestNonUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
-
-    virtual void HSTSOpenDecisionManager::initializeNumberToBeat(const HSTSHeuristics::CandidateOrder& order, int& numberToBeat);
-
-    virtual void HSTSOpenDecisionManager::compareTokensAccordingToOrder(const HSTSHeuristics::CandidateOrder& order, const ChoiceId& choice, ChoiceId& bestChoice, const int est, const int lst, int& numberToBeat); 
 
     ObjectDecisionSet m_sortedObjectDecs;
 

@@ -1,6 +1,4 @@
 #include "ResourceDefs.hh"
-#include "Choice.hh"
-#include "TokenChoice.hh"
 #include "ResourceOpenDecisionManager.hh"
 #include "Resource.hh"
 #include "DMResourceListener.hh"
@@ -96,7 +94,7 @@ namespace EUROPA {
     else m_curDec = DecisionPointId::noId();
 
     // Shold be able to require that current choices are empty
-    check_error(m_curDec.isNoId() || m_curDec->getCurrentChoices().empty());
+    check_error(m_curDec.isNoId() || m_curDec->isOpen(), "Can only return a decision if it is open.");
 
     return m_curDec;
   }

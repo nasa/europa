@@ -1,5 +1,5 @@
 #include "ObjectDecisionPoint.hh"
-#include "TokenChoice.hh"
+#include "OpenDecisionManager.hh"
 #include "DbClient.hh"
 #include "Token.hh"
 #include "Object.hh"
@@ -10,55 +10,57 @@
 
 namespace EUROPA {
 
-  ObjectDecisionPoint::ObjectDecisionPoint(const DbClientId& dbClient, const TokenId& token)
+  ObjectDecisionPoint::ObjectDecisionPoint(const DbClientId& dbClient, const TokenId& token, const OpenDecisionManagerId& odm)
     : DecisionPoint(dbClient, token) {
     m_token = token;
+    m_choiceIndex = 0;
+    m_odm = odm;
   }
 
   ObjectDecisionPoint::~ObjectDecisionPoint() { }
 
-  const bool ObjectDecisionPoint::assign(const ChoiceId& choice) {
-    check_error(choice.isValid());
-    check_error(Id<TokenChoice>::convertable(choice));
-    const Id<TokenChoice>& tChoice = choice;
-    check_error(choice.isValid());
-    m_dbClient->constrain(tChoice->getObject(), tChoice->getPredecessor(), tChoice->getSuccessor());
-    check_error(choice.isValid());
-    return DecisionPoint::assign(choice);
+  void ObjectDecisionPoint::initializeChoices() {
+    check_error(m_odm.isValid(), "must have a valid open decision manager before initializing choices");
+    ObjectDecisionPointId dp(m_id);
+    m_odm->initializeObjectChoices(dp);
+  }
+
+  const bool ObjectDecisionPoint::assign() {
+    if (m_choiceIndex && m_choiceIndex >= m_choices.size()) return false;
+    check_error(m_token.isValid());
+
+    if (m_choiceIndex == 0) initializeChoices();
+
+    if (m_choices.empty()) return false; // unable to find any choices
+
+    m_open = false;
+
+    ObjectId object = m_choices[m_choiceIndex].first;
+    TokenId predecessor = m_choices[m_choiceIndex].second.first;
+    TokenId successor = m_choices[m_choiceIndex].second.second;
+    checkError(predecessor == m_token || successor == m_token,
+	       "Given token must be part of assignment.");
+    m_dbClient->constrain(object, predecessor, successor);
+    m_choiceIndex++;
+    return true;
   }
 
   const bool ObjectDecisionPoint::retract() {
-    check_error(Id<TokenChoice>::convertable(m_current));
-    Id<TokenChoice> tChoice = m_current;
-    m_dbClient->free(tChoice->getObject(), tChoice->getPredecessor(), tChoice->getSuccessor());
-    return DecisionPoint::retract();
+    ObjectId object = m_choices[m_choiceIndex-1].first;
+    TokenId predecessor = m_choices[m_choiceIndex-1].second.first;
+    TokenId successor = m_choices[m_choiceIndex-1].second.second;
+    m_dbClient->free(object, predecessor, successor);
+    
+    m_open = true;
+
+    if (hasRemainingChoices())
+      return true;
+    return false;
   }
 
-  std::list<ChoiceId>& ObjectDecisionPoint::getChoices() {
-    check_error(m_id.isValid());
-    cleanup(m_choices);
-    m_choices.clear();
-    std::list<double> values;
-    m_token->getObject()->getLastDomain().getValues(values);
-    std::list<double>::iterator it = values.begin();
-    for ( ; it != values.end(); ++it) {
-      ObjectId obj = *it;
-      check_error(obj.isValid());
-      std::vector<std::pair<TokenId, TokenId> > tuples;
-      obj->getOrderingChoices(m_token, tuples);
-      std::vector<std::pair<TokenId, TokenId> >::iterator it = tuples.begin();
-      debugMsg("ObjectDecisionPoint:getChoices", "Choices constraining (" << m_token->getKey() << ")");
-      for (; it != tuples.end(); it++) {
-	TokenId predecessor = it->first;
-	TokenId successor = it->second;
-	check_error(predecessor.isValid());
-	check_error(successor.isValid());
-	ChoiceId choice = (new TokenChoice(m_id, obj, predecessor, successor))->getId();
-	debugMsg("ObjectDecisionPoint:getChoices", "  constrain(" << predecessor->getKey() << ", " << successor->getKey() << ")");
-	m_choices.push_back(choice);
-      }
-    }
-    return DecisionPoint::getChoices();
+  const bool ObjectDecisionPoint::hasRemainingChoices() {
+    if (m_choiceIndex == 0) return true; // we have never assigned this decision  or initialized choices
+    return m_choiceIndex < m_choices.size();
   }
 
   const TokenId& ObjectDecisionPoint::getToken() const {
@@ -69,12 +71,17 @@ namespace EUROPA {
     check_error(m_id.isValid());
     if (!m_token.isNoId()) {
       os << "(" << getKey() << ") Object Token (" << m_entityKey << ") ";
+      if (m_choiceIndex == 0) os << " Current Choice:  No Choice ";
+      else { 
+	os << " Current Choice: on Object (" << m_choices[m_choiceIndex-1].first->getKey() << ") ";
+	os << " constrained (" << m_choices[m_choiceIndex-1].second.first->getKey() << ") and (";
+	os << m_choices[m_choiceIndex-1].second.second->getKey() << ") ";
+      }
+      os << " Discarded: " << m_choiceIndex;
     }
     else {
-      os << "(" << getKey() << ") Object Token (" << m_entityKey << ")  [deleted] ";
+      os << "(" << getKey() << ") Object Token (" << m_entityKey << ")  [deleted]  ";
     }
-    os << " Current Choice: " << m_current;
-    os << " Discarded: " << m_discarded.size();
   }
 
   std::ostream& operator <<(std::ostream& os, const Id<ObjectDecisionPoint>& decision) {

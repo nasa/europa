@@ -3,6 +3,9 @@
 
 #include "CBPlannerDefs.hh"
 #include "DecisionPoint.hh"
+#include "Token.hh"
+#include "Object.hh"
+#include <vector>
 
 namespace EUROPA {
 
@@ -10,19 +13,26 @@ namespace EUROPA {
   public:
     virtual ~ObjectDecisionPoint();
 
-    const bool assign(const ChoiceId&);
+    const bool assign();
     const bool retract();
-    std::list<ChoiceId>& getChoices();
+    const bool hasRemainingChoices();
+    void initializeChoices();
+
     const TokenId& getToken() const;
 
     void print(std::ostream& os) const;
   private:
     friend class OpenDecisionManager;
+    friend class DefaultOpenDecisionManager;
+    friend class HSTSOpenDecisionManager;
 
-    ObjectDecisionPoint(const DbClientId& dbClient, const TokenId&);
-    const bool testIfExhausted();
+    std::vector< std::pair< ObjectId, std::pair<TokenId, TokenId> > > m_choices;
+    unsigned int m_choiceIndex;
+
+    ObjectDecisionPoint(const DbClientId& dbClient, const TokenId&, const OpenDecisionManagerId& odm);
 
     TokenId m_token;
+    OpenDecisionManagerId m_odm;
   };
 
   std::ostream& operator <<(std::ostream& os, const Id<ObjectDecisionPoint>&);

@@ -1,4 +1,5 @@
 #include "CBPlannerDefs.hh"
+#include "DecisionPoint.hh"
 #include "CBPlanner.hh"
 #include "DecisionManager.hh"
 #include "SubgoalOnceRule.hh"
@@ -20,7 +21,6 @@
 
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabase.hh"
-#include "PlanDatabaseWriter.hh"
 #include "Schema.hh"
 #include "Object.hh"
 #include "EventToken.hh"
@@ -35,12 +35,13 @@
 
 #include "NumericDomain.hh"
 #include "StringDomain.hh"
-#include "Choice.hh"
 #include "ObjectDecisionPoint.hh"
 #include "ConditionalRule.hh"
 #include "NotFalseConstraint.hh"
 #include "ConstrainedVariableDecisionPoint.hh"
 
+#include <list>
+#include <vector>
 #include <iostream>
 #include <string>
 
@@ -528,8 +529,6 @@ private:
     assertTrue(TokenDecisionPointId::convertable(planner.getDecisionManager()->getCurrentDecision()));
     TokenDecisionPointId tokdec = planner.getDecisionManager()->getCurrentDecision();
     assertTrue(tokdec->getToken() == tokenA.getId());
-    assertTrue(!planner.getDecisionManager()->getCurrentChoice().isNoId());
-    assertTrue(tokdec->getCurrent() == planner.getDecisionManager()->getCurrentChoice());
 
     planner.getDecisionManager()->synchronize();
     DEFAULT_TEARDOWN_PLAN();
@@ -554,7 +553,8 @@ private:
 
     //std::cout << "RETRACTING" << std::endl;
 
-    assertTrue(planner.getDecisionManager()->retractDecision());
+    unsigned int count;
+    assertTrue(planner.getDecisionManager()->retractDecision(count));
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
@@ -909,7 +909,7 @@ private:
 
     assertTrue(ce.propagate());
 
-    CBPlanner::Status result = planner.run();
+    CBPlanner::Status result = planner.run(18);
     assertTrue(result == CBPlanner::PLAN_FOUND);
 
     assertTrue(planner.getTime() == planner.getDepth());
@@ -923,7 +923,7 @@ private:
 
     assertTrue(planner.getTime() != planner.getDepth());
 
-    assertTrue(planner.getDepth() == 9);
+    assertTrue(planner.getDepth() == 7);
     assertTrue(planner.getTime() == 17);
 
     tokenA.cancel();
@@ -1019,11 +1019,6 @@ private:
     planner.getDecisionManager()->getOpenDecisions(decisions);
     DecisionPointId dec = decisions.front();
     assertTrue(ObjectDecisionPointId::convertable(dec));
-    /*
-    ObjectDecisionPointId odec = dec;
-    std::list<ChoiceId> choices = odec->getUpdatedChoices();
-    assertTrue(choices.size() == 2);
-    */
 
     dec = decisions.back();
     assertTrue(ConstrainedVariableDecisionPointId::convertable(dec));
@@ -1036,13 +1031,6 @@ private:
     planner.getDecisionManager()->getOpenDecisions(decisions);
     dec = decisions.front();
     assertTrue(ObjectDecisionPointId::convertable(dec));
-    /* getChoices is protected; getUpdatedChoices will return previous set
-       of choices; getCurrentChoices same thing.
-    odec = dec;
-    choices.clear();
-    choices = dec->getChoices();
-    assertTrue(choices.size() == 1);
-    */
 
     //    o1.constrain(tokenB.getId(), TokenId::noId());
     planner.getDecisionManager()->assignDecision();
@@ -1050,7 +1038,8 @@ private:
     assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 0); 
     
     //    o1.free(tokenB.getId());
-    planner.getDecisionManager()->retractDecision();
+    unsigned int count;
+    planner.getDecisionManager()->retractDecision(count);
 
     assertTrue(planner.getDecisionManager()->isRetracting());
     assertTrue(!planner.getDecisionManager()->hasDecisionToRetract());
@@ -1090,7 +1079,6 @@ public:
   static bool test() {
     runTest(testFindAnotherPlan);
     runTest(testAddSubgoalAfterPlanning);
-    runTest(testPurgeClosedDecisionsBeforeReplanning);
     return(true);
   }
 private:
@@ -1148,9 +1136,10 @@ private:
     assertTrue(planner.getDepth() == 9);
 
     DecisionManagerId dm = planner.getDecisionManager();
-    dm->retractDecision();
+    unsigned int count;
+    dm->retractDecision(count);
     while(dm->hasDecisionToRetract() && dm->isRetracting())
-      dm->retractDecision();
+      dm->retractDecision(count);
 
     result = planner.run();
     assertTrue(result == CBPlanner::PLAN_FOUND);
@@ -1236,64 +1225,6 @@ private:
     }
 
     */
-    DEFAULT_TEARDOWN_PLAN();
-    return true;
-  }
-
-  static bool testPurgeClosedDecisionsBeforeReplanning() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
-    hor.setHorizon(0,100);
-
-    std::list<double> values;
-    values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
-
-    Variable<LabelSet> v0(ce.getId(), LabelSet(values));
-    LabelSet leaveOpen;
-    leaveOpen.insert(values);
-    Variable<LabelSet> v1(ce.getId(), leaveOpen);
-    Variable<IntervalDomain> v2(ce.getId(), IntervalDomain(1, 2));
-    Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 2));
-    Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
-    Variable<NumericDomain> v5(ce.getId(), NumericDomain());
-    v5.insert(5);
-    v5.insert(23);
-    v5.close();
-
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
-    db.close();
-
-    for (;;) { /* Forever: only way out is to return */
-      CBPlanner::Status result = planner.step();
-      if (result != CBPlanner::IN_PROGRESS) {
-	assertTrue(result == CBPlanner::PLAN_FOUND);
-	break;
-      }
-    }
-    assertTrue(planner.getDepth() ==  planner.getTime());
-    assertTrue(planner.getDepth() == 3);
-
-    //    PlanDatabaseWriter::write(db.getId(),std::cout);
-
-    planner.getDecisionManager()->purgeClosedDecisions();
-
-    Variable<BoolDomain> v6(ce.getId(), BoolDomain());
-    IntervalToken tokenA(db.getId(), 
-			 "Objects.PADDED",
-			 true); 
-
-    tokenA.getStart()->specify(IntervalIntDomain(0, 10));
-    tokenA.getEnd()->specify(IntervalIntDomain(0, 200));
-
-    //    std::cout << "AFTER ADDING NEW GOAL TOKEN " << std::endl;
-
-    CBPlanner::Status res = planner.run();
-    assertTrue(res == CBPlanner::PLAN_FOUND);
-    assertTrue(planner.getDepth() ==  planner.getTime());
-    assertTrue(planner.getDepth() == 6);
-
-    //    PlanDatabaseWriter::write(db.getId(),std::cout);
-
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }

@@ -7,8 +7,6 @@
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "Object.hh"
 #include "ObjectDecisionPoint.hh"
-#include "Choice.hh"
-#include "ValueChoice.hh"
 #include "DefaultOpenDecisionManager.hh"
 #include "Debug.hh"
 
@@ -231,9 +229,6 @@ namespace EUROPA {
       m_curDec = *m_sortedNonUnitVarDecs.begin();
     else m_curDec = DecisionPointId::noId();
 
-    check_error(m_curDec.isNoId() || m_curDec->getCurrentChoices().empty(),
-		"Require the current decision to have no choices. They will be expanded, just in time.");
-
     check_error(m_curDec.isNoId() || m_curDec->isOpen(), "Can only return a decision if it is open.");
     return m_curDec;
   }
@@ -253,57 +248,6 @@ namespace EUROPA {
     m_sortedUnitVarDecs.clear();
     m_sortedNonUnitVarDecs.clear();
   }
-
-  // if there's a merge choice, keep the first one you get and return that one.
-  // otherwise prefer to activate
-  // finally prefer to reject
-  const ChoiceId DefaultOpenDecisionManager::getNextChoice() {
-    check_error(m_curDec.isValid());
-    m_curChoice = ChoiceId::noId();
-    const std::list<ChoiceId>& choices = m_curDec->getUpdatedChoices();
-
-    debugMsg("DefaultOpenDecisionManager:getNextChoice", " num choices " << choices.size() << std::endl);
-
-    if (TokenDecisionPointId::convertable(m_curDec)) {
-      ChoiceId merge;
-      ChoiceId reject;
-      ChoiceId activate;
- 
-      for (std::list<ChoiceId>::const_iterator it = choices.begin(); it != choices.end(); ++it) {
-	ChoiceId choice = *it;
-	check_error(choice.isValid());
-	check_error(choice->getType() == Choice::VALUE);
-	check_error(!m_curDec->hasDiscarded(choice));
-
-	LabelStr val = Id<ValueChoice>(choice)->getValue();
-	if (merge.isNoId() && val == Token::MERGED) {
-	  merge = choice;
-	  break; // we'll do this first, no point in assigning the rest.
-	}
-	if (val == Token::ACTIVE)
-	  activate = choice;
-	if (val == Token::REJECTED)
-	  reject = choice;
-	// we ignore choices for INACTIVE and INCOMPLETE.
-      }
-
-      if (!merge.isNoId())
-	m_curChoice = merge;
-      else if (!activate.isNoId())
-	m_curChoice = activate;
-      else if (!reject.isNoId()) 
-	m_curChoice = reject;
-    }
-
-    // If we have no choice selected and there is a choice, pick the first
-    if (!choices.empty() && m_curChoice == ChoiceId::noId())
-      m_curChoice = choices.front();
-
-    //    if(m_curChoice.isNoId())
-      //      std::cout << "DEBUG: No more choices" << std::endl;
-    return m_curChoice;
-  }
-
 
   void DefaultOpenDecisionManager::getOpenDecisions(std::list<DecisionPointId>& decisions) {
     std::map<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
@@ -331,6 +275,58 @@ namespace EUROPA {
       os << it->second << std::endl;
     for (vit = m_nonUnitVarDecs.begin(); vit != m_nonUnitVarDecs.end(); ++vit)
       os << vit->second << std::endl;
+  }
+
+
+  void DefaultOpenDecisionManager::initializeTokenChoices(TokenDecisionPointId& tdp) {
+    const StateDomain stateDomain(tdp->getToken()->getState()->lastDomain());
+    TokenId tok(tdp->getToken());
+    if(stateDomain.isMember(Token::MERGED)) {
+      tok->getPlanDatabase()->getCompatibleTokens(tok, tdp->m_compatibleTokens, PLUS_INFINITY, true);
+      if(tdp->m_compatibleTokens.size() > 0)
+	tdp->m_choices.push_back(Token::MERGED);
+    }
+    if(stateDomain.isMember(Token::ACTIVE) && tok->getPlanDatabase()->hasOrderingChoice(tok))
+      tdp->m_choices.push_back(Token::ACTIVE);
+    if(stateDomain.isMember(Token::REJECTED))
+      tdp->m_choices.push_back(Token::REJECTED);
+  }
+
+  void DefaultOpenDecisionManager::initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp) {
+    if (vdp->m_var->lastDomain().isNumeric() && vdp->m_var->lastDomain().getSize() > 50) {
+      vdp->m_choices.push_back(vdp->m_var->lastDomain().getLowerBound());
+      vdp->m_choices.push_back(vdp->m_var->lastDomain().getUpperBound()); // we'll keep the initial lb and ub for reference
+    }
+    else {
+      std::list<double> values;
+      vdp->m_var->lastDomain().getValues(values);
+      values.sort();
+      for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
+	vdp->m_choices.push_back(*it);
+    }
+  }
+
+  void DefaultOpenDecisionManager::initializeObjectChoices(ObjectDecisionPointId& odp) {
+    std::list<double> values;
+    TokenId tok(odp->getToken());
+    tok->getObject()->getLastDomain().getValues(values);
+    std::list<double>::iterator it = values.begin();
+    for ( ; it != values.end(); ++it) {
+      ObjectId obj = *it;
+      check_error(obj.isValid());
+      std::vector<std::pair<TokenId, TokenId> > tuples;
+      obj->getOrderingChoices(tok, tuples);
+      std::vector<std::pair<TokenId, TokenId> >::iterator it = tuples.begin();
+      debugMsg("ObjectDecisionPoint:getChoices", "Choices constraining (" << tok->getKey() << ")");
+      for (; it != tuples.end(); it++) {
+	TokenId predecessor = it->first;
+	TokenId successor = it->second;
+	check_error(predecessor.isValid());
+	check_error(successor.isValid());
+	odp->m_choices.push_back(std::make_pair<ObjectId,std::pair<TokenId,TokenId> > (obj, *it));
+	debugMsg("ObjectDecisionPoint:getChoices", "  constrain(" << predecessor->getKey() << ", " << successor->getKey() << ") on Object ( " << obj->getKey() << ")");
+      }
+    }
   }
 
 }

@@ -7,6 +7,15 @@
 
 namespace EUROPA {
 
+  class CBPlanner;
+  typedef Id<CBPlanner> CBPlannerId;
+
+  class DecisionManagerListener;
+  typedef Id<DecisionManagerListener> DecisionManagerListenerId;
+
+  class OpenDecisionManager;
+  typedef Id<OpenDecisionManager> OpenDecisionManagerId;
+
   class Condition;
   typedef Id<Condition> ConditionId;
 
@@ -25,9 +34,6 @@ namespace EUROPA {
   class DecisionManager;
   typedef Id<DecisionManager> DecisionManagerId;
 
-  class Choice;
-  typedef Id<Choice> ChoiceId;
-
   class DecisionPoint;
   typedef Id<DecisionPoint> DecisionPointId;
 
@@ -40,24 +46,11 @@ namespace EUROPA {
   class ConstrainedVariableDecisionPoint;
   typedef Id<ConstrainedVariableDecisionPoint> ConstrainedVariableDecisionPointId;
 
-  class CBPlanner;
-  typedef Id<CBPlanner> CBPlannerId;
-
-  class DecisionManagerListener;
-  typedef Id<DecisionManagerListener> DecisionManagerListenerId;
-
-  class OpenDecisionManager;
-  typedef Id<OpenDecisionManager> OpenDecisionManagerId;
-
-
   class ResourceOpenDecisionManager;
   typedef Id<ResourceOpenDecisionManager> ResourceOpenDecisionManagerId;
 
   class ResourceFlawDecisionPoint;
   typedef Id<ResourceFlawDecisionPoint> ResourceFlawDecisionPointId;
-
-  class ResourceFlawChoice;
-  typedef Id<ResourceFlawChoice> ResourceFlawChoiceId;
 
   class DMResourceListener;
   typedef Id<DMResourceListener> DMResourceListenerId;
