@@ -1,3 +1,8 @@
+M_22:
+1. Added NegationConstraint.
+2. Added support for a PlannerConfig class in NDDL, rtaher than using NddlWorld.
+3. Completed support for object dynamicity, addressing GNATS 2342.
+
 M_21:
 1. Changed object decision model to avoid incompleness in search.
 2. GNATS addressed in this milestone: 2469, 2485
