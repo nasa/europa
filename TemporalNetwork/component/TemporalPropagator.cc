@@ -422,6 +422,7 @@ namespace Prototype {
       m_tnet->removeTemporalConstraint(tnetConstraint);
       newConstraint = m_tnet->addTemporalConstraint(source, target, (Time)lb, (Time)ub);
       if(!cnetConstraint.isNoId()){
+	newConstraint->setExternalEntity(cnetConstraint);
 	cnetConstraint->clearExternalEntity();
 	cnetConstraint->setExternalEntity(newConstraint);
 	publish(notifyConstraintAdded(cnetConstraint, newConstraint,  (Time)lb, (Time)ub));
