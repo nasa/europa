@@ -1,6 +1,7 @@
 #include "LabelStr.hh"
 #include "Domain.hh"
 #include "IntervalIntDomain.hh"
+#include "BoolDomain.hh"
 #include "ConstraintEngine.hh"
 #include "Constraints.hh"
 #include "DefaultPropagator.hh"
@@ -278,20 +279,20 @@ static void testCopyingBoolDomains() {
 
   copyPtr = falseDom.copy();
   assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
-  assertTrue(copyPtr->isFalse());
-  assertFalse(copyPtr->isTrue());
+  assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
+  assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
   delete copyPtr;
 
   copyPtr = trueDom.copy();
   assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
-  assertTrue(copyPtr->isTrue());
-  assertFalse(copyPtr->isFalse());
+  assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
+  assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
   delete copyPtr;
 
   copyPtr = both.copy();
   assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
-  assertFalse(copyPtr->isFalse());
-  assertFalse(copyPtr->isTrue());
+  assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
+  assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
   delete copyPtr;
 
   // Cannot check that expected errors are detected until
@@ -328,7 +329,7 @@ static void testCopyingEnumeratedDomains() {
   assertTrue(copyPtr->isDynamic());
   assertTrue(copyPtr->isEnumerated());
   copyPtr->close();
-  assertTrue(copyPtr->size() == 4);
+  assertTrue(copyPtr->getSize() == 4);
   assertTrue(copyPtr->isSubsetOf(fiveDom));
   delete copyPtr;
 
@@ -336,7 +337,7 @@ static void testCopyingEnumeratedDomains() {
   assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
   assertFalse(copyPtr->isDynamic());
   assertTrue(copyPtr->isEnumerated());
-  assertTrue(copyPtr->size() == 5);
+  assertTrue(copyPtr->getSize() == 5);
   assertTrue(fourDom.isSubsetOf(*copyPtr));
   delete copyPtr;
 
@@ -345,7 +346,7 @@ static void testCopyingEnumeratedDomains() {
   assertFalse(copyPtr->isDynamic());
   assertTrue(copyPtr->isEnumerated());
   assertTrue(copyPtr->isSingleton());
-  assertTrue(copyPtr->isSubsetOf(four));
+  assertTrue(copyPtr->isSubsetOf(fourDom));
   delete copyPtr;
 
   // Cannot check that expected errors are detected until
@@ -371,7 +372,7 @@ static void testCopyingIntervalDomains() {
   assertTrue(copyPtr->getSize() == 0);
   assertTrue(*copyPtr == empty);
   assertFalse(*copyPtr == one2ten);
-  copyPtr->relax(-3.1, 11.0);
+  copyPtr->relax(IntervalDomain(-3.1, 11.0));
   assertTrue(copyPtr->isMember(0.0));
   assertFalse(copyPtr->isSingleton());
   assertFalse(copyPtr->isEmpty());
@@ -391,7 +392,7 @@ static void testCopyingIntervalDomains() {
   assertFalse(copyPtr->isEmpty());
   assertFalse(*copyPtr == empty);
   assertTrue(*copyPtr == one2ten);
-  copyPtr->relax(-3.1, 11.0);
+  copyPtr->relax(IntervalDomain(-3.1, 11.0));
   assertTrue(copyPtr->isMember(0.0));
   assertFalse(copyPtr->isSingleton());
   assertFalse(copyPtr->isEmpty());
@@ -412,7 +413,7 @@ static void testCopyingIntervalDomains() {
   assertFalse(*copyPtr == empty);
   assertTrue(*copyPtr == four);
   assertFalse(*copyPtr == one2ten);
-  copyPtr->relax(-3.1, 11.0);
+  copyPtr->relax(IntervalDomain(-3.1, 11.0));
   assertTrue(copyPtr->isMember(0.0));
   assertFalse(copyPtr->isSingleton());
   assertFalse(copyPtr->isEmpty());
@@ -444,7 +445,7 @@ static void testCopyingIntervalIntDomains() {
   assertTrue(copyPtr->getSize() == 0);
   assertTrue(*copyPtr == empty);
   assertFalse(*copyPtr == one2ten);
-  copyPtr->relax(-3, 11);
+  copyPtr->relax(IntervalDomain(-3, 11));
   assertTrue(copyPtr->isMember(0));
   assertFalse(copyPtr->isSingleton());
   assertFalse(copyPtr->isEmpty());
@@ -465,7 +466,7 @@ static void testCopyingIntervalIntDomains() {
   assertTrue(copyPtr->getSize() == 10);
   assertFalse(*copyPtr == empty);
   assertTrue(*copyPtr == one2ten);
-  copyPtr->relax(-3, 11);
+  copyPtr->relax(IntervalIntDomain(-3, 11));
   assertTrue(copyPtr->getSize() == 15);
   assertTrue(copyPtr->isMember(0));
   assertFalse(copyPtr->isSingleton());
@@ -487,7 +488,7 @@ static void testCopyingIntervalIntDomains() {
   assertFalse(*copyPtr == empty);
   assertTrue(*copyPtr == four);
   assertFalse(*copyPtr == one2ten);
-  copyPtr->relax(-3, 11);
+  copyPtr->relax(IntervalIntDomain(-3, 11));
   assertTrue(copyPtr->getSize() == 15);
   assertTrue(copyPtr->isMember(0));
   assertFalse(copyPtr->isSingleton());
@@ -501,9 +502,11 @@ static void testCopyingIntervalIntDomains() {
   //   new error handling support is in use.
 }
 
+// Has to be outside next function or compiler complains.
+typedef enum Fruits { orange, lemon, blueberry, raspberry } Fruits;
+
 static void testCopyingTemplateDomains() {
   AbstractDomain *copyPtr;
-  typedef enum Fruits { orange, lemon, blueberry, raspberry } Fruits;
   Domain<Fruits> emptyFruit;
   Domain<Fruits> orangeOnly(orange);
   std::list<Fruits> fruitList;
@@ -554,7 +557,7 @@ static void testCopyingTemplateDomains() {
   assertTrue(emptyFruit.isSubsetOf(*copyPtr));
   assertTrue(orangeOnly.isSubsetOf(*copyPtr));
   assertFalse(fruitDom.isSubsetOf(*copyPtr));
-  assertTrue(copyPtr->isSubsetOf(orange));
+  assertTrue(copyPtr->isSubsetOf(Domain<Fruits>(orange)));
   assertTrue(copyPtr->isSubsetOf(fruitDom));
   assertFalse(copyPtr->isSubsetOf(emptyFruit));
   delete copyPtr;
@@ -580,7 +583,7 @@ static void testCopyingTemplateDomains() {
   assertTrue(emptyFruit.isSubsetOf(*copyPtr));
   assertTrue(orangeOnly.isSubsetOf(*copyPtr));
   assertFalse(fruitDom.isSubsetOf(*copyPtr));
-  assertTrue(copyPtr->isSubsetOf(orange));
+  assertTrue(copyPtr->isSubsetOf(Domain<Fruits>(orange)));
   assertTrue(copyPtr->isSubsetOf(fruitDom));
   assertFalse(copyPtr->isSubsetOf(emptyFruit));
   delete copyPtr;
