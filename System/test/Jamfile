@@ -1,2 +1,15 @@
 SubDir PLASMA System test ;
 
+NddlSystemTest nddl-planner-tests : runTest.cc : Rover.nddl ;
+NddlSystemTest nddl-planner-tests : runTest.cc : basic-model.nddl ;
+NddlSystemTest nddl-planner-tests : runTest.cc : k9.nddl ;
+# NddlSystemTest nddl-planner-tests : runTest.cc : k9.backtrack.moderate.nddl ;
+NddlSystemTest nddl-planner-tests : runTest.cc : path-filter.nddl ;
+
+NddlSystemTest nddl-planner-tests : runInitialTest.cc : k9-initial.nddl ;
+
+NddlSystemTest nddl-planner-tests : runTransactionTest.cc : Rover-transaction.nddl ;
+NddlSystemTest nddl-planner-tests : runTransactionTest.cc : basic-model-transaction.nddl ;
+NddlSystemTest nddl-planner-tests : runTransactionTest.cc : k9-transaction.nddl ;
+# NddlSystemTest nddl-planner-tests : runTransactionTest.cc : k9.backtrack.moderate-transaction.nddl ;
+NddlSystemTest nddl-planner-tests : runTransactionTest.cc : path-filter-transaction.nddl ;

@@ -109,4 +109,8 @@ if $(OS) = CYGWIN {
   NOARSCAN = true ;
 }
 
+if $(OS) = BEOS {
+  LINKLIBS += -lbe ;
+}
+
 } # PlatformRules_INCLUDED

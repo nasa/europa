@@ -1,3 +1,6 @@
 SubDir PLASMA System component ;
 
-ModuleComponent System ;
+ModuleComponent System
+	:
+	PartialPlanWriter.cc
+	;

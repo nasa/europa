@@ -12,8 +12,6 @@ local compiler_test ;
 for compiler_test in $(NDDL_COMPILER_TESTS) {
   local hh = $(compiler_test:S=.hh) ;
   local cc = $(compiler_test:S=.cc) ;
-  local xml = $(compiler_test:S=.xml) ;
   LocalDepends tests : $(hh) $(cc) ;
-  NddlParser $(xml) : $(compiler_test) ;
-  NddlCompiler $(hh) $(cc) : $(xml) ;
+  NddlCompiler $(hh) $(cc) : $(compiler_test) ;
 }

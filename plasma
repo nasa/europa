@@ -219,9 +219,10 @@ cp McGann/NddlCompiler/test/simple-resources.nddl PLASMA/NDDL/test/compiler/
 cp McGann/NddlCompiler/test/simple-rules.nddl PLASMA/NDDL/test/compiler/
 cp McGann/NddlCompiler/test/subclass.nddl PLASMA/NDDL/test/compiler/
 
-# McGann/PlanDatabase -> PLASMA/Planner/component/
+# McGann/PlanDatabase -> PLASMA/System/component/
 
-cp McGann/PlanDatabase/PartialPlanWriter.cc PLASMA/CBPlanner/component/
+cp McGann/PlanDatabase/PartialPlanWriter.cc PLASMA/System/component/
+cp McGann/PlanDatabase/PartialPlanWriter.hh PLASMA/System/component/
 
 # McGann/PlanDatabase -> PLASMA/PlanDatabase
 
@@ -270,7 +271,6 @@ cp McGann/PlanDatabase/EventToken.cc PLASMA/PlanDatabase/component/
 cp McGann/PlanDatabase/EventToken.hh PLASMA/PlanDatabase/component/
 cp McGann/PlanDatabase/IntervalToken.cc PLASMA/PlanDatabase/component/
 cp McGann/PlanDatabase/IntervalToken.hh PLASMA/PlanDatabase/component/
-cp McGann/PlanDatabase/PartialPlanWriter.hh PLASMA/PlanDatabase/component/
 cp McGann/PlanDatabase/PlanDatabaseDefs.hh PLASMA/PlanDatabase/component/
 cp McGann/PlanDatabase/PlanDatabaseWriter.hh PLASMA/PlanDatabase/component/
 cp McGann/PlanDatabase/Timeline.cc PLASMA/PlanDatabase/component/

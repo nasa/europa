@@ -3,6 +3,6 @@ SubDir PLASMA System ;
 if ! $(System_INCLUDED) {
 System_INCLUDED = TRUE ;
 
-Module System : ConstraintEngine ;
+Module System : ConstraintEngine NDDL TemporalNetwork CBPlanner ;
 
 } # System_INCLUDED

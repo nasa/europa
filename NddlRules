@@ -5,14 +5,48 @@ include [ FDirName $(SUBDIR) JavaRules ] ;
 
 # TRACE_NDDL ?= TRUE ;
 
-# NddlCompiler model.hh model.cc : model.xml ;
-rule NddlCompiler {
-  local code = $(1) ;
-  local xml = $(2) ;
+rule NddlSystemTest {
+  local target = $(1) ;
+  local code = $(2) ;
+  local model = $(3) ;
 
   if $(TRACE_NDDL) = TRUE {
-    Echo NddlCompiler $(code) . $(xml) ;
+    Echo NddlSystemTest $(target) . $(code) . $(model) ;
   }
+
+  local hh = $(model:S=.hh) ;
+  local cc = [ FGristFiles $(model:S=.cc) ] ;
+  local exe = $(model:S=) ;
+  Includes $(cc) : $(hh) ;
+  NddlCompiler $(hh) $(cc) : $(model:S=.nddl) ;
+  ModuleMain $(exe) : $(code) $(cc) : System ;
+  RunModuleMain $(target) : $(exe) : $(model:S=.xml) ;
+}
+
+# NddlCompiler model.hh model.cc : model.xml ;
+# NddlCompiler model.hh model.cc : model.nddl ;
+rule NddlCompiler {
+  local code = $(1) ;
+  local model = $(2) ;
+
+  if $(TRACE_NDDL) = TRUE {
+    Echo NddlCompiler $(code) . $(model) ;
+  }
+
+  local xml ;
+  if $(model:S) = .xml {
+    xml = $(model) ;
+  } else {
+    xml = $(model:S=.xml) ;
+    NddlParser $(xml) : $(model) ;
+  }
+
+  NddlCompiler1 $(code) : $(xml) ;
+}
+
+rule NddlCompiler1 {
+  local code = $(1) ;
+  local xml = $(2) ;
 
   SEARCH on $(xml) = $(SEARCH_SOURCE) ;
   Depends $(code) : nddl.jar ;
@@ -21,7 +55,7 @@ rule NddlCompiler {
   Clean clean : $(code) ;
 }
 
-actions NddlCompiler {
+actions NddlCompiler1 {
   $(JAVA) -cp $(CLASSPATH) nddl.NddlCompiler $(2) 
 }
 
