@@ -11,7 +11,6 @@
 #include "Token.hh"
 #include "Object.hh"
 #include "TokenVariable.hh"
-#include "ObjectSet.hh"
 #include "PlanDatabase.hh"
 
 #include "../ConstraintEngine/ConstraintEngine.hh"

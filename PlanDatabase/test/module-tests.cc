@@ -1,7 +1,6 @@
 #include "PlanDatabase.hh"
 #include "Schema.hh"
 #include "Object.hh"
-#include "ObjectSet.hh"
 #include "EventToken.hh"
 #include "TokenVariable.hh"
 #include "ObjectTokenRelation.hh"
@@ -14,7 +13,7 @@
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/Utils.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
-#include "../ConstraintEngine/LabelSet.hh"
+#include "../ConstraintEngine/Domain.hh"
 #include "../ConstraintEngine/DefaultPropagator.hh"
 #include "../ConstraintEngine/EqualityConstraintPropagator.hh"
 

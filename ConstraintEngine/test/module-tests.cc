@@ -16,10 +16,10 @@
 /* Include for domain management */
 #include "AbstractDomain.hh"
 #include "EnumeratedDomain.hh"
-#include "LabelSet.hh"
 #include "LabelStr.hh"
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
+#include "Domain.hh"
 #include "domain-tests.hh"
 
 #include <iostream>
@@ -30,7 +30,6 @@
 
 using namespace Prototype;
 using namespace std;
-
 
 class DelegationTestConstraint: public Constraint{
 public:

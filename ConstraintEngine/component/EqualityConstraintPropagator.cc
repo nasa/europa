@@ -1,10 +1,10 @@
 #include "EqualityConstraintPropagator.hh"
 #include "Constraint.hh"
 #include "Constraints.hh"
-#include "LabelSet.hh"
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
 #include "ConstrainedVariable.hh"
+#include "Domain.hh"
 
 namespace Prototype {
 
@@ -123,9 +123,6 @@ namespace Prototype {
       break;
     case AbstractDomain::BOOL:
       processScope<BoolDomain>(scope);
-      break;
-    case AbstractDomain::LABEL_SET:
-      processScope<LabelSet>(scope);
       break;
     case AbstractDomain::INT_INTERVAL:
       processScope<IntervalIntDomain>(scope);

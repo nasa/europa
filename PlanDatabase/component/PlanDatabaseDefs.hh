@@ -2,6 +2,7 @@
 #define _H_PlanDatabaseDefs
 
 #include "../ConstraintEngine/ConstraintEngineDefs.hh"
+#include "../ConstraintEngine/Domain.hh"
 
 namespace Prototype {
   class Object;
@@ -28,7 +29,8 @@ namespace Prototype {
   template<class DomainType> class TokenVariable;
   typedef Europa::Id< TokenVariable<EnumeratedDomain> > StateVarId;
   typedef Europa::Id< TokenVariable<IntervalIntDomain> > TempVarId;
-  class ObjectSet;
+
+  typedef Domain<ObjectId>  ObjectSet;
   typedef Europa::Id< TokenVariable<ObjectSet> > ObjectVarId;
 
   class Schema;

@@ -3,7 +3,7 @@
 #include "ConstrainedVariable.hh"
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
-#include "LabelSet.hh"
+#include "Domain.hh"
 
 namespace Prototype
 {
