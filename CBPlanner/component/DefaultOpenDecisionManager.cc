@@ -50,7 +50,7 @@ namespace Prototype {
   }
 
   void DefaultOpenDecisionManager::add(const ObjectId& object) {
-    check_error(ALWAYS_FAILS);
+    // check_error(ALWAYS_FAILS);
     /*
     check_error(object.isValid());
     std::vector<TokenId> tokens;

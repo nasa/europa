@@ -61,6 +61,9 @@ namespace Prototype {
     virtual const ChoiceId& getNextChoice();
     virtual const int getNumberOfDecisions();
 
+	virtual bool hasOpenDecisions() {
+	  return (getNumberOfDecisions()>0);
+	}
     virtual void getOpenDecisions(std::list<DecisionPointId>& decisions);
     virtual void printOpenDecisions(std::ostream& os = std::cout);
   protected:
