@@ -1,5 +1,5 @@
 // /home/sailesh/work/EXPERIMENTS/CPlan1.5/model/k9.ddl
-#include "../../NDDL/test/Resources.nddl"
+#include "../../NDDL/core/Resources.nddl"
 
 enum Types {ACTION, FLUENT};
 enum Data {CHAMPIMAGE, MOSSBAUER, OPPSCI};

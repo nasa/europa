@@ -6,7 +6,7 @@
 // as well as too cumbersome, even if feasible.
 //////////////////////////////////////////////////////////////
 
-#include "../Plasma.nddl"
+#include "../../core/Plasma.nddl"
 
 class Location {
  string description;
