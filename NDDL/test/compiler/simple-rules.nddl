@@ -30,8 +30,8 @@ class Rover{
   eq(v3, [0 12]);
   eq(v4, [-1.98 2.67]);
   eq(v3, 8);
-  //neq(v3, +inf);
-  //neq(v4, [-inf -100]);
+  neq(v3, +inf);
+  neq(v4, [-inf -100]);
  }
 
  Rover(){

@@ -23,6 +23,8 @@ namespace NDDL {
   class ObjectFilterCondition;
   typedef Id<ObjectFilterCondition> ObjectFilterConditionId;
 
+  #define inf PLUS_INFINITY
+
 } // namespace NDDL
 
 namespace EUROPA {
