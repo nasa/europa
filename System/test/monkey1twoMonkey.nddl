@@ -1,0 +1,94 @@
+// Translated from NewPlan/ModuleTests/Parser/monkey1/timeline.twoMonkeys,
+//   which has been copied here as monkey1twoMonkey.init.
+
+// This was converted from NewPlan/ModuleTests/Parser/monkey1/monkey-compats.objvar.ddl.
+#include "twoMonkey.nddl"
+
+// This is "generic" to using NDDL with PLASMA (Europa II), at least when
+//   running tests in this directory.
+#include "NddlWorld.nddl"
+
+// Debug 1
+// [ 0 200 ]
+
+// This is also "generic", but the first two arguments are the horizon.
+//   The third is the maximum number of planner steps/nodes.
+NddlWorld world = new NddlWorld(0, 200, 1000);
+
+//Object_Timelines Monkey_Class Monkey1 (
+Monkey_Class Monkey1 = new Monkey_Class();
+
+//!!This was later, but it seems to be required to appear before the first propagation or something similar
+Monkey_Class Fred = new Monkey_Class();
+
+//        Location_SV (At (Rock) ... At (Rock))
+goal(Monkey_Class___Location_SV.At initialLocation);
+eq(initialLocation.start, world.m_horizonStart);
+eq(initialLocation.Loc_Label, Rock);
+//!!eq(initialLocation.__DDL__object, Monkey1); causes error in player trying to look up "initialLocation:__DDL__object"
+eq(initialLocation.object, Monkey1.Location_SV);
+goal(Monkey_Class___Location_SV.At finalLocation);
+eq(finalLocation.end, world.m_horizonEnd);
+eq(finalLocation.Loc_Label, Rock);
+eq(finalLocation.object, Monkey1.Location_SV);
+
+//        Altitude_SV (LOW() ... HIGH())
+goal(Monkey_Class___Altitude_SV.LOW initialHeight);
+eq(initialHeight.start, world.m_horizonStart);
+eq(initialHeight.object, Monkey1.Altitude_SV);
+goal(Monkey_Class___Altitude_SV.LOW finalHeight);
+eq(finalHeight.end, world.m_horizonEnd);
+eq(finalHeight.object, Monkey1.Altitude_SV);
+
+//        Banana_SV (NOT_HAVE_BANANA() ... HAVE_BANANA()))
+goal(Monkey_Class___Banana_SV.NOT_HAVE_BANANA noBanana);
+eq(noBanana.start, world.m_horizonStart);
+eq(noBanana.object, Monkey1.Banana_SV);
+goal(Monkey_Class___Banana_SV.NOT_HAVE_BANANA hasBanana);
+eq(hasBanana.end, world.m_horizonEnd);
+eq(hasBanana.object, Monkey1.Banana_SV);
+
+//Object_Timelines Monkey_Class Fred (
+//!!Monkey_Class Fred = new Monkey_Class(); //!!moved earlier; see note there
+
+//        Location_SV (At (*) ... )
+goal(Monkey_Class___Location_SV.At fredStartLoc);
+eq(fredStartLoc.start, world.m_horizonStart);
+eq(fredStartLoc.object, Fred.Location_SV);
+
+//        Altitude_SV (LOW() ... )
+goal(Monkey_Class___Altitude_SV.LOW fredStartHeight);
+eq(fredStartHeight.start, world.m_horizonStart);
+eq(fredStartHeight.object, Fred.Altitude_SV);
+
+//        Banana_SV (NOT_HAVE_BANANA() ... GRABBING_BANANA()))
+goal(Monkey_Class___Banana_SV.NOT_HAVE_BANANA fredNoBanana);
+eq(fredNoBanana.start, world.m_horizonStart);
+eq(fredNoBanana.object, Fred.Banana_SV);
+goal(Monkey_Class___Banana_SV.GRABBING_BANANA fredGrabbing);
+eq(fredGrabbing.end, world.m_horizonEnd);
+eq(fredGrabbing.object, Fred.Banana_SV);
+
+//; This should always be rejected
+//Rejectable_Token 10.0 Monkey_Class Banana_SV ([0 200] HAVE_BANANA(Fred) [0 200])
+//!! I don't know the syntax for rejectable tokens in NDDL.
+//!!goal(Monkey_Class___Banana_SV fredHasBanana);
+//!!eq(fredHasBanana.start, [0 200]);
+//!!eq(fredHasBanana.end, [0 200]);
+//!!eq(fredHasBanana.object, Fred.Banana_SV);
+
+//; This should always merge with Monkey1's existing HAVE_BANANA()
+//Rejectable_Token 5.0 Monkey_Class Banana_SV ([0 200] HAVE_BANANA(*) [0 200])
+goal(Monkey_Class___Banana_SV.HAVE_BANANA oneHasBanana);
+//!!eq(oneHasBanana.start, [0 200]); causes error looking for TypeFactory for "interval"
+//!!eq(oneHasBanana.end, [0 200]);
+int horizonBound, hb2;
+leq(world.m_horizonStart, horizonBound);
+leq(horizonBound, world.m_horizonEnd);
+leq(world.m_horizonStart, hb2);
+leq(hb2, world.m_horizonEnd);
+eq(oneHasBanana.start, horizonBound);
+eq(oneHasBanana.end, hb2);
+
+// Usually needed to allow propagation of variables of the object classes.
+close();
