@@ -310,6 +310,16 @@ private:
     assert(intervalToken.getStart()->getDerivedDomain() == IntervalIntDomain(5, 8));
     assert(intervalToken.getDuration()->getDerivedDomain() == IntervalIntDomain(2, 5));
 
+    // Create and delete a Token
+    TokenId token = (new IntervalToken(db.getId(), 
+				       LabelStr("Predicate"), 
+				       true, 
+				       IntervalIntDomain(0, 1000),
+				       IntervalIntDomain(0, 1000),
+				       IntervalIntDomain(2, 10),
+				       Token::noObject(), true))->getId();
+
+    delete (Token*) token; // It is inComplete
     return true;
   }
 
