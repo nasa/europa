@@ -19,6 +19,7 @@ for model in
         backtr.nddl better-res.nddl CAPER.nddl
         monkey1monkey-transaction.nddl
 #        sum-init.nddl
+#        C3-init.nddl
 {
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
