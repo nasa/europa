@@ -102,6 +102,14 @@ namespace Prototype {
     check_error(ALWAYS_FAILS);
   }
 
+  void IntervalIntDomain::getValues(std::list<double>& results) const {
+    check_error(isFinite());
+    int lb = (int) check(m_lb);
+    int ub = (int) check(m_ub);
+    for (int i = lb; i <= ub; i++)
+      results.push_back(i);
+  }
+
   double IntervalIntDomain::minDelta() const {
     return(1.0);
   }

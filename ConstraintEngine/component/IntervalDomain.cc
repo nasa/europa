@@ -294,11 +294,10 @@ namespace Prototype {
   }
 
   void IntervalDomain::getValues(std::list<double>& results) const {
-    check_error(isFinite());
-    int lb = (int) check(m_lb);
-    int ub = (int) check(m_ub);
-    for (int i = lb; i <= ub; i++)
-      results.push_back(i);
+    check_error(isSingleton());
+    if (!isEmpty()) {
+      results.push_back(m_lb); // consider averaging m_lb and m_ub
+    }
   }
 
   double IntervalDomain::check(const double& value) const {

@@ -67,6 +67,13 @@ namespace Prototype{
     virtual void remove(double value);
 
     /**
+     * @brief Fill the given list with the contents of the set.
+     * @note Should only be called on finite (and thus closed) domains.
+     * @param results The target collection to fill with all values in the set.
+     */
+    void getValues(std::list<double>& results) const;
+
+    /**
      * @brief Enforces integer semantics by restricting changes to units.
      */
     double minDelta() const;

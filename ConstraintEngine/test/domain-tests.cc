@@ -47,6 +47,8 @@ namespace Prototype {
       runTest(testInfinitesAndInts);
       runTest(testInsertAndRemove);
       runTest(testValidComparisonWithEmpty_gnats2403);
+      runTest(testIntervalSingletonValues);
+      runTest(testIntervalIntValues);
       return(true);
     }
 
@@ -513,6 +515,63 @@ namespace Prototype {
 
       return true;
     }
+
+    static bool testIntervalSingletonValues() {
+      for (double value = -2.0 ; value <= 1.5 ; value += 0.1) {
+        IntervalDomain id(value, value);
+        std::list<double> values;
+        id.getValues(values);
+        assertTrue(values.size() == 1);
+        assertTrue(values.front() == value);
+      }
+      for (double value = 2.0 ; value >= 1.5 ; value -= 0.1) {
+        IntervalDomain id(value, value);
+        std::list<double> values;
+        id.getValues(values);
+        assertTrue(values.size() == 1);
+        assertTrue(values.front() == value);
+      }
+      IntervalDomain id(0, 0);
+      std::list<double> values;
+      id.getValues(values);
+      assertTrue(values.size() == 1);
+      assertTrue(values.front() == 0);
+      return true;
+    }
+
+    static bool testIntervalIntValues() {
+      std::list<double> values;
+
+      IntervalIntDomain i0(10, 20);
+      i0.getValues(values);
+      assertTrue(values.size() == 11);
+      assertTrue(values.front() == 10); values.pop_front();
+      assertTrue(values.front() == 11); values.pop_front();
+      assertTrue(values.front() == 12); values.pop_front();
+      assertTrue(values.front() == 13); values.pop_front();
+      assertTrue(values.front() == 14); values.pop_front();
+      assertTrue(values.front() == 15); values.pop_front();
+      assertTrue(values.front() == 16); values.pop_front();
+      assertTrue(values.front() == 17); values.pop_front();
+      assertTrue(values.front() == 18); values.pop_front();
+      assertTrue(values.front() == 19); values.pop_front();
+      assertTrue(values.front() == 20); values.pop_front();
+
+      IntervalIntDomain i1(-4, 3);
+      i1.getValues(values);
+      assertTrue(values.size() == 8);
+      assertTrue(values.front() == -4); values.pop_front();
+      assertTrue(values.front() == -3); values.pop_front();
+      assertTrue(values.front() == -2); values.pop_front();
+      assertTrue(values.front() == -1); values.pop_front();
+      assertTrue(values.front() ==  0); values.pop_front();
+      assertTrue(values.front() ==  1); values.pop_front();
+      assertTrue(values.front() ==  2); values.pop_front();
+      assertTrue(values.front() ==  3); values.pop_front();
+
+      return true;
+    }
+
   };
 
   class EnumeratedDomainTest {
