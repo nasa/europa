@@ -1908,7 +1908,7 @@ namespace EUROPA {
       bool retval = false;
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
-        //std::cerr << "DEBUG:reading buf: " << buf << std::endl;
+        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
@@ -1935,6 +1935,7 @@ namespace EUROPA {
       char buf[PATH_MAX];
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
+        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
@@ -1958,6 +1959,14 @@ namespace EUROPA {
           std::string wd = line.substr(line.find("=")+1);
           dest = wd;
         }
+        else if(line.find(MAX_CHOICES) != std::string::npos) {
+          std::string mc = line.substr(line.find("=")+1);
+          maxChoices = strtol(mc.c_str(), NULL, 10);
+          if(maxChoices < 0)
+            FatalError("maxChoices < 0", "MaxChoices must be a non-negative value");
+          if(maxChoices == LONG_MAX || maxChoices == LONG_MIN)
+            FatalErrno();
+        }
         else {
           for(int i = strlen(buf); i >= 0; i--)
             configFile.putback(buf[i]);
@@ -1970,6 +1979,7 @@ namespace EUROPA {
       char buf[PATH_MAX];
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
+        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
@@ -1993,6 +2003,7 @@ namespace EUROPA {
       char buf[PATH_MAX];
       while(!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
+        std::cerr << "DEBUG:reading buf: " << buf << std::endl;
         if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
