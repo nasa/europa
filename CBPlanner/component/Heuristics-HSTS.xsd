@@ -63,8 +63,11 @@ xmlns="HSTS" elementFormDefault="qualified">
 
 <xs:complexType name="ParameterType">
    <xs:sequence minOccurs="0" maxOccurs="unbounded">
-       <xs:element name="Index" type="xs:integer"/>
-       <xs:element name="Value" type="xs:string"/>
+     <xs:choice>
+        <xs:element name="Index" type="xs:integer"/>
+        <xs:element name="Name" type="xs:string"/> 
+     </xs:choice>
+     <xs:element name="Value" type="xs:string"/>
    </xs:sequence>
 </xs:complexType>
 
