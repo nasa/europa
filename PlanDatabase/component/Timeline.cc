@@ -16,6 +16,7 @@
 #include "Constraint.hh"
 #include "ConstraintLibrary.hh"
 #include "IntervalIntDomain.hh"
+#include "Debug.hh"
 
 #include <algorithm>
 
@@ -43,6 +44,8 @@ namespace EUROPA {
     check_error(token.isValid());
     check_error(limit > 0, "Cannot set limit to less than 1.");
 
+    debugMsg("Timeline:getOrderingChoices", "getting ordering choices for token (" << token->getKey() << ") " << token->getName().c_str());
+
     // Force propagation and return if inconsistent - leads to no ordering choices.
     if (!getPlanDatabase()->getConstraintEngine()->propagate())
       return;
@@ -59,6 +62,7 @@ namespace EUROPA {
     unsigned int choiceCount = 0;
     // If the sequence is empty, add the case where both elements of the pair are the given token.
     if (m_tokenSequence.empty()) {
+      debugMsg("Timeline:getOrderingChoices:canPrecede"," token sequence is empty, returning a single pair with same token");
       results.push_back(std::make_pair(token, token));
       choiceCount++;
       return;
@@ -69,14 +73,20 @@ namespace EUROPA {
 
     // Move forward until we find a Token we can precede
     while (current != m_tokenSequence.end()) {
-      if (getPlanDatabase()->getTemporalAdvisor()->canPrecede(token, *current))
+      if (getPlanDatabase()->getTemporalAdvisor()->canPrecede(token, *current)) {
+	debugMsg("Timeline:getOrderingChoices:canPrecede"," first find Precedes (" << token->getKey() << ") " << token->getName().c_str() << " (" << (*current)->getKey() << ") " << (*current)->getName().c_str());
         break;
+      }
+      else {
+        debugMsg("Timeline:getOrderingChoices:canPrecede"," first find CAN'T Precedes (" << token->getKey() << ") " << token->getName().c_str() << " (" << (*current)->getKey() << ") " << (*current)->getName().c_str());
+      }
       current++;
     }
 
     // If it can precede the first one, we do not have to test for fitting between
     // token in the sequence, thus, we should push it back and move on.
     if (current == m_tokenSequence.begin() && choiceCount < limit) {
+      debugMsg("TImeline:getOrderingChoices:canPrecede", " precedes the beginning token ");
       results.push_back(std::make_pair(token, *current));
       current++;
       choiceCount++;
@@ -93,12 +103,18 @@ namespace EUROPA {
 
       // we still need to check that the predecessor can precede the token,
       // otherwise we'll return bogus successors (see PlanDatabse::module-tests::testNoChoicesThatFit
-      if (!getPlanDatabase()->getTemporalAdvisor()->canPrecede(predecessor,token))
+      if (!getPlanDatabase()->getTemporalAdvisor()->canPrecede(predecessor,token)) {
+        debugMsg("Timeline:getOrderingChoices:canPrecede"," pred CAN'T Precedes tok (" << predecessor->getKey() << ") " << predecessor->getName().c_str() << " (" << token->getKey() << ") " << token->getName().c_str());
         break;
+      }
 
       if (getPlanDatabase()->getTemporalAdvisor()->canFitBetween(token, predecessor, successor)){
+        debugMsg("Timeline:getOrderingChoices:canPrecede"," tok Between pred, succ (" << token->getKey() << ") " << token->getName().c_str() << " (" << predecessor->getKey() << ") " << predecessor->getName().c_str() << " (" << successor->getKey() << ") " << successor->getName().c_str());
         results.push_back(std::make_pair(token, successor));
 	choiceCount++;
+      }
+      else {
+        debugMsg("Timeline:getOrderingChoices:canPrecede"," tok CAN'T Between pred,succ (" << token->getKey() << ") " << token->getName().c_str() << " (" << predecessor->getKey() << ") " << predecessor->getName().c_str() << " (" << successor->getKey() << ") " << successor->getName().c_str());
       }
 
       previous = current++;
@@ -106,8 +122,12 @@ namespace EUROPA {
 
     // Special case, the token could be placed at the end, which can't precede anything. This
     // results in an ordering choice of the noId() i.e. ordering w.r.t. no successor
-    if (choiceCount < limit && getPlanDatabase()->getTemporalAdvisor()->canPrecede(m_tokenSequence.back(),token))
+    if (choiceCount < limit && getPlanDatabase()->getTemporalAdvisor()->canPrecede(m_tokenSequence.back(),token)) {
+      debugMsg("Timeline:getOrderingChoices:canPrecede"," last Precedes (" << m_tokenSequence.back()->getKey() << ") " << m_tokenSequence.back()->getName().c_str() << " (" << token->getKey() << ") " << token->getName().c_str());
       results.push_back(std::make_pair(m_tokenSequence.back(), token));
+    }
+
+    debugMsg("Timeline:getOrderingChoices:canPrecede", "exiting");
   }
 
   void Timeline::getTokensToOrder(std::vector<TokenId>& results) {

@@ -358,6 +358,9 @@ namespace EUROPA {
     check_error(fir.isValid());
     check_error(sec.isValid());
 
+
+    debugMsg("TemporalPropagator:canPrecede", "determining if  " << first->lastDomain() << " precedes " << second->lastDomain());
+
     // further propagation in temporal network will only restrict values
     // further, so if we already are in violation, we will continue to be
     // in violation.
@@ -368,10 +371,14 @@ namespace EUROPA {
     Time slb, sub;
     m_tnet->getLastTimepointBounds(sec, slb, sub);
 
-    if (sub < flb)
+    if (sub < flb) {
+      debugMsg("TemporalPropagator:canPrecede", "second upper bound = " << sub << " < first lower bound " << flb << " returning before calculating distance");
       return false;
+    }
 
     bool result=m_tnet->isDistanceLessThan(fir,sec,0);
+    condDebugMsg(result, "TemporalPropagator:canPrecede", " calculated distance between first and second < 0");
+    condDebugMsg(!result, "TemporalPropagator:canPrecede", " calculated distance between first and second >= 0");
     return !result;
   }
 

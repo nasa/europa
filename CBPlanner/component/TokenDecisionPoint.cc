@@ -3,6 +3,7 @@
 #include "ValueChoice.hh"
 #include "DbClient.hh"
 #include "Utils.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -40,6 +41,9 @@ namespace EUROPA {
     m_choices.clear();
     const AbstractDomain& dom(m_tok->getState()->lastDomain());
     check_error(!dom.isOpen());
+
+    debugMsg("TokenDecisionPoint:getChoices", "State domain = " << dom);
+
     ValueChoice::makeChoices(DecisionPoint::getId(), dom, m_choices);
     return DecisionPoint::getChoices();
   }
