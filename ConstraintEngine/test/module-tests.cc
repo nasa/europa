@@ -26,6 +26,8 @@
 #include "TypeFactory.hh"
 #include "EnumeratedTypeFactory.hh"
 
+#include "ConstraintAllocator.hh"
+
 #include "module-tests.hh"
 
 #include <iostream>
@@ -82,6 +84,15 @@ public:
 private:
   void increment(int event){m_events[event] = m_events[event] + 1;}
   int m_events[ConstraintEngine::EVENT_COUNT];
+};
+
+
+class TestConstraintAllocator: public ConstraintAllocator {
+public:
+  TestConstraintAllocator(): ConstraintAllocator(), m_currentUser("TEST_HARNESS") {}
+  const LabelStr getCurrentUser() const { return m_currentUser; }
+private:
+  const LabelStr m_currentUser;
 };
 
 class TypeFactoryTests {
@@ -506,6 +517,7 @@ public:
     runTest(testNegateConstraint);
     runTest(testUnaryQuery);
     runTest(testTestEqConstraint);
+    runTest(testConstraintAllocator);
     return(true);
   }
 
@@ -2510,7 +2522,31 @@ private:
     return true;
   }
 
+  static bool testConstraintAllocator() {
+    assertTrue(ConstraintAllocator::getInstance().getCurrentUser() == LabelStr("ANONYMOUS"));
 
+    // Ensure new instance overwrites old
+    {
+      ConstraintAllocator std_allocator;
+      assertTrue(&std_allocator == &ConstraintAllocator::getInstance());
+    }
+
+    // Now allocate the test allocator and confirm it is assigned
+    TestConstraintAllocator testAllocator;
+    assertTrue(ConstraintAllocator::getInstance().getCurrentUser() == LabelStr("TEST_HARNESS"));
+    {
+      Variable<LabelSet> v0(ENGINE, LabelSet(LabelStr("C")));
+      Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("E")));
+      Variable<BoolDomain> v2(ENGINE, BoolDomain());
+      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
+			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+
+      // Now ensure the appropriate identifer has been passed to the constraint
+      assertTrue(c0.getCreatedBy() == LabelStr("TEST_HARNESS"));
+    }
+
+    return true;
+  }
 
 }; // class ConstraintTest
 
