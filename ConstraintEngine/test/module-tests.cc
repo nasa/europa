@@ -422,6 +422,7 @@ private:
     IntervalIntDomain d1(10, 20);
     IntervalIntDomain d2(11, 20);
     assert(DomainUtilities::isSubsetOf(d2, d1));
+    assert(!DomainUtilities::equals(d2, d1));
     return true;
   }
 };
