@@ -72,6 +72,8 @@ class Bat {
  }
 }
 
+class Bing {}
+
 class World {
  string m_str1;
  Foo m_foo1;
