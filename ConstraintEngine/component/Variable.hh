@@ -47,7 +47,7 @@ namespace Prototype
      * @see specify()
      */
     void reset();
-
+    
     /**
      * @brief return the domain first used in initialization
      */
