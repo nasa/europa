@@ -95,8 +95,9 @@ rule ModuleObjects {
 
         local output = [ FVariantName $(file:S=) : $(variant) ] ;
         output = $(output)$(SUFOBJ) ;
-        Object $(output) : $(file) ;
+        local HDRS = $(headers) ;
         ObjectHdrs $(output) : $(headers) ;
+        Object $(output) : $(file) ;
       }
     }
   }
