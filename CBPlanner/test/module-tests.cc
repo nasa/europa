@@ -536,8 +536,8 @@ private:
     tokenA.addParameter(IntervalIntDomain(1, 20));
     tokenA.close();
     
-    bool res = planner.run(loggingEnabled());
-    assert(res == 1);
+    CBPlanner::Status res = planner.run(loggingEnabled());
+    assert(res == CBPlanner::PLAN_FOUND);
 
     const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
 
@@ -646,8 +646,8 @@ private:
 
     ConstraintLibrary::createConstraint(LabelStr("eq"), ce.getId(), scope);
 
-    int res = planner.run(loggingEnabled(), 100);
-    assert(res == -3);
+    CBPlanner::Status res = planner.run(loggingEnabled(), 100);
+    assert(res == CBPlanner::SEARCH_EXHAUSTED);
 
     DEFAULT_TEARDOWN_PLAN();
     return(true);
