@@ -165,12 +165,17 @@ namespace Prototype {
     inline void handleExecute() { }
 
   private:
-    const int ARG_COUNT;
+    const unsigned int ARG_COUNT;
 
     ConstraintId m_eqSumC1, m_eqSumC2, m_eqSumC3, m_eqSumC4, m_eqSumC5;
     Variable<IntervalDomain> m_sum1, m_sum2, m_sum3, m_sum4;
   };
 
+  /**
+   * @class LessThanSumConstraint
+   * @brief X <= Y + Z.
+   * Converted into two constraints: X <= temp and temp equal to Y + Z.
+   */
   class LessOrEqThanSumConstraint : public Constraint {
   public:
     LessOrEqThanSumConstraint(const LabelStr& name,
