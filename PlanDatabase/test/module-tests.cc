@@ -10,13 +10,13 @@
 #include "Rule.hh"
 #include "RuleContext.hh"
 #include "ObjectFilter.hh"
+#include "DbLogger.hh"
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/Utils.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
 #include "../ConstraintEngine/LabelSet.hh"
 #include "../ConstraintEngine/DefaultPropagator.hh"
 #include "../ConstraintEngine/EqualityConstraintPropagator.hh"
-#include "../ConstraintEngine/InstrumentationLogger.hh"
 
 #include <iostream>
 #include <sstream>
@@ -54,6 +54,10 @@ SchemaId DefaultSchemaAccessor::s_instance;
     Schema schema;\
     PlanDatabase db(ce.getId(), schema.getId());\
     new DefaultPropagator(LabelStr("Default"), ce.getId());\
+    if(loggingEnabled()){\
+     new CeLogger(cout, ce.getId());\
+     new DbLogger(cout, db.getId());\
+    }\
     RulesEngine re(db.getId()); \
     new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());\
     Object object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));\
@@ -570,7 +574,6 @@ private:
   // add backtracking and longer chain, also add a before constraint
   static bool testMergingPerformance(){
     DEFAULT_SETUP(ce, db, schema, false);
-    InstrumentationLogger listener(ce.getId());
     ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
     db.close();
 
@@ -768,29 +771,36 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
+    std::vector<TokenId> tokens;
+    timeline.getTokensToOrder(tokens);
+    assert(tokens.empty());
     tokenA.activate();
     tokenB.activate();
     tokenC.activate();
+    timeline.getTokensToOrder(tokens);
+    assert(tokens.size() == 3);
+    assert(timeline.getTokenSequence().size() == 0);
 
     timeline.constrain(tokenA.getId());
     timeline.constrain(tokenB.getId());
     timeline.constrain(tokenC.getId(), tokenA.getId());
 
-    std::vector<TokenId> tokens;
     assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
     assert(timeline.getTokenSequence().size() == 3);
+    tokens.clear();
     timeline.getTokensToOrder(tokens);
     assert(tokens.empty());
 
     timeline.free(tokenA.getId());
     assert(timeline.getTokenSequence().size() == 2);
     timeline.getTokensToOrder(tokens);
-    assert(tokens.empty()); // No longer part of this timeline, so it will not be included
+    assert(tokens.size() == 1);
 
     // Now force it to be part of this timeline, even though it is not otherwise constrained
     tokenA.getObject()->specify(timeline.getId());
+    tokens.clear();
     timeline.getTokensToOrder(tokens);
-    assert(tokens.size() == 1);
+    assert(tokens.size() == 1); // Won't affect this quantity
     assert(tokens.front() == tokenA.getId());
 
     timeline.constrain(tokenA.getId());
@@ -840,12 +850,12 @@ private:
     timeline.getTokensToOrder(tokensToOrder);
     assert(tokensToOrder.empty());
 
-    // Now activate all of them - should only get back the one that was specified to a singleton
+    // Now activate all of them
     tokenA.activate();
     tokenB.activate();
     tokenC.activate();
     timeline.getTokensToOrder(tokensToOrder);
-    assert(tokensToOrder.size() == 1 && tokensToOrder.front() == tokenA.getId());
+    assert(tokensToOrder.size() == 3);
 
     // Set remainders so they are singeltons and get all back
     tokenB.getObject()->specify(timeline.getId());
@@ -866,6 +876,22 @@ private:
     assert(tokensToOrder.size() == 1);
 
     timeline.constrain(tokenC.getId());
+    tokensToOrder.clear();
+    timeline.getTokensToOrder(tokensToOrder);
+    assert(tokensToOrder.empty());
+
+
+    // Test destruction call path
+    Token* tokenD = new IntervalToken(db.getId(), 
+				      LabelStr("P1"), 
+				      true,
+				      IntervalIntDomain(0, 10),
+				      IntervalIntDomain(0, 20),
+				      IntervalIntDomain(1, 1000));
+    tokenD->activate();
+    timeline.getTokensToOrder(tokensToOrder);
+    assert(tokensToOrder.size() == 1);
+    delete tokenD;
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
     assert(tokensToOrder.empty());
@@ -1110,7 +1136,7 @@ int main(){
   REGISTER_NARY(EqualConstraint, "CoTemporal", "Default");
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
   REGISTER_NARY(LessThanEqualConstraint, "Before", "Default");
-  REGISTER_UNARY(ObjectTokenRelation, "ObjectRelation", "Default");
+  REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
   REGISTER_NARY(EqualConstraint, "EqualConstraint", "EquivalenceClass");
   // Allocate default schema initially so tests don't fail because of ID's
