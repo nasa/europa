@@ -70,7 +70,10 @@ namespace EUROPA {
       printTokensHelper(os, "Rejected", rejectedTokens);
       printTokensHelper(os, "Inactive", inactiveTokens);
       printTokensHelper(os, "Incomplete", incompleteTokens);
-      printTokensHelper(os, "Merged", mergedTokens);
+      // Skip printing these for two reasons:
+      // 1. Expensive due to constraints not being propagated to their variable domains.
+      // 2. Their id's are printed when their active token is printed with writeToken().
+      // printTokensHelper(os, "Merged", mergedTokens);
     }
 
   private:
