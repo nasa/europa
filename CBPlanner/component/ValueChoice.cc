@@ -36,9 +36,17 @@ namespace PLASMA {
   void ValueChoice::print(std::ostream& os) const {
     check_error(m_id.isValid());
     check_error(m_type == VALUE);
-    if (!m_token.isNoId())
-      os << "Value (" << m_value << ") Token (" << m_token->getKey() << ") ";
-    else 
-      os << "Value (" << m_value << ") ";
+    if (!m_token.isNoId()) {
+      os << "Value (";
+      if (LabelStr::isString(m_value))
+	os << LabelStr(m_value).c_str();
+      os << ") Token (" << m_token->getKey() << ") ";
+    }
+    else {
+      os << "Value ("; 
+      if (LabelStr::isString(m_value))
+	os << LabelStr(m_value).c_str();
+      os << ") ";
+    }
   }
 }
