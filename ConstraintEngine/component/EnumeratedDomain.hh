@@ -81,6 +81,13 @@ namespace EUROPA {
     bool isNumeric() const;
 
     /**
+     * @brief Check if the domain is Bool.
+     */
+    bool isBool() const {
+      return(false);
+    }
+
+    /**
      * @see AbstractDomain::isSingleton()
      */
     bool isSingleton() const;

@@ -214,12 +214,16 @@ namespace EUROPA {
     }
 
     static bool testBoolDomain() {
-      BoolDomain dom0;
-      assertTrue(dom0.getSize() == 2);
+      BoolDomain dom0(true);
+      assertTrue(dom0.getSize() == 1);
       assertTrue(dom0.getUpperBound() == true);
-      assertTrue(dom0.getLowerBound() == false);
+      assertTrue(dom0.getLowerBound() == true);
 
-      IntervalIntDomain dom1(0, 100);
+      BoolDomain dom1;
+      assertTrue(dom1.getSize() == 2);
+      assertTrue(dom1.getUpperBound() == true);
+      assertTrue(dom1.getLowerBound() == false);
+
       dom1.intersect(dom0);
       assertTrue(dom1 == dom0);
       return(true);
@@ -1078,6 +1082,7 @@ namespace EUROPA {
       runTest(testIntDomain);
       runTest(testDomainComparatorConfiguration);
       runTest(testCopying);
+      runTest(testSymbolicVsNumeric);
       return(true);
     }
 
@@ -1148,9 +1153,6 @@ namespace EUROPA {
       dom2.intersect(dom3);
       assertTrue(dom2.getSize() == 3);
 
-      BoolDomain dom4;
-      dom2.intersect(dom4);
-      assertTrue(dom2.getSize() == 1);
       return(true);
     }
 
@@ -1590,6 +1592,34 @@ namespace EUROPA {
 
       return(true);
     }
+
+    static bool testSymbolicVsNumeric() {
+
+      BoolDomain bDom(false);
+      IntervalIntDomain iiDom(-2, PLUS_INFINITY);
+      IntervalDomain iDom(MINUS_INFINITY);
+      NumericDomain nDom(2.7);
+      EnumeratedDomain eDom(false, "MyEnum"); // non numeric enum
+      eDom.set(LabelStr("myEnumMember").getKey());
+      eDom.close();
+      EnumeratedDomain enDom(true, "MyEnum"); // numeric enum
+      enDom.set(20.6);
+      enDom.close();
+      SymbolDomain sDom("mySymbol");
+      StringDomain stDom("myName");
+
+      assertTrue(bDom.isSymbolic());
+      assertTrue(iiDom.isNumeric());
+      assertTrue(iDom.isNumeric());
+      assertTrue(nDom.isNumeric());
+      assertTrue(eDom.isSymbolic());
+      assertTrue(enDom.isNumeric());
+      assertTrue(sDom.isSymbolic());
+      assertTrue(stDom.isSymbolic());
+
+      return(true);
+    }
+
   };
 }
 

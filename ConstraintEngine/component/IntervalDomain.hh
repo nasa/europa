@@ -57,6 +57,16 @@ namespace EUROPA {
     }
 
     /**
+     * @brief IntervalDomains are not BoolDomain unless it is instantiated
+     * as BoolDomain.
+     * @note BoolDomain presently inherits from this class via class
+     * IntervalIntDomain. 
+     */
+    virtual bool isBool() const {
+      return(false);
+    }
+
+    /**
      * @brief Get the type of the domain to aid in type checking.
      * @see AbstractDomain::DomainType
      */

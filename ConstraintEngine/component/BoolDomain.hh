@@ -42,6 +42,14 @@ namespace EUROPA {
 
     bool isTrue() const;
 
+    bool isNumeric() const {
+      return(false);
+    }
+
+    bool isBool() const {
+      return(true);
+    }
+
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
      */

@@ -1254,7 +1254,7 @@ namespace EUROPA {
                                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     for (unsigned int i = 0; i < m_variables.size(); i++)
-      check_error(getCurrentDomain(m_variables[i]).isNumeric());
+      check_error(getCurrentDomain(m_variables[i]).isNumeric() || getCurrentDomain(m_variables[i]).isBool());
   }
 
   void CountZerosConstraint::handleExecute() {

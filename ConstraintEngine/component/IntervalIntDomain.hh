@@ -35,6 +35,10 @@ namespace EUROPA{
 
     bool isFinite() const;
 
+    virtual bool isBool() const {
+      return(false);
+    }
+
     /**
      * @brief Get the type of the domain to aid in type checking.
      * @see AbstractDomain::DomainType

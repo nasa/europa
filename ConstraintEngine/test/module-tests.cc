@@ -154,11 +154,14 @@ public:
   static bool testDomainCreation() {
     const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(TypeFactory::baseDomain(IntervalIntDomain().getTypeName().c_str()));
     assertTrue(bd0.isMember(0));
+    assertTrue(!bd0.isBool());
     const IntervalDomain & bd1 = dynamic_cast<const IntervalDomain &>(TypeFactory::baseDomain(IntervalDomain().getTypeName().c_str()));
     assertTrue(bd1.isMember(0.1));
+    assertTrue(!bd1.isBool());
     const BoolDomain & bd2 = dynamic_cast<const BoolDomain &>(TypeFactory::baseDomain(BoolDomain().getTypeName().c_str()));
     assertTrue(bd2.isMember(false));
     assertTrue(bd2.isMember(true));
+    assertTrue(bd2.isBool());
     assertTrue(LocationsBaseDomain().isMember(LabelStr("Hill")));
     assertTrue(LocationsBaseDomain().isMember(LabelStr("Rock")));
     assertTrue(LocationsBaseDomain().isMember(LabelStr("Lander")));
@@ -166,6 +169,7 @@ public:
     //!!This (and SymbolDomain) die with complaints of a "bad cast"
     //!!const Locations & loc0 = dynamic_cast<const Locations&>(TypeFactory::baseDomain("Locations"));
     const EnumeratedDomain & loc0 = dynamic_cast<const EnumeratedDomain &>(TypeFactory::baseDomain("Locations"));
+    assertTrue(!loc0.isBool());
     assertTrue(loc0.isMember(LabelStr("Hill")));
     assertTrue(loc0.isMember(LabelStr("Rock")));
     assertTrue(loc0.isMember(LabelStr("Lander")));
