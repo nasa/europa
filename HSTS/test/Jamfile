@@ -63,6 +63,15 @@ RunEUROPATest monkey2Tests : timeline2.nddl timeline22.nddl timeline23.nddl ;
 
 RunEUROPATest robotTests : req1.nddl ;
 
+# These fail; converter used explicit bounds on a temporal constraint, which the NDDL compiler does not support.
+#   Also, the NDDL compiler printed the wrong file name for the error: rover.nddl rather than rover-test.nddl,
+#     rover3.nddl rather than rover3-test.nddl, rover4.nddl rather than rover4-test.nddl, and
+#     multrover.nddl rather than multrover-test.nddl.
+# RunEUROPATest roverTests : rover-test.nddl rover3-test.nddl rover4-test.nddl multrover-test.nddl ;
+
+# These use constraint tokens, which Europa2 (PLASMA) does not support.
+# RunEUROPATest roverTests : rover2-test.nddl rover2a-test.nddl rover2b-test.nddl ;
+
 # Example; not yet converted or committed
 #RunEUROPATest dnp3-fourFreeObs : dnp3-fourFreeObs-tx.nddl : dnp3.heuristics.xml : dnp3.heuristics.pid ;
 

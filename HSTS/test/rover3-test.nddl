@@ -1,0 +1,55 @@
+// ../../../ModuleTests/Parser/rover/rover3.ddl
+
+#include "../../NDDL/core/Plasma.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
+#include "rover3.nddl"
+
+PlannerConfig world = new PlannerConfig(0, 200, 1000);
+
+Rover_Class Bobo = new Rover_Class();
+
+close();
+
+goal(Rover_Class___location.At g11);
+  g11.activate();
+  g11.start.specify(0);
+  g11.end.specify([1 40]);
+  g11.duration.specify([1 40]);
+  g11.Loc_Label.specify(Location_Label.'lander');
+
+goal(Rover_Class___location.At g32);
+  g32.activate();
+  g32.start.specify([20 40]);
+  g32.end.specify([21 79]);
+  g32.duration.specify([1 59]);
+  g32.Loc_Label.specify(Location_Label.'hill');
+
+goal(Rover_Class___location.At g54);
+  g54.activate();
+  g54.start.specify([41 99]);
+  g54.end.specify([80 100]);
+  g54.duration.specify([1 59]);
+  g54.Loc_Label.specify(Location_Label.'sand');
+
+goal(Rover_Class___location.At g76);
+  g76.activate();
+  g76.start.specify([130 150]);
+  g76.end.specify([170 180]);
+  g76.duration.specify([20 50]);
+  g76.Loc_Label.specify(Location_Label.'sand');
+
+goal(Rover_Class___location.At g98);
+  g98.activate();
+  g98.start.specify([170 199]);
+  g98.end.specify(200);
+  g98.duration.specify([1 30]);
+  g98.Loc_Label.specify(Location_Label.'rock');
+
+g11 before [0,30] g32; // key=41
+g11 before g32; // key=50
+g32 before [20,30] g54; // key=63
+g32 before g54; // key=72
+g54 before g76; // key=85
+g54 before g76; // key=94
+g76 before g98; // key=107
+g76 before g98; // key=117

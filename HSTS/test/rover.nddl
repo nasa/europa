@@ -1,0 +1,46 @@
+// ../../../ModuleTests/Parser/rover/rover.ddl
+
+enum Location_Label { 'lander', 'rock', 'hill', 'sand', 'martian_city' } 
+
+class Rover_Class___location {
+  predicate At {
+    Location_Label Loc_Label;
+
+    eq(duration, [1 +inf]);
+  }
+
+  predicate Going {
+    Location_Label From_Loc;
+    Location_Label To_Loc;
+
+    eq(duration, 5);
+    neq(From_Loc, To_Loc);
+  }
+
+  Rover_Class __DDL__object;
+  Rover_Class___location(Rover_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class Rover_Class {
+  Rover_Class___location location;
+  Rover_Class() {
+    location = new Rover_Class___location(this);
+  }
+}
+
+Rover_Class___location::At {
+  met_by(Rover_Class___location.Going s0);
+    eq(s0.To_Loc, Loc_Label);
+  meets(Rover_Class___location.Going s1);
+    eq(s1.From_Loc, Loc_Label);
+}
+
+Rover_Class___location::Going {
+  met_by(Rover_Class___location.At s0);
+    eq(s0.Loc_Label, From_Loc);
+  meets(Rover_Class___location.At s1);
+    eq(s1.Loc_Label, To_Loc);
+}
+

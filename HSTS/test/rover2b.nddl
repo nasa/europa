@@ -1,0 +1,155 @@
+// ../../../ModuleTests/Parser/rover/rover2b.ddl
+
+enum Location_Label { 'lander', 'rock', 'hill', 'sand', 'martian_city' } 
+
+class Rover_Class___location {
+  predicate At {
+    Location_Label Loc_Label;
+  }
+
+  predicate Going {
+    Location_Label From_Loc;
+    Location_Label To_Loc;
+
+    eq(duration, [5 15]);
+    neq(From_Loc, To_Loc);
+  }
+
+  Rover_Class __DDL__object;
+  Rover_Class___location(Rover_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class Rover_Class___activity {
+  predicate Wave {
+    Rover_Class rover;
+    bool withArm;
+    bool isLander;
+    bool toLander;
+    Location_Label toLocation;
+    Location_Label fromLocation;
+
+    neq(rover, object.__DDL__object);
+    neq(withArm, false);
+    condadiff(Location_Label.'lander', toLocation, isLander);
+    neq(toLocation, fromLocation);
+    condadiff(toLocation, fromLocation, true);
+  }
+
+  predicate Idle {
+  }
+
+  Rover_Class __DDL__object;
+  Rover_Class___activity(Rover_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class Rover_Class___foo {
+  predicate DoFoo {
+    int value;
+    float real;
+    float sum;
+    float inf;
+    float inf2;
+    Rover_Class rover;
+
+    eq(real, [-1 15]);
+    eq(sum, [0 10]);
+    eq(inf, [-10 +inf]);
+    sum(sum, real, [1.5 10], [0 10], inf);
+    sum(real, inf, inf2);
+    neq(object.__DDL__object, rover);
+    eq(inf2, [-inf 20]);
+  }
+
+  Rover_Class __DDL__object;
+  Rover_Class___foo(Rover_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class Rover_Class___bar {
+  predicate DoBar {
+    int value;
+    Rover_Class rover;
+
+    neq(object.__DDL__object, rover);
+  }
+
+  predicate NotDoBar {
+    int value;
+    Rover_Class rover;
+
+    eq(object.__DDL__object, rover);
+  }
+
+  Rover_Class __DDL__object;
+  Rover_Class___bar(Rover_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class Rover_Class {
+  Rover_Class___location location;
+  Rover_Class___activity activity;
+  Rover_Class___foo foo;
+  Rover_Class___bar bar;
+  Rover_Class() {
+    location = new Rover_Class___location(this);
+    activity = new Rover_Class___activity(this);
+    foo = new Rover_Class___foo(this);
+    bar = new Rover_Class___bar(this);
+  }
+}
+
+Rover_Class___location::At {
+  met_by(Going s0);
+    eq(s0.To_Loc, Loc_Label);
+  meets(Going s1);
+    eq(s1.From_Loc, Loc_Label);
+}
+
+Rover_Class___location::Going {
+  met_by(At s0);
+    eq(s0.Loc_Label, From_Loc);
+  meets(At s1);
+    eq(s1.Loc_Label, To_Loc);
+}
+
+Rover_Class___activity::Wave {
+  met_by(Idle s0);
+  meets(Idle s1);
+  contained_by(Rover_Class___location.At s2);
+    eq(object.__DDL__object.location, s2.object);
+    eq(s2.Loc_Label, fromLocation);
+}
+
+Rover_Class___activity::Idle {
+  met_by(Wave s0);
+  meets(Wave s1);
+}
+
+Rover_Class___foo::DoFoo {
+  contained_by(Rover_Class___bar.DoBar s0m0, Rover_Class___bar.NotDoBar s0m1);
+    eq(s0m0.value, value);
+    eq(s0m0.rover, rover);
+    eq(s0m1.value, value);
+    eq(s0m1.rover, object.__DDL__object);
+}
+
+Rover_Class___bar::DoBar {
+  met_by(?o___bar.NotDoBar s0);
+    eq(s0.rover, object.__DDL__object);
+  meets(?o___bar.NotDoBar s1);
+    eq(s1.rover, object.__DDL__object);
+}
+
+Rover_Class___bar::NotDoBar {
+  met_by(DoBar s0);
+    eq(s0.rover, object.__DDL__object);
+  meets(DoBar s1);
+    eq(s1.rover, object.__DDL__object);
+}
+
