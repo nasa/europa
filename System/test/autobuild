@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.80 2004-09-19 03:21:01 wedgingt Exp $
+# $Id: autobuild,v 1.81 2004-09-21 01:41:18 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -181,7 +181,7 @@ cvsTagPassed $tag
     echo '';
     echo "All builds, tests, and cleans passed for each variant (of $variants) and";
     echo "  each method of building the libraries (of $libmethods).";
-    echo "Tagged: 'cvs tag -F '$tag") | \
+    echo "Tagged: 'cvs tag -F $tag'") | \
   Mail -s 'PLASMA Autobuild on '"`hostname`"' passed.' "$email"
 
 date > lastCompleted
