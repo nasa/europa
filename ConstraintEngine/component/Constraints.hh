@@ -221,7 +221,7 @@ namespace Prototype {
                               const std::vector<ConstrainedVariableId>& variables);
 
     ~LessOrEqThanSumConstraint() {
-      delete (Constraint*) m_eqSumConstraint;
+      delete (EqualSumConstraint*) m_eqSumConstraint;
     }
 
     // All the work is done by the member constraints
@@ -246,7 +246,7 @@ namespace Prototype {
                           const std::vector<ConstrainedVariableId>& variables);
 
     ~LessThanSumConstraint() {
-      delete (Constraint*) m_eqSumConstraint;
+      delete (EqualSumConstraint*) m_eqSumConstraint;
     }
 
     // All the work is done by the member constraints
@@ -271,7 +271,7 @@ namespace Prototype {
                                  const std::vector<ConstrainedVariableId>& variables);
 
     ~GreaterOrEqThanSumConstraint() {
-      delete (Constraint*) m_eqSumConstraint;
+      delete (EqualSumConstraint*) m_eqSumConstraint;
     }
 
     // All the work is done by the member constraints
@@ -296,7 +296,7 @@ namespace Prototype {
                              const std::vector<ConstrainedVariableId>& variables);
 
     ~GreaterThanSumConstraint() {
-      delete (Constraint*) m_eqSumConstraint;
+      delete (EqualSumConstraint*) m_eqSumConstraint;
     }
 
     // All the work is done by the member constraints
@@ -506,6 +506,31 @@ namespace Prototype {
   };
 
   /**
+   * @class CondEqualSumConstraint
+   * @brief If A is true, then B = C + D ...; if A is false, B != C + D ...
+   * Converted into two constraints: CondAllSame(A, B, sum) and EqualSum(sum, C, D, ...).
+   */
+  class CondEqualSumConstraint : public Constraint {
+  public:
+    CondEqualSumConstraint(const LabelStr& name,
+                           const LabelStr& propagatorName,
+                           const ConstraintEngineId& constraintEngine,
+                           const std::vector<ConstrainedVariableId>& variables);
+
+    ~CondEqualSumConstraint() {
+      delete (EqualSumConstraint*) m_eqSumConstraint;
+    }
+
+    // All the work is done by the member constraints.
+    inline void handleExecute() { }
+
+  private:
+    Variable<IntervalDomain> m_sumVar;
+    CondAllSameConstraint m_condAllSameConstraint;
+    ConstraintId m_eqSumConstraint;
+  };
+
+  /**
    * @class RotateScopeRightConstraint
    * @brief Rotate the scope right rotateCount places and call the otherName
    * constraint.
@@ -535,8 +560,42 @@ namespace Prototype {
 
     ~RotateScopeRightConstraint() {
       assertTrue(m_otherConstraint.isValid());
-      // const std::vector<ConstrainedVariableId> scope = m_otherConstraint->getScope();
-      // m_otherConstraint.release();
+      delete (Constraint*) m_otherConstraint;
+    }
+
+    void handleExecute() { }
+
+  private:
+    ConstraintId m_otherConstraint;
+  };
+
+  /**
+   * @class SwapTwoVarsConstraint
+   * @brief Swap two variables in the scope and call the otherName
+   * constraint.
+   */
+  class SwapTwoVarsConstraint : public Constraint {
+  public:
+    SwapTwoVarsConstraint(const LabelStr& name,
+                          const LabelStr& propagatorName,
+                          const ConstraintEngineId& constraintEngine,
+                          const std::vector<ConstrainedVariableId>& variables)
+      : Constraint(name, propagatorName, constraintEngine, variables) {
+      // Called via REGISTER_NARY() macro's factory rather than via the
+      //   REGISTER_SWAP_TWO_VARS_NARY() macro's factory: not enough information
+      //   to create the constraint.
+      assertTrue(false);
+    }
+
+    SwapTwoVarsConstraint(const LabelStr& name,
+                          const LabelStr& propagatorName,
+                          const ConstraintEngineId& constraintEngine,
+                          const std::vector<ConstrainedVariableId>& variables,
+                          const LabelStr& otherName,
+                          int firstIndex, int secondIndex);
+
+    ~SwapTwoVarsConstraint() {
+      assertTrue(m_otherConstraint.isValid());
       delete (Constraint*) m_otherConstraint;
     }
 
