@@ -74,23 +74,25 @@ namespace Prototype {
   }
 
   void EnumeratedDomain::set(const EnumeratedDomain& dom){
-    if(*this != dom){
-      intersect(dom);
-      notifyChange(DomainListener::SET);
-    }
+    intersect(dom);
+    notifyChange(DomainListener::SET);
   }
 
   void EnumeratedDomain::set(double value){
     // Find the value in the current set.
     int index = getIndex(value);
 
-    if (index < 0)
+    if (index < 0){
       empty();
-    else if(!isSingleton()){ // Implying not currently a singleton
+      return;
+    }
+
+    if(!isSingleton()){ // Implying not currently a singleton
       m_membership.reset();
       m_membership.set(index);
-      notifyChange(DomainListener::SET_TO_SINGLETON);
     }
+
+    notifyChange(DomainListener::SET_TO_SINGLETON);
   }
 
   void EnumeratedDomain::reset(const EnumeratedDomain& dom){
