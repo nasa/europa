@@ -1731,462 +1731,462 @@ test 1730 for inputs [0 1] [1] [1] [1] outputs [0 1] [1] [1] [1]
 test 1731 for inputs [0 1] [1] [1] [0] outputs [0 1] [1] [1] [0]
 test 1732 for inputs [0 1] [1] [0] [0] outputs [0 1] [1] [0] [0]
 test 1733 for inputs [0 1] [0] [0] [0] outputs [0 1] [0] [0] [0]
-test 1734 addeqcond inputs [1] [1] [1] [1] outputs [] [] [] []
-test 1735 addeqcond inputs [0] [0] [0] [1] outputs [0] [0] [0] [1]
-test 1736 addeqcond inputs [-1] [-1] [-1] [1] outputs [] [] [] []
-test 1737 addeqcond inputs [Infinity] [Infinity] [Infinity] [1] outputs [Infinity] [Infinity] [Infinity] [1]
-test 1738 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] [1] outputs [-Infinity] [-Infinity] [-Infinity] [1]
-test 1739 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [1] outputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [1]
-test 1740 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [1] outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [1]
-test 1741 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [1] outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [1]
-test 1742 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [1] outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [1]
-test 1743 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] [1] outputs [0 Infinity] [0 Infinity] [0 Infinity] [1]
-test 1744 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] [1] outputs [1 Infinity] [1 Infinity] [1 Infinity] [1]
-test 1745 addeqcond inputs [-1] [-1] [0] [1] outputs [] [] [] []
-test 1746 addeqcond inputs [-1] [0] [1] [1] outputs [] [] [] []
-test 1747 addeqcond inputs [-1] [0] [-1] [1] outputs [-1] [0] [-1] [1]
-test 1748 addeqcond inputs [-1] [0] [0] [1] outputs [] [] [] []
-test 1749 addeqcond inputs [-1] [0] [1] [1] outputs [] [] [] []
-test 1750 addeqcond inputs [-1] [1] [-1] [1] outputs [] [] [] []
-test 1751 addeqcond inputs [-1] [1] [0] [1] outputs [-1] [1] [0] [1]
-test 1752 addeqcond inputs [-1] [1] [1] [1] outputs [] [] [] []
-test 1753 addeqcond inputs [0] [-1] [0] [1] outputs [] [] [] []
-test 1754 addeqcond inputs [0] [0] [1] [1] outputs [] [] [] []
-test 1755 addeqcond inputs [0] [0] [-1] [1] outputs [] [] [] []
-test 1756 addeqcond inputs [0] [0] [1] [1] outputs [] [] [] []
-test 1757 addeqcond inputs [0] [1] [-1] [1] outputs [] [] [] []
-test 1758 addeqcond inputs [0] [1] [0] [1] outputs [] [] [] []
-test 1759 addeqcond inputs [0] [1] [1] [1] outputs [0] [1] [1] [1]
-test 1760 addeqcond inputs [1] [-1] [0] [1] outputs [1] [-1] [0] [1]
-test 1761 addeqcond inputs [1] [0] [1] [1] outputs [1] [0] [1] [1]
-test 1762 addeqcond inputs [0] [1] [0] [1] outputs [] [] [] []
-test 1763 addeqcond inputs [1] [0] [0] [1] outputs [] [] [] []
-test 1764 addeqcond inputs [1] [0] [1] [1] outputs [1] [0] [1] [1]
-test 1765 addeqcond inputs [1] [1] [-1] [1] outputs [] [] [] []
-test 1766 addeqcond inputs [1] [1] [0] [1] outputs [] [] [] []
-test 1767 addeqcond inputs [-1] [-1] [Infinity] [1] outputs [-1] [-1] [Infinity] [1]
-test 1768 addeqcond inputs [-1] [-1] [-Infinity] [1] outputs [-1] [-1] [-Infinity] [1]
-test 1769 addeqcond inputs [-1] [Infinity] [1] [1] outputs [-1] [Infinity] [1] [1]
-test 1770 addeqcond inputs [-1] [-Infinity] [1] [1] outputs [-1] [-Infinity] [1] [1]
-test 1771 addeqcond inputs [Infinity] [-1] [1] [1] outputs [Infinity] [-1] [1] [1]
-test 1772 addeqcond inputs [-Infinity] [-1] [1] [1] outputs [-Infinity] [-1] [1] [1]
-test 1773 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] [1] outputs [] [] [] []
-test 1774 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] [1] outputs [] [] [] []
-test 1775 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] [1] outputs [-1] [1] [0] [1]
-test 1776 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1777 addeqcond inputs [-Infinity -1] [0 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1778 addeqcond inputs [-Infinity -1] [1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1779 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] [1] outputs [] [] [] []
-test 1780 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] [1] outputs [0] [0] [0] [1]
-test 1781 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] [1] outputs [-1 0] [0 1] [0] [1]
-test 1782 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1783 addeqcond inputs [-Infinity 0] [0 Infinity] [0] [1] outputs [-Infinity 0] [0 Infinity] [0] [1]
-test 1784 addeqcond inputs [-Infinity 0] [1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1785 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] [1] outputs [1] [-1] [0] [1]
-test 1786 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] [1] outputs [0 1] [-1 0] [0] [1]
-test 1787 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] [1] outputs [-1 1] [-1 1] [0] [1]
-test 1788 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] [1] outputs [-Infinity 1] [-1 Infinity] [0] [1]
-test 1789 addeqcond inputs [-Infinity 1] [0 Infinity] [0] [1] outputs [-Infinity 0] [0 Infinity] [0] [1]
-test 1790 addeqcond inputs [-Infinity 1] [1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1791 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 1792 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] [1] outputs [0 Infinity] [-Infinity 0] [0] [1]
-test 1793 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] [1] outputs [-1 Infinity] [-Infinity 1] [0] [1]
-test 1794 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] [1] outputs [-1 1] [-1 1] [0] [1]
-test 1795 addeqcond inputs [-1 Infinity] [0 Infinity] [0] [1] outputs [-1 0] [0 1] [0] [1]
-test 1796 addeqcond inputs [-1 Infinity] [1 Infinity] [0] [1] outputs [-1] [1] [0] [1]
-test 1797 addeqcond inputs [0 Infinity] [-Infinity -1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 1798 addeqcond inputs [0 Infinity] [-Infinity 0] [0] [1] outputs [0 Infinity] [-Infinity 0] [0] [1]
-test 1799 addeqcond inputs [0 Infinity] [-Infinity 1] [0] [1] outputs [0 Infinity] [-Infinity 0] [0] [1]
-test 1800 addeqcond inputs [0 Infinity] [-1 Infinity] [0] [1] outputs [0 1] [-1 0] [0] [1]
-test 1801 addeqcond inputs [0 Infinity] [0 Infinity] [0] [1] outputs [0] [0] [0] [1]
-test 1802 addeqcond inputs [0 Infinity] [1 Infinity] [0] [1] outputs [] [] [] []
-test 1803 addeqcond inputs [1 Infinity] [-Infinity -1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 1804 addeqcond inputs [1 Infinity] [-Infinity 0] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 1805 addeqcond inputs [1 Infinity] [-Infinity 1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 1806 addeqcond inputs [1 Infinity] [-1 Infinity] [0] [1] outputs [1] [-1] [0] [1]
-test 1807 addeqcond inputs [1 Infinity] [0 Infinity] [0] [1] outputs [] [] [] []
-test 1808 addeqcond inputs [1 Infinity] [1 Infinity] [0] [1] outputs [] [] [] []
-test 1809 addeqcond inputs [1] [1] [1] [0] outputs [1] [1] [1] [0]
-test 1810 addeqcond inputs [0] [0] [0] [0] outputs [] [] [] []
-test 1811 addeqcond inputs [-1] [-1] [-1] [0] outputs [-1] [-1] [-1] [0]
-test 1812 addeqcond inputs [Infinity] [Infinity] [Infinity] [0] outputs [Infinity] [Infinity] [Infinity] [0]
-test 1813 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] [0] outputs [-Infinity] [-Infinity] [-Infinity] [0]
-test 1814 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [0] outputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [0]
-test 1815 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [0] outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [0]
-test 1816 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [0] outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [0]
-test 1817 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [0] outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [0]
-test 1818 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] [0] outputs [0 Infinity] [0 Infinity] [0 Infinity] [0]
-test 1819 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] [0] outputs [1 Infinity] [1 Infinity] [1 Infinity] [0]
-test 1820 addeqcond inputs [-1] [-1] [0] [0] outputs [-1] [-1] [0] [0]
-test 1821 addeqcond inputs [-1] [0] [1] [0] outputs [-1] [0] [1] [0]
-test 1822 addeqcond inputs [-1] [0] [-1] [0] outputs [] [] [] []
-test 1823 addeqcond inputs [-1] [0] [0] [0] outputs [-1] [0] [0] [0]
-test 1824 addeqcond inputs [-1] [1] [-1] [0] outputs [-1] [1] [-1] [0]
-test 1825 addeqcond inputs [-1] [1] [0] [0] outputs [] [] [] []
-test 1826 addeqcond inputs [-1] [1] [1] [0] outputs [-1] [1] [1] [0]
-test 1827 addeqcond inputs [0] [-1] [0] [0] outputs [0] [-1] [0] [0]
-test 1828 addeqcond inputs [0] [0] [1] [0] outputs [0] [0] [1] [0]
-test 1829 addeqcond inputs [0] [0] [-1] [0] outputs [0] [0] [-1] [0]
-test 1830 addeqcond inputs [0] [0] [0] [0] outputs [] [] [] []
-test 1831 addeqcond inputs [0] [0] [1] [0] outputs [0] [0] [1] [0]
-test 1832 addeqcond inputs [0] [1] [-1] [0] outputs [0] [1] [-1] [0]
-test 1833 addeqcond inputs [0] [1] [0] [0] outputs [0] [1] [0] [0]
-test 1834 addeqcond inputs [0] [1] [1] [0] outputs [] [] [] []
-test 1835 addeqcond inputs [1] [-1] [0] [0] outputs [] [] [] []
-test 1836 addeqcond inputs [1] [0] [1] [0] outputs [] [] [] []
-test 1837 addeqcond inputs [1] [0] [-1] [0] outputs [1] [0] [-1] [0]
-test 1838 addeqcond inputs [1] [0] [0] [0] outputs [1] [0] [0] [0]
-test 1839 addeqcond inputs [1] [1] [-1] [0] outputs [1] [1] [-1] [0]
-test 1840 addeqcond inputs [1] [1] [0] [0] outputs [1] [1] [0] [0]
-test 1841 addeqcond inputs [1] [1] [1] [0] outputs [1] [1] [1] [0]
-test 1842 addeqcond inputs [-1] [-1] [Infinity] [0] outputs [-1] [-1] [Infinity] [0]
-test 1843 addeqcond inputs [-1] [-1] [-Infinity] [0] outputs [-1] [-1] [-Infinity] [0]
-test 1844 addeqcond inputs [-1] [Infinity] [1] [0] outputs [-1] [Infinity] [1] [0]
-test 1845 addeqcond inputs [-1] [-Infinity] [1] [0] outputs [-1] [-Infinity] [1] [0]
-test 1846 addeqcond inputs [Infinity] [-1] [1] [0] outputs [Infinity] [-1] [1] [0]
-test 1847 addeqcond inputs [-Infinity] [-1] [1] [0] outputs [-Infinity] [-1] [1] [0]
-test 1848 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] [0] outputs [-Infinity -1] [-Infinity -1] [0] [0]
-test 1849 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] [0] outputs [-Infinity -1] [-Infinity 0] [0] [0]
-test 1850 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] [0] outputs [-Infinity -1] [-Infinity 1] [0] [0]
-test 1851 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] [0] outputs [-Infinity -1] [-1 Infinity] [0] [0]
-test 1852 addeqcond inputs [-Infinity -1] [0 Infinity] [0] [0] outputs [-Infinity -1] [0 Infinity] [0] [0]
-test 1853 addeqcond inputs [-Infinity -1] [1 Infinity] [0] [0] outputs [-Infinity -1] [1 Infinity] [0] [0]
-test 1854 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] [0] outputs [-Infinity 0] [-Infinity -1] [0] [0]
-test 1855 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] [0] outputs [-Infinity 0] [-Infinity 0] [0] [0]
-test 1856 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] [0] outputs [-Infinity 0] [-Infinity 1] [0] [0]
-test 1857 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] [0] outputs [-Infinity 0] [-1 Infinity] [0] [0]
-test 1858 addeqcond inputs [-Infinity 0] [0 Infinity] [0] [0] outputs [-Infinity 0] [0 Infinity] [0] [0]
-test 1859 addeqcond inputs [-Infinity 0] [1 Infinity] [0] [0] outputs [-Infinity 0] [1 Infinity] [0] [0]
-test 1860 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] [0] outputs [-Infinity 1] [-Infinity -1] [0] [0]
-test 1861 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] [0] outputs [-Infinity 1] [-Infinity 0] [0] [0]
-test 1862 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] [0] outputs [-Infinity 1] [-Infinity 1] [0] [0]
-test 1863 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] [0] outputs [-Infinity 1] [-1 Infinity] [0] [0]
-test 1864 addeqcond inputs [-Infinity 1] [0 Infinity] [0] [0] outputs [-Infinity 1] [0 Infinity] [0] [0]
-test 1865 addeqcond inputs [-Infinity 1] [1 Infinity] [0] [0] outputs [-Infinity 1] [1 Infinity] [0] [0]
-test 1866 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] [0] outputs [-1 Infinity] [-Infinity -1] [0] [0]
-test 1867 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] [0] outputs [-1 Infinity] [-Infinity 0] [0] [0]
-test 1868 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] [0] outputs [-1 Infinity] [-Infinity 1] [0] [0]
-test 1869 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] [0] outputs [-1 Infinity] [-1 Infinity] [0] [0]
-test 1870 addeqcond inputs [-1 Infinity] [0 Infinity] [0] [0] outputs [-1 Infinity] [0 Infinity] [0] [0]
-test 1871 addeqcond inputs [-1 Infinity] [1 Infinity] [0] [0] outputs [-1 Infinity] [1 Infinity] [0] [0]
-test 1872 addeqcond inputs [0 Infinity] [-Infinity -1] [0] [0] outputs [0 Infinity] [-Infinity -1] [0] [0]
-test 1873 addeqcond inputs [0 Infinity] [-Infinity 0] [0] [0] outputs [0 Infinity] [-Infinity 0] [0] [0]
-test 1874 addeqcond inputs [0 Infinity] [-Infinity 1] [0] [0] outputs [0 Infinity] [-Infinity 1] [0] [0]
-test 1875 addeqcond inputs [0 Infinity] [-1 Infinity] [0] [0] outputs [0 Infinity] [-1 Infinity] [0] [0]
-test 1876 addeqcond inputs [0 Infinity] [0 Infinity] [0] [0] outputs [0 Infinity] [0 Infinity] [0] [0]
-test 1877 addeqcond inputs [0 Infinity] [1 Infinity] [0] [0] outputs [0 Infinity] [1 Infinity] [0] [0]
-test 1878 addeqcond inputs [1 Infinity] [-Infinity -1] [0] [0] outputs [1 Infinity] [-Infinity -1] [0] [0]
-test 1879 addeqcond inputs [1 Infinity] [-Infinity 0] [0] [0] outputs [1 Infinity] [-Infinity 0] [0] [0]
-test 1880 addeqcond inputs [1 Infinity] [-Infinity 1] [0] [0] outputs [1 Infinity] [-Infinity 1] [0] [0]
-test 1881 addeqcond inputs [1 Infinity] [-1 Infinity] [0] [0] outputs [1 Infinity] [-1 Infinity] [0] [0]
-test 1882 addeqcond inputs [1 Infinity] [0 Infinity] [0] [0] outputs [1 Infinity] [0 Infinity] [0] [0]
-test 1883 addeqcond inputs [1 Infinity] [1 Infinity] [0] [0] outputs [1 Infinity] [1 Infinity] [0] [0]
-test 1884 addeqcond inputs [1] [-1 10] [0] [0] outputs [1] [0 10] [0] [0]
-test 1885 addeqcond inputs [1] [-2 10] [0] [0] outputs [1] [-2 10] [0] [0]
-test 1886 addeqcond inputs [1] [1] [1] [1] outputs [] [] [] []
-test 1887 addeqcond inputs [0] [0] [0] [1] outputs [0] [0] [0] [1]
-test 1888 addeqcond inputs [-1] [-1] [-1] [1] outputs [] [] [] []
-test 1889 addeqcond inputs [Infinity] [Infinity] [Infinity] [1] outputs [Infinity] [Infinity] [Infinity] [1]
-test 1890 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] [1] outputs [-Infinity] [-Infinity] [-Infinity] [1]
-test 1891 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [1] outputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [1]
-test 1892 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [1] outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [1]
-test 1893 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [1] outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [1]
-test 1894 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [1] outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [1]
-test 1895 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] [1] outputs [0 Infinity] [0 Infinity] [0 Infinity] [1]
-test 1896 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] [1] outputs [1 Infinity] [1 Infinity] [1 Infinity] [1]
-test 1897 addeqcond inputs [-1] [-1] [0] [1] outputs [] [] [] []
-test 1898 addeqcond inputs [-1] [0] [1] [1] outputs [] [] [] []
-test 1899 addeqcond inputs [-1] [0] [-1] [1] outputs [-1] [0] [-1] [1]
-test 1900 addeqcond inputs [-1] [0] [0] [1] outputs [] [] [] []
-test 1901 addeqcond inputs [-1] [0] [1] [1] outputs [] [] [] []
-test 1902 addeqcond inputs [-1] [1] [-1] [1] outputs [] [] [] []
-test 1903 addeqcond inputs [-1] [1] [0] [1] outputs [-1] [1] [0] [1]
-test 1904 addeqcond inputs [-1] [1] [1] [1] outputs [] [] [] []
-test 1905 addeqcond inputs [0] [-1] [0] [1] outputs [] [] [] []
-test 1906 addeqcond inputs [0] [0] [1] [1] outputs [] [] [] []
-test 1907 addeqcond inputs [0] [0] [-1] [1] outputs [] [] [] []
-test 1908 addeqcond inputs [0] [0] [1] [1] outputs [] [] [] []
-test 1909 addeqcond inputs [0] [1] [-1] [1] outputs [] [] [] []
-test 1910 addeqcond inputs [0] [1] [0] [1] outputs [] [] [] []
-test 1911 addeqcond inputs [0] [1] [1] [1] outputs [0] [1] [1] [1]
-test 1912 addeqcond inputs [1] [-1] [0] [1] outputs [1] [-1] [0] [1]
-test 1913 addeqcond inputs [1] [0] [1] [1] outputs [1] [0] [1] [1]
-test 1914 addeqcond inputs [0] [1] [0] [1] outputs [] [] [] []
-test 1915 addeqcond inputs [1] [0] [0] [1] outputs [] [] [] []
-test 1916 addeqcond inputs [1] [0] [1] [1] outputs [1] [0] [1] [1]
-test 1917 addeqcond inputs [1] [1] [-1] [1] outputs [] [] [] []
-test 1918 addeqcond inputs [1] [1] [0] [1] outputs [] [] [] []
-test 1919 addeqcond inputs [-1] [-1] [Infinity] [1] outputs [-1] [-1] [Infinity] [1]
-test 1920 addeqcond inputs [-1] [-1] [-Infinity] [1] outputs [-1] [-1] [-Infinity] [1]
-test 1921 addeqcond inputs [-1] [Infinity] [1] [1] outputs [-1] [Infinity] [1] [1]
-test 1922 addeqcond inputs [-1] [-Infinity] [1] [1] outputs [-1] [-Infinity] [1] [1]
-test 1923 addeqcond inputs [Infinity] [-1] [1] [1] outputs [Infinity] [-1] [1] [1]
-test 1924 addeqcond inputs [-Infinity] [-1] [1] [1] outputs [-Infinity] [-1] [1] [1]
-test 1925 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] [1] outputs [] [] [] []
-test 1926 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] [1] outputs [] [] [] []
-test 1927 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] [1] outputs [-1] [1] [0] [1]
-test 1928 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1929 addeqcond inputs [-Infinity -1] [0 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1930 addeqcond inputs [-Infinity -1] [1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1931 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] [1] outputs [] [] [] []
-test 1932 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] [1] outputs [0] [0] [0] [1]
-test 1933 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] [1] outputs [-1 0] [0 1] [0] [1]
-test 1934 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1935 addeqcond inputs [-Infinity 0] [0 Infinity] [0] [1] outputs [-Infinity 0] [0 Infinity] [0] [1]
-test 1936 addeqcond inputs [-Infinity 0] [1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1937 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] [1] outputs [1] [-1] [0] [1]
-test 1938 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] [1] outputs [0 1] [-1 0] [0] [1]
-test 1939 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] [1] outputs [-1 1] [-1 1] [0] [1]
-test 1940 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] [1] outputs [-Infinity 1] [-1 Infinity] [0] [1]
-test 1941 addeqcond inputs [-Infinity 1] [0 Infinity] [0] [1] outputs [-Infinity 0] [0 Infinity] [0] [1]
-test 1942 addeqcond inputs [-Infinity 1] [1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 1943 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 1944 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] [1] outputs [0 Infinity] [-Infinity 0] [0] [1]
-test 1945 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] [1] outputs [-1 Infinity] [-Infinity 1] [0] [1]
-test 1946 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] [1] outputs [-1 1] [-1 1] [0] [1]
-test 1947 addeqcond inputs [-1 Infinity] [0 Infinity] [0] [1] outputs [-1 0] [0 1] [0] [1]
-test 1948 addeqcond inputs [-1 Infinity] [1 Infinity] [0] [1] outputs [-1] [1] [0] [1]
-test 1949 addeqcond inputs [0 Infinity] [-Infinity -1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 1950 addeqcond inputs [0 Infinity] [-Infinity 0] [0] [1] outputs [0 Infinity] [-Infinity 0] [0] [1]
-test 1951 addeqcond inputs [0 Infinity] [-Infinity 1] [0] [1] outputs [0 Infinity] [-Infinity 0] [0] [1]
-test 1952 addeqcond inputs [0 Infinity] [-1 Infinity] [0] [1] outputs [0 1] [-1 0] [0] [1]
-test 1953 addeqcond inputs [0 Infinity] [0 Infinity] [0] [1] outputs [0] [0] [0] [1]
-test 1954 addeqcond inputs [0 Infinity] [1 Infinity] [0] [1] outputs [] [] [] []
-test 1955 addeqcond inputs [1 Infinity] [-Infinity -1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 1956 addeqcond inputs [1 Infinity] [-Infinity 0] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 1957 addeqcond inputs [1 Infinity] [-Infinity 1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 1958 addeqcond inputs [1 Infinity] [-1 Infinity] [0] [1] outputs [1] [-1] [0] [1]
-test 1959 addeqcond inputs [1 Infinity] [0 Infinity] [0] [1] outputs [] [] [] []
-test 1960 addeqcond inputs [1 Infinity] [1 Infinity] [0] [1] outputs [] [] [] []
-test 1961 addeqcond inputs [1] [1] [1] [0] outputs [1] [1] [1] [0]
-test 1962 addeqcond inputs [0] [0] [0] [0] outputs [] [] [] []
-test 1963 addeqcond inputs [-1] [-1] [-1] [0] outputs [-1] [-1] [-1] [0]
-test 1964 addeqcond inputs [Infinity] [Infinity] [Infinity] [0] outputs [Infinity] [Infinity] [Infinity] [0]
-test 1965 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] [0] outputs [-Infinity] [-Infinity] [-Infinity] [0]
-test 1966 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [0] outputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [0]
-test 1967 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [0] outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [0]
-test 1968 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [0] outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [0]
-test 1969 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [0] outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [0]
-test 1970 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] [0] outputs [0 Infinity] [0 Infinity] [0 Infinity] [0]
-test 1971 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] [0] outputs [1 Infinity] [1 Infinity] [1 Infinity] [0]
-test 1972 addeqcond inputs [-1] [-1] [0] [0] outputs [-1] [-1] [0] [0]
-test 1973 addeqcond inputs [-1] [0] [1] [0] outputs [-1] [0] [1] [0]
-test 1974 addeqcond inputs [-1] [0] [-1] [0] outputs [] [] [] []
-test 1975 addeqcond inputs [-1] [0] [0] [0] outputs [-1] [0] [0] [0]
-test 1976 addeqcond inputs [-1] [1] [-1] [0] outputs [-1] [1] [-1] [0]
-test 1977 addeqcond inputs [-1] [1] [0] [0] outputs [] [] [] []
-test 1978 addeqcond inputs [-1] [1] [1] [0] outputs [-1] [1] [1] [0]
-test 1979 addeqcond inputs [0] [-1] [0] [0] outputs [0] [-1] [0] [0]
-test 1980 addeqcond inputs [0] [0] [1] [0] outputs [0] [0] [1] [0]
-test 1981 addeqcond inputs [0] [0] [-1] [0] outputs [0] [0] [-1] [0]
-test 1982 addeqcond inputs [0] [0] [0] [0] outputs [] [] [] []
-test 1983 addeqcond inputs [0] [0] [1] [0] outputs [0] [0] [1] [0]
-test 1984 addeqcond inputs [0] [1] [-1] [0] outputs [0] [1] [-1] [0]
-test 1985 addeqcond inputs [0] [1] [0] [0] outputs [0] [1] [0] [0]
-test 1986 addeqcond inputs [0] [1] [1] [0] outputs [] [] [] []
-test 1987 addeqcond inputs [1] [-1] [0] [0] outputs [] [] [] []
-test 1988 addeqcond inputs [1] [0] [1] [0] outputs [] [] [] []
-test 1989 addeqcond inputs [1] [0] [-1] [0] outputs [1] [0] [-1] [0]
-test 1990 addeqcond inputs [1] [0] [0] [0] outputs [1] [0] [0] [0]
-test 1991 addeqcond inputs [1] [1] [-1] [0] outputs [1] [1] [-1] [0]
-test 1992 addeqcond inputs [1] [1] [0] [0] outputs [1] [1] [0] [0]
-test 1993 addeqcond inputs [1] [1] [1] [0] outputs [1] [1] [1] [0]
-test 1994 addeqcond inputs [-1] [-1] [Infinity] [0] outputs [-1] [-1] [Infinity] [0]
-test 1995 addeqcond inputs [-1] [-1] [-Infinity] [0] outputs [-1] [-1] [-Infinity] [0]
-test 1996 addeqcond inputs [-1] [Infinity] [1] [0] outputs [-1] [Infinity] [1] [0]
-test 1997 addeqcond inputs [-1] [-Infinity] [1] [0] outputs [-1] [-Infinity] [1] [0]
-test 1998 addeqcond inputs [Infinity] [-1] [1] [0] outputs [Infinity] [-1] [1] [0]
-test 1999 addeqcond inputs [-Infinity] [-1] [1] [0] outputs [-Infinity] [-1] [1] [0]
-test 2000 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] [0] outputs [-Infinity -1] [-Infinity -1] [0] [0]
-test 2001 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] [0] outputs [-Infinity -1] [-Infinity 0] [0] [0]
-test 2002 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] [0] outputs [-Infinity -1] [-Infinity 1] [0] [0]
-test 2003 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] [0] outputs [-Infinity -1] [-1 Infinity] [0] [0]
-test 2004 addeqcond inputs [-Infinity -1] [0 Infinity] [0] [0] outputs [-Infinity -1] [0 Infinity] [0] [0]
-test 2005 addeqcond inputs [-Infinity -1] [1 Infinity] [0] [0] outputs [-Infinity -1] [1 Infinity] [0] [0]
-test 2006 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] [0] outputs [-Infinity 0] [-Infinity -1] [0] [0]
-test 2007 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] [0] outputs [-Infinity 0] [-Infinity 0] [0] [0]
-test 2008 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] [0] outputs [-Infinity 0] [-Infinity 1] [0] [0]
-test 2009 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] [0] outputs [-Infinity 0] [-1 Infinity] [0] [0]
-test 2010 addeqcond inputs [-Infinity 0] [0 Infinity] [0] [0] outputs [-Infinity 0] [0 Infinity] [0] [0]
-test 2011 addeqcond inputs [-Infinity 0] [1 Infinity] [0] [0] outputs [-Infinity 0] [1 Infinity] [0] [0]
-test 2012 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] [0] outputs [-Infinity 1] [-Infinity -1] [0] [0]
-test 2013 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] [0] outputs [-Infinity 1] [-Infinity 0] [0] [0]
-test 2014 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] [0] outputs [-Infinity 1] [-Infinity 1] [0] [0]
-test 2015 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] [0] outputs [-Infinity 1] [-1 Infinity] [0] [0]
-test 2016 addeqcond inputs [-Infinity 1] [0 Infinity] [0] [0] outputs [-Infinity 1] [0 Infinity] [0] [0]
-test 2017 addeqcond inputs [-Infinity 1] [1 Infinity] [0] [0] outputs [-Infinity 1] [1 Infinity] [0] [0]
-test 2018 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] [0] outputs [-1 Infinity] [-Infinity -1] [0] [0]
-test 2019 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] [0] outputs [-1 Infinity] [-Infinity 0] [0] [0]
-test 2020 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] [0] outputs [-1 Infinity] [-Infinity 1] [0] [0]
-test 2021 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] [0] outputs [-1 Infinity] [-1 Infinity] [0] [0]
-test 2022 addeqcond inputs [-1 Infinity] [0 Infinity] [0] [0] outputs [-1 Infinity] [0 Infinity] [0] [0]
-test 2023 addeqcond inputs [-1 Infinity] [1 Infinity] [0] [0] outputs [-1 Infinity] [1 Infinity] [0] [0]
-test 2024 addeqcond inputs [0 Infinity] [-Infinity -1] [0] [0] outputs [0 Infinity] [-Infinity -1] [0] [0]
-test 2025 addeqcond inputs [0 Infinity] [-Infinity 0] [0] [0] outputs [0 Infinity] [-Infinity 0] [0] [0]
-test 2026 addeqcond inputs [0 Infinity] [-Infinity 1] [0] [0] outputs [0 Infinity] [-Infinity 1] [0] [0]
-test 2027 addeqcond inputs [0 Infinity] [-1 Infinity] [0] [0] outputs [0 Infinity] [-1 Infinity] [0] [0]
-test 2028 addeqcond inputs [0 Infinity] [0 Infinity] [0] [0] outputs [0 Infinity] [0 Infinity] [0] [0]
-test 2029 addeqcond inputs [0 Infinity] [1 Infinity] [0] [0] outputs [0 Infinity] [1 Infinity] [0] [0]
-test 2030 addeqcond inputs [1 Infinity] [-Infinity -1] [0] [0] outputs [1 Infinity] [-Infinity -1] [0] [0]
-test 2031 addeqcond inputs [1 Infinity] [-Infinity 0] [0] [0] outputs [1 Infinity] [-Infinity 0] [0] [0]
-test 2032 addeqcond inputs [1 Infinity] [-Infinity 1] [0] [0] outputs [1 Infinity] [-Infinity 1] [0] [0]
-test 2033 addeqcond inputs [1 Infinity] [-1 Infinity] [0] [0] outputs [1 Infinity] [-1 Infinity] [0] [0]
-test 2034 addeqcond inputs [1 Infinity] [0 Infinity] [0] [0] outputs [1 Infinity] [0 Infinity] [0] [0]
-test 2035 addeqcond inputs [1 Infinity] [1 Infinity] [0] [0] outputs [1 Infinity] [1 Infinity] [0] [0]
-test 2036 addeqcond inputs [1] [-1 10] [0] [0] outputs [1] [0 10] [0] [0]
-test 2037 addeqcond inputs [1] [-2 10] [0] [0] outputs [1] [-2 10] [0] [0]
-test 2038 addeqcond inputs [1] [1] [1] [1] outputs [] [] [] []
-test 2039 addeqcond inputs [0] [0] [0] [1] outputs [0] [0] [0] [1]
-test 2040 addeqcond inputs [-1] [-1] [-1] [1] outputs [] [] [] []
-test 2041 addeqcond inputs [Infinity] [Infinity] [Infinity] [1] outputs [Infinity] [Infinity] [Infinity] [1]
-test 2042 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] [1] outputs [-Infinity] [-Infinity] [-Infinity] [1]
-test 2043 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [1] outputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [1]
-test 2044 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [1] outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [1]
-test 2045 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [1] outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [1]
-test 2046 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [1] outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [1]
-test 2047 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] [1] outputs [0 Infinity] [0 Infinity] [0 Infinity] [1]
-test 2048 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] [1] outputs [1 Infinity] [1 Infinity] [1 Infinity] [1]
-test 2049 addeqcond inputs [-1] [-1] [0] [1] outputs [] [] [] []
-test 2050 addeqcond inputs [-1] [0] [1] [1] outputs [] [] [] []
-test 2051 addeqcond inputs [-1] [0] [-1] [1] outputs [-1] [0] [-1] [1]
-test 2052 addeqcond inputs [-1] [0] [0] [1] outputs [] [] [] []
-test 2053 addeqcond inputs [-1] [0] [1] [1] outputs [] [] [] []
-test 2054 addeqcond inputs [-1] [1] [-1] [1] outputs [] [] [] []
-test 2055 addeqcond inputs [-1] [1] [0] [1] outputs [-1] [1] [0] [1]
-test 2056 addeqcond inputs [-1] [1] [1] [1] outputs [] [] [] []
-test 2057 addeqcond inputs [0] [-1] [0] [1] outputs [] [] [] []
-test 2058 addeqcond inputs [0] [0] [1] [1] outputs [] [] [] []
-test 2059 addeqcond inputs [0] [0] [-1] [1] outputs [] [] [] []
-test 2060 addeqcond inputs [0] [0] [1] [1] outputs [] [] [] []
-test 2061 addeqcond inputs [0] [1] [-1] [1] outputs [] [] [] []
-test 2062 addeqcond inputs [0] [1] [0] [1] outputs [] [] [] []
-test 2063 addeqcond inputs [0] [1] [1] [1] outputs [0] [1] [1] [1]
-test 2064 addeqcond inputs [1] [-1] [0] [1] outputs [1] [-1] [0] [1]
-test 2065 addeqcond inputs [1] [0] [1] [1] outputs [1] [0] [1] [1]
-test 2066 addeqcond inputs [0] [1] [0] [1] outputs [] [] [] []
-test 2067 addeqcond inputs [1] [0] [0] [1] outputs [] [] [] []
-test 2068 addeqcond inputs [1] [0] [1] [1] outputs [1] [0] [1] [1]
-test 2069 addeqcond inputs [1] [1] [-1] [1] outputs [] [] [] []
-test 2070 addeqcond inputs [1] [1] [0] [1] outputs [] [] [] []
-test 2071 addeqcond inputs [-1] [-1] [Infinity] [1] outputs [-1] [-1] [Infinity] [1]
-test 2072 addeqcond inputs [-1] [-1] [-Infinity] [1] outputs [-1] [-1] [-Infinity] [1]
-test 2073 addeqcond inputs [-1] [Infinity] [1] [1] outputs [-1] [Infinity] [1] [1]
-test 2074 addeqcond inputs [-1] [-Infinity] [1] [1] outputs [-1] [-Infinity] [1] [1]
-test 2075 addeqcond inputs [Infinity] [-1] [1] [1] outputs [Infinity] [-1] [1] [1]
-test 2076 addeqcond inputs [-Infinity] [-1] [1] [1] outputs [-Infinity] [-1] [1] [1]
-test 2077 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] [1] outputs [] [] [] []
-test 2078 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] [1] outputs [] [] [] []
-test 2079 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] [1] outputs [-1] [1] [0] [1]
-test 2080 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 2081 addeqcond inputs [-Infinity -1] [0 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 2082 addeqcond inputs [-Infinity -1] [1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 2083 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] [1] outputs [] [] [] []
-test 2084 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] [1] outputs [0] [0] [0] [1]
-test 2085 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] [1] outputs [-1 0] [0 1] [0] [1]
-test 2086 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 2087 addeqcond inputs [-Infinity 0] [0 Infinity] [0] [1] outputs [-Infinity 0] [0 Infinity] [0] [1]
-test 2088 addeqcond inputs [-Infinity 0] [1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 2089 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] [1] outputs [1] [-1] [0] [1]
-test 2090 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] [1] outputs [0 1] [-1 0] [0] [1]
-test 2091 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] [1] outputs [-1 1] [-1 1] [0] [1]
-test 2092 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] [1] outputs [-Infinity 1] [-1 Infinity] [0] [1]
-test 2093 addeqcond inputs [-Infinity 1] [0 Infinity] [0] [1] outputs [-Infinity 0] [0 Infinity] [0] [1]
-test 2094 addeqcond inputs [-Infinity 1] [1 Infinity] [0] [1] outputs [-Infinity -1] [1 Infinity] [0] [1]
-test 2095 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 2096 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] [1] outputs [0 Infinity] [-Infinity 0] [0] [1]
-test 2097 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] [1] outputs [-1 Infinity] [-Infinity 1] [0] [1]
-test 2098 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] [1] outputs [-1 1] [-1 1] [0] [1]
-test 2099 addeqcond inputs [-1 Infinity] [0 Infinity] [0] [1] outputs [-1 0] [0 1] [0] [1]
-test 2100 addeqcond inputs [-1 Infinity] [1 Infinity] [0] [1] outputs [-1] [1] [0] [1]
-test 2101 addeqcond inputs [0 Infinity] [-Infinity -1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 2102 addeqcond inputs [0 Infinity] [-Infinity 0] [0] [1] outputs [0 Infinity] [-Infinity 0] [0] [1]
-test 2103 addeqcond inputs [0 Infinity] [-Infinity 1] [0] [1] outputs [0 Infinity] [-Infinity 0] [0] [1]
-test 2104 addeqcond inputs [0 Infinity] [-1 Infinity] [0] [1] outputs [0 1] [-1 0] [0] [1]
-test 2105 addeqcond inputs [0 Infinity] [0 Infinity] [0] [1] outputs [0] [0] [0] [1]
-test 2106 addeqcond inputs [0 Infinity] [1 Infinity] [0] [1] outputs [] [] [] []
-test 2107 addeqcond inputs [1 Infinity] [-Infinity -1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 2108 addeqcond inputs [1 Infinity] [-Infinity 0] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 2109 addeqcond inputs [1 Infinity] [-Infinity 1] [0] [1] outputs [1 Infinity] [-Infinity -1] [0] [1]
-test 2110 addeqcond inputs [1 Infinity] [-1 Infinity] [0] [1] outputs [1] [-1] [0] [1]
-test 2111 addeqcond inputs [1 Infinity] [0 Infinity] [0] [1] outputs [] [] [] []
-test 2112 addeqcond inputs [1 Infinity] [1 Infinity] [0] [1] outputs [] [] [] []
-test 2113 addeqcond inputs [1] [1] [1] [0] outputs [1] [1] [1] [0]
-test 2114 addeqcond inputs [0] [0] [0] [0] outputs [] [] [] []
-test 2115 addeqcond inputs [-1] [-1] [-1] [0] outputs [-1] [-1] [-1] [0]
-test 2116 addeqcond inputs [Infinity] [Infinity] [Infinity] [0] outputs [Infinity] [Infinity] [Infinity] [0]
-test 2117 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] [0] outputs [-Infinity] [-Infinity] [-Infinity] [0]
-test 2118 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [0] outputs [-Infinity -1] [-Infinity -1] [-Infinity -1] [0]
-test 2119 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [0] outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] [0]
-test 2120 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [0] outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] [0]
-test 2121 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [0] outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] [0]
-test 2122 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] [0] outputs [0 Infinity] [0 Infinity] [0 Infinity] [0]
-test 2123 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] [0] outputs [1 Infinity] [1 Infinity] [1 Infinity] [0]
-test 2124 addeqcond inputs [-1] [-1] [0] [0] outputs [-1] [-1] [0] [0]
-test 2125 addeqcond inputs [-1] [0] [1] [0] outputs [-1] [0] [1] [0]
-test 2126 addeqcond inputs [-1] [0] [-1] [0] outputs [] [] [] []
-test 2127 addeqcond inputs [-1] [0] [0] [0] outputs [-1] [0] [0] [0]
-test 2128 addeqcond inputs [-1] [1] [-1] [0] outputs [-1] [1] [-1] [0]
-test 2129 addeqcond inputs [-1] [1] [0] [0] outputs [] [] [] []
-test 2130 addeqcond inputs [-1] [1] [1] [0] outputs [-1] [1] [1] [0]
-test 2131 addeqcond inputs [0] [-1] [0] [0] outputs [0] [-1] [0] [0]
-test 2132 addeqcond inputs [0] [0] [1] [0] outputs [0] [0] [1] [0]
-test 2133 addeqcond inputs [0] [0] [-1] [0] outputs [0] [0] [-1] [0]
-test 2134 addeqcond inputs [0] [0] [0] [0] outputs [] [] [] []
-test 2135 addeqcond inputs [0] [0] [1] [0] outputs [0] [0] [1] [0]
-test 2136 addeqcond inputs [0] [1] [-1] [0] outputs [0] [1] [-1] [0]
-test 2137 addeqcond inputs [0] [1] [0] [0] outputs [0] [1] [0] [0]
-test 2138 addeqcond inputs [0] [1] [1] [0] outputs [] [] [] []
-test 2139 addeqcond inputs [1] [-1] [0] [0] outputs [] [] [] []
-test 2140 addeqcond inputs [1] [0] [1] [0] outputs [] [] [] []
-test 2141 addeqcond inputs [1] [0] [-1] [0] outputs [1] [0] [-1] [0]
-test 2142 addeqcond inputs [1] [0] [0] [0] outputs [1] [0] [0] [0]
-test 2143 addeqcond inputs [1] [1] [-1] [0] outputs [1] [1] [-1] [0]
-test 2144 addeqcond inputs [1] [1] [0] [0] outputs [1] [1] [0] [0]
-test 2145 addeqcond inputs [1] [1] [1] [0] outputs [1] [1] [1] [0]
-test 2146 addeqcond inputs [-1] [-1] [Infinity] [0] outputs [-1] [-1] [Infinity] [0]
-test 2147 addeqcond inputs [-1] [-1] [-Infinity] [0] outputs [-1] [-1] [-Infinity] [0]
-test 2148 addeqcond inputs [-1] [Infinity] [1] [0] outputs [-1] [Infinity] [1] [0]
-test 2149 addeqcond inputs [-1] [-Infinity] [1] [0] outputs [-1] [-Infinity] [1] [0]
-test 2150 addeqcond inputs [Infinity] [-1] [1] [0] outputs [Infinity] [-1] [1] [0]
-test 2151 addeqcond inputs [-Infinity] [-1] [1] [0] outputs [-Infinity] [-1] [1] [0]
-test 2152 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] [0] outputs [-Infinity -1] [-Infinity -1] [0] [0]
-test 2153 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] [0] outputs [-Infinity -1] [-Infinity 0] [0] [0]
-test 2154 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] [0] outputs [-Infinity -1] [-Infinity 1] [0] [0]
-test 2155 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] [0] outputs [-Infinity -1] [-1 Infinity] [0] [0]
-test 2156 addeqcond inputs [-Infinity -1] [0 Infinity] [0] [0] outputs [-Infinity -1] [0 Infinity] [0] [0]
-test 2157 addeqcond inputs [-Infinity -1] [1 Infinity] [0] [0] outputs [-Infinity -1] [1 Infinity] [0] [0]
-test 2158 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] [0] outputs [-Infinity 0] [-Infinity -1] [0] [0]
-test 2159 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] [0] outputs [-Infinity 0] [-Infinity 0] [0] [0]
-test 2160 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] [0] outputs [-Infinity 0] [-Infinity 1] [0] [0]
-test 2161 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] [0] outputs [-Infinity 0] [-1 Infinity] [0] [0]
-test 2162 addeqcond inputs [-Infinity 0] [0 Infinity] [0] [0] outputs [-Infinity 0] [0 Infinity] [0] [0]
-test 2163 addeqcond inputs [-Infinity 0] [1 Infinity] [0] [0] outputs [-Infinity 0] [1 Infinity] [0] [0]
-test 2164 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] [0] outputs [-Infinity 1] [-Infinity -1] [0] [0]
-test 2165 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] [0] outputs [-Infinity 1] [-Infinity 0] [0] [0]
-test 2166 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] [0] outputs [-Infinity 1] [-Infinity 1] [0] [0]
-test 2167 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] [0] outputs [-Infinity 1] [-1 Infinity] [0] [0]
-test 2168 addeqcond inputs [-Infinity 1] [0 Infinity] [0] [0] outputs [-Infinity 1] [0 Infinity] [0] [0]
-test 2169 addeqcond inputs [-Infinity 1] [1 Infinity] [0] [0] outputs [-Infinity 1] [1 Infinity] [0] [0]
-test 2170 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] [0] outputs [-1 Infinity] [-Infinity -1] [0] [0]
-test 2171 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] [0] outputs [-1 Infinity] [-Infinity 0] [0] [0]
-test 2172 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] [0] outputs [-1 Infinity] [-Infinity 1] [0] [0]
-test 2173 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] [0] outputs [-1 Infinity] [-1 Infinity] [0] [0]
-test 2174 addeqcond inputs [-1 Infinity] [0 Infinity] [0] [0] outputs [-1 Infinity] [0 Infinity] [0] [0]
-test 2175 addeqcond inputs [-1 Infinity] [1 Infinity] [0] [0] outputs [-1 Infinity] [1 Infinity] [0] [0]
-test 2176 addeqcond inputs [0 Infinity] [-Infinity -1] [0] [0] outputs [0 Infinity] [-Infinity -1] [0] [0]
-test 2177 addeqcond inputs [0 Infinity] [-Infinity 0] [0] [0] outputs [0 Infinity] [-Infinity 0] [0] [0]
-test 2178 addeqcond inputs [0 Infinity] [-Infinity 1] [0] [0] outputs [0 Infinity] [-Infinity 1] [0] [0]
-test 2179 addeqcond inputs [0 Infinity] [-1 Infinity] [0] [0] outputs [0 Infinity] [-1 Infinity] [0] [0]
-test 2180 addeqcond inputs [0 Infinity] [0 Infinity] [0] [0] outputs [0 Infinity] [0 Infinity] [0] [0]
-test 2181 addeqcond inputs [0 Infinity] [1 Infinity] [0] [0] outputs [0 Infinity] [1 Infinity] [0] [0]
-test 2182 addeqcond inputs [1 Infinity] [-Infinity -1] [0] [0] outputs [1 Infinity] [-Infinity -1] [0] [0]
-test 2183 addeqcond inputs [1 Infinity] [-Infinity 0] [0] [0] outputs [1 Infinity] [-Infinity 0] [0] [0]
-test 2184 addeqcond inputs [1 Infinity] [-Infinity 1] [0] [0] outputs [1 Infinity] [-Infinity 1] [0] [0]
-test 2185 addeqcond inputs [1 Infinity] [-1 Infinity] [0] [0] outputs [1 Infinity] [-1 Infinity] [0] [0]
-test 2186 addeqcond inputs [1 Infinity] [0 Infinity] [0] [0] outputs [1 Infinity] [0 Infinity] [0] [0]
-test 2187 addeqcond inputs [1 Infinity] [1 Infinity] [0] [0] outputs [1 Infinity] [1 Infinity] [0] [0]
-test 2188 addeqcond inputs [1] [-1 10] [0] [0] outputs [1] [0 10] [0] [0]
-test 2189 addeqcond inputs [1] [-2 10] [0] [0] outputs [1] [-2 10] [0] [0]
+test 1734 addeqcond inputs [1] [1] [1] {true} outputs [] [] [] []
+test 1735 addeqcond inputs [0] [0] [0] {true} outputs [0] [0] [0] {true}
+test 1736 addeqcond inputs [-1] [-1] [-1] {true} outputs [] [] [] []
+test 1737 addeqcond inputs [Infinity] [Infinity] [Infinity] {true} outputs [Infinity] [Infinity] [Infinity] {true}
+test 1738 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] {true} outputs [-Infinity] [-Infinity] [-Infinity] {true}
+test 1739 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] {true} outputs [-Infinity -1] [-Infinity -1] [-Infinity -2] {true}
+test 1740 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {true} outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {true}
+test 1741 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {true} outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {true}
+test 1742 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {true} outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {true}
+test 1743 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] {true} outputs [0 Infinity] [0 Infinity] [0 Infinity] {true}
+test 1744 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] {true} outputs [1 Infinity] [1 Infinity] [2 Infinity] {true}
+test 1745 addeqcond inputs [-1] [-1] [0] {true} outputs [] [] [] []
+test 1746 addeqcond inputs [-1] [0] [1] {true} outputs [] [] [] []
+test 1747 addeqcond inputs [-1] [0] [-1] {true} outputs [-1] [0] [-1] {true}
+test 1748 addeqcond inputs [-1] [0] [0] {true} outputs [] [] [] []
+test 1749 addeqcond inputs [-1] [0] [1] {true} outputs [] [] [] []
+test 1750 addeqcond inputs [-1] [1] [-1] {true} outputs [] [] [] []
+test 1751 addeqcond inputs [-1] [1] [0] {true} outputs [-1] [1] [0] {true}
+test 1752 addeqcond inputs [-1] [1] [1] {true} outputs [] [] [] []
+test 1753 addeqcond inputs [0] [-1] [0] {true} outputs [] [] [] []
+test 1754 addeqcond inputs [0] [0] [1] {true} outputs [] [] [] []
+test 1755 addeqcond inputs [0] [0] [-1] {true} outputs [] [] [] []
+test 1756 addeqcond inputs [0] [0] [1] {true} outputs [] [] [] []
+test 1757 addeqcond inputs [0] [1] [-1] {true} outputs [] [] [] []
+test 1758 addeqcond inputs [0] [1] [0] {true} outputs [] [] [] []
+test 1759 addeqcond inputs [0] [1] [1] {true} outputs [0] [1] [1] {true}
+test 1760 addeqcond inputs [1] [-1] [0] {true} outputs [1] [-1] [0] {true}
+test 1761 addeqcond inputs [1] [0] [1] {true} outputs [1] [0] [1] {true}
+test 1762 addeqcond inputs [0] [1] [0] {true} outputs [] [] [] []
+test 1763 addeqcond inputs [1] [0] [0] {true} outputs [] [] [] []
+test 1764 addeqcond inputs [1] [0] [1] {true} outputs [1] [0] [1] {true}
+test 1765 addeqcond inputs [1] [1] [-1] {true} outputs [] [] [] []
+test 1766 addeqcond inputs [1] [1] [0] {true} outputs [] [] [] []
+test 1767 addeqcond inputs [-1] [-1] [Infinity] {true} outputs [] [] [] {}
+test 1768 addeqcond inputs [-1] [-1] [-Infinity] {true} outputs [] [] [] {}
+test 1769 addeqcond inputs [-1] [Infinity] [1] {true} outputs [] [] [] {}
+test 1770 addeqcond inputs [-1] [-Infinity] [1] {true} outputs [] [] [] {}
+test 1771 addeqcond inputs [Infinity] [-1] [1] {true} outputs [] [] [] {}
+test 1772 addeqcond inputs [-Infinity] [-1] [1] {true} outputs [] [] [] {}
+test 1773 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] {true} outputs [] [] [] []
+test 1774 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] {true} outputs [] [] [] []
+test 1775 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] {true} outputs [-1] [1] [0] {true}
+test 1776 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 1777 addeqcond inputs [-Infinity -1] [0 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 1778 addeqcond inputs [-Infinity -1] [1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 1779 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] {true} outputs [] [] [] []
+test 1780 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] {true} outputs [0] [0] [0] {true}
+test 1781 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] {true} outputs [-1 0] [0 1] [0] {true}
+test 1782 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] {true} outputs [-Infinity 0] [0 Infinity] [0] {true}
+test 1783 addeqcond inputs [-Infinity 0] [0 Infinity] [0] {true} outputs [-Infinity 0] [0 Infinity] [0] {true}
+test 1784 addeqcond inputs [-Infinity 0] [1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 1785 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] {true} outputs [1] [-1] [0] {true}
+test 1786 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] {true} outputs [0 1] [-1 0] [0] {true}
+test 1787 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] {true} outputs [-1 1] [-1 1] [0] {true}
+test 1788 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] {true} outputs [-Infinity 1] [-1 Infinity] [0] {true}
+test 1789 addeqcond inputs [-Infinity 1] [0 Infinity] [0] {true} outputs [-Infinity 0] [0 Infinity] [0] {true}
+test 1790 addeqcond inputs [-Infinity 1] [1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 1791 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 1792 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] {true} outputs [0 Infinity] [-Infinity 0] [0] {true}
+test 1793 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] {true} outputs [-1 Infinity] [-Infinity 1] [0] {true}
+test 1794 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] {true} outputs [-1 1] [-1 1] [0] {true}
+test 1795 addeqcond inputs [-1 Infinity] [0 Infinity] [0] {true} outputs [-1 0] [0 1] [0] {true}
+test 1796 addeqcond inputs [-1 Infinity] [1 Infinity] [0] {true} outputs [-1] [1] [0] {true}
+test 1797 addeqcond inputs [0 Infinity] [-Infinity -1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 1798 addeqcond inputs [0 Infinity] [-Infinity 0] [0] {true} outputs [0 Infinity] [-Infinity 0] [0] {true}
+test 1799 addeqcond inputs [0 Infinity] [-Infinity 1] [0] {true} outputs [0 Infinity] [-Infinity 0] [0] {true}
+test 1800 addeqcond inputs [0 Infinity] [-1 Infinity] [0] {true} outputs [0 1] [-1 0] [0] {true}
+test 1801 addeqcond inputs [0 Infinity] [0 Infinity] [0] {true} outputs [0] [0] [0] {true}
+test 1802 addeqcond inputs [0 Infinity] [1 Infinity] [0] {true} outputs [] [] [] []
+test 1803 addeqcond inputs [1 Infinity] [-Infinity -1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 1804 addeqcond inputs [1 Infinity] [-Infinity 0] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 1805 addeqcond inputs [1 Infinity] [-Infinity 1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 1806 addeqcond inputs [1 Infinity] [-1 Infinity] [0] {true} outputs [1] [-1] [0] {true}
+test 1807 addeqcond inputs [1 Infinity] [0 Infinity] [0] {true} outputs [] [] [] []
+test 1808 addeqcond inputs [1 Infinity] [1 Infinity] [0] {true} outputs [] [] [] []
+test 1809 addeqcond inputs [1] [1] [1] {false} outputs [1] [1] [1] {false}
+test 1810 addeqcond inputs [0] [0] [0] {false} outputs [] [] [] []
+test 1811 addeqcond inputs [-1] [-1] [-1] {false} outputs [-1] [-1] [-1] {false}
+test 1812 addeqcond inputs [Infinity] [Infinity] [Infinity] {false} outputs [Infinity] [Infinity] [Infinity] {false}
+test 1813 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] {false} outputs [-Infinity] [-Infinity] [-Infinity] {false}
+test 1814 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] {false} outputs [-Infinity -1] [-Infinity -1] [-Infinity -1] {false}
+test 1815 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {false} outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {false}
+test 1816 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {false} outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {false}
+test 1817 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {false} outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {false}
+test 1818 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] {false} outputs [0 Infinity] [0 Infinity] [0 Infinity] {false}
+test 1819 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] {false} outputs [1 Infinity] [1 Infinity] [1 Infinity] {false}
+test 1820 addeqcond inputs [-1] [-1] [0] {false} outputs [-1] [-1] [0] {false}
+test 1821 addeqcond inputs [-1] [0] [1] {false} outputs [-1] [0] [1] {false}
+test 1822 addeqcond inputs [-1] [0] [-1] {false} outputs [] [] [] []
+test 1823 addeqcond inputs [-1] [0] [0] {false} outputs [-1] [0] [0] {false}
+test 1824 addeqcond inputs [-1] [1] [-1] {false} outputs [-1] [1] [-1] {false}
+test 1825 addeqcond inputs [-1] [1] [0] {false} outputs [] [] [] []
+test 1826 addeqcond inputs [-1] [1] [1] {false} outputs [-1] [1] [1] {false}
+test 1827 addeqcond inputs [0] [-1] [0] {false} outputs [0] [-1] [0] {false}
+test 1828 addeqcond inputs [0] [0] [1] {false} outputs [0] [0] [1] {false}
+test 1829 addeqcond inputs [0] [0] [-1] {false} outputs [0] [0] [-1] {false}
+test 1830 addeqcond inputs [0] [0] [0] {false} outputs [] [] [] []
+test 1831 addeqcond inputs [0] [0] [1] {false} outputs [0] [0] [1] {false}
+test 1832 addeqcond inputs [0] [1] [-1] {false} outputs [0] [1] [-1] {false}
+test 1833 addeqcond inputs [0] [1] [0] {false} outputs [0] [1] [0] {false}
+test 1834 addeqcond inputs [0] [1] [1] {false} outputs [] [] [] []
+test 1835 addeqcond inputs [1] [-1] [0] {false} outputs [] [] [] []
+test 1836 addeqcond inputs [1] [0] [1] {false} outputs [] [] [] []
+test 1837 addeqcond inputs [1] [0] [-1] {false} outputs [1] [0] [-1] {false}
+test 1838 addeqcond inputs [1] [0] [0] {false} outputs [1] [0] [0] {false}
+test 1839 addeqcond inputs [1] [1] [-1] {false} outputs [1] [1] [-1] {false}
+test 1840 addeqcond inputs [1] [1] [0] {false} outputs [1] [1] [0] {false}
+test 1841 addeqcond inputs [1] [1] [1] {false} outputs [1] [1] [1] {false}
+test 1842 addeqcond inputs [-1] [-1] [Infinity] {false} outputs [-1] [-1] [Infinity] {false}
+test 1843 addeqcond inputs [-1] [-1] [-Infinity] {false} outputs [-1] [-1] [-Infinity] {false}
+test 1844 addeqcond inputs [-1] [Infinity] [1] {false} outputs [-1] [Infinity] [1] {false}
+test 1845 addeqcond inputs [-1] [-Infinity] [1] {false} outputs [-1] [-Infinity] [1] {false}
+test 1846 addeqcond inputs [Infinity] [-1] [1] {false} outputs [Infinity] [-1] [1] {false}
+test 1847 addeqcond inputs [-Infinity] [-1] [1] {false} outputs [-Infinity] [-1] [1] {false}
+test 1848 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] {false} outputs [-Infinity -1] [-Infinity -1] [0] {false}
+test 1849 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] {false} outputs [-Infinity -1] [-Infinity 0] [0] {false}
+test 1850 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] {false} outputs [-Infinity -1] [-Infinity 1] [0] {false}
+test 1851 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] {false} outputs [-Infinity -1] [-1 Infinity] [0] {false}
+test 1852 addeqcond inputs [-Infinity -1] [0 Infinity] [0] {false} outputs [-Infinity -1] [0 Infinity] [0] {false}
+test 1853 addeqcond inputs [-Infinity -1] [1 Infinity] [0] {false} outputs [-Infinity -1] [1 Infinity] [0] {false}
+test 1854 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] {false} outputs [-Infinity 0] [-Infinity -1] [0] {false}
+test 1855 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] {false} outputs [-Infinity 0] [-Infinity 0] [0] {false}
+test 1856 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] {false} outputs [-Infinity 0] [-Infinity 1] [0] {false}
+test 1857 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] {false} outputs [-Infinity 0] [-1 Infinity] [0] {false}
+test 1858 addeqcond inputs [-Infinity 0] [0 Infinity] [0] {false} outputs [-Infinity 0] [0 Infinity] [0] {false}
+test 1859 addeqcond inputs [-Infinity 0] [1 Infinity] [0] {false} outputs [-Infinity 0] [1 Infinity] [0] {false}
+test 1860 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] {false} outputs [-Infinity 1] [-Infinity -1] [0] {false}
+test 1861 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] {false} outputs [-Infinity 1] [-Infinity 0] [0] {false}
+test 1862 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] {false} outputs [-Infinity 1] [-Infinity 1] [0] {false}
+test 1863 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] {false} outputs [-Infinity 1] [-1 Infinity] [0] {false}
+test 1864 addeqcond inputs [-Infinity 1] [0 Infinity] [0] {false} outputs [-Infinity 1] [0 Infinity] [0] {false}
+test 1865 addeqcond inputs [-Infinity 1] [1 Infinity] [0] {false} outputs [-Infinity 1] [1 Infinity] [0] {false}
+test 1866 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] {false} outputs [-1 Infinity] [-Infinity -1] [0] {false}
+test 1867 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] {false} outputs [-1 Infinity] [-Infinity 0] [0] {false}
+test 1868 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] {false} outputs [-1 Infinity] [-Infinity 1] [0] {false}
+test 1869 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] {false} outputs [-1 Infinity] [-1 Infinity] [0] {false}
+test 1870 addeqcond inputs [-1 Infinity] [0 Infinity] [0] {false} outputs [-1 Infinity] [0 Infinity] [0] {false}
+test 1871 addeqcond inputs [-1 Infinity] [1 Infinity] [0] {false} outputs [-1 Infinity] [1 Infinity] [0] {false}
+test 1872 addeqcond inputs [0 Infinity] [-Infinity -1] [0] {false} outputs [0 Infinity] [-Infinity -1] [0] {false}
+test 1873 addeqcond inputs [0 Infinity] [-Infinity 0] [0] {false} outputs [0 Infinity] [-Infinity 0] [0] {false}
+test 1874 addeqcond inputs [0 Infinity] [-Infinity 1] [0] {false} outputs [0 Infinity] [-Infinity 1] [0] {false}
+test 1875 addeqcond inputs [0 Infinity] [-1 Infinity] [0] {false} outputs [0 Infinity] [-1 Infinity] [0] {false}
+test 1876 addeqcond inputs [0 Infinity] [0 Infinity] [0] {false} outputs [0 Infinity] [0 Infinity] [0] {false}
+test 1877 addeqcond inputs [0 Infinity] [1 Infinity] [0] {false} outputs [0 Infinity] [1 Infinity] [0] {false}
+test 1878 addeqcond inputs [1 Infinity] [-Infinity -1] [0] {false} outputs [1 Infinity] [-Infinity -1] [0] {false}
+test 1879 addeqcond inputs [1 Infinity] [-Infinity 0] [0] {false} outputs [1 Infinity] [-Infinity 0] [0] {false}
+test 1880 addeqcond inputs [1 Infinity] [-Infinity 1] [0] {false} outputs [1 Infinity] [-Infinity 1] [0] {false}
+test 1881 addeqcond inputs [1 Infinity] [-1 Infinity] [0] {false} outputs [1 Infinity] [-1 Infinity] [0] {false}
+test 1882 addeqcond inputs [1 Infinity] [0 Infinity] [0] {false} outputs [1 Infinity] [0 Infinity] [0] {false}
+test 1883 addeqcond inputs [1 Infinity] [1 Infinity] [0] {false} outputs [1 Infinity] [1 Infinity] [0] {false}
+test 1884 addeqcond inputs [1] [-1 10] [0] {false} outputs [1] [-1 10] [0] {false}
+test 1885 addeqcond inputs [1] [-2 10] [0] {false} outputs [1] [-2 10] [0] {false}
+test 1886 addeqcond inputs [1] [1] [1] {true} outputs [] [] [] []
+test 1887 addeqcond inputs [0] [0] [0] {true} outputs [0] [0] [0] {true}
+test 1888 addeqcond inputs [-1] [-1] [-1] {true} outputs [] [] [] []
+test 1889 addeqcond inputs [Infinity] [Infinity] [Infinity] {true} outputs [Infinity] [Infinity] [Infinity] {true}
+test 1890 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] {true} outputs [-Infinity] [-Infinity] [-Infinity] {true}
+test 1891 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] {true} outputs [-Infinity -1] [-Infinity -1] [-Infinity -2] {true}
+test 1892 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {true} outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {true}
+test 1893 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {true} outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {true}
+test 1894 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {true} outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {true}
+test 1895 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] {true} outputs [0 Infinity] [0 Infinity] [0 Infinity] {true}
+test 1896 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] {true} outputs [1 Infinity] [1 Infinity] [2 Infinity] {true}
+test 1897 addeqcond inputs [-1] [-1] [0] {true} outputs [] [] [] []
+test 1898 addeqcond inputs [-1] [0] [1] {true} outputs [] [] [] []
+test 1899 addeqcond inputs [-1] [0] [-1] {true} outputs [-1] [0] [-1] {true}
+test 1900 addeqcond inputs [-1] [0] [0] {true} outputs [] [] [] []
+test 1901 addeqcond inputs [-1] [0] [1] {true} outputs [] [] [] []
+test 1902 addeqcond inputs [-1] [1] [-1] {true} outputs [] [] [] []
+test 1903 addeqcond inputs [-1] [1] [0] {true} outputs [-1] [1] [0] {true}
+test 1904 addeqcond inputs [-1] [1] [1] {true} outputs [] [] [] []
+test 1905 addeqcond inputs [0] [-1] [0] {true} outputs [] [] [] []
+test 1906 addeqcond inputs [0] [0] [1] {true} outputs [] [] [] []
+test 1907 addeqcond inputs [0] [0] [-1] {true} outputs [] [] [] []
+test 1908 addeqcond inputs [0] [0] [1] {true} outputs [] [] [] []
+test 1909 addeqcond inputs [0] [1] [-1] {true} outputs [] [] [] []
+test 1910 addeqcond inputs [0] [1] [0] {true} outputs [] [] [] []
+test 1911 addeqcond inputs [0] [1] [1] {true} outputs [0] [1] [1] {true}
+test 1912 addeqcond inputs [1] [-1] [0] {true} outputs [1] [-1] [0] {true}
+test 1913 addeqcond inputs [1] [0] [1] {true} outputs [1] [0] [1] {true}
+test 1914 addeqcond inputs [0] [1] [0] {true} outputs [] [] [] []
+test 1915 addeqcond inputs [1] [0] [0] {true} outputs [] [] [] []
+test 1916 addeqcond inputs [1] [0] [1] {true} outputs [1] [0] [1] {true}
+test 1917 addeqcond inputs [1] [1] [-1] {true} outputs [] [] [] []
+test 1918 addeqcond inputs [1] [1] [0] {true} outputs [] [] [] []
+test 1919 addeqcond inputs [-1] [-1] [Infinity] {true} outputs [] [] [] {}
+test 1920 addeqcond inputs [-1] [-1] [-Infinity] {true} outputs [] [] [] {}
+test 1921 addeqcond inputs [-1] [Infinity] [1] {true} outputs [] [] [] {}
+test 1922 addeqcond inputs [-1] [-Infinity] [1] {true} outputs [] [] [] {}
+test 1923 addeqcond inputs [Infinity] [-1] [1] {true} outputs [] [] [] {}
+test 1924 addeqcond inputs [-Infinity] [-1] [1] {true} outputs [] [] [] {}
+test 1925 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] {true} outputs [] [] [] []
+test 1926 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] {true} outputs [] [] [] []
+test 1927 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] {true} outputs [-1] [1] [0] {true}
+test 1928 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 1929 addeqcond inputs [-Infinity -1] [0 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 1930 addeqcond inputs [-Infinity -1] [1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 1931 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] {true} outputs [] [] [] []
+test 1932 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] {true} outputs [0] [0] [0] {true}
+test 1933 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] {true} outputs [-1 0] [0 1] [0] {true}
+test 1934 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] {true} outputs [-Infinity 0] [0 Infinity] [0] {true}
+test 1935 addeqcond inputs [-Infinity 0] [0 Infinity] [0] {true} outputs [-Infinity 0] [0 Infinity] [0] {true}
+test 1936 addeqcond inputs [-Infinity 0] [1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 1937 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] {true} outputs [1] [-1] [0] {true}
+test 1938 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] {true} outputs [0 1] [-1 0] [0] {true}
+test 1939 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] {true} outputs [-1 1] [-1 1] [0] {true}
+test 1940 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] {true} outputs [-Infinity 1] [-1 Infinity] [0] {true}
+test 1941 addeqcond inputs [-Infinity 1] [0 Infinity] [0] {true} outputs [-Infinity 0] [0 Infinity] [0] {true}
+test 1942 addeqcond inputs [-Infinity 1] [1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 1943 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 1944 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] {true} outputs [0 Infinity] [-Infinity 0] [0] {true}
+test 1945 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] {true} outputs [-1 Infinity] [-Infinity 1] [0] {true}
+test 1946 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] {true} outputs [-1 1] [-1 1] [0] {true}
+test 1947 addeqcond inputs [-1 Infinity] [0 Infinity] [0] {true} outputs [-1 0] [0 1] [0] {true}
+test 1948 addeqcond inputs [-1 Infinity] [1 Infinity] [0] {true} outputs [-1] [1] [0] {true}
+test 1949 addeqcond inputs [0 Infinity] [-Infinity -1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 1950 addeqcond inputs [0 Infinity] [-Infinity 0] [0] {true} outputs [0 Infinity] [-Infinity 0] [0] {true}
+test 1951 addeqcond inputs [0 Infinity] [-Infinity 1] [0] {true} outputs [0 Infinity] [-Infinity 0] [0] {true}
+test 1952 addeqcond inputs [0 Infinity] [-1 Infinity] [0] {true} outputs [0 1] [-1 0] [0] {true}
+test 1953 addeqcond inputs [0 Infinity] [0 Infinity] [0] {true} outputs [0] [0] [0] {true}
+test 1954 addeqcond inputs [0 Infinity] [1 Infinity] [0] {true} outputs [] [] [] []
+test 1955 addeqcond inputs [1 Infinity] [-Infinity -1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 1956 addeqcond inputs [1 Infinity] [-Infinity 0] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 1957 addeqcond inputs [1 Infinity] [-Infinity 1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 1958 addeqcond inputs [1 Infinity] [-1 Infinity] [0] {true} outputs [1] [-1] [0] {true}
+test 1959 addeqcond inputs [1 Infinity] [0 Infinity] [0] {true} outputs [] [] [] []
+test 1960 addeqcond inputs [1 Infinity] [1 Infinity] [0] {true} outputs [] [] [] []
+test 1961 addeqcond inputs [1] [1] [1] {false} outputs [1] [1] [1] {false}
+test 1962 addeqcond inputs [0] [0] [0] {false} outputs [] [] [] []
+test 1963 addeqcond inputs [-1] [-1] [-1] {false} outputs [-1] [-1] [-1] {false}
+test 1964 addeqcond inputs [Infinity] [Infinity] [Infinity] {false} outputs [Infinity] [Infinity] [Infinity] {false}
+test 1965 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] {false} outputs [-Infinity] [-Infinity] [-Infinity] {false}
+test 1966 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] {false} outputs [-Infinity -1] [-Infinity -1] [-Infinity -1] {false}
+test 1967 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {false} outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {false}
+test 1968 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {false} outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {false}
+test 1969 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {false} outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {false}
+test 1970 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] {false} outputs [0 Infinity] [0 Infinity] [0 Infinity] {false}
+test 1971 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] {false} outputs [1 Infinity] [1 Infinity] [1 Infinity] {false}
+test 1972 addeqcond inputs [-1] [-1] [0] {false} outputs [-1] [-1] [0] {false}
+test 1973 addeqcond inputs [-1] [0] [1] {false} outputs [-1] [0] [1] {false}
+test 1974 addeqcond inputs [-1] [0] [-1] {false} outputs [] [] [] []
+test 1975 addeqcond inputs [-1] [0] [0] {false} outputs [-1] [0] [0] {false}
+test 1976 addeqcond inputs [-1] [1] [-1] {false} outputs [-1] [1] [-1] {false}
+test 1977 addeqcond inputs [-1] [1] [0] {false} outputs [] [] [] []
+test 1978 addeqcond inputs [-1] [1] [1] {false} outputs [-1] [1] [1] {false}
+test 1979 addeqcond inputs [0] [-1] [0] {false} outputs [0] [-1] [0] {false}
+test 1980 addeqcond inputs [0] [0] [1] {false} outputs [0] [0] [1] {false}
+test 1981 addeqcond inputs [0] [0] [-1] {false} outputs [0] [0] [-1] {false}
+test 1982 addeqcond inputs [0] [0] [0] {false} outputs [] [] [] []
+test 1983 addeqcond inputs [0] [0] [1] {false} outputs [0] [0] [1] {false}
+test 1984 addeqcond inputs [0] [1] [-1] {false} outputs [0] [1] [-1] {false}
+test 1985 addeqcond inputs [0] [1] [0] {false} outputs [0] [1] [0] {false}
+test 1986 addeqcond inputs [0] [1] [1] {false} outputs [] [] [] []
+test 1987 addeqcond inputs [1] [-1] [0] {false} outputs [] [] [] []
+test 1988 addeqcond inputs [1] [0] [1] {false} outputs [] [] [] []
+test 1989 addeqcond inputs [1] [0] [-1] {false} outputs [1] [0] [-1] {false}
+test 1990 addeqcond inputs [1] [0] [0] {false} outputs [1] [0] [0] {false}
+test 1991 addeqcond inputs [1] [1] [-1] {false} outputs [1] [1] [-1] {false}
+test 1992 addeqcond inputs [1] [1] [0] {false} outputs [1] [1] [0] {false}
+test 1993 addeqcond inputs [1] [1] [1] {false} outputs [1] [1] [1] {false}
+test 1994 addeqcond inputs [-1] [-1] [Infinity] {false} outputs [-1] [-1] [Infinity] {false}
+test 1995 addeqcond inputs [-1] [-1] [-Infinity] {false} outputs [-1] [-1] [-Infinity] {false}
+test 1996 addeqcond inputs [-1] [Infinity] [1] {false} outputs [-1] [Infinity] [1] {false}
+test 1997 addeqcond inputs [-1] [-Infinity] [1] {false} outputs [-1] [-Infinity] [1] {false}
+test 1998 addeqcond inputs [Infinity] [-1] [1] {false} outputs [Infinity] [-1] [1] {false}
+test 1999 addeqcond inputs [-Infinity] [-1] [1] {false} outputs [-Infinity] [-1] [1] {false}
+test 2000 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] {false} outputs [-Infinity -1] [-Infinity -1] [0] {false}
+test 2001 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] {false} outputs [-Infinity -1] [-Infinity 0] [0] {false}
+test 2002 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] {false} outputs [-Infinity -1] [-Infinity 1] [0] {false}
+test 2003 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] {false} outputs [-Infinity -1] [-1 Infinity] [0] {false}
+test 2004 addeqcond inputs [-Infinity -1] [0 Infinity] [0] {false} outputs [-Infinity -1] [0 Infinity] [0] {false}
+test 2005 addeqcond inputs [-Infinity -1] [1 Infinity] [0] {false} outputs [-Infinity -1] [1 Infinity] [0] {false}
+test 2006 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] {false} outputs [-Infinity 0] [-Infinity -1] [0] {false}
+test 2007 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] {false} outputs [-Infinity 0] [-Infinity 0] [0] {false}
+test 2008 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] {false} outputs [-Infinity 0] [-Infinity 1] [0] {false}
+test 2009 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] {false} outputs [-Infinity 0] [-1 Infinity] [0] {false}
+test 2010 addeqcond inputs [-Infinity 0] [0 Infinity] [0] {false} outputs [-Infinity 0] [0 Infinity] [0] {false}
+test 2011 addeqcond inputs [-Infinity 0] [1 Infinity] [0] {false} outputs [-Infinity 0] [1 Infinity] [0] {false}
+test 2012 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] {false} outputs [-Infinity 1] [-Infinity -1] [0] {false}
+test 2013 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] {false} outputs [-Infinity 1] [-Infinity 0] [0] {false}
+test 2014 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] {false} outputs [-Infinity 1] [-Infinity 1] [0] {false}
+test 2015 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] {false} outputs [-Infinity 1] [-1 Infinity] [0] {false}
+test 2016 addeqcond inputs [-Infinity 1] [0 Infinity] [0] {false} outputs [-Infinity 1] [0 Infinity] [0] {false}
+test 2017 addeqcond inputs [-Infinity 1] [1 Infinity] [0] {false} outputs [-Infinity 1] [1 Infinity] [0] {false}
+test 2018 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] {false} outputs [-1 Infinity] [-Infinity -1] [0] {false}
+test 2019 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] {false} outputs [-1 Infinity] [-Infinity 0] [0] {false}
+test 2020 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] {false} outputs [-1 Infinity] [-Infinity 1] [0] {false}
+test 2021 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] {false} outputs [-1 Infinity] [-1 Infinity] [0] {false}
+test 2022 addeqcond inputs [-1 Infinity] [0 Infinity] [0] {false} outputs [-1 Infinity] [0 Infinity] [0] {false}
+test 2023 addeqcond inputs [-1 Infinity] [1 Infinity] [0] {false} outputs [-1 Infinity] [1 Infinity] [0] {false}
+test 2024 addeqcond inputs [0 Infinity] [-Infinity -1] [0] {false} outputs [0 Infinity] [-Infinity -1] [0] {false}
+test 2025 addeqcond inputs [0 Infinity] [-Infinity 0] [0] {false} outputs [0 Infinity] [-Infinity 0] [0] {false}
+test 2026 addeqcond inputs [0 Infinity] [-Infinity 1] [0] {false} outputs [0 Infinity] [-Infinity 1] [0] {false}
+test 2027 addeqcond inputs [0 Infinity] [-1 Infinity] [0] {false} outputs [0 Infinity] [-1 Infinity] [0] {false}
+test 2028 addeqcond inputs [0 Infinity] [0 Infinity] [0] {false} outputs [0 Infinity] [0 Infinity] [0] {false}
+test 2029 addeqcond inputs [0 Infinity] [1 Infinity] [0] {false} outputs [0 Infinity] [1 Infinity] [0] {false}
+test 2030 addeqcond inputs [1 Infinity] [-Infinity -1] [0] {false} outputs [1 Infinity] [-Infinity -1] [0] {false}
+test 2031 addeqcond inputs [1 Infinity] [-Infinity 0] [0] {false} outputs [1 Infinity] [-Infinity 0] [0] {false}
+test 2032 addeqcond inputs [1 Infinity] [-Infinity 1] [0] {false} outputs [1 Infinity] [-Infinity 1] [0] {false}
+test 2033 addeqcond inputs [1 Infinity] [-1 Infinity] [0] {false} outputs [1 Infinity] [-1 Infinity] [0] {false}
+test 2034 addeqcond inputs [1 Infinity] [0 Infinity] [0] {false} outputs [1 Infinity] [0 Infinity] [0] {false}
+test 2035 addeqcond inputs [1 Infinity] [1 Infinity] [0] {false} outputs [1 Infinity] [1 Infinity] [0] {false}
+test 2036 addeqcond inputs [1] [-1 10] [0] {false} outputs [1] [-1 10] [0] {false}
+test 2037 addeqcond inputs [1] [-2 10] [0] {false} outputs [1] [-2 10] [0] {false}
+test 2038 addeqcond inputs [1] [1] [1] {true} outputs [] [] [] []
+test 2039 addeqcond inputs [0] [0] [0] {true} outputs [0] [0] [0] {true}
+test 2040 addeqcond inputs [-1] [-1] [-1] {true} outputs [] [] [] []
+test 2041 addeqcond inputs [Infinity] [Infinity] [Infinity] {true} outputs [Infinity] [Infinity] [Infinity] {true}
+test 2042 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] {true} outputs [-Infinity] [-Infinity] [-Infinity] {true}
+test 2043 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] {true} outputs [-Infinity -1] [-Infinity -1] [-Infinity -2] {true}
+test 2044 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {true} outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {true}
+test 2045 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {true} outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {true}
+test 2046 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {true} outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {true}
+test 2047 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] {true} outputs [0 Infinity] [0 Infinity] [0 Infinity] {true}
+test 2048 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] {true} outputs [1 Infinity] [1 Infinity] [2 Infinity] {true}
+test 2049 addeqcond inputs [-1] [-1] [0] {true} outputs [] [] [] []
+test 2050 addeqcond inputs [-1] [0] [1] {true} outputs [] [] [] []
+test 2051 addeqcond inputs [-1] [0] [-1] {true} outputs [-1] [0] [-1] {true}
+test 2052 addeqcond inputs [-1] [0] [0] {true} outputs [] [] [] []
+test 2053 addeqcond inputs [-1] [0] [1] {true} outputs [] [] [] []
+test 2054 addeqcond inputs [-1] [1] [-1] {true} outputs [] [] [] []
+test 2055 addeqcond inputs [-1] [1] [0] {true} outputs [-1] [1] [0] {true}
+test 2056 addeqcond inputs [-1] [1] [1] {true} outputs [] [] [] []
+test 2057 addeqcond inputs [0] [-1] [0] {true} outputs [] [] [] []
+test 2058 addeqcond inputs [0] [0] [1] {true} outputs [] [] [] []
+test 2059 addeqcond inputs [0] [0] [-1] {true} outputs [] [] [] []
+test 2060 addeqcond inputs [0] [0] [1] {true} outputs [] [] [] []
+test 2061 addeqcond inputs [0] [1] [-1] {true} outputs [] [] [] []
+test 2062 addeqcond inputs [0] [1] [0] {true} outputs [] [] [] []
+test 2063 addeqcond inputs [0] [1] [1] {true} outputs [0] [1] [1] {true}
+test 2064 addeqcond inputs [1] [-1] [0] {true} outputs [1] [-1] [0] {true}
+test 2065 addeqcond inputs [1] [0] [1] {true} outputs [1] [0] [1] {true}
+test 2066 addeqcond inputs [0] [1] [0] {true} outputs [] [] [] []
+test 2067 addeqcond inputs [1] [0] [0] {true} outputs [] [] [] []
+test 2068 addeqcond inputs [1] [0] [1] {true} outputs [1] [0] [1] {true}
+test 2069 addeqcond inputs [1] [1] [-1] {true} outputs [] [] [] []
+test 2070 addeqcond inputs [1] [1] [0] {true} outputs [] [] [] []
+test 2071 addeqcond inputs [-1] [-1] [Infinity] {true} outputs [] [] [] {}
+test 2072 addeqcond inputs [-1] [-1] [-Infinity] {true} outputs [] [] [] {}
+test 2073 addeqcond inputs [-1] [Infinity] [1] {true} outputs [] [] [] {}
+test 2074 addeqcond inputs [-1] [-Infinity] [1] {true} outputs [] [] [] {}
+test 2075 addeqcond inputs [Infinity] [-1] [1] {true} outputs [] [] [] {}
+test 2076 addeqcond inputs [-Infinity] [-1] [1] {true} outputs [] [] [] {}
+test 2077 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] {true} outputs [] [] [] []
+test 2078 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] {true} outputs [] [] [] []
+test 2079 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] {true} outputs [-1] [1] [0] {true}
+test 2080 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 2081 addeqcond inputs [-Infinity -1] [0 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 2082 addeqcond inputs [-Infinity -1] [1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 2083 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] {true} outputs [] [] [] []
+test 2084 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] {true} outputs [0] [0] [0] {true}
+test 2085 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] {true} outputs [-1 0] [0 1] [0] {true}
+test 2086 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] {true} outputs [-Infinity 0] [0 Infinity] [0] {true}
+test 2087 addeqcond inputs [-Infinity 0] [0 Infinity] [0] {true} outputs [-Infinity 0] [0 Infinity] [0] {true}
+test 2088 addeqcond inputs [-Infinity 0] [1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 2089 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] {true} outputs [1] [-1] [0] {true}
+test 2090 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] {true} outputs [0 1] [-1 0] [0] {true}
+test 2091 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] {true} outputs [-1 1] [-1 1] [0] {true}
+test 2092 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] {true} outputs [-Infinity 1] [-1 Infinity] [0] {true}
+test 2093 addeqcond inputs [-Infinity 1] [0 Infinity] [0] {true} outputs [-Infinity 0] [0 Infinity] [0] {true}
+test 2094 addeqcond inputs [-Infinity 1] [1 Infinity] [0] {true} outputs [-Infinity -1] [1 Infinity] [0] {true}
+test 2095 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 2096 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] {true} outputs [0 Infinity] [-Infinity 0] [0] {true}
+test 2097 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] {true} outputs [-1 Infinity] [-Infinity 1] [0] {true}
+test 2098 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] {true} outputs [-1 1] [-1 1] [0] {true}
+test 2099 addeqcond inputs [-1 Infinity] [0 Infinity] [0] {true} outputs [-1 0] [0 1] [0] {true}
+test 2100 addeqcond inputs [-1 Infinity] [1 Infinity] [0] {true} outputs [-1] [1] [0] {true}
+test 2101 addeqcond inputs [0 Infinity] [-Infinity -1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 2102 addeqcond inputs [0 Infinity] [-Infinity 0] [0] {true} outputs [0 Infinity] [-Infinity 0] [0] {true}
+test 2103 addeqcond inputs [0 Infinity] [-Infinity 1] [0] {true} outputs [0 Infinity] [-Infinity 0] [0] {true}
+test 2104 addeqcond inputs [0 Infinity] [-1 Infinity] [0] {true} outputs [0 1] [-1 0] [0] {true}
+test 2105 addeqcond inputs [0 Infinity] [0 Infinity] [0] {true} outputs [0] [0] [0] {true}
+test 2106 addeqcond inputs [0 Infinity] [1 Infinity] [0] {true} outputs [] [] [] []
+test 2107 addeqcond inputs [1 Infinity] [-Infinity -1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 2108 addeqcond inputs [1 Infinity] [-Infinity 0] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 2109 addeqcond inputs [1 Infinity] [-Infinity 1] [0] {true} outputs [1 Infinity] [-Infinity -1] [0] {true}
+test 2110 addeqcond inputs [1 Infinity] [-1 Infinity] [0] {true} outputs [1] [-1] [0] {true}
+test 2111 addeqcond inputs [1 Infinity] [0 Infinity] [0] {true} outputs [] [] [] []
+test 2112 addeqcond inputs [1 Infinity] [1 Infinity] [0] {true} outputs [] [] [] []
+test 2113 addeqcond inputs [1] [1] [1] {false} outputs [1] [1] [1] {false}
+test 2114 addeqcond inputs [0] [0] [0] {false} outputs [] [] [] []
+test 2115 addeqcond inputs [-1] [-1] [-1] {false} outputs [-1] [-1] [-1] {false}
+test 2116 addeqcond inputs [Infinity] [Infinity] [Infinity] {false} outputs [Infinity] [Infinity] [Infinity] {false}
+test 2117 addeqcond inputs [-Infinity] [-Infinity] [-Infinity] {false} outputs [-Infinity] [-Infinity] [-Infinity] {false}
+test 2118 addeqcond inputs [-Infinity -1] [-Infinity -1] [-Infinity -1] {false} outputs [-Infinity -1] [-Infinity -1] [-Infinity -1] {false}
+test 2119 addeqcond inputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {false} outputs [-Infinity 0] [-Infinity 0] [-Infinity 0] {false}
+test 2120 addeqcond inputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {false} outputs [-Infinity 1] [-Infinity 1] [-Infinity 1] {false}
+test 2121 addeqcond inputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {false} outputs [-1 Infinity] [-1 Infinity] [-1 Infinity] {false}
+test 2122 addeqcond inputs [0 Infinity] [0 Infinity] [0 Infinity] {false} outputs [0 Infinity] [0 Infinity] [0 Infinity] {false}
+test 2123 addeqcond inputs [1 Infinity] [1 Infinity] [1 Infinity] {false} outputs [1 Infinity] [1 Infinity] [1 Infinity] {false}
+test 2124 addeqcond inputs [-1] [-1] [0] {false} outputs [-1] [-1] [0] {false}
+test 2125 addeqcond inputs [-1] [0] [1] {false} outputs [-1] [0] [1] {false}
+test 2126 addeqcond inputs [-1] [0] [-1] {false} outputs [] [] [] []
+test 2127 addeqcond inputs [-1] [0] [0] {false} outputs [-1] [0] [0] {false}
+test 2128 addeqcond inputs [-1] [1] [-1] {false} outputs [-1] [1] [-1] {false}
+test 2129 addeqcond inputs [-1] [1] [0] {false} outputs [] [] [] []
+test 2130 addeqcond inputs [-1] [1] [1] {false} outputs [-1] [1] [1] {false}
+test 2131 addeqcond inputs [0] [-1] [0] {false} outputs [0] [-1] [0] {false}
+test 2132 addeqcond inputs [0] [0] [1] {false} outputs [0] [0] [1] {false}
+test 2133 addeqcond inputs [0] [0] [-1] {false} outputs [0] [0] [-1] {false}
+test 2134 addeqcond inputs [0] [0] [0] {false} outputs [] [] [] []
+test 2135 addeqcond inputs [0] [0] [1] {false} outputs [0] [0] [1] {false}
+test 2136 addeqcond inputs [0] [1] [-1] {false} outputs [0] [1] [-1] {false}
+test 2137 addeqcond inputs [0] [1] [0] {false} outputs [0] [1] [0] {false}
+test 2138 addeqcond inputs [0] [1] [1] {false} outputs [] [] [] []
+test 2139 addeqcond inputs [1] [-1] [0] {false} outputs [] [] [] []
+test 2140 addeqcond inputs [1] [0] [1] {false} outputs [] [] [] []
+test 2141 addeqcond inputs [1] [0] [-1] {false} outputs [1] [0] [-1] {false}
+test 2142 addeqcond inputs [1] [0] [0] {false} outputs [1] [0] [0] {false}
+test 2143 addeqcond inputs [1] [1] [-1] {false} outputs [1] [1] [-1] {false}
+test 2144 addeqcond inputs [1] [1] [0] {false} outputs [1] [1] [0] {false}
+test 2145 addeqcond inputs [1] [1] [1] {false} outputs [1] [1] [1] {false}
+test 2146 addeqcond inputs [-1] [-1] [Infinity] {false} outputs [-1] [-1] [Infinity] {false}
+test 2147 addeqcond inputs [-1] [-1] [-Infinity] {false} outputs [-1] [-1] [-Infinity] {false}
+test 2148 addeqcond inputs [-1] [Infinity] [1] {false} outputs [-1] [Infinity] [1] {false}
+test 2149 addeqcond inputs [-1] [-Infinity] [1] {false} outputs [-1] [-Infinity] [1] {false}
+test 2150 addeqcond inputs [Infinity] [-1] [1] {false} outputs [Infinity] [-1] [1] {false}
+test 2151 addeqcond inputs [-Infinity] [-1] [1] {false} outputs [-Infinity] [-1] [1] {false}
+test 2152 addeqcond inputs [-Infinity -1] [-Infinity -1] [0] {false} outputs [-Infinity -1] [-Infinity -1] [0] {false}
+test 2153 addeqcond inputs [-Infinity -1] [-Infinity 0] [0] {false} outputs [-Infinity -1] [-Infinity 0] [0] {false}
+test 2154 addeqcond inputs [-Infinity -1] [-Infinity 1] [0] {false} outputs [-Infinity -1] [-Infinity 1] [0] {false}
+test 2155 addeqcond inputs [-Infinity -1] [-1 Infinity] [0] {false} outputs [-Infinity -1] [-1 Infinity] [0] {false}
+test 2156 addeqcond inputs [-Infinity -1] [0 Infinity] [0] {false} outputs [-Infinity -1] [0 Infinity] [0] {false}
+test 2157 addeqcond inputs [-Infinity -1] [1 Infinity] [0] {false} outputs [-Infinity -1] [1 Infinity] [0] {false}
+test 2158 addeqcond inputs [-Infinity 0] [-Infinity -1] [0] {false} outputs [-Infinity 0] [-Infinity -1] [0] {false}
+test 2159 addeqcond inputs [-Infinity 0] [-Infinity 0] [0] {false} outputs [-Infinity 0] [-Infinity 0] [0] {false}
+test 2160 addeqcond inputs [-Infinity 0] [-Infinity 1] [0] {false} outputs [-Infinity 0] [-Infinity 1] [0] {false}
+test 2161 addeqcond inputs [-Infinity 0] [-1 Infinity] [0] {false} outputs [-Infinity 0] [-1 Infinity] [0] {false}
+test 2162 addeqcond inputs [-Infinity 0] [0 Infinity] [0] {false} outputs [-Infinity 0] [0 Infinity] [0] {false}
+test 2163 addeqcond inputs [-Infinity 0] [1 Infinity] [0] {false} outputs [-Infinity 0] [1 Infinity] [0] {false}
+test 2164 addeqcond inputs [-Infinity 1] [-Infinity -1] [0] {false} outputs [-Infinity 1] [-Infinity -1] [0] {false}
+test 2165 addeqcond inputs [-Infinity 1] [-Infinity 0] [0] {false} outputs [-Infinity 1] [-Infinity 0] [0] {false}
+test 2166 addeqcond inputs [-Infinity 1] [-Infinity 1] [0] {false} outputs [-Infinity 1] [-Infinity 1] [0] {false}
+test 2167 addeqcond inputs [-Infinity 1] [-1 Infinity] [0] {false} outputs [-Infinity 1] [-1 Infinity] [0] {false}
+test 2168 addeqcond inputs [-Infinity 1] [0 Infinity] [0] {false} outputs [-Infinity 1] [0 Infinity] [0] {false}
+test 2169 addeqcond inputs [-Infinity 1] [1 Infinity] [0] {false} outputs [-Infinity 1] [1 Infinity] [0] {false}
+test 2170 addeqcond inputs [-1 Infinity] [-Infinity -1] [0] {false} outputs [-1 Infinity] [-Infinity -1] [0] {false}
+test 2171 addeqcond inputs [-1 Infinity] [-Infinity 0] [0] {false} outputs [-1 Infinity] [-Infinity 0] [0] {false}
+test 2172 addeqcond inputs [-1 Infinity] [-Infinity 1] [0] {false} outputs [-1 Infinity] [-Infinity 1] [0] {false}
+test 2173 addeqcond inputs [-1 Infinity] [-1 Infinity] [0] {false} outputs [-1 Infinity] [-1 Infinity] [0] {false}
+test 2174 addeqcond inputs [-1 Infinity] [0 Infinity] [0] {false} outputs [-1 Infinity] [0 Infinity] [0] {false}
+test 2175 addeqcond inputs [-1 Infinity] [1 Infinity] [0] {false} outputs [-1 Infinity] [1 Infinity] [0] {false}
+test 2176 addeqcond inputs [0 Infinity] [-Infinity -1] [0] {false} outputs [0 Infinity] [-Infinity -1] [0] {false}
+test 2177 addeqcond inputs [0 Infinity] [-Infinity 0] [0] {false} outputs [0 Infinity] [-Infinity 0] [0] {false}
+test 2178 addeqcond inputs [0 Infinity] [-Infinity 1] [0] {false} outputs [0 Infinity] [-Infinity 1] [0] {false}
+test 2179 addeqcond inputs [0 Infinity] [-1 Infinity] [0] {false} outputs [0 Infinity] [-1 Infinity] [0] {false}
+test 2180 addeqcond inputs [0 Infinity] [0 Infinity] [0] {false} outputs [0 Infinity] [0 Infinity] [0] {false}
+test 2181 addeqcond inputs [0 Infinity] [1 Infinity] [0] {false} outputs [0 Infinity] [1 Infinity] [0] {false}
+test 2182 addeqcond inputs [1 Infinity] [-Infinity -1] [0] {false} outputs [1 Infinity] [-Infinity -1] [0] {false}
+test 2183 addeqcond inputs [1 Infinity] [-Infinity 0] [0] {false} outputs [1 Infinity] [-Infinity 0] [0] {false}
+test 2184 addeqcond inputs [1 Infinity] [-Infinity 1] [0] {false} outputs [1 Infinity] [-Infinity 1] [0] {false}
+test 2185 addeqcond inputs [1 Infinity] [-1 Infinity] [0] {false} outputs [1 Infinity] [-1 Infinity] [0] {false}
+test 2186 addeqcond inputs [1 Infinity] [0 Infinity] [0] {false} outputs [1 Infinity] [0 Infinity] [0] {false}
+test 2187 addeqcond inputs [1 Infinity] [1 Infinity] [0] {false} outputs [1 Infinity] [1 Infinity] [0] {false}
+test 2188 addeqcond inputs [1] [-1 10] [0] {false} outputs [1] [-1 10] [0] {false}
+test 2189 addeqcond inputs [1] [-2 10] [0] {false} outputs [1] [-2 10] [0] {false}
 test 2190 addeq inputs [1] [1] [1] outputs [] [] []
 test 2191 addeq inputs [0] [0] [0] outputs [0] [0] [0]
 test 2192 addeq inputs [-1] [-1] [-1] outputs [] [] []
