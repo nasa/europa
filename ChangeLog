@@ -1,3 +1,10 @@
+M_24:
+1. Revised implementation for GNATS-2489. Existential Quantification will now enforce constraints on input variables. Filtering will not
+enforce such constraints.
+2. Fixed problem with epsilon safe comparisons discovered in Enumerated domains.
+3. Enhanced integration of Error and Debug support.
+
+
 M_23:
 1. Fixed bug in Planner where it was retracting all the way out of the first decision failed. See System/tests/rejection.nddl.
 2. Reimplemented existential and universal quantification, driven by GNATS-2489.

@@ -29,7 +29,6 @@ Trackable tr3 = new Trackable(p2, t3);
 Trackable tr4 = new Trackable(p2, t4);
 Trackable tr5 = new Trackable(p3, t5);
 Trackable tr6 = new Trackable(p3, t6);
-
 NotTrackable nt1 = new NotTrackable(p3, t6);
 
 Rover rover = new Rover();

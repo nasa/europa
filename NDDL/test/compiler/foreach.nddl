@@ -61,15 +61,15 @@ Rover::Navigate{
 	eq(to, p.to);
  };
 
- Trackable trackable : {
-	eq(trackable.path, p);
- };
-
- NotTrackable notTrackable : {
-	eq(notTrackable.path, p);
- };
-
  if(p){
+ 	Trackable trackable : {
+		eq(trackable.path, p);
+ 	};
+
+ 	NotTrackable notTrackable : {
+		eq(notTrackable.path, p);
+ 	};
+
  	foreach (t in trackable) {
 		contains(Target.Tracking target);
 		eq(target.object, t.target);

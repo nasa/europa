@@ -1,7 +1,6 @@
 #include "EnumeratedDomain.hh"
 #include "LabelStr.hh"
 #include "Entity.hh"
-#include <cmath>
 
 namespace Prototype {
 
@@ -92,7 +91,7 @@ namespace Prototype {
     check_error(check_value(value));
     std::set<double>::iterator it = m_values.begin();
     for ( ; it != m_values.end(); it++) {
-      if (fabs(value - *it) < minDelta())
+      if (EPSILON_SAFE_EQUAL(value, *it))
         return; // Already a member.
       if (value < *it) // Since members are sorted, value goes before *it.
         break;
@@ -105,7 +104,7 @@ namespace Prototype {
     check_error(check_value(value));
     std::set<double>::iterator it = m_values.begin();
     for ( ; it != m_values.end(); it++)
-      if (fabs(value - *it) < minDelta())
+      if (EPSILON_SAFE_EQUAL(value, *it))
         break;
     if (it == m_values.end())
       return; // not present: no-op
@@ -164,7 +163,7 @@ namespace Prototype {
         double val_a = *it_a;
         double val_b = *it_b;
 
-        if (val_a == val_b) {
+        if (EPSILON_SAFE_EQUAL(val_a, val_b)) {
           ++it_a;
           ++it_b;
         } else
@@ -223,7 +222,7 @@ namespace Prototype {
   bool EnumeratedDomain::isMember(double value) const {
     std::set<double>::iterator it = m_values.begin();
     for ( ; it != m_values.end(); it++) {
-      if (fabs(value - *it) < minDelta())
+      if (EPSILON_SAFE_EQUAL(value, *it))
         return(true);
       if (value < *it) // Since members are sorted, value should be before *it.
         break;
@@ -331,7 +330,7 @@ namespace Prototype {
         double val_a = *it_a;
         double val_b = *it_b;
 
-        if (val_a == val_b) { // If they are equal, advance both
+        if (EPSILON_SAFE_EQUAL(val_a, val_b)) { // If they are equal, advance both
           ++it_a;
           ++it_b;
         } else
