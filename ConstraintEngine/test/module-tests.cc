@@ -101,8 +101,9 @@ private:
     assert (dom0 == dom1);
     assert(v0.isValid());
     assert(v0.canBeSpecified());
-    Variable<IntervalIntDomain> v1(ENGINE, dom1, false);
+    Variable<IntervalIntDomain> v1(ENGINE, dom1, false, LabelStr("TEST VARIABLE"));
     assert(!v1.canBeSpecified());
+    assert(v1.getName() == LabelStr("TEST VARIABLE"));
     assert(v1.isValid());
     return true;
   }

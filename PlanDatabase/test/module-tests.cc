@@ -315,7 +315,7 @@ private:
     assert(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.getStart()->specify(IntervalIntDomain(5, 10));
     assert(eventToken.getEnd()->getDerivedDomain() == IntervalIntDomain(5, 10));
-    eventToken.addParameter(IntervalRealDomain(-1.08, 20.18));
+    eventToken.addParameter(IntervalRealDomain(-1.08, 20.18), LabelStr("TestParam"));
     eventToken.close();
 
     // IntervalToken

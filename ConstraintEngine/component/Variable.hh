@@ -33,6 +33,7 @@ namespace Prototype
     Variable(const ConstraintEngineId& constraintEngine, 
 	     const DomainType& baseDomain,
 	     bool canBeSpecified = true,
+	     const LabelStr& name = ConstrainedVariable::NO_NAME(),
 	     const EntityId& parent = EntityId::noId(),
 	     int index = ConstrainedVariable::NO_INDEX);
 
@@ -154,9 +155,10 @@ namespace Prototype
   Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine, 
 				 const DomainType& baseDomain,
 				 bool canBeSpecified,
+				 const LabelStr& name,
 				 const EntityId& parent,
 				 int index) 
-    : ConstrainedVariable(constraintEngine, canBeSpecified, parent, index), 
+    : ConstrainedVariable(constraintEngine, canBeSpecified, name, parent, index), 
     m_baseDomain(baseDomain),
     m_specifiedDomain(baseDomain),
     m_derivedDomain(baseDomain){
