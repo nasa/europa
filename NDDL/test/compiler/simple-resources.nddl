@@ -1,4 +1,5 @@
-#include "../../core/Plasma.nddl"
+#include "../../core/Core.nddl"
+#include "../../core/Resources.nddl"
 
 class Battery extends Resource {
  predicate change{
@@ -33,7 +34,7 @@ Rover::At{
  equals(UnaryResource.uses);
 }
 
-class World{
+class World extends Timeline {
  Battery mainBattery;
  Battery reserveBattery;
 
