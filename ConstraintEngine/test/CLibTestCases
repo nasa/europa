@@ -3385,3 +3385,27 @@ test 3384 max inputs [0 1] [-1] [0 1] outputs [0 1] [-1] [0 1]
 test 3385 max inputs [0 1] [-1] [1] outputs [1] [-1] [1]
 test 3386 max inputs [0 1] [-1] [0] outputs [0] [-1] [0]
 test 3387 max inputs [0 1] [-1] [-1] outputs [] [] []
+test 3388 MemberImply inputs [-10.4 10] [5 6.1] [0 1] [10 12] outputs [-10.4 10] [5 6.1] [0 1] [10 12]
+test 3389 memberImply inputs [-10.4 10] [-11 16.1] [0 1] [10 12] outputs [] [] [] []
+test 3390 memberImply inputs [-10.4 10] [-11 16.1] [0 1] [0 12] outputs [-10.4 10] [-11 16.1] [0 1] [0 12]
+test 3391 memberImply inputs [-10.4 10] [-11 16.1] [-10 1] [0 12] outputs [-10.4 10] [-11 16.1] [0 1] [0 12]
+test 3392 memberImply inputs [-10.4 10] [-5 6.1] [0 1] [10 12] outputs [-10.4 10] [-5 6.1] [0 1] [10 12]
+test 3393 memberImply inputs [-10.4 10] [-11 16.1] [-inf inf] [0 12] outputs [-10.4 10] [-11 16.1] [0 12] [0 12]
+test 3394 condeq inputs {false true} [0 1] [0 1] outputs {false true} [0 1] [0 1]
+test 3395 condeq inputs {false true} {0} {1} outputs {false} {0} {1}
+test 3396 condeq inputs {false true} {0} {0} outputs {true} {0} {0}
+test 3397 condeq inputs {false} [0 1] [0 1] outputs {false} [0 1] [0 1]
+test 3398 condeq inputs {FALSE} {0 1} {0} outputs {false} {1} {0}
+test 3399 condeq inputs {FALSE} {1 0} {0} outputs {false} {1} {0}
+test 3400 condeq inputs {true} [0 1] [0 1] outputs {true} [0 1] [0 1]
+test 3401 condeq inputs {False True} [0 1] [1.1 2] outputs {false} [0 1] [1.1 2]
+test 3402 condeq inputs {true} {0 1} {1} outputs {true} {1} {1}
+test 3403 condeq inputs {true} [-inf 10] [-1 inf] outputs {true} [-1 10] [-1 10]
+test 3404 condeq inputs {false true} {false} {true} outputs {false} {false} {true}
+test 3405 condeq inputs {false true} {false} {false} outputs {true} {false} {false}
+test 3406 condeq inputs {false} [0 1] [0 1] outputs {false} [0 1] [0 1]
+test 3407 condeq inputs {true} [-inf 10] [-1 inf] outputs {true} [-1 10] [-1 10]
+test 3408 condeq inputs {true} [0 1] [0 1] outputs {true} [0 1] [0 1]
+test 3409 condeq inputs {False True} [0 1] [1.1 2] outputs {false} [0 1] [1.1 2]
+test 3410 condeq inputs {true} {false true} {true} outputs {true} {true} {true}
+test 3411 condeq inputs {FALSE} {TRUE FALSE} {false} outputs {false} {true} {false}
