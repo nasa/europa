@@ -20,11 +20,13 @@ for model in
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
   local cc = [ FGristFiles $(model:S=.cc) ] ;
+  local o = $(cc:S=.o) ;
   local lib = $(model:S=) ;
   Includes $(cc) : $(hh) ;
   NddlCompiler $(hh) $(cc) : $(model) ;
-  ModuleMain $(exe) : $(cc) runTransactionTest.o DefaultTestInit.o : System ;
-  ModuleSharedLibrary $(lib) : $(cc) : NDDL : model-libraries ;
+  ModuleObjects $(cc) : NDDL ;
+  ModuleMain $(exe) : $(o) runTransactionTest.o DefaultTestInit.o : System ;
+  ModuleSharedLibrary $(lib) : $(o) : NDDL : model-libraries ;
   RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 }
