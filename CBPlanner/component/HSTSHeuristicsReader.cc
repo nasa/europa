@@ -4,6 +4,7 @@
 #include "HSTSHeuristics.hh"
 #include "LabelStr.hh"
 #include "Schema.hh"
+#include "Token.hh"
 
 namespace PLASMA {
 
@@ -178,10 +179,8 @@ namespace PLASMA {
 	readPriority(*child,p);
 	m_heuristics->setDefaultPriorityForConstrainedVariableDPs(p);
       }
-      else if (IS_TAG("Preference")) {
-	readPreference(*child, genName, dorder, values);
-	check_error(genName == NO_STRING, "Expected Generator Name to be empty.");
-	check_error(values.empty(), "Expected values to be empty.");
+      else if (IS_TAG("ValueOrder")) {
+	readValueOrder(*child, dorder);
 	m_heuristics->setDefaultPreferenceForConstrainedVariableDPs(dorder);
       }
       else
@@ -327,7 +326,17 @@ namespace PLASMA {
   }
 
   void HSTSHeuristicsReader::readState(const TiXmlElement& element, LabelStr& state) {
-    state = getTextChild(element);
+    state = NO_STRING;
+    std::string s = getTextChild(element);
+    if (s == "activate")
+      state = Token::ACTIVE;
+    if (s == "merge")
+      state = Token::MERGED;
+    if (s == "reject")
+      state = Token::REJECTED;
+    //    if (s == "defer")
+    //      state = Token::DEFER;
+    check_error(state != NO_STRING, "Expected one of activate, merge, or reject. Defer is not implemented yet.");
   }
 
   void HSTSHeuristicsReader::readConstrainedVariable(const TiXmlElement& element){
