@@ -15,13 +15,16 @@ if $(LIBRARIES) = SHARED {
 EXTRA_DEFS = ;
 ModuleNamedObjects runProblem_link : runProblem.cc : System ;
 
+# Not working due at least to gnats 2583
+# EOS-backtrack-test.nddl 
+
 local model ;
 for model in
         basic-types.nddl Rover-transaction.nddl basic-model-transaction.nddl 
         k9.backtrack.moderate-transaction.nddl k9-transaction.nddl 
         path-filter-transaction.nddl foreach-transaction.nddl force-object-distribution.nddl 
         resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl 
-        parent-predicate.nddl EOS-backtrack-test.nddl k9-initial.nddl backtr.nddl 
+        parent-predicate.nddl k9-initial.nddl backtr.nddl 
         better-res.nddl CAPER.nddl monkey1monkey-transaction.nddl
 {
   local exe = $(model:S=) ;

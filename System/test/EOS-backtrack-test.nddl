@@ -113,6 +113,7 @@ Satellite::Slew {
   eq(pto.m_target,m_to);
   int dx, dy, dz;
 // workaround while multiple . is not being supported in the NDDL compiler
+/*
   Target tgt;
   eq(pto.m_target,tgt);
   Target fgt;
@@ -120,9 +121,10 @@ Satellite::Slew {
   addeq(dx,fgt.m_x,tgt.m_x);
   addeq(dy,fgt.m_y,tgt.m_y);
   addeq(dz,fgt.m_z,tgt.m_z);
-//  addeq(dx,pfrom.m_x,pto.m_target.m_x);
-//  addeq(dy,pfrom.m_y,pto.m_target.m_y);
-//  addeq(dz,pfrom.m_z,pto.m_target.m_z);
+*/
+  addeq(dx,pfrom.m_target.m_x,pto.m_target.m_x);
+  addeq(dy,pfrom.m_target.m_y,pto.m_target.m_y);
+  addeq(dz,pfrom.m_target.m_z,pto.m_target.m_z);
   addmuleq(dz,dy,dz,m_rate,duration);
 }
 
@@ -157,18 +159,20 @@ Satellite::Transmit {
 }
 
 GroundStation::Receive {
-// workaround while NDDL compiler support for contains(m_station.m_disk.change tx2);
-  GroundStation g;
-  eq(g,object);
+//  GroundStation g;
+//  eq(g,object);
 //  starts(g.m_disk.change tx2);
+  starts(object.m_disk.change tx2);
+/*
   Storage d;
   eq(d,g.m_disk);
   starts(d.change tx2);
   eq(tx2.quantity, m_data.m_size);
+*/
 // this is what we'd like to write
 //  starts(Storage.change tx2);
 //  eq(tx2.object,object.m_disk);
-//  eq(tx2.quantity, m_data.m_size);
+   eq(tx2.quantity, m_data.m_size);
 }
 
 // create  objects
