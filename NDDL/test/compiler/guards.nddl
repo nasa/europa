@@ -12,6 +12,7 @@ class Foo{
  }
 
  predicate impliedObjectGuard{}
+ predicate impliedLocalVariableGuard{}
  predicate singletonGuard{}
  predicate mixGuardedWithUnguarded{}
  predicate localVariableGuard{}
@@ -27,6 +28,14 @@ Foo::impliedObjectGuard{
  // Comments:
  // 1. Should not be allowed to say this in-line! 
  // 2. Should be allowed to apply it to slave tokens too i.e. g.object.x. We do not support nested references yet.
+}
+
+// Guard on local variable of objects is implied
+// by the constraint referencing a field.
+Foo::impliedLocalVariableGuard{
+ // Not yet supported. 
+ // Foo f1;
+ // eq(f1.arg1, 20);
 }
 
 // Singleton guard. Can be variables of tokens too
@@ -77,6 +86,11 @@ Foo::localVariableGuard{
  if(local_locations == Hill){
   met_by(basicToken t2);
  }
+
+ Foo f; // Set of objects
+ if(f){ // When a singleton
+  eq(f.arg1, 20); // Constrain its field
+ }
 }
 
 // Test multiple levels of nesting
@@ -120,4 +134,7 @@ World::initialState{
 
  any(Foo.multipleNestedGuards g5);
  eq(g5.state, 2); 
+
+ any(Foo.impliedLocalVariableGuard g6);
+ eq(g6.state, 2);
 }
