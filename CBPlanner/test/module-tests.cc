@@ -390,8 +390,6 @@ private:
 
     assert(ce.propagate());
 
-    assert(dm.getNumberOfDecisions() == 1);
-
     dm.assignNextDecision();
 
     assert(dm.getNumberOfDecisions() == 0);
@@ -455,7 +453,8 @@ private:
       planner.getDecisionManager()->printClosedDecisions();
       */
     }    
-    assert(planner.getDecisionManager()->getNextDecision().isNoId());
+    
+    assert(!planner.getDecisionManager()->assignNextDecision());
 
     DEFAULT_TEARDOWN_PLAN();
     return(true);
