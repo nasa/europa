@@ -96,19 +96,6 @@ namespace PLASMA {
 
   void IntervalDomain::insert(double value) {
     check_error(ALWAYS_FAILS, "Cannot insert to an interval domain");
-    /*
-    if (isEmpty()) {
-      m_lb = m_ub = value;
-      if (!isOpen())
-        notifyChange(DomainListener::RELAXED);
-      return;
-    }        
-    if (m_lb <= value && value <= m_ub)
-      return; // Within domain.
-    if (compareEqual(m_lb, value) || compareEqual(m_ub, value))
-      return; // Within minDelta() of end points of domain.
-    check_error(ALWAYS_FAILS); // Can't add it without a 'gap' between interval and value.
-    */
   }
 
   void IntervalDomain::insert(const std::list<double>& values){
@@ -117,19 +104,6 @@ namespace PLASMA {
 
   void IntervalDomain::remove(double value) {
     check_error(ALWAYS_FAILS, "Cannot remove an interval domain");
-    /*
-    if(!isMember(value))
-      return;
-
-    if (isSingleton() && compareEqual(m_lb, value)) {
-      empty();
-      notifyChange(DomainListener::EMPTIED);
-      return;
-    }
-
-    // Not in interval, so removing it is no-op.
-    return;
-    */
   }
 
   bool IntervalDomain::operator==(const AbstractDomain& dom) const {

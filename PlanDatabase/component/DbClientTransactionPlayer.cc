@@ -41,6 +41,8 @@ namespace PLASMA {
   void DbClientTransactionPlayer::play(std::istream& is)
   {
     int txCounter = 0;
+    check_error(is, "Invalid input stream for playing transactions.");
+
     while (!is.eof()) {
       if (is.peek() != '<') {
         is.get(); // discard characters up to '<'
