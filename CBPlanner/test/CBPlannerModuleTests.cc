@@ -5,6 +5,7 @@
 #include "Variable.hh"
 #include "BinaryCustomConstraint.hh"
 #include "NotFalseConstraint.hh"
+#include "ConditionalRule.hh"
 
 extern bool loggingEnabled();
 
@@ -501,6 +502,7 @@ namespace Prototype {
 
     CBPlanner::Status res = planner.run(loggingEnabled(), 100);
     assert(res == CBPlanner::SEARCH_EXHAUSTED);
+    assert(planner.getClosedDecisions().empty());
     return true;
   }
 
@@ -688,8 +690,9 @@ namespace Prototype {
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
 
-    int numDecs = 4;
-    int i=0;
+    //    int numDecs = 4;
+    //    int i=0;
+    CBPlanner::Status result;
     for (;;) { /* Forever: only way out is to return */
       /*
       std::cout << std::endl;
@@ -698,60 +701,76 @@ namespace Prototype {
       std::cout << " curent dec = " << planner.getDecisionManager()->getCurrentDecision();
       std::cout << " num Open Decs = " << planner.getDecisionManager()->getNumberOfDecisions() << std::endl;
       */
-      planner.getDecisionManager()->printOpenDecisions();
+      //      planner.getDecisionManager()->printOpenDecisions();
 
       //      check_error(planner.getDecisionManager()->getNumberOfDecisions() == numDecs--);
-      CBPlanner::Status result = planner.step(0);
-      if (result != CBPlanner::IN_PROGRESS) return result;
+      result = planner.step(0);
+      if (result != CBPlanner::IN_PROGRESS) break;
     }
+    assert(result == CBPlanner::PLAN_FOUND);
+    assert(planner.getDepth() != planner.getTime());
+    assert(planner.getDepth() == 4);
+    assert(planner.getTime() == 11);
 
     return true;
   }
 
-  bool testTokenDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon& hor) {
-    HorizonCondition hcond(hor.getId(), dm.getId());
-    TemporalVariableCondition tcond(hor.getId(), dm.getId());
-    DynamicInfiniteRealCondition dcond(dm.getId());
+  bool testTokenDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, Horizon& hor, CBPlanner& planner) {
 
-    assert(dm.getConditions().size() == 3);
+    hor.setHorizon(300,400);
 
-    std::list<LabelStr> values;
-    values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
-    values.push_back(LabelStr("L2"));
-    values.push_back(LabelStr("L5"));
-    values.push_back(LabelStr("L3"));
-
-    Variable<LabelSet> v0(ce.getId(), LabelSet(values, true));
-    Variable<LabelSet> v1(ce.getId(), LabelSet(values, false));
-    Variable<IntervalDomain> v2(ce.getId(), IntervalDomain(1, 20));
-    Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 20));
-    Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
-
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t1(db.getId(), LabelStr("Objects"), LabelStr("Timeline1"));
+    Timeline t2(db.getId(), LabelStr("Objects"), LabelStr("Timeline2"));
+    Object t3(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
     db.close();
+
+    ConditionalRule r(LabelStr("PredicateA"));
+
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("P1"), 
-			 false,
+			 LabelStr("PredicateA"), 
+			 true,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
-			 IntervalIntDomain(1, 1000));
+			 IntervalIntDomain(200, 200),
+			 LabelStr("Timeline1"), false);
+    tokenA.addParameter(IntervalIntDomain(1,2));
+    tokenA.close();
+
+    IntervalToken tokenB(db.getId(), 
+			 LabelStr("PredicateB"), 
+			 false,
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(200, 200),
+			 LabelStr("Timeline2"));
+
+    tokenB.activate();
+    t2.constrain(tokenB.getId(), TokenId::noId());
 
     assert(ce.propagate());
 
-    assert(dm.getNumberOfDecisions() == 3);
+    std::cout << "nr of decs = " << planner.getDecisionManager()->getNumberOfDecisions() << std::endl;
 
-    dm.assignDecision();
+    CBPlanner::Status result = planner.run(loggingEnabled());
+    assert(result == CBPlanner::PLAN_FOUND);
 
-    //    std::cout << "nr of decs = " << dm.getNumberOfDecisions() << std::endl;
-    assert(dm.getNumberOfDecisions() == 3);
+    assert(planner.getTime() == planner.getDepth());
+    assert(planner.getTime() == 0);
+    assert(planner.getClosedDecisions().empty());
 
-    dm.assignDecision();
+    hor.setHorizon(0,200);
+
+    result = planner.run(loggingEnabled());
+    assert(result == CBPlanner::PLAN_FOUND);
+
+    assert(planner.getTime() != planner.getDepth());
+    assert(planner.getDepth() == 8);
+    assert(planner.getTime() == 13);
 
     return true;
   }
 
-  bool testObjectDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, DecisionManager &dm, Horizon& hor) {
+  bool testObjectDecisionCycleImpl(ConstraintEngine &ce, PlanDatabase &db, Schema &schema, CBPlanner& planner) {
 
     return true;
   }
@@ -780,8 +799,8 @@ namespace Prototype {
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
 
-    int numDecs = 4;
-    int i=0;
+    //    int numDecs = 4;
+    //    int i=0;
     for (;;) { /* Forever: only way out is to return */
       /*
       std::cout << std::endl;
@@ -790,12 +809,17 @@ namespace Prototype {
       std::cout << " curent dec = " << planner.getDecisionManager()->getCurrentDecision();
       std::cout << " num Open Decs = " << planner.getDecisionManager()->getNumberOfDecisions() << std::endl;
       */
-      planner.getDecisionManager()->printOpenDecisions();
+      //planner.getDecisionManager()->printOpenDecisions();
 
       //      check_error(planner.getDecisionManager()->getNumberOfDecisions() == numDecs--);
       CBPlanner::Status result = planner.step(0);
-      if (result != CBPlanner::IN_PROGRESS) break;
+      if (result != CBPlanner::IN_PROGRESS) {
+	assert(result == CBPlanner::PLAN_FOUND);
+	break;
+      }
     }
+    assert(planner.getDepth() ==  planner.getTime());
+    assert(planner.getDepth() == 3);
 
     Variable<BoolDomain> v6(ce.getId(), BoolDomain());
     IntervalToken tokenA(db.getId(), 
@@ -808,7 +832,10 @@ namespace Prototype {
     //    std::cout << "AFTER ADDING NEW GOAL TOKEN " << std::endl;
 
     CBPlanner::Status res = planner.run(loggingEnabled());
-    
+    assert(res == CBPlanner::PLAN_FOUND);
+    assert(planner.getDepth() ==  planner.getTime());
+    assert(planner.getDepth() == 6);
+
     /*
     for (;;) {
       std::cout << std::endl;

@@ -270,16 +270,16 @@ private:
   }
   static bool testTokenDecisionCycle() {
     bool retval = false;
-    DEFAULT_SETUP(ce, db, schema, false);
-    retval = testTokenDecisionCycleImpl(ce, db, schema, dm, hor);
-    DEFAULT_TEARDOWN();
+    DEFAULT_SETUP_PLAN(ce, db, schema, false);
+    retval = testTokenDecisionCycleImpl(ce, db, schema, hor, planner);
+    DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
   static bool testObjectDecisionCycle() {
     bool retval = false;
-    DEFAULT_SETUP(ce, db, schema, false);
-    retval = testObjectDecisionCycleImpl(ce, db, schema, dm, hor);
-    DEFAULT_TEARDOWN();
+    DEFAULT_SETUP_PLAN(ce, db, schema, false);
+    retval = testObjectDecisionCycleImpl(ce, db, schema, planner);
+    DEFAULT_TEARDOWN_PLAN();
     return retval;
   }
 };
