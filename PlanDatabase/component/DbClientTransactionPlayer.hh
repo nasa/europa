@@ -48,10 +48,12 @@ namespace Prototype {
     void playVariableSpecified(const TiXmlElement & element);
     void playVariableReset(const TiXmlElement & element);
     void playInvokeConstraint(const TiXmlElement & element);
+    void playUnaryConstraint(const TiXmlElement & element);
 
   private:
     DbClientId m_client;
     int m_objectCount;
+    int m_varCount;
     std::map<std::string, TokenId> m_tokens;
     std::map<std::string, ConstrainedVariableId> m_variables;
     std::list<std::string> m_enumerations;
@@ -78,6 +80,12 @@ namespace Prototype {
      * @brief read a value string as a variable identifier
      */
     ConstrainedVariableId parseVariable(const char * varString);
+
+    /** 
+     * @brief read a value string as a token identifier
+     */
+    TokenId parseToken(const char * tokString);
+
   //! XML input functions
 
     /** 
@@ -109,6 +117,12 @@ namespace Prototype {
      * @brief return a token as represented by an xml element
      */
     TokenId xmlAsToken(const TiXmlElement & token);
+
+    /**
+     * @brief return a newly created variable as represented by an xml element
+     */
+    ConstrainedVariableId xmlAsCreateVariable(const char * type, const char * name, const TiXmlElement * value);
+
   };
 
 }

@@ -22,8 +22,7 @@ const char* TX_LOG = "TransactionLog.xml";
 const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
 bool replay = true;
 
-#include "k9-transaction.hh"
-#include "IntervalIntDomain.hh"
+const char * initialTransactions = NULL;
 
 bool runPlanner(){
     SamplePlanDatabase db1(schema, replay);
@@ -31,12 +30,14 @@ bool runPlanner(){
     DbClientId client = db1.planDatabase->getClient();
 
     DbClientTransactionPlayer player(client);
-    std::ifstream in("k9-transaction.xml");
+    check_error(initialTransactions != NULL);
+    std::ifstream in(initialTransactions);
     player.play(in);
 
     assert(client->propagate());
 
-	NDDL::NddlWorldId world = client->getObject(LabelStr("world"));
+	ObjectId world = client->getObject(LabelStr("world"));
+    check_error(world.isValid());
     // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
     ConstrainedVariableId horizonStart = world->getVariable(LabelStr("world.m_horizonStart"));
     check_error(horizonStart.isValid());
@@ -107,6 +108,13 @@ bool copyFromFile(){
 }
 
 int main(int argc, const char ** argv){
+  if (argc < 2) {
+    std::cerr << "Must provide initial transactions file." << std::endl;
+    return -1;
+  }
+
+  initialTransactions = argv[1];
+
   // Initialize constraint factories
   SamplePlanDatabase::initialize();
   schema = NDDL::schema();

@@ -150,7 +150,7 @@ namespace Prototype {
   }
 
   void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint, const AbstractDomain& domain){
-    TiXmlElement * element = new TiXmlElement("invoke");
+    TiXmlElement * element = new TiXmlElement("unary");
     element->SetAttribute("name", constraint->getName().toString());    
     const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
     check_error(variables.size() == 1);

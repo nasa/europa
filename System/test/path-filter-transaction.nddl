@@ -1,0 +1,60 @@
+#include "NddlWorld.nddl"
+
+class Location{
+ string name;
+ Location(string _name){
+  name = _name;
+ }
+}
+
+class Path{
+ Location from, to;
+ Path(Location _from, Location _to){
+  from = _from;
+  to = _to;
+ }
+}
+
+Location rock = new Location("ROCK");
+Location hill = new Location("HILL");
+Location lander = new Location("LANDER");
+Location martianCity = new Location("MARTIAN_CITY");
+Location crater = new Location("CRATER");
+
+Path p1 = new Path(rock, hill);
+Path p2 = new Path(lander, hill);
+Path p3 = new Path(martianCity, hill);
+Path p4 = new Path(hill, lander);
+
+class World extends NddlWorld{
+ predicate Going{
+  Location from;
+  Location to;
+  neq(from, to);
+ }
+
+ predicate initialState{}
+ World(){
+  super();
+ }
+}
+
+World world = new World();
+
+World::Going{
+ Path path : {
+  eq(path.from, from);
+  eq(path.to, to);
+ };
+}
+
+any(World.Going g);
+eq(g.from, rock);
+eq(g.to, hill);
+
+/*
+ Path path : {
+  eq(path.from, g.from);
+  eq(path.to, g.to);
+ };
+*/

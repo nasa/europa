@@ -1,0 +1,66 @@
+#include "NddlWorld.nddl"
+
+enum Locations {Hill, Rock, Lander};
+
+class Rover{
+ predicate At{
+  Locations m_location;
+  eq(duration, 1);
+ }
+
+ predicate Going{
+  Locations m_from, m_to;
+  eq(duration, 1);
+  neq(m_from, m_to);
+ }
+}
+
+Rover::At{
+ meets(Going to);
+ eq(to.m_from, m_location);
+
+ met_by(Going from);
+ eq(from.m_to, m_location);
+}
+
+Rover::Going{
+  met_by(At from);
+  eq(m_from, from.m_location);
+  meets(At to);
+  eq(m_to, to.m_location);
+}
+
+NddlWorld world = new NddlWorld(10, 101, 350);
+
+Rover rover = new Rover();
+
+any(Rover.At a);
+a.m_location.specify(Lander);
+a.start.specify(10);
+
+any(Rover.At b);
+b.m_location.specify(Rock);
+b.start.specify(100);
+
+a before b;
+
+/*
+World::initialState{
+ // Enforce horizon bounds on initialState
+ leq(object.m_horizonStart, start);
+ leq(end, object.m_horizonEnd);
+ 
+ any(Rover.At a);
+ eq(a.m_location, Lander);
+ eq(a.start, 10);
+
+ any(Rover.At b);
+ eq(b.m_location, Rock);
+ eq(b.start, 100);
+
+ // This doesn't work because it doesn't hook it up with the temporal network
+ //leq(a.end, b.start);
+ a before b;
+}
+*/
+

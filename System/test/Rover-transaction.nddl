@@ -1,0 +1,182 @@
+#include "NddlWorld.nddl"
+
+/**
+ * Changes from ROUND 3:
+ * 1. Added an Instrument class
+ * 2. Changed Commands to delegate to the Instrument
+ * 3. Built in the instrument to the rover
+ */
+
+class Location {
+ string name;
+ int x;
+ int y;
+
+ Location(string _name, int _x, int _y){
+  name = _name;
+  x = _x;
+  y = _y;
+ }
+}
+
+class Rock extends Location
+{
+ Rock(string _name, int _x, int _y){
+  super(_name, _x, _y);
+ }
+}
+
+
+class Navigator
+{
+ predicate At{
+  Location location;
+ }
+
+ predicate Going{
+  Location from;
+  Location to;
+  neq(from, to);
+ }
+}
+
+Navigator::At{
+ met_by(object.Going from);
+ eq(from.to, location);
+ meets(object.Going to);
+ eq(to.from, location);
+}
+
+Navigator::Going{
+ met_by(object.At _from);
+ eq(_from.location, from);
+ meets(object.At _to);
+ eq(_to.location, to);
+}
+
+class Commands{
+ predicate TakeSample{
+  Rock rock;
+  eq(duration, [20 25]); // Flexible durations for taking a sample
+ }
+}
+
+Commands::TakeSample{
+ contains(Instrument.TakeSample a);
+ eq(a.rock, rock);
+ Rover rovers;
+ commonAncestor(a.object, this.object, rovers);
+}
+
+class Instrument{
+ predicate TakeSample{
+  Rock rock;
+  leq(10, duration);
+ }
+
+ predicate Place{
+  Rock rock;
+  eq([3 12], duration);
+ }
+
+ predicate Stow{
+  leq([2 6], duration);
+ }
+
+ predicate Unstow{
+  leq([2 6], duration);
+ }
+
+ predicate Stowed{}
+}
+
+Instrument::TakeSample{
+ // Same rover must be at the target rock throughout (Need a shared macro for this)
+ contained_by(Navigator.At at);
+ eq(at.location, rock);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ // Preceded by placing the instrument
+ met_by(Place b);
+ eq(b.rock, rock);
+
+ // Succeded by stowing the instrument
+ meets(Stow c);
+}
+
+Instrument::Place{
+ contained_by(Navigator.At at);
+ eq(at.location, rock);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ meets(TakeSample a);
+ eq(a.rock, rock);
+ met_by(Unstow b);
+}
+
+Instrument::Unstow{
+ contained_by(Navigator.At at);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ meets(Place a);
+ met_by(Stowed b);
+}
+
+Instrument::Stow{
+ contained_by(Navigator.At at);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ meets(Stowed a);
+ met_by(TakeSample b);
+}
+
+
+Instrument::Stowed{
+ met_by(Stow a);
+ meets(Unstow b);
+}
+
+
+class Rover {
+ Commands commands; // High-level rover commands
+ Navigator navigator; // Handles position control and achievement
+ Instrument instrument;
+
+ Rover(){
+  commands = new Commands();
+  navigator = new Navigator();
+  instrument = new Instrument();
+ }
+}
+
+NddlWorld world = new NddlWorld();
+
+Location lander = new Location(LANDER, 0, 0);
+Rock rock1 = new Rock(ROCK1, 9, 9);
+Rock rock2 = new Rock(ROCK2, 1, 6);
+Rock rock3 = new Rock(ROCK2, 4, 8);
+Rock rock4 = new Rock(ROCK2, 3, 9);
+Rover spirit = new Rover();
+Rover opportunity = new Rover();
+
+// Establish the initial position for spirit
+any(Navigator.At initialPosition);
+eq(initialPosition.start, world.m_horizonStart); // What time - the start of this planmning horizon
+eq(initialPosition.location, lander); // What position - the lander
+
+// Establish the goal - to take a sample at a position
+any(Commands.TakeSample sample);
+eq(sample.start, 50);
+eq(sample.rock, rock4); // Want to get to rock4
+
+// Establish the initial instrument state
+any(Instrument.Stowed stowed);
+eq(stowed.start, world.m_horizonStart);
+
+// Assign states to Spirit
+commonAncestor(sample.object, initialPosition.object, spirit);
+commonAncestor(sample.object, stowed.object, spirit);
