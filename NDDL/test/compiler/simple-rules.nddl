@@ -27,8 +27,8 @@ class World {
  // Horizon information
  int m_horizonStart;
  int m_horizonEnd;
-
  Rover rover;
+
  predicate initialState{}
  World(){
   // Set up the planning horizon
