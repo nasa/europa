@@ -343,7 +343,7 @@ SSR_Storage_Use_Timeline::Playback {
     DNP_Science DNP_Science_1;
     contained_by(DNP_Science_1.Fields_and_Particles.F_and_P_Idle);
     DSS_Any DNP_Any_0;
-    contained_by(DNP_Any_0.Dss_Availability.Downlink_Window dw);
+    contained_by(DNP_Any_0.DSS_Availability.Downlink_Window dw);
     eq(dw.Downlink_Rate,Playback_Rate);
     eq(dw.loc,Location);
     eq(dw.Opp_Number,DSS_Opp_Num);
