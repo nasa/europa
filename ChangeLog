@@ -1,3 +1,22 @@
+EUROPA2_20050114_0
+1. Aver test language and interpreter added to the modules
+2. HSTS planner, constraint semantics, and heuristics and plan id support
+for migrating users added to the modules
+3. Numerous Europa system tests have been added to HSTS/test, though not
+all run successfully.
+4. Object constrain has been changed to constrain(object,pred,succ) to
+ensure uniformity when using any type of object.  Free has been
+changed to match.  Makes it easier to keep track of relationships when
+doing non-chronological backtracking.
+5. Id locking has been added to allow multiple users to lock the plan
+database while imposing transactions on it on a thread by thread basis.
+6. DebugMsg has replaced logging to std::cout and we added configuration
+files in each module.
+7. API documentation templates in doxygen have been added.
+8. User guide has improved.
+9. We include more comprehensive README and BUILDING files as well as a HELLOWORLD
+10. Numerous bug fixes and better build support
+	
 M_25
 1. A fairly solid milestone using the new build structure with numerous small fixes.
 2. First incorporation of the project creation utilities to make a useful project.
