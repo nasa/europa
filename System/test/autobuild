@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.62 2003-12-13 09:46:10 wedgingt Exp $
+# $Id: autobuild,v 1.63 2003-12-13 22:12:44 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -173,11 +173,12 @@ do
         mkdir NewPlan/working/failed
     fi
 
-    # Save the make output files
+    # Save the make output files and the timings data
     mv NewPlan/make.tests . || exit 2
     mv testDist/make.simple . || exit 2
     mv testDist/make.simple.clean . || exit 2
     mv NewPlan/make.clean . || exit 2
+    mv NewPlan/SupportFiles/timings* . || exit 2
 
     # Would continue with the next one after a failure,
     #   but the disk space might not be available.
