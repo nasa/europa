@@ -5,59 +5,69 @@
 
 namespace Prototype {
 
+#define IS_TAG(x) (strcmp (tagName, x) == 0)
+
   HSTSHeuristicsReader::HSTSHeuristicsReader(HSTSHeuristics& heuristics) : m_heuristics(heuristics) { }
 
   HSTSHeuristicsReader::~HSTSHeuristicsReader() { }
 
   void HSTSHeuristicsReader::read(const std::string& fileName) {
 
-    std::ifstream is(fileName.c_str());
+    check_error(fileName != "");
+    std::cout << "Reading " << fileName << std::endl;
 
-    int elements = 0;
-    while (!is.eof()) {
-      if (is.peek() != '<') {
-	is.get(); // discard characters up to '<'
-	continue;
-      }
-      TiXmlElement element("");
-      is >> element;
-      const char * tagname = element.Value();    
-      if (strcmp(tagname, "Document") == 0) {
-	for (TiXmlElement* child = element.FirstChildElement(); child;
-	     child = child->NextSiblingElement()) {
-	  check_error(child != NULL);
-	  readElement(*child);
-	}
-      }
-      else
-	readElement(element);
-      elements++;
+    TiXmlNode *main_node = NULL;
+  
+    TiXmlDocument doc(fileName);
+    bool loadOkay = doc.LoadFile();
+    check_error(loadOkay);
+
+    main_node = doc.FirstChild();
+  
+    const char *value = NULL;
+    TiXmlElement* element = NULL;
+    element = main_node->ToElement();
+    const char * tagName = element->Value();    
+    std::cout << "tagName = " << tagName << std::endl;
+    check_error(IS_TAG("Heuristics-HSTS"));
+
+    element = main_node->FirstChildElement();
+
+    while(element) {
+      tagName = element->Value();
+      std::cout << "tagName = " << tagName << std::endl;
+      check_error(IS_TAG("Defaults") || IS_TAG("VariableSpecification") || IS_TAG("TokenSpecification"));
+      readElement(*element);
+      element = element->NextSiblingElement();
     }
   }
 
   void HSTSHeuristicsReader::readElement(const TiXmlElement& element) {
+    std::cout << " in ReadElement" << std::endl;
     const char * tagName = element.Value();
-    if (strcmp(tagName, "Defaults") == 0)
+    if (IS_TAG("Defaults"))
       readDefaults(element);
-    else if (strcmp(tagName, "VariableSpecification") == 0)
+    else if (IS_TAG("VariableSpecification"))
       readVariableSpecification(element);
-    else if (strcmp(tagName, "TokenSpecification") == 0)
+    else if (IS_TAG("TokenSpecification"))
       readTokenSpecification(element);
   }
 
   void HSTSHeuristicsReader::readDefaults(const TiXmlElement& element) {
+    std::cout << " in ReadDefaults" << std::endl;
+
     for (TiXmlElement* child = element.FirstChildElement(); child;
 	 child = child->NextSiblingElement()) {
       check_error(child != NULL);
       const char* tagName = child->Value();
       check_error(tagName != NULL);
-      if (strcmp(tagName, "PriorityPref") == 0) 
+      if (IS_TAG("PriorityPref")) 
 	readPriorityPref(*child);
-      else if (strcmp(tagName, "Compatibility") == 0)
+      else if (IS_TAG("Compatibility"))
 	readCompatibility(*child);
-      else if (strcmp(tagName, "Token") == 0)
+      else if (IS_TAG("Token"))
 	readTokenSpecification(*child);
-      else if (strcmp(tagName, "ConstrainedVariable") == 0)
+      else if (IS_TAG("ConstrainedVariable"))
 	readConstrainedVariable(*child);
     }
   }
@@ -68,6 +78,8 @@ namespace Prototype {
   }
 
   void HSTSHeuristicsReader::readPriorityPref(const TiXmlElement& element) {
+    std::cout << " in ReadPriorityPref" << std::endl;
+
     std::string tmp = getTextChild(element);
     HSTSHeuristics::PriorityPref pp;
     if ((tmp == "low") || (tmp == "LOW"))
@@ -82,14 +94,30 @@ namespace Prototype {
     std::cout << "getting PriorityPref = " << m_heuristics.getDefaultPriorityPreference() << std::endl;
   }
 
-  void HSTSHeuristicsReader::readVariableSpecification(const TiXmlElement& element){}
-  void HSTSHeuristicsReader::readTokenSpecification(const TiXmlElement& element){}
-  void HSTSHeuristicsReader::readCompatibility(const TiXmlElement& element){}
-  void HSTSHeuristicsReader::readPredicateSpec(const TiXmlElement& element){}
-  void HSTSHeuristicsReader::readDecisionPreference(const TiXmlElement& element){}
-  void HSTSHeuristicsReader::readConstrainedVariable(const TiXmlElement& element){}
-  void HSTSHeuristicsReader::readPreference(const TiXmlElement& element){}
-  void HSTSHeuristicsReader::readMaster(const TiXmlElement& element){}
+  void HSTSHeuristicsReader::readVariableSpecification(const TiXmlElement& element){
+    std::cout << "in ReadVariableSpecification" << std::endl;
+  }
+  void HSTSHeuristicsReader::readTokenSpecification(const TiXmlElement& element){
+    std::cout << "in ReadTokenSpecification" << std::endl;
+  }
+  void HSTSHeuristicsReader::readCompatibility(const TiXmlElement& element){
+    std::cout << "in ReadCompatibility" << std::endl;
+  }
+  void HSTSHeuristicsReader::readPredicateSpec(const TiXmlElement& element){
+    std::cout << "in ReadPredicateSpec" << std::endl;
+  }
+  void HSTSHeuristicsReader::readDecisionPreference(const TiXmlElement& element){
+    std::cout << "in ReadDecisionPreference" << std::endl;
+  }
+  void HSTSHeuristicsReader::readConstrainedVariable(const TiXmlElement& element){
+    std::cout << "in ReadConstrainedVariable" << std::endl;
+  }
+  void HSTSHeuristicsReader::readPreference(const TiXmlElement& element){
+    std::cout << "in ReadPreference" << std::endl;
+  }
+  void HSTSHeuristicsReader::readMaster(const TiXmlElement& element){
+    std::cout << "in ReadMaster" << std::endl;
+  }
 
-  GeneratorId HSTSHeuristicsReader::getGeneratorFromName(std::string genName){}
+  GeneratorId HSTSHeuristicsReader::getGeneratorFromName(std::string genName){ return GeneratorId::noId(); }
 }
