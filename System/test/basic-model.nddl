@@ -55,5 +55,7 @@ World::initialState{
  eq(b.m_location, Rock);
  eq(b.start, 100);
 
- leq(a.end, b.start);
+ // This doesn't work because it doesn't hook it up with the temporal network
+ //leq(a.end, b.start);
+ a before b;
 }
