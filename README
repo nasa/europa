@@ -6,6 +6,13 @@ Known areas of performance improvement:
 5. Improve exchange of data in TemporalPropagator with  direct calculation of duration variables.
 6. Update TemporalNetwork to adjust for deactivated constraints
 
+M_13:
+**** Major Performance Milestone
+1. Introduced CBPlanner which responds to PlanDatabase and ConstraintEngine
+events to manage decisions directly without Flaws.
+2. Moved java nddl parser.
+3. Introduced support for Dynamic Objects
+
 M_12:
 **** Fixed problems creating Object Decision Points from flaws.
 1. Introduced new test cases in Planner module to test backtracking due to
