@@ -190,6 +190,7 @@ namespace EUROPA {
     }
 
     static bool testBoolean() {
+
       EnumeratedDomain d1(1., true, EnumeratedDomain::getDefaultTypeName().c_str());
       EnumeratedDomain d2(2., true, EnumeratedDomain::getDefaultTypeName().c_str());
       EnumeratedDomain d3(2., true, EnumeratedDomain::getDefaultTypeName().c_str());
@@ -262,7 +263,8 @@ namespace EUROPA {
         tokens.insert(tok);
         tokenIds.push_back((double)tok);
       }
-      
+
+
       DomainContainer* tokDom = AverHelper::tokenSetToDomain(tokens);
       std::list<double> resultIds;
       (*tokDom)->getValues(resultIds);
@@ -272,7 +274,8 @@ namespace EUROPA {
       tokenIds.sort();
       assert(resultIds == tokenIds);
 
-      DomainContainer tempDom(new EnumeratedDomain(tokenIds, true, EnumeratedDomain::getDefaultTypeName().c_str()), true, true);
+
+      DomainContainer tempDom(new EnumeratedDomain(tokenIds, false, EnumeratedDomain::getDefaultTypeName().c_str()), true, true);
       TokenSet tokSet = AverHelper::domainToTokenSet(&tempDom);
       
       assert(tokSet == tokens);
