@@ -85,6 +85,7 @@ class ConstraintEngineTest
 public:
   static bool test(){
     runTest(testDeallocationWithPurging);
+    runTest(testInconsistentInitialVariableDomain);
     return true;
   }
 
@@ -111,6 +112,18 @@ public:
     Entity::purgeStarted();
     delete (ConstraintEngine*) ce;
     Entity::purgeEnded();
+
+    return true;
+  }
+
+  static bool testInconsistentInitialVariableDomain(){
+    EnumeratedDomain emptyDomain;
+    emptyDomain.close();
+    {
+      Variable<EnumeratedDomain> v0(ENGINE, emptyDomain);
+      assert(ENGINE->provenInconsistent()); // Should be immediately inconsistent!
+    }
+    assert(ENGINE->propagate()); // Should be fixed by deletion of the variable
 
     return true;
   }

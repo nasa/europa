@@ -169,11 +169,11 @@ namespace Prototype {
     m_baseDomain(baseDomain),
     m_specifiedDomain(baseDomain),
     m_derivedDomain(baseDomain) {
-    check_error(m_derivedDomain.isDynamic() || !m_derivedDomain.isEmpty());
+    // Note that we permit the domain to be empty initially
     m_derivedDomain.setListener(m_listener);
 
-    // Don't propagate set operations on dynamic domains.
-    if (baseDomain.isDynamic())
+    // Don't propagate set operations on dynamic or empty domains.
+    if (baseDomain.isDynamic() || baseDomain.isEmpty())
       return;
 
     if (baseDomain.isSingleton())

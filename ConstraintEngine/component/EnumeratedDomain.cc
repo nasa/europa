@@ -76,7 +76,7 @@ namespace Prototype {
 
   void EnumeratedDomain::close() {
     AbstractDomain::close();
-    check_error(isAscending(m_values));
+    check_error(isEmpty() || isAscending(m_values));
   }
 
   int EnumeratedDomain::getSize() const {

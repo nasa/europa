@@ -503,6 +503,7 @@ namespace Prototype {
       runTest(testIntersection);
       runTest(testDifference);
       runTest(testOperatorEquals);
+      runTest(testEmptyOnClosure);
       return(true);
     }
 
@@ -793,6 +794,28 @@ namespace Prototype {
 
       dom1 = dom2;
       assert(dom1 == dom2);
+
+      return(true);
+    }
+
+    static bool testEmptyOnClosure(){
+      std::list<Prototype::LabelStr> values;
+      {
+	ChangeListener l_listener;
+	LabelSet ls0(values, true, l_listener.getId());
+	DomainListener::ChangeType change;
+	bool res = l_listener.checkAndClearChange(change);
+	assert(res && change == DomainListener::EMPTIED);
+      }
+
+      {
+	LabelSet ls0(values, true); // Will be empty on closure, but no listener attached
+	DomainListener::ChangeType change;
+	ChangeListener l_listener;
+	ls0.setListener(l_listener.getId());
+	bool res = l_listener.checkAndClearChange(change);
+	assert(res && change == DomainListener::EMPTIED);
+      }
 
       return(true);
     }
