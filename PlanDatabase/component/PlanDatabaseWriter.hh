@@ -1,0 +1,54 @@
+#ifndef _H_PlanDatabaseWriter
+#define _H_PlanDatabaseWriter
+
+#include "Timeline.hh"
+#include "PlanDatabase.hh"
+#include "Token.hh"
+#include "ConstraintEngine.hh"
+#include "IntervalIntDomain.hh"
+#include "PlanDatabaseDefs.hh"
+#include "TokenVariable.hh"
+#include "ConstrainedVariable.hh"
+#include "TokenTemporalVariable.hh"
+
+namespace Prototype {
+
+  class PlanDatabaseWriter {
+
+  public:
+
+    static void write(PlanDatabaseId db, std::ostream& os) {
+      db->getConstraintEngine()->propagate();
+      std::set<ObjectId> objs = db->getObjects();
+      for (std::set<ObjectId>::const_iterator oit = objs.begin(); oit != objs.end() ; ++oit) {
+	if (TimelineId::convertable((*oit))) {
+	  TimelineId timeline = (*oit);
+	  os << "Timeline: " << timeline->getName().toString() << "*************************" << std::endl;
+	  std::list<TokenId> toks = timeline->getTokenSequence();
+	  for(std::list<TokenId>::const_iterator tokit = toks.begin(); tokit != toks.end(); ++tokit) {
+	    TokenId t = (*tokit);
+	    TempVarId st = t->getStart();
+	    os << "[ " << st->getDerivedDomain().getLowerBound() << " " << st->getDerivedDomain().getUpperBound() << " ]"<< std::endl;
+	    os << "\t" << t->getPredicateName().toString() << "(" ;
+	    std::vector<ConstrainedVariableId> vars = t->getParameters();
+	    for(std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
+	      ConstrainedVariableId v = (*varit);
+	      os << v->derivedDomain();
+	    }
+	    os << ")" <<std::endl;
+	    os << "\tKey=" << t->getKey() << std::endl;
+	    std::set<TokenId> mergedtoks = t->getMergedTokens();
+	    for(std::set<TokenId>::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
+	      os << "\t\tMerged Key=" << (*mit)->getKey() << std::endl;
+	    os << "[ " << t->getEnd()->getDerivedDomain().getLowerBound() << " " << t->getEnd()->getDerivedDomain().getUpperBound() << " ]"<< std::endl;
+	  }
+	  os << "End Timeline: " << timeline->getName().toString() << "*************************" << std::endl;
+	}
+      }
+    }
+  };
+}
+#endif
+	    
+	        
+	  
