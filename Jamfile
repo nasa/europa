@@ -17,6 +17,7 @@ Module plasma : all System ;
 
 Depends run-tests : tests ;
 Depends run-all-tests : run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests run-hsts-planner-tests ;
+Depends run-checkin-tests : check-cvs-changes ;
 Depends run-checkin-tests : run-tests ;
 NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
 
@@ -35,5 +36,7 @@ SubInclude PLASMA HSTS ;
 
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml ;
+
+ExecuteSO check-cvs-changes : checkcvs : $(PLASMA) ;
 
 } # PLASMA_READY
