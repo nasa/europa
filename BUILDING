@@ -137,9 +137,10 @@ When running with SHARED it is required to add the
 PLASMA shared library directory to your library search
 path.  The relevant variable depends on your platform,
 and the way to set it depends on your shell.  Here is
-an example for the bash shell on linux/solaris:
+an example for the sh and bash shells:
 
-% export LD_LIBRARY_PATH=%LD_LIBRARY_PATH:/user/me/PLASMA/lib
+% LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/user/me/PLASMA/lib
+% export LD_LIBRARY_PATH
 
 - Getting more help
 
