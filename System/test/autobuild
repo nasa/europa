@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.14 2002-12-11 01:12:03 wedgingt Exp $
+# $Id: autobuild,v 1.15 2002-12-11 18:40:01 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -103,6 +103,8 @@ do
         mkdir working/failed
     fi
 
+    # Would continue with the next one after a failure,
+    #   but the disk space is not available.
     rmdir working || exit 1
 
     # Now, wipe out all that hard work
