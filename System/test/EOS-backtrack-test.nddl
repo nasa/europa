@@ -99,8 +99,7 @@ class Storage extends Resource {
 }
 
 Satellite::TakeImg {
-  met_by(Satellite.Pointing p);
-  eq(p.object,object);
+  met_by(object.Pointing p);
   starts(Memory.change tx);
   if (m_target) {
     eq(tx.quantity,m_target.m_size);
@@ -110,10 +109,8 @@ Satellite::TakeImg {
 
 // doesn't calculate exact, but rather, linear distance as a simplification
 Satellite::Slew {
-  met_by(Satellite.Pointing pfrom);
-  meets(Satellite.Pointing pto);
-  eq(pfrom.object,object);
-  eq(pto.object,object);
+  met_by(object.Pointing pfrom);
+  meets(object.Pointing pto);
   eq(pfrom.m_target,m_from);
   eq(pto.m_target,m_to);
   int dx, dy, dz;
@@ -124,8 +121,7 @@ Satellite::Slew {
 }
 
 Satellite::HaveImg {
-  met_by(Satellite.TakeImg t);
-  eq(t.object,object);
+  met_by(object.TakeImg t);
 }
 
 Satellite::Pointing {
@@ -178,5 +174,3 @@ eq(r1.object,ground1);
 any(GroundStation.Receive r2);
 eq(r2.m_data, target2);
 eq(r2.object,ground1);
-
-
