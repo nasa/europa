@@ -204,8 +204,14 @@ namespace Prototype
       update();
 
     if(provenInconsistent()){
+      static bool sl_initialized = false;
       static DomainType sl_emptyDomain;
-      sl_emptyDomain.empty();
+      if (sl_initialized = false) {
+	if (sl_emptyDomain.isDynamic())
+	  sl_emptyDomain.close();
+	sl_emptyDomain.empty();
+	sl_initialized = true;
+      }
       return sl_emptyDomain;
     }
     else
