@@ -75,6 +75,7 @@ namespace Prototype {
     virtual void add(const ObjectId& object, const TokenId& token);
     virtual void add(const ObjectId& object);
     virtual void addActive(const TokenId& token);
+    virtual void condAddActive(const TokenId& token);
     virtual void condAdd(const TokenId& token);
     virtual void add(const TokenId& token);
     virtual void condAdd(const ConstrainedVariableId& var, const bool units);

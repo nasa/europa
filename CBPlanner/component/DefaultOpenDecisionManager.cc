@@ -69,10 +69,21 @@ namespace Prototype {
 
   void DefaultOpenDecisionManager::addActive(const TokenId& token) {
     check_error(token.isValid());
+    check_error(m_objDecs.find(token->getKey()) == m_objDecs.end());
     DecisionPointId dp = createObjectDecisionPoint(token);
     check_error(dp->getEntityKey() == token->getKey());
     m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
     publishNewDecision(dp);
+  }
+
+  void DefaultOpenDecisionManager::condAddActive(const TokenId& token) {
+    check_error(token.isValid());
+    if (m_objDecs.find(token->getKey()) == m_objDecs.end()) {
+      DecisionPointId dp = createObjectDecisionPoint(token);
+      check_error(dp->getEntityKey() == token->getKey());
+      m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
+      publishNewDecision(dp);
+    }
   }
 
   void DefaultOpenDecisionManager::condAdd(const ConstrainedVariableId& var, const bool units) {
