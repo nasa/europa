@@ -274,7 +274,7 @@ void outerLoopIntervalEqualConstraint(bool useEquivalenceClasses){
   for (int i=0;i<1000; i++)
     testIntervalEqualityPerformance(ce.getId());
 }
-void main()
+int main()
 {
   //outerLoopForTestEquate();
   outerLoopForTestIntersection();
