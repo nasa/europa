@@ -211,17 +211,6 @@ rule RunModuleMain {
 ################
 # internal rules
 
-rule CheckForCycle {
-  local pushed = $(1) ;
-  local found = $(2) ;
-
-#  Echo CheckForCycle $(pushed) . $(found) ;
-
-  if $(found) in $(pushed) {
-    Exit Cycle Detected in FLinkModules. ;
-  }
-}
-
 rule FLinkModules {
   local module = $(1) ;
 
@@ -238,6 +227,10 @@ rule FLinkModules {
       Echo - $(mod) ;
     }
     if $(mod) in $(found) {
+      if $(LIBRARIES) = NONE {
+        modules = $(modules[2-]) ;
+        continue ;
+      }
       found = [ FRemoveItem $(found) : $(mod) ] ;
       if ! $(mod) in $(pushed) {
         pushed += $(mod) ;
@@ -245,7 +238,9 @@ rule FLinkModules {
     }
     found += $(mod) ;
     modules = [ FMergeList $(modules[2-]) : [ on $(mod:G=module) return $(LINK_MODULES:G=) ] ] ;
-    CheckForCycle $(pushed) : $(found) ;
+    if $(found) in $(pushed) {
+      Exit Cycle Detected in FLinkModules. ;
+    }
   }
 
   if $(TRACE_MODULE) = TRUE {
