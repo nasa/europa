@@ -11,6 +11,7 @@
 #include "./ConstraintEngine/IntervalRealDomain.hh"
 #include "./ConstraintEngine/LabelSet.hh"
 #include "./ConstraintEngine/DefaultPropagator.hh"
+#include "./ConstraintEngine/EqualityConstraintPropagator.hh"
 
 #include <iostream>
 
@@ -20,8 +21,10 @@
     Schema schema;\
     PlanDatabase db(ce.getId(), schema.getId());\
     new DefaultPropagator(LabelStr("Default"), ce.getId());\
+    new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());\
     Object object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));\
     if(autoClose) db.close();
+
 
 class ObjectTest {
 public:
@@ -471,7 +474,8 @@ int main(){
   REGISTER_NARY(LessThanEqualConstraint, "Before", "Default");
   REGISTER_UNARY(ObjectTokenRelation, "ObjectRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
-
+  REGISTER_NARY(EqualConstraint, "EqualConstraint", "EquivalenceClass");
+  
   runTestSuite(ObjectTest::test, "Object Tests");
   runTestSuite(TokenTest::test, "Token Tests");
   runTestSuite(TimelineTest::test, "Timeline Tests");
