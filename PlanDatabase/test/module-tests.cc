@@ -247,7 +247,8 @@ private:
     t1.merge(t0.getId());
 
     // Verify that the equality constraint has migrated and original has been deactivated.
-    check_error(!equalityConstraint->isActive());
+    //TBW: when stacking instead of merging tokens, the next check is not true
+    // check_error(!equalityConstraint->isActive());
     check_error(t0.getEnd()->getDerivedDomain().getLowerBound() == 8);
     check_error(t0.getEnd()->getDerivedDomain() == t2.getEnd()->getDerivedDomain());
 
