@@ -1,0 +1,97 @@
+Building PLASMA
+by Andrew Bachmann
+2004-07-13
+
+
+- Building Jam
+
+The build PLASMA you must have Jam installed on your
+system.  If you are building on a solaris box the
+systems group may have already installed jam.  Type
+"jam -v" to test your jam version.  Versions 2.4 and
+versions 2.5rc3 are known to work.  
+
+Although version 2.4 works, it is not recommended
+because using it will result in the entire tree being
+rebuilt even when it is run in a subdirectory.
+
+Jam is open source and can be downloaded from:
+ftp://ftp.perforce.com/pub/jam/
+
+
+- Performing a build
+
+If you run "jam" in a directory of the PLASMA tree, it
+will build all files below that subdirectory, and any
+files in the rest of the tree that the files in that
+subdirectory depend on.  This includes libraries and
+test executables.
+
+If you run "jam tests" in a directory of the PLASMA
+tree, it will build and run all the tests below that
+subdirectory.  To build and run all tests in the
+entire PLASMA tree, run "jam tests" at the PLASMA
+directory.
+
+If you run "jam clean" in a directory of the PLASMA
+tree, it will remove generated files that are below
+that subdirectory.  To remove generated files in the
+entire PLASMA tree, run "jam clean" at the PLASMA
+directory.
+
+
+- Configuring the build
+
+The PLASMA build has a few variations that can be
+built.  The variations and parameters of the build
+can be configured through environment variables or
+parameters to jam.
+
+PLASMA supports building 1 or more "variants" at the
+same time.  The valid variants are:
+
+	1. DEV - unoptimized, unprofiled, debug
+	2. OPTIMIZED - optimized, unprofiled, no debug
+	3. PROFILE - unoptimized, profiled, no debug
+	4. CUSTOM
+
+For example, to build an optimized build run jam like
+this: (assumes bash)
+
+% VARIANTS=OPTIMIZED jam
+
+Or alternatively:
+
+% jam -sVARIANTS=OPTIMIZED
+
+The output files are named differently for each variant,
+which makes it possible to build different variants at
+the same time.  It is also not necessary to clean the
+tree when switching variants.  Here are the naming
+patterns for each of the main variants:
+
+	DEV = <filename>_g<ext>
+	OPTIMIZED = <filename>_o<ext>
+	PROFILE = <filename>_p<ext>
+
+The fourth variant, CUSTOM is a special variant which
+examines some additional environment variables to
+determine the compilation flags.  These additional
+variables are:
+
+	1. DEBUG - use debugging
+	2. OPTIMIZE - use optimization
+	3. PROFILE - use profiling
+	4. WARN - use additional warnings
+
+In the case of the CUSTOM variant, the above variables
+are used to construct the name by composition.  Thus,
+the DEV variant is identical to the CUSTOM DEBUG variant.
+
+The default variant is DEV.
+
+
+- Getting more help
+
+If you have difficulty with any part of these
+instructions please contact the PLASMA development team.
