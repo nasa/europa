@@ -7,7 +7,7 @@ Known areas of performance improvement:
 
 M_4:
 1. Working version of DecisionPlay and Replay
-2. Some minor fixess to the NddlCompiler
+2. Some minor fixes to the NddlCompiler
 3. A bunch of new Constraints ported from EUROPA
 4. Introduction of Constraint test harness
 5. Other minor bug fixes
