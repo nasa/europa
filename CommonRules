@@ -165,8 +165,8 @@ rule LinkSharedLibraries
 
     local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
 
-    Depends $(_t) : $(>:S=$(SUFSHARE)) ;
-    NEEDSHARES on $(_t) += $(>:S=$(SUFSHARE)) ;
+    Depends $(_t) : lib$(>:S=$(SUFSHARE)) ;
+    NEEDSHARES on $(_t) += $(>) ;
 }
 
 #
@@ -625,7 +625,7 @@ actions together Chmod1
 
 actions together Link bind NEEDLIBS
 {
-	$(LINK) $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS) 
+	$(LINK) $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS) -l$(NEEDSHARES)
 }
 
 } # CommonRules_INCLUDED
