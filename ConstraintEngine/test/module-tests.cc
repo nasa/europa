@@ -61,11 +61,35 @@ public:
 int DelegationTestConstraint::s_executionCount = 0;
 int DelegationTestConstraint::s_instanceCount = 0;
 
+
+class TestListener: public ConstraintEngineListener{
+public:
+  TestListener(const ConstraintEngineId& ce):ConstraintEngineListener(ce){
+    for (int i=0;i<ConstraintEngine::EVENT_COUNT;i++) m_events[i] = 0;
+  }
+  void notifyPropagationCommenced(){increment(ConstraintEngine::PROPAGATION_COMMENCED);}
+  void notifyPropagationCompleted(){increment(ConstraintEngine::PROPAGATION_COMPLETED);}
+  void notifyPropagationPreempted(){increment(ConstraintEngine::PROPAGATION_PREEMPTED);}
+  void notifyAdded(const ConstraintId& constraint){increment(ConstraintEngine::CONSTRAINT_ADDED);}
+  void notifyRemoved(const ConstraintId& constraint){increment(ConstraintEngine::CONSTRAINT_REMOVED);}
+  void notifyExecuted(const ConstraintId& constraint){increment(ConstraintEngine::CONSTRAINT_EXECUTED);}
+  void notifyAdded(const ConstrainedVariableId& variable){increment(ConstraintEngine::VARIABLE_ADDED);}
+  void notifyRemoved(const ConstrainedVariableId& variable){increment(ConstraintEngine::VARIABLE_REMOVED);}
+  void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType){increment(changeType);}
+
+  int getCount(ConstraintEngine::Event event){return m_events[event];}
+
+private:
+  void increment(int event){m_events[event] = m_events[event] + 1;}
+  int m_events[ConstraintEngine::EVENT_COUNT];
+};
+
 class VariableTest
 {
 public:
   static bool test() {
     runTest(testAllocation);
+    runTest(testMessaging);
     return true;
   }
 
@@ -80,6 +104,22 @@ private:
     InternalVariable<IntervalIntDomain> v1(ENGINE, dom1);
     assert(!v1.canBeSpecified());
     assert(v1.isValid());
+    return true;
+  }
+
+  static bool testMessaging(){
+    TestListener listener(ENGINE);
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, 100));
+      assert(listener.getCount(ConstraintEngine::SET) == 1);
+      assert(listener.getCount(ConstraintEngine::VARIABLE_ADDED) == 1);
+      v0.specify(IntervalIntDomain(3, 8));
+      assert(listener.getCount(ConstraintEngine::SET) == 2);
+      v0.specify(5);
+      assert(listener.getCount(ConstraintEngine::SET) == 2);
+      assert(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 1);
+    }
+    assert(listener.getCount(ConstraintEngine::VARIABLE_REMOVED) == 1);
     return true;
   }
 };

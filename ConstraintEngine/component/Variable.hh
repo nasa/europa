@@ -83,12 +83,17 @@ namespace Prototype
      */
     const DomainType& getDerivedDomain();
 
-
     /**
      * @brief Impements the base class pure virtual function
      * @see ConstrainedVariable::lastDomain()
      */
     const AbstractDomain& lastDomain() const;
+
+    /**
+     * @brief Impements the base class pure virtual function
+     * @see ConstrainedVariable::derivedDomain()
+     */
+    const AbstractDomain& derivedDomain();
 
     /**
      * @brief Retrieve the specified domain
@@ -103,7 +108,6 @@ namespace Prototype
 
     virtual void handleSpecified(const AbstractDomain& specDomain){}
     virtual void handleReset() {}
-    virtual bool isSpecified() const;
 
   private:
 
@@ -136,7 +140,6 @@ namespace Prototype
     DomainType m_specifiedDomain; /*!< May contain a user specified restriction on the maximum set of the domain */
     DomainType m_derivedDomain; /*!< The current domain of the variable based on user specifications and derived from
 				  constraint propagation */
-    bool m_isSpecified;
   };
 
 
@@ -148,10 +151,14 @@ namespace Prototype
     : ConstrainedVariable(constraintEngine, parent, index), 
     m_baseDomain(baseDomain),
     m_specifiedDomain(baseDomain),
-    m_derivedDomain(baseDomain),
-    m_isSpecified(false){
-    m_derivedDomain.setListener(m_listener);
+    m_derivedDomain(baseDomain){
     check_error(m_derivedDomain.isDynamic() || !m_derivedDomain.isEmpty());
+    m_derivedDomain.setListener(m_listener);
+
+    if(baseDomain.isSingleton())
+      m_derivedDomain.set(m_specifiedDomain.getSingletonValue());
+    else
+      m_derivedDomain.set(m_specifiedDomain);
   }
   
   template<class DomainType>
@@ -190,6 +197,10 @@ namespace Prototype
   const AbstractDomain& Variable<DomainType>::lastDomain() const {
     return m_derivedDomain;
   }
+  template<class DomainType>
+  const AbstractDomain& Variable<DomainType>::derivedDomain() {
+    return getDerivedDomain();
+  }
 
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::specifiedDomain() const {
@@ -215,7 +226,6 @@ namespace Prototype
     }
 
     check_error(isValid());
-    m_isSpecified = true;
   }
 
   template <class DomainType>
@@ -229,7 +239,6 @@ namespace Prototype
   template<class DomainType>
   void Variable<DomainType>::reset(){
     m_specifiedDomain.relax(m_baseDomain);
-    m_isSpecified = false;
     m_derivedDomain.reset(m_baseDomain);
   }
 
@@ -244,11 +253,6 @@ namespace Prototype
   template<class DomainType>
   void Variable<DomainType>::relax(){
     m_derivedDomain.relax(m_specifiedDomain);
-  }
-
-  template<class DomainType>
-  bool Variable<DomainType>::isSpecified() const {
-    return (m_isSpecified || (m_baseDomain != m_specifiedDomain));
   }
 }
 #endif
