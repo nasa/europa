@@ -23,6 +23,7 @@ namespace Prototype {
 		 false)
     
   {
+
     m_min = min;
     m_max = max;
 
@@ -42,6 +43,39 @@ namespace Prototype {
 
     m_usage->specify(IntervalDomain(m_min, m_max));
 
+    close();
+
+  }
+ 
+  Transaction::Transaction(const PlanDatabaseId& planDatabase,
+			   const LabelStr& predicateName,
+			   bool rejectable,
+			   const IntervalIntDomain& timeBaseDomain,
+			   const LabelStr& objectName,
+			   bool closed)
+    : EventToken(planDatabase, 
+		 predicateName, 
+		 false,
+		 timeBaseDomain,
+		 objectName,
+		 false) {
+    std::cout << "NDDL Constructor executing " << std::endl;
+  }
+
+  Transaction::Transaction(const TokenId& parent,
+			   const LabelStr& predicateName,
+			   const IntervalIntDomain& timeBaseDomain,
+			   const LabelStr& objectName,
+			   bool closed)
+    : EventToken(parent, 
+		 predicateName,
+		 timeBaseDomain,
+		 objectName,
+		 closed){
+    std::cout << "NDDL Constructor executing " << std::endl;
+  }
+  
+  void Transaction::commonInit() {
     // add the resource constraint which will act as a messenger to changes and inform the ResourcePropagator.
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(getTime());
@@ -59,14 +93,7 @@ namespace Prototype {
     ConstraintId horizonRelation = 
       ConstraintLibrary::createConstraint(LabelStr("HorizonRelation"), m_planDatabase->getConstraintEngine(), temp1);
     m_standardConstraints.insert(horizonRelation);
-
-    close();
-
-    // All transactions as immediately active
-    activate();
-
   }
-    
 
   int Transaction::getEarliest() const 
   {
@@ -180,6 +207,19 @@ namespace Prototype {
   {
     check_error(isValid());
     m_changed = true;
+  }
+
+  void Transaction::close() {
+    EventToken::close();
+    assert(m_allVariables.size() == 5);
+    assert(m_allVariables[4]->getName().toString().find("quantity") == std::string::npos);
+
+    m_usage = m_allVariables[4];
+    m_min = m_usage->derivedDomain().getLowerBound();
+    m_max = m_usage->derivedDomain().getUpperBound();
+
+    commonInit();
+    activate();    
   }
 
 } //namespace prototype

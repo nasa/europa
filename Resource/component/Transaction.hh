@@ -50,6 +50,25 @@ namespace Prototype {
 		double min = -LARGEST_VALUE, 
 		double max = LARGEST_VALUE);
 
+    Transaction(const PlanDatabaseId& planDatabase,
+		const LabelStr& predicateName,
+		bool rejectable,
+		const IntervalIntDomain& timeBaseDomain,
+		const LabelStr& objectName,
+		bool closed);
+
+    Transaction(const TokenId& parent,
+		const LabelStr& predicateName,
+		const IntervalIntDomain& timeBaseDomain,
+		const LabelStr& objectName,
+		bool closed);
+
+    
+    /**
+     * @brief Common Initialization for both NDDL and test based construction
+     */
+    void commonInit();
+
     /**
      * @brief Set the earliest time with a new value.
      * This operation may increase or decrease the earliest occurence of the Transaction.
@@ -130,6 +149,8 @@ namespace Prototype {
      * @return true if the Transaction data has been modified since the last time this function was called, otherwise false.
      */
     bool checkAndClearChange();
+
+    void close(); //Overidden base class method.
 
   private:
     // Resource is only class privy to send notifications.

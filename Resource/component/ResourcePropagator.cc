@@ -57,7 +57,7 @@ namespace Prototype {
     check_error(ResourceConstraintId::convertable(constraint));
     ConstrainedVariableId variable = constraint->getScope().front();
     if (checkResourcePropagationRequired(variable)) {
-      TransactionId t(variable->getParent());
+      TokenId t(variable->getParent());
       ResourceId r = ResourceConstraint::getCurrentDomain(t->getObject()).getSingletonValue();
 
       // Buffer this resource for propagation
