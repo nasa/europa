@@ -109,6 +109,10 @@ if $(OS) = CYGWIN {
   NOARSCAN = true ;
 }
 
+if $(OS) = MACOSX {
+  NOARSCAN = true ;
+}
+
 if $(OS) = BEOS {
   LINKLIBS += -lbe ;
 }
