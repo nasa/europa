@@ -92,8 +92,6 @@ public:
 private:
   static bool testAllocation(){
     IntervalIntDomain dom0(0, 1000);
-    const AbstractDomain& tempDomain = dom0;
-    tempDomain >> std::cout;
     Variable<IntervalIntDomain> v0(ENGINE, dom0);
     const IntervalIntDomain& dom1 = v0.getBaseDomain();
     assert (dom0 == dom1);

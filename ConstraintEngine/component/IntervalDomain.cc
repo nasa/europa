@@ -3,11 +3,21 @@
 #include <math.h>
 
 namespace Prototype {
+  IntervalDomain::IntervalDomain(const DomainListenerId& listener)
+    : AbstractDomain(true, false, listener), m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY){
+  }
+
   IntervalDomain::IntervalDomain(double lb, double ub, const DomainListenerId& listener)
     : AbstractDomain(true, false, listener), m_ub(ub), m_lb(lb){
     check_error(ub >= lb);
     check_error(ub <= PLUS_INFINITY);
     check_error(lb >= MINUS_INFINITY);
+  }
+
+  IntervalDomain::IntervalDomain(double value, const DomainListenerId& listener)
+    : AbstractDomain(true, false, listener), m_ub(value), m_lb(value){
+    check_error(value <= PLUS_INFINITY);
+    check_error(value >= MINUS_INFINITY);
   }
 
   IntervalDomain::~IntervalDomain(){}

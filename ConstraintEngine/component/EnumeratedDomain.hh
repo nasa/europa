@@ -35,8 +35,16 @@ namespace Prototype{
      * @see AbstractDomain::isDynamic()
      */
     EnumeratedDomain(const std::list<double>& values, 
-	     bool closed = true,
-	     const DomainListenerId& listener = DomainListenerId::noId());
+		     bool closed = true,
+		     const DomainListenerId& listener = DomainListenerId::noId());
+
+    /**
+     * @brief Constructor
+     * @param value Constructs a singleton domain. Closed on construction.
+     * @param listener Allows connection of a listener to change events on the domain. 
+     */
+    EnumeratedDomain(double value, 
+		     const DomainListenerId& listener = DomainListenerId::noId());
 
     /**
      * @brief Copy constructor
@@ -157,7 +165,7 @@ namespace Prototype{
      */
     void getValues(std::list<double>& results) const;
 
-   /**
+    /**
      * @brief Access upper bound
      */
     double getUpperBound() const;

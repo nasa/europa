@@ -20,10 +20,16 @@ namespace Prototype{
    */
   class IntervalIntDomain: public IntervalDomain {
   public:
-    IntervalIntDomain(int lb = -MAX_INT, 
-		      int ub = MAX_INT, 
+
+    IntervalIntDomain(const DomainListenerId& listener = DomainListenerId::noId());
+
+    IntervalIntDomain(int lb, 
+		      int ub, 
 		      const DomainListenerId& listener = DomainListenerId::noId());
-    IntervalIntDomain(const DomainListenerId& listener);
+
+    IntervalIntDomain(int value, 
+		      const DomainListenerId& listener = DomainListenerId::noId());
+
     IntervalIntDomain(const IntervalIntDomain& org);
 
     bool isFinite() const;

@@ -19,6 +19,13 @@ namespace Prototype {
       close();
   }
 
+  EnumeratedDomain::EnumeratedDomain(double value, 
+				     const DomainListenerId& listener = DomainListenerId::noId())
+    :AbstractDomain(false, true, listener){
+    insert(value);
+    close();
+  }
+
   EnumeratedDomain::EnumeratedDomain(const EnumeratedDomain& org)
     : AbstractDomain(org.m_closed, true, DomainListenerId::noId()) {
     m_values = org.m_values;

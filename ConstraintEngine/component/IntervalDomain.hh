@@ -22,8 +22,13 @@ namespace Prototype{
      */
     void operator>>(ostream& os) const;
 
-    IntervalDomain(double lb = -MAX_INT, 
-		   double ub = MAX_INT, 
+    IntervalDomain(const DomainListenerId& listener = DomainListenerId::noId());
+
+    IntervalDomain(double lb, 
+		   double ub,
+		   const DomainListenerId& listener = DomainListenerId::noId());
+
+    IntervalDomain(double value, 
 		   const DomainListenerId& listener = DomainListenerId::noId());
 
     IntervalDomain(const IntervalDomain& org);

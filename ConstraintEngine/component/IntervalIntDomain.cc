@@ -2,11 +2,14 @@
 
 namespace Prototype {
 
+  IntervalIntDomain::IntervalIntDomain(const DomainListenerId& listener)
+    :IntervalDomain(listener){}
+
   IntervalIntDomain::IntervalIntDomain(int lb, int ub, const DomainListenerId& listener)
     :IntervalDomain(lb, ub, listener){}
 
-  IntervalIntDomain::IntervalIntDomain(const DomainListenerId& listener)
-    :IntervalDomain(-MAX_INT, MAX_INT, listener){}
+  IntervalIntDomain::IntervalIntDomain(int value, const DomainListenerId& listener)
+    :IntervalDomain(value, listener){}
 
   IntervalIntDomain::IntervalIntDomain(const IntervalIntDomain& org)
     :IntervalDomain(org){}

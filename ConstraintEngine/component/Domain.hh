@@ -24,6 +24,14 @@ namespace Prototype {
 	     const DomainListenerId& listener = DomainListenerId::noId());
 
     /**
+     * @brief Constructor
+     * @param value Singleton value, and then domain is closed
+     * @param listener Allows connection of a listener to change events on the domain. 
+     */
+    Domain(const ELEMENT_TYPE& value,
+	   const DomainListenerId& listener = DomainListenerId::noId());
+
+    /**
      * @brief Copy constructor
      * @param org The source domain.
      */
@@ -72,6 +80,10 @@ namespace Prototype {
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain(const std::list<ELEMENT_TYPE>& labels, bool closed, const DomainListenerId& listener)
     : EnumeratedDomain(convert(labels), closed, listener){}
+
+  template <class ELEMENT_TYPE>
+  Domain<ELEMENT_TYPE>::Domain(const ELEMENT_TYPE& value, const DomainListenerId& listener)
+    : EnumeratedDomain(value, listener){}
 
   template <class ELEMENT_TYPE>
   Domain<ELEMENT_TYPE>::Domain(const Domain& org)

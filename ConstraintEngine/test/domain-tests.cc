@@ -534,11 +534,11 @@ namespace Prototype {
       EnumeratedDomain dom0(dom);
       dom0.set(1.0);
 
-      IntervalDomain dom1(1.0, 1.0);
+      IntervalDomain dom1(1.0);
       assert(dom1 == dom0);
       assert(dom0 == dom1);
 
-      IntervalIntDomain dom2(1, 1);
+      IntervalIntDomain dom2(1);
       assert(dom1 == dom2);
 
       dom0.reset(dom);
@@ -613,6 +613,9 @@ namespace Prototype {
 
       assert(dom0 != dom1);
 
+      Domain<int> dom2(10);
+      assert(!dom2.isDynamic());
+      assert(dom2.isSingleton());
       return true;
     }
   };
