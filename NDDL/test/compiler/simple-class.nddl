@@ -22,6 +22,8 @@ class World {
  Foo m_foo1;
  Foo m_foo2;
 
+ predicate initialState{}
+
  World(){
   m_foo1 = new Foo();
   m_foo2 = new Foo();

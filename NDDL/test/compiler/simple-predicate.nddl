@@ -14,14 +14,23 @@ class Foo{
  }
 }
 
+Foo::pred1{
+ meets (pred1 p1);
+ met_by (pred1 p2);
+}
+
 // Declares mandatory world class, with constructor with no arguments.
 class World {
  Foo m_foo1;
- predicate initialState{
-  any(Foo.pred1 a);
- }
+ predicate initialState{}
 
  World(){
   m_foo1 = new Foo();
  }
+}
+
+World::initialState
+{
+ any(Foo.pred1 a);
+ any(Foo.pred1 b);
 }

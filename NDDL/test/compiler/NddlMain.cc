@@ -31,7 +31,7 @@ namespace NDDL {
 			      IntervalIntDomain(),
 			      IntervalIntDomain(1, PLUS_INFINITY),
 			      Prototype::Token::noObject(),
-			      false){}
+			      false){commonInit();}
 
   NddlToken::NddlToken(const TokenId& master, const LabelStr& predicateName)
     :Prototype::IntervalToken(master, 
@@ -40,7 +40,15 @@ namespace NDDL {
 			      IntervalIntDomain(),
 			      IntervalIntDomain(1, PLUS_INFINITY),
 			      Prototype::Token::noObject(),
-			      false){}
+			      false){commonInit();}
+
+  void NddlToken::commonInit(){
+    state = getState();
+    object = getObject();
+    start = getStart();
+    end = getEnd();
+    duration = getDuration();
+  }
 }
 
 void main(){
