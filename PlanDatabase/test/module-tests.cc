@@ -154,7 +154,7 @@
   void initDbModuleTests() {
     initConstraintEngine();
     initConstraintLibrary();
-    
+
     // Allocate default schema initially so tests don't fail because of ID's
     SCHEMA;
     initDbTestSchema(SCHEMA);

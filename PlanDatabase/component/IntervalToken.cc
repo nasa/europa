@@ -76,9 +76,13 @@ namespace EUROPA{
     temp.push_back(m_start);
     temp.push_back(m_duration);
     temp.push_back(m_end);
+
     ConstraintId temporalRelation = 
-      ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"), m_planDatabase->getConstraintEngine(), temp);
+      ConstraintLibrary::createConstraint(LabelStr("StartEndDurationRelation"), 
+					  m_planDatabase->getConstraintEngine(), temp);
+
     m_standardConstraints.insert(temporalRelation);
+
     if (closed)
       close();
   }
