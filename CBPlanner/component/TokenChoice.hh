@@ -10,7 +10,8 @@ namespace Prototype {
   public:
     virtual ~TokenChoice();
     
-    const TokenId& getToken() const;
+    const ObjectId& getObject() const;
+    const TokenId& getSuccessor() const;
 
     bool operator==(const Choice& choice) const;
 
@@ -20,9 +21,10 @@ namespace Prototype {
   private:
     friend class Choice;
 
-    TokenChoice(const DecisionPointId&, const TokenId&);
+    TokenChoice(const DecisionPointId&, const ObjectId&, const TokenId&);
 
-    TokenId m_token;
+    ObjectId m_object;
+    TokenId m_successor;
   };
 
 }

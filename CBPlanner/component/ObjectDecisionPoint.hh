@@ -14,16 +14,14 @@ namespace Prototype {
     const bool retract();
     std::list<ChoiceId>& getChoices();
     const TokenId& getToken() const;
-    const ObjectId& getObject() const;
 
     void print(std::ostream& os) const;
   private:
     friend class OpenDecisionManager;
 
-    ObjectDecisionPoint(const DbClientId& dbClient, const EntityId&, const TokenId&);
+    ObjectDecisionPoint(const DbClientId& dbClient, const TokenId&);
     const bool testIfExhausted();
 
-    ObjectId m_object;
     TokenId m_token;
   };
 

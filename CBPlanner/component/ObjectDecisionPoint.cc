@@ -8,23 +8,27 @@
 
 namespace Prototype {
 
-  ObjectDecisionPoint::ObjectDecisionPoint(const DbClientId& dbClient, const EntityId& entity, const TokenId& token)
-    : DecisionPoint(dbClient, entity) {
-    m_object = entity;
+  ObjectDecisionPoint::ObjectDecisionPoint(const DbClientId& dbClient, const TokenId& token)
+    : DecisionPoint(dbClient, token) {
     m_token = token;
   }
 
   ObjectDecisionPoint::~ObjectDecisionPoint() { }
 
   const bool ObjectDecisionPoint::assign(const ChoiceId& choice) { 
-    check_error(!choice.isNoId());
+    check_error(choice.isValid());
     check_error(Id<TokenChoice>::convertable(choice));
-    m_dbClient->constrain(m_object, m_token, Id<TokenChoice>(choice)->getToken()); 
+    const Id<TokenChoice>& tChoice = choice;
+    check_error(choice.isValid());
+    m_dbClient->constrain(tChoice->getObject(), m_token, tChoice->getSuccessor()); 
+    check_error(choice.isValid());
     return DecisionPoint::assign(choice);
   }
 
   const bool ObjectDecisionPoint::retract() {
-    m_dbClient->free(m_object, m_token);
+    check_error(Id<TokenChoice>::convertable(m_current));
+    Id<TokenChoice> tChoice = m_current;
+    m_dbClient->free(tChoice->getObject(), m_token);
     return DecisionPoint::retract();
   }
 
@@ -32,15 +36,23 @@ namespace Prototype {
     check_error(m_id.isValid());
     cleanup(m_choices);
     m_choices.clear();
-    std::vector<TokenId> successors;
-    m_object->getOrderingChoices(m_token, successors);
-    std::vector<TokenId>::iterator it = successors.begin();
-    //std::cout << "Choices for (" << getKey() << "):" << std::endl;
-    for (; it != successors.end(); it++) {      
-      TokenId token = *it;
-      ChoiceId choice = Choice::makeChoiceId(m_id, token);
-      //std::cout << choice << std::endl;
-      m_choices.push_back(choice);
+    std::list<ObjectId> values;
+    m_token->getObject()->getLastDomain().getValues(values);
+    std::list<ObjectId>::iterator it = values.begin();
+    for ( ; it != values.end(); ++it) {
+      ObjectId obj = *it;
+      check_error(obj.isValid());
+      std::vector<TokenId> successors;
+      obj->getOrderingChoices(m_token, successors);
+      std::vector<TokenId>::iterator it = successors.begin();
+      //std::cout << "Choices for (" << getKey() << "):" << std::endl;
+      for (; it != successors.end(); it++) {      
+	TokenId token = *it;
+	check_error(token.isValid() || token.isNoId());
+	ChoiceId choice = Choice::makeChoiceId(m_id, obj, token);
+	//std::cout << choice << std::endl;
+	m_choices.push_back(choice);
+      }
     }
     return DecisionPoint::getChoices();
   }
@@ -49,19 +61,13 @@ namespace Prototype {
     return m_token;
   }
 
-  const ObjectId& ObjectDecisionPoint::getObject() const { 
-    return m_object;
-  }
-
   void ObjectDecisionPoint::print(std::ostream& os) const {
     check_error(m_id.isValid());
-    if (!m_object.isNoId()) {
-      os << "(" << getKey() << ") Object (" << m_entityKey << ") ";
-      os << "Token (" << m_token->getKey() << ") ";
+    if (!m_token.isNoId()) {
+      os << "(" << getKey() << ") Token (" << m_entityKey << ") ";
     }
     else {
-      os << "(" << getKey() << ") Object (" << m_entityKey << ") ";
-      os << "Token (" << m_token->getKey() << ") Flaw [deleted] ";
+      os << "(" << getKey() << ") Token (" << m_entityKey << ")  [deleted] ";
     }
     os << " Current Choice: " << m_current;
     os << " Discarded: " << m_discarded.size();
