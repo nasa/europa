@@ -19,8 +19,9 @@
 #include "../PlanDatabase/EventToken.hh"
 #include "../PlanDatabase/TokenVariable.hh"
 #include "../PlanDatabase/ObjectTokenRelation.hh"
-#include "../PlanDatabase/RulesEngine.hh"
 #include "../PlanDatabase/DbLogger.hh"
+
+#include "../RulesEngine/RulesEngine.hh"
 
 #include <iostream>
 #include <string>
