@@ -359,6 +359,8 @@ RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP3heur.xml ;
 
 # Working
 RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
+
+# Fails with !domain.empty() is false HSTSHeuristics.cc:667
 RunEUROPATest dnp-fourFreeObs-h : fourFreeObs.nddl : DNP2heur3.xml ;
 
 # Runs for a while
