@@ -198,8 +198,15 @@ namespace Prototype
   void Variable<DomainType>::specify(const AbstractDomain& domain){
     check_error(!domain.isDynamic() && !domain.isEmpty());
     check_error(domain.isSubsetOf(m_specifiedDomain));
-    if(m_specifiedDomain.intersect(domain))
-      m_derivedDomain.set(m_specifiedDomain);
+
+    // If this actually changes the domain then propagate the change to the derived domain
+    if(m_specifiedDomain.intersect(domain)){
+      if(domain.isSingleton())
+	m_derivedDomain.set(m_specifiedDomain.getSingletonValue());
+      else
+	m_derivedDomain.set(m_specifiedDomain);
+    }
+
     check_error(isValid());
     m_isSpecified = true;
   }

@@ -68,6 +68,7 @@ namespace Prototype {
   }
  
   void IntervalDomain::set(const AbstractDomain& dom){
+    check_error(!dom.isSingleton());
     intersect(dom);
     notifyChange(DomainListener::SET);
   }
