@@ -199,7 +199,7 @@ namespace Prototype {
       seqName = seqName.substr(0, extStart);
       if(stepsPerWrite) {
 	if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
-	  std::cerr << "Failed to make directory " << dest << endl;
+	  std::cerr << "Failed to make directory " << dest << std::endl;
 	  FatalErrno();
 	}
 	dest += seqName;
