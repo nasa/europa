@@ -32,6 +32,10 @@ namespace PLASMA {
     virtual void getBestTokenDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
     virtual void getBestVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
 
+    virtual void HSTSOpenDecisionManager::initializeNumberToBeat(const HSTSHeuristics::CandidateOrder& order, int& numberToBeat);
+
+    virtual void HSTSOpenDecisionManager::compareTokensAccordingToOrder(const HSTSHeuristics::CandidateOrder& order, const ChoiceId& choice, ChoiceId& bestChoice, const int est, const int lst, int& numberToBeat); 
+
     ObjectDecisionSet m_sortedObjectDecs;
 
     HSTSHeuristicsId m_heur;
