@@ -10,13 +10,15 @@ namespace Prototype{
 			 const LabelStr& predicateName,
 			 const BooleanDomain& rejectabilityBaseDomain,
 			 const IntervalIntDomain& timeBaseDomain,
-			 const LabelStr& objectName)
+			 const LabelStr& objectName,
+			 bool closed)
     :Token(planDatabase, predicateName, 
 	   rejectabilityBaseDomain,
 	   timeBaseDomain, 
 	   timeBaseDomain, 
 	   IntervalIntDomain(0, 0), 
-	   objectName){
+	   objectName,
+	   closed){
     commonInit();
   }
 
@@ -24,13 +26,15 @@ namespace Prototype{
 			 const LabelStr& predicateName,
 			 const BooleanDomain& rejectabilityBaseDomain,
 			 const IntervalIntDomain& timeBaseDomain,
-			 const LabelStr& objectName)
+			 const LabelStr& objectName,
+			 bool closed)
     :Token(master, predicateName, 
 	   rejectabilityBaseDomain,
 	   timeBaseDomain, 
 	   timeBaseDomain, 
 	   IntervalIntDomain(0, 0), 
-	   objectName){
+	   objectName,
+	   closed){
     commonInit();
   }
 

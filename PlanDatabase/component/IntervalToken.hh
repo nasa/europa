@@ -15,7 +15,8 @@ namespace Prototype {
 		  const IntervalIntDomain& startBaseDomain,
 		  const IntervalIntDomain& endBaseDomain,
 		  const IntervalIntDomain& durationBaseDomain,
-		  const LabelStr& objectName = Token::noObject());
+		  const LabelStr& objectName = Token::noObject(),
+		  bool closed = true);
 
     IntervalToken(const TokenId& master, 
 		  const LabelStr& predicateName, 
@@ -23,7 +24,8 @@ namespace Prototype {
 		  const IntervalIntDomain& startBaseDomain,
 		  const IntervalIntDomain& endBaseDomain,
 		  const IntervalIntDomain& durationBaseDomain,
-		  const LabelStr& objectName = Token::noObject());
+		  const LabelStr& objectName = Token::noObject(),
+		  bool closed = true);
   private:
     void commonInit();
   };

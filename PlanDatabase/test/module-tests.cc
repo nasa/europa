@@ -85,12 +85,13 @@ private:
     DEFAULT_SETUP(ce, db, schema, true);
 
     // Event Token
-    EventToken eventToken(db.getId(), LabelStr("Predicate"), IntervalIntDomain(0, 1), IntervalIntDomain(0, 1000));
+    EventToken eventToken(db.getId(), LabelStr("Predicate"), IntervalIntDomain(0, 1), IntervalIntDomain(0, 1000), Token::noObject(), false);
     assert(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
     assert(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.getStart()->specify(IntervalIntDomain(5, 10));
     assert(eventToken.getEnd()->getDerivedDomain() == IntervalIntDomain(5, 10));
     eventToken.addParameter(IntervalRealDomain(-1.08, 20.18));
+    eventToken.close();
 
     // IntervalToken
     IntervalToken intervalToken(db.getId(), 
@@ -98,7 +99,8 @@ private:
 				IntervalIntDomain(0, 1), 
 				IntervalIntDomain(0, 1000),
 				IntervalIntDomain(0, 1000),
-				IntervalIntDomain(2, 10));
+				IntervalIntDomain(2, 10),
+				Token::noObject(), false);
 
     std::list<Prototype::LabelStr> values;
     values.push_back(Prototype::LabelStr("L1"));
@@ -107,7 +109,7 @@ private:
     values.push_back(Prototype::LabelStr("L5"));
     values.push_back(Prototype::LabelStr("L3"));
     intervalToken.addParameter(LabelSet(values, true));
-
+    intervalToken.close();
     assert(intervalToken.getEnd()->getDerivedDomain().getLowerBound() == 2);
     intervalToken.getStart()->specify(IntervalIntDomain(5, 10));
     assert(intervalToken.getEnd()->getDerivedDomain() == IntervalIntDomain(7, 20));
