@@ -210,6 +210,8 @@ public:
     runTest(testMultEqualConstraint);
     runTest(testAddMultEqualConstraint);
     runTest(testEqualSumConstraint);
+    runTest(testCondAllSameConstraint);
+    runTest(testCondAllDiffConstraint);
     runTest(testConstraintDeletion);
     return(true);
   }
@@ -292,7 +294,7 @@ private:
       assert(ENGINE->provenInconsistent());
     }
 
-    // Now test special case of rounding with a singleton, with negative domain bounds
+    // Now test special case of rounding with negative domain bounds.
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(-10, 10));
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(-10, 10));
@@ -302,7 +304,21 @@ private:
       assert(!res);
     }
 
-    // Confirm correct result will all singletons
+    // Another, similar, case of rounding with negative domain bounds.
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(-10, 10));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(-10, 10));
+      Variable<IntervalDomain> v2(ENGINE, IntervalDomain(0.01, 1.99));
+      AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      bool res = ENGINE->propagate();
+      assertTrue(res);
+      // Require correct result to be in v2's domain.
+      assertTrue(v2.getDerivedDomain().isMember(1.0));
+      // Following is false because implementation of AddEqualConstraint is not smart enough to deduce it.
+      //assertTrue(v2.getDerivedDomain().getSingletonValue() == 1.0);
+    }
+
+    // Confirm correct result with all singletons.
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(-1, -1));
       Variable<IntervalDomain> v1(ENGINE, IntervalDomain(10.4, 10.4));
@@ -312,7 +328,7 @@ private:
       assert(res);
     }
 
-    // Confirm inconsistency detected with all singletons
+    // Confirm inconsistency detected with all singletons.
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(-1, -1));
       Variable<IntervalDomain> v1(ENGINE, IntervalDomain(10.4, 10.4));
@@ -322,7 +338,7 @@ private:
       assert(!res);
     }
 
-    // Obtain factors correct values for fixed result
+    // Obtain factors correct values for fixed result.
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, PLUS_INFINITY));
       Variable<IntervalDomain> v1(ENGINE, IntervalDomain(0, PLUS_INFINITY));
@@ -601,11 +617,11 @@ private:
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
 
-    /* Call reset on a constraint consistent network - not sure one would want to do this*/
+    /* Call reset on a constraint consistent network - not sure one would want to do this. */
     v1.reset();
     assert(ENGINE->pending()); /* Strictly speaking we know it is not inconsistent here since all we have done is relax a previously
 				  consistent network. However, we have to propagate to find the new derived domains based on relaxed
-				  domains.*/
+				  domains. */
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
     return true;
@@ -946,6 +962,468 @@ private:
       assert(vE.getDerivedDomain().getSingletonValue() == 0);
       assert(vF.getDerivedDomain().getSingletonValue() == 0);
       assert(vG.getDerivedDomain().getSingletonValue() == 0);
+    }
+    return(true);
+  }
+
+  static bool testCondAllSameConstraint() {
+    BoolDomain bothDom;
+    Variable<BoolDomain> bothVar(ENGINE, bothDom);
+    Variable<BoolDomain> falseVar(ENGINE, bothDom);
+    falseVar.specify(false);
+    Variable<BoolDomain> trueVar(ENGINE, bothDom);
+    trueVar.specify(true);
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(0));
+    Variable<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(0));
+    Variable<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(0));
+    Variable<IntervalIntDomain> v9(ENGINE, IntervalIntDomain(1));
+    Variable<IntervalIntDomain> vA(ENGINE, IntervalIntDomain(11, 27));
+    std::vector<ConstrainedVariableId> scope;
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(v0.getId());
+      scope.push_back(v1.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
+      assertTrue(v1.getDerivedDomain().getSingletonValue() == 1);
+    }
+    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    scope.clear();
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(v0.getId());
+      scope.push_back(vA.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(bothVar.getDerivedDomain() == BoolDomain(false));
+    }
+    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    scope.clear();
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v7.getId());
+      scope.push_back(v8.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(bothVar.getDerivedDomain() == BoolDomain(true));
+    }
+    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    scope.clear();
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(v2.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v7.getId());
+      scope.push_back(v8.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    }
+    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    scope.clear();
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v7.getId());
+      scope.push_back(v8.getId());
+      scope.push_back(v2.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    }
+    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    scope.clear();
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v7.getId());
+      scope.push_back(v2.getId());
+      scope.push_back(v8.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    }
+    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    scope.clear();
+    {
+      scope.push_back(trueVar.getId());
+      scope.push_back(v2.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v7.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0));
+    }
+    scope.clear();
+    {
+      scope.push_back(trueVar.getId());
+      scope.push_back(v2.getId());
+      scope.push_back(v3.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v7.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0));
+      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(0));
+    }
+    scope.clear();
+    {
+      scope.push_back(trueVar.getId());
+      scope.push_back(v2.getId());
+      scope.push_back(v3.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
+      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(0, 2));
+    }
+    scope.clear();
+    {
+      scope.push_back(trueVar.getId());
+      scope.push_back(v1.getId());
+      scope.push_back(v2.getId());
+      scope.push_back(v3.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(1));
+      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(1));
+    }
+    assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
+    assertTrue(v3.getDerivedDomain() == IntervalIntDomain(0, 27));
+    scope.clear();
+    {
+      scope.push_back(falseVar.getId());
+      scope.push_back(v3.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v7.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      // Could be restricted to [1 27], but current implementation doesn't do that much checking.
+      assertTrue(v3.getDerivedDomain().isSubsetOf(IntervalIntDomain(0, 27)));
+    }
+    scope.clear();
+    {
+      scope.push_back(falseVar.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v7.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(!ENGINE->constraintConsistent());
+    }
+    ENGINE->propagate();
+    assertTrue(ENGINE->constraintConsistent());
+    scope.clear();
+    {
+      scope.push_back(falseVar.getId());
+      scope.push_back(v2.getId());
+      scope.push_back(v3.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
+      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(0, 27));
+    }
+    ENGINE->propagate();
+    assertTrue(ENGINE->constraintConsistent());
+    scope.clear();
+    {
+      scope.push_back(trueVar.getId());
+      scope.push_back(v0.getId());
+      scope.push_back(vA.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(!ENGINE->constraintConsistent());
+    }
+    ENGINE->propagate();
+    assertTrue(ENGINE->constraintConsistent());
+    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    scope.clear();
+    return(true);
+  }
+
+  static bool testCondAllDiffConstraint() {
+    BoolDomain bothDom;
+    Variable<BoolDomain> bothVar(ENGINE, bothDom);
+    Variable<BoolDomain> falseVar(ENGINE, bothDom);
+    falseVar.specify(false);
+    Variable<BoolDomain> trueVar(ENGINE, bothDom);
+    trueVar.specify(true);
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 27));
+    Variable<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(0));
+    Variable<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(0));
+    Variable<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(0));
+    Variable<IntervalIntDomain> v9(ENGINE, IntervalIntDomain(1));
+    Variable<IntervalIntDomain> vA(ENGINE, IntervalIntDomain(11, 27));
+    Variable<IntervalIntDomain> vB(ENGINE, IntervalIntDomain(-1, 2));
+    Variable<IntervalIntDomain> vC(ENGINE, IntervalIntDomain(10, 11));
+    Variable<IntervalIntDomain> vD(ENGINE, IntervalIntDomain(10, 11));
+    Variable<IntervalIntDomain> vE(ENGINE, IntervalIntDomain(10, 11));
+    Variable<IntervalIntDomain> vF(ENGINE, IntervalIntDomain(0, 3));
+    Variable<IntervalIntDomain> vG(ENGINE, IntervalIntDomain(9, 12));
+    Variable<IntervalIntDomain> vH(ENGINE, IntervalIntDomain(3, 5));
+    Variable<IntervalIntDomain> vI(ENGINE, IntervalIntDomain(0, 7));
+    Variable<IntervalIntDomain> vJ(ENGINE, IntervalIntDomain(5, 9));
+    Variable<IntervalIntDomain> vK(ENGINE, IntervalIntDomain(9));
+    Variable<IntervalIntDomain> vL(ENGINE, IntervalIntDomain(5, 13));
+    Variable<IntervalIntDomain> vM(ENGINE, IntervalIntDomain(5));
+    Variable<IntervalIntDomain> vN(ENGINE, IntervalIntDomain(-1, 15));
+    Variable<IntervalIntDomain> vO(ENGINE, IntervalIntDomain(-2, 6));
+    Variable<IntervalIntDomain> vP(ENGINE, IntervalIntDomain(-2));
+    Variable<IntervalIntDomain> vQ(ENGINE, IntervalIntDomain(15));
+    std::vector<ConstrainedVariableId> scope;
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(v0.getId());
+      scope.push_back(v1.getId());
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
+      assertTrue(v1.getDerivedDomain().getSingletonValue() == 1);
+    }
+    scope.clear();
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(v0.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(vA.getId());
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(bothVar.getDerivedDomain().getSingletonValue());
+      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
+      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
+      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
+    }
+    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    scope.clear();
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(v0.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v9.getId());
+      scope.push_back(vA.getId());
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
+      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
+      assertTrue(v9.getDerivedDomain().getSingletonValue() == 1);
+      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
+    }
+    scope.clear();
+    {
+      scope.push_back(trueVar.getId());
+      scope.push_back(v0.getId()); // 1 10 so far
+      scope.push_back(v2.getId()); // 1 10, 0 2
+      scope.push_back(v6.getId()); // 1 10, 1 2, 0
+      scope.push_back(v9.getId()); // 3 10, 2, 0, 1
+      scope.push_back(vA.getId()); // 3 10, 2, 0, 1, 11 27
+      scope.push_back(vB.getId()); // 3 10, 2, 0, 1, 11 27, -1
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(trueVar.getDerivedDomain().isSingleton());
+      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(3, 10));
+      assertTrue(v2.getDerivedDomain().getSingletonValue() == 2);
+      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
+      assertTrue(v9.getDerivedDomain().getSingletonValue() == 1);
+      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
+      assertTrue(vB.getDerivedDomain().getSingletonValue() == -1);
+    }
+    assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
+    assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
+    assertTrue(vB.getDerivedDomain() == IntervalIntDomain(-1, 2));
+    scope.clear();
+    {
+      scope.push_back(falseVar.getId());
+      scope.push_back(v0.getId()); // 1 10
+      scope.push_back(v6.getId()); // 1 10, 0 (inconsistent)
+      scope.push_back(v9.getId()); // 1, 0, 1
+      scope.push_back(vA.getId()); // 1, 0, 1, 11 27
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      // This next restriction is correct but the current implementation
+      //   does not enforce it, as it requires checking all pairs to see
+      //   that two individual vars are the only ones that overlap and
+      //   therefore must be equal.
+      // assertTrue(v0.getDerivedDomain().getSingletonValue() == 1);
+      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
+      assertTrue(v9.getDerivedDomain().getSingletonValue() == 1);
+      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
+    }
+    scope.clear();
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(v6.getId()); // 0
+      scope.push_back(v7.getId()); // 0, 0 -> false; rest irrelevant
+      scope.push_back(v8.getId());
+      scope.push_back(v9.getId());
+      scope.push_back(vA.getId());
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(!bothVar.getDerivedDomain().getSingletonValue());
+      assertTrue(v6.getDerivedDomain() == IntervalIntDomain(0));
+      assertTrue(v7.getDerivedDomain() == IntervalIntDomain(0));
+      assertTrue(v8.getDerivedDomain() == IntervalIntDomain(0));
+      assertTrue(v9.getDerivedDomain() == IntervalIntDomain(1));
+      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
+    }
+    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    scope.clear();
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(vC.getId()); // 10 11
+      scope.push_back(vD.getId()); // 10 11, 10 11
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    }
+    scope.clear();
+    {
+      scope.push_back(bothVar.getId());
+      scope.push_back(vC.getId()); // 10 11
+      scope.push_back(vD.getId()); // 10 11, 10 11
+      scope.push_back(vE.getId()); // 10 11, 10 11, 10 11 -> false: three vars but only two values
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(!bothVar.getDerivedDomain().getSingletonValue());
+    }
+    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    scope.clear();
+    {
+      scope.push_back(trueVar.getId());
+      scope.push_back(v0.getId()); // 1 10
+      scope.push_back(vA.getId()); // 1 10, 11 27
+      scope.push_back(vB.getId()); // 1 10, 11 27, -1 2
+      scope.push_back(vC.getId()); // 1 10, 11 27, -1 2, 10 11
+      scope.push_back(vD.getId()); // 1 10, 11 27, -1 2, 10 11, 10 11
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      // 10 could be removed from v0 and 11 from vA, but current
+      //   implementation doesn't check for such things.
+    }
+    scope.clear();
+    {
+      scope.push_back(trueVar.getId());
+      scope.push_back(v0.getId()); // 1 10 so far
+      scope.push_back(v1.getId()); // 2 10, 1 (since condition is true, remove singletons from all others)
+      scope.push_back(v2.getId()); // 2 10, 1, 0 2
+      scope.push_back(v3.getId()); // 2 10, 1, 0 2, 0 27
+      scope.push_back(v4.getId()); // 2 10, 1, 0 2, 0 27, 0 27
+      scope.push_back(v5.getId()); // 2 10, 1, 0 2, 0 27, 0 27, 0 27
+      scope.push_back(v6.getId()); // 3 10, 1, 2, 3 27, 3 27, 3 27, 0
+      scope.push_back(vA.getId()); // 3 10, 1, 2, 3 27, 3 27, 3 27, 0, 11 27
+      scope.push_back(vB.getId()); // 3 10, 1, 2, 3 27, 3 27, 3 27, 0, 11 27, -1
+      scope.push_back(vC.getId()); // 3 10, 1, 2, 3 27, 3 27, 3 27, 0, 11 27, -1, 10 11
+      scope.push_back(vF.getId()); // 4 10, 1, 2, 4 27, 4 27, 4 27, 0, 11 27, -1, 10 11, 3
+      scope.push_back(vG.getId()); // 4 10, 1, 2, 4 27, 4 27, 4 27, 0, 11 27, -1, 10 11, 3, 9 12
+      scope.push_back(vH.getId()); // 4 10, 1, 2, 4 27, 4 27, 4 27, 0, 11 27, -1, 10 11, 3, 9 12, 4 5
+      scope.push_back(vI.getId()); // 4 10, 1, 2, 4 27, 4 27, 4 27, 0, 11 27, -1, 10 11, 3, 9 12, 4 5, 4 7
+      scope.push_back(vJ.getId()); // 4 10, 1, 2, 4 27, 4 27, 4 27, 0, 11 27, -1, 10 11, 3, 9 12, 4 5, 4 7, 5 9
+      scope.push_back(vK.getId()); // 4 10, 1, 2, 4 27, 4 27, 4 27, 0, 11 27, -1, 10 11, 3, 10 12, 4 5, 4 7, 5 8, 9
+      scope.push_back(vL.getId()); // 4 10, 1, 2, 4 27, 4 27, 4 27, 0, 11 27, -1, 10 11, 3, 10 12, 4 5, 4 7, 5 8, 9, 5 13
+      scope.push_back(vM.getId()); // 6 10, 1, 2, 6 27, 6 27, 6 27, 0, 11 27, -1, 10 11, 3, 10 12, 4, 6 7, 6 8, 9, 6 13, 5
+      scope.push_back(vN.getId()); // 6 10, 1, 2, 6 27, 6 27, 6 27, 0, 11 27, -1, 10 11, 3, 10 12, 4, 6 7, 6 8, 9, 6 13, 5, 6 15
+      scope.push_back(vO.getId()); // 6 10, 1, 2, 6 27, 6 27, 6 27, 0, 11 27, -1, 10 11, 3, 10 12, 4, 6 7, 6 8, 9, 6 13, 5, 6 15, -2 6
+      scope.push_back(vP.getId()); // 10, 1, 2, 14 27, 14 27, 14 27, 0, 14 27, -1, 11, 3, 12, 4, 7, 8, 9, 13, 5, 14 15, 6, -2
+      scope.push_back(vQ.getId()); // 10, 1, 2, 16 27, 16 27, 16 27, 0, 16 27, -1, 11, 3, 12, 4, 7, 8, 9, 13, 5, 14, 6, -2, 15
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(10));
+      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(1));
+      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(2));
+      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(16, 27));
+      assertTrue(v4.getDerivedDomain() == IntervalIntDomain(16, 27));
+      assertTrue(v5.getDerivedDomain() == IntervalIntDomain(16, 27));
+      assertTrue(v6.getDerivedDomain() == IntervalIntDomain(0));
+      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(16, 27));
+      assertTrue(vB.getDerivedDomain() == IntervalIntDomain(-1));
+      assertTrue(vC.getDerivedDomain() == IntervalIntDomain(11));
+      assertTrue(vF.getDerivedDomain() == IntervalIntDomain(3));
+      assertTrue(vG.getDerivedDomain() == IntervalIntDomain(12));
+      assertTrue(vH.getDerivedDomain() == IntervalIntDomain(4));
+      assertTrue(vI.getDerivedDomain() == IntervalIntDomain(7));
+      assertTrue(vJ.getDerivedDomain() == IntervalIntDomain(8));
+      assertTrue(vK.getDerivedDomain() == IntervalIntDomain(9));
+      assertTrue(vL.getDerivedDomain() == IntervalIntDomain(13));
+      assertTrue(vM.getDerivedDomain() == IntervalIntDomain(5));
+      assertTrue(vN.getDerivedDomain() == IntervalIntDomain(14));
+      assertTrue(vO.getDerivedDomain() == IntervalIntDomain(6));
+      assertTrue(vP.getDerivedDomain() == IntervalIntDomain(-2));
+      assertTrue(vQ.getDerivedDomain() == IntervalIntDomain(15));
+    }
+    scope.clear();
+    {
+      scope.push_back(falseVar.getId());
+      scope.push_back(v6.getId()); // 0
+      scope.push_back(v7.getId()); // 0
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
+      assertTrue(v7.getDerivedDomain().getSingletonValue() == 0);
+    }
+    scope.clear();
+    {
+      scope.push_back(falseVar.getId());
+      scope.push_back(v3.getId()); // 0 27
+      scope.push_back(v4.getId()); // 0 27
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(0, 27));
+      assertTrue(v4.getDerivedDomain() == IntervalIntDomain(0, 27));
+    }
+    scope.clear();
+    {
+      scope.push_back(falseVar.getId());
+      scope.push_back(vP.getId()); // -2
+      scope.push_back(vF.getId()); // 0 3
+      scope.push_back(vI.getId()); // 0 7
+      scope.push_back(vC.getId()); // 10 11
+      CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      // Only vF and vI overlap, so they have to be equal.
+      assertTrue(vF.getDerivedDomain() == IntervalIntDomain(0, 3));
+      // This next restriction is correct but the current implementation
+      //   does not enforce it, as it requires checking all pairs to see
+      //   that two individual vars are the only ones that overlap and
+      //   therefore must be equal.
+      // assertTrue(vI.getDerivedDomain() == IntervalIntDomain(0, 3));
     }
     return(true);
   }
