@@ -21,7 +21,9 @@ namespace Prototype {
   bool STNTemporalAdvisor::canPrecede(const TokenId& first, const TokenId& second){    
     if (!DefaultTemporalAdvisor::canPrecede(first, second))
       return false;
-    return ((TemporalPropagatorId)m_propagator)->canPrecede(first->getEnd(), second->getStart());
+
+    bool retval = ((TemporalPropagatorId)m_propagator)->canPrecede(first->getEnd(), second->getStart());
+    return (retval);
   }
 
   bool STNTemporalAdvisor::canFitBetween(const TokenId& token, const TokenId& predecessor, const TokenId& successor){
