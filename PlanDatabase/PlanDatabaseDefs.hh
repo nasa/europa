@@ -39,6 +39,18 @@ namespace Prototype {
 
   class PlanDatabase;
   typedef Europa::Id<PlanDatabase> PlanDatabaseId;
+
+  class RulesEngine;
+  typedef Europa::Id<RulesEngine> RulesEngineId;
+
+  class Rule;
+  typedef Europa::Id<Rule> RuleId;
+
+  class RuleContext;
+  typedef Europa::Id<RuleContext> RuleContextId;
+
+  class RuleInstance;
+  typedef Europa::Id<RuleInstance> RuleInstanceId;
 }
 
 #endif

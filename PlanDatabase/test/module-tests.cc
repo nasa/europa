@@ -6,6 +6,8 @@
 #include "TokenVariable.hh"
 #include "ObjectTokenRelation.hh"
 #include "Timeline.hh"
+#include "RulesEngine.hh"
+#include "Rule.hh"
 #include "./ConstraintEngine/TestSupport.hh"
 #include "./ConstraintEngine/IntervalIntDomain.hh"
 #include "./ConstraintEngine/IntervalRealDomain.hh"
@@ -21,10 +23,34 @@
     Schema schema;\
     PlanDatabase db(ce.getId(), schema.getId());\
     new DefaultPropagator(LabelStr("Default"), ce.getId());\
+    RulesEngine re(db.getId()); \
     new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());\
     Object object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));\
     if(autoClose) db.close();
 
+class TestRule: public Rule {
+public:
+
+  TestRule(const RulesEngineId& rulesEngine, const LabelStr& name): Rule(rulesEngine, name){}
+
+  void initializeContext(const TokenId& token, std::vector<ConstrainedVariableId>& scope) const{
+    check_error(scope.empty());
+    scope.push_back(token->getObject());
+    scope.push_back(token->getRejectability());
+  }
+
+  bool handleSet(const RuleContextId& context, int index, const ConstrainedVariableId& var) const{
+    std::vector<TokenId> newTokens;
+    std::vector<ConstraintId> newConstraints;
+    context->execute(newTokens, newConstraints);
+    return true;
+  }
+
+  bool handleReset(const RuleContextId& context, int index, const ConstrainedVariableId& var) const{
+    context->undo();
+    return true;
+  }
+};
 
 class ObjectTest {
 public:
@@ -467,6 +493,73 @@ private:
   }
 };
 
+class RulesEngineTest {
+public:
+  static bool test(){
+    runTest(testBasicAllocation, "BasicAllocation");
+    runTest(testActivation, "Activation");
+    runTest(testRuleFiringAndCleanup, "RuleFiringAndCleanup");
+    return true;
+  }
+private:
+  static bool testBasicAllocation(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    new TestRule(re.getId(), LabelStr("AnyType::AnyPredicate"));
+    return true;
+  }
+
+  static bool testActivation(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    db.close();
+    new TestRule(re.getId(), LabelStr("Type::Predicate"));
+
+    IntervalToken tokenA(db.getId(), 
+		     LabelStr("Type::Predicate"), 
+		     BooleanDomain(),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    check_error(re.getRules().size() == 1);
+    check_error(re.getRuleInstances().empty());
+
+    int num_constraints = ce.getConstraints().size();
+    // Activate and confirm the rule instance is created
+    tokenA.activate();
+    check_error(re.getRuleInstances().size() == 1);
+    // New constraints added to restrict rejectability and to listen to rule variables
+    check_error(ce.getConstraints().size() == num_constraints + 2);
+
+    // Deactivate to ensure the rule instance is removed
+    tokenA.deactivate();
+    check_error(re.getRuleInstances().empty());
+    check_error(ce.getConstraints().size() == num_constraints);
+
+    // Activate again to test deletion through automatic cleanup.
+    tokenA.activate();
+    check_error(re.getRuleInstances().size() == 1);
+    return true;
+  }
+
+  static bool testRuleFiringAndCleanup(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    db.close();
+    new TestRule(re.getId(), LabelStr("Type::Predicate"));
+
+    IntervalToken tokenA(db.getId(), 
+		     LabelStr("Type::Predicate"), 
+		     BooleanDomain(),
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+
+    tokenA.activate();
+    tokenA.getStart()->specify(5);
+    check_error(ce.propagate());
+    return true;
+  }
+};
+
 int main(){
   initConstraintLibrary();
   
@@ -480,5 +573,6 @@ int main(){
   runTestSuite(ObjectTest::test, "Object Tests");
   runTestSuite(TokenTest::test, "Token Tests");
   runTestSuite(TimelineTest::test, "Timeline Tests");
+  runTestSuite(RulesEngineTest::test, "RulesEngine Tests");
   std::cout << "Finished" << std::endl;
 }
