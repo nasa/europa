@@ -455,6 +455,18 @@ private:
     assert(v2.getDerivedDomain().getUpperBound() == 100);
     assert(v3.getDerivedDomain().getLowerBound() == 2);
 
+
+    // Handle restriction to singleton
+    Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(0, 10));
+    Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(5, 15));
+    Variable<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(0, 100));
+    LessThanEqualConstraint c3(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId()));
+    EqualConstraint c4(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v5.getId(), v6.getId()));
+    assert(ENGINE->propagate());
+    v6.specify(9);
+    assert(ENGINE->propagate());
+    assert(v4.getDerivedDomain().getUpperBound() == 9);
+
     return true;
   }
 
