@@ -36,15 +36,20 @@ namespace Prototype {
     : Propagator(name, constraintEngine), m_tnet((new TemporalNetwork())->getId()) {}
 
   TemporalPropagator::~TemporalPropagator() {
+    check_error(Entity::isPurging() || m_wrappedTimepoints.empty());
+    cleanup(m_wrappedTimepoints);
     cleanup(m_listeners);
     check_error(m_tnet.isValid());
     delete (TemporalNetwork*) m_tnet;
   }
 
   void TemporalPropagator::notifyDeleted(const TempVarId& tempVar, const TimepointId& tp) {
+    check_error(!Entity::isPurging());
     m_changedVariables.erase(tempVar);
     m_activeVariables.erase(tempVar);
+    EntityId tw = tempVar->getExternalEntity();
     tp->clearExternalEntity(); // Breaks link to original
+    m_wrappedTimepoints.erase(tw);
     m_variablesForDeletion.insert(tp);
   }
 
@@ -53,6 +58,7 @@ namespace Prototype {
   }
 
   void TemporalPropagator::handleConstraintRemoved(const ConstraintId& constraint){
+    check_error(!Entity::isPurging());
     // Delete constraint from list of pending additions and executions. It may be there if we have not propagated them yet.
     m_constraintsForAddition.erase(constraint);
     m_constraintsForExecution.erase(constraint);
@@ -128,7 +134,6 @@ namespace Prototype {
     m_changedVariables.insert(variable);
   }
 
-
   void TemporalPropagator::execute(){
     check_error(!getConstraintEngine()->provenInconsistent());
 
@@ -202,6 +207,7 @@ namespace Prototype {
 	EntityId tw = (new TimepointWrapper(getId(), var, timepoint))->getId();
 	var->setExternalEntity(tw);
 	timepoint->setExternalEntity(var);
+	m_wrappedTimepoints.insert(tw);
 	publish(notifyTimepointAdded(var, timepoint));
 
 	m_activeVariables.insert(var);

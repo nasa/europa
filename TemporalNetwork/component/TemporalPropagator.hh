@@ -95,7 +95,7 @@ namespace Prototype {
     std::set<ConstraintId> m_constraintsForAddition; /*!< Buffer insertions till we have to propagate */
     std::set<TemporalConstraintId> m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */
-
+    std::set<EntityId> m_wrappedTimepoints;
     std::set<TemporalNetworkListenerId> m_listeners;
 
     static const int DURATION_VAR_INDEX = 2; /*!< Position in token vector of variables */

@@ -7,7 +7,9 @@ namespace Prototype {
     :m_propagator(prop), m_tempVar(tempVar), m_timepoint(point), m_id(this) {}
 
   TimepointWrapper::~TimepointWrapper() {
-    m_propagator->notifyDeleted(m_tempVar, m_timepoint); 
+    if(!Entity::isPurging())
+      m_propagator->notifyDeleted(m_tempVar, m_timepoint);
+
     m_id.remove();
   }
 

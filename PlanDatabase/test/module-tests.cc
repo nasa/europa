@@ -49,27 +49,33 @@ SchemaId DefaultSchemaAccessor::s_instance;
 #define SCHEMA DefaultSchemaAccessor::instance()
 
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
-    ConstraintEngine ce; \
-    Schema schema; \
-    PlanDatabase db(ce.getId(), schema.getId()); \
-    { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+    ConstraintEngineId ce = (new ConstraintEngine())->getId(); \
+    SchemaId schema = (new Schema())->getId(); \
+    PlanDatabaseId db = (new PlanDatabase(ce, schema))->getId(); \
+    { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce); \
       assert(dp != 0); } \
     Id<DbLogger> dbLId; \
     if (loggingEnabled()) { \
-      new CeLogger(std::cout, ce.getId()); \
-      dbLId = (new DbLogger(std::cout, db.getId()))->getId(); \
+      new CeLogger(std::cout, ce); \
+      dbLId = (new DbLogger(std::cout, db))->getId(); \
     } \
-    { EqualityConstraintPropagator* ecp = new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId()); \
+    { EqualityConstraintPropagator* ecp = new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce); \
       assert(ecp != 0); } \
-    Object* objectPtr = new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")); \
+    Object* objectPtr = new Object(db, LabelStr("AllObjects"), LabelStr("o1")); \
     assert(objectPtr != 0); \
     Object& object = *objectPtr; \
     assert(objectPtr->getId() == object.getId()); \
     if (autoClose) \
-      db.close();
+      db->close();\
+    {
 
 #define DEFAULT_TEARDOWN() \
-    delete (DbLogger*) dbLId;
+    }\
+    Entity::purgeStarted();\
+    delete (PlanDatabase*) db;\
+    delete (Schema*) schema;\
+    delete (ConstraintEngine*) ce;\
+    Entity::purgeEnded();
 
 class ObjectTest {
 public:
@@ -422,7 +428,7 @@ private:
     DEFAULT_SETUP(ce, db, schema, true);
 
     // Event Token
-    EventToken eventToken(db.getId(), LabelStr("Predicate"), true, IntervalIntDomain(0, 1000), Token::noObject(), false);
+    EventToken eventToken(db, LabelStr("Predicate"), true, IntervalIntDomain(0, 1000), Token::noObject(), false);
     assert(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
     assert(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.getStart()->specify(IntervalIntDomain(5, 10));
@@ -431,7 +437,7 @@ private:
     eventToken.close();
 
     // IntervalToken
-    IntervalToken intervalToken(db.getId(), 
+    IntervalToken intervalToken(db, 
 				LabelStr("Predicate"), 
 				true, 
 				IntervalIntDomain(0, 1000),
@@ -455,7 +461,7 @@ private:
     assert(intervalToken.getDuration()->getDerivedDomain() == IntervalIntDomain(2, 5));
 
     // Create and delete a Token
-    TokenId token = (new IntervalToken(db.getId(), 
+    TokenId token = (new IntervalToken(db, 
 				       LabelStr("Predicate"), 
 				       true, 
 				       IntervalIntDomain(0, 1000),
@@ -471,11 +477,11 @@ private:
 
   static bool testBasicTokenCreation() {                                                            
     DEFAULT_SETUP(ce,db,schema,false);                                                   
-    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    ObjectId timeline = (new Timeline(db, LabelStr("AllObjects"), LabelStr("o2")))->getId();
     assert(!timeline.isNoId());
-    db.close();                                                                          
+    db->close();                                                                          
     
-    IntervalToken t1(db.getId(),                                                         
+    IntervalToken t1(db,                                                         
                      LabelStr("P1"),                                                     
                      true,                                                               
                      IntervalIntDomain(0, 10),                                           
@@ -489,7 +495,7 @@ private:
   static bool testStateModel(){
     DEFAULT_SETUP(ce, db, schema, true);
 
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
 		     LabelStr("Predicate"), 
 		     true, 
 		     IntervalIntDomain(0, 1000),
@@ -509,7 +515,7 @@ private:
     t0.cancel();
     assert(t0.isInactive());
 
-    IntervalToken t1(db.getId(), 
+    IntervalToken t1(db, 
 		     LabelStr("Predicate"), 
 		     true, 
 		     IntervalIntDomain(0, 1000),
@@ -534,7 +540,7 @@ private:
   static bool testMasterSlaveRelationship(){
     DEFAULT_SETUP(ce, db, schema, true);
 
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
 		     LabelStr("Predicate"), 
 		     false, 
 		     IntervalIntDomain(0, 1),
@@ -542,7 +548,7 @@ private:
 		     IntervalIntDomain(1, 1));
     t0.activate();
 
-    TokenId t1 = (new IntervalToken(db.getId(), 
+    TokenId t1 = (new IntervalToken(db, 
 				    LabelStr("Predicate"), 
 				    false,
 				    IntervalIntDomain(0, 1),
@@ -600,7 +606,7 @@ private:
     DEFAULT_SETUP(ce, db, schema, true);
 
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -609,7 +615,7 @@ private:
 
     assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
 
-    IntervalToken t1(db.getId(),
+    IntervalToken t1(db,
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -640,7 +646,7 @@ private:
     assert(t1.isInactive());
 
     // Now post equality constraint between t1 and extra token t2 and remerge
-    IntervalToken t2(db.getId(), 
+    IntervalToken t2(db, 
 		     LabelStr("P2"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -653,7 +659,7 @@ private:
     temp.push_back(t1.getEnd());
     temp.push_back(t2.getEnd());
     ConstraintId equalityConstraint = ConstraintLibrary::createConstraint(LabelStr("concurrent"),
-									  db.getConstraintEngine(),
+									  db->getConstraintEngine(),
 									  temp);
     t1.merge(t0.getId());
 
@@ -685,7 +691,7 @@ private:
     // Test unary
     t1.cancel();
     ConstraintId subsetOfConstraint = ConstraintLibrary::createConstraint(LabelStr("SubsetOf"),
-									  db.getConstraintEngine(),
+									  db->getConstraintEngine(),
 									  t1.getDuration(),
 									  IntervalIntDomain(5, 6));
     t1.merge(t0.getId());
@@ -704,19 +710,19 @@ private:
 
   static bool testConstraintMigrationDuringMerge() {
     DEFAULT_SETUP(ce, db, schema, false);
-    ObjectId timeline1 = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("timeline1")))->getId();
-    ObjectId timeline2 = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("timeline2")))->getId();
-    db.close();
+    ObjectId timeline1 = (new Timeline(db, LabelStr("AllObjects"), LabelStr("timeline1")))->getId();
+    ObjectId timeline2 = (new Timeline(db, LabelStr("AllObjects"), LabelStr("timeline2")))->getId();
+    db->close();
 
     // Create two base tokens
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    IntervalToken t1(db.getId(),
+    IntervalToken t1(db,
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -725,14 +731,14 @@ private:
 
 
     // Create 2 mergeable tokens - predicates, types and base domains match
-    IntervalToken t2(db.getId(), 
+    IntervalToken t2(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    IntervalToken t3(db.getId(),
+    IntervalToken t3(db,
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -740,14 +746,14 @@ private:
 		     IntervalIntDomain(1, 1000));
 
 
-    LessThanEqualConstraint c0(LabelStr("leq"), LabelStr("Default"), db.getConstraintEngine(), makeScope(t1.getStart(), t3.getStart()));
+    LessThanEqualConstraint c0(LabelStr("leq"), LabelStr("Default"), db->getConstraintEngine(), makeScope(t1.getStart(), t3.getStart()));
 
     t0.activate();
     t2.activate();
     timeline1->constrain(t0.getId());
     timeline2->constrain(t2.getId());
 
-    db.getConstraintEngine()->propagate();
+    db->getConstraintEngine()->propagate();
 
     t1.merge(t0.getId());
     t3.merge(t2.getId());
@@ -763,8 +769,8 @@ private:
   // add backtracking and longer chain, also add a before constraint
   static bool testMergingPerformance(){
     DEFAULT_SETUP(ce, db, schema, false);
-    ObjectId timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
-    db.close();
+    ObjectId timeline = (new Timeline(db, LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    db->close();
 
     typedef Id<IntervalToken> IntervalTokenId;
     
@@ -779,7 +785,7 @@ private:
     for (int i=0; i < NUMTOKS; i++) {
       std::vector<IntervalTokenId> tmp;
       for (int j=0; j < UNIFIED; j++) {
-	IntervalTokenId t = (new IntervalToken(db.getId(), 
+	IntervalTokenId t = (new IntervalToken(db, 
 					       LabelStr("P1"), 
 					       true,
 					       IntervalIntDomain(0, 210),
@@ -828,7 +834,7 @@ private:
     for (int i=0; i < NUMTOKS; i++)
       for (int j=1; j < UNIFIED; j++) { 
 	tokens[i][j]->merge(tokens[i][0]);
-	ce.propagate();
+	ce->propagate();
       }
 
     IntervalIntDomain sdom3(tokens[0][0]->getStart()->getDerivedDomain());
@@ -847,7 +853,7 @@ private:
     for (int i=0; i < NUMTOKS; i++)
       for (int j=1; j < UNIFIED; j++) {
 	tokens[i][j]->cancel();
-	ce.propagate();
+	ce->propagate();
       }
 
     IntervalIntDomain sdom4(tokens[0][0]->getStart()->getDerivedDomain());
@@ -871,7 +877,7 @@ private:
     DEFAULT_SETUP(ce, db, schema, true);
 
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -882,7 +888,7 @@ private:
     t0.close();
 
     // Same predicate and has an intersection
-    IntervalToken t1(db.getId(),
+    IntervalToken t1(db,
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -894,20 +900,20 @@ private:
 
     t0.activate();
     std::vector<TokenId> compatibleTokens;
-    bool res = ce.propagate();
+    bool res = ce->propagate();
     assert(res);
-    db.getCompatibleTokens(t1.getId(), compatibleTokens);
+    db->getCompatibleTokens(t1.getId(), compatibleTokens);
     assert(compatibleTokens.size() == 1);
     assert(compatibleTokens[0] == t0.getId());
 
     compatibleTokens.clear();
     t0.cancel();
-    res = ce.propagate();
+    res = ce->propagate();
     assert(res);
-    db.getCompatibleTokens(t1.getId(), compatibleTokens);
+    db->getCompatibleTokens(t1.getId(), compatibleTokens);
     assert(compatibleTokens.empty()); // No match since no tokens are active
 
-    IntervalToken t2(db.getId(),
+    IntervalToken t2(db,
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -918,14 +924,14 @@ private:
     t2.close();
 
     t0.activate();
-    res = ce.propagate();
+    res = ce->propagate();
     assert(res);
     compatibleTokens.clear();
-    db.getCompatibleTokens(t2.getId(), compatibleTokens);
+    db->getCompatibleTokens(t2.getId(), compatibleTokens);
     assert(compatibleTokens.empty()); // No match since parameter variable has no intersection
 
 
-    IntervalToken t3(db.getId(),
+    IntervalToken t3(db,
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -936,10 +942,10 @@ private:
     t3.close();
 
     // Post equality constraint between t3 and t0. Should permit a match since it is a binary constraint
-    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), db.getConstraintEngine(), makeScope(t0.getStart(), t3.getStart()));
-    db.getConstraintEngine()->propagate();
+    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), db->getConstraintEngine(), makeScope(t0.getStart(), t3.getStart()));
+    db->getConstraintEngine()->propagate();
     compatibleTokens.clear();
-    db.getCompatibleTokens(t3.getId(), compatibleTokens);
+    db->getCompatibleTokens(t3.getId(), compatibleTokens);
     assert(compatibleTokens.size() == 1); // Expect a single match
 
     DEFAULT_TEARDOWN();
@@ -962,24 +968,24 @@ public:
 private:
   static bool testBasicInsertion(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
-    db.close();
+    Timeline timeline(db, LabelStr("AllObjects"), LabelStr("o2"));
+    db->close();
 
-    IntervalToken tokenA(db.getId(), 
+    IntervalToken tokenA(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenB(db.getId(), 
+    IntervalToken tokenB(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenC(db.getId(), 
+    IntervalToken tokenC(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -996,19 +1002,19 @@ private:
     assert(timeline.getTokenSequence().size() == 0);
     assert(timeline.hasTokensToOrder());
 
-    unsigned int num_constraints = ce.getConstraints().size();
+    unsigned int num_constraints = ce->getConstraints().size();
 
     timeline.constrain(tokenA.getId());
     num_constraints += 1; // Only object is constrained since sequence should be empty
-    assert(ce.getConstraints().size() == num_constraints);
+    assert(ce->getConstraints().size() == num_constraints);
 
     timeline.constrain(tokenB.getId());
     num_constraints += 2; // Object variable and a single temporal constraint since placing at the end
-    assert(ce.getConstraints().size() == num_constraints);
+    assert(ce->getConstraints().size() == num_constraints);
 
     timeline.constrain(tokenC.getId(), tokenA.getId());
     num_constraints += 2; // Object variable and a single temporal constraint since placing at the beginning
-    assert(ce.getConstraints().size() == num_constraints);
+    assert(ce->getConstraints().size() == num_constraints);
 
     assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
     assert(timeline.getTokenSequence().size() == 3);
@@ -1017,7 +1023,7 @@ private:
     timeline.free(tokenA.getId());
     num_constraints -= 3; // Object variable and temporal constraints for placement w.r.t B and C.
     num_constraints += 1; // Should have added a new constraint to preserve temporal relationship between B and C which had been indirect
-    assert(ce.getConstraints().size() == num_constraints);
+    assert(ce->getConstraints().size() == num_constraints);
 
     assert(timeline.getTokenSequence().size() == 2);
     tokens.clear();
@@ -1046,24 +1052,24 @@ private:
 
   static bool testObjectTokenRelation(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
-    db.close();
+    Timeline timeline(db, LabelStr("AllObjects"), LabelStr("o2"));
+    db->close();
 
-    IntervalToken tokenA(db.getId(), 
+    IntervalToken tokenA(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenB(db.getId(), 
+    IntervalToken tokenB(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenC(db.getId(), 
+    IntervalToken tokenC(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -1112,7 +1118,7 @@ private:
 
 
     // Test destruction call path
-    Token* tokenD = new IntervalToken(db.getId(), 
+    Token* tokenD = new IntervalToken(db, 
 				      LabelStr("P1"), 
 				      true,
 				      IntervalIntDomain(0, 10),
@@ -1132,15 +1138,15 @@ private:
 
   static bool testTokenOrderQuery(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Id<Timeline> timeline = (new Timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2")))->getId();
-    db.close();
+    Id<Timeline> timeline = (new Timeline(db, LabelStr("AllObjects"), LabelStr("o2")))->getId();
+    db->close();
 
     const int COUNT = 5;
     const int DURATION = 10;
     
     for (int i=0;i<COUNT;i++){
       int start = i*DURATION;
-      TokenId token = (new IntervalToken(db.getId(), 
+      TokenId token = (new IntervalToken(db, 
 					 LabelStr("P1"),
 					 true,
 					 IntervalIntDomain(start, start),
@@ -1152,7 +1158,7 @@ private:
     }
 
     assert(timeline->getTokens().size() == 0);
-    ce.propagate();
+    ce->propagate();
     assert(timeline->getTokens().size() == (unsigned int) COUNT);
 
     int i = 0;
@@ -1168,12 +1174,12 @@ private:
       assert(!choices.empty());
       TokenId successor = choices.front();
       timeline->constrain(toConstrain, successor);
-      bool res = ce.propagate();
+      bool res = ce->propagate();
       assert(res);
       tokensToOrder.clear();
       timeline->getTokensToOrder(tokensToOrder);
       i++;
-      res = ce.propagate();
+      res = ce->propagate();
       assert(res);
     }
 
@@ -1182,7 +1188,7 @@ private:
     assert(tokenSequence.back()->getEnd()->getDerivedDomain().getSingletonValue() == COUNT*DURATION);
 
     // Now ensure the query can correctly indicate no options available
-    TokenId token = (new IntervalToken(db.getId(), 
+    TokenId token = (new IntervalToken(db, 
 				       LabelStr("P1"),
 				       true,
 				       IntervalIntDomain(0, 0),
@@ -1200,10 +1206,10 @@ private:
 
   static bool testEventTokenInsertion(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
-    db.close();
+    Timeline timeline(db, LabelStr("AllObjects"), LabelStr("o2"));
+    db->close();
 
-    IntervalToken it1(db.getId(), 
+    IntervalToken it1(db, 
 		      LabelStr("P1"), 
 		      true,
 		      IntervalIntDomain(0, 10),
@@ -1215,7 +1221,7 @@ private:
     timeline.constrain(it1.getId(), TokenId::noId());
 
     // Insert at the end after a token
-    EventToken et1(db.getId(), 
+    EventToken et1(db, 
 		   LabelStr("P2"), 
 		   true, 
 		   IntervalIntDomain(0, 100), 
@@ -1227,7 +1233,7 @@ private:
     assert(it1.getEnd()->getDerivedDomain().getUpperBound() == 100);
 
     // Insert between a token and an event
-    EventToken et2(db.getId(), 
+    EventToken et2(db, 
 		   LabelStr("P2"), 
 		   true, 
 		   IntervalIntDomain(0, 100), 
@@ -1239,7 +1245,7 @@ private:
     assert(it1.getEnd()->getDerivedDomain().getUpperBound() == 100);
 
     // Insert before a token
-    EventToken et3(db.getId(), 
+    EventToken et3(db, 
 		   LabelStr("P2"), 
 		   true, 
 		   IntervalIntDomain(10, 100), 
@@ -1251,7 +1257,7 @@ private:
     assert(it1.getStart()->getDerivedDomain().getLowerBound() == 10);
 
     // Insert between events
-    EventToken et4(db.getId(), 
+    EventToken et4(db, 
 		   LabelStr("P2"), 
 		   true, 
 		   IntervalIntDomain(0, 100), 
@@ -1260,7 +1266,7 @@ private:
     et4.getObject()->specify(timeline.getId());
     et4.activate();
     timeline.constrain(et4.getId(), et1.getId());
-    bool res = ce.propagate();
+    bool res = ce->propagate();
     assert(res);
 
     DEFAULT_TEARDOWN();
@@ -1269,24 +1275,24 @@ private:
 
   static bool testFullInsertion(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
-    db.close();
+    Timeline timeline(db, LabelStr("AllObjects"), LabelStr("o2"));
+    db->close();
 
-    IntervalToken tokenA(db.getId(), 
+    IntervalToken tokenA(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenB(db.getId(), 
+    IntervalToken tokenB(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenC(db.getId(), 
+    IntervalToken tokenC(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(0, 10),
@@ -1313,24 +1319,24 @@ private:
 
   static bool testNoChoicesThatFit(){
     DEFAULT_SETUP(ce, db, schema, false);
-    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
-    db.close();
+    Timeline timeline(db, LabelStr("AllObjects"), LabelStr("o2"));
+    db->close();
 
-    IntervalToken tokenA(db.getId(), 
+    IntervalToken tokenA(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(10, 10),
 		     IntervalIntDomain(20, 20),
 		     IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenB(db.getId(), 
+    IntervalToken tokenB(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(100, 100),
 		     IntervalIntDomain(120, 120),
 		     IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenC(db.getId(), 
+    IntervalToken tokenC(db, 
 		     LabelStr("P1"), 
 		     true,
 		     IntervalIntDomain(9, 9),
@@ -1343,14 +1349,14 @@ private:
 
     timeline.constrain(tokenA.getId());
     timeline.constrain(tokenB.getId());
-    bool res = ce.propagate();
+    bool res = ce->propagate();
     assert(res);
 
     std::vector<TokenId> choices;
     timeline.getOrderingChoices(tokenC.getId(), choices);
     assert(choices.empty());
     timeline.constrain(tokenC.getId(), tokenB.getId());
-    res = ce.propagate();
+    res = ce->propagate();
     assert(!res);
 
     DEFAULT_TEARDOWN();
@@ -1477,7 +1483,7 @@ private:
   static bool testBasicAllocation(){
     DEFAULT_SETUP(ce, db, schema, false);
 
-    DbClientId client = db.getClient();
+    DbClientId client = db->getClient();
     DbClientTransactionLog* txLog = new DbClientTransactionLog(client);
 
     FooId foo1 = client->createObject(LabelStr("Foo"), LabelStr("foo1"));
@@ -1509,10 +1515,10 @@ private:
 
   static bool testPathBasedRetrieval(){
     DEFAULT_SETUP(ce, db, schema, true);
-    TokenId t0 = db.getClient()->createToken(LabelStr("Foo"));
+    TokenId t0 = db->getClient()->createToken(LabelStr("Foo"));
     t0->activate();
 
-    TokenId t1 = db.getClient()->createToken(LabelStr("Foo"));
+    TokenId t1 = db->getClient()->createToken(LabelStr("Foo"));
     t1->activate();
 
     TokenId t0_0 = (new IntervalToken(t0, 
@@ -1559,16 +1565,16 @@ private:
 
 
     // Base case with just the root
-    assert(db.getClient()->getTokenByPath(path) == t0);
-    assert(db.getClient()->getPathByToken(t0).size() == 1);
+    assert(db->getClient()->getTokenByPath(path) == t0);
+    assert(db->getClient()->getPathByToken(t0).size() == 1);
 
     // Now test a more convoluted path
     path.push_back(1);
     path.push_back(1);
-    assert(db.getClient()->getTokenByPath(path) == t0_1_1);
+    assert(db->getClient()->getTokenByPath(path) == t0_1_1);
 
     path.clear();
-    path = db.getClient()->getPathByToken(t0_1_1);
+    path = db->getClient()->getPathByToken(t0_1_1);
     assert(path.size() == 3);
     assert(path[0] == 0);
     assert(path[1] == 1);
@@ -1577,9 +1583,9 @@ private:
 
     // Negative tests
     path.push_back(100);
-    assert(db.getClient()->getTokenByPath(path) == TokenId::noId());
+    assert(db->getClient()->getTokenByPath(path) == TokenId::noId());
     path[0] = 99999;
-    assert(db.getClient()->getTokenByPath(path) == TokenId::noId());
+    assert(db->getClient()->getTokenByPath(path) == TokenId::noId());
 
     DEFAULT_TEARDOWN();
     return true;

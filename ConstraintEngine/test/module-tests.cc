@@ -79,6 +79,42 @@ private:
   int m_events[ConstraintEngine::EVENT_COUNT];
 };
 
+class ConstraintEngineTest
+{
+public:
+  static bool test(){
+    runTest(testDeallocationWithPurging);
+    return true;
+  }
+
+  static bool testDeallocationWithPurging(){
+    ConstraintEngineId ce = (new ConstraintEngine())->getId();
+    new DefaultPropagator(LabelStr("Default"), ce);
+
+    // Set up a base domain
+    Domain<int> intBaseDomain;
+    intBaseDomain.insert(1);
+    intBaseDomain.insert(2);
+    intBaseDomain.insert(3);
+    intBaseDomain.insert(4);
+    intBaseDomain.insert(5);
+    intBaseDomain.close();
+
+    for(int i=0;i<100;i++){
+      Id<Variable<Domain<int> > > v0 = (new Variable<Domain<int> > (ce, intBaseDomain))->getId();
+      Id<Variable<Domain<int> > > v1 = (new Variable<Domain<int> >(ce, intBaseDomain))->getId();
+      new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ce, makeScope(v0, v1));
+    }
+
+    assert(ce->propagate());
+    Entity::purgeStarted();
+    delete (ConstraintEngine*) ce;
+    Entity::purgeEnded();
+
+    return true;
+  }
+};
+
 class VariableTest
 {
 public:
@@ -219,7 +255,6 @@ public:
   }
 
 private:
-
   static bool testSubsetConstraint() {
     std::list<Prototype::LabelStr> values;
     values.push_back(Prototype::LabelStr("A"));
@@ -2202,6 +2237,7 @@ int main() {
   REGISTER_UNARY(DelegationTestConstraint, "TestOnly", "Default");
 
   DomainTests::test();
+  runTestSuite(ConstraintEngineTest::test);
   runTestSuite(VariableTest::test); 
   runTestSuite(ConstraintTest::test); 
   runTestSuite(FactoryTest::test);
