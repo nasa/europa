@@ -29,10 +29,14 @@ namespace Prototype {
 
   void DbLogger::notifyReinstated(const TokenId& token){m_os << "DbLogger: Token Reinstated(" << token->getKey() << ")" << std::endl;}
 
+  void DbLogger::notifyConstrained(const ObjectId& object, const TokenId& token, const TokenId& successor){m_os << "DbLogger: Token Constrained (" << token->getKey() << ") On Object (" << object->getKey() << ") After Token (" << successor->getKey() << ")" << std::endl;}
+
+  void DbLogger::notifyFreed(const ObjectId& object, const TokenId& token){m_os << "DbLogger: Token Freed (" << token->getKey() << ") On Object (" << object->getKey() << ")" << std::endl;}
+
   void DbLogger::notifyAdded(const ObjectId& object, const TokenId& token){
-    m_os << "DbLogger: Token (" << token->getKey() << ") Added to Object(" << object->getKey() << ")" << std::endl;
+    m_os << "DbLogger: Token (" << token->getKey() << ") Added to Object (" << object->getKey() << ")" << std::endl;
   }
   void DbLogger::notifyRemoved(const ObjectId& object, const TokenId& token){
-    m_os << "DbLogger: Token (" << token->getKey() << ") Removed from Object(" << object->getKey() << ")" << std::endl;
+    m_os << "DbLogger: Token (" << token->getKey() << ") Removed from Object (" << object->getKey() << ")" << std::endl;
   }
 }

@@ -168,6 +168,7 @@ namespace Prototype {
       check_error(successor.isNoId());
       m_tokenSequence.push_back(token);
       m_tokenIndex.insert(std::make_pair(token->getKey(), m_tokenSequence.begin()));
+      Object::constrain(token,successor);
       return;
     }
 
@@ -205,6 +206,7 @@ namespace Prototype {
 								   vars);
     m_constraints.push_back(new ConstraintEntry(constraint, first, second));
     check_error(isValid());
+    Object::constrain(token,successor);
   }
 
   void Timeline::remove(const TokenId& token){
@@ -217,6 +219,7 @@ namespace Prototype {
     check_error(token.isValid());
     check_error(token->isActive());
     cleanup(token);
+    Object::free(token);
   }
 
   /**
