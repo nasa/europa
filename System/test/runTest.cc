@@ -22,12 +22,10 @@ SchemaId schema;
 
 const char* TX_LOG = "TransactionLog.xml";
 const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
-bool replay = true;
+bool replay = false;
 
 bool runPlanner(){
-  std::stringstream os1;
-  {
-    SamplePlanDatabase db1(schema, true);
+    SamplePlanDatabase db1(schema, replay);
 
   // Initialize the plan database
     NDDL::initialize(db1.planDatabase);
@@ -56,31 +54,29 @@ bool runPlanner(){
 
     std::cout << "\nNr. Of Decisions:" << planner.getClosedDecisions().size() << std::endl;
 
-    db1.planDatabase->getClient()->toStream(os1);
     PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
     assert(res == 1);
 
     // Store transactions for recreation of database
-    {
+    if(replay) {
+      std::stringstream os1;
+      db1.planDatabase->getClient()->toStream(os1);
       std::ofstream out(TX_LOG);
       db1.txLog->flush(out);
       out.close();
-    }
-  }
 
-  std::stringstream os2;
-  {
-    SamplePlanDatabase db(schema, true);
-    DbClientTransactionPlayer player(db.planDatabase->getClient());
-    std::ifstream in(TX_LOG);
-    player.play(in);
-    db.planDatabase->getClient()->toStream(os2);
-  }
+      std::stringstream os2;
+      SamplePlanDatabase db(schema, true);
+      DbClientTransactionPlayer player(db.planDatabase->getClient());
+      std::ifstream in(TX_LOG);
+      player.play(in);
+      db.planDatabase->getClient()->toStream(os2);
 
-  std::string s1 = os1.str();
-  std::string s2 = os2.str();
-  assert(s1 == s2);
+      std::string s1 = os1.str();
+      std::string s2 = os2.str();
+      assert(s1 == s2);
+  }
 
   return true;
 }
@@ -116,6 +112,7 @@ int main(int argc, const char ** argv){
   SamplePlanDatabase::initialize();
   schema = NDDL::schema();
 
+  replay = true;
   runTest(runPlanner);
   runTest(copyFromFile);
 

@@ -714,6 +714,26 @@ namespace Prototype {
       ls3.remove(Prototype::LabelStr("I"));
       ls4.intersect(ls3);
       assert(ls4.isEmpty());
+
+      {
+	EnumeratedDomain d0;
+	d0.insert(0);
+	d0.insert(1);
+	d0.insert(2);
+	d0.insert(3);
+	d0.close();
+
+	EnumeratedDomain d1;
+	d1.insert(-1);
+	d1.insert(2);
+	d1.insert(4);
+	d1.insert(5);
+	d1.close();
+
+	d0.intersect(d1);
+	assert(d0.getSize() == 1);
+      }
+
       return(true);
     }
 

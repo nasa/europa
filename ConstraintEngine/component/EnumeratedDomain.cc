@@ -5,6 +5,17 @@
 
 namespace Prototype {
 
+  bool isAscending(const std::set<double>& values){
+    double greatest = *(values.begin());
+    for(std::set<double>::const_iterator it = values.begin(); it != values.end(); ++it){
+      double current = *it;
+      if(current < greatest)
+	return false;
+      else greatest = current;
+    }
+    return true;
+  }
+
   const AbstractDomain::DomainType& EnumeratedDomain::getType() const {
     static const AbstractDomain::DomainType s_type = AbstractDomain::REAL_ENUMERATION;
     return(s_type);
@@ -65,6 +76,7 @@ namespace Prototype {
 
   void EnumeratedDomain::close() {
     AbstractDomain::close();
+    check_error(isAscending(m_values));
   }
 
   int EnumeratedDomain::getSize() const {
@@ -288,7 +300,6 @@ namespace Prototype {
   bool EnumeratedDomain::intersect(const AbstractDomain& dom) {
     check_error(isDynamic() || dom.isDynamic() || (!isEmpty() && !dom.isEmpty()));
     check_error(isNumeric() == dom.isNumeric());
-
     bool changed = false;
     if (dom.isInterval()) {
       std::set<double>::iterator it = m_values.begin();
@@ -314,18 +325,17 @@ namespace Prototype {
         double val_a = *it_a;
         double val_b = *it_b;
 
-        if (val_a == val_b) {
+        if (val_a == val_b) { // If they are equal, advance both
           ++it_a;
           ++it_b;
-        } else
-          if (val_a < val_b) {
-            std::set<double>::iterator target = m_values.find(val_b);
-            m_values.erase(it_a, target);
-            it_a = target;
-            changed = true;
-            check_error(!isMember(val_a));
-          } else
-            it_b = l_dom.m_values.find(val_a);
+        } 
+	else if (val_a < val_b) { // A < B, so remove A and advance 
+	  m_values.erase(it_a++);
+	  changed = true;
+	  check_error(!isMember(val_a));
+	} 
+	else
+	  ++it_b; // So just advance B
       }
 
       if (it_a != m_values.end()) {
@@ -333,6 +343,7 @@ namespace Prototype {
         changed = true;
       }
     }
+
     if (!changed)
       return(false);
 
