@@ -77,6 +77,8 @@ SchemaId DefaultSchemaAccessor::s_instance;
     delete (ConstraintEngine*) ce;\
     Entity::purgeEnded();
 
+
+
 class ObjectTest {
 public:
 
@@ -407,6 +409,23 @@ private:
  }
 };
 
+
+
+
+class IntervalTokenFactory: public ConcreteTokenFactory {
+public:
+  IntervalTokenFactory(): ConcreteTokenFactory(LabelStr("Foo")){}
+private:
+  TokenId createInstance(const PlanDatabaseId& planDb) const{
+    TokenId token = (new IntervalToken(planDb, LabelStr("Foo"), true))->getId();
+    return token;
+  }
+  TokenId createInstance(const TokenId& master) const{
+    TokenId token = (new IntervalToken(master, LabelStr("Foo")))->getId();
+    return token;
+  }
+};
+
 class TokenTest {
 public:
 
@@ -419,6 +438,7 @@ public:
     runTest(testConstraintMigrationDuringMerge);
     runTest(testMergingPerformance);
     runTest(testTokenCompatibility);
+    runTest(testTokenFactory);
     return(true);
   }
 
@@ -951,6 +971,16 @@ private:
     DEFAULT_TEARDOWN();
     return true;
   }
+
+  static bool testTokenFactory(){
+    DEFAULT_SETUP(ce, db, schema, true);
+    TokenId master = TokenFactory::createInstance(db, LabelStr("Foo"));
+    master->activate();
+    TokenId slave = TokenFactory::createInstance(master, LabelStr("Foo"));
+    assert(slave->getMaster() == master);
+    DEFAULT_TEARDOWN();
+    return true;
+  }
 };
 
 class TimelineTest {
@@ -1447,16 +1477,6 @@ private:
     foo->constructor(arg0, arg1);
     foo->handleDefaults();
     return foo;
-  }
-};
-
-class IntervalTokenFactory: public ConcreteTokenFactory {
-public:
-  IntervalTokenFactory(): ConcreteTokenFactory(LabelStr("Foo")){}
-private:
-  TokenId createInstance(const PlanDatabaseId& planDb) const{
-    TokenId token = (new IntervalToken(planDb, LabelStr("Foo"), true))->getId();
-    return token;
   }
 };
 
