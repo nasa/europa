@@ -10,7 +10,7 @@ ModuleMain ce-module-tests
 	:
 	ConstraintEngine
 	;
-
-RunModuleMain tests : ce-module-tests ;
+RunModuleMain run-ce-module-tests : ce-module-tests ;
+LocalDepends tests : run-ce-module-tests ;
 
 } # PLASMA_READY

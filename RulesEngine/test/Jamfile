@@ -4,6 +4,7 @@ if ! $(PLASMA_READY) {
 
 ModuleMain re-module-tests : module-tests.cc TestRule.cc : RulesEngine ;
 
-RunModuleMain tests : re-module-tests ;
+RunModuleMain run-re-module-tests : re-module-tests ;
+LocalDepends tests : run-re-module-tests ;
 
 } # PLASMA_READY

@@ -16,7 +16,7 @@ rule Execute {
   } else {
     target_exec_arg = RUN_$(executable) ;
   }
-  LocalDepends $(target) : $(target_exec_arg) ;
+  Depends $(target) : $(target_exec_arg) ;
   ExecuteTarget $(target_exec_arg) : [ FAppendSuffix $(executable) : $(SUFEXE) ] : $(arguments) ;
 }
 

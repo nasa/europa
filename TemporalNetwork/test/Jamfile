@@ -3,7 +3,7 @@ SubDir PLASMA TemporalNetwork test ;
 if ! $(PLASMA_READY) {
 
 ModuleMain tn-module-tests : module-tests.cc : TemporalNetwork ;
-
-RunModuleMain tests : tn-module-tests ;
+RunModuleMain run-tn-module-tests : tn-module-tests ;
+LocalDepends tests : run-tn-module-tests ;
 
 } # PLASMA_READY

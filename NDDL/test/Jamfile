@@ -6,7 +6,7 @@ SubInclude PLASMA NDDL test parser ;
 SubInclude PLASMA NDDL test compiler ;
 
 ModuleMain nddl-module-tests : module-tests.cc : NDDL ;
-
-RunModuleMain tests : nddl-module-tests ;
+RunModuleMain run-nddl-module-tests : nddl-module-tests ;
+LocalDepends tests : run-nddl-module-tests ;
 
 } # PLASMA_READY
