@@ -2,7 +2,8 @@
 #include "Schema.hh"
 #include "Object.hh"
 #include "ObjectSet.hh"
-#include "Token.hh"
+#include "StaticToken.hh"
+#include "EventToken.hh"
 #include "TokenVariable.hh"
 #include "./ConstraintEngine/TestSupport.hh"
 #include "./ConstraintEngine/IntervalIntDomain.hh"
@@ -71,13 +72,41 @@ private:
     PlanDatabase db(ENGINE, schema.getId());
     Object staticObject(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));
     std::vector<ConstrainedVariableId> noParameters;
-    Token staticToken(db.getId(), LabelStr("Predicate"), noParameters, LabelStr("o1"));
+
+    // Static Token
+    StaticToken staticToken(db.getId(), LabelStr("Predicate"), noParameters, LabelStr("o1"));
+
+    // Event Token
+    EventToken eventToken(db.getId(), LabelStr("Predicate"), IntervalIntDomain(0, 1), noParameters, IntervalIntDomain(0, 1000));
+    assert(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
+    assert(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
+    eventToken.getStart()->specify(IntervalIntDomain(5, 10));
+    assert(eventToken.getEnd()->getDerivedDomain() == IntervalIntDomain(5, 10));
+
+    // IntervalToken
+    IntervalToken intervalToken(db.getId(), 
+				LabelStr("Predicate"), 
+				IntervalIntDomain(0, 1), 
+				IntervalIntDomain(0, 1000),
+				IntervalIntDomain(0, 1000),
+				IntervalIntDomain(2, 10));
+
+    assert(intervalToken.getEnd()->getDerivedDomain().getLowerBound() == 2);
+    intervalToken.getStart()->specify(IntervalIntDomain(5, 10));
+    assert(intervalToken.getEnd()->getDerivedDomain() == IntervalIntDomain(7, 20));
+    intervalToken.getEnd()->specify(IntervalIntDomain(9, 10));
+    assert(intervalToken.getStart()->getDerivedDomain() == IntervalIntDomain(5, 8));
+    assert(intervalToken.getDuration()->getDerivedDomain() == IntervalIntDomain(2, 5));
     return true;
   }
 };
 
 void main(){
   initConstraintLibrary();
+  
+  REGISTER_NARY(EqualConstraint, "CoTemporal");
+  REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation");
+
   runTestSuite(ObjectTest::test, "Token Tests");
   runTestSuite(TokenTest::test, "Token Tests");
   cout << "Finished" << endl;
