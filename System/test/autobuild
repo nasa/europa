@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.40 2003-03-25 20:45:41 wedgingt Exp $
+# $Id: autobuild,v 1.41 2003-04-01 18:05:42 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -125,7 +125,7 @@ do
             if test -s .autobuild.profFind
             then
                 SupportFiles/gather.gprofs
-		cvs tag -F Europa-autobuild-profiled
+		cvs tag -F Europa-Auto-Profiled-"`uname -n | sed -e 's/[.].*$//'`"
             fi
             rm -rf .autobuild.profFind
         fi
