@@ -67,7 +67,7 @@ namespace PLASMA {
     if (dec.isNoId())
       m_os << "DMLogger: Failed to assign next decision noId" << std::endl;   
     else {
-      m_os << "DMLogger: Failed to assign " << dec->getCurrent() << " next decision (" << dec->getKey() << ") from the following choices ";
+      m_os << "DMLogger: Failed to assign " << dec->getCurrent() << " next decision (" << dec->getKey() << ") with remaining choices ";
       std::list<ChoiceId>::const_iterator it = m_dm->getCurrentDecisionChoices().begin();
       for ( ; it != m_dm->getCurrentDecisionChoices().end(); ++it) {
 	(*it)->print(m_os);
