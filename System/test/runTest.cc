@@ -47,6 +47,8 @@ int main(){
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
+  REGISTER_NARY(LessThanEqualConstraint, "precede", "Default");
+
   
   // Allocate the schema
   SchemaId schema = NDDL::schema();
