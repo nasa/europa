@@ -11,6 +11,7 @@
 #include "RuleContext.hh"
 #include "ObjectFilter.hh"
 #include "../ConstraintEngine/TestSupport.hh"
+#include "../ConstraintEngine/Utils.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
 #include "../ConstraintEngine/IntervalRealDomain.hh"
 #include "../ConstraintEngine/LabelSet.hh"
@@ -106,6 +107,7 @@ public:
     runTest(testObjectSet);
     runTest(testObjectVariables);
     runTest(testObjectFilteringConstraint);
+    runTest(testFilterAndConstrain);
     return true;
   }
 private:
@@ -208,11 +210,7 @@ private:
     Variable<ObjectSet> objectVar(db.getConstraintEngine(), objects);
 
     // Set up the filter variable
-    std::list<double> emptyList;
-    EnumeratedDomain filterBaseDomain(emptyList, false);
-    for (int i=0; i<NUM_OBJECTS;i++)
-      filterBaseDomain.insert(i);
-    filterBaseDomain.close();
+    EnumeratedDomain filterBaseDomain = ObjectFilter::constructUnion(objects, 0);
     Variable<EnumeratedDomain> filterVar(db.getConstraintEngine(), filterBaseDomain);
 
     // Construct the filter constraint
@@ -238,6 +236,63 @@ private:
 
     objectVar.specify(objects.front());
     assert(filterVar.getDerivedDomain().isSingleton());
+    return true;
+  }
+
+  /**
+   * This case will emulate the following in nddl
+   * class Fact {
+   *  int p1;
+   *  int p2;
+   * }
+
+   */
+  static bool testFilterAndConstrain(){
+    PlanDatabase db(ENGINE);
+
+    static const int NUM_OBJECTS = 1000;
+
+    std::list<ObjectId> objects;
+
+    // Allocate objects with 2 field variables
+    for (int i=0;i<NUM_OBJECTS;i++){
+      std::stringstream ss;
+      ss << "Object" << i;
+      std::string objectName(ss.str());
+      ObjectId object = (new Object(db.getId(), LabelStr("AllObjects"), LabelStr(objectName.c_str()), true))->getId();
+      object->addVariable(IntervalIntDomain(i, i)); // p1
+      object->addVariable(IntervalIntDomain(NUM_OBJECTS - i, NUM_OBJECTS - i)); // p2
+      object->close();
+      objects.push_back(object);
+    }
+
+    // Prepare variables
+    Variable<ObjectSet> objectVar(db.getConstraintEngine(), objects);
+
+    EnumeratedDomain filterBaseDomain0 = ObjectFilter::constructUnion(objects, 0);
+    Variable<EnumeratedDomain> filterVar0(db.getConstraintEngine(), filterBaseDomain0);
+    ObjectFilter filter0(LabelStr("Default"), db.getConstraintEngine(), objectVar.getId(), 0, filterVar0.getId());
+
+    EnumeratedDomain filterBaseDomain1 = ObjectFilter::constructUnion(objects, 1);
+    Variable<EnumeratedDomain> filterVar1(db.getConstraintEngine(), filterBaseDomain1);
+    ObjectFilter filter1(LabelStr("Default"), db.getConstraintEngine(), objectVar.getId(), 1, filterVar1.getId());
+
+    // OK - now create 2 variables to constrain against, using the equals constraint
+    Variable<EnumeratedDomain> v0(db.getConstraintEngine(), filterBaseDomain0);
+    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), db.getConstraintEngine(), makeScope(v0.getId(), filterVar0.getId()));
+
+    Variable<EnumeratedDomain> v1(db.getConstraintEngine(), filterBaseDomain1);
+    EqualConstraint c1(LabelStr("eq"), LabelStr("Default"), db.getConstraintEngine(), makeScope(v1.getId(), filterVar1.getId()));
+
+    assert(objectVar.getDerivedDomain().getSize() == NUM_OBJECTS);
+    assert(v0.getDerivedDomain() == filterBaseDomain0);
+    assert(v1.getDerivedDomain() == filterBaseDomain1);
+
+    // Specify one variable to a singleton
+    v0.specify(3);
+    assert(v1.getDerivedDomain().isSingleton());
+    assert(v1.getDerivedDomain().getSingletonValue() == (NUM_OBJECTS - 3 ));
+
     return true;
   }
 };
