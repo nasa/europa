@@ -58,9 +58,17 @@ namespace Prototype {
 
 
   void Timeline::getOrderingChoices(const TokenId& token, std::vector<TokenId>& results){
+    check_error(isValid());
     check_error(results.empty());
     check_error(token.isValid());
-    check_error(getPlanDatabase()->getConstraintEngine()->propagate()); // Must not be inconsistent
+
+    // Force propagation and return if inconsistent - leads to no ordering choices.
+    if(!getPlanDatabase()->getConstraintEngine()->propagate())
+      return;
+
+    // It makes no sense to query for ordering choices for a Token that has already been inserted. Conseqeuntly,
+    // we trap that as an error. We could just return indicating no choices but that might lead caller to conclude
+    // there is simply an inconsistency rather than force them to write code to ensure this does not happen.
     check_error(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end());
 
     // Special cases, the sequence is empty.
@@ -106,21 +114,27 @@ namespace Prototype {
   }
 
   void Timeline::getTokensToOrder(std::vector<TokenId>& results){
+    check_error(isValid());
     check_error(results.empty());
 
     // Do propagation to update the information
-    getPlanDatabase()->getConstraintEngine()->propagate();
+    bool isOk = getPlanDatabase()->getConstraintEngine()->propagate();
+
+    // Should only progress if we are consistent
+    check_error(isOk);
 
     const std::set<TokenId>& tokensForThisObject = getTokens();
     for(std::set<TokenId>::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it){
       TokenId token = *it;
       if(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end() && token->isActive())
-	results.push_back(token);
+	results.push_back(token); // We should now have an active token that has not been constrained
     }
   }
 
-
-  const std::list<TokenId>& Timeline::getTokenSequence() const{return m_tokenSequence;}
+  const std::list<TokenId>& Timeline::getTokenSequence() const{
+    check_error(isValid());
+    return m_tokenSequence;
+  }
 
   void Timeline::constrain(const TokenId& token, const TokenId& successor){
     check_error(token.isValid());
@@ -184,38 +198,49 @@ namespace Prototype {
 
   void Timeline::remove(const TokenId& token){
     check_error(token.isValid());
-    if(token->isActive())
-      cleanupToken(token, true);
-    else
-      cleanupToken(token, false);
+    cleanup(token);
     Object::remove(token);
   }
 
   void Timeline::free(const TokenId& token){
     check_error(token.isValid());
     check_error(token->isActive());
-    cleanupToken(token, true);
+    cleanup(token);
   }
 
-  void Timeline::cleanupToken(const TokenId& token, bool deleteConstraints){
+  /**
+   * Note that we take special care for active vs. inactive tokens. It is not intuitive
+   * that we may clean up for a token that is now inactive, since only active tokens
+   * can be assigned to objects. However, due to propagation of the object variable to a
+   * singleton, or during deletion of a token - when it gets deactivated automatically - such cleanup
+   * is required.
+   */
+  void Timeline::cleanup(const TokenId& token){
     check_error(token.isValid());
-    check_error(isValid());
-    check_error(token->isActive() == deleteConstraints); 
-  
+    check_error(isValid(CLEANING_UP));
+
+    std::vector<ConstraintId> constraintsToDelete;
+
     // Remove Token's constraints if there are any
     std::list<ConstraintEntry*>::iterator it = m_constraints.begin();
     while(it != m_constraints.end()){
       ConstraintEntry* ce = *it;
       if (ce->m_first == token || ce->m_second == token){
-	if(deleteConstraints){
+	if(token->isActive()){ // Then we want to delete the constraints
 	  check_error(ce->isValid());
-	  delete (Constraint*) ce->m_constraint;
+	  constraintsToDelete.push_back(ce->m_constraint);
 	}
-	delete ce;
 	it = m_constraints.erase(it);
+	delete ce;
       }
       else
 	it++;
+    }
+
+    for(std::vector<ConstraintId>::const_iterator it = constraintsToDelete.begin(); it != constraintsToDelete.end(); ++it){
+      ConstraintId constraintToDelete = *it;
+      check_error(constraintToDelete.isValid());
+      delete (Constraint*) constraintToDelete;
     }
 
     // Clean up TokenSequence and TokenIndex data structures
@@ -225,11 +250,20 @@ namespace Prototype {
       m_tokenIndex.erase(token_it);
     }
 
-    check_error(isValid());
+    check_error(isValid(CLEANING_UP));
   }
 
-  bool Timeline::isValid() const{
-    return (m_tokenIndex.size() == m_tokenSequence.size());
+  bool Timeline::isValid(bool cleaningUp) const{
+    check_error(m_tokenIndex.size() == m_tokenSequence.size());
+    std::set<TokenId> allTokens;
+    for(std::list<TokenId>::const_iterator it = m_tokenSequence.begin(); it != m_tokenSequence.end(); ++it){
+      TokenId token = *it;
+      allTokens.insert(token);
+      check_error(m_tokenIndex.find(token->getKey()) != m_tokenIndex.end());
+      check_error(cleaningUp || token->isActive());
+    }
+    check_error(allTokens.size() == m_tokenSequence.size()); // No duplicates.
+    return true;
   }
 
   void Timeline::constrainToSingleton(const TokenId& token, const AbstractDomain& domain, const ConstrainedVariableId& var){

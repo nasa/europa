@@ -89,7 +89,7 @@ public:
     {
       std::vector<ConstrainedVariableId> constrainedVars;
       constrainedVars.push_back(slave->getDuration());
-      constrainedVars.push_back(context->getScope().back());
+      constrainedVars.push_back(context->getGuards().back());
       ConstraintId restrictDuration = ConstraintLibrary::createConstraint(LabelStr("Equal"),
 									  getRulesEngine()->getPlanDatabase()->getConstraintEngine(),
 									  constrainedVars);
@@ -660,7 +660,31 @@ private:
     timeline.constrain(tokenB.getId());
     timeline.constrain(tokenC.getId(), tokenA.getId());
 
+    std::vector<TokenId> tokens;
     assert(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+    assert(timeline.getTokenSequence().size() == 3);
+    timeline.getTokensToOrder(tokens);
+    assert(tokens.empty());
+
+    timeline.free(tokenA.getId());
+    assert(timeline.getTokenSequence().size() == 2);
+    timeline.getTokensToOrder(tokens);
+    assert(tokens.empty()); // No longer part of this timeline, so it will not be included
+
+    // Now force it to be part of this timeline, even though it is not otherwise constrained
+    tokenA.getObject()->specify(timeline.getId());
+    timeline.getTokensToOrder(tokens);
+    assert(tokens.size() == 1);
+    assert(tokens.front() == tokenA.getId());
+
+    timeline.constrain(tokenA.getId());
+    tokens.clear();
+    timeline.getTokensToOrder(tokens);
+    assert(tokens.empty());
+    assert(timeline.getTokenSequence().size() == 3);
+    timeline.free(tokenC.getId());
+
+    assert(timeline.getTokenSequence().size() == 2);
     return true;
   }
 
