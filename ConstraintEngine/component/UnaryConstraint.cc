@@ -7,4 +7,6 @@ namespace Prototype{
 				   const ConstraintEngineId& constraintEngine,
 				   const ConstrainedVariableId& variable)
     : Constraint(name, propagatorName, constraintEngine, variable){}
+
+  UnaryConstraint::~UnaryConstraint(){}
 }

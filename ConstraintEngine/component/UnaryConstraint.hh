@@ -12,6 +12,7 @@ namespace Prototype{
 		    const ConstraintEngineId& constraintEngine,
 		    const ConstrainedVariableId& variable);
 
+    virtual ~UnaryConstraint();
     virtual const AbstractDomain& getDomain() const = 0;
   };
 }

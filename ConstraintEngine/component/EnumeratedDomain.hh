@@ -184,6 +184,14 @@ namespace Prototype{
     bool operator==(const EnumeratedDomain& dom) const;
 
     /**
+     * @brief Test that the domains are not equal.
+     * @param dom The domain to test against
+     * @return true if the values in each are not the same.
+     * @see AbstractDomain::operator!=()
+     */
+    bool operator!=(const EnumeratedDomain& dom) const;
+
+    /**
      * @brief Computes the intersection of this object and the given object and assigns that intersection to this object.
      * @param dom the domain to be intersected with
      * @return true if a change occurs, otherwise false.
@@ -199,6 +207,7 @@ namespace Prototype{
     bool isSubsetOf(const EnumeratedDomain& dom) const;
   protected:
     int getIndex(double value) const;
+    bool sameBaseSet(const EnumeratedDomain& dom) const;
 
     static const int MAX_SIZE = 32; /*!< Since bitset have to have a fixed size, we allocate one large enough to hold all */
 

@@ -140,7 +140,13 @@ namespace Prototype {
   }
 
   bool EnumeratedDomain::operator==(const EnumeratedDomain& dom) const{
+    check_error(sameBaseSet(dom));
     return (AbstractDomain::operator==(dom) && m_membership == dom.m_membership);
+  }
+
+  bool EnumeratedDomain::operator!=(const EnumeratedDomain& dom) const{
+    check_error(sameBaseSet(dom));
+    return (!operator==(dom));
   }
 
   EnumeratedDomain& EnumeratedDomain::operator=(const EnumeratedDomain& dom) {
@@ -183,6 +189,7 @@ namespace Prototype {
 
   bool EnumeratedDomain::intersect(const EnumeratedDomain& dom){
     check_error(isDynamic() || dom.isDynamic() || (!isEmpty() && !dom.isEmpty()));
+    check_error(sameBaseSet(dom));
 
     int lastCount = m_membership.count();
     m_membership = m_membership & dom.m_membership;
@@ -202,6 +209,7 @@ namespace Prototype {
 
   bool EnumeratedDomain::isSubsetOf(const EnumeratedDomain& dom) const{
     check_error(dom.isDynamic() || !dom.isEmpty());
+    check_error(sameBaseSet(dom));
     std::bitset<MAX_SIZE> intersection = dom.m_membership & m_membership;
     return m_membership == intersection;
   }
@@ -215,5 +223,11 @@ namespace Prototype {
 	i++;
     }
     return -1;
+  }
+
+  bool EnumeratedDomain::sameBaseSet(const EnumeratedDomain& dom) const{
+    /*!< @todo Put this back in */
+    //return (dom.m_values == m_values);
+    return true;
   }
 }
