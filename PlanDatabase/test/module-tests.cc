@@ -52,6 +52,11 @@ private:
     assertTrue(SCHEMA->isEnumValue(LabelStr("BarEnum"), 5));
     assertFalse(SCHEMA->isEnumValue(LabelStr("BarEnum"), 6));
 
+    std::list<LabelStr> allenums;
+    SCHEMA->getEnumerations(allenums);
+    assert(allenums.size() == 2);
+    assert(allenums.back() == LabelStr("FooEnum"));
+    assert(allenums.front() == LabelStr("BarEnum"));
     return true;
   }
 
@@ -89,6 +94,8 @@ private:
     assertTrue(SCHEMA->canContain(LabelStr("Bar"), LabelStr("float"), LabelStr("arg0")));
     assertTrue(SCHEMA->canContain(LabelStr("Bar"), LabelStr("Foo"), LabelStr("arg1")));
     assertTrue(SCHEMA->canContain(LabelStr("Bar"), LabelStr("Bar"), LabelStr("arg1")));
+
+    assert(SCHEMA->getAllObjectTypes().size() == 3);
 
     return true;
   }
@@ -144,6 +151,27 @@ private:
     SCHEMA->addPredicate("Derived.Predicate");
     SCHEMA->addMember("Derived.Predicate", "Battery", "battery");
 
+
+    assert(SCHEMA->getParameterCount(LabelStr("Resource.change")) == 1);
+    assert(SCHEMA->getParameterType(LabelStr("Resource.change"), 0) == LabelStr("float"));
+
+    std::set<LabelStr> predicates;
+    SCHEMA->getPredicates(LabelStr("Battery"), predicates);
+    assert(predicates.size() == 1);
+    predicates.clear();
+    SCHEMA->getPredicates(LabelStr("Resource"), predicates);
+    assert(predicates.size() == 1);
+
+    SCHEMA->addObjectType("One");
+    SCHEMA->addPredicate("One.Predicate1");
+    SCHEMA->addPredicate("One.Predicate2");
+    SCHEMA->addPredicate("One.Predicate3");
+    SCHEMA->addPredicate("One.Predicate4");
+
+    predicates.clear();
+    SCHEMA->getPredicates(LabelStr("One"), predicates);
+    assert(predicates.size() == 4);
+
     return(true);
   }
 
@@ -175,6 +203,11 @@ private:
 
     SCHEMA->addObjectType(LabelStr("Baz"), LabelStr("Bar"));
     assertTrue(SCHEMA->getMemberType(LabelStr("Baz.Argle"), LabelStr("targle")) == LabelStr("Targle"));
+
+    assert(SCHEMA->getParameterCount(LabelStr("Foo.Argle")) == 2);
+    assert(SCHEMA->getParameterType(LabelStr("Foo.Argle"), 0) == LabelStr("Bargle"));
+    assert(SCHEMA->getParameterType(LabelStr("Foo.Argle"), 1) == LabelStr("Targle"));
+
     return true;
   }
 };
