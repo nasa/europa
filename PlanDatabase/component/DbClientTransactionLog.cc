@@ -92,9 +92,12 @@ namespace EUROPA {
 
 
   void DbClientTransactionLog::notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
-    check_error(m_chronologicalBacktracking || strcmp(m_bufferedTransactions.back()->Value(), "constrain") == 0,
-		"Chronological backtracking assumption violated");
-
+    if(m_chronologicalBacktracking) {
+      check_error(strcmp(m_bufferedTransactions.back()->Value(), "constrain") == 0,
+		  "Chronological backtracking assumption violated");
+      popTransaction();
+      return;
+    }
     TiXmlElement * element = allocateXmlElement("free");
     TiXmlElement * object_el = allocateXmlElement("object");
     object_el->SetAttribute("name", object->getName().toString());
@@ -128,7 +131,7 @@ namespace EUROPA {
       check_error((strcmp(m_bufferedTransactions.back()->Value(), "activate") == 0) ||
                   (strcmp(m_bufferedTransactions.back()->Value(), "reject") == 0) ||
                   (strcmp(m_bufferedTransactions.back()->Value(), "merge") == 0),
-                  "chronological backtracking assumption violated");
+                  "Chronological backtracking assumption violated");
       popTransaction();
       return;
     }
@@ -159,7 +162,7 @@ namespace EUROPA {
   void DbClientTransactionLog::notifyVariableReset(const ConstrainedVariableId& variable){
     if (m_chronologicalBacktracking) {
       check_error(strcmp(m_bufferedTransactions.back()->Value(), "specify") == 0,
-                  "chronological backtracking assumption violated");
+                  "Chronological backtracking assumption violated");
       popTransaction();
       return;
     }
