@@ -272,7 +272,7 @@ namespace EUROPA {
 
     // If it is mandatory, then activate immediately so there is less for a
     // client to figure out, or specify in the transactions
-    if(b_mandatory)
+    if (b_mandatory)
       m_client->activate(token);
 
     const char * name = child->Attribute("name");
@@ -307,8 +307,7 @@ namespace EUROPA {
     m_client->constrain(object, predecessor, successor);
   }
 
-  void DbClientTransactionPlayer::playFreed(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playFreed(const TiXmlElement & element) {
     TiXmlElement * object_el = element.FirstChildElement();
     check_error(object_el != NULL);
     check_error(strcmp(object_el->Value(), "object") == 0);
@@ -321,30 +320,24 @@ namespace EUROPA {
     check_error(token_el != NULL);
     TokenId predecessor = xmlAsToken(*token_el);
     check_error(predecessor.isValid());
-
     TiXmlElement * successor_el = token_el->NextSiblingElement();
     TokenId successor = predecessor;
-
-    if(successor_el != NULL){
+    if (successor_el != NULL) {
       successor = xmlAsToken(*successor_el);
       check_error(successor.isValid());
     }
-
     m_client->free(object, predecessor, successor);
   }
 
-  void DbClientTransactionPlayer::playActivated(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playActivated(const TiXmlElement & element) {
     TiXmlElement * token_el = element.FirstChildElement();
     check_error(token_el != NULL);
     TokenId token = xmlAsToken(*token_el);
     check_error(token.isValid());
-    if(!token->isActive()) // Temporary till we scrub explicit activations from test files.
-      m_client->activate(token);
+    m_client->activate(token);
   }
 
-  void DbClientTransactionPlayer::playMerged(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playMerged(const TiXmlElement & element) {
     TiXmlElement * token_el = element.FirstChildElement();
     check_error(token_el != NULL);
     TokenId token = xmlAsToken(*token_el);
@@ -357,8 +350,7 @@ namespace EUROPA {
     m_client->merge(token, active_token);
   }
 
-  void DbClientTransactionPlayer::playRejected(const TiXmlElement & element)
-  {
+  void DbClientTransactionPlayer::playRejected(const TiXmlElement & element) {
     TiXmlElement * token_el = element.FirstChildElement();
     check_error(token_el != NULL);
     TokenId token = xmlAsToken(*token_el);
