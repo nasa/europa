@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.56 2003-09-10 19:14:40 wedgingt Exp $
+# $Id: autobuild,v 1.57 2003-10-09 17:05:16 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -126,9 +126,18 @@ do
     statusMakeDist=$?
     echo '"make '"$makeopt"' simple" in '"`pwd`"' exited '"$statusMakeDist"
 
+    make $makeopt clean >> make.simple.clean 2>&1
+    statusMakeDistClean=$?
+    echo '"make '"$makeopt"' clean" in '"`pwd`"' exited '"$statusMakeDistClean"
+
+    cd ../NewPlan
+    make $makeopt clean >> make.clean 2>&1
+    statusMakeClean=$?
+    echo '"make '"$makeopt"' clean" in '"`pwd`"' exited '"$statusMakeClean"
+
     cd ..
 
-    if test $statusMakeTar$status$statusTarExtract$statusMakeDist = 0000
+    if test $statusMakeTar$status$statusTarExtract$statusMakeDist$statusMakeDistClean$statusMakeClean = 000000
     then
         (uname -a; echo ''; cat make.options; echo ''; g++ --version) | \
             Mail -s 'Autobuild on '"`hostname`"' in '"`pwd`"' succeeded' "$email"
@@ -153,6 +162,8 @@ do
     # Save the make output files
     mv NewPlan/make.tests . || exit 2
     mv testDist/make.simple . || exit 2
+    mv testDist/make.simple.clean . || exit 2
+    mv NewPlan/make.clean . || exit 2
 
     # Would continue with the next one after a failure,
     #   but the disk space might not be available.
