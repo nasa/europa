@@ -6,7 +6,7 @@ class Test___Variable {
     int y;
     bool z;
 
-    condasame(0, x, y, z);
+    condasame(false, x, y, z);
   }
 
   Test __DDL__object;
