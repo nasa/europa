@@ -413,10 +413,10 @@ namespace PLASMA {
     }
     key << TokenType::getIndexKey(tt).c_str();
     if (!mastertt.isNoId()) {
-      key << DELIMITER << TokenType::getIndexKey(mastertt).c_str();
       LabelStr str(NO_STRING);
       HSTSHeuristics::relationshipToString(rel,str);
       key << DELIMITER << str.toString();
+      key << DELIMITER << TokenType::getIndexKey(mastertt).c_str();
     }
     return key.str();
   }
