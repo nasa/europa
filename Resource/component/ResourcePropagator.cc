@@ -81,7 +81,7 @@ namespace Prototype {
 						const ConstraintId& constraint, 
 						const DomainListener::ChangeType& changeType) {
     check_error(ResourceConstraintId::convertable(constraint));
-    ConstrainedVariableId objectvar = constraint->getScope().front();
+    // ConstrainedVariableId objectvar = constraint->getScope().front();
     if (TransactionId::convertable(variable->getParent())) {    
       TransactionId t = variable->getParent();
       if (t->getResource() != ResourceId::noId()){
@@ -101,7 +101,7 @@ namespace Prototype {
 
     check_error(ResourceConstraintId::convertable(constraint));
     if (TransactionId::convertable(variable->getParent())) {    
-      ConstrainedVariableId objectvar = constraint->getScope().front();
+      // ConstrainedVariableId objectvar = constraint->getScope().front();
       TransactionId t = variable->getParent();
       if (t->getResource() != ResourceId::noId()){
 	ResourceId r = t->getResource();
