@@ -32,19 +32,26 @@ if ! $(PLASMA_READY) {
   NddlCompiler $(hh) $(cc) : $(model) ;
   ModuleObjects $(cc) : NDDL ;
 
-  ModuleSharedLibrary $(lib) : $(o) : NDDL ;
+  if $(LIBRARIES) = SHARED {
+    ModuleSharedLibrary $(lib) : $(o) : NDDL ;
 
-  local variant ;
-  for variant in $(VARIANTS) {
-    local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
-    local run_variant_name = [ FVariantName runTransactions : $(variant) ] ;
-    run_variant_name = $(run_variant_name)_rt ;
-    local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) ;
-    Depends run-problem-$(exe) : $(libname) ;
-    RunModuleMain run-problem-$(exe) : runTransactions : $(arguments) ;
-    LocalDepends run-aver-module-tests : run-problem-$(exe) ;
+    local variant ;
+    for variant in $(VARIANTS) {
+      local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
+      local run_variant_name = [ FVariantName runTransactions : $(variant) ] ;
+      run_variant_name = $(run_variant_name)_rt ;
+      local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) ;
+      Depends run-problem-$(exe) : $(libname) ;
+      RunModuleMain run-problem-$(exe) : runTransactions : $(arguments) ;
+      LocalDepends run-aver-module-tests : run-problem-$(exe) ;
+    }
   }
-
+  else {
+    ModuleMain $(exe) : $(o) runTransactions_link.o : Aver ;
+    RunModuleMain run-$(exe) : $(exe) : ;
+    LocalDepends run-aver-module-tests : run-$(exe) ;
+  }
+  
   #ModuleMain aver-module-tests : module-tests.cc : Aver ;
   #RunModuleMain run-aver-module-tests : aver-module-tests ;
   #LocalDepends tests : run-aver-module-tests ;

@@ -81,7 +81,7 @@ int main(int argc, const char** argv) {
   schema = (*fcn_schema)();
 #else //STANDALONE
   if(argc != 1) {
-    std::cout << "usage: runProblem" << std::endl;
+    std::cout << "usage: runTransactions" << std::endl;
     exit(1);
   }
   //initialTransactions = argv[1];
