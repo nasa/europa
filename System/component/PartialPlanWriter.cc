@@ -1615,11 +1615,13 @@ namespace Prototype {
 				switch(choice->getType()) {
 				case Choice::TOKEN:
 					{
-					  const TokenId &tId = Id<TokenChoice>(choice)->getToken();
-						if(!tId.isNoId())
-							retval << tId->getKey();
-						else
-							retval << -1;
+					  const ObjectId &oId = Id<TokenChoice>(choice)->getObject();
+					  const TokenId &tId = Id<TokenChoice>(choice)->getSuccessor();
+					  check_error(oId.isValid());
+					  if(!tId.isNoId())
+					    retval << oId->getKey() << COMMA << tId->getKey();
+					  else
+					    retval << oId->getKey() << COMMA << -1;
 					}
 				break;
 				case Choice::VALUE:
