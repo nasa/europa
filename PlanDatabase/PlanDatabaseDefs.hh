@@ -43,6 +43,9 @@ namespace Prototype {
 
   class TemporalAdvisor;
   typedef Id<TemporalAdvisor> TemporalAdvisorId;
+
+  class DbClient;
+  typedef Id<DbClient> DbClientId;
 }
 
 #endif
