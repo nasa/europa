@@ -37,7 +37,19 @@ LocalDepends tests : run-hsts-module-tests
         gnats-condasame
         gnats-rover-fixed
 #       gnats-sum # Failing; see below
-#       dnpTests # Incomplete; see below
+#       dnp-timeline
+#       dnp-DNP2
+#       dnp-allDSS
+#       dnp-fourFreeObs
+#       dnp-DNP3fourFreeObs
+#       dnp-DNP3
+#       dnp-fourFreeObsNotEmpty
+#       dnp-freeObs
+#       dnp-freeObsNoEmpty
+#       dnp-tenFreeObs
+#       dnp-threeFreeObs
+#       dnp-twentyFreeObs
+#       dnp-twoFreeObs
         ;
 
 #
@@ -149,7 +161,7 @@ RunEUROPATest dnp-allDSS : allDSS.nddl : : : DNPConstraints.o ;
 RunEUROPATest dnp-fourFreeObs : fourFreeObs.nddl : : : DNPConstraints.o ;
 RunEUROPATest dnp-DNP3fourFreeObs : DNP3.fourFreeObs.nddl : : : DNPConstraints.o ;
 RunEUROPATest dnp-DNP3 : DNP3.timeline.nddl : : : DNPConstraints.o ;
-RunEUROPATest dnp-fourFreeObs : fourFreeObs-initBufNotEmpty.nddl : : : DNPConstraints.o ;
+RunEUROPATest dnp-fourFreeObsNotEmpty : fourFreeObs-initBufNotEmpty.nddl : : : DNPConstraints.o ;
 RunEUROPATest dnp-freeObs : freeObs.nddl : : : DNPConstraints.o ;
 RunEUROPATest dnp-freeObsNoEmpty : freeObs.noEmpty.nddl : : : DNPConstraints.o ;
 RunEUROPATest dnp-tenFreeObs : tenFreeObs.nddl : : : DNPConstraints.o ;
