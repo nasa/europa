@@ -21,6 +21,7 @@ const bool ALWAYS_FAILS = false;
 
 namespace Prototype
 {
+
   static const int MAX_INT = 9999999;
   static const int PLUS_INFINITY = MAX_INT;
   static const int MINUS_INFINITY = -PLUS_INFINITY;

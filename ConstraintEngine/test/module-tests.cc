@@ -14,6 +14,7 @@
 
 /* Include for domain management */
 #include "AbstractDomain.hh"
+#include "EnumeratedDomain.hh"
 #include "LabelSet.hh"
 #include "LabelStr.hh"
 #include "IntervalIntDomain.hh"
@@ -64,7 +65,7 @@ private:
   ChangeType m_change;
 };
 
-class LabelTest
+class EnumerationTest
 {
 public:
   static bool test(){
@@ -73,6 +74,7 @@ public:
     runTest(testEquate, "LabelSet::equate");
     runTest(testValueRetrieval, "ValueRetrieval");
     runTest(testIntersection, "Intersection");
+    runTest(testEnumerationOnly, "EnumerationOnly");
     return true;
   }
 private:
@@ -259,6 +261,31 @@ private:
     ls3.remove(Prototype::LabelStr("I"));
     ls4.intersect(ls3);
     assert(ls4.isEmpty());
+    return true;
+  }
+
+  /**
+   * Note that the enumeration is pretty thoroughly tested through the LabelSet tests which build on it
+   */
+  static bool testEnumerationOnly(){
+    std::list<double> values;
+    values.push_back(-98.67);
+    values.push_back(-0.01);
+    values.push_back(1);
+    values.push_back(2);
+    values.push_back(10);
+    values.push_back(11);
+
+    EnumeratedDomain d0(values);
+    EnumeratedDomain d1(values);
+    assert(d0 == d1);
+    assert(d0.isSubsetOf(d1));
+    assert(d0.isMember(-98.67));
+    d0.remove(-0.01);
+    assert(!d0.isMember(-0.01));
+    assert(d0.isSubsetOf(d1));
+    assert(!d1.isSubsetOf(d0));
+
     return true;
   }
 };
@@ -994,7 +1021,7 @@ int main()
 {
   initConstraintLibrary();
   REGISTER_UNARY(DelegationTestConstraint, "TestOnly");
-  runTestSuite(LabelTest::test, "LabelTests"); 
+  runTestSuite(EnumerationTest::test, "LabelTests"); 
   runTestSuite(DomainTest::test, "DomainTests");  
   runTestSuite(VariableTest::test, "VariableTests"); 
   runTestSuite(ConstraintTest::test, "ConstraintTests"); 
