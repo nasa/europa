@@ -39,7 +39,7 @@ for model in
 	k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl force-object-distribution.nddl 
 	resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl parent-predicate.nddl #backtr-long.nddl
 	EOS-backtrack-test.nddl
-	backtr.nddl
+	backtr.nddl better-res.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : runTransactionTest.o DefaultTestInit.o : $(model) : System ;
