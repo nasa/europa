@@ -1,5 +1,7 @@
 #include "ValueChoice.hh"
 #include "Token.hh"
+#include "ConstrainedVariableDecisionPoint.hh"
+#include "Object.hh"
 
 namespace PLASMA {
 
@@ -33,19 +35,36 @@ namespace PLASMA {
     return false;
   }
 
+  void ValueChoice::printValue(std::ostream& os) const {
+    if (LabelStr::isString(m_value))
+      os << LabelStr(m_value).c_str();
+    else
+      if (ConstrainedVariableDecisionPointId::convertable(m_decision)) {
+	ConstrainedVariableDecisionPointId cvdec(m_decision);
+	const AbstractDomain& dom = cvdec->getVariable()->specifiedDomain();
+	check_error(dom.isSingleton());
+	if (Schema::instance()->isObjectType(dom.getTypeName())) {
+	  ObjectId obj(m_value);
+	  os << obj->getName().c_str();
+	}
+	else
+	  os << m_value;
+      }
+      else
+	os << m_value;
+  }
+
   void ValueChoice::print(std::ostream& os) const {
     check_error(m_id.isValid());
     check_error(m_type == VALUE);
     if (!m_token.isNoId()) {
       os << "Value (";
-      if (LabelStr::isString(m_value))
-	os << LabelStr(m_value).c_str();
+      printValue(os);
       os << ") Token (" << m_token->getKey() << ") ";
     }
     else {
       os << "Value ("; 
-      if (LabelStr::isString(m_value))
-	os << LabelStr(m_value).c_str();
+      printValue(os);
       os << ") ";
     }
   }

@@ -23,6 +23,8 @@ namespace PLASMA {
     ValueChoice(const DecisionPointId&, const double);
     ValueChoice(const DecisionPointId&, const double, const TokenId&);
 
+    void printValue(std::ostream& os) const;
+
     double m_value;		/**< One value of a domain. */
     TokenId m_token;
   };
