@@ -20,9 +20,33 @@
 #include "Domain.hh"
 #include "DefaultPropagator.hh"
 #include "EqualityConstraintPropagator.hh"
+#include "UnaryConstraint.hh"
 
 #include <iostream>
 #include <string>
+
+/**
+ * @brief Declaration and definition for test constraint to force a failure when the domain becomes a singleton
+ */
+class ForceFailureConstraint : public UnaryConstraint {
+public:
+  ForceFailureConstraint(const LabelStr& name,
+			 const LabelStr& propagatorName,
+			 const ConstraintEngineId& constraintEngine,
+			 const ConstrainedVariableId& variable,
+			 const AbstractDomain& domain = IntervalIntDomain())
+  : UnaryConstraint(name, propagatorName, constraintEngine, variable){}
+
+  const AbstractDomain& getDomain() const {
+    static IntervalIntDomain sl_noDomain;
+    return sl_noDomain;
+  }
+
+  void handleExecute(){
+    if(getCurrentDomain(m_variables[0]).isSingleton())
+      getCurrentDomain(m_variables[0]).empty();
+  }
+};
 
 class DefaultSchemaAccessor {
 public:
@@ -511,6 +535,7 @@ public:
     runTest(testMergingPerformance);
     runTest(testTokenCompatibility);
     runTest(testTokenFactory);
+    runTest(testCorrectSplit_Gnats2450);
     return(true);
   }
 
@@ -1050,6 +1075,48 @@ private:
     master->activate();
     TokenId slave = TokenFactory::createInstance(master, LabelStr("Foo"));
     assert(slave->getMaster() == master);
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  /**
+   * @brief Tests that a split will not cause the specified domain of the merged token
+   * to be relaxed to the base domain.
+   */
+  static bool testCorrectSplit_Gnats2450(){
+    DEFAULT_SETUP(ce, db, schema, true);
+
+    IntervalToken tokenA(db, 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+    tokenA.getStart()->specify(5);
+    tokenA.activate();
+    assert(ce->propagate());
+
+    IntervalToken tokenB(db, 
+		     LabelStr("P1"), 
+		     true,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+    tokenB.getEnd()->specify(IntervalIntDomain(3, 10));
+
+    // Post a constraint on tokenB so that it will always fail when it gets merged
+    ForceFailureConstraint c0(LabelStr("ForceFailure"), LabelStr("Default"), ce, tokenB.getState());
+    assert(ce->propagate());
+
+    // Now do the merge
+    tokenB.merge(tokenA.getId());
+    assert(!ce->propagate()); // Should always fail
+
+    // Now split it and test that the specified domaion is unchanged
+    tokenB.cancel();
+    assert(ce->propagate()); // Should be OK now
+    assert(tokenB.getEnd()->getSpecifiedDomain() == IntervalIntDomain(3, 10));
+
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -1695,6 +1762,7 @@ int main() {
   REGISTER_NARY(AddEqualConstraint, "StartEndDurationRelation", "Default");
   REGISTER_NARY(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_UNARY(SubsetOfConstraint, "Singleton", "Default");
+  REGISTER_UNARY(ForceFailureConstraint, "ForceFailure", "Default");
 
   // This is now done in ConstraintEngine/test-support.cc::initConstraintLibrary()
   //   for ConstraintEngine/module-tests.cc::testArbitraryConstraints().

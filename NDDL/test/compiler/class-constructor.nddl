@@ -74,6 +74,13 @@ class Bat {
 
 class Bing {}
 
+class Baluga{
+ Locations location;
+ Baluga(Locations loc){
+  location = loc;
+ }
+}
+
 class World {
  string m_str1;
  Foo m_foo1;
