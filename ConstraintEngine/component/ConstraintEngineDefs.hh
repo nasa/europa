@@ -31,6 +31,7 @@ namespace Prototype
   class AbstractDomain;
   class IntervalIntDomain;
   class IntervalRealDomain;
+  class EnumeratedDomain;
   class LabelSet;
   class BoolDomain;
 
