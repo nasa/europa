@@ -36,8 +36,6 @@ void initConstraintLibrary() {
     // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
     REGISTER_NARY(AddEqualConstraint, "addeq", "Default");
     REGISTER_NARY(AddMultEqualConstraint, "addmuleq", "Default");
-    REGISTER_NARY(AddLessThanConstraint, "addlt", "Default");
-    REGISTER_NARY(AddLessOrEqThanConstraint, "addleq", "Default");
     REGISTER_NARY(AllDiffConstraint, "adiff", "Default"); // all different
     REGISTER_NARY(EqualConstraint, "asame", "Default"); // all same
     REGISTER_NARY(CardinalityConstraint, "card", "Default"); // cardinality not more than
@@ -49,7 +47,15 @@ void initConstraintLibrary() {
     REGISTER_NARY(LessThanEqualConstraint, "leq", "Default");
     REGISTER_NARY(LessOrEqThanSumConstraint, "leqsum", "Default");
     REGISTER_NARY(LessThanConstraint, "lt", "Default");
-    REGISTER_NARY(MinimumEqualConstraint, "min", "Default");
+
+    // Rotate scope right one (last var moves to front) to ...
+    // ... change min constraint to EqualMinimum constraint:
+    REGISTER_ROTATED_NARY("min", "Default", "EqualMinimum", 1);
+    // ... change addlt constraint to GreaterThanSum constraint:
+    REGISTER_ROTATED_NARY("addlt", "Default", "GreaterThanSum", 1);
+    // ... change addleq constraint to GreaterOrEqThan constraint:
+    REGISTER_ROTATED_NARY("addleq", "Default", "GreaterOrEqThanSum", 1);
+
     REGISTER_NARY(MemberImplyConstraint, "memberImply", "Default");
     REGISTER_NARY(NotEqualConstraint, "neq", "Default");
     REGISTER_NARY(OrConstraint, "or", "Default");
