@@ -18,7 +18,7 @@
 
 SchemaId schema;
 
-#define REPLAY_DECISIONS
+//#define PERFORMANCE
 
 const char* TX_LOG = "TransactionLog.xml";
 const char* TX_REPLAY_LOG = "ReplayedTransactions.xml";
@@ -52,7 +52,7 @@ bool runPlanner(){
       
     int res = planner.run(strategy.getId(), loggingEnabled());
 
-    std::cout << "\nNr. Of Decisions:" << planner.getClosedDecisions().size() << std::endl;
+    //std::cout << "\nNr. Of Decisions:" << planner.getClosedDecisions().size() << std::endl;
 
     PlanDatabaseWriter::write(db1.planDatabase, std::cout);
 
@@ -76,9 +76,9 @@ bool runPlanner(){
       std::string s1 = os1.str();
       std::string s2 = os2.str();
       assert(s1 == s2);
-  }
+    }
 
-  return true;
+    return true;
 }
 
 bool copyFromFile(){
@@ -112,9 +112,13 @@ int main(int argc, const char ** argv){
   SamplePlanDatabase::initialize();
   schema = NDDL::schema();
 
+#ifdef PERFORMANCE
+  runTest(runPlanner);
+#else
   replay = true;
   runTest(runPlanner);
   runTest(copyFromFile);
+#endif
 
   SamplePlanDatabase::terminate();
 
