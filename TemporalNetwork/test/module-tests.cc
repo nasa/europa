@@ -1,11 +1,12 @@
 #include "TestSupport.hh"
 #include "TemporalNetwork.hh"
 #include "TemporalPropagator.hh"
+#include "STNTemporalAdvisor.hh"
+#include "../PlanDatabase/TemporalAdvisor.hh"
 #include "../PlanDatabase/Schema.hh"
 #include "../RulesEngine/RulesEngine.hh"
 #include "../PlanDatabase/PlanDatabase.hh"
 #include "../PlanDatabase/DbLogger.hh"
-#include "../PlanDatabase/STNTemporalAdvisor.hh"
 #include "../ConstraintEngine/CeLogger.hh"
 #include "ObjectTokenRelation.hh"
 
@@ -214,7 +215,7 @@ private:
     // assert from propagator direcly
     assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
     // compute from advisor
-    //assert (!db.getTemporalAdvisor()->canPrecede(first,second));
+    assert (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
 
     // restrict via specifying the domain
 
@@ -231,7 +232,7 @@ private:
     // compute from propagator directly
     assert (!((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
     // compute from advisor
-    //    assert (!db.getTemporalAdvisor()->canPrecede(first,second));
+    assert (!db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     
     second.getStart()->reset();
     second.getEnd()->reset();
@@ -252,7 +253,7 @@ private:
     // compute from propagator directly
     assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canPrecede(first.getEnd(), second.getStart()));
     // compute from advisor
-    //    assert (db.getTemporalAdvisor()->canPrecede(first,second));
+    assert (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     
     return true;
   }
@@ -285,7 +286,7 @@ private:
     assert (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canFitBetween(token.getStart(), token.getEnd(), predecessor.getEnd(), successor.getStart()));
 
     // compute from advisor
-    //    assert (db.getTemporalAdvisor()->canFitBetween(token.getStart(), token.getEnd(), predecessor.getEnd(), successor.getStart()));
+    assert (db.getTemporalAdvisor()->canFitBetween(token.getId(), predecessor.getId(), successor.getId()));
 
     return true;
   }
