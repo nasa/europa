@@ -2301,7 +2301,6 @@ public:
 
     /* Initialize state-domain-at-creation of mandatory and rejectable tokens.  Const after this. */
     s_mandatoryStateDom.insert(Token::ACTIVE);
-    s_mandatoryStateDom.insert(Token::MERGED);
     s_mandatoryStateDom.close();
     s_rejectableStateDom.insert(Token::ACTIVE);
     s_rejectableStateDom.insert(Token::MERGED);
@@ -2871,7 +2870,7 @@ public:
 
     // Activate a token.  Will have to create one and identify it first.
     TokenSet oldTokens = s_db->getTokens();
-    TEST_PLAYING_XML(buildXMLCreateGoalStr("TestClass2.Sample", true, "invokeActivateTestToken"));
+    TEST_PLAYING_XML(buildXMLCreateGoalStr("TestClass2.Sample", false, "invokeActivateTestToken"));
     TokenSet newTokens = s_db->getTokens();
     assertTrue(oldTokens.size() + 1 == newTokens.size());
     TokenId tok = *(newTokens.begin());
@@ -2879,9 +2878,9 @@ public:
       newTokens.erase(newTokens.begin());
       tok = *(newTokens.begin());
     }
-    assertTrue(!tok->isActive() && tok->isInactive());
+    assertTrue(!tok->isActive());
     TEST_PLAYING_XML(buildXMLInvokeActivateTokenStr("invokeActivateTestToken"));
-    assertTrue(tok->isActive() && !tok->isInactive());
+    assertTrue(tok->isActive());
     // Now, destroy it so it doesn't affect later tests.
     delete (Token*) tok;
     tok = TokenId::noId();
@@ -3014,19 +3013,17 @@ public:
    * Test constraining tokens to an object and ordering tokens on an object.
    */
   static void testConstrain() {
-    TokenId constrainedToken = createToken("constrainedSample", true);
-    std::cout << __FILE__ << ':' << __LINE__ << ": constrainedToken is " << constrainedToken << '\n';
-    std::cout << __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain() << '\n';
-    /* Activate it. */
-    TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "constrainedSample", ""));
-    /* Verify that it is not attached to an object. */
-    std::cout << __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain() << '\n';
-    assertTrue(!constrainedToken->getObject()->derivedDomain().isSingleton(), "token already constrained to one object");
     /* Get an existing object.  See testCreateObject(). */
     ObjectId obj2b = s_db->getObject("testObj2b");
     assertTrue(!obj2b.isNoId() && obj2b.isValid());
     assertTrue(obj2b->getType() == LabelStr("TestClass2"));
     assertTrue(obj2b->getName() == LabelStr("testObj2b"));
+    const unsigned int initialObjectTokenCount_B = obj2b->getTokens().size();
+
+    TokenId constrainedToken = createToken("constrainedSample", true);
+    std::cout << __FILE__ << ':' << __LINE__ << ": constrainedToken is " << constrainedToken << '\n';
+    std::cout << __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain() << '\n';
+    assertTrue(!constrainedToken->getObject()->derivedDomain().isSingleton(), "token already constrained to one object");
     /* Create the constraint. */
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample", ""));
     /* Verify its intended effect. */
@@ -3040,7 +3037,6 @@ public:
     TokenId constrained2 = createToken("constrainedSample2", true);
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2 is " << constrained2 << '\n';
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
-    TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "constrainedSample2", ""));
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
     assertTrue(!constrained2->getObject()->derivedDomain().isSingleton(), "token already constrained to one object");
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample2", "constrainedSample"));
@@ -3048,10 +3044,17 @@ public:
     assertTrue(constrained2->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
     assertTrue(constrained2->getObject()->derivedDomain() == objDom2b, "player did not constrain token to expected object");
     assertTrue(verifyTokenRelation(constrainedToken, constrained2, "before")); //!! "precedes" ?
-    assertTrue(obj2b->getTokens().size() == 2);
+    assertTrue(obj2b->getTokens().size() == initialObjectTokenCount_B + 2);
     /* Leave them in plan db for testFree(). */
 
     /* Create two rejectable tokens and do the same tests, but with testObj2a. */
+    ObjectId obj2a = s_db->getObject("testObj2a");
+    assertTrue(!obj2a.isNoId() && obj2a.isValid());
+    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
+    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
+    ObjectDomain objDom2a(obj2a, "TestClass2");
+    const unsigned int initialObjectTokenCount_A = obj2a->getTokens().size();
+
     TokenId rejectable = createToken("rejectableConstrainedSample", false);
     std::cout << __FILE__ << ':' << __LINE__ << ": rejectable is " << rejectable << '\n';
     std::cout << __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain() << '\n';
@@ -3061,11 +3064,7 @@ public:
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2a", "rejectableConstrainedSample", ""));
     std::cout << __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain() << '\n';
     assertTrue(rejectable->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
-    ObjectId obj2a = s_db->getObject("testObj2a");
-    assertTrue(!obj2a.isNoId() && obj2a.isValid());
-    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
-    ObjectDomain objDom2a(obj2a, "TestClass2");;
+
     assertTrue(rejectable->getObject()->derivedDomain() == objDom2a, "player did not constrain token to expected object");
     TokenId rejectable2 = createToken("rejectable2", false);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "rejectable2", ""));
@@ -3074,7 +3073,7 @@ public:
     assertTrue(rejectable2->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
     assertTrue(rejectable2->getObject()->derivedDomain() == objDom2a, "player did not constrain token to expected object");
     assertTrue(verifyTokenRelation(rejectable, rejectable2, "before")); //!! "precedes" ?
-    assertTrue(obj2a->getTokens().size() == 2);
+    assertTrue(obj2a->getTokens().size() == initialObjectTokenCount_A + 2);
     /* Leave them in plan db for testFree(). */
   }
 
@@ -3085,6 +3084,8 @@ public:
     assertTrue(obj2a->getType() == LabelStr("TestClass2"));
     assertTrue(obj2a->getName() == LabelStr("testObj2a"));
     ObjectDomain objDom2a(obj2a, "TestClass2");
+    const unsigned int initialObjectTokenCount_A = obj2a->getTokens().size();
+
     ObjectId obj2b = s_db->getObject("testObj2b");
     assertTrue(!obj2b.isNoId() && obj2b.isValid());
     assertTrue(obj2b->getType() == LabelStr("TestClass2"));
@@ -3099,8 +3100,7 @@ public:
       tokens2.erase(tokens2.begin());
     }
     !!*/
-    assertTrue(tokens.size() == 2);
-    TokenId one = *(tokens.begin());
+    TokenId one = *(--tokens.rbegin());
     assertTrue(one.isValid());
     assertTrue(one->getObject()->derivedDomain().isSingleton());
     assertTrue(one->getObject()->derivedDomain() == objDom2b);
@@ -3137,13 +3137,13 @@ public:
     !!*/
     // This is correct because Object::getTokens() returns tokens that _could_ go on the object,
     //   not just the tokens that _are_ on the object.
-    assertTrue(tokens.size() == 4);
+    assertTrue(tokens.size() == initialObjectTokenCount_A + 2);
     TokenId three, four;
     tokens.erase(one);
     tokens.erase(two);
-    three = *(tokens.begin());
+    three = *(--tokens.rbegin());
     tokens.erase(three);
-    four = *(tokens.begin());
+    four = *(tokens.rbegin());
     assertTrue(three->getObject()->derivedDomain().isSingleton());
     assertTrue(four->getObject()->derivedDomain() == objDom2a);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("free", "testObj2a", "rejectableConstrainedSample", ""));
@@ -3155,7 +3155,7 @@ public:
 
   /** Test activating a token. */
   static void testActivate() {
-    s_activatedToken = createToken("activateSample", true);
+    s_activatedToken = createToken("activateSample", false);
     std::cout << __FILE__ << ':' << __LINE__ << ": s_activatedToken is " << s_activatedToken << '\n';
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "activateSample", ""));
     assertTrue(s_activatedToken->isActive(), "token not activated by player");
@@ -3164,7 +3164,7 @@ public:
 
   /** Test merging tokens. */
   static void testMerge() {
-    s_mergedToken = createToken("mergeSample", true);
+    s_mergedToken = createToken("mergeSample", false);
     std::cout << __FILE__ << ':' << __LINE__ << ": s_mergedToken is " << s_mergedToken << '\n';
     TEST_PLAYING_XML(buildXMLObjTokTokStr("merge", "", "mergeSample", "activateSample"));
     assertTrue(s_mergedToken->isMerged(), "token not merged by player");

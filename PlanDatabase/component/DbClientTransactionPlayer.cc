@@ -270,6 +270,11 @@ namespace EUROPA {
       m_client->specify(token->getObject(), object);
     }
 
+    // If it is mandatory, then activate immediately so there is less for a
+    // client to figure out, or specify in the transactions
+    if(b_mandatory)
+      m_client->activate(token);
+
     const char * name = child->Attribute("name");
 
     if (name != NULL) {
@@ -334,7 +339,8 @@ namespace EUROPA {
     check_error(token_el != NULL);
     TokenId token = xmlAsToken(*token_el);
     check_error(token.isValid());
-    m_client->activate(token);    
+    if(!token->isActive()) // Temporary till we scrub explicit activations from test files.
+      m_client->activate(token);
   }
 
   void DbClientTransactionPlayer::playMerged(const TiXmlElement & element)
@@ -477,7 +483,8 @@ namespace EUROPA {
       std::string token_name = identifier;
       TokenId token = m_tokens[token_name];
       check_error(token.isValid(), "Invalid token name '" + token_name + "' for activation.");
-      m_client->activate(token);
+      if(!token->isActive()) // Temporary. Pull out when we scrub test input files
+	m_client->activate(token);
       return;
     }
 
