@@ -738,9 +738,14 @@ namespace Prototype {
       else
         newMembers.push_back((*unionOfDomains)->getSingletonValue());
       for (std::list<double>::const_iterator it = membersToAdd.begin();
-           it != membersToAdd.end(); it++)
-        if (find(newMembers.begin(), newMembers.end(), *it) == newMembers.end())
+           it != membersToAdd.end(); it++) {
+        std::list<double>::const_iterator it2 = newMembers.begin();
+        for ( ; it2 != newMembers.end(); it2++)
+          if (*it == *it2)
+            break;
+        if (it2 == newMembers.end())
           newMembers.push_back(*it);
+      }
       newUnion = new EnumeratedDomain(newMembers, /* closed = */ true,
                                       (*unionOfDomains)->getListener(),
                                       (*unionOfDomains)->isNumeric());
