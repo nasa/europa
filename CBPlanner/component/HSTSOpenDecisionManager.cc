@@ -7,30 +7,23 @@
 
 namespace PLASMA {
 
-  HSTSOpenDecisionManager::HSTSOpenDecisionManager(const DecisionManagerId& dm) : DefaultOpenDecisionManager(dm) {
+  HSTSOpenDecisionManager::HSTSOpenDecisionManager(const DecisionManagerId& dm, const HSTSHeuristicsId& heur) : DefaultOpenDecisionManager(dm), m_heur(heur) {
   }
 
   HSTSOpenDecisionManager::~HSTSOpenDecisionManager() { }
 
   void HSTSOpenDecisionManager::addActive(const TokenId& token) {
-    check_error(token.isValid());
-    check_error(m_objDecs.find(token->getKey()) == m_objDecs.end());
-    DecisionPointId dp = createObjectDecisionPoint(token);
-    check_error(dp->getEntityKey() == token->getKey());
-    m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
-    m_sortedObjectDecs.insert(dp);
-    publishNewDecision(dp);
+    DefaultOpenDecisionManager::addActive(token);
+    std::map<int,ObjectDecisionPointId>::iterator pos = m_objDecs.find(token->getKey());
+    check_error(pos != m_objDecs.end());
+    m_sortedObjectDecs.insert(pos->second);
   }
 
   void HSTSOpenDecisionManager::condAddActive(const TokenId& token) {
-    check_error(token.isValid());
-    if (m_objDecs.find(token->getKey()) == m_objDecs.end()) {
-      DecisionPointId dp = createObjectDecisionPoint(token);
-      check_error(dp->getEntityKey() == token->getKey());
-      m_objDecs.insert(std::pair<int,ObjectDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedObjectDecs.insert(dp);
-      publishNewDecision(dp);
-    }
+    DefaultOpenDecisionManager::condAddActive(token);
+    std::map<int,ObjectDecisionPointId>::iterator pos = m_objDecs.find(token->getKey());
+    check_error(pos != m_objDecs.end());
+    m_sortedObjectDecs.insert(pos->second);
   }
 
   const bool HSTSOpenDecisionManager::removeVarDP(const ConstrainedVariableId& var, const bool deleting, std::map<int,ConstrainedVariableDecisionPointId>& varMap, HSTSVariableDecisionSet& sortedVars) {
@@ -127,20 +120,21 @@ namespace PLASMA {
   // finally prefer to reject
   const ChoiceId HSTSOpenDecisionManager::getNextChoice() {
     check_error(m_curDec.isValid());
-    bool assigned(false); 
-    std::list<ChoiceId> choices = m_curDec->getUpdatedChoices();
+    m_curChoice = ChoiceId::noId();
+    const std::list<ChoiceId>& choices = m_curDec->getUpdatedChoices();
     //    std::cout << "getNextChoice:: num choices " << choices.size() << std::endl;
     if (TokenDecisionPointId::convertable(m_curDec)) {
       ChoiceId merge;
       ChoiceId reject;
       ChoiceId activate;
-      std::list<ChoiceId>::iterator it = choices.begin();
-      for ( ; it != choices.end(); ++it) {
+ 
+      for (std::list<ChoiceId>::const_iterator it = choices.begin(); it != choices.end(); ++it) {
 	ChoiceId choice = *it;
 	check_error(choice.isValid());
 	check_error(choice->getType() == Choice::VALUE);
 	check_error(!m_curDec->hasDiscarded(choice));
-	LabelStr val = Id<ValueChoice>(*it)->getValue();
+
+	LabelStr val = Id<ValueChoice>(choice)->getValue();
 	if (merge.isNoId() && val == Token::MERGED) {
 	  merge = choice;
 	  break; // we'll do this first, no point in assigning the rest.
@@ -157,14 +151,11 @@ namespace PLASMA {
 	m_curChoice = activate;
       else if (!reject.isNoId()) 
 	m_curChoice = reject;
-      assigned = true;
     }      
-    if (choices.empty())
-      m_curChoice = ChoiceId::noId();
-    else if (!assigned) {
-      //      std::cout << " choices is not empty " << std::endl;
+
+    // If we have no choice selected and there is a choice, pick the first
+    if (!choices.empty() && m_curChoice == ChoiceId::noId())
       m_curChoice = choices.front();
-    }
 
     //    if(m_curChoice.isNoId())
       //      std::cout << "DEBUG: No more choices" << std::endl;
@@ -172,7 +163,7 @@ namespace PLASMA {
   }
 
   void HSTSOpenDecisionManager::getOpenDecisions(std::list<DecisionPointId>& decisions) {
-    std::multimap<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
+    std::map<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
     for (; oit != m_objDecs.end(); ++oit)
       decisions.push_back(oit->second);
     std::map<int,ConstrainedVariableDecisionPointId>::iterator vit = m_unitVarDecs.begin();
@@ -186,7 +177,7 @@ namespace PLASMA {
   }
 
   void HSTSOpenDecisionManager::printOpenDecisions(std::ostream& os) {
-    std::multimap<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
+    std::map<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
     for (; oit != m_objDecs.end(); ++oit)
       os << oit->second << std::endl;
     std::map<int,ConstrainedVariableDecisionPointId>::iterator vit = m_unitVarDecs.begin();
