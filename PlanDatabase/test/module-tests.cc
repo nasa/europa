@@ -10,6 +10,8 @@
 #include "RuleContext.hh"
 #include "ObjectFilter.hh"
 #include "DbLogger.hh"
+#include "TestRule.hh"
+
 #include "../ConstraintEngine/TestSupport.hh"
 #include "../ConstraintEngine/Utils.hh"
 #include "../ConstraintEngine/IntervalIntDomain.hh"
@@ -61,69 +63,6 @@ SchemaId DefaultSchemaAccessor::s_instance;
     new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce.getId());\
     Object object(db.getId(), LabelStr("AllObjects"), LabelStr("o1"));\
     if(autoClose) db.close();
-
-class TestRule: public Rule {
-public:
-  TestRule(const LabelStr& name): Rule(name){
-    new TestRule(getId());
-  }
-
-  TestRule(const RuleId& parent): Rule(parent){}
-  /**
-   * Initialize the context with some variables form the token and add a local variable for the rule too. This
-   * will test cleanup.
-   */
-  void initialize(const RuleContextId& context, std::vector<ConstrainedVariableId>& guards) const {
-    assert(context->getGuards().empty());
-    assert(guards.empty());
-    guards.push_back(context->getToken()->getObject());
-    guards.push_back(context->getToken()->getState());
-    
-    Europa::Id< Variable<IntervalIntDomain> >  localVariable = 
-      (new Variable<IntervalIntDomain>(context->getPlanDatabase()->getConstraintEngine(), IntervalIntDomain(1, 1)))->getId();
-    localVariable->specify(1);
-    guards.push_back(localVariable);
-  }
-
-  bool test(int index, const ConstrainedVariableId& var) const {
-     return var->specifiedDomain().isSingleton();
-  }
-
-  void fire(const RuleContextId& context,
-	    std::vector<TokenId>& newTokens,
-	    std::vector<ConstrainedVariableId>& newVariables,
-	    std::vector<ConstraintId>& newConstraints) const {
-    // Allocate a new slave Token
-    TokenId slave = (new IntervalToken(context->getToken(), 
-				       LabelStr("Predicate")))->getId();
-    newTokens.push_back(slave);
-
-    // Allocate a new constraint equating the start variable of the new token with the end variable of
-    // the existing token
-    {
-      std::vector<ConstrainedVariableId> constrainedVars;
-      constrainedVars.push_back(context->getToken()->getEnd());
-      constrainedVars.push_back(slave->getStart());
-      ConstraintId meets = ConstraintLibrary::createConstraint(LabelStr("Equal"),
-							       context->getPlanDatabase()->getConstraintEngine(),
-							       constrainedVars);
-      newConstraints.push_back(meets);
-    }
-
-    // Allocate a constraint restricting the duration of the slave using
-    {
-      std::vector<ConstrainedVariableId> constrainedVars;
-      constrainedVars.push_back(slave->getDuration());
-      constrainedVars.push_back(context->getGuards().back());
-      ConstraintId restrictDuration = ConstraintLibrary::createConstraint(LabelStr("Equal"),
-									  context->getPlanDatabase()->getConstraintEngine(),
-									  constrainedVars);
-      newConstraints.push_back(restrictDuration);
-    }
-    if(!getChildren().empty())
-      context->createChild(getChildren().front());
-  }
-};
 
 class ObjectTest {
 public:
@@ -1108,7 +1047,7 @@ private:
     assert(db.getTokens().size() == 3);
     assert(tokenA.getSlaves().size() == 2);
     TokenId slave = *(tokenA.getSlaves().begin());
-    assert(slave->getDuration()->getDerivedDomain().isSingleton()); // Due to constraint on local variable
+    assert(slave->getDuration()->getDerivedDomain().isSingleton()); // Due to constraint on local variable, propagated through interim constraint
 
     // Test reset which should backtrack the rule
     tokenA.getObject()->reset();
