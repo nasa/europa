@@ -1,42 +1,57 @@
 Warning: This file is totally incomplete.
 
 A: Prerequisites:
-1. Jam 2.4 or higher
-2. Java 1.4.2 or higher
-3. gcc 3.3.3 (Though prior versions are known to work)
+1. Jam 2.4 or higher.
+2. Java 1.4.2 or higher.
+3. gcc 3.3.3 (Though some prior versions are thought to work, only
+   this one is tested regularly & automatically).
 
 B: Optional 3rd Party Software:
 1. PlanWorks - recommended for visualization and debugging.
 
 C: Getting started:
-In this section we provide brief details on how to get up an running with PLASMA, and give pointers to more detailed documentation to assist in the process.
+
+In this section we provide brief details on how to get up an running
+with PLASMA, and give pointers to more detailed documentation to
+assist in the process.
 
 1. Building PLASMA. 
-See the file in this directory 'BUILDING' for more details
+See the file in this directory 'BUILDING' for more details.
 
 2. Ensuring the system is working correctly.
-Once you have successfully built PLASMA, type 'jam tests' from the command line. This will build and execute a significant number of module tests. You can also run integrated systems tests by typing 'jam run-nddl-planner-tests' from PLASMA_HOME
+
+Once you have successfully built PLASMA, run 'jam run-all-tests'.
+This will build and execute a significant number of module tests.
 
 3. Creating your own project
-A script is available to get you started with your own project. It will create a directory for your project as a sibling of PLASMA and populate it with a build setup, initial model, initial state, and a main executable to use a standard PLASMA assembly, including a planner. We will illustrate it's use with a sample project called SampleProject:
+
+A script is available to get you started with your own project.  It
+will create a directory for your project as a sibling directory to
+PLASMA and populate it with a build setup, initial model, initial
+state, and a main executable to use a standard PLASMA assembly,
+including a planner.  We will illustrate it's use with a sample
+project called SampleProject:
 
 	cd PLASMA
 	makeproject SampleProject
 	cd ../SampleProject
 	jam SampleProject
 
-You will observe that an executable is built and executed, resulting in a plan. You may know change the model and initial state and simpy retype 'jam SampleProject' to rebuild as necessary and rerun.
+You will observe that an executable is built and executed, resulting
+in a plan.  You may know change the model and initial state and simpy
+retype 'jam SampleProject' to rebuild as necessary and rerun.
 
 D. Troubleshooting
 
 E. Additional materials
 
-1. ChangeLog
-
+1. ChangeLog file
 2. PLASMA Users Guide
-
-3. GNATS
-
-4. PLASMA Team Contact Information
+3. GNATS (see below for URL)
+4. PLASMA Development Team: plasma-developers@postdoc.arc.nasa.gov
 
 F. Known Issues
+
+See GNATS reports filed in the PLASMA category under Query at:
+
+http://ic.arc.nasa.gov/cgi-bin/gnatsweb.pl?database=ic-gnats
