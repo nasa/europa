@@ -258,20 +258,6 @@ namespace Prototype {
 					 const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() == (unsigned int) ARG_COUNT);
-
-    // Check the arguments - must both be enumerations, since we don't
-    // implement splitting of intervals.
-    // This is pointlessly restrictive; shouldn't the Domain class
-    // decide whether it splits intervals or not?
-    // But needing to know how a particular Domain class treats
-    // removal of arbitrary members is what makes the conditions
-    // so involved in this class's handleExecute().
-    // --wedgingt@ptolemy.arc.nasa.gov 2004 Feb 12
-    //check_error(getCurrentDomain(m_variables[X]).isEnumerated() && getCurrentDomain(m_variables[Y]).isEnumerated());
-
-    // This - and all other constraints that compare values of numeric
-    // domains - has the minDelta() problem noted in CondAllSameConstraint's
-    // constructor.  @see CondAllSameConstraint::CondAllSameConstraint.
   }
 
   void NotEqualConstraint::handleExecute() {
@@ -286,35 +272,42 @@ namespace Prototype {
 
     check_error(!domx.isEmpty() && !domy.isEmpty());
 
-    if (domx.isSingleton() && domy.isMember(domx.getSingletonValue())) {
-      if (domy.isEnumerated() || domy.isSingleton()
-          || domy.getType() == AbstractDomain::BOOL
-          || (domy.getType() == AbstractDomain::INT_INTERVAL
-              && (domx.isMember(domy.getLowerBound())
-                  || domx.isMember(domy.getUpperBound()))))
-        domy.remove(domx.getSingletonValue());
-    } else
-      if (domy.isSingleton() && domx.isMember(domy.getSingletonValue())) {
-        if (domx.isEnumerated() || domx.isSingleton()
-            || domx.getType() == AbstractDomain::BOOL
-            || (domx.getType() == AbstractDomain::INT_INTERVAL
-                && (domy.isMember(domx.getLowerBound())
-                    || domy.isMember(domx.getUpperBound()))))
-          domx.remove(domy.getSingletonValue());
-      }
+    if(!checkAndRemove(domx, domy))
+      checkAndRemove(domy, domx);
+  }
+
+  bool NotEqualConstraint::checkAndRemove(const AbstractDomain& domx, AbstractDomain& domy){
+    if(!domx.isSingleton())
+      return false;
+
+    double value = domx.getSingletonValue();
+
+    // Not present, so nothing to remove
+    if(!domy.isMember(value)){
+      return false;
+    }
+
+    if(!domy.isEnumerated() && (!domy.isFinite() || domy.getSize() > 2))
+      return false;
+
+    // Now exectute the removal based on the data
+    domy.remove(value);
+    return false;
   }
 
   bool NotEqualConstraint::canIgnore(const ConstrainedVariableId& variable,
 				     int argIndex,
 				     const DomainListener::ChangeType& changeType) {
-    // If it is a restriction, but not a singleton, then we can ignore it.
-    // Can't anything except a restriction to singleton be ignored? --wedgingt 2004 Feb 24
-    // And even that if the domains were disjoint previously?
-    // But there is the odd case of a relax or reset of one var that includes
-    // adding the other var's singleton value. --wedgingt 2004 Mar 4
-    if (changeType != DomainListener::RESET && changeType != DomainListener::RELAXED)
-      return(!getCurrentDomain(variable).isSingleton());
-    return(false);
+    if(changeType==DomainListener::RESET || changeType == DomainListener::RELAXED)
+      return false;
+
+    const AbstractDomain& domain = variable->lastDomain();
+
+    if(domain.isSingleton() ||
+       (domain.isInterval() && domain.isFinite() && domain.getSize() <=2 )) // Since this transition is key for propagation
+       return false;
+
+    return true;
   }
 
   LessThanConstraint::LessThanConstraint(const LabelStr& name,

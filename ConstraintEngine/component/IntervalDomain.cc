@@ -1,6 +1,5 @@
 #include "IntervalDomain.hh"
 #include "DomainListener.hh"
-#include <math.h>
 
 namespace Prototype {
 
@@ -93,27 +92,29 @@ namespace Prototype {
     }        
     if (m_lb <= value && value <= m_ub)
       return; // Within domain.
-    if (fabs(m_lb - value) < minDelta() || fabs(value - m_ub) < minDelta())
+    if (compareEqual(m_lb, value) || compareEqual(m_ub, value))
       return; // Within minDelta() of end points of domain.
     check_error(ALWAYS_FAILS); // Can't add it without a 'gap' between interval and value.
   }
 
   void IntervalDomain::remove(double value) {
-    if (isSingleton() && fabs(m_lb - value) < minDelta()) {
+    if(!isMember(value))
+      return;
+
+    if (isSingleton() && compareEqual(m_lb, value)) {
       empty();
       notifyChange(DomainListener::EMPTIED);
       return;
     }
-    check_error(!(m_lb <= value && value <= m_ub)); // In middle of interval: would require splitting it.
-    check_error(!(fabs(m_lb - value) < minDelta() || fabs(value - m_ub) < minDelta())); // Within minDelta() of end-point: would require open ended interval.
+
     // Not in interval, so removing it is no-op.
     return;
   }
 
   bool IntervalDomain::operator==(const AbstractDomain& dom) const {
     check_error(AbstractDomain::canBeCompared(*this, dom));
-    return(fabs(m_ub - dom.getUpperBound()) < minDelta() &&
-           fabs(m_lb - dom.getLowerBound()) < minDelta() &&
+    return(compareEqual(m_lb, dom.getLowerBound()) &&
+           compareEqual(m_ub, dom.getUpperBound()) &&
            AbstractDomain::operator==(dom));
   }
 
@@ -260,14 +261,14 @@ namespace Prototype {
 
   bool IntervalDomain::isMember(double value) const {
     double converted = convert(value);
-    return((converted == value) && 
+    return(converted == value && 
            converted + minDelta() > m_lb && 
            converted - minDelta() < m_ub);
   }
 
   bool IntervalDomain::isSingleton() const {
     check_error(!isOpen());
-    return(fabs(m_ub - m_lb) < minDelta());
+    return(compareEqual(m_lb, m_ub));
   }
 
   bool IntervalDomain::isEmpty() const {

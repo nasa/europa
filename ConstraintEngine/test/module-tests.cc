@@ -991,10 +991,14 @@ private:
     // Test not equals among variables and singletons
     IntervalIntDomain dom1(1);
     IntervalIntDomain dom2(2);
-    IntervalIntDomain dom3(1,3);
+    EnumeratedDomain dom3;
+    dom3.insert(1);
+    dom3.insert(2);
+    dom3.insert(3);
+    dom3.close();
     Variable<IntervalIntDomain> v3(ENGINE, dom1); 
+    Variable<EnumeratedDomain> v4(ENGINE, dom3);
     Variable<IntervalIntDomain> v5(ENGINE, dom2); 
-    Variable<IntervalIntDomain> v4(ENGINE, dom3);
 
     NotEqualConstraint c4(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId()));
     NotEqualConstraint c3(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v3.getId()));

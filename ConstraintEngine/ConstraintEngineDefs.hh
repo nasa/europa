@@ -7,6 +7,7 @@
 
 #include "CommonDefs.hh"
 #include "Id.hh"
+#include "Entity.hh"
 
 #include <list>
 
@@ -29,8 +30,7 @@ namespace Prototype {
 
   class Constraint;
   typedef Id<Constraint> ConstraintId;
-  class UnaryConstraint;
-  typedef Id<UnaryConstraint> UnaryConstraintId;
+  typedef std::set<ConstraintId, EntityComparator<ConstraintId> > ConstraintSet;
   class Propagator;
   typedef Id<Propagator> PropagatorId;
   class ConstraintEngine;

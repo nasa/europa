@@ -60,7 +60,7 @@ namespace Prototype {
       double lb, ub;
       intDomain.getBounds(lb,ub);
       assert(lb<ub);
-
+      assert(!intDomain.isMember(1.889));
       assert(!intDomain.isOpen());
       IntervalIntDomain d1(intDomain);
       d1.empty();

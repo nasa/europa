@@ -39,8 +39,9 @@ namespace Prototype {
     check_error(m_activeConstraint == 0);
 
     while(!m_agenda.empty()){
-      std::set<ConstraintId>::iterator it = m_agenda.begin();
+      ConstraintSet::iterator it = m_agenda.begin();
       ConstraintId constraint = *it;
+      m_agenda.erase(constraint);
 
       if(constraint->isActive()){
 	m_activeConstraint = constraint->getKey();
@@ -49,8 +50,6 @@ namespace Prototype {
 
       if(getConstraintEngine()->provenInconsistent())
 	m_agenda.clear();
-      else
-	m_agenda.erase(it);
     }
 
     m_activeConstraint = 0;

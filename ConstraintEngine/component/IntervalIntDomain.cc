@@ -80,26 +80,25 @@ namespace Prototype {
     check_error(check_value(value));
     if (!isMember(value))
       return; // Outside the interval.
-    if (m_lb + minDelta() <= value && value <= m_ub - minDelta()) {
-      // Too far "inside" interval; would cause split.
-      check_error(ALWAYS_FAILS);
-    }
-    if (fabs(value - m_lb) < minDelta()) {
-      m_lb += minDelta();
+
+    if (compareEqual(value, m_lb)) {
+      m_lb += minDelta(); // Could make this 1 at this point!
       if (isEmpty())
         notifyChange(DomainListener::EMPTIED);
       else
         notifyChange(DomainListener::LOWER_BOUND_INCREASED);
       return;
     }
-    if (fabs(m_ub - value) < minDelta()) {
+
+    if (compareEqual(value, m_ub)) {
       m_ub -= minDelta();
       check_error(!isEmpty()); // If it were empty, it should have been covered by prior EMPTIED call.
       notifyChange(DomainListener::UPPER_BOUND_DECREASED);
       return;
     }
+
     // Logic error above: the conditions should cover all possibilities.
-    check_error(ALWAYS_FAILS);
+    check_error( ALWAYS_FAILS, "Attempted to remove an element from within the interval. Wuuld require splitting.");
   }
 
   void IntervalIntDomain::getValues(std::list<double>& results) const {

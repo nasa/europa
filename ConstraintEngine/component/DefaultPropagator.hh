@@ -23,7 +23,7 @@ namespace Prototype {
 			    const DomainListener::ChangeType& changeType);
 
   private:
-    std::set<ConstraintId> m_agenda;
+    ConstraintSet m_agenda;
     int m_activeConstraint;
   };
 }

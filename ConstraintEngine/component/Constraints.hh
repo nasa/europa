@@ -117,6 +117,10 @@ namespace Prototype {
     bool canIgnore(const ConstrainedVariableId& variable,
 		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
+    /**
+     * @brief Helper method to do domain comparisons, and process removals if necessary
+     */
+    static bool checkAndRemove(const AbstractDomain& domx, AbstractDomain& domy);
 
   private:
     static const int X = 0;
