@@ -1,4 +1,4 @@
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 #include "../../NDDL/core/Plasma.nddl"
 
 /*
@@ -177,14 +177,12 @@ Memory::Empty{
   // meets(Rover.Sample sm);
 }
 
-NddlWorld world = new NddlWorld(10, 101, 3000);
+PlannerConfig world = new PlannerConfig(10, 101, 3000);
 
 // Limits are essentially infinity
 // float ic, float ll_min, float ll_max,
 // float prod_max, float prod_Rmax, float cons_max, float cons_Rmax
 Rover rover = new Rover(0.0, 0.0, 20.0, 76.0, 16.0, -76.0, -16.0);
-
-NddlWorld.close();
 
 close();
 

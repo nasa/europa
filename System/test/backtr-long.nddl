@@ -1,4 +1,4 @@
-#include "NddlWorld.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
 
 
 //*****************************************************************
@@ -164,7 +164,7 @@ Memory::Empty{
 
 
 
-NddlWorld world = new NddlWorld(10, 101, 1000);
+PlannerConfig world = new PlannerConfig(10, 101, 1000);
 
 Rover rover = new Rover();
 
