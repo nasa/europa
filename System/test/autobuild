@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.44 2003-05-09 16:19:44 wedgingt Exp $
+# $Id: autobuild,v 1.45 2003-05-28 17:34:31 wedgingt Exp $
 #
 # Automatically build some variants of the Europa planner system
 
@@ -113,7 +113,7 @@ do
 
     if test $status = 0
     then
-        (uname -a; echo ''; cat ../make.options) | \
+        (uname -a; echo ''; cat ../make.options; echo ''; g++ --version) | \
             Mail -s 'Autobuild on '"`hostname`"' in '"`pwd`"' succeeded' "$email"
 
         # If appropriate, look for and save the profiling data
@@ -128,7 +128,7 @@ do
             rm -rf .autobuild.profFind
         fi
     else
-        ( uname -a; echo ''; cat ../make.options; echo ''; tail -40 make.tests) | \
+        ( uname -a; echo ''; cat ../make.options; echo ''; g++ --version; echo ''; tail -40 make.tests) | \
             Mail -s 'Autobuild in '"`pwd`"' failed; exited '"$status" "$email"
         mkdir working/failed
     fi
