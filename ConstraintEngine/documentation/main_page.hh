@@ -56,11 +56,11 @@
  * the Constraint base class, and any derived classes.
  * @li New Event Model - provides a message based model of control among the pieces rather than a centralized control model. Also
  * provides higher-fidelity events with data to expedite processing.
- * @li Integration Model for Backward Compatibility - deomonstrated easy translation from old domains to new ones and back to allow
+ * @li Integration Model for Backward Compatibility - demonstrated easy translation from old domains to new ones and back to allow
  * exploration of incremental changes to the core as we go.
  * @see Consraint, AbstractDomain, Propagator, ConstrainedVariable, Variable
  *
- * @section results Performane Results
+ * @section results Performance Results
  * A number of performance tests have been conducted. There are parallel versions of each test in DomainTest.cc and EuropaDomainTest.cc,
  * reflecting the new constraint engine paradigm and the exiting Europa code respoectively. The tests are ass follows:
  * @li testIntersection - compares the cost for domain creation and intersection for numeric intreval domains.
@@ -86,7 +86,7 @@ testIntersection             0.35                              2.26             
 testLabelSetPerformance      0.30             [0.25]           1.48              4.9 [5.92]
 testIntervalPerformance      0.19                              1.03              5.4 @endverbatim
  * 
- * Note that the above results do not explore any possible improvements in algoritms or handling of propagation events.
+ * Note that the above results do not explore any possible improvements in algorithms or handling of propagation events.
  * @section guide Readers Guide
  * @li module-tests.cc provides test cases for the system which are also intstuctive for seeing its use. In particular, look at
  * methods in the Constrainttest class.
