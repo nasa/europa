@@ -5,7 +5,6 @@
 #include "Utils.hh"
 #include "Schema.hh"
 #include "DefaultPropagator.hh"
-//#include "PlanDbModuleTests.hh"
 
 using namespace EUROPA;
 
@@ -14,8 +13,9 @@ using namespace EUROPA;
     SchemaId schema = SCHEMA; \
     initDbTestSchema(schema); \
     PlanDatabaseId db = (new PlanDatabase(ce, schema))->getId(); \
-    { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce); \
-      assert(dp != 0); } \
+    { new DefaultPropagator(LabelStr("Default"), ce);\
+      new DefaultPropagator(LabelStr("Temporal"), ce);\
+    } \
     Object* objectPtr = new Object(db, DEFAULT_OBJECT_TYPE(), LabelStr("o1")); \
     assert(objectPtr != 0); \
     Object& object = *objectPtr; \

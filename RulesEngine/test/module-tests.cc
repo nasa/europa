@@ -187,8 +187,8 @@ void LocalVariableGuard_0_0::handleExecute(){
     Schema::instance()->addObjectType(LabelStr("AllObjects")); \
     Schema::instance()->addPredicate(LabelStr("AllObjects.Predicate")); \
     PlanDatabase db(ce.getId(), Schema::instance()); \
-    { DefaultPropagator* dp = new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-      assert(dp != 0); \
+    { new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+      new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
     } \
     RulesEngine re(db.getId()); \
     Object* objectPtr = new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")); \
@@ -365,14 +365,6 @@ int main() {
   LockManager::instance().lock();
 
   initConstraintLibrary();
-  
-  // Special designations for temporal relations
-  REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
-  REGISTER_CONSTRAINT(LessThanEqualConstraint, "precede", "Default");
-
-  // Support for Token implementations
-  REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
-  REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
   // Allocate default schema initially so tests don't fail because of ID's
   Schema::instance();

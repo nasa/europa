@@ -566,11 +566,6 @@ int main() {
   Schema::instance();
   initConstraintLibrary();
 
-  // Special designations for temporal relations
-  REGISTER_CONSTRAINT(PrecedesConstraint, "precedes", "Temporal");
-  REGISTER_CONSTRAINT(TemporalDistanceConstraint, "StartEndDurationRelation", "Temporal");
-  REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-
   for(int i=0;i<1;i++){
     runTestSuite(TemporalNetworkTest::test);
     runTestSuite(TemporalPropagatorTest::test);

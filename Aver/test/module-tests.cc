@@ -10,7 +10,6 @@
 #include "IntervalDomain.hh"
 #include "IntervalToken.hh"
 #include "LabelStr.hh"
-#include "ObjectTokenRelation.hh"
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabase.hh"
 #include "Schema.hh"
@@ -47,9 +46,6 @@ namespace EUROPA {
 
       new DefaultPropagator(LabelStr("Default"), m_ce);
       new TemporalPropagator(LabelStr("Temporal"), m_ce);
-      REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-      REGISTER_CONSTRAINT(TemporalDistanceConstraint, "StartEndDurationRelation", 
-                          "Temporal");
       initConstraintEngine();
     }
     ~TestAssembly() {

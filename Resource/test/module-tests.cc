@@ -44,6 +44,7 @@ const double consumptionMax = -50;
     schema->addMember(LabelStr("Resource.change"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
     PlanDatabase db(ce.getId(), schema); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+    new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
     new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId()); \
     if (autoClose) \
       db.close();
@@ -996,8 +997,6 @@ int main() {
   
   Schema::instance();
   initConstraintLibrary();
-  REGISTER_CONSTRAINT(ResourceConstraint, "ResourceRelation", "Resource");
-  REGISTER_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Default");
   REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);

@@ -120,7 +120,7 @@ Satellite::Slew {
   addEq(dx,pfrom.m_target.m_x,pto.m_target.m_x);
   addEq(dy,pfrom.m_target.m_y,pto.m_target.m_y);
   addEq(dz,pfrom.m_target.m_z,pto.m_target.m_z);
-  addmuleq(dz,dy,dz,m_rate,duration);
+  // Wrong number of arguments: addMulEq(dz,dy,dz,m_rate,duration);
 }
 
 Satellite::HaveImg {
@@ -147,7 +147,7 @@ Satellite::Pointing {
 Satellite::Transmit {
   eq(duration,m_data.m_size);
   met_by(object.HaveImg h);
-  eq(m_data,h);
+  eq(m_data,h.m_target);
   starts(object.m_antenna.change tx1);
   float qty;
   addEq(qty,m_data.m_size,0);

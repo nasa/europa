@@ -6,7 +6,6 @@
 
 namespace EUROPA
 {
-
   class ResourceViolation;
   typedef Id<ResourceViolation> ResourceViolationId;
 

@@ -32,7 +32,6 @@
 #include "Object.hh"
 #include "EventToken.hh"
 #include "TokenVariable.hh"
-#include "ObjectTokenRelation.hh"
 #include "Timeline.hh"
 
 #include "RuleInstance.hh"
@@ -53,6 +52,7 @@
     initCBPTestSchema(); \
     PlanDatabase db(ce.getId(), Schema::instance()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+    new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
     RulesEngine re(db.getId()); \
     Horizon hor(0,200); \
     DecisionManager dm(db.getId()); \
@@ -66,6 +66,7 @@
   initCBPTestSchema();						\
   PlanDatabase db(ce.getId(), Schema::instance());		\
   new DefaultPropagator(LabelStr("Default"), ce.getId());	\
+  new DefaultPropagator(LabelStr("Temporal"), ce.getId());	\
   RulesEngine re(db.getId());					\
   Horizon hor(0, 200);						\
   CBPlanner planner(db.getId(), hor.getId());			\
@@ -87,6 +88,7 @@
   initCBPTestSchema();						\
   PlanDatabase db(ce.getId(), Schema::instance());		\
   new DefaultPropagator(LabelStr("Default"), ce.getId());	\
+  new DefaultPropagator(LabelStr("Temporal"), ce.getId());	\
   RulesEngine re(db.getId());					\
   Horizon hor(0, 200);						\
   CBPlanner planner(db.getId(), hor.getId());			\
@@ -420,10 +422,6 @@ int main() {
   //!!initConstraintEngine(); // Needed ?
   //!!initConstraintLibrary(); // Needed ?  May interfere with some of the later register constraint calls.
 
-  REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
-  REGISTER_CONSTRAINT(LessThanEqualConstraint, "precedes", "Default");
-  REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
-  REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
   REGISTER_CONSTRAINT(EqualConstraint, "Equal", "Default");
   REGISTER_CONSTRAINT(LessThanConstraint, "lt", "Default");

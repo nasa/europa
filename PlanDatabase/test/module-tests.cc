@@ -4,7 +4,6 @@
 #include "Token.hh"
 #include "EventToken.hh"
 #include "TokenVariable.hh"
-#include "ObjectTokenRelation.hh"
 #include "Timeline.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
@@ -156,15 +155,6 @@
   void initDbModuleTests() {
     initConstraintEngine();
     initConstraintLibrary();
-
-    // Special designations for temporal relations
-    REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
-    REGISTER_CONSTRAINT(LessThanEqualConstraint, "precedes", "Default");
-    REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
-    
-    // Support for Token implementations
-    REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-    REGISTER_CONSTRAINT(ForceFailureConstraint, "ForceFailure", "Default");
     
     // Allocate default schema initially so tests don't fail because of ID's
     SCHEMA;

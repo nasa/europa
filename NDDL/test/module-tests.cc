@@ -10,7 +10,6 @@
 #include "DefaultPropagator.hh"
 #include "Object.hh"
 #include "Constraints.hh"
-#include "ObjectTokenRelation.hh"
 #include "PlanDatabaseTestSupport.hh"
 
 #include "LockManager.hh"
@@ -256,13 +255,6 @@ public:
 int main() {
   LockManager::instance().connect();
   LockManager::instance().lock();
-  // Special designations for temporal relations
-  REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
-  REGISTER_CONSTRAINT(LessThanEqualConstraint, "precede", "Default");
-
-  // Support for Token implementations
-  REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
-  REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
   REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
 
