@@ -10,8 +10,8 @@ SubDirHdrs $(PLASMA)$(SLASH)Aver$(SLASH)component ;
 ModuleComponent System
 	:
   TestAssembly.cc
-  EventAggregator.cc
-  AggregateListener.cc
+  #EventAggregator.cc
+  #AggregateListener.cc
   CBPlannerControl.cc
   LoadInitModel.cc
 	;
