@@ -99,9 +99,9 @@ LocalDepends run-hsts-planner-tests :
         dnp-twoFreeObs 
 #       dnp-timeline-h # runs forever
        dnp-DNP2-h 
-#       dnp-DNP23-h # fails with heuristics error
+       dnp-DNP23-h
        dnp-allDSS-h 
-#       dnp-fourFreeObs-h # fails with heuristics error
+#       dnp-fourFreeObs-h # times out
 #       dnp-DNP3fourFreeObs-h # runs forever
        dnp-DNP3-h
 #       dnp-fourFreeObsNotEmpty-h # runs forever
@@ -353,14 +353,10 @@ RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
 
 # Working
 RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
-
-# Fails with !domain.empty() is false HSTSHeuristics.cc:667
 RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP3heur.xml ;
-
-# Working
 RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
 
-# Fails with !domain.empty() is false HSTSHeuristics.cc:667
+# Times out
 RunEUROPATest dnp-fourFreeObs-h : fourFreeObs.nddl : DNP2heur3.xml ;
 
 # Runs for a while
