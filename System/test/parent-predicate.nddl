@@ -1,0 +1,36 @@
+#include "NddlWorld.nddl"
+#include "../../NDDL/core/Resources.nddl"
+
+/**
+ * Test that class hierarchy is checked when searching for predicate definitions.
+ * GNATS 2529
+ */
+
+class Battery extends Resource {
+ Battery(int hs, int he, int ic, int ll_min, int ll_max) {
+  super(hs, he, ic, ll_min, ll_max, 0, 0, MINUS_INFINITY, MINUS_INFINITY);
+ }
+}
+
+class Rover{
+ Battery battery;
+
+ predicate Move{}
+
+ Rover(Battery b){
+  battery = b;
+ }
+}
+
+Rover::Move{
+  contains( Battery.change change1 );
+}
+
+// Allocation of objects
+NddlWorld world = new NddlWorld(0, 100, 350);
+Battery mainBattery = new Battery(0, 100, 30, 0, 50);
+Rover rover = new Rover(mainBattery);
+close();
+
+any(Rover.Move indirectChange);
+any(Battery.change directChange);
