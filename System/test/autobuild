@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.104 2004-10-23 19:08:16 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.105 2004-11-12 19:32:01 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -84,13 +84,13 @@ OS="`uname -s`"
 case "$OS" in
     [Ll][Ii][Nn][Uu][Xx])
         CVS_HOME=/usr
-        GCC_ROOTDIR=/usr
+        GCC_ROOTDIR=/usr/local/gcc-3.3.3
         JAM_HOME=/usr/local/jam2.4
         JAVA_HOME=/usr/java/j2sdk1.4.2_04
         ;;
     [Ss][Uu][Nn][Oo][Ss])
         CVS_HOME=/usr/local
-        GCC_ROOTDIR=/usr/local/beta/gcc-3.2.2
+        GCC_ROOTDIR=/usr/local/beta/gcc-3.3.3
         JAM_HOME=/usr/local/beta/bin
         JAVA_HOME=/usr/local/j2sdk1.4.1
         ;;
@@ -110,7 +110,7 @@ done
 PATH="$JAVA_HOME"/bin:"$JAM_HOME":"$GCC_ROOTDIR"/bin:"$CVS_HOME"/bin:/usr/ucb:/opt/ssh/bin:"$PATH"
 export GCC_ROOTDIR JAVA_HOME PATH
 
-info="Emailing to $email; removePlasma is $removePlasma`echo ''; uname -a; echo ''; g++ --version ; pwd ; echo ''`"
+info="Emailing to $email; removePlasma is $removePlasma`echo ''; uname -a; echo ''; $GCC_ROOTDIR/bin/g++ --version ; pwd ; echo ''`"
 echo "$info"
 
 # CVS info
