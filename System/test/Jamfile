@@ -21,14 +21,6 @@ for model in
 }
 
 #
-# INITIAL TESTS
-#
-
-NddlMain k9-initial : runInitialTest.cc : k9-initial.nddl : System ;
-RunModuleMain run-k9-initial : k9-initial ;
-# LocalDepends run-nddl-planner-tests : run-k9-initial ;
-
-#
 # TRANSACTION TESTS
 #
 
@@ -38,7 +30,7 @@ for model in
 	basic-types.nddl Rover-transaction.nddl basic-model-transaction.nddl k9.backtrack.moderate-transaction.nddl
 	k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl force-object-distribution.nddl 
 	resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl parent-predicate.nddl #backtr-long.nddl
-	EOS-backtrack-test.nddl
+	EOS-backtrack-test.nddl k9-initial.nddl
 	backtr.nddl better-res.nddl
 {
   local exe = $(model:S=) ;
