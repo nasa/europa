@@ -756,7 +756,7 @@ namespace Prototype {
       // As with singleton false case, we can do nothing if any are dynamic.
       bool canProveTrue = true;
       AbstractDomain* common = 0;
-      double single;
+      double single = 0.0;
       for (unsigned int i = 1; !boolDom.isSingleton() && i < ARG_COUNT; i++) {
         AbstractDomain& current(getCurrentDomain(m_variables[i]));
         if (current.isDynamic()) {
@@ -911,7 +911,7 @@ namespace Prototype {
     assertTrue(unionOfDomains != 0 && *unionOfDomains != 0);
     assertTrue(!(*unionOfDomains)->isEmpty() && !(*unionOfDomains)->isDynamic());
     assertTrue(!domToAdd.isEmpty() && !domToAdd.isDynamic());
-    AbstractDomain *newUnion;
+    AbstractDomain *newUnion = 0;
     std::list<double> membersToAdd;
     std::list<double> newMembers;
     if (((*unionOfDomains)->isEnumerated() || (*unionOfDomains)->isSingleton())

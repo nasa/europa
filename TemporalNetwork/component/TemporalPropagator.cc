@@ -163,8 +163,8 @@ namespace Prototype {
   void TemporalPropagator::addTnetConstraint(const ConstraintId& constraint) {
     TempVarId start;
     TempVarId end;
-    Time lb, ub;
-
+    Time lb=0;
+    Time ub=0;
 
     if (constraint->getName() == LabelStr("StartEndDurationRelation")) {    
       start = constraint->getScope()[0];
