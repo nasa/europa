@@ -151,10 +151,10 @@ private:
     }
     catch(Error e) {
       __z__(e, Error("s_os != 0", "no debug stream has been assigned",
-                     "../../Utils/core/Debug.cc", 91));
+                     "Utils/core/Debug.cc", 91));
     }
 #endif
-    return true;
+    return(true);
   }
 
   static bool testDebugFiles() {
@@ -200,52 +200,72 @@ private:
  */
 class Root {
 public:
-  Root(){}
-  virtual ~Root(){}
+  Root() {
+  }
+
+  virtual ~Root() {
+  }
 };
 
-class Foo: public Root
-{
+class Foo: public Root {
 public:
-  Foo() {counter++;}
+  Foo() {
+    counter++;
+  }
 
-  virtual ~Foo()
-  {
+  virtual ~Foo() {
     counter--;
   }
 
-  void increment(){counter++;}
-  void decrement(){counter--;}
+  void increment() {
+    counter++;
+  }
 
-  bool doConstFunc() const {return true;}
+  void decrement() {
+    counter--;
+  }
 
-  static int getCount() {return counter;}
+  bool doConstFunc() const {
+    return(true);
+  }
+
+  static int getCount() {
+    return(counter);
+  }
+
 private:
   static int counter;
 };
 
-class Bar: public Foo
-{
+int Foo::counter(0);
+
+class Bar: public Foo {
 public:
-  Bar(){}
+  Bar() {
+  }
 };
 
 class Baz: public Foo
 {
 public:
-  Baz(){}
+  Baz(){
+  }
 };
 
 class Bing: public Root 
 {
 public:
-  Bing(){}
+  Bing(){
+  }
 };
 
-int Foo::counter(0);
+void overloadFunc(const Id<Bing>& arg) {
+  assert(true);
+}
 
-void overloadFunc(const Id<Bing>& arg){assert(true);}
-void overloadFunc(const Id<Foo>& arg){assert(true);}
+void overloadFunc(const Id<Foo>& arg) {
+  assert(true);
+}
 
 class IdTests {
 public:
@@ -279,7 +299,8 @@ bool IdTests::test(){
 bool IdTests::testBasicAllocation()
 {
   int initialSize = IdTable::size();
-  Id<Foo> fId1(new Foo());
+  Foo *fooPtr = new Foo();
+  Id<Foo> fId1(fooPtr);
   assert(Foo::getCount() == 1);
   non_fast_only_assert(IdTable::size() == initialSize + 1);
 
@@ -297,7 +318,6 @@ bool IdTests::testBasicAllocation()
   fId2.release();
   assert(Foo::getCount() == 0);
   non_fast_only_assert( fId1.isInvalid() &&  fId2.isInvalid());
-
   return true;
 }
 
