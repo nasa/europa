@@ -24,6 +24,21 @@ Moffett Field, CA 94034-1000 \\
 
 \tableofcontents
 
+\section{Work In Progress}
+
+This manual is still work in progress.  Here is a preliminary list of
+things that we need to do:
+\begin{enumerate}
+ \item Review organization: if reader doesn't know anything about EUROPA
+he/she may be lost in the ``translation''.
+ \item Describe entities and relationships in the system (possibly include
+an entities diagram explaining the relationships).
+ \item Describe mapping from planning into constraints 
+ \item Describe planning decisions and how they translate to changes in the
+plan database
+ \item Describe extensions and external hooks
+\end{enumerate}
+
 \section{Introduction}
 \label{intro}
 \ET\, is the next generation of the Extensible Universal Remote
@@ -1628,28 +1643,28 @@ used constraints.  In the examples, ``A'' and ``B'' are tokens.
 \begin{tabular}{ll}
 NDDL syntax & Constraints created \\
 \cline{1-2} \\
-A after B; & B.end <= A.start \\
+A after B; & B.end $<=$ A.start \\
 A any B; & (none) \\
-A before B; & A.end <= B.start \\
-A contained\_by B; & B.start <= A.start, A.end <= B.end \\
-A contains B; & A.start <= B.start, B.end <= A.end \\
-A contains\_end B; & A.start <= B.end, B.end <= A.end \\
-A contains\_start B; & A.start <= B.start, B.start <= A.end \\
+A before B; & A.end $<=$ B.start \\
+A contained\_by B; & B.start $<=$ A.start, A.end $<=$ B.end \\
+A contains B; & A.start $<=$ B.start, B.end $<=$ A.end \\
+A contains\_end B; & A.start $<=$ B.end, B.end $<=$ A.end \\
+A contains\_start B; & A.start $<=$ B.start, B.start $<=$ A.end \\
 A ends B; & A.end = B.end \\
-A ends\_after B; & B.end <= A.end \\
-A ends\_after\_start B; & B.start <= A.end \\
-A ends\_before B; & A.end <= B.end \\
-A ends\_during B; & B.start <= A.end, A.end <= B.end \\
+A ends\_after B; & B.end $<=$ A.end \\
+A ends\_after\_start B; & B.start $<=$ A.end \\
+A ends\_before B; & A.end $<=$ B.end \\
+A ends\_during B; & B.start $<=$ A.end, A.end $<=$ B.end \\
 A equal B; & A.start = B.start, A.end = B.end \\
 A meets B; & A.end = B.start \\
 A met\_by B; & A.start = B.end \\
-A paralleled\_by B; & B.start <= A.start, B.end <= A.end \\
-A parallels B; & A.start <= B.start, A.end <= B.end \\
+A paralleled\_by B; & B.start $<=$ A.start, B.end $<=$ A.end \\
+A parallels B; & A.start $<=$ B.start, A.end $<=$ B.end \\
 A starts B; & A.start = B.start \\
-A starts\_after B; & B.start <= A.start \\
-A starts\_before B; & A.start <= B.start \\
-A starts\_before\_end B; & A.start <= B.end \\
-A starts\_during B; & B.start <= A.start, A.start <= B.end \\
+A starts\_after B; & B.start $<=$ A.start \\
+A starts\_before B; & A.start $<=$ B.start \\
+A starts\_before\_end B; & A.start $<=$ B.end \\
+A starts\_during B; & B.start $<=$ A.start, A.start $<=$ B.end \\
 \end{tabular}
 
 Here are the inverse relations.
@@ -1688,18 +1703,18 @@ paper [] are:
 Allen Relation & Constraints & Equivalent Europa Relation \\
 \cline{1-3} \\
 A equals B (=) & A.start = B.start, A.end = B.end & A equal B \\
-A precedes B (<) & A.end < B.start & A before [1 +Inf] B \\
-A follows B (>) & A.start > B.end & A after [1 +Inf] B \\
+A precedes B ($<$) & A.end $<$ B.start & A before [1 +Inf] B \\
+A follows B ($>$) & A.start $>$ B.end & A after [1 +Inf] B \\
 A meets B (m) & A.end = B.start & A meets B \\
 A inverse-meets B (im) & A.start = B.end & A met\_by B \\
-A during B (d) & A.start > B.start, A.end < B.end & A contained\_by [1 +Inf] [1 +Inf] B \\
-A inverse-during B (id) & A.start < B.start, A.end > B.end & A contains [1 +Inf] [1 +Inf] B \\
-A starts B (s) & A.start = B.start, A.end < B.end & A parallels [0 0] [-Inf -1] B \\
-A inverse-starts B (is) & A.start = B.start, A.end > B.end & A parallels [0 0] [1 +Inf] B \\
-A finishes B (f) & A.start > B.start, A.end = B.end & A parallels [-Inf -1] [0 0] B \\
-A inverse-finishes B (if) & A.start < B.start, A.end = B.end & A parallels [1 +Inf] [0 0] B \\
-A overlaps B (o) & A.start < B.start, A.end > B.start, A.end < B.end & <unsupported as a single relation> \\
-A inverse-overlaps B (io) & A.start < B.end, A.end > B.start, A.end > B.end & <unsupported as a single relation> \\
+A during B (d) & A.start $>$ B.start, A.end $<$ B.end & A contained\_by [1 +Inf] [1 +Inf] B \\
+A inverse-during B (id) & A.start $<$ B.start, A.end $>$ B.end & A contains [1 +Inf] [1 +Inf] B \\
+A starts B (s) & A.start = B.start, A.end $<$ B.end & A parallels [0 0] [-Inf -1] B \\
+A inverse-starts B (is) & A.start = B.start, A.end $>$ B.end & A parallels [0 0] [1 +Inf] B \\
+A finishes B (f) & A.start $>$ B.start, A.end = B.end & A parallels [-Inf -1] [0 0] B \\
+A inverse-finishes B (if) & A.start $<$ B.start, A.end = B.end & A parallels [1 +Inf] [0 0] B \\
+A overlaps B (o) & A.start $<$ B.start, A.end $>$ B.start, A.end $<$ B.end & $<$unsupported as a single relation$>$ \\
+A inverse-overlaps B (io) & A.start $<$ B.end, A.end $>$ B.start, A.end $>$ B.end & $<$unsupported as a single relation$>$ \\
 \end{tabular}
 
 Note the explicit naming of nearly all of the inverse relations.
@@ -1739,7 +1754,7 @@ A inverse-overlaps B (io) & LessThan(A.start, B.end); LessThan(B.start, A.end); 
 
 \item[] Pre-processing
  \begin{itemize}
-  \item	Include system headers by using the angle bracket style. (\#include <stdio>)
+  \item	Include system headers by using the angle bracket style. (\#include $<$stdio$>$)
   \item	Include user files by using the double quote style. (\#include "File.h")
   \item	Do not define your own pre-processor macros to control level of or presence of debugging output or error checks.
  \end{itemize}
@@ -1813,7 +1828,7 @@ A inverse-overlaps B (io) & LessThan(A.start, B.end); LessThan(B.start, A.end); 
   \item	Avoid using non-const functions in checkError tests.
   \item	Do not use assert.
   \item	Do not use Id::isValid outside of checkError.
-  \item	Do not write "if (Test) checkError(...Check...);".  Write "checkError(!Test || ...Check...)".
+  \item	Do not write "if (Test) checkError(...Check...);".  Write "checkError(!Test $||$ ...Check...)".
  \end{itemize}
 
 \item[] Debugging Output
