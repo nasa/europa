@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autobuild,v 1.71 2004-08-31 17:36:30 wedgingt Exp $
+# $Id: autobuild,v 1.72 2004-09-16 23:06:40 wedgingt Exp $
 #
 # Automatically build some variants of the PLASMA planner system
 
@@ -19,6 +19,9 @@ mkdir working || exit 1
 
 trap 'rmdir $startdir/working; rm -f $startdir/.tokens.$$' 0
 
+rm -rf Old
+test -d Prior && mv Prior Old
+
 info=`uname -a; echo ''; g++ --version ; hostname ; pwd`
 
 echo "$info"
@@ -27,15 +30,23 @@ echo "$info"
 email=checkins@postdoc.arc.nasa.gov
 
 # Refuse to run if a prior check out is present.
-if test -d PLASMA
+if test -d PLASMA -o -d Prior
 then
-    (echo "$info"; echo ''; echo 'PLASMA directory already present, aborting autobuild') | \
-        Mail -s 'PLASMA Autobuild on '"`hostname`"' in '"`pwd`"' aborted' "$email"
-    exit 2
+  (echo "$info";
+     echo '';
+     echo 'PLASMA directory already present or configuration botch; aborting autobuild') | \
+    Mail -s 'PLASMA Autobuild on '"`hostname`"' in '"`pwd`"' aborted' "$email"
+  exit 2
 fi
+
+mkdir Prior
+mv jam.* Prior/
 
 # The (compilation) variants to build and test.
 variants='DEV OPTIMIZED PROFILE'
+
+# The different ways of building the libraries.
+libmethods='STATIC NONE'
 
 # CVS info
 CVS_RSH=ssh
@@ -67,64 +78,73 @@ ulimit -a
 for var in $variants
 do
 
-  cvs co PLASMA > cvs.co.PLASMA 2>&1
-  status=$?
-  echo '"cvs co PLASMA" in '"`pwd`"' exited '"$status"
-  if test "$status" != 0
-  then
+  for libmethod in $libmethods
+  do
+  
+    cvs co PLASMA > cvs.co.PLASMA 2>&1
+    status=$?
+    echo '"cvs co PLASMA" in '"`pwd`"' exited '"$status"
+    if test "$status" != 0
+    then
       mkdir PLASMA/cvs.co.failed
       (echo "$info"; echo ''; echo "'cvs co PLASMA' failed; aborting autobuild"; tail cvs.co.PLASMA) | \
           Mail -s 'PLASMA Autobuild cvs checkout on '"`hostname`"' in '"`pwd`"' failed' "$email"
       exit "$status"
-  fi
+    fi
 
-  cd PLASMA
+    cd PLASMA
 
-  jam -sVARIANTS=$var > jam.output.$var 2>&1
-  statusJam=$?
-  echo '"jam -sVARIANTS='"$var"'" in '"`pwd`"' exited '"$statusJam"
-  if test $statusJam = 0
-  then
-      jam -sVARIANTS=$var tests > jam.tests.$var 2>&1
+    jam -sVARIANTS=$var -sLIBRARIES=$libmethod > jam.output.$var.$libmethod 2>&1
+    statusJam=$?
+    echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"' in '"`pwd`"' exited '"$statusJam"
+    if test $statusJam = 0
+    then
+      jam -sVARIANTS=$var -sLIBRARIES=$libmethod tests run-nddl-tests run-nddl-planner-tests > jam.tests.$var.$libmethod 2>&1
       statusJamTests=$?
-      echo '"jam -sVARIANTS='"$var"' tests" in '"`pwd`"' exited '"$statusJamTests"
+      echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"'tests run-nddl-tests run-nddl-planner-tests " in '"`pwd`"' exited '"$statusJamTests"
       if test $statusJamTests = 0
       then
-          jam -sVARIANTS=$var clean > jam.clean.$var 2>&1
-          statusJamClean=$?
-          echo '"jam -sVARIANTS='"$var"' clean" in '"`pwd`"' exited '"$statusJamClean"
-          if test $statusJamClean = 0
-          then
-              :
-          else
-              (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"' clean" in '"`pwd`"' exited '"$statusJamClean"; tail -40 jam.clean.$var) | \
-                  Mail -s 'PLASMA Autobuild jam clean on '"`hostname`"' in '"`pwd`"' failed' "$email"
-              exit $statusJamClean
-          fi
+        jam -sVARIANTS=$var -sLIBRARIES=$libmethod clean > jam.clean.$var.$libmethod 2>&1
+        statusJamClean=$?
+        echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"' clean" in '"`pwd`"' exited '"$statusJamClean"
+        if test $statusJamClean = 0
+        then
+          (echo "$info"; echo ''; echo 'PLASMA autobuild, variant '"$var"' and library method '"$libmethod"' in '"`pwd`"' passed.';
+              more jam.*.$var.$libmethod < /dev/null) | \
+            Mail -s 'PLASMA Autobuild jam clean on '"`hostname`"' in '"`pwd`"' failed' "$email"
+        else
+          (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"' clean" in '"`pwd`"' exited '"$statusJamClean"; more jam.*.$var < /dev/null) | \
+              Mail -s 'PLASMA Autobuild jam clean on '"`hostname`"' in '"`pwd`"' failed' "$email"
+          exit $statusJamClean
+        fi
       else
-          (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"' tests" in '"`pwd`"' exited '"$statusJamTests"; tail -40 jam.tests.$var) | \
-              Mail -s 'PLASMA Autobuild jam tests on '"`hostname`"' in '"`pwd`"' failed' "$email"
-          exit $statusJamTests
+        (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"' tests run-nddl-tests run-nddl-planner-tests" in '"`pwd`"' exited '"$statusJamTests"; more jam.*.$var < /dev/null) | \
+            Mail -s 'PLASMA Autobuild jam tests on '"`hostname`"' in '"`pwd`"' failed' "$email"
+        exit $statusJamTests
       fi
-  else
-      (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"'" in '"`pwd`"' exited '"$statusJam"; tail -40 jam.output.$var) | \
+    else
+      (echo "$info"; echo ''; echo '"jam -sVARIANTS='"$var"'" -sLIBRARIES='"$libmethod"' in '"`pwd`"' exited '"$statusJam"; more jam.*.$var < /dev/null) | \
           Mail -s 'PLASMA Autobuild jam compile on '"`hostname`"' in '"`pwd`"' failed' "$email"
       exit $statusJam
-  fi
+    fi
 
-  # Save the jam output files.
-  mv -f jam.*.$var ..
+    # Save the jam output files.
+    mv -f jam.*.$var ..
 
-  cd ..
+    cd ..
 
-  # Remove everything so that each variant is tested completely independently.
-  rm -rf PLASMA
+    # Remove everything so that each variant is tested completely independently.
+    rm -rf PLASMA
 
+  done
 done
 
-(echo "$info"; echo ''; echo "All builds, tests, and cleans passed for each variant: $variants.") | \
-    Mail -s 'PLASMA Autobuild on '"`hostname`"' passed.' "$email"
+(echo "$info";
+    echo '';
+    echo "All builds, tests, and cleans passed for each variant (of $variants) and";
+    echo "  each method of building the libraries (of $libmethods).") | \
+  Mail -s 'PLASMA Autobuild on '"`hostname`"' passed.' "$email"
 
-echo "All builds, tests, and cleans passed for each variant: $variants."
+date > lastCompleted
 
 exit 0
