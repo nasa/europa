@@ -55,4 +55,8 @@ World::initialState{
  Rover r1;
  Rover r2;
  eq(r1, r2);
+
+ // Test use of binary temporal relation
+ b after (Rover.At c);
+ a meets c;
 }
