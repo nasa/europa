@@ -28,12 +28,15 @@ bool runPlanner(){
   if(replay)
     txLog = (new DbClientTransactionLog(assembly.getPlanDatabase()->getClient()))->getId();
   
-  assert(assembly.plan(initialTransactions, averTestFile) == CBPlanner::PLAN_FOUND);
+  CBPlanner::Status result = assembly.plan(initialTransactions, averTestFile);
 
-#ifdef PERFORMANCE
-  std::cout << "runProblem found a plan at depth " << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched() << std::endl;
-  //  assembly.write(std::cout);
-#else
+  assert(result == CBPlanner::PLAN_FOUND);
+
+  // std::cout << "assembly.plan status = " << result << std::endl;
+
+  std::cout << " found a plan at depth " << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched() << std::endl;
+
+#ifndef PERFORMANCE
   assembly.write(std::cout);
 #endif
 
@@ -60,7 +63,7 @@ bool copyFromFile(){
   {
     TestAssembly assembly(schema);
     assembly.playTransactions(TX_LOG);
-    assembly.getPlanDatabase()->getClient()->toStream(os1);
+    assembly.getPlanDatabase()->getClient()->toStream(os2);
   }
 
   std::string s1 = os1.str();
