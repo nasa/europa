@@ -1,3 +1,10 @@
+DEV_20040817_0
+1. Changed logic for handling retracted decisions, we now ensure that
+decisions are deleted when there are no more choices left and new ones are
+created eagerly.
+2. Fixed several bugs in decision handling and managing discarded decisions.
+3. We now evaluate tokens every time a temporal variable changes.	
+	
 M_24:
 1. Revised implementation for GNATS-2489. Existential Quantification will now enforce constraints on input variables. Filtering will not
 enforce such constraints.
