@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.105 2004-11-12 19:32:01 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.106 2004-11-14 00:22:26 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -308,6 +308,7 @@ then
     else
         PPW_CONFIG="$startdir"'/CBPlanner/component/sample-ppw-config'
     fi
+    export PPW_CONFIG
     jamCmd run-nddl-planner-tests withPPW
     if "$removePlasma"
         then
