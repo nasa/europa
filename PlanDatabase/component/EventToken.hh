@@ -14,15 +14,15 @@ namespace Prototype {
   public:
     EventToken(const PlanDatabaseId& planDatabase,
 	       const LabelStr& predicateName,
-	       const BooleanDomain& rejectabilityBaseDomain,
-	       const IntervalIntDomain& timeBaseDomain,
+	       const BooleanDomain& rejectabilityBaseDomain = BooleanDomain(),
+	       const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 	       const LabelStr& objectName = Token::noObject(),
 	       bool closed = true);
 
     EventToken(const TokenId& master,
 	       const LabelStr& predicateName,
-	       const BooleanDomain& rejectabilityBaseDomain,
-	       const IntervalIntDomain& timeBaseDomain,
+	       const BooleanDomain& rejectabilityBaseDomain = BooleanDomain(),
+	       const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 	       const LabelStr& objectName = Token::noObject(),
 	       bool closed = true);
   private:

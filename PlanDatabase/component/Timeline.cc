@@ -119,7 +119,7 @@ namespace Prototype {
     std::list<ObjectId> singleton;
     singleton.push_back(getId());
     constrainToSingleton(token, ObjectSet(singleton), token->getObject());
-    constrainToSingleton(token, BooleanDomain(1, 1), token->getRejectability());
+    constrainToSingleton(token, BooleanDomain(false), token->getRejectability());
 
     if(m_tokenSequence.empty()){
       check_error(successor.isNoId());

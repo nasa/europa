@@ -85,7 +85,7 @@ private:
     DEFAULT_SETUP(ce, db, schema, true);
 
     // Event Token
-    EventToken eventToken(db.getId(), LabelStr("Predicate"), IntervalIntDomain(0, 1), IntervalIntDomain(0, 1000), Token::noObject(), false);
+    EventToken eventToken(db.getId(), LabelStr("Predicate"), BooleanDomain(), IntervalIntDomain(0, 1000), Token::noObject(), false);
     assert(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
     assert(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.getStart()->specify(IntervalIntDomain(5, 10));
@@ -96,7 +96,7 @@ private:
     // IntervalToken
     IntervalToken intervalToken(db.getId(), 
 				LabelStr("Predicate"), 
-				IntervalIntDomain(0, 1), 
+				BooleanDomain(), 
 				IntervalIntDomain(0, 1000),
 				IntervalIntDomain(0, 1000),
 				IntervalIntDomain(2, 10),
@@ -125,7 +125,7 @@ private:
 
     IntervalToken t0(db.getId(), 
 		     LabelStr("Predicate"), 
-		     IntervalIntDomain(1, 1), 
+		     BooleanDomain(false), 
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(1, 1));
@@ -133,7 +133,7 @@ private:
 
     TokenId t1 = (new IntervalToken(db.getId(), 
 				    LabelStr("Predicate"), 
-				    IntervalIntDomain(1, 1), 
+				    BooleanDomain(false),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
@@ -141,35 +141,35 @@ private:
 
     TokenId t2 = (new IntervalToken(t0.getId(), 
 				    LabelStr("Predicate"), 
-				    IntervalIntDomain(1, 1), 
+				    BooleanDomain(false),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
 
     TokenId t3 = (new IntervalToken(t0.getId(), 
 				    LabelStr("Predicate"), 
-				    IntervalIntDomain(1, 1), 
+				    BooleanDomain(false), 
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
 
     TokenId t4 = (new IntervalToken(t0.getId(), 
 				    LabelStr("Predicate"), 
-				    IntervalIntDomain(1, 1), 
+				    BooleanDomain(false), 
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
 
     TokenId t5 = (new IntervalToken(t1, 
 				    LabelStr("Predicate"), 
-				    IntervalIntDomain(1, 1), 
+				    BooleanDomain(false), 
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
 
     TokenId t6 = (new EventToken(t0.getId(), 
 				    LabelStr("Predicate"), 
-				    IntervalIntDomain(1, 1),
+				    BooleanDomain(false),
 				    IntervalIntDomain(0, 1)))->getId();
 
     // Delete slave only
@@ -188,7 +188,7 @@ private:
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(0, 1),
+		     BooleanDomain(),
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -197,7 +197,7 @@ private:
 
     IntervalToken t1(db.getId(),
 		     LabelStr("P1"), 
-		     BooleanDomain(0, 1),
+		     BooleanDomain(),
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -220,7 +220,7 @@ private:
     // Now post equality constraint between t1 and extra token t2 and remerge
     IntervalToken t2(db.getId(), 
 		     LabelStr("P2"), 
-		     BooleanDomain(0, 1),
+		     BooleanDomain(),
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -289,21 +289,21 @@ private:
 
     IntervalToken tokenA(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(0, 1),
+		     BooleanDomain(),
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(0, 1),
+		     BooleanDomain(),
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(0, 1),
+		     BooleanDomain(),
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -326,21 +326,21 @@ private:
 
     IntervalToken tokenA(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(0, 1),
+		     BooleanDomain(),
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(0, 1),
+		     BooleanDomain(),
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(0, 1),
+		     BooleanDomain(),
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -400,7 +400,7 @@ private:
       int start = i*DURATION;
       TokenId token = (new IntervalToken(db.getId(), 
 					 LabelStr("P1"),
-					 BooleanDomain(0, 1),
+					 BooleanDomain(),
 					 IntervalIntDomain(start, start),
 					 IntervalIntDomain(start+DURATION, start+DURATION),
 					 IntervalIntDomain(DURATION, DURATION)))->getId();
@@ -429,7 +429,7 @@ private:
     // Now ensure the query can correctly indicate no options available
     TokenId token = (new IntervalToken(db.getId(), 
 				       LabelStr("P1"),
-				       BooleanDomain(0, 1),
+				       BooleanDomain(),
 				       IntervalIntDomain(0, 0),
 				       IntervalIntDomain(),
 				       IntervalIntDomain(DURATION, DURATION)))->getId();

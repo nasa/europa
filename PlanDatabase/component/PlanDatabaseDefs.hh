@@ -16,7 +16,7 @@ namespace Prototype {
   template<class DomainType> class TokenVariable;
   typedef Europa::Id< TokenVariable<IntervalIntDomain> > TempVarId;
 
-  typedef IntervalIntDomain BooleanDomain;
+  typedef BoolDomain BooleanDomain;
   typedef Europa::Id< TokenVariable<BooleanDomain> > BoolVarId; /*!< Typedef it as just an int domain for now and change later */
 
   class ObjectSet;

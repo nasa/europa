@@ -11,19 +11,19 @@ namespace Prototype {
 
     IntervalToken(const PlanDatabaseId& planDatabase, 
 		  const LabelStr& predicateName, 
-		  const BooleanDomain& rejectabilityBaseDomain,
-		  const IntervalIntDomain& startBaseDomain,
-		  const IntervalIntDomain& endBaseDomain,
-		  const IntervalIntDomain& durationBaseDomain,
+		  const BooleanDomain& rejectabilityBaseDomain = BooleanDomain(),
+		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
+		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
+		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(),
 		  const LabelStr& objectName = Token::noObject(),
 		  bool closed = true);
 
     IntervalToken(const TokenId& master, 
 		  const LabelStr& predicateName, 
-		  const BooleanDomain& rejectabilityBaseDomain,
-		  const IntervalIntDomain& startBaseDomain,
-		  const IntervalIntDomain& endBaseDomain,
-		  const IntervalIntDomain& durationBaseDomain,
+		  const BooleanDomain& rejectabilityBaseDomain = BooleanDomain(),
+		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
+		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
+		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(),
 		  const LabelStr& objectName = Token::noObject(),
 		  bool closed = true);
   private:
