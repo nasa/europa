@@ -27,11 +27,15 @@ namespace Prototype
      * @brief Type specific constructor
      * @param constraintEngine - the engine required by parent constructors.
      * @param baseDomain - the initial value for the domain and the maximum possible value.
+     * @param parent owner if appropriate
+     * @param index position in parent collection
      */
-    Variable(const ConstraintEngineId& constraintEngine, const DomainType& baseDomain, int index = ConstrainedVariable::NO_INDEX);
+    Variable(const ConstraintEngineId& constraintEngine, 
+	     const DomainType& baseDomain,
+	     const EntityId& parent = EntityId::noId(),
+	     int index = ConstrainedVariable::NO_INDEX);
 
     virtual ~Variable();
-
 
     /**
      * @brief Restricts the domain of the variable to be a subset of the given domain.
@@ -137,8 +141,11 @@ namespace Prototype
 
 
   template<class DomainType>
-  Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine, const DomainType& baseDomain, int index) 
-    : ConstrainedVariable(constraintEngine, index), 
+  Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine, 
+				 const DomainType& baseDomain, 
+				 const EntityId& parent,
+				 int index) 
+    : ConstrainedVariable(constraintEngine, parent, index), 
     m_baseDomain(baseDomain),
     m_specifiedDomain(baseDomain),
     m_derivedDomain(baseDomain),
