@@ -27,6 +27,8 @@
 #include "RulesEngine.hh"
 #include "Rule.hh"
 
+#include "DNPConstraints.hh"
+
 #include <iostream>
 #include <string>
 
@@ -189,6 +191,10 @@ private:
 
 int main() {
   Schema::instance();
+
+  //!!initConstraintEngine(); // Needed ?
+  //!!initConstraintLibrary(); // Needed ?  May interfere with some of the later register constraint calls.
+
   REGISTER_CONSTRAINT(EqualConstraint, "concurrent", "Default");
   REGISTER_CONSTRAINT(LessThanEqualConstraint, "precedes", "Default");
   REGISTER_CONSTRAINT(AddEqualConstraint, "StartEndDurationRelation", "Default");
@@ -197,7 +203,18 @@ int main() {
   REGISTER_CONSTRAINT(EqualConstraint, "Equal", "Default");
   REGISTER_CONSTRAINT(LessThanConstraint, "lt", "Default");
   REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
-  for(int i=0;i<1;i++){
+
+  // Register the DNP constraint functions.
+  REGISTER_CONSTRAINT(BOUNDS_PLAYBACK_START_STORAGE, "BOUNDS_PLAYBACK_START_STORAGE", "Default");
+  REGISTER_CONSTRAINT(BOUNDS_PLAYBACK_END_STORAGE, "BOUNDS_PLAYBACK_END_STORAGE", "Default");
+  REGISTER_CONSTRAINT(BOUNDS_RECORD_END_STORAGE, "BOUNDS_RECORD_END_STORAGE", "Default");
+  REGISTER_CONSTRAINT(BOUNDS_RECORD_START_STORAGE, "BOUNDS_RECORD_START_STORAGE", "Default");
+  REGISTER_CONSTRAINT(COMPUTE_PLAYBACK_DURATION, "COMPUTE_PLAYBACK_DURATION", "Default");
+  REGISTER_CONSTRAINT(FIGURE_EARLIER_OP_IDS, "FIGURE_EARLIER_OP_IDS", "Default");
+
+  //!!Add calls to readTestCases(), etc., from ConstraintEngine/test/module-tests.cc
+
+  for (int i = 0; i < 1; i++) {
     runTestSuite(ConditionTest::test);
     runTestSuite(HeuristicsTest::test);
   }
