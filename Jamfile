@@ -2,6 +2,15 @@ SubDir PLASMA ;
 
 if ! $(PLASMA_READY) {
 
+if SHARED in $(LIBRARIES) { 
+  if PROFILE in $(VARIANTS) {
+    Exit Cannot build PROFILE and SHARED ;
+  }
+  if CUSTOM in $(VARIANTS) && $(PROFILE) {
+    Exit Cannot build PROFILE and SHARED ;
+  }
+}
+
 Depends plasma-all : all ;
 
 Module plasma : all System ;

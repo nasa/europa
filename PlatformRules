@@ -20,7 +20,6 @@ LINKER_PASSTHROUGH_FLAG ?= -Wl, ;
 # SHARED_FLAG = Flag to generate shared library
 
 if $(OS) = MACOSX {
-   LIBRARIES = STATIC ;
    SHARED_FLAG ?= -fno-common -dynamiclib ;
 } else {
 	SHARED_FLAG ?= -shared ;

@@ -35,7 +35,6 @@ rule FVariantC++Flags
   case OPTIMIZED :
     return $(OPTIMIZE_FLAGS) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case PROFILE :
-    LIBRARIES = STATIC ;
     return $(OPTIMIZE_FLAGS) $(PROFILE_FLAGS) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case COVERAGE :
     return $(COVERAGE_FLAGS) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
