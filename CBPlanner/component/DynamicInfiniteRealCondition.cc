@@ -10,7 +10,7 @@ namespace EUROPA {
 
   DynamicInfiniteRealCondition::~DynamicInfiniteRealCondition() { }
 
-  inline bool DynamicInfiniteRealCondition::test(const EntityId& entity) {
+  bool DynamicInfiniteRealCondition::test(const EntityId& entity) {
     if (!ConstrainedVariableId::convertable(entity)) return true;
     ConstrainedVariableId var(entity); 
     check_error(var.isValid());
