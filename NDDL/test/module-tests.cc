@@ -111,10 +111,20 @@ private:
     // Now select other and confirm again
     v3.specify(8.1);
     assert(filterVariable.getDerivedDomain().isSingleton());
+    assert(v3.getDerivedDomain().isSingleton());
+    assert(v1.getDerivedDomain().isSingleton());
 
     // Reset and confirm repropagation is correct. Non chronologically.
     v1.reset();
     assert(filterVariable.getDerivedDomain().getSize() == 2); // @ objects with 8.1
+
+    v3.reset();
+    // Now specify in a different order. Should get the same results
+    v3.specify(8.1);
+    v1.specify(LabelStr("A"));
+    assert(filterVariable.getDerivedDomain().isSingleton());
+    assert(v3.getDerivedDomain().isSingleton());
+    assert(v1.getDerivedDomain().isSingleton());
 
     // Propagate and confirm restrictions
     DEFAULT_TEARDOWN();
