@@ -107,6 +107,13 @@ namespace PLASMA {
      */
     ConstrainedVariableId xmlAsCreateVariable(const char * type, const char * name, const TiXmlElement * value);
 
+#define construct_constraint(relation, ftoken, fvar, stoken, svar){\
+        std::vector<ConstrainedVariableId> variables;\
+        variables.push_back( ftoken##_token->get##fvar());\
+        variables.push_back( stoken##_token->get##svar());\
+        m_client->createConstraint(#relation, variables);\
+        }
+
   };
 
 }

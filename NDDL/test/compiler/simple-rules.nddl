@@ -67,7 +67,18 @@ World::initialState{
  starts(Rover.At s6);
  ends(Rover.At s7);
  any(Rover.At s8);
- 
+ ends_after(Rover.At s9);
+ ends_before(Rover.At s10);
+ ends_after_start(Rover.At s11);
+ starts_before_end(Rover.At s12);
+ starts_during(Rover.At s13);
+ contains_start(Rover.At s14);
+ ends_during(Rover.At s15);
+ contains_end(Rover.At s16);
+ starts_before(Rover.At s17);
+ starts_after(Rover.At s18);
+ equals(Rover.At s19);
+
  // Subgoal and bind
  contains(Rover.At a);
  eq(a._location, Lander);
@@ -106,3 +117,65 @@ t2.merge(t1);
 
 goal(SuperRover.At t3);
 t3.activate();
+
+goal(Rover.At a1);
+
+goal(Rover.At a2);
+a1 contains a2;
+
+goal(Rover.At a3);
+a1 contained_by a3;
+
+goal(Rover.At a4);
+a1 meets a4;
+
+goal(Rover.At a4);
+a1 met_by a4;
+
+goal(Rover.At a5);
+a1 before a5;
+
+goal(Rover.At a6);
+a1 after a6;
+
+goal(Rover.At a7);
+a1 starts a7;
+
+goal(Rover.At a8);
+a1 ends a8;
+
+goal(Rover.At a9);
+a1 any a9;
+
+goal(Rover.At a10);
+a1 ends_after a10;
+
+goal(Rover.At a11);
+a1  ends_before a11;
+
+goal(Rover.At a12);
+a1 ends_after_start a12;
+
+goal(Rover.At a13);
+a1 starts_before_end a13;
+
+goal(Rover.At a14);
+a1 starts_during a14;
+
+goal(Rover.At a15);
+a1 contains_start a15;
+
+goal(Rover.At a16);
+a1 ends_during a16;
+
+goal(Rover.At a17);
+a1 contains_end a17;
+
+goal(Rover.At a18);
+a1 starts_before a18;
+
+goal(Rover.At a19);
+a1 starts_after a19;
+
+goal(Rover.At a20);
+a1 equals a20;

@@ -148,6 +148,7 @@ namespace PLASMA {
     xmlAsValue(element, name);
   }
 
+
   void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element)
   {
     const char * relation = element.Attribute("relation");
@@ -160,25 +161,92 @@ namespace PLASMA {
       check_error(origin_token.isValid());
       check_error(target_token.isValid());
       if (strcmp(relation, "before") == 0) {
-        std::vector<ConstrainedVariableId> variables;
-        variables.push_back(origin_token->getEnd());
-        variables.push_back(target_token->getStart());
-        m_client->createConstraint("precedes", variables);
+	construct_constraint(precedes, origin, End, target, Start);
+	return;
+      }
+      else if (strcmp(relation, "after") == 0) {
+	construct_constraint(precedes, target, End, origin, Start);
+	return;
+      }
+      else if (strcmp(relation, "starts") == 0) {
+	construct_constraint(concurrent, origin, Start, target, Start);
+	return;
+      }
+      else if (strcmp(relation, "ends") == 0) {
+	construct_constraint(concurrent, origin, End, target, End);
+	return;
+      }
+      else if (strcmp(relation, "ends_after") == 0) {
+	construct_constraint(precedes, target, Start, origin, End);
+	return;
+      }
+      else if (strcmp(relation, "ends_before") == 0) {
+	construct_constraint(precedes, origin, End, target, Start);
+	return;
+      }
+      else if (strcmp(relation, "ends_after_start") == 0) {
+	construct_constraint(precedes, target, Start, origin, End);
+	return;
+      }
+      else if (strcmp(relation, "starts_before_end") == 0) {
+	construct_constraint(precedes, origin, Start, target, End);
+	return;
+      }
+      else if (strcmp(relation, "starts_during") == 0) {
+	construct_constraint(precedes, target, Start, origin, Start);
+	construct_constraint(precedes, origin, Start, target, End);
+	return;
+      }
+      else if (strcmp(relation, "contains_start") == 0) {
+	construct_constraint(precedes, origin, Start, target, Start);
+	construct_constraint(precedes, target, Start, origin, End);
+	return;
+      }
+      else if (strcmp(relation, "ends_during") == 0) {
+	construct_constraint(precedes, target, Start, origin, End);
+	construct_constraint(precedes, origin, End, target, End);
+	return;
+      }
+      else if (strcmp(relation, "contains_end") == 0) {
+	construct_constraint(precedes, origin, Start, target, End);
+	construct_constraint(precedes, target, End, origin, End);
+	return;
+      }
+      else if (strcmp(relation, "contains") == 0) {
+	construct_constraint(precedes, origin, Start, target, Start);
+	construct_constraint(precedes, target, End, origin, End);
+	return;
+      }
+      else if (strcmp(relation, "contained_by") == 0) {
+	construct_constraint(precedes, target, Start, origin, Start);
+	construct_constraint(precedes, origin, End, target, End);
+	return;
+      }
+      else if (strcmp(relation, "starts_after") == 0) {
+	construct_constraint(precedes, target, Start, origin, Start);
+	return;
+      }
+      else if (strcmp(relation, "starts_before") == 0) {
+	construct_constraint(precedes, origin, Start, target, Start);
+	return;
+      }
+      else if (strcmp(relation, "meets") == 0) {
+	construct_constraint(concurrent, origin, End, target, Start);
+	return;
+      }
+      else if (strcmp(relation, "met_by") == 0) {
+	construct_constraint(concurrent, origin, Start, target, End);
         return;
       }
-      if (strcmp(relation, "meets") == 0) {
-        std::vector<ConstrainedVariableId> variables;
-        variables.push_back(origin_token->getEnd());
-        variables.push_back(target_token->getStart());
-        m_client->createConstraint("concurrent", variables);
-        return;
+      else if ((strcmp(relation, "equal") == 0) || 
+	       (strcmp(relation, "equals") == 0)) {
+	construct_constraint(concurrent, origin, Start, target, Start);
+	construct_constraint(concurrent, origin, End, target, End);
+	return;
       }
-      if (strcmp(relation, "met_by") == 0) {
-        std::vector<ConstrainedVariableId> variables;
-        variables.push_back(origin_token->getStart());
-        variables.push_back(target_token->getEnd());
-        m_client->createConstraint("concurrent", variables);
-        return;
+      else if (strcmp(relation, "any") == 0) {
+	//do nothing just create the token
+	return;
       }
 
       // TODO: the others
