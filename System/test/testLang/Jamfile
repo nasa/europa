@@ -1,7 +1,7 @@
 SubDir PLASMA System test testLang ;
 
 if ! $(PLASMA_READY) {
-  #SubInclude PLASMA System test testLang converter ;
+  SubInclude PLASMA System test testLang converter ;
 
   local modtest = modtest ;
 
