@@ -64,10 +64,10 @@ namespace Prototype {
   void ObjectDecisionPoint::print(std::ostream& os) const {
     check_error(m_id.isValid());
     if (!m_token.isNoId()) {
-      os << "(" << getKey() << ") Token (" << m_entityKey << ") ";
+      os << "(" << getKey() << ") Object Token (" << m_entityKey << ") ";
     }
     else {
-      os << "(" << getKey() << ") Token (" << m_entityKey << ")  [deleted] ";
+      os << "(" << getKey() << ") Object Token (" << m_entityKey << ")  [deleted] ";
     }
     os << " Current Choice: " << m_current;
     os << " Discarded: " << m_discarded.size();
