@@ -8,12 +8,12 @@ namespace Prototype{
 
   EventToken::EventToken(const PlanDatabaseId& planDatabase,
 			 const LabelStr& predicateName,
-			 const BooleanDomain& rejectabilityBaseDomain,
+			 bool rejectable,
 			 const IntervalIntDomain& timeBaseDomain,
 			 const LabelStr& objectName,
 			 bool closed)
     :Token(planDatabase, predicateName, 
-	   rejectabilityBaseDomain,
+	   rejectable,
 	   IntervalIntDomain(0, 0), 
 	   objectName,
 	   closed){
@@ -22,12 +22,10 @@ namespace Prototype{
 
   EventToken::EventToken(const TokenId& master,
 			 const LabelStr& predicateName,
-			 const BooleanDomain& rejectabilityBaseDomain,
 			 const IntervalIntDomain& timeBaseDomain,
 			 const LabelStr& objectName,
 			 bool closed)
     :Token(master, predicateName, 
-	   rejectabilityBaseDomain,
 	   IntervalIntDomain(0, 0), 
 	   objectName,
 	   closed){

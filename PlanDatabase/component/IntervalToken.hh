@@ -11,7 +11,7 @@ namespace Prototype {
 
     IntervalToken(const PlanDatabaseId& planDatabase, 
 		  const LabelStr& predicateName, 
-		  const BooleanDomain& rejectabilityBaseDomain = BooleanDomain(),
+		  bool rejectable,
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, MAX_INT),
@@ -20,7 +20,6 @@ namespace Prototype {
 
     IntervalToken(const TokenId& master, 
 		  const LabelStr& predicateName, 
-		  const BooleanDomain& rejectabilityBaseDomain = BooleanDomain(),
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, MAX_INT),

@@ -7,8 +7,8 @@
 namespace Prototype{
 
   IntervalToken::IntervalToken(const PlanDatabaseId& planDatabase, 
-			       const LabelStr& predicateName, 
-			       const BooleanDomain& rejectabilityBaseDomain,
+			       const LabelStr& predicateName,
+			       bool rejectable,
 			       const IntervalIntDomain& startBaseDomain,
 			       const IntervalIntDomain& endBaseDomain,
 			       const IntervalIntDomain& durationBaseDomain,
@@ -16,7 +16,7 @@ namespace Prototype{
 			       bool closed)
     :Token(planDatabase, 
 	   predicateName, 
-	   rejectabilityBaseDomain,
+	   rejectable,
 	   durationBaseDomain,
 	   objectName,
 	   closed){
@@ -24,8 +24,7 @@ namespace Prototype{
   }
 
   IntervalToken::IntervalToken(const TokenId& m_master, 
-			       const LabelStr& predicateName, 
-			       const BooleanDomain& rejectabilityBaseDomain,
+			       const LabelStr& predicateName,
 			       const IntervalIntDomain& startBaseDomain,
 			       const IntervalIntDomain& endBaseDomain,
 			       const IntervalIntDomain& durationBaseDomain,
@@ -33,7 +32,6 @@ namespace Prototype{
 			       bool closed)
     :Token(m_master, 
 	   predicateName, 
-	   rejectabilityBaseDomain,
 	   durationBaseDomain,
 	   objectName,
 	   closed){

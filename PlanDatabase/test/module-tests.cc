@@ -48,7 +48,7 @@ public:
     assert(context->getGuards().empty());
     assert(guards.empty());
     guards.push_back(context->getToken()->getObject());
-    guards.push_back(context->getToken()->getRejectability());
+    guards.push_back(context->getToken()->getState());
     
     Europa::Id< Variable<IntervalIntDomain> >  localVariable = 
       (new Variable<IntervalIntDomain>(context->getPlanDatabase()->getConstraintEngine(), IntervalIntDomain(1, 1)))->getId();
@@ -57,10 +57,7 @@ public:
   }
 
   bool test(int index, const ConstrainedVariableId& var) const {
-    if(index == 1)
-      return var->specifiedDomain().isSingleton();
-    else 
-      return true;
+     return var->specifiedDomain().isSingleton();
   }
 
   void fire(const RuleContextId& context,
@@ -69,8 +66,7 @@ public:
 	    std::vector<ConstraintId>& newConstraints) const {
     // Allocate a new slave Token
     TokenId slave = (new IntervalToken(context->getToken(), 
-				       LabelStr("Predicate"), 
-				       BooleanDomain(false)))->getId();
+				       LabelStr("Predicate")))->getId();
     newTokens.push_back(slave);
 
     // Allocate a new constraint equating the start variable of the new token with the end variable of
@@ -312,7 +308,7 @@ private:
     DEFAULT_SETUP(ce, db, schema, true);
 
     // Event Token
-    EventToken eventToken(db.getId(), LabelStr("Predicate"), BooleanDomain(), IntervalIntDomain(0, 1000), Token::noObject(), false);
+    EventToken eventToken(db.getId(), LabelStr("Predicate"), true, IntervalIntDomain(0, 1000), Token::noObject(), false);
     assert(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
     assert(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.getStart()->specify(IntervalIntDomain(5, 10));
@@ -323,7 +319,7 @@ private:
     // IntervalToken
     IntervalToken intervalToken(db.getId(), 
 				LabelStr("Predicate"), 
-				BooleanDomain(), 
+				true, 
 				IntervalIntDomain(0, 1000),
 				IntervalIntDomain(0, 1000),
 				IntervalIntDomain(2, 10),
@@ -352,7 +348,7 @@ private:
 
     IntervalToken t0(db.getId(), 
 		     LabelStr("Predicate"), 
-		     BooleanDomain(false), 
+		     false, 
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(1, 1));
@@ -360,7 +356,7 @@ private:
 
     TokenId t1 = (new IntervalToken(db.getId(), 
 				    LabelStr("Predicate"), 
-				    BooleanDomain(false),
+				    false,
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
@@ -368,35 +364,30 @@ private:
 
     TokenId t2 = (new IntervalToken(t0.getId(), 
 				    LabelStr("Predicate"), 
-				    BooleanDomain(false),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
 
     TokenId t3 = (new IntervalToken(t0.getId(), 
 				    LabelStr("Predicate"), 
-				    BooleanDomain(false), 
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
 
     TokenId t4 = (new IntervalToken(t0.getId(), 
 				    LabelStr("Predicate"), 
-				    BooleanDomain(false), 
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
 
     TokenId t5 = (new IntervalToken(t1, 
 				    LabelStr("Predicate"), 
-				    BooleanDomain(false), 
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(0, 1),
 				    IntervalIntDomain(1, 1)))->getId();
 
     TokenId t6 = (new EventToken(t0.getId(), 
 				    LabelStr("Predicate"), 
-				    BooleanDomain(false),
 				    IntervalIntDomain(0, 1)))->getId();
 
     // Delete slave only
@@ -415,7 +406,7 @@ private:
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(),
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -424,7 +415,7 @@ private:
 
     IntervalToken t1(db.getId(),
 		     LabelStr("P1"), 
-		     BooleanDomain(),
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -432,12 +423,12 @@ private:
     t1.getDuration()->specify(IntervalIntDomain(5, 7));
 
     // Activate & deactivate - ensure proper handling of rejectability variable
-    assert(!t0.getRejectability()->getDerivedDomain().isSingleton());
+    assert(!t0.getState()->getDerivedDomain().isSingleton());
     t0.activate();
-    assert(t0.getRejectability()->getDerivedDomain().isSingleton());
-    assert(t0.getRejectability()->getDerivedDomain().getSingletonValue() == false);
-    t0.deactivate();
-    assert(!t0.getRejectability()->getDerivedDomain().isSingleton());
+    assert(t0.getState()->getDerivedDomain().isSingleton());
+    assert(t0.getState()->getDerivedDomain().getSingletonValue() == Token::ACTIVE);
+    t0.cancel();
+    assert(!t0.getState()->getDerivedDomain().isSingleton());
 
     // Now activate and merge
     t0.activate();
@@ -448,14 +439,14 @@ private:
     assert(t1.isMerged());
 
     // Do a split and make sure the old values are reinstated.
-    t1.split();
+    t1.cancel();
     assert(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
     assert(t1.isInactive());
 
     // Now post equality constraint between t1 and extra token t2 and remerge
     IntervalToken t2(db.getId(), 
 		     LabelStr("P2"), 
-		     BooleanDomain(),
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -477,7 +468,7 @@ private:
     assert(t0.getEnd()->getDerivedDomain() == t2.getEnd()->getDerivedDomain());
 
     // Undo the merge and check for initial conditions being established
-    t1.split();
+    t1.cancel();
     assert(equalityConstraint->isActive());
 
     // Redo the merge
@@ -494,7 +485,7 @@ private:
 
 
     // Test unary
-    t1.split();
+    t1.cancel();
     ConstraintId subsetOfConstraint = ConstraintLibrary::createConstraint(LabelStr("SubsetOf"),
 									  db.getConstraintEngine(),
 									  t1.getDuration(),
@@ -528,7 +519,7 @@ private:
       for (int j=0; j < UNIFIED; j++) {
 	IntervalTokenId t = (new IntervalToken(db.getId(), 
 					       LabelStr("P1"), 
-					       BooleanDomain(),
+					       true,
 					       IntervalIntDomain(0, 210),
 					       IntervalIntDomain(0, 220),
 					       IntervalIntDomain(1, 110),
@@ -593,7 +584,7 @@ private:
 
     for (int i=0; i < NUMTOKS; i++)
       for (int j=1; j < UNIFIED; j++) {
-	tokens[i][j]->split();
+	tokens[i][j]->cancel();
 	ce.propagate();
       }
 
@@ -633,21 +624,21 @@ private:
 
     IntervalToken tokenA(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(),
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(),
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(),
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -695,21 +686,21 @@ private:
 
     IntervalToken tokenA(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(),
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(),
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db.getId(), 
 		     LabelStr("P1"), 
-		     BooleanDomain(),
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -769,7 +760,7 @@ private:
       int start = i*DURATION;
       TokenId token = (new IntervalToken(db.getId(), 
 					 LabelStr("P1"),
-					 BooleanDomain(),
+					 true,
 					 IntervalIntDomain(start, start),
 					 IntervalIntDomain(start+DURATION, start+DURATION),
 					 IntervalIntDomain(DURATION, DURATION)))->getId();
@@ -809,7 +800,7 @@ private:
     // Now ensure the query can correctly indicate no options available
     TokenId token = (new IntervalToken(db.getId(), 
 				       LabelStr("P1"),
-				       BooleanDomain(),
+				       true,
 				       IntervalIntDomain(0, 0),
 				       IntervalIntDomain(),
 				       IntervalIntDomain(DURATION, DURATION)))->getId();
@@ -829,7 +820,7 @@ private:
 
     IntervalToken it1(db.getId(), 
 		      LabelStr("P1"), 
-		      BooleanDomain(),
+		      true,
 		      IntervalIntDomain(0, 10),
 		      IntervalIntDomain(0, 1000),
 		      IntervalIntDomain(1, 1000));
@@ -841,7 +832,7 @@ private:
     // Insert at the end after a token
     EventToken et1(db.getId(), 
 		   LabelStr("P2"), 
-		   BooleanDomain(), 
+		   true, 
 		   IntervalIntDomain(0, 100), 
 		   Token::noObject());
 
@@ -853,7 +844,7 @@ private:
     // Insert between a token and an event
     EventToken et2(db.getId(), 
 		   LabelStr("P2"), 
-		   BooleanDomain(), 
+		   true, 
 		   IntervalIntDomain(0, 100), 
 		   Token::noObject());
 
@@ -865,7 +856,7 @@ private:
     // Insert before a token
     EventToken et3(db.getId(), 
 		   LabelStr("P2"), 
-		   BooleanDomain(), 
+		   true, 
 		   IntervalIntDomain(10, 100), 
 		   Token::noObject());
 
@@ -877,7 +868,7 @@ private:
     // Insert between events
     EventToken et4(db.getId(), 
 		   LabelStr("P2"), 
-		   BooleanDomain(), 
+		   true, 
 		   IntervalIntDomain(0, 100), 
 		   Token::noObject());
 
@@ -907,12 +898,14 @@ private:
 
   static bool testActivation(){
     DEFAULT_SETUP(ce, db, schema, false);
+    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
     db.close();
-    TestRule r(LabelStr("Type::Predicate"));
 
-    IntervalToken tokenA(db.getId(), 
-		     LabelStr("Type::Predicate"), 
-		     BooleanDomain(),
+    TestRule r(LabelStr("AllObjects::Predicate"));
+
+    IntervalToken tokenA(db.getId(),
+		     LabelStr("AllObjects::Predicate"), 
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -924,11 +917,11 @@ private:
     // Activate and confirm the rule instance is created
     tokenA.activate();
     assert(re.getRuleInstances().size() == 1);
-    // New constraints added to restrict rejectability and to listen to rule variables
-    assert(ce.getConstraints().size() == num_constraints + 2);
+    // New constraint added to listen to rule variables
+    assert(ce.getConstraints().size() == num_constraints + 1);
 
     // Deactivate to ensure the rule instance is removed
-    tokenA.deactivate();
+    tokenA.cancel();
     assert(re.getRuleInstances().empty());
     assert(ce.getConstraints().size() == num_constraints);
 
@@ -940,12 +933,13 @@ private:
 
   static bool testRuleFiringAndCleanup(){
     DEFAULT_SETUP(ce, db, schema, false);
+    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
     db.close();
-    TestRule r(LabelStr("Type::Predicate"));
+    TestRule r(LabelStr("AllObjects::Predicate"));
 
     IntervalToken tokenA(db.getId(), 
-		     LabelStr("Type::Predicate"), 
-		     BooleanDomain(),
+		     LabelStr("AllObjects::Predicate"), 
+		     true,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -957,8 +951,7 @@ private:
     assert(ce.propagate());
     assert(db.getTokens().size() == 1);
 
-    tokenA.getObject()->specify(object.getId());
-    tokenA.getRejectability()->specify(false);
+    tokenA.getObject()->specify(timeline.getId());
     assert(ce.propagate());
     // 2 tokens added since fire will trigger twice due to composition
     assert(db.getTokens().size() == 3);
@@ -967,15 +960,15 @@ private:
     assert(slave->getDuration()->getDerivedDomain().isSingleton()); // Due to constraint on local variable
 
     // Test reset which should backtrack the rule
-    tokenA.getRejectability()->reset();
+    tokenA.getObject()->reset();
     assert(ce.propagate());
     assert(db.getTokens().size() == 1);
 
     // Set again, and deactivate
-    tokenA.getRejectability()->specify(false);
+    tokenA.getObject()->specify(timeline.getId());
     assert(ce.propagate());
     assert(db.getTokens().size() == 3);
-    tokenA.deactivate();
+    tokenA.cancel();
     assert(db.getTokens().size() == 1);
 
     // Now repeast to ensure correct automatic cleanup

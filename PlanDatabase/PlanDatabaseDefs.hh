@@ -26,14 +26,8 @@ namespace Prototype {
   typedef Europa::Id<PlanDatabaseListener> PlanDatabaseListenerId;
 
   template<class DomainType> class TokenVariable;
+  typedef Europa::Id< TokenVariable<EnumeratedDomain> > StateVarId;
   typedef Europa::Id< TokenVariable<IntervalIntDomain> > TempVarId;
-
-  typedef BoolDomain BooleanDomain;
-  typedef Europa::Id< TokenVariable<BooleanDomain> > BoolVarId; /*!< Typedef it as just an int domain for now and change later */
-
-  template<class DomainType> class TokenVariable;
-  typedef Europa::Id< TokenVariable<LabelSet> > StateVarId;
-
   class ObjectSet;
   typedef Europa::Id< TokenVariable<ObjectSet> > ObjectVarId;
 
