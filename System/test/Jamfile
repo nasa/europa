@@ -26,6 +26,7 @@ for model in
         resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl 
         parent-predicate.nddl k9-initial.nddl backtr.nddl 
         better-res.nddl CAPER.nddl monkey1monkey-transaction.nddl
+	basic-model-backtrack.nddl
 {
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
