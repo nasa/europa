@@ -194,6 +194,30 @@ rule FRemoveItem {
   return $(result) ;
 }
 
+rule FMergeList {
+  local list1 = $(1) ;
+  local list2 = $(2) ;
+
+  local result = $(list1) ;
+  for i in $(list2) {
+    if ! $(i) in $(result) {
+      result += $(i) ;
+    }
+  }
+  return $(result) ;
+}
+
+rule CheckForCycle {
+  local pushed = $(1) ;
+  local found = $(2) ;
+
+#  Echo CheckForCycle $(pushed) . $(found) ;
+
+  if $(found) in $(pushed) {
+    Exit Cycle Detected in FLinkModules. ;
+  }
+}
+
 rule FLinkModules {
   local module = $(1) ;
 
@@ -201,6 +225,7 @@ rule FLinkModules {
     Echo FLinkModules $(module) ;
   }
 
+  local pushed ;
   local modules = $(module:G=) ;
   local found ;
   while $(modules) {
@@ -208,10 +233,15 @@ rule FLinkModules {
     if $(TRACE_MODULE) = TRUE {
       Echo - $(mod) ;
     }
-    found = [ FRemoveItem $(found) : $(mod) ] ;
+    if $(mod) in $(found) {
+      found = [ FRemoveItem $(found) : $(mod) ] ;
+      if ! $(mod) in $(pushed) {
+        pushed += $(mod) ;
+      }
+    }
     found += $(mod) ;
-    modules += [ on $(mod:G=module) return $(LINK_MODULES:G=) ] ;
-    modules = $(modules[2-]) ;
+    modules = [ FMergeList $(modules[2-]) : [ on $(mod:G=module) return $(LINK_MODULES:G=) ] ] ;
+    CheckForCycle $(pushed) : $(found) ;
   }
 
   if $(TRACE_MODULE) = TRUE {
