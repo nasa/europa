@@ -56,9 +56,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define FatalError(s) { std::cerr << "At " << __FILE__ << ":" << __PRETTY_FUNCTION__ << ", line " << __LINE__ << std::endl; std::cerr << (s) << std::endl; exit(-1);}
-#define FatalErrno(){FatalError(strerror(errno))}
-#define FatalErr(s) {std::cerr << (s) << std::endl; FatalErrno();}
+#define FatalError(s) { std::cerr << __FILE__ << ':' << __LINE__ << ": " << __PRETTY_FUNCTION__ << std::endl << (s) << std::endl; exit(errno == 0 ? -1 : errno); }
+#define FatalErrno() { FatalError(strerror(errno)) }
+#define FatalErr(s) {std::cerr << (s) << std::endl; FatalErrno(); }
 
 const char *envPPWConfigFile = "PPW_CONFIG";
 
@@ -321,24 +321,26 @@ namespace Prototype {
       sourcePaths.push_back(".");
       sourcePaths.push_back("..");
 			char *configPath = getenv(envPPWConfigFile);
-			if(configPath == NULL) {
-				std::cerr << "Warning: PPW_CONFIG not set.  PartialPlanWriter will not write." << std::endl;
-				stepsPerWrite = 0;
-				noFullWrite = 1;
-                                writeStep = 0;
-				return;
+			if (configPath == NULL || configPath[0] == '\0') {
+                          std::cerr << "Warning: PPW_CONFIG not set or is empty; PartialPlanWriter will not write." << std::endl;
+                          stepsPerWrite = 0;
+                          noFullWrite = 1;
+                          writeStep = 0;
+                          return;
 			}
 			
 			char *configBuf = new char[PATH_MAX + 100];
-			if(realpath(configPath, configBuf) == NULL) {
-				std::cerr << "Failed to get config file " << configPath << std::endl;
-				FatalErrno();
+                        if (configBuf == 0)
+                          FatalErr("No memory for PPW_CONFIG");
+			if (realpath(configPath, configBuf) == NULL) {
+                          std::cerr << "Failed to get config file " << configPath << std::endl;
+                          FatalErrno();
 			}
 
 			std::ifstream configFile(configBuf);
-			if(!configFile) {
-				std::cerr << "Failed to open config file " << configBuf << std::endl;
-				FatalErrno();
+			if (!configFile) {
+                          std::cerr << "Failed to open config file " << configBuf << std::endl;
+                          FatalErrno();
 			}
 			
 			std::string buf;
