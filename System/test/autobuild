@@ -1,12 +1,25 @@
 #!/bin/bash
-# $Id: autobuild,v 1.88 2004-09-29 17:52:17 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.89 2004-09-29 18:28:45 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
+
+# $email is the address to mail messages to.
+# If a user name or email address is given as an argument, send email to that
+#   address instead, do not call cvs except to update and get diffs,
+#   do not remove PLASMA, and require starting within an existing PLASMA checkout.
+if test -z "$1"
+then
+    email=checkins@postdoc.arc.nasa.gov
+    removePlasma=true
+else
+    email="$1"
+    removePlasma=false
+fi
 
 echo ''
 echo 'PLASMA autobuild script'
 echo ''
-info=`uname -a; echo ''; g++ --version ; hostname ; pwd`
+info="Emailing to $email; removePlasma is $removePlasma`echo ''; uname -a; echo ''; g++ --version ; pwd ; echo ''`"
 echo "$info"
 
 # "Guess" where the programs that we need are, based on the operating system.
@@ -54,18 +67,28 @@ else
 fi
 export LD_LIBRARY_PATH
 
-# Address to mail messages to.
-email=checkins@postdoc.arc.nasa.gov
-
 # CVS info
 CVS_RSH=ssh
 CVSROOT='copernicus.arc.nasa.gov:/home/cvs/ISG-Repository'
 export CVS_RSH CVSROOT
 
-# For this to work, this script must always be called by its full path name.
-startdir="`dirname $0`"
-startdir="`cd $startdir; pwd`"
-cd "$startdir"
+if "$removePlasma"
+then
+    # For this to work, this script must always be called by its full path name.
+    startdir="`dirname $0`"
+    startdir="`cd $startdir; pwd`"
+    cd "$startdir"
+else
+    startdir="`pwd`"
+    case "$startdir" in
+    *PLASMA)
+            ;;
+    *)
+            echo "$0"': run inside existing PLASMA checkout when giving email address'
+            exit 22
+            ;;
+    esac
+fi
 
 # Don't run this script more than once in the same directory.
 #   Should figure out a way to require at most one run on a computer at a time,
@@ -80,23 +103,22 @@ else
     exit 1
 fi
 
-
-rm -rf Old
-test -d Prior && mv Prior Old
-
-# Refuse to run if a prior check out is present.
-if test -d PLASMA -o -d Prior
+if "$removePlasma"
 then
-  (echo "$info";
-     echo '';
-     echo 'PLASMA directory already present or configuration botch; aborting autobuild') | \
-    Mail -s 'PLASMA Autobuild on '"`hostname`"' in '"`pwd`"' aborted' "$email"
-  mkdir working/aborted
-  exit 1
+    rm -rf Old
+    test -d Prior && mv Prior Old
+    # Refuse to run if a prior check out is present.
+    if test -d PLASMA -o -d Prior
+    then
+        (echo "$info";
+            echo 'PLASMA directory already present or configuration botch; aborting autobuild') | \
+                Mail -s 'PLASMA Autobuild on '"`hostname`"' in '"`pwd`"' aborted' "$email"
+        mkdir working/aborted
+        exit 1
+    fi
+    mkdir Prior
+    mv cvs.PLASMA jam.* Prior/
 fi
-
-mkdir Prior
-mv cvs.PLASMA jam.* Prior/
 
 # The (compilation) variants to build and test.
 variants='DEV OPTIMIZED PROFILE'
@@ -123,7 +145,15 @@ ulimit -a
 
 # Perform a cvs command, checking that it succeeds, etc., and send email if something goes wrong.
 function cvsCmd() {
-  if test "$1" != 'co' -a "$1" != 'rtag'
+  if test "$1" != 'co' -a "$1" != 'rtag' -a "$removePlasma" = 'true'
+  then
+    mkdir PLASMA/autobuild.bug
+    (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments: '"$*") | \
+        Mail -s 'PLASMA autobuild bug on '"`hostname`"' in '"`pwd`"' failed' "$email"
+    mkdir working/failed
+    exit 22
+  fi
+  if test "$1" != 'update' -a "$1" != 'up' -a "$removePlasma" = 'false'
   then
     mkdir PLASMA/autobuild.bug
     (echo "$info"; echo ''; echo 'cvsCmd() called with unexpected arguments: '"$*") | \
@@ -164,64 +194,85 @@ function jamCmd() {
   fi
 }
 
-# This tag - and all others used by this script - must be unique to
-#   this computer, or two autobuild scripts running on different hosts
-#   are likely to interfere with each other.
-testingTag=AutobuildTesting_"`hostname | sed -e 's/[.].*//'`"
+if "$removePlasma"
+then
+    # This tag - and all others used by this script - must be unique to
+    #   this computer, or two autobuild scripts running on different hosts
+    #   are likely to interfere with each other.
+    testingTag=AutobuildTesting_"`hostname | sed -e 's/[.].*//'`"
 
-# This is needed if nothing under PLASMA has "$testingTag".
-cvsCmd rtag -F "$testingTag" PLASMA/README
-# Remove the prior testing tag before ...
-cvsCmd rtag -d "$testingTag" PLASMA
-# ... tagging the to-be-tested version:
-cvsCmd rtag -rHEAD "$testingTag" PLASMA
+    # This is needed if nothing under PLASMA has "$testingTag".
+    cvsCmd rtag -F "$testingTag" PLASMA/README
+    # Remove the prior testing tag before ...
+    cvsCmd rtag -d "$testingTag" PLASMA
+    # ... tagging the to-be-tested version:
+    cvsCmd rtag -rHEAD "$testingTag" PLASMA
+fi
 
 # Now, for the primary purpose: run all the tests of all build variants.
 for var in $variants
 do
   for libmethod in $libmethods
   do
-    cvsCmd co -r "$testingTag" PLASMA
-    cd PLASMA
+    if "$removePlasma"
+    then
+        cvsCmd co -r "$testingTag" PLASMA
+        cd PLASMA
+    else
+        cvsCmd -q update -d -P
+    fi
     jam_args='-sVARIANTS='"$var"' -sLIBRARIES='"$libmethod"
     jamCmd '' build
     for target in run-all-tests clean
     do
       jamCmd $target $target
     done
-    PPW_Config="$startdir"'/PLASMA/CBPlanner/component/sample-ppw-config'
+    if "$removePlasma"
+    then
+        PPW_Config="$startdir"'/PLASMA/CBPlanner/component/sample-ppw-config'
+    else
+        PPW_Config="$startdir"'/CBPlanner/component/sample-ppw-config'
+    fi
     export PPW_Config
     jamCmd run-nddl-planner-tests withPPW
     jamCmd clean clean
-    (echo "$info"; echo ''; echo 'PLASMA autobuild and tests of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
+    (echo "$info"; echo 'PLASMA autobuild and tests of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
         more jam.*.$var.$libmethod < /dev/null) | \
       Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
-    # Save the output files.
-    mv -f jam.* ..
-    cd ..
-    # Remove everything so that each variant is tested completely independently.
-    #   Should probably test everything without removing in between as well, but ...
-    rm -rf PLASMA
+    if "$removePlasma"
+    then
+        # Save the output files.
+        mv -f jam.* ..
+        cd ..
+        # Remove everything so that each variant is tested completely independently.
+        #   Should probably test everything without removing in between as well, but ...
+        rm -rf PLASMA
+    fi
   done
 done
 
 # All the tests have passed (or jamCmd would have exit'd this script)
 
-tag=AutobuildPassed_"`hostname | sed -e 's/[.].*//'`"
-prior="$tag"'_old'
-# Make sure the prior tag is in CVS:
-cvsCmd rtag -F "$prior" PLASMA/README
-# ... before removing it:
-cvsCmd rtag -d "$prior" PLASMA
-# ... and changing it to the previous successful tag,
-#   again after making sure that tag is in CVS:
-cvsCmd rtag -rHEAD "$tag" PLASMA/README
-cvsCmd rtag -F -r "$tag" "$prior" PLASMA
-# ... and removing "$tag" so that any files that are later 'cvs remove'd are no longer tagged:
-cvsCmd rtag -d "$tag" PLASMA
+if "$removePlasma"
+then
+    tag=AutobuildPassed_"`hostname | sed -e 's/[.].*//'`"
+    prior="$tag"'_old'
+    # Make sure the prior tag is in CVS:
+    cvsCmd rtag -F "$prior" PLASMA/README
+    # ... before removing it:
+    cvsCmd rtag -d "$prior" PLASMA
+    # ... and changing it to the previous successful tag,
+    #   again after making sure that tag is in CVS:
+    cvsCmd rtag -rHEAD "$tag" PLASMA/README
+    cvsCmd rtag -F -r "$tag" "$prior" PLASMA
+    # ... and removing "$tag" so that any files that are later 'cvs remove'd are no longer tagged:
+    cvsCmd rtag -d "$tag" PLASMA
 
-# Finally, tag the tested version to indicate it passed the tests:
-cvsCmd rtag -r "$testingTag" "$tag" PLASMA
+    # Finally, tag the tested version to indicate it passed the tests:
+    cvsCmd rtag -r "$testingTag" "$tag" PLASMA
+else
+    cvs -q diff -c > cvs.diff-c 2>&1
+fi
 
 (echo "$info";
     echo '';
