@@ -10,6 +10,7 @@
 #include "Choice.hh"
 #include "ValueChoice.hh"
 #include "DefaultOpenDecisionManager.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -260,7 +261,9 @@ namespace EUROPA {
     check_error(m_curDec.isValid());
     m_curChoice = ChoiceId::noId();
     const std::list<ChoiceId>& choices = m_curDec->getUpdatedChoices();
-    //    std::cout << "getNextChoice:: num choices " << choices.size() << std::endl;
+
+    debugMsg("DefaultOpenDecisionManager:getNextChoice", " num choices " << choices.size() << std::endl);
+
     if (TokenDecisionPointId::convertable(m_curDec)) {
       ChoiceId merge;
       ChoiceId reject;
