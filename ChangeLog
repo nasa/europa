@@ -1,3 +1,7 @@
+M_25
+1. A fairly solid milestone using the new build structure with numerous small fixes.
+2. First incorporation of the project creation utilities to make a useful project.
+
 DEV_20041026_0
 1. build support for shared libraries for modules & models
 
