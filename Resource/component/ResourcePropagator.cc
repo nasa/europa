@@ -24,7 +24,7 @@ namespace Prototype {
     //handle change of variables
     switch(argIndex) {
     case ResourceConstraint::OBJECT: 
-      //handleObjectChange(variable, changeType);
+      handleObjectChange(variable);
       break;
     case ResourceConstraint::TIME: 
       handleTimeChange(variable, argIndex, constraint, changeType);
@@ -33,8 +33,6 @@ namespace Prototype {
       handleQuantityChange(variable, argIndex, constraint, changeType);
       break;
     }
-    //buffer for propagation if necessary
-    handleResourcePropagation(constraint);
   }
 
   void ResourcePropagator::execute(){
@@ -58,39 +56,26 @@ namespace Prototype {
   }
 
 
-  void ResourcePropagator::handleResourcePropagation(const ConstraintId constraint) {
-    check_error(ResourceConstraintId::convertable(constraint));
-    ConstrainedVariableId objectvar = constraint->getScope().front();
-    //delay propagation of resource until the transaction has been assigned to a resource
-    if (objectvar->specifiedDomain().isSingleton()) {
-      ResourceId r = ResourceConstraint::getCurrentDomain(objectvar).getSingletonValue();
-      // Buffer this resource for propagation
-      if (m_resources.find(r) == m_resources.end())
-	m_resources.insert(r);
+  void ResourcePropagator::handleResourcePropagation(const ResourceId& r, const ConstrainedVariableId& variable) {
+    // Buffer this resource for propagation
+    if (m_resources.find(r) == m_resources.end()) {
+      m_resources.insert(r);
       //store a variable so that its domain can be emptied
-      m_forempty = objectvar;
+      m_forempty = variable;
     }
   }
 
-  void ResourcePropagator::handleObjectChange(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType) {
-    if (variable->specifiedDomain().isSingleton()) {
+  void ResourcePropagator::handleObjectChange(const ConstrainedVariableId& variable) {
+    if (TransactionId::convertable(variable->getParent())) {
       TransactionId t = variable->getParent();
-      //if the spec domain is a singleton and this transaction has not yet been assigned to a resource, then assign it.
-      if(t->getResource() == ResourceId::noId()) {
-	ResourceId r = ResourceConstraint::getCurrentDomain(variable).getSingletonValue();	
-	std::cout << "Inserting " << t << " on " << r << std::endl;
-	  r->insert(t);
-	}
+      if ( t->getResource() != ResourceId::noId()) {
+	ResourceId r = t->getResource();
+	//buffer for propagation if necessary
+	handleResourcePropagation(r, variable);
       }
-      //else if the spec domain is no longer a singleton and this transaction is still assigned this resource, then remove it. 
-      else if (!variable->specifiedDomain().isSingleton() && (changeType == DomainListener::RESET) ) {
-	TransactionId t = variable->getParent();
-	if ( t->getResource() != ResourceId::noId()) {
-	  ResourceId r = t->getResource();
-	  r->remove(t);
-	}
-      }
+    }
   }
+
   void ResourcePropagator::handleQuantityChange(const ConstrainedVariableId& variable, 
 						int argIndex, 
 						const ConstraintId& constraint, 
@@ -102,6 +87,8 @@ namespace Prototype {
       if (t->getResource() != ResourceId::noId()){
 	ResourceId r = t->getResource();
 	r->notifyQuantityChanged(t);
+	//buffer for propagation if necessary
+	handleResourcePropagation(r, variable);
       } 
       t->notifyChanged();
     }
@@ -122,6 +109,8 @@ namespace Prototype {
 	  r->notifyTimeRelaxed(t);
 	else
 	  r->notifyTimeRestricted(t);
+	//buffer for propagation if necessary
+	handleResourcePropagation(r, variable);
       }
       t->notifyChanged();
     }

@@ -25,7 +25,7 @@ namespace Prototype {
 
   private:
     
-    void handleObjectChange(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
+    void handleObjectChange(const ConstrainedVariableId& variable);
     void handleQuantityChange(const ConstrainedVariableId& variable, 
     			    int argIndex, 
     			    const ConstraintId& constraint, 
@@ -34,7 +34,7 @@ namespace Prototype {
     			    int argIndex, 
     			    const ConstraintId& constraint, 
     			    const DomainListener::ChangeType& changeType);
-    void handleResourcePropagation(const ConstraintId constraint);
+    void handleResourcePropagation(const ResourceId& r, const ConstrainedVariableId& variable);
 
     std::set<ResourceId> m_resources;
     ConstrainedVariableId m_forempty;
