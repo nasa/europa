@@ -90,7 +90,7 @@ rule RunAntlrTool
 actions RunAntlrTool
 {
   rm -f $(1)
-  $(JAVA) -cp $(ANTLR_JAR) antlr.Tool -o $(PATHNAME) $(2) 
+  "$(JAVA)" -cp $(ANTLR_JAR) antlr.Tool -o $(PATHNAME) $(2) 
 }
 
 } # AntlrRules_INCLUDED

@@ -84,9 +84,9 @@ if $(OS) = CYGWIN {
 # JAR = java archiver
 
 if $(JAVA_HOME) {
-  JAVA ?= [ FDirName $(JAVA_HOME) bin java ] ;
-  JAVAC ?= [ FDirName $(JAVA_HOME) bin javac ] ;
-  JAR ?= [ FDirName $(JAVA_HOME) bin jar ] ;
+  JAVA ?= [ FDirName $(JAVA_HOME:J=" ") bin java ] ;
+  JAVAC ?= [ FDirName $(JAVA_HOME:J=" ") bin javac ] ;
+  JAR ?= [ FDirName $(JAVA_HOME:J=" ") bin jar ] ;
 } else {
   JAVA ?= java ;
   JAVAC ?= javac ;

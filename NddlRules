@@ -68,7 +68,7 @@ rule NddlCompiler1 {
 }
 
 actions NddlCompiler1 {
-  $(JAVA) -cp $(CLASSPATH) nddl.NddlCompiler $(2) 
+  "$(JAVA)" -cp $(CLASSPATH) nddl.NddlCompiler $(2) 
 }
 
 # NddlParser model.xml : model.nddl ;
@@ -102,7 +102,7 @@ rule NddlParser1 {
 }
 
 actions NddlParser1 {
-  $(JAVA) -cp $(CLASSPATH) nddl.Parse -q -o $(1) $(2) 
+  "$(JAVA)" -cp $(CLASSPATH) nddl.Parse -q -o $(1) $(2) 
 }
 
 } # NddlRules_INCLUDED
