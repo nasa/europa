@@ -109,6 +109,9 @@ namespace Prototype {
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
       AbstractDomain * domain = TransactionXml::abstractDomain(*child_el);
       std::string type = TransactionXml::domainTypeAsString(domain);
+      if (type == "object") {
+        type = (((ObjectId)domain->getLowerBound())->getType()).toString();
+      }
       arguments.push_back(ConstructorArgument(LabelStr(type.c_str()), domain));
     }
 
