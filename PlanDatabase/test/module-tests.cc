@@ -17,7 +17,6 @@
 
 #include <iostream>
 
-
 #define DEFAULT_SETUP(ce, db, schema, autoClose) \
     ConstraintEngine ce;\
     Schema schema;\
@@ -142,6 +141,7 @@ public:
     runTest(testBasicTokenAllocation, "BasicTokenAllocation");
     runTest(testMasterSlaveRelationship, "MasterSlaveRelationship");
     runTest(testBasicMerging, "BasicMerging");
+    runTest(testMergingPerformance, "MergingPerformance");
     return true;
   }
 
@@ -344,6 +344,113 @@ private:
     // Deletion will now occur and test proper cleanup.
     return true;
   }
+
+  // add backtracking and longer chain, also add a before constraint
+  static bool testMergingPerformance(){
+    DEFAULT_SETUP(ce, db, schema, false);
+    Timeline timeline(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
+    db.close();
+
+    typedef Europa::Id<IntervalToken> IntervalTokenId;
+    
+    static const int UNIFIED=5;
+    static const int NUMTOKS=10;
+    static const int NUMPARAMS=5;
+
+    //Create tokens with the same domains.  We will impose a constraint on
+    //each token variable.  Tokens will have 5 parameter variables.
+    std::vector< std::vector<IntervalTokenId> > tokens;
+
+    for (int i=0; i < NUMTOKS; i++) {
+      std::vector<IntervalTokenId> tmp;
+      for (int j=0; j < UNIFIED; j++) {
+	IntervalTokenId t(new IntervalToken(db.getId(), 
+					    LabelStr("P1"), 
+					    BooleanDomain(),
+					    IntervalIntDomain(0, 210),
+					    IntervalIntDomain(0, 220),
+					    IntervalIntDomain(1, 110),
+					    Token::noObject(), false));
+	for (int k=0; k < NUMPARAMS; k++)
+	  t->addParameter(IntervalIntDomain(500+j,1000));
+	t->close();
+	tmp.push_back(t);
+      }
+      tokens.push_back(tmp);
+    }
+
+    IntervalIntDomain sdom1(tokens[0][0]->getStart()->getDerivedDomain());
+    check_error(sdom1.getLowerBound() == 0);
+    check_error(sdom1.getUpperBound() == 210);
+
+    IntervalIntDomain edom1(tokens[0][0]->getEnd()->getDerivedDomain());
+    check_error(edom1.getLowerBound() == 1);
+    check_error(edom1.getUpperBound() == 220);
+
+    Europa::Id<TokenVariable<IntervalIntDomain> > pvar1(tokens[0][0]->getParameters()[0]);
+    IntervalIntDomain pdom1(pvar1->getDerivedDomain());
+    check_error(pdom1.getLowerBound() == 500);
+    check_error(pdom1.getUpperBound() == 1000);
+
+    for (int i=0; i < NUMTOKS; i++) {
+      tokens[i][0]->activate();
+      timeline.constrain(tokens[i][0]);
+    }
+
+    IntervalIntDomain sdom2(tokens[0][0]->getStart()->getDerivedDomain());
+    check_error(sdom2.getLowerBound() == 0);
+    check_error(sdom2.getUpperBound() == 209);
+
+    IntervalIntDomain edom2(tokens[0][0]->getEnd()->getDerivedDomain());
+    check_error(edom2.getLowerBound() == 1);
+    check_error(edom2.getUpperBound() == 210);
+
+    Europa::Id<TokenVariable<IntervalIntDomain> > pvar2(tokens[0][0]->getParameters()[0]);
+    IntervalIntDomain pdom2(pvar2->getDerivedDomain());
+    check_error(pdom2.getLowerBound() == 500);
+    check_error(pdom2.getUpperBound() == 1000);
+
+    for (int i=0; i < NUMTOKS; i++)
+      for (int j=1; j < UNIFIED; j++) { 
+	tokens[i][j]->merge(tokens[i][0]);
+	ce.propagate();
+      }
+
+    IntervalIntDomain sdom3(tokens[0][0]->getStart()->getDerivedDomain());
+    check_error(sdom3.getLowerBound() == 0);
+    check_error(sdom3.getUpperBound() == 209);
+
+    IntervalIntDomain edom3(tokens[0][0]->getEnd()->getDerivedDomain());
+    check_error(edom3.getLowerBound() == 1);
+    check_error(edom3.getUpperBound() == 210);
+
+    Europa::Id<TokenVariable<IntervalIntDomain> > pvar3(tokens[0][0]->getParameters()[0]);
+    IntervalIntDomain pdom3(pvar3->getDerivedDomain());
+    check_error(pdom3.getLowerBound() == 500+UNIFIED-1);
+    check_error(pdom3.getUpperBound() == 1000);
+
+    for (int i=0; i < NUMTOKS; i++)
+      for (int j=1; j < UNIFIED; j++) {
+	tokens[i][j]->split();
+	ce.propagate();
+      }
+
+    IntervalIntDomain sdom4(tokens[0][0]->getStart()->getDerivedDomain());
+    check_error(sdom4.getLowerBound() == sdom1.getLowerBound());
+    check_error(sdom4.getUpperBound() == sdom1.getUpperBound());
+
+    IntervalIntDomain edom4(tokens[0][0]->getEnd()->getDerivedDomain());
+    check_error(edom4.getLowerBound() == edom1.getLowerBound());
+    check_error(edom4.getUpperBound() == edom1.getUpperBound());
+
+    Europa::Id<TokenVariable<IntervalIntDomain> > pvar4(tokens[0][0]->getParameters()[0]);
+    IntervalIntDomain pdom4(pvar4->getDerivedDomain());
+    check_error(pdom4.getLowerBound() == pdom1.getLowerBound());
+    check_error(pdom4.getUpperBound() == pdom1.getUpperBound());
+
+    return true;
+  }    
+
 };
 
 class TimelineTest {
