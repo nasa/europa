@@ -1119,7 +1119,7 @@ detailed instructions on how to visualize your plan can also be found in
 PLASMA/HELLOWORLD. 
 
 Once you have installed PlanWorks, run it using ant.  This should bring the
-following screen:
+initial screen as shown in Figure~\ref{PlanWorksInitial}.
 
 \begin{figure}[htb]
 \centering\epsfig{file=PlanWorks-initial.eps, width = 5in}
@@ -1132,7 +1132,7 @@ and Help (the Windows menu will be disabled since there are no windows
 inside your PlanWorks workspace).  Click on Project and create a new
 project. Then, select your planning sequence which should be under your
 plans directory and will be a long name with a sequence number encoded in
-the name.  The planning sequence screen should look like this:
+the name.  Figure~\ref{PlaningSequence} shows the planning sequence screen.
 
 \begin{figure}[h]
 \centering\epsfig{file=PlanWorks-planningSequence.eps, width = 5in}
@@ -1140,13 +1140,25 @@ the name.  The planning sequence screen should look like this:
 \label{PlanningSequence}
 \end{figure}
 
-Once you have loaded a sequence, you'll see a histogram of each of the
+Once you have loaded a sequence, you'll see two panels: SequenceQuery and
+SequenceStepsView. The SequenceStepsView shows a histogram of each of the
 planning steps.  The first bar indicates the first step of the plan and
 the last bar, the last step of the plan.  A yellow dot above the bar
 indicates that data is available for this step.  A red dot means that no
 data is available for this step.  The green dot means that the data is
 available and loaded.  The color of the dot changes when you decide to log
-only some steps or when you use the planner control.
+only some steps or when you use the planner control.  
+
+Each bar is composed of three different colors.  The green color denotes
+the number of tokens, the blue color denotes the number of variables, and
+the sand color denotes the number of constraints.  This gives visual
+feedback as to the proportion of tokens, variables, and constraints in each
+step of the plannning process.
+
+Right-click on any column in the step view, you'll see a set of menus:
+Constraint Network View, DB Transaction View, Decision View, Resource
+Profile View, Resource Transaction View, Temporal Extent View, Timeline
+view, and Token Network View as shown in Figure~\ref{StepMenu}.
 
 \begin{figure}[h]
 \centering\epsfig{file=PlanWorks-StepMenu.eps, width = 5in}
@@ -1156,21 +1168,32 @@ only some steps or when you use the planner control.
 
 Now, let's get some information from the plan.  Let's focus on a Going
 token that takes spirit from the lander to rock4.  Let's click on the last
-step and bring up the timeline view.
-
-%% TBW: TODO: replace with the timeline view of the last step.
+step and bring up the timeline view. You can get more information about the
+Going token by right-clicking on it and bringing up the Navigator view.
+You'll see the token in the center of the view with its variables beneath
+it and the rule that is responsible for it's existence on the top.  You can
+find the parent token by clicking on the rule.  You'll see the token
+Navigator.At appear in blue.  It is blue because that is the color of the
+Nav timeline.  You will also see the other Going token appear which also
+results from appylying rule2.  Figure~\ref{TimelineView} shows the Timeline
+and Navigator View.
 
 \begin{figure}[h]
-\centering\epsfig{file=PlanWorks-timelineView.eps, width = 5in}
-\caption{\ET\, PlanWorks Timeline View}
+\centering\epsfig{file=PlanWorks-timeline-navigator.eps, width = 5in}
+\caption{\ET\, PlanWorks Timeline and Navigator View}
 \label{TimelineView}
 \end{figure}
 
 Since there's too much information and we are looking for the Going token,
 why don't we limit the view to show only Going tokens.  We can do this by
-using the Content Filter.  Type Going on the first Predicate line and then
-click Apply Filter.  You should see a new timeline view showing only the
-tokens of interest.
+using the Content Filter.  The content filter allows you to restrict the
+view to only those things that you're interested in viewing. Click on the
+content filter window.  In Predicate, type Navigator.Going.  Then press
+"Apply Filter".  You should see the timeline view restricted to the free
+Going tokens only, with no tokens on any of the timelines.  That is because
+there are currently no inserted tokens on any timeline (nav is the only
+possible one).  Figure~\ref{TimelineViewFiltered} shows the timeline view
+with Going tokens only.
 
 \begin{figure}[h]
 \centering\epsfig{file=PlanWorks-timelineViewGoingFiltered.eps, width = 5in}
@@ -1189,8 +1212,8 @@ workspace.  The options on the window should show: Steps ... Where
 Constraint Transacted ... Key ... CONSTRAINT\_ALL. Instead of ``Where
 Constarint Transacted'' select ``Where Token Transacted'' and enter the key
 145 in the key field, then press Apply Query.  This will bring a window
-with the set of transactions that apply to the Going token 145.  It will
-look something like this:
+with the set of transactions that apply to the Going token 145.
+Figure~\ref{TokenQuery} shows the results of the transaction query.
 
 \begin{figure}[htb]
 \centering\epsfig{file=PlanWorks-tokenQuery.eps, width = 5in}
@@ -1212,7 +1235,8 @@ one level up and one level down.  This will give you an idea of its parent
 and its subgoals.  Then, right-click on Battery.Change token and select the
 RuleInstance View.  This will bring up the rule code in a separate window.
 This is useful when you're debugging your model as well as your planner.
-The window should look like this:
+Figure~\ref{TokenNetwork-RuleInstance} shows the Token Network View
+just described.
 
 %\begin{figure}[htb]
 %\centering\epsfig{file=PlanWorks-tokenNetworkFiltered-ruleInstance-withBattery.eps, width = 5in}
@@ -1220,11 +1244,34 @@ The window should look like this:
 %\label{TokenNetwork-RuleInstance}
 %\end{figure}
 
-%% TBW: TODO: Get the resource view with the correct profile!
-
 If you have questions about the resource levels and want to view the
-resource profile, you can click on Step 16 which should show the effect of
-the Battery.change as a consequence of the Going token. 
+resource profile, you can click on Step 34 which should show the effect of
+the resources on the final plan. The resource profile view shows the
+resource envelope and the limits imposed. The transaction view shows all
+transactions to date.  Right-click on the transaction in the middle row and
+bring up the Navigator view to display information about the transaction.
+You'll see that Rule 8 is responsible for this transaction.  Click on Rule
+8 and you should see the Going token with key = 145.
+Figure~\ref{ResourceOverview} shows the Resource Profile and Resource
+Transaction windows for the last step.
+
+\begin{figure}[h]
+\centering\epsfig{file=PlanWorks-resource.eps, width = 5in}
+\caption{\ET\, PlanWorks Resource Profile and Transaction View}
+\label{ResourceOverview}
+\end{figure}
+
+Let's open the Constraint Network view and let's see what constraints are
+acting on the variables of the Going token. Click on every variable from
+left to right.  You'll have to scroll to get to the other variables since
+the view expands beyond your window.  In order to see the entire data, you
+can bring up an overview window.  Right-click on the background of the
+Constraint Network view.  Select the "Overview Window".  A small windows
+showing the entire data that can be displayed in this view will pop up.
+The rectangle shows the data currently in view.  The Constraint Network
+view allows you to view all variables and consraints and their
+relationships to each other.  Figure~\ref{ConstraintNetworkOverview} shows
+the Constraint Network View with the Overview window.
 
 \begin{figure}[h]
 \centering\epsfig{file=PlanWorks-constraintNetwork-overview.eps, width = 5in}
@@ -1232,8 +1279,17 @@ the Battery.change as a consequence of the Going token.
 \label{ConstraintNetworkOverview}
 \end{figure}
 
-Finally, if you want to focus your attention in the timepoints at which
-events happen, you may bring up the Temporal Extent View.
+Let's open the Temporal Extent view on step 15.  Scroll down until you
+see token Going with key = 145.  The top arrows that are above the line and
+pointing down show the range for the start time.  The bottom arrows that
+are beneath the line and pointing up show the range for the end time.
+Mousing over the arrow will show you the time.  In this view you can show
+the timescale line which will help you view the events that happen before,
+at and after that time.  You can bring this line up by right-clicking on
+the background of the view and selecting Set Time Scale Line.  You should
+see a red line appear wherever you had your mouse last.  That is also the
+current method to move the time scale line. Figure~\ref{TemporalExtentView}
+shows time 35.  
 \begin{figure}[h]
 \centering\epsfig{file=PlanWorks-temporalExtent-timeScaleLine.eps, width = 5in}
 \caption{\ET\, PlanWorks Temporal Extent View}
