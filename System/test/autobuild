@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.93 2004-10-05 00:51:04 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.94 2004-10-05 18:29:50 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the PLASMA planner system.
 
@@ -9,11 +9,16 @@
 #   do not remove PLASMA, and require starting within an existing PLASMA checkout.
 if test -z "$1"
 then
-    email=checkins@postdoc.arc.nasa.gov
-    removePlasma=true
+    email="$USER"@email.arc.nasa.gov
+    removePlasma=false
 else
     email="$1"
-    removePlasma=false
+    if test "$email" != 'checkins@postdoc.arc.nasa.gov'
+    then
+        removePlasma=false
+    else
+        removePlasma=true
+    fi
 fi
 
 echo ''
@@ -74,7 +79,8 @@ export CVS_RSH CVSROOT
 
 if "$removePlasma"
 then
-    # For this to work, this script must always be called by its full path name.
+    # For this to work, this script must be called by its full path name
+    #   when emailing to checkins@postdoc.arc.nasa.gov.
     startdir="`dirname $0`"
     startdir="`cd $startdir; pwd`"
     cd "$startdir"
@@ -82,9 +88,14 @@ else
     startdir="`pwd`"
     case "$startdir" in
     *PLASMA)
+            if test ! -d CVS
+            then
+                echo "$0"': must be run inside existing PLASMA checkout when giving email address other than checkins@postdoc.arc.nasa.gov'
+                exit 21
+            fi
             ;;
     *)
-            echo "$0"': run inside existing PLASMA checkout when giving email address'
+            echo "$0"': must be run inside existing PLASMA checkout when giving email address other than checkins@postdoc.arc.nasa.gov'
             exit 22
             ;;
     esac
