@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.112 2004-12-31 22:14:13 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.113 2005-01-14 01:31:25 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the EUROPA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -365,9 +365,9 @@ then
     fi
     if "$removePlasma"
         then
-        PPW_CONFIG="$startdir"'/PLASMA/CBPlanner/component/sample-ppw-config'
+        PPW_CONFIG="$startdir"'/PLASMA/CBPlanner/component/PlanWorks.cfg'
     else
-        PPW_CONFIG="$startdir"'/CBPlanner/component/sample-ppw-config'
+        PPW_CONFIG="$startdir"'/CBPlanner/component/PlanWorks.cfg'
     fi
     export PPW_CONFIG
     jamCmd run-nddl-planner-tests withPPW
@@ -446,9 +446,9 @@ else
         if "$removePlasma"
             then
             jamCmd clean clean
-            PPW_CONFIG="$startdir"'/PLASMA/CBPlanner/component/sample-ppw-config'
+            PPW_CONFIG="$startdir"'/PLASMA/CBPlanner/component/PlanWorks.cfg'
         else
-            PPW_CONFIG="$startdir"'/CBPlanner/component/sample-ppw-config'
+            PPW_CONFIG="$startdir"'/CBPlanner/component/PlanWorks.cfg'
         fi
         export PPW_CONFIG
         jamCmd run-nddl-planner-tests withPPW
