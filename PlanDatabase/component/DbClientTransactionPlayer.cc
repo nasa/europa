@@ -613,6 +613,8 @@ namespace Prototype {
           typeName = child_el->Attribute("type");
         }
         if (type == SYMBOL) {
+          check_error(strcmp(typeName, child_el->Attribute("type")) == 0,
+                      "symbols from different types in the same enumerated set");
           continue;
         }
       }
@@ -624,7 +626,7 @@ namespace Prototype {
 //          continue;
 //        }
 //      }
-      check_error(ALWAYS_FAILS);
+      check_error(ALWAYS_FAILS, "unknown type for value in an enumerated set");
     }
     check_error(type != ANY);
     // gather the values
