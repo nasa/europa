@@ -2,8 +2,10 @@ SubDir PLASMA Utils test ;
 
 if ! $(PLASMA_READY) {
 
-ModuleMain error-test : error-test.cc : Utils ;
-RunModuleMain run-error-test : error-test ;
-LocalDepends tests : run-error-test ;
+SubDirHdrs $(PLASMA) ConstraintEngine component ;
+
+ModuleMain utils-module-tests : module-tests.cc : Utils ;
+RunModuleMain run-utils-module-tests : utils-module-tests ;
+LocalDepends tests : run-utils-module-tests ;
 
 } # PLASMA_READY
