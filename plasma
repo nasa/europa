@@ -218,6 +218,7 @@ cp McGann/NddlCompiler/test/simple-predicate.nddl PLASMA/NDDL/test/compiler/
 cp McGann/NddlCompiler/test/simple-resources.nddl PLASMA/NDDL/test/compiler/
 cp McGann/NddlCompiler/test/simple-rules.nddl PLASMA/NDDL/test/compiler/
 cp McGann/NddlCompiler/test/subclass.nddl PLASMA/NDDL/test/compiler/
+cp McGann/NddlCompiler/test/NddlMain.cc PLASMA/NDDL/test/compiler/
 
 # McGann/PlanDatabase -> PLASMA/System/component/
 

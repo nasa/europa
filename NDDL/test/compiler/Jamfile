@@ -1,17 +1,19 @@
 SubDir PLASMA NDDL test compiler ;
 
-NDDL_COMPILER_TESTS = 
-	class-constructor.nddl   multi-resources.nddl   simple-resources.nddl
-	existential.nddl         no-world.nddl          simple-rules.nddl
-	guards.nddl              plasma-base.nddl       subclass.nddl
-	interval-constants.nddl  simple-class.nddl
-	less-basic-model.nddl    simple-predicate.nddl 
-	;
+local compiler_test = no-world.nddl ;
+local hh = $(compiler_test:S=.hh) ;
+local cc = $(compiler_test:S=.cc) ;
+LocalDepends nddl-tests : $(hh) $(cc) ;
+NddlCompiler $(hh) $(cc) : $(compiler_test) ;
 
-local compiler_test ;
-for compiler_test in $(NDDL_COMPILER_TESTS) {
-  local hh = $(compiler_test:S=.hh) ;
-  local cc = $(compiler_test:S=.cc) ;
-  LocalDepends tests : $(hh) $(cc) ;
-  NddlCompiler $(hh) $(cc) : $(compiler_test) ;
+local model ;
+
+for model in
+	class-constructor.nddl   multi-resources.nddl   simple-rules.nddl
+	existential.nddl         plasma-base.nddl       subclass.nddl
+	guards.nddl              simple-class.nddl
+	interval-constants.nddl  simple-predicate.nddl
+	less-basic-model.nddl    simple-resources.nddl
+{
+  NddlSystemTest nddl-tests : NddlMain.cc : $(model) : NDDL ;
 }
