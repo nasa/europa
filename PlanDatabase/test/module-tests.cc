@@ -454,7 +454,7 @@ private:
   }
 };
 
-void main(){
+int main(){
   initConstraintLibrary();
   
   REGISTER_NARY(EqualConstraint, "CoTemporal", "Default");
@@ -466,5 +466,5 @@ void main(){
   runTestSuite(ObjectTest::test, "Object Tests");
   runTestSuite(TokenTest::test, "Token Tests");
   runTestSuite(TimelineTest::test, "Timeline Tests");
-  cout << "Finished" << endl;
+  std::cout << "Finished" << std::endl;
 }
