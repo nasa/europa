@@ -361,7 +361,7 @@ namespace Prototype {
 	}
 	if(!emptySlots)
 	  objOut << SNULL;
-	objOut << endl;
+	objOut << std::endl;
       }
       for(std::set<TokenId>::iterator tokenIterator = tokens.begin(); tokenIterator != tokens.end();
 	  ++tokenIterator) {

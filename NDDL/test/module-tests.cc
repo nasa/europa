@@ -49,5 +49,5 @@ private:
 
 int main() {
   runTestSuite(NddlSchemaTest::test);
-  cout << "Finished" << endl;
+  std::cout << "Finished" << std::endl;
 }
