@@ -5,6 +5,7 @@
  * Just provide forward declarations of classes
  */
 
+#include "CommonDefs.hh"
 #include "Id.hh"
 #include <list>
 #include <cassert>
@@ -19,11 +20,6 @@ const bool ALWAYS_FAILS = false;
 
 namespace Prototype
 {
-  static const int MAX_INT = 1999999999;
-  static const int PLUS_INFINITY = MAX_INT;
-  static const int MINUS_INFINITY = -PLUS_INFINITY;
-  static const double EPSILON = 0.00001; /*!< Used when computing differences on REAL NUMBERS. Smallest increment */
-
   class Entity;
   typedef Id<Entity> EntityId;
 
