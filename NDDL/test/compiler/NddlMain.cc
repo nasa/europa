@@ -1,55 +1,23 @@
+// Include prototypes required to integrate to the NDDL generated model
 #include "Nddl.hh"
-#include "NddlUtils.hh"
+
+// Support for registered constraints
+#include "ConstraintLibrary.hh"
+#include "Constraints.hh"
+#include "ObjectTokenRelation.hh"
+
+// Support fro required plan database components
 #include "PlanDatabase.hh"
 #include "RulesEngine.hh"
 #include "Schema.hh"
-#include "ObjectTokenRelation.hh"
-#include "ObjectFilter.hh"
+#include "ConstraintEngine.hh"
+
+// Access for registered event loggers for instrumentation
+#include "CeLogger.hh"
 #include "DbLogger.hh"
 
-#include "../ConstraintEngine/ConstraintEngine.hh"
-#include "../ConstraintEngine/IntervalIntDomain.hh"
-#include "../ConstraintEngine/BoolDomain.hh"
-#include "../ConstraintEngine/ConstraintLibrary.hh"
-#include "../ConstraintEngine/Constraint.hh"
-#include "../ConstraintEngine/Constraints.hh"
-#include "../ConstraintEngine/TestSupport.hh"
-#include "../ConstraintEngine/CeLogger.hh"
-
-#include <list>
-#include <vector>
-#include <iostream>
-#include <cassert>
-
-namespace NDDL {
-
-  NddlToken::NddlToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName)
-    :Prototype::IntervalToken(planDatabase, 
-			      predicateName,
-			      true,
-			      IntervalIntDomain(),
-			      IntervalIntDomain(),
-			      IntervalIntDomain(1, PLUS_INFINITY),
-			      Prototype::Token::noObject(),
-			      false){commonInit();}
-
-  NddlToken::NddlToken(const TokenId& master, const LabelStr& predicateName)
-    :Prototype::IntervalToken(master, 
-			      predicateName,
-			      IntervalIntDomain(),
-			      IntervalIntDomain(),
-			      IntervalIntDomain(1, PLUS_INFINITY),
-			      Prototype::Token::noObject(),
-			      false){commonInit();}
-
-  void NddlToken::commonInit(){
-    state = getState();
-    object = getObject();
-    start = getStart();
-    end = getEnd();
-    duration = getDuration();
-  }
-}
+// Utility for obtaining defualt constraint library registration
+#include "TestSupport.hh"
 
 void main(){
   // Initialize constraints
