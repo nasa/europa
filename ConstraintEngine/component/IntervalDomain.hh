@@ -51,32 +51,101 @@ namespace Prototype{
      */
     void setToSingleton(double value);
 
+    /**
+     * @brief restricts this domain to the intersection of its values with the given domain.
+     * @param dom the domain to intersect with. Must not be empty.
+     * @return true if the intersection results in a change to this domain, otherwise false.
+     */
+    bool intersect(const IntervalDomain& dom);
+
+    /**
+     * @brief Convenience version of intersect.
+     * @param lb the lower bound of domain to intersect with
+     * @param ub the upper bound of domain to intersect with. ub must be >= lb.
+     * @return true if the intersection results in a change to this domain, otherwise false.
+     * @see (const IntervalDomain& dom
+     */
     bool intersect(double lb, double ub);
-    bool relax(double lb, double ub);
-    bool isMember(double value) const;
-    bool isEnumerated() const;
-    bool isSingleton() const;
-    bool isEmpty() const;
+
+    /**
+     * @brief Force the domain to empty.
+     * @see DomainListener::EMPTIED
+     */
     void empty();
-    int getSize() const;
-  protected:
-    IntervalDomain(double lb, double ub, bool finite, bool closed, const DomainListenerId& listener);
-    IntervalDomain(const IntervalDomain& org);
-    IntervalDomain(Europa::Domain& org);
 
     /**
      * @brief Relax this domain to that of the given domain
      * @param dom - The domain to relax it to. Must not be empty and must be a superset of this domain.
      */
     IntervalDomain& operator=(const IntervalDomain& dom);
+
+    /**
+     * @brief Convenience method for relaxing a domain.
+     * @param lb the lower bound of domain to relax to. lb must be <= m_lb
+     * @param ub the upper bound of domain to relax to. ub must be >= m_ub
+     * @return true if relaxation causes a change to this domain
+     * @see operator=(const IntervalDomain& dom)
+     */
+    bool relax(double lb, double ub);
+
+    /**
+     * @brief test for membership
+     * @param value to test for
+     * @return true if a member of the domain, otherwise false
+     */
+    bool isMember(double value) const;
+
+    /**
+     * @brief Always false
+     */
+    bool isEnumerated() const;
+
+    /**
+     * @brief test for single valued domain.
+     */
+    bool isSingleton() const;
+
+    /**
+     * @brief test for empty domain. Only allowed to call this on closed domains.
+     */
+    bool isEmpty() const;
+
+    /**
+     * @brief return the number of elements in the domain. an only be called on a domain which is finite.
+     */
+    int getSize() const;
+
+    /**
+     * @brief test for equality.
+     */
     bool operator==(const IntervalDomain& dom) const;
-    bool intersect(const IntervalDomain& dom);
+
+    /**
+     * @brief test if this domain is a subset of dom.
+     * @param dom the domain tested against.
+     * @param true if all elements of this domain are in dom. Otherwise false.
+     */
     bool isSubsetOf(const IntervalDomain& dom) const;
+
+  protected:
+    IntervalDomain(double lb, double ub, bool finite, bool closed, const DomainListenerId& listener);
+    IntervalDomain(const IntervalDomain& org);
+    IntervalDomain(Europa::Domain& org);
+
+    /**
+     * @brief Helper method to test if the given value can be considered an integer. Used in derived class.
+     * @see testPrecision
+     */
     double check(const double& value) const;
+
+    /**
+     * @brief tests if the given value is of the correct type for the domain type. Mostly used for
+     * restricting values of doubles to int. However, we could restrict it in other ways perhaps.
+     */
     virtual void testPrecision(const double& value) const = 0;
 
-    double m_ub;
-    double m_lb;
+    double m_ub; /*!< The upper bound of the domain */
+    double m_lb; /*!< The lower bound o fthe domain */
   };
 }
 #endif

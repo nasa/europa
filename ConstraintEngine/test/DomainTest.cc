@@ -1,5 +1,6 @@
 #include "LabelSet.hh"
 #include "LabelStr.hh"
+#include "IntervalIntDomain.hh"
 
 #include <iostream>
 #include <cassert>

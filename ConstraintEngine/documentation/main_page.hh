@@ -26,11 +26,11 @@
  * The prototype must address the deficincies outlined above. Some concrete design directions seem clear:
  * @li Restrict interfaces to allow required behaviour and prohibit unacceptable behavior.
  * @li Allow flexible configuration/control of the Propagation Scheduling
- * @li Allow registration of external constraints without requiring static linking
+ * @li Allow registration of external constraints without requiring static linking. Have not put much effort into this, but would investigate
+ * introducing a Library of some kind that can be extended and would be explciitly initialized in some way.
  * @li Provide fast implementations fo primitive components of propagation i.e. Domains
- * @li Require construction of actual objects to be extrenal to the constraint network to
- * allow specialization of implementations without change to the CNet core.
- * @li Require construction of propagators to be external to allow extension.
+ * @li Require construction of actual objects to be external to the constraint network to
+ * allow specialization of implementations without change to the CNet core. This is key to extendibility and maintainability.
  *
  * We also keep in mind a concrete instantiation of the framework that is guided by the Europa usage scenario. Thus we can
  * assume certain components would have to be integrated in an effective fashion:
@@ -76,12 +76,12 @@
  *
  * @section build Build Instructions
  * Some of the basics are:
+ * @li make this simple change to Value.cc:1320:  os << "Temporary hack to simplify linking while working on CE"; // os << obj->getName();
  * @li To build code, be sure to set the EUROPA_ROOT in the makefile.
  * @li make doc generates the html you are looking at :-)
  * @li make will run the module tests
  *
  * To run performance tests:
- * @li make this simple change to Value.cc:1320:  os << "Hack to simplify linking while working on CE"; // os << obj->getName();
  * @li first make under NewPlan as follows: make EUROPA_VERSION=_EUROPA_FAST_VERSION_ OPTIMIZE=3.
  * @li with Europa built correctly, change CC_FLAGS in the local makefile to CC_FLAGS=-03.
  * @li define _PROTOTYPE_FAST_VALUE_ in ConstraintEngineDefs.hh
@@ -101,5 +101,4 @@
  * @todo Define a ConstraintEngineListener interface and implement publish and subscribe support.
  * @todo Add support to gather statistics on performance and general instrumentation - probably through event listeners.
  * @todo Examine how the system could be extended to obtain explanations - for example, the path to change, or inconsistency.
- * @todo Implement code to remove constraint from a propagator when removed from the ConstraintEngine
  */

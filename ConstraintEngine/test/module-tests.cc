@@ -5,6 +5,7 @@
  * @brief Read the source for details
  */
 #include "ConstraintEngine.hh"
+#include "DefaultPropagator.hh"
 #include "AbstractVar.hh"
 #include "ConstraintFactory.hh"
 #include "ConstraintLibrary.hh"
@@ -26,8 +27,10 @@ using namespace std;
 class DefaultEngineAccessor{
 public:
   static const ConstraintEngineId& instance(){
-    if (s_instance.isNoId())
+    if (s_instance.isNoId()){
       s_instance = (new ConstraintEngine())->getId();
+      new DefaultPropagator(s_instance);
+    }
 
     return s_instance;
   }
@@ -612,7 +615,7 @@ private:
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
 
-    /*!< Show that we can simply delete a constraint and confirm that the system is still consistent */
+    /* Show that we can simply delete a constraint and confirm that the system is still consistent */
     delete (Constraint*) c1;
     ENGINE->propagate();
     assert(ENGINE->constraintConsistent());
@@ -631,7 +634,7 @@ private:
     assert(ENGINE->constraintConsistent());
     assert(v1.getDerivedDomain().getUpperBound() == 10);
 
-    /*!< Add a constraint to force an inconsistency and show that consistency can be restored by removing the
+    /* Add a constraint to force an inconsistency and show that consistency can be restored by removing the
       constraint */
     variables.clear();
     VariableImpl<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 0));
