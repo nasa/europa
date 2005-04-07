@@ -78,39 +78,39 @@ LocalDepends run-hsts-planner-tests :
        merTest16-h
        merTest17-h
        merTest18-h
-#        gnats-C3 # now failing to find a plan
+       gnats-C3
        gnats-NoBranchBug
-#        gnats-P4-C3  # now failing to find a plan
-#        gnats-P4-C3eq # now failing to find a plan
+       gnats-P4-C3 
+       gnats-P4-C3eq
         gnats-SC
         gnats-rover-fixed
         gnats-sum
        dnp-timeline
        dnp-DNP2 
        dnp-allDSS 
-#       dnp-fourFreeObs # times out
-#       dnp-DNP3fourFreeObs # times out
+#       dnp-fourFreeObs # times out (after 3-4 minutes on tara)
+#       dnp-DNP3fourFreeObs # times out (after 9-10 minutes on tara)
        dnp-DNP3
-#       dnp-fourFreeObsNotEmpty # times out
+#       dnp-fourFreeObsNotEmpty # times out (after 9-10 minutes on tara)
 #       dnp-freeObs # needs heursitics?!
 #       dnp-freeObsNoEmpty # needs heuristics?!
 #       dnp-tenFreeObs # needs heuristics?!
         dnp-threeFreeObs
-#     dnp-twentyFreeObs # times out
+#     dnp-twentyFreeObs # times out (after 8-9 minutes on tara)
         dnp-twoFreeObs 
        dnp-timeline-h
        dnp-DNP2-h 
        dnp-DNP23-h
        dnp-allDSS-h 
-#       dnp-fourFreeObs-h # times out
-#       dnp-DNP3fourFreeObs-h
+#       dnp-fourFreeObs-h # times out (after 4-5 minutes on tara)
+#       dnp-DNP3fourFreeObs-h # times out (after 8-9 minutes on tara)
        dnp-DNP3-h
-#       dnp-fourFreeObsNotEmpty-h
-#      dnp-freeObs-h # runs forever
-#       dnp-freeObsNoEmpty-h # runs forever
+#       dnp-fourFreeObsNotEmpty-h # times out (after 9-10 minutes on tara)
+#      dnp-freeObs-h # times out (after 40-45 minutes on tara)
+#       dnp-freeObsNoEmpty-h # times out (after 37-38 minutes on tara)
        dnp-tenFreeObs-h
        dnp-threeFreeObs-h
-#       dnp-twentyFreeObs-h # times out
+       dnp-twentyFreeObs-h
        dnp-twoFreeObs-h
         ;
 
