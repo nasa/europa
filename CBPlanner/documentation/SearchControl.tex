@@ -1,0 +1,154 @@
+\documentclass[10pt, letterpaper, twoside]{article}
+
+\usepackage{epsfig}
+
+\usepackage{verbatim}
+
+\pagestyle{headings}
+
+\author{Conor McGann}
+
+\title{Search Control for CBPlanner}
+
+\begin{document}
+
+\maketitle
+
+This document outlines the requirements and technical approach for controlling the search undertaken by the standard planner, CBPlanner. We assume a chronological-backtracking heuristic search.
+
+\section{Preliminaries}
+
+In our planning paradigm, a planner is a problem solving actor which operates to resolve flaws in a plan database. Informally, a flaw is an indication of a potential for inconsistency in a given partial plan. We distinguish 3 types of flaw, each with its own corresponding  procedure to resolve it:
+\begin{enumerate}
+\item An Object Flaw - arises when an ordering is required for tokens associated with an object. This occurs in objects such as {\em Timelines} to ensure that a mutual exclusion is enforced, and on metric resources to ensure that the resource level is within specified limits.
+\item A Token Flaw - arises when a token is in the {\em Plan Database} but not yet in the {\em Plan}. Such a token is said to be {\em Inactive}. Token Flaws are resolved through merging with an existing token already in the plan, through insertion as a new token in the plan, or through rejection, if permitted.
+\item A Variable Flaw - arises if there are variables of tokens already in the plan whose values have not been specified. Such a variable is said to be {\em unbound}. Variable Flaws are addressed by specifying a value for the domain. 
+\end{enumerate}
+
+Within the standard search procedure we distinguish 3 elements of search control which provide the tools for tuning and customization to particular applications and domains:
+\begin{enumerate}
+\item Scope Definition - defines the set of flaws that must be resolved to complete the plan. When there are no flaws remaining, and the plan database is not inconsistent, the plan is considered complete and the planner terminates.
+\item Flaw Selection - identifies which flaw to resolve next.
+\item Flaw Resolution - executes appropriate underlying procedures to resolve a flaw, until all stipulated options are exhausted. These underlying procedures include the actions already mentioned, as well as the aggregation and ordering of choices for resolution. Note that a flaw may persist after resolution steps have been taken. For example, a Timeline may require additional orderings in order to ensure the temporal mutual exclusion is satisfied.
+\end{enumerate}
+
+The focus of this document is to provide the means to efficiently, compactly and flexibly customize each of the above elements of search control to provide a versatile planner.
+
+\section{Requirements}
+This section reviews by example the main components of search control and presents observations for generalization of the requirement or to consider as we further develop the technical approach.
+
+\subsection{Scope Management}
+In general, there may be many sophisticated ways in which the scope of flaws for a planner to work on can be specified. We look at this from the point of view of filters applied to the built in set of system flaws described earlier. Examples of the criteria that have arisen include:
+\begin{enumerate}
+\item Exclude all Token Flaws whose timepoints are not necessarily contained by the planners horizon. This is a dynamic flaw filter in that it may have to be re-evaluated if the timepoints are restricted.
+\item Exclude all Temporal Variable Flaws. This is a static flaw filter since a variable is always a temporal variable.
+\item Exclude all Variable Flaws with the name {\em foo}. This is a static flaw filter since the name of a variable cannot change.
+\item Exclude all Variable Flaws with infinite domains. This may be a static filter for some variables and a dynamic filter for others. For example, all variabes with enumerated domains are finite. Interval domains may be finitie if they are singletons, or if they are restricted to integer values and have finite bounds.
+\item Exclude all Variable Flaws with the name {\em foo} unless they are singletons. This is a dynamic filter since it must be re-evaluated as the domain is restricted.
+\item Exclude all Object Flaws on objects of class {\em Foo}. This applies to all subclasses of {\em Foo} also.
+\item Exclude all Variable Flaws on all Tokens of all objects of class {\em Foo}. This is a static filter.
+\item Exclude all Token Flaws which can be rejected until there are no token flaws which cannot be rejected. This is a dynamic filter that should be re-evaluated as tokens change their state or are added to the plan database.
+\item Exclude all start variables of all tokens of predicate {\em Bar} unless the start variable is a singleton or the level of the resource between the lower bound of the start variable, and a horizon {\em h} exceeds a given threshold.
+\end{enumerate}
+
+OBSERVATIONS: We consider that the requirements of Scope Management can be considered in 2 parts:
+\begin{enumerate}
+\item What filters should be considered for a given entity? This is a problem of matching the scope specification of a filter with the context of a flaw.
+\item What test should be applied to evaluate the filter? In the simplest cases, this is trivial, since the match against a scope specification is sufficient to concusively exclude a flaw. However, it may be more complex requiring arbitrary procedures to be executed to evaluate rich and possibly only remotely connected contextual information.
+\end{enumerate}
+
+\subsection{Flaw Selection}
+There are many conceivable ways in which the next flaw to work on can be determined. Here are some examples:
+\begin{enumerate}
+\item Prefer unit variable flaws over all other flaws. The rational behind this approach is based on the combination of prefering the most constrained flaw with the cheapest cost to find such a flaw.
+\item Prefer unit token flaws over all other flaws except unit variable flaws.
+\item Prefer non-variable flaws participating in a conditional subgoal over non-unit variable flaws not participating in a subgoal.
+\item Prefer Object Flaws with the least number of ordering choices.
+\end{enumerate}
+
+OBSERVATIONS: One has to carefully consider the cost of computing sophisticated heuristics with their benefits. One should like to experiment with these matters as a planning problem is being tackled and the nature of the search is becoming apparent. Stronger heuristics may need to be introduced in a targetted fashion to address particularly troublesome aspects of the search. In contrast, cheap and naive methods may well suffice where choices seem to have little impact on the problem. Thus we have a few key points:
+\begin{enumerate}
+\item We must be able to customize the heuristic evaluation technique for targetted subsets of the set of flaws.
+\item Given that we will likely end up in a division of the set of flaws into subsets governed by specialized techniques, it is imperitive to have a globally agreed priority scheme to allow one group to over-ride another, and also to permit a cut-off prior to visiting all flaws if a current best priority cannot be beaten.
+\item It must be possible to unambiguously relate a flaw to exactly one flaw selection mechanism. This relationship is often static but could conceivably be dynamic.
+\end{enumerate}
+
+\subsection{Flaw Resolution}
+Once again there is quite a spectrum of complexity for resolving flaws. Here are some examples encountered so far:
+\begin{enumerate}
+\item Prefer values in ascending order of all Variables of all Tokens on all objects of class {\em Foo} or its subclasses.
+\item Prefer values in descending order for all Variables of the name {\em foo}
+\item Randomly select from all possible values for all Variables on all Tokens of all objects of class {\em Bing} using a uniform distribution.
+\item Prefer merging with tokens with minimal {\em distance} from the inactive token. This selects the least constraining value in some sense.
+\item Select a single value for all variables with name {\em foo} by request from external agent {\em WeatherSensor}.
+\item Prefer to place tokens as early as possible for all instances of the class {\em Bar}.
+\item Prefer values on variables of tokens of predicate {\em Baz} which have the highest value for the function {\em func}.
+\end{enumerate}
+
+OBSERVATIONS: There is clearly a diversity of resolution schemes. Once again we see the need for a targetted approach allowing very specific and quite esoteric methods to be used and also for very straightforward methods to be used. The former are most likely relevant for key parts of the search, for whatever the purposes of the planner. We note the following additional points:
+\begin{enumerate}
+\item We must be able to customize the flaw resoultion technique for arbitrary subsets of the flaws.
+\item It seems highly desireable to seek a close collaboration between Flaw Selection and Flaw Resolution since the data obtained to select the next flaw to work with, which may have been costly to obtain, is more often than not going to be directly useful to the Flaw Resolution technique. For example, computing the set of tokens with which a given token can be ordered is often useful to determine its priority as a flaw and is immediately useful as input to the resolver. 
+\item It may be desireable to scope Flaw Resolution mechanisms within the scope of Flaws of a given Flaw Selector.
+\end{enumerate}
+
+\section{Technical Approach}
+In this section we outline the basic scheme and describe its pro's and con's. We go on to describe a proposed syntax and semantics for matchable expressions, and describe the interfaces which will be provided to integrate search control components. Finally, a set of components that will be provided will be described and examples of how they can be configured for a planner will be presented.
+
+\subsection{Fundamental Design Decisions}
+There are 2 basic approaches to accomplishing the search control capabilities described. The first is to develop a rich and expressive scripting language which can be used to address each area of Scope Management, Flaw Selection, and Flaw Resolution in a context dependent manner. The second is to prefer a hybrid approach which uses a combination of a specialized language as a means to bind to specialized C++ code for final computation in each case. This second approach focuses on fast matching of entities based on local contextual information for each flaw type, and binding to pre-compiled plug-ins. The former approach has the advantage that it will most likely result in a coherent language for describing a carefully circumscribed set of search control capabilities. Its principal disadvantage is that it will likely be:
+\begin{enumerate}
+\item complex as it attempts to cover a broad scope of scenarios
+\item inevitably deficient and hence limiting
+\item costly to develop and maintain
+\end{enumerate}
+
+The latter, hybrid approach offers flexibility and extendibility since we can plug in arbitrary procedural code as a component for doing final computations. It possibly will lead to more efficient sytems since specialized, optimized code can be inserted for particularly costly calculations. It will also be less costly to develop and maintain since it permits rapid development of basic functionality and targetted incremental development of additional capabilities. The main disadvantage of the hybrid approach is that of reduced transparency for a user since the semantics of final calculation will be specific to component plug-ins. This is similar to the drawback of using procedural constraints instead of specifying the semantics of a constraint explicitly in the language. Arguably, there is a further potential draw-back in that there may be more of a requirement on the part of the application developer to have recourse to C++ programing. This can be augmented with a reasonable set of available plug-ins, which will be enhanced over time. We will hereafter refer to the hybrid approach as the {\em Dynamic Plug-in} approach. The remainder of this section addresses the details of achieving a dynamic plug-in framework for search control.
+
+\subsection{Expression Syntax and Semantics}
+We are focussed on matching against the local context of Objects, Tokens, and Variables. The approach for doing this is based on the relations between these entities arising in the schema and the plan database. The relations of interest are:
+\begin{enumerate}
+\item isA(ObjectType, ObjectType) - defines an inheritance relation between object types (STATIC).
+\item isA(objectName, ObjectType) - defines an object name in the plan database to be of a certain type (STATIC).
+\item hasA(ObjectType, ObjectType, ObjectName) - defines a composition relation between object types (STATIC).
+\item hasA(ObjectType, Variable Type, Variable Name) - defines a composition relation where variables are composed in Objects. In current implemenations, such variables will not be flaws as they are required to be singleton values on construction. We include it here for completeness (STATIC). 
+\item hasA(ObjectType, Predicate) - defines a 1 to many relation associating a given predicate with all instances of a given object type (STATIC).
+\item hasA(Predicate, Variable Type, Variable Name) - defines a 1 to many relation associating a set of variables with a Predicate (STATIC). Note that this includes local variables introduced in rules.
+\item hasSubGoal(Token, Token, TemporalRelation) - defines a relation between a master token, and its subgoal, with a qualification for the nature of the TemporalRelation (i.e. any, meets, metby, starts, ends....). This relation is dynamic since a given relation may not exist immediately but may be added as additional subgoal rules are triggered.
+\item hasDomain(Variable, Domain) - relates a set of domain values to a variable. This is a DYNAMIC relation since the set of values change as planning progresses. Note that certain expressions may take advantage of the monotonic restriction of the set of values to avoid re-evaluation of expressions over domains.
+\end{enumerate}
+
+In general, the syntax for expressions follows that developed for validating that certain patterns exist in Partial Plans using the {\em Aver} test language. This syntax is based on functions for returning sets of obects, tokens and variables: Objects(query-spec), Tokens(query-spec) and Variables(query-spec), were:
+\begin{enumerate}
+\item query-spec takes the form: [operand operator operand [ AND operand operator operand [..] ]]
+\item all operands resolve to a domain of values
+\item an operand can be a multi-valued literal domain such as {'A' 'B' 'C'} or [0.4 100.23]
+\item an operand can be a singleton value literal such as 'A' or 7.82 or 'fooObjectName'
+\item an operand can be derived from the properties of a local context e.g. this, objectType, predicateType, varType,  start, end, duration, state, object, userDefinedVariableName, domain. Note that the set of such properties is entirely dependent on the entity context in which they are being resolved.
+\item an operand can be a function on an operand: operand-function(operand). Examples of operand functions include: min, max, temporal-relations, ancestors, singleton
+\item an operator is drawn from the set of basic domain operations: >, <, ==, !=, in, out, intersects.
+\end{enumerate}
+
+Here are some sample expressions using this scheme:
+\begin{enumerate}
+\item ``Variables(objectType in {'Foo' 'Bar' 'Baz'} AND singleton(domain) == false)''. This will match all non-singleton variables on all tokens on all objects whose object type is in the given set.
+\item ``Tokens('Timeline' in ancestors(objectType))''. This will match all Tokens on all objects whose object type is derived from a Timeline.
+\item ``Tokens(object == 'navigator' AND speed in [3 7])''. This will match all tokens whose object variable is a singleton value with the name 'navigator' and the speed predicate variable is in the range [3 7].
+\end{enumerate}
+
+\subsection{Components and their responsibilities}
+We identify the following broad types of Components and indicate their responsibilities:
+\begin{enumerate}
+\item Static Flaw Filter. No component name or arguments are required with this component type. This declaration will be evaluated during Scope Management once on the first consideration of a Flaw. If a match is found then entity will be filtered out of scope.
+\item Dynamic Flaw Filter. This declaration will be evaluated and re-evaluated at most at every plan step for determining if as yet unexcluded flaws may be included in the planner scope. This declaration will include a component name indicating the plug-in to use to conduct the final test once the expression is successfully matched. We also indicate that components may be parameterized. We will not specify any general syntax or semantics to such parameterization, but will instead leave that up to each individual component to interpret.
+\item Object|Token|Variable Decision Manager. Responsible for Flaw Selelection for the given set of Flaws defined by the match expression, assuming they are in scope. Minimally we will provide components for each case which can handle a standard policy for Flaw Selection. We will ensure each component integrates with the Filtering Mechanisms configured to decide if a flaw is in scope or not. Filters declarations will be scoped within the context of a decision manager declaration. Decision Managers will be visitied in the order in which they are declared. These components will cache flaws that have been definitively excluded from scope, included into their scope, or as yet undetermined. Note that the integration with filters, where necessary will be done one flaw at a time, so that if we have the opportunity of an early cut-off due to a top-priority item, we can take it without wasting effort evaluating all the flaws.
+\item Object|Token|Variable Decision Point. Responsible for Flaw Resolution. These components are responsible for formulating the set of choices (internally), for selecting which choice to try next, for tracking which choices have already been tried, and for determining when there are no more choices available. These components are also responsible for invoking the appropriate plan database api's to execute a decision. All such details are fully encpasulated, permitting optimization internally and minimizing the need for unnecessary object creation.
+\end{enumerate}
+
+\subsection{Standard Plug-Ins}
+TBD
+
+\subsection{Instrumentation}
+TBD
+
+\end{document}
