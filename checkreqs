@@ -27,6 +27,10 @@ MINDOX_J=2
 MINDOX_K=14
 DOXPATH="/usr/local/bin"
 BADDOX=0
+BADPATH=0
+BADENVV=0
+BADJH=0
+BADBAL=0
 
 echo "Checking for required software versions:"
 
@@ -62,7 +66,7 @@ then
 fi
 
 #Check for minimum gcc version
-GCCVER=`gcc -v 2>&1 | egrep 'gcc version [0-9]\.[0-9]+\.[0-9]+' | cut -d" " -f3`
+GCCVER=`gcc -v 2>&1 | egrep 'gcc version [0-9]\.[0-9]+' | cut -d" " -f3`
 if [ -n "$GCCVER" ]
 then
   i=`echo $GCCVER | cut -d. -f1`
@@ -78,9 +82,12 @@ then
     then
       BADGCC=1 
     else
-      if [ $i -le $MINGCC_I -a $j -le $MINGCC_J -a $k -lt $MINGCC_K ]
+      if [ $OSTYPE != darwin ]
       then
-        BADGCC=1 
+        if [ $i -le $MINGCC_I -a $j -le $MINGCC_J -a $k -lt $MINGCC_K ]
+        then
+          BADGCC=1 
+        fi
       fi
     fi
   fi
@@ -239,8 +246,42 @@ fi
 
 if [ $BADJAM -eq 1 -o $BADGCC -eq 1 -o $BADJAVA -eq 1  -o $BADDOX -eq 1 ]
 then
-  exit 1
+  BADPATH=1
+else
+  echo "Path includes required versions to build EUROPA2"
 fi
 
-echo "Path includes required versions to build EUROPA2"
+echo "Checking for required environment variables:"
+
+if [ -z "$JAVA_HOME" ]
+then
+  echo "JAVA_HOME environment variable missing or not set"
+  BADJH=1
+else
+  echo "  JAVA_HOME is set to " $JAVA_HOME
+fi
+
+if [ $OSTYPE = darwin ]
+then
+  if [ "$DYLD_BIND_AT_LAUNCH"  != YES ]
+  then
+    echo "DYLD_BIND_AT_LAUNCH environment variable missing or not set to YES" 
+    BADBAL=1
+  else
+    echo "  DYLD_BIND_AT_LAUNCH is set to " $DYLD_BIND_AT_LAUNCH
+  fi
+fi
+
+if [ $BADJH -eq 1 -o $BADBAL -eq 1 ]
+then
+  BADENVV=1
+  echo "Environment variables may not be set correctly to build EUROPA2"
+else
+  echo "Required environment variables are present"
+fi
+
+if [ $BADPATH -eq 1 -o $BADENVV -eq 1 ]
+then
+  exit 1
+fi
 exit 0
