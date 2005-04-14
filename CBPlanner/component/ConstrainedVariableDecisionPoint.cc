@@ -30,6 +30,10 @@ namespace EUROPA {
     return m_choices.size();
   }
 
+  std::vector<double>& ConstrainedVariableDecisionPoint::getChoices() {
+    return m_choices;
+  }
+
   const double ConstrainedVariableDecisionPoint::getChoiceValue(const unsigned int index) const {
     if (m_var->lastDomain().isNumeric() && m_var->lastDomain().getSize() > 50) 
       return m_choices[0]+index;

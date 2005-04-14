@@ -18,6 +18,9 @@ namespace EUROPA {
 
     const ConstrainedVariableId& getVariable() const;
 
+    //QUICK FIX to support decision manager extension.
+    std::vector<double>& getChoices();
+
     void print(std::ostream& os) const;
   protected:
     ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId&, const OpenDecisionManagerId& odm);

@@ -24,6 +24,14 @@ namespace EUROPA {
     m_odm->initializeTokenChoices(dp);
   }
 
+  std::vector<LabelStr>& TokenDecisionPoint::getChoices() {
+    return m_choices;
+  }
+
+  unsigned int TokenDecisionPoint::getCurrentChoice() const {
+    return m_choiceIndex;
+  }
+
   const bool TokenDecisionPoint::assign() { 
     if (m_choiceIndex && m_choiceIndex >= m_choices.size()) return false;
     check_error(m_tok.isValid());
