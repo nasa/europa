@@ -21,6 +21,8 @@ namespace EUROPA {
     const TokenId& getToken() const;
 
     void print(std::ostream& os) const;
+  protected:
+    ObjectDecisionPoint(const DbClientId& dbClient, const TokenId&, const OpenDecisionManagerId& odm);
   private:
     friend class OpenDecisionManager;
     friend class DefaultOpenDecisionManager;
@@ -28,8 +30,6 @@ namespace EUROPA {
 
     std::vector< std::pair< ObjectId, std::pair<TokenId, TokenId> > > m_choices;
     unsigned int m_choiceIndex;
-
-    ObjectDecisionPoint(const DbClientId& dbClient, const TokenId&, const OpenDecisionManagerId& odm);
 
     TokenId m_token;
     OpenDecisionManagerId m_odm;

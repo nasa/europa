@@ -20,13 +20,14 @@ namespace EUROPA {
     const ResourceId& getResource() const { return m_resource; }
 
     void print(std::ostream& os) const;
+
+  protected:
+    ResourceFlawDecisionPoint(const ResourceId&);
   private:
     friend class ResourceOpenDecisionManager;
     
     std::vector<std::pair<TransactionId, TransactionId> > m_choices;
     unsigned int m_choiceIndex;
-
-    ResourceFlawDecisionPoint(const ResourceId&);
 
     ResourceId m_resource;
   };

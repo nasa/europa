@@ -26,7 +26,7 @@ namespace EUROPA {
     check_error(m_var.isValid());
     if (m_var->lastDomain().isNumeric()) 
       if (!m_var->lastDomain().isFinite() || m_var->lastDomain().getSize() > 50) 
-	return m_choices[1] - m_choices[0];
+	return (unsigned int) (m_choices[1] - m_choices[0]);
     return m_choices.size();
   }
 

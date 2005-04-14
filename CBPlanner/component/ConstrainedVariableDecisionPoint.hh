@@ -19,12 +19,13 @@ namespace EUROPA {
     const ConstrainedVariableId& getVariable() const;
 
     void print(std::ostream& os) const;
+  protected:
+    ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId&, const OpenDecisionManagerId& odm);
   private:
     friend class OpenDecisionManager;
     friend class DefaultOpenDecisionManager;
     friend class HSTSOpenDecisionManager;
 
-    ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId&, const OpenDecisionManagerId& odm);
     unsigned int getNrChoices();
     const double getChoiceValue(const unsigned int index) const;
     
