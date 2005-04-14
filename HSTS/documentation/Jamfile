@@ -1,7 +1,0 @@
-SubDir PLASMA HSTS documentation ;
-
-if ! $(PLASMA_READY) {
-
-ModuleDocumentation HSTS ;
-
-} # PLASMA_READY
