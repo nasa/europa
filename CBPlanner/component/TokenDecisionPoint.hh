@@ -21,7 +21,7 @@ namespace EUROPA {
     unsigned int getCurrentChoice() const;
 
     void print(std::ostream& os) const;
-  protected:
+
     TokenDecisionPoint(const DbClientId& dbClient, const TokenId&, const OpenDecisionManagerId& odm);
   private:
     friend class OpenDecisionManager;

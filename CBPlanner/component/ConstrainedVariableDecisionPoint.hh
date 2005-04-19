@@ -22,7 +22,7 @@ namespace EUROPA {
     std::vector<double>& getChoices();
 
     void print(std::ostream& os) const;
-  protected:
+
     ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId&, const OpenDecisionManagerId& odm);
   private:
     friend class OpenDecisionManager;

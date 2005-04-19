@@ -21,7 +21,6 @@ namespace EUROPA {
 
     void print(std::ostream& os) const;
 
-  protected:
     ResourceFlawDecisionPoint(const ResourceId&);
   private:
     friend class ResourceOpenDecisionManager;
