@@ -475,7 +475,7 @@ namespace EUROPA {
 	}
       }
       else {
-	std::cout << " domain.size = " << domain.size() << " values.size = " << values.size() << std::endl;
+	//std::cout << " domain.size = " << domain.size() << " values.size = " << values.size() << std::endl;
 	for (std::list<double>::const_iterator sit = domain.begin(); sit != domain.end(); ++ sit)
 	  if (vdp->m_var->lastDomain().isMember((*sit)))
 	    vdp->m_choices.push_back((*sit));
