@@ -23,12 +23,12 @@ namespace EUROPA {
     void print(std::ostream& os) const;
 
     TokenDecisionPoint(const DbClientId& dbClient, const TokenId&, const OpenDecisionManagerId& odm);
+  protected:
+    virtual void initializeChoices();
   private:
     friend class OpenDecisionManager;
     friend class DefaultOpenDecisionManager;
     friend class HSTSOpenDecisionManager;
-
-    void initializeChoices();
 
     TokenId m_tok; /**< cached for efficiency */
     std::vector<LabelStr> m_choices;
