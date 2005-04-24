@@ -25,12 +25,13 @@ namespace EUROPA {
     TokenDecisionPoint(const DbClientId& dbClient, const TokenId&, const OpenDecisionManagerId& odm);
   protected:
     virtual void initializeChoices();
+    TokenId m_tok; /**< cached for efficiency */
   private:
     friend class OpenDecisionManager;
     friend class DefaultOpenDecisionManager;
     friend class HSTSOpenDecisionManager;
 
-    TokenId m_tok; /**< cached for efficiency */
+
     std::vector<LabelStr> m_choices;
     unsigned int m_choiceIndex; /*< keeps a pointer to current choice */
     std::vector<TokenId> m_compatibleTokens; 
