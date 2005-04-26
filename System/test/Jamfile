@@ -55,6 +55,8 @@ for model in
   RunModuleMain run-$(exe) : $(exe) : $(xml) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 
+  Clean clean-system-xml : $(xml) ;
+
   if $(LIBRARIES) = SHARED {
     # create planner with dlopen model
     ModuleSharedLibrary $(lib) : $(o) : NDDL ;
