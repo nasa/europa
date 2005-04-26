@@ -1,4 +1,4 @@
-$Id: HELLOWORLD,v 1.5 2005-02-01 17:40:58 pdaley Exp $
+$Id: HELLOWORLD,v 1.6 2005-04-26 17:34:48 pdaley Exp $
 
 Note: Please first see the file README in this directory for details
       on how to checkout, build, and test Europa2 before attempting
@@ -158,6 +158,13 @@ C. Running a plan from PlanWorks
    This change is required since PlanWorks will be running from a directory
    other than SampleProject, so "WriteDest=./plans" is no longer appropriate
    to describe the path to SampleProject/plans.
+
+   Next, uncomment the two lines of the RuleConfigSection and set the SourcePath
+   to the project directory. This tells the PPW where to look for the nddl files
+   that contain the rules source code.
+
+        RuleConfigSection:
+        SourcePath=/home/me/SampleProject
 
    Once the logger has been reconfigured, rerun the plan as specified in
    section A 'Creating your own project' by entering:
