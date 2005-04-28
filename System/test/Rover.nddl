@@ -126,11 +126,11 @@ class Instrument{
  }
 
  predicate Stow{
-  leq([2 6], duration);
+  eq([2 6], duration);
  }
 
  predicate Unstow{
-  leq([2 6], duration);
+  eq([2 6], duration);
  }
 
  predicate Stowed{}
