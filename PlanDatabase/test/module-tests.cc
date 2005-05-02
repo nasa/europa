@@ -915,6 +915,7 @@ public:
     runTest(testPredicateInheritance);
     runTest(testTokenFactory);
     runTest(testCorrectSplit_Gnats2450);
+    runTest(testRemergeOnDeactivation);
     return(true);
   }
   
@@ -1033,6 +1034,66 @@ private:
 
     }
     DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testRemergeOnDeactivation(){
+    DEFAULT_SETUP(ce, db, true);
+    // Create 4 mergeable tokens - predicates, types and base domaiuns match
+    IntervalToken t0(db, 
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+  
+    IntervalToken t1(db,
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+  
+    IntervalToken t2(db,
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+  
+    IntervalToken t3(db,
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+  
+    t0.activate();
+    t1.merge(t0.getId());
+    t2.merge(t0.getId());
+    t3.merge(t0.getId());
+
+    assertTrue(t0.isActive());
+    assertTrue(t1.isMerged());
+    assertTrue(t2.isMerged());
+    assertTrue(t3.isMerged());
+
+    t0.cancel();
+
+    assertTrue(t0.isInactive());
+    assertTrue(t1.isActive());
+    assertTrue(t2.isMerged());
+    assertTrue(t3.isMerged());
+
+    t2.cancel();
+    assertTrue(t1.isActive());
+    assertTrue(t3.isMerged());
+
+    t1.cancel();
+    assertTrue(t3.isActive());
+
+    DEFAULT_TEARDOWN();
+    // Deletion will now occur and test proper cleanup.
     return true;
   }
 
@@ -1206,7 +1267,7 @@ private:
   static bool testConstraintMigrationDuringMerge() {
     DEFAULT_SETUP(ce, db, false);
     ObjectId timeline1 = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline1"))->getId();
-    ObjectId timeline2 = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline2"))->getId();
+    new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline2");
     db->close();
 
     // Create two base tokens
@@ -1262,7 +1323,7 @@ private:
 
   static bool testNonChronGNATS2439() {
     DEFAULT_SETUP(ce, db, false);
-    ObjectId timeline1 = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline1"))->getId();
+    new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline1");
     db->close();
 
     std::list<double> values;
@@ -4007,16 +4068,15 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
   std::list<double> vals;
   for (dom.getValues(vals); !vals.empty(); vals.pop_front()) {
     str += "<";
-    if (dom.getType() == AbstractDomain::SYMBOL_ENUMERATION) {
+    if (dom.isSymbolic()) {
       str += "symbol value=\"";
     } else {
       str += "value name=\"";
     }
-    if (dom.getType() == AbstractDomain::STRING_ENUMERATION ||
-        dom.getType() == AbstractDomain::SYMBOL_ENUMERATION)
+    if (dom.isSymbolic())
       str += LabelStr(*(vals.begin())).toString();
     else {
-      assertTrue(dom.getType() == AbstractDomain::REAL_ENUMERATION, "sorry: only string, symbol, and real enumerations are supported");
+      assertTrue(!dom.isInterval(), "sorry: only string, symbol, and real enumerations are supported");
       std::ostringstream oss4;
       oss4 << *(vals.begin());
       str += oss4.str();

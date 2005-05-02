@@ -31,6 +31,7 @@ SubInclude PLASMA CBPlanner ;
 SubInclude PLASMA TemporalNetwork ;
 SubInclude PLASMA NDDL ;
 SubInclude PLASMA Aver ;
+#SubInclude PLASMA Solvers ;
 SubInclude PLASMA System ;
 SubInclude PLASMA HSTS ;
 

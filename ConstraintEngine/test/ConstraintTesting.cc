@@ -24,6 +24,7 @@
 #include "Constraint.hh"
 #include "ConstrainedVariable.hh"
 #include "Debug.hh"
+#include "TypeFactory.hh"
 
 namespace EUROPA {
 
@@ -35,12 +36,13 @@ namespace EUROPA {
   static AbstractDomain* readSet(std::istream& in) {
     char ch;
     AbstractDomain *dom = 0;
-    AbstractDomain::DomainType type = AbstractDomain::REAL_ENUMERATION;
     bool negative = false;
     double value;
     std::list<double> values;
     std::string member;
     std::list<std::string> members;
+    bool isBool = false;
+
     for (in.get(ch); ch != '}' && in.good(); ) {
       switch (ch) {
       case ' ':
@@ -48,13 +50,13 @@ namespace EUROPA {
         in.get(ch);
         continue;
       case '-':
-        assertTrue(members.empty() && type == AbstractDomain::REAL_ENUMERATION);
+        assertTrue(members.empty());
         negative = true;
         in.get(ch);
         continue;
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
-        assertTrue(members.empty() && type == AbstractDomain::REAL_ENUMERATION);
+        assertTrue(members.empty());
         if (negative)
           member = "-";
         member += ch;
@@ -73,29 +75,22 @@ namespace EUROPA {
           member += ch;
         assertTrue(in.good());
         if (member == "-Infinity" || member == "-Inf" || member == "-INF") {
-          assertTrue(type == AbstractDomain::REAL_ENUMERATION);
           values.push_back(MINUS_INFINITY);
         } else
           if (member == "Infinity" || member == "Inf" || member == "INF") {
-            assertTrue(type == AbstractDomain::REAL_ENUMERATION);
             values.push_back(PLUS_INFINITY);
           } else
             if (member == "false" || member == "False" || member == "FALSE") {
+	      isBool = true;
               members.push_back("false");
-              // Allow "false" - but not "False"! - to be a member of a user defined type.
-              // Need to know expected type of this arg of constraint to do better.
-              if (type == AbstractDomain::REAL_ENUMERATION)
-                type = AbstractDomain::BOOL;
             } else
               if (member == "true" || member == "True" || member == "TRUE") {
+		isBool = true;
                 members.push_back("true");
                 // Allow "true" - but not "True"! - to be a member of a user defined type.
                 // Need to know expected type of this arg of constraint to do better.
-                if (type == AbstractDomain::REAL_ENUMERATION)
-                  type = AbstractDomain::BOOL;
               } else {
                 members.push_back(member);
-                type = AbstractDomain::USER_DEFINED;
               }
         member = "";
         break;
@@ -103,11 +98,7 @@ namespace EUROPA {
     }
     assertTrue(in.good() && ch == '}');
     assertTrue(values.empty() || members.empty());
-    switch (type) {
-    case AbstractDomain::REAL_ENUMERATION:
-      dom = new NumericDomain(values);
-      break;
-    case AbstractDomain::BOOL:
+    if(isBool){
       dom = new BoolDomain;
       dom->empty();
       for (std::list<std::string>::iterator it = members.begin();
@@ -118,17 +109,14 @@ namespace EUROPA {
           assertTrue(*it == "true", "Only 'false' and 'true' are supported for boolean values");
           dom->insert(true);
         }
-      break;
-    case AbstractDomain::USER_DEFINED:
-      // Cannot support members without knowing how to map them to doubles.
-      // For now, caller will have to skip this test.
-      return(0);
-      break;
-    default: // Unsupported or unimplemented type.
-      assertTrue(false);
-      break;
     }
+    else if(members.empty())
+      dom = new NumericDomain(values);
+    else
+      return(0);
+
     assertTrue(dom != 0);
+
     return(dom);
   }
 
@@ -337,49 +325,9 @@ namespace EUROPA {
         AbstractDomain *domPtr = testDomains.front();
         assertTrue(domPtr != 0 && (domPtr->isOpen() || !domPtr->isEmpty()));
         testDomains.pop_front();
-        AbstractDomain::DomainType domType = domPtr->getType();
 
-        // This is ugly and precludes support for USER_DEFINED domains
-        // since the corresponding C++ class is unknown. --wedgingt 2004 Mar 10
-        switch (domType) {
-        case AbstractDomain::INT_INTERVAL:
-          {
-            Variable<IntervalIntDomain> *var = new Variable<IntervalIntDomain>(engine, IntervalIntDomain());
-            assertTrue(var != 0);
-            var->specify(*domPtr);
-            cVarId = var->getId();
-          }
-          break;
-        case AbstractDomain::REAL_INTERVAL:
-          {
-            Variable<IntervalDomain> *var = new Variable<IntervalDomain>(engine, IntervalDomain());
-            assertTrue(var != 0);
-            var->specify(*domPtr);
-            cVarId = var->getId();
-          }
-          break;
-        case AbstractDomain::REAL_ENUMERATION:
-          {
-            std::list<double> values;
-            domPtr->getValues(values);
-            Variable<NumericDomain> *var = new Variable<NumericDomain>(engine, NumericDomain(values));
-            assertTrue(var != 0);
-            var->specify(*domPtr);
-            cVarId = var->getId();
-          }
-          break;
-        case AbstractDomain::BOOL:
-          {
-            Variable<BoolDomain> *var = new Variable<BoolDomain>(engine, BoolDomain());
-            assertTrue(var != 0);
-            var->specify(*domPtr);
-            cVarId = var->getId();
-          }
-          break;
-        default:
-          assertTrue(false);
-          break;
-        }
+	LabelStr typeName = domPtr->getTypeName();
+	ConstrainedVariableId cVarId = TypeFactory::createVariable(typeName.c_str(), engine, *domPtr);
 
         delete domPtr;
         scope.push_back(cVarId);

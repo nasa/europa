@@ -103,7 +103,28 @@ namespace EUROPA {
   }
 
   void IntervalDomain::remove(double value) {
-    check_error(ALWAYS_FAILS, "Cannot remove an interval domain");
+    check_error(check_value(value));
+    if (!isMember(value))
+      return; // Outside the interval.
+
+    if (compareEqual(value, m_lb)) {
+      m_lb += minDelta(); // Could make this 1 at this point!
+      if (isEmpty())
+        notifyChange(DomainListener::EMPTIED);
+      else
+        notifyChange(DomainListener::LOWER_BOUND_INCREASED);
+      return;
+    }
+
+    if (compareEqual(value, m_ub)) {
+      m_ub -= minDelta();
+      check_error(!isEmpty()); // If it were empty, it should have been covered by prior EMPTIED call.
+      notifyChange(DomainListener::UPPER_BOUND_DECREASED);
+      return;
+    }
+
+    // Logic error above: the conditions should cover all possibilities.
+    check_error( ALWAYS_FAILS, "Attempted to remove an element from within the interval. Wuuld require splitting.");
   }
 
   bool IntervalDomain::operator==(const AbstractDomain& dom) const {
@@ -346,11 +367,6 @@ namespace EUROPA {
     check_error(!isOpen());
     // Real domains are only finite if they are singleton or empty.
     return(isSingleton() || isEmpty());
-  }
-
-  const AbstractDomain::DomainType& IntervalDomain::getType() const{
-    static const AbstractDomain::DomainType s_type = REAL_INTERVAL;
-    return(s_type);
   }
 
   const LabelStr& IntervalDomain::getDefaultTypeName() {

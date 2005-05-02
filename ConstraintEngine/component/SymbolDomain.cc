@@ -19,14 +19,6 @@ namespace EUROPA {
     : EnumeratedDomain(org) {}
 
 
-  const AbstractDomain::DomainType&
-  SymbolDomain::getType() const
-  {
-    static const AbstractDomain::DomainType s_type = SYMBOL_ENUMERATION;
-    return(s_type);
-  }
-
-
   const LabelStr&
   SymbolDomain::getDefaultTypeName()
   {

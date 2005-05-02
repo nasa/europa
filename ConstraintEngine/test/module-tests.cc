@@ -208,11 +208,11 @@ public:
   static bool testVariableCreation(){
     ConstraintEngineId ce = (new ConstraintEngine())->getId();
     ConstrainedVariableId cv0 = TypeFactory::createVariable(IntervalIntDomain().getTypeName().c_str(), ce);
-    assertTrue(cv0->baseDomain().getType() == IntervalIntDomain().getType());
+    assertTrue(cv0->baseDomain().getTypeName() == IntervalIntDomain().getTypeName());
     ConstrainedVariableId cv1 = TypeFactory::createVariable(IntervalDomain().getTypeName().c_str(), ce);
-    assertTrue(cv1->baseDomain().getType() == IntervalDomain().getType());
+    assertTrue(cv1->baseDomain().getTypeName() == IntervalDomain().getTypeName());
     ConstrainedVariableId cv2 = TypeFactory::createVariable(BoolDomain().getTypeName().c_str(), ce);
-    assertTrue(cv2->baseDomain().getType() == BoolDomain().getType());
+    assertTrue(cv2->baseDomain().getTypeName() == BoolDomain().getTypeName());
     Entity::purgeStarted();
     delete (ConstraintEngine*) ce;
     Entity::purgeEnded();

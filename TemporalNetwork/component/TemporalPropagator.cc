@@ -449,7 +449,7 @@ namespace EUROPA {
     // at that time.
     if(constraint->getScope().size() == 3) {
       const ConstrainedVariableId& distance = constraint->getScope()[1];
-      check_error(distance->lastDomain().getType() == AbstractDomain::INT_INTERVAL, constraint->getKey() + " is invalid")
+      check_error(distance->lastDomain().isInterval(), constraint->getKey() + " is invalid")
       const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
       Time lbt=0, ubt=0;
       tnetConstraint->getBounds(lbt, ubt);

@@ -32,8 +32,6 @@ namespace EUROPA {
 
     BoolDomain(const AbstractDomain& org);
 
-    const DomainType& getType() const;
-
     static const LabelStr& getDefaultTypeName();
 
     bool isFinite() const;

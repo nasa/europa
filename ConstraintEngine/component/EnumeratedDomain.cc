@@ -16,11 +16,6 @@ namespace EUROPA {
     return(true);
   }
 
-  const AbstractDomain::DomainType& EnumeratedDomain::getType() const {
-    static const AbstractDomain::DomainType s_type = AbstractDomain::REAL_ENUMERATION;
-    return(s_type);
-  }
-
   const LabelStr& EnumeratedDomain::getDefaultTypeName() {
     static const LabelStr sl_typeName("REAL_ENUMERATION");
     return(sl_typeName);

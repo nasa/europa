@@ -19,6 +19,7 @@ Path p3 = new Path("Short Cut", lander, rock4, -400.0);
 Battery battery = new Battery(1000.0, 0.0, 1000.0);
 Rover spirit = new Rover(battery);
 
+Resource.close();
 close();
 
 // Establish the initial position for spirit
@@ -34,5 +35,5 @@ sample.start.specify(50);
 sample.rock.specify(rock4); // Want to get to rock4
 
 // Establish the initial instrument state
-goal(Instrument.Stowed stowed);
+rejectable(Instrument.Stowed stowed);
 eq(stowed.start, world.m_horizonStart);

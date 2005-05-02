@@ -5,8 +5,8 @@ namespace EUROPA {
 
   BinaryCustomConstraint::BinaryCustomConstraint(const LabelStr& name, const LabelStr& propagatorName, const ConstraintEngineId& constraintEngine, const std::vector<ConstrainedVariableId>& variables) : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error (variables.size() == 2); // temporary while Factories are fixed
-    check_error (getCurrentDomain(variables[X]).getType() == AbstractDomain::INT_INTERVAL);
-    check_error (getCurrentDomain(variables[Y]).getType() == AbstractDomain::BOOL);
+    check_error (getCurrentDomain(variables[X]).isInterval());
+    check_error (getCurrentDomain(variables[Y]).isBool());
   }
 
   void BinaryCustomConstraint::handleExecute() {

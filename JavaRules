@@ -88,6 +88,7 @@ rule JavaCompile
 
 actions JavaCompile
 {
+   echo "ECHOING" $(CLASSPATH);
   "$(JAVAC)" -sourcepath $(JAVA_SRC_DIR) -classpath $(CLASSPATH) -d $(JAVA_CLASSES_DIR) $(2) ;
 }
 

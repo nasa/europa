@@ -5,7 +5,7 @@ namespace EUROPA {
 
   NotFalseConstraint::NotFalseConstraint(const LabelStr& name, const LabelStr& propagatorName, const ConstraintEngineId& constraintEngine, const std::vector<ConstrainedVariableId>& variables) : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error (variables.size() == 1); // temporary while Factories are fixed
-    check_error (getCurrentDomain(variables[X]).getType() == AbstractDomain::BOOL);
+    check_error (getCurrentDomain(variables[X]).isBool());
   }
 
   void NotFalseConstraint::handleExecute() {

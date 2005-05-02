@@ -56,6 +56,7 @@ namespace EUROPA {
 
   private:
     Horizon m_horizon;
+    CBPlannerId m_planner;
   };
 }
 #endif

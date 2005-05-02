@@ -291,10 +291,11 @@ namespace EUROPA {
 	return(true);
     }
     // If it is a Boolean domain then set it to be the alternate
-    if (domy.getType() == AbstractDomain::BOOL) {
-      domy.intersect(BoolDomain(!value));
+    if (domy.isBool()) {
+      domy.set(!value);
       return(true);
     }
+
     if (domx.compareEqual(domx.getSingletonValue(), domy.getLowerBound())) {
       double low = domx.getSingletonValue() + domx.minDelta();
       domy.intersect(IntervalDomain(low, domy.getUpperBound()));
@@ -591,7 +592,7 @@ namespace EUROPA {
       default:
         check_error(ALWAYS_FAILS);
         break;
-      } /* switch (ARGCOUNT) 5, 6, 7 */
+      } // switch (ARGCOUNT) 5, 6, 7
       break;
     default:
       { // A = first_half + second_half, recursively
@@ -710,7 +711,7 @@ namespace EUROPA {
       default:
         check_error(ALWAYS_FAILS);
         break;
-      } /* switch (ARGCOUNT) 5, 6, 7 */
+      } // switch (ARGCOUNT) 5, 6, 7
       break;
     default:
       { // A = first_half * second_half, recursively
@@ -820,7 +821,7 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()) {
     check_error(ARG_COUNT > 2);
-    check_error(getCurrentDomain(m_variables[0]).getType() == AbstractDomain::BOOL);
+    check_error(getCurrentDomain(m_variables[0]).isBool());
     for (unsigned int i = 2; i < ARG_COUNT; i++) {
       check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[1]),
                                                 getCurrentDomain(m_variables[i])));
@@ -876,7 +877,7 @@ namespace EUROPA {
               boolDom.remove(true);
           }
           continue;
-        } /* if !current.isSingleton() */
+        } // if !current.isSingleton()
         if (canProveTrue) {
           if (i == 1)
             single = current.getSingletonValue();
@@ -886,14 +887,14 @@ namespace EUROPA {
               canProveTrue = false;
               boolDom.remove(true);
             }
-        } /* if canProveTrue */
-      } /* for i = 1; !boolDom.isSingleton && i < ARG_COUNT; i++ */
+        } // if canProveTrue
+      } // for i = 1; !boolDom.isSingleton && i < ARG_COUNT; i++
       if (canProveTrue)
         boolDom.remove(false);
       // Before it goes out of scope:
       if (common != 0)
         delete common;
-    } /* if !boolDom.isSingleton */
+    } //if !boolDom.isSingleton 
 
     // Whether the condition was singleton on entry to this function
     // or became singleton just above, propagate the effects of that
@@ -945,8 +946,8 @@ namespace EUROPA {
         // But it can only be trimmed if it is enumerated (including boolean) or
         // if it is an integer interval with one of the end points equal to
         // single, which is painful to check.
-        if (domToTrim.isEnumerated() || domToTrim.getType() == AbstractDomain::BOOL
-            || (domToTrim.getType() == AbstractDomain::INT_INTERVAL
+        if (domToTrim.isEnumerated() || domToTrim.isBool()
+            || (domToTrim.minDelta() == 1.0
                 && (domj.isMember(domToTrim.getLowerBound())
                     || domj.isMember(domToTrim.getUpperBound()))))
           domToTrim.remove(single);
@@ -982,7 +983,7 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()) {
     check_error(ARG_COUNT > 2);
-    check_error(getCurrentDomain(m_variables[0]).getType() == AbstractDomain::BOOL);
+    check_error(getCurrentDomain(m_variables[0]).isBool());
     for (unsigned int i = 2; i < ARG_COUNT; i++)
       check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[1]),
                                                 getCurrentDomain(m_variables[i])));
@@ -1054,12 +1055,11 @@ namespace EUROPA {
       changing = true;
     }
     if (changing) {
-      if (domToAdd.getType() == AbstractDomain::REAL_INTERVAL
-          || (*unionOfDomains)->getType() == AbstractDomain::REAL_INTERVAL)
+      if((*unionOfDomains)->minDelta() < 1.0)
         newUnion = new IntervalDomain(newMin, newMax);
-      if (domToAdd.getType() == AbstractDomain::INT_INTERVAL
-          || (*unionOfDomains)->getType() == AbstractDomain::INT_INTERVAL)
+      else
         newUnion = new IntervalIntDomain((int)newMin, (int)newMax);
+
       /* BOOL should be not get to here since both are non-singleton
        *   but then unionOfDomains "covers" domToAdd and changing
        *   would be false.
@@ -1069,7 +1069,7 @@ namespace EUROPA {
        *   messy to implement, but note that this also checks the
        *   assumptions/logic earlier in this comment.
        */
-      assertFalse(newUnion == 0);
+      checkError(newUnion != 0, "Failed to allocate memory.");
       delete *unionOfDomains;
       *unionOfDomains = newUnion;
       return;
@@ -1309,10 +1309,7 @@ namespace EUROPA {
           // here.
           if (other.isEnumerated())
             other.remove(0.0);
-          else
-            if (other.getType() != AbstractDomain::REAL_INTERVAL) {
-              // Unfortunately, the easiest way to test correctly (due
-              // to IntervalIntDomain::minDelta()) is rather messy:
+          else {
               const IntervalDomain zeroDom(0.0);
               if (zeroDom.isMember(other.getLowerBound()) ||
                   zeroDom.isMember(other.getUpperBound()))
@@ -1406,7 +1403,7 @@ namespace EUROPA {
     AbstractDomain& firstDom = getCurrentDomain(m_variables[1]);
     double minSoFar = firstDom.getLowerBound();
     double maxSoFar = firstDom.getUpperBound();
-    std::set<unsigned int> contributors; /**< Set of var indices that "affect" minimum, or are affected by minDom's minimum. */
+    std::set<unsigned int> contributors; // Set of var indices that "affect" minimum, or are affected by minDom's minimum.
     contributors.insert(1);
     std::vector<ConstrainedVariableId>::iterator it = m_variables.begin();
     unsigned int i = 2;
@@ -1490,7 +1487,7 @@ namespace EUROPA {
     AbstractDomain& firstDom = getCurrentDomain(m_variables[1]);
     double minSoFar = firstDom.getLowerBound();
     double maxSoFar = firstDom.getUpperBound();
-    std::set<unsigned int> contributors; /**< Set of var indices that "affect" maximum, or are affected by maxDom's maximum. */
+    std::set<unsigned int> contributors; // Set of var indices that "affect" maximum, or are affected by maxDom's maximum.
     contributors.insert(1);
     std::vector<ConstrainedVariableId>::iterator it = m_variables.begin();
     unsigned int i = 2;
@@ -1709,7 +1706,6 @@ namespace EUROPA {
         result = false;
     domZ.intersect(BoolDomain(result));
   }
-
 
   void initConstraintLibrary() {
     static bool s_runAlready(false);

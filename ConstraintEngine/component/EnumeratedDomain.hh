@@ -59,12 +59,6 @@ namespace EUROPA {
     EnumeratedDomain(const AbstractDomain& org);
 
     /**
-     * @brief Get the type of the domain to aid in type checking.
-     * @see AbstractDomain::DomainType
-     */
-    virtual const DomainType& getType() const;
-
-    /**
      * @brief Get the default name of the type of the domain.
      * @see AbstractDomain::getTypeName
      */

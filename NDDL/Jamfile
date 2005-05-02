@@ -2,7 +2,7 @@ SubDir PLASMA NDDL ;
 
 if ! $(PLASMA_READY) {
 
-Module NDDL : RulesEngine Resource TemporalNetwork CBPlanner PlanDatabase ;
+Module NDDL : RulesEngine Resource TemporalNetwork PlanDatabase ;
 
 SubInclude PLASMA NDDL core ;
 SubInclude PLASMA NDDL component ;

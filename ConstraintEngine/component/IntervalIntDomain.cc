@@ -51,11 +51,6 @@ namespace EUROPA {
     return((int) value);
   }
 
-  const AbstractDomain::DomainType& IntervalIntDomain::getType() const {
-    static const AbstractDomain::DomainType s_type = INT_INTERVAL;
-    return(s_type);
-  }
-
   const LabelStr& IntervalIntDomain::getDefaultTypeName() {
     static const LabelStr sl_typeName("INT_INTERVAL");
     return(sl_typeName);
@@ -88,31 +83,6 @@ namespace EUROPA {
     }
     // Too far outside the interval to represent with a single interval.
     check_error(ALWAYS_FAILS);
-  }
-    
-  void IntervalIntDomain::remove(double value) {
-    check_error(check_value(value));
-    if (!isMember(value))
-      return; // Outside the interval.
-
-    if (compareEqual(value, m_lb)) {
-      m_lb += minDelta(); // Could make this 1 at this point!
-      if (isEmpty())
-        notifyChange(DomainListener::EMPTIED);
-      else
-        notifyChange(DomainListener::LOWER_BOUND_INCREASED);
-      return;
-    }
-
-    if (compareEqual(value, m_ub)) {
-      m_ub -= minDelta();
-      check_error(!isEmpty()); // If it were empty, it should have been covered by prior EMPTIED call.
-      notifyChange(DomainListener::UPPER_BOUND_DECREASED);
-      return;
-    }
-
-    // Logic error above: the conditions should cover all possibilities.
-    check_error( ALWAYS_FAILS, "Attempted to remove an element from within the interval. Wuuld require splitting.");
   }
 
   void IntervalIntDomain::getValues(std::list<double>& results) const {

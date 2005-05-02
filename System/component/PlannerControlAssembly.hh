@@ -12,6 +12,7 @@
 #include "PlanDatabaseDefs.hh"
 #include "CBPlanner.hh"
 #include "StandardAssembly.hh"
+#include "PartialPlanWriter.hh"
 #include "DbClientTransactionLog.hh"
 
 namespace EUROPA {
@@ -34,14 +35,20 @@ namespace EUROPA {
      */
     CBPlanner::Status initPlan(const char* txSource);
 
+
+    const CBPlannerId& getPlanner() const { return m_planner; }
+
+    PlanWriter::PartialPlanWriter* getWriter() const { return m_ppw; }
+
     /**
      * The following method is used by the PlannerControl interface for PlanWorks.
      */
     const HorizonId& getHorizon() const { return m_horizon; }
 
   protected:
+    CBPlannerId m_planner;	/*!< A planner to complete the plan. */
+    PlanWriter::PartialPlanWriter* m_ppw; /*!< A plan writer to output data for PlanWorks */
     HorizonId m_horizon;      /*!< A horizon for the plan. */
-
   };
 }
 #endif

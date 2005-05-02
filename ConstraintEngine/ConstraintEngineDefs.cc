@@ -4,6 +4,7 @@
 #include "IntervalTypeFactory.hh"
 #include "StringTypeFactory.hh"
 #include "SymbolTypeFactory.hh"
+#include "EnumeratedTypeFactory.hh"
 
 namespace EUROPA {
 
@@ -22,6 +23,7 @@ namespace EUROPA {
       new IntervalTypeFactory();
       new StringTypeFactory();
       new SymbolTypeFactory();
+      new EnumeratedTypeFactory("REAL_ENUMERATION", "ELEMENT", EnumeratedDomain(true, "REAL_ENUMERATION"));
     }
   }
 

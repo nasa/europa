@@ -40,12 +40,6 @@ namespace EUROPA{
     }
 
     /**
-     * @brief Get the type of the domain to aid in type checking.
-     * @see AbstractDomain::DomainType
-     */
-    virtual const DomainType& getType() const;
-
-    /**
      * @brief Get the default name of the type of the domain.
      * @see AbstractDomain::getTypeName
      */
@@ -61,15 +55,6 @@ namespace EUROPA{
      * since it uses minDelta().
      */
     virtual void insert(double value);
-
-    /**
-     * @brief Remove a value from the domain.
-     * @param value The value to remove.
-     * @note Will generate an error if value is in "middle" of interval.
-     * @note This implementation might also work in IntervalDomain
-     * since it uses minDelta().
-     */
-    virtual void remove(double value);
 
     /**
      * @brief Fill the given list with the contents of the set.

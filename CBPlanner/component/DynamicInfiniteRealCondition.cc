@@ -16,8 +16,7 @@ namespace EUROPA {
     check_error(var.isValid());
     bool passed(true);
     const AbstractDomain& dom = var->lastDomain();
-    const AbstractDomain::DomainType& type = dom.getType();
-    if (dom.isOpen() || dom.isInfinite() || type == AbstractDomain::REAL_INTERVAL)
+    if (dom.isOpen() || dom.isInfinite())
       passed = false;
     return passed;
   } 

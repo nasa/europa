@@ -22,15 +22,6 @@ namespace EUROPA {
   {
   }
 
-
-  const AbstractDomain::DomainType&
-  StringDomain::getType() const
-  {
-    static const AbstractDomain::DomainType s_type = STRING_ENUMERATION;
-    return(s_type);
-  }
-
-
   const LabelStr&
   StringDomain::getDefaultTypeName()
   {

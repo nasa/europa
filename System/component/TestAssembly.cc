@@ -74,43 +74,7 @@ namespace EUROPA {
    */
   void TestAssembly::initialize() {
     StandardAssembly::initialize();
-    /*
 
-    // Temporal Constraints
-    REGISTER_CONSTRAINT(ConcurrentConstraint, "concurrent", "Temporal");
-    REGISTER_CONSTRAINT(PrecedesConstraint, "precedes", "Temporal"); 
-    REGISTER_CONSTRAINT(TemporalDistanceConstraint, "StartEndDurationRelation", "Temporal");
-    REGISTER_CONSTRAINT(TemporalDistanceConstraint, "temporaldistance", "Temporal");
-
-    initConstraintEngine();
-
-    // Procedural Constraints used with Default Propagation
-    REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
-    REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
-    REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
-    REGISTER_CONSTRAINT(AddEqualConstraint, "addEq", "Default");
-    REGISTER_CONSTRAINT(NegateConstraint, "neg", "Default");
-    REGISTER_CONSTRAINT(MultEqualConstraint, "mulEq", "Default");
-    REGISTER_CONSTRAINT(SubsetOfConstraint, "subsetOf", "Default");
-    REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-    REGISTER_CONSTRAINT(SubsetOfConstraint, "Singleton", "Default");
-    REGISTER_CONSTRAINT(LockConstraint, "Lock", "Default");
-    REGISTER_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
-    REGISTER_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
-
-    // The only resource specific constraints
-    REGISTER_CONSTRAINT(ResourceConstraint, "ResourceRelation", "Resource");
-    REGISTER_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Default");
-
-    REGISTER_CONSTRAINT(AddEqualConstraint, "addEq", "Default");
-    REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-    REGISTER_CONSTRAINT(SubsetOfConstraint, "Singleton", "Default");
-    REGISTER_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
-    REGISTER_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
-    REGISTER_CONSTRAINT(ResourceConstraint, "ResourceRelation", "Resource");
-    REGISTER_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Default");
-    REGISTER_CONSTRAINT(SubsetOfConstraint, "subsetOf", "Default");
-    */
     REGISTER_CONSTRAINT(PLASMAPerformanceConstraint, "perf", "Default");
 
     // LoraxConstraints for some of the resources tests.

@@ -1216,28 +1216,28 @@ namespace EUROPA {
       BoolDomain customDom(true, "boolean");
 
       copyPtr = falseDom.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+      assertTrue(copyPtr->isBool());
       assertTrue(copyPtr->getTypeName() == LabelStr("BOOL"));
       assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       delete copyPtr;
 
       copyPtr = trueDom.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+      assertTrue(copyPtr->isBool());
       assertTrue(copyPtr->getTypeName() == LabelStr("BOOL"));
       assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       delete copyPtr;
 
       copyPtr = both.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+      assertTrue(copyPtr->isBool());
       assertTrue(copyPtr->getTypeName() == LabelStr("BOOL"));
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       delete copyPtr;
 
       copyPtr = customDom.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::BOOL);
+      assertTrue(copyPtr->isBool());
       assertTrue(copyPtr->getTypeName() == LabelStr("boolean"));
       assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
@@ -1265,7 +1265,6 @@ namespace EUROPA {
       NumericDomain oneDom(2.7); // Singleton
 
       copyPtr = emptyOpen.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
       assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
       assertTrue(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
@@ -1278,7 +1277,6 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = fourDom.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
       assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
       assertTrue(copyPtr->isOpen());
       assertTrue(copyPtr->isEnumerated());
@@ -1288,7 +1286,6 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = fiveDom.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
       assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isEnumerated());
@@ -1297,7 +1294,6 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = oneDom.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::REAL_ENUMERATION);
       assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isEnumerated());
@@ -1323,7 +1319,6 @@ namespace EUROPA {
       // Domains containing infinities should also be tested.
 
       copyPtr = empty.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
       assertTrue(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
@@ -1345,7 +1340,6 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = one2ten.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
       assertTrue(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
@@ -1365,7 +1359,6 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = four.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::REAL_INTERVAL);
       assertTrue(copyPtr->getTypeName() == LabelStr("fourType"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
@@ -1400,7 +1393,6 @@ namespace EUROPA {
       // domains containing infinities should also be tested
 
       copyPtr = empty.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
       assertTrue(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
@@ -1422,7 +1414,6 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = one2ten.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
       assertTrue(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());
@@ -1444,7 +1435,6 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = four.copy();
-      assertTrue(copyPtr->getType() == AbstractDomain::INT_INTERVAL);
       assertTrue(copyPtr->getTypeName() == LabelStr("fourType"));
       assertFalse(copyPtr->isOpen());
       assertTrue(copyPtr->isNumeric());

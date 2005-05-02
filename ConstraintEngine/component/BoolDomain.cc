@@ -46,11 +46,6 @@ namespace EUROPA {
     return(m_ub == 1 && m_lb == 1);
   }
 
-  const AbstractDomain::DomainType& BoolDomain::getType() const {
-    static const AbstractDomain::DomainType s_type = BOOL;
-    return(s_type);
-  }
-
   const LabelStr& BoolDomain::getDefaultTypeName() {
     static const LabelStr sl_typeName("BOOL");
     return(sl_typeName);

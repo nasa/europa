@@ -403,6 +403,7 @@ private:
 };
 
 int main() {
+  initConstraintEngine();
   //Use relaxed domain comparator that allows comparison of members of two different enum types
   WeakDomainComparator* wdc = new WeakDomainComparator();
   DomainComparator::initialize((DomainComparator*)wdc);
