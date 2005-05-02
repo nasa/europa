@@ -54,7 +54,6 @@ namespace EUROPA {
   void HSTSOpenDecisionManager::getBestObjectDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
     check_error(bestDec.isNoId());
     if (m_sortedObjectDecs.empty()) return;
-    /*
     unsigned int bestNrChoices=0;
     for (ObjectDecisionSet::iterator it = m_sortedObjectDecs.begin(); it != m_sortedObjectDecs.end(); ++it) {
       TokenId tok = (*it)->getToken();
@@ -73,7 +72,6 @@ namespace EUROPA {
 	}
       }
     }
-    */
     if (bestDec.isNoId() && !m_sortedObjectDecs.empty()) {
       bestDec = *m_sortedObjectDecs.begin();
       bestp = m_heur->getPriorityForObjectDP(bestDec);
