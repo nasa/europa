@@ -1,7 +1,0 @@
-SubDir PLASMA TemporalNetwork ;
-
-if ! $(PLASMA_READY) {
-
-ModuleDocumentation TemporalNetwork ;
-
-} # PLASMA_READY
