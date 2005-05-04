@@ -2367,6 +2367,7 @@ public:
     runTest(testFactoryMethods);
     runTest(testBasicAllocation);
     runTest(testPathBasedRetrieval);
+    runTest(testGlobalVariables);
     return true;
   }
 private:
@@ -2485,6 +2486,35 @@ private:
     assertTrue(db->getClient()->getTokenByPath(path) == TokenId::noId());
     path[0] = 99999;
     assertTrue(db->getClient()->getTokenByPath(path) == TokenId::noId());
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testGlobalVariables(){
+    DEFAULT_SETUP(ce, db, true);
+
+    DbClientId client = db->getClient();
+
+    // Allocate
+    client->createVariable(IntervalIntDomain().getDefaultTypeName().c_str(), "v1");
+    client->createVariable(IntervalIntDomain().getDefaultTypeName().c_str(), "v2");
+    client->createVariable(IntervalIntDomain().getDefaultTypeName().c_str(), "v3");
+
+    // Retrieve
+    ConstrainedVariableId v1 = client->getGlobalVariable("v1");
+    ConstrainedVariableId v2 = client->getGlobalVariable("v2");
+    ConstrainedVariableId v3 = client->getGlobalVariable("v3");
+
+
+    // Use
+    client->createConstraint("eq", makeScope(v1, v2));
+    client->createConstraint("neq", makeScope(v1, v3));
+    client->createConstraint("eq", makeScope(v2, v3));
+
+    v1->specify(10);
+
+    assertFalse(client->propagate());
+
     DEFAULT_TEARDOWN();
     return true;
   }

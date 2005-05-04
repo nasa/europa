@@ -5,6 +5,11 @@
 #include "Schema.hh"
 #include "Utils.hh"
 #include "DefaultPropagator.hh"
+#include "IntervalDomain.hh"
+#include "IntervalIntDomain.hh"
+#include "StringDomain.hh"
+#include "BoolDomain.hh"
+#include "Object.hh"
 
 using namespace EUROPA;
 
