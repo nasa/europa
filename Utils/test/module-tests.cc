@@ -594,6 +594,14 @@ private:
     assertTrue(lbl2 > lbl4);
     assertTrue(lbl2 != lbl4);
     assertTrue(lbl4 == lbl3);
+
+    LabelStr lbl5("ABCDEFGH");
+
+    assertTrue(lbl5.contains("A"));
+    assertTrue(lbl5.contains("H"));
+    assertTrue(lbl5.contains("FG"));
+    assertTrue(lbl5.contains(lbl5));
+    assertFalse(lbl5.contains("I"));
     return true;
   }
 };
