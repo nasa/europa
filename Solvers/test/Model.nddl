@@ -1,0 +1,59 @@
+#include "../../NDDL/core/Plasma.nddl"
+
+enum Letters {X, Y, Z};
+
+class A extends Timeline {
+ predicate predicateA{
+  int arg1;
+  float arg2;
+ }
+
+ predicate predicateB{
+  bool arg3;
+  bool arg4;
+ }
+}
+
+class B extends A {
+ predicate predicateC{
+  Letters arg5;
+ }
+}
+
+class C extends B {
+ predicate predicateA{}
+ predicate predicateC{}
+}
+
+class D extends A {
+ predicate predicateA{}
+
+ predicate predicateC{
+  int arg6;
+  int arg7;
+  int arg8;
+ }
+
+ predicate predicateF{}
+}
+
+class E extends D{
+ predicate predicateC{}
+}
+
+
+class NoPredicates {
+}
+
+class PredicateRoot extends Timeline {
+ predicate predicateD{}
+ predicate predicateE{}
+}
+
+class PredicateDerived extends PredicateRoot {}
+
+D::predicateF{
+ any(E.predicateC);
+ any(D.predicateC);
+ any(B.predicateB);
+}

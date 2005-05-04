@@ -1,0 +1,281 @@
+<nddl>
+    <class line="7" column="7" filename="PlannerConfig.nddl" name="PlannerConfig">
+        <var line="9" column="6" name="m_horizonStart" type="int"/>
+        <var line="10" column="6" name="m_horizonEnd" type="int"/>
+        <var line="11" column="6" name="m_maxPlannerSteps" type="int"/>
+        <constructor line="13" column="2">
+            <arg name="start" type="int"/>
+            <arg name="end" type="int"/>
+            <arg name="maxPlannerSteps" type="int"/>
+            <assign line="14" column="3" name="m_horizonStart">
+                <id name="start" type="int"/>
+            </assign>
+            <assign line="15" column="3" name="m_horizonEnd">
+                <id name="end" type="int"/>
+            </assign>
+            <assign line="16" column="3" name="m_maxPlannerSteps">
+                <id name="maxPlannerSteps" type="int"/>
+            </assign>
+        </constructor>
+        <constructor line="19" column="2">
+            <assign line="20" column="3" name="m_horizonStart">
+                <value name="0" type="int"/>
+            </assign>
+            <assign line="21" column="3" name="m_horizonEnd">
+                <value name="100" type="int"/>
+            </assign>
+            <assign line="22" column="3" name="m_maxPlannerSteps">
+                <value name="200" type="int"/>
+            </assign>
+        </constructor>
+    </class>
+    <enum line="8" column="6" filename="Plasma.nddl" name="TokenStates">
+        <set type="TokenStates">
+            <symbol value="INACTIVE" type="TokenStates"/>
+            <symbol value="ACTIVE" type="TokenStates"/>
+            <symbol value="MERGED" type="TokenStates"/>
+            <symbol value="REJECTED" type="TokenStates"/>
+        </set>
+    </enum>
+    <class line="12" column="7" filename="Plasma.nddl" name="Object"/>
+    <class line="17" column="7" filename="Plasma.nddl" name="Timeline"/>
+    <class line="20" column="7" filename="Plasma.nddl" name="Resource">
+        <var line="22" column="8" name="initialCapacity" type="float"/>
+        <var line="23" column="8" name="levelLimitMin" type="float"/>
+        <var line="24" column="8" name="levelLimitMax" type="float"/>
+        <var line="25" column="8" name="productionRateMax" type="float"/>
+        <var line="26" column="8" name="productionMax" type="float"/>
+        <var line="27" column="8" name="consumptionRateMax" type="float"/>
+        <var line="28" column="8" name="consumptionMax" type="float"/>
+        <predicate line="31" column="12" name="change">
+            <var line="32" column="9" name="quantity" type="float"/>
+        </predicate>
+        <constructor line="35" column="2">
+            <arg name="ic" type="float"/>
+            <arg name="ll_min" type="float"/>
+            <arg name="ll_max" type="float"/>
+            <assign line="36" column="3" name="initialCapacity">
+                <id name="ic" type="float"/>
+            </assign>
+            <assign line="37" column="3" name="levelLimitMin">
+                <id name="ll_min" type="float"/>
+            </assign>
+            <assign line="38" column="3" name="levelLimitMax">
+                <id name="ll_max" type="float"/>
+            </assign>
+            <assign line="39" column="3" name="productionRateMax">
+                <value name="+inf" type="int"/>
+            </assign>
+            <assign line="40" column="3" name="productionMax">
+                <value name="+inf" type="int"/>
+            </assign>
+            <assign line="41" column="3" name="consumptionRateMax">
+                <value name="-inf" type="int"/>
+            </assign>
+            <assign line="42" column="3" name="consumptionMax">
+                <value name="-inf" type="int"/>
+            </assign>
+        </constructor>
+        <constructor line="45" column="2">
+            <arg name="ic" type="float"/>
+            <arg name="ll_min" type="float"/>
+            <arg name="ll_max" type="float"/>
+            <arg name="p_max" type="float"/>
+            <arg name="c_max" type="float"/>
+            <assign line="47" column="3" name="initialCapacity">
+                <id name="ic" type="float"/>
+            </assign>
+            <assign line="48" column="3" name="levelLimitMin">
+                <id name="ll_min" type="float"/>
+            </assign>
+            <assign line="49" column="3" name="levelLimitMax">
+                <id name="ll_max" type="float"/>
+            </assign>
+            <assign line="50" column="3" name="productionRateMax">
+                <id name="p_max" type="float"/>
+            </assign>
+            <assign line="51" column="3" name="productionMax">
+                <id name="p_max" type="float"/>
+            </assign>
+            <assign line="52" column="3" name="consumptionRateMax">
+                <value name="-16" type="int"/>
+            </assign>
+            <assign line="53" column="3" name="consumptionMax">
+                <id name="c_max" type="float"/>
+            </assign>
+        </constructor>
+        <constructor line="56" column="2">
+            <arg name="ic" type="float"/>
+            <arg name="ll_min" type="float"/>
+            <arg name="ll_max" type="float"/>
+            <arg name="pr_max" type="float"/>
+            <arg name="p_max" type="float"/>
+            <arg name="cr_max" type="float"/>
+            <arg name="c_max" type="float"/>
+            <assign line="58" column="3" name="initialCapacity">
+                <id name="ic" type="float"/>
+            </assign>
+            <assign line="59" column="3" name="levelLimitMin">
+                <id name="ll_min" type="float"/>
+            </assign>
+            <assign line="60" column="3" name="levelLimitMax">
+                <id name="ll_max" type="float"/>
+            </assign>
+            <assign line="61" column="3" name="productionRateMax">
+                <id name="pr_max" type="float"/>
+            </assign>
+            <assign line="62" column="3" name="productionMax">
+                <id name="p_max" type="float"/>
+            </assign>
+            <assign line="63" column="3" name="consumptionRateMax">
+                <id name="cr_max" type="float"/>
+            </assign>
+            <assign line="64" column="3" name="consumptionMax">
+                <id name="c_max" type="float"/>
+            </assign>
+        </constructor>
+        <constructor line="67" column="2">
+            <assign line="68" column="3" name="initialCapacity">
+                <value name="0" type="int"/>
+            </assign>
+            <assign line="69" column="3" name="levelLimitMin">
+                <value name="-inf" type="int"/>
+            </assign>
+            <assign line="70" column="3" name="levelLimitMax">
+                <value name="+inf" type="int"/>
+            </assign>
+            <assign line="71" column="3" name="productionRateMax">
+                <value name="+inf" type="int"/>
+            </assign>
+            <assign line="72" column="3" name="productionMax">
+                <value name="+inf" type="int"/>
+            </assign>
+            <assign line="73" column="3" name="consumptionRateMax">
+                <value name="-inf" type="int"/>
+            </assign>
+            <assign line="74" column="3" name="consumptionMax">
+                <value name="-inf" type="int"/>
+            </assign>
+        </constructor>
+    </class>
+    <class line="83" column="7" filename="Plasma.nddl" name="UnaryResource" extends="Timeline">
+        <predicate line="84" column="12" name="uses">
+            <invoke line="85" column="3" name="eq">
+                <id name="state" type="STATE"/>
+                <symbol value="ACTIVE" type="TokenStates"/>
+            </invoke>
+        </predicate>
+    </class>
+    <enum line="3" column="6" filename="Model.nddl" name="Letters">
+        <set type="Letters">
+            <symbol value="X" type="Letters"/>
+            <symbol value="Y" type="Letters"/>
+            <symbol value="Z" type="Letters"/>
+        </set>
+    </enum>
+    <class line="5" column="7" filename="Model.nddl" name="A" extends="Timeline">
+        <predicate line="6" column="12" name="predicateA">
+            <var line="7" column="7" name="arg1" type="int"/>
+            <var line="8" column="9" name="arg2" type="float"/>
+        </predicate>
+        <predicate line="11" column="12" name="predicateB">
+            <var line="12" column="8" name="arg3" type="bool"/>
+            <var line="13" column="8" name="arg4" type="bool"/>
+        </predicate>
+    </class>
+    <class line="17" column="7" filename="Model.nddl" name="B" extends="A">
+        <predicate line="18" column="12" name="predicateC">
+            <var line="19" column="11" name="arg5" type="Letters"/>
+        </predicate>
+    </class>
+    <class line="23" column="7" filename="Model.nddl" name="C" extends="B">
+        <predicate line="24" column="12" name="predicateA"/>
+        <predicate line="25" column="12" name="predicateC"/>
+    </class>
+    <class line="28" column="7" filename="Model.nddl" name="D" extends="A">
+        <predicate line="29" column="12" name="predicateA"/>
+        <predicate line="31" column="12" name="predicateC">
+            <var line="32" column="7" name="arg6" type="int"/>
+            <var line="33" column="7" name="arg7" type="int"/>
+            <var line="34" column="7" name="arg8" type="int"/>
+        </predicate>
+        <predicate line="37" column="12" name="predicateF"/>
+    </class>
+    <class line="40" column="7" filename="Model.nddl" name="E" extends="D">
+        <predicate line="41" column="12" name="predicateC"/>
+    </class>
+    <class line="45" column="7" filename="Model.nddl" name="NoPredicates"/>
+    <class line="48" column="7" filename="Model.nddl" name="PredicateRoot" extends="Timeline">
+        <predicate line="49" column="12" name="predicateD"/>
+        <predicate line="50" column="12" name="predicateE"/>
+    </class>
+    <class line="53" column="7" filename="Model.nddl" name="PredicateDerived" extends="PredicateRoot"/>
+    <compat line="55" column="1" filename="Model.nddl" class="D" name="predicateF">
+        <group>
+            <subgoal line="56" column="2" relation="any">
+                <predicateinstance type="E.predicateC"/>
+            </subgoal>
+            <subgoal line="57" column="2" relation="any">
+                <predicateinstance type="D.predicateC"/>
+            </subgoal>
+            <subgoal line="58" column="2" relation="any">
+                <predicateinstance type="B.predicateB"/>
+            </subgoal>
+        </group>
+    </compat>
+    <var line="4" column="3" name="a" type="A">
+        <new type="A"/>
+    </var>
+    <var line="5" column="3" name="b" type="B">
+        <new type="B"/>
+    </var>
+    <var line="6" column="3" name="c" type="C">
+        <new type="C"/>
+    </var>
+    <var line="7" column="3" name="d" type="D">
+        <new type="D"/>
+    </var>
+    <var line="8" column="3" name="e" type="E">
+        <new type="E"/>
+    </var>
+    <var line="10" column="14" name="noPred" type="NoPredicates">
+        <new type="NoPredicates"/>
+    </var>
+    <var line="11" column="15" name="root" type="PredicateRoot">
+        <new type="PredicateRoot"/>
+    </var>
+    <var line="12" column="18" name="derived" type="PredicateDerived">
+        <new type="PredicateDerived"/>
+    </var>
+    <invoke line="14" column="1" name="close"/>
+    <goal line="16" column="1" mandatory="true">
+        <predicateinstance type="A.predicateA" name="t0"/>
+    </goal>
+    <goal line="17" column="1" mandatory="true">
+        <predicateinstance type="A.predicateB" name="t1"/>
+    </goal>
+    <goal line="18" column="1" mandatory="true">
+        <predicateinstance type="B.predicateA" name="t2"/>
+    </goal>
+    <goal line="19" column="1" mandatory="true">
+        <predicateinstance type="C.predicateA" name="t3"/>
+    </goal>
+    <goal line="20" column="1" mandatory="true">
+        <predicateinstance type="D.predicateC" name="t4"/>
+    </goal>
+    <goal line="21" column="1" mandatory="true">
+        <predicateinstance type="D.predicateF" name="t8"/>
+    </goal>
+    <goal line="23" column="1" mandatory="true">
+        <predicateinstance type="PredicateRoot.predicateD" name="t5"/>
+    </goal>
+    <goal line="24" column="1" mandatory="true">
+        <predicateinstance type="PredicateRoot.predicateE" name="t6"/>
+    </goal>
+    <goal line="25" column="1" mandatory="true">
+        <predicateinstance type="PredicateRoot.predicateD" name="t7"/>
+    </goal>
+    <goal line="27" column="1" mandatory="true">
+        <predicateinstance type="C.predicateC" name="t8"/>
+    </goal>
+</nddl>

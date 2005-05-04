@@ -1,0 +1,27 @@
+#include "../../NDDL/core/PlannerConfig.nddl"
+#include "Model.nddl"
+
+A a = new A();
+B b = new B();
+C c = new C();
+D d = new D();
+E e = new E();
+
+NoPredicates noPred = new NoPredicates();
+PredicateRoot root = new PredicateRoot();
+PredicateDerived derived = new PredicateDerived();
+
+close();
+
+goal(A.predicateA t0);
+goal(A.predicateB t1);
+goal(B.predicateA t2);
+goal(C.predicateA t3);
+goal(D.predicateC t4);
+goal(D.predicateF t8);
+
+goal(PredicateRoot.predicateD t5);
+goal(PredicateRoot.predicateE t6);
+goal(PredicateRoot.predicateD t7);
+
+goal(C.predicateC t8);
