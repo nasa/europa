@@ -35,7 +35,7 @@
  * determined by numerical quantities.  We also provide ObjectFactories so
  * users are able to define and register their own objects based on their
  * specific needs.  
- * @li @ref Resource "Resource": we provide a mosule dedicated to
+ * @li @ref Resource "Resource": we provide a module dedicated to
  * Resources because Resources are a common type of object that requires
  * special reasoning. This module includes basic  resource definitions,
  * reasoning, decision support, and modeling support  for resources.  A
@@ -81,7 +81,7 @@
  * @section motive Motivation
  * There are a number of perceived problems with the EUROPA which motivated
  * this new release.
- * @li Performance  - couldn't scale well to hundreds of objects and
+ * @li Performance  - did not scale well to hundreds of objects and
  * thousands of tokens.
  * @li Configurability - couldn't pick and choose components to solve
  * particular problems.
