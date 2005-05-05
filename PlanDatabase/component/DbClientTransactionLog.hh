@@ -31,6 +31,7 @@ namespace EUROPA {
     void notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
     void notifyActivated(const TokenId& token);
     void notifyMerged(const TokenId& token, const TokenId& activeToken);
+    void notifyMerged(const TokenId& token);
     void notifyRejected(const TokenId& token);
     void notifyCancelled(const TokenId& token);
     void notifyConstraintCreated(const ConstraintId& constraint);

@@ -915,7 +915,6 @@ public:
     runTest(testPredicateInheritance);
     runTest(testTokenFactory);
     runTest(testCorrectSplit_Gnats2450);
-    runTest(testRemergeOnDeactivation);
     return(true);
   }
   
@@ -1034,66 +1033,6 @@ private:
 
     }
     DEFAULT_TEARDOWN();
-    return true;
-  }
-
-  static bool testRemergeOnDeactivation(){
-    DEFAULT_SETUP(ce, db, true);
-    // Create 4 mergeable tokens - predicates, types and base domaiuns match
-    IntervalToken t0(db, 
-                     DEFAULT_PREDICATE(), 
-                     true,
-                     IntervalIntDomain(0, 10),
-                     IntervalIntDomain(0, 20),
-                     IntervalIntDomain(1, 1000));
-  
-    IntervalToken t1(db,
-                     DEFAULT_PREDICATE(), 
-                     true,
-                     IntervalIntDomain(0, 10),
-                     IntervalIntDomain(0, 20),
-                     IntervalIntDomain(1, 1000));
-  
-    IntervalToken t2(db,
-                     DEFAULT_PREDICATE(), 
-                     true,
-                     IntervalIntDomain(0, 10),
-                     IntervalIntDomain(0, 20),
-                     IntervalIntDomain(1, 1000));
-  
-    IntervalToken t3(db,
-                     DEFAULT_PREDICATE(), 
-                     true,
-                     IntervalIntDomain(0, 10),
-                     IntervalIntDomain(0, 20),
-                     IntervalIntDomain(1, 1000));
-  
-    t0.activate();
-    t1.merge(t0.getId());
-    t2.merge(t0.getId());
-    t3.merge(t0.getId());
-
-    assertTrue(t0.isActive());
-    assertTrue(t1.isMerged());
-    assertTrue(t2.isMerged());
-    assertTrue(t3.isMerged());
-
-    t0.cancel();
-
-    assertTrue(t0.isInactive());
-    assertTrue(t1.isActive());
-    assertTrue(t2.isMerged());
-    assertTrue(t3.isMerged());
-
-    t2.cancel();
-    assertTrue(t1.isActive());
-    assertTrue(t3.isMerged());
-
-    t1.cancel();
-    assertTrue(t3.isActive());
-
-    DEFAULT_TEARDOWN();
-    // Deletion will now occur and test proper cleanup.
     return true;
   }
 

@@ -139,6 +139,12 @@ namespace EUROPA {
     pushTransaction(element);
   }
 
+  void DbClientTransactionLog::notifyMerged(const TokenId& token){
+    TiXmlElement * element = allocateXmlElement("merge");
+    element->LinkEndChild(tokenAsXml(token));
+    pushTransaction(element);
+  }
+
   void DbClientTransactionLog::notifyRejected(const TokenId& token){
     TiXmlElement * element = allocateXmlElement("reject");
     element->LinkEndChild(tokenAsXml(token));

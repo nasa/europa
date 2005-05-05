@@ -309,7 +309,7 @@ namespace EUROPA {
     TokenId successor = predecessor;
     if(successor_el != NULL){
       successor = xmlAsToken(*successor_el);
-      check_error(successor.isValid());
+      checkError(successor.isValid(), "Invalid id for successor: " << *successor_el);
     }
 
     m_client->constrain(object, predecessor, successor);
@@ -351,11 +351,15 @@ namespace EUROPA {
     TokenId token = xmlAsToken(*token_el);
     check_error(token.isValid());
 
+    // It may or may not have another sibling element
     TiXmlElement * active_el = token_el->NextSiblingElement();
-    TokenId active_token = xmlAsToken(*active_el);
-    check_error(active_token.isValid());
-
-    m_client->merge(token, active_token);
+    if(active_el != NULL){
+      TokenId active_token = xmlAsToken(*active_el);
+      check_error(active_token.isValid());
+      m_client->merge(token, active_token);
+    }
+    else
+      m_client->merge(token);
   }
 
   void DbClientTransactionPlayer::playRejected(const TiXmlElement & element) {

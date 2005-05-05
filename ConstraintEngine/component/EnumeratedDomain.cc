@@ -119,7 +119,7 @@ namespace EUROPA {
   }
 
   void EnumeratedDomain::set(double value) {
-    check_error(isOpen() || isMember(value), "Can only set a value from the current domain if closed.")
+    checkError(isOpen() || isMember(value), "Can only set a value from the current domain if closed." << toString())
     m_values.clear();
     m_values.insert(value);
 
