@@ -1479,11 +1479,11 @@ namespace EUROPA {
       assertTrue(AbstractDomain::canBeCompared(dom0, dom1));
 
       // Switch for the bogus one - and make sure it fails as expected
-      new BogusComparator();
+      BogusComparator bogus;
       assertFalse(AbstractDomain::canBeCompared(dom0, dom1));
 
       // Allocate the standard comparator, and ensure it compares once again
-      new DomainComparator();
+      DomainComparator standard;
       assertTrue(AbstractDomain::canBeCompared(dom0, dom1));
 
       // Now allocate a new one again
