@@ -217,6 +217,24 @@ private:
     assert(allenums.size() == 2);
     assert(allenums.back() == LabelStr("FooEnum"));
     assert(allenums.front() == LabelStr("BarEnum"));
+
+    // test getEnumValues.
+    LabelStr enumDomainName = "TestEnum";
+    std::set<double> testEnumDomain;
+    testEnumDomain.insert( 1 );
+    testEnumDomain.insert( 2 );
+    testEnumDomain.insert( 3 );
+
+    SCHEMA->addEnum( enumDomainName );
+    std::set<double>::iterator i;
+    for ( i = testEnumDomain.begin(); i != testEnumDomain.end(); ++i ) {
+      SCHEMA->addValue( enumDomainName, *i );
+    }
+
+    std::set<double> enumDomainReturned;
+    enumDomainReturned = SCHEMA->getEnumValues( enumDomainName );
+    assert( enumDomainReturned == testEnumDomain );
+
     return true;
   }
 
