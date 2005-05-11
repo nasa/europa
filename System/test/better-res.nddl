@@ -73,7 +73,9 @@ class Rover{
 Rover::Sample{
   // we care that it consumes the battery
   any(Battery.change bc);
-  eq(bc.time, start);
+  // These should all be equivalent and all supported
+  temporalDistance(start, [1 2], bc.time);
+  
   // battery consumption and duration depend on work
   // should we pass coordinates here?
   sampleBattery( bc.quantity, m_x, m_y );
