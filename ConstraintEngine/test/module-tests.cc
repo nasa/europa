@@ -48,7 +48,13 @@ public:
 			   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){s_instanceCount++;}
   ~DelegationTestConstraint(){s_instanceCount--;}
-  void handleExecute(){s_executionCount++;}
+
+  void handleExecute(){
+    s_executionCount++;
+    ConstrainedVariableId var = getScope().front();
+    assertTrue(!var->derivedDomain().isSingleton(), "Should be able to access derived domain during propagation safely.");
+  }
+
   void handleExecute(const ConstrainedVariableId&,int, const DomainListener::ChangeType&){}
   bool canIgnore(const ConstrainedVariableId& variable, 
 		 int argIndex, 

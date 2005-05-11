@@ -2,6 +2,7 @@
 #define _H_AbstractVar
 
 #include "ConstrainedVariable.hh"
+#include "ConstraintEngine.hh"
 
 /**
  * @file Variable.hh
@@ -164,7 +165,7 @@ namespace EUROPA {
 
   template<class DomainType>
   const DomainType& Variable<DomainType>::getDerivedDomain() {
-    if (pending())
+    if (!m_constraintEngine->isPropagating() && pending())
       update();
 
     if (!provenInconsistent())
