@@ -12,27 +12,29 @@
 using namespace EUROPA;
 
 namespace EUROPA {
+  namespace SOLVERS {
 
-  class Component;
-  typedef Id<Component> ComponentId;
+    class Component;
+    typedef Id<Component> ComponentId;
 
-  class FlawManager;
-  typedef Id<FlawManager> FlawManagerId;
-  typedef std::set<FlawManagerId, EntityComparator<FlawManagerId> > FlawManagers;
+    class FlawManager;
+    typedef Id<FlawManager> FlawManagerId;
+    typedef std::list<FlawManagerId> FlawManagers;
 
-  class DecisionPoint;
-  typedef Id<DecisionPoint> DecisionPointId;
+    class VariableMatchingRule;
+    typedef Id<VariableMatchingRule> VariableMatchingRuleId;
 
-  class Solver;
-  typedef Id<Solver> SolverId;
+    class DecisionPoint;
+    typedef Id<DecisionPoint> DecisionPointId;
 
-  typedef std::vector<DecisionPointId> DecisionStack;
+    class Solver;
+    typedef Id<Solver> SolverId;
 
-  /** Specialized Factories **/
-  class VariableDecisionPointFactory;
-  typedef Id<VariableDecisionPointFactory> VariableDecisionPointFactoryId;
+    typedef std::vector<DecisionPointId> DecisionStack;
 
-  class FilterCondition;
-  typedef Id<FilterCondition> FilterConditionId;
+    class FilterCondition;
+    typedef Id<FilterCondition> FilterConditionId;
+
+  }
 }
 #endif

@@ -1,0 +1,12 @@
+SubDir PLASMA Solvers component ;
+
+if ! $(PLASMA_READY) {
+
+ModuleComponent Solvers
+	:
+	VariableDecisionPoint.cc
+	VariableFlawManager.cc
+	Filters.cc
+	;
+
+} # PLASMA_READY

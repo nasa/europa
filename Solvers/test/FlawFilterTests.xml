@@ -1,28 +1,30 @@
-<EmptyFilters>
- <StaticFlawFilter/>
- <DynamicFlawFilter/>
-</EmptyFilters>
-<StaticMatching>
- <StaticFlawFilter>
+<VariableFlawManager>
   <-- Exclude all temporal variables -->
-  <Filter scope="*.start"/>
-  <Filter scope="*.end"/>
-  <Filter scope="*.duration"/>
+  <VariableFilter var-match="start"/>
+  <VariableFilter var-match="end"/>
+  <VariableFilter var-match="duration"/>
 
   <-- Exlude all arg1 parameters of predicateA on A and all its subclasses -->
-  <Filter scope="A.predicateA.arg1"/>
+  <VariableFilter var-match="arg1" predicate-match="predicateA" class-match="A"/>
 
   <-- Exclude all variables of predicateB -->
-  <Filter scope="A.predicateB.*"/>
+  <VariableFilter class-match="A" predicate-match="predicateB"/>
 
   <-- Exclude all tokens and variables of class D -->
-  <Filter scope="D.*"/>
+  <VariableFilter class-match="D"/>
 
+  <-- Impose a dynamic filter based on a singleton -->
+  <VariableFilter var-match="globalVariable1" component="Singleton"/>
+</VariableFlawManager>
+
+<TokenFlawManager>
+  <TokenFilterCondition class-match="D"/>
+
+  <-- Exclude all token flaws in predicate E.PredicateC -->
+  <TokenFilterCondition class-match="E" predicate-match="PredicateC"/>
+</TokenFlawManager>
+ 
+<ObjectFlawManager>
   <-- Exclude all object flaws on instances of PredicateRoot or its subclasses -->
-  <Filter scope="PredicateRoot"/>
-
-  <-- Exclude all token flaws in predicate C.PredicateC -->
-  <Filter scope="E.PredicateC"/>
-
- </StaticFlawFilter>
-</StaticMatching>
+  <ObjectFilterCondition class-match="PredicateRoot"/>
+</ObjectFlawManager>

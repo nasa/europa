@@ -1,5 +1,8 @@
-#include "../../NDDL/core/PlannerConfig.nddl"
 #include "Model.nddl"
+
+int globalVariable1 = [1 1000];
+int globalVariable2 = [1 100];
+eq(globalVariable1, globalVariable2);
 
 A a = new A();
 B b = new B();

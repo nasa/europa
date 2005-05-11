@@ -57,3 +57,28 @@ D::predicateF{
  any(D.predicateC);
  any(B.predicateB);
 }
+
+class Container extends Timeline {
+ int objectVar1 = 10;
+ int objectVar2 = 20;
+ predicate pred1 {
+  int arg1;
+  int arg2;
+ }
+
+ predicate pred2 {
+  int arg3;
+ }
+}
+
+class DerivedContainer extends Container {
+ int objectVar3;
+ int objectVar4;
+ predicate pred3{
+  int arg4;
+ }
+}
+
+Container::pred2 {
+ int localArg1;
+}

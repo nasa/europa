@@ -1,0 +1,8 @@
+<SimpleCSPSolver>
+ <Solver name="SimpleCSPSolver">
+  <-- Will have variable flaws, but no filtering -->
+  <VariableFlawManager>
+   <VariableHandler component="Min"/>
+  </VariableManager>
+ <\Solver>
+</SimpleCSPSolver>

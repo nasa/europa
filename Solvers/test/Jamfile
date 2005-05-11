@@ -3,16 +3,16 @@ SubDir PLASMA Solvers test ;
 if ! $(PLASMA_READY) {
 
  # All input file names used for the tests
- local inputFiles = StaticMatching.nddl ;
-
+ local inputFiles = VariableFiltering.nddl StaticCSP.nddl ;
+ 
  # Create dependency for initial state files to be parsed
  local inputFile ;
  for inputFile in $(inputFiles) {
   NddlParser $(inputFile:S=.xml) : $(inputFile) ;
-  LocalDepends run-solver-module-tests : $(inputFile:S=.xml) ;
+  LocalDepends run-solvers-module-tests : $(inputFile:S=.xml) ;
  }
 
- NddlMain solver-module-tests : module-tests.cc : Model.nddl : Solvers ;
- RunModuleMain run-solver-module-tests : solver-module-tests ;
- LocalDepends tests : run-solver-module-tests ;
+ NddlMain solvers-module-tests : module-tests.cc : Model.nddl : Solvers ;
+ RunModuleMain run-solvers-module-tests : solvers-module-tests ;
+ LocalDepends tests : run-solvers-module-tests ;
 } # PLASMA_READY

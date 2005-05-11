@@ -1,7 +1,7 @@
 <root name="BasicTest" scope="B">
- <child name="A"/>
- <child name="B"/>
- <child name="C"/>
- <child name="D"/>
- <child name="E"/>
+ <child component="A"/>
+ <child component="B"/>
+ <child component="C"/>
+ <child component="D"/>
+ <child component="E"/>
 </root>

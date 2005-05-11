@@ -2,7 +2,9 @@
 #include "StandardAssembly.hh"
 #include "Solver.hh"
 #include "ComponentFactory.hh"
-#include "FlawFilter.hh"
+#include "VariableFlawManager.hh"
+//#include "FlawFilter.hh"
+#include "Filters.hh"
 #include "Token.hh"
 #include "TestSupport.hh"
 #include "Debug.hh"
@@ -16,6 +18,7 @@
  */
 
 using namespace EUROPA;
+using namespace EUROPA::SOLVERS;
 
 class TestComponent: public Component{
 public:
@@ -36,6 +39,9 @@ REGISTER_COMPONENT_FACTORY(TestComponent, B);
 REGISTER_COMPONENT_FACTORY(TestComponent, C);
 REGISTER_COMPONENT_FACTORY(TestComponent, D);
 REGISTER_COMPONENT_FACTORY(TestComponent, E);
+
+// Register filter components
+REGISTER_COMPONENT_FACTORY(SingletonFilter, Singleton)
 
 /**
  * @brief Helper method to get the first xml element in the file
@@ -89,46 +95,23 @@ private:
 };
 
 
+
 class FlawFilterTests {
 public:
   static bool test(){
-    runTest(testEmptyFilters);
-    runTest(testStaticMatching);
+    runTest(testVariableFiltering);
     return true;
   }
 
 private:
-  static bool testEmptyFilters(){
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "EmptyFilters");
-
-    // Get the node out for the static filter
-    TiXmlElement* node = root->FirstChildElement();
-
-    // Initialize Static Filter
-    StaticFlawFilter staticFilter(*node);
-
-    // Get node for expected dynamic filter
-    // Initialize Dynamic Filter
-    node = static_cast<TiXmlElement*>(root->IterateChildren(node));
-    assert(node != NULL);
-    DynamicFlawFilter dynamicFilter(*node);
-
-    delete root;
-    return true;
-  }
-
-  static bool testStaticMatching(){
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "StaticMatching");
-
-    // Get the node out for the static filter
-    TiXmlElement* node = root->FirstChildElement();
-
-    // Initialize Static Filter
-    StaticFlawFilter staticFilter(*node);
+  
+  static bool testVariableFiltering(){
+    TiXmlElement* root = initXml("FlawFilterTests.xml", "VariableFlawManager");
 
     StandardAssembly assembly(Schema::instance());
-
-    assert(assembly.playTransactions("StaticMatching.xml"));
+    VariableFlawManager fm(*root);
+    fm.initialize(assembly.getPlanDatabase());
+    assert(assembly.playTransactions("VariableFiltering.xml"));
 
     // Simple filter on a variable
     ConstrainedVariableSet variables = assembly.getConstraintEngine()->getVariables();
@@ -140,11 +123,30 @@ private:
       static const LabelStr includedVariables(":arg2:arg5:");
       std::string s = ":" + var->getName().toString() + ":";
       if(excludedVariables.contains(s))
-	assertTrue(!staticFilter.inScope(var))
+	assertTrue(!fm.inScope(var))
       else if(includedVariables.contains(s))
-	assertTrue(staticFilter.inScope(var), var->toString());
+	assertTrue(fm.inScope(var), var->toString());
     }
 
+    // Confirm that a global variable is first a flaw, but when bound is no longer a flaw, and when bound again,
+    // returns as a flaw
+    ConstrainedVariableId globalVar1 = assembly.getPlanDatabase()->getGlobalVariable("globalVariable1");
+    ConstrainedVariableId globalVar2 = assembly.getPlanDatabase()->getGlobalVariable("globalVariable2");
+    assertTrue(!fm.inScope(globalVar1));
+    assertTrue(fm.inScope(globalVar2));
+    globalVar2->specify(globalVar2->lastDomain().getLowerBound());
+    assembly.getConstraintEngine()->propagate();
+    assertTrue(!fm.inScope(globalVar2));
+    assertTrue(fm.inScope(globalVar1)); // By propagation it will be a singleton, so it will be included
+    globalVar2->reset();
+    assembly.getConstraintEngine()->propagate();
+    assertTrue(!fm.inScope(globalVar1));
+    assertTrue(fm.inScope(globalVar2));
+
+    return true;
+  }
+
+    /*
     // All Variables of a predicate are excluded
     TokenSet tokens = assembly.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
@@ -167,28 +169,51 @@ private:
     }
 
     return true;
-  }
+    }*/
 };
 
 
 class SolverTests {
 public:
   static bool test(){
-    runTest(testBasicAllocation);
+    runTest(testMinValuesSimpleCSP);
     return true;
   }
 
 private:
-  static bool testBasicAllocation(){
-    DEFAULT_SETUP(ce, db, true);
+  /**
+   * @brief Will load an intial state and solve a csp with only variables.
+   */
+  static bool testMinValuesSimpleCSP(){
+    StandardAssembly assembly(Schema::instance());
+    TiXmlElement* root = initXml("SolverTests.xml", "SimpleCSPSolver");
+    TiXmlElement* child = root->FirstChildElement();
     {
-      Solver solver(db->getClient());
+      assert(assembly.playTransactions("StaticCSP.xml"));
+      Solver solver(assembly.getPlanDatabase(), *child);
+      assertTrue(solver.solve());
+      const ConstrainedVariableSet& allVars = assembly.getPlanDatabase()->getGlobalVariables();
+      assertTrue(solver.getStepCount() == allVars.size());
+      assertTrue(solver.getDepth() == allVars.size());
+      for(ConstrainedVariableSet::const_iterator it = allVars.begin(); it != allVars.end(); ++it){
+	ConstrainedVariableId var = *it;
+	assertTrue(var->specifiedDomain().isSingleton());
+      }
+
+      // Run the solver again.
+      assertTrue(solver.solve());
+      assertTrue(solver.getStepCount() == allVars.size());
+      assertTrue(solver.getDepth() == allVars.size());
+
+      // Now clear it and run it again
+      solver.reset();
+      assertTrue(solver.solve());
+      assertTrue(solver.getStepCount() == allVars.size());
+      assertTrue(solver.getDepth() == allVars.size());
     }
-    DEFAULT_TEARDOWN();
     return true;
   }
 };
-
 
 void initSolverModuleTests() {
   StandardAssembly::initialize();
