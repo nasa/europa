@@ -3,7 +3,6 @@
 #include "Solver.hh"
 #include "ComponentFactory.hh"
 #include "VariableFlawManager.hh"
-//#include "FlawFilter.hh"
 #include "Filters.hh"
 #include "Token.hh"
 #include "TestSupport.hh"
@@ -210,6 +209,20 @@ private:
       assertTrue(solver.solve());
       assertTrue(solver.getStepCount() == allVars.size());
       assertTrue(solver.getDepth() == allVars.size());
+
+      // Now partially reset it, and run again
+      solver.reset(2);
+      assertTrue(solver.solve());
+      assertTrue(solver.getStepCount() == 2);
+      assertTrue(solver.getDepth() == allVars.size());
+      /*
+      // Now we reset one decision, then clear it. Expect the solution and depth to be 1.
+      solver.reset(1);
+      solver.clear();
+      assertTrue(solver.solve());
+      assertTrue(solver.getStepCount() == 1);
+      assertTrue(solver.getDepth() == 1);
+      */
     }
     return true;
   }
