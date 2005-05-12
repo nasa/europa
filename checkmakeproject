@@ -1,0 +1,44 @@
+#!/bin/sh
+#
+# checkmakeproject: sh script for checking makeproject is
+#                   working and that nddl path is correctly
+#                   searched when specified in NDDL.cfg files. 
+#
+#   Argument: relative location of PLASMA root
+#
+
+TEST_PROJECT_NAME="CheckMakeProjectTestProject"
+RELDIR=`dirname "$0"`
+
+echo "Testing makeproject."
+
+# Ensure test project directory does not already exist.
+cd "$RELDIR"
+cd ..
+if [ -d $TEST_PROJECT_NAME ]  
+then
+  # Directory exists. Print warning and exit.
+  echo "**** [WARNING] Terminating makeproject test - directory ../$TEST_PROJECT_NAME already exists." 
+  exit -1
+fi
+
+echo "Creating test project - $TEST_PROJECT_NAME"
+# Run makeproject.
+cd "$RELDIR"
+cd PLASMA 
+makeproject "$TEST_PROJECT_NAME"
+cd ..
+cd "$TEST_PROJECT_NAME"
+
+# Copy in NDDL.cfg file with serach path set
+cp ../plasma/nddl/test/cfg-path-test/NDDL.cfg .
+
+# Execute project.
+ jam "$TEST_PROJECT_NAME"
+
+# Remove project.
+echo "Cleaning up - removing directory $TEST_PROJECT_NAME"
+cd ..
+rm -r "$TEST_PROJECT_NAME"
+echo "Finished testing makeproject."
+exit 0
