@@ -120,7 +120,7 @@ then
   exit -1
 fi
 echo "Adding "$NAME"-Main.cc"
-cp ./NDDL/test/project/Main.cc $DIRECTORY/$NAME-Main.cc
+cp ./System/component/Main.cc $DIRECTORY/$NAME-Main.cc
 
 
 if [ -e $DIRECTORY/PlanWorks.cfg ]
