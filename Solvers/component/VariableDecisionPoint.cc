@@ -32,6 +32,7 @@ namespace EUROPA {
     void VariableDecisionPoint::handleExecute(){
       double nextValue = getNext();
       m_client->specify(m_flawedVariable, nextValue);
+      debugMsg("VariableDecisionPoint:handleExecute", m_flawedVariable->toString());
     }
 
     void VariableDecisionPoint::handleUndo(){
@@ -73,8 +74,8 @@ namespace EUROPA {
 	debugMsg("RandomValue:RandomValue", "Seeding Random Number Generator with " << seedValue);
       }
 
-      checkError(strcmp(configData.Value(), "variable-heuristic") == 0,
-		 "Expected element <variable-heuristic> but found " << configData.Value());
+      checkError(strcmp(configData.Value(), "VariableHandler") == 0,
+		 "Expected element <VariableHandler> but found " << configData.Value());
 
       // If there is an XML child for the distribution, then obtain it. Make sure there is at most 1.
       bool foundOne = false;

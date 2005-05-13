@@ -2,6 +2,8 @@
  <Solver name="SimpleCSPSolver">
   <-- Will have variable flaws, but no filtering -->
   <VariableFlawManager>
+   <VariableHandler var-match="v0" component="Min"/>
+   <VariableHandler var-match="v1" component="Min"/>
    <VariableHandler component="Min"/>
   </VariableManager>
  <\Solver>

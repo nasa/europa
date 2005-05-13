@@ -307,6 +307,19 @@ private:
       assert(assembly.playTransactions("ExhaustiveSearch.xml"));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertFalse(solver.solve());
+
+      debugMsg("SolverTests:testExhaustinveSearch", "Step count == " << solver.getStepCount());
+
+      const ConstrainedVariableSet& allVars = assembly.getPlanDatabase()->getGlobalVariables();
+      unsigned int stepCount = 0;
+      unsigned int product = 1;
+      for(ConstrainedVariableSet::const_iterator it = allVars.begin(); it != allVars.end(); ++it){
+	static const unsigned int baseDomainSize = (*it)->baseDomain().getSize();
+	stepCount = stepCount + (product*baseDomainSize);
+	product = product*baseDomainSize;
+      }
+
+      assertTrue(solver.getStepCount() == stepCount);
     }
     return true;
   }

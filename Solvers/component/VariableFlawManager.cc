@@ -76,7 +76,8 @@ namespace EUROPA {
 	addFlaw(var);
       }
 
-      // PROCESS CONSTRAINTS TO INITIALIZE GUARDS
+      // PROCESS CONSTRAINTS TO INITIALIZE GUARDS. We are looking for RuleVariableListener constraints since they 
+      // determine if a variable is guarded or not.
       const ConstraintSet& allConstraints = m_db->getConstraintEngine()->getConstraints();
       for(ConstraintSet::const_iterator it = allConstraints.begin(); it != allConstraints.end(); ++it){ 
 	ConstraintId constraint = *it;
@@ -227,6 +228,9 @@ namespace EUROPA {
       return result;
     }
 
+    /**
+     * We may filter based on static information only.
+     */
     void VariableFlawManager::addFlaw(const ConstrainedVariableId& var){
       if(!var->specifiedDomain().isSingleton() && !matches(var, m_staticMatchingRules)){
 	debugMsg("VariableFlawManager:addFlaw",
