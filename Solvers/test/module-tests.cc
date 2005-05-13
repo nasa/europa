@@ -2,6 +2,8 @@
 #include "StandardAssembly.hh"
 #include "Solver.hh"
 #include "ComponentFactory.hh"
+#include "Constraint.hh"
+#include "ConstraintLibrary.hh"
 #include "VariableFlawManager.hh"
 #include "Filters.hh"
 #include "Token.hh"
@@ -16,8 +18,64 @@
  * @date May, 2005
  */
 
+
+
 using namespace EUROPA;
 using namespace EUROPA::SOLVERS;
+
+/**
+ * @brief Test Constraint to only fire when all values are singletons and to then
+ * require that all values are different. Deliberately want to force an ineefiecint search with
+ * lots of backtrack.
+ */
+class LazyAllDiff: public Constraint {
+public:
+  LazyAllDiff(const LabelStr& name,
+	      const LabelStr& propagatorName,
+	      const ConstraintEngineId& constraintEngine,
+	      const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+  }
+
+  void handleExecute() {
+    std::set<double> singletonValues;
+    std::vector<ConstrainedVariableId>::const_iterator it_end = getScope().end();
+    for(std::vector<ConstrainedVariableId>::const_iterator it = getScope().begin(); it != it_end; ++it){
+      ConstrainedVariableId var = *it;
+      if(getCurrentDomain(var).isSingleton())
+	singletonValues.insert(getCurrentDomain(var).getSingletonValue());
+      else
+	return;
+    }
+
+    if(singletonValues.size() < getScope().size())
+      getCurrentDomain(getScope().front()).empty();
+  }
+};
+
+/**
+ * @brief Test Constraint to only fire when all values are singletons and to then always fail. Used to force exhaustive search.
+ */
+class LazyAlwaysFails: public Constraint {
+public:
+  LazyAlwaysFails(const LabelStr& name,
+	      const LabelStr& propagatorName,
+	      const ConstraintEngineId& constraintEngine,
+	      const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+  }
+
+  void handleExecute() {
+    std::vector<ConstrainedVariableId>::const_iterator it_end = getScope().end();
+    for(std::vector<ConstrainedVariableId>::const_iterator it = getScope().begin(); it != it_end; ++it){
+      ConstrainedVariableId var = *it;
+      if(!getCurrentDomain(var).isSingleton())
+	return;
+    }
+
+    getCurrentDomain(getScope().front()).empty();
+  }
+};
 
 class TestComponent: public Component{
 public:
@@ -176,6 +234,8 @@ class SolverTests {
 public:
   static bool test(){
     runTest(testMinValuesSimpleCSP);
+    runTest(testSuccessfulSearch);
+    runTest(testExhaustiveSearch);
     return true;
   }
 
@@ -215,14 +275,38 @@ private:
       assertTrue(solver.solve());
       assertTrue(solver.getStepCount() == 2);
       assertTrue(solver.getDepth() == allVars.size());
-      /*
+ 
       // Now we reset one decision, then clear it. Expect the solution and depth to be 1.
       solver.reset(1);
       solver.clear();
       assertTrue(solver.solve());
       assertTrue(solver.getStepCount() == 1);
       assertTrue(solver.getDepth() == 1);
-      */
+    }
+    return true;
+  }
+
+
+  static bool testSuccessfulSearch(){
+    StandardAssembly assembly(Schema::instance());
+    TiXmlElement* root = initXml("SolverTests.xml", "SimpleCSPSolver");
+    TiXmlElement* child = root->FirstChildElement();
+    {
+      assert(assembly.playTransactions("SuccessfulSearch.xml"));
+      Solver solver(assembly.getPlanDatabase(), *child);
+      assertTrue(solver.solve());
+    }
+    return true;
+  }
+
+  static bool testExhaustiveSearch(){
+    StandardAssembly assembly(Schema::instance());
+    TiXmlElement* root = initXml("SolverTests.xml", "SimpleCSPSolver");
+    TiXmlElement* child = root->FirstChildElement();
+    {
+      assert(assembly.playTransactions("ExhaustiveSearch.xml"));
+      Solver solver(assembly.getPlanDatabase(), *child);
+      assertFalse(solver.solve());
     }
     return true;
   }
@@ -239,6 +323,9 @@ void initSolverModuleTests() {
 int main(){
   // Initialization of various id's and other required elements
   initSolverModuleTests();
+
+  REGISTER_CONSTRAINT(LazyAllDiff, "lazyAllDiff",  "Default");
+  REGISTER_CONSTRAINT(LazyAlwaysFails, "lazyAlwaysFails",  "Default");
 
   runTestSuite(ComponentFactoryTests::test);
   runTestSuite(FlawFilterTests::test);

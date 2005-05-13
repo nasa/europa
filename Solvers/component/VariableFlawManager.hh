@@ -19,7 +19,7 @@ namespace EUROPA {
 
       virtual ~VariableFlawManager();
 
-      DecisionPointId next(unsigned int& bestPriority);
+      DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
 
       /**
        * @brief True if the given variable is in scope.
@@ -35,7 +35,12 @@ namespace EUROPA {
       void removeGuard(const ConstrainedVariableId& var);
       void handleConstraintAddition(const ConstraintId& constraint);
       void handleConstraintRemoval(const ConstraintId& constraint);
-      
+
+      /**
+       * @brief Utility to test if the given variable is part of a token that is merged, rejected or inactive.
+       */
+      static bool variableOfNonActiveToken(const ConstrainedVariableId& var);
+
       ConstrainedVariableSet m_flawCandidates; /*!< All variables that have passed the static filter */
 
       std::map<ConstrainedVariableId, unsigned int> m_guardCache; /*!< Cache of variables that are

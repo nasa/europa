@@ -123,8 +123,9 @@ namespace EUROPA {
     }
 
 
-    DecisionPointId VariableFlawManager::next(unsigned int& bestPriority){
-
+    DecisionPointId VariableFlawManager::next(unsigned int priorityLowerBound,
+					      unsigned int& bestPriority){
+      checkError(bestPriority > priorityLowerBound, "Should not be calling this otherwise.");
       ConstrainedVariableId flawedVariable;
       bool flawIsGuarded = false;
 
@@ -132,10 +133,14 @@ namespace EUROPA {
 	       "Evaluating next decision to work on. Must beat priority of " << bestPriority);
 
       for(ConstrainedVariableSet::const_iterator it = m_flawCandidates.begin(); it != m_flawCandidates.end(); ++it){
-	if(bestPriority <= ZERO_COMMITMENT_SCORE()) // Can't do better
+	if(bestPriority <= priorityLowerBound) // Can't do better
 	  break;
 
 	ConstrainedVariableId candidate = *it;
+
+	checkError(!variableOfNonActiveToken(candidate),
+		   "Expect that " << candidate->toString() << " cannot belong to an inactive or merged token.");
+
 	check_error(!candidate->specifiedDomain().isSingleton(),
 		    "Should not be seeing this as a candidate flaw since it is already specified.");
 
@@ -145,13 +150,13 @@ namespace EUROPA {
 	  continue;
 	}
 
-	const AbstractDomain& derivedDomain = candidate->lastDomain();
+	const AbstractDomain& derivedDomain = candidate->derivedDomain();
 
 	if(!derivedDomain.isOpen() && derivedDomain.areBoundsFinite()){
 	  unsigned int valueCount = candidate->lastDomain().getSize();
 
-	  // If it is not a unit decision and it is not a guard, but we have a guard, then skip it
-	  if(valueCount > ZERO_COMMITMENT_SCORE() && flawIsGuarded){
+	  // If it is not a best case priority, and not a guard, but we have a guard, then skip it
+	  if(valueCount > priorityLowerBound && flawIsGuarded){
 	    debugMsg("VariableFlawManager:next",
 		     candidate->toString() << " does not beat a guarded variable decision.");
 	    continue;
@@ -175,14 +180,14 @@ namespace EUROPA {
       if(flawedVariable.isNoId())
 	return DecisionPointId::noId();
 
-      // If not a singleton, but is a guard, then set bestPriority to 2 so it dominates all
+      // If not a best-case, but is a guard, then set bestPriority to 2 so it dominates all
       // non singleton decision types.
-      if(bestPriority > ZERO_COMMITMENT_SCORE() && flawIsGuarded)
-	bestPriority = ZERO_COMMITMENT_SCORE()+1;
+      if(bestPriority > priorityLowerBound && flawIsGuarded)
+	bestPriority = priorityLowerBound+1;
 
       // If it is neither a singleton nor a guard, then bump up the priority so that it is dominated
       // by all other decision types
-      if(bestPriority > ZERO_COMMITMENT_SCORE())
+      if(bestPriority > priorityLowerBound)
 	bestPriority = WORST_SCORE();
 
       DecisionPointId decisionPoint = allocateDecisionPoint(flawedVariable);
@@ -285,6 +290,17 @@ namespace EUROPA {
 	  removeGuard(guard);
 	}
       }
+    }
+
+    bool VariableFlawManager::variableOfNonActiveToken(const ConstrainedVariableId& var){
+      // If var parent is a token and the state is not active, then true.
+      if(TokenId::convertable(var->getParent())){
+	TokenId token(var->getParent());
+	return !token->isActive();
+      }
+
+      // Otherwise false
+      return false;
     }
 
     VariableFlawManager::CeListener::CeListener(const ConstraintEngineId& ce,

@@ -3,7 +3,7 @@ SubDir PLASMA Solvers test ;
 if ! $(PLASMA_READY) {
 
  # All input file names used for the tests
- local inputFiles = VariableFiltering.nddl StaticCSP.nddl ;
+ local inputFiles = VariableFiltering.nddl StaticCSP.nddl SuccessfulSearch.nddl ExhaustiveSearch.nddl ;
  
  # Create dependency for initial state files to be parsed
  local inputFile ;
