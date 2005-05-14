@@ -123,6 +123,15 @@ namespace EUROPA {
       return false;
     }
 
+    /**
+     * Expect that finding singleton variable decisions will not be very costly, so we will
+     * use the general technique and thus avoid special handling for singletons. We call 'next'
+     * but pass it very tight bounds so it will terminate on a unit or not return anything.
+     */
+    DecisionPointId VariableFlawManager::nextZeroCommitmentDecision(){
+      unsigned int bestPriority = ZERO_COMMITMENT_SCORE()+1;
+      return next(ZERO_COMMITMENT_SCORE(), bestPriority);
+    }
 
     DecisionPointId VariableFlawManager::next(unsigned int priorityLowerBound,
 					      unsigned int& bestPriority){

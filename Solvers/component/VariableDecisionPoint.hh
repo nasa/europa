@@ -37,6 +37,7 @@ namespace EUROPA {
        */
       std::string toString() const;
 
+      bool canUndo() const;
 
     protected:
       VariableDecisionPoint(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);

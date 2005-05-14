@@ -4,6 +4,7 @@ if ! $(PLASMA_READY) {
 
 ModuleComponent Solvers
 	:
+	MatchingRule.cc
 	VariableDecisionPoint.cc
 	VariableFlawManager.cc
 	Filters.cc

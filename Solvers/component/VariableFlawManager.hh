@@ -18,8 +18,8 @@ namespace EUROPA {
       VariableFlawManager(const TiXmlElement& configData);
 
       virtual ~VariableFlawManager();
-
-      DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
+      virtual DecisionPointId nextZeroCommitmentDecision();
+      virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
 
       /**
        * @brief True if the given variable is in scope.

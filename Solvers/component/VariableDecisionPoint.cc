@@ -3,6 +3,7 @@
 #include "DbClient.hh"
 #include "AbstractDomain.hh"
 #include "Debug.hh"
+#include "MatchingRule.hh"
 
 /**
  * @brief Provides implementation for base class and common subclasses for handling variable flaws.
@@ -13,7 +14,7 @@ namespace EUROPA {
   namespace SOLVERS {
 
     VariableDecisionPoint::VariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
-      : DecisionPoint(dbClient),
+      : DecisionPoint(dbClient, flawedVariable->getKey()),
 	m_flawedVariable(flawedVariable),
 	m_choices(ValueSource::getSource(flawedVariable)){
       checkError(flawedVariable->lastDomain().areBoundsFinite(),
@@ -26,6 +27,10 @@ namespace EUROPA {
     }
 
     const ConstrainedVariableId& VariableDecisionPoint::getFlawedVariable() const{return m_flawedVariable;}
+
+    bool VariableDecisionPoint::canUndo() const {
+      return DecisionPoint::canUndo() && m_flawedVariable->specifiedDomain().isSingleton();
+    }
 
     void VariableDecisionPoint::handleInitialize(){}
 

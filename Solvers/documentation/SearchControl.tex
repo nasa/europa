@@ -8,17 +8,17 @@
 
 \author{Conor McGann}
 
-\title{Search Control Framework}
+\title{The EUROPA Solver Framework}
 
 \begin{document}
 
 \maketitle
 
-This document outlines the requirements and technical approach for controlling the search undertaken by the standard EUROPA planner. We assume a chronological-backtracking heuristic search.
+This document outlines the requirements and technical approach for controlling the search undertaken by the standard EUROPA solver. We assume a chronological-backtracking heuristic search.
 
 \section{Preliminaries}
 
-In our planning paradigm, a planner is a problem solving actor which operates to resolve flaws in a plan database. Informally, a flaw is an indication of a potential for inconsistency in a given partial plan. We distinguish 3 types of flaw, each with its own corresponding  procedure to resolve it:
+In our planning paradigm, a solver is a problem solving actor which operates to resolve flaws in a plan database. Informally, a flaw is an indication of a potential for inconsistency in a given partial plan. We distinguish 3 types of flaw, each with its own corresponding  procedure to resolve it:
 \begin{enumerate}
 \item An Object Flaw - arises when an ordering is required for tokens associated with an object. This occurs in objects such as {\em Timelines} to ensure that a mutual exclusion is enforced, and on metric resources to ensure that the resource level is within specified limits.
 \item A Token Flaw - arises when a token is in the {\em Plan Database} but not yet in the {\em Plan}. Such a token is said to be {\em inactive}. Token Flaws are resolved through merging with an existing token already in the plan, through insertion as a new token in the plan, or through rejection, if permitted.
@@ -27,21 +27,20 @@ In our planning paradigm, a planner is a problem solving actor which operates to
 
 Within the standard search procedure we distinguish 3 elements of search control which provide the tools for tuning and customization to particular applications and domains:
 \begin{enumerate}
-\item Scope Definition - defines the set of flaws that must be resolved to complete the plan. When there are no flaws remaining, and the plan database is not inconsistent, the plan is considered complete and the planner terminates.
+\item Scope Definition - defines the set of flaws that must be resolved to complete the plan. When there are no flaws remaining, and the plan database is not inconsistent, the plan is considered complete and the solver terminates.
 \item Flaw Selection - identifies which flaw to resolve next.
 \item Flaw Resolution - executes appropriate underlying procedures to resolve a flaw, until all stipulated options are exhausted. These underlying procedures include the actions already mentioned e.g. token activation, token merging, token ordering, variable binding. In addition they must address aggregation and ordering of choices for resolution. Note that a flaw may persist after resolution steps have been taken. For example, a {\em Timeline} may require additional orderings in order to ensure the temporal mutual exclusion is satisfied.
 \end{enumerate}
 
-The focus of this document is to provide the means to efficiently, compactly and flexibly customize each of the above elements of search control to provide a versatile planner.
+The focus of this document is to provide the means to efficiently, compactly and flexibly customize each of the above elements of search control to provide a versatile solver.
 
 \section{Requirements}
 This section reviews by example the main components of search control and presents observations for generalization of the requirement or to consider as we further develop the technical approach.
-
 \subsection{Scope Definition}
-In general, there may be many sophisticated ways in which the scope of flaws for a planner to work on can be specified. We look at this from the point of view of filters applied to the built in set of system flaws described earlier. Examples of the criteria that have arisen include:
+In general, there may be many sophisticated ways in which the scope of flaws for a solver to work on can be specified. We look at this from the point of view of filters applied to the built in set of system flaws described earlier. Examples of the criteria that have arisen include:
 \begin{enumerate}
 \item Exclude all singleton {\em Variable Flaws} that are not guards in a rule.
-\item Exclude all token flaws whose timepoints are not necessarily contained by the planners horizon. This is a dynamic flaw filter in that it may have to be re-evaluated if the timepoints are restricted.
+\item Exclude all token flaws whose timepoints are not necessarily contained by the solvers horizon. This is a dynamic flaw filter in that it may have to be re-evaluated if the timepoints are restricted.
 \item Exclude all temporal variable flaws. This is a static flaw filter since a variable is always a temporal variable.
 \item Exclude all variable flaws with the name {\em foo}. This is a static flaw filter since the name of a variable cannot change.
 \item Exclude all variable flaws with infinite domains. This may be a static filter for some variables and a dynamic filter for others. For example, all variabes with enumerated domains are finite. Interval domains may be finite if they are singletons, or if they are restricted to integer values and have finite bounds.
@@ -91,7 +90,7 @@ Once again there is quite a spectrum of complexity for resolving flaws. Here are
 \end{enumerate}
 
 \subsubsection{Observations}
-There is clearly a diversity of resolution schemes. Once again we see the need for a targetted approach allowing very specific and quite esoteric methods to be used and also for very straightforward methods to be used. The former are most likely relevant for key parts of the search, for whatever the purposes of the planner. We note the following additional points:
+There is clearly a diversity of resolution schemes. Once again we see the need for a targetted approach allowing very specific and quite esoteric methods to be used and also for very straightforward methods to be used. The former are most likely relevant for key parts of the search, for whatever the purposes of the solver. We note the following additional points:
 \begin{enumerate}
 \item We must be able to customize the flaw resoultion technique for arbitrary subsets of the flaws.
 \item It seems highly desireable to seek a close collaboration between Flaw Selection and Flaw Resolution since the data obtained to select the next flaw to work with, which may have been costly to obtain, is more often than not going to be directly useful to the Flaw Resolution technique. For example, computing the set of tokens with which a given token can be ordered is often useful to determine its priority as a flaw and is immediately useful as input to the resolver. 
@@ -100,7 +99,7 @@ There is clearly a diversity of resolution schemes. Once again we see the need f
 
 
 \section{Technical Approach}
-In this section we make the case for a dynamic plug-in approach for customization of the planner. To ground that we present the core planning algorithm and indicate where components can be plugged in. We go on to describe a proposed syntax and semantics for matchable expressions which can be used for configration control, and describe the interfaces which will be provided to integrate search control components. Finally, a set of standard components are described and examples of how they can be configured for a planner will be presented.
+In this section we make the case for a dynamic plug-in approach for customization of the solver. To ground that we present the core planning algorithm and indicate where components can be plugged in. We go on to describe a proposed syntax and semantics for matchable expressions which can be used for configration control, and describe the interfaces which will be provided to integrate search control components. Finally, a set of standard components are described and examples of how they can be configured for a solver will be presented.
 
 \subsection{Most Basic Design Decision}
 There are 2 basic approaches to accomplishing the search control capabilities described. The first is to develop a rich and expressive scripting language which can be used to address each area of Scope Management, Flaw Selection, and Flaw Resolution in a context dependent manner. The second is to prefer a hybrid approach which uses a combination of a specialized language as a means to bind to specialized C++ code for final computation in each case. This second approach focuses on fast matching of entities based on local contextual information for each flaw type, and binding to pre-compiled plug-ins. The former approach has the advantage that it will most likely result in a coherent language for describing a carefully circumscribed set of search control capabilities. Its principal disadvantage is that it will likely be:
@@ -113,7 +112,7 @@ There are 2 basic approaches to accomplishing the search control capabilities de
 The latter, hybrid approach offers flexibility and extendibility since we can plug in arbitrary procedural code to address the requirements of {\em flaw selection} and {\em resolution}. It will lead to more efficient sytems since specialized, optimized code can be inserted for particularly costly calculations. It will also be less costly to develop and maintain since it permits rapid development of basic functionality and targetted incremental development of additional capabilities. The main disadvantage of the hybrid approach is that of reduced transparency for a user since the semantics of final calculation will be specific to component plug-ins. This is similar to the drawback of using procedural constraints instead of specifying the semantics of a constraint explicitly in the language. Arguably, there is a further potential draw-back in that there may be more of a requirement on the part of the application developer to have recourse to C++ programing. This can be augmented with a reasonable set of available plug-ins, which will be enhanced over time. We shall proceed with the hybrid approach.
 
 \subsection{The Chronological Backtracking Planning Algorithm}
-The structure of the planning algorithm provides us the template which we instantiate to provide a specific planner. The general planning algorithm is outlined below. Note that the algorithm takes as input an initial {\em Plan Database} containing a partial plan, and a set of {\em Flaw Managers}. A {\em Flaw Manager} will be responsible for obtaining the set of {\em Flaws} within some confined subset of overall {\em Flaws}. A {\em Flaw Manager} is further resposnible for formulating a {\em DecisionPoint} to address a {\em Flaw} under it's control. A {\em Decision Point} encapsulates the details of what operations on the partial plan can be taken and in what order they should be tried.
+The structure of the planning algorithm provides us the template which we instantiate to provide a specific solver. The general planning algorithm is outlined below. Note that the algorithm takes as input an initial {\em Plan Database} containing a partial plan, and a set of {\em Flaw Managers}. A {\em Flaw Manager} will be responsible for obtaining the set of {\em Flaws} within some confined subset of overall {\em Flaws}. A {\em Flaw Manager} is further resposnible for formulating a {\em DecisionPoint} to address a {\em Flaw} under it's control. A {\em Decision Point} encapsulates the details of what operations on the partial plan can be taken and in what order they should be tried.
 \begin{verbatim}
 Result plan(PlanDatabase db, FlawManagers fms){
   if(!checkConsistency(db))
@@ -196,7 +195,7 @@ In summary, observe the following points of flexibility for controlling search a
 
 Figure \ref{SearchControlFramework} is a UML class diagram of main elements of the {\em Search Control Object Model}. The core collaboration is between the following elements:
 \begin{enumerate}
-\item Planner - provides the core algorithm and data structures to accomplish a chronological backtracking heuristic search. It deals in abstract constructs of {\em Flaw Managers} and {\em Decision Points}. These abstractions allow the planner to delegate responsibility for how to manage scope, flaw selection, and flaw resolution to components that may be plugged in. Thus we use the planner as an example of a {\em Template Pattern} for providing configurable search control.
+\item Solver - provides the core algorithm and data structures to accomplish a chronological backtracking heuristic search. It deals in abstract constructs of {\em Flaw Managers} and {\em Decision Points}. These abstractions allow the planner to delegate responsibility for how to manage scope, flaw selection, and flaw resolution to components that may be plugged in. Thus we use the planner as an example of a {\em Template Pattern} for providing configurable search control.
 \item FlawManager - provides for the flaw selection from a given subset of flaws defined to be in scope. It uses a pair of {\em Flaw Filters} to manage static and dynamic scoping rules. The system shall ensure that Flaw Managers manage disjoint sets of {\em Flaws}.
 \item FlawFilter - the only responsibility of this class is to answer the question: is a given flaw in scope? In contrast to previous designs, this class {\em does not} maintain the set of all flaws. This prevented combining a flaw selection heuristic with a test for scope. Such a combination may exploit opportunities for early termination when a flaw of highest priority (such as a unit decision) is found. Experience shows that such flaws are common. Each {\em FlawManager} is constructed with a {\em StaticFilter} and a {\em DynamicFilter}. 
 \item StaticFilter - separates out scoping criteria that always return the same answer for any candidate flaw. 
