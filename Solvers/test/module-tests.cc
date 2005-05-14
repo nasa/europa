@@ -139,7 +139,7 @@ private:
 	 child != NULL; 
 	 child = child->NextSiblingElement()) {
 
-      TestComponent * testComponent = static_cast<TestComponent*>(Allocator::allocate(*child));
+      TestComponent * testComponent = static_cast<TestComponent*>(Component::AbstractFactory::allocate(*child));
       delete testComponent;
     }
 

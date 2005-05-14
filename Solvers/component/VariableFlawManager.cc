@@ -44,7 +44,7 @@ namespace EUROPA {
 
 	// If we come across a variable heuristic, register the factory.
 	if(strcmp(child->Value(), "VariableHandler") == 0){
-	  VariableDecisionPointFactoryId factory = static_cast<VariableDecisionPointFactoryId>(Allocator::allocate(*child));
+	  VariableDecisionPointFactoryId factory = static_cast<VariableDecisionPointFactoryId>(Component::AbstractFactory::allocate(*child));
 	  m_factories.push_back(factory);
 	}
 	else { // Must be a variable filter
@@ -58,7 +58,7 @@ namespace EUROPA {
 	    m_staticMatchingRules.push_back(rule);
 	  }
 	  else{ // Allocate via registered factory
-	    VariableMatchingRuleId rule = static_cast<VariableMatchingRuleId>(Allocator::allocate(*child));
+	    VariableMatchingRuleId rule = static_cast<VariableMatchingRuleId>(Component::AbstractFactory::allocate(*child));
 	    m_dynamicMatchingRules.push_back(rule);
 	  }
 	}
