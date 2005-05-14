@@ -4,6 +4,7 @@
 #include "AbstractDomain.hh"
 #include "Debug.hh"
 #include "MatchingRule.hh"
+#include "ValueSource.hh"
 
 /**
  * @brief Provides implementation for base class and common subclasses for handling variable flaws.

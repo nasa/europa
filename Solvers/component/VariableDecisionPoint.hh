@@ -2,7 +2,6 @@
 #define H_VariableDecisionPoint
 
 #include "DecisionPoint.hh"
-#include "ValueSource.hh"
 #include "ConstrainedVariable.hh"
 
 /**
@@ -13,6 +12,7 @@ namespace EUROPA {
 
   namespace SOLVERS {
 
+    class ValueSource;
     typedef DecisionPoint::AbstractFactory<ConstrainedVariable, VariableMatchingRule> VariableDecisionPointFactory;
     typedef Id<VariableDecisionPointFactory> VariableDecisionPointFactoryId;
 
