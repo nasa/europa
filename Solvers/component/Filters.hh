@@ -16,7 +16,34 @@ namespace EUROPA {
     class SingletonFilter: public VariableMatchingRule {
     public:
       SingletonFilter(const TiXmlElement& configData);
-      bool matches(const ConstrainedVariableId& var, const LabelStr& objectType, const LabelStr& predicate) const;
+      bool matches(const ConstrainedVariableId& var) const;
+    };
+
+
+    /**
+     * @brief Will filter a token based on the horizon
+     */
+    class HorizonFilter: public TokenMatchingRule {
+    public:
+      HorizonFilter(const TiXmlElement& configData);
+      bool matches(const TokenId& token) const;
+      std::string getExpression() const;
+      /**
+       * @brief Allowed policy strings for customization
+       */
+      static const LabelStr& policies(){
+	static const LabelStr sl_policies("PossiblyContained:PartiallyContained:TotallyContained:");
+	return sl_policies;
+      }
+
+      /**
+       * @brief uses a singleton horizon that is regularly adjusted.
+       */
+      static IntervalIntDomain& getHorizon();
+
+    private:
+
+      LabelStr m_policy;
     };
   }
 }

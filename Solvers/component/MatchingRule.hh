@@ -25,7 +25,7 @@ namespace EUROPA {
       /**
        * @brief Retrieves a string expression for the scope over which this filter is evaluated.
        */
-      const std::string& getExpression() const;
+      virtual std::string getExpression() const;
 
     protected:
       void setExpression(const std::string& expression);
@@ -35,25 +35,78 @@ namespace EUROPA {
       std::string m_expression; /*!< Stores the matching expression as a string for display */
     };
 
-    class VariableMatchingRule: public MatchingRule {
+    class ObjectMatchingRule: public MatchingRule {
+    public:
+      /**
+       * @brief Construct a condition from an XML node
+       */
+      ObjectMatchingRule(const TiXmlElement& configData);
+
+      /**
+       * @brief Used to test of the given objectType is matched by this rule
+       */
+      bool matches(const LabelStr& objectType) const;
+
+      /**
+       * @brief True if the object is matched by the expression. Used as a point of extendibility.
+       */
+      virtual bool matches(const ObjectId& object) const {return true;}
+
+    private:
+      LabelStr m_objectType;
+    };
+  
+    class TokenMatchingRule: public ObjectMatchingRule {
+    public:
+      /**
+       * @brief Construct a condition from an XML node
+       */
+      TokenMatchingRule(const TiXmlElement& configData);
+
+      /**
+       * @brief Used to test a specific token for a match against the internal match expression.
+       * @param objectType The object type of the parent token, rule instance or object, if it has such a parent.
+       * @param predicate The predicate of token
+       * @return true if a match has been found, otherwise false.
+       */
+      bool matches(const LabelStr& objectType, const LabelStr& predicate) const;
+
+      /**
+       * @brief A hook to add additional matching requirements in a derived class
+       * @param token The token to be tested.
+       */
+      virtual bool matches(const TokenId& token) const {return true;}
+
+      static std::string makeExpression(const TokenId& token);
+
+      static void extractParts(const TokenId& token, LabelStr& objectType, LabelStr& predicate);
+
+    private:
+      LabelStr m_objectType;
+      LabelStr m_predicate;
+    };
+
+    class VariableMatchingRule: public TokenMatchingRule {
     public:
       /**
        * @brief Construct a condition from an XML node
        */
       VariableMatchingRule(const TiXmlElement& configData);
 
-      virtual ~VariableMatchingRule();
-
       /**
        * @brief Used to test a specific variable for a match against the internal match expression.
-       * @param var The variable to be evaluated.
+       * @param varName The variable to be evaluated.
        * @param objectType The object type of the parent token, rule instance or object, if it has such a parent.
        * @param predicate The predicate of the parent token or rule instance, if it has suc a parent.
        * @return true if a match has been found, otherwose false.
-       * @note The object type and predicate are passed redundantly to improve efficiency.
        * @see extractParts
        */
-      virtual bool matches(const ConstrainedVariableId& var, const LabelStr& objectType, const LabelStr& predicate) const;
+      bool matches(const LabelStr& varName, const LabelStr& objectType, const LabelStr& predicate) const;
+
+      /**
+       * @brief Hook for additional macthing requirements to be added in a derived class.
+       */
+      virtual bool matches(const ConstrainedVariableId& var) const {return true;}
 
       /**
        * @brief Utility to extract the parts of the variable used for rule matching to expedite the process.
@@ -76,50 +129,7 @@ namespace EUROPA {
       LabelStr m_predicate;
       LabelStr m_var;
     };
-  
-    class TokenMatchingRule: public MatchingRule {
-    public:
-      /**
-       * @brief Construct a condition from an XML node
-       */
-      TokenMatchingRule(const TiXmlElement& configData);
 
-      virtual ~TokenMatchingRule();
-
-      /**
-       * @brief Test a specific token against this rule.
-       * @param token The token to be tested.
-       * @param objectType The objectType of the token.
-       * @return true if matched, otherwise false.
-       * @note The objectType is redundantly provided to improve efficiency
-       * @see getObjectType
-       */
-      bool matches(const TokenId& token, const LabelStr& objectType) const;
-
-      static const LabelStr& getObjectType(const TokenId& token);
-
-    private:
-      LabelStr m_objectType;
-      LabelStr m_predicate;
-    };
-
-    class ObjectMatchingRule: public MatchingRule {
-    public:
-      /**
-       * @brief Construct a condition from an XML node
-       */
-      ObjectMatchingRule(const TiXmlElement& configData);
-
-      virtual ~ObjectMatchingRule();
-
-      /**
-       * @brief True if the object is matched by the expression.
-       */
-      bool matches(const ObjectId& object) const;
-
-    private:
-      LabelStr m_objectType;
-    };
   }
 }
 #endif

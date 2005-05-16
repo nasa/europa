@@ -8,6 +8,8 @@ ModuleComponent Solvers
 	MatchingRule.cc
 	VariableDecisionPoint.cc
 	VariableFlawManager.cc
+	TokenDecisionPoint.cc
+	TokenFlawManager.cc
 	Filters.cc
 	;
 

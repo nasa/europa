@@ -1558,6 +1558,7 @@ private:
     assertTrue(res);
     db->getCompatibleTokens(t1.getId(), compatibleTokens);
     assertTrue(compatibleTokens.size() == 1);
+    assertTrue(db->hasCompatibleTokens(t1.getId()));
     assertTrue(compatibleTokens[0] == t0.getId());
 
     compatibleTokens.clear();
@@ -1566,6 +1567,7 @@ private:
     assertTrue(res);
     db->getCompatibleTokens(t1.getId(), compatibleTokens);
     assertTrue(compatibleTokens.empty()); // No match since no tokens are active
+    assertFalse(db->hasCompatibleTokens(t1.getId()));
 
     IntervalToken t2(db,
                      LabelStr(DEFAULT_PREDICATE()), 

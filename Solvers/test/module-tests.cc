@@ -5,6 +5,7 @@
 #include "Constraint.hh"
 #include "ConstraintLibrary.hh"
 #include "VariableFlawManager.hh"
+#include "TokenFlawManager.hh"
 #include "Filters.hh"
 #include "Token.hh"
 #include "TestSupport.hh"
@@ -25,7 +26,7 @@ using namespace EUROPA::SOLVERS;
 
 /**
  * @brief Test Constraint to only fire when all values are singletons and to then
- * require that all values are different. Deliberately want to force an ineefiecint search with
+ * require that all values are different. Deliberately want to force an inefficient search with
  * lots of backtrack.
  */
 class LazyAllDiff: public Constraint {
@@ -98,7 +99,8 @@ REGISTER_COMPONENT_FACTORY(TestComponent, D);
 REGISTER_COMPONENT_FACTORY(TestComponent, E);
 
 // Register filter components
-REGISTER_COMPONENT_FACTORY(SingletonFilter, Singleton)
+REGISTER_COMPONENT_FACTORY(SingletonFilter, Singleton);
+REGISTER_COMPONENT_FACTORY(HorizonFilter, HorizonFilter);
 
 /**
  * @brief Helper method to get the first xml element in the file
@@ -157,6 +159,7 @@ class FlawFilterTests {
 public:
   static bool test(){
     runTest(testVariableFiltering);
+    runTest(testTokenFiltering);
     return true;
   }
 
@@ -203,18 +206,39 @@ private:
     return true;
   }
 
-    /*
-    // All Variables of a predicate are excluded
+  static bool testTokenFiltering(){
+    TiXmlElement* root = initXml("FlawFilterTests.xml", "TokenFlawManager");
+
+    StandardAssembly assembly(Schema::instance());
+    TokenFlawManager fm(*root);
+    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
+    horizon = IntervalIntDomain(0, 1000);
+    fm.initialize(assembly.getPlanDatabase());
+    assert(assembly.playTransactions("TokenFiltering.xml"));
+
     TokenSet tokens = assembly.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
-      static const LabelStr excludedPredicates(":D.predicateA:D.predicateB:D.predicateC:E.predicateC:");
+      static const LabelStr excludedPredicates(":D.predicateA:D.predicateB:D.predicateC:E.predicateC:HorizonFiltered.predicate1:HorizonFiltered.predicate2:HorizonFiltered.predicate5:");
       TokenId token = *it;
       std::string s = ":" + token->getPredicateName().toString() + ":";
       if(excludedPredicates.contains(s))
-	assertTrue(!staticFilter.inScope(token))
+	assertTrue(!fm.inScope(token), token->toString() + " is in scope after all.")
       else
-	assertTrue(token->isActive() || staticFilter.inScope(token), token->toString());
+	assertTrue(token->isActive() || fm.inScope(token), token->toString() + " is not in scope and not active.");
     }
+
+    return true;
+  }
+
+  /*
+  static bool testTokenFiltering(){
+    // All Variables of a predicate are excluded
+    TiXmlElement* root = initXml("FlawFilterTests.xml", "TokenFlawManager");
+
+    StandardAssembly assembly(Schema::instance());
+    TokenFlawManager fm(*root);
+    fm.initialize(assembly.getPlanDatabase());
+    assert(assembly.playTransactions("TokenFiltering.xml"));
 
     ObjectSet objects = assembly.getPlanDatabase()->getObjects();
     for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
@@ -226,7 +250,8 @@ private:
     }
 
     return true;
-    }*/
+    }
+  */
 };
 
 

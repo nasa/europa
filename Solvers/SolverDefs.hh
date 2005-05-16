@@ -24,6 +24,9 @@ namespace EUROPA {
     class VariableMatchingRule;
     typedef Id<VariableMatchingRule> VariableMatchingRuleId;
 
+    class TokenMatchingRule;
+    typedef Id<TokenMatchingRule> TokenMatchingRuleId;
+
     class DecisionPoint;
     typedef Id<DecisionPoint> DecisionPointId;
 

@@ -106,12 +106,14 @@ namespace EUROPA {
     bool VariableFlawManager::matches(const ConstrainedVariableId& var,const std::list<VariableMatchingRuleId>& rules)  const{
       LabelStr objectType;
       LabelStr predicate;
+      LabelStr varName = var->getName();
       VariableMatchingRule::extractParts(var, objectType, predicate);
 
       for(std::list<VariableMatchingRuleId>::const_iterator it = rules.begin(); it != rules.end(); ++it){
 	VariableMatchingRuleId rule = *it;
 	check_error(rule.isValid());
-	if(rule->matches(var, objectType, predicate)){
+	// Test for a match against the statndard match and the extendable match
+	if(rule->matches(varName, objectType, predicate) && rule->matches(var)){
 	  debugMsg("VariableFlawManager:matches", "Match found for " << VariableMatchingRule::makeExpression(var) << " with " << rule->getExpression());
 	  return true;
 	}
@@ -121,16 +123,6 @@ namespace EUROPA {
       }
 
       return false;
-    }
-
-    /**
-     * Expect that finding singleton variable decisions will not be very costly, so we will
-     * use the general technique and thus avoid special handling for singletons. We call 'next'
-     * but pass it very tight bounds so it will terminate on a unit or not return anything.
-     */
-    DecisionPointId VariableFlawManager::nextZeroCommitmentDecision(){
-      unsigned int bestPriority = ZERO_COMMITMENT_SCORE()+1;
-      return next(ZERO_COMMITMENT_SCORE(), bestPriority);
     }
 
     DecisionPointId VariableFlawManager::next(unsigned int priorityLowerBound,
@@ -216,6 +208,7 @@ namespace EUROPA {
       sl_counter++;
 
       std::list<VariableDecisionPointFactoryId>::const_iterator it = m_factories.begin();
+      LabelStr varName(flawedVariable->getName());
       LabelStr objectType, predicate;
       VariableMatchingRule::extractParts(flawedVariable, objectType, predicate);
 
@@ -223,7 +216,7 @@ namespace EUROPA {
 
       while(it != m_factories.end()){
 	VariableDecisionPointFactoryId factory = *it;
-	if(factory->matches(flawedVariable, objectType, predicate)){
+	if(factory->matches(varName, objectType, predicate) && factory->matches(flawedVariable)){
 	  result = factory->create(m_db->getClient(), flawedVariable);
 	  break;
 	}
@@ -243,7 +236,7 @@ namespace EUROPA {
     void VariableFlawManager::addFlaw(const ConstrainedVariableId& var){
       if(!var->specifiedDomain().isSingleton() && !matches(var, m_staticMatchingRules)){
 	debugMsg("VariableFlawManager:addFlaw",
-		 "Adding " << var->toString() << " as a flaw.");
+		 "Adding " << var->toString() << " as a candidate flaw.");
 	m_flawCandidates.insert(var);
       }
     }

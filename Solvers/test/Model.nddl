@@ -82,3 +82,11 @@ class DerivedContainer extends Container {
 Container::pred2 {
  int localArg1;
 }
+
+class HorizonFiltered extends Timeline {
+ predicate predicate1{}
+ predicate predicate2{}
+ predicate predicate3{}
+ predicate predicate4{}
+ predicate predicate5{}
+}

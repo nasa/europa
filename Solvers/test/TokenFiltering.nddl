@@ -1,0 +1,47 @@
+#include "Model.nddl"
+
+A a = new A();
+B b = new B();
+C c = new C();
+D d = new D();
+E e = new E();
+
+HorizonFiltered h = new HorizonFiltered();
+
+close();
+
+goal(A.predicateA t0);
+goal(A.predicateB t1);
+goal(B.predicateA t2);
+goal(C.predicateA t3);
+goal(D.predicateC t4);
+goal(D.predicateF t5);
+goal(C.predicateC t6);
+
+// Set up cases for horizon tests
+int hStart = 0;
+int hEnd = 1000;
+
+// Ends on or before start of horizon
+rejectable(HorizonFiltered.predicate1 t10);
+leq(t10.end, hStart);
+
+// Starts on or after end of horizon
+rejectable(HorizonFiltered.predicate2 t11);
+leq(hEnd, t11.start);
+
+// Completely within the horizon
+rejectable(HorizonFiltered.predicate3 t12);
+lessThan(hStart, t12.start);
+lessThan(t12.end, hEnd);
+
+// Each timepoint possibly contained
+rejectable(HorizonFiltered.predicate4 t13);
+temporalDistance(hStart, [-10 10], t13.start);
+temporalDistance(hEnd, [-10 10], t13.end);
+
+
+// Each timepoint possibly contained as is the case for t13. Use a different policy to exclude it
+rejectable(HorizonFiltered.predicate5 t14);
+temporalDistance(hStart, [-10 10], t14.start);
+temporalDistance(hEnd, [-10 10], t14.end);

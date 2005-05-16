@@ -18,8 +18,6 @@ namespace EUROPA {
       VariableFlawManager(const TiXmlElement& configData);
 
       virtual ~VariableFlawManager();
-      virtual DecisionPointId nextZeroCommitmentDecision();
-      virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
 
       /**
        * @brief True if the given variable is in scope.
@@ -27,6 +25,7 @@ namespace EUROPA {
       bool inScope(const ConstrainedVariableId& var) const;
 
     private:
+      virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
       DecisionPointId allocateDecisionPoint(const ConstrainedVariableId& flawedVariable);
       void handleInitialize();
       void addFlaw(const ConstrainedVariableId& var);

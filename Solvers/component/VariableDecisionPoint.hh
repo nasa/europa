@@ -26,6 +26,15 @@ namespace EUROPA {
     class VariableDecisionPoint: public DecisionPoint {
     public:
 
+      /**
+       * @brief Utility to obtain the next decision point from the set of candidates if it can exceed the
+       * given best priority.
+       * @param flawCandidates A set of unbound variables to choose from
+       * @param guardCache The set of guard variables, each with a reference to the number of guards posted on it.
+       * @param bestPriority A mutable current best priority. If a new decision point is created, the new
+       * bestPriority will be updated to the priority of the new decision point.
+       * @return A noId if no better decision can be found, otherwise a new decision with a better priority.
+       */
       static DecisionPointId next(const ConstrainedVariableSet& flawCandidates, 
 				  const std::map< ConstrainedVariableId, unsigned int>& guardCache,
 				  unsigned int& bestPriority);
@@ -37,9 +46,8 @@ namespace EUROPA {
        */
       std::string toString() const;
 
-      bool canUndo() const;
-
     protected:
+
       VariableDecisionPoint(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
 
       const ConstrainedVariableId& getFlawedVariable() const;
@@ -49,11 +57,14 @@ namespace EUROPA {
       ValueSource* m_choices;
 
     private:
+
       void handleInitialize();
 
       void handleExecute();
 
       void handleUndo();
+
+      bool canUndo() const;
 
       /**
        * @brief Retrieves the next choice to be executed. Implementation will depend

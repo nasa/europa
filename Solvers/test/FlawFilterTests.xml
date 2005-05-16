@@ -18,10 +18,14 @@
 </VariableFlawManager>
 
 <TokenFlawManager>
-  <TokenFilterCondition class-match="D"/>
+  <TokenFilter class-match="D"/>
 
   <-- Exclude all token flaws in predicate E.PredicateC -->
-  <TokenFilterCondition class-match="E" predicate-match="PredicateC"/>
+  <TokenFilter class-match="E" predicate-match="PredicateC"/>
+
+  <-- Exclude all token flaws on the HorizonFiltered class based on horizon values and policy -->
+  <TokenFilter class-match="HorizonFiltered" predicate-match="predicate5" component="HorizonFilter" policy="TotallyContained"/> 
+  <TokenFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
 </TokenFlawManager>
  
 <ObjectFlawManager>
