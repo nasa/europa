@@ -31,7 +31,7 @@ cd ..
 cd "$TEST_PROJECT_NAME"
 
 # Copy in NDDL.cfg file with serach path set
-cp ../plasma/nddl/test/cfg-path-test/NDDL.cfg .
+cp ../PLASMA/NDDL/test/cfg-path-test/NDDL.cfg .
 
 # Execute project.
  jam "$TEST_PROJECT_NAME"
