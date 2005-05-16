@@ -29,6 +29,8 @@
 #include "Rule.hh"
 #include "RulesEngineDefs.hh"
 
+#include "Debug.hh"
+
 #include <algorithm>
 #include <exception>
 #include <fstream>
@@ -320,9 +322,9 @@ namespace EUROPA {
       }
 
       if (configPath == NULL || configPath[0] == '\0') {
-        std::cerr << "Warning: PPW_CONFIG not set or is empty." << std::endl;
-        std::cerr << "   PartialPlanWriter will not write." << std::endl;
-        std::cerr << "   Under client control, some step 0 transactions will not be logged." << std::endl;
+        debugMsg("PartialPlanWriter",  "Warning: PPW_CONFIG not set or is empty.");
+        debugMsg("PartialPlanWriter",  "   PartialPlanWriter will not write.");
+        debugMsg("PartialPlanWriter",  "    Under client control, some step 0 transactions will not be logged.");
         stepsPerWrite = 0;
         noFullWrite = 1;
         writeStep = 0;
