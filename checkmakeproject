@@ -26,7 +26,7 @@ echo "Creating test project - $TEST_PROJECT_NAME"
 # Run makeproject.
 cd "$RELDIR"
 cd PLASMA 
-makeproject "$TEST_PROJECT_NAME"
+./makeproject "$TEST_PROJECT_NAME"
 cd ..
 cd "$TEST_PROJECT_NAME"
 
