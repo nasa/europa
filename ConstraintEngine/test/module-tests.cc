@@ -335,10 +335,12 @@ public:
     runTest(testMessaging);
     runTest(testDynamicVariable);
     runTest(testListener);
+    runTest(testVariablesWithOpenDomains);
     return true;
   }
 
 private:
+
   static bool testAllocation(){
     IntervalIntDomain dom0(0, 1000);
     Variable<IntervalIntDomain> v0(ENGINE, dom0);
@@ -504,6 +506,37 @@ private:
     ConstrainedVariableId v1 = (new Variable<IntervalIntDomain>(ENGINE, IntervalIntDomain()))->getId();
     new TestVariableListener(v0, v1);
     delete (ConstrainedVariable*) v0; // Should force deletion of all
+    return true;
+  }
+
+  static bool testVariablesWithOpenDomains() {
+    EnumeratedDomain e0(true, "Test");
+    e0.insert(0); e0.insert(1); e0.insert(2); e0.insert(3);
+    Variable<EnumeratedDomain> v0(ENGINE, e0);
+
+    assertTrue(v0.baseDomain().isOpen());
+    assertTrue(v0.specifiedDomain().isOpen());
+    assertTrue(v0.derivedDomain().isOpen());
+
+    v0.close();
+    assertTrue(v0.baseDomain().isClosed());
+    assertTrue(v0.specifiedDomain().isClosed());
+    assertTrue(v0.derivedDomain().isClosed());
+
+    v0.open();
+    assertTrue(v0.baseDomain().isOpen());
+    assertTrue(v0.specifiedDomain().isOpen());
+    assertTrue(v0.derivedDomain().isOpen());
+
+    e0.close();
+    v0.specify(e0);
+    assertTrue(v0.baseDomain().isOpen());
+    assertTrue(v0.specifiedDomain().isClosed());
+    
+    v0.restrictBaseDomain(e0);
+    assertTrue(v0.baseDomain().isClosed());
+    assertTrue(v0.isClosed());
+
     return true;
   }
 };

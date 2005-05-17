@@ -611,6 +611,8 @@ namespace EUROPA {
 
   };
 
+  
+
   class EnumeratedDomainTest {
   public:
 
@@ -624,10 +626,114 @@ namespace EUROPA {
       runTest(testDifference);
       runTest(testOperatorEquals);
       runTest(testEmptyOnClosure);
+      runTest(testOpenEnumerations);
       return(true);
     }
 
   private:
+
+    static bool testOpenEnumerations() {
+      EnumeratedDomain e1(true, "Test");
+      ChangeListener l1;
+      DomainListener::ChangeType change;
+      e1.setListener(l1.getId());
+
+      assertTrue(e1.isOpen());
+      assertTrue(e1.isFinite());
+      assertTrue(e1.isEmpty());
+      e1.insert(1.0);
+      assertTrue(e1.isOpen());
+
+      e1.remove(1.0);
+      assertTrue(l1.checkAndClearChange(change));
+      assertTrue(change == DomainListener::VALUE_REMOVED);
+      e1.insert(1.0);
+
+      e1.close();
+      assertTrue(e1.isClosed());
+      assertTrue(l1.checkAndClearChange(change));
+      assertTrue(change == DomainListener::CLOSED);
+
+      e1.open();
+      assertTrue(e1.isOpen());
+      assertTrue(l1.checkAndClearChange(change));
+      assertTrue(change == DomainListener::OPENED);
+
+      e1.insert(2.0);
+      e1.insert(3.0);
+      e1.insert(4.0);
+
+      std::list<double> vals;
+      vals.push_back(1.0);
+      vals.push_back(2.0);
+      vals.push_back(3.0);
+      EnumeratedDomain e2(vals, true, "Test");
+
+      assertTrue(e2.isClosed());
+
+      e1.set(e2);
+      assertTrue(e1.isClosed());
+      
+      e1.open();
+      assertTrue(e1.isOpen());
+
+      e1.insert(4.0);
+      e1.set(4.0);
+      assertTrue(e1.isClosed());
+      e1.open();
+      e1.insert(1.0);
+      e1.insert(2.0);
+      e1.insert(3.0);
+
+      e1.intersect(e2);
+      assertTrue(e1.isClosed());
+
+      e1.open();
+      e2.open();
+      e1.intersect(e2);
+      assertTrue(e1.isOpen());
+      assertTrue(e2.isOpen());
+      e2.close();
+
+      e1.insert(4.0);
+      e2.reset(e1);
+      assertTrue(e2.isOpen());
+
+      assertTrue(e1 == e2);
+      e2.close();
+      assertTrue(e1 == e2);
+      e1.close();
+      assertTrue(e1 == e2);
+
+      e1.open();
+      e2.open();
+      assertTrue(e1.intersects(e2));
+      e2.close();
+      assertTrue(e1.intersects(e2));
+      e1.close();
+      assertTrue(e1.intersects(e2));
+      
+      e1.open();
+      e2.open();
+      assertTrue(e1.isSubsetOf(e2));
+      e2.close();
+      assertTrue(e1.isSubsetOf(e2));
+      e1.close();
+      assertTrue(e1.isSubsetOf(e2));
+
+      e1.open();
+      e2.open();
+
+      e1.equate(e2);
+      assertTrue(e1.isOpen() && e2.isOpen());
+      e2.close();
+      e1.equate(e2);
+      assertTrue(e1.isClosed() && e2.isClosed());
+      e2.open();
+      e1.equate(e2);
+      assertTrue(e1.isClosed() && e2.isClosed());
+      return true;
+    }
 
     static bool testEnumerationOnly() {
       std::list<double> values;
@@ -1591,10 +1697,10 @@ namespace EUROPA {
       NumericDomain nDom(2.7);
       EnumeratedDomain eDom(false, "MyEnum"); // non numeric enum
       eDom.set(LabelStr("myEnumMember").getKey());
-      eDom.close();
+      //eDom.close();
       EnumeratedDomain enDom(true, "MyEnum"); // numeric enum
       enDom.set(20.6);
-      enDom.close();
+      //enDom.close();
       SymbolDomain sDom("mySymbol");
       StringDomain stDom("myName");
 
