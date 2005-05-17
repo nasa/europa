@@ -1,7 +1,6 @@
 #include "EnumeratedDomain.hh"
 #include "LabelStr.hh"
 #include "Entity.hh"
-#include "debug.hh"
 
 namespace EUROPA {
 
