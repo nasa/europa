@@ -933,6 +933,7 @@ public:
     runTest(testPredicateInheritance);
     runTest(testTokenFactory);
     runTest(testCorrectSplit_Gnats2450);
+    runTest(testOpenMerge);
     return(true);
   }
   
@@ -1834,6 +1835,51 @@ private:
     assertTrue(ce->propagate()); // Should be OK now
     assertTrue(tokenA.getStart()->lastDomain().getSingletonValue() == 5);
 
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testOpenMerge() {
+    DEFAULT_SETUP(ce, db, true);
+    
+    EnumeratedDomain base(true, "Test");
+    base.insert(0);
+    base.insert(1);
+    base.insert(2);
+    IntervalToken t0(db,
+                     DEFAULT_PREDICATE(),
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+    //t0.addParameter(base, LabelStr("FOO"));
+    //t0.close();
+    IntervalToken t1(db,
+                     DEFAULT_PREDICATE(),
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+    t1.getDuration()->specify(IntervalIntDomain(5, 7));
+    //t1.addParameter(base, LabelStr("FOO"));
+    //t1.getVariable(LabelStr("FOO"))->close();
+    //t1.close();
+
+    assertTrue(t0.getObject()->isClosed());
+    t1.getObject()->open();
+    assertTrue(!t1.getObject()->isClosed());
+
+    t0.activate();
+    assertTrue(ce->propagate());
+
+    assertTrue(db->hasCompatibleTokens(t1.getId()));
+    std::vector<TokenId> compatibleTokens;
+    db->getCompatibleTokens(t1.getId(), compatibleTokens);
+    assertTrue(compatibleTokens.size() == 1);
+    assertTrue(compatibleTokens[0] == t0.getId());
+
+    t1.merge(t0.getId());
 
     DEFAULT_TEARDOWN();
     return true;
