@@ -19,7 +19,6 @@ Depends run-tests : tests ;
 Depends run-all-tests : run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests run-hsts-planner-tests ;
 Depends run-checkin-tests : check-cvs-changes ;
 Depends run-checkin-tests : run-tests ;
-Depends run-checkin-tests : check-makefile ;
 NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
 Depends run-makefile-tests : check-makefile ;
 
