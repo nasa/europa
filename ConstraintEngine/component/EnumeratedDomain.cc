@@ -91,7 +91,8 @@ namespace EUROPA {
         break;
     }
     m_values.insert(it, value);
-    notifyChange(DomainListener::RELAXED);
+    if(isClosed())
+      notifyChange(DomainListener::RELAXED);
   }
 
   void EnumeratedDomain::insert(const std::list<double>& values){
@@ -108,7 +109,7 @@ namespace EUROPA {
     if (it == m_values.end())
       return; // not present: no-op
     m_values.erase(it);
-    if (!isEmpty())
+    if (!isEmpty() || isOpen())
       notifyChange(DomainListener::VALUE_REMOVED);
     else
       notifyChange(DomainListener::EMPTIED);
@@ -127,7 +128,10 @@ namespace EUROPA {
 
     m_values.clear();
     m_values.insert(value);
-    
+
+    if(isOpen())
+      close();
+
     notifyChange(DomainListener::SET_TO_SINGLETON);
   }
 
@@ -159,6 +163,16 @@ namespace EUROPA {
       EnumeratedDomain& l_dom = static_cast<EnumeratedDomain&>(dom);
       std::set<double>::iterator it_a = m_values.begin();
       std::set<double>::iterator it_b = l_dom.m_values.begin();
+
+      if(isOpen() && dom.isClosed()) {
+        close();
+        changed_a = true;
+      }
+      else if(isClosed() && dom.isOpen()) {
+        dom.close();
+        changed_b = true;
+      }
+        
 
       while (it_a != m_values.end() && it_b != l_dom.m_values.end()) {
         double val_a = *it_a;
@@ -291,6 +305,8 @@ namespace EUROPA {
     if (isEmpty() || !((*this) == dom)) {
       const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
       m_values = l_dom.m_values;
+      if(dom.isOpen() && isClosed())
+        open();
       notifyChange(DomainListener::RELAXED);
     }
   }
@@ -377,6 +393,12 @@ namespace EUROPA {
         changed = true;
       }
     }
+
+    if(dom.isClosed() && isOpen()) {
+      close();
+      changed = true;
+    }
+      
 
     if (!changed)
       return(false);
