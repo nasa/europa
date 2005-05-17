@@ -194,21 +194,23 @@ namespace EUROPA {
   }
  
   void IntervalDomain::set(const AbstractDomain& dom) {
+    //check_error(isSubsetOf(dom), "Attempt to set to a new domain that is not a subset of the current domain.");
+    //check_error(!dom.isSingleton(), "You must use set(double value) to set a domain to a singleton.");
+    
     safeComparison(*this, dom);
-    check_error(!dom.isSingleton());
+    
     intersect(dom);
     notifyChange(DomainListener::SET);
   }
  
   void IntervalDomain::set(double value) {
-    if (!isMember(value)) {
-      empty();
-      return;
-    }
-
+    //check_error(isMember(value), "Attempt to set to a value that is not a member of the domain.");
+    
     m_lb = value;
     m_ub = value;
+ 
     notifyChange(DomainListener::SET_TO_SINGLETON);
+ 
   }
 
   bool IntervalDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const {
