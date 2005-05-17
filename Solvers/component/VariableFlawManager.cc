@@ -234,7 +234,7 @@ namespace EUROPA {
      * We may filter based on static information only.
      */
     void VariableFlawManager::addFlaw(const ConstrainedVariableId& var){
-      if(!var->specifiedDomain().isSingleton() && !matches(var, m_staticMatchingRules)){
+      if(!variableOfNonActiveToken(var) && var->canBeSpecified() && !var->specifiedDomain().isSingleton() && !matches(var, m_staticMatchingRules)){
 	debugMsg("VariableFlawManager:addFlaw",
 		 "Adding " << var->toString() << " as a candidate flaw.");
 	m_flawCandidates.insert(var);
@@ -299,7 +299,7 @@ namespace EUROPA {
     }
 
     bool VariableFlawManager::variableOfNonActiveToken(const ConstrainedVariableId& var){
-      // If var parent is a token and the state is not active, then true.
+      // If var parent is a token and the state is active, then true.
       if(TokenId::convertable(var->getParent())){
 	TokenId token(var->getParent());
 	return !token->isActive();

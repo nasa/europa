@@ -89,4 +89,28 @@ class HorizonFiltered extends Timeline {
  predicate predicate3{}
  predicate predicate4{}
  predicate predicate5{}
+
+ predicate uberPredicate{
+  bool forceRejection;
+  eq(duration, 10);
+  eq(forceRejection, true);
+ }
+}
+
+/**
+ * Subgoal lots of predicates within the temporal extent
+ * of this uber predicate. Also subgoal recursively before and
+ * after.
+ */
+HorizonFiltered::uberPredicate{
+ meets(uberPredicate g0);
+ eq(g0.forceRejection, forceRejection);
+ met_by(uberPredicate g1);
+ eq(g1.forceRejection, forceRejection);
+
+ if(end == 50){
+  if(forceRejection == true){
+   eq(1, 0); // Force failure
+  }
+ }
 }

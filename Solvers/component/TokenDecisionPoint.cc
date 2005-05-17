@@ -6,6 +6,8 @@
 namespace EUROPA {
   namespace SOLVERS {
 
+    REGISTER_TOKEN_DECISION_FACTORY(TokenDecisionPoint, StandardTokenHandler);
+
     TokenDecisionPoint::TokenDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData)
       : DecisionPoint(client, flawedToken->getKey()),
 	m_flawedToken(flawedToken), 

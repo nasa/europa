@@ -14,6 +14,8 @@
 namespace EUROPA {
   namespace SOLVERS {
 
+    REGISTER_VARIABLE_DECISION_FACTORY(MinValue, StandardVariableHandler);
+
     VariableDecisionPoint::VariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
       : DecisionPoint(dbClient, flawedVariable->getKey()),
 	m_flawedVariable(flawedVariable),

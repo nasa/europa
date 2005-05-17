@@ -261,6 +261,8 @@ public:
     runTest(testMinValuesSimpleCSP);
     runTest(testSuccessfulSearch);
     runTest(testExhaustiveSearch);
+    runTest(testSimpleActivation);
+    runTest(testSimpleRejection);
     return true;
   }
 
@@ -346,6 +348,38 @@ private:
 
       assertTrue(solver.getStepCount() == stepCount);
     }
+    return true;
+  }
+
+  static bool testSimpleActivation() {
+    StandardAssembly assembly(Schema::instance());
+    TiXmlElement* root = initXml("SolverTests.xml", "SimpleActivationSolver");
+    TiXmlElement* child = root->FirstChildElement();
+    {
+      IntervalIntDomain& horizon = HorizonFilter::getHorizon();
+      horizon = IntervalIntDomain(0, 100);
+      assert(assembly.playTransactions("SimpleActivation.xml"));
+      Solver solver(assembly.getPlanDatabase(), *child);
+      assertTrue(solver.solve());
+    }
+
+    return true;
+  }
+
+  static bool testSimpleRejection() {
+    StandardAssembly assembly(Schema::instance());
+    TiXmlElement* root = initXml("SolverTests.xml", "SimpleRejectionSolver");
+    TiXmlElement* child = root->FirstChildElement();
+    {
+      IntervalIntDomain& horizon = HorizonFilter::getHorizon();
+      horizon = IntervalIntDomain(0, 100);
+      assert(assembly.playTransactions("SimpleRejection.xml"));
+      Solver solver(assembly.getPlanDatabase(), *child);
+      assertTrue(solver.solve());
+      assertTrue(assembly.getPlanDatabase()->getTokens().size() == 1);
+    }
+
+
     return true;
   }
 };
