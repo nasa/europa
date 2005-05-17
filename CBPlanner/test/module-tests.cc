@@ -779,12 +779,12 @@ private:
 
     makeTestToken(tokenG, values);
     
-    CBPlanner::Status res = planner.run(20);
+    CBPlanner::Status res = planner.run(10);
     assertTrue(res == CBPlanner::TIMEOUT_REACHED);
 
     const std::list<DecisionPointId>& closed = planner.getClosedDecisions();
 
-    assertTrue(closed.size() == 20);
+    assertTrue(closed.size() == 10);
     assertTrue(closed.size() == planner.getTime());
     assertTrue(planner.getTime() == planner.getDepth());
     DEFAULT_TEARDOWN_PLAN();
