@@ -48,7 +48,7 @@ namespace EUROPA {
       runTest(testDifference);
       runTest(testOperatorEquals);
       runTest(testInfinitesAndInts);
-      runTest(testEnumSet);
+      runTest(testEnumSet); 
       runTest(testInsertAndRemove);
       runTest(testValidComparisonWithEmpty_gnats2403);
       runTest(testIntervalSingletonValues);
@@ -308,9 +308,11 @@ namespace EUROPA {
     }
 
     static bool testEnumSet(){
-      EnumeratedDomain dom0(true, "Enum"); // Create enum of type 'Enum'
+     
+      EnumeratedDomain dom0(true, "Enum");
       assertTrue(dom0.isOpen());
-      dom0.set(10);
+      dom0.insert(1); // required for isMember precondition of set.
+      dom0.set(1);
       assertTrue(dom0.isSingleton());
       return true;
     }
@@ -1725,3 +1727,5 @@ bool DomainTests::test() {
   runTestSuite(EUROPA::MixedTypeTest::test);
   return(true);
 }
+
+
