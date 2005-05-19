@@ -1,0 +1,19 @@
+#include "../../NDDL/core/Plasma.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
+
+class TestObject extends Timeline {
+  TestObject(){}
+
+  predicate TestPred {}
+}
+
+PlannerConfig world = new PlannerConfig(0, 10, 200);
+
+TestObject test1 = new TestObject();
+
+goal(TestObject.TestPred g);
+rejectable(TestObject.TestPred r);
+g equals r;
+g.object.specify(test1);
+g.start.specify(0);
+g.end.specify(10);
