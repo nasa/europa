@@ -1,9 +1,9 @@
-#ifndef H_TokenFlawManager
-#define H_TokenFlawManager
+#ifndef H_OpenConditionManager
+#define H_OpenConditionManager
 
 #include "SolverDefs.hh"
 #include "FlawManager.hh"
-#include "TokenDecisionPoint.hh"
+#include "OpenConditionDecisionPoint.hh"
 #include "PlanDatabaseListener.hh"
 
 #include <vector>
@@ -15,11 +15,11 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    class TokenFlawManager: public FlawManager {
+    class OpenConditionManager: public FlawManager {
     public:
-      TokenFlawManager(const TiXmlElement& configData);
+      OpenConditionManager(const TiXmlElement& configData);
 
-      virtual ~TokenFlawManager();
+      virtual ~OpenConditionManager();
 
       bool inScope(const TokenId& token) const;
 
@@ -40,7 +40,7 @@ namespace EUROPA {
       class DbListener: public PlanDatabaseListener {
       public:
 	DbListener(const PlanDatabaseId& db,
-		   TokenFlawManager& dm);
+		   OpenConditionManager& dm);
 
       private:
 	void notifyAdded(const TokenId& token);
@@ -52,11 +52,11 @@ namespace EUROPA {
 	void notifyRejected(const TokenId& token);
 	void notifyReinstated(const TokenId& token);
 
-	TokenFlawManager& m_dm;
+	OpenConditionManager& m_dm;
       };
 
-      friend class TokenFlawManager::DbListener;
-      TokenFlawManager::DbListener* m_dbListener; /*!< For processing Plan Database events */
+      friend class OpenConditionManager::DbListener;
+      OpenConditionManager::DbListener* m_dbListener; /*!< For processing Plan Database events */
 
       /**
        * @brief Helper method to iterate over the rules to match
@@ -66,12 +66,16 @@ namespace EUROPA {
       /**
        * @brief Helper method to obtain the most restrictive decision point factory
        */
-      TokenDecisionPointFactoryId matchFactory(const TokenId& token) const;
+      OpenConditionDecisionPointFactoryId matchFactory(const TokenId& token) const;
 
       std::list<TokenMatchingRuleId> m_staticMatchingRules;
       std::list<TokenMatchingRuleId> m_dynamicMatchingRules;
-      std::list<TokenDecisionPointFactoryId> m_factories;
+      std::list<OpenConditionDecisionPointFactoryId> m_factories;
     };
   }
 }
+
+#define REGISTER_TOKEN_DECISION_FACTORY(CLASS, NAME)\
+REGISTER_DECISION_FACTORY(CLASS, Token, TokenMatchingRule, NAME);
+
 #endif

@@ -34,7 +34,7 @@ namespace EUROPA {
   typedef Id<TimepointWrapper> TimepointWrapperId;
 
   TemporalPropagator::TemporalPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
-    : Propagator(name, constraintEngine), m_tnet((new TemporalNetwork())->getId()) {}
+    : Propagator(name, constraintEngine), m_tnet((new TemporalNetwork())->getId()), m_mostRecentRepropagation(1) {}
 
   TemporalPropagator::~TemporalPropagator() {
     check_error(Entity::isPurging() || m_wrappedTimepoints.empty());
@@ -262,6 +262,10 @@ namespace EUROPA {
   }
 
   void TemporalPropagator::updateTnet() {
+    // When updating, if we have deletions
+    if(!m_constraintsForDeletion.empty() || !m_variablesForDeletion.empty())
+      m_mostRecentRepropagation = getConstraintEngine()->cycleCount();
+
     // Process constraints for deletion
     for(std::set<TemporalConstraintId>::const_iterator it = m_constraintsForDeletion.begin(); it != m_constraintsForDeletion.end(); ++it) {
       TemporalConstraintId constraint = *it;
@@ -471,6 +475,8 @@ namespace EUROPA {
     check_error(lb <= ub);
 
     if(lb < lbt || ub > ubt) { // Handle relaxation
+      m_mostRecentRepropagation = getConstraintEngine()->cycleCount();
+
       // think about whether we can do better here, possibly by changing
       // the condition above.  There are cases
       // where the temporal network has restricted it further so we're just
@@ -609,6 +615,11 @@ namespace EUROPA {
     return(IntervalIntDomain(lb,ub));
   }
 
+  unsigned int TemporalPropagator::mostRecentRepropagation() const{
+    checkError(getConstraintEngine()->mostRecentRepropagation() >= m_mostRecentRepropagation,
+	       "Cannot imagine how it could be more recent since we should always have a stricter criteria for capturing the need for a reprop.");
+    return m_mostRecentRepropagation;
+  }
 
   void TemporalPropagator::getTemporalNogood
   (const ConstrainedVariableId& useAsOrigin,

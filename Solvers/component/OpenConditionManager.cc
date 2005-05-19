@@ -1,4 +1,4 @@
-#include "TokenFlawManager.hh"
+#include "OpenConditionManager.hh"
 #include "PlanDatabase.hh"
 #include "Token.hh"
 #include "Utils.hh"
@@ -13,24 +13,24 @@ namespace EUROPA {
   namespace SOLVERS {
 
     /* REGSITER DEFAULT TOKEN FLAW MANAGER */
-    REGISTER_COMPONENT_FACTORY(TokenFlawManager, TokenFlawManager);
+    REGISTER_COMPONENT_FACTORY(OpenConditionManager, OpenConditionManager);
 
-    TokenFlawManager::TokenFlawManager(const TiXmlElement& configData)
+    OpenConditionManager::OpenConditionManager(const TiXmlElement& configData)
       : FlawManager(configData), m_dbListener(NULL) {
 
-      checkError(strcmp(configData.Value(), "TokenFlawManager") == 0,
-		 "Expected element <TokenFlawManager> but found " << configData.Value());
+      checkError(strcmp(configData.Value(), "OpenConditionManager") == 0,
+		 "Expected element <OpenConditionManager> but found " << configData.Value());
 
       // Load all filtering rules
       for (TiXmlElement * child = configData.FirstChildElement(); 
 	   child != NULL; 
 	   child = child->NextSiblingElement()) {
-	debugMsg("TokenFlawManager:TokenFlawManager",
+	debugMsg("OpenConditionManager:OpenConditionManager",
 		 "Evaluating configuration element " << child->Value());
 
 	// If we come across a token heuristic, register the factory.
 	if(strcmp(child->Value(), "TokenHandler") == 0){
-	  TokenDecisionPointFactoryId factory = static_cast<TokenDecisionPointFactoryId>(Component::AbstractFactory::allocate(*child));
+	  OpenConditionDecisionPointFactoryId factory = static_cast<OpenConditionDecisionPointFactoryId>(Component::AbstractFactory::allocate(*child));
 	  m_factories.push_back(factory);
 	}
 	else { // Must be a token filter
@@ -51,7 +51,7 @@ namespace EUROPA {
       }
     }
 
-    void TokenFlawManager::handleInitialize(){
+    void OpenConditionManager::handleInitialize(){
       m_dbListener = new DbListener(m_db, *this);
 
       // FILL UP TOKENS
@@ -62,7 +62,7 @@ namespace EUROPA {
       }
     }
 
-    TokenFlawManager::~TokenFlawManager(){
+    OpenConditionManager::~OpenConditionManager(){
       if(m_dbListener != NULL)
 	delete m_dbListener;
 
@@ -72,13 +72,13 @@ namespace EUROPA {
     }
 
 
-    bool TokenFlawManager::inScope(const TokenId& token) const {
+    bool OpenConditionManager::inScope(const TokenId& token) const {
       checkError(m_db->getConstraintEngine()->constraintConsistent(), "Assumes the database is constraint consistent but it is not.");
       bool result =  (!token->isActive() && !matches(token, m_staticMatchingRules) && !matches(token, m_dynamicMatchingRules));
       return result;
     }
 
-    bool TokenFlawManager::matches(const TokenId& token,const std::list<TokenMatchingRuleId>& rules)  const{
+    bool OpenConditionManager::matches(const TokenId& token,const std::list<TokenMatchingRuleId>& rules)  const{
       LabelStr objectType, predicate;
       TokenMatchingRule::extractParts(token, objectType, predicate);
 
@@ -86,11 +86,11 @@ namespace EUROPA {
 	TokenMatchingRuleId rule = *it;
 	check_error(rule.isValid());
 	if(rule->matches(objectType, predicate) && rule->matches(token)){
-	  debugMsg("TokenFlawManager:matches", "Match found for " << TokenMatchingRule::makeExpression(token) << " with " << rule->getExpression());
+	  debugMsg("OpenConditionManager:matches", "Match found for " << TokenMatchingRule::makeExpression(token) << " with " << rule->getExpression());
 	  return true;
 	}
 	else {
-	  debugMsg("TokenFlawManager:matches", "No match for " << TokenMatchingRule::makeExpression(token) << " with " << rule->getExpression());
+	  debugMsg("OpenConditionManager:matches", "No match for " << TokenMatchingRule::makeExpression(token) << " with " << rule->getExpression());
 	}
       }
 
@@ -101,18 +101,18 @@ namespace EUROPA {
     /**
      * @brief Now we conduct a simple match where we select based on first avalaibale.
      */
-    DecisionPointId TokenFlawManager::allocateDecisionPoint(const TokenId& flawedToken){
+    DecisionPointId OpenConditionManager::allocateDecisionPoint(const TokenId& flawedToken){
       static unsigned int sl_counter(0); // Helpful for debugging
       sl_counter++;
 
-      std::list<TokenDecisionPointFactoryId>::const_iterator it = m_factories.begin();
+      std::list<OpenConditionDecisionPointFactoryId>::const_iterator it = m_factories.begin();
       LabelStr predicate(flawedToken->getPredicateName());
       LabelStr objectType(flawedToken->getBaseObjectType());
 
       DecisionPointId result;
 
       while(it != m_factories.end()){
-	TokenDecisionPointFactoryId factory = *it;
+	OpenConditionDecisionPointFactoryId factory = *it;
 	if(factory->matches(predicate, objectType) && factory->matches(flawedToken)){
 	  result = factory->create(m_db->getClient(), flawedToken);
 	  break;
@@ -127,16 +127,16 @@ namespace EUROPA {
       return result;
     }
 
-    void TokenFlawManager::addFlaw(const TokenId& token){
+    void OpenConditionManager::addFlaw(const TokenId& token){
       if(token->isInactive() && !matches(token, m_staticMatchingRules)){
-	debugMsg("TokenFlawManager:addFlaw",
+	debugMsg("OpenConditionManager:addFlaw",
 		 "Adding " << token->toString() << " as a candidate flaw.");
 	m_flawCandidates.insert(token);
       }
     }
 
-    void TokenFlawManager::removeFlaw(const TokenId& token){
-      condDebugMsg(m_flawCandidates.find(token) != m_flawCandidates.end(), "TokenFlawManager:removeFlaw", "Removing " << token->toString() << " as a flaw.");
+    void OpenConditionManager::removeFlaw(const TokenId& token){
+      condDebugMsg(m_flawCandidates.find(token) != m_flawCandidates.end(), "OpenConditionManager:removeFlaw", "Removing " << token->toString() << " as a flaw.");
       m_flawCandidates.erase(token);
     }
 
@@ -147,7 +147,7 @@ namespace EUROPA {
      * active tokens in prioritizing and also be developing much better caching mechanisms
      * that can use prior results to guide the retrieval.
      */
-    DecisionPointId TokenFlawManager::next(unsigned int priorityLowerBound,
+    DecisionPointId OpenConditionManager::next(unsigned int priorityLowerBound,
 					   unsigned int& bestPriority){
       TokenId flawedToken;
 
@@ -160,7 +160,7 @@ namespace EUROPA {
 	checkError(candidate->isInactive(), "It must be inactive to be a candidate.");
 
 	if(matches(candidate, m_dynamicMatchingRules)){
-	  debugMsg("TokenFlawManager:next",
+	  debugMsg("OpenConditionManager:next",
 		   candidate->toString() << " is out of dynamic scope.");
 	  continue;
 	}
@@ -197,7 +197,7 @@ namespace EUROPA {
 	  flawedToken = candidate;
 	}
 
-	debugMsg("TokenFlawManager:next",
+	debugMsg("OpenConditionManager:next",
 		 candidate->toString() << 
 		 (candidate == flawedToken ? " is the best candidate so far." : " is not a better candidate."));
       }
@@ -213,39 +213,39 @@ namespace EUROPA {
       return decisionPoint;
     }
 
-    TokenFlawManager::DbListener::DbListener(const PlanDatabaseId& planDb,
-					     TokenFlawManager& dm)
+    OpenConditionManager::DbListener::DbListener(const PlanDatabaseId& planDb,
+					     OpenConditionManager& dm)
       : PlanDatabaseListener(planDb), m_dm(dm) {}
 
-    void TokenFlawManager::DbListener::notifyAdded(const TokenId& token){
+    void OpenConditionManager::DbListener::notifyAdded(const TokenId& token){
       m_dm.addFlaw(token);
     }
 
-    void TokenFlawManager::DbListener::notifyRemoved(const TokenId& token){
+    void OpenConditionManager::DbListener::notifyRemoved(const TokenId& token){
       m_dm.removeFlaw(token);
     }
 
-    void TokenFlawManager::DbListener::notifyActivated(const TokenId& token){
+    void OpenConditionManager::DbListener::notifyActivated(const TokenId& token){
       m_dm.removeFlaw(token);
     }
 
-    void TokenFlawManager::DbListener::notifyDeactivated(const TokenId& token){
+    void OpenConditionManager::DbListener::notifyDeactivated(const TokenId& token){
       m_dm.addFlaw(token);
     }
 
-    void TokenFlawManager::DbListener::notifyMerged(const TokenId& token){
+    void OpenConditionManager::DbListener::notifyMerged(const TokenId& token){
       m_dm.removeFlaw(token);
     }
 
-    void TokenFlawManager::DbListener::notifySplit(const TokenId& token){
+    void OpenConditionManager::DbListener::notifySplit(const TokenId& token){
       m_dm.addFlaw(token);
     }
 
-    void TokenFlawManager::DbListener::notifyRejected(const TokenId& token){
+    void OpenConditionManager::DbListener::notifyRejected(const TokenId& token){
       m_dm.removeFlaw(token);
     }
 
-    void TokenFlawManager::DbListener::notifyReinstated(const TokenId& token){
+    void OpenConditionManager::DbListener::notifyReinstated(const TokenId& token){
       m_dm.addFlaw(token);
     }
 

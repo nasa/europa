@@ -1,4 +1,4 @@
-<VariableFlawManager>
+<UnboundVariableManager>
   <-- Exclude all temporal variables -->
   <VariableFilter var-match="start"/>
   <VariableFilter var-match="end"/>
@@ -15,9 +15,9 @@
 
   <-- Impose a dynamic filter based on a singleton -->
   <VariableFilter var-match="globalVariable1" component="Singleton"/>
-</VariableFlawManager>
+</UnboundVariableManager>
 
-<TokenFlawManager>
+<OpenConditionManager>
   <TokenFilter class-match="D"/>
 
   <-- Exclude all token flaws in predicate E.PredicateC -->
@@ -26,9 +26,15 @@
   <-- Exclude all token flaws on the HorizonFiltered class based on horizon values and policy -->
   <TokenFilter class-match="HorizonFiltered" predicate-match="predicate5" component="HorizonFilter" policy="TotallyContained"/> 
   <TokenFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
-</TokenFlawManager>
+</OpenConditionManager>
  
-<ObjectFlawManager>
-  <-- Exclude all object flaws on instances of PredicateRoot or its subclasses -->
-  <ObjectFilterCondition class-match="PredicateRoot"/>
-</ObjectFlawManager>
+<ThreatManager>
+  <TokenFilter class-match="D"/>
+
+  <-- Exclude all token flaws in predicate E.PredicateC -->
+  <TokenFilter class-match="E" predicate-match="PredicateC"/>
+
+  <-- Exclude all token flaws on the HorizonFiltered class based on horizon values and policy -->
+  <TokenFilter class-match="HorizonFiltered" predicate-match="predicate5" component="HorizonFilter" policy="TotallyContained"/> 
+  <TokenFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
+</ThreatManager>

@@ -1,4 +1,4 @@
-#include "TokenDecisionPoint.hh"
+#include "OpenConditionDecisionPoint.hh"
 #include "PlanDatabase.hh"
 #include "Token.hh"
 #include "ConstrainedVariable.hh"
@@ -6,9 +6,9 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    REGISTER_TOKEN_DECISION_FACTORY(TokenDecisionPoint, StandardTokenHandler);
+    REGISTER_OPENCONDITION_DECISION_FACTORY(OpenConditionDecisionPoint, StandardOpenConditionHandler);
 
-    TokenDecisionPoint::TokenDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData)
+    OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData)
       : DecisionPoint(client, flawedToken->getKey()),
 	m_flawedToken(flawedToken), 
 	m_mergeIndex(0),
@@ -23,9 +23,9 @@ namespace EUROPA {
       // Activation preference - direct vs. indirect. Default is to use direct activation
     }
 
-    TokenDecisionPoint::~TokenDecisionPoint() {}
+    OpenConditionDecisionPoint::~OpenConditionDecisionPoint() {}
 
-    void TokenDecisionPoint::handleInitialize(){
+    void OpenConditionDecisionPoint::handleInitialize(){
       const StateDomain stateDomain(m_flawedToken->getState()->lastDomain());
 
       // Next merge choices if there are any.
@@ -47,7 +47,7 @@ namespace EUROPA {
       m_choiceCount = m_choices.size();
     }
 
-    void TokenDecisionPoint::handleExecute(){
+    void OpenConditionDecisionPoint::handleExecute(){
       checkError(m_choiceIndex < m_choiceCount, "Tried to execute past available choices.");
       if(m_mergeIndex < m_mergeCount){
 	checkError(m_choiceIndex == 0, "Expect Merging to be the first choice.");
@@ -64,7 +64,7 @@ namespace EUROPA {
       }
     }
 
-    void TokenDecisionPoint::handleUndo(){
+    void OpenConditionDecisionPoint::handleUndo(){
       m_client->cancel(m_flawedToken);
 
       if(m_mergeIndex < m_mergeCount)
@@ -74,11 +74,11 @@ namespace EUROPA {
 	m_choiceIndex++;
     }
 
-    bool TokenDecisionPoint::hasNext() const {
+    bool OpenConditionDecisionPoint::hasNext() const {
       return m_choiceIndex < m_choiceCount;
     }
 
-    std::string TokenDecisionPoint::toString() const{
+    std::string OpenConditionDecisionPoint::toString() const{
       std::stringstream strStream;
       strStream << "TOKEN STATE: TOKEN=" << 
 	m_flawedToken->getName().toString()  << "(" << m_flawedToken->getKey() << "), " <<
@@ -104,7 +104,7 @@ namespace EUROPA {
       return strStream.str();
     }
 
-    bool TokenDecisionPoint::canUndo() const {
+    bool OpenConditionDecisionPoint::canUndo() const {
       return DecisionPoint::canUndo() && m_flawedToken->getState()->specifiedDomain().isSingleton();
     }
   }

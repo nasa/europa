@@ -1,33 +1,38 @@
 <SimpleCSPSolver>
  <Solver name="SimpleCSPSolver">
   <-- Will have variable flaws, but no filtering -->
-  <VariableFlawManager>
+  <UnboundVariableManager>
    <VariableHandler var-match="v0" component="Min"/>
    <VariableHandler var-match="v1" component="Min"/>
    <VariableHandler component="Min"/>
-  </VariableManager>
+  </UnboundVariableManager>
  </Solver>
 </SimpleCSPSolver>
 <SimpleActivationSolver>
  <Solver name="SimpleTokenSolver">
-  <TokenFlawManager>
+  <OpenConditionManager>
     <-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
     <TokenFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
-    <TokenHandler component="StandardTokenHandler"/>
-  </TokenFlawManager>
+    <TokenHandler component="StandardOpenConditionHandler"/>
+  </OpenConditionManager>
+  <ThreatManager>
+    <-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
+    <TokenFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
+    <TokenOrderHandler component="StandardThreatHandler"/>
+  </ThreatManager>
  </Solver>
 </SimpleActivationSolver>
 <SimpleRejectionSolver>
  <!-- Solver is set up to take variable decisions thus forcing branch logic to make rejection happen
       late in the process and back all the way out -->
  <Solver name="SimpleRejectionSolver">
-  <VariableFlawManager>
+  <UnboundVariableManager>
    <VariableHandler component="Max"/>
-  </VariableFlawManager>
-  <TokenFlawManager>
+  </UnboundVariableManager>
+  <OpenConditionManager>
     <-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
     <TokenFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
-    <TokenHandler component="StandardTokenHandler"/>
-  </TokenFlawManager>
+    <TokenHandler component="StandardOpenConditionHandler"/>
+  </OpenConditionManager>
  </Solver>
 </SimpleRejectionSolver>

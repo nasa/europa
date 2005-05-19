@@ -45,6 +45,12 @@ namespace EUROPA {
     const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId& first, 
 						      const ConstrainedVariableId& second, const bool exact);
 
+
+    /**
+     * @see TemporalAdvisor
+     */
+    unsigned int mostRecentRepropagation() const;
+
     void getTemporalNogood(const ConstrainedVariableId& useAsOrigin,
                            std::vector<ConstrainedVariableId>& fromvars,
                            std::vector<ConstrainedVariableId>& tovars,
@@ -135,7 +141,7 @@ namespace EUROPA {
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */
     std::set<EntityId> m_wrappedTimepoints;
     std::set<TemporalNetworkListenerId> m_listeners;
-
+    unsigned int m_mostRecentRepropagation;
   };
 }
 #endif

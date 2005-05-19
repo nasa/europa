@@ -134,16 +134,11 @@ namespace EUROPA {
     check_error(results.empty());
 
     // Do propagation to update the information
-#ifdef EUROPA_FAST
     getPlanDatabase()->getConstraintEngine()->propagate();
-#else
-    bool isOk = getPlanDatabase()->getConstraintEngine()->propagate();
-    check_error(isOk);
-    check_error(isValid());
 
-    // Should only progress if we are consistent
-    check_error(isOk);
-#endif
+    checkError(getPlanDatabase()->getConstraintEngine()->constraintConsistent(),
+	       "Should be consistent to continue here. Should have checked before you called the method in the first place.");
+    check_error(isValid());
 
     const TokenSet& tokensForThisObject = getTokens();
     for (TokenSet::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it) {
@@ -177,6 +172,14 @@ namespace EUROPA {
   void Timeline::constrain(const TokenId& predecessor, const TokenId& successor) {
     // Delegate to base class.
     Object::constrain(predecessor, successor, true);
+
+    // Notify the PlanDatabase that an ordering is no longer required for either of these, if they were previously required
+    if(orderingRequired(predecessor))
+      notifyOrderingNoLongerRequired(predecessor);
+
+    if(predecessor != successor && orderingRequired(successor))
+      notifyOrderingNoLongerRequired(successor);
+
 
     // Additional tests for a Timeline
     check_error(m_tokenIndex.find(predecessor->getKey()) == m_tokenIndex.end() ||
@@ -238,9 +241,17 @@ namespace EUROPA {
     }
   }
 
+  void Timeline::add(const TokenId& token){
+    Object::add(token);
+    notifyOrderingRequired(token);
+  }
+
   void Timeline::remove(const TokenId& token) {
     check_error(token.isValid());
     check_error(isValid(CLEANING_UP));
+
+    if(orderingRequired(token))
+      notifyOrderingNoLongerRequired(token);
 
     // CASE 0: It is not sequenced, so can ignore it
     std::map<int, std::list<TokenId>::iterator >::iterator token_it = m_tokenIndex.find(token->getKey());
@@ -380,7 +391,7 @@ namespace EUROPA {
   TokenId Timeline::removeSuccessor(const TokenId& token) {
     freeImplicitConstraints(token);
     std::list<TokenId>::iterator pos = m_tokenIndex.find(token->getKey())->second;
-    m_tokenIndex.erase(token->getKey());
+    removeFromIndex(token);
 
     if (m_tokenIndex.empty()) {
       m_tokenSequence.clear();
@@ -399,7 +410,7 @@ namespace EUROPA {
   TokenId Timeline::removePredecessor(const TokenId& token) {
     freeImplicitConstraints(token);
     std::list<TokenId>::iterator pos = m_tokenIndex.find(token->getKey())->second;
-    m_tokenIndex.erase(token->getKey());
+    removeFromIndex(token);
 
     if (m_tokenIndex.empty()) {
       m_tokenSequence.clear();
@@ -426,7 +437,7 @@ namespace EUROPA {
   void Timeline::unlink(const TokenId& token) {
     freeImplicitConstraints(token);
     std::list<TokenId>::iterator pos = m_tokenIndex.find(token->getKey())->second;
-    m_tokenIndex.erase(token->getKey());
+    removeFromIndex(token);
     if (atStart(token))
       m_tokenSequence.pop_front();
     else
@@ -442,4 +453,14 @@ namespace EUROPA {
       }
     return;
   }
+
+  void Timeline::removeFromIndex(const TokenId& token){
+    m_tokenIndex.erase(token->getKey());
+    notifyOrderingRequired(token);
+  }
+
+  bool Timeline::orderingRequired(const TokenId& token){
+    return (m_tokenIndex.find(token->getKey()) == m_tokenIndex.end());
+  }
+
 }

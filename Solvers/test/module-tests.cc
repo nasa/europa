@@ -4,8 +4,9 @@
 #include "ComponentFactory.hh"
 #include "Constraint.hh"
 #include "ConstraintLibrary.hh"
-#include "VariableFlawManager.hh"
-#include "TokenFlawManager.hh"
+#include "UnboundVariableManager.hh"
+#include "OpenConditionManager.hh"
+#include "ThreatManager.hh"
 #include "Filters.hh"
 #include "Token.hh"
 #include "TestSupport.hh"
@@ -160,18 +161,19 @@ public:
   static bool test(){
     runTest(testVariableFiltering);
     runTest(testTokenFiltering);
+    runTest(testThreatFiltering);
     return true;
   }
 
 private:
   
   static bool testVariableFiltering(){
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "VariableFlawManager");
+    TiXmlElement* root = initXml("FlawFilterTests.xml", "UnboundVariableManager");
 
     StandardAssembly assembly(Schema::instance());
-    VariableFlawManager fm(*root);
+    UnboundVariableManager fm(*root);
     fm.initialize(assembly.getPlanDatabase());
-    assert(assembly.playTransactions("VariableFiltering.xml"));
+    assert(assembly.playTransactions("UnboundVariableFiltering.xml"));
 
     // Simple filter on a variable
     ConstrainedVariableSet variables = assembly.getConstraintEngine()->getVariables();
@@ -207,14 +209,14 @@ private:
   }
 
   static bool testTokenFiltering(){
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "TokenFlawManager");
+    TiXmlElement* root = initXml("FlawFilterTests.xml", "OpenConditionManager");
 
     StandardAssembly assembly(Schema::instance());
-    TokenFlawManager fm(*root);
+    OpenConditionManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
     fm.initialize(assembly.getPlanDatabase());
-    assert(assembly.playTransactions("TokenFiltering.xml"));
+    assert(assembly.playTransactions("OpenConditionFiltering.xml"));
 
     TokenSet tokens = assembly.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
@@ -230,28 +232,29 @@ private:
     return true;
   }
 
-  /*
-  static bool testTokenFiltering(){
-    // All Variables of a predicate are excluded
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "TokenFlawManager");
+
+  static bool testThreatFiltering(){
+    TiXmlElement* root = initXml("FlawFilterTests.xml", "ThreatManager");
 
     StandardAssembly assembly(Schema::instance());
-    TokenFlawManager fm(*root);
+    ThreatManager fm(*root);
+    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
+    horizon = IntervalIntDomain(0, 1000);
     fm.initialize(assembly.getPlanDatabase());
-    assert(assembly.playTransactions("TokenFiltering.xml"));
+    assert(assembly.playTransactions("ThreatFiltering.xml"));
 
-    ObjectSet objects = assembly.getPlanDatabase()->getObjects();
-    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
-      static const LabelStr excludedObjectTypes(":NoPredicates:PredicateRoot:PredicateDerived:");
-      ObjectId object = *it;
-      std::string s = ":" + object->getType().toString() + ":";
-      if(excludedObjectTypes.contains(s))
-	assertFalse(staticFilter.inScope(object));
+    TokenSet tokens = assembly.getPlanDatabase()->getTokens();
+    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
+      static const LabelStr excludedPredicates(":D.predicateA:D.predicateB:D.predicateC:E.predicateC:HorizonFiltered.predicate1:HorizonFiltered.predicate2:HorizonFiltered.predicate5:");
+      TokenId token = *it;
+      assertTrue(token->isActive() || !fm.inScope(token), token->toString() + " is not in scope and not active.");
+      std::string s = ":" + token->getPredicateName().toString() + ":";
+      if(excludedPredicates.contains(s))
+	assertTrue(!fm.inScope(token), token->toString() + " is in scope after all.")
     }
 
     return true;
-    }
-  */
+  }
 };
 
 

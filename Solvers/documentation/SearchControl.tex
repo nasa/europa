@@ -14,10 +14,9 @@
 
 \maketitle
 
-This document outlines the requirements and technical approach for controlling the search undertaken by the standard EUROPA solver. We assume a chronological-backtracking heuristic search.
+This document outlines the requirements and technical approach for controlling the search undertaken by the standard EUROPA solver. We assume a chronological-backtracking, heuristically guided, refinement search.
 
 \section{Preliminaries}
-
 In our planning paradigm, a solver is a problem solving actor which operates to resolve flaws in a plan database. Informally, a flaw is an indication of a potential for inconsistency in a given partial plan. We distinguish 3 types of flaw, each with its own corresponding  procedure to resolve it:
 \begin{enumerate}
 \item An Object Flaw - arises when an ordering is required for tokens associated with an object. This occurs in objects such as {\em Timelines} to ensure that a mutual exclusion is enforced, and on metric resources to ensure that the resource level is within specified limits.
@@ -328,6 +327,21 @@ Most of the component framework presented can be used independently of the match
 
 In the above example, we assume the existence of a standard component for evaluating expressions of a plan query language.
 
+\section{Notes on ObjectFlaws}
+An Object Flaw arises where additional ordering constraints are required upon the tokens associated with that object. In EUROPA 1 and in the CBPlanner, a Token-centric perspective was taken i.e. one considers a token to inherently require some ordering on an object. The flaw model would then compute the aggregate set of ordering choices over all possible objects. In EUROPA 1 this wold retrieve all slots across all timelines. In EUROPA 2, this obtains all ordering pairs across all objects. There are 2 issues with this approach:
+\begin{enumerate}
+\item It is costly in general to construct such a large set of token ordering choices, since one must potentially evaluate many options and the cost for evalutaion of an option is relatively high.
+\item It seems un-intutitive in the general case of tokens and objects to raise the flaw from the token's perspective. Flaw detection should be based on the object which is the source of the issue. For example, one a timeline, all tokens must be totally ordered. If active tokens on a timeline could overlap then we should require additional ordering decisions. Similarly for a metric resource. If an envelope could be violated, but might not be, then we are concerned to reduce the flexibililty of tokens on that resource such that they bring the limits within bounds sufficiciently. An object is in a position to know this most effectively.
+\end{enumerate}
+
+If we take an Object perspective, then under current circumstances, an Object which has tokens to order will raise flaws for each such token, and the choices will be developed once the token is selected. Currently, a token may be considered for ordering even though its object variable has not yet been bound. This means that we cannot conclude a dead-end simply becuase there are no viable ordering choices for this token on this particular object. This is because it could be removed from the object as an acceptable strategy since it need not be placed on that object. This is arguably a good approach since it permits an incremental resolution of the actual flaw, and does so in a way that is information rich - the relevant tokens and constraints on that object are localized with the decision to order or exclude it. In contrast, we could require that flaws are only raised when a token is necessarily placed on an object (i.e. its object variable is a singleton). This would be quite simple and have the advantage that the decision model for resolving object flaws remains limited to simply posting token ordering constraints. However, we would lose some ability to work on the object flaws earlier in the planning process, and it would change the search structure. Furthermore,  it makes it very difficult to structure a search preference for ordering a token prefering particular locations across different objectcs before other locations. If we view it from a single object perspective, then that information is not readily available in the context of decision making, and one is forced to commit to an object before committing to a temporal position in the plan.
+
+This then begs the question of finding the best way to maintain the total set of tokens to order, since these are the TokenOrder flaws. Trivially we can assume that all tokens, once activated, require an ordering. However, this is problematic since that token may require more than one ordering in the case of a metric resource, or it may not require any ordering at all if there is no overlap possible for this token. What we would really like is that the set of tokens that actually require orderings is propagated by the objects (i.e. resources in general). Alternatley, we might not propagate it, but rather just poll for it. It would be nice to defer that decision but build in the api.
+
+A further issue with respect to flaw filtering on objects. The concept would be to ignore ordering requirements induced by certain objects. However, if we view the situation from the perspective of tokens, then we may formulate resolutions for a token with constrain it to an oject that has been filtered out. Should we allow this? To prevent it we would have to sacrifice completeness. The view for now is that we would only filter the generation of the flaw, but not prevent the resolution of the flaw from including choices on an object that would otherwise be filtered. In order to exclude choices, it seems like we have to think in terms of access control rather than flaw filtering.
+
+Yet another issue - the way we structure choices around a token is just wrong in the case of resources in general. It imposes a decision for each token, and can thus impose a dependency in the solution on which decision you select to work on. This is not a problem with a timeline since every token requires and ordering. However, in a resource, things are different and we do not want to require an ordering but yet one of the nXn orderings (or more) may be required in order to solve the resource flaw. This can be alleviated by the NO-OP of constraining a token with respect to itself. In a timeline this covers the special case of an insertion in an empty timeline. However, that is only required since we base the flaw on a token being active, and thus requiring such insertion. Rather, we should not have to make such a commitment, but it is a small matter. So, to recap, resolution of this issue is accomplished by permiting a choice that can effectively be a NO-OP for a resource. The api already permits this and the response will be dependent on the underlying concrete class - Timeline vs Resource.
+ 
 \section{Conclusion}
 The proposed system can be functional in a matter of a few weeks. From there we can develop the capabilities in an incremental fashion. Future work may look at variations of the core planning algorithm to explore alternate search strategies. For example, incorportaing backjumping. However, given the flexibility provided, we expect that a large class of search engines can be assembled based on the simple chronological backtracking planner outlined.
 \section{Gloassary}
@@ -343,4 +357,4 @@ The proposed system can be functional in a matter of a few weeks. From there we 
 \item Token
 \item Variable
 \end{enumerate}
-\end{document}
+\end{document}j

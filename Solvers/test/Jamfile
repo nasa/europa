@@ -3,8 +3,9 @@ SubDir PLASMA Solvers test ;
 if ! $(PLASMA_READY) {
 
  # All input file names used for the tests
- local inputFiles = 	VariableFiltering.nddl 
-			TokenFiltering.nddl 
+ local inputFiles = 	UnboundVariableFiltering.nddl 
+			OpenConditionFiltering.nddl
+			ThreatFiltering.nddl
 			StaticCSP.nddl 
 			SuccessfulSearch.nddl 
 			ExhaustiveSearch.nddl 

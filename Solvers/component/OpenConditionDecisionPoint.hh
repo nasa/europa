@@ -1,5 +1,5 @@
-#ifndef H_TokenDecisionPoint
-#define H_TokenDecisionPoint
+#ifndef H_OpenConditionDecisionPoint
+#define H_OpenConditionDecisionPoint
 
 #include "SolverDefs.hh"
 #include "DecisionPoint.hh"
@@ -13,8 +13,8 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    typedef DecisionPoint::AbstractFactory<Token, TokenMatchingRule> TokenDecisionPointFactory;
-    typedef Id<TokenDecisionPointFactory> TokenDecisionPointFactoryId;
+    typedef DecisionPoint::AbstractFactory<Token, TokenMatchingRule> OpenConditionDecisionPointFactory;
+    typedef Id<OpenConditionDecisionPointFactory> OpenConditionDecisionPointFactoryId;
 
     /**
      * @brief Defines a class for formulation, execution and retraction of a decision
@@ -28,14 +28,14 @@ namespace EUROPA {
      * @li REJECT. If REJECT is a valid choice, then we will address this flaw by rejecting
      * this token.
      */
-    class TokenDecisionPoint: public DecisionPoint {
+    class OpenConditionDecisionPoint: public DecisionPoint {
     public:
       /**
        * @brief Constructor. Matches signature for DecisionPointFactory
        */
-      TokenDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData);
+      OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData);
 
-      virtual ~TokenDecisionPoint();
+      virtual ~OpenConditionDecisionPoint();
 
       /**
        * @brief Utility to obtain the next decision point from the set of candidates if it can exceed the
@@ -68,7 +68,7 @@ namespace EUROPA {
   }
 }
 
-#define REGISTER_TOKEN_DECISION_FACTORY(CLASS, NAME)\
-REGISTER_DECISION_FACTORY(CLASS, Token, TokenMatchingRule, NAME);
 
+#define REGISTER_OPENCONDITION_DECISION_FACTORY(CLASS, NAME)\
+REGISTER_DECISION_FACTORY(CLASS, Token, TokenMatchingRule, NAME);
 #endif

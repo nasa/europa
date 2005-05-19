@@ -1,5 +1,5 @@
-#ifndef H_VariableDecisionPoint
-#define H_VariableDecisionPoint
+#ifndef H_UnboundVariableDecisionPoint
+#define H_UnboundVariableDecisionPoint
 
 #include "DecisionPoint.hh"
 #include "ConstrainedVariable.hh"
@@ -13,8 +13,8 @@ namespace EUROPA {
   namespace SOLVERS {
 
     class ValueSource;
-    typedef DecisionPoint::AbstractFactory<ConstrainedVariable, VariableMatchingRule> VariableDecisionPointFactory;
-    typedef Id<VariableDecisionPointFactory> VariableDecisionPointFactoryId;
+    typedef DecisionPoint::AbstractFactory<ConstrainedVariable, VariableMatchingRule> UnboundVariableDecisionPointFactory;
+    typedef Id<UnboundVariableDecisionPointFactory> UnboundVariableDecisionPointFactoryId;
 
     /**
      * @brief Abstract base class for Variable decisions.
@@ -23,7 +23,7 @@ namespace EUROPA {
      * leaves all details of how choices are stored and how they are iterated through to
      * derived classes, thus allowing for specialized storage and selection.
      */
-    class VariableDecisionPoint: public DecisionPoint {
+    class UnboundVariableDecisionPoint: public DecisionPoint {
     public:
 
       /**
@@ -39,7 +39,7 @@ namespace EUROPA {
 				  const std::map< ConstrainedVariableId, unsigned int>& guardCache,
 				  unsigned int& bestPriority);
 
-      virtual ~VariableDecisionPoint();
+      virtual ~UnboundVariableDecisionPoint();
 
       /**
        * @brief Dump contents to a String.
@@ -48,7 +48,7 @@ namespace EUROPA {
 
     protected:
 
-      VariableDecisionPoint(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
+      UnboundVariableDecisionPoint(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
 
       const ConstrainedVariableId& getFlawedVariable() const;
 
@@ -76,7 +76,7 @@ namespace EUROPA {
     /**
      * @brief Provides for access in ascending order
      */
-    class MinValue: public VariableDecisionPoint {
+    class MinValue: public UnboundVariableDecisionPoint {
     public:
       MinValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
       bool hasNext() const;
@@ -90,7 +90,7 @@ namespace EUROPA {
     /**
      * @brief Provides for access in descending order
      */
-    class MaxValue: public VariableDecisionPoint {
+    class MaxValue: public UnboundVariableDecisionPoint {
     public:
       MaxValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
       bool hasNext() const;
@@ -107,7 +107,7 @@ namespace EUROPA {
      *
      * @todo Extend to allow alternate distributions.
      */
-    class RandomValue: public VariableDecisionPoint {
+    class RandomValue: public UnboundVariableDecisionPoint {
     public:
       RandomValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
       bool hasNext() const;

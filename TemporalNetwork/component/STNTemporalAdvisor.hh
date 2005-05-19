@@ -22,6 +22,7 @@ namespace EUROPA{
 							      const TempVarId& second,
 							      const bool exact);
 
+    unsigned int mostRecentRepropagation() const;
   private:
     TemporalPropagatorId m_propagator;
 

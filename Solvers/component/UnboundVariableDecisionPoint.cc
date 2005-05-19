@@ -1,4 +1,4 @@
-#include "VariableDecisionPoint.hh"
+#include "UnboundVariableDecisionPoint.hh"
 #include "ConstrainedVariable.hh"
 #include "DbClient.hh"
 #include "AbstractDomain.hh"
@@ -16,7 +16,7 @@ namespace EUROPA {
 
     REGISTER_VARIABLE_DECISION_FACTORY(MinValue, StandardVariableHandler);
 
-    VariableDecisionPoint::VariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
+    UnboundVariableDecisionPoint::UnboundVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
       : DecisionPoint(dbClient, flawedVariable->getKey()),
 	m_flawedVariable(flawedVariable),
 	m_choices(ValueSource::getSource(flawedVariable)){
@@ -25,29 +25,29 @@ namespace EUROPA {
 		 << flawedVariable->toString());
     }
 
-    VariableDecisionPoint::~VariableDecisionPoint(){
+    UnboundVariableDecisionPoint::~UnboundVariableDecisionPoint(){
       delete m_choices;
     }
 
-    const ConstrainedVariableId& VariableDecisionPoint::getFlawedVariable() const{return m_flawedVariable;}
+    const ConstrainedVariableId& UnboundVariableDecisionPoint::getFlawedVariable() const{return m_flawedVariable;}
 
-    bool VariableDecisionPoint::canUndo() const {
+    bool UnboundVariableDecisionPoint::canUndo() const {
       return DecisionPoint::canUndo() && m_flawedVariable->specifiedDomain().isSingleton();
     }
 
-    void VariableDecisionPoint::handleInitialize(){}
+    void UnboundVariableDecisionPoint::handleInitialize(){}
 
-    void VariableDecisionPoint::handleExecute(){
+    void UnboundVariableDecisionPoint::handleExecute(){
       double nextValue = getNext();
       m_client->specify(m_flawedVariable, nextValue);
-      debugMsg("VariableDecisionPoint:handleExecute", m_flawedVariable->toString());
+      debugMsg("UnboundVariableDecisionPoint:handleExecute", m_flawedVariable->toString());
     }
 
-    void VariableDecisionPoint::handleUndo(){
+    void UnboundVariableDecisionPoint::handleUndo(){
       m_client->reset(m_flawedVariable);
     }
 
-    std::string VariableDecisionPoint::toString() const{
+    std::string UnboundVariableDecisionPoint::toString() const{
       std::stringstream strStream;
       strStream << "VARIABLE=" <<m_flawedVariable->getName().toString() << "(" << m_flawedVariable->getKey() << ")"
 		<< m_flawedVariable->lastDomain().toString();
@@ -56,7 +56,7 @@ namespace EUROPA {
 
 
     MinValue::MinValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
-      : VariableDecisionPoint(client, flawedVariable, configData), m_choiceIndex(0){}
+      : UnboundVariableDecisionPoint(client, flawedVariable, configData), m_choiceIndex(0){}
 
     bool MinValue::hasNext() const {return m_choiceIndex < m_choices->getCount();}
 
@@ -64,7 +64,7 @@ namespace EUROPA {
 
     /** MAX VALUE **/
     MaxValue::MaxValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
-      : VariableDecisionPoint(client, flawedVariable, configData), m_choiceIndex(m_choices->getCount()){}
+      : UnboundVariableDecisionPoint(client, flawedVariable, configData), m_choiceIndex(m_choices->getCount()){}
 
     bool MaxValue::hasNext() const { return m_choiceIndex > 0; }
 
@@ -72,7 +72,7 @@ namespace EUROPA {
 
     /** RANDOM VALUE **/
     RandomValue::RandomValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
-      : VariableDecisionPoint(client, flawedVariable, configData), m_distribution(NORMAL){
+      : UnboundVariableDecisionPoint(client, flawedVariable, configData), m_distribution(NORMAL){
       static bool sl_seeded(false);
 
       if(!sl_seeded){

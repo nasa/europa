@@ -6,11 +6,13 @@ ModuleComponent Solvers
 	:
 	ValueSource.cc
 	MatchingRule.cc
-	VariableDecisionPoint.cc
-	VariableFlawManager.cc
-	TokenDecisionPoint.cc
-	TokenFlawManager.cc
+	UnboundVariableDecisionPoint.cc
+	UnboundVariableManager.cc
+	OpenConditionDecisionPoint.cc
+	OpenConditionManager.cc
 	Filters.cc
+	ThreatDecisionPoint.cc
+	ThreatManager.cc
 	;
 
 } # PLASMA_READY

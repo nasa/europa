@@ -33,7 +33,14 @@ namespace EUROPA {
 
     void free(const TokenId& predecessor, const TokenId& successor);
   private:
-    void remove(const TokenId& token); // Over-ride base class implementation
+
+    /** Over-ride base class implementations to add extra handling **/
+    void add(const TokenId& token);
+    void remove(const TokenId& token);
+
+    void removeFromIndex(const TokenId& token);
+    bool orderingRequired(const TokenId& token);
+
     bool isValid(bool cleaningUp = false) const;
 
     /**

@@ -1,10 +1,10 @@
-#ifndef H_VariableFlawManager
-#define H_VariableFlawManager
+#ifndef H_UnboundVariableManager
+#define H_UnboundVariableManager
 
 #include "FlawManager.hh"
 #include "ConstraintEngineListener.hh"
 #include "PlanDatabaseListener.hh"
-#include "VariableDecisionPoint.hh"
+#include "UnboundVariableDecisionPoint.hh"
 
 /**
  * @brief Provides class declaration for handling variable flaws.
@@ -13,11 +13,11 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    class VariableFlawManager: public FlawManager {
+    class UnboundVariableManager: public FlawManager {
     public:
-      VariableFlawManager(const TiXmlElement& configData);
+      UnboundVariableManager(const TiXmlElement& configData);
 
-      virtual ~VariableFlawManager();
+      virtual ~UnboundVariableManager();
 
       /**
        * @brief True if the given variable is in scope.
@@ -52,7 +52,7 @@ namespace EUROPA {
       class CeListener: public ConstraintEngineListener {
       public:
 	CeListener(const ConstraintEngineId& ce, 
-		   VariableFlawManager& dm);
+		   UnboundVariableManager& dm);
 
 	void notifyRemoved(const ConstrainedVariableId& variable);
 	void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
@@ -60,11 +60,11 @@ namespace EUROPA {
 	void notifyRemoved(const ConstraintId& constraint);
 
       private:
-	VariableFlawManager& m_fm;
+	UnboundVariableManager& m_fm;
       };
 
-      friend class VariableFlawManager::CeListener;
-      VariableFlawManager::CeListener* m_ceListener; /*!< For Processing constraint engine events */
+      friend class UnboundVariableManager::CeListener;
+      UnboundVariableManager::CeListener* m_ceListener; /*!< For Processing constraint engine events */
 
       /**
        * @brief Plugs into Token Activation and Deactivation events on the Plan
@@ -73,15 +73,15 @@ namespace EUROPA {
       class DbListener: public PlanDatabaseListener {
       public:
 	DbListener(const PlanDatabaseId& db,
-		   VariableFlawManager& dm);
+		   UnboundVariableManager& dm);
       private:
 	void notifyActivated(const TokenId& token);
 	void notifyDeactivated(const TokenId& token);
-	VariableFlawManager& m_fm;
+	UnboundVariableManager& m_fm;
       };
 
-      friend class VariableFlawManager::DbListener;
-      VariableFlawManager::DbListener* m_dbListener; /*!< For processing Plan Database events */
+      friend class UnboundVariableManager::DbListener;
+      UnboundVariableManager::DbListener* m_dbListener; /*!< For processing Plan Database events */
 
       /**
        * @brief Helper method to iterate over the rules to match
@@ -91,11 +91,11 @@ namespace EUROPA {
       /**
        * @brief Helper method to obtain the most restrictive decision point factory
        */
-      VariableDecisionPointFactoryId matchFactory(const ConstrainedVariableId& var) const;
+      UnboundVariableDecisionPointFactoryId matchFactory(const ConstrainedVariableId& var) const;
 
       std::list<VariableMatchingRuleId> m_staticMatchingRules;
       std::list<VariableMatchingRuleId> m_dynamicMatchingRules;
-      std::list<VariableDecisionPointFactoryId> m_factories;
+      std::list<UnboundVariableDecisionPointFactoryId> m_factories;
     };
   }
 }
