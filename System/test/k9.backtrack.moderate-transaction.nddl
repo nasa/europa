@@ -76,6 +76,9 @@ Path startL1 = new Path(start, L1);
 Path L0start = new Path(L0, start);
 Path startL0 = new Path(start, L0);
 
+
+close();
+
 rejectable(Position.At a);
 leq(a.end, world.m_horizonEnd);
 eq(a.location, start);
@@ -133,7 +136,5 @@ rejectable(Target.NotTracked nt_L4_target);
 leq(nt_L4_target.end, world.m_horizonEnd);
 eq(nt_L4_target.target, L4_target);
 eq(nt_L4_target.start, 0);
-
-close();
 
 //EOF

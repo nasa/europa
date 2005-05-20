@@ -153,6 +153,8 @@ Rover rover = new Rover(0.0, 0.0, 100.0, 70.0, -70.0);
 Wind wind = new Wind();
 Mission mission = new Mission();
 
+close();
+
 // Initially Rover stays at the source and does nothing
 goal(Rover.Standby roverInit);
 roverInit.m_x.specify(0);
@@ -201,7 +203,3 @@ goal2.end.specify([10 100]);
 ////goal2.activate();
 
 leq( goal1.end, goal2.start );
-
-close();
-
-

@@ -82,6 +82,7 @@ namespace EUROPA {
 
   void EnumeratedDomain::insert(double value) {
     check_error(check_value(value));
+    checkError(isOpen(), "Cannot insert into a closed domain." << toString());
     std::set<double>::iterator it = m_values.begin();
     for ( ; it != m_values.end(); it++) {
       if (compareEqual(value, *it))

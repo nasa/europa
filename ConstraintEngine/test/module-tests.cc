@@ -183,6 +183,7 @@ public:
     //!!The compiler complains about using Locations here when EnumeratedDomain is used above.
     //!!Locations *loc1 = loc0.copy();
     EnumeratedDomain *loc1 = loc0.copy();
+    loc1->open();
     loc1->remove(LabelStr("Hill"));
     assertTrue(!loc1->isMember(LabelStr("Hill")));
     assertTrue(loc1->isMember(LabelStr("Rock")));
@@ -475,21 +476,33 @@ private:
       // since v0 has not been closed      
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
       assertTrue(ENGINE->propagate());
+      assertTrue(v1.getDerivedDomain().getSize() == 3);
 
       // Now close v0, and we should see a restriction on v1
       v0.close();
       assertTrue(v1.getDerivedDomain().isSingleton());
 
       // insert further, and propagate again, the domain should grow by one
+      v0.open();
       v0.insert(2);
+      v0.close();
       assertTrue(v1.getDerivedDomain().getSize() == 2);
 
-      // specify v0 to a singleton
+      // Open it and ensure that the engine is pending once again
+      v0.open();
+      assertTrue(ENGINE->pending());
+      assertTrue(v1.getDerivedDomain().getSize() == 3);
+
       v0.specify(2);
+      assertTrue(v0.specifiedDomain().isClosed());
       assertTrue(v1.getDerivedDomain().isSingleton());
 
-      // Now insert and confirm it does not affect v1.
+      // Now insert and confirm it does not affect v1. Shoud insert to base domain but
+      // not push to the specified or derived domain.
       v0.insert(3);
+      assertTrue(v0.specifiedDomain().isSingleton()); // Still, since spec domain is closed.
+      assertTrue(v1.getDerivedDomain().isSingleton());
+      assertFalse(v0.baseDomain().isClosed());
       assertTrue(v1.getDerivedDomain().isSingleton());
 
       // Now if we reset, the base domain will have 3 elements in it, so derived domain of v1 will also have 3 elements
@@ -798,15 +811,19 @@ private:
 
     LabelSet ls0(baseDomain);
     ls0.empty();
+    ls0.open();
     ls0.insert(EUROPA::LabelStr("A"));
+    ls0.close();
 
     LabelSet ls1(baseDomain);
     ls1.empty();
+    ls1.open();
     ls1.insert(EUROPA::LabelStr("A"));
     ls1.insert(EUROPA::LabelStr("B"));
     ls1.insert(EUROPA::LabelStr("C"));
     ls1.insert(EUROPA::LabelStr("D"));
     ls1.insert(EUROPA::LabelStr("E"));
+    ls1.close();
 
     Variable<LabelSet> v2(ENGINE, ls1);
     Variable<LabelSet> v3(ENGINE, ls1);

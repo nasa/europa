@@ -46,10 +46,10 @@ Path p4 = new Path(hill, lander);
 
 Rover rover = new Rover();
 
+close();
+
 rejectable(Rover.Going g);
 g.from.specify(hill);
 g.to.specify(lander);
 eq(g.start, world.m_horizonStart);
 eq(g.end, world.m_horizonEnd);
-
-close();

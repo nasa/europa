@@ -180,15 +180,19 @@ private:
 
     LabelSet ls0(baseDomain);
     ls0.empty();
+    ls0.open();
     ls0.insert(EUROPA::LabelStr("A"));
+    ls0.close();
 
     LabelSet ls1(baseDomain);
     ls1.empty();
+    ls1.open();
     ls1.insert(EUROPA::LabelStr("A"));
     ls1.insert(EUROPA::LabelStr("B"));
     ls1.insert(EUROPA::LabelStr("C"));
     ls1.insert(EUROPA::LabelStr("D"));
     ls1.insert(EUROPA::LabelStr("E"));
+    ls1.close();
 
     Variable<LabelSet> v2(ENGINE, ls1);
     Variable<LabelSet> v3(ENGINE, ls1);

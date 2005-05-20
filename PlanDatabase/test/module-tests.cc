@@ -777,15 +777,21 @@ private:
   }
   
   /**
-   * Have at least one object in the system prior to creating a token. Then show how
-   * removal triggers an inconsistency, and insertion of another object fixes it. Also
-   * show that specifiying the object prevents propagation if we add another object, but
-   * relaxing it will populate the object variable to include the new object.
+   * Have at least one object in the system prior to creating a token. Show that we can successfully allocate
+   * a token. Show that the object variable is closed.
    */
   static bool testTokenObjectVariable(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    // Now add an object and we should expect the constraint network to be consistent
+
+    // Iniially we add a token but have no object. Should cause an immediate inconsistency
+    {
+      EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, IntervalIntDomain(0, 10));
+      assertFalse(ENGINE->propagate());
+    }
+
+    assertTrue(ENGINE->propagate());
+    // Now add an object and we should expect the constraint network to be consistent next time we add the token.
     ObjectId o1 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "o1"))->getId();
     EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, IntervalIntDomain(0, 10));
 
@@ -795,46 +801,15 @@ private:
     // Make sure the object var of the token contains o1.
     assertTrue(eventToken.getObject()->lastDomain().isMember(o1));
 
-    // Since the object type has not been closed, the object variable will not propagate changes,
-    // so the object token relation will not link up the Token and the object.
-    assertTrue(o1->getTokens().empty());
+    // Since the object type should be closed automatically, the object variable will propagate changes,
+    // so the object token relation will link up the Token and the object.
+    assertTrue(!o1->getTokens().empty());
 
-    // Deletion of the object should result in the domain of the token becoming empty. However,
-    // that will not cause an inconsistency. Nor will it cuase propagation
-    delete (Object*) o1;
-    assertTrue(ENGINE->constraintConsistent());
-    assertTrue(eventToken.getObject()->baseDomain().isEmpty());
-
-    // Insertion of a new object should reecover the situation
+    // Insertion of a new object should not affect the given event token
     ObjectId o2 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "o2"))->getId();
     assertTrue(ENGINE->constraintConsistent());
-    assertTrue(eventToken.getObject()->baseDomain().isSingleton());
+    assertTrue(!eventToken.getObject()->baseDomain().isMember(o2));
 
-    // Now specify it
-    eventToken.getObject()->specify(o2);
-
-    // Addition of a new object will update the base domain, but not the spec or derived.
-    // Consequently, no further propagation is required
-    ObjectId o3 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "o3"))->getId();
-    assertTrue(ENGINE->constraintConsistent());
-    assertFalse(eventToken.getObject()->baseDomain().isSingleton());
-    assertTrue(eventToken.getObject()->lastDomain().isSingleton());
-
-    // Now resetting the specified domain will revert the derived domain back completely
-    eventToken.getObject()->reset();
-    assertTrue(ENGINE->constraintConsistent());
-    assertTrue(eventToken.getObject()->lastDomain().isMember(o2));
-    assertTrue(eventToken.getObject()->lastDomain().isMember(o3));
-
-    // Confirm that since the object type is not closed, no tokens are added to the object
-    assertTrue(o2->getTokens().find(eventToken.getId()) == o2->getTokens().end());
-
-    // Finally, close the database for this type, and ensure propagation is triggered, and results in consistency
-    db.close(DEFAULT_OBJECT_TYPE().c_str());
-    assertFalse(o2->getTokens().find(eventToken.getId()) == o2->getTokens().end());
-    assertTrue(ENGINE->propagate());
-
-    // Confirm the object-token relation has propagated
     return true;
   }
 
@@ -844,10 +819,6 @@ private:
     {
       // Leave this class of objects open. So we should be able to create a token and have things consistent
       EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, IntervalIntDomain(0, 10));
-      assertTrue(ENGINE->propagate());
-
-    // Now close the datbase for this class of objects, and ensure we are inconsistent
-      db.close(DEFAULT_OBJECT_TYPE().c_str());
       assertFalse(ENGINE->propagate());
     }
 

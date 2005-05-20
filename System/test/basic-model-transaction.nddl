@@ -34,6 +34,8 @@ PlannerConfig world = new PlannerConfig(10, 101, 350);
 
 Rover rover = new Rover();
 
+close();
+
 rejectable(Rover.At a);
 a.m_location.specify(Lander);
 a.start.specify(10);
@@ -43,6 +45,4 @@ b.m_location.specify(Rock);
 b.start.specify(100);
 
 a before b;
-
-close();
 
