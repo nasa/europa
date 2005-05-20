@@ -36,8 +36,10 @@ Fruit f3 = orange;
 Fruit f4 = { orange, grape, banana };
 
 Color c;
-Color c0 = apple;
-Color c1 = 'apple';
+// Uncomment the following two lines to check the code for checking variable assignments
+// are type compatible. 
+//Color c0 = apple;
+//Color c1 = 'apple';
 Color c2 = 'purple';
 Color c3 = purple;
 Color c5 = { purple, red, yellow };
