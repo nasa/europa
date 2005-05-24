@@ -360,7 +360,7 @@ private:
     TiXmlElement* child = root->FirstChildElement();
     {
       IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-      horizon = IntervalIntDomain(0, 100);
+      horizon = IntervalIntDomain(0, 1000);
       assert(assembly.playTransactions("SimpleActivation.xml"));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertTrue(solver.solve());
@@ -375,7 +375,7 @@ private:
     TiXmlElement* child = root->FirstChildElement();
     {
       IntervalIntDomain& horizon = HorizonFilter::getHorizon();
-      horizon = IntervalIntDomain(0, 100);
+      horizon = IntervalIntDomain(0, 1000);
       assert(assembly.playTransactions("SimpleRejection.xml"));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertTrue(solver.solve());

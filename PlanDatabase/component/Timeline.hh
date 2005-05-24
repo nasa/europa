@@ -7,6 +7,7 @@
 #include <vector>
 
 namespace EUROPA {
+  class OrderingChoicesCache;
 
   class Timeline: public Object {
   public:
@@ -33,11 +34,16 @@ namespace EUROPA {
 
     void free(const TokenId& predecessor, const TokenId& successor);
   private:
+    /**
+     * @brief Initialization utility
+     */
+    void commonInit(bool open);
 
     /** Over-ride base class implementations to add extra handling **/
     void add(const TokenId& token);
     void remove(const TokenId& token);
 
+    void insertToIndex(const TokenId& token, const std::list<TokenId>::iterator& position);
     void removeFromIndex(const TokenId& token);
     bool orderingRequired(const TokenId& token);
 
@@ -71,6 +77,8 @@ namespace EUROPA {
 
     /** Index to find position in sequence by Token */
     std::map<int, std::list<TokenId>::iterator > m_tokenIndex;
+
+    Id<OrderingChoicesCache> m_cache;
 
     static const bool CLEANING_UP = true;
 

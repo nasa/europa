@@ -43,13 +43,13 @@ namespace EUROPA {
 		 "Evaluating configuration element " << child->Value());
 
 	// If we come across a variable heuristic, register the factory.
-	if(strcmp(child->Value(), "VariableHandler") == 0){
+	if(strcmp(child->Value(), "FlawHandler") == 0){
 	  UnboundVariableDecisionPointFactoryId factory = static_cast<UnboundVariableDecisionPointFactoryId>(Component::AbstractFactory::allocate(*child));
 	  m_factories.push_back(factory);
 	}
 	else { // Must be a variable filter
-	  checkError(strcmp(child->Value(), "VariableFilter") == 0,
-		     "Expected element <VariableFilter> but found " << child->Value());
+	  checkError(strcmp(child->Value(), "FlawFilter") == 0,
+		     "Expected element <FlawFilter> but found " << child->Value());
 
 	  const char* component = child->Attribute("component");
 

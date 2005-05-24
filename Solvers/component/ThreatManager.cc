@@ -29,13 +29,13 @@ namespace EUROPA {
 		 "Evaluating configuration element " << child->Value());
 
 	// If we come across a token heuristic, register the factory.
-	if(strcmp(child->Value(), "TokenOrderHandler") == 0){
+	if(strcmp(child->Value(), "FlawHandler") == 0){
 	  ThreatDecisionPointFactoryId factory = static_cast<ThreatDecisionPointFactoryId>(Component::AbstractFactory::allocate(*child));
 	  m_factories.push_back(factory);
 	}
 	else { // Must be a token filter
-	  checkError(strcmp(child->Value(), "TokenFilter") == 0,
-		     "Expected element <TokenFilter> but found " << child->Value());
+	  checkError(strcmp(child->Value(), "FlawFilter") == 0,
+		     "Expected element <FlawFilter> but found " << child->Value());
 
 	  const char* component = child->Attribute("component");
 

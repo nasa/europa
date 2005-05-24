@@ -616,9 +616,13 @@ namespace EUROPA {
   }
 
   unsigned int TemporalPropagator::mostRecentRepropagation() const{
+    return getConstraintEngine()->mostRecentRepropagation();
+    /* TODO: FIGURE OUT CLEAN WAY TO GET MORE RESTRICTIVE COUNTER
     checkError(getConstraintEngine()->mostRecentRepropagation() >= m_mostRecentRepropagation,
-	       "Cannot imagine how it could be more recent since we should always have a stricter criteria for capturing the need for a reprop.");
+	       "Cannot imagine how it could be more recent since we should always have a stricter criteria for capturing the need for a reprop." <<
+	       getConstraintEngine()->mostRecentRepropagation() << " < " <<  m_mostRecentRepropagation);
     return m_mostRecentRepropagation;
+    */
   }
 
   void TemporalPropagator::getTemporalNogood

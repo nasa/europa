@@ -29,13 +29,13 @@ namespace EUROPA {
 		 "Evaluating configuration element " << child->Value());
 
 	// If we come across a token heuristic, register the factory.
-	if(strcmp(child->Value(), "TokenHandler") == 0){
+	if(strcmp(child->Value(), "FlawHandler") == 0){
 	  OpenConditionDecisionPointFactoryId factory = static_cast<OpenConditionDecisionPointFactoryId>(Component::AbstractFactory::allocate(*child));
 	  m_factories.push_back(factory);
 	}
 	else { // Must be a token filter
-	  checkError(strcmp(child->Value(), "TokenFilter") == 0,
-		     "Expected element <TokenFilter> but found " << child->Value());
+	  checkError(strcmp(child->Value(), "FlawFilter") == 0,
+		     "Expected element <FlawFilter> but found " << child->Value());
 
 	  const char* component = child->Attribute("component");
 
@@ -149,21 +149,34 @@ namespace EUROPA {
      */
     DecisionPointId OpenConditionManager::next(unsigned int priorityLowerBound,
 					   unsigned int& bestPriority){
-      TokenId flawedToken;
 
+      // First we filter and sort candidate tokens to order according to our flaw filtering rules and the previously
+      // counted number of choices. A likely useful method for leveraging cached information to find unit decisions
+      // sooner.
+      std::map<int, TokenId> candidates;
       for(TokenSet::const_iterator it = m_flawCandidates.begin(); it != m_flawCandidates.end(); ++it){
-	if(bestPriority == priorityLowerBound) // Can't do better
-	  break;
-
 	TokenId candidate = *it;
-
 	checkError(candidate->isInactive(), "It must be inactive to be a candidate.");
+
 
 	if(matches(candidate, m_dynamicMatchingRules)){
 	  debugMsg("OpenConditionManager:next",
 		   candidate->toString() << " is out of dynamic scope.");
 	  continue;
 	}
+
+	// Now insert in order of last count computed to increase chance of finding better choices early.
+	unsigned int lastCount = m_db->lastOrderingChoiceCount(candidate) + m_db->lastCompatibleTokenCount(candidate);
+	candidates.insert(std::pair<int, TokenId>(lastCount, candidate));
+      }
+
+      TokenId flawedToken;
+
+      for(std::map<int, TokenId>::const_iterator it = candidates.begin(); it != candidates.end(); ++it){
+	if(bestPriority == priorityLowerBound) // Can't do better so go with what we have
+	  break;
+
+	TokenId candidate = it->second;
 
 	unsigned int priority = 0;
 

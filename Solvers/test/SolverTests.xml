@@ -2,9 +2,9 @@
  <Solver name="SimpleCSPSolver">
   <-- Will have variable flaws, but no filtering -->
   <UnboundVariableManager>
-   <VariableHandler var-match="v0" component="Min"/>
-   <VariableHandler var-match="v1" component="Min"/>
-   <VariableHandler component="Min"/>
+   <FlawHandler var-match="v0" component="Min"/>
+   <FlawHandler var-match="v1" component="Min"/>
+   <FlawHandler component="Min"/>
   </UnboundVariableManager>
  </Solver>
 </SimpleCSPSolver>
@@ -12,13 +12,13 @@
  <Solver name="SimpleTokenSolver">
   <OpenConditionManager>
     <-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
-    <TokenFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
-    <TokenHandler component="StandardOpenConditionHandler"/>
+    <FlawFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
+    <FlawHandler component="StandardOpenConditionHandler"/>
   </OpenConditionManager>
   <ThreatManager>
     <-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
-    <TokenFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
-    <TokenOrderHandler component="StandardThreatHandler"/>
+    <FlawFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
+    <FlawHandler component="StandardThreatHandler"/>
   </ThreatManager>
  </Solver>
 </SimpleActivationSolver>
@@ -27,12 +27,12 @@
       late in the process and back all the way out -->
  <Solver name="SimpleRejectionSolver">
   <UnboundVariableManager>
-   <VariableHandler component="Max"/>
+   <FlawHandler component="Max"/>
   </UnboundVariableManager>
   <OpenConditionManager>
     <-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
-    <TokenFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
-    <TokenHandler component="StandardOpenConditionHandler"/>
+    <FlawFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
+    <FlawHandler component="StandardOpenConditionHandler"/>
   </OpenConditionManager>
  </Solver>
 </SimpleRejectionSolver>
