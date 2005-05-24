@@ -18,6 +18,7 @@
 #include "Utils.hh"
 #include "Debug.hh"
 
+#include <sstream>
 #include <algorithm>
 
 namespace EUROPA {
@@ -66,6 +67,13 @@ namespace EUROPA {
 			    std::vector< std::pair<TokenId, TokenId> >& results,
 			    unsigned int limit);
 
+    /**
+     * @brief Integrity check to compare results using a cached entry vs. a new entry
+     */
+    bool validateCachedResult(const TokenId& token, 
+			    const std::vector< std::pair<TokenId, TokenId> >& results,
+			    unsigned int limit);
+
     /** Synchronization Methods **/
 
     /**
@@ -100,20 +108,43 @@ namespace EUROPA {
     m_id.remove();
   }
 
+  std::string printResults(const std::vector< std::pair<TokenId, TokenId> >& results){
+    std::stringstream sstr;
+    for(std::vector< std::pair<TokenId, TokenId> >::const_iterator it = results.begin(); it!=results.end(); ++it){
+      const std::pair<TokenId, TokenId>& pair = *it;
+      sstr << "<" << pair.first->getKey() << ", " << pair.second->getKey() << "> ";
+    }
+    return sstr.str();
+  }
+
+  bool OrderingChoicesCache::validateCachedResult(const TokenId& token, 
+						  const std::vector< std::pair<TokenId, TokenId> >& results,
+						  unsigned int limit){
+    removeCacheEntry(token);
+    std::vector< std::pair<TokenId, TokenId> > newResults;
+    getOrderingChoices(token, newResults, limit);
+
+    checkError(newResults == results, 
+	       "Results from cached data differ from fresh computation. \n" <<
+	       "CachedData: " << printResults(results) << "\n" <<
+	       "FreshData:  " << printResults(newResults));
+
+    return true;
+  }
+
   bool OrderingChoicesCache::isValid() const {
     for(std::map<TokenId, Id<OrderingChoicesCache::Entry> >::const_iterator it = m_orderingChoices.begin(); it != m_orderingChoices.end(); ++it){
       Id<OrderingChoicesCache::Entry> entry = it->second;
       check_error(entry.isValid());
-
-      // Exit if it is a stale entry
-      if(Entity::getEntity(entry->m_tokenToOrderKey).isNoId())
-	return true;
-
       checkError(entry->m_tokenToOrder.isValid(), entry->m_tokenToOrder);
+      checkError(entry->m_tokenToOrder->getState()->lastDomain().isMember(Token::ACTIVE), 
+		 "Cache entry should have been removed for " << entry->m_tokenToOrder->toString());
       check_error(entry->m_first == m_tokenSequence.end() || (*entry->m_first).isValid());
-      checkError(entry->m_first == m_tokenSequence.end() || (*entry->m_first)->isActive(), "Synchronization bug. " << (*entry->m_first)->toString() << " is not active.");
+      checkError(entry->m_first == m_tokenSequence.end() || (*entry->m_first)->isActive(), 
+		 "Synchronization bug. " << (*entry->m_first)->toString() << " is not active.");
       check_error(entry->m_last == m_tokenSequence.end() || (*entry->m_last).isValid());
-      checkError(entry->m_last == m_tokenSequence.end() || (*entry->m_last)->isActive(), "Synchronization bug. " << (*entry->m_last)->toString() << " is not active.");
+      checkError(entry->m_last == m_tokenSequence.end() || (*entry->m_last)->isActive(), 
+		 "Synchronization bug. " << (*entry->m_last)->toString() << " is not active.");
     }
     return true;
   }
@@ -156,7 +187,7 @@ namespace EUROPA {
     Id<OrderingChoicesCache::Entry> entry = getCacheEntry(token);
 
     // Alternatively, we can go through the sequence till we find something that we can precede.
-    std::list<TokenId>::iterator& current = entry->m_first;
+    std::list<TokenId>::iterator current = entry->m_first;
     std::list<TokenId>::iterator& last = entry->m_last;
     std::set<TokenId>& excludedTokens = entry->m_excludedTokens;
 
@@ -196,7 +227,7 @@ namespace EUROPA {
       check_error(predecessor.isValid() && predecessor->isActive());
       check_error(successor.isValid() && successor->isActive());
 
-      // Only worth considering this insertion poistion if the successor has not already
+      // Only worth considering this insertion position if the successor has not already
       // been excluded
       if(excludedTokens.find(successor) == excludedTokens.end()){
 	// we still need to check that the predecessor can precede the token,
@@ -217,9 +248,11 @@ namespace EUROPA {
 		     token->toString() << "cannot be inserted between " << predecessor->toString() << " and " << successor->toString());
 	    excludedTokens.insert(successor);
 	  }
-	  previous = current++;
 	}
       }
+
+      if(last != current)
+	  previous = current++;
     }
 
     // Special case, the token could be placed at the end, which can't precede anything. This
@@ -230,19 +263,26 @@ namespace EUROPA {
       results.push_back(std::make_pair(m_tokenSequence.back(), token));
     }
 
-    removeCacheEntry(token);
-
     debugMsg("Timeline:getOrderingChoices:canPrecede", "exiting");
   }
 
 
   void OrderingChoicesCache::removeCacheEntry(const TokenId& token){
+    debugMsg("OrderingChoicesCache:removeCacheEntry", token->toString());
     std::map<TokenId, Id<OrderingChoicesCache::Entry> >::iterator it = m_orderingChoices.find(token);
     if(it != m_orderingChoices.end()){
       Id<OrderingChoicesCache::Entry> entry = it->second;
       m_orderingChoices.erase(it);
       delete (OrderingChoicesCache::Entry*) entry;
     }
+  }
+
+  /**
+   * @brief If a token is removed we have to rebuild the cache.
+   */
+  void OrderingChoicesCache::removeInsertedToken(const TokenId& token){
+    debugMsg("OrderingChoiceCache:removeInertedToken", token->toString());
+    cleanup(m_orderingChoices);
   }
 
   /** TIMELINE IMPLEMENTATION **/
@@ -293,6 +333,8 @@ namespace EUROPA {
     }
 
     m_cache->getOrderingChoices(token, results, limit);
+
+    debugMsg("Timeline:getOrderingChoices", (m_cache->validateCachedResult(token, results, limit)? "Cache is OK" : "Cache is broken") );
   }
 
   void Timeline::getTokensToOrder(std::vector<TokenId>& results) {
@@ -627,6 +669,7 @@ namespace EUROPA {
 
   void Timeline::removeFromIndex(const TokenId& token){
     m_tokenIndex.erase(token->getKey());
+    m_cache->removeInsertedToken(token);
     notifyOrderingRequired(token);
   }
 
@@ -634,4 +677,7 @@ namespace EUROPA {
     return (m_tokenIndex.find(token->getKey()) == m_tokenIndex.end());
   }
 
+  void Timeline::notifyMerged(const TokenId& token){ m_cache->removeCacheEntry(token);}
+  void Timeline::notifyRejected(const TokenId& token) { m_cache->removeCacheEntry(token);}
+  void Timeline::notifyDeleted(const TokenId& token){ m_cache->removeCacheEntry(token);}
 }

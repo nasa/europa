@@ -33,6 +33,13 @@ namespace EUROPA {
     void constrain(const TokenId& predecessor, const TokenId& successor);
 
     void free(const TokenId& predecessor, const TokenId& successor);
+
+  protected:
+    /** Implement notifications to synch cached data **/
+    void notifyMerged(const TokenId& token);
+    void notifyRejected(const TokenId& token);
+    void notifyDeleted(const TokenId& token);
+
   private:
     /**
      * @brief Initialization utility

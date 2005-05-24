@@ -264,7 +264,7 @@ namespace EUROPA {
   void TemporalPropagator::updateTnet() {
     // When updating, if we have deletions
     if(!m_constraintsForDeletion.empty() || !m_variablesForDeletion.empty())
-      m_mostRecentRepropagation = getConstraintEngine()->cycleCount();
+      m_mostRecentRepropagation = getConstraintEngine()->mostRecentRepropagation();
 
     // Process constraints for deletion
     for(std::set<TemporalConstraintId>::const_iterator it = m_constraintsForDeletion.begin(); it != m_constraintsForDeletion.end(); ++it) {
@@ -475,7 +475,7 @@ namespace EUROPA {
     check_error(lb <= ub);
 
     if(lb < lbt || ub > ubt) { // Handle relaxation
-      m_mostRecentRepropagation = getConstraintEngine()->cycleCount();
+      m_mostRecentRepropagation = getConstraintEngine()->mostRecentRepropagation();
 
       // think about whether we can do better here, possibly by changing
       // the condition above.  There are cases
@@ -616,13 +616,11 @@ namespace EUROPA {
   }
 
   unsigned int TemporalPropagator::mostRecentRepropagation() const{
-    return getConstraintEngine()->mostRecentRepropagation();
-    /* TODO: FIGURE OUT CLEAN WAY TO GET MORE RESTRICTIVE COUNTER
+    //return getConstraintEngine()->mostRecentRepropagation();
     checkError(getConstraintEngine()->mostRecentRepropagation() >= m_mostRecentRepropagation,
 	       "Cannot imagine how it could be more recent since we should always have a stricter criteria for capturing the need for a reprop." <<
 	       getConstraintEngine()->mostRecentRepropagation() << " < " <<  m_mostRecentRepropagation);
     return m_mostRecentRepropagation;
-    */
   }
 
   void TemporalPropagator::getTemporalNogood

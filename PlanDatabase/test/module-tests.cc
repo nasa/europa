@@ -2168,14 +2168,60 @@ private:
     TokenId token = (new IntervalToken(db, 
                                        LabelStr(DEFAULT_PREDICATE()),
                                        true,
-                                       IntervalIntDomain(0, 0),
+                                       IntervalIntDomain(),
                                        IntervalIntDomain(),
                                        IntervalIntDomain(DURATION, DURATION)))->getId();
     token->getObject()->specify(timeline->getId());
+    token->getStart()->specify(0);
     token->activate();
     std::vector<std::pair<TokenId, TokenId> > choices;
     timeline->getOrderingChoices(token, choices);
     assertTrue(choices.empty());
+
+    // Now back off restrictions to token and try patterns which excercise cache management in the face of merging and rejection
+    token->cancel();
+    token->getObject()->reset();
+    token->getStart()->reset();
+    assertTrue(ce->propagate());
+
+
+    TokenId token2 = (new IntervalToken(db, 
+					LabelStr(DEFAULT_PREDICATE()),
+					true,
+					IntervalIntDomain(),
+					IntervalIntDomain(),
+					IntervalIntDomain(DURATION, DURATION)))->getId();
+
+    choices.clear();
+    timeline->getOrderingChoices(token2, choices);
+    assertFalse(choices.empty());
+    token->reject();
+    assertTrue(ce->propagate());
+    choices.clear();
+    timeline->getOrderingChoices(token2, choices);
+    assertFalse(choices.empty());
+
+    token->cancel();
+    assertTrue(ce->propagate());
+    choices.clear();
+    timeline->getOrderingChoices(token, choices);
+    assertFalse(choices.empty());
+
+    std::vector< TokenId > mergeChoices;
+    db->getCompatibleTokens(token, mergeChoices);
+    assertFalse(mergeChoices.empty());
+    token->merge(mergeChoices.front());
+    assertTrue(ce->propagate());
+
+    choices.clear();
+    timeline->getOrderingChoices(token2, choices);
+    assertFalse(choices.empty());
+
+    token->cancel();
+    assertTrue(ce->propagate());
+    choices.clear();
+    timeline->getOrderingChoices(token, choices);
+    assertFalse(choices.empty());
 
     DEFAULT_TEARDOWN();
     return true;
