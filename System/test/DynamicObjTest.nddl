@@ -1,19 +1,29 @@
 #include "../../NDDL/core/Plasma.nddl"
 #include "../../NDDL/core/PlannerConfig.nddl"
 
+class Foo {}
+
 class TestObject extends Timeline {
   TestObject(){}
 
-  predicate TestPred {}
+  predicate TestPred {Foo foo;}
 }
 
 PlannerConfig world = new PlannerConfig(0, 10, 200);
 
 TestObject test1 = new TestObject();
+Foo f1 = new Foo();
+Foo f2 = new Foo();
 
+// Allocate an active and inactive token
 goal(TestObject.TestPred g);
 rejectable(TestObject.TestPred r);
-g.object.specify(test1);
+
+
+g.foo.specify(f1); // Closes foo parameter
+eq(r.foo, f2); // Variable should remain open
+
+// Constraint times for the planner
 g.start.specify(0);
 g.end.specify(10);
 leq(0, r.start);
