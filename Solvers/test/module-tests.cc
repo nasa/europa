@@ -399,6 +399,19 @@ int main(){
   // Initialization of various id's and other required elements
   initSolverModuleTests();
 
+  // Set up the required components. Shoudl eventually go into an assembly. Note they are allocated on the stack, not the heap
+  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, StandardVariableHandler);
+  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, Min);
+  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MaxValue, Max);
+  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::RandomValue, Random);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::UnboundVariableManager, UnboundVariableManager);
+  REGISTER_OPENCONDITION_DECISION_FACTORY(EUROPA::SOLVERS::OpenConditionDecisionPoint, StandardOpenConditionHandler);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::OpenConditionManager, OpenConditionManager);
+  REGISTER_THREAT_DECISION_FACTORY(EUROPA::SOLVERS::ThreatDecisionPoint, StandardThreatHandler);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::ThreatManager, ThreatManager);
+
+
+  // Constraints used for testing
   REGISTER_CONSTRAINT(LazyAllDiff, "lazyAllDiff",  "Default");
   REGISTER_CONSTRAINT(LazyAlwaysFails, "lazyAlwaysFails",  "Default");
 

@@ -6,8 +6,6 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    REGISTER_OPENCONDITION_DECISION_FACTORY(OpenConditionDecisionPoint, StandardOpenConditionHandler);
-
     OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData)
       : DecisionPoint(client, flawedToken->getKey()),
 	m_flawedToken(flawedToken), 

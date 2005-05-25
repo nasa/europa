@@ -13,8 +13,6 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    REGISTER_THREAT_DECISION_FACTORY(ThreatDecisionPoint, StandardThreatHandler);
-
     ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData)
       : DecisionPoint(client, tokenToOrder->getKey()), m_tokenToOrder(tokenToOrder), m_index(0) {
       // Here is where we would look for custom processing for configuration of the decision point

@@ -22,9 +22,6 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    /* REGSITER DEFAULT FLAW MANAGERS */
-    REGISTER_COMPONENT_FACTORY(UnboundVariableManager, UnboundVariableManager);
-
     /**
      * @brief Constructor will evaluate the configuration information and construct assembly from there.
      * @see ComponentFactory

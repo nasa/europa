@@ -12,9 +12,6 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    /* REGSITER DEFAULT TOKEN FLAW MANAGER */
-    REGISTER_COMPONENT_FACTORY(OpenConditionManager, OpenConditionManager);
-
     OpenConditionManager::OpenConditionManager(const TiXmlElement& configData)
       : FlawManager(configData), m_dbListener(NULL) {
 

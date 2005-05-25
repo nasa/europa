@@ -14,8 +14,6 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    REGISTER_VARIABLE_DECISION_FACTORY(MinValue, StandardVariableHandler);
-
     UnboundVariableDecisionPoint::UnboundVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
       : DecisionPoint(dbClient, flawedVariable->getKey()),
 	m_flawedVariable(flawedVariable),
@@ -133,9 +131,5 @@ namespace EUROPA {
 
       return value;
     }
-
-    REGISTER_VARIABLE_DECISION_FACTORY(MinValue, Min);
-    REGISTER_VARIABLE_DECISION_FACTORY(MaxValue, Max);
-    REGISTER_VARIABLE_DECISION_FACTORY(RandomValue, Random);
   }
 }

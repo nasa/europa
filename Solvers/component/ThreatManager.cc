@@ -12,9 +12,6 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    /* REGSITER DEFAULT TOKEN FLAW MANAGER */
-    REGISTER_COMPONENT_FACTORY(ThreatManager, ThreatManager);
-
     ThreatManager::ThreatManager(const TiXmlElement& configData)
       : FlawManager(configData){
 
