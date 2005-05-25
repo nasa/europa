@@ -1,3 +1,12 @@
+M_26
+1. Important changes in the way we handle dynamic domains. We now force object variables of
+dynamic object types to be closed on construction, though the type may be open. We also allow
+direct operations in variables to close and open them and consider opening a variable a relaxation
+in the network.
+2. A good first cut at the new solvers module is in place.
+3. Caching has been introduced into the plan database for more efficiently obtaining compatible tokens
+and ordering choices.
+
 EUROPA2_20050404_0
 1. fixes to HSTS heuristics that cause some problems but fix others
 2. fixes to the converter to convert initial states properly and to
@@ -9,7 +18,7 @@ full domain.
 6. fixed parser to parse strings with "." in them (like filenames)
 7. Bool types are now symbolic and not numeric.
 8. Dynamic linking works on Mac OSX now.
-	
+
 EUROPA2_20050228_0
 1. fixed HSTS heuristics so all HSTS models either succeed or timeout
 2. added stream version of check_error
