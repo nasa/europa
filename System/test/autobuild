@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.119 2005-03-08 20:51:51 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.120 2005-05-26 15:15:40 pjarvis Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the EUROPA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -73,7 +73,7 @@ then
     removePlasma=false
 else
     email="$1"
-    if test "$email" != 'checkins@postdoc.arc.nasa.gov'
+    if test "$email" != 'europa-night-build-results@nx.arc.nasa.gov'
     then
         removePlasma=false
     else
@@ -95,13 +95,13 @@ else
     *PLASMA)
             if test ! -d CVS
             then
-                echo "$0"': must be run inside existing PLASMA checkout when giving email address other than checkins@postdoc.arc.nasa.gov'
+                echo "$0"': must be run inside existing PLASMA checkout when giving email address other than europa-night-build-results@nx.arc.nasa.gov'
                 exit 21
             fi
             PLASMA_DIR="$startdir"
             ;;
     *)
-            echo "$0"': must be run inside existing PLASMA checkout when giving email address other than checkins@postdoc.arc.nasa.gov'
+            echo "$0"': must be run inside existing PLASMA checkout when giving email address other than europa-night-build-results@nx.arc.nasa.gov'
             exit 22
             ;;
     esac
