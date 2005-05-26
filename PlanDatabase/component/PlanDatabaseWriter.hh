@@ -35,13 +35,32 @@ namespace EUROPA {
 	else { // Treat as any object
 	  ObjectId object = *oit;
 	  os << object->getType().toString() << ":" << object->getName().toString() << "*************************" << std::endl;
-	  const TokenSet& tokens = object->getTokens();
+	  const TokenSet& tokens = object->getTokens(); 
 	  for(TokenSet::const_iterator tokit = tokens.begin(); tokit != tokens.end(); ++tokit){
 	    TokenId t = *tokit;
 	    alltokens.erase(t);
 	    writeToken(t, os);
 	  }
+
+          // print variables associated with this object.
+	  const std::vector<ConstrainedVariableId> variables = object->getVariables();
+	  std::vector<ConstrainedVariableId>::const_iterator varit;
+          for(varit = variables.begin(); varit != variables.end(); ++varit) {
+ 	    ConstrainedVariableId var = *varit;
+	    writeVariable(var, os);
+	  }
 	}
+      }
+     
+      // print global variables
+      const ConstrainedVariableSet globalVariablesSet = db->getGlobalVariables();
+      if (! globalVariablesSet.empty()) {
+        os << "Global Variables" << "*************************" << std::endl;
+        for(ConstrainedVariableSet::const_iterator it = globalVariablesSet.begin(); it != globalVariablesSet.end(); ++it) {
+	  ConstrainedVariableId var = *it;
+          check_error(var.isValid());
+	  writeVariable(var,os);
+        } 
       }
       if (alltokens.empty())
         return;
@@ -106,6 +125,7 @@ namespace EUROPA {
       else
 	os << "  Master=" << t->getMaster()->getKey() << std::endl;
 
+
       TokenSet mergedtoks = t->getMergedTokens();
 
       for (TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
@@ -113,7 +133,14 @@ namespace EUROPA {
 
       os << "[ " << t->getEnd()->derivedDomain() << " ]"<< std::endl;
     }
+
+    static void writeVariable(const ConstrainedVariableId& var, ostream& os) {
+      check_error(var.isValid());
+      os << var->getName().toString() << "=" << var->derivedDomain() << std::endl;
+    }
+
   };
+
 }
 
 #endif /* #ifndef _H_PlanDatabaseWriter */
