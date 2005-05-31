@@ -148,6 +148,7 @@ namespace EUROPA {
       const char * target = element.Attribute("target");
       TokenId origin_token = parseToken(origin);
       TokenId target_token = parseToken(target);
+      std::cerr << "got token " << origin_token->getKey() << " and " << target_token->getKey() << " for relation " << relation << std::endl;
       checkError(origin_token.isValid(), "Invalid token for label '" << origin << "'");
       checkError(target_token.isValid(), "Invalid token for label '" << target << "'");
       if (strcmp(relation, "before") == 0) {
@@ -525,10 +526,13 @@ namespace EUROPA {
 
     if (strcmp(name, "specify") == 0) {
       // specify variable special case
+      std::cerr << "specifying for " << identifier << std::endl;
       ConstrainedVariableId variable = parseVariable(identifier);
+      std::cerr << "found variable " << variable->getKey() << std::endl;
       TiXmlElement * value_el = element.FirstChildElement();
       check_error(value_el != NULL);
       const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+      std::cerr << "specifying to " << (*value) << std::endl;
       if (value->isSingleton()) {
         double v = value->getSingletonValue();
         m_client->specify(variable, v);
