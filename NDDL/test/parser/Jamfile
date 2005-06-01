@@ -15,7 +15,7 @@ NDDL_PARSER_TESTS =
 	extendQualified.nddl              rover-camera.nddl
 	globals.nddl                      rover.nddl
 	includer.nddl                     simpleInstantiation.nddl
-	initial-state.nddl                structureTests.nddl
+	initial.nddl                      structureTests.nddl
 	initializerTests.nddl             switchTests.nddl
 	inner-classes.nddl                temporalNumericIntervals.nddl
 	inner-enums.nddl                  transitional-subgoaling.nddl
