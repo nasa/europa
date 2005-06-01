@@ -9,7 +9,7 @@ SubInclude PLASMA ConstraintEngine component ;
 
 ModuleFiles ConstraintEngine : ConstraintEngineDefs.cc ;
 
-SubInclude PLASMA ConstraintEngine documentation ;
+#SubInclude PLASMA ConstraintEngine documentation ;
 SubInclude PLASMA ConstraintEngine test ;
 
 } # PLASMA_READY

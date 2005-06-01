@@ -7,7 +7,7 @@ ModuleLibraries Aver : $(DLOPEN_LIBRARY) ;
 
 SubInclude PLASMA Aver core ;
 SubInclude PLASMA Aver component ;
-SubInclude PLASMA Aver documentation ;
+#SubInclude PLASMA Aver documentation ;
 SubInclude PLASMA Aver test ;
 
 }

@@ -6,7 +6,7 @@ Module TemporalNetwork : PlanDatabase ;
 
 SubInclude PLASMA TemporalNetwork core ;
 SubInclude PLASMA TemporalNetwork component ;
-SubInclude PLASMA TemporalNetwork documentation ;
+#SubInclude PLASMA TemporalNetwork documentation ;
 SubInclude PLASMA TemporalNetwork test ;
 
 } # PLASMA_READY

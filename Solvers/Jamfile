@@ -6,7 +6,7 @@ if ! $(PLASMA_READY) {
 
 	SubInclude PLASMA Solvers core ;
 	SubInclude PLASMA Solvers component ;
-	#SubInclude PLASMA Solvers documentation ;
+	SubInclude PLASMA Solvers documentation ;
 	SubInclude PLASMA Solvers test ;
 
 } # PLASMA_READY
