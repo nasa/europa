@@ -386,7 +386,8 @@ void initSolverModuleTests() {
 }
 
 int main(){
-
+  // Register components under program execution so that static allocation can have occurred
+  // safely. This was required due to problemso nthe MAC.
   REGISTER_COMPONENT_FACTORY(TestComponent, A);
   REGISTER_COMPONENT_FACTORY(TestComponent, B);
   REGISTER_COMPONENT_FACTORY(TestComponent, C);
