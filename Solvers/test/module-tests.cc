@@ -93,16 +93,6 @@ private:
 
 unsigned int TestComponent::s_counter(0);
 
-REGISTER_COMPONENT_FACTORY(TestComponent, A);
-REGISTER_COMPONENT_FACTORY(TestComponent, B);
-REGISTER_COMPONENT_FACTORY(TestComponent, C);
-REGISTER_COMPONENT_FACTORY(TestComponent, D);
-REGISTER_COMPONENT_FACTORY(TestComponent, E);
-
-// Register filter components
-REGISTER_COMPONENT_FACTORY(SingletonFilter, Singleton);
-REGISTER_COMPONENT_FACTORY(HorizonFilter, HorizonFilter);
-
 /**
  * @brief Helper method to get the first xml element in the file
  */
@@ -396,6 +386,17 @@ void initSolverModuleTests() {
 }
 
 int main(){
+
+  REGISTER_COMPONENT_FACTORY(TestComponent, A);
+  REGISTER_COMPONENT_FACTORY(TestComponent, B);
+  REGISTER_COMPONENT_FACTORY(TestComponent, C);
+  REGISTER_COMPONENT_FACTORY(TestComponent, D);
+  REGISTER_COMPONENT_FACTORY(TestComponent, E);
+
+  // Register filter components
+  REGISTER_COMPONENT_FACTORY(SingletonFilter, Singleton);
+  REGISTER_COMPONENT_FACTORY(HorizonFilter, HorizonFilter);
+
   // Initialization of various id's and other required elements
   initSolverModuleTests();
 
