@@ -3133,17 +3133,10 @@ public:
     std::list<double> locs;
     locs.push_back(LabelStr("Hill"));
     locs.push_back(LabelStr("Rock"));
-    //!!This is not supported yet:
-    //!!TEST_PLAYING_XML(buildXMLInvokeSpecifyVariableStr(obj2vars[2], Locations(locs, "Locations")));
-    //!!... so do it the other way, at least for now:
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(obj2vars[2], Locations(locs, "Locations")));
-    assertTrue(obj2vars[2]->specifiedDomain() == Locations(locs, "Locations"));
-    assertTrue(obj2vars[2]->derivedDomain() == Locations(LabelStr("Rock"), "Locations"));
 
     // Resetting variables via invoke is _not_ supported by the player, so do it the other way:
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_location));
     assertTrue(sg_location->specifiedDomain() == LocationsBaseDomain());
-    assertTrue(obj2vars[2]->derivedDomain() == Locations(locs, "Locations"));
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[2]));
     assertTrue(obj2vars[2]->specifiedDomain() == LocationsBaseDomain());
     assertTrue(obj2vars[2]->derivedDomain() == LocationsBaseDomain());

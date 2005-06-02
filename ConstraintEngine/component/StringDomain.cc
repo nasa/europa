@@ -43,11 +43,16 @@ namespace EUROPA {
    * base class method rather than having to delegate to it.
    */
   void StringDomain::set(const StringDomain& dom){
+    checkError(isEmpty() || isSubsetOf(dom), dom.toString() << " is not a subset of the domain :" << toString());
     EnumeratedDomain::set(dom);
   }
   
   void StringDomain::set(double value) {
     check_error(LabelStr::isString(value));
+    checkError(isEmpty() || isMember(value), value << " is not a member of the domain :" << toString());
+
+    // Insert the value into the set as a special behavior for strings
+    m_values.insert(value);
     EnumeratedDomain::set(value);
   }
 

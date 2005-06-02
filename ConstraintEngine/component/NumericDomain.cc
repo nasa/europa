@@ -41,4 +41,7 @@ namespace EUROPA {
   void NumericDomain::set(const NumericDomain& dom){
     EnumeratedDomain::set(dom);
   }
+  void NumericDomain::set(double value){
+    EnumeratedDomain::set(value);
+  }
 }

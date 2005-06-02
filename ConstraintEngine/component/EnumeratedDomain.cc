@@ -116,15 +116,17 @@ namespace EUROPA {
   }
 
   void EnumeratedDomain::set(const AbstractDomain& dom) {
-    //check_error(isSubsetOf(dom), "Attempt to set to a new domain that is not a subset of the current domain.");
-    //check_error(!dom.isSingleton(), "You must use set(double value) to set a domain to a singleton.");
+    checkError(dom.isSubsetOf(*this), 
+	       "Attempt to set to a new domain " << dom.toString() <<
+	       " that is not a subset of the current domain " << toString());
+    checkError(!dom.isSingleton(), "You must use set(double value) to set a domain to a singleton.");
     
     intersect(dom);
     notifyChange(DomainListener::SET);
   }
 
   void EnumeratedDomain::set(double value) {
-    //check_error(isMember(value), "Attempt to set to a value that is not a member of the domain.");
+    check_error(isMember(value), "Attempt to set to a value that is not a member of the domain.");
 
     m_values.clear();
     m_values.insert(value);

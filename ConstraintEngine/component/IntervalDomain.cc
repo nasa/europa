@@ -194,8 +194,11 @@ namespace EUROPA {
   }
  
   void IntervalDomain::set(const AbstractDomain& dom) {
-    //check_error(isSubsetOf(dom), "Attempt to set to a new domain that is not a subset of the current domain.");
-    //check_error(!dom.isSingleton(), "You must use set(double value) to set a domain to a singleton.");
+    checkError(dom.isSubsetOf(*this), 
+	       "Attempt to set to a new domain " << dom.toString() << 
+	       " that is not a subset of the current domain " << toString());
+
+    checkError(!dom.isSingleton(), "You must use set(double value) to set a domain to a singleton.");
     
     safeComparison(*this, dom);
     
@@ -204,7 +207,7 @@ namespace EUROPA {
   }
  
   void IntervalDomain::set(double value) {
-    //check_error(isMember(value), "Attempt to set to a value that is not a member of the domain.");
+    checkError(isMember(value), "Attempt to set to " << value << " which is not a member of the " << toString());
     
     m_lb = value;
     m_ub = value;

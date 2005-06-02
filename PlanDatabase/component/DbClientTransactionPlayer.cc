@@ -148,7 +148,9 @@ namespace EUROPA {
       const char * target = element.Attribute("target");
       TokenId origin_token = parseToken(origin);
       TokenId target_token = parseToken(target);
-      std::cerr << "got token " << origin_token->getKey() << " and " << target_token->getKey() << " for relation " << relation << std::endl;
+      debugMsg("DbClientTransactionPlayer:playTokenCreated",
+	       "got token " << origin_token->getKey() << " and " << 
+	       target_token->getKey() << " for relation " << relation);
       checkError(origin_token.isValid(), "Invalid token for label '" << origin << "'");
       checkError(target_token.isValid(), "Invalid token for label '" << target << "'");
       if (strcmp(relation, "before") == 0) {
@@ -526,13 +528,13 @@ namespace EUROPA {
 
     if (strcmp(name, "specify") == 0) {
       // specify variable special case
-      std::cerr << "specifying for " << identifier << std::endl;
+      debugMsg("DbClientTransactionPlayer:playInvokeTransaction", "specifying for " << identifier);
       ConstrainedVariableId variable = parseVariable(identifier);
-      std::cerr << "found variable " << variable->getKey() << std::endl;
+      debugMsg("DbClientTransactionPlayer:playInvokeTransaction", "found variable " << variable->getKey());
       TiXmlElement * value_el = element.FirstChildElement();
       check_error(value_el != NULL);
       const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
-      std::cerr << "specifying to " << (*value) << std::endl;
+      debugMsg("DbClientTransactionPlayer:playInvokeTransaction", "specifying to " << (*value));
       if (value->isSingleton()) {
         double v = value->getSingletonValue();
         m_client->specify(variable, v);
@@ -629,7 +631,10 @@ namespace EUROPA {
       check_error(name != NULL, "missing name for domain in transaction XML");
       AbstractDomain * domain = TypeFactory::baseDomain(type).copy();
       check_error(domain != 0, "unknown type, lack of memory, or other problem with domain in transaction XML");
-      domain->set(TypeFactory::createValue(type, name));
+      double value = TypeFactory::createValue(type, name);
+      if(domain->isOpen() && !domain->isMember(value))
+	domain->insert(value);
+      domain->set(value);
       return(domain);
     }
     const char * value_st = element.Attribute("value");

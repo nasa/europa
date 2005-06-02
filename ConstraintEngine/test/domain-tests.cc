@@ -183,6 +183,10 @@ namespace EUROPA {
       assertTrue(! dom4.isSubsetOf(dom0));
       assertTrue(! dom0.isSubsetOf(dom4));
 
+      // Handle intersection with infinites
+      IntervalDomain dom5; 
+      IntervalDomain dom6(0, 100);
+      assertTrue(dom6.isSubsetOf(dom5)); 
       return(true);
     }
 
@@ -666,7 +670,6 @@ namespace EUROPA {
       e1.insert(4.0);
 
       std::list<double> vals;
-      vals.push_back(1.0);
       vals.push_back(2.0);
       vals.push_back(3.0);
       EnumeratedDomain e2(vals, true, "Test");
@@ -1699,11 +1702,9 @@ namespace EUROPA {
       IntervalDomain iDom(MINUS_INFINITY);
       NumericDomain nDom(2.7);
       EnumeratedDomain eDom(false, "MyEnum"); // non numeric enum
+      eDom.insert(LabelStr("myEnumMember"));
       eDom.set(LabelStr("myEnumMember").getKey());
-      //eDom.close();
       EnumeratedDomain enDom(true, "MyEnum"); // numeric enum
-      enDom.set(20.6);
-      //enDom.close();
       SymbolDomain sDom("mySymbol");
       StringDomain stDom("myName");
 
