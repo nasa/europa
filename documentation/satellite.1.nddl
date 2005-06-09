@@ -1,0 +1,26 @@
+// Declare a class for all positions of interest.
+class Position {}
+
+// Class declaration to capture state and behavior of all attitude controllers in this domain.
+// Note that they extend a Timeline. As such, a total order will be required on all tokens of
+// each class instance.
+class AttitudeController extends Timeline
+{
+ // Declare a predicate for the state of pointing at a position with one parameter. 
+ // Will include built-in variables for object, start, and end.
+ predicate Pointing{Position p;}
+
+ // Declare a predicate for the behavior of turning which will adjust the attitude from
+ // one position to another. Will also include built-in variables for object, start, and end.
+ predicate Turning(Position from, to;}
+}
+
+
+// Declare a rule which indicates a required relationship between tokens of a
+// Turning predicate and other tokens.
+AttitudeController::Turning{
+ met_by(Pointing p0); // Causes introduction of a new token. Posts a temporal constraint
+ eq(p0.p, from); // Posts an equality constraint between parameters across tokens
+ meets (Pointing p1); // Causes introduction of a new token. Posts a temporal constraint
+ eq((p1.p, to); // Posts an equality constraint between parameters across tokens
+}

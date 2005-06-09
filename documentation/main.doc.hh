@@ -7,7 +7,7 @@
  *
  * EUROPA 2 is built on the formulation of planning and scheduling as a process of 
  * refinement of a dynamic constraint network. To that end it provides the following key capabilities:
- * @li A high-level modelling language (NDDL) for describing particular planning domains.
+ * @li A high-level modelling language (@ref nddl "NDDL") for describing particular planning domains.
  * @li A database in which plans may be created and manipulated in accordance with the
  * semantics of the specified planning domain. The database employs an extensive array
  * of automated reasoning techniques to exclude avenues of refinement that lead to inconsistent
@@ -43,5 +43,5 @@
  * targetted mainly at making the technology easier to use, more efficient, easier to integrate and easier to extend. The
  * development of EUROPA 2 has been lead by Conor McGann in collaboration with Andrew Bachmann, Tania Bedrax-Weiss, 
  * Patrick Daley, Will Edgington, Jeremy Frank, Michael Iatauro, Peter Jarvis, Ari Jonsson, Sailesh Ramakrishnan and 
- * Will Taylor. Funding for this work has been provided by the NASA Intelligent Systems Program.
+ * Will Taylor. Funding for this work has been provided by the NASA Intelligent Systems and Collaborative Decision Systems Programmes.
  */
