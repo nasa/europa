@@ -221,8 +221,8 @@ namespace EUROPA {
   template<class DomainType>
   void Variable<DomainType>::restrictBaseDomain(const AbstractDomain& newBaseDomain) {
     check_error(validate());
-    m_baseDomain.intersect(newBaseDomain);
-    internalSpecify(newBaseDomain);
+    if(m_baseDomain.intersect(newBaseDomain))
+      internalSpecify(newBaseDomain);
   }
  
   template<class DomainType>
