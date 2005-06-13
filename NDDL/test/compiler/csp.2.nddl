@@ -1,0 +1,18 @@
+// Declare the most trivial class.
+class Foo {};
+
+// Allocate unnamed instances of this class. Populates objects in the plan database.
+new Foo();
+new Foo();
+new Foo();
+
+Foo allFoo; // A variable to contain all instances of the class Foo.
+
+// Allocate variables of 
+Foo f1 = new Foo();
+Foo f2 = new Foo();
+Foo f3 = new Foo();
+
+// Allocate variables but assign them the the contents of another variable. 
+Foo f4 = f3;
+Foo f5 = allFoo;
