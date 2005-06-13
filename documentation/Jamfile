@@ -20,7 +20,7 @@ actions Doxygen {
 
 Doxygen documentation : doxygen.cfg ;
 
-Depends documentation : run-csp.0 ;
+Depends documentation : run-csp.0 run-csp.1 run-csp.2 ;
 
 rule Latex 
 {
