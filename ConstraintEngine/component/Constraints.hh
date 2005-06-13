@@ -659,7 +659,40 @@ namespace EUROPA {
     static const int Y=1;
   };
 
+  class TestEQ : public Constraint {
+  public:
+    TestEQ(const LabelStr& name,
+	   const LabelStr& propagatorName,
+	   const ConstraintEngineId& constraintEngine,
+	   const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+    AbstractDomain& m_test;
+    AbstractDomain& m_arg1;
+    AbstractDomain& m_arg2;
+    static const unsigned int ARG_COUNT = 3;
+  };
+
+  class TestLessThan : public Constraint {
+  public:
+    TestLessThan(const LabelStr& name,
+		 const LabelStr& propagatorName,
+		 const ConstraintEngineId& constraintEngine,
+		 const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+    AbstractDomain& m_test;
+    AbstractDomain& m_arg1;
+    AbstractDomain& m_arg2;
+    static const unsigned int ARG_COUNT = 3;
+  };
+
   //Test if X==Y and return the result in Z
+  /**
   class TestEqConstraint: public Constraint
   {
   public:
@@ -676,7 +709,7 @@ namespace EUROPA {
     static const int Z = 2;
     static const int ARG_COUNT = 3;
   };
-
+  */
   extern void initConstraintLibrary();
 }
 #endif

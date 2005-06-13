@@ -20,6 +20,8 @@ actions Doxygen {
 
 Doxygen documentation : doxygen.cfg ;
 
+Depends documentation : run-csp.0 ;
+
 rule Latex 
 {
   local file = $(1) ;

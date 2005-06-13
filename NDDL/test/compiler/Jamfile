@@ -13,6 +13,7 @@ ModuleObjects NddlMain.cc : NDDL ;
 local model ;
 
 for model in
+	csp.0.nddl csp.1.nddl csp.2.nddl
 	class-constructor.nddl   simple-rules.nddl guards.nddl
 	existential.nddl         plasma-base.nddl  subclass.nddl
 	simple-class.nddl constraint-test.nddl

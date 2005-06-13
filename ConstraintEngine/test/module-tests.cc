@@ -2062,56 +2062,90 @@ private:
 
   static bool testTestEqConstraint() {
     {
-      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(5));
+      EnumeratedDomain baseDomain(true, "ENUM");
+      baseDomain.insert(1);
+      baseDomain.insert(2);
+      baseDomain.insert(3);
+      baseDomain.insert(4);
+      baseDomain.close();
+
+      Variable<BoolDomain> test(ENGINE, BoolDomain());
+      Variable<EnumeratedDomain> arg1(ENGINE, baseDomain);
+      Variable<EnumeratedDomain> arg2(ENGINE, baseDomain);
+      TestEQ c1(LabelStr("TestEq"),
+		LabelStr("Default"),
+		ENGINE, 
+		makeScope(test.getId(), arg1.getId(), arg2.getId()));
+      assert(ENGINE->propagate());
+
+      assert(ENGINE->propagate());
+      arg1.specify(4);
+      arg2.specify(4);
+      assert(ENGINE->propagate());
+      assert(test.lastDomain().getSingletonValue() == 1);
+
+      arg1.reset();
+      arg1.specify(3);
+      assert(ENGINE->propagate());
+      assert(test.lastDomain().getSingletonValue() == 0);
+
+      arg2.reset();
+      test.specify(1);
+      arg2.specify(1);
+      assert(!ENGINE->propagate());
+    }
+    
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
-      Variable<BoolDomain> v2(ENGINE, BoolDomain());
-      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
-			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(5));
+      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v2.getDerivedDomain().isTrue());
+      assertTrue(v0.getDerivedDomain().isTrue());
     }
     {
-      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(5));
-      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(6));
-      Variable<BoolDomain> v2(ENGINE, BoolDomain());
-      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
-			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(6));
+      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v2.getDerivedDomain().isFalse());
+      assertTrue(v0.getDerivedDomain().isFalse());
     }
     {
-      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(5,10));
-      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5, 20));
-      Variable<BoolDomain> v2(ENGINE, BoolDomain());
-      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
-			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5,10));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(5, 20));
+      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(!v2.getDerivedDomain().isSingleton());
-      v0.specify(7);
+      assertTrue(!v0.getDerivedDomain().isSingleton());
       v1.specify(7);
+      v2.specify(7);
       ENGINE->propagate();
-      assertTrue(v2.getDerivedDomain().isTrue());
-      v0.reset();
+      assertTrue(v0.getDerivedDomain().isTrue());
+      v1.reset();
       ENGINE->propagate();
-      assertTrue(!v2.getDerivedDomain().isSingleton());      
+      assertTrue(!v0.getDerivedDomain().isSingleton());      
     }
     {
-      Variable<LabelSet> v0(ENGINE, LabelSet(LabelStr("C")));
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("C")));
-      Variable<BoolDomain> v2(ENGINE, BoolDomain());
-      TestEqConstraint c0("TestEqConstraint", "Default", 
-			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      Variable<LabelSet> v2(ENGINE, LabelSet(LabelStr("C")));
+      TestEQ c0("TestEQ", "Default", 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v2.getDerivedDomain().isTrue());
+      assertTrue(v0.getDerivedDomain().isTrue());
     }
     {
-      Variable<LabelSet> v0(ENGINE, LabelSet(LabelStr("C")));
-      Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("E")));
-      Variable<BoolDomain> v2(ENGINE, BoolDomain());
-      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
-			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("C")));
+      Variable<LabelSet> v2(ENGINE, LabelSet(LabelStr("E")));
+      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v2.getDerivedDomain().isFalse());
+      assertTrue(v0.getDerivedDomain().isFalse());
     }
     return true;
   }
@@ -2129,11 +2163,11 @@ private:
     TestLockManager testManager;
     assertTrue(LockManager::instance().getCurrentUser() == LabelStr("TEST_HARNESS"));
     {
-      Variable<LabelSet> v0(ENGINE, LabelSet(LabelStr("C")));
-      Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("E")));
-      Variable<BoolDomain> v2(ENGINE, BoolDomain());
-      TestEqConstraint c0(LabelStr("TestEqConstraint"), LabelStr("Default"), 
-			  ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("C")));
+      Variable<LabelSet> v2(ENGINE, LabelSet(LabelStr("E")));
+      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
       // Now ensure the appropriate identifer has been passed to the constraint
       assertTrue(c0.getCreatedBy() == LabelStr("TEST_HARNESS"));

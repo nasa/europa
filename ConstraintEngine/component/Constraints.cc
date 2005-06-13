@@ -126,10 +126,9 @@ namespace EUROPA {
       const AbstractDomain& current = m_variables[i]->lastDomain();
       requiresEnumeration = requiresEnumeration || (current.isEnumerated() && !current.isSingleton());
       check_error(!requiresEnumeration || current.isEnumerated() || current.isSingleton());
-      check_error(AbstractDomain::canBeCompared(first,
-                                                getCurrentDomain(m_variables[i])),
-		  "cannot equate variables of type " + first.getTypeName().toString() + 
-		  " and " + getCurrentDomain(m_variables[i]).getTypeName().toString());
+      checkError(AbstractDomain::canBeCompared(first, getCurrentDomain(m_variables[i])),
+		 "cannot equate variables " << m_variables[0]->toString() <<
+		 " and " << m_variables[i]->toString());
       // This constraint has problems similar to CondAllSameConstraint's
       // related to minDelta().  @see CondAllSameConstraint::CondAllSameConstraint.
     }
@@ -1680,6 +1679,60 @@ namespace EUROPA {
     domy.intersect(-xMax, -xMin);
   }
 
+  TestEQ::TestEQ(const LabelStr& name,
+			   const LabelStr& propagatorName,
+			   const ConstraintEngineId& constraintEngine,
+			   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])),
+      m_arg2(getCurrentDomain(variables[2])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void TestEQ::handleExecute(){  
+    if(m_arg1.isSingleton() && 
+       m_arg2.isSingleton() && 
+       m_arg1.intersects(m_arg2))// Exactly equal with no flexibility
+      m_test.remove(0);
+    else if(!m_arg1.intersects(m_arg2)) // No intersection so they cannot be equal
+      m_test.remove(1);
+
+    if(m_test.isSingleton()){
+      if(m_test.getSingletonValue() == true){
+	if(m_arg1.intersect(m_arg2) && m_arg1.isEmpty())
+	  return;
+
+	m_arg2.intersect(m_arg1);
+      }
+    }
+  }
+
+  TestLessThan::TestLessThan(const LabelStr& name,
+			     const LabelStr& propagatorName,
+			     const ConstraintEngineId& constraintEngine,
+			     const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])),
+      m_arg2(getCurrentDomain(variables[2])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+
+  void TestLessThan::handleExecute(){
+    // If the lesser values lowest value >= the greaters highest, then
+    // there is no way for the test to be true
+    if(m_arg1.getLowerBound() >= m_arg2.getUpperBound())
+      m_test.remove(1);
+
+    // Similarly, if the upper bound of the lesser value <= the lowest possible value
+    // for the larger argument, it can never be false;
+    if(m_arg1.getUpperBound() <= m_arg2.getLowerBound())
+      m_test.remove(0);
+  }
+
+  /*
   TestEqConstraint::TestEqConstraint(const LabelStr& name,
 				     const LabelStr& propagatorName,
 				     const ConstraintEngineId& constraintEngine,
@@ -1706,7 +1759,7 @@ namespace EUROPA {
         result = false;
     domZ.intersect(BoolDomain(result));
   }
-
+  */
   void initConstraintLibrary() {
     static bool s_runAlready(false);
     
@@ -1738,7 +1791,10 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(NotEqualConstraint, "NotEqual", "Default");
       REGISTER_CONSTRAINT(OrConstraint, "Or", "Default");
       REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
-      REGISTER_CONSTRAINT(TestEqConstraint, "TestEqual", "Default");
+      REGISTER_CONSTRAINT(TestEQ, "TestEqual", "Default");
+      REGISTER_CONSTRAINT(TestLessThan, "TestLessThan", "Default");
+      REGISTER_CONSTRAINT(TestEQ, "testEQ", "Default");
+      REGISTER_CONSTRAINT(TestLessThan, "testLEQ", "Default");
 
       // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
       REGISTER_CONSTRAINT(AddEqualConstraint, "addeq", "Default");
