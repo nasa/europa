@@ -194,9 +194,10 @@ namespace EUROPA {
   }
  
   void IntervalDomain::set(const AbstractDomain& dom) {
-    checkError(dom.isSubsetOf(*this), 
-	       "Attempt to set to a new domain " << dom.toString() << 
-	       " that is not a subset of the current domain " << toString());
+    // David Rijsman filed GNAT 2963
+    //checkError(dom.isSubsetOf(*this), 
+    //"Attempt to set to a new domain " << dom.toString() << 
+    //" that is not a subset of the current domain " << toString());
 
     checkError(!dom.isSingleton(), "You must use set(double value) to set a domain to a singleton.");
     
