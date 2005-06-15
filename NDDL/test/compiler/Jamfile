@@ -14,7 +14,8 @@ local model ;
 
 for model in
 	csp.0.nddl csp.1.nddl csp.2.nddl classes.0.tx.nddl classes.1.tx.nddl
-	classes.2.tx.nddl
+	classes.2.tx.nddl inheritance.0.nddl inheritance.1.nddl inheritance.2.nddl
+	composition.0.nddl rules.0.tx.nddl
 	class-constructor.nddl   simple-rules.nddl guards.nddl
 	existential.nddl         plasma-base.nddl  subclass.nddl
 	simple-class.nddl constraint-test.nddl

@@ -21,8 +21,8 @@ actions Doxygen {
 Doxygen documentation : doxygen.cfg ;
 
 Depends documentation : run-csp.0 run-csp.1 run-csp.2 run-classes.0.tx run-classes.1.tx 
-			run-classes.2.tx ;
-
+			run-classes.2.tx run-inheritance.0 run-inheritance.1 run-inheritance.2
+			run-composition.0 run-rules.0.tx ;
 rule Latex 
 {
   local file = $(1) ;

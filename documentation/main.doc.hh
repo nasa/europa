@@ -29,7 +29,8 @@
  * @li @ref background "Background Material". Introduces the concepts underlying EUROPA 2. By example, it develops the key elements of plan representation and automated reasoning upon which EUROPA 2 is built.
  * @li @ref building "Build Instructions". In order to get started working with the software, the reader should consult the @ref readme file for general information and the @ref building "build instructions" to compile, link and test the installation. 
  * @li @ref helloWorld "Hello World Example Project". A chapter describing a simple @ref helloWorld "Hello World" domain is presented to familiarize the reader with the various tools available in @ref europa "EUROPA".
- * @li @ref nddl. Provides an in-depth tutorial on the practice of building domain models using the NDDL modeling language. @ref solvers will teach the reader to define problem instances, assemble a suitable solver for the problem at hand, and customize search control. 
+ * @li @ref nddl. Provides an in-depth tutorial on the practice of building domain models using the NDDL modeling language.
+ * @li @ref solvers. Will teach the reader to define problem instances, assemble a suitable solver for the problem at hand, and customize search control. 
  * @li @ref system. The system architecture is described in detail to convey the underlying structure of EUROPA and the roles and responsibilities of different modules. 
  * @li @ref trouble. A trouble-shooting guide presents tools and techniques for detection and diagnosis of problems using EUROPA. 
  * @li @ref relatedwork. For the interested reader a chapter on @ref relatedwork is provided with @ref references.

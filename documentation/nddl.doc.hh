@@ -4,8 +4,12 @@
  * In this chapter we review the capabilities of the NDDL modeling language for describing problem domains and constructing partial plans. NDDL is an acronym for New Domain Description Language which reflects its origins in @ref ddl "DDL" which established many of the semantics and constructs found in NDDL. NDDL is an object-oriented language designed to support expression of problem domain elements and axioms in a manner consistent with the paradigm outlined in @ref planRep. The reader is strongly advised to review the material in @ref background prior to working through this chapter. The material contains:
  * @li @ref varsAndConstraints
  * @li @ref classes
- * @li @ref rules
  * @li @ref nddlTx
+ * @li @ref rules
+ * @li @ref idioms
+ * @li @ref nddlConfig
+ * @li @ref nddlKeywords
+ *
  * @section varsAndConstraints Introducing Variables and Constraints
  * Variables and constraints are the basic building blocks of EUROPA. They can be introduced in a number of ways, and in a range of scopes. The following basic forms for variable declaration are supported:
  * @li @em type @em label; Declares a variable of type @em type with the name @em label and allocates a default domain as the @ref baseDomain "base domain" based on the type. The available primitive types are: @em int, @em float, @em bool, and @em string. In addition, a type can be a user-defined @em enumeration or @em class. The default base domain for @em int and @em float is <em>[-inf +inf]</em>, i.e. from negative to positive infinity. Variables of type @em bool have a base domain of <em>{false, true}</em>. Variables of type @em string are a special case requiring a singleton value on declaration.
@@ -16,7 +20,7 @@
  * @li <em> constraintName(arg0, arg1[, arg2[, ..argN]]);</em> Allocates an instance of a constraint registered under the name @em constraintName. A constraint has 2 or more arguments. An argument can be one of: @em label, @em value, or @em domain.
  *
  * The example below illustrates the use of NDDL to formulate a @ref csp "Constraint Satisfaction Problem" over 4 integer variables.
- * @include ./NDDL/test/compiler/csp.0.nddl
+ * @anchor csp_0 @include ./NDDL/test/compiler/csp.0.nddl
  *
  * If one were to run this problem, the output would be as shown below. First we see the variables <em>a, b, c, </em> and @em d and their values. Note the additional unnamed variables. They arise since constraint arguments that are not references to existing variables result in implict variable creation behind the scenes i.e. a variable is created for each @em non-label constraint argument.
  *
@@ -47,10 +51,6 @@
  * @li @ref predicates
  * @li @ref inheritance
  * @li @ref composition
- * @li @ref rules
- * @li @ref idioms
- * @li @ref nddlTx
- * @li @ref nddlConfig
  *
  * @subsection classesAndMembers Classes and Members
  * Consider the statement:
@@ -95,17 +95,100 @@
  * @li The @em end variables of each token have been propagated to reflect the @em temporalDistance constraint and the built in requirement that @ref intervalToken "interval tokens" have a @em duration of at least 1.
  * @li The tokens have no @ref masterToken "master token". This is because these tokens have been introduced explicitly by an external client (i.e. an initial state loader), rather than implicitly through @ref ruleInstanceDef "rule instance" execution. Tokens without a @em master are referred to as @ref orphanToken "orphans".
  * @subsection inheritance Inheritance
+ * Inheritance is a method of re-use in NDDL designed to make models more compact, and modeling less laborious and error-prone. The goal is that NDDL libraries may be developed that can be applied on many applications in a common domain (e.g. robotic control).
+ *
+ * @par Making the @em Navigator a @em Timeline
  * In the @em Navigator example, we really desire that tokens for @em At and @em Going may not overlap in time. To obtain this behavior, we change the definition of @em Navigator such that it extends the built-in @ref timeline "Timeline" class and thus inherits the desired semantics. The revision to the previous example is shown below which uses the @em extends keyword to declare inheritance.
  * @include ./NDDL/test/compiler/classes.2.nddl
- * This particular example of inheritance shows extension of a class that maps to a special implementation in the plan database. For more on this important mechanism of customization and specialization of NDDL, see @ref nddlConfig. Since we are for now relying on commands in the initial state to construct the final partial plan for our examples, we must also add and additional command to explicitly assign the tokens to the @em nav1 object. This is accomplished with the additional statement: @verbatim nav1.constrain(t0, t1);@endverbatim The new partial plan resulting indicates the active tokens are now sequenced on the @em Navigator instance.
+ * This particular example of inheritance shows extension of a class that maps to a special implementation in the plan database. For more on this important mechanism of customization and specialization of NDDL, see @ref nddlConfig. Since we are for now relying on commands in the initial state to construct the final partial plan for our examples (i.e. we are not running a @em solver to fill out a final plan), we must also add an additional command to explicitly assign the tokens to the @em nav1 object. This is accomplished with the additional statement: @verbatim nav1.constrain(t0, t1);@endverbatim The new partial plan resulting indicates the active tokens are now sequenced on the @em Navigator instance.
  * @include ./NDDL/test/compiler/RUN_classes.2.tx_g_rt.classes.2.tx.xml.output
+ * @par Inheritance, Types and Sets
+ * The @em Navigator example provides a first look at the mechanism of inheritance i.e. the @em extends keyword. Before delving further into the mechanics of this language feature, we will consider the relationship between inheritance, types and sets of objects in the partial plan. This is very important since we deal extensively in sets of objects so the interaction with inheritance must be well understood. To understand this, consider the diagram below which depicts an inheritance tree where an arrow indicates an @em is-A relationship. For example, a <em>Bar is-A Foo</em>.
+ * @image html inheritance.0.png
+ * When we create instances of these classes in the plan database, each instance will fall into one of the sets identified in the Venn Diagram below according to its type. For example, @verbatim Foo f = new Foo();@endverbatim will insert f into the set of all instances of type @em foo.
+ * @image html inheritance.1.png
+ * The NDDL code below creates this class hierarchy (@em Object and @em Timeline are re-used from Plasma.nddl). For this example, the classes are trivial. The code also allocates instances of each class and declares variables, each of which will be populated with the set of objects of the type of the variable.
+ * @include ./NDDL/test/compiler/inheritance.0.nddl
+ * The resulting plan database illustrates precisely which objects are placed in which sets in the afore mentioned Venn Diagram. The contents of variables <em>allObjects, allTimelines, allFoo, allBar, allBaz, and allBing</em> indicate the membership of the sets of objects of type <em>Object, Timeline, Foo, Bar, Baz, and Bing</em> respectively.
+ * @include ./NDDL/test/compiler/RUN_inheritance.0_g_rt.inheritance.0.xml.output
+ * @par Superclass Constructors
+ * We have seen that NDDL permits the declaration of 0 or more constructors for any given class. Similarly, one may declare 0 or more constructors in a subclass. Since constructors can be @em overloaded (i.e. more than one version), we must be able to unambiguously refer to a specific constructor of the immediate superclass from within the constructor of a derived class. For this, the keyword @em super is introduced.
+ * @include ./NDDL/test/compiler/inheritance.1.nddl
+ * The output is shown below:
+ * @include ./NDDL/test/compiler/RUN_inheritance.1_g_rt.inheritance.1.xml.output
+ * @par Predicate Inheritance
+ * So far, we have seen examples of inheritance which extend the set of member variables in the derived class. Predicates defined in a base class are also inherited. In a derived class one can:
+ * @li inherit all predicate definitions from super classses.
+ * @li extend the set of arguments to a predicate defined in a super class
+ * @li extend the set of predicates defined in the derived class
+ * @li add additional constraints to the arguments of a predicate defined in a super class
+ * @li add additional rules relating to the compatibility of a predicate first defined in a super class with other predicates. This capability will be discussed in the chapter on @ref rules "Model Rules".
+ *
+ * The example below demonstrates these feautures.
+ * @include ./NDDL/test/compiler/inheritance.2.nddl
+ * The output is shown below.
+ * @include ./NDDL/test/compiler/RUN_inheritance.2_g_rt.inheritance.2.xml.output
  * @subsection composition Composition
+ * We have already seen that classes can compose variables of primitive data types. We have also seen one mechansim for re-use through @em inheritance. NDDL also supports re-use of classes by @em composition, and it achieves this by permitting member variables to be of a class. For example, consider a domain with a @em rover and a @em crew-carrier which both have a common behavior for navigation. Specifically, they both can be @em At a location or @em Going from one location to another. However, one can easily imagine that other details of the @em rover and @em crew-carrier might be very different from one another. We can represent the @em rover and @em crew-carrier as classes which both contain a @em Navigator. This permits the modeler to re-use the model-component and integrate it into additional needs of the containing object. The NDDL code below gives a trivial example of class composition which illustrates the method of declaration following that already established for variables in general. It also illustrates different methods of assignment, including passing an object into a constructor, thereby allowing objects to be shared. Alternatively, an object can be allocated within the class constructor.
+ * @include ./NDDL/test/compiler/composition.0.nddl
+ * The output is shown below.
+ * @include ./NDDL/test/compiler/RUN_composition.0_g_rt.composition.0.xml.output
+ * @section nddlTx The NDDL transaction language
+ * Now that we have explained the type structures available in NDDL, we can present the NDDL commands to operate on the plan database and thus initialize and/or modify a partial plan. The idea of the NDDL transaction language is to provide syntax and demantics closely related to the use of NDDL elsewhere for class, predicate and rule declaration. However, the NDDL transaction language pertains exclusively to @ref runTime "run-time" data.
+ *
+ * In @ref varsAndConstrainst we covered variables and constraint creation using the NDDL transaction language. We showed:
+ * @li Declaration of a variable with a default base domain - e.g. <em>int i; Colors colors;</em>
+ * @li Declaration of a variable with an explicit and restricted base domain - e.g. <em> int i = 6; int j = [10 40]; Colors colors = Blue;</em>
+ * @li Declaration of an @em object variable and allocation of an object - e.g. <em>Foo f = new Foo();</em>
+ * @li Declaration of one variable by assignment of the contents of another - e.g. <em>Foo b = f;</em>
+ * @li Allocation of a constraint - e.g. <em>eq(i, j); neq(j, k);</em>
+ *
+ * In @ref classes we introduced @em predicates, @em composition and @em inheritance. There we learned that constructors with arguments can be invoked explicitly , passing in values, domains or variable references - e.g. <em>Bar b = new Bar(f);</em>. We also learned that tokens can be created using the @em goal keyword. We used the @em constrain keyword to asssign tokens to an object and impose an ordering, and used the @em specify keyword to set values of a variable. We will revisit some of these operations in the remainder of this section as well as reviewing others.
+ * @par Creating Tokens
+ * There are 2 ways to introduce a token into the plan database using NDDL transactions:
+ * @li The @em goal keyword. It has the form <em>goal(<class>.<predicate> [label]);</em> where @em class designates the set of objects to which this token can be assigned and <predicate> designates the particular predicate to be created. A @em label is optionally used if later NDDL statements wish to refer to the instance to be allocated. For example, consider the statement: @verbatim goal(Navigator.At);</em> This statement results in a new token in the plan database which will be in the @em active state. The object variable of the new token will be populated with the set of all instances in the Navigator class present in the database <em>at the time of token creation</em>.
+ * @subsection ssec3 Closure
+ * @subsection ssec4 Specifying and Resetting Variables
+ * @subsection ssec5 Operations on Tokens
  * @section rules Model Rules
- * @subsection allenRelations Subgoals and Allen Relations
+ * So far in our discussion of NDDL we have managed to avoid any real planning context, since we have not yet mentioned any means of expressing interactions among tokens other than through statements see in examples of using the @ref nddlTx. In this section we will describe the facilities in NDDL for describing relationships that must or must not exist between tokens and their variables. The components of this section are:
+ * @li @ref basicRules
+ * @li @ref allenRelations
+ * @li @ref conditionalSubgoals
+ * @li @ref existentialQuantification
+ * @li @ref universalQuantification
+ * @li @ref idioms
+ * @subsection basicRules Basic Rule Definition
+ * Let us return to our navigation example. For the careful reader, it should be clear that the proper relationships betwen @em At tokens and @em Going tokens are absent. Though we have extended a Timeline to give an indication of a total order, we have not precluded the seemingly magical movement from being <em>At(Lander)</em> and immediately switching to <em>At(Rock)</em> without actually @em Going anywhere. To rectify this, we define 2 model rules. The first defines appopriate relations that must hold for an @em active instance of the @em At predicate. The second addresses the same for @em Going.
+ * @include ./NDDL/test/compiler/rules.0.nddl
+ * @include ./NDDL/test/compiler/rules.0.tx.nddl
+ * @include ./NDDL/test/compiler/RUN_rules.0.tx_g_rt.rules.0.tx.xml.output
+ * @subsection allenRelations The Allen Relations
  * @subsection conditionalSubGoals Conditional Subgoals
  * @subsection existentialQuantification Existential Quantification
  * @subsection universalQuantification Universal Quantification
- * @section idioms Useful Modeling Idioms
- * @section nddlTx The NDDL transaction language
+ * @subsection idioms Useful Modeling Idioms
  * @section nddlConfig NDDL Compiler Configuration
+ * @section nddlKeywords Summary of NDDL keywords
+ * class
+ * extends
+ * int
+ * float
+ * bool
+ * string
+ * enum
+ * meets
+ * met_by
+ * any
+ * overlaps
+ * contains
+ * contained_by
+ * starts
+ * ends
+ * if
+ * foreach
+ * in
+ * ==
+ * true
+ * false
  */
