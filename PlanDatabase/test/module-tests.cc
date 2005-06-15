@@ -406,6 +406,7 @@ public:
     runTest(testCommonAncestorConstraint);
     runTest(testHasAncestorConstraint);
     runTest(testMakeObjectVariable);
+    runTest(testInterleavedDynamicObjetAndVariableCreation);
     runTest(testTokenObjectVariable);
     runTest(testTokenWithNoObjectOnCreation);
     runTest(testFreeAndConstrain);
@@ -775,7 +776,49 @@ private:
 
     return true;
   }
-  
+
+  /**
+   * Ensure that we can allocate variables, interleaved with Object creation,and get correct results
+   */
+  static bool testInterleavedDynamicObjetAndVariableCreation(){
+    initDbTestSchema(SCHEMA);
+    PlanDatabase db(ENGINE, SCHEMA);
+
+    // Now add an object and we should expect the constraint network to be consistent
+    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    assertTrue(ENGINE->propagate());
+
+    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(DEFAULT_OBJECT_TYPE().c_str())))->getId();
+    assertFalse(v0->isClosed());
+    db.makeObjectVariableFromType(DEFAULT_OBJECT_TYPE(), v0);
+    assertFalse(v0->isClosed());
+    assertTrue(ENGINE->propagate());
+    assertFalse(db.isClosed(DEFAULT_OBJECT_TYPE().c_str()));
+    assertTrue(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
+
+    // Now create another object and verify it is part of the initial domain of the next variable
+    Object o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+    assertTrue(ENGINE->propagate());
+
+    // Confirm the first variable has the value
+    assertTrue(!v0->lastDomain().isSingleton());
+
+    // Allocate another variable and confirm the domains are equal
+    ConstrainedVariableId v1 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(DEFAULT_OBJECT_TYPE().c_str())))->getId();
+    assertFalse(v1->isClosed());
+    db.makeObjectVariableFromType(DEFAULT_OBJECT_TYPE(), v1);
+    assertFalse(v1->isClosed());
+    assertTrue(v0->lastDomain() == v1->lastDomain() && 
+	       v1->lastDomain().isMember(o1.getId())  && 
+	       v1->lastDomain().isMember(o2.getId()), v1->lastDomain().toString());
+
+    // Now delete the variables.
+    delete (ConstrainedVariable*) v0;
+    delete (ConstrainedVariable*) v1;
+
+    return true;
+  }
+
   /**
    * Have at least one object in the system prior to creating a token. Show that we can successfully allocate
    * a token. Show that the object variable is closed.
