@@ -20,38 +20,59 @@ namespace EUROPA {
       check_error(!db->getConstraintEngine()->provenInconsistent());
       ObjectSet objs = db->getObjects();
       TokenSet alltokens = db->getTokens();
+      os << "Objects *************************" << std::endl;
+      indent()++;
       for (ObjectSet::const_iterator oit = objs.begin(); oit != objs.end() ; ++oit) {
+	ObjectId object = *oit;
+	os << indentation() << object->getType().toString() << ":" 
+	   << object->getName().toString() << "*************************" << std::endl;
+
+
+	std::list<TokenId> toks;
 	if (TimelineId::convertable((*oit))) {
 	  TimelineId timeline = (*oit);
-	  os << timeline->getType().toString() << ":" << timeline->getName().toString() << "*************************" << std::endl;
-	  std::list<TokenId> toks = timeline->getTokenSequence();
+	  toks = timeline->getTokenSequence();
+	}
+	else { // Treat as any object
+	  const TokenSet& tokens = object->getTokens(); 
+	  for(TokenSet::const_iterator tokit = tokens.begin(); tokit != tokens.end(); ++tokit){
+	    TokenId t = *tokit;
+	    toks.push_back(t);
+	  }
+	}
+
+	if(!toks.empty()){
+	  indent()++;
+	  os << indentation() << "Tokens *************************" << std::endl;
 	  for(std::list<TokenId>::const_iterator tokit = toks.begin(); tokit != toks.end(); ++tokit) {
 	    TokenId t = (*tokit);
 	    alltokens.erase(t);
 	    writeToken(t, os);
 	  }
-	  os << "End Timeline: " << timeline->getName().toString() << "*************************" << std::endl;
-	}
-	else { // Treat as any object
-	  ObjectId object = *oit;
-	  os << object->getType().toString() << ":" << object->getName().toString() << "*************************" << std::endl;
-	  const TokenSet& tokens = object->getTokens(); 
-	  for(TokenSet::const_iterator tokit = tokens.begin(); tokit != tokens.end(); ++tokit){
-	    TokenId t = *tokit;
-	    alltokens.erase(t);
-	    writeToken(t, os);
-	  }
 
-          // print variables associated with this object.
-	  const std::vector<ConstrainedVariableId> variables = object->getVariables();
-	  std::vector<ConstrainedVariableId>::const_iterator varit;
-          for(varit = variables.begin(); varit != variables.end(); ++varit) {
- 	    ConstrainedVariableId var = *varit;
+	  os << indentation() << "End Tokens *********************" << std::endl;
+	  indent()--;
+	}
+
+	// print variables associated with this object.
+	const std::vector<ConstrainedVariableId> variables = object->getVariables();
+	std::vector<ConstrainedVariableId>::const_iterator varit;
+	if(!variables.empty()){
+	  indent()++;
+	  os << indentation() << "Variables *************************" << std::endl;
+	  for(varit = variables.begin(); varit != variables.end(); ++varit) {
+	    ConstrainedVariableId var = *varit;
 	    writeVariable(var, os);
 	  }
+	  os << indentation() << "End Variables *********************" << std::endl;
+	  indent()--;
 	}
+
+	os << indentation() << "End " << object->getType().toString() << ":" << object->getName().toString() 
+	   << "*************************" << std::endl;
       }
-     
+      indent()--;
+
       // print global variables
       const ConstrainedVariableSet globalVariablesSet = db->getGlobalVariables();
       if (! globalVariablesSet.empty()) {
@@ -109,17 +130,18 @@ namespace EUROPA {
     }
 
     static void writeToken(const TokenId& t, ostream& os) {
+      indent()++;
       check_error(t.isValid());
       TempVarId st = t->getStart();
-      os << "[ " << st->derivedDomain() << " ]"<< std::endl;
-      os << "\t" << t->getPredicateName().toString() << "(" ;
+      os << indentation() << "[ " << st->derivedDomain() << " ]"<< std::endl;
+      os << indentation() << "\t" << t->getPredicateName().toString() << "(" ;
       std::vector<ConstrainedVariableId> vars = t->getParameters();
       for (std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
 	ConstrainedVariableId v = (*varit);
 	os << v->getName().toString() << "=" << v->derivedDomain();
       }
       os << ")" <<std::endl;
-      os << "\tKey=" << t->getKey();
+      os << indentation() << "\tKey=" << t->getKey();
       if (t->getMaster().isNoId())
 	os << "  Master=NONE" << std::endl;
       else
@@ -129,14 +151,30 @@ namespace EUROPA {
       TokenSet mergedtoks = t->getMergedTokens();
 
       for (TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
-	os << "\t\tMerged Key=" << (*mit)->getKey() << std::endl;
+	os << indentation() << "\t\tMerged Key=" << (*mit)->getKey() << std::endl;
 
-      os << "[ " << t->getEnd()->derivedDomain() << " ]"<< std::endl;
+      os << indentation() << "[ " << t->getEnd()->derivedDomain() << " ]"<< std::endl;
+      indent()--;
     }
 
     static void writeVariable(const ConstrainedVariableId& var, ostream& os) {
       check_error(var.isValid());
-      os << var->getName().toString() << "=" << var->derivedDomain() << std::endl;
+      indent()++;
+      os << indentation() << var->getName().toString() << "=" << var->derivedDomain() << std::endl;
+      indent()--;
+    }
+
+  private:
+    static std::string indentation(){
+      std::string s;
+      for(unsigned int i=0; i<indent(); i++)
+	s = s + "\t";
+      return s;
+    }
+
+    static unsigned int& indent(){
+      static unsigned int sl_indentLevel(0);
+      return sl_indentLevel;
     }
 
   };
