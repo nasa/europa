@@ -1,4 +1,4 @@
-// Declares a class of the raw types. No World in this model.
+// Declares a class of the raw types.
 class Foo {
  int m_0;
  float m_1;

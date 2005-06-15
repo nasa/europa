@@ -25,9 +25,15 @@
  * EUROPA 2 is tested and supported on Red Hat Linux, Mac OSX, and Solaris.
  *
  * @section guide Reader's Guide
- * A section of @ref background material introduces the concepts underlying EUROPA 2. By example, it develops
- * the key elements of plan representation and automated reasoning upon which EUROPA 2 is built.
- * In order to get started working with the software, the reader should consult the @ref readme file for general information and the @ref building "build instructions" to compile, link and test the installation. A chapter describing a simple @ref helloWorld "Hello World" domain is presented to familiarize the reader with the various tools available in @ref europa "EUROPA". @ref nddl provides an in-depth tutorial on the practice of building domain models using the NDDL modeling language. @ref solvers will teach the reader to define problem instances, assemble a suitable solver for the problem at hand, and customize search control. The @ref system is described in detail to convey the underlying structure of EUROPA and the roles and responsibilities of different modules. A @ref trouble section presents tools and techniques for detection and diagnosis of problems using EUROPA. For the interested reader a section on @ref relatedwork is provided with @ref references. Finally, we include an @ref appendix which contains a variety of reference material that may be of interest.
+ * This documentation repository integrates all the assets of EUROPA, including code, examples and test cases, to provide documentation for users interested in building solvers, using solvers, or making alterations and extensions in the underlying technology. It includes:
+ * @li @ref background "Background Material". Introduces the concepts underlying EUROPA 2. By example, it develops the key elements of plan representation and automated reasoning upon which EUROPA 2 is built.
+ * @li @ref building "Build Instructions". In order to get started working with the software, the reader should consult the @ref readme file for general information and the @ref building "build instructions" to compile, link and test the installation. 
+ * @li @ref helloWorld "Hello World Example Project". A chapter describing a simple @ref helloWorld "Hello World" domain is presented to familiarize the reader with the various tools available in @ref europa "EUROPA".
+ * @li @ref nddl. Provides an in-depth tutorial on the practice of building domain models using the NDDL modeling language. @ref solvers will teach the reader to define problem instances, assemble a suitable solver for the problem at hand, and customize search control. 
+ * @li @ref system. The system architecture is described in detail to convey the underlying structure of EUROPA and the roles and responsibilities of different modules. 
+ * @li @ref trouble. A trouble-shooting guide presents tools and techniques for detection and diagnosis of problems using EUROPA. 
+ * @li @ref relatedwork. For the interested reader a chapter on @ref relatedwork is provided with @ref references.
+ * @li @ref appendix. Contains a variety of detailed reference material that may be of interest.
  *
  * @section acknowledgements Acknowledgements
  * EUROPA 2 is a culmination of many years of research, development and deployment of constraint-based planning

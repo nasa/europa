@@ -1,7 +1,13 @@
 /**
  * @page background Background
  * In this chapter we review some of the core concepts employed in the @ref europa "EUROPA" 2 Constraint-based Planning 
- * Paradigm. We discuss @ref csp, @ref stp, @ref planRep, @ref partialPlan, @ref problemSolving and close with a @ref summary.
+ * Paradigm. The sections are:
+ * @li @ref csp
+ * @li @ref stp
+ * @li @ref planRep
+ * @li @ref partialPlan
+ * @li @ref problemSolving
+ * @li @ref summary.
  *
  * @section csp Constraint Satisfaction Problems
  * @ref europa "EUROPA" is based on translating a representation of a plan into a graph of constraints and variables. Solving a planning
@@ -118,6 +124,7 @@
  * are such a common requirement for @ref europa "EUROPA" users that special constructs are also provided for them. 
  * Instances of @em classes derived from a @em Resource will induce ordering requirements on their @em Tokens in order to ensure that the @em level of the @em resource remains within specified @em limits.
  *
+ * @section dynamicObjects Dynamic Objects
  * @section partialPlan Partial Plans
  * A @em partial @em plan is a plan that is @em incomplete or @em partially @em specified. @ref europa "EUROPA" represents @em partial @em plans in terms of @em Objects, @em Tokens, @em Variables, and @em Constraints. To make this more concrete consider a simple example from our toy satellite domain. We start with the model fragment included below.
  * @include satellite.1.nddl
