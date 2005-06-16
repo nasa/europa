@@ -133,7 +133,7 @@
  * The output is shown below.
  * @include NDDL/test/compiler/RUN_composition.0_g_rt.composition.0.xml.output
  * @section nddlTx The NDDL transaction language
- * Now that we have explained the type structures available in NDDL, we can present the NDDL commands to operate on the plan database and thus initialize and/or modify a partial plan. The idea of the NDDL transaction language is to provide syntax and demantics closely related to the use of NDDL elsewhere for class, predicate and rule declaration. However, the NDDL transaction language pertains exclusively to @ref runTime "run-time" data.
+ * Now that we have explained the type structures available in NDDL, we can present the NDDL commands to operate on the plan database and thus initialize and/or modify a partial plan. The idea of the NDDL transaction language is to provide syntax and semantics closely related to the use of NDDL elsewhere for class, predicate and rule declaration. However, the NDDL transaction language pertains exclusively to @ref runTime "run-time" data.
  *
  * In @ref varsAndConstraints we covered variables and constraint creation using the NDDL transaction language. We showed:
  * @li Declaration of a variable with a default base domain - e.g. <em>int i; Colors colors;</em>
@@ -143,9 +143,13 @@
  * @li Allocation of a constraint - e.g. <em>eq(i, j); neq(j, k);</em>
  *
  * In @ref classes we introduced @em predicates, @em composition and @em inheritance. There we learned that constructors with arguments can be invoked explicitly , passing in values, domains or variable references - e.g. <em>Bar b = new Bar(f);</em>. We also learned that tokens can be created using the @em goal keyword. We used the @em constrain keyword to asssign tokens to an object and impose an ordering, and used the @em specify keyword to set values of a variable. We will revisit some of these operations in the remainder of this section as well as reviewing others.
- * @par Creating Tokens
+ * @subsection tokenCreation Creating Tokens
  * There are 2 ways to introduce a token into the plan database using NDDL transactions:
- * @li The @em goal keyword. It has the form <em>goal(class.predicate [label]);</em> where @em class designates the set of objects to which this token can be assigned and @em predicate designates the particular predicate to be created. A @em label is optionally used if later NDDL statements wish to refer to the instance to be allocated. For example, consider the statement: @verbatim goal(Navigator.At);@endverbatim This statement results in a new token in the plan database which will be in the @em active state. The object variable of the new token will be populated with the set of all instances in the Navigator class present in the database <em>at the time of token creation</em>.
+ * @li The @em goal keyword. It has the form <em>goal(objectScope.predicate [label]);</em> where @em objectScope designates the set of objects to which this token can be assigned and @em predicate designates the particular predicate to be created. A @em label is optionally used if later NDDL statements wish to refer to the instance to be allocated. For example, consider the statement: @verbatim
+goal(Navigator.At); // Allocates an anonymous active token which can be assigned to any instance of Navigator
+@endverbatim This statement results in a new token in the plan database which will be in the @ref activeToken  "active" state. The object variable of the new token will be populated with the set of all instances in the Navigator class present in the database <em>at the time of token creation</em>. Other examples include: @verbatim
+goal(nav1.At); // Allocates an anonymous active token with a singleton object variable == nav1
+goal(nav1.At t0); // Allocates a labelled active token t1 with a singleton object variable == nav1@endverbatim
  * @subsection ssec3 Closure
  * @subsection ssec4 Specifying and Resetting Variables
  * @subsection ssec5 Operations on Tokens
