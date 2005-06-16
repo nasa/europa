@@ -734,7 +734,8 @@ namespace EUROPA {
                  << rId->getInitialCapacity() << COMMA << rId->getLimitMin() << COMMA
                  << rId->getLimitMax() << COMMA;
 
-          const std::set<TransactionId>& resTrans = rId->getTransactions();
+          std::set<TransactionId> resTrans;
+	  rId->getTransactions(resTrans);
           for(std::set<TransactionId>::iterator transIt = resTrans.begin();
               transIt != resTrans.end(); ++transIt) {
             TransactionId trans = *transIt;
