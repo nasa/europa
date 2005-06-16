@@ -133,8 +133,18 @@
  * The output is shown below.
  * @include NDDL/test/compiler/RUN_composition.0_g_rt.composition.0.xml.output
  * @section nddlTx The NDDL transaction language
- * Now that we have explained the type structures available in NDDL, we can present the NDDL commands to operate on the plan database and thus initialize and/or modify a partial plan. The idea of the NDDL transaction language is to provide syntax and semantics closely related to the use of NDDL elsewhere for class, predicate and rule declaration. However, the NDDL transaction language pertains exclusively to @ref runTime "run-time" data.
+ * Now that we have explained the type structures available in NDDL, we can present the NDDL commands to operate on the plan database and thus initialize and/or modify a partial plan. The idea of the NDDL transaction language is to provide syntax and semantics closely related to the use of NDDL elsewhere for class, predicate and rule declaration. However, the NDDL transaction language pertains exclusively to @ref runTime "run-time" data. We refer to it as a transaction language since a set of statements in this language form a procedurally executed sequence of atomic operations on the plan database, which stores an instance of a partial plan. Each statement of the language is thus directly translated into one or more operations available through the DbClient interface. The NDDL transaction language has many applictaions, but the most common one is the construction of an initial partial plan as an input to a @ref solver "solver". The operations covered are:
+ * @li <em>Object Creation.</em> :-
+ * @li <em>Type Closure</em> :-
+ * @li <em>Token Creation</em> :-
+ * @li <em>Token Activation and Deactivation</em> :-
+ * @li <em>Token Merging and Splitting</em> :-
+ * @li <em>Token Rejection and Reinstating</em> :-
+ * @li <em>Global Variable Creation</em> :-
+ * @li <em>Constraint Creation</em> :-
+ * @li <em>Variable Assignment and Unassignment</em> :-
  *
+ * @subsection reviewMaterial A Quick Review
  * In @ref varsAndConstraints we covered variables and constraint creation using the NDDL transaction language. We showed:
  * @li Declaration of a variable with a default base domain - e.g. <em>int i; Colors colors;</em>
  * @li Declaration of a variable with an explicit and restricted base domain - e.g. <em> int i = 6; int j = [10 40]; Colors colors = Blue;</em>
@@ -142,7 +152,7 @@
  * @li Declaration of one variable by assignment of the contents of another - e.g. <em>Foo b = f;</em>
  * @li Allocation of a constraint - e.g. <em>eq(i, j); neq(j, k);</em>
  *
- * In @ref classes we introduced @em predicates, @em composition and @em inheritance. There we learned that constructors with arguments can be invoked explicitly , passing in values, domains or variable references - e.g. <em>Bar b = new Bar(f);</em>. We also learned that tokens can be created using the @em goal keyword. We used the @em constrain keyword to asssign tokens to an object and impose an ordering, and used the @em specify keyword to set values of a variable. We will revisit some of these operations in the remainder of this section as well as reviewing others.
+ * In @ref classes we introduced @em predicates, @em composition and @em inheritance. There we learned that constructors with arguments can be invoked explicitly , passing in values, domains or variable references - e.g. <em>Bar b = new Bar(f);</em>. We also learned that tokens can be created using the @em goal keyword. We used the @em constrain keyword to asssign tokens to an object and impose an ordering, and used the @em specify keyword to set values of a variable. We will revisit some of these operations in the remainder of this section as well as discussing new material.
  * @subsection tokenCreation Creating Tokens
  * There are 2 ways to introduce a token into the plan database using NDDL transactions:
  * @li The @em goal keyword. It has the form <em>goal(objectScope.predicate [label]);</em> where @em objectScope designates the set of objects to which this token can be assigned and @em predicate designates the particular predicate to be created. A @em label is optionally used if later NDDL statements wish to refer to the instance to be allocated. For example, consider the statement: @verbatim

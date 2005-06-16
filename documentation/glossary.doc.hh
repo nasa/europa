@@ -18,5 +18,6 @@
  * @li @anchor ruleInstanceDef Rule Instance :- an instance of a model rule, scoped to a particular token and its subgoals.
  * @li @anchor runTime Run-time Data :- those elements of a problem specification that are created or deleted during the lifetime of a @ref planDatabaseDef "plan database".  See @ref workFlow "the batch-solver process overview" for further clarification.
  * @li @anchor slaveToken Slave Token :- Any token that has been created through @ref ruleInstanceDef "rule instance" execution.
+ * @li @anchor solver Solver :- A problem solving agent which conducts refinements to a @ref partialPlanDef "partial plan" until it is completed, has exhausted all possibilities, or has exhausted all its allocated time. For more information see @ref solvers.
  * @li @anchor specifiedDomain Specified Domain :- indicates a subset of the @ref baseDomain "base domain" of a variable to which it has been @em specified by an external client.
  */
