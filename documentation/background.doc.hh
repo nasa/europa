@@ -77,9 +77,7 @@
  * @li @em pointing at a position
  * @li @em turning from one position to another.
  *
- * An @em object is an instance of a @em class, as is the case in most object-oriented paradigms. And we model using the
- * abstraction of a class to speak about all instances having certain properties of state and behavior. In order to
- * describe such state and behavior we turn build on the formalism of @em first @em order @em logic.
+ * An @em object is an instance of a @em class. In @ref europa "EUROPA" we model using the abstraction of a class to speak about all instances having certain properties of state and behavior. In order to describe such state and behavior we build on the formalism of @em first @em order @em logic.
  *
  * @subsection tqa Temporally Qualified Predicates
  * A predicate defines a relation between objects and properties. In @ref europa "EUROPA", we define such relations between @em variables

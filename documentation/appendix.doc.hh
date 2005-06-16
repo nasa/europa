@@ -7,13 +7,13 @@
  * @li @ref nddlXML.
  * @li @ref nddlGrammar
  * @section readme README
- * @include ../README
+ * @include README
  * @section building BUILDING EUROPA
- * @include ../BUILDING
+ * @include BUILDING
  * @section makeProject Template Project Generator
- * @include ../makeproject
+ * @include makeproject
  * @section nddlXML XML DTD for NDDL Parser Output
- * @include ../NDDL/core/antlr/nddl.dtd
+ * @include NDDL/core/antlr/nddl.dtd
  * @section nddlGrammar Antler Grammar file for NDDL
- * @include ../NDDL/core/antlr/nddl.g
+ * @include NDDL/core/antlr/nddl.g
  */

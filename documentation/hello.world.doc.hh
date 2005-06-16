@@ -12,7 +12,7 @@
  * While the workflow might seem complex, do not be intimidated! A convenient set of build rules have been set up to make this process quite straightforward. To try it out for yourself, follow the instructions in @ref tryItYourself.
  * @image html build.process.png
  * @section tryItYourself Trying HelloWorld
- * @include ../HELLOWORLD
+ * @include HELLOWORLD
  * @section model The Model
  * @include HelloWorld-model.nddl
  * @section initialState The Initial State
