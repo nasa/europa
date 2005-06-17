@@ -9,7 +9,7 @@ class TestObject extends Timeline {
   predicate TestPred {Foo foo;}
 }
 
-PlannerConfig world = new PlannerConfig(0, 10, 200);
+PlannerConfig world = new PlannerConfig(0, 20, 200);
 
 TestObject test1 = new TestObject();
 Foo f1 = new Foo();
@@ -28,3 +28,15 @@ g.start.specify(0);
 g.end.specify(10);
 leq(0, r.start);
 leq(r.end, 10);
+
+
+//Allocate an active and inactive token
+goal(TestObject.TestPred g1);
+rejectable(TestObject.TestPred r1);
+
+//don't close the parameter
+
+g1.start.specify(10);
+g1.end.specify(20);
+leq(10, r1.start);
+leq(r1.end, 20);
