@@ -1,0 +1,27 @@
+#include "../../core/Plasma.nddl"
+
+class Foo { // Declare a basic class with a simple predicate
+ predicate pred{int arg;}
+}
+
+Foo foo = new Foo();
+close();
+
+goal(foo.pred t0); // Initially active
+rejectable(foo.pred t1); // Initially inactive
+t1.merge(t0); // Now merged
+
+rejectable(foo.pred t2);  // Initially inactive
+t2.reject(); // Now rejected
+
+rejectable(foo.pred t3);  // Initially inactive
+t3.activate(); // Now Active
+
+rejectable(foo.pred t4);  // Initially inactive
+t4.activate(); // Now Active
+t4.cancel(); // Now inactive again
+
+// Now an example of allocating a token that can be merged or actiavted but not rejected
+rejectable(foo.pred t5); // Initially inactive
+neq(t5.state, REJECTED); // Now it can be merged or activated but not rejected
+
