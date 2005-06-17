@@ -149,29 +149,61 @@ namespace EUROPA {
     check_error(isActive());
 
     unsigned int i = 0;
-    for ( ; i < m_argCount; i++)
+
+    for (i = 0; i < m_argCount; i++)
       if (!getCurrentDomain(m_variables[i]).isOpen())
         break;
+    //if all are open, there is no meaningful action
     if (i >= m_argCount)
       return;
 
-    // Start from the first closed domain.
-    AbstractDomain& closedDom = getCurrentDomain(m_variables[i]);
-    check_error(!closedDom.isEmpty());
-    bool changedOne = true;
+    bool changed = false;
+    for(i = 1; i < m_argCount; i++) {
+      AbstractDomain& d1 = getCurrentDomain(m_variables[i-1]);
+      AbstractDomain& d2 = getCurrentDomain(m_variables[i]);
 
-    // This loop will run at most twice.
-    while (changedOne) {
-      changedOne = false;
-      for (unsigned int j = i + 1; j < m_argCount; j++) {
-        AbstractDomain& otherDom(getCurrentDomain(m_variables[j]));
-        if (!otherDom.isOpen() && closedDom.equate(otherDom)) {
-          if (closedDom.isEmpty() || otherDom.isEmpty())
-            return;
-          changedOne = true;
-        }
+      //if any are closed, all need to be closed
+      if(d1.isOpen())
+        d1.close();
+      if(d2.isOpen())
+        d2.close();
+
+      //equate the two domains.  if they become empty, just return
+      if((changed = d1.equate(d2) || changed) && d1.isEmpty())
+        return;
+    }
+
+    //if the previous process changed the domains, we need to make sure that
+    //the change occurs everywhere.  fortunately, since the n-1st variable
+    //is now equal to the intersection of all of the variables, 
+    //we can just equate backwards and they should all be equal
+    if(changed && m_argCount > 2) {
+      for(i = m_argCount - 2; i >= 1; i--) {
+        AbstractDomain& d1 = getCurrentDomain(m_variables[i]);
+        AbstractDomain& d2 = getCurrentDomain(m_variables[i-1]);
+        
+        //if the intersection of the two is empty, just return
+        if(d1.equate(d2) && d1.isEmpty())
+          return;
       }
     }
+//     // Start from the first closed domain.
+//     AbstractDomain& closedDom = getCurrentDomain(m_variables[i]);
+//     check_error(!closedDom.isEmpty());
+//     bool changedOne = true;
+
+//     // This loop will run at most twice.
+//     while (changedOne) {
+//       changedOne = false;
+//       for (unsigned int j = i + 1; j < m_argCount; j++) {
+//         AbstractDomain& otherDom(getCurrentDomain(m_variables[j]));
+//         if (!otherDom.isOpen() && closedDom.equate(otherDom)) {
+//           if (closedDom.isEmpty() || otherDom.isEmpty())
+//             return;
+//           changedOne = true;
+//         }
+//       }
+//     }
 
   }
 
@@ -265,8 +297,8 @@ namespace EUROPA {
     AbstractDomain& domy = getCurrentDomain(m_variables[Y]);
     check_error(AbstractDomain::canBeCompared(domx, domy), "Cannot compare " + domx.toString() + " and " + domy.toString() + ".");
     // Discontinue if either domain is open.
-    if (domx.isOpen() || domy.isOpen())
-      return;
+    //if (domx.isOpen() || domy.isOpen())
+    //  return;
     check_error(!domx.isEmpty() && !domy.isEmpty());
     if (!checkAndRemove(domx, domy))
       checkAndRemove(domy, domx);
