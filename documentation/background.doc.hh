@@ -111,6 +111,15 @@
  * @li @em Merged. Once @em Merged, the requirements of the given token are passed onto the designated @em active @em token in the @em partial @em plan and the @em merged token and all its @em variables and @em constraints are removed from further consideration.
  * @li @em Reject. It may be that a problem is formulated as an oversubscription problem where more goals are presented than can be satisifed. In such cases it can be useful to represent a @em rejectable @em goal i.e. one that can be rejected if it cannot be otherwise resolved. The operation to @em reject an @em inactive @em token supports this behavior. It is reversed by @em reinstate.
  * @li @em Rejected. A @em rejected @em token has no impact on the @em partial @em plan.
+ *
+ * The values in the @em state @em variable impact the @em actual state of the token and the @em reachable states of the token. The @ref baseDomain "base domain" of the <em>state variable</em> is <em>{INACTIVE, ACTIVE, MERGED, REJECTED}</em>. For a state to be @em reachable, its value must be a member of the domain of values of the <em>state variable</em>. Here are the interpretations mapping the actual states to the variable values:
+ * @li State Variable={INACTIVE, ACTIVE, MERGED, REJECTED}. State="OPEN".
+ * @li State Variable={ACTIVE, MERGED, REJECTED}. State="INACTIVE".
+ * @li State Variable={ACTIVE, MERGED}. State="INACTIVE".
+ * @li State Variable={ACTIVE, REJECTED}. State="INACTIVE".
+ * @li State Variable={ACTIVE}. State="ACTIVE".
+ * @li State Variable={MERGED}. State="MERGED".
+ * @li State Variable={REJECTED}. State="REJECTED".
  * @subsection object Objects
  * As we have noted, @em Tokens describe some aspect of an @em Object in time. @em Objects thus may have many @em Tokens in a plan in order to describe their state and behaviour throughout all points in time of the plan. Within this general framework, we note a few particulars:
  * @li @ref staticFacts "Static Facts". @em Classes without @em predicates lead to @em Objects without @em Tokens. This arises where an @em objects state or behaviour is independent of time. For example, a domain may have a set of @em locations and/or @em paths for which there is nothing more to say than that they exist.

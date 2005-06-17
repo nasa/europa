@@ -283,8 +283,10 @@ namespace EUROPA {
 
     // If it is mandatory, then activate immediately so there is less for a
     // client to figure out, or specify in the transactions
-    if (b_mandatory)
+    if (b_mandatory){
       m_client->activate(token);
+      token->getState()->restrictBaseDomain(token->getState()->lastDomain());
+    }
 
     const char * name = child->Attribute("name");
 
@@ -629,6 +631,7 @@ namespace EUROPA {
       check_error(type != NULL, "missing type for domain in transaction XML");
       const char * name = element.Attribute("name");
       check_error(name != NULL, "missing name for domain in transaction XML");
+
       AbstractDomain * domain = TypeFactory::baseDomain(type).copy();
       check_error(domain != 0, "unknown type, lack of memory, or other problem with domain in transaction XML");
       double value = TypeFactory::createValue(type, name);

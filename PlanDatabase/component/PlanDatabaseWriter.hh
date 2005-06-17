@@ -107,6 +107,7 @@ namespace EUROPA {
           check_error(false, "Token with unknown status");
       }
       printTokensHelper(os, "Active", activeTokens);
+      printTokensHelper(os, "Merged", mergedTokens);
       printTokensHelper(os, "Rejected", rejectedTokens);
       printTokensHelper(os, "Inactive", inactiveTokens);
       printTokensHelper(os, "Incomplete", incompleteTokens);

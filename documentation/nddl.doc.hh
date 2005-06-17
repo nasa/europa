@@ -168,7 +168,8 @@ goal(Navigator.At); // Allocates an anonymous active token which can be assigned
 @endverbatim This statement results in a new token in the plan database which will be in the @ref activeToken  "active" state. The object variable of the new token will be populated with the set of all instances in the Navigator class present in the database <em>at the time of token creation</em>. Other examples include: @verbatim
 goal(nav1.At); // Allocates an anonymous active token with a singleton object variable == nav1
 goal(nav1.At t0); // Allocates a labelled active token t1 with a singleton object variable == nav1@endverbatim
-* @li The @em rejectable keyword. The keyword @em rejectable is identical in form to the @em goal keyword. The only difference is that the resulting token is in an @ref inactiveToken "inactive" state and it can be @ref rejectedToken "rejected".
+Upon execution of this command, the state variable of the new token={ACTIVE}. This means that the token cannot be MERGED or REJECTED.
+* @li The @em rejectable keyword. The keyword @em rejectable is identical in form to the @em goal keyword. The only difference is that the resulting token is in an @ref inactiveToken "inactive" state and it can be @ref rejectedToken "rejected". Upon execution of this command, the state variable of the new token={ACTIVE, MERGED, REJECTED}. This means that we can activate, reject or merge the token.
  * @subsection specifyAndReset Specifying and Resetting Variables
  * In @ref varsAndConstraints we saw many examples where the domain of values of a variable was being restricted:
  * @li On construction it is restricted to the set of all values in the default base domain for the type e.g. <em>int i;</em>
@@ -181,10 +182,15 @@ eq(i, 6);@endverbatim
 
 Sometimes it is more convenient, even necessary, to directly set the value of a variable after it has been constructed. For example, token variables are created outside of your control (since they are defined in the model). Also, if once truly wants to indicate the value of a variable it is less cumbersome to set a value directly rather than post a constrant, and it is more efficient also. Finally, there is an operational difference between setting a variable to a value, and constraining it to the same value since @ref conditionalSubgoals "rules of inference" which may be conditional on this value will not be evaluated until the value is specified. A final motive for supplying a variable assignment operator is to support recording and replay of client operations on the database. Where clients are planners, they commonly bind variables to singletons using the @em specify operator. Primarily in support of this goal, we also provide a @em reset operator which reverts the variable to its base domain. Here is an example transaction sequence (and tiny model) using @em specify and @reset in a variety of ways.
  * @include NDDL/test/compiler/nddl.tx.nddl
- * And the resulting plan datasbe is printed below.
+ * And the resulting plan database is printed below.
  * @include NDDL/test/compiler/RUN_nddl.tx_g_rt.nddl.tx.xml.output
 @note Be careful using @em specify with a non singleton domain i.e. <em> v.specify([0 4])</em>. It is not guaranteed that this restriction will persist since another client could specify it to a singleton and then backtrack that assignment, which will reset the variable to its base domain. It is recommended that the @em specify operation only be used to bind singleton values. For non-singleton assignments, use a constraint.
  * @subsection tokenOperations Operations on Tokens
+ * When we first discussed @ref token "tokens" we learned that they have a specific set of internal states indicating their role and relevance in the plan database and the partial plan. We have also seen how tokens are introduced into the plan database using either @em goal or @em rejectable. The example below demonstrates the use of NDDL transactions to effect state changes in the token.
+ * @include NDDL/test/compiler/nddl.tx.0.nddl
+ * And the resulting plan database is printed below.
+ * @include NDDL/test/compiler/RUN_nddl.tx.0_g_rt.nddl.tx.0.xml.output
+ * @note There is no command currently available to allocate a token and have it be mandatory but permitting it to be @em active or @em merged. If you wish to allocate a token that can be merged or activated, but not rejected, then you must first allocate the token using the @em rejectable command, and then constrain the domain to exclude @em REJECTED as shown above. In order to do this, you must include <em>Plasma.nddl</em> which contains the introduction of the symbol @em REJECTED.
  * @section rules Model Rules
  * So far in our discussion of NDDL we have managed to avoid any real planning context, since we have not yet mentioned any means of expressing interactions among tokens other than through statements see in examples of using the @ref nddlTx. In this section we will describe the facilities in NDDL for describing relationships that must or must not exist between tokens and their variables. The components of this section are:
  * @li @ref basicRules
@@ -194,7 +200,7 @@ Sometimes it is more convenient, even necessary, to directly set the value of a 
  * @li @ref universalQuantification
  * @li @ref idioms
  * @section basicRules Basic Rule Definition
- * Let us return to our navigation example. For the careful reader, it should be clear that the proper relationships betwen @em At tokens and @em Going tokens are absent. Though we have extended a Timeline to give an indication of a total order, we have not precluded the seemingly magical movement from being <em>At(Lander)</em> and immediately switching to <em>At(Rock)</em> without actually @em Going anywhere. To rectify this, we define 2 model rules. The first defines appopriate relations that must hold for an @em active instance of the @em At predicate. The second addresses the same for @em Going.
+ * Let us return to our navigation example. The insightful reader may have observed that the proper relationships betwen @em At tokens and @em Going tokens are absent. Though we have extended a Timeline to give an indication of a total order, we have not precluded the seemingly magical movement from being <em>At(Lander)</em> and immediately switching to <em>At(Rock)</em> without actually @em Going anywhere. To rectify this, we define 2 model rules. The first defines appopriate relations that must hold for an @em active instance of the @em At predicate. The second addresses the same for @em Going.
  * @include NDDL/test/compiler/rules.0.nddl
  * @include NDDL/test/compiler/rules.0.tx.nddl
  * @include NDDL/test/compiler/RUN_rules.0.tx_g_rt.rules.0.tx.xml.output
