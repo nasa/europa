@@ -116,25 +116,36 @@ namespace EUROPA {
   }
 
   void EnumeratedDomain::set(const AbstractDomain& dom) {
-    checkError(dom.isSubsetOf(*this), 
-	       "Attempt to set to a new domain " << dom.toString() <<
-	       " that is not a subset of the current domain " << toString());
-    checkError(!dom.isSingleton(), "You must use set(double value) to set a domain to a singleton.");
-    
-    intersect(dom);
-    notifyChange(DomainListener::SET);
-  }
-
-  void EnumeratedDomain::set(double value) {
-    check_error(isMember(value), "Attempt to set to a value that is not a member of the domain.");
-
-    m_values.clear();
-    m_values.insert(value);
+    if(dom.isSingleton()){
+      set(dom.getSingletonValue());
+      return;
+    }
 
     if(isOpen())
       close();
 
-    notifyChange(DomainListener::SET_TO_SINGLETON);
+    // If there is a non-empty intersection, perform the restriction and be done with it.
+    if(intersects(dom)){
+      intersect(dom);
+      notifyChange(DomainListener::SET);
+    }
+    else // Empty the domain
+      empty();
+  }
+
+  void EnumeratedDomain::set(double value) {
+    if(isOpen())
+      close();
+
+    if(isMember(value)){
+      m_values.clear();
+      m_values.insert(value);
+      // Generate the notification, even if already a singleton. This is because setting a value to a singleton
+      // is different from restricting it.
+      notifyChange(DomainListener::SET_TO_SINGLETON);
+    }
+    else
+      empty();
   }
 
   void EnumeratedDomain::reset(const AbstractDomain& dom) {

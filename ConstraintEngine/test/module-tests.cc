@@ -337,6 +337,7 @@ public:
     runTest(testDynamicVariable);
     runTest(testListener);
     runTest(testVariablesWithOpenDomains);
+    runTest(testRestrictionScenarios);
     return true;
   }
 
@@ -550,6 +551,38 @@ private:
     assertTrue(v0.baseDomain().isClosed());
     assertTrue(v0.isClosed());
 
+    return true;
+  }
+
+  static bool testRestrictionScenarios(){
+    EnumeratedDomain e0(true, "Test");
+    e0.insert(0); e0.insert(1); e0.insert(2); e0.insert(3);
+    e0.close();
+
+    EnumeratedDomain e1(true, "Test");
+    e1.insert(1); e1.insert(3);
+    e1.close();
+
+    Variable<EnumeratedDomain> v0(ENGINE, e0);
+    Variable<EnumeratedDomain> v1(ENGINE, e0);
+
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
+
+    // Specify v0 and propagate
+    v0.specify(1);
+    assertTrue(ENGINE->propagate());
+
+    // Now v1's derived domain will also be a singleton. However, I want to restrict the base domain of v1 partially.
+    v1.restrictBaseDomain(e1);
+    assertTrue(ENGINE->propagate());
+
+    // Now specify v1 to a singleton also, a different value than that already specified.
+    v1.specify(3);
+    assertFalse(ENGINE->propagate());
+
+    // Repair by reseting v0
+    v0.reset();
+    assertTrue(ENGINE->propagate());
     return true;
   }
 };

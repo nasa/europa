@@ -194,27 +194,25 @@ namespace EUROPA {
   }
  
   void IntervalDomain::set(const AbstractDomain& dom) {
-    // David Rijsman filed GNAT 2963
-    //checkError(dom.isSubsetOf(*this), 
-    //"Attempt to set to a new domain " << dom.toString() << 
-    //" that is not a subset of the current domain " << toString());
-
     checkError(!dom.isSingleton(), "You must use set(double value) to set a domain to a singleton.");
     
     safeComparison(*this, dom);
     
     intersect(dom);
-    notifyChange(DomainListener::SET);
+
+    if(!isEmpty())
+      notifyChange(DomainListener::SET);
   }
  
   void IntervalDomain::set(double value) {
-    checkError(isMember(value), "Attempt to set to " << value << " which is not a member of the " << toString());
-    
-    m_lb = value;
-    m_ub = value;
+    if(!isMember(value))
+      empty();
+    else {
+      m_lb = value;
+      m_ub = value;
  
-    notifyChange(DomainListener::SET_TO_SINGLETON);
- 
+      notifyChange(DomainListener::SET_TO_SINGLETON);
+    }
   }
 
   bool IntervalDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const {
