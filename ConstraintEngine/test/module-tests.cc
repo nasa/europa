@@ -475,9 +475,10 @@ private:
 
       // Post equality constraint between v0 and v1. It should not cause any restriction yet
       // since v0 has not been closed      
+      //this test has been invalidated since we now propagate closed-ness, so the size should be 1
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
       assertTrue(ENGINE->propagate());
-      assertTrue(v1.getDerivedDomain().getSize() == 3);
+      assertTrue(v1.getDerivedDomain().getSize() == 1);
 
       // Now close v0, and we should see a restriction on v1
       v0.close();
@@ -492,7 +493,7 @@ private:
       // Open it and ensure that the engine is pending once again
       v0.open();
       assertTrue(ENGINE->pending());
-      assertTrue(v1.getDerivedDomain().getSize() == 3);
+      assertTrue(v1.getDerivedDomain().getSize() == 2);
 
       v0.specify(2);
       assertTrue(v0.specifiedDomain().isClosed());
@@ -897,6 +898,10 @@ private:
 
       NumericDomain e2;
       e2.insert(5);
+      
+      assertTrue(e0.isOpen());
+      assertTrue(e1.isOpen());
+      assertTrue(e2.isOpen());
       // Leave domains dynamic
 
       Variable<NumericDomain> a(ENGINE, e0);
@@ -908,21 +913,32 @@ private:
 			 makeScope(a.getId(), b.getId(), c.getId()));
       assertTrue(ENGINE->propagate());
 
-      // Now close one only. Should not change anything else.
+      //if they're all open, there should be no change
+      assertTrue(a.lastDomain().isOpen());
+      assertTrue(a.lastDomain() == e0);
+      assertTrue(b.lastDomain().isOpen());
+      assertTrue(b.lastDomain() == e1);
+      assertTrue(c.lastDomain().isOpen());
+      assertTrue(c.lastDomain() == e2);
+
+      c.insert(3); //want to have a common element so there's no empty
+      e2.insert(3);
+      e2.remove(5);
+
+      // Now close one
       b.close();
+      e2.close(); //close the domain for comparison
       assertTrue(b.lastDomain().getSize() == 4);
       assertTrue(ENGINE->propagate());
+     
+      //all should be closed
+      assertTrue(!a.lastDomain().isOpen());
+      assertTrue(a.lastDomain() == e2);
+      assertTrue(!b.lastDomain().isOpen());
+      assertTrue(b.lastDomain() == e2);
+      assertTrue(!c.lastDomain().isOpen());
+      assertTrue(c.lastDomain() == e2);
 
-      // Close another, should see partial restriction
-      a.close();
-      assertTrue(a.lastDomain().getSize() == 3);
-      assertTrue(ENGINE->propagate());
-      assertTrue(a.lastDomain().getSize() == 3);
-      assertTrue(b.lastDomain().getSize() == 3);
-
-      // By closing the final variables domain
-      c.close();
-      assertTrue(!ENGINE->propagate());
     }
 
     // Create a fairly large multi-variable test that will ensure we handle the need for 2 passes.
