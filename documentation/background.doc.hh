@@ -8,7 +8,7 @@
  * @li @ref partialPlan
  * @li @ref planDb
  * @li @ref problemSolving
- * @li @ref summary.
+ * @li @ref summary
  *
  * @section csp Constraint Satisfaction Problems
  * @ref europa "EUROPA" is based on translating a representation of a plan into a graph of constraints and variables. Solving a planning
@@ -147,6 +147,7 @@
  *
  * @image html partialPlan.1.png
  * @section planDb The Idea of a Plan Database
+ * @image html applications.png
  * @section problemSolving Problem Solving
  * @ref europa "EUROPA" is designed first and foremost to solve planning and scheduling problems. In classical planning a planning problem is presented in terms of an @em initial @em state and a @em goal @em state. It is the role of a @em planner to derive the appropriate actions and orderings to flesh out a legal plan to go from one to the other. This is referred to as @em state @em space @em planning since the nodes in the search towards a solution vary in the states they result in based on planning operators selected. In contrast, @ref europa "EUROPA" formulates a planning problem as an initial @em partial @em plan which is @em refined through a series of refinement operations into a final plan that is complete with respect to the requirements of the planner. This approach is referred to as @ref refinementSearch "refinement search" and/or @em plan-space @em planning, since each node represents a different @em partial @em plan obtained by application of a particular refinement operator to a predecessor. In this section, we outline a general algorithm for @ref refinementSearch "refinement search". We then examine in more detail the nature of @ref flaws "flaws" and methods of @ref flaws "flaw resolution". For further details on the framework provided in @ref europa "EUROPA" for implementing custom problem-solvers, the reader is referred to @ref solvers.
  * @subsection refinementSearch Refinement Search

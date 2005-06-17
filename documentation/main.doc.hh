@@ -1,9 +1,7 @@
 /**
  * @mainpage EUROPA 2 
  * @section intro Introduction
- * EUROPA 2 is a specialized database for specification, storage and manipulation of plans.
- * It is used primarily for developing planning and scheduling applications and/or
- * embedding planning and scheduling capabilities within a broader system architecture.
+ * EUROPA 2 is a specialized database for specification, storage and manipulation of plans. Consequently, the main technology product in EUROPA 2 is called a @ref planDb "plan database".. It is used primarily for developing planning and scheduling applications and/or embedding planning and scheduling capabilities within a broader system architecture.
  *
  * EUROPA 2 is built on the formulation of planning and scheduling as a process of 
  * refinement of a dynamic constraint network. To that end it provides the following key capabilities:
