@@ -191,8 +191,19 @@ Sometimes it is more convenient, even necessary, to directly set the value of a 
  * And the resulting plan database is printed below.
  * @include NDDL/test/compiler/RUN_nddl.tx.0_g_rt.nddl.tx.0.xml.output
  * @note There is no command currently available to allocate a token and have it be mandatory but permitting it to be @em active or @em merged. If you wish to allocate a token that can be merged or activated, but not rejected, then you must first allocate the token using the @em rejectable command, and then constrain the domain to exclude @em REJECTED as shown above. In order to do this, you must include <em>Plasma.nddl</em> which contains the introduction of the symbol @em REJECTED.
+ * @subsection orderAndDisorder Token Relationships
+ * In addition to the general capability of creating constraints among variables, NDDL supports special kinds of relationships to be stated among tokens. These relationships are based on the @ref allenRelations introduced in @ref Allen91. The general form for specification of these relations in @ref nddlTx is a binary relation - @verbatim tokenA relationName tokenB;@endverbatim This imposes the specified relation @em relationName between @em tokenA and @em tokenB. Common examples are illustrated in the example below.
+ * @include NDDL/test/compiler/nddl.tx.1.nddl
+ * Note that each relation is followed by the corresponding constraints that would be generated. They have no effect in this case on the outcome since they are redundant. If you don't believe me, comment them out and observe the results are unchanged! The resulting plan database is printed below.
+ * @include NDDL/test/compiler/RUN_nddl.tx.1_g_rt.nddl.tx.1.xml.output
+ * A very specific type of ordering relation, @em constrain, is supported which is equivalent to the @em before temporal relation in terms of its effect on the timepoints of the variable. However, it is @em object specific and is used to also indicate an assignment of the tokens involved on the timeline. Unlike the situation with temporal relations, this operation can be reveresed using the @em free operation. These operations are the basis for resolving @ref flaws "threats". The example below illustrates usage of these 2 operators.
+ * @include NDDL/test/compiler/nddl.tx.2.nddl
+ * The resulting partial plan is listed below.
+ * @include NDDL/test/compiler/RUN_nddl.tx.2_g_rt.nddl.tx.2.xml.output
+ * @note @em constrain can only be applied to @em active tokens
+ * @note @free can only be applied to tokens that have been @em constrained
  * @section rules Model Rules
- * So far in our discussion of NDDL we have managed to avoid any real planning context, since we have not yet mentioned any means of expressing interactions among tokens other than through statements see in examples of using the @ref nddlTx. In this section we will describe the facilities in NDDL for describing relationships that must or must not exist between tokens and their variables. The components of this section are:
+ * So far in our discussion of NDDL we have managed to avoid any real planning context, since we have not yet mentioned any means of expressing interactions among tokens other than through statements seen in examples of the @ref nddlTx. In this section we will describe the facilities in NDDL for describing relationships that must or must not exist between tokens and their variables. The components of this section are:
  * @li @ref basicRules
  * @li @ref allenRelations
  * @li @ref conditionalSubgoals
