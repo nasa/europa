@@ -133,17 +133,19 @@
  * The output is shown below.
  * @include NDDL/test/compiler/RUN_composition.0_g_rt.composition.0.xml.output
  * @section nddlTx The NDDL transaction language
- * Now that we have explained the type structures available in NDDL, we can present the NDDL commands to operate on the plan database and thus initialize and/or modify a partial plan. The idea of the NDDL transaction language is to provide syntax and semantics closely related to the use of NDDL elsewhere for class, predicate and rule declaration. However, the NDDL transaction language pertains exclusively to @ref runTime "run-time" data. We refer to it as a transaction language since a set of statements in this language form a procedurally executed sequence of atomic operations on the plan database, which stores an instance of a partial plan. Each statement of the language is thus directly translated into one or more operations available through the DbClient interface. The NDDL transaction language has many applictaions, but the most common one is the construction of an initial partial plan as an input to a @ref solver "solver". The operations covered are:
- * @li <em>Object Creation.</em> :-
- * @li <em>Type Closure</em> :-
- * @li <em>Token Creation</em> :-
- * @li <em>Token Activation and Deactivation</em> :-
- * @li <em>Token Merging and Splitting</em> :-
- * @li <em>Token Rejection and Reinstating</em> :-
- * @li <em>Global Variable Creation</em> :-
- * @li <em>Constraint Creation</em> :-
- * @li <em>Variable Assignment and Unassignment</em> :-
+ * Now that we have explained the type structures available in NDDL, we can present the NDDL commands to operate on the plan database and thus initialize and/or modify a partial plan. The idea of the NDDL transaction language is to provide syntax and semantics closely related to the use of NDDL elsewhere for class, predicate and rule declaration. However, the NDDL transaction language pertains exclusively to @ref runTime "run-time" data. We refer to it as a transaction language since a set of statements in this language form a procedurally executed sequence of atomic operations on the plan database, which stores an instance of a partial plan. Each statement of the language is thus directly translated into one or more operations available through the DbClient interface. The NDDL transaction language has many applictaions, but the most common one is the construction of an initial partial plan as an input to a @ref solver "solver". A second important application is to log transactions on the database for later replay. This is useful for copying a database, and for reproducing a state found through planning in a direct manner without having to search. It is also a potentially very useful integration mechanism for pushing updates to the database from external systems. The operations covered are:
+ * @li @ref reviewMaterial "Global Variable Creation" :- The means to declare and define a global variable which can be referenced by subsequent statements in a transaction sequence or from within the model.
+ * @li @ref reviewMaterial "Constraint Creation" :- The means to create a instance of a given registered constraint between any variables referenceable in the transaction sequence.
+ * @li @ref reviewMaterial "Object Creation" :- The means to allocate instances of any class declared in the model, using any of the declared constructors.
+ * @li @ref closure "Type Closure" :- The means to indicate that no new instances of a class shall be created. Unless explcitly closed, all types remain open.
+ * @li @ref tokenCreation "Token Creation" :- The means to allocate instances of any predicate declared in the model.
+ * @li @ref specifyAndReset "Variable Assignment and Unassignment" :- The means to commit to specific values or domains for any variable referencable in the transaction sequence and to withdraw that commitment.
+ * @li @ref tokenOperations "Token Activation and Deactivation" :- The means to force a token to be @ref activeToken "active", and the means to retract from this state.
+ * @li @ref tokenOperations "Token Merging and Splitting" :- The means to force a token to be @ref mergedToken "merged", and the means to retract from this state.
+ * @li @ref tokenOperations "Token Rejection and Reinstating" :- The means to force a token to be @ref rejectedToken "rejected", and the means to retract from this state.
  *
+ * @note <b>Inconsistency is not an option.</b> It is a limitation imposed by the procedure which processes NDDL transactions sequences that the plan database must be conststent after each step. If an inconsistency is found, it will abort the program. 
+ * @note <b>NDDL not necessary.</b> The NDDL language described in this section is converted to an xml-based language as described in @ref workFlow. It is not strictly necessary to use the NDDL syntax and one can work directly in XML if appropriate.
  * @subsection reviewMaterial A Quick Review
  * In @ref varsAndConstraints we covered variables and constraint creation using the NDDL transaction language. We showed:
  * @li Declaration of a variable with a default base domain - e.g. <em>int i; Colors colors;</em>
@@ -153,6 +155,12 @@
  * @li Allocation of a constraint - e.g. <em>eq(i, j); neq(j, k);</em>
  *
  * In @ref classes we introduced @em predicates, @em composition and @em inheritance. There we learned that constructors with arguments can be invoked explicitly , passing in values, domains or variable references - e.g. <em>Bar b = new Bar(f);</em>. We also learned that tokens can be created using the @em goal keyword. We used the @em constrain keyword to asssign tokens to an object and impose an ordering, and used the @em specify keyword to set values of a variable. We will revisit some of these operations in the remainder of this section as well as discussing new material.
+ * @subsection closure Type Closure
+ * Most commonly, all objects are instantiated in the PlanDatabase before any tokens or constraints are added. Furthermore, once all the objects are created, it is typical to indicate to the database that no more objects can be added. The most straightforward way to accomplsih this is with the statement: @verbatim close(); // Close the plan database. Now new objects can be added @endverbatim Under certain circumstances, it may be prefereable to allow objects of a particular type to be created throughout the lifetime of the plan database. The motivation for this is described elsewhere when we discuss @ref dynamicObjects. However, at this juncture we shall simply state the NDDL statements to allow partial closure. The general form of such a statement is <em>class.close();</em> To prohibit further instantiation of objects of type @em class. Here are some examples: @verbatim
+Rover.close(); // Close the database to new Rover instances (and any subclasses).
+Timeline.close(); // Close the database to new Timeline instances (and any subclasses).@endverbatim
+Any attempt to allocate an instance of a @em class that has been closed will result in an error. By default, all types remain open until they are explcitly closed.
+Unless you have specialized requirements for @ref dynamicObjects, you should always insert a @verbatim close();@endverbatim before creating any tokens. There is no operation to open a class once it has been closed.
  * @subsection tokenCreation Creating Tokens
  * There are 2 ways to introduce a token into the plan database using NDDL transactions:
  * @li The @em goal keyword. It has the form <em>goal(objectScope.predicate [label]);</em> where @em objectScope designates the set of objects to which this token can be assigned and @em predicate designates the particular predicate to be created. A @em label is optionally used if later NDDL statements wish to refer to the instance to be allocated. For example, consider the statement: @verbatim
@@ -160,9 +168,23 @@ goal(Navigator.At); // Allocates an anonymous active token which can be assigned
 @endverbatim This statement results in a new token in the plan database which will be in the @ref activeToken  "active" state. The object variable of the new token will be populated with the set of all instances in the Navigator class present in the database <em>at the time of token creation</em>. Other examples include: @verbatim
 goal(nav1.At); // Allocates an anonymous active token with a singleton object variable == nav1
 goal(nav1.At t0); // Allocates a labelled active token t1 with a singleton object variable == nav1@endverbatim
- * @subsection ssec3 Closure
- * @subsection ssec4 Specifying and Resetting Variables
- * @subsection ssec5 Operations on Tokens
+* @li The @em rejectable keyword. The keyword @em rejectable is identical in form to the @em goal keyword. The only difference is that the resulting token is in an @ref inactiveToken "inactive" state and it can be @ref rejectedToken "rejected".
+ * @subsection specifyAndReset Specifying and Resetting Variables
+ * In @ref varsAndConstraints we saw many examples where the domain of values of a variable was being restricted:
+ * @li On construction it is restricted to the set of all values in the default base domain for the type e.g. <em>int i;</em>
+ * @li On construction it is restricted to an explict domain e.g. <em>int i = [0 100];</em>
+ * @li On construction it is restricted to a singleton value e.g. <em>int i = 10;</em>
+ * @li A constraint is posted on the variable relating it to another variable, domain or value:@verbatim
+eq(i, j);
+eq(i, [10 20]);
+eq(i, 6);@endverbatim
+
+Sometimes it is more convenient, even necessary, to directly set the value of a variable after it has been constructed. For example, token variables are created outside of your control (since they are defined in the model). Also, if once truly wants to indicate the value of a variable it is less cumbersome to set a value directly rather than post a constrant, and it is more efficient also. Finally, there is an operational difference between setting a variable to a value, and constraining it to the same value since @ref conditionalSubgoals "rules of inference" which may be conditional on this value will not be evaluated until the value is specified. A final motive for supplying a variable assignment operator is to support recording and replay of client operations on the database. Where clients are planners, they commonly bind variables to singletons using the @em specify operator. Primarily in support of this goal, we also provide a @em reset operator which reverts the variable to its base domain. Here is an example transaction sequence (and tiny model) using @em specify and @reset in a variety of ways.
+ * @include NDDL/test/compiler/nddl.tx.nddl
+ * And the resulting plan datasbe is printed below.
+ * @include NDDL/test/compiler/RUN_nddl.tx_g_rt.nddl.tx.xml.output
+@note Be careful using @em specify with a non singleton domain i.e. <em> v.specify([0 4])</em>. It is not guaranteed that this restriction will persist since another client could specify it to a singleton and then backtrack that assignment, which will reset the variable to its base domain. It is recommended that the @em specify operation only be used to bind singleton values. For non-singleton assignments, use a constraint.
+ * @subsection tokenOperations Operations on Tokens
  * @section rules Model Rules
  * So far in our discussion of NDDL we have managed to avoid any real planning context, since we have not yet mentioned any means of expressing interactions among tokens other than through statements see in examples of using the @ref nddlTx. In this section we will describe the facilities in NDDL for describing relationships that must or must not exist between tokens and their variables. The components of this section are:
  * @li @ref basicRules
@@ -171,7 +193,7 @@ goal(nav1.At t0); // Allocates a labelled active token t1 with a singleton objec
  * @li @ref existentialQuantification
  * @li @ref universalQuantification
  * @li @ref idioms
- * @subsection basicRules Basic Rule Definition
+ * @section basicRules Basic Rule Definition
  * Let us return to our navigation example. For the careful reader, it should be clear that the proper relationships betwen @em At tokens and @em Going tokens are absent. Though we have extended a Timeline to give an indication of a total order, we have not precluded the seemingly magical movement from being <em>At(Lander)</em> and immediately switching to <em>At(Rock)</em> without actually @em Going anywhere. To rectify this, we define 2 model rules. The first defines appopriate relations that must hold for an @em active instance of the @em At predicate. The second addresses the same for @em Going.
  * @include NDDL/test/compiler/rules.0.nddl
  * @include NDDL/test/compiler/rules.0.tx.nddl

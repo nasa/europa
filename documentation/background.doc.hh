@@ -6,6 +6,7 @@
  * @li @ref stp
  * @li @ref planRep
  * @li @ref partialPlan
+ * @li @ref planDb
  * @li @ref problemSolving
  * @li @ref summary.
  *
@@ -62,8 +63,9 @@
  * first is the notion of an @em Object and the second is the notion of a @em Token. To explain these concepts, we use
  * an example of a satellite which has a camera on board to take pictures. It also has an attitude control
  * system that is responsible for holding a position and altering the position from one attitude to another in order to
- * take the next picture.
- *
+ * take the next picture. Before getting into that however, we must first spend some more time discussing the particulars of @em variables in EUROPA which tie directly in to their representation in @ref csp but which have some particulars (one might say quirks) which must be understood.
+ * @subsection variables Variables
+ * Talk about base, specified and derived domains. This really confuses people!
  * @subsection objects Objects
  * The things we wish to describe and refer to in a domain are considered @em Objects. As in the case with object-oriented
  * analysis and design, one can seek out the nouns in any domain description to find likely objects. In our example,
@@ -135,6 +137,7 @@
  * Within a domain described by such a model, a @em partial @em plan of the form depicted below would be allowed. There we see @em ac1,  an instance of an @em AttitudeController, which contains 3 tokens. Given our model fragment above, we might imagine that the @em Turning token gave rise to each of its adjacent @em Pointing tokens. Note the constraints equating timepoints and parameters. 'D12' and 'Ast' are instances of the class @em position. The @em partial @em plan shown can be described as: "ac1 is pointing at D12 for some time between 0 and 15, whereafter it turns to Ast. It will be pointing at Ast for some time between 2 and 60."
  *
  * @image html partialPlan.1.png
+ * @section planDb The Idea of a Plan Database
  * @section problemSolving Problem Solving
  * @ref europa "EUROPA" is designed first and foremost to solve planning and scheduling problems. In classical planning a planning problem is presented in terms of an @em initial @em state and a @em goal @em state. It is the role of a @em planner to derive the appropriate actions and orderings to flesh out a legal plan to go from one to the other. This is referred to as @em state @em space @em planning since the nodes in the search towards a solution vary in the states they result in based on planning operators selected. In contrast, @ref europa "EUROPA" formulates a planning problem as an initial @em partial @em plan which is @em refined through a series of refinement operations into a final plan that is complete with respect to the requirements of the planner. This approach is referred to as @ref refinementSearch "refinement search" and/or @em plan-space @em planning, since each node represents a different @em partial @em plan obtained by application of a particular refinement operator to a predecessor. In this section, we outline a general algorithm for @ref refinementSearch "refinement search". We then examine in more detail the nature of @ref flaws "flaws" and methods of @ref flaws "flaw resolution". For further details on the framework provided in @ref europa "EUROPA" for implementing custom problem-solvers, the reader is referred to @ref solvers.
  * @subsection refinementSearch Refinement Search

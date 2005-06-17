@@ -32,7 +32,8 @@
  * @li @ref nddl. Provides an in-depth tutorial on the practice of building domain models using the NDDL modeling language.
  * @li @ref solvers. Will teach the reader to define problem instances, assemble a suitable solver for the problem at hand, and customize search control. 
  * @li @ref system. The system architecture is described in detail to convey the underlying structure of EUROPA and the roles and responsibilities of different modules. 
- * @li @ref trouble. A trouble-shooting guide presents tools and techniques for detection and diagnosis of problems using EUROPA. 
+ * @li @ref trouble. A trouble-shooting guide presents tools and techniques for detection and diagnosis of problems using EUROPA.
+ * @li @ref lorax. Puts it all together to tackle a real domain, based on recent application of EUROPA to the Life-ObseRving Antarctic eXplorer (LORAX) project. Here we tackle modeling, solver assembly and customization, custom constraint development, and more. We also discuss alternative approaches and trade-offs.
  * @li @ref relatedwork. For the interested reader a chapter on @ref relatedwork is provided with @ref references.
  * @li @ref appendix. Contains a variety of detailed reference material that may be of interest.
  *
