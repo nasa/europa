@@ -2,7 +2,7 @@
 #include "classes.0.nddl"
 
 // Include built-in class definitions. This is where we find the declaration of Timeline
-#include "../../core/Plasma.nddl"
+#include "Plasma.nddl"
 
 // Declare a class for describing basic Navigation state and action.
 class Navigator extends Timeline {

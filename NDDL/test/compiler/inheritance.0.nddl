@@ -1,5 +1,5 @@
 // Include built-in class definitions.
-#include "../../core/Plasma.nddl"
+#include "Plasma.nddl"
 
 // Declare a simple class hierarchy, derived from built-in class Object
 class Foo extends Object {}

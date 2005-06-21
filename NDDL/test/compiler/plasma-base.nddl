@@ -3,7 +3,7 @@
 // objects without imposing the default of a Timeline implementation
 //////////////////////////////////////////////////////////////
 
-#include "../../core/Plasma.nddl"
+#include "Plasma.nddl"
 
 class BaseTimeline extends Timeline {
  predicate p0{};

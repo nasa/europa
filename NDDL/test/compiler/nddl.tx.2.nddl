@@ -1,4 +1,5 @@
-class Foo { // Declare a basic class with a set of simple predicates
+// Declare a basic class with a set of simple predicates
+class Foo { 
  predicate pred0{}
  predicate pred1{}
  predicate pred2{}
@@ -39,7 +40,7 @@ foo1.constrain(t0, t1);
 // Now free it to illustrate the reversal. Should see that it is unassigned.
 foo1.free(t0, t1);
 
-// Add some additional temporal relatiosn to create a total order
+// Add some additional temporal relations to create a total order
 t0 before t1;
 t0 before t2;
 t3 before t4;

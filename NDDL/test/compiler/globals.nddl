@@ -1,4 +1,4 @@
-#include "../../core/Plasma.nddl"
+#include "Plasma.nddl"
 
 /**
  * Test use of global variables in various scopes.

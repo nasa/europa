@@ -1,5 +1,5 @@
-#include "../../core/Core.nddl"
-#include "../../core/Resources.nddl"
+#include "Core.nddl"
+#include "Resources.nddl"
 
 class Battery extends Resource {
  predicate change{
