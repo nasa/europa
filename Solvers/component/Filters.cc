@@ -7,6 +7,22 @@
 namespace EUROPA {
   namespace SOLVERS {
 
+    InfiniteDynamicFilter::InfiniteDynamicFilter(const TiXmlElement& configData)
+      : VariableMatchingRule(configData) {
+      debugMsg("InfiniteDynamicFilter:constructor", "Constructing an InfiniteDynamicFilter.");
+    }
+
+    bool InfiniteDynamicFilter::matches(const ConstrainedVariableId& var) const {
+      debugMsg("InfiniteDynamicFilter:matches", "Evaluating " << var->toString() << " for dynamic/infinite filter.");
+      debugMsg("InfiniteDynamicFilter:matches", var->lastDomain() << " isOpen : " << var->lastDomain().isOpen());
+      debugMsg("InfiniteDynamicFilter:matches", var->lastDomain() << " isInfinite : " << var->lastDomain().isInfinite());
+      return (var->lastDomain().isOpen() || var->lastDomain().isInfinite());
+    }
+
+    std::string InfiniteDynamicFilter::getExpression() const {
+      return "infinite/dynamic";
+    }
+
     SingletonFilter::SingletonFilter(const TiXmlElement& configData)
       : VariableMatchingRule(configData) {}
 

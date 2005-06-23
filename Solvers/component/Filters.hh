@@ -10,6 +10,18 @@
  */
 namespace EUROPA {
   namespace SOLVERS {
+
+    /**
+     * @brief Will filter a variable out until its derived domain is closed
+     * and finite.
+     */
+    class InfiniteDynamicFilter : public VariableMatchingRule {
+    public:
+      InfiniteDynamicFilter(const TiXmlElement& configData);
+      bool matches(const ConstrainedVariableId& var) const;
+      std::string getExpression() const;
+    };
+
     /**
      * @brief Will filter a variable out until its derived domain becomes a singleton.
      */
