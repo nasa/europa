@@ -5,6 +5,7 @@
 #include "FlawManager.hh"
 #include "OpenConditionDecisionPoint.hh"
 #include "PlanDatabaseListener.hh"
+#include "MatchingRule.hh"
 
 #include <vector>
 
@@ -76,6 +77,6 @@ namespace EUROPA {
 }
 
 #define REGISTER_TOKEN_DECISION_FACTORY(CLASS, NAME)\
-REGISTER_DECISION_FACTORY(CLASS, Token, TokenMatchingRule, NAME);
+REGISTER_DECISION_FACTORY(CLASS, EUROPA::Token, EUROPA::SOLVERS::TokenMatchingRule, NAME);
 
 #endif

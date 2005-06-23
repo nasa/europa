@@ -127,6 +127,6 @@ namespace EUROPA {
 }
 
 #define REGISTER_VARIABLE_DECISION_FACTORY(CLASS, NAME)\
-REGISTER_DECISION_FACTORY(CLASS, ConstrainedVariable, VariableMatchingRule, NAME);
+REGISTER_DECISION_FACTORY(CLASS, EUROPA::ConstrainedVariable, EUROPA::SOLVERS::VariableMatchingRule, NAME);
 
 #endif
