@@ -59,7 +59,7 @@ echo "SubDir "$NAME" ;" >> $DIRECTORY/Jamfile
 echo "" >> $DIRECTORY/Jamfile
 echo "if ! \$("$NAME"_READY) {" >> $DIRECTORY/Jamfile
 echo " # Create a build target to run a problem" >> $DIRECTORY/Jamfile
-echo " RunProblem "$NAME" : "$NAME"-initial-state.nddl : "$NAME"-planner ;" >> $DIRECTORY/Jamfile
+echo " RunProblem "$NAME" : "$NAME"-initial-state.nddl : "$NAME"-planner : PlannerConfig.xml ;" >> $DIRECTORY/Jamfile
 echo "" >> $DIRECTORY/Jamfile
 echo " # Create a build target for the planner executable with the given model." >> $DIRECTORY/Jamfile
 echo " NddlMain "$NAME"-planner : "$NAME"-Main.cc : "$NAME"-model.nddl : System : "$NAME"-planner ;" >> $DIRECTORY/Jamfile
@@ -111,8 +111,8 @@ echo "Adding "$NAME"-initial-state.nddl"
 echo "#include \""$NAME"-model.nddl\"" >> $DIRECTORY/$NAME-initial-state.nddl
 echo "" >> $DIRECTORY/$NAME-initial-state.nddl
 echo "// Create a planner configuration instance in PLASMA." >> $DIRECTORY/$NAME-initial-state.nddl
-echo "// Horizon Start, Horizon End, MaxPlannerSteps" >> $DIRECTORY/$NAME-initial-state.nddl
-echo "PlannerConfig plannerConfiguration = new PlannerConfig(0, 1000, 500);" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "// Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "PlannerConfig plannerConfiguration = new PlannerConfig(0, 1000, 500, +inf);" >> $DIRECTORY/$NAME-initial-state.nddl
 echo "" >> $DIRECTORY/$NAME-initial-state.nddl
 echo "// Sample object" >> $DIRECTORY/$NAME-initial-state.nddl
 echo "YourObject object = new YourObject();" >> $DIRECTORY/$NAME-initial-state.nddl
@@ -150,3 +150,11 @@ then
 fi
 echo "Adding Debug.cfg"
 cp ./NDDL/test/project/Debug.cfg $DIRECTORY/Debug.cfg
+
+if [ -e $DIRECTORY/PlannerConfig.xml ]
+then
+  echo "error: "$DIRECTORY"/PlannerConfig.xml already exists"
+  exit -1
+fi
+echo "Adding PlannerConfig.xml"
+cp ./System/test/DefaultPlannerConfig.xml $DIRECTORY/PlannerConfig.xml
