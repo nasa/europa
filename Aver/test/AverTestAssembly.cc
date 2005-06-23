@@ -43,12 +43,14 @@
 #include "Utils.hh"
 
 // Planner Support
-#include "CBPlannerDefs.hh"
-#include "CBPlanner.hh"
+//#include "CBPlannerDefs.hh"
+//#include "CBPlanner.hh"
+#include "Solver.hh"
 #include "PartialPlanWriter.hh"
-#include "Horizon.hh"
-#include "DecisionManager.hh"
-#include "ResourceOpenDecisionManager.hh"
+//#include "Horizon.hh"
+//#include "DecisionManager.hh"
+//#include "ResourceOpenDecisionManager.hh"
+
 
 // Test Support
 //#include "PLASMAPerformanceConstraint.hh"
@@ -57,23 +59,32 @@
 
 #include "AverInterp.hh"
 
+#ifndef TIXML_USE_STL
+#define TIXML_USE_STL
+#endif
+#include "tinyxml.h"
+
 #include <string>
 #include <fstream>
 
 #define PPW_WITH_PLANNER
 
 const char* TX_LOG = "TransactionLog.xml";
+const char* s_plannerConfig = "DefaultPlannerConfig.xml";
 
 namespace EUROPA {
 
   AverTestAssembly::AverTestAssembly(const SchemaId& schema, const char* averFile) : StandardAssembly(schema) { 
-    m_planner = (new CBPlanner(m_planDatabase, m_horizon.getId()))->getId();
-    AverInterp::init(averFile, m_planner->getDecisionManager(), m_constraintEngine, m_planDatabase, m_rulesEngine);
+    //m_planner = (new CBPlanner(m_planDatabase, m_horizon.getId()))->getId();
+    TiXmlDocument doc(s_plannerConfig);
+    doc.LoadFile();
+    m_planner = (new SOLVERS::Solver(m_planDatabase, *(doc.RootElement())))->getId();
+    AverInterp::init(averFile, m_planner, m_constraintEngine, m_planDatabase, m_rulesEngine);
   }
 
   AverTestAssembly::~AverTestAssembly() {
     AverInterp::terminate();
-    delete (CBPlanner*) m_planner;
+    delete (SOLVERS::Solver*) m_planner;
   }
 
   /**
@@ -84,8 +95,8 @@ namespace EUROPA {
     isInitialized() = true;
   }
 
-  CBPlanner::Status AverTestAssembly::plan(const char* txSource, const char* averFile){
-    return CBPlanner::PLAN_FOUND;
+  int AverTestAssembly::plan(const char* txSource, const char* averFile){
+    return 2;
   }
 
   void AverTestAssembly::replay(const DbClientTransactionLogId& txLog) {

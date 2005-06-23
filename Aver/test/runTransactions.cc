@@ -1,8 +1,9 @@
 #include "Nddl.hh"
 
-#include "CBPlanner.hh"
-#include "DecisionPoint.hh"
-#include "ResourceOpenDecisionManager.hh"
+//#include "CBPlanner.hh"
+//#include "DecisionPoint.hh"
+//#include "ResourceOpenDecisionManager.hh"
+#include "Solver.hh"
 #include "PlanDatabaseWriter.hh"
 #include "Constraints.hh"
 #include "Debug.hh"
@@ -10,6 +11,17 @@
 #include "EventAggregator.hh"
 #include "AverTestAssembly.hh"
 #include "Pdlfcn.hh"
+
+#include "ComponentFactory.hh"
+#include "OpenConditionDecisionPoint.hh"
+#include "OpenConditionManager.hh"
+#include "ThreatDecisionPoint.hh"
+#include "ThreatManager.hh"
+#include "UnboundVariableDecisionPoint.hh"
+#include "UnboundVariableManager.hh"
+#include "DecisionPoint.hh"
+#include "MatchingRule.hh"
+#include "Filters.hh"
 
 #include <iostream>
 #include <stdlib.h>
@@ -20,6 +32,18 @@ static const char* s_tx_log = "TransactionLog.xml";
 static const char* s_aver_test = "modtest.xml";
 
 bool runTransactions() {
+  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, MinValue);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::UnboundVariableManager, UnboundVariableManager);
+  
+  REGISTER_OPENCONDITION_DECISION_FACTORY(EUROPA::SOLVERS::OpenConditionDecisionPoint, StandardOpenConditionHandler);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::OpenConditionManager, OpenConditionManager);
+  
+  REGISTER_THREAT_DECISION_FACTORY(EUROPA::SOLVERS::ThreatDecisionPoint, StandardThreatHandler);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::ThreatManager, ThreatManager);
+  
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
+
   AverTestAssembly::initialize();
   AverTestAssembly assembly(schema, s_aver_test);
   

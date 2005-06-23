@@ -11,10 +11,11 @@
 
 #include "PlanDatabaseDefs.hh"
 #include "RulesEngineDefs.hh"
-#include "CBPlanner.hh"
+//#include "CBPlanner.hh"
+#include "Solver.hh"
 #include "StandardAssembly.hh"
 #include "DbClientTransactionLog.hh"
-#include "Horizon.hh"
+//#include "Horizon.hh"
 
 namespace EUROPA {
 
@@ -40,7 +41,7 @@ namespace EUROPA {
      * @return The result of planning
      * @see CBPlanner::Status
      */
-    CBPlanner::Status plan(const char* txSource, const char* averFile = NULL);
+    int plan(const char* txSource, const char* averFile = NULL);
 
     /** 
      * @brief Replays the transaction log and verifies that the outputs are
@@ -55,8 +56,9 @@ namespace EUROPA {
     const RulesEngineId& getRulesEngine() const;
 
   private:
-    Horizon m_horizon;
-    CBPlannerId m_planner;
+    //Horizon m_horizon;
+    //CBPlannerId m_planner;
+    SOLVERS::SolverId m_planner;
   };
 }
 #endif
