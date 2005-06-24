@@ -2,7 +2,8 @@ SubDir PLASMA System ;
 
 if ! $(PLASMA_READY) {
 
-Module System : NDDL CBPlanner Aver ;
+#Module System : NDDL CBPlanner Aver ;
+Module System : NDDL Solvers Aver ;
 ModuleLibraries System : $(DLOPEN_LIBRARY) ;
 
 SubInclude PLASMA System core ;
