@@ -4,7 +4,7 @@
 #include "monkey1monkey.nddl"
 #include "../../NDDL/core/PlannerConfig.nddl"
 
-PlannerConfig world = new PlannerConfig(0, 200, 400);
+PlannerConfig world = new PlannerConfig(0, 200, 500);
 
 Monkey_Class Monkey1 = new Monkey_Class();
 
