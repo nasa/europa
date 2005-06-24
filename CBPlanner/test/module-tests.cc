@@ -455,6 +455,7 @@ public:
     runTest(testNoBacktrackCase);
     runTest(testSubgoalOnceRule);
     runTest(testBacktrackCase);
+    runTest(testResetPlannerCase);
     runTest(testTimeoutCase);
     return true;
   }
@@ -694,6 +695,84 @@ private:
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
+
+   // test CBPlanner::reset. Sets up aproblem identical to 
+   // backtrack testcase then does a reset when no plan is found. 
+   static bool testResetPlannerCase() {
+
+    DEFAULT_SETUP_PLAN(ce, db, false);
+    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
+    db.close();
+
+    SubgoalOnceRule r("Objects.P1", 0);
+
+    std::list<double> values;
+    values.push_back(LabelStr("L1"));
+    values.push_back(LabelStr("L4"));
+    values.push_back(LabelStr("L2"));
+    values.push_back(LabelStr("L5"));
+    values.push_back(LabelStr("L3"));
+
+    IntervalToken tokenA(db.getId(), 
+			 "Objects.P1", 
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 20),
+			 IntervalIntDomain(1, 1000),
+			 Token::noObject(), false);
+    tokenA.addParameter(LabelSet(values), "LabelSetParam0");
+    // can't merge tokens with parameters that are dynamic domains
+    //tokenA.addParameter(LabelSet(values, false));
+    tokenA.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
+    tokenA.close();
+
+    IntervalToken tokenB(db.getId(), 
+			 "Objects.P1", 
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 20),
+			 IntervalIntDomain(1, 1000),
+			 Token::noObject(), false);
+    tokenB.addParameter(LabelSet(values), "LabelSetParam0");
+    // can't merge tokens with parameters that are dynamic domains
+    //tokenB.addParameter(LabelSet(values, false));
+    tokenB.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
+    tokenB.close();
+    
+    IntervalToken tokenC(db.getId(), 
+			 "Objects.P1", 
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 20),
+			 IntervalIntDomain(1, 1000),
+			 Token::noObject(), false);
+    tokenC.addParameter(LabelSet(values), "LabelSetParam0");
+    // can't merge tokens with parameters that are dynamic domains
+    //tokenC.addParameter(LabelSet(values, false));
+    tokenC.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
+    tokenC.close();
+
+    // an equivalence constraint between the start times will cause the
+    // planner to retract the activate decision and use the merge decision
+    // instead. 
+    std::vector<ConstrainedVariableId> scope;
+    scope.push_back(tokenA.getStart());
+    scope.push_back(tokenB.getStart());
+
+    ConstraintLibrary::createConstraint(LabelStr("eq"), ce.getId(), scope);
+
+    CBPlanner::Status res = planner.run(100);
+
+    assertTrue(res == CBPlanner::SEARCH_EXHAUSTED);
+    assertTrue(planner.getClosedDecisions().empty());
+
+    // reset planner - the purpose of this test..
+    planner.reset(); 
+
+    DEFAULT_TEARDOWN_PLAN();
+    return true;
+  }
+
 
   static bool testTimeoutCase() {
     DEFAULT_SETUP_PLAN(ce, db, false);
