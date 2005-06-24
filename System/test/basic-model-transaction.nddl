@@ -30,7 +30,7 @@ Rover::Going{
   eq(m_to, to.m_location);
 }
 
-PlannerConfig world = new PlannerConfig(10, 101, 350);
+PlannerConfig world = new PlannerConfig(10, 101, 500);
 
 Rover rover = new Rover();
 
