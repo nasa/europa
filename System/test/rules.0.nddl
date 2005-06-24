@@ -1,0 +1,18 @@
+#include "classes.2.nddl" // Reuse the definitions
+
+// Define compatibility rules for the At predicate
+Navigator::At{
+ meets(object.Going successor);
+ eq(successor.from, location);
+
+ met_by(object.Going predecessor);
+ eq(predecessor.to, location);
+}
+
+Navigator::Going{
+ meets(object.At successor);
+ eq(successor.location, to);
+
+ met_by(object.At predecessor);
+ eq(predecessor.location, from);
+}

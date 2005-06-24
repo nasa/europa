@@ -212,9 +212,9 @@ Sometimes it is more convenient, even necessary, to directly set the value of a 
  * @li @ref idioms
  * @section basicRules Basic Rule Definition
  * Let us return to our navigation example. The insightful reader may have observed that the proper relationships betwen @em At tokens and @em Going tokens are absent. Though we have extended a Timeline to give an indication of a total order, we have not precluded the seemingly magical movement from being <em>At(Lander)</em> and immediately switching to <em>At(Rock)</em> without actually @em Going anywhere. To rectify this, we define 2 model rules. The first defines appopriate relations that must hold for an @em active instance of the @em At predicate. The second addresses the same for @em Going.
- * @include NDDL/test/compiler/rules.0.nddl
- * @include NDDL/test/compiler/rules.0.tx.nddl
- * @include NDDL/test/compiler/RUN_rules.0.tx_g_rt.rules.0.tx.xml.output
+ * @include System/test/rules.0.nddl
+ * @include System/test/rules.0.tx.nddl
+ * @include System/test/RUN_rules.0.tx_g_rt.rules.0.tx.xml.DefaultPlannerConfig.xml.output
  * @subsection allenRelations The Allen Relations
  * @subsection conditionalSubgoals Conditional Subgoals
  * @subsection existentialQuantification Existential Quantification
