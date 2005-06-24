@@ -4,11 +4,12 @@
 #include <dlfcn.h>
 
 int main(int argc, const char ** argv) {
-
+  
   const char* plannerLibPath;
   const char* initialStatePath;
   const char* modelLibPath;
   const char* destPath;
+  const char* plannerConfigPath;
   char* error_msg;
   char* status_msg;
   void* libHandle;
@@ -18,36 +19,38 @@ int main(int argc, const char ** argv) {
   int (*fcn_completeRun)();
   int (*fcn_terminateRun)();
   int (*fcn_getStatus)();
-
+  
   switch (argc) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-      printf("Usage: runPlannerControlTest planner model transactions destination\n\nwhere:\n");
-      printf("   planner        Planner library name\n");
-      printf("   model          Model library path\n");
-      printf("   transactions   Initial state XML file path\n");
-      printf("   destination    Planner output destination path\n");
-      exit(1);
-    case 5:
-      plannerLibPath = argv[1];
-      modelLibPath = argv[2];
-      initialStatePath = argv[3];
-      destPath = argv[4];
-      break;
-    default:
-      printf("Too many arguments\n");
-      exit(1);
+  case 1:
+  case 2:
+  case 3:
+  case 4:
+  case 5:
+    printf("Usage: runPlannerControlTest planner model transactions destination\n\nwhere:\n");
+    printf("   planner        Planner library name\n");
+    printf("   model          Model library path\n");
+    printf("   transactions   Initial state XML file path\n");
+    printf("   destination    Planner output destination path\n");
+    exit(1);
+  case 6:
+    plannerLibPath = argv[1];
+    modelLibPath = argv[2];
+    initialStatePath = argv[3];
+    destPath = argv[4];
+    plannerConfigPath = argv[5];
+    break;
+  default:
+    printf("Too many arguments\n");
+    exit(1);
   }
 
   // load the CBPlannerControl shared library
   printf("runPlannerControlTest:Loading planner shared library file: %s\n", plannerLibPath);
   fflush(stdout);
-
+  
   //load model library using full path
   libHandle = dlopen(plannerLibPath, RTLD_LAZY);
-
+  
   if (!libHandle) {
     error_msg = dlerror();
     printf("Error during dlopen() of %s:", plannerLibPath);
@@ -60,7 +63,7 @@ int main(int argc, const char ** argv) {
   }
 
   //locate the initModel function
-  fcn_initModel = (int (*)(const char*, const char*, const char*))dlsym(libHandle, "initModel");
+  fcn_initModel = (int (*)(const char*, const char*, const char*, const char*))dlsym(libHandle, "initModel");
   if (!fcn_initModel) {
     error_msg = dlerror();
     printf("dlsym: Error locating EUROPA::initModel:");
@@ -74,7 +77,7 @@ int main(int argc, const char ** argv) {
 
   // call the EUROPA::initModel function
   try {
-    retStatus = (*fcn_initModel)(modelLibPath, initialStatePath, destPath);
+    retStatus = (*fcn_initModel)(modelLibPath, initialStatePath, destPath, plannerConfigPath);
   } 
   catch (...) {
     printf("runPlannerControlTest.cc:Unexpected exception in initModel function\n");

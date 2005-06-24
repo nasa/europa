@@ -1,13 +1,24 @@
 #include "PLASMAPerformanceConstraint.hh"
 #include "Nddl.hh"
 #include "TestAssembly.hh"
-#include "CBPlanner.hh"
-#include "DecisionPoint.hh"
-#include "ResourceOpenDecisionManager.hh"
+//#include "CBPlanner.hh"
+//#include "DecisionPoint.hh"
+//#include "ResourceOpenDecisionManager.hh"
 #include "PlanDatabaseWriter.hh"
 #include "Constraints.hh"
 #include "Debug.hh"
 #include "Pdlfcn.hh"
+
+#include "ComponentFactory.hh"
+#include "OpenConditionDecisionPoint.hh"
+#include "OpenConditionManager.hh"
+#include "ThreatDecisionPoint.hh"
+#include "ThreatManager.hh"
+#include "UnboundVariableDecisionPoint.hh"
+#include "UnboundVariableManager.hh"
+#include "DecisionPoint.hh"
+#include "MatchingRule.hh"
+#include "Filters.hh"
 
 //#include <dlfcn.h>
 #include <iostream>
@@ -16,6 +27,7 @@
 SchemaId schema;
 const char* initialTransactions = NULL;
 const char* averTestFile = NULL;
+const char* plannerConfig = NULL;
 bool replay = false;
 extern const char* TX_LOG;
 
@@ -23,13 +35,31 @@ bool runPlanner(){
 
   TestAssembly assembly(schema);
 
+  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, MinValue);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::UnboundVariableManager, UnboundVariableManager);
+  
+  REGISTER_OPENCONDITION_DECISION_FACTORY(EUROPA::SOLVERS::OpenConditionDecisionPoint, StandardOpenConditionHandler);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::OpenConditionManager, OpenConditionManager);
+  
+  REGISTER_THREAT_DECISION_FACTORY(EUROPA::SOLVERS::ThreatDecisionPoint, StandardThreatHandler);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::ThreatManager, ThreatManager);
+  
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
+
+
   DbClientTransactionLogId txLog;
   if(replay)
     txLog = (new DbClientTransactionLog(assembly.getPlanDatabase()->getClient()))->getId();
-  
-  CBPlanner::Status result = assembly.plan(initialTransactions, averTestFile);
 
-  assert(result == CBPlanner::PLAN_FOUND);
+  check_error(plannerConfig != NULL, "Must have a planner config argument.");
+  TiXmlDocument doc(plannerConfig);
+  doc.LoadFile();
+  
+
+  assert(assembly.plan(initialTransactions,*(doc.RootElement()), averTestFile));
+
+  //assert(result == CBPlanner::PLAN_FOUND);
 
   std::cout << " found a plan at depth " << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched() << std::endl;
 
@@ -71,23 +101,32 @@ bool copyFromFile(){
 
 //namespace NDDL { SchemaId loadSchema() {return Schema::instance();}}
 
+
+
 int main(int argc, const char** argv) {
 #ifdef STANDALONE
+#define MODEL_INDEX 1
+#define TRANS_INDEX 2
+#define PCONF_INDEX 3
+#define AVER_INDEX 4
+#define ARGC 5
+
   const char* error_msg;
   void* libHandle;
   const char* libPath;
   SchemaId (*fcn_schema)();
 
-  if(argc != 3 && argc != 4) {
-    std::cout << "usage: runProblem <model shared library path> <initial transaction file> [Aver test file]" << std::endl;
+  if(argc != ARGC && argc != ARGC - 1) {
+    std::cout << "usage: runProblem <model shared library path> <initial transaction file> <planner config file> [Aver test file]" << std::endl;
     exit(1);
   }
   
-  libPath = argv[1];
-  initialTransactions = argv[2];
-  
-  if(argc == 4)
-    averTestFile = argv[3];
+  libPath = argv[MODEL_INDEX];
+  initialTransactions = argv[TRANS_INDEX];
+  plannerConfig = argv[PCONF_INDEX];
+
+  if(argc == ARGC)
+    averTestFile = argv[AVER_INDEX];
 
   std::cout << "runProblem: p_dlopen() file: " << libPath << std::endl;
   std::cout.flush();
@@ -116,14 +155,20 @@ int main(int argc, const char** argv) {
   TestAssembly::initialize();
   schema = (*fcn_schema)();
 #else //STANDALONE
-  if(argc != 2 && argc != 3) {
-    std::cout << "usage: runProblem <initial transaction file> [Aver test file]" << std::endl;
+#define TRANS_INDEX 1
+#define PCONF_INDEX 2
+#define AVER_INDEX 3
+#define ARGC 4
+  if(argc != ARGC && argc != ARGC-1) {
+    std::cout << "usage: runProblem <initial transaction file> <planner config> [Aver test file]" << std::endl;
+    std::cout << ARGC << " " << argc << std::endl;
     exit(1);
   }
-  initialTransactions = argv[1];
+  initialTransactions = argv[TRANS_INDEX];
+  plannerConfig = argv[PCONF_INDEX];
 
-  if(argc == 3)
-    averTestFile = argv[2];
+  if(argc == ARGC)
+    averTestFile = argv[AVER_INDEX];
 
   TestAssembly::initialize();
   schema = NDDL::loadSchema();
