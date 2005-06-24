@@ -141,7 +141,7 @@ then
   exit -1
 fi
 echo "Adding PlanWorks.cfg"
-cp ./CBPlanner/component/PlanWorks.cfg $DIRECTORY/PlanWorks.cfg
+cp ./Solvers/component/PlanWorks.cfg $DIRECTORY/PlanWorks.cfg
 
 if [ -e $DIRECTORY/Debug.cfg ]
 then
