@@ -15,6 +15,9 @@
 
   <-- Impose a dynamic filter based on a singleton -->
   <FlawFilter var-match="globalVariable1" component="Singleton"/>
+
+  <-- Impose a dynamic filter based on finiteness and dynamicity -->
+  <FlawFilter var-match="globalVariable3" component="InfiniteDynamicFilter"/>
 </UnboundVariableManager>
 
 <OpenConditionManager>

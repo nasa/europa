@@ -12,6 +12,10 @@
 #include "TestSupport.hh"
 #include "Debug.hh"
 #include "../../PlanDatabase/test/PlanDatabaseTestSupport.hh"
+#include "Variable.hh"
+#include "IntervalDomain.hh"
+#include "IntervalIntDomain.hh"
+#include "EnumeratedDomain.hh"
 #include <fstream>
 
 /**
@@ -184,6 +188,7 @@ private:
     // returns as a flaw
     ConstrainedVariableId globalVar1 = assembly.getPlanDatabase()->getGlobalVariable("globalVariable1");
     ConstrainedVariableId globalVar2 = assembly.getPlanDatabase()->getGlobalVariable("globalVariable2");
+    ConstrainedVariableId globalVar3 = assembly.getPlanDatabase()->getGlobalVariable("globalVariable3");
     assertTrue(!fm.inScope(globalVar1));
     assertTrue(fm.inScope(globalVar2));
     globalVar2->specify(globalVar2->lastDomain().getLowerBound());
@@ -194,6 +199,9 @@ private:
     assembly.getConstraintEngine()->propagate();
     assertTrue(!fm.inScope(globalVar1));
     assertTrue(fm.inScope(globalVar2));
+
+
+    assertTrue(!fm.inScope(globalVar3));
 
     return true;
   }
@@ -397,6 +405,7 @@ int main(){
   // Register filter components
   REGISTER_COMPONENT_FACTORY(SingletonFilter, Singleton);
   REGISTER_COMPONENT_FACTORY(HorizonFilter, HorizonFilter);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
 
   // Initialization of various id's and other required elements
   initSolverModuleTests();
