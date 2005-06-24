@@ -43,16 +43,34 @@
 #include "Utils.hh"
 
 // Planner Support
-#include "CBPlanner.hh"
+//#include "CBPlanner.hh"
+#include "Solver.hh"
 #include "PartialPlanWriter.hh"
-#include "Horizon.hh"
-#include "DecisionManager.hh"
-#include "ResourceOpenDecisionManager.hh"
+#include "Filters.hh"
+//#include "Horizon.hh"
+//#include "DecisionManager.hh"
+//#include "ResourceOpenDecisionManager.hh"
 
 // Test Support
 #include "PLASMAPerformanceConstraint.hh"
 #include "LoraxConstraints.hh"
 #include "TestSupport.hh"
+
+#include "ComponentFactory.hh"
+#include "OpenConditionDecisionPoint.hh"
+#include "OpenConditionManager.hh"
+#include "ThreatDecisionPoint.hh"
+#include "ThreatManager.hh"
+#include "UnboundVariableDecisionPoint.hh"
+#include "UnboundVariableManager.hh"
+#include "DecisionPoint.hh"
+#include "MatchingRule.hh"
+#include "Filters.hh"
+
+#ifndef TIXML_USE_STL
+#define TIXML_USE_STL
+#endif
+#include "tinyxml.h"
 
 #include <string>
 #include <fstream>
@@ -64,23 +82,37 @@ namespace EUROPA {
   PlannerControlAssembly::~PlannerControlAssembly() {}
 
 
-  CBPlanner::Status PlannerControlAssembly::initPlan(const char* txSource){
-    m_horizon = (new Horizon())->getId();
-    m_planner = (new CBPlanner(m_planDatabase, m_horizon))->getId();
-    m_ppw = new PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine, m_planner);
+  PlannerStatus PlannerControlAssembly::initPlan(const char* txSource, const char* plannerConfig){
+    static bool initFactories = true;
+    if(initFactories) {
+      REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, MinValue);
+      REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::UnboundVariableManager, UnboundVariableManager);
+      
+      REGISTER_OPENCONDITION_DECISION_FACTORY(EUROPA::SOLVERS::OpenConditionDecisionPoint, StandardOpenConditionHandler);
+      REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::OpenConditionManager, OpenConditionManager);
+      
+      REGISTER_THREAT_DECISION_FACTORY(EUROPA::SOLVERS::ThreatDecisionPoint, StandardThreatHandler);
+      REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::ThreatManager, ThreatManager);
+      
+      REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
+      REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
+      initFactories = !initFactories;
+    }
 
-    std::cout << "Set up Resource Decision Manager" << std::endl;
-    // Set up Resource Decision Manager
-    DecisionManagerId local_dm = m_planner->getDecisionManager();
-    ResourceOpenDecisionManagerId local_rodm = (new ResourceOpenDecisionManager(local_dm))->getId();
-    local_dm->setOpenDecisionManager(local_rodm);
-
+    m_step = 0;
     std::cout << "Now process the transactions" << std::endl;
-    // Now process the transactions
     if(!playTransactions(txSource))
-      return CBPlanner::INITIALLY_INCONSISTENT;
+      return INITIALLY_INCONSISTENT;
+    
+    TiXmlDocument doc(plannerConfig);
+    doc.LoadFile();
+
+    m_planner = (new SOLVERS::Solver(m_planDatabase, *(doc.RootElement())))->getId();
+    m_ppw = new PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine, m_planner);
+    m_listener = (new StatusListener(m_planner))->getId();
 
     std::cout << "Configure the planner from data in the initial state" << std::endl;
+
     // Configure the planner from data in the initial state
     std::list<ObjectId> configObjects;
     m_planDatabase->getObjectsByType("PlannerConfig", configObjects); // Standard configuration class
@@ -92,30 +124,82 @@ namespace EUROPA {
     check_error(configSource.isValid());
 
     const std::vector<ConstrainedVariableId>& variables = configSource->getVariables();
-    check_error(variables.size() == 3,
-                "Expecting exactly 3 configuration variables");
+    check_error(variables.size() == 4,
+                "Expecting exactly 4 configuration variables");
 
     std::cout << "Set up the horizon  from the model now." << std::endl;
     // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
     ConstrainedVariableId horizonStart = variables[0];
     ConstrainedVariableId horizonEnd = variables[1];
     ConstrainedVariableId plannerSteps = variables[2];
+    ConstrainedVariableId plannerDepth = variables[3];
 
     int start = (int) horizonStart->baseDomain().getSingletonValue();
     int end = (int) horizonEnd->baseDomain().getSingletonValue();
-    m_horizon->setHorizon(start, end);
+    SOLVERS::HorizonFilter::getHorizon() = IntervalIntDomain(start, end);
+
 
     std::cout << "Now get planner step max" << std::endl;
-    // Now get planner step max
-    int steps = (int) plannerSteps->baseDomain().getSingletonValue();
+    m_planner->setMaxSteps((unsigned int) plannerSteps->baseDomain().getSingletonValue());
 
-    std::cout << "Now initialize it" << std::endl;
-    // Now initialize it
-    CBPlanner::Status res = m_planner->initRun(steps);
+    std::cout << "Now get planner depth max" << std::endl;
+    m_planner->setMaxDepth((unsigned int) plannerDepth->baseDomain().getSingletonValue());
 
-    std::cout << "Planner ready to step  Status is " << res << std::endl;
+    PlanWriter::PartialPlanWriter::noFullWrite = 1;
+    PlanWriter::PartialPlanWriter::writeStep = 1;
 
-    return res;
+    return IN_PROGRESS;
+  }
+
+  const int PlannerControlAssembly::getPlannerStatus() const {
+    return ((StatusListener*)m_listener)->getStatus();
+  }
+
+  int PlannerControlAssembly::writeStep(int step) {
+    std::cout << "Write step " << step << std::endl;
+    if(m_step || step)
+      while(m_step < step) {
+        std::cout << "Skipping step " << m_step << std::endl;
+        m_planner->step();
+        m_step++;
+        if(getPlannerStatus() != IN_PROGRESS) {
+          std::cout << "Terminated before step." << std::endl;
+          return m_step;
+        }
+      }
+    std::cout << "Writing step " << m_step << std::endl;
+    PlanWriter::PartialPlanWriter::noFullWrite = 0;
+    m_planner->step();
+    PlanWriter::PartialPlanWriter::noFullWrite = 1;
+    return m_step;
+  }
+
+  int PlannerControlAssembly::writeNext(int n) {
+    PlanWriter::PartialPlanWriter::noFullWrite = 0;
+    while(n) {
+      m_planner->step();
+      m_step++;
+      if(getPlannerStatus() != IN_PROGRESS)
+        return m_step;
+      n--;
+    }
+    PlanWriter::PartialPlanWriter::noFullWrite = 1;
+    return m_step;
+  }
+
+  int PlannerControlAssembly::completeRun() {
+    PlanWriter::PartialPlanWriter::noFullWrite = 1;
+    for(;;) {
+      m_planner->step();
+      std::cout << "Completed step " << m_step << std::endl;
+      m_step++;
+      if(getPlannerStatus() != IN_PROGRESS) {
+        m_ppw->write();
+        return m_step;
+      }
+    }
+    check_error(false);
+    return m_step;
   }
 
 }

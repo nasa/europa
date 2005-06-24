@@ -43,16 +43,32 @@
 #include "Utils.hh"
 
 // Planner Support
-#include "CBPlanner.hh"
+//#include "CBPlanner.hh"
+#include "ComponentFactory.hh"
+#include "Solver.hh"
+#include "OpenConditionDecisionPoint.hh"
+#include "OpenConditionManager.hh"
+#include "ThreatDecisionPoint.hh"
+#include "ThreatManager.hh"
+#include "UnboundVariableDecisionPoint.hh"
+#include "UnboundVariableManager.hh"
+#include "DecisionPoint.hh"
+#include "MatchingRule.hh"
+#include "Filters.hh"
 #include "PartialPlanWriter.hh"
-#include "Horizon.hh"
-#include "DecisionManager.hh"
-#include "ResourceOpenDecisionManager.hh"
+//#include "Horizon.hh"
+//#include "DecisionManager.hh"
+//#include "ResourceOpenDecisionManager.hh"
 
 // Test Support
 #include "PLASMAPerformanceConstraint.hh"
 #include "LoraxConstraints.hh"
 #include "TestSupport.hh"
+
+#ifndef TIXML_USE_STL
+#define TIXML_USE_STL
+#endif
+#include "tinyxml.h"
 
 #include <string>
 #include <fstream>
@@ -89,29 +105,34 @@ namespace EUROPA {
     isInitialized() = true;
   }
 
-  CBPlanner::Status TestAssembly::plan(const char* txSource, const char* averFile){
-    Horizon horizon;
-    CBPlanner planner(m_planDatabase, horizon.getId());
+  bool TestAssembly::plan(const char* txSource, const char* config, const char* averFile) {
+    TiXmlDocument doc(config);
+    doc.LoadFile();
+    return plan(txSource, *(doc.RootElement()), averFile);
+  }
+
+  bool TestAssembly::plan(const char* txSource, const TiXmlElement& config, const char* averFile){
+    SOLVERS::SolverId solver = (new SOLVERS::Solver(m_planDatabase, config))->getId();
 
 #ifdef PPW_WITH_PLANNER
-    PlanWriter::PartialPlanWriter ppw(m_planDatabase, m_constraintEngine, m_rulesEngine, planner.getId());
+    PlanWriter::PartialPlanWriter ppw(m_planDatabase, m_constraintEngine, m_rulesEngine, solver);
 #else
     PlanWriter::PartialPlanWriter ppw(m_planDatabase, m_constraintEngine, m_rulesEngine);
 #endif
 
     if(averFile != NULL) {
-      AverInterp::init(std::string(averFile), planner.getDecisionManager(), 
+      AverInterp::init(std::string(averFile), solver, 
                        m_planDatabase->getConstraintEngine(), m_planDatabase, m_rulesEngine);
     }
 
     // Set up Resource Decision Manager
-    DecisionManagerId local_dm = planner.getDecisionManager();
-    ResourceOpenDecisionManagerId local_rodm = (new ResourceOpenDecisionManager(local_dm))->getId();
-    local_dm->setOpenDecisionManager(local_rodm);
+    //DecisionManagerId local_dm = planner.getDecisionManager();
+    //ResourceOpenDecisionManagerId local_rodm = (new ResourceOpenDecisionManager(local_dm))->getId();
+    //local_dm->setOpenDecisionManager(local_rodm);
 
     // Now process the transactions
     if(!playTransactions(txSource))
-      return CBPlanner::INITIALLY_INCONSISTENT;
+      return false;
 
     // Configure the planner from data in the initial state
     std::list<ObjectId> configObjects;
@@ -124,29 +145,32 @@ namespace EUROPA {
     check_error(configSource.isValid());
 
     const std::vector<ConstrainedVariableId>& variables = configSource->getVariables();
-    check_error(variables.size() == 3, 
-		"Expecting exactly 3 configuration variables");
+    check_error(variables.size() == 4, "Expecting exactly 4 configuration variables");
 
     // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
     ConstrainedVariableId horizonStart = variables[0];
     ConstrainedVariableId horizonEnd = variables[1];
     ConstrainedVariableId plannerSteps = variables[2];
+    ConstrainedVariableId maxDepth = variables[3];
 
     int start = (int) horizonStart->baseDomain().getSingletonValue();
     int end = (int) horizonEnd->baseDomain().getSingletonValue();
-    horizon.setHorizon(start, end);
+    SOLVERS::HorizonFilter::getHorizon() = IntervalDomain(start, end);
 
     // Now get planner step max
     int steps = (int) plannerSteps->baseDomain().getSingletonValue();
+    int depth = (int) maxDepth->baseDomain().getSingletonValue();
 
-    CBPlanner::Status retval = planner.run(steps);
+    bool retval = solver->solve(steps, depth);
     
-    m_totalNodes = planner.getTime();
-    m_finalDepth = planner.getDepth();
+    m_totalNodes = solver->getStepCount();
+    m_finalDepth = solver->getDepth();
 
     if(averFile != NULL)
       AverInterp::terminate();
     
+    delete (SOLVERS::Solver*) solver;
+
     return retval;
   }
 

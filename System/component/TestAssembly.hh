@@ -11,9 +11,15 @@
 
 #include "PlanDatabaseDefs.hh"
 #include "RulesEngineDefs.hh"
-#include "CBPlanner.hh"
+//#include "CBPlanner.hh"
+#include "Solver.hh"
 #include "StandardAssembly.hh"
 #include "DbClientTransactionLog.hh"
+
+#ifndef TIXML_USE_STL
+#define TIXML_USE_STL
+#endif
+#include "tinyxml.h"
 
 namespace EUROPA {
 
@@ -31,6 +37,8 @@ namespace EUROPA {
      */
     static void initialize();
 
+    bool plan(const char* txSource, const char* config, const char* averFile = NULL);
+
     /**
      * @brief Invoke the planner. Calls playTransactions(txSource).
      * @param txSource The source from which we get the initial state
@@ -39,7 +47,7 @@ namespace EUROPA {
      * @return The result of planning
      * @see CBPlanner::Status
      */
-    CBPlanner::Status plan(const char* txSource, const char* averFile = NULL);
+    bool plan(const char* txSource, const TiXmlElement& config, const char* averFile = NULL);
 
     /** 
      * @brief Replays the transaction log and verifies that the outputs are

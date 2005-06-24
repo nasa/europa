@@ -10,7 +10,9 @@
  */
 
 #include "PlanDatabaseDefs.hh"
-#include "CBPlanner.hh"
+//#include "CBPlanner.hh"
+#include "Solver.hh"
+#include "SearchListener.hh"
 #include "StandardAssembly.hh"
 #include "PartialPlanWriter.hh"
 #include "DbClientTransactionLog.hh"
@@ -18,6 +20,13 @@
 namespace EUROPA {
 
 #define PPW_WITH_PLANNER
+
+  enum PlannerStatus { IN_PROGRESS=0,
+                       TIMEOUT_REACHED,
+                       PLAN_FOUND,
+                       SEARCH_EXHAUSTED,
+                       INITIALLY_INCONSISTENT
+  };
 
   class PlannerControlAssembly : public StandardAssembly {
   public:
@@ -33,22 +42,44 @@ namespace EUROPA {
      * @return The result of planner initialization
      * @see CBPlanner::Status
      */
-    CBPlanner::Status initPlan(const char* txSource);
+    PlannerStatus initPlan(const char* txSource, const char* plannerConfig);
 
 
-    const CBPlannerId& getPlanner() const { return m_planner; }
+    const SOLVERS::SolverId& getPlanner() const { return m_planner; }
 
     PlanWriter::PartialPlanWriter* getWriter() const { return m_ppw; }
 
-    /**
-     * The following method is used by the PlannerControl interface for PlanWorks.
-     */
-    const HorizonId& getHorizon() const { return m_horizon; }
+    const int getPlannerStatus() const;
+
+    int writeStep(int step);
+
+    int writeNext(int n);
+    
+    int completeRun();
+    
+    int terminateRun();
 
   protected:
-    CBPlannerId m_planner;	/*!< A planner to complete the plan. */
+    SOLVERS::SolverId m_planner;	/*!< A planner to complete the plan. */
+    SOLVERS::SearchListenerId m_listener;
     PlanWriter::PartialPlanWriter* m_ppw; /*!< A plan writer to output data for PlanWorks */
-    HorizonId m_horizon;      /*!< A horizon for the plan. */
+    int m_step;
+    
+
+    class StatusListener : public SOLVERS::SearchListener {
+    public:
+      StatusListener(SOLVERS::SolverId solver) : SearchListener(), m_solver(solver), m_status(IN_PROGRESS) {solver->addListener(getId());}
+      ~StatusListener() {m_solver->removeListener(getId());}
+      const PlannerStatus getStatus() const {return m_status;}
+      void notifyStepSucceeded() {m_status = IN_PROGRESS;}
+      void notifyCompleted() {m_status = PLAN_FOUND;}
+      void notifyExhausted() {m_status = SEARCH_EXHAUSTED;}
+      void notifyTimedOut() {m_status = TIMEOUT_REACHED;}
+    protected:
+    private:
+      SOLVERS::SolverId m_solver;
+      PlannerStatus m_status;
+    };
   };
 }
 #endif

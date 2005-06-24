@@ -5,9 +5,10 @@
 #include "PlannerControlAssembly.hh"
 
 // Support for planner
-#include "CBPlanner.hh"
-#include "DecisionPoint.hh"
-#include "ResourceOpenDecisionManager.hh"
+//not needed
+//#include "CBPlanner.hh"
+//#include "DecisionPoint.hh"
+//#include "ResourceOpenDecisionManager.hh"
 
 #include "PlanDatabaseWriter.hh"
 #include "Constraints.hh"
@@ -19,7 +20,7 @@
 #include <stdio.h>
 
 namespace EUROPA {
-  int loadInitModel(const char* libPath, const char* initialStatePath) {
+  int loadInitModel(const char* libPath, const char* initialStatePath, const char* plannerConfigPath) {
 
     int retStatus;
     const char* error_msg;
@@ -111,7 +112,7 @@ namespace EUROPA {
 
     // Initialize plan given the transactions in initialStatePath.
     try {
-      retStatus = db1->initPlan(initialStatePath);
+      retStatus = db1->initPlan(initialStatePath, plannerConfigPath);
     }
     catch (Error e) {
       printf("Unexpected exception initializing planner\n");

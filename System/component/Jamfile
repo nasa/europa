@@ -8,7 +8,8 @@ ModuleComponent System
   #EventAggregator.cc
   #AggregateListener.cc
   PlannerControlAssembly.cc
-  CBPlannerControl.cc
+  #CBPlannerControl.cc
+  SolverControl.cc
   LoadInitModel.cc
 	;
 
