@@ -15,6 +15,8 @@ if $(LIBRARIES) = SHARED {
 EXTRA_DEFS = ;
 ModuleNamedObjects runProblem_link : runProblem.cc : System ;
 
+local DEFAULT_PCONFIG = "DefaultPlannerConfig.xml" ;
+
 # To run one of these individulally: jam run-<target> i.e. jam run-basic-types
 
 local checkin-tests ;
@@ -55,7 +57,7 @@ for model in
 
   # create planner with linked model
   ModuleMain $(exe) : $(o) runProblem_link.o : System Aver ;
-  RunModuleMain run-$(exe) : $(exe) : $(xml) ;
+  RunModuleMain run-$(exe) : $(exe) : $(xml) $(DEFAULT_PCONFIG) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 
   Clean clean-system-xml : $(xml) ;
@@ -68,7 +70,7 @@ for model in
       local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
       local run_variant_name = [ FVariantName runProblem : $(variant) ] ;
       run_variant_name = $(run_variant_name)_rt ;
-      local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) ;
+      local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) $(DEFAULT_PCONFIG) ;
       Depends run-problem-$(exe) : $(libname) ;
       RunModuleMain run-problem-$(exe) : runProblem : $(arguments) ;
       Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
@@ -127,7 +129,7 @@ for numSatellites in 1 {
           local xml = $(model:S=.xml) ;
           GenerateStack [ FGristFiles $(model) ] : [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
           NddlMain $(exe) : runProblem_link.o : $(model) : System : performance-tests ;
-          RunModuleMain run-$(exe) : $(exe) : $(xml) : time ;
+          RunModuleMain run-$(exe) : $(exe) : $(xml) $(DEFAULT_PCONFIG) : time ;
           LocalDepends run-performance-tests : run-$(exe) ;
         }
       }
