@@ -1,13 +1,14 @@
-#include "DbClientTransactionLog.hh"
-#include "Object.hh"
-#include "Token.hh"
-#include "Utils.hh"
 #include "Debug.hh"
+#include "Utils.hh"
 #include "EnumeratedDomain.hh"
 #include "BoolDomain.hh"
 #include "StringDomain.hh"
 #include "SymbolDomain.hh"
 #include "tinyxml.h"
+#include "Object.hh"
+#include "UnifyMemento.hh"
+#include "Token.hh"
+#include "DbClientTransactionLog.hh"
 
 namespace EUROPA {
 

@@ -1,14 +1,16 @@
+#include "Debug.hh"
+#include "ConstrainedVariable.hh"
+#include "Object.hh"
 #include "DecisionManager.hh"
 #include "OpenDecisionManager.hh"
 #include "PlanDatabase.hh"
+#include "UnifyMemento.hh"
 #include "Token.hh"
+#include "TokenVariable.hh"
 #include "TokenDecisionPoint.hh"
-#include "ConstrainedVariable.hh"
 #include "ConstrainedVariableDecisionPoint.hh"
-#include "Object.hh"
 #include "ObjectDecisionPoint.hh"
 #include "DefaultOpenDecisionManager.hh"
-#include "Debug.hh"
 
 namespace EUROPA {
 

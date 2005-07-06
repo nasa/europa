@@ -3,6 +3,7 @@
 #include "RuleInstance.hh"
 #include "PlanDatabase.hh"
 #include "IntervalToken.hh"
+#include "TokenVariable.hh"
 #include "SubgoalOnceRule.hh"
 #include "Utils.hh"
 #include "Object.hh"

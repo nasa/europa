@@ -6,6 +6,7 @@
 #include "Utils.hh"
 #include "Object.hh"
 #include "BoolDomain.hh"
+#include "TokenVariable.hh"
 
 namespace EUROPA {
 

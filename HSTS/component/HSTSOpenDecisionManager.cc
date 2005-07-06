@@ -1,3 +1,4 @@
+#include "TokenVariable.hh"
 #include "DefaultOpenDecisionManager.hh"
 #include "HSTSOpenDecisionManager.hh"
 #include "Object.hh"

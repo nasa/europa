@@ -1,6 +1,8 @@
-#include "HorizonCondition.hh"
-#include "Token.hh"
 #include "ConstrainedVariable.hh"
+#include "HorizonCondition.hh"
+#include "UnifyMemento.hh"
+#include "Token.hh"
+#include "TokenVariable.hh"
 
 namespace EUROPA {
 

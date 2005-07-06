@@ -1,6 +1,7 @@
 #include "OpenConditionDecisionPoint.hh"
 #include "PlanDatabase.hh"
 #include "Token.hh"
+#include "TokenVariable.hh"
 #include "ConstrainedVariable.hh"
 
 namespace EUROPA {

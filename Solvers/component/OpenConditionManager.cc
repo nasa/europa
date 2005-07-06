@@ -1,9 +1,11 @@
-#include "OpenConditionManager.hh"
-#include "PlanDatabase.hh"
-#include "Token.hh"
 #include "Utils.hh"
 #include "Debug.hh"
 #include "Error.hh"
+#include "Token.hh"
+#include "TokenVariable.hh"
+#include "OpenConditionManager.hh"
+#include "PlanDatabase.hh"
+
 
 /**
  * @author Conor McGann

@@ -11,6 +11,7 @@
 #include "Utils.hh"
 #include "IntervalIntDomain.hh"
 #include "LockManager.hh"
+#include "TokenVariable.hh"
 
 #include "RulesEngine.hh"
 #include "TestSubgoalRule.hh"

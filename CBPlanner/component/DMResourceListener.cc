@@ -1,5 +1,7 @@
 #include "ResourceDefs.hh"
+#include "UnifyMemento.hh"
 #include "DMResourceListener.hh"
+#include "TokenVariable.hh"
 #include "Resource.hh"
 #include "ResourceOpenDecisionManager.hh"
 

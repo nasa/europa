@@ -1,6 +1,7 @@
 #ifndef _H_AbstractVar
 #define _H_AbstractVar
 
+#include "AbstractDomain.hh"
 #include "ConstrainedVariable.hh"
 #include "ConstraintEngine.hh"
 

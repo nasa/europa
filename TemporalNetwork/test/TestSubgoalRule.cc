@@ -3,6 +3,7 @@
 #include "RuleInstance.hh"
 #include "TestSubgoalRule.hh"
 #include "IntervalToken.hh"
+#include "TokenVariable.hh"
 
 namespace EUROPA {
 

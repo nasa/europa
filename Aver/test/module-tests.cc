@@ -18,6 +18,7 @@
 #include "TemporalPropagator.hh"
 #include "Test.hh"
 #include "Token.hh"
+#include "TokenVariable.hh"
 
 #include "tinyxml.h"
 

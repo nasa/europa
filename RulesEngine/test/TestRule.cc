@@ -1,6 +1,7 @@
 #include "TestRule.hh"
 #include "RuleInstance.hh"
 #include "Token.hh"
+#include "TokenVariable.hh"
 #include "Object.hh"
 #include "IntervalToken.hh"
 #include "PlanDatabase.hh"
