@@ -15,8 +15,6 @@ if $(LIBRARIES) = SHARED {
 EXTRA_DEFS = ;
 ModuleNamedObjects runProblem_link : runProblem.cc : System ;
 
-local DEFAULT_PCONFIG = "DefaultPlannerConfig.xml" ;
-
 # To run one of these individulally: jam run-<target> i.e. jam run-basic-types
 
 local checkin-tests ;
@@ -27,7 +25,7 @@ checkin-tests = basic-types
         resource-backtrack-test
         better-res
         constrain-transaction
-        # foreach-transaction
+        #foreach-transaction
         force-object-distribution
         ;
 
@@ -41,7 +39,7 @@ for model in
         parent-predicate.nddl k9-initial.nddl backtr.nddl
         better-res.nddl CAPER.nddl monkey1monkey-transaction.nddl
         basic-model-backtrack.nddl EOS-backtrack-test.nddl gnats_2837-tx.nddl
-        DynamicObjTest.nddl rules.0.tx.nddl
+        DynamicObjTest.nddl
 {
   local exe = $(model:S=) ;
   local hh = $(model:S=.hh) ;
@@ -58,7 +56,7 @@ for model in
 
   # create planner with linked model
   ModuleMain $(exe) : $(o) runProblem_link.o : System Aver ;
-  RunModuleMain run-$(exe) : $(exe) : $(xml) $(DEFAULT_PCONFIG) ;
+  RunModuleMain run-$(exe) : $(exe) : $(xml) ;
   LocalDepends run-nddl-planner-tests : run-$(exe) ;
 
   Clean clean-system-xml : $(xml) ;
@@ -71,7 +69,7 @@ for model in
       local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
       local run_variant_name = [ FVariantName runProblem : $(variant) ] ;
       run_variant_name = $(run_variant_name)_rt ;
-      local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) $(DEFAULT_PCONFIG) ;
+      local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) ;
       Depends run-problem-$(exe) : $(libname) ;
       RunModuleMain run-problem-$(exe) : runProblem : $(arguments) ;
       Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
@@ -130,7 +128,7 @@ for numSatellites in 1 {
           local xml = $(model:S=.xml) ;
           GenerateStack [ FGristFiles $(model) ] : [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
           NddlMain $(exe) : runProblem_link.o : $(model) : System : performance-tests ;
-          RunModuleMain run-$(exe) : $(exe) : $(xml) $(DEFAULT_PCONFIG) : time ;
+          RunModuleMain run-$(exe) : $(exe) : $(xml) : time ;
           LocalDepends run-performance-tests : run-$(exe) ;
         }
       }
