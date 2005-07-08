@@ -1,4 +1,4 @@
-$Id: HELLOWORLD,v 1.7 2005-06-09 23:01:21 cmcgann Exp $
+$Id: HELLOWORLD,v 1.8 2005-07-08 21:34:49 pjarvis Exp $
 
 Note: Please first see the file README in this directory for details
       on how to checkout, build, and test Europa2 before attempting
@@ -219,6 +219,11 @@ C. Running a plan from PlanWorks
    the plans directory. The full path will look like:
 
    /home/me/HelloWorld/plans
+
+   In the "planner config path" field, enter the full path and name to
+   planner config file. It will look like:
+
+   /home/me/HelloWorld/PlannerConfig.xml
 
    Once all of the fields have been entered, click on the "Enter" button.
 
