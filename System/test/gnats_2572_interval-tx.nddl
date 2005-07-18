@@ -1,4 +1,4 @@
-# Test case for x.specify([z, z]) and eq(x.start, [z, z])
+// Test case for x.specify([z, z]) and eq(x.start, [z, z])
 #include "gnats_2837.nddl"
 
 PlannerConfig plannerConfiguration = new PlannerConfig(0,1000,500);
