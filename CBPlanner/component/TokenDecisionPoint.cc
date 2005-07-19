@@ -12,11 +12,11 @@ namespace EUROPA {
 
   TokenDecisionPoint::TokenDecisionPoint(const DbClientId& dbClient, const TokenId& tok, const OpenDecisionManagerId& odm)
     : DecisionPoint(dbClient, tok) { 
-      m_tok = tok; 
-      m_odm = odm;
-      m_choiceIndex = 0;
-      m_mergeIndex = 0;
-    }
+    m_tok = tok; 
+    m_odm = odm;
+    m_choiceIndex = 0;
+    m_mergeIndex = 0;
+  }
 
   TokenDecisionPoint::~TokenDecisionPoint() { }
 
@@ -35,30 +35,37 @@ namespace EUROPA {
   }
 
   const bool TokenDecisionPoint::assign() { 
-    if (m_choiceIndex && m_choiceIndex >= m_choices.size()) return false;
+    if (m_choiceIndex && m_choiceIndex >= m_choices.size()) {
+      debugMsg("TokenDecisionPoint", "Returning immediately because we're out of choices.");
+      return false;
+    }
     check_error(m_tok.isValid());
 
     if (m_choiceIndex == 0 && m_mergeIndex == 0) initializeChoices();
 
-    if (m_choices.empty()) return false; // unable to find any choices
+    if (m_choices.empty()) {
+      debugMsg("TokenDecisionPoint", "Returning later because initializeChoices ended up empty");
+      return false; // unable to find any choices
+    }
 
     m_open = false;
 
     LabelStr state = m_choices[m_choiceIndex];
     if(state == Token::MERGED) {
       if(m_mergeIndex < m_compatibleTokens.size()) {
-	m_dbClient->merge(m_tok, m_compatibleTokens[m_mergeIndex]);
-	m_mergeIndex++;
-	if (m_mergeIndex == m_compatibleTokens.size())
-	  m_choiceIndex++;
-	return true;
+        m_dbClient->merge(m_tok, m_compatibleTokens[m_mergeIndex]);
+        m_mergeIndex++;
+        if (m_mergeIndex == m_compatibleTokens.size())
+          m_choiceIndex++;
+        return true;
       } else {
-	m_choiceIndex++;
-	if (m_choiceIndex == m_choices.size()) {
-	  m_open = true;
-	  return false;
-	}
-	state = m_choices[m_choiceIndex];
+        m_choiceIndex++;
+        if (m_choiceIndex == m_choices.size()) {
+          debugMsg("TokenDecisionPoint", "Assigning m_open to true because we ran out of things with which to merge.");
+          m_open = true;
+          return false;
+        }
+        state = m_choices[m_choiceIndex];
       }
     }
     if(state == Token::ACTIVE) {
@@ -68,9 +75,9 @@ namespace EUROPA {
       // against a plan database that does not have factories allocated and does not therefore
       // support automatic allocation of new tokens.
       if(m_tok->getState()->lastDomain().isMember(MERGED) && m_dbClient->supportsAutomaticAllocation())
-	m_dbClient->merge(m_tok);
+        m_dbClient->merge(m_tok);
       else // Just activate it directly. No alternative.
-	m_dbClient->activate(m_tok);
+        m_dbClient->activate(m_tok);
     }
     else if(state == Token::REJECTED)
       m_dbClient->reject(m_tok);
@@ -94,9 +101,9 @@ namespace EUROPA {
     if (m_choiceIndex == 0 && m_mergeIndex == 0) return true; // we have never assigned this decision  or initialized choices
     if (m_choiceIndex == m_choices.size())
       if (!m_tok->isMerged())
-	return false;
+        return false;
       else if(m_mergeIndex == m_compatibleTokens.size())
-	return false;
+        return false;
     return true;
   }
 
@@ -108,11 +115,11 @@ namespace EUROPA {
       os << "(" << getKey() << ") Token (" << m_entityKey << ") ";
       os << " Current Choice: ";
       if (m_tok->isMerged())
-	os << "merged with token (" << m_compatibleTokens[m_mergeIndex-1]->getKey() << ") ";
+        os << "merged with token (" << m_compatibleTokens[m_mergeIndex-1]->getKey() << ") ";
       else  if (m_choiceIndex == 0)
-	os << " No Choice ";
+        os << " No Choice ";
       else
-	os << LabelStr(m_choices[m_choiceIndex-1]).toString() << " "; 
+        os << LabelStr(m_choices[m_choiceIndex-1]).toString() << " "; 
       os << " Discarded: " << m_choiceIndex+m_mergeIndex;
     }
     else 
