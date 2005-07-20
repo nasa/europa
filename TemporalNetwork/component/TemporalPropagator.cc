@@ -417,8 +417,14 @@ namespace EUROPA {
   bool TemporalPropagator::canBeConcurrent(const ConstrainedVariableId& first, const ConstrainedVariableId& second) {
     const TimepointId& _first = getTimepoint(first);
     const TimepointId& _second = getTimepoint(second);
+
+    debugMsg("TemporalPropagator:canBeConcurrent", "determining if  " << first->lastDomain() << " can be concurrent with " << second->lastDomain());
+
     Time lb, ub;
     m_tnet->calcDistanceBounds(_first, _second, lb, ub, true);
+
+    debugMsg("TemporalPropagator:canBeConcurrent", "calculated bounds " << lb << " ... " << ub);
+
     return (lb <= 0 && ub >= 0);
   }
 

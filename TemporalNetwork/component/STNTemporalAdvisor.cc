@@ -5,6 +5,7 @@
 #include "PlanDatabase.hh"
 #include "TemporalNetworkDefs.hh"
 #include "TemporalPropagator.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -31,7 +32,10 @@ namespace EUROPA {
    * @brief 2 tokens can be concurrent if the temporal distance between them can be 0
    */
   bool STNTemporalAdvisor::canBeConcurrent(const TokenId& first, const TokenId& second){
-    return (m_propagator->canBeConcurrent(first->getStart(), second->getStart()) &&
+    debugMsg("STNTemporalAdvisor:canBeConcurrent", "first [" << first->getStart() << ", " << first->getEnd() << "]");
+    debugMsg("STNTemporalAdvisor:canBeConcurrent", "second[" << second->getStart() << ", " << second->getEnd() << "]"); 
+
+   return (m_propagator->canBeConcurrent(first->getStart(), second->getStart()) &&
 	    m_propagator->canBeConcurrent(first->getEnd(), second->getEnd()));
   }
 
