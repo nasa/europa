@@ -769,6 +769,11 @@ private:
     // reset planner - the purpose of this test..
     planner.reset(); 
 
+    res = planner.run(100);
+
+    assertTrue(res == CBPlanner::SEARCH_EXHAUSTED);
+    assertTrue(planner.getClosedDecisions().empty());
+
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
