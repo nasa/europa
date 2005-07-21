@@ -285,8 +285,11 @@ namespace EUROPA {
     TokenId tok(tdp->getToken());
     if(stateDomain.isMember(Token::MERGED)) {
       tok->getPlanDatabase()->getCompatibleTokens(tok, tdp->m_compatibleTokens, PLUS_INFINITY, true);
-      if(tdp->m_compatibleTokens.size() > 0)
+      debugMsg("ObjectDecisionPoint:initializeTokenChoices", "Found " << tdp->m_compatibleTokens.size() << " compatible tokens");
+      if(tdp->m_compatibleTokens.size() > 0) {
+        debugMsg("ObjectDecisionPoint:initializeTokenChoices", "Pushing token:merged m_choices");
 	tdp->m_choices.push_back(Token::MERGED);
+      }
     }
     if(stateDomain.isMember(Token::ACTIVE) && tok->getPlanDatabase()->hasOrderingChoice(tok))
       tdp->m_choices.push_back(Token::ACTIVE);
