@@ -41,7 +41,10 @@ namespace EUROPA {
     }
     check_error(m_tok.isValid());
 
-    if (m_choiceIndex == 0 && m_mergeIndex == 0) initializeChoices();
+    if (m_choiceIndex == 0 && m_mergeIndex == 0) {
+      debugMsg("TokenDecisionPoint", "Initializing choices.");
+      initializeChoices();
+    }
 
     if (m_choices.empty()) {
       debugMsg("TokenDecisionPoint", "Returning later because initializeChoices ended up empty");
@@ -53,6 +56,8 @@ namespace EUROPA {
     LabelStr state = m_choices[m_choiceIndex];
     if(state == Token::MERGED) {
       if(m_mergeIndex < m_compatibleTokens.size()) {
+        debugMsg("TokenDecisionPoint", "Merging " << m_tok->getPredicateName().toString() << " with " 
+                 << m_compatibleTokens[m_mergeIndex]->getPredicateName().toString());
         m_dbClient->merge(m_tok, m_compatibleTokens[m_mergeIndex]);
         m_mergeIndex++;
         if (m_mergeIndex == m_compatibleTokens.size())
@@ -74,13 +79,19 @@ namespace EUROPA {
       // Note that we also test if any factories are registered. This is required since we may test
       // against a plan database that does not have factories allocated and does not therefore
       // support automatic allocation of new tokens.
-      if(m_tok->getState()->lastDomain().isMember(MERGED) && m_dbClient->supportsAutomaticAllocation())
+      if(m_tok->getState()->lastDomain().isMember(MERGED) && m_dbClient->supportsAutomaticAllocation()) {
+        debugMsg("TokenDecisionPoint", "Creating new base token and merging onto it for " << m_tok->getPredicateName().toString());
         m_dbClient->merge(m_tok);
-      else // Just activate it directly. No alternative.
+      }
+      else { // Just activate it directly. No alternative.
+        debugMsg("TokenDecisionPoint", "Activating token " << m_tok->getPredicateName().toString());
         m_dbClient->activate(m_tok);
+      }
     }
-    else if(state == Token::REJECTED)
+    else if(state == Token::REJECTED) {
+      debugMsg("TokenDecisionPoint", "Rejecting token " << m_tok->getPredicateName().toString());
       m_dbClient->reject(m_tok);
+    }
     else
       check_error(ALWAYS_FAILS, "Inavlid choice for token state assignment" + state.toString());
     m_choiceIndex++;
