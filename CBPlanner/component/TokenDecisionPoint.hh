@@ -37,6 +37,7 @@ namespace EUROPA {
     std::vector<TokenId> m_compatibleTokens; 
     unsigned int m_mergeIndex; /*< keeps a pointer to current compatible token */
     OpenDecisionManagerId m_odm; /*< to reference the algorithm for initializing choices */
+    bool m_initialized;
   };
 
 std::ostream& operator <<(std::ostream& os, const Id<TokenDecisionPoint>&);

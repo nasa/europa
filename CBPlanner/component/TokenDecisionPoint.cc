@@ -16,6 +16,7 @@ namespace EUROPA {
     m_odm = odm;
     m_choiceIndex = 0;
     m_mergeIndex = 0;
+    m_initialized = false;
   }
 
   TokenDecisionPoint::~TokenDecisionPoint() { }
@@ -24,6 +25,7 @@ namespace EUROPA {
     check_error(m_odm.isValid());
     TokenDecisionPointId dp(m_id);
     m_odm->initializeTokenChoices(dp);
+    m_initialized = true;
   }
 
   std::vector<LabelStr>& TokenDecisionPoint::getChoices() {
@@ -101,7 +103,8 @@ namespace EUROPA {
 
   const bool TokenDecisionPoint::retract() {
     bool retval = hasRemainingChoices();
-    m_dbClient->cancel(m_tok);
+    if(m_tok->getState()->specifiedDomain().isSingleton())
+      m_dbClient->cancel(m_tok);
     m_open = true;
     return retval;
   }
@@ -109,6 +112,17 @@ namespace EUROPA {
   const bool TokenDecisionPoint::hasRemainingChoices() {
     check_error(m_choiceIndex <= m_choices.size(), "choices index exceeded number of choices");
     check_error(m_mergeIndex <= m_compatibleTokens.size(), "merge index exceeded number of compatible tokens");
+
+    if(!m_initialized) return true;
+    
+    if(m_choices.empty() || //if we have no choices
+       (m_choices.size() == 1 &&   //or there's only one choice
+        (double) (*(m_choices.begin())) == (double) Token::MERGED && //and that choice is to merge
+        m_compatibleTokens.empty())) {
+      debugMsg("TokenDecisionPoint:hasRemainingChoices", "Following the path that *surely* must be correct.");
+      return false; //but there are no compatible tokens, return false
+    }
+
     if (m_choiceIndex == 0 && m_mergeIndex == 0) return true; // we have never assigned this decision  or initialized choices
     if (m_choiceIndex == m_choices.size())
       if (!m_tok->isMerged())
