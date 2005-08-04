@@ -1,6 +1,7 @@
 #include "HSTSNoBranchCondition.hh"
 #include "ConstrainedVariable.hh"
 #include "Debug.hh"
+#include "AbstractDomain.hh"
 
 namespace EUROPA {
 
@@ -30,6 +31,8 @@ namespace EUROPA {
     debugMsg("HSTSNoBranchCondition"," Testing variable (" << var->getKey() << ") " << varName);
     std::set<LabelStr>::iterator it = m_noBranches.find(varName);
     if (it != m_noBranches.end()) {
+      if(var->lastDomain().isSingleton()) //changing NO_BRANCH semantic to allow decisions on unit vars
+        return true;
       debugMsg("HSTSNoBranchCondition"," matched NO_BRANCH");
       return false;
     }
