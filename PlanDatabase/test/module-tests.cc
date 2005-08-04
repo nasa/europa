@@ -948,6 +948,7 @@ public:
     runTest(testTokenFactory);
     runTest(testCorrectSplit_Gnats2450);
     runTest(testOpenMerge);
+    runTest(testCompatCacheReset);
     return(true);
   }
   
@@ -1894,6 +1895,65 @@ private:
     assertTrue(compatibleTokens[0] == t0.getId());
 
     t1.merge(t0.getId());
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testCompatCacheReset() {
+    DEFAULT_SETUP(ce, db, true);
+    //create a regular token
+    IntervalToken t0(db, 
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+
+    //create a token that ends slightly later
+    IntervalToken t1(db, 
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(10, 20),
+                     IntervalIntDomain(1, 1000));
+
+    t0.activate();
+    t1.activate();
+
+    //equate the end times
+    std::vector<ConstrainedVariableId> temp;
+    temp.push_back(t0.getEnd());
+    temp.push_back(t1.getEnd());
+    ConstraintId eq = ConstraintLibrary::createConstraint("concurrent",
+                                                          db->getConstraintEngine(),
+                                                          temp);
+
+
+    //create a token that has to end later
+    IntervalToken t2(db, 
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 9),
+                     IntervalIntDomain(1, 1000));
+
+    ce->propagate(); //propagate the change
+
+    //shouldn't be able to merge with anything
+    assert(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) == 0);
+    
+    delete (Constraint *) eq; //remove the constraint
+
+    ce->propagate();
+    
+    //the cache should retain the data here, so still can't merge
+    assert(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) == 0);
+
+    db->invalidateCache();
+
+    //should be able to merge now
+    assert(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) > 0);
 
     DEFAULT_TEARDOWN();
     return true;
