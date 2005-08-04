@@ -60,7 +60,7 @@ EmotionalStatus::Relaxed {
 
   Geek g;
   contains(CaffeineLevel.change c);
-  eq(-10.0, c.quantity);
+  eq(-1.0, c.quantity);
   commonAncestor(c.object, object, g);
 }
 
@@ -69,7 +69,7 @@ EmotionalStatus::Bored {
 
   Geek g;
   contains(CaffeineLevel.change c);
-  eq(-30.0, c.quantity);
+  eq(-3.0, c.quantity);
   commonAncestor(c.object, object, g);
 }
 
@@ -78,7 +78,7 @@ EmotionalStatus::Focused {
   
   Geek g;
   contains(CaffeineLevel.change c);
-  eq(50.0, c.quantity);
+  eq(5.0, c.quantity);
   commonAncestor(c.object, object, g);
 }
 
