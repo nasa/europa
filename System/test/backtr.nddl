@@ -182,7 +182,7 @@ PlannerConfig world = new PlannerConfig(10, 101, 3000);
 // Limits are essentially infinity
 // float ic, float ll_min, float ll_max,
 // float prod_max, float prod_Rmax, float cons_max, float cons_Rmax
-Rover rover = new Rover(0.0, 0.0, 20.0, 76.0, 16.0, -76.0, -16.0);
+Rover rover = new Rover(100.0, 0.0, 100.0, 76.0, 16.0, -76.0, -16.0);
 
 close();
 
