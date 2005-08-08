@@ -1,0 +1,229 @@
+#include "../../NDDL/core/Plasma.nddl"
+#include "../../NDDL/core/PlannerConfig.nddl"
+
+/**
+* A point on the planet's surface. We assume a Euclidean Plane.
+*/ 
+
+class Location {
+ string name;
+ int x;
+ int y;
+
+ Location(string _name, int _x, int _y){
+  name = _name;
+  x = _x;
+  y = _y;
+ }
+}
+
+/**
+ * Paths between pairs of locations.
+ *  Includes cost in battery power for a rover to transverse the path..
+ */
+class Path {
+ string name;
+ Location from;
+ Location to;
+ float cost;
+ Path(string _name, Location _from, Location _to, float _cost){
+  name = _name;
+  from = _from;
+  to = _to;
+  cost = _cost;
+ }
+}
+
+
+/*
+ * Navigation portion of a rover. Responsible for managing the location the 
+ * rover is at together with the state of navigating between locations.
+ */
+class Navigator
+{
+ // Rover maybe AT a location.
+ predicate At{
+  Location location;
+ }
+
+ // Rover maybe going between two locations. 
+ predicate Going{
+  Location from;
+  Location to;
+  neq(from, to);
+ }
+}
+
+Navigator::At{
+ met_by(object.Going from);
+ eq(from.to, location);
+ meets(object.Going to);
+ eq(to.from, location);
+}
+
+Navigator::Going{
+ met_by(object.At _from);
+ eq(_from.location, from);
+ meets(object.At _to);
+ eq(_to.location, to);
+
+ // Select a path from those available between the 2 points
+ Path p : {
+  eq(p.from, from);
+  eq(p.to, to);
+ };
+
+ // Pull power from the battery equal to the path cost.
+ starts(Battery.change tx);
+ eq(tx.quantity, p.cost);
+}
+
+// Component of the rover for handling commands such as 
+// taking samples or transmitting information back to the lander. 
+class Commands{
+ predicate TakeSample{
+  Location rock;
+  eq(duration, [20 25]); // Flexible durations for taking a sample
+ }
+
+ // Communicate material back to earth
+ predicate PhoneHome{}
+
+ // Communicate material back to lander
+ predicate PhoneLander{}
+
+}
+
+Commands::TakeSample{
+ contains(Instrument.TakeSample a);
+ eq(a.rock, rock);
+ Rover rovers;
+ commonAncestor(a.object, this.object, rovers);
+
+ // Make contact with results. Prefer to phone home, but
+ // also allow contact to lander instead as a relay
+ bool OR;
+
+ if(OR == false){
+  meets(object.PhoneHome t0);
+ }
+ if(OR == true){
+  meets(object.PhoneLander t1);
+ }
+}
+
+Commands::PhoneHome{
+ starts(Battery.change tx);
+ eq(tx.quantity, -600);
+}
+
+Commands::PhoneLander{
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
+}
+
+// Management of the rover's instruments.
+class Instrument{
+ predicate TakeSample{
+  Location rock;
+  leq(10, duration);
+ }
+
+ predicate Place{
+  Location rock;
+  eq([3 12], duration);
+ }
+
+ predicate Stow{
+  eq([2 6], duration);
+ }
+
+ predicate Unstow{
+  eq([2 6], duration);
+ }
+
+ predicate Stowed{}
+}
+
+Instrument::TakeSample{
+ // Same rover must be at the target rock throughout (Need a shared macro for this)
+ contained_by(Navigator.At at);
+ eq(at.location, rock);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ // Preceded by placing the instrument
+ met_by(Place b);
+ eq(b.rock, rock);
+
+ // Succeded by stowing the instrument
+ meets(Stow c);
+
+ starts(Battery.change tx);
+ eq(tx.quantity, -120);
+}
+
+Instrument::Place{
+ contained_by(Navigator.At at);
+ eq(at.location, rock);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ meets(TakeSample a);
+ eq(a.rock, rock);
+ met_by(Unstow b);
+
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
+}
+
+Instrument::Unstow{
+ contained_by(Navigator.At at);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ meets(Place a);
+ met_by(Stowed b);
+
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
+}
+
+Instrument::Stow{
+ contained_by(Navigator.At at);
+ Rover rovers;
+ commonAncestor(at.object, this.object, rovers);
+
+ meets(Stowed a);
+ met_by(TakeSample b);
+
+ starts(Battery.change tx);
+ eq(tx.quantity, -20);
+}
+
+Instrument::Stowed{
+ met_by(Stow a);
+ meets(Unstow b);
+}
+
+class Battery extends Resource {
+  Battery(float ic, float ll_min, float ll_max){
+   super(ic, ll_min, ll_max, 0.0, 0.0, MINUS_INFINITY, MINUS_INFINITY);
+  }
+}
+
+// Rover itself is made up of command, navigator, instrument, and battery
+// componenents.
+class Rover {
+ Commands commands; // High-level rover commands
+ Navigator navigator; // Handles position control and achievement
+ Instrument instrument; // Handles rock sampling
+ Battery mainBattery; // Provides power for other timelines.
+
+ Rover(Battery r){
+  commands = new Commands();
+  navigator = new Navigator();
+  instrument = new Instrument();
+  mainBattery = r;
+ }
+}
