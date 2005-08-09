@@ -261,6 +261,27 @@ else
   echo "  JAVA_HOME is set to " $JAVA_HOME
 fi
 
+#check load library
+if [ $OSTYPE = darwin ]
+then 
+  if [ -z "$DYLD_LIBRARY_PATH" ] 
+  then
+    echo "  DYLD_LIBRARY_PATH environment variable missing or not set"
+    BADLL=1
+  else 
+    echo "  DYLD_LIBRARY_PATH is set to " $DYLD_LIBRARY_PATH
+  fi
+else 
+  if [ -z "$LD_LIBRARY_PATH"] 
+    then
+      echo "  LD_LIBRARY environment variable missing or not set"
+      BADLL=1
+    else 
+      echo "  LD_LIBRARY_PATH is set to " $LD_LIBRARY_PATH
+    fi
+fi
+
+
 if [ $OSTYPE = darwin ]
 then
   if [ "$DYLD_BIND_AT_LAUNCH"  != YES ]
@@ -272,7 +293,7 @@ then
   fi
 fi
 
-if [ $BADJH -eq 1 -o $BADBAL -eq 1 ]
+if [ $BADJH -eq 1 -o $BADBAL -eq 1 -o $BADLL -eq 1 ]
 then
   BADENVV=1
   echo "Environment variables may not be set correctly to build EUROPA2"
@@ -284,4 +305,6 @@ if [ $BADPATH -eq 1 -o $BADENVV -eq 1 ]
 then
   exit 1
 fi
+
+
 exit 0
