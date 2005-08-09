@@ -272,7 +272,7 @@ then
     echo "  DYLD_LIBRARY_PATH is set to " $DYLD_LIBRARY_PATH
   fi
 else 
-  if [ -z "$LD_LIBRARY_PATH"] 
+  if [ -z "$LD_LIBRARY_PATH" ] 
     then
       echo "  LD_LIBRARY environment variable missing or not set"
       BADLL=1
