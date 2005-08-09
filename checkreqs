@@ -31,6 +31,7 @@ BADPATH=0
 BADENVV=0
 BADJH=0
 BADBAL=0
+BADLL=0
 
 echo "Checking for required software versions:"
 
@@ -281,19 +282,18 @@ else
     fi
 fi
 
-
 if [ $OSTYPE = darwin ]
 then
   if [ "$DYLD_BIND_AT_LAUNCH"  != YES ]
   then
     echo "DYLD_BIND_AT_LAUNCH environment variable missing or not set to YES" 
-    BADBAL=1
+    BADENV=1
   else
     echo "  DYLD_BIND_AT_LAUNCH is set to " $DYLD_BIND_AT_LAUNCH
   fi
 fi
 
-if [ $BADJH -eq 1 -o $BADBAL -eq 1 -o $BADLL -eq 1 ]
+if [ $BADJH -eq 1 -o $BADPATH -eq 1 -o $BADLL -eq 1 ]
 then
   BADENVV=1
   echo "Environment variables may not be set correctly to build EUROPA2"
@@ -305,6 +305,5 @@ if [ $BADPATH -eq 1 -o $BADENVV -eq 1 ]
 then
   exit 1
 fi
-
 
 exit 0
