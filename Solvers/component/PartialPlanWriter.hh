@@ -94,6 +94,7 @@ namespace EUROPA {
       long long int seqId;
       int numTokens, numConstraints, numVariables, numTransactions;
       int stepsPerWrite, transactionId, nstep, writeCounter, maxChoices;
+      double m_writing;
 
       ConstraintEngineId ceId;
       PlanDatabaseId pdbId;

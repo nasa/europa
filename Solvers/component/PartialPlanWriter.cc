@@ -269,6 +269,7 @@ namespace EUROPA {
       reId = _reId;
       nstep = 0;
       destAlreadyInitialized = false;
+      m_writing = false;
       struct timeval currTime;
       if(gettimeofday(&currTime, NULL)) {
         FatalError("gettimeofday()", "Failed to get current time.");
@@ -611,6 +612,9 @@ namespace EUROPA {
        */
 
       // std::cerr << " PartialPlanWriter::write() called " << std::endl;
+      check_error(!m_writing, "PartialPlanWriter attempted to write while writing.");
+      m_writing = true;
+      debugMsg("PartialPlanWriter:write", "Writing step " << nstep);
 
       if(!destAlreadyInitialized) {
         initOutputDestination();
@@ -766,7 +770,7 @@ namespace EUROPA {
 
           //const std::set<TransactionId>& resTrans = rId->getTransactions();
           std::set<TransactionId> resTrans;
-          rId->getTransactions(resTrans);
+          rId->getTransactions(resTrans, MINUS_INFINITY, PLUS_INFINITY, false);
           for(std::set<TransactionId>::iterator transIt = resTrans.begin();
               transIt != resTrans.end(); ++transIt) {
             TransactionId trans = *transIt;
@@ -819,7 +823,9 @@ namespace EUROPA {
       varOut.close();
       constrOut.close();
       cvmOut.close();
+      instsOut.close();
       decsOut.close();
+      m_writing = false;
     }
 
     /* writeStatsAndTransactions() is called at the end of each step 
