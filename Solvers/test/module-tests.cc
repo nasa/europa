@@ -403,14 +403,14 @@ int main(){
   REGISTER_COMPONENT_FACTORY(TestComponent, E);
 
   // Register filter components
-  REGISTER_COMPONENT_FACTORY(SingletonFilter, Singleton);
-  REGISTER_COMPONENT_FACTORY(HorizonFilter, HorizonFilter);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::SingletonFilter, Singleton);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
 
   // Initialization of various id's and other required elements
   initSolverModuleTests();
 
-  // Set up the required components. Shoudl eventually go into an assembly. Note they are allocated on the stack, not the heap
+  // Set up the required components. Should eventually go into an assembly. Note they are allocated on the stack, not the heap
   REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, StandardVariableHandler);
   REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, Min);
   REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MaxValue, Max);

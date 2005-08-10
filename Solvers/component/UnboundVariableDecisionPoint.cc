@@ -21,6 +21,9 @@ namespace EUROPA {
       checkError(flawedVariable->lastDomain().areBoundsFinite(),
 		 "Attempted to allocate a Decision Point for an domain with infinite bounds for variable " 
 		 << flawedVariable->toString());
+
+      checkError(strcmp(configData.Value(), "FlawHandler") == 0,
+		 "Expected element <FlawHandler> but found " << configData.Value());
     }
 
     UnboundVariableDecisionPoint::~UnboundVariableDecisionPoint(){
@@ -79,9 +82,6 @@ namespace EUROPA {
 	sl_seeded = true;
 	debugMsg("RandomValue:RandomValue", "Seeding Random Number Generator with " << seedValue);
       }
-
-      checkError(strcmp(configData.Value(), "VariableHandler") == 0,
-		 "Expected element <VariableHandler> but found " << configData.Value());
 
       // If there is an XML child for the distribution, then obtain it. Make sure there is at most 1.
       bool foundOne = false;

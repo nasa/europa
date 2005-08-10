@@ -2,6 +2,7 @@
 #define H_Filters
 
 #include "MatchingRule.hh"
+#include "IntervalIntDomain.hh"
 
 /**
  * @file Provides Declarations for useful flaw filter components
