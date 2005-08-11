@@ -30,7 +30,7 @@ namespace EUROPA {
       : FlawManager(configData), m_ceListener(NULL), m_dbListener(NULL){
 
       checkError(strcmp(configData.Value(), "UnboundVariableManager") == 0,
-		 "Expected element <UnboundVariableManager> but found " << configData.Value());
+		 "Configuration error. Expected element <UnboundVariableManager> but found " << configData.Value());
 
       // Load all filtering rules
       for (TiXmlElement * child = configData.FirstChildElement(); 
@@ -46,7 +46,7 @@ namespace EUROPA {
 	}
 	else { // Must be a variable filter
 	  checkError(strcmp(child->Value(), "FlawFilter") == 0,
-		     "Expected element <FlawFilter> but found " << child->Value());
+		     "Configuration error. Expected element <FlawFilter> but found " << child->Value());
 
 	  const char* component = child->Attribute("component");
 
@@ -95,7 +95,8 @@ namespace EUROPA {
     }
 
     bool UnboundVariableManager::inScope(const ConstrainedVariableId& var) const {
-      checkError(m_db->getConstraintEngine()->constraintConsistent(), "Assumes the database is constraint consistent but it is not.");
+      checkError(m_db->getConstraintEngine()->constraintConsistent(), 
+		 "Assumes the database is constraint consistent but it is not.");
       bool result =  (!var->specifiedDomain().isSingleton() && !matches(var, m_staticMatchingRules) && !matches(var, m_dynamicMatchingRules));
       return result;
     }
@@ -124,7 +125,8 @@ namespace EUROPA {
 
     DecisionPointId UnboundVariableManager::next(unsigned int priorityLowerBound,
 					      unsigned int& bestPriority){
-      checkError(bestPriority > priorityLowerBound, "Should not be calling this otherwise.");
+      checkError(bestPriority > priorityLowerBound, 
+		 "Should not be calling this otherwise: " << bestPriority << ">=" << priorityLowerBound);
       ConstrainedVariableId flawedVariable;
       bool flawIsGuarded = false;
 
@@ -192,7 +194,8 @@ namespace EUROPA {
       DecisionPointId decisionPoint = allocateDecisionPoint(flawedVariable);
 
       checkError(decisionPoint.isValid(),
-		 "Failed to allocate a decision point for " << flawedVariable->toString());
+		 "Failed to allocate a decision point for " << flawedVariable->toString() <<
+		 " . Indicates that now FlawHandler is configured for this flaw.");
 
       return decisionPoint;
     }

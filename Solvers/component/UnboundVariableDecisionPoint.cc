@@ -19,11 +19,11 @@ namespace EUROPA {
 	m_flawedVariable(flawedVariable),
 	m_choices(ValueSource::getSource(flawedVariable)){
       checkError(flawedVariable->lastDomain().areBoundsFinite(),
-		 "Attempted to allocate a Decision Point for an domain with infinite bounds for variable " 
+		 "Attempted to allocate a Decision Point for a domain with infinite bounds for variable " 
 		 << flawedVariable->toString());
 
       checkError(strcmp(configData.Value(), "FlawHandler") == 0,
-		 "Expected element <FlawHandler> but found " << configData.Value());
+		 "Configuration error. Expected element <FlawHandler> but found " << configData.Value());
     }
 
     UnboundVariableDecisionPoint::~UnboundVariableDecisionPoint(){
@@ -101,7 +101,8 @@ namespace EUROPA {
 	else if(strcmp(distribution, "UNIFORM") == 0)
 	  m_distribution = UNIFORM;
 	else {
-	  checkError(ALWAYS_FAILS, distribution << " is not a valid probability distribution.");
+	  checkError(ALWAYS_FAILS, "Configuration error. " << 
+		     distribution << " is not a valid probability distribution.");
 	}
 
 	debugMsg("RandomValue:RandomValue",

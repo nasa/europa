@@ -19,14 +19,15 @@ namespace EUROPA {
     }
 
     void ThreatDecisionPoint::handleExecute(){
-      checkError(m_index < m_choiceCount, "Tried to execute past available choices.");
+      checkError(m_index < m_choiceCount, "Tried to execute past available choices:" << m_index << ">=" << m_choiceCount);
       ObjectId object;
       TokenId predecessor;
       TokenId successor;
       extractParts(m_index, object, predecessor, successor);
 
       checkError(predecessor == m_tokenToOrder || successor == m_tokenToOrder,
-		 "Given token must be part of assignment.");
+		 "Given token must be part of assignment." 
+		 << m_tokenToOrder->toString() << ";" << predecessor->toString() << "; " << successor->toString());
 
       m_client->constrain(object, predecessor, successor);
     }
@@ -37,7 +38,8 @@ namespace EUROPA {
       TokenId successor;
       extractParts(m_index, object, predecessor, successor);
       checkError(predecessor == m_tokenToOrder || successor == m_tokenToOrder,
-		 "Given token must be part of assignment.");
+		 "Given token must be part of assignment."
+		 << m_tokenToOrder->toString() << ";" << predecessor->toString() << "; " << successor->toString());
 
       m_client->free(object, predecessor, successor);
       m_index++; // Advance to next choice

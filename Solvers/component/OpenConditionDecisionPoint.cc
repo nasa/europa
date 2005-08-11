@@ -47,10 +47,14 @@ namespace EUROPA {
     }
 
     void OpenConditionDecisionPoint::handleExecute(){
-      checkError(m_choiceIndex < m_choiceCount, "Tried to execute past available choices.");
+      checkError(m_choiceIndex < m_choiceCount, 
+		 "Tried to execute past available choices:" << m_choiceIndex << ">=" << m_choiceCount);
+
       if(m_mergeIndex < m_mergeCount){
-	checkError(m_choiceIndex == 0, "Expect Merging to be the first choice.");
-	checkError(m_choices[m_choiceIndex] == Token::MERGED, "Expect this choice to be a merge.");
+	checkError(m_choiceIndex == 0, 
+		   "Expect Merging to be the first choice but index is:" << m_choiceIndex);
+	checkError(m_choices[m_choiceIndex] == Token::MERGED, 
+		   "Expect this choice to be a merge instead it is:" << m_choices[m_choiceIndex].toString());
 	TokenId activeToken = m_compatibleTokens[m_mergeIndex];
 	m_client->merge(m_flawedToken, activeToken);
       }

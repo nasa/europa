@@ -1,6 +1,7 @@
 #include "ThreatManager.hh"
 #include "PlanDatabase.hh"
 #include "Token.hh"
+#include "TokenVariable.hh"
 #include "Object.hh"
 #include "Debug.hh"
 #include "Utils.hh"
@@ -16,7 +17,7 @@ namespace EUROPA {
       : FlawManager(configData){
 
       checkError(strcmp(configData.Value(), "ThreatManager") == 0,
-		 "Expected element <ThreatManager> but found " << configData.Value());
+		 "Error in configuration file. Expected element <ThreatManager> but found " << configData.Value());
 
       // Load all filtering rules
       for (TiXmlElement * child = configData.FirstChildElement(); 
@@ -32,7 +33,7 @@ namespace EUROPA {
 	}
 	else { // Must be a token filter
 	  checkError(strcmp(child->Value(), "FlawFilter") == 0,
-		     "Expected element <FlawFilter> but found " << child->Value());
+		     "Error in configuratiuon file. Expected element <FlawFilter> but found " << child->Value());
 
 	  const char* component = child->Attribute("component");
 
@@ -57,8 +58,13 @@ namespace EUROPA {
     void ThreatManager::handleInitialize() {}
 
     bool ThreatManager::inScope(const TokenId& token) const {
-      checkError(m_db->getConstraintEngine()->constraintConsistent(), "Assumes the database is constraint consistent but it is not.");
-      bool result =  (token->isActive() && !matches(token, m_staticMatchingRules) && !matches(token, m_dynamicMatchingRules));
+      checkError(m_db->getConstraintEngine()->constraintConsistent(), 
+		 "Assumes the database is constraint consistent but it is not.");
+
+      bool result =  (token->isActive() && 
+		      !matches(token, m_staticMatchingRules) && 
+		      !matches(token, m_dynamicMatchingRules));
+
       return result;
     }
 
@@ -70,11 +76,13 @@ namespace EUROPA {
 	TokenMatchingRuleId rule = *it;
 	check_error(rule.isValid());
 	if(rule->matches(objectType, predicate) && rule->matches(token)){
-	  debugMsg("ThreatManager:matches", "Match found for " << TokenMatchingRule::makeExpression(token) << " with " << rule->getExpression());
+	  debugMsg("ThreatManager:matches", 
+		   "Match found for " << TokenMatchingRule::makeExpression(token) << " with " << rule->getExpression());
 	  return true;
 	}
 	else {
-	  debugMsg("ThreatManager:matches", "No match for " << TokenMatchingRule::makeExpression(token) << " with " << rule->getExpression());
+	  debugMsg("ThreatManager:matches", 
+		   "No match for " << TokenMatchingRule::makeExpression(token) << " with " << rule->getExpression());
 	}
       }
 
@@ -90,7 +98,8 @@ namespace EUROPA {
       std::map<int, TokenId> candidates;
       for(std::map<TokenId, ObjectSet>::const_iterator it = tokensToOrder.begin(); it != tokensToOrder.end(); ++it){
 	TokenId candidate = it->first;
-	checkError(candidate->isActive(), "It must be inactive to be a candidate.");
+	checkError(candidate->isActive(), "It must be inactive to be a candidate. " 
+		   << candidate->toString() << ";" << candidate->getState()->toString());
 
 	if(!inScope(candidate)){
 	  debugMsg("ThreatManager:next",
@@ -132,7 +141,8 @@ namespace EUROPA {
       DecisionPointId decisionPoint = allocateDecisionPoint(tokenToOrder);
 
       checkError(decisionPoint.isValid(),
-		 "Failed to allocate a decision point for " << tokenToOrder->toString());
+		 "Failed to allocate a decision point for " << tokenToOrder->toString() <<
+		 " Indicates that no FlawHandler has been configured for this flaw.");
 
       return decisionPoint;
     }

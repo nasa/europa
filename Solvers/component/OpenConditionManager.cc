@@ -18,7 +18,7 @@ namespace EUROPA {
       : FlawManager(configData), m_dbListener(NULL) {
 
       checkError(strcmp(configData.Value(), "OpenConditionManager") == 0,
-		 "Expected element <OpenConditionManager> but found " << configData.Value());
+		 "Configuration Error. Expected element <OpenConditionManager> but found " << configData.Value());
 
       // Load all filtering rules
       for (TiXmlElement * child = configData.FirstChildElement(); 
@@ -34,7 +34,7 @@ namespace EUROPA {
 	}
 	else { // Must be a token filter
 	  checkError(strcmp(child->Value(), "FlawFilter") == 0,
-		     "Expected element <FlawFilter> but found " << child->Value());
+		     "Configuration Error. Expected element <FlawFilter> but found " << child->Value());
 
 	  const char* component = child->Attribute("component");
 
@@ -121,7 +121,8 @@ namespace EUROPA {
 
       checkError(result.isValid(),
 		 "At count " << sl_counter << ": No Decision Point could be allocated for " 
-		 << flawedToken->toString());
+		 << flawedToken->toString() << 
+		 ". This indicates a failure to register a FlawHandler for this Flaw.");
 
       return result;
     }
@@ -155,7 +156,8 @@ namespace EUROPA {
       std::map<int, TokenId> candidates;
       for(TokenSet::const_iterator it = m_flawCandidates.begin(); it != m_flawCandidates.end(); ++it){
 	TokenId candidate = *it;
-	checkError(candidate->isInactive(), "It must be inactive to be a candidate.");
+	checkError(candidate->isInactive(), 
+		   "It must be inactive to be a candidate." << candidate->getState()->lastDomain().toString());
 
 
 	if(matches(candidate, m_dynamicMatchingRules)){
@@ -220,7 +222,8 @@ namespace EUROPA {
       DecisionPointId decisionPoint = allocateDecisionPoint(flawedToken);
 
       checkError(decisionPoint.isValid(),
-		 "Failed to allocate a decision point for " << flawedToken->toString());
+		 "Failed to allocate a decision point for " << flawedToken->toString() <<
+		 ". This indicates a failure to configure a FlawHandler for this flaw.");
 
       return decisionPoint;
     }
