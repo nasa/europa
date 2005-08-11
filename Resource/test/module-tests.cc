@@ -103,9 +103,9 @@ public:
     runTest(testTransactionRemoval);
     runTest(testIntervalCapacityValues);
     runTest(testConstraintCheckOnInsertion);
-    runTest(testLowerBoundResourceViolation);
-    runTest(testUpperBoundResourceViolation);
-    
+    runTest(testLowerTotalProductionExceededResourceViolation);
+    runTest(testLowerTotalConsumptionExceededResourceViolation);
+    runTest(testUpperLimitExceededResourceViolation);
     runTest(testSummationConstraintResourceViolation);
     runTest(testResourceListenerFlawNotification);
     return true;
@@ -523,7 +523,7 @@ private:
     return(true);
   }
 
-  static bool testLowerBoundResourceViolation()
+  static bool testLowerTotalProductionExceededResourceViolation()
   {
     // Define input constrains for the resource spec
 
@@ -535,53 +535,113 @@ private:
 
     std::list<ResourceViolationId> violations;
 
-    // Test Lower Bound
-    TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -5, -5))->getId();
+    // Test that a violation is detected when the excess in the level cannot be overcome by remaining
+    // production
+    TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
+    assertTrue(ce.propagate());
+    TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
+    assertTrue(ce.propagate());    
+    TokenId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
+    assertTrue(ce.propagate());
+    TokenId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
+    assertTrue(ce.propagate());
+    TokenId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 6), -8, -8))->getId();
     assertTrue(ce.propagate());
     // This will push it over the edge
-    TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -1, -1))->getId();
-    assertTrue(!ce.propagate());    
+    TokenId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(10, 10), -8, -8))->getId();
+    assertTrue(!ce.propagate());
     assertTrue(checkLevelArea(r) == 0);
     r->getResourceViolations(violations);
     assertTrue(violations.front()->getType() == ResourceViolation::LevelTooLow);
 
     delete (Token*) t1;
     delete (Token*) t2;
-   
+    delete (Token*) t3;
+    delete (Token*) t4;
+    delete (Token*) t5;
+    delete (Token*) t6;
+
     DEFAULT_TEARDOWN();
     return(true);
   }
 
- static bool testUpperBoundResourceViolation()
+  static bool testLowerTotalConsumptionExceededResourceViolation()
   {
     // Define input constrains for the resource spec
 
     DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
-				 limitMin, limitMax, productionMax, productionMax, MINUS_INFINITY, MINUS_INFINITY))->getId();
+				 limitMin, limitMax, PLUS_INFINITY, PLUS_INFINITY, consumptionMax, consumptionMax))->getId();
     db.close();
 
     std::list<ResourceViolationId> violations;
 
-    // Test Lower Bound
-    TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), 5, 5))->getId();
+    // Test that a violation is detected when the excess in the level cannot be overcome by remaining
+    // production
+    TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
+    assertTrue(ce.propagate());
+    TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
+    assertTrue(ce.propagate());    
+    TokenId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
+    assertTrue(ce.propagate());
+    TokenId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
+    assertTrue(ce.propagate());
+    TokenId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 6), -8, -8))->getId();
+    assertTrue(ce.propagate());
+    TokenId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(8, 8), -8, -8))->getId();
     assertTrue(ce.propagate());
     // This will push it over the edge
-    TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), 1, 1))->getId();
-    assertTrue(!ce.propagate());    
+    TokenId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(10, 10), -8, -8))->getId();
+    assertTrue(!ce.propagate());
+
     assertTrue(checkLevelArea(r) == 0);
     r->getResourceViolations(violations);
-    assertTrue(violations.front()->getType() == ResourceViolation::LevelTooHigh);
+    assertTrue(!violations.empty());
+    assertTrue(violations.front()->getType() == ResourceViolation::ConsumptionSumExceeded);
 
     delete (Token*) t1;
     delete (Token*) t2;
-   
+    delete (Token*) t3;
+    delete (Token*) t4;
+    delete (Token*) t5;
+    delete (Token*) t6;
+    delete (Token*) t7;
+
     DEFAULT_TEARDOWN();
     return(true);
   }
 
- 
+  static bool testUpperLimitExceededResourceViolation()
+  {
+    // Define input constrains for the resource spec
+    DEFAULT_SETUP(ce,db,false);
+    
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity + 1,  
+				 limitMin, limitMax, productionRateMax, productionMax + 100, consumptionRateMax, consumptionMax))->getId();
+    db.close();
+
+
+    // Test that a violation is detected when the excess in the level cannot be overcome by remaining
+    // consumption
+    std::list<TokenId> transactions;
+    for (int i = 0; i < 11; i++){
+      TokenId t = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(i, i), productionRateMax, productionRateMax))->getId();
+      //r->constrain(t);
+      ce.propagate();
+      transactions.push_back(t);
+    }
+
+    assertTrue(checkLevelArea(r) == 0);
+
+    std::list<ResourceViolationId> violations;
+    r->getResourceViolations(violations);
+    assertTrue(violations.size() == 1);
+    assertTrue(violations.front()->getType() == ResourceViolation::LevelTooHigh);
+
+    DEFAULT_TEARDOWN();
+    return(true);
+  }
 
   static bool testSummationConstraintResourceViolation()
   {
