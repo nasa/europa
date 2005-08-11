@@ -45,16 +45,18 @@ namespace EUROPA {
     bool passed(true);
 
     if (m_possiblyOutside) {
+      // apply possibly defintion.
       if (!tokStartDomain.isEmpty() && (tokStartDomain.getUpperBound() >= end))
 	passed = false; 
       if (!tokEndDomain.isEmpty() && (tokEndDomain.getLowerBound() <= start))
 	passed = false; 
     }
     else {
-      if (!tokStartDomain.isEmpty() && (tokStartDomain.getUpperBound() > end))
-	passed = false;
-      if (!tokEndDomain.isEmpty() && (tokEndDomain.getLowerBound() < start))
-	passed = false;
+      // apply necessary defintion.
+      if (!tokStartDomain.isEmpty() && (tokStartDomain.getLowerBound() > end))
+	passed = false; 
+      if (!tokEndDomain.isEmpty() && (tokEndDomain.getUpperBound() < start))
+	passed = false; 
     }
     return passed;
   }
