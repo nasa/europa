@@ -155,6 +155,7 @@ public:
     runTest(testCondition);
     runTest(testHorizon);
     runTest(testHorizonCondition);
+    runTest(testHorizonConditionNecessary);
     runTest(testTemporalVariableCondition);
     runTest(testDynamicInfiniteRealCondition);
     return(true);
@@ -195,6 +196,7 @@ private:
     DEFAULT_SETUP(ce, db, false);
     HorizonCondition cond(hor.getId(), dm.getId());
     assertTrue(cond.isPossiblyOutsideHorizon());
+    assertTrue(!cond.isNecessarilyOutsideHorizon());
     assertTrue(dm.getConditions().size() == 1);
 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
@@ -248,6 +250,63 @@ private:
     DEFAULT_TEARDOWN();
     return true;
   }
+
+static bool testHorizonConditionNecessary() {
+    DEFAULT_SETUP(ce, db, false);
+    HorizonCondition cond(hor.getId(), dm.getId());
+    // change to using the necessary condtion for horizion containment. 
+    cond.setNecessarilyOutsideHorizon();
+    // check the flags are set correctly. 
+    assertTrue(!cond.isPossiblyOutsideHorizon());
+    assertTrue(cond.isNecessarilyOutsideHorizon());
+
+    // build a test token. 
+    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    db.close();
+    IntervalToken tokenA(db.getId(), 
+			 "Objects.P1", 
+			 false,
+			 IntervalIntDomain(10, 13),
+			 IntervalIntDomain(20, 23),
+			 IntervalIntDomain(10, 10));
+
+    assertTrue(ce.propagate());
+    assertTrue(cond.test(t.getId())); 
+
+    // Horizon covers tokenA
+    hor.setHorizon(0,30);
+    assertTrue(cond.hasChanged());
+    assertTrue(ce.propagate());
+    assertTrue(cond.test(tokenA.getId()));
+
+    // test tokenstart.upperbound > end
+    hor.setHorizon(0,10);
+    assertTrue(cond.hasChanged());
+    assertTrue(ce.propagate());
+    assertTrue(cond.test(tokenA.getId()));
+
+    // test tokenstart.lowerbound > end
+    hor.setHorizon(0,9);
+    assertTrue(cond.hasChanged());
+    assertTrue(ce.propagate());
+    assertTrue(!cond.test(tokenA.getId()));
+
+    // test tokenend.lowerboud < start
+    hor.setHorizon(21,30);
+    assertTrue(cond.hasChanged());
+    assertTrue(ce.propagate());
+    assertTrue(cond.test(tokenA.getId()));
+
+    // test tokenend.upperbound < start
+    hor.setHorizon(24,30);
+    assertTrue(cond.hasChanged());
+    assertTrue(ce.propagate());
+    assertTrue(!cond.test(tokenA.getId()));
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
 
   static bool testTemporalVariableCondition() {
     DEFAULT_SETUP(ce, db, false);
