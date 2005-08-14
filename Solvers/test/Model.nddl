@@ -89,6 +89,8 @@ class HorizonFiltered extends Timeline {
  predicate predicate3{}
  predicate predicate4{}
  predicate predicate5{}
+ predicate predicate6{bool filterVar;}
+ predicate predicate7{bool keepVar;}
 
  predicate uberPredicate{
   bool forceRejection;

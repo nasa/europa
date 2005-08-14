@@ -18,6 +18,10 @@
 
   <-- Impose a dynamic filter based on finiteness and dynamicity -->
   <FlawFilter var-match="globalVariable3" component="InfiniteDynamicFilter"/>
+
+  <-- Impose a horizon filter based on predicates -->
+  <FlawFilter class-match="HorizonFiltered" component="HorizonVariableFilter"/>
+
 </UnboundVariableManager>
 
 <OpenConditionManager>

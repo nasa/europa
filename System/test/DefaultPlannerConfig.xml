@@ -5,6 +5,7 @@
     <FlawFilter var-match="duration"/>
     <FlawFilter component="InfiniteDynamicFilter"/>
     <FlawHandler component="MinValue"/>
+    <FlawFilter component="HorizonVariableFilter" policy="PartiallyContained"/>
   </UnboundVariableManager>
 
   <OpenConditionManager>

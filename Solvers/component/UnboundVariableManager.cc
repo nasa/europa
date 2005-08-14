@@ -112,11 +112,13 @@ namespace EUROPA {
 	check_error(rule.isValid());
 	// Test for a match against the statndard match and the extendable match
 	if(rule->matches(varName, objectType, predicate) && rule->matches(var)){
-	  debugMsg("UnboundVariableManager:matches", "Match found for " << VariableMatchingRule::makeExpression(var) << " with " << rule->getExpression());
+	  debugMsg("UnboundVariableManager:matches", 
+		   "Match found for " << VariableMatchingRule::makeExpression(var) << " with " << rule->getExpression());
 	  return true;
 	}
 	else {
-	  debugMsg("UnboundVariableManager:matches", "No match for " << VariableMatchingRule::makeExpression(var) << " with " << rule->getExpression());
+	  debugMsg("UnboundVariableManager:matches", 
+		   "No match for " << VariableMatchingRule::makeExpression(var) << " with " << rule->getExpression());
 	}
       }
 

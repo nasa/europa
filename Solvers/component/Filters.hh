@@ -58,6 +58,20 @@ namespace EUROPA {
 
       LabelStr m_policy;
     };
+
+    /**
+     * @brief Will compose the Horizon Filter already available for a token in order to ensure
+     * that the token for the variable is actually in the horizon.
+     */
+    class HorizonVariableFilter: public VariableMatchingRule {
+    public:
+      HorizonVariableFilter(const TiXmlElement& configData);
+      bool matches(const ConstrainedVariableId& var) const;
+      std::string getExpression() const;
+
+    private:
+      HorizonFilter m_horizonFilter;
+    };
   }
 }
 #endif

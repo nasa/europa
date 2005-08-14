@@ -92,5 +92,34 @@ namespace EUROPA {
       expr = expr + " Policy='" + m_policy.toString() + "' Horizon=" + horizon.toString();
       return expr;
     }
+
+    HorizonVariableFilter::HorizonVariableFilter(const TiXmlElement& configData)
+      : VariableMatchingRule(configData), m_horizonFilter(configData){}
+
+    bool HorizonVariableFilter::matches(const ConstrainedVariableId& var) const {
+      debugMsg("HorizonVariableFilter:matches", "Evaluating " << var->toString() << " for horizon filter.");
+
+      EntityId parent = var->getParent();
+
+      if(parent.isNoId() || ObjectId::convertable(parent))
+	return false;
+
+      TokenId token;
+
+      if(RuleInstanceId::convertable(parent))
+	token = RuleInstanceId(parent)->getToken();
+      else {
+	checkError(TokenId::convertable(parent), 
+		   "If we have covered our bases, it must be a token, but it ain't:" << var->toString());
+	token = (TokenId) parent;
+      }
+
+      // Now simply delegate to the filter stored internally.
+      return m_horizonFilter.matches(token);
+    }
+
+    std::string HorizonVariableFilter::getExpression() const {
+      return m_horizonFilter.getExpression();
+    }
   }
 }

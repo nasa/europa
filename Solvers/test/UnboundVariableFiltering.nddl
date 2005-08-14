@@ -15,6 +15,8 @@ NoPredicates noPred = new NoPredicates();
 PredicateRoot root = new PredicateRoot();
 PredicateDerived derived = new PredicateDerived();
 
+HorizonFiltered f = new HorizonFiltered();
+
 close();
 
 goal(A.predicateA t0);
@@ -29,3 +31,10 @@ goal(PredicateRoot.predicateE t6);
 goal(PredicateRoot.predicateD t7);
 
 goal(C.predicateC t8);
+
+goal(HorizonFiltered.predicate6 t9);
+t9.start.specify(1001);
+
+goal(HorizonFiltered.predicate7 t10);
+t10.start.specify(100);
+t10.end.specify(1000);

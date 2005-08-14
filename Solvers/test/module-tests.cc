@@ -169,17 +169,21 @@ private:
     fm.initialize(assembly.getPlanDatabase());
     assert(assembly.playTransactions("UnboundVariableFiltering.xml"));
 
+    // Set the horizon
+    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
+    horizon = IntervalIntDomain(0, 1000);
+
     // Simple filter on a variable
     ConstrainedVariableSet variables = assembly.getConstraintEngine()->getVariables();
     for(ConstrainedVariableSet::const_iterator it = variables.begin(); it != variables.end(); ++it){
       ConstrainedVariableId var = *it;
 
       // Confirm temporal variables have been excluded
-      static const LabelStr excludedVariables(":start:end:duration:arg1:arg3:arg4:arg6:arg7:arg8");
-      static const LabelStr includedVariables(":arg2:arg5:");
+      static const LabelStr excludedVariables(":start:end:duration:arg1:arg3:arg4:arg6:arg7:arg8:filterVar:");
+      static const LabelStr includedVariables(":arg2:arg5:keepVar:");
       std::string s = ":" + var->getName().toString() + ":";
       if(excludedVariables.contains(s))
-	assertTrue(!fm.inScope(var))
+	assertTrue(!fm.inScope(var), var->toString())
       else if(includedVariables.contains(s))
 	assertTrue(fm.inScope(var), var->toString());
     }
@@ -406,6 +410,7 @@ int main(){
   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::SingletonFilter, Singleton);
   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
+  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonVariableFilter, HorizonVariableFilter);
 
   // Initialization of various id's and other required elements
   initSolverModuleTests();
