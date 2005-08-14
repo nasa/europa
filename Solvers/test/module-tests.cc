@@ -268,6 +268,7 @@ public:
     runTest(testExhaustiveSearch);
     runTest(testSimpleActivation);
     runTest(testSimpleRejection);
+    runTest(testMultipleSearch);
     return true;
   }
 
@@ -384,6 +385,24 @@ private:
       assertTrue(assembly.getPlanDatabase()->getTokens().size() == 1);
     }
 
+
+    return true;
+  }
+
+
+  static bool testMultipleSearch(){
+    StandardAssembly assembly(Schema::instance());
+    TiXmlElement* root = initXml("SolverTests.xml", "SimpleCSPSolver");
+    TiXmlElement* child = root->FirstChildElement();
+
+    // Call the solver
+    Solver solver(assembly.getPlanDatabase(), *child);
+    assertTrue(solver.solve());
+
+    // Now modify the database and invoke the solver again. Ensure that it does work
+    assert(assembly.playTransactions("SuccessfulSearch.xml"));
+    assertTrue(solver.solve());
+    assertTrue(solver.getDepth() > 0);
 
     return true;
   }

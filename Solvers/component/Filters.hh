@@ -34,7 +34,15 @@ namespace EUROPA {
 
 
     /**
-     * @brief Will filter a token based on the horizon
+     * @brief Will filter a token based on the horizon.
+     *
+     * A number of policies are supported for applying the Horizon Tesy. They are:
+     * @li PossiblyContained - for the token to be in the horizon, both the start and end times must 
+     * intersect the horizon.
+     * @li PartiallyContained - for the token to be in the horizon, there need only be some temporal overlap
+     * between the temporal extent of the token and the horizon.
+     * @li TotallyContained - for the token to be in the horizon, the temporal extend of the token must be a subset of
+     * the horizon.
      */
     class HorizonFilter: public TokenMatchingRule {
     public:
