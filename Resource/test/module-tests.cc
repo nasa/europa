@@ -108,6 +108,7 @@ public:
     runTest(testUpperLimitExceededResourceViolation);
     runTest(testSummationConstraintResourceViolation);
     runTest(testResourceListenerFlawNotification);
+    runTest(testPointProfileQueries);
     return true;
   }
     
@@ -718,6 +719,57 @@ private:
     assertTrue(ce.propagate());
     assertTrue(!r->hasFlaws());
     assertTrue(!(rl->m_flawed));
+
+    delete (Token*) producer;
+    delete (Token*) c1;
+    delete (Token*) c2;
+
+    DEFAULT_TEARDOWN();
+    return(true);
+  }
+  
+  static bool testPointProfileQueries()
+  {
+    // Define input constrains for the resource spec
+    DEFAULT_SETUP(ce,db,false);
+    ResourceId r = (new Resource( db.getId(), LabelStr("Resource"), LabelStr("r1"), 
+				  initialCapacity, 
+				  limitMin, limitMax, productionRateMax, 5, consumptionRateMax, consumptionMax))->getId();
+    db.close();
+
+    IntervalDomain result;
+    // Verify correct behaviour for the case with no transactions
+    r->getPointLevelsBefore(10, result);
+    assertTrue(result.isSingleton() && result.getSingletonValue() == initialCapacity);
+
+    // Test that a flaw is signalled when there is a possibility to violate limits
+    TransactionId producer = (new Transaction(db.getId(), LabelStr("Resource.change"), 
+					      IntervalIntDomain(5, 5), 5, 5))->getId();
+
+    // Have a single transaction, test before, at and after.
+    r->getPointLevelsBefore(0, result);
+    assertTrue(result.isSingleton() && result.getSingletonValue() == initialCapacity);
+    r->getPointLevelsBefore(5, result);
+    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
+    r->getPointLevelsBefore(1000, result);
+    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
+
+    TransactionId c1 = (new Transaction(db.getId(), LabelStr("Resource.change"), 
+					IntervalIntDomain(0, 7), -5, -5))->getId();
+
+    TransactionId c2 = (new Transaction(db.getId(), LabelStr("Resource.change"), 
+					IntervalIntDomain(2, 10), -5, -5))->getId();
+
+    // Confirm that we can query in the middle
+    r->getPointLevelsBefore(6, result);
+    assertTrue(result == IntervalDomain(initialCapacity+5-10, initialCapacity+5));
+
+    // Confirm that we can query at the end
+    r->getPointLevelsBefore(1000, result);
+    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5 - 10));
+
+    // There should be no violations, only flaws
+    assertTrue(ce.propagate());
 
     delete (Token*) producer;
     delete (Token*) c1;
