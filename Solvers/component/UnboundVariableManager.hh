@@ -26,10 +26,16 @@ namespace EUROPA {
 
     private:
       virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
+
+      virtual DecisionPointId next(unsigned int priorityLowerBound,
+				   unsigned int& bestPriority,
+				   const ConstrainedVariableSet& flawCandidates);
+
       DecisionPointId allocateDecisionPoint(const ConstrainedVariableId& flawedVariable);
       void handleInitialize();
       void addFlaw(const ConstrainedVariableId& var);
       void removeFlaw(const ConstrainedVariableId& var);
+      void toggleSingletonFlaw(const ConstrainedVariableId& var);
       void addGuard(const ConstrainedVariableId& var);
       void removeGuard(const ConstrainedVariableId& var);
       void handleConstraintAddition(const ConstraintId& constraint);
@@ -41,7 +47,7 @@ namespace EUROPA {
       static bool variableOfNonActiveToken(const ConstrainedVariableId& var);
 
       ConstrainedVariableSet m_flawCandidates; /*!< All variables that have passed the static filter */
-
+      ConstrainedVariableSet m_singletonFlawCandidates; /*!< All singleton variables that have passed the static filter */
       std::map<ConstrainedVariableId, unsigned int> m_guardCache; /*!< Cache of variables that are
 								    guarded. Includes reference counts. */
 

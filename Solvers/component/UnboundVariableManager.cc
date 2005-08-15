@@ -126,16 +126,27 @@ namespace EUROPA {
     }
 
     DecisionPointId UnboundVariableManager::next(unsigned int priorityLowerBound,
-					      unsigned int& bestPriority){
+						 unsigned int& bestPriority){
+      // For the special case of a singleton flaw we will use the cached singlton flaw candidates
+      if(bestPriority == 2)
+	return next(priorityLowerBound, bestPriority, m_singletonFlawCandidates);
+      else
+	return next(priorityLowerBound, bestPriority, m_flawCandidates);
+    }
+
+    DecisionPointId UnboundVariableManager::next(unsigned int priorityLowerBound,
+						 unsigned int& bestPriority,
+						 const ConstrainedVariableSet& flawCandidates){
       checkError(bestPriority > priorityLowerBound, 
 		 "Should not be calling this otherwise: " << bestPriority << ">=" << priorityLowerBound);
+
       ConstrainedVariableId flawedVariable;
       bool flawIsGuarded = false;
 
       debugMsg("UnboundVariableManager:next",
 	       "Evaluating next decision to work on. Must beat priority of " << bestPriority);
 
-      for(ConstrainedVariableSet::const_iterator it = m_flawCandidates.begin(); it != m_flawCandidates.end(); ++it){
+      for(ConstrainedVariableSet::const_iterator it = flawCandidates.begin(); it != flawCandidates.end(); ++it){
 	if(bestPriority <= priorityLowerBound) // Can't do better
 	  break;
 
@@ -240,12 +251,28 @@ namespace EUROPA {
 	debugMsg("UnboundVariableManager:addFlaw",
 		 "Adding " << var->toString() << " as a candidate flaw.");
 	m_flawCandidates.insert(var);
+
+	if(var->lastDomain().isSingleton())
+	  m_singletonFlawCandidates.insert(var);
       }
     }
 
     void UnboundVariableManager::removeFlaw(const ConstrainedVariableId& var){
       condDebugMsg(m_flawCandidates.find(var) != m_flawCandidates.end(), "UnboundVariableManager:removeFlaw", "Removing " << var->toString() << " as a flaw.");
       m_flawCandidates.erase(var);
+      m_singletonFlawCandidates.erase(var);
+    }
+
+    void UnboundVariableManager::toggleSingletonFlaw(const ConstrainedVariableId& var){
+      debugMsg("UnboundVariableManager:toggleSingletonFlaw", var->toString());
+
+      // Only if it has already passed the test to be a flaw candidate do we do anything with it
+      if(m_flawCandidates.find(var) != m_flawCandidates.end()){
+	if(var->lastDomain().isSingleton())
+	  m_singletonFlawCandidates.insert(var);
+	else
+	  m_singletonFlawCandidates.erase(var);
+      } 
     }
 
     void UnboundVariableManager::addGuard(const ConstrainedVariableId& var){
@@ -325,6 +352,8 @@ namespace EUROPA {
 	m_fm.removeFlaw(variable);
       else if(changeType == DomainListener::RESET || changeType == DomainListener::CLOSED)
 	m_fm.addFlaw(variable);
+      else if(changeType == DomainListener::RELAXED || changeType == DomainListener::RESTRICT_TO_SINGLETON)
+	m_fm.toggleSingletonFlaw(variable);
     }
 
     void UnboundVariableManager::CeListener::notifyAdded(const ConstraintId& constraint){

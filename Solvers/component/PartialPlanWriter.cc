@@ -4,11 +4,6 @@
 
 #include "PartialPlanWriter.hh"
 
-//#include "ConstrainedVariableDecisionPoint.hh"
-//#include "DecisionManager.hh"
-//#include "ObjectDecisionPoint.hh"
-//#include "TokenDecisionPoint.hh"
-//#include "ResourceFlawDecisionPoint.hh"
 #include "Constraint.hh"
 #include "ConstraintEngine.hh"
 #include "ConstraintEngineDefs.hh"
