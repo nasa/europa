@@ -136,37 +136,32 @@ namespace EUROPA {
 
   /**
    * @brief Restrict all variables to the intersection of their domains.
-   * @note Will only restrict closed domains.
+   * @note intersec in sensative to the open/closed state of a domain.
+   * We will not restrict a closed domain based on an open domain as 
+   * values could be added that will invalidate such a restriction.
    * @note In the worst case, this algorithm requires 2 passes over
    * the variables.
-   * @note Should also restrict open domains (closing them and copying
-   * the members of the intersection of the closed domains) if there
-   * are any closed domains, but that is not supported elsewhere
-   * presently, it seems.
-   * --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 22
    */
   void EqualConstraint::handleExecute() {
     check_error(isActive());
 
     unsigned int i = 0;
 
+    // Stop if all domain are open - nothing we can infer.
+    bool foundClosedDomain = false;
     for (i = 0; i < m_argCount; i++)
-      if (!getCurrentDomain(m_variables[i]).isOpen())
+      if (!getCurrentDomain(m_variables[i]).isOpen()) {
+        foundClosedDomain = true;
         break;
+      }
     //if all are open, there is no meaningful action
-    if (i >= m_argCount)
+    if (!foundClosedDomain)
       return;
 
     bool changed = false;
     for(i = 1; i < m_argCount; i++) {
       AbstractDomain& d1 = getCurrentDomain(m_variables[i-1]);
       AbstractDomain& d2 = getCurrentDomain(m_variables[i]);
-
-      //if any are closed, all need to be closed
-      if(d1.isOpen())
-        d1.close();
-      if(d2.isOpen())
-        d2.close();
 
       //equate the two domains.  if they become empty, just return
       if((changed = d1.equate(d2) || changed) && d1.isEmpty())
