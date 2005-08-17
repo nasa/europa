@@ -117,16 +117,17 @@ namespace EUROPA {
   }
 
   const bool DefaultOpenDecisionManager::removeVarDP(const ConstrainedVariableId& var, const bool deleting, std::map<int,ConstrainedVariableDecisionPointId>& varMap, VariableDecisionSet& sortedVars) {
-
     std::map<int,ConstrainedVariableDecisionPointId>::iterator it = varMap.find(var->getKey());
     if (it != varMap.end()) {
       if (deleting) {
+        debugMsg("DefaultOpenDecisionManager::removeVarDP", "deleting path");
 	ConstrainedVariableDecisionPointId dec = it->second;
 	check_error(dec.isValid());
 	sortedVars.erase(dec);
 	varMap.erase(it);
 	m_dm->deleteDecision(dec);
       } else {
+        debugMsg("DefaultOpenDecisionManager::removeVarDP", "not delteing path");
 	sortedVars.erase(it->second);
 	varMap.erase(it);
       }
@@ -139,26 +140,38 @@ namespace EUROPA {
 
   void DefaultOpenDecisionManager::removeVar(const ConstrainedVariableId& var, const bool deleting) {
     check_error(var.isValid());
-
+    debugMsg("DefaultOpenDecisionManager:removeVar", "Removing var start");
+    printOpenDecisions();
+    debugMsg("DefaultOpenDecisionManager:removeVar", "removing variable from change buffer");
     m_dm->getVariableChangeBuffer().erase(var);
+    debugMsg("DefaultOpenDecisionManager:removeVar", "removing variable from relaxed buffer");
     m_dm->getRelaxedBuffer().erase(var);
 
-    if (!removeVarDP(var, deleting, m_unitVarDecs, m_sortedUnitVarDecs))
-      removeVarDP(var, deleting, m_nonUnitVarDecs, m_sortedNonUnitVarDecs);
-
+    if (!removeVarDP(var, deleting, m_unitVarDecs, m_sortedUnitVarDecs)) {
+        debugMsg("DefaultOpoenDecisionManager:removeVar", "failed to removeVarDP from m_unitVars. Removing from nonUnitVarDecs");
+        removeVarDP(var, deleting, m_nonUnitVarDecs, m_sortedNonUnitVarDecs);
+    }
+    debugMsg("DefaultOpenDecisionManager:removeVar", "Removing var end");
+    printOpenDecisions();
   }
 
   void DefaultOpenDecisionManager::condRemoveVar(const ConstrainedVariableId& var) { 
     check_error(m_curDec.isValid() || m_curDec.isNoId());
+    debugMsg("DefaultOpenDecisionManager:condRemoveVar", "Considering remove var " <<  var->toString());    
     if (ConstrainedVariableDecisionPointId::convertable(m_curDec)) {
       ConstrainedVariableDecisionPointId cvdec = m_curDec;
-      if (cvdec->getVariable()->getKey() != var->getKey())
-	removeVar(var, true);
-      else 
+      if (cvdec->getVariable()->getKey() != var->getKey()) {
+	debugMsg("DefaultOpenDecisionManager:condRemoveVar", "remove var true");
+         removeVar(var, true);
+      } else {
+        debugMsg("DefaultOpenDecisionManager:condRemoveVar", "remove var false"); 
 	removeVar(var, false);
+      }
     }
-    else 
+    else {
+      debugMsg("DefaultOpenDecisionManager:condRemoveVar", "Removing var ture"); 
       removeVar(var, true);
+    }
   }
 
 
