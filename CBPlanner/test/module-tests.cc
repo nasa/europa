@@ -1276,7 +1276,7 @@ private:
     assertTrue(result == CBPlanner::PLAN_FOUND);
 
     assertTrue(planner.getTime() == planner.getDepth());
-    assertTrue(planner.getDepth() == 9);
+    assertTrue(planner.getDepth() == 11);
 
     DecisionManagerId dm = planner.getDecisionManager();
     unsigned int count;
@@ -1288,7 +1288,7 @@ private:
     assertTrue(result == CBPlanner::PLAN_FOUND);
 
     assertTrue(planner.getTime() == planner.getDepth());
-    assertTrue(planner.getDepth() == 10);
+    assertTrue(planner.getDepth() == 14);
 
     DEFAULT_TEARDOWN_PLAN();
     return true;
