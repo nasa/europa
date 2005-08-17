@@ -141,7 +141,7 @@ namespace EUROPA {
   void DefaultOpenDecisionManager::removeVar(const ConstrainedVariableId& var, const bool deleting) {
     check_error(var.isValid());
     debugMsg("DefaultOpenDecisionManager:removeVar", "Removing var start");
-    printOpenDecisions();
+    //printOpenDecisions();
     debugMsg("DefaultOpenDecisionManager:removeVar", "removing variable from change buffer");
     m_dm->getVariableChangeBuffer().erase(var);
     debugMsg("DefaultOpenDecisionManager:removeVar", "removing variable from relaxed buffer");
@@ -152,7 +152,7 @@ namespace EUROPA {
         removeVarDP(var, deleting, m_nonUnitVarDecs, m_sortedNonUnitVarDecs);
     }
     debugMsg("DefaultOpenDecisionManager:removeVar", "Removing var end");
-    printOpenDecisions();
+    //printOpenDecisions();
   }
 
   void DefaultOpenDecisionManager::condRemoveVar(const ConstrainedVariableId& var) { 
