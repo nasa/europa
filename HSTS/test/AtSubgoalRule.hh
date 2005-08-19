@@ -2,6 +2,7 @@
 #define _H_AtSubgoalRule
 
 #include "Rule.hh"
+#include "TokenVariable.hh"
 
 namespace EUROPA {
 
