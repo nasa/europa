@@ -414,16 +414,15 @@ RunEUROPATest dnp-twentyFreeObs-h : twentyFreeObs.nddl : DNP3heur.xml : DNP3nobr
 
 # Working
 RunEUROPATest dnp-twoFreeObs-h : twoFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+# LITA
+EUROPA_NDDL lita-init.nddl ;
+RunEUROPATest lita : lita-init.nddl : lita-heur.xml : lita.pi ;
 
- LITA
-#EUROPA_NDDL lita-init.nddl ;
-#RunEUROPATest lita : lita-init.nddl : lita-heur.xml : lita.pi ;
-
- LITA - from Vijay
+#LITA - from Vijay
 EUROPA_NDDL missionExec.init.e2 ; 
 RunEUROPATest litaEuropa2 : missionExec.init.e2 : missionExec.heuristics.e2 : missionExec.noBranch.e2 ;
 
- XMONKEY - from Olga
+#XMONKEY - from Olga
 EUROPA_NDDL xmonkey-timeline.init.nddl ;
 RunEUROPATest xmonkey : xmonkey-timeline.init.nddl : deliberative.heuristics.xml : xmonkey.nobr ;
 
