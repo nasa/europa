@@ -1,3 +1,0 @@
-/**
- * @page relatedwork Related Work
- */
