@@ -17,11 +17,13 @@ Depends plasma-all : all ;
 Module plasma : all System ;
 
 Depends run-tests : tests ;
-Depends run-all-tests : run-tests run-nddl-tests run-nddl-planner-tests run-checkin-tests run-hsts-planner-tests ;
+Depends run-all-tests : run-tests run-nddl-tests run-nddl-planner-tests run-checkin-tests; 
+#run-hsts-planner-tests ;
 Depends run-checkin-tests : check-cvs-changes ;
 Depends run-checkin-tests : run-tests ;
 Depends run-checkin-tests : run-makefile-tests ;
-NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
+NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests; 
+#run-hsts-planner-tests ;
 Depends run-makefile-tests : check-makefile ;
 
 SubInclude PLASMA Utils ;
