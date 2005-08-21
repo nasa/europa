@@ -1003,6 +1003,28 @@ private:
     assertTrue(res);
     assertTrue(v4.getDerivedDomain().getUpperBound() == 9);
 
+    // Test with Numeric Domains
+    NumericDomain realBaseDomain;
+  
+    realBaseDomain.insert(1.1);
+    realBaseDomain.insert(2.2);
+    realBaseDomain.insert(3.3);
+ 
+    realBaseDomain.close();
+ 
+    Variable<NumericDomain> realVar1(ENGINE, realBaseDomain);
+    Variable<NumericDomain> realVar2(ENGINE, realBaseDomain);
+
+    LessThanEqualConstraint cRealTest(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(realVar2.getId(), realVar1.getId()));
+    
+    res = ENGINE->propagate();
+    assertTrue(res);
+    
+    realVar2.specify(2.2);
+    res = ENGINE->propagate();
+    assertTrue(res);
+    assertTrue(realVar2.getDerivedDomain().getUpperBound() == 2.2);
+
     return(true);
   }
 
