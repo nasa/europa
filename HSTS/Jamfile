@@ -9,6 +9,6 @@ ModuleLibraries HSTS : $(DLOPEN_LIBRARY) ;
 SubInclude PLASMA HSTS core ;
 SubInclude PLASMA HSTS component ;
 SubInclude PLASMA HSTS documentation ;
-SubInclude PLASMA HSTS test ;
+#SubInclude PLASMA HSTS test ;
 
 } # PLASMA_READY
