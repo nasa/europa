@@ -30,6 +30,7 @@
 
 #include "RulesEngine.hh"
 #include "Rule.hh"
+#include "RuleInstance.hh"
 
 #include "TestSupport.hh"
 
@@ -95,6 +96,54 @@
 #define DEFAULT_TEARDOWN_PLAN_HEURISTICS()
 
 extern bool loggingEnabled();
+
+/***********************************************************************************************
+ * Declaration of classes and definition to test rule guard behavior.
+ ***********************************************************************************************/
+
+/**
+ * On activation of a token of type 'Object.P1' this will allocate a root rule instance.
+ * @see GNATS_3013
+ */
+
+
+/**
+ * Child rule will fire as a NO-OP
+ */
+class NestedGuardsRuleInstanceChild: public RuleInstance{
+public:
+  NestedGuardsRuleInstanceChild(const RuleInstanceId& parentInstance, const std::vector<ConstrainedVariableId>& guards)
+    : RuleInstance(parentInstance, guards){};
+  void handleExecute(){} // A NO-OP
+};
+
+/**
+ * Root rule instance will be guarded by parametr LabelSetParam0. When set to a singleton it will
+ * fire. Because of this, the Decision Manager will only learn that it is a guard after it has first evaluated it.
+ */
+class NestedGuardsRuleInstanceRoot: public RuleInstance{
+public:
+  NestedGuardsRuleInstanceRoot(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb, makeScope(token->getVariable(LabelStr("LabelSetParam0")))) {}
+
+  /** Execution will allocate a child rule which is also guarded using the object variable now. **/
+  void handleExecute(){
+    addChildRule(new NestedGuardsRuleInstanceChild(m_id, 
+						   makeScope(getToken()->getVariable(LabelStr("LabelSetParam1")))));
+  }
+};
+
+class NestedGuardsRule: public Rule {
+public:
+  NestedGuardsRule(): Rule(LabelStr("Objects.P1")){}
+
+  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb,
+                                const RulesEngineId &rulesEngine) const{
+    RuleInstanceId rootInstance = (new NestedGuardsRuleInstanceRoot(m_id, token, planDb))->getId();
+    rootInstance->setRulesEngine(rulesEngine);
+    return rootInstance;
+  }
+};
 
   /**
    * @brief Creates the type specifications required for testing
@@ -432,6 +481,8 @@ class DecisionManagerTest {
 public:
   static bool test() {
     runTest(testForwardDecisionHandling);
+    // NOT RUNNING UNLESS WE OPTIMIZE OUT MAKING UNITS EXPECT FOR COMPAT GUARDS: runTest(testNestedGuard_GNATS_3013);
+    // SHOULD WORK: runTest(testInclusionOfSingletons);
     return(true);
   }
 
@@ -502,6 +553,111 @@ private:
     assertTrue(dm.getNumberOfDecisions() == 0);
     DEFAULT_TEARDOWN();
     return true;
+  }
+
+
+  /**
+   * Tests the case of a variable being initially found undecidable
+   * but later becoming decidable. This can occur, even with restrictions in the
+   * plan database, since a variable may have a unit valued derived domain but not be a
+   * guard. It may subsequently be found to be a guard.
+   */
+  static bool testNestedGuard_GNATS_3013(){
+    DEFAULT_SETUP(ce, db, false);
+
+    assertTrue(ce.propagate());
+    assertTrue(dm.getOpenDecisionManager().isValid()); // Force allocate of default
+    assertTrue(dm.getNumberOfDecisions() == 0);
+
+    // Allocate a timeline and close the database.
+    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    db.close();
+
+    // Register a test rule to be fired.
+    NestedGuardsRule r;
+
+    IntervalToken tokenA(db.getId(), 
+			 "Objects.P1", 
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 20),
+			 IntervalIntDomain(1, 1000),
+			 Token::noObject(), false);
+    tokenA.addParameter(LabelSet(LabelStr("V0")), "LabelSetParam0");
+    tokenA.addParameter(LabelSet(LabelStr("V1")), "LabelSetParam1");
+    tokenA.close();
+
+    // Note that the 2 additional parameters will not initially become decisions in this scenario
+    // since they are singletons and we do not as yet have a rule fired since the token is not active.
+    assertTrue(ce.propagate());
+    assertTrue(dm.getNumberOfDecisions() == 4, toString(dm.getNumberOfDecisions()));
+
+    // Now activate the token and expect that we will get an additional decision arising to
+    // insert the token, and another to bind what will now be a compat guard.
+    tokenA.activate();
+    assertTrue(ce.propagate());
+    assertTrue(dm.getNumberOfDecisions() == 5, toString(dm.getNumberOfDecisions()));
+
+    // Now bind the value of the first additional parameter which should be an active guard.
+    // We expect it to be removed from the decision manager. We also expect an additional decision
+    // point to be allocated since the new child rule is in place.
+    tokenA.getVariable(LabelStr("LabelSetParam0"))->specify(LabelStr("V0"));
+    assertTrue(ce.propagate());
+    assertTrue(dm.getNumberOfDecisions() == 5, toString(dm.getNumberOfDecisions()));
+
+    // Now bind the second parameter and the net open decision count should go down.
+    tokenA.getVariable(LabelStr("LabelSetParam1"))->specify(LabelStr("V1"));
+    assertTrue(ce.propagate());
+    assertTrue(dm.getNumberOfDecisions() == 4, toString(dm.getNumberOfDecisions()));
+
+    return(true);
+  }
+
+  static bool testInclusionOfSingletons(){
+    DEFAULT_SETUP(ce, db, false);
+
+    assertTrue(ce.propagate());
+    assertTrue(dm.getOpenDecisionManager().isValid()); // Force allocate of default
+    assertTrue(dm.getNumberOfDecisions() == 0);
+
+    // Allocate a timeline and close the database.
+    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    db.close();
+
+    IntervalToken tokenA(db.getId(), 
+			 "Objects.P1", 
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 20),
+			 IntervalIntDomain(1, 1000),
+			 Token::noObject(), false);
+    tokenA.addParameter(LabelSet(LabelStr("V0")), "LabelSetParam0");
+    tokenA.addParameter(LabelSet(LabelStr("V1")), "LabelSetParam1");
+    tokenA.close();
+
+    // Note that the 2 additional parameters will not initially become decisions in this scenario
+    // since they are singletons and we do not as yet have a rule fired since the token is not active.
+    assertTrue(ce.propagate());
+    assertTrue(dm.getNumberOfDecisions() == 6, toString(dm.getNumberOfDecisions()));
+
+    // Now activate the token and expect that we will get an additional decision arising to
+    // insert the token, and another to bind what will now be a compat guard.
+    tokenA.activate();
+    assertTrue(ce.propagate());
+    assertTrue(dm.getNumberOfDecisions() == 6, toString(dm.getNumberOfDecisions()));
+
+    // Now bind the value of the first additional parameter which should be an active guard.
+    // We expect it to be removed from the decision manager.
+    tokenA.getVariable(LabelStr("LabelSetParam0"))->specify(LabelStr("V0"));
+    assertTrue(ce.propagate());
+    assertTrue(dm.getNumberOfDecisions() == 5, toString(dm.getNumberOfDecisions()));
+
+    // Now bind the second parameter and the net open decision count should go down.
+    tokenA.getVariable(LabelStr("LabelSetParam1"))->specify(LabelStr("V1"));
+    assertTrue(ce.propagate());
+    assertTrue(dm.getNumberOfDecisions() == 4, toString(dm.getNumberOfDecisions()));
+
+    return(true);
   }
 };
 
