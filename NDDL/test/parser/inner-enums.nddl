@@ -1,8 +1,0 @@
-class X {
-  enum baz {1, 2., 3}
-  enum bar {-1, 0, +3}
-  enum foo {-4, 5, +6.}
-  enum ball [-inf +inf]
-  enum stick [3. +inf]
-  enum bat [-inf 2.5]
-}
