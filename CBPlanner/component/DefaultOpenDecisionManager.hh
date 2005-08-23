@@ -94,6 +94,9 @@ namespace EUROPA {
     virtual void removeToken(const TokenId& tok, const bool deleting);
     virtual const bool removeTokenDP(const TokenId& tok, const bool deleting, std::map<int,TokenDecisionPointId>& tokMap, TokenDecisionSet& sortedToks);
 
+    virtual bool unitDecisionExistsForVariable(const ConstrainedVariableId& var);
+    virtual bool nonUnitDecisionExistsForVariable(const ConstrainedVariableId& var);
+
     /* the following are the decision caches */
     std::map<int,TokenDecisionPointId> m_tokDecs;
     std::map<int,ConstrainedVariableDecisionPointId> m_nonUnitVarDecs;
