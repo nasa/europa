@@ -3,7 +3,6 @@
 #include "Transaction.hh"
 #include "ResourceConstraint.hh"
 #include "ResourcePropagator.hh"
-#include "ResourceListener.hh"
 
 #include "TestSupport.hh"
 #include "IntervalIntDomain.hh"
@@ -107,7 +106,6 @@ public:
     runTest(testLowerTotalConsumptionExceededResourceViolation);
     runTest(testUpperLimitExceededResourceViolation);
     runTest(testSummationConstraintResourceViolation);
-    runTest(testResourceListenerFlawNotification);
     runTest(testPointProfileQueries);
     return true;
   }
@@ -186,7 +184,7 @@ private:
     assertTrue(checkLevelArea(r) == 1000 * 45);
 
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, HORIZON_END), 35, 35))->getId();
-    ce.propagate();
+    assertTrue(ce.propagate());
     assertTrue(checkSum(r) == (1*1 + 2*2 + 3*2));
     assertTrue(checkLevelArea(r) == (1*45 + 80*999));
 
@@ -677,57 +675,6 @@ private:
     return(true);
   }
 
-  // Test propagation of notification for resource flaws
-  class SimpleResourceListener : public ResourceListener {
-  public:
-    SimpleResourceListener( const ResourceId& resource ) : ResourceListener(resource) {}
-    virtual void notifyFlawState( bool hasFlawsNow ) {
-      ////std::cout << "Notification " << hasFlawsNow << std::endl;
-      m_flawed = hasFlawsNow;
-    }
-    bool m_flawed;
-  };
-  
-  static bool testResourceListenerFlawNotification()
-  {
-	
-    // Define input constrains for the resource spec
-    DEFAULT_SETUP(ce,db,false);
-    ResourceId r = (new Resource( db.getId(), LabelStr("Resource"), LabelStr("r1"), 
-				  initialCapacity, 
-				  limitMin, limitMax, productionRateMax, 5, consumptionRateMax, consumptionMax))->getId();
-    db.close();
-
-    // Register the listener
-    SimpleResourceListener* rl = new SimpleResourceListener(r);
-
-    // Test that a flaw is signalled when there is a possibility to violate limits
-    TransactionId producer = (new Transaction(db.getId(), LabelStr("Resource.change"), 
-					      IntervalIntDomain(5, 5), 5, 5))->getId();
-    TransactionId c1 = (new Transaction(db.getId(), LabelStr("Resource.change"), 
-					IntervalIntDomain(0, 7), -5, -5))->getId();
-    TransactionId c2 = (new Transaction(db.getId(), LabelStr("Resource.change"), 
-					IntervalIntDomain(2, 10), -5, -5))->getId();
-
-    // There should be no violations, only flaws
-    assertTrue(ce.propagate());
-    assertTrue(r->hasFlaws());
-    assertTrue(rl->m_flawed);
-	
-    // Now remove the flaw
-    c2->setEarliest(6);
-    assertTrue(ce.propagate());
-    assertTrue(!r->hasFlaws());
-    assertTrue(!(rl->m_flawed));
-
-    delete (Token*) producer;
-    delete (Token*) c1;
-    delete (Token*) c2;
-
-    DEFAULT_TEARDOWN();
-    return(true);
-  }
-  
   static bool testPointProfileQueries()
   {
     // Define input constrains for the resource spec

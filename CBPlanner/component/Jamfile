@@ -18,9 +18,6 @@ ModuleComponent CBPlanner
 	TemporalVariableCondition.cc
 	TokenDecisionPoint.cc
 	PartialPlanWriter.cc
-	ResourceFlawDecisionPoint.cc
-	ResourceOpenDecisionManager.cc
-	DMResourceListener.cc
 	;
 
 } # PLASMA_READY

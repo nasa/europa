@@ -8,7 +8,6 @@
 #include "DecisionManager.hh"
 #include "ObjectDecisionPoint.hh"
 #include "TokenDecisionPoint.hh"
-#include "ResourceFlawDecisionPoint.hh"
 #include "Constraint.hh"
 #include "ConstraintEngine.hh"
 #include "ConstraintEngineDefs.hh"
@@ -1188,8 +1187,6 @@ namespace EUROPA {
            !vdp->getVariable()->lastDomain().isSingleton())
           isUnit = 1;
       }
-      else if(ResourceFlawDecisionPointId::convertable(dp))
-	type = D_RESOURCE;
       else
         type = D_ERROR;
 		

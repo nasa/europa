@@ -35,7 +35,7 @@ namespace EUROPA {
   }
 
   void DefaultPropagator::execute(){
-    check_error(m_agenda.size() > 0);
+    checkError(!m_agenda.empty(), "Should never be calling this with an empty agenda.");
     check_error(!getConstraintEngine()->provenInconsistent());
     check_error(m_activeConstraint == 0);
 

@@ -22,8 +22,8 @@ namespace EUROPA {
 			    const ConstraintId& constraint, 
 			    const DomainListener::ChangeType& changeType);
 
-  private:
     ConstraintSet m_agenda;
+
     int m_activeConstraint;
   };
 }
