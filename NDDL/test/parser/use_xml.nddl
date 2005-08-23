@@ -1,8 +1,0 @@
-#use_xml "rover.xml"
-
-Rover r2 = new Rover();
-
-Location l = r2.loc;
-
-goal(Location.At g0);
- g0.object.specify(l);
