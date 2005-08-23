@@ -691,25 +691,22 @@ namespace EUROPA {
     static const unsigned int ARG_COUNT = 3;
   };
 
-  //Test if X==Y and return the result in Z
-  /**
-  class TestEqConstraint: public Constraint
-  {
+  class TestLEQ : public Constraint {
   public:
-
-    TestEqConstraint(const LabelStr& name,
-			const LabelStr& propagatorName,
-			const ConstraintEngineId& constraintEngine,
-			const std::vector<ConstrainedVariableId>& variables);
+    TestLEQ(const LabelStr& name,
+	    const LabelStr& propagatorName,
+	    const ConstraintEngineId& constraintEngine,
+	    const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
+
   private:
-    static const int X = 0;
-    static const int Y = 1;
-    static const int Z = 2;
-    static const int ARG_COUNT = 3;
+    AbstractDomain& m_test;
+    AbstractDomain& m_arg1;
+    AbstractDomain& m_arg2;
+    static const unsigned int ARG_COUNT = 3;
   };
-  */
+
   extern void initConstraintLibrary();
 }
 #endif

@@ -1746,47 +1746,38 @@ namespace EUROPA {
     check_error(variables.size() == ARG_COUNT);
   }
 
-
   void TestLessThan::handleExecute(){
-    // If the lesser values lowest value >= the greaters highest, then
-    // there is no way for the test to be true
-    if(m_arg1.getLowerBound() >= m_arg2.getUpperBound())
-      m_test.remove(1);
-
-    // Similarly, if the upper bound of the lesser value <= the lowest possible value
-    // for the larger argument, it can never be false;
-    if(m_arg1.getUpperBound() <= m_arg2.getLowerBound())
+    if(m_arg1.getUpperBound() < m_arg2.getLowerBound())
       m_test.remove(0);
+    else if(m_arg1.getLowerBound() >= m_arg2.getUpperBound())
+      m_test.remove(1);
   }
 
-  /*
-  TestEqConstraint::TestEqConstraint(const LabelStr& name,
-				     const LabelStr& propagatorName,
-				     const ConstraintEngineId& constraintEngine,
-				     const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables) {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
-    check_error(AbstractDomain::canBeCompared(getCurrentDomain(variables[X]), getCurrentDomain(variables[Y])));
+  TestLEQ::TestLEQ(const LabelStr& name,
+			     const LabelStr& propagatorName,
+			     const ConstraintEngineId& constraintEngine,
+			     const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])),
+      m_arg2(getCurrentDomain(variables[2])){
+    check_error(variables.size() == ARG_COUNT);
   }
-  
-  void TestEqConstraint::handleExecute() {
-    AbstractDomain& domX = getCurrentDomain(m_variables[X]);
-    AbstractDomain& domY = getCurrentDomain(m_variables[Y]);
-    AbstractDomain& domZ = getCurrentDomain(m_variables[Z]);
 
-    check_error(!domX.isEmpty() && !domY.isEmpty() && !domZ.isEmpty());
+  void TestLEQ::handleExecute(){
+    bool intersects = m_arg1.intersects(m_arg2);
 
-    bool result;
-    if (domX.isSingleton() && domY.isSingleton())
-      result = (domX == domY);
-    else
-      if (domX.intersects(domY))
-        return;
+    // if there is no intersection, we can remove true or false
+    if(!intersects){
+      if(m_arg1.getUpperBound() <= m_arg2.getLowerBound())
+	m_test.remove(0);
       else
-        result = false;
-    domZ.intersect(BoolDomain(result));
+	m_test.remove(1);
+    }
+    else if(m_arg1.isSingleton() && m_arg2.isSingleton())
+	m_test.remove(false);
   }
-  */
+
   void initConstraintLibrary() {
     static bool s_runAlready(false);
     
@@ -1821,7 +1812,7 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(TestEQ, "TestEqual", "Default");
       REGISTER_CONSTRAINT(TestLessThan, "TestLessThan", "Default");
       REGISTER_CONSTRAINT(TestEQ, "testEQ", "Default");
-      REGISTER_CONSTRAINT(TestLessThan, "testLEQ", "Default");
+      REGISTER_CONSTRAINT(TestLEQ, "testLEQ", "Default");
 
       // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
       REGISTER_CONSTRAINT(AddEqualConstraint, "addeq", "Default");
@@ -1831,6 +1822,9 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(AllDiffConstraint, "fneq", "Default"); // flexible not equal
       REGISTER_CONSTRAINT(CardinalityConstraint, "card", "Default"); // cardinality not more than
       REGISTER_CONSTRAINT(CondAllSameConstraint, "condeq", "Default");
+      REGISTER_CONSTRAINT(CondAllSameConstraint, "condasame", "Default");
+      REGISTER_CONSTRAINT(TestLessThan, "condlt", "Default");
+      REGISTER_CONSTRAINT(TestLEQ, "condleq", "Default");
       REGISTER_CONSTRAINT(CountNonZerosConstraint, "cardeq", "Default"); // cardinality equals
       REGISTER_CONSTRAINT(EqualConstraint, "asame", "Default"); // all same
       REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");

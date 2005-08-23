@@ -614,6 +614,8 @@ public:
     runTest(testNegateConstraint);
     runTest(testUnaryQuery);
     runTest(testTestEqConstraint);
+    runTest(testTestLessThanConstraint);
+    runTest(testTestLEQConstraint);
     runTest(testLockManager);
     return(true);
   }
@@ -2218,6 +2220,158 @@ private:
       ENGINE->propagate();
       assertTrue(v0.getDerivedDomain().isFalse());
     }
+    return true;
+  }
+
+  static bool testTestLessThanConstraint(){
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(6));
+      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assertTrue(v0.getDerivedDomain().isTrue());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(5));
+      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assertTrue(v0.getDerivedDomain().isFalse());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5, 10));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(5));
+      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assertTrue(v0.getDerivedDomain().isFalse());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(4, 10));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(11, 20));
+      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assertTrue(v0.getDerivedDomain().isTrue());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(4, 10));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
+      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assertTrue(!v0.getDerivedDomain().isSingleton());
+    }
+
+    return true;
+  }
+
+  static bool testTestLEQConstraint(){
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(5));
+
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+
+      assertTrue(v0.getDerivedDomain().isTrue());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(4));
+
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+
+      assertTrue(v0.getDerivedDomain().isFalse());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(4));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(6));
+
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      assertTrue(ENGINE->propagate());
+      assertTrue(v0.getDerivedDomain().isTrue());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 10));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 10));
+
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+
+      assertTrue(ENGINE->propagate());
+
+      assertTrue(!v0.getDerivedDomain().isSingleton());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain(false));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 10));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(11, 20));
+
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+
+      assertTrue(!ENGINE->propagate());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain(true));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5, 10));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(2, 4));
+
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+
+      assertTrue(!ENGINE->propagate());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 10));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(11, 20));
+
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+
+      assertTrue(ENGINE->propagate());
+      assertTrue(v0.getDerivedDomain().isTrue());
+    }
+
+    {
+      Variable<BoolDomain> v0(ENGINE, BoolDomain());
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(10, 20));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 9));
+
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+
+      assertTrue(ENGINE->propagate());
+      assertTrue(v0.getDerivedDomain().isFalse());
+    }
+
     return true;
   }
 
