@@ -43,5 +43,7 @@ namespace EUROPA {
   bool testHSTSNoBranchImpl(ConstraintEngine &ce, PlanDatabase& db, CBPlanner& planner);
 
   bool testHSTSHeuristicsAssemblyImpl(ConstraintEngine& ce, PlanDatabase& db, CBPlanner& planner, HSTSHeuristics& heuristics);
+  bool testPreferredPriorityImpl(const PlanDatabase& db);
+  bool testHSTSHeuristicsStrictImpl(ConstraintEngine& ce, PlanDatabase& db, CBPlanner& planner, HSTSHeuristics& heuristics);
 }
 #endif

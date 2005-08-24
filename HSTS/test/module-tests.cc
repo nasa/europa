@@ -339,6 +339,8 @@ public:
     runTest(testHSTSNoBranch);
     runTest(testHSTSHeuristicsAssembly);
     runTest(testDNPConstraints);
+    runTest(testPreferredPriority);
+    runTest(testHSTSHeuristicsStrict);
     return(true);
   }
 private:
@@ -388,6 +390,22 @@ private:
     bool retval = false;
     DEFAULT_SETUP_PLAN_HEURISTICS();
     retval = testHSTSHeuristicsAssemblyImpl(ce, db, planner, heuristics);
+    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
+    return retval;
+  }
+
+  static bool testPreferredPriority() {
+    bool retval = false;
+    DEFAULT_SETUP_PLAN(ce,db,true);
+    retval = testPreferredPriorityImpl(db);
+    DEFAULT_TEARDOWN_PLAN();
+    return retval;
+  }
+
+  static bool testHSTSHeuristicsStrict() {
+    bool retval = false;
+    DEFAULT_SETUP_PLAN_HEURISTICS();
+    retval = testHSTSHeuristicsStrictImpl(ce, db, planner, heuristics);
     DEFAULT_TEARDOWN_PLAN_HEURISTICS();
     return retval;
   }

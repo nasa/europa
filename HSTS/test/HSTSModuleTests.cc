@@ -397,4 +397,130 @@ namespace EUROPA {
     return true;
   }
 
+  bool testPreferredPriorityImpl(const PlanDatabase& db) {
+    HSTSHeuristics heur(db.getId());
+    HSTSHeuristics::Priority p1 = 0.0;
+    HSTSHeuristics::Priority p2 = 1.0;
+
+    heur.setDefaultPriorityPreference(HSTSHeuristics::LOW);
+    check_error(heur.preferredPriority(p1, p2) == p1);
+    heur.setDefaultPriorityPreference(HSTSHeuristics::HIGH);
+    check_error(heur.preferredPriority(p1, p2) == p2);
+    return true;
+  }
+
+  bool testHSTSHeuristicsStrictImpl(ConstraintEngine& ce, PlanDatabase& db, CBPlanner& planner, HSTSHeuristics& heur) {
+    initHeuristicsSchema();
+    
+
+    //read in the heuristics
+    //prefers high
+    //assigns 1024.5 priority to tokens with parent Navigator.At
+    //assigns 100.25 priority to tokens with parent Navigator.Going
+    //assigns 10.0 priority with preference to merge then activate for default token priority
+    //assigns 5000.0 priority for default variable priority
+    //assigns 6000.25 priority to variables named "to" which are parameters of Navigator.Going,
+    //        with an initial parameter of Loc1
+    //assigns 6000.5 priority to initial parameter of Commands.TakeSample
+    //assigns 6000.25 priority to initial variables of Instrument.TakeSample
+    //assigns 9000 priority to minutes parameter of Telemetry.Communicate
+    //assigns 9000 priority to mode parameter of Telemetry.Communicate
+    //assigns 443.7 priority to Navigator.At tokens
+    //assigns 200.4 priority to Commands.TakeSample with an initial parameter equal to Loc3
+    //assigns 10000.0 priority to Navigator.Going tokens with parameter 0 == Loc1, parameter 1 == Loc3
+    //                that is after a Navigator.At
+    HSTSHeuristicsReader reader(heur.getNonConstId());
+    reader.read("../core/Heuristics-HSTS.xml");
+
+    //create open decision managers for both cases
+    //HSTSOpenDecisionManager looseDM(planner.getDecisionManager(), heur.getId(), false);
+    HSTSOpenDecisionManagerId strictDM = (new HSTSOpenDecisionManager(planner.getDecisionManager(), heur.getId(), true))->getId();
+    planner.getDecisionManager()->setOpenDecisionManager(strictDM);
+
+    //set up the database
+    Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
+    Timeline ins(db.getId(),LabelStr("Instrument"),LabelStr("ins1"));
+    Timeline nav(db.getId(),LabelStr("Navigator"),LabelStr("nav1"));
+    Timeline tel(db.getId(),LabelStr("Telemetry"),LabelStr("tel1"));
+
+    Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
+    Object loc2(db.getId(),LabelStr("Location"),LabelStr("Loc2"));
+    Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
+    Object loc4(db.getId(),LabelStr("Location"),LabelStr("Loc4"));
+    Object loc5(db.getId(),LabelStr("Location"),LabelStr("Loc5"));
+
+    db.close();
+
+    std::list<ObjectId> results;
+    db.getObjectsByType("Location",results);
+    ObjectDomain allLocs(results,"Location");
+
+    std::list<double> values;
+    values.push_back(LabelStr("high"));
+    values.push_back(LabelStr("medium-high"));
+    values.push_back(LabelStr("medium"));
+    values.push_back(LabelStr("medium-low"));
+    values.push_back(LabelStr("low"));
+    EnumeratedDomain allModes(values,false,"Mode");
+
+    //Telemetry.Communicate(minutes = [60 120], bandwidth = [500.3 1200.4], mode = {high medium-high medium medium-low low}, priority = 10.0
+    IntervalToken tok0(db.getId(),LabelStr("Telemetry.Communicate"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,100), IntervalIntDomain(1,100), "tel1", false);
+    tok0.addParameter(IntervalDomain("int"), LabelStr("minutes"));
+    ConstrainedVariableId vmin = tok0.getVariable("minutes");
+    vmin->specify(IntervalIntDomain(60,120));
+    tok0.addParameter(IntervalDomain("float"), LabelStr("bandwidth"));
+    ConstrainedVariableId vband = tok0.getVariable("bandwidth");
+    vband->specify(IntervalDomain(500.3,1200.4));
+    //    tok0.addParameter(BoolDomain(), LabelStr("encoded"));  token
+    //    fails to recognize BoolDomain().
+    tok0.addParameter(allModes, LabelStr("mode"));
+    tok0.close();
+
+    //Commands.TakeSample(rock => {Loc1 Loc2 Loc3 Loc4})
+    IntervalToken tok1(db.getId(),LabelStr("Commands.TakeSample"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,100), IntervalIntDomain(1,100), "com1", false);
+    tok1.addParameter(allLocs, LabelStr("rock"));
+    tok1.close();
+    //ConstrainedVariableId vrock = tok1.getVariable("rock");
+    //vrock->specify(db.getObject("Loc3"));
+    tok1.activate(); //activate to cause decision point to be cretaed for parameter, should have priority 6000.5
+
+    //Instrument.TakeSample(rock = {Loc1 Loc2 Loc3 Loc4 Loc5}, priority 10.0
+    IntervalToken tok2(db.getId(),LabelStr("Instrument.TakeSample"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "ins1", false);
+    tok2.addParameter(allLocs, LabelStr("rock"));
+    tok2.close();
+
+    //Navigator.At(location = {Loc1 Loc2 Loc3 Loc4 Loc5}) priority 443.7
+    IntervalToken tok3(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
+    tok3.addParameter(allLocs, LabelStr("location"));
+    tok3.close();
+
+    //Navigator.Going(from = {Loc1 Loc2 Loc3 Loc4 Loc5} to = {Loc1 Loc2 Loc3 Loc4 Loc5}), priority 10.0
+    IntervalToken tok4(db.getId(),LabelStr("Navigator.Going"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
+    tok4.addParameter(allLocs, LabelStr("from"));
+    tok4.addParameter(allLocs, LabelStr("to"));
+    tok4.close();
+
+    //Navigator.At(location = {Loc3}), priority 443.7
+    IntervalToken tok5(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
+    tok5.addParameter(allLocs, LabelStr("location"));
+    tok5.close();
+    ConstrainedVariableId vatloc = tok5.getVariable("location");
+    vatloc->specify(db.getObject("Loc3"));
+
+    AtSubgoalRule r("Navigator.At");
+
+    assert(ce.propagate());
+
+    // DecisionPointId d1 = looseDM.getNextDecision();
+    DecisionPointId d2 = strictDM->getNextDecision();
+
+    //assert(ObjectDecisionPointId::convertable(d1));
+    //assert(d1->getEntityKey() == tok3.getKey());
+
+    assert(ConstrainedVariableDecisionPointId::convertable(d2));
+    assert(d2->getEntityKey() == (tok1.getParameters())[0]->getKey());
+
+    return true;
+  }
+  
 }
