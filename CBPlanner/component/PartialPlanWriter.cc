@@ -56,8 +56,6 @@
 #define FatalErrno(){FatalError("Condition", strerror(errno))}
 #define FatalErr(s) {std::cerr << (s) << std::endl; FatalErrno(); }
 
-const char *envPPWConfigFile = "PPW_CONFIG";
-
 #define IN_NO_SECTION 0
 #define IN_GENERAL_SECTION 1
 #define IN_TRANSACTION_SECTION 2
@@ -286,6 +284,7 @@ namespace EUROPA {
                                        const ConstraintEngineId &ceId2,
 				       const RulesEngineId& _reId, 
 				       const CBPlannerId& _plId) {
+      static const char *envPPWConfigFile = "PPW_CONFIG";
       havePlanner = (_plId.isNoId() ? false : true);
       plId = _plId;
       reId = _reId;

@@ -61,11 +61,11 @@
 #define IN_GENERAL_SECTION 1
 #define IN_TRANSACTION_SECTION 2
 
-const char *envPPWConfigFile = "PPW_CONFIG";
-
 namespace EUROPA {
   namespace SOLVERS {
     namespace PlanWriter {
+
+      const char *envPPWConfigFile = "PPW_CONFIG";
 
       std::set<LabelStr> Transaction::s_types;
       std::set<LabelStr> Transaction::s_trans;
