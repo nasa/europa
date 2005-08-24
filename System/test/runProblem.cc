@@ -13,7 +13,7 @@ const char* averTestFile = NULL;
 const char* plannerConfig = NULL;
 bool replay = false;
 
-#define USE_SOLVER
+//#define USE_SOLVER
 
 #ifdef USE_SOLVER
 #define ASSEMBLY SolverAssembly
@@ -159,9 +159,9 @@ int main(int argc, const char** argv) {
   }
   else {
     for(int i = 0; i < 1; i++) {
-      replay = true;
+      //SKIP - GNATS 3031: replay = true;
       runTest(runPlanner);
-      runTest(copyFromFile);
+      //SKIP - GNATS 30301: runTest(copyFromFile);
     }
   }
 
