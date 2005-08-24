@@ -298,6 +298,11 @@ namespace EUROPA {
       return m_curDec;
     }
 
+    if(bestODec.isNoId() && bestTDec.isNoId() && bestVDec.isNoId()) {
+      debugMsg("HSTS:OpenDecisionManager:getNextDecision", "No decisions to make.  Returning noId.");
+      return DecisionPointId::noId();
+    }
+
     /* If I'm here, I need to compare bestTDec to bestVDec */
     if (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH) {
       /* pick max */
