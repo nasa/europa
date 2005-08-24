@@ -91,7 +91,7 @@ namespace EUROPA {
           (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
         bestDec = *it;
         bestp = priority;
-        TokenDecisionPointId tokDec = bestDec;
+        TokenDecisionPointId tokDec = bestDec; // CMG: THIS IS NOT USED. WHY NOT?
         bestNrChoices = tok->getPlanDatabase()->countCompatibleTokens(tok);
         if (tok->getState()->lastDomain().isMember(Token::ACTIVE) && tok->getPlanDatabase()->hasOrderingChoice(tok)) bestNrChoices++;
         debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Selecting new bestDec = " << bestDec << " with bestNrChoices = " << bestNrChoices);
@@ -302,6 +302,7 @@ namespace EUROPA {
     if (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH) {
       /* pick max */
       if (bestTP >= bestVP) {
+	checkError(bestVDec.isValid(), "We assume we have a valid unit var decision, but we don't");
         /* prefer units though */
         ConstrainedVariableDecisionPointId vdec(bestVDec);
         debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
