@@ -28,7 +28,6 @@ namespace EUROPA {
     SchemaId (*fcn_loadSchema)();   //function pointer to NDDL::loadSchema()
     SchemaId schema;
     PlannerControlAssembly *db1;
-    DbClientId client;
 
 
     //printf("LoadInitModel:p_dlopen() file %s\n", libPath);

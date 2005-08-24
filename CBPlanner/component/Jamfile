@@ -2,10 +2,6 @@ SubDir PLASMA CBPlanner component ;
 
 if ! $(PLASMA_READY) {
 
-SubDirHdrs $(PLASMA) Resource ;
-SubDirHdrs $(PLASMA) Resource core ;
-SubDirHdrs $(PLASMA) Resource component ;
-
 SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
 
 ModuleComponent CBPlanner

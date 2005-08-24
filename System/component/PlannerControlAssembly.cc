@@ -43,13 +43,8 @@
 #include "Utils.hh"
 
 // Planner Support
-//#include "CBPlanner.hh"
 #include "Solver.hh"
-#include "PartialPlanWriter.hh"
 #include "Filters.hh"
-//#include "Horizon.hh"
-//#include "DecisionManager.hh"
-//#include "ResourceOpenDecisionManager.hh"
 
 // Test Support
 #include "PLASMAPerformanceConstraint.hh"
@@ -63,7 +58,7 @@
 #include "ThreatManager.hh"
 #include "UnboundVariableDecisionPoint.hh"
 #include "UnboundVariableManager.hh"
-#include "DecisionPoint.hh"
+#include "SolverDecisionPoint.hh"
 #include "MatchingRule.hh"
 #include "Filters.hh"
 
@@ -108,7 +103,7 @@ namespace EUROPA {
     doc.LoadFile();
 
     m_planner = (new SOLVERS::Solver(m_planDatabase, *(doc.RootElement())))->getId();
-    m_ppw = new PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine, m_planner);
+    m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine, m_planner);
     m_listener = (new StatusListener(m_planner))->getId();
 
     std::cout << "Configure the planner from data in the initial state" << std::endl;
@@ -145,8 +140,8 @@ namespace EUROPA {
     std::cout << "Now get planner depth max" << std::endl;
     m_planner->setMaxDepth((unsigned int) plannerDepth->baseDomain().getSingletonValue());
 
-    PlanWriter::PartialPlanWriter::noFullWrite = 1;
-    PlanWriter::PartialPlanWriter::writeStep = 1;
+    SOLVERS::PlanWriter::PartialPlanWriter::noFullWrite = 1;
+    SOLVERS::PlanWriter::PartialPlanWriter::writeStep = 1;
 
     return IN_PROGRESS;
   }
@@ -168,14 +163,14 @@ namespace EUROPA {
         }
       }
     std::cout << "Writing step " << m_step << std::endl;
-    PlanWriter::PartialPlanWriter::noFullWrite = 0;
+    SOLVERS::PlanWriter::PartialPlanWriter::noFullWrite = 0;
     m_planner->step();
-    PlanWriter::PartialPlanWriter::noFullWrite = 1;
+    SOLVERS::PlanWriter::PartialPlanWriter::noFullWrite = 1;
     return m_step;
   }
 
   int PlannerControlAssembly::writeNext(int n) {
-    PlanWriter::PartialPlanWriter::noFullWrite = 0;
+    SOLVERS::PlanWriter::PartialPlanWriter::noFullWrite = 0;
     while(n) {
       m_planner->step();
       m_step++;
@@ -183,12 +178,12 @@ namespace EUROPA {
         return m_step;
       n--;
     }
-    PlanWriter::PartialPlanWriter::noFullWrite = 1;
+    SOLVERS::PlanWriter::PartialPlanWriter::noFullWrite = 1;
     return m_step;
   }
 
   int PlannerControlAssembly::completeRun() {
-    PlanWriter::PartialPlanWriter::noFullWrite = 1;
+    SOLVERS::PlanWriter::PartialPlanWriter::noFullWrite = 1;
     for(;;) {
       m_planner->step();
       std::cout << "Completed step " << m_step << std::endl;

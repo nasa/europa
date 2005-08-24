@@ -1,7 +1,7 @@
 #ifndef H_UnboundVariableDecisionPoint
 #define H_UnboundVariableDecisionPoint
 
-#include "DecisionPoint.hh"
+#include "SolverDecisionPoint.hh"
 #include "ConstrainedVariable.hh"
 
 /**

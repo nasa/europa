@@ -1,23 +1,9 @@
 #include "PLASMAPerformanceConstraint.hh"
 #include "Nddl.hh"
-#include "TestAssembly.hh"
-#include "PlanDatabaseWriter.hh"
-#include "Constraints.hh"
+#include "PlanDatabase.hh"
+#include "TestSupport.hh"
 #include "Debug.hh"
 #include "Pdlfcn.hh"
-
-#include "ComponentFactory.hh"
-#include "OpenConditionDecisionPoint.hh"
-#include "OpenConditionManager.hh"
-#include "ThreatDecisionPoint.hh"
-#include "ThreatManager.hh"
-#include "UnboundVariableDecisionPoint.hh"
-#include "UnboundVariableManager.hh"
-#include "DecisionPoint.hh"
-#include "MatchingRule.hh"
-#include "Filters.hh"
-
-//#include <dlfcn.h>
 #include <iostream>
 #include <stdlib.h>
 
@@ -26,25 +12,20 @@ const char* initialTransactions = NULL;
 const char* averTestFile = NULL;
 const char* plannerConfig = NULL;
 bool replay = false;
-extern const char* TX_LOG;
+
+#define USE_SOLVER
+
+#ifdef USE_SOLVER
+#define ASSEMBLY SolverAssembly
+#include "SolverAssembly.hh"
+#else
+#define ASSEMBLY CBPlannerAssembly
+#include "CBPlannerAssembly.hh"
+#endif
 
 bool runPlanner(){
 
-  TestAssembly assembly(schema);
-
-  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, MinValue);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::UnboundVariableManager, UnboundVariableManager);
-  
-  REGISTER_OPENCONDITION_DECISION_FACTORY(EUROPA::SOLVERS::OpenConditionDecisionPoint, StandardOpenConditionHandler);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::OpenConditionManager, OpenConditionManager);
-  
-  REGISTER_THREAT_DECISION_FACTORY(EUROPA::SOLVERS::ThreatDecisionPoint, StandardThreatHandler);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::ThreatManager, ThreatManager);
-  
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonVariableFilter, HorizonVariableFilter);
-
+  ASSEMBLY assembly(schema);
 
   DbClientTransactionLogId txLog;
   if(replay)
@@ -57,9 +38,8 @@ bool runPlanner(){
 
   assert(assembly.plan(initialTransactions,*(doc.RootElement()), averTestFile));
 
-  //assert(result == CBPlanner::PLAN_FOUND);
-
-  std::cout << " found a plan at depth " << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched() << std::endl;
+  debugMsg("Main:runPlanner", "Found a plan at depth " 
+	   << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched());
 
   if (replay)  // this ensures we're not running the performance tests.
     assembly.write(std::cout);
@@ -79,14 +59,14 @@ bool copyFromFile(){
   // Populate plan database from transaction log
   std::stringstream os1;
   {
-    TestAssembly assembly(schema);
-    assembly.playTransactions(TX_LOG);
+    ASSEMBLY assembly(schema);
+    assembly.playTransactions(ASSEMBLY::TX_LOG());
     assembly.getPlanDatabase()->getClient()->toStream(os1);
   }
   std::stringstream os2;
   {
-    TestAssembly assembly(schema);
-    assembly.playTransactions(TX_LOG);
+    ASSEMBLY assembly(schema);
+    assembly.playTransactions(ASSEMBLY::TX_LOG());
     assembly.getPlanDatabase()->getClient()->toStream(os2);
   }
 
@@ -96,9 +76,6 @@ bool copyFromFile(){
 
   return true;
 }
-
-//namespace NDDL { SchemaId loadSchema() {return Schema::instance();}}
-
 
 
 int main(int argc, const char** argv) {
@@ -150,7 +127,7 @@ int main(int argc, const char** argv) {
   }
   
   assert(Schema::instance().isValid());
-  TestAssembly::initialize();
+  ASSEMBLY::initialize();
   schema = (*fcn_schema)();
 #else //STANDALONE
 #define TRANS_INDEX 1
@@ -168,7 +145,7 @@ int main(int argc, const char** argv) {
   if(argc == ARGC)
     averTestFile = argv[AVER_INDEX];
 
-  TestAssembly::initialize();
+  ASSEMBLY::initialize();
   schema = NDDL::loadSchema();
 #endif //STANDALONE
 
@@ -188,7 +165,7 @@ int main(int argc, const char** argv) {
     }
   }
 
-  TestAssembly::terminate();
+  ASSEMBLY::terminate();
 
 #ifdef STANDALONE
   if(p_dlclose(libHandle)) {

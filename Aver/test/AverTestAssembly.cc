@@ -15,46 +15,18 @@
 
 // Transactions
 #include "DbClientTransactionPlayer.hh"
-#include "BoolTypeFactory.hh"
-#include "StringTypeFactory.hh"
-#include "floatType.hh"
-#include "intType.hh"
-
-// Support for Temporal Network
-#include "TemporalPropagator.hh"
-#include "STNTemporalAdvisor.hh"
-
-// Support for registered constraints
-#include "ConstraintLibrary.hh"
-#include "Constraints.hh"
-#include "EqualityConstraintPropagator.hh"
-#include "ObjectTokenRelation.hh"
-#include "CommonAncestorConstraint.hh"
-#include "HasAncestorConstraint.hh"
 
 #include "NddlDefs.hh"
-
-// For cleanup purging
-#include "TokenFactory.hh"
-#include "ObjectFactory.hh"
-#include "Rule.hh"
 
 // Misc
 #include "Utils.hh"
 
 // Planner Support
-//#include "CBPlannerDefs.hh"
-//#include "CBPlanner.hh"
 #include "Solver.hh"
-#include "PartialPlanWriter.hh"
-//#include "Horizon.hh"
-//#include "DecisionManager.hh"
-//#include "ResourceOpenDecisionManager.hh"
+#include "SolverPartialPlanWriter.hh"
 
 
 // Test Support
-//#include "PLASMAPerformanceConstraint.hh"
-//#include "LoraxConstraints.hh"
 #include "TestSupport.hh"
 
 #include "AverInterp.hh"

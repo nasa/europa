@@ -1,8 +1,5 @@
 #include "Nddl.hh"
 
-//#include "CBPlanner.hh"
-//#include "DecisionPoint.hh"
-//#include "ResourceOpenDecisionManager.hh"
 #include "Solver.hh"
 #include "PlanDatabaseWriter.hh"
 #include "Constraints.hh"
@@ -19,10 +16,10 @@
 #include "ThreatManager.hh"
 #include "UnboundVariableDecisionPoint.hh"
 #include "UnboundVariableManager.hh"
-#include "DecisionPoint.hh"
+#include "SolverDecisionPoint.hh"
 #include "MatchingRule.hh"
 #include "Filters.hh"
-
+#include "TestSupport.hh"
 #include <iostream>
 #include <stdlib.h>
 

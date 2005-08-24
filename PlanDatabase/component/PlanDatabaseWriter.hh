@@ -6,10 +6,8 @@
 #include "Token.hh"
 #include "ConstraintEngine.hh"
 #include "IntervalIntDomain.hh"
-#include "PlanDatabaseDefs.hh"
 #include "TokenVariable.hh"
 #include "ConstrainedVariable.hh"
-#include "TestSupport.hh"
 
 namespace EUROPA {
 

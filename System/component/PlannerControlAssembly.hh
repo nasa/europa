@@ -10,11 +10,10 @@
  */
 
 #include "PlanDatabaseDefs.hh"
-//#include "CBPlanner.hh"
 #include "Solver.hh"
 #include "SearchListener.hh"
+#include "SolverPartialPlanWriter.hh"
 #include "StandardAssembly.hh"
-#include "PartialPlanWriter.hh"
 #include "DbClientTransactionLog.hh"
 
 namespace EUROPA {
@@ -47,7 +46,7 @@ namespace EUROPA {
 
     const SOLVERS::SolverId& getPlanner() const { return m_planner; }
 
-    PlanWriter::PartialPlanWriter* getWriter() const { return m_ppw; }
+    SOLVERS::PlanWriter::PartialPlanWriter* getWriter() const { return m_ppw; }
 
     const int getPlannerStatus() const;
 
@@ -62,7 +61,7 @@ namespace EUROPA {
   protected:
     SOLVERS::SolverId m_planner;	/*!< A planner to complete the plan. */
     SOLVERS::SearchListenerId m_listener;
-    PlanWriter::PartialPlanWriter* m_ppw; /*!< A plan writer to output data for PlanWorks */
+    SOLVERS::PlanWriter::PartialPlanWriter* m_ppw; /*!< A plan writer to output data for PlanWorks */
     int m_step;
     
 

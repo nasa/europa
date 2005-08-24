@@ -2,7 +2,7 @@
 #define H_OpenConditionDecisionPoint
 
 #include "SolverDefs.hh"
-#include "DecisionPoint.hh"
+#include "SolverDecisionPoint.hh"
 #include "MatchingRule.hh"
 #include <vector>
 
@@ -13,7 +13,7 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    typedef DecisionPoint::AbstractFactory<Token, TokenMatchingRule> OpenConditionDecisionPointFactory;
+    typedef EUROPA::SOLVERS::DecisionPoint::AbstractFactory<Token, TokenMatchingRule> OpenConditionDecisionPointFactory;
     typedef Id<OpenConditionDecisionPointFactory> OpenConditionDecisionPointFactoryId;
 
     /**
