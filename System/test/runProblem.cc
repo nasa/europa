@@ -4,6 +4,7 @@
 #include "TestSupport.hh"
 #include "Debug.hh"
 #include "Pdlfcn.hh"
+#include <fstream>
 #include <iostream>
 #include <stdlib.h>
 
@@ -11,7 +12,7 @@ SchemaId schema;
 const char* initialTransactions = NULL;
 const char* averTestFile = NULL;
 const char* plannerConfig = NULL;
-bool replay = false;
+bool replayRequired = false;
 
 //#define USE_SOLVER
 
@@ -23,12 +24,32 @@ bool replay = false;
 #include "CBPlannerAssembly.hh"
 #endif
 
+
+
+void replay(const PlanDatabaseId& db, const DbClientTransactionLogId& txLog) {
+  std::stringstream os1;
+  db->getClient()->toStream(os1);
+  std::ofstream out(ASSEMBLY::TX_LOG());
+  txLog->flush(out);
+  out.close();
+
+  std::stringstream os2;
+  ASSEMBLY replayed(Schema::instance());
+  replayed.playTransactions(ASSEMBLY::TX_LOG());
+  replayed.getPlanDatabase()->getClient()->toStream(os2);
+
+  std::string s1 = os1.str();
+  std::string s2 = os2.str();
+
+  assert(s1 == s2);
+}
+
 bool runPlanner(){
 
   ASSEMBLY assembly(schema);
 
   DbClientTransactionLogId txLog;
-  if(replay)
+  if(replayRequired)
     txLog = (new DbClientTransactionLog(assembly.getPlanDatabase()->getClient()))->getId();
 
   check_error(plannerConfig != NULL, "Must have a planner config argument.");
@@ -41,13 +62,13 @@ bool runPlanner(){
   debugMsg("Main:runPlanner", "Found a plan at depth " 
 	   << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched());
 
-  if (replay)  // this ensures we're not running the performance tests.
+  if (replayRequired)  // this ensures we're not running the performance tests.
     assembly.write(std::cout);
 
   // Store transactions for recreation of database
 
-  if(replay)
-    assembly.replay(txLog);
+  if(replayRequired)
+    replay(assembly.getPlanDatabase(), txLog);
 
   debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr));
 
@@ -152,16 +173,16 @@ int main(int argc, const char** argv) {
   const char* performanceTest = getenv("EUROPA_PERFORMANCE");
 
   if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
-    replay = false;
+    replayRequired = false;
     for(int i = 0; i < 1; i++) {
       runTest(runPlanner);
     }
   }
   else {
     for(int i = 0; i < 1; i++) {
-      //SKIP - GNATS 3031: replay = true;
+      replayRequired = true;
       runTest(runPlanner);
-      //SKIP - GNATS 30301: runTest(copyFromFile);
+      runTest(copyFromFile);
     }
   }
 

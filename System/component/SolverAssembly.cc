@@ -40,7 +40,6 @@
 #include "tinyxml.h"
 
 #include <string>
-#include <fstream>
 
 #include "AverInterp.hh"
 
@@ -153,24 +152,6 @@ namespace EUROPA {
     delete (SOLVERS::Solver*) solver;
 
     return retval;
-  }
-
-  void SolverAssembly::replay(const DbClientTransactionLogId& txLog) {
-    std::stringstream os1;
-    m_planDatabase->getClient()->toStream(os1);
-    std::ofstream out(TX_LOG());
-    txLog->flush(out);
-    out.close();
-
-    std::stringstream os2;
-    SolverAssembly replayed(Schema::instance());
-    replayed.playTransactions(TX_LOG());
-    replayed.getPlanDatabase()->getClient()->toStream(os2);
-
-    std::string s1 = os1.str();
-    std::string s2 = os2.str();
-
-    assert(s1 == s2);
   }
 
   const PlanDatabaseId& SolverAssembly::getPlanDatabase() const {

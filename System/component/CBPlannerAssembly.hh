@@ -45,14 +45,6 @@ namespace EUROPA {
      */
     bool plan(const char* txSource, const TiXmlElement& config, const char* averFile = NULL);
 
-    /** 
-     * @brief Replays the transaction log and verifies that the outputs are
-     * the same. Useful for testing.
-     * 
-     * @param txLog The transaction log.
-     */    
-    void replay(const DbClientTransactionLogId& txLog);
-
     const PlanDatabaseId& getPlanDatabase() const;
 
     const unsigned int getTotalNodesSearched() const;

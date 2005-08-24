@@ -26,7 +26,6 @@
 #include "TestSupport.hh"
 
 #include <string>
-#include <fstream>
 
 #include "AverInterp.hh"
 
@@ -120,20 +119,6 @@ namespace EUROPA {
       return true;
     else
       return false;
-  }
-
-  void CBPlannerAssembly::replay(const DbClientTransactionLogId& txLog) {
-    std::stringstream os1;
-    m_planDatabase->getClient()->toStream(os1);
-    std::ofstream out(TX_LOG());
-    txLog->flush(out);
-    out.close();
-
-    std::stringstream os2;
-
-    std::string s1 = os1.str();
-    std::string s2 = os2.str();
-    assert(s1 == s2);
   }
 
   const PlanDatabaseId& CBPlannerAssembly::getPlanDatabase() const {
