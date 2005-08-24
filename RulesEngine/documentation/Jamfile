@@ -1,7 +1,0 @@
-SubDir PLASMA RulesEngine documentation ;
-
-if ! $(PLASMA_READY) {
-
-ModuleDocumentation RulesEngine ;
-
-} # PLASMA_READY
