@@ -7,8 +7,8 @@
 
 namespace EUROPA {
 
-  HSTSOpenDecisionManager::HSTSOpenDecisionManager(const DecisionManagerId& dm, const HSTSHeuristicsId& heur)
-    : DefaultOpenDecisionManager(dm), m_heur(heur) {
+  HSTSOpenDecisionManager::HSTSOpenDecisionManager(const DecisionManagerId& dm, const HSTSHeuristicsId& heur, const bool strictHeuristics)
+    : DefaultOpenDecisionManager(dm), m_heur(heur), m_strictHeuristics(strictHeuristics) {
   }
 
   HSTSOpenDecisionManager::~HSTSOpenDecisionManager() { }
@@ -91,8 +91,9 @@ namespace EUROPA {
           (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
         bestDec = *it;
         bestp = priority;
-        TokenDecisionPointId tokDec = bestDec; // CMG: THIS IS NOT USED. WHY NOT?
-        bestNrChoices = tok->getPlanDatabase()->countCompatibleTokens(tok);
+        //TokenDecisionPointId tokDec = bestDec; // CMG: THIS IS NOT USED. WHY NOT?
+        if(tok->getState()->lastDomain().isMember(Token::MERGED))
+          bestNrChoices = tok->getPlanDatabase()->countCompatibleTokens(tok);
         if (tok->getState()->lastDomain().isMember(Token::ACTIVE) && tok->getPlanDatabase()->hasOrderingChoice(tok)) bestNrChoices++;
         debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Selecting new bestDec = " << bestDec << " with bestNrChoices = " << bestNrChoices);
       }
@@ -239,6 +240,66 @@ namespace EUROPA {
   }
 
   DecisionPointId HSTSOpenDecisionManager::getNextDecision() {
+    return (m_strictHeuristics ? getNextDecisionStrict() : getNextDecisionLoose());
+  }
+
+  DecisionPointId HSTSOpenDecisionManager::getNextDecisionStrict() {
+    DecisionPointId bestDec = DecisionPointId::noId();
+    HSTSHeuristics::Priority bestP = MIN_PRIORITY - 1;
+    
+    if(m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW)
+      bestP = MAX_PRIORITY + 1;
+
+    //prefer unit variable decisions over everything
+    getBestUnitVariableDecision(bestDec, bestP);
+    
+    //if we don't have a decision yet, get the best of the object, token, 
+    //and non-unit variable decisions
+    if(bestDec.isNoId()) {
+      DecisionPointId oDec = DecisionPointId::noId();
+      DecisionPointId tDec = DecisionPointId::noId();
+      DecisionPointId vDec = DecisionPointId::noId();
+      HSTSHeuristics::Priority bestOP = MIN_PRIORITY - 1;
+      HSTSHeuristics::Priority bestTP = MIN_PRIORITY - 1;
+      HSTSHeuristics::Priority bestVP = MIN_PRIORITY - 1;
+      if (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW) {
+        bestOP = MAX_PRIORITY + 1;
+        bestTP = MAX_PRIORITY + 1;
+        bestVP = MAX_PRIORITY + 1;
+      }
+
+      getBestObjectDecision(oDec, bestOP);
+      getBestNonUnitVariableDecision(vDec, bestVP);
+      getBestTokenDecision(tDec, bestTP);
+
+      //we assume that preference is transitive
+      HSTSHeuristics::Priority bestVTP = m_heur->preferredPriority(bestVP, bestTP);
+      //if the best priority belongs to the object decision or there is a tie between the object
+      //and one of the others, the object is best
+      if(m_heur->preferredPriority(bestOP, bestVTP) == bestOP) {
+        bestDec = oDec;
+        bestP = bestOP;
+      }
+      else {
+        //if the best priority belongs to the token decision or there is a tie between
+        //the token and variable decisions, the token is best
+        if(bestVTP == bestTP) {
+          bestDec = tDec;
+          bestP = bestTP;
+        }
+        //at this point, the variable has the best priority
+        else {
+          bestDec = vDec;
+          bestP = bestVP;
+        }
+      }
+    }
+    
+    debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Dec = [" << bestP << "] " << bestDec);
+    return bestDec;
+  }
+
+  DecisionPointId HSTSOpenDecisionManager::getNextDecisionLoose() {
     DecisionPointId bestODec;
     DecisionPointId bestTDec;
     DecisionPointId bestVDec;

@@ -12,7 +12,7 @@ namespace EUROPA {
   class HSTSOpenDecisionManager : public DefaultOpenDecisionManager {
   public:
 
-    HSTSOpenDecisionManager(const DecisionManagerId& dm, const HSTSHeuristicsId& heur);
+    HSTSOpenDecisionManager(const DecisionManagerId& dm, const HSTSHeuristicsId& heur, const bool strictHeuristics = false);
     ~HSTSOpenDecisionManager();
 
     virtual DecisionPointId getNextDecision();
@@ -20,7 +20,7 @@ namespace EUROPA {
     virtual void initializeTokenChoices(TokenDecisionPointId& tdp);
     virtual void initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp);
     virtual void initializeObjectChoices(ObjectDecisionPointId& odp);
-
+    
   protected:
     friend class DecisionManager;
 
@@ -35,10 +35,15 @@ namespace EUROPA {
     virtual void getBestTokenDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
     virtual void getBestUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
     virtual void getBestNonUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
+    DecisionPointId getNextDecisionLoose();
+    DecisionPointId getNextDecisionStrict();
 
     ObjectDecisionSet m_sortedObjectDecs;
 
     HSTSHeuristicsId m_heur;
+    bool m_strictHeuristics; /*<! if this flag is true, we ignore the implicit deicision heuristic order of
+                              object, unit variable, token, non-unit variable and instead follow
+                             the heuristics directly, with the exception of preferring unit variable decisions over all others.*/
   };
 
 }
