@@ -686,7 +686,7 @@ private:
 
     IntervalDomain result;
     // Verify correct behaviour for the case with no transactions
-    r->getPointLevelsBefore(10, result);
+    r->getLevelAt(10, result);
     assertTrue(result.isSingleton() && result.getSingletonValue() == initialCapacity);
 
     // Test that a flaw is signalled when there is a possibility to violate limits
@@ -694,11 +694,11 @@ private:
 					      IntervalIntDomain(5, 5), 5, 5))->getId();
 
     // Have a single transaction, test before, at and after.
-    r->getPointLevelsBefore(0, result);
+    r->getLevelAt(0, result);
     assertTrue(result.isSingleton() && result.getSingletonValue() == initialCapacity);
-    r->getPointLevelsBefore(5, result);
+    r->getLevelAt(5, result);
     assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
-    r->getPointLevelsBefore(1000, result);
+    r->getLevelAt(1000, result);
     assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
 
     TransactionId c1 = (new Transaction(db.getId(), LabelStr("Resource.change"), 
@@ -708,11 +708,11 @@ private:
 					IntervalIntDomain(2, 10), -5, -5))->getId();
 
     // Confirm that we can query in the middle
-    r->getPointLevelsBefore(6, result);
+    r->getLevelAt(6, result);
     assertTrue(result == IntervalDomain(initialCapacity+5-10, initialCapacity+5));
 
     // Confirm that we can query at the end
-    r->getPointLevelsBefore(1000, result);
+    r->getLevelAt(1000, result);
     assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5 - 10));
 
     // There should be no violations, only flaws
