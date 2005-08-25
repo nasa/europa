@@ -296,6 +296,7 @@ namespace EUROPA {
     }
     
     debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Dec = [" << bestP << "] " << bestDec);
+    m_curDec = bestDec;
     return bestDec;
   }
 
