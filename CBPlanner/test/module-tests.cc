@@ -46,6 +46,20 @@
 #include <iostream>
 #include <string>
 
+class NotSingleton : public Constraint {
+public:
+  NotSingleton(const LabelStr& name,
+		     const LabelStr& propagatorName,
+		     const ConstraintEngineId& constraintEngine,
+		     const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables){}
+
+  void handleExecute(){
+    if(getScope()[0]->lastDomain().isSingleton())
+      getCurrentDomain(getScope()[0]).empty();
+  }
+};
+
 #define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
     initCBPTestSchema(); \
@@ -482,7 +496,7 @@ public:
   static bool test() {
     runTest(testForwardDecisionHandling);
     // NOT RUNNING UNLESS WE OPTIMIZE OUT MAKING UNITS EXPECT FOR COMPAT GUARDS: runTest(testNestedGuard_GNATS_3013);
-    // SHOULD WORK: runTest(testInclusionOfSingletons);
+    runTest(testSynchronizationBug_GNATS_3027);
     return(true);
   }
 
@@ -613,51 +627,58 @@ private:
     return(true);
   }
 
-  static bool testInclusionOfSingletons(){
+  static bool testSynchronizationBug_GNATS_3027(){
     DEFAULT_SETUP(ce, db, false);
+    HorizonCondition hcond(hor.getId(), dm.getId());
+    TemporalVariableCondition tcond(hor.getId(), dm.getId());
+    DynamicInfiniteRealCondition dcond(dm.getId());
 
-    assertTrue(ce.propagate());
-    assertTrue(dm.getOpenDecisionManager().isValid()); // Force allocate of default
-    assertTrue(dm.getNumberOfDecisions() == 0);
+    assertTrue(dm.getConditions().size() == 3);
 
-    // Allocate a timeline and close the database.
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
-
     IntervalToken tokenA(db.getId(), 
 			 "Objects.P1", 
-			 false,
+			 true,
 			 IntervalIntDomain(0, 10),
-			 IntervalIntDomain(0, 20),
-			 IntervalIntDomain(1, 1000),
-			 Token::noObject(), false);
-    tokenA.addParameter(LabelSet(LabelStr("V0")), "LabelSetParam0");
-    tokenA.addParameter(LabelSet(LabelStr("V1")), "LabelSetParam1");
-    tokenA.close();
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(1, 1000));
 
-    // Note that the 2 additional parameters will not initially become decisions in this scenario
-    // since they are singletons and we do not as yet have a rule fired since the token is not active.
+    NotSingleton constraint("NOT_SINGLETON", "Default", ce.getId(), makeScope(tokenA.getState(), tokenA.getObject()));
+
     assertTrue(ce.propagate());
-    assertTrue(dm.getNumberOfDecisions() == 6, toString(dm.getNumberOfDecisions()));
 
-    // Now activate the token and expect that we will get an additional decision arising to
-    // insert the token, and another to bind what will now be a compat guard.
-    tokenA.activate();
+    assertTrue(dm.getNumberOfDecisions() == 1);
+
+    DecisionPointId decision = dm.getCurrentDecision();
+    assertTrue(decision.isNoId());
+
+    // Assign a decision. Should find the decision to make and that will become the 
+    // current decision
+    dm.assignDecision();
+    decision = dm.getCurrentDecision();
+    assertTrue(decision.isId());
+
+    // Expect a failure
+    assertTrue(ce.provenInconsistent());
+
+    // Now retract the decision. It should still be current
+    unsigned int retractCounter = 0;
+    dm.retractDecision(retractCounter);
     assertTrue(ce.propagate());
-    assertTrue(dm.getNumberOfDecisions() == 6, toString(dm.getNumberOfDecisions()));
+    assertTrue(decision == dm.getCurrentDecision());
+    assertTrue(retractCounter == 0);
 
-    // Now bind the value of the first additional parameter which should be an active guard.
-    // We expect it to be removed from the decision manager.
-    tokenA.getVariable(LabelStr("LabelSetParam0"))->specify(LabelStr("V0"));
+    // Now synchronize the decision manager and confirm we still have the same current decision
+    dm.synchronize();
     assertTrue(ce.propagate());
-    assertTrue(dm.getNumberOfDecisions() == 5, toString(dm.getNumberOfDecisions()));
+    assertTrue(decision == dm.getCurrentDecision());
 
-    // Now bind the second parameter and the net open decision count should go down.
-    tokenA.getVariable(LabelStr("LabelSetParam1"))->specify(LabelStr("V1"));
-    assertTrue(ce.propagate());
-    assertTrue(dm.getNumberOfDecisions() == 4, toString(dm.getNumberOfDecisions()));
-
-    return(true);
+    // Finish out this decision
+    dm.assignDecision();
+    dm.retractDecision(retractCounter);
+    DEFAULT_TEARDOWN();
+    return true;
   }
 };
 
