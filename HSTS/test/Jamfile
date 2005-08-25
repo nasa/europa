@@ -95,7 +95,7 @@ LocalDepends run-hsts-planner-tests :
 #       dnp-freeObs # needs heursitics?!
 #       dnp-freeObsNoEmpty # needs heuristics?!
 #       dnp-tenFreeObs # needs heuristics?!
-#        dnp-threeFreeObs
+#        dnp-threeFree
 #     dnp-twentyFreeObs # times out (after 8-9 minutes on tara)
         dnp-twoFreeObs 
        dnp-timeline-h
@@ -108,8 +108,8 @@ LocalDepends run-hsts-planner-tests :
 #      dnp-fourFreeObsNotEmpty-h # times out (after 9-10 minutes on tara)
 #     dnp-freeObs-h # times out (after 40-45 minutes on tara)
 #      dnp-freeObsNoEmpty-h # times out (after 37-38 minutes on tara)
-       dnp-tenFreeObs-h
-       dnp-threeFreeObs-h
+      dnp-tenFreeObs-h
+#      dnp-threeFreeObs-h
        dnp-twentyFreeObs-h
        dnp-twoFreeObs-h
         ;
