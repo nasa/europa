@@ -26,7 +26,16 @@ namespace EUROPA {
 
     private:
       // TODO: Special code for units. virtual DecisionPointId nextZeroCommitmentDecision();
+
       virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
+
+      /**
+       * @brief Obtains a priority for the given candidate token
+       * @param candidate An inactive token for evaluation
+       * @param bestPriority A current best priority to beat. Allows early termination when we know we can't beat it.
+       */
+      virtual unsigned int getPriority(const TokenId& candidate, unsigned int bestPriority);
+
       DecisionPointId allocateDecisionPoint(const TokenId& flawedToken);
       void handleInitialize();
       void addFlaw(const TokenId& token);

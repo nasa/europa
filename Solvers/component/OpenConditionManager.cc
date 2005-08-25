@@ -178,33 +178,9 @@ namespace EUROPA {
 
 	TokenId candidate = it->second;
 
-	unsigned int priority = 0;
+	unsigned int priority = getPriority(candidate, bestPriority);
 
-	if(candidate->getState()->lastDomain().isMember(Token::REJECTED))
-	  priority++;
-
-	// Provide a quick exit if this candiate has met or exceded the best priority already
-	if(priority >= bestPriority)
-	  continue;
-
-	// If a merge is allowed we want to evaluate the number of likely choices and add them
-	// to the current priority. Note that the count has to beat the bestPriority by the priority
-	// accumulated so far. We do this last since it is the most expensive one
-	if(candidate->getState()->lastDomain().isMember(Token::MERGED))
-	  priority = priority + candidate->getPlanDatabase()->countCompatibleTokens(candidate, 
-										    bestPriority-priority);
-
-	// Skip if we can!
-	if(priority >= bestPriority)
-	  continue;
-
-	// If an activation is allowed, we want to evaluate the number of ordering choices on this token
-	// to see if it is actually worthwhile. This lookAhead may be expensive but could reduce it alot
-	// with some useful caching
-	if(candidate->getState()->lastDomain().isMember(Token::ACTIVE) &&
-	   candidate->getPlanDatabase()->hasOrderingChoice(candidate))
-	  priority++;
-
+	// If we have a better candidate, update the best pick data
 	if(priority < bestPriority){
 	  bestPriority = priority;
 	  flawedToken = candidate;
@@ -225,6 +201,33 @@ namespace EUROPA {
 		 ". This indicates a failure to configure a FlawHandler for this flaw.");
 
       return decisionPoint;
+    }
+
+
+    unsigned int OpenConditionManager::getPriority(const TokenId& candidate, unsigned int bestPriority){
+      checkError(candidate->isInactive(), 
+		 "Only expet to get priorities on inactive tokens: " << candidate->toString());
+
+      unsigned int priority = 1;
+
+      if(candidate->getState()->lastDomain().isMember(Token::REJECTED))
+	priority++;
+
+      // If a merge is allowed we want to evaluate the number of likely choices and add them
+      // to the current priority. Note that the count has to beat the bestPriority by the priority
+      // accumulated so far. We do this last since it is the most expensive one.
+      if(priority < bestPriority && candidate->getState()->lastDomain().isMember(Token::MERGED))
+	priority = priority + candidate->getPlanDatabase()->countCompatibleTokens(candidate, 2);
+
+      // If an activation is allowed, we want to evaluate the number of ordering choices on this token
+      // to see if it is actually worthwhile. This lookAhead may be expensive but could reduce it alot
+      // with some useful caching
+      if(priority < bestPriority &&
+	 candidate->getState()->lastDomain().isMember(Token::ACTIVE) &&
+	 candidate->getPlanDatabase()->hasOrderingChoice(candidate))
+	priority++;
+
+      return priority;
     }
 
     OpenConditionManager::DbListener::DbListener(const PlanDatabaseId& planDb,
