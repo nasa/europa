@@ -38,7 +38,7 @@ Rover::Going{
   eq(m_to, to.m_location);
 }
 
-PlannerConfig world = new PlannerConfig(10, 13, 500);
+PlannerConfig world = new PlannerConfig(10, 13, 800);
 
 Rover spirit = new Rover();
 Rover opportunity = new Rover();
