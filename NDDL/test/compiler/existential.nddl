@@ -68,6 +68,19 @@ World::initialState{
  };
 
  Path p3 : {};
+
+ // Now create a filter that will remove all values
+ // but verify that no inconsistency is triggered. Note that if
+ // the keyword 'filterOnly' is ommitted, then it will cause an inconsistency
+ Location loc1;
+ Location loc2;
+ eq(loc1, object.rock);
+ eq(loc2, object.rock);
+
+ Path p4 filterOnly : {
+  eq(p4.from, loc1);
+  eq(p4.to, loc2);
+ };
 }
 
 World world = new World();

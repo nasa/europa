@@ -47,7 +47,6 @@ private:
 			      LabelStr("Default"),
 			      ce,
 			      filterVariable.getId(),
-			      ObjectFilterConstraint::CONSTRAIN,
 			      filter);
 
     assertTrue(ce->propagate());
@@ -87,7 +86,6 @@ private:
 			      LabelStr("Default"),
 			      ce,
 			      filterVariable.getId(),
-			      ObjectFilterConstraint::CONSTRAIN,
 			      filter);
 
     assertTrue(ce->propagate());
@@ -134,20 +132,23 @@ private:
   static bool testFiltering() {
     DEFAULT_SETUP(ce, db, false);
     // Allocate a number of objects
-    std::list<ObjectId> objects;
-    objects.push_back(makeObjectForTesting(db, LabelStr("object0"), 1, LabelStr("A"), true, 1.1));
-    objects.push_back(makeObjectForTesting(db, LabelStr("object1"), 1, LabelStr("A"), true, 1.1));
-    objects.push_back(makeObjectForTesting(db, LabelStr("object2"), 1, LabelStr("B"), true, 3.1));
-    objects.push_back(makeObjectForTesting(db, LabelStr("object3"), 1, LabelStr("B"), true, 4.1));
-    objects.push_back(makeObjectForTesting(db, LabelStr("object4"), 1, LabelStr("A"), false,4.1));
-    objects.push_back(makeObjectForTesting(db, LabelStr("object5"), 2, LabelStr("A"), true, 6.1));
-    objects.push_back(makeObjectForTesting(db, LabelStr("object6"), 1, LabelStr("B"), false, 7.1));
-    objects.push_back(makeObjectForTesting(db, LabelStr("object7"), 2, LabelStr("B"), true, 8.1));
-    objects.push_back(makeObjectForTesting(db, LabelStr("object8"), 1, LabelStr("A"), true, 8.1));
-    objects.push_back(makeObjectForTesting(db, LabelStr("object9"), 1, LabelStr("A"), true, 8.1));
+    ObjectDomain baseDomain(DEFAULT_OBJECT_TYPE().c_str());
+    baseDomain.insert(makeObjectForTesting(db, LabelStr("object0"), 1, LabelStr("A"), true, 1.1));
+    baseDomain.insert(makeObjectForTesting(db, LabelStr("object1"), 1, LabelStr("A"), true, 1.1));
+    baseDomain.insert(makeObjectForTesting(db, LabelStr("object2"), 1, LabelStr("B"), true, 3.1));
+    baseDomain.insert(makeObjectForTesting(db, LabelStr("object3"), 1, LabelStr("B"), true, 4.1));
+    baseDomain.insert(makeObjectForTesting(db, LabelStr("object4"), 1, LabelStr("A"), false,4.1));
+    baseDomain.insert(makeObjectForTesting(db, LabelStr("object5"), 2, LabelStr("A"), true, 6.1));
+    baseDomain.insert(makeObjectForTesting(db, LabelStr("object6"), 1, LabelStr("B"), false, 7.1));
+    baseDomain.insert(makeObjectForTesting(db, LabelStr("object7"), 2, LabelStr("B"), true, 8.1));
+    baseDomain.insert(makeObjectForTesting(db, LabelStr("object8"), 1, LabelStr("A"), true, 8.1));
+    baseDomain.insert(makeObjectForTesting(db, LabelStr("object9"), 1, LabelStr("A"), true, 8.1));
     db->close();
 
-    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(objects, DEFAULT_OBJECT_TYPE().c_str()));
+    // Now use an object variable for filtering which is left open.
+    Variable<ObjectDomain> filterVariable(ce, baseDomain);
+    assertTrue(filterVariable.lastDomain().isOpen() && filterVariable.lastDomain().getSize() == 10, 
+	       filterVariable.toString());
 
     // Allocate a number of filter variables, one for each field    
     Variable<LabelSet> v1(ce, makeLabelSetDomain());
@@ -162,11 +163,16 @@ private:
 			      LabelStr("Default"),
 			      ce,
 			      filterVariable.getId(),
-			      ObjectFilterConstraint::FILTER,
 			      filter);
 
-    v1.specify(LabelStr("A")); // Fixing A only will still leave the filter var empty
-    v3.specify(8.1); // Fixing A only will still leave the filter var empty
+    v1.specify(LabelStr("A"));
+    v3.specify(0.1); 
+
+    assertTrue(ce->propagate());
+    assertTrue(c0.getFilteredObjects().getSize() == 0);
+
+    v3.reset();
+    v3.specify(8.1); 
 
     assertTrue(ce->propagate());
     assertTrue(c0.getFilteredObjects().getSize() == 2);

@@ -20,7 +20,7 @@ for model in
 	existential.nddl         plasma-base.nddl  subclass.nddl
 	simple-class.nddl constraint-test.nddl
 	interval-constants.nddl  simple-predicate.nddl
-	less-basic-model.nddl    #foreach-exec.nddl
+	less-basic-model.nddl    foreach-exec.nddl
 	gnats-2537.nddl simple-resources.nddl multi-resources.nddl
 	multidot.nddl gnats_2830.nddl globals.nddl string-domain.nddl
 {

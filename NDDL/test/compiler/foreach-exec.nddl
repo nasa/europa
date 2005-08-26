@@ -2,11 +2,17 @@
 
 class World {
  Rover rover;
+ Location loc1;
+ Location loc2;
  predicate initialState{}
- World(){
+ World(Location l1, Location l2){
   rover = new Rover();
+  loc1 = l1;
+  loc2 = l2;
  }
 }
+
+
 
 World::initialState{
  // Try one without a filter
@@ -14,9 +20,17 @@ World::initialState{
  foreach (t in r) {
   contains(Rover.Navigate n);
  };
+
+ Path emptyPath filterOnly : {
+  eq(emptyPath.from, object.loc1);
+  eq(emptyPath.to, object.loc2);
+ };
+
+ foreach(q in emptyPath) {
+  contains(Rover.Navigate n);
+ };
 }
 
-World world = new World();
 Rover r0 = new Rover();
 Rover r1 = new Rover();
 Rover r2 = new Rover();
@@ -24,6 +38,8 @@ Rover r2 = new Rover();
 Location l0 = new Location("Hill");
 Location l1 = new Location("Rock");
 Location l2 = new Location("Lander");
+
+World world = new World(l0, l0);
 
 Path p0 = new Path(l0, l1);
 Path p1 = new Path(l0, l2);
