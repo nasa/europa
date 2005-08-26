@@ -522,5 +522,78 @@ namespace EUROPA {
 
     return true;
   }
+
+  bool testPrioritiesImpl(ConstraintEngine& ce, PlanDatabase& db, HSTSHeuristics& heur) {
+    initHeuristicsSchema();
+    HSTSHeuristicsReader reader(heur.getNonConstId());
+    reader.read("../core/Heuristics-HSTS.xml");
+
+    Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
+    Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
+
+    Object nav(db.getId(), LabelStr("Navigator"), LabelStr("nav"));
+
+    db.close();
+
+    std::list<ObjectId> results;
+    db.getObjectsByType("Location",results);
+    ObjectDomain allLocs(results,"Location");
+
+    //Navigator.At(Location location);
+    //Navigator.Going(Location from, Location to);
+    //Commands.TakeSample(Location rock);
+    
+    //create an unknown variable, priority should be 5000.0
+    Variable<IntervalIntDomain> randomVar(ce.getId(), IntervalIntDomain(1, 20), true, LabelStr("randomVar"));
+    ConstrainedVariableDecisionPoint randomVarDec(DbClientId::noId(), randomVar.getId(), OpenDecisionManagerId::noId());
+    assert(heur.getPriorityForConstrainedVariableDP(randomVarDec.getId()) == 5000.0);
+
+    //create Commands.TakeSample, first parameter should have priority = 6000.5
+    IntervalToken takeSample(db.getId(), LabelStr("Commands.TakeSample"), false, IntervalIntDomain(), IntervalIntDomain(), 
+                             IntervalIntDomain(1, 100), Token::noObject(), false);
+    takeSample.addParameter(allLocs, LabelStr("rock"));
+    takeSample.close();
+    ConstrainedVariableDecisionPoint takeSampleParamDec(DbClientId::noId(), (takeSample.getParameters())[0], OpenDecisionManagerId::noId());
+    assert(heur.getPriorityForConstrainedVariableDP(takeSampleParamDec.getId()) == 6000.5);
+
+    //create a token not in the heuristics, priority should be 10.0, order should be merge,activate (default match)
+    IntervalToken randomTok(db.getId(), LabelStr("UnaryResource.uses"), false);
+    ObjectDecisionPoint randomTokDP(DbClientId::noId(), randomTok.getId(), OpenDecisionManagerId::noId());
+    assert(heur.getPriorityForObjectDP(randomTokDP.getId()) == 10.0);
+
+    //create a Navigator.At, priority should be 443.7 (simple predicate match)
+    IntervalToken navAt(db.getId(), LabelStr("Navigator.At"), false, IntervalIntDomain(), IntervalIntDomain(), 
+                        IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
+    navAt.addParameter(allLocs, LabelStr("location"));
+    navAt.close();
+    ObjectDecisionPoint navAtDP(DbClientId::noId(), navAt.getId(), OpenDecisionManagerId::noId());
+    assert(heur.getPriorityForObjectDP(navAtDP.getId()) == 443.7);
+    navAt.activate();
+
+    //create a Navigator.Going with a parent of Navigator.At, priority should be 1024.5 (simple parent match)
+    IntervalToken navGoing(navAt.getId(), LabelStr("after"), LabelStr("Navigator.Going"), IntervalIntDomain(), IntervalIntDomain(), 
+                           IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
+    navGoing.addParameter(allLocs, LabelStr("from"));
+    navGoing.addParameter(allLocs, LabelStr("to"));
+    navGoing.close();
+    ObjectDecisionPoint navGoingDP(DbClientId::noId(), navGoing.getId(), OpenDecisionManagerId::noId());
+    assert(heur.getPriorityForObjectDP(navGoingDP.getId()) == 1024.5);
+
+    //set first parameter of Commands.TakeSample to loc3, priority should be 200.4 (simple variable match)
+    (takeSample.getParameters())[0]->specify(loc3.getId());
+    ObjectDecisionPoint takeSampleDP(DbClientId::noId(), takeSample.getId(), OpenDecisionManagerId::noId());
+    assert(heur.getPriorityForObjectDP(takeSampleDP.getId()) == 200.4);
+
+    //set Navigator.Going "from" parameter to Loc1, parameter "to" should have priority 6000.25 (more complex variable match)
+    (navGoing.getParameters())[0]->specify(loc1.getId());
+    ConstrainedVariableDecisionPoint fromDP(DbClientId::noId(), (navGoing.getParameters())[1], OpenDecisionManagerId::noId());
+    assert(heur.getPriorityForConstrainedVariableDP(fromDP.getId()) == 6000.25);
+
+    //set Navigator.Going "to" parameter to Loc3, priority should be 10000 (parent relation match)
+    (navGoing.getParameters())[1]->specify(loc3.getId());
+    assert(heur.getPriorityForObjectDP(navGoingDP.getId()) == 10000.0);    
+
+    return true;
+  }
   
 }

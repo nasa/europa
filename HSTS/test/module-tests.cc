@@ -80,6 +80,8 @@
   ConstraintEngine ce;					\
   initCBPTestSchema();					\
   PlanDatabase db(ce.getId(), Schema::instance());	\
+  new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+  new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
   HSTSHeuristics heuristics(db.getId()); 
 
 #define DEFAULT_TEARDOWN_HEURISTICS()
@@ -341,9 +343,11 @@ public:
     runTest(testDNPConstraints);
     runTest(testPreferredPriority);
     runTest(testHSTSHeuristicsStrict);
+    runTest(testPriorities);
     return(true);
   }
 private:
+
   static bool testDefaultInitialization() {
     bool retval = false;
     DEFAULT_SETUP_HEURISTICS();
@@ -422,6 +426,14 @@ private:
     assertTrue(executeTestCases(ce.getId(), tests));
     DEFAULT_TEARDOWN_PLAN_HEURISTICS();
     return(true);
+  }
+
+  static bool testPriorities() {
+    bool retval = false;
+    DEFAULT_SETUP_HEURISTICS();
+    retval = testPrioritiesImpl(ce, db, heuristics);
+    DEFAULT_TEARDOWN_HEURISTICS();
+    return retval;
   }
 };
 
