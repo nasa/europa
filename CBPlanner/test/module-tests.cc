@@ -109,6 +109,23 @@ public:
 
 #define DEFAULT_TEARDOWN_PLAN_HEURISTICS()
 
+#define DEFAULT_SETUP_PLANNER() \
+    ConstraintEngine ce; \
+    initCBPTestSchema(); \
+    PlanDatabase db(ce.getId(), Schema::instance()); \
+    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
+    new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
+    RulesEngine re(db.getId()); \
+    Horizon hor(0, 200); \
+    CBPlanner planner(db.getId(), hor.getId());   
+
+#define DEFAULT_TEARDOWN_PLANNER()
+
+
+
+
+
+
 extern bool loggingEnabled();
 
 /***********************************************************************************************
@@ -219,6 +236,7 @@ public:
     runTest(testHorizon);
     runTest(testHorizonCondition);
     runTest(testHorizonConditionNecessary);
+    runTest(testSetHorizionCondition);
     runTest(testTemporalVariableCondition);
     runTest(testDynamicInfiniteRealCondition);
     return(true);
@@ -231,6 +249,31 @@ private:
   
     assertTrue(dm.getConditions().size() == 1);
     DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testSetHorizionCondition() {
+    // create a CBPlanner
+    DEFAULT_SETUP_PLANNER();
+    // Default horizion condition should be
+    assertTrue(!planner.isPossiblyOutsideHorizon());
+    assertTrue(planner.isNecessarilyOutsideHorizon());
+
+    // Set horizion condition
+    planner.setNecessarilyOutsideHorizon();
+
+    // test horizion condition setting.
+    assertTrue(planner.isPossiblyOutsideHorizon());
+    assertTrue(!planner.isNecessarilyOutsideHorizon());
+
+    // set back 
+    planner.setPossiblyOutsideHorizon();
+
+    // test is back
+    assertTrue(!planner.isPossiblyOutsideHorizon());
+    assertTrue(planner.isNecessarilyOutsideHorizon());
+
+    DEFAULT_TEARDOWN_PLANNER();
     return true;
   }
 
