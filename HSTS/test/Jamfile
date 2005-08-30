@@ -6,7 +6,7 @@ if ! $(PLASMA_READY) {
 # Heuristics Tests
 #
 
-HSTS_Test_Files = [ FGristFiles AtSubgoalRule HSTSModuleTests DNPConstraints ] ;
+HSTS_Test_Files = [ FGristFiles AtSubgoalRule DNPConstraints ] ;
 ModuleObjects $(HSTS_Test_Files:S=.cc) : HSTS ;
 
 CET_Files = <ConstraintEngine!test>ConstraintTesting ;
