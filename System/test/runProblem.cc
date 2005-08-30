@@ -8,24 +8,17 @@
 #include <iostream>
 #include <stdlib.h>
 
+#include "SolverAssembly.hh"
+#include "CBPlannerAssembly.hh"
+
 SchemaId schema;
 const char* initialTransactions = NULL;
 const char* averTestFile = NULL;
 const char* plannerConfig = NULL;
 bool replayRequired = false;
 
-//#define USE_SOLVER
 
-#ifdef USE_SOLVER
-#define ASSEMBLY SolverAssembly
-#include "SolverAssembly.hh"
-#else
-#define ASSEMBLY CBPlannerAssembly
-#include "CBPlannerAssembly.hh"
-#endif
-
-
-
+template<class ASSEMBLY>
 void replay(const PlanDatabaseId& db, const DbClientTransactionLogId& txLog) {
   std::stringstream os1;
   db->getClient()->toStream(os1);
@@ -44,6 +37,7 @@ void replay(const PlanDatabaseId& db, const DbClientTransactionLogId& txLog) {
   assert(s1 == s2);
 }
 
+template<class ASSEMBLY>
 bool runPlanner(){
 
   ASSEMBLY assembly(schema);
@@ -68,7 +62,7 @@ bool runPlanner(){
   // Store transactions for recreation of database
 
   if(replayRequired)
-    replay(assembly.getPlanDatabase(), txLog);
+    replay<ASSEMBLY>(assembly.getPlanDatabase(), txLog);
 
   debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr));
 
@@ -76,6 +70,7 @@ bool runPlanner(){
 }
 
 
+template<class ASSEMBLY>
 bool copyFromFile(){
   // Populate plan database from transaction log
   std::stringstream os1;
@@ -98,8 +93,8 @@ bool copyFromFile(){
   return true;
 }
 
-
-int main(int argc, const char** argv) {
+template<class ASSEMBLY>
+int internalMain(int argc, const char** argv){
 #ifdef STANDALONE
 #define MODEL_INDEX 1
 #define TRANS_INDEX 2
@@ -114,7 +109,7 @@ int main(int argc, const char** argv) {
 
   if(argc != ARGC && argc != ARGC - 1) {
     std::cout << "usage: runProblem <model shared library path> <initial transaction file> <planner config file> [Aver test file]" << std::endl;
-    exit(1);
+    return 1;
   }
   
   libPath = argv[MODEL_INDEX];
@@ -158,7 +153,7 @@ int main(int argc, const char** argv) {
   if(argc != ARGC && argc != ARGC-1) {
     std::cout << "usage: runProblem <initial transaction file> <planner config> [Aver test file]" << std::endl;
     std::cout << ARGC << " " << argc << std::endl;
-    exit(1);
+    return 1;
   }
   initialTransactions = argv[TRANS_INDEX];
   plannerConfig = argv[PCONF_INDEX];
@@ -175,14 +170,14 @@ int main(int argc, const char** argv) {
   if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
     replayRequired = false;
     for(int i = 0; i < 1; i++) {
-      runTest(runPlanner);
+      runTest(runPlanner<ASSEMBLY>);
     }
   }
   else {
     for(int i = 0; i < 1; i++) {
       replayRequired = true;
-      runTest(runPlanner);
-      runTest(copyFromFile);
+      runTest(runPlanner<ASSEMBLY>);
+      runTest(copyFromFile<ASSEMBLY>);
     }
   }
 
@@ -200,8 +195,10 @@ int main(int argc, const char** argv) {
 #endif
   
   std::cout << "Finished" << std::endl;
-  exit(0);
+  return 0;
 }
+
+
 
 #ifdef __BEOS__
 
@@ -214,3 +211,12 @@ void __assert_fail(const char *__assertion,
 }
 
 #endif
+
+
+int main(int argc, const char** argv) {
+  int result = internalMain<CBPlannerAssembly>(argc, argv);
+  if(result != 0)
+    return result;
+  else 
+    return internalMain<SolverAssembly>(argc, argv);
+}
