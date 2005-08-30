@@ -1,0 +1,61 @@
+// NDDL/test/compiler/inheritance.1.xml
+
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+  class Foo;
+  typedef Id<Foo> FooId;
+  typedef ObjectDomain FooDomain;
+  
+  class Bar;
+  typedef Id<Bar> BarId;
+  typedef ObjectDomain BarDomain;
+  
+  
+  // inheritance.1.nddl:2 Foo
+  class Foo : public Object {
+  public:
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId arg1; // SchemaWriter::declareVariable
+    ConstrainedVariableId arg2; // SchemaWriter::declareVariable
+    ConstrainedVariableId arg3; // SchemaWriter::declareVariable
+    
+    // inheritance.1.nddl:2 Foo
+    virtual void constructor();
+    
+    // inheritance.1.nddl:2 Foo
+    virtual void constructor(int _arg1, float _arg2);
+    
+    // inheritance.1.nddl:2 Foo
+    virtual void constructor(int _arg1, float _arg2, bool _arg3);
+  };
+  
+  // inheritance.1.nddl:31 Bar
+  class Bar : public Foo {
+  public:
+    Bar(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Bar(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Bar(const ObjectId& parent, const LabelStr& name);
+    Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId arg4; // SchemaWriter::declareVariable
+    
+    // inheritance.1.nddl:31 Bar
+    virtual void constructor();
+    
+    // inheritance.1.nddl:31 Bar
+    virtual void constructor(const LabelStr& _arg4);
+    
+    // inheritance.1.nddl:31 Bar
+    virtual void constructor(const LabelStr& _arg4, int _arg1, float _arg2, bool _arg3);
+  };
+} // End NDDL namespace

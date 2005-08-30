@@ -1,0 +1,421 @@
+// NDDL/test/compiler/existential.xml
+
+#include "existential.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  
+  // existential.nddl:1 Location
+  Location::Location(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Location", name, true) {
+  }
+  Location::Location(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Location::Location(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Location", name, true) {}
+  Location::Location(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Location::handleDefaults(bool autoClose) {
+    if(name.isNoId()){
+      name = addVariable(StringDomain("DefaultString"), "name");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // existential.nddl:1 Location
+  void Location::constructor(const LabelStr& _name) {
+    name = addVariable(StringDomain(_name, "string"), "name");
+  }
+  
+  // existential.nddl:1 Location
+  class LocationFactory0: public ConcreteObjectFactory {
+  public:
+    LocationFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0].first.toString() + " to string");
+      check_error(arguments[0].second->isSingleton());
+      LabelStr _name((LabelStr)arguments[0].second->getSingletonValue());
+      
+      LocationId instance = (new Location(planDb, objectType, objectName))->getId();
+      instance->constructor(_name);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // existential.nddl:8 Path
+  Path::Path(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Path", name, true) {
+  }
+  Path::Path(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Path::Path(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Path", name, true) {}
+  Path::Path(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Path::handleDefaults(bool autoClose) {
+    check_error(from.isValid(), "object variables must be initialized explicitly");
+    
+    check_error(to.isValid(), "object variables must be initialized explicitly");
+    
+    if (autoClose)
+      close();
+  }
+  
+  
+  // existential.nddl:8 Path
+  void Path::constructor(const LocationId& _from, const LocationId& _to) {
+    from = addVariable(LocationDomain(_from, "Location"), "from");
+    to = addVariable(LocationDomain(_to, "Location"), "to");
+  }
+  
+  // existential.nddl:8 Path
+  class PathFactory1: public ConcreteObjectFactory {
+  public:
+    PathFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 2);
+      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+                                                TypeFactory::baseDomain("Location")), 
+                  "Cannot convert " + arguments[0].first.toString() + " to Location");
+      check_error(arguments[0].second->isSingleton());
+      LocationId _from((LocationId)arguments[0].second->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
+                                                TypeFactory::baseDomain("Location")), 
+                  "Cannot convert " + arguments[1].first.toString() + " to Location");
+      check_error(arguments[1].second->isSingleton());
+      LocationId _to((LocationId)arguments[1].second->getSingletonValue());
+      
+      PathId instance = (new Path(planDb, objectType, objectName))->getId();
+      instance->constructor(_from, _to);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // existential.nddl:16 World
+  World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "World", name, true) {
+  }
+  World::World(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  World::World(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "World", name, true) {}
+  World::World(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void World::handleDefaults(bool autoClose) {
+    check_error(rock.isValid(), "object variables must be initialized explicitly");
+    
+    check_error(hill.isValid(), "object variables must be initialized explicitly");
+    
+    check_error(lander.isValid(), "object variables must be initialized explicitly");
+    
+    check_error(martianCity.isValid(), "object variables must be initialized explicitly");
+    
+    check_error(p1.isValid(), "object variables must be initialized explicitly");
+    
+    check_error(p2.isValid(), "object variables must be initialized explicitly");
+    
+    check_error(p3.isValid(), "object variables must be initialized explicitly");
+    
+    check_error(p4.isValid(), "object variables must be initialized explicitly");
+    
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // existential.nddl:27 Going
+  World::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
+   : NddlToken(planDatabase, name, rejectable, false) {
+    handleDefaults(close);
+  }
+  
+  World::Going::Going(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void World::Going::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if(from.isNoId()){
+      from = addParameter(ObjectDomain("Location"), "from");
+      completeObjectParam(Location, from);
+    }
+    if(to.isNoId()){
+      to = addParameter(ObjectDomain("Location"), "to");
+      completeObjectParam(Location, to);
+    }
+    if (autoClose)
+      close();
+    
+    // Post parameter constraints
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("from")));
+      vars.push_back(var(getId(),std::string("to")));
+      token_constraint(neq, vars);
+    }
+  }
+  
+  
+  
+  // existential.nddl:33 initialState
+  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
+   : NddlToken(planDatabase, name, rejectable, false) {
+    handleDefaults(close);
+  }
+  
+  World::initialState::initialState(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void World::initialState::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // existential.nddl:16 World
+  void World::constructor() {
+    rock = addVariable(LocationDomain((new Location(m_id, "rock"))->getId(), "Location"), "rock");
+    Id<Location>(singleton(rock))->constructor(LabelStr("ROCK"));
+    Id<Location>(singleton(rock))->handleDefaults();
+    hill = addVariable(LocationDomain((new Location(m_id, "hill"))->getId(), "Location"), "hill");
+    Id<Location>(singleton(hill))->constructor(LabelStr("HILL"));
+    Id<Location>(singleton(hill))->handleDefaults();
+    lander = addVariable(LocationDomain((new Location(m_id, "lander"))->getId(), "Location"), "lander");
+    Id<Location>(singleton(lander))->constructor(LabelStr("LANDER"));
+    Id<Location>(singleton(lander))->handleDefaults();
+    martianCity = addVariable(LocationDomain((new Location(m_id, "martianCity"))->getId(), "Location"), "martianCity");
+    Id<Location>(singleton(martianCity))->constructor(LabelStr("MARTIAN_CITY"));
+    Id<Location>(singleton(martianCity))->handleDefaults();
+    p1 = addVariable(PathDomain((new Path(m_id, "p1"))->getId(), "Path"), "p1");
+    Id<Path>(singleton(p1))->constructor(singleton(rock), singleton(hill));
+    Id<Path>(singleton(p1))->handleDefaults();
+    p2 = addVariable(PathDomain((new Path(m_id, "p2"))->getId(), "Path"), "p2");
+    Id<Path>(singleton(p2))->constructor(singleton(lander), singleton(hill));
+    Id<Path>(singleton(p2))->handleDefaults();
+    p3 = addVariable(PathDomain((new Path(m_id, "p3"))->getId(), "Path"), "p3");
+    Id<Path>(singleton(p3))->constructor(singleton(martianCity), singleton(hill));
+    Id<Path>(singleton(p3))->handleDefaults();
+    p4 = addVariable(PathDomain((new Path(m_id, "p4"))->getId(), "Path"), "p4");
+    Id<Path>(singleton(p4))->constructor(singleton(hill), singleton(lander));
+    Id<Path>(singleton(p4))->handleDefaults();
+  }
+  
+  // existential.nddl:16 World
+  class WorldFactory2: public ConcreteObjectFactory {
+  public:
+    WorldFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 0);
+      WorldId instance = (new World(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // existential.nddl:46 Going
+  class World$Going$0$0: public RuleInstance {
+  public:
+    World$Going$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$World$Going$0, World$Going$0$0, World.Going, "existential.nddl,46");
+  
+  void World$Going$0$0::handleExecute() {
+    objectVar(Path, path, false, false);
+    objectVar(Path, p1, false, false);
+    declareFilter(Path,path);
+    allocateFilterCondition(path, Location, var(getId(),std::string("from")), from, eq);
+    allocateFilterCondition(path, Location, var(getId(),std::string("to")), to, eq);
+    allocateFilterConstraint(path);
+  }
+  
+  // existential.nddl:55 initialState
+  class World$initialState$1$0: public RuleInstance {
+  public:
+    World$initialState$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  class World$initialState$1$0$0: public RuleInstance {
+  public:
+    World$initialState$1$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
+    : RuleInstance(parent, vars){}
+    void handleExecute();
+  };
+  
+  class World$initialState$1$0$1: public RuleInstance {
+  public:
+    World$initialState$1$0$1(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
+    : RuleInstance(parent, vars){}
+    void handleExecute();
+  };
+  
+  class World$initialState$1$0$2: public RuleInstance {
+  public:
+    World$initialState$1$0$2(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
+    : RuleInstance(parent, vars){}
+    void handleExecute();
+  };
+  
+  class World$initialState$1$0$3: public RuleInstance {
+  public:
+    World$initialState$1$0$3(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
+    : RuleInstance(parent, vars){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "existential.nddl,55");
+  
+  void World$initialState$1$0::handleExecute() {
+    objectVar(Path, p1, false, false);
+    objectVar(Path, p2, false, false);
+    objectVar(Path, p3, false, false);
+    objectVar(Location, loc1, false, false);
+    objectVar(Location, loc2, false, false);
+    objectVar(Path, p4, false, true);
+    slave(World::Going, World.Going, g, LabelStr("any"));
+    declareFilter(Path,p1);
+    allocateFilterCondition(p1, Location, varfromtok(tok(getId(), std::string("g")), std::string("from")), from, eq);
+    allocateFilterCondition(p1, Location, varfromtok(tok(getId(), std::string("g")), std::string("to")), to, eq);
+    allocateFilterConstraint(p1);
+    declareFilter(Path,p2);
+    allocateFilterCondition(p2, Location, varfromtok(tok(getId(), std::string("g")), std::string("from")), from, eq);
+    allocateFilterCondition(p2, Location, varfromtok(tok(getId(), std::string("g")), std::string("to")), to, eq);
+    allocateFilterConstraint(p2);
+    declareFilter(Path,p4);
+    allocateFilterCondition(p4, Location, var(getId(),std::string("loc1")), from, eq);
+    allocateFilterCondition(p4, Location, var(getId(),std::string("loc2")), to, eq);
+    allocateFilterConstraint(p4);
+    addChildRule(new World$initialState$1$0$0(m_id, getVariables(":object:")));
+    addChildRule(new World$initialState$1$0$1(m_id, getVariables(":object:")));
+    addChildRule(new World$initialState$1$0$2(m_id, getVariables(":object:")));
+    addChildRule(new World$initialState$1$0$3(m_id, getVariables(":object:")));
+  }
+  void World$initialState$1$0$0::handleExecute() {
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("g")), std::string("from")));
+      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("rock")));
+      rule_constraint(eq, vars);
+    }
+  }
+  void World$initialState$1$0$1::handleExecute() {
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varfromtok(tok(getId(), std::string("g")), std::string("to")));
+      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("hill")));
+      rule_constraint(eq, vars);
+    }
+  }
+  void World$initialState$1$0$2::handleExecute() {
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("loc1")));
+      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("rock")));
+      rule_constraint(eq, vars);
+    }
+  }
+  void World$initialState$1$0$3::handleExecute() {
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("loc2")));
+      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("rock")));
+      rule_constraint(eq, vars);
+    }
+  }
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("NDDL/test/compiler/existential");
+    id->reset(); // Reset prior data if present. 
+    
+    // Invoke commands to populate schema with type definitions
+    id->addPrimitive("int");
+    id->addPrimitive("float");
+    id->addPrimitive("bool");
+    id->addPrimitive("string");
+    id->addObjectType("Object");
+    id->addObjectType("Timeline", "Object");
+    id->addObjectType("NddlResource", "Object");
+    id->addObjectType("Location", "Object");
+    id->addMember("Location", "string", "name");
+    id->addObjectType("Path", "Object");
+    id->addMember("Path", "Location", "from");
+    id->addMember("Path", "Location", "to");
+    id->addObjectType("World", "Timeline");
+    id->addMember("World", "Location", "rock");
+    id->addMember("World", "Location", "hill");
+    id->addMember("World", "Location", "lander");
+    id->addMember("World", "Location", "martianCity");
+    id->addMember("World", "Path", "p1");
+    id->addMember("World", "Path", "p2");
+    id->addMember("World", "Path", "p3");
+    id->addMember("World", "Path", "p4");
+    id->addPredicate("World.Going");
+    id->addMember("World.Going", "Location", "from");
+    id->addMember("World.Going", "Location", "to");
+    id->addPredicate("World.initialState");
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TOKEN_FACTORY(World::Going::Factory);
+    REGISTER_TOKEN_FACTORY(World::initialState::Factory);
+    REGISTER_TYPE_FACTORY(Location, ObjectDomain("Location"));
+    REGISTER_OBJECT_FACTORY(LocationFactory0, Location:string);
+    REGISTER_TYPE_FACTORY(Path, ObjectDomain("Path"));
+    REGISTER_OBJECT_FACTORY(PathFactory1, Path:Location:Location);
+    REGISTER_OBJECT_FACTORY(PathFactory1, Path:Location:Object);
+    REGISTER_OBJECT_FACTORY(PathFactory1, Path:Object:Location);
+    REGISTER_OBJECT_FACTORY(PathFactory1, Path:Object:Object);
+    REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
+    REGISTER_OBJECT_FACTORY(WorldFactory2, World);
+    // Allocate rules
+    new Rule$World$Going$0();
+    new Rule$World$initialState$1();
+    return id;
+  }
+  
+}

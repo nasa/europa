@@ -1,0 +1,39 @@
+// NDDL/test/compiler/csp.1.xml
+
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+  
+  
+  // csp.1.nddl:2 Ints
+  typedef NumericDomain Ints;
+  Ints IntsBaseDomain();
+  
+  
+  // csp.1.nddl:3 Floats
+  typedef NumericDomain Floats;
+  Floats FloatsBaseDomain();
+  
+  
+  // csp.1.nddl:4 Strings
+  typedef SymbolDomain Strings;
+  Strings StringsBaseDomain();
+  
+  
+  // csp.1.nddl:5 Symbols
+  typedef SymbolDomain Symbols;
+  Symbols SymbolsBaseDomain();
+  
+  
+  // csp.1.nddl:6 Fruits
+  typedef SymbolDomain Fruits;
+  Fruits FruitsBaseDomain();
+  
+  
+  // csp.1.nddl:7 Speed
+  typedef SymbolDomain Speed;
+  Speed SpeedBaseDomain();
+} // End NDDL namespace
