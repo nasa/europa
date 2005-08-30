@@ -95,7 +95,7 @@
   RulesEngine re(db.getId());					\
   Horizon hor(0, 200);						\
   CBPlanner planner(db.getId(), hor.getId());			\
-  HSTSHeuristics heuristics(db.getId()); 
+  HSTSHeuristics heuristics(db.getId());
 
 #define DEFAULT_TEARDOWN_PLAN_HEURISTICS()
 
@@ -430,21 +430,26 @@ private:
 
   static bool testPriorities() {
     bool retval = false;
-    DEFAULT_SETUP_HEURISTICS();
-    retval = testPrioritiesImpl(ce, db, heuristics);
-    DEFAULT_TEARDOWN_HEURISTICS();
+    DEFAULT_SETUP_PLAN_HEURISTICS();
+    planner.getDecisionManager()->setOpenDecisionManager((new HSTSOpenDecisionManager(planner.getDecisionManager(), heuristics.getId(), true))->getId()); 
+    retval = testPrioritiesImpl(ce, db, heuristics, planner);
+    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
     return retval;
   }
 };
+
+bool testWeakDomainComparator() {
+  bool retval = false;
+  DEFAULT_SETUP(ce,db,false);
+  retval = testWeakDomainComparatorImpl(ce, db);
+  DEFAULT_TEARDOWN();
+  return retval;
+}
 
 int main() {
   initConstraintEngine();
 
   Schema::instance();
-
-  //Use relaxed domain comparator that allows comparison of members of two different enum types
-  WeakDomainComparator wdc;
-
 
   //!!initConstraintEngine(); // Needed ?
   //!!initConstraintLibrary(); // Needed ?  May interfere with some of the later register constraint calls.
@@ -465,6 +470,9 @@ int main() {
   //!!Add calls to readTestCases(), etc., from ConstraintEngine/test/module-tests.cc
 
   for (int i = 0; i < 1; i++) {
+    runTest(testWeakDomainComparator);
+    //Use relaxed domain comparator that allows comparison of members of two different enum types
+    WeakDomainComparator wdc;
     runTestSuite(ConstraintTest::test);
     runTestSuite(ConditionTest::test);
     runTestSuite(HeuristicsTest::test);

@@ -11,6 +11,8 @@
 #include "HSTSPlanIdReader.hh"
 #include "HSTSOpenDecisionManager.hh"
 #include "AtSubgoalRule.hh"
+#include "AbstractDomain.hh"
+#include "WeakDomainComparator.hh"
 
 extern bool loggingEnabled();
 
@@ -270,7 +272,12 @@ namespace EUROPA {
 
     reader.read("../core/Heuristics-HSTS.xml");
     
-    //    heuristics.write();
+    assertTrue(heuristics.getDefaultPriorityPreference() == HSTSHeuristics::HIGH);
+    assertTrue(heuristics.getDefaultPriorityForTokenDPsWithParent(LabelStr("Navigator.At")) == 1024.5);
+    assertTrue(heuristics.getDefaultPriorityForTokenDPs() == 10.0);
+    assertTrue(heuristics.getDefaultPriorityForConstrainedVariableDPs() == 5000.0);
+    assertTrue(heuristics.getDefaultPreferenceForConstrainedVariableDPs() == HSTSHeuristics::DESCENDING);
+    //everything else requires decision points and is tested in testPriorityImpl and testOrderingImpl
 
     return true;
   }
@@ -300,13 +307,14 @@ namespace EUROPA {
     Variable<IntervalIntDomain> var1(ce.getId(), IntervalIntDomain(), true, LabelStr("Commands.TakeSample.rock"));
     Variable<IntervalIntDomain> var2(ce.getId(), IntervalIntDomain(), true, LabelStr("AnObj.APred.Var2"));
 
-    //    std::cout << " var1 name = " << var1.getName().c_str() << std::endl;
-    //    std::cout << " var2 name = " << var2.getName().c_str() << std::endl;
-
     cond.initialize(noBranchSpec);
 
     assert(!cond.test(var1.getId()));
     assert(cond.test(var2.getId()));
+
+    const_cast<IntervalIntDomain&>(var1.getLastDomain()).intersect(IntervalIntDomain(0));
+
+    assert(cond.test(var1.getId()));
 
     return true;
   }
@@ -523,7 +531,7 @@ namespace EUROPA {
     return true;
   }
 
-  bool testPrioritiesImpl(ConstraintEngine& ce, PlanDatabase& db, HSTSHeuristics& heur) {
+  bool testPrioritiesImpl(ConstraintEngine& ce, PlanDatabase& db, HSTSHeuristics& heur, CBPlanner& planner) {
     initHeuristicsSchema();
     HSTSHeuristicsReader reader(heur.getNonConstId());
     reader.read("../core/Heuristics-HSTS.xml");
@@ -532,6 +540,10 @@ namespace EUROPA {
     Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
 
     Object nav(db.getId(), LabelStr("Navigator"), LabelStr("nav"));
+
+    Object com(db.getId(), LabelStr("Commands"), LabelStr("com"));
+
+    Object res(db.getId(), LabelStr("UnaryResource"), LabelStr("res"));
 
     db.close();
 
@@ -592,6 +604,66 @@ namespace EUROPA {
     //set Navigator.Going "to" parameter to Loc3, priority should be 10000 (parent relation match)
     (navGoing.getParameters())[1]->specify(loc3.getId());
     assert(heur.getPriorityForObjectDP(navGoingDP.getId()) == 10000.0);    
+
+
+    takeSample.activate();
+    IntervalToken testPreferMerge(takeSample.getId(), LabelStr("before"), LabelStr("Navigator.Going"), IntervalIntDomain(), IntervalIntDomain(),
+                                  IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
+    testPreferMerge.addParameter(allLocs, LabelStr("from"));
+    testPreferMerge.addParameter(allLocs, LabelStr("to"));
+    testPreferMerge.close();
+
+    IntervalToken dummyForMerge(db.getId(), LabelStr("Navigator.Going"), false, IntervalIntDomain(), IntervalIntDomain(), 
+                                IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
+    dummyForMerge.addParameter(allLocs, LabelStr("from"));
+    dummyForMerge.addParameter(allLocs, LabelStr("to"));
+    dummyForMerge.close();
+    dummyForMerge.activate();
+
+    assert(ce.propagate());
+
+    TokenDecisionPoint preferMergeDP(DbClientId::noId(), testPreferMerge.getId(), planner.getDecisionManager()->getOpenDecisionManager());
+    assert(heur.getPriorityForTokenDP(preferMergeDP.getId()) == 3.14159);
+    TokenDecisionPointId mergeDPId = (TokenDecisionPointId) preferMergeDP.getId();
+    planner.getDecisionManager()->getOpenDecisionManager()->initializeTokenChoices(mergeDPId);
+    const std::vector<LabelStr>& choices = preferMergeDP.getChoices();
+    assert(choices.size() == 1);
+    assert(choices[0] == Token::MERGED);
+
+    return true;
+  }
+
+  bool testWeakDomainComparatorImpl(ConstraintEngine& ce, PlanDatabase& db) {
+    initHeuristicsSchema();
+    DomainComparator();
+    IntervalDomain i1;
+    IntervalIntDomain i2;
+
+    assertTrue(DomainComparator::getComparator().canCompare(i1, i2));
+
+    Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
+    Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
+    
+    std::list<ObjectId> results1;
+    db.getObjectsByType("Location",results1);
+    ObjectDomain allLocs(results1,"Location");
+
+
+    Object nav(db.getId(), LabelStr("Navigator"), LabelStr("nav"));
+
+    std::list<ObjectId> results2;
+    db.getObjectsByType("Navigator",results2);
+    ObjectDomain allNavs(results2,"Navigator");
+
+    assertTrue(!DomainComparator::getComparator().canCompare(i1, allLocs));
+    assertTrue(!DomainComparator::getComparator().canCompare(allLocs, allNavs));
+
+    WeakDomainComparator wdc;
+
+
+    assertTrue(DomainComparator::getComparator().canCompare(i1, i2));
+    assertTrue(!DomainComparator::getComparator().canCompare(i1, allLocs));
+    assertTrue(DomainComparator::getComparator().canCompare(allLocs, allNavs));
 
     return true;
   }
