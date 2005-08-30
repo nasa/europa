@@ -4,10 +4,11 @@ if ! $(PLASMA_READY) {
 
 Module ConstraintEngine : Utils ;
 
+ModuleFiles ConstraintEngine : ConstraintEngineDefs.cc ;
+
 SubInclude PLASMA ConstraintEngine core ;
 SubInclude PLASMA ConstraintEngine component ;
 
-ModuleFiles ConstraintEngine : ConstraintEngineDefs.cc ;
 
 #SubInclude PLASMA ConstraintEngine documentation ;
 SubInclude PLASMA ConstraintEngine test ;

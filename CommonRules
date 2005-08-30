@@ -733,6 +733,16 @@ rule Yacc
 	Includes $(<) : $(_h) ;
 }
 
+rule Compare
+{
+	SEARCH on $(1) = $(SEARCH_SOURCE) ;
+}
+
+actions ignore Compare
+{
+	cmp $(1)
+}
+
 actions together Chmod1
 {
 	$(CHMOD) $(MODE) $(<)
