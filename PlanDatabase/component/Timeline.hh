@@ -28,6 +28,13 @@ namespace EUROPA {
 
     bool hasTokensToOrder() const;
 
+    /**
+     * @brief Test if the given token is actually assigned to this object. Over-ride the parent to require
+     * explicit ordering.
+     * @see constrain
+     */
+    bool hasToken(const TokenId& token) const;
+
     const std::list<TokenId>& getTokenSequence() const;
 
     void constrain(const TokenId& predecessor, const TokenId& successor);

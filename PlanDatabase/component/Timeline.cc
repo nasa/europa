@@ -301,6 +301,10 @@ namespace EUROPA {
     m_cache = (new OrderingChoicesCache(m_tokenSequence, getPlanDatabase()->getTemporalAdvisor()))->getId();
   }
 
+  bool Timeline::hasToken(const TokenId& token) const{
+    return m_tokenIndex.find(token->getKey()) != m_tokenIndex.end();
+  }
+
   void Timeline::getOrderingChoices(const TokenId& token, 
 				    std::vector< std::pair<TokenId, TokenId> >& results,
 				    unsigned int limit){

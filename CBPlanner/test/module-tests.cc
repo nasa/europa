@@ -40,7 +40,7 @@
 #include "ConditionalRule.hh"
 #include "NotFalseConstraint.hh"
 #include "ConstrainedVariableDecisionPoint.hh"
-
+#include "MasterMustBeInserted.hh"
 #include <list>
 #include <vector>
 #include <iostream>
@@ -232,25 +232,16 @@ private:
 class ConditionTest {
 public:
   static bool test() {
-    runTest(testCondition);
     runTest(testHorizon);
     runTest(testHorizonCondition);
     runTest(testHorizonConditionNecessary);
     runTest(testSetHorizionCondition);
     runTest(testTemporalVariableCondition);
     runTest(testDynamicInfiniteRealCondition);
+    runTest(testMasterMustBeInserted);
     return(true);
   }
 private:
-  static bool testCondition(){
-    DEFAULT_SETUP(ce, db, false);
-    Condition cond(dm.getId());
-    assertTrue(!cond.hasChanged());
-  
-    assertTrue(dm.getConditions().size() == 1);
-    DEFAULT_TEARDOWN();
-    return true;
-  }
 
   static bool testSetHorizionCondition() {
     // create a CBPlanner
@@ -301,6 +292,7 @@ private:
   static bool testHorizonCondition() {
     DEFAULT_SETUP(ce, db, false);
     HorizonCondition cond(hor.getId(), dm.getId());
+
     assertTrue(cond.isPossiblyOutsideHorizon());
     assertTrue(!cond.isNecessarilyOutsideHorizon());
     assertTrue(dm.getConditions().size() == 1);
@@ -529,6 +521,71 @@ static bool testHorizonConditionNecessary() {
     assertTrue(dm.getNumberOfDecisions() == 6);
 
     DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testMasterMustBeInserted(){
+    DEFAULT_SETUP(ce, db, false);
+    MasterMustBeInserted condition(dm.getId());
+
+    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    db.close();
+
+    IntervalToken t0(db.getId(), 
+                     "Objects.P1",
+                     false, 
+                     IntervalIntDomain(0, 1),
+                     IntervalIntDomain(0, 1),
+                     IntervalIntDomain(1, 1));
+
+    // Since it is an inactive token with no master, we will not exclude it.
+    ce.propagate();
+    assertTrue(MasterMustBeInserted::executeTest(t0.getId()));
+
+    // Token State
+    //assertTrue(dm.getNumberOfDecisions() == 1, toString(dm.getNumberOfDecisions()));
+
+    // Now activate it. It should still pass, since we do not care about it.
+    t0.activate();
+    ce.propagate();
+    assertFalse(t0.isAssigned());
+
+    // Since it must now be constrained, the decision to handle state is replaced, and we
+    // also get the start and end variables (which are not specified to singletons).
+    //assertTrue(dm.getNumberOfDecisions() == 3, toString(dm.getNumberOfDecisions()));
+    assertTrue(MasterMustBeInserted::executeTest(t0.getId()));
+  
+    // Now allocate a slave.
+    IntervalToken t1(t0.getId(), 
+		     LabelStr("any"),
+                     LabelStr("Objects.P1"),
+		     IntervalIntDomain(0, 1),
+		     IntervalIntDomain(0, 1),
+		     IntervalIntDomain(1, 1));
+
+    // This should be excluded since the master has not been assigned
+    ce.propagate();
+    assertFalse(MasterMustBeInserted::executeTest(t1.getId()));
+
+    // Number of decisions should not change, since it is filtered out
+    //assertTrue(dm.getNumberOfDecisions() == 3, toString(dm.getNumberOfDecisions()));
+  
+    // Constrain the master and thus enable the slave
+    t.constrain(t0.getId(), t0.getId());
+    ce.propagate();
+    assertTrue(MasterMustBeInserted::executeTest(t1.getId()));
+
+    // Now the number of decisions should be increased to include the State decision on the slave
+    // but also reduced by constrain
+    //assertTrue(dm.getNumberOfDecisions() == 3, toString(dm.getNumberOfDecisions()));
+
+    // Now free it and verify it is once again excluded
+    t.free(t0.getId(), t0.getId());
+    ce.propagate();
+
+    // Now we should go back to 3
+    //assertTrue(dm.getNumberOfDecisions() == 3, toString(dm.getNumberOfDecisions()));
+    assertFalse(MasterMustBeInserted::executeTest(t1.getId()));
     return true;
   }
 

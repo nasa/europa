@@ -949,6 +949,7 @@ public:
     runTest(testCorrectSplit_Gnats2450);
     runTest(testOpenMerge);
     runTest(testCompatCacheReset);
+    runTest(testAssignemnt);
     return(true);
   }
   
@@ -1958,6 +1959,54 @@ private:
     DEFAULT_TEARDOWN();
     return true;
   }
+
+  static bool testAssignemnt(){
+    initDbTestSchema(SCHEMA);
+    PlanDatabase db(ENGINE, SCHEMA);
+    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Object o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+    db.close();
+
+    //create a token that has to end later
+    IntervalToken t0(db.getId(), 
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 9),
+                     IntervalIntDomain(1, 1000));
+
+    ENGINE->propagate();
+
+    // Should not be assigned since inactive and object domain not a sinleton
+    assertFalse(t0.isAssigned());
+
+    // Should not have this token for the same reasons
+    assertFalse(o1.hasToken(t0.getId()));
+
+    // Now activate it, situation should be unchanged
+    t0.activate();
+
+    ENGINE->propagate();
+
+    // Should not be assigned since inactive and object domain not a singleton
+    assertFalse(t0.isAssigned());
+    assertFalse(o1.hasToken(t0.getId()));
+    
+    // Now specify the object value. Expect it to be assigned.	
+    t0.getObject()->specify(o1.getId());
+    ENGINE->propagate();
+
+    assertTrue(t0.isAssigned());
+    assertTrue(o1.hasToken(t0.getId()));
+
+    // Now we can reset and expect it to go back	
+    t0.getObject()->reset();
+    ENGINE->propagate();
+
+    assertTrue(!t0.isAssigned());
+    assertTrue(!o1.hasToken(t0.getId()));
+    return true;
+  }
 };
 
 class TimelineTest {
@@ -1969,6 +2018,7 @@ public:
     runTest(testTokenOrderQuery);
     runTest(testEventTokenInsertion);
     runTest(testNoChoicesThatFit);
+    runTest(testAssignment);
     return true;
   }
 
@@ -2482,6 +2532,60 @@ private:
     assertFalse(res);
 
     DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testAssignment(){
+    initDbTestSchema(SCHEMA);
+    PlanDatabase db(ENGINE, SCHEMA);
+    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Timeline o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+    db.close();
+
+    //create a token that has to end later
+    IntervalToken t0(db.getId(), 
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 9),
+                     IntervalIntDomain(1, 1000));
+
+    ENGINE->propagate();
+
+    // Should not be assigned since inactive and object domain not a sinleton
+    assertFalse(t0.isAssigned());
+
+    // Should not have this token for the same reasons
+    assertFalse(o1.hasToken(t0.getId()));
+
+    // Now activate it, situation should be unchanged
+    t0.activate();
+
+    ENGINE->propagate();
+
+    // Should not be assigned since inactive and object domain not a singleton
+    assertFalse(t0.isAssigned());
+    assertFalse(o1.hasToken(t0.getId()));
+    
+    // Now specify the object value.	
+    t0.getObject()->specify(o1.getId());
+    ENGINE->propagate();
+
+    // It should still not be assigned
+    assertFalse(t0.isAssigned());
+    assertFalse(o1.hasToken(t0.getId()));
+
+    // Now constrain the token and finnaly expect it to be assigned
+    o1.constrain(t0.getId(), t0.getId());
+    ENGINE->propagate();
+
+    assertTrue(t0.isAssigned());
+    assertTrue(o1.hasToken(t0.getId()));
+
+    // Free the token and it should be un assigned
+    o1.free(t0.getId(), t0.getId());
+    assertFalse(t0.isAssigned());
+    assertFalse(o1.hasToken(t0.getId()));
     return true;
   }
 };
