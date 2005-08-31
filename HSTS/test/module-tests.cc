@@ -866,12 +866,11 @@ private:
 
     // DecisionPointId d1 = looseDM.getNextDecision();
     DecisionPointId d2 = strictDM->getNextDecision();
-
     //assert(ObjectDecisionPointId::convertable(d1));
     //assert(d1->getEntityKey() == tok3.getKey());
 
-    assert(ConstrainedVariableDecisionPointId::convertable(d2));
-    assert(d2->getEntityKey() == (tok1.getParameters())[0]->getKey());
+    //assert(ConstrainedVariableDecisionPointId::convertable(d2));
+    assertFalse(d2->getEntityKey() == (tok1.getParameters())[0]->getKey(), "Cannot be because parent is not slotted.");
     DEFAULT_TEARDOWN_PLAN_HEURISTICS();
     return true;
   }

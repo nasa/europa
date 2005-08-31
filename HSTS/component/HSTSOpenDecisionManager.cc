@@ -3,6 +3,7 @@
 #include "HSTSOpenDecisionManager.hh"
 #include "Object.hh"
 #include "HSTSHeuristics.hh"
+#include "MasterMustBeInserted.hh"
 #include "Debug.hh"
 
 namespace EUROPA {
@@ -128,6 +129,8 @@ namespace EUROPA {
     for (; it != m_sortedUnitVarDecs.end(); ++it) {
       // ignore variables of uninserted tokens
       ConstrainedVariableDecisionPointId vdec(*it);
+      if( !MasterMustBeInserted::executeTest( vdec->getVariable() ) )
+	continue;
       if (TokenId::convertable(vdec->getVariable()->getParent())) {
         TokenId parent = vdec->getVariable()->getParent();
         if (!parent->isActive()) continue;
@@ -151,6 +154,8 @@ namespace EUROPA {
       // Ignore variables of inactive tokens.
       ConstrainedVariableDecisionPointId vdec(*it);
       check_error(vdec.isValid());
+      if( !MasterMustBeInserted::executeTest( vdec->getVariable() ) )
+	continue;
       if (TokenId::convertable(vdec->getVariable()->getParent())) {
         TokenId parent = vdec->getVariable()->getParent();
         if (!parent->isActive())

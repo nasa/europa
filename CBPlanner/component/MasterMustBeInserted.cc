@@ -36,7 +36,7 @@ namespace EUROPA {
   bool MasterMustBeInserted::executeTest(const ConstrainedVariableId& var) {
     if(var->getParent().isId() && TokenId::convertable(var->getParent())){
       TokenId token(var->getParent());
-      return token->isActive();
+      return token->isAssigned();
     }
     else
       return true;
