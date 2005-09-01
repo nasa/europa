@@ -117,29 +117,24 @@ namespace EUROPA {
     }
   }
 
+  /**
+   * Priority does not acutaully count for this since all units have the same priority
+   */
   void HSTSOpenDecisionManager::getBestUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
     check_error(bestDec.isNoId());
-    if (m_sortedUnitVarDecs.empty()) return;
-    // these must be compat guards
-    VariableDecisionSet::iterator it = m_sortedUnitVarDecs.begin();
-    bestDec = *it;
-    check_error(bestDec.isValid());
-    ++it;
-    bestp = m_heur->getPriorityForConstrainedVariableDP(bestDec);
-    for (; it != m_sortedUnitVarDecs.end(); ++it) {
+    if (m_sortedUnitVarDecs.empty()) 
+      return;
+
+    for (VariableDecisionSet::iterator it = m_sortedUnitVarDecs.begin(); it != m_sortedUnitVarDecs.end(); ++it) {
       // ignore variables of uninserted tokens
       ConstrainedVariableDecisionPointId vdec(*it);
-      if( !MasterMustBeInserted::executeTest( vdec->getVariable() ) )
-	continue;
-      if (TokenId::convertable(vdec->getVariable()->getParent())) {
-        TokenId parent = vdec->getVariable()->getParent();
-        if (!parent->isActive()) continue;
-      }
-      const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(vdec);
-      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
-          (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
-        bestDec = vdec;
-        bestp = priority;
+
+      checkError(vdec.isValid() && vdec->getVariable()->lastDomain().isSingleton(),
+		 "Not a sinleton!" << vdec->getVariable()->toString());
+
+      if(MasterMustBeInserted::executeTest( vdec->getVariable() )){
+	bestDec = vdec;
+	return;
       }
     }
   }
