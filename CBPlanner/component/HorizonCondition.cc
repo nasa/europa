@@ -10,25 +10,21 @@ namespace EUROPA {
     Condition(dm), m_horizon(horizon), m_possiblyOutside(true) {
     check_error(m_horizon.isValid());
     check_error(m_id.isValid());
-    m_horizon->subscribe(m_id);
   }
 
   HorizonCondition::~HorizonCondition() {
     check_error(m_horizon.isValid());
-    m_horizon->unsubscribe(m_id);
   }
 
   void HorizonCondition::setNecessarilyOutsideHorizon() { 
     if (m_possiblyOutside) {
       m_possiblyOutside = false;
-      notifyChanged();
     }
   }
 
   void HorizonCondition::setPossiblyOutsideHorizon() { 
     if (!m_possiblyOutside) {
       m_possiblyOutside = true;
-      notifyChanged();
     }
   }
 

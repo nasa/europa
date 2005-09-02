@@ -771,6 +771,7 @@ namespace EUROPA {
 				outputToken(token, T_INTERVAL, 0, 0, 0, ObjectId::noId(), tokOut, varOut);
       }
 
+      /*
       if(!plId.isNoId()) {
         const DecisionManagerId &dm = plId->getDecisionManager();
         std::list<DecisionPointId> decs;
@@ -782,6 +783,7 @@ namespace EUROPA {
         for(std::list<DecisionPointId>::iterator it = decs.begin(); it != decs.end(); ++it)
           outputDecision(*it, decsOut);
       }
+      */
 
       std::set<RuleInstanceId> ruleInst = reId->getRuleInstances();
       for(std::set<RuleInstanceId>::const_iterator it = ruleInst.begin();

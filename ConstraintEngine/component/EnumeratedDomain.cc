@@ -109,6 +109,9 @@ namespace EUROPA {
     if (it == m_values.end())
       return; // not present: no-op
     m_values.erase(it);
+
+    // If it is not empty, or if it is empty but open, output
+    // a removal event. We cannot trigger emptying!
     if (!isEmpty() || isOpen())
       notifyChange(DomainListener::VALUE_REMOVED);
     else

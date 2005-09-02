@@ -13,9 +13,6 @@ namespace EUROPA {
 
   void HSTSNoBranchCondition::initialize(const HSTSNoBranchId& noBranchSpec) {
     m_noBranches = noBranchSpec->getNoBranchSpec();
-    if (!m_noBranches.empty()) {
-      notifyChanged();
-    }
   }
 
   bool HSTSNoBranchCondition::test(const EntityId& entity) {

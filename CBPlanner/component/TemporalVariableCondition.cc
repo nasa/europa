@@ -6,7 +6,8 @@
 
 namespace EUROPA {
 
-  TemporalVariableCondition::TemporalVariableCondition(const HorizonId& horizon, const DecisionManagerId& dm): Condition(dm),
+  TemporalVariableCondition::TemporalVariableCondition(const HorizonId& horizon, const DecisionManagerId& dm)
+    : Condition(dm),
     m_start(true), m_end(true), m_duration(true),m_allowOverlap(false), m_horizon(horizon) {
     check_error(m_horizon.isValid());
     check_error(m_id.isValid());
@@ -24,21 +25,18 @@ namespace EUROPA {
   void TemporalVariableCondition::setIgnoreStart(const bool& start) { 
     if (m_start != start) {
       m_start = start; 
-      notifyChanged();
     }
   }
 
   void TemporalVariableCondition::setIgnoreEnd(const bool& end) { 
     if (m_end != end) {
       m_end = end;
-      notifyChanged();
     }
   } 
 
   void TemporalVariableCondition::setIgnoreDuration(const bool& duration) { 
     if (m_duration != duration) {
       m_duration = duration; 
-      notifyChanged();
     }
   }
 
@@ -51,14 +49,12 @@ namespace EUROPA {
   void TemporalVariableCondition::allowHorizonOverlap() { 
     if (!m_allowOverlap) {
       m_allowOverlap = true; 
-      notifyChanged();
     }
   } 
 
   void TemporalVariableCondition::disallowHorizonOverlap() { 
     if (m_allowOverlap) {
-      m_allowOverlap = false; 
-      notifyChanged();
+      m_allowOverlap = false;
     }
   }
 

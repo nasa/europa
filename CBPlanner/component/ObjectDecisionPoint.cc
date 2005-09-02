@@ -19,21 +19,12 @@ namespace EUROPA {
 
   ObjectDecisionPoint::~ObjectDecisionPoint() { }
 
-  void ObjectDecisionPoint::initializeChoices() {
-    check_error(m_odm.isValid(), "must have a valid open decision manager before initializing choices");
-    ObjectDecisionPointId dp(m_id);
-    m_odm->initializeObjectChoices(dp);
-  }
-
-  const bool ObjectDecisionPoint::assign() {
-    if (m_choiceIndex && m_choiceIndex >= m_choices.size()) return false;
+  bool ObjectDecisionPoint::assign() {
+    checkError(m_choiceIndex < m_choices.size(), "Choice index cannot exceeed choices. Bug in control loop.");
+    checkError(!m_choices.empty(), "Should never call to assign if there are no coices. Bug in control loop.");
     check_error(m_token.isValid());
 
-    if (m_choiceIndex == 0) initializeChoices();
-
     debugMsg("CBPlanner:ObjectDecisionPoint", "nr of choices = " << m_choices.size());
-
-    if (m_choices.empty()) return false; // unable to find any choices
 
     m_open = false;
 
@@ -47,21 +38,18 @@ namespace EUROPA {
     return true;
   }
 
-  const bool ObjectDecisionPoint::retract() {
+  bool ObjectDecisionPoint::retract() {
+    checkError(m_choiceIndex > 0, "Choice index must be at least 1. Bug in control loop.");
     ObjectId object = m_choices[m_choiceIndex-1].first;
     TokenId predecessor = m_choices[m_choiceIndex-1].second.first;
     TokenId successor = m_choices[m_choiceIndex-1].second.second;
     m_dbClient->free(object, predecessor, successor);
     
     m_open = true;
-
-    if (hasRemainingChoices())
-      return true;
-    return false;
+    return true;
   }
 
-  const bool ObjectDecisionPoint::hasRemainingChoices() {
-    if (m_choiceIndex == 0) return true; // we have never assigned this decision  or initialized choices
+  bool ObjectDecisionPoint::hasRemainingChoices() {
     return m_choiceIndex < m_choices.size();
   }
 

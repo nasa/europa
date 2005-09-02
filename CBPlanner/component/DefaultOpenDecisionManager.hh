@@ -57,58 +57,14 @@ namespace EUROPA {
   class DefaultOpenDecisionManager : public OpenDecisionManager {
   public:
 
-    DefaultOpenDecisionManager(const DecisionManagerId& dm);
+    DefaultOpenDecisionManager(const PlanDatabaseId& db);
     ~DefaultOpenDecisionManager();
 
     virtual DecisionPointId getNextDecision();
-    virtual const int getNumberOfDecisions();
-
-    virtual bool hasOpenDecisions() {
-      return (getNumberOfDecisions()>0);
-    }
-    virtual void getOpenDecisions(std::list<DecisionPointId>& decisions);
-    virtual void printOpenDecisions(std::ostream& os = std::cout);
     
     virtual void initializeTokenChoices(TokenDecisionPointId& tdp);
     virtual void initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp);
     virtual void initializeObjectChoices(ObjectDecisionPointId& odp);
-
-  protected:
-    friend class DecisionManager;
-
-    virtual void cleanupAllDecisionCaches();
-
-    virtual void addActive(const TokenId& token);
-    virtual void condAddActive(const TokenId& token);
-    virtual void condAdd(const TokenId& token);
-    virtual void add(const TokenId& token);
-    virtual void condAdd(const ConstrainedVariableId& var, const bool units);
-    virtual void add(const ConstrainedVariableId& variable);
-    virtual void add(const ObjectId& object);
-
-    virtual void removeVar(const ConstrainedVariableId& var, const bool deleting);
-    virtual const bool removeVarDP(const ConstrainedVariableId& var, const bool deleting, std::map<int,ConstrainedVariableDecisionPointId>& varMap, VariableDecisionSet& sortedVars);
-    virtual void condRemoveVar(const ConstrainedVariableId& var);
-
-    virtual void removeActive(const TokenId& tok, const bool deleting);
-    virtual void removeToken(const TokenId& tok, const bool deleting);
-    virtual const bool removeTokenDP(const TokenId& tok, const bool deleting, std::map<int,TokenDecisionPointId>& tokMap, TokenDecisionSet& sortedToks);
-
-    virtual bool unitDecisionExistsForVariable(const ConstrainedVariableId& var);
-    virtual bool nonUnitDecisionExistsForVariable(const ConstrainedVariableId& var);
-
-    /* the following are the decision caches */
-    std::map<int,TokenDecisionPointId> m_tokDecs;
-    std::map<int,ConstrainedVariableDecisionPointId> m_nonUnitVarDecs;
-    std::map<int,ConstrainedVariableDecisionPointId> m_unitVarDecs;
-    std::map<int,ObjectDecisionPointId> m_objDecs;
-
-    /* the following are the heuristically ordered sets of decisions */
-    /* note that object decisions are not sorted, and we don't handle unit
-       tok decs at the moment. */
-    VariableDecisionSet m_sortedUnitVarDecs;
-    VariableDecisionSet m_sortedNonUnitVarDecs;
-    TokenDecisionSet m_sortedTokDecs;
   };
 
 }
