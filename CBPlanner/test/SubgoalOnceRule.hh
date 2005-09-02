@@ -5,9 +5,6 @@
 
 namespace EUROPA {
 
-  /**
-   * @brief Hand built rule to force backtracking after one level of subgoaling
-   */
   class SubgoalOnceRule : public Rule {
   public:
     RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& pdb, const RulesEngineId &rulesEngine) const;

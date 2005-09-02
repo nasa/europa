@@ -11,9 +11,6 @@
 #include "Horizon.hh"
 #include "DecisionManager.hh"
 #include "Utils.hh"
-#include "ConstrainedVariableDecisionPoint.hh"
-#include "ObjectDecisionPoint.hh"
-#include "TokenDecisionPoint.hh"
 
 /* Constraint Engine files */
 #include "DefaultPropagator.hh"
@@ -62,8 +59,7 @@
     new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
     RulesEngine re(db.getId()); \
     Horizon hor(0,200); \
-    OpenDecisionManager odm(db.getId()); \
-    DecisionManager dm(db.getId(), odm.getId()); \
+    DecisionManager dm(db.getId()); \
     if (autoClose) \
       db.close();
 
@@ -89,10 +85,7 @@
   PlanDatabase db(ce.getId(), Schema::instance());	\
   new DefaultPropagator(LabelStr("Default"), ce.getId()); \
   new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
-  HSTSHeuristics heuristics(db.getId()); \
-  initHeuristicsSchema(); \
-  HSTSHeuristicsReader hreader(heuristics.getNonConstId()); \
-  hreader.read("../core/Heuristics-HSTS.xml");
+  HSTSHeuristics heuristics(db.getId()); 
 
 #define DEFAULT_TEARDOWN_HEURISTICS()
 
@@ -103,13 +96,9 @@
   new DefaultPropagator(LabelStr("Default"), ce.getId());	\
   new DefaultPropagator(LabelStr("Temporal"), ce.getId());	\
   RulesEngine re(db.getId());					\
-  HSTSHeuristics heuristics(db.getId()); \
-  initHeuristicsSchema(); \
-  HSTSHeuristicsReader hreader(heuristics.getNonConstId()); \
-  hreader.read("../core/Heuristics-HSTS.xml"); \
-  HSTSOpenDecisionManager odm(db.getId(), heuristics.getId());  \
   Horizon hor(0, 200);						\
-  CBPlanner planner(db.getId(), hor.getId(), odm.getId());	
+  CBPlanner planner(db.getId(), hor.getId());			\
+  HSTSHeuristics heuristics(db.getId());
 
 #define DEFAULT_TEARDOWN_PLAN_HEURISTICS()
 
@@ -613,6 +602,12 @@ private:
   static bool testReader() {
     
     DEFAULT_SETUP_HEURISTICS();
+    initHeuristicsSchema();
+
+    HSTSHeuristicsReader reader(heuristics.getNonConstId());
+
+    reader.read("../core/Heuristics-HSTS.xml");
+    
     assertTrue(heuristics.getDefaultPriorityPreference() == HSTSHeuristics::HIGH);
     assertTrue(heuristics.getDefaultPriorityForTokenDPsWithParent(LabelStr("Navigator.At")) == 1024.5);
     assertTrue(heuristics.getDefaultPriorityForTokenDPs() == 10.0);
@@ -663,7 +658,12 @@ private:
     return true;
   }
   static bool testHSTSHeuristicsAssembly() {
+    
     DEFAULT_SETUP_PLAN_HEURISTICS();
+    initHeuristicsSchema();
+    HSTSHeuristicsReader hreader(heuristics.getNonConstId());
+    hreader.read("../core/Heuristics-HSTS.xml");
+    //    heuristics.write();
 
     HSTSNoBranchId noBranchSpec(new HSTSNoBranch());
     HSTSPlanIdReader pireader(noBranchSpec);
@@ -672,6 +672,8 @@ private:
     DecisionManagerId& dm = planner.getDecisionManager();
     HSTSNoBranchCondition cond(dm);
     cond.initialize(noBranchSpec);
+    HSTSOpenDecisionManagerId odm = (new HSTSOpenDecisionManager(dm, heuristics.getId()))->getId();
+    dm->setOpenDecisionManager(odm);
 
     Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
     Timeline ins(db.getId(),LabelStr("Instrument"),LabelStr("ins1"));
@@ -759,7 +761,10 @@ private:
   }
 
   static bool testHSTSHeuristicsStrict() {
+    
     DEFAULT_SETUP_PLAN_HEURISTICS();
+    initHeuristicsSchema();
+    
 
     //read in the heuristics
     //prefers high
@@ -777,6 +782,13 @@ private:
     //assigns 200.4 priority to Commands.TakeSample with an initial parameter equal to Loc3
     //assigns 10000.0 priority to Navigator.Going tokens with parameter 0 == Loc1, parameter 1 == Loc3
     //                that is after a Navigator.At
+    HSTSHeuristicsReader reader(heuristics.getNonConstId());
+    reader.read("../core/Heuristics-HSTS.xml");
+
+    //create open decision managers for both cases
+    //HSTSOpenDecisionManager looseDM(planner.getDecisionManager(), heuristics.getId(), false);
+    HSTSOpenDecisionManagerId strictDM = (new HSTSOpenDecisionManager(planner.getDecisionManager(), heuristics.getId(), true))->getId();
+    planner.getDecisionManager()->setOpenDecisionManager(strictDM);
 
     //set up the database
     Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
@@ -852,11 +864,13 @@ private:
 
     assert(ce.propagate());
 
-    DecisionPointId d2 = odm.getNextDecision();
-    assert(ConstrainedVariableDecisionPointId::convertable(d2));
-    assert(d2->getEntityKey() == (tok1.getParameters())[0]->getKey());
+    // DecisionPointId d1 = looseDM.getNextDecision();
+    DecisionPointId d2 = strictDM->getNextDecision();
+    //assert(ObjectDecisionPointId::convertable(d1));
+    //assert(d1->getEntityKey() == tok3.getKey());
 
-    delete (DecisionPoint*) d2;
+    //assert(ConstrainedVariableDecisionPointId::convertable(d2));
+    assertFalse(d2->getEntityKey() == (tok1.getParameters())[0]->getKey(), "Cannot be because parent is not slotted.");
     DEFAULT_TEARDOWN_PLAN_HEURISTICS();
     return true;
   }
@@ -876,7 +890,12 @@ private:
   }
 
   static bool testPriorities() {
+    
     DEFAULT_SETUP_PLAN_HEURISTICS();
+    planner.getDecisionManager()->setOpenDecisionManager((new HSTSOpenDecisionManager(planner.getDecisionManager(), heuristics.getId(), true))->getId()); 
+    initHeuristicsSchema();
+    HSTSHeuristicsReader reader(heuristics.getNonConstId());
+    reader.read("../core/Heuristics-HSTS.xml");
 
     Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
     Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
@@ -899,59 +918,58 @@ private:
     
     //create an unknown variable, priority should be 5000.0
     Variable<IntervalIntDomain> randomVar(ce.getId(), IntervalIntDomain(1, 20), true, LabelStr("randomVar"));
-    assert(heuristics.getPriorityForConstrainedVariableDP(randomVar.getId()) == 5000.0);
+    ConstrainedVariableDecisionPoint randomVarDec(DbClientId::noId(), randomVar.getId(), OpenDecisionManagerId::noId());
+    assert(heuristics.getPriorityForConstrainedVariableDP(randomVarDec.getId()) == 5000.0);
 
     //create Commands.TakeSample, first parameter should have priority = 6000.5
-    IntervalToken takeSample(db.getId(), LabelStr("Commands.TakeSample"), false, 
-			     IntervalIntDomain(), IntervalIntDomain(), 
-			     IntervalIntDomain(1, 100), Token::noObject(), false);
-    
+    IntervalToken takeSample(db.getId(), LabelStr("Commands.TakeSample"), false, IntervalIntDomain(), IntervalIntDomain(), 
+                             IntervalIntDomain(1, 100), Token::noObject(), false);
     takeSample.addParameter(allLocs, LabelStr("rock"));
     takeSample.close();
-    assert(heuristics.getPriorityForConstrainedVariableDP(takeSample.getParameters()[0]) == 6000.5);
+    ConstrainedVariableDecisionPoint takeSampleParamDec(DbClientId::noId(), (takeSample.getParameters())[0], OpenDecisionManagerId::noId());
+    assert(heuristics.getPriorityForConstrainedVariableDP(takeSampleParamDec.getId()) == 6000.5);
 
     //create a token not in the heuristics, priority should be 10.0, order should be merge,activate (default match)
     IntervalToken randomTok(db.getId(), LabelStr("UnaryResource.uses"), false);
-    assert(heuristics.getPriorityForObjectDP(randomTok.getId()) == 10.0);
+    ObjectDecisionPoint randomTokDP(DbClientId::noId(), randomTok.getId(), OpenDecisionManagerId::noId());
+    assert(heuristics.getPriorityForObjectDP(randomTokDP.getId()) == 10.0);
 
     //create a Navigator.At, priority should be 443.7 (simple predicate match)
     IntervalToken navAt(db.getId(), LabelStr("Navigator.At"), false, IntervalIntDomain(), IntervalIntDomain(), 
                         IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
     navAt.addParameter(allLocs, LabelStr("location"));
     navAt.close();
-    assert(heuristics.getPriorityForObjectDP(navAt.getId()) == 443.7);
+    ObjectDecisionPoint navAtDP(DbClientId::noId(), navAt.getId(), OpenDecisionManagerId::noId());
+    assert(heuristics.getPriorityForObjectDP(navAtDP.getId()) == 443.7);
     navAt.activate();
- 
-    //create a Navigator.Going with a parent of Navigator.At, priority should be 1024.5 (simple parent match)
-    IntervalToken navGoing(navAt.getId(), 
-			   LabelStr("after"), 
-			   LabelStr("Navigator.Going"), 
-			   IntervalIntDomain(), IntervalIntDomain(), 
-                           IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
 
+    //create a Navigator.Going with a parent of Navigator.At, priority should be 1024.5 (simple parent match)
+    IntervalToken navGoing(navAt.getId(), LabelStr("after"), LabelStr("Navigator.Going"), IntervalIntDomain(), IntervalIntDomain(), 
+                           IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
     navGoing.addParameter(allLocs, LabelStr("from"));
     navGoing.addParameter(allLocs, LabelStr("to"));
     navGoing.close();
-    assert(heuristics.getPriorityForObjectDP(navGoing.getId()) == 1024.5);
+    ObjectDecisionPoint navGoingDP(DbClientId::noId(), navGoing.getId(), OpenDecisionManagerId::noId());
+    assert(heuristics.getPriorityForObjectDP(navGoingDP.getId()) == 1024.5);
 
     //set first parameter of Commands.TakeSample to loc3, priority should be 200.4 (simple variable match)
-    takeSample.getParameters()[0]->specify(loc3.getId());
-    assert(heuristics.getPriorityForObjectDP(takeSample.getId()) == 200.4);
+    (takeSample.getParameters())[0]->specify(loc3.getId());
+    ObjectDecisionPoint takeSampleDP(DbClientId::noId(), takeSample.getId(), OpenDecisionManagerId::noId());
+    assert(heuristics.getPriorityForObjectDP(takeSampleDP.getId()) == 200.4);
 
     //set Navigator.Going "from" parameter to Loc1, parameter "to" should have priority 6000.25 (more complex variable match)
-    navGoing.getParameters()[0]->specify(loc1.getId());
-    assert(heuristics.getPriorityForConstrainedVariableDP(navGoing.getParameters()[1]) == 6000.25);
+    (navGoing.getParameters())[0]->specify(loc1.getId());
+    ConstrainedVariableDecisionPoint fromDP(DbClientId::noId(), (navGoing.getParameters())[1], OpenDecisionManagerId::noId());
+    assert(heuristics.getPriorityForConstrainedVariableDP(fromDP.getId()) == 6000.25);
 
     //set Navigator.Going "to" parameter to Loc3, priority should be 10000 (parent relation match)
-    navGoing.getParameters()[1]->specify(loc3.getId());
-    assert(heuristics.getPriorityForObjectDP(navGoing.getId()) == 10000.0);    
+    (navGoing.getParameters())[1]->specify(loc3.getId());
+    assert(heuristics.getPriorityForObjectDP(navGoingDP.getId()) == 10000.0);    
 
 
     takeSample.activate();
-    IntervalToken testPreferMerge(takeSample.getId(), LabelStr("before"), 
-				  LabelStr("Navigator.Going"), IntervalIntDomain(), IntervalIntDomain(),
-				  IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
-
+    IntervalToken testPreferMerge(takeSample.getId(), LabelStr("before"), LabelStr("Navigator.Going"), IntervalIntDomain(), IntervalIntDomain(),
+                                  IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
     testPreferMerge.addParameter(allLocs, LabelStr("from"));
     testPreferMerge.addParameter(allLocs, LabelStr("to"));
     testPreferMerge.close();
@@ -965,17 +983,13 @@ private:
 
     assert(ce.propagate());
 
-    // This is a test for full only heuristics and pruning
-    TokenDecisionPoint preferMergeDP(DbClientId::noId(), 
-				     testPreferMerge.getId(), 
-				     planner.getDecisionManager()->getOpenDecisionManager());
-
-    assert(heuristics.getPriorityForTokenDP(testPreferMerge.getId()) == 3.14159);
+    TokenDecisionPoint preferMergeDP(DbClientId::noId(), testPreferMerge.getId(), planner.getDecisionManager()->getOpenDecisionManager());
+    assert(heuristics.getPriorityForTokenDP(preferMergeDP.getId()) == 3.14159);
     TokenDecisionPointId mergeDPId = (TokenDecisionPointId) preferMergeDP.getId();
-    planner.getDecisionManager()->getOpenDecisionManager()->initializeChoices(mergeDPId);
+    planner.getDecisionManager()->getOpenDecisionManager()->initializeTokenChoices(mergeDPId);
     const std::vector<LabelStr>& choices = preferMergeDP.getChoices();
-    assertTrue(choices.size() == 1, toString(choices.size()));
-    assertTrue(choices[0] == Token::MERGED);
+    assert(choices.size() == 1);
+    assert(choices[0] == Token::MERGED);
     DEFAULT_TEARDOWN_PLAN_HEURISTICS();
     return true;
   }

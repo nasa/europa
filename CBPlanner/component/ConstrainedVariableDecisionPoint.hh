@@ -11,9 +11,10 @@ namespace EUROPA {
   public:
     virtual ~ConstrainedVariableDecisionPoint();
 
-    bool assign();
-    bool retract();
-    bool hasRemainingChoices();
+    const bool assign();
+    const bool retract();
+    const bool hasRemainingChoices();
+    void initializeChoices();
 
     const ConstrainedVariableId& getVariable() const;
 
@@ -25,6 +26,7 @@ namespace EUROPA {
     ConstrainedVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId&, const OpenDecisionManagerId& odm);
   private:
     friend class OpenDecisionManager;
+    friend class DefaultOpenDecisionManager;
     friend class HSTSOpenDecisionManager;
 
     unsigned int getNrChoices();

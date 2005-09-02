@@ -32,11 +32,11 @@ LocalDepends run-hsts-planner-tests :
         monkey-timeline-extendedHeur
         monkey1-timeline1
         monkey1-timeline-objvar
-        monkey1-timeline-twomonkeys-objvar
-        monkey1-timeline-twomonkeys
-        monkey2-timeline2 #commented out for run
-        monkey2-timeline22 #commented out for run
-        monkey2-timeline23 #commented out for run
+       monkey1-timeline-twomonkeys-objvar
+       monkey1-timeline-twomonkeys
+#       monkey2-timeline2 #commented out for run
+#       monkey2-timeline22 #commented out for run
+#       monkey2-timeline23 #commented out for run
         robotTests
         roverTest1
         roverTest2

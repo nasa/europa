@@ -302,8 +302,6 @@ namespace EUROPA {
   }
 
   bool Timeline::hasToken(const TokenId& token) const{
-    checkError(getPlanDatabase()->getConstraintEngine()->constraintConsistent(),
-	       "Can only call this if the object-token relation is propagated first.");
     return m_tokenIndex.find(token->getKey()) != m_tokenIndex.end();
   }
 

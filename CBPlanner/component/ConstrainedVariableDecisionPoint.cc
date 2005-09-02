@@ -16,6 +16,12 @@ namespace EUROPA {
 
   ConstrainedVariableDecisionPoint::~ConstrainedVariableDecisionPoint() { }
 
+  void ConstrainedVariableDecisionPoint::initializeChoices() {
+    check_error(m_odm.isValid());
+    ConstrainedVariableDecisionPointId dp(m_id);
+    m_odm->initializeVariableChoices(dp);
+  }
+
   unsigned int ConstrainedVariableDecisionPoint::getNrChoices() {
     check_error(m_var.isValid());
     if (m_var->lastDomain().isNumeric()) 
@@ -35,12 +41,13 @@ namespace EUROPA {
       return m_choices[index];
   }
 
-  bool ConstrainedVariableDecisionPoint::assign() {
-    checkError(m_choiceIndex < getNrChoices() && getNrChoices() > 0 && !m_choices.empty(),
-	       "Cannor be assigning if we have no choices. A control loop bug.");
+const  bool ConstrainedVariableDecisionPoint::assign() {
+    if (m_choiceIndex && m_choiceIndex >= getNrChoices()) return false;
     check_error(m_var.isValid());
-    check_error(!m_var->lastDomain().isOpen() && m_var->lastDomain().isFinite(),
-		"Cannot assign a variable with open or infinite domain");
+    check_error(!m_var->lastDomain().isOpen() && m_var->lastDomain().isFinite(), " Cannot assign a variable with open or infinite domain");
+    if (m_choiceIndex == 0) initializeChoices();
+
+    if (m_choices.empty()) return false; // unable to find any choices
 
     m_open = false;
 
@@ -49,7 +56,7 @@ namespace EUROPA {
     return true;
   }
 
-  bool ConstrainedVariableDecisionPoint::retract() {
+  const bool ConstrainedVariableDecisionPoint::retract() {
     m_dbClient->reset(m_var);
 
     m_open = true;
@@ -59,7 +66,7 @@ namespace EUROPA {
     return true;
   }
 
-  bool ConstrainedVariableDecisionPoint::hasRemainingChoices() {
+  const bool ConstrainedVariableDecisionPoint::hasRemainingChoices() {
     if (m_choiceIndex == 0) return true; // we have never assigned this decision  or initialized choices
     return m_choiceIndex < getNrChoices();
   }

@@ -54,12 +54,9 @@ namespace EUROPA {
     tok->addParameter(IntervalIntDomain(1,20), "IntervalIntParam");
     tok->close();
     TokenId slave = addSlave(tok);
-
-    // If This is the first time executing, then make master meet slave
     if (m_count < 2)
       addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), slave->getStart()));
     else {
-      // Force an inconsistency such that the slave timepoints are equal
       addConstraint(LabelStr("lt"), makeScope(slave->getEnd(), slave->getStart()));
     }
   }
