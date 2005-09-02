@@ -22,6 +22,9 @@ namespace EUROPA {
    * Iterate over the set of candidates. If it gets a better priority than the current best priority.
    */
   DecisionPointId HSTSOpenDecisionManager::getBestObjectDecision(HSTSHeuristics::Priority& bestp) {
+    debugMsg("HSTSOpenDecisionManager:getBestObjectDecision", 
+	     "Evaluating at priority " << bestp << "." << m_db->getTokensToOrder().size() << " candidates to evaluate.");
+
     DecisionPointId betterDecision;
     TokenId flawToResolve;
     const std::map<TokenId, ObjectSet>& candidates = m_db->getTokensToOrder(); // Pushed via propagation
@@ -46,10 +49,13 @@ namespace EUROPA {
     if(flawToResolve.isId())
       betterDecision = createObjectDecisionPoint(flawToResolve);
 
+    debugMsg("HSTSOpenDecisionManager:getBestObjectDecision", "Finishing with priority " << bestp << " and decision: " << betterDecision);
     return betterDecision;
   }
 
   DecisionPointId HSTSOpenDecisionManager::getBestTokenDecision(HSTSHeuristics::Priority& bestp) {
+    debugMsg("HSTSOpenDecisionManager:getBestTokenDecision", 
+	     "Evaluating at priority " << bestp << "." << getTokenFlawCandidates().size() << " candidates to evaluate.");
     DecisionPointId betterDecision;
     TokenId flawToResolve;
     const TokenSet& candidates = getTokenFlawCandidates();
@@ -57,7 +63,7 @@ namespace EUROPA {
       TokenId candidate = *it;
 
       // First, if not a decision, skip it
-      if(!isObjectDecision(candidate))
+      if(!isTokenDecision(candidate))
 	continue;
 
       // Since it is a decision, obtain its priority
@@ -72,12 +78,16 @@ namespace EUROPA {
     // If we have a token to order, then it means we have a better priority and so
     // we allocate a new decision
     if(flawToResolve.isId())
-      betterDecision = createObjectDecisionPoint(flawToResolve);
+      betterDecision = createTokenDecisionPoint(flawToResolve);
 
+    debugMsg("HSTSOpenDecisionManager:getBestTokenDecision", "Finishing with priority " << bestp << " and decision: " << betterDecision);
     return betterDecision;
   }
 
   DecisionPointId HSTSOpenDecisionManager::getBestNonUnitVariableDecision(HSTSHeuristics::Priority& bestp) {
+    debugMsg("HSTSOpenDecisionManager:getBestNonUnitVariableDecision",
+	     "Evaluating at priority " << bestp  << "." << getVariableFlawCandidates().size() << " candidates to evaluate.");
+
     DecisionPointId betterDecision;
     ConstrainedVariableId flawToResolve;
     const ConstrainedVariableSet& candidates = getVariableFlawCandidates();
@@ -102,6 +112,7 @@ namespace EUROPA {
     if(flawToResolve.isId())
       betterDecision = createConstrainedVariableDecisionPoint(flawToResolve);
 
+    debugMsg("HSTSOpenDecisionManager:getBestNonUnitVariableDecision", "Finishing with priority " << bestp << " and decision: " << betterDecision);
     return betterDecision;
   }
 
@@ -116,28 +127,29 @@ namespace EUROPA {
   }
 
   DecisionPointId HSTSOpenDecisionManager::getNextDecision() {
+    debugMsg("HSTSOpenDecisionManager:getNextDecision", "Entering. Heuristics are " << (m_strictHeuristics ? "strict" : "loose"));
     //prefer zero commitment decisions over everything. So just try to get one.
     DecisionPointId bestDecision = getZeroCommitmentDecision();
 
-    HSTSHeuristics::Priority bestP = MIN_PRIORITY - 1; // Low is worst
+    HSTSHeuristics::Priority bestp = MIN_PRIORITY - 1; // Low is worst
 
     // See if we switch interpretation around.
     if(m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW)
-      bestP = MAX_PRIORITY + 1;
+      bestp = MAX_PRIORITY + 1;
 
     // If we failed, look for the priority based best decision
     if(bestDecision.isNoId()){
-      DecisionPointId candidateDecision = getBestObjectDecision(bestP);
+      DecisionPointId candidateDecision = getBestObjectDecision(bestp);
 
       updateDecisionPoints(candidateDecision, bestDecision);
 
       if(m_strictHeuristics)
-	candidateDecision = getBestNonUnitVariableDecision(bestP);
+	candidateDecision = getBestNonUnitVariableDecision(bestp);
 
       updateDecisionPoints(candidateDecision, bestDecision);
 
       if(m_strictHeuristics)
-	candidateDecision = getBestTokenDecision(bestP);
+	candidateDecision = getBestTokenDecision(bestp);
 
       updateDecisionPoints(candidateDecision, bestDecision);
     }
@@ -145,7 +157,7 @@ namespace EUROPA {
     if(bestDecision.isId())
       initializeChoices(bestDecision);
 
-    debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Dec = [" << bestP << "] " << bestDecision);
+    debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Dec = [" << bestp << "] " << bestDecision);
     return bestDecision;
   }
 
