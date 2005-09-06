@@ -655,6 +655,7 @@ static bool testHorizonConditionNecessary() {
 class DecisionManagerTest {
 public:
   static bool test() {
+    runTest(testUnitHandling);
     runTest(testForwardDecisionHandling);
     // NOT RUNNING UNLESS WE OPTIMIZE OUT MAKING UNITS EXPECT FOR COMPAT GUARDS: runTest(testNestedGuard_GNATS_3013);
     runTest(testSynchronizationBug_GNATS_3027);
@@ -662,6 +663,59 @@ public:
   }
 
 private:
+  static bool testUnitHandling() {
+    DEFAULT_SETUP(ce, db, false);
+
+    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    db.close();
+
+    std::list<double> values;
+    values.push_back(LabelStr("L1"));
+    values.push_back(LabelStr("L4"));
+    values.push_back(LabelStr("L2"));
+    values.push_back(LabelStr("L5"));
+    values.push_back(LabelStr("L3"));
+    Variable<LabelSet> v0(ce.getId(), LabelSet(values));
+    Variable<IntervalIntDomain> v1(ce.getId(), IntervalIntDomain());
+    Variable<IntervalIntDomain> v2(ce.getId(), IntervalIntDomain());
+    ce.propagate();
+    assertTrue(odm.getNumberOfDecisions() == 3);
+    assertFalse(odm.isUnitDecision(v0.getId()));
+    v0.specify(LabelStr("L1"));
+    assertFalse(odm.isUnitDecision(v0.getId()));
+    ce.propagate();
+    assertFalse(odm.isVariableDecision(v0.getId()));
+    v0.reset();
+    assertTrue(odm.isVariableDecision(v0.getId()));
+
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ce.getId(), makeScope(v1.getId(), v2.getId()));
+    v1.specify(10);
+    ce.propagate();
+    assertFalse(odm.isVariableDecision(v1.getId()));
+
+    // Propagate and expect that v2 will become a singleton. Since it is not a guard, that indicates it is
+    // evaluated as a singleton
+    ce.propagate();
+    assertFalse(odm.isVariableDecision(v2.getId()));
+
+    v1.reset();
+    ce.propagate();
+    assertTrue(odm.isVariableDecision(v2.getId()));
+
+    DecisionPointId dec = odm.getZeroCommitmentDecision();
+    assertTrue(dec.isNoId());
+
+    // No allocate a token. Want to see that we get a zero commitment decision
+    // for a token decision
+    IntervalToken tokenA(db.getId(), 
+			 "Objects.P1", 
+			 false,
+			 IntervalIntDomain(0, 10),
+			 IntervalIntDomain(0, 200),
+			 IntervalIntDomain(1, 1000));
+
+    return true;
+  }
   static bool testForwardDecisionHandling() {
     DEFAULT_SETUP(ce, db, false);
     HorizonCondition hcond(hor.getId(), dm.getId());

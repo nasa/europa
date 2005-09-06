@@ -36,8 +36,7 @@ namespace EUROPA {
 	  m_choices.push_back(Token::MERGED);
       }
 
-      if(stateDomain.isMember(Token::ACTIVE) && 
-	 m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken))
+      if(stateDomain.isMember(Token::ACTIVE) && m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken))
 	m_choices.push_back(Token::ACTIVE);
 
       if(stateDomain.isMember(Token::REJECTED))
