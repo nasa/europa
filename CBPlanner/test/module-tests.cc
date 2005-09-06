@@ -657,7 +657,7 @@ public:
   static bool test() {
     runTest(testUnitHandling);
     runTest(testForwardDecisionHandling);
-    // NOT RUNNING UNLESS WE OPTIMIZE OUT MAKING UNITS EXPECT FOR COMPAT GUARDS: runTest(testNestedGuard_GNATS_3013);
+    runTest(testNestedGuard_GNATS_3013);
     runTest(testSynchronizationBug_GNATS_3027);
     return(true);
   }
@@ -813,6 +813,16 @@ private:
     // Register a test rule to be fired.
     NestedGuardsRule r;
 
+    std::list<double> values;
+    values.push_back(LabelStr("L1"));
+    values.push_back(LabelStr("L4"));
+    values.push_back(LabelStr("L2"));
+    values.push_back(LabelStr("L5"));
+    values.push_back(LabelStr("L3"));
+
+    // Spec domain will be a singleton so should not be a flaw
+    Variable<LabelSet> v0(ce.getId(), LabelSet(LabelStr("L3")));
+
     IntervalToken tokenA(db.getId(), 
 			 "Objects.P1", 
 			 false,
@@ -820,33 +830,59 @@ private:
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
-    tokenA.addParameter(LabelSet(LabelStr("V0")), "LabelSetParam0");
-    tokenA.addParameter(LabelSet(LabelStr("V1")), "LabelSetParam1");
+    tokenA.addParameter(LabelSet(values), "LabelSetParam0");
+    tokenA.addParameter(LabelSet(values), "LabelSetParam1");
     tokenA.close();
+
+    // Set up constraints os they are all equal
+    ConstrainedVariableId v1 = tokenA.getVariable(LabelStr("LabelSetParam0"));
+    ConstrainedVariableId v2 = tokenA.getVariable(LabelStr("LabelSetParam1"));
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ce.getId(), makeScope(v0.getId(), v1));
+    EqualConstraint c1(LabelStr("EqualConstraint"), LabelStr("Default"), ce.getId(), makeScope(v1, v2));
 
     // Note that the 2 additional parameters will not initially become decisions in this scenario
     // since they are singletons and we do not as yet have a rule fired since the token is not active.
+    // Furthermore, since the token is inactive, they will be filtered out anyway.
     assertTrue(ce.propagate());
-    assertTrue(dm.getNumberOfDecisions() == 4, toString(dm.getNumberOfDecisions()));
+
+    // Now we expect that v1 and v2 are singletons
+    assertTrue(v1->lastDomain().isSingleton());
+    assertTrue(v2->lastDomain().isSingleton());
+    assertTrue(dm.getNumberOfDecisions() == 1, toString(dm.getNumberOfDecisions()));
 
     // Now activate the token and expect that we will get an additional decision arising to
-    // insert the token, and another to bind what will now be a compat guard.
+    // insert the token, and another to bind what will now be a compat guard variable. We will also
+    // get decisions for start, end and duration.
     tokenA.activate();
     assertTrue(ce.propagate());
-    assertTrue(dm.getNumberOfDecisions() == 5, toString(dm.getNumberOfDecisions()));
+    assertTrue(dm.getNumberOfDecisions() == 5, dm.getOpenDecisionManager()->printOpenDecisions());
+    assertTrue(dm.getOpenDecisionManager()->isUnitDecision(v1));
+    assertFalse(dm.getOpenDecisionManager()->isUnitDecision(v2));
 
     // Now bind the value of the first additional parameter which should be an active guard.
     // We expect it to be removed from the decision manager. We also expect an additional decision
     // point to be allocated since the new child rule is in place.
-    tokenA.getVariable(LabelStr("LabelSetParam0"))->specify(LabelStr("V0"));
+    v1->specify(LabelStr("L3"));
     assertTrue(ce.propagate());
+    assertFalse(dm.getOpenDecisionManager()->isUnitDecision(v1));
+    assertTrue(dm.getOpenDecisionManager()->isUnitDecision(v2));
     assertTrue(dm.getNumberOfDecisions() == 5, toString(dm.getNumberOfDecisions()));
 
     // Now bind the second parameter and the net open decision count should go down.
-    tokenA.getVariable(LabelStr("LabelSetParam1"))->specify(LabelStr("V1"));
+    v2->specify(LabelStr("L3"));
     assertTrue(ce.propagate());
     assertTrue(dm.getNumberOfDecisions() == 4, toString(dm.getNumberOfDecisions()));
 
+    // Now unwind incrementally and test that the correct referssh of flaws has occurred
+    v2->reset();
+    v1->reset();
+    assertTrue(ce.propagate());
+    assertTrue(dm.getNumberOfDecisions() == 5, dm.getOpenDecisionManager()->printOpenDecisions());
+    assertTrue(dm.getOpenDecisionManager()->isUnitDecision(v1));
+    assertFalse(dm.getOpenDecisionManager()->isUnitDecision(v2));
+    tokenA.cancel();
+    assertTrue(ce.propagate());
+    assertTrue(dm.getNumberOfDecisions() == 1, dm.getOpenDecisionManager()->printOpenDecisions());
     return(true);
   }
 
