@@ -165,6 +165,19 @@ namespace EUROPA {
       dom8.intersect(IntervalDomain(0.1, 0.10));
       dom9.intersect(IntervalDomain(0.10, 0.10));
       assertTrue(dom8.intersects(dom9));
+          
+      // Case added to recreate failure case for GNATS 3045
+      
+      IntervalDomain dom8a;
+      IntervalDomain dom9a;
+      dom8a.intersect(IntervalDomain(0.1, 0.1));
+      dom9a.intersect(IntervalDomain(0.1, 0.1));
+      assertTrue(dom8a.intersects(dom9a));
+          
+       assertTrue (dom8a.getUpperBound() == 0.1);
+       assertTrue (dom8a.getLowerBound() == 0.1);
+       assertTrue (dom9a.getUpperBound() == 0.1);
+       assertTrue (dom9a.getLowerBound() == 0.1);
 
       // Test at the limit of precision
       IntervalDomain dom10(0.0001);
