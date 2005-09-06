@@ -1,7 +1,0 @@
-SubDir PLASMA CBPlanner documentation ;
-
-if ! $(PLASMA_READY) {
-
-ModuleDocumentation CBPlanner ;
-
-} # PLASMA_READY
