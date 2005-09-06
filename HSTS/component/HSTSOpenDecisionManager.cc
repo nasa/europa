@@ -1,425 +1,55 @@
 #include "TokenVariable.hh"
-#include "DefaultOpenDecisionManager.hh"
 #include "HSTSOpenDecisionManager.hh"
 #include "Object.hh"
 #include "HSTSHeuristics.hh"
-#include "MasterMustBeInserted.hh"
+#include "ConstrainedVariableDecisionPoint.hh"
+#include "TokenDecisionPoint.hh"
+#include "ObjectDecisionPoint.hh"
 #include "Debug.hh"
 
 namespace EUROPA {
 
-  HSTSOpenDecisionManager::HSTSOpenDecisionManager(const DecisionManagerId& dm, const HSTSHeuristicsId& heur, const bool strictHeuristics)
-    : DefaultOpenDecisionManager(dm), m_heur(heur), m_strictHeuristics(strictHeuristics) {
+  HSTSOpenDecisionManager::HSTSOpenDecisionManager(const PlanDatabaseId& db, 
+						   const HSTSHeuristicsId& heur, 
+						   bool strictHeuristics)
+    : OpenDecisionManager(db), m_heur(heur), m_strictHeuristics(strictHeuristics) {
+    checkError(strictHeuristics, "Loose heuristics are not supported.");
   }
 
   HSTSOpenDecisionManager::~HSTSOpenDecisionManager() { }
 
-  void HSTSOpenDecisionManager::addActive(const TokenId& token) {
-    DefaultOpenDecisionManager::addActive(token);
-    std::map<int,ObjectDecisionPointId>::iterator pos = m_objDecs.find(token->getKey());
-    check_error(pos != m_objDecs.end());
-    check_error(pos->second.isValid());
-    m_sortedObjectDecs.insert(pos->second);
-  }
-
-  void HSTSOpenDecisionManager::condAddActive(const TokenId& token) {
-    DefaultOpenDecisionManager::condAddActive(token);
-    std::map<int,ObjectDecisionPointId>::iterator pos = m_objDecs.find(token->getKey());
-    check_error(pos != m_objDecs.end());
-    check_error(pos->second.isValid());
-    m_sortedObjectDecs.insert(pos->second);
-  }
-
-  void HSTSOpenDecisionManager::removeActive(const TokenId& token, const bool deleting) {
-    std::map<int, ObjectDecisionPointId>::iterator it = m_objDecs.find(token->getKey());
-    if (it != m_objDecs.end()) {
-      if (it->second->isOpen() || deleting) {
-        ObjectDecisionPointId dec = it->second;
-        check_error(dec.isValid());
-        m_objDecs.erase(it);
-        m_sortedObjectDecs.erase(dec);
-        m_dm->deleteDecision(dec);
-      }
-      else {
-        m_objDecs.erase(it);
-        m_sortedObjectDecs.erase(it->second);
-      }
-      publishRemovedDecision(token);
-    }
-  }
-
-  void HSTSOpenDecisionManager::cleanupAllDecisionCaches() {
-    DefaultOpenDecisionManager::cleanupAllDecisionCaches();
-    m_sortedObjectDecs.clear();
-  }
-
-  void HSTSOpenDecisionManager::getBestObjectDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
-    check_error(bestDec.isNoId());
-    if (m_sortedObjectDecs.empty()) return;
-    unsigned int bestNrChoices=0;
-    for (ObjectDecisionSet::iterator it = m_sortedObjectDecs.begin(); it != m_sortedObjectDecs.end(); ++it) {
-      TokenId tok = (*it)->getToken();
-      const HSTSHeuristics::Priority priority = m_heur->getPriorityForObjectDP(*it);
-      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
-          (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
-        bestDec = *it;
-        bestp = priority;
-        bestNrChoices = tok->getPlanDatabase()->countOrderingChoices(tok);
-      }
-      else if (priority == bestp && !bestDec.isNoId()) {
-        unsigned int nrChoices = tok->getPlanDatabase()->countOrderingChoices(tok,bestNrChoices+1);
-        if (nrChoices < bestNrChoices) {
-          bestDec = *it;
-          bestNrChoices = nrChoices;
-        }
-      }
-    }
-    if (bestDec.isNoId() && !m_sortedObjectDecs.empty()) {
-      bestDec = *m_sortedObjectDecs.begin();
-      bestp = m_heur->getPriorityForObjectDP(bestDec);
-    }
-  }
-
-  void HSTSOpenDecisionManager::getBestTokenDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
-    check_error(bestDec.isNoId());
-    if (m_sortedTokDecs.empty()) return;
-    unsigned int bestNrChoices = 999999;
-    for (TokenDecisionSet::iterator it = m_sortedTokDecs.begin(); it != m_sortedTokDecs.end(); ++it) {
-      const HSTSHeuristics::Priority priority = m_heur->getPriorityForTokenDP(*it);
-      TokenId tok = (*it)->getToken();
-      debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Comparing priority = " << priority << " to bestp = " << bestp);
-      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
-          (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
-        bestDec = *it;
-        bestp = priority;
-        //TokenDecisionPointId tokDec = bestDec; // CMG: THIS IS NOT USED. WHY NOT?
-        if(tok->getState()->lastDomain().isMember(Token::MERGED))
-          bestNrChoices = tok->getPlanDatabase()->countCompatibleTokens(tok);
-        if (tok->getState()->lastDomain().isMember(Token::ACTIVE) && tok->getPlanDatabase()->hasOrderingChoice(tok)) bestNrChoices++;
-        debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Selecting new bestDec = " << bestDec << " with bestNrChoices = " << bestNrChoices);
-      }
-      else if (priority == bestp && !bestDec.isNoId() && bestNrChoices > 0) {
-        unsigned int nrChoices = tok->getPlanDatabase()->countCompatibleTokens(tok,bestNrChoices);
-        if (tok->getState()->lastDomain().isMember(Token::ACTIVE) && tok->getPlanDatabase()->hasOrderingChoice(tok)) nrChoices++;
-        debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Evaluated nrChoices for decision " << *it << " = " << nrChoices << " vs. bestNrChoices = " << bestNrChoices);
-        if (nrChoices < bestNrChoices) {
-          bestDec = *it;
-          bestNrChoices = nrChoices;
-          debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Selecting new bestDec = " << bestDec << " with bestNrChoices = " << bestNrChoices);
-          if (bestNrChoices == 0) break;
-        }
-      }
-    }
-    if (bestDec.isNoId() && !m_sortedTokDecs.empty()) {
-      bestDec = *m_sortedTokDecs.begin();
-      bestp = m_heur->getPriorityForTokenDP(bestDec);
-      debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Selecting first decision as bestDec = " << bestDec);
-    }
+  /**
+   * @brief Obtain the heuristic value for the given UnboundVariable.
+   * @param var The given unbound variable
+   */
+  Priority HSTSOpenDecisionManager::getPriorityForUnboundVariable(const ConstrainedVariableId& var) const {
+    return m_heur->getPriorityForConstrainedVariable(var);
   }
 
   /**
-   * Priority does not acutaully count for this since all units have the same priority
+   * @brief Obtain the heuristic value for the given inactive token.
    */
-  void HSTSOpenDecisionManager::getBestUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
-    check_error(bestDec.isNoId());
-    if (m_sortedUnitVarDecs.empty()) 
-      return;
-
-    for (VariableDecisionSet::iterator it = m_sortedUnitVarDecs.begin(); it != m_sortedUnitVarDecs.end(); ++it) {
-      // ignore variables of uninserted tokens
-      ConstrainedVariableDecisionPointId vdec(*it);
-
-      checkError(vdec.isValid() && vdec->getVariable()->lastDomain().isSingleton(),
-		 "Not a sinleton!" << vdec->getVariable()->toString());
-
-      if(MasterMustBeInserted::executeTest( vdec->getVariable() )){
-	bestDec = vdec;
-	return;
-      }
-    }
+  Priority HSTSOpenDecisionManager::getPriorityForOpenCondition(const TokenId& token) const {
+    return m_heur->getPriorityForToken(token);
   }
 
-  void HSTSOpenDecisionManager::getBestNonUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
-    check_error(bestDec.isNoId());
-    if (m_sortedNonUnitVarDecs.empty()) return;
-    ConstrainedVariableDecisionPointId bestFloatDec;
-    HSTSHeuristics::Priority bestFloatp = bestp;
-    VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin();
-    for ( ; it != m_sortedNonUnitVarDecs.end(); ++it) {
-      // Ignore variables of inactive tokens.
-      ConstrainedVariableDecisionPointId vdec(*it);
-      check_error(vdec.isValid());
-      if( !MasterMustBeInserted::executeTest( vdec->getVariable() ) )
-	continue;
-      if (TokenId::convertable(vdec->getVariable()->getParent())) {
-        TokenId parent = vdec->getVariable()->getParent();
-        if (!parent->isActive())
-          continue;
-      }
-      const HSTSHeuristics::Priority& priority = m_heur->getPriorityForConstrainedVariableDP(vdec);
-      if (vdec->getVariable()->lastDomain().isFinite()) {
-        if (bestDec.isNoId() ||
-            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp ||
-            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp) {
-          bestDec = vdec;
-          bestp = priority;
-        } else
-          if (priority == bestp) { // secondary heuristic - domain size
-            ConstrainedVariableDecisionPointId bdec(bestDec); // casting necessary
-            ConstrainedVariableId  bdecVar(bdec->getVariable());
-            ConstrainedVariableId vdecVar(vdec->getVariable());
-            if (!m_dm->isCompatGuard(bdecVar->getKey()) && m_dm->isCompatGuard(vdecVar->getKey()))
-              bestDec = vdec;
-            else // terciary heuristic - domain size
-              if (bdec->getVariable()->lastDomain().getSize() > vdec->getVariable()->lastDomain().getSize())
-                bestDec = vdec;
-          }
-      } else {
-        if (bestFloatDec.isNoId() ||
-            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestFloatp ||
-            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestFloatp) {
-          bestFloatDec = vdec;
-          bestFloatp = priority;
-        } // else ... messy to compare sizes of infinite domains, but it could be done if needed
-      }
-    }
-    if (bestDec.isNoId() && !bestFloatDec.isNoId()) {
-      bestDec = bestFloatDec;
-      bestp = bestFloatp;
-    }
-
-
-    /*
-      if (!m_sortedNonUnitVarDecs.empty()) { // there are no unit vars and some non-unit vars
-      ConstrainedVariableDecisionPointId bestFloatDec;
-      HSTSHeuristics::Priority bestFloatp;
-      VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin();
-      if ((*it)->getVariable()->lastDomain().isFinite())
-      
-      bestDec = *it;
-      check_error(bestDec.isValid());
-      ++it;
-      bestp = m_heur->getPriorityForConstrainedVariableDP(bestDec);
-      for (; it != m_sortedNonUnitVarDecs.end(); ++it) {
-      // ignore variables of uninserted tokens
-      ConstrainedVariableDecisionPointId vdec(*it);
-      check_error(vdec.isValid());
-      if (TokenId::convertable(vdec->getVariable()->getParent())) {
-      TokenId parent = vdec->getVariable()->getParent();
-      if (!parent->isActive()) continue;
-      }
-      const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(vdec);
-      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
-	    (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
-      if (vdec->getVariable()->lastDomain().isFinite()) {
-	    bestDec = vdec;
-	    bestp = priority;
-      }
-      else {
-	    bestFloatDec = vdec;
-	    bestFloatp = priority;
-      }
-      }
-      else if (priority == bestp) { // secondary heuristic - compat guards first
-      ConstrainedVariableDecisionPointId bdec(bestDec); // casting necessary
-      ConstrainedVariableId  bdecVar(bdec->getVariable());
-      ConstrainedVariableId vdecVar(vdec->getVariable());
-      if (!m_dm->isCompatGuard(bdecVar->getKey()) && m_dm->isCompatGuard(vdecVar->getKey()))
-	    bestDec = vdec;
-      else // terciary heuristic - domain size
-	    if (vdec->getVariable()->lastDomain().isFinite() && bdec->getVariable()->lastDomain().getSize() > vdec->getVariable()->lastDomain().getSize())
-      bestDec = vdec;
-      }
-      }
-      if (bestDec.isNoId()) { // must return the best float dec.
-      bestDec = bestFloatDec;
-      bestp = bestFloatp;
-      }
-      }
-    */
+  /**
+   * @brief Obtain the heuristic value for the given threatened token (one that requires ordering)
+   */
+  Priority HSTSOpenDecisionManager::getPriorityForThreat(const TokenId& token) const {
+    return m_heur->getPriorityForObject(token);
   }
 
-  DecisionPointId HSTSOpenDecisionManager::getNextDecision() {
-    return (m_strictHeuristics ? getNextDecisionStrict() : getNextDecisionLoose());
-  }
-
-  DecisionPointId HSTSOpenDecisionManager::getNextDecisionStrict() {
-    DecisionPointId bestDec = DecisionPointId::noId();
-    HSTSHeuristics::Priority bestP = MIN_PRIORITY - 1;
-    
-    if(m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW)
-      bestP = MAX_PRIORITY + 1;
-
-    //prefer unit variable decisions over everything
-    getBestUnitVariableDecision(bestDec, bestP);
-    
-    //if we don't have a decision yet, get the best of the object, token, 
-    //and non-unit variable decisions
-    if(bestDec.isNoId()) {
-      DecisionPointId oDec = DecisionPointId::noId();
-      DecisionPointId tDec = DecisionPointId::noId();
-      DecisionPointId vDec = DecisionPointId::noId();
-      HSTSHeuristics::Priority bestOP = MIN_PRIORITY - 1;
-      HSTSHeuristics::Priority bestTP = MIN_PRIORITY - 1;
-      HSTSHeuristics::Priority bestVP = MIN_PRIORITY - 1;
-      if (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW) {
-        bestOP = MAX_PRIORITY + 1;
-        bestTP = MAX_PRIORITY + 1;
-        bestVP = MAX_PRIORITY + 1;
-      }
-
-      getBestObjectDecision(oDec, bestOP);
-      getBestNonUnitVariableDecision(vDec, bestVP);
-      getBestTokenDecision(tDec, bestTP);
-
-      //we assume that preference is transitive
-      HSTSHeuristics::Priority bestVTP = m_heur->preferredPriority(bestVP, bestTP);
-      //if the best priority belongs to the object decision or there is a tie between the object
-      //and one of the others, the object is best
-      if(m_heur->preferredPriority(bestOP, bestVTP) == bestOP) {
-        bestDec = oDec;
-        bestP = bestOP;
-      }
-      else {
-        //if the best priority belongs to the token decision or there is a tie between
-        //the token and variable decisions, the token is best
-        if(bestVTP == bestTP) {
-          bestDec = tDec;
-          bestP = bestTP;
-        }
-        //at this point, the variable has the best priority
-        else {
-          bestDec = vDec;
-          bestP = bestVP;
-        }
-      }
-    }
-    
-    debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Dec = [" << bestP << "] " << bestDec);
-    m_curDec = bestDec;
-    return bestDec;
-  }
-
-  DecisionPointId HSTSOpenDecisionManager::getNextDecisionLoose() {
-    DecisionPointId bestODec;
-    DecisionPointId bestTDec;
-    DecisionPointId bestVDec;
-    HSTSHeuristics::Priority bestOP = MIN_PRIORITY - 1;
-    HSTSHeuristics::Priority bestTP = MIN_PRIORITY - 1;
-    HSTSHeuristics::Priority bestVP = MIN_PRIORITY - 1;
-    if (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW) {
-      bestOP = MAX_PRIORITY + 1;
-      bestTP = MAX_PRIORITY + 1;
-      bestVP = MAX_PRIORITY + 1;
-    }
-    bool assignedBest(false);
-
-    if(!m_sortedObjectDecs.empty())  getBestObjectDecision(bestODec, bestOP);
-
-    if (!bestODec.isNoId()) { /* Europa doesn't distinguish between object and token decisions so we make any object decisions */
-      ObjectDecisionPointId odec(bestODec);
-      debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Obj Dec = [" << bestOP << "] (" << odec->getKey() << ") with Token " << odec->getToken()->getName().c_str());
-      m_curDec = bestODec;
-      assignedBest = true;
-
-      return m_curDec;
-    }
-
-    if (!m_sortedUnitVarDecs.empty()) getBestUnitVariableDecision(bestVDec, bestVP);
-
-    if (!bestVDec.isNoId()) {
-      m_curDec = bestVDec;
-      assignedBest = true;
-
-      ConstrainedVariableDecisionPointId vdec(bestVDec);
-      debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
-
-      return m_curDec;
-    }
-
-    if (!m_sortedTokDecs.empty()) getBestTokenDecision(bestTDec, bestTP);
-    if (!m_sortedNonUnitVarDecs.empty()) getBestNonUnitVariableDecision(bestVDec, bestVP);
-
-    if (bestTDec.isNoId() && !bestVDec.isNoId()) {
-      m_curDec = bestVDec;
-      assignedBest = true;
-
-      ConstrainedVariableDecisionPointId vdec(bestVDec);
-      debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
-
-      return m_curDec;
-    }
-
-    if (bestVDec.isNoId() && !bestTDec.isNoId()) {
-      m_curDec = bestTDec;
-      assignedBest = true;
-	
-      TokenDecisionPointId tdec(bestTDec);
-      debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Tok Dec = [" << bestTP << "] (" << tdec->getKey() << ") with Token " << tdec->getToken()->getName().c_str() << " with domain " << tdec->getToken()->getState()->lastDomain()) ;
-	
-      return m_curDec;
-    }
-
-    if(bestODec.isNoId() && bestTDec.isNoId() && bestVDec.isNoId()) {
-      debugMsg("HSTS:OpenDecisionManager:getNextDecision", "No decisions to make.  Returning noId.");
-      return DecisionPointId::noId();
-    }
-
-    /* If I'm here, I need to compare bestTDec to bestVDec */
-    if (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH) {
-      /* pick max */
-      if (bestTP >= bestVP) {
-	checkError(bestVDec.isValid(), "We assume we have a valid unit var decision, but we don't");
-        /* prefer units though */
-        ConstrainedVariableDecisionPointId vdec(bestVDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
-        TokenDecisionPointId tdec(bestTDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Tok Dec = [" << bestTP << "] (" << tdec->getKey() << ") with Token " << tdec->getToken()->getName().c_str() << " with domain " << tdec->getToken()->getState()->lastDomain()) ;
-        if (bestTP == bestVP && vdec->getVariable()->lastDomain().isSingleton())  m_curDec = bestVDec;
-        else m_curDec = bestTDec;
-        assignedBest = true;
-      }
-      else { /* bestVP > bestTP */
-        ConstrainedVariableDecisionPointId vdec(bestVDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
-        m_curDec = bestVDec;
-        assignedBest = true;
-      }
-    }
-    else { /* default priority preference is low */
-      if (bestTP <= bestVP) {
-        /* prefer units though */
-        ConstrainedVariableDecisionPointId vdec(bestVDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
-        TokenDecisionPointId tdec(bestTDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Tok Dec = [" << bestTP << "] (" << tdec->getKey() << ") with Token " << tdec->getToken()->getName().c_str() << " with domain " << tdec->getToken()->getState()->lastDomain()) ;
-        if (bestTP == bestVP && vdec->getVariable()->lastDomain().isSingleton())  m_curDec = bestVDec;
-        else m_curDec = bestTDec;
-        assignedBest = true;
-      }
-      else { /* bestVP < bestTP */
-        ConstrainedVariableDecisionPointId vdec(bestVDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
-        m_curDec = bestVDec;
-        assignedBest = true;
-      }
-    }
-
-    //check_error(assignedBest || m_curDec.isNoId() || m_curDec->hasRemainingChoices());
-
-    return m_curDec;
-  } /* we have found a best */
-
-  void HSTSOpenDecisionManager::initializeTokenChoices(TokenDecisionPointId& tdp) {
+  void HSTSOpenDecisionManager::initializeTokenChoices(const TokenDecisionPointId& tdp) {
     check_error(tdp.isValid());
     check_error(tdp->m_choices.empty());
-    DefaultOpenDecisionManager::initializeTokenChoices(tdp);
+    OpenDecisionManager::initializeTokenChoices(tdp);
 
     if (tdp->m_choices.empty()) return;
 
     std::list<LabelStr> states;
     HSTSHeuristics::CandidateOrder order = HSTSHeuristics::UNKNOWN;
-    m_heur->getOrderedStatesForTokenDP(tdp, states, order);
+    m_heur->getOrderedStatesForToken(tdp->getToken(), states, order);
 
     check_error (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::FAR || order == HSTSHeuristics::EARLY || order == HSTSHeuristics::LATE || order == HSTSHeuristics::NONE, "Unable to handle cases other than late, early, near, far, none.");
     
@@ -565,7 +195,7 @@ namespace EUROPA {
     debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tdp->getKey() << ") for Token (" << tdp->getToken()->getKey() << ") has best choice =  " << tdp->m_choices[0].toString() << " of " << tdp->m_choices.size());
   }
 
-  void HSTSOpenDecisionManager::initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp) {
+  void HSTSOpenDecisionManager::initializeVariableChoices(const ConstrainedVariableDecisionPointId& vdp) {
     check_error(vdp.isValid());
     check_error(vdp->getVariable()->lastDomain().isFinite());
     check_error(vdp->m_choices.empty());
@@ -580,7 +210,7 @@ namespace EUROPA {
       if (values.empty()) return;
       
       std::list<double> domain;
-      m_heur->getOrderedDomainForConstrainedVariableDP(vdp, domain);
+      m_heur->getOrderedDomainForConstrainedVariable(vdp->m_var, domain);
       if (domain.empty() || values.size() == 1) {
         for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
           double value = (*it);
@@ -598,15 +228,15 @@ namespace EUROPA {
     } 
   }
 
-  void HSTSOpenDecisionManager::initializeObjectChoices(ObjectDecisionPointId& odp) {
+  void HSTSOpenDecisionManager::initializeObjectChoices(const ObjectDecisionPointId& odp) {
     check_error(odp.isValid());
     check_error(odp->m_choices.empty());
-    DefaultOpenDecisionManager::initializeObjectChoices(odp);
+    OpenDecisionManager::initializeObjectChoices(odp);
 
     if (odp->m_choices.empty()) return;
 
     HSTSHeuristics::CandidateOrder order = HSTSHeuristics::UNKNOWN;
-    m_heur->getOrderForObjectDP(odp, order);
+    m_heur->getOrderForObject(odp->getToken(), order);
 
     check_error (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::FAR || order == HSTSHeuristics::EARLY || order == HSTSHeuristics::LATE || order == HSTSHeuristics::NONE, "Unable to handle cases other than late, early, near, far.");
     

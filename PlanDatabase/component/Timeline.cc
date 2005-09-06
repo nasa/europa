@@ -257,8 +257,11 @@ namespace EUROPA {
 		 "last entry " << m_tokenSequence.back()->toString() << " precedes " << token->toString());
 	results.push_back(std::make_pair(m_tokenSequence.back(), token));
       }
-      else
+      else{
+	debugMsg("Timeline:getOrderingChoices:canPrecede",
+		 "last entry " << m_tokenSequence.back()->toString() << " cannot precede " << token->toString());
 	excludedSuccessors.insert(token);
+      }
     }
 
     debugMsg("Timeline:getOrderingChoices:canPrecede", "exiting");
@@ -391,6 +394,7 @@ namespace EUROPA {
 
 
     // Additional tests for a Timeline
+
     check_error(m_tokenIndex.find(predecessor->getKey()) == m_tokenIndex.end() ||
                 m_tokenIndex.find(successor->getKey()) == m_tokenIndex.end(),
                 "At least one of predecessor and successor should not be sequenced yet.");
@@ -486,7 +490,8 @@ namespace EUROPA {
 
     // May have to post a constraint between earlier and later if none exists already in the case
     // where the token is surrounded
-    if (!earlier.isNoId() && !later.isNoId() && getPrecedenceConstraint(earlier, later).isNoId())
+    if (!earlier.isNoId() && !later.isNoId() && 
+	getPrecedenceConstraint(earlier, later).isNoId())
       constrain(earlier, later);
 
     std::map<int, std::list<TokenId>::iterator >::iterator it = m_tokenIndex.find(token->getKey());

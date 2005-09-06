@@ -11,9 +11,9 @@ namespace EUROPA {
   public:
     virtual ~TokenDecisionPoint();
 
-    const bool assign();
-    const bool retract();
-    const bool hasRemainingChoices();
+    bool assign();
+    bool retract();
+    bool hasRemainingChoices();
     const TokenId& getToken() const;
 
     std::vector<LabelStr>& getChoices();
@@ -24,11 +24,9 @@ namespace EUROPA {
 
     TokenDecisionPoint(const DbClientId& dbClient, const TokenId&, const OpenDecisionManagerId& odm);
   protected:
-    virtual void initializeChoices();
     TokenId m_tok; /**< cached for efficiency */
   private:
     friend class OpenDecisionManager;
-    friend class DefaultOpenDecisionManager;
     friend class HSTSOpenDecisionManager;
 
 

@@ -71,7 +71,8 @@ namespace EUROPA {
     }
 
     bool OpenConditionManager::inScope(const TokenId& token) const {
-      checkError(m_db->getConstraintEngine()->constraintConsistent(), "Assumes the database is constraint consistent but it is not.");
+      checkError(m_db->getConstraintEngine()->constraintConsistent(), 
+		 "Assumes the database is constraint consistent but it is not.");
       bool result =  (!token->isActive() && !matches(token, m_staticMatchingRules) && !matches(token, m_dynamicMatchingRules));
       return result;
     }

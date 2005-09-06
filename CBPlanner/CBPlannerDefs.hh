@@ -4,6 +4,7 @@
 #include "CommonDefs.hh"
 #include "PlanDatabaseDefs.hh"
 #include <cmath>
+#include <vector>
 
 namespace EUROPA {
 
@@ -46,23 +47,9 @@ namespace EUROPA {
   class ConstrainedVariableDecisionPoint;
   typedef Id<ConstrainedVariableDecisionPoint> ConstrainedVariableDecisionPointId;
 
-  class ResourceOpenDecisionManager;
-  typedef Id<ResourceOpenDecisionManager> ResourceOpenDecisionManagerId;
+  typedef std::vector<DecisionPointId> DecisionStack;
 
-  class ResourceFlawDecisionPoint;
-  typedef Id<ResourceFlawDecisionPoint> ResourceFlawDecisionPointId;
-
-  class DMResourceListener;
-  typedef Id<DMResourceListener> DMResourceListenerId;
-
-  class HSTSHeuristics;
-  typedef Id<HSTSHeuristics> HSTSHeuristicsId;
-
-  class HSTSNoBranch;
-  typedef Id<HSTSNoBranch> HSTSNoBranchId;
-
-  class HSTSOpenDecisionManager;
-  typedef Id<HSTSOpenDecisionManager> HSTSOpenDecisionManagerId;
+  typedef double Priority; /*!< Used to reference to the priority used in calculating heuristics. */
 }
 
 #endif

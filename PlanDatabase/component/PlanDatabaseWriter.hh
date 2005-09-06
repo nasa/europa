@@ -9,11 +9,20 @@
 #include "TokenVariable.hh"
 #include "ConstrainedVariable.hh"
 
+#include <sstream>
+
 namespace EUROPA {
 
   class PlanDatabaseWriter {
 
   public:
+
+    static std::string toString(const PlanDatabaseId& db){
+      std::stringstream sstr;
+      write(db, sstr);
+      return sstr.str();
+    }
+
     static void write(PlanDatabaseId db, std::ostream& os) {
       check_error(!db->getConstraintEngine()->provenInconsistent());
       ObjectSet objs = db->getObjects();

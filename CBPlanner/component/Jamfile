@@ -7,7 +7,6 @@ SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
 ModuleComponent CBPlanner
 	:
 	ConstrainedVariableDecisionPoint.cc
-	DefaultOpenDecisionManager.cc
 	DynamicInfiniteRealCondition.cc
 	HorizonCondition.cc
 	ObjectDecisionPoint.cc

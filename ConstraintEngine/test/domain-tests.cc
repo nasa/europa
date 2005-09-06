@@ -158,6 +158,28 @@ namespace EUROPA {
       IntervalDomain dom7(-1, 0);
       dom6.intersect(dom7);
       assertTrue(dom6.isEmpty());
+
+
+      IntervalDomain dom8;
+      IntervalDomain dom9;
+      dom8.intersect(IntervalDomain(0.1, 0.10));
+      dom9.intersect(IntervalDomain(0.10, 0.10));
+      assertTrue(dom8.intersects(dom9));
+
+      // Test at the limit of precision
+      IntervalDomain dom10(0.0001);
+      IntervalDomain dom11(0.0001);
+      assertTrue(dom10.intersects(dom11));
+
+      // Test at the limit of precision
+      IntervalDomain dom12(-0.0001);
+      IntervalDomain dom13(-0.0001);
+      assertTrue(dom12.intersects(dom13));
+
+      // Test beyond the limits of precission
+      IntervalDomain dom14(-0.1 - EPSILON/10);
+      IntervalDomain dom15(-0.1);
+      // POSSIBLE BUG? assertTrue(dom14.intersects(dom15), dom14.toString() + " cannot intersect " + dom15.toString());
       return(true);
     }
 

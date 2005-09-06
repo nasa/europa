@@ -24,21 +24,17 @@ namespace EUROPA {
   void TemporalVariableCondition::setIgnoreStart(const bool& start) { 
     if (m_start != start) {
       m_start = start; 
-      notifyChanged();
     }
   }
 
   void TemporalVariableCondition::setIgnoreEnd(const bool& end) { 
     if (m_end != end) {
-      m_end = end;
-      notifyChanged();
-    }
+      m_end = end;    }
   } 
 
   void TemporalVariableCondition::setIgnoreDuration(const bool& duration) { 
     if (m_duration != duration) {
       m_duration = duration; 
-      notifyChanged();
     }
   }
 
@@ -51,14 +47,12 @@ namespace EUROPA {
   void TemporalVariableCondition::allowHorizonOverlap() { 
     if (!m_allowOverlap) {
       m_allowOverlap = true; 
-      notifyChanged();
     }
   } 
 
   void TemporalVariableCondition::disallowHorizonOverlap() { 
     if (m_allowOverlap) {
       m_allowOverlap = false; 
-      notifyChanged();
     }
   }
 

@@ -39,6 +39,7 @@ void replay(const PlanDatabaseId& db, const DbClientTransactionLogId& txLog) {
 
 template<class ASSEMBLY>
 bool runPlanner(){
+  check_error(DebugMessage::isGood());
 
   ASSEMBLY assembly(schema);
 
@@ -214,7 +215,7 @@ void __assert_fail(const char *__assertion,
 
 
 int main(int argc, const char** argv) {
-  int result = internalMain<CBPlannerAssembly>(argc, argv);
+  bool result = internalMain<CBPlannerAssembly>(argc, argv);
   if(result != 0)
     return result;
   else 

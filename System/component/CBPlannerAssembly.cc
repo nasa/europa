@@ -19,6 +19,7 @@
 #include "PartialPlanWriter.hh"
 #include "Horizon.hh"
 #include "DecisionManager.hh"
+#include "MasterMustBeInserted.hh"
 
 // Test Support
 #include "PLASMAPerformanceConstraint.hh"
@@ -65,7 +66,7 @@ namespace EUROPA {
   bool CBPlannerAssembly::plan(const char* txSource, const TiXmlElement&, const char* averFile){
     Horizon horizon;
     CBPlanner planner(m_planDatabase, horizon.getId());
-    /* COMMENTED OUT AS IT CASUES A HANG
+    /*
 #ifdef PPW_WITH_PLANNER
     PlanWriter::PartialPlanWriter ppw(m_planDatabase, m_constraintEngine, m_rulesEngine, planner.getId());
 #else
@@ -106,6 +107,9 @@ namespace EUROPA {
 
     // Now get planner step max
     int steps = (int) plannerSteps->baseDomain().getSingletonValue();
+
+    // Add the MasterMustBeInserted condition
+    MasterMustBeInserted condition(planner.getDecisionManager());
 
     CBPlanner::Status retval = planner.run(steps);
     
