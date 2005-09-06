@@ -1,5 +1,6 @@
 #include "IntervalDomain.hh"
 #include "DomainListener.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -29,6 +30,7 @@ namespace EUROPA {
     : AbstractDomain(true, false, getDefaultTypeName().c_str()), m_ub(value), m_lb(value) {
     check_error(value <= PLUS_INFINITY);
     check_error(value >= MINUS_INFINITY);
+    debugMsg("IntervalDomain:IntervalDomain", "created interval with range [" << m_lb << " " << m_ub << "]"); 
   }
 
   IntervalDomain::~IntervalDomain() {}
@@ -234,6 +236,8 @@ namespace EUROPA {
   }
 
   bool IntervalDomain::intersect(double lb, double ub) {
+    debugMsg("IntervalDomain:intersect", "Testing intersection of [" << lb << " " << ub << "] with this domain [" << m_lb << " "  << m_ub << "]");
+
     // Test for empty intersection while accounting for precision/rounding errors.
     if ((lb > ub && (lb-ub > EPSILON)) || m_lb - ub >= minDelta() || lb - m_ub >= minDelta()) {
       empty();
@@ -241,15 +245,19 @@ namespace EUROPA {
     }
 
     bool ub_decreased(false);
+    debugMsg("IntervalDomain:intersect", "ub_decreased = false");
     if (ub < m_ub) {
       m_ub = safeConversion(ub);
       ub_decreased = true;
+      debugMsg("IntervalDomain:intersect", "ub_decreased = true");
     }
 
     bool lb_increased(false);
+     debugMsg("IntervalDomain:intersect", "lb_increased = false");
     if (lb > m_lb) {
       m_lb = safeConversion(lb);
       lb_increased = true;
+      debugMsg("IntervalDomain:intersect", "lb_increased = true");
     }
 
     // Select the strongest message applicable.
@@ -267,6 +275,8 @@ namespace EUROPA {
         else
           if (ub_decreased)
             notifyChange(DomainListener::UPPER_BOUND_DECREASED);
+
+    debugMsg("IntervalDomain:intersect", "returning lb_increased || ub_decreased");
     return(lb_increased || ub_decreased);
   }
 
