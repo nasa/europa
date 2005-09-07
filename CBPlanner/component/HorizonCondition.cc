@@ -40,31 +40,39 @@ namespace EUROPA {
     int start, end;
     m_horizon->getHorizon(start, end);
     bool passed(true);
+
+    checkError(!tokStartDomain.isEmpty(), startVar->toString());
+    checkError(!tokEndDomain.isEmpty(), endVar->toString());
+
     debugMsg("HorizonCondition:testToken", "Horizion is [" << start << ", " << end << "]");
+
     if (m_possiblyOutside) {
-      debugMsg("HorizonCondition:testToken", "Testing possibly outside [" << tokStartDomain.getUpperBound() << ", " << tokEndDomain.getLowerBound() << "]");
+      debugMsg("HorizonCondition:testToken", 
+	       "Testing possibly outside [" << 
+	       tokStartDomain.getLowerBound() << ", " << tokEndDomain.getUpperBound() << "]");;
+
       // apply possibly defintion.
-      if (!tokStartDomain.isEmpty() && (tokStartDomain.getUpperBound() >= end)) {
+      if (tokStartDomain.getUpperBound() >= end)
 	passed = false; 
-        debugMsg("HorizionCondition:testToken", "Possible test failed start.upperbound >= end");
-      }
-      if (!tokEndDomain.isEmpty() && (tokEndDomain.getLowerBound() <= start)) {
-	passed = false; 
-       debugMsg("HorizionCondition:testToken", "Possible test failed end.lowerbound <= start");
-      }
+      if (tokEndDomain.getLowerBound() <= start)
+	passed = false;
+      debugMsg("HorizionCondition:testToken", "Possible test failed end.lowerbound <= start");
     }
     else {
       // apply necessary defintion.
-       debugMsg("HorizonCondition:testToken", "Testing necessary outside [" << tokStartDomain.getLowerBound() << ", " << tokEndDomain.getUpperBound() << "]");
-       if (!tokStartDomain.isEmpty() && (tokStartDomain.getLowerBound() > end)) {
-	passed = false; 
+      debugMsg("HorizonCondition:testToken", 
+	       "Testing necessary outside [" << 
+	       tokStartDomain.getLowerBound() << ", " << tokEndDomain.getUpperBound() << "]");
+      if (tokStartDomain.getLowerBound() > end){
         debugMsg("HorizionCondition:testToken", "Necessary test failed start.lowerbound > end");
-       }
-       if (!tokEndDomain.isEmpty() && (tokEndDomain.getUpperBound() < start)) {
 	passed = false; 
+      }
+      if (tokEndDomain.getUpperBound() < start){
+	passed = false;
         debugMsg("HorizionCondition:testToken", "Necessary test failed end.upperbound < start");
-       }
+      }
     }
+
     return passed;
   }
 

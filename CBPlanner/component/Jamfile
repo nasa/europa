@@ -12,6 +12,7 @@ ModuleComponent CBPlanner
 	ObjectDecisionPoint.cc
 	TemporalVariableCondition.cc
 	MasterMustBeInserted.cc
+	TemporalVariableFilter.cc
 	TokenDecisionPoint.cc
 	PartialPlanWriter.cc
 	;

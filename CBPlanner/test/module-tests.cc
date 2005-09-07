@@ -9,6 +9,7 @@
 #include "HorizonCondition.hh"
 #include "TemporalVariableCondition.hh"
 #include "DynamicInfiniteRealCondition.hh"
+#include "TemporalVariableFilter.hh"
 #include "TokenDecisionPoint.hh"
 #include "TestSupport.hh"
 #include "IntervalIntDomain.hh"
@@ -309,6 +310,7 @@ public:
     runTest(testTemporalVariableCondition);
     runTest(testDynamicInfiniteRealCondition);
     runTest(testMasterMustBeInserted);
+    runTest(testTemporalVariableFilter);
     return(true);
   }
 private:
@@ -647,6 +649,31 @@ static bool testHorizonConditionNecessary() {
     // Now we should go back to 1
     assertTrue(dm.getNumberOfDecisions() == 1, toString(dm.getNumberOfDecisions()));
     assertFalse(MasterMustBeInserted::executeTest(t1.getId()));
+    return true;
+  }
+
+  static bool testTemporalVariableFilter(){
+    DEFAULT_SETUP(ce, db, false);
+
+    TemporalVariableFilter condition(dm.getId());
+
+    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    db.close();
+
+    IntervalToken t0(db.getId(), 
+                     "Objects.P1",
+                     false, 
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 100),
+                     IntervalIntDomain(1, 100));
+
+    // Since it is an inactive token with no master, we will not exclude it.
+    t0.activate();
+    ce.propagate();
+
+    // Just a threat
+    assertTrue(dm.getNumberOfDecisions() == 1, odm.printOpenDecisions());
+
     return true;
   }
 
