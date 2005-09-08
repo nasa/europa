@@ -1345,13 +1345,13 @@ private:
   
     assertTrue(status == CBPlanner::PLAN_FOUND);
     assertTrue(planner.getDepth() == 2);
-    assertTrue(planner.getTime() == 4 + 3*4, toString(planner.getTime()));
+    assertTrue(planner.getTime() == 3 + 3*4, toString(planner.getTime()));
 
     planner.retract();
     status = planner.run();
     assertTrue(status == CBPlanner::PLAN_FOUND);
     assertTrue(planner.getDepth() == 2);
-    assertTrue(planner.getTime() == 4 + 3*4, toString(planner.getTime()));
+    assertTrue(planner.getTime() == 3 + 3*4, toString(planner.getTime()));
     DEFAULT_TEARDOWN_PLAN();
     return true; 
   }
@@ -1602,8 +1602,8 @@ private:
     }
     assertTrue(result == CBPlanner::PLAN_FOUND);
     assertTrue(planner.getDepth() != planner.getTime());
-    assertTrue(planner.getDepth() == 4);
-    assertTrue(planner.getTime() == 5);
+    assertTrue(planner.getDepth() == 4, toString(planner.getDepth()));
+    assertTrue(planner.getTime() == 11, toString(planner.getTime()));
 
     DEFAULT_TEARDOWN_PLAN();
     return true;
