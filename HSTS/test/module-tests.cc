@@ -109,7 +109,8 @@
   hreader.read("../core/Heuristics-HSTS.xml"); \
   HSTSOpenDecisionManager odm(db.getId(), heuristics.getId());  \
   Horizon hor(0, 200);						\
-  CBPlanner planner(db.getId(), hor.getId(), odm.getId());	
+  CBPlanner planner(db.getId(), hor.getId(), odm.getId());	\
+  planner.getDecisionManager()->getOpenDecisionManager()->initializeIfNeeded();
 
 #define DEFAULT_TEARDOWN_PLAN_HEURISTICS()
 

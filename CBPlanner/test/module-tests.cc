@@ -174,6 +174,7 @@ public:
     RulesEngine re(db.getId()); \
     Horizon hor(0, 200); \
     CBPlanner planner(db.getId(), hor.getId()); \
+    planner.getDecisionManager()->getOpenDecisionManager()->initializeIfNeeded(); \
     if (autoClose) \
       db.close();
 
@@ -370,7 +371,11 @@ private:
     assertTrue(dm.getConditions().size() == 1);
 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+
     db.close();
+
+    odm.initializeIfNeeded();
+
     IntervalToken tokenA(db.getId(), 
 			 "Objects.P1", 
 			 false,
@@ -430,6 +435,7 @@ static bool testHorizonConditionNecessary() {
     // build a test token. 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
+    odm.initializeIfNeeded();
     IntervalToken tokenA(db.getId(), 
 			 "Objects.P1", 
 			 false,
@@ -483,6 +489,8 @@ static bool testHorizonConditionNecessary() {
 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
+
+    odm.initializeIfNeeded();
     IntervalToken tokenA(db.getId(), 
 			 "Objects.P1", 
 			 false,
@@ -564,6 +572,9 @@ static bool testHorizonConditionNecessary() {
 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
+
+    odm.initializeIfNeeded();
+
     IntervalToken tokenA(db.getId(), 
 			 "Objects.P1", 
 			 false,
@@ -594,6 +605,8 @@ static bool testHorizonConditionNecessary() {
 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
+
+    odm.initializeIfNeeded();
 
     IntervalToken t0(db.getId(), 
                      "Objects.P1",
@@ -660,6 +673,8 @@ static bool testHorizonConditionNecessary() {
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
 
+    odm.initializeIfNeeded();
+
     IntervalToken t0(db.getId(), 
                      "Objects.P1",
                      false, 
@@ -695,6 +710,8 @@ private:
 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
+
+    odm.initializeIfNeeded();
 
     std::list<double> values;
     values.push_back(LabelStr("L1"));
@@ -757,6 +774,8 @@ private:
     values.push_back(LabelStr("L2"));
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
+
+    odm.initializeIfNeeded();
 
     Variable<LabelSet> v0(ce.getId(), LabelSet(values));
     LabelSet leaveOpen;
@@ -829,12 +848,14 @@ private:
   static bool testNestedGuard_GNATS_3013(){
     DEFAULT_SETUP(ce, db, false);
 
+    odm.initializeIfNeeded();
     assertTrue(ce.propagate());
     assertTrue(dm.getOpenDecisionManager().isValid()); // Force allocate of default
     assertTrue(dm.getNumberOfDecisions() == 0);
 
     // Allocate a timeline and close the database.
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+
     db.close();
 
     // Register a test rule to be fired.
@@ -923,6 +944,9 @@ private:
 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
+
+    odm.initializeIfNeeded();
+
     IntervalToken tokenA(db.getId(), 
 			 "Objects.P1", 
 			 true,
