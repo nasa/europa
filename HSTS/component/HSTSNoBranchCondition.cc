@@ -5,7 +5,7 @@
 
 namespace EUROPA {
 
-  HSTSNoBranchCondition::HSTSNoBranchCondition(const DecisionManagerId& dm) : Condition(dm) {
+  HSTSNoBranchCondition::HSTSNoBranchCondition(const DecisionManagerId& dm) : Condition(dm, false) {
     check_error(m_id.isValid());
   }
 
