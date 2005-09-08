@@ -38,6 +38,11 @@ namespace EUROPA {
 
     virtual void initializeObjectChoices(const ObjectDecisionPointId& odp);
 
+    /**
+     * @brief Extend base behavior to exclude all time points using the TemporalVariableCondition
+     */
+    bool passesStaticConditions(const EntityId& entity) const;
+
     HSTSHeuristicsId m_heur; /*!< Used to compute priorities */ 
 
     bool m_strictHeuristics; /*!< if this flag is true, we ignore the implicit deicision heuristic order of

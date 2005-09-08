@@ -19,6 +19,8 @@ namespace EUROPA {
     bool test(const EntityId& entity);
 
     inline void print (std::ostream& os) { os << "TEMPORAL_VARIABLE_FILTER"; }
+
+    static bool isTemporalVariable(const EntityId& entity);
   };
 
 } /* namespace Europa */
