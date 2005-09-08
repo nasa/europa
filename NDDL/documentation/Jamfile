@@ -1,7 +1,0 @@
-SubDir PLASMA NDDL documentation ;
-
-if ! $(PLASMA_READY) {
-
-ModuleDocumentation NDDL ;
-
-} # PLASMA_READY

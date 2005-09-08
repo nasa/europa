@@ -1,4 +1,0 @@
-SubDir PLASMA Aver documentation ;
-if ! $(PLASMA_READY) {
-ModuleDocumentation Aver ;
-}

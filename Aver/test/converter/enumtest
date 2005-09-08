@@ -1,8 +1,0 @@
-Test('Enumtest',
-  At any step : {0} < 1;
-  At any step : {3 5 7 9} out {0};
-  At any step : {3,5,7,9} out {0};
-  At any step : {'Foo' 'Bar' 'Baz' 'Quux'} out {0};
-  At any step : {'Foo', 'Bar', 'Baz', 'Quux'} out {0};
-);
-  
