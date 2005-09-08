@@ -1,7 +1,0 @@
-// Declares a class of the raw types. No World in this model.
-class Foo {
- int m_0;
- float m_1;
- bool m_2;
- string m_3;
-}
