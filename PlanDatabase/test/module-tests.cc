@@ -2019,6 +2019,7 @@ public:
     runTest(testEventTokenInsertion);
     runTest(testNoChoicesThatFit);
     runTest(testAssignment);
+    runTest(testFreeAndConstrain);
     return true;
   }
 
@@ -2586,6 +2587,66 @@ private:
     o1.free(t0.getId(), t0.getId());
     assertFalse(t0.isAssigned());
     assertFalse(o1.hasToken(t0.getId()));
+    return true;
+  }
+
+  static bool testFreeAndConstrain(){
+    initDbTestSchema(SCHEMA);
+    PlanDatabase db(ENGINE, SCHEMA);
+    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    db.close();                                                                          
+  
+    IntervalToken t1(db.getId(),  
+                     DEFAULT_PREDICATE(),                                                     
+                     true,                                                               
+                     IntervalIntDomain(0, 10),                                           
+                     IntervalIntDomain(0, 20),                                           
+                     IntervalIntDomain(1, 1000));                                        
+  
+    IntervalToken t2(db.getId(),                                                         
+                     DEFAULT_PREDICATE(),                                                     
+                     true,                                                               
+                     IntervalIntDomain(0, 10),                                           
+                     IntervalIntDomain(0, 20),                                           
+                     IntervalIntDomain(1, 1000));                                        
+  
+    IntervalToken t3(db.getId(),                                                         
+                     DEFAULT_PREDICATE(),                                                     
+                     true,                                                               
+                     IntervalIntDomain(0, 10),                                           
+                     IntervalIntDomain(0, 20),                                           
+                     IntervalIntDomain(1, 1000));
+
+    t1.activate();
+    t2.activate();
+    t3.activate();
+
+    // Insert, but keep putting in the middle
+    o1.constrain(t1.getId(), t3.getId());
+    o1.constrain(t2.getId(), t3.getId());
+
+    o1.free(t1.getId(), t3.getId());
+    o1.free(t2.getId(), t3.getId());
+
+    // Constrain again to leave all cleanup automatic
+    o1.constrain(t1.getId(), t3.getId());                                 
+
+    // Also use a locally scoped token to force a different deletion path
+    TokenId t4 = (new IntervalToken(db.getId(),                                                         
+				    DEFAULT_PREDICATE(),                                                     
+				    true,                                                               
+				    IntervalIntDomain(0, 10),                                           
+				    IntervalIntDomain(0, 20),                                           
+				    IntervalIntDomain(1, 1000)))->getId();
+
+    t4->activate();
+    o1.constrain(t4, t3.getId());   
+    o1.constrain(t2.getId(), t4);  
+    assertTrue(ENGINE->propagate()); 
+    
+    // Now delete t4 to leave a hole which will require repair
+    delete (Token*) t4; 
+    assertTrue(ENGINE->propagate()); 
     return true;
   }
 };
