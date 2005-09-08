@@ -1018,6 +1018,104 @@ bool testWeakDomainComparator() {
   return true;
 }
 
+class KeyMatcherTest {
+ public:
+  static bool test() {
+    runTest(testKeyMatcher);
+    runTest(testVariableMatch);
+    runTest(testTokenMatch);
+    return true;
+  }
+ private:
+  static bool testKeyMatcher() {
+    assert(KeyMatcher::keyMatches("Foo", "Foo"));
+    assert(KeyMatcher::keyMatches("Foo:bar", "Foo:bar"));
+    assert(!KeyMatcher::keyMatches("Foo:bar", "bar:Foo"));
+    assert(KeyMatcher::keyMatches("Foo:bar:", "Foo:bar:"));
+    assert(KeyMatcher::keyMatches("Foo:bar:", "Foo:bar"));
+    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:ANY:Bar", "SUBGOAL:Foo:ANY:Bar"));
+    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:AFTER:Bar", "SUBGOAL:Foo:ANY:Bar"));
+    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:BEFORE:Bar", "SUBGOAL:Foo:ANY:Bar"));
+    assert(KeyMatcher::keyMatches("Foo:foo|true:bar|false", "Foo"));
+    assert(KeyMatcher::keyMatches("Foo:foo|true:bar|false", "Foo:bar|false"));
+    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:::foo|true:BEFORE:Bar", "SUBGOAL:Foo:ANY:Bar")); 
+    return true;
+  }
+
+  static bool testVariableMatch() {
+    std::string simpleKey("foo:Foo");
+    std::string predOneArgKey("foo:Foo:bar|true");
+    std::string predParentKey("foo:SUBGOAL:Foo:ANY:Bar");
+    std::string predParentArgKey("foo:SUBGOAL:Foo:bar|true:ANY:Bar");
+    std::string predParentBothArgKey("foo:SUBGOAL:Foo:bar|true:ANY:Bar:baz|nargle");
+    
+    std::string match("foo:SUBGOAL:Foo::bar|true::BEFORE:Bar:baz|nargle::quux|argle");
+    
+    assert(KeyMatcher::keyMatches(match, simpleKey));
+    assert(KeyMatcher::keyMatches(match, predOneArgKey));
+    assert(KeyMatcher::keyMatches(match, predParentKey));
+    assert(KeyMatcher::keyMatches(match, predParentArgKey));
+    assert(KeyMatcher::keyMatches(match, predParentBothArgKey));
+    return true;
+  }
+
+  static bool testTokenMatch() {
+    std::string initialSimpleKey("INITIAL:Foo");
+    std::string initialOneParam("INITIAL:Foo:bar|true");
+    std::string initialTwoParam("INITIAL:Foo:bar|true:baz|true");
+    std::string initialSkipParam("INITIAL:Foo:baz|true");
+
+    std::string initialMatch("INITIAL:Foo:bar|true:baz|true:");
+    
+    assert(KeyMatcher::keyMatches(initialMatch, initialSimpleKey));
+    assert(KeyMatcher::keyMatches(initialMatch, initialOneParam));
+    assert(KeyMatcher::keyMatches(initialMatch, initialTwoParam));
+    assert(KeyMatcher::keyMatches(initialMatch, initialSkipParam));
+
+    std::string subgoalSimpleKey("SUBGOAL:Foo:ANY:Bar");
+    std::string subgoalOneParam("SUBGOAL:Foo:foo|true:ANY:Bar");
+    std::string subgoalTwoParam("SUBGOAL:Foo:foo|true:bar|ack:ANY:Bar");
+    std::string subgoalSkipParam("SUBGOAL:Foo:bar|ack:ANY:Bar");
+    std::string subgoalParentOneParam("SUBGOAL:Foo:ANY:Bar:bar|true");
+    std::string subgoalParentTwoParam("SUBGOAL:Foo:ANY:Bar:bar|true:baz|ack");
+    std::string subgoalParentSkipParam("SUBGOAL:Foo:ANY:Bar:baz|ack");
+    std::string subgoalBothParam("SUBGOAL:Foo:foo|true:ANY:Bar:bar|true");
+    std::string subgoalSkipBothParam("SUBGOAL:Foo:bar|ack:ANY:Bar:baz|ack");
+    std::string subgoalEverything("SUBGOAL:Foo:foo|true:bar|ack:ANY:Bar:bar|true:baz|ack");
+
+    std::string subgoalAnyMatch("SUBGOAL:Foo:foo|true:bar|ack:AFTER:Bar:bar|true:baz|ack:");
+    
+    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalSimpleKey));
+    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalOneParam));
+    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalTwoParam));
+    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalSkipParam));
+    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalParentOneParam));
+    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalParentTwoParam));
+    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalParentSkipParam));
+    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalBothParam));
+    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalSkipBothParam));
+    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalEverything));
+
+    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:::foo|true:ANY:Bar", subgoalSimpleKey));
+
+    assert(KeyMatcher::keyMatches("BEFORE", "ANY"));
+    assert(KeyMatcher::keyMatches("AFTER", "ANY"));
+    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:BEFORE:Bar", subgoalSimpleKey));
+    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:AFTER:Bar", subgoalSimpleKey));
+    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:ANY:Bar", subgoalSimpleKey));
+
+    assert(!KeyMatcher::keyMatches("SUBGOAL:Foo:BEFORE:Bar", "SUBGOAL:Foo:AFTER:Bar"));    
+    assert(!KeyMatcher::keyMatches("SUBGOAL:Foo:AFTER:Bar", "SUBGOAL:Foo:BEFORE:Bar"));
+    assert(!KeyMatcher::keyMatches("SUBGOAL:Foo:ANY:Bar", "SUBGOAL:Foo:BEFORE:Bar"));
+    assert(!KeyMatcher::keyMatches("SUBGOAL:Foo:ANY:Bar", "SUBGOAL:Foo:AFTER:Bar"));
+    
+    assert(!KeyMatcher::keyMatches("SUBGOAL:Foo:foo|bar:ANY:Bar:bar|foo", "SUBGOAL:Foo:foo|foo:ANY:Bar:bar|bar"));
+
+    return true;
+  }
+};
+
+
 int main() {
   initConstraintEngine();
 
@@ -1042,6 +1140,7 @@ int main() {
   //!!Add calls to readTestCases(), etc., from ConstraintEngine/test/module-tests.cc
 
   for (int i = 0; i < 1; i++) {
+    runTestSuite(KeyMatcherTest::test);
     runTest(testWeakDomainComparator);
     //Use relaxed domain comparator that allows comparison of members of two different enum types
     WeakDomainComparator wdc;
