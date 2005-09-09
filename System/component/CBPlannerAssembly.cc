@@ -20,7 +20,6 @@
 #include "Horizon.hh"
 #include "DecisionManager.hh"
 #include "MasterMustBeInserted.hh"
-#include "TemporalVariableFilter.hh"
 
 // Test Support
 #include "PLASMAPerformanceConstraint.hh"
@@ -111,9 +110,6 @@ namespace EUROPA {
 
     // Add the MasterMustBeInserted condition
     MasterMustBeInserted condition1(planner.getDecisionManager());
-
-    // Filter all temporal variables using a static filter
-    TemporalVariableFilter condition2(planner.getDecisionManager());
 
     CBPlanner::Status retval = planner.run(steps);
     

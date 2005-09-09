@@ -10,7 +10,6 @@ ModuleComponent CBPlanner
 	DynamicInfiniteRealCondition.cc
 	HorizonCondition.cc
 	ObjectDecisionPoint.cc
-	TemporalVariableCondition.cc
 	MasterMustBeInserted.cc
 	TemporalVariableFilter.cc
 	TokenDecisionPoint.cc

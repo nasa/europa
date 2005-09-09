@@ -652,7 +652,7 @@ private:
 
     DecisionManagerId dm = planner.getDecisionManager();
     HSTSNoBranchCondition cond(dm);
-    assert(dm->getConditions().size() == 4);
+    assert(dm->getConditions().size() == 3);
 
     Variable<IntervalIntDomain> var1(ce.getId(), IntervalIntDomain(), true, LabelStr("Commands.TakeSample.rock"));
     Variable<IntervalIntDomain> var2(ce.getId(), IntervalIntDomain(), true, LabelStr("AnObj.APred.Var2"));

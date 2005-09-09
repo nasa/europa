@@ -324,8 +324,4 @@ namespace EUROPA {
     debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << odp->getKey()  << ") with Token (" << odp->getToken()->getKey() << ") has best choice =  Obj (" << odp->m_choices[0].first->getKey() << ") Pred (" << odp->m_choices[0].second.first->getKey() << ") Succ (" << odp->m_choices[0].second.second->getKey() << ")");
   }
 
-  bool HSTSOpenDecisionManager::passesStaticConditions(const EntityId& entity) const{
-    return !TemporalVariableFilter::isTemporalVariable(entity) && OpenDecisionManager::passesStaticConditions(entity);
-  }
-
 }

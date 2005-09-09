@@ -7,7 +7,6 @@
 #include "Condition.hh"
 #include "Horizon.hh"
 #include "HorizonCondition.hh"
-#include "TemporalVariableCondition.hh"
 #include "DynamicInfiniteRealCondition.hh"
 #include "TemporalVariableFilter.hh"
 #include "TokenDecisionPoint.hh"
@@ -308,7 +307,6 @@ public:
     runTest(testHorizonCondition);
     runTest(testHorizonConditionNecessary);
     runTest(testSetHorizionCondition);
-    runTest(testTemporalVariableCondition);
     runTest(testDynamicInfiniteRealCondition);
     runTest(testMasterMustBeInserted);
     runTest(testTemporalVariableFilter);
@@ -391,7 +389,7 @@ private:
     assertTrue(cond.test(tokenA.getDuration()));
     tokenA.activate();
     assertTrue(ce.propagate());
-    assertTrue(dm.getNumberOfDecisions() == 4, toString(dm.getNumberOfDecisions()));
+    assertTrue(dm.getNumberOfDecisions() == 1, toString(dm.getNumberOfDecisions()));
 
     hor.setHorizon(200,400);
     assertTrue(ce.propagate());
@@ -418,7 +416,7 @@ private:
     
     //std::cout << " Decisions after changing horizon = 4" << std::endl;
 
-    assertTrue(dm.getNumberOfDecisions() == 4, toString(dm.getNumberOfDecisions()));
+    assertTrue(dm.getNumberOfDecisions() == 1, toString(dm.getNumberOfDecisions()));
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -475,7 +473,7 @@ static bool testHorizonConditionNecessary() {
     return true;
   }
 
-
+  /*
   static bool testTemporalVariableCondition() {
     DEFAULT_SETUP(ce, db, false);
     TemporalVariableCondition cond(hor.getId(), dm.getId());
@@ -549,7 +547,7 @@ static bool testHorizonConditionNecessary() {
     DEFAULT_TEARDOWN();
     return true;
   }
-
+  */
   static bool testDynamicInfiniteRealCondition() {
     DEFAULT_SETUP(ce, db, false);
     DynamicInfiniteRealCondition cond(dm.getId());
@@ -593,7 +591,7 @@ static bool testHorizonConditionNecessary() {
     assertTrue(!cond.test(v4.getId()));
     assertTrue(cond.test(tokenA.getDuration()));
 
-    assertTrue(dm.getNumberOfDecisions() == 6, toString(dm.getNumberOfDecisions()));
+    assertTrue(dm.getNumberOfDecisions() == 3, toString(dm.getNumberOfDecisions()));
 
     DEFAULT_TEARDOWN();
     return true;
@@ -763,10 +761,9 @@ private:
   static bool testForwardDecisionHandling() {
     DEFAULT_SETUP(ce, db, false);
     HorizonCondition hcond(hor.getId(), dm.getId());
-    TemporalVariableCondition tcond(hor.getId(), dm.getId());
     DynamicInfiniteRealCondition dcond(dm.getId());
 
-    assertTrue(dm.getConditions().size() == 3);
+    assertTrue(dm.getConditions().size() == 2);
 
     std::list<double> values;
     values.push_back(LabelStr("L1"));
@@ -903,7 +900,7 @@ private:
     // get decisions for start, end and duration.
     tokenA.activate();
     assertTrue(ce.propagate());
-    assertTrue(dm.getNumberOfDecisions() == 5, dm.getOpenDecisionManager()->printOpenDecisions());
+    assertTrue(dm.getNumberOfDecisions() == 2, dm.getOpenDecisionManager()->printOpenDecisions());
     assertTrue(dm.getOpenDecisionManager()->isUnitDecision(v1));
     assertFalse(dm.getOpenDecisionManager()->isUnitDecision(v2));
 
@@ -914,18 +911,19 @@ private:
     assertTrue(ce.propagate());
     assertFalse(dm.getOpenDecisionManager()->isUnitDecision(v1));
     assertTrue(dm.getOpenDecisionManager()->isUnitDecision(v2));
-    assertTrue(dm.getNumberOfDecisions() == 5, toString(dm.getNumberOfDecisions()));
+    assertTrue(dm.getNumberOfDecisions() == 2, toString(dm.getNumberOfDecisions()));
 
     // Now bind the second parameter and the net open decision count should go down.
     v2->specify(LabelStr("L3"));
     assertTrue(ce.propagate());
-    assertTrue(dm.getNumberOfDecisions() == 4, toString(dm.getNumberOfDecisions()));
+    assertTrue(dm.getNumberOfDecisions() == 1, toString(dm.getNumberOfDecisions()));
 
-    // Now unwind incrementally and test that the correct referssh of flaws has occurred
+    // Now unwind incrementally and test that the correct refresh of flaws has occurred
     v2->reset();
     v1->reset();
     assertTrue(ce.propagate());
-    assertTrue(dm.getNumberOfDecisions() == 5, dm.getOpenDecisionManager()->printOpenDecisions());
+    dm.getOpenDecisionManager()->printOpenDecisions();
+    assertTrue(dm.getNumberOfDecisions() == 2, dm.getOpenDecisionManager()->printOpenDecisions());
     assertTrue(dm.getOpenDecisionManager()->isUnitDecision(v1));
     assertFalse(dm.getOpenDecisionManager()->isUnitDecision(v2));
     tokenA.cancel();
@@ -937,10 +935,9 @@ private:
   static bool testSynchronizationBug_GNATS_3027(){
     DEFAULT_SETUP(ce, db, false);
     HorizonCondition hcond(hor.getId(), dm.getId());
-    TemporalVariableCondition tcond(hor.getId(), dm.getId());
     DynamicInfiniteRealCondition dcond(dm.getId());
 
-    assertTrue(dm.getConditions().size() == 3);
+    assertTrue(dm.getConditions().size() == 2);
 
     Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
     db.close();
