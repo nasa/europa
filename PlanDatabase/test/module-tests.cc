@@ -950,6 +950,7 @@ public:
     runTest(testOpenMerge);
     runTest(testCompatCacheReset);
     runTest(testAssignemnt);
+    runTest(testGNATS_3045);
     return(true);
   }
   
@@ -2007,6 +2008,52 @@ private:
     assertTrue(!o1.hasToken(t0.getId()));
     return true;
   }
+
+  /**
+   * Attempt to reproduce GNATS_3045
+   */
+  static bool testGNATS_3045(){
+    DEFAULT_SETUP(ce, db, true);
+
+    // Create 2 mergeable tokens - predicates, types and base domaiuns match
+    IntervalToken t0(db, 
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+		     Token::noObject(), false);
+  
+    t0.addParameter(IntervalDomain(0.001, 0.001), "IntervalParam");
+    t0.close();
+    ce->propagate();
+    assertFalse(db->hasCompatibleTokens(t0.getId()));
+  
+    IntervalToken t1(db,
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+		     Token::noObject(), false);
+  
+  
+    ConstrainedVariableId var = t1.addParameter(IntervalDomain(), "IntervalParam");
+    t1.close();
+
+    var->restrictBaseDomain(IntervalDomain(0.001, 0.001));
+
+    t1.activate();
+
+    ce->propagate();    
+    assertTrue(db->hasCompatibleTokens(t0.getId()));
+
+    t0.merge(t1.getId());
+    assertTrue(ce->propagate());
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
 };
 
 class TimelineTest {
