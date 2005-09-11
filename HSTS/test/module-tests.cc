@@ -252,6 +252,7 @@ public:
     runTest(testBasicAllocation);
     runTest(testTokenMatching);
     runTest(testDynamicMatching);
+    runTest(testTargetSelection);
     return true;
   }
 
@@ -295,12 +296,12 @@ private:
     assertTrue(he.getHeuristicInstances().size() == 3, toString(he.getHeuristicInstances().size()));
 
     // Ensures we get a hit with a single value
-    assertTrue(he.getPriorityForOpenCondition(t1.getId()) == 11.23, 
-	       toString(he.getPriorityForOpenCondition(t1.getId())));
+    assertTrue(he.getPriority(t1.getId()) == 11.23, 
+	       toString(he.getPriority(t1.getId())));
 
     // Ensures we get the last allocated
-    assertTrue(he.getPriorityForOpenCondition(t2.getId()) == 20.78, 
-	       toString(he.getPriorityForOpenCondition(t2.getId())));
+    assertTrue(he.getPriority(t2.getId()) == 20.78, 
+	       toString(he.getPriority(t2.getId())));
 
     // Allocte in a limited scope to force de-allocation afterwards
     {
@@ -330,8 +331,8 @@ private:
     assertTrue(he.getHeuristicInstances().size() == 3, toString(he.getHeuristicInstances().size()));
 
     // Ensure we get the default priority
-    assertTrue(he.getPriorityForOpenCondition(t4.getId()) == 0, 
-	       toString(he.getPriorityForOpenCondition(t4.getId())));
+    assertTrue(he.getPriority(t4.getId()) == 0, 
+	       toString(he.getPriority(t4.getId())));
 
     DEFAULT_TEARDOWN();
     return true;
@@ -502,39 +503,93 @@ private:
     t0.close();
 
     // veryfy we get the default priority
-    assertTrue(he.getPriorityForOpenCondition(t0.getId()) == 0);
+    assertTrue(he.getPriority(t0.getId()) == 0);
 
     // Bind and check - only 1 of t guards will be hit
     param2->specify(LabelStr("A"));
     ce.propagate();
-    assertTrue(he.getPriorityForOpenCondition(t0.getId()) == 0);
+    assertTrue(he.getPriority(t0.getId()) == 0);
 
-    //Bind the second to fire 12 A
+    // Bind the second to fire 12 A
     param0->specify(12);
     ce.propagate();
-    assertTrue(he.getPriorityForOpenCondition(t0.getId()) == 5);
+    assertTrue(he.getPriority(t0.getId()) == 5);
 
     // Fire 12 B
     param2->reset();
     ce.propagate();
-    assertTrue(he.getPriorityForOpenCondition(t0.getId()) == 0);
+    assertTrue(he.getPriority(t0.getId()) == 0);
     param2->specify(LabelStr("B"));
     ce.propagate();
-    assertTrue(he.getPriorityForOpenCondition(t0.getId()) == 10);
+    assertTrue(he.getPriority(t0.getId()) == 10);
 
     param0->reset();
     ce.propagate();
-    assertTrue(he.getPriorityForOpenCondition(t0.getId()) == 0);
+    assertTrue(he.getPriority(t0.getId()) == 0);
     param0->specify(40);
     ce.propagate();
-    assertTrue(he.getPriorityForOpenCondition(t0.getId()) == 15);
+    assertTrue(he.getPriority(t0.getId()) == 15);
 
     param0->reset();
     param2->reset();
     param0->specify(12);
     param2->specify(LabelStr("A"));
     ce.propagate();
-    assertTrue(he.getPriorityForOpenCondition(t0.getId()) == 5);
+    assertTrue(he.getPriority(t0.getId()) == 5);
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  /**
+   * Test dynamic matching against guard values
+   */
+  static bool testTargetSelection() {
+    DEFAULT_SETUP(ce,db,false);      
+    Object o1(db.getId(), "Objects", "o1");
+    db.close();               
+  
+    // Set up the heuristics
+    HeuristicsEngine he(db.getId());
+
+    std::vector< std::pair<unsigned int, double> > guards;
+    guards.push_back(std::pair<unsigned int, double>(0, 12));
+    guards.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
+    Heuristic h0(he.getId(), "Objects.PredicateE", LabelStr("start"), 5, guards, Heuristic::NONE);
+    Heuristic h1(he.getId(), "Objects.PredicateE", LabelStr("param1"), 10, guards, Heuristic::NONE);
+
+    he.initialize();
+
+    // Set up the token
+    IntervalToken t0(db.getId(),  
+		     "Objects.PredicateE",                                                     
+		     true,                                                               
+		     IntervalIntDomain(0, 10),                                           
+		     IntervalIntDomain(0, 20),                                           
+		     IntervalIntDomain(1, 1000),
+		     Token::noObject(),
+		     false);
+
+    ConstrainedVariableId param0 = t0.addParameter(IntervalIntDomain(), LabelStr("param0"));
+    ConstrainedVariableId param1 = t0.addParameter(IntervalDomain(), LabelStr("param1"));
+    LabelSet values;
+    values.insert(LabelStr("A"));
+    values.insert(LabelStr("B"));
+    values.close();
+    ConstrainedVariableId param2 = t0.addParameter(values, LabelStr("param2"));
+    t0.close();
+
+    // veryfy we get the default priority
+    assertTrue(he.getPriority(t0.getId()) == 0);
+
+    // Bind
+    param0->specify(12);
+    param2->specify(LabelStr("A"));
+    ce.propagate();
+
+    // Confirm
+    assertTrue(he.getPriority(t0.getId()) == 0);
+    assertTrue(he.getPriority(t0.getStart()) == 5);
+    assertTrue(he.getPriority(param1) == 10);
     DEFAULT_TEARDOWN();
     return true;
   }
