@@ -282,9 +282,9 @@ private:
     HeuristicsEngine he(db.getId());
 
     // Still allowed to add heuristics
-    Heuristic h0(he.getId(), "Objects.PredicateA", Heuristic::TOKEN, 11.23, Heuristic::NONE);
-    new Heuristic(he.getId(), "Objects.PredicateB", Heuristic::TOKEN, 14.45, Heuristic::NONE);
-    new Heuristic(he.getId(), "Objects.PredicateB", Heuristic::TOKEN, 20.78, Heuristic::NONE);
+    Heuristic h0(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 11.23, Heuristic::NONE);
+    new Heuristic(he.getId(), "Objects.PredicateB", EMPTY_LABEL(), 14.45, Heuristic::NONE);
+    new Heuristic(he.getId(), "Objects.PredicateB", EMPTY_LABEL(), 20.78, Heuristic::NONE);
 
     assertTrue(he.getHeuristics().size() == 3, toString(he.getHeuristics().size())); 
 
@@ -347,15 +347,15 @@ private:
   
     // Set up the heuristics
     HeuristicsEngine he(db.getId());
-    Heuristic dontcare(he.getId(), "Objects.PredicateA", Heuristic::TOKEN, 1);
-    Heuristic allSlaves(he.getId(), "Objects.PredicateA", Heuristic::TOKEN, 2, Heuristic::ALL);
-    Heuristic before(he.getId(), "Objects.PredicateA", Heuristic::TOKEN, 3, Heuristic::BEFORE);
-    Heuristic other(he.getId(), "Objects.PredicateA", Heuristic::TOKEN, 4, Heuristic::OTHER);
+    Heuristic dontcare(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 1);
+    Heuristic allSlaves(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 2, Heuristic::ALL);
+    Heuristic before(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 3, Heuristic::BEFORE);
+    Heuristic other(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 4, Heuristic::OTHER);
 
     std::vector< std::pair<unsigned int, double> > intLabelSetGuards;
     intLabelSetGuards.push_back(std::pair<unsigned int, double>(0, 12));
     intLabelSetGuards.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
-    Heuristic dontcareIntLabelSetGuards(he.getId(), "Objects.PredicateE", Heuristic::TOKEN, 5, intLabelSetGuards);
+    Heuristic dontcareIntLabelSetGuards(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 5, intLabelSetGuards);
 
     he.initialize();
 
@@ -468,17 +468,17 @@ private:
     std::vector< std::pair<unsigned int, double> > guards_12_A;
     guards_12_A.push_back(std::pair<unsigned int, double>(0, 12));
     guards_12_A.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
-    Heuristic h_12_A(he.getId(), "Objects.PredicateE", Heuristic::TOKEN, 5, guards_12_A, Heuristic::NONE);
+    Heuristic h_12_A(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 5, guards_12_A, Heuristic::NONE);
 
     std::vector< std::pair<unsigned int, double> > guards_12_B;
     guards_12_B.push_back(std::pair<unsigned int, double>(0, 12));
     guards_12_B.push_back(std::pair<unsigned int, double>(2, LabelStr("B")));
-    Heuristic h_12_B(he.getId(), "Objects.PredicateE", Heuristic::TOKEN, 10, guards_12_B, Heuristic::NONE);
+    Heuristic h_12_B(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 10, guards_12_B, Heuristic::NONE);
 
     std::vector< std::pair<unsigned int, double> > guards_40_B;
     guards_40_B.push_back(std::pair<unsigned int, double>(0, 40));
     guards_40_B.push_back(std::pair<unsigned int, double>(2, LabelStr("B")));
-    Heuristic h_40_B(he.getId(), "Objects.PredicateE", Heuristic::TOKEN, 15, guards_40_B, Heuristic::NONE);
+    Heuristic h_40_B(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 15, guards_40_B, Heuristic::NONE);
 
     he.initialize();
 
