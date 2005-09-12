@@ -254,7 +254,7 @@ public:
     runTest(testDynamicMatching);
     runTest(testMasterMatching);
     runTest(testTargetSelection);
-    //runTest(testVariableHeuristicConfiguration);
+    runTest(testVariableHeuristicConfiguration);
     return true;
   }
 
@@ -680,17 +680,18 @@ private:
 
   static bool testVariableHeuristicConfiguration(){
     DEFAULT_SETUP(ce,db,false);      
-    Object o1(db.getId(), "Objects", "o1");
+    initHeuristicsSchema();
     db.close();               
   
     // Set up the heuristics
     HeuristicsEngine he(db.getId());
     TiXmlElement* configXml = initXml("VariableHeuristics.xml");
-
+    assertTrue(configXml != NULL, "Bad test input data.");
     for (TiXmlElement * child = configXml->FirstChildElement(); 
 	 child != NULL; 
 	 child = child->NextSiblingElement()) {
       VariableHeuristicId heuristic = HeuristicsReader::createVariableHeuristic(he.getId(), *child);
+      debugMsg("Test", std::endl << heuristic->toString());
       assertTrue(heuristic.isValid());
     }
 
