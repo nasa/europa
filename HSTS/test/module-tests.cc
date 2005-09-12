@@ -48,12 +48,12 @@
 #include "TestSupport.hh"
 #include "DNPConstraints.hh"
 #include "WeakDomainComparator.hh"
-
+#include "XMLUtils.hh"
 
 /* Heuristics Engine */
 #include "HeuristicsEngine.hh"
 #include "Heuristic.hh"
-
+#include "HeuristicsReader.hh"
 
 #include "test/ConstraintTesting.hh"
 
@@ -253,6 +253,7 @@ public:
     runTest(testTokenMatching);
     runTest(testDynamicMatching);
     runTest(testTargetSelection);
+    //runTest(testVariableHeuristicConfiguration);
     return true;
   }
 
@@ -283,9 +284,9 @@ private:
     HeuristicsEngine he(db.getId());
 
     // Still allowed to add heuristics
-    Heuristic h0(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 11.23, Heuristic::NONE);
-    new Heuristic(he.getId(), "Objects.PredicateB", EMPTY_LABEL(), 14.45, Heuristic::NONE);
-    new Heuristic(he.getId(), "Objects.PredicateB", EMPTY_LABEL(), 20.78, Heuristic::NONE);
+    Heuristic h0(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 11.23, true);
+    new Heuristic(he.getId(), "Objects.PredicateB", EMPTY_LABEL(), 14.45, true);
+    new Heuristic(he.getId(), "Objects.PredicateB", EMPTY_LABEL(), 20.78, true);
 
     assertTrue(he.getHeuristics().size() == 3, toString(he.getHeuristics().size())); 
 
@@ -349,14 +350,17 @@ private:
     // Set up the heuristics
     HeuristicsEngine he(db.getId());
     Heuristic dontcare(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 1);
-    Heuristic allSlaves(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 2, Heuristic::ALL);
-    Heuristic before(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 3, Heuristic::BEFORE);
-    Heuristic other(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 4, Heuristic::OTHER);
+    Heuristic allSlaves(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 2, Heuristic::noGuards(), 
+			"Objects.PredicateA", Heuristic::ALL);
+    Heuristic before(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 3, Heuristic::noGuards(),
+			"Objects.PredicateA", Heuristic::BEFORE);
+    Heuristic other(he.getId(), "Objects.PredicateA", EMPTY_LABEL(), 4, Heuristic::noGuards(),
+			"Objects.PredicateA", Heuristic::OTHER);
 
     std::vector< std::pair<unsigned int, double> > intLabelSetGuards;
     intLabelSetGuards.push_back(std::pair<unsigned int, double>(0, 12));
     intLabelSetGuards.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
-    Heuristic dontcareIntLabelSetGuards(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 5, intLabelSetGuards);
+    Heuristic dontcareIntLabelSetGuards(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 5, false, intLabelSetGuards);
 
     he.initialize();
 
@@ -469,17 +473,17 @@ private:
     std::vector< std::pair<unsigned int, double> > guards_12_A;
     guards_12_A.push_back(std::pair<unsigned int, double>(0, 12));
     guards_12_A.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
-    Heuristic h_12_A(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 5, guards_12_A, Heuristic::NONE);
+    Heuristic h_12_A(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 5, true, guards_12_A);
 
     std::vector< std::pair<unsigned int, double> > guards_12_B;
     guards_12_B.push_back(std::pair<unsigned int, double>(0, 12));
     guards_12_B.push_back(std::pair<unsigned int, double>(2, LabelStr("B")));
-    Heuristic h_12_B(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 10, guards_12_B, Heuristic::NONE);
+    Heuristic h_12_B(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 10,true,  guards_12_B);
 
     std::vector< std::pair<unsigned int, double> > guards_40_B;
     guards_40_B.push_back(std::pair<unsigned int, double>(0, 40));
     guards_40_B.push_back(std::pair<unsigned int, double>(2, LabelStr("B")));
-    Heuristic h_40_B(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 15, guards_40_B, Heuristic::NONE);
+    Heuristic h_40_B(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 15, true, guards_40_B);
 
     he.initialize();
 
@@ -554,8 +558,8 @@ private:
     std::vector< std::pair<unsigned int, double> > guards;
     guards.push_back(std::pair<unsigned int, double>(0, 12));
     guards.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
-    Heuristic h0(he.getId(), "Objects.PredicateE", LabelStr("start"), 5, guards, Heuristic::NONE);
-    Heuristic h1(he.getId(), "Objects.PredicateE", LabelStr("param1"), 10, guards, Heuristic::NONE);
+    Heuristic h0(he.getId(), "Objects.PredicateE", LabelStr("start"), 5, true, guards);
+    Heuristic h1(he.getId(), "Objects.PredicateE", LabelStr("param1"), 10, true, guards);
 
     he.initialize();
 
@@ -590,6 +594,26 @@ private:
     assertTrue(he.getPriority(t0.getId()) == 0);
     assertTrue(he.getPriority(t0.getStart()) == 5);
     assertTrue(he.getPriority(param1) == 10);
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testVariableHeuristicConfiguration(){
+    DEFAULT_SETUP(ce,db,false);      
+    Object o1(db.getId(), "Objects", "o1");
+    db.close();               
+  
+    // Set up the heuristics
+    HeuristicsEngine he(db.getId());
+    TiXmlElement* configXml = initXml("VariableHeuristics.xml");
+
+    for (TiXmlElement * child = configXml->FirstChildElement(); 
+	 child != NULL; 
+	 child = child->NextSiblingElement()) {
+      VariableHeuristicId heuristic = HeuristicsReader::createVariableHeuristic(he.getId(), *child);
+      assertTrue(heuristic.isValid());
+    }
+
     DEFAULT_TEARDOWN();
     return true;
   }

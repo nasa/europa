@@ -26,9 +26,9 @@ Depends run-makefile-tests : check-makefile ;
 # install tests designed for off site customers to check system is installed without cvs update
 Depends run-install-tests : run-tests ;
 
+SubInclude PLASMA TinyXml ;
 SubInclude PLASMA Utils ;
 SubInclude PLASMA ConstraintEngine ;
-SubInclude PLASMA TinyXml ;
 SubInclude PLASMA PlanDatabase ;
 SubInclude PLASMA Resource ;
 SubInclude PLASMA RulesEngine ;

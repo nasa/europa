@@ -16,7 +16,6 @@
 #include "IntervalDomain.hh"
 #include "IntervalIntDomain.hh"
 #include "EnumeratedDomain.hh"
-#include <fstream>
 
 /**
  * @file Provides module tests for Solver Module.
@@ -96,30 +95,6 @@ private:
 };
 
 unsigned int TestComponent::s_counter(0);
-
-/**
- * @brief Helper method to get the first xml element in the file
- */
-TiXmlElement* initXml(const char* sourceFile, const char* element = NULL){
-  std::ifstream is(sourceFile);
-  checkError(is.good(), "Invalid input stream '" << sourceFile << "'");
-
-  
-  while(!is.eof()){
-    while(!is.eof() && is.peek() != '<')
-      is.get();
-
-    TiXmlElement * xmlElement = new TiXmlElement("");
-    is >> (*xmlElement);
-    debugMsg("Tests", "Loading element " << *xmlElement);
-    if(element == NULL || strcmp(xmlElement->Value(), element) == 0)
-      return xmlElement;
-    else
-      delete xmlElement;
-  }
-
-  return NULL;
-}
 
 class ComponentFactoryTests{
 public:
