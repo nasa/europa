@@ -252,6 +252,7 @@ public:
     runTest(testBasicAllocation);
     runTest(testTokenMatching);
     runTest(testDynamicMatching);
+    runTest(testMasterMatching);
     runTest(testTargetSelection);
     //runTest(testVariableHeuristicConfiguration);
     return true;
@@ -540,6 +541,85 @@ private:
     param2->specify(LabelStr("A"));
     ce.propagate();
     assertTrue(he.getPriority(t0.getId()) == 5);
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  /**
+   * Proves the heuristics are selective to master gaurds.
+   */
+  static bool testMasterMatching(){
+
+    DEFAULT_SETUP(ce,db,false);      
+    Object o1(db.getId(), "Objects", "o1");
+    db.close();               
+  
+    // Set up the heuristics
+    HeuristicsEngine he(db.getId());
+
+    std::vector< std::pair<unsigned int, double> > guards;
+    guards.push_back(std::pair<unsigned int, double>(0, 12));
+    guards.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
+
+    // Heuristic guarded on the master. Predicate match on both, and one must be before the other
+    Heuristic h0(he.getId(), "Objects.PredicateE", EMPTY_LABEL(), 5, Heuristic::noGuards(), 
+		 "Objects.PredicateE", Heuristic::BEFORE, guards);
+
+    he.initialize();
+
+    // Set up the token
+    IntervalToken master0(db.getId(),  
+			  "Objects.PredicateE",                                                     
+			  true,                                                               
+			  IntervalIntDomain(0, 10),                                           
+			  IntervalIntDomain(0, 20),                                           
+			  IntervalIntDomain(1, 1000),
+			  Token::noObject(),
+			  false);
+
+    ConstrainedVariableId param0 = master0.addParameter(IntervalIntDomain(), LabelStr("param0"));
+    master0.addParameter(IntervalDomain(), LabelStr("param1"));
+    LabelSet values;
+    values.insert(LabelStr("A"));
+    values.insert(LabelStr("B"));
+    values.close();
+    ConstrainedVariableId param2 = master0.addParameter(values, LabelStr("param2"));
+    master0.close();
+
+    assertFalse(h0.canMatch(master0.getId()));
+
+    master0.activate();
+
+    IntervalToken slave0(master0.getId(),
+			 LabelStr("before"),
+			 LabelStr("Objects.PredicateE"),                                                     
+			 IntervalIntDomain(0, 10),                                           
+			 IntervalIntDomain(0, 20),                                           
+			 IntervalIntDomain(1, 1000));
+
+    // It should match
+    assertTrue(h0.canMatch(slave0.getId()));
+
+    // But not fire
+    assertTrue(he.getPriority(slave0.getId()) == 0);
+
+    // Bind and check - only 1 of the guards will be hit
+    param2->specify(LabelStr("A"));
+    ce.propagate();
+    assertTrue(he.getPriority(slave0.getId()) == 0);
+
+    // Bind the second to fire 12 A
+    param0->specify(12);
+    ce.propagate();
+    assertTrue(he.getPriority(slave0.getId()) == 5);
+
+    // Reset and fire B
+    param0->reset();
+    param2->reset();
+    param0->specify(12);
+    param2->specify(LabelStr("B"));
+    ce.propagate();
+    assertTrue(he.getPriority(slave0.getId()) == 0);
     DEFAULT_TEARDOWN();
     return true;
   }
