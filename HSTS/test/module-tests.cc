@@ -255,6 +255,7 @@ public:
     runTest(testMasterMatching);
     runTest(testTargetSelection);
     runTest(testVariableHeuristicConfiguration);
+    runTest(testTokenHeuristicConfiguration);
     return true;
   }
 
@@ -690,7 +691,28 @@ private:
     for (TiXmlElement * child = configXml->FirstChildElement(); 
 	 child != NULL; 
 	 child = child->NextSiblingElement()) {
-      VariableHeuristicId heuristic = HeuristicsReader::createVariableHeuristic(he.getId(), *child);
+      VariableHeuristicId heuristic = HeuristicsReader::createHeuristic(he.getId(), *child);
+      debugMsg("Test", std::endl << heuristic->toString());
+      assertTrue(heuristic.isValid());
+    }
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testTokenHeuristicConfiguration(){
+    DEFAULT_SETUP(ce,db,false);      
+    initHeuristicsSchema();
+    db.close();               
+  
+    // Set up the heuristics
+    HeuristicsEngine he(db.getId());
+    TiXmlElement* configXml = initXml("TokenHeuristics.xml");
+    assertTrue(configXml != NULL, "Bad test input data.");
+    for (TiXmlElement * child = configXml->FirstChildElement(); 
+	 child != NULL; 
+	 child = child->NextSiblingElement()) {
+      TokenHeuristicId heuristic = HeuristicsReader::createHeuristic(he.getId(), *child);
       debugMsg("Test", std::endl << heuristic->toString());
       assertTrue(heuristic.isValid());
     }
