@@ -2,7 +2,7 @@ SubDir PLASMA PlanDatabase ;
 
 if ! $(PLASMA_READY) {
 
-Module PlanDatabase : ConstraintEngine TinyXml ;
+Module PlanDatabase : ConstraintEngine ;
 
 SubInclude PLASMA PlanDatabase core ;
 SubInclude PLASMA PlanDatabase component ;
