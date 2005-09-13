@@ -38,6 +38,8 @@ namespace EUROPA {
 
     virtual void initializeObjectChoices(const ObjectDecisionPointId& odp);
 
+    bool betterThan(const Priority p1, const Priority p2) const;
+
     HeuristicsEngineId m_heur; /*!< Used to compute priorities */ 
 
     bool m_strictHeuristics; /*!< if this flag is true, we ignore the implicit deicision heuristic order of
