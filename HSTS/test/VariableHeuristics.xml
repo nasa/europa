@@ -59,7 +59,10 @@
 <ConstrainedVariable comment="Incorporate Master Relation with Guards. TODO: Handle Object Vars correctly.">
   <Priority>3</Priority>
   <Preference>
-  <ValueOrder>descending</ValueOrder>
+  <DomainOrder>
+    <Value>0</Value>
+    <Value>1</Value>
+  </DomainOrder>
   </Preference>
   <VariableSpec>
     <Index>2</Index>
@@ -89,6 +92,20 @@
       </PredicateParameters>
     </PredicateSpec>
   </Master>
+</ConstrainedVariable>
+
+<ConstrainedVariable comment="Incorporate Master Relation with Guards. TODO: Handle Object Vars correctly.">
+  <Priority>3</Priority>
+  <Preference>
+  <ValueOrder>descending</ValueOrder>
+  </Preference>
+  <VariableSpec>
+    <Index>2</Index>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Telemetry.Communicate</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
 </ConstrainedVariable>
 
 </root>

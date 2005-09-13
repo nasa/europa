@@ -46,6 +46,7 @@
     <StateOrder>
      <State>merge</State>
     </StateOrder>
+    <State>reject</State>
   </DecisionPreference>
 </Token>
 
