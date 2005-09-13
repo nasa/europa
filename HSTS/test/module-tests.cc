@@ -59,6 +59,7 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
 
 #define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
@@ -75,56 +76,29 @@
 
 #define DEFAULT_TEARDOWN()
 
-#define DEFAULT_SETUP_PLAN(ce, db, autoClose)			\
+#define SETUP_PLAN_HEURISTICS()			      \
+  SETUP_HEURISTICS()                                  \
+  planner.getDecisionManager()->getOpenDecisionManager()->initializeIfNeeded();
+
+#define SETUP_HEURISTICS(heuristicsSource) READ_HEURISTICS(heuristicsSource, true)
+
+
+#define READ_HEURISTICS(heuristicsSource, autoClose)		\
   ConstraintEngine ce;						\
   initCBPTestSchema();						\
   PlanDatabase db(ce.getId(), Schema::instance());		\
   new DefaultPropagator(LabelStr("Default"), ce.getId());	\
   new DefaultPropagator(LabelStr("Temporal"), ce.getId());	\
   RulesEngine re(db.getId());					\
-  Horizon hor(0, 200);						\
-  CBPlanner planner(db.getId(), hor.getId());			\
-  if (autoClose)						\
-    db.close();
-
-#define DEFAULT_TEARDOWN_PLAN()
-
-#define DEFAULT_SETUP_HEURISTICS()			\
-  ConstraintEngine ce;					\
-  initCBPTestSchema();					\
-  PlanDatabase db(ce.getId(), Schema::instance());	\
-  new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-  new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
-  HSTSHeuristics heuristics(db.getId()); \
+  HeuristicsEngine heuristics(db.getId()); \
   initHeuristicsSchema(); \
-  HSTSHeuristicsReader hreader(heuristics.getNonConstId()); \
-  hreader.read("../core/Heuristics-HSTS.xml");
-
-#define DEFAULT_TEARDOWN_HEURISTICS()
-
-#define HSTS_SETUP_PLAN_HEURISTICS()			        \
-  ConstraintEngine ce;						\
-  initCBPTestSchema();						\
-  PlanDatabase db(ce.getId(), Schema::instance());		\
-  new DefaultPropagator(LabelStr("Default"), ce.getId());	\
-  new DefaultPropagator(LabelStr("Temporal"), ce.getId());	\
-  RulesEngine re(db.getId());					\
-  HSTSHeuristics heuristics(db.getId()); \
-  initHeuristicsSchema(); \
-  HSTSHeuristicsReader hreader(heuristics.getNonConstId()); \
-  hreader.read("../core/Heuristics-HSTS.xml"); \
+  HeuristicsReader hreader(heuristics.getId()); \
+  hreader.read(heuristicsSource, autoClose); \
   HSTSOpenDecisionManager odm(db.getId(), heuristics.getId());  \
   Horizon hor(0, 200);						\
   CBPlanner planner(db.getId(), hor.getId(), odm.getId());	
 
-
-#define DEFAULT_SETUP_PLAN_HEURISTICS()				\
-  HSTS_SETUP_PLAN_HEURISTICS()                                  \
-  planner.getDecisionManager()->getOpenDecisionManager()->initializeIfNeeded();
-
-#define DEFAULT_TEARDOWN_PLAN_HEURISTICS()
-
-
+#define TEARDOWN()
 
   /**
    * @brief Creates the type specifications required for testing
@@ -292,11 +266,11 @@ private:
 
     assertTrue(he.getHeuristics().size() == 3, toString(he.getHeuristics().size())); 
 
-    assertTrue(he.getHeuristicInstances().empty());
+    assertTrue(ce.propagate() && he.getHeuristicInstances().empty());
 
     he.initialize();
 
-    assertTrue(he.getHeuristicInstances().size() == 3, toString(he.getHeuristicInstances().size()));
+    assertTrue(ce.propagate() && he.getHeuristicInstances().size() == 3, toString(he.getHeuristicInstances().size()));
 
     // Ensures we get a hit with a single value
     assertTrue(he.getPriority(t1.getId()) == 11.23, 
@@ -315,6 +289,7 @@ private:
 		       IntervalIntDomain(0, 20),                                           
 		       IntervalIntDomain(1, 1000));
 
+      ce.propagate();
 
       assertTrue(he.getHeuristicInstances().size() == 5, toString(he.getHeuristicInstances().size()));
     }                
@@ -331,10 +306,10 @@ private:
                      IntervalIntDomain(1, 1000));
 
 
-    assertTrue(he.getHeuristicInstances().size() == 3, toString(he.getHeuristicInstances().size()));
+    assertTrue(ce.propagate() && he.getHeuristicInstances().size() == 3, toString(he.getHeuristicInstances().size()));
 
     // Ensure we get the default priority
-    assertTrue(he.getPriority(t4.getId()) == 0, 
+    assertTrue(ce.propagate() && he.getPriority(t4.getId()) == he.getDefaultTokenPriority(), 
 	       toString(he.getPriority(t4.getId())));
 
     DEFAULT_TEARDOWN();
@@ -509,12 +484,12 @@ private:
     t0.close();
 
     // veryfy we get the default priority
-    assertTrue(he.getPriority(t0.getId()) == 0);
+    assertTrue(ce.propagate() && he.getPriority(t0.getId()) == he.getDefaultTokenPriority());
 
     // Bind and check - only 1 of t guards will be hit
     param2->specify(LabelStr("A"));
     ce.propagate();
-    assertTrue(he.getPriority(t0.getId()) == 0);
+    assertTrue(he.getPriority(t0.getId()) == he.getDefaultTokenPriority());
 
     // Bind the second to fire 12 A
     param0->specify(12);
@@ -524,14 +499,14 @@ private:
     // Fire 12 B
     param2->reset();
     ce.propagate();
-    assertTrue(he.getPriority(t0.getId()) == 0);
+    assertTrue(he.getPriority(t0.getId()) == he.getDefaultTokenPriority());
     param2->specify(LabelStr("B"));
     ce.propagate();
     assertTrue(he.getPriority(t0.getId()) == 10);
 
     param0->reset();
     ce.propagate();
-    assertTrue(he.getPriority(t0.getId()) == 0);
+    assertTrue(he.getPriority(t0.getId()) == he.getDefaultTokenPriority());
     param0->specify(40);
     ce.propagate();
     assertTrue(he.getPriority(t0.getId()) == 15);
@@ -602,12 +577,12 @@ private:
     assertTrue(h0.canMatch(slave0.getId()));
 
     // But not fire
-    assertTrue(he.getPriority(slave0.getId()) == 0);
+    assertTrue( ce.propagate() && he.getPriority(slave0.getId()) == he.getDefaultTokenPriority());
 
     // Bind and check - only 1 of the guards will be hit
     param2->specify(LabelStr("A"));
     ce.propagate();
-    assertTrue(he.getPriority(slave0.getId()) == 0);
+    assertTrue(he.getPriority(slave0.getId()) == he.getDefaultTokenPriority());
 
     // Bind the second to fire 12 A
     param0->specify(12);
@@ -620,7 +595,7 @@ private:
     param0->specify(12);
     param2->specify(LabelStr("B"));
     ce.propagate();
-    assertTrue(he.getPriority(slave0.getId()) == 0);
+    assertTrue(he.getPriority(slave0.getId()) == he.getDefaultTokenPriority());
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -664,7 +639,7 @@ private:
     t0.close();
 
     // veryfy we get the default priority
-    assertTrue(he.getPriority(t0.getId()) == 0);
+    assertTrue(ce.propagate() && he.getPriority(t0.getId()) == he.getDefaultTokenPriority());
 
     // Bind
     param0->specify(12);
@@ -672,7 +647,7 @@ private:
     ce.propagate();
 
     // Confirm
-    assertTrue(he.getPriority(t0.getId()) == 0);
+    assertTrue(he.getPriority(t0.getId()) == he.getDefaultTokenPriority());
     assertTrue(he.getPriority(t0.getStart()) == 5);
     assertTrue(he.getPriority(param1) == 10);
     DEFAULT_TEARDOWN();
@@ -680,43 +655,35 @@ private:
   }
 
   static bool testVariableHeuristicConfiguration(){
-    DEFAULT_SETUP(ce,db,false);      
-    initHeuristicsSchema();
-    db.close();               
-  
-    // Set up the heuristics
-    HeuristicsEngine he(db.getId());
-    TiXmlElement* configXml = initXml("VariableHeuristics.xml");
-    assertTrue(configXml != NULL, "Bad test input data.");
-    for (TiXmlElement * child = configXml->FirstChildElement(); 
-	 child != NULL; 
-	 child = child->NextSiblingElement()) {
-      VariableHeuristicId heuristic = HeuristicsReader::createHeuristic(he.getId(), *child);
-      debugMsg("Test", std::endl << heuristic->toString());
-      assertTrue(heuristic.isValid());
-    }
-
-    DEFAULT_TEARDOWN();
-    return true;
+    return testHeuristicConfiguration("VariableHeuristics.xml");
   }
 
   static bool testTokenHeuristicConfiguration(){
+    return testHeuristicConfiguration("TokenHeuristics.xml");
+  }
+
+  static bool testHeuristicConfiguration(const char* source){
     DEFAULT_SETUP(ce,db,false);      
     initHeuristicsSchema();
     db.close();               
   
+    std::string outputFile(source);
+    outputFile = outputFile + ".out";
+    std::ofstream ofs(outputFile.c_str());
+
     // Set up the heuristics
     HeuristicsEngine he(db.getId());
-    TiXmlElement* configXml = initXml("TokenHeuristics.xml");
+    TiXmlElement* configXml = initXml(source);
     assertTrue(configXml != NULL, "Bad test input data.");
     for (TiXmlElement * child = configXml->FirstChildElement(); 
 	 child != NULL; 
 	 child = child->NextSiblingElement()) {
-      TokenHeuristicId heuristic = HeuristicsReader::createHeuristic(he.getId(), *child);
-      debugMsg("Test", std::endl << heuristic->toString());
+      HeuristicId heuristic = HeuristicsReader::createHeuristic(he.getId(), *child);
+      ofs << heuristic->toString() << std::endl;
       assertTrue(heuristic.isValid());
     }
 
+    ofs.close();
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -739,12 +706,12 @@ private:
    * @note Almost a copy of ConstraintEngine/test/module-tests.cc's testArbitraryCosntraints().
    */
   static bool testDNPConstraints() {
-    DEFAULT_SETUP_PLAN_HEURISTICS();
+    DEFAULT_SETUP(ce,db,false);
     std::list<ConstraintTestCase> tests;
     assertTrue(readTestCases(std::string("DNPTestCases"), tests) ||
                readTestCases(std::string("HSTS/test/DNPTestCases"), tests));
     assertTrue(executeTestCases(ce.getId(), tests));
-    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
+    DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -944,7 +911,6 @@ public:
   }
 private:
   static bool testHSTSNoBranchCondition() {
-    
     DEFAULT_SETUP(ce,db,false);
     HSTSNoBranchCondition cond(dm.getId());
     assert(dm.getConditions().size() == 1);
@@ -978,14 +944,9 @@ class HeuristicsTest {
 public:
   static bool test() {
     runTest(testDefaultInitialization);
-    runTest(testTokenInitialization);
-    runTest(testVariableInitialization);
-    runTest(testReader);
     runTest(testHSTSPlanIdReader);
     runTest(testHSTSNoBranch);
     runTest(testHSTSHeuristicsAssembly);
-    runTest(testDNPConstraints);
-    runTest(testPreferredPriority);
     runTest(testHSTSHeuristicsStrict);
     runTest(testPriorities);
     return(true);
@@ -993,148 +954,45 @@ public:
 private:
 
   static bool testDefaultInitialization() {
-    
-    DEFAULT_SETUP_HEURISTICS();
-    heuristics.setDefaultPriorityPreference(HSTSHeuristics::HIGH);
-
-    std::vector<std::pair<LabelStr,LabelStr> > domainSpecs;
-    heuristics.setDefaultPriorityForTokenDPsWithParent(20.3, LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs);
-
+    READ_HEURISTICS("HSTSAssemblyHeuristics.xml", false);
+    initHeuristicsSchema();
+    std::vector< GuardEntry > domainSpecs;
+    heuristics.setDefaultPriorityForTokenDPsWithParent(20.3, LabelStr("Commands.TakeSample"), domainSpecs);
     heuristics.setDefaultPriorityForTokenDPs(10000.0);
     
     heuristics.setDefaultPriorityForConstrainedVariableDPs(10000.0);
 
     std::vector<LabelStr> states;
-    std::vector<HSTSHeuristics::CandidateOrder> orders;
+    std::vector<TokenHeuristic::CandidateOrder> orders;
     states.push_back(Token::REJECTED);
     states.push_back(Token::MERGED);
     //    states.push_back(Token::DEFER);
     states.push_back(Token::ACTIVE);
-    orders.push_back(HSTSHeuristics::NONE);
-    orders.push_back(HSTSHeuristics::EARLY);
+    orders.push_back(TokenHeuristic::NONE);
+    orders.push_back(TokenHeuristic::EARLY);
     //    orders.push_back(HSTSHeuristics::NONE);
-    orders.push_back(HSTSHeuristics::EARLY);
+    orders.push_back(TokenHeuristic::EARLY);
     heuristics.setDefaultPreferenceForTokenDPs(states,orders);
 
-    heuristics.setDefaultPreferenceForConstrainedVariableDPs(HSTSHeuristics::ASCENDING);
+    heuristics.setDefaultPreferenceForConstrainedVariableDPs(VariableHeuristic::ASCENDING);
 
-    DEFAULT_TEARDOWN_HEURISTICS();
+    TEARDOWN();
     return true;
   }
-  static bool testTokenInitialization() {
-    
-    DEFAULT_SETUP_HEURISTICS();
-    std::vector<std::pair<LabelStr,LabelStr> > dsb;
-    dsb.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_trans"),LabelStr("NO_RIGHT")));
-    dsb.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"),LabelStr("CON")));
-    dsb.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("DES")));
-    std::vector<LabelStr> statesb;
-    statesb.push_back(Token::REJECTED);
-    statesb.push_back(Token::MERGED);
-    //    statesb.push_back(LabelStr::DEFER);
-    statesb.push_back(Token::ACTIVE);
-    std::vector<HSTSHeuristics::CandidateOrder> ordersb;
-    ordersb.push_back(HSTSHeuristics::NONE);
-    ordersb.push_back(HSTSHeuristics::NEAR);
-    //    ordersb.push_back(HSTSHeuristics::NONE);
-    ordersb.push_back(HSTSHeuristics::MIN_FLEXIBLE);
-    std::vector<std::pair<LabelStr,LabelStr> > domainSpecs;
-    heuristics.setHeuristicsForToken(334.5, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsb, HSTSHeuristics::ANY, NO_STRING,domainSpecs, statesb, ordersb);
 
-    std::vector<std::pair<LabelStr,LabelStr> > dsc;
-    dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_trans"),LabelStr("NO_RIGHT")));
-    dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"),LabelStr("CON")));
-    dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("DES")));
-    std::vector<LabelStr> statesc;
-    std::vector<HSTSHeuristics::CandidateOrder> ordersc;
-    statesc.push_back(Token::MERGED);
-    statesc.push_back(Token::ACTIVE);
-    ordersc.push_back(HSTSHeuristics::TGENERATOR);
-    ordersc.push_back(HSTSHeuristics::LATE);
-    heuristics.setHeuristicsForToken(6213.7, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsc, HSTSHeuristics::AFTER, LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs, statesc, ordersc);
-
-    std::vector<std::pair<LabelStr,LabelStr> > dsd;
-    dsd.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_trans"),LabelStr("NO_RIGHT")));
-    dsd.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"),LabelStr("SIN")));
-    dsd.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("RES")));
-    std::vector<LabelStr> statesd;
-    std::vector<HSTSHeuristics::CandidateOrder> ordersd;
-    statesd.push_back(Token::ACTIVE);
-    ordersd.push_back(HSTSHeuristics::EARLY);
-    heuristics.setHeuristicsForToken(6213.7, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsd, HSTSHeuristics::ANY, NO_STRING, domainSpecs, statesd, ordersd);
-
-    /* this rightly produces a duplicate entry error in the code 
-    std::vector<LabelStr> statese;
-    std::vector<HSTSHeuristics::CandidateOrder> orderse;
-    heuristics.setHeuristicsForToken(7652.4, ttd.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), statese, orderse);
-    */
-
-    DEFAULT_TEARDOWN_HEURISTICS();
-    return true;
-  }
-  static bool testVariableInitialization() {
-    
-    DEFAULT_SETUP_HEURISTICS();
-    /*  doesn't work because the schema doesn't agree with the data used
-	here 
-    std::vector<std::pair<LabelStr,LabelStr> > domainSpec;
-    TokenType tt(LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"),domainSpec);
-    std::vector<LabelStr> aenums;
-    heuristics.setHeuristicsForConstrainedVariable(443.6, LabelStr("with"), tt.getId(), HSTSHeuristics::ASCENDING, NO_STRING, aenums);
-
-    aenums.push_back(LabelStr("SIN"));
-    aenums.push_back(LabelStr("CON"));
-    aenums.push_back(LabelStr("SAL"));
-    aenums.push_back(LabelStr("PEP"));
-    heuristics.setHeuristicsForConstrainedVariable(443.6, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.with"), TokenTypeId::noId(), HSTSHeuristics::ENUMERATION, NO_STRING, aenums);
-
-    std::vector<LabelStr> emptyList;
-    heuristics.setHeuristicsForConstrainedVariable(2269.3, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Left.m_with"), TokenTypeId::noId(), HSTSHeuristics::VGENERATOR, LabelStr("Generator1"),emptyList);
-
-    std::vector<LabelStr> benums;
-    heuristics.setHeuristicsForConstrainedVariable(234.5, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.m_sys"), TokenTypeId::noId(), HSTSHeuristics::ENUMERATION, NO_STRING, benums);
-
-    std::vector<LabelStr> cenums;
-    cenums.push_back(LabelStr("CON"));
-    //    LabelStr parentName = stripVariableName("Made_Up_Parent_SV.Made_Up_SV.Thrust_Left.m_with");
-    LabelStr parentName = LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Left");
-    std::vector<std::pair<LabelStr,LabelStr> > cds;
-    cds.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("ON")));
-    TokenType ctt(parentName, cds);
-    heuristics.setHeuristicsForConstrainedVariable(6234.7, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.m_with"), ctt.getId(), HSTSHeuristics::ENUMERATION, NO_STRING, benums);
-    */
-    DEFAULT_TEARDOWN_HEURISTICS();
-    return true;
-  }
-  static bool testReader() {
-    
-    DEFAULT_SETUP_HEURISTICS();
-    assertTrue(heuristics.getDefaultPriorityPreference() == HSTSHeuristics::HIGH);
-    assertTrue(heuristics.getDefaultPriorityForTokenDPsWithParent(LabelStr("Navigator.At")) == 1024.5);
-    assertTrue(heuristics.getDefaultPriorityForTokenDPs() == 10.0);
-    assertTrue(heuristics.getDefaultPriorityForConstrainedVariableDPs() == 5000.0);
-    assertTrue(heuristics.getDefaultPreferenceForConstrainedVariableDPs() == HSTSHeuristics::DESCENDING);
-    //everything else requires decision points and is tested in testPriorityImpl and testOrderingImpl
-
-    DEFAULT_TEARDOWN_HEURISTICS();
-    return true;
-  }
-  static bool testHSTSPlanIdReader() {
-    
-    DEFAULT_SETUP_HEURISTICS();
+  static bool testHSTSPlanIdReader() { 
+    DEFAULT_SETUP(ce,db,true);
     initHeuristicsSchema();
 
     HSTSNoBranchId noBranchSpec(new HSTSNoBranch());
     HSTSPlanIdReader reader(noBranchSpec);
     reader.read("../core/NoBranch.pi");
 
-    DEFAULT_TEARDOWN_HEURISTICS();
+    DEFAULT_TEARDOWN();
     return true;
   }
-  static bool testHSTSNoBranch() {
-    
-    DEFAULT_SETUP_PLAN(ce,db,true);
-    initHeuristicsSchema();
+  static bool testHSTSNoBranch() {    
+    SETUP_HEURISTICS("HSTSAssemblyHeuristics.xml");
 
     HSTSNoBranchId noBranchSpec(new HSTSNoBranch());
     HSTSPlanIdReader reader(noBranchSpec);
@@ -1155,11 +1013,11 @@ private:
     const_cast<IntervalIntDomain&>(var1.getLastDomain()).intersect(IntervalIntDomain(0));
 
     assert(cond.test(var1.getId()));
-    DEFAULT_TEARDOWN_PLAN();
+    TEARDOWN();
     return true;
   }
   static bool testHSTSHeuristicsAssembly() {
-    HSTS_SETUP_PLAN_HEURISTICS();
+    SETUP_HEURISTICS("HSTSAssemblyHeuristics.xml");
 
     HSTSNoBranchId noBranchSpec(new HSTSNoBranch());
     HSTSPlanIdReader pireader(noBranchSpec);
@@ -1233,47 +1091,17 @@ private:
 
     AtSubgoalRule r("Navigator.At");
 
-    CBPlanner::Status res = planner.run();
-    assert(res == CBPlanner::PLAN_FOUND);
+    planner.run();
+
+    //CBPlanner::Status res = planner.run();
+    //assert(res == CBPlanner::PLAN_FOUND);
     planner.retract();
-    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
-    return true;
-  }
-
-  static bool testPreferredPriority() {
-    
-    DEFAULT_SETUP_PLAN(ce,db,true);
-    HSTSHeuristics heur(db.getId());
-    Priority p1 = 0.0;
-    Priority p2 = 1.0;
-
-    heur.setDefaultPriorityPreference(HSTSHeuristics::LOW);
-    check_error(heur.preferredPriority(p1, p2) == p1);
-    heur.setDefaultPriorityPreference(HSTSHeuristics::HIGH);
-    check_error(heur.preferredPriority(p1, p2) == p2);
-    DEFAULT_TEARDOWN_PLAN();
+    TEARDOWN();
     return true;
   }
 
   static bool testHSTSHeuristicsStrict() {
-    DEFAULT_SETUP_PLAN_HEURISTICS();
-
-    //read in the heuristics
-    //prefers high
-    //assigns 1024.5 priority to tokens with parent Navigator.At
-    //assigns 100.25 priority to tokens with parent Navigator.Going
-    //assigns 10.0 priority with preference to merge then activate for default token priority
-    //assigns 5000.0 priority for default variable priority
-    //assigns 6000.25 priority to variables named "to" which are parameters of Navigator.Going,
-    //        with an initial parameter of Loc1
-    //assigns 6000.5 priority to initial parameter of Commands.TakeSample
-    //assigns 6000.25 priority to initial variables of Instrument.TakeSample
-    //assigns 9000 priority to minutes parameter of Telemetry.Communicate
-    //assigns 9000 priority to mode parameter of Telemetry.Communicate
-    //assigns 443.7 priority to Navigator.At tokens
-    //assigns 200.4 priority to Commands.TakeSample with an initial parameter equal to Loc3
-    //assigns 10000.0 priority to Navigator.Going tokens with parameter 0 == Loc1, parameter 1 == Loc3
-    //                that is after a Navigator.At
+    SETUP_HEURISTICS("HSTSAssemblyHeuristics.xml");
 
     //set up the database
     Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
@@ -1311,68 +1139,69 @@ private:
     vband->specify(IntervalDomain(500.3,1200.4));
     //    tok0.addParameter(BoolDomain(), LabelStr("encoded"));  token
     //    fails to recognize BoolDomain().
-    tok0.addParameter(allModes, LabelStr("mode"));
+    ConstrainedVariableId mode = tok0.addParameter(allModes, LabelStr("mode"));
     tok0.close();
+    ce.propagate();
+    assertTrue(heuristics.getPriority(mode) ==  9000, toString(heuristics.getPriority(mode)));
+    assertTrue(heuristics.getPriority(tok0.getId()) ==  10, toString(heuristics.getPriority(tok0.getId())));
 
     //Commands.TakeSample(rock => {Loc1 Loc2 Loc3 Loc4})
     IntervalToken tok1(db.getId(),LabelStr("Commands.TakeSample"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,100), IntervalIntDomain(1,100), "com1", false);
-    tok1.addParameter(allLocs, LabelStr("rock"));
+    ConstrainedVariableId rock = tok1.addParameter(allLocs, LabelStr("rock"));
     tok1.close();
-    //ConstrainedVariableId vrock = tok1.getVariable("rock");
-    //vrock->specify(db.getObject("Loc3"));
-    tok1.activate(); //activate to cause decision point to be cretaed for parameter, should have priority 6000.5
+    ce.propagate();
+    assertTrue(heuristics.getPriority(rock) ==  6000.5, toString(heuristics.getPriority(rock)));
+
+    tok1.activate();
 
     //Instrument.TakeSample(rock = {Loc1 Loc2 Loc3 Loc4 Loc5}, priority 10.0
     IntervalToken tok2(db.getId(),LabelStr("Instrument.TakeSample"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "ins1", false);
-    tok2.addParameter(allLocs, LabelStr("rock"));
+    rock = tok2.addParameter(allLocs, LabelStr("rock"));
     tok2.close();
-
+    ce.propagate();
+    assertTrue(heuristics.getPriority(rock) ==  6000.25, toString(heuristics.getPriority(rock)));
+	      
     //Navigator.At(location = {Loc1 Loc2 Loc3 Loc4 Loc5}) priority 443.7
     IntervalToken tok3(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
-    tok3.addParameter(allLocs, LabelStr("location"));
+    ConstrainedVariableId location = tok3.addParameter(allLocs, LabelStr("location"));
     tok3.close();
+    ce.propagate();
 
-    //Navigator.Going(from = {Loc1 Loc2 Loc3 Loc4 Loc5} to = {Loc1 Loc2 Loc3 Loc4 Loc5}), priority 10.0
+    assertTrue(heuristics.getPriority(tok3.getId()) ==  443.7, toString(heuristics.getPriority(tok3.getId())));
+    assertTrue(heuristics.getPriority(location) ==  5000, toString(heuristics.getPriority(location)));
+
+    //Navigator.Going(from = {Loc1 Loc2 Loc3 Loc4 Loc5} to = {Loc1 Loc2 Loc3 Loc4 Loc5}), priority 
     IntervalToken tok4(db.getId(),LabelStr("Navigator.Going"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
-    tok4.addParameter(allLocs, LabelStr("from"));
-    tok4.addParameter(allLocs, LabelStr("to"));
+    ConstrainedVariableId from = tok4.addParameter(allLocs, LabelStr("from"));
+    ConstrainedVariableId to = tok4.addParameter(allLocs, LabelStr("to"));
     tok4.close();
+    ce.propagate();
+
+    assertTrue(heuristics.getPriority(tok4.getId()) ==  100.25, toString(heuristics.getPriority(tok4.getId())));
+    assertTrue(heuristics.getPriority(from) ==  5000, toString(heuristics.getPriority(from)));
+    assertTrue(heuristics.getPriority(to) ==  5000, toString(heuristics.getPriority(to)));
 
     //Navigator.At(location = {Loc3}), priority 443.7
     IntervalToken tok5(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
-    tok5.addParameter(allLocs, LabelStr("location"));
+    location = tok5.addParameter(allLocs, LabelStr("location"));
     tok5.close();
-    ConstrainedVariableId vatloc = tok5.getVariable("location");
-    vatloc->specify(db.getObject("Loc3"));
+    ce.propagate();
+    assertTrue(heuristics.getPriority(tok5.getId()) ==  443.7, toString(heuristics.getPriority(tok5.getId())));
+	       
+    location->specify(db.getObject("Loc5"));
+    ce.propagate();
+    assertTrue(heuristics.getPriority(tok5.getId()) ==  7.23, toString(heuristics.getPriority(tok5.getId())));
 
     AtSubgoalRule r("Navigator.At");
 
     assert(ce.propagate());
 
-    DecisionPointId d2 = odm.getNextDecision();
-    assert(TokenDecisionPointId::convertable(d2));
-
-    delete (DecisionPoint*) d2;
-    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
+    TEARDOWN();
     return true;
   }
 
-  /**
-   * Test the DNP specific constraint functions.
-   * @note Almost a copy of ConstraintEngine/test/module-tests.cc's testArbitraryCosntraints().
-   */
-  static bool testDNPConstraints() {
-    DEFAULT_SETUP_PLAN_HEURISTICS();
-    std::list<ConstraintTestCase> tests;
-    assertTrue(readTestCases(std::string("DNPTestCases"), tests) ||
-               readTestCases(std::string("HSTS/test/DNPTestCases"), tests));
-    assertTrue(executeTestCases(ce.getId(), tests));
-    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
-    return(true);
-  }
-
   static bool testPriorities() {
-    DEFAULT_SETUP_PLAN_HEURISTICS();
+    SETUP_HEURISTICS("HSTSAssemblyHeuristics.xml");
 
     Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
     Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
@@ -1395,7 +1224,8 @@ private:
     
     //create an unknown variable, priority should be 5000.0
     Variable<IntervalIntDomain> randomVar(ce.getId(), IntervalIntDomain(1, 20), true, LabelStr("randomVar"));
-    assert(heuristics.getPriorityForConstrainedVariable(randomVar.getId()) == 5000.0);
+    ce.propagate();
+    assert(heuristics.getPriority(randomVar.getId()) == 5000.0);
 
     //create Commands.TakeSample, first parameter should have priority = 6000.5
     IntervalToken takeSample(db.getId(), LabelStr("Commands.TakeSample"), false, 
@@ -1404,23 +1234,28 @@ private:
     
     takeSample.addParameter(allLocs, LabelStr("rock"));
     takeSample.close();
-    assert(heuristics.getPriorityForConstrainedVariable(takeSample.getParameters()[0]) == 6000.5);
+    ce.propagate();
+    assert(heuristics.getPriority(takeSample.getParameters()[0]) == 6000.5);
 
     //create a token not in the heuristics, priority should be 10.0, order should be merge,activate (default match)
     IntervalToken randomTok(db.getId(), LabelStr("UnaryResource.uses"), false);
-    assert(heuristics.getPriorityForObject(randomTok.getId()) == 10.0);
+    ce.propagate();
+    assert(heuristics.getPriority(randomTok.getId()) == 10.0);
 
     //create a Navigator.At, priority should be 443.7 (simple predicate match)
     IntervalToken navAt(db.getId(), LabelStr("Navigator.At"), false, IntervalIntDomain(), IntervalIntDomain(), 
                         IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
     navAt.addParameter(allLocs, LabelStr("location"));
     navAt.close();
-    assert(heuristics.getPriorityForObject(navAt.getId()) == 443.7);
+    ce.propagate();
+    assert(heuristics.getPriority(navAt.getId()) == 443.7);
     navAt.activate();
- 
-    //create a Navigator.Going with a parent of Navigator.At, priority should be 1024.5 (simple parent match)
-    IntervalToken navGoing(navAt.getId(), 
-			   LabelStr("after"), 
+
+    takeSample.activate();
+
+    //create a Navigator.Going with a parent of TakeSample, priority should be 3.14159
+    IntervalToken navGoing(takeSample.getId(), 
+			   LabelStr("before"), 
 			   LabelStr("Navigator.Going"), 
 			   IntervalIntDomain(), IntervalIntDomain(), 
                            IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
@@ -1428,22 +1263,41 @@ private:
     navGoing.addParameter(allLocs, LabelStr("from"));
     navGoing.addParameter(allLocs, LabelStr("to"));
     navGoing.close();
-    assert(heuristics.getPriorityForObject(navGoing.getId()) == 1024.5);
+    ce.propagate();
+    assertTrue(heuristics.getPriority(navGoing.getId()) == 3.14159, toString(heuristics.getPriority(navGoing.getId())));
 
     //set first parameter of Commands.TakeSample to loc3, priority should be 200.4 (simple variable match)
     takeSample.getParameters()[0]->specify(loc3.getId());
-    assert(heuristics.getPriorityForObject(takeSample.getId()) == 200.4);
+    ce.propagate();
+    assert(heuristics.getPriority(takeSample.getId()) == 200.4);
 
     //set Navigator.Going "from" parameter to Loc1, parameter "to" should have priority 6000.25 (more complex variable match)
     navGoing.getParameters()[0]->specify(loc1.getId());
-    assert(heuristics.getPriorityForConstrainedVariable(navGoing.getParameters()[1]) == 6000.25);
+    ce.propagate();
+    assert(heuristics.getPriority(navGoing.getParameters()[1]) == 6000.25);
 
-    //set Navigator.Going "to" parameter to Loc3, priority should be 10000 (parent relation match)
+    //set Navigator.Going "to" parameter to Loc3. Should not change, because of the master relation being 'before'
     navGoing.getParameters()[1]->specify(loc3.getId());
-    assert(heuristics.getPriorityForObject(navGoing.getId()) == 10000.0);    
+    ce.propagate();
+    assert(heuristics.getPriority(navGoing.getParameters()[1]) == 6000.25);
 
+    {
+      //create a Navigator.Going with a parent of TakeSample, priority should be 3.14159
+      IntervalToken newNavGoing(takeSample.getId(), 
+				LabelStr("after"), 
+				LabelStr("Navigator.Going"), 
+				IntervalIntDomain(), IntervalIntDomain(), 
+				IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
 
-    takeSample.activate();
+      newNavGoing.addParameter(allLocs, LabelStr("from"));
+      newNavGoing.addParameter(allLocs, LabelStr("to"));
+      newNavGoing.close();
+      newNavGoing.getParameters()[0]->specify(loc1.getId());
+      newNavGoing.getParameters()[1]->specify(loc3.getId());
+      ce.propagate();
+      assert(heuristics.getPriority(newNavGoing.getId()) == 10000.0);
+    }
+
     IntervalToken testPreferMerge(takeSample.getId(), LabelStr("before"), 
 				  LabelStr("Navigator.Going"), IntervalIntDomain(), IntervalIntDomain(),
 				  IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
@@ -1466,13 +1320,13 @@ private:
 				     testPreferMerge.getId(), 
 				     planner.getDecisionManager()->getOpenDecisionManager());
 
-    assert(heuristics.getPriorityForToken(testPreferMerge.getId()) == 3.14159);
+    assert(heuristics.getPriority(testPreferMerge.getId()) == 3.14159);
     TokenDecisionPointId mergeDPId = (TokenDecisionPointId) preferMergeDP.getId();
     planner.getDecisionManager()->getOpenDecisionManager()->initializeChoices(mergeDPId);
     const std::vector<LabelStr>& choices = preferMergeDP.getChoices();
     assertTrue(choices.size() == 1, toString(choices.size()));
     assertTrue(choices[0] == Token::MERGED);
-    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
+    TEARDOWN();
     return true;
   }
 };

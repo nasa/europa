@@ -73,6 +73,7 @@ using namespace EUROPA;
 
 class TestError {
 public:
+  DECLARE_STATIC_CLASS_CONST(char*, TEST_CONST, "TestData");
   DECLARE_ERROR(BadThing);
 };
 
@@ -84,6 +85,7 @@ public:
   }
 private:
   static bool testExceptions() {
+    assertTrue(strcmp(TestError::TEST_CONST(), "TestData") == 0);
     bool success = true;
     Error::doThrowExceptions();
     int var = 1;

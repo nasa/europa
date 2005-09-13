@@ -1,7 +1,8 @@
 #include "TokenVariable.hh"
 #include "HSTSOpenDecisionManager.hh"
 #include "Object.hh"
-#include "HSTSHeuristics.hh"
+#include "HeuristicsEngine.hh"
+#include "Heuristic.hh"
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "TokenDecisionPoint.hh"
 #include "ObjectDecisionPoint.hh"
@@ -11,7 +12,7 @@
 namespace EUROPA {
 
   HSTSOpenDecisionManager::HSTSOpenDecisionManager(const PlanDatabaseId& db, 
-						   const HSTSHeuristicsId& heur, 
+						   const HeuristicsEngineId& heur, 
 						   bool strictHeuristics)
     : OpenDecisionManager(db), m_heur(heur), m_strictHeuristics(strictHeuristics) {
     checkError(strictHeuristics, "Loose heuristics are not supported.");
@@ -24,21 +25,21 @@ namespace EUROPA {
    * @param var The given unbound variable
    */
   Priority HSTSOpenDecisionManager::getPriorityForUnboundVariable(const ConstrainedVariableId& var) const {
-    return m_heur->getPriorityForConstrainedVariable(var);
+    return m_heur->getPriority(var);
   }
 
   /**
    * @brief Obtain the heuristic value for the given inactive token.
    */
   Priority HSTSOpenDecisionManager::getPriorityForOpenCondition(const TokenId& token) const {
-    return m_heur->getPriorityForToken(token);
+    return m_heur->getPriority(token);
   }
 
   /**
    * @brief Obtain the heuristic value for the given threatened token (one that requires ordering)
    */
   Priority HSTSOpenDecisionManager::getPriorityForThreat(const TokenId& token) const {
-    return m_heur->getPriorityForObject(token);
+    return m_heur->getPriority(token);
   }
 
   void HSTSOpenDecisionManager::initializeTokenChoices(const TokenDecisionPointId& tdp) {
@@ -49,14 +50,17 @@ namespace EUROPA {
     if (tdp->m_choices.empty()) return;
 
     std::list<LabelStr> states;
-    HSTSHeuristics::CandidateOrder order = HSTSHeuristics::UNKNOWN;
-    m_heur->getOrderedStatesForToken(tdp->getToken(), states, order);
+    TokenHeuristic::CandidateOrder order = TokenHeuristic::UNKNOWN;
+    m_heur->getChoices(tdp->getToken(), states, order);
 
-    check_error (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::FAR || order == HSTSHeuristics::EARLY || order == HSTSHeuristics::LATE || order == HSTSHeuristics::NONE, "Unable to handle cases other than late, early, near, far, none.");
+    checkError (order == TokenHeuristic::NEAR || order == TokenHeuristic::FAR || 
+		order == TokenHeuristic::EARLY || order == TokenHeuristic::LATE || order == TokenHeuristic::NONE,
+		 "Unable to handle cases other than late, early, near, far, none. " << 
+		 TokenHeuristic::candidateOrderStrings()[order]);
     
     debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tdp->getKey() << ") for Token (" << tdp->getToken()->getKey() << ") has " << tdp->m_choices.size() + tdp->m_compatibleTokens.size() << " choices.");
     
-    if (order == HSTSHeuristics::NONE) {
+    if (order == TokenHeuristic::NONE) {
       debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tdp->getKey() << ") for Token (" << tdp->getToken()->getKey() << ") has best choice =  " << LabelStr(tdp->m_choices[0]).toString());
       return;
     }
@@ -128,7 +132,7 @@ namespace EUROPA {
     int number;
     current = 0;
 
-    if (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::EARLY) {
+    if (order == TokenHeuristic::NEAR || order == TokenHeuristic::EARLY) {
       debugMsg("HSTS:OpenDecisionManager:getNextChoice", "NEAR || EARLY");
       numberToBeat = MAX_FINITE_TIME;
       for (unsigned int i = current; i != tdp->m_compatibleTokens.size(); ++i) {
@@ -136,7 +140,7 @@ namespace EUROPA {
         if (token.isNoId()) 
           number = MAX_FINITE_TIME;
         else {
-          if (order == HSTSHeuristics::NEAR) {
+          if (order == TokenHeuristic::NEAR) {
             debugMsg("HSTS:OpenDecisionManager:getNextChoice", "NEAR");
             number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)tdp->getToken()->getStart()->lastDomain().getLowerBound()) +
               abs((int)token->getStart()->lastDomain().getUpperBound() - (int)tdp->getToken()->getStart()->lastDomain().getUpperBound());
@@ -168,7 +172,7 @@ namespace EUROPA {
         if (token.isNoId()) 
           number = MAX_FINITE_TIME;
         else {
-          if (order == HSTSHeuristics::FAR) {
+          if (order == TokenHeuristic::FAR) {
             debugMsg("HSTS:OpenDecisionManager:getNextChoice","FAR");
             number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)tdp->getToken()->getStart()->lastDomain().getLowerBound()) +
               abs((int)token->getStart()->lastDomain().getUpperBound() - (int)tdp->getToken()->getStart()->lastDomain().getUpperBound());
@@ -211,7 +215,7 @@ namespace EUROPA {
       if (values.empty()) return;
       
       std::list<double> domain;
-      m_heur->getOrderedDomainForConstrainedVariable(vdp->m_var, domain);
+      m_heur->getChoices(vdp->m_var, domain);
       if (domain.empty() || values.size() == 1) {
         for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
           double value = (*it);
@@ -236,14 +240,17 @@ namespace EUROPA {
 
     if (odp->m_choices.empty()) return;
 
-    HSTSHeuristics::CandidateOrder order = HSTSHeuristics::UNKNOWN;
-    m_heur->getOrderForObject(odp->getToken(), order);
+    TokenHeuristic::CandidateOrder order = TokenHeuristic::UNKNOWN;
+    m_heur->getChoices(odp->getToken(), order);
 
-    check_error (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::FAR || order == HSTSHeuristics::EARLY || order == HSTSHeuristics::LATE || order == HSTSHeuristics::NONE, "Unable to handle cases other than late, early, near, far.");
+    checkError (order == TokenHeuristic::NEAR || order == TokenHeuristic::FAR || 
+		order == TokenHeuristic::EARLY || order == TokenHeuristic::LATE || order == TokenHeuristic::NONE, 
+		"Unable to handle cases other than late, early, near, far. " <<
+		TokenHeuristic::candidateOrderStrings()[order]);
     
     debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << odp->getKey() << ") sorting choices according to order = " << order);
 
-    if (order == HSTSHeuristics::NONE) {
+    if (order == TokenHeuristic::NONE) {
       debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << odp->getKey()  << ") with Token (" << odp->getToken()->getKey() << ") has best choice =  Obj (" << odp->m_choices[0].first->getKey() << ") Pred (" << odp->m_choices[0].second.first->getKey() << ") Succ (" << odp->m_choices[0].second.second->getKey() << ")");
       return;
     }
@@ -254,7 +261,7 @@ namespace EUROPA {
     int numberToBeat;
     int number;
 
-    if (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::EARLY) {
+    if (order == TokenHeuristic::NEAR || order == TokenHeuristic::EARLY) {
       numberToBeat = MAX_FINITE_TIME;
       for (unsigned int i = current; i != odp->m_choices.size(); ++i) {
         TokenId token;
@@ -265,7 +272,7 @@ namespace EUROPA {
         if (token.isNoId()) 
           number = MAX_FINITE_TIME;
         else {
-          if (order == HSTSHeuristics::NEAR) {
+          if (order == TokenHeuristic::NEAR) {
             //	  std::cout << "NEAR" << std::endl;
             number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)odp->m_token->getStart()->lastDomain().getLowerBound()) +
               abs((int)token->getStart()->lastDomain().getUpperBound() - (int)odp->m_token->getStart()->lastDomain().getUpperBound());
@@ -298,7 +305,7 @@ namespace EUROPA {
         if (token.isNoId()) 
           number = MAX_FINITE_TIME;
         else {
-          if (order == HSTSHeuristics::FAR) {
+          if (order == TokenHeuristic::FAR) {
             //	  std::cout << "FAR" << std::endl;
             number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)odp->m_token->getStart()->lastDomain().getLowerBound()) +
               abs((int)token->getStart()->lastDomain().getUpperBound() - (int)odp->m_token->getStart()->lastDomain().getUpperBound());

@@ -1304,9 +1304,11 @@ namespace EUROPA {
 	    stream << ObjectId(*it)->getName().toString() << " ";
 	  }
 	}
-	if(streamIsEmpty(stream)) {
-	  return "bugStr";
-	}
+
+	//BUG: WHAT IS THIS
+	//if(streamIsEmpty(stream)) {
+	//  return "bugStr";
+	//}
 	return std::string(stream.str());
       }
 

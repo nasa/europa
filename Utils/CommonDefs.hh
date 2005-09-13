@@ -11,7 +11,18 @@
 
 #include "Error.hh"
 
-#define streamIsEmpty(s) ((s).str() == "")
+#define streamIsEmpty(s) ((s).str() == ")"
+
+/**
+ * @def DEFINE_CLASS_CONST(TYPE,NAME)
+ * @brief Declare and define class scoped constant to ensure initialization
+ * occurs before use with all linkers.
+ */
+#define DECLARE_STATIC_CLASS_CONST(TYPE, NAME, VALUE) \
+  static const TYPE& NAME() { \
+    static const TYPE sl_data(VALUE); \
+    return(sl_data); \
+  }
 
 /**
  * @def DECLARE_GLOBAL_CONST(TYPE,NAME)

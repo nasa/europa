@@ -3,14 +3,14 @@
 
 #include "CBPlannerDefs.hh"
 #include "OpenDecisionManager.hh"
-#include "HSTSHeuristics.hh"
+#include "HSTSDefs.hh"
 
 namespace EUROPA {
 
   class HSTSOpenDecisionManager : public OpenDecisionManager {
   public:
 
-    HSTSOpenDecisionManager(const PlanDatabaseId& db, const HSTSHeuristicsId& heur, bool strictHeuristics = true);
+    HSTSOpenDecisionManager(const PlanDatabaseId& db, const HeuristicsEngineId& heur, bool strictHeuristics = true);
 
     ~HSTSOpenDecisionManager();
     
@@ -38,7 +38,7 @@ namespace EUROPA {
 
     virtual void initializeObjectChoices(const ObjectDecisionPointId& odp);
 
-    HSTSHeuristicsId m_heur; /*!< Used to compute priorities */ 
+    HeuristicsEngineId m_heur; /*!< Used to compute priorities */ 
 
     bool m_strictHeuristics; /*!< if this flag is true, we ignore the implicit deicision heuristic order of
                               object, unit variable, token, non-unit variable and instead follow
