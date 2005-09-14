@@ -81,7 +81,7 @@ namespace EUROPA {
       // Note that we also test if any factories are registered. This is required since we may test
       // against a plan database that does not have factories allocated and does not therefore
       // support automatic allocation of new tokens.
-      if(m_tok->getState()->lastDomain().isMember(MERGED) && m_dbClient->supportsAutomaticAllocation()) {
+      if(m_tok->getState()->lastDomain().isMember(Token::MERGED) && m_dbClient->supportsAutomaticAllocation()) {
         debugMsg("TokenDecisionPoint", "Creating new base token and merging onto it for " << m_tok->getPredicateName().toString());
         m_dbClient->merge(m_tok);
       }
