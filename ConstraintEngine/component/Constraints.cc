@@ -1259,7 +1259,9 @@ namespace EUROPA {
     check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[2]),
                                               getCurrentDomain(m_variables[3])));
   }
-
+  /**
+   * @brief if B in C then restrict A to D:
+   */
   void MemberImplyConstraint::handleExecute() {
     AbstractDomain& domA(getCurrentDomain(m_variables[0]));
     AbstractDomain& domB(getCurrentDomain(m_variables[1]));
@@ -1270,8 +1272,8 @@ namespace EUROPA {
     
     if (domA.isOpen() || domB.isOpen() || domD.isOpen())
       return;
-    if (domA.isSubsetOf(domB))
-      (void)domC.intersect(domD);
+    if (domB.isSubsetOf(domC))
+      (void) domA.intersect(domD);
   }
 
   CountZerosConstraint::CountZerosConstraint(const LabelStr& name,
