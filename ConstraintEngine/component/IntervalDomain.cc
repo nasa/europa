@@ -151,18 +151,22 @@ namespace EUROPA {
   }
 
   bool IntervalDomain::intersects(const AbstractDomain& dom) const {
+    debugMsg("IntervalDomain:intersects", "Testing intersection of [" << dom.getLowerBound() << " " << dom.getUpperBound() << "] with this domain [" << m_lb << " "  << m_ub << "]");
     safeComparison(*this, dom);
     check_error(!isOpen());
     check_error(!dom.isEmpty());
 
     double ub = dom.getUpperBound();
-    if(ub < m_lb)
+    if(ub < m_lb) {
+      debugMsg("IntervalDomain:intersects", "fail, ub < m_lb");
       return false;
-
+    }
     double lb = dom.getLowerBound();
-    if(lb > m_ub)
+    if(lb > m_ub) {
+      debugMsg("IntervalDomain:intersects", "fail lb > m_ub"); 
       return false;
-
+    }
+    debugMsg("IntervalDomain:intersects", "success - domains intersect");
     return true;
   }
 
@@ -236,8 +240,7 @@ namespace EUROPA {
   }
 
   bool IntervalDomain::intersect(double lb, double ub) {
-    debugMsg("IntervalDomain:intersect", "Testing intersection of [" << lb << " " << ub << "] with this domain [" << m_lb << " "  << m_ub << "]");
-
+  
     // Test for empty intersection while accounting for precision/rounding errors.
     if ((lb > ub && (lb-ub > EPSILON)) || m_lb - ub >= minDelta() || lb - m_ub >= minDelta()) {
       empty();
@@ -245,19 +248,16 @@ namespace EUROPA {
     }
 
     bool ub_decreased(false);
-    debugMsg("IntervalDomain:intersect", "ub_decreased = false");
     if (ub < m_ub) {
       m_ub = safeConversion(ub);
       ub_decreased = true;
-      debugMsg("IntervalDomain:intersect", "ub_decreased = true");
+   
     }
 
     bool lb_increased(false);
-     debugMsg("IntervalDomain:intersect", "lb_increased = false");
     if (lb > m_lb) {
       m_lb = safeConversion(lb);
       lb_increased = true;
-      debugMsg("IntervalDomain:intersect", "lb_increased = true");
     }
 
     // Select the strongest message applicable.
@@ -276,8 +276,8 @@ namespace EUROPA {
           if (ub_decreased)
             notifyChange(DomainListener::UPPER_BOUND_DECREASED);
 
-    debugMsg("IntervalDomain:intersect", "returning lb_increased || ub_decreased");
     return(lb_increased || ub_decreased);
+   
   }
 
   bool IntervalDomain::relax(double lb, double ub) {
