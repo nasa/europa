@@ -62,7 +62,6 @@ namespace EUROPA {
       // Note that we also test if any factories are registered. This is required since we may test
       // against a plan database that does not have factories allocated and does not therefore
       // support automatic allocation of new tokens.
-      /*
       if(m_tok->getState()->lastDomain().isMember(Token::MERGED) && 
 	 m_dbClient->supportsAutomaticAllocation()) {
         debugMsg("TokenDecisionPoint", 
@@ -73,9 +72,6 @@ namespace EUROPA {
         debugMsg("TokenDecisionPoint", "Activating token " << m_tok->getPredicateName().toString());
         m_dbClient->activate(m_tok);
       }
-      */
-      debugMsg("TokenDecisionPoint", "Activating token " << m_tok->getPredicateName().toString());
-      m_dbClient->activate(m_tok);
     }
     else if(state == Token::REJECTED) {
       debugMsg("TokenDecisionPoint", "Rejecting token " << m_tok->getPredicateName().toString());
