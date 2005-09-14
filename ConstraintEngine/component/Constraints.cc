@@ -1272,7 +1272,7 @@ namespace EUROPA {
     
     if (domA.isOpen() || domB.isOpen() || domD.isOpen())
       return;
-    if (domB.isSubsetOf(domC))
+    if (domC.isSubsetOf(domB))
       (void) domA.intersect(domD);
   }
 
