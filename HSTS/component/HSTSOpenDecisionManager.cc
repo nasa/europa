@@ -67,6 +67,7 @@ namespace EUROPA {
 
     debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Clearing unavailable states from the potential state list.");
 
+    // TODO: Remove this streaming and place inside the guard of a debug message!
     std::stringstream data1;
     for(std::list<LabelStr>::const_iterator it = states.begin(); it != states.end(); ++it) {
       data1 << " " << (*it).toString();
@@ -78,8 +79,6 @@ namespace EUROPA {
     debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Allowable states:" << data1.str());
     debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Available states: " << data2.str());
     
-
-
     for(std::list<LabelStr>::iterator it = states.begin(); it != states.end(); ++it) {
       bool found = false;
       for(std::vector<LabelStr>::iterator cit = tdp->m_choices.begin(); cit != tdp->m_choices.end(); ++cit) {
@@ -329,6 +328,15 @@ namespace EUROPA {
     }
 
     debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << odp->getKey()  << ") with Token (" << odp->getToken()->getKey() << ") has best choice =  Obj (" << odp->m_choices[0].first->getKey() << ") Pred (" << odp->m_choices[0].second.first->getKey() << ") Succ (" << odp->m_choices[0].second.second->getKey() << ")");
+  }
+
+
+  const Priority& HSTSOpenDecisionManager::bestCasePriority() const {
+    return m_heur->bestCasePriority();
+  }
+
+  const Priority& HSTSOpenDecisionManager::worstCasePriority() const {
+    return m_heur->worstCasePriority();
   }
 
   bool HSTSOpenDecisionManager::betterThan(const Priority p1, const Priority p2) const {

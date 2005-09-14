@@ -38,6 +38,10 @@ namespace EUROPA {
 
     virtual void initializeObjectChoices(const ObjectDecisionPointId& odp);
 
+    const Priority& worstCasePriority() const;
+
+    const Priority&  bestCasePriority() const;
+
     bool betterThan(const Priority p1, const Priority p2) const;
 
     HeuristicsEngineId m_heur; /*!< Used to compute priorities */ 
