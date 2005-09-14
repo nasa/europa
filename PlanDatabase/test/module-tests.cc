@@ -2658,6 +2658,7 @@ public:
     runTest(testBasicAllocation);
     runTest(testPathBasedRetrieval);
     runTest(testGlobalVariables);
+    runTest(testReferenceCounting);
     return true;
   }
 private:
@@ -2806,6 +2807,94 @@ private:
     assertFalse(client->propagate());
 
     DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testReferenceCounting(){
+
+    initDbTestSchema(SCHEMA);
+    PlanDatabase db(ENGINE, SCHEMA);
+    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    db.close(); 
+
+    DbClientId dbClient = db.getClient();                                                                         
+  
+    IntervalToken t1(db.getId(),  
+                     DEFAULT_PREDICATE(),                                                     
+                     true,                                                               
+                     IntervalIntDomain(0, 10),                                           
+                     IntervalIntDomain(0, 20),                                           
+                     IntervalIntDomain(1, 1000));                                        
+  
+    IntervalToken t2(db.getId(),                                                         
+                     DEFAULT_PREDICATE(),                                                     
+                     true,                                                               
+                     IntervalIntDomain(0, 10),                                           
+                     IntervalIntDomain(0, 20),                                           
+                     IntervalIntDomain(1, 1000));    
+
+    // Base case, normal merge and activation
+    dbClient->activate(t1.getId());
+    check_error(!t1.canBeCommitted());
+
+    dbClient->merge(t2.getId(), t1.getId());
+    assertTrue(t1.isActive());
+    check_error(!t1.canBeCommitted());
+    assertTrue(t2.isMerged());
+    assertTrue(db.getTokens().size() == 2);
+    assertTrue(t1.getMergedTokens().find(t2.getId()) != t1.getMergedTokens().end(), "Should be hooked up.");
+
+    // Now force a split by deactivation of the active token
+    dbClient->cancel(t2.getId());
+    dbClient->propagate();
+    assertTrue(t2.isInactive());
+
+    // Now do again, but with the operation that allocates a new token under the covers
+    dbClient->merge(t2.getId());
+    assertTrue(db.getTokens().size() == 3, "Extra token expected.");
+
+    TokenId newToken = t2.getActiveToken();
+    check_error(newToken->canBeCommitted(), "Should be able to commit this token.");
+    assertTrue(t2.isMerged());
+    assertTrue(newToken.isValid() && newToken->isActive() && newToken->getMaster().isNoId());
+ 
+    // Now cancel the merge and expect we lose a token
+    assertTrue(ENGINE->propagate()); 
+    dbClient->cancel(t2.getId());
+    assertTrue(db.getTokens().size() == 2, "Extra token deleted.");
+    assertTrue(t2.isInactive());
+
+    // Repeat last sequence, but delete the new token to force a split
+    dbClient->merge(t2.getId());
+    assertTrue(db.getTokens().size() == 3, "Extra token expected.");
+    assertTrue(t2.isMerged());
+    newToken = t2.getActiveToken();
+    delete (Token*) newToken;
+    assertTrue(db.getTokens().size() == 2, "Extra token deleted.");
+    assertTrue(t2.isInactive());
+
+    // OK, repeat, but commit it. This should not be removed when we cancel
+    dbClient->merge(t2.getId());
+    newToken = t2.getActiveToken();
+    newToken->commit();
+    assertTrue(t2.isMerged());
+    assertTrue(db.getTokens().size() == 3, "Extra token expected");
+    dbClient->cancel(t2.getId());
+    assertTrue(t2.isInactive());
+    assertTrue(db.getTokens().size() == 3, "Extra token still expected");
+
+    // Cleanup
+    delete (Token*) newToken;
+
+    // Finnaly, repeat last one excelt delete the new token before cancelling to make sure you
+    // get a split automatically as it unwinds.
+    dbClient->merge(t2.getId());
+    newToken = t2.getActiveToken();
+    newToken->commit();
+    assertTrue(t2.isMerged());
+    delete (Token*) newToken;
+    assertTrue(t2.isInactive());
+
     return true;
   }
 };
