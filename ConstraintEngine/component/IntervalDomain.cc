@@ -151,19 +151,22 @@ namespace EUROPA {
   }
 
   bool IntervalDomain::intersects(const AbstractDomain& dom) const {
-    debugMsg("IntervalDomain:intersects", "Testing intersection of [" << dom.getLowerBound() << " " << dom.getUpperBound() << "] with this domain [" << m_lb << " "  << m_ub << "]");
+    debugMsg("IntervalDomain:intersects", "Testing intersection of " << dom.toString() << " with this domain [" << m_lb << " "  << m_ub << "]");
     safeComparison(*this, dom);
     check_error(!isOpen());
     check_error(!dom.isEmpty());
 
     double ub = dom.getUpperBound();
-    if(ub < m_lb) {
-      debugMsg("IntervalDomain:intersects", "fail, ub < m_lb");
+   
+    if( (ub + EPSILON) < m_lb ) {
+      debugMsg("IntervalDomain:intersects", "failed because ub is less than m_lb. Where ub= " << ub << " m_lb= " << m_lb  );
       return false;
     }
+   
     double lb = dom.getLowerBound();
-    if(lb > m_ub) {
-      debugMsg("IntervalDomain:intersects", "fail lb > m_ub"); 
+
+    if( (lb - EPSILON) > m_ub ) {
+      debugMsg("IntervalDomain:intersects", "failed because lb is greater than m_ub. Where lb = " << lb << " m_ub " << m_ub ); 
       return false;
     }
     debugMsg("IntervalDomain:intersects", "success - domains intersect");
