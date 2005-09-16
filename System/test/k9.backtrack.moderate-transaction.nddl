@@ -9,7 +9,7 @@
 #include "k9.model.backtrack.moderate.nddl"
 #include "../../NDDL/core/PlannerConfig.nddl"
 
-PlannerConfig world = new PlannerConfig(0,500,100);
+PlannerConfig world = new PlannerConfig(0,500,1000);
 
 Rover rover = new Rover(1000.0);
 

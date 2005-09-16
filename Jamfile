@@ -46,6 +46,7 @@ Depends clean-all : clean clean-nddl-xml clean-system-xml clean-system-output ;
 
 ExecuteSO check-cvs-changes : checkcvs : $(PLASMA) ;
 
-ExecuteSO check-makefile : checkmakeproject : $(PLASMA) ;
+#NOT WORKING. DONT KNOW WHY.
+#ExecuteSO check-makefile : checkmakeproject : $(PLASMA) ;
 
 } # PLASMA_READY

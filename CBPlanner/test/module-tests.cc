@@ -174,7 +174,7 @@ public:
 #define DEFAULT_TEARDOWN()
 
 #define DEFAULT_SETUP_PLAN(ce, db, autoClose) \
-  SETUP_HEURISTICS("DefaultHeuristics.xml") \
+  SETUP_HEURISTICS("../../HeuristicsEngine/test/DefaultHeuristics.xml") \
   initCBPTestSchema();			    \
   planner.getDecisionManager()->getOpenDecisionManager()->initializeIfNeeded(); \
   if (autoClose) \
