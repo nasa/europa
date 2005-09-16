@@ -1156,6 +1156,13 @@ private:
     return true;
   }
 
+  /**
+   * @todo
+   */
+  static bool testStatePruning(){
+    return true;
+  }
+
   static bool testVariableValueOrderingChoices(){
     DEFAULT_SETUP(ce,db,false);      
     // Want a bunch of objects - note the names will not match the keys. 
