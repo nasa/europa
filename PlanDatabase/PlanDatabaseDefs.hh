@@ -63,6 +63,12 @@ namespace EUROPA {
 
   typedef std::pair<LabelStr, const AbstractDomain*> ConstructorArgument;
 
+  /**
+   * @brief Used for returning ordering choices for tokens on objects
+   */
+  typedef std::pair< ObjectId, std::pair<TokenId, TokenId> > OrderingChoice;
+
+
   DECLARE_GLOBAL_CONST(std::string, g_ClassDelimiter);
 
 #define CLASS_DELIMITER (EUROPA::g_ClassDelimiter())
