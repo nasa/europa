@@ -1,6 +1,7 @@
 #include "DynamicInfiniteRealCondition.hh"
 #include "AbstractDomain.hh"
 #include "ConstrainedVariable.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -18,6 +19,9 @@ namespace EUROPA {
     const AbstractDomain& dom = var->lastDomain();
     if (dom.isOpen() || dom.isInfinite())
       passed = false;
+
+    debugMsg("DynamicInfiniteRealCondition:test", var->toString() << (passed ? " PASSED" : "FAILED"));
+
     return passed;
   } 
 	      

@@ -2,7 +2,7 @@ SubDir PLASMA Utils ;
 
 if ! $(PLASMA_READY) {
 
-Module Utils ;
+Module Utils : TinyXml ;
 
 ModuleLibraries Utils : $(DLOPEN_LIBRARY) ;
 

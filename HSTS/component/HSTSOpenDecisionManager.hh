@@ -3,7 +3,7 @@
 
 #include "CBPlannerDefs.hh"
 #include "DefaultOpenDecisionManager.hh"
-#include "HSTSHeuristics.hh"
+#include "HeuristicsEngine.hh"
 
 namespace EUROPA {
 
@@ -12,14 +12,25 @@ namespace EUROPA {
   class HSTSOpenDecisionManager : public DefaultOpenDecisionManager {
   public:
 
-    HSTSOpenDecisionManager(const DecisionManagerId& dm, const HSTSHeuristicsId& heur, const bool strictHeuristics = false);
+    HSTSOpenDecisionManager(const DecisionManagerId& dm, const HeuristicsEngineId& heur, const bool strictHeuristics = false);
     ~HSTSOpenDecisionManager();
 
     virtual DecisionPointId getNextDecision();
 
-    virtual void initializeTokenChoices(TokenDecisionPointId& tdp);
-    virtual void initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp);
-    virtual void initializeObjectChoices(ObjectDecisionPointId& odp);
+
+    /**
+     * Helper method to establish the base set of token choices. No Pruning.
+     */
+    void initializeTokenChoicesInternal(const TokenDecisionPointId& tdp);
+
+    /**
+     * Helper method to establish the base set of object choices. No Pruning.
+     */
+    void initializeObjectChoicesInternal(const ObjectDecisionPointId& odp);
+
+    virtual void initializeTokenChoices(const TokenDecisionPointId& tdp);
+    virtual void initializeVariableChoices(const ConstrainedVariableDecisionPointId& vdp);
+    virtual void initializeObjectChoices(const ObjectDecisionPointId& odp);
     
   protected:
     friend class DecisionManager;
@@ -31,16 +42,16 @@ namespace EUROPA {
     virtual void condAddActive(const TokenId& token);
     virtual void removeActive(const TokenId& tok, const bool deleting);
 
-    virtual void getBestObjectDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
-    virtual void getBestTokenDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
-    virtual void getBestUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
-    virtual void getBestNonUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp);
+    virtual void getBestObjectDecision(DecisionPointId& bestDec, Priority& bestp);
+    virtual void getBestTokenDecision(DecisionPointId& bestDec, Priority& bestp);
+    virtual void getBestUnitVariableDecision(DecisionPointId& bestDec, Priority& bestp);
+    virtual void getBestNonUnitVariableDecision(DecisionPointId& bestDec, Priority& bestp);
     DecisionPointId getNextDecisionLoose();
     DecisionPointId getNextDecisionStrict();
 
     ObjectDecisionSet m_sortedObjectDecs;
 
-    HSTSHeuristicsId m_heur;
+    HeuristicsEngineId m_heur;
     bool m_strictHeuristics; /*<! if this flag is true, we ignore the implicit deicision heuristic order of
                               object, unit variable, token, non-unit variable and instead follow
                              the heuristics directly, with the exception of preferring unit variable decisions over all others.*/
