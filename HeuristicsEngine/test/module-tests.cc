@@ -654,6 +654,7 @@ public:
     runTest(testPriorities);
     runTest(testTokenOrderingCalculations);
     runTest(testTokenOrdering);
+    runTest(testTokenOrderingChoices);
     return(true);
   }
 
@@ -1008,6 +1009,16 @@ private:
     return true;
   }
 
+
+
+  static int earliest(const TokenId& orderingChoice){
+    return (int) orderingChoice->getStart()->lastDomain().getLowerBound();
+  }
+
+  static int earliest(const Token& orderingChoice){
+    return earliest(orderingChoice.getId());
+  }
+
   static bool testTokenOrdering(){
     DEFAULT_SETUP(ce,db,false);      
     Object o1(db.getId(), "Object", "o1");
@@ -1018,17 +1029,18 @@ private:
     IntervalToken referenceToken(db.getId(),  
 				 "Object.PredicateA",                                                     
 				 true,                                                               
-				 IntervalIntDomain(-50, 10),                                           
-				 IntervalIntDomain(40, 50),                                           
+				 IntervalIntDomain(-50, -50),                                           
+				 IntervalIntDomain(0, 0),                                           
 				 IntervalIntDomain(1, PLUS_INFINITY));
 
-    // Allocate tokens to span before and after the refrence token
+    // Allocate tokens to span before and after the refrence token, but not symmetrically so we can
+    // be specific in picking best and worst
     const int baseTime(-500);
     const int increment(50);
     const int tokenCount(20);
     int newBase(baseTime);
     for(int i = 0; i < tokenCount; i++){
-      newBase = newBase + (i*increment);
+      newBase = baseTime + i * increment;
       TokenId token = (new IntervalToken(db.getId(),  
 					 "Object.PredicateA",                                                     
 					 true,                                                               
@@ -1038,12 +1050,108 @@ private:
       tokensToOrder.push_back(token);
     }
 
-    // LATE: Ensure the first token is the last in the sequence
+    // LATE: Ensure the earliest token is the last in the sequence. and latest is first
     TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::LATE);
-    assertTrue(tokensToOrder.back()->getStart()->lastDomain().getLowerBound() == baseTime,
-	       tokensToOrder.back()->getStart()->lastDomain().toString());
+    assertTrue(earliest(tokensToOrder.back()) == baseTime);
+    assertTrue(earliest(tokensToOrder[0]) == baseTime + (increment * (tokenCount-1)),
+	       toString(earliest(tokensToOrder.back()))); 
+
+    // EARLY && NONE: Ensure the opposite
+    TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::EARLY);
+    assertTrue(earliest(tokensToOrder.back()) == baseTime + (increment * (tokenCount-1)));
+    assertTrue(earliest(tokensToOrder[0]) == baseTime,
+	       toString(earliest(tokensToOrder.back()))); 
+
+    TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::NONE);
+    assertTrue(earliest(tokensToOrder.back()) == baseTime + (increment * (tokenCount-1)));
+    assertTrue(earliest(tokensToOrder[0]) == baseTime,
+	       toString(earliest(tokensToOrder.back()))); 
+
+    // NEAR: First should be the same bounds. Latest should be either extreme.
+    TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::NEAR);
+    assertTrue(earliest(tokensToOrder[0]) ==  earliest(referenceToken));
+    assertTrue(abs((int) (earliest(tokensToOrder.back()))) == abs(baseTime + increment),
+	       toString(earliest(tokensToOrder.back())));
+
+    // FAR: The opposite of near
+    TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::FAR);
+    assertTrue(earliest(tokensToOrder.back()) == earliest(referenceToken));
+    assertTrue(abs((int) (earliest(tokensToOrder[0]))) == abs(baseTime + increment),
+	       toString(earliest(tokensToOrder[0])));
 
     cleanup(tokensToOrder);
+    return true;
+  }
+
+  static int earliest(const OrderingChoice& orderingChoice){
+    return earliest(orderingChoice.second.second);
+  }
+
+  static bool testTokenOrderingChoices(){
+    DEFAULT_SETUP(ce,db,false);      
+    Object o1(db.getId(), "Object", "o1");
+    db.close();               
+
+    std::vector< OrderingChoice > tokensToOrder;
+    std::vector<TokenId> tokensToDelete;
+
+    IntervalToken referenceToken(db.getId(),  
+				 "Object.PredicateA",                                                     
+				 true,                                                               
+				 IntervalIntDomain(-50, -50),                                           
+				 IntervalIntDomain(0, 0),                                           
+				 IntervalIntDomain(1, PLUS_INFINITY));
+
+    // Allocate tokens to span before and after the refrence token, but not symmetrically so we can
+    // be specific in picking best and worst
+    const int baseTime(-500);
+    const int increment(50);
+    const int tokenCount(20);
+    int newBase(baseTime);
+    for(int i = 0; i < tokenCount; i++){
+      newBase = baseTime + i * increment;
+      TokenId token = (new IntervalToken(db.getId(),  
+					 "Object.PredicateA",                                                     
+					 true,                                                               
+					 IntervalIntDomain(newBase, newBase),
+					 IntervalIntDomain(newBase + increment, newBase + increment),
+					 IntervalIntDomain(1, PLUS_INFINITY)))->getId();
+      OrderingChoice choice(o1.getId(), std::pair<TokenId, TokenId>(referenceToken.getId(), token));
+      tokensToOrder.push_back(choice);
+      tokensToDelete.push_back(token);
+    }
+
+
+    // LATE: Ensure the earliest token is the last in the sequence. and latest is first
+    TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::LATE);
+    assertTrue(earliest(tokensToOrder.back()) == baseTime);
+    assertTrue(earliest(tokensToOrder[0]) == baseTime + (increment * (tokenCount-1)),
+	       toString(earliest(tokensToOrder.back()))); 
+
+    // EARLY && NONE: Ensure the opposite
+    TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::EARLY);
+    assertTrue(earliest(tokensToOrder.back()) == baseTime + (increment * (tokenCount-1)));
+    assertTrue(earliest(tokensToOrder[0]) == baseTime,
+	       toString(earliest(tokensToOrder.back()))); 
+
+    TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::NONE);
+    assertTrue(earliest(tokensToOrder.back()) == baseTime + (increment * (tokenCount-1)));
+    assertTrue(earliest(tokensToOrder[0]) == baseTime,
+	       toString(earliest(tokensToOrder.back()))); 
+
+    // NEAR: First should be the same bounds. Latest should be either extreme.
+    TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::NEAR);
+    assertTrue(earliest(tokensToOrder[0]) ==  earliest(referenceToken));
+    assertTrue(abs((int) (earliest(tokensToOrder.back()))) == abs(baseTime + increment),
+	       toString(earliest(tokensToOrder.back())));
+
+    // FAR: The opposite of near
+    TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::FAR);
+    assertTrue(earliest(tokensToOrder.back()) == earliest(referenceToken));
+    assertTrue(abs((int) (earliest(tokensToOrder[0]))) == abs(baseTime + increment),
+	       toString(earliest(tokensToOrder[0])));
+
+    cleanup(tokensToDelete);
     return true;
   }
 };
