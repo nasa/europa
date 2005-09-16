@@ -140,9 +140,12 @@ namespace EUROPA {
       os << "(" << getKey() << ") Token (" << m_entityKey << ") ";
       os << " Current Choice: ";
       if (m_tok->isMerged())
-        os << "merged with token (" << m_compatibleTokens[m_mergeIndex-1]->getKey() << ") ";
-      else  if (m_choiceIndex == 0)
-        os << " No Choice ";
+	// os << "merged with token (" << m_compatibleTokens[m_mergeIndex-1]->getKey() << ") ";
+         os << "merged with token (" << m_tok->getActiveToken() << ") ";
+      else if (m_choices.empty()) 
+	os << " No Choice ";
+       else  if (m_choiceIndex == 0)
+          os << LabelStr(m_choices[m_choiceIndex]).toString() << " ";
       else
         os << LabelStr(m_choices[m_choiceIndex-1]).toString() << " "; 
       os << " Discarded: " << m_choiceIndex+m_mergeIndex;
