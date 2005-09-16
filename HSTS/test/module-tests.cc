@@ -2,7 +2,6 @@
 #include "HSTSNoBranch.hh"
 #include "HSTSNoBranchCondition.hh"
 #include "HSTSPlanIdReader.hh"
-#include "HSTSHeuristicsReader.hh"
 #include "HSTSOpenDecisionManager.hh"
 #include "AtSubgoalRule.hh"
 
@@ -84,8 +83,7 @@
   initCBPTestSchema();					\
   PlanDatabase db(ce.getId(), Schema::instance());	\
   new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-  new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
-  HSTSHeuristics heuristics(db.getId()); 
+  new DefaultPropagator(LabelStr("Temporal"), ce.getId()); 
 
 #define DEFAULT_TEARDOWN_HEURISTICS()
 
@@ -97,8 +95,7 @@
   new DefaultPropagator(LabelStr("Temporal"), ce.getId());	\
   RulesEngine re(db.getId());					\
   Horizon hor(0, 200);						\
-  CBPlanner planner(db.getId(), hor.getId());			\
-  HSTSHeuristics heuristics(db.getId());
+  CBPlanner planner(db.getId(), hor.getId());	
 
 #define DEFAULT_TEARDOWN_PLAN_HEURISTICS()
 
@@ -470,154 +467,14 @@ private:
 class HeuristicsTest {
 public:
   static bool test() {
-    runTest(testDefaultInitialization);
-    runTest(testTokenInitialization);
-    runTest(testVariableInitialization);
-    runTest(testReader);
     runTest(testHSTSPlanIdReader);
     runTest(testHSTSNoBranch);
-    runTest(testHSTSHeuristicsAssembly);
     runTest(testDNPConstraints);
-    runTest(testPreferredPriority);
-    runTest(testHSTSHeuristicsStrict);
-    runTest(testPriorities);
     return(true);
   }
+
 private:
 
-  static bool testDefaultInitialization() {
-    
-    DEFAULT_SETUP_HEURISTICS();
-    heuristics.setDefaultPriorityPreference(HSTSHeuristics::HIGH);
-
-    std::vector<std::pair<LabelStr,LabelStr> > domainSpecs;
-    heuristics.setDefaultPriorityForTokenDPsWithParent(20.3, LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs);
-
-    heuristics.setDefaultPriorityForTokenDPs(10000.0);
-    
-    heuristics.setDefaultPriorityForConstrainedVariableDPs(10000.0);
-
-    std::vector<LabelStr> states;
-    std::vector<HSTSHeuristics::CandidateOrder> orders;
-    states.push_back(Token::REJECTED);
-    states.push_back(Token::MERGED);
-    //    states.push_back(Token::DEFER);
-    states.push_back(Token::ACTIVE);
-    orders.push_back(HSTSHeuristics::NONE);
-    orders.push_back(HSTSHeuristics::EARLY);
-    //    orders.push_back(HSTSHeuristics::NONE);
-    orders.push_back(HSTSHeuristics::EARLY);
-    heuristics.setDefaultPreferenceForTokenDPs(states,orders);
-
-    heuristics.setDefaultPreferenceForConstrainedVariableDPs(HSTSHeuristics::ASCENDING);
-
-    DEFAULT_TEARDOWN_HEURISTICS();
-    return true;
-  }
-  static bool testTokenInitialization() {
-    
-    DEFAULT_SETUP_HEURISTICS();
-    std::vector<std::pair<LabelStr,LabelStr> > dsb;
-    dsb.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_trans"),LabelStr("NO_RIGHT")));
-    dsb.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"),LabelStr("CON")));
-    dsb.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("DES")));
-    std::vector<LabelStr> statesb;
-    statesb.push_back(Token::REJECTED);
-    statesb.push_back(Token::MERGED);
-    //    statesb.push_back(LabelStr::DEFER);
-    statesb.push_back(Token::ACTIVE);
-    std::vector<HSTSHeuristics::CandidateOrder> ordersb;
-    ordersb.push_back(HSTSHeuristics::NONE);
-    ordersb.push_back(HSTSHeuristics::NEAR);
-    //    ordersb.push_back(HSTSHeuristics::NONE);
-    ordersb.push_back(HSTSHeuristics::MIN_FLEXIBLE);
-    std::vector<std::pair<LabelStr,LabelStr> > domainSpecs;
-    heuristics.setHeuristicsForTokenDP(334.5, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsb, HSTSHeuristics::ANY, NO_STRING,domainSpecs, statesb, ordersb);
-
-    std::vector<std::pair<LabelStr,LabelStr> > dsc;
-    dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_trans"),LabelStr("NO_RIGHT")));
-    dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"),LabelStr("CON")));
-    dsc.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("DES")));
-    std::vector<LabelStr> statesc;
-    std::vector<HSTSHeuristics::CandidateOrder> ordersc;
-    statesc.push_back(Token::MERGED);
-    statesc.push_back(Token::ACTIVE);
-    ordersc.push_back(HSTSHeuristics::TGENERATOR);
-    ordersc.push_back(HSTSHeuristics::LATE);
-    heuristics.setHeuristicsForTokenDP(6213.7, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsc, HSTSHeuristics::AFTER, LabelStr("SEP_Thrust_Timer_SV.Max_Thrust_Time"), domainSpecs, statesc, ordersc);
-
-    std::vector<std::pair<LabelStr,LabelStr> > dsd;
-    dsd.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_trans"),LabelStr("NO_RIGHT")));
-    dsd.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_with"),LabelStr("SIN")));
-    dsd.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("RES")));
-    std::vector<LabelStr> statesd;
-    std::vector<HSTSHeuristics::CandidateOrder> ordersd;
-    statesd.push_back(Token::ACTIVE);
-    ordersd.push_back(HSTSHeuristics::EARLY);
-    heuristics.setHeuristicsForTokenDP(6213.7, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"), dsd, HSTSHeuristics::ANY, NO_STRING, domainSpecs, statesd, ordersd);
-
-    /* this rightly produces a duplicate entry error in the code 
-    std::vector<LabelStr> statese;
-    std::vector<HSTSHeuristics::CandidateOrder> orderse;
-    heuristics.setHeuristicsForTokenDP(7652.4, ttd.getId(), HSTSHeuristics::ANY, TokenTypeId::noId(), statese, orderse);
-    */
-
-    DEFAULT_TEARDOWN_HEURISTICS();
-    return true;
-  }
-  static bool testVariableInitialization() {
-    
-    DEFAULT_SETUP_HEURISTICS();
-    /*  doesn't work because the schema doesn't agree with the data used
-	here 
-    std::vector<std::pair<LabelStr,LabelStr> > domainSpec;
-    TokenType tt(LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd"),domainSpec);
-    std::vector<LabelStr> aenums;
-    heuristics.setHeuristicsForConstrainedVariableDP(443.6, LabelStr("with"), tt.getId(), HSTSHeuristics::ASCENDING, NO_STRING, aenums);
-
-    aenums.push_back(LabelStr("SIN"));
-    aenums.push_back(LabelStr("CON"));
-    aenums.push_back(LabelStr("SAL"));
-    aenums.push_back(LabelStr("PEP"));
-    heuristics.setHeuristicsForConstrainedVariableDP(443.6, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.with"), TokenTypeId::noId(), HSTSHeuristics::ENUMERATION, NO_STRING, aenums);
-
-    std::vector<LabelStr> emptyList;
-    heuristics.setHeuristicsForConstrainedVariableDP(2269.3, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Left.m_with"), TokenTypeId::noId(), HSTSHeuristics::VGENERATOR, LabelStr("Generator1"),emptyList);
-
-    std::vector<LabelStr> benums;
-    heuristics.setHeuristicsForConstrainedVariableDP(234.5, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.m_sys"), TokenTypeId::noId(), HSTSHeuristics::ENUMERATION, NO_STRING, benums);
-
-    std::vector<LabelStr> cenums;
-    cenums.push_back(LabelStr("CON"));
-    //    LabelStr parentName = stripVariableName("Made_Up_Parent_SV.Made_Up_SV.Thrust_Left.m_with");
-    LabelStr parentName = LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Left");
-    std::vector<std::pair<LabelStr,LabelStr> > cds;
-    cds.push_back(std::make_pair<LabelStr,LabelStr>(LabelStr("m_sys"),LabelStr("ON")));
-    TokenType ctt(parentName, cds);
-    heuristics.setHeuristicsForConstrainedVariableDP(6234.7, LabelStr("Made_Up_Parent_SV.Made_Up_SV.Thrust_Fwd.m_with"), ctt.getId(), HSTSHeuristics::ENUMERATION, NO_STRING, benums);
-    */
-    DEFAULT_TEARDOWN_HEURISTICS();
-    return true;
-  }
-  static bool testReader() {
-    
-    DEFAULT_SETUP_HEURISTICS();
-    initHeuristicsSchema();
-
-    HSTSHeuristicsReader reader(heuristics.getNonConstId());
-
-    reader.read("../core/Heuristics-HSTS.xml");
-    
-    assertTrue(heuristics.getDefaultPriorityPreference() == HSTSHeuristics::HIGH);
-    assertTrue(heuristics.getDefaultPriorityForTokenDPsWithParent(LabelStr("Navigator.At")) == 1024.5);
-    assertTrue(heuristics.getDefaultPriorityForTokenDPs() == 10.0);
-    assertTrue(heuristics.getDefaultPriorityForConstrainedVariableDPs() == 5000.0);
-    assertTrue(heuristics.getDefaultPreferenceForConstrainedVariableDPs() == HSTSHeuristics::DESCENDING);
-    //everything else requires decision points and is tested in testPriorityImpl and testOrderingImpl
-
-    DEFAULT_TEARDOWN_HEURISTICS();
-    return true;
-  }
   static bool testHSTSPlanIdReader() {
     
     DEFAULT_SETUP_HEURISTICS();
@@ -657,223 +514,6 @@ private:
     DEFAULT_TEARDOWN_PLAN();
     return true;
   }
-  static bool testHSTSHeuristicsAssembly() {
-    
-    DEFAULT_SETUP_PLAN_HEURISTICS();
-    initHeuristicsSchema();
-    HSTSHeuristicsReader hreader(heuristics.getNonConstId());
-    hreader.read("../core/Heuristics-HSTS.xml");
-    //    heuristics.write();
-
-    HSTSNoBranchId noBranchSpec(new HSTSNoBranch());
-    HSTSPlanIdReader pireader(noBranchSpec);
-    pireader.read("../core/NoBranch.pi");
-
-    DecisionManagerId& dm = planner.getDecisionManager();
-    HSTSNoBranchCondition cond(dm);
-    cond.initialize(noBranchSpec);
-    HSTSOpenDecisionManagerId odm = (new HSTSOpenDecisionManager(dm, heuristics.getId()))->getId();
-    dm->setOpenDecisionManager(odm);
-
-    Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
-    Timeline ins(db.getId(),LabelStr("Instrument"),LabelStr("ins1"));
-    Timeline nav(db.getId(),LabelStr("Navigator"),LabelStr("nav1"));
-    Timeline tel(db.getId(),LabelStr("Telemetry"),LabelStr("tel1"));
-
-    Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
-    Object loc2(db.getId(),LabelStr("Location"),LabelStr("Loc2"));
-    Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
-    Object loc4(db.getId(),LabelStr("Location"),LabelStr("Loc4"));
-    Object loc5(db.getId(),LabelStr("Location"),LabelStr("Loc5"));
-
-    db.close();
-
-    std::list<ObjectId> results;
-    db.getObjectsByType("Location",results);
-    ObjectDomain allLocs(results,"Location");
-
-    std::list<double> values;
-    values.push_back(LabelStr("high"));
-    values.push_back(LabelStr("medium-high"));
-    values.push_back(LabelStr("medium"));
-    values.push_back(LabelStr("medium-low"));
-    values.push_back(LabelStr("low"));
-    EnumeratedDomain allModes(values,false,"Mode");
-
-    IntervalToken tok0(db.getId(),LabelStr("Telemetry.Communicate"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,100), IntervalIntDomain(1,100), "tel1", false);
-    tok0.addParameter(IntervalDomain("int"), LabelStr("minutes"));
-    ConstrainedVariableId vmin = tok0.getVariable("minutes");
-    vmin->specify(IntervalIntDomain(60,120));
-    tok0.addParameter(IntervalDomain("float"), LabelStr("bandwidth"));
-    ConstrainedVariableId vband = tok0.getVariable("bandwidth");
-    vband->specify(IntervalDomain(500.3,1200.4));
-    //    tok0.addParameter(BoolDomain(), LabelStr("encoded"));  token
-    //    fails to recognize BoolDomain().
-    tok0.addParameter(allModes, LabelStr("mode"));
-    tok0.close();
-
-    IntervalToken tok1(db.getId(),LabelStr("Commands.TakeSample"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,100), IntervalIntDomain(1,100), "com1", false);
-    tok1.addParameter(allLocs, LabelStr("rock"));
-    tok1.close();
-    ConstrainedVariableId vrock = tok1.getVariable("rock");
-    vrock->specify(db.getObject("Loc3"));
-
-    IntervalToken tok2(db.getId(),LabelStr("Instrument.TakeSample"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,200), IntervalIntDomain(1,300), "ins1", false);
-    tok2.addParameter(allLocs, LabelStr("rock"));
-    tok2.close();
-
-    IntervalToken tok3(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,200), IntervalIntDomain(1,300), "nav1", false);
-    tok3.addParameter(allLocs, LabelStr("location"));
-    tok3.close();
-
-    IntervalToken tok4(db.getId(),LabelStr("Navigator.Going"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,200), IntervalIntDomain(1,300), "nav1", false);
-    tok4.addParameter(allLocs, LabelStr("from"));
-    tok4.addParameter(allLocs, LabelStr("to"));
-    tok4.close();
-
-    IntervalToken tok5(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,200), IntervalIntDomain(1,300), "nav1", false);
-    tok5.addParameter(allLocs, LabelStr("location"));
-    tok5.close();
-    ConstrainedVariableId vatloc = tok5.getVariable("location");
-    vatloc->specify(db.getObject("Loc3"));
-
-    AtSubgoalRule r("Navigator.At");
-
-    CBPlanner::Status res = planner.run();
-    assert(res == CBPlanner::PLAN_FOUND);
-    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
-    return true;
-  }
-
-  static bool testPreferredPriority() {
-    
-    DEFAULT_SETUP_PLAN(ce,db,true);
-    HSTSHeuristics heur(db.getId());
-    HSTSHeuristics::Priority p1 = 0.0;
-    HSTSHeuristics::Priority p2 = 1.0;
-
-    heur.setDefaultPriorityPreference(HSTSHeuristics::LOW);
-    check_error(heur.preferredPriority(p1, p2) == p1);
-    heur.setDefaultPriorityPreference(HSTSHeuristics::HIGH);
-    check_error(heur.preferredPriority(p1, p2) == p2);
-    DEFAULT_TEARDOWN_PLAN();
-    return true;
-  }
-
-  static bool testHSTSHeuristicsStrict() {
-    
-    DEFAULT_SETUP_PLAN_HEURISTICS();
-    initHeuristicsSchema();
-    
-
-    //read in the heuristics
-    //prefers high
-    //assigns 1024.5 priority to tokens with parent Navigator.At
-    //assigns 100.25 priority to tokens with parent Navigator.Going
-    //assigns 10.0 priority with preference to merge then activate for default token priority
-    //assigns 5000.0 priority for default variable priority
-    //assigns 6000.25 priority to variables named "to" which are parameters of Navigator.Going,
-    //        with an initial parameter of Loc1
-    //assigns 6000.5 priority to initial parameter of Commands.TakeSample
-    //assigns 6000.25 priority to initial variables of Instrument.TakeSample
-    //assigns 9000 priority to minutes parameter of Telemetry.Communicate
-    //assigns 9000 priority to mode parameter of Telemetry.Communicate
-    //assigns 443.7 priority to Navigator.At tokens
-    //assigns 200.4 priority to Commands.TakeSample with an initial parameter equal to Loc3
-    //assigns 10000.0 priority to Navigator.Going tokens with parameter 0 == Loc1, parameter 1 == Loc3
-    //                that is after a Navigator.At
-    HSTSHeuristicsReader reader(heuristics.getNonConstId());
-    reader.read("../core/Heuristics-HSTS.xml");
-
-    //create open decision managers for both cases
-    //HSTSOpenDecisionManager looseDM(planner.getDecisionManager(), heuristics.getId(), false);
-    HSTSOpenDecisionManagerId strictDM = (new HSTSOpenDecisionManager(planner.getDecisionManager(), heuristics.getId(), true))->getId();
-    planner.getDecisionManager()->setOpenDecisionManager(strictDM);
-
-    //set up the database
-    Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
-    Timeline ins(db.getId(),LabelStr("Instrument"),LabelStr("ins1"));
-    Timeline nav(db.getId(),LabelStr("Navigator"),LabelStr("nav1"));
-    Timeline tel(db.getId(),LabelStr("Telemetry"),LabelStr("tel1"));
-
-    Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
-    Object loc2(db.getId(),LabelStr("Location"),LabelStr("Loc2"));
-    Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
-    Object loc4(db.getId(),LabelStr("Location"),LabelStr("Loc4"));
-    Object loc5(db.getId(),LabelStr("Location"),LabelStr("Loc5"));
-
-    db.close();
-
-    std::list<ObjectId> results;
-    db.getObjectsByType("Location",results);
-    ObjectDomain allLocs(results,"Location");
-
-    std::list<double> values;
-    values.push_back(LabelStr("high"));
-    values.push_back(LabelStr("medium-high"));
-    values.push_back(LabelStr("medium"));
-    values.push_back(LabelStr("medium-low"));
-    values.push_back(LabelStr("low"));
-    EnumeratedDomain allModes(values,false,"Mode");
-
-    //Telemetry.Communicate(minutes = [60 120], bandwidth = [500.3 1200.4], mode = {high medium-high medium medium-low low}, priority = 10.0
-    IntervalToken tok0(db.getId(),LabelStr("Telemetry.Communicate"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,100), IntervalIntDomain(1,100), "tel1", false);
-    tok0.addParameter(IntervalDomain("int"), LabelStr("minutes"));
-    ConstrainedVariableId vmin = tok0.getVariable("minutes");
-    vmin->specify(IntervalIntDomain(60,120));
-    tok0.addParameter(IntervalDomain("float"), LabelStr("bandwidth"));
-    ConstrainedVariableId vband = tok0.getVariable("bandwidth");
-    vband->specify(IntervalDomain(500.3,1200.4));
-    //    tok0.addParameter(BoolDomain(), LabelStr("encoded"));  token
-    //    fails to recognize BoolDomain().
-    tok0.addParameter(allModes, LabelStr("mode"));
-    tok0.close();
-
-    //Commands.TakeSample(rock => {Loc1 Loc2 Loc3 Loc4})
-    IntervalToken tok1(db.getId(),LabelStr("Commands.TakeSample"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,100), IntervalIntDomain(1,100), "com1", false);
-    tok1.addParameter(allLocs, LabelStr("rock"));
-    tok1.close();
-    //ConstrainedVariableId vrock = tok1.getVariable("rock");
-    //vrock->specify(db.getObject("Loc3"));
-    tok1.activate(); //activate to cause decision point to be cretaed for parameter, should have priority 6000.5
-
-    //Instrument.TakeSample(rock = {Loc1 Loc2 Loc3 Loc4 Loc5}, priority 10.0
-    IntervalToken tok2(db.getId(),LabelStr("Instrument.TakeSample"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "ins1", false);
-    tok2.addParameter(allLocs, LabelStr("rock"));
-    tok2.close();
-
-    //Navigator.At(location = {Loc1 Loc2 Loc3 Loc4 Loc5}) priority 443.7
-    IntervalToken tok3(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
-    tok3.addParameter(allLocs, LabelStr("location"));
-    tok3.close();
-
-    //Navigator.Going(from = {Loc1 Loc2 Loc3 Loc4 Loc5} to = {Loc1 Loc2 Loc3 Loc4 Loc5}), priority 10.0
-    IntervalToken tok4(db.getId(),LabelStr("Navigator.Going"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
-    tok4.addParameter(allLocs, LabelStr("from"));
-    tok4.addParameter(allLocs, LabelStr("to"));
-    tok4.close();
-
-    //Navigator.At(location = {Loc3}), priority 443.7
-    IntervalToken tok5(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
-    tok5.addParameter(allLocs, LabelStr("location"));
-    tok5.close();
-    ConstrainedVariableId vatloc = tok5.getVariable("location");
-    vatloc->specify(db.getObject("Loc3"));
-
-    AtSubgoalRule r("Navigator.At");
-
-    assert(ce.propagate());
-
-    // DecisionPointId d1 = looseDM.getNextDecision();
-    DecisionPointId d2 = strictDM->getNextDecision();
-    //assert(ObjectDecisionPointId::convertable(d1));
-    //assert(d1->getEntityKey() == tok3.getKey());
-
-    //assert(ConstrainedVariableDecisionPointId::convertable(d2));
-    assertFalse(d2->getEntityKey() == (tok1.getParameters())[0]->getKey(), "Cannot be because parent is not slotted.");
-    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
-    return true;
-  }
 
   /**
    * Test the DNP specific constraint functions.
@@ -888,112 +528,6 @@ private:
     DEFAULT_TEARDOWN_PLAN_HEURISTICS();
     return(true);
   }
-
-  static bool testPriorities() {
-    
-    DEFAULT_SETUP_PLAN_HEURISTICS();
-    planner.getDecisionManager()->setOpenDecisionManager((new HSTSOpenDecisionManager(planner.getDecisionManager(), heuristics.getId(), true))->getId()); 
-    initHeuristicsSchema();
-    HSTSHeuristicsReader reader(heuristics.getNonConstId());
-    reader.read("../core/Heuristics-HSTS.xml");
-
-    Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
-    Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
-
-    Object nav(db.getId(), LabelStr("Navigator"), LabelStr("nav"));
-
-    Object com(db.getId(), LabelStr("Commands"), LabelStr("com"));
-
-    Object res(db.getId(), LabelStr("UnaryResource"), LabelStr("res"));
-
-    db.close();
-
-    std::list<ObjectId> results;
-    db.getObjectsByType("Location",results);
-    ObjectDomain allLocs(results,"Location");
-
-    //Navigator.At(Location location);
-    //Navigator.Going(Location from, Location to);
-    //Commands.TakeSample(Location rock);
-    
-    //create an unknown variable, priority should be 5000.0
-    Variable<IntervalIntDomain> randomVar(ce.getId(), IntervalIntDomain(1, 20), true, LabelStr("randomVar"));
-    ConstrainedVariableDecisionPoint randomVarDec(DbClientId::noId(), randomVar.getId(), OpenDecisionManagerId::noId());
-    assert(heuristics.getPriorityForConstrainedVariableDP(randomVarDec.getId()) == 5000.0);
-
-    //create Commands.TakeSample, first parameter should have priority = 6000.5
-    IntervalToken takeSample(db.getId(), LabelStr("Commands.TakeSample"), false, IntervalIntDomain(), IntervalIntDomain(), 
-                             IntervalIntDomain(1, 100), Token::noObject(), false);
-    takeSample.addParameter(allLocs, LabelStr("rock"));
-    takeSample.close();
-    ConstrainedVariableDecisionPoint takeSampleParamDec(DbClientId::noId(), (takeSample.getParameters())[0], OpenDecisionManagerId::noId());
-    assert(heuristics.getPriorityForConstrainedVariableDP(takeSampleParamDec.getId()) == 6000.5);
-
-    //create a token not in the heuristics, priority should be 10.0, order should be merge,activate (default match)
-    IntervalToken randomTok(db.getId(), LabelStr("UnaryResource.uses"), false);
-    ObjectDecisionPoint randomTokDP(DbClientId::noId(), randomTok.getId(), OpenDecisionManagerId::noId());
-    assert(heuristics.getPriorityForObjectDP(randomTokDP.getId()) == 10.0);
-
-    //create a Navigator.At, priority should be 443.7 (simple predicate match)
-    IntervalToken navAt(db.getId(), LabelStr("Navigator.At"), false, IntervalIntDomain(), IntervalIntDomain(), 
-                        IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
-    navAt.addParameter(allLocs, LabelStr("location"));
-    navAt.close();
-    ObjectDecisionPoint navAtDP(DbClientId::noId(), navAt.getId(), OpenDecisionManagerId::noId());
-    assert(heuristics.getPriorityForObjectDP(navAtDP.getId()) == 443.7);
-    navAt.activate();
-
-    //create a Navigator.Going with a parent of Navigator.At, priority should be 1024.5 (simple parent match)
-    IntervalToken navGoing(navAt.getId(), LabelStr("after"), LabelStr("Navigator.Going"), IntervalIntDomain(), IntervalIntDomain(), 
-                           IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
-    navGoing.addParameter(allLocs, LabelStr("from"));
-    navGoing.addParameter(allLocs, LabelStr("to"));
-    navGoing.close();
-    ObjectDecisionPoint navGoingDP(DbClientId::noId(), navGoing.getId(), OpenDecisionManagerId::noId());
-    assert(heuristics.getPriorityForObjectDP(navGoingDP.getId()) == 1024.5);
-
-    //set first parameter of Commands.TakeSample to loc3, priority should be 200.4 (simple variable match)
-    (takeSample.getParameters())[0]->specify(loc3.getId());
-    ObjectDecisionPoint takeSampleDP(DbClientId::noId(), takeSample.getId(), OpenDecisionManagerId::noId());
-    assert(heuristics.getPriorityForObjectDP(takeSampleDP.getId()) == 200.4);
-
-    //set Navigator.Going "from" parameter to Loc1, parameter "to" should have priority 6000.25 (more complex variable match)
-    (navGoing.getParameters())[0]->specify(loc1.getId());
-    ConstrainedVariableDecisionPoint fromDP(DbClientId::noId(), (navGoing.getParameters())[1], OpenDecisionManagerId::noId());
-    assert(heuristics.getPriorityForConstrainedVariableDP(fromDP.getId()) == 6000.25);
-
-    //set Navigator.Going "to" parameter to Loc3, priority should be 10000 (parent relation match)
-    (navGoing.getParameters())[1]->specify(loc3.getId());
-    assert(heuristics.getPriorityForObjectDP(navGoingDP.getId()) == 10000.0);    
-
-
-    takeSample.activate();
-    IntervalToken testPreferMerge(takeSample.getId(), LabelStr("before"), LabelStr("Navigator.Going"), IntervalIntDomain(), IntervalIntDomain(),
-                                  IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
-    testPreferMerge.addParameter(allLocs, LabelStr("from"));
-    testPreferMerge.addParameter(allLocs, LabelStr("to"));
-    testPreferMerge.close();
-
-    IntervalToken dummyForMerge(db.getId(), LabelStr("Navigator.Going"), false, IntervalIntDomain(), IntervalIntDomain(), 
-                                IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
-    dummyForMerge.addParameter(allLocs, LabelStr("from"));
-    dummyForMerge.addParameter(allLocs, LabelStr("to"));
-    dummyForMerge.close();
-    dummyForMerge.activate();
-
-    assert(ce.propagate());
-
-    TokenDecisionPoint preferMergeDP(DbClientId::noId(), testPreferMerge.getId(), planner.getDecisionManager()->getOpenDecisionManager());
-    assert(heuristics.getPriorityForTokenDP(preferMergeDP.getId()) == 3.14159);
-    TokenDecisionPointId mergeDPId = (TokenDecisionPointId) preferMergeDP.getId();
-    planner.getDecisionManager()->getOpenDecisionManager()->initializeTokenChoices(mergeDPId);
-    const std::vector<LabelStr>& choices = preferMergeDP.getChoices();
-    assert(choices.size() == 1);
-    assert(choices[0] == Token::MERGED);
-    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
-    return true;
-  }
-
 };
 
 bool testWeakDomainComparator() {
@@ -1033,102 +567,6 @@ bool testWeakDomainComparator() {
   return true;
 }
 
-class KeyMatcherTest {
- public:
-  static bool test() {
-    runTest(testKeyMatcher);
-    runTest(testVariableMatch);
-    runTest(testTokenMatch);
-    return true;
-  }
- private:
-  static bool testKeyMatcher() {
-    assert(KeyMatcher::keyMatches("Foo", "Foo"));
-    assert(KeyMatcher::keyMatches("Foo:bar", "Foo:bar"));
-    assert(!KeyMatcher::keyMatches("Foo:bar", "bar:Foo"));
-    assert(KeyMatcher::keyMatches("Foo:bar:", "Foo:bar:"));
-    assert(KeyMatcher::keyMatches("Foo:bar:", "Foo:bar"));
-    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:ANY:Bar", "SUBGOAL:Foo:ANY:Bar"));
-    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:AFTER:Bar", "SUBGOAL:Foo:ANY:Bar"));
-    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:BEFORE:Bar", "SUBGOAL:Foo:ANY:Bar"));
-    assert(KeyMatcher::keyMatches("Foo:foo|true:bar|false", "Foo"));
-    assert(KeyMatcher::keyMatches("Foo:foo|true:bar|false", "Foo:bar|false"));
-    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:::foo|true:BEFORE:Bar", "SUBGOAL:Foo:ANY:Bar")); 
-    return true;
-  }
-
-  static bool testVariableMatch() {
-    std::string simpleKey("foo:Foo");
-    std::string predOneArgKey("foo:Foo:bar|true");
-    std::string predParentKey("foo:SUBGOAL:Foo:ANY:Bar");
-    std::string predParentArgKey("foo:SUBGOAL:Foo:bar|true:ANY:Bar");
-    std::string predParentBothArgKey("foo:SUBGOAL:Foo:bar|true:ANY:Bar:baz|nargle");
-    
-    std::string match("foo:SUBGOAL:Foo::bar|true::BEFORE:Bar:baz|nargle::quux|argle");
-    
-    assert(KeyMatcher::keyMatches(match, simpleKey));
-    assert(KeyMatcher::keyMatches(match, predOneArgKey));
-    assert(KeyMatcher::keyMatches(match, predParentKey));
-    assert(KeyMatcher::keyMatches(match, predParentArgKey));
-    assert(KeyMatcher::keyMatches(match, predParentBothArgKey));
-    return true;
-  }
-
-  static bool testTokenMatch() {
-    std::string initialSimpleKey("INITIAL:Foo");
-    std::string initialOneParam("INITIAL:Foo:bar|true");
-    std::string initialTwoParam("INITIAL:Foo:bar|true:baz|true");
-    std::string initialSkipParam("INITIAL:Foo:baz|true");
-
-    std::string initialMatch("INITIAL:Foo:bar|true:baz|true:");
-    
-    assert(KeyMatcher::keyMatches(initialMatch, initialSimpleKey));
-    assert(KeyMatcher::keyMatches(initialMatch, initialOneParam));
-    assert(KeyMatcher::keyMatches(initialMatch, initialTwoParam));
-    assert(KeyMatcher::keyMatches(initialMatch, initialSkipParam));
-
-    std::string subgoalSimpleKey("SUBGOAL:Foo:ANY:Bar");
-    std::string subgoalOneParam("SUBGOAL:Foo:foo|true:ANY:Bar");
-    std::string subgoalTwoParam("SUBGOAL:Foo:foo|true:bar|ack:ANY:Bar");
-    std::string subgoalSkipParam("SUBGOAL:Foo:bar|ack:ANY:Bar");
-    std::string subgoalParentOneParam("SUBGOAL:Foo:ANY:Bar:bar|true");
-    std::string subgoalParentTwoParam("SUBGOAL:Foo:ANY:Bar:bar|true:baz|ack");
-    std::string subgoalParentSkipParam("SUBGOAL:Foo:ANY:Bar:baz|ack");
-    std::string subgoalBothParam("SUBGOAL:Foo:foo|true:ANY:Bar:bar|true");
-    std::string subgoalSkipBothParam("SUBGOAL:Foo:bar|ack:ANY:Bar:baz|ack");
-    std::string subgoalEverything("SUBGOAL:Foo:foo|true:bar|ack:ANY:Bar:bar|true:baz|ack");
-
-    std::string subgoalAnyMatch("SUBGOAL:Foo:foo|true:bar|ack:AFTER:Bar:bar|true:baz|ack:");
-    
-    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalSimpleKey));
-    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalOneParam));
-    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalTwoParam));
-    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalSkipParam));
-    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalParentOneParam));
-    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalParentTwoParam));
-    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalParentSkipParam));
-    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalBothParam));
-    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalSkipBothParam));
-    assert(KeyMatcher::keyMatches(subgoalAnyMatch, subgoalEverything));
-
-    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:::foo|true:ANY:Bar", subgoalSimpleKey));
-
-    assert(KeyMatcher::keyMatches("BEFORE", "ANY"));
-    assert(KeyMatcher::keyMatches("AFTER", "ANY"));
-    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:BEFORE:Bar", subgoalSimpleKey));
-    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:AFTER:Bar", subgoalSimpleKey));
-    assert(KeyMatcher::keyMatches("SUBGOAL:Foo:ANY:Bar", subgoalSimpleKey));
-
-    assert(!KeyMatcher::keyMatches("SUBGOAL:Foo:BEFORE:Bar", "SUBGOAL:Foo:AFTER:Bar"));    
-    assert(!KeyMatcher::keyMatches("SUBGOAL:Foo:AFTER:Bar", "SUBGOAL:Foo:BEFORE:Bar"));
-    assert(!KeyMatcher::keyMatches("SUBGOAL:Foo:ANY:Bar", "SUBGOAL:Foo:BEFORE:Bar"));
-    assert(!KeyMatcher::keyMatches("SUBGOAL:Foo:ANY:Bar", "SUBGOAL:Foo:AFTER:Bar"));
-    
-    assert(!KeyMatcher::keyMatches("SUBGOAL:Foo:foo|bar:ANY:Bar:bar|foo", "SUBGOAL:Foo:foo|foo:ANY:Bar:bar|bar"));
-
-    return true;
-  }
-};
 
 int main() {
   initConstraintEngine();
@@ -1154,7 +592,6 @@ int main() {
   //!!Add calls to readTestCases(), etc., from ConstraintEngine/test/module-tests.cc
 
   for (int i = 0; i < 1; i++) {
-    runTestSuite(KeyMatcherTest::test);
     runTest(testWeakDomainComparator);
     //Use relaxed domain comparator that allows comparison of members of two different enum types
     WeakDomainComparator wdc;
