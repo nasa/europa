@@ -13,6 +13,7 @@
 /* Miscellaneous */
 #include "TestSupport.hh"
 #include "XMLUtils.hh"
+#include "Utils.hh"
 
 /* Heuristics Engine */
 #include "HeuristicsEngine.hh"
@@ -651,8 +652,11 @@ public:
     runTest(testHSTSHeuristicsAssembly);
     runTest(testHSTSHeuristicsStrict);
     runTest(testPriorities);
+    runTest(testTokenOrderingCalculations);
+    runTest(testTokenOrdering);
     return(true);
   }
+
 private:
 
   static bool testDefaultInitialization() {
@@ -963,6 +967,83 @@ private:
 
     assert(ce.propagate());
     TEARDOWN();
+    return true;
+  }
+
+  static bool testTokenOrderingCalculations() {
+    DEFAULT_SETUP(ce,db,false);      
+    Object o1(db.getId(), "Object", "o1");
+    db.close();               
+
+    IntervalToken t0(db.getId(),  
+		     "Object.PredicateA",                                                     
+		     true,                                                               
+		     IntervalIntDomain(-12, 10),                                           
+		     IntervalIntDomain(-10, 8),                                           
+		     IntervalIntDomain(1, PLUS_INFINITY));
+
+    assertTrue(TokenHeuristic::midpoint(t0.getId()) == -2, toString(TokenHeuristic::midpoint(t0.getId())));
+
+    // Same tokens have zero distance
+    assertTrue(TokenHeuristic::absoluteDistance(t0.getId(), t0.getId()) == 0, 
+	       toString(TokenHeuristic::absoluteDistance(t0.getId(), t0.getId())));
+
+    IntervalToken t1(db.getId(),  
+		     "Object.PredicateA",                                                     
+		     true,                                                               
+		     IntervalIntDomain(0, 10),                                           
+		     IntervalIntDomain(1, 49),                                           
+		     IntervalIntDomain(1, 1000));
+
+    assertTrue(TokenHeuristic::midpoint(t1.getId()) == 24, toString(TokenHeuristic::midpoint(t1.getId())));
+
+    // Different tokens
+    assertTrue(TokenHeuristic::absoluteDistance(t0.getId(), t1.getId()) == 26, 
+	       toString(TokenHeuristic::absoluteDistance(t0.getId(), t1.getId())));
+
+    // Order reversed
+    assertTrue(TokenHeuristic::absoluteDistance(t1.getId(), t0.getId()) == 26, 
+	       toString(TokenHeuristic::absoluteDistance(t1.getId(), t0.getId())));
+
+    return true;
+  }
+
+  static bool testTokenOrdering(){
+    DEFAULT_SETUP(ce,db,false);      
+    Object o1(db.getId(), "Object", "o1");
+    db.close();               
+
+    std::vector<TokenId> tokensToOrder;
+
+    IntervalToken referenceToken(db.getId(),  
+				 "Object.PredicateA",                                                     
+				 true,                                                               
+				 IntervalIntDomain(-50, 10),                                           
+				 IntervalIntDomain(40, 50),                                           
+				 IntervalIntDomain(1, PLUS_INFINITY));
+
+    // Allocate tokens to span before and after the refrence token
+    const int baseTime(-500);
+    const int increment(50);
+    const int tokenCount(20);
+    int newBase(baseTime);
+    for(int i = 0; i < tokenCount; i++){
+      newBase = newBase + (i*increment);
+      TokenId token = (new IntervalToken(db.getId(),  
+					 "Object.PredicateA",                                                     
+					 true,                                                               
+					 IntervalIntDomain(newBase, newBase),
+					 IntervalIntDomain(newBase + increment, newBase + increment),
+					 IntervalIntDomain(1, PLUS_INFINITY)))->getId();
+      tokensToOrder.push_back(token);
+    }
+
+    // LATE: Ensure the first token is the last in the sequence
+    TokenHeuristic::orderTokens(tokensToOrder, referenceToken.getId(), TokenHeuristic::LATE);
+    assertTrue(tokensToOrder.back()->getStart()->lastDomain().getLowerBound() == baseTime,
+	       tokensToOrder.back()->getStart()->lastDomain().toString());
+
+    cleanup(tokensToOrder);
     return true;
   }
 };
