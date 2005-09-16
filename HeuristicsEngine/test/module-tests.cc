@@ -655,6 +655,7 @@ public:
     runTest(testTokenOrderingCalculations);
     runTest(testTokenOrdering);
     runTest(testTokenOrderingChoices);
+    runTest(testVariableValueOrderingChoices);
     return(true);
   }
 
@@ -1154,6 +1155,99 @@ private:
     cleanup(tokensToDelete);
     return true;
   }
+
+  static bool testVariableValueOrderingChoices(){
+    DEFAULT_SETUP(ce,db,false);      
+    // Want a bunch of objects - note the names will not match the keys. 
+    Object o3(db.getId(), "Object", "o3");
+    Object o2(db.getId(), "Object", "o2");
+    Object o4(db.getId(), "Object", "o4");
+    Object o5(db.getId(), "Object", "o5");
+    Object o1(db.getId(), "Object", "o1");
+    Object o6(db.getId(), "Object", "o6");
+    db.close();
+
+    // Start with an object variable
+    Variable<ObjectDomain> v0(ce.getId(), ObjectDomain("Object"));
+    db.makeObjectVariableFromType("Object", v0.getId());
+    std::list<double> initialValues;
+    v0.baseDomain().getValues(initialValues);
+
+    // Define an enumeration - it prunes. It also orders by an ordering that I would not otherwise expect
+    std::list<double> values;
+    values.push_back(LabelStr("o5"));
+    values.push_back(LabelStr("o1"));
+    values.push_back(LabelStr("o3"));
+    {
+      std::list<double> orderedChoices = initialValues;
+      VariableHeuristic::orderChoices(db.getId(), v0.getId(), values, VariableHeuristic::ENUMERATION, orderedChoices);
+      assertTrue(orderedChoices.size() == values.size(), toString(orderedChoices.size()));
+      assertTrue(orderedChoices.front() == o5.getId());
+      assertTrue(orderedChoices.back() == o3.getId());
+    }
+
+    // Go for ascending order by key. This will give order of initialization. No pruning
+    {
+      std::list<double> orderedChoices = initialValues;
+      VariableHeuristic::orderChoices(db.getId(), v0.getId(), VariableHeuristic::noValues(), 
+				      VariableHeuristic::ASCENDING, orderedChoices);
+      assertTrue(orderedChoices.size() == initialValues.size(), toString(orderedChoices.size()));
+      assertTrue(orderedChoices.front() == o3.getId(), ((ObjectId) orderedChoices.front())->getName().toString());
+      assertTrue(orderedChoices.back() == o6.getId(), ((ObjectId) orderedChoices.back())->getName().toString());
+    }
+
+    // Go for descending order by key. This will give reverse order of initialization. No pruning
+    {
+      std::list<double> orderedChoices = initialValues;
+      VariableHeuristic::orderChoices(db.getId(), v0.getId(), VariableHeuristic::noValues(), 
+				      VariableHeuristic::DESCENDING, orderedChoices);
+      assertTrue(orderedChoices.size() == initialValues.size(), toString(orderedChoices.size()));
+      assertTrue(orderedChoices.back() == o3.getId());
+      assertTrue(orderedChoices.front() == o6.getId());
+    }
+
+    // Now lets go for no intersection - empty choices.
+    values.clear();
+    values.push_back(LabelStr("o5"));
+    values.push_back(LabelStr("o1"));
+    values.push_back(LabelStr("o3"));
+    v0.specify(o4.getId());
+
+    {
+      std::list<double> orderedChoices;
+      v0.lastDomain().getValues(orderedChoices);
+      VariableHeuristic::orderChoices(db.getId(), v0.getId(), values, VariableHeuristic::ENUMERATION, orderedChoices);
+      assertTrue(orderedChoices.empty());
+    }
+
+    // Now lets try a BoolDomain
+    Variable<BoolDomain> v1(ce.getId(), BoolDomain());
+    initialValues.clear();
+    v1.baseDomain().getValues(initialValues);
+
+    // Define an enumeration - it prunes. 
+    values.clear();
+    values.push_back(true);
+    {
+      std::list<double> orderedChoices = initialValues;
+      VariableHeuristic::orderChoices(db.getId(), v1.getId(), values, VariableHeuristic::ENUMERATION, orderedChoices);
+      assertTrue(orderedChoices.size() == values.size(), toString(orderedChoices.size()));
+      assertTrue(orderedChoices.front() == true);
+    }
+
+    // Now lets reverse the order
+    {
+      std::list<double> orderedChoices = initialValues;
+      VariableHeuristic::orderChoices(db.getId(), v1.getId(), VariableHeuristic::noValues(), 
+				      VariableHeuristic::DESCENDING, orderedChoices);
+      assertTrue(orderedChoices.size() == initialValues.size(), toString(orderedChoices.size()));
+      assertTrue(orderedChoices.back() == false);
+      assertTrue(orderedChoices.front() == true);
+    }
+
+    return true;
+  }
+
 };
 
 int main() {
