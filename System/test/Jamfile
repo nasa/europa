@@ -18,7 +18,7 @@ ModuleNamedObjects runProblem_link : runProblem.cc : System ;
 
 local DEFAULT_PCONFIG = "DefaultPlannerConfig.xml" ;
 
-local DEFAULT_HEURISTICS = "DefaultHeuristics.xml" ;
+local DEFAULT_HEURISTICS = "../../HeuristicsEngine/test/DefaultHeuristics.xml" ;
 
 # To run one of these individulally: jam run-<target> i.e. jam run-basic-types
 
@@ -67,7 +67,7 @@ rule RunProblem {
       local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
       local run_variant_name = [ FVariantName runProblem : $(variant) ] ;
       run_variant_name = $(run_variant_name)_rt ;
-      local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) $(DEFAULT_PCONFIG) ;
+      local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) $(configurationFile) $(heuristicsFile) ;
       Depends run-problem-$(exe) : $(libname) ;
       RunModuleMain run-problem-$(exe) : runProblem : $(arguments) ;
       Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
