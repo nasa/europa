@@ -2,13 +2,13 @@
 #include "DefaultOpenDecisionManager.hh"
 #include "HSTSOpenDecisionManager.hh"
 #include "Object.hh"
-#include "HSTSHeuristics.hh"
+#include "HeuristicsEngine.hh"
 #include "MasterMustBeInserted.hh"
 #include "Debug.hh"
 
 namespace EUROPA {
 
-  HSTSOpenDecisionManager::HSTSOpenDecisionManager(const DecisionManagerId& dm, const HSTSHeuristicsId& heur, const bool strictHeuristics)
+  HSTSOpenDecisionManager::HSTSOpenDecisionManager(const DecisionManagerId& dm, const HeuristicsEngineId& heur, const bool strictHeuristics)
     : DefaultOpenDecisionManager(dm), m_heur(heur), m_strictHeuristics(strictHeuristics) {
   }
 
@@ -53,15 +53,14 @@ namespace EUROPA {
     m_sortedObjectDecs.clear();
   }
 
-  void HSTSOpenDecisionManager::getBestObjectDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
+  void HSTSOpenDecisionManager::getBestObjectDecision(DecisionPointId& bestDec, Priority& bestp) {
     check_error(bestDec.isNoId());
     if (m_sortedObjectDecs.empty()) return;
     unsigned int bestNrChoices=0;
     for (ObjectDecisionSet::iterator it = m_sortedObjectDecs.begin(); it != m_sortedObjectDecs.end(); ++it) {
       TokenId tok = (*it)->getToken();
-      const HSTSHeuristics::Priority priority = m_heur->getPriorityForObjectDP(*it);
-      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
-          (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
+      const Priority priority = m_heur->getPriority(tok);
+      if (m_heur->betterThan(priority, bestp)) {
         bestDec = *it;
         bestp = priority;
         bestNrChoices = tok->getPlanDatabase()->countOrderingChoices(tok);
@@ -76,20 +75,19 @@ namespace EUROPA {
     }
     if (bestDec.isNoId() && !m_sortedObjectDecs.empty()) {
       bestDec = *m_sortedObjectDecs.begin();
-      bestp = m_heur->getPriorityForObjectDP(bestDec);
+      bestp = m_heur->getPriority(ObjectDecisionPointId(bestDec)->getToken());
     }
   }
 
-  void HSTSOpenDecisionManager::getBestTokenDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
+  void HSTSOpenDecisionManager::getBestTokenDecision(DecisionPointId& bestDec, Priority& bestp) {
     check_error(bestDec.isNoId());
     if (m_sortedTokDecs.empty()) return;
     unsigned int bestNrChoices = 999999;
     for (TokenDecisionSet::iterator it = m_sortedTokDecs.begin(); it != m_sortedTokDecs.end(); ++it) {
-      const HSTSHeuristics::Priority priority = m_heur->getPriorityForTokenDP(*it);
       TokenId tok = (*it)->getToken();
+      const Priority priority = m_heur->getPriority(tok);
       debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Comparing priority = " << priority << " to bestp = " << bestp);
-      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
-          (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
+      if (m_heur->betterThan(priority, bestp)) {
         bestDec = *it;
         bestp = priority;
         //TokenDecisionPointId tokDec = bestDec; // CMG: THIS IS NOT USED. WHY NOT?
@@ -112,7 +110,7 @@ namespace EUROPA {
     }
     if (bestDec.isNoId() && !m_sortedTokDecs.empty()) {
       bestDec = *m_sortedTokDecs.begin();
-      bestp = m_heur->getPriorityForTokenDP(bestDec);
+      bestp = m_heur->getPriority(ObjectDecisionPointId(bestDec)->getToken());
       debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Selecting first decision as bestDec = " << bestDec);
     }
   }
@@ -120,7 +118,7 @@ namespace EUROPA {
   /**
    * Priority does not acutaully count for this since all units have the same priority
    */
-  void HSTSOpenDecisionManager::getBestUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
+  void HSTSOpenDecisionManager::getBestUnitVariableDecision(DecisionPointId& bestDec, Priority& bestp) {
     check_error(bestDec.isNoId());
     if (m_sortedUnitVarDecs.empty()) 
       return;
@@ -139,11 +137,11 @@ namespace EUROPA {
     }
   }
 
-  void HSTSOpenDecisionManager::getBestNonUnitVariableDecision(DecisionPointId& bestDec, HSTSHeuristics::Priority& bestp) {
+  void HSTSOpenDecisionManager::getBestNonUnitVariableDecision(DecisionPointId& bestDec, Priority& bestp) {
     check_error(bestDec.isNoId());
     if (m_sortedNonUnitVarDecs.empty()) return;
     ConstrainedVariableDecisionPointId bestFloatDec;
-    HSTSHeuristics::Priority bestFloatp = bestp;
+    Priority bestFloatp = bestp;
     VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin();
     for ( ; it != m_sortedNonUnitVarDecs.end(); ++it) {
       // Ignore variables of inactive tokens.
@@ -156,11 +154,10 @@ namespace EUROPA {
         if (!parent->isActive())
           continue;
       }
-      const HSTSHeuristics::Priority& priority = m_heur->getPriorityForConstrainedVariableDP(vdec);
+      const Priority& priority = m_heur->getPriority(vdec->getVariable());
       if (vdec->getVariable()->lastDomain().isFinite()) {
         if (bestDec.isNoId() ||
-            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp ||
-            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp) {
+            m_heur->betterThan(priority, bestp)) {
           bestDec = vdec;
           bestp = priority;
         } else
@@ -176,8 +173,7 @@ namespace EUROPA {
           }
       } else {
         if (bestFloatDec.isNoId() ||
-            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestFloatp ||
-            m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestFloatp) {
+            m_heur->betterThan(priority, bestFloatp)) {
           bestFloatDec = vdec;
           bestFloatp = priority;
         } // else ... messy to compare sizes of infinite domains, but it could be done if needed
@@ -187,56 +183,6 @@ namespace EUROPA {
       bestDec = bestFloatDec;
       bestp = bestFloatp;
     }
-
-
-    /*
-      if (!m_sortedNonUnitVarDecs.empty()) { // there are no unit vars and some non-unit vars
-      ConstrainedVariableDecisionPointId bestFloatDec;
-      HSTSHeuristics::Priority bestFloatp;
-      VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin();
-      if ((*it)->getVariable()->lastDomain().isFinite())
-      
-      bestDec = *it;
-      check_error(bestDec.isValid());
-      ++it;
-      bestp = m_heur->getPriorityForConstrainedVariableDP(bestDec);
-      for (; it != m_sortedNonUnitVarDecs.end(); ++it) {
-      // ignore variables of uninserted tokens
-      ConstrainedVariableDecisionPointId vdec(*it);
-      check_error(vdec.isValid());
-      if (TokenId::convertable(vdec->getVariable()->getParent())) {
-      TokenId parent = vdec->getVariable()->getParent();
-      if (!parent->isActive()) continue;
-      }
-      const HSTSHeuristics::Priority priority = m_heur->getPriorityForConstrainedVariableDP(vdec);
-      if ((m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH && priority > bestp) ||
-	    (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW && priority < bestp)) {
-      if (vdec->getVariable()->lastDomain().isFinite()) {
-	    bestDec = vdec;
-	    bestp = priority;
-      }
-      else {
-	    bestFloatDec = vdec;
-	    bestFloatp = priority;
-      }
-      }
-      else if (priority == bestp) { // secondary heuristic - compat guards first
-      ConstrainedVariableDecisionPointId bdec(bestDec); // casting necessary
-      ConstrainedVariableId  bdecVar(bdec->getVariable());
-      ConstrainedVariableId vdecVar(vdec->getVariable());
-      if (!m_dm->isCompatGuard(bdecVar->getKey()) && m_dm->isCompatGuard(vdecVar->getKey()))
-	    bestDec = vdec;
-      else // terciary heuristic - domain size
-	    if (vdec->getVariable()->lastDomain().isFinite() && bdec->getVariable()->lastDomain().getSize() > vdec->getVariable()->lastDomain().getSize())
-      bestDec = vdec;
-      }
-      }
-      if (bestDec.isNoId()) { // must return the best float dec.
-      bestDec = bestFloatDec;
-      bestp = bestFloatp;
-      }
-      }
-    */
   }
 
   DecisionPointId HSTSOpenDecisionManager::getNextDecision() {
@@ -245,10 +191,7 @@ namespace EUROPA {
 
   DecisionPointId HSTSOpenDecisionManager::getNextDecisionStrict() {
     DecisionPointId bestDec = DecisionPointId::noId();
-    HSTSHeuristics::Priority bestP = MIN_PRIORITY - 1;
-    
-    if(m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW)
-      bestP = MAX_PRIORITY + 1;
+    Priority bestP = m_heur->worstCasePriority() * 2;
 
     //prefer unit variable decisions over everything
     getBestUnitVariableDecision(bestDec, bestP);
@@ -259,39 +202,25 @@ namespace EUROPA {
       DecisionPointId oDec = DecisionPointId::noId();
       DecisionPointId tDec = DecisionPointId::noId();
       DecisionPointId vDec = DecisionPointId::noId();
-      HSTSHeuristics::Priority bestOP = MIN_PRIORITY - 1;
-      HSTSHeuristics::Priority bestTP = MIN_PRIORITY - 1;
-      HSTSHeuristics::Priority bestVP = MIN_PRIORITY - 1;
-      if (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW) {
-        bestOP = MAX_PRIORITY + 1;
-        bestTP = MAX_PRIORITY + 1;
-        bestVP = MAX_PRIORITY + 1;
-      }
+      Priority bestOP = bestP;
+      Priority bestTP = bestP;
+      Priority bestVP = bestP;
 
       getBestObjectDecision(oDec, bestOP);
       getBestNonUnitVariableDecision(vDec, bestVP);
       getBestTokenDecision(tDec, bestTP);
 
-      //we assume that preference is transitive
-      HSTSHeuristics::Priority bestVTP = m_heur->preferredPriority(bestVP, bestTP);
-      //if the best priority belongs to the object decision or there is a tie between the object
-      //and one of the others, the object is best
-      if(m_heur->preferredPriority(bestOP, bestVTP) == bestOP) {
-        bestDec = oDec;
-        bestP = bestOP;
-      }
-      else {
-        //if the best priority belongs to the token decision or there is a tie between
-        //the token and variable decisions, the token is best
-        if(bestVTP == bestTP) {
-          bestDec = tDec;
-          bestP = bestTP;
-        }
-        //at this point, the variable has the best priority
-        else {
+      bestP = bestOP;
+      bestDec = oDec;
+
+      if(m_heur->betterThan(bestVP, bestP)){
           bestDec = vDec;
           bestP = bestVP;
-        }
+      }
+
+      if(m_heur->betterThan(bestTP, bestP)){
+          bestDec = tDec;
+          bestP = bestTP;
       }
     }
     
@@ -304,14 +233,10 @@ namespace EUROPA {
     DecisionPointId bestODec;
     DecisionPointId bestTDec;
     DecisionPointId bestVDec;
-    HSTSHeuristics::Priority bestOP = MIN_PRIORITY - 1;
-    HSTSHeuristics::Priority bestTP = MIN_PRIORITY - 1;
-    HSTSHeuristics::Priority bestVP = MIN_PRIORITY - 1;
-    if (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::LOW) {
-      bestOP = MAX_PRIORITY + 1;
-      bestTP = MAX_PRIORITY + 1;
-      bestVP = MAX_PRIORITY + 1;
-    }
+    Priority bestOP = m_heur->worstCasePriority() * 2;
+    Priority bestTP = bestOP;
+    Priority bestVP = bestOP;
+
     bool assignedBest(false);
 
     if(!m_sortedObjectDecs.empty())  getBestObjectDecision(bestODec, bestOP);
@@ -366,43 +291,22 @@ namespace EUROPA {
     }
 
     /* If I'm here, I need to compare bestTDec to bestVDec */
-    if (m_heur->getDefaultPriorityPreference() == HSTSHeuristics::HIGH) {
-      /* pick max */
-      if (bestTP >= bestVP) {
-	checkError(bestVDec.isValid(), "We assume we have a valid unit var decision, but we don't");
-        /* prefer units though */
-        ConstrainedVariableDecisionPointId vdec(bestVDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
-        TokenDecisionPointId tdec(bestTDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Tok Dec = [" << bestTP << "] (" << tdec->getKey() << ") with Token " << tdec->getToken()->getName().c_str() << " with domain " << tdec->getToken()->getState()->lastDomain()) ;
-        if (bestTP == bestVP && vdec->getVariable()->lastDomain().isSingleton())  m_curDec = bestVDec;
-        else m_curDec = bestTDec;
-        assignedBest = true;
-      }
-      else { /* bestVP > bestTP */
-        ConstrainedVariableDecisionPointId vdec(bestVDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
-        m_curDec = bestVDec;
-        assignedBest = true;
-      }
+    if (m_heur->betterThan(bestTP, bestVP)) {
+      checkError(bestVDec.isValid(), "We assume we have a valid unit var decision, but we don't");
+      /* prefer units though */
+      ConstrainedVariableDecisionPointId vdec(bestVDec);
+      debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
+      TokenDecisionPointId tdec(bestTDec);
+      debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Tok Dec = [" << bestTP << "] (" << tdec->getKey() << ") with Token " << tdec->getToken()->getName().c_str() << " with domain " << tdec->getToken()->getState()->lastDomain()) ;
+      if (bestTP == bestVP && vdec->getVariable()->lastDomain().isSingleton())  m_curDec = bestVDec;
+      else m_curDec = bestTDec;
+      assignedBest = true;
     }
-    else { /* default priority preference is low */
-      if (bestTP <= bestVP) {
-        /* prefer units though */
-        ConstrainedVariableDecisionPointId vdec(bestVDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
-        TokenDecisionPointId tdec(bestTDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Tok Dec = [" << bestTP << "] (" << tdec->getKey() << ") with Token " << tdec->getToken()->getName().c_str() << " with domain " << tdec->getToken()->getState()->lastDomain()) ;
-        if (bestTP == bestVP && vdec->getVariable()->lastDomain().isSingleton())  m_curDec = bestVDec;
-        else m_curDec = bestTDec;
-        assignedBest = true;
-      }
-      else { /* bestVP < bestTP */
-        ConstrainedVariableDecisionPointId vdec(bestVDec);
-        debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
-        m_curDec = bestVDec;
-        assignedBest = true;
-      }
+    else { /* bestVP > bestTP */
+      ConstrainedVariableDecisionPointId vdec(bestVDec);
+      debugMsg("HSTS:OpenDecisionManager:getNextDecision", "Best Var Dec = [" << bestVP << "] (" << vdec->getKey() << ") with Variable " << vdec->getVariable()->getName().c_str() << " with domain " << vdec->getVariable()->lastDomain()) ;
+      m_curDec = bestVDec;
+      assignedBest = true;
     }
 
     //check_error(assignedBest || m_curDec.isNoId() || m_curDec->hasRemainingChoices());
@@ -410,287 +314,84 @@ namespace EUROPA {
     return m_curDec;
   } /* we have found a best */
 
-  void HSTSOpenDecisionManager::initializeTokenChoices(TokenDecisionPointId& tdp) {
+  void HSTSOpenDecisionManager::initializeTokenChoicesInternal(const TokenDecisionPointId& tdp) {
+    const StateDomain stateDomain(tdp->getToken()->getState()->lastDomain());
+    TokenId tok(tdp->getToken());
+    if(stateDomain.isMember(Token::MERGED)) {
+      tok->getPlanDatabase()->getCompatibleTokens(tok, tdp->m_compatibleTokens, PLUS_INFINITY, true);
+      debugMsg("HSTSOpenDecisionManager:initializeTokenChoices", "Found " << tdp->m_compatibleTokens.size() << " compatible tokens");
+      if(tdp->m_compatibleTokens.size() > 0) {
+        debugMsg("HSTSOpenDecisionManager:initializeTokenChoices", "Pushing token:merged m_choices");
+	tdp->m_choices.push_back(Token::MERGED);
+      }
+    }
+    if(stateDomain.isMember(Token::ACTIVE) && tok->getPlanDatabase()->hasOrderingChoice(tok))
+      tdp->m_choices.push_back(Token::ACTIVE);
+    if(stateDomain.isMember(Token::REJECTED))
+      tdp->m_choices.push_back(Token::REJECTED);
+  }
+
+  void HSTSOpenDecisionManager::initializeObjectChoicesInternal(const ObjectDecisionPointId& odp) {
+    std::list<double> values;
+    TokenId tok(odp->getToken());
+    tok->getObject()->getLastDomain().getValues(values);
+    std::list<double>::iterator it = values.begin();
+    for ( ; it != values.end(); ++it) {
+      ObjectId obj = *it;
+      check_error(obj.isValid());
+      std::vector<std::pair<TokenId, TokenId> > tuples;
+      obj->getOrderingChoices(tok, tuples);
+      std::vector<std::pair<TokenId, TokenId> >::iterator it = tuples.begin();
+      debugMsg("ObjectDecisionPoint:getChoices", "Choices constraining (" << tok->getKey() << ")");
+      for (; it != tuples.end(); it++) {
+	TokenId predecessor = it->first;
+	TokenId successor = it->second;
+	check_error(predecessor.isValid());
+	check_error(successor.isValid());
+	odp->m_choices.push_back(std::make_pair<ObjectId,std::pair<TokenId,TokenId> > (obj, *it));
+	debugMsg("ObjectDecisionPoint:getChoices", "  constrain(" << predecessor->getKey() << ", " << successor->getKey() << ") on Object ( " << obj->getKey() << ")");
+      }
+    }
+  }
+
+  void HSTSOpenDecisionManager::initializeTokenChoices(const TokenDecisionPointId& tdp) {
     check_error(tdp.isValid());
     check_error(tdp->m_choices.empty());
-    DefaultOpenDecisionManager::initializeTokenChoices(tdp);
+    initializeTokenChoicesInternal(tdp);
 
     if (tdp->m_choices.empty()) return;
 
-    std::list<LabelStr> states;
-    HSTSHeuristics::CandidateOrder order = HSTSHeuristics::UNKNOWN;
-    m_heur->getOrderedStatesForTokenDP(tdp, states, order);
-
-    check_error (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::FAR || order == HSTSHeuristics::EARLY || order == HSTSHeuristics::LATE || order == HSTSHeuristics::NONE, "Unable to handle cases other than late, early, near, far, none.");
-    
-    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tdp->getKey() << ") for Token (" << tdp->getToken()->getKey() << ") has " << tdp->m_choices.size() + tdp->m_compatibleTokens.size() << " choices.");
-    
-    if (order == HSTSHeuristics::NONE) {
-      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tdp->getKey() << ") for Token (" << tdp->getToken()->getKey() << ") has best choice =  " << LabelStr(tdp->m_choices[0]).toString());
-      return;
-    }
-
-    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Clearing unavailable states from the potential state list.");
-
-    std::stringstream data1;
-    for(std::list<LabelStr>::const_iterator it = states.begin(); it != states.end(); ++it) {
-      data1 << " " << (*it).toString();
-    }
-    std::stringstream data2;
-    for(std::vector<LabelStr>::const_iterator it = tdp->m_choices.begin(); it != tdp->m_choices.end(); ++it) {
-      data2 << " " << (*it).toString();
-    }
-    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Allowable states:" << data1.str());
-    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Available states: " << data2.str());
-    
-
-
-    for(std::list<LabelStr>::iterator it = states.begin(); it != states.end(); ++it) {
-      bool found = false;
-      for(std::vector<LabelStr>::iterator cit = tdp->m_choices.begin(); cit != tdp->m_choices.end(); ++cit) {
-        if(fabs((double)(*cit) - (double)(*it)) < EPSILON)
-          found = true;
-      }
-      if(!found) {
-        debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Removing " << (*it).toString());
-        std::list<LabelStr>::iterator tmp = it;
-        --it;
-        states.erase(tmp);
-      }
-        // if(!std::binary_search(tdp->m_choices.begin(), tdp->m_choices.end(), *it)) {
-        //  debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Removing " << (*it).toString());
-        //  std::list<LabelStr>::iterator tmp = it;
-        //  --it;
-        //  states.erase(tmp);
-        //}
-    }
- 
-    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Assigning ordered states to the token.");
-    tdp->m_choices.clear();
-    tdp->m_choices.insert(tdp->m_choices.begin(), states.begin(), states.end());
-
-    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Done.  TDP now has " << tdp->m_choices.size() << " choices.");
-
-     unsigned int current = 0;
-//     LabelStr tmpChoice;
-//     for (std::list<LabelStr>::const_iterator sit = states.begin(); sit != states.end(); ++ sit) {
-//       for (unsigned int i = current; i != tdp->m_choices.size(); ++i) {
-//         LabelStr val(tdp->m_choices[i]);
-	
-//         debugMsg("HSTS:OpenDecisionManager:getNextChoice","comparing " << val.c_str() << " with " << (*sit).c_str());
-
-//         if (strcmp(val.c_str(),(*sit).c_str()) == 0) {
-//           if (i != current) {
-//             tmpChoice = tdp->m_choices[current];
-//             tdp->m_choices[current] = tdp->m_choices[i];
-//             tdp->m_choices[i] = tmpChoice;
-//           }
-//           current++;
-//         }
-//       }
-//     }
-
-    // Next, order the compatibleTokens
-
-    TokenId tmpCompatibleToken;
-    int numberToBeat;
-    int number;
-    current = 0;
-
-    if (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::EARLY) {
-      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "NEAR || EARLY");
-      numberToBeat = MAX_FINITE_TIME;
-      for (unsigned int i = current; i != tdp->m_compatibleTokens.size(); ++i) {
-        TokenId token = tdp->m_compatibleTokens[i];
-        if (token.isNoId()) 
-          number = MAX_FINITE_TIME;
-        else {
-          if (order == HSTSHeuristics::NEAR) {
-            debugMsg("HSTS:OpenDecisionManager:getNextChoice", "NEAR");
-            number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)tdp->getToken()->getStart()->lastDomain().getLowerBound()) +
-              abs((int)token->getStart()->lastDomain().getUpperBound() - (int)tdp->getToken()->getStart()->lastDomain().getUpperBound());
-          }
-          else {
-            debugMsg("HSTS:OpenDecisionManager:getNextChoice","EARLY");
-            number = (int)token->getStart()->lastDomain().getLowerBound();
-          }
-        }
-        if (number < numberToBeat) {
-          if (current != i) {
-            tmpCompatibleToken = tdp->m_compatibleTokens[current];
-            tdp->m_compatibleTokens[current] = token;
-            tdp->m_compatibleTokens[i] = tmpCompatibleToken;
-          }
-          numberToBeat = number;
-          current++;
-          debugMsg("HSTS:OpenDecisionManager:getNextChoice", 
-                   " best token so far (" << token->getKey() << ") [" << token->getStart()->lastDomain().getLowerBound() 
-                   << "," <<  token->getStart()->lastDomain().getUpperBound() << "]");
-        }
-      }
-    }
-    else { // LATE or FAR
-      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "LATE || FAR");
-      numberToBeat = MIN_FINITE_TIME;
-      for (unsigned int i = current; i != tdp->m_compatibleTokens.size(); ++i) {
-        TokenId token = tdp->m_compatibleTokens[i];
-        if (token.isNoId()) 
-          number = MAX_FINITE_TIME;
-        else {
-          if (order == HSTSHeuristics::FAR) {
-            debugMsg("HSTS:OpenDecisionManager:getNextChoice","FAR");
-            number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)tdp->getToken()->getStart()->lastDomain().getLowerBound()) +
-              abs((int)token->getStart()->lastDomain().getUpperBound() - (int)tdp->getToken()->getStart()->lastDomain().getUpperBound());
-          }
-          else {
-            debugMsg("HSTS:OpenDecisionManager:getNextChoice","LATE");
-            number = (int)token->getStart()->lastDomain().getLowerBound();
-          }
-        }
-        if (number > numberToBeat) {
-          if (current != i) {
-            tmpCompatibleToken = tdp->m_compatibleTokens[current];
-            tdp->m_compatibleTokens[current] = token;
-            tdp->m_compatibleTokens[i] = tmpCompatibleToken;
-          }
-          numberToBeat = number;
-          current++;
-          debugMsg("HSTS:OpenDecisionManager:getNextChoice", " best token so far (" << token->getKey() << ") [" 
-                   << token->getStart()->lastDomain().getLowerBound() << "," <<  
-                   token->getStart()->lastDomain().getUpperBound() << "]");
-        }
-      }
-    }
-
-    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Token Decision Point (" << tdp->getKey() << ") for Token (" << tdp->getToken()->getKey() << ") has best choice =  " << tdp->m_choices[0].toString() << " of " << tdp->m_choices.size());
+    m_heur->orderChoices(tdp->getToken(), tdp->m_choices, tdp->m_compatibleTokens);
   }
 
-  void HSTSOpenDecisionManager::initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp) {
+  void HSTSOpenDecisionManager::initializeVariableChoices(const ConstrainedVariableDecisionPointId& vdp) {
     check_error(vdp.isValid());
     check_error(vdp->getVariable()->lastDomain().isFinite());
     check_error(vdp->m_choices.empty());
+
     if (vdp->m_var->lastDomain().isNumeric() && vdp->m_var->lastDomain().getSize() > 50) {
       vdp->m_choices.push_back(vdp->m_var->lastDomain().getLowerBound());
-      vdp->m_choices.push_back(vdp->m_var->lastDomain().getUpperBound()); // we'll keep the initial lb and ub for reference
+      vdp->m_choices.push_back(vdp->m_var->lastDomain().getUpperBound()); // we'll keep the initial lb and ub for ref.
     }
     else {
       std::list<double> values;
       vdp->m_var->lastDomain().getValues(values);
-
-      if (values.empty()) return;
-      
-      std::list<double> domain;
-      m_heur->getOrderedDomainForConstrainedVariableDP(vdp, domain);
-      if (domain.empty() || values.size() == 1) {
-        for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
-          double value = (*it);
-          vdp->m_choices.push_back(value);
-        }
-      }
-      else {
-        //std::cout << " domain.size = " << domain.size() << " values.size = " << values.size() << std::endl;
-        for (std::list<double>::const_iterator sit = domain.begin(); sit != domain.end(); ++ sit)
-          if (vdp->m_var->lastDomain().isMember((*sit)))
-            vdp->m_choices.push_back((*sit));
-      }
-      debugMsg("HSTS:OpenDecisionManager:initializeChoices", "Variable Decision Point (" << vdp->getKey() << ") for Variable (" << vdp->getVariable()->getKey() << ") has " << vdp->m_choices.size() << " choices.");
-      debugMsg("HSTS:OpenDecisionManager:initializeChoices", "Variable Decision Point (" << vdp->getKey() << ") for Variable (" << vdp->getVariable()->getKey() << ") has best choice = " << vdp->m_choices[0]);
-    } 
+      m_heur->orderChoices(vdp->m_var, values);
+      check_error(!values.empty(), "That would be an inconsistency which we should have detected already.");
+      for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
+	vdp->m_choices.push_back(*it);
+    }
   }
 
-  void HSTSOpenDecisionManager::initializeObjectChoices(ObjectDecisionPointId& odp) {
+  void HSTSOpenDecisionManager::initializeObjectChoices(const ObjectDecisionPointId& odp) {
     check_error(odp.isValid());
     check_error(odp->m_choices.empty());
-    DefaultOpenDecisionManager::initializeObjectChoices(odp);
+    initializeObjectChoicesInternal(odp);
 
     if (odp->m_choices.empty()) return;
 
-    HSTSHeuristics::CandidateOrder order = HSTSHeuristics::UNKNOWN;
-    m_heur->getOrderForObjectDP(odp, order);
+    // Invoke heuristics engine to order choices according to whatever heuristics it has
+    m_heur->orderChoices(odp->getToken(), odp->m_choices);
 
-    check_error (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::FAR || order == HSTSHeuristics::EARLY || order == HSTSHeuristics::LATE || order == HSTSHeuristics::NONE, "Unable to handle cases other than late, early, near, far.");
-    
-    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << odp->getKey() << ") sorting choices according to order = " << order);
-
-    if (order == HSTSHeuristics::NONE) {
-      debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << odp->getKey()  << ") with Token (" << odp->getToken()->getKey() << ") has best choice =  Obj (" << odp->m_choices[0].first->getKey() << ") Pred (" << odp->m_choices[0].second.first->getKey() << ") Succ (" << odp->m_choices[0].second.second->getKey() << ")");
-      return;
-    }
-    
-    // Order the successors
-    unsigned int current = 0;
-    std::pair< ObjectId, std::pair<TokenId, TokenId> > tmpChoice;
-    int numberToBeat;
-    int number;
-
-    if (order == HSTSHeuristics::NEAR || order == HSTSHeuristics::EARLY) {
-      numberToBeat = MAX_FINITE_TIME;
-      for (unsigned int i = current; i != odp->m_choices.size(); ++i) {
-        TokenId token;
-        if (odp->m_choices[i].second.first == odp->m_token)
-          token = odp->m_choices[i].second.second;
-        else
-          token = odp->m_choices[i].second.first;
-        if (token.isNoId()) 
-          number = MAX_FINITE_TIME;
-        else {
-          if (order == HSTSHeuristics::NEAR) {
-            //	  std::cout << "NEAR" << std::endl;
-            number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)odp->m_token->getStart()->lastDomain().getLowerBound()) +
-              abs((int)token->getStart()->lastDomain().getUpperBound() - (int)odp->m_token->getStart()->lastDomain().getUpperBound());
-          }
-          else {
-            //	  std::cout << "EARLY" << std::endl;
-            number = (int)token->getStart()->lastDomain().getLowerBound();
-          }
-        }
-        if (number < numberToBeat) {
-          if (current != i) {
-            tmpChoice = odp->m_choices[current];
-            odp->m_choices[current] = odp->m_choices[i];
-            odp->m_choices[i] = tmpChoice;
-          }
-          numberToBeat = number;
-          current++;
-          //	      std::cout << " best token so far (" << token->getKey() << ") [" << token->getStart()->lastDomain().getLowerBound() << "," <<  token->getStart()->lastDomain().getUpperBound() << "]" << std::endl;
-        }
-      }
-    }
-    else { // LATE or FAR
-      numberToBeat = MIN_FINITE_TIME;
-      for (unsigned int i = current; i != odp->m_choices.size(); ++i) {
-        TokenId token;
-        if (odp->m_choices[i].second.first == odp->m_token)
-          token = odp->m_choices[i].second.second;
-        else
-          token = odp->m_choices[i].second.first;
-        if (token.isNoId()) 
-          number = MAX_FINITE_TIME;
-        else {
-          if (order == HSTSHeuristics::FAR) {
-            //	  std::cout << "FAR" << std::endl;
-            number = abs((int)token->getStart()->lastDomain().getLowerBound() - (int)odp->m_token->getStart()->lastDomain().getLowerBound()) +
-              abs((int)token->getStart()->lastDomain().getUpperBound() - (int)odp->m_token->getStart()->lastDomain().getUpperBound());
-          }
-          else {
-            //	  std::cout << "LATE" << std::endl;
-            number = (int)token->getStart()->lastDomain().getLowerBound();
-          }
-        }
-        if (number > numberToBeat) {
-          if (current != i) {
-            tmpChoice = odp->m_choices[current];
-            odp->m_choices[current] = odp->m_choices[i];
-            odp->m_choices[i] = tmpChoice;
-          }
-          numberToBeat = number;
-          current++;
-          //	      std::cout << " best token so far (" << token->getKey() << ") [" << token->getStart()->lastDomain().getLowerBound() << "," <<  token->getStart()->lastDomain().getUpperBound() << "]" << std::endl;
-        }
-      }
-    }
-
-    debugMsg("HSTS:OpenDecisionManager:getNextChoice", "Object Decision Point (" << odp->getKey()  << ") with Token (" << odp->getToken()->getKey() << ") has best choice =  Obj (" << odp->m_choices[0].first->getKey() << ") Pred (" << odp->m_choices[0].second.first->getKey() << ") Succ (" << odp->m_choices[0].second.second->getKey() << ")");
   }
-
 }
