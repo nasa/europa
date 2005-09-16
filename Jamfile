@@ -24,10 +24,11 @@ Depends run-checkin-tests : run-makefile-tests ;
 NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
 Depends run-makefile-tests : check-makefile ;
 
+SubInclude PLASMA TinyXml ;
 SubInclude PLASMA Utils ;
 SubInclude PLASMA ConstraintEngine ;
-SubInclude PLASMA TinyXml ;
 SubInclude PLASMA PlanDatabase ;
+SubInclude PLASMA HeuristicsEngine ;
 SubInclude PLASMA Resource ;
 SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA CBPlanner ;
