@@ -2,7 +2,7 @@ SubDir PLASMA HSTS ;
 
 if ! $(PLASMA_READY) {
 
-Module HSTS : NDDL ConstraintEngine RulesEngine PlanDatabase TemporalNetwork CBPlanner TinyXml ;
+Module HSTS : NDDL RulesEngine CBPlanner HeuristicsEngine TemporalNetwork ;
 
 ModuleLibraries HSTS : $(DLOPEN_LIBRARY) ;
 
