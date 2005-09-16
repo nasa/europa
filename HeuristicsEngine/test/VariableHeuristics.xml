@@ -1,0 +1,111 @@
+<root>
+<ConstrainedVariable comment="Base case. No order preference.">
+  <Priority>1</Priority>
+  <VariableSpec>
+    <Name>mode</Name>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Telemetry.Communicate</PredicateName>
+  <PredicateParameters>
+   <Parameter>
+     <Index>0</Index>
+     <Value>17</Value>
+   </Parameter>
+   <Parameter>
+     <Name>bandwidth</Name>
+     <Value>189.34</Value>
+   </Parameter>
+   <Parameter>
+     <Index>2</Index>
+     <Value>false</Value>
+   </Parameter>
+   <Parameter>
+     <Index>3</Index>
+     <Value>medium-low</Value>
+   </Parameter>
+  </PredicateParameters>
+  </PredicateSpec>
+</ConstrainedVariable>
+
+<ConstrainedVariable comment="Enumerated order.">
+  <Priority>2</Priority>
+  <Preference>
+  <DomainOrder>
+    <Value>low</Value>
+    <Value>medium</Value>
+    <Value>high</Value>
+    <Value>medium-high</Value>
+    <Value>medium-low</Value>
+  </DomainOrder>
+  </Preference>
+  <VariableSpec>
+    <Name>mode</Name>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Telemetry.Communicate</PredicateName>
+  <PredicateParameters>
+   <Parameter>
+     <Index>2</Index>
+     <Value>FALSE</Value>
+   </Parameter>
+   <Parameter>
+     <Index>3</Index>
+     <Value>medium-low</Value>
+   </Parameter>
+  </PredicateParameters>
+  </PredicateSpec>
+</ConstrainedVariable>
+
+<ConstrainedVariable comment="Incorporate Master Relation with Guards. TODO: Handle Object Vars correctly.">
+  <Priority>3</Priority>
+  <Preference>
+  <DomainOrder>
+    <Value>0</Value>
+    <Value>1</Value>
+  </DomainOrder>
+  </Preference>
+  <VariableSpec>
+    <Index>2</Index>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Telemetry.Communicate</PredicateName>
+  <PredicateParameters>
+   <Parameter>
+     <Index>2</Index>
+     <Value>FALSE</Value>
+   </Parameter>
+   <Parameter>
+     <Index>3</Index>
+     <Value>medium-low</Value>
+   </Parameter>
+  </PredicateParameters>
+  </PredicateSpec>
+  <Master>
+    <Relation>after</Relation>
+    <PredicateSpec>
+      <PredicateName>Instrument.Place</PredicateName>
+      <PredicateParameters>
+       <Parameter>
+        <Index>rock</Index>
+        <Value>Rock17</Value>
+       </Parameter>
+      </PredicateParameters>
+    </PredicateSpec>
+  </Master>
+</ConstrainedVariable>
+
+<ConstrainedVariable comment="Incorporate Master Relation with Guards. TODO: Handle Object Vars correctly.">
+  <Priority>3</Priority>
+  <Preference>
+  <ValueOrder>descending</ValueOrder>
+  </Preference>
+  <VariableSpec>
+    <Index>2</Index>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Telemetry.Communicate</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
+</ConstrainedVariable>
+
+</root>
