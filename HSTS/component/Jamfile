@@ -8,7 +8,6 @@ SubDirHdrs $(PLASMA) CBPlanner component ;
 
 ModuleComponent HSTS
 	:
-	HSTSOpenDecisionManager.cc
 	HSTSNoBranchCondition.cc
 	;
 

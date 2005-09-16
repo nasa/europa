@@ -33,7 +33,14 @@
 #include "Rule.hh"
 #include "RuleInstance.hh"
 
+/* Miscellaneous */
 #include "TestSupport.hh"
+#include "XMLUtils.hh"
+
+/* Heuristics Engine */
+#include "HeuristicsEngine.hh"
+#include "Heuristic.hh"
+#include "HeuristicsReader.hh"
 
 #include "NumericDomain.hh"
 #include "StringDomain.hh"
@@ -47,6 +54,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <fstream>
 
 /**
  * @brief Test Constraint to only fire when all values are singletons and to then
@@ -149,6 +157,7 @@ public:
   }
 };
 
+
 #define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
     initCBPTestSchema(); \
@@ -165,39 +174,34 @@ public:
 #define DEFAULT_TEARDOWN()
 
 #define DEFAULT_SETUP_PLAN(ce, db, autoClose) \
-    ConstraintEngine ce; \
-    initCBPTestSchema(); \
-    PlanDatabase db(ce.getId(), Schema::instance()); \
-    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-    new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
-    RulesEngine re(db.getId()); \
-    Horizon hor(0, 200); \
-    CBPlanner planner(db.getId(), hor.getId()); \
-    planner.getDecisionManager()->getOpenDecisionManager()->initializeIfNeeded(); \
-    if (autoClose) \
-      db.close();
+  SETUP_HEURISTICS("DefaultHeuristics.xml") \
+  initCBPTestSchema();			    \
+  planner.getDecisionManager()->getOpenDecisionManager()->initializeIfNeeded(); \
+  if (autoClose) \
+    db.close();
 
 #define DEFAULT_TEARDOWN_PLAN()
 
-
-#define DEFAULT_SETUP_PLANNER() \
-    ConstraintEngine ce; \
-    initCBPTestSchema(); \
-    PlanDatabase db(ce.getId(), Schema::instance()); \
-    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-    new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
-    RulesEngine re(db.getId()); \
-    Horizon hor(0, 200); \
-    CBPlanner planner(db.getId(), hor.getId());   
-
-#define DEFAULT_TEARDOWN_PLANNER()
+#define SETUP_HEURISTICS(heuristicsSource) \
+  READ_HEURISTICS(heuristicsSource, true)
 
 
+#define READ_HEURISTICS(heuristicsSource, autoClose)		\
+  ConstraintEngine ce;						\
+  PlanDatabase db(ce.getId(), Schema::instance());		\
+  new DefaultPropagator(LabelStr("Default"), ce.getId());	\
+  new DefaultPropagator(LabelStr("Temporal"), ce.getId());	\
+  RulesEngine re(db.getId());					\
+  HeuristicsEngine heuristics(db.getId()); \
+  HeuristicsReader hreader(heuristics.getId()); \
+  hreader.read(heuristicsSource, autoClose); \
+  OpenDecisionManager odm(db.getId(), heuristics.getId());  \
+  DecisionManager dm(db.getId(), odm.getId()); \
+  Horizon hor(0, 200);						\
+  CBPlanner planner(db.getId(), hor.getId(), odm.getId());
+	
+#define TEARDOWN()
 
-
-
-
-extern bool loggingEnabled();
 
 /***********************************************************************************************
  * Declaration of classes and definition to test rule guard behavior.
@@ -237,7 +241,7 @@ public:
 
 class NestedGuardsRule: public Rule {
 public:
-  NestedGuardsRule(): Rule(LabelStr("Objects.P1")){}
+  NestedGuardsRule(): Rule(LabelStr("Object.P1")){}
 
   RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb,
                                 const RulesEngineId &rulesEngine) const{
@@ -247,30 +251,36 @@ public:
   }
 };
 
+
   /**
    * @brief Creates the type specifications required for testing
    */
   void initCBPTestSchema(){
     const SchemaId& schema = Schema::instance();
     schema->reset();
-    schema->addObjectType("Objects");
+    schema->addObjectType("Object");
 
-    schema->addPredicate("Objects.PredicateA");
-    schema->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalIntParam");
+    schema->addPredicate("Object.PredicateA");
+    schema->addMember("Object.PredicateA", IntervalIntDomain().getTypeName(), "IntervalIntParam");
 
-    schema->addPredicate("Objects.PredicateB");
-    schema->addPredicate("Objects.PredicateC");
-    schema->addPredicate("Objects.PredicateD");
-    schema->addPredicate("Objects.PADDED");
+    schema->addPredicate("Object.PredicateB");
+    schema->addPredicate("Object.PredicateC");
+    schema->addPredicate("Object.PredicateD");
+    schema->addPredicate("Object.PADDED");
 
-    schema->addPredicate("Objects.P1");
-    schema->addMember("Objects.P1", LabelSet().getTypeName(), "LabelSetParam0");
-    schema->addMember("Objects.P1", LabelSet().getTypeName(), "LabelSetParam1");
-    schema->addMember("Objects.P1", IntervalIntDomain().getTypeName(), "IntervalIntParam");
+    schema->addPredicate("Object.PredicateE");
+    schema->addMember("Object.PredicateE", IntervalIntDomain().getTypeName(), "param0");
+    schema->addMember("Object.PredicateE", IntervalDomain().getTypeName(), "param1");
+    schema->addMember("Object.PredicateE", LabelSet().getTypeName(), "param2");
 
-    schema->addPredicate("Objects.P1True");
-    schema->addMember("Objects.P1True", BoolDomain().getTypeName(), "BoolParam");
-    schema->addPredicate("Objects.P1False");
+    schema->addPredicate("Object.P1");
+    schema->addMember("Object.P1", LabelSet().getTypeName(), "LabelSetParam0");
+    schema->addMember("Object.P1", LabelSet().getTypeName(), "LabelSetParam1");
+    schema->addMember("Object.P1", IntervalIntDomain().getTypeName(), "IntervalIntParam");
+
+    schema->addPredicate("Object.P1True");
+    schema->addMember("Object.P1True", BoolDomain().getTypeName(), "BoolParam");
+    schema->addPredicate("Object.P1False");
   }
 
   static void makeTestToken(IntervalToken& token, const std::list<double>& values){
@@ -316,7 +326,7 @@ private:
 
   static bool testSetHorizionCondition() {
     // create a CBPlanner
-    DEFAULT_SETUP_PLANNER();
+    DEFAULT_SETUP_PLAN(ce, db, true);
     // Default horizion condition should be
     assertTrue(!planner.isPossiblyOutsideHorizon());
     assertTrue(planner.isNecessarilyOutsideHorizon());
@@ -335,7 +345,7 @@ private:
     assertTrue(!planner.isPossiblyOutsideHorizon());
     assertTrue(planner.isNecessarilyOutsideHorizon());
 
-    DEFAULT_TEARDOWN_PLANNER();
+    DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
@@ -368,14 +378,14 @@ private:
     assertTrue(!cond.isNecessarilyOutsideHorizon());
     assertTrue(dm.getConditions().size() == 1);
 
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
 
     db.close();
 
     odm.initializeIfNeeded();
 
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -431,11 +441,11 @@ static bool testHorizonConditionNecessary() {
     assertTrue(cond.isNecessarilyOutsideHorizon());
 
     // build a test token. 
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
     odm.initializeIfNeeded();
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(10, 13),
 			 IntervalIntDomain(20, 23),
@@ -473,81 +483,6 @@ static bool testHorizonConditionNecessary() {
     return true;
   }
 
-  /*
-  static bool testTemporalVariableCondition() {
-    DEFAULT_SETUP(ce, db, false);
-    TemporalVariableCondition cond(hor.getId(), dm.getId());
-    assertTrue(dm.getConditions().size() == 1);
-
-    assertTrue(cond.isStartIgnored());
-    assertTrue(cond.isEndIgnored());
-    assertTrue(cond.isDurationIgnored());
-    assertTrue(cond.isTemporalIgnored());
-    assertTrue(!cond.isHorizonOverlapAllowed());
-
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
-    db.close();
-
-    odm.initializeIfNeeded();
-    IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
-			 false,
-			 IntervalIntDomain(0, 10),
-			 IntervalIntDomain(0, 200),
-			 IntervalIntDomain(1, 1000));
-    tokenA.activate();
-    assertTrue(ce.propagate());
-    assertTrue(cond.test(t.getId()));
-    assertTrue(cond.test(tokenA.getId()));
-    assertTrue(!cond.test(tokenA.getStart()));
-    assertTrue(!cond.test(tokenA.getEnd()));
-    assertTrue(!cond.test(tokenA.getDuration()));
-
-    assertTrue(dm.getNumberOfDecisions() == 1, toString(dm.getNumberOfDecisions()));
-    
-    assertTrue(ce.propagate());
-    cond.allowHorizonOverlap();
-    assertTrue(cond.isHorizonOverlapAllowed());
-
-    assertTrue(cond.test(t.getId()));
-    assertTrue(cond.test(tokenA.getId()));
-    assertTrue(!cond.test(tokenA.getStart()));
-    assertTrue(cond.test(tokenA.getEnd()));
-    assertTrue(!cond.test(tokenA.getDuration()));
-
-    assertTrue(dm.getNumberOfDecisions() == 2, toString(dm.getNumberOfDecisions()));
-
-    assertTrue(ce.propagate());
-    cond.disallowHorizonOverlap();
-    assertTrue(!cond.isHorizonOverlapAllowed());
-    
-    assertTrue(cond.test(t.getId()));
-    assertTrue(cond.test(tokenA.getId()));
-    assertTrue(!cond.test(tokenA.getStart()));
-    assertTrue(!cond.test(tokenA.getEnd()));
-    assertTrue(!cond.test(tokenA.getDuration()));
-
-    assertTrue(dm.getNumberOfDecisions() == 1, toString(dm.getNumberOfDecisions()));
-
-    cond.setIgnoreStart(false);
-    cond.setIgnoreEnd(false);
-    assertTrue(!cond.isStartIgnored());
-    assertTrue(!cond.isEndIgnored());
-    assertTrue(cond.isDurationIgnored());
-    assertTrue(!cond.isTemporalIgnored());
-    assertTrue(ce.propagate());
-
-    assertTrue(cond.test(t.getId()));
-    assertTrue(cond.test(tokenA.getId()));
-    assertTrue(cond.test(tokenA.getStart()));
-    assertTrue(cond.test(tokenA.getEnd()));
-    assertTrue(!cond.test(tokenA.getDuration()));
-
-    assertTrue(dm.getNumberOfDecisions() == 3, toString(dm.getNumberOfDecisions()));
-    DEFAULT_TEARDOWN();
-    return true;
-  }
-  */
   static bool testDynamicInfiniteRealCondition() {
     DEFAULT_SETUP(ce, db, false);
     DynamicInfiniteRealCondition cond(dm.getId());
@@ -568,13 +503,13 @@ static bool testHorizonConditionNecessary() {
     Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 20));
     Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
 
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     odm.initializeIfNeeded();
 
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -601,13 +536,13 @@ static bool testHorizonConditionNecessary() {
     DEFAULT_SETUP(ce, db, false);
     MasterMustBeInserted condition(dm.getId());
 
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     odm.initializeIfNeeded();
 
     IntervalToken t0(db.getId(), 
-                     "Objects.P1",
+                     "Object.P1",
                      false, 
                      IntervalIntDomain(0, 1),
                      IntervalIntDomain(0, 1),
@@ -632,7 +567,7 @@ static bool testHorizonConditionNecessary() {
     // Now allocate a slave.
     IntervalToken t1(t0.getId(), 
 		     LabelStr("any"),
-                     LabelStr("Objects.P1"),
+                     LabelStr("Object.P1"),
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(0, 1),
 		     IntervalIntDomain(1, 1));
@@ -668,13 +603,13 @@ static bool testHorizonConditionNecessary() {
 
     TemporalVariableFilter condition(dm.getId());
 
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     odm.initializeIfNeeded();
 
     IntervalToken t0(db.getId(), 
-                     "Objects.P1",
+                     "Object.P1",
                      false, 
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 100),
@@ -706,7 +641,7 @@ private:
   static bool testUnitHandling() {
     DEFAULT_SETUP(ce, db, false);
 
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     odm.initializeIfNeeded();
@@ -750,7 +685,7 @@ private:
     // No allocate a token. Want to see that we get a zero commitment decision
     // for a token decision
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -782,10 +717,10 @@ private:
     Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 20));
     Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
 
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -821,7 +756,7 @@ private:
     assertFalse(dm.assignDecision(), "No more decisions.");
 
     IntervalToken tokenB(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -851,7 +786,7 @@ private:
     assertTrue(dm.getNumberOfDecisions() == 0);
 
     // Allocate a timeline and close the database.
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
 
     db.close();
 
@@ -869,7 +804,7 @@ private:
     Variable<LabelSet> v0(ce.getId(), LabelSet(LabelStr("L3")));
 
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -939,13 +874,13 @@ private:
 
     assertTrue(dm.getConditions().size() == 2);
 
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     odm.initializeIfNeeded();
 
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 true,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -1023,17 +958,17 @@ private:
     Variable<IntervalIntDomain> v3(ce.getId(), IntervalIntDomain(1, 20));
     Variable<IntervalIntDomain> v4(ce.getId(), IntervalIntDomain());
 
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -1059,10 +994,10 @@ private:
 
   static bool testCurrentState() {
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -1083,10 +1018,10 @@ private:
 
   static bool testRetractMove() {
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -1107,11 +1042,11 @@ private:
 
   static bool testNoBacktrackCase() {
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
+    Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     IntervalToken tokenA(db.getId(), 
-			 LabelStr("Objects.P1"), 
+			 LabelStr("Object.P1"), 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -1141,12 +1076,12 @@ private:
 
   static bool testSubgoalOnceRule() {
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
+    Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
-    SubgoalOnceRule r("Objects.P1", 0);
+    SubgoalOnceRule r("Object.P1", 0);
 
-    IntervalToken t0(db.getId(), "Objects.P1", true, 		     
+    IntervalToken t0(db.getId(), "Object.P1", true, 		     
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
@@ -1173,7 +1108,7 @@ private:
 
   static bool testStraightCSPSolution() {
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
+    Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     std::list<double> values;
@@ -1204,7 +1139,7 @@ private:
    */
   static bool testExhaustiveCSPSearch() {
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
+    Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     std::list<double> values;
@@ -1233,7 +1168,7 @@ private:
    */
   static bool testExhaustiveTokenSearch() {
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
+    Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     std::list<double> values;
@@ -1244,7 +1179,7 @@ private:
     values.push_back(LabelStr("L3"));
 
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -1254,7 +1189,7 @@ private:
     tokenA.close();
 
     IntervalToken tokenB(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -1275,62 +1210,50 @@ private:
     return true;
   }
 
+  /**
+   * The goal of this test is to force the planner through an exhaustive search
+   * and make sure it does not find a solution but backtracks all the way out. This is accomplished by:
+   * 0. Set up a planning problem with 1 inactive tokens need to be planned out on the same object. The tokens
+   *    include parameters which force decisions on variables.
+   * 1. Introducing a subgoal rule that will  prohibit the subgoal from merging back on to the active master eventually.
+   *    It will circumvent the lookahead to make the behavior more interesting.
+   * 3. In the interim, we interleave variable decisions to make the search work hard.
+   */
   static bool testBacktrackCase() {
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
+    Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
-    SubgoalOnceRule r("Objects.P1", 0);
+    SubgoalOnceRule r("Object.P1", 0);
 
     std::list<double> values;
     values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
     values.push_back(LabelStr("L2"));
-    values.push_back(LabelStr("L5"));
-    values.push_back(LabelStr("L3"));
 
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
     tokenA.addParameter(LabelSet(values), "LabelSetParam0");
-    // can't merge tokens with parameters that are dynamic domains
-    //tokenA.addParameter(LabelSet(values, false));
-    tokenA.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
+    tokenA.addParameter(IntervalIntDomain(1, 2), "IntervalIntParam");
     tokenA.close();
 
     IntervalToken tokenB(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
     tokenB.addParameter(LabelSet(values), "LabelSetParam0");
-    // can't merge tokens with parameters that are dynamic domains
-    //tokenB.addParameter(LabelSet(values, false));
-    tokenB.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
+    tokenB.addParameter(IntervalIntDomain(1, 2), "IntervalIntParam");
     tokenB.close();
-    
-    IntervalToken tokenC(db.getId(), 
-			 "Objects.P1", 
-			 false,
-			 IntervalIntDomain(0, 10),
-			 IntervalIntDomain(0, 20),
-			 IntervalIntDomain(1, 1000),
-			 Token::noObject(), false);
-    tokenC.addParameter(LabelSet(values), "LabelSetParam0");
-    // can't merge tokens with parameters that are dynamic domains
-    //tokenC.addParameter(LabelSet(values, false));
-    tokenC.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
-    tokenC.close();
 
-    // an equivalence constraint between the start times will cause the
-    // planner to retract the activate decision and use the merge decision
-    // instead. 
+    // an equivalence constraint between the start times prevent A and B from being sequenced no the
+    // same timeline
     std::vector<ConstrainedVariableId> scope;
     scope.push_back(tokenA.getStart());
     scope.push_back(tokenB.getStart());
@@ -1348,7 +1271,7 @@ private:
   // Test that all options will be tried before coming to a conclusion 
   static bool testCompleteCSPSearch(){
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
+    Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     std::list<double> values;
@@ -1382,56 +1305,37 @@ private:
    static bool testResetPlannerCase() {
 
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline timeline(db.getId(),LabelStr("Objects"), LabelStr("t1"));
+    Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
-    SubgoalOnceRule r("Objects.P1", 0);
+    SubgoalOnceRule r("Object.P1", 0);
 
     std::list<double> values;
     values.push_back(LabelStr("L1"));
-    values.push_back(LabelStr("L4"));
     values.push_back(LabelStr("L2"));
-    values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
 
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
     tokenA.addParameter(LabelSet(values), "LabelSetParam0");
-    // can't merge tokens with parameters that are dynamic domains
-    //tokenA.addParameter(LabelSet(values, false));
-    tokenA.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
+    tokenA.addParameter(IntervalIntDomain(1, 2), "IntervalIntParam");
     tokenA.close();
 
     IntervalToken tokenB(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
     tokenB.addParameter(LabelSet(values), "LabelSetParam0");
-    // can't merge tokens with parameters that are dynamic domains
-    //tokenB.addParameter(LabelSet(values, false));
-    tokenB.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
+    tokenB.addParameter(IntervalIntDomain(1, 2), "IntervalIntParam");
     tokenB.close();
-    
-    IntervalToken tokenC(db.getId(), 
-			 "Objects.P1", 
-			 false,
-			 IntervalIntDomain(0, 10),
-			 IntervalIntDomain(0, 20),
-			 IntervalIntDomain(1, 1000),
-			 Token::noObject(), false);
-    tokenC.addParameter(LabelSet(values), "LabelSetParam0");
-    // can't merge tokens with parameters that are dynamic domains
-    //tokenC.addParameter(LabelSet(values, false));
-    tokenC.addParameter(IntervalIntDomain(1, 20), "IntervalIntParam");
-    tokenC.close();
 
     // an equivalence constraint between the start times will cause the
     // planner to retract the activate decision and use the merge decision
@@ -1462,9 +1366,9 @@ private:
 
   static bool testTimeoutCase() {
     DEFAULT_SETUP_PLAN(ce, db, false);
-    Timeline t1(db.getId(),LabelStr("Objects"), LabelStr("t1"));
-    Timeline t2(db.getId(),LabelStr("Objects"), LabelStr("t2"));
-    Object o1(db.getId(),LabelStr("Objects"),LabelStr("o1"));
+    Timeline t1(db.getId(),LabelStr("Object"), LabelStr("t1"));
+    Timeline t2(db.getId(),LabelStr("Object"), LabelStr("t2"));
+    Object o1(db.getId(),LabelStr("Object"),LabelStr("o1"));
     db.close();
 
     std::list<double> values;
@@ -1475,7 +1379,7 @@ private:
     values.push_back(LabelStr("L3"));
 
     IntervalToken tokenA(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -1484,7 +1388,7 @@ private:
     makeTestToken(tokenA, values);
 
     IntervalToken tokenB(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -1494,7 +1398,7 @@ private:
     makeTestToken(tokenB, values);
 
     IntervalToken tokenC(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -1505,7 +1409,7 @@ private:
     
 
     IntervalToken tokenD(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -1515,7 +1419,7 @@ private:
     makeTestToken(tokenD, values);
 
     IntervalToken tokenE(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -1525,7 +1429,7 @@ private:
     makeTestToken(tokenE, values);
 
     IntervalToken tokenF(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -1535,7 +1439,7 @@ private:
     makeTestToken(tokenF, values);
 
     IntervalToken tokenG(db.getId(), 
-			 "Objects.P1", 
+			 "Object.P1", 
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 20),
@@ -1611,7 +1515,7 @@ private:
 
     //    NotFalseConstraint c2(LabelStr("neqfalse"), LabelStr("Default"), ce.getId(), makeScope(v6.getId()));
     
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     //    int numDecs = 4;
@@ -1634,15 +1538,15 @@ private:
 
     hor.setHorizon(300,400);
 
-    Timeline t1(db.getId(), LabelStr("Objects"), LabelStr("Timeline1"));
-    Timeline t2(db.getId(), LabelStr("Objects"), LabelStr("Timeline2"));
-    Object t3(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
+    Timeline t1(db.getId(), LabelStr("Object"), LabelStr("Timeline1"));
+    Timeline t2(db.getId(), LabelStr("Object"), LabelStr("Timeline2"));
+    Object t3(db.getId(), LabelStr("Object"), LabelStr("Object1"));
     db.close();
 
-    ConditionalRule r("Objects.PredicateA");
+    ConditionalRule r("Object.PredicateA");
 
     IntervalToken tokenA(db.getId(), 
-			 "Objects.PredicateA", 
+			 "Object.PredicateA", 
 			 true,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -1652,7 +1556,7 @@ private:
     tokenA.close();
 
     IntervalToken tokenB(db.getId(), 
-			 "Objects.PredicateB", 
+			 "Object.PredicateB", 
 			 false,
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(0, 200),
@@ -1695,11 +1599,11 @@ private:
 
     hor.setHorizon(10,500);
 
-    Timeline t1(db.getId(), LabelStr("Objects"), LabelStr("Timeline1"));
+    Timeline t1(db.getId(), LabelStr("Object"), LabelStr("Timeline1"));
     db.close();
 
     IntervalToken tokenB(db.getId(), 
-			 "Objects.PredicateB", 
+			 "Object.PredicateB", 
 			 false,
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(0, 200),
@@ -1742,12 +1646,12 @@ private:
     DEFAULT_SETUP_PLAN(ce, db, false);
     hor.setHorizon(10,500);
 
-    Object o1(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
-    Timeline t1(db.getId(), LabelStr("Objects"), LabelStr("Timeline1"));
+    Object o1(db.getId(), LabelStr("Object"), LabelStr("Object1"));
+    Timeline t1(db.getId(), LabelStr("Object"), LabelStr("Timeline1"));
     db.close();
 
     IntervalToken tokenB(db.getId(), 
-			 "Objects.PredicateB", 
+			 "Object.PredicateB", 
 			 false,
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(0, 200),
@@ -1787,11 +1691,11 @@ private:
   static bool testObjectHorizon() {
     DEFAULT_SETUP_PLAN(ce, db, false);
 
-    Object o1(db.getId(), LabelStr("Objects"), LabelStr("Object1"));
-    Object o2(db.getId(), LabelStr("Objects"), LabelStr("Object2"));
+    Object o1(db.getId(), LabelStr("Object"), LabelStr("Object1"));
+    Object o2(db.getId(), LabelStr("Object"), LabelStr("Object2"));
     db.close();
 
-    IntervalToken tokenB(db.getId(), "Objects.PredicateB", false);
+    IntervalToken tokenB(db.getId(), "Object.PredicateB", false);
 
     hor.setHorizon(10,100);
 
@@ -1848,26 +1752,26 @@ private:
     v5.insert(23);
     v5.close();
 
-    Object o1(db.getId(), LabelStr("Objects"), LabelStr("o1"));
-    Timeline t1(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Object o1(db.getId(), LabelStr("Object"), LabelStr("o1"));
+    Timeline t1(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     IntervalToken tokenA(db.getId(), 
-			 "Objects.PredicateD",
+			 "Object.PredicateD",
 			 true,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db.getId(), 
-			 "Objects.PredicateB",
+			 "Object.PredicateB",
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db.getId(), 
-			 "Objects.PredicateC",
+			 "Object.PredicateC",
 			 true,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -1881,11 +1785,11 @@ private:
 
     assertTrue(planner.getTime() == planner.getDepth());
 
-    DecisionManagerId dm = planner.getDecisionManager();
+    DecisionManagerId ldm = planner.getDecisionManager();
     unsigned int count;
-    dm->retractDecision(count);
-    while(dm->hasDecisionToRetract() && dm->isRetracting())
-      dm->retractDecision(count);
+    ldm->retractDecision(count);
+    while(ldm->hasDecisionToRetract() && ldm->isRetracting())
+      ldm->retractDecision(count);
 
     result = planner.run();
 
@@ -1916,7 +1820,7 @@ private:
     v5.insert(23);
     v5.close();
 
-    Timeline t(db.getId(), LabelStr("Objects"), LabelStr("t1"));
+    Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
 
     //    int numDecs = 4;
@@ -1932,7 +1836,7 @@ private:
 
     Variable<BoolDomain> v6(ce.getId(), BoolDomain());
     IntervalToken tokenA(db.getId(), 
-			 "Objects.PADDED",
+			 "Object.PADDED",
 			 true); 
 
     tokenA.getStart()->specify(IntervalIntDomain(0, 10));
@@ -1944,6 +1848,8 @@ private:
     return true;
   }
 };
+
+
 
 int main() {
   LockManager::instance().connect();

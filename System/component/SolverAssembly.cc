@@ -93,10 +93,10 @@ namespace EUROPA {
     check_error(config != NULL, "Must have a planner config argument.");
     TiXmlDocument doc(config);
     doc.LoadFile();
-    return plan(txSource, *(doc.RootElement()));
+    return plan(txSource, *(doc.RootElement()), NULL );
   }
 
-  bool SolverAssembly::plan(const char* txSource, const TiXmlElement& config, const char* averFile){
+  bool SolverAssembly::plan(const char* txSource, const TiXmlElement& config, const char*, const char* averFile){
     SOLVERS::SolverId solver = (new SOLVERS::Solver(m_planDatabase, config))->getId();
 
 #ifdef PPW_WITH_PLANNER

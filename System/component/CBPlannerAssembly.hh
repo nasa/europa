@@ -40,10 +40,12 @@ namespace EUROPA {
      * @brief Invoke the planner. Calls playTransactions(txSource).
      * @param txSource The source from which we get the initial state
      * @param An unused parameter for compatibility with what client expects.
+     * @param The required heuristics file - can be a default
      * @param An optional aver test file input
      * @return True if successfully found a plan. Otherwise false
      */
-    bool plan(const char* txSource, const TiXmlElement& config, const char* averFile = NULL);
+    bool plan(const char* txSource, const TiXmlElement& config, 
+	      const char* heuristics, const char* averFile = NULL);
 
     const PlanDatabaseId& getPlanDatabase() const;
 

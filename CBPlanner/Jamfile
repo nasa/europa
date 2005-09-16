@@ -2,7 +2,7 @@ SubDir PLASMA CBPlanner ;
 
 if ! $(PLASMA_READY) {
 
-Module CBPlanner : RulesEngine Resource TinyXml ;
+Module CBPlanner : RulesEngine Resource HeuristicsEngine ;
 
 SubInclude PLASMA CBPlanner core ;
 SubInclude PLASMA CBPlanner component ;

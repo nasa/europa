@@ -39,21 +39,21 @@ namespace EUROPA {
   void SubgoalOnceRuleRoot::handleExecute() {
     TokenId tok =  (new IntervalToken(m_token,  
 				      "after",
-				      LabelStr("Objects.P1"), 
+				      LabelStr("Object.P1"), 
 				      IntervalIntDomain(0, 10),
 				      IntervalIntDomain(0, 20),
 				      IntervalIntDomain(1, 1000),
 				      Token::noObject(), false))->getId();
     std::list<double> values;
     values.push_back(EUROPA::LabelStr("L1"));
-    values.push_back(EUROPA::LabelStr("L4"));
     values.push_back(EUROPA::LabelStr("L2"));
-    values.push_back(EUROPA::LabelStr("L5"));
-    values.push_back(EUROPA::LabelStr("L3"));
     tok->addParameter(LabelSet(values), "LabelSetParam0");
-    tok->addParameter(IntervalIntDomain(1,20), "IntervalIntParam");
+    tok->addParameter(IntervalIntDomain(1,2), "IntervalIntParam");
     tok->close();
     TokenId slave = addSlave(tok);
+
+    // The first time around, we post an equality constraint which is OK. Second time around
+    // we place an impossible constraint such that it will backtrack
     if (m_count < 2)
       addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), slave->getStart()));
     else {

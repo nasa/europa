@@ -93,9 +93,10 @@ Commands::TakeSample{
  commonAncestor(a.object, this.object, rovers);
 
  // Make contact with results. Prefer to phone home, but
- // also allow contact to lander instead as a relay
- bool OR;
+ // also allow contact to lander instead as a relay. This will force a branch
+ // point with different resource costs
 
+ bool OR;
  if(OR == false){
   meets(object.PhoneHome t0);
  }

@@ -19,6 +19,9 @@
 #include "PartialPlanWriter.hh"
 #include "Horizon.hh"
 #include "DecisionManager.hh"
+#include "OpenDecisionManager.hh"
+#include "HeuristicsEngine.hh"
+#include "HeuristicsReader.hh"
 #include "MasterMustBeInserted.hh"
 
 // Test Support
@@ -63,16 +66,22 @@ namespace EUROPA {
     isInitialized() = true;
   }
 
-  bool CBPlannerAssembly::plan(const char* txSource, const TiXmlElement&, const char* averFile){
+  bool CBPlannerAssembly::plan(const char* txSource, const TiXmlElement&,  
+			       const char* heuristics, const char* averFile){
     Horizon horizon;
-    CBPlanner planner(m_planDatabase, horizon.getId());
-    /*
+    HeuristicsEngine he(m_planDatabase);
+    HeuristicsReader reader(he.getId());
+    reader.read(heuristics);
+
+    OpenDecisionManager odm(m_planDatabase, he.getId());
+    CBPlanner planner(m_planDatabase, horizon.getId(), odm.getId());
+
 #ifdef PPW_WITH_PLANNER
     PlanWriter::PartialPlanWriter ppw(m_planDatabase, m_constraintEngine, m_rulesEngine, planner.getId());
 #else
     PlanWriter::PartialPlanWriter ppw(m_planDatabase, m_constraintEngine, m_rulesEngine);
 #endif
-    */
+
     if(averFile != NULL) {
       AverInterp::init(std::string(averFile), planner.getDecisionManager(), 
                        m_planDatabase->getConstraintEngine(), m_planDatabase, m_rulesEngine);
