@@ -1,9 +1,0 @@
-SubDir PLASMA HeuristicsEngine test ;
-
-if ! $(PLASMA_READY) {
-
-	ModuleMain he-module-tests : module-tests.cc : HeuristicsEngine ;
-	RunModuleMain run-he-module-tests : he-module-tests ;
-	LocalDepends tests : run-he-module-tests ;
-
-} # PLASMA_READY

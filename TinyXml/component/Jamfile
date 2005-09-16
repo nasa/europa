@@ -1,7 +1,0 @@
-SubDir PLASMA TinyXml component ;
-
-if ! $(PLASMA_READY) {
-
-ModuleComponent TinyXml ;
-
-} # PLASMA_READY
