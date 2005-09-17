@@ -31,6 +31,12 @@ namespace EUROPA {
     virtual void initializeTokenChoices(const TokenDecisionPointId& tdp);
     virtual void initializeVariableChoices(const ConstrainedVariableDecisionPointId& vdp);
     virtual void initializeObjectChoices(const ObjectDecisionPointId& odp);
+
+    /**
+     * @brief Tests if configured to use auto allocation of a new
+     * active token as a proxy when resolving an open condition.
+     */
+    bool isAutoAllocationEnabled() const;
     
   protected:
     friend class DecisionManager;
