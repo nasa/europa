@@ -429,4 +429,10 @@ namespace EUROPA {
     m_heur->orderChoices(odp->getToken(), odp->m_choices);
 
   }
+
+
+  /**
+   * @brief Over-ride the default behavior to enable autoallocation
+   */
+  bool HSTSOpenDecisionManager::isAutoAllocationEnabled() const{ return true;}
 }
