@@ -55,17 +55,24 @@ namespace EUROPA {
 
   void HSTSOpenDecisionManager::getBestObjectDecision(DecisionPointId& bestDec, Priority& bestp) {
     check_error(bestDec.isNoId());
-    if (m_sortedObjectDecs.empty()) return;
+    if (m_sortedObjectDecs.empty()) 
+      return;
     unsigned int bestNrChoices=0;
     for (ObjectDecisionSet::iterator it = m_sortedObjectDecs.begin(); it != m_sortedObjectDecs.end(); ++it) {
       TokenId tok = (*it)->getToken();
       const Priority priority = m_heur->getPriority(tok);
+      debugMsg("HSTS:OpenDecisionManager:getBestObjectDecision", 
+	       "Comparing priority = " << priority << " to bestp = " << bestp);
+
       if (m_heur->betterThan(priority, bestp)) {
         bestDec = *it;
         bestp = priority;
         bestNrChoices = tok->getPlanDatabase()->countOrderingChoices(tok);
+	debugMsg("HSTS:OpenDecisionManager:getBestObjectDecision",
+		 priority << " is better than " << bestp);
       }
       else if (priority == bestp && !bestDec.isNoId()) {
+	debugMsg("HSTS:OpenDecisionManager:getBestObjectDecision", "Priority is the same but still we have a decision.");
         unsigned int nrChoices = tok->getPlanDatabase()->countOrderingChoices(tok,bestNrChoices+1);
         if (nrChoices < bestNrChoices) {
           bestDec = *it;
@@ -76,6 +83,7 @@ namespace EUROPA {
     if (bestDec.isNoId() && !m_sortedObjectDecs.empty()) {
       bestDec = *m_sortedObjectDecs.begin();
       bestp = m_heur->getPriority(ObjectDecisionPointId(bestDec)->getToken());
+      debugMsg("HSTS:OpenDecisionManager:getBestObjectDecision", "Selecting first decision as bestDec = " << bestDec);
     }
   }
 
@@ -86,20 +94,30 @@ namespace EUROPA {
     for (TokenDecisionSet::iterator it = m_sortedTokDecs.begin(); it != m_sortedTokDecs.end(); ++it) {
       TokenId tok = (*it)->getToken();
       const Priority priority = m_heur->getPriority(tok);
-      debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Comparing priority = " << priority << " to bestp = " << bestp);
+      debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", 
+	       "Comparing priority = " << priority << " to bestp = " << bestp);
+
       if (m_heur->betterThan(priority, bestp)) {
         bestDec = *it;
         bestp = priority;
-        //TokenDecisionPointId tokDec = bestDec; // CMG: THIS IS NOT USED. WHY NOT?
         if(tok->getState()->lastDomain().isMember(Token::MERGED))
           bestNrChoices = tok->getPlanDatabase()->countCompatibleTokens(tok);
-        if (tok->getState()->lastDomain().isMember(Token::ACTIVE) && tok->getPlanDatabase()->hasOrderingChoice(tok)) bestNrChoices++;
-        debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Selecting new bestDec = " << bestDec << " with bestNrChoices = " << bestNrChoices);
+
+        if (tok->getState()->lastDomain().isMember(Token::ACTIVE) && 
+	    tok->getPlanDatabase()->hasOrderingChoice(tok)) 
+	  bestNrChoices++;
+
+        debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", 
+		 "Selecting new bestDec = " << bestDec << " with bestNrChoices = " << bestNrChoices);
       }
       else if (priority == bestp && !bestDec.isNoId() && bestNrChoices > 0) {
         unsigned int nrChoices = tok->getPlanDatabase()->countCompatibleTokens(tok,bestNrChoices);
-        if (tok->getState()->lastDomain().isMember(Token::ACTIVE) && tok->getPlanDatabase()->hasOrderingChoice(tok)) nrChoices++;
-        debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", "Evaluated nrChoices for decision " << *it << " = " << nrChoices << " vs. bestNrChoices = " << bestNrChoices);
+        if (tok->getState()->lastDomain().isMember(Token::ACTIVE) &&
+	    tok->getPlanDatabase()->hasOrderingChoice(tok)) 
+	  nrChoices++;
+        debugMsg("HSTS:OpenDecisionManager:getBestTokenDecision", 
+		 "Evaluated nrChoices for decision " << *it << " = " << nrChoices << 
+		 " vs. bestNrChoices = " << bestNrChoices);
         if (nrChoices < bestNrChoices) {
           bestDec = *it;
           bestNrChoices = nrChoices;
@@ -119,27 +137,40 @@ namespace EUROPA {
    * Priority does not acutaully count for this since all units have the same priority
    */
   void HSTSOpenDecisionManager::getBestUnitVariableDecision(DecisionPointId& bestDec, Priority& bestp) {
+    debugMsg("HSTS:OpenDecisionManager:getBestUnitVariableDecision", 
+	     "Searching for a unit variable decisions");
+
     check_error(bestDec.isNoId());
-    if (m_sortedUnitVarDecs.empty()) 
+
+    if (m_sortedUnitVarDecs.empty()) {
+      debugMsg("HSTS:OpenDecisionManager:getBestUnitVariableDecision", 
+	       "No candidates to evaluates");
       return;
+    }
 
     for (VariableDecisionSet::iterator it = m_sortedUnitVarDecs.begin(); it != m_sortedUnitVarDecs.end(); ++it) {
       // ignore variables of uninserted tokens
       ConstrainedVariableDecisionPointId vdec(*it);
 
       checkError(vdec.isValid() && vdec->getVariable()->lastDomain().isSingleton(),
-		 "Not a sinleton!" << vdec->getVariable()->toString());
+		 "Not a singleton!" << vdec->getVariable()->toString());
 
       if(MasterMustBeInserted::executeTest( vdec->getVariable() )){
 	bestDec = vdec;
+	debugMsg("HSTS:OpenDecisionManager:getBestUnitVariableDecision", 
+		 "Found the unit variable decisions" << bestDec->toString());
 	return;
       }
     }
+
+    debugMsg("HSTS:OpenDecisionManager:getBestUnitVariableDecision", 
+	     "Found the unit variable decision " << bestDec->toString());
   }
 
   void HSTSOpenDecisionManager::getBestNonUnitVariableDecision(DecisionPointId& bestDec, Priority& bestp) {
     check_error(bestDec.isNoId());
     if (m_sortedNonUnitVarDecs.empty()) return;
+
     ConstrainedVariableDecisionPointId bestFloatDec;
     Priority bestFloatp = bestp;
     VariableDecisionSet::iterator it = m_sortedNonUnitVarDecs.begin();
@@ -147,13 +178,16 @@ namespace EUROPA {
       // Ignore variables of inactive tokens.
       ConstrainedVariableDecisionPointId vdec(*it);
       check_error(vdec.isValid());
+
       if( !MasterMustBeInserted::executeTest( vdec->getVariable() ) )
 	continue;
+
       if (TokenId::convertable(vdec->getVariable()->getParent())) {
         TokenId parent = vdec->getVariable()->getParent();
         if (!parent->isActive())
           continue;
       }
+
       const Priority& priority = m_heur->getPriority(vdec->getVariable());
       if (vdec->getVariable()->lastDomain().isFinite()) {
         if (bestDec.isNoId() ||
@@ -263,6 +297,7 @@ namespace EUROPA {
     }
 
     if (!m_sortedTokDecs.empty()) getBestTokenDecision(bestTDec, bestTP);
+
     if (!m_sortedNonUnitVarDecs.empty()) getBestNonUnitVariableDecision(bestVDec, bestVP);
 
     if (bestTDec.isNoId() && !bestVDec.isNoId()) {
