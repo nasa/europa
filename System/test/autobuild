@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.121 2005-06-28 15:15:00 pjarvis Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.122 2005-09-17 00:11:07 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the EUROPA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -8,12 +8,8 @@ echo ''
 echo 'EUROPA autobuild script'
 echo ''
 
-# $multibuild determines whether all EUROPA variants are built at once or
-#   one at a time.  If -m is given, it will be true; otherwise, false.
 coverage=false
-multibuild=false
 performance=false
-warn=true
 if test ! -z "$1"
 then
     case "$1" in
@@ -21,36 +17,16 @@ then
 	    coverage=true;
 	    shift
 	    ;;
-        -m|--multibuild)
-            multibuild=true
-            if "$performance" && "$warn"
-            then
-                echo "$0"': running performance tests with multibuild not advised; use -w first if you really want to.'
-                exit 0
-            fi
-            shift
-            ;;
         -p|--performance)
             performance=true
-            if "$multibuild" && "$warn"
-            then
-                echo "$0"': running performance tests with multibuild not advised; use -w first if you really want to.'
-                exit 0
-            fi
-            shift
-            ;;
-        -w)
-            warn=false
             shift
             ;;
         -h|-H|'-?'|--help|--Help|--HELP)
             echo "$0"': Usage: '"`basename $0`"' [-chm] [email@address.domain]'
 	    echo '    -c, --coverage: build the COVERAGE variant (which is not fully supported yet)'
             echo '    -h, -H, --help: help (print this message and exit)'
-            echo '    -m, --multibuild: multibuild (compile all variants in one run of jam; default off/false)'
             echo '    -p, --performance: run the performance tests via the run-performance-tests jam target'
-            echo '        (only with VARIANTS=OPTIMIZED and VARIANTS=PROFILE unless also multibuild)'
-            echo '    -w: allow running performance tests with multibuild, which is rarely useful'
+            echo '        (only with VARIANTS=OPTIMIZED and VARIANTS=PROFILE)'
             echo '    Any other option (with a leading dash: "-") evokes an error.'
             echo '  Any other single argument should be an email address for status messages;'
             echo '    it defaults to "$USER@email.arc.nasa.gov" ("$USER" is currently "'"$USER"'").'
@@ -201,17 +177,11 @@ fi
 variants='DEV OPTIMIZED PROFILE'
 if $coverage
 then
-    if $multibuild
+    if $performance
     then
-	echo "$0"': COVERAGE variant is not supported by multibuild; ignoring -c/--coverage'
-	echo '    (this is one reason that the COVERAGE variant is not fully supported yet)'
+        echo "$0"': COVERAGE and PROFILE require incompatible g++ options; skipping COVERAGE'
     else
-        if $performance
-        then
-            echo "$0"': COVERAGE and PROFILE require incompatible g++ options; skipping COVERAGE'
-        else
-            variants="$variants"' COVERAGE'
-        fi
+        variants="$variants"' COVERAGE'
     fi
 fi
 
@@ -271,12 +241,7 @@ function cvsCmd() {
 # Run jam with the given arguments, saving the output in a specific file
 #   and complaining via email if something fails.
 function jamCmd() {
-  if "$multibuild"
-  then
-      outFile="jam.$2.multibuild"
-  else
-      outFile="jam.$2.$var.$libmethod"
-  fi
+  outFile="jam.$2.$var.$libmethod"
   jam "${jam_args[@]}" $1 > "$outFile" 2>&1
   status=$?
   echo 'jam '"${jam_args[*]} $1"' in '"`pwd`"' exited '"$status"
@@ -312,10 +277,6 @@ then
     #   this computer, or two autobuild scripts running on different hosts
     #   are likely to interfere with each other.
     testingTag=AutobuildTesting_"`hostname | sed -e 's/[.].*//'`"
-    if "$multibuild"
-    then
-        testingTag="$testingTag"_multibuild
-    fi
 
     # This is needed if nothing under PLASMA has "$testingTag".
     cvsCmd rtag -F "$testingTag" PLASMA/README
@@ -344,10 +305,30 @@ if test -d "$startdir"/working/stop
     exit 5
 fi
 
-if "$multibuild"
-then
+for var in $variants
+  do
+  for libmethod in $libmethods
+    do
+    if test "$var $libmethod" = 'PROFILE SHARED' \
+            -o "$var $libmethod" = 'COVERAGE SHARED' \
+            -o "$var $libmethod" = 'COVERAGE NONE'
+        then
+        continue
+    fi
+    if test ! -d "$startdir"/working
+        then
+        echo ''
+        echo "$0"': lock directory '"$startdir"'/working removed externally; exiting early'
+        exit 4
+    fi
+    if test -d "$startdir"/working/stop
+        then
+        echo ''
+        echo "$0"': directory '"$startdir"'/working/stop created externally; exiting early'
+        exit 5
+    fi
     if "$removePlasma"
-    then
+        then
         cvsCmd co -r "$testingTag" PLASMA
         if "$warn"
             then
@@ -363,19 +344,23 @@ then
         fi
         cd PLASMA
     fi
-    # COVERAGE must be done separately presently; this is part of why it is not yet fully supported
-    jam_args=(-sVARIANTS='DEV OPTIMIZED PROFILE' -sLIBRARIES="$libmethods")
+    jam_args=(-sVARIANTS="$var" -sLIBRARIES="$libmethod")
     PPW_CONFIG=''
-    jamCmd run-all-tests run-all-tests
-    if "$performance"
+    jamCmd plasma-all plasma
+    jamCmd run-checkin-tests run-checkin-tests
+
+#!! jamCmd run-all-tests run-all-tests
+
+    # Add this to the next test's arguments for use with valgrind, memcheck, etc.:
+    # -o \( "$var" = 'DEV' -a "$libmethod" = 'SHARED' \)
+    if "$performance" && \
+        test \( \( "$var" = 'PROFILE' -o "$var" = 'OPTIMIZED' \) -a "$libmethod" = 'STATIC' \)
         then
-        EUROPA_PERFORMANCE=1
-        export EUROPA_PERFORMANCE
         jamCmd run-performance-tests run-performance-tests
-        EUROPA_PERFORMANCE=''
     fi
     if "$removePlasma"
         then
+        jamCmd clean clean
         PPW_CONFIG="$startdir"'/PLASMA/Solvers/component/PlanWorks.cfg'
     else
         PPW_CONFIG="$startdir"'/Solvers/component/PlanWorks.cfg'
@@ -386,9 +371,9 @@ then
         then
         jamCmd clean clean
     fi
-    (echo "$info"; echo 'PLASMA autobuild and tests of primary variants and all library methods in '"`pwd`"' passed.';
-        more jam.* < /dev/null) | \
-            Mail -s 'PLASMA Autobuild/multibuild on '"`hostname`"' passed' "$email"
+    (echo "$info"; echo 'PLASMA autobuild and tests of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
+        more jam.*.$var.$libmethod.summary jam.*.$var.$libmethod < /dev/null) | \
+            Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
     if "$removePlasma"
         then
         # Save the output files.
@@ -399,105 +384,18 @@ then
         fi
         mv -f jam.* ..
         cd ..
-            # Remove everything so that each variant is tested completely independently.
-            #   Should probably test everything without removing in between as well, but ...
+        # Remove everything so that each variant is tested completely independently.
+        #   Should probably test everything without removing in between as well, but ...
         rm -rf PLASMA
     fi
-else
-    for var in $variants
-      do
-      for libmethod in $libmethods
-        do
-        if test "$var $libmethod" = 'PROFILE SHARED' \
-            -o "$var $libmethod" = 'COVERAGE SHARED' \
-            -o "$var $libmethod" = 'COVERAGE NONE'
-            then
-            continue
-        fi
-        if test ! -d "$startdir"/working
-            then
-            echo ''
-            echo "$0"': lock directory '"$startdir"'/working removed externally; exiting early'
-            exit 4
-        fi
-        if test -d "$startdir"/working/stop
-            then
-            echo ''
-            echo "$0"': directory '"$startdir"'/working/stop created externally; exiting early'
-            exit 5
-        fi
-        if "$removePlasma"
-            then
-            cvsCmd co -r "$testingTag" PLASMA
-            if "$warn"
-                then
-                cmp -s "$0" PLASMA/System/test/autobuild
-                status=$?
-                if test "$status" -ne 0
-                    then
-                    echo ''
-                    echo "$0"': warning: newer autobuild script in CVS'
-                    echo ''
-                    warn=false
-                fi
-            fi
-            cd PLASMA
-        fi
-        jam_args=(-sVARIANTS="$var" -sLIBRARIES="$libmethod")
-        PPW_CONFIG=''
-        jamCmd plasma-all plasma
-        jamCmd run-checkin-tests run-checkin-tests
-        jamCmd run-all-tests run-all-tests
-        # Add this to the next test's arguments for use with valgrind, memcheck, etc.:
-        # -o \( "$var" = 'DEV' -a "$libmethod" = 'SHARED' \)
-        if "$performance" && \
-            test \( \( "$var" = 'PROFILE' -o "$var" = 'OPTIMIZED' \) -a "$libmethod" = 'STATIC' \)
-            then
-            jamCmd run-performance-tests run-performance-tests
-        fi
-        if "$removePlasma"
-            then
-            jamCmd clean clean
-            PPW_CONFIG="$startdir"'/PLASMA/Solvers/component/PlanWorks.cfg'
-        else
-            PPW_CONFIG="$startdir"'/Solvers/component/PlanWorks.cfg'
-        fi
-        export PPW_CONFIG
-        jamCmd run-nddl-planner-tests withPPW
-        if "$removePlasma"
-            then
-            jamCmd clean clean
-        fi
-        (echo "$info"; echo 'PLASMA autobuild and tests of variant '"$var"' with library method '"$libmethod"' in '"`pwd`"' passed.';
-            more jam.*.$var.$libmethod.summary jam.*.$var.$libmethod < /dev/null) | \
-                Mail -s 'PLASMA Autobuild '"$var"' '"$libmethod"' on '"`hostname`"' passed' "$email"
-        if "$removePlasma"
-            then
-            # Save the output files.
-            if test -s "$outFile".summary && "$removePlasma"
-                then
-                # Use a "pattern" for the first file in case the other pattern does not match anything due to not profiling
-                mv "$outFile".summar[y] System/test/RUN_satellites-1-*.gprof ..
-            fi
-            mv -f jam.* ..
-            cd ..
-            # Remove everything so that each variant is tested completely independently.
-            #   Should probably test everything without removing in between as well, but ...
-            rm -rf PLASMA
-        fi
-      done
-    done
-fi
+  done
+done
 
 # All the tests have passed (or jamCmd would have exit'd this script)
 
 if "$removePlasma"
 then
     tag=AutobuildPassed_"`hostname | sed -e 's/[.].*//'`"
-    if "$multibuild"
-    then
-        tag="$tag"_multibuild
-    fi
     prior="$tag"'_old'
     # Make sure the prior tag is in CVS:
     cvsCmd rtag -F "$prior" PLASMA/README
@@ -520,26 +418,16 @@ fi
     echo '';
     if "$removePlasma"
     then
-        if "$multibuild"
-        then
-            echo "Multibuild, tests, and cleans passed.";
-        else
-            echo "All builds, tests, and cleans passed for each variant (of $variants) and";
-            echo "  each method of building the libraries (of $libmethods).";
-        fi
+        echo "All builds, tests, and cleans passed for each variant (of $variants) and";
+        echo "  each method of building the libraries (of $libmethods).";
         echo "Tagged: 'cvs rtag $tag'";
     else
-        if "$multibuild"
-        then
-            echo "Multibuild and tests passed.";
-        else
-            echo "All builds and tests passed for each variant (of $variants) and";
-            echo "  each method of building the libraries (of $libmethods).";
-        fi
+        echo "All builds and tests passed for each variant (of $variants) and";
+        echo "  each method of building the libraries (of $libmethods).";
 	echo "Note: 'jam clean' was not run and no CVS tags were made or changed.";
     fi
   ) | \
-  Mail -s 'PLASMA Autobuild (multibuild '"$multibuild"') on '"`hostname`"' passed' "$email"
+  Mail -s 'PLASMA Autobuild on '"`hostname`"' passed' "$email"
 
 date > lastCompleted
 
