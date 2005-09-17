@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.122 2005-09-17 00:11:07 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.123 2005-09-17 00:13:47 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the EUROPA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -348,8 +348,7 @@ for var in $variants
     PPW_CONFIG=''
     jamCmd plasma-all plasma
     jamCmd run-checkin-tests run-checkin-tests
-
-#!! jamCmd run-all-tests run-all-tests
+    jamCmd run-all-tests run-all-tests
 
     # Add this to the next test's arguments for use with valgrind, memcheck, etc.:
     # -o \( "$var" = 'DEV' -a "$libmethod" = 'SHARED' \)
