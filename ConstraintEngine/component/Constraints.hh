@@ -707,6 +707,30 @@ namespace EUROPA {
     static const unsigned int ARG_COUNT = 3;
   };
 
+
+  /**
+   * @brief WithinBounds(x, y, z) maintains the relations:
+   * @li x.lb >= y.lb
+   * @li x.ub <= z.ub
+   * @li y <= z
+   */
+  class WithinBounds : public Constraint {
+  public:
+    WithinBounds(const LabelStr& name,
+		 const LabelStr& propagatorName,
+		 const ConstraintEngineId& constraintEngine,
+		 const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+    IntervalDomain& m_x;
+    IntervalDomain& m_y;
+    IntervalDomain& m_z;
+    LessThanEqualConstraint m_leq;
+    static const unsigned int ARG_COUNT = 3;
+  };
+
   extern void initConstraintLibrary();
 }
 #endif

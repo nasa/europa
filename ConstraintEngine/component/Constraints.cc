@@ -1780,6 +1780,29 @@ namespace EUROPA {
 	m_test.remove(false);
   }
 
+
+  /**
+   * WithinBounds Implementation
+   */
+  WithinBounds::WithinBounds(const LabelStr& name,
+			     const LabelStr& propagatorName,
+			     const ConstraintEngineId& constraintEngine,
+			     const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_x(static_cast<IntervalDomain&>(getCurrentDomain(variables[0]))),
+      m_y(static_cast<IntervalDomain&>(getCurrentDomain(variables[1]))),
+      m_z(static_cast<IntervalDomain&>(getCurrentDomain(variables[2]))),
+      m_leq(name, propagatorName, constraintEngine, makeScope(variables[1], variables[2])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void WithinBounds::handleExecute(){
+    // Process x - let the composed constraint look after y <= z
+    m_x.intersect(m_y.getLowerBound(), m_z.getUpperBound());
+  }
+
+  /**************************************************************************************/
+
   void initConstraintLibrary() {
     static bool s_runAlready(false);
     
@@ -1805,6 +1828,7 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(LessOrEqThanSumConstraint, "LessOrEqThanSum", "Default");
       REGISTER_CONSTRAINT(LessThanConstraint, "LessThan", "Default");
       REGISTER_CONSTRAINT(LessThanEqualConstraint, "LessThanEqual", "Default");
+      REGISTER_CONSTRAINT(WithinBounds, "WithinBounds", "Default");
       REGISTER_CONSTRAINT(LessThanSumConstraint, "LessThanSum", "Default");
       REGISTER_CONSTRAINT(LockConstraint, "Lock", "Default");
       REGISTER_CONSTRAINT(MemberImplyConstraint, "MemberImply", "Default");
@@ -1838,6 +1862,7 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(LessOrEqThanSumConstraint, "leqsum", "Default");
       REGISTER_CONSTRAINT(LessThanConstraint, "lt", "Default");
       REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
+      REGISTER_CONSTRAINT(WithinBounds, "withinBounds", "Default");
       REGISTER_CONSTRAINT(MemberImplyConstraint, "memberImply", "Default");
       REGISTER_CONSTRAINT(MultEqualConstraint, "mulEq", "Default");
       REGISTER_CONSTRAINT(MultEqualConstraint, "multEq", "Default");

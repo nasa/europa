@@ -3409,3 +3409,8 @@ test 3408 condeq inputs {true} [0 1] [0 1] outputs {true} [0 1] [0 1]
 test 3409 condeq inputs {False True} [0 1] [1.1 2] outputs {false} [0 1] [1.1 2]
 test 3410 condeq inputs {true} {false true} {true} outputs {true} {true} {true}
 test 3411 condeq inputs {FALSE} {TRUE FALSE} {false} outputs {false} {true} {false}
+test 3412 withinBounds inputs [-inf inf] [0 10] [-inf 40] outputs [0 40] [0 10] [0 40]
+test 3413 withinBounds inputs [0 10] [0 10] [-inf 0] outputs [0] [0] [0]
+test 3414 withinBounds inputs [0 10] [0 10] [-inf -2] outputs [] [] []
+test 3415 withinBounds inputs [-10.8 10.8] [-10 0] [0 10] outputs [-10 10] [-10 0] [0 10]
+test 3416 withinBounds inputs [-10.8 10.8] [0.2] [0.3] outputs [0.2 0.3] [0.2] [0.3]
