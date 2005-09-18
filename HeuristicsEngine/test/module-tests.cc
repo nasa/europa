@@ -232,8 +232,8 @@ private:
     assertTrue(he.getPriority(t1.getId()) == 11.23, 
 	       toString(he.getPriority(t1.getId())));
 
-    // Ensures we get the last allocated
-    assertTrue(he.getPriority(t2.getId()) == 20.78, 
+    // Ensures we get the best priority, all esle being equal
+    assertTrue(he.getPriority(t2.getId()) == 14.45, 
 	       toString(he.getPriority(t2.getId())));
 
     // Allocte in a limited scope to force de-allocation afterwards
@@ -284,7 +284,7 @@ private:
     HeuristicsEngine he(db.getId());
     Heuristic dontcare(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 1);
     Heuristic allSlaves(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 2, Heuristic::noGuards(), 
-			"Object.PredicateA", Heuristic::ALL);
+			"Object.PredicateA", Heuristic::ANY);
     Heuristic before(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 3, Heuristic::noGuards(),
 			"Object.PredicateA", Heuristic::BEFORE);
     Heuristic other(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 4, Heuristic::noGuards(),
@@ -1153,13 +1153,6 @@ private:
 	       toString(earliest(tokensToOrder[0])));
 
     cleanup(tokensToDelete);
-    return true;
-  }
-
-  /**
-   * @todo
-   */
-  static bool testStatePruning(){
     return true;
   }
 
