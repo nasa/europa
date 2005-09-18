@@ -552,7 +552,7 @@ private:
     assertFalse(LabelStr::isString(labelStr2));
     LabelStr lbl4(labelStr2);
     assertTrue(LabelStr::isString(labelStr2));
-    assertTrue(lbl4 != lbl2);
+    assertTrue(lbl4 != lbl2, lbl4.toString() + " != " + lbl2.toString());
 
     double key = lbl2.getKey();
     LabelStr lbl5(key);
