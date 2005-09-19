@@ -78,15 +78,10 @@ namespace EUROPA {
     if(state == Token::ACTIVE) {
       // If the token state permits merging, but we have exhausted current options, then
       // create a new token and merge onto it. This is to support cheaper non-chronological splitting.
-      // It is also required to manage recovery so that tokens may be retained if they have been executed.
       // Note that we also test if any factories are registered. This is required since we may test
       // against a plan database that does not have factories allocated and does not therefore
-      // support automatic allocation of new tokens. Finally,not every planner will want this feature, so we
-      // allow it to be configured in the OpenDecisionManager
-      if(m_tok->getState()->lastDomain().isMember(Token::MERGED) && 
-	 m_odm->isAutoAllocationEnabled() && // A planner preference
-	 m_dbClient->supportsAutomaticAllocation() // Test of system capability enabled
-	 ) {
+      // support automatic allocation of new tokens.
+      if(m_tok->getState()->lastDomain().isMember(Token::MERGED) && m_dbClient->supportsAutomaticAllocation()) {
         debugMsg("TokenDecisionPoint", "Creating new base token and merging onto it for " << m_tok->getPredicateName().toString());
         m_dbClient->merge(m_tok);
       }
@@ -145,12 +140,9 @@ namespace EUROPA {
       os << "(" << getKey() << ") Token (" << m_entityKey << ") ";
       os << " Current Choice: ";
       if (m_tok->isMerged())
-	// os << "merged with token (" << m_compatibleTokens[m_mergeIndex-1]->getKey() << ") ";
-         os << "merged with token (" << m_tok->getActiveToken() << ") ";
-      else if (m_choices.empty()) 
-	os << " No Choice ";
-       else  if (m_choiceIndex == 0)
-          os << LabelStr(m_choices[m_choiceIndex]).toString() << " ";
+        os << "merged with token (" << m_compatibleTokens[m_mergeIndex-1]->getKey() << ") ";
+      else  if (m_choiceIndex == 0)
+        os << " No Choice ";
       else
         os << LabelStr(m_choices[m_choiceIndex-1]).toString() << " "; 
       os << " Discarded: " << m_choiceIndex+m_mergeIndex;
