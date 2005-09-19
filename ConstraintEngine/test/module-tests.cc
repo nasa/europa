@@ -617,6 +617,7 @@ public:
     runTest(testTestLessThanConstraint);
     runTest(testTestLEQConstraint);
     runTest(testLockManager);
+    runTest(testGNATS_3075);
     return(true);
   }
 
@@ -2398,6 +2399,52 @@ private:
       assertTrue(c0.getCreatedBy() == LabelStr("TEST_HARNESS"));
     }
 
+    return true;
+  }
+
+  /**
+   * @brief Derived from an example from Nicola
+   */
+  static bool testGNATS_3075(){
+    Variable<IntervalDomain> goalBox_leftBottomX(ENGINE, IntervalDomain());
+    Variable<IntervalDomain> goalBox_leftBottomY(ENGINE, IntervalDomain());
+    Variable<IntervalDomain> goalBox_rightTopX(ENGINE, IntervalDomain());
+    Variable<IntervalDomain> goalBox_rightTopY(ENGINE, IntervalDomain());
+    Variable<IntervalDomain> goalBoxTolerance(ENGINE, IntervalDomain(0.5, 0.5));
+    Variable<IntervalDomain> goalX(ENGINE, IntervalDomain(0.1, 0.1));
+    Variable<IntervalDomain> goalY(ENGINE, IntervalDomain(-0.2, -0.2));
+    Variable<IntervalDomain> start_x(ENGINE, IntervalDomain());
+    Variable<IntervalDomain> start_y(ENGINE, IntervalDomain());
+
+    AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, 
+			  makeScope(goalBox_leftBottomX.getId(), goalBoxTolerance.getId(), goalX.getId()));
+
+    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, 
+			  makeScope(goalBox_leftBottomY.getId(), goalBoxTolerance.getId(), goalY.getId()));
+
+    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, 
+			  makeScope(goalX.getId(), goalBoxTolerance.getId(), goalBox_rightTopX.getId()));
+
+    AddEqualConstraint c3(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, 
+			  makeScope(goalY.getId(), goalBoxTolerance.getId(), goalBox_rightTopY.getId()));
+
+    Variable<BoolDomain> right_of_goalBox_left(ENGINE, BoolDomain());
+    TestLEQ c4(LabelStr("TestLEQ"), LabelStr("Default"), 
+	      ENGINE, makeScope(right_of_goalBox_left.getId(), goalBox_leftBottomX.getId(), start_x.getId()));
+
+    Variable<BoolDomain> left_of_goalBox_right(ENGINE, BoolDomain());
+    TestLEQ c5(LabelStr("TestLEQ"), LabelStr("Default"), 
+	      ENGINE, makeScope(left_of_goalBox_right.getId(), start_x.getId(), goalBox_rightTopX.getId()));
+
+    Variable<BoolDomain> over_goalBox_bottom(ENGINE, BoolDomain());
+    TestLEQ c6(LabelStr("TestLEQ"), LabelStr("Default"), 
+	      ENGINE, makeScope(over_goalBox_bottom.getId(), start_y.getId(), goalBox_leftBottomY.getId()));
+
+    Variable<BoolDomain> under_goalBox_bottom(ENGINE, BoolDomain());
+    TestLEQ c7(LabelStr("TestLEQ"), LabelStr("Default"), 
+	      ENGINE, makeScope(under_goalBox_bottom.getId(), start_y.getId(), goalBox_rightTopY.getId()));
+
+    assert(ENGINE->propagate());
     return true;
   }
 
