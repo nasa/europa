@@ -492,12 +492,12 @@ namespace EUROPA {
         os << comma << valueAsDouble;
         comma = ", ";
       } 
-      else if (LabelStr::isString(valueAsDouble))
-	orderedSet.insert(LabelStr(valueAsDouble).toString());
       else if (valueAsDouble == true)
 	orderedSet.insert("true");
       else if (valueAsDouble == false)
 	orderedSet.insert("false");
+      else if (LabelStr::isString(valueAsDouble))
+	orderedSet.insert(LabelStr(valueAsDouble).toString());
       else {
 	EntityId entity(valueAsDouble);
 	orderedSet.insert(entity->getName().toString());
