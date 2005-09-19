@@ -403,7 +403,6 @@ namespace EUROPA {
     check_error(vdp.isValid());
     check_error(vdp->getVariable()->lastDomain().isFinite());
     check_error(vdp->m_choices.empty());
-
     if (vdp->m_var->lastDomain().isNumeric() && vdp->m_var->lastDomain().getSize() > 50) {
       vdp->m_choices.push_back(vdp->m_var->lastDomain().getLowerBound());
       vdp->m_choices.push_back(vdp->m_var->lastDomain().getUpperBound()); // we'll keep the initial lb and ub for ref.
