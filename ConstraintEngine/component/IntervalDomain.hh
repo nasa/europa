@@ -292,8 +292,7 @@ namespace EUROPA {
      * we could restrict it in other ways perhaps.
      * @note No-op for real domains.
      */
-    virtual void testPrecision(const double& value) const {
-    }
+    virtual void testPrecision(const double& value) const;
 
 
     /**
@@ -302,6 +301,11 @@ namespace EUROPA {
      * @return The value subject to any rounding required for th sub-type (e.g. int)
      */
     virtual double convert(const double& value) const;
+
+    /**
+     * @brief Conduct common initialization across constructors.
+     */
+    void commonInit();
 
     double m_ub; /**< The upper bound of the domain */
     double m_lb; /**< The lower bound o fthe domain */

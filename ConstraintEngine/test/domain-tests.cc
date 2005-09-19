@@ -41,6 +41,7 @@ namespace EUROPA {
     static bool test() {
       runTest(testAllocation); 
       runTest(testRelaxation); 
+      runTest(testPrecision);
       runTest(testIntersection);  
       runTest(testSubset);
       runTest(testPrinting);
@@ -115,6 +116,20 @@ namespace EUROPA {
       return(true);
     }
 
+    static bool testPrecision() {
+      IntervalDomain dom0(-EPSILON, 0);
+      assertTrue(dom0.isMember(-EPSILON));
+      assertTrue(dom0.isMember(-EPSILON -EPSILON/10));
+      assertTrue(!dom0.isMember(-EPSILON -EPSILON));
+
+      IntervalDomain dom1(-EPSILON, EPSILON/10);
+      assertTrue(dom1 == dom0);
+
+      IntervalDomain dom2(-EPSILON, -EPSILON/10);
+      assertTrue(dom2.intersects(dom0));
+      return true;
+    }
+
     static bool testIntersection() {
       ChangeListener l_listener;
       IntervalIntDomain dom0; // Will have very large default range
@@ -159,7 +174,6 @@ namespace EUROPA {
       dom6.intersect(dom7);
       assertTrue(dom6.isEmpty())
 
-
       IntervalDomain dom8;    
       IntervalDomain dom9;      
       dom8.intersect(IntervalDomain(0.1, 0.10));      
@@ -190,7 +204,8 @@ namespace EUROPA {
       // Test beyond the limits of precission     
       IntervalDomain dom14(-0.1 - EPSILON/10);
       IntervalDomain dom15(-0.1);
-      assertTrue(dom14.intersects(dom15), dom14.toString() + " cannot intersect " + dom15.toString());
+      assertTrue(dom14.intersects(dom15), dom15.toString() + " should have a non-empty intersection " + dom14.toString());
+      assertFalse(dom14.intersect(dom15), dom15.toString() + " should not cause a change for " + dom14.toString());
 
       return(true);
     }

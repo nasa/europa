@@ -1,6 +1,7 @@
 #include "IntervalDomain.hh"
 #include "DomainListener.hh"
 #include "Debug.hh"
+#include <math.h>
 
 namespace EUROPA {
 
@@ -14,23 +15,17 @@ namespace EUROPA {
 
   IntervalDomain::IntervalDomain(double lb, double ub, const char* typeName)
     : AbstractDomain(true, false, typeName), m_ub(ub), m_lb(lb) {
-    check_error(ub >= lb);
-    check_error(ub <= PLUS_INFINITY);
-    check_error(lb >= MINUS_INFINITY);
+    commonInit();
   }
 
   IntervalDomain::IntervalDomain(double lb, double ub)
     : AbstractDomain(true, false, getDefaultTypeName().c_str()), m_ub(ub), m_lb(lb) {
-    checkError(ub >= lb, "Tried to construct a domain with bounds [" << lb << " " << ub << "]");
-    checkError(ub <= PLUS_INFINITY, "Upper bound " << ub << " is too large.");
-    checkError(lb >= MINUS_INFINITY, "Lower bound " << lb << " is too small.");
+    commonInit();
   }
 
   IntervalDomain::IntervalDomain(double value)
     : AbstractDomain(true, false, getDefaultTypeName().c_str()), m_ub(value), m_lb(value) {
-    check_error(value <= PLUS_INFINITY);
-    check_error(value >= MINUS_INFINITY);
-    debugMsg("IntervalDomain:IntervalDomain", "created interval with range [" << m_lb << " " << m_ub << "]"); 
+    commonInit();
   }
 
   IntervalDomain::~IntervalDomain() {}
@@ -39,6 +34,7 @@ namespace EUROPA {
     : AbstractDomain(org), m_ub(org.getUpperBound()), m_lb(org.getLowerBound()){
     check_error(org.isInterval(), 
 		"Attempted to create an Interval domain from " + org.getTypeName().toString());
+    commonInit();
   }
 
   bool IntervalDomain::intersect(const AbstractDomain& dom) {
@@ -55,26 +51,26 @@ namespace EUROPA {
 
     // Check for case where difference could cause a split in the interval;
     //   don't handle it in this implementation.
-    check_error(! (dom.getLowerBound() > m_lb && dom.getUpperBound() < m_ub));
+    check_error(! (lt(m_lb, dom.getLowerBound()) && lt(dom.getUpperBound(), m_ub)));
 
     // Nothing to be done if the lower bound > dom.upper bound, or the upper bound < dom.lowerbound
-    if (m_lb > dom.getUpperBound() || m_ub < dom.getLowerBound())
+    if (lt(dom.getUpperBound(), m_lb) || lt(m_ub, dom.getLowerBound()))
       return(false);
 
     // If it is contained by dom then it will be emptied
-    if (m_lb >= dom.getLowerBound() && m_ub <= dom.getUpperBound()) {
+    if (leq(dom.getLowerBound(), m_lb) && leq(m_ub, dom.getUpperBound())) {
       empty();
       return(true);
     }
 
     // If lower bound > dom.lower bound then we must increment it to exceed the upper bound
-    if (m_lb >= dom.getLowerBound()) {
+    if (leq(dom.getLowerBound(), m_lb)) {
       m_lb = dom.getUpperBound() + minDelta();
       notifyChange(DomainListener::LOWER_BOUND_INCREASED);
     }
 
     // Similarly for the upper bound
-    if (m_ub <= dom.getUpperBound()) {
+    if (leq(m_ub, dom.getUpperBound())) {
       m_ub = dom.getLowerBound() - minDelta();
       notifyChange(DomainListener::UPPER_BOUND_DECREASED);
     }
@@ -131,9 +127,10 @@ namespace EUROPA {
 
   bool IntervalDomain::operator==(const AbstractDomain& dom) const {
     safeComparison(*this, dom);
-    return(compareEqual(m_lb, dom.getLowerBound()) &&
-           compareEqual(m_ub, dom.getUpperBound()) &&
-           AbstractDomain::operator==(dom));
+
+    return(eq(m_lb, dom.getLowerBound()) &&
+           eq(m_ub, dom.getUpperBound()) &&
+	   AbstractDomain::operator==(dom));
   }
 
   bool IntervalDomain::operator!=(const AbstractDomain& dom) const {
@@ -145,27 +142,28 @@ namespace EUROPA {
     check_error(!isOpen());
     check_error(!dom.isEmpty());
     bool result = ((isFinite() || dom.isInfinite()) && 
-                   (dom.getUpperBound() + minDelta()) >= m_ub && 
-                   (dom.getLowerBound() - minDelta()) <= m_lb);
+                   leq(m_ub, dom.getUpperBound()) &&
+                   leq(dom.getLowerBound(), m_lb));
     return result;
   }
 
   bool IntervalDomain::intersects(const AbstractDomain& dom) const {
-    debugMsg("IntervalDomain:intersects", "Testing intersection of " << dom.toString() << " with this domain [" << m_lb << " "  << m_ub << "]");
+    debugMsg("IntervalDomain:intersects", 
+	     "Testing intersection of " << dom.toString() << " with this domain [" << m_lb << " "  << m_ub << "]");
     safeComparison(*this, dom);
     check_error(!isOpen());
     check_error(!dom.isEmpty());
 
     double ub = dom.getUpperBound();
    
-    if( (ub + EPSILON) < m_lb ) {
+    if( lt(ub, m_lb) ) {
       debugMsg("IntervalDomain:intersects", "failed because ub is less than m_lb. Where ub= " << ub << " m_lb= " << m_lb  );
       return false;
     }
    
     double lb = dom.getLowerBound();
 
-    if( (lb - EPSILON) > m_ub ) {
+    if( lt(m_ub, lb)){
       debugMsg("IntervalDomain:intersects", "failed because lb is greater than m_ub. Where lb = " << lb << " m_ub " << m_ub ); 
       return false;
     }
@@ -245,20 +243,20 @@ namespace EUROPA {
   bool IntervalDomain::intersect(double lb, double ub) {
   
     // Test for empty intersection while accounting for precision/rounding errors.
-    if ((lb > ub && (lb-ub > EPSILON)) || m_lb - ub >= minDelta() || lb - m_ub >= minDelta()) {
+    if (lt(ub, lb) || lt(ub, m_lb) || lt(m_ub, lb)){
       empty();
       return(true);
     }
-
+  
     bool ub_decreased(false);
-    if (ub < m_ub) {
+
+    if (lt(ub,m_ub)) {
       m_ub = safeConversion(ub);
       ub_decreased = true;
-   
     }
 
     bool lb_increased(false);
-    if (lb > m_lb) {
+    if (lt(m_lb, lb)){
       m_lb = safeConversion(lb);
       lb_increased = true;
     }
@@ -285,13 +283,13 @@ namespace EUROPA {
 
   bool IntervalDomain::relax(double lb, double ub) {
     // Ensure given bounds are not empty
-    check_error(lb <= ub);
+    check_error(leq(lb, ub));
 
     // Ensure this domain is a subset of the new bounds for relaxation.
-    check_error(isEmpty() || (lb - minDelta() <= m_lb  && ub + minDelta() >= m_ub));
+    check_error(isEmpty() || (leq(lb, m_lb) && leq(m_ub, ub)));
 
     // Test if really causes a change.
-    bool relaxed = (ub > m_ub) || (lb < m_lb);
+    bool relaxed = (lt(m_ub, ub) || lt(lb, m_lb));
 
     if (relaxed) {
       m_lb = safeConversion(lb);
@@ -304,9 +302,7 @@ namespace EUROPA {
 
   bool IntervalDomain::isMember(double value) const {
     double converted = convert(value);
-    return(converted == value && 
-           converted + minDelta() > m_lb && 
-           converted - minDelta() < m_ub);
+    return(converted == value && leq(m_lb, converted) && leq(converted, m_ub));
   }
 
   bool IntervalDomain::isSingleton() const {
@@ -316,7 +312,7 @@ namespace EUROPA {
 
   bool IntervalDomain::isEmpty() const {
     check_error(!isOpen());
-    return(m_ub - m_lb < -EPSILON);
+    return(lt(m_ub, m_lb));
   }
 
   void IntervalDomain::empty() {
@@ -349,6 +345,9 @@ namespace EUROPA {
     testPrecision(value);
     return(value);
   }
+
+
+  void IntervalDomain::testPrecision(const double& value) const {}
 
   void IntervalDomain::operator>>(ostream& os) const {
     AbstractDomain::operator>>(os);
@@ -406,5 +405,11 @@ namespace EUROPA {
     IntervalDomain *ptr = new IntervalDomain(*this);
     check_error(ptr != 0);
     return(ptr);
+  }
+
+  void IntervalDomain::commonInit(){
+    checkError(leq(m_lb, m_ub), "Tried to construct a domain with bounds [" << m_lb << " " << m_ub << "]");
+    checkError(leq(m_ub,PLUS_INFINITY), "Upper bound " << m_ub << " is too large.");
+    checkError(leq(MINUS_INFINITY, m_lb), "Lower bound " << m_lb << " is too small.");
   }
 }
