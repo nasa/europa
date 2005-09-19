@@ -25,7 +25,7 @@ local DEFAULT_HEURISTICS = "../../HeuristicsEngine/test/DefaultHeuristics.xml" ;
 local checkin-tests ;
 checkin-tests = basic-types
         Rover-transaction
-        #k9.backtrack.moderate-transaction
+        k9.backtrack.moderate-transaction
         rejection
         resource-backtrack-test
         better-res
@@ -86,7 +86,7 @@ rule RunProblem {
 RunProblem Rover-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
 RunProblem basic-types.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
 RunProblem basic-model-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ; 
-#RunProblem k9.backtrack.moderate-transaction.nddl  : $(DEFAULT_PCONFIG) : k9.heur ;
+RunProblem k9.backtrack.moderate-transaction.nddl  : $(DEFAULT_PCONFIG) : k9.heur ;
 RunProblem k9-transaction.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
 RunProblem path-filter-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
 RunProblem foreach-transaction.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;

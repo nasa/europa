@@ -1448,12 +1448,12 @@ private:
 
     makeTestToken(tokenG, values);
     
-    CBPlanner::Status res = planner.run(10);
+    CBPlanner::Status res = planner.run(9);
     assertTrue(res == CBPlanner::TIMEOUT_REACHED);
 
     const DecisionStack& closed = planner.getClosedDecisions();
 
-    assertTrue(closed.size() == 10);
+    assertTrue(closed.size() == 9);
     assertTrue(closed.size() == planner.getTime());
     assertTrue(planner.getTime() == planner.getDepth());
     DEFAULT_TEARDOWN_PLAN();
