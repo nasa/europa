@@ -491,13 +491,17 @@ namespace EUROPA {
       if (isNumeric()) {
         os << comma << valueAsDouble;
         comma = ", ";
-      } else
-        if (LabelStr::isString(valueAsDouble))
-          orderedSet.insert(LabelStr(valueAsDouble).toString());
-        else {
-          EntityId entity(valueAsDouble);
-          orderedSet.insert(entity->getName().toString());
-        }
+      } 
+      else if (valueAsDouble == true)
+	orderedSet.insert("true");
+      else if (valueAsDouble == false)
+	orderedSet.insert("false");
+      else if (LabelStr::isString(valueAsDouble))
+	orderedSet.insert(LabelStr(valueAsDouble).toString());
+      else {
+	EntityId entity(valueAsDouble);
+	orderedSet.insert(entity->getName().toString());
+      }
     }
 
     for (std::set<std::string>::const_iterator it = orderedSet.begin(); it != orderedSet.end(); ++it) {
