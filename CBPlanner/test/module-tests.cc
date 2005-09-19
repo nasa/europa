@@ -236,7 +236,7 @@ public:
     runTest(testHorizonCondition);
     runTest(testHorizonConditionNecessary);
     runTest(testSetHorizionCondition);
-    //runTest(testTemporalVariableCondition);
+    runTest(testTemporalVariableCondition);
     runTest(testDynamicInfiniteRealCondition);
     runTest(testMasterMustBeInserted);
     return(true);
@@ -518,7 +518,7 @@ static bool testHorizonConditionNecessary() {
     assertTrue(!cond.test(v4.getId()));
     assertTrue(cond.test(tokenA.getDuration()));
 
-    assertTrue(dm.getNumberOfDecisions() == 3);
+    assertTrue(dm.getNumberOfDecisions() == 6);
 
     DEFAULT_TEARDOWN();
     return true;
