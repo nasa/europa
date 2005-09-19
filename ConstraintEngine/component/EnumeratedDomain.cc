@@ -477,6 +477,9 @@ namespace EUROPA {
   }
 
   void EnumeratedDomain::operator>>(ostream&os) const {
+    static const std::string sl_false("0");
+    static const std::string sl_true("1");
+
     // Now commence output
     AbstractDomain::operator>>(os);
     os << "{";
@@ -493,9 +496,9 @@ namespace EUROPA {
         comma = ", ";
       } 
       else if (valueAsDouble == true)
-	orderedSet.insert("true");
+	orderedSet.insert(sl_true);
       else if (valueAsDouble == false)
-	orderedSet.insert("false");
+	orderedSet.insert(sl_false);
       else if (LabelStr::isString(valueAsDouble))
 	orderedSet.insert(LabelStr(valueAsDouble).toString());
       else {
