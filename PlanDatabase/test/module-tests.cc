@@ -940,6 +940,7 @@ public:
     runTest(testStateModel);
     runTest(testMasterSlaveRelationship);
     runTest(testBasicMerging);
+    runTest(testMergingWithEmptyDomains);
     runTest(testConstraintMigrationDuringMerge);
     runTest(testNonChronGNATS2439);
     runTest(testMergingPerformance);
@@ -1130,6 +1131,52 @@ private:
     // Should verify correct count of tokens remain. --wedgingt 2004 Feb 27
     DEFAULT_TEARDOWN();
     // Remainder should be cleaned up automatically.
+    return true;
+  }
+
+  // Added for GNATS 3077
+  static bool testMergingWithEmptyDomains() {
+    DEFAULT_SETUP(ce, db, true);
+    // Create 2 mergeable tokens.
+    
+    IntervalToken t0(db, 
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000),
+		     Token::noObject(), false);
+  
+    IntervalToken t1(db,
+                     DEFAULT_PREDICATE(), 
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+
+    // add parameters and merge
+    t0.addParameter(LabelSet(), "LabelSetParam");
+    t1.addParameter(LabelSet(), "LabelSetParam");
+ 
+    t0.close();
+    t1.close();
+
+    // activate t0 
+    t0.activate();
+    
+    // propagate
+    bool res = ce->propagate();
+    assertTrue(res);
+
+    // look for compatible tokens for t1. Should find one - t0
+    std::vector<TokenId> compatibleTokens;
+    db->getCompatibleTokens(t1.getId(), compatibleTokens);
+
+    assertTrue(compatibleTokens.size() == 1);
+    assertTrue(compatibleTokens[0] == t0.getId());
+
+    DEFAULT_TEARDOWN();
     return true;
   }
 
