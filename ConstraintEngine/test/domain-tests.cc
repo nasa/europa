@@ -207,6 +207,17 @@ namespace EUROPA {
       assertTrue(dom14.intersects(dom15), dom15.toString() + " should have a non-empty intersection " + dom14.toString());
       assertFalse(dom14.intersect(dom15), dom15.toString() + " should not cause a change for " + dom14.toString());
 
+      // GNAT 3077: Two open but empty domains should _not_ intersect.
+      StringDomain enumDomain1;
+      StringDomain enumDomain2;
+
+      assertTrue(enumDomain1.isOpen());
+      assertTrue(enumDomain2.isOpen());
+      assertTrue(enumDomain1.getSize() == 0);
+      assertTrue(enumDomain2.getSize() == 0);
+      assertFalse(enumDomain1.intersects(enumDomain2));
+      assertFalse(enumDomain2.intersects(enumDomain1));
+
       return(true);
     }
 
