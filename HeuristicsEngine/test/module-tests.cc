@@ -388,6 +388,35 @@ private:
       assertFalse(dontcareIntLabelSetGuards.canMatch(t1.getId()));
     }
 
+    IntervalToken t1(db.getId(),  
+		     "Object.PredicateE",                                                     
+		     true,                                                               
+		     IntervalIntDomain(0, 10),                                           
+		     IntervalIntDomain(0, 20),                                           
+		     IntervalIntDomain(1, 1000));
+
+
+    assertFalse(dontcare.canMatch(t1.getId()));
+    assertFalse(allSlaves.canMatch(t1.getId()));
+    assertFalse(before.canMatch(t1.getId()));
+    assertFalse(other.canMatch(t1.getId()));
+    assertFalse(dontcareIntLabelSetGuards.canMatch(t1.getId()));
+
+    t1.activate();
+
+    IntervalToken t2(t1.getId(),
+		     LabelStr("before"),
+		     LabelStr("Object.PredicateA"),                                                     
+		     IntervalIntDomain(0, 10),                                           
+		     IntervalIntDomain(0, 20),                                           
+		     IntervalIntDomain(1, 1000));
+
+    assertTrue(dontcare.canMatch(t2.getId()));
+    assertFalse(allSlaves.canMatch(t2.getId()));
+    assertFalse(before.canMatch(t2.getId()));
+    assertFalse(other.canMatch(t2.getId()));
+    assertFalse(dontcareIntLabelSetGuards.canMatch(t2.getId()));
+
     DEFAULT_TEARDOWN();
     return true;
   }
