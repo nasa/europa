@@ -9,7 +9,7 @@ echo "Checking for recent CVS checkins..."
 
 RELDIR=`dirname "$0"`
 cd "$RELDIR"
-CVSSTATS=`cvs -f -q -n update -d -P -A 2> /dev/null | egrep "^[CMPRU]" | cut -d" " -f1`
+CVSSTATS=`cvs -f -q -n update -d -P -A 2> /dev/null | egrep "^[CPRU]" | cut -d" " -f1`
 if [ -n "$CVSSTATS" ]
 then 
   echo "***************************************"
