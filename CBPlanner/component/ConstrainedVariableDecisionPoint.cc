@@ -44,7 +44,7 @@ namespace EUROPA {
 const  bool ConstrainedVariableDecisionPoint::assign() {
     if (m_choiceIndex && m_choiceIndex >= getNrChoices()) return false;
     check_error(m_var.isValid());
-    check_error(!m_var->lastDomain().isOpen() && m_var->lastDomain().isFinite(), " Cannot assign a variable with open or infinite domain");
+    check_error(m_var->lastDomain().isFinite(), " Cannot assign a variable with a infinite domain");
     if (m_choiceIndex == 0) initializeChoices();
 
     if (m_choices.empty()) return false; // unable to find any choices
