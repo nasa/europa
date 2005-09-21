@@ -183,6 +183,7 @@ public:
     runTest(testTokenMatching);
     runTest(testDynamicMatching);
     runTest(testMasterMatching);
+    runTest(testProxyTokenHandling);
     runTest(testTargetSelection);
     runTest(testVariableHeuristicConfiguration);
     runTest(testTokenHeuristicConfiguration);
@@ -539,6 +540,10 @@ private:
     Heuristic h0(he.getId(), "Object.PredicateE", EMPTY_LABEL(), 5, Heuristic::noGuards(), 
 		 "Object.PredicateE", Heuristic::BEFORE, guards);
 
+    // Heuristic on the master. Predicate match on both, with any relation between them
+    Heuristic h1(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 5000, Heuristic::noGuards(), 
+		 "Object.PredicateE", Heuristic::ANY, Heuristic::noGuards());
+
     he.initialize();
 
     // Set up the token
@@ -564,40 +569,122 @@ private:
 
     master0.activate();
 
-    IntervalToken slave0(master0.getId(),
-			 LabelStr("before"),
-			 LabelStr("Object.PredicateE"),                                                     
-			 IntervalIntDomain(0, 10),                                           
-			 IntervalIntDomain(0, 20),                                           
-			 IntervalIntDomain(1, 1000));
+    {
+      IntervalToken slave0(master0.getId(),
+			   LabelStr("before"),
+			   LabelStr("Object.PredicateE"),                                                     
+			   IntervalIntDomain(0, 10),                                           
+			   IntervalIntDomain(0, 20),                                           
+			   IntervalIntDomain(1, 1000));
 
-    // It should match
-    assertTrue(h0.canMatch(slave0.getId()));
+      // It should match
+      assertTrue(h0.canMatch(slave0.getId()));
 
-    // But not fire
-    assertTrue( ce.propagate() && he.getPriority(slave0.getId()) == he.getDefaultTokenPriority());
+      // But not fire
+      assertTrue( ce.propagate() && he.getPriority(slave0.getId()) == he.getDefaultTokenPriority());
 
-    // Bind and check - only 1 of the guards will be hit
-    param2->specify(LabelStr("A"));
-    ce.propagate();
-    assertTrue(he.getPriority(slave0.getId()) == he.getDefaultTokenPriority());
+      // Bind and check - only 1 of the guards will be hit
+      param2->specify(LabelStr("A"));
+      ce.propagate();
+      assertTrue(he.getPriority(slave0.getId()) == he.getDefaultTokenPriority());
 
-    // Bind the second to fire 12 A
-    param0->specify(12);
-    ce.propagate();
-    assertTrue(he.getPriority(slave0.getId()) == 5);
+      // Bind the second to fire 12 A
+      param0->specify(12);
+      ce.propagate();
+      assertTrue(he.getPriority(slave0.getId()) == 5);
 
-    // Reset and fire B
-    param0->reset();
-    param2->reset();
-    param0->specify(12);
-    param2->specify(LabelStr("B"));
-    ce.propagate();
-    assertTrue(he.getPriority(slave0.getId()) == he.getDefaultTokenPriority());
+      // Reset and fire B
+      param0->reset();
+      param2->reset();
+      param0->specify(12);
+      param2->specify(LabelStr("B"));
+      ce.propagate();
+      assertTrue(he.getPriority(slave0.getId()) == he.getDefaultTokenPriority());
+    }
+
+    {
+      // Test match with wierd case of a 'none' relation which is a synonym for 'any'
+      IntervalToken slave0(master0.getId(),
+			   LabelStr("any"),
+			   LabelStr("Object.PredicateA"),                       
+			   IntervalIntDomain(0, 10),                                           
+			   IntervalIntDomain(0, 20),                                           
+			   IntervalIntDomain(1, 1000));
+
+      ce.propagate();
+      assertTrue(he.getPriority(slave0.getId()) == 5000);
+
+    }
+
+
     DEFAULT_TEARDOWN();
     return true;
   }
 
+  static bool testProxyTokenHandling(){
+    DEFAULT_SETUP(ce,db,false);      
+    Object o1(db.getId(), "Object", "o1");
+    db.close();               
+
+    HeuristicsEngine he(db.getId());
+
+    // Declare a heuristic contingent on a master relation
+    Heuristic h1(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 5000, Heuristic::noGuards(), 
+		 "Object.PredicateE", Heuristic::ANY, Heuristic::noGuards());
+
+    he.initialize();
+
+    // Allocate a master
+    IntervalToken master(db.getId(),  
+			 "Object.PredicateE",                                                     
+			 true,                                                               
+			 IntervalIntDomain(0, 10),                                           
+			 IntervalIntDomain(0, 20),                                           
+			 IntervalIntDomain(1, 1000));
+    master.activate();
+
+    // Allocate a slave
+    IntervalToken slave(master.getId(),
+			LabelStr("before"),
+			LabelStr("Object.PredicateA"),                                                     
+			IntervalIntDomain(0, 10),                                           
+			IntervalIntDomain(0, 20),                                           
+			IntervalIntDomain(1, 1000));
+
+    // Confirm the heursitc applies to the inactive slave
+    ce.propagate();
+    assertTrue(he.getPriority(slave.getId()) == 5000);
+
+    // Allocate another active token with no master - the proxy
+    IntervalToken proxy(db.getId(),  
+			"Object.PredicateA",                                                     
+			true,                                                               
+			IntervalIntDomain(0, 10),                                           
+			IntervalIntDomain(0, 20),                                           
+			IntervalIntDomain(1, 1000));
+
+    // Confirm the heursistic does not apply
+    ce.propagate();
+    assertTrue(he.getPriority(proxy.getId()) != 5000);
+
+    // Excute activation as proxy
+    proxy.activate(slave.getId());    
+
+    // Confirm the heuristic now applies to the proxy token
+    ce.propagate();
+    assertTrue(he.getPriority(proxy.getId()) == 5000);
+
+    // Commit the active token. The heuristic should still apply
+    proxy.commit();
+
+    // Now split, thus breaking the causal links justifying its special priority
+    slave.cancel();
+    ce.propagate();
+    assertTrue(he.getPriority(proxy.getId()) != 5000);
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
   /**
    * Test dynamic matching against guard values
    */
@@ -698,18 +785,18 @@ private:
     he.setDefaultPriorityPreference(false);
 
     // Set default token and variable priorities
-    he.setDefaultPriorityForTokenDPs(100);
-    he.setDefaultPriorityForConstrainedVariableDPs(10);
+    he.setDefaultPriorityForToken(100);
+    he.setDefaultPriorityForConstrainedVariable(10);
 
     // Set priorities for tokens with parents
-    he.setDefaultPriorityForTokenDPsWithParent(1000, LabelStr("Object.PredicateA"), Heuristic::noGuards());
-    he.setDefaultPriorityForTokenDPsWithParent(2000, LabelStr("Object.PredicateB"), Heuristic::noGuards());
+    he.setDefaultPriorityForToken(1000, LabelStr("Object.PredicateA"), Heuristic::noGuards());
+    he.setDefaultPriorityForToken(2000, LabelStr("Object.PredicateB"), Heuristic::noGuards());
 
     he.initialize();
 
     {
       IntervalToken token(db.getId(),  
-			  "Object.PredicateA",                                                     
+			  "Object.PredicateC",                                                     
 			  true,                                                               
 			  IntervalIntDomain(0, 10),                                           
 			  IntervalIntDomain(0, 20),                                           
@@ -717,13 +804,13 @@ private:
 			  Token::noObject(),
 			  true);
       ce.propagate();
-      // TODO: assertTrue(he.getPriority(token.getId()) == 100, toString(he.getPriority(token.getId())))
+      assertTrue(he.getPriority(token.getId()) == 100, toString(he.getPriority(token.getId())))
       assertTrue(he.getPriority(token.getStart()) == 10);
     }
 
     {
       IntervalToken master(db.getId(),  
-			   "Object.PredicateA",                                                     
+			   "Object.PredicateA",                                                
 			   true,                                                               
 			   IntervalIntDomain(0, 10),                                           
 			   IntervalIntDomain(0, 20),                                           
@@ -792,10 +879,10 @@ private:
   static bool testDefaultInitialization() {
     READ_HEURISTICS("HSTSHeuristics.xml", false);
     std::vector< GuardEntry > domainSpecs;
-    heuristics.setDefaultPriorityForTokenDPsWithParent(20.3, LabelStr("Commands.TakeSample"), domainSpecs);
-    heuristics.setDefaultPriorityForTokenDPs(10000.0);
+    heuristics.setDefaultPriorityForToken(20.3, LabelStr("Commands.TakeSample"), domainSpecs);
+    heuristics.setDefaultPriorityForToken(10000.0);
     
-    heuristics.setDefaultPriorityForConstrainedVariableDPs(10000.0);
+    heuristics.setDefaultPriorityForConstrainedVariable(10000.0);
 
     std::vector<LabelStr> states;
     std::vector<TokenHeuristic::CandidateOrder> orders;
@@ -807,9 +894,9 @@ private:
     orders.push_back(TokenHeuristic::EARLY);
     //    orders.push_back(HSTSHeuristics::NONE);
     orders.push_back(TokenHeuristic::EARLY);
-    heuristics.setDefaultPreferenceForTokenDPs(states,orders);
+    heuristics.setDefaultPreferenceForToken(states,orders);
 
-    heuristics.setDefaultPreferenceForConstrainedVariableDPs(VariableHeuristic::ASCENDING);
+    heuristics.setDefaultPreferenceForConstrainedVariable(VariableHeuristic::ASCENDING);
 
     TEARDOWN();
     return true;
