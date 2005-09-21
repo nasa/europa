@@ -12,6 +12,13 @@ namespace EUROPA {
 
       bool test(const EntityId& entity);
       void print (std::ostream& os = std::cout);
+      
+      // Turn off dynamic exclusion. This should be done before planning begins.
+      void disableDynamicExclusion();
+      bool isDynamicExclusionEnabled();
+
+    private:
+      bool m_applyDynamicExclusion; // flag to control application of dynamic exclusinon policy
     };
 
 }
