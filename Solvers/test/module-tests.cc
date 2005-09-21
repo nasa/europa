@@ -244,6 +244,7 @@ public:
     runTest(testSimpleActivation);
     runTest(testSimpleRejection);
     runTest(testMultipleSearch);
+    runTest(testOversearch);
     return true;
   }
 
@@ -379,6 +380,20 @@ private:
     assertTrue(solver.solve());
     assertTrue(solver.getDepth() > 0);
 
+    return true;
+  }
+
+  //to test GNATS 3068
+  static bool testOversearch() {
+    StandardAssembly assembly(Schema::instance());
+    TiXmlElement* root = initXml("SolverTests.xml", "SimpleCSPSolver");
+    TiXmlElement* child = root->FirstChildElement();
+
+    assert(assembly.playTransactions("SuccessfulSearch.xml"));
+    Solver solver(assembly.getPlanDatabase(), *child);
+    solver.setMaxSteps(5); //arbitrary number of maximum steps
+    assert(solver.solve(20)); //arbitrary number of steps < max
+    
     return true;
   }
 };
