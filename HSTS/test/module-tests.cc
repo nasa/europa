@@ -481,6 +481,7 @@ public:
     runTest(testPreferredPriority);
     runTest(testHSTSHeuristicsStrict);
     runTest(testPriorities);
+    runTest(testProxyTokenHandling);
     return(true);
   }
 private:
@@ -994,6 +995,77 @@ private:
     return true;
   }
 
+  static bool testProxyTokenHandling() {
+    DEFAULT_SETUP_PLAN_HEURISTICS();
+    planner.getDecisionManager()->setOpenDecisionManager((new HSTSOpenDecisionManager(planner.getDecisionManager(), heuristics.getId(), true))->getId()); 
+    initHeuristicsSchema();
+    HSTSHeuristicsReader reader(heuristics.getNonConstId());
+    reader.read("../core/Heuristics-HSTS.xml");
+
+    Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
+    Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
+
+    Object nav(db.getId(), LabelStr("Navigator"), LabelStr("nav"));
+
+    Object com(db.getId(), LabelStr("Commands"), LabelStr("com"));
+
+    Object res(db.getId(), LabelStr("UnaryResource"), LabelStr("res"));
+
+    db.close();
+
+    std::list<ObjectId> results;
+    db.getObjectsByType("Location",results);
+    ObjectDomain allLocs(results,"Location");
+
+    //allocate a master
+    IntervalToken navAt(db.getId(), LabelStr("Navigator.At"), false, IntervalIntDomain(), IntervalIntDomain(), 
+                        IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
+    navAt.addParameter(allLocs, LabelStr("location"));
+    navAt.close();
+    navAt.activate();
+
+    //create a Navigator.Going with a parent of Navigator.At, priority should be 1024.5 (simple parent match)
+    IntervalToken navGoing(navAt.getId(), LabelStr("after"), LabelStr("Navigator.Going"), IntervalIntDomain(), IntervalIntDomain(), 
+                           IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
+    navGoing.addParameter(allLocs, LabelStr("from"));
+    navGoing.addParameter(allLocs, LabelStr("to"));
+    navGoing.close();
+    navGoing.getParameters()[0]->specify(loc1.getId());
+    navGoing.getParameters()[1]->specify(loc3.getId());
+    ce.propagate();
+    ObjectDecisionPoint navGoingDP(DbClientId::noId(), navGoing.getId(), OpenDecisionManagerId::noId());
+    assert(heuristics.getPriorityForObjectDP(navGoingDP.getId()) == 10000.0);
+
+    //allocate another token with no master - the proxy
+    IntervalToken navGoingProxy(db.getId(), LabelStr("Navigator.Going"), false, IntervalIntDomain(), IntervalIntDomain(), 
+                                IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false);
+    navGoingProxy.addParameter(allLocs, LabelStr("from"));
+    navGoingProxy.addParameter(allLocs, LabelStr("to"));
+    navGoingProxy.close();
+    ce.propagate();
+    ObjectDecisionPoint navGoingProxyDP(DbClientId::noId(), navGoingProxy.getId(), OpenDecisionManagerId::noId());
+    //make sure the heuristic no longer applies
+    assert(heuristics.getPriorityForObjectDP(navGoingProxyDP.getId()) != 10000.0);
+    
+    //execute activation as proxy
+    navGoingProxy.activate(navGoing.getId());
+    ce.propagate();
+    //the heuristic now applies to the proxy
+    assert(heuristics.getPriorityForObjectDP(navGoingProxyDP.getId()) == 10000.0);
+
+    navGoingProxy.commit();
+
+    navGoing.cancel();
+    ce.propagate();
+    //the heurist
+    assert(heuristics.getPriorityForObjectDP(navGoingProxyDP.getId()) != 10000.0);
+
+
+    DEFAULT_TEARDOWN_PLAN_HEURISTICS();
+    return true;
+  }
+
+
 };
 
 bool testWeakDomainComparator() {
@@ -1128,6 +1200,7 @@ class KeyMatcherTest {
 
     return true;
   }
+
 };
 
 int main() {
