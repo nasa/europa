@@ -186,6 +186,7 @@ public:
     runTest(testTargetSelection);
     runTest(testVariableHeuristicConfiguration);
     runTest(testTokenHeuristicConfiguration);
+    runTest(tesDefaultHandling);
     return true;
   }
 
@@ -212,8 +213,20 @@ private:
                      IntervalIntDomain(0, 10),                                           
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));
+                     
+  
+    IntervalToken t3(db.getId(),  
+                     "Object.PredicateC",                                                     
+                     true,                                                               
+                     IntervalIntDomain(0, 10),                                           
+                     IntervalIntDomain(0, 20),                                           
+                     IntervalIntDomain(1, 1000));
 
     HeuristicsEngine he(db.getId());
+
+    assertTrue(he.bestCasePriority() == MINUS_INFINITY-1);
+
+    assertTrue(he.betterThan(MINUS_INFINITY-2, he.bestCasePriority()));
 
     // Still allowed to add heuristics
     Heuristic h0(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 11.23, true);
@@ -669,6 +682,92 @@ private:
     }
 
     ofs.close();
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool tesDefaultHandling() {
+    DEFAULT_SETUP(ce,db,false);      
+    Object o1(db.getId(), "Object", "o1");
+    db.close();               
+
+    // Set up the heuristics defaults
+    HeuristicsEngine he(db.getId());
+
+    // Prefer high-priority
+    he.setDefaultPriorityPreference(false);
+
+    // Set default token and variable priorities
+    he.setDefaultPriorityForTokenDPs(100);
+    he.setDefaultPriorityForConstrainedVariableDPs(10);
+
+    // Set priorities for tokens with parents
+    he.setDefaultPriorityForTokenDPsWithParent(1000, LabelStr("Object.PredicateA"), Heuristic::noGuards());
+    he.setDefaultPriorityForTokenDPsWithParent(2000, LabelStr("Object.PredicateB"), Heuristic::noGuards());
+
+    he.initialize();
+
+    {
+      IntervalToken token(db.getId(),  
+			  "Object.PredicateA",                                                     
+			  true,                                                               
+			  IntervalIntDomain(0, 10),                                           
+			  IntervalIntDomain(0, 20),                                           
+			  IntervalIntDomain(1, 1000),
+			  Token::noObject(),
+			  true);
+      ce.propagate();
+      // TODO: assertTrue(he.getPriority(token.getId()) == 100, toString(he.getPriority(token.getId())))
+      assertTrue(he.getPriority(token.getStart()) == 10);
+    }
+
+    {
+      IntervalToken master(db.getId(),  
+			   "Object.PredicateA",                                                     
+			   true,                                                               
+			   IntervalIntDomain(0, 10),                                           
+			   IntervalIntDomain(0, 20),                                           
+			   IntervalIntDomain(1, 1000),
+			   Token::noObject(),
+			   true);
+
+      ce.propagate();
+      //TODO: assertTrue(he.getPriority(master.getId()) == 100);
+      assertTrue(he.getPriority(master.getStart()) == 10);
+      master.activate();
+
+      ce.propagate();
+      IntervalToken slave0(master.getId(),
+			   LabelStr("before"),
+			   LabelStr("Object.PredicateE"),                                                     
+			   IntervalIntDomain(0, 10),                                           
+			   IntervalIntDomain(0, 20),                                           
+			   IntervalIntDomain(1, 1000));
+
+      ce.propagate();
+      // TODO:assertTrue(he.getPriority(slave0.getId()) == 100);
+
+      IntervalToken slave1(master.getId(),
+			   LabelStr("before"),
+			   LabelStr("Object.PredicateA"),                                                     
+			   IntervalIntDomain(0, 10),                                           
+			   IntervalIntDomain(0, 20),                                           
+			   IntervalIntDomain(1, 1000));
+
+      ce.propagate();
+      assertTrue(he.getPriority(slave1.getId()) == 1000);
+
+      IntervalToken slave2(master.getId(),
+			   LabelStr("before"),
+			   LabelStr("Object.PredicateB"),                                                     
+			   IntervalIntDomain(0, 10),                                           
+			   IntervalIntDomain(0, 20),                                           
+			   IntervalIntDomain(1, 1000));
+
+      ce.propagate();
+      assertTrue(he.getPriority(slave2.getId()) == 2000);
+    }
+
     DEFAULT_TEARDOWN();
     return true;
   }

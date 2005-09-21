@@ -39,8 +39,6 @@ namespace EUROPA {
     checkError(m_choiceIndex < getNrChoices() && getNrChoices() > 0 && !m_choices.empty(),
 	       "Cannor be assigning if we have no choices. A control loop bug.");
     check_error(m_var.isValid());
-    check_error(!m_var->lastDomain().isOpen() && m_var->lastDomain().isFinite(),
-		"Cannot assign a variable with open or infinite domain");
 
     m_open = false;
 

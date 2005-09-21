@@ -2724,6 +2724,7 @@ private:
     DEFAULT_SETUP(ce, db, false);
 
     DbClientId client = db->getClient();
+    client->enableTransactionLogging();
     DbClientTransactionLog* txLog = new DbClientTransactionLog(client);
 
     FooId foo1 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo1");
@@ -2753,6 +2754,7 @@ private:
 
   static bool testPathBasedRetrieval(){
     DEFAULT_SETUP(ce, db, true);
+    db->getClient()->enableTransactionLogging();
     TokenId t0 = db->getClient()->createToken(DEFAULT_PREDICATE().c_str());
     t0->activate();
 
@@ -4620,6 +4622,8 @@ private:
     LockManager::instance().unlock();
 
     LockManager::instance().lock();
+    if(!db->getClient()->isTransactionLoggingEnabled())
+      db->getClient()->enableTransactionLogging();
     DbClientTransactionLog* txLog = new DbClientTransactionLog(db->getClient());
     LockManager::instance().unlock();
 
