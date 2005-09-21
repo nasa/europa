@@ -464,6 +464,28 @@ private:
     he.initialize();
 
     // Set up the token
+    IntervalToken referenceToken(db.getId(),  
+		     "Object.PredicateE",                                                     
+		     true,                                                               
+		     IntervalIntDomain(0, 10),                                           
+		     IntervalIntDomain(0, 20),                                           
+		     IntervalIntDomain(1, 1000),
+		     Token::noObject(),
+		     false);
+
+    ConstrainedVariableId constrainParam0 = referenceToken.addParameter(IntervalIntDomain(), LabelStr("param0"));
+    referenceToken.addParameter(IntervalDomain(), LabelStr("param1"));
+    LabelSet values;
+    values.insert(LabelStr("A"));
+    values.insert(LabelStr("B"));
+    values.close();
+
+    ConstrainedVariableId constrainParam2 = referenceToken.addParameter(values, LabelStr("param2"));
+    referenceToken.close();
+    constrainParam0->specify(12);
+    constrainParam2->specify(LabelStr("A"));
+
+    // Set up the token
     IntervalToken t0(db.getId(),  
 		     "Object.PredicateE",                                                     
 		     true,                                                               
@@ -475,25 +497,31 @@ private:
 
     ConstrainedVariableId param0 = t0.addParameter(IntervalIntDomain(), LabelStr("param0"));
     t0.addParameter(IntervalDomain(), LabelStr("param1"));
-    LabelSet values;
-    values.insert(LabelStr("A"));
-    values.insert(LabelStr("B"));
-    values.close();
     ConstrainedVariableId param2 = t0.addParameter(values, LabelStr("param2"));
     t0.close();
 
     // veryfy we get the default priority
     assertTrue(ce.propagate() && he.getPriority(t0.getId()) == he.getDefaultTokenPriority());
 
-    // Bind and check - only 1 of t guards will be hit
-    param2->specify(LabelStr("A"));
-    ce.propagate();
-    assertTrue(he.getPriority(t0.getId()) == he.getDefaultTokenPriority());
+    // Force evaluation using the derived domain
+    {
+      // Bind and check - only 1 of t guards will be hit
+      EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ce.getId(), 
+			 makeScope(constrainParam2, param2));
+      ce.propagate();
+      assertTrue(param2->lastDomain().isSingleton() && constrainParam2->lastDomain() == param2->lastDomain(),
+		 param2->toString() + " != " + constrainParam2->toString());
 
-    // Bind the second to fire 12 A
+      assertTrue(he.getPriority(t0.getId()) == he.getDefaultTokenPriority());
+
+      EqualConstraint c1(LabelStr("EqualConstraint"), LabelStr("Default"), ce.getId(), 
+			 makeScope(constrainParam0, param0));
+      ce.propagate();
+      assertTrue(he.getPriority(t0.getId()) == 5);
+    }
+
+    // Now use the specified domains
     param0->specify(12);
-    ce.propagate();
-    assertTrue(he.getPriority(t0.getId()) == 5);
 
     // Fire 12 B
     param2->reset();
