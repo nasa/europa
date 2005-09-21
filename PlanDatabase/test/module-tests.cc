@@ -2906,6 +2906,7 @@ private:
     check_error(newToken->canBeCommitted(), "Should be able to commit this token.");
     assertTrue(t2.isMerged());
     assertTrue(newToken.isValid() && newToken->isActive() && newToken->getMaster().isNoId());
+    assertTrue(newToken->getSource() == t2.getId());
  
     // Now cancel the merge and expect we lose a token
     assertTrue(ENGINE->propagate()); 
@@ -2927,8 +2928,10 @@ private:
     newToken = t2.getActiveToken();
     newToken->commit();
     assertTrue(t2.isMerged());
+    assertTrue(newToken->getSource() == t2.getId());
     assertTrue(db.getTokens().size() == 3, "Extra token expected");
     dbClient->cancel(t2.getId());
+    assertTrue(newToken->getSource() == TokenId::noId());
     assertTrue(t2.isInactive());
     assertTrue(db.getTokens().size() == 3, "Extra token still expected");
 
