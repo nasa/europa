@@ -17,6 +17,7 @@ namespace EUROPA {
   {
     m_chronologicalBacktracking = chronologicalBacktracking;
     m_tokensCreated = 0;
+    check_error(client->isTransactionLoggingEnabled());
   }
 
   DbClientTransactionLog::~DbClientTransactionLog(){
