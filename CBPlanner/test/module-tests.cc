@@ -518,7 +518,33 @@ static bool testHorizonConditionNecessary() {
     assertTrue(!cond.test(v4.getId()));
     assertTrue(cond.test(tokenA.getDuration()));
 
+    // make sure it appears as expected. 
     assertTrue(dm.getNumberOfDecisions() == 6);
+
+    // test function to disable dynamic exclsuion
+    
+    // should be on by default.
+     assertTrue(cond.isDynamicExclusionEnabled());
+    
+    // turn it off.
+    cond.disableDynamicExclusion();
+
+    // should now be off.
+    assertFalse(cond.isDynamicExclusionEnabled());
+ 
+    // V1 should now be testable as its domain is open 
+    // and we have stopped excluding open domains.
+
+    assertTrue(cond.test(t.getId()));
+    assertTrue(cond.test(tokenA.getId()));
+    assertTrue(cond.test(v0.getId()));
+    assertTrue(cond.test(v1.getId()));  // now testable
+    assertTrue(!cond.test(v2.getId()));
+    assertTrue(cond.test(v3.getId()));
+    assertTrue(!cond.test(v4.getId()));
+    assertTrue(cond.test(tokenA.getDuration()));
+
+     assertTrue(dm.getNumberOfDecisions() == 6);
 
     DEFAULT_TEARDOWN();
     return true;
