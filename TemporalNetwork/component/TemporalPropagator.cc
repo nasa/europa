@@ -494,7 +494,9 @@ namespace EUROPA {
     bool result = lb <= 0 && ub >= 0;
 
     // Conditionally output the edge distances in the tnet if the test is negative.
-    condDebugMsg(!result, "TemporalPropagator:canBeConcurrent:verbose", std::endl << m_tnet->toString());
+    condDebugMsg(!result, "TemporalPropagator:canBeConcurrent:verbose",
+		 "FROM " << _first << " TO " << _second << " WITH ORIGIN " << m_tnet->getOrigin()
+		 << std::endl << m_tnet->toString());
  
     return result;
   }
