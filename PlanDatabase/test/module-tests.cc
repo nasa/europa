@@ -948,6 +948,7 @@ public:
     runTest(testPredicateInheritance);
     runTest(testTokenFactory);
     runTest(testCorrectSplit_Gnats2450);
+    runTest(testGNATS_3086);
     runTest(testOpenMerge);
     runTest(testCompatCacheReset);
     runTest(testAssignemnt);
@@ -1943,6 +1944,56 @@ private:
     assertTrue(compatibleTokens[0] == t0.getId());
 
     t1.merge(t0.getId());
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+
+  static bool testGNATS_3086() {
+    DEFAULT_SETUP(ce, db, true);
+    
+    LabelSet lbl;
+    lbl.insert(LabelStr("L1"));
+
+    IntervalToken t0(db,
+                     DEFAULT_PREDICATE(),
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+
+    ConstrainedVariableId param0 = t0.addParameter(lbl, "LabelSetParam");
+    t0.close();
+
+    IntervalToken t1(db,
+                     DEFAULT_PREDICATE(),
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+                     Token::noObject(), false);
+
+    ConstrainedVariableId param1 = t1.addParameter(lbl, "LabelSetParam");
+    t1.close();
+
+    assertTrue(!param0->specifiedDomain().isClosed());
+    assertTrue(!param1->specifiedDomain().isClosed());
+
+    param0->specify(LabelStr("L1"));
+    assertTrue(param0->specifiedDomain().isClosed());
+
+    // Now activate and merge onto it.
+    t1.activate();
+    t0.merge(t1.getId());
+
+    assertTrue(param0->specifiedDomain().isClosed());
+    assertTrue(param1->specifiedDomain().isClosed());
+
+    param0->reset();
+    assertTrue(!param0->specifiedDomain().isClosed());
+    assertTrue(!param1->specifiedDomain().isClosed());
 
     DEFAULT_TEARDOWN();
     return true;
