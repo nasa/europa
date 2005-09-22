@@ -491,7 +491,12 @@ namespace EUROPA {
 
     debugMsg("TemporalPropagator:canBeConcurrent", "calculated bounds " << lb << " ... " << ub);
 
-    return (lb <= 0 && ub >= 0);
+    bool result = lb <= 0 && ub >= 0;
+
+    // Conditionally output the edge distances in the tnet if the test is negative.
+    condDebugMsg(!result, "TemporalPropagator:canBeConcurrent:verbose", std::endl << m_tnet->toString());
+ 
+    return result;
   }
 
   void TemporalPropagator::updateTimepoint(const ConstrainedVariableId& var){
