@@ -231,9 +231,9 @@ private:
     assertTrue(he.betterThan(MINUS_INFINITY-2, he.bestCasePriority()));
 
     // Still allowed to add heuristics
-    Heuristic h0(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 11.23, true);
-    new Heuristic(he.getId(), "Object.PredicateB", EMPTY_LABEL(), 14.45, true);
-    new Heuristic(he.getId(), "Object.PredicateB", EMPTY_LABEL(), 20.78, true);
+    TokenHeuristic h0(he.getId(), "Object.PredicateA", 11.23, true);
+    new TokenHeuristic(he.getId(), "Object.PredicateB", 14.45, true);
+    new TokenHeuristic(he.getId(), "Object.PredicateB", 20.78, true);
 
     assertTrue(he.getHeuristics().size() == 3, toString(he.getHeuristics().size())); 
 
@@ -298,8 +298,8 @@ private:
     std::vector< std::pair<unsigned int, double> > guards_12_A;
     guards_12_A.push_back(std::pair<unsigned int, double>(0, 12));
     guards_12_A.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
-    Heuristic h_12_A(he.getId(), "Object.PredicateE", EMPTY_LABEL(), 5, true, guards_12_A);
-    Heuristic h(he.getId(), "Object.PredicateE", EMPTY_LABEL(), 100, true);
+    TokenHeuristic h_12_A(he.getId(), "Object.PredicateE",  5, true, guards_12_A);
+    TokenHeuristic h(he.getId(), "Object.PredicateE",  100, true);
     he.initialize();
 
     TokenId t1 = (new IntervalToken(db.getId(),  
@@ -401,18 +401,29 @@ private:
   
     // Set up the heuristics
     HeuristicsEngine he(db.getId());
-    Heuristic dontcare(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 1);
-    Heuristic allSlaves(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 2, Heuristic::noGuards(), 
-			"Object.PredicateA", Heuristic::ANY);
-    Heuristic before(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 3, Heuristic::noGuards(),
-			"Object.PredicateA", Heuristic::BEFORE);
-    Heuristic other(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 4, Heuristic::noGuards(),
-			"Object.PredicateA", Heuristic::OTHER);
+    TokenHeuristic dontcare(he.getId(), "Object.PredicateA",  1);
+    TokenHeuristic allSlaves(he.getId(), "Object.PredicateA",  2, 
+			     TokenHeuristic::noStates(),
+			     TokenHeuristic::noOrders(),
+			     Heuristic::noGuards(), 
+			     "Object.PredicateA", Heuristic::ANY);
+
+    TokenHeuristic before(he.getId(), "Object.PredicateA",  3, 
+			  TokenHeuristic::noStates(),
+			  TokenHeuristic::noOrders(),
+			  Heuristic::noGuards(),
+			  "Object.PredicateA", Heuristic::BEFORE);
+
+    TokenHeuristic other(he.getId(), "Object.PredicateA",  4, 
+			 TokenHeuristic::noStates(),
+			 TokenHeuristic::noOrders(),
+			 Heuristic::noGuards(),
+			 "Object.PredicateA", Heuristic::OTHER);
 
     std::vector< std::pair<unsigned int, double> > intLabelSetGuards;
     intLabelSetGuards.push_back(std::pair<unsigned int, double>(0, 12));
     intLabelSetGuards.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
-    Heuristic dontcareIntLabelSetGuards(he.getId(), "Object.PredicateE", EMPTY_LABEL(), 5, false, intLabelSetGuards);
+    TokenHeuristic dontcareIntLabelSetGuards(he.getId(), "Object.PredicateE",  5, false, intLabelSetGuards);
 
     he.initialize();
 
@@ -554,17 +565,17 @@ private:
     std::vector< std::pair<unsigned int, double> > guards_12_A;
     guards_12_A.push_back(std::pair<unsigned int, double>(0, 12));
     guards_12_A.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
-    Heuristic h_12_A(he.getId(), "Object.PredicateE", EMPTY_LABEL(), 5, true, guards_12_A);
+    TokenHeuristic h_12_A(he.getId(), "Object.PredicateE",  5, true, guards_12_A);
 
     std::vector< std::pair<unsigned int, double> > guards_12_B;
     guards_12_B.push_back(std::pair<unsigned int, double>(0, 12));
     guards_12_B.push_back(std::pair<unsigned int, double>(2, LabelStr("B")));
-    Heuristic h_12_B(he.getId(), "Object.PredicateE", EMPTY_LABEL(), 10,true,  guards_12_B);
+    TokenHeuristic h_12_B(he.getId(), "Object.PredicateE",  10,true,  guards_12_B);
 
     std::vector< std::pair<unsigned int, double> > guards_40_B;
     guards_40_B.push_back(std::pair<unsigned int, double>(0, 40));
     guards_40_B.push_back(std::pair<unsigned int, double>(2, LabelStr("B")));
-    Heuristic h_40_B(he.getId(), "Object.PredicateE", EMPTY_LABEL(), 15, true, guards_40_B);
+    TokenHeuristic h_40_B(he.getId(), "Object.PredicateE",  15, true, guards_40_B);
 
     he.initialize();
 
@@ -670,12 +681,22 @@ private:
     guards.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
 
     // Heuristic guarded on the master. Predicate match on both, and one must be before the other
-    Heuristic h0(he.getId(), "Object.PredicateE", EMPTY_LABEL(), 5, Heuristic::noGuards(), 
-		 "Object.PredicateE", Heuristic::BEFORE, guards);
+    TokenHeuristic h0(he.getId(), "Object.PredicateE",  5, 
+		      TokenHeuristic::noStates(),
+		      TokenHeuristic::noOrders(),
+		      Heuristic::noGuards(),
+		      "Object.PredicateE", 
+		      Heuristic::BEFORE,
+		      guards);
 
     // Heuristic on the master. Predicate match on both, with any relation between them
-    Heuristic h1(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 5000, Heuristic::noGuards(), 
-		 "Object.PredicateE", Heuristic::ANY, Heuristic::noGuards());
+    TokenHeuristic h1(he.getId(), "Object.PredicateA",  5000, 
+		      TokenHeuristic::noStates(),
+		      TokenHeuristic::noOrders(),
+		      Heuristic::noGuards(), 
+		      "Object.PredicateE", 
+		      Heuristic::ANY, 
+		      Heuristic::noGuards());
 
     he.initialize();
 
@@ -762,8 +783,11 @@ private:
     HeuristicsEngine he(db.getId());
 
     // Declare a heuristic contingent on a master relation
-    Heuristic h1(he.getId(), "Object.PredicateA", EMPTY_LABEL(), 5000, Heuristic::noGuards(), 
-		 "Object.PredicateE", Heuristic::ANY, Heuristic::noGuards());
+    TokenHeuristic h1(he.getId(), "Object.PredicateA",  5000, 
+		      TokenHeuristic::noStates(),
+		      TokenHeuristic::noOrders(),
+		      Heuristic::noGuards(), 
+		      "Object.PredicateE", Heuristic::ANY, Heuristic::noGuards());
 
     he.initialize();
 
@@ -832,8 +856,10 @@ private:
     std::vector< std::pair<unsigned int, double> > guards;
     guards.push_back(std::pair<unsigned int, double>(0, 12));
     guards.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
-    Heuristic h0(he.getId(), "Object.PredicateE", LabelStr("start"), 5, true, guards);
-    Heuristic h1(he.getId(), "Object.PredicateE", LabelStr("param1"), 10, true, guards);
+    VariableHeuristic h0(he.getId(), "Object.PredicateE", LabelStr("start"), 5,
+			 VariableHeuristic::noValues(), he.getDefaultDomainOrder(), true, guards);
+    VariableHeuristic h1(he.getId(), "Object.PredicateE", LabelStr("param1"), 10,
+			 VariableHeuristic::noValues(), he.getDefaultDomainOrder(), true, guards);
 
     he.initialize();
 
