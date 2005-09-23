@@ -14,6 +14,8 @@ namespace EUROPA {
 
   HSTSOpenDecisionManager::~HSTSOpenDecisionManager() { }
 
+  bool HSTSOpenDecisionManager::isAutoAllocationEnabled() const { return true;}
+
   void HSTSOpenDecisionManager::addActive(const TokenId& token) {
     DefaultOpenDecisionManager::addActive(token);
     std::map<int,ObjectDecisionPointId>::iterator pos = m_objDecs.find(token->getKey());
