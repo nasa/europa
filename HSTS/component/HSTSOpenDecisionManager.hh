@@ -20,7 +20,8 @@ namespace EUROPA {
     virtual void initializeTokenChoices(TokenDecisionPointId& tdp);
     virtual void initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp);
     virtual void initializeObjectChoices(ObjectDecisionPointId& odp);
-    
+
+    bool isAutoAllocationEnabled() const;    
   protected:
     friend class DecisionManager;
 
