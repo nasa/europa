@@ -315,7 +315,7 @@ namespace EUROPA {
     if(dom.isEmpty())
       return;
 
-    if (isEmpty() || !((*this) == dom)) {
+    if (isEmpty() || this->isSubsetOf(dom)){
       const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
       m_values = l_dom.m_values;
       if(dom.isOpen() && isClosed())
