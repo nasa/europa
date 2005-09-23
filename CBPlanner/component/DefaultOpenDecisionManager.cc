@@ -78,6 +78,7 @@ namespace EUROPA {
       ConstrainedVariableDecisionPointId dp = createConstrainedVariableDecisionPoint(var);
       check_error(dp->getEntityKey() == var->getKey());
       debugMsg("DefaultOpenDecisionManager:condAdd", "Inserting a unit decision on variable (" << var-> getKey() << ")");
+      checkError(dp.isValid() && dp->getVariable()->lastDomain().isSingleton(), "Attempting to put a non singleton variable in unit decision list." << dp->getVariable()->toString());
       m_unitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
       m_sortedUnitVarDecs.insert(dp);
       publishNewDecision(dp);
@@ -86,6 +87,9 @@ namespace EUROPA {
       ConstrainedVariableDecisionPointId dp = createConstrainedVariableDecisionPoint(var);
       check_error(dp->getEntityKey() == var->getKey());
       debugMsg("DefaultOpenDecisionManager:condAdd", "Inserting a nonunit decision on variable (" << var-> getKey() << ")");
+      // It is ok to put unit variable decisions into this list as we are controlled by the units parameter.
+      // We just made a note of this in the trace.
+      condDebugMsg(dp->getVariable()->lastDomain().isSingleton(), "DefaultOpenDecisionManager:condAdd", "Note - inserting unit variable in nonUnit list");
       m_nonUnitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
       m_sortedNonUnitVarDecs.insert(dp);
       publishNewDecision(dp);
@@ -105,6 +109,7 @@ namespace EUROPA {
       if ( !unitDecisionExistsForVariable(var) ) {      
          m_unitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
          debugMsg("DefaultOpenDecisionManager:add", "Inserting a unit decision on variable(" << var-> getKey() << ")");
+         checkError(dp.isValid() && dp->getVariable()->lastDomain().isSingleton(), "Attempting to put a non singleton variable in unit decision list." << dp->getVariable()->toString());
          m_sortedUnitVarDecs.insert(dp);
          publishNewUnitDecision(dp);
       } else {
@@ -115,6 +120,7 @@ namespace EUROPA {
     else if ( !unitDecisionExistsForVariable(var) && !nonUnitDecisionExistsForVariable(var) ) {
       m_nonUnitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
       debugMsg("DefaultOpenDecisionManager:add", "Inserting a nonunit decision on variable (" << var-> getKey() << ")");
+      checkError(dp.isValid() && !dp->getVariable()->lastDomain().isSingleton(), "Attempting to put a singleton variable in non unit decision list." << dp->getVariable()->toString());
       m_sortedNonUnitVarDecs.insert(dp);
       publishNewDecision(dp);
    } else {
