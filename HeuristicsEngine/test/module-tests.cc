@@ -1025,6 +1025,7 @@ public:
     runTest(testDefaultInitialization);
     runTest(testHSTSHeuristicsAssembly);
     runTest(testHSTSHeuristicsStrict);
+    runTest(testDefaultCompatibilityHeuristic);
     runTest(testPriorities);
     runTest(testTokenOrderingCalculations);
     runTest(testTokenOrdering);
@@ -1198,7 +1199,7 @@ private:
     ce.propagate();
 
     assertTrue(heuristics.getPriority(tok3.getId()) ==  443.7, toString(heuristics.getPriority(tok3.getId())));
-    assertTrue(heuristics.getPriority(location) ==  5000, toString(heuristics.getPriority(location)));
+    assertTrue(heuristics.getPriority(location) ==  1024.5, toString(heuristics.getPriority(location)));
 
     //Navigator.Going(from = {Loc1 Loc2 Loc3 Loc4 Loc5} to = {Loc1 Loc2 Loc3 Loc4 Loc5}), priority 
     IntervalToken tok4(db.getId(),LabelStr("Navigator.Going"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
@@ -1208,8 +1209,8 @@ private:
     ce.propagate();
 
     assertTrue(heuristics.getPriority(tok4.getId()) ==  100.25, toString(heuristics.getPriority(tok4.getId())));
-    assertTrue(heuristics.getPriority(from) ==  5000, toString(heuristics.getPriority(from)));
-    assertTrue(heuristics.getPriority(to) ==  5000, toString(heuristics.getPriority(to)));
+    assertTrue(heuristics.getPriority(from) ==  100.25, toString(heuristics.getPriority(from)));
+    assertTrue(heuristics.getPriority(to) ==  100.25, toString(heuristics.getPriority(to)));
 
     //Navigator.At(location = {Loc3}), priority 443.7
     IntervalToken tok5(db.getId(),LabelStr("Navigator.At"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,200), IntervalIntDomain(1,300), "nav1", false);
@@ -1223,6 +1224,136 @@ private:
     assertTrue(heuristics.getPriority(tok5.getId()) ==  7.23, toString(heuristics.getPriority(tok5.getId())));
 
     assert(ce.propagate());
+
+    TEARDOWN();
+    return true;
+  }
+
+  static bool testDefaultCompatibilityHeuristic() {
+    SETUP_HEURISTICS("DefaultCompatHeuristics.xml");
+
+    //set up the database
+    Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
+    Timeline ins(db.getId(),LabelStr("Instrument"),LabelStr("ins1"));
+    Timeline nav(db.getId(),LabelStr("Navigator"),LabelStr("nav1"));
+    Timeline tel(db.getId(),LabelStr("Telemetry"),LabelStr("tel1"));
+
+    Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
+    Object loc2(db.getId(),LabelStr("Location"),LabelStr("Loc2"));
+    Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
+    Object loc4(db.getId(),LabelStr("Location"),LabelStr("Loc4"));
+    Object rock1(db.getId(),LabelStr("Location"),LabelStr("Rock1"));
+
+    db.close();
+
+    std::list<ObjectId> results;
+    db.getObjectsByType("Location",results);
+    ObjectDomain allLocs(results,"Location");
+
+    std::list<double> values;
+    values.push_back(LabelStr("high"));
+    values.push_back(LabelStr("medium-high"));
+    values.push_back(LabelStr("medium"));
+    values.push_back(LabelStr("medium-low"));
+    values.push_back(LabelStr("low"));
+    EnumeratedDomain allModes(values,false,"Mode");
+
+    /**
+     * Telemetry.Communicate:
+     * - minutes = [60 120]
+     * - bandwidth = [500.3 1200.4]
+     * - mode = {high medium-high medium medium-low low}
+     * - priority = 10.0
+     */
+    IntervalToken communicate(db.getId(),
+			      LabelStr("Telemetry.Communicate"), 
+			      true, 
+			      IntervalIntDomain(1,100), 
+			      IntervalIntDomain(1,100), 
+			      IntervalIntDomain(1,100), "tel1", false);
+    ConstrainedVariableId minutes = 
+      communicate.addParameter(IntervalDomain(60,120, "int"), LabelStr("minutes"));
+
+    ConstrainedVariableId bandwidth = 
+      communicate.addParameter(IntervalDomain(500.3, 1200.4, "float"), LabelStr("bandwidth"));
+
+    ConstrainedVariableId mode = communicate.addParameter(allModes, LabelStr("mode"));
+
+    communicate.close();
+    ce.propagate();
+
+    // This should match as the master. As such it should get the priority applied to its tokens and variables
+    assertTrue(heuristics.getPriority(communicate.getId()) ==  1000, 
+	       toString(heuristics.getPriority(communicate.getId())));
+
+    assertTrue(heuristics.getPriority(mode) ==  1000,  toString(heuristics.getPriority(mode)));
+
+    assertTrue(heuristics.getPriority(bandwidth) == 1000, toString(heuristics.getPriority(bandwidth)));
+
+    /**
+     * Commands.TakeSample:
+     * - rock = {Loc1 Loc2 Loc3 Loc4}
+     */
+    IntervalToken takeSampleMaster(db.getId(),
+				   LabelStr("Commands.TakeSample"), 
+				   true, 
+				   IntervalIntDomain(1,100), 
+				   IntervalIntDomain(1,100), 
+				   IntervalIntDomain(1,100), "com1", false);
+    ConstrainedVariableId rock = takeSampleMaster.addParameter(allLocs, LabelStr("rock"));
+    takeSampleMaster.close();
+
+    ce.propagate();
+
+    // Verify that the defualt compatibility for this has not fired since it is guarded by a value for rock
+    assertTrue(heuristics.getPriority(takeSampleMaster.getId()) ==  500, // Default token
+	       toString(heuristics.getPriority(takeSampleMaster.getId())));
+    assertTrue(heuristics.getPriority(rock) ==  100, toString(heuristics.getPriority(rock))); // Default variable
+
+
+    // Now allocate a slave token for takeSampleMaster
+
+    takeSampleMaster.activate();
+
+    /**
+     * Commands.TakeSample:
+     * - rock = {Loc1 Loc2 Loc3 Loc4}
+     */
+    IntervalToken navAt(takeSampleMaster.getId(),
+				  LabelStr("contained_by"),
+				  LabelStr("Navigator.At"),
+				  IntervalIntDomain(1,100), 
+				  IntervalIntDomain(1,100), 
+				  IntervalIntDomain(1,100), Token::noObject(), false);
+    ConstrainedVariableId location = navAt.addParameter(allLocs, LabelStr("location"));
+    navAt.close();
+
+    // Also this should not be impacted yet since the master guard has not matched
+    ce.propagate();
+    assertTrue(heuristics.getPriority(takeSampleMaster.getId()) ==  500, // Default token
+	       toString(heuristics.getPriority(takeSampleMaster.getId())));
+    assertTrue(heuristics.getPriority(rock) ==  100, toString(heuristics.getPriority(rock))); // Default variable
+    assertTrue(heuristics.getPriority(navAt.getId()) ==  500, // Default token
+	       toString(heuristics.getPriority(navAt.getId())));
+    assertTrue(heuristics.getPriority(location) ==  100, toString(heuristics.getPriority(location))); // Default variable
+
+    // Now bind the master guard variable
+    rock->specify(rock1.getId());
+    ce.propagate();
+
+    // Confirm the master token and variable priorities are matched
+    assertTrue(heuristics.getPriority(takeSampleMaster.getId()) ==  100.25, // Default token
+	       toString(heuristics.getPriority(takeSampleMaster.getId())));
+    assertTrue(heuristics.getPriority(rock) ==  100.25, toString(heuristics.getPriority(rock))); // Default variable
+
+    // Confirm the slave token priority has changed to the special default
+    assertTrue(heuristics.getPriority(navAt.getId()) ==  100.25, // Default token
+	       toString(heuristics.getPriority(navAt.getId())));
+
+
+    // Confirm the slave tokens variable priorities have not changed.
+    assertTrue(heuristics.getPriority(location) ==  100, toString(heuristics.getPriority(location)));
+
 
     TEARDOWN();
     return true;
