@@ -94,10 +94,11 @@ namespace EUROPA {
 
       // First we filter and sort candidate tokens to order according to our flaw filtering rules and the previously
       // counted number of choices.
-      const std::map<TokenId, ObjectSet>& tokensToOrder = m_db->getTokensToOrder();
+      const std::map<int, std::pair<TokenId, ObjectSet> >& tokensToOrder = m_db->getTokensToOrder();
       std::map<int, TokenId> candidates;
-      for(std::map<TokenId, ObjectSet>::const_iterator it = tokensToOrder.begin(); it != tokensToOrder.end(); ++it){
-	TokenId candidate = it->first;
+      for(std::map<int, std::pair<TokenId, ObjectSet> >::const_iterator it = tokensToOrder.begin(); 
+	  it != tokensToOrder.end(); ++it){
+	TokenId candidate = it->second.first;
 	checkError(candidate->isActive(), "It must be inactive to be a candidate. " 
 		   << candidate->toString() << ";" << candidate->getState()->toString());
 
