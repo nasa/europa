@@ -56,4 +56,14 @@ namespace EUROPA {
     check_error(ptr != 0);
     return(ptr);
   }
+
+  LabelStr BoolDomain::displayValue(double value) const{
+    static const LabelStr sl_true("true");
+    static const LabelStr sl_false("false");
+    checkError(value == true || value == false, value << "is not a bool value" );
+    if(value == true)
+      return sl_true;
+    else
+      return sl_false;
+  }
 }

@@ -19,6 +19,11 @@ namespace EUROPA {
      * active token as a proxy when resolving an open condition.
      */
     bool isAutoAllocationEnabled() const;
+
+    /**
+     * @brief Custmization point to prefere higher keys
+     */
+    bool preferHigherKeys() const;
   };
 }
 

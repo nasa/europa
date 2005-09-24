@@ -9,4 +9,7 @@ namespace EUROPA {
   HSTSOpenDecisionManager::~HSTSOpenDecisionManager() { }
 
   bool HSTSOpenDecisionManager::isAutoAllocationEnabled() const { return true; }
+
+
+  bool HSTSOpenDecisionManager::preferHigherKeys() const {return true;}
 }

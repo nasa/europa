@@ -53,6 +53,11 @@ namespace EUROPA {
      */
     virtual BoolDomain *copy() const;
 
+    /**
+     * @brief COnvert to true or false as needed
+     */
+    LabelStr displayValue(double value) const;
+
   private:
     virtual void testPrecision(const double& value) const;
   };
