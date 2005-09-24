@@ -154,7 +154,7 @@ for numSatellites in 1 {
           local xml = $(model:S=.xml) ;
           GenerateStack [ FGristFiles $(model) ] : [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
           NddlMain $(exe) : runProblem_link.o : $(model) : System CBPlanner : performance-tests ;
-          RunModuleMain run-$(exe) : $(exe) : $(xml) $(DEFAULT_PCONFIG) : time ;
+          RunModuleMain run-$(exe) : $(exe) : $(xml) $(DEFAULT_PCONFIG) $(DEFAULT_HEURISTICS) : time ;
           LocalDepends run-performance-tests : run-$(exe) ;
         }
       }
