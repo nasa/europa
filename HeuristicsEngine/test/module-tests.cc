@@ -1102,10 +1102,20 @@ private:
     tok0.addParameter(allModes, LabelStr("mode"));
     tok0.close();
 
-    IntervalToken tok1(db.getId(),LabelStr("Commands.TakeSample"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,100), IntervalIntDomain(1,100), "com1", false);
+    IntervalToken tok1(db.getId(),LabelStr("Instrument.TakeSample"), true, 
+		       IntervalIntDomain(0,100), IntervalIntDomain(0,100), IntervalIntDomain(1,100), "ins1", false);
+
     tok1.addParameter(allLocs, LabelStr("rock"));
     tok1.close();
+
     ConstrainedVariableId vrock = tok1.getVariable("rock");
+    std::list<double> choices;
+    vrock->lastDomain().getValues(choices);
+    ce.propagate();
+    heuristics.orderChoices(vrock, choices);
+    assertTrue(choices.size() < vrock->lastDomain().getSize()); // Should be pruned to 3
+    ObjectId firstChoice = choices.front();
+    assertTrue(firstChoice == db.getObject("Loc4"));
     vrock->specify(db.getObject("Loc3"));
 
     IntervalToken tok2(db.getId(),LabelStr("Instrument.TakeSample"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,200), IntervalIntDomain(1,300), "ins1", false);
@@ -1271,8 +1281,7 @@ private:
 			      IntervalIntDomain(1,100), 
 			      IntervalIntDomain(1,100), 
 			      IntervalIntDomain(1,100), "tel1", false);
-    ConstrainedVariableId minutes = 
-      communicate.addParameter(IntervalDomain(60,120, "int"), LabelStr("minutes"));
+    communicate.addParameter(IntervalDomain(60,120, "int"), LabelStr("minutes"));
 
     ConstrainedVariableId bandwidth = 
       communicate.addParameter(IntervalDomain(500.3, 1200.4, "float"), LabelStr("bandwidth"));
@@ -1396,6 +1405,16 @@ private:
     ce.propagate();
     assert(heuristics.getPriority(takeSample.getParameters()[0]) == 6000.5);
 
+    // Ensure descending order is imposed, by key, for an object variable
+    std::list<double> choices;
+    takeSample.getParameters()[0]->lastDomain().getValues(choices);
+    heuristics.orderChoices(takeSample.getParameters()[0], choices);
+    ObjectId firstObject = choices.front();
+    ObjectId lastObject = choices.back();
+    assertTrue(firstObject->getKey() > lastObject->getKey());  
+
+    assert(heuristics.getPriority(takeSample.getParameters()[0]) == 6000.5);
+
     //create a token not in the heuristics, priority should be 10.0, order should be merge,activate (default match)
     IntervalToken randomTok(db.getId(), LabelStr("UnaryResource.uses"), false);
     ce.propagate();
@@ -1424,6 +1443,16 @@ private:
     navGoing.close();
     ce.propagate();
     assertTrue(heuristics.getPriority(navGoing.getId()) == 3.14159, toString(heuristics.getPriority(navGoing.getId())));
+
+    // Should also ensure that the option to merge on is the only one available
+    std::vector<LabelStr> stateChoices;
+    stateChoices.push_back(Token::ACTIVE);
+    stateChoices.push_back(Token::MERGED);
+    stateChoices.push_back(Token::REJECTED);
+
+    std::vector<TokenId> compatibleTokens;
+    heuristics.orderChoices(navGoing.getId(), stateChoices, compatibleTokens);
+    assertTrue(stateChoices.size() == 1 && stateChoices.front() == Token::MERGED);
 
     //set first parameter of Commands.TakeSample to loc3, priority should be 200.4 (simple variable match)
     takeSample.getParameters()[0]->specify(loc3.getId());

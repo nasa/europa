@@ -72,9 +72,9 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <Priority>6000.25</Priority>
   <Preference>
   <DomainOrder>
-    <Value>Loc3</Value>
     <Value>Loc4</Value>
     <Value>Loc5</Value>
+    <Value>Loc3</Value>
   </DomainOrder>
   </Preference>
   <VariableSpec>

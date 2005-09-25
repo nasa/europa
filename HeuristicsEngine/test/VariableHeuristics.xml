@@ -94,7 +94,7 @@
   </Master>
 </ConstrainedVariable>
 
-<ConstrainedVariable comment="Incorporate Master Relation with Guards. TODO: Handle Object Vars correctly.">
+<ConstrainedVariable comment="Incorporate Master Relation with Guards.">
   <Priority>3</Priority>
   <Preference>
   <ValueOrder>descending</ValueOrder>
