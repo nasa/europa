@@ -13,6 +13,7 @@
 
 // Misc
 #include "Utils.hh"
+#include "Debug.hh"
 
 // Planner Support
 #include "CBPlanner.hh"
@@ -102,31 +103,45 @@ namespace EUROPA {
     check_error(configSource.isValid());
 
     const std::vector<ConstrainedVariableId>& variables = configSource->getVariables();
-    check_error(variables.size() == 4, 
-		"Expecting exactly 4 configuration variables");
+    check_error(variables.size() == 4, "Expecting exactly 4 configuration variables");
 
     // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
     ConstrainedVariableId horizonStart = variables[0];
     ConstrainedVariableId horizonEnd = variables[1];
     ConstrainedVariableId plannerSteps = variables[2];
+    ConstrainedVariableId plannerDepth = variables[3];
+    bool expectLimits = false;
+
+    if(configSource->getType() == LabelStr("PlannerTestConfig"))
+      expectLimits = true;
 
     int start = (int) horizonStart->baseDomain().getSingletonValue();
     int end = (int) horizonEnd->baseDomain().getSingletonValue();
     horizon.setHorizon(start, end);
 
     // Now get planner step max
-    int steps = (int) plannerSteps->baseDomain().getSingletonValue();
+    unsigned int steps = (unsigned int) plannerSteps->baseDomain().getSingletonValue();
+    unsigned int depth = (unsigned int) plannerDepth->baseDomain().getSingletonValue();
 
     // Add the MasterMustBeInserted condition
     MasterMustBeInserted condition1(planner.getDecisionManager());
 
-    CBPlanner::Status retval = planner.run(steps);
+    CBPlanner::Status retval = planner.run(steps+1);
     
     m_totalNodes = planner.getTime();
     m_finalDepth = planner.getDepth();
 
     if(averFile != NULL)
       AverInterp::terminate();
+
+    debugMsg("Main:plan", "Result:" << retval << " Depth:" << m_finalDepth << " Steps:" << m_totalNodes);
+
+    assertTrue(!expectLimits || (steps == m_totalNodes && depth == m_finalDepth),
+	       "Result:" + EUROPA::toString(retval) + 
+	       " Expected Depth:" + EUROPA::toString(depth) + 
+	       " Expected Steps:" + EUROPA::toString(steps) + 
+	       " Actual Depth:" + EUROPA::toString(m_finalDepth) + 
+	       " Actual Steps:" + EUROPA::toString(m_totalNodes));
 
     if(retval == CBPlanner::PLAN_FOUND)
       return true;

@@ -1,7 +1,7 @@
 /**
  * This test validates that we correctly control the order of states.
  */
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "PlannerTestConfig.nddl"
 
 
 class A {
@@ -14,7 +14,7 @@ A::pred{
  equals (pred p);
 }
 
-PlannerConfig world = new PlannerConfig(0, 10, 2);
+PlannerTestConfig world = new PlannerTestConfig(0, 10, 1, 1);
 A a = new A();
 close();
 rejectable(a.pred pred);
