@@ -187,7 +187,7 @@ namespace EUROPA {
     return(dom);
   }
 
-  bool EUROPA::readTestCases(std::string file, std::list<ConstraintTestCase>& testCases) {
+  bool readTestCases(std::string file, std::list<ConstraintTestCase>& testCases) {
     std::ifstream tCS(file.c_str()); /**< testCaseStream. */
     if (!tCS.is_open() || !tCS.good())
       return(false);
@@ -294,7 +294,7 @@ namespace EUROPA {
     return(tCS.eof());
   }
 
-  bool EUROPA::executeTestCases(const ConstraintEngineId& engine,
+  bool executeTestCases(const ConstraintEngineId& engine,
                                 std::list<ConstraintTestCase>& testCases) {
     // Run each test, in the same order they appear in the list,
     //   keeping a count of failed test cases.
