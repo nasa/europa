@@ -8,6 +8,14 @@
   </PredicateSpec>
 </Token>
 
+<Token comment="Default priority.">
+  <Priority>-1</Priority>
+  <PredicateSpec>
+    <PredicateName>Navigator.Going</PredicateName>
+    <PredicateParameters/>
+  </PredicateSpec>
+</Token>
+
 <Token comment="Master constrained, with preferences. Guarded slave">
   <Priority>2</Priority>
   <PredicateSpec>
