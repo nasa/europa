@@ -37,7 +37,7 @@ namespace EUROPA {
 
   bool ConstrainedVariableDecisionPoint::assign() {
     checkError(m_choiceIndex < getNrChoices() && getNrChoices() > 0 && !m_choices.empty(),
-	       "Cannor be assigning if we have no choices. A control loop bug.");
+	       "Cannor be assigning if we have no choices. A control loop bug. " << m_var->toString());
     check_error(m_var.isValid());
 
     m_open = false;
