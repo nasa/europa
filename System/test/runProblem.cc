@@ -222,6 +222,7 @@ void __assert_fail(const char *__assertion,
 
 
 int main(int argc, const char** argv) {
+#define ONE_ASSEMBLY_ONLY
 #ifdef ONE_ASSEMBLY_ONLY
   return internalMain<CBPlannerAssembly>(argc, argv);
 #else

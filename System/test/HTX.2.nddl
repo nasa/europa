@@ -1,0 +1,21 @@
+/**
+ * This test validates that we correctly control the order of states.
+ */
+#include "../../NDDL/core/PlannerConfig.nddl"
+
+
+class A {
+  predicate pred {
+   eq(duration, 10);
+  }
+}
+
+A::pred{
+ equals (pred p);
+}
+
+PlannerConfig world = new PlannerConfig(0, 10, 2);
+A a = new A();
+close();
+rejectable(a.pred pred);
+pred.start.specify(0);

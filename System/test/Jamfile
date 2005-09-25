@@ -24,6 +24,7 @@ local DEFAULT_HEURISTICS = "../../HeuristicsEngine/test/DefaultHeuristics.xml" ;
 
 local checkin-tests ;
 checkin-tests = basic-types
+	HTX.1
         Rover-transaction
         k9.backtrack.moderate-transaction
         rejection
@@ -83,6 +84,9 @@ rule RunProblem {
 #
 # PLANNER SYSTEM TESTS
 #
+RunProblem HTX.1.nddl : $(DEFAULT_PCONFIG) : HTX.1.heur ;
+RunProblem HTX.2.nddl : $(DEFAULT_PCONFIG) : HTX.2.heur ;
+RunProblem HTX.3.nddl : $(DEFAULT_PCONFIG) : HTX.3.heur ;
 RunProblem Rover-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
 RunProblem basic-types.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
 RunProblem basic-model-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ; 
