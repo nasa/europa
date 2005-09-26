@@ -2,7 +2,7 @@
 #include "../../NDDL/core/PlannerConfig.nddl"
 
 // Allocate objects of the problem
-PlannerConfig world = new PlannerConfig(0, 100, 600);
+PlannerConfig world = new PlannerConfig(0, 100, 100);
 
 Location lander = new Location("LANDER", 0, 0);
 Location rock1 = new Location("ROCK1", 9, 9);

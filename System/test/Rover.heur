@@ -1,0 +1,50 @@
+<Heuristics-HSTS
+xmlns="HSTS"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="Heuristics-HSTS.xsd">
+
+<Defaults>
+ <DefaultPriorityPref>low</DefaultPriorityPref>
+ <DefaultCompatibility/>
+ <DefaultToken>
+   <Priority>1000</Priority>
+   <DecisionPreference>
+     <StateOrder>
+        <State>merge</State>
+        <Order>early</Order>
+     </StateOrder>
+     <StateOrder>
+        <State>activate</State>
+        <Order>early</Order>
+     </StateOrder>
+     <State>reject</State>
+   </DecisionPreference>
+ </DefaultToken>
+ <DefaultConstrainedVariable>
+   <Priority>1000</Priority>
+   <ValueOrder>ascending</ValueOrder>
+ </DefaultConstrainedVariable> 
+</Defaults>
+
+<VariableSpecification/>
+
+<TokenSpecification>
+ <Token>
+  <Priority>1</Priority>
+  <PredicateSpec>
+    <PredicateName>Navigator.At</PredicateName>
+    <PredicateParameters/>
+  </PredicateSpec>
+ </Token>
+
+ <Token>
+  <Priority>1</Priority>
+  <PredicateSpec>
+    <PredicateName>Navigator.Going</PredicateName>
+    <PredicateParameters/>
+  </PredicateSpec>
+ </Token>
+
+</TokenSpecification>
+
+</Heuristics-HSTS>
