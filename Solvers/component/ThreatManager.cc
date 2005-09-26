@@ -90,7 +90,7 @@ namespace EUROPA {
     }
 
     DecisionPointId ThreatManager::next(unsigned int priorityLowerBound,
-					    unsigned int& bestPriority){
+					unsigned int& bestPriority){
 
       // First we filter and sort candidate tokens to order according to our flaw filtering rules and the previously
       // counted number of choices.
@@ -111,7 +111,6 @@ namespace EUROPA {
 	unsigned int lastCount = m_db->lastOrderingChoiceCount(candidate);
 	candidates.insert(std::pair<int, TokenId>(lastCount, candidate));
       }
-
 
       // Now we may have some candidates in scope to evaluate in order to get the best token to order
       TokenId tokenToOrder;
