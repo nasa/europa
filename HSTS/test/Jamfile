@@ -28,12 +28,12 @@ LocalDepends run-hsts-planner-tests :
         monkey-timeline-hacked
         monkey-timeline-hacked2
         monkey-timeline-hacked3
-        monkey-timeline-newHeur
+#       monkey-timeline-newHeur
         monkey-timeline-extendedHeur
         monkey1-timeline1
         monkey1-timeline-objvar
-        monkey1-timeline-twomonkeys-objvar
-        monkey1-timeline-twomonkeys
+#       monkey1-timeline-twomonkeys-objvar
+#       monkey1-timeline-twomonkeys
 #       monkey2-timeline2 #commented out for run
 #       monkey2-timeline22 #commented out for run
 #       monkey2-timeline23 #commented out for run
@@ -63,13 +63,13 @@ LocalDepends run-hsts-planner-tests :
         merTest1-h
         merTest2-h
         merTest3-h
-        merTest4-h
+#       merTest4-h
         merTest5-h
         merTest6-h
         merTest7-h
         merTest8-h
         merTest9-h
-        merTest10-h
+#        merTest10-h
 #       merTest11-h
         merTest12-h
         merTest13-h
@@ -348,18 +348,18 @@ RunEUROPATest dnp-timeline : DNP.timeline.nddl ;
 # These fail; no idea why yet.
 # None are run by NewPlan tests without a heuristics file.
 # Probably fail due to creating huge numbers of ChoiceId's like the prior test.
-#EUROPA_NDDL DNP2.timeline.nddl ;
-#RunEUROPATest dnp-DNP2 : DNP2.timeline.nddl ;
+EUROPA_NDDL DNP2.timeline.nddl ;
+RunEUROPATest dnp-DNP2 : DNP2.timeline.nddl ;
 EUROPA_NDDL allDSS.nddl ;
 RunEUROPATest dnp-allDSS : allDSS.nddl ;
 EUROPA_NDDL fourFreeObs.nddl ;
-#RunEUROPATest dnp-fourFreeObs : fourFreeObs.nddl ;
+RunEUROPATest dnp-fourFreeObs : fourFreeObs.nddl ;
 EUROPA_NDDL DNP3.fourFreeObs.nddl ;
-#RunEUROPATest dnp-DNP3fourFreeObs : DNP3.fourFreeObs.nddl ;
+RunEUROPATest dnp-DNP3fourFreeObs : DNP3.fourFreeObs.nddl ;
 EUROPA_NDDL DNP3.timeline.nddl ;
 RunEUROPATest dnp-DNP3 : DNP3.timeline.nddl ;
 EUROPA_NDDL fourFreeObs-initBufNotEmpty.nddl ;
-#RunEUROPATest dnp-fourFreeObsNotEmpty : fourFreeObs-initBufNotEmpty.nddl ;
+RunEUROPATest dnp-fourFreeObsNotEmpty : fourFreeObs-initBufNotEmpty.nddl ;
 
 # These two fail to find plans in 1000 steps.
 # None are run by NewPlan tests without a heuristics file.
@@ -391,8 +391,8 @@ RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl ;
 
 # Working
 RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
-#RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
-#RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP3heur.xml ;
+RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
+RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP3heur.xml ;
 RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
 
 # Times out
@@ -409,7 +409,7 @@ RunEUROPATest dnp-fourFreeObsNotEmpty-h : fourFreeObs-initBufNotEmpty.nddl : DNP
 RunEUROPATest dnp-freeObs-h : freeObs.nddl : DNP3heur.xml : DNP3nobr ;
 RunEUROPATest dnp-freeObsNoEmpty-h : freeObs.noEmpty.nddl : DNP3heur.xml : DNP3nobr ;
 RunEUROPATest dnp-tenFreeObs-h : tenFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
-#RunEUROPATest dnp-threeFreeObs-h : threeFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+RunEUROPATest dnp-threeFreeObs-h : threeFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 RunEUROPATest dnp-twentyFreeObs-h : twentyFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 
 # Working
