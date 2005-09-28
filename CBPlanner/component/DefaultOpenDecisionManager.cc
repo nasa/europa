@@ -11,6 +11,7 @@
 #include "ConstrainedVariableDecisionPoint.hh"
 #include "ObjectDecisionPoint.hh"
 #include "DefaultOpenDecisionManager.hh"
+#include "Error.hh"
 
 namespace EUROPA {
 
@@ -25,7 +26,6 @@ namespace EUROPA {
       DecisionPointId decision = *it;
       m_dm->deleteDecision(decision);
     }
-
     m_tokDecs.clear();
     m_unitVarDecs.clear();
     m_nonUnitVarDecs.clear();
@@ -60,72 +60,54 @@ namespace EUROPA {
     return !(m_nonUnitVarDecs.find(var->getKey()) == m_nonUnitVarDecs.end());
   }
 
-     
-  // PLASMA/3038 patched method
-
- 
-  void DefaultOpenDecisionManager::condAdd(const ConstrainedVariableId& var, const bool units) {
-    check_error(var.isValid());
-    check_error(m_curDec.isValid() || m_curDec.isNoId());
-
-    if (ConstrainedVariableDecisionPointId::convertable(m_curDec)) {
-      ConstrainedVariableDecisionPointId vdp = m_curDec;
-      if (vdp->getVariable()->getKey() == var->getKey())
-	return;
-    } 
-  
-    if ( units && !unitDecisionExistsForVariable(var) ) {
-      ConstrainedVariableDecisionPointId dp = createConstrainedVariableDecisionPoint(var);
-      check_error(dp->getEntityKey() == var->getKey());
-      debugMsg("DefaultOpenDecisionManager:condAdd", "Inserting a unit decision on variable (" << var-> getKey() << ")");
-      checkError(dp.isValid() && dp->getVariable()->lastDomain().isSingleton(), "Attempting to put a non singleton variable in unit decision list." << dp->getVariable()->toString());
-      m_unitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedUnitVarDecs.insert(dp);
-      publishNewDecision(dp);
-    } 
-    else if ( !unitDecisionExistsForVariable(var) && !nonUnitDecisionExistsForVariable(var)) {
-      ConstrainedVariableDecisionPointId dp = createConstrainedVariableDecisionPoint(var);
-      check_error(dp->getEntityKey() == var->getKey());
-      debugMsg("DefaultOpenDecisionManager:condAdd", "Inserting a nonunit decision on variable (" << var-> getKey() << ")");
-      // It is ok to put unit variable decisions into this list as we are controlled by the units parameter.
-      // We just made a note of this in the trace.
-      condDebugMsg(dp->getVariable()->lastDomain().isSingleton(), "DefaultOpenDecisionManager:condAdd", "Note - inserting unit variable in nonUnit list");
-      m_nonUnitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
-      m_sortedNonUnitVarDecs.insert(dp);
-      publishNewDecision(dp);
-    } 
-    else {
-      // should be an assertion?
-      debugMsg("DefaultOpenDecisionManager:condAdd", "Ignoring request - a decision already exists for the variable (" << var-> getKey() << ")");
-    }
-  }
-
   void DefaultOpenDecisionManager::add(const ConstrainedVariableId& var) {
-    ConstrainedVariableDecisionPointId dp;
-    dp = createConstrainedVariableDecisionPoint(var);
-    check_error(dp->getEntityKey() == var->getKey());
-    if (var->lastDomain().isSingleton()) {
-      // Guard to match behaviour in condAdd - must not add a unit decision if one already exists.
-      if ( !unitDecisionExistsForVariable(var) ) {      
-         m_unitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
-         debugMsg("DefaultOpenDecisionManager:add", "Inserting a unit decision on variable(" << var-> getKey() << ")");
-         checkError(dp.isValid() && dp->getVariable()->lastDomain().isSingleton(), "Attempting to put a non singleton variable in unit decision list." << dp->getVariable()->toString());
-         m_sortedUnitVarDecs.insert(dp);
-         publishNewUnitDecision(dp);
-      } else {
-	// should be an assertion?
-          debugMsg("DefaultOpenDecisionManager:condAdd", "Ignoring request - a unit decision already exists for the variable (" << var-> getKey() << ")");
-      }
+    if(m_curDec.isValid() && m_curDec->getEntityKey() == var->getKey()) {
+      debugMsg("DefaultOpenDecisionManager:add", "Ignoring request - the variable " << var->toString() << " is in the current decision (" << m_curDec << ")");
+      return;
     }
-    else if ( !unitDecisionExistsForVariable(var) && !nonUnitDecisionExistsForVariable(var) ) {
-      m_nonUnitVarDecs.insert(std::pair<int,ConstrainedVariableDecisionPointId>(dp->getEntityKey(),dp));
-      debugMsg("DefaultOpenDecisionManager:add", "Inserting a nonunit decision on variable (" << var-> getKey() << ")");
-      checkError(dp.isValid() && !dp->getVariable()->lastDomain().isSingleton(), "Attempting to put a singleton variable in non unit decision list." << dp->getVariable()->toString());
+    ConstrainedVariableDecisionPointId dp;
+    std::map<int, ConstrainedVariableDecisionPointId>::const_iterator mapIt;
+    
+    if(isUnitVarDec(var)) {
+      if((mapIt = m_unitVarDecs.find(var->getKey())) != m_unitVarDecs.end()) {
+	debugMsg("DefaultOpenDecisionManager:add", "Ignoring request - a unit decision (" <<  (*mapIt).second << ")already exists for variable " << var->toString());
+	return;
+      }
+      mapIt = m_nonUnitVarDecs.find(var->getKey());
+      if(mapIt != m_nonUnitVarDecs.end()) {
+	debugMsg("DefaultOpenDecisionManager:add", "A non-unit decision point (" << (*mapIt).second << ") already exists for " << var->toString() 
+		 << ".  Moving it to the unit decision list.");
+	dp = (*mapIt).second;
+	m_nonUnitVarDecs.erase(var->getKey());
+	m_sortedNonUnitVarDecs.erase(dp);
+      }
+      else {
+	dp = createConstrainedVariableDecisionPoint(var);
+	debugMsg("DefaultOpenDecisionManager:add", "Created a unit decision point: " << dp);
+      }
+      m_unitVarDecs.insert(std::pair<int, ConstrainedVariableDecisionPointId>(var->getKey(), dp));
+      m_sortedUnitVarDecs.insert(dp);
+    }
+    else {
+      if((mapIt = m_nonUnitVarDecs.find(var->getKey())) != m_nonUnitVarDecs.end()) {
+	debugMsg("DefaultOpenDecisionManager:add", "Ignoring request - a non-unit decision (" << (*mapIt).second << ") already exists for variable " << var->toString());
+	return;
+      }
+      mapIt = m_unitVarDecs.find(var->getKey());
+      if(mapIt != m_unitVarDecs.end()) {
+	debugMsg("DefaultOpenDecisionManager:add", "A unit decision point (" << (*mapIt).second << ") already exists for " << var->toString()
+		 << ".  Moving it to the non-unit decision list.");
+	dp = (*mapIt).second;
+	m_unitVarDecs.erase(var->getKey());
+	m_sortedUnitVarDecs.erase(dp);
+      }
+      else {
+	dp = createConstrainedVariableDecisionPoint(var);
+	debugMsg("DefaultOpenDecisionManager:add", "Created a non-unit decision point: " << dp);
+      }
+      m_nonUnitVarDecs.insert(std::pair<int, ConstrainedVariableDecisionPointId>(var->getKey(), dp));
       m_sortedNonUnitVarDecs.insert(dp);
-      publishNewDecision(dp);
-   } else {
-      debugMsg("DefaultOpenDecisionManager:add", "Ignoring request - a non unit decision already exists for the variable (" << var-> getKey() << ")");
-   }
+    }
   }
 
   void DefaultOpenDecisionManager::add(const TokenId& token) {
@@ -156,14 +138,14 @@ namespace EUROPA {
     std::map<int,ConstrainedVariableDecisionPointId>::iterator it = varMap.find(var->getKey());
     if (it != varMap.end()) {
       if (deleting) {
-	ConstrainedVariableDecisionPointId dec = it->second;
-	check_error(dec.isValid());
-	sortedVars.erase(dec);
-	varMap.erase(it);
-	m_dm->deleteDecision(dec);
+        ConstrainedVariableDecisionPointId dec = it->second;
+        check_error(dec.isValid());
+        sortedVars.erase(dec);
+        varMap.erase(it);
+        m_dm->deleteDecision(dec);
       } else {
-	sortedVars.erase(it->second);
-	varMap.erase(it);
+        sortedVars.erase(it->second);
+        varMap.erase(it);
       }
       publishRemovedDecision(var);
     }
@@ -181,9 +163,8 @@ namespace EUROPA {
     m_dm->getVariableChangeBuffer().erase(var);
     m_dm->getRelaxedBuffer().erase(var);
 
-    if (!removeVarDP(var, deleting, m_unitVarDecs, m_sortedUnitVarDecs)) {
-      removeVarDP(var, deleting, m_nonUnitVarDecs, m_sortedNonUnitVarDecs);
-    }  
+    removeVarDP(var, deleting, m_unitVarDecs, m_sortedUnitVarDecs);
+    removeVarDP(var, deleting, m_nonUnitVarDecs, m_sortedNonUnitVarDecs);
   }
 
   void DefaultOpenDecisionManager::condRemoveVar(const ConstrainedVariableId& var) { 
@@ -191,9 +172,9 @@ namespace EUROPA {
     if (ConstrainedVariableDecisionPointId::convertable(m_curDec)) {
       ConstrainedVariableDecisionPointId cvdec = m_curDec;
       if (cvdec->getVariable()->getKey() != var->getKey()) {
-         removeVar(var, true);
+        removeVar(var, true);
       } else {
-	removeVar(var, false);
+        removeVar(var, false);
       }
     }
     else {
@@ -206,15 +187,15 @@ namespace EUROPA {
     if (it != tokMap.end()) {
       //      if (deleting) {
       if (it->second->isOpen() || deleting) {
-	TokenDecisionPointId dec = it->second;
-	sortedToks.erase(dec);
-	check_error(dec.isValid());
-	tokMap.erase(it);
-	m_dm->deleteDecision(dec);
+        TokenDecisionPointId dec = it->second;
+        sortedToks.erase(dec);
+        check_error(dec.isValid());
+        tokMap.erase(it);
+        m_dm->deleteDecision(dec);
       }
       else {
-	sortedToks.erase(it->second);
-	tokMap.erase(it);
+        sortedToks.erase(it->second);
+        tokMap.erase(it);
       }
       publishRemovedDecision(token);
       return true;
@@ -234,32 +215,34 @@ namespace EUROPA {
 
   void DefaultOpenDecisionManager::removeActive(const TokenId& token, const bool deleting) {
     /*
-    if (ObjectDecisionPointId::convertable(m_curDec)) {
+      if (ObjectDecisionPointId::convertable(m_curDec)) {
       ObjectDecisionPointId objdec = m_curDec;
       if (objdec->getToken()->getKey() == token->getKey())
-	return;
-    }
+      return;
+      }
     */
     std::map<int,ObjectDecisionPointId>::iterator it = m_objDecs.find(token->getKey());
     if (it != m_objDecs.end()) {
       if (it->second->isOpen() || deleting) {
-	ObjectDecisionPointId dec = it->second;
-	check_error(dec.isValid());
-	m_objDecs.erase(it);
-	m_dm->deleteDecision(dec);
+        ObjectDecisionPointId dec = it->second;
+        check_error(dec.isValid());
+        m_objDecs.erase(it);
+        m_dm->deleteDecision(dec);
       }
       else {
-	m_objDecs.erase(it);
+        m_objDecs.erase(it);
       }
       publishRemovedDecision(token);
     }
   }
 
   const int DefaultOpenDecisionManager::getNumberOfDecisions() {
+    check_error(cachesAreValid());
     return m_objDecs.size() + m_unitVarDecs.size() + m_nonUnitVarDecs.size() + m_tokDecs.size();
   }
 
   DecisionPointId DefaultOpenDecisionManager::getNextDecision() {
+    check_error(cachesAreValid());
     if(!m_objDecs.empty())
       m_curDec = m_objDecs.begin()->second;
     else if (!m_sortedUnitVarDecs.empty())
@@ -291,6 +274,7 @@ namespace EUROPA {
   }
 
   void DefaultOpenDecisionManager::getOpenDecisions(std::list<DecisionPointId>& decisions) {
+    check_error(cachesAreValid());
     std::map<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
     for (; oit != m_objDecs.end(); ++oit)
       decisions.push_back(oit->second);
@@ -305,6 +289,7 @@ namespace EUROPA {
   }
 
   void DefaultOpenDecisionManager::printOpenDecisions(std::ostream& os) {
+    check_error(cachesAreValid());
     os << "Object Decs ";
     std::map<int,ObjectDecisionPointId>::iterator oit = m_objDecs.begin();
     for (; oit != m_objDecs.end(); ++oit)
@@ -334,7 +319,7 @@ namespace EUROPA {
       debugMsg("ObjectDecisionPoint:initializeTokenChoices", "Found " << tdp->m_compatibleTokens.size() << " compatible tokens");
       if(tdp->m_compatibleTokens.size() > 0) {
         debugMsg("ObjectDecisionPoint:initializeTokenChoices", "Pushing token:merged m_choices");
-	tdp->m_choices.push_back(Token::MERGED);
+        tdp->m_choices.push_back(Token::MERGED);
       }
     }
     if(stateDomain.isMember(Token::ACTIVE) && tok->getPlanDatabase()->hasOrderingChoice(tok))
@@ -353,7 +338,7 @@ namespace EUROPA {
       vdp->m_var->lastDomain().getValues(values);
       values.sort();
       for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
-	vdp->m_choices.push_back(*it);
+        vdp->m_choices.push_back(*it);
     }
   }
 
@@ -370,26 +355,90 @@ namespace EUROPA {
       std::vector<std::pair<TokenId, TokenId> >::iterator it = tuples.begin();
       debugMsg("ObjectDecisionPoint:getChoices", "Choices constraining (" << tok->getKey() << ")");
       for (; it != tuples.end(); it++) {
-	TokenId predecessor = it->first;
-	TokenId successor = it->second;
-	check_error(predecessor.isValid());
-	check_error(successor.isValid());
-	odp->m_choices.push_back(std::make_pair<ObjectId,std::pair<TokenId,TokenId> > (obj, *it));
-	debugMsg("ObjectDecisionPoint:getChoices", "  constrain(" << predecessor->getKey() << ", " << successor->getKey() << ") on Object ( " << obj->getKey() << ")");
+        TokenId predecessor = it->first;
+        TokenId successor = it->second;
+        check_error(predecessor.isValid());
+        check_error(successor.isValid());
+        odp->m_choices.push_back(std::make_pair<ObjectId,std::pair<TokenId,TokenId> > (obj, *it));
+        debugMsg("ObjectDecisionPoint:getChoices", "  constrain(" << predecessor->getKey() << ", " << successor->getKey() << ") on Object ( " << obj->getKey() << ")");
       }
     }
   }
 
- //  bool DefaultOpenDecisoinManager::cachesAreValid() {
-//     // length of list and sorted counter parts are equal
-//     check_error( m_sortedUnitVarDecs.size() == m_unitVarDecs.size() );
-//     check_error( m_sortedNonUnitVarDecs.size() == m_nonUnitVarDecs.size() );
+  bool DefaultOpenDecisionManager::isUnit(const ConstrainedVariableDecisionPointId& dp) const {
+    bool inUnits = (m_unitVarDecs.find(dp->getEntityKey()) != m_unitVarDecs.end());
+    bool inSortedUnits = (m_sortedUnitVarDecs.find(dp) != m_sortedUnitVarDecs.end());
+    bool inNonUnits = (m_nonUnitVarDecs.find(dp->getEntityKey()) != m_nonUnitVarDecs.end());
+    bool inSortedNonUnits = (m_sortedNonUnitVarDecs.find(dp) != m_sortedNonUnitVarDecs.end());
+    checkError((inUnits && inSortedUnits && !inNonUnits && !inSortedNonUnits) ||
+               (!inUnits && !inSortedUnits && inNonUnits && inSortedNonUnits),
+               "Synchronization error with decision " << dp << " inUnits: " << inUnits << " inSortedUnits: " << inSortedUnits << " inNonUnits: " << inNonUnits << " inSortedNonUnits: " << inSortedNonUnits);
+    
+    return inUnits && inSortedUnits;
+  }
+  bool DefaultOpenDecisionManager::isUnit(const TokenDecisionPointId& dp) const {
+    return isUnitTokDec(dp);
+  }
+  bool DefaultOpenDecisionManager::isUnit(const ObjectDecisionPointId& dp) const {
+    return false;
+  }
 
-//     // unitVarDecs and nonUnitVarDecs should not have a member in common.
 
-//     // unitVarDecs and nonUnitVarDecs should not also appear in closed decsions.
-		 
+  bool DefaultOpenDecisionManager::cachesAreValid() {
+    // length of list and sorted counter parts are equal
+    check_error( m_sortedUnitVarDecs.size() == m_unitVarDecs.size() );
+    check_error( m_sortedNonUnitVarDecs.size() == m_nonUnitVarDecs.size() );
 
-//   }
+    for(VariableDecisionSet::const_iterator it = m_sortedUnitVarDecs.begin(); it != m_sortedUnitVarDecs.end(); ++it) {
+      check_error((*it).isValid());
+      checkError(isUnit(*it), "Supposed unit var dec " << (*it) << " isn't.");
+    }
+    for(VariableDecisionSet::const_iterator it = m_sortedNonUnitVarDecs.begin(); it != m_sortedNonUnitVarDecs.end(); ++it) {
+      check_error((*it).isValid());
+      checkError(!isUnit(*it), "Supposed non-unit var dec " << (*it) << " isn't.");
+    }
+    for(std::map<int,ConstrainedVariableDecisionPointId>::const_iterator it = m_unitVarDecs.begin(); it != m_unitVarDecs.end(); ++it) {
+      check_error((*it).second.isValid());
+      checkError(isUnit((*it).second), "Supposed unit var dec " << (*it).second << " isn't.");
+    }
+    for(std::map<int,ConstrainedVariableDecisionPointId>::const_iterator it = m_nonUnitVarDecs.begin(); it != m_nonUnitVarDecs.end(); ++it) {
+      check_error((*it).second.isValid());
+      checkError(!isUnit((*it).second), "Supposed non-unit var dec " << (*it).second << " isn't.");
+    }
+    
+    for(VariableDecisionSet::const_iterator it = m_sortedUnitVarDecs.begin(); it != m_sortedUnitVarDecs.end(); ++it) {
+      const int key = (*it)->getEntityKey();
+      checkError(m_unitVarDecs.find(key) != m_unitVarDecs.end(), "Unit decision " << (*it) << " appears in the sorted list but not the unsorted.");
+      checkError(m_nonUnitVarDecs.find(key) == m_nonUnitVarDecs.end(), "Unit decision " << (*it) << " appears in the sorted list and the unsorted non-unit list." );
+      checkError(m_sortedNonUnitVarDecs.find(*it) == m_sortedNonUnitVarDecs.end(), "Unit decision " << (*it) << " appears in the sorted list and the sorted non-unit list.");
+      VariableDecisionSet::const_iterator subIt = it;
+      ++subIt;
+      for(; subIt != m_sortedUnitVarDecs.end(); ++subIt) {
+	checkError(key != (*subIt)->getEntityKey(), "There exists two unit decisions for " << key << " (" << (*it) << ", " << (*subIt) << ")");
+      }
+      for(subIt = m_sortedNonUnitVarDecs.begin(); subIt != m_sortedNonUnitVarDecs.end(); ++subIt) {
+	checkError(key != (*subIt)->getEntityKey(), "There exists a unit and a non-unit decision for " << key << " (" << (*it) << ", " << (*subIt) << ")");
+      }
+    }
+
+    for(VariableDecisionSet::const_iterator it = m_sortedNonUnitVarDecs.begin(); it != m_sortedNonUnitVarDecs.end(); ++it) {
+      const int key = (*it)->getEntityKey();
+      checkError(m_nonUnitVarDecs.find(key) != m_nonUnitVarDecs.end(), "Non-unit decision " << (*it) << " appears in the sorted list but n ot the unsorted.");
+      checkError(m_unitVarDecs.find(key) == m_unitVarDecs.end(), "Non-unit decision " << (*it) << " appears in the sorted list and the unsorted unit list.");
+      checkError(m_sortedUnitVarDecs.find(*it) == m_sortedUnitVarDecs.end(), "Non-unit decision " << (*it) << "appars in the sorted list and the sorted unit list");
+      VariableDecisionSet::const_iterator subIt = it;
+      ++subIt;
+      for(; subIt != m_sortedNonUnitVarDecs.end(); ++subIt) {
+	checkError(key != (*subIt)->getEntityKey(), "There exists two non-unit decisions for " << key << " (" << (*it) << ", " << (*subIt) << ")");
+      }
+      for(subIt = m_sortedUnitVarDecs.begin(); subIt != m_sortedUnitVarDecs.end(); ++subIt) {
+	checkError(key != (*subIt)->getEntityKey(), "There exists a non-unit and a unit decision for " << key << " (" << (*it) << ", " << (*subIt) << ")");
+      }
+    }
+
+
+    return true;
+  }
 
 }
+ 
