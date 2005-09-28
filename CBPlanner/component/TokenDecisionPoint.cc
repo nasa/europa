@@ -146,7 +146,8 @@ namespace EUROPA {
       os << "(" << getKey() << ") Token (" << m_entityKey << ") ";
       os << " Current Choice: ";
       if (m_tok->isMerged())
-        os << "merged with token (" << m_compatibleTokens[m_mergeIndex-1]->getKey() << ") ";
+	os << "merged with token (" << m_tok->getActiveToken()->getKey() << ") ";
+        //os << "merged with token (" << m_compatibleTokens[m_mergeIndex-1]->getKey() << ") ";
       else  if (m_choiceIndex == 0)
         os << " No Choice ";
       else
