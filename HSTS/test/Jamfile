@@ -22,7 +22,7 @@ LocalDepends tests : run-hsts-module-tests ;
 
 # Commented out tests are failing for various reasons; see each test for more info.
 LocalDepends run-hsts-planner-tests :
-#       xmonkey
+        xmonkey
 #       litaEuropa2 #commented out for run
         monkey-timeline
         monkey-timeline-hacked
@@ -38,26 +38,26 @@ LocalDepends run-hsts-planner-tests :
 #       monkey2-timeline22 #commented out for run
 #       monkey2-timeline23 #commented out for run
         robotTests
-#       roverTest1
-#       roverTest2
-#       roverTest3
-#       roverTest4
+        roverTest1
+        roverTest2
+        roverTest3
+        roverTest4
         merTest1
-#       merTest2
-#       merTest3  # needs heuristics?!
-#       merTest4  # never run by NewPlan?!
+        merTest2
+        merTest3  # needs heuristics?!
+        merTest4  # never run by NewPlan?!
         merTest5
-#       merTest6  # never run by NewPlan?!
-#       merTest7 # never run by NewPlan?!
+        merTest6  # never run by NewPlan?!
+        merTest7 # never run by NewPlan?!
         merTest8
         merTest9
-#       merTest10 # needs heuristics?!
-#       merTest11 # needs heuristics?!
-#       merTest12 # needs heuristics?!
+#       merTest10 # needs heuristics?! ... or 1938 steps
+        merTest11
+        merTest12 # needs heuristics?!
         merTest13
-#       merTest14 # needs heuristics?!
-#       merTest15 # needs heuristics?!
-#       merTest16 # needs heuristics?!
+        merTest14 # needs heuristics?!
+        merTest15 # needs heuristics?!
+        merTest16 # needs heuristics?!
         merTest17
         merTest18
         merTest1-h
@@ -69,7 +69,7 @@ LocalDepends run-hsts-planner-tests :
         merTest7-h
         merTest8-h
         merTest9-h
-#        merTest10-h
+#       merTest10-h
 #       merTest11-h
         merTest12-h
         merTest13-h
@@ -79,13 +79,13 @@ LocalDepends run-hsts-planner-tests :
         merTest17-h
         merTest18-h
         gnats-C3
-#       gnats-NoBranchBug
+#       gnats-NoBranchBug # Will not pass while singleton gaurds ignore no branch designations
 #       gnats-P4-C3 
 #       gnats-P4-C3eq
         gnats-SC
         gnats-rover-fixed
         gnats-sum
-#       dnp-timeline
+        dnp-timeline
 #       dnp-DNP2 
 #       dnp-allDSS 
 #       dnp-fourFreeObs # times out (after 3-4 minutes on tara)
@@ -95,10 +95,10 @@ LocalDepends run-hsts-planner-tests :
 #       dnp-freeObs # needs heursitics?!
 #       dnp-freeObsNoEmpty # needs heuristics?!
 #       dnp-tenFreeObs # needs heuristics?!
-#       dnp-threeFree
+        dnp-threeFreeObs
 #       dnp-twentyFreeObs # times out (after 8-9 minutes on tara)
 #       dnp-twoFreeObs #commented out for run
-#       dnp-timeline-h
+        dnp-timeline-h
 #       dnp-DNP2-h 
 #       dnp-DNP23-h
 #       dnp-allDSS-h 
@@ -338,10 +338,7 @@ RunEUROPATest gnats-sum : sum-init.nddl ;
 
 # DNP tests need the DNP specific constraints.
 
-# Failing with no error message
-#   Wanted over 1GB of RAM at 16 CPU seconds.
-# NewPlan's simplePlan finds a plan at depth 56 after 70 nodes of search.
-# Creating a ChoiceId for each of nearly 90 _million_ values for a particular integer variable.
+# Working
 EUROPA_NDDL DNP.timeline.nddl ;
 RunEUROPATest dnp-timeline : DNP.timeline.nddl ;
 
@@ -392,7 +389,7 @@ RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl ;
 # Working
 RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
 RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
-RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP3heur.xml ;
+RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP2heur3.xml ;
 RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
 
 # Times out
@@ -414,6 +411,7 @@ RunEUROPATest dnp-twentyFreeObs-h : twentyFreeObs.nddl : DNP3heur.xml : DNP3nobr
 
 # Working
 RunEUROPATest dnp-twoFreeObs-h : twoFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+
 # LITA
 # we don't have these files in system test.
 #EUROPA_NDDL lita-init.nddl ;
