@@ -4648,6 +4648,8 @@ private:
     LockManager::instance().unlock();
 
     LockManager::instance().lock();
+    if(!db->getClient()->isTransactionLoggingEnabled())
+      db->getClient()->enableTransactionLogging();
     DbClientTransactionLog* txLog = new DbClientTransactionLog(db->getClient());
     LockManager::instance().unlock();
 
