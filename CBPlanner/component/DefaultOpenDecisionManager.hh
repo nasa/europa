@@ -72,6 +72,9 @@ namespace EUROPA {
     virtual void initializeTokenChoices(TokenDecisionPointId& tdp);
     virtual void initializeVariableChoices(ConstrainedVariableDecisionPointId& vdp);
     virtual void initializeObjectChoices(ObjectDecisionPointId& odp);
+    virtual bool isUnit(const ConstrainedVariableDecisionPointId& dp) const;
+    virtual bool isUnit(const TokenDecisionPointId& dp) const;
+    virtual bool isUnit(const ObjectDecisionPointId& dp) const;
 
   protected:
     friend class DecisionManager;
@@ -82,7 +85,7 @@ namespace EUROPA {
     virtual void condAddActive(const TokenId& token);
     virtual void condAdd(const TokenId& token);
     virtual void add(const TokenId& token);
-    virtual void condAdd(const ConstrainedVariableId& var, const bool units);
+    //virtual void condAdd(const ConstrainedVariableId& var, const bool units);
     virtual void add(const ConstrainedVariableId& variable);
     virtual void add(const ObjectId& object);
 
@@ -96,6 +99,8 @@ namespace EUROPA {
 
     virtual bool unitDecisionExistsForVariable(const ConstrainedVariableId& var);
     virtual bool nonUnitDecisionExistsForVariable(const ConstrainedVariableId& var);
+    
+    bool cachesAreValid();
 
     /* the following are the decision caches */
     std::map<int,TokenDecisionPointId> m_tokDecs;
