@@ -80,12 +80,14 @@ bool copyFromFile(){
     ASSEMBLY assembly(schema);
     assembly.playTransactions(ASSEMBLY::TX_LOG());
     assembly.getPlanDatabase()->getClient()->toStream(os1);
+    assembly.getPlanDatabase()->archive();
   }
   std::stringstream os2;
   {
     ASSEMBLY assembly(schema);
     assembly.playTransactions(ASSEMBLY::TX_LOG());
     assembly.getPlanDatabase()->getClient()->toStream(os2);
+    assembly.getPlanDatabase()->archive();
   }
 
   std::string s1 = os1.str();

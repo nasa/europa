@@ -15,15 +15,18 @@ namespace EUROPA {
   void DefaultPropagator::handleConstraintRemoved(const ConstraintId& constraint){
     // Remove from agenda
     m_agenda.erase(constraint);
+    check_error(isValid());
   }
 
   void DefaultPropagator::handleConstraintActivated(const ConstraintId& constraint){
     m_agenda.insert(constraint);
+    check_error(isValid());
   }
 
   void DefaultPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
     // Remove from agenda
     m_agenda.erase(constraint);
+    check_error(isValid());
   }
 
   void DefaultPropagator::handleNotification(const ConstrainedVariableId& variable, 
@@ -58,5 +61,14 @@ namespace EUROPA {
 
   bool DefaultPropagator::updateRequired() const{
     return (m_agenda.size() > 0);
+  }
+
+  bool DefaultPropagator::isValid() const{
+    for(ConstraintSet::iterator it = m_agenda.begin(); it != m_agenda.end(); ++it){
+      ConstraintId constraint = *it;
+      checkError(constraint.isValid(), constraint);
+      checkError(!constraint->isDiscarded(), constraint);
+    }
+    return true;
   }
 }

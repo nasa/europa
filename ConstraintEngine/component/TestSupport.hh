@@ -41,6 +41,7 @@ private:
   unsigned int id_count = IdTable::size(); \
   bool result = test(); \
   DefaultEngineAccessor::reset(); \
+  Entity::garbageCollect(); \
   if (result && IdTable::size() <= id_count) \
     std::cout << " PASSED." << std::endl; \
   else \

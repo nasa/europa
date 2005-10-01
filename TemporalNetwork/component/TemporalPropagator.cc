@@ -37,23 +37,28 @@ namespace EUROPA {
     : Propagator(name, constraintEngine), m_tnet((new TemporalNetwork())->getId()), m_mostRecentRepropagation(1) {}
 
   TemporalPropagator::~TemporalPropagator() {
+    discard(false);
+  }
+
+  void TemporalPropagator::handleDiscard(){
     check_error(Entity::isPurging() || m_wrappedTimepoints.empty());
     cleanup(m_wrappedTimepoints);
     cleanup(m_listeners);
-    cleanup(m_baseDomainListeners);
     check_error(m_tnet.isValid());
     delete (TemporalNetwork*) m_tnet;
+
+    Propagator::handleDiscard();
   }
 
   void TemporalPropagator::notifyDeleted(const ConstrainedVariableId& tempVar, const TimepointId& tp) {
     check_error(!Entity::isPurging());
-    debugMsg("TemporalPropagator:notifyDeleted", "Marking as deleted variable " << tempVar->toString());
+    debugMsg("TemporalPropagator:notifyDeleted", "Marking as deleted variable " << tempVar->getKey());
     m_changedVariables.erase(tempVar->getKey());
     m_activeVariables.erase(tempVar->getKey());
-    m_baseDomainListeners.erase(tempVar);
 
     EntityId tw = tempVar->getExternalEntity();
     tp->clearExternalEntity(); // Breaks link to original
+    tempVar->clearExternalEntity(); // Break link here too
     m_wrappedTimepoints.erase(tw);
     m_variablesForDeletion.insert(tp);
   }
@@ -114,18 +119,34 @@ namespace EUROPA {
   void TemporalPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
     // Delete constraint from list of pending additions and executions. 
     // It may be there if we have not propagated them yet.
-    debugMsg("TemporalPropagator:handleConstraintDeactivated", "Handling deactivation of constraint " << constraint->toString());
+    debugMsg("TemporalPropagator:handleConstraintDeactivated", 
+	     "Handling deactivation of constraint " << constraint->toString());
     m_changedConstraints.erase(constraint);
 
-    const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
-    for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
-      const ConstrainedVariableId& var = *it;
-      check_error(var.isValid());
+    // Finally, we deactive the constraint in the temporal network if one exists
+    const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
+    if (tnetConstraint.isId()){
+      tnetConstraint->clearExternalEntity();
+      constraint->clearExternalEntity();
+      m_tnet->removeTemporalConstraint(tnetConstraint, false);
+    }
+  }
 
-      if(!var->isActive()){
-        m_changedVariables.erase(var->getKey());
-        m_activeVariables.erase(var->getKey());
-      }
+
+  void TemporalPropagator::handleVariableActivated(const ConstrainedVariableId& var){
+    // Nothing to do - already addressed by contrant handler
+  }
+
+  void TemporalPropagator::handleVariableDeactivated(const ConstrainedVariableId& var){
+    const TimepointId& timepoint = getTimepoint(var);
+    if(timepoint.isId()){
+      timepoint->clearDeletionMarker();
+      EntityId tw = var->getExternalEntity();
+      delete (Entity*) tw;
+    }
+    else {
+      m_changedVariables.erase(var->getKey());
+      m_activeVariables.erase(var->getKey());
     }
   }
 
@@ -216,9 +237,6 @@ namespace EUROPA {
     else {// update the Temp Vars of the CNET.
       debugMsg("TemporalPropagator:execute", "Calling updateTempVar");
       updateTempVar();
-      //COMMENT THIS OUT LATER! IT'S VERY EXPENSIVE
-      //debugMsg("TemporalPropagator:execute", "Checking consistency after Cnet update.");
-      //condDebugMsg(!isConsistentWithConstraintNetwork(), "TemporalPropagator:execute", "After updateTempVar() the two are out of synch");
     }
   }
 
@@ -348,7 +366,7 @@ namespace EUROPA {
       check_error(tp->getExternalEntity().isNoId()); // Should have cleared its connection to the TempVar
       publish(notifyConstraintDeleted(baseDomainConstraint->getKey(), baseDomainConstraint));
 
-      m_tnet->removeTemporalConstraint(baseDomainConstraint);
+      m_tnet->removeTemporalConstraint(baseDomainConstraint, tp->getDeletionMarker());
 
       debugMsg("TemporalPropagator:updateTnet",	"Base Domain Constraint " << baseDomainConstraint->getKey() << " DELETED");
 
@@ -383,18 +401,19 @@ namespace EUROPA {
    */
   void TemporalPropagator::updateTempVar() {
     debugMsg("TemporalPropagator:updateTempVar", "In updateTempVar");
-    for(std::map<int,ConstrainedVariableId>::const_iterator it = m_activeVariables.begin(); it != m_activeVariables.end(); ++it){
-      ConstrainedVariableId var = it->second;
-      check_error(var.isValid());
-
-      const TimepointId& tp = getTimepoint(var);
+    const std::set<TimepointId>& updatedTimepoints = m_tnet->getUpdatedTimepoints();
+    for(std::set<TimepointId>::const_iterator it = updatedTimepoints.begin(); it != updatedTimepoints.end(); ++it){
+      const TimepointId& tp = *it;
       check_error(tp.isValid());
-      check_error(tp->getExternalEntity() == var, "Ensure the connection between TempVar and Timepointis correct");
-
       const Time& lb = tp->getLowerBound();
       const Time& ub = tp->getUpperBound();
 
       check_error(lb <= ub);
+
+      check_error(tp->getExternalEntity().isValid(), "Ensure the connection between TempVar and Timepointis correct");
+      ConstrainedVariableId var = tp->getExternalEntity();
+
+      checkError(var->isActive(), "Variable should be active " << var->toString());
 
       IntervalIntDomain& dom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(var));
 
@@ -404,13 +423,10 @@ namespace EUROPA {
                  "Updated bounds [" << lb << " " << ub << "] from timepoint " << tp << " are outside of " 
                  << dom.toString() << " for " << var->toString());
 
-      double domlb, domub;
-      dom.getBounds(domlb,domub);
-      if (lb > domlb || ub < domub) {
-        dom.intersect(lb, ub);
-        check_error(!dom.isEmpty());
-      }
+      dom.intersect(lb, ub);
     }
+
+    m_tnet->resetUpdatedTimepoints();
   }
       
   bool TemporalPropagator::canPrecede(const ConstrainedVariableId& first, const ConstrainedVariableId& second) {
@@ -523,13 +539,12 @@ namespace EUROPA {
 
     check_error(tp.isValid());
 
-    // Instead of getTimepointBounds here we'd like to get cached values
-    // from the last computation since the temporal network may be made
-    // inconsistent in this mapping process.
-    Time lbt=0, ubt=0;
-    m_tnet->getLastTimepointBounds(tp, lbt, ubt);
+    const IntervalIntDomain& timeBounds = static_cast<const IntervalIntDomain&>(var->lastDomain());
+    Time lb = (Time) timeBounds.getLowerBound();
+    Time ub = (Time) timeBounds.getUpperBound();
     const TemporalConstraintId& baseDomainConstraint = tp->getBaseDomainConstraint();
-    TemporalConstraintId newConstraint = updateConstraint(var, baseDomainConstraint, lbt, ubt);
+    TemporalConstraintId newConstraint = updateConstraint(var, baseDomainConstraint, lb, ub);
+
     if(!newConstraint.isNoId())
       tp->setBaseDomainConstraint(baseDomainConstraint);
 
@@ -546,31 +561,44 @@ namespace EUROPA {
       return;
     }
 
-    // We should only handle changes for a duration constraint. Note that this may change
-    // when we have variable distance constraints in the system. Should generalize the scheme
-    // at that time.
+    // Update for the distance variable
     if(constraint->getScope().size() == 3) {
       const ConstrainedVariableId& distance = constraint->getScope()[1];
-      check_error(distance->lastDomain().isInterval(), constraint->getKey() + " is invalid")
-        const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
-      Time lbt=0, ubt=0;
-      tnetConstraint->getBounds(lbt, ubt);
+
+      checkError(distance->getExternalEntity().isNoId(), 
+		 "No support for timepoints being distances. " << distance->toString());
+
+      check_error(distance->lastDomain().isInterval(), constraint->getKey() + " is invalid");
+      const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
+      const IntervalIntDomain& dom = static_cast<const IntervalIntDomain&>(distance->lastDomain());
+      Time lb= (Time) dom.getLowerBound();
+      Time ub= (Time) dom.getUpperBound();
       debugMsg("TemporalPropagator:updateTemporalConstraint", "Calling updateConstraint");
-      updateConstraint(distance, tnetConstraint, lbt, ubt);
+      updateConstraint(distance, tnetConstraint, lb, ub);
     }
   }
 
   TemporalConstraintId TemporalPropagator::updateConstraint(const ConstrainedVariableId& var, 
                                                             const TemporalConstraintId& tnetConstraint, 
-                                                            Time lbt,
-                                                            Time ubt){
+                                                            Time lb,
+                                                            Time ub){
+    static unsigned int sl_counter(0);
+    sl_counter++;
+
     if(tnetConstraint.isNoId())
-      return m_tnet->addTemporalConstraint(m_tnet->getOrigin(), getTimepoint(var), lbt, ubt);
+      return m_tnet->addTemporalConstraint(m_tnet->getOrigin(), getTimepoint(var), lb, ub);
 
     TemporalConstraintId newConstraint;
-    const IntervalIntDomain& dom = static_cast<const IntervalIntDomain&>(var->lastDomain());
-    double lb =0, ub=0;
-    dom.getBounds(lb, ub);
+
+    Time lbt =0, ubt=0;
+
+    // Get the current bounds in the temporal nework
+    if(var->getExternalEntity().isId()){
+      const TimepointId& timepoint = getTimepoint(var);
+      timepoint->getBounds(lbt, ubt);
+    }
+    else
+      tnetConstraint->getBounds(lbt, ubt);
 
     check_error(lbt <= ubt);
     check_error(lb <= ub);
@@ -618,11 +646,19 @@ namespace EUROPA {
       }
     } 
     else if (!tnetConstraint->isComplete() || lb > lbt || ub < ubt) { // Handle restriction. Retain most restricted values
-      m_tnet->narrowTemporalConstraint(tnetConstraint, (Time)lb, (Time)ub);
-      publish(notifyBoundsRestricted(var, (Time)lb, (Time)ub));
-
-      debugMsg("TemporalPropagator:updateTemporalConstraint",
-               "Bounds of "  << var->getKey() << " Restricted to -[" << lb << "," << ub << "]-");
+      Time newLb = std::max(lb, lbt);
+      Time newUb = std::min(ub, ubt);
+      Time currentLb = 0; 
+      Time currentUb = 0;
+      tnetConstraint->getBounds(currentLb, currentUb);
+      if(!tnetConstraint->isComplete() || currentUb > newUb || currentLb < newLb ){ 
+	newLb = std::max(newLb, currentLb);
+	newUb = std::min(newUb, currentUb);
+	m_tnet->narrowTemporalConstraint(tnetConstraint, newLb, newUb);
+	publish(notifyBoundsRestricted(var, newLb, newUb));
+	debugMsg("TemporalPropagator:updateTemporalConstraint",
+		 "Bounds of "  << var->getKey() << " Restricted to -[" << newLb << "," << newUb << "]-");
+      }
     }
 
     return newConstraint;
@@ -688,7 +724,8 @@ namespace EUROPA {
         TimepointWrapperId wrapper = var->getExternalEntity();
         TimepointId shadow = wrapper->getTimepoint();
         if(shadow->getExternalEntity() != var) {
-          debugMsg("TemporalPropagator:isValidForPropagation", "Shadow is not linked up correctly ");
+          debugMsg("TemporalPropagator:isValidForPropagation", 
+		   "Shadow is not linked up correctly for " << var->toString());
           return false;
         }
       }
@@ -722,10 +759,11 @@ namespace EUROPA {
   }
 
   unsigned int TemporalPropagator::mostRecentRepropagation() const{
-    //return getConstraintEngine()->mostRecentRepropagation();
     checkError(getConstraintEngine()->mostRecentRepropagation() >= m_mostRecentRepropagation,
-               "Cannot imagine how it could be more recent since we should always have a stricter criteria for capturing the need for a reprop." <<
+               "Cannot imagine how it could be more recent since we should always have a " <<
+	       " stricter criteria for capturing the need for a reprop. " <<  
                getConstraintEngine()->mostRecentRepropagation() << " < " <<  m_mostRecentRepropagation);
+
     return m_mostRecentRepropagation;
   }
 

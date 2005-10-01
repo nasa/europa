@@ -23,8 +23,11 @@ local DEFAULT_HEURISTICS = "../../HeuristicsEngine/test/DefaultHeuristics.xml" ;
 # To run one of these individulally: jam run-<target> i.e. jam run-basic-types
 
 local checkin-tests ;
-checkin-tests = basic-types
+checkin-tests = 
+	basic-types
 	HTX.1
+	HTX.2
+	HTX.3
         Rover-transaction
         k9.backtrack.moderate-transaction
         rejection

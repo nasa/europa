@@ -60,10 +60,13 @@ namespace EUROPA {
     void addListener(const TemporalNetworkListenerId& listener);
 
   protected:
+    void handleDiscard();
     void handleConstraintAdded(const ConstraintId& constraint);
     void handleConstraintRemoved(const ConstraintId& constraint);
     void handleConstraintActivated(const ConstraintId& constraint);
     void handleConstraintDeactivated(const ConstraintId& constraint);
+    void handleVariableDeactivated(const ConstrainedVariableId& var);
+    void handleVariableActivated(const ConstrainedVariableId& var);
     void handleNotification(const ConstrainedVariableId& variable, 
 			    int argIndex, 
 			    const ConstraintId& constraint, 
@@ -71,21 +74,6 @@ namespace EUROPA {
 
   private:
     friend class TimepointWrapper;
-
-    class BaseSpecificationListener : public DomainListener {
-    public:
-      BaseSpecificationListener(const TemporalPropagatorId& tp, const TimepointWrapperId& tw, const AbstractDomain& dom);
-      void notifyChange(const ChangeType& changeType);
-      ~BaseSpecificationListener(){}
-    protected:
-    private:
-      TemporalPropagatorId m_tp;
-      TimepointWrapperId m_tw;
-      const AbstractDomain& m_dom;
-      TemporalConstraintId m_tc;
-    };
-
-    friend class BaseSpecificationListener;
     
     TemporalConstraintId addSpecificationConstraint(const TemporalConstraintId& tc, const TimepointId& tp, const Time lb, const Time ub);
 
@@ -98,8 +86,13 @@ namespace EUROPA {
     bool isConsistentWithConstraintNetwork();
 
     inline static const TimepointId& getTimepoint(const ConstrainedVariableId& var) {
-      check_error(var->getExternalEntity().isValid());
+      static const TimepointId sl_noId;
+      check_error(var->getExternalEntity().isNoId() || var->getExternalEntity().isValid());
       const TimepointWrapperId wrapper(var->getExternalEntity());
+
+      if(wrapper.isNoId())
+	return sl_noId;
+
       return wrapper->getTimepoint();
     }
 
@@ -162,7 +155,6 @@ namespace EUROPA {
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */
     std::set<EntityId> m_wrappedTimepoints;
     std::set<TemporalNetworkListenerId> m_listeners;
-    std::map<ConstrainedVariableId, DomainListenerId> m_baseDomainListeners;
     unsigned int m_mostRecentRepropagation;
   };
 }

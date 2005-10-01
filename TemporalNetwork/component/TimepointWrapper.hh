@@ -19,6 +19,7 @@ namespace EUROPA {
     inline const TimepointId& getTimepoint() const {return m_timepoint;}
     inline const ConstrainedVariableId& getTempVar() const {return m_tempVar;}
   private:
+    void handleDiscard();
     TemporalPropagatorId m_propagator;
     ConstrainedVariableId m_tempVar;
     TimepointId m_timepoint;

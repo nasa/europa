@@ -598,6 +598,7 @@ public:
     runTest(testLessThanEqualConstraint);
     runTest(testLessOrEqThanSumConstraint);
     runTest(testBasicPropagation);
+    runTest(testDeactivation);
     runTest(testForceInconsistency);
     runTest(testRepropagation);
     runTest(testConstraintRemoval);
@@ -1082,6 +1083,41 @@ private:
     return true;
   }
 
+  static bool testDeactivation(){
+    // v0 == v1
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
+
+    ENGINE->propagate();
+    assertTrue(ENGINE->constraintConsistent());
+
+    v0.deactivate();
+    assertTrue(!c0.isActive());
+    assertTrue(c0.deactivationCount() == 1);
+
+    v1.deactivate();
+    assertTrue(!c0.isActive());
+    assertTrue(c0.deactivationCount() == 2);
+
+    c0.deactivate();
+    assertTrue(c0.deactivationCount() == 3);
+    v0.undoDeactivation();
+    v1.undoDeactivation();
+    assertTrue(c0.deactivationCount() == 1);
+    assertTrue(!c0.isActive());
+
+    v1.deactivate();
+    assertTrue(!c0.isActive());
+    assertTrue(c0.deactivationCount() == 2);
+    v1.undoDeactivation();
+    assertTrue(c0.deactivationCount() == 1);
+    c0.undoDeactivation();
+    assertTrue(c0.isActive());
+
+    return true;
+  }
+
   static bool testForceInconsistency(){
     // v0 == v1
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
@@ -1246,7 +1282,7 @@ private:
 
     // Delete the delegate and verify instance counts and that the prior delegate has been reinstated and executed.
     delete (Constraint*) c1;
-    c0->activate();
+    c0->undoDeactivation();
     ENGINE->propagate();
     assertTrue(ENGINE->constraintConsistent());
     assertTrue(DelegationTestConstraint::s_instanceCount == 4);
@@ -1382,6 +1418,31 @@ private:
       ENGINE->propagate();
       assertTrue(ENGINE->constraintConsistent());
       assertTrue(v1.getDerivedDomain() == IntervalDomain(1.0, 2.0));
+    }
+    // Signs tested
+    {
+      Variable<IntervalDomain> v0(ENGINE, IntervalDomain(-2.3, -1.8));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalDomain(1, PLUS_INFINITY));
+      Variable<IntervalDomain> v2(ENGINE, IntervalDomain(-11.6, 12.4));
+      MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(v0.getDerivedDomain() == IntervalDomain(-2.3, -1.8), v0.getDerivedDomain().toString());
+      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(1, 6), v1.getDerivedDomain().toString());
+      assertTrue(v2.getDerivedDomain() == IntervalDomain(-11.6, -1.8), v2.getDerivedDomain().toString());
+    }
+
+    // Signs tested
+    {
+      Variable<IntervalDomain> v1(ENGINE, IntervalDomain(-2.3, -1.8));
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalDomain(1, PLUS_INFINITY));
+      Variable<IntervalDomain> v2(ENGINE, IntervalDomain(-11.6, 12.4));
+      MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
+      ENGINE->propagate();
+      assertTrue(ENGINE->constraintConsistent());
+      assertTrue(v1.getDerivedDomain() == IntervalDomain(-2.3, -1.8), v0.getDerivedDomain().toString());
+      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 6), v1.getDerivedDomain().toString());
+      assertTrue(v2.getDerivedDomain() == IntervalDomain(-11.6, -1.8), v2.getDerivedDomain().toString());
     }
     return true;
   }

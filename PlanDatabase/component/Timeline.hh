@@ -47,6 +47,7 @@ namespace EUROPA {
     void notifyRejected(const TokenId& token);
     void notifyDeleted(const TokenId& token);
 
+    void handleDiscard();
   private:
     /**
      * @brief Initialization utility
@@ -95,8 +96,6 @@ namespace EUROPA {
     Id<OrderingChoicesCache> m_cache;
 
     static const bool CLEANING_UP = true;
-
-
   };
 }
 

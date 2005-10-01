@@ -295,7 +295,12 @@ namespace EUROPA {
     : Object(parent, type, localName, true) {commonInit(open);}
 
   Timeline::~Timeline(){
+    discard(false);
+  }
+
+  void Timeline::handleDiscard(){
     delete (OrderingChoicesCache*) m_cache;
+    Object::handleDiscard();
   }
 
   void Timeline::commonInit(bool open){
@@ -687,10 +692,13 @@ namespace EUROPA {
   }
 
   bool Timeline::orderingRequired(const TokenId& token){
-    return (m_tokenIndex.find(token->getKey()) == m_tokenIndex.end());
+    return (!token->isDeleted() && m_tokenIndex.find(token->getKey()) == m_tokenIndex.end());
   }
 
   void Timeline::notifyMerged(const TokenId& token){ m_cache->removeCacheEntry(token);}
   void Timeline::notifyRejected(const TokenId& token) { m_cache->removeCacheEntry(token);}
-  void Timeline::notifyDeleted(const TokenId& token){ m_cache->removeCacheEntry(token);}
+  void Timeline::notifyDeleted(const TokenId& token){ 
+    m_cache->removeCacheEntry(token);
+    remove(token);
+  }
 }

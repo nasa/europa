@@ -939,6 +939,7 @@ public:
     runTest(testBasicTokenCreation);
     runTest(testStateModel);
     runTest(testMasterSlaveRelationship);
+    runTest(testTermination);
     runTest(testBasicMerging);
     runTest(testMergingWithEmptyDomains);
     runTest(testConstraintMigrationDuringMerge);
@@ -1123,8 +1124,11 @@ private:
     assertTrue(t3 != t4);
     assertTrue(t5 != t6);
   
-    // Delete slave only
+    // Delete slave only - master must be committed to allow this
+    t0.commit();
     delete (Token*) t2;
+    assertTrue(t0.getSlaves().size() == 3);
+
     // Should verify correct count of tokens remain. --wedgingt 2004 Feb 27
   
     // Delete master & slaves
@@ -1132,6 +1136,92 @@ private:
     // Should verify correct count of tokens remain. --wedgingt 2004 Feb 27
     DEFAULT_TEARDOWN();
     // Remainder should be cleaned up automatically.
+    return true;
+  }
+
+  /**
+   * Test that the terminatin behavior correctly permits deallocation of tokens
+   * without causing prpagation.
+   */
+  static bool testTermination(){
+    DEFAULT_SETUP(ce, db, true);
+
+    {    
+      IntervalToken t0(db, 
+		       DEFAULT_PREDICATE(), 
+		       true,
+		       IntervalIntDomain(0, 10),
+		       IntervalIntDomain(0, 20),
+		       IntervalIntDomain(1, 1000));
+  
+      IntervalToken t1(db,
+		       DEFAULT_PREDICATE(), 
+		       true,
+		       IntervalIntDomain(0, 10),
+		       IntervalIntDomain(0, 20),
+		       IntervalIntDomain(1, 1000));
+
+      assertTrue(ce->propagate());
+    }
+    // The delation of the above tokens should imply we have something to propagate
+    assertTrue(ce->pending());
+
+    // Now try again, but make sure that if we terminate them, the deletion causes no problems
+    {    
+      IntervalToken t0(db, 
+		       DEFAULT_PREDICATE(), 
+		       true,
+		       IntervalIntDomain(0, 10),
+		       IntervalIntDomain(0, 20),
+		       IntervalIntDomain(1, 1000));
+  
+      IntervalToken t1(db,
+		       DEFAULT_PREDICATE(), 
+		       true,
+		       IntervalIntDomain(0, 10),
+		       IntervalIntDomain(0, 20),
+		       IntervalIntDomain(1, 1000));
+
+      assertTrue(ce->propagate());
+      t0.terminate();
+      t1.terminate();
+    }
+
+    assertTrue(ce->constraintConsistent());
+
+    // Now make sure that we can correctly delete a slave that has been terminated
+    TokenId t1;
+    {    
+      IntervalToken t0(db, 
+		       DEFAULT_PREDICATE(), 
+		       true,
+		       IntervalIntDomain(0, 10),
+		       IntervalIntDomain(0, 20),
+		       IntervalIntDomain(1, 1000));
+  
+      t0.activate();
+
+      t1 = (new IntervalToken(t0.getId(), "any", 
+				      DEFAULT_PREDICATE(), 
+				      IntervalIntDomain(0, 10),
+				      IntervalIntDomain(0, 20),
+				      IntervalIntDomain(1, 1000)))->getId();
+
+      t1->activate();
+      assertTrue(ce->propagate());
+      t1->commit();
+      t0.terminate();
+    }
+
+    // Make sure the slave remains, since it was committed explicitly
+    assertTrue(t1.isValid());
+    assertTrue(ce->constraintConsistent());
+    assertTrue(t1->getMaster().isNoId());
+    t1->terminate();
+    delete (Token*) t1;
+    assertTrue(ce->constraintConsistent());
+
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -1464,7 +1554,7 @@ private:
     // inherits the before constraint between t2 and t3.
 
     assertFalse(token0.getParameters()[0]->lastDomain().isSingleton());
-    assertFalse(token1.getParameters()[0]->lastDomain().isSingleton());
+    assertTrue(token1.getParameters()[0]->lastDomain().isSingleton(), token1.getParameters()[0]->toString());
     assertTrue(token2.getParameters()[0]->lastDomain().isSingleton());
     assertTrue(token3.getParameters()[0]->lastDomain().isSingleton());
 
@@ -1473,6 +1563,8 @@ private:
     assertTrue(token0.getEnd()->lastDomain().getLowerBound() == 1);
     assertTrue(token0.getEnd()->lastDomain().getUpperBound() == 200);
 
+    assertTrue(token3.isMerged());
+    token3.cancel();
     assertFalse(token3.isMerged());
 
     DEFAULT_TEARDOWN();
@@ -2119,10 +2211,15 @@ public:
     runTest(testNoChoicesThatFit);
     runTest(testAssignment);
     runTest(testFreeAndConstrain);
+    runTest(testRemovalOfMasterAndSlave);
+    runTest(testArchiving1);
+    runTest(testArchiving2);
+    runTest(testArchiving3);
     return true;
   }
 
 private:
+
   static bool testBasicInsertion(){
     DEFAULT_SETUP(ce, db, false);
     Timeline timeline(db, DEFAULT_OBJECT_TYPE(), "o2");
@@ -2748,6 +2845,265 @@ private:
     assertTrue(ENGINE->propagate()); 
     return true;
   }
+
+  /**
+   * This test makes sure we can correctly remove a master-slave pair on a timeline
+   * when the slave is forced to be removed because the master is being deleted.
+   */
+  static bool testRemovalOfMasterAndSlave(){
+    DEFAULT_SETUP(ce, db, false);
+    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    db->close();
+
+    {
+      TokenId master = (new IntervalToken(db, 
+					  LabelStr(DEFAULT_PREDICATE()), 
+					  true,
+					  IntervalIntDomain(0, 0),
+					  IntervalIntDomain(),
+					  IntervalIntDomain(1, 1)))->getId();
+      master->activate();
+
+      TokenId slave = (new IntervalToken(master, "any" ,
+					 LabelStr(DEFAULT_PREDICATE()),
+					 IntervalIntDomain(1, 1),
+					 IntervalIntDomain(),
+					 IntervalIntDomain(1, 1)))->getId();
+
+
+      slave->activate();
+
+      timeline.constrain(master, slave); // Place at the end
+
+      // Propagate to consistency first
+      ce->propagate();
+
+      // Now nuke the master and make sure we safely delete both.
+      delete (Token*) master;
+
+      assertTrue(db->getTokens().empty());
+    }
+
+
+    {
+      TokenId master = (new IntervalToken(db, 
+					  LabelStr(DEFAULT_PREDICATE()), 
+					  true,
+					  IntervalIntDomain(1, 1),
+					  IntervalIntDomain(),
+					  IntervalIntDomain(1, 1)))->getId();
+      master->activate();
+
+      TokenId slave = (new IntervalToken(master, "any" ,
+					 LabelStr(DEFAULT_PREDICATE()),
+					 IntervalIntDomain(0, 0),
+					 IntervalIntDomain(),
+					 IntervalIntDomain(1, 1)))->getId();
+
+
+      slave->activate();
+
+      timeline.constrain(slave,master); // Place at the end
+
+      // Propagate to consistency first
+      ce->propagate();
+
+      // Now nuke the master and make sure we safely delete both.
+      delete (Token*) master;
+
+      assertTrue(db->getTokens().empty());
+    }
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+
+  /**
+   * @brief This test will address the need to be able to remove active and inactive tokens
+   * in the database cleanly, without propagation, in the event that no consequenmces should arise.
+   * Tokens do not reach into the furture so there is no risk of conflicts there. The idea is to 
+   * allocate in incrementing ticks, 4 tokens at a time. Then archive over the same tick increments
+   * and verify the database is reduced 4 tokens at a time. This will cover active and assigned, active and free,
+   * inactive orphans, and inactive slaves.
+   */
+  static bool testArchiving1() {
+    DEFAULT_SETUP(ce, db, false);
+    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    db->close();
+
+    const unsigned int startTick(0);
+    const unsigned int endTick(10);
+
+    // Allocate tokens in each tick
+    TokenId lastToken;
+    for(unsigned int i=startTick;i<endTick;i++){
+      TokenId tokenA = (new IntervalToken(db, 
+					  LabelStr(DEFAULT_PREDICATE()), 
+					  true,
+					  IntervalIntDomain(i, i),
+					  IntervalIntDomain(),
+					  IntervalIntDomain(1, 1)))->getId();
+      tokenA->activate();
+
+      // Allocate an inactive orphan
+      new IntervalToken(db, 
+			LabelStr(DEFAULT_PREDICATE()), 
+			true,
+			IntervalIntDomain(i, i),
+			IntervalIntDomain(),
+			IntervalIntDomain(1, 1));
+
+      // Allocate an inactive slave
+      Token* slaveA = new IntervalToken(tokenA, "any",
+					LabelStr(DEFAULT_PREDICATE()), 
+					IntervalIntDomain(i, i),
+					IntervalIntDomain(),
+					IntervalIntDomain(1, 1));
+
+      // Allocate an active slave
+      Token* slaveB = new IntervalToken(tokenA, "any", 
+					LabelStr(DEFAULT_PREDICATE()), 
+					IntervalIntDomain(i, i),
+					IntervalIntDomain(),
+					IntervalIntDomain(1, 1));
+
+      slaveB->activate();
+
+      // Allocate a committed slave
+      Token* slaveC = new IntervalToken(tokenA, "any", 
+					LabelStr(DEFAULT_PREDICATE()), 
+					IntervalIntDomain(i, i),
+					IntervalIntDomain(),
+					IntervalIntDomain(1, 1));
+
+      slaveC->activate();
+      slaveC->commit();
+
+      if(lastToken.isNoId())
+	lastToken = tokenA;
+
+      timeline.constrain(lastToken, tokenA); // Place at the end
+
+      lastToken = tokenA;
+    }
+
+    // Propagate to consistency first
+    ce->propagate();
+
+    // Now incrementally archive, verifying that no propagation is required afetr each
+    const unsigned int TOKENS_PER_TICK(5);
+    for(unsigned int i=startTick;i<endTick;i++){
+      assertTrue(db->getTokens().size() == (endTick - i) * TOKENS_PER_TICK);
+      unsigned int deletionCount = db->archive(i+1);
+      assertTrue(deletionCount == TOKENS_PER_TICK, toString(deletionCount));
+      assertTrue(ce->constraintConsistent());
+    }
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  /**
+   * @brief Now we want to verify that uncommitted dependent tokens reaching into the future are correctly
+   * removed if we allocate a single root master, and then iteratively allocate slaves. We then archive only
+   * the first tick and make sure the whole database is cleared.
+   */
+  static bool testArchiving2() {
+    DEFAULT_SETUP(ce, db, false);
+    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    db->close();
+
+    const unsigned int startTick(0);
+    const unsigned int endTick(10);
+
+    TokenId tokenA = (new IntervalToken(db, 
+					LabelStr(DEFAULT_PREDICATE()), 
+					true,
+					IntervalIntDomain(startTick, startTick),
+					IntervalIntDomain(),
+					IntervalIntDomain(1, 1)))->getId();
+    tokenA->activate();
+
+    for(unsigned int i=startTick+1;i<endTick;i++){
+      TokenId tokenB = (new IntervalToken(tokenA, "any" ,
+					  LabelStr(DEFAULT_PREDICATE()),
+					  IntervalIntDomain(i, i),
+					  IntervalIntDomain(),
+					  IntervalIntDomain(1, 1)))->getId();
+
+
+      tokenB->activate();
+
+      timeline.constrain(tokenA, tokenB); // Place at the end
+      tokenA = tokenB;
+    }
+
+    // Propagate to consistency first
+    ce->propagate();
+
+    // Now nuke in one shot just by nuking up to the end of the first tick window
+    assertTrue(db->archive(startTick+1) == endTick);
+    assertTrue(db->getTokens().empty());
+    assertTrue(ce->pending());
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  /**
+   * @brief Simliar to prior example but now we commit as we go. This should prevent automatic deallocaation
+   * until we archove on each increment
+   */
+  static bool testArchiving3() {
+    DEFAULT_SETUP(ce, db, false);
+    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    db->close();
+
+    const unsigned int startTick(0);
+    const unsigned int endTick(10);
+
+    TokenId tokenA = (new IntervalToken(db, 
+					LabelStr(DEFAULT_PREDICATE()), 
+					true,
+					IntervalIntDomain(startTick, startTick),
+					IntervalIntDomain(),
+					IntervalIntDomain(1, 1)))->getId();
+    tokenA->activate();
+
+    for(unsigned int i=startTick+1;i<endTick;i++){
+      TokenId tokenB = (new IntervalToken(tokenA, "any" ,
+					  LabelStr(DEFAULT_PREDICATE()),
+					  IntervalIntDomain(i, i),
+					  IntervalIntDomain(),
+					  IntervalIntDomain(1, 1)))->getId();
+
+
+      tokenB->activate();
+      timeline.constrain(tokenA, tokenB); // Place at the end
+      // Commit it. Should prevent deallocation until it is archived within
+      // its own tick
+      tokenB->commit();
+      tokenA = tokenB;
+    }
+
+    // Propagate to consistency first
+    ce->propagate();
+
+
+    // Now incrementally archive, verifying that no propagation is required afetr each
+    const unsigned int TOKENS_PER_TICK(1);
+    for(unsigned int i=startTick;i<endTick;i++){
+      assertTrue(db->getTokens().size() == (endTick - i) * TOKENS_PER_TICK);
+      unsigned int deletionCount = db->archive(i+1);
+      assertTrue(deletionCount == TOKENS_PER_TICK, toString(deletionCount));
+      assertTrue(ce->constraintConsistent());
+    }
+    assertTrue(db->getTokens().empty());
+
+    DEFAULT_TEARDOWN();
+    return true;
+  }
 };
 
 class DbClientTest {
@@ -2936,11 +3292,11 @@ private:
 
     // Base case, normal merge and activation
     dbClient->activate(t1.getId());
-    check_error(!t1.canBeCommitted());
+    check_error(t1.canBeCommitted());
 
     dbClient->merge(t2.getId(), t1.getId());
     assertTrue(t1.isActive());
-    check_error(!t1.canBeCommitted());
+    check_error(t1.canBeCommitted());
     assertTrue(t2.isMerged());
     assertTrue(db.getTokens().size() == 2);
     assertTrue(t1.getMergedTokens().find(t2.getId()) != t1.getMergedTokens().end(), "Should be hooked up.");
@@ -2990,7 +3346,7 @@ private:
     // Cleanup
     delete (Token*) newToken;
 
-    // Finnaly, repeat last one excelt delete the new token before cancelling to make sure you
+    // Finnaly, repeat last one except delete the new token before cancelling to make sure you
     // get a split automatically as it unwinds.
     dbClient->merge(t2.getId());
     newToken = t2.getActiveToken();

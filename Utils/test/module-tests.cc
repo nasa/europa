@@ -18,7 +18,7 @@
    @brief A small test of classes Error and TestData and the related
    macros.
    
-   CMG: Added test for id's
+   CMG: Added test for id's and entities
 */
 
 #include "Error.hh"
@@ -27,6 +27,7 @@
 #include "TestData.hh"
 #include "Id.hh"
 #include "LockManager.hh"
+#include "Entity.hh"
 #include <list>
 #include <sstream>
 #include <iostream>
@@ -687,6 +688,36 @@ private:
   }
 };
 
+class EntityTest {
+public:
+  static bool test(){
+    runTest(testReferenceCounting);
+    return true;
+  }
+
+  class TestEntity: public Entity {
+  public:
+    TestEntity(): Entity() {}
+    void handleDiscard(){}
+  };
+
+private:      
+  static bool testReferenceCounting(){
+    TestEntity* e1 = new TestEntity();
+    TestEntity* e2 = new TestEntity();
+    e1->discard();
+    assertTrue(e1->isDiscarded());
+    assertTrue(!e2->isDiscarded());
+    e2->incRefCount();
+    e2->decRefCount();
+    assertTrue(!e2->isDiscarded());
+    e2->decRefCount();
+    assertTrue(e2->isDiscarded());
+
+    assertTrue(Entity::garbageCollect() == 2);
+    return true;
+  }
+};
 int main() {
   LockManager::instance().connect();
   runTestSuite(ErrorTest::test);
@@ -694,6 +725,7 @@ int main() {
   runTestSuite(IdTests::test);
   runTestSuite(LabelTests::test);
   runTestSuite(MultithreadTest::test);
+  runTestSuite(EntityTest::test);
 
   std::cout << "Finished" << std::endl;
   exit(0);

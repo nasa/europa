@@ -551,7 +551,7 @@ private:
     std::vector<ConstrainedVariableId> scope;
     scope.push_back(slave->getEnd());
     scope.push_back(t1.getParameters()[0]);
-    ConstraintId culprit = ConstraintLibrary::createConstraint(LabelStr("leq"), ce.getId(), scope);
+    ConstraintLibrary::createConstraint(LabelStr("leq"), ce.getId(), scope);
 
     assertTrue (!ce.propagate());
 
