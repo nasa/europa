@@ -180,11 +180,9 @@ class HeuristicsEngineTest {
 public:
   static bool test(){
     runTest(testBasicAllocation);
-    runTest(testMergingAndSplitting);
     runTest(testTokenMatching);
     runTest(testDynamicMatching);
     runTest(testMasterMatching);
-    runTest(testProxyTokenHandling);
     runTest(testTargetSelection);
     runTest(testVariableHeuristicConfiguration);
     runTest(testTokenHeuristicConfiguration);
@@ -284,110 +282,6 @@ private:
 	       toString(he.getPriority(t4.getId())));
 
     DEFAULT_TEARDOWN();
-    return true;
-  }
-
-  static bool testMergingAndSplitting(){
-    DEFAULT_SETUP(ce,db,false);      
-    Object o1(db.getId(), "Object", "o1");
-    db.close();               
-  
-    HeuristicsEngine he(db.getId());
-    // Still allowed to add heuristics
-
-    std::vector< std::pair<unsigned int, double> > guards_12_A;
-    guards_12_A.push_back(std::pair<unsigned int, double>(0, 12));
-    guards_12_A.push_back(std::pair<unsigned int, double>(2, LabelStr("A")));
-    TokenHeuristic h_12_A(he.getId(), "Object.PredicateE",  5, true, guards_12_A);
-    TokenHeuristic h(he.getId(), "Object.PredicateE",  100, true);
-    he.initialize();
-
-    TokenId t1 = (new IntervalToken(db.getId(),  
-				    "Object.PredicateE",                                                     
-				    true,                                                               
-				    IntervalIntDomain(0, 10),                                           
-				    IntervalIntDomain(0, 20),                                           
-				    IntervalIntDomain(1, 1000),
-				    Token::noObject(),
-				    false))->getId();
-    {
-      t1->addParameter(IntervalIntDomain(), LabelStr("param0"));
-      t1->addParameter(IntervalDomain(), LabelStr("param1"));
-      LabelSet values;
-      values.insert(LabelStr("A"));
-      values.insert(LabelStr("B"));
-      values.close();
-      t1->addParameter(values, LabelStr("param2"));
-      t1->close();
-    }
-
-    ce.propagate();
-
-    IntervalToken t2(db.getId(),  
-                     "Object.PredicateE",                                                     
-                     true,                                                               
-                     IntervalIntDomain(0, 10),                                           
-                     IntervalIntDomain(0, 20),                                           
-                     IntervalIntDomain(1, 1000),
-		     Token::noObject(),
-		     false);
-    {
-      t2.addParameter(IntervalIntDomain(12, 12), LabelStr("param0"));
-      t2.addParameter(IntervalDomain(), LabelStr("param1"));
-      LabelSet values;
-      values.insert(LabelStr("A"));
-      values.insert(LabelStr("B"));
-      values.close();
-      t2.addParameter(values, LabelStr("param2"));
-      t2.close();
-    }
-
-    IntervalToken t3(db.getId(),  
-                     "Object.PredicateE",                                                     
-                     true,                                                               
-                     IntervalIntDomain(0, 10),                                           
-                     IntervalIntDomain(0, 20),                                           
-                     IntervalIntDomain(1, 1000),
-		     Token::noObject(),
-		     false);
-    {
-      t3.addParameter(IntervalIntDomain(), LabelStr("param0"));
-      t3.addParameter(IntervalDomain(), LabelStr("param1"));
-      LabelSet values;
-      values.insert(LabelStr("A"));
-      values.close();
-      t3.addParameter(values, LabelStr("param2"));
-      t3.close();
-    }
-
-    ce.propagate();
-    assertTrue(he.getPriority(t1->getId()) == 100);
-    assertTrue(he.getPriority(t2.getId()) == 100);
-    assertTrue(he.getPriority(t3.getId()) == 100);
-
-    t1->activate(t2.getId());
-    ce.propagate();
-    assertTrue(he.getPriority(t1->getId()) == 100);
-    assertTrue(he.getPriority(t2.getId()) == 100);
-    assertTrue(he.getPriority(t3.getId()) == 100);
-
-    t3.merge(t1->getId());
-    t2.cancel();
-    t1->commit();
-    t3.cancel();
-    t2.merge(t1->getId());
-    t3.merge(t1->getId());
-
-    ce.propagate();
-    assertTrue(he.getPriority(t1->getId()) == 5);
-    assertTrue(he.getPriority(t2.getId()) == 100);
-    assertTrue(he.getPriority(t3.getId()) == 100);
-
-    delete (Token*) t1;
-    ce.propagate();
-    assertTrue(he.getPriority(t2.getId()) == 100);
-    assertTrue(he.getPriority(t3.getId()) == 100);
-
     return true;
   }
 
@@ -775,73 +669,6 @@ private:
     return true;
   }
 
-  static bool testProxyTokenHandling(){
-    DEFAULT_SETUP(ce,db,false);      
-    Object o1(db.getId(), "Object", "o1");
-    db.close();               
-
-    HeuristicsEngine he(db.getId());
-
-    // Declare a heuristic contingent on a master relation
-    TokenHeuristic h1(he.getId(), "Object.PredicateA",  5000, 
-		      TokenHeuristic::noStates(),
-		      TokenHeuristic::noOrders(),
-		      Heuristic::noGuards(), 
-		      "Object.PredicateE", Heuristic::ANY, Heuristic::noGuards());
-
-    he.initialize();
-
-    // Allocate a master
-    IntervalToken master(db.getId(),  
-			 "Object.PredicateE",                                                     
-			 true,                                                               
-			 IntervalIntDomain(0, 10),                                           
-			 IntervalIntDomain(0, 20),                                           
-			 IntervalIntDomain(1, 1000));
-    master.activate();
-
-    // Allocate a slave
-    IntervalToken slave(master.getId(),
-			LabelStr("before"),
-			LabelStr("Object.PredicateA"),                                                     
-			IntervalIntDomain(0, 10),                                           
-			IntervalIntDomain(0, 20),                                           
-			IntervalIntDomain(1, 1000));
-
-    // Confirm the heursitc applies to the inactive slave
-    ce.propagate();
-    assertTrue(he.getPriority(slave.getId()) == 5000);
-
-    // Allocate another active token with no master - the proxy
-    IntervalToken proxy(db.getId(),  
-			"Object.PredicateA",                                                     
-			true,                                                               
-			IntervalIntDomain(0, 10),                                           
-			IntervalIntDomain(0, 20),                                           
-			IntervalIntDomain(1, 1000));
-
-    // Confirm the heursistic does not apply
-    ce.propagate();
-    assertTrue(he.getPriority(proxy.getId()) != 5000);
-
-    // Excute activation as proxy
-    proxy.activate(slave.getId());    
-
-    // Confirm the heuristic now applies to the proxy token
-    ce.propagate();
-    assertTrue(he.getPriority(proxy.getId()) == 5000);
-
-    // Commit the active token. The heuristic should still apply
-    proxy.commit();
-
-    // Now split, thus breaking the causal links justifying its special priority
-    slave.cancel();
-    ce.propagate();
-    assertTrue(he.getPriority(proxy.getId()) != 5000);
-
-    DEFAULT_TEARDOWN();
-    return true;
-  }
   /**
    * Test dynamic matching against guard values
    */

@@ -360,13 +360,10 @@ namespace EUROPA {
 
     // It may or may not have another sibling element
     TiXmlElement * active_el = token_el->NextSiblingElement();
-    if(active_el != NULL){
-      TokenId active_token = xmlAsToken(*active_el);
-      check_error(active_token.isValid());
-      m_client->merge(token, active_token);
-    }
-    else
-      m_client->merge(token);
+    checkError(active_el != NULL, "Active element required for merge.");
+    TokenId active_token = xmlAsToken(*active_el);
+    check_error(active_token.isValid());
+    m_client->merge(token, active_token);
   }
 
   void DbClientTransactionPlayer::playRejected(const TiXmlElement & element) {

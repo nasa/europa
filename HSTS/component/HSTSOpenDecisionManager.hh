@@ -5,6 +5,9 @@
 #include "OpenDecisionManager.hh"
 #include "HeuristicsEngine.hh"
 
+/**
+ * @brief Basically only here for backward compatibility
+ */
 namespace EUROPA {
 
   class HSTSOpenDecisionManager : public OpenDecisionManager {
@@ -13,17 +16,6 @@ namespace EUROPA {
     HSTSOpenDecisionManager(const PlanDatabaseId& db, const HeuristicsEngineId& heur, 
 			    const bool strictHeuristics = false);
     ~HSTSOpenDecisionManager();
-
-    /**
-     * @brief Tests if configured to use auto allocation of a new
-     * active token as a proxy when resolving an open condition.
-     */
-    bool isAutoAllocationEnabled() const;
-
-    /**
-     * @brief Custmization point to prefere higher keys
-     */
-    bool preferHigherKeys() const;
   };
 }
 

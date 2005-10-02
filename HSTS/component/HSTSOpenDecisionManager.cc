@@ -7,9 +7,4 @@ namespace EUROPA {
     : OpenDecisionManager(db, heur){}
 
   HSTSOpenDecisionManager::~HSTSOpenDecisionManager() { }
-
-  bool HSTSOpenDecisionManager::isAutoAllocationEnabled() const { return true; }
-
-
-  bool HSTSOpenDecisionManager::preferHigherKeys() const {return true;}
 }
