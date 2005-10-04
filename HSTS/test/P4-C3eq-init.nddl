@@ -4,7 +4,7 @@
 #include "../../NDDL/core/PlannerConfig.nddl"
 #include "P4-C3eq.nddl"
 
-PlannerConfig world = new PlannerConfig(0, 100, 1000);
+PlannerConfig world = new PlannerConfig(0, 100, 1000); // 1000 steps is not enough but used to be.
 
 P4C3 T = new P4C3();
 

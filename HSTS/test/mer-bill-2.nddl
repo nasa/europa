@@ -4,7 +4,7 @@
 #include "../../NDDL/core/PlannerConfig.nddl"
 #include "mer.nddl"
 
-PlannerConfig world = new PlannerConfig(129520807, 129609583, 1000);
+PlannerConfig world = new PlannerConfig(129520807, 129609583, 1000); // 10,000 steps is not enough; 1000 used to be.
 
 Comm_Window_Class CommWindow = new Comm_Window_Class();
 

@@ -4,7 +4,7 @@
 #include "../../NDDL/core/PlannerConfig.nddl"
 #include "DNP2.nddl"
 
-PlannerConfig world = new PlannerConfig(0, 31536000, 1000);
+PlannerConfig world = new PlannerConfig(0, 31536000, 1000); // 10,000 steps is not enough; 1000 used to be.
 
 DNP_Science DNP_Sci = new DNP_Science();
 

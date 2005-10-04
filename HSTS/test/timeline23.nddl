@@ -4,7 +4,7 @@
 #include "../../NDDL/core/PlannerConfig.nddl"
 #include "monkey2.nddl"
 
-PlannerConfig world = new PlannerConfig(-5, 350, 1000);
+PlannerConfig world = new PlannerConfig(-5, 350, 1000); // 5000 steps is not enough; 1000 used to be.
 
 Monkey_Class Koko = new Monkey_Class();
 
