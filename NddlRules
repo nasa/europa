@@ -5,9 +5,9 @@ include [ FDirName $(SUBDIR) JavaRules ] ;
 
 # TRACE_NDDL ?= TRUE ;
 
-# Runs a planner problem: RunProblem test-01 : initial-state.nddl : planner : planner-config.xml ;
+# Runs a planner problem: RunNDDLProblem test-01 : initial-state.nddl : planner : planner-config.xml ;
 # Will ensure initial state is parsed into xml first
-rule RunProblem {
+rule RunNDDLProblem {
  local problem = $(1) ;
  local initialState = $(2) ;
  local executable = $(3) ;
