@@ -4,7 +4,7 @@
 #include "../../NDDL/core/PlannerConfig.nddl"
 #include "missionExec.nddl"
 
-PlannerConfig world = new PlannerConfig(0, 2000, 4000);
+PlannerConfig world = new PlannerConfig(0, 2000, 4000); // Requires more than 4000 steps but didn't use to.
 
 TEMPEST_Class TEMPEST_Processing = new TEMPEST_Class();
 
