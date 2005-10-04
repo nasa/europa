@@ -77,7 +77,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <Value>Rec_Bef_CS</Value>
    </DomainOrder>
   </Preference>
-  <VariableSpec>*g
+  <VariableSpec>
    <Index>3</Index>
   </VariableSpec>
    <PredicateSpec>
