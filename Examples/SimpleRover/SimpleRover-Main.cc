@@ -47,4 +47,5 @@ int main(int argc, const char ** argv){
   SolverAssembly::terminate();
 
   std::cout << "Finished\n";
+  exit(0);
 }
