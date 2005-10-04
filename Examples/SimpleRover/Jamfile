@@ -2,10 +2,11 @@ SubDir PLASMA Examples SimpleRover ;
 
 if ! $(SimpleRover_READY) {
  # Create a build target to run a problem
- RunProblem SimpleRover : SimpleRover-initial-state.nddl : SimpleRover-planner : PlannerConfig.xml ;
+ RunNDDLProblem SimpleRover : SimpleRover-initial-state.nddl : SimpleRover-planner : PlannerConfig.xml ;
 
  # Create a build target for the planner executable with the given model.
  NddlMain SimpleRover-planner : SimpleRover-Main.cc : SimpleRover-model.nddl : System : SimpleRover-planner ;
- # Create a build target for the planner shared library with model.
- ModuleSharedLibrary SimpleRover : SimpleRover-model.o : System : SimpleRover ;
+
+ Depends run-examples-tests : SimpleRover ;
+
 } # SimpleRover_READY
