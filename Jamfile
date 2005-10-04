@@ -1,6 +1,5 @@
 SubDir PLASMA ;
 
-
 if ! $(PLASMA_READY) {
 
 if SHARED in $(LIBRARIES) { 
@@ -17,15 +16,24 @@ Depends plasma-all : all ;
 Module plasma : all System ;
 
 Depends run-tests : tests ;
-Depends run-all-tests : run-tests run-nddl-tests run-nddl-planner-tests run-checkin-tests run-hsts-planner-tests ;
+
+Depends run-all-tests : run-tests ;
+Depends run-all-tests : run-checkin-tests ;
+Depends run-all-tests : run-examples-tests ;
+Depends run-all-tests : run-nddl-tests ;
+Depends run-all-tests : run-nddl-planner-tests ;
+Depends run-all-tests : run-hsts-planner-tests ;
+
 Depends run-checkin-tests : check-cvs-changes ;
 Depends run-checkin-tests : run-tests ;
 Depends run-checkin-tests : run-nddl-planner-tests ;
-#Depends run-checkin-tests : run-makefile-tests ; commented out because check-makefile fails
-NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
+
 #Depends run-makefile-tests : check-makefile ; commented out because check-makefile fails
+
 # install tests designed for off site customers to check system is installed without cvs update
 Depends run-install-tests : run-tests ;
+
+NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
 
 SubInclude PLASMA TinyXml ;
 SubInclude PLASMA Utils ;
@@ -41,6 +49,8 @@ SubInclude PLASMA Solvers ;
 SubInclude PLASMA Aver ;
 SubInclude PLASMA System ;
 SubInclude PLASMA HSTS ;
+
+SubInclude PLASMA Examples ;
 
 RemoveBinaries clean-all ;
 #Depends clean-all : clean clean-nddl-xml clean-system-xml clean-system-output ;
