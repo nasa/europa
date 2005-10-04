@@ -43,11 +43,12 @@ SubInclude PLASMA System ;
 SubInclude PLASMA HSTS ;
 
 RemoveBinaries clean-all ;
-Depends clean-all : clean clean-nddl-xml clean-system-xml clean-system-output ;
+#Depends clean-all : clean clean-nddl-xml clean-system-xml clean-system-output ;
+Depends clean-all : clean clean-nddl-xml clean-system-xml ;
 
 ExecuteSO check-cvs-changes : checkcvs : $(PLASMA) ;
 
 #NOT WORKING. DONT KNOW WHY.
-#ExecuteSO check-makefile : checkmakeproject : $(PLASMA) ;
+ExecuteSO check-makefile : checkmakeproject : $(PLASMA) ;
 
 } # PLASMA_READY
