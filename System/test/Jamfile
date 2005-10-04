@@ -38,8 +38,8 @@ checkin-tests =
         force-object-distribution
         ;
 
-#RunProblem <model> : <configurationFile> : <heuristicsFile> ;
-rule RunProblem {
+#RunPlannerProblem <model> : <configurationFile> : <heuristicsFile> ;
+rule RunPlannerProblem {
   local model = $(1) ;
   local configurationFile = $(2) ;
   local heuristicsFile = $(3) ;
@@ -87,32 +87,32 @@ rule RunProblem {
 #
 # PLANNER SYSTEM TESTS
 #
-RunProblem HTX.1.nddl : $(DEFAULT_PCONFIG) : HTX.1.heur ;
-RunProblem HTX.2.nddl : $(DEFAULT_PCONFIG) : HTX.2.heur ;
-RunProblem HTX.3.nddl : $(DEFAULT_PCONFIG) : HTX.3.heur ;
-RunProblem Rover-transaction.nddl : $(DEFAULT_PCONFIG) : Rover.heur ;
-RunProblem basic-types.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem basic-model-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ; 
-RunProblem k9.backtrack.moderate-transaction.nddl  : $(DEFAULT_PCONFIG) : k9.heur ;
-RunProblem k9-transaction.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem path-filter-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem foreach-transaction.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem force-object-distribution.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem resource-backtrack-test.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem rejection.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem constrain-transaction.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem parent-predicate.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem k9-initial.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem backtr.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem better-res.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ; 
-RunProblem CAPER.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem monkey1monkey-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem basic-model-backtrack.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem EOS-backtrack-test.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem gnats_2837-tx.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem DynamicObjTest.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem rules.0.tx.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunProblem gnats_2572_interval-tx.nddl  : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem HTX.1.nddl : $(DEFAULT_PCONFIG) : HTX.1.heur ;
+RunPlannerProblem HTX.2.nddl : $(DEFAULT_PCONFIG) : HTX.2.heur ;
+RunPlannerProblem HTX.3.nddl : $(DEFAULT_PCONFIG) : HTX.3.heur ;
+RunPlannerProblem Rover-transaction.nddl : $(DEFAULT_PCONFIG) : Rover.heur ;
+RunPlannerProblem basic-types.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem basic-model-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ; 
+RunPlannerProblem k9.backtrack.moderate-transaction.nddl : $(DEFAULT_PCONFIG) : k9.heur ;
+RunPlannerProblem k9-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem path-filter-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem foreach-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem force-object-distribution.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem resource-backtrack-test.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem rejection.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem constrain-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem parent-predicate.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem k9-initial.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem backtr.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem better-res.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ; 
+RunPlannerProblem CAPER.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem monkey1monkey-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem basic-model-backtrack.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem EOS-backtrack-test.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem gnats_2837-tx.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem DynamicObjTest.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem rules.0.tx.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem gnats_2572_interval-tx.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
 
 #
 # PERFORMANCE TESTS
@@ -172,7 +172,7 @@ for numSatellites in 1 {
 #
 # PLANNER CONTROL TESTS
 #
-ModuleMain runPlannerControlTest : runPlannerControlTest.cc :  : planner-control-tests ;
+ModuleMain runPlannerControlTest : runPlannerControlTest.cc : : planner-control-tests ;
 LinkSharedLibrariesNoDeps runPlannerControlTest_g_rt : $(DLOPEN_LIBRARY) ;
 
 
