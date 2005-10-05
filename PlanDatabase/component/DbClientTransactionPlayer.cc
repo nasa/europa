@@ -850,7 +850,7 @@ namespace EUROPA {
       return parseVariable(name);
     }
     if (strcmp(variable.Value(), "variable") == 0) {
-      int index;
+      int index = -1;
       const char * i = variable.Attribute("index", &index);
       check_error(i != NULL);
       check_error(0 <= index);
