@@ -23,7 +23,7 @@ LocalDepends tests : run-hsts-module-tests ;
 # Commented out tests are failing for various reasons; see each test for more info.
 LocalDepends run-hsts-planner-tests :
         xmonkey
-#       litaEuropa2 #commented out for run
+#       litaEuropa2
         monkey-timeline
         monkey-timeline-hacked
         monkey-timeline-hacked2
@@ -51,8 +51,8 @@ LocalDepends run-hsts-planner-tests :
         merTest7 # never run by NewPlan?!
         merTest8
         merTest9
-#       merTest10 # needs heuristics?! ... or 1938 steps
-        merTest11
+        merTest10 # needs heuristics?! ... or 1938 steps
+        merTest11 # needs heuristics?!
         merTest12 # needs heuristics?!
         merTest13
         merTest14 # needs heuristics?!
@@ -69,7 +69,7 @@ LocalDepends run-hsts-planner-tests :
         merTest7-h
         merTest8-h
         merTest9-h
-#       merTest10-h
+        merTest10-h
 #       merTest11-h
         merTest12-h
         merTest13-h
