@@ -4,14 +4,8 @@ rule RemoveBinaries {
 }
 
 actions RemoveBinaries {
-  find . -name '*.o' -exec rm {} \;
-  find . -name '*.a' -exec rm {} \;
-  find . -name '*.so' -exec rm {} \;
-  find . -name '*_g' -exec rm {} \;
-  find . -name '*_o' -exec rm {} \;
-  find . -name '*_p' -exec rm {} \;
-  find . -name '*_rt' -exec rm {} \;
-  find . -name '*_no' -exec rm {} \;
+  # '*.output' & '*.gprof' should probably have separate rules and actions, but ...
+  find . \( -name '*.[ao]' -o -name '*.so' -o -name '*_[gop]' -o -name '*_rt' -o -name '*_no' -o -name '*.output' -o -name '*.gprof' \) -exec rm {} \;
 }
 
 {
