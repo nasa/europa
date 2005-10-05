@@ -53,7 +53,6 @@ SubInclude PLASMA HSTS ;
 SubInclude PLASMA Examples ;
 
 RemoveBinaries clean-all ;
-#Depends clean-all : clean clean-nddl-xml clean-system-xml clean-system-output ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;
 
 ExecuteSO check-cvs-changes : checkcvs : $(PLASMA) ;
