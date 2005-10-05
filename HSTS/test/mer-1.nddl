@@ -4,7 +4,7 @@
 #include "../../NDDL/core/PlannerConfig.nddl"
 #include "mer.nddl"
 
-PlannerConfig world = new PlannerConfig(129513607, 129602383, 1000);
+PlannerConfig world = new PlannerConfig(129513607, 129602383, 2000);
 
 Comm_Window_Class CommWindow = new Comm_Window_Class();
 
