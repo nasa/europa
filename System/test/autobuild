@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: autobuild,v 1.124 2005-10-04 20:21:15 wedgingt Exp $ @email.arc.nasa.gov
+# $Id: autobuild,v 1.125 2005-10-05 15:32:28 wedgingt Exp $ @email.arc.nasa.gov
 #
 # Automatically build most/all variants of the EUROPA planner system.
 #   See just below (or run with '-h') for (minimal) usage information.
@@ -97,7 +97,7 @@ case "$OS" in
         CVS_HOME=/usr/local
         GCC_ROOTDIR=/usr/local/beta/gcc-3.3.3
         JAM_HOME=/usr/local/beta/bin
-        JAVA_HOME=/usr/local/j2sdk1.4.2_05
+        JAVA_HOME=/usr/local/jdk1.5.0_04
         ;;
 esac
 
