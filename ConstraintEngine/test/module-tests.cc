@@ -1115,6 +1115,29 @@ private:
     c0.undoDeactivation();
     assertTrue(c0.isActive());
 
+    // Now restrict the base domains to automatically deactivate
+    v0.restrictBaseDomain(IntervalIntDomain(1, 1));
+    assertTrue(c0.isActive());
+    v1.restrictBaseDomain(IntervalIntDomain(1, 1));
+    assertTrue(c0.isActive()); // Have not propagated yet!
+    ENGINE->propagate();
+    assertFalse(c0.isActive()); // Now we have propagated, so should be deactivated.
+
+    // Make sure it stays deactive
+    c0.undoDeactivation();
+    assertFalse(c0.isActive());
+
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
+    EqualConstraint c1(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId()));
+    ENGINE->propagate();
+    v2.restrictBaseDomain(IntervalIntDomain(1, 1));
+    v3.restrictBaseDomain(IntervalIntDomain(2, 2));
+
+    // Now propagate. The constraint will not be deactivated.
+    ENGINE->propagate();
+    assertTrue(c1.isActive());
+
     return true;
   }
 

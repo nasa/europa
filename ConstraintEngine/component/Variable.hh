@@ -97,11 +97,6 @@ namespace EUROPA {
      */
     const AbstractDomain& baseDomain() const;
 
-    /**
-     * @brief Restrict the base domain. This cannot be reversed. It is a special update operation
-     */
-    virtual void restrictBaseDomain(const AbstractDomain& baseDomain);
-
     virtual void handleSpecified(const AbstractDomain& specDomain) {}
     
     virtual void handleReset() {}
@@ -109,6 +104,7 @@ namespace EUROPA {
   protected:
     AbstractDomain& internal_specifiedDomain();
     AbstractDomain& internal_baseDomain();
+    virtual void handleRestrictBaseDomain(const AbstractDomain& baseDomain);
   private:
 
     /**
@@ -220,7 +216,7 @@ namespace EUROPA {
   }
 
   template<class DomainType>
-  void Variable<DomainType>::restrictBaseDomain(const AbstractDomain& newBaseDomain) {
+  void Variable<DomainType>::handleRestrictBaseDomain(const AbstractDomain& newBaseDomain) {
     check_error(validate());
     if(m_baseDomain.intersect(newBaseDomain))
       internalSpecify(m_baseDomain);

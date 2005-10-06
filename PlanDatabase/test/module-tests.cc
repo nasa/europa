@@ -1197,21 +1197,24 @@ private:
       IntervalToken t0(db, 
 		       DEFAULT_PREDICATE(), 
 		       true,
-		       IntervalIntDomain(0, 10),
-		       IntervalIntDomain(0, 20),
-		       IntervalIntDomain(1, 1000));
+		       IntervalIntDomain(0, 0),
+		       IntervalIntDomain(1, 1),
+		       IntervalIntDomain(1, 1));
   
       t0.activate();
 
       t1 = (new IntervalToken(t0.getId(), "any", 
 				      DEFAULT_PREDICATE(), 
-				      IntervalIntDomain(0, 10),
-				      IntervalIntDomain(0, 20),
-				      IntervalIntDomain(1, 1000)))->getId();
+				      IntervalIntDomain(0, 0),
+				      IntervalIntDomain(1, 1),
+				      IntervalIntDomain(1, 1)))->getId();
 
       t1->activate();
       assertTrue(ce->propagate());
       t1->commit();
+      t0.restrictBaseDomains();
+      t1->restrictBaseDomains();
+      assertTrue(ce->propagate());
       t0.terminate();
     }
 
@@ -3106,6 +3109,12 @@ private:
 	lastToken = tokenA;
 
       timeline.constrain(lastToken, tokenA); // Place at the end
+      slaveB->getObject()->specify(timeline.getId());
+      slaveC->getObject()->specify(timeline.getId());
+      ce->propagate();
+      tokenA->restrictBaseDomains();
+      slaveB->restrictBaseDomains();
+      slaveC->restrictBaseDomains();
 
       lastToken = tokenA;
     }
@@ -3146,6 +3155,7 @@ private:
 					IntervalIntDomain(),
 					IntervalIntDomain(1, 1)))->getId();
     tokenA->activate();
+    tokenA->commit();
 
     for(unsigned int i=startTick+1;i<endTick;i++){
       TokenId tokenB = (new IntervalToken(tokenA, "any" ,
@@ -3156,8 +3166,10 @@ private:
 
 
       tokenB->activate();
-
       timeline.constrain(tokenA, tokenB); // Place at the end
+      ce->propagate();
+      tokenB->restrictBaseDomains();
+      tokenA->restrictBaseDomains();
       tokenA = tokenB;
     }
 
@@ -3167,7 +3179,6 @@ private:
     // Now nuke in one shot just by nuking up to the end of the first tick window
     assertTrue(db->archive(startTick+1) == endTick);
     assertTrue(db->getTokens().empty());
-    assertTrue(ce->pending());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -3206,6 +3217,9 @@ private:
       // Commit it. Should prevent deallocation until it is archived within
       // its own tick
       tokenB->commit();
+      ce->propagate();
+      tokenA->restrictBaseDomains();
+      tokenB->restrictBaseDomains();
       tokenA = tokenB;
     }
 
