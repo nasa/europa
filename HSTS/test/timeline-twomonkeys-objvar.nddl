@@ -4,7 +4,7 @@
 #include "../../NDDL/core/PlannerConfig.nddl"
 #include "monkey-objvar.nddl"
 
-PlannerConfig world = new PlannerConfig(0, 200, 1000);
+PlannerConfig world = new PlannerConfig(0, 200, 200); // 5000 steps is not enough
 
 Monkey_Class Monkey1 = new Monkey_Class();
 
