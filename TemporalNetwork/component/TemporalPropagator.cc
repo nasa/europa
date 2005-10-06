@@ -590,18 +590,28 @@ namespace EUROPA {
 
     TemporalConstraintId newConstraint;
 
-    Time lbt =0, ubt=0;
-
-    // Get the current bounds in the temporal nework
+    // Initialize the bounds in the temporal network
+    Time lbt = MINUS_INFINITY;
+    Time ubt = PLUS_INFINITY;
+    
+    // If we have a timpeoint for this variable, restruct bounds to that
     if(var->getExternalEntity().isId()){
       const TimepointId& timepoint = getTimepoint(var);
       timepoint->getBounds(lbt, ubt);
     }
-    else
-      tnetConstraint->getBounds(lbt, ubt);
 
-    check_error(lbt <= ubt);
-    check_error(lb <= ub);
+    // Now see if we get tighter bounds from the constraint
+    {
+      Time tempLb, tempUb;
+      tnetConstraint->getBounds(tempLb, tempUb);
+      checkError(tempLb <= tempUb, tempLb << ">" << tempUb);
+      lbt = std::max(tempLb, lbt);
+      ubt = std::min(tempUb, ubt);
+    }
+
+    // Note that at this point we may in fact have a case where lbt > ubt in the event of a relaxation.
+
+    checkError(lb <= ub, lb << ">" << ub);
 
     debugMsg("TemporalPropagator:updateTemporalConstraint", "Update base constraint for Variable " << var->getKey() 
              << " [" << lbt << "," << ubt << "]"
