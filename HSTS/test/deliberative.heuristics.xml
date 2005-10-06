@@ -25,6 +25,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <Preference>
    <DomainOrder>
     <Value>OK</Value>
+    <Value>Failed</Value>
    </DomainOrder>
   </Preference>
   <VariableSpec>
@@ -39,7 +40,8 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   <Priority>1</Priority>
   <Preference>
    <DomainOrder>
-    <Value>1</Value>
+    <Value>true</Value>
+    <Value>false</Value>
    </DomainOrder>
   </Preference>
   <VariableSpec>
