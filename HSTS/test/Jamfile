@@ -23,20 +23,20 @@ LocalDepends tests : run-hsts-module-tests ;
 # Commented out tests are failing for various reasons; see each test for more info.
 LocalDepends run-hsts-planner-tests :
         xmonkey
-#       litaEuropa2
+#       litaEuropa2 # See missionExec.init.e2; broken since before 24 Aug 2005
         monkey-timeline
         monkey-timeline-hacked
         monkey-timeline-hacked2
         monkey-timeline-hacked3
-#       monkey-timeline-newHeur
+        monkey-timeline-newHeur
         monkey-timeline-extendedHeur
         monkey1-timeline1
         monkey1-timeline-objvar
-#       monkey1-timeline-twomonkeys-objvar
-#       monkey1-timeline-twomonkeys
-#       monkey2-timeline2 #commented out for run
-#       monkey2-timeline22 #commented out for run
-#       monkey2-timeline23 #commented out for run
+#       monkey1-timeline-twomonkeys-objvar # see timeline-twomonkeys-objvar.nddl
+#       monkey1-timeline-twomonkeys # see timeline-twomonkeys.nddl
+        monkey2-timeline2 # see timeline2.nddl
+        monkey2-timeline22 # see timeline22.nddl
+        monkey2-timeline23 # see timeline23.nddl
         robotTests
         roverTest1
         roverTest2
@@ -44,33 +44,33 @@ LocalDepends run-hsts-planner-tests :
         roverTest4
         merTest1
         merTest2
-        merTest3  # needs heuristics?!
-        merTest4  # never run by NewPlan?!
+        merTest3
+        merTest4
         merTest5
-        merTest6  # never run by NewPlan?!
-        merTest7 # never run by NewPlan?!
+        merTest6
+        merTest7
         merTest8
         merTest9
         merTest10 # needs heuristics?! ... or 1938 steps
-        merTest11 # needs heuristics?!
-        merTest12 # needs heuristics?!
+        merTest11
+        merTest12
         merTest13
-        merTest14 # needs heuristics?!
-        merTest15 # needs heuristics?!
-        merTest16 # needs heuristics?!
+        merTest14
+        merTest15
+        merTest16
         merTest17
         merTest18
         merTest1-h
         merTest2-h
         merTest3-h
-#       merTest4-h
+        merTest4-h # see R2-files-R21-Bill.nddl
         merTest5-h
         merTest6-h
         merTest7-h
         merTest8-h
         merTest9-h
         merTest10-h
-#       merTest11-h
+        merTest11-h # see mer-bill-2.nddl
         merTest12-h
         merTest13-h
         merTest14-h
@@ -79,35 +79,35 @@ LocalDepends run-hsts-planner-tests :
         merTest17-h
         merTest18-h
         gnats-C3
-#       gnats-NoBranchBug # Will not pass while singleton gaurds ignore no branch designations
-#       gnats-P4-C3 
-#       gnats-P4-C3eq
+#       gnats-NoBranchBug # Will not pass while singleton guards ignore no branch designations.
+        gnats-P4-C3 # see P4-C3-init.nddl
+        gnats-P4-C3eq # identical to prior except for a different constraint is used, which does not affect the semantics of the problem.
         gnats-SC
         gnats-rover-fixed
         gnats-sum
         dnp-timeline
-#       dnp-DNP2 
-#       dnp-allDSS 
-#       dnp-fourFreeObs # times out (after 3-4 minutes on tara)
-#       dnp-DNP3fourFreeObs # times out (after 9-10 minutes on tara)
-#       dnp-DNP3
-#       dnp-fourFreeObsNotEmpty # times out (after 9-10 minutes on tara)
-#       dnp-freeObs # needs heursitics?!
-#       dnp-freeObsNoEmpty # needs heuristics?!
-#       dnp-tenFreeObs # needs heuristics?!
+        dnp-DNP2 # see DNP2.timeline.nddl
+        dnp-allDSS # see allDSS.nddl
+#       dnp-fourFreeObs # see fourFreeObs.nddl
+#       dnp-DNP3fourFreeObs # see DNP3.fourFreeObs.nddl
+#       dnp-DNP3 # see DNP3.timeline.nddl
+#       dnp-fourFreeObsNotEmpty # see fourFreeObs-initBufNotEmpty.nddl
+#       dnp-freeObs # see freeObs.nddl
+#       dnp-freeObsNoEmpty # see freeObs.noEmpty.nddl
+#       dnp-tenFreeObs # see tenFreeObs.nddl
         dnp-threeFreeObs
-#       dnp-twentyFreeObs # times out (after 8-9 minutes on tara)
-#       dnp-twoFreeObs #commented out for run
+#       dnp-twentyFreeObs # see twentyFreeObs.nddl
+#       dnp-twoFreeObs # see twoFreeObs.nddl
         dnp-timeline-h
 #       dnp-DNP2-h 
 #       dnp-DNP23-h
 #       dnp-allDSS-h 
-#       dnp-fourFreeObs-h # times out (after 4-5 minutes on tara)
-#       dnp-DNP3fourFreeObs-h # times out (after 8-9 minutes on tara)
+#       dnp-fourFreeObs-h
+#       dnp-DNP3fourFreeObs-h
 #       dnp-DNP3-h
-#       dnp-fourFreeObsNotEmpty-h # times out (after 9-10 minutes on tara)
-#       dnp-freeObs-h # times out (after 40-45 minutes on tara)
-#       dnp-freeObsNoEmpty-h # times out (after 37-38 minutes on tara)
+#       dnp-fourFreeObsNotEmpty-h
+#       dnp-freeObs-h
+#       dnp-freeObsNoEmpty-h
 #       dnp-tenFreeObs-h
 #       dnp-threeFreeObs-h
 #       dnp-twentyFreeObs-h
