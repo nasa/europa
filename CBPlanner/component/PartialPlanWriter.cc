@@ -1936,22 +1936,19 @@ namespace EUROPA {
 
     void PartialPlanWriter::parseTransactionConfigSection(std::ifstream& configFile) {
       char buf[PATH_MAX];
-      while(!configFile.eof()) {
+      while (!configFile.eof()) {
         configFile.getline(buf, PATH_MAX);
         //std::cerr << "DEBUG:reading buf: " << buf << std::endl;
-        if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
+        if (buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
           continue;
         std::string line = buf;
         bool foundTransaction = false;
-        for(int i = 0; i < transactionTotal; i++) {
-          if(line == transactionNameStrs[i]) {
-            allowTransaction[i] = true;
-            foundTransaction = true;
-            break;
-          }
-        }
-        if(!foundTransaction) {
-          for(int i = strlen(buf); i >= 0; i--)
+        for (int i = 0; !foundTransaction && i < transactionTotal; i++)
+          if (line == transactionNameStrs[i])
+            allowTransaction[i] = foundTransaction = true;
+        if (!foundTransaction) {
+          debugMsg("PartialPlanWriter:parseTransactionConfigSection", "unsupported keyword(?) " << buf);
+          for (int i = strlen(buf); i >= 0; i--)
             configFile.putback(buf[i]);
           return;
         }
