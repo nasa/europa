@@ -5,6 +5,8 @@
 #include "TemporalNetworkListener.hh"
 #include "ConstraintEngine.hh"
 #include "ConstrainedVariable.hh"
+#include "IntervalIntDomain.hh"
+#include "TokenVariable.hh"
 #include "Constraint.hh"
 #include "Utils.hh"
 #include "Debug.hh"
@@ -427,11 +429,42 @@ namespace EUROPA {
                  << dom.toString() << " for " << var->toString());
 
       dom.intersect(lb, ub);
+
+      if(TokenId::convertable(var->getParent())){
+	TokenId token = var->getParent();
+	if (var == token->getStart() || var == token->getEnd())
+	  updateDuration(token);
+      }
     }
 
     m_tnet->resetUpdatedTimepoints();
   }
       
+  void TemporalPropagator::updateDuration(const TokenId& token) const{
+    IntervalIntDomain& domx = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->getStart()));
+    IntervalIntDomain& domy = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->getDuration()));
+    IntervalIntDomain& domz = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->getEnd()));
+
+    check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
+
+    double xMin, xMax, yMin, yMax, zMin, zMax;
+    domx.getBounds(xMin, xMax);
+    domy.getBounds(yMin, yMax);
+    domz.getBounds(zMin, zMax);
+
+    // Process Y
+    double yMaxCandidate = Infinity::minus(zMax, xMin, yMax);
+    if (yMax > yMaxCandidate)
+      yMax = domy.translateNumber(yMaxCandidate, false);
+
+    double yMinCandidate = Infinity::minus(zMin, xMax, yMin);
+    if (yMin < yMinCandidate)
+      yMin = domy.translateNumber(yMinCandidate, true);
+
+    if (domy.intersect(yMin,yMax) && domy.isEmpty())
+      return;
+  }
+
   bool TemporalPropagator::canPrecede(const ConstrainedVariableId& first, const ConstrainedVariableId& second) {
     check_error(!updateRequired());
     const TimepointId& fir = getTimepoint(first);
@@ -593,24 +626,10 @@ namespace EUROPA {
 
     TemporalConstraintId newConstraint;
 
-    // Initialize the bounds in the temporal network
-    Time lbt = MINUS_INFINITY;
-    Time ubt = PLUS_INFINITY;
-    
-    // If we have a timpeoint for this variable, restruct bounds to that
-    //if(var->getExternalEntity().isId()){
-    //const TimepointId& timepoint = getTimepoint(var);
-    //timepoint->getBounds(lbt, ubt);
-    //}
-
-    // Now see if we get tighter bounds from the constraint
-    {
-      Time tempLb, tempUb;
-      tnetConstraint->getBounds(tempLb, tempUb);
-      checkError(tempLb <= tempUb, tempLb << ">" << tempUb);
-      lbt = std::max(tempLb, lbt);
-      ubt = std::min(tempUb, ubt);
-    }
+    // Initialize the bounds from the current constraint
+    Time lbt, ubt;
+    tnetConstraint->getBounds(lbt, ubt);
+    checkError(lbt <= ubt, lbt << ">" << ubt);
 
     // Note that at this point we may in fact have a case where lbt > ubt in the event of a relaxation.
 

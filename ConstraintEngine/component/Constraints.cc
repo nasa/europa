@@ -6,29 +6,8 @@
 #include "BoolDomain.hh"
 #include "EnumeratedDomain.hh"
 #include "Utils.hh"
-#include <cmath>
 
 namespace EUROPA {
-
-  /**
-   * Utility class that might get promoted later.
-   */
-  class Infinity {
-  public:
-    static double plus(double n1, double n2, double defaultValue) {
-      // Why cast to int and use abs()?  Why not just use fabs()? --wedgingt 2004 Feb 24
-      if (abs((int)n1) == PLUS_INFINITY || abs((int)n2) == PLUS_INFINITY)
-	return(defaultValue);
-      return(n1 + n2);
-    }
-
-    static double minus(double n1, double n2, double defaultValue) {
-      // Why cast to int and use abs()?  Why not just use fabs()? --wedgingt 2004 Feb 24
-      if (abs((int)n1) == PLUS_INFINITY || abs((int)n2) == PLUS_INFINITY)
-	return(defaultValue);
-      return(n1 - n2);
-    }
-  };
 
   AddEqualConstraint::AddEqualConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,

@@ -6,6 +6,7 @@
 #include "TemporalNetworkDefs.hh"
 #include "TimepointWrapper.hh"
 #include "IntervalIntDomain.hh"
+#include "Token.hh"
 
 #include <set>
 
@@ -143,6 +144,11 @@ namespace EUROPA {
      * @brief Test that the buffer status is correct prior to propagation
      */
     bool isValidForPropagation() const;
+
+    /**
+     * @brief Update duration bounds
+     */
+    void updateDuration(const TokenId& token) const;
 
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
 
