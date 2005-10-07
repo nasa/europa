@@ -34,7 +34,8 @@ namespace EUROPA {
   typedef Id<TimepointWrapper> TimepointWrapperId;
 
   TemporalPropagator::TemporalPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine)
-    : Propagator(name, constraintEngine), m_tnet((new TemporalNetwork())->getId()), m_mostRecentRepropagation(1) {}
+    : Propagator(name, constraintEngine), m_tnet((new TemporalNetwork())->getId()), 
+      m_mostRecentRepropagation(1){}
 
   TemporalPropagator::~TemporalPropagator() {
     discard(false);
@@ -154,6 +155,7 @@ namespace EUROPA {
                                               int argIndex, 
                                               const ConstraintId& constraint, 
                                               const DomainListener::ChangeType& changeType){
+
     debugMsg("TemporalPropagator:handleNotification",
              variable->toString() << " change through " << constraint->getName().toString());
 
@@ -401,6 +403,7 @@ namespace EUROPA {
    */
   void TemporalPropagator::updateTempVar() {
     debugMsg("TemporalPropagator:updateTempVar", "In updateTempVar");
+
     const std::set<TimepointId>& updatedTimepoints = m_tnet->getUpdatedTimepoints();
     for(std::set<TimepointId>::const_iterator it = updatedTimepoints.begin(); it != updatedTimepoints.end(); ++it){
       const TimepointId& tp = *it;
@@ -595,10 +598,10 @@ namespace EUROPA {
     Time ubt = PLUS_INFINITY;
     
     // If we have a timpeoint for this variable, restruct bounds to that
-    if(var->getExternalEntity().isId()){
-      const TimepointId& timepoint = getTimepoint(var);
-      timepoint->getBounds(lbt, ubt);
-    }
+    //if(var->getExternalEntity().isId()){
+    //const TimepointId& timepoint = getTimepoint(var);
+    //timepoint->getBounds(lbt, ubt);
+    //}
 
     // Now see if we get tighter bounds from the constraint
     {
