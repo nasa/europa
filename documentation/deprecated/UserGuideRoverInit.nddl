@@ -1,0 +1,45 @@
+
+#include "UserGuideRover.nddl"
+
+PlannerConfig plannerConfiguration = new PlannerConfig(0,1000,500);
+
+Location lander = new Location(0, 0, "lander");
+Location rock1 = new Location(9, 9, "rock1");
+Location rock2 = new Location(1, 6, "rock2");
+Location rock3 = new Location(4, 8, "rock3");
+Location rock4 = new Location(3, 9, "rock4");
+
+// Allocate paths
+Path p1 = new Path("Very Long Way", lander, rock4, -2000.0, Category.'low');
+Path p2 = new Path("Moderately Long Way", lander, rock4, -1500.0, Category.'medium');
+Path p3 = new Path("Short Cut", lander, rock4, -400.0, Category.'high');
+
+// Allocate Rover
+Battery battery = new Battery(1000.0, 0.0, 1000.0);
+Rover spirit = new Rover(battery);
+
+close();
+
+// Establish the initial position for spirit
+goal(Navigator.At initialPosition);
+initialPosition.start.specify(0); // Starts at the beginning of the horizon
+initialPosition.location.specify(lander); // Initial position is lander
+
+// Establish a goal - to shoot an image at a location sometime before the
+// experiment that follows
+goal(Camera.ShootRequest image);
+image.filtering.specify(true);
+image.view.specify(rock4);
+image.length.specify(10);
+leq(image.start,49);
+leq(0,image.start);
+
+// Establish a goal - to position an instrument at a location
+goal(Stowable_Instrument.Positioned experiment);
+experiment.destination.specify(rock4); // Want to get to rock4
+eq(experiment.end,100);
+
+// Establish the initial instrument state
+goal(Stowable_Instrument.Stowed stowed);
+eq(stowed.object,spirit.rat);
+stowed.start.specify(0);
