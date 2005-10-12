@@ -1,0 +1,11 @@
+SubDir HelloWorld ;
+
+if ! $(HelloWorld_READY) {
+ # Create a build target to run a problem
+ RunProblem HelloWorld : HelloWorld-initial-state.nddl : HelloWorld-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain HelloWorld-planner : HelloWorld-Main.cc : HelloWorld-model.nddl : System : HelloWorld-planner ;
+ # Create a build target for the planner shared library with model.
+ ModuleSharedLibrary HelloWorld : HelloWorld-model.o : System : HelloWorld ;
+} # HelloWorld_READY
