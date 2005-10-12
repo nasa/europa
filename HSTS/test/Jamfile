@@ -28,15 +28,15 @@ LocalDepends run-hsts-planner-tests :
         monkey-timeline-hacked
         monkey-timeline-hacked2
         monkey-timeline-hacked3
-        monkey-timeline-newHeur
+# 3114      monkey-timeline-newHeur
         monkey-timeline-extendedHeur
         monkey1-timeline1
         monkey1-timeline-objvar
 #       monkey1-timeline-twomonkeys-objvar # see timeline-twomonkeys-objvar.nddl
 #       monkey1-timeline-twomonkeys # see timeline-twomonkeys.nddl
-        monkey2-timeline2 # see timeline2.nddl
-        monkey2-timeline22 # see timeline22.nddl
-        monkey2-timeline23 # see timeline23.nddl
+# 3114        monkey2-timeline2 # see timeline2.nddl
+# 3114        monkey2-timeline22 # see timeline22.nddl
+# 3114        monkey2-timeline23 # see timeline23.nddl
         robotTests
         roverTest1
         roverTest2
@@ -63,14 +63,14 @@ LocalDepends run-hsts-planner-tests :
         merTest1-h
         merTest2-h
         merTest3-h
-        merTest4-h # see R2-files-R21-Bill.nddl
-        merTest5-h
+#3114        merTest4-h # see R2-files-R21-Bill.nddl
+#3114        merTest5-h # see R2-files-R21-IDD2_g
         merTest6-h
         merTest7-h
         merTest8-h
         merTest9-h
         merTest10-h
-        merTest11-h # see mer-bill-2.nddl
+#3114        merTest11-h # see mer-bill-2.nddl
         merTest12-h
         merTest13-h
         merTest14-h
@@ -80,14 +80,14 @@ LocalDepends run-hsts-planner-tests :
         merTest18-h
         gnats-C3
 #       gnats-NoBranchBug # Will not pass while singleton guards ignore no branch designations.
-        gnats-P4-C3 # see P4-C3-init.nddl
-        gnats-P4-C3eq # identical to prior except for a different constraint is used, which does not affect the semantics of the problem.
+#3114        gnats-P4-C3 # see P4-C3-init.nddl
+#3114        gnats-P4-C3eq # identical to prior except for a different constraint is used, which does not affect the semantics of the problem.
         gnats-SC
         gnats-rover-fixed
         gnats-sum
         dnp-timeline
-        dnp-DNP2 # see DNP2.timeline.nddl
-        dnp-allDSS # see allDSS.nddl
+#3114        dnp-DNP2 # see DNP2.timeline.nddl
+#3114        dnp-allDSS # see allDSS.nddl
 #       dnp-fourFreeObs # see fourFreeObs.nddl
 #       dnp-DNP3fourFreeObs # see DNP3.fourFreeObs.nddl
 #       dnp-DNP3 # see DNP3.timeline.nddl
