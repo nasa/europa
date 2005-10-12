@@ -3137,8 +3137,7 @@ private:
 
   /**
    * @brief Now we want to verify that uncommitted dependent tokens reaching into the future are correctly
-   * removed if we allocate a single root master, and then iteratively allocate slaves. We then archive only
-   * the first tick and make sure the whole database is cleared.
+   * preserved.
    */
   static bool testArchiving2() {
     DEFAULT_SETUP(ce, db, false);
@@ -3176,9 +3175,10 @@ private:
     // Propagate to consistency first
     ce->propagate();
 
-    // Now nuke in one shot just by nuking up to the end of the first tick window
-    assertTrue(db->archive(startTick+1) == endTick);
-    assertTrue(db->getTokens().empty());
+    // Nuke one at a time, without any committing
+    for(unsigned int i=startTick+1;i<=endTick;i++){
+      assertTrue(db->archive(startTick+i) == 1);
+    }
 
     DEFAULT_TEARDOWN();
     return true;
