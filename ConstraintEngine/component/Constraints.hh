@@ -731,6 +731,24 @@ namespace EUROPA {
     static const unsigned int ARG_COUNT = 3;
   };
 
+  /**
+   * @brief AbsoluteValue(x, y) maintains the relation:
+   * @li x.lb >= 0
+   * @li x.ub = max(abs(y.lb), abs(y.ub))
+   */
+  class AbsoluteValue : public Constraint {
+  public:
+    AbsoluteValue(const LabelStr& name,
+		  const LabelStr& propagatorName,
+		  const ConstraintEngineId& constraintEngine,
+		  const std::vector<ConstrainedVariableId>& variables);
+    void handleExecute();
+  private:
+    IntervalDomain& m_x;
+    IntervalDomain& m_y;
+    static const unsigned int ARG_COUNT = 2;
+  };
+
   extern void initConstraintLibrary();
 }
 #endif

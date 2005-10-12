@@ -1780,6 +1780,35 @@ namespace EUROPA {
     m_x.intersect(m_y.getLowerBound(), m_z.getUpperBound());
   }
 
+  AbsoluteValue::AbsoluteValue(const LabelStr& name,
+			       const LabelStr& propagatorName,
+			       const ConstraintEngineId& constraintEngine,
+			       const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_x(static_cast<IntervalDomain&>(getCurrentDomain(variables[0]))),
+      m_y(static_cast<IntervalDomain&>(getCurrentDomain(variables[1]))) {
+    check_error(variables.size() == ARG_COUNT);
+  }
+  
+  void AbsoluteValue::handleExecute() {
+    double lb, ub;
+   
+    if(m_y.getLowerBound() >= 0) {
+      lb = m_y.getLowerBound();
+      ub = m_y.getUpperBound();
+    }
+    else {
+      if(m_y.getUpperBound() >= 0)
+	lb = 0.0;
+      else
+	lb = std::min(fabs(m_y.getLowerBound()), fabs(m_y.getUpperBound()));
+      ub = std::max(fabs(m_y.getLowerBound()), m_y.getUpperBound());
+    }
+
+    m_x.intersect(IntervalDomain(lb, ub));
+  }
+
+
   /**************************************************************************************/
 
   void initConstraintLibrary() {
@@ -1849,6 +1878,9 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
       REGISTER_CONSTRAINT(OrConstraint, "for", "Default"); // flexible or
       REGISTER_CONSTRAINT(OrConstraint, "or", "Default");
+
+      REGISTER_CONSTRAINT(AbsoluteValue, "absVal", "Default");
+      REGISTER_CONSTRAINT(AbsoluteValue, "abs", "Default");
 
       // Rotate scope right one (last var moves to front) to ...
       // ... change addleq constraint to GreaterOrEqThan constraint:
