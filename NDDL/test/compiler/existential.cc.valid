@@ -313,19 +313,23 @@ namespace NDDL {
     objectVar(Location, loc1, false, false);
     objectVar(Location, loc2, false, false);
     objectVar(Path, p4, false, true);
-    slave(World::Going, World.Going, g, LabelStr("any"));
+    objectVar(Path, g, false, false);
+    slave(World::Going, World.Going, going, LabelStr("any"));
     declareFilter(Path,p1);
-    allocateFilterCondition(p1, Location, varfromtok(tok(getId(), std::string("g")), std::string("from")), from, eq);
-    allocateFilterCondition(p1, Location, varfromtok(tok(getId(), std::string("g")), std::string("to")), to, eq);
+    allocateFilterCondition(p1, Location, varfromtok(tok(getId(), std::string("going")), std::string("from")), from, eq);
+    allocateFilterCondition(p1, Location, varfromtok(tok(getId(), std::string("going")), std::string("to")), to, eq);
     allocateFilterConstraint(p1);
     declareFilter(Path,p2);
-    allocateFilterCondition(p2, Location, varfromtok(tok(getId(), std::string("g")), std::string("from")), from, eq);
-    allocateFilterCondition(p2, Location, varfromtok(tok(getId(), std::string("g")), std::string("to")), to, eq);
+    allocateFilterCondition(p2, Location, varfromtok(tok(getId(), std::string("going")), std::string("from")), from, eq);
+    allocateFilterCondition(p2, Location, varfromtok(tok(getId(), std::string("going")), std::string("to")), to, eq);
     allocateFilterConstraint(p2);
     declareFilter(Path,p4);
     allocateFilterCondition(p4, Location, var(getId(),std::string("loc1")), from, eq);
     allocateFilterCondition(p4, Location, var(getId(),std::string("loc2")), to, eq);
     allocateFilterConstraint(p4);
+    declareFilter(Path,g);
+    allocateFilterCondition(g, Location, varfromtok(tok(getId(), std::string("going")), std::string("from")), from, eq);
+    allocateFilterConstraint(g);
     addChildRule(new World$initialState$1$0$0(m_id, getVariables(":object:")));
     addChildRule(new World$initialState$1$0$1(m_id, getVariables(":object:")));
     addChildRule(new World$initialState$1$0$2(m_id, getVariables(":object:")));
@@ -334,7 +338,7 @@ namespace NDDL {
   void World$initialState$1$0$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromtok(tok(getId(), std::string("g")), std::string("from")));
+      vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
       vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("rock")));
       rule_constraint(eq, vars);
     }
@@ -342,7 +346,7 @@ namespace NDDL {
   void World$initialState$1$0$1::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromtok(tok(getId(), std::string("g")), std::string("to")));
+      vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("to")));
       vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("hill")));
       rule_constraint(eq, vars);
     }
