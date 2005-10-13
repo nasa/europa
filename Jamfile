@@ -26,9 +26,10 @@ Depends run-all-tests : run-hsts-planner-tests ;
 
 Depends run-checkin-tests : check-cvs-changes ;
 Depends run-checkin-tests : run-tests ;
+Depends run-checkin-tests : run-makefile-tests ;
 Depends run-checkin-tests : run-nddl-planner-tests ;
 
-#Depends run-makefile-tests : check-makefile ; commented out because check-makefile fails
+Depends run-makefile-tests : check-makefile ;
 
 # install tests designed for off site customers to check system is installed without cvs update
 Depends run-install-tests : run-tests ;
@@ -57,7 +58,6 @@ Depends clean-all : clean clean-nddl-xml clean-system-xml ;
 
 ExecuteSO check-cvs-changes : checkcvs : $(PLASMA) ;
 
-#NOT WORKING. DONT KNOW WHY.
 ExecuteSO check-makefile : checkmakeproject : $(PLASMA) ;
 
 } # PLASMA_READY
