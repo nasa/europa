@@ -7,6 +7,11 @@ class Battery extends Resource {
   float actualQuantity;
   mulEq(quantity, conversionRate, actualQuantity);
  }
+
+ 
+ Battery(float ic, float ll_min, float ll_max){
+  super(ic, ll_min, ll_max);
+ }
 }
 
 enum Location {Hill, Rock, Lander}

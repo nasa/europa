@@ -75,15 +75,8 @@ then
 fi
 
 echo "Adding "$NAME"-model.nddl"
-# in the special case of a test project - don't specify path for include statements. 
-if [ "$NAME" == "$TEST_PROJECT_NAME" ]
-then
-  echo "#include \"Plasma.nddl\"" >> $DIRECTORY/$NAME-model.nddl
-  echo "#include \"PlannerConfig.nddl\"" >> $DIRECTORY/$NAME-model.nddl
-else
-  echo "#include \"../PLASMA/NDDL/core/Plasma.nddl\"" >> $DIRECTORY/$NAME-model.nddl
-  echo "#include \"../PLASMA/NDDL/core/PlannerConfig.nddl\"" >> $DIRECTORY/$NAME-model.nddl
-fi
+echo "#include \"Plasma.nddl\"" >> $DIRECTORY/$NAME-model.nddl
+echo "#include \"PlannerConfig.nddl\"" >> $DIRECTORY/$NAME-model.nddl
 echo "" >> $DIRECTORY/$NAME-model.nddl
 echo "/**" >> $DIRECTORY/$NAME-model.nddl
 echo " * @brief Place holder class with a single predicate" >> $DIRECTORY/$NAME-model.nddl
@@ -158,3 +151,11 @@ then
 fi
 echo "Adding PlannerConfig.xml"
 cp ./System/test/DefaultPlannerConfig.xml $DIRECTORY/PlannerConfig.xml
+
+if [ -e $DIRECTORY/NDDL.cfg ]
+then
+  echo "error: "$DIRECTORY"/NDDL.cfg already exists"
+  exit -1
+fi
+echo "Adding NDDL.cfg"
+cp ./DefaultNDDL.cfg $DIRECTORY/NDDL.cfg

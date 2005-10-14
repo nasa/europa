@@ -1,8 +1,16 @@
 #include "Plasma.nddl"
 
-class Battery extends Resource {}
+class Battery extends Resource {
+ Battery(float ic, float ll_min, float ll_max){
+  super(ic, ll_min, ll_max);
+ }
+}
 
-class SolarPanel extends Resource {}
+class SolarPanel extends Resource {
+ SolarPanel(float ic, float ll_min, float ll_max){
+  super(ic, ll_min, ll_max);
+ }
+}
 
 enum Locations {Here, There, Everywhere};
 
