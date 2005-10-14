@@ -9,6 +9,7 @@ MINJAM_I=2
 MINJAM_J=4
 JAMPATH="/usr/local/beta/bin"
 BADJAM=0
+BADOSTYPE=1
 GCCVERSTR="Minimum gcc version is 3.3.3"
 MINGCC_I=3
 MINGCC_J=3
@@ -34,6 +35,32 @@ BADBAL=0
 BADLL=0
 
 echo "Checking for required software versions:"
+
+echo "  Checking OSTYPE"
+
+#Check OS type set to a known OS
+if [ $OSTYPE = darwin ]
+then
+  BADOSTYPE=0
+fi
+
+if [ $OSTYPE = solaris ]
+then
+  BADOSTYPE=0
+fi
+
+if [ $OSTYPE = linux ]
+then
+  BADOSTYPE=0
+fi
+
+if [ $BADOSTYPE -eq 1 ]
+then
+ echo " [PROBLEM!] Unknown OSTYPE " $OSTYPE
+ echo "            Known values are darwin, solaris, and linux." 
+else 
+ echo "  OSTYPE is set to " $OSTYPE
+fi
 
 #Check for minimum Jam version
 JAMVER=`jam -v | egrep "Jam [0-9]\.[0-9]+" | cut -d" " -f2`
