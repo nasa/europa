@@ -17,17 +17,15 @@ Module plasma : all System ;
 
 Depends run-tests : tests ;
 
-Depends run-all-tests : run-tests ;
 Depends run-all-tests : run-checkin-tests ;
 Depends run-all-tests : run-examples-tests ;
 Depends run-all-tests : run-nddl-tests ;
-Depends run-all-tests : run-nddl-planner-tests ;
 Depends run-all-tests : run-hsts-planner-tests ;
 
 Depends run-checkin-tests : check-cvs-changes ;
 Depends run-checkin-tests : run-tests ;
-Depends run-checkin-tests : run-makefile-tests ;
 Depends run-checkin-tests : run-nddl-planner-tests ;
+Depends run-checkin-tests : run-makefile-tests ;
 
 Depends run-makefile-tests : check-makefile ;
 
