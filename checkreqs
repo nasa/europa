@@ -36,32 +36,6 @@ BADLL=0
 
 echo "Checking for required software versions:"
 
-echo "  Checking OSTYPE"
-
-#Check OS type set to a known OS
-if [ $OSTYPE = darwin ]
-then
-  BADOSTYPE=0
-fi
-
-if [ $OSTYPE = solaris ]
-then
-  BADOSTYPE=0
-fi
-
-if [ $OSTYPE = linux ]
-then
-  BADOSTYPE=0
-fi
-
-if [ $BADOSTYPE -eq 1 ]
-then
- echo " [PROBLEM!] Unknown OSTYPE " $OSTYPE
- echo "            Known values are darwin, solaris, and linux." 
-else 
- echo "  OSTYPE is set to " $OSTYPE
-fi
-
 #Check for minimum Jam version
 JAMVER=`jam -v | egrep "Jam [0-9]\.[0-9]+" | cut -d" " -f2`
 if [ -n "$JAMVER" ]
@@ -280,6 +254,31 @@ else
 fi
 
 echo "Checking for required environment variables:"
+
+#Check OS type set to a known OS
+if [ $OSTYPE = darwin ]
+then
+  BADOSTYPE=0
+fi
+
+if [ $OSTYPE = solaris ]
+then
+  BADOSTYPE=0
+fi
+
+if [ $OSTYPE = linux ]
+then
+  BADOSTYPE=0
+fi
+
+if [ $BADOSTYPE -eq 1 ]
+then
+ echo " [PROBLEM!] Unknown OSTYPE " $OSTYPE
+ echo "            Known values are darwin, solaris, and linux." 
+else 
+ echo "  OSTYPE is set to " $OSTYPE
+fi
+
 
 if [ -z "$JAVA_HOME" ]
 then
