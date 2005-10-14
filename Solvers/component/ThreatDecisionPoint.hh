@@ -25,10 +25,13 @@ namespace EUROPA {
 
       ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData);
 
+    protected:
+      virtual void handleInitialize();
+      const TokenId m_tokenToOrder; /*!< The token that must be ordered */
+
     private:
       /** Main Interface for the solver **/
       bool hasNext() const;
-      void handleInitialize();
       void handleExecute();
       void handleUndo();
 
@@ -37,7 +40,6 @@ namespace EUROPA {
       std::string toString(unsigned int index, const std::pair<ObjectId, std::pair<TokenId, TokenId> >& choice) const;
       void extractParts(unsigned int index, ObjectId& object, TokenId& predecessor, TokenId& successor) const;
 
-      const TokenId m_tokenToOrder; /*!< The token that must be ordered */
       std::vector< std::pair<ObjectId, std::pair<TokenId, TokenId> > > m_choices; /*!< Choices across all objects */
       unsigned int m_index; /*!< Current choice position in m_orderingChoices */
       unsigned int m_choiceCount; /*!< Stored choice count - size of m_orderingChoices */
