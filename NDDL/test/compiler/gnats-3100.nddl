@@ -1,0 +1,6 @@
+class Base {}
+
+class Derived extends Base {}
+
+Base b = new Derived();
+close();
