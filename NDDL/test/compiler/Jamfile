@@ -7,7 +7,6 @@ local hh = $(compiler_test:S=.hh) ;
 local cc = $(compiler_test:S=.cc) ;
 LocalDepends nddl-tests : $(hh) $(cc) ;
 NddlCompiler $(hh) $(cc) : $(compiler_test) ;
-
 ModuleObjects NddlMain.cc : NDDL ;
 
 local model ;
@@ -30,15 +29,13 @@ for model in
   NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;
   RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
 
-	#ALWAYS $(model:S=.hh).diff $(model:S=.cc).diff ;
-	#NOTFILE $(model:S=.hh).diff $(model:S=.cc).diff ;
-	#LocalDepends $(model:S=.hh).diff : $(model:S=.hh).valid $(model:S=.hh) ;
-	#LocalDepends $(model:S=.cc).diff : $(model:S=.cc).valid $(model:S=.cc) ;
-	#Diff $(model:S=.hh).diff : $(model:S=.hh).valid $(model:S=.hh) ;
-	#Diff $(model:S=.cc).diff : $(model:S=.cc).valid $(model:S=.cc) ;
+	NOTFILE $(model:S=.hh).diff $(model:S=.cc).diff ;
+	LocalDepends $(model:S=.hh).diff : $(model:S=.hh).valid $(model:S=.hh) ;
+	LocalDepends $(model:S=.cc).diff : $(model:S=.cc).valid [ FGristFiles $(model:S=.cc) ] ;
+	Diff $(model:S=.hh).diff : $(model:S=.hh).valid $(model:S=.hh) ;
+	Diff $(model:S=.cc).diff : $(model:S=.cc).valid [ FGristFiles $(model:S=.cc) ] ;
 
-  LocalDepends run-nddl-tests : run-$(exe) ;
-	#$(model:S=.hh).diff $(model:S=.cc).diff ;
+  LocalDepends run-nddl-tests : run-$(exe) $(model:S=.hh).diff $(model:S=.cc).diff ;
 }
 
 } # PLASMA_READY
