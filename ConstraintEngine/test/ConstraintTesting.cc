@@ -205,10 +205,6 @@ namespace EUROPA {
       assertTrue(strcmp(buf, "test") == 0 && !tCS.eof() && tCS.good());
       tCS >> cnt;
 
-      // This requirement that cnt == line is probably overkill and should be dropped.
-      // If nothing else, it makes it harder to insert tests in the middle of files.
-      assert(cnt == line && !tCS.eof() && tCS.good());
-
       constraintName = "";
       tCS.get(ch);
       assertTrue(ch == ' ' && !tCS.eof() && tCS.good());
