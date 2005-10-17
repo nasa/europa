@@ -1,4 +1,4 @@
-// SimpleRover-model.xml
+// Examples/SimpleRover/SimpleRover-model.xml
 
 #include "SimpleRover-model.hh"
 #include "NddlUtils.hh"
@@ -21,270 +21,8 @@ namespace NDDL {
   
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
   
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Resource
   
-  
-  // Plasma.nddl:20 Resource
-  Resource::Resource(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : NddlResource(planDatabase, "Resource", name, true) {
-  }
-  Resource::Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
-   : NddlResource(planDatabase, type, name, true) {
-  }
-  Resource::Resource(const ObjectId& parent, const LabelStr& name)
-   : NddlResource(parent, "Resource", name, true) {}
-  Resource::Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
-   : NddlResource(parent, type, name, true) {}
-  // default initialization of member variables
-  void Resource::handleDefaults(bool autoClose) {
-    if(initialCapacity.isNoId()){
-      initialCapacity = addVariable(IntervalDomain("float"), "initialCapacity");
-    }
-    if(levelLimitMin.isNoId()){
-      levelLimitMin = addVariable(IntervalDomain("float"), "levelLimitMin");
-    }
-    if(levelLimitMax.isNoId()){
-      levelLimitMax = addVariable(IntervalDomain("float"), "levelLimitMax");
-    }
-    if(productionRateMax.isNoId()){
-      productionRateMax = addVariable(IntervalDomain("float"), "productionRateMax");
-    }
-    if(productionMax.isNoId()){
-      productionMax = addVariable(IntervalDomain("float"), "productionMax");
-    }
-    if(consumptionRateMax.isNoId()){
-      consumptionRateMax = addVariable(IntervalDomain("float"), "consumptionRateMax");
-    }
-    if(consumptionMax.isNoId()){
-      consumptionMax = addVariable(IntervalDomain("float"), "consumptionMax");
-    }
-    if (autoClose)
-      close();
-  }
-  
-  
-  
-  // Plasma.nddl:31 change
-  Resource::change::change(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlResourceTransaction(planDatabase, name, rejectable, false) {
-    handleDefaults(close);
-  }
-  
-  Resource::change::change(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
-   : NddlResourceTransaction(parent, name, relation, false) {
-    handleDefaults(close);
-  }
-  
-  // default initialization of member variables
-  void Resource::change::handleDefaults(bool autoClose) {
-    if(quantity.isNoId()){
-      quantity = addParameter(IntervalDomain("float"), "quantity");
-    }
-    if (autoClose)
-      close();
-  }
-  
-  
-  // Plasma.nddl:20 Resource
-  void Resource::constructor(float ic, float ll_min, float ll_max) {
-    initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(-inf, -inf, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(-inf, -inf, "float"), "consumptionMax");
-  }
-  
-  // Plasma.nddl:20 Resource
-  class ResourceFactory0: public ConcreteObjectFactory {
-  public:
-    ResourceFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
-  private:
-    ObjectId createInstance(const PlanDatabaseId& planDb,
-                            const LabelStr& objectType, 
-                            const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
-      check_error(arguments.size() == 3);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to float");
-      check_error(arguments[0].second->isSingleton());
-      float ic((float)arguments[0].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[1].first.toString() + " to float");
-      check_error(arguments[1].second->isSingleton());
-      float ll_min((float)arguments[1].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[2].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[2].first.toString() + " to float");
-      check_error(arguments[2].second->isSingleton());
-      float ll_max((float)arguments[2].second->getSingletonValue());
-      
-      ResourceId instance = (new Resource(planDb, objectType, objectName))->getId();
-      instance->constructor(ic, ll_min, ll_max);
-      instance->handleDefaults();
-      return instance;
-    }
-  };
-  
-  // Plasma.nddl:20 Resource
-  void Resource::constructor(float ic, float ll_min, float ll_max, float p_max, float c_max) {
-    initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(p_max, p_max, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(p_max, p_max, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(-16, -16, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
-  }
-  
-  // Plasma.nddl:20 Resource
-  class ResourceFactory1: public ConcreteObjectFactory {
-  public:
-    ResourceFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
-  private:
-    ObjectId createInstance(const PlanDatabaseId& planDb,
-                            const LabelStr& objectType, 
-                            const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
-      check_error(arguments.size() == 5);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to float");
-      check_error(arguments[0].second->isSingleton());
-      float ic((float)arguments[0].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[1].first.toString() + " to float");
-      check_error(arguments[1].second->isSingleton());
-      float ll_min((float)arguments[1].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[2].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[2].first.toString() + " to float");
-      check_error(arguments[2].second->isSingleton());
-      float ll_max((float)arguments[2].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[3].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[3].first.toString() + " to float");
-      check_error(arguments[3].second->isSingleton());
-      float p_max((float)arguments[3].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[4].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[4].first.toString() + " to float");
-      check_error(arguments[4].second->isSingleton());
-      float c_max((float)arguments[4].second->getSingletonValue());
-      
-      ResourceId instance = (new Resource(planDb, objectType, objectName))->getId();
-      instance->constructor(ic, ll_min, ll_max, p_max, c_max);
-      instance->handleDefaults();
-      return instance;
-    }
-  };
-  
-  // Plasma.nddl:20 Resource
-  void Resource::constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max) {
-    initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(pr_max, pr_max, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(p_max, p_max, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
-  }
-  
-  // Plasma.nddl:20 Resource
-  class ResourceFactory2: public ConcreteObjectFactory {
-  public:
-    ResourceFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
-  private:
-    ObjectId createInstance(const PlanDatabaseId& planDb,
-                            const LabelStr& objectType, 
-                            const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
-      check_error(arguments.size() == 7);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to float");
-      check_error(arguments[0].second->isSingleton());
-      float ic((float)arguments[0].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[1].first.toString() + " to float");
-      check_error(arguments[1].second->isSingleton());
-      float ll_min((float)arguments[1].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[2].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[2].first.toString() + " to float");
-      check_error(arguments[2].second->isSingleton());
-      float ll_max((float)arguments[2].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[3].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[3].first.toString() + " to float");
-      check_error(arguments[3].second->isSingleton());
-      float pr_max((float)arguments[3].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[4].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[4].first.toString() + " to float");
-      check_error(arguments[4].second->isSingleton());
-      float p_max((float)arguments[4].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[5].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[5].first.toString() + " to float");
-      check_error(arguments[5].second->isSingleton());
-      float cr_max((float)arguments[5].second->getSingletonValue());
-      
-      check_error(AbstractDomain::canBeCompared(*arguments[6].second, 
-                                                TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[6].first.toString() + " to float");
-      check_error(arguments[6].second->isSingleton());
-      float c_max((float)arguments[6].second->getSingletonValue());
-      
-      ResourceId instance = (new Resource(planDb, objectType, objectName))->getId();
-      instance->constructor(ic, ll_min, ll_max, pr_max, p_max, cr_max, c_max);
-      instance->handleDefaults();
-      return instance;
-    }
-  };
-  
-  // Plasma.nddl:20 Resource
-  void Resource::constructor() {
-    initialCapacity = addVariable(IntervalDomain(0, 0, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(-inf, -inf, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(+inf, +inf, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(-inf, -inf, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(-inf, -inf, "float"), "consumptionMax");
-  }
-  
-  // Plasma.nddl:20 Resource
-  class ResourceFactory3: public ConcreteObjectFactory {
-  public:
-    ResourceFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
-  private:
-    ObjectId createInstance(const PlanDatabaseId& planDb,
-                            const LabelStr& objectType, 
-                            const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
-      check_error(arguments.size() == 0);
-      ResourceId instance = (new Resource(planDb, objectType, objectName))->getId();
-      instance->constructor();
-      instance->handleDefaults();
-      return instance;
-    }
-  };
   
   
   // Plasma.nddl:83 UnaryResource
@@ -310,7 +48,7 @@ namespace NDDL {
   
   
   // Plasma.nddl:83 UnaryResource
-  DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory4, UnaryResource);
+  DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);
   
   
   // Plasma.nddl:84 uses
@@ -368,9 +106,9 @@ namespace NDDL {
   }
   
   // Plasma.nddl:93 StringData
-  class StringDataFactory5: public ConcreteObjectFactory {
+  class StringDataFactory1: public ConcreteObjectFactory {
   public:
-    StringDataFactory5(const LabelStr& name): ConcreteObjectFactory(name){}
+    StringDataFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -430,9 +168,9 @@ namespace NDDL {
   }
   
   // PlannerConfig.nddl:7 PlannerConfig
-  class PlannerConfigFactory6: public ConcreteObjectFactory {
+  class PlannerConfigFactory2: public ConcreteObjectFactory {
   public:
-    PlannerConfigFactory6(const LabelStr& name): ConcreteObjectFactory(name){}
+    PlannerConfigFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -479,9 +217,9 @@ namespace NDDL {
   }
   
   // PlannerConfig.nddl:7 PlannerConfig
-  class PlannerConfigFactory7: public ConcreteObjectFactory {
+  class PlannerConfigFactory3: public ConcreteObjectFactory {
   public:
-    PlannerConfigFactory7(const LabelStr& name): ConcreteObjectFactory(name){}
+    PlannerConfigFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -522,9 +260,9 @@ namespace NDDL {
   }
   
   // PlannerConfig.nddl:7 PlannerConfig
-  class PlannerConfigFactory8: public ConcreteObjectFactory {
+  class PlannerConfigFactory4: public ConcreteObjectFactory {
   public:
-    PlannerConfigFactory8(const LabelStr& name): ConcreteObjectFactory(name){}
+    PlannerConfigFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -574,9 +312,9 @@ namespace NDDL {
   }
   
   // SimpleRover-model.nddl:8 Location
-  class LocationFactory9: public ConcreteObjectFactory {
+  class LocationFactory5: public ConcreteObjectFactory {
   public:
-    LocationFactory9(const LabelStr& name): ConcreteObjectFactory(name){}
+    LocationFactory5(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -646,9 +384,9 @@ namespace NDDL {
   }
   
   // SimpleRover-model.nddl:24 Path
-  class PathFactory10: public ConcreteObjectFactory {
+  class PathFactory6: public ConcreteObjectFactory {
   public:
-    PathFactory10(const LabelStr& name): ConcreteObjectFactory(name){}
+    PathFactory6(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -710,7 +448,7 @@ namespace NDDL {
   
   
   // SimpleRover-model.nddl:42 Navigator
-  DECLARE_DEFAULT_OBJECT_FACTORY(NavigatorFactory11, Navigator);
+  DECLARE_DEFAULT_OBJECT_FACTORY(NavigatorFactory7, Navigator);
   
   
   // SimpleRover-model.nddl:45 At
@@ -821,7 +559,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Navigator$Going$1, Navigator$Going$1$0, Navigator.Going, "SimpleRover-model.nddl,64");
   
   void Navigator$Going$1$0::handleExecute() {
-    objectVar(Path, p, true);
+    objectVar(Path, p, true, false);
     slave(Navigator::At, Navigator.At, _from, LabelStr("met_by"));
     sameObject(object, _from);
     met_by(this, _from);
@@ -833,7 +571,7 @@ namespace NDDL {
     declareFilter(Path,p);
     allocateFilterCondition(p, Location, var(getId(),std::string("from")), from, eq);
     allocateFilterCondition(p, Location, var(getId(),std::string("to")), to, eq);
-    allocateFilterConstraint(p, CONSTRAIN);
+    allocateFilterConstraint(p);
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("_from")), std::string("location")));
@@ -881,7 +619,7 @@ namespace NDDL {
   
   
   // SimpleRover-model.nddl:83 Commands
-  DECLARE_DEFAULT_OBJECT_FACTORY(CommandsFactory12, Commands);
+  DECLARE_DEFAULT_OBJECT_FACTORY(CommandsFactory8, Commands);
   
   
   // SimpleRover-model.nddl:84 TakeSample
@@ -980,7 +718,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Commands$TakeSample$2, Commands$TakeSample$2$0, Commands.TakeSample, "SimpleRover-model.nddl,97");
   
   void Commands$TakeSample$2$0::handleExecute() {
-    objectVar(Rover, rovers, false);
+    objectVar(Rover, rovers, false, false);
     localVar(BoolDomain(), OR, true);
     slave(Instrument::TakeSample, Instrument.TakeSample, a, LabelStr("contains"));
     contains(this, a);
@@ -1077,7 +815,7 @@ namespace NDDL {
   
   
   // SimpleRover-model.nddl:126 Instrument
-  DECLARE_DEFAULT_OBJECT_FACTORY(InstrumentFactory13, Instrument);
+  DECLARE_DEFAULT_OBJECT_FACTORY(InstrumentFactory9, Instrument);
   
   
   // SimpleRover-model.nddl:127 TakeSample
@@ -1230,7 +968,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Instrument$TakeSample$5, Instrument$TakeSample$5$0, Instrument.TakeSample, "SimpleRover-model.nddl,148");
   
   void Instrument$TakeSample$5$0::handleExecute() {
-    objectVar(Rover, rovers, false);
+    objectVar(Rover, rovers, false, false);
     slave(Navigator::At, Navigator.At, at, LabelStr("contained_by"));
     contained_by(this, at);
     slave(Instrument::Place, Instrument.Place, b, LabelStr("met_by"));
@@ -1277,7 +1015,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Instrument$Place$6, Instrument$Place$6$0, Instrument.Place, "SimpleRover-model.nddl,166");
   
   void Instrument$Place$6$0::handleExecute() {
-    objectVar(Rover, rovers, false);
+    objectVar(Rover, rovers, false, false);
     slave(Navigator::At, Navigator.At, at, LabelStr("contained_by"));
     contained_by(this, at);
     slave(Instrument::TakeSample, Instrument.TakeSample, a, LabelStr("meets"));
@@ -1324,7 +1062,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Instrument$Unstow$7, Instrument$Unstow$7$0, Instrument.Unstow, "SimpleRover-model.nddl,180");
   
   void Instrument$Unstow$7$0::handleExecute() {
-    objectVar(Rover, rovers, false);
+    objectVar(Rover, rovers, false, false);
     slave(Navigator::At, Navigator.At, at, LabelStr("contained_by"));
     contained_by(this, at);
     slave(Instrument::Place, Instrument.Place, a, LabelStr("meets"));
@@ -1359,7 +1097,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Instrument$Stow$8, Instrument$Stow$8$0, Instrument.Stow, "SimpleRover-model.nddl,192");
   
   void Instrument$Stow$8$0::handleExecute() {
-    objectVar(Rover, rovers, false);
+    objectVar(Rover, rovers, false, false);
     slave(Navigator::At, Navigator.At, at, LabelStr("contained_by"));
     contained_by(this, at);
     slave(Instrument::Stowed, Instrument.Stowed, a, LabelStr("meets"));
@@ -1403,18 +1141,17 @@ namespace NDDL {
   
   // SimpleRover-model.nddl:209 Battery
   Battery::Battery(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : Resource(planDatabase, "Battery", name) {
+   : NddlResource(planDatabase, "Battery", name, true) {
   }
   Battery::Battery(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
-   : Resource(planDatabase, type, name) {
+   : NddlResource(planDatabase, type, name, true) {
   }
   Battery::Battery(const ObjectId& parent, const LabelStr& name)
-   : Resource(parent, "Battery", name) {}
+   : NddlResource(parent, "Battery", name, true) {}
   Battery::Battery(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
-   : Resource(parent, type, name) {}
+   : NddlResource(parent, type, name, true) {}
   // default initialization of member variables
   void Battery::handleDefaults(bool autoClose) {
-    Resource::handleDefaults(false);
     if (autoClose)
       close();
   }
@@ -1422,13 +1159,13 @@ namespace NDDL {
   
   // SimpleRover-model.nddl:209 Battery
   void Battery::constructor(float ic, float ll_min, float ll_max) {
-    Resource::constructor(ic, ll_min, ll_max, 0.0, 0.0, MINUS_INFINITY, MINUS_INFINITY);
+    NddlResource::constructor(ic, ll_min, ll_max, 0.0, 0.0, MINUS_INFINITY, MINUS_INFINITY);
   }
   
   // SimpleRover-model.nddl:209 Battery
-  class BatteryFactory14: public ConcreteObjectFactory {
+  class BatteryFactory10: public ConcreteObjectFactory {
   public:
-    BatteryFactory14(const LabelStr& name): ConcreteObjectFactory(name){}
+    BatteryFactory10(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -1502,9 +1239,9 @@ namespace NDDL {
   }
   
   // SimpleRover-model.nddl:217 Rover
-  class RoverFactory15: public ConcreteObjectFactory {
+  class RoverFactory11: public ConcreteObjectFactory {
   public:
-    RoverFactory15(const LabelStr& name): ConcreteObjectFactory(name){}
+    RoverFactory11(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -1530,7 +1267,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("SimpleRover-model");
+    Id<Schema> id = Schema::instance("Examples/SimpleRover/SimpleRover-model");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
@@ -1539,9 +1276,8 @@ namespace NDDL {
     id->addPrimitive("bool");
     id->addPrimitive("string");
     id->addObjectType("Object");
-    id->addObjectType("Timeline", "Object");
-    id->addObjectType("NddlResource", "Object");
-    id->addObjectType("Resource", "NddlResource");
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Resource", "Object");
     id->addMember("Resource", "float", "initialCapacity");
     id->addMember("Resource", "float", "levelLimitMin");
     id->addMember("Resource", "float", "levelLimitMax");
@@ -1601,7 +1337,6 @@ namespace NDDL {
     id->addValue("TokenStates", LabelStr("REJECTED"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TOKEN_FACTORY(Resource::change::Factory);
     REGISTER_TOKEN_FACTORY(UnaryResource::uses::Factory);
     REGISTER_TOKEN_FACTORY(Navigator::At::Factory);
     REGISTER_TOKEN_FACTORY(Navigator::Going::Factory);
@@ -1617,37 +1352,33 @@ namespace NDDL {
     REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
     REGISTER_TYPE_FACTORY(Resource, ObjectDomain("Resource"));
-    REGISTER_OBJECT_FACTORY(ResourceFactory0, Resource:float:float:float);
-    REGISTER_OBJECT_FACTORY(ResourceFactory1, Resource:float:float:float:float:float);
-    REGISTER_OBJECT_FACTORY(ResourceFactory2, Resource:float:float:float:float:float:float:float);
-    REGISTER_OBJECT_FACTORY(ResourceFactory3, Resource);
     REGISTER_TYPE_FACTORY(UnaryResource, ObjectDomain("UnaryResource"));
-    REGISTER_OBJECT_FACTORY(UnaryResourceFactory4, UnaryResource);
+    REGISTER_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);
     REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
-    REGISTER_OBJECT_FACTORY(StringDataFactory5, StringData:string);
+    REGISTER_OBJECT_FACTORY(StringDataFactory1, StringData:string);
     REGISTER_TYPE_FACTORY(PlannerConfig, ObjectDomain("PlannerConfig"));
-    REGISTER_OBJECT_FACTORY(PlannerConfigFactory6, PlannerConfig:int:int:int:int);
-    REGISTER_OBJECT_FACTORY(PlannerConfigFactory7, PlannerConfig:int:int:int);
-    REGISTER_OBJECT_FACTORY(PlannerConfigFactory8, PlannerConfig);
+    REGISTER_OBJECT_FACTORY(PlannerConfigFactory2, PlannerConfig:int:int:int:int);
+    REGISTER_OBJECT_FACTORY(PlannerConfigFactory3, PlannerConfig:int:int:int);
+    REGISTER_OBJECT_FACTORY(PlannerConfigFactory4, PlannerConfig);
     REGISTER_TYPE_FACTORY(Location, ObjectDomain("Location"));
-    REGISTER_OBJECT_FACTORY(LocationFactory9, Location:string:int:int);
+    REGISTER_OBJECT_FACTORY(LocationFactory5, Location:string:int:int);
     REGISTER_TYPE_FACTORY(Path, ObjectDomain("Path"));
-    REGISTER_OBJECT_FACTORY(PathFactory10, Path:string:Location:Location:float);
-    REGISTER_OBJECT_FACTORY(PathFactory10, Path:string:Location:Object:float);
-    REGISTER_OBJECT_FACTORY(PathFactory10, Path:string:Object:Location:float);
-    REGISTER_OBJECT_FACTORY(PathFactory10, Path:string:Object:Object:float);
+    REGISTER_OBJECT_FACTORY(PathFactory6, Path:string:Location:Location:float);
+    REGISTER_OBJECT_FACTORY(PathFactory6, Path:string:Location:Object:float);
+    REGISTER_OBJECT_FACTORY(PathFactory6, Path:string:Object:Location:float);
+    REGISTER_OBJECT_FACTORY(PathFactory6, Path:string:Object:Object:float);
     REGISTER_TYPE_FACTORY(Navigator, ObjectDomain("Navigator"));
-    REGISTER_OBJECT_FACTORY(NavigatorFactory11, Navigator);
+    REGISTER_OBJECT_FACTORY(NavigatorFactory7, Navigator);
     REGISTER_TYPE_FACTORY(Commands, ObjectDomain("Commands"));
-    REGISTER_OBJECT_FACTORY(CommandsFactory12, Commands);
+    REGISTER_OBJECT_FACTORY(CommandsFactory8, Commands);
     REGISTER_TYPE_FACTORY(Instrument, ObjectDomain("Instrument"));
-    REGISTER_OBJECT_FACTORY(InstrumentFactory13, Instrument);
+    REGISTER_OBJECT_FACTORY(InstrumentFactory9, Instrument);
     REGISTER_TYPE_FACTORY(Battery, ObjectDomain("Battery"));
-    REGISTER_OBJECT_FACTORY(BatteryFactory14, Battery:float:float:float);
+    REGISTER_OBJECT_FACTORY(BatteryFactory10, Battery:float:float:float);
     REGISTER_TYPE_FACTORY(Rover, ObjectDomain("Rover"));
-    REGISTER_OBJECT_FACTORY(RoverFactory15, Rover:Battery);
-    REGISTER_OBJECT_FACTORY(RoverFactory15, Rover:NddlResource);
-    REGISTER_OBJECT_FACTORY(RoverFactory15, Rover:Resource);
+    REGISTER_OBJECT_FACTORY(RoverFactory11, Rover:Battery);
+    REGISTER_OBJECT_FACTORY(RoverFactory11, Rover:Object);
+    REGISTER_OBJECT_FACTORY(RoverFactory11, Rover:Resource);
     // Allocate rules
     new Rule$Navigator$Going$1();
     new Rule$Navigator$At$0();
