@@ -9,12 +9,6 @@ rule Doxygen
 
 actions Doxygen {
   rm -rf html ;
-#  rm -rf HelloWorld ;
-#  cd .. ;
-#  rm -rf ../HelloWorld ;
-#  ./makeproject HelloWorld ;
-#  mv ../HelloWorld ./documentation ;
-#  cd documentation ;
   doxygen $(2) ;
 }
 
