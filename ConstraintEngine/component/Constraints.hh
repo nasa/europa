@@ -735,6 +735,8 @@ namespace EUROPA {
    * @brief AbsoluteValue(x, y) maintains the relation:
    * @li x.lb >= 0
    * @li x.ub = max(abs(y.lb), abs(y.ub))
+   * @li y.lb >= -x.lb
+   * @li y.ub <= x.ub
    */
   class AbsoluteValue : public Constraint {
   public:

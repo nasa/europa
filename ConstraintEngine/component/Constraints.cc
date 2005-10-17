@@ -6,6 +6,8 @@
 #include "BoolDomain.hh"
 #include "EnumeratedDomain.hh"
 #include "Utils.hh"
+#include "Debug.hh"
+#include "TypeFactory.hh"
 
 namespace EUROPA {
 
@@ -841,8 +843,10 @@ namespace EUROPA {
       // Presently, e.g., this precludes real and integer intervals
       // from appearing in the same constraint, which isn't really a problem.
       // --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 21
-      check_error(getCurrentDomain(m_variables[1]).minDelta() ==
-                  getCurrentDomain(m_variables[i]).minDelta());
+      checkError(getCurrentDomain(m_variables[1]).minDelta() == getCurrentDomain(m_variables[i]).minDelta(),
+		 "In CondAllSameConstraint, variable 1: " << m_variables[1]->toString() << " has a different minDelta than variable " <<
+		 i << ": " << m_variables[i]->toString() << " " << getCurrentDomain(m_variables[1]).minDelta() << " " << 
+		 getCurrentDomain(m_variables[i]).minDelta());
 
     }
   }
@@ -1560,7 +1564,8 @@ namespace EUROPA {
                                                  const ConstraintEngineId& constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_sumVar(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_sumVar(constraintEngine, TypeFactory::baseDomain(m_variables[1]->baseDomain().getTypeName().c_str()),
+	       false, LabelStr("InternalConstraintVariable"), getId()),
       m_condAllSameConstraint(LabelStr("CondAllSame"), propagatorName, constraintEngine,
                               makeScope(m_variables[0], m_variables[1], m_sumVar.getId()))
   {
@@ -1806,6 +1811,23 @@ namespace EUROPA {
     }
 
     m_x.intersect(IntervalDomain(lb, ub));
+    lb = m_x.getLowerBound();
+    ub = m_x.getUpperBound();
+
+    //for any absolute value domain [lb ub], there are two domains that could have
+    //produced it: [lb ub] and [-ub lb].  If there is a non-empty intersection between y
+    //and both domains, then we cannot determine a correct further restriction for y
+    //except when a == 0 and [-ub ub] is a subset of y
+    if(lb == 0 && m_y.isMember(-ub) && m_y.isMember(ub))
+      m_y.intersect(IntervalDomain(-ub, ub));
+
+    if((m_y.isMember(lb) || m_y.isMember(ub)) && (m_y.isMember(-lb) || m_y.isMember(-ub)))
+      return;
+    
+    if(m_y.isMember(lb) || m_y.isMember(ub))
+      m_y.intersect(IntervalDomain(lb, ub));
+    else if(m_y.isMember(-lb) || m_y.isMember(-ub))
+      m_y.intersect(IntervalDomain(-ub, -lb));
   }
 
 
@@ -1880,7 +1902,6 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(OrConstraint, "or", "Default");
 
       REGISTER_CONSTRAINT(AbsoluteValue, "absVal", "Default");
-      REGISTER_CONSTRAINT(AbsoluteValue, "abs", "Default");
 
       // Rotate scope right one (last var moves to front) to ...
       // ... change addleq constraint to GreaterOrEqThan constraint:
