@@ -105,7 +105,7 @@ echo "#include \""$NAME"-model.nddl\"" >> $DIRECTORY/$NAME-initial-state.nddl
 echo "" >> $DIRECTORY/$NAME-initial-state.nddl
 echo "// Create a planner configuration instance in PLASMA." >> $DIRECTORY/$NAME-initial-state.nddl
 echo "// Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth" >> $DIRECTORY/$NAME-initial-state.nddl
-echo "PlannerConfig plannerConfiguration = new PlannerConfig(0, 1000, 500, +inf);" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);" >> $DIRECTORY/$NAME-initial-state.nddl
 echo "" >> $DIRECTORY/$NAME-initial-state.nddl
 echo "// Sample object" >> $DIRECTORY/$NAME-initial-state.nddl
 echo "YourObject object = new YourObject();" >> $DIRECTORY/$NAME-initial-state.nddl
