@@ -260,6 +260,7 @@ public:
     runTest(testDeallocationWithPurging);
     runTest(testInconsistentInitialVariableDomain);
     runTest(testVariableLookupByIndex);
+    runTest(testGNATS_3133);
     return true;
   }
 
@@ -313,6 +314,57 @@ public:
     }
 
     cleanup(vars);
+    return true;
+  }
+
+  /**
+   * A single relaxation may not be enough to empty the variable. Want to ensure that
+   * we correctly manage this case.
+   */
+  static bool testGNATS_3133(){
+    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, 10));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 10));
+    Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 10));
+    Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(0, 10));
+
+    Constraint* c0 = new EqualConstraint(LabelStr("EqualConstraint"), 
+					 LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
+
+    Constraint* c1 = new EqualConstraint(LabelStr("EqualConstraint"), 
+					 LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId()));
+
+    Constraint* c2 = new EqualConstraint(LabelStr("EqualConstraint"), 
+					 LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId()));
+
+    v0.specify(1);
+    v1.specify(2);
+    v2.specify(3);
+    v3.specify(3);
+    assertFalse(ENGINE->propagate());
+
+    v2.reset();
+    assertTrue(ENGINE->provenInconsistent());
+    assertFalse(ENGINE->propagate());
+    v3.reset();
+    assertFalse(ENGINE->propagate())
+    assertTrue(ENGINE->provenInconsistent());;
+    v0.reset();
+    assertFalse(ENGINE->provenInconsistent());
+    assertTrue(ENGINE->propagate());
+
+    v0.specify(1);
+    v1.specify(2);
+    v2.specify(3);
+    v3.specify(3);
+
+    // Now delete constraints in the order that relaxes the empty variable last
+    delete (Constraint*) c1;
+    assertFalse(ENGINE->propagate());
+    delete (Constraint*) c2;
+    assertFalse(ENGINE->propagate());
+    delete (Constraint*) c0;
+    assertTrue(ENGINE->propagate());
+
     return true;
   }
 };
