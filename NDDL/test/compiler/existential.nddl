@@ -7,9 +7,12 @@ class Location{
 
 class Path{
  Location from, to;
+ int m_int; // To test intervals (GNATS 3132)
+ 
  Path(Location _from, Location _to){
   from = _from;
   to = _to;
+  m_int = 1;
  }
 }
 
@@ -44,9 +47,12 @@ class World{
 }
 
 World::Going{
+ int intVar;
+
  Path path : {
   eq(path.from, from);
   eq(path.to, to);
+  eq(path.m_int, intVar);
  };
 
  Path p1: {};
@@ -60,11 +66,13 @@ World::initialState{
  Path p1 : {
   eq(p1.from, going.from);
   eq(p1.to, going.to);
+  eq(p1.m_int, 1);
  };
 
- Path p2 : {
+ Path p2 filterOnly : {
   eq(p2.from, going.from);
   eq(p2.to, going.to);
+  eq(p2.m_int, 2);
  };
 
  Path p3 : {};
@@ -77,9 +85,11 @@ World::initialState{
  eq(loc1, object.rock);
  eq(loc2, object.rock);
 
+ int filterVar;
  Path p4 filterOnly : {
   eq(p4.from, loc1);
   eq(p4.to, loc2);
+  eq(p4.m_int, filterVar);
  };
 
  // Make sure that the model compiles if the filter
