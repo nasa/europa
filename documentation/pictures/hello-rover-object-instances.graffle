@@ -378,8 +378,9 @@ predicates\{ helloWorld \}}</string>
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc
 
 \f0\b\fs24 \cf0 \ul \ulc0 planner Configuration\
-\ulnone start = 0\
-end = 1000\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc
+\cf0 \ulnone start = 0\
+end = 100\
 max_steps = 500\
 max_depth = inf}</string>
 			</dict>
@@ -517,7 +518,7 @@ max_depth = inf}</string>
 		</dict>
 	</array>
 	<key>ModificationDate</key>
-	<string>2005-10-17 16:38:33 -0700</string>
+	<string>2005-10-18 14:00:56 -0700</string>
 	<key>Modifier</key>
 	<string>Peter Jarvis</string>
 	<key>NotesVisible</key>
