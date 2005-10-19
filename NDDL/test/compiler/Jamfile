@@ -29,14 +29,17 @@ for model in
   NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;
   RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
 
-	GenerateValid generate-nddl-valid : $(model:S=.hh) [ FGristFiles $(model:S=.cc) ] ;
-	NOTFILE $(model:S=.hh).diff $(model:S=.cc).diff ;
-	LocalDepends $(model:S=.hh).diff : $(model:S=.hh).valid $(model:S=.hh) ;
-	LocalDepends $(model:S=.cc).diff : $(model:S=.cc).valid [ FGristFiles $(model:S=.cc) ] ;
-	Diff $(model:S=.hh).diff : $(model:S=.hh).valid $(model:S=.hh) ;
-	Diff $(model:S=.cc).diff : $(model:S=.cc).valid [ FGristFiles $(model:S=.cc) ] ;
+	local hh = $(model:S=.hh) ;
+	local cc = [ FGristFiles $(model:S=.cc) ] ;
 
-  LocalDepends run-nddl-tests : run-$(exe) $(model:S=.hh).diff $(model:S=.cc).diff ;
+	GenerateValid generate-nddl-valid : $(hh) $(cc) ;
+
+	ALWAYS $(hh).diff $(cc).diff ;
+	NOTFILE $(hh).diff $(cc).diff ;
+	Diff $(hh).diff : $(hh).valid $(hh) ;
+	Diff $(cc).diff : $(cc).valid $(cc) ;
+
+  LocalDepends run-nddl-tests : run-$(exe) $(hh).diff $(cc).diff ;
 }
 
 } # PLASMA_READY
