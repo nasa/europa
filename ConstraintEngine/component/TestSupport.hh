@@ -47,7 +47,7 @@ private:
   else \
     if (result) { \
       std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED IDs:\n"; \
-      IdTable::output(std::cout); \
+      IdTable::output(std::cerr); \
       std::cout << "\tWere " << id_count << " IDs before; " << IdTable::size() << " now"; \
       std::cout << std::endl; \
       throw Error::GeneralMemoryError(); \
