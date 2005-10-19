@@ -736,17 +736,17 @@ rule Yacc
 rule GenerateValid
 {
 	LOCATE on $(2).valid += $(LOCATE_TARGET) ; 
-	ALWAYS $(2).valid ;
 
 	for orig in $(2)
 	{
 		File $(orig).valid : $(orig) ;
 	}
-		LocalDepends $(1) : $(2).valid ;
+	LocalDepends $(1) : $(2) ;
 }
 
 rule Diff
 {
+	LocalDepends $(1) : $(2) ;
 	SEARCH on $(2) = $(SEARCH_SOURCE) ;
 }
 
