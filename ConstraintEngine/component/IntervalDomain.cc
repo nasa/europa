@@ -241,7 +241,7 @@ namespace EUROPA {
   }
 
   bool IntervalDomain::intersect(double lb, double ub) {
-  
+    debugMsg("IntervalDomain:intersect", "Intersecting " << toString() << " with [" << lb << " " << ub << "]");
     // Test for empty intersection while accounting for precision/rounding errors.
     if (lt(ub, lb) || lt(ub, m_lb) || lt(m_ub, lb)){
       empty();
@@ -251,12 +251,14 @@ namespace EUROPA {
     bool ub_decreased(false);
 
     if (lt(ub,m_ub)) {
+      debugMsg("IntervalDomain:intersect", "Decreasing upper bound from " << m_ub << " to " << ub);
       m_ub = safeConversion(ub);
       ub_decreased = true;
     }
 
     bool lb_increased(false);
     if (lt(m_lb, lb)){
+      debugMsg("IntervalDomain:intersect", "Increasing lower bound from " << m_lb << " to " << lb);
       m_lb = safeConversion(lb);
       lb_increased = true;
     }

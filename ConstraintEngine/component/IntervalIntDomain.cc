@@ -5,32 +5,36 @@ namespace EUROPA {
 
 
   IntervalIntDomain::IntervalIntDomain()
-    : IntervalDomain(getDefaultTypeName().c_str()) {}
+    : IntervalDomain(getDefaultTypeName().c_str()) {m_minDelta = 1.0;}
 
   IntervalIntDomain::IntervalIntDomain(const char* typeName)
-    : IntervalDomain(typeName){}
+    : IntervalDomain(typeName) {m_minDelta = 1.0;}
 
   IntervalIntDomain::IntervalIntDomain(int lb, int ub)
     : IntervalDomain(lb, ub, getDefaultTypeName().c_str()) {
     check_error(check_value(m_lb), "Invalid lower bound");
     check_error(check_value(m_ub), "Invalid upper bound");
+    m_minDelta = 1.0;
   }
 
   IntervalIntDomain::IntervalIntDomain(int value)
     : IntervalDomain(value, value, getDefaultTypeName().c_str()) {
     check_error(check_value(value), "Invalid value");
+    m_minDelta = 1.0;
   }
 
   IntervalIntDomain::IntervalIntDomain(int lb, int ub, const char* typeName)
     : IntervalDomain(lb, ub, typeName) {
     check_error(check_value(m_lb), "Invalid lower bound");
     check_error(check_value(m_ub), "Invalid upper bound");
+    m_minDelta = 1.0;
   }
 
   IntervalIntDomain::IntervalIntDomain(const AbstractDomain& org)
     : IntervalDomain(org) {
     check_error(check_value(m_lb), "Invalid lower bound");
     check_error(check_value(m_ub), "Invalid upper bound");
+    m_minDelta = 1.0;
   }
 
   bool IntervalIntDomain::isFinite() const {
@@ -93,9 +97,9 @@ namespace EUROPA {
       results.push_back(i);
   }
 
-  double IntervalIntDomain::minDelta() const {
-    return(1.0);
-  }
+//   double IntervalIntDomain::minDelta() const {
+//     return(1.0);
+//   }
 
   double IntervalIntDomain::translateNumber(double number, bool asMin) const {
     double result = IntervalDomain::translateNumber(int(number), asMin);
@@ -111,5 +115,13 @@ namespace EUROPA {
     IntervalIntDomain *ptr = new IntervalIntDomain(*this);
     check_error(ptr != 0);
     return(ptr);
+  }
+
+  bool IntervalIntDomain::intersect(double lb, double ub) {    
+    return IntervalDomain::intersect(ceil(lb), floor(ub));
+  }
+
+  bool IntervalIntDomain::intersect(const AbstractDomain& dom) {
+    return intersect(dom.getLowerBound(), dom.getUpperBound());
   }
 }

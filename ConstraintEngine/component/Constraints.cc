@@ -244,6 +244,7 @@ namespace EUROPA {
       return;
 
     // Restrict X to be no larger than Y's max
+    debugMsg("LessThanEqualConstraint:handleExecute", "Intersecting " << domx.toString() << " with [" << domx.getLowerBound() << " " << domy.getUpperBound() << "]");
     if (domx.intersect(domx.getLowerBound(), domy.getUpperBound()) && domx.isEmpty())
       return;
 
@@ -352,6 +353,8 @@ namespace EUROPA {
     if (domx.isOpen() || domy.isOpen())
       return;
 
+    debugMsg("LessThanConstraint:handleExecute", "Computing " << domx.toString() << " < " << domy.toString() << " x.minDelta = " <<
+	     domx.minDelta() << " y.minDelta = " << domy.minDelta());
     if(domx.getUpperBound() >= domy.getUpperBound() && 
        domy.getUpperBound() < PLUS_INFINITY &&
        domx.intersect(domx.getLowerBound(), domy.getUpperBound() - domx.minDelta()) && 
@@ -810,8 +813,9 @@ namespace EUROPA {
                                                const ConstraintEngineId& constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
-      m_lessThanConstraint(LabelStr("LessThanEq"), propagatorName, constraintEngine,
+      m_interimVariable(constraintEngine, TypeFactory::baseDomain(m_variables[0]->baseDomain().getTypeName().c_str()), 
+			false, LabelStr("InternalConstraintVariable"), getId()),
+      m_lessThanConstraint(LabelStr("LessThan"), propagatorName, constraintEngine,
                            makeScope(m_interimVariable.getId(), m_variables[0]))
   {
     std::vector<ConstrainedVariableId> eqSumScope = m_variables;
@@ -1343,7 +1347,7 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_zeros(constraintEngine, IntervalDomain(), false, LabelStr("InternalCountNonZerosVar"), getId()),
       m_otherVars(constraintEngine, IntervalDomain(), false, LabelStr("InternalCountNonZerosOtherVars"), getId()),
-      m_superset(constraintEngine, IntervalDomain(variables.size() - 1), false, LabelStr("InternalCountNonZerosSuperset"), getId()),
+      m_superset(constraintEngine, IntervalDomain((double)(variables.size() - 1)), false, LabelStr("InternalCountNonZerosSuperset"), getId()),
       m_addEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine,
                            makeScope(m_zeros.getId(), m_variables[0], m_otherVars.getId()))
   {

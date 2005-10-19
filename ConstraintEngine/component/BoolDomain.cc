@@ -66,4 +66,22 @@ namespace EUROPA {
     else
       return sl_false;
   }
+
+  bool BoolDomain::intersect(const AbstractDomain& dom) {
+    return intersect(dom.getLowerBound(), dom.getUpperBound());
+  }
+
+  bool BoolDomain::intersect(double lb, double ub) {
+    double boolLb = lb;
+    double boolUb = ub;
+    if(boolLb > boolUb) {
+      boolLb = boolUb;
+      boolUb = lb;
+    }
+    if(boolLb != 0.0)
+      boolLb = 1.0;
+    if(boolUb != 0.0)
+      boolUb = 1.0;
+    return IntervalIntDomain::intersect(boolLb, boolUb);
+  }
 }

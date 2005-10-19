@@ -58,6 +58,10 @@ namespace EUROPA {
      */
     LabelStr displayValue(double value) const;
 
+    bool intersect(const AbstractDomain& dom);
+
+    bool intersect(double lb, double ub);
+
   private:
     virtual void testPrecision(const double& value) const;
   };

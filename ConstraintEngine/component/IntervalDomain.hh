@@ -126,7 +126,7 @@ namespace EUROPA {
      * @param dom the domain to intersect with, which cannot be empty.
      * @return true if the intersection results in a change to this domain, otherwise false.
      */
-    bool intersect(const AbstractDomain& dom);
+    virtual bool intersect(const AbstractDomain& dom);
 
     /**
      * @brief Restricts this domain to the difference of its values with the given domain.
@@ -149,7 +149,7 @@ namespace EUROPA {
      * @return true if the intersection results in a change to this domain, otherwise false.
      * @note ub must be >= lb.
      */
-    bool intersect(double lb, double ub);
+    virtual bool intersect(double lb, double ub);
 
     /**
      * @brief Force the domain to empty.

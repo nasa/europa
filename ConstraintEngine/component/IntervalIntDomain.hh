@@ -33,6 +33,8 @@ namespace EUROPA{
 
     IntervalIntDomain(const AbstractDomain& org);
 
+    virtual ~IntervalIntDomain(){}
+
     bool isFinite() const;
 
     virtual bool isBool() const {
@@ -63,17 +65,16 @@ namespace EUROPA{
      */
     void getValues(std::list<double>& results) const;
 
-    /**
-     * @brief Enforces integer semantics by restricting changes to units.
-     */
-    double minDelta() const;
-
     double translateNumber(double number, bool asMin = true) const;
 
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
      */
     virtual IntervalIntDomain *copy() const;
+
+    virtual bool intersect(double lb, double ub);
+
+    virtual bool intersect(const AbstractDomain& dom);
 
   protected:
 

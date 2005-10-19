@@ -124,6 +124,9 @@ namespace EUROPA {
     static const int ARG_COUNT = 2;
   };
 
+  /**
+   * Enforces the relation x < y
+   */
 
   class LessThanConstraint : public Constraint {
   public:
