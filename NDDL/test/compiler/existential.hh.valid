@@ -45,12 +45,13 @@ namespace NDDL {
     
     ConstrainedVariableId from; // SchemaWriter::declareVariable
     ConstrainedVariableId to; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_int; // SchemaWriter::declareVariable
     
     // existential.nddl:8 Path
     virtual void constructor(const LocationId& _from, const LocationId& _to);
   };
   
-  // existential.nddl:16 World
+  // existential.nddl:19 World
   class World : public Timeline {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -72,7 +73,7 @@ namespace NDDL {
     ConstrainedVariableId p3; // SchemaWriter::declareVariable
     ConstrainedVariableId p4; // SchemaWriter::declareVariable
     
-    // existential.nddl:27 Going
+    // existential.nddl:30 Going
     class Going : public NddlToken {
     public:
       Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -84,7 +85,7 @@ namespace NDDL {
       ConstrainedVariableId to; // SchemaWriter::declareVariable
     };
     
-    // existential.nddl:33 initialState
+    // existential.nddl:36 initialState
     class initialState : public NddlToken {
     public:
       initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -94,7 +95,7 @@ namespace NDDL {
       
     };
     
-    // existential.nddl:16 World
+    // existential.nddl:19 World
     virtual void constructor();
   };
 } // End NDDL namespace

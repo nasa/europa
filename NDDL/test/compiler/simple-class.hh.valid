@@ -47,7 +47,7 @@ namespace NDDL {
     
     
     // simple-class.nddl:15 ClassScopedEnum
-    typedef SymbolDomain Foo::ClassScopedEnum;
+    typedef SymbolDomain ClassScopedEnum;
     static Foo::ClassScopedEnum Foo::ClassScopedEnumBaseDomain();
     ConstrainedVariableId m_0; // SchemaWriter::declareVariable
     ConstrainedVariableId m_1; // SchemaWriter::declareVariable

@@ -75,13 +75,25 @@ namespace NDDL {
     Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
     void handleDefaults(bool autoClose = true); // default variable initialization
     
+    class p0;
+    typedef Id<p0> p0Id;
     class p1;
     typedef Id<p1> p1Id;
     class p2;
     typedef Id<p2> p2Id;
     ConstrainedVariableId m_4; // SchemaWriter::declareVariable
     
-    // subclass.nddl:23 p1
+    // subclass.nddl:23 p0
+    class p0 : public Foo::p0 {
+    public:
+      p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      p0(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Bar::p0, Bar.p0);
+      
+    };
+    
+    // subclass.nddl:28 p1
     class p1 : public Foo::p1 {
     public:
       p1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -92,7 +104,7 @@ namespace NDDL {
       ConstrainedVariableId arg1; // SchemaWriter::declareVariable
     };
     
-    // subclass.nddl:27 p2
+    // subclass.nddl:32 p2
     class p2 : public NddlToken {
     public:
       p2(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -103,7 +115,7 @@ namespace NDDL {
     };
   };
   
-  // subclass.nddl:30 Baz
+  // subclass.nddl:35 Baz
   class Baz : public Bar {
   public:
     Baz(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -117,7 +129,7 @@ namespace NDDL {
     class p1;
     typedef Id<p1> p1Id;
     
-    // subclass.nddl:32 p0
+    // subclass.nddl:37 p0
     class p0 : public Foo::p0 {
     public:
       p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -128,7 +140,7 @@ namespace NDDL {
       ConstrainedVariableId arg1; // SchemaWriter::declareVariable
     };
     
-    // subclass.nddl:37 p1
+    // subclass.nddl:42 p1
     class p1 : public Foo::p1 {
     public:
       p1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -140,7 +152,7 @@ namespace NDDL {
     };
   };
   
-  // subclass.nddl:42 World
+  // subclass.nddl:47 World
   class World : public Timeline {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -152,10 +164,11 @@ namespace NDDL {
     class initialState;
     typedef Id<initialState> initialStateId;
     ConstrainedVariableId m_foo; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_foo2; // SchemaWriter::declareVariable
     ConstrainedVariableId m_bar; // SchemaWriter::declareVariable
     ConstrainedVariableId m_baz; // SchemaWriter::declareVariable
     
-    // subclass.nddl:46 initialState
+    // subclass.nddl:52 initialState
     class initialState : public NddlToken {
     public:
       initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -165,7 +178,7 @@ namespace NDDL {
       
     };
     
-    // subclass.nddl:42 World
+    // subclass.nddl:47 World
     virtual void constructor();
   };
 } // End NDDL namespace

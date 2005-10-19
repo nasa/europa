@@ -46,8 +46,7 @@ namespace NDDL {
     id->addPrimitive("bool");
     id->addPrimitive("string");
     id->addObjectType("Object");
-    id->addObjectType("Timeline", "Object");
-    id->addObjectType("NddlResource", "Object");
+    id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");
     // Force allocation of model specific type factories
     // Allocate factories

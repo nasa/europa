@@ -128,7 +128,28 @@ namespace NDDL {
   DECLARE_DEFAULT_OBJECT_FACTORY(BarFactory1, Bar);
   
   
-  // subclass.nddl:23 p1
+  // subclass.nddl:23 p0
+  Bar::p0::p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
+   : Foo::p0(planDatabase, name, rejectable, false) {
+    handleDefaults(close);
+  }
+  
+  Bar::p0::p0(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : Foo::p0(parent, name, relation, false) {
+    handleDefaults(close);
+    arg0 = addParameter(IntervalDomain(1.0, 1.0, "float"), "arg0");
+  }
+  
+  // default initialization of member variables
+  void Bar::p0::handleDefaults(bool autoClose) {
+    Foo::p0::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // subclass.nddl:28 p1
   Bar::p1::p1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : Foo::p1(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -143,7 +164,7 @@ namespace NDDL {
   void Bar::p1::handleDefaults(bool autoClose) {
     Foo::p1::handleDefaults(false);
     if(arg1.isNoId()){
-      arg1 = addParameter(IntervalIntDomain("int"), "arg1");
+      arg1 = addParameter(IntervalIntDomain(1,1, "int"), "arg1");
     }
     if (autoClose)
       close();
@@ -151,7 +172,7 @@ namespace NDDL {
   
   
   
-  // subclass.nddl:27 p2
+  // subclass.nddl:32 p2
   Bar::p2::p2(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -171,7 +192,7 @@ namespace NDDL {
   
   
   
-  // subclass.nddl:30 Baz
+  // subclass.nddl:35 Baz
   Baz::Baz(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Bar(planDatabase, "Baz", name) {
   }
@@ -190,11 +211,11 @@ namespace NDDL {
   }
   
   
-  // subclass.nddl:30 Baz
+  // subclass.nddl:35 Baz
   DECLARE_DEFAULT_OBJECT_FACTORY(BazFactory2, Baz);
   
   
-  // subclass.nddl:32 p0
+  // subclass.nddl:37 p0
   Baz::p0::p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : Foo::p0(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -217,7 +238,7 @@ namespace NDDL {
   
   
   
-  // subclass.nddl:37 p1
+  // subclass.nddl:42 p1
   Baz::p1::p1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : Foo::p1(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -240,7 +261,7 @@ namespace NDDL {
   
   
   
-  // subclass.nddl:42 World
+  // subclass.nddl:47 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -255,6 +276,8 @@ namespace NDDL {
   void World::handleDefaults(bool autoClose) {
     check_error(m_foo.isValid(), "object variables must be initialized explicitly");
     
+    check_error(m_foo2.isValid(), "object variables must be initialized explicitly");
+    
     check_error(m_bar.isValid(), "object variables must be initialized explicitly");
     
     check_error(m_baz.isValid(), "object variables must be initialized explicitly");
@@ -265,7 +288,7 @@ namespace NDDL {
   
   
   
-  // subclass.nddl:46 initialState
+  // subclass.nddl:52 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -284,11 +307,14 @@ namespace NDDL {
   }
   
   
-  // subclass.nddl:42 World
+  // subclass.nddl:47 World
   void World::constructor() {
     m_foo = addVariable(FooDomain((new Foo(m_id, "m_foo"))->getId(), "Foo"), "m_foo");
     Id<Foo>(singleton(m_foo))->constructor();
     Id<Foo>(singleton(m_foo))->handleDefaults();
+    m_foo2 = addVariable(BazDomain((new Baz(m_id, "m_foo2"))->getId(), "Baz"), "m_foo2");
+    Id<Foo>(singleton(m_foo2))->constructor();
+    Id<Foo>(singleton(m_foo2))->handleDefaults();
     m_bar = addVariable(BarDomain((new Bar(m_id, "m_bar"))->getId(), "Bar"), "m_bar");
     Id<Bar>(singleton(m_bar))->constructor();
     Id<Bar>(singleton(m_bar))->handleDefaults();
@@ -297,7 +323,7 @@ namespace NDDL {
     Id<Baz>(singleton(m_baz))->handleDefaults();
   }
   
-  // subclass.nddl:42 World
+  // subclass.nddl:47 World
   class WorldFactory3: public ConcreteObjectFactory {
   public:
     WorldFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -314,7 +340,7 @@ namespace NDDL {
     }
   };
   
-  // subclass.nddl:55 initialState
+  // subclass.nddl:62 initialState
   class World$initialState$0$0: public RuleInstance {
   public:
     World$initialState$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -322,7 +348,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$0, World$initialState$0$0, World.initialState, "subclass.nddl,55");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$0, World$initialState$0$0, World.initialState, "subclass.nddl,62");
   
   void World$initialState$0$0::handleExecute() {
     slave(Foo::p1, Foo.p1, p1, LabelStr("any"));
@@ -347,8 +373,7 @@ namespace NDDL {
     id->addPrimitive("bool");
     id->addPrimitive("string");
     id->addObjectType("Object");
-    id->addObjectType("Timeline", "Object");
-    id->addObjectType("NddlResource", "Object");
+    id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Timeline");
     id->addMember("Foo", "int", "m_0");
     id->addMember("Foo", "float", "m_1");
@@ -359,6 +384,7 @@ namespace NDDL {
     id->addPredicate("Foo.p1");
     id->addObjectType("Bar", "Foo");
     id->addMember("Bar", "int", "m_4");
+    id->addPredicate("Bar.p0");
     id->addPredicate("Bar.p1");
     id->addMember("Bar.p1", "int", "arg1");
     id->addPredicate("Bar.p2");
@@ -369,6 +395,7 @@ namespace NDDL {
     id->addMember("Baz.p1", "float", "arg2");
     id->addObjectType("World", "Timeline");
     id->addMember("World", "Foo", "m_foo");
+    id->addMember("World", "Foo", "m_foo2");
     id->addMember("World", "Bar", "m_bar");
     id->addMember("World", "Baz", "m_baz");
     id->addPredicate("World.initialState");
@@ -376,6 +403,7 @@ namespace NDDL {
     // Allocate factories
     REGISTER_TOKEN_FACTORY(Foo::p0::Factory);
     REGISTER_TOKEN_FACTORY(Foo::p1::Factory);
+    REGISTER_TOKEN_FACTORY(Bar::p0::Factory);
     REGISTER_TOKEN_FACTORY(Bar::p1::Factory);
     REGISTER_TOKEN_FACTORY(Bar::p2::Factory);
     REGISTER_TOKEN_FACTORY(Baz::p0::Factory);

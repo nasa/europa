@@ -6,10 +6,6 @@
 
 namespace NDDL {
 
-  class Resource;
-  typedef Id<Resource> ResourceId;
-  typedef ObjectDomain ResourceDomain;
-  
   class UnaryResource;
   typedef Id<UnaryResource> UnaryResourceId;
   typedef ObjectDomain UnaryResourceDomain;
@@ -43,49 +39,8 @@ namespace NDDL {
   
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
   
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Resource
   
-  // Plasma.nddl:20 Resource
-  class Resource : public NddlResource {
-  public:
-    Resource(const PlanDatabaseId& planDatabase, const LabelStr& name);
-    Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
-    Resource(const ObjectId& parent, const LabelStr& name);
-    Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
-    void handleDefaults(bool autoClose = true); // default variable initialization
-    
-    class change;
-    typedef Id<change> changeId;
-    ConstrainedVariableId initialCapacity; // SchemaWriter::declareVariable
-    ConstrainedVariableId levelLimitMin; // SchemaWriter::declareVariable
-    ConstrainedVariableId levelLimitMax; // SchemaWriter::declareVariable
-    ConstrainedVariableId productionRateMax; // SchemaWriter::declareVariable
-    ConstrainedVariableId productionMax; // SchemaWriter::declareVariable
-    ConstrainedVariableId consumptionRateMax; // SchemaWriter::declareVariable
-    ConstrainedVariableId consumptionMax; // SchemaWriter::declareVariable
-    
-    // Plasma.nddl:31 change
-    class change : public NddlResourceTransaction {
-    public:
-      change(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
-      change(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
-      void handleDefaults(bool autoClose = true); // default variable initialization
-      DECLARE_TOKEN_FACTORY(Resource::change, Resource.change);
-      
-      ConstrainedVariableId quantity; // SchemaWriter::declareVariable
-    };
-    
-    // Plasma.nddl:20 Resource
-    virtual void constructor(float ic, float ll_min, float ll_max);
-    
-    // Plasma.nddl:20 Resource
-    virtual void constructor(float ic, float ll_min, float ll_max, float p_max, float c_max);
-    
-    // Plasma.nddl:20 Resource
-    virtual void constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max);
-    
-    // Plasma.nddl:20 Resource
-    virtual void constructor();
-  };
   
   // Plasma.nddl:83 UnaryResource
   class UnaryResource : public Timeline {

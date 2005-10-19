@@ -73,6 +73,9 @@ namespace NDDL {
     
     check_error(to.isValid(), "object variables must be initialized explicitly");
     
+    if(m_int.isNoId()){
+      m_int = addVariable(IntervalIntDomain("int"), "m_int");
+    }
     if (autoClose)
       close();
   }
@@ -82,6 +85,7 @@ namespace NDDL {
   void Path::constructor(const LocationId& _from, const LocationId& _to) {
     from = addVariable(LocationDomain(_from, "Location"), "from");
     to = addVariable(LocationDomain(_to, "Location"), "to");
+    m_int = addVariable(IntervalIntDomain(1, 1, "int"), "m_int");
   }
   
   // existential.nddl:8 Path
@@ -114,7 +118,7 @@ namespace NDDL {
   };
   
   
-  // existential.nddl:16 World
+  // existential.nddl:19 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -149,7 +153,7 @@ namespace NDDL {
   
   
   
-  // existential.nddl:27 Going
+  // existential.nddl:30 Going
   World::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -185,7 +189,7 @@ namespace NDDL {
   
   
   
-  // existential.nddl:33 initialState
+  // existential.nddl:36 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -204,7 +208,7 @@ namespace NDDL {
   }
   
   
-  // existential.nddl:16 World
+  // existential.nddl:19 World
   void World::constructor() {
     rock = addVariable(LocationDomain((new Location(m_id, "rock"))->getId(), "Location"), "rock");
     Id<Location>(singleton(rock))->constructor(LabelStr("ROCK"));
@@ -232,7 +236,7 @@ namespace NDDL {
     Id<Path>(singleton(p4))->handleDefaults();
   }
   
-  // existential.nddl:16 World
+  // existential.nddl:19 World
   class WorldFactory2: public ConcreteObjectFactory {
   public:
     WorldFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -249,7 +253,7 @@ namespace NDDL {
     }
   };
   
-  // existential.nddl:46 Going
+  // existential.nddl:49 Going
   class World$Going$0$0: public RuleInstance {
   public:
     World$Going$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -257,18 +261,20 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$Going$0, World$Going$0$0, World.Going, "existential.nddl,46");
+  DECLARE_AND_DEFINE_RULE(Rule$World$Going$0, World$Going$0$0, World.Going, "existential.nddl,49");
   
   void World$Going$0$0::handleExecute() {
+    localVar(IntervalIntDomain(), intVar, false);
     objectVar(Path, path, false, false);
     objectVar(Path, p1, false, false);
     declareFilter(Path,path);
     allocateFilterCondition(path, Location, var(getId(),std::string("from")), from, eq);
     allocateFilterCondition(path, Location, var(getId(),std::string("to")), to, eq);
+    allocateFilterCondition(path, int, var(getId(),std::string("intVar")), m_int, eq);
     allocateFilterConstraint(path);
   }
   
-  // existential.nddl:55 initialState
+  // existential.nddl:61 initialState
   class World$initialState$1$0: public RuleInstance {
   public:
     World$initialState$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -304,28 +310,32 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "existential.nddl,55");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "existential.nddl,61");
   
   void World$initialState$1$0::handleExecute() {
     objectVar(Path, p1, false, false);
-    objectVar(Path, p2, false, false);
+    objectVar(Path, p2, false, true);
     objectVar(Path, p3, false, false);
     objectVar(Location, loc1, false, false);
     objectVar(Location, loc2, false, false);
+    localVar(IntervalIntDomain(), filterVar, false);
     objectVar(Path, p4, false, true);
     objectVar(Path, g, false, false);
     slave(World::Going, World.Going, going, LabelStr("any"));
     declareFilter(Path,p1);
     allocateFilterCondition(p1, Location, varfromtok(tok(getId(), std::string("going")), std::string("from")), from, eq);
     allocateFilterCondition(p1, Location, varfromtok(tok(getId(), std::string("going")), std::string("to")), to, eq);
+    allocateFilterCondition(p1, int, ruleVariable(IntervalIntDomain(1,1, "int")), m_int, eq);
     allocateFilterConstraint(p1);
     declareFilter(Path,p2);
     allocateFilterCondition(p2, Location, varfromtok(tok(getId(), std::string("going")), std::string("from")), from, eq);
     allocateFilterCondition(p2, Location, varfromtok(tok(getId(), std::string("going")), std::string("to")), to, eq);
+    allocateFilterCondition(p2, int, ruleVariable(IntervalIntDomain(2,2, "int")), m_int, eq);
     allocateFilterConstraint(p2);
     declareFilter(Path,p4);
     allocateFilterCondition(p4, Location, var(getId(),std::string("loc1")), from, eq);
     allocateFilterCondition(p4, Location, var(getId(),std::string("loc2")), to, eq);
+    allocateFilterCondition(p4, int, var(getId(),std::string("filterVar")), m_int, eq);
     allocateFilterConstraint(p4);
     declareFilter(Path,g);
     allocateFilterCondition(g, Location, varfromtok(tok(getId(), std::string("going")), std::string("from")), from, eq);
@@ -383,13 +393,13 @@ namespace NDDL {
     id->addPrimitive("bool");
     id->addPrimitive("string");
     id->addObjectType("Object");
-    id->addObjectType("Timeline", "Object");
-    id->addObjectType("NddlResource", "Object");
+    id->addObjectType("Timeline","Object");
     id->addObjectType("Location", "Object");
     id->addMember("Location", "string", "name");
     id->addObjectType("Path", "Object");
     id->addMember("Path", "Location", "from");
     id->addMember("Path", "Location", "to");
+    id->addMember("Path", "int", "m_int");
     id->addObjectType("World", "Timeline");
     id->addMember("World", "Location", "rock");
     id->addMember("World", "Location", "hill");

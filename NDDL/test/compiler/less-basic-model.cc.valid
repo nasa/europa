@@ -560,8 +560,7 @@ namespace NDDL {
     id->addPrimitive("bool");
     id->addPrimitive("string");
     id->addObjectType("Object");
-    id->addObjectType("Timeline", "Object");
-    id->addObjectType("NddlResource", "Object");
+    id->addObjectType("Timeline","Object");
     id->addObjectType("Camera", "Timeline");
     id->addPredicate("Camera.On");
     id->addPredicate("Camera.Off");

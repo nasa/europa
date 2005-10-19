@@ -6,10 +6,6 @@
 
 namespace NDDL {
 
-  class Resource;
-  typedef Id<Resource> ResourceId;
-  typedef ObjectDomain ResourceDomain;
-  
   class UnaryResource;
   typedef Id<UnaryResource> UnaryResourceId;
   typedef ObjectDomain UnaryResourceDomain;
@@ -35,49 +31,8 @@ namespace NDDL {
   
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
   
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Resource
   
-  // Resources.nddl:9 Resource
-  class Resource : public NddlResource {
-  public:
-    Resource(const PlanDatabaseId& planDatabase, const LabelStr& name);
-    Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
-    Resource(const ObjectId& parent, const LabelStr& name);
-    Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
-    void handleDefaults(bool autoClose = true); // default variable initialization
-    
-    class change;
-    typedef Id<change> changeId;
-    ConstrainedVariableId initialCapacity; // SchemaWriter::declareVariable
-    ConstrainedVariableId levelLimitMin; // SchemaWriter::declareVariable
-    ConstrainedVariableId levelLimitMax; // SchemaWriter::declareVariable
-    ConstrainedVariableId productionRateMax; // SchemaWriter::declareVariable
-    ConstrainedVariableId productionMax; // SchemaWriter::declareVariable
-    ConstrainedVariableId consumptionRateMax; // SchemaWriter::declareVariable
-    ConstrainedVariableId consumptionMax; // SchemaWriter::declareVariable
-    
-    // Resources.nddl:20 change
-    class change : public NddlResourceTransaction {
-    public:
-      change(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
-      change(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
-      void handleDefaults(bool autoClose = true); // default variable initialization
-      DECLARE_TOKEN_FACTORY(Resource::change, Resource.change);
-      
-      ConstrainedVariableId quantity; // SchemaWriter::declareVariable
-    };
-    
-    // Resources.nddl:9 Resource
-    virtual void constructor(float ic, float ll_min, float ll_max);
-    
-    // Resources.nddl:9 Resource
-    virtual void constructor(float ic, float ll_min, float ll_max, float p_max, float c_max);
-    
-    // Resources.nddl:9 Resource
-    virtual void constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max);
-    
-    // Resources.nddl:9 Resource
-    virtual void constructor();
-  };
   
   // Resources.nddl:72 UnaryResource
   class UnaryResource : public Timeline {
@@ -104,7 +59,7 @@ namespace NDDL {
   };
   
   // simple-resources.nddl:4 Battery
-  class Battery : public Resource {
+  class Battery : public NddlResource {
   public:
     Battery(const PlanDatabaseId& planDatabase, const LabelStr& name);
     Battery(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
@@ -116,7 +71,7 @@ namespace NDDL {
     typedef Id<change> changeId;
     
     // simple-resources.nddl:5 change
-    class change : public Resource::change {
+    class change : public NddlResource::change {
     public:
       change(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
       change(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
@@ -126,14 +81,17 @@ namespace NDDL {
       ConstrainedVariableId conversionRate; // SchemaWriter::declareVariable
       ConstrainedVariableId actualQuantity; // SchemaWriter::declareVariable
     };
+    
+    // simple-resources.nddl:4 Battery
+    virtual void constructor(float ic, float ll_min, float ll_max);
   };
   
   
-  // simple-resources.nddl:12 Location
+  // simple-resources.nddl:17 Location
   typedef SymbolDomain Location;
   Location LocationBaseDomain();
   
-  // simple-resources.nddl:14 Rover
+  // simple-resources.nddl:19 Rover
   class Rover : public Object {
   public:
     Rover(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -147,7 +105,7 @@ namespace NDDL {
     class Going;
     typedef Id<Going> GoingId;
     
-    // simple-resources.nddl:15 At
+    // simple-resources.nddl:20 At
     class At : public NddlToken {
     public:
       At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -158,7 +116,7 @@ namespace NDDL {
       ConstrainedVariableId location; // SchemaWriter::declareVariable
     };
     
-    // simple-resources.nddl:19 Going
+    // simple-resources.nddl:24 Going
     class Going : public NddlToken {
     public:
       Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -171,11 +129,11 @@ namespace NDDL {
     };
     ConstrainedVariableId mutex; // SchemaWriter::declareVariable
     
-    // simple-resources.nddl:14 Rover
+    // simple-resources.nddl:19 Rover
     virtual void constructor();
   };
   
-  // simple-resources.nddl:37 World
+  // simple-resources.nddl:42 World
   class World : public Timeline {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -189,7 +147,7 @@ namespace NDDL {
     ConstrainedVariableId mainBattery; // SchemaWriter::declareVariable
     ConstrainedVariableId reserveBattery; // SchemaWriter::declareVariable
     
-    // simple-resources.nddl:41 initialState
+    // simple-resources.nddl:46 initialState
     class initialState : public NddlToken {
     public:
       initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -199,7 +157,7 @@ namespace NDDL {
       
     };
     
-    // simple-resources.nddl:37 World
+    // simple-resources.nddl:42 World
     virtual void constructor();
   };
 } // End NDDL namespace

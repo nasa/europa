@@ -206,8 +206,7 @@ namespace NDDL {
     id->addPrimitive("bool");
     id->addPrimitive("string");
     id->addObjectType("Object");
-    id->addObjectType("Timeline", "Object");
-    id->addObjectType("NddlResource", "Object");
+    id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Timeline");
     id->addMember("Foo", "float", "f_var");
     id->addPredicate("Foo.pred1");
