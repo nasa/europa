@@ -32,14 +32,21 @@ for model in
 	local hh = $(model:S=.hh) ;
 	local cc = [ FGristFiles $(model:S=.cc) ] ;
 
-	GenerateValid generate-nddl-valid : $(hh) $(cc) ;
+	if $(INVALID)
+	{
+		GenerateValid generate-valids : $(hh) $(cc) ;
+		LocalDepends run-nddl-tests : generate-valids ;
+	}
+	else
+	{
+		ALWAYS $(hh).diff $(cc).diff ;
+		NOTFILE $(hh).diff $(cc).diff ;
+		Diff $(hh).diff : $(hh).valid $(hh) ;
+		Diff $(cc).diff : $(cc).valid $(cc) ;
+  	LocalDepends run-nddl-tests : $(hh).diff $(cc).diff ;
+	}
 
-	ALWAYS $(hh).diff $(cc).diff ;
-	NOTFILE $(hh).diff $(cc).diff ;
-	Diff $(hh).diff : $(hh).valid $(hh) ;
-	Diff $(cc).diff : $(cc).valid $(cc) ;
-
-  LocalDepends run-nddl-tests : run-$(exe) $(hh).diff $(cc).diff ;
+  LocalDepends run-nddl-tests : run-$(exe) ;
 }
 
 } # PLASMA_READY
