@@ -19,9 +19,14 @@ class Foo {
 class Bar extends Foo {
  int m_4;
 
+ // Declare predicate to assign value to inherited argument
+ predicate p0{
+  arg0 = 1.0;
+ }
+
  // Declare predicate to extend arguments of ancestor
  predicate p1{
-  int arg1;
+  int arg1 = 1;
  }
 
  predicate p2{}
@@ -41,12 +46,14 @@ class Baz extends Bar {
 
 class World {
  Foo m_foo;
+ Foo m_foo2;
  Bar m_bar;
  Baz m_baz;
  predicate initialState{}
 
  World() {
   m_foo = new Foo();
+	m_foo2 = new Baz();
   m_bar = new Bar();
   m_baz = new Baz();
  }
