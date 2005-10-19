@@ -207,6 +207,39 @@ namespace EUROPA {
       assertTrue(dom14.intersects(dom15), dom15.toString() + " should have a non-empty intersection " + dom14.toString());
       assertFalse(dom14.intersect(dom15), dom15.toString() + " should not cause a change for " + dom14.toString());
 
+      IntervalIntDomain intBase(-3, 3);
+      IntervalIntDomain dom16(intBase);
+      IntervalDomain dom17(-2.9, 3);
+      IntervalDomain dom18(-3, 2.9);
+      IntervalDomain dom19(-2.9, 2.9);
+      IntervalDomain dom20(-0.9, 3);
+      IntervalDomain dom21(-3, 0.9);
+      IntervalDomain dom22(0.3, 0.4);
+
+      dom16.intersect(dom17);
+      assertTrue(dom16.getLowerBound() == -2.0 && dom16.getUpperBound() == 3.0);
+      dom16.relax(intBase);
+      
+      dom16.intersect(dom18);
+      assertTrue(dom16.getLowerBound() == -3.0 && dom16.getUpperBound() == 2.0);
+      dom16.relax(intBase);
+
+      dom16.intersect(dom19);
+      assertTrue(dom16.getLowerBound() == -2 && dom16.getUpperBound() == 2.0);
+      dom16.relax(intBase);
+
+      dom16.intersect(dom20);
+      assertTrue(dom16.getLowerBound() == 0.0 && dom16.getUpperBound() == 3.0);
+      dom16.relax(intBase);
+
+      dom16.intersect(dom21);
+      assertTrue(dom16.getLowerBound() == -3.0 && dom16.getUpperBound() == 0);
+      dom16.relax(intBase);
+
+      dom16.intersect(dom22);
+      assertTrue(dom16.isEmpty());
+      dom16.relax(intBase);
+
       return(true);
     }
 
@@ -660,6 +693,17 @@ namespace EUROPA {
       assertTrue(values.front() ==  1); values.pop_front();
       assertTrue(values.front() ==  2); values.pop_front();
       assertTrue(values.front() ==  3); values.pop_front();
+
+      IntervalIntDomain i2(-10, 10);
+      IntervalDomain& i3 = i2;
+      IntervalDomain* i4 = &i2;
+      assertTrue(i2.minDelta() == 1);
+      assertTrue(i3.minDelta() == 1);
+      assertTrue(i4->minDelta() == 1);
+      assertTrue(dynamic_cast<IntervalDomain*>(&i2)->minDelta() == 1);
+      //std::cout << "FOO: " << static_cast<IntervalDomain>(i2).minDelta() << std::endl;
+      //assertTrue(static_cast<IntervalDomain>(i2).minDelta() == 1);
+      //assertTrue(((IntervalDomain)i2).minDelta() == 1);
 
       return true;
     }

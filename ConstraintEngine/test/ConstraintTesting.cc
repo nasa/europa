@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "Error.hh"
 #include "AbstractDomain.hh"
@@ -130,6 +131,7 @@ namespace EUROPA {
     bool negative = false;
     double endPoints[2];
     unsigned int which = 0; // 0 for no bounds; 1 for lower bound; 2 for upper bound.
+    bool constructInts = true;
     for (in.get(ch); ch != ']' && in.good(); ) {
       switch (ch) {
       case ' ': case '+':
@@ -148,7 +150,8 @@ namespace EUROPA {
         else
           endPoints[which - 1] = PLUS_INFINITY;
         for (in.get(ch); ch != ' ' && ch != ']' && in.good(); in.get(ch))
-          ;
+          if(ch == '.')
+	    constructInts = false;
         assertTrue(in.good());
         continue;
       case '0': case '1': case '2': case '3': case '4':
@@ -160,8 +163,11 @@ namespace EUROPA {
           if (negative)
             number = "-";
           number += ch;
-          for (in.get(ch); ch != ']' && ch != ' ' && in.good(); in.get(ch))
+          for (in.get(ch); ch != ']' && ch != ' ' && in.good(); in.get(ch)) {
+	    if(ch == '.')
+	      constructInts = false;
             number += ch;
+	  }
           assertTrue(in.good());
           endPoints[which - 1] = atof(number.c_str());
         }
@@ -176,13 +182,27 @@ namespace EUROPA {
     // Presume always IntervalDomain (rather than IntervalIntDomain) for now.
     // To know which will probably require a DomainType argument to this function.
     if (which == 0) {
-      dom = new IntervalDomain();
+      if(constructInts)
+	//dom = new IntervalDomain();
+	dom = new IntervalIntDomain();
+      else
+	dom = new IntervalDomain();
       dom->empty();
     } else
-      if (which == 1)
-        dom = new IntervalDomain(endPoints[0]);
-      else
-        dom = new IntervalDomain(endPoints[0], endPoints[1]);
+      if (which == 1) {
+	if(constructInts)
+	  //dom = new IntervalDomain(endPoints[0]);
+	  dom = new IntervalIntDomain((int) endPoints[0]);
+	else
+	  dom = new IntervalDomain(endPoints[0]);
+      }
+      else {
+	if(constructInts)
+	  //dom = new IntervalDomain(endPoints[0], endPoints[1]);
+	  dom = new IntervalIntDomain((int) endPoints[0], (int) endPoints[1]);
+	else
+	  dom = new IntervalDomain(endPoints[0], endPoints[1]);
+      }
     assertTrue(dom != 0);
     return(dom);
   }
@@ -335,6 +355,14 @@ namespace EUROPA {
       assertTrue(scope.size() == outputDoms.size());
 
       // Create and execute the constraint.
+      
+      std::stringstream scopeStr;
+      for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it)
+	scopeStr << " " << (*it)->toString();
+     
+      debugMsg("ConstraintTesting", "Creating constraint " << testCases.front().m_constraintName << " with scope " << scopeStr.str() << " for test " 
+	       << testCases.front().m_line);
+
       ConstraintId constraint = ConstraintLibrary::createConstraint(LabelStr(testCases.front().m_constraintName), engine, scope);
       assertTrue(engine->pending());
       engine->propagate();
