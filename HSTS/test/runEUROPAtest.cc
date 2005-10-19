@@ -1,3 +1,4 @@
+
 /**
  * @file Main.cc
  *
@@ -83,7 +84,7 @@ int main(int argc, const char ** argv) {
     switch(result) {
     case CBPlanner::PLAN_FOUND: 
       planFound = true;
-      std::cerr << "Finished Planning. Printing the plan." << std::endl;
+      debugMsg("EuropaTest:plan",  "Finished Planning. Printing the plan.");
       std::cout << "runEUROPAtest found a plan at depth " << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched() << std::endl;
       // Dump the results
       assembly.write(std::cout);
