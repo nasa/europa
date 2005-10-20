@@ -34,6 +34,11 @@ class Path {
  }
 }
 
+class Battery extends Resource {
+  Battery(float ic, float ll_min, float ll_max){
+   super(ic, ll_min, ll_max, 0.0, 0.0, MINUS_INFINITY, MINUS_INFINITY);
+  }
+}
 
 /*
  * Navigation portion of a rover. Responsible for managing the location the 
@@ -204,12 +209,6 @@ Instrument::Stow{
 Instrument::Stowed{
  met_by(Stow a);
  meets(Unstow b);
-}
-
-class Battery extends Resource {
-  Battery(float ic, float ll_min, float ll_max){
-   super(ic, ll_min, ll_max, 0.0, 0.0, MINUS_INFINITY, MINUS_INFINITY);
-  }
 }
 
 // Rover itself is made up of command, navigator, instrument, and battery
