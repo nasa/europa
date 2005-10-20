@@ -25,12 +25,12 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>34</integer>
+				<integer>62</integer>
 				<key>Info</key>
 				<integer>4</integer>
 			</dict>
 			<key>ID</key>
-			<integer>35</integer>
+			<integer>63</integer>
 			<key>Labels</key>
 			<array>
 				<dict>
@@ -104,7 +104,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>12</integer>
+				<integer>40</integer>
 				<key>Info</key>
 				<integer>3</integer>
 			</dict>
@@ -115,7 +115,7 @@
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
-			<integer>34</integer>
+			<integer>62</integer>
 			<key>Magnets</key>
 			<array>
 				<string>{0, 1}</string>
@@ -133,7 +133,7 @@
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc
 
-\f0\b\fs24 \cf0 Battary}</string>
+\f0\b\fs24 \cf0 Battery}</string>
 			</dict>
 		</dict>
 		<dict>
@@ -142,10 +142,10 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>9</integer>
+				<integer>37</integer>
 			</dict>
 			<key>ID</key>
-			<integer>33</integer>
+			<integer>61</integer>
 			<key>Labels</key>
 			<array>
 				<dict>
@@ -239,7 +239,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>13</integer>
+				<integer>41</integer>
 				<key>Info</key>
 				<integer>2</integer>
 			</dict>
@@ -250,10 +250,10 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>8</integer>
+				<integer>36</integer>
 			</dict>
 			<key>ID</key>
-			<integer>32</integer>
+			<integer>60</integer>
 			<key>Labels</key>
 			<array>
 				<dict>
@@ -347,7 +347,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>14</integer>
+				<integer>42</integer>
 				<key>Info</key>
 				<integer>3</integer>
 			</dict>
@@ -358,12 +358,12 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>12</integer>
+				<integer>40</integer>
 				<key>Info</key>
 				<integer>4</integer>
 			</dict>
 			<key>ID</key>
-			<integer>31</integer>
+			<integer>59</integer>
 			<key>Labels</key>
 			<array>
 				<dict>
@@ -455,7 +455,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>30</integer>
+				<integer>58</integer>
 				<key>Info</key>
 				<integer>3</integer>
 			</dict>
@@ -466,7 +466,7 @@
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
-			<integer>30</integer>
+			<integer>58</integer>
 			<key>Magnets</key>
 			<array>
 				<string>{0, 1}</string>
@@ -493,12 +493,12 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>15</integer>
+				<integer>43</integer>
 				<key>Info</key>
 				<integer>1</integer>
 			</dict>
 			<key>ID</key>
-			<integer>29</integer>
+			<integer>57</integer>
 			<key>Labels</key>
 			<array>
 				<dict>
@@ -588,7 +588,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>24</integer>
+				<integer>52</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -597,12 +597,12 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>15</integer>
+				<integer>43</integer>
 				<key>Info</key>
 				<integer>4</integer>
 			</dict>
 			<key>ID</key>
-			<integer>28</integer>
+			<integer>56</integer>
 			<key>Labels</key>
 			<array>
 				<dict>
@@ -654,7 +654,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>12</integer>
+				<integer>40</integer>
 				<key>Info</key>
 				<integer>3</integer>
 			</dict>
@@ -665,12 +665,12 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>14</integer>
+				<integer>42</integer>
 				<key>Info</key>
 				<integer>4</integer>
 			</dict>
 			<key>ID</key>
-			<integer>27</integer>
+			<integer>55</integer>
 			<key>Labels</key>
 			<array>
 				<dict>
@@ -740,7 +740,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>12</integer>
+				<integer>40</integer>
 				<key>Info</key>
 				<integer>3</integer>
 			</dict>
@@ -751,10 +751,10 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>13</integer>
+				<integer>41</integer>
 			</dict>
 			<key>ID</key>
-			<integer>26</integer>
+			<integer>54</integer>
 			<key>Labels</key>
 			<array>
 				<dict>
@@ -806,7 +806,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>12</integer>
+				<integer>40</integer>
 				<key>Info</key>
 				<integer>3</integer>
 			</dict>
@@ -822,7 +822,7 @@
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
-					<integer>17</integer>
+					<integer>45</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -863,7 +863,7 @@
 							<key>Class</key>
 							<string>LineGraphic</string>
 							<key>ID</key>
-							<integer>19</integer>
+							<integer>47</integer>
 							<key>Points</key>
 							<array>
 								<string>{486, 532.136}</string>
@@ -884,7 +884,7 @@
 							<key>Class</key>
 							<string>LineGraphic</string>
 							<key>ID</key>
-							<integer>20</integer>
+							<integer>48</integer>
 							<key>Points</key>
 							<array>
 								<string>{462, 532.136}</string>
@@ -905,7 +905,7 @@
 							<key>Class</key>
 							<string>LineGraphic</string>
 							<key>ID</key>
-							<integer>21</integer>
+							<integer>49</integer>
 							<key>Points</key>
 							<array>
 								<string>{462, 550.955}</string>
@@ -926,7 +926,7 @@
 							<key>Class</key>
 							<string>LineGraphic</string>
 							<key>ID</key>
-							<integer>22</integer>
+							<integer>50</integer>
 							<key>Points</key>
 							<array>
 								<string>{462, 550.955}</string>
@@ -949,7 +949,7 @@
 							<key>Class</key>
 							<string>LineGraphic</string>
 							<key>ID</key>
-							<integer>23</integer>
+							<integer>51</integer>
 							<key>Points</key>
 							<array>
 								<string>{462, 522.727}</string>
@@ -972,13 +972,13 @@
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>ID</key>
-							<integer>24</integer>
+							<integer>52</integer>
 							<key>Shape</key>
 							<string>Circle</string>
 						</dict>
 					</array>
 					<key>ID</key>
-					<integer>18</integer>
+					<integer>46</integer>
 				</dict>
 				<dict>
 					<key>Bounds</key>
@@ -986,7 +986,7 @@
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
-					<integer>25</integer>
+					<integer>53</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -1010,7 +1010,7 @@
 				</dict>
 			</array>
 			<key>ID</key>
-			<integer>16</integer>
+			<integer>44</integer>
 		</dict>
 		<dict>
 			<key>Bounds</key>
@@ -1018,7 +1018,7 @@
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
-			<integer>15</integer>
+			<integer>43</integer>
 			<key>Magnets</key>
 			<array>
 				<string>{0, 1}</string>
@@ -1045,7 +1045,7 @@
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
-			<integer>14</integer>
+			<integer>42</integer>
 			<key>Magnets</key>
 			<array>
 				<string>{0, 1}</string>
@@ -1072,7 +1072,7 @@
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
-			<integer>13</integer>
+			<integer>41</integer>
 			<key>Magnets</key>
 			<array>
 				<string>{0, 1}</string>
@@ -1099,7 +1099,7 @@
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
-			<integer>12</integer>
+			<integer>40</integer>
 			<key>Magnets</key>
 			<array>
 				<string>{0, 1}</string>
@@ -1126,12 +1126,12 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>9</integer>
+				<integer>37</integer>
 				<key>Info</key>
 				<integer>3</integer>
 			</dict>
 			<key>ID</key>
-			<integer>11</integer>
+			<integer>39</integer>
 			<key>Labels</key>
 			<array>
 				<dict>
@@ -1225,7 +1225,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>8</integer>
+				<integer>36</integer>
 				<key>Info</key>
 				<integer>3</integer>
 			</dict>
@@ -1236,12 +1236,12 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>9</integer>
+				<integer>37</integer>
 				<key>Info</key>
 				<integer>4</integer>
 			</dict>
 			<key>ID</key>
-			<integer>10</integer>
+			<integer>38</integer>
 			<key>Labels</key>
 			<array>
 				<dict>
@@ -1335,7 +1335,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>8</integer>
+				<integer>36</integer>
 				<key>Info</key>
 				<integer>4</integer>
 			</dict>
@@ -1346,7 +1346,7 @@
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
-			<integer>9</integer>
+			<integer>37</integer>
 			<key>Magnets</key>
 			<array>
 				<string>{0, 1}</string>
@@ -1373,7 +1373,7 @@
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
-			<integer>8</integer>
+			<integer>36</integer>
 			<key>Magnets</key>
 			<array>
 				<string>{0, 1}</string>
@@ -1427,7 +1427,7 @@
 	<key>MagnetsVisible</key>
 	<string>NO</string>
 	<key>ModificationDate</key>
-	<string>2005-10-20 11:22:25 -0700</string>
+	<string>2005-10-20 11:27:59 -0700</string>
 	<key>Modifier</key>
 	<string>Peter Jarvis</string>
 	<key>Orientation</key>
