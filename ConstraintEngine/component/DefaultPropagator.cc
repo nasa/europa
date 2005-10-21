@@ -33,6 +33,7 @@ namespace EUROPA {
 					     int argIndex, 
 					     const ConstraintId& constraint, 
 					     const DomainListener::ChangeType& changeType){
+    checkError(!constraint->isDiscarded(), constraint);
     if(constraint->getKey() != m_activeConstraint)
       m_agenda.insert(constraint);
   }
@@ -67,7 +68,7 @@ namespace EUROPA {
     for(ConstraintSet::iterator it = m_agenda.begin(); it != m_agenda.end(); ++it){
       ConstraintId constraint = *it;
       checkError(constraint.isValid(), constraint);
-      checkError(!constraint->isDiscarded(), constraint);
+      checkError(!constraint->isDiscarded(), constraint->getName().toString() << "(" << constraint->getKey() << ")");
     }
     return true;
   }
