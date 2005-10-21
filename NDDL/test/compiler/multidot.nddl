@@ -66,4 +66,3 @@ goal(Baz.apred ap);
 
 goal(Baz.bpred bp);
 
-//eq(bp.predBar.m_foo, f1);

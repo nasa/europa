@@ -147,10 +147,9 @@ Position::At{
 
 Position::navigate{
 
-  Path path : {
-    eq(path.m_from, from);
-    eq(path.m_to, to);
-  };
+  Path path;
+  eq(path.m_from, from);
+  eq(path.m_to, to);
 
   meets(object.At a);
   eq(to , a.location);
@@ -409,10 +408,9 @@ OpportunisticScience::oppscilooknow {
   contained_by(Target.Tracked tr);
   eq(tr.object, target);
 
-  OppSci_Accessable oppsci : {
-    eq(oppsci.m_from, at_loc);
-    eq(oppsci.m_to, target);
-  };
+  OppSci_Accessable oppsci;
+  eq(oppsci.m_from, at_loc);
+  eq(oppsci.m_to, target);
 
   Rover rovers;
   contained_by(Tracker.TrackingFrozen tfo);
@@ -436,10 +434,9 @@ OpportunisticScience::oppscigetstatus {
   contained_by(Target.Tracked tr);
   eq(tr.object, target);
 
-  OppSci_Accessable oppsci : {
-    eq(oppsci.m_from, at_loc);
-    eq(oppsci.m_to, target);
-  };
+  OppSci_Accessable oppsci;
+  eq(oppsci.m_from, at_loc);
+  eq(oppsci.m_to, target);
 
   Rover rovers;
   contained_by(Tracker.TrackingFrozen tfo);
@@ -557,16 +554,9 @@ CHAMP::ipgetname {
   contained_by(Target.Tracked tr);
   eq(tr.object, target);
 
-  // Target.Tracked tr : {
-  //   eq(tr.object, target);
-  // };
-  // contained_by(Target.Tracked tr);
-
-
-  CHAMP_Accessable champ : {
-    eq(champ.m_from, at_loc);
-    eq(champ.m_to, target);
-  };
+  CHAMP_Accessable champ;
+  eq(champ.m_from, at_loc);
+  eq(champ.m_to, target);
 
   Rover rovers;
   contained_by(Tracker.TrackingOn tfo);
@@ -592,10 +582,9 @@ CHAMP::ipsettarget {
   contained_by(Target.Tracked tr);
   eq(tr.object, target);
 
-  CHAMP_Accessable champ : {
-    eq(champ.m_from, at_loc);
-    eq(champ.m_to, target);
-  };
+  CHAMP_Accessable champ;
+  eq(champ.m_from, at_loc);
+  eq(champ.m_to, target);
 
   Rover rovers;
   contained_by(Tracker.TrackingOn tfo);
@@ -621,10 +610,9 @@ CHAMP::ipplaceinstrument {
   contained_by(Target.Tracked tr);
   eq(tr.object, target);
 
-  CHAMP_Accessable champ : {
-    eq(champ.m_from, at_loc);
-    eq(champ.m_to, target);
-  };
+  CHAMP_Accessable champ;
+  eq(champ.m_from, at_loc);
+  eq(champ.m_to, target);
 
   Rover rovers;
   contained_by(Tracker.TrackingOn tfo);
@@ -650,10 +638,9 @@ CHAMP::ipgetstatus {
   contained_by(Target.Tracked tr);
   eq(tr.object, target);
 
-  CHAMP_Accessable champ : {
-    eq(champ.m_from, at_loc);
-    eq(champ.m_to, target);
-  };
+  CHAMP_Accessable champ;
+  eq(champ.m_from, at_loc);
+  eq(champ.m_to, target);
 
   Rover rovers;
   contained_by(Tracker.TrackingOn tfo);

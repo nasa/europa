@@ -21,14 +21,16 @@ World::initialState{
   contains(Rover.Navigate n);
  };
 
- Path emptyPath filterOnly : {
+ bool hasPath;
+ if(hasPath){
+  Path emptyPath;
   eq(emptyPath.from, object.loc1);
   eq(emptyPath.to, object.loc2);
- };
 
- foreach(q in emptyPath) {
-  contains(Rover.Navigate n);
- };
+  foreach(q in emptyPath) {
+   contains(Rover.Navigate n);
+  };
+ }
 }
 
 Rover r0 = new Rover();

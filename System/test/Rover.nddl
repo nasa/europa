@@ -62,10 +62,9 @@ Navigator::Going{
  eq(_to.location, to);
 
  // Select a path from those available between the 2 points
- Path p : {
-  eq(p.from, from);
-  eq(p.to, to);
- };
+ Path p;
+ eq(p.from, from);
+ eq(p.to, to);
 
  // Pull juice from the battery. Should be based on path length.
  starts(Battery.change tx);

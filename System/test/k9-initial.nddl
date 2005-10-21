@@ -61,10 +61,9 @@ Position::At{
 
 Position::navigate{
 
-  Path path : {
-    eq(path.m_from, from);
-    eq(path.m_to, to);
-  };
+  Path path;
+  eq(path.m_from, from);
+  eq(path.m_to, to);
 
   meets(At a);
   eq(to , a.location);

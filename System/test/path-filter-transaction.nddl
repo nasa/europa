@@ -24,10 +24,9 @@ class Rover{
 }
 
 Rover::Going{
- Path path : {
-  eq(path.from, from);
-  eq(path.to, to);
- };
+ Path path;
+ eq(path.from, from);
+ eq(path.to, to);
 }
 
 // Create initial state to allow a plan to be found

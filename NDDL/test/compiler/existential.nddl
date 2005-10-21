@@ -22,10 +22,10 @@ class World{
  Location lander;
  Location martianCity;
 
- Path p1;
- Path p2;
- Path p3;
- Path p4;
+ Path path1;
+ Path path2;
+ Path path3;
+ Path path4;
 
  predicate Going{
   Location from;
@@ -39,23 +39,22 @@ class World{
   hill = new Location("HILL");
   lander = new Location("LANDER");
   martianCity = new Location("MARTIAN_CITY");
-  p1 = new Path(rock, hill);
-  p2 = new Path(lander, hill);
-  p3 = new Path(martianCity, hill);
-  p4 = new Path(hill, lander);
+  path1 = new Path(rock, hill);
+  path2 = new Path(lander, hill);
+  path3 = new Path(martianCity, hill);
+  path4 = new Path(hill, lander);
  }
 }
 
 World::Going{
  int intVar;
 
- Path path : {
-  eq(path.from, from);
-  eq(path.to, to);
-  eq(path.m_int, intVar);
- };
+ Path path;
+ eq(path.from, from);
+ eq(path.to, to);
+ eq(path.m_int, intVar);
 
- Path p1: {};
+ Path p1;
 }
 
 World::initialState{
@@ -63,40 +62,40 @@ World::initialState{
  eq(going.from, object.rock);
  eq(going.to, object.hill);
 
- Path p1 : {
-  eq(p1.from, going.from);
-  eq(p1.to, going.to);
-  eq(p1.m_int, 1);
- };
+ Path p1;
+ eq(p1.from, going.from);
+ eq(p1.to, going.to);
+ eq(p1.m_int, 1);
 
- Path p2 filterOnly : {
-  eq(p2.from, going.from);
-  eq(p2.to, going.to);
-  eq(p2.m_int, 2);
- };
-
- Path p3 : {};
 
  // Now create a filter that will remove all values
  // but verify that no inconsistency is triggered. Note that if
  // the keyword 'filterOnly' is ommitted, then it will cause an inconsistency
- Location loc1;
- Location loc2;
- eq(loc1, object.rock);
- eq(loc2, object.rock);
+ bool hasPath;
+ if(hasPath){
+  Path p2;
+  eq(p2.from, going.from);
+  eq(p2.to, going.to);
+  eq(p2.m_int, 2);
 
- int filterVar;
- Path p4 filterOnly : {
+  Location loc1;
+  Location loc2;
+  eq(loc1, object.rock);
+  eq(loc2, object.rock);
+
+  int filterVar;
+  Path p4;
   eq(p4.from, loc1);
   eq(p4.to, loc2);
   eq(p4.m_int, filterVar);
- };
+ }
+
+ Path p3;
 
  // Make sure that the model compiles if the filter
  // variable name is a substring of the constraint argument
-  Path g : {
-    eq(g.from, going.from);
-  };
+ Path g;
+ eq(g.from, going.from);
 }
 
 World world = new World();

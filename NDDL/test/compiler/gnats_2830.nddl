@@ -43,25 +43,19 @@ class Foo {
 }
 
 Position::Navigate {
+    Path p;
+    eq(p._from, _from);
+    eq(p._to, _to);
 
-    Path p : {
-	eq(p._from, _from);
-	eq(p._to, _to);
-    };
-
-/* NOT CURRENTLY SUPPORTED
-    Enable en : {
-        eq(en._p, p);
-        // Implied guard on _p for this
-	eq(en._t, _p._from);
-    };
-*/
+    Enable en;
+    eq(en._p, p);
+    eq(en._t, _p._from);
 
     if (p) {
-	Enable enable : {
-	    eq(enable._p, p);
-	    eq(enable._t, p._from);
-	};
+	Enable enable;
+	eq(enable._p, p);
+	eq(enable._t, p._from);
+
         if (enable) {
 	    any(Foo.FooPred fp);
 	    eq(fp.loc, enable._t);

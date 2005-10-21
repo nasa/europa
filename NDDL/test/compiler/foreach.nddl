@@ -57,34 +57,21 @@ class Rover {
 }
 
 Rover::Navigate{
- Path p: {
-	eq(from, p.from);
-	eq(to, p.to);
- };
-
+ Path p;
  eq(path, p);
+ eq(from, p.from);
+ eq(to, p.to);
 
+ Trackable trackable;
+ eq(trackable.path, p);
+
+ // Guard so iteration set is not going to be restricted
  if(path){
- 	Trackable trackable : {
-		eq(trackable.path, p);
- 	};
-
- 	NotTrackable notTrackable filterOnly : {
-		eq(notTrackable.path, p);
- 	};
-
  	foreach (t in trackable) {
                 Trackable t_local_0;
 		contains(Target.Tracking target);
 		eq(target.object, t.target);
                 eq(t, t_local_0);
- 	};
-
- 	foreach (t in notTrackable) {
-                Trackable t_local_1;
-		contains(Target.Tracking target);
-		eq(target.object, t.target);
-                neq(t, t_local_1);
  	};
  }
 }

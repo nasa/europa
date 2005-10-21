@@ -7,7 +7,7 @@ class Bar{
 }
 
 class Foo{
- int arg1;
+ int arg1=20;
  Bar arg2;
 
  Foo(){
@@ -39,7 +39,6 @@ class Foo{
 // by the constrain referencing a field. Expect a single 
 // RuleInstance to be created, which is an object guarded instance
 Foo::impliedObjectGuard{
- eq(object.arg1, 10); // 0: Guarded by object
  eq(allFoo.arg1, [0 100]); // 1: Guarded by allFoo
 
  eq(object.arg1, allFoo.arg1); // 2: Guarded by object and allFoo
