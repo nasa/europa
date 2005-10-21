@@ -73,10 +73,10 @@ Navigator::Going{
  eq(_to.location, to);
 
  // Select a path from those available between the 2 points
- Path p : {
-  eq(p.from, from);
-  eq(p.to, to);
- };
+
+ Path p;
+ eq(p.from, from);
+ eq(p.to, to);
 
  // Pull power from the battery equal to the path cost.
  starts(Battery.change tx);
