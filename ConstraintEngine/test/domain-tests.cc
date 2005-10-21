@@ -1186,6 +1186,10 @@ namespace EUROPA {
 
 	d0.intersect(d1);
 	assertTrue(d0.getSize() == 1);
+
+	// Also test bounds intersection
+	d1.intersect(0, 4.6);
+	assertTrue(d1.getSize() == 2);
       }
 
       return(true);

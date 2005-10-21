@@ -246,6 +246,15 @@ namespace EUROPA {
     bool intersect(const AbstractDomain& dom);
 
     /**
+     * @brief Convenience version of intersect.
+     * @param lb the lower bound of domain to intersect with.
+     * @param ub the upper bound of domain to intersect with.
+     * @return true if the intersection results in a change to this domain, otherwise false.
+     * @note ub must be >= lb.
+     */
+    bool intersect(double lb, double ub);
+
+    /**
      * @brief restricts this domain to the difference of its values with the given domain.
      * @param dom the domain to differ with. Must not be empty.
      * @return true if the operation results in a change to this domain, otherwise false.

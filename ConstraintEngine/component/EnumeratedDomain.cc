@@ -1,6 +1,8 @@
 #include "EnumeratedDomain.hh"
 #include "LabelStr.hh"
 #include "Entity.hh"
+#include "IntervalDomain.hh"
+#include "BoolDomain.hh"
 
 namespace EUROPA {
 
@@ -160,7 +162,7 @@ namespace EUROPA {
 
     if (dom.isInterval()) {
       bool changed = intersect(dom);
-      if (isEmpty())
+      if (changed && isEmpty())
         return(true);
 
       // The changed flag cannot be tested first as
@@ -169,7 +171,6 @@ namespace EUROPA {
       // include values outside *this.
       // --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 22
       return(dom.intersect(*this) || changed);
-
     } else {
       bool changed_a = false;
       bool changed_b = false;
@@ -425,6 +426,19 @@ namespace EUROPA {
         notifyChange(DomainListener::VALUE_REMOVED);
 
     return(true);
+  }
+
+  bool EnumeratedDomain::intersect(double lb, double ub){
+    checkError(!isSymbolic(), "Cannot do bounds based intersection on symbolic domain " << toString());
+    if(lb > ub){
+      empty();
+      return true;
+    }
+
+    // Allocate as an interval and delegate to existing method
+    IntervalDomain intervalDomain(lb, ub, getTypeName().c_str());
+
+    return intersect(intervalDomain);
   }
 
   bool EnumeratedDomain::difference(const AbstractDomain& dom) {
