@@ -55,7 +55,7 @@ class Satellite {
  }
 
  predicate HaveImg {
-   Target m_target;   
+   Target m_target;
  }
 
  predicate Pointing {
@@ -123,10 +123,10 @@ Satellite::Slew {
   addEq(dx,pfrom.m_target.m_x,pto.m_target.m_x);
   addEq(dy,pfrom.m_target.m_y,pto.m_target.m_y);
   addEq(dz,pfrom.m_target.m_z,pto.m_target.m_z);
-  int tmp, tmp2;
+  int tmp, distance;
   addEq(dx,dy,tmp);
-  addEq(tmp,dz,tmp2);
-  mulEq(duration,tmp2,m_rate);
+  addEq(tmp,dz,distance);
+  mulEq(duration,m_rate, distance);
 }
 
 Satellite::HaveImg {
@@ -173,7 +173,7 @@ GroundStation::Receive {
 }
 
 // create  objects
-PlannerConfig world = new PlannerConfig(0,100,5000);
+PlannerConfig world = new PlannerConfig(0,100,100);
 Target target1 = new Target("target1",10,10,10,100,95.0);
 Target target2 = new Target("target2",25,25,25,25,90.0);
 Target target3 = new Target("target3",50,50,50,80,84.0);
