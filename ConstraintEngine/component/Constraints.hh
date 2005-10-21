@@ -20,6 +20,10 @@ namespace EUROPA {
     void handleExecute();
 
   private:
+    AbstractDomain& m_x;
+    AbstractDomain& m_y;
+    AbstractDomain& m_z;
+
     static const int X = 0;
     static const int Y = 1;
     static const int Z = 2;
@@ -96,6 +100,8 @@ namespace EUROPA {
 		   const DomainListener::ChangeType& changeType);
 
   private:
+    AbstractDomain& m_x;
+    AbstractDomain& m_y;
     static const int X = 0;
     static const int Y = 1;
     static const int ARG_COUNT = 2;

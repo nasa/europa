@@ -15,70 +15,68 @@ namespace EUROPA {
 					 const LabelStr& propagatorName,
 					 const ConstraintEngineId& constraintEngine,
 					 const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables) {
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_x(getCurrentDomain(m_variables[X])),
+      m_y(getCurrentDomain(m_variables[Y])),
+      m_z(getCurrentDomain(m_variables[Z])){
     check_error(variables.size() == (unsigned int) ARG_COUNT);
-    for (int i = 0; i < ARG_COUNT; i++)
-      check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
   }
 
   void AddEqualConstraint::handleExecute() {
-    IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
-    IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
-    IntervalDomain& domz = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
-
-    check_error(AbstractDomain::canBeCompared(domx, domy));
-    check_error(AbstractDomain::canBeCompared(domx, domz));
-    check_error(AbstractDomain::canBeCompared(domz, domy));
+    static unsigned int sl_counter(0);
+    sl_counter++;
+    debugMsg("AddEqualConstraint:handleExecute", toString() << " counter == " << sl_counter);
+    check_error(AbstractDomain::canBeCompared(m_x, m_y));
+    check_error(AbstractDomain::canBeCompared(m_x, m_z));
+    check_error(AbstractDomain::canBeCompared(m_z, m_y));
 
     // Test preconditions for continued execution.
-    // Should this be part of canIgnore() instead? --wedgingt 2004 Feb 24
-    if (domx.isOpen() ||
-        domy.isOpen() ||
-        domz.isOpen())
+    if (m_x.isOpen() ||
+        m_y.isOpen() ||
+        m_z.isOpen())
       return;
 
-    check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
-
     double xMin, xMax, yMin, yMax, zMin, zMax;
-    domx.getBounds(xMin, xMax);
-    domy.getBounds(yMin, yMax);
-    domz.getBounds(zMin, zMax);
+    m_x.getBounds(xMin, xMax);
+    m_y.getBounds(yMin, yMax);
+    m_z.getBounds(zMin, zMax);
 
     // Process Z
     double xMax_plus_yMax = Infinity::plus(xMax, yMax, zMax);
     if (zMax > xMax_plus_yMax)
-      zMax = domz.translateNumber(xMax_plus_yMax, false);
+      zMax = m_z.translateNumber(xMax_plus_yMax, false);
 
     double xMin_plus_yMin = Infinity::plus(xMin, yMin, zMin);
     if (zMin < xMin_plus_yMin)
-      zMin = domz.translateNumber(xMin_plus_yMin, true);
+      zMin = m_z.translateNumber(xMin_plus_yMin, true);
 
-    if (domz.intersect(zMin, zMax) && domz.isEmpty())
+    if (m_z.intersect(zMin, zMax) && m_z.isEmpty())
       return;
 
     // Process X
     double zMax_minus_yMin = Infinity::minus(zMax, yMin, xMax);
     if (xMax > zMax_minus_yMin)
-      xMax = domx.translateNumber(zMax_minus_yMin, false);
+      xMax = m_x.translateNumber(zMax_minus_yMin, false);
 
     double zMin_minus_yMax = Infinity::minus(zMin, yMax, xMin);
     if (xMin < zMin_minus_yMax)
-      xMin = domx.translateNumber(zMin_minus_yMax, true);
+      xMin = m_x.translateNumber(zMin_minus_yMax, true);
 
-    if (domx.intersect(xMin, xMax) && domx.isEmpty())
+    if (m_x.intersect(xMin, xMax) && m_x.isEmpty())
       return;
 
     // Process Y
     double yMaxCandidate = Infinity::minus(zMax, xMin, yMax);
     if (yMax > yMaxCandidate)
-      yMax = domy.translateNumber(yMaxCandidate, false);
+      yMax = m_y.translateNumber(yMaxCandidate, false);
 
     double yMinCandidate = Infinity::minus(zMin, xMax, yMin);
     if (yMin < yMinCandidate)
-      yMin = domy.translateNumber(yMinCandidate, true);
+      yMin = m_y.translateNumber(yMinCandidate, true);
 
-    if (domy.intersect(yMin,yMax) && domy.isEmpty())
+    if (m_y.intersect(yMin,yMax) && m_y.isEmpty())
       return;
+
 
     /* Now, rounding issues from mixed numeric types can lead to the
      * following inconsistency, not yet caught.  We handle it here
@@ -86,34 +84,16 @@ namespace EUROPA {
      * is not satisfied. The motivating case for this: A:Int[-10,10] +
      * B:Int[-10,10] == C:Real[0.01, 0.99].
      */
-    if (!domz.isMember(Infinity::plus(yMax, xMin, zMin)) ||
-        !domz.isMember(Infinity::plus(yMin, xMax, zMin)))
-      domz.empty();
+    if (m_z.isInterval() && (!m_z.isMember(Infinity::plus(yMax, xMin, zMin)) ||
+			     !m_z.isMember(Infinity::plus(yMin, xMax, zMin))))
+      m_z.empty();
   }
 
   EqualConstraint::EqualConstraint(const LabelStr& name,
 				   const LabelStr& propagatorName,
 				   const ConstraintEngineId& constraintEngine,
 				   const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables), m_argCount(variables.size()) {
-    // Check the arguments.  Any that are not singleton must all be
-    //   enumerations or must all be intervals.
-    // Could support a mix of enumerations and intervals.  Not doing
-    //   so might permit arbitrary and pointless search during planning
-    //   in some problem domains. --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 21
-    AbstractDomain& first = getCurrentDomain(m_variables[0]);
-    bool requiresEnumeration = first.isEnumerated() && !first.isSingleton();
-    for (unsigned int i = 1; i < m_argCount; i++) {
-      const AbstractDomain& current = m_variables[i]->lastDomain();
-      requiresEnumeration = requiresEnumeration || (current.isEnumerated() && !current.isSingleton());
-      check_error(!requiresEnumeration || current.isEnumerated() || current.isSingleton());
-      checkError(AbstractDomain::canBeCompared(first, getCurrentDomain(m_variables[i])),
-		 "cannot equate variables " << m_variables[0]->toString() <<
-		 " and " << m_variables[i]->toString());
-      // This constraint has problems similar to CondAllSameConstraint's
-      // related to minDelta().  @see CondAllSameConstraint::CondAllSameConstraint.
-    }
-  }
+    : Constraint(name, propagatorName, constraintEngine, variables), m_argCount(variables.size()) {}
 
   /**
    * @brief Restrict all variables to the intersection of their domains.
@@ -135,6 +115,7 @@ namespace EUROPA {
         foundClosedDomain = true;
         break;
       }
+
     //if all are open, there is no meaningful action
     if (!foundClosedDomain)
       return;
@@ -163,23 +144,6 @@ namespace EUROPA {
           return;
       }
     }
-//     // Start from the first closed domain.
-//     AbstractDomain& closedDom = getCurrentDomain(m_variables[i]);
-//     check_error(!closedDom.isEmpty());
-//     bool changedOne = true;
-
-//     // This loop will run at most twice.
-//     while (changedOne) {
-//       changedOne = false;
-//       for (unsigned int j = i + 1; j < m_argCount; j++) {
-//         AbstractDomain& otherDom(getCurrentDomain(m_variables[j]));
-//         if (!otherDom.isOpen() && closedDom.equate(otherDom)) {
-//           if (closedDom.isEmpty() || otherDom.isEmpty())
-//             return;
-//           changedOne = true;
-//         }
-//       }
-//     }
 
   }
 
@@ -220,36 +184,33 @@ namespace EUROPA {
 						   const LabelStr& propagatorName,
 						   const ConstraintEngineId& constraintEngine,
 						   const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables) {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_x(getCurrentDomain(variables[X])),
+      m_y(getCurrentDomain(variables[Y])){
+    checkError(variables.size() == (unsigned int) ARG_COUNT, toString());
+    checkError(m_x.isNumeric(), variables[X]->toString());
+    checkError(m_y.isNumeric(), variables[Y]->toString());
   }
 
   void LessThanEqualConstraint::handleExecute() {
-    IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
-    IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
-
-    check_error(AbstractDomain::canBeCompared(domx, domy));
+    check_error(AbstractDomain::canBeCompared(m_x, m_y));
 
     // Discontinue if either domain is open.
-    if (domx.isOpen() || domy.isOpen())
+    if (m_x.isOpen() || m_y.isOpen())
       return;
 
-    check_error(!domx.isEmpty() && !domy.isEmpty());
-
-    // Discontinue if any domain is enumerated but not a singleton.
-    // Would not have to do this if enumerations were sorted. --wedgingt 2004 Feb 24
-    if (domx.isEnumerated() && !domx.isSingleton())
-      return;
-    if (domy.isEnumerated() && !domy.isSingleton())
-      return;
+    check_error(!m_x.isEmpty() && !m_y.isEmpty());
 
     // Restrict X to be no larger than Y's max
-    debugMsg("LessThanEqualConstraint:handleExecute", "Intersecting " << domx.toString() << " with [" << domx.getLowerBound() << " " << domy.getUpperBound() << "]");
-    if (domx.intersect(domx.getLowerBound(), domy.getUpperBound()) && domx.isEmpty())
+    debugMsg("LessThanEqualConstraint:handleExecute", 
+	     "Intersecting " << m_x.toString() << " with [" << 
+	     m_x.getLowerBound() << " " << m_y.getUpperBound() << "]");
+
+    if (m_x.intersect(m_x.getLowerBound(), m_y.getUpperBound()) && m_x.isEmpty())
       return;
 
     // Restrict Y to be at least X's min
-    domy.intersect(domx.getLowerBound(), domy.getUpperBound());
+    m_y.intersect(m_x.getLowerBound(), m_y.getUpperBound());
   }
 
   bool LessThanEqualConstraint::canIgnore(const ConstrainedVariableId& variable,
