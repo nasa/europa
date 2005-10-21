@@ -68,10 +68,10 @@ namespace NDDL {
     ConstrainedVariableId hill; // SchemaWriter::declareVariable
     ConstrainedVariableId lander; // SchemaWriter::declareVariable
     ConstrainedVariableId martianCity; // SchemaWriter::declareVariable
-    ConstrainedVariableId p1; // SchemaWriter::declareVariable
-    ConstrainedVariableId p2; // SchemaWriter::declareVariable
-    ConstrainedVariableId p3; // SchemaWriter::declareVariable
-    ConstrainedVariableId p4; // SchemaWriter::declareVariable
+    ConstrainedVariableId path1; // SchemaWriter::declareVariable
+    ConstrainedVariableId path2; // SchemaWriter::declareVariable
+    ConstrainedVariableId path3; // SchemaWriter::declareVariable
+    ConstrainedVariableId path4; // SchemaWriter::declareVariable
     
     // existential.nddl:30 Going
     class Going : public NddlToken {

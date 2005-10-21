@@ -450,20 +450,6 @@ namespace NDDL {
     void handleExecute();
   };
   
-  class World$initialState$5$0$0: public RuleInstance {
-  public:
-    World$initialState$5$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  class World$initialState$5$0$1: public RuleInstance {
-  public:
-    World$initialState$5$0$1(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
   DECLARE_AND_DEFINE_RULE(Rule$World$initialState$5, World$initialState$5$0, World.initialState, "less-basic-model.nddl,83");
   
   void World$initialState$5$0::handleExecute() {
@@ -477,6 +463,18 @@ namespace NDDL {
     contains(this, f);
     slave(Camera::On, Camera.On, g, LabelStr("contains"));
     contains(this, g);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("object"), std::string("m_horizonStart")));
+      vars.push_back(var(getId(),std::string("start")));
+      rule_constraint(leq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("end")));
+      vars.push_back(varFromObject(std::string("object"), std::string("m_horizonEnd")));
+      rule_constraint(leq, vars);
+    }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("a")), std::string("m_location")));
@@ -523,24 +521,6 @@ namespace NDDL {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("o")), std::string("end")));
       vars.push_back(varfromtok(tok(getId(), std::string("f")), std::string("start")));
-      rule_constraint(leq, vars);
-    }
-    addChildRule(new World$initialState$5$0$0(m_id, getVariables(":object:")));
-    addChildRule(new World$initialState$5$0$1(m_id, getVariables(":object:")));
-  }
-  void World$initialState$5$0$0::handleExecute() {
-    {
-      std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("m_horizonStart")));
-      vars.push_back(var(getId(),std::string("start")));
-      rule_constraint(leq, vars);
-    }
-  }
-  void World$initialState$5$0$1::handleExecute() {
-    {
-      std::vector<ConstrainedVariableId> vars;
-      vars.push_back(var(getId(),std::string("end")));
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("m_horizonEnd")));
       rule_constraint(leq, vars);
     }
   }

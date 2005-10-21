@@ -91,22 +91,12 @@ namespace NDDL {
     void handleExecute();
   };
   
-  class Foo$pred1$0$0$0: public RuleInstance {
-  public:
-    Foo$pred1$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
   DECLARE_AND_DEFINE_RULE(Rule$Foo$pred1$0, Foo$pred1$0$0, Foo.pred1, "interval-constants.nddl,13");
   
   void Foo$pred1$0$0::handleExecute() {
-    addChildRule(new Foo$pred1$0$0$0(m_id, getVariables(":object:")));
-  }
-  void Foo$pred1$0$0$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("f_var")));
+      vars.push_back(varFromObject(std::string("object"), std::string("f_var")));
       vars.push_back(ruleVariable(IntervalDomain(10.9, 10.9, "float")));
       rule_constraint(eq, vars);
     }

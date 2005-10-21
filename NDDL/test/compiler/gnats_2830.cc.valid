@@ -434,40 +434,59 @@ namespace NDDL {
     void handleExecute();
   };
   
-  class Position$Navigate$0$0$0$0$0: public RuleInstance {
-  public:
-    Position$Navigate$0$0$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
   DECLARE_AND_DEFINE_RULE(Rule$Position$Navigate$0, Position$Navigate$0$0, Position.Navigate, "gnats_2830.nddl,45");
   
   void Position$Navigate$0$0::handleExecute() {
     objectVar(Path, p, true, false);
-    declareFilter(Path,p);
-    allocateFilterCondition(p, Location, var(getId(),std::string("_from")), _from, eq);
-    allocateFilterCondition(p, Location, var(getId(),std::string("_to")), _to, eq);
-    allocateFilterConstraint(p);
+    objectVar(Enable, en, false, false);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p"), std::string("_from")));
+      vars.push_back(var(getId(),std::string("_from")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p"), std::string("_to")));
+      vars.push_back(var(getId(),std::string("_to")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("en"), std::string("_p")));
+      vars.push_back(var(getId(),std::string("p")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("en"), std::string("_t")));
+      vars.push_back(varFromObject(std::string("_p"), std::string("_from")));
+      rule_constraint(eq, vars);
+    }
     addChildRule(new Position$Navigate$0$0$0(m_id, makeScope(var(getId(),std::string("p")))));
   }
   void Position$Navigate$0$0$0::handleExecute() {
     objectVar(Enable, enable, true, false);
-    declareFilter(Enable,enable);
-    allocateFilterCondition(enable, Path, var(getId(),std::string("p")), _p, eq);
-    allocateFilterCondition(enable, Location, varfromobject(object(getId(),std::string("p")), std::string("_from")), _t, eq);
-    allocateFilterConstraint(enable);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("enable"), std::string("_p")));
+      vars.push_back(var(getId(),std::string("p")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("enable"), std::string("_t")));
+      vars.push_back(varFromObject(std::string("p"), std::string("_from")));
+      rule_constraint(eq, vars);
+    }
     addChildRule(new Position$Navigate$0$0$0$0(m_id, makeScope(var(getId(),std::string("enable")))));
   }
   void Position$Navigate$0$0$0$0::handleExecute() {
     slave(Foo::FooPred, Foo.FooPred, fp, LabelStr("any"));
-    addChildRule(new Position$Navigate$0$0$0$0$0(m_id, getVariables(":enable:")));
-  }
-  void Position$Navigate$0$0$0$0$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("fp")), std::string("loc")));
-      vars.push_back(varfromobject(object(getId(),std::string("enable")), std::string("_t")));
+      vars.push_back(varFromObject(std::string("enable"), std::string("_t")));
       rule_constraint(eq, vars);
     }
   }

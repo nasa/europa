@@ -93,7 +93,7 @@ namespace NDDL {
   // default initialization of member variables
   void Foo::handleDefaults(bool autoClose) {
     if(arg1.isNoId()){
-      arg1 = addVariable(IntervalIntDomain("int"), "arg1");
+      arg1 = addVariable(IntervalIntDomain(20,20, "int"), "arg1");
     }
     check_error(arg2.isValid(), "object variables must be initialized explicitly");
     
@@ -320,100 +320,44 @@ namespace NDDL {
     void handleExecute();
   };
   
-  class Foo$impliedObjectGuard$0$0$1: public RuleInstance {
-  public:
-    Foo$impliedObjectGuard$0$0$1(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  class Foo$impliedObjectGuard$0$0$2: public RuleInstance {
-  public:
-    Foo$impliedObjectGuard$0$0$2(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  class Foo$impliedObjectGuard$0$0$3: public RuleInstance {
-  public:
-    Foo$impliedObjectGuard$0$0$3(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  class Foo$impliedObjectGuard$0$0$4: public RuleInstance {
-  public:
-    Foo$impliedObjectGuard$0$0$4(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  class Foo$impliedObjectGuard$0$0$5: public RuleInstance {
-  public:
-    Foo$impliedObjectGuard$0$0$5(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
   DECLARE_AND_DEFINE_RULE(Rule$Foo$impliedObjectGuard$0, Foo$impliedObjectGuard$0$0, Foo.impliedObjectGuard, "guards.nddl,41");
   
   void Foo$impliedObjectGuard$0$0::handleExecute() {
     objectVar(Bar, bar, false, false);
     slave(Foo::basicToken, Foo.basicToken, g1, LabelStr("meets"));
     meets(this, g1);
-    addChildRule(new Foo$impliedObjectGuard$0$0$0(m_id, getVariables(":object:")));
-    addChildRule(new Foo$impliedObjectGuard$0$0$1(m_id, getVariables(":allFoo:")));
-    addChildRule(new Foo$impliedObjectGuard$0$0$2(m_id, getVariables(":object::allFoo:")));
-    addChildRule(new Foo$impliedObjectGuard$0$0$3(m_id, getVariables(":g1.object::object:")));
-    addChildRule(new Foo$impliedObjectGuard$0$0$4(m_id, getVariables(":object:")));
-    addChildRule(new Foo$impliedObjectGuard$0$0$5(m_id, makeScope(var(getId(),std::string("object")))));
-  }
-  void Foo$impliedObjectGuard$0$0$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("arg1")));
-      vars.push_back(ruleVariable(IntervalIntDomain(10,10, "int")));
-      rule_constraint(eq, vars);
-    }
-  }
-  void Foo$impliedObjectGuard$0$0$1::handleExecute() {
-    {
-      std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromobject(object(getId(),std::string("allFoo")), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("allFoo"), std::string("arg1")));
       vars.push_back(ruleVariable(IntervalIntDomain(0, 100, "int")));
       rule_constraint(eq, vars);
     }
-  }
-  void Foo$impliedObjectGuard$0$0$2::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("arg1")));
-      vars.push_back(varfromobject(object(getId(),std::string("allFoo")), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("object"), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("allFoo"), std::string("arg1")));
       rule_constraint(eq, vars);
     }
-  }
-  void Foo$impliedObjectGuard$0$0$3::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("g1")), std::string("object.arg1")));
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("object"), std::string("arg1")));
       rule_constraint(eq, vars);
     }
-  }
-  void Foo$impliedObjectGuard$0$0$4::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("arg2")));
+      vars.push_back(varFromObject(std::string("object"), std::string("arg2")));
       vars.push_back(var(getId(),std::string("bar")));
       rule_constraint(eq, vars);
     }
+    addChildRule(new Foo$impliedObjectGuard$0$0$0(m_id, makeScope(var(getId(),std::string("object")))));
   }
-  void Foo$impliedObjectGuard$0$0$5::handleExecute() {
+  void Foo$impliedObjectGuard$0$0$0::handleExecute() {
     slave(Bar::pred, Bar.pred, t0, LabelStr("any"));
     constrainObject(object ,arg2,t0);
   }
   
-  // guards.nddl:63 impliedLocalVariableGuard
+  // guards.nddl:62 impliedLocalVariableGuard
   class Foo$impliedLocalVariableGuard$1$0: public RuleInstance {
   public:
     Foo$impliedLocalVariableGuard$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -421,29 +365,19 @@ namespace NDDL {
     void handleExecute();
   };
   
-  class Foo$impliedLocalVariableGuard$1$0$0: public RuleInstance {
-  public:
-    Foo$impliedLocalVariableGuard$1$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$impliedLocalVariableGuard$1, Foo$impliedLocalVariableGuard$1$0, Foo.impliedLocalVariableGuard, "guards.nddl,63");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$impliedLocalVariableGuard$1, Foo$impliedLocalVariableGuard$1$0, Foo.impliedLocalVariableGuard, "guards.nddl,62");
   
   void Foo$impliedLocalVariableGuard$1$0::handleExecute() {
-    objectVar(Foo, f1, true, false);
-    addChildRule(new Foo$impliedLocalVariableGuard$1$0$0(m_id, getVariables(":f1:")));
-  }
-  void Foo$impliedLocalVariableGuard$1$0$0::handleExecute() {
+    objectVar(Foo, f1, false, false);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromobject(object(getId(),std::string("f1")), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("f1"), std::string("arg1")));
       vars.push_back(ruleVariable(IntervalIntDomain(20,20, "int")));
       rule_constraint(eq, vars);
     }
   }
   
-  // guards.nddl:69 singletonGuard
+  // guards.nddl:68 singletonGuard
   class Foo$singletonGuard$2$0: public RuleInstance {
   public:
     Foo$singletonGuard$2$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -465,7 +399,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$singletonGuard$2, Foo$singletonGuard$2$0, Foo.singletonGuard, "guards.nddl,69");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$singletonGuard$2, Foo$singletonGuard$2$0, Foo.singletonGuard, "guards.nddl,68");
   
   void Foo$singletonGuard$2$0::handleExecute() {
     addChildRule(new Foo$singletonGuard$2$0$0(m_id, makeScope(var(getId(),std::string("object")))));
@@ -486,7 +420,7 @@ namespace NDDL {
     }
   }
   
-  // guards.nddl:79 tokenWithParameters
+  // guards.nddl:78 tokenWithParameters
   class Foo$tokenWithParameters$3$0: public RuleInstance {
   public:
     Foo$tokenWithParameters$3$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -550,7 +484,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$3, Foo$tokenWithParameters$3$0, Foo.tokenWithParameters, "guards.nddl,79");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$3, Foo$tokenWithParameters$3$0, Foo.tokenWithParameters, "guards.nddl,78");
   
   void Foo$tokenWithParameters$3$0::handleExecute() {
     addChildRule(new Foo$tokenWithParameters$3$0$0(m_id, var(getId(),std::string("bool_arg")), BoolDomain(true, "bool")));
@@ -595,7 +529,7 @@ namespace NDDL {
     meets(this, t6);
   }
   
-  // guards.nddl:108 tokenWithParameters
+  // guards.nddl:107 tokenWithParameters
   class Foo$tokenWithParameters$4$0: public RuleInstance {
   public:
     Foo$tokenWithParameters$4$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -610,7 +544,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$4, Foo$tokenWithParameters$4$0, Foo.tokenWithParameters, "guards.nddl,108");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$4, Foo$tokenWithParameters$4$0, Foo.tokenWithParameters, "guards.nddl,107");
   
   void Foo$tokenWithParameters$4$0::handleExecute() {
     addChildRule(new Foo$tokenWithParameters$4$0$0(m_id, makeScope(var(getId(),std::string("bool_arg")))));
@@ -620,7 +554,7 @@ namespace NDDL {
     meets(this, t1);
   }
   
-  // guards.nddl:115 mixGuardedWithUnguarded
+  // guards.nddl:114 mixGuardedWithUnguarded
   class Foo$mixGuardedWithUnguarded$5$0: public RuleInstance {
   public:
     Foo$mixGuardedWithUnguarded$5$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -635,7 +569,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$mixGuardedWithUnguarded$5, Foo$mixGuardedWithUnguarded$5$0, Foo.mixGuardedWithUnguarded, "guards.nddl,115");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$mixGuardedWithUnguarded$5, Foo$mixGuardedWithUnguarded$5$0, Foo.mixGuardedWithUnguarded, "guards.nddl,114");
   
   void Foo$mixGuardedWithUnguarded$5$0::handleExecute() {
     slave(Foo::tokenWithParameters, Foo.tokenWithParameters, t1, LabelStr("meets"));
@@ -653,7 +587,7 @@ namespace NDDL {
     meets(this, t2);
   }
   
-  // guards.nddl:124 localVariableGuard
+  // guards.nddl:123 localVariableGuard
   class Foo$localVariableGuard$6$0: public RuleInstance {
   public:
     Foo$localVariableGuard$6$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -696,14 +630,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  class Foo$localVariableGuard$6$0$4$0: public RuleInstance {
-  public:
-    Foo$localVariableGuard$6$0$4$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$localVariableGuard$6, Foo$localVariableGuard$6$0, Foo.localVariableGuard, "guards.nddl,124");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$localVariableGuard$6, Foo$localVariableGuard$6$0, Foo.localVariableGuard, "guards.nddl,123");
   
   void Foo$localVariableGuard$6$0::handleExecute() {
     localVar(BoolDomain(), b, true);
@@ -732,18 +659,15 @@ namespace NDDL {
     met_by(this, t2);
   }
   void Foo$localVariableGuard$6$0$4::handleExecute() {
-    addChildRule(new Foo$localVariableGuard$6$0$4$0(m_id, getVariables(":f:")));
-  }
-  void Foo$localVariableGuard$6$0$4$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromobject(object(getId(),std::string("f")), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("f"), std::string("arg1")));
       vars.push_back(ruleVariable(IntervalIntDomain(20,20, "int")));
       rule_constraint(eq, vars);
     }
   }
   
-  // guards.nddl:148 multipleNestedGuards
+  // guards.nddl:147 multipleNestedGuards
   class Foo$multipleNestedGuards$7$0: public RuleInstance {
   public:
     Foo$multipleNestedGuards$7$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -772,7 +696,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$multipleNestedGuards$7, Foo$multipleNestedGuards$7$0, Foo.multipleNestedGuards, "guards.nddl,148");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$multipleNestedGuards$7, Foo$multipleNestedGuards$7$0, Foo.multipleNestedGuards, "guards.nddl,147");
   
   void Foo$multipleNestedGuards$7$0::handleExecute() {
     localVar(LocationsBaseDomain(), locs, false);

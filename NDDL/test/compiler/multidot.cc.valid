@@ -194,38 +194,18 @@ namespace NDDL {
     void handleExecute();
   };
   
-  class Baz$apred$0$0$0: public RuleInstance {
-  public:
-    Baz$apred$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  class Baz$apred$0$0$1: public RuleInstance {
-  public:
-    Baz$apred$0$0$1(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
   DECLARE_AND_DEFINE_RULE(Rule$Baz$apred$0, Baz$apred$0$0, Baz.apred, "multidot.nddl,32");
   
   void Baz$apred$0$0::handleExecute() {
     slave(Baz::bpred, Baz.bpred, bp, LabelStr("meets"));
     sameObject(object, bp);
     meets(this, bp);
-    addChildRule(new Baz$apred$0$0$0(m_id, getVariables(":object:")));
-    addChildRule(new Baz$apred$0$0$1(m_id, getVariables(":bp.predBar:")));
-  }
-  void Baz$apred$0$0$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("myBar.m_foo")));
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("myfoo")));
+      vars.push_back(varFromObject(std::string("object"), std::string("myBar.m_foo")));
+      vars.push_back(varFromObject(std::string("object"), std::string("myfoo")));
       rule_constraint(eq, vars);
     }
-  }
-  void Baz$apred$0$0$1::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("bp")), std::string("predBar.m_foo")));
@@ -315,22 +295,12 @@ namespace NDDL {
     void handleExecute();
   };
   
-  class Mumble$mumbPred$1$0$0: public RuleInstance {
-  public:
-    Mumble$mumbPred$1$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
   DECLARE_AND_DEFINE_RULE(Rule$Mumble$mumbPred$1, Mumble$mumbPred$1$0, Mumble.mumbPred, "multidot.nddl,51");
   
   void Mumble$mumbPred$1$0::handleExecute() {
-    addChildRule(new Mumble$mumbPred$1$0$0(m_id, getVariables(":object:")));
-  }
-  void Mumble$mumbPred$1$0$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("myBaz.myBar.m_foo")));
+      vars.push_back(varFromObject(std::string("object"), std::string("myBaz.myBar.m_foo")));
       vars.push_back(var(getId(),std::string("m_foo")));
       rule_constraint(eq, vars);
     }

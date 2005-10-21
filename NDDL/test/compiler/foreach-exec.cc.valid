@@ -479,27 +479,34 @@ namespace NDDL {
   
   void Rover$Navigate$0$0::handleExecute() {
     objectVar(Path, p, false, false);
-    declareFilter(Path,p);
-    allocateFilterCondition(p, Location, var(getId(),std::string("from")), from, eq);
-    allocateFilterCondition(p, Location, var(getId(),std::string("to")), to, eq);
-    allocateFilterConstraint(p);
+    objectVar(Trackable, trackable, false, false);
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("path")));
       vars.push_back(var(getId(),std::string("p")));
       rule_constraint(eq, vars);
     }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("from")));
+      vars.push_back(varFromObject(std::string("p"), std::string("from")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("to")));
+      vars.push_back(varFromObject(std::string("p"), std::string("to")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("trackable"), std::string("path")));
+      vars.push_back(var(getId(),std::string("p")));
+      rule_constraint(eq, vars);
+    }
     addChildRule(new Rover$Navigate$0$0$0(m_id, makeScope(var(getId(),std::string("path")))));
   }
   void Rover$Navigate$0$0$0::handleExecute() {
-    objectVar(Trackable, trackable, false, false);
-    objectVar(NotTrackable, notTrackable, false, true);
-    declareFilter(Trackable,trackable);
-    allocateFilterCondition(trackable, Path, var(getId(),std::string("p")), path, eq);
-    allocateFilterConstraint(trackable);
-    declareFilter(NotTrackable,notTrackable);
-    allocateFilterCondition(notTrackable, Path, var(getId(),std::string("p")), path, eq);
-    allocateFilterConstraint(notTrackable);
     {
       // Create a local domain based on the trackable objects
       ConstraintId l_constraint(constraint("trackable"));
@@ -538,7 +545,7 @@ namespace NDDL {
           {
             std::vector<ConstrainedVariableId> vars;
             vars.push_back(varfromtok(tok(getId(), std::string("target")), std::string("object")));
-            vars.push_back(varfromobject(object(getId(),std::string("t")), std::string("target")));
+            vars.push_back(varFromObject(std::string("t"), std::string("target")));
             rule_constraint(eq, vars);
           }
           {
@@ -546,56 +553,6 @@ namespace NDDL {
             vars.push_back(var(getId(),std::string("t")));
             vars.push_back(var(getId(),std::string("t_local_0")));
             rule_constraint(eq, vars);
-          }
-        }
-      }
-    }
-    {
-      // Create a local domain based on the notTrackable objects
-      ConstraintId l_constraint(constraint("notTrackable"));
-      const ObjectDomain& foreach_notTrackable(
-        l_constraint.isNoId() ? // If no filter constraint was placed, source from object variable 
-        static_cast<const ObjectDomain&>(var(getId(), std::string("notTrackable"))->lastDomain()) : 
-        ((Id<ObjectFilterConstraint>)l_constraint)->getFilteredObjects()); // Otherwise source from the filtered set. 
-        
-      if(!foreach_notTrackable.isEmpty()){
-        // Post a locking constraint on notTrackable
-        {
-          std::vector<ConstrainedVariableId> loop_vars;
-          loop_vars.push_back(var(getId(), std::string("notTrackable")));
-          loop_vars.push_back(ruleVariable(foreach_notTrackable));
-          rule_constraint(Lock, loop_vars);
-        }
-        std::list<double> foreach_notTrackable_values;
-        foreach_notTrackable.getValues(foreach_notTrackable_values);
-        // Translate into a set ordered by key to ensure reliable ordering across runs
-        ObjectSet foreach_notTrackable_valuesByKey;
-        for(std::list<double>::iterator it=foreach_notTrackable_values.begin();
-          it!=foreach_notTrackable_values.end(); ++it){
-          NotTrackableId t = *it;
-          foreach_notTrackable_valuesByKey.insert(t);
-        }
-        // Process slaves
-        for(ObjectSet::const_iterator it=foreach_notTrackable_valuesByKey.begin();
-          it!=foreach_notTrackable_valuesByKey.end(); ++it){
-          NotTrackableId t = *it;
-          check_error(t.isValid());
-          // Allocate a local variable for this singleton object
-          loopVar(NotTrackable, t);
-          objectVar(Trackable, t_local_1, false, false);
-          slave(Target::Tracking, Target.Tracking, target, LabelStr("contains"));
-          contains(this, target);
-          {
-            std::vector<ConstrainedVariableId> vars;
-            vars.push_back(varfromtok(tok(getId(), std::string("target")), std::string("object")));
-            vars.push_back(varfromobject(object(getId(),std::string("t")), std::string("target")));
-            rule_constraint(eq, vars);
-          }
-          {
-            std::vector<ConstrainedVariableId> vars;
-            vars.push_back(var(getId(),std::string("t")));
-            vars.push_back(var(getId(),std::string("t_local_1")));
-            rule_constraint(neq, vars);
           }
         }
       }
@@ -693,15 +650,18 @@ namespace NDDL {
     void handleExecute();
   };
   
+  class World$initialState$1$0$0: public RuleInstance {
+  public:
+    World$initialState$1$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
+    : RuleInstance(parent, vars){}
+    void handleExecute();
+  };
+  
   DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "foreach-exec.nddl,17");
   
   void World$initialState$1$0::handleExecute() {
     objectVar(Rover, r, false, false);
-    objectVar(Path, emptyPath, false, true);
-    declareFilter(Path,emptyPath);
-    allocateFilterCondition(emptyPath, Location, varfromobject(object(getId(),std::string("object")), std::string("loc1")), from, eq);
-    allocateFilterCondition(emptyPath, Location, varfromobject(object(getId(),std::string("object")), std::string("loc2")), to, eq);
-    allocateFilterConstraint(emptyPath);
+    localVar(BoolDomain(), hasPath, true);
     {
       // Create a local domain based on the r objects
       ConstraintId l_constraint(constraint("r"));
@@ -738,6 +698,22 @@ namespace NDDL {
           contains(this, n);
         }
       }
+    }
+    addChildRule(new World$initialState$1$0$0(m_id, makeScope(var(getId(),std::string("hasPath")))));
+  }
+  void World$initialState$1$0$0::handleExecute() {
+    objectVar(Path, emptyPath, false, false);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("emptyPath"), std::string("from")));
+      vars.push_back(varFromObject(std::string("object"), std::string("loc1")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("emptyPath"), std::string("to")));
+      vars.push_back(varFromObject(std::string("object"), std::string("loc2")));
+      rule_constraint(eq, vars);
     }
     {
       // Create a local domain based on the emptyPath objects

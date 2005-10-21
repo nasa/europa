@@ -139,13 +139,13 @@ namespace NDDL {
     
     check_error(martianCity.isValid(), "object variables must be initialized explicitly");
     
-    check_error(p1.isValid(), "object variables must be initialized explicitly");
+    check_error(path1.isValid(), "object variables must be initialized explicitly");
     
-    check_error(p2.isValid(), "object variables must be initialized explicitly");
+    check_error(path2.isValid(), "object variables must be initialized explicitly");
     
-    check_error(p3.isValid(), "object variables must be initialized explicitly");
+    check_error(path3.isValid(), "object variables must be initialized explicitly");
     
-    check_error(p4.isValid(), "object variables must be initialized explicitly");
+    check_error(path4.isValid(), "object variables must be initialized explicitly");
     
     if (autoClose)
       close();
@@ -222,18 +222,18 @@ namespace NDDL {
     martianCity = addVariable(LocationDomain((new Location(m_id, "martianCity"))->getId(), "Location"), "martianCity");
     Id<Location>(singleton(martianCity))->constructor(LabelStr("MARTIAN_CITY"));
     Id<Location>(singleton(martianCity))->handleDefaults();
-    p1 = addVariable(PathDomain((new Path(m_id, "p1"))->getId(), "Path"), "p1");
-    Id<Path>(singleton(p1))->constructor(singleton(rock), singleton(hill));
-    Id<Path>(singleton(p1))->handleDefaults();
-    p2 = addVariable(PathDomain((new Path(m_id, "p2"))->getId(), "Path"), "p2");
-    Id<Path>(singleton(p2))->constructor(singleton(lander), singleton(hill));
-    Id<Path>(singleton(p2))->handleDefaults();
-    p3 = addVariable(PathDomain((new Path(m_id, "p3"))->getId(), "Path"), "p3");
-    Id<Path>(singleton(p3))->constructor(singleton(martianCity), singleton(hill));
-    Id<Path>(singleton(p3))->handleDefaults();
-    p4 = addVariable(PathDomain((new Path(m_id, "p4"))->getId(), "Path"), "p4");
-    Id<Path>(singleton(p4))->constructor(singleton(hill), singleton(lander));
-    Id<Path>(singleton(p4))->handleDefaults();
+    path1 = addVariable(PathDomain((new Path(m_id, "path1"))->getId(), "Path"), "path1");
+    Id<Path>(singleton(path1))->constructor(singleton(rock), singleton(hill));
+    Id<Path>(singleton(path1))->handleDefaults();
+    path2 = addVariable(PathDomain((new Path(m_id, "path2"))->getId(), "Path"), "path2");
+    Id<Path>(singleton(path2))->constructor(singleton(lander), singleton(hill));
+    Id<Path>(singleton(path2))->handleDefaults();
+    path3 = addVariable(PathDomain((new Path(m_id, "path3"))->getId(), "Path"), "path3");
+    Id<Path>(singleton(path3))->constructor(singleton(martianCity), singleton(hill));
+    Id<Path>(singleton(path3))->handleDefaults();
+    path4 = addVariable(PathDomain((new Path(m_id, "path4"))->getId(), "Path"), "path4");
+    Id<Path>(singleton(path4))->constructor(singleton(hill), singleton(lander));
+    Id<Path>(singleton(path4))->handleDefaults();
   }
   
   // existential.nddl:19 World
@@ -267,14 +267,27 @@ namespace NDDL {
     localVar(IntervalIntDomain(), intVar, false);
     objectVar(Path, path, false, false);
     objectVar(Path, p1, false, false);
-    declareFilter(Path,path);
-    allocateFilterCondition(path, Location, var(getId(),std::string("from")), from, eq);
-    allocateFilterCondition(path, Location, var(getId(),std::string("to")), to, eq);
-    allocateFilterCondition(path, int, var(getId(),std::string("intVar")), m_int, eq);
-    allocateFilterConstraint(path);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("path"), std::string("from")));
+      vars.push_back(var(getId(),std::string("from")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("path"), std::string("to")));
+      vars.push_back(var(getId(),std::string("to")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("path"), std::string("m_int")));
+      vars.push_back(var(getId(),std::string("intVar")));
+      rule_constraint(eq, vars);
+    }
   }
   
-  // existential.nddl:61 initialState
+  // existential.nddl:60 initialState
   class World$initialState$1$0: public RuleInstance {
   public:
     World$initialState$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -289,91 +302,104 @@ namespace NDDL {
     void handleExecute();
   };
   
-  class World$initialState$1$0$1: public RuleInstance {
-  public:
-    World$initialState$1$0$1(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  class World$initialState$1$0$2: public RuleInstance {
-  public:
-    World$initialState$1$0$2(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  class World$initialState$1$0$3: public RuleInstance {
-  public:
-    World$initialState$1$0$3(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
-    void handleExecute();
-  };
-  
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "existential.nddl,61");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "existential.nddl,60");
   
   void World$initialState$1$0::handleExecute() {
     objectVar(Path, p1, false, false);
-    objectVar(Path, p2, false, true);
+    localVar(BoolDomain(), hasPath, true);
     objectVar(Path, p3, false, false);
-    objectVar(Location, loc1, false, false);
-    objectVar(Location, loc2, false, false);
-    localVar(IntervalIntDomain(), filterVar, false);
-    objectVar(Path, p4, false, true);
     objectVar(Path, g, false, false);
     slave(World::Going, World.Going, going, LabelStr("any"));
-    declareFilter(Path,p1);
-    allocateFilterCondition(p1, Location, varfromtok(tok(getId(), std::string("going")), std::string("from")), from, eq);
-    allocateFilterCondition(p1, Location, varfromtok(tok(getId(), std::string("going")), std::string("to")), to, eq);
-    allocateFilterCondition(p1, int, ruleVariable(IntervalIntDomain(1,1, "int")), m_int, eq);
-    allocateFilterConstraint(p1);
-    declareFilter(Path,p2);
-    allocateFilterCondition(p2, Location, varfromtok(tok(getId(), std::string("going")), std::string("from")), from, eq);
-    allocateFilterCondition(p2, Location, varfromtok(tok(getId(), std::string("going")), std::string("to")), to, eq);
-    allocateFilterCondition(p2, int, ruleVariable(IntervalIntDomain(2,2, "int")), m_int, eq);
-    allocateFilterConstraint(p2);
-    declareFilter(Path,p4);
-    allocateFilterCondition(p4, Location, var(getId(),std::string("loc1")), from, eq);
-    allocateFilterCondition(p4, Location, var(getId(),std::string("loc2")), to, eq);
-    allocateFilterCondition(p4, int, var(getId(),std::string("filterVar")), m_int, eq);
-    allocateFilterConstraint(p4);
-    declareFilter(Path,g);
-    allocateFilterCondition(g, Location, varfromtok(tok(getId(), std::string("going")), std::string("from")), from, eq);
-    allocateFilterConstraint(g);
-    addChildRule(new World$initialState$1$0$0(m_id, getVariables(":object:")));
-    addChildRule(new World$initialState$1$0$1(m_id, getVariables(":object:")));
-    addChildRule(new World$initialState$1$0$2(m_id, getVariables(":object:")));
-    addChildRule(new World$initialState$1$0$3(m_id, getVariables(":object:")));
-  }
-  void World$initialState$1$0$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("rock")));
+      vars.push_back(varFromObject(std::string("object"), std::string("rock")));
       rule_constraint(eq, vars);
     }
-  }
-  void World$initialState$1$0$1::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("to")));
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("hill")));
+      vars.push_back(varFromObject(std::string("object"), std::string("hill")));
       rule_constraint(eq, vars);
     }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p1"), std::string("from")));
+      vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p1"), std::string("to")));
+      vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("to")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p1"), std::string("m_int")));
+      vars.push_back(ruleVariable(IntervalIntDomain(1,1, "int")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("g"), std::string("from")));
+      vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
+      rule_constraint(eq, vars);
+    }
+    addChildRule(new World$initialState$1$0$0(m_id, makeScope(var(getId(),std::string("hasPath")))));
   }
-  void World$initialState$1$0$2::handleExecute() {
+  void World$initialState$1$0$0::handleExecute() {
+    objectVar(Path, p2, false, false);
+    objectVar(Location, loc1, false, false);
+    objectVar(Location, loc2, false, false);
+    localVar(IntervalIntDomain(), filterVar, false);
+    objectVar(Path, p4, false, false);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p2"), std::string("from")));
+      vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p2"), std::string("to")));
+      vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("to")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p2"), std::string("m_int")));
+      vars.push_back(ruleVariable(IntervalIntDomain(2,2, "int")));
+      rule_constraint(eq, vars);
+    }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("loc1")));
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("rock")));
+      vars.push_back(varFromObject(std::string("object"), std::string("rock")));
       rule_constraint(eq, vars);
     }
-  }
-  void World$initialState$1$0$3::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("loc2")));
-      vars.push_back(varfromobject(object(getId(),std::string("object")), std::string("rock")));
+      vars.push_back(varFromObject(std::string("object"), std::string("rock")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p4"), std::string("from")));
+      vars.push_back(var(getId(),std::string("loc1")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p4"), std::string("to")));
+      vars.push_back(var(getId(),std::string("loc2")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(varFromObject(std::string("p4"), std::string("m_int")));
+      vars.push_back(var(getId(),std::string("filterVar")));
       rule_constraint(eq, vars);
     }
   }
@@ -405,10 +431,10 @@ namespace NDDL {
     id->addMember("World", "Location", "hill");
     id->addMember("World", "Location", "lander");
     id->addMember("World", "Location", "martianCity");
-    id->addMember("World", "Path", "p1");
-    id->addMember("World", "Path", "p2");
-    id->addMember("World", "Path", "p3");
-    id->addMember("World", "Path", "p4");
+    id->addMember("World", "Path", "path1");
+    id->addMember("World", "Path", "path2");
+    id->addMember("World", "Path", "path3");
+    id->addMember("World", "Path", "path4");
     id->addPredicate("World.Going");
     id->addMember("World.Going", "Location", "from");
     id->addMember("World.Going", "Location", "to");
