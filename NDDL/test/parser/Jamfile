@@ -11,7 +11,7 @@ NDDL_PARSER_TESTS =
 	constraints.nddl                  multipleSubgoals.nddl
 	constructorTests.nddl             otherFile.nddl
 	enumTests.nddl                    pns-conf-test.nddl
-	existentialQuantification.nddl    predicatePrototypes.nddl
+	predicatePrototypes.nddl
 	extendQualified.nddl              rover-camera.nddl
 	globals.nddl                      rover.nddl
 	includer.nddl                     simpleInstantiation.nddl
