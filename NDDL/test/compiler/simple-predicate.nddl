@@ -28,7 +28,14 @@ Foo::pred1{
  met_by (pred1 p2);
 }
 
-class Bar extends Foo {}
+class Bar extends Foo {
+ predicate pred1{
+  // CMG: ERROR HERE - won't accept specification to an interval for built in duration 
+  //duration = [2 100];
+  // CMG: ERROR HERE - it thinks it is adding a parameter
+  //m_3 = true;  
+ }
+}
 
 // Declares mandatory world class, with constructor with no arguments.
 class World {
