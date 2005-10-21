@@ -214,22 +214,23 @@ namespace EUROPA {
     unsigned line = 1; /**< Line within file. */
     std::string constraintName; /**< Name of a constraint, from each line of file. */
     char buf[20]; /**< For single "words" of input. */
-    unsigned int cnt; /**< For test number. */
     char ch; /**< For braces, brackets, and other miscellany. */
     AbstractDomain *domain = 0;
     while (tCS.good() && !tCS.eof()) {
-      tCS.width(5);
-      tCS >> buf;
-      if (tCS.eof())
-        break;
-      assertTrue(strcmp(buf, "test") == 0 && !tCS.eof() && tCS.good());
-      tCS >> cnt;
+      tCS.get(ch);
+      static const std::string skipable(" 0123456789");
+      while (skipable.find(ch) != std::string::npos && !tCS.eof() && tCS.good())
+	tCS.get(ch);
+
+      if(tCS.eof())
+	break;
 
       constraintName = "";
-      tCS.get(ch);
-      assertTrue(ch == ' ' && !tCS.eof() && tCS.good());
-      for (tCS.get(ch); ch != ' ' && tCS.good(); tCS.get(ch))
+      while(ch != ' ' && tCS.good()){
         constraintName += ch;
+	tCS.get(ch);
+      }
+
       assertTrue(constraintName.size() > 0 && !tCS.eof() && tCS.good());
       tCS.width(7);
       tCS >> buf;
@@ -359,11 +360,12 @@ namespace EUROPA {
       std::stringstream scopeStr;
       for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it)
 	scopeStr << " " << (*it)->toString();
-     
-      debugMsg("ConstraintTesting", "Creating constraint " << testCases.front().m_constraintName << " with scope " << scopeStr.str() << " for test " 
-	       << testCases.front().m_line);
 
       ConstraintId constraint = ConstraintLibrary::createConstraint(LabelStr(testCases.front().m_constraintName), engine, scope);
+     
+      debugMsg("ConstraintTesting", "Created constraint " << constraint->toString() <<
+	       " with scope " << scopeStr.str() << " for test " 
+	       << testCases.front().m_line);
       assertTrue(engine->pending());
       engine->propagate();
       assertFalse(engine->pending());
