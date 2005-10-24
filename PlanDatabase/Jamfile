@@ -6,7 +6,7 @@ Module PlanDatabase : ConstraintEngine ;
 
 SubInclude PLASMA PlanDatabase core ;
 SubInclude PLASMA PlanDatabase component ;
-#SubInclude PLASMA PlanDatabase documentation ;
+SubInclude PLASMA PlanDatabase documentation ;
 SubInclude PLASMA PlanDatabase test ;
 
 } # PLASMA_READY

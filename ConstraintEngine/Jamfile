@@ -10,7 +10,7 @@ SubInclude PLASMA ConstraintEngine core ;
 SubInclude PLASMA ConstraintEngine component ;
 
 
-#SubInclude PLASMA ConstraintEngine documentation ;
+SubInclude PLASMA ConstraintEngine documentation ;
 SubInclude PLASMA ConstraintEngine test ;
 
 } # PLASMA_READY
