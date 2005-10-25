@@ -24,6 +24,7 @@ for model in
         simple-resources.nddl 
         multi-resources.nddl
 	multidot.nddl gnats_2830.nddl globals.nddl string-domain.nddl
+	gnats_3140.nddl
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;
