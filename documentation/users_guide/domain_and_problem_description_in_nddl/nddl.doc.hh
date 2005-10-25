@@ -1,5 +1,5 @@
 /**
- * @page nddl Modeling with NDDL
+ * @page nddl Domain and Problem Description in NDDL
  * In this chapter we review the capabilities of the NDDL modeling language for describing problem domains and constructing partial plans. NDDL is an acronym for New Domain Description Language which reflects its origins in @ref ddl "DDL" which established many of the semantics and constructs found in NDDL. NDDL is an object-oriented language designed to support expression of problem domain elements and axioms in a manner consistent with the paradigm outlined in @ref planRep. The reader is strongly advised to review the material in @ref background prior to working through this chapter. The material contains:
  * @li @ref varsAndConstraints
  * @li @ref classes

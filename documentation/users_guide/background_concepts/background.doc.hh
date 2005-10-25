@@ -1,5 +1,5 @@
 /**
- * @page background Advanced Background Concepts
+ * @page background Background Concepts
  * In this chapter we review some of the core concepts employed in the @ref europa "EUROPA" 2 Constraint-based Planning 
  * Paradigm. The sections are:
  * @li @ref csp
