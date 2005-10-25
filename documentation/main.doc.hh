@@ -2,18 +2,20 @@
  * @mainpage EUROPA 2 Documentation :
  *
  * <ul>
- * <li> Introduction
+ * <li> @ref introduction
  *  <ul>
- *   <li> Reader's Guide
- *   <li> Projects
- *   <li> Contacts and Support
+ *   <li> @ref planning
+ *   <li> @ref europa2intro
+ *   <li> @ref readersguide
+ *   <li> @ref projects
+ *   <li> @ref contactandsupport
  *     <ul>
- *     <li> Logging bugs and feature requets
- *     <li> Deprecation Policy
- *     <li> Release Policy
- *     <li> Contributing to the Library
+ *     <li> @ref loggingbugs
+ *     <li> @ref deprecation
+ *     <li> @ref release
+ *     <li> @ref contribute
  *     </ul>
- *   <li> Acknowledgements
+ *   <li> @ref ack
  *   </ul>
  * <li> Getting Started
  *    <ul>
