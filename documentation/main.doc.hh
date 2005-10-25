@@ -9,33 +9,27 @@
  *   <li> @ref readersguide
  *   <li> @ref projects
  *   <li> @ref contactandsupport
- *     <ul>
- *     <li> @ref loggingbugs
- *     <li> @ref deprecation
- *     <li> @ref release
- *     <li> @ref contribute
- *     </ul>
  *   <li> @ref ack
  *   </ul>
  * <li> Getting Started
  *    <ul>
- *    <li> Installation Guide
- *    <li> A Simple Sample Applicatoin (The Planetary Rover)
+ *    <li> <a href="../install_guide/install_guide.pdf">Install Guide</a>
+ *    <li> @ref rovertutorial
  *    </ul>
- *  <li> Background Concepts
+ *  <li>@ref background
  *   <ul>
- *   <li> csp
- *   <li> STP
- *   <li> Plan Representation
- *   <li> Dynamic Objects
- *   <li> Partial Plans
- *   <li> Problem Solving
+ *   <li> @ref csp
+ *   <li> @ref stp
+ *   <li> @ref planRep
+ *   <li> @ref dynamicObjects
+ *   <li> @ref partialPlan
+ *   <li> @ref problemSolving
  *   </ul>
- *  <li> Domain and Problem Description in NDDL
- *  <li> Visualization and Troubleshooting
+ *  <li> @ref nddl
+ *  <li> @ref visualization
  *     <ul>
  *     <li> Stepping and Writing
- *     <li> Debug Output Management
+ *     <li> @ref debugoutputman
  *     <li> Timelines
  *     <li> The Token Network
  *     <li> The Constraint Network
@@ -61,15 +55,16 @@
  *     <li> Crating new NDDL foundation classes
  *     <li> Solver Configuration
  *     </ul>
- *  <li> References
+ *  <li> @ref references
+ *  <li> @ref glossary
  *  <li> Appendix A: NDDL Syntax and semantics
  *  <li> Appendix B: The Constraint Library
  *  <li> Appendix C: Developer's Guide
  *      <ul>
- *      <li> Build Management
+ *      <li> @ref advancedbuildoptions
  *      <li> Module Testing
  *      <li> Application Testing
- *      <li> Coding Practacies. 
+ *      <li> @ref programmingstyle 
  *     </ul>
  *  </ul>
  */
