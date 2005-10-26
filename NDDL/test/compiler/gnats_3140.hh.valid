@@ -1,0 +1,91 @@
+// NDDL/test/compiler/gnats_3140.xml
+
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+  class Boo;
+  typedef Id<Boo> BooId;
+  typedef ObjectDomain BooDomain;
+  
+  class Foo;
+  typedef Id<Foo> FooId;
+  typedef ObjectDomain FooDomain;
+  
+  class Bar;
+  typedef Id<Bar> BarId;
+  typedef ObjectDomain BarDomain;
+  
+  
+  
+  // gnats_3140.nddl:4 numericEnum
+  typedef NumericDomain numericEnum;
+  numericEnum numericEnumBaseDomain();
+  
+  
+  // gnats_3140.nddl:5 symbolicEnum
+  typedef SymbolDomain symbolicEnum;
+  symbolicEnum symbolicEnumBaseDomain();
+  
+  // gnats_3140.nddl:7 Boo
+  class Boo : public Object {
+  public:
+    Boo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Boo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Boo(const ObjectId& parent, const LabelStr& name);
+    Boo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+  };
+  
+  // gnats_3140.nddl:9 Foo
+  class Foo : public Object {
+  public:
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId field1; // SchemaWriter::declareVariable
+    ConstrainedVariableId field2; // SchemaWriter::declareVariable
+    ConstrainedVariableId field4; // SchemaWriter::declareVariable
+    ConstrainedVariableId field6; // SchemaWriter::declareVariable
+    ConstrainedVariableId field7; // SchemaWriter::declareVariable
+    
+    // gnats_3140.nddl:9 Foo
+    virtual void constructor(bool _field1, int _field2, float _field4, const LabelStr& _field6, const BooId& _field7);
+  };
+  
+  // gnats_3140.nddl:30 Bar
+  class Bar : public Timeline {
+  public:
+    Bar(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Bar(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Bar(const ObjectId& parent, const LabelStr& name);
+    Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class pred;
+    typedef Id<pred> predId;
+    
+    // gnats_3140.nddl:31 pred
+    class pred : public NddlToken {
+    public:
+      pred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      pred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Bar::pred, Bar.pred);
+      
+      ConstrainedVariableId field1; // SchemaWriter::declareVariable
+      ConstrainedVariableId field2; // SchemaWriter::declareVariable
+      ConstrainedVariableId field4; // SchemaWriter::declareVariable
+      ConstrainedVariableId field6; // SchemaWriter::declareVariable
+      ConstrainedVariableId field7; // SchemaWriter::declareVariable
+    };
+  };
+} // End NDDL namespace
