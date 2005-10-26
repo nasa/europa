@@ -218,22 +218,17 @@ namespace EUROPA {
     debugMsg("TemporalPropagator:execute", "Calling updateTnet()");
     updateTnet();
 
-    //COMMENT THIS OUT LATER!  IT'S VERY EXPENSIVE!
-    //debugMsg("TemporalPropagator:execute", "Checking consistency after Tnet update.");
-    //condDebugMsg(!isConsistentWithConstraintNetwork(), "TemporalPropagator:execute", 
-    //             "After updateTnet() the two are out of synch");
-
     //propagate the tnet
     if (!m_tnet->isConsistent()) {
-      //std::cout << " Tnet is inconsistent " << std::endl;
       debugMsg("TemporalPropagator:execute", "Tnet is inconsistent.");
       std::list<TimepointId> results(m_tnet->getInconsistencyReason());
       check_error(!results.empty());
       std::list<TimepointId>::iterator it = results.begin();
-      if (*it == m_tnet->getOrigin()) {
-        check_error (results.size()>1);
+      if(*it == m_tnet->getOrigin()){
+        check_error(results.size()>1);
         ++it;
       }
+
       ConstrainedVariableId var = (*it)->getExternalEntity();
       check_error (!var.isNoId());
       Propagator::getCurrentDomain(var).empty();
