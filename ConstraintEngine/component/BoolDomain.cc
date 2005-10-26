@@ -58,12 +58,14 @@ namespace EUROPA {
   }
 
   LabelStr BoolDomain::displayValue(double value) const{
+    check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
+
     static const LabelStr sl_true("true");
     static const LabelStr sl_false("false");
     checkError(value == true || value == false, value << "is not a bool value" );
     if(value == true)
       return sl_true;
-    else
+    else 
       return sl_false;
   }
 
