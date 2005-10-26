@@ -297,39 +297,39 @@ namespace EUROPA {
       std::string anotherActualString2 = d2.toString();
       assertTrue(anotherActualString2 == expectedString2);
 
-      // test displayValue.
+      // test toString(value).
   
       //intervalInt domain
       IntervalIntDomain intervalInt (1,100);
       intervalInt.set(1);
-      std::string d1DisplayValueStr = intervalInt.displayValue(intervalInt.getSingletonValue()).toString();
+      std::string d1DisplayValueStr = intervalInt.toString(intervalInt.getSingletonValue());
       std::string expectedD1DisplayValue("1");
       assertTrue(d1DisplayValueStr == expectedD1DisplayValue);
    
       //intervalReal domain
       IntervalDomain intervalReal (1.5, 100.6);
       intervalReal.set(1.5);
-      std::string d2DisplayValueStr = intervalReal.displayValue(intervalReal.getSingletonValue()).toString();
+      std::string d2DisplayValueStr = intervalReal.toString(intervalReal.getSingletonValue());
       std::string expectedD2DisplayValue("1.5");
       assertTrue(d2DisplayValueStr == expectedD2DisplayValue);
        
       // boolean domain
       BoolDomain boolDomainTrue(true);
       boolDomainTrue.set(true);
-      std::string d3DisplayValueStr = boolDomainTrue.displayValue(boolDomainTrue.getSingletonValue()).toString();
+      std::string d3DisplayValueStr = boolDomainTrue.toString(boolDomainTrue.getSingletonValue());
       std::string expectedD3DisplayValue("true");
       assertTrue(d3DisplayValueStr == expectedD3DisplayValue);
    
       BoolDomain boolDomainFalse(false);
       boolDomainFalse.set(false);
-      std::string d4DisplayValueStr = boolDomainFalse.displayValue(boolDomainFalse.getSingletonValue()).toString();
+      std::string d4DisplayValueStr = boolDomainFalse.toString(boolDomainFalse.getSingletonValue());
       std::string expectedD4DisplayValue("false");
       assertTrue(d4DisplayValueStr == expectedD4DisplayValue);
    
       // numeric domain
       NumericDomain numericDom(1.117);
       numericDom.set(1.117);
-      std::string d5DisplayValueStr = numericDom.displayValue(numericDom.getSingletonValue()).toString();
+      std::string d5DisplayValueStr = numericDom.toString(numericDom.getSingletonValue());
       std::string expectedD5DisplayValue("1.117");
       assertTrue(d5DisplayValueStr == expectedD5DisplayValue);
    
@@ -338,7 +338,7 @@ namespace EUROPA {
       StringDomain stringDom(theString);
       stringDom.set(theString);
       assertTrue(stringDom.isSingleton());
-      std::string d6DisplayValueStr = stringDom.displayValue(stringDom.getSingletonValue()).toString();
+      std::string d6DisplayValueStr = stringDom.toString(stringDom.getSingletonValue());
       std::string expectedD6DisplayValue("AString");
       assertTrue(d6DisplayValueStr == expectedD6DisplayValue);
 
@@ -346,7 +346,7 @@ namespace EUROPA {
       LabelStr element("ASymbol"); 
       SymbolDomain symbolDom(element);
       symbolDom.set(element);
-      std::string d7DisplayValueStr = symbolDom.displayValue(symbolDom.getSingletonValue()).toString();
+      std::string d7DisplayValueStr = symbolDom.toString(symbolDom.getSingletonValue());
       std::string expectedD7DisplayValue("ASymbol");
       assertTrue(d7DisplayValueStr == expectedD7DisplayValue);
      
