@@ -57,16 +57,16 @@ namespace EUROPA {
     return(ptr);
   }
 
-  LabelStr BoolDomain::displayValue(double value) const{
+  std::string  BoolDomain::toString(double value) const{
     check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
 
     static const LabelStr sl_true("true");
     static const LabelStr sl_false("false");
     checkError(value == true || value == false, value << "is not a bool value" );
     if(value == true)
-      return sl_true;
+      return sl_true.toString();
     else 
-      return sl_false;
+      return sl_false.toString();
   }
 
   bool BoolDomain::intersect(const AbstractDomain& dom) {

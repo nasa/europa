@@ -56,7 +56,7 @@ namespace EUROPA {
     /**
      * @brief COnvert to true or false as needed
      */
-    LabelStr displayValue(double value) const;
+    std::string toString(double value) const;
 
     bool intersect(const AbstractDomain& dom);
 
