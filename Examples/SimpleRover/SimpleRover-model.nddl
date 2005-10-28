@@ -103,7 +103,6 @@ Commands::TakeSample{
  contains(Instrument.TakeSample a);
  eq(a.rock, rock);
  Rover rovers;
- commonAncestor(a.object, this.object, rovers);
 
  // Make contact with results. Prefer to phone home, but
  // also allow contact to lander instead as a relay
@@ -155,7 +154,7 @@ Instrument::TakeSample{
  contained_by(Navigator.At at);
  eq(at.location, rock);
  Rover rovers;
- commonAncestor(at.object, this.object, rovers);
+ //commonAncestor(at.object, this.object, rovers);
 
  // Preceded by placing the instrument
  met_by(Place b);
@@ -172,7 +171,6 @@ Instrument::Place{
  contained_by(Navigator.At at);
  eq(at.location, rock);
  Rover rovers;
- commonAncestor(at.object, this.object, rovers);
 
  meets(TakeSample a);
  eq(a.rock, rock);
@@ -185,7 +183,6 @@ Instrument::Place{
 Instrument::Unstow{
  contained_by(Navigator.At at);
  Rover rovers;
- commonAncestor(at.object, this.object, rovers);
 
  meets(Place a);
  met_by(Stowed b);
@@ -197,7 +194,6 @@ Instrument::Unstow{
 Instrument::Stow{
  contained_by(Navigator.At at);
  Rover rovers;
- commonAncestor(at.object, this.object, rovers);
 
  meets(Stowed a);
  met_by(TakeSample b);
