@@ -1,7 +1,0 @@
-{
-  local SUBDIR = $(HelloWorld) ;
-  local PLASMA = [ FDirName $(HelloWorld) .. PLASMA ] ;
-  include [ FDirName $(PLASMA) Jamrules ] ;
-  include [ FDirName $(SUBDIR) Jamfile ] ;
-  HelloWorld_READY = TRUE ;
-}
