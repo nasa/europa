@@ -212,6 +212,9 @@ namespace EUROPA {
   }
 
   void TemporalPropagator::execute(){
+    static unsigned int sl_counter(0);
+    sl_counter++;
+
     check_error(!getConstraintEngine()->provenInconsistent());
     check_error(isValidForPropagation());
     //update the tnet
@@ -222,7 +225,7 @@ namespace EUROPA {
     if (!m_tnet->isConsistent()) {
       debugMsg("TemporalPropagator:execute", "Tnet is inconsistent.");
       const std::set<TimepointId>& updatedTimepoints = m_tnet->getUpdatedTimepoints();
-      check_error(!updatedTimepoints.empty());
+      checkError(!updatedTimepoints.empty(), sl_counter);
       TimepointId tp = *(updatedTimepoints.begin());
 
       ConstrainedVariableId var = tp->getExternalEntity();
@@ -413,7 +416,7 @@ namespace EUROPA {
 
       IntervalIntDomain& dom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(var));
 
-      check_error(!dom.isEmpty());
+      checkError(!dom.isEmpty(), var->toString());
 
       checkError(dom.isMember(lb) && dom.isMember(ub), 
                  "Updated bounds [" << lb << " " << ub << "] from timepoint " << tp << " are outside of " 
