@@ -13,8 +13,8 @@
  * @section structure Documentation Structure
  * <ul> 
  * <li>A <a href="../install_guide/install_guide.pdf">Installation Guide</a> has been prepared to set up an installation and a simple project. 
- * <li>A @ref rovertutorial "Simple Sample Applictaion" is described to get an overview of the capabilities of EUROPA. 
- * <li>A more comprehensive @ref usersGuide "Users' Guide" is also available which covers background material, tutorials, case studies and technical references.
+ * <li>A @ref rovertutorial "Simple Sample Application" is described to get an overview of the capabilities of EUROPA. 
+ * <li>A more comprehensive @ref usersGuide  is also available which covers background material, tutorials, case studies and technical references.
  *</ul>
  * @section projects Projects
  * Under construction
