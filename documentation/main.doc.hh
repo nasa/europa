@@ -10,7 +10,12 @@
  * @li <b>On-board Planning and Plan Execution</b>. EUROPA was the core planning technolgoy for deliberative and reactive planning on-board a variety of mobile robots. It has been fielded in the Atacama Desert and was the cornerstone of a recent milestone of human-robotic collaboration for the Collaborative Decision Systems program.
  * @li <b>Mission Simulation</B>. EUROPA was used to simulate a prospective robotic mission (LORAX) to the Antarctic for the purposes of system design evaluation.
  *
- * For your convenience, a <a href="../install_guide/install_guide.pdf">Installation Guide</a> has been prepared to set up an installation and a simple project. A @ref rovertutorial "Simple Sample Applictaion" is described to get an overview of the capabilities of EUROPA. A more comprehensive @ref usersGuide "Users Guide" is also available which covers background material, tutorials, case studies and technical references.
+ * @section structure Documentation Structure
+ * <ul> 
+ * <li>A <a href="../install_guide/install_guide.pdf">Installation Guide</a> has been prepared to set up an installation and a simple project. 
+ * <li>A @ref rovertutorial "Simple Sample Applictaion" is described to get an overview of the capabilities of EUROPA. 
+ * <li>A more comprehensive @ref usersGuide "Users' Guide" is also available which covers background material, tutorials, case studies and technical references.
+ *</ul>
  * @section projects Projects
  * Under construction
  *
