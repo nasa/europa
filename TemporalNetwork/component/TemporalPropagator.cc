@@ -221,15 +221,11 @@ namespace EUROPA {
     //propagate the tnet
     if (!m_tnet->isConsistent()) {
       debugMsg("TemporalPropagator:execute", "Tnet is inconsistent.");
-      std::list<TimepointId> results(m_tnet->getInconsistencyReason());
-      check_error(!results.empty());
-      std::list<TimepointId>::iterator it = results.begin();
-      if(*it == m_tnet->getOrigin()){
-        check_error(results.size()>1);
-        ++it;
-      }
+      const std::set<TimepointId>& updatedTimepoints = m_tnet->getUpdatedTimepoints();
+      check_error(!updatedTimepoints.empty());
+      TimepointId tp = *(updatedTimepoints.begin());
 
-      ConstrainedVariableId var = (*it)->getExternalEntity();
+      ConstrainedVariableId var = tp->getExternalEntity();
       check_error (!var.isNoId());
       Propagator::getCurrentDomain(var).empty();
     }
