@@ -343,7 +343,7 @@ public:
     assertFalse(ENGINE->propagate());
 
     v2.reset();
-    assertTrue(ENGINE->provenInconsistent());
+    //DEPRECATED (GNATS 3140):assertTrue(ENGINE->provenInconsistent());
     assertFalse(ENGINE->propagate());
     v3.reset();
     assertFalse(ENGINE->propagate())
