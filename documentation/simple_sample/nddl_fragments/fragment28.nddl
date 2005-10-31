@@ -1,0 +1,3 @@
+goal(Commands.TakeSample sample);
+sample.start.specify(50);
+sample.rock.specify(rock4);

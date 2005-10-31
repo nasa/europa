@@ -1,0 +1,12 @@
+Instrument::Place{
+  contained_by(Navigator.At at);
+  eq(at.location, rock); 
+  Rover rovers;
+
+  meets(TakeSample a);
+  eq(a.rock, rock);
+  met_by(Unstow b);
+
+  starts(Battery.change tx);
+  eq(tx.quantity, -20); // consume battery power
+} 

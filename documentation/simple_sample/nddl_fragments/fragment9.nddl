@@ -1,0 +1,14 @@
+Commands::TakeSample{ 
+   contains(Instrument.TakeSample a); 
+   eq(a.rock, rock); 
+   Rover rovers;
+
+   bool OR;
+
+   if(OR == false){ 
+     meets(object.PhoneHome t0);
+   }
+   if(OR == true){
+     meets(object.PhoneLander t1);
+   } 
+}

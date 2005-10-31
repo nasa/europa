@@ -1,0 +1,13 @@
+class Rover {
+  Commands commands;
+  Navigator navigator;
+  Instrument instrument;
+  Battery mainBattery;
+
+  Rover(Battery r){
+    commands = new Commands();
+    navigator = new Navigator();
+    instrument = new Instrument();
+    mainBattery = r;
+  }
+}

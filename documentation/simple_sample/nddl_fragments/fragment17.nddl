@@ -1,0 +1,10 @@
+Instrument::Stow{ 
+  contained_by(Navigator.At at);
+  Rover rovers; 
+
+  meets(Stowed a);
+  met_by(TakeSample b);
+
+  starts(Battery.change tx);
+  eq(tx.quantity, -20);  // consume batter power
+}

@@ -1,0 +1,3 @@
+Path p1 = new Path("Very Long Way", lander, rock4, -2000.0);
+Path p2 = new Path("Moderately Long Way", lander, rock4, -1500.0);
+Path p3 = new Path("Short Cut", lander, rock4, -400.0);
