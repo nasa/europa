@@ -18,7 +18,6 @@ Path p3 = new Path("Short Cut", lander, rock4, -400.0);
 Battery battery = new Battery(1000.0, 0.0, 1000.0);
 Rover spirit = new Rover(battery);
 
-Resource.close();
 close();
 
 // Establish the initial position for spirit
