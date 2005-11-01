@@ -7,6 +7,14 @@
 
 namespace EUROPA{
 
+ /**
+   * @class STNTemporalAdvisor
+   * @brief Implementation of DefaultTemporalAdvisor for @ref stp "Simple Temporal Networks". Class supports
+   * the quering of temporal relations between tokens.
+   *
+   * Specializes methods for properties of STNs.
+   * @ingroup TemporalNetwork
+   */
   class STNTemporalAdvisor: public DefaultTemporalAdvisor {
 
   public:

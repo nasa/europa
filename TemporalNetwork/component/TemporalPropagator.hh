@@ -10,12 +10,14 @@
 
 #include <set>
 
-/**
- * @author Conor McGann & Sailesh Ramakrishnan
- */
-
 namespace EUROPA {
 
+  /**
+   * @class TemporalPropagator
+   * @author Conor McGann & Sailesh Ramakrishnan
+   * @brief Propagation event manager specialized for temporal constraints. See parent class for more information.
+   * @ingroup TemporalNetwork
+   */
   class TemporalPropagator: public Propagator
   {
   public:
@@ -25,30 +27,30 @@ namespace EUROPA {
     bool updateRequired() const;
 
     /**
-     * @see TemporalAdvisor
+     * @see TemporalAdvisor::canPrecede
      */
     bool canPrecede(const ConstrainedVariableId& first, const ConstrainedVariableId& second);
 
     /**
-     * @see TemporalAdvisor
+     * @see TemporalAdvisor::canFitBetween
      */
     bool canFitBetween(const ConstrainedVariableId& start, const ConstrainedVariableId& end,
 		       const ConstrainedVariableId& predend, const ConstrainedVariableId& succstart);
 
     /**
-     * @see TemporalAdvisor
+     * @see TemporalAdvisor::canBeConcurrent
      */
     bool canBeConcurrent(const ConstrainedVariableId& first, const ConstrainedVariableId& second);
 
     /**
-     * @see TemporalAdvisor
+     * @see TemporalAdvisor::getTemporalDistanceDomain
      */
     const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId& first, 
 						      const ConstrainedVariableId& second, const bool exact);
 
 
     /**
-     * @see TemporalAdvisor
+     * @see TemporalAdvisor::mostRecentReprogation
      */
     unsigned int mostRecentRepropagation() const;
 

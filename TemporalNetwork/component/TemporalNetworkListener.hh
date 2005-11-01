@@ -10,6 +10,7 @@ namespace EUROPA{
   /**
    * @class TemporalNetworkListener
    * @brief The abstract interface for events published from the temporal network
+   * @ingroup TemporalNetwork
    */
   class TemporalNetworkListener{
   public:
