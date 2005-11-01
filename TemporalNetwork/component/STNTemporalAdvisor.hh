@@ -34,6 +34,9 @@ namespace EUROPA{
   private:
     TemporalPropagatorId m_propagator;
 
+
+
+
   };
 
 }
