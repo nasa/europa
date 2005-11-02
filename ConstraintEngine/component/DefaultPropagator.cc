@@ -68,7 +68,8 @@ namespace EUROPA {
     for(ConstraintSet::iterator it = m_agenda.begin(); it != m_agenda.end(); ++it){
       ConstraintId constraint = *it;
       checkError(constraint.isValid(), constraint);
-      checkError(!constraint->isDiscarded(), constraint->getName().toString() << "(" << constraint->getKey() << ")");
+      checkError(!constraint->isDiscarded(), 
+		 constraint->getName().toString() << "(" << constraint->getKey() << ") Id=" << constraint);
     }
     return true;
   }

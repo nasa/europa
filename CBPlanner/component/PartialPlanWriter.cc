@@ -1170,7 +1170,7 @@ namespace EUROPA {
         type = D_VARIABLE;
         ConstrainedVariableDecisionPointId &vdp = (ConstrainedVariableDecisionPointId &)dp;
         if((isCompatGuard(vdp->getVariable()) &&
-            !vdp->getVariable()->specifiedDomain().isSingleton()) ||
+            !vdp->getVariable()->isSpecified()) ||
            !vdp->getVariable()->lastDomain().isSingleton())
           isUnit = 1;
       }
@@ -1517,11 +1517,6 @@ namespace EUROPA {
             transactionList->push_back(Transaction(VAR_DOMAIN_RESTRICT_TO_SINGLETON, varId->getKey(),
                                                    SYSTEM, transactionId++, seqId, nstep, 
                                                    getVarInfo(varId)));
-          break;
-        case DomainListener::SET:
-          if(allowTransaction[VAR_DOMAIN_SET])
-            transactionList->push_back(Transaction(VAR_DOMAIN_SET, varId->getKey(), UNKNOWN,
-                                                   transactionId++, seqId, nstep, getVarInfo(varId)));
           break;
         case DomainListener::SET_TO_SINGLETON:
           if(allowTransaction[VAR_DOMAIN_SET_TO_SINGLETON])

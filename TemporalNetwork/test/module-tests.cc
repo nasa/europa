@@ -216,7 +216,7 @@ private:
     		     IntervalIntDomain(0, 20),
     		     IntervalIntDomain(1, 1000));
 
-    t1.getDuration()->specify(IntervalIntDomain(5, 7));
+    t1.getDuration()->restrictBaseDomain(IntervalIntDomain(5, 7));
     assertTrue(t1.getEnd()->getDerivedDomain().getLowerBound() == 5);
     assertTrue(t1.getEnd()->getDerivedDomain().getUpperBound() == 17);
 
@@ -227,7 +227,7 @@ private:
     		     IntervalIntDomain(0, 20),
     		     IntervalIntDomain(1, 1000));
 
-    //t2.getEnd()->specify(IntervalIntDomain(8, 10));
+    //t2.getEnd()->restrictBaseDomain(IntervalIntDomain(8, 10));
 
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(t1.getEnd());
@@ -285,25 +285,6 @@ private:
 
     // compute from advisor
     assertTrue (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
-
-    // restrict via specifying the domain
-
-    IntervalIntDomain dom(21, 31);
-    first.getStart()->specify(dom);
-    first.getEnd()->specify(dom);
-
-    IntervalIntDomain dom2(1, 20);
-    second.getStart()->specify(dom2);
-    second.getEnd()->specify(dom2);
-
-    bool res = ce.propagate();
-    assertTrue(res);
-    
-    // compute from propagator directly
-    assertTrue (!tp->canPrecede(first.getEnd(), second.getStart()));
-    assertTrue (tp->canPrecede(second.getEnd(), first.getStart()));
-    // compute from advisor
-    assertTrue (!db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     
     second.getStart()->reset();
     second.getEnd()->reset();
@@ -322,7 +303,7 @@ private:
 									temp);
     assertTrue(beforeConstraint.isValid());
 
-    res = ce.propagate();
+    bool res = ce.propagate();
     assertTrue(res);
     
     // compute from propagator directly
@@ -335,6 +316,26 @@ private:
     assertTrue (!db.getTemporalAdvisor()->canPrecede(second.getId(), first.getId()));
 
     delete (Constraint*) beforeConstraint;
+
+    // restrict via specifying the domain
+
+    IntervalIntDomain dom(21, 31);
+    first.getStart()->restrictBaseDomain(dom);
+    first.getEnd()->restrictBaseDomain(dom);
+
+    IntervalIntDomain dom2(1, 20);
+    second.getStart()->restrictBaseDomain(dom2);
+    second.getEnd()->restrictBaseDomain(dom2);
+
+    res = ce.propagate();
+    assertTrue(res);
+    
+    // compute from propagator directly
+    assertTrue (!tp->canPrecede(first.getEnd(), second.getStart()));
+    assertTrue (tp->canPrecede(second.getEnd(), first.getStart()));
+    // compute from advisor
+    assertTrue (!db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
+
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -485,7 +486,7 @@ private:
     t2.merge(t1.getId());
 
     // Now changes on v0 should propagate to the end variable of t1.
-    v0.specify(IntervalIntDomain(8, 10));
+    v0.restrictBaseDomain(IntervalIntDomain(8, 10));
     assertTrue(t1.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
 
     // If we split again, expect that the restriction now applies to the end-point
@@ -616,7 +617,7 @@ private:
     ConstrainedVariableId v5 = (new Variable<IntervalIntDomain> (ce.getId(), domDur, true, "v5"))->getId();
     ConstrainedVariableId v6 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, true, "v6"))->getId();
 
-    v2->specify(IntervalIntDomain(5, 7));
+    v2->restrictBaseDomain(IntervalIntDomain(5, 7));
 
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(v1);

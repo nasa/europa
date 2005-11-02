@@ -37,6 +37,7 @@ namespace EUROPA {
     void notifyConstraintCreated(const ConstraintId& constraint);
     void notifyVariableCreated(const ConstrainedVariableId& variable);
     void notifyVariableSpecified(const ConstrainedVariableId& variable);
+    void notifyVariableRestricted(const ConstrainedVariableId& variable);
     void notifyVariableReset(const ConstrainedVariableId& variable);
 
     /**

@@ -101,13 +101,6 @@ namespace EUROPA {
     }
 
     /**
-     * @brief Set to the specified domain.
-     * @note May empty the domain if target does not intersect the current domain.
-     * @param value the target singleton value.
-     */
-    void set(const AbstractDomain& dom);
-
-    /**
      * @brief Set to a singleton.
      * @note May empty the domain if value is not a member of the current domain.
      * @param value the target singleton value.
@@ -120,7 +113,6 @@ namespace EUROPA {
      * @see relax
      */
     void reset(const AbstractDomain& dom);
-
     /**
      * @brief Restricts this domain to the intersection of its values with the given domain.
      * @param dom the domain to intersect with, which cannot be empty.
@@ -163,6 +155,11 @@ namespace EUROPA {
      * must be a superset of this domain.
      */
     void relax(const AbstractDomain& dom);
+
+    /**
+     * @brief Relax to a singleton value
+     */
+    void relax(double value);
 
     /**
      * @brief Convenience method for relaxing a domain.

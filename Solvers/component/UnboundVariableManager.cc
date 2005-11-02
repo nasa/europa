@@ -97,7 +97,7 @@ namespace EUROPA {
     bool UnboundVariableManager::inScope(const ConstrainedVariableId& var) const {
       checkError(m_db->getConstraintEngine()->constraintConsistent(), 
 		 "Assumes the database is constraint consistent but it is not.");
-      bool result =  (!var->specifiedDomain().isSingleton() && !matches(var, m_staticMatchingRules) && !matches(var, m_dynamicMatchingRules));
+      bool result =  (!var->isSpecified() && !matches(var, m_staticMatchingRules) && !matches(var, m_dynamicMatchingRules));
       return result;
     }
 
@@ -155,7 +155,7 @@ namespace EUROPA {
 	checkError(!variableOfNonActiveToken(candidate),
 		   "Expect that " << candidate->toString() << " cannot belong to an inactive or merged token.");
 
-	check_error(!candidate->specifiedDomain().isSingleton(),
+	check_error(!candidate->isSpecified(),
 		    "Should not be seeing this as a candidate flaw since it is already specified.");
 
 	if(matches(candidate, m_dynamicMatchingRules)){
@@ -247,7 +247,7 @@ namespace EUROPA {
      * We may filter based on static information only.
      */
     void UnboundVariableManager::addFlaw(const ConstrainedVariableId& var){
-      if(!variableOfNonActiveToken(var) && var->canBeSpecified() && !var->specifiedDomain().isSingleton() && !matches(var, m_staticMatchingRules)){
+      if(!variableOfNonActiveToken(var) && var->canBeSpecified() && !var->isSpecified() && !matches(var, m_staticMatchingRules)){
 	debugMsg("UnboundVariableManager:addFlaw",
 		 "Adding " << var->toString() << " as a candidate flaw.");
 	m_flawCandidates.insert(var);

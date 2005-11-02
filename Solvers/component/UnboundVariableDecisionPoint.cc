@@ -33,7 +33,7 @@ namespace EUROPA {
     const ConstrainedVariableId& UnboundVariableDecisionPoint::getFlawedVariable() const{return m_flawedVariable;}
 
     bool UnboundVariableDecisionPoint::canUndo() const {
-      return DecisionPoint::canUndo() && m_flawedVariable->specifiedDomain().isSingleton();
+      return DecisionPoint::canUndo() && m_flawedVariable->isSpecified();
     }
 
     void UnboundVariableDecisionPoint::handleInitialize(){}

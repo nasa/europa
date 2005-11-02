@@ -1573,11 +1573,6 @@ namespace EUROPA {
 						     SYSTEM, transactionId++, seqId, nstep, 
 						     getVarInfo(varId)));
 	    break;
-	  case DomainListener::SET:
-	    if(Transaction::isAllowed(VAR_DOMAIN_SET))
-	      transactionList->push_back(Transaction(VAR_DOMAIN_SET, varId->getKey(), UNKNOWN,
-						     transactionId++, seqId, nstep, getVarInfo(varId)));
-	    break;
 	  case DomainListener::SET_TO_SINGLETON:
 	    if(Transaction::isAllowed(VAR_DOMAIN_SET_TO_SINGLETON))
 	      transactionList->push_back(Transaction(VAR_DOMAIN_SET_TO_SINGLETON, varId->getKey(),

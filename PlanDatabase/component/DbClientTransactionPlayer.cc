@@ -104,6 +104,8 @@ namespace EUROPA {
       playCancelled(element);
     else if (strcmp(tagname, "specify") == 0)
       playVariableSpecified(element);
+    else if (strcmp(tagname, "restrict") == 0)
+      playVariableRestricted(element);
     else if (strcmp(tagname, "reset") == 0)
       playVariableReset(element);
     else if (strcmp(tagname, "invoke") == 0)
@@ -280,7 +282,9 @@ namespace EUROPA {
       check_error(object.isValid(), "Failed to find an object named " + prefix.toString());
       std::string newType(object->getType().toString() + Schema::getDelimiter() + suffix.toString());
       token = m_client->createToken(newType.c_str(), !b_mandatory);
-      m_client->specify(token->getObject(), object);
+
+      // We restrict the base domain permanently since the name is specifically mentioned on creation
+      token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
     }
 
     // If it is mandatory, then activate immediately so there is less for a
@@ -395,8 +399,21 @@ namespace EUROPA {
     if (value->isSingleton()) {
       double v = value->getSingletonValue();
       m_client->specify(variable, v);
-    } else
-      m_client->specify(variable, *value);
+    } 
+    else
+      playVariableRestricted(element);
+  }
+
+  void DbClientTransactionPlayer::playVariableRestricted(const TiXmlElement & element) {
+    TiXmlElement * var_el = element.FirstChildElement();
+    check_error(var_el != NULL);
+    ConstrainedVariableId variable = xmlAsVariable(*var_el);
+    check_error(variable.isValid());
+
+    TiXmlElement * value_el = var_el->NextSiblingElement();
+    check_error(value_el != NULL);
+    const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+    m_client->restrict(variable, *value);
   }
 
   void DbClientTransactionPlayer::playVariableReset(const TiXmlElement & element) {
@@ -537,11 +554,12 @@ namespace EUROPA {
       const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
       debugMsg("DbClientTransactionPlayer:playInvokeTransaction", "specifying to " << (*value));
       if (value->isSingleton()) {
-        double v = value->getSingletonValue();
-        m_client->specify(variable, v);
-      } else {
-        m_client->specify(variable, *value);
-      }
+	double v = value->getSingletonValue();
+	m_client->specify(variable, v);
+      } 
+      else
+	m_client->restrict(variable, *value);
+
       return;
     }
 
@@ -585,7 +603,7 @@ namespace EUROPA {
     }
     ConstrainedVariableId var = m_variables[ident];
     check_error(var.isValid(), "Invalid id for " + ident);
-    ObjectId object = var->specifiedDomain().getSingletonValue();
+    ObjectId object = var->lastDomain().getSingletonValue();
     check_error(object.isValid());
     var = object->getVariable(LabelStr(varString));
     check_error(var.isValid());

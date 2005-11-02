@@ -920,10 +920,10 @@ private:
     IntervalToken tok0(db.getId(),LabelStr("Telemetry.Communicate"), true, IntervalIntDomain(0,100), IntervalIntDomain(0,100), IntervalIntDomain(1,100), "tel1", false);
     tok0.addParameter(IntervalDomain("int"), LabelStr("minutes"));
     ConstrainedVariableId vmin = tok0.getVariable("minutes");
-    vmin->specify(IntervalIntDomain(60,120));
+    vmin->restrictBaseDomain(IntervalIntDomain(60,120));
     tok0.addParameter(IntervalDomain("float"), LabelStr("bandwidth"));
     ConstrainedVariableId vband = tok0.getVariable("bandwidth");
-    vband->specify(IntervalDomain(500.3,1200.4));
+    vband->restrictBaseDomain(IntervalDomain(500.3,1200.4));
     //    tok0.addParameter(BoolDomain(), LabelStr("encoded"));  token
     //    fails to recognize BoolDomain().
     tok0.addParameter(allModes, LabelStr("mode"));
@@ -1001,10 +1001,10 @@ private:
     IntervalToken tok0(db.getId(),LabelStr("Telemetry.Communicate"), true, IntervalIntDomain(1,100), IntervalIntDomain(1,100), IntervalIntDomain(1,100), "tel1", false);
     tok0.addParameter(IntervalDomain("int"), LabelStr("minutes"));
     ConstrainedVariableId vmin = tok0.getVariable("minutes");
-    vmin->specify(IntervalIntDomain(60,120));
+    vmin->restrictBaseDomain(IntervalIntDomain(60,120));
     tok0.addParameter(IntervalDomain("float"), LabelStr("bandwidth"));
     ConstrainedVariableId vband = tok0.getVariable("bandwidth");
-    vband->specify(IntervalDomain(500.3,1200.4));
+    vband->restrictBaseDomain(IntervalDomain(500.3,1200.4));
     //    tok0.addParameter(BoolDomain(), LabelStr("encoded"));  token
     //    fails to recognize BoolDomain().
     ConstrainedVariableId mode = tok0.addParameter(allModes, LabelStr("mode"));

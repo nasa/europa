@@ -73,7 +73,7 @@ namespace EUROPA {
 
   bool TokenDecisionPoint::retract() {
     bool retval = hasRemainingChoices();
-    if(m_tok->getState()->specifiedDomain().isSingleton())
+    if(m_tok->getState()->isSpecified())
       m_dbClient->cancel(m_tok);
     m_open = true;
     return retval;

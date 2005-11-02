@@ -923,7 +923,7 @@ private:
 		       IntervalIntDomain(0, 20),                                           
 		       IntervalIntDomain(1, 1000));
       t4.activate();
-      o1.constrain(t3.getId(), t4.getId());   
+      o1.constrain(t3.getId(), t4.getId());
     }
 
     assertTrue(ENGINE->propagate());
@@ -966,7 +966,7 @@ private:
     EventToken eventToken(db, DEFAULT_PREDICATE(), true, IntervalIntDomain(0, 1000), Token::noObject(), false);
     assertTrue(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
     assertTrue(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
-    eventToken.getStart()->specify(IntervalIntDomain(5, 10));
+    eventToken.getStart()->restrictBaseDomain(IntervalIntDomain(5, 10));
     assertTrue(eventToken.getEnd()->getDerivedDomain() == IntervalIntDomain(5, 10));
     eventToken.addParameter(IntervalDomain(-1.08, 20.18), "IntervalParam");
     eventToken.close();
@@ -989,9 +989,9 @@ private:
     intervalToken.addParameter(LabelSet(values), "LabelSetParam");
     intervalToken.close();
     assertTrue(intervalToken.getEnd()->getDerivedDomain().getLowerBound() == 2);
-    intervalToken.getStart()->specify(IntervalIntDomain(5, 10));
+    intervalToken.getStart()->restrictBaseDomain(IntervalIntDomain(5, 10));
     assertTrue(intervalToken.getEnd()->getDerivedDomain() == IntervalIntDomain(7, 20));
-    intervalToken.getEnd()->specify(IntervalIntDomain(9, 10));
+    intervalToken.getEnd()->restrictBaseDomain(IntervalIntDomain(9, 10));
     assertTrue(intervalToken.getStart()->getDerivedDomain() == IntervalIntDomain(5, 8));
     assertTrue(intervalToken.getDuration()->getDerivedDomain() == IntervalIntDomain(2, 5));
 
@@ -1066,7 +1066,8 @@ private:
     assertTrue(t1.isInactive());
     t1.merge(t0.getId());
 
-    // Test that we can allocate a token, but if we constrain it with any external entity, then the state variable will be restricted
+    // Test that we can allocate a token, but if we constrain it with any external entity, 
+    // then the state variable will be restricted
     // to exclude the possibility of rejecting the token.
     {
 
@@ -1295,7 +1296,7 @@ private:
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
   
-    t1.getDuration()->specify(IntervalIntDomain(5, 7));
+    t1.getDuration()->restrictBaseDomain(IntervalIntDomain(5, 7));
   
     // Activate & deactivate - ensure proper handling of rejectability variable
     assertFalse(t0.getState()->getDerivedDomain().isSingleton());
@@ -1310,12 +1311,12 @@ private:
     t1.merge(t0.getId());
   
     // Make sure the necessary restrictions have been imposed due to merging i.e. restruction due to specified domain
-    assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 7);
+    assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 7, t0.getDuration()->toString());
     assertTrue(t1.isMerged());
   
     // Do a split and make sure the old values are reinstated.
     t1.cancel();
-    assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
+    assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 20, t0.getDuration()->toString());
     assertTrue(t1.isInactive());
   
     // Now post equality constraint between t1 and extra token t2 and remerge
@@ -1326,7 +1327,7 @@ private:
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
   
-    t2.getEnd()->specify(IntervalIntDomain(8, 10));
+    t2.getEnd()->restrictBaseDomain(IntervalIntDomain(8, 10));
   
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(t1.getEnd());
@@ -1354,11 +1355,6 @@ private:
     // Confirm deletion of the constraint is handled correctly
     delete (Constraint*) equalityConstraint;
     assertTrue(t0.getEnd()->getDerivedDomain() != t2.getEnd()->getDerivedDomain());
-  
-    // Confirm previous restriction due to specified domain, then reset and note the change
-    assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 7);
-    t1.getDuration()->reset();
-    assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
   
   
     // Test subset path
@@ -2022,7 +2018,7 @@ private:
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
-    t1.getDuration()->specify(IntervalIntDomain(5, 7));
+    t1.getDuration()->restrictBaseDomain(IntervalIntDomain(5, 7));
     //t1.addParameter(base, LabelStr("FOO"));
     //t1.getVariable(LabelStr("FOO"))->close();
     //t1.close();
@@ -2076,22 +2072,23 @@ private:
     ConstrainedVariableId param1 = t1.addParameter(lbl, "LabelSetParam");
     t1.close();
 
-    assertTrue(!param0->specifiedDomain().isClosed());
-    assertTrue(!param1->specifiedDomain().isClosed());
+    assertTrue(!param0->lastDomain().isClosed());
+    assertTrue(!param1->lastDomain().isClosed());
 
     param0->specify(LabelStr("L1"));
-    assertTrue(param0->specifiedDomain().isClosed());
+    assertTrue(param0->lastDomain().isClosed());
 
     // Now activate and merge onto it.
     t1.activate();
     t0.merge(t1.getId());
 
-    assertTrue(param0->specifiedDomain().isClosed());
-    assertTrue(param1->specifiedDomain().isClosed());
+    assertTrue(param0->lastDomain().isClosed());
+    assertTrue(param1->lastDomain().isClosed());
 
+    // Reset, thus reverting to the base domain which should be open
     param0->reset();
-    assertTrue(!param0->specifiedDomain().isClosed());
-    assertTrue(!param1->specifiedDomain().isClosed());
+    assertTrue(!param0->lastDomain().isClosed());
+    assertTrue(!param1->lastDomain().isClosed());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -3654,8 +3651,12 @@ public:
       TestClass2Id instance = (new TestClass2(planDb, objectType, objectName))->getId();
       instance->handleDefaults();
       std::vector<ConstrainedVariableId> vars = instance->getVariables();
-      for (unsigned int i = 1; i < arguments.size(); i++)
-        vars[i - 1]->specify(*(arguments[i].second));
+      for (unsigned int i = 1; i < arguments.size(); i++){
+	if(arguments[i].second->isSingleton())
+	   vars[i - 1]->specify(arguments[i].second->getSingletonValue());
+	else
+	  vars[i - 1]->restrictBaseDomain(*(arguments[i].second));
+      }
       std::cout << "TestClass2 objectId " << instance->getId() << ' ' << instance->getName().toString()
                 << " has varIds " << vars[0] << ' ' << vars[1] << ' ' << vars[2] << '\n';
       return(instance);
@@ -3727,11 +3728,11 @@ public:
             else
               g_location2 = *varIter;
     assertTrue(!sg_int.isNoId() && sg_int.isValid());
-    assertTrue(sg_int->specifiedDomain() == IntervalIntDomain());
+    assertTrue(sg_int->lastDomain() == IntervalIntDomain());
     assertTrue(!sg_float.isNoId() && sg_float.isValid());
-    assertTrue(sg_float->specifiedDomain() == IntervalDomain());
+    assertTrue(sg_float->lastDomain() == IntervalDomain());
     assertTrue(!sg_location.isNoId() && sg_location.isValid());
-    assertTrue(sg_location->specifiedDomain() == LocationsBaseDomain());
+    assertTrue(sg_location->lastDomain() == LocationsBaseDomain());
     assertTrue(g_int2.isNoId());
     assertTrue(g_float2.isNoId());
     assertTrue(g_location2.isNoId());
@@ -3796,27 +3797,24 @@ public:
       var->constraints(constraints);
       assertTrue(constraints.empty());
       assertTrue(var->getParent() == obj2a);
-      assertTrue(var->derivedDomain() == var->specifiedDomain());
       assertTrue(i == var->getIndex());
-      std::cout << "testObj2a var[" << i << ' ' << var->getName().toString() << "] has specDom " << var->specifiedDomain() << '\n';
       switch (i) {
       case 0:
-        assertTrue(var->specifiedDomain() == IntervalIntDomain(1));
+        assertTrue(var->lastDomain() == IntervalIntDomain(1));
         break;
       case 1:
-        assertTrue(var->specifiedDomain() == IntervalDomain(1.414));
+        assertTrue(var->lastDomain() == IntervalDomain(1.414));
         break;
       case 2:
-        assertTrue(var->specifiedDomain() == SymbolDomain((double)LabelStr("Hill"), "Locations"));
+        assertTrue(var->lastDomain() == SymbolDomain((double)LabelStr("Hill"), "Locations"));
         break;
       default:
         assertTrue(false, "erroneous variable index within obj2a");
       }
     }
-    domains.push_back(new IntervalIntDomain(2, 14));
-    domains.push_back(new IntervalDomain(1.414, 3.14159265358979));
+    domains.push_back(new IntervalIntDomain(2));
+    domains.push_back(new IntervalDomain(3.14159265358979));
     std::list<double> locs;
-    locs.push_back(LabelStr("Hill"));
     locs.push_back(LabelStr("Rock"));
     domains.push_back(new Locations(locs, "Locations"));
     Locations toCompare(locs, "Locations");
@@ -3837,18 +3835,16 @@ public:
       var->constraints(constraints);
       assertTrue(constraints.empty());
       assertTrue(var->getParent() == obj2b);
-      assertTrue(var->derivedDomain() == var->specifiedDomain());
       assertTrue(i == var->getIndex());
-      std::cout << "testObj2b var[" << i << ' ' << var->getName().toString() << "] has specDom " << var->specifiedDomain() << '\n';
       switch (i) {
       case 0:
-        assertTrue(var->specifiedDomain() == IntervalIntDomain(2, 14));
+        assertTrue(var->lastDomain() == IntervalIntDomain(2));
         break;
       case 1:
-        assertTrue(var->specifiedDomain() == IntervalDomain(1.414, 3.14159265358979));
+        assertTrue(var->lastDomain() == IntervalDomain(3.14159265358979));
         break;
       case 2:
-        assertTrue(var->specifiedDomain() == toCompare);
+        assertTrue(var->lastDomain() == toCompare);
         break;
       default:
         assertTrue(false, "erroneous variable index within obj2b");
@@ -3866,46 +3862,25 @@ public:
 
   /** Test specifying variables. */
   static void testSpecifyVariable() {
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_int, IntervalIntDomain(-MAX_INT, PLUS_INFINITY)));
-    assertTrue(sg_int->specifiedDomain() == IntervalIntDomain(-MAX_INT, PLUS_INFINITY));
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_int, IntervalIntDomain(-1000, MAX_INT)));
-    assertTrue(sg_int->specifiedDomain() == IntervalIntDomain(-1000, MAX_INT));
     TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_int, IntervalIntDomain(-5)));
-    assertTrue(sg_int->specifiedDomain() == IntervalIntDomain(-5));
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_float, IntervalDomain(MINUS_INFINITY, MAX_INT)));
-    assertTrue(sg_float->specifiedDomain() == IntervalDomain(MINUS_INFINITY, MAX_INT));
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_float, IntervalDomain(MINUS_INFINITY, 3.14)));
-    assertTrue(sg_float->specifiedDomain() == IntervalDomain(MINUS_INFINITY, 3.14));
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_float, IntervalDomain(-MAX_INT, 3.14)));
-    assertTrue(sg_float->specifiedDomain() == IntervalDomain(-MAX_INT, 3.14));
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_float, IntervalDomain(-3.1415e6, 2.78)));
-    assertTrue(sg_float->specifiedDomain() == IntervalDomain(-3.1415e6, 2.78));
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_float, IntervalDomain(-10.0, 1.41)));
-    assertTrue(sg_float->specifiedDomain() == IntervalDomain(-10.0, 1.41));
+    assertTrue(sg_int->lastDomain() == IntervalIntDomain(-5));
     TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_float, IntervalDomain(-5.0)));
-    assertTrue(sg_float->specifiedDomain() == IntervalDomain(-5.0));
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_location, LocationsBaseDomain()));
-    assertTrue(sg_location->specifiedDomain() == LocationsBaseDomain());
+    assertTrue(sg_float->lastDomain() == IntervalDomain(-5.0));
     std::list<double> locs;
     locs.push_back(LabelStr("Lander"));
-    locs.push_back(LabelStr("Hill"));
     TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_location, Locations(locs, "Locations")));
-    assertTrue(sg_location->specifiedDomain() == Locations(locs, "Locations"));
-    locs.pop_front();
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_location, Locations(locs, "Locations")));
-    assertTrue(sg_location->specifiedDomain() == Locations(locs, "Locations"));
-
-    //!!other global vars, object vars, object member vars, token parameter vars, token special vars, etc.
+    assertTrue(sg_location->lastDomain() == Locations(locs, "Locations"));
   }
 
   /** Test resetting variables. */
   static void testResetVariable() {
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_int));
-    assertTrue(sg_int->specifiedDomain() == IntervalIntDomain());
+    assertTrue(sg_int->lastDomain() == IntervalIntDomain(), sg_int->toString());
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_float));
-    assertTrue(sg_float->specifiedDomain() == IntervalDomain());
+    assertTrue(sg_float->lastDomain() == IntervalDomain());
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_location));
-    assertTrue(sg_location->specifiedDomain() == LocationsBaseDomain());
+    assertTrue(sg_location->lastDomain() == LocationsBaseDomain());
+
     ObjectId obj2b = s_db->getObject("testObj2b");
     assertTrue(!obj2b.isNoId() && obj2b.isValid());
     assertTrue(obj2b->getType() == LabelStr("TestClass2"));
@@ -3913,13 +3888,11 @@ public:
     std::vector<ConstrainedVariableId> obj2vars = obj2b->getVariables();
     assertTrue(obj2vars.size() == 3);
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[0]));
-    assertTrue(obj2vars[0]->specifiedDomain() == IntervalIntDomain());
+    assertTrue(obj2vars[0]->lastDomain() == IntervalIntDomain(), obj2vars[0]->toString());
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[1]));
-    assertTrue(obj2vars[1]->specifiedDomain() == IntervalDomain());
+    assertTrue(obj2vars[1]->lastDomain() == IntervalDomain(), obj2vars[1]->toString());
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[2]));
-    assertTrue(obj2vars[2]->specifiedDomain() == LocationsBaseDomain());
-
-    //!!other variables, as for specify
+    assertTrue(obj2vars[2]->lastDomain() == LocationsBaseDomain(), obj2vars[2]->toString());
   }
 
   /** Test invoking constraints, including "special cases" (as the player calls them). */
@@ -3990,17 +3963,16 @@ public:
 
     // Specifying variables is one of the special cases.
     TEST_PLAYING_XML(buildXMLInvokeSpecifyVariableStr(sg_location, Locations(LabelStr("Hill"), "Locations")));
-    assertTrue(sg_location->specifiedDomain() == Locations(LabelStr("Hill"), "Locations"));
+    assertTrue(sg_location->lastDomain() == Locations(LabelStr("Hill"), "Locations"));
     std::list<double> locs;
     locs.push_back(LabelStr("Hill"));
     locs.push_back(LabelStr("Rock"));
 
     // Resetting variables via invoke is _not_ supported by the player, so do it the other way:
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_location));
-    assertTrue(sg_location->specifiedDomain() == LocationsBaseDomain());
+    assertTrue(sg_location->lastDomain() == LocationsBaseDomain());
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[2]));
-    assertTrue(obj2vars[2]->specifiedDomain() == LocationsBaseDomain());
-    assertTrue(obj2vars[2]->derivedDomain() == LocationsBaseDomain());
+    assertTrue(obj2vars[2]->lastDomain() == LocationsBaseDomain());
 
     //!!Most special cases involve tokens: constrain, free, activate, merge, reject, cancel
     //!!  Of these, only activate and constrain are used in any of PLASMA/System/test/*.xml.
@@ -4649,7 +4621,6 @@ std::set<LabelStr> DbTransPlayerTest::s_tempRels;
 void DbTransPlayerTest::testPlayingXML(const std::string& xml, const char *file, const int& line) {
   assertTrue(s_dbPlayer != 0);
   std::istringstream iss(xml);
-  std::cout << file << ':' << line << ": testPlayingXML() about to play '" << xml << "'\n";
   s_dbPlayer->play(iss);
 }
 

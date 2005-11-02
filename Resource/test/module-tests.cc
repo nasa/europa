@@ -193,15 +193,15 @@ private:
     assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
     assertTrue(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
 
-    t2->setEarliest(2);
-    assertTrue(ce.propagate());
-    assertTrue(checkSum(r) == (1*1 + 2*3 + 3*3));
-    assertTrue(checkLevelArea(r) == (2*45 + 998*100));
-
     t2->setEarliest(1);
     assertTrue(ce.propagate());
     assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
     assertTrue(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
+
+    t2->setEarliest(2);
+    assertTrue(ce.propagate());
+    assertTrue(checkSum(r) == (1*1 + 2*3 + 3*3));
+    assertTrue(checkLevelArea(r) == (2*45 + 998*100));
 
     delete (Token*) t1;
     delete (Token*) t2;
@@ -340,17 +340,11 @@ private:
     t1->setEarliest(1);
     assertTrue(checkLevelArea(r) == 10*9);
 
-    t1->setLatest(6);
-    assertTrue(checkLevelArea(r) == 10*5);
-
-    // Now try some relaxations
     t1->setLatest(8);
     assertTrue(checkLevelArea(r) == 10*7);
 
-    t1->setMin(-4);
-    t1->setMax(1);
-    ce.propagate();
-    assertTrue(checkLevelArea(r) == 5*7);
+    t1->setLatest(6);
+    assertTrue(checkLevelArea(r) == 10*5);
 
     DEFAULT_TEARDOWN();
     return(true);
@@ -457,17 +451,14 @@ private:
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), productionRateMax + 1, productionRateMax + 1))->getId();
-    assertTrue(!ce.propagate());    
-
-    t1->setMin(productionRateMax);
-    assertTrue(!ce.provenInconsistent());
+    assertTrue(!ce.propagate());
     delete (Transaction*) t1;
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), consumptionRateMax - 1, consumptionRateMax - 1))->getId();
     assertTrue(!ce.propagate());
-    t2->setMax(consumptionRateMax);
-    assertTrue(!ce.provenInconsistent());
+    delete (Transaction*) t2;
+
     DEFAULT_TEARDOWN();
     return(true);
   }

@@ -200,17 +200,6 @@ namespace EUROPA {
     return(m_ub);
   }
  
-  void IntervalDomain::set(const AbstractDomain& dom) {
-    checkError(!dom.isSingleton(), "You must use set(double value) to set a domain to a singleton.");
-    
-    safeComparison(*this, dom);
-    
-    intersect(dom);
-
-    if(!isEmpty())
-      notifyChange(DomainListener::SET);
-  }
- 
   void IntervalDomain::set(double value) {
     if(!isMember(value))
       empty();
@@ -281,6 +270,17 @@ namespace EUROPA {
 
     return(lb_increased || ub_decreased);
    
+  }
+
+  void IntervalDomain::relax(double value) {
+    // Ensure this domain is a subset of the new bounds for relaxation.
+    check_error(isEmpty() || (m_ub == value && m_lb == value));
+
+    if (isEmpty()) {
+      m_lb = value;
+      m_ub = m_lb;
+      notifyChange(DomainListener::RELAXED);
+    }
   }
 
   bool IntervalDomain::relax(double lb, double ub) {

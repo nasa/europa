@@ -64,6 +64,7 @@ namespace EUROPA {
     void playRejected(const TiXmlElement & element);
     void playCancelled(const TiXmlElement & element);
     void playVariableSpecified(const TiXmlElement & element);
+    void playVariableRestricted(const TiXmlElement & element);
     void playVariableReset(const TiXmlElement & element);
     void playInvokeConstraint(const TiXmlElement & element);
     void playInvokeTransaction(const TiXmlElement & element);

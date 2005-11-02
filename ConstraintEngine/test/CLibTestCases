@@ -1601,7 +1601,8 @@ addeq inputs {-1} {-1} {-1} outputs {} {} {}
 1675 eq inputs {red blue green} {red} outputs {red} {red}
 1676 eq inputs {red blue green} {blue} outputs {blue} {blue}
 1677 eq inputs {red blue green} {green} outputs {green} {green}
-1678 eq inputs {red blue} {green} outputs {} {}
+eq inputs {red blue} {green} outputs {} {}
+eq inputs {red blue} {green red} outputs {red} {red}
 1679 neq inputs [1] [1] outputs [] []
 1680 neq inputs [-1] [-1] outputs [] []
 1681 neq inputs [0] [0] outputs [] []
@@ -2339,6 +2340,9 @@ addeq inputs {-1} {-1} {-1} outputs {} {} {}
 2413 addeq inputs [1 Infinity] [0 Infinity] [0] outputs [] [] []
 2414 addeq inputs [1 Infinity] [1 Infinity] [0] outputs [] [] []
 2415 addeq inputs [4] [0 6000] [4] outputs [4] [0] [4]
+addeq inputs [9 29] [-Infinity Infinity] [8 28] outputs [9 29] [-21 19] [8 28]
+addeq inputs [1 10] [1.2 2.8] [0 3] outputs [1] [2] [3]
+addeq inputs [0 10] [0 10] [0.5 0.5] outputs [] [] []
 2416 addleq inputs [1] [1] [1] outputs [] [] []
 2417 addleq inputs [0] [0] [0] outputs [0] [0] [0]
 2418 addleq inputs [-1] [-1] [-1] outputs [-1] [-1] [-1]
@@ -3377,3 +3381,7 @@ addeq inputs {-1} {-1} {-1} outputs {} {} {}
 3453 withinBounds inputs [-10.8 10.8] [-10 0] [0 10] outputs [-10. 10.] [-10 0] [0 10]
 3454 eq inputs [-4 10] {2 3 4 40}  outputs [2 4] {2 3 4}
 3455 leq inputs {10} [-inf inf] outputs {10} [10 inf]
+subsetOf inputs {A B C} {A B C D E} outputs {A B C} {A B C D E}
+subsetOf inputs {A B C D E} {A B C} outputs {A B C} {A B C}
+subsetOf inputs {A B C} {A B C} outputs {A B C} {A B C}
+subsetOf inputs {A B C} {D E F} outputs {} {}

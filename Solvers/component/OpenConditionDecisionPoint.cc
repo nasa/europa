@@ -107,7 +107,7 @@ namespace EUROPA {
     }
 
     bool OpenConditionDecisionPoint::canUndo() const {
-      return DecisionPoint::canUndo() && m_flawedToken->getState()->specifiedDomain().isSingleton();
+      return DecisionPoint::canUndo() && m_flawedToken->getState()->isSpecified();
     }
   }
 }

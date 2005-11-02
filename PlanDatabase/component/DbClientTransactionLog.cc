@@ -179,9 +179,17 @@ namespace EUROPA {
   }
 
   void DbClientTransactionLog::notifyVariableSpecified(const ConstrainedVariableId& variable){
+    checkError(variable->lastDomain().isSingleton(), variable->toString() << " is not a singleton.");
     TiXmlElement * element = allocateXmlElement("specify");
     element->LinkEndChild(variableAsXml(variable));
-    element->LinkEndChild(abstractDomainAsXml(&variable->specifiedDomain()));
+    element->LinkEndChild(domainValueAsXml(&variable->lastDomain(), variable->lastDomain().getSingletonValue()));
+    pushTransaction(element);
+  }
+
+  void DbClientTransactionLog::notifyVariableRestricted(const ConstrainedVariableId& variable){
+    TiXmlElement * element = allocateXmlElement("restrict");
+    element->LinkEndChild(variableAsXml(variable));
+    element->LinkEndChild(abstractDomainAsXml(&variable->baseDomain()));
     pushTransaction(element);
   }
 

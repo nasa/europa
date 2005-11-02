@@ -1867,8 +1867,8 @@ private:
 			 "Object.PADDED",
 			 true); 
 
-    tokenA.getStart()->specify(IntervalIntDomain(0, 10));
-    tokenA.getEnd()->specify(IntervalIntDomain(0, 200));
+    tokenA.getStart()->restrictBaseDomain(IntervalIntDomain(0, 10));
+    tokenA.getEnd()->restrictBaseDomain(IntervalIntDomain(0, 200));
 
     CBPlanner::Status res = planner.run();
     assertTrue(res == CBPlanner::PLAN_FOUND);

@@ -129,15 +129,6 @@ namespace EUROPA {
     void remove(double value);
 
     /**
-     * @brief Attempt to set the domain to the target.
-     *
-     * Indicates an external call to set the domain to the given target.
-     * @param dom The target domain.
-     * @see DomainListener::EMPTIED, DomainListener::SET, intersect()
-     */
-    virtual void set(const AbstractDomain& dom);
-
-    /**
      * @brief Attempt to set the domain to a singleton.
      *
      * If the value is not a member of the domain then this will cause the domain to be emptied. If the set is already the singleton
@@ -158,6 +149,12 @@ namespace EUROPA {
      * @see relax
      */
     void relax(const AbstractDomain& dom);
+
+    /**
+     * @brief Indicates relaxation to a singleton value. Occurs when domain has been emptied previously
+     * @param The value to relax to
+     */
+    void relax(double value);
 
     /**
      * @brief Construct a mutual restriction of the 2 domains to the intersection between them.

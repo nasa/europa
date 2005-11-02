@@ -265,7 +265,7 @@ private:
       assertTrue(solver.getDepth() == allVars.size());
       for(ConstrainedVariableSet::const_iterator it = allVars.begin(); it != allVars.end(); ++it){
 	ConstrainedVariableId var = *it;
-	assertTrue(var->specifiedDomain().isSingleton());
+	assertTrue(var->isSpecified());
       }
 
       // Run the solver again.

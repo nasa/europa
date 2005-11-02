@@ -38,15 +38,6 @@ namespace EUROPA {
     return ptr;
   }
   
-  /**
-   * This appears to be necessary, though it should be sufficient to use the
-   * base class method rather than having to delegate to it.
-   */
-  void StringDomain::set(const StringDomain& dom){
-    checkError(isEmpty() || isSubsetOf(dom), dom.toString() << " is not a subset of the domain :" << toString());
-    EnumeratedDomain::set(dom);
-  }
-  
   void StringDomain::set(double value) {
     check_error(LabelStr::isString(value));
     checkError(isEmpty() || isMember(value), value << " is not a member of the domain :" << toString());

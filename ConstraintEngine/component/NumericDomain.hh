@@ -63,11 +63,6 @@ namespace EUROPA {
     /**
      * @brief Sets the domain
      */
-    void set(const NumericDomain& dom);
-
-    /**
-     * @brief Sets the domain
-     */
     void set(double value);
 
   };

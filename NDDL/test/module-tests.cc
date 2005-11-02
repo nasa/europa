@@ -33,6 +33,7 @@ private:
     // Allocate an object with fields
     ObjectId object = makeObjectForTesting(db, LabelStr("objectName"), 1, LabelStr("A"), true, 2.1);
     Variable<ObjectDomain> filterVariable(ce, ObjectDomain(object, DEFAULT_OBJECT_TYPE().c_str()));
+    filterVariable.specify(object);
 
     // Allocate a number of filter variables, one for each field
     Variable<LabelSet> v1(ce, makeLabelSetDomain());

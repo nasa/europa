@@ -37,6 +37,11 @@ Foo::pred1{
 // Transactions
 
 Foo f1 = new Foo();
+Foo f2 = new Foo();
+int i = [0 10];
+float j;
+j.specify([8.6 123.9]);
+
 close();
 
 goal(f1.pred1);

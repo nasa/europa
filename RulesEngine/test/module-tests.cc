@@ -334,13 +334,14 @@ private:
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
 
+    t0.getObject()->specify(t0.getObject()->lastDomain().getSingletonValue());
+
     /* Force first level of execution based on object variable being specified to a singleton on activation.
        second level of execution should also occur through propagation, since by default, the local guard base domain
        is a singleton */
-
     t0.activate();
     ce.propagate();
-    assertTrue(t0.getSlaves().size() == 2);
+    assertTrue(t0.getSlaves().size() == 1, toString(t0.getSlaves().size()));
 
     DEFAULT_TEARDOWN();
     return true;

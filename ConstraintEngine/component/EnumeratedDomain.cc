@@ -117,24 +117,6 @@ namespace EUROPA {
       notifyChange(DomainListener::EMPTIED);
   }
 
-  void EnumeratedDomain::set(const AbstractDomain& dom) {
-    if(dom.isSingleton()){
-      set(dom.getSingletonValue());
-      return;
-    }
-
-    if(isOpen())
-      close();
-
-    // If there is a non-empty intersection, perform the restriction and be done with it.
-    if(intersects(dom)){
-      intersect(dom);
-      notifyChange(DomainListener::SET);
-    }
-    else // Empty the domain
-      empty();
-  }
-
   void EnumeratedDomain::set(double value) {
     if(isOpen())
       close();
@@ -325,8 +307,17 @@ namespace EUROPA {
     }
   }
 
+  void EnumeratedDomain::relax(double value) {
+    checkError(isEmpty() || (isSingleton() && (getSingletonValue() == value)), toString());
+
+    if (isEmpty()){
+      m_values.insert(value);
+      notifyChange(DomainListener::RELAXED);
+    }
+  }
+
   double EnumeratedDomain::getSingletonValue() const {
-    check_error(isSingleton());
+    checkError(isSingleton(), toString());
     return(*m_values.begin());
   }
 

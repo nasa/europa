@@ -60,11 +60,6 @@ namespace EUROPA {
     virtual StringDomain *copy() const;
 
     /**
-     * @brief Sets the domain
-     */
-    void set(const StringDomain& dom);
-
-    /**
      * @brief Sets a singleton value.
      * @param value The value to set. Must be a LabelStr.
      */

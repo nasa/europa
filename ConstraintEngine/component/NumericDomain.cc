@@ -38,9 +38,6 @@ namespace EUROPA {
    * This appears to be necessary, though it should be sufficient to use the
    * base class method rather than having to delegate to it.
    */
-  void NumericDomain::set(const NumericDomain& dom){
-    EnumeratedDomain::set(dom);
-  }
   void NumericDomain::set(double value){
     EnumeratedDomain::set(value);
   }

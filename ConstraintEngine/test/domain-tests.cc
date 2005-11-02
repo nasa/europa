@@ -823,12 +823,13 @@ namespace EUROPA {
 
       assertTrue(e2.isClosed());
 
+      /* NOT APPLICABLE
       e1.set(e2);
       assertTrue(e1.isClosed());
       
       e1.open();
       assertTrue(e1.isOpen());
-
+      */
       e1.insert(4.0);
       e1.set(4.0);
       assertTrue(e1.isClosed());
@@ -853,7 +854,7 @@ namespace EUROPA {
 
       assertTrue(e1 == e2);
       e2.close();
-      assertTrue(e1 == e2);
+      assertTrue(e1 != e2);
       e1.close();
       assertTrue(e1 == e2);
 
@@ -1816,10 +1817,8 @@ namespace EUROPA {
       copy = iiDom.copy();
       assertTrue(copy != 0);
       assertTrue(*copy == iiDom && copy != &iiDom);
-      iiDom.set(IntervalIntDomain(-2, PLUS_INFINITY-1));
+      iiDom = IntervalIntDomain(-2, PLUS_INFINITY-1);
       assertTrue(*copy != iiDom);
-      copy->set(IntervalIntDomain(-2, PLUS_INFINITY-1));
-      assertTrue(*copy == iiDom && copy != &iiDom);
       delete copy;
 
       IntervalDomain iDom(MINUS_INFINITY);
