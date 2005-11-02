@@ -24,7 +24,7 @@ namespace EUROPA {
     return s_libHandle;
   }
 
-  int loadInitModel(const char* libPath, const char* initialStatePath, const char* plannerConfigPath);
+  int loadInitModel(const char* libPath, const char* initialStatePath, const char* plannerConfigPath, const char* destPath);
   void unloadModel(void);
 }
 

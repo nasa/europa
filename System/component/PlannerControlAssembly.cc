@@ -41,6 +41,7 @@
 
 // Misc
 #include "Utils.hh"
+#include "Debug.hh"
 
 // Planner Support
 #include "Solver.hh"
@@ -66,18 +67,19 @@
 #define TIXML_USE_STL
 #endif
 #include "tinyxml.h"
+#include <cstdlib>
 
 #include <string>
 #include <fstream>
 
 namespace EUROPA {
 
-  PlannerControlAssembly::PlannerControlAssembly(const SchemaId& schema) : StandardAssembly(schema) { }
+  PlannerControlAssembly::PlannerControlAssembly(const SchemaId& schema) : StandardAssembly(schema), m_debugStream(NULL) {}
 
-  PlannerControlAssembly::~PlannerControlAssembly() {}
+  PlannerControlAssembly::~PlannerControlAssembly() { if(m_debugStream != NULL) {m_debugStream->flush(); m_debugStream->close(); delete m_debugStream;}}
 
 
-  PlannerStatus PlannerControlAssembly::initPlan(const char* txSource, const char* plannerConfig){
+  PlannerStatus PlannerControlAssembly::initPlan(const char* txSource, const char* plannerConfig, const char* destPath){
     static bool initFactories = true;
     if(initFactories) {
       REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, MinValue);
@@ -91,9 +93,20 @@ namespace EUROPA {
       
       REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
       REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
+      REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonVariableFilter, HorizonVariableFilter);
+      REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::SingletonFilter, SingletonFilter);
+
       initFactories = !initFactories;
     }
 
+    std::string debugDest = std::string(destPath) + "/DEBUG_FILE";
+    m_debugStream = new std::ofstream(debugDest.c_str(), std::ios_base::out);
+    if(!m_debugStream->good()) {
+      std::cout << "Error: can't open the debug file '" << debugDest << std::endl;
+      return INITIALLY_INCONSISTENT;
+    }
+    DebugMessage::setStream(*m_debugStream);
+    
     m_step = 0;
     std::cout << "Now process the transactions" << std::endl;
     if(!playTransactions(txSource))
@@ -197,4 +210,12 @@ namespace EUROPA {
     return m_step;
   }
 
+  void PlannerControlAssembly::enableDebugMessage(const char* file, const char* pattern) {
+    DebugMessage::enableMatchingMsgs(std::string(file), std::string(pattern));
+  }
+
+  void PlannerControlAssembly::disableDebugMessage(const char* file, const char* pattern) {
+    std::cerr << "Disabling messages for file: " << file << " with pattern: " << pattern << std::endl;
+    DebugMessage::disableMatchingMsgs(std::string(file), std::string(pattern));
+  }
 }

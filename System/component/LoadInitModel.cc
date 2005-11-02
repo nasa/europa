@@ -20,7 +20,7 @@
 #include <stdio.h>
 
 namespace EUROPA {
-  int loadInitModel(const char* libPath, const char* initialStatePath, const char* plannerConfigPath) {
+  int loadInitModel(const char* libPath, const char* initialStatePath, const char* plannerConfigPath, const char* destPath) {
 
     int retStatus;
     const char* error_msg;
@@ -111,7 +111,7 @@ namespace EUROPA {
 
     // Initialize plan given the transactions in initialStatePath.
     try {
-      retStatus = db1->initPlan(initialStatePath, plannerConfigPath);
+      retStatus = db1->initPlan(initialStatePath, plannerConfigPath, destPath);
     }
     catch (Error e) {
       printf("Unexpected exception initializing planner\n");

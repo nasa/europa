@@ -35,7 +35,7 @@ namespace EUROPA {
     try {
       //enable EUROPA exceptions
       Error::doThrowExceptions();
-      retStatus = loadInitModel(libPath, initialState, plannerConfigPath);
+      retStatus = loadInitModel(libPath, initialState, plannerConfigPath, destPath);
 
       /*
        * now that PPW is initialized set the output destination path 
@@ -281,5 +281,13 @@ namespace EUROPA {
       throw;
     }
     delete[] filterState;
+  }
+
+  void enableDebugMsg(const char* file, const char* pattern) {
+    accessAssembly()->enableDebugMessage(file, pattern);
+  }
+
+  void disableDebugMsg(const char* file, const char* pattern) {
+    accessAssembly()->disableDebugMessage(file, pattern);
   }
 }

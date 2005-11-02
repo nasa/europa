@@ -3,7 +3,7 @@
 
 /**
  * @file   PlannerControlAssembly.hh
- * @author Patrick Daley
+ * @author Patrick Daley & Michael Iatauro
  * @date   
  * @brief  
  * @ingroup System
@@ -15,6 +15,7 @@
 #include "SolverPartialPlanWriter.hh"
 #include "StandardAssembly.hh"
 #include "DbClientTransactionLog.hh"
+#include <fstream>
 
 namespace EUROPA {
 
@@ -41,7 +42,7 @@ namespace EUROPA {
      * @return The result of planner initialization
      * @see CBPlanner::Status
      */
-    PlannerStatus initPlan(const char* txSource, const char* plannerConfig);
+    PlannerStatus initPlan(const char* txSource, const char* plannerConfig, const char* destPath);
 
 
     const SOLVERS::SolverId& getPlanner() const { return m_planner; }
@@ -58,11 +59,15 @@ namespace EUROPA {
     
     int terminateRun();
 
+    void enableDebugMessage(const char* file, const char* pattern);
+    void disableDebugMessage(const char* file, const char* pattern);
+
   protected:
     SOLVERS::SolverId m_planner;	/*!< A planner to complete the plan. */
     SOLVERS::SearchListenerId m_listener;
     SOLVERS::PlanWriter::PartialPlanWriter* m_ppw; /*!< A plan writer to output data for PlanWorks */
     int m_step;
+    std::ofstream* m_debugStream;
     
 
     class StatusListener : public SOLVERS::SearchListener {
