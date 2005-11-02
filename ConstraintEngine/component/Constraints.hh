@@ -206,10 +206,13 @@ namespace EUROPA {
 
     ~EqualSumConstraint();
 
+  private:
+
     // All the work is done by the member constraints
     inline void handleExecute() { }
 
-  private:
+    void handleDiscard();
+
     const unsigned int ARG_COUNT;
 
     ConstraintId m_eqSumC1, m_eqSumC2, m_eqSumC3, m_eqSumC4, m_eqSumC5;
@@ -230,10 +233,13 @@ namespace EUROPA {
 
     ~EqualProductConstraint();
 
+  private:
+
     // All the work is done by the member constraints
     inline void handleExecute() { }
 
-  private:
+    void handleDiscard();
+
     const unsigned int ARG_COUNT;
 
     ConstraintId m_eqProductC1, m_eqProductC2, m_eqProductC3, m_eqProductC4, m_eqProductC5;
@@ -252,14 +258,12 @@ namespace EUROPA {
                               const ConstraintEngineId& constraintEngine,
                               const std::vector<ConstrainedVariableId>& variables);
 
-    ~LessOrEqThanSumConstraint() {
-      delete (EqualSumConstraint*) m_eqSumConstraint;
-    }
-
-    // All the work is done by the member constraints
-    inline void handleExecute() { }
+    ~LessOrEqThanSumConstraint();
 
   private:
+    void handleExecute();
+    void handleDiscard();
+
     Variable<IntervalDomain> m_interimVariable;
     LessThanEqualConstraint m_lessOrEqualConstraint;
     ConstraintId m_eqSumConstraint;
@@ -278,13 +282,21 @@ namespace EUROPA {
                           const std::vector<ConstrainedVariableId>& variables);
 
     ~LessThanSumConstraint() {
-      delete (EqualSumConstraint*) m_eqSumConstraint;
+      discard(false);
     }
+
+  private:
 
     // All the work is done by the member constraints
     inline void handleExecute() { }
 
-  private:
+    void handleDiscard(){
+      Constraint::handleDiscard();
+      m_interimVariable.discard();
+      m_lessThanConstraint.discard();
+      m_eqSumConstraint->discard();
+    }
+
     Variable<IntervalDomain> m_interimVariable;
     LessThanConstraint m_lessThanConstraint;
     ConstraintId m_eqSumConstraint;
@@ -303,13 +315,20 @@ namespace EUROPA {
                                  const std::vector<ConstrainedVariableId>& variables);
 
     ~GreaterOrEqThanSumConstraint() {
-      delete (EqualSumConstraint*) m_eqSumConstraint;
+      discard(false);
     }
 
+  private:
     // All the work is done by the member constraints
     inline void handleExecute() { }
 
-  private:
+    void handleDiscard(){
+      Constraint::handleDiscard();
+      m_interimVariable.discard();
+      m_lessOrEqualConstraint.discard();
+      m_eqSumConstraint->discard();
+    }
+
     Variable<IntervalDomain> m_interimVariable;
     LessThanEqualConstraint m_lessOrEqualConstraint;
     ConstraintId m_eqSumConstraint;
@@ -328,13 +347,20 @@ namespace EUROPA {
                              const std::vector<ConstrainedVariableId>& variables);
 
     ~GreaterThanSumConstraint() {
-      delete (EqualSumConstraint*) m_eqSumConstraint;
+      discard(false);
     }
 
+  private:
     // All the work is done by the member constraints
     inline void handleExecute() { }
 
-  private:
+    void handleDiscard(){
+      Constraint::handleDiscard();
+      m_interimVariable.discard();
+      m_lessThanConstraint.discard();
+      m_eqSumConstraint->discard();
+    }
+
     Variable<IntervalDomain> m_interimVariable;
     LessThanConstraint m_lessThanConstraint;
     ConstraintId m_eqSumConstraint;
@@ -390,12 +416,17 @@ namespace EUROPA {
                       const std::vector<ConstrainedVariableId>& variables);
 
     ~AllDiffConstraint() {
-      delete (CondAllDiffConstraint *) m_condAllDiffConstraint;
     }
 
+  private:
     void handleExecute() { }
 
-  private:
+    void handleDiscard(){
+      Constraint::handleDiscard();
+      m_condVar.discard();
+      m_condAllDiffConstraint->discard();
+    }
+
     Variable<BoolDomain> m_condVar;
     ConstraintId m_condAllDiffConstraint;
   };
@@ -451,12 +482,21 @@ namespace EUROPA {
                             const std::vector<ConstrainedVariableId>& variables);
 
     ~CountNonZerosConstraint() {
-      delete (CountZerosConstraint*) m_countZerosConstraint;
-      delete (SubsetOfConstraint*) m_subsetConstraint;
+      discard(false);
     }
 
     // All the work is done by the member constraints.
     inline void handleExecute() { }
+
+    void handleDiscard(){
+      Constraint::handleDiscard();
+      m_zeros.discard();
+      m_otherVars.discard();
+      m_superset.discard();
+      m_addEqualConstraint.discard();
+      m_countZerosConstraint->discard();
+      m_subsetConstraint->discard();
+    }
 
   private:
     Variable<IntervalDomain> m_zeros, m_otherVars,  m_superset;
@@ -481,13 +521,20 @@ namespace EUROPA {
                           const std::vector<ConstrainedVariableId>& variables);
 
     ~CardinalityConstraint() {
-      delete (CountNonZerosConstraint*) m_countNonZerosConstraint;
+      discard(false);
     }
 
+  private:
     // All the work is done by the member constraints.
     inline void handleExecute() { }
 
-  private:
+    void handleDiscard(){
+      Constraint::handleDiscard();
+      m_nonZeros.discard();
+      m_lessThanEqualConstraint.discard();
+      m_countNonZerosConstraint->discard();
+    }
+
     Variable<IntervalIntDomain> m_nonZeros;
     LessThanEqualConstraint m_lessThanEqualConstraint;
     ConstraintId m_countNonZerosConstraint;
@@ -508,14 +555,21 @@ namespace EUROPA {
                  const std::vector<ConstrainedVariableId>& variables);
 
     ~OrConstraint() {
-      delete (CountNonZerosConstraint*) m_countNonZerosConstraint;
-      delete (SubsetOfConstraint*) m_subsetConstraint;
+      discard(false);
     }
 
+  private:
     // All the work is done by the member constraints.
     inline void handleExecute() { }
 
-  private:
+    void handleDiscard(){
+      Constraint::handleDiscard();
+      m_nonZeros.discard();
+      m_superset.discard();
+      m_subsetConstraint->discard();
+      m_countNonZerosConstraint->discard();
+    }
+
     Variable<IntervalIntDomain> m_nonZeros;
     Variable<IntervalIntDomain> m_superset;
     ConstraintId m_subsetConstraint;
@@ -567,13 +621,20 @@ namespace EUROPA {
                            const std::vector<ConstrainedVariableId>& variables);
 
     ~CondEqualSumConstraint() {
-      delete (EqualSumConstraint*) m_eqSumConstraint;
+      discard(false);
     }
 
+  private:
     // All the work is done by the member constraints.
     inline void handleExecute() { }
 
-  private:
+    void handleDiscard(){
+      Constraint::handleDiscard();
+      m_sumVar.discard();
+      m_condAllSameConstraint.discard();
+      m_eqSumConstraint->discard();
+    }
+
     Variable<IntervalDomain> m_sumVar;
     CondAllSameConstraint m_condAllSameConstraint;
     ConstraintId m_eqSumConstraint;
@@ -608,13 +669,17 @@ namespace EUROPA {
                                const int& rotateCount);
 
     ~RotateScopeRightConstraint() {
-      assertTrue(m_otherConstraint.isValid());
-      delete (Constraint*) m_otherConstraint;
+      discard(false);
     }
 
+  private:
     void handleExecute() { }
 
-  private:
+    void handleDiscard(){
+      Constraint::handleDiscard();
+      m_otherConstraint->discard();
+    }
+
     ConstraintId m_otherConstraint;
   };
 
@@ -644,13 +709,17 @@ namespace EUROPA {
                           int firstIndex, int secondIndex);
 
     ~SwapTwoVarsConstraint() {
-      assertTrue(m_otherConstraint.isValid());
-      delete (Constraint*) m_otherConstraint;
+      discard(false);
     }
 
+  private:
     void handleExecute() { }
 
-  private:
+    void handleDiscard(){
+      Constraint::handleDiscard();
+      m_otherConstraint->discard();
+    }
+
     ConstraintId m_otherConstraint;
   };
 

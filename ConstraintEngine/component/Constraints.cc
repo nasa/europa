@@ -592,19 +592,18 @@ namespace EUROPA {
   }
 
   EqualSumConstraint::~EqualSumConstraint() {
-    // Have to remove these before the variables they refer to
-    //   and there's no other way to force the compiler to do
-    //   these first. --wedgingt 2004 Feb 27
-    if (!m_eqSumC5.isNoId())
-      delete (Constraint*) m_eqSumC5;
-    if (!m_eqSumC4.isNoId())
-      delete (Constraint*) m_eqSumC4;
-    if (!m_eqSumC3.isNoId())
-      delete (Constraint*) m_eqSumC3;
-    if (!m_eqSumC2.isNoId())
-      delete (Constraint*) m_eqSumC2;
-    if (!m_eqSumC1.isNoId())
-      delete (Constraint*) m_eqSumC1;
+    discard(false);
+  }
+
+  void EqualSumConstraint::handleDiscard(){
+    // Process for this constraint first
+    Constraint::handleDiscard();
+
+    // Further unwind for contained variables    Constraint::handleDiscard();
+    m_sum1.discard();
+    m_sum2.discard();
+    m_sum3.discard();
+    m_sum4.discard();
   }
 
   EqualProductConstraint::EqualProductConstraint(const LabelStr& name,
@@ -711,20 +710,19 @@ namespace EUROPA {
   }
 
   EqualProductConstraint::~EqualProductConstraint(){
-    // Have to remove these before the variables they refer to
-    //   and there's no other way to force the compiler to do
-    //   these first. --wedgingt 2004 Feb 27
-    if (!m_eqProductC5.isNoId())
-      delete (Constraint*) m_eqProductC5;
-    if (!m_eqProductC4.isNoId())
-      delete (Constraint*) m_eqProductC4;
-    if (!m_eqProductC3.isNoId())
-      delete (Constraint*) m_eqProductC3;
-    if (!m_eqProductC2.isNoId())
-      delete (Constraint*) m_eqProductC2;
-    if (!m_eqProductC1.isNoId())
-      delete (Constraint*) m_eqProductC1;
-}
+    discard(false);
+  }
+
+  void EqualProductConstraint::handleDiscard(){
+    // Process for this constraint first
+    Constraint::handleDiscard();
+
+    // Further unwind for contained variables
+    m_product1.discard();
+    m_product2.discard();
+    m_product3.discard();
+    m_product4.discard();
+  }
 
   LessOrEqThanSumConstraint::LessOrEqThanSumConstraint(const LabelStr& name,
                                                        const LabelStr& propagatorName,
@@ -1796,6 +1794,18 @@ namespace EUROPA {
   }
 
 
+  LessOrEqThanSumConstraint::~LessOrEqThanSumConstraint() {
+    discard(false);
+  }
+
+  void LessOrEqThanSumConstraint::handleExecute() { }
+
+  void LessOrEqThanSumConstraint::handleDiscard(){
+    Constraint::handleDiscard();
+    m_interimVariable.discard();
+    m_lessOrEqualConstraint.discard();
+    m_eqSumConstraint->discard();
+  }
   /**************************************************************************************/
 
   void initConstraintLibrary() {
