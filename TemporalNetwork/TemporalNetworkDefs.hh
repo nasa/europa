@@ -4,7 +4,7 @@
 #include "Error.hh"
 #include "Id.hh"
 
-/*!< Type definitions to map for th eones we were using in Europa */
+/*!< Type definitions to map for ht ones we were using in Europa */
 namespace EUROPA {
   typedef bool Bool;
   typedef int Int;

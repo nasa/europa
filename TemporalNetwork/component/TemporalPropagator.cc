@@ -17,7 +17,7 @@
 
 // @todo: there are cases where we may be able to fail early during the
 // mapping from the constraint engine to the temporal network.  In these
-// cases we could propagate the temporal netowrk as we're doing the mapping
+// cases we could propagate the temporal network as we're doing the mapping
 // and detect inconsistencies at that point.  In cases where domains were
 // relaxed in temporal variables we must do the mapping first or we'll run
 // the risk of detecting an inconsistency where there isn't one.
@@ -126,7 +126,7 @@ namespace EUROPA {
 	     "Handling deactivation of constraint " << constraint->toString());
     m_changedConstraints.erase(constraint);
 
-    // Finally, we deactive the constraint in the temporal network if one exists
+    // Finally, we deactivate the constraint in the temporal network if one exists
     const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
     if (tnetConstraint.isId()){
       tnetConstraint->clearExternalEntity();
@@ -137,7 +137,7 @@ namespace EUROPA {
 
 
   void TemporalPropagator::handleVariableActivated(const ConstrainedVariableId& var){
-    // Nothing to do - already addressed by contrant handler
+    // Nothing to do - already addressed by constraint handler
   }
 
   void TemporalPropagator::handleVariableDeactivated(const ConstrainedVariableId& var){
@@ -162,7 +162,7 @@ namespace EUROPA {
              variable->toString() << " change through " << constraint->getName().toString());
 
     checkError(constraint->isActive(),
-               "Receieved a change notification for inactive constraint " << constraint->getName().toString() <<
+               "Received a change notification for inactive constraint " << constraint->getName().toString() <<
                ". Must be a bug in the ConstraintEngine.");
 
     m_changedConstraints.insert(constraint);
@@ -732,7 +732,7 @@ namespace EUROPA {
     }
 
     // For all buffered constraints for deletion, none should have any dangling external entities. This is because
-    // we will have already deleteed the TempVar for which this timepoint shadows it.
+    // we will have already deleted the TempVar for which this timepoint shadows it.
     for(std::set<TimepointId>::const_iterator it = m_variablesForDeletion.begin(); it != m_variablesForDeletion.end(); ++it){
       TimepointId timepoint = *it;
       if(!timepoint->getExternalEntity().isNoId()) {
@@ -746,7 +746,7 @@ namespace EUROPA {
     for(std::map<int,ConstrainedVariableId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
       const ConstrainedVariableId& var = it->second;
       if(!var->getExternalEntity().isNoId()){ // It must be a start or end variable
-        // Confirm the shadow is linked up coorrectly
+        // Confirm the shadow is linked up correctly
         TimepointWrapperId wrapper = var->getExternalEntity();
         TimepointId shadow = wrapper->getTimepoint();
         if(shadow->getExternalEntity() != var) {

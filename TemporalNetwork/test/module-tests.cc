@@ -279,7 +279,7 @@ private:
 
     const TemporalPropagatorId& tp = (TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal"));
 
-    // assert from propagator direcly
+    // assert from propagator directly
     assertTrue (tp->canPrecede(first.getEnd(), second.getStart()));
     assertTrue (tp->canPrecede(second.getEnd(), first.getStart()));
 
@@ -409,7 +409,7 @@ private:
 
     ce.propagate();
 
-    // Check that they can co-incide, trivially.
+    // Check that they can coincide, trivially.
     assertTrue(db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
 
     // May 1 very tight, but still ok
