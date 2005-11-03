@@ -10,6 +10,43 @@
 
 namespace EUROPA {
 
+  /**
+   * @brief Maintains a unary relation from a constant to a variable such that the variable
+   * is a subset of the given constant.
+   */
+  class UnaryConstraint : public Constraint {
+  public:
+    /**
+     * @brief Specialized constructor
+     */
+    UnaryConstraint(const AbstractDomain& dom, const ConstrainedVariableId& var); 
+
+    /**
+     * @brief Standard constructor
+     */
+    UnaryConstraint(const LabelStr& name,
+		    const LabelStr& propagatorName,
+		    const ConstraintEngineId& constraintEngine,
+		    const std::vector<ConstrainedVariableId>& variables);
+
+    ~UnaryConstraint();
+
+  private:
+
+    void handleExecute();
+
+    void handleDiscard();
+
+    bool canIgnore(const ConstrainedVariableId& variable,
+		   int argIndex,
+		   const DomainListener::ChangeType& changeType);
+
+    void setSource(const ConstraintId& sourceConstraint);
+
+    AbstractDomain* m_x;
+    AbstractDomain* m_y;
+  };
+
   class AddEqualConstraint : public Constraint {
   public:
     AddEqualConstraint(const LabelStr& name,

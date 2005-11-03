@@ -11,6 +11,62 @@
 
 namespace EUROPA {
 
+  UnaryConstraint::UnaryConstraint(const AbstractDomain& dom, 
+				   const ConstrainedVariableId& var)
+    : Constraint("UNARY", "Default", var->getConstraintEngine(), makeScope(var)),
+      m_x(dom.copy()),
+      m_y(static_cast<AbstractDomain*>(& (getCurrentDomain(var)))) {
+  }
+
+  UnaryConstraint::UnaryConstraint(const LabelStr& name,
+				   const LabelStr& propagatorName,
+				   const ConstraintEngineId& constraintEngine,
+				   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_x(0),
+      m_y(static_cast<AbstractDomain*>(& (getCurrentDomain(variables[0])))) {
+    checkError(variables.size() == 1, "Invalid arg count. " << toString());
+  }
+
+  /**
+   * @brief Destructor will initiate custom discard.
+   */
+  UnaryConstraint::~UnaryConstraint(){
+    discard(false);
+  }
+
+  void UnaryConstraint::handleExecute() {
+    checkError(m_x != 0, "Source not set for " << toString());
+    m_y->intersect(*m_x);
+  }
+
+  void UnaryConstraint::handleDiscard() {
+    Constraint::handleDiscard();
+    delete m_x;
+    m_x = 0;
+  }
+
+  bool UnaryConstraint::canIgnore(const ConstrainedVariableId& variable,
+				  int argIndex,
+				  const DomainListener::ChangeType& changeType){
+    checkError(argIndex == 0, "Cannot have more than one variable in scope.");
+
+    // Can ignore if this is a restriction of the variable which we can assume has already been 
+    // restricted by the constraint by initial execution of the constraint
+    if(changeType == DomainListener::RESET || changeType == DomainListener::RELAXED)
+      return false;
+    else
+      return true;
+  }
+
+  void UnaryConstraint::setSource(const ConstraintId& sourceConstraint){
+    checkError(m_x == 0, "Already set domain for " << toString() << " and not using " << sourceConstraint->toString());
+    UnaryConstraint* source = (UnaryConstraint*) sourceConstraint;
+    m_x = source->m_x->copy();
+  }
+
+  /****************************************************************/
+
   AddEqualConstraint::AddEqualConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
 					 const ConstraintEngineId& constraintEngine,
@@ -1821,6 +1877,7 @@ namespace EUROPA {
     
     if (!s_runAlready) {
       // Register constraint Factories
+      REGISTER_CONSTRAINT(UnaryConstraint, "UNARY", "Default");
       REGISTER_CONSTRAINT(AddEqualConstraint, "AddEqual", "Default");
       REGISTER_CONSTRAINT(MultEqualConstraint, "MultEqual", "Default");
       REGISTER_CONSTRAINT(AddMultEqualConstraint, "AddMultEqual", "Default");

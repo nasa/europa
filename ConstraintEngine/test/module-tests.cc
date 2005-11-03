@@ -619,6 +619,7 @@ class ConstraintTest
 {
 public:
   static bool test() {
+    runTest(testUnaryConstraint);
     runTest(testAddEqualConstraint);
     runTest(testLessThanEqualConstraint);
     runTest(testLessOrEqThanSumConstraint);
@@ -648,6 +649,31 @@ public:
   }
 
 private:
+
+  static bool testUnaryConstraint(){
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(-10, 10));
+      UnaryConstraint c0(IntervalDomain(4, 6), v0.getId());
+      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(4, 6), v0.toString());
+      v0.specify(5);
+      assertTrue(v0.constraintConsistent());
+      v0.reset();
+      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(4, 6), v0.toString());
+      c0.discard();
+      assertTrue(v0.lastDomain() == IntervalIntDomain(-10, 10), v0.toString());
+    }
+
+    {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(-10, 10));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(-10, 10));
+      UnaryConstraint c0(IntervalDomain(4, 6), v0.getId());
+      UnaryConstraint c1("UNARY", "Default", ENGINE, makeScope(v1.getId()));
+      c1.getId()->setSource(c0.getId());
+      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(4, 6), v0.toString());
+    }
+
+    return true;
+  }
 
   static bool testAddEqualConstraint() {
 
