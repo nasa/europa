@@ -300,7 +300,7 @@ private:
     LabelSet ls2(ls1);
     ls2.remove(EUROPA::LabelStr("E"));
 
-    v2.specify(ls2);
+    v2.restrictBaseDomain(ls2);
     ENGINE->propagate();
     assertTrue(!v3.getDerivedDomain().isMember(EUROPA::LabelStr("E")));
 
