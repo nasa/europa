@@ -488,6 +488,15 @@ namespace EUROPA {
     check_error(m_variables.size() == (unsigned int) ARG_COUNT);
   }
 
+  AddMultEqualConstraint::~AddMultEqualConstraint(){
+    discard(false);
+  }
+
+  void AddMultEqualConstraint::handleDiscard(){
+    Constraint::handleDiscard();
+    m_interimVariable.discard();
+  }
+
   EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
                                          const LabelStr& propagatorName,
                                          const ConstraintEngineId& constraintEngine,
@@ -736,6 +745,19 @@ namespace EUROPA {
     eqSumScope[0] = m_interimVariable.getId();
     m_eqSumConstraint = (new EqualSumConstraint(LabelStr("EqualSum"), propagatorName,
                                                 constraintEngine, eqSumScope))->getId();
+  }
+
+  LessOrEqThanSumConstraint::~LessOrEqThanSumConstraint(){
+    discard(false);
+  }
+
+  void LessOrEqThanSumConstraint::handleExecute(){}
+
+  void LessOrEqThanSumConstraint::handleDiscard(){
+    Constraint::handleDiscard();
+
+    // Discarding the variable will discard the constraints
+    m_interimVariable.discard();
   }
 
   LessThanSumConstraint::LessThanSumConstraint(const LabelStr& name,
@@ -1791,20 +1813,6 @@ namespace EUROPA {
       m_y.intersect(IntervalDomain(lb, ub));
     else if(m_y.isMember(-lb) || m_y.isMember(-ub))
       m_y.intersect(IntervalDomain(-ub, -lb));
-  }
-
-
-  LessOrEqThanSumConstraint::~LessOrEqThanSumConstraint() {
-    discard(false);
-  }
-
-  void LessOrEqThanSumConstraint::handleExecute() { }
-
-  void LessOrEqThanSumConstraint::handleDiscard(){
-    Constraint::handleDiscard();
-    m_interimVariable.discard();
-    m_lessOrEqualConstraint.discard();
-    m_eqSumConstraint->discard();
   }
   /**************************************************************************************/
 

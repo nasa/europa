@@ -177,10 +177,12 @@ namespace EUROPA {
 			   const ConstraintEngineId& constraintEngine,
 			   const std::vector<ConstrainedVariableId>& variables);
 
+    ~AddMultEqualConstraint();
+  private:
     // All the work is done by the member constraints
     inline void handleExecute() { }
+    void handleDiscard();
 
-  private:
     static const int A = 0;
     static const int B = 1;
     static const int C = 2;
@@ -263,7 +265,6 @@ namespace EUROPA {
   private:
     void handleExecute();
     void handleDiscard();
-
     Variable<IntervalDomain> m_interimVariable;
     LessThanEqualConstraint m_lessOrEqualConstraint;
     ConstraintId m_eqSumConstraint;
