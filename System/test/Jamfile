@@ -2,6 +2,8 @@ SubDir PLASMA System test ;
 
 if ! $(PLASMA_READY) {
 
+ModuleMain all-module-tests : test-main.cc : System ;
+RunModuleMain run-all-module-tests : all-module-tests ;
 
 #
 # TRANSACTION TESTS
