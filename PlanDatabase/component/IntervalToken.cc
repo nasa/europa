@@ -41,12 +41,13 @@ namespace EUROPA{
   }
 
   const TempVarId& IntervalToken::getStart() const{
-    check_error(m_start.isValid());
+    checkError(m_start.isValid(), m_start);
     return m_start;}
 
   const TempVarId& IntervalToken::getEnd() const{
-    check_error(m_end.isValid());
-    return m_end;}
+    checkError(m_end.isValid(), m_end);
+    return m_end;
+  }
 
   void IntervalToken::commonInit( const IntervalIntDomain& startBaseDomain,
 				  const IntervalIntDomain& endBaseDomain,

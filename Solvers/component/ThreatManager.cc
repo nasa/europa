@@ -99,6 +99,7 @@ namespace EUROPA {
       for(std::map<int, std::pair<TokenId, ObjectSet> >::const_iterator it = tokensToOrder.begin(); 
 	  it != tokensToOrder.end(); ++it){
 	TokenId candidate = it->second.first;
+	checkError(candidate.isValid(), candidate);
 	checkError(candidate->isActive(), "It must be inactive to be a candidate. " 
 		   << candidate->toString() << ";" << candidate->getState()->toString());
 
