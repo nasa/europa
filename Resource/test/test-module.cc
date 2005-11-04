@@ -34,7 +34,7 @@ const double productionMax = 40;
 const double consumptionRateMax = -8;
 const double consumptionMax = -50;
 
-#define DEFAULT_SETUP(ce, db, autoClose) \
+#define RESOURCE_DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
     SchemaId schema = Schema::instance();\
     schema->reset();\
@@ -48,7 +48,7 @@ const double consumptionMax = -50;
     if (autoClose) \
       db.close();
 
-#define DEFAULT_TEARDOWN()
+#define RESOURCE_DEFAULT_TEARDOWN()
 
 class DefaultSetupTest {
 public:
@@ -58,13 +58,13 @@ public:
   }
 private:
   static bool testDefaultSetup() {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     assertTrue(db.isClosed() == false);
     db.close();
     assertTrue(db.isClosed() == true);
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return true;
   }
 };
@@ -114,7 +114,7 @@ private:
   
   static bool testResourceConstructionAndDestruction()
   {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource (db.getId(), LabelStr("Resource"), LabelStr("r1")))->getId();
     std::list<InstantId> instants;
@@ -125,13 +125,13 @@ private:
     new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), 189.34, 0, 1000);
 
     db.close();
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testBasicTransactionInsertion()
   {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 10, 0, 1000))->getId();
 
@@ -165,13 +165,13 @@ private:
     ce.propagate();
     r->free(t1, t1);
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testTransactionChangeHandling()
   {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     const int HORIZON_END = 1000;
 
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
@@ -206,14 +206,14 @@ private:
     delete (Token*) t1;
     delete (Token*) t2;
     delete (Token*) t3;
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
   static bool testCorrectTransactionAllocation()
   {
     // Test that the right insertion behaviour (in terms of instants) is occuring
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
@@ -266,13 +266,13 @@ private:
     delete (Transaction*) (t1);
     assertTrue(ce.propagate() && checkSum(r) == 0);
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
   static bool testLevelCalculation()
   {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
@@ -321,13 +321,13 @@ private:
     delete (Token*) t6;
     delete (Token*) t7;
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
   static bool testTransactionUpdates()
   {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
@@ -346,13 +346,13 @@ private:
     t1->setLatest(6);
     assertTrue(checkLevelArea(r) == 10*5);
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
   static bool testTransactionRemoval()
   {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r0"), 0, 0, 10))->getId();
@@ -405,13 +405,13 @@ private:
     t2->getObject()->reset();
     t5->getObject()->reset();
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
   static bool testIntervalCapacityValues()
   {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
@@ -435,13 +435,13 @@ private:
     delete (Token*) t1;
     delete (Token*) t2;
     delete (Token*) t3;
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
   static bool testConstraintCheckOnInsertion()
   {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
@@ -459,14 +459,14 @@ private:
     assertTrue(!ce.propagate());
     delete (Transaction*) t2;
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
   // Test that a violation can be detected if a concurrent transaction violates a rate constraint
   static bool testRateConstraintViolation()
   {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
@@ -509,7 +509,7 @@ private:
     delete (Transaction*) t4;
     assertTrue(ce.propagate());
       
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -517,7 +517,7 @@ private:
   {
     // Define input constrains for the resource spec
 
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
 				 limitMin, limitMax, productionMax, productionMax, MINUS_INFINITY, MINUS_INFINITY))->getId();
@@ -551,7 +551,7 @@ private:
     delete (Token*) t5;
     delete (Token*) t6;
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
@@ -559,7 +559,7 @@ private:
   {
     // Define input constrains for the resource spec
 
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
 				 limitMin, limitMax, PLUS_INFINITY, PLUS_INFINITY, consumptionMax, consumptionMax))->getId();
@@ -598,14 +598,14 @@ private:
     delete (Token*) t6;
     delete (Token*) t7;
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
   static bool testUpperLimitExceededResourceViolation()
   {
     // Define input constrains for the resource spec
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity + 1,  
 				 limitMin, limitMax, productionRateMax, productionMax + 100, consumptionRateMax, consumptionMax))->getId();
@@ -629,13 +629,13 @@ private:
     assertTrue(violations.size() == 1);
     assertTrue(violations.front()->getType() == ResourceViolation::LevelTooHigh);
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
   static bool testSummationConstraintResourceViolation()
   {
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
 				 limitMin, limitMax, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
@@ -662,14 +662,14 @@ private:
     std::list<ResourceViolationId> violations;     
     r->getResourceViolations(violations);
     assertTrue(violations.size() > 0);
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
   static bool testPointProfileQueries()
   {
     // Define input constrains for the resource spec
-    DEFAULT_SETUP(ce,db,false);
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
     ResourceId r = (new Resource( db.getId(), LabelStr("Resource"), LabelStr("r1"), 
 				  initialCapacity, 
 				  limitMin, limitMax, productionRateMax, 5, consumptionRateMax, consumptionMax))->getId();
@@ -713,7 +713,7 @@ private:
     delete (Token*) c1;
     delete (Token*) c2;
 
-    DEFAULT_TEARDOWN();
+    RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
 
