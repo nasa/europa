@@ -1873,9 +1873,8 @@ namespace EUROPA {
   /**************************************************************************************/
 
   void initConstraintLibrary() {
-    static bool s_runAlready(false);
-    
-    if (!s_runAlready) {
+
+      debugMsg("Constriants:initConstriantLibrary", "Initializing the constraint library");
       // Register constraint Factories
       REGISTER_CONSTRAINT(UnaryConstraint, "UNARY", "Default");
       REGISTER_CONSTRAINT(AddEqualConstraint, "AddEqual", "Default");
@@ -1958,8 +1957,5 @@ namespace EUROPA {
       // But addeqcond is harder, requiring two "steps":
       REGISTER_SWAP_TWO_VARS_CONSTRAINT("eqcondsum", "Default", "CondEqualSum", 0, 1);
       REGISTER_ROTATED_CONSTRAINT("addeqcond", "Default", "eqcondsum", 2);
-
-      s_runAlready = true;
-    }
   }
 } // end namespace EUROPA
