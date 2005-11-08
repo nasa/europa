@@ -158,7 +158,7 @@ public:
 };
 
 
-#define DEFAULT_SETUP(ce, db, autoClose) \
+#define CBP_DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
     initCBPTestSchema(); \
     PlanDatabase db(ce.getId(), Schema::instance()); \
@@ -171,16 +171,16 @@ public:
     if (autoClose) \
       db.close();
 
-#define DEFAULT_TEARDOWN()
+#define CBP_DEFAULT_TEARDOWN()
 
-#define DEFAULT_SETUP_PLAN(ce, db, autoClose) \
+#define CBP_DEFAULT_SETUP_PLAN(ce, db, autoClose) \
   SETUP_HEURISTICS("../../HeuristicsEngine/test/DefaultHeuristics.xml") \
   initCBPTestSchema();			    \
   planner.getDecisionManager()->getOpenDecisionManager()->initializeIfNeeded(); \
   if (autoClose) \
     db.close();
 
-#define DEFAULT_TEARDOWN_PLAN()
+#define CBP_DEFAULT_TEARDOWN_PLAN()
 
 #define SETUP_HEURISTICS(heuristicsSource) \
   READ_HEURISTICS(heuristicsSource, true)
@@ -292,7 +292,7 @@ public:
     token.close();
   }
 
-class DefaultSetupTest {
+class CBPDefaultSetupTest {
 public:
   static bool test() {
     runTest(testDefaultSetup);
@@ -301,11 +301,11 @@ public:
 
 private:
   static bool testDefaultSetup() {
-    DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_SETUP(ce, db, false);
     assertTrue(db.isClosed() == false);
     db.close();
     assertTrue(db.isClosed() == true);
-    DEFAULT_TEARDOWN();
+    CBP_DEFAULT_TEARDOWN();
     return true;
   }
 };
@@ -326,7 +326,7 @@ private:
 
   static bool testSetHorizionCondition() {
     // create a CBPlanner
-    DEFAULT_SETUP_PLAN(ce, db, true);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, true);
     // Default horizion condition should be
     assertTrue(!planner.isPossiblyOutsideHorizon());
     assertTrue(planner.isNecessarilyOutsideHorizon());
@@ -345,12 +345,12 @@ private:
     assertTrue(!planner.isPossiblyOutsideHorizon());
     assertTrue(planner.isNecessarilyOutsideHorizon());
 
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
   static bool testHorizon() {
-    DEFAULT_SETUP(ce, db, true);
+    CBP_DEFAULT_SETUP(ce, db, true);
     Horizon hor1;
     int start, end;
     hor1.getHorizon(start,end);
@@ -366,12 +366,12 @@ private:
     hor2.getHorizon(start,end);
     assertTrue(start == 0);
     assertTrue(end == 400);
-    DEFAULT_TEARDOWN();
+    CBP_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testHorizonCondition() {
-    DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_SETUP(ce, db, false);
     HorizonCondition cond(hor.getId(), dm.getId());
 
     assertTrue(cond.isPossiblyOutsideHorizon());
@@ -427,12 +427,12 @@ private:
     //std::cout << " Decisions after changing horizon = 4" << std::endl;
 
     assertTrue(dm.getNumberOfDecisions() == 1, toString(dm.getNumberOfDecisions()));
-    DEFAULT_TEARDOWN();
+    CBP_DEFAULT_TEARDOWN();
     return true;
   }
 
 static bool testHorizonConditionNecessary() {
-    DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_SETUP(ce, db, false);
     HorizonCondition cond(hor.getId(), dm.getId());
     // change to using the necessary condtion for horizion containment. 
     cond.setNecessarilyOutsideHorizon();
@@ -479,12 +479,12 @@ static bool testHorizonConditionNecessary() {
     assertTrue(ce.propagate());
     assertTrue(!cond.test(tokenA.getId()));
 
-    DEFAULT_TEARDOWN();
+    CBP_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testDynamicInfiniteRealCondition() {
-    DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_SETUP(ce, db, false);
     DynamicInfiniteRealCondition cond(dm.getId());
     assertTrue(dm.getConditions().size() == 1);
 
@@ -556,12 +556,12 @@ static bool testHorizonConditionNecessary() {
     // one extra decision
     assertTrue(dm.getNumberOfDecisions() == 4, toString(dm.getNumberOfDecisions()));
 
-    DEFAULT_TEARDOWN();
+    CBP_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testMasterMustBeInserted(){
-    DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_SETUP(ce, db, false);
     MasterMustBeInserted condition(dm.getId());
 
     Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
@@ -627,7 +627,7 @@ static bool testHorizonConditionNecessary() {
   }
 
   static bool testTemporalVariableFilter(){
-    DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_SETUP(ce, db, false);
 
     TemporalVariableFilter condition(dm.getId());
 
@@ -667,7 +667,7 @@ public:
 
 private:
   static bool testUnitHandling() {
-    DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_SETUP(ce, db, false);
 
     Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
@@ -722,7 +722,7 @@ private:
     return true;
   }
   static bool testForwardDecisionHandling() {
-    DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_SETUP(ce, db, false);
     HorizonCondition hcond(hor.getId(), dm.getId());
     DynamicInfiniteRealCondition dcond(dm.getId());
 
@@ -794,7 +794,7 @@ private:
     assertTrue(dm.assignDecision());
     assertTrue(dm.getNumberOfDecisions() == 0);
     assertFalse(dm.assignDecision(), "No more decisions.");
-    DEFAULT_TEARDOWN();
+    CBP_DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -806,7 +806,7 @@ private:
    * guard. It may subsequently be found to be a guard.
    */
   static bool testNestedGuard_GNATS_3013(){
-    DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_SETUP(ce, db, false);
 
     odm.initializeIfNeeded();
     assertTrue(ce.propagate());
@@ -896,7 +896,7 @@ private:
   }
 
   static bool testSynchronizationBug_GNATS_3027(){
-    DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_SETUP(ce, db, false);
     HorizonCondition hcond(hor.getId(), dm.getId());
     DynamicInfiniteRealCondition dcond(dm.getId());
 
@@ -946,7 +946,7 @@ private:
     // Finish out this decision
     dm.assignDecision();
     dm.retractDecision(retractCounter);
-    DEFAULT_TEARDOWN();
+    CBP_DEFAULT_TEARDOWN();
     return true;
   }
 };
@@ -970,7 +970,7 @@ public:
   }
 private:
   static bool testMakeMove() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     std::list<double> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
@@ -1016,12 +1016,12 @@ private:
     }    
     
     assertTrue(!planner.getDecisionManager()->assignDecision());
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
   static bool testCurrentState() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
@@ -1040,12 +1040,12 @@ private:
     TokenDecisionPointId tokdec = planner.getDecisionManager()->getCurrentDecision();
     assertTrue(tokdec->getToken() == tokenA.getId());
 
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
   static bool testRetractMove() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline t(db.getId(), LabelStr("Object"), LabelStr("t1"));
     db.close();
     IntervalToken tokenA(db.getId(), 
@@ -1064,12 +1064,12 @@ private:
 
     unsigned int count;
     assertTrue(planner.getDecisionManager()->retractDecision(count));
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
   static bool testNoBacktrackCase() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
@@ -1098,12 +1098,12 @@ private:
     assertTrue(planner.getTime() == planner.getDepth());
     assertTrue(closed.size() == planner.getTime());
     assertTrue(closed.size() == 4);
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
   static bool testSubgoalOnceRule() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
@@ -1130,12 +1130,12 @@ private:
     (*it1)->activate();
     res = ce.propagate();
     assertTrue(!res);
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
   static bool testStraightCSPSolution() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
@@ -1157,7 +1157,7 @@ private:
     assertTrue(status == CBPlanner::PLAN_FOUND);
     assertTrue(planner.getDepth() == 5);
     assertTrue(planner.getTime() == 5);
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
@@ -1166,7 +1166,7 @@ private:
    * CBP algorithm through its paces.
    */
   static bool testExhaustiveCSPSearch() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
@@ -1186,7 +1186,7 @@ private:
     assertTrue(planner.getDepth() == 0);
     assertTrue(planner.getTime() == 6, toString(planner.getTime()));
 
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
@@ -1195,7 +1195,7 @@ private:
    * CBP algorithm through its paces.
    */
   static bool testExhaustiveTokenSearch() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
@@ -1234,7 +1234,7 @@ private:
     assertTrue(status == CBPlanner::SEARCH_EXHAUSTED);
     assertTrue(planner.getDepth() == 0);
 
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
@@ -1248,7 +1248,7 @@ private:
    * 3. In the interim, we interleave variable decisions to make the search work hard.
    */
   static bool testBacktrackCase() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
@@ -1292,13 +1292,13 @@ private:
 
     assertTrue(res == CBPlanner::SEARCH_EXHAUSTED, toString(res));
     assertTrue(planner.getClosedDecisions().empty());
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
   // Test that all options will be tried before coming to a conclusion 
   static bool testCompleteCSPSearch(){
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
@@ -1324,7 +1324,7 @@ private:
     assertTrue(status == CBPlanner::PLAN_FOUND);
     assertTrue(planner.getDepth() == 2);
     assertTrue(planner.getTime() == 3 + 3*4, toString(planner.getTime()));
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true; 
   }
 
@@ -1332,7 +1332,7 @@ private:
    // backtrack testcase then does a reset when no plan is found. 
    static bool testResetPlannerCase() {
 
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline timeline(db.getId(),LabelStr("Object"), LabelStr("t1"));
     db.close();
 
@@ -1387,13 +1387,13 @@ private:
     assertTrue(res == CBPlanner::SEARCH_EXHAUSTED);
     assertTrue(planner.getClosedDecisions().empty());
 
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 
 
   static bool testTimeoutCase() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     Timeline t1(db.getId(),LabelStr("Object"), LabelStr("t1"));
     Timeline t2(db.getId(),LabelStr("Object"), LabelStr("t2"));
     Object o1(db.getId(),LabelStr("Object"),LabelStr("o1"));
@@ -1484,7 +1484,7 @@ private:
     assertTrue(closed.size() == 9);
     assertTrue(closed.size() == planner.getTime());
     assertTrue(planner.getTime() == planner.getDepth());
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 };    
@@ -1497,8 +1497,8 @@ public:
   }
 private:
   static bool testMultipleDMs() {
-    DEFAULT_SETUP(ce, db, false);
-    DEFAULT_TEARDOWN();
+    CBP_DEFAULT_SETUP(ce, db, false);
+    CBP_DEFAULT_TEARDOWN();
     return true;
   }
 };
@@ -1516,7 +1516,7 @@ public:
   }
 private:
   static bool testVariableDecisionCycle() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
 
     std::list<double> values;
     values.push_back(LabelStr("L1"));
@@ -1558,11 +1558,11 @@ private:
     assertTrue(planner.getDepth() == 4, toString(planner.getDepth()));
     assertTrue(planner.getTime() == 11, toString(planner.getTime()));
 
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
   static bool testTokenDecisionCycle() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
 
     hor.setHorizon(300,400);
 
@@ -1619,11 +1619,11 @@ private:
 
     result = planner.run();
     assertTrue(result == CBPlanner::PLAN_FOUND);
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
   static bool testObjectDecisionCycle() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
 
     hor.setHorizon(10,500);
 
@@ -1667,11 +1667,11 @@ private:
     assertTrue(tokenB.getStart()->getDerivedDomain().isSingleton());
     assertTrue(tokenB.getStart()->getDerivedDomain().getSingletonValue() == 0);
 
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
   static bool testObjectAndObjectVariable() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     hor.setHorizon(10,500);
 
     Object o1(db.getId(), LabelStr("Object"), LabelStr("Object1"));
@@ -1713,11 +1713,11 @@ private:
     //it was the only object we could constrain to and we failed, so
     //there's no more to do.
 
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
   static bool testObjectHorizon() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
 
     Object o1(db.getId(), LabelStr("Object"), LabelStr("Object1"));
     Object o2(db.getId(), LabelStr("Object"), LabelStr("Object2"));
@@ -1748,7 +1748,7 @@ private:
     assertTrue(!planner.getDecisionManager()->isVariableDecision(tokenB.getObject()));
     assertTrue(planner.getDecisionManager()->getNumberOfDecisions() == 0);
 
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 };
@@ -1762,7 +1762,7 @@ public:
   }
 private:
   static bool testFindAnotherPlan() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     hor.setHorizon(0,100);
     std::list<double> values;
     values.push_back(LabelStr("L1"));
@@ -1825,11 +1825,11 @@ private:
 
     assertTrue(planner.getTime() == planner.getDepth());
 
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
   static bool testAddSubgoalAfterPlanning() {
-    DEFAULT_SETUP_PLAN(ce, db, false);
+    CBP_DEFAULT_SETUP_PLAN(ce, db, false);
     hor.setHorizon(0,100);
 
     std::list<double> values;
@@ -1872,7 +1872,7 @@ private:
 
     CBPlanner::Status res = planner.run();
     assertTrue(res == CBPlanner::PLAN_FOUND);
-    DEFAULT_TEARDOWN_PLAN();
+    CBP_DEFAULT_TEARDOWN_PLAN();
     return true;
   }
 };
@@ -1902,7 +1902,7 @@ public:
 
     for (int i = 0; i < 1; i++) {
       LockManager::instance().lock();
-      runTestSuite(DefaultSetupTest::test);
+      runTestSuite(CBPDefaultSetupTest::test);
       runTestSuite(ConditionTest::test);
       runTestSuite(DecisionManagerTest::test);
       runTestSuite(CBPlannerTest::test);
