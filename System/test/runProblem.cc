@@ -227,6 +227,7 @@ int main(int argc, const char** argv) {
 #define ONE_ASSEMBLY_ONLY
 #ifdef ONE_ASSEMBLY_ONLY
   return internalMain<CBPlannerAssembly>(argc, argv);
+  //return internalMain<SolverAssembly>(argc, argv);
 #else
   bool result = internalMain<CBPlannerAssembly>(argc, argv);
   if(result != 0)

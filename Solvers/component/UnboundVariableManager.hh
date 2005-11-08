@@ -19,10 +19,7 @@ namespace EUROPA {
 
       virtual ~UnboundVariableManager();
 
-      /**
-       * @brief True if the given variable is in scope.
-       */
-      bool inScope(const ConstrainedVariableId& var) const;
+      bool inScope(const EntityId& entity) const;
 
     private:
       virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
@@ -30,8 +27,6 @@ namespace EUROPA {
       virtual DecisionPointId next(unsigned int priorityLowerBound,
 				   unsigned int& bestPriority,
 				   const ConstrainedVariableSet& flawCandidates);
-
-      DecisionPointId allocateDecisionPoint(const ConstrainedVariableId& flawedVariable);
       void handleInitialize();
       void addFlaw(const ConstrainedVariableId& var);
       void removeFlaw(const ConstrainedVariableId& var);
@@ -88,20 +83,6 @@ namespace EUROPA {
 
       friend class UnboundVariableManager::DbListener;
       UnboundVariableManager::DbListener* m_dbListener; /*!< For processing Plan Database events */
-
-      /**
-       * @brief Helper method to iterate over the rules to match
-       */
-      bool matches(const ConstrainedVariableId& var, const std::list<VariableMatchingRuleId>& rules) const;
-
-      /**
-       * @brief Helper method to obtain the most restrictive decision point factory
-       */
-      UnboundVariableDecisionPointFactoryId matchFactory(const ConstrainedVariableId& var) const;
-
-      std::list<VariableMatchingRuleId> m_staticMatchingRules;
-      std::list<VariableMatchingRuleId> m_dynamicMatchingRules;
-      std::list<UnboundVariableDecisionPointFactoryId> m_factories;
     };
   }
 }

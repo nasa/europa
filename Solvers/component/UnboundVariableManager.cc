@@ -27,40 +27,7 @@ namespace EUROPA {
      * @see ComponentFactory
      */
     UnboundVariableManager::UnboundVariableManager(const TiXmlElement& configData)
-      : FlawManager(configData), m_ceListener(NULL), m_dbListener(NULL){
-
-      checkError(strcmp(configData.Value(), "UnboundVariableManager") == 0,
-		 "Configuration error. Expected element <UnboundVariableManager> but found " << configData.Value());
-
-      // Load all filtering rules
-      for (TiXmlElement * child = configData.FirstChildElement(); 
-	   child != NULL; 
-	   child = child->NextSiblingElement()) {
-	debugMsg("UnboundVariableManager:UnboundVariableManager",
-		 "Evaluating configuration element " << child->Value());
-
-	// If we come across a variable heuristic, register the factory.
-	if(strcmp(child->Value(), "FlawHandler") == 0){
-	  UnboundVariableDecisionPointFactoryId factory = static_cast<UnboundVariableDecisionPointFactoryId>(Component::AbstractFactory::allocate(*child));
-	  m_factories.push_back(factory);
-	}
-	else { // Must be a variable filter
-	  checkError(strcmp(child->Value(), "FlawFilter") == 0,
-		     "Configuration error. Expected element <FlawFilter> but found " << child->Value());
-
-	  const char* component = child->Attribute("component");
-
-	  if(component == NULL){ // Allocate default. It will be static.
-	    VariableMatchingRuleId rule = (new VariableMatchingRule(*child))->getId();
-	    m_staticMatchingRules.push_back(rule);
-	  }
-	  else{ // Allocate via registered factory
-	    VariableMatchingRuleId rule = static_cast<VariableMatchingRuleId>(Component::AbstractFactory::allocate(*child));
-	    m_dynamicMatchingRules.push_back(rule);
-	  }
-	}
-      }
-    }
+      : FlawManager(configData), m_ceListener(NULL), m_dbListener(NULL){}
 
     void UnboundVariableManager::handleInitialize(){
       m_ceListener = new CeListener(m_db->getConstraintEngine(), *this);
@@ -88,41 +55,17 @@ namespace EUROPA {
 
       if(m_dbListener != NULL)
 	delete m_dbListener;
-
-      EUROPA::cleanup(m_staticMatchingRules);
-      EUROPA::cleanup(m_dynamicMatchingRules);
-      EUROPA::cleanup(m_factories);
     }
 
-    bool UnboundVariableManager::inScope(const ConstrainedVariableId& var) const {
-      checkError(m_db->getConstraintEngine()->constraintConsistent(), 
-		 "Assumes the database is constraint consistent but it is not.");
-      bool result =  (!var->isSpecified() && !matches(var, m_staticMatchingRules) && !matches(var, m_dynamicMatchingRules));
-      return result;
-    }
 
-    bool UnboundVariableManager::matches(const ConstrainedVariableId& var,const std::list<VariableMatchingRuleId>& rules)  const{
-      LabelStr objectType;
-      LabelStr predicate;
-      LabelStr varName = var->getName();
-      VariableMatchingRule::extractParts(var, objectType, predicate);
-
-      for(std::list<VariableMatchingRuleId>::const_iterator it = rules.begin(); it != rules.end(); ++it){
-	VariableMatchingRuleId rule = *it;
-	check_error(rule.isValid());
-	// Test for a match against the statndard match and the extendable match
-	if(rule->matches(varName, objectType, predicate) && rule->matches(var)){
-	  debugMsg("UnboundVariableManager:matches", 
-		   "Match found for " << VariableMatchingRule::makeExpression(var) << " with " << rule->getExpression());
-	  return true;
-	}
-	else {
-	  debugMsg("UnboundVariableManager:matches", 
-		   "No match for " << VariableMatchingRule::makeExpression(var) << " with " << rule->getExpression());
-	}
+    bool UnboundVariableManager::inScope(const EntityId& entity) const {
+      bool result = false;
+      if(ConstrainedVariableId::convertable(entity)){
+	ConstrainedVariableId var = entity;
+	result =  (!var->isSpecified() && FlawManager::inScope(entity));
       }
 
-      return false;
+      return result;
     }
 
     DecisionPointId UnboundVariableManager::next(unsigned int priorityLowerBound,
@@ -158,7 +101,7 @@ namespace EUROPA {
 	check_error(!candidate->isSpecified(),
 		    "Should not be seeing this as a candidate flaw since it is already specified.");
 
-	if(matches(candidate, m_dynamicMatchingRules)){
+	if(dynamicMatch(candidate)){
 	  debugMsg("UnboundVariableManager:next",
 		   candidate->toString() << " is out of dynamic scope.");
 	  continue;
@@ -214,40 +157,10 @@ namespace EUROPA {
     }
 
     /**
-     * @brief Now we conduct a simple match where we select based on first avalaibale.
-     */
-    DecisionPointId UnboundVariableManager::allocateDecisionPoint(const ConstrainedVariableId& flawedVariable){
-      static unsigned int sl_counter(0); // Helpful for debugging
-      sl_counter++;
-
-      std::list<UnboundVariableDecisionPointFactoryId>::const_iterator it = m_factories.begin();
-      LabelStr varName(flawedVariable->getName());
-      LabelStr objectType, predicate;
-      VariableMatchingRule::extractParts(flawedVariable, objectType, predicate);
-
-      DecisionPointId result;
-
-      while(it != m_factories.end()){
-	UnboundVariableDecisionPointFactoryId factory = *it;
-	if(factory->matches(varName, objectType, predicate) && factory->matches(flawedVariable)){
-	  result = factory->create(m_db->getClient(), flawedVariable);
-	  break;
-	}
-	++it;
-      }
-
-      checkError(result.isValid(),
-		 "At count " << sl_counter << ": No Decision Point could be allocated for " 
-		 << flawedVariable->toString());
-
-      return result;
-    }
-
-    /**
      * We may filter based on static information only.
      */
     void UnboundVariableManager::addFlaw(const ConstrainedVariableId& var){
-      if(!variableOfNonActiveToken(var) && var->canBeSpecified() && !var->isSpecified() && !matches(var, m_staticMatchingRules)){
+      if(!variableOfNonActiveToken(var) && var->canBeSpecified() && !var->isSpecified() && !staticMatch(var)){
 	debugMsg("UnboundVariableManager:addFlaw",
 		 "Adding " << var->toString() << " as a candidate flaw.");
 	m_flawCandidates.insert(var);

@@ -5,7 +5,6 @@ if ! $(PLASMA_READY) {
 ModuleComponent Solvers
 	:
 	ValueSource.cc
-	MatchingRule.cc
 	UnboundVariableDecisionPoint.cc
 	UnboundVariableManager.cc
 	OpenConditionDecisionPoint.cc

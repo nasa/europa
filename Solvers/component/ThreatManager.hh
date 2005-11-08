@@ -23,26 +23,10 @@ namespace EUROPA {
 
       virtual ~ThreatManager();
 
-      bool inScope(const TokenId& token) const;
+      bool inScope(const EntityId& entity) const;
     private:
       virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
-      DecisionPointId allocateDecisionPoint(const TokenId& tokenToOrder);
       void handleInitialize();
-
-
-      /**
-       * @brief Helper method to iterate over the rules to match
-       */
-      bool matches(const TokenId& token, const std::list<TokenMatchingRuleId>& rules) const;
-
-      /**
-       * @brief Helper method to obtain the most restrictive decision point factory
-       */
-      ThreatDecisionPointFactoryId matchFactory(const TokenId& token) const;
-
-      std::list<TokenMatchingRuleId> m_staticMatchingRules;
-      std::list<TokenMatchingRuleId> m_dynamicMatchingRules;
-      std::list<ThreatDecisionPointFactoryId> m_factories;
     };
 
   }

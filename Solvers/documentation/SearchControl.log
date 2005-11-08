@@ -1,5 +1,5 @@
-This is TeX, Version 3.14159 (Web2C 7.3.1) (format=latex 2003.2.18)  17 MAY 2005 15:11
-**SearchControl
+This is TeX, Version 3.14159 (Web2C 7.3.1) (format=latex 2003.2.18)  7 NOV 2005 10:31
+**SearchControl.tex
 (SearchControl.tex
 LaTeX2e <2001/06/01>
 Babel <v3.7h> and hyphenation patterns for american, french, german, ngerman, i
@@ -53,7 +53,8 @@ Package: verbatim 2001/03/12 v1.5p LaTeX2e package for verbatim enhancements
 \every@verbatim=\toks15
 \verbatim@line=\toks16
 \verbatim@in@stream=\read1
-) (SearchControl.aux)
+)
+No file SearchControl.aux.
 \openout1 = `SearchControl.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 13.
@@ -74,46 +75,43 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <8> on input line 15.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 15.
- [1
+[1
 
-]
-[2] [3] [4] [5] [6]
+] [2] [3] [4] [5] [6]
 Overfull \hbox (3.53427pt too wide) in paragraph at lines 158--159
 []\OT1/cmr/m/n/10 The func-tion \OT1/cmr/m/it/10 se-lect-NextDe-ci-sion-Point \
 OT1/cmr/m/n/10 is listed be-low. It takes a \OT1/cmr/m/it/10 Plan Database
  []
 
 [7]
-File: SearchControl.eps Graphic file (type eps)
- <SearchControl.eps> [8] [9]
-File: ConfigurationFramework.eps Graphic file (type eps)
- <ConfigurationFramework.eps> [10] [11] [12]
-Overfull \hbox (4.83391pt too wide) in paragraph at lines 290--291
-[]\OT1/cmr/m/n/10 isA(objectName, Ob-ject-Type) - de-fines an ob-ject name in t
-he plan database
- []
 
-[13] [14]
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 308.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 308.
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 313.
+LaTeX Warning: File `SearchControl.eps' not found on input line 190.
 
- (/usr/share/texmf/tex/latex/base/omscmr.fd
-File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 313.
- [15] [16]
-(SearchControl.aux) ) 
+
+! LaTeX Error: File `SearchControl.eps' not found.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.190 ...degraphics[scale=0.75]{SearchControl.eps}
+                                                  
+? 
+! Emergency stop.
+ ...                                              
+                                                  
+l.190 ...degraphics[scale=0.75]{SearchControl.eps}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+ 
 Here is how much of TeX's memory you used:
- 611 strings out of 20880
- 6968 string characters out of 196184
- 55369 words of memory out of 350001
- 3598 multiletter control sequences out of 10000+15000
+ 585 strings out of 20880
+ 6687 string characters out of 196184
+ 54369 words of memory out of 350001
+ 3575 multiletter control sequences out of 10000+15000
  8762 words of font info for 31 fonts, out of 400000 for 1000
  14 hyphenation exceptions out of 10000
- 25i,6n,19p,1823b,331s stack positions out of 3000i,100n,1500p,50000b,4000s
-
-Output written on SearchControl.dvi (16 pages, 44860 bytes).
+ 25i,6n,19p,1149b,331s stack positions out of 3000i,100n,1500p,50000b,4000s
+Output written on SearchControl.dvi (7 pages, 20996 bytes).

@@ -13,6 +13,10 @@
 namespace EUROPA {
   namespace SOLVERS {
 
+    bool ThreatDecisionPoint::matches(const EntityId& entity){ 
+      return(TokenId::convertable(entity) || TokenId(entity)->isActive());
+    }
+
     ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData)
       : DecisionPoint(client, tokenToOrder->getKey()), m_tokenToOrder(tokenToOrder), m_index(0) {
       // Here is where we would look for custom processing for configuration of the decision point

@@ -16,27 +16,26 @@ namespace EUROPA {
      * @brief Will filter a variable out until its derived domain is closed
      * and finite.
      */
-    class InfiniteDynamicFilter : public VariableMatchingRule {
+    class InfiniteDynamicFilter : public MatchingRule {
     public:
       InfiniteDynamicFilter(const TiXmlElement& configData);
-      bool matches(const ConstrainedVariableId& var) const;
-      std::string getExpression() const;
+      bool matches(const EntityId& entity) const;
     };
 
     /**
      * @brief Will filter a variable out until its derived domain becomes a singleton.
      */
-    class SingletonFilter: public VariableMatchingRule {
+    class SingletonFilter: public MatchingRule {
     public:
       SingletonFilter(const TiXmlElement& configData);
-      bool matches(const ConstrainedVariableId& var) const;
+      bool matches(const EntityId& entity) const;
     };
 
 
     /**
      * @brief Will filter a token based on the horizon.
      *
-     * A number of policies are supported for applying the Horizon Tesy. They are:
+     * A number of policies are supported for applying the Horizon Test. They are:
      * @li PossiblyContained - for the token to be in the horizon, both the start and end times must 
      * intersect the horizon.
      * @li PartiallyContained - for the token to be in the horizon, there need only be some temporal overlap
@@ -44,11 +43,11 @@ namespace EUROPA {
      * @li TotallyContained - for the token to be in the horizon, the temporal extend of the token must be a subset of
      * the horizon.
      */
-    class HorizonFilter: public TokenMatchingRule {
+    class HorizonFilter: public MatchingRule {
     public:
       HorizonFilter(const TiXmlElement& configData);
-      bool matches(const TokenId& token) const;
-      std::string getExpression() const;
+      bool matches(const EntityId& entity) const;
+      std::string toString() const;
       /**
        * @brief Allowed policy strings for customization
        */
@@ -71,11 +70,11 @@ namespace EUROPA {
      * @brief Will compose the Horizon Filter already available for a token in order to ensure
      * that the token for the variable is actually in the horizon.
      */
-    class HorizonVariableFilter: public VariableMatchingRule {
+    class HorizonVariableFilter: public MatchingRule {
     public:
       HorizonVariableFilter(const TiXmlElement& configData);
-      bool matches(const ConstrainedVariableId& var) const;
-      std::string getExpression() const;
+      bool matches(const EntityId& entity) const;
+      std::string toString() const;
 
     private:
       HorizonFilter m_horizonFilter;

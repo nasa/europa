@@ -1,20 +1,18 @@
 <Solver name="DefaultTestSolver">
+  <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
   <UnboundVariableManager>
     <FlawFilter var-match="start"/>
     <FlawFilter var-match="end"/>
     <FlawFilter var-match="duration"/>
     <FlawFilter component="InfiniteDynamicFilter"/>
     <FlawHandler component="MinValue"/>
-    <FlawFilter component="HorizonVariableFilter" policy="PartiallyContained"/>
   </UnboundVariableManager>
 
   <OpenConditionManager>
-    <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
     <FlawHandler component="StandardOpenConditionHandler"/>
   </OpenConditionManager>
 
   <ThreatManager>
-    <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
     <FlawHandler component="StandardThreatHandler"/>
   </ThreatManager>
 </Solver>

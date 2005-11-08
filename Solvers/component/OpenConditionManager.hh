@@ -22,7 +22,7 @@ namespace EUROPA {
 
       virtual ~OpenConditionManager();
 
-      bool inScope(const TokenId& token) const;
+      bool inScope(const EntityId& entity) const;
 
     private:
       // TODO: Special code for units. virtual DecisionPointId nextZeroCommitmentDecision();
@@ -36,7 +36,6 @@ namespace EUROPA {
        */
       virtual unsigned int getPriority(const TokenId& candidate, unsigned int bestPriority);
 
-      DecisionPointId allocateDecisionPoint(const TokenId& flawedToken);
       void handleInitialize();
       void addFlaw(const TokenId& token);
       void removeFlaw(const TokenId& token);
@@ -67,20 +66,6 @@ namespace EUROPA {
 
       friend class OpenConditionManager::DbListener;
       OpenConditionManager::DbListener* m_dbListener; /*!< For processing Plan Database events */
-
-      /**
-       * @brief Helper method to iterate over the rules to match
-       */
-      bool matches(const TokenId& token, const std::list<TokenMatchingRuleId>& rules) const;
-
-      /**
-       * @brief Helper method to obtain the most restrictive decision point factory
-       */
-      OpenConditionDecisionPointFactoryId matchFactory(const TokenId& token) const;
-
-      std::list<TokenMatchingRuleId> m_staticMatchingRules;
-      std::list<TokenMatchingRuleId> m_dynamicMatchingRules;
-      std::list<OpenConditionDecisionPointFactoryId> m_factories;
     };
   }
 }

@@ -13,9 +13,6 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    typedef EUROPA::SOLVERS::DecisionPoint::AbstractFactory<Token, TokenMatchingRule> OpenConditionDecisionPointFactory;
-    typedef Id<OpenConditionDecisionPointFactory> OpenConditionDecisionPointFactoryId;
-
     /**
      * @brief Defines a class for formulation, execution and retraction of a decision
      * to resolve a flaw concerning the state of a token.
@@ -48,6 +45,11 @@ namespace EUROPA {
       static DecisionPointId next(const TokenSet& flawCandidates, 
 				  unsigned int& bestPriority);
 
+      /**
+       * @brief Used to prune entities out which are not inactive tokens
+       */
+      static bool matches(const EntityId& entity);
+
       std::string toString() const;
 
     private:
@@ -70,5 +72,5 @@ namespace EUROPA {
 
 
 #define REGISTER_OPENCONDITION_DECISION_FACTORY(CLASS, NAME)\
-REGISTER_DECISION_FACTORY(CLASS, EUROPA::Token, EUROPA::SOLVERS::TokenMatchingRule, NAME);
+REGISTER_DECISION_FACTORY(CLASS, NAME);
 #endif

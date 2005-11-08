@@ -13,9 +13,6 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    typedef DecisionPoint::AbstractFactory<Token, TokenMatchingRule> ThreatDecisionPointFactory;
-    typedef Id<ThreatDecisionPointFactory> ThreatDecisionPointFactoryId;
-
     /**
      * @brief Defines a class for formulation, execution and retraction of token ordering
      * decisions as a means to resolve object flaws.
@@ -24,6 +21,11 @@ namespace EUROPA {
     public:
 
       ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData);
+
+      /**
+       * @brief Used to prune entities out which are not active tokens
+       */
+      static bool matches(const EntityId& entity);
 
     protected:
       virtual void handleInitialize();
@@ -50,5 +52,5 @@ namespace EUROPA {
 }
 
 #define REGISTER_THREAT_DECISION_FACTORY(CLASS, NAME)\
-REGISTER_DECISION_FACTORY(CLASS, EUROPA::Token, EUROPA::SOLVERS::TokenMatchingRule, NAME);
+REGISTER_DECISION_FACTORY(CLASS, NAME);
 #endif

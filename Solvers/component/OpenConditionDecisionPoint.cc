@@ -7,6 +7,10 @@
 namespace EUROPA {
   namespace SOLVERS {
 
+    bool OpenConditionDecisionPoint::matches(const EntityId& entity){ 
+      return(TokenId::convertable(entity) || TokenId(entity)->isInactive());
+    }
+
     OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData)
       : DecisionPoint(client, flawedToken->getKey()),
 	m_flawedToken(flawedToken), 

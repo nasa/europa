@@ -8,31 +8,35 @@ namespace EUROPA {
   namespace SOLVERS {
 
     InfiniteDynamicFilter::InfiniteDynamicFilter(const TiXmlElement& configData)
-      : VariableMatchingRule(configData) {
+      : MatchingRule(configData) {
       debugMsg("InfiniteDynamicFilter:constructor", "Constructing an InfiniteDynamicFilter.");
+      setExpression(toString() + ":infinite/dynamic");
     }
 
-    bool InfiniteDynamicFilter::matches(const ConstrainedVariableId& var) const {
+    bool InfiniteDynamicFilter::matches(const EntityId& entity) const {
+      if(!ConstrainedVariableId::convertable(entity))
+	return false;
+
+      ConstrainedVariableId var = entity;  
       debugMsg("InfiniteDynamicFilter:matches", "Evaluating " << var->toString() << " for dynamic/infinite filter.");
       debugMsg("InfiniteDynamicFilter:matches", var->lastDomain() << " isOpen : " << var->lastDomain().isOpen());
       debugMsg("InfiniteDynamicFilter:matches", var->lastDomain() << " isInfinite : " << var->lastDomain().isInfinite());
-      return (var->lastDomain().isOpen() || var->lastDomain().isInfinite());
-    }
-
-    std::string InfiniteDynamicFilter::getExpression() const {
-      return "infinite/dynamic";
+      return (var->lastDomain().isOpen() || var->lastDomain().isInfinite()) && MatchingRule::matches(entity);
     }
 
     SingletonFilter::SingletonFilter(const TiXmlElement& configData)
-      : VariableMatchingRule(configData) {}
+      : MatchingRule(configData) {}
 
-    bool SingletonFilter::matches(const ConstrainedVariableId& var) const {
+    bool SingletonFilter::matches(const EntityId& entity) const {
+      if(!ConstrainedVariableId::convertable(entity))
+	return false;
+
+      ConstrainedVariableId var = entity;
       debugMsg("SingletonFilter:matches", "Evaluating " << var->toString() << " for singleton filter.");
 
       // Indicate a match if it is not a singleton
-      return !var->lastDomain().isSingleton();
+      return !var->lastDomain().isSingleton() && MatchingRule::matches(entity);
     }
-
 
     /** HORIZON FILTERING **/
     IntervalIntDomain& HorizonFilter::getHorizon() {
@@ -41,7 +45,7 @@ namespace EUROPA {
     }
 
     HorizonFilter::HorizonFilter(const TiXmlElement& configData)
-      : TokenMatchingRule(configData) {
+      : MatchingRule(configData) {
       static const LabelStr sl_defaultPolicy("PartiallyContained");
       const char* argData = NULL;
       argData = configData.Attribute("policy");
@@ -53,11 +57,15 @@ namespace EUROPA {
 	m_policy = sl_defaultPolicy;
     }
 
-    bool HorizonFilter::matches(const TokenId& token) const {
+    bool HorizonFilter::matches(const EntityId& entity) const {
       static const LabelStr sl_possiblyContained("PossiblyContained");
       static const LabelStr sl_partiallyContained("PartiallyContained");
       static const LabelStr sl_totallyContained("TotallyContained");
 
+      if(!TokenId::convertable(entity))
+	return false;
+
+      TokenId token = entity;
       const IntervalIntDomain& horizon = getHorizon();
       checkError(horizon.isFinite(), "Infinite Horizon not permitted." << horizon.toString());
       const IntervalIntDomain& startTime = token->getStart()->lastDomain();
@@ -82,21 +90,26 @@ namespace EUROPA {
       debugMsg("HorizonFilter:matches", 
 	       token->toString() << " is " << (withinHorizon ? " inside " : " outside ") << " the horizon.");
 
-      return !withinHorizon;
+      return !withinHorizon && MatchingRule::matches(entity);
     }
 
 
-    std::string HorizonFilter::getExpression() const {
+    std::string HorizonFilter::toString() const {
       const IntervalIntDomain& horizon = getHorizon();
-      std::string expr = TokenMatchingRule::getExpression();
+      std::string expr = MatchingRule::toString();
       expr = expr + " Policy='" + m_policy.toString() + "' Horizon=" + horizon.toString();
       return expr;
     }
 
     HorizonVariableFilter::HorizonVariableFilter(const TiXmlElement& configData)
-      : VariableMatchingRule(configData), m_horizonFilter(configData){}
+      : MatchingRule(configData), m_horizonFilter(configData){}
 
-    bool HorizonVariableFilter::matches(const ConstrainedVariableId& var) const {
+    bool HorizonVariableFilter::matches(const EntityId& entity) const {
+      if(!ConstrainedVariableId::convertable(entity))
+	return false;
+
+      ConstrainedVariableId var = entity;
+
       debugMsg("HorizonVariableFilter:matches", "Evaluating " << var->toString() << " for horizon filter.");
 
       EntityId parent = var->getParent();
@@ -115,11 +128,11 @@ namespace EUROPA {
       }
 
       // Now simply delegate to the filter stored internally.
-      return m_horizonFilter.matches(token);
+      return m_horizonFilter.matches(token) && MatchingRule::matches(entity);
     }
 
-    std::string HorizonVariableFilter::getExpression() const {
-      return m_horizonFilter.getExpression();
+    std::string HorizonVariableFilter::toString() const {
+      return m_horizonFilter.toString();
     }
   }
 }

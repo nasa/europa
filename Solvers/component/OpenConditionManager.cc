@@ -15,40 +15,7 @@ namespace EUROPA {
   namespace SOLVERS {
 
     OpenConditionManager::OpenConditionManager(const TiXmlElement& configData)
-      : FlawManager(configData), m_dbListener(NULL) {
-
-      checkError(strcmp(configData.Value(), "OpenConditionManager") == 0,
-		 "Configuration Error. Expected element <OpenConditionManager> but found " << configData.Value());
-
-      // Load all filtering rules
-      for (TiXmlElement * child = configData.FirstChildElement(); 
-	   child != NULL; 
-	   child = child->NextSiblingElement()) {
-	debugMsg("OpenConditionManager:OpenConditionManager",
-		 "Evaluating configuration element " << child->Value());
-
-	// If we come across a token heuristic, register the factory.
-	if(strcmp(child->Value(), "FlawHandler") == 0){
-	  OpenConditionDecisionPointFactoryId factory = static_cast<OpenConditionDecisionPointFactoryId>(Component::AbstractFactory::allocate(*child));
-	  m_factories.push_back(factory);
-	}
-	else { // Must be a token filter
-	  checkError(strcmp(child->Value(), "FlawFilter") == 0,
-		     "Configuration Error. Expected element <FlawFilter> but found " << child->Value());
-
-	  const char* component = child->Attribute("component");
-
-	  if(component == NULL){ // Allocate default. It will be static.
-	    TokenMatchingRuleId rule = (new TokenMatchingRule(*child))->getId();
-	    m_staticMatchingRules.push_back(rule);
-	  }
-	  else{ // Allocate via registered factory
-	    TokenMatchingRuleId rule = static_cast<TokenMatchingRuleId>(Component::AbstractFactory::allocate(*child));
-	    m_dynamicMatchingRules.push_back(rule);
-	  }
-	}
-      }
-    }
+      : FlawManager(configData), m_dbListener(NULL) {}
 
     void OpenConditionManager::handleInitialize(){
       m_dbListener = new DbListener(m_db, *this);
@@ -64,71 +31,22 @@ namespace EUROPA {
     OpenConditionManager::~OpenConditionManager(){
       if(m_dbListener != NULL)
 	delete m_dbListener;
-
-      EUROPA::cleanup(m_staticMatchingRules);
-      EUROPA::cleanup(m_dynamicMatchingRules);
-      EUROPA::cleanup(m_factories);
     }
 
-    bool OpenConditionManager::inScope(const TokenId& token) const {
-      checkError(m_db->getConstraintEngine()->constraintConsistent(), 
-		 "Assumes the database is constraint consistent but it is not.");
-      bool result =  (!token->isActive() && !matches(token, m_staticMatchingRules) && !matches(token, m_dynamicMatchingRules));
-      return result;
-    }
+    bool OpenConditionManager::inScope(const EntityId& entity) const {
+      bool result = false;
 
-    bool OpenConditionManager::matches(const TokenId& token,const std::list<TokenMatchingRuleId>& rules)  const{
-      LabelStr objectType, predicate;
-      TokenMatchingRule::extractParts(token, objectType, predicate);
+      if(TokenId::convertable(entity)){
+	TokenId token = entity;
 
-      for(std::list<TokenMatchingRuleId>::const_iterator it = rules.begin(); it != rules.end(); ++it){
-	TokenMatchingRuleId rule = *it;
-	check_error(rule.isValid());
-	if(rule->matches(objectType, predicate) && rule->matches(token)){
-	  debugMsg("OpenConditionManager:matches", "Match found for " << TokenMatchingRule::makeExpression(token) << " with " << rule->getExpression());
-	  return true;
-	}
-	else {
-	  debugMsg("OpenConditionManager:matches", "No match for " << TokenMatchingRule::makeExpression(token) << " with " << rule->getExpression());
-	}
+	result = token->isInactive() && FlawManager::inScope(entity);
       }
-
-      return false;
-    }
-
-
-    /**
-     * @brief Now we conduct a simple match where we select based on first avalaibale.
-     */
-    DecisionPointId OpenConditionManager::allocateDecisionPoint(const TokenId& flawedToken){
-      static unsigned int sl_counter(0); // Helpful for debugging
-      sl_counter++;
-
-      std::list<OpenConditionDecisionPointFactoryId>::const_iterator it = m_factories.begin();
-      LabelStr predicate(flawedToken->getPredicateName());
-      LabelStr objectType(flawedToken->getBaseObjectType());
-
-      DecisionPointId result;
-
-      while(it != m_factories.end()){
-	OpenConditionDecisionPointFactoryId factory = *it;
-	if(factory->matches(predicate, objectType) && factory->matches(flawedToken)){
-	  result = factory->create(m_db->getClient(), flawedToken);
-	  break;
-	}
-	++it;
-      }
-
-      checkError(result.isValid(),
-		 "At count " << sl_counter << ": No Decision Point could be allocated for " 
-		 << flawedToken->toString() << 
-		 ". This indicates a failure to register a FlawHandler for this Flaw.");
 
       return result;
     }
 
     void OpenConditionManager::addFlaw(const TokenId& token){
-      if(token->isInactive() && !matches(token, m_staticMatchingRules)){
+      if(token->isInactive() && !staticMatch(token)){
 	debugMsg("OpenConditionManager:addFlaw",
 		 "Adding " << token->toString() << " as a candidate flaw.");
 	m_flawCandidates.insert(token);
@@ -159,8 +77,7 @@ namespace EUROPA {
 	checkError(candidate->isInactive(), 
 		   "It must be inactive to be a candidate." << candidate->getState()->lastDomain().toString());
 
-
-	if(matches(candidate, m_dynamicMatchingRules)){
+	if(dynamicMatch(candidate)){
 	  debugMsg("OpenConditionManager:next",
 		   candidate->toString() << " is out of dynamic scope.");
 	  continue;

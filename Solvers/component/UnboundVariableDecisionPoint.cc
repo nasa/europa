@@ -14,7 +14,13 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    UnboundVariableDecisionPoint::UnboundVariableDecisionPoint(const DbClientId& dbClient, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
+    bool UnboundVariableDecisionPoint::matches(const EntityId& entity){ 
+      return ConstrainedVariableId::convertable(entity);
+    }
+
+    UnboundVariableDecisionPoint::UnboundVariableDecisionPoint(const DbClientId& dbClient, 
+							       const ConstrainedVariableId& flawedVariable, 
+							       const TiXmlElement& configData)
       : DecisionPoint(dbClient, flawedVariable->getKey()),
 	m_flawedVariable(flawedVariable),
 	m_choices(ValueSource::getSource(flawedVariable)){

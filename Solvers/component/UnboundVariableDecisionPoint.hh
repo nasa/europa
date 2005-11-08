@@ -13,8 +13,6 @@ namespace EUROPA {
   namespace SOLVERS {
 
     class ValueSource;
-    typedef DecisionPoint::AbstractFactory<ConstrainedVariable, VariableMatchingRule> UnboundVariableDecisionPointFactory;
-    typedef Id<UnboundVariableDecisionPointFactory> UnboundVariableDecisionPointFactoryId;
 
     /**
      * @brief Abstract base class for Variable decisions.
@@ -38,6 +36,11 @@ namespace EUROPA {
       static DecisionPointId next(const ConstrainedVariableSet& flawCandidates, 
 				  const std::map< ConstrainedVariableId, unsigned int>& guardCache,
 				  unsigned int& bestPriority);
+
+      /**
+       * @brief Used to prune entities out which are not variables
+       */
+      static bool matches(const EntityId& entity);
 
       virtual ~UnboundVariableDecisionPoint();
 
@@ -127,6 +130,6 @@ namespace EUROPA {
 }
 
 #define REGISTER_VARIABLE_DECISION_FACTORY(CLASS, NAME)\
-REGISTER_DECISION_FACTORY(CLASS, EUROPA::ConstrainedVariable, EUROPA::SOLVERS::VariableMatchingRule, NAME);
+REGISTER_DECISION_FACTORY(CLASS, NAME);
 
 #endif
