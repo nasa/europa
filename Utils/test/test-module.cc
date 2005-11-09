@@ -41,6 +41,7 @@
 #define non_fast_only_assert(T) //NO-OP
 #endif
 
+#ifndef runTest(test)
 #define runTest(test) { \
   try { \
     std::cout << "      " << #test; \
@@ -69,7 +70,7 @@
    err.print(std::cout);\
   }\
   }
-
+#endif
 using namespace EUROPA;
 
 class TestError {
