@@ -40,7 +40,7 @@ namespace EUROPA {
       /**
        * @brief Used to prune entities out which are not variables
        */
-      static bool matches(const EntityId& entity);
+      static bool test(const EntityId& entity);
 
       virtual ~UnboundVariableDecisionPoint();
 

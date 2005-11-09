@@ -7,7 +7,7 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    bool OpenConditionDecisionPoint::matches(const EntityId& entity){ 
+    bool OpenConditionDecisionPoint::test(const EntityId& entity){ 
       return(TokenId::convertable(entity) || TokenId(entity)->isInactive());
     }
 

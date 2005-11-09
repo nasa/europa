@@ -15,22 +15,15 @@ namespace EUROPA {
   namespace SOLVERS {
 
     OpenConditionManager::OpenConditionManager(const TiXmlElement& configData)
-      : FlawManager(configData), m_dbListener(NULL) {}
+      : FlawManager(configData) {}
 
     void OpenConditionManager::handleInitialize(){
-      m_dbListener = new DbListener(m_db, *this);
-
       // FILL UP TOKENS
       const TokenSet& allTokens = m_db->getTokens();
       for(TokenSet::const_iterator it = allTokens.begin(); it != allTokens.end(); ++it){
 	TokenId token = *it;
 	addFlaw(token);
       }
-    }
-
-    OpenConditionManager::~OpenConditionManager(){
-      if(m_dbListener != NULL)
-	delete m_dbListener;
     }
 
     bool OpenConditionManager::inScope(const EntityId& entity) const {
@@ -148,41 +141,22 @@ namespace EUROPA {
       return priority;
     }
 
-    OpenConditionManager::DbListener::DbListener(const PlanDatabaseId& planDb,
-					     OpenConditionManager& dm)
-      : PlanDatabaseListener(planDb), m_dm(dm) {}
-
-    void OpenConditionManager::DbListener::notifyAdded(const TokenId& token){
-      m_dm.addFlaw(token);
+    void OpenConditionManager::notifyRemoved(const ConstrainedVariableId& variable){
+      if(Token::isStateVariable(variable))
+	removeFlaw(variable->getParent());
     }
 
-    void OpenConditionManager::DbListener::notifyRemoved(const TokenId& token){
-      m_dm.removeFlaw(token);
-    }
+    void OpenConditionManager::notifyChanged(const ConstrainedVariableId& variable, 
+					     const DomainListener::ChangeType& changeType){
+      if(!Token::isStateVariable(variable))
+	return;
 
-    void OpenConditionManager::DbListener::notifyActivated(const TokenId& token){
-      m_dm.removeFlaw(token);
+      if(changeType == DomainListener::RESET)
+	addFlaw(variable->getParent());
+      else if(changeType == DomainListener::SET_TO_SINGLETON)
+	removeFlaw(variable->getParent());
+      else if(changeType == DomainListener::CLOSED)
+	addFlaw(variable->getParent());
     }
-
-    void OpenConditionManager::DbListener::notifyDeactivated(const TokenId& token){
-      m_dm.addFlaw(token);
-    }
-
-    void OpenConditionManager::DbListener::notifyMerged(const TokenId& token){
-      m_dm.removeFlaw(token);
-    }
-
-    void OpenConditionManager::DbListener::notifySplit(const TokenId& token){
-      m_dm.addFlaw(token);
-    }
-
-    void OpenConditionManager::DbListener::notifyRejected(const TokenId& token){
-      m_dm.removeFlaw(token);
-    }
-
-    void OpenConditionManager::DbListener::notifyReinstated(const TokenId& token){
-      m_dm.addFlaw(token);
-    }
-
   }
 }

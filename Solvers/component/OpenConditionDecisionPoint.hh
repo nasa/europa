@@ -3,7 +3,6 @@
 
 #include "SolverDefs.hh"
 #include "SolverDecisionPoint.hh"
-#include "MatchingRule.hh"
 #include <vector>
 
 /**
@@ -28,7 +27,7 @@ namespace EUROPA {
     class OpenConditionDecisionPoint: public DecisionPoint {
     public:
       /**
-       * @brief Constructor. Matches signature for DecisionPointFactory
+       * @brief Constructor. Test signature for DecisionPointFactory
        */
       OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData);
 
@@ -48,7 +47,7 @@ namespace EUROPA {
       /**
        * @brief Used to prune entities out which are not inactive tokens
        */
-      static bool matches(const EntityId& entity);
+      static bool test(const EntityId& entity);
 
       std::string toString() const;
 

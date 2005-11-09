@@ -3,7 +3,6 @@
 
 #include "SolverDefs.hh"
 #include "SolverDecisionPoint.hh"
-#include "MatchingRule.hh"
 #include <vector>
 
 /**
@@ -25,7 +24,7 @@ namespace EUROPA {
       /**
        * @brief Used to prune entities out which are not active tokens
        */
-      static bool matches(const EntityId& entity);
+      static bool test(const EntityId& entity);
 
     protected:
       virtual void handleInitialize();

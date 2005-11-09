@@ -3,7 +3,6 @@
 #include "DbClient.hh"
 #include "AbstractDomain.hh"
 #include "Debug.hh"
-#include "MatchingRule.hh"
 #include "ValueSource.hh"
 
 /**
@@ -14,7 +13,7 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    bool UnboundVariableDecisionPoint::matches(const EntityId& entity){ 
+    bool UnboundVariableDecisionPoint::test(const EntityId& entity){ 
       return ConstrainedVariableId::convertable(entity);
     }
 

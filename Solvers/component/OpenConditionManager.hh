@@ -5,7 +5,7 @@
 #include "FlawManager.hh"
 #include "OpenConditionDecisionPoint.hh"
 #include "PlanDatabaseListener.hh"
-#include "MatchingRule.hh"
+//#include "MatchingRule.hh"
 
 #include <vector>
 
@@ -19,8 +19,6 @@ namespace EUROPA {
     class OpenConditionManager: public FlawManager {
     public:
       OpenConditionManager(const TiXmlElement& configData);
-
-      virtual ~OpenConditionManager();
 
       bool inScope(const EntityId& entity) const;
 
@@ -36,36 +34,13 @@ namespace EUROPA {
        */
       virtual unsigned int getPriority(const TokenId& candidate, unsigned int bestPriority);
 
+      void notifyRemoved(const ConstrainedVariableId& variable);
+      void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
       void handleInitialize();
       void addFlaw(const TokenId& token);
       void removeFlaw(const TokenId& token);
 
       TokenSet m_flawCandidates; /*!< The set of candidate token flaws */
-
-      /**
-       * @brief Plugs into Plan Database events on the Plan
-       * Database to synchronize flaw candidates.
-       */
-      class DbListener: public PlanDatabaseListener {
-      public:
-	DbListener(const PlanDatabaseId& db,
-		   OpenConditionManager& dm);
-
-      private:
-	void notifyAdded(const TokenId& token);
-	void notifyRemoved(const TokenId& token);
-	void notifyActivated(const TokenId& token);
-	void notifyDeactivated(const TokenId& token);
-	void notifyMerged(const TokenId& token);
-	void notifySplit(const TokenId& token);
-	void notifyRejected(const TokenId& token);
-	void notifyReinstated(const TokenId& token);
-
-	OpenConditionManager& m_dm;
-      };
-
-      friend class OpenConditionManager::DbListener;
-      OpenConditionManager::DbListener* m_dbListener; /*!< For processing Plan Database events */
     };
   }
 }

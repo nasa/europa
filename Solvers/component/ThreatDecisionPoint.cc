@@ -13,7 +13,7 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    bool ThreatDecisionPoint::matches(const EntityId& entity){ 
+    bool ThreatDecisionPoint::test(const EntityId& entity){ 
       return(TokenId::convertable(entity) || TokenId(entity)->isActive());
     }
 

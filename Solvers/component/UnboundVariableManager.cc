@@ -1,6 +1,6 @@
 #include "UnboundVariableManager.hh"
 #include "ConstrainedVariable.hh"
-#include "MatchingRule.hh"
+//#include "MatchingRule.hh"
 #include "PlanDatabase.hh"
 #include "ConstraintEngine.hh"
 #include "Debug.hh"
@@ -27,11 +27,9 @@ namespace EUROPA {
      * @see ComponentFactory
      */
     UnboundVariableManager::UnboundVariableManager(const TiXmlElement& configData)
-      : FlawManager(configData), m_ceListener(NULL), m_dbListener(NULL){}
+      : FlawManager(configData) {}
 
     void UnboundVariableManager::handleInitialize(){
-      m_ceListener = new CeListener(m_db->getConstraintEngine(), *this);
-      m_dbListener = new DbListener(m_db, *this);
 
       // FILL UP VARIABLES
       const ConstrainedVariableSet& allVars = m_db->getConstraintEngine()->getVariables();
@@ -48,15 +46,6 @@ namespace EUROPA {
 	handleConstraintAddition(constraint);
       }
     }
-
-    UnboundVariableManager::~UnboundVariableManager(){
-      if(m_ceListener != NULL)
-	delete m_ceListener;
-
-      if(m_dbListener != NULL)
-	delete m_dbListener;
-    }
-
 
     bool UnboundVariableManager::inScope(const EntityId& entity) const {
       bool result = false;
@@ -251,50 +240,52 @@ namespace EUROPA {
       return false;
     }
 
-    UnboundVariableManager::CeListener::CeListener(const ConstraintEngineId& ce,
-						    UnboundVariableManager& dm)
-      : ConstraintEngineListener(ce), m_fm(dm){}
 
-    void UnboundVariableManager::CeListener::notifyRemoved(const ConstrainedVariableId& variable){
-      m_fm.removeFlaw(variable);
+    void UnboundVariableManager::notifyRemoved(const ConstrainedVariableId& variable){
+      removeFlaw(variable);
     }
 
-    void UnboundVariableManager::CeListener::notifyChanged(const ConstrainedVariableId& variable, 
-							    const DomainListener::ChangeType& changeType){
-      if(changeType == DomainListener::SET_TO_SINGLETON)
-	m_fm.removeFlaw(variable);
-      else if(changeType == DomainListener::RESET || changeType == DomainListener::CLOSED)
-	m_fm.addFlaw(variable);
+    void UnboundVariableManager::notifyChanged(const ConstrainedVariableId& variable, 
+					       const DomainListener::ChangeType& changeType){
+      if(changeType == DomainListener::SET_TO_SINGLETON){
+	// If it is a token state variable, we test if a case for activation
+	if(Token::isStateVariable(variable) &&
+	   variable->getSpecifiedValue() == Token::ACTIVE){
+	  TokenId token = variable->getParent();
+	  const std::vector<ConstrainedVariableId>& variables = token->getVariables();
+	  for(std::vector<ConstrainedVariableId>::const_iterator it = variables.begin(); it != variables.end(); ++it){
+	    ConstrainedVariableId var = *it;
+	    addFlaw(var);
+	  }
+	}
+	else
+	  removeFlaw(variable);
+      }
+      else if(changeType == DomainListener::RESET || changeType == DomainListener::CLOSED){
+	// If it is a token state variable, we remove all its variables
+	if(Token::isStateVariable(variable)){
+	  TokenId token = variable->getParent();
+	  const std::vector<ConstrainedVariableId>& variables = token->getVariables();
+	  for(std::vector<ConstrainedVariableId>::const_iterator it = variables.begin(); it != variables.end(); ++it){
+	    ConstrainedVariableId var = *it;
+	    removeFlaw(var);
+	  }
+	}
+	else
+	  addFlaw(variable);
+      }
+      else if(changeType == DomainListener::OPENED)
+	addFlaw(variable);
       else if(changeType == DomainListener::RELAXED || changeType == DomainListener::RESTRICT_TO_SINGLETON)
-	m_fm.toggleSingletonFlaw(variable);
+	toggleSingletonFlaw(variable);
     }
 
-    void UnboundVariableManager::CeListener::notifyAdded(const ConstraintId& constraint){
-      m_fm.handleConstraintAddition(constraint);
+    void UnboundVariableManager::notifyAdded(const ConstraintId& constraint){
+      handleConstraintAddition(constraint);
     }
 
-    void UnboundVariableManager::CeListener::notifyRemoved(const ConstraintId& constraint){
-      m_fm.handleConstraintRemoval(constraint);
-    }
-
-    UnboundVariableManager::DbListener::DbListener(const PlanDatabaseId& db,
-						    UnboundVariableManager& dm)
-      : PlanDatabaseListener(db), m_fm(dm){}
-
-    void UnboundVariableManager::DbListener::notifyActivated(const TokenId& token){
-      const std::vector<ConstrainedVariableId>& variables = token->getVariables();
-      for(std::vector<ConstrainedVariableId>::const_iterator it = variables.begin(); it != variables.end(); ++it){
-	ConstrainedVariableId var = *it;
-	m_fm.addFlaw(var);
-      }
-    }
-
-    void UnboundVariableManager::DbListener::notifyDeactivated(const TokenId& token){
-      const std::vector<ConstrainedVariableId>& variables = token->getVariables();
-      for(std::vector<ConstrainedVariableId>::const_iterator it = variables.begin(); it != variables.end(); ++it){
-	ConstrainedVariableId var = *it;
-	m_fm.removeFlaw(var);
-      }
+    void UnboundVariableManager::notifyRemoved(const ConstraintId& constraint){
+      handleConstraintRemoval(constraint);
     }
   }
 }

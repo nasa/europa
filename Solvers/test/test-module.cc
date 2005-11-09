@@ -358,7 +358,8 @@ private:
       assert(assembly.playTransactions("SimpleRejection.xml"));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertTrue(solver.solve());
-      assertTrue(assembly.getPlanDatabase()->getTokens().size() == 1);
+      assertTrue(assembly.getPlanDatabase()->getTokens().size() == 1, 
+		 toString(assembly.getPlanDatabase()->getTokens().size()));
     }
 
 

@@ -18,8 +18,8 @@ namespace EUROPA {
     typedef Id<FlawManager> FlawManagerId;
     typedef std::list<FlawManagerId> FlawManagers;
 
-    class MatchingRule;
-    typedef Id<MatchingRule> MatchingRuleId;
+    class Condition;
+    typedef Id<Condition> ConditionId;
 
     class DecisionPoint;
     typedef Id<DecisionPoint> DecisionPointId;
