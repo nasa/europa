@@ -32,31 +32,31 @@
 #include <pthread.h>
 #include <string>
 
-  class Foo;
-  typedef Id<Foo> FooId;
+  class DBFoo;
+  typedef Id<DBFoo> DBFooId;
 
-  class Foo : public Timeline {
+  class DBFoo : public Timeline {
   public:
-    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
-    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    DBFoo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    DBFoo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
     void handleDefaults(bool autoClose = true); // default variable initialization
     
-    // test/simple-predicate.nddl:4 Foo
+    // test/simple-predicate.nddl:4 DBFoo
     void constructor();
     void constructor(int arg0, LabelStr& arg1);
     Id< Variable< IntervalIntDomain > > m_0;
     Id< Variable< LabelSet > > m_1;
   };
 
-  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+  DBFoo::DBFoo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
     : Timeline(planDatabase, type, name, true) {
   }
 
-  Foo::Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+  DBFoo::DBFoo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
     : Timeline(parent, type, name, true) {}
 
   // default initialization of member variables
-  void Foo::handleDefaults(bool autoClose) {
+  void DBFoo::handleDefaults(bool autoClose) {
     if(m_0.isNoId()){
       check_error(!ObjectId::convertable(m_0)); // Object Variables must be explicitly initialized to a singleton
       m_0 = addVariable(IntervalIntDomain(), "IntervalIntVar");
@@ -65,18 +65,18 @@
     if(autoClose) close();
   }
 
-  void Foo::constructor() {
+  void DBFoo::constructor() {
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
 
-  void Foo::constructor(int arg0, LabelStr& arg1) {
+  void DBFoo::constructor(int arg0, LabelStr& arg1) {
     m_0 = addVariable(IntervalIntDomain(arg0), "IntervalIntVar");
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
 
-  class StandardFooFactory: public ConcreteObjectFactory {
+  class StandardDBFooFactory: public ConcreteObjectFactory {
   public:
-    StandardFooFactory(): ConcreteObjectFactory(DEFAULT_OBJECT_TYPE()){}
+    StandardDBFooFactory(): ConcreteObjectFactory(DEFAULT_OBJECT_TYPE()){}
 
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb, 
@@ -84,16 +84,16 @@
                             const LabelStr& objectName,
                             const std::vector<ConstructorArgument>& arguments) const {
       assert(arguments.empty());
-      FooId foo = (new Foo(planDb, objectType, objectName))->getId();
+      DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       foo->constructor();
       foo->handleDefaults();
       return foo;
     }
   };
 
-  class SpecialFooFactory: public ConcreteObjectFactory{
+  class SpecialDBFooFactory: public ConcreteObjectFactory{
   public:
-    SpecialFooFactory(): ConcreteObjectFactory(DEFAULT_OBJECT_TYPE().toString() +
+    SpecialDBFooFactory(): ConcreteObjectFactory(DEFAULT_OBJECT_TYPE().toString() +
 					       ":" + IntervalIntDomain::getDefaultTypeName().toString() +
 					       ":" + LabelSet::getDefaultTypeName().toString())
     {}
@@ -103,7 +103,7 @@
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
                             const std::vector<ConstructorArgument>& arguments) const {
-      FooId foo = (new Foo(planDb, objectType, objectName))->getId();
+      DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       // Type check the arguments
       assert(arguments.size() == 2);
       assert(arguments[0].first == IntervalIntDomain::getDefaultTypeName());
@@ -160,8 +160,8 @@
     initDbTestSchema(SCHEMA);
 
     // Have to register factories for testing.
-    new StandardFooFactory();
-    new SpecialFooFactory();
+    new StandardDBFooFactory();
+    new SpecialDBFooFactory();
     new IntervalTokenFactory();
   }
 
@@ -3267,7 +3267,7 @@ private:
     client->enableTransactionLogging();
     DbClientTransactionLog* txLog = new DbClientTransactionLog(client);
 
-    FooId foo1 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo1");
+    DBFooId foo1 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo1");
     assertTrue(foo1.isValid());
 
     std::vector<ConstructorArgument> arguments;
@@ -3275,7 +3275,7 @@ private:
     LabelSet arg1(LabelSet::getDefaultTypeName(), "Label");
     arguments.push_back(ConstructorArgument(IntervalIntDomain::getDefaultTypeName(), &arg0)); 
     arguments.push_back(ConstructorArgument(LabelSet::getDefaultTypeName(), &arg1));
-    FooId foo2 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo2", arguments);
+    DBFooId foo2 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo2", arguments);
     assertTrue(foo2.isValid());
 
     TokenId token = client->createToken(DEFAULT_PREDICATE().c_str());
