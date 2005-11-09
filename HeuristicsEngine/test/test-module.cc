@@ -27,22 +27,22 @@
 #include <fstream>
 
 
-#define DEFAULT_SETUP(ce, db, autoClose) \
+#define HE_DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
-    initCBPTestSchema(); \
+    HEinitCBPTestSchema(); \
     PlanDatabase db(ce.getId(), Schema::instance()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
     if (autoClose) \
       db.close();
 
-#define DEFAULT_TEARDOWN()
+#define HE_DEFAULT_TEARDOWN()
 
-#define SETUP_HEURISTICS(heuristicsSource) \
-  READ_HEURISTICS(heuristicsSource, true)
+#define HE_SETUP_HEURISTICS(heuristicsSource) \
+  HE_READ_HEURISTICS(heuristicsSource, true)
 
 
-#define READ_HEURISTICS(heuristicsSource, autoClose)		\
+#define HE_READ_HEURISTICS(heuristicsSource, autoClose)		\
   initHeuristicsSchema();                                       \
   ConstraintEngine ce;						\
   PlanDatabase db(ce.getId(), Schema::instance());		\
@@ -58,7 +58,7 @@
 /**
  * @brief Creates the type specifications required for testing
  */
-void initCBPTestSchema(){
+void HEinitCBPTestSchema(){
   const SchemaId& schema = Schema::instance();
   schema->reset();
   schema->addObjectType("Object");
@@ -195,7 +195,7 @@ private:
    * Ensure basic hook up and cleanup of Heuristics components
    */
   static bool testBasicAllocation(){
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     Object o1(db.getId(), "Object", "o1");
     db.close();               
   
@@ -281,7 +281,7 @@ private:
     assertTrue(ce.propagate() && he.getPriority(t4.getId()) == he.getDefaultTokenPriority(), 
 	       toString(he.getPriority(t4.getId())));
 
-    DEFAULT_TEARDOWN();
+    HE_DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -289,7 +289,7 @@ private:
    * Test matching of tokens and Heuristics based on static matching data (rather than guard values)
    */
   static bool testTokenMatching(){
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     Object o1(db.getId(), "Object", "o1");
     db.close();               
   
@@ -441,7 +441,7 @@ private:
     assertFalse(other.canMatch(t2.getId()));
     assertFalse(dontcareIntLabelSetGuards.canMatch(t2.getId()));
 
-    DEFAULT_TEARDOWN();
+    HE_DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -449,7 +449,7 @@ private:
    * Test dynamic matching against guard values
    */
   static bool testDynamicMatching() {
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     Object o1(db.getId(), "Object", "o1");
     db.close();               
   
@@ -554,7 +554,7 @@ private:
     param2->specify(LabelStr("A"));
     ce.propagate();
     assertTrue(he.getPriority(t0.getId()) == 5);
-    DEFAULT_TEARDOWN();
+    HE_DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -563,7 +563,7 @@ private:
    */
   static bool testMasterMatching(){
 
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     Object o1(db.getId(), "Object", "o1");
     db.close();               
   
@@ -665,7 +665,7 @@ private:
     }
 
 
-    DEFAULT_TEARDOWN();
+    HE_DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -673,7 +673,7 @@ private:
    * Test dynamic matching against guard values
    */
   static bool testTargetSelection() {
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     Object o1(db.getId(), "Object" , "o1");
     db.close();               
   
@@ -721,7 +721,7 @@ private:
     assertTrue(he.getPriority(t0.getId()) == he.getDefaultTokenPriority());
     assertTrue(he.getPriority(t0.getStart()) == 5);
     assertTrue(he.getPriority(param1) == 10);
-    DEFAULT_TEARDOWN();
+    HE_DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -734,7 +734,7 @@ private:
   }
 
   static bool testHeuristicConfiguration(const char* source){
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     initHeuristicsSchema();
     db.close();               
   
@@ -755,12 +755,12 @@ private:
     }
 
     ofs.close();
-    DEFAULT_TEARDOWN();
+    HE_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool tesDefaultHandling() {
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     Object o1(db.getId(), "Object", "o1");
     db.close();               
 
@@ -841,7 +841,7 @@ private:
       assertTrue(he.getPriority(slave2.getId()) == 2000);
     }
 
-    DEFAULT_TEARDOWN();
+    HE_DEFAULT_TEARDOWN();
     return true;
   }
 };
@@ -864,7 +864,7 @@ public:
 private:
 
   static bool testDefaultInitialization() {
-    READ_HEURISTICS("HSTSHeuristics.xml", false);
+    HE_READ_HEURISTICS("HSTSHeuristics.xml", false);
     std::vector< GuardEntry > domainSpecs;
     heuristics.setDefaultPriorityForToken(20.3, LabelStr("Commands.TakeSample"), domainSpecs);
     heuristics.setDefaultPriorityForToken(10000.0);
@@ -890,7 +890,7 @@ private:
   }
 
   static bool testHSTSHeuristicsAssembly() {
-    SETUP_HEURISTICS("HSTSHeuristics.xml");
+    HE_SETUP_HEURISTICS("HSTSHeuristics.xml");
 
     Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
     Timeline ins(db.getId(),LabelStr("Instrument"),LabelStr("ins1"));
@@ -969,7 +969,7 @@ private:
   }
 
   static bool testHSTSHeuristicsStrict() {
-    SETUP_HEURISTICS("HSTSHeuristics.xml");
+    HE_SETUP_HEURISTICS("HSTSHeuristics.xml");
 
     //set up the database
     Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
@@ -1067,7 +1067,7 @@ private:
   }
 
   static bool testDefaultCompatibilityHeuristic() {
-    SETUP_HEURISTICS("DefaultCompatHeuristics.xml");
+    HE_SETUP_HEURISTICS("DefaultCompatHeuristics.xml");
 
     //set up the database
     Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
@@ -1196,7 +1196,7 @@ private:
   }
 
   static bool testPriorities() {
-    SETUP_HEURISTICS("HSTSHeuristics.xml");
+    HE_SETUP_HEURISTICS("HSTSHeuristics.xml");
 
     Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
     Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
@@ -1334,7 +1334,7 @@ private:
   }
 
   static bool testTokenOrderingCalculations() {
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     Object o1(db.getId(), "Object", "o1");
     db.close();               
 
@@ -1382,7 +1382,7 @@ private:
   }
 
   static bool testTokenOrdering(){
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     Object o1(db.getId(), "Object", "o1");
     db.close();               
 
@@ -1450,7 +1450,7 @@ private:
   }
 
   static bool testTokenOrderingChoices(){
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     Object o1(db.getId(), "Object", "o1");
     db.close();               
 
@@ -1518,7 +1518,7 @@ private:
   }
 
   static bool testVariableValueOrderingChoices(){
-    DEFAULT_SETUP(ce,db,false);      
+    HE_DEFAULT_SETUP(ce,db,false);      
     // Want a bunch of objects - note the names will not match the keys. 
     Object o3(db.getId(), "Object", "o3");
     Object o2(db.getId(), "Object", "o2");
