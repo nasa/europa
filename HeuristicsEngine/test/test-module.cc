@@ -26,7 +26,6 @@
 #include <string>
 #include <fstream>
 
-
 #define HE_DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
     HEinitCBPTestSchema(); \
@@ -186,7 +185,8 @@ public:
     runTest(testTargetSelection);
     runTest(testVariableHeuristicConfiguration);
     runTest(testTokenHeuristicConfiguration);
-    runTest(tesDefaultHandling);
+    runTest(testDefaultHandling);
+    runTest(testGNATS_3153);
     return true;
   }
 
@@ -759,8 +759,8 @@ private:
     return true;
   }
 
-  static bool tesDefaultHandling() {
-    HE_DEFAULT_SETUP(ce,db,false);      
+  static bool testDefaultHandling() {
+    HE_DEFAULT_SETUP(ce,db,false);     
     Object o1(db.getId(), "Object", "o1");
     db.close();               
 
@@ -840,6 +840,32 @@ private:
       ce.propagate();
       assertTrue(he.getPriority(slave2.getId()) == 2000);
     }
+
+    HE_DEFAULT_TEARDOWN();
+    return true;
+  }
+  static bool testGNATS_3153() {
+    HE_SETUP_HEURISTICS("GNATS_3153_Heuristics.xml");
+    Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
+    Object loc2(db.getId(),LabelStr("Location"),LabelStr("Loc2"));
+    Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
+    Object loc4(db.getId(),LabelStr("Location"),LabelStr("Loc4"));
+    Object loc5(db.getId(),LabelStr("Location"),LabelStr("Loc5"));
+    Object com(db.getId(), LabelStr("Commands"), LabelStr("com"));
+    db.close();               
+
+    std::list<ObjectId> results;
+    db.getObjectsByType("Location",results);
+    ObjectDomain allLocs(results,"Location");
+
+    IntervalToken tok1(db.getId(),LabelStr("Commands.TakeSample"), true, 
+		       IntervalIntDomain(1,100), IntervalIntDomain(1,100), IntervalIntDomain(1,100), 
+		       "com", false);
+
+    ConstrainedVariableId rock = tok1.addParameter(allLocs, LabelStr("rock"));
+    tok1.close();
+    ce.propagate();
+    assertTrue(heuristics.getPriority(rock) ==  50, toString(heuristics.getPriority(rock)));
 
     HE_DEFAULT_TEARDOWN();
     return true;
