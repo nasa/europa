@@ -63,7 +63,7 @@ namespace EUROPA {
       IntervalDomain realDomain(10.2,20.4);
       assertFalse(realDomain.isEmpty());
       assertFalse(realDomain.isFinite());
-      assert(realDomain.getSize() == PLUS_INFINITY);
+      assert(realDomain.getSize() == (unsigned int) PLUS_INFINITY);
 
       IntervalIntDomain intDomain(10, 20);
       assertTrue(intDomain.isFinite());

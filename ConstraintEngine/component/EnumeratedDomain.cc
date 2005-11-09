@@ -78,7 +78,7 @@ namespace EUROPA {
     check_error(isEmpty() || isAscending(m_values));
   }
 
-  int EnumeratedDomain::getSize() const {
+  unsigned int EnumeratedDomain::getSize() const {
     return(m_values.size());
   }
 

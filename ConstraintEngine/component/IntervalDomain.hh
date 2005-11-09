@@ -223,7 +223,7 @@ namespace EUROPA {
      * @brief Return the number of elements in the domain.
      * @note Can only be called on finite domains.
      */
-    int getSize() const;
+    unsigned int getSize() const;
 
     /**
      * @brief Test for equality.

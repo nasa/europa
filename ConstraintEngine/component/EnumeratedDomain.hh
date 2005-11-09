@@ -107,7 +107,7 @@ namespace EUROPA {
      * @return isEmpty() <=> 0, isSingleton() <=> 1
      * @see AbstractDomain::getSize()
      */
-    int getSize() const;
+    unsigned int getSize() const;
 
     /**
      * @brief Add an element to the set.

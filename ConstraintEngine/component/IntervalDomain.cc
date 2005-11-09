@@ -323,7 +323,7 @@ namespace EUROPA {
     notifyChange(DomainListener::EMPTIED);
   }
 
-  int IntervalDomain::getSize() const {
+  unsigned int IntervalDomain::getSize() const {
     checkError(!isOpen(), "Cannot test for the size of an open domain.");
 
     if (isEmpty())
