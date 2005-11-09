@@ -60,7 +60,6 @@
 #include "UnboundVariableDecisionPoint.hh"
 #include "UnboundVariableManager.hh"
 #include "SolverDecisionPoint.hh"
-#include "MatchingRule.hh"
 #include "Filters.hh"
 
 #ifndef TIXML_USE_STL

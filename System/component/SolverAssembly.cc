@@ -25,7 +25,6 @@
 #include "UnboundVariableDecisionPoint.hh"
 #include "UnboundVariableManager.hh"
 #include "SolverDecisionPoint.hh"
-#include "MatchingRule.hh"
 #include "Filters.hh"
 #include "SolverPartialPlanWriter.hh"
 
