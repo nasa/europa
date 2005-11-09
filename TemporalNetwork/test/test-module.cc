@@ -27,7 +27,7 @@
 
 #define DEFAULT_TEARDOWN_CE_ONLY()
 
-#define DEFAULT_SETUP(ce, db,  autoClose) \
+#define CD_DEFAULT_SETUP(ce, db,  autoClose) \
     ConstraintEngine ce; \
     Schema::instance()->reset();\
     Schema::instance()->addObjectType("Objects"); \
@@ -43,7 +43,7 @@
     if (autoClose) \
       db.close();
 
-#define DEFAULT_TEARDOWN()
+#define TN_DEFAULT_TEARDOWN()
 
 
 #define DEFAULT_SETUP_RULES(ce, db,  autoClose) \
@@ -195,14 +195,14 @@ public:
 private:
 
   static bool testBasicAllocation() {
-    DEFAULT_SETUP(ce,db,true);
+    CD_DEFAULT_SETUP(ce,db,true);
     ce.propagate();
-    DEFAULT_TEARDOWN();
+    TN_DEFAULT_TEARDOWN();
     return true;
   }
   
   static bool testTemporalPropagation() {
-    DEFAULT_SETUP(ce,db,false);
+    CD_DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", "o2"))->getId();
     assertTrue(!timeline.isNoId());
@@ -249,12 +249,12 @@ private:
     assertTrue(t2.getEnd()->getDerivedDomain().getUpperBound() == 20);
 
     delete (Constraint*) beforeConstraint;
-    DEFAULT_TEARDOWN();
+    TN_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testCanPrecede() {
-    DEFAULT_SETUP(ce,db,false);
+    CD_DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assertTrue(!timeline.isNoId());
@@ -336,12 +336,12 @@ private:
     // compute from advisor
     assertTrue (!db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
 
-    DEFAULT_TEARDOWN();
+    TN_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testCanFitBetween() {
-    DEFAULT_SETUP(ce,db,false);
+    CD_DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assertTrue(!timeline.isNoId());
@@ -374,12 +374,12 @@ private:
     // compute from advisor
     assertTrue (db.getTemporalAdvisor()->canFitBetween(token.getId(), predecessor.getId(), successor.getId()));
 
-    DEFAULT_TEARDOWN();
+    TN_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testCanBeConcurrent() {
-    DEFAULT_SETUP(ce,db,false);
+    CD_DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assertTrue(!timeline.isNoId());
@@ -447,12 +447,12 @@ private:
     delete (Constraint*) c0;
     delete (Constraint*) c1;
 
-    DEFAULT_TEARDOWN();
+    TN_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testTokenStateChangeSynchronization() {
-    DEFAULT_SETUP(ce,db,false);
+    CD_DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
     assertTrue(!timeline.isNoId());
@@ -495,7 +495,7 @@ private:
 
     assertTrue(t2.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
 
-    DEFAULT_TEARDOWN();
+    TN_DEFAULT_TEARDOWN();
     return true;
   }
 
