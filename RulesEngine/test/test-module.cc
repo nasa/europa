@@ -181,7 +181,7 @@ void LocalVariableGuard_0_0::handleExecute(){
   addSlave(new IntervalToken(m_token, "any", LabelStr("AllObjects.Predicate")));
 }
 
-#define DEFAULT_SETUP(ce, db, autoClose) \
+#define RE_DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
     Schema::instance()->reset();\
     Schema::instance()->addObjectType(LabelStr("AllObjects")); \
@@ -198,7 +198,7 @@ void LocalVariableGuard_0_0::handleExecute(){
     if (autoClose) \
       db.close();
 
-#define DEFAULT_TEARDOWN()
+#define RE_DEFAULT_TEARDOWN()
 
 class RulesEngineTest {
 public:
@@ -213,7 +213,7 @@ public:
 private:
 
   static bool testSimpleSubGoal(){
-    DEFAULT_SETUP(ce, db, false);
+    RE_DEFAULT_SETUP(ce, db, false);
     db.close();
 
     SimpleSubGoal r;
@@ -234,12 +234,12 @@ private:
     TokenId slaveToken = *(t0.getSlaves().begin());
     assertTrue(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
 
-    DEFAULT_TEARDOWN();
+    RE_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testNestedGuards(){
-    DEFAULT_SETUP(ce, db, false);
+    RE_DEFAULT_SETUP(ce, db, false);
     Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
     db.close();
 
@@ -282,12 +282,12 @@ private:
     t0.cancel();
     ce.propagate();
     assertTrue(t0.getSlaves().empty());
-    DEFAULT_TEARDOWN();
+    RE_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testLocalVariable(){
-    DEFAULT_SETUP(ce, db, false);
+    RE_DEFAULT_SETUP(ce, db, false);
     db.close();
 
     LocalVariableGuard_0 r;
@@ -317,12 +317,12 @@ private:
     ce.propagate();
     assertTrue(t0.getSlaves().size() == 1);
 
-    DEFAULT_TEARDOWN();
+    RE_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testTestRule(){
-    DEFAULT_SETUP(ce, db, false);
+    RE_DEFAULT_SETUP(ce, db, false);
     db.close();
 
     TestRule r(LabelStr("AllObjects.Predicate"));
@@ -343,19 +343,19 @@ private:
     ce.propagate();
     assertTrue(t0.getSlaves().size() == 1, toString(t0.getSlaves().size()));
 
-    DEFAULT_TEARDOWN();
+    RE_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testPurge(){
-    DEFAULT_SETUP(ce, db, false);
+    RE_DEFAULT_SETUP(ce, db, false);
     db.close();
 
     new TestRule(LabelStr("AllObjects.Predicate"));
 
     Rule::purgeAll();
 
-    DEFAULT_TEARDOWN();
+    RE_DEFAULT_TEARDOWN();
     return true;
   }
 
