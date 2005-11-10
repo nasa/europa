@@ -1,6 +1,6 @@
-#include "test-module.cc"
+#include "ce-test-module.hh"
 
 int main(int argc, const char** argv) {
   ConstraintEngineModuleTests::runTests();
-  exit(0);
+  return 0;
 }

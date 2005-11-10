@@ -4,6 +4,7 @@
  * @date August, 2003
  * @brief Read the source for details
  */
+#include "ce-test-module.hh"
 #include "TestSupport.hh"
 #include "Utils.hh"
 #include "Variable.hh"
@@ -2561,9 +2562,7 @@ private:
   }
 };
 
-class ConstraintEngineModuleTests {
-public:
-  static void runTests() {
+void ConstraintEngineModuleTests::runTests() {
     LockManager::instance().connect();
     LockManager::instance().lock();
 
@@ -2582,6 +2581,6 @@ public:
     std::cout << "Finished" << std::endl;
     ConstraintLibrary::purgeAll();
   }
-};
+
 
 
