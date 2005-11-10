@@ -1,3 +1,4 @@
+#include "tn-test-module.hh"
 #include "TestSupport.hh"
 #include "TemporalNetwork.hh"
 #include "TemporalPropagator.hh"
@@ -722,9 +723,7 @@ private:
 };
 
 
-class TemporalNetworkModuleTests {
-public:
-  static void runTests() {
+void TemporalNetworkModuleTests::runTests() {
   LockManager::instance().connect();
   LockManager::instance().lock();
 
@@ -739,4 +738,3 @@ public:
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
   }
-};

@@ -2,7 +2,7 @@ SubDir PLASMA TemporalNetwork test ;
 
 if ! $(PLASMA_READY) {
 
-ModuleMain tn-module-tests : TestSubgoalRule.cc module-tests.cc : TemporalNetwork RulesEngine ;
+ModuleMain tn-module-tests : TestSubgoalRule.cc module-tests.cc tn-test-module.cc : TemporalNetwork RulesEngine ;
 RunModuleMain run-tn-module-tests : tn-module-tests ;
 LocalDepends tests : run-tn-module-tests ;
 

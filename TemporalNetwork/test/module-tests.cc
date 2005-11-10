@@ -1,6 +1,6 @@
-#include "test-module.cc"
+#include "tn-test-module.hh"
 
 int main(int argc, const char** argv) {
   TemporalNetworkModuleTests::runTests();
-  exit(0);
+  return 0;
 }
