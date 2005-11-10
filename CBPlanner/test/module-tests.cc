@@ -1,6 +1,6 @@
-#include "test-module.cc"
+#include "cbp-test-module.hh"
 
 int main(int argc, const char** argv) {
   CBPlannerModuleTests::runTests();
-  exit(0);
+  return 0;
 }

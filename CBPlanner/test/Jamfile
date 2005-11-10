@@ -8,7 +8,7 @@ if ! $(PLASMA_READY) {
 CBPlanner_Test_Files = [ FGristFiles NotFalseConstraint BinaryCustomConstraint ConditionalRule SubgoalOnceRule  ] ;
 ModuleObjects $(CBPlanner_Test_Files:S=.cc) : CBPlanner ;
 
-ModuleMain cbp-module-tests : $(CBPlanner_Test_Files:S=$(SUFOBJ)) module-tests.cc : CBPlanner ;
+ModuleMain cbp-module-tests : $(CBPlanner_Test_Files:S=$(SUFOBJ)) module-tests.cc cbp-test-module.cc : CBPlanner ;
 RunModuleMain run-cbp-module-tests : cbp-module-tests ;
 LocalDepends tests : run-cbp-module-tests ;
 

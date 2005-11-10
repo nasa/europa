@@ -1,3 +1,4 @@
+#include "cbp-test-module.hh"
 #include "CBPlannerDefs.hh"
 #include "DecisionPoint.hh"
 #include "CBPlanner.hh"
@@ -1879,9 +1880,7 @@ private:
 
 
 
-class CBPlannerModuleTests {
-public:
-  static void runTests() {
+void CBPlannerModuleTests::runTests() {
     LockManager::instance().connect();
     LockManager::instance().lock();
 
@@ -1915,6 +1914,6 @@ public:
 
     std::cout << "Finished" << std::endl;
     ConstraintLibrary::purgeAll();
+    uninitConstraintLibrary();
   }
-};
 
