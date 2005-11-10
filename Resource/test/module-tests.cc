@@ -1,6 +1,6 @@
-#include "test-module.cc"
+#include "rs-test-module.hh"
 
 int main(int argc, const char** argv) {
   ResourceModuleTests::runTests();
-  exit(0);
+  return 0;
 }
