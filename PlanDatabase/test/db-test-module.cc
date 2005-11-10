@@ -5158,6 +5158,7 @@ void PlanDatabaseModuleTests::runTests() {
 
   LockManager::instance().lock();
   ConstraintLibrary::purgeAll();
+  uninitConstraintLibrary();
   LockManager::instance().unlock();
 
   LockManager::instance().lock();
