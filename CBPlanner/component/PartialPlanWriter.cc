@@ -58,106 +58,7 @@
 
 #define IN_NO_SECTION 0
 #define IN_GENERAL_SECTION 1
-#define IN_TRANSACTION_SECTION 2
-
-                       //0                   1               2              3
-enum transactionNames {OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_ADDED_TO_OBJECT, 
-                       //4             5                6                  7             8
-                       TOKEN_CLOSED, TOKEN_ACTIVATED, TOKEN_DEACTIVATED, TOKEN_MERGED, TOKEN_SPLIT,
-                       //9               10                11             12
-                       TOKEN_REJECTED, TOKEN_REINSTATED, TOKEN_DELETED, TOKEN_REMOVED, 
-                       //13              14           15                  16
-                       TOKEN_INSERTED, TOKEN_FREED, CONSTRAINT_CREATED, CONSTRAINT_DELETED,
-                       //17                   18           19           20
-                       CONSTRAINT_EXECUTED, VAR_CREATED, VAR_DELETED, VAR_DOMAIN_RELAXED,
-                       //21                     22                    23
-                       VAR_DOMAIN_RESTRICTED, VAR_DOMAIN_SPECIFIED, VAR_DOMAIN_RESET, 
-                       //24                  25                    
-                       VAR_DOMAIN_EMPTIED, VAR_DOMAIN_UPPER_BOUND_DECREASED, 
-                       //26                                27
-                       VAR_DOMAIN_LOWER_BOUND_INCREASED, VAR_DOMAIN_BOUNDS_RESTRICTED,
-                       //28                        29
-                       VAR_DOMAIN_VALUE_REMOVED, VAR_DOMAIN_RESTRICT_TO_SINGLETON,
-                       //30              31                           32
-                       VAR_DOMAIN_SET, VAR_DOMAIN_SET_TO_SINGLETON, VAR_DOMAIN_CLOSED, 
-                       //33             34           35                   36                  37
-                       RULE_EXECUTED, RULE_UNDONE, ASSIGN_NEXT_STARTED, ASSIGN_NEXT_FAILED, ASSIGN_NEXT_SUCCEEDED,
-                       //38                      39                     40
-                       ASSIGN_CURRENT_STARTED, ASSIGN_CURRENT_FAILED, ASSIGN_CURRENT_SUCCEEDED,
-                       //41               42              43               
-                       RETRACT_STARTED, RETRACT_FAILED, RETRACT_SUCCEEDED, 
-                       //44                     45                     46                     47
-                       PROPAGATION_COMMENCED, PROPAGATION_COMPLETED, PROPAGATION_PREEMPTED, ERROR};
-
-const int transactionTotal = ERROR + 1;
-
-const char *CREATION = "CREATION";
-const char *DELETION = "DELETION";
-const char *ADDITION = "ADDITION";
-const char *REMOVAL = "REMOVAL";
-const char *CLOSURE = "CLOSURE";
-const char *RESTRICTION = "RESTRICTION";
-const char *RELAXATION = "RELAXATION";
-const char *EXECUTION = "EXECUTION";
-const char *SPECIFICATION = "SPECIFICATION";
-const char *UNDO = "UNDO";
-const char *ASSIGNMENT = "ASSIGNMENT";
-const char *RETRACTION = "RETRACTION";
-const char *NONE = "";
-
-const char *transactionTypeStrs[transactionTotal] = {
-  //OBJECT_CREATED = 0, OBJECT_DELETED, TOKEN_CREATED, TOKEN_ADDED_TO_OBJECT,
-  CREATION, DELETION, CREATION, ADDITION,
-  // TOKEN_CLOSED, TOKEN_ACTIVATED, TOKEN_DEACTIVATED, TOKEN_MERGED, TOKEN_SPLIT,
-  CLOSURE, NONE, NONE, NONE, NONE,
-  //TOKEN_REJECTED, TOKEN_REINSTATED, TOKEN_DELETED, TOKEN_REMOVED,
-  NONE, NONE, DELETION, REMOVAL, 
-  //TOKEN_INSERTED, TOKEN_FREED, CONSTRAINT_CREATED, CONSTRAINT_DELETED,
-  NONE, NONE, CREATION, DELETION,
-  // CONSTRAINT_EXECUTED, VAR_CREATED, VAR_DELETED, VAR_DOMAIN_RELAXED,
-  EXECUTION, CREATION, DELETION, RELAXATION,
-  //VAR_DOMAIN_RESTRICTED, VAR_DOMAIN_SPECIFIED, VAR_DOMAIN_RESET, 
-  RESTRICTION, SPECIFICATION, RELAXATION, 
-  //VAR_DOMAIN_EMPTIED, VAR_DOMAIN_UPPER_BOUND_DECREASED, 
-  RESTRICTION, RESTRICTION,
-  //VAR_DOMAIN_LOWER_BOUND_INCREASED, VAR_DOMAIN_BOUNDS_RESTRICTED,
-  RESTRICTION, RESTRICTION,
-  //VAR_DOMAIN_VALUE_REMOVED, VAR_DOMAIN_RESTRICT_TO_SINGLETON,
-  RESTRICTION, RESTRICTION,
-  //VAR_DOMAIN_SET, VAR_DOMAIN_SET_TO_SINGLETON, VAR_DOMAIN_CLOSED,
-  SPECIFICATION, SPECIFICATION, CLOSURE, 
-  //RULE_EXECUTED, RULE_UNDONE, ASSIGN_NEXT_STARTED, ASSIGN_NEXT_FAILED, ASSIGN_NEXT_SUCCEEDED,
-  EXECUTION, UNDO, ASSIGNMENT, ASSIGNMENT, ASSIGNMENT,
-  //ASSIGN_CURRENT_STARTED, ASSIGN_CURRENT_FAILED, ASSIGN_CURRENT_SUCCEEDED,
-  ASSIGNMENT, ASSIGNMENT, ASSIGNMENT,
-  //RETRACT_STARTED, RETRACT_FAILED, RETRACT_SUCCEEDED,
-  RETRACTION, RETRACTION, RETRACTION,
-  //PROPAGATION_COMMENCED, PROPAGATION_COMPLETED, PROPAGATION_PREEMPTED, ERROR
-  NONE, NONE, NONE, "ERROR"};
- 
-const char *transactionNameStrs[transactionTotal] = { 
-  "OBJECT_CREATED", "OBJECT_DELETED", "TOKEN_CREATED", "TOKEN_ADDED_TO_OBJECT", "TOKEN_CLOSED",
-  "TOKEN_ACTIVATED", "TOKEN_DEACTIVATED", "TOKEN_MERGED", "TOKEN_SPLIT", "TOKEN_REJECTED",
-  "TOKEN_REINSTATED", "TOKEN_DELETED", "TOKEN_REMOVED", "TOKEN_INSERTED", "TOKEN_FREED",
-  "CONSTRAINT_CREATED", "CONSTRAINT_DELETED", "CONSTRAINT_EXECUTED", "VARIABLE_CREATED",
-  "VARIABLE_DELETED", "VARIABLE_DOMAIN_RELAXED", "VARIABLE_DOMAIN_RESTRICTED", 
-  "VARIABLE_DOMAIN_SPECIFIED", "VARIABLE_DOMAIN_RESET", "VARIABLE_DOMAIN_EMPTIED", 
-  "VARIABLE_DOMAIN_UPPER_BOUND_DECREASED", "VARIABLE_DOMAIN_LOWER_BOUND_INCREASED", 
-  "VARIABLE_DOMAIN_BOUNDS_RESTRICTED", "VARIABLE_DOMAIN_VALUE_REMOVED", 
-  "VARIABLE_DOMAIN_RESTRICT_TO_SINGLETON", "VARIABLE_DOMAIN_SET", 
-  "VARIABLE_DOMAIN_SET_TO_SINGLETON", "VARIABLE_DOMAIN_CLOSED", "RULE_EXECUTED", "RULE_UNDONE",
-  "ASSIGN_NEXT_DECISION_STARTED", "ASSIGN_NEXT_DECISION_FAILED", "ASSIGN_NEXT_DECISION_SUCCEEDED", 
-  "ASSIGN_CURRENT_DECISION_STARTED", "ASSIGN_CURRENT_DECISION_FAILED","ASSIGN_CURRENT_DECISION_SUCCEEDED",
-  "RETRACT_DECISION_STARTED", "RETRACT_DECISION_FAILED", "RETRACT_DECISION_SUCCEEDED",
-  "PROPAGATION_COMMENCED", "PROPAGATION_COMPLETED", "PROPAGATION_PREEMPTED",
-  "ERROR"};
-
-bool allowTransaction[transactionTotal];
-
-const char *sourceTypeNames[3] = {"SYSTEM", "USER", "UNKNOWN"};
-
-enum sourceTypes {SYSTEM = 0, USER, UNKNOWN};
-
+//0                   1               2              3
 const std::string DURATION_VAR("DURATION_VAR");
 const std::string END_VAR("END_VAR");
 const std::string START_VAR("START_VAR");
@@ -200,7 +101,6 @@ const std::string INTEGER_SORT("INTEGER_SORT");
 const std::string REAL_SORT("REAL_SORT");
 const std::string STEP("step");
 const std::string PARTIAL_PLAN_STATS("/partialPlanStats");
-const std::string TRANSACTIONS("/transactions");
 const std::string SEQUENCE("/sequence");
 const std::string RULES("/rules");
 const std::string PARTIAL_PLAN(".partialPlan");
@@ -219,7 +119,6 @@ const std::string CAUSAL("CAUSAL");
 const std::string ENUM_DOMAIN("EnumeratedDomain");
 const std::string INT_DOMAIN("IntervalDomain");
 const std::string GENERAL_CONFIG_SECTION("GeneralConfigSection:");
-const std::string TRANSACTION_CONFIG_SECTION("TransactionConfigSection:");
 const std::string RULE_CONFIG_SECTION("RuleConfigSection:");
 const std::string SOURCE_PATH("SourcePath");
 const std::string AUTO_WRITE("AutoWrite");
@@ -272,10 +171,7 @@ namespace EUROPA {
     }
 
     void PartialPlanWriter::allocateListeners() {
-      dbl = (new PPWPlanDatabaseListener(pdbId, this))->getId();
       cel = (new PPWConstraintEngineListener(ceId, this))->getId();
-      if (!reId.isNoId())
-	rel = (new PPWRulesEngineListener(reId, this))->getId();
       if (!plId.isNoId())
 	pl = (new PPWPlannerListener(plId, this))->getId();
     }
@@ -298,14 +194,11 @@ namespace EUROPA {
       seqId = timeval2Id(currTime);
       pdbId = planDb;
       ceId = ceId2;
-      transactionId = writeCounter = numTransactions = 0;
-      transactionList = new std::list<Transaction>();
+      writeCounter = 0;
       stepsPerWrite = 0;
       dest = "./plans";
       noFullWrite = 1;
       writeStep = 0;
-      for(int i = 0; i < transactionTotal; i++)
-        allowTransaction[i] = false;
 
       //add default directories to search for model files
       sourcePaths.push_back(".");
@@ -322,14 +215,9 @@ namespace EUROPA {
       if (configPath == NULL || configPath[0] == '\0') {
         debugMsg("PartialPlanWriter",  "Warning: PPW_CONFIG not set or is empty.");
         debugMsg("PartialPlanWriter",  "   PartialPlanWriter will not write.");
-        debugMsg("PartialPlanWriter",  "    Under client control, some step 0 transactions will not be logged.");
         stepsPerWrite = 0;
         noFullWrite = 1;
         writeStep = 0;
-        //initialize as enabled in case under client control
-        //does not affect normal operation since stepsPerWrite = 0
-        for(int i = 0; i < transactionTotal; i++)
-          allowTransaction[i] = true;
         return;
       }
 			
@@ -407,7 +295,6 @@ namespace EUROPA {
           FatalErrno();
         }
         std::string ppStats(dest + PARTIAL_PLAN_STATS);
-        std::string ppTransactions(dest + TRANSACTIONS);
         std::string seqRules(dest + RULES);
         std::string seqStr(dest + SEQUENCE);
         std::ofstream seqOut(seqStr.c_str());
@@ -468,10 +355,6 @@ namespace EUROPA {
         seqOut << SEQ_LINE_SEP;
         seqOut.close();
 
-        transOut = new std::ofstream(ppTransactions.c_str());
-        if(!(*transOut)) {
-          FatalErrno();
-        }
         statsOut = new std::ofstream(ppStats.c_str());
         if(!(*statsOut)) {
           FatalErrno();
@@ -480,28 +363,21 @@ namespace EUROPA {
     }
   
     PartialPlanWriter::~PartialPlanWriter(void) {
-      if (!dbl.isNoId())
-	delete (PlanDatabaseListener*) dbl;
       if (!cel.isNoId())
 	delete (ConstraintEngineListener*) cel;
-      if (!rel.isNoId())
-        delete (RulesEngineListener*) rel;
       if (!pl.isNoId())
         delete (DecisionManagerListener*) pl;
       if(stepsPerWrite) {
         if(destAlreadyInitialized) {
-          transOut->close();
           statsOut->close();
-          delete transOut;
           delete statsOut;
         }
-        delete transactionList;
       }
     }
 
     // accessor to get output destination full path
     std::string PartialPlanWriter::getDest(void) {
-       return dest;
+      return dest;
     }
 
     /*
@@ -538,38 +414,6 @@ namespace EUROPA {
       }
     }
 
-    int PartialPlanWriter::getNumTransactions() {
-      return transactionTotal - 1;
-    }
-
-    int PartialPlanWriter::getMaxLengthTransactions() {
-      std::string::size_type maxLen = 0;
-      std::string name;
-
-      for(int i = 0; i < transactionTotal; i++) {
-        name = transactionNameStrs[i];
-        if (name.length() > maxLen)
-           maxLen = name.length();
-      }
-      return (int)maxLen;
-    }
-
-    const char** PartialPlanWriter::getTransactionNameStrs() {
-      return transactionNameStrs;
-    }
-     
-    bool* PartialPlanWriter::getTransactionFilterStates() {
-      return allowTransaction;
-    }
-
-    void PartialPlanWriter::setTransactionFilterStates(bool* transFilterStates, 
-                                                       int numTrans) {
-      check_error(numTrans == transactionTotal - 1, "Wrong transaction total");
-      for (int i = 0; i < numTrans; i++) {
-        allowTransaction[i] = transFilterStates[i];
-      }
-    }
-
     void PartialPlanWriter::write(void) {
 
       /*
@@ -584,7 +428,7 @@ namespace EUROPA {
         initOutputDestination();
         destAlreadyInitialized = true;
       }
-      if(!transOut || !statsOut)
+      if(!statsOut)
         return;
       ppId = 0LL;
       struct timeval currTime;
@@ -613,7 +457,7 @@ namespace EUROPA {
       }
 
       ppOut << stepnum << TAB << ppId << TAB << pdbId->getSchema()->getName().toString()
-						<< TAB << seqId << std::endl;
+	    << TAB << seqId << std::endl;
       ppOut.close();
 
       std::string ppObj = ppDest + SLASH + stepnum + OBJECTS;
@@ -748,14 +592,6 @@ namespace EUROPA {
             outputInstant(inst, rId->getKey(), instsOut);
             objOut << inst->getKey() << COMMA;
           }
-//           std::list<InstantId> insts;
-//           rId->getInstants(insts, MINUS_INFINITY, PLUS_INFINITY);
-//           for(std::list<InstantId>::iterator instIt = insts.begin();
-//               instIt != insts.end(); ++instIt) {
-//             InstantId inst = *instIt;
-//             outputInstant(inst, rId->getKey(), instsOut);
-//             objOut << inst->getKey() << COMMA;
-//           }
           objOut << std::endl;
         }
         else {
@@ -766,9 +602,9 @@ namespace EUROPA {
       }
       for(TokenSet::iterator tokenIterator = tokens.begin(); 
           tokenIterator != tokens.end(); ++tokenIterator) {
-				TokenId token = *tokenIterator;
-				check_error(token.isValid());
-				outputToken(token, T_INTERVAL, 0, 0, 0, ObjectId::noId(), tokOut, varOut);
+	TokenId token = *tokenIterator;
+	check_error(token.isValid());
+	outputToken(token, T_INTERVAL, 0, 0, 0, ObjectId::noId(), tokOut, varOut);
       }
 
       std::set<RuleInstanceId> ruleInst = reId->getRuleInstances();
@@ -780,10 +616,8 @@ namespace EUROPA {
 			
       collectStats(); // this call will overwrite incremental counters for tokens, variables, and constraints
       (*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
-                  << TAB << numConstraints << TAB << numTransactions << std::endl;
+                  << TAB << numConstraints << std::endl;
       statsOut->flush();
-
-      outputTransactions(transOut);
 
       objOut.close();
       tokOut.close();
@@ -799,14 +633,12 @@ namespace EUROPA {
        instead of write() when step data is written for only the 
        final step. this ensures that transaction and statistics info
        is written for all steps.
-     */
-    void PartialPlanWriter::writeStatsAndTransactions(void) {
+    */
+    void PartialPlanWriter::writeStats(void) {
       if(!destAlreadyInitialized) {
         initOutputDestination();
         destAlreadyInitialized = true;
       }
-      if(!transOut)
-        return;
 
       ppId = 0LL;
       struct timeval currTime;
@@ -817,16 +649,14 @@ namespace EUROPA {
 
       collectStats();
       (*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
-                  << TAB << numConstraints << TAB << numTransactions << std::endl;
+                  << TAB << numConstraints << std::endl;
       statsOut->flush();
-
-      outputTransactions(transOut);
     }
 
 
     /* collects all but numTransactions which are
        collected incrementally
-     */
+    */
     void PartialPlanWriter::collectStats(void) {
       TokenSet tokens(pdbId->getTokens());
       numTokens = tokens.size();
@@ -834,13 +664,6 @@ namespace EUROPA {
       numVariables = variables.size();
       const ConstraintSet &constraints = ceId->getConstraints();
       numConstraints = constraints.size();
-    }
-
-    void PartialPlanWriter::outputTransactions(std::ofstream *transOut) {
-      for(std::list<Transaction>::iterator it = transactionList->begin();
-          it != transactionList->end(); ++it) {
-            (*it).write((*transOut), ppId);
-      }
     }
 
     void PartialPlanWriter::outputObject(const ObjectId &objId, const int type,
@@ -926,7 +749,7 @@ namespace EUROPA {
       std::string paramVarIds;
       char paramIdStr[NBBY * sizeof(int) * 28/93 + 4];
       for(std::vector<ConstrainedVariableId>::const_iterator paramVarIterator = 
-          token->getParameters().begin();
+	    token->getParameters().begin();
           paramVarIterator != token->getParameters().end(); ++paramVarIterator) {
         ConstrainedVariableId varId = *paramVarIterator;
         check_error(varId.isValid());
@@ -960,7 +783,7 @@ namespace EUROPA {
                                            std::ofstream &varOut) {
       numVariables++;
       varOut << stateVar->getKey() << TAB << ppId << TAB << parentId << TAB 
-						 << stateVar->getName().toString() << TAB;
+	     << stateVar->getName().toString() << TAB;
 
       varOut << ENUM_DOMAIN << TAB;
       StateDomain &dom = (StateDomain &) stateVar->lastDomain();
@@ -978,10 +801,10 @@ namespace EUROPA {
 
     void PartialPlanWriter::outputEnumVar(const Id<TokenVariable<EnumeratedDomain> >& enumVar, 
                                           const int parentId, const int type,
-																					std::ofstream &varOut) {
+					  std::ofstream &varOut) {
       numVariables++;
       varOut << enumVar->getKey() << TAB << ppId << TAB << parentId << TAB 
-						 << enumVar->getName().toString() << TAB;
+	     << enumVar->getName().toString() << TAB;
 
       varOut << ENUM_DOMAIN << TAB;
 
@@ -993,47 +816,47 @@ namespace EUROPA {
   
     void PartialPlanWriter::outputIntVar(const Id<TokenVariable<IntervalDomain> >& intVar,
                                          const int parentId, const int type,
-																				 std::ofstream &varOut) {
+					 std::ofstream &varOut) {
       numVariables++;
       varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB 
-						 << intVar->getName().toString() << TAB;
+	     << intVar->getName().toString() << TAB;
 
       varOut << INT_DOMAIN << TAB << SNULL << TAB << REAL_SORT << TAB 
-						 << getLowerBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB
-						 << getUpperBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB;
+	     << getLowerBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB
+	     << getUpperBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB;
 
       varOut << tokenVarTypes[type] << std::endl;
     }
   
     void PartialPlanWriter::outputIntIntVar(const Id<TokenVariable<IntervalIntDomain> >& intVar,
                                             const int parentId, const int type,
-																						std::ofstream &varOut) {
+					    std::ofstream &varOut) {
       numVariables++;
 
       varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB 
-						 << intVar->getName().toString() << TAB;
+	     << intVar->getName().toString() << TAB;
 
       varOut << INT_DOMAIN << TAB << SNULL << TAB << INTEGER_SORT << TAB 
-						 << getLowerBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB
-						 << getUpperBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB;
+	     << getLowerBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB
+	     << getUpperBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB;
     
       varOut << tokenVarTypes[type] << std::endl;
     }
 
     void PartialPlanWriter::outputObjVar(const ObjectVarId& objVar,
                                          const int parentId, const int type,
-																				 std::ofstream &varOut) {
+					 std::ofstream &varOut) {
       numVariables++;
 
       varOut << objVar->getKey() << TAB << ppId << TAB << parentId << TAB 
-						 << objVar->getName().toString() << TAB;
+	     << objVar->getName().toString() << TAB;
 
       varOut << ENUM_DOMAIN << TAB;
 
       std::list<double> objects;
       ((ObjectDomain &)objVar->lastDomain()).getValues(objects);
       for(std::list<double>::iterator it = objects.begin(); it != objects.end(); ++it) {
-				varOut << ((ObjectId)(*it))->getName().toString() << " ";
+	varOut << ((ObjectId)(*it))->getName().toString() << " ";
       }
 
       varOut << TAB << SNULL << TAB << SNULL << TAB << SNULL << TAB;
@@ -1043,20 +866,20 @@ namespace EUROPA {
   
     void PartialPlanWriter::outputConstrVar(const ConstrainedVariableId &otherVar, 
                                             const int parentId, const int type,
-																						std::ofstream &varOut) {
+					    std::ofstream &varOut) {
       numVariables++;
 
       varOut << otherVar->getKey() << TAB << ppId << TAB << parentId << TAB 
-						 << otherVar->getName().toString() << TAB;
+	     << otherVar->getName().toString() << TAB;
 
       if(otherVar->lastDomain().isEnumerated()) {
-				varOut << ENUM_DOMAIN << TAB << getEnumerationStr((EnumeratedDomain &)otherVar->lastDomain()) 
-							 << TAB << SNULL << TAB << SNULL << TAB << SNULL << TAB;
+	varOut << ENUM_DOMAIN << TAB << getEnumerationStr((EnumeratedDomain &)otherVar->lastDomain()) 
+	       << TAB << SNULL << TAB << SNULL << TAB << SNULL << TAB;
       }
       else if(otherVar->lastDomain().isInterval()) {
-				varOut << INT_DOMAIN << TAB << SNULL << TAB << REAL_SORT << TAB 
-							 << getLowerBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB 
-							 << getUpperBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB;
+	varOut << INT_DOMAIN << TAB << SNULL << TAB << REAL_SORT << TAB 
+	       << getLowerBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB 
+	       << getUpperBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB;
       }
       else {
         FatalError("otherVar->lastDomain()isEnumerated() || otherVar->lastDomain().isInterval()",
@@ -1066,20 +889,20 @@ namespace EUROPA {
     }
 
     void PartialPlanWriter::outputConstraint(const ConstraintId &constrId, std::ofstream &constrOut, 
-																						 std::ofstream &cvmOut) {
+					     std::ofstream &cvmOut) {
       constrOut << constrId->getKey() << TAB << ppId << TAB << constrId->getName().toString() 
-								<< TAB << ATEMPORAL << std::endl;
+		<< TAB << ATEMPORAL << std::endl;
       std::vector<ConstrainedVariableId>::const_iterator it =
-				constrId->getScope().begin();
+	constrId->getScope().begin();
       for(; it != constrId->getScope().end(); ++it) {
-				cvmOut << constrId->getKey() << TAB << (*it)->getKey() << TAB << ppId << std::endl;
+	cvmOut << constrId->getKey() << TAB << (*it)->getKey() << TAB << ppId << std::endl;
       }
     }
 
-     void PartialPlanWriter::outputRuleInstance(const RuleInstanceId &ruleId,
-                                           std::ofstream &ruleInstanceOut,
-                                           std::ofstream &varOut,
-                                           std::ofstream &rismOut) {
+    void PartialPlanWriter::outputRuleInstance(const RuleInstanceId &ruleId,
+					       std::ofstream &ruleInstanceOut,
+					       std::ofstream &varOut,
+					       std::ofstream &rismOut) {
 
       ruleInstanceOut << ruleId->getKey() << TAB << ppId << TAB << seqId
                       << TAB << ruleId->getRule()->getKey()
@@ -1098,7 +921,7 @@ namespace EUROPA {
           TokenId slaveToken = *it;
           if(slaveToken.isValid())
             ruleInstanceOut << slaveToken->getKey() << COMMA;
-            rismOut << ruleId->getKey() <<TAB << slaveToken->getKey() << TAB << ppId << std::endl;
+	  rismOut << ruleId->getKey() <<TAB << slaveToken->getKey() << TAB << ppId << std::endl;
         }
         ruleInstanceOut << TAB;
       }
@@ -1291,299 +1114,14 @@ namespace EUROPA {
       return false;
     }
   
-    /****From PlanDatabaseListener****/
-
-    void PartialPlanWriter::notifyAdded(const ObjectId &objId) {
-      if(stepsPerWrite && allowTransaction[OBJECT_CREATED]) {
-        transactionList->push_back(Transaction(OBJECT_CREATED, objId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               objId->getName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyRemoved(const ObjectId &objId) {
-      if(stepsPerWrite && allowTransaction[OBJECT_DELETED]) {
-        transactionList->push_back(Transaction(OBJECT_DELETED, objId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               objId->getName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyAdded(const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_CREATED]) {
-        transactionList->push_back(Transaction(TOKEN_CREATED, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep, 
-                                               tokId->getPredicateName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyAdded(const ObjectId &objId, const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_ADDED_TO_OBJECT]) {
-        transactionList->push_back(Transaction(TOKEN_ADDED_TO_OBJECT, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep, 
-                                               tokId->getPredicateName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyClosed(const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_CLOSED]) {
-        transactionList->push_back(Transaction(TOKEN_CLOSED, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               tokId->getPredicateName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyActivated(const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_ACTIVATED]) {
-        transactionList->push_back(Transaction(TOKEN_ACTIVATED, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               tokId->getPredicateName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyDeactivated(const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_DEACTIVATED]) {
-        transactionList->push_back(Transaction(TOKEN_DEACTIVATED, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               tokId->getPredicateName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyMerged(const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_MERGED]) {
-        transactionList->push_back(Transaction(TOKEN_MERGED, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               tokId->getPredicateName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifySplit(const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_SPLIT]) {
-        transactionList->push_back(Transaction(TOKEN_SPLIT, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               tokId->getPredicateName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyRejected(const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_REJECTED]) {
-        transactionList->push_back(Transaction(TOKEN_REJECTED, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               tokId->getPredicateName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyReinstated(const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_REINSTATED]) {
-        transactionList->push_back(Transaction(TOKEN_REINSTATED, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               tokId->getPredicateName().toString()));
-        numTransactions++;
-      }
-    }
-
-
-    void PartialPlanWriter::notifyConstrained(const ObjectId &objId, const TokenId &tokId,
-                                              const TokenId &successor) {
-      if(stepsPerWrite && allowTransaction[TOKEN_INSERTED]) {
-        transactionList->push_back(Transaction(TOKEN_INSERTED, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               tokId->getPredicateName().toString()));
-      }
-    }
-
-    void PartialPlanWriter::notifyRemoved(const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_DELETED]) {
-				transactionList->push_back(Transaction(TOKEN_DELETED, tokId->getKey(), UNKNOWN, 
-                                               transactionId++, seqId, nstep, 
-                                               tokId->getPredicateName().toString()));
-				numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyRemoved(const ObjectId &objId, const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_REMOVED]) {
-				transactionList->push_back(Transaction(TOKEN_REMOVED, tokId->getKey(), UNKNOWN, 
-                                               transactionId++, seqId, nstep, 
-                                               tokId->getPredicateName().toString()));
-				numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyFreed(const ObjectId &objId, const TokenId &tokId) {
-      if(stepsPerWrite && allowTransaction[TOKEN_FREED]) {
-        transactionList->push_back(Transaction(TOKEN_FREED, tokId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               tokId->getPredicateName().toString()));
-        numTransactions++;
-      }
-    }
-
-    /****From ConstraintEngineListener****/
-  
-    void PartialPlanWriter::notifyAdded(const ConstraintId &constrId) {
-      if(stepsPerWrite && allowTransaction[CONSTRAINT_CREATED]) {
-        transactionList->push_back(Transaction(CONSTRAINT_CREATED, constrId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep, 
-                                               constrId->getName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyRemoved(const ConstraintId &constrId) {
-      if(stepsPerWrite && allowTransaction[CONSTRAINT_DELETED]) {
-        transactionList->push_back(Transaction(CONSTRAINT_DELETED, constrId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep, 
-                                               constrId->getName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyExecuted(const ConstraintId &constrId) {
-      if(stepsPerWrite && allowTransaction[CONSTRAINT_EXECUTED]) {
-        transactionList->push_back(Transaction(CONSTRAINT_EXECUTED, constrId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep,
-                                               constrId->getName().toString()));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyAdded(const ConstrainedVariableId &varId) {
-      if(stepsPerWrite && allowTransaction[VAR_CREATED]) {
-        transactionList->push_back(Transaction(VAR_CREATED, varId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep, 
-                                               getVarInfo(varId)));
-      }
-    }
-
-    void PartialPlanWriter::notifyRemoved(const ConstrainedVariableId &varId) {
-      if(stepsPerWrite && allowTransaction[VAR_DELETED]) {
-        transactionList->push_back(Transaction(VAR_DELETED, varId->getKey(), UNKNOWN,
-                                               transactionId++, seqId, nstep, 
-                                               getVarInfo(varId)));
-      }
-    }
-
-    void PartialPlanWriter::notifyChanged(const ConstrainedVariableId &varId, 
-                                          const DomainListener::ChangeType &changeType) {
-      if(stepsPerWrite) {
-        switch(changeType) {
-        case DomainListener::RELAXED:
-          if(allowTransaction[VAR_DOMAIN_RELAXED])
-            transactionList->push_back(Transaction(VAR_DOMAIN_RELAXED, varId->getKey(), SYSTEM,
-                                                   transactionId++, seqId, nstep, getVarInfo(varId)));
-          break;
-        case DomainListener::RESET:
-          if(allowTransaction[VAR_DOMAIN_RESET])
-            transactionList->push_back(Transaction(VAR_DOMAIN_RESET, varId->getKey(), USER,
-                                                   transactionId++, seqId, nstep, getVarInfo(varId)));
-          break;
-        case DomainListener::VALUE_REMOVED:
-          if(allowTransaction[VAR_DOMAIN_VALUE_REMOVED])
-            transactionList->push_back(Transaction(VAR_DOMAIN_VALUE_REMOVED, varId->getKey(), 
-                                                   UNKNOWN, transactionId++, seqId, nstep, 
-                                                   getVarInfo(varId)));
-          break;
-        case DomainListener::BOUNDS_RESTRICTED:
-          if(allowTransaction[VAR_DOMAIN_BOUNDS_RESTRICTED])
-            transactionList->push_back(Transaction(VAR_DOMAIN_BOUNDS_RESTRICTED, varId->getKey(),
-                                                   UNKNOWN, transactionId++, seqId, nstep, 
-                                                   getVarInfo(varId)));
-          break;
-        case DomainListener::LOWER_BOUND_INCREASED:
-          if(allowTransaction[VAR_DOMAIN_LOWER_BOUND_INCREASED])
-            transactionList->push_back(Transaction(VAR_DOMAIN_LOWER_BOUND_INCREASED, varId->getKey(),
-                                                   UNKNOWN, transactionId++, seqId, nstep, 
-                                                   getVarInfo(varId)));
-          break;
-        case DomainListener::UPPER_BOUND_DECREASED:
-          if(allowTransaction[VAR_DOMAIN_UPPER_BOUND_DECREASED])
-            transactionList->push_back(Transaction(VAR_DOMAIN_UPPER_BOUND_DECREASED, varId->getKey(),
-                                                   UNKNOWN, transactionId++, seqId, nstep, 
-                                                   getVarInfo(varId)));
-          break;
-        case DomainListener::RESTRICT_TO_SINGLETON:
-          if(allowTransaction[VAR_DOMAIN_RESTRICT_TO_SINGLETON])
-            transactionList->push_back(Transaction(VAR_DOMAIN_RESTRICT_TO_SINGLETON, varId->getKey(),
-                                                   SYSTEM, transactionId++, seqId, nstep, 
-                                                   getVarInfo(varId)));
-          break;
-        case DomainListener::SET_TO_SINGLETON:
-          if(allowTransaction[VAR_DOMAIN_SET_TO_SINGLETON])
-            transactionList->push_back(Transaction(VAR_DOMAIN_SET_TO_SINGLETON, varId->getKey(),
-                                                  USER, transactionId++, seqId, nstep, getVarInfo(varId)));
-          break;
-        case DomainListener::EMPTIED:
-          if(allowTransaction[VAR_DOMAIN_EMPTIED])
-            transactionList->push_back(Transaction(VAR_DOMAIN_EMPTIED, varId->getKey(), SYSTEM,
-                                                   transactionId++, seqId, nstep, getVarInfo(varId)));
-          break;
-        case DomainListener::CLOSED:
-          if(allowTransaction[VAR_DOMAIN_CLOSED])
-            transactionList->push_back(Transaction(VAR_DOMAIN_CLOSED, varId->getKey(), SYSTEM,
-                                                   transactionId++, seqId, nstep, getVarInfo(varId)));
-          break;
-        default:
-          break;
-	}
-      }
-    }
-
-    void PartialPlanWriter::notifyExecuted(const RuleInstanceId &ruleId) {
-      if(stepsPerWrite && allowTransaction[RULE_EXECUTED]) {
-        std::stringstream info;
-        info << ruleId->getRule()->getKey() << COMMA << ruleId->getToken()->getKey();
-        transactionList->push_back(Transaction(RULE_EXECUTED, ruleId->getKey(), SYSTEM,
-                                               transactionId++, seqId, nstep,
-                                               std::string(info.str())));
-        numTransactions++;
-      }
-    }
-    
-    void PartialPlanWriter::notifyUndone(const RuleInstanceId &ruleId) {
-      if(stepsPerWrite && allowTransaction[RULE_UNDONE]) {
-        std::stringstream info;
-        info << ruleId->getRule()->getKey() << COMMA << ruleId->getToken()->getKey();
-        transactionList->push_back(Transaction(RULE_UNDONE, ruleId->getKey(), SYSTEM,
-                                               transactionId++, seqId, nstep,
-                                               std::string(info.str())));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyPropagationCommenced(void) {
-      if(stepsPerWrite && allowTransaction[PROPAGATION_COMMENCED]) {
-        transactionList->push_back(Transaction(PROPAGATION_COMMENCED, -1, SYSTEM,
-                                   transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
-    }
-
     void PartialPlanWriter::notifyPropagationCompleted(void) {
-      if(stepsPerWrite && allowTransaction[PROPAGATION_COMPLETED]) {
-        transactionList->push_back(Transaction(PROPAGATION_COMPLETED, -1, SYSTEM,
-                                   transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
       if(!havePlanner) {
         writeCounter++;
         if(noFullWrite == 0) {
           if(writeCounter == stepsPerWrite) {
             write();
             nstep++;
-            transactionList->clear();
-            numTransactions = 0;
-            writeCounter = 0;
+	    writeCounter = 0;
           }
         }
         else {
@@ -1593,54 +1131,26 @@ namespace EUROPA {
     }
   
     void PartialPlanWriter::notifyPropagationPreempted(void) {
-      if(stepsPerWrite && allowTransaction[PROPAGATION_PREEMPTED]) {
-        transactionList->push_back(Transaction(PROPAGATION_PREEMPTED, -1, SYSTEM,
-                                   transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
       if(noFullWrite == 0 && !havePlanner) {
         write();
         nstep++;
-        transactionList->clear();
-        numTransactions = 0;
         writeCounter = 0;
       }
     }
 
-		
-    void PartialPlanWriter::notifyAssignNextStarted(const DecisionPointId &dec) {
-      if(stepsPerWrite && allowTransaction[ASSIGN_NEXT_STARTED]) {
-        int key = -1;
-        if(dec.isValid())
-          key = dec->getKey();
-        transactionList->push_back(Transaction(ASSIGN_NEXT_STARTED, key, USER,
-                                               transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
-    }
-
     void PartialPlanWriter::notifyAssignNextFailed(const DecisionPointId &dec) {
-      if(stepsPerWrite && allowTransaction[ASSIGN_NEXT_FAILED]) {
-        transactionList->push_back(Transaction(ASSIGN_NEXT_FAILED, dec->getKey(), USER,
-                                               transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
       if(havePlanner) {
         writeCounter++;
         if(noFullWrite == 0) {
           if(writeCounter == stepsPerWrite) {
             write();
             nstep++;
-            transactionList->clear();
-            numTransactions = 0;
             writeCounter = 0;
           }
         }
         else {
           if(writeStep == 1) {
-            writeStatsAndTransactions();
-            transactionList->clear();
-            numTransactions = 0;
+            writeStats();
             writeCounter = 0;
           }
           nstep++;
@@ -1649,27 +1159,18 @@ namespace EUROPA {
     }
 
     void PartialPlanWriter::notifyAssignNextSucceeded(const DecisionPointId &dec) {
-      if(stepsPerWrite && allowTransaction[ASSIGN_NEXT_SUCCEEDED]) {
-        transactionList->push_back(Transaction(ASSIGN_NEXT_SUCCEEDED, dec->getKey(), USER,
-                                               transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
       if(havePlanner) {
         writeCounter++;
         if(noFullWrite == 0) {
           if(writeCounter == stepsPerWrite) {
             write();
             nstep++;
-            transactionList->clear();
-            numTransactions = 0;
             writeCounter = 0;
           }
         }
         else {
           if(writeStep == 1) {
-            writeStatsAndTransactions();
-            transactionList->clear();
-            numTransactions = 0;
+            writeStats();
             writeCounter = 0;
           }
           nstep++;
@@ -1677,36 +1178,19 @@ namespace EUROPA {
       }
     }
 
-    void PartialPlanWriter::notifyAssignCurrentStarted(const DecisionPointId &dec) {
-      if(stepsPerWrite && allowTransaction[ASSIGN_CURRENT_STARTED]) {
-        transactionList->push_back(Transaction(ASSIGN_CURRENT_STARTED, dec->getKey(), USER,
-                                               transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
-    }
-
     void PartialPlanWriter::notifyAssignCurrentFailed(const DecisionPointId &dec) {
-      if(stepsPerWrite && allowTransaction[ASSIGN_CURRENT_FAILED]) {
-        transactionList->push_back(Transaction(ASSIGN_CURRENT_FAILED, dec->getKey(), USER,
-                                               transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
       if(havePlanner) {
         writeCounter++;
         if(noFullWrite == 0) {
           if(writeCounter == stepsPerWrite) {
             write();
             nstep++;
-            transactionList->clear();
-            numTransactions = 0;
             writeCounter = 0;
           }
         }
         else {
           if(writeStep == 1) {
-            writeStatsAndTransactions();
-            transactionList->clear();
-            numTransactions = 0;
+            writeStats();
             writeCounter = 0;
           }
           nstep++;
@@ -1715,98 +1199,23 @@ namespace EUROPA {
     }
 
     void PartialPlanWriter::notifyAssignCurrentSucceeded(const DecisionPointId &dec) {
-      if(stepsPerWrite && allowTransaction[ASSIGN_CURRENT_SUCCEEDED]) {
-        transactionList->push_back(Transaction(ASSIGN_CURRENT_SUCCEEDED, dec->getKey(), USER,
-                                               transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
       if(havePlanner) {
         writeCounter++;
         if(noFullWrite == 0) {
           if(writeCounter == stepsPerWrite) {
             write();
             nstep++;
-            transactionList->clear();
-            numTransactions = 0;
             writeCounter = 0;
           }
         }
         else {
           if(writeStep == 1) {
-            writeStatsAndTransactions();
-            transactionList->clear();
-            numTransactions = 0;
+            writeStats();
             writeCounter = 0;
           }
           nstep++;
         }
       }
-    }
-
-    void PartialPlanWriter::notifyRetractStarted(const DecisionPointId &dec) {
-      if(stepsPerWrite && allowTransaction[RETRACT_STARTED]) {
-        transactionList->push_back(Transaction(RETRACT_STARTED, dec->getKey(), USER,
-                                               transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
-    }
-
-    void PartialPlanWriter::notifyRetractFailed(const DecisionPointId &dec) {
-      if(stepsPerWrite && allowTransaction[RETRACT_FAILED]) {
-        transactionList->push_back(Transaction(RETRACT_FAILED, dec->getKey(), USER,
-                                               transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
-//       if(havePlanner) {
-//         writeCounter++;
-//         if(noFullWrite == 0) {
-//           if(writeCounter == stepsPerWrite) {
-//             write();
-//             nstep++;
-//             transactionList->clear();
-//             numTransactions = 0;
-//             writeCounter = 0;
-//           }
-//         }
-//         else {
-//           if(writeStep == 1) {
-//             writeStatsAndTransactions();
-//             transactionList->clear();
-//             numTransactions = 0;
-//             writeCounter = 0;
-//           }
-//           nstep++;
-//         }
-//       }
-    }
-
-    void PartialPlanWriter::notifyRetractSucceeded(const DecisionPointId &dec) {
-      if(stepsPerWrite && allowTransaction[RETRACT_SUCCEEDED]) {
-        transactionList->push_back(Transaction(RETRACT_SUCCEEDED, dec->getKey(), USER,
-                                               transactionId++, seqId, nstep, SNULL));
-        numTransactions++;
-      }
-//       if(havePlanner) {
-//         writeCounter++;
-//         if(noFullWrite == 0) {
-//           if(writeCounter == stepsPerWrite) {
-//             write();
-//             nstep++;
-//             transactionList->clear();
-//             numTransactions = 0;
-//             writeCounter = 0;
-//           }
-//         }
-//         else {
-//           if(writeStep == 1) {
-//             writeStatsAndTransactions();
-//             transactionList->clear();
-//             numTransactions = 0;
-//             writeCounter = 0;
-//           }
-//           nstep++;
-//         }
-//       }
     }
 
     void PartialPlanWriter::notifySearchFinished() {
@@ -1831,20 +1240,20 @@ namespace EUROPA {
     const std::string PartialPlanWriter::getVarInfo(const ConstrainedVariableId &varId) const {
       std::string type, paramName, predName, retval;
       if(varId->getIndex() >= I_STATE && varId->getIndex() <= I_END) {
-				type = tokenVarTypes[varId->getIndex()];
+	type = tokenVarTypes[varId->getIndex()];
       }
       else {
-				type = PARAMETER_VAR;
-				paramName = varId->getName().toString();
+	type = PARAMETER_VAR;
+	paramName = varId->getName().toString();
       }
       if(TokenId::convertable(varId->getParent())) {
-				predName = ((TokenId &)varId->getParent())->getPredicateName().toString();
+	predName = ((TokenId &)varId->getParent())->getPredicateName().toString();
       }
       else if(ObjectId::convertable(varId->getParent())) {
         predName = ((ObjectId &)varId->getParent())->getName().toString();
       }
       else {
-				predName = "UNKNOWN VARIABLE PARENT";
+	predName = "UNKNOWN VARIABLE PARENT";
       }
       retval = type + COMMA + predName + COMMA + paramName + COMMA;
       return retval;
@@ -1868,10 +1277,6 @@ namespace EUROPA {
         
         if(line == GENERAL_CONFIG_SECTION) {
           parseGeneralConfigSection(configFile);
-          retval = true;
-        }
-        else if(line == TRANSACTION_CONFIG_SECTION) {
-          parseTransactionConfigSection(configFile);
           retval = true;
         }
         else if(line == RULE_CONFIG_SECTION) {
@@ -1929,27 +1334,6 @@ namespace EUROPA {
       }
     }
 
-    void PartialPlanWriter::parseTransactionConfigSection(std::ifstream& configFile) {
-      char buf[PATH_MAX];
-      while (!configFile.eof()) {
-        configFile.getline(buf, PATH_MAX);
-        //std::cerr << "DEBUG:reading buf: " << buf << std::endl;
-        if (buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
-          continue;
-        std::string line = buf;
-        bool foundTransaction = false;
-        for (int i = 0; !foundTransaction && i < transactionTotal; i++)
-          if (line == transactionNameStrs[i])
-            allowTransaction[i] = foundTransaction = true;
-        if (!foundTransaction) {
-          debugMsg("PartialPlanWriter:parseTransactionConfigSection", "unsupported keyword(?) " << buf);
-          for (int i = strlen(buf); i >= 0; i--)
-            configFile.putback(buf[i]);
-          return;
-        }
-      }
-    }
-
     void PartialPlanWriter::parseRuleConfigSection(std::ifstream& configFile) {
       char buf[PATH_MAX];
       while(!configFile.eof()) {
@@ -1968,12 +1352,6 @@ namespace EUROPA {
           return;
         }
       }
-    }
-
-    void Transaction::write(std::ostream &out, long long int ppId) const {
-      out << transactionNameStrs[transactionType] << TAB << transactionTypeStrs[transactionType]
-          << TAB << objectKey << TAB << sourceTypeNames[source] << TAB << id << TAB << stepNum 
-          << TAB << sequenceId << TAB << ppId << TAB << info << std::endl;
     }
   }
 }
