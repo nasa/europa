@@ -33,6 +33,7 @@
 #include <string>
 
 #include "AverInterp.hh"
+#include "Constraints.hh"
 
 #define PPW_WITH_PLANNER
 
@@ -64,6 +65,7 @@ namespace EUROPA {
     REGISTER_CONSTRAINT(SampleBatteryConstraint, "sampleBattery", "Default");
     REGISTER_CONSTRAINT(SampleDurationConstraint, "sampleDuration", "Default");
 
+    //initConstraintLibrary();
     isInitialized() = true;
   }
 

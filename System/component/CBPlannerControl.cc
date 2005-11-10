@@ -24,7 +24,7 @@ namespace EUROPA {
 
   const char* SAstr = "PlannerControlAssembly not initialized";
 
-  int initModel(const char* libPath, const char* initialState, const char* destPath) {
+  int initModel(const char* libPath, const char* initialState, const char* destPath, const char* debugPath) {
 
     int retStatus;
 
@@ -34,7 +34,7 @@ namespace EUROPA {
     try {
       //enable EUROPA exceptions
       Error::doThrowExceptions();
-      retStatus = loadInitModel(libPath, initialState);
+      retStatus = loadInitModel(libPath, initialState, NULL, debugPath);
 
       /*
        * now that PPW is initialized set the output destination path 
@@ -180,99 +180,12 @@ namespace EUROPA {
     return dPath; 
   }
 
-  int  getNumTransactions(void) {
-
-    int numTypes;
-
-    try {
-      PlannerControlAssembly *db1 = accessAssembly();
-      check_always(db1, SAstr);
-      numTypes = db1->getWriter()->getNumTransactions();
-    }
-    catch (Error e) {
-      printf("Exception in CBPlannerControl.cc:getNumTransactions()\n");
-      fflush(stdout);
-      e.display();
-      throw;
-    }
-    return numTypes;
+  void enableDebugMsg(const char* file, const char* pattern) {
+    accessAssembly()->enableDebugMsg(file, pattern);
   }
 
-  int  getMaxLengthTransactions(void) {
-
-    int typeLength;
-
-    try {
-      PlannerControlAssembly *db1 = accessAssembly();
-      check_always(db1, SAstr);
-      typeLength = db1->getWriter()->getMaxLengthTransactions();
-    }
-    catch (Error e) {
-      printf("Exception in CBPlannerControl.cc:getMaxLengthTransactions()\n");
-      fflush(stdout);
-      e.display();
-      throw;
-    }
-    return typeLength;
+  void disableDebugMsg(const char* file, const char* pattern) {
+    accessAssembly()->disableDebugMsg(file, pattern);
   }
 
-  const char** getTransactionNameStrs(void) {
-
-    const char** types;
-
-    try {
-      PlannerControlAssembly *db1 = accessAssembly();
-      check_always(db1, SAstr);
-      types = db1->getWriter()->getTransactionNameStrs();
-    }
-    catch (Error e) {
-      printf("Exception in CBPlannerControl.cc:getTransactionNameStrs()\n");
-      fflush(stdout);
-      e.display();
-      throw;
-    }
-    return types;
-  }
-
-  void getTransactionFilterStates(int* states, int numTypes) {
-
-    bool* filterState;
-
-    try {
-      PlannerControlAssembly *db1 = accessAssembly();
-      check_always(db1, SAstr);
-      filterState = db1->getWriter()->getTransactionFilterStates();
-    }
-    catch (Error e) {
-      printf("Exception in CBPlannerControl.cc:getTransactionFilterStates()\n");
-      fflush(stdout);
-      e.display();
-      throw;
-    }
-    for (int i = 0; i < numTypes; i++) {
-      states[i] = (filterState[i]) ? 1 : 0;
-    }
-  }
-
-  void setTransactionFilterStates(int* states, int numTypes) {
-
-    bool* filterState;
-
-    try {
-      PlannerControlAssembly *db1 = accessAssembly();
-      check_always(db1, SAstr);
-      filterState = new bool[numTypes];
-      for (int i = 0; i < numTypes; i++) {
-        filterState[i] = (states[i]) ? true : false;
-      }
-      db1->getWriter()->setTransactionFilterStates(filterState, numTypes);
-    }
-    catch (Error e) {
-      printf("Exception in CBPlannerControl.cc:setTransactionFilterStates()\n");
-      fflush(stdout);
-      e.display();
-      throw;
-    }
-    delete[] filterState;
-  }
 }
