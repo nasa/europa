@@ -1,6 +1,6 @@
-#include "test-module.cc"
+#include "re-test-module.hh"
 
 int main(int argc, const char** argv) {
   RulesEngineModuleTests::runTests();
-  exit(0);
+  return 0;
 }

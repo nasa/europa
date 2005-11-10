@@ -2,7 +2,7 @@ SubDir PLASMA RulesEngine test ;
 
 if ! $(PLASMA_READY) {
 
-ModuleMain re-module-tests : module-tests.cc TestRule.cc : RulesEngine ;
+ModuleMain re-module-tests : module-tests.cc re-test-module.cc TestRule.cc : RulesEngine ;
 
 RunModuleMain run-re-module-tests : re-module-tests ;
 LocalDepends tests : run-re-module-tests ;
