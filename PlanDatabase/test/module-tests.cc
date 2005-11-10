@@ -1,4 +1,4 @@
-#include "test-module.hh"
+#include "db-test-module.hh"
 
 int main() {
   PlanDatabaseModuleTests::runTests();
