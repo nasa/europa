@@ -1,3 +1,4 @@
+#include "test-module.hh"
 #include "PlanDatabase.hh"
 #include "Schema.hh"
 #include "Object.hh"
@@ -5135,37 +5136,33 @@ private:
   }
 };
 
+void PlanDatabaseModuleTests::runTests() {
+  LockManager::instance().connect();
 
-class PlanDatabaseModuleTests {
-  public:
-    static void runTests() {
-       LockManager::instance().connect();
+  LockManager::instance().lock();
+  initDbModuleTests();
+  LockManager::instance().unlock();
 
-       LockManager::instance().lock();
-      initDbModuleTests();
-      LockManager::instance().unlock();
+  for (int i = 0; i < 1; i++) {
+    LockManager::instance().lock();
+    runTestSuite(SchemaTest::test);
+    runTestSuite(ObjectTest::test);
+    runTestSuite(TokenTest::test);
+    runTestSuite(TimelineTest::test);
+    runTestSuite(DbClientTest::test);
+    runTestSuite(MultithreadedTest::test);
+    runTestSuite(DbTransPlayerTest::test);
+    std::cout << "Finished #" << i << std::endl;
+    LockManager::instance().unlock();
+  }
 
-      for (int i = 0; i < 1; i++) {
-       LockManager::instance().lock();
-       runTestSuite(SchemaTest::test);
-       runTestSuite(ObjectTest::test);
-       runTestSuite(TokenTest::test);
-       runTestSuite(TimelineTest::test);
-       runTestSuite(DbClientTest::test);
-       runTestSuite(MultithreadedTest::test);
-       runTestSuite(DbTransPlayerTest::test);
-       std::cout << "Finished #" << i << std::endl;
-       LockManager::instance().unlock();
-      }
+  LockManager::instance().lock();
+  ConstraintLibrary::purgeAll();
+  LockManager::instance().unlock();
 
-      LockManager::instance().lock();
-      ConstraintLibrary::purgeAll();
-      LockManager::instance().unlock();
-
-      LockManager::instance().lock();
-      std::cout << "All done and purged" << std::endl;
-    }
-};
+  LockManager::instance().lock();
+  std::cout << "All done and purged" << std::endl;
+}
 
 
 

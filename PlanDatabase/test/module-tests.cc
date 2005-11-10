@@ -1,6 +1,6 @@
-#include "test-module.cc"
+#include "test-module.hh"
 
 int main() {
   PlanDatabaseModuleTests::runTests();
-  exit(0);
+  return 0;
 }
