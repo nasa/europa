@@ -2580,6 +2580,7 @@ void ConstraintEngineModuleTests::runTests() {
     runTestSuite(EquivalenceClassTest::test);
     std::cout << "Finished" << std::endl;
     ConstraintLibrary::purgeAll();
+    uninitConstraintLibrary();
   }
 
 
