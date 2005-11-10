@@ -1,9 +1,0 @@
-SubDir PLASMA Examples ;
-
-if ! $(PLASMA_READY) {
-
-Module Examples : System ;
-
-SubInclude PLASMA Examples SimpleRover ;
-
-} # PLASMA_READY

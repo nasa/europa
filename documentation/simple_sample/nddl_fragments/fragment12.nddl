@@ -1,4 +1,0 @@
-predicate Place{
-   Location rock;
-   eq([3 12], duration); // duration of Place is between 3 and 12 time units
-}
