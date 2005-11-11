@@ -2,7 +2,25 @@ SubDir PLASMA System test ;
 
 if ! $(PLASMA_READY) {
 
-ModuleMain all-module-tests : test-main.cc : System ;
+SubInclude PLASMA PlanDatabase test ;
+SubInclude PLASMA CBPlanner test ;
+
+ModuleMain all-module-tests : test-main.cc ../../PlanDatabase/test/db-test-module.cc 
+                                           ../../Resource/test/rs-test-module.cc 
+                                           ../../RulesEngine/test/re-test-module.cc 
+                                           ../../RulesEngine/test/TestRule.cc 
+                                           ../../ConstraintEngine/test/ConstraintTesting.cc
+                                           ../../ConstraintEngine/test/ce-test-module.cc
+                                           ../../ConstraintEngine/test/domain-tests.cc
+                                           ../../TemporalNetwork/test/TestSubgoalRule.cc
+                                           ../../TemporalNetwork/test/tn-test-module.cc
+                                           ../../ConstraintEngine/test/ce-test-module.cc
+                                           ../../ConstraintEngine/test/ConstraintTesting.cc
+                                           ../../Utils/test/util-test-module.cc
+                                           ../../CBPlanner/test/cbp-test-module.cc
+                                           $(CBPlanner_Test_Files:S=$(SUFOBJ))
+                                           : 
+                                            System ;
 RunModuleMain run-all-module-tests : all-module-tests ;
 
 #
