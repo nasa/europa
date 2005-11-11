@@ -2,9 +2,6 @@ SubDir PLASMA System test ;
 
 if ! $(PLASMA_READY) {
 
-SubInclude PLASMA PlanDatabase test ;
-SubInclude PLASMA CBPlanner test ;
-
 ModuleMain all-module-tests : test-main.cc ../../PlanDatabase/test/db-test-module.cc 
                                            ../../Resource/test/rs-test-module.cc 
                                            ../../RulesEngine/test/re-test-module.cc 
