@@ -6,4 +6,4 @@ class HeuristicsEngineModuleTests {
   static void runTests();
 };
 
-#endif /* H_HeMODULE_TESTS */
+#endif /* H_HE_MODULE_TESTS */

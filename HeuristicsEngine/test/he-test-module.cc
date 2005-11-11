@@ -1656,6 +1656,7 @@ void HeuristicsEngineModuleTests::runTests() {
 
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
+  uninitConstraintLibrary();
   }
 
 
