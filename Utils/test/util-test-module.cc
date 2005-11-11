@@ -21,6 +21,7 @@
    CMG: Added test for id's and entities
 */
 
+#include "util-test-module.hh"
 #include "Error.hh"
 #include "Debug.hh"
 #include "LabelStr.hh"
@@ -720,9 +721,7 @@ private:
   }
 };
 
-class UtilModuleTests {
-public:
-  static void runTests() {
+void UtilModuleTests::runTests() {
   LockManager::instance().connect();
   runTestSuite(ErrorTest::test);
   runTestSuite(DebugTest::test);
@@ -733,5 +732,3 @@ public:
 
   std::cout << "Finished" << std::endl;
   }
-};
-

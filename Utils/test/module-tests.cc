@@ -1,6 +1,6 @@
-#include "test-module.cc"
+#include "util-test-module.hh"
 
 int main(int argc, const char** argv) {
   UtilModuleTests::runTests();
-  exit(0);
+  return 0;
 }

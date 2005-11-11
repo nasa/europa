@@ -4,7 +4,7 @@ if ! $(PLASMA_READY) {
 
 SubDirHdrs $(PLASMA) ConstraintEngine component ;
 
-ModuleMain utils-module-tests : module-tests.cc : Utils ;
+ModuleMain utils-module-tests : module-tests.cc util-test-module.cc : Utils ;
 RunModuleMain run-utils-module-tests : utils-module-tests ;
 LocalDepends tests : run-utils-module-tests ;
 
