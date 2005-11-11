@@ -1,6 +1,6 @@
-#include "test-module.cc"
+#include "nddl-test-module.hh"
 
 int main(int argc, const char** argv) {
   NDDLModuleTests::runTests();  
-  exit(0);
+  return 0;
 }

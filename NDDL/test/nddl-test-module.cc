@@ -2,6 +2,7 @@
 #include "NddlUtils.hh"
 #include "TestSupport.hh"
 
+#include "nddl-test-module.hh"
 // Support for default setup
 #include "ConstraintEngine.hh"
 #include "PlanDatabase.hh"
@@ -259,9 +260,7 @@ public:
 };
 
 
-class NDDLModuleTests {
-public:
-  static void runTests() {
+void NDDLModuleTests::runTests() {
   LockManager::instance().connect();
   LockManager::instance().lock();
 
@@ -276,6 +275,7 @@ public:
   runTestSuite(UtilitiesTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
+  uninitConstraintLibrary();
   }
-};
+
 
