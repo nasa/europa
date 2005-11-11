@@ -1,6 +1,6 @@
-#include "test-module.cc"
+#include "hsts-test-module.hh"
 
 int main(int argc, const char** argv) {
   HSTSModuleTests::runTests();
-  exit(0);
+  return 0;
 }

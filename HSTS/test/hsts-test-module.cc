@@ -1,3 +1,5 @@
+#include "hsts-test-module.hh"
+
 /* HSTS Files */
 #include "HSTSNoBranch.hh"
 #include "HSTSNoBranchCondition.hh"
@@ -479,9 +481,7 @@ bool testWeakDomainComparator() {
   return true;
 }
 
-class HSTSModuleTests {
-public:
-  static void runTests() {
+void HSTSModuleTests::runTests() {
   initConstraintEngine();
 
   Schema::instance();
@@ -513,6 +513,6 @@ public:
   }
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
+  uninitConstraintLibrary();
   }
-};
   
