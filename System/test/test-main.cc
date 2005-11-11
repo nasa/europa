@@ -1,15 +1,15 @@
-#include "../../Aver/test/test-module.cc"
-#include "../../CBPlanner/test/test-module.cc"
-#include "../../ConstraintEngine/test/test-module.cc"
-#include "../../HeuristicsEngine/test/test-module.cc"
-#include "../../PlanDatabase/test/test-module.cc"
-#include "../../Resource/test/test-module.cc"
-#include "../../RulesEngine/test/test-module.cc"
 //#include "../../Solvers/test/test-module.cc"
-#include "../../TemporalNetwork/test/test-module.cc"
-#include "../../Utils/test/test-module.cc"
-#include "../../NDDL/test/test-module.cc"
-//#include "../../HSTS/test/test-module.cc"
+//#include "../../NDDL/test/nddl-test-module.cc"
+#include "../Aver/test/aver-test-module.hh"
+#include "../CBPlanner/test/cbp-test-module.hh"
+#include "../ConstraintEngine/test/ce-test-module.hh"
+#include "../../HeuristicsEngine/test/he-test-module.cc"
+#include "../PlanDatabase/test/db-test-module.hh"
+#include "../Resource/test/rs-test-module.hh"
+#include "../RulesEngine/test/re-test-module.hh"
+#include "../TemporalNetwork/test/tn-test-module.hh"
+#include "../HSTS/test/hsts-test-module.hh"
+//#include "../../Utils/test/util-test-module.cc" // duplicate symbol defintion problems.
 
 /**
  * @brief Test harness for running all module tests from a single binary to enable code coverage
@@ -17,20 +17,20 @@
  */
 
 int main(int argc, const char** argv) {
-  // setup singleton entities for all tests.
-  SchemaId schema = Schema::instance();
+ 
+  //SolverModuleTests::runTests();  // cannot include .hh file
+  //NDDLModuleTets::runTests(); // cannot include .hh file
 
-  //AverModuleTests::runTests();  // looks like a path problem in the test itself when called from outside standard dir.
-  //CBPlannerModuleTests::runTests();
-  //ConstraintEngineModuleTests::runTests();  // load problem
-  HeuristicsEngineModuleTests::runTests(); // xmutils error
-  //HSTSModuleTests::runTests(); // cannot find hstsnobranch...
-  // NDDLModuleTets::runTests(); // conot find domain.hh
+  //AverModuleTests::runTests();  // load file path
+  //UtilModuleTests::runTests(); // lot of duplicate symbol problems
+  //HSTSModuleTests::runTests();  // load file path
+  CBPlannerModuleTests::runTests();
+  //ConstraintEngineModuleTests::runTests(); // load file path
   PlanDatabaseModuleTests::runTests();
-  //ResourceModuleTests::runTests();
-  //RulesEngineModuleTests::runTests(); // test rule not found
-  //SolverModuleTests::runTests(); // won't ru n
-  //TemporalNetworkModuleTests::runTests(); // cannot find testSubgoalRule
-  //UtilModuleTests::runTests(); // test appears to fail
+  ResourceModuleTests::runTests();
+  RulesEngineModuleTests::runTests();
+  //HeuristicsEngineModuleTests::runTests();  // load file path
+  TemporalNetworkModuleTests::runTests(); 
+
   return 0;
 }
