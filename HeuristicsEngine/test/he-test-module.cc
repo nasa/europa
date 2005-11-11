@@ -727,11 +727,11 @@ private:
   }
 
   static bool testVariableHeuristicConfiguration(){
-    return testHeuristicConfiguration("/Users/pjarvis/europa2/PLASMA/HSTS/test/VariableHeuristics.xml");
+    return testHeuristicConfiguration("VariableHeuristics.xml");
   }
 
   static bool testTokenHeuristicConfiguration(){
-    return testHeuristicConfiguration("/Users/pjarvis/europa2/PLASMA/HSTS/test/TokenHeuristics.xml");
+    return testHeuristicConfiguration("TokenHeuristics.xml");
   }
 
   static bool testHeuristicConfiguration(const char* source){
