@@ -13,7 +13,7 @@ if ! $(PLASMA_READY) {
   LocalDepends aver-module-tests : $(modxml) ;
   LocalDepends run-aver-module-tests : $(modxml) ;
 
-  ModuleMain aver-module-tests : module-tests.cc : Aver ;
+  ModuleMain aver-module-tests : module-tests.cc aver-test-module.cc : Aver ;
   RunModuleMain run-aver-module-tests : aver-module-tests ;
   LocalDepends tests : run-aver-module-tests ;
 

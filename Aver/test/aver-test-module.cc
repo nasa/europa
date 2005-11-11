@@ -1,3 +1,4 @@
+#include "aver-test-module.hh"
 #include "AbstractDomain.hh"
 #include "AssertionExecutor.hh"
 #include "Assertion.hh"
@@ -906,12 +907,10 @@ namespace EUROPA {
 
 }
 
-class AverModuleTests {
-  public:
-  static void runTests() {
+void AverModuleTests::runTests() {
      Schema::instance();
      runTestSuite(EUROPA::FooTest::test);
      runTestSuite(EUROPA::AverHelperTest::test);
      std::cout << "Finished" << std::endl;
   }
-};
+
