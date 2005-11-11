@@ -209,6 +209,7 @@ public:
     runTest(testLocalVariable);
     runTest(testTestRule);
     runTest(testPurge);
+    runTest(testGNATS_3157);
     return true;
   }
 private:
@@ -360,6 +361,35 @@ private:
     return true;
   }
 
+  static bool testGNATS_3157(){
+    RE_DEFAULT_SETUP(ce, db, false);
+    db.close();
+
+    SimpleSubGoal r;
+    // Create a token of an expected type
+
+    IntervalToken t0(db.getId(), 
+		     LabelStr("AllObjects.Predicate"), 
+		     true,
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(0, 1000),
+		     IntervalIntDomain(1, 1000));
+    // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
+    assertTrue(t0.getSlaves().empty());
+    t0.activate();
+    assertTrue(db.getTokens().size() == 2);
+    assertTrue(t0.getSlaves().size() == 1);
+
+    TokenId slaveToken = *(t0.getSlaves().begin());
+    assertTrue(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
+
+    t0.commit();
+    delete (Token*) slaveToken;
+    Entity::garbageCollect();
+
+    RE_DEFAULT_TEARDOWN();
+    return true;
+  }
 };
 
 void RulesEngineModuleTests::runTests() {
