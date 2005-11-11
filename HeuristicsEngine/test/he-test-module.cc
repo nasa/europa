@@ -1,3 +1,4 @@
+#include "he-test-module.hh"
 #include "IntervalIntDomain.hh"
 #include "IntervalDomain.hh"
 #include "DefaultPropagator.hh"
@@ -726,11 +727,11 @@ private:
   }
 
   static bool testVariableHeuristicConfiguration(){
-    return testHeuristicConfiguration("VariableHeuristics.xml");
+    return testHeuristicConfiguration("/Users/pjarvis/europa2/PLASMA/HSTS/test/VariableHeuristics.xml");
   }
 
   static bool testTokenHeuristicConfiguration(){
-    return testHeuristicConfiguration("TokenHeuristics.xml");
+    return testHeuristicConfiguration("/Users/pjarvis/europa2/PLASMA/HSTS/test/TokenHeuristics.xml");
   }
 
   static bool testHeuristicConfiguration(const char* source){
@@ -1637,9 +1638,7 @@ private:
 
 };
 
-class HeuristicsEngineModuleTests {
-public:
-  static void runTests() {
+void HeuristicsEngineModuleTests::runTests() {
   LockManager::instance().connect();
   LockManager::instance().lock();
 
@@ -1658,6 +1657,5 @@ public:
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
   }
-};
 
 
