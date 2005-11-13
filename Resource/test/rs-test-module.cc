@@ -783,10 +783,11 @@ private:
 
 
 
-void ResourceModuleTests::runTests() {
+void ResourceModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
   LockManager::instance().lock();
-  
+  setTestLoadLibraryPath(path);  
+
   Schema::instance();
   initConstraintLibrary();
   REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");

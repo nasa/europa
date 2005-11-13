@@ -723,9 +723,10 @@ private:
 };
 
 
-void TemporalNetworkModuleTests::runTests() {
+void TemporalNetworkModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
   LockManager::instance().lock();
+  setTestLoadLibraryPath(path);
 
   Schema::instance();
   initConstraintLibrary();

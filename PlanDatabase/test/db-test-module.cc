@@ -5136,9 +5136,10 @@ private:
   }
 };
 
-void PlanDatabaseModuleTests::runTests() {
+void PlanDatabaseModuleTests::runTests(std::string path) {
+ 
   LockManager::instance().connect();
-
+  setTestLoadLibraryPath(path);
   LockManager::instance().lock();
   initDbModuleTests();
   LockManager::instance().unlock();

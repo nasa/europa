@@ -907,7 +907,7 @@ namespace EUROPA {
 
 }
 
-void AverModuleTests::runTests() {
+void AverModuleTests::runTests(std::string path) {
      Schema::instance();
      runTestSuite(EUROPA::FooTest::test);
      runTestSuite(EUROPA::AverHelperTest::test);

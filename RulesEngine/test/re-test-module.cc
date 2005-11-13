@@ -392,11 +392,12 @@ private:
   }
 };
 
-void RulesEngineModuleTests::runTests() {
+void RulesEngineModuleTests::runTests(std::string path) {
     LockManager::instance().connect();
     LockManager::instance().lock();
 
     initConstraintLibrary();
+    setTestLoadLibraryPath(path);
 
     // Allocate default schema initially so tests don't fail because of ID's
     Schema::instance();

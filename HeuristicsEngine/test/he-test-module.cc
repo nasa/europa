@@ -727,11 +727,12 @@ private:
   }
 
   static bool testVariableHeuristicConfiguration(){
-    return testHeuristicConfiguration("VariableHeuristics.xml");
+  
+    return testHeuristicConfiguration((getTestLoadLibraryPath() + "/VariableHeuristics.xml").c_str());
   }
 
   static bool testTokenHeuristicConfiguration(){
-    return testHeuristicConfiguration("TokenHeuristics.xml");
+    return testHeuristicConfiguration((getTestLoadLibraryPath() + "/TokenHeuristics.xml").c_str());
   }
 
   static bool testHeuristicConfiguration(const char* source){
@@ -846,7 +847,7 @@ private:
     return true;
   }
   static bool testGNATS_3153() {
-    HE_SETUP_HEURISTICS("GNATS_3153_Heuristics.xml");
+    HE_SETUP_HEURISTICS((getTestLoadLibraryPath() +"/GNATS_3153_Heuristics.xml").c_str());
     Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
     Object loc2(db.getId(),LabelStr("Location"),LabelStr("Loc2"));
     Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
@@ -891,7 +892,7 @@ public:
 private:
 
   static bool testDefaultInitialization() {
-    HE_READ_HEURISTICS("HSTSHeuristics.xml", false);
+    HE_READ_HEURISTICS((getTestLoadLibraryPath() + "/HSTSHeuristics.xml").c_str(), false);
     std::vector< GuardEntry > domainSpecs;
     heuristics.setDefaultPriorityForToken(20.3, LabelStr("Commands.TakeSample"), domainSpecs);
     heuristics.setDefaultPriorityForToken(10000.0);
@@ -917,7 +918,7 @@ private:
   }
 
   static bool testHSTSHeuristicsAssembly() {
-    HE_SETUP_HEURISTICS("HSTSHeuristics.xml");
+    HE_SETUP_HEURISTICS((getTestLoadLibraryPath() +"/HSTSHeuristics.xml").c_str());
 
     Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
     Timeline ins(db.getId(),LabelStr("Instrument"),LabelStr("ins1"));
@@ -996,7 +997,7 @@ private:
   }
 
   static bool testHSTSHeuristicsStrict() {
-    HE_SETUP_HEURISTICS("HSTSHeuristics.xml");
+    HE_SETUP_HEURISTICS((getTestLoadLibraryPath() +"/HSTSHeuristics.xml").c_str());
 
     //set up the database
     Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
@@ -1094,7 +1095,7 @@ private:
   }
 
   static bool testDefaultCompatibilityHeuristic() {
-    HE_SETUP_HEURISTICS("DefaultCompatHeuristics.xml");
+    HE_SETUP_HEURISTICS((getTestLoadLibraryPath() + "/DefaultCompatHeuristics.xml").c_str());
 
     //set up the database
     Timeline com(db.getId(),LabelStr("Commands"),LabelStr("com1"));
@@ -1223,7 +1224,7 @@ private:
   }
 
   static bool testPriorities() {
-    HE_SETUP_HEURISTICS("HSTSHeuristics.xml");
+    HE_SETUP_HEURISTICS((getTestLoadLibraryPath() + "/HSTSHeuristics.xml").c_str());
 
     Object loc1(db.getId(),LabelStr("Location"),LabelStr("Loc1"));
     Object loc3(db.getId(),LabelStr("Location"),LabelStr("Loc3"));
@@ -1638,9 +1639,10 @@ private:
 
 };
 
-void HeuristicsEngineModuleTests::runTests() {
+void HeuristicsEngineModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
   LockManager::instance().lock();
+  setTestLoadLibraryPath(path);
 
   Schema::instance();
 

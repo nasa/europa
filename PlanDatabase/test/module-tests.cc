@@ -1,6 +1,7 @@
 #include "db-test-module.hh"
+#include <string>
 
 int main() {
-  PlanDatabaseModuleTests::runTests();
+  PlanDatabaseModuleTests::runTests(std::string("."));
   return 0;
 }

@@ -260,7 +260,7 @@ public:
 };
 
 
-void NDDLModuleTests::runTests() {
+void NDDLModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
   LockManager::instance().lock();
 

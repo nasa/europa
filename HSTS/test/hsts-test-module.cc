@@ -481,9 +481,9 @@ bool testWeakDomainComparator() {
   return true;
 }
 
-void HSTSModuleTests::runTests() {
+void HSTSModuleTests::runTests(std::string path) {
   initConstraintEngine();
-
+  setTestLoadLibraryPath(path);
   Schema::instance();
 
   //!!initConstraintEngine(); // Needed ?

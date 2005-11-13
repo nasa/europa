@@ -73,5 +73,6 @@ private:
    err.print(std::cout);\
   }\
   }
-
 #endif
+
+

@@ -1,6 +1,6 @@
 #include "he-test-module.hh"
 
 int main(int argc, const char** argv) {
-  HeuristicsEngineModuleTests::runTests();
+  HeuristicsEngineModuleTests::runTests(".");
   return 0;
 }

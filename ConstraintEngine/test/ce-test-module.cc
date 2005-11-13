@@ -2562,9 +2562,10 @@ private:
   }
 };
 
-void ConstraintEngineModuleTests::runTests() {
+void ConstraintEngineModuleTests::runTests(std::string path) {
     LockManager::instance().connect();
     LockManager::instance().lock();
+    setTestLoadLibraryPath(path);
 
     initConstraintEngine();
     initConstraintLibrary();

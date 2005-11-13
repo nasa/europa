@@ -29,6 +29,7 @@
 #include "Id.hh"
 #include "LockManager.hh"
 #include "Entity.hh"
+
 #include <list>
 #include <sstream>
 #include <iostream>
@@ -721,8 +722,9 @@ private:
   }
 };
 
-void UtilModuleTests::runTests() {
+void UtilModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
+  
   runTestSuite(ErrorTest::test);
   runTestSuite(DebugTest::test);
   runTestSuite(IdTests::test);

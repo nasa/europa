@@ -18,19 +18,18 @@
 
 int main(int argc, const char** argv) {
  
-  //SolverModuleTests::runTests();  // cannot include .hh file
-  //NDDLModuleTets::runTests(); // cannot include .hh file
-
-  //AverModuleTests::runTests();  // load file path
-  //UtilModuleTests::runTests(); // lot of duplicate symbol problems
-  //HSTSModuleTests::runTests();  // load file path
-  CBPlannerModuleTests::runTests();
-  //ConstraintEngineModuleTests::runTests(); // load file path
-  PlanDatabaseModuleTests::runTests();
-  ResourceModuleTests::runTests();
-  RulesEngineModuleTests::runTests();
-  //HeuristicsEngineModuleTests::runTests();  // load file path
-  TemporalNetworkModuleTests::runTests(); 
+  //SolverModuleTests::runTests("../../Solvers/test");
+  //NDDLModuleTets::runTests("../../NDDL/test");
+  //AverModuleTests::runTests("../../Aver/test");
+  //UtilModuleTests::runTests("../../Utils/test");
+  HSTSModuleTests::runTests("../../hsts/test");
+  CBPlannerModuleTests::runTests("../../CBPlanner/test");
+  //ConstraintEngineModuleTests::runTests("../../ConstraintEngine/test"); // assertion failure in domian-tests.cc
+  PlanDatabaseModuleTests::runTests("../../PlanDatabase/test");
+  ResourceModuleTests::runTests("../../Resource/test");
+  RulesEngineModuleTests::runTests("../../RulesEngine/test");
+  HeuristicsEngineModuleTests::runTests("../../HeuristicsEngine/test");
+  TemporalNetworkModuleTests::runTests("../../TemporalNetwork/test"); 
 
   return 0;
 }

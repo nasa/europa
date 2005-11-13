@@ -1880,9 +1880,10 @@ private:
 
 
 
-void CBPlannerModuleTests::runTests() {
+void CBPlannerModuleTests::runTests(std::string path) {
     LockManager::instance().connect();
     LockManager::instance().lock();
+    setTestLoadLibraryPath(path);
 
     Schema::instance();
     REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
