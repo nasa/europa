@@ -945,7 +945,6 @@ namespace EUROPA {
       assertTrue(dt_l1 == copy1);
       assertTrue(dt_l2 != copy1);
 
-      std::cout << "label str size " << EUROPA::LabelStr::getSize() << " count " << initialCount << std::endl;
       assertTrue((EUROPA::LabelStr::getSize() - initialCount) == 5);
       assertTrue(dt_l1.toString() == "DT_L1");
 
