@@ -930,10 +930,10 @@ namespace EUROPA {
 
     static bool testBasicLabelOperations() {
       int initialCount = EUROPA::LabelStr::getSize();
-      EUROPA::LabelStr l1("L1");
-      EUROPA::LabelStr l2("L2");
-      EUROPA::LabelStr l3("L3");
-      assertTrue(l1 < l2 && l2 < l3);
+      EUROPA::LabelStr dt_l1("DT_L1");
+      EUROPA::LabelStr dt_l2("DT_L2");
+      EUROPA::LabelStr dt_l3("DT_L3");
+      assertTrue(dt_l1 < dt_l2 && dt_l2 < dt_l3);
 
       EUROPA::LabelStr la("L");
       EUROPA::LabelStr l4("L30");
@@ -941,42 +941,43 @@ namespace EUROPA {
       assertTrue(la == lb);
       assertTrue(la < l4);
 
-      EUROPA::LabelStr copy1(l1);
-      assertTrue(l1 == copy1);
-      assertTrue(l2 != copy1);
+      EUROPA::LabelStr copy1(dt_l1);
+      assertTrue(dt_l1 == copy1);
+      assertTrue(dt_l2 != copy1);
 
+      std::cout << "label str size " << EUROPA::LabelStr::getSize() << " count " << initialCount << std::endl;
       assertTrue((EUROPA::LabelStr::getSize() - initialCount) == 5);
-      assertTrue(l1.toString() == "L1");
+      assertTrue(dt_l1.toString() == "DT_L1");
 
-      assertTrue(LabelStr::isString(l1.getKey()));
+      assertTrue(LabelStr::isString(dt_l1.getKey()));
       assertTrue(!LabelStr::isString(PLUS_INFINITY+1));
       return(true);
     }
 
     static bool testLabelSetAllocations() {
       std::list<double> values;
-      values.push_back(EUROPA::LabelStr("L1"));
+      values.push_back(EUROPA::LabelStr("DT_L1"));
       values.push_back(EUROPA::LabelStr("L4"));
-      values.push_back(EUROPA::LabelStr("L2"));
+      values.push_back(EUROPA::LabelStr("DT_L2"));
       values.push_back(EUROPA::LabelStr("L5"));
-      values.push_back(EUROPA::LabelStr("L3"));
+      values.push_back(EUROPA::LabelStr("DT_L3"));
 
       ChangeListener l_listener;
       LabelSet ls0(values);
       ls0.setListener(l_listener.getId());
       assertTrue(!ls0.isOpen());
 
-      EUROPA::LabelStr l2("L2");
-      assertTrue(ls0.isMember(l2));
+      EUROPA::LabelStr dt_l2("DT_L2");
+      assertTrue(ls0.isMember(dt_l2));
       DomainListener::ChangeType change;
-      ls0.remove(l2);
+      ls0.remove(dt_l2);
       bool res = l_listener.checkAndClearChange(change);
       assertTrue(res && change == DomainListener::VALUE_REMOVED);
-      assertTrue(!ls0.isMember(l2));
+      assertTrue(!ls0.isMember(dt_l2));
 
-      EUROPA::LabelStr l3("L3");
-      ls0.set(l3);
-      assertTrue(ls0.isMember(l3));
+      EUROPA::LabelStr dt_l3("DT_L3");
+      ls0.set(dt_l3);
+      assertTrue(ls0.isMember(dt_l3));
       assertTrue(ls0.getSize() == 1);
 
       LabelSet ls1(values);
@@ -1163,16 +1164,16 @@ namespace EUROPA {
       values.push_back(EUROPA::LabelStr("D"));
       values.push_back(EUROPA::LabelStr("E"));
 
-      LabelSet l1(values);
+      LabelSet dt_l1(values);
       std::list<double> results;
-      l1.getValues(results);
+      dt_l1.getValues(results);
 
-      LabelSet l2(results);
+      LabelSet dt_l2(results);
 
-      assertTrue(l1 == l2);
+      assertTrue(dt_l1 == dt_l2);
       LabelStr lbl("C");
-      l1.set(lbl);
-      assertTrue(lbl == l1.getSingletonValue());
+      dt_l1.set(lbl);
+      assertTrue(lbl == dt_l1.getSingletonValue());
       return(true);
     }
 
