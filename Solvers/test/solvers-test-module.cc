@@ -1,3 +1,4 @@
+#include "solvers-test-module.hh"
 #include "Nddl.hh"
 #include "StandardAssembly.hh"
 #include "Solver.hh"
@@ -407,10 +408,7 @@ void initSolverModuleTests() {
   NDDL::loadSchema();
 }
 
-class SolverModuleTests {
-
-public:
-  static void runTests() {
+void SolversModuleTests::runTests(std::string path) {
   // Register components under program execution so that static allocation can have occurred
   // safely. This was required due to problemso nthe MAC.
   REGISTER_COMPONENT_FACTORY(TestComponent, A);
@@ -448,5 +446,4 @@ public:
   runTestSuite(FlawFilterTests::test);
   runTestSuite(SolverTests::test);
   }
-};
 

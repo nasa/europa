@@ -19,7 +19,7 @@ if ! $(PLASMA_READY) {
   LocalDepends run-solvers-module-tests : $(inputFile:S=.xml) ;
  }
 
- NddlMain solvers-module-tests : module-tests.cc : Model.nddl : Solvers ;
+ NddlMain solvers-module-tests : module-tests.cc solvers-test-module.cc : Model.nddl : Solvers ;
  RunModuleMain run-solvers-module-tests : solvers-module-tests ;
  LocalDepends tests : run-solvers-module-tests ;
 } # PLASMA_READY

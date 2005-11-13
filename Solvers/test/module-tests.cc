@@ -1,6 +1,6 @@
-#include "test-module.cc"
+#include "solvers-test-module.hh"
 
 int main(int argc, const char** argv) {
-  SolverModuleTests::runTests();
+  SolversModuleTests::runTests(".");
   return 0;
 }
