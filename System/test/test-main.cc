@@ -1,4 +1,4 @@
-#include "../../Solvers/test/solvers-test-module.hh"
+//#include "../../Solvers/test/solvers-test-module.hh" // three mulitple symbol defintion problems.
 //#include "../../NDDL/test/nddl-test-module.hh"
 //#include "../HSTS/test/hsts-test-module.hh"
 //#include "../../Utils/test/util-test-module.hh"
@@ -21,7 +21,7 @@ extern "C" void loadSchema() {}
 
 int main(int argc, const char** argv) {
  
-  //SolverModuleTests::runTests("../../Solvers/test");
+  //SolversModuleTests::runTests("../../Solvers/test");
   //NDDLModuleTets::runTests("../../NDDL/test");
   //UtilModuleTests::runTests("../../Utils/test");
   //HSTSModuleTests::runTests("../../hsts/test");
