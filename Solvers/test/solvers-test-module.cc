@@ -310,10 +310,10 @@ private:
 
   static bool testExhaustiveSearch(){
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "SolverTests.xml").c_str(), "SimpleCSPSolver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
-      assert(assembly.playTransactions((getTestLoadLibraryPath() + "ExhaustiveSearch.xml").c_str()));
+      assert(assembly.playTransactions((getTestLoadLibraryPath() + "/ExhaustiveSearch.xml").c_str()));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertFalse(solver.solve());
 
@@ -335,12 +335,12 @@ private:
 
   static bool testSimpleActivation() {
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "SolverTests.xml").c_str(), "SimpleActivationSolver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleActivationSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
       IntervalIntDomain& horizon = HorizonFilter::getHorizon();
       horizon = IntervalIntDomain(0, 1000);
-      assert(assembly.playTransactions((getTestLoadLibraryPath() + "SimpleActivation.xml").c_str()));
+      assert(assembly.playTransactions((getTestLoadLibraryPath() + "/SimpleActivation.xml").c_str()));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertTrue(solver.solve());
     }
@@ -350,12 +350,12 @@ private:
 
   static bool testSimpleRejection() {
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "SolverTests.xml").c_str(), "SimpleRejectionSolver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleRejectionSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
       IntervalIntDomain& horizon = HorizonFilter::getHorizon();
       horizon = IntervalIntDomain(0, 1000);
-      assert(assembly.playTransactions((getTestLoadLibraryPath() + "SimpleRejection.xml").c_str()));
+      assert(assembly.playTransactions((getTestLoadLibraryPath() + "/SimpleRejection.xml").c_str()));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertTrue(solver.solve());
       assertTrue(assembly.getPlanDatabase()->getTokens().size() == 1, 
@@ -369,7 +369,7 @@ private:
 
   static bool testMultipleSearch(){
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "SolverTests.xml").c_str(), "SimpleCSPSolver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
 
     // Call the solver
@@ -377,7 +377,7 @@ private:
     assertTrue(solver.solve());
 
     // Now modify the database and invoke the solver again. Ensure that it does work
-    assert(assembly.playTransactions((getTestLoadLibraryPath() + "SuccessfulSearch.xml").c_str()));
+    assert(assembly.playTransactions((getTestLoadLibraryPath() + "/SuccessfulSearch.xml").c_str()));
     assertTrue(solver.solve());
     assertTrue(solver.getDepth() > 0);
 
@@ -387,10 +387,10 @@ private:
   //to test GNATS 3068
   static bool testOversearch() {
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "SolverTests.xml").c_str(), "SimpleCSPSolver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
 
-    assert(assembly.playTransactions((getTestLoadLibraryPath() +"SuccessfulSearch.xml").c_str()));
+    assert(assembly.playTransactions((getTestLoadLibraryPath() +"/SuccessfulSearch.xml").c_str()));
     Solver solver(assembly.getPlanDatabase(), *child);
     solver.setMaxSteps(5); //arbitrary number of maximum steps
     assert(solver.solve(20)); //arbitrary number of steps < max
