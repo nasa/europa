@@ -1,6 +1,6 @@
 <SimpleCSPSolver>
  <Solver name="SimpleCSPSolver">
-  <-- Will have variable flaws, but no filtering -->
+  <!-- Will have variable flaws, but no filtering -->
   <UnboundVariableManager>
    <FlawHandler var-match="v0" component="Min"/>
    <FlawHandler var-match="v1" component="Min"/>
@@ -10,7 +10,7 @@
 </SimpleCSPSolver>
 <SimpleActivationSolver>
  <Solver name="SimpleTokenSolver">
-  <-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
+  <!-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
   <FlawFilter class-match="HorizonFiltered" component="HorizonFilter"/>
   <OpenConditionManager>
     <FlawHandler component="StandardOpenConditionHandler"/>
@@ -22,7 +22,7 @@
 </SimpleActivationSolver>
 <SimpleRejectionSolver>
  <Solver name="SimpleRejectionSolver">
-  <-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
+  <!-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
   <FlawFilter class-match="HorizonFiltered" component="HorizonFilter"/>
 
   <UnboundVariableManager>
