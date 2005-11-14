@@ -1,11 +1,11 @@
-//#include "../../Solvers/test/test-module.cc"
-//#include "../../NDDL/test/nddl-test-module.cc"
+#include "../../Solvers/test/solvers-test-module.hh"
+//#include "../../NDDL/test/nddl-test-module.hh"
 //#include "../HSTS/test/hsts-test-module.hh"
-//#include "../../Utils/test/util-test-module.cc"
+//#include "../../Utils/test/util-test-module.hh"
 #include "../Aver/test/aver-test-module.hh"
 #include "../CBPlanner/test/cbp-test-module.hh"
 #include "../ConstraintEngine/test/ce-test-module.hh"
-#include "../../HeuristicsEngine/test/he-test-module.cc"
+#include "../HeuristicsEngine/test/he-test-module.hh"
 #include "../PlanDatabase/test/db-test-module.hh"
 #include "../Resource/test/rs-test-module.hh"
 #include "../RulesEngine/test/re-test-module.hh"
@@ -15,6 +15,9 @@
  * @brief Test harness for running all module tests from a single binary to enable code coverage
  *        analysis tools to examine the codebase.
  */
+
+extern "C" void loadSchema() {}
+
 
 int main(int argc, const char** argv) {
  
