@@ -3,6 +3,7 @@ SubDir PLASMA System test ;
 if ! $(PLASMA_READY) {
 
 ModuleMain all-module-tests : test-main.cc ../../PlanDatabase/test/db-test-module.cc
+                                           ../../Solvers/test/solvers-test-module.cc
                                            ../../HeuristicsEngine/test/he-test-module.cc 
                                            ../../Aver/test/aver-test-module.cc
                                            ../../Resource/test/rs-test-module.cc 
