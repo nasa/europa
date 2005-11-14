@@ -810,13 +810,12 @@ namespace EUROPA {
 	}
       
 	tokOut << std::endl;
-	numTokens++;
       }
   
       void PartialPlanWriter::outputStateVar(const Id<TokenVariable<StateDomain> >& stateVar,
 					     const int parentId, const int type,
 					     std::ofstream &varOut) {
-	numVariables++;
+	
 	varOut << stateVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 	       << stateVar->getName().toString() << TAB;
 
@@ -837,7 +836,7 @@ namespace EUROPA {
       void PartialPlanWriter::outputEnumVar(const Id<TokenVariable<EnumeratedDomain> >& enumVar, 
 					    const int parentId, const int type,
 					    std::ofstream &varOut) {
-	numVariables++;
+	
 	varOut << enumVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 	       << enumVar->getName().toString() << TAB;
 
@@ -852,7 +851,7 @@ namespace EUROPA {
       void PartialPlanWriter::outputIntVar(const Id<TokenVariable<IntervalDomain> >& intVar,
 					   const int parentId, const int type,
 					   std::ofstream &varOut) {
-	numVariables++;
+	
 	varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 	       << intVar->getName().toString() << TAB;
 
@@ -866,7 +865,7 @@ namespace EUROPA {
       void PartialPlanWriter::outputIntIntVar(const Id<TokenVariable<IntervalIntDomain> >& intVar,
 					      const int parentId, const int type,
 					      std::ofstream &varOut) {
-	numVariables++;
+	
 
 	varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 	       << intVar->getName().toString() << TAB;
@@ -881,7 +880,7 @@ namespace EUROPA {
       void PartialPlanWriter::outputObjVar(const ObjectVarId& objVar,
 					   const int parentId, const int type,
 					   std::ofstream &varOut) {
-	numVariables++;
+	
 
 	varOut << objVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 	       << objVar->getName().toString() << TAB;
@@ -902,7 +901,7 @@ namespace EUROPA {
       void PartialPlanWriter::outputConstrVar(const ConstrainedVariableId &otherVar, 
 					      const int parentId, const int type,
 					      std::ofstream &varOut) {
-	numVariables++;
+	
 
 	varOut << otherVar->getKey() << TAB << ppId << TAB << parentId << TAB 
 	       << otherVar->getName().toString() << TAB;
@@ -1162,7 +1161,7 @@ namespace EUROPA {
 	condWrite(RETRACT_SUCCEEDED);
       }
 
-      void PartialPlanWriter::notifyRetractFailed() {
+      void PartialPlanWriter::notifyRetractNotDone() {
 	condWrite(RETRACT_FAILED);
       }
 
