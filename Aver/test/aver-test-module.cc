@@ -233,7 +233,7 @@ namespace EUROPA {
     }
 
     static bool testBuildPath() {
-      TiXmlDocument paths("testpaths.xml");
+      TiXmlDocument paths(getTestLoadLibraryPath() + "/testpaths.xml");
       assertTrue(paths.LoadFile());
       TiXmlElement* root = paths.RootElement();
       TiXmlElement* file = NULL;
@@ -908,6 +908,7 @@ namespace EUROPA {
 }
 
 void AverModuleTests::runTests(std::string path) {
+     setTestLoadLibraryPath(path);
      Schema::instance();
      runTestSuite(EUROPA::FooTest::test);
      runTestSuite(EUROPA::AverHelperTest::test);
