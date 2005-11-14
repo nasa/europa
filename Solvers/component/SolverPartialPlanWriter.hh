@@ -108,7 +108,7 @@ namespace EUROPA {
 	void notifyStepSucceeded();
 	void notifyStepFailed();
 	void notifyRetractSucceeded();
-	void notifyRetractFailed();
+	void notifyRetractNotDone();
 	void notifyCompleted();
 	void notifyExhausted();
 	void notifyTimedOut();
@@ -140,7 +140,7 @@ namespace EUROPA {
 	  void notifyStepSucceeded(DecisionPointId& dp) {ppw->notifyStepSucceeded();}
 	  void notifyStepFailed(DecisionPointId& dp) {ppw->notifyStepFailed();}
 	  void notifyRetractSucceeded(DecisionPointId& dp) {ppw->notifyRetractSucceeded();}
-	  void notifyRetractFailed(DecisionPointId& dp) {ppw->notifyRetractFailed();}
+	  void notifyRetractNotDone(DecisionPointId& dp) {ppw->notifyRetractNotDone();}
 	  void notifyCompleted() {ppw->notifyCompleted();}
 	  void notifyExhausted() {ppw->notifyExhausted();}
 	  void notifyTimedOut() {ppw->notifyTimedOut();}
