@@ -148,6 +148,8 @@ namespace EUROPA {
       const std::string WRITE_DEST("WriteDest");
       const std::string MAX_CHOICES("MaxChoices");
 
+      const std::string configSections[] = {GENERAL_CONFIG_SECTION, RULE_CONFIG_SECTION};
+
 #ifdef __BEOS__
 #define NBBY 8
       static char *realpath(const char *path, char *resolved_path) {
@@ -1268,9 +1270,14 @@ namespace EUROPA {
 	      FatalErrno();
 	  }
 	  else {
-	    for(int i = strlen(buf); i >= 0; i--)
-	      configFile.putback(buf[i]);
-	    return;
+	    for(int i = 0; i < 2; i++) {
+	      if(line.find(configSections[i]) != std::string::npos) {
+		for(int j = strlen(buf); j >= 0; j--)
+		  configFile.putback(buf[j]);
+		return;
+	      }
+	    }
+	    FatalError("Config parse error: unexpected line: ", line);
 	  }
 	}
       }
@@ -1289,9 +1296,14 @@ namespace EUROPA {
 	    sourcePaths.push_back(path);
 	  }
 	  else {
-	    for(int i = strlen(buf); i >= 0; i--)
-	      configFile.putback(buf[i]);
-	    return;
+	    for(int i = 0; i < 2; i++) {
+	      if(line.find(configSections[i]) != std::string::npos) {
+		for(int j = strlen(buf); j >= 0; j--)
+		  configFile.putback(buf[j]);
+		return;
+	      }
+	    }
+	    FatalError("Config parse error: unexpected line: ", line);
 	  }
 	}
       }
