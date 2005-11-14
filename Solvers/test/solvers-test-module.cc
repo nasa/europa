@@ -12,7 +12,6 @@
 #include "Token.hh"
 #include "TestSupport.hh"
 #include "Debug.hh"
-#include "../../PlanDatabase/test/PlanDatabaseTestSupport.hh"
 #include "Variable.hh"
 #include "IntervalDomain.hh"
 #include "IntervalIntDomain.hh"
@@ -106,7 +105,7 @@ public:
 
 private:
   static bool testBasicAllocation(){
-    TiXmlElement* configXml = initXml("ComponentFactoryTest.xml");
+    TiXmlElement* configXml = initXml((getTestLoadLibraryPath() + "/ComponentFactoryTest.xml").c_str());
 
     for (TiXmlElement * child = configXml->FirstChildElement(); 
 	 child != NULL; 
@@ -138,12 +137,12 @@ public:
 private:
   
   static bool testVariableFiltering(){
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "UnboundVariableManager");
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawFilterTests.xml").c_str(), "UnboundVariableManager");
 
     StandardAssembly assembly(Schema::instance());
     UnboundVariableManager fm(*root);
     fm.initialize(assembly.getPlanDatabase());
-    assert(assembly.playTransactions("UnboundVariableFiltering.xml"));
+    assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str() ));
 
     // Set the horizon
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
@@ -187,14 +186,14 @@ private:
   }
 
   static bool testTokenFiltering(){
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "OpenConditionManager");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml").c_str(), "OpenConditionManager");
 
     StandardAssembly assembly(Schema::instance());
     OpenConditionManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
     fm.initialize(assembly.getPlanDatabase());
-    assert(assembly.playTransactions("OpenConditionFiltering.xml"));
+    assert(assembly.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.xml").c_str() ));
 
     TokenSet tokens = assembly.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
@@ -212,14 +211,14 @@ private:
 
 
   static bool testThreatFiltering(){
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "ThreatManager");
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "ThreatManager");
 
     StandardAssembly assembly(Schema::instance());
     ThreatManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
     fm.initialize(assembly.getPlanDatabase());
-    assert(assembly.playTransactions("ThreatFiltering.xml"));
+    assert(assembly.playTransactions(( getTestLoadLibraryPath() + "/ThreatFiltering.xml").c_str()));
 
     TokenSet tokens = assembly.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
@@ -255,10 +254,10 @@ private:
    */
   static bool testMinValuesSimpleCSP(){
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml("SolverTests.xml", "SimpleCSPSolver");
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
-      assert(assembly.playTransactions("StaticCSP.xml"));
+      assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.xml").c_str()));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertTrue(solver.solve());
       const ConstrainedVariableSet& allVars = assembly.getPlanDatabase()->getGlobalVariables();
@@ -299,10 +298,10 @@ private:
 
   static bool testSuccessfulSearch(){
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml("SolverTests.xml", "SimpleCSPSolver");
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
-      assert(assembly.playTransactions("SuccessfulSearch.xml"));
+      assert(assembly.playTransactions((getTestLoadLibraryPath() + "/SuccessfulSearch.xml").c_str()));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertTrue(solver.solve());
     }
@@ -311,10 +310,10 @@ private:
 
   static bool testExhaustiveSearch(){
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml("SolverTests.xml", "SimpleCSPSolver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
-      assert(assembly.playTransactions("ExhaustiveSearch.xml"));
+      assert(assembly.playTransactions((getTestLoadLibraryPath() + "ExhaustiveSearch.xml").c_str()));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertFalse(solver.solve());
 
@@ -336,12 +335,12 @@ private:
 
   static bool testSimpleActivation() {
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml("SolverTests.xml", "SimpleActivationSolver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "SolverTests.xml").c_str(), "SimpleActivationSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
       IntervalIntDomain& horizon = HorizonFilter::getHorizon();
       horizon = IntervalIntDomain(0, 1000);
-      assert(assembly.playTransactions("SimpleActivation.xml"));
+      assert(assembly.playTransactions((getTestLoadLibraryPath() + "SimpleActivation.xml").c_str()));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertTrue(solver.solve());
     }
@@ -351,12 +350,12 @@ private:
 
   static bool testSimpleRejection() {
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml("SolverTests.xml", "SimpleRejectionSolver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "SolverTests.xml").c_str(), "SimpleRejectionSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
       IntervalIntDomain& horizon = HorizonFilter::getHorizon();
       horizon = IntervalIntDomain(0, 1000);
-      assert(assembly.playTransactions("SimpleRejection.xml"));
+      assert(assembly.playTransactions((getTestLoadLibraryPath() + "SimpleRejection.xml").c_str()));
       Solver solver(assembly.getPlanDatabase(), *child);
       assertTrue(solver.solve());
       assertTrue(assembly.getPlanDatabase()->getTokens().size() == 1, 
@@ -370,7 +369,7 @@ private:
 
   static bool testMultipleSearch(){
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml("SolverTests.xml", "SimpleCSPSolver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
 
     // Call the solver
@@ -378,7 +377,7 @@ private:
     assertTrue(solver.solve());
 
     // Now modify the database and invoke the solver again. Ensure that it does work
-    assert(assembly.playTransactions("SuccessfulSearch.xml"));
+    assert(assembly.playTransactions((getTestLoadLibraryPath() + "SuccessfulSearch.xml").c_str()));
     assertTrue(solver.solve());
     assertTrue(solver.getDepth() > 0);
 
@@ -388,10 +387,10 @@ private:
   //to test GNATS 3068
   static bool testOversearch() {
     StandardAssembly assembly(Schema::instance());
-    TiXmlElement* root = initXml("SolverTests.xml", "SimpleCSPSolver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
 
-    assert(assembly.playTransactions("SuccessfulSearch.xml"));
+    assert(assembly.playTransactions((getTestLoadLibraryPath() +"SuccessfulSearch.xml").c_str()));
     Solver solver(assembly.getPlanDatabase(), *child);
     solver.setMaxSteps(5); //arbitrary number of maximum steps
     assert(solver.solve(20)); //arbitrary number of steps < max
@@ -409,6 +408,8 @@ void initSolverModuleTests() {
 }
 
 void SolversModuleTests::runTests(std::string path) {
+   setTestLoadLibraryPath(path);
+
   // Register components under program execution so that static allocation can have occurred
   // safely. This was required due to problemso nthe MAC.
   REGISTER_COMPONENT_FACTORY(TestComponent, A);
@@ -442,8 +443,11 @@ void SolversModuleTests::runTests(std::string path) {
   REGISTER_CONSTRAINT(LazyAllDiff, "lazyAllDiff",  "Default");
   REGISTER_CONSTRAINT(LazyAlwaysFails, "lazyAlwaysFails",  "Default");
 
+
   runTestSuite(ComponentFactoryTests::test);
   runTestSuite(FlawFilterTests::test);
   runTestSuite(SolverTests::test);
+
+  uninitConstraintLibrary();
   }
 
