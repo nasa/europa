@@ -18,7 +18,8 @@ ModuleMain all-module-tests : test-main.cc ../../PlanDatabase/test/db-test-modul
                                            ../../ConstraintEngine/test/ConstraintTesting.cc
                                            ../../Utils/test/util-test-module.cc
                                            ../../CBPlanner/test/cbp-test-module.cc
-                                           $(CBPlanner_Test_Files:S=$(SUFOBJ))
+                                           $(CBPlanner_Test_Files:S=$(SUFOBJ))                                   
+                                           $(PlanDatabase_Test_Files:S=$(SUFOBJ))
                                            : 
                                             System ;
 RunModuleMain run-all-module-tests : all-module-tests ;
