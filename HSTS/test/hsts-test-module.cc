@@ -51,7 +51,7 @@
 #include "WeakDomainComparator.hh"
 #include "XMLUtils.hh"
 
-#include "test/ConstraintTesting.hh"
+#include "../test/ConstraintTesting.hh"
 
 #include <iostream>
 #include <string>
@@ -59,7 +59,7 @@
 
 #define DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
-    initCBPTestSchema(); \
+    hstsInitCBPTestSchema(); \
     PlanDatabase db(ce.getId(), Schema::instance()); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
@@ -77,7 +77,7 @@
   /**
    * @brief Creates the type specifications required for testing
    */
-  void initCBPTestSchema(){
+  void hstsInitCBPTestSchema(){
     const SchemaId& schema = Schema::instance();
     schema->reset();
     schema->addObjectType("Objects");
@@ -105,7 +105,7 @@
     schema->addPredicate("Objects.P1False");
   }
 
-  void initHeuristicsSchema(){
+  void hstsInitHeuristicsSchema(){
     const SchemaId& rover = Schema::instance();
     rover->reset();
     rover->addObjectType(LabelStr("Object"));
@@ -447,7 +447,7 @@ private:
 bool testWeakDomainComparator() {
   
   DEFAULT_SETUP(ce,db,false);
-  initHeuristicsSchema();
+  hstsInitHeuristicsSchema();
   DomainComparator();
   IntervalDomain i1;
   IntervalIntDomain i2;
