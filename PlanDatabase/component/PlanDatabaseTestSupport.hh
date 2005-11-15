@@ -3,7 +3,7 @@
 
 #include "Utils.hh"
 #include "IntervalIntDomain.hh"
-#include "Domain.hh"
+#include "Domain.hh" // cannot find this header file anywhere in plasma.
 #include "DefaultPropagator.hh"
 
 class DefaultSchemaAccessor {
@@ -30,7 +30,7 @@ SchemaId DefaultSchemaAccessor::s_instance;
 
 #define SCHEMA DefaultSchemaAccessor::instance()
 
-#define DEFAULT_SETUP(ce, db, schema, autoClose) \
+#define DB_DEFAULT_SETUP(ce, db, schema, autoClose) \
     ConstraintEngineId ce = (new ConstraintEngine())->getId(); \
     SchemaId schema = (new Schema())->getId(); \
     PlanDatabaseId db = (new PlanDatabase(ce, schema))->getId(); \
@@ -49,7 +49,7 @@ SchemaId DefaultSchemaAccessor::s_instance;
       db->close();\
     {
 
-#define DEFAULT_TEARDOWN() \
+#define DB_DEFAULT_TEARDOWN() \
     }\
     Entity::purgeStarted();\
     delete (PlanDatabase*) db;\
