@@ -21,17 +21,25 @@ extern "C" void loadSchema() {}
 
 
 int main(int argc, const char** argv) {
-  //HSTSModuleTests::runTests("../../hsts/test");
-  AverModuleTests::runTests("../../Aver/test");
-  CBPlannerModuleTests::runTests("../../CBPlanner/test");
+
+  // c++ path finding problems etc.
+
+  HSTSModuleTests::runTests("../../hsts/test"); // not able to find some hsts includes/
+  //UtilModuleTests::runTests("../../Utils/test");
+  //NDDLModuleTests::runTests("../../NDDL/test");
+
+  // PLASMA problems
+
   //ConstraintEngineModuleTests::runTests("../../ConstraintEngine/test"); // assertion failure in domian-tests.cc a is b   instance of a can be compared to instance of b
   //SolversModuleTests::runTests("../../Solvers/test");  // Factory "A" is not registered.
+
+  AverModuleTests::runTests("../../Aver/test");
+  CBPlannerModuleTests::runTests("../../CBPlanner/test");
   PlanDatabaseModuleTests::runTests("../../PlanDatabase/test");
   ResourceModuleTests::runTests("../../Resource/test");
   RulesEngineModuleTests::runTests("../../RulesEngine/test");
   HeuristicsEngineModuleTests::runTests("../../HeuristicsEngine/test");
   TemporalNetworkModuleTests::runTests("../../TemporalNetwork/test"); 
-  //UtilModuleTests::runTests("../../Utils/test");
-  //NDDLModuleTests::runTests("../../NDDL/test");
+
   return 0;
 }
