@@ -47,8 +47,8 @@ SubInclude PLASMA TemporalNetwork ;
 SubInclude PLASMA NDDL ;
 SubInclude PLASMA Solvers ;
 SubInclude PLASMA Aver ;
-SubInclude PLASMA System ;
 SubInclude PLASMA HSTS ;
+SubInclude PLASMA System ;
 
 SubInclude PLASMA Examples ;
 
