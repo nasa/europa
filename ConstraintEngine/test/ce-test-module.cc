@@ -1964,9 +1964,9 @@ private:
     //   "CLibTestCases".
     // For each file, try twice with different relative paths since we don't know what
     //   the current working directory is.
-    assertTrue(readTestCases(std::string("NewTestCases"), tests) ||
+    assertTrue(readTestCases(getTestLoadLibraryPath() + std::string("/NewTestCases"), tests) ||
                readTestCases(std::string("ConstraintEngine/test/NewTestCases"), tests));
-    assertTrue(readTestCases(std::string("CLibTestCases"), tests) ||
+    assertTrue(readTestCases(getTestLoadLibraryPath() + std::string("/CLibTestCases"), tests) ||
                readTestCases(std::string("ConstraintEngine/test/CLibTestCases"), tests));
 
     return(executeTestCases(ENGINE, tests));
