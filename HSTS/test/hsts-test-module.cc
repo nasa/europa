@@ -51,7 +51,7 @@
 #include "WeakDomainComparator.hh"
 #include "XMLUtils.hh"
 
-#include "../test/ConstraintTesting.hh"
+#include "HSTSConstraintTesting.hh"
 
 #include <iostream>
 #include <string>
@@ -210,10 +210,10 @@ private:
    */
   static bool testDNPConstraints() {
     DEFAULT_SETUP(ce,db,false);
-    std::list<ConstraintTestCase> tests;
-    assertTrue(readTestCases(std::string("DNPTestCases"), tests) ||
-               readTestCases(std::string("HSTS/test/DNPTestCases"), tests));
-    assertTrue(executeTestCases(ce.getId(), tests));
+    std::list<HSTSConstraintTestCase> tests;
+    assertTrue(HSTSReadTestCases(std::string("DNPTestCases"), tests) ||
+               HSTSReadTestCases(std::string("HSTS/test/DNPTestCases"), tests));
+    assertTrue(HSTSExecuteTestCases(ce.getId(), tests));
     DEFAULT_TEARDOWN();
     return(true);
   }
