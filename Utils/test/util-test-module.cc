@@ -200,7 +200,7 @@ private:
   static void runDebugTest(int cfgNum) {
 #if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
     std::stringstream cfgName;
-    cfgName << "../../Utils/test/Debug" << cfgNum << ".cfg";
+    cfgName << "../../Utils/test/debug" << cfgNum << ".cfg";
     std::string cfgFile(cfgName.str());
     cfgName << ".output";
     std::string cfgOut(cfgName.str());
