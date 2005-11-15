@@ -2,9 +2,12 @@ SubDir PLASMA System test ;
 
 if ! $(PLASMA_READY) {
 
+SubDirHdrs $(PLASMA) PlanDatabase test ;
+
 ModuleMain all-module-tests : test-main.cc
                               # [ FDirName $(PLASMA) PlanDatabase test db-test-module.cc ]
-                                           ../../PlanDatabase/test/db-test-module.cc
+                                           ../../NDDL/test/nddl-test-module.cc
+                                         #  ../../PlanDatabase/test/db-test-module.cc
                                            ../../Solvers/test/solvers-test-module.cc
                                            ../../HeuristicsEngine/test/he-test-module.cc 
                                            ../../Aver/test/aver-test-module.cc
@@ -25,7 +28,7 @@ ModuleMain all-module-tests : test-main.cc
                                            ../../HSTS/test/hsts-test-module.cc
                                            ../../HSTS/test/HSTSConstraintTesting.cc
                                            : 
-                                            System HSTS ;
+                                            System HSTS NDDL ;
 RunModuleMain run-all-module-tests : all-module-tests ;
 
 #
