@@ -200,16 +200,18 @@ private:
   static void runDebugTest(int cfgNum) {
 #if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
     std::stringstream cfgName;
-    cfgName << "debug" << cfgNum << ".cfg";
+    cfgName << "../../Utils/test/Debug" << cfgNum << ".cfg";
     std::string cfgFile(cfgName.str());
     cfgName << ".output";
     std::string cfgOut(cfgName.str());
 
     Error::doNotThrowExceptions();
     Error::doNotDisplayErrors();
+    std::cout << "output stream " << cfgOut.c_str() << std::endl;
     std::ofstream debugOutput(cfgOut.c_str());
     assertTrue(debugOutput.good(), "could not open debug output file");
     DebugMessage::setStream(debugOutput);
+    std::cout << "open stram " << cfgFile.c_str() << std::endl;
     std::ifstream debugStream(cfgFile.c_str());
     assertTrue(debugStream.good(), "could not open debug config file",
                 DebugErr::DebugConfigError());
