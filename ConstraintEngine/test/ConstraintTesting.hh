@@ -1,3 +1,6 @@
+#ifndef _H_CONSTRAINT_TESTING
+#define _H_CONSTRAINT_TESTING
+
 /**
  * @file ConstraintTesting.hh
  * @author Will Edgington
@@ -57,3 +60,4 @@ namespace EUROPA {
   bool executeTestCases(const ConstraintEngineId& engine, std::list<ConstraintTestCase>& testCases);
 
 }; /* namespace EUROPA */
+#endif // ifndef..
