@@ -400,18 +400,20 @@ private:
 };
 
 void initSolverModuleTests() {
+ 
   StandardAssembly::initialize();
 
   // Allocate the schema with a call to the linked in model function - eventually
   // make this called via dlopen
   NDDL::loadSchema();
+ 
 }
 
 void SolversModuleTests::runTests(std::string path) {
    setTestLoadLibraryPath(path);
 
   // Register components under program execution so that static allocation can have occurred
-  // safely. This was required due to problemso nthe MAC.
+  // safely. This was required due to problems on the MAC.
   REGISTER_COMPONENT_FACTORY(TestComponent, A);
   REGISTER_COMPONENT_FACTORY(TestComponent, B);
   REGISTER_COMPONENT_FACTORY(TestComponent, C);
@@ -424,7 +426,7 @@ void SolversModuleTests::runTests(std::string path) {
   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonVariableFilter, HorizonVariableFilter);
 
-  // Initialization of various id's and other required elements
+  // Initialization of various ids and other required elements
   initSolverModuleTests();
 
   // Set up the required components. Should eventually go into an assembly. Note they are allocated on the stack, not the heap
@@ -438,11 +440,9 @@ void SolversModuleTests::runTests(std::string path) {
   REGISTER_THREAT_DECISION_FACTORY(EUROPA::SOLVERS::ThreatDecisionPoint, StandardThreatHandler);
   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::ThreatManager, ThreatManager);
 
-
   // Constraints used for testing
   REGISTER_CONSTRAINT(LazyAllDiff, "lazyAllDiff",  "Default");
   REGISTER_CONSTRAINT(LazyAlwaysFails, "lazyAlwaysFails",  "Default");
-
 
   runTestSuite(ComponentFactoryTests::test);
   runTestSuite(FlawFilterTests::test);
