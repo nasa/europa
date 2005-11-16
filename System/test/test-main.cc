@@ -28,7 +28,6 @@ int main(int argc, const char** argv) {
   //HSTSModuleTests::runTests("../../hsts/test"); // factory for constraint TEstOnly is not regestered.
  
   ConstraintEngineModuleTests::runTests("../../ConstraintEngine/test");
-  UtilModuleTests::runTests("../../Utils/test");
   AverModuleTests::runTests("../../Aver/test");
   CBPlannerModuleTests::runTests("../../CBPlanner/test");
   //PlanDatabaseModuleTests::runTests("../../PlanDatabase/test");
@@ -37,6 +36,8 @@ int main(int argc, const char** argv) {
   RulesEngineModuleTests::runTests("../../RulesEngine/test");
   HeuristicsEngineModuleTests::runTests("../../HeuristicsEngine/test");
   TemporalNetworkModuleTests::runTests("../../TemporalNetwork/test"); 
+  // Keep this test last. Leaves some debug messages set as a side effect. 
+  UtilModuleTests::runTests("../../Utils/test");
    
   return 0;
 }
