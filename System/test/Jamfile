@@ -1,13 +1,17 @@
 SubDir PLASMA System test ;
 
+# MJI's idea on fixing paths [ FDirName $(PLASMA) PlanDatabase test db-test-module.cc ]
+                             
 if ! $(PLASMA_READY) {
 
 SubDirHdrs $(PLASMA) PlanDatabase test ;
 
-ModuleMain all-module-tests : test-main.cc
-                              # [ FDirName $(PLASMA) PlanDatabase test db-test-module.cc ]
+#ModuleMain all-module-tests : test-main.cc
+#made switch to nddlMain as we Solvers test needs some nddl compiled.
+
+NddlMain all-module-tests : test-main.cc
                                            ../../NDDL/test/nddl-test-module.cc
-                                         #  ../../PlanDatabase/test/db-test-module.cc
+                                         # ../../PlanDatabase/test/db-test-module.cc
                                            ../../Solvers/test/solvers-test-module.cc
                                            ../../HeuristicsEngine/test/he-test-module.cc 
                                            ../../Aver/test/aver-test-module.cc
@@ -28,7 +32,10 @@ ModuleMain all-module-tests : test-main.cc
                                            ../../HSTS/test/hsts-test-module.cc
                                            ../../HSTS/test/HSTSConstraintTesting.cc
                                            : 
+                                           ../../Solvers/test/Model.nddl
+                                           :
                                             System HSTS NDDL ;
+
 RunModuleMain run-all-module-tests : all-module-tests ;
 
 #
