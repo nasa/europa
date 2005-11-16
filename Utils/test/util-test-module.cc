@@ -207,11 +207,9 @@ private:
 
     Error::doNotThrowExceptions();
     Error::doNotDisplayErrors();
-    std::cout << "output stream " << cfgOut.c_str() << std::endl;
     std::ofstream debugOutput(cfgOut.c_str());
     assertTrue(debugOutput.good(), "could not open debug output file");
     DebugMessage::setStream(debugOutput);
-    std::cout << "open stram " << cfgFile.c_str() << std::endl;
     std::ifstream debugStream(cfgFile.c_str());
     assertTrue(debugStream.good(), "could not open debug config file",
                 DebugErr::DebugConfigError());
