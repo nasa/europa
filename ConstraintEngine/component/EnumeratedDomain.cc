@@ -292,7 +292,7 @@ namespace EUROPA {
   }
 
   void EnumeratedDomain::relax(const AbstractDomain& dom) {
-    check_error(isSubsetOf(dom));
+    checkError(isSubsetOf(dom), toString() << " is not a subset of " << dom.toString());
     check_error(dom.isEnumerated());
 
     if(dom.isEmpty())
