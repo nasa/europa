@@ -2088,8 +2088,8 @@ private:
 
     // Reset, thus reverting to the base domain which should be open
     param0->reset();
-    assertTrue(!param0->lastDomain().isClosed());
-    assertTrue(!param1->lastDomain().isClosed());
+    assertTrue(!param0->lastDomain().isClosed(), param0->toString());
+    assertTrue(!param1->lastDomain().isClosed(), param1->toString());
 
     DEFAULT_TEARDOWN();
     return true;
