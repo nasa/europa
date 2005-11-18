@@ -3447,7 +3447,7 @@ public:
     s_mandatoryStateDom.insert(Token::ACTIVE);
     s_mandatoryStateDom.close();
     s_rejectableStateDom.insert(Token::ACTIVE);
-    s_rejectableStateDom.insert(Token::MERGED);
+    // NOT PERMITTED: s_rejectableStateDom.insert(Token::MERGED);
     s_rejectableStateDom.insert(Token::REJECTED);
     s_rejectableStateDom.close();
 
@@ -4276,10 +4276,12 @@ public:
 
   /** Test merging tokens. */
   static void testMerge() {
+    /* DEPRECATED SINCE IT IS INCORRECT TO MERGE A REJECTABLE TOKEN
     s_mergedToken = createToken("mergeSample", false);
     std::cout << __FILE__ << ':' << __LINE__ << ": s_mergedToken is " << s_mergedToken << '\n';
     TEST_PLAYING_XML(buildXMLObjTokTokStr("merge", "", "mergeSample", "activateSample"));
     assertTrue(s_mergedToken->isMerged(), "token not merged by player");
+    */
     /* Leave merged for testCancel(). */
   }
 
@@ -4296,8 +4298,8 @@ public:
   static void testCancel() {
     TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "rejectSample", ""));
     assertTrue(!s_rejectedToken->isRejected(), "token not unrejected by player");
-    TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "mergeSample", ""));
-    assertTrue(!s_mergedToken->isMerged(), "token not unmerged by player");
+    //TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "mergeSample", ""));
+    //assertTrue(!s_mergedToken->isMerged(), "token not unmerged by player");
     TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "activateSample", ""));
     assertTrue(!s_activatedToken->isActive(), "token not unactivated by player");
   }

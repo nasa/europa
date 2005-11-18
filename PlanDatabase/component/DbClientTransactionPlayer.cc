@@ -293,6 +293,11 @@ namespace EUROPA {
       m_client->activate(token);
       token->getState()->restrictBaseDomain(token->getState()->lastDomain());
     }
+    else {
+      StateDomain state = token->getState()->lastDomain();
+      state.remove(Token::MERGED);
+      token->getState()->restrictBaseDomain(state);
+    }
 
     const char * name = child->Attribute("name");
 
