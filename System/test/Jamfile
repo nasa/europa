@@ -71,6 +71,7 @@ checkin-tests =
         constrain-transaction
         foreach-transaction
         force-object-distribution
+	gnats_3161
         ;
 
 #RunPlannerProblem <model> : <configurationFile> : <heuristicsFile> ;
@@ -148,6 +149,7 @@ RunPlannerProblem gnats_2837-tx.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS
 RunPlannerProblem DynamicObjTest.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
 RunPlannerProblem rules.0.tx.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
 RunPlannerProblem gnats_2572_interval-tx.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem gnats_3161.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
 
 #
 # PERFORMANCE TESTS
