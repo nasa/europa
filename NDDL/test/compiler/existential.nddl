@@ -96,6 +96,10 @@ World::initialState{
  // variable name is a substring of the constraint argument
  Path g;
  eq(g.from, going.from);
+
+ // A no-op to test generation of code as an explcit guard on a proxy variable.
+ // Arises in GNATS_3161
+ if(g.m_int == 1){}
 }
 
 World world = new World();
