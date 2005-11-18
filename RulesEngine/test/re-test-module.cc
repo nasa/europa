@@ -16,8 +16,9 @@
 #include "DefaultPropagator.hh"
 #include "EqualityConstraintPropagator.hh"
 #include "StringDomain.hh"
-
+#include "NumericDomain.hh"
 #include "LockManager.hh"
+#include "ProxyVariableRelation.hh"
 
 #include <iostream>
 #include <string>
@@ -186,6 +187,8 @@ void LocalVariableGuard_0_0::handleExecute(){
     ConstraintEngine ce; \
     Schema::instance()->reset();\
     Schema::instance()->addObjectType(LabelStr("AllObjects")); \
+    Schema::instance()->addObjectType(LabelStr("Objects")); \
+    Schema::instance()->addMember(LabelStr("Objects"), IntervalIntDomain::getDefaultTypeName(), "m_int"); \
     Schema::instance()->addPredicate(LabelStr("AllObjects.Predicate")); \
     PlanDatabase db(ce.getId(), Schema::instance()); \
     { new DefaultPropagator(LabelStr("Default"), ce.getId()); \
@@ -210,6 +213,7 @@ public:
     runTest(testTestRule);
     runTest(testPurge);
     runTest(testGNATS_3157);
+    runTest(testProxyVariableRelation);
     return true;
   }
 private:
@@ -339,11 +343,11 @@ private:
     t0.getObject()->specify(t0.getObject()->lastDomain().getSingletonValue());
 
     /* Force first level of execution based on object variable being specified to a singleton on activation.
-       second level of execution should also occur through propagation, since by default, the local guard base domain
-       is a singleton */
+       second level of execution should also occur, since by default, the local guard base domain
+       is a singleton. Note that this addresses a case for GNATS_ */
     t0.activate();
     ce.propagate();
-    assertTrue(t0.getSlaves().size() == 1, toString(t0.getSlaves().size()));
+    assertTrue(t0.getSlaves().size() == 2, toString(t0.getSlaves().size()));
 
     RE_DEFAULT_TEARDOWN();
     return true;
@@ -390,12 +394,95 @@ private:
     RE_DEFAULT_TEARDOWN();
     return true;
   }
+
+  static bool testProxyVariableRelation(){
+    RE_DEFAULT_SETUP(ce, db, false);
+    Object obj0(db.getId(), "Objects", "obj0", true);
+    assertFalse(obj0.isComplete());
+    obj0.addVariable(IntervalIntDomain(0, 0), "m_int");
+    obj0.close();
+    Object obj1(db.getId(), "Objects", "obj1", true);
+    assertFalse(obj1.isComplete());
+    obj1.addVariable(IntervalIntDomain(1, 1), "m_int");
+    obj1.close();
+    Object obj2(db.getId(), "Objects", "obj2", true);
+    assertFalse(obj2.isComplete());
+    obj2.addVariable(IntervalIntDomain(2, 2), "m_int");
+    obj2.close();
+
+    ObjectDomain emptyDomain("Objects");
+
+    // Allocate an object variable with an empty domain
+    Variable<ObjectDomain> objVar(ce.getId(), emptyDomain);
+
+    // populate the domain, leaving it open
+    db.makeObjectVariableFromType("Objects", objVar.getId(), true);
+    assertTrue(objVar.lastDomain().getSize() == 3, objVar.toString());
+
+    // Create the initial proxy variable
+    NumericDomain dom(IntervalIntDomain::getDefaultTypeName().c_str());
+    dom.insert(0);
+    dom.insert(1);
+    dom.insert(2);
+    Variable<NumericDomain> proxyVar(ce.getId(), dom);
+    assertFalse(proxyVar.isClosed());
+
+    // Allocate the constraint
+    std::vector<unsigned int> path;
+    path.push_back(0);
+    ProxyVariableRelation c(objVar.getId(), proxyVar.getId(), path);
+
+    assertTrue(ce.propagate());
+
+    // Specify the proxy and ensure the object variable is propagated
+    proxyVar.specify(1);
+    assertTrue(ce.propagate());
+    assertTrue(objVar.lastDomain().isSingleton());
+    assertTrue(objVar.lastDomain().getSingletonValue() == obj1.getId());
+
+    // Reset and ensure things go back to normal
+    proxyVar.reset();
+    ce.propagate();
+    assertTrue(objVar.lastDomain().getSize() == 3, objVar.toString());
+
+    // Specify the object var and ensure the proxy var also becomes specified
+    objVar.specify(obj2.getId());
+    assertTrue(ce.propagate());
+    assertTrue(proxyVar.isSpecified());
+
+    // Reset and ensure things go back to normal
+    objVar.reset();
+    ce.propagate();
+    assertFalse(proxyVar.isSpecified());
+
+    // First set the proxy, then set the object. Retract the proxy but ensure it is not reset
+    proxyVar.specify(1);
+    objVar.specify(obj1.getId());
+    proxyVar.reset();
+    assertTrue(proxyVar.isSpecified());
+
+    // Now reset the object var also, and ensure all is back to normal
+    objVar.reset();
+    assertFalse(proxyVar.isSpecified());
+
+    // specify both such that there is an inconsistency
+    proxyVar.specify(2);
+    objVar.specify(obj1.getId());
+    assertFalse(ce.propagate());
+
+    // Back off an fix it
+    proxyVar.reset();
+    assertTrue(ce.propagate());
+
+    return true;
+  }
 };
 
 void RulesEngineModuleTests::runTests(std::string path) {
     LockManager::instance().connect();
     LockManager::instance().lock();
 
+    initConstraintEngine();
     initConstraintLibrary();
     setTestLoadLibraryPath(path);
 
