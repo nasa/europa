@@ -44,5 +44,3 @@ rejectable(Rover.At b);
 b.m_location.specify(Rock);
 b.start.specify(100);
 
-a before b;
-
