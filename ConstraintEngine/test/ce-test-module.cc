@@ -385,6 +385,7 @@ public:
     runTest(testListener);
     runTest(testVariablesWithOpenDomains);
     runTest(testRestrictionScenarios);
+    runTest(testSpecification);
     return true;
   }
 
@@ -612,6 +613,58 @@ private:
     // Repair by reseting v0
     v0.reset();
     assertTrue(ENGINE->propagate());
+    return true;
+  }
+
+  static bool testSpecification(){
+    // Variable with a base domain that is a singleton
+    {
+      Variable<IntervalIntDomain> v(ENGINE, IntervalIntDomain(0, 0));
+      assertTrue(v.isSpecified());
+    }
+
+    // Variable with a base domain that is left open but then closed
+    {
+      EnumeratedDomain e0(true, "Test");
+      e0.insert(0);
+
+      Variable<EnumeratedDomain> v(ENGINE, e0);
+      assertFalse(v.isSpecified());
+
+      v.close();
+      assertTrue(v.isSpecified());
+      assertTrue(v.getSpecifiedValue() == 0);
+
+      v.open();
+      assertFalse(v.isSpecified());
+    }
+
+
+    // Variable with a base domain that is left open and we reset
+    {
+      EnumeratedDomain e0(true, "Test");
+      e0.insert(0);
+
+      Variable<EnumeratedDomain> v(ENGINE, e0);
+      assertFalse(v.isSpecified());
+
+      assertFalse(v.isSpecified());
+      v.specify(0);
+      assertTrue(v.isSpecified());
+
+      v.reset();
+      assertFalse(v.isSpecified());
+    }
+
+    // Restrict base domain
+    {
+      Variable<IntervalIntDomain> v(ENGINE, IntervalIntDomain(0, 10));
+      assertFalse(v.isSpecified());
+      v.restrictBaseDomain(IntervalIntDomain(0, 0));
+      assertTrue(v.isSpecified());
+      assertTrue(v.getSpecifiedValue() == 0);
+    }
+
     return true;
   }
 };
