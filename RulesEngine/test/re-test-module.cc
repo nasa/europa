@@ -370,26 +370,57 @@ private:
     db.close();
 
     SimpleSubGoal r;
-    // Create a token of an expected type
 
-    IntervalToken t0(db.getId(), 
-		     LabelStr("AllObjects.Predicate"), 
-		     true,
-		     IntervalIntDomain(0, 1000),
-		     IntervalIntDomain(0, 1000),
-		     IntervalIntDomain(1, 1000));
-    // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-    assertTrue(t0.getSlaves().empty());
-    t0.activate();
-    assertTrue(db.getTokens().size() == 2);
-    assertTrue(t0.getSlaves().size() == 1);
+    // Case where we have a master's rule that remains even though slaves and constraints are removed.
+    {
+      // Create a token of an expected type
+      IntervalToken t0(db.getId(), 
+		       LabelStr("AllObjects.Predicate"), 
+		       true,
+		       IntervalIntDomain(0, 1000),
+		       IntervalIntDomain(0, 1000),
+		       IntervalIntDomain(1, 1000));
+      // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
+      assertTrue(t0.getSlaves().empty());
+      t0.activate();
+      assertTrue(db.getTokens().size() == 2);
+      assertTrue(t0.getSlaves().size() == 1);
 
-    TokenId slaveToken = *(t0.getSlaves().begin());
-    assertTrue(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
+      TokenId slaveToken = *(t0.getSlaves().begin());
+      assertTrue(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
 
-    t0.commit();
-    delete (Token*) slaveToken;
-    Entity::garbageCollect();
+      t0.commit();
+      delete (Token*) slaveToken;
+      Entity::garbageCollect();
+    }
+
+    // Case now where the slave remains and master is deleted. Make sure we disconnext dependents
+    {
+      TokenId slaveToken;
+      {
+	// Create a token of an expected type
+	IntervalToken t0(db.getId(), 
+			 LabelStr("AllObjects.Predicate"), 
+			 true,
+			 IntervalIntDomain(0, 1000),
+			 IntervalIntDomain(0, 1000),
+			 IntervalIntDomain(1, 1000));
+	// Activate it and confirm we are getting a subgoal and that the expected constraint holds.
+	assertTrue(t0.getSlaves().empty());
+	t0.activate();
+	assertTrue(db.getTokens().size() == 2);
+	assertTrue(t0.getSlaves().size() == 1);
+
+	slaveToken = *(t0.getSlaves().begin());
+	assertTrue(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
+
+	slaveToken->activate();
+	slaveToken->commit();
+      }
+
+      Entity::garbageCollect();
+      delete (Token*) slaveToken;
+    }
 
     RE_DEFAULT_TEARDOWN();
     return true;
