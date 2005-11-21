@@ -2338,6 +2338,7 @@ public:
     runTest(testArchiving1);
     runTest(testArchiving2);
     runTest(testArchiving3);
+    runTest(testGNATS_3162);
     return true;
   }
 
@@ -3235,6 +3236,48 @@ private:
     }
     assertTrue(db->getTokens().empty());
 
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  /**
+   * Test archiving a token which is spporting other tokens, and then archive the supported tokens.
+   * Note that this case fails to reproduce the problem.
+   */
+  static bool testGNATS_3162(){
+    DEFAULT_SETUP(ce, db, false);
+    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    db->close();
+
+    const unsigned int startTick(0);
+
+    TokenId tokenA = (new IntervalToken(db, 
+					LabelStr(DEFAULT_PREDICATE()), 
+					true,
+					IntervalIntDomain(startTick, startTick),
+					IntervalIntDomain(),
+					IntervalIntDomain(1, 1)))->getId();
+    tokenA->activate();
+    timeline.constrain(tokenA, tokenA);
+    ce->propagate();
+
+    TokenId tokenB = (new IntervalToken(db, 
+					LabelStr(DEFAULT_PREDICATE()), 
+					true,
+					IntervalIntDomain(startTick, startTick),
+					IntervalIntDomain(),
+					IntervalIntDomain(1, 1)))->getId();
+    tokenB->merge(tokenA);
+    tokenA->restrictBaseDomains();
+    ce->propagate();
+    assertTrue(tokenA->canBeTerminated());
+    assertTrue(tokenB->canBeTerminated());
+
+    tokenA->terminate();
+    tokenA->discard();
+    tokenB->terminate();
+    tokenB->discard();
+    ce->propagate();
     DEFAULT_TEARDOWN();
     return true;
   }
