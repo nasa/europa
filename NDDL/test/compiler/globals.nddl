@@ -33,6 +33,14 @@ Foo::pred1{
  eq(global4, object);
 }
 
+float global5 = [1 18]; // Leave restricted but unbound
+
+enum Color {red, green, blue};
+
+enum Random {purple, violet};
+
+// Correctly does not work: Color color = {red, violet};
+Color color = {red, blue};
 
 // Transactions
 

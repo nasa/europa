@@ -8,8 +8,6 @@ Foo foo = new Foo();
 close();
 
 goal(foo.pred t0); // Initially active
-rejectable(foo.pred t1); // Initially inactive
-t1.merge(t0); // Now merged
 
 rejectable(foo.pred t2);  // Initially inactive
 t2.reject(); // Now rejected
