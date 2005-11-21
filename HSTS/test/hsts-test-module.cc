@@ -192,7 +192,7 @@
   }
 
 
-class ConstraintTest {
+class HSTSConstraintTest {
 public:
   static bool test() {
     runTest(testDNPConstraints);
@@ -211,7 +211,7 @@ private:
   static bool testDNPConstraints() {
     DEFAULT_SETUP(ce,db,false);
     std::list<HSTSConstraintTestCase> tests;
-    assertTrue(HSTSReadTestCases(std::string("DNPTestCases"), tests) ||
+    assertTrue(HSTSReadTestCases(getTestLoadLibraryPath() + std::string("/DNPTestCases"), tests) ||
                HSTSReadTestCases(std::string("HSTS/test/DNPTestCases"), tests));
     assertTrue(HSTSExecuteTestCases(ce.getId(), tests));
     DEFAULT_TEARDOWN();
@@ -406,7 +406,7 @@ private:
 
 };
 
-class ConditionTest {
+class HSTSConditionTest {
 public:
   static bool test() {
     runTest(testHSTSNoBranchCondition);
@@ -508,8 +508,8 @@ void HSTSModuleTests::runTests(std::string path) {
     runTest(testWeakDomainComparator);
     //Use relaxed domain comparator that allows comparison of members of two different enum types
     WeakDomainComparator wdc;
-    runTestSuite(ConstraintTest::test);
-    runTestSuite(ConditionTest::test);
+    runTestSuite(HSTSConstraintTest::test);
+    runTestSuite(HSTSConditionTest::test);
   }
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
