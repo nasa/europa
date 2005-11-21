@@ -11,7 +11,7 @@
 #include "DefaultPropagator.hh"
 #include "Object.hh"
 #include "Constraints.hh"
-#include "PlanDatabaseTestSupport.hh"
+#include "NddlTestSupport.hh"
 
 #include "LockManager.hh"
 
@@ -29,11 +29,11 @@ public:
 
 private:
   static bool testBasicAllocation() {
-    DEFAULT_SETUP(ce, db, false);
+    NDDL_DEFAULT_SETUP(ce, db, false);
 
     // Allocate an object with fields
     ObjectId object = makeObjectForTesting(db, LabelStr("objectName"), 1, LabelStr("A"), true, 2.1);
-    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(object, DEFAULT_OBJECT_TYPE().c_str()));
+    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(object, NDDL_DEFAULT_OBJECT_TYPE().c_str()));
     filterVariable.specify(object);
 
     // Allocate a number of filter variables, one for each field
@@ -53,12 +53,12 @@ private:
 
     assertTrue(ce->propagate());
 
-    DEFAULT_TEARDOWN();
+    NDDL_DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testPropagation() {
-    DEFAULT_SETUP(ce, db, false);
+    NDDL_DEFAULT_SETUP(ce, db, false);
     // Allocate a number of objects
     std::list<ObjectId> objects;
     objects.push_back(makeObjectForTesting(db, LabelStr("object0"), 1, LabelStr("A"), true, 1.1));
@@ -73,7 +73,7 @@ private:
     objects.push_back(makeObjectForTesting(db, LabelStr("object9"), 1, LabelStr("A"), true, 0.1));
     db->close();
 
-    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(objects, DEFAULT_OBJECT_TYPE().c_str()));
+    Variable<ObjectDomain> filterVariable(ce, ObjectDomain(objects, NDDL_DEFAULT_OBJECT_TYPE().c_str()));
 
     // Allocate a number of filter variables, one for each field    
     Variable<LabelSet> v1(ce, makeLabelSetDomain());
@@ -126,15 +126,15 @@ private:
     assertTrue(v1.getDerivedDomain().isSingleton());
 
     // Propagate and confirm restrictions
-    DEFAULT_TEARDOWN();
+    NDDL_DEFAULT_TEARDOWN();
     return true;
   }
 
 
   static bool testFiltering() {
-    DEFAULT_SETUP(ce, db, false);
+    NDDL_DEFAULT_SETUP(ce, db, false);
     // Allocate a number of objects
-    ObjectDomain baseDomain(DEFAULT_OBJECT_TYPE().c_str());
+    ObjectDomain baseDomain(NDDL_DEFAULT_OBJECT_TYPE().c_str());
     baseDomain.insert(makeObjectForTesting(db, LabelStr("object0"), 1, LabelStr("A"), true, 1.1));
     baseDomain.insert(makeObjectForTesting(db, LabelStr("object1"), 1, LabelStr("A"), true, 1.1));
     baseDomain.insert(makeObjectForTesting(db, LabelStr("object2"), 1, LabelStr("B"), true, 3.1));
@@ -179,7 +179,7 @@ private:
     assertTrue(ce->propagate());
     assertTrue(c0.getFilteredObjects().getSize() == 2);
 
-    DEFAULT_TEARDOWN();
+    NDDL_DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -192,7 +192,7 @@ private:
 				       const LabelStr& arg1,
 				       bool arg2,
 				       float arg3){
-    ObjectId object = (new Object(db, DEFAULT_OBJECT_TYPE(), name, true))->getId();
+    ObjectId object = (new Object(db, NDDL_DEFAULT_OBJECT_TYPE(), name, true))->getId();
     object->addVariable(IntervalIntDomain(arg0), "IntervalIntVar");
     object->addVariable(LabelSet(arg1), "LabelSetVar");
     object->addVariable(BoolDomain(arg2), "BoolVar");
