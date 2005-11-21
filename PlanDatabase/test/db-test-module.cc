@@ -1154,17 +1154,16 @@ private:
       IntervalToken t0(db, 
 		       DEFAULT_PREDICATE(), 
 		       true,
-		       IntervalIntDomain(0, 10),
-		       IntervalIntDomain(0, 20),
-		       IntervalIntDomain(1, 1000));
+		       IntervalIntDomain(0, 0),
+		       IntervalIntDomain(),
+		       IntervalIntDomain(1, 1));
   
       IntervalToken t1(db,
 		       DEFAULT_PREDICATE(), 
 		       true,
-		       IntervalIntDomain(0, 10),
-		       IntervalIntDomain(0, 20),
-		       IntervalIntDomain(1, 1000));
-
+		       IntervalIntDomain(0, 0),
+		       IntervalIntDomain(),
+		       IntervalIntDomain(1, 1));
       assertTrue(ce->propagate());
       t0.terminate();
       t1.terminate();
@@ -3100,7 +3099,7 @@ private:
     // Propagate to consistency first
     ce->propagate();
 
-    // Now incrementally archive, verifying that no propagation is required afetr each
+    // Now incrementally archive, verifying that no propagation is required after each
     const unsigned int TOKENS_PER_TICK(5);
     for(unsigned int i=startTick;i<endTick;i++){
       assertTrue(db->getTokens().size() == (endTick - i) * TOKENS_PER_TICK);
