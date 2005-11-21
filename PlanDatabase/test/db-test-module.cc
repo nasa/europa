@@ -409,7 +409,6 @@ public:
     runTest(testMakeObjectVariable);
     runTest(testInterleavedDynamicObjetAndVariableCreation);
     runTest(testTokenObjectVariable);
-    runTest(testTokenWithNoObjectOnCreation);
     runTest(testFreeAndConstrain);
     return(true);
   }
@@ -828,12 +827,6 @@ private:
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
 
-    // Iniially we add a token but have no object. Should cause an immediate inconsistency
-    {
-      EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, IntervalIntDomain(0, 10));
-      assertFalse(ENGINE->propagate());
-    }
-
     assertTrue(ENGINE->propagate());
     // Now add an object and we should expect the constraint network to be consistent next time we add the token.
     ObjectId o1 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "o1"))->getId();
@@ -854,20 +847,6 @@ private:
     assertTrue(ENGINE->constraintConsistent());
     assertTrue(!eventToken.getObject()->baseDomain().isMember(o2));
 
-    return true;
-  }
-
-  static bool testTokenWithNoObjectOnCreation(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    {
-      // Leave this class of objects open. So we should be able to create a token and have things consistent
-      EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, IntervalIntDomain(0, 10));
-      assertFalse(ENGINE->propagate());
-    }
-
-    // Now the token has gone out of scope so we expect the system to be consistent again
-    assertTrue(ENGINE->propagate());
     return true;
   }
 

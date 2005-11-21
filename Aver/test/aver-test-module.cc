@@ -48,7 +48,11 @@ namespace EUROPA {
       new DefaultPropagator(LabelStr("Default"), m_ce);
       new TemporalPropagator(LabelStr("Temporal"), m_ce);
       initConstraintEngine();
+
+      Schema::instance()->addObjectType(LabelStr("Foo"));
+      new Object(m_db, "Foo", "o1");
     }
+
     ~TestAssembly() {
       Entity::purgeStarted();
       uninitConstraintEngine();
@@ -255,7 +259,6 @@ namespace EUROPA {
     static bool testConversions() {
       TestAssembly assembly;
 
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addPredicate(LabelStr("Foo.bar"));
       TokenSet tokens;
       std::list<double> tokenIds;
@@ -404,7 +407,6 @@ namespace EUROPA {
       TestAssembly assembly;
       AverHelper::s_db = assembly.m_db;
 
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addPredicate(LabelStr("Foo.bar"));
       
       std::list<double> tokenIds;
@@ -436,9 +438,10 @@ namespace EUROPA {
       TestAssembly assembly;
       AverHelper::s_db = assembly.m_db;
 
-      Schema::instance()->addObjectType(LabelStr("Foo"));
 
       std::list<double> objIds;
+      ObjectId initialObject = assembly.m_db->getObject("o1");
+      objIds.push_back(initialObject);
       for(int i = 0; i < 10; i++) {
         std::stringstream n;
         n << "Foo" << i;
@@ -486,7 +489,6 @@ namespace EUROPA {
     static bool testTrimByPred() {
       TestAssembly assembly;
       AverHelper::s_db = assembly.m_db;
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addPredicate(LabelStr("Foo.bar"));  
       Schema::instance()->addPredicate(LabelStr("Foo.baz"));
 
@@ -545,7 +547,6 @@ namespace EUROPA {
       TestAssembly assembly;
       AverHelper::s_db = assembly.m_db;
       
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addObjectType(LabelStr("Bar"));
 
       DomainContainer d1(new SymbolDomain((double) LabelStr("foo")), true, false);
@@ -602,7 +603,6 @@ namespace EUROPA {
     static bool testTrimByStart() {
       TestAssembly assembly;
       AverHelper::s_db = assembly.m_db;
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addPredicate(LabelStr("Foo.bar"));
 
       TokenId tok = (new IntervalToken(assembly.m_db, LabelStr("Foo.bar"), true))->getId();
@@ -640,7 +640,6 @@ namespace EUROPA {
     static bool testTrimByEnd() {
       TestAssembly assembly;
       AverHelper::s_db = assembly.m_db;
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addPredicate(LabelStr("Foo.bar"));
 
       TokenId tok = (new IntervalToken(assembly.m_db, LabelStr("Foo.bar"), true))->getId();
@@ -680,7 +679,6 @@ namespace EUROPA {
     static bool testTrimByStatus() {
       TestAssembly assembly;
       AverHelper::s_db = assembly.m_db;
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addPredicate(LabelStr("Foo.bar"));
       
       TokenId tok = (new IntervalToken(assembly.m_db, LabelStr("Foo.bar"), true))->getId();
@@ -723,7 +721,6 @@ namespace EUROPA {
     static bool testTrimTokensByVariable() {
       TestAssembly assembly;
       AverHelper::s_db = assembly.m_db;
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addPredicate(LabelStr("Foo.bar"));
       Schema::instance()->addMember(LabelStr("Foo.bar"), 
                                     EnumeratedDomain::getDefaultTypeName().c_str(),
@@ -786,7 +783,6 @@ namespace EUROPA {
       AverHelper::s_db = assembly.m_db;
       std::string varType = IntervalDomain::getDefaultTypeName().c_str();
 
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addMember(LabelStr("Foo"), LabelStr(varType), LabelStr("baz"));
 
       ObjectId obj = (new Object(assembly.m_db, LabelStr("Foo"), LabelStr("argle"), 
@@ -837,7 +833,6 @@ namespace EUROPA {
     static bool testTokenProperty() {
       TestAssembly assembly;
       AverHelper::s_db = assembly.m_db;
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addPredicate(LabelStr("Foo.bar"));
       Schema::instance()->addMember(LabelStr("Foo.bar"), 
                                     EnumeratedDomain::getDefaultTypeName().c_str(),
@@ -877,14 +872,18 @@ namespace EUROPA {
       AverHelper::s_db = assembly.m_db;
       std::string varType = IntervalDomain::getDefaultTypeName().c_str();
 
-      Schema::instance()->addObjectType(LabelStr("Foo"));
       Schema::instance()->addMember(LabelStr("Foo"), LabelStr(varType), LabelStr("baz"));
 
-      ObjectId obj = (new Object(assembly.m_db, LabelStr("Foo"), LabelStr("argle"), 
-                                 true))->getId();
       IntervalDomain base(0., 100.);
+
+      // Get rid of default allocated object
+      ObjectId obj = assembly.m_db->getObject("o1");
+      obj->discard();
+
+      // Allocate a new one
+      obj = (new Object(assembly.m_db, "Foo", "o1", true))->getId();
       obj->addVariable(base, "baz");
-      obj->getVariable(LabelStr("argle.baz"))->specify(33.);
+      obj->getVariable(LabelStr("o1.baz"))->specify(33.);
       obj->close();
 
       AverHelper::queryObjects(); //for the moment, 'property' requires that there be only
