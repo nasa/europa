@@ -160,6 +160,7 @@ else if $(PLANNER) = SOLVER {
   Depends run-checkin-tests : run-solver-tests ;
 }
 
+Depends run-all-tests : run-nddl-planner-tests ;
 Depends run-all-tests : run-model-tests ;
 #
 # PERFORMANCE TESTS
