@@ -922,14 +922,18 @@ public:
     runTest(testTermination);
     runTest(testBasicMerging);
     runTest(testMergingWithEmptyDomains);
+    runTest(testMergingWithEmptyDomains, false);
     runTest(testConstraintMigrationDuringMerge);
     runTest(testNonChronGNATS2439);
     runTest(testMergingPerformance);
     runTest(testTokenCompatibility);
+    runTest(testTokenCompatibility, false);
     runTest(testPredicateInheritance);
+    runTest(testPredicateInheritance, false);
     runTest(testTokenFactory);
     runTest(testCorrectSplit_Gnats2450);
     runTest(testOpenMerge);
+    runTest(testOpenMerge, false);
     runTest(testGNATS_3086);
     runTest(testCompatCacheReset);
     runTest(testAssignemnt);
@@ -1211,8 +1215,9 @@ private:
   }
 
   // Added for GNATS 3077
-  static bool testMergingWithEmptyDomains() {
+  static bool testMergingWithEmptyDomains(bool cacheTokens = true) {
     DEFAULT_SETUP(ce, db, true);
+    db->setCacheCompatibleTokens(cacheTokens);
     // Create 2 mergeable tokens.
     
     IntervalToken t0(db, 
@@ -1664,8 +1669,9 @@ private:
     return true;
   }    
 
-  static bool testTokenCompatibility(){
+  static bool testTokenCompatibility(bool cacheTokens = true){
     DEFAULT_SETUP(ce, db, true);
+    db->setCacheCompatibleTokens(cacheTokens);
 
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db, 
@@ -1755,8 +1761,9 @@ private:
     return str;
   }
 
-  static bool testPredicateInheritance(){
+  static bool testPredicateInheritance(bool cacheTokens = true){
     DEFAULT_SETUP(ce, db, false);
+    db->setCacheCompatibleTokens(cacheTokens);
     // Add model elements to test inheritance
     schema->addObjectType("A");
     schema->addObjectType("B", "A");
@@ -1976,8 +1983,9 @@ private:
     return true;
   }
 
-  static bool testOpenMerge() {
+  static bool testOpenMerge(bool cacheTokens = true) {
     DEFAULT_SETUP(ce, db, true);
+    db->setCacheCompatibleTokens(cacheTokens);
     
     EnumeratedDomain base(true, "Test");
     base.insert(0);
@@ -2308,6 +2316,7 @@ public:
     runTest(testBasicInsertion);
     runTest(testObjectTokenRelation);
     runTest(testTokenOrderQuery);
+    runTest(testTokenOrderQuery, false);
     runTest(testEventTokenInsertion);
     runTest(testNoChoicesThatFit);
     runTest(testAssignment);
@@ -2560,8 +2569,10 @@ private:
     return true;
   }
 
-  static bool testTokenOrderQuery(){
+  static bool testTokenOrderQuery(bool cacheTokens = true){
     DEFAULT_SETUP(ce, db, false);
+    db->setCacheCompatibleTokens(cacheTokens);
+
     Id<Timeline> timeline = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "o2"))->getId();
     db->close();
 
