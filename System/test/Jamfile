@@ -83,6 +83,7 @@ rule RunPlannerProblem {
   local heuristicsFile = $(3) ;
   local deptarget = $(4) ;
   local exe = $(model:S=_$(PLANNER)) ;
+  local executable = $(model:S=) ;
   local hh = $(model:S=.hh) ;
   local cc = [ FGristFiles $(model:S=.cc) ] ;
   local xml = $(model:S=.xml) ;
@@ -117,7 +118,7 @@ rule RunPlannerProblem {
       Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
       #LocalDepends run-model-tests : run-problem-$(exe) ;
       LocalDepends run-$(deptarget)-model-tests : run-problem-$(exe) ;
-      if $(exe:S=) in $(checkin-tests) {
+      if $(executable) in $(checkin-tests) {
 	LocalDepends run-$(deptarget)-checkin-tests : run-problem-$(exe) ;
       }
     }
@@ -153,7 +154,7 @@ if $(PLANNER) = CBPLANNER {
   if $(LIBRARIES) = SHARED {
     Depends run-model-tests : run-cbplanner-tests-model-tests ;
   }
-  Depends run-checkin-tests : run-cbplanner-tests ;
+  Depends run-checkin-tests : run-cbplanner-tests-checkin-tests ;
 }
 else if $(PLANNER) = SOLVER {
   Depends solver-tests : common-tests ;
@@ -161,7 +162,7 @@ else if $(PLANNER) = SOLVER {
   if $(LIBRARIES) = SHARED) {
     Depends run-model-tests : run-solver-tests-model-tests ;
   }
-  Depends run-checkin-tests : run-solver-tests ;
+  Depends run-checkin-tests : run-solver-tests-checkin-tests ;
 }
 
 Depends run-all-tests : run-nddl-planner-tests ;
