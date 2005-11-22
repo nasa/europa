@@ -11,29 +11,34 @@
 #include "../../RulesEngine/test/re-test-module.hh"
 #include "../../TemporalNetwork/test/tn-test-module.hh"
 
-#include <stdio.h>
-
 /**
  * @brief Test harness for running all module tests from a single binary to enable code coverage
- *        analysis tools to examine the codebase.
+ *        analysis tools to examine the codebase. Note that the order of the tests is important.
  */
 
 int main(int argc, const char** argv) {
 
-  //HSTSModuleTests::runTests("../../hsts/test"); // factory for constraint TEstOnly is not regestered.
+  /** O R D E R  I S  I M P O R T A N T ! **/
+
+  // Keep ConstraintEngine test first as it demands an absolutly clean system to operate. 
+  //ConstraintEngineModuleTests::runTests("../../ConstraintEngine/test");
  
-  ConstraintEngineModuleTests::runTests("../../ConstraintEngine/test");
+  // The following cluster of tests can be placed in any order
   AverModuleTests::runTests("../../Aver/test");
   CBPlannerModuleTests::runTests("../../CBPlanner/test");
-  //PlanDatabaseModuleTests::runTests("../../PlanDatabase/test");
+  HSTSModuleTests::runTests("../../hsts/test");  
   NDDLModuleTests::runTests("../../NDDL/test"); 
   ResourceModuleTests::runTests("../../Resource/test");
   RulesEngineModuleTests::runTests("../../RulesEngine/test");
   HeuristicsEngineModuleTests::runTests("../../HeuristicsEngine/test");
-  TemporalNetworkModuleTests::runTests("../../TemporalNetwork/test"); 
-  // Keep SolversModuleTests as the next to last test. It leaves the system in a state 
-  // that will distrub other tests. 
+  TemporalNetworkModuleTests::runTests("../../TemporalNetwork/test");
+
+  // Keep SolversModuleTests and PlanDatabaseModuleTests here. They
+  // leave the system in a dirty state that will upset the earlier tests.
   SolversModuleTests::runTests("../../Solvers/test");  
+
+  //PlanDatabaseModuleTests::runTests("../../PlanDatabase/test"); // domain comparater interacting from HSTS test.
+ 
   // Keep UtilModuleTests last as it leaves some debug messages set as a side effect. 
   // The "fix" would be to detect the set of debug messages registered by test
   // then unregister them iff they were not previously registered.
