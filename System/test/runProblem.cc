@@ -226,13 +226,26 @@ void __assert_fail(const char *__assertion,
 int main(int argc, const char** argv) {
 #define ONE_ASSEMBLY_ONLY
 #ifdef ONE_ASSEMBLY_ONLY
+#ifdef CBPLANNER
   return internalMain<CBPlannerAssembly>(argc, argv);
-  //return internalMain<SolverAssembly>(argc, argv);
 #else
+  return internalMain<SolverAssembly>(argc, argv);
+#endif
+#else
+#ifdef CBPLANNER
   bool result = internalMain<CBPlannerAssembly>(argc, argv);
+#else
+  bool result = internalMain<SolverAssembly>(argc, argv);
+#endif
+
   if(result != 0)
     return result;
-  else 
+  else {
+#ifdef CBPLANNER
     return internalMain<SolverAssembly>(argc, argv);
+#else
+    return internalMain<CBPlannerAssembly>(argc, argv);
+#endif
+  }
 #endif
 }

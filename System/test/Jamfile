@@ -4,6 +4,8 @@ SubDir PLASMA System test ;
                              
 if ! $(PLASMA_READY) {
 
+PLANNER ?= CBPLANNER ;
+
 SubDirHdrs $(PLASMA) PlanDatabase test ;
 
 #ModuleMain all-module-tests : test-main.cc
@@ -43,13 +45,13 @@ RunModuleMain run-all-module-tests : all-module-tests ;
 #
 
 if $(LIBRARIES) = SHARED {
-  EXTRA_DEFS = -DSTANDALONE ;
-  ModuleNamedObjects runProblem_standalone : runProblem.cc : System ;
-  ModuleMain runProblem : runProblem_standalone.o : System ;
+  EXTRA_DEFS = -DSTANDALONE -D$(PLANNER) ;
+  ModuleNamedObjects runProblem_standalone_$(PLANNER) : runProblem.cc : System ;
+  ModuleMain runProblem_$(PLANNER) : runProblem_standalone_$(PLANNER).o : System ;
 }
 
-EXTRA_DEFS = ;
-ModuleNamedObjects runProblem_link : runProblem.cc : System ;
+EXTRA_DEFS = -D$(PLANNER) ;
+ModuleNamedObjects runProblem_link_$(PLANNER) : runProblem.cc : System ;
 
 local DEFAULT_PCONFIG = "DefaultPlannerConfig.xml" ;
 
@@ -74,12 +76,13 @@ checkin-tests =
 	gnats_3161
         ;
 
-#RunPlannerProblem <model> : <configurationFile> : <heuristicsFile> ;
+#RunPlannerProblem <model> : <configurationFile> : <heuristicsFile> : <target that depends> ;
 rule RunPlannerProblem {
   local model = $(1) ;
   local configurationFile = $(2) ;
   local heuristicsFile = $(3) ;
-  local exe = $(model:S=) ;
+  local deptarget = $(4) ;
+  local exe = $(model:S=_$(PLANNER)) ;
   local hh = $(model:S=.hh) ;
   local cc = [ FGristFiles $(model:S=.cc) ] ;
   local xml = $(model:S=.xml) ;
@@ -93,9 +96,10 @@ rule RunPlannerProblem {
   #ModuleObjects $(cc) : NDDL Aver ;
 
   # create planner with linked model
-  ModuleMain $(exe) : $(o) runProblem_link.o : System Aver ;
+  ModuleMain $(exe) : $(o) runProblem_link_$(PLANNER).o : System Aver ;
   RunModuleMain run-$(exe) : $(exe) : $(xml) $(configurationFile) $(heuristicsFile) ;
-  LocalDepends run-nddl-planner-tests : run-$(exe) ;
+
+  Depends $(deptarget) : run-$(exe) ;
 
   Clean clean-system-xml : $(xml) ;
 
@@ -105,52 +109,58 @@ rule RunPlannerProblem {
     local variant ;
     for variant in $(VARIANTS) {
       local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
-      local run_variant_name = [ FVariantName runProblem : $(variant) ] ;
+      local run_variant_name = [ FVariantName runProblem_$(PLANNER) : $(variant) ] ;
       run_variant_name = $(run_variant_name)_rt ;
       local arguments = $(PWD)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) $(configurationFile) $(heuristicsFile) ;
       Depends run-problem-$(exe) : $(libname) ;
-      RunModuleMain run-problem-$(exe) : runProblem : $(arguments) ;
+      RunModuleMain run-problem-$(exe) : runProblem_$(PLANNER) : $(arguments) ;
       Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
-      LocalDepends run-model-tests : run-problem-$(exe) ;
-      if $(exe) in $(checkin-tests) {
-        LocalDepends run-checkin-tests : run-problem-$(exe) ;
+      #LocalDepends run-model-tests : run-problem-$(exe) ;
+      LocalDepends run-$(deptarget)-model-tests : run-problem-$(exe) ;
+      if $(exe:S=) in $(checkin-tests) {
+	LocalDepends run-$(deptarget)-checkin-tests : run-problem-$(exe) ;
       }
     }
-    Depends run-all-tests : run-model-tests ;
   }
 }
 
 #
 # PLANNER SYSTEM TESTS
 #
-RunPlannerProblem HTX.1.nddl : $(DEFAULT_PCONFIG) : HTX.1.heur ;
-RunPlannerProblem HTX.2.nddl : $(DEFAULT_PCONFIG) : HTX.2.heur ;
-RunPlannerProblem HTX.3.nddl : $(DEFAULT_PCONFIG) : HTX.3.heur ;
-RunPlannerProblem Rover-transaction.nddl : $(DEFAULT_PCONFIG) : Rover.heur ;
-RunPlannerProblem basic-types.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem basic-model-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ; 
-RunPlannerProblem k9.backtrack.moderate-transaction.nddl : $(DEFAULT_PCONFIG) : k9.heur ;
-RunPlannerProblem k9-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem path-filter-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem foreach-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem force-object-distribution.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem resource-backtrack-test.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem rejection.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem constrain-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem parent-predicate.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem k9-initial.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem backtr.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem better-res.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ; 
-RunPlannerProblem CAPER.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem monkey1monkey-transaction.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem basic-model-backtrack.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem EOS-backtrack-test.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem gnats_2837-tx.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem DynamicObjTest.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem rules.0.tx.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem gnats_2572_interval-tx.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
-RunPlannerProblem gnats_3161.nddl : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) ;
+RunPlannerProblem HTX.1.nddl : $(DEFAULT_PCONFIG) : HTX.1.heur : cbplanner-tests ;
+RunPlannerProblem HTX.2.nddl : $(DEFAULT_PCONFIG) : HTX.2.heur : cbplanner-tests ;
+RunPlannerProblem HTX.3.nddl : $(DEFAULT_PCONFIG) : HTX.3.heur : cbplanner-tests ;
+RunPlannerProblem Rover-transaction.nddl : $(DEFAULT_PCONFIG) : Rover.heur : cbplanner-tests ;
+RunPlannerProblem k9.backtrack.moderate-transaction.nddl : $(DEFAULT_PCONFIG) : k9.heur : cbplanner-tests ;
+RunPlannerProblem compat_token_cache.nddl : $(DEFAULT_PCONFIG) : compat_token_cache.heur : cbplanner-tests ;
 
+local testmodels = k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl
+      force-object-distribution.nddl resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl
+      parent-predicate.nddl k9-initial.nddl backtr.nddl better-res.nddl CAPER.nddl monkey1monkey-transaction.nddl
+      basic-model-transaction.nddl EOS-backtrack-test.nddl gnats_2837-tx.nddl DynamicObjTest.nddl
+      rules.0.tx.nddl gnats_2572_interval-tx.nddl gnats_3161.nddl basic-types.nddl ;
+
+for model in $(testmodels) {
+  RunPlannerProblem $(model) : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) : common-tests ;
+}
+
+
+Depends run-model-tests : run-common-tests-model-tests ;
+
+if $(PLANNER) = CBPLANNER {
+  Depends cbplanner-tests : common-tests ;
+  Depends run-nddl-planner-tests : cbplanner-tests ;
+  Depends run-model-tests : run-cbplanner-tests-model-tests ;
+  Depends run-checkin-tests : run-cbplanner-tests ;
+}
+else if $(PLANNER) = SOLVER {
+  Depends solver-tests : common-tests ;
+  Depends run-nddl-planner-tests : solver-tests ;
+  Depends run-model-tests : run-solver-tests-model-tests ;
+  Depends run-checkin-tests : run-solver-tests ;
+}
+
+Depends run-all-tests : run-model-tests ;
 #
 # PERFORMANCE TESTS
 #
@@ -194,10 +204,17 @@ for numSatellites in 1 {
        for numParamChoices in 0 {
         if $(numParamChoices) <= $(numParams) {
           local model = [ FSatelliteModel $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ] ;
-          local exe = $(model:S=) ;
+          local exe = $(model:S=_$(PLANNER)) ;
           local xml = $(model:S=.xml) ;
           GenerateStack [ FGristFiles $(model) ] : [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
-          NddlMain $(exe) : runProblem_link.o : $(model) : System CBPlanner : performance-tests ;
+	  local plannerModule ;
+ 	  if $(PLANNER) = CBPLANNER {
+	    plannerModule = CBPlanner ;
+	  }
+	  else if $(PLANNER) = SOLVER {
+	    plannerModule = Solvers ;
+	  }
+          NddlMain $(exe) : runProblem_link_$(PLANNER).o : $(model) : System $(plannerModule) : performance-tests ;
           RunModuleMain run-$(exe) : $(exe) : $(xml) $(DEFAULT_PCONFIG) $(DEFAULT_HEURISTICS) : time ;
           LocalDepends run-performance-tests : run-$(exe) ;
         }
