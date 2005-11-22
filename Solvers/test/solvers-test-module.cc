@@ -399,6 +399,174 @@ private:
   }
 };
 
+
+class FlawIteratorTests {
+public:
+  static bool test() {
+    runTest(testUnboundVariableFlawIteration);
+    runTest(testThreatFlawIteration);
+    runTest(testOpenConditionFlawIteration);
+    runTest(testSolverIteration);
+    return true;
+  }
+private:
+
+  static bool testUnboundVariableFlawIteration() {
+    TiXmlElement* root = initXml("FlawFilterTests.xml", "UnboundVariableManager");
+    
+    StandardAssembly assembly(Schema::instance());
+    UnboundVariableManager fm(*root);
+    fm.initialize(assembly.getPlanDatabase());
+    assert(assembly.playTransactions("UnboundVariableFiltering.xml"));
+
+    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
+    horizon = IntervalIntDomain(0, 1000);
+
+    ConstrainedVariableSet variables = assembly.getConstraintEngine()->getVariables();
+    IteratorId flawIterator = fm.createIterator();
+    while(!flawIterator->done()) {
+      const ConstrainedVariableId var = (const ConstrainedVariableId) flawIterator->next();
+      if(var.isNoId())
+	continue;
+      assertTrue(fm.inScope(var));
+      assertTrue(variables.find(var) != variables.end());
+      variables.erase(var);
+    }
+    
+    assertTrue(flawIterator->done());
+    
+    for(ConstrainedVariableSet::const_iterator it = variables.begin(); it != variables.end(); ++it)
+      assertTrue(!fm.inScope(*it));
+
+    delete (Iterator*) flawIterator;
+    delete root;
+    return true;
+  }
+  
+  static bool testOpenConditionFlawIteration() {
+    TiXmlElement* root = initXml("FlawFilterTests.xml", "OpenConditionManager");
+    
+    StandardAssembly assembly(Schema::instance());
+    OpenConditionManager fm(*root);
+    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
+    horizon = IntervalIntDomain(0, 1000);
+    fm.initialize(assembly.getPlanDatabase());
+    assert(assembly.playTransactions("OpenConditionFiltering.xml"));
+
+    TokenSet tokens = assembly.getPlanDatabase()->getTokens();
+    IteratorId flawIterator = fm.createIterator();
+    
+    while(!flawIterator->done()) {
+      const TokenId token = (const TokenId) flawIterator->next();
+      if(token.isNoId())
+	continue;
+      assertTrue(fm.inScope(token));
+      assertTrue(tokens.find(token) != tokens.end());
+      tokens.erase(token);
+    }
+
+    assertTrue(flawIterator->done());
+
+    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
+      assertTrue(!fm.inScope(*it));
+
+    delete (Iterator*) flawIterator;
+    delete root;
+    
+    return true;
+  }
+
+  static bool testThreatFlawIteration() {
+    TiXmlElement* root = initXml("FlawFilterTests.xml", "ThreatManager");
+
+    StandardAssembly assembly(Schema::instance());
+    ThreatManager fm(*root);
+    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
+    horizon = IntervalIntDomain(0, 1000);
+    fm.initialize(assembly.getPlanDatabase());
+    assert(assembly.playTransactions("ThreatFiltering.xml"));
+
+    TokenSet tokens = assembly.getPlanDatabase()->getTokens();
+    IteratorId flawIterator = fm.createIterator();
+    
+    while(!flawIterator->done()) {
+      const TokenId token = (const TokenId) flawIterator->next();
+      if(token.isNoId())
+	continue;
+      assertTrue(fm.inScope(token));
+      assertTrue(tokens.find(token) != tokens.end());
+      tokens.erase(token);
+    }
+
+    assertTrue(flawIterator->done());
+
+    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
+      assertTrue(!fm.inScope(*it));
+
+    delete (Iterator*) flawIterator;
+    delete root;
+    return true;
+  }
+
+  static bool testSolverIteration() {
+    TiXmlElement* root = initXml("IterationTests.xml", "Solver");
+    StandardAssembly assembly(Schema::instance());
+    ThreatManager tm(*(root->FirstChildElement("ThreatManager")));
+    OpenConditionManager ocm(*(root->FirstChildElement("OpenConditionManager")));
+    UnboundVariableManager uvm(*(root->FirstChildElement("UnboundVariableManager")));
+    Solver solver(assembly.getPlanDatabase(), *root);
+
+    IntervalIntDomain& horizon = HorizonFilter::getHorizon();
+    horizon = IntervalIntDomain(0, 1000);
+
+    assert(assembly.playTransactions("ThreatFiltering.xml"));
+    //assert(assembly.playTransactions("OpenConditionFiltering.xml"));
+    //assert(assembly.playTransactions("UnboundVariableFiltering.xml"));
+
+    tm.initialize(assembly.getPlanDatabase());
+    ocm.initialize(assembly.getPlanDatabase());
+    uvm.initialize(assembly.getPlanDatabase());
+
+    TokenSet tokens = assembly.getPlanDatabase()->getTokens();
+    ConstrainedVariableSet vars = assembly.getConstraintEngine()->getVariables();
+
+    IteratorId flawIterator = solver.createIterator();
+    while(!flawIterator->done()) {
+      const EntityId entity = flawIterator->next();
+      if(entity.isNoId())
+	continue;
+      if(TokenId::convertable(entity)) {
+	const TokenId tok = (const TokenId) entity;
+	assertTrue(tm.inScope(tok) || ocm.inScope(tok));
+	assertTrue(tokens.find(tok) != tokens.end());
+	tokens.erase(tok);
+      }
+      else if(ConstrainedVariableId::convertable(entity)) {
+	const ConstrainedVariableId var = (const ConstrainedVariableId) entity;
+	assertTrue(uvm.inScope(var));
+	assertTrue(vars.find(var) != vars.end());
+	std::cerr << var->toString() << std::endl;
+	vars.erase(var);
+      }
+      else
+	assertTrue(false);
+    }
+
+    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
+      assertTrue(!tm.inScope(*it) && !ocm.inScope(*it));
+
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+      std::cerr << (*it)->toString() << std::endl;
+      assertTrue(!uvm.inScope(*it));
+    }
+
+    delete (Iterator*) flawIterator;
+    delete root;
+
+    return true;
+  }
+};
+
 void initSolverModuleTests() {
  
   StandardAssembly::initialize();
