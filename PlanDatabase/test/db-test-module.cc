@@ -939,6 +939,7 @@ public:
     runTest(testAssignemnt);
     runTest(testDeleteMasterAndPreserveSlave);
     runTest(testPreserveMergeWithNonChronSplit);
+    runTest(testGNATS_3163);
     return(true);
   }
   
@@ -2305,6 +2306,31 @@ private:
     assertTrue(orphan->isInactive());
 
     delete (Token*) orphan;
+    return true;
+  }
+
+  /**
+   * After some work, we now have it boiled down to a failure to handle the case of restricting
+   * a base domain correctly. Problem is that the change to use the base domain being a singleton
+   * as permiting 'isSpecified' to be true. Consequently, when restricting the base domain, 
+   * we over-ride 'specify' and it thinks the variable is already specified.
+   */
+  static bool testGNATS_3163(){
+    initDbTestSchema(SCHEMA);
+    PlanDatabase db(ENGINE, SCHEMA);
+    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    db.close();
+
+    TokenId master = (new IntervalToken(db.getId(),  
+				       DEFAULT_PREDICATE(),                                                     
+				       true,                                                               
+				       IntervalIntDomain(0, 10),                                           
+				       IntervalIntDomain(0, 20),                                           
+				       IntervalIntDomain(1, 1000)))->getId();                                  
+
+    master->getStart()->restrictBaseDomain(IntervalIntDomain(1, 1));
+    assertTrue(master->getStart()->specifiedFlag());    
+    master->discard();
     return true;
   }
 };
