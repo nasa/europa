@@ -44,7 +44,9 @@ namespace EUROPA {
     return sl_txLog;
   }
 
-  CBPlannerAssembly::CBPlannerAssembly(const SchemaId& schema) : StandardAssembly(schema) { }
+  CBPlannerAssembly::CBPlannerAssembly(const SchemaId& schema) : StandardAssembly(schema) { 
+    m_planDatabase->setCacheCompatibleTokens(false);
+  }
 
   CBPlannerAssembly::~CBPlannerAssembly() {}
 
