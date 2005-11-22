@@ -35,11 +35,11 @@ private:
 
 #define ENGINE DefaultEngineAccessor::instance()
 
-#define runTest(test) { \
+#define runTest(test, args...) {			\
   try { \
   std::cout << "   " << #test << " "; \
   unsigned int id_count = IdTable::size(); \
-  bool result = test(); \
+  bool result = test(args); \
   DefaultEngineAccessor::reset(); \
   Entity::garbageCollect(); \
   if (result && IdTable::size() <= id_count) \
