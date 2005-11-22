@@ -24,9 +24,26 @@ namespace EUROPA {
       virtual ~ThreatManager();
 
       bool inScope(const EntityId& entity) const;
+
+      virtual IteratorId createIterator() const;
     private:
       virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
       void handleInitialize();
+
+      class FlawIterator : public Iterator {
+      public:
+	FlawIterator(const ThreatManager& manager);
+	bool done() const;
+	const EntityId next();
+	unsigned int visited() const {return m_visited;}
+      protected:
+      private:
+	unsigned int m_visited;
+	unsigned int m_timestamp;
+	const ThreatManager& m_manager;
+	std::map<int, std::pair<TokenId, ObjectSet> >::const_iterator m_it;
+	std::map<int, std::pair<TokenId, ObjectSet> >::const_iterator m_end;
+      };
     };
 
   }

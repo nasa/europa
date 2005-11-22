@@ -287,5 +287,33 @@ namespace EUROPA {
     void UnboundVariableManager::notifyRemoved(const ConstraintId& constraint){
       handleConstraintRemoval(constraint);
     }
+
+    IteratorId UnboundVariableManager::createIterator() const {
+      return (new UnboundVariableManager::FlawIterator(*this))->getId();
+    }
+
+    UnboundVariableManager::FlawIterator::FlawIterator(const UnboundVariableManager& manager)
+      : m_visited(0), m_timestamp(manager.m_db->getConstraintEngine()->cycleCount()),
+	m_manager(manager), m_it(manager.m_flawCandidates.begin()), m_end(manager.m_flawCandidates.end())  {}
+    
+    bool UnboundVariableManager::FlawIterator::done() const { return m_it == m_end;}
+
+    const EntityId UnboundVariableManager::FlawIterator::next() {
+      check_error(m_manager.m_db->getConstraintEngine()->cycleCount() == m_timestamp,
+		  "Error: potentially stale flaw iterator.");
+      ConstrainedVariableId retval = ConstrainedVariableId::noId();
+      
+      for(; !done(); ++m_it) {
+	ConstrainedVariableId var = *m_it;
+	check_error(var.isValid());
+	if(m_manager.inScope(*m_it)) {
+	  retval = var;
+	  ++m_visited;
+	  ++m_it;
+	  break;
+	}
+      }
+      return retval;
+    }
   }
 }

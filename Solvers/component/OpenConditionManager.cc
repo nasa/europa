@@ -158,5 +158,36 @@ namespace EUROPA {
       else if(changeType == DomainListener::CLOSED)
 	addFlaw(variable->getParent());
     }
+
+    IteratorId OpenConditionManager::createIterator() const {
+      IteratorId retval = (new FlawIterator(*this))->getId();
+      return retval;
+    }
+
+    OpenConditionManager::FlawIterator::FlawIterator(const OpenConditionManager& manager) 
+      : m_visited(0), m_timestamp(manager.m_db->getConstraintEngine()->cycleCount()),
+	m_manager(manager), m_it(manager.m_flawCandidates.begin()), m_end(manager.m_flawCandidates.end()) {}
+
+    bool OpenConditionManager::FlawIterator::done() const {
+      return m_it == m_end;
+    }
+
+    const EntityId OpenConditionManager::FlawIterator::next() {
+      check_error(m_manager.m_db->getConstraintEngine()->cycleCount() == m_timestamp,
+		  "Error: potentially stale flaw iterator.");
+      TokenId retval = TokenId::noId();
+
+      for(; !done(); ++m_it) {
+	TokenId tok = *m_it;
+	check_error(tok.isValid());
+	if(m_manager.inScope(tok)) {	
+	  retval = tok;
+	  ++m_visited;
+	  ++m_it;
+	  break;
+	}
+      }
+      return retval;
+    }
   }
 }

@@ -85,5 +85,37 @@ namespace EUROPA {
 
       return decisionPoint;
     }
+
+    IteratorId ThreatManager::createIterator() const {
+      return (new ThreatManager::FlawIterator(*this))->getId();
+    }
+
+    ThreatManager::FlawIterator::FlawIterator(const ThreatManager& manager)
+      : m_visited(0), m_timestamp(manager.m_db->getConstraintEngine()->cycleCount()),
+	m_manager(manager), m_it(manager.m_db->getTokensToOrder().begin()), 
+	m_end(manager.m_db->getTokensToOrder().end()) {
+    }
+
+    bool ThreatManager::FlawIterator::done() const {
+      return m_it == m_end;
+    }
+
+    const EntityId ThreatManager::FlawIterator::next() {
+      check_error(m_manager.m_db->getConstraintEngine()->cycleCount() == m_timestamp,
+		  "Error: potentially stale flaw iterator.");
+      TokenId retval = TokenId::noId();
+
+      for(; !done(); ++m_it) {
+	TokenId tok = m_it->second.first;
+	check_error(tok.isValid());
+	if(m_manager.inScope(tok)) {
+	  retval = tok;
+	  ++m_visited;
+	  ++m_it;
+	  break;
+	}
+      }
+      return retval;
+    }
   }
 }

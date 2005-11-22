@@ -3,6 +3,7 @@
 
 #include "FlawManager.hh"
 #include "UnboundVariableDecisionPoint.hh"
+#include "EntityIterator.hh"
 
 /**
  * @brief Provides class declaration for handling variable flaws.
@@ -17,6 +18,7 @@ namespace EUROPA {
 
       bool inScope(const EntityId& entity) const;
 
+      IteratorId createIterator() const;
     private:
       virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
 
@@ -47,6 +49,21 @@ namespace EUROPA {
       ConstrainedVariableSet m_singletonFlawCandidates; /*!< All singleton variables that have passed the static filter */
       std::map<ConstrainedVariableId, unsigned int> m_guardCache; /*!< Cache of variables that are
 								    guarded. Includes reference counts. */
+
+      class FlawIterator : public Iterator {
+      public:
+	FlawIterator(const UnboundVariableManager& manager);
+	bool done() const;
+	const EntityId next();
+	unsigned int visited() const {return m_visited;}
+      protected:
+      private:
+	unsigned int m_visited;
+	unsigned int m_timestamp;
+	const UnboundVariableManager& m_manager;
+	ConstrainedVariableSet::const_iterator m_it;
+	ConstrainedVariableSet::const_iterator m_end;
+      };
     };
   }
 }
