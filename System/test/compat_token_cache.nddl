@@ -1,0 +1,67 @@
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+
+class Possibility extends Timeline {
+  Possibility(){}
+  predicate pospred {
+    Possibility pos;
+  }
+}
+
+class Controller extends Timeline {
+  Controller(){}
+
+  predicate controlpred {
+    Possibility pos;
+  }
+}
+
+Controller::controlpred {
+  ends(Possibility.pospred p);
+  eq(p.pos, pos);
+}
+
+Possibility pos1 = new Possibility();
+Possibility pos2 = new Possibility();
+Possibility pos3 = new Possibility();
+Possibility pos4 = new Possibility();
+
+Controller control = new Controller();
+
+PlannerConfig world = new PlannerConfig(0, 10, 100, 100);
+
+goal(pos1.pospred p1);
+p1.pos.specify(pos1);
+
+goal(pos2.pospred p2);
+p2.pos.specify(pos2);
+
+goal(pos3.pospred p3);
+p3.pos.specify(pos3);
+
+goal(pos4.pospred p4);
+p4.pos.specify(pos4);
+
+eq(p1.start, world.m_horizonStart);
+eq(p2.start, world.m_horizonStart);
+eq(p3.start, world.m_horizonStart);
+eq(p4.start, world.m_horizonStart);
+
+goal(control.controlpred c1);
+eq(c1.start, world.m_horizonStart);
+eq(c1.end, 8);
+
+eq(p1.end, world.m_horizonEnd); //subgoal is temporally incompatible
+eq(p2.end, world.m_horizonEnd); //subgoal is temporally incompatible
+eq(p3.end, [5 10]); //subgoal is temporally compatible, but pos parameters will be incompatible on first try
+eq(p4.end, world.m_horizonEnd); //subgoal is temporally incompatible
+
+close();
+
+//expected incorrect behavior:
+//planner chooses pos1 for pos parameter of c1, which restricts domain of subgoal
+//planner attempts to merge subgoal, but it is incompatible with all available predicates
+//(can't be concurrent with p1, pos parameter can't fit with other options)
+//merge fails
+//planner backs over c1 parameter decision
+//all other merges fail because the compatible token cache won't reset
