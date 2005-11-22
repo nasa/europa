@@ -455,12 +455,18 @@ rule ModulePart {
                                     $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)$(LOCATE_TARGET) ;
           LINKLIBS on $(libname) = $(LINKLIBS) ;
           local need_shares = [ on $(module) return $(LINK_LIBRARIES) ] ;
+          local shared_dirs ;
           local link ;
           for link in [ FLinkModules [ on $(module) return $(LINK_MODULES) ] ] {
             local variant_name = [ FModuleSharedLibraryLinkName $(link) : $(variant) ] ;
             Depends $(libname) : lib$(variant_name)$(SUFSHARE) ;
             need_shares = [ FMergeList $(need_shares) : $(variant_name) ] ;
             need_shares = [ FMergeList $(need_shares) : [ on $(link:G=module) return $(LINK_LIBRARIES) ] ] ;
+            local locate_shared = [ on $(link:G=module) return $(LOCATE_SHARED) ] ;
+            shared_dirs = [ FMergeList $(shared_dirs) : $(locate_shared) ] ;
+          }
+          for shared_dir in $(shared_dirs) {
+            LINKFLAGS on $(libname) += $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)$(shared_dir) ;
           }
           NEEDSHARES on $(libname) = $(need_shares) ;
           if $(variant) in $(VARIANTS) {
