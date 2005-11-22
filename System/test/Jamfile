@@ -121,6 +121,8 @@ rule RunPlannerProblem {
 	LocalDepends run-$(deptarget)-checkin-tests : run-problem-$(exe) ;
       }
     }
+    Depends run-model-tests : run-common-tests-model-tests ;
+    Depends run-all-tests : run-model-tests ;
   }
 }
 
@@ -145,23 +147,25 @@ for model in $(testmodels) {
 }
 
 
-Depends run-model-tests : run-common-tests-model-tests ;
-
 if $(PLANNER) = CBPLANNER {
   Depends cbplanner-tests : common-tests ;
   Depends run-nddl-planner-tests : cbplanner-tests ;
-  Depends run-model-tests : run-cbplanner-tests-model-tests ;
+  if $(LIBRARIES) = SHARED {
+    Depends run-model-tests : run-cbplanner-tests-model-tests ;
+  }
   Depends run-checkin-tests : run-cbplanner-tests ;
 }
 else if $(PLANNER) = SOLVER {
   Depends solver-tests : common-tests ;
   Depends run-nddl-planner-tests : solver-tests ;
-  Depends run-model-tests : run-solver-tests-model-tests ;
+  if $(LIBRARIES) = SHARED) {
+    Depends run-model-tests : run-solver-tests-model-tests ;
+  }
   Depends run-checkin-tests : run-solver-tests ;
 }
 
 Depends run-all-tests : run-nddl-planner-tests ;
-Depends run-all-tests : run-model-tests ;
+
 #
 # PERFORMANCE TESTS
 #
