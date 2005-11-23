@@ -104,6 +104,10 @@ rule RunPlannerProblem {
 
   Clean clean-system-xml : $(xml) ;
 
+  if $(executable) in $(checkin-tests) {
+    LocalDepends run-$(deptarget)-checkin-tests : run-$(exe) ;
+  }
+
   if $(LIBRARIES) = SHARED {
     # create planner with dlopen model
     ModuleSharedLibrary $(lib) : $(o) : NDDL ;
