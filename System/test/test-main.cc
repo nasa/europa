@@ -21,7 +21,7 @@ int main(int argc, const char** argv) {
   /** O R D E R  I S  I M P O R T A N T ! **/
 
   // Keep ConstraintEngine test first as it demands an absolutly clean system to operate. 
-  //ConstraintEngineModuleTests::runTests("../../ConstraintEngine/test");
+  ConstraintEngineModuleTests::runTests("../../ConstraintEngine/test");
  
   // The following cluster of tests can be placed in any order
   AverModuleTests::runTests("../../Aver/test");
@@ -36,8 +36,7 @@ int main(int argc, const char** argv) {
   // Keep SolversModuleTests and PlanDatabaseModuleTests here. They
   // leave the system in a dirty state that will upset the earlier tests.
   SolversModuleTests::runTests("../../Solvers/test");  
-
-  //PlanDatabaseModuleTests::runTests("../../PlanDatabase/test"); // domain comparater interacting from HSTS test.
+  PlanDatabaseModuleTests::runTests("../../PlanDatabase/test"); // domain comparater interacting from HSTS test.
  
   // Keep UtilModuleTests last as it leaves some debug messages set as a side effect. 
   // The "fix" would be to detect the set of debug messages registered by test
