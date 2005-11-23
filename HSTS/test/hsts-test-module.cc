@@ -36,7 +36,6 @@
 
 /* PlanDatababse */
 #include "PlanDatabase.hh"
-#include "Schema.hh"
 #include "Object.hh"
 #include "TokenVariable.hh"
 #include "Timeline.hh"
@@ -49,6 +48,7 @@
 #include "TestSupport.hh"
 #include "DNPConstraints.hh"
 #include "WeakDomainComparator.hh"
+#include "Schema.hh"
 #include "XMLUtils.hh"
 
 #include "HSTSConstraintTesting.hh"
@@ -514,5 +514,11 @@ void HSTSModuleTests::runTests(std::string path) {
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
   uninitConstraintLibrary();
-  }
+
+  const SchemaId& schema = Schema::instance();  
+  // set back to regular domain comparator (from weak domain comparator).
+  DomainComparator* p = (DomainComparator*) schema;
+  DomainComparator::setComparator( p );  
+
+}
   
