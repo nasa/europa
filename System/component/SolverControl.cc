@@ -25,7 +25,7 @@ namespace EUROPA {
 
   const char* SAstr = "PlannerControlAssembly not initialized";
 
-  int initModel(const char* libPath, const char* initialState, const char* destPath, const char* plannerConfigPath) {
+  int initModel(const char* libPath, const char* initialState, const char* destPath, const char* plannerConfigPath, const char** modelPaths, const int numPaths) {
 
     int retStatus;
 
@@ -42,6 +42,8 @@ namespace EUROPA {
        */
       PlannerControlAssembly *db1 = accessAssembly();
       check_always(db1, SAstr);
+      for(int i = 0; i < numPaths; i++)
+	db1->getWriter()->addSourcePath(modelPaths[i]);
       db1->getWriter()->setDest(destPath);
     }
     catch (Error e) {
