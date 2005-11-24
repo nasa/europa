@@ -684,6 +684,8 @@ namespace EUROPA {
 	ppId = timeval2Id(currTime);
 
 	collectStats();
+	debugMsg("PartialPlanWriter:writeStats", "Writing statistics numTokens: " << numTokens 
+		 << " numVariables: " << numVariables << " numConstraints: " << numConstraints);
 	(*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
 		    << TAB << numConstraints << std::endl;
 	statsOut->flush();
@@ -1320,6 +1322,14 @@ namespace EUROPA {
       
       bool PartialPlanWriter::isStep(const LabelStr& trans) {
 	return std::find(stepTransactions.begin(), stepTransactions.end(), trans) != stepTransactions.end();	
+      }
+
+      void PartialPlanWriter::addSourcePath(const char* path) {
+	std::string spath(path);
+	if(path == "" || path == ":")
+	  return;
+	debugMsg("PartialPlanWriter:addSourcePath", "Adding path '" << spath << "'");
+	sourcePaths.push_back(spath);
       }
     }
   }

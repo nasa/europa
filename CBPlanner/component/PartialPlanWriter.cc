@@ -1343,5 +1343,13 @@ namespace EUROPA {
         }
       }
     }
+
+    void PartialPlanWriter::addSourcePath(const char* path) {
+      std::string spath(path);
+      if(path == "" || path == ":")
+	return;
+      debugMsg("PartialPlanWriter:addSourcePath", "Adding path '" << spath << "'");
+      sourcePaths.push_back(spath);
+    }
   }
 }

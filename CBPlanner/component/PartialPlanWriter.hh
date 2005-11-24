@@ -37,6 +37,7 @@ namespace EUROPA {
       //EUROPA JNI runtime interface functions
       std::string getDest(void);
       void setDest(std::string destPath);
+      void addSourcePath(const char* path);
       static int noFullWrite, writeStep;
     protected:
       virtual bool parseSection(std::ifstream& configFile);
