@@ -16,9 +16,9 @@ namespace EUROPA {
     public:
       UnboundVariableManager(const TiXmlElement& configData);
 
-      bool inScope(const EntityId& entity) const;
+      bool inScope(const EntityId& entity);
 
-      IteratorId createIterator() const;
+      IteratorId createIterator();
     private:
       virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
 
@@ -52,7 +52,7 @@ namespace EUROPA {
 
       class FlawIterator : public Iterator {
       public:
-	FlawIterator(const UnboundVariableManager& manager);
+	FlawIterator(UnboundVariableManager& manager);
 	bool done() const;
 	const EntityId next();
 	unsigned int visited() const {return m_visited;}
@@ -60,7 +60,7 @@ namespace EUROPA {
       private:
 	unsigned int m_visited;
 	unsigned int m_timestamp;
-	const UnboundVariableManager& m_manager;
+	UnboundVariableManager& m_manager;
 	ConstrainedVariableSet::const_iterator m_it;
 	ConstrainedVariableSet::const_iterator m_end;
       };

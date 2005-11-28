@@ -14,12 +14,18 @@ namespace EUROPA {
     class Component;
     typedef Id<Component> ComponentId;
 
+    class MatchingEngine;
+    typedef Id<MatchingEngine> MatchingEngineId;
+
+    class MatchingRule;
+    typedef Id<MatchingRule> MatchingRuleId;
+
+    class FlawFilter;
+    typedef Id<FlawFilter> FlawFilterId;
+
     class FlawManager;
     typedef Id<FlawManager> FlawManagerId;
     typedef std::list<FlawManagerId> FlawManagers;
-
-    class Condition;
-    typedef Id<Condition> ConditionId;
 
     class DecisionPoint;
     typedef Id<DecisionPoint> DecisionPointId;
@@ -29,9 +35,13 @@ namespace EUROPA {
 
     typedef std::vector<DecisionPointId> DecisionStack;
 
-    class FilterCondition;
-    typedef Id<FilterCondition> FilterConditionId;
-
+    /**
+     * @brief Defines a configuration class
+     */
+    class SolverConfig{
+    public:
+      SolverConfig();
+    };
   }
 }
 #endif

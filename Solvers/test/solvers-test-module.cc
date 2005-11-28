@@ -8,14 +8,17 @@
 #include "UnboundVariableManager.hh"
 #include "OpenConditionManager.hh"
 #include "ThreatManager.hh"
+#include "Object.hh"
 #include "Filters.hh"
-#include "Token.hh"
+#include "IntervalToken.hh"
+#include "TokenVariable.hh"
 #include "TestSupport.hh"
 #include "Debug.hh"
 #include "Variable.hh"
 #include "IntervalDomain.hh"
 #include "IntervalIntDomain.hh"
 #include "EnumeratedDomain.hh"
+#include "MatchingEngine.hh"
 
 /**
  * @file Provides module tests for Solver Module.
@@ -123,11 +126,10 @@ private:
   }
 };
 
-
-
-class FlawFilterTests {
+class FilterTests {
 public:
   static bool test(){
+    runTest(testRuleMatching);
     runTest(testVariableFiltering);
     runTest(testTokenFiltering);
     runTest(testThreatFiltering);
@@ -135,7 +137,165 @@ public:
   }
 
 private:
-  
+  static bool testRuleMatching() {
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/RuleMatchingTests.xml").c_str(), "MatchingEngine");
+    MatchingEngine me(*root);
+    assertTrue(me.ruleCount() == 13, toString(me.ruleCount()));
+    assertTrue(me.hasRule("[R0]*.*.*.*.*.*"));
+    assertTrue(me.hasRule("[R1]*.*.start.*.*.*"));
+    assertTrue(me.hasRule("[R2]*.*.arg3.*.*.*"));
+    assertTrue(me.hasRule("[R3]*.predicateF.*.*.*.*"));
+    assertTrue(me.hasRule("[R4]*.predicateC.arg6.*.*.*"));
+    assertTrue(me.hasRule("[R5]C.predicateC.*.*.*.*"));
+    assertTrue(me.hasRule("[R6]C.*.*.*.*.*"));
+    assertTrue(me.hasRule("[R7]*.*.duration.*.Object.*"));
+    assertTrue(me.hasRule("[R7a]*.*.duration.none.*.*"));
+    assertTrue(me.hasRule("[R8]*.*.*.*.B.*"));
+    assertTrue(me.hasRule("[R9]*.*.*.meets.D.predicateG"));
+    assertTrue(me.hasRule("[R10]*.*.*.before.*.*"));
+    assertTrue(me.hasRule("[R11]*.*.neverMatched.*.*.*"));
+
+    StandardAssembly assembly(Schema::instance());
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    Object o1(db, "A", "o1");
+    Object o2(db, "D", "o2");
+    Object o3(db, "C", "o3");
+    Object o4(db, "E", "o4");
+    db->close();
+
+    // test RO
+    {
+      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "v0");
+      std::vector<MatchingRuleId> rules;
+      me.getVariableMatches(v0.getId(), rules);
+      assertTrue(rules.size() == 1, toString(rules.size()));
+      assertTrue(rules[0]->toString() == "[R0]*.*.*.*.*.*", rules[0]->toString());
+    }
+
+    // test R1 
+    {
+      IntervalToken token(db, 
+			  "A.predicateA", 
+			  true, 
+			  IntervalIntDomain(0, 1000),
+			  IntervalIntDomain(0, 1000),
+			  IntervalIntDomain(2, 10),
+			  Token::noObject(), true);
+
+      std::vector<MatchingRuleId> rules;
+      me.getVariableMatches(token.getStart(), rules);
+      assertTrue(rules.size() == 2, toString(rules.size()));
+      assertTrue(rules[1]->toString() == "[R1]*.*.start.*.*.*", rules[1]->toString());
+    }
+
+    // test R2 
+    {
+      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "arg3");
+      std::vector<MatchingRuleId> rules;
+      me.getVariableMatches(v0.getId(), rules);
+      assertTrue(rules.size() == 2, toString(rules.size()));
+      assertTrue(rules[1]->toString() == "[R2]*.*.arg3.*.*.*", rules[1]->toString());
+    }
+
+    // test R3 
+    {
+      TokenId token = db->getClient()->createToken("D.predicateF", false);
+      std::vector<MatchingRuleId> rules;
+      me.getTokenMatches(token, rules);
+      assertTrue(rules.size() == 2, toString(rules.size()));
+      assertTrue(rules[1]->toString() == "[R3]*.predicateF.*.*.*.*", rules[1]->toString());
+      token->discard();
+    }
+
+    // test R4
+    {
+      TokenId token = db->getClient()->createToken("D.predicateC", false);
+      std::vector<MatchingRuleId> rules;
+      me.getVariableMatches(token->getVariable("arg6"), rules);
+      assertTrue(rules.size() == 2, toString(rules.size()));
+      assertTrue(rules[1]->toString() == "[R4]*.predicateC.arg6.*.*.*", rules[1]->toString());
+      token->discard();
+    }
+
+    // test R5 & R6
+    {
+      TokenId token = db->getClient()->createToken("C.predicateC", false);
+      std::vector<MatchingRuleId> rules;
+      me.getTokenMatches(token, rules);
+      assertTrue(rules.size() == 3, toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString());
+      assertTrue(rules[1]->toString() == "[R5]C.predicateC.*.*.*.*", rules[1]->toString());
+      assertTrue(rules[2]->toString() == "[R6]C.*.*.*.*.*", rules[2]->toString());
+      token->discard();
+    }
+
+    // test R6
+    {
+      TokenId token = db->getClient()->createToken("C.predicateA", false);
+      std::vector<MatchingRuleId> rules;
+      me.getTokenMatches(token, rules);
+      assertTrue(rules.size() == 2, toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString());
+      assertTrue(rules[1]->toString() == "[R6]C.*.*.*.*.*", rules[1]->toString());
+      token->discard();
+    }
+
+    // test R7
+    {
+      TokenId token = db->getClient()->createToken("D.predicateF", false);
+      token->activate();
+      TokenId E_predicateC = *(token->getSlaves().begin());
+      std::vector<MatchingRuleId> rules;
+      me.getVariableMatches(E_predicateC->getDuration(), rules);
+      assertTrue(rules.size() == 2, toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString());
+      assertTrue(rules[1]->toString() == "[R7]*.*.duration.*.Object.*", rules[1]->toString());
+      token->discard();
+    }
+
+    // test R7a
+    {
+      TokenId token = db->getClient()->createToken("E.predicateC", false);
+      std::vector<MatchingRuleId> rules;
+      me.getVariableMatches(token->getDuration(), rules);
+      assertTrue(rules.size() == 2, toString(rules.size()) + " for " + token->getPredicateName().toString());
+      assertTrue(rules[1]->toString() == "[R7a]*.*.duration.none.*.*", rules[1]->toString());
+      token->discard();
+    }
+
+    // test R8
+    {
+      TokenId token = db->getClient()->createToken("B.predicateC", false);
+      token->activate();
+      TokenId E_predicateC = *(token->getSlaves().begin());
+      std::vector<MatchingRuleId> rules;
+      me.getVariableMatches(E_predicateC->getDuration(), rules);
+      assertTrue(rules.size() == 3, toString(rules.size()) + " for " + token->getPredicateName().toString());
+      assertTrue(rules[1]->toString() == "[R8]*.*.*.*.B.*", rules[1]->toString());
+      assertTrue(rules[2]->toString() == "[R7]*.*.duration.*.Object.*", rules[2]->toString());
+      token->discard();
+    }
+
+    // test R*, R9 and R10
+    {
+      TokenId token = db->getClient()->createToken("D.predicateG", false);
+      token->activate();
+      TokenId E_predicateC = *(token->getSlaves().begin());
+
+      // Expect to fire R8, R9 and R10
+      std::set<LabelStr> expectedRules;
+      expectedRules.insert(LabelStr("[R8]*.*.*.*.B.*"));
+      expectedRules.insert(LabelStr("[R9]*.*.*.meets.D.predicateG"));
+      expectedRules.insert(LabelStr("[R10]*.*.*.before.*.*"));
+      std::vector<MatchingRuleId> rules;
+      me.getVariableMatches(E_predicateC->getDuration(), rules);
+      assertTrue(rules.size() == 4, toString(rules.size()) + " for " + token->getPredicateName().toString());
+      for(int i=0;i>4; i++)
+	assertTrue(expectedRules.find(LabelStr(rules[i]->toString())) != expectedRules.end(), rules[i]->toString());
+
+      token->discard();
+    }
+
+    return true;
+  }
+
   static bool testVariableFiltering(){
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawFilterTests.xml").c_str(), "UnboundVariableManager");
 
@@ -178,7 +338,6 @@ private:
     assembly.getConstraintEngine()->propagate();
     assertTrue(!fm.inScope(globalVar1));
     assertTrue(fm.inScope(globalVar2));
-
 
     assertTrue(!fm.inScope(globalVar3));
 
@@ -580,42 +739,36 @@ void initSolverModuleTests() {
 void SolversModuleTests::runTests(std::string path) {
    setTestLoadLibraryPath(path);
 
-  // Register components under program execution so that static allocation can have occurred
-  // safely. This was required due to problems on the MAC.
-  REGISTER_COMPONENT_FACTORY(TestComponent, A);
-  REGISTER_COMPONENT_FACTORY(TestComponent, B);
-  REGISTER_COMPONENT_FACTORY(TestComponent, C);
-  REGISTER_COMPONENT_FACTORY(TestComponent, D);
-  REGISTER_COMPONENT_FACTORY(TestComponent, E);
+   // Register components under program execution so that static allocation can have occurred
+   // safely. This was required due to problems on the MAC.
+   REGISTER_COMPONENT_FACTORY(TestComponent, A);
+   REGISTER_COMPONENT_FACTORY(TestComponent, B);
+   REGISTER_COMPONENT_FACTORY(TestComponent, C);
+   REGISTER_COMPONENT_FACTORY(TestComponent, D);
+   REGISTER_COMPONENT_FACTORY(TestComponent, E);
 
-  // Register filter components
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::SingletonFilter, Singleton);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonVariableFilter, HorizonVariableFilter);
+   // Register filter components
+   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::SingletonFilter, Singleton);
+   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
+   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
+   REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonVariableFilter, HorizonVariableFilter);
 
-  // Initialization of various ids and other required elements
-  initSolverModuleTests();
+   // Initialization of various ids and other required elements
+   initSolverModuleTests();
 
-  // Set up the required components. Should eventually go into an assembly. Note they are allocated on the stack, not the heap
-  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, StandardVariableHandler);
-  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, Min);
-  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MaxValue, Max);
-  REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::RandomValue, Random);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::UnboundVariableManager, UnboundVariableManager);
-  REGISTER_OPENCONDITION_DECISION_FACTORY(EUROPA::SOLVERS::OpenConditionDecisionPoint, StandardOpenConditionHandler);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::OpenConditionManager, OpenConditionManager);
-  REGISTER_THREAT_DECISION_FACTORY(EUROPA::SOLVERS::ThreatDecisionPoint, StandardThreatHandler);
-  REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::ThreatManager, ThreatManager);
+   // Set up the required components. Should eventually go into an assembly. Note they are allocated on the stack, not the heap
+   REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MinValue, Min);
+   REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::MaxValue, Max);
+   REGISTER_VARIABLE_DECISION_FACTORY(EUROPA::SOLVERS::RandomValue, Random);
 
-  // Constraints used for testing
-  REGISTER_CONSTRAINT(LazyAllDiff, "lazyAllDiff",  "Default");
-  REGISTER_CONSTRAINT(LazyAlwaysFails, "lazyAlwaysFails",  "Default");
+   // Constraints used for testing
+   REGISTER_CONSTRAINT(LazyAllDiff, "lazyAllDiff",  "Default");
+   REGISTER_CONSTRAINT(LazyAlwaysFails, "lazyAlwaysFails",  "Default");
 
-  runTestSuite(ComponentFactoryTests::test);
-  runTestSuite(FlawFilterTests::test);
-  runTestSuite(SolverTests::test);
+   runTestSuite(ComponentFactoryTests::test);
+   runTestSuite(FilterTests::test);
+   runTestSuite(SolverTests::test);
 
-  uninitConstraintLibrary();
-  }
+   uninitConstraintLibrary();
+}
 

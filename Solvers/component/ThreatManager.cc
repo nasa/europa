@@ -20,7 +20,7 @@ namespace EUROPA {
 
     void ThreatManager::handleInitialize() {}
 
-    bool ThreatManager::inScope(const EntityId& entity) const {
+    bool ThreatManager::inScope(const EntityId& entity) {
       checkError(TokenId::convertable(entity), entity->toString());
       TokenId token = entity;
       return token->isActive() && FlawManager::inScope(entity);
@@ -86,11 +86,11 @@ namespace EUROPA {
       return decisionPoint;
     }
 
-    IteratorId ThreatManager::createIterator() const {
+    IteratorId ThreatManager::createIterator(){
       return (new ThreatManager::FlawIterator(*this))->getId();
     }
 
-    ThreatManager::FlawIterator::FlawIterator(const ThreatManager& manager)
+    ThreatManager::FlawIterator::FlawIterator(ThreatManager& manager)
       : m_visited(0), m_timestamp(manager.m_db->getConstraintEngine()->cycleCount()),
 	m_manager(manager), m_it(manager.m_db->getTokensToOrder().begin()), 
 	m_end(manager.m_db->getTokensToOrder().end()) {

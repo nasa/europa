@@ -20,9 +20,9 @@ namespace EUROPA {
     public:
       OpenConditionManager(const TiXmlElement& configData);
 
-      bool inScope(const EntityId& entity) const;
+      bool inScope(const EntityId& entity);
 
-      virtual IteratorId createIterator() const;
+      virtual IteratorId createIterator();
 
     private:
       // TODO: Special code for units. virtual DecisionPointId nextZeroCommitmentDecision();
@@ -46,7 +46,7 @@ namespace EUROPA {
 
       class FlawIterator : public Iterator {
       public:
-	FlawIterator(const OpenConditionManager& manager);
+	FlawIterator(OpenConditionManager& manager);
 	bool done() const;
 	const EntityId next();
 	unsigned int visited() const {return m_visited;}
@@ -54,7 +54,7 @@ namespace EUROPA {
       private:
 	unsigned int m_visited;
 	unsigned int m_timestamp;
-	const OpenConditionManager& m_manager;
+	OpenConditionManager& m_manager;
 	TokenSet::const_iterator m_it;
 	TokenSet::const_iterator m_end;
       };

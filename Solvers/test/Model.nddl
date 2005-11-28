@@ -35,6 +35,8 @@ class D extends A {
  }
 
  predicate predicateF{}
+
+ predicate predicateG{}
 }
 
 class E extends D{
@@ -52,10 +54,18 @@ class PredicateRoot extends Timeline {
 
 class PredicateDerived extends PredicateRoot {}
 
+B::predicateC{
+ any(E.predicateC);
+}
+
 D::predicateF{
  any(E.predicateC);
  any(D.predicateC);
  any(B.predicateB);
+}
+
+D::predicateG{
+ meets(E.predicateC);
 }
 
 class Container extends Timeline {

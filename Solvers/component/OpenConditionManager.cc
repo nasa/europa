@@ -26,7 +26,7 @@ namespace EUROPA {
       }
     }
 
-    bool OpenConditionManager::inScope(const EntityId& entity) const {
+    bool OpenConditionManager::inScope(const EntityId& entity){
       bool result = false;
 
       if(TokenId::convertable(entity)){
@@ -159,12 +159,12 @@ namespace EUROPA {
 	addFlaw(variable->getParent());
     }
 
-    IteratorId OpenConditionManager::createIterator() const {
+    IteratorId OpenConditionManager::createIterator(){
       IteratorId retval = (new FlawIterator(*this))->getId();
       return retval;
     }
 
-    OpenConditionManager::FlawIterator::FlawIterator(const OpenConditionManager& manager) 
+    OpenConditionManager::FlawIterator::FlawIterator(OpenConditionManager& manager) 
       : m_visited(0), m_timestamp(manager.m_db->getConstraintEngine()->cycleCount()),
 	m_manager(manager), m_it(manager.m_flawCandidates.begin()), m_end(manager.m_flawCandidates.end()) {}
 

@@ -16,19 +16,19 @@ namespace EUROPA {
      * @brief Will filter a variable out until its derived domain is closed
      * and finite.
      */
-    class InfiniteDynamicFilter : public Condition {
+    class InfiniteDynamicFilter : public FlawFilter {
     public:
       InfiniteDynamicFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity) const;
+      bool test(const EntityId& entity);
     };
 
     /**
      * @brief Will filter a variable out until its derived domain becomes a singleton.
      */
-    class SingletonFilter: public Condition {
+    class SingletonFilter: public FlawFilter {
     public:
       SingletonFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity) const;
+      bool test(const EntityId& entity);
     };
 
 
@@ -43,10 +43,10 @@ namespace EUROPA {
      * @li TotallyContained - for the token to be in the horizon, the temporal extend of the token must be a subset of
      * the horizon.
      */
-    class HorizonFilter: public Condition {
+    class HorizonFilter: public FlawFilter {
     public:
       HorizonFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity) const;
+      bool test(const EntityId& entity);
       std::string toString() const;
       /**
        * @brief Allowed policy strings for customization
@@ -70,10 +70,10 @@ namespace EUROPA {
      * @brief Will compose the Horizon Filter already available for a token in order to ensure
      * that the token for the variable is actually in the horizon.
      */
-    class HorizonVariableFilter: public Condition {
+    class HorizonVariableFilter: public FlawFilter {
     public:
       HorizonVariableFilter(const TiXmlElement& configData);
-      bool test(const EntityId& entity) const;
+      bool test(const EntityId& entity);
       std::string toString() const;
 
     private:

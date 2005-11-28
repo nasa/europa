@@ -13,6 +13,7 @@ ModuleComponent Solvers
 	ThreatDecisionPoint.cc
 	ThreatManager.cc
         SolverPartialPlanWriter.cc
+	SolverConfig.cc
 	;
 
 } # PLASMA_READY

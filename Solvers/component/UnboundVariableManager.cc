@@ -47,7 +47,7 @@ namespace EUROPA {
       }
     }
 
-    bool UnboundVariableManager::inScope(const EntityId& entity) const {
+    bool UnboundVariableManager::inScope(const EntityId& entity){
       bool result = false;
       if(ConstrainedVariableId::convertable(entity)){
 	ConstrainedVariableId var = entity;
@@ -140,7 +140,7 @@ namespace EUROPA {
 
       checkError(decisionPoint.isValid(),
 		 "Failed to allocate a decision point for " << flawedVariable->toString() <<
-		 " . Indicates that now FlawHandler is configured for this flaw.");
+		 " . Indicates that no FlawHandler is configured for this flaw.");
 
       return decisionPoint;
     }
@@ -288,11 +288,11 @@ namespace EUROPA {
       handleConstraintRemoval(constraint);
     }
 
-    IteratorId UnboundVariableManager::createIterator() const {
+    IteratorId UnboundVariableManager::createIterator() {
       return (new UnboundVariableManager::FlawIterator(*this))->getId();
     }
 
-    UnboundVariableManager::FlawIterator::FlawIterator(const UnboundVariableManager& manager)
+    UnboundVariableManager::FlawIterator::FlawIterator(UnboundVariableManager& manager)
       : m_visited(0), m_timestamp(manager.m_db->getConstraintEngine()->cycleCount()),
 	m_manager(manager), m_it(manager.m_flawCandidates.begin()), m_end(manager.m_flawCandidates.end())  {}
     

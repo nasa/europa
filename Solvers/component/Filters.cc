@@ -8,12 +8,12 @@ namespace EUROPA {
   namespace SOLVERS {
 
     InfiniteDynamicFilter::InfiniteDynamicFilter(const TiXmlElement& configData)
-      : Condition(configData, true) {
+      : FlawFilter(configData, true) {
       debugMsg("InfiniteDynamicFilter:constructor", "Constructing an InfiniteDynamicFilter.");
       setExpression(toString() + ":infinite/dynamic");
     }
 
-    bool InfiniteDynamicFilter::test(const EntityId& entity) const {
+    bool InfiniteDynamicFilter::test(const EntityId& entity){
       if(!ConstrainedVariableId::convertable(entity))
 	return false;
 
@@ -21,13 +21,15 @@ namespace EUROPA {
       debugMsg("InfiniteDynamicFilter:test", "Evaluating " << var->toString() << " for dynamic/infinite filter.");
       debugMsg("InfiniteDynamicFilter:test", var->lastDomain() << " isOpen : " << var->lastDomain().isOpen());
       debugMsg("InfiniteDynamicFilter:test", var->lastDomain() << " isInfinite : " << var->lastDomain().isInfinite());
-      return (var->lastDomain().isOpen() || var->lastDomain().isInfinite()) && Condition::test(entity);
+      return (var->lastDomain().isOpen() || var->lastDomain().isInfinite()) && FlawFilter::test(entity);
     }
 
     SingletonFilter::SingletonFilter(const TiXmlElement& configData)
-      : Condition(configData, true) {}
+      : FlawFilter(configData, true) {
+      setExpression("Singleton");
+    }
 
-    bool SingletonFilter::test(const EntityId& entity) const {
+    bool SingletonFilter::test(const EntityId& entity) {
       if(!ConstrainedVariableId::convertable(entity))
 	return false;
 
@@ -35,7 +37,7 @@ namespace EUROPA {
       debugMsg("SingletonFilter:test", "Evaluating " << var->toString() << " for singleton filter.");
 
       // Indicate a match if it is not a singleton
-      return !var->lastDomain().isSingleton() && Condition::test(entity);
+      return !var->lastDomain().isSingleton() && FlawFilter::test(entity);
     }
 
     /** HORIZON FILTERING **/
@@ -45,7 +47,7 @@ namespace EUROPA {
     }
 
     HorizonFilter::HorizonFilter(const TiXmlElement& configData)
-      : Condition(configData, true) {
+      : FlawFilter(configData, true) {
       static const LabelStr sl_defaultPolicy("PartiallyContained");
       const char* argData = NULL;
       argData = configData.Attribute("policy");
@@ -57,7 +59,7 @@ namespace EUROPA {
 	m_policy = sl_defaultPolicy;
     }
 
-    bool HorizonFilter::test(const EntityId& entity) const {
+    bool HorizonFilter::test(const EntityId& entity) {
       static const LabelStr sl_possiblyContained("PossiblyContained");
       static const LabelStr sl_partiallyContained("PartiallyContained");
       static const LabelStr sl_totallyContained("TotallyContained");
@@ -90,21 +92,21 @@ namespace EUROPA {
       debugMsg("HorizonFilter:test", 
 	       token->toString() << " is " << (withinHorizon ? " inside " : " outside ") << " the horizon.");
 
-      return !withinHorizon && Condition::test(entity);
+      return !withinHorizon && FlawFilter::test(entity);
     }
 
 
     std::string HorizonFilter::toString() const {
       const IntervalIntDomain& horizon = getHorizon();
-      std::string expr = Condition::toString();
+      std::string expr = FlawFilter::toString();
       expr = expr + " Policy='" + m_policy.toString() + "' Horizon=" + horizon.toString();
       return expr;
     }
 
     HorizonVariableFilter::HorizonVariableFilter(const TiXmlElement& configData)
-      : Condition(configData, true), m_horizonFilter(configData){}
+      : FlawFilter(configData, true), m_horizonFilter(configData){}
 
-    bool HorizonVariableFilter::test(const EntityId& entity) const {
+    bool HorizonVariableFilter::test(const EntityId& entity) {
       if(!ConstrainedVariableId::convertable(entity))
 	return false;
 
@@ -128,7 +130,7 @@ namespace EUROPA {
       }
 
       // Now simply delegate to the filter stored internally.
-      return m_horizonFilter.test(token) && Condition::test(entity);
+      return m_horizonFilter.test(token) && FlawFilter::test(entity);
     }
 
     std::string HorizonVariableFilter::toString() const {
