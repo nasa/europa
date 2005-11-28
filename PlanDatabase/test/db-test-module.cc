@@ -256,7 +256,8 @@ private:
     assertTrue(SCHEMA->isObjectType(LabelStr("Bar")));
     assertTrue(SCHEMA->isA(LabelStr("Bar"), LabelStr("Foo")));
     assertFalse(SCHEMA->isA(LabelStr("Foo"), LabelStr("Bar")));
-
+    assertTrue(SCHEMA->getAllObjectTypes(LabelStr("Bar")).size() == 2);
+    
     // Composition
     SCHEMA->addMember(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0"));
     SCHEMA->addMember(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1"));
