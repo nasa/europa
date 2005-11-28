@@ -26,7 +26,7 @@ int main(int argc, const char** argv) {
   // The following cluster of tests can be placed in any order
   AverModuleTests::runTests("../../Aver/test");
   CBPlannerModuleTests::runTests("../../CBPlanner/test");
-  HSTSModuleTests::runTests("../../hsts/test");  
+  HSTSModuleTests::runTests("../../HSTS/test");  
   NDDLModuleTests::runTests("../../NDDL/test"); 
   ResourceModuleTests::runTests("../../Resource/test");
   RulesEngineModuleTests::runTests("../../RulesEngine/test");
