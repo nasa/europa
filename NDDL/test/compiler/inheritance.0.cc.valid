@@ -1,4 +1,4 @@
-// NDDL/test/compiler/inheritance.0.xml
+// inheritance.0.xml
 
 #include "inheritance.0.hh"
 #include "NddlUtils.hh"
@@ -229,7 +229,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/inheritance.0");
+    Id<Schema> id = Schema::instance("inheritance.0");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

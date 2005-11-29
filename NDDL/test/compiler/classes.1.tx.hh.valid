@@ -1,4 +1,4 @@
-// NDDL/test/compiler/classes.1.tx.xml
+// classes.1.tx.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

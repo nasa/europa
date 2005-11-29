@@ -1,4 +1,4 @@
-// NDDL/test/compiler/guards.xml
+// guards.xml
 
 #include "guards.hh"
 #include "NddlUtils.hh"
@@ -328,25 +328,25 @@ namespace NDDL {
     meets(this, g1);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("allFoo"), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("allFoo"), std::string("arg1"), false));
       vars.push_back(ruleVariable(IntervalIntDomain(0, 100, "int")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("object"), std::string("arg1")));
-      vars.push_back(varFromObject(std::string("allFoo"), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("object"), std::string("arg1"), false));
+      vars.push_back(varFromObject(std::string("allFoo"), std::string("arg1"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("g1")), std::string("object.arg1")));
-      vars.push_back(varFromObject(std::string("object"), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("object"), std::string("arg1"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("object"), std::string("arg2")));
+      vars.push_back(varFromObject(std::string("object"), std::string("arg2"), false));
       vars.push_back(var(getId(),std::string("bar")));
       rule_constraint(eq, vars);
     }
@@ -371,7 +371,7 @@ namespace NDDL {
     objectVar(Foo, f1, false, false);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("f1"), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("f1"), std::string("arg1"), false));
       vars.push_back(ruleVariable(IntervalIntDomain(20,20, "int")));
       rule_constraint(eq, vars);
     }
@@ -661,7 +661,7 @@ namespace NDDL {
   void Foo$localVariableGuard$6$0$4::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("f"), std::string("arg1")));
+      vars.push_back(varFromObject(std::string("f"), std::string("arg1"), false));
       vars.push_back(ruleVariable(IntervalIntDomain(20,20, "int")));
       rule_constraint(eq, vars);
     }
@@ -729,7 +729,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/guards");
+    Id<Schema> id = Schema::instance("guards");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

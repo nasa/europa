@@ -136,7 +136,6 @@ goal(World.initialState t0);
 goal(Rover.At t1);
 
 rejectable(Rover.At t2);
-t2.merge(t1);
 
 goal(SuperRover.At t3);
 

@@ -223,31 +223,31 @@ namespace NDDL {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("field1")));
-      vars.push_back(varFromObject(std::string("f"), std::string("field1")));
+      vars.push_back(varFromObject(std::string("f"), std::string("field1"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("field2")));
-      vars.push_back(varFromObject(std::string("f"), std::string("field2")));
+      vars.push_back(varFromObject(std::string("f"), std::string("field2"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("field4")));
-      vars.push_back(varFromObject(std::string("f"), std::string("field4")));
+      vars.push_back(varFromObject(std::string("f"), std::string("field4"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("field6")));
-      vars.push_back(varFromObject(std::string("f"), std::string("field6")));
+      vars.push_back(varFromObject(std::string("f"), std::string("field6"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("field7")));
-      vars.push_back(varFromObject(std::string("f"), std::string("field7")));
+      vars.push_back(varFromObject(std::string("f"), std::string("field7"), false));
       rule_constraint(eq, vars);
     }
   }

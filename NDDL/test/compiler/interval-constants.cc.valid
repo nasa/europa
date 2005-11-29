@@ -96,7 +96,7 @@ namespace NDDL {
   void Foo$pred1$0$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("object"), std::string("f_var")));
+      vars.push_back(varFromObject(std::string("object"), std::string("f_var"), false));
       vars.push_back(ruleVariable(IntervalDomain(10.9, 10.9, "float")));
       rule_constraint(eq, vars);
     }

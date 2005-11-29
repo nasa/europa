@@ -465,14 +465,14 @@ namespace NDDL {
     contains(this, g);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("object"), std::string("m_horizonStart")));
+      vars.push_back(varFromObject(std::string("object"), std::string("m_horizonStart"), false));
       vars.push_back(var(getId(),std::string("start")));
       rule_constraint(leq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("end")));
-      vars.push_back(varFromObject(std::string("object"), std::string("m_horizonEnd")));
+      vars.push_back(varFromObject(std::string("object"), std::string("m_horizonEnd"), false));
       rule_constraint(leq, vars);
     }
     {

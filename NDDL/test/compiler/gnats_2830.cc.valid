@@ -441,26 +441,26 @@ namespace NDDL {
     objectVar(Enable, en, false, false);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p"), std::string("_from")));
+      vars.push_back(varFromObject(std::string("p"), std::string("_from"), false));
       vars.push_back(var(getId(),std::string("_from")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p"), std::string("_to")));
+      vars.push_back(varFromObject(std::string("p"), std::string("_to"), false));
       vars.push_back(var(getId(),std::string("_to")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("en"), std::string("_p")));
+      vars.push_back(varFromObject(std::string("en"), std::string("_p"), false));
       vars.push_back(var(getId(),std::string("p")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("en"), std::string("_t")));
-      vars.push_back(varFromObject(std::string("_p"), std::string("_from")));
+      vars.push_back(varFromObject(std::string("en"), std::string("_t"), false));
+      vars.push_back(varFromObject(std::string("_p"), std::string("_from"), false));
       rule_constraint(eq, vars);
     }
     addChildRule(new Position$Navigate$0$0$0(m_id, makeScope(var(getId(),std::string("p")))));
@@ -469,14 +469,14 @@ namespace NDDL {
     objectVar(Enable, enable, true, false);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("enable"), std::string("_p")));
+      vars.push_back(varFromObject(std::string("enable"), std::string("_p"), false));
       vars.push_back(var(getId(),std::string("p")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("enable"), std::string("_t")));
-      vars.push_back(varFromObject(std::string("p"), std::string("_from")));
+      vars.push_back(varFromObject(std::string("enable"), std::string("_t"), false));
+      vars.push_back(varFromObject(std::string("p"), std::string("_from"), false));
       rule_constraint(eq, vars);
     }
     addChildRule(new Position$Navigate$0$0$0$0(m_id, makeScope(var(getId(),std::string("enable")))));
@@ -486,7 +486,7 @@ namespace NDDL {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("fp")), std::string("loc")));
-      vars.push_back(varFromObject(std::string("enable"), std::string("_t")));
+      vars.push_back(varFromObject(std::string("enable"), std::string("_t"), false));
       rule_constraint(eq, vars);
     }
   }

@@ -269,19 +269,19 @@ namespace NDDL {
     objectVar(Path, p1, false, false);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("path"), std::string("from")));
+      vars.push_back(varFromObject(std::string("path"), std::string("from"), false));
       vars.push_back(var(getId(),std::string("from")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("path"), std::string("to")));
+      vars.push_back(varFromObject(std::string("path"), std::string("to"), false));
       vars.push_back(var(getId(),std::string("to")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("path"), std::string("m_int")));
+      vars.push_back(varFromObject(std::string("path"), std::string("m_int"), false));
       vars.push_back(var(getId(),std::string("intVar")));
       rule_constraint(eq, vars);
     }
@@ -302,6 +302,13 @@ namespace NDDL {
     void handleExecute();
   };
   
+  class World$initialState$1$0$1: public RuleInstance {
+  public:
+    World$initialState$1$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
+    : RuleInstance(parent, var, domain){}
+    void handleExecute();
+  };
+  
   DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "existential.nddl,60");
   
   void World$initialState$1$0::handleExecute() {
@@ -313,40 +320,41 @@ namespace NDDL {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
-      vars.push_back(varFromObject(std::string("object"), std::string("rock")));
+      vars.push_back(varFromObject(std::string("object"), std::string("rock"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("to")));
-      vars.push_back(varFromObject(std::string("object"), std::string("hill")));
+      vars.push_back(varFromObject(std::string("object"), std::string("hill"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p1"), std::string("from")));
+      vars.push_back(varFromObject(std::string("p1"), std::string("from"), false));
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p1"), std::string("to")));
+      vars.push_back(varFromObject(std::string("p1"), std::string("to"), false));
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("to")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p1"), std::string("m_int")));
+      vars.push_back(varFromObject(std::string("p1"), std::string("m_int"), false));
       vars.push_back(ruleVariable(IntervalIntDomain(1,1, "int")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("g"), std::string("from")));
+      vars.push_back(varFromObject(std::string("g"), std::string("from"), false));
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
       rule_constraint(eq, vars);
     }
     addChildRule(new World$initialState$1$0$0(m_id, makeScope(var(getId(),std::string("hasPath")))));
+    addChildRule(new World$initialState$1$0$1(m_id, varFromObject(std::string("g"), std::string("m_int"), true), IntervalIntDomain(1,1, "int")));
   }
   void World$initialState$1$0$0::handleExecute() {
     objectVar(Path, p2, false, false);
@@ -356,52 +364,54 @@ namespace NDDL {
     objectVar(Path, p4, false, false);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p2"), std::string("from")));
+      vars.push_back(varFromObject(std::string("p2"), std::string("from"), false));
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p2"), std::string("to")));
+      vars.push_back(varFromObject(std::string("p2"), std::string("to"), false));
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("to")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p2"), std::string("m_int")));
+      vars.push_back(varFromObject(std::string("p2"), std::string("m_int"), false));
       vars.push_back(ruleVariable(IntervalIntDomain(2,2, "int")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("loc1")));
-      vars.push_back(varFromObject(std::string("object"), std::string("rock")));
+      vars.push_back(varFromObject(std::string("object"), std::string("rock"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("loc2")));
-      vars.push_back(varFromObject(std::string("object"), std::string("rock")));
+      vars.push_back(varFromObject(std::string("object"), std::string("rock"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p4"), std::string("from")));
+      vars.push_back(varFromObject(std::string("p4"), std::string("from"), false));
       vars.push_back(var(getId(),std::string("loc1")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p4"), std::string("to")));
+      vars.push_back(varFromObject(std::string("p4"), std::string("to"), false));
       vars.push_back(var(getId(),std::string("loc2")));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("p4"), std::string("m_int")));
+      vars.push_back(varFromObject(std::string("p4"), std::string("m_int"), false));
       vars.push_back(var(getId(),std::string("filterVar")));
       rule_constraint(eq, vars);
     }
+  }
+  void World$initialState$1$0$1::handleExecute() {
   }
   
 } // namespace NDDL

@@ -202,8 +202,8 @@ namespace NDDL {
     meets(this, bp);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("object"), std::string("myBar.m_foo")));
-      vars.push_back(varFromObject(std::string("object"), std::string("myfoo")));
+      vars.push_back(varFromObject(std::string("object"), std::string("myBar.m_foo"), false));
+      vars.push_back(varFromObject(std::string("object"), std::string("myfoo"), false));
       rule_constraint(eq, vars);
     }
     {
@@ -300,7 +300,7 @@ namespace NDDL {
   void Mumble$mumbPred$1$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("object"), std::string("myBaz.myBar.m_foo")));
+      vars.push_back(varFromObject(std::string("object"), std::string("myBaz.myBar.m_foo"), false));
       vars.push_back(var(getId(),std::string("m_foo")));
       rule_constraint(eq, vars);
     }

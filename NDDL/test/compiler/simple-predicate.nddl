@@ -67,6 +67,6 @@ g1.m_3.specify(false);
 g1.m_4.specify(world);
 
 rejectable(Foo.pred1 g2);
-g2.merge(g1);
+g2.reject();
 g2.cancel();
 g2.activate();

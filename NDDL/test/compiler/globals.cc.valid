@@ -237,6 +237,29 @@ namespace NDDL {
     met_by(this, slave1);
   }
   
+  Color ColorBaseDomain(){
+    static Color sl_enum("Color");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("red"));
+      sl_enum.insert(LabelStr("green"));
+      sl_enum.insert(LabelStr("blue"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  
+  Random RandomBaseDomain(){
+    static Random sl_enum("Random");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("purple"));
+      sl_enum.insert(LabelStr("violet"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  
 } // namespace NDDL
 
 
@@ -276,6 +299,13 @@ namespace NDDL {
     id->addValue("TokenStates", LabelStr("ACTIVE"));
     id->addValue("TokenStates", LabelStr("MERGED"));
     id->addValue("TokenStates", LabelStr("REJECTED"));
+    id->addEnum("Color");
+    id->addValue("Color", LabelStr("red"));
+    id->addValue("Color", LabelStr("green"));
+    id->addValue("Color", LabelStr("blue"));
+    id->addEnum("Random");
+    id->addValue("Random", LabelStr("purple"));
+    id->addValue("Random", LabelStr("violet"));
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TOKEN_FACTORY(UnaryResource::uses::Factory);
@@ -290,6 +320,8 @@ namespace NDDL {
     REGISTER_OBJECT_FACTORY(StringDataFactory1, StringData:string);
     REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
     REGISTER_OBJECT_FACTORY(FooFactory2, Foo);
+    REGISTER_TYPE_FACTORY(Color, ColorBaseDomain());
+    REGISTER_TYPE_FACTORY(Random, RandomBaseDomain());
     // Allocate rules
     new Rule$Foo$pred1$0();
     return id;

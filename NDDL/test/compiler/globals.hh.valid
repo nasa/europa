@@ -94,4 +94,14 @@ namespace NDDL {
       ConstrainedVariableId local1; // SchemaWriter::declareVariable
     };
   };
+  
+  
+  // globals.nddl:38 Color
+  typedef SymbolDomain Color;
+  Color ColorBaseDomain();
+  
+  
+  // globals.nddl:40 Random
+  typedef SymbolDomain Random;
+  Random RandomBaseDomain();
 } // End NDDL namespace

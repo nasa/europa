@@ -489,18 +489,18 @@ namespace NDDL {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("from")));
-      vars.push_back(varFromObject(std::string("p"), std::string("from")));
+      vars.push_back(varFromObject(std::string("p"), std::string("from"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("to")));
-      vars.push_back(varFromObject(std::string("p"), std::string("to")));
+      vars.push_back(varFromObject(std::string("p"), std::string("to"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("trackable"), std::string("path")));
+      vars.push_back(varFromObject(std::string("trackable"), std::string("path"), false));
       vars.push_back(var(getId(),std::string("p")));
       rule_constraint(eq, vars);
     }
@@ -545,7 +545,7 @@ namespace NDDL {
           {
             std::vector<ConstrainedVariableId> vars;
             vars.push_back(varfromtok(tok(getId(), std::string("target")), std::string("object")));
-            vars.push_back(varFromObject(std::string("t"), std::string("target")));
+            vars.push_back(varFromObject(std::string("t"), std::string("target"), false));
             rule_constraint(eq, vars);
           }
           {
@@ -705,14 +705,14 @@ namespace NDDL {
     objectVar(Path, emptyPath, false, false);
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("emptyPath"), std::string("from")));
-      vars.push_back(varFromObject(std::string("object"), std::string("loc1")));
+      vars.push_back(varFromObject(std::string("emptyPath"), std::string("from"), false));
+      vars.push_back(varFromObject(std::string("object"), std::string("loc1"), false));
       rule_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(varFromObject(std::string("emptyPath"), std::string("to")));
-      vars.push_back(varFromObject(std::string("object"), std::string("loc2")));
+      vars.push_back(varFromObject(std::string("emptyPath"), std::string("to"), false));
+      vars.push_back(varFromObject(std::string("object"), std::string("loc2"), false));
       rule_constraint(eq, vars);
     }
     {

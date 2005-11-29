@@ -1,4 +1,4 @@
-// NDDL/test/compiler/nddl.tx.2.xml
+// nddl.tx.2.xml
 
 #include "nddl.tx.2.hh"
 #include "NddlUtils.hh"
@@ -137,7 +137,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/nddl.tx.2");
+    Id<Schema> id = Schema::instance("nddl.tx.2");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
