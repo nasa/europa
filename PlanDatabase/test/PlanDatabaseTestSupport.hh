@@ -58,6 +58,13 @@ const LabelStr& DEFAULT_PREDICATE(){
 
 void initDbTestSchema(const SchemaId& schema) {
   schema->reset();
+
+  schema->addPrimitive(IntervalDomain::getDefaultTypeName());
+  schema->addPrimitive(IntervalIntDomain::getDefaultTypeName());
+  schema->addPrimitive(BoolDomain::getDefaultTypeName());
+  schema->addPrimitive(LabelSet::getDefaultTypeName());
+  schema->addPrimitive(EnumeratedDomain::getDefaultTypeName());
+
   // Set up object types and compositions for testing - builds a recursive structure
   schema->addObjectType(DEFAULT_OBJECT_TYPE());
   schema->addMember(DEFAULT_OBJECT_TYPE(), DEFAULT_OBJECT_TYPE(), "id0");

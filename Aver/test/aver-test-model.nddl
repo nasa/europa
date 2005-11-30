@@ -1,6 +1,24 @@
 #include "../../NDDL/core/Plasma.nddl"
 #include "../../NDDL/core/PlannerConfig.nddl"
 
+class PhysicalStatus extends Timeline {
+  predicate Sleeping {}
+  predicate AtSchool {}
+  predicate Working {}
+}
+
+class EmotionalStatus extends Timeline {
+  predicate Relaxed {}
+  predicate Bored {}
+  predicate Focused {}
+}
+
+class CaffeineLevel extends Resource {
+  CaffeineLevel(float ic, float ll_min, float ll_max) {
+    super(ic, ll_min, ll_max);
+  }
+}
+
 class Geek extends Object {
   PhysicalStatus where;
   EmotionalStatus what;
@@ -13,11 +31,6 @@ class Geek extends Object {
   }
 }
 
-class PhysicalStatus extends Timeline {
-  predicate Sleeping {}
-  predicate AtSchool {}
-  predicate Working {}
-}
 
 PhysicalStatus::Sleeping {
   met_by(object.Working w);
@@ -49,12 +62,6 @@ PhysicalStatus::Working {
   commonAncestor(b.object, object, g);
 }
 
-class EmotionalStatus extends Timeline {
-  predicate Relaxed {}
-  predicate Bored {}
-  predicate Focused {}
-}
-
 EmotionalStatus::Relaxed {
   eq(8, duration);
 
@@ -80,12 +87,6 @@ EmotionalStatus::Focused {
   contains(CaffeineLevel.change c);
   eq(5.0, c.quantity);
   commonAncestor(c.object, object, g);
-}
-
-class CaffeineLevel extends Resource {
-  CaffeineLevel(float ic, float ll_min, float ll_max) {
-    super(ic, ll_min, ll_max);
-  }
 }
 
 PlannerConfig world = new PlannerConfig(0, 64, 100000);

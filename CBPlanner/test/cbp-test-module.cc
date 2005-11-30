@@ -259,6 +259,15 @@ public:
   void initCBPTestSchema(){
     const SchemaId& schema = Schema::instance();
     schema->reset();
+    schema->addPrimitive("int");
+    schema->addPrimitive("float");
+    schema->addPrimitive("bool");
+    schema->addPrimitive("string");
+    schema->addPrimitive(IntervalDomain::getDefaultTypeName());
+    schema->addPrimitive(IntervalIntDomain::getDefaultTypeName());
+    schema->addPrimitive(BoolDomain::getDefaultTypeName());
+    schema->addPrimitive(LabelSet::getDefaultTypeName());
+    schema->addPrimitive(EnumeratedDomain::getDefaultTypeName());
     schema->addObjectType("Object");
 
     schema->addPredicate("Object.PredicateA");

@@ -242,6 +242,9 @@ private:
 
   static bool testObjectTypeRelationships() {
     SCHEMA->reset();
+    SCHEMA->addPrimitive("int");
+    SCHEMA->addPrimitive("float");
+    SCHEMA->addPrimitive("bool");
     SCHEMA->addObjectType(LabelStr("Foo"));
     SCHEMA->addObjectType(LabelStr("Baz"));
     SCHEMA->addPredicate("Baz.pred");
@@ -373,7 +376,9 @@ private:
 
     SCHEMA->addObjectType(LabelStr("Foo"));
     SCHEMA->addPredicate(LabelStr("Foo.Argle"));
+    SCHEMA->addPrimitive("Bargle");
     SCHEMA->addMember(LabelStr("Foo.Argle"), LabelStr("Bargle"), LabelStr("bargle"));
+    SCHEMA->addPrimitive("Targle");
     SCHEMA->addMember(LabelStr("Foo.Argle"), LabelStr("Targle"), LabelStr("targle"));
 
     assertTrue(SCHEMA->getMemberType(LabelStr("Foo.Argle"), LabelStr("bargle")) == LabelStr("Bargle"));
@@ -383,6 +388,7 @@ private:
     SCHEMA->addObjectType(LabelStr("Bar"), LabelStr("Foo"));
     SCHEMA->addPredicate(LabelStr("Bar.Argle"));
     assertTrue(SCHEMA->hasParent(LabelStr("Bar.Argle")));
+    SCHEMA->addPrimitive("float");
     SCHEMA->addMember(LabelStr("Bar.Argle"), LabelStr("float"), LabelStr("huey"));
     assertTrue(SCHEMA->getMemberType(LabelStr("Bar.Argle"), LabelStr("huey")) == LabelStr("float"));
 
@@ -3806,6 +3812,7 @@ public:
     TEST_PLAYING_XML(buildXMLNameStr("class", "TestClass1", __FILE__, __LINE__));
 
     s_db->getSchema()->addObjectType("TestClass2");
+    s_db->getSchema()->addObjectType("Locations");
     assertTrue(s_db->getSchema()->isObjectType("TestClass2"));
     s_db->getSchema()->addMember("TestClass2", IntervalIntDomain::getDefaultTypeName().toString(), "int1");
     s_db->getSchema()->addMember("TestClass2", IntervalDomain::getDefaultTypeName().toString(), "float2");

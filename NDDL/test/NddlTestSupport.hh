@@ -58,6 +58,11 @@ const LabelStr& NDDL_DEFAULT_PREDICATE(){
 
 void nddlInitDbTestSchema(const SchemaId& schema) {
   schema->reset();
+  schema->addPrimitive(IntervalDomain::getDefaultTypeName());
+  schema->addPrimitive(IntervalIntDomain::getDefaultTypeName());
+  schema->addPrimitive(BoolDomain::getDefaultTypeName());
+  schema->addPrimitive(LabelSet::getDefaultTypeName());
+  schema->addPrimitive(EnumeratedDomain::getDefaultTypeName());
   // Set up object types and compositions for testing - builds a recursive structure
   schema->addObjectType(NDDL_DEFAULT_OBJECT_TYPE());
   schema->addMember(NDDL_DEFAULT_OBJECT_TYPE(), NDDL_DEFAULT_OBJECT_TYPE(), "id0");

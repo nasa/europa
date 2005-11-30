@@ -61,6 +61,13 @@
 void HEinitCBPTestSchema(){
   const SchemaId& schema = Schema::instance();
   schema->reset();
+
+  schema->addPrimitive(IntervalDomain::getDefaultTypeName());
+  schema->addPrimitive(IntervalIntDomain::getDefaultTypeName());
+  schema->addPrimitive(BoolDomain::getDefaultTypeName());
+  schema->addPrimitive(LabelSet::getDefaultTypeName());
+  schema->addPrimitive(EnumeratedDomain::getDefaultTypeName());
+
   schema->addObjectType("Object");
 
   schema->addPredicate("Object.PredicateA");
@@ -89,6 +96,12 @@ void HEinitCBPTestSchema(){
 void initHeuristicsSchema(){
   const SchemaId& rover = Schema::instance();
   rover->reset();
+
+  rover->addPrimitive("int");
+  rover->addPrimitive("float");
+  rover->addPrimitive("bool");
+  rover->addPrimitive("string");
+
   rover->addObjectType(LabelStr("Object"));
   rover->addObjectType(LabelStr("Timeline"), LabelStr("Object"));
   rover->addObjectType(LabelStr("NddlResource"));
@@ -157,6 +170,13 @@ void initHeuristicsSchema(){
   rover->addMember("Instrument.Unstow", "Rover", "rovers");
   rover->addMember("Instrument.Stow", "Rover", "rovers");
 
+  rover->addEnum("Mode");
+  rover->addValue("Mode", LabelStr("high"));
+  rover->addValue("Mode", LabelStr("medium-high"));
+  rover->addValue("Mode", LabelStr("medium"));
+  rover->addValue("Mode", LabelStr("medium-low"));
+  rover->addValue("Mode", LabelStr("low"));
+
   // extra stuff to test
   rover->addObjectType("Telemetry", "Object");
   rover->addPredicate("Telemetry.Communicate");
@@ -164,12 +184,6 @@ void initHeuristicsSchema(){
   rover->addMember("Telemetry.Communicate", "float", "bandwidth");
   rover->addMember("Telemetry.Communicate", "bool", "encoded");
   rover->addMember("Telemetry.Communicate", "Mode", "mode");
-  rover->addEnum("Mode");
-  rover->addValue("Mode", LabelStr("high"));
-  rover->addValue("Mode", LabelStr("medium-high"));
-  rover->addValue("Mode", LabelStr("medium"));
-  rover->addValue("Mode", LabelStr("medium-low"));
-  rover->addValue("Mode", LabelStr("low"));
 }
 
 

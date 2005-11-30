@@ -19,6 +19,9 @@
 #include "SolverDecisionPoint.hh"
 #include "MatchingRule.hh"
 #include "Filters.hh"
+#include "FlawHandler.hh"
+#include "FlawFilter.hh"
+#include "Token.hh"
 #include "TestSupport.hh"
 #include <iostream>
 #include <stdlib.h>

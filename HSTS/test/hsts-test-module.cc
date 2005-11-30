@@ -80,6 +80,13 @@
   void hstsInitCBPTestSchema(){
     const SchemaId& schema = Schema::instance();
     schema->reset();
+
+    schema->addPrimitive(IntervalDomain::getDefaultTypeName());
+    schema->addPrimitive(IntervalIntDomain::getDefaultTypeName());
+    schema->addPrimitive(BoolDomain::getDefaultTypeName());
+    schema->addPrimitive(LabelSet::getDefaultTypeName());
+    schema->addPrimitive(EnumeratedDomain::getDefaultTypeName());
+
     schema->addObjectType("Objects");
 
     schema->addPredicate("Objects.PredicateA");
@@ -108,6 +115,10 @@
   void hstsInitHeuristicsSchema(){
     const SchemaId& rover = Schema::instance();
     rover->reset();
+    rover->addPrimitive("int");
+    rover->addPrimitive("float");
+    rover->addPrimitive("bool");
+    rover->addPrimitive("string");
     rover->addObjectType(LabelStr("Object"));
     rover->addObjectType(LabelStr("Timeline"), LabelStr("Object"));
     rover->addObjectType(LabelStr("NddlResource"));
@@ -177,18 +188,19 @@
     rover->addMember("Instrument.Stow", "Rover", "rovers");
 
     // extra stuff to test
-    rover->addObjectType("Telemetry", "Object");
-    rover->addPredicate("Telemetry.Communicate");
-    rover->addMember("Telemetry.Communicate", "int", "minutes");
-    rover->addMember("Telemetry.Communicate", "float", "bandwidth");
-    rover->addMember("Telemetry.Communicate", "bool", "encoded");
-    rover->addMember("Telemetry.Communicate", "Mode", "mode");
     rover->addEnum("Mode");
     rover->addValue("Mode", LabelStr("high"));
     rover->addValue("Mode", LabelStr("medium-high"));
     rover->addValue("Mode", LabelStr("medium"));
     rover->addValue("Mode", LabelStr("medium-low"));
     rover->addValue("Mode", LabelStr("low"));
+
+    rover->addObjectType("Telemetry", "Object");
+    rover->addPredicate("Telemetry.Communicate");
+    rover->addMember("Telemetry.Communicate", "int", "minutes");
+    rover->addMember("Telemetry.Communicate", "float", "bandwidth");
+    rover->addMember("Telemetry.Communicate", "bool", "encoded");
+    rover->addMember("Telemetry.Communicate", "Mode", "mode");
   }
 
 

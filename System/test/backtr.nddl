@@ -19,6 +19,18 @@ class Battery extends Resource {
    } 
 }
 //*****************************************************************
+
+class Antenna {
+  predicate Transmit{}
+  predicate Idle{}
+}
+
+class Memory {
+  predicate Full{}
+  predicate Empty{}
+  predicate Busy{}
+}
+
 class Rover{
  Battery m_battery;
  Antenna m_antenna;
@@ -136,10 +148,6 @@ Rover::Standby{
   }
 }
 
-class Antenna {
-  predicate Transmit{}
-  predicate Idle{}
-}
 
 Antenna::Transmit {
   eq(duration, 4);
@@ -160,12 +168,6 @@ Antenna::Transmit {
 Antenna::Idle {
   meets(Transmit t1);
   met_by(Transmit t2);
-}
-
-class Memory {
-  predicate Full{}
-  predicate Empty{}
-  predicate Busy{}
 }
 
 Memory::Full{
