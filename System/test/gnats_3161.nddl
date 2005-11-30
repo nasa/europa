@@ -50,7 +50,7 @@ first.arg.specify(true); // Force it to be specified right off the bat
 rejectable(b.otherPred second);
 
 // Expected behavior
-// 1. activate token, which will immeidatly fire impossible guard since base is a singleton
+// 1. activate token, which will immediatly fire impossible guard since base is a singleton
 // 2. reject token
 // 3. bind local variable to x, causing backtrack
 // 4. bind local variable to y, succeeding
