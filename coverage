@@ -2,15 +2,15 @@
 #
 # Build code coverage information.
 # 1) Only works on linux
-# 2) Once built you have to visit each .cc file in the system to look at its coverage 
-#     gcov -o <path to dir where you ran this script> <file-name>.cc
-
 
 echo ''
 echo 'EUROPA code test case coverage anlaysis script - uses gcov'
 echo ''
 
-jam -sVARIANTS=COVERAGE -sLIBRARIES=STATIC run-solvers-module-tests # ensure required .xml files get built
+jam -sVARIANTS=COVERAGE -sLIBRARIES=STATIC run-solvers-module-tests # ensure required .xml files get built. Cheaper than adding dependancy information to System/test jamfile.
 jam -sVARIANTS=COVERAGE -sLIBRARIES=STATIC run-all-module-tests
+
+javac ./System/test/Java/RunGcov.java
+java  -classpath ./System/test/Java RunGcov coverage-results.txt .
 
 exit 0
