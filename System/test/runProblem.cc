@@ -4,6 +4,7 @@
 #include "TestSupport.hh"
 #include "Debug.hh"
 #include "Pdlfcn.hh"
+#include "PlanDatabaseWriter.hh"
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
@@ -21,21 +22,15 @@ bool replayRequired = false;
 
 template<class ASSEMBLY>
 void replay(const PlanDatabaseId& db, const DbClientTransactionLogId& txLog) {
-  std::stringstream os1;
-  db->getClient()->toStream(os1);
+  std::string s1 = PlanDatabaseWriter::toString(db, false);
   std::ofstream out(ASSEMBLY::TX_LOG());
   txLog->flush(out);
   out.close();
-
-  std::stringstream os2;
   ASSEMBLY replayed(Schema::instance());
   replayed.playTransactions(ASSEMBLY::TX_LOG());
-  replayed.getPlanDatabase()->getClient()->toStream(os2);
-
-  std::string s1 = os1.str();
-  std::string s2 = os2.str();
-
-  assert(s1 == s2);
+  std::string s2 = PlanDatabaseWriter::toString(replayed.getPlanDatabase(), false);
+  condDebugMsg(s1 != s2, "Main", "S1" << std::endl << s1 << std::endl << "S2" << std::endl << s2);
+  assertTrue(s1 == s2);
 }
 
 template<class ASSEMBLY>
@@ -75,23 +70,22 @@ bool runPlanner(){
 template<class ASSEMBLY>
 bool copyFromFile(){
   // Populate plan database from transaction log
-  std::stringstream os1;
+  std::string s1;
   {
     ASSEMBLY assembly(schema);
     assembly.playTransactions(ASSEMBLY::TX_LOG());
-    assembly.getPlanDatabase()->getClient()->toStream(os1);
-    assembly.getPlanDatabase()->archive();
-  }
-  std::stringstream os2;
-  {
-    ASSEMBLY assembly(schema);
-    assembly.playTransactions(ASSEMBLY::TX_LOG());
-    assembly.getPlanDatabase()->getClient()->toStream(os2);
+    s1 = PlanDatabaseWriter::toString(assembly.getPlanDatabase(), false);
     assembly.getPlanDatabase()->archive();
   }
 
-  std::string s1 = os1.str();
-  std::string s2 = os2.str();
+  std::string s2;
+  {
+    ASSEMBLY assembly(schema);
+    assembly.playTransactions(ASSEMBLY::TX_LOG());
+    s2 = PlanDatabaseWriter::toString(assembly.getPlanDatabase(), false);
+    assembly.getPlanDatabase()->archive();
+  }
+
   assert(s1 == s2);
 
   return true;

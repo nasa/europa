@@ -6,6 +6,7 @@ SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
 
 ModuleComponent PlanDatabase
 	:
+	PlanDatabaseWriter.cc
 	DbClientTransactionLog.cc
 	DbClientTransactionPlayer.cc
 	EventToken.cc
