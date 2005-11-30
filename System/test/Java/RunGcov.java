@@ -5,6 +5,7 @@ public class RunGcov {
 
     private static String OUTPUT_FILE_NAME_DEFAULT = "europa-gcov-results.txt";
     private static String INPUT_DIRECTORY_DEFAULT = ".";
+    private static String NO_RESULT = "NORESULT";
 
     public static void runGcov( String outputFileName, String inputDirectory ) {
    
@@ -47,12 +48,12 @@ public class RunGcov {
 
         for (int i=0; i < dotCCFiles.length; i++) {
             filesInDir.add ( directory.getPath() + "/" + dotCCFiles[i] );
-            System.out.println( directory.getPath() + "/" + dotCCFiles[i] );
+            //System.out.println( directory.getPath() + "/" + dotCCFiles[i] );
         }
 
        for (int i=0; i < dotHHFiles.length; i++) {
             filesInDir.add ( directory.getPath() + "/" + dotHHFiles[i] );
-            System.out.println( directory.getPath() + "/" + dotHHFiles[i] );
+            //System.out.println( directory.getPath() + "/" + dotHHFiles[i] );
        }
 
        // process all sub directories.
@@ -85,14 +86,11 @@ public class RunGcov {
 		String cmd = "gcov -o " + inputDirectory + " " + fileName;
                 String result = runCommand( cmd , fileName );
        
-                System.out.println("produced result " + result);
-
-
-                results.add( result );
+                if (! result.equalsIgnoreCase(NO_RESULT)) {  
+                  results.add( result );
+		}
             } else {
-		System.out.println("skipping " + fileName + " as no .bb file exists for it");
-                String result = "no gcov data for file " + fileName;
-	        results.add( result );
+		results.add (fileName + " has no gcov data");
             }
         }
        
@@ -129,7 +127,7 @@ public class RunGcov {
 
 
     private static String runCommand(String command, String fileName) {
-         String result = "No result produced for" + fileName;
+	String result = NO_RESULT;
      
          try {
             System.out.println("Executing command " + command);
@@ -144,14 +142,10 @@ public class RunGcov {
 
             try {
                 while ((ls_str = ls_in.readLine()) != null) {
-                   
-		  System.out.println(ls_str);     
+                
                   if (ls_str.toLowerCase().indexOf( fileName.toLowerCase() ) != -1) {
                       result = ls_str;
-                  } else {
-		      System.out.println (fileName + " is not in line above");
-		  } 
-
+		  }
 
                 }
             } catch (IOException e) {
