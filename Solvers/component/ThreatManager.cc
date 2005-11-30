@@ -26,66 +26,6 @@ namespace EUROPA {
       return token->isActive() && FlawManager::inScope(entity);
     }
 
-    DecisionPointId ThreatManager::next(unsigned int priorityLowerBound,
-					unsigned int& bestPriority){
-
-      // First we filter and sort candidate tokens to order according to our flaw filtering rules and the previously
-      // counted number of choices.
-      const std::map<int, std::pair<TokenId, ObjectSet> >& tokensToOrder = m_db->getTokensToOrder();
-      std::map<int, TokenId> candidates;
-      for(std::map<int, std::pair<TokenId, ObjectSet> >::const_iterator it = tokensToOrder.begin(); 
-	  it != tokensToOrder.end(); ++it){
-	TokenId candidate = it->second.first;
-	checkError(candidate.isValid(), candidate);
-	checkError(candidate->isActive(), "It must be inactive to be a candidate. " 
-		   << candidate->toString() << ";" << candidate->getState()->toString());
-
-	if(!inScope(candidate)){
-	  debugMsg("ThreatManager:next",
-		   candidate->toString() << " is out of scope.");
-	  continue;
-	}
-
-	// Now insert in order of last count computed to increase chance of finding better choices early.
-	unsigned int lastCount = m_db->lastOrderingChoiceCount(candidate);
-	candidates.insert(std::pair<int, TokenId>(lastCount, candidate));
-      }
-
-
-      // Now we may have some candidates in scope to evaluate in order to get the best token to order
-      TokenId tokenToOrder;
-      for(std::map<int, TokenId>::const_iterator it = candidates.begin(); it != candidates.end(); ++it){
-	if(bestPriority == priorityLowerBound) // Can't do better
-	  break;
-
-	TokenId candidate = it->second;
-
-	unsigned int priority = 0;
-
-	priority = m_db->countOrderingChoices(candidate);
-
-	if(priority < bestPriority){
-	  bestPriority = priority;
-	  tokenToOrder = candidate;
-	}
-
-	debugMsg("ThreatManager:next",
-		 candidate->toString() << 
-		 (candidate == tokenToOrder ? " is the best candidate so far." : " is not a better candidate."));
-      }
-
-      if(tokenToOrder.isNoId())
-	return DecisionPointId::noId();
-
-      DecisionPointId decisionPoint = allocateDecisionPoint(tokenToOrder);
-
-      checkError(decisionPoint.isValid(),
-		 "Failed to allocate a decision point for " << tokenToOrder->toString() <<
-		 " Indicates that no FlawHandler has been configured for this flaw.");
-
-      return decisionPoint;
-    }
-
     IteratorId ThreatManager::createIterator(){
       return (new ThreatManager::FlawIterator(*this))->getId();
     }
@@ -94,6 +34,15 @@ namespace EUROPA {
       : m_visited(0), m_timestamp(manager.m_db->getConstraintEngine()->cycleCount()),
 	m_manager(manager), m_it(manager.m_db->getTokensToOrder().begin()), 
 	m_end(manager.m_db->getTokensToOrder().end()) {
+
+      // Must advance to the first available flaw in scope.
+      while(!done()){
+	TokenId tok = m_it->second.first;
+	if(m_manager.inScope(tok))
+	  break;
+	else
+	  ++m_it;
+      }
     }
 
     bool ThreatManager::FlawIterator::done() const {
@@ -103,19 +52,33 @@ namespace EUROPA {
     const EntityId ThreatManager::FlawIterator::next() {
       check_error(m_manager.m_db->getConstraintEngine()->cycleCount() == m_timestamp,
 		  "Error: potentially stale flaw iterator.");
-      TokenId retval = TokenId::noId();
+      checkError(!done(), "Cannot be done when you call next.");
 
-      for(; !done(); ++m_it) {
+      // Pick up the flaw for the current position
+      TokenId flaw = m_it->second.first;
+      checkError(m_manager.inScope(flaw), "Not advancing correctly.");
+      ++m_visited;
+
+      // Advance till we get another hit
+      ++m_it;
+      while(!done()){
 	TokenId tok = m_it->second.first;
-	check_error(tok.isValid());
-	if(m_manager.inScope(tok)) {
-	  retval = tok;
-	  ++m_visited;
-	  ++m_it;
+	if(m_manager.inScope(tok))
 	  break;
-	}
+	else
+	  ++m_it;
       }
-      return retval;
+
+      return flaw;
+    }
+
+
+    std::string ThreatManager::toString(const EntityId& entity) const {
+      checkError(TokenId::convertable(entity), entity->toString());
+      TokenId token = entity;
+      std::stringstream os;
+      os << "THREAT:" << token->toString();
+      return os.str();
     }
   }
 }

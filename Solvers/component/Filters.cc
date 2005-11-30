@@ -40,6 +40,33 @@ namespace EUROPA {
       return !var->lastDomain().isSingleton() && FlawFilter::test(entity);
     }
 
+    /** TokenMustBeAssignedFilter **/
+    TokenMustBeAssignedFilter::TokenMustBeAssignedFilter(const TiXmlElement& configData)
+      : FlawFilter(configData, true) {
+      setExpression("Singleton");
+    }
+
+    bool TokenMustBeAssignedFilter::test(const EntityId& entity) {
+      checkError(ConstrainedVariableId::convertable(entity), 
+		 "Configuration Error. Cannot apply to " << entity->toString());
+
+      ConstrainedVariableId var = entity;
+
+      debugMsg("TokenMustBeAssignedFilter:test", "Evaluating " << var->toString() << " for token assignment filter.");
+
+      if(var->getParent().isNoId() || ObjectId::convertable(var->getParent()))
+	 return false;
+
+      TokenId parentToken;
+      if(RuleInstanceId::convertable(var->getParent()))
+	parentToken = (RuleInstanceId(var->getParent())->getToken());
+      else
+	parentToken = var->getParent();
+
+      // Indicate a match if it is not an assigned token
+      return !parentToken->isAssigned();
+    }
+
     /** HORIZON FILTERING **/
     IntervalIntDomain& HorizonFilter::getHorizon() {
       static IntervalIntDomain sl_instance;

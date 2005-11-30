@@ -4,8 +4,8 @@ enum Letters {X, Y, Z};
 
 class A extends Timeline {
  predicate predicateA{
-  int arg1;
-  float arg2;
+  int arg1 = [0 1000];
+  float arg2 = [0 1000];
  }
 
  predicate predicateB{
@@ -120,7 +120,7 @@ HorizonFiltered::uberPredicate{
  met_by(uberPredicate g1);
  eq(g1.forceRejection, forceRejection);
 
- if(end == 50){
+ if(end == 10){
   if(forceRejection == true){
    eq(1, 0); // Force failure
   }

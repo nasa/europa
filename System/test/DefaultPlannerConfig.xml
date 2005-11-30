@@ -1,5 +1,14 @@
 <Solver name="DefaultTestSolver">
   <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
+
+  <ThreatManager>
+    <FlawHandler component="StandardThreatHandler"/>
+  </ThreatManager>
+
+  <OpenConditionManager>
+    <FlawHandler component="StandardOpenConditionHandler"/>
+  </OpenConditionManager>
+
   <UnboundVariableManager>
     <FlawFilter var-match="start"/>
     <FlawFilter var-match="end"/>
@@ -7,14 +16,7 @@
     <FlawFilter class-match="Resource" var-match="time"/>
     <FlawFilter class-match="Resource" var-match="quantity"/>
     <FlawFilter component="InfiniteDynamicFilter"/>
+    <FlawFilter component="TokenMustBeAssignedFilter"/>
     <FlawHandler component="StandardVariableHandler"/>
   </UnboundVariableManager>
-
-  <OpenConditionManager>
-    <FlawHandler component="StandardOpenConditionHandler"/>
-  </OpenConditionManager>
-
-  <ThreatManager>
-    <FlawHandler component="StandardThreatHandler"/>
-  </ThreatManager>
 </Solver>

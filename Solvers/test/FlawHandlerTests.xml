@@ -1,0 +1,27 @@
+<TestPriorities defaultPriority="1000">
+  <!-- Test Default Priority with no guards -->
+  <FlawHandler label="H0" component="StandardVariableHandler"/>
+  <FlawHandler label="H1" variable="start" component="StandardVariableHandler"/>
+  <FlawHandler label="H2" variable="end" priority="200" component="StandardVariableHandler"/>
+  <FlawHandler label="H3" variable="end" masterPredicate="predicateG" priority="1" component="StandardVariableHandler"/>
+</TestPriorities>
+
+<DefaultVariableOrdering>
+ <Solver name="SimpleCSPSolver">
+  <!-- Will have variable flaws, but no filtering -->
+  <UnboundVariableManager>
+   <FlawHandler component="Min"/>
+  </UnboundVariableManager>
+ </Solver>
+</DefaultVariableOrdering>
+
+<HeuristicVariableOrdering>
+ <Solver name="SimpleCSPSolver">
+  <!-- Will have variable flaws, but no filtering. Priorities will give a result different from default. -->
+  <UnboundVariableManager defaultPriority="100">
+   <FlawHandler component="Min"/>
+   <FlawHandler var-match="v2" component="Max" priority="0"/>
+   <FlawHandler var-match="v1" component="Max" priority="1"/>
+  </UnboundVariableManager>
+ </Solver>
+</HeuristicVariableOrdering>

@@ -5,7 +5,6 @@
 #include "FlawManager.hh"
 #include "OpenConditionDecisionPoint.hh"
 #include "PlanDatabaseListener.hh"
-//#include "MatchingRule.hh"
 
 #include <vector>
 
@@ -22,19 +21,11 @@ namespace EUROPA {
 
       bool inScope(const EntityId& entity);
 
-      virtual IteratorId createIterator();
+      IteratorId createIterator();
+
+      std::string toString(const EntityId& entity) const;
 
     private:
-      // TODO: Special code for units. virtual DecisionPointId nextZeroCommitmentDecision();
-
-      virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
-
-      /**
-       * @brief Obtains a priority for the given candidate token
-       * @param candidate An inactive token for evaluation
-       * @param bestPriority A current best priority to beat. Allows early termination when we know we can't beat it.
-       */
-      virtual unsigned int getPriority(const TokenId& candidate, unsigned int bestPriority);
 
       void notifyRemoved(const ConstrainedVariableId& variable);
       void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);

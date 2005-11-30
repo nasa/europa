@@ -23,8 +23,12 @@ namespace EUROPA {
     class FlawFilter;
     typedef Id<FlawFilter> FlawFilterId;
 
+    class FlawHandler;
+    typedef Id<FlawHandler> FlawHandlerId;
+
     class FlawManager;
     typedef Id<FlawManager> FlawManagerId;
+
     typedef std::list<FlawManagerId> FlawManagers;
 
     class DecisionPoint;
@@ -34,6 +38,13 @@ namespace EUROPA {
     typedef Id<Solver> SolverId;
 
     typedef std::vector<DecisionPointId> DecisionStack;
+
+    typedef double Priority; /*!< Used to reference to the priority used in calculating heuristics. */
+
+    /**
+     * @brief Used to store guard entry data - var index and expected value to match on.
+     */
+    typedef std::pair<unsigned int, double> GuardEntry;
 
     /**
      * @brief Defines a configuration class

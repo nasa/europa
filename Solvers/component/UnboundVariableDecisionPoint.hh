@@ -3,6 +3,7 @@
 
 #include "SolverDecisionPoint.hh"
 #include "ConstrainedVariable.hh"
+#include "FlawHandler.hh"
 
 /**
  * @brief Provides class declarations for handling variable flaws. Includes classes for min, max and random orderings.
@@ -129,7 +130,6 @@ namespace EUROPA {
   }
 }
 
-#define REGISTER_VARIABLE_DECISION_FACTORY(CLASS, NAME)\
-REGISTER_DECISION_FACTORY(CLASS, NAME);
+#define REGISTER_VARIABLE_DECISION_FACTORY(CLASS, NAME) REGISTER_FLAW_HANDLER(CLASS, NAME)
 
 #endif

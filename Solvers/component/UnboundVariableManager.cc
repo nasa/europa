@@ -35,7 +35,7 @@ namespace EUROPA {
       const ConstrainedVariableSet& allVars = m_db->getConstraintEngine()->getVariables();
       for(ConstrainedVariableSet::const_iterator it = allVars.begin(); it != allVars.end(); ++it){
 	ConstrainedVariableId var = *it;
-	addFlaw(var);
+	updateFlaw(var);
       }
 
       // PROCESS CONSTRAINTS TO INITIALIZE GUARDS. We are looking for RuleVariableListener constraints since they 
@@ -45,6 +45,36 @@ namespace EUROPA {
 	ConstraintId constraint = *it;
 	handleConstraintAddition(constraint);
       }
+    }
+
+    DecisionPointId UnboundVariableManager::nextZeroCommitmentDecision(){
+      for(ConstrainedVariableSet::const_iterator it = m_singletonFlawCandidates.begin(); 
+	  it != m_singletonFlawCandidates.end(); ++it){
+	ConstrainedVariableId var = *it;
+	checkError(var.isValid(), var);
+	checkError(var->lastDomain().isSingleton(), "Buffer management error:" << var->toString());
+
+	if(!dynamicMatch(var)){
+	  debugMsg("UnboundVariableManager:nextZeroCommitmentDecision", "Allocating for " << var->toString());
+	  return allocateDecisionPoint(var);
+	}
+      }
+
+      return DecisionPointId::noId();
+    }
+
+    bool UnboundVariableManager::dynamicMatch(const EntityId& entity){
+      if (FlawManager::dynamicMatch(entity))
+	return true;
+
+      ConstrainedVariableId var = entity;
+
+      // We also exclude singletons unless they are guards
+      if(!isCompatGuard(var) && var->lastDomain().isSingleton())
+	return true;
+
+      // Finally, we exlude if the bounds are not finite
+      return !var->lastDomain().areBoundsFinite();
     }
 
     bool UnboundVariableManager::inScope(const EntityId& entity){
@@ -57,124 +87,34 @@ namespace EUROPA {
       return result;
     }
 
-    DecisionPointId UnboundVariableManager::next(unsigned int priorityLowerBound,
-						 unsigned int& bestPriority){
-      // For the special case of a singleton flaw we will use the cached singlton flaw candidates
-      if(bestPriority == 2)
-	return next(priorityLowerBound, bestPriority, m_singletonFlawCandidates);
-      else
-	return next(priorityLowerBound, bestPriority, m_flawCandidates);
-    }
-
-    DecisionPointId UnboundVariableManager::next(unsigned int priorityLowerBound,
-						 unsigned int& bestPriority,
-						 const ConstrainedVariableSet& flawCandidates){
-      checkError(bestPriority > priorityLowerBound, 
-		 "Should not be calling this otherwise: " << bestPriority << ">=" << priorityLowerBound);
-
-      ConstrainedVariableId flawedVariable;
-      bool flawIsGuarded = false;
-
-      debugMsg("UnboundVariableManager:next",
-	       "Evaluating next decision to work on. Must beat priority of " << bestPriority);
-
-      for(ConstrainedVariableSet::const_iterator it = flawCandidates.begin(); it != flawCandidates.end(); ++it){
-	if(bestPriority <= priorityLowerBound) // Can't do better
-	  break;
-
-	ConstrainedVariableId candidate = *it;
-
-	checkError(!variableOfNonActiveToken(candidate),
-		   "Expect that " << candidate->toString() << " cannot belong to an inactive or merged token.");
-
-	check_error(!candidate->isSpecified(),
-		    "Should not be seeing this as a candidate flaw since it is already specified.");
-
-	if(dynamicMatch(candidate)){
-	  debugMsg("UnboundVariableManager:next",
-		   candidate->toString() << " is out of dynamic scope.");
-	  continue;
-	}
-
-	const AbstractDomain& derivedDomain = candidate->derivedDomain();
-
-	if(!derivedDomain.isOpen() && derivedDomain.areBoundsFinite()){
-	  unsigned int valueCount = candidate->lastDomain().getSize();
-
-	  // If it is not a best case priority, and not a guard, but we have a guard, then skip it
-	  if(valueCount > priorityLowerBound && flawIsGuarded){
-	    debugMsg("UnboundVariableManager:next",
-		     candidate->toString() << " does not beat a guarded variable decision.");
-	    continue;
-	  }
-
-	  debugMsg("UnboundVariableManager:next",
-		   candidate->toString() << " has a priority of " << valueCount);
-
-	  if(valueCount < bestPriority){
-	    bestPriority = valueCount;
-	    flawedVariable = candidate;
-	    flawIsGuarded = (m_guardCache.find(candidate) != m_guardCache.end());
-	  }
-	}
-
-	debugMsg("UnboundVariableManager:next",
-		 candidate->toString() <<
-		 (candidate == flawedVariable ? " is the best candidate so far." : " is not a better candidate."));
-      }
-
-      if(flawedVariable.isNoId())
-	return DecisionPointId::noId();
-
-      // If not a best-case, but is a guard, then set bestPriority to 2 so it dominates all
-      // non singleton decision types.
-      if(bestPriority > priorityLowerBound && flawIsGuarded)
-	bestPriority = priorityLowerBound+1;
-
-      // If it is neither a singleton nor a guard, then bump up the priority so that it is dominated
-      // by all other decision types
-      if(bestPriority > priorityLowerBound)
-	bestPriority = WORST_SCORE();
-
-      DecisionPointId decisionPoint = allocateDecisionPoint(flawedVariable);
-
-      checkError(decisionPoint.isValid(),
-		 "Failed to allocate a decision point for " << flawedVariable->toString() <<
-		 " . Indicates that no FlawHandler is configured for this flaw.");
-
-      return decisionPoint;
-    }
-
     /**
      * We may filter based on static information only.
      */
-    void UnboundVariableManager::addFlaw(const ConstrainedVariableId& var){
-      if(!variableOfNonActiveToken(var) && var->canBeSpecified() && !var->isSpecified() && !staticMatch(var)){
-	debugMsg("UnboundVariableManager:addFlaw",
-		 "Adding " << var->toString() << " as a candidate flaw.");
-	m_flawCandidates.insert(var);
+    void UnboundVariableManager::updateFlaw(const ConstrainedVariableId& var){
+      debugMsg("UnboundVariableManager:updateFlaw", var->toString());
+      m_flawCandidates.erase(var);
+      m_singletonFlawCandidates.erase(var);
 
-	if(var->lastDomain().isSingleton())
-	  m_singletonFlawCandidates.insert(var);
+      if(variableOfNonActiveToken(var) || !var->canBeSpecified() || var->isSpecified() || staticMatch(var)){
+	debugMsg("UnboundVariableManager:updateFlaw", "Excluding: " << var->toString());
+	return;
       }
+
+      debugMsg("UnboundVariableManager:addFlaw",
+	       "Adding " << var->toString() << " as a candidate flaw.");
+
+      m_flawCandidates.insert(var);
+
+      if(var->lastDomain().isSingleton() && isCompatGuard(var))
+	m_singletonFlawCandidates.insert(var);
     }
 
     void UnboundVariableManager::removeFlaw(const ConstrainedVariableId& var){
-      condDebugMsg(m_flawCandidates.find(var) != m_flawCandidates.end(), "UnboundVariableManager:removeFlaw", "Removing " << var->toString() << " as a flaw.");
+      condDebugMsg(m_flawCandidates.find(var) != m_flawCandidates.end(), 
+		   "UnboundVariableManager:removeFlaw", "Removing " << var->toString() << " as a flaw.");
+
       m_flawCandidates.erase(var);
       m_singletonFlawCandidates.erase(var);
-    }
-
-    void UnboundVariableManager::toggleSingletonFlaw(const ConstrainedVariableId& var){
-      debugMsg("UnboundVariableManager:toggleSingletonFlaw", var->toString());
-
-      // Only if it has already passed the test to be a flaw candidate do we do anything with it
-      if(m_flawCandidates.find(var) != m_flawCandidates.end()){
-	if(var->lastDomain().isSingleton())
-	  m_singletonFlawCandidates.insert(var);
-	else
-	  m_singletonFlawCandidates.erase(var);
-      } 
     }
 
     void UnboundVariableManager::addGuard(const ConstrainedVariableId& var){
@@ -191,6 +131,8 @@ namespace EUROPA {
 
       debugMsg("UnboundVariableManager:addGuard", 
 	       "GUARDS=" << refCount << " for " << var->getName().toString() << "(" << var->getKey() << ")");
+
+      updateFlaw(var);
     }
 
     void UnboundVariableManager::removeGuard(const ConstrainedVariableId& var){
@@ -207,6 +149,8 @@ namespace EUROPA {
 
       debugMsg("UnboundVariableManager:removeGuard", 
 	       "GUARDS=" << refCount << " for " << var->getName().toString() << "(" << var->getKey() << ")");
+
+      updateFlaw(var);
     }
 
     void UnboundVariableManager::handleConstraintAddition(const ConstraintId& constraint){
@@ -247,37 +191,42 @@ namespace EUROPA {
 
     void UnboundVariableManager::notifyChanged(const ConstrainedVariableId& variable, 
 					       const DomainListener::ChangeType& changeType){
+
+      // In the event it is bound to a singleton, we remove it altogether as a flaw.
       if(changeType == DomainListener::SET_TO_SINGLETON){
 	// If it is a token state variable, we test if a case for activation
-	if(Token::isStateVariable(variable) &&
-	   variable->getSpecifiedValue() == Token::ACTIVE){
+	if(Token::isStateVariable(variable) && variable->getSpecifiedValue() == Token::ACTIVE){
 	  TokenId token = variable->getParent();
 	  const std::vector<ConstrainedVariableId>& variables = token->getVariables();
 	  for(std::vector<ConstrainedVariableId>::const_iterator it = variables.begin(); it != variables.end(); ++it){
 	    ConstrainedVariableId var = *it;
-	    addFlaw(var);
+	    updateFlaw(var);
 	  }
 	}
 	else
 	  removeFlaw(variable);
+
+	return;
       }
-      else if(changeType == DomainListener::RESET || changeType == DomainListener::CLOSED){
-	// If it is a token state variable, we remove all its variables
-	if(Token::isStateVariable(variable)){
-	  TokenId token = variable->getParent();
-	  const std::vector<ConstrainedVariableId>& variables = token->getVariables();
-	  for(std::vector<ConstrainedVariableId>::const_iterator it = variables.begin(); it != variables.end(); ++it){
-	    ConstrainedVariableId var = *it;
-	    removeFlaw(var);
-	  }
+
+      if(changeType == DomainListener::RESET && Token::isStateVariable(variable)){
+	TokenId token = variable->getParent();
+	const std::vector<ConstrainedVariableId>& variables = token->getVariables();
+	for(std::vector<ConstrainedVariableId>::const_iterator it = variables.begin(); it != variables.end(); ++it){
+	  ConstrainedVariableId var = *it;
+	  removeFlaw(var);
 	}
-	else
-	  addFlaw(variable);
+	return;
       }
-      else if(changeType == DomainListener::OPENED)
-	addFlaw(variable);
-      else if(changeType == DomainListener::RELAXED || changeType == DomainListener::RESTRICT_TO_SINGLETON)
-	toggleSingletonFlaw(variable);
+
+      // Now listen for all the other events of interest. We can ignore other cases of restriction since
+      // the event set below is sufficient to capture all the meaningful changes without incurring
+      // all the evaluation costs on every propagation.
+      if(changeType == DomainListener::RESET || 
+	 changeType == DomainListener::CLOSED ||
+	 changeType == DomainListener::RELAXED ||
+	 changeType == DomainListener::RESTRICT_TO_SINGLETON)
+	updateFlaw(variable);
     }
 
     void UnboundVariableManager::notifyAdded(const ConstraintId& constraint){
@@ -294,26 +243,66 @@ namespace EUROPA {
 
     UnboundVariableManager::FlawIterator::FlawIterator(UnboundVariableManager& manager)
       : m_visited(0), m_timestamp(manager.m_db->getConstraintEngine()->cycleCount()),
-	m_manager(manager), m_it(manager.m_flawCandidates.begin()), m_end(manager.m_flawCandidates.end())  {}
+	m_manager(manager), m_it(manager.m_flawCandidates.begin()), m_end(manager.m_flawCandidates.end())  {
+
+      // Must advance to the first available flaw in scope.
+      while(!done()){
+	ConstrainedVariableId var = *m_it;
+	if(!m_manager.dynamicMatch(var))
+	  break;
+	else
+	  ++m_it;
+      }
+    }
     
     bool UnboundVariableManager::FlawIterator::done() const { return m_it == m_end;}
 
     const EntityId UnboundVariableManager::FlawIterator::next() {
       check_error(m_manager.m_db->getConstraintEngine()->cycleCount() == m_timestamp,
 		  "Error: potentially stale flaw iterator.");
-      ConstrainedVariableId retval = ConstrainedVariableId::noId();
-      
-      for(; !done(); ++m_it) {
+      checkError(!done(), "Cannot be done when you call next.");
+      ConstrainedVariableId flaw = *m_it;
+      checkError(!m_manager.dynamicMatch(flaw), "Not advancing correctly.");
+      ++m_visited;
+
+      // Advance till we get another hit
+      ++m_it;
+      while(!done()){
 	ConstrainedVariableId var = *m_it;
-	check_error(var.isValid());
-	if(m_manager.inScope(*m_it)) {
-	  retval = var;
-	  ++m_visited;
-	  ++m_it;
+	if(!m_manager.dynamicMatch(var))
 	  break;
-	}
+	else
+	  ++m_it;
       }
-      return retval;
+
+      return flaw;
+    }
+
+    bool UnboundVariableManager::isCompatGuard(const ConstrainedVariableId& var) const{
+      return (m_guardCache.find(var) != m_guardCache.end());
+    }
+
+    bool UnboundVariableManager::betterThan(const EntityId& a, const EntityId& b){
+      if(a.isId() && b.isId()) {
+	bool aCompat = isCompatGuard(a);
+	bool bCompat = isCompatGuard(b);
+	if(aCompat && !bCompat)
+	  return true;
+	else if(!aCompat && bCompat)
+	  return false;
+      }
+
+      return FlawManager::betterThan(a, b);
+    }
+
+    std::string UnboundVariableManager::toString(const EntityId& entity) const {
+      checkError(ConstrainedVariableId::convertable(entity), entity->toString());
+      ConstrainedVariableId var = entity;
+      std::string compatStr = (isCompatGuard(var) ? " GUARD" : "");
+      std::string unitStr = (var->lastDomain().isSingleton() ? " UNIT" : "");
+      std::stringstream os;
+      os << "VAR:   " << var->toString() << unitStr << compatStr;
+      return os.str();
     }
   }
 }

@@ -1,7 +1,7 @@
 #ifndef H_Filters
 #define H_Filters
 
-#include "MatchingRule.hh"
+#include "FlawFilter.hh"
 #include "IntervalIntDomain.hh"
 
 /**
@@ -28,6 +28,15 @@ namespace EUROPA {
     class SingletonFilter: public FlawFilter {
     public:
       SingletonFilter(const TiXmlElement& configData);
+      bool test(const EntityId& entity);
+    };
+
+    /**
+     * @brief Will filter a variable out until its parent token is assigned.
+     */
+    class TokenMustBeAssignedFilter: public FlawFilter {
+    public:
+      TokenMustBeAssignedFilter(const TiXmlElement& configData);
       bool test(const EntityId& entity);
     };
 

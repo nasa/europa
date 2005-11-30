@@ -25,9 +25,11 @@ namespace EUROPA {
 
       bool inScope(const EntityId& entity);
 
-      virtual IteratorId createIterator();
+      IteratorId createIterator();
+
+      std::string toString(const EntityId& entity) const;
+
     private:
-      virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
       void handleInitialize();
 
       class FlawIterator : public Iterator {

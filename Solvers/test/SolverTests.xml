@@ -25,11 +25,12 @@
   <!-- All tokens filtered using the standard horizon filter with the default policy of 'PartiallyContained'-->
   <FlawFilter class-match="HorizonFiltered" component="HorizonFilter"/>
 
-  <UnboundVariableManager>
-   <FlawHandler component="Max"/>
-  </UnboundVariableManager>
   <OpenConditionManager>
     <FlawHandler component="StandardOpenConditionHandler"/>
   </OpenConditionManager>
+
+  <UnboundVariableManager>
+   <FlawHandler component="Max"/>
+  </UnboundVariableManager>
  </Solver>
 </SimpleRejectionSolver>

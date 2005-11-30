@@ -16,17 +16,17 @@ namespace EUROPA {
     public:
       UnboundVariableManager(const TiXmlElement& configData);
 
+      DecisionPointId nextZeroCommitmentDecision();
+
       bool inScope(const EntityId& entity);
 
+      bool dynamicMatch(const EntityId& entity);
+
       IteratorId createIterator();
+
+      std::string toString(const EntityId& entity) const;
+
     private:
-      virtual DecisionPointId next(unsigned int priorityLowerBound, unsigned int& bestPriority);
-
-      virtual DecisionPointId next(unsigned int priorityLowerBound,
-				   unsigned int& bestPriority,
-				   const ConstrainedVariableSet& flawCandidates);
-
-
       void notifyAdded(const ConstraintId& constraint);
       void notifyRemoved(const ConstraintId& constraint);
       void notifyRemoved(const ConstrainedVariableId& var);
@@ -34,16 +34,19 @@ namespace EUROPA {
       void handleInitialize();
       void addFlaw(const ConstrainedVariableId& var);
       void removeFlaw(const ConstrainedVariableId& var);
-      void toggleSingletonFlaw(const ConstrainedVariableId& var);
+      void updateFlaw(const ConstrainedVariableId& var);
       void addGuard(const ConstrainedVariableId& var);
       void removeGuard(const ConstrainedVariableId& var);
       void handleConstraintAddition(const ConstraintId& constraint);
       void handleConstraintRemoval(const ConstraintId& constraint);
+      bool betterThan(const EntityId& a, const EntityId& b);
 
       /**
        * @brief Utility to test if the given variable is part of a token that is merged, rejected or inactive.
        */
       static bool variableOfNonActiveToken(const ConstrainedVariableId& var);
+
+      bool isCompatGuard(const ConstrainedVariableId& var) const;
 
       ConstrainedVariableSet m_flawCandidates; /*!< All variables that have passed the static filter */
       ConstrainedVariableSet m_singletonFlawCandidates; /*!< All singleton variables that have passed the static filter */
