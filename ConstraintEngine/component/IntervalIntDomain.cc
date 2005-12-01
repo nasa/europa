@@ -42,6 +42,10 @@ namespace EUROPA {
     return(m_lb > -MAX_INT && m_ub < MAX_INT);
   }
 
+  bool IntervalIntDomain::isSingleton() const {
+    return(m_lb == m_ub);
+  }
+
   void IntervalIntDomain::testPrecision(const double& value) const {
 #ifndef EUROPA_FAST
     int intValue = (int) value;

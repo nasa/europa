@@ -400,6 +400,7 @@ namespace EUROPA {
   void TemporalPropagator::updateTempVar() {
     debugMsg("TemporalPropagator:updateTempVar", "In updateTempVar");
 
+    std::vector<TokenId> updatedTokens; // Used to push update to duration
     const std::set<TimepointId>& updatedTimepoints = m_tnet->getUpdatedTimepoints();
     for(std::set<TimepointId>::const_iterator it = updatedTimepoints.begin(); it != updatedTimepoints.end(); ++it){
       const TimepointId& tp = *it;
@@ -426,37 +427,39 @@ namespace EUROPA {
 
       if(TokenId::convertable(var->getParent())){
 	TokenId token = var->getParent();
+	// If we get a hit, then buffer the token for later update to duartion (so we only do it once with updated bounds
 	if (var == token->getStart() || var == token->getEnd())
-	  updateDuration(token);
+	  updatedTokens.push_back(token);
       }
     }
+
+    for(std::vector<TokenId>::const_iterator it = updatedTokens.begin(); it != updatedTokens.end(); ++it)
+      updateDuration(*it);
 
     m_tnet->resetUpdatedTimepoints();
   }
       
   void TemporalPropagator::updateDuration(const TokenId& token) const{
-    IntervalIntDomain& domx = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->getStart()));
-    IntervalIntDomain& domy = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->getDuration()));
-    IntervalIntDomain& domz = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->getEnd()));
-
-    check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
-
-    double xMin, xMax, yMin, yMax, zMin, zMax;
-    domx.getBounds(xMin, xMax);
-    domy.getBounds(yMin, yMax);
-    domz.getBounds(zMin, zMax);
-
-    // Process Y
-    double yMaxCandidate = Infinity::minus(zMax, xMin, yMax);
-    if (yMax > yMaxCandidate)
-      yMax = domy.translateNumber(yMaxCandidate, false);
-
-    double yMinCandidate = Infinity::minus(zMin, xMax, yMin);
-    if (yMin < yMinCandidate)
-      yMin = domy.translateNumber(yMinCandidate, true);
-
-    if (domy.intersect(yMin,yMax) && domy.isEmpty())
+    // Because we know the context is an update from a temporal network, which has already factored in all of the
+    // restrictions from the duration to get here, we can make the following assumptions:
+    // 1. The domains are not empty
+    // 2. The duration will necessarily be restricted.
+    // 3. The start and end bounds are current
+    const AbstractDomain& start = token->getStart()->lastDomain();
+    if(!start.areBoundsFinite())
       return;
+
+    const AbstractDomain& end = token->getEnd()->lastDomain();
+    if(!end.areBoundsFinite())
+      return;
+
+    IntervalIntDomain& duration = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->getDuration()));
+
+    check_error(!start.isEmpty() && !end.isEmpty() && !duration.isEmpty());
+
+    double maxDuration = end.getUpperBound() - start.getLowerBound();
+    double minDuration = end.getLowerBound() - start.getUpperBound();
+    duration.intersect(minDuration, maxDuration);
   }
 
   bool TemporalPropagator::canPrecede(const ConstrainedVariableId& first, const ConstrainedVariableId& second) {

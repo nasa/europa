@@ -1,6 +1,5 @@
 #include "IntervalDomain.hh"
 #include "DomainListener.hh"
-#include "Debug.hh"
 #include <math.h>
 
 namespace EUROPA {
@@ -148,26 +147,20 @@ namespace EUROPA {
   }
 
   bool IntervalDomain::intersects(const AbstractDomain& dom) const {
-    debugMsg("IntervalDomain:intersects", 
-	     "Testing intersection of " << dom.toString() << " with this domain [" << m_lb << " "  << m_ub << "]");
     safeComparison(*this, dom);
     check_error(!isOpen());
     check_error(!dom.isEmpty());
 
     double ub = dom.getUpperBound();
    
-    if( lt(ub, m_lb) ) {
-      debugMsg("IntervalDomain:intersects", "failed because ub is less than m_lb. Where ub= " << ub << " m_lb= " << m_lb  );
+    if( lt(ub, m_lb) ) 
       return false;
-    }
    
     double lb = dom.getLowerBound();
 
-    if( lt(m_ub, lb)){
-      debugMsg("IntervalDomain:intersects", "failed because lb is greater than m_ub. Where lb = " << lb << " m_ub " << m_ub ); 
+    if( lt(m_ub, lb))
       return false;
-    }
-    debugMsg("IntervalDomain:intersects", "success - domains intersect");
+
     return true;
   }
 
@@ -230,7 +223,6 @@ namespace EUROPA {
   }
 
   bool IntervalDomain::intersect(double lb, double ub) {
-    debugMsg("IntervalDomain:intersect", "Intersecting " << toString() << " with [" << lb << " " << ub << "]");
     // Test for empty intersection while accounting for precision/rounding errors.
     if (lt(ub, lb) || lt(ub, m_lb) || lt(m_ub, lb)){
       empty();
@@ -240,20 +232,18 @@ namespace EUROPA {
     bool ub_decreased(false);
 
     if (lt(ub,m_ub)) {
-      debugMsg("IntervalDomain:intersect", "Decreasing upper bound from " << m_ub << " to " << ub);
       m_ub = safeConversion(ub);
       ub_decreased = true;
     }
 
     bool lb_increased(false);
     if (lt(m_lb, lb)){
-      debugMsg("IntervalDomain:intersect", "Increasing lower bound from " << m_lb << " to " << lb);
       m_lb = safeConversion(lb);
       lb_increased = true;
     }
 
     // Select the strongest message applicable.
-    if (isSingleton() && (lb_increased || ub_decreased))
+    if ((lb_increased || ub_decreased) && isSingleton())
       notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
     else
       if (lb_increased && ub_decreased) {

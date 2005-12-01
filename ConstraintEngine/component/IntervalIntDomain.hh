@@ -37,6 +37,8 @@ namespace EUROPA{
 
     bool isFinite() const;
 
+    bool isSingleton() const;
+
     virtual bool isBool() const {
       return(false);
     }
