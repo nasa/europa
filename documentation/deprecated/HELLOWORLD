@@ -1,4 +1,4 @@
-$Id: HELLOWORLD,v 1.3 2005-10-17 20:20:37 pjarvis Exp $
+$Id: HELLOWORLD,v 1.4 2005-12-02 22:35:29 pjarvis Exp $
 
 Note: Please first see the file README in this directory for details
       on how to checkout, build, and test Europa2 before attempting
@@ -226,6 +226,10 @@ C. Running a plan from PlanWorks
    /home/me/HelloWorld/PlannerConfig.xml
 
    Once all of the fields have been entered, click on the "Enter" button.
+
+   Set the heuristics to 
+
+   /home/me/plasma/HeuristicsEngine/test/DefaultHeuristics.xml
 
 4. Getting a Planner Controller Window
 
