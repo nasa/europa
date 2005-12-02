@@ -202,19 +202,19 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addObjectType("Object");
     id->addObjectType("Timeline","Object");
     id->addObjectType("Hill", "Object");
     id->addObjectType("Foo", "Object");
     id->addObjectType("Region", "Object");
+    id->addPrimitive("int");
+    id->addPrimitive("float");
+    id->addPrimitive("bool");
+    id->addPrimitive("string");
+    id->addEnum("Location");
     id->addMember("Region", "Hill", "hill");
     id->addMember("Region", "Location", "location");
     id->addMember("Region", "Foo", "foo");
-    id->addEnum("Location");
     id->addValue("Location", LabelStr("Hill"));
     id->addValue("Location", LabelStr("Rock"));
     id->addValue("Location", LabelStr("Lander"));

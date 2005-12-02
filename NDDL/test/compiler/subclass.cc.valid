@@ -368,13 +368,16 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
+    id->addObjectType("Object");
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Foo", "Timeline");
+    id->addObjectType("Bar", "Foo");
+    id->addObjectType("Baz", "Bar");
+    id->addObjectType("World", "Timeline");
     id->addPrimitive("int");
     id->addPrimitive("float");
     id->addPrimitive("bool");
     id->addPrimitive("string");
-    id->addObjectType("Object");
-    id->addObjectType("Timeline","Object");
-    id->addObjectType("Foo", "Timeline");
     id->addMember("Foo", "int", "m_0");
     id->addMember("Foo", "float", "m_1");
     id->addMember("Foo", "bool", "m_2");
@@ -382,18 +385,15 @@ namespace NDDL {
     id->addPredicate("Foo.p0");
     id->addMember("Foo.p0", "float", "arg0");
     id->addPredicate("Foo.p1");
-    id->addObjectType("Bar", "Foo");
     id->addMember("Bar", "int", "m_4");
     id->addPredicate("Bar.p0");
     id->addPredicate("Bar.p1");
     id->addMember("Bar.p1", "int", "arg1");
     id->addPredicate("Bar.p2");
-    id->addObjectType("Baz", "Bar");
     id->addPredicate("Baz.p0");
     id->addMember("Baz.p0", "bool", "arg1");
     id->addPredicate("Baz.p1");
     id->addMember("Baz.p1", "float", "arg2");
-    id->addObjectType("World", "Timeline");
     id->addMember("World", "Foo", "m_foo");
     id->addMember("World", "Foo", "m_foo2");
     id->addMember("World", "Bar", "m_bar");

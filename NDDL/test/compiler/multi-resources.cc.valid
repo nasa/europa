@@ -482,13 +482,20 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
+    id->addObjectType("Object");
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Resource", "Object");
+    id->addObjectType("UnaryResource", "Timeline");
+    id->addObjectType("StringData", "Object");
+    id->addObjectType("Battery", "Resource");
+    id->addObjectType("SolarPanel", "Resource");
+    id->addObjectType("Rover", "Timeline");
+    id->addObjectType("World", "Timeline");
     id->addPrimitive("int");
     id->addPrimitive("float");
     id->addPrimitive("bool");
     id->addPrimitive("string");
-    id->addObjectType("Object");
-    id->addObjectType("Timeline","Object");
-    id->addObjectType("Resource", "Object");
+    id->addEnum("TokenStates");
     id->addMember("Resource", "float", "initialCapacity");
     id->addMember("Resource", "float", "levelLimitMin");
     id->addMember("Resource", "float", "levelLimitMax");
@@ -498,29 +505,22 @@ namespace NDDL {
     id->addMember("Resource", "float", "consumptionMax");
     id->addPredicate("Resource.change");
     id->addMember("Resource.change", "float", "quantity");
-    id->addObjectType("UnaryResource", "Timeline");
     id->addPredicate("UnaryResource.uses");
-    id->addObjectType("StringData", "Object");
     id->addMember("StringData", "string", "data");
-    id->addObjectType("Battery", "Resource");
-    id->addObjectType("SolarPanel", "Resource");
-    id->addObjectType("Rover", "Timeline");
+    id->addEnum("Locations");
     id->addPredicate("Rover.Drive");
     id->addMember("Rover.Drive", "Locations", "from");
     id->addMember("Rover.Drive", "Locations", "to");
     id->addMember("Rover.Drive", "float", "expected_energy_used");
-    id->addObjectType("World", "Timeline");
     id->addMember("World", "SolarPanel", "solarPanel");
     id->addMember("World", "Battery", "mainBattery");
     id->addMember("World", "Battery", "reserveBattery");
     id->addMember("World", "Rover", "rover");
     id->addPredicate("World.initialState");
-    id->addEnum("TokenStates");
     id->addValue("TokenStates", LabelStr("INACTIVE"));
     id->addValue("TokenStates", LabelStr("ACTIVE"));
     id->addValue("TokenStates", LabelStr("MERGED"));
     id->addValue("TokenStates", LabelStr("REJECTED"));
-    id->addEnum("Locations");
     id->addValue("Locations", LabelStr("Here"));
     id->addValue("Locations", LabelStr("There"));
     id->addValue("Locations", LabelStr("Everywhere"));

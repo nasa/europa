@@ -1,4 +1,4 @@
-// composition.0.xml
+// NDDL/test/compiler/composition.0.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

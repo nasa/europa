@@ -501,34 +501,34 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
+    id->addObjectType("Object");
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("PlannerConfig", "Object");
+    id->addObjectType("Path", "Object");
+    id->addObjectType("Enable", "Object");
+    id->addObjectType("Position", "Timeline");
+    id->addObjectType("Foo", "Timeline");
     id->addPrimitive("int");
     id->addPrimitive("float");
     id->addPrimitive("bool");
     id->addPrimitive("string");
-    id->addObjectType("Object");
-    id->addObjectType("Timeline","Object");
-    id->addObjectType("PlannerConfig", "Object");
     id->addMember("PlannerConfig", "int", "m_horizonStart");
     id->addMember("PlannerConfig", "int", "m_horizonEnd");
     id->addMember("PlannerConfig", "int", "m_maxPlannerSteps");
     id->addMember("PlannerConfig", "int", "m_maxPlannerDepth");
-    id->addObjectType("Path", "Object");
+    id->addEnum("Location");
     id->addMember("Path", "Location", "_from");
     id->addMember("Path", "Location", "_to");
-    id->addObjectType("Enable", "Object");
     id->addMember("Enable", "Location", "_t");
     id->addMember("Enable", "Path", "_p");
-    id->addObjectType("Position", "Timeline");
     id->addPredicate("Position.At");
     id->addMember("Position.At", "Location", "_l");
     id->addPredicate("Position.Navigate");
     id->addMember("Position.Navigate", "Location", "_from");
     id->addMember("Position.Navigate", "Location", "_to");
     id->addMember("Position.Navigate", "Path", "_p");
-    id->addObjectType("Foo", "Timeline");
     id->addPredicate("Foo.FooPred");
     id->addMember("Foo.FooPred", "Location", "loc");
-    id->addEnum("Location");
     id->addValue("Location", LabelStr("Hill"));
     id->addValue("Location", LabelStr("Rock"));
     id->addValue("Location", LabelStr("Lander"));

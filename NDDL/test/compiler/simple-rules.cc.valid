@@ -1,4 +1,4 @@
-// simple-rules.xml
+// NDDL/test/compiler/simple-rules.xml
 
 #include "simple-rules.hh"
 #include "NddlUtils.hh"
@@ -541,19 +541,24 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("simple-rules");
+    Id<Schema> id = Schema::instance("NDDL/test/compiler/simple-rules");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
+    id->addObjectType("Object");
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Foo", "Timeline");
+    id->addObjectType("Rover", "Timeline");
+    id->addObjectType("SuperRover", "Rover");
+    id->addObjectType("World", "Timeline");
     id->addPrimitive("int");
     id->addPrimitive("float");
     id->addPrimitive("bool");
     id->addPrimitive("string");
-    id->addObjectType("Object");
-    id->addObjectType("Timeline","Object");
-    id->addObjectType("Foo", "Timeline");
+    id->addEnum("Locations");
+    id->addEnum("StringEnum");
+    id->addEnum("NumericEnum");
     id->addPredicate("Foo.Bar");
-    id->addObjectType("Rover", "Timeline");
     id->addMember("Rover", "Foo", "foo");
     id->addPredicate("Rover.At");
     id->addMember("Rover.At", "Locations", "_location");
@@ -567,19 +572,14 @@ namespace NDDL {
     id->addMember("Rover.AnyPredicate", "NumericEnum", "v2");
     id->addMember("Rover.AnyPredicate", "int", "v3");
     id->addMember("Rover.AnyPredicate", "float", "v4");
-    id->addObjectType("SuperRover", "Rover");
-    id->addObjectType("World", "Timeline");
     id->addMember("World", "Rover", "rover");
     id->addPredicate("World.initialState");
-    id->addEnum("Locations");
     id->addValue("Locations", LabelStr("Hill"));
     id->addValue("Locations", LabelStr("Rock"));
     id->addValue("Locations", LabelStr("Lander"));
-    id->addEnum("StringEnum");
     id->addValue("StringEnum", LabelStr("s1"));
     id->addValue("StringEnum", LabelStr("s2"));
     id->addValue("StringEnum", LabelStr("s3"));
-    id->addEnum("NumericEnum");
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TOKEN_FACTORY(Foo::Bar::Factory);

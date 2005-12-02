@@ -537,13 +537,21 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
+    id->addObjectType("Object");
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Foo", "Object");
+    id->addObjectType("Bar", "Foo");
+    id->addObjectType("Baz", "Object");
+    id->addObjectType("Bat", "Object");
+    id->addObjectType("Bing", "Object");
+    id->addObjectType("Bang", "Bing");
+    id->addObjectType("Baluga", "Object");
+    id->addObjectType("World", "Object");
     id->addPrimitive("int");
     id->addPrimitive("float");
     id->addPrimitive("bool");
     id->addPrimitive("string");
-    id->addObjectType("Object");
-    id->addObjectType("Timeline","Object");
-    id->addObjectType("Foo", "Object");
+    id->addEnum("Locations");
     id->addMember("Foo", "int", "m_0");
     id->addMember("Foo", "int", "m_1");
     id->addMember("Foo", "bool", "m_2");
@@ -552,17 +560,10 @@ namespace NDDL {
     id->addMember("Foo", "Locations", "m_5");
     id->addMember("Foo", "float", "m_6");
     id->addMember("Foo", "World", "m_7");
-    id->addObjectType("Bar", "Foo");
     id->addMember("Bar", "float", "m_8");
-    id->addObjectType("Baz", "Object");
     id->addMember("Baz", "Foo", "m_foo");
-    id->addObjectType("Bat", "Object");
     id->addMember("Bat", "Baz", "m_baz");
-    id->addObjectType("Bing", "Object");
-    id->addObjectType("Bang", "Bing");
-    id->addObjectType("Baluga", "Object");
     id->addMember("Baluga", "Locations", "location");
-    id->addObjectType("World", "Object");
     id->addMember("World", "string", "m_str1");
     id->addMember("World", "Foo", "m_foo1");
     id->addMember("World", "Foo", "m_foo2");
@@ -571,7 +572,6 @@ namespace NDDL {
     id->addMember("World", "Baz", "m_baz1");
     id->addMember("World", "Bat", "m_bat1");
     id->addMember("World", "int", "m_int1");
-    id->addEnum("Locations");
     id->addValue("Locations", LabelStr("Hill"));
     id->addValue("Locations", LabelStr("Rock"));
     id->addValue("Locations", LabelStr("Lander"));

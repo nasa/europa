@@ -1,4 +1,4 @@
-// guards.xml
+// NDDL/test/compiler/guards.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

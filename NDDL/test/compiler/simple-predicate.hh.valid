@@ -1,4 +1,4 @@
-// simple-predicate.xml
+// NDDL/test/compiler/simple-predicate.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

@@ -1,4 +1,4 @@
-// composition.0.xml
+// NDDL/test/compiler/composition.0.xml
 
 #include "composition.0.hh"
 #include "NddlUtils.hh"
@@ -110,18 +110,18 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("composition.0");
+    Id<Schema> id = Schema::instance("NDDL/test/compiler/composition.0");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addObjectType("Object");
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");
     id->addObjectType("Bar", "Object");
+    id->addPrimitive("int");
+    id->addPrimitive("float");
+    id->addPrimitive("bool");
+    id->addPrimitive("string");
     id->addMember("Bar", "Foo", "foo");
     // Force allocation of model specific type factories
     // Allocate factories

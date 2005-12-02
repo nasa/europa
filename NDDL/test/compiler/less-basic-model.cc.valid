@@ -535,30 +535,30 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
+    id->addObjectType("Object");
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Camera", "Timeline");
+    id->addObjectType("Rover", "Timeline");
+    id->addObjectType("World", "Timeline");
     id->addPrimitive("int");
     id->addPrimitive("float");
     id->addPrimitive("bool");
     id->addPrimitive("string");
-    id->addObjectType("Object");
-    id->addObjectType("Timeline","Object");
-    id->addObjectType("Camera", "Timeline");
+    id->addEnum("Locations");
     id->addPredicate("Camera.On");
     id->addPredicate("Camera.Off");
     id->addPredicate("Camera.TakingPicture");
     id->addMember("Camera.TakingPicture", "Locations", "m_loc");
-    id->addObjectType("Rover", "Timeline");
     id->addMember("Rover", "Camera", "m_camera");
     id->addPredicate("Rover.At");
     id->addMember("Rover.At", "Locations", "m_location");
     id->addPredicate("Rover.Going");
     id->addMember("Rover.Going", "Locations", "m_from");
     id->addMember("Rover.Going", "Locations", "m_to");
-    id->addObjectType("World", "Timeline");
     id->addMember("World", "int", "m_horizonStart");
     id->addMember("World", "int", "m_horizonEnd");
     id->addMember("World", "Rover", "m_rover");
     id->addPredicate("World.initialState");
-    id->addEnum("Locations");
     id->addValue("Locations", LabelStr("Hill"));
     id->addValue("Locations", LabelStr("Rock"));
     id->addValue("Locations", LabelStr("Lander"));

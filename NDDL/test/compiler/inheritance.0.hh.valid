@@ -1,4 +1,4 @@
-// inheritance.0.xml
+// NDDL/test/compiler/inheritance.0.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

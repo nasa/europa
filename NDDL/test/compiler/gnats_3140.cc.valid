@@ -262,28 +262,28 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addObjectType("Object");
     id->addObjectType("Timeline","Object");
     id->addObjectType("Boo", "Object");
     id->addObjectType("Foo", "Object");
+    id->addObjectType("Bar", "Timeline");
+    id->addPrimitive("int");
+    id->addPrimitive("float");
+    id->addPrimitive("bool");
+    id->addPrimitive("string");
+    id->addEnum("numericEnum");
+    id->addEnum("symbolicEnum");
     id->addMember("Foo", "bool", "field1");
     id->addMember("Foo", "int", "field2");
     id->addMember("Foo", "float", "field4");
     id->addMember("Foo", "symbolicEnum", "field6");
     id->addMember("Foo", "Boo", "field7");
-    id->addObjectType("Bar", "Timeline");
     id->addPredicate("Bar.pred");
     id->addMember("Bar.pred", "bool", "field1");
     id->addMember("Bar.pred", "int", "field2");
     id->addMember("Bar.pred", "float", "field4");
     id->addMember("Bar.pred", "symbolicEnum", "field6");
     id->addMember("Bar.pred", "Boo", "field7");
-    id->addEnum("numericEnum");
-    id->addEnum("symbolicEnum");
     id->addValue("symbolicEnum", LabelStr("A"));
     id->addValue("symbolicEnum", LabelStr("AB"));
     id->addValue("symbolicEnum", LabelStr("ABC"));

@@ -211,13 +211,18 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
+    id->addObjectType("Object");
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Resource", "Object");
+    id->addObjectType("UnaryResource", "Timeline");
+    id->addObjectType("StringData", "Object");
+    id->addObjectType("TestData", "StringData");
+    id->addObjectType("Foo", "Timeline");
     id->addPrimitive("int");
     id->addPrimitive("float");
     id->addPrimitive("bool");
     id->addPrimitive("string");
-    id->addObjectType("Object");
-    id->addObjectType("Timeline","Object");
-    id->addObjectType("Resource", "Object");
+    id->addEnum("TokenStates");
     id->addMember("Resource", "float", "initialCapacity");
     id->addMember("Resource", "float", "levelLimitMin");
     id->addMember("Resource", "float", "levelLimitMax");
@@ -227,15 +232,10 @@ namespace NDDL {
     id->addMember("Resource", "float", "consumptionMax");
     id->addPredicate("Resource.change");
     id->addMember("Resource.change", "float", "quantity");
-    id->addObjectType("UnaryResource", "Timeline");
     id->addPredicate("UnaryResource.uses");
-    id->addObjectType("StringData", "Object");
     id->addMember("StringData", "string", "data");
-    id->addObjectType("TestData", "StringData");
-    id->addObjectType("Foo", "Timeline");
     id->addPredicate("Foo.Bar");
     id->addMember("Foo.Bar", "TestData", "test");
-    id->addEnum("TokenStates");
     id->addValue("TokenStates", LabelStr("INACTIVE"));
     id->addValue("TokenStates", LabelStr("ACTIVE"));
     id->addValue("TokenStates", LabelStr("MERGED"));

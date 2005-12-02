@@ -316,23 +316,23 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addObjectType("Object");
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");
     id->addObjectType("Bar", "Object");
-    id->addMember("Bar", "Foo", "m_foo");
     id->addObjectType("Baz", "Timeline");
+    id->addObjectType("Mumble", "Timeline");
+    id->addPrimitive("int");
+    id->addPrimitive("float");
+    id->addPrimitive("bool");
+    id->addPrimitive("string");
+    id->addMember("Bar", "Foo", "m_foo");
     id->addMember("Baz", "Foo", "myfoo");
     id->addMember("Baz", "Bar", "myBar");
     id->addPredicate("Baz.apred");
     id->addMember("Baz.apred", "Foo", "predFoo");
     id->addPredicate("Baz.bpred");
     id->addMember("Baz.bpred", "Bar", "predBar");
-    id->addObjectType("Mumble", "Timeline");
     id->addMember("Mumble", "Baz", "myBaz");
     id->addPredicate("Mumble.mumbPred");
     id->addMember("Mumble.mumbPred", "Foo", "m_foo");

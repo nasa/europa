@@ -262,13 +262,19 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
+    id->addObjectType("Object");
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Foo", "Object");
+    id->addObjectType("World", "Timeline");
     id->addPrimitive("int");
     id->addPrimitive("float");
     id->addPrimitive("bool");
     id->addPrimitive("string");
-    id->addObjectType("Object");
-    id->addObjectType("Timeline","Object");
-    id->addObjectType("Foo", "Object");
+    id->addEnum("Locations");
+    id->addEnum("Strings");
+    id->addEnum("Speeds");
+    id->addEnum("Frequencies");
+    id->addEnum("Foo::ClassScopedEnum");
     id->addMember("Foo", "int", "m_0");
     id->addMember("Foo", "float", "m_1");
     id->addMember("Foo", "bool", "m_2");
@@ -278,23 +284,17 @@ namespace NDDL {
     id->addMember("Foo", "Frequencies", "m_6");
     id->addMember("Foo", "Foo::ClassScopedEnum", "m_7");
     id->addMember("Foo", "Strings", "m_8");
-    id->addObjectType("World", "Timeline");
     id->addMember("World", "int", "m_0");
     id->addMember("World", "int", "m_1");
     id->addMember("World", "Foo", "m_foo1");
     id->addMember("World", "Foo", "m_foo2");
     id->addPredicate("World.initialState");
-    id->addEnum("Locations");
     id->addValue("Locations", LabelStr("Hill"));
     id->addValue("Locations", LabelStr("Rock"));
     id->addValue("Locations", LabelStr("Lander"));
-    id->addEnum("Strings");
     id->addValue("Strings", LabelStr("A1"));
     id->addValue("Strings", LabelStr("B1"));
     id->addValue("Strings", LabelStr("Martian City"));
-    id->addEnum("Speeds");
-    id->addEnum("Frequencies");
-    id->addEnum("Foo::ClassScopedEnum");
     id->addValue("Foo::ClassScopedEnum", LabelStr("A"));
     id->addValue("Foo::ClassScopedEnum", LabelStr("B"));
     id->addValue("Foo::ClassScopedEnum", LabelStr("C"));
