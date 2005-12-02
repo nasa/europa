@@ -1,0 +1,15 @@
+SubDir PLASMA Examples SimpleRover ;
+
+if ! $(pddl2nddl_READY) {
+ # Create a build target to run a problem
+ RunNDDLProblem pddl2nddl : pddl2nddl-initial-state.nddl : pddl2nddl-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain pddl2nddl-planner : pddl2nddl-Main.cc : pddl2nddl-model.nddl : System : pddl2nddl-planner ;
+
+ # Create a build target for the planner shared library with model.
+ #ModuleSharedLibrary pddl2nddl : pddl2nddl-model.o : System : pddl2nddl ;
+
+ Depends run-examples-tests : pddl2nddl ;
+
+} # pddl2nddl_READY
