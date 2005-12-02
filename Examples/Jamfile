@@ -4,6 +4,8 @@ if ! $(PLASMA_READY) {
 
 Module Examples : System ;
 
+SubInclude PLASMA Examples pddl2nddl ;
 SubInclude PLASMA Examples SimpleRover ;
+
 
 } # PLASMA_READY
