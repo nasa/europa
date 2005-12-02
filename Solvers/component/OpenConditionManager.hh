@@ -19,14 +19,14 @@ namespace EUROPA {
     public:
       OpenConditionManager(const TiXmlElement& configData);
 
-      bool inScope(const EntityId& entity);
+      bool staticMatch(const EntityId& entity);
 
       IteratorId createIterator();
 
       std::string toString(const EntityId& entity) const;
 
     private:
-
+      friend class OpenConditionIterator;
       void notifyRemoved(const ConstrainedVariableId& variable);
       void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
       void handleInitialize();
@@ -34,21 +34,6 @@ namespace EUROPA {
       void removeFlaw(const TokenId& token);
 
       TokenSet m_flawCandidates; /*!< The set of candidate token flaws */
-
-      class FlawIterator : public Iterator {
-      public:
-	FlawIterator(OpenConditionManager& manager);
-	bool done() const;
-	const EntityId next();
-	unsigned int visited() const {return m_visited;}
-      protected:
-      private:
-	unsigned int m_visited;
-	unsigned int m_timestamp;
-	OpenConditionManager& m_manager;
-	TokenSet::const_iterator m_it;
-	TokenSet::const_iterator m_end;
-      };
     };
   }
 }

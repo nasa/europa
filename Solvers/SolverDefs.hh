@@ -42,9 +42,9 @@ namespace EUROPA {
     typedef double Priority; /*!< Used to reference to the priority used in calculating heuristics. */
 
     /**
-     * @brief Used to store guard entry data - var index and expected value to match on.
+     * @brief Used to store guard entry data - var name and expected value to match on.
      */
-    typedef std::pair<unsigned int, double> GuardEntry;
+    typedef std::pair<LabelStr, double> GuardEntry;
 
     /**
      * @brief Defines a configuration class

@@ -63,6 +63,13 @@ namespace EUROPA {
       return DecisionPointId::noId();
     }
 
+    /**
+     * Filter out if not a variable
+     */
+    bool UnboundVariableManager::staticMatch(const EntityId& entity){
+      return !ConstrainedVariableId::convertable(entity) || FlawManager::staticMatch(entity);
+    }
+
     bool UnboundVariableManager::dynamicMatch(const EntityId& entity){
       if (FlawManager::dynamicMatch(entity))
 	return true;
@@ -75,16 +82,6 @@ namespace EUROPA {
 
       // Finally, we exlude if the bounds are not finite
       return !var->lastDomain().areBoundsFinite();
-    }
-
-    bool UnboundVariableManager::inScope(const EntityId& entity){
-      bool result = false;
-      if(ConstrainedVariableId::convertable(entity)){
-	ConstrainedVariableId var = entity;
-	result =  (!var->isSpecified() && FlawManager::inScope(entity));
-      }
-
-      return result;
     }
 
     /**
@@ -237,47 +234,6 @@ namespace EUROPA {
       handleConstraintRemoval(constraint);
     }
 
-    IteratorId UnboundVariableManager::createIterator() {
-      return (new UnboundVariableManager::FlawIterator(*this))->getId();
-    }
-
-    UnboundVariableManager::FlawIterator::FlawIterator(UnboundVariableManager& manager)
-      : m_visited(0), m_timestamp(manager.m_db->getConstraintEngine()->cycleCount()),
-	m_manager(manager), m_it(manager.m_flawCandidates.begin()), m_end(manager.m_flawCandidates.end())  {
-
-      // Must advance to the first available flaw in scope.
-      while(!done()){
-	ConstrainedVariableId var = *m_it;
-	if(!m_manager.dynamicMatch(var))
-	  break;
-	else
-	  ++m_it;
-      }
-    }
-    
-    bool UnboundVariableManager::FlawIterator::done() const { return m_it == m_end;}
-
-    const EntityId UnboundVariableManager::FlawIterator::next() {
-      check_error(m_manager.m_db->getConstraintEngine()->cycleCount() == m_timestamp,
-		  "Error: potentially stale flaw iterator.");
-      checkError(!done(), "Cannot be done when you call next.");
-      ConstrainedVariableId flaw = *m_it;
-      checkError(!m_manager.dynamicMatch(flaw), "Not advancing correctly.");
-      ++m_visited;
-
-      // Advance till we get another hit
-      ++m_it;
-      while(!done()){
-	ConstrainedVariableId var = *m_it;
-	if(!m_manager.dynamicMatch(var))
-	  break;
-	else
-	  ++m_it;
-      }
-
-      return flaw;
-    }
-
     bool UnboundVariableManager::isCompatGuard(const ConstrainedVariableId& var) const{
       return (m_guardCache.find(var) != m_guardCache.end());
     }
@@ -303,6 +259,32 @@ namespace EUROPA {
       std::stringstream os;
       os << "VAR:   " << var->toString() << unitStr << compatStr;
       return os.str();
+    }
+
+    class UnboundVariableIterator : public FlawIterator {
+    public:
+      UnboundVariableIterator(UnboundVariableManager& manager)
+	: FlawIterator(manager), m_it(manager.m_flawCandidates.begin()), m_end(manager.m_flawCandidates.end()) {
+	advance();
+      }
+
+    private:
+      const EntityId nextCandidate() {
+	EntityId candidate;
+	if(m_it != m_end){
+	  candidate = *m_it;
+	  ++m_it;
+	}
+	return candidate;
+      }
+
+      ConstrainedVariableSet::const_iterator m_it;
+      ConstrainedVariableSet::const_iterator m_end;
+    };
+
+
+    IteratorId UnboundVariableManager::createIterator() {
+      return (new UnboundVariableIterator(*this))->getId();
     }
   }
 }

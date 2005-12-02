@@ -18,8 +18,7 @@ namespace EUROPA {
 
       DecisionPointId nextZeroCommitmentDecision();
 
-      bool inScope(const EntityId& entity);
-
+      bool staticMatch(const EntityId& entity);
       bool dynamicMatch(const EntityId& entity);
 
       IteratorId createIterator();
@@ -27,6 +26,8 @@ namespace EUROPA {
       std::string toString(const EntityId& entity) const;
 
     private:
+      friend class UnboundVariableIterator;
+
       void notifyAdded(const ConstraintId& constraint);
       void notifyRemoved(const ConstraintId& constraint);
       void notifyRemoved(const ConstrainedVariableId& var);
@@ -52,21 +53,6 @@ namespace EUROPA {
       ConstrainedVariableSet m_singletonFlawCandidates; /*!< All singleton variables that have passed the static filter */
       std::map<ConstrainedVariableId, unsigned int> m_guardCache; /*!< Cache of variables that are
 								    guarded. Includes reference counts. */
-
-      class FlawIterator : public Iterator {
-      public:
-	FlawIterator(UnboundVariableManager& manager);
-	bool done() const;
-	const EntityId next();
-	unsigned int visited() const {return m_visited;}
-      protected:
-      private:
-	unsigned int m_visited;
-	unsigned int m_timestamp;
-	UnboundVariableManager& m_manager;
-	ConstrainedVariableSet::const_iterator m_it;
-	ConstrainedVariableSet::const_iterator m_end;
-      };
     };
   }
 }

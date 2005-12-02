@@ -26,16 +26,11 @@ namespace EUROPA {
       }
     }
 
-    bool OpenConditionManager::inScope(const EntityId& entity){
-      bool result = false;
-
-      if(TokenId::convertable(entity)){
-	TokenId token = entity;
-
-	result = token->isInactive() && FlawManager::inScope(entity);
-      }
-
-      return result;
+    /**
+     * Filter out if not a token
+     */
+    bool OpenConditionManager::staticMatch(const EntityId& entity){
+      return !TokenId::convertable(entity) || FlawManager::staticMatch(entity);
     }
 
     void OpenConditionManager::addFlaw(const TokenId& token){
@@ -69,58 +64,37 @@ namespace EUROPA {
 	addFlaw(variable->getParent());
     }
 
-    IteratorId OpenConditionManager::createIterator(){
-      IteratorId retval = (new FlawIterator(*this))->getId();
-      return retval;
-    }
-
-    OpenConditionManager::FlawIterator::FlawIterator(OpenConditionManager& manager) 
-      : m_visited(0), m_timestamp(manager.m_db->getConstraintEngine()->cycleCount()),
-	m_manager(manager), m_it(manager.m_flawCandidates.begin()), m_end(manager.m_flawCandidates.end()) {
-
-      // Must advance to the first available flaw in scope.
-      while(!done()){
-	TokenId tok = *m_it;
-	if(!m_manager.dynamicMatch(tok))
-	  break;
-	else
-	  ++m_it;
-      }
-    }
-
-    bool OpenConditionManager::FlawIterator::done() const {
-      return m_it == m_end;
-    }
-
-    const EntityId OpenConditionManager::FlawIterator::next() {
-      check_error(m_manager.m_db->getConstraintEngine()->cycleCount() == m_timestamp,
-		  "Error: potentially stale flaw iterator.");
-      checkError(!done(), "Cannot be done when you call next.");
-
-      // Pick up the flaw for the current position
-      TokenId flaw = *m_it;
-      checkError(!m_manager.dynamicMatch(flaw), "Not advancing correctly.");
-      ++m_visited;
-
-      // Advance till we get another hit
-      ++m_it;
-      while(!done()){
-	TokenId tok = *m_it;
-	if(!m_manager.dynamicMatch(tok))
-	  break;
-	else
-	  ++m_it;
-      }
-
-      return flaw;
-    }
-
     std::string OpenConditionManager::toString(const EntityId& entity) const {
       checkError(TokenId::convertable(entity), entity->toString());
       TokenId token = entity;
       std::stringstream os;
       os << "TOKEN: " << token->toString();
       return os.str();
+    }
+
+    class OpenConditionIterator : public FlawIterator {
+    public:
+      OpenConditionIterator(OpenConditionManager& manager)
+	: FlawIterator(manager), m_it(manager.m_flawCandidates.begin()), m_end(manager.m_flawCandidates.end()) {
+	advance();
+      }
+
+    private:
+      const EntityId nextCandidate() {
+	EntityId candidate;
+	if(m_it != m_end){
+	  candidate = *m_it;
+	  ++m_it;
+	}
+	return candidate;
+      }
+
+      TokenSet::const_iterator m_it;
+      TokenSet::const_iterator m_end;
+    };
+
+    IteratorId OpenConditionManager::createIterator() {
+      return (new OpenConditionIterator(*this))->getId();
     }
   }
 }

@@ -6,6 +6,77 @@
   <FlawHandler label="H3" variable="end" masterPredicate="predicateG" priority="1" component="StandardVariableHandler"/>
 </TestPriorities>
 
+<TestGuards defaultPriority="1000">
+  <!-- Test Default Priority with no guards -->
+  <FlawHandler label="H0" predicate="predicateG" component="StandardVariableHandler">
+   <Guard name="start" value="30"/>
+   <Guard name="object" value="o2"/>
+  </FlawHandler>
+
+  <FlawHandler label="H1" class="C" component="StandardVariableHandler">
+   <Guard name="noArg" value="30"/>
+  </FlawHandler>
+
+  <!-- Failure case when it has no master -->
+  <FlawHandler label="H2" predicate="predicateC" component="StandardVariableHandler">
+   <MasterGuard name="start" value="30"/>
+  </FlawHandler>
+
+  <!-- Failure case when it has no parent at all. A free variable -->
+  <FlawHandler label="H3" variable="FreeVariable" component="StandardVariableHandler">
+   <MasterGuard name="start" value="30"/>
+  </FlawHandler>
+
+</TestGuards>
+
+<TestDynamicFlaws>
+ <Solver name="Solver">
+
+  <UnboundVariableManager>
+   <FlawHandler component="Min"/>
+  </UnboundVariableManager>
+
+  <OpenConditionManager>
+    <FlawHandler component="StandardOpenConditionHandler"/>
+
+    <FlawHandler class="D" predicate="predicateC" component="StandardOpenConditionHandler" priority="1">
+     <Guard name="start" value="10"/>
+    </FlawHandler>
+
+    <FlawHandler class="D" predicate="predicateC" component="StandardOpenConditionHandler" priority="2">
+     <Guard name="start" value="10"/>
+     <Guard name="end" value="20"/>
+    </FlawHandler>
+
+    <FlawHandler class="D" predicate="predicateC" component="StandardOpenConditionHandler" priority="3">
+     <Guard name="start" value="10"/>
+     <Guard name="end" value="20"/>
+     <Guard name="object" value="o5"/>
+    </FlawHandler>
+
+    <FlawHandler class="D" predicate="predicateC" component="StandardOpenConditionHandler" priority="4">
+     <Guard name="start" value="10"/>
+     <Guard name="end" value="20"/>
+     <Guard name="object" value="o5"/>
+     <MasterGuard name="start" value="10"/>
+    </FlawHandler>
+
+    <FlawHandler class="D" predicate="predicateC" component="StandardOpenConditionHandler" priority="5">
+     <Guard name="start" value="10"/>
+     <Guard name="end" value="20"/>
+     <Guard name="object" value="o5"/>
+     <MasterGuard name="start" value="10"/>
+     <MasterGuard name="end" value="20"/>
+    </FlawHandler>
+  </OpenConditionManager>
+
+  <ThreatManager>
+    <FlawHandler component="StandardThreatHandler"/>
+  </ThreatManager>
+
+ </Solver>
+</TestDynamicFlaws>
+
 <DefaultVariableOrdering>
  <Solver name="SimpleCSPSolver">
   <!-- Will have variable flaws, but no filtering -->

@@ -301,8 +301,10 @@ private:
 
     StandardAssembly assembly(Schema::instance());
     UnboundVariableManager fm(*root);
-    fm.initialize(assembly.getPlanDatabase());
     assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str() ));
+
+    // Initialize after filling the database since we are not connected to an event source
+    fm.initialize(assembly.getPlanDatabase());
 
     // Set the horizon
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
@@ -351,8 +353,10 @@ private:
     OpenConditionManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
-    fm.initialize(assembly.getPlanDatabase());
     assert(assembly.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.xml").c_str() ));
+
+    // Initialize with data in the database
+    fm.initialize(assembly.getPlanDatabase());
 
     TokenSet tokens = assembly.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
@@ -376,8 +380,10 @@ private:
     ThreatManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
-    fm.initialize(assembly.getPlanDatabase());
     assert(assembly.playTransactions(( getTestLoadLibraryPath() + "/ThreatFiltering.xml").c_str()));
+
+    // Initialize with data in the database
+    fm.initialize(assembly.getPlanDatabase());
 
     TokenSet tokens = assembly.getPlanDatabase()->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
@@ -397,6 +403,8 @@ class FlawHandlerTests {
 public:
   static bool test(){
     runTest(testPriorities);
+    runTest(testGuards);
+    runTest(testDynamicFlawManagement);
     runTest(testDefaultVariableOrdering);
     runTest(testHeuristicVariableOrdering);
     return true;
@@ -464,6 +472,200 @@ private:
     return true;
   }
 
+  static bool testGuards(){
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestGuards");
+    MatchingEngine me(*root, "FlawHandler");
+    StandardAssembly assembly(Schema::instance());
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    Object o1(db, "A", "o1");
+    Object o2(db, "D", "o2");
+    Object o3(db, "C", "o3");
+    Object o4(db, "E", "o4");
+    Object o5(db, "D", "o5");
+    db->close();
+
+    // test H0
+    {
+      TokenId token = db->getClient()->createToken("D.predicateG", false);
+      std::vector<MatchingRuleId> rules;
+      me.getTokenMatches(token, rules);
+      assertTrue(rules.size() == 1, toString(rules.size()));
+      FlawHandlerId flawHandler = rules[0];
+      std::vector<ConstrainedVariableId> guards;
+      assertTrue(flawHandler->makeConstraintScope(token, guards));
+      assertTrue(guards.size() == 2, toString(guards.size()));
+      assertTrue(guards[0] == token->getStart(), guards[0]->toString());
+      assertTrue(guards[1] == token->getObject(), guards[1]->toString());
+      assertFalse(flawHandler->test(guards));
+      token->getStart()->specify(30);
+      assertFalse(flawHandler->test(guards));
+      token->getObject()->specify(o2.getId());
+      assertTrue(flawHandler->test(guards));
+      token->discard();
+    }
+
+    // test H1
+    {
+      TokenId token = db->getClient()->createToken("C.predicateA", false);
+      std::vector<MatchingRuleId> rules;
+      me.getTokenMatches(token, rules);
+      assertTrue(rules.size() == 1, toString(rules.size()));
+      FlawHandlerId flawHandler = rules[0];
+      std::vector<ConstrainedVariableId> guards;
+      assertFalse(flawHandler->makeConstraintScope(token, guards));
+      token->discard();
+    }
+
+    // test H2
+    {
+      TokenId token = db->getClient()->createToken("B.predicateC", false);
+      {
+	std::vector<MatchingRuleId> rules;
+	me.getTokenMatches(token, rules);
+	assertTrue(rules.size() == 1, toString(rules.size()));
+	FlawHandlerId flawHandler = rules[0];
+	std::vector<ConstrainedVariableId> guards;
+	assertFalse(flawHandler->makeConstraintScope(token, guards));
+      }
+      // Now fire on the subgoal. Rule will match as it has a master
+      token->activate();
+      TokenId B_predicateC = *(token->getSlaves().begin());
+      std::vector<MatchingRuleId> rules;
+      me.getTokenMatches(B_predicateC, rules);
+      assertTrue(rules.size() == 1, toString(rules.size()));
+      FlawHandlerId flawHandler = rules[0];
+      std::vector<ConstrainedVariableId> guards;
+      assertTrue(flawHandler->makeConstraintScope(B_predicateC, guards));
+      assertFalse(flawHandler->test(guards));
+      // Specify the master guard variable
+      token->getStart()->specify(30);
+      assertTrue(flawHandler->test(guards));
+      token->discard();
+    }
+
+    // test H3
+    {
+      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "FreeVariable");
+      std::vector<MatchingRuleId> rules;
+      me.getVariableMatches(v0.getId(), rules);
+      assertTrue(rules.size() == 1, toString(rules.size()));
+      FlawHandlerId flawHandler = rules[0];
+      std::vector<ConstrainedVariableId> guards;
+      assertFalse(flawHandler->makeConstraintScope(v0.getId(), guards));
+    }
+
+    return true;
+  }
+
+  static bool testDynamicFlawManagement(){
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestDynamicFlaws");
+    TiXmlElement* child = root->FirstChildElement();
+    StandardAssembly assembly(Schema::instance());
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    Object o1(db, "A", "o1");
+    Object o2(db, "D", "o2");
+    Object o3(db, "C", "o3");
+    Object o4(db, "E", "o4");
+    Object o5(db, "D", "o5");
+    db->close();
+    Solver solver(assembly.getPlanDatabase(), *child);
+
+    // test basic flaw filtering and default handler access
+    {
+      TokenId token = db->getClient()->createToken("D.predicateG", false);
+      db->getConstraintEngine()->propagate();
+      // Initially the token is in scope and the variable is not
+      assertTrue(solver.inScope(token));
+      assertTrue(!solver.inScope(token->getStart()));
+      assertTrue(solver.getFlawHandler(token->getStart()).isNoId());
+      assertTrue(solver.getFlawHandler(token).isValid());
+
+      // Activate the token. The variable will still no be in scope since it is not finite.
+      token->activate();
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(token->getStart()).isNoId());
+
+      // The token should not be a flaw since it is nota timeline!
+      assertTrue(solver.getFlawHandler(token).isNoId());
+
+      // Restrict the base domain to finite bounds for the start variable
+      token->getStart()->restrictBaseDomain(IntervalIntDomain(0, 50));
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(token->getStart()).isValid());
+
+      // Now insert the token and bind the variable
+      token->getStart()->specify(30);
+      db->getConstraintEngine()->propagate();
+      assertTrue(!solver.inScope(token));
+      assertTrue(!solver.inScope(token->getStart()));
+
+      // Reset the variable and it should be back in business
+      token->getStart()->reset();
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(token->getStart()).isValid());
+
+      // Deactivation of the token will introduce it as a flaw, and nuke the start variable
+      token->cancel();
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.inScope(token));
+      assertTrue(!solver.inScope(token->getStart()));
+
+      // Now activate it and the variable should be back
+      token->activate();
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(token->getStart()).isId());
+
+      // Restrict the base domain of the variable to a singleton. It should no longer be a flaw
+      token->getStart()->restrictBaseDomain(IntervalIntDomain(0, 0));
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(token->getStart()).isNoId());
+
+      token->discard();
+    }
+
+    // Now handle a case with increasingly restrictive filters
+    {
+      TokenId master = db->getClient()->createToken("D.predicateF", false);
+      db->getConstraintEngine()->propagate();
+      master->activate();
+      TokenId slave = master->getSlave(1);
+      assertTrue(slave->getPredicateName() == LabelStr("D.predicateC"), slave->getPredicateName().toString());
+
+      // With no guards set, we should just get the default priority
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(slave)->getPriority() == 99999);
+
+      slave->getStart()->specify(10);
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(slave)->getPriority() == 1);
+
+      slave->getEnd()->specify(20);
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(slave)->getPriority() == 2);
+
+      slave->getObject()->specify(o5.getId());
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(slave)->getPriority() == 3);
+
+      master->getStart()->specify(10);
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(slave)->getPriority() == 4);
+
+      master->getEnd()->specify(20);
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(slave)->getPriority() == 5);
+
+      slave->getStart()->reset();
+      slave->getStart()->specify(11);
+      db->getConstraintEngine()->propagate();
+      assertTrue(solver.getFlawHandler(slave)->getPriority() == 99999);
+
+      master->discard();
+    }
+
+    return true;
+  }
+
   static bool testDefaultVariableOrdering(){
     StandardAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "DefaultVariableOrdering");
@@ -506,10 +708,10 @@ private:
 class SolverTests {
 public:
   static bool test(){
-    //runTest(testMinValuesSimpleCSP);
-    //runTest(testSuccessfulSearch);
-    //runTest(testExhaustiveSearch);
-    //runTest(testSimpleActivation);
+    runTest(testMinValuesSimpleCSP);
+    runTest(testSuccessfulSearch);
+    runTest(testExhaustiveSearch);
+    runTest(testSimpleActivation);
     runTest(testSimpleRejection);
     runTest(testMultipleSearch);
     runTest(testOversearch);
