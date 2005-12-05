@@ -91,10 +91,20 @@ namespace EUROPA {
       static const LabelStr sl_partiallyContained("PartiallyContained");
       static const LabelStr sl_totallyContained("TotallyContained");
 
-      if(!TokenId::convertable(entity))
-	return false;
+      TokenId token;
+      if(ConstrainedVariableId::convertable(entity)){
+	EntityId parent = ConstrainedVariableId(entity)->getParent();
+	if(parent.isNoId() || ObjectId::convertable(parent))
+	   return false;
 
-      TokenId token = entity;
+	if(RuleInstanceId::convertable(parent))
+	  token = RuleInstanceId(parent)->getToken();
+	else
+	  token = parent;
+      }
+      else
+	token = entity;
+
       const IntervalIntDomain& horizon = getHorizon();
       checkError(horizon.isFinite(), "Infinite Horizon not permitted." << horizon.toString());
       const IntervalIntDomain& startTime = token->getStart()->lastDomain();
