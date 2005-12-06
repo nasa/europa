@@ -1,4 +1,4 @@
-// class-constructor.xml
+// NDDL/test/compiler/class-constructor.xml
 
 #include "class-constructor.hh"
 #include "NddlUtils.hh"
@@ -533,7 +533,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("class-constructor");
+    Id<Schema> id = Schema::instance("NDDL/test/compiler/class-constructor");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
