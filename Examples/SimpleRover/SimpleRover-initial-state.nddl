@@ -22,16 +22,18 @@ close();
 
 // Establish the initial position for spirit
 goal(Navigator.At initialPosition);
-eq(initialPosition.start, world.m_horizonStart); // What time - the start of this planmning horizon
-
-
+eq(initialPosition.start, world.m_horizonStart); // What time - the start of this planning horizon
 eq(initialPosition.location, lander); // What position - the lander
+precedes(initialPosition.end, world.m_horizonEnd);
 
 // Establish the goal - to take a sample at a position
 goal(Commands.TakeSample sample);
 sample.start.specify(50);
 sample.rock.specify(rock4); // Want to get to rock4
+precedes(sample.end, world.m_horizonEnd);
 
 // Establish the initial instrument state
-rejectable(Instrument.Stowed stowed);
+goal(Instrument.Stowed stowed);
 eq(stowed.start, world.m_horizonStart);
+precedes(stowed.end, world.m_horizonEnd);
+

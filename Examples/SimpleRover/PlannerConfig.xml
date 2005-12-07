@@ -1,18 +1,19 @@
 <Solver name="DefaultTestSolver">
-    <FlawFilter component="InfiniteDynamicFilter"/>
+  <FlawFilter class-match="HorizonFiltered" component="HorizonFilter"/>
+  <FlawFilter component="InfiniteDynamicFilter"/>
 
-  <UnboundVariableManager>
+  <UnboundVariableManager defaultPriority="0">
     <FlawFilter var-match="start"/>
     <FlawFilter var-match="end"/>
     <FlawFilter var-match="duration"/>
     <FlawHandler component="StandardVariableHandler"/>
   </UnboundVariableManager>
 
-  <OpenConditionManager>
+  <OpenConditionManager defaultPriority="0">
     <FlawHandler component="StandardOpenConditionHandler"/>
   </OpenConditionManager>
 
-  <ThreatManager>
+  <ThreatManager defaultPriority="0">
     <FlawHandler component="StandardThreatHandler"/>
   </ThreatManager>
 </Solver>
