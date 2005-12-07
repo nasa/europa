@@ -17,7 +17,6 @@
 #include "Object.hh"
 #include "EventToken.hh"
 #include "TokenVariable.hh"
-#include "ObjectTokenRelation.hh"
 #include "Debug.hh"
 
 #include "LockManager.hh"
@@ -790,7 +789,6 @@ void ResourceModuleTests::runTests(std::string path) {
 
   Schema::instance();
   initConstraintLibrary();
-  REGISTER_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   std::cout << "Finished" << std::endl;

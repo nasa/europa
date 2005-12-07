@@ -54,6 +54,10 @@ SubInclude PLASMA System ;
 
 SubInclude PLASMA Examples ;
 
+# Build target for PlanWorks integration via a controller
+Module PlanWorks : System ;
+ModuleCore PlanWorks : MasterController.cc SingleSolverController.cc ;
+
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;
 

@@ -29,9 +29,9 @@
 #include "SolverPartialPlanWriter.hh"
 
 // Test Support
+#include "TestSupport.hh"
 #include "PLASMAPerformanceConstraint.hh"
 #include "LoraxConstraints.hh"
-#include "TestSupport.hh"
 
 #ifndef TIXML_USE_STL
 #define TIXML_USE_STL
@@ -61,6 +61,7 @@ namespace EUROPA {
   void SolverAssembly::initialize() {
     StandardAssembly::initialize();
 
+
     REGISTER_CONSTRAINT(PLASMAPerformanceConstraint, "perf", "Default");
 
     // LoraxConstraints for some of the resources tests.
@@ -71,8 +72,6 @@ namespace EUROPA {
     REGISTER_CONSTRAINT(WindPowerConstraint, "windPower", "Default");
     REGISTER_CONSTRAINT(SampleBatteryConstraint, "sampleBattery", "Default");
     REGISTER_CONSTRAINT(SampleDurationConstraint, "sampleDuration", "Default");
-
-    // Also add some 
   
     REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
     REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);

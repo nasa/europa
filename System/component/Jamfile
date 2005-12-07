@@ -2,14 +2,7 @@ SubDir PLASMA System component ;
 
 if ! $(PLASMA_READY) {
 
-ModuleComponent System
-	:
-  CBPlannerAssembly.cc
-  SolverAssembly.cc
-  PlannerControlAssembly.cc
-  SolverControl.cc
-  LoadInitModel.cc
-	;
+ModuleComponent System	: CBPlannerAssembly.cc SolverAssembly.cc ;
 
 SubInclude PLASMA NDDL core libraries ;
 } # PLASMA_READY

@@ -58,13 +58,19 @@ echo "Adding Jamfile"
 echo "SubDir "$NAME" ;" >> $DIRECTORY/Jamfile
 echo "" >> $DIRECTORY/Jamfile
 echo "if ! \$("$NAME"_READY) {" >> $DIRECTORY/Jamfile
+echo " # Declare a library for PlanWorks Control" >> $DIRECTORY/Jamfile
+echo " ModuleSharedLibrary Controller : Controller.cc : PlanWorks : Controller ;" >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
 echo " # Create a build target to run a problem" >> $DIRECTORY/Jamfile
 echo " RunNDDLProblem "$NAME" : "$NAME"-initial-state.nddl : "$NAME"-planner : PlannerConfig.xml ;" >> $DIRECTORY/Jamfile
 echo "" >> $DIRECTORY/Jamfile
 echo " # Create a build target for the planner executable with the given model." >> $DIRECTORY/Jamfile
 echo " NddlMain "$NAME"-planner : "$NAME"-Main.cc : "$NAME"-model.nddl : System : "$NAME"-planner ;" >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
 echo " # Create a build target for the planner shared library with model." >> $DIRECTORY/Jamfile
 echo " ModuleSharedLibrary "$NAME" : "$NAME"-model.o : System : "$NAME" ;" >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
+echo " Depends all : ControllerDemo Controller ;" >> $DIRECTORY/Jamfile
 echo "} # "$NAME"_READY" >> $DIRECTORY/Jamfile
 
 
@@ -127,6 +133,14 @@ fi
 echo "Adding "$NAME"-Main.cc"
 cp ./System/component/Main.cc $DIRECTORY/$NAME-Main.cc
 
+
+if [ -e $DIRECTORY/Controller.cc ]
+then
+  echo "error: "$DIRECTORY"/Controller.cc already exists"
+  exit -1
+fi
+echo "Adding Controller.cc"
+cp ./System/component/Controller.cc $DIRECTORY/Controller.cc
 
 if [ -e $DIRECTORY/PlanWorks.cfg ]
 then

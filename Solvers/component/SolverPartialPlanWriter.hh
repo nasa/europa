@@ -30,10 +30,11 @@ namespace EUROPA {
 			  const RulesEngineId &, SOLVERS::SolverId&);
 	virtual ~PartialPlanWriter();
 	virtual void write();
-
+	virtual void writeStatistics();
 	void marksStep(const LabelStr& trans);
 	void unmarksStep(const LabelStr& trans);
 	bool isStep(const LabelStr& trans);
+	void incrementStep();
 
 	//EUROPA JNI runtime interface functions
 	std::string getDest(void);

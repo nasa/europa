@@ -53,6 +53,10 @@ namespace EUROPA {
     public:
       SolverConfig();
     };
+
+    namespace PlanWriter {
+      class PartialPlanWriter;
+    }
   }
 }
 #endif

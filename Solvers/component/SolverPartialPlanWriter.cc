@@ -665,6 +665,9 @@ namespace EUROPA {
 	m_writing = false;
       }
 
+      void PartialPlanWriter::writeStatistics(void) {
+	writeStats();
+      }
       /* writeStatsAndTransactions() is called at the end of each step 
 	 instead of write() when step data is written for only the 
 	 final step. this ensures that transaction and statistics info
@@ -1323,6 +1326,8 @@ namespace EUROPA {
       bool PartialPlanWriter::isStep(const LabelStr& trans) {
 	return std::find(stepTransactions.begin(), stepTransactions.end(), trans) != stepTransactions.end();	
       }
+
+      void PartialPlanWriter::incrementStep(){nstep++;}
 
       void PartialPlanWriter::addSourcePath(const char* path) {
 	std::string spath(path);
