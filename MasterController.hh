@@ -27,6 +27,11 @@ namespace EUROPA {
     };
 
     /**
+     * @brief Implement this function to link to specific concrete class.
+     */
+    static MasterController* createInstance();
+
+    /**
      * @brief Loads the model.
      */
     void loadModel(const char* libPath);
@@ -35,7 +40,7 @@ namespace EUROPA {
      * @brief Loads the initial state
      */
     int loadInitialState(const char* configPath, 
-			 const char* initialStatePaths,
+			 const char* initialStatePath,
 			 const char* destination,
 			 const char** sourcePaths,
 			 const int numPaths);
@@ -44,6 +49,8 @@ namespace EUROPA {
      * @brief Singleton accessor
      */
     static MasterController* instance();
+
+    virtual ~MasterController();
 
     /**
      * @brief Complete planning, writing out the last step only
@@ -98,19 +105,12 @@ namespace EUROPA {
 
     MasterController();
 
-    virtual ~MasterController();
-
     /**
      * @brief Called after model is loaded
      */
     virtual void handleRegistration();
 
   private:
-
-    /**
-     * @brief Implement this function to link to specific concrete class.
-     */
-    static MasterController* createInstance();
 
     /**
      * @brief Unloads the model

@@ -11,6 +11,8 @@ if SHARED in $(LIBRARIES) {
   }
 }
 
+PLANWORKS_COMPONENTS = $(PLASMA)/MasterController.cc $(PLASMA)/SingleSolverController.cc ;
+
 Depends plasma-all : all ;
 
 Module plasma : all System ;
@@ -53,10 +55,6 @@ SubInclude PLASMA HSTS ;
 SubInclude PLASMA System ;
 
 SubInclude PLASMA Examples ;
-
-# Build target for PlanWorks integration via a controller
-Module PlanWorks : System ;
-ModuleCore PlanWorks : MasterController.cc SingleSolverController.cc ;
 
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;

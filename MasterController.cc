@@ -101,11 +101,14 @@ namespace EUROPA {
 
     try {
       MasterController* controller = MasterController::instance();
-      while(controller->getStatus() == MasterController::IN_PROGRESS &&  controller->getStepCount() < stepNum){
+      bool ok = controller->getStatus() == MasterController::IN_PROGRESS &&  controller->getStepCount() < stepNum;
+      while(ok){
 	controller->next();
-	controller->writeStatistics();
+	ok = controller->getStatus() == MasterController::IN_PROGRESS &&  controller->getStepCount() < stepNum;
+	if(ok)
+	  controller->writeStatistics();
       }
-
+      
       // Now output at step_num
       controller->write();
       retStatus = controller->getStatus();
@@ -136,15 +139,9 @@ namespace EUROPA {
   int completeRun(void){
     debugMsg("JNI:completeRun", "Completing remaining steps.");
 
-    MasterController* controller = MasterController::instance();
-    while(controller->getStatus() == MasterController::IN_PROGRESS){
-      controller->next();
-      controller->writeStatistics();
-    }
+    writeStep(PLUS_INFINITY);
 
-    controller->write();
-
-    debugMsg("JNI:completeRun", MasterController::toString(controller->getPlanDatabase()));
+    debugMsg("JNI:completeRun", MasterController::toString(MasterController::instance()->getPlanDatabase()));
 
     return MasterController::instance()->getStatus();
   }
@@ -364,7 +361,6 @@ namespace EUROPA {
       m_status = IN_PROGRESS;
     }
 
-    writeStatistics();
     write();
 
     return m_status;

@@ -1,8 +1,10 @@
 SubDir PLASMA Examples SimpleRover ;
 
 if ! $(SimpleRover_READY) {
+ 
  # Declare a library for PlanWorks Control
- ModuleSharedLibrary Controller : Controller.cc : PlanWorks : Controller ;
+ ModuleSharedLibrary SimpleRoverController : 
+                     $(PLASMA)/ControllerStub.cc $(PLANWORKS_COMPONENTS) : System : SimpleRoverController ;
 
  # Create a build target to run a problem
  RunNDDLProblem SimpleRover : SimpleRover-initial-state.nddl : SimpleRover-planner : PlannerConfig.xml ;
@@ -15,5 +17,4 @@ if ! $(SimpleRover_READY) {
 
  Depends run-examples-tests : SimpleRover ;
 
- Depends all : SimpleRover Controller ;
 } # SimpleRover_READY
