@@ -69,7 +69,7 @@ namespace EUROPA {
 	return MasterController::TIMEOUT_REACHED;
       else if(m_solver->noMoreFlaws())
 	return MasterController::PLAN_FOUND;
-      else if(m_solver->getDepth() == 0)
+      else if(m_solver->isExhausted())
 	return MasterController::SEARCH_EXHAUSTED;
       else
 	return MasterController::IN_PROGRESS;

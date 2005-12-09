@@ -44,9 +44,7 @@ namespace EUROPA {
     return sl_txLog;
   }
 
-  CBPlannerAssembly::CBPlannerAssembly(const SchemaId& schema) : StandardAssembly(schema) { 
-    m_planDatabase->setCacheCompatibleTokens(false);
-  }
+  CBPlannerAssembly::CBPlannerAssembly(const SchemaId& schema) : StandardAssembly(schema){}
 
   CBPlannerAssembly::~CBPlannerAssembly() {}
 
@@ -67,7 +65,6 @@ namespace EUROPA {
     REGISTER_CONSTRAINT(SampleBatteryConstraint, "sampleBattery", "Default");
     REGISTER_CONSTRAINT(SampleDurationConstraint, "sampleDuration", "Default");
 
-    //initConstraintLibrary();
     isInitialized() = true;
   }
 

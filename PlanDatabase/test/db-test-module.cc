@@ -259,7 +259,7 @@ private:
     assertTrue(SCHEMA->isObjectType(LabelStr("Bar")));
     assertTrue(SCHEMA->isA(LabelStr("Bar"), LabelStr("Foo")));
     assertFalse(SCHEMA->isA(LabelStr("Foo"), LabelStr("Bar")));
-    assertTrue(SCHEMA->getAllObjectTypes(LabelStr("Bar")).size() == 2);
+    assertTrue(SCHEMA->getAllObjectTypes(LabelStr("Bar")).size() == 3);
     
     // Composition
     SCHEMA->addMember(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0"));
@@ -279,7 +279,7 @@ private:
     assertTrue(SCHEMA->canContain(LabelStr("Bar"), LabelStr("Foo"), LabelStr("arg1")));
     assertTrue(SCHEMA->canContain(LabelStr("Bar"), LabelStr("Bar"), LabelStr("arg1")));
 
-    assert(SCHEMA->getAllObjectTypes().size() == 3);
+    assert(SCHEMA->getAllObjectTypes().size() == 4);
 
     assertFalse(SCHEMA->hasPredicates("Foo"));
     assertFalse(SCHEMA->hasPredicates("Foo")); // Call again for cached result
@@ -929,18 +929,14 @@ public:
     runTest(testTermination);
     runTest(testBasicMerging);
     runTest(testMergingWithEmptyDomains);
-    runTest(testMergingWithEmptyDomains, false);
     runTest(testConstraintMigrationDuringMerge);
     runTest(testNonChronGNATS2439);
     runTest(testMergingPerformance);
     runTest(testTokenCompatibility);
-    runTest(testTokenCompatibility, false);
     runTest(testPredicateInheritance);
-    runTest(testPredicateInheritance, false);
     runTest(testTokenFactory);
     runTest(testCorrectSplit_Gnats2450);
     runTest(testOpenMerge);
-    runTest(testOpenMerge, false);
     runTest(testGNATS_3086);
     runTest(testCompatCacheReset);
     runTest(testAssignemnt);
@@ -1223,9 +1219,8 @@ private:
   }
 
   // Added for GNATS 3077
-  static bool testMergingWithEmptyDomains(bool cacheTokens = true) {
+  static bool testMergingWithEmptyDomains() {
     DEFAULT_SETUP(ce, db, true);
-    db->setCacheCompatibleTokens(cacheTokens);
     // Create 2 mergeable tokens.
     
     IntervalToken t0(db, 
@@ -1677,9 +1672,8 @@ private:
     return true;
   }    
 
-  static bool testTokenCompatibility(bool cacheTokens = true){
+  static bool testTokenCompatibility(){
     DEFAULT_SETUP(ce, db, true);
-    db->setCacheCompatibleTokens(cacheTokens);
 
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db, 
@@ -1769,11 +1763,10 @@ private:
     return str;
   }
 
-  static bool testPredicateInheritance(bool cacheTokens = true){
+  static bool testPredicateInheritance(){
     DEFAULT_SETUP(ce, db, false);
-    db->setCacheCompatibleTokens(cacheTokens);
     // Add model elements to test inheritance
-    schema->addObjectType("A");
+    schema->addObjectType("A", "Object");
     schema->addObjectType("B", "A");
     schema->addObjectType("C", "B");
     schema->addObjectType("D", "A");
@@ -1991,9 +1984,8 @@ private:
     return true;
   }
 
-  static bool testOpenMerge(bool cacheTokens = true) {
+  static bool testOpenMerge() {
     DEFAULT_SETUP(ce, db, true);
-    db->setCacheCompatibleTokens(cacheTokens);
     
     EnumeratedDomain base(true, "Test");
     base.insert(0);
@@ -2136,12 +2128,7 @@ private:
 
     ce->propagate();
     
-    //the cache should retain the data here, so still can't merge
-    assert(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) == 0);
-
-    db->invalidateCache();
-
-    //should be able to merge now
+    // Should now be able to merge
     assert(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) > 0);
 
     DEFAULT_TEARDOWN();
@@ -2349,7 +2336,6 @@ public:
     runTest(testBasicInsertion);
     runTest(testObjectTokenRelation);
     runTest(testTokenOrderQuery);
-    runTest(testTokenOrderQuery, false);
     runTest(testEventTokenInsertion);
     runTest(testNoChoicesThatFit);
     runTest(testAssignment);
@@ -2602,9 +2588,8 @@ private:
     return true;
   }
 
-  static bool testTokenOrderQuery(bool cacheTokens = true){
+  static bool testTokenOrderQuery(){
     DEFAULT_SETUP(ce, db, false);
-    db->setCacheCompatibleTokens(cacheTokens);
 
     Id<Timeline> timeline = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "o2"))->getId();
     db->close();

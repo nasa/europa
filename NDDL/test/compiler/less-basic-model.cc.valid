@@ -535,7 +535,6 @@ namespace NDDL {
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
-    id->addObjectType("Object");
     id->addObjectType("Timeline","Object");
     id->addObjectType("Camera", "Timeline");
     id->addObjectType("Rover", "Timeline");
