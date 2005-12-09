@@ -2,18 +2,19 @@
   <FlawFilter component="HorizonFilter" />
   <FlawFilter component="InfiniteDynamicFilter"/>
 
+  <ThreatManager defaultPriority="0">
+    <FlawHandler component="StandardThreatHandler"/>
+  </ThreatManager>
+
+
+  <OpenConditionManager defaultPriority="0">
+    <FlawHandler component="StandardOpenConditionHandler"/>
+  </OpenConditionManager>
+
   <UnboundVariableManager defaultPriority="0">
     <FlawFilter var-match="start"/>
     <FlawFilter var-match="end"/>
     <FlawFilter var-match="duration"/>
     <FlawHandler component="StandardVariableHandler"/>
   </UnboundVariableManager>
-
-  <OpenConditionManager defaultPriority="0">
-    <FlawHandler component="StandardOpenConditionHandler"/>
-  </OpenConditionManager>
-
-  <ThreatManager defaultPriority="0">
-    <FlawHandler component="StandardThreatHandler"/>
-  </ThreatManager>
 </Solver>
