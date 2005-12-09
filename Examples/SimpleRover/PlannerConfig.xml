@@ -1,5 +1,5 @@
 <Solver name="DefaultTestSolver">
-  <FlawFilter class-match="HorizonFiltered" component="HorizonFilter"/>
+  <FlawFilter component="HorizonFilter" />
   <FlawFilter component="InfiniteDynamicFilter"/>
 
   <UnboundVariableManager defaultPriority="0">
