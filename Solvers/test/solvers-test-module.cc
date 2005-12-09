@@ -715,6 +715,7 @@ public:
     runTest(testSimpleRejection);
     runTest(testMultipleSearch);
     runTest(testOversearch);
+    runTest(testBacktrackFirstDecisionPoint);
     return true;
   }
 
@@ -865,6 +866,18 @@ private:
     solver.setMaxSteps(5); //arbitrary number of maximum steps
     assert(solver.solve(20)); //arbitrary number of steps < max
     
+    return true;
+  }
+
+  static bool testBacktrackFirstDecisionPoint(){
+    StandardAssembly assembly(Schema::instance());
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "BacktrackSolver");
+    TiXmlElement* child = root->FirstChildElement();
+
+    assert(assembly.playTransactions((getTestLoadLibraryPath() +"/BacktrackFirstDecision.xml").c_str()));
+    Solver solver(assembly.getPlanDatabase(), *child);
+    solver.setMaxSteps(5); //arbitrary number of maximum steps
+    assert(solver.solve(20)); //arbitrary number of steps < max
     return true;
   }
 };

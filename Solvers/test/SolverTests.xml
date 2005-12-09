@@ -34,3 +34,13 @@
   </UnboundVariableManager>
  </Solver>
 </SimpleRejectionSolver>
+<BacktrackSolver>
+ <Solver name="BacktrackSolver">
+  <!-- Will have variable flaws, but no filtering -->
+  <UnboundVariableManager>
+   <FlawHandler var-match="b" component="Min" priority="0"/>
+   <FlawHandler var-match="c" component="Min" priority="1"/>
+   <FlawHandler component="Min" priority="10"/>
+  </UnboundVariableManager>
+ </Solver>
+</BacktrackSolver>

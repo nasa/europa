@@ -126,3 +126,22 @@ HorizonFiltered::uberPredicate{
   }
  }
 }
+
+class BacktrackTest extends Object {
+ predicate pred{}
+}
+
+/**
+ * When we select b as false, we are forced to take c next. Then we get a failure which
+ * will backtrack out. Should be OK if we then pick b true.
+ */
+BacktrackTest::pred{
+ bool b;
+ if(b == false){
+  bool c;
+  eq(c, true);
+  if(c == true){
+   neq(c, true);
+  }
+ }
+}
