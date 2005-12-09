@@ -1,4 +1,4 @@
-$Id: HELLOWORLD,v 1.4 2005-12-02 22:35:29 pjarvis Exp $
+$Id: HELLOWORLD,v 1.5 2005-12-09 18:40:13 pjarvis Exp $
 
 Note: Please first see the file README in this directory for details
       on how to checkout, build, and test Europa2 before attempting
@@ -190,6 +190,10 @@ C. Running a plan from PlanWorks
 
 3. Configuring a PlanWorks Project 
 
+   You need to create a controller for Planworks. Type
+   
+   /home/me/Helloworld/jam HelloWorldController 
+
    Once a project has been opened, select "Project--->Configure" from the 
    top level menu bar. This will bring up a "Configure Project" window with
    "HelloWorld" in the "name" field. The "working directory" field, should
@@ -197,12 +201,10 @@ C. Running a plan from PlanWorks
    If not, enter it now. The browse button may be used to assist in finding
    the path.
 
-   In the "planner library path" field, enter the full path to the planner 
-   shared library in PLASMA/lib. This is the Europa2 System shared library. 
-   (It is NOT the model library that was created in your HelloWorld 
-   directory.) The full path will look like:
+   In the "planner library path" enter the full path to the controller in your 
+   project. e.g.
 
-   /home/me/PLASMA/lib/libSystem_g.so
+   /home/me/HelloWorld/libHelloWorldControllor_g.so
 
    In the "model library path" field, enter the full path to the model 
    shared library in HelloWorld.This is the model shared library that was 
