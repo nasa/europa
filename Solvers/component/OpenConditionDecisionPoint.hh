@@ -51,6 +51,11 @@ namespace EUROPA {
 
       std::string toString() const;
 
+      /**
+       * @brief Accessor to flawed token
+       */
+      const TokenId& getToken() const;
+
     private:
       void handleInitialize();
       bool hasNext() const;

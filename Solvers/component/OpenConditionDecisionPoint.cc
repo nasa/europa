@@ -28,6 +28,8 @@ namespace EUROPA {
 
     OpenConditionDecisionPoint::~OpenConditionDecisionPoint() {}
 
+    const TokenId& OpenConditionDecisionPoint::getToken() const{ return m_flawedToken; }
+
     void OpenConditionDecisionPoint::handleInitialize(){
       const StateDomain stateDomain(m_flawedToken->getState()->lastDomain());
 
