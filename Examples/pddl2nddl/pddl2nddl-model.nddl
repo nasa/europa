@@ -134,26 +134,25 @@ Domain::navigate{
 
    // ** Mutex Constraints   
    //cannot be at while navigating.
-  //  contained_by(At_and_navigate_mutex.use mutex_constraint);
-//    eq(mutex_constraint.rover, x);
-//    eq(mutex_constraint.waypoint, y);
+   contained_by(At_and_navigate_mutex.use mutex_constraint);
+   eq(mutex_constraint.rover, x);
+   eq(mutex_constraint.waypoint, y);
 
-//    At_and_navigate_mutex m: {
-//        eq(m.rover, x);
-//        eq(m.waypoint, y);
-//     };
-//     eq(mutex_constraint.object, m);
+   At_and_navigate_mutex m;
+   eq(m.rover, x);
+   eq(m.waypoint, y);
 
-//     // cannot be not(at) while navigating
-//     contained_by(Not_at_and_navigate_mutex.use mutex_constraint2);
-//     eq(mutex_constraint2.rover, x);
-//     eq(mutex_constraint2.waypoint, y);
+   eq(mutex_constraint.object, m);
 
-//     Not_at_and_navigate_mutex m2: {
-//        eq(m2.rover, x);
-//        eq(m2.waypoint, y);
-//     };
-//     eq(mutex_constraint2.object, m2);
+   // cannot be not(at) while navigating
+    contained_by(Not_at_and_navigate_mutex.use mutex_constraint2);
+    eq(mutex_constraint2.rover, x);
+    eq(mutex_constraint2.waypoint, y);
+
+    Not_at_and_navigate_mutex m2;
+    eq(m2.rover, x);
+    eq(m2.waypoint, y);
+    eq(mutex_constraint2.object, m2);
 }
 
 Domain::at {
@@ -170,27 +169,27 @@ Domain::at {
     eq(nextMove.y, y);
 
     // ** Mutex Relationships
-  //   // cannot be at(rover, loc) and not(at(rov, loc))
-//     contained_by(At_and_not_at_mutex.use mutex_constraint);
-//     eq(mutex_constraint.rover, x);
-//     eq(mutex_constraint.waypoint, y);
+    // cannot be at(rover, loc) and not(at(rov, loc))
+       contained_by(At_and_not_at_mutex.use mutex_constraint);
+       eq(mutex_constraint.rover, x);
+       eq(mutex_constraint.waypoint, y);
 
-//     At_and_not_at_mutex m: {
-//       eq(m.rover, x);
-//       eq(m.waypoint, y);
-//     };
-//     eq(mutex_constraint.object, m);
+     At_and_not_at_mutex m;
+       eq(m.rover, x);
+       eq(m.waypoint, y);
+
+       eq(mutex_constraint.object, m);
    
-//     // cannot be at and navigating
-//     contained_by(At_and_navigate_mutex.use mutex_constraint2);
-//     eq(mutex_constraint2.rover, x);
-//     eq(mutex_constraint2.waypoint, y);
+     // cannot be at and navigating
+       contained_by(At_and_navigate_mutex.use mutex_constraint2); 
+       eq(mutex_constraint2.rover, x);
+       eq(mutex_constraint2.waypoint, y);
+ 
+      At_and_navigate_mutex m2;
+        eq(m2.rover, x);
+        eq(m2.waypoint, y);
 
-//     At_and_navigate_mutex m2: {
-//        eq(m2.rover, x);
-//        eq(m2.waypoint, y);
-//     };
-//     eq(mutex_constraint2.object, m2);
+     eq(mutex_constraint2.object, m2);
 }
 
 Domain::not_at {
@@ -202,27 +201,26 @@ Domain::not_at {
     // none?
  
     // ** Mutex Relationships
-   //  // mutex relationship with at
-//     contained_by(At_and_not_at_mutex.use mutex_constraint);
-//     eq(mutex_constraint.rover, x);
-//     eq(mutex_constraint.waypoint, y);
+      // mutex relationship with at
+      contained_by(At_and_not_at_mutex.use mutex_constraint);
+      eq(mutex_constraint.rover, x);
+     eq(mutex_constraint.waypoint, y);
 
-//     At_and_not_at_mutex m: {
-//       eq(m.rover, x);
-//       eq(m.waypoint, y);
-//     };
-//     eq(mutex_constraint.object, m);
+       At_and_not_at_mutex m;
+         eq(m.rover, x);
+         eq(m.waypoint, y);
 
-//     // cannot be not at while navigating
-//     contained_by(Not_at_and_navigate_mutex.use mutex_constraint2);
-//     eq(mutex_constraint2.rover, x);
-//     eq(mutex_constraint2.waypoint, y);
+     eq(mutex_constraint.object, m);
 
-//     Not_at_and_navigate_mutex m2: {
-//        eq(m2.rover, x);
-//        eq(m2.waypoint, y);
-//     };
-//     eq(mutex_constraint2.object, m2);
+     // cannot be not at while navigating
+     contained_by(Not_at_and_navigate_mutex.use mutex_constraint2);
+     eq(mutex_constraint2.rover, x);
+     eq(mutex_constraint2.waypoint, y);
+
+     Not_at_and_navigate_mutex m2;
+        eq(m2.rover, x);
+        eq(m2.waypoint, y);
+     eq(mutex_constraint2.object, m2);
 
 }
 
