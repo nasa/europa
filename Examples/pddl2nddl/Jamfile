@@ -1,6 +1,11 @@
-SubDir PLASMA Examples SimpleRover ;
+SubDir PLASMA Examples pddl2nddl ;
 
 if ! $(pddl2nddl_READY) {
+ 
+ # Declare a library for PlanWorks Control
+ ModuleSharedLibrary pddl2nddlController : 
+                     $(PLASMA)/ControllerStub.cc $(PLANWORKS_COMPONENTS) : System : pddl2nddlController ;
+
  # Create a build target to run a problem
  RunNDDLProblem pddl2nddl : pddl2nddl-initial-state.nddl : pddl2nddl-planner : PlannerConfig.xml ;
 
@@ -8,7 +13,7 @@ if ! $(pddl2nddl_READY) {
  NddlMain pddl2nddl-planner : pddl2nddl-Main.cc : pddl2nddl-model.nddl : System : pddl2nddl-planner ;
 
  # Create a build target for the planner shared library with model.
- #ModuleSharedLibrary pddl2nddl : pddl2nddl-model.o : System : pddl2nddl ;
+ ModuleSharedLibrary pddl2nddl : pddl2nddl-model.o : System : pddl2nddl ;
 
  Depends run-examples-tests : pddl2nddl ;
 
