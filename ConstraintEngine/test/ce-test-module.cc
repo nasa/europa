@@ -505,10 +505,9 @@ private:
 
       // Post equality constraint between v0 and v1. It should not cause any restriction yet
       // since v0 has not been closed      
-      //this test has been invalidated since we now propagate closed-ness, so the size should be 1
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
       assertTrue(ENGINE->propagate());
-      assertTrue(v1.getDerivedDomain().getSize() == 1);
+      assertTrue(v1.getDerivedDomain().getSize() == 3);
 
       // Now close v0, and we should see a restriction on v1
       v0.close();
@@ -523,7 +522,7 @@ private:
       // Open it and ensure that the engine is pending once again
       v0.open();
       assertTrue(ENGINE->pending());
-      assertTrue(v1.getDerivedDomain().getSize() == 2);
+      assertTrue(v1.getDerivedDomain().getSize() == 3);
 
       v0.specify(2);
       assertTrue(v0.lastDomain().isClosed());
@@ -673,6 +672,7 @@ class ConstraintTest
 {
 public:
   static bool test() {
+    runTest(testGNATS_3181);
     runTest(testUnaryConstraint);
     runTest(testAddEqualConstraint);
     runTest(testLessThanEqualConstraint);
@@ -703,6 +703,49 @@ public:
   }
 
 private:
+  static bool testGNATS_3181(){
+    std::list<double> values;
+    values.push_back(1);
+    values.push_back(2);
+    values.push_back(3);
+    values.push_back(4);
+    values.push_back(5);
+
+    EnumeratedDomain dom(values, true, "ANY");
+    dom.open();
+
+    // All domains closed should be a no-op
+    Variable<EnumeratedDomain> v0(ENGINE, dom);
+
+    // Remove 1 and add another
+    dom.remove(1);
+    dom.insert(6);
+    Variable<EnumeratedDomain> v1(ENGINE, dom);
+
+    EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"),
+		       ENGINE, makeScope(v0.getId(), v1.getId()));
+
+    assertTrue(ENGINE->propagate());
+
+    assertTrue(!v0.isClosed(), v0.toString());
+    assertTrue(!v1.isClosed(), v1.toString());
+    assertFalse(v0.lastDomain() == v1.lastDomain());
+
+    // Close 1 variable. It should prune values, but not propagate closure
+    v1.close();
+    assertTrue(ENGINE->propagate());
+    assertTrue(!v0.isClosed(), v0.toString());
+    assertTrue(v1.isClosed(), v1.toString());
+    assertFalse(v0.lastDomain() == v1.lastDomain(), v0.toString() + " == " + v1.toString());
+
+    // Value test to ensure the restriction has occurred and that we have retained the inequality also.
+    // Basically one way propagation.
+    assertFalse(v0.lastDomain().isMember(1));
+    assertTrue(v1.lastDomain().isMember(6), v1.toString());
+
+    // Re-open the variable, it should no longer propagate the equality
+    return true;
+  }
 
   static bool testUnaryConstraint(){
     {

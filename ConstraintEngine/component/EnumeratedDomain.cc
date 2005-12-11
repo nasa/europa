@@ -142,92 +142,91 @@ namespace EUROPA {
   bool EnumeratedDomain::equate(AbstractDomain& dom) {
     safeComparison(*this, dom);
 
-    if (dom.isInterval()) {
-      bool changed = intersect(dom);
-      if (changed && isEmpty())
-        return(true);
+    // If both domains are closed enumerations we can use optimized method
+    if(!dom.isInterval() && dom.isClosed() && isClosed())
+      return equateClosedEnumerations(static_cast<EnumeratedDomain&>(dom));
 
-      // The changed flag cannot be tested first as
-      // the call to intersect() would be skipped,
-      // leaving dom with its old members even if they
-      // include values outside *this.
-      // --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 22
-      return(dom.intersect(*this) || changed);
-    } else {
-      bool changed_a = false;
-      bool changed_b = false;
-      EnumeratedDomain& l_dom = static_cast<EnumeratedDomain&>(dom);
-      std::set<double>::iterator it_a = m_values.begin();
-      std::set<double>::iterator it_b = l_dom.m_values.begin();
+    bool changed = false;
+    if(isClosed())
+      changed = dom.intersect(*this);
 
-      if(isOpen() && dom.isClosed()) {
-        close();
-        changed_a = true;
-      }
-      else if(isClosed() && dom.isOpen()) {
-        dom.close();
-        changed_b = true;
-      }
-        
+    if(changed && dom.isEmpty())
+      return true;
 
-      while (it_a != m_values.end() && it_b != l_dom.m_values.end()) {
-        double val_a = *it_a;
-        double val_b = *it_b;
-
-        if (compareEqual(val_a, val_b)) {
-          ++it_a;
-          ++it_b;
-        } else
-          if (val_a < val_b) {
-            std::set<double>::iterator target = m_values.lower_bound(val_b);
-            m_values.erase(it_a, target);
-            it_a = target;
-            changed_a = true;
-            check_error(!isMember(val_a));
-          } else {
-            std::set<double>::iterator target = l_dom.m_values.lower_bound(val_a);
-            l_dom.m_values.erase(it_b, target);
-            it_b = target;
-            changed_b = true;
-            check_error(!l_dom.isMember(val_b));
-          }
-      }
-
-      if (it_a != m_values.end() && !l_dom.isEmpty()) {
-        m_values.erase(it_a, m_values.end());
-        changed_a = true;
-        check_error(it_b == l_dom.m_values.end());
-      } else
-        if (it_b != l_dom.m_values.end() && !isEmpty()) {
-          l_dom.m_values.erase(it_b, l_dom.m_values.end());
-          changed_b = true;
-          check_error(it_a == m_values.end());
-        }
-
-      if (changed_a) {
-        if (isEmpty())
-          notifyChange(DomainListener::EMPTIED);
-        else
-          if (isSingleton())
-            notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
-          else
-            notifyChange(DomainListener::VALUE_REMOVED);
-      }
-
-      if (changed_b) {
-        if (l_dom.isEmpty())
-          l_dom.notifyChange(DomainListener::EMPTIED);
-        else
-          if (isSingleton())
-            l_dom.notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
-          else
-            l_dom.notifyChange(DomainListener::VALUE_REMOVED);
-      }
-
-      check_error(!isEmpty() || ! dom.isEmpty());
-      check_error(isEmpty() || dom.isEmpty() || (l_dom.m_values == m_values));
-      return(changed_a || changed_b);
+    if(dom.isClosed() && intersect(dom)){
+      changed = true;
+      if(!isEmpty())
+	dom.intersect(*this);
     }
+
+    return changed;
+  }
+
+  bool EnumeratedDomain::equateClosedEnumerations(EnumeratedDomain& dom){
+    bool changed_a = false;
+    bool changed_b = false;
+    EnumeratedDomain& l_dom = static_cast<EnumeratedDomain&>(dom);
+
+    std::set<double>::iterator it_a = m_values.begin();
+    std::set<double>::iterator it_b = l_dom.m_values.begin();
+
+    while (it_a != m_values.end() && it_b != l_dom.m_values.end()) {
+      double val_a = *it_a;
+      double val_b = *it_b;
+
+      if (compareEqual(val_a, val_b)) {
+	++it_a;
+	++it_b;
+      } else
+	if (val_a < val_b) {
+	  std::set<double>::iterator target = m_values.lower_bound(val_b);
+	  m_values.erase(it_a, target);
+	  it_a = target;
+	  changed_a = true;
+	  check_error(!isMember(val_a));
+	} else {
+	  std::set<double>::iterator target = l_dom.m_values.lower_bound(val_a);
+	  l_dom.m_values.erase(it_b, target);
+	  it_b = target;
+	  changed_b = true;
+	  check_error(!l_dom.isMember(val_b));
+	}
+    }
+
+    if (it_a != m_values.end() && !l_dom.isEmpty()) {
+      m_values.erase(it_a, m_values.end());
+      changed_a = true;
+      check_error(it_b == l_dom.m_values.end());
+    } else
+      if (it_b != l_dom.m_values.end() && !isEmpty()) {
+	l_dom.m_values.erase(it_b, l_dom.m_values.end());
+	changed_b = true;
+	check_error(it_a == m_values.end());
+      }
+
+    if (changed_a) {
+      if (isEmpty())
+	notifyChange(DomainListener::EMPTIED);
+      else
+	if (isSingleton())
+	  notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
+	else
+	  notifyChange(DomainListener::VALUE_REMOVED);
+    }
+
+    if (changed_b) {
+      if (l_dom.isEmpty())
+	l_dom.notifyChange(DomainListener::EMPTIED);
+      else
+	if (isSingleton())
+	  l_dom.notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
+	else
+	  l_dom.notifyChange(DomainListener::VALUE_REMOVED);
+    }
+
+    check_error(!isEmpty() || ! dom.isEmpty());
+    check_error(isEmpty() || dom.isEmpty() || (l_dom.m_values == m_values));
+    return(changed_a || changed_b);
   }
 
   bool EnumeratedDomain::isMember(double value) const {
@@ -372,7 +371,9 @@ namespace EUROPA {
           ++it;
         }
       }
-    } else {
+    } else if (dom.isOpen())
+      return false;
+    else {
       const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
       std::set<double>::iterator it_a = m_values.begin();
       std::set<double>::const_iterator it_b = l_dom.m_values.begin();
@@ -398,12 +399,6 @@ namespace EUROPA {
         changed = true;
       }
     }
-
-    if(dom.isClosed() && isOpen()) {
-      close();
-      changed = true;
-    }
-      
 
     if (!changed)
       return(false);

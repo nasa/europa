@@ -823,13 +823,6 @@ namespace EUROPA {
 
       assertTrue(e2.isClosed());
 
-      /* NOT APPLICABLE
-      e1.set(e2);
-      assertTrue(e1.isClosed());
-      
-      e1.open();
-      assertTrue(e1.isOpen());
-      */
       e1.insert(4.0);
       e1.set(4.0);
       assertTrue(e1.isClosed());
@@ -839,9 +832,8 @@ namespace EUROPA {
       e1.insert(3.0);
 
       e1.intersect(e2);
-      assertTrue(e1.isClosed());
+      assertFalse(e1.isClosed());
 
-      e1.open();
       e2.open();
       e1.intersect(e2);
       assertTrue(e1.isOpen());
@@ -881,10 +873,10 @@ namespace EUROPA {
       assertTrue(e1.isOpen() && e2.isOpen());
       e2.close();
       e1.equate(e2);
-      assertTrue(e1.isClosed() && e2.isClosed());
+      assertTrue(e1.isOpen() && e2.isClosed());
       e2.open();
       e1.equate(e2);
-      assertTrue(e1.isClosed() && e2.isClosed());
+      assertTrue(e1.isOpen() && e2.isOpen());
       return true;
     }
 
@@ -1104,8 +1096,8 @@ namespace EUROPA {
       IntervalDomain id0(-10.0, 10.0);
 
       id0.equate(ed0);
-      assertTrue(ed0.isSingleton() && ed0.getSingletonValue() == 0.0);
-      assertTrue(id0.isSingleton() && id0.getSingletonValue() == 0.0);
+      assertTrue(ed0.isSingleton() && ed0.getSingletonValue() == 0.0, ed0.toString());
+      assertTrue(id0.isSingleton() && id0.getSingletonValue() == 0.0, id0.toString());
 
       ed0 = NumericDomain(enumVals); // Now 0.0 and 20.0
       assertTrue(!ed0.isEmpty() && !ed0.isSingleton());

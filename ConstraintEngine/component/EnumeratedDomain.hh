@@ -297,6 +297,11 @@ namespace EUROPA {
     virtual void testPrecision(const double& value) const {
     }
 
+    /**
+     * @brief Implements equate where both are closed enumerations
+     */
+    bool EnumeratedDomain::equateClosedEnumerations(EnumeratedDomain& dom);
+
     std::set<double> m_values; /**< Holds the contents from which the set membership is then derived. */
     bool m_isNumeric;
   };

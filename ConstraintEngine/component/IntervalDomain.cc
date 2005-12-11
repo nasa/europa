@@ -40,7 +40,9 @@ namespace EUROPA {
     safeComparison(*this, dom);
     check_error(dom.isOpen() || !dom.isEmpty());
     check_error(isOpen() || !isEmpty());
-    return(intersect(dom.getLowerBound(), dom.getUpperBound()));
+    double lb, ub;
+    dom.getBounds(lb, ub);
+    return(intersect(lb, ub));
   }
 
   bool IntervalDomain::difference(const AbstractDomain& dom) {
