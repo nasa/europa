@@ -1,4 +1,4 @@
-// NDDL/test/compiler/foreach-exec.xml
+// foreach-exec.xml
 
 #include "foreach-exec.hh"
 #include "NddlUtils.hh"
@@ -509,11 +509,8 @@ namespace NDDL {
   void Rover$Navigate$0$0$0::handleExecute() {
     {
       // Create a local domain based on the trackable objects
-      ConstraintId l_constraint(constraint("trackable"));
-      const ObjectDomain& foreach_trackable(
-        l_constraint.isNoId() ? // If no filter constraint was placed, source from object variable 
-        static_cast<const ObjectDomain&>(var(getId(), std::string("trackable"))->lastDomain()) : 
-        ((Id<ObjectFilterConstraint>)l_constraint)->getFilteredObjects()); // Otherwise source from the filtered set. 
+      const ObjectDomain& foreach_trackable =
+        static_cast<const ObjectDomain&>(var(getId(), std::string("trackable"))->lastDomain()); 
         
       if(!foreach_trackable.isEmpty()){
         // Post a locking constraint on trackable
@@ -664,11 +661,8 @@ namespace NDDL {
     localVar(BoolDomain(), hasPath, true);
     {
       // Create a local domain based on the r objects
-      ConstraintId l_constraint(constraint("r"));
-      const ObjectDomain& foreach_r(
-        l_constraint.isNoId() ? // If no filter constraint was placed, source from object variable 
-        static_cast<const ObjectDomain&>(var(getId(), std::string("r"))->lastDomain()) : 
-        ((Id<ObjectFilterConstraint>)l_constraint)->getFilteredObjects()); // Otherwise source from the filtered set. 
+      const ObjectDomain& foreach_r =
+        static_cast<const ObjectDomain&>(var(getId(), std::string("r"))->lastDomain()); 
         
       if(!foreach_r.isEmpty()){
         // Post a locking constraint on r
@@ -717,11 +711,8 @@ namespace NDDL {
     }
     {
       // Create a local domain based on the emptyPath objects
-      ConstraintId l_constraint(constraint("emptyPath"));
-      const ObjectDomain& foreach_emptyPath(
-        l_constraint.isNoId() ? // If no filter constraint was placed, source from object variable 
-        static_cast<const ObjectDomain&>(var(getId(), std::string("emptyPath"))->lastDomain()) : 
-        ((Id<ObjectFilterConstraint>)l_constraint)->getFilteredObjects()); // Otherwise source from the filtered set. 
+      const ObjectDomain& foreach_emptyPath =
+        static_cast<const ObjectDomain&>(var(getId(), std::string("emptyPath"))->lastDomain()); 
         
       if(!foreach_emptyPath.isEmpty()){
         // Post a locking constraint on emptyPath
@@ -760,7 +751,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/foreach-exec");
+    Id<Schema> id = Schema::instance("foreach-exec");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
