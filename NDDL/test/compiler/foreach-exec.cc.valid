@@ -1,4 +1,4 @@
-// foreach-exec.xml
+// NDDL/test/compiler/foreach-exec.xml
 
 #include "foreach-exec.hh"
 #include "NddlUtils.hh"
@@ -751,7 +751,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("foreach-exec");
+    Id<Schema> id = Schema::instance("NDDL/test/compiler/foreach-exec");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions
