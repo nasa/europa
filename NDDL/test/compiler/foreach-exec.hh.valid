@@ -1,4 +1,4 @@
-// foreach-exec.xml
+// NDDL/test/compiler/foreach-exec.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"
