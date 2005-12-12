@@ -45,7 +45,7 @@ initialPosition.y.specify(waypoint1);
 // Goal State
 goal(Domain.at goalPosition);
 goalPosition.x.specify(rover1);
-goalPosition.y.specify(waypoint3);
+goalPosition.y.specify(waypoint2);
 goalPosition.activate();
 
 // Temporal relationship between inital state and goal state
