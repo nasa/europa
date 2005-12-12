@@ -2,13 +2,15 @@
 
 PlannerConfig planner = new PlannerConfig(0, 100, 600);
 
+// A single rover.
 Rover rover1 = new Rover();
 
+// Simple world of three waypoints.
 Waypoint waypoint1 = new Waypoint();
 Waypoint waypoint2 = new Waypoint();
 Waypoint waypoint3 = new Waypoint();
 
-// wp1->wp2->wp3
+// only path is wp1->wp2->wp3
 Can_Traverse t1 = new Can_Traverse(rover1, waypoint1, waypoint2);
 Can_Traverse t2 = new Can_Traverse(rover1, waypoint2, waypoint3);
 
@@ -44,7 +46,7 @@ initialPosition.y.specify(waypoint1);
 goal(Domain.at goalPosition);
 goalPosition.x.specify(rover1);
 goalPosition.y.specify(waypoint3);
-//goalPosition.activate();
+goalPosition.activate();
 
 // Temporal relationship between inital state and goal state
 
