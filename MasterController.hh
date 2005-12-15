@@ -110,6 +110,16 @@ namespace EUROPA {
      */
     virtual void handleRegistration();
 
+    /**
+     * @brief
+     */
+    virtual void configureDatabase();
+
+    /**
+     * @brief Utility for path extraction
+     */
+    static std::string extractPath(const char* configPath);
+
   private:
 
     /**

@@ -280,7 +280,7 @@ namespace EUROPA {
     }
 
     // Register factories
-    logMsg("Calling handleregistration");
+    logMsg("Calling handleRegistration");
 
     handleRegistration();
   }
@@ -309,21 +309,7 @@ namespace EUROPA {
     // Allocate the plan database
     m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();
 
-    // Construct propagators - order of introduction determines order of propagation.
-    // Note that propagators will subsequently be managed by the constraint engine
-    new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
-    new TemporalPropagator(LabelStr("Temporal"), m_constraintEngine);
-    new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
-
-    // Link up the Temporal Advisor in the PlanDatabase so that it can use the temporal
-    // network for determining temporal distances between time points.
-    PropagatorId temporalPropagator = m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
-    m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
-
-    // Allocate the rules engine to process rules
-    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
-
-    m_planDatabase->getClient()->enableTransactionLogging();
+    configureDatabase();
 
     logMsg("loadInitialState: Configuring Partial PlanWriter");
     m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine);
@@ -352,7 +338,7 @@ namespace EUROPA {
     logMsg("loadInitialState: Calling configureSolvers");
     configureSolvers(configPath);
 
-    if(!m_constraintEngine->constraintConsistent()){
+    if(!m_constraintEngine->propagate()){
       logMsg("loadInitialState: Found to be initially inconsistent");
       m_status = INITIALLY_INCONSISTENT;
     }
@@ -364,6 +350,24 @@ namespace EUROPA {
     write();
 
     return m_status;
+  }
+
+  void MasterController::configureDatabase(){
+    // Construct propagators - order of introduction determines order of propagation.
+    // Note that propagators will subsequently be managed by the constraint engine
+    new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
+    new TemporalPropagator(LabelStr("Temporal"), m_constraintEngine);
+    new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
+
+    // Link up the Temporal Advisor in the PlanDatabase so that it can use the temporal
+    // network for determining temporal distances between time points.
+    PropagatorId temporalPropagator = m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
+    m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
+
+    // Allocate the rules engine to process rules
+    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
+
+    m_planDatabase->getClient()->enableTransactionLogging();
   }
 
   void MasterController::unloadModel(){
@@ -455,5 +459,15 @@ namespace EUROPA {
     std::stringstream ss;
     PlanDatabaseWriter::write(planDatabase, ss);
     return ss.str();
+  }
+
+  std::string MasterController::extractPath(const char* configPath){
+    LabelStr lblStr(configPath);
+    int numElements = lblStr.countElements("/");
+    LabelStr suffix = lblStr.getElement(numElements-1, "/");
+
+    std::string configStr(configPath);
+    int pos = configStr.find(suffix.toString());
+    return configStr.substr(0, pos);
   }
 }
