@@ -46,6 +46,28 @@ namespace EUROPA {
      */
     typedef std::pair<LabelStr, double> GuardEntry;
 
+    static Priority & worstCasePriority() {
+      static Priority sl_worstCasePriority(99999);
+      return sl_worstCasePriority;
+    }
+
+    static Priority & bestCasePriority() {
+      static Priority sl_bestCasePriority(0);
+      return sl_bestCasePriority;
+    }
+  
+    inline const Priority getBestCasePriority() {
+      return bestCasePriority();
+    }
+
+    inline const Priority getWorstCasePriority() {
+      return worstCasePriority();
+    }
+
+ 
+
+
+
     /**
      * @brief Defines a configuration class
      */
