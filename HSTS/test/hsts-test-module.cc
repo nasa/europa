@@ -357,7 +357,7 @@ private:
       // Now close one only. Should not change anything else.
       b.close();
       assertTrue(b.lastDomain().getSize() == 4);
-      assertTrue(!ENGINE->propagate());
+      assertTrue(ENGINE->propagate());
 
      //  // Close another, should see partial restriction
 //       a.close();

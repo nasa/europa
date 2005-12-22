@@ -740,7 +740,7 @@ private:
 
     // Value test to ensure the restriction has occurred and that we have retained the inequality also.
     // Basically one way propagation.
-    assertFalse(v0.lastDomain().isMember(1));
+    assertFalse(v0.lastDomain().isMember(1), v0.lastDomain().toString());
     assertTrue(v1.lastDomain().isMember(6), v1.toString());
 
     // Re-open the variable, it should no longer propagate the equality

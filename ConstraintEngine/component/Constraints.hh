@@ -82,6 +82,7 @@ namespace EUROPA {
     static AbstractDomain& getCurrentDomain(const ConstrainedVariableId& var);
 
   private:
+    bool equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty);
     const unsigned int m_argCount;
   };
 

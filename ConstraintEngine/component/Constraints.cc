@@ -153,36 +153,19 @@ namespace EUROPA {
 
   /**
    * @brief Restrict all variables to the intersection of their domains.
-   * @note intersec in sensative to the open/closed state of a domain.
-   * We will not restrict a closed domain based on an open domain as 
-   * values could be added that will invalidate such a restriction.
-   * @note In the worst case, this algorithm requires 2 passes over
-   * the variables.
+   * @see equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty) for details of handling
+   * issues with open and closed domains.
    */
   void EqualConstraint::handleExecute() {
     check_error(isActive());
 
-    unsigned int i = 0;
-
-    // Stop if all domain are open - nothing we can infer.
-    bool foundClosedDomain = false;
-    for (i = 0; i < m_argCount; i++)
-      if (!getCurrentDomain(m_variables[i]).isOpen()) {
-        foundClosedDomain = true;
-        break;
-      }
-
-    //if all are open, there is no meaningful action
-    if (!foundClosedDomain)
-      return;
-
     bool changed = false;
-    for(i = 1; i < m_argCount; i++) {
-      AbstractDomain& d1 = getCurrentDomain(m_variables[i-1]);
-      AbstractDomain& d2 = getCurrentDomain(m_variables[i]);
-
-      //equate the two domains.  if they become empty, just return
-      if((changed = d1.equate(d2) || changed) && d1.isEmpty())
+    for(unsigned int i = 1; i < m_argCount; i++) {
+      ConstrainedVariableId v1 = m_variables[i-1];
+      ConstrainedVariableId v2 = m_variables[i];
+      bool isEmpty = false;
+      changed = equate(v1, v2, isEmpty) || changed;
+      if(isEmpty)
         return;
     }
 
@@ -191,16 +174,64 @@ namespace EUROPA {
     //is now equal to the intersection of all of the variables, 
     //we can just equate backwards and they should all be equal
     if(changed && m_argCount > 2) {
-      for(i = m_argCount - 2; i >= 1; i--) {
-        AbstractDomain& d1 = getCurrentDomain(m_variables[i]);
-        AbstractDomain& d2 = getCurrentDomain(m_variables[i-1]);
-        
-        //if the intersection of the two is empty, just return
-        if(d1.equate(d2) && d1.isEmpty())
-          return;
+      for(unsigned int i = m_argCount - 2; i >= 1; i--) {
+	ConstrainedVariableId v1 = m_variables[i];
+	ConstrainedVariableId v2 = m_variables[i-1];
+	bool isEmpty = false;
+	equate(v1, v2, isEmpty);
+	if(isEmpty)
+	  return;
+      }
+    }
+  }
+
+  bool EqualConstraint::equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty){
+    checkError(isEmpty == false, "Should be initially false.");
+    AbstractDomain& d1 = getCurrentDomain(v1);
+    AbstractDomain& d2 = getCurrentDomain(v2);
+
+    bool changed = false;
+    if(d1.isClosed() && d2.isClosed()){
+      changed = d1.equate(d2);
+      if(changed && (d1.isEmpty() || d2.isEmpty()))
+	 isEmpty = true;
+    }
+    else {
+      checkError(!d1.isInterval() && !d2.isInterval(),
+		 v1->toString() << " should not be equated with " << v2->toString());
+
+      std::list<double> d1_values;
+      d1.getValues(d1_values);
+      const AbstractDomain& d2_base = v2->baseDomain();
+      while(!isEmpty && !d1_values.empty()){
+	// if it not a member of d2 BUT a member of the base domain of v2, then we should exclude from d1.
+	double value = d1_values.front();
+	if(!d2.isMember(value) && (d2_base.isMember(value) || d2.isClosed())){
+	  d1.remove(value);
+	  changed = true;
+	  isEmpty = d1.isEmpty();
+	}
+	d1_values.pop_front();
+      }
+
+      if(!isEmpty){
+	std::list<double> d2_values;
+	d2.getValues(d2_values);
+	const AbstractDomain& d1_base = v1->baseDomain();
+	while(!isEmpty && !d2_values.empty()){
+	  // if it not a member of d2 BUT a member of the base domain of v2, then we should exclude from d1.
+	  double value = d2_values.front();
+	  if(!d1.isMember(value) && (d1_base.isMember(value) || d1.isClosed())){
+	    d2.remove(value);
+	    changed = true;
+	    isEmpty = d2.isEmpty();
+	  }
+	  d2_values.pop_front();
+	}
       }
     }
 
+    return changed;
   }
 
   AbstractDomain& EqualConstraint::getCurrentDomain(const ConstrainedVariableId& var) {
