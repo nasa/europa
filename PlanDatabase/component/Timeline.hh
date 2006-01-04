@@ -1,6 +1,13 @@
 #ifndef _H_Timeline
 #define _H_Timeline
 
+/**
+ * @file Timeline.hh
+ * @author Conor McGann
+ * @brief
+ * @ingroup PlanDatabase
+*/
+
 #include "Object.hh"
 #include <list>
 #include <map>
@@ -8,6 +15,10 @@
 
 namespace EUROPA {
   class OrderingChoicesCache;
+
+  /**
+   * @brief Timeline class
+   */
 
   class Timeline: public Object {
   public:
