@@ -19,6 +19,7 @@
 #include "IntervalIntDomain.hh"
 #include "EnumeratedDomain.hh"
 #include "MatchingEngine.hh"
+#include "PlanDatabaseWriter.hh"
 
 /**
  * @file Provides module tests for Solver Module.
@@ -716,6 +717,7 @@ public:
     runTest(testMultipleSearch);
     runTest(testOversearch);
     runTest(testBacktrackFirstDecisionPoint);
+    runTest(testMultipleSolutionsSearch);
     return true;
   }
 
@@ -873,11 +875,70 @@ private:
     StandardAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "BacktrackSolver");
     TiXmlElement* child = root->FirstChildElement();
-
     assert(assembly.playTransactions((getTestLoadLibraryPath() +"/BacktrackFirstDecision.xml").c_str()));
     Solver solver(assembly.getPlanDatabase(), *child);
     solver.setMaxSteps(5); //arbitrary number of maximum steps
     assert(solver.solve(20)); //arbitrary number of steps < max
+    return true;
+  }
+
+  /**
+   * Tests the ability to use backjumping and an outer loop to find multiple solutions. The loop used will
+   * search for a given number of solutions. It will be bounded by a maximum number of iterations, and it will
+   * have a cut-off for exploration within each ieration. The idea of backjumping:
+   * 1. If I have a solution, invoking backjump(1) and then calling solve will yield the next alternative.
+   * 2. If I call solve, and it returns that it has exhausted all poossibilities, then we have explored all
+   * possible solutions. This is because a call to backjump will invoke backtrack, which may cause multiple decisions
+   * to be popped and undone if they are exhausted.
+   * 3. If we timeout, then we wish to explore an alternate path. This may or may not be a good idea. It assumes
+   * we are better off trying anoher branch with the time we have rather than working the current one.
+   */
+  static bool testMultipleSolutionsSearch(){
+    StandardAssembly assembly(Schema::instance());
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
+    TiXmlElement* child = root->FirstChildElement();
+    assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.xml").c_str()));
+    Solver solver(assembly.getPlanDatabase(), *child);
+    assertTrue(solver.solve(10));
+    assertTrue(solver.getStepCount() == solver.getDepth());
+
+    unsigned int solutionLimit = 100;
+    unsigned int solutionCount = 1;
+    unsigned int timeoutCount = 0;
+    unsigned int iterationCount = 0;
+    unsigned int backjumpDistance = 1;
+    while(iterationCount < solutionLimit && !solver.isExhausted()){
+      debugMsg("SolverTests:testMultipleSolutionsSearch", "Solving for iteration " << iterationCount);
+
+      unsigned int priorDepth = solver.getDepth();
+      iterationCount++;
+      solver.backjump(backjumpDistance);
+      solver.solve(10);
+      if(solver.noMoreFlaws()){
+	solutionCount++;
+
+	debugMsg("SolverTests:testMultipleSolutionsSearch", 
+		 "Solution " << solutionCount << " found." << PlanDatabaseWriter::toString(assembly.getPlanDatabase()));
+
+	backjumpDistance = 1;
+      }
+      else if(solver.isTimedOut()){
+	// In the event of a tmeout, we may have backtracked to a lesser depth in searching, or we may have stopped
+	// further down the stack. In the latter case we will have to backjump further.
+	backjumpDistance = (solver.getDepth() > priorDepth ? solver.getDepth() - priorDepth : 1 );
+
+	debugMsg("SolverTests:testMultipleSolutionsSearch", 
+		 "Timed out on iteration " << iterationCount << " at depth " << solver.getDepth() << 
+		 ". Backjump distance = " << backjumpDistance);
+
+	timeoutCount++;
+      }
+      else {
+	debugMsg("SolverTests:testMultipleSolutionsSearch", 
+		 "Exhausted after iteration " << iterationCount);
+      }
+    }
+
     return true;
   }
 };

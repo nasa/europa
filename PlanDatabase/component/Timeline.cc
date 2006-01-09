@@ -132,11 +132,10 @@ namespace EUROPA {
 
   bool OrderingChoicesCache::isValid() const {
     for(std::map<TokenId, Id<OrderingChoicesCache::Entry> >::const_iterator it = m_orderingChoices.begin(); it != m_orderingChoices.end(); ++it){
-      Id<OrderingChoicesCache::Entry> entry = it->second;
-      check_error(entry.isValid());
-      checkError(entry->m_tokenToOrder.isValid(), entry->m_tokenToOrder);
-      checkError(entry->m_tokenToOrder->getState()->lastDomain().isMember(Token::ACTIVE), 
-		 "Cache entry should have been removed for " << entry->m_tokenToOrder->toString());
+      check_error(it->second.isValid());
+      checkError(it->second->m_tokenToOrder.isValid(), it->second->m_tokenToOrder);
+      checkError(it->second->m_tokenToOrder->getState()->lastDomain().isMember(Token::ACTIVE), 
+		 "Cache entry should have been removed for " << it->second->m_tokenToOrder->toString());
     }
     return true;
   }

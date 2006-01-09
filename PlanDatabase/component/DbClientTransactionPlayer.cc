@@ -874,8 +874,7 @@ namespace EUROPA {
     }
     if (strcmp(variable.Value(), "variable") == 0) {
       int index = -1;
-      const char * i = variable.Attribute("index", &index);
-      check_error(i != NULL);
+      check_error(variable.Attribute("index", &index) != NULL);
       check_error(0 <= index);
   
       const char * token_path = variable.Attribute("token");
