@@ -943,6 +943,7 @@ public:
     runTest(testDeleteMasterAndPreserveSlave);
     runTest(testPreserveMergeWithNonChronSplit);
     runTest(testGNATS_3163);
+    runTest(testGNATS_3193);
     return(true);
   }
   
@@ -2325,6 +2326,48 @@ private:
     master->getStart()->restrictBaseDomain(IntervalIntDomain(1, 1));
     assertTrue(master->getStart()->specifiedFlag());    
     master->discard();
+    return true;
+  }
+
+  /**
+   * Should be able to post a constraint on a state variable of a token which would then get merged. Confirm that
+   * the constraint remains active after the merge (although it will be basically moot since if consistent the state
+   * variable will be grounded). Also want to ensure that if we delete the constraint, it will be removed safely.
+   */ 
+  static bool testGNATS_3193(){
+    initDbTestSchema(SCHEMA);
+    PlanDatabase db(ENGINE, SCHEMA);
+    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    db.close();
+
+    TokenId t0 = (new IntervalToken(db.getId(),  
+				       DEFAULT_PREDICATE(),                                                     
+				       true,                                                               
+				       IntervalIntDomain(0, 10),                                           
+				       IntervalIntDomain(0, 20),                                           
+				       IntervalIntDomain(1, 1000)))->getId();  
+    t0->activate();
+
+    TokenId t1 = (new IntervalToken(db.getId(),  
+				       DEFAULT_PREDICATE(),                                                     
+				       true,                                                               
+				       IntervalIntDomain(0, 10),                                           
+				       IntervalIntDomain(0, 20),                                           
+				       IntervalIntDomain(1, 1000)))->getId();
+    {
+      StateDomain dom;
+      dom.insert(Token::MERGED);
+      dom.close();
+
+      Variable<StateDomain> v(ENGINE, dom);
+      EqualConstraint c0("eq", "Default", ENGINE, makeScope(t1->getState(), v.getId()));
+
+      t1->merge(t0);
+    }
+
+    t1->discard();
+    t0->discard();
+
     return true;
   }
 };
