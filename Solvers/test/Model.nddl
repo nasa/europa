@@ -145,3 +145,11 @@ BacktrackTest::pred{
   }
  }
 }
+
+class Foo {
+ predicate p{}
+}
+
+Foo::p{
+ eq(1, 0); // Always fails
+}

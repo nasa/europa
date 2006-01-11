@@ -44,3 +44,10 @@
   </UnboundVariableManager>
  </Solver>
 </BacktrackSolver>
+<GNATS_3196>
+ <Solver name="GNATS_3196">
+  <OpenConditionManager>
+    <FlawHandler component="StandardOpenConditionHandler"/>
+  </UnboundVariableManager>
+ </Solver>
+</GNATS_3196>

@@ -11,7 +11,8 @@ local solverInputFiles = 	../../Solvers/test/UnboundVariableFiltering.nddl
 				../../Solvers/test/ExhaustiveSearch.nddl 
 				../../Solvers/test/SimpleActivation.nddl 
 				../../Solvers/test/SimpleRejection.nddl 
-				../../Solvers/test/BacktrackFirstDecision.nddl ;
+				../../Solvers/test/BacktrackFirstDecision.nddl 
+				../../Solvers/test/GNATS_3196.nddl ;
  
  # Create dependency for initial state files to be parsed
  local solversInputFile ;

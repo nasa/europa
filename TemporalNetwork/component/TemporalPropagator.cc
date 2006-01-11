@@ -707,12 +707,6 @@ namespace EUROPA {
 
   bool TemporalPropagator::isValidForPropagation() const {
 
-    // The set of active variables should not be empty
-    if(m_activeVariables.empty()) {
-      debugMsg("TemporalPropagator:isValidForPropagation", "Active variables empty");
-      return false;
-    }
-
     // All buffers should only contain valid id's
     if(!allValid(m_activeVariables) ||
        !allValid(m_changedVariables) ||

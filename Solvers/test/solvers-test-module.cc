@@ -718,6 +718,7 @@ public:
     runTest(testOversearch);
     runTest(testBacktrackFirstDecisionPoint);
     runTest(testMultipleSolutionsSearch);
+    runTest(testGNATS_3196);
     return true;
   }
 
@@ -939,6 +940,20 @@ private:
       }
     }
 
+    return true;
+  }
+
+  static bool testGNATS_3196(){
+    StandardAssembly assembly(Schema::instance());
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "GNATS_3196");
+    TiXmlElement* child = root->FirstChildElement();
+    assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/GNATS_3196.xml").c_str()));
+    Solver solver(assembly.getPlanDatabase(), *child);
+    assertFalse(solver.solve(1));
+    solver.clear();
+    TokenId onlyToken = *(assembly.getPlanDatabase()->getTokens().begin());
+    onlyToken->discard();
+    assertTrue(solver.solve(1));
     return true;
   }
 };
