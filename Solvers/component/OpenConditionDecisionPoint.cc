@@ -15,8 +15,8 @@ namespace EUROPA {
       : DecisionPoint(client, flawedToken->getKey()),
 	m_flawedToken(flawedToken), 
 	m_mergeIndex(0),
-	m_mergeCount(0),
 	m_choiceIndex(0),
+	m_mergeCount(0),
 	m_choiceCount(0){
 
       // Retrieve policy information from configuration node

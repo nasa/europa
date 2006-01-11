@@ -57,19 +57,22 @@ namespace EUROPA {
       const TokenId& getToken() const;
 
     private:
-      void handleInitialize();
       bool hasNext() const;
       void handleExecute();
       void handleUndo();
       bool canUndo() const;
 
       const TokenId m_flawedToken; /*!< The token to be resolved. */
-      std::vector<TokenId> m_compatibleTokens; /*!< A possibly empty collection of tokens to merge with. */
       unsigned int m_mergeIndex; /*!< The position of the next choice in m_compatibleTokens. */
+      unsigned int m_choiceIndex; /*!< The position of the next choice in m_choices. */
+
+    protected:
+      virtual void handleInitialize();
+      std::vector<TokenId> m_compatibleTokens; /*!< A possibly empty collection of tokens to merge with. */
       unsigned int m_mergeCount; /*!< The size of m_compatibleTokens */
       std::vector<LabelStr> m_choices; /*!< The sequences list of states to choose. */
-      unsigned int m_choiceIndex; /*!< The position of the next choice in m_choices. */
       unsigned int m_choiceCount; /*!< The size of m_choices. */
+
     };
   }
 }

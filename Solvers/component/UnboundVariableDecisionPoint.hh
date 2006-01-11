@@ -60,15 +60,13 @@ namespace EUROPA {
 
       ValueSource* m_choices;
 
-    private:
+      virtual void handleInitialize();
 
-      void handleInitialize();
+      virtual void handleExecute();
 
-      void handleExecute();
+      virtual void handleUndo();
 
-      void handleUndo();
-
-      bool canUndo() const;
+      virtual bool canUndo() const;
 
       /**
        * @brief Retrieves the next choice to be executed. Implementation will depend
