@@ -5,7 +5,10 @@
 #include "Token.hh"
 
 namespace EUROPA {
-
+ /**
+   * @class IntervalToken 
+   * @brief to be written
+   */
   class IntervalToken: public Token {
   public:
 
