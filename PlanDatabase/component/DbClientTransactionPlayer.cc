@@ -874,6 +874,7 @@ namespace EUROPA {
     }
     if (strcmp(variable.Value(), "variable") == 0) {
       int index = -1;
+      variable.Attribute("index", &index);
       check_error(variable.Attribute("index", &index) != NULL);
       check_error(0 <= index);
   
