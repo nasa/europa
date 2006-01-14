@@ -9,6 +9,7 @@
 #include "Error.hh"
 #include "Utils.hh"
 
+
 using namespace EUROPA;
 
 class DefaultEngineAccessor {
@@ -25,8 +26,8 @@ public:
   static void reset() {
     if (!s_instance.isNoId()) {
       delete (ConstraintEngine*) s_instance;
-      s_instance = ConstraintEngineId::noId();
-    }
+      s_instance = 0.0; // Patch for GNATS 3184 ConstraintEngineId::noId(); 
+     }
   }
 
 private:
