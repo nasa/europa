@@ -3325,8 +3325,6 @@ private:
 
     tokenA->terminate();
     tokenA->discard();
-    tokenB->terminate();
-    tokenB->discard();
     ce->propagate();
     DEFAULT_TEARDOWN();
     return true;
