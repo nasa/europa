@@ -185,6 +185,7 @@ namespace EUROPA {
       plId = _plId;
       reId = _reId;
       nstep = 0;
+      autoIncrement = true;
       maxChoices = INT_MAX;
       destAlreadyInitialized = false;
       struct timeval currTime;
@@ -1110,12 +1111,14 @@ namespace EUROPA {
         if(noFullWrite == 0) {
           if(writeCounter == stepsPerWrite) {
             write();
-            nstep++;
+	    if(autoIncrement)
+	      incrementStep();
 	    writeCounter = 0;
           }
         }
         else {
-          nstep++;
+	  if(autoIncrement)
+	    incrementStep();
         }
       }
     }
@@ -1123,7 +1126,8 @@ namespace EUROPA {
     void PartialPlanWriter::notifyPropagationPreempted(void) {
       if(noFullWrite == 0 && !havePlanner) {
         write();
-        nstep++;
+	if(autoIncrement)
+	  incrementStep();
         writeCounter = 0;
       }
     }
@@ -1134,7 +1138,8 @@ namespace EUROPA {
         if(noFullWrite == 0) {
           if(writeCounter == stepsPerWrite) {
             write();
-            nstep++;
+	    if(autoIncrement)
+	      incrementStep();
             writeCounter = 0;
           }
         }
@@ -1143,7 +1148,8 @@ namespace EUROPA {
             writeStats();
             writeCounter = 0;
           }
-          nstep++;
+	  if(autoIncrement)
+	    incrementStep();
         }
       }
     }
@@ -1154,7 +1160,7 @@ namespace EUROPA {
         if(noFullWrite == 0) {
           if(writeCounter == stepsPerWrite) {
             write();
-            nstep++;
+            if(autoIncrement){incrementStep();}
             writeCounter = 0;
           }
         }
@@ -1163,7 +1169,7 @@ namespace EUROPA {
             writeStats();
             writeCounter = 0;
           }
-          nstep++;
+          if(autoIncrement){incrementStep();}
         }
       }
     }
@@ -1174,7 +1180,7 @@ namespace EUROPA {
         if(noFullWrite == 0) {
           if(writeCounter == stepsPerWrite) {
             write();
-            nstep++;
+            if(autoIncrement){incrementStep();}
             writeCounter = 0;
           }
         }
@@ -1183,7 +1189,7 @@ namespace EUROPA {
             writeStats();
             writeCounter = 0;
           }
-          nstep++;
+          if(autoIncrement){incrementStep();}
         }
       }
     }
@@ -1194,7 +1200,7 @@ namespace EUROPA {
         if(noFullWrite == 0) {
           if(writeCounter == stepsPerWrite) {
             write();
-            nstep++;
+            if(autoIncrement){incrementStep();}
             writeCounter = 0;
           }
         }
@@ -1203,7 +1209,7 @@ namespace EUROPA {
             writeStats();
             writeCounter = 0;
           }
-          nstep++;
+          if(autoIncrement){incrementStep();}
         }
       }
     }

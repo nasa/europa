@@ -38,6 +38,8 @@ namespace EUROPA {
       std::string getDest(void);
       void setDest(std::string destPath);
       void addSourcePath(const char* path);
+      void incrementStep() {nstep++;}
+      void setAutoIncrement(bool flag) {autoIncrement = flag;}
       static int noFullWrite, writeStep;
     protected:
       virtual bool parseSection(std::ifstream& configFile);
@@ -50,6 +52,7 @@ namespace EUROPA {
 
       bool havePlanner;
       bool destAlreadyInitialized;
+      bool autoIncrement;
       long long int seqId;
       int numTokens, numConstraints, numVariables;
       int stepsPerWrite, nstep, writeCounter, maxChoices;
