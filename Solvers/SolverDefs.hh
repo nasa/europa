@@ -6,8 +6,6 @@
 
 #include <vector>
 
-using namespace EUROPA;
-
 namespace EUROPA {
   namespace SOLVERS {
 
