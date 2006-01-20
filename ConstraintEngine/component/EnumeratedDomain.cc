@@ -93,8 +93,7 @@ namespace EUROPA {
         break;
     }
     m_values.insert(it, value);
-    if(isClosed())
-      notifyChange(DomainListener::RELAXED);
+    notifyChange(DomainListener::RELAXED);
   }
 
   void EnumeratedDomain::insert(const std::list<double>& values){

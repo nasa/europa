@@ -454,7 +454,7 @@ private:
       v0.insert(3);
       v0.insert(5);
       v0.insert(10);
-      assertTrue(listener.getCount(ConstraintEngine::RELAXED) == 0); // Should not generate any of these messages while not closed
+      assertTrue(listener.getCount(ConstraintEngine::RELAXED) == 4);
       v0.close();
       assertTrue(listener.getCount(ConstraintEngine::CLOSED) == 1);
 
@@ -476,7 +476,7 @@ private:
       ENGINE->propagate(); // Expect to see exactly one domain emptied
       assertTrue(listener.getCount(ConstraintEngine::EMPTIED) == 1);
       v1.reset(); // Should now see 2 domains relaxed.
-      assertTrue(listener.getCount(ConstraintEngine::RELAXED) == 2);
+      assertTrue(listener.getCount(ConstraintEngine::RELAXED) == 6);
     }
 
     return true;
