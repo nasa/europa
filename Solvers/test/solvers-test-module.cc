@@ -9,6 +9,7 @@
 #include "OpenConditionManager.hh"
 #include "ThreatManager.hh"
 #include "Object.hh"
+#include "Timeline.hh"
 #include "Filters.hh"
 #include "IntervalToken.hh"
 #include "TokenVariable.hh"
@@ -19,6 +20,7 @@
 #include "IntervalIntDomain.hh"
 #include "EnumeratedDomain.hh"
 #include "MatchingEngine.hh"
+#include "HSTSDecisionPoints.hh"
 #include "PlanDatabaseWriter.hh"
 
 /**
@@ -31,6 +33,7 @@
 
 using namespace EUROPA;
 using namespace EUROPA::SOLVERS;
+using namespace EUROPA::SOLVERS::HSTS;
 
 /**
  * @brief Test Constraint to only fire when all values are singletons and to then
@@ -408,6 +411,10 @@ public:
     runTest(testDynamicFlawManagement);
     runTest(testDefaultVariableOrdering);
     runTest(testHeuristicVariableOrdering);
+    runTest(testTokenComparators);
+    runTest(testValueEnum);
+    runTest(testHSTSOpenConditionDecisionPoint);
+    runTest(testHSTSThreatDecisionPoint);
     return true;
   }
 
@@ -676,7 +683,7 @@ private:
       Solver solver(assembly.getPlanDatabase(), *child);
       assertTrue(solver.solve());
       assertTrue(solver.getStepCount() == solver.getDepth());
-      assertTrue(solver.getStepCount() == 3, toString(solver.getStepCount()));
+      assertTrue(solver.getStepCount() == 2, toString(solver.getStepCount()));
       ConstrainedVariableId v1 = assembly.getPlanDatabase()->getGlobalVariable("v1");
       assertTrue(v1->lastDomain().getSingletonValue() == 1, v1->toString());
       ConstrainedVariableId v2 = assembly.getPlanDatabase()->getGlobalVariable("v2");
@@ -702,6 +709,702 @@ private:
       assertTrue(v2->getSpecifiedValue() == 10, v2->toString());
     }
 
+    return true;
+  }
+
+  static bool testTokenComparators() {
+    StandardAssembly assembly(Schema::instance());
+    Schema::instance()->addPredicate("A.Foo");
+    PlanDatabaseId db = assembly.getPlanDatabase();
+
+    Object o1(db, "A", "o1");
+
+    //create the token to which everything is going to get compared.  Midpoint at 10.
+    IntervalToken foo(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 20), IntervalIntDomain(1, 10), "o1", true);
+    //create a token after foo
+    IntervalToken t1(db, "A.Foo", false, IntervalIntDomain(7, 10), IntervalIntDomain(8, 20), IntervalIntDomain(1, 10), "o1", true);
+    //create a token before foo
+    IntervalToken t2(db, "A.Foo", false, IntervalIntDomain(4, 10), IntervalIntDomain(5, 20), IntervalIntDomain(1, 10), "o1", true);
+    //create a token that starts at the same time as foo
+    IntervalToken t3(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(9, 20), IntervalIntDomain(4, 10), "o1", true);
+
+    EarlyTokenComparator early(foo.getId());
+    assertTrue(early.compare(foo.getId(), t1.getId()));
+    assertTrue(!early.compare(t1.getId(), foo.getId()));
+    assertTrue(!early.compare(foo.getId(), t2.getId()));
+    assertTrue(early.compare(t2.getId(), foo.getId()));
+    assertTrue(!early.compare(foo.getId(), t3.getId()));
+    assertTrue(!early.compare(t3.getId(), foo.getId()));
+
+    LateTokenComparator late(foo.getId());
+    assertTrue(!late.compare(foo.getId(), t1.getId()));
+    assertTrue(late.compare(t1.getId(), foo.getId()));
+    assertTrue(late.compare(foo.getId(), t2.getId()));
+    assertTrue(!late.compare(t2.getId(), foo.getId()));
+    assertTrue(!late.compare(foo.getId(), t3.getId()));
+    assertTrue(!late.compare(t3.getId(), foo.getId()));
+
+    //create a token w/ midpoint 1 after foo's midpoint, starting before foo
+    IntervalToken t4(db, "A.Foo", false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 19), IntervalIntDomain(1, 14), "o1", true);
+    //create a token w/ midpoint 1 after foo's midpoint, starting at the same time as foo
+    IntervalToken t5(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 22), IntervalIntDomain(1, 12), "o1", true);
+    //create a token w/ midpoint 1 after foo's midpoint, starting after foo
+    IntervalToken t6(db, "A.Foo", false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 21), IntervalIntDomain(1, 10), "o1", true);
+
+    //create a token w/ midpoint 1 before foo's midpoint, starting before foo
+    IntervalToken t7(db, "A.Foo", false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 19), IntervalIntDomain(1, 10), "o1", true);
+    //create a token w/ midpoint 1 before foo's midpoint, starting at the same time as foo
+    IntervalToken t8(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 18), IntervalIntDomain(1, 8), "o1", true);
+    //create a token w/ midpoint 1 before foo's midpoint, starting after foo
+    IntervalToken t9(db, "A.Foo", false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 17), IntervalIntDomain(1, 6), "o1", true);
+
+    //create a token w/ midpoint 2 after foo's midpoint, starting before foo
+    IntervalToken t10(db, "A.Foo", false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 25), IntervalIntDomain(1, 16), "o1", true);
+    //create a token w/ midpoint 2 after foo's midpoint, starting at the same time as foo
+    IntervalToken t11(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 24), IntervalIntDomain(1, 14), "o1", true);
+    //create a token w/ midpoint 2 after foo's midpoint, starting after foo
+    IntervalToken t12(db, "A.Foo", false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 23), IntervalIntDomain(1, 12), "o1", true);
+
+    //create a token w/ midpoint 2 before foo's midpoint, starting before foo
+    IntervalToken t13(db, "A.Foo", false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 17), IntervalIntDomain(1, 8), "o1", true);
+    //create a token w/ midpoint 2 before foo's midpoint, starting at the same time as foo
+    IntervalToken t14(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 16), IntervalIntDomain(1, 6), "o1", true);
+    //create a token w/ midpoint 2 before foo's mispoint, starting after foo
+    IntervalToken t15(db, "A.Foo", false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 15), IntervalIntDomain(1, 4), "o1", true);
+
+    NearTokenComparator near(foo.getId());
+    assertTrue(!near.compare(foo.getId(), foo.getId()));
+    assertTrue(!near.compare(t4.getId(), t5.getId()));
+    assertTrue(!near.compare(t5.getId(), t6.getId()));
+    assertTrue(!near.compare(t4.getId(), t6.getId()));
+
+    assertTrue(!near.compare(t4.getId(), t7.getId()));
+    assertTrue(!near.compare(t7.getId(), t4.getId()));
+    assertTrue(!near.compare(t4.getId(), t8.getId()));
+    assertTrue(!near.compare(t8.getId(), t4.getId()));
+    assertTrue(!near.compare(t4.getId(), t9.getId()));
+    assertTrue(!near.compare(t9.getId(), t4.getId()));
+
+    assertTrue(near.compare(t4.getId(), t10.getId()));
+    assertTrue(!near.compare(t10.getId(), t4.getId()));
+    assertTrue(near.compare(t4.getId(), t11.getId()));
+    assertTrue(!near.compare(t11.getId(), t4.getId()));
+    assertTrue(near.compare(t4.getId(), t12.getId()));
+    assertTrue(!near.compare(t12.getId(), t4.getId()));
+    
+    assertTrue(near.compare(t4.getId(), t13.getId()));
+    assertTrue(!near.compare(t13.getId(), t4.getId()));
+    assertTrue(near.compare(t4.getId(), t14.getId()));
+    assertTrue(!near.compare(t14.getId(), t4.getId()));
+    assertTrue(near.compare(t4.getId(), t15.getId()));
+    assertTrue(!near.compare(t15.getId(), t4.getId()));
+
+
+    assertTrue(!near.compare(t5.getId(), t7.getId()));
+    assertTrue(!near.compare(t7.getId(), t5.getId()));
+    assertTrue(!near.compare(t5.getId(), t8.getId()));
+    assertTrue(!near.compare(t8.getId(), t5.getId()));
+    assertTrue(!near.compare(t5.getId(), t9.getId()));
+    assertTrue(!near.compare(t9.getId(), t5.getId()));
+
+    assertTrue(near.compare(t5.getId(), t10.getId()));
+    assertTrue(!near.compare(t10.getId(), t5.getId()));
+    assertTrue(near.compare(t5.getId(), t11.getId()));
+    assertTrue(!near.compare(t11.getId(), t5.getId()));
+    assertTrue(near.compare(t5.getId(), t12.getId()));
+    assertTrue(!near.compare(t12.getId(), t5.getId()));
+    
+    assertTrue(near.compare(t5.getId(), t13.getId()));
+    assertTrue(!near.compare(t13.getId(), t5.getId()));
+    assertTrue(near.compare(t5.getId(), t14.getId()));
+    assertTrue(!near.compare(t14.getId(), t5.getId()));
+    assertTrue(near.compare(t5.getId(), t15.getId()));
+    assertTrue(!near.compare(t15.getId(), t5.getId()));
+
+
+    assertTrue(!near.compare(t6.getId(), t7.getId()));
+    assertTrue(!near.compare(t7.getId(), t6.getId()));
+    assertTrue(!near.compare(t6.getId(), t8.getId()));
+    assertTrue(!near.compare(t8.getId(), t6.getId()));
+    assertTrue(!near.compare(t6.getId(), t9.getId()));
+    assertTrue(!near.compare(t9.getId(), t6.getId()));
+
+    assertTrue(near.compare(t6.getId(), t10.getId()));
+    assertTrue(!near.compare(t10.getId(), t6.getId()));
+    assertTrue(near.compare(t6.getId(), t11.getId()));
+    assertTrue(!near.compare(t11.getId(), t6.getId()));
+    assertTrue(near.compare(t6.getId(), t12.getId()));
+    assertTrue(!near.compare(t12.getId(), t6.getId()));
+    
+    assertTrue(near.compare(t6.getId(), t13.getId()));
+    assertTrue(!near.compare(t13.getId(), t6.getId()));
+    assertTrue(near.compare(t6.getId(), t14.getId()));
+    assertTrue(!near.compare(t14.getId(), t6.getId()));
+    assertTrue(near.compare(t6.getId(), t15.getId()));
+    assertTrue(!near.compare(t15.getId(), t6.getId()));
+
+
+
+
+    assertTrue(!near.compare(t7.getId(), t8.getId()));
+    assertTrue(!near.compare(t8.getId(), t9.getId()));
+    assertTrue(!near.compare(t9.getId(), t7.getId()));
+
+    assertTrue(near.compare(t7.getId(), t10.getId()));
+    assertTrue(!near.compare(t10.getId(), t7.getId()));
+    assertTrue(near.compare(t7.getId(), t11.getId()));
+    assertTrue(!near.compare(t11.getId(), t7.getId()));
+    assertTrue(near.compare(t7.getId(), t12.getId()));
+    assertTrue(!near.compare(t12.getId(), t7.getId()));
+
+    assertTrue(near.compare(t7.getId(), t13.getId()));
+    assertTrue(!near.compare(t13.getId(), t7.getId()));
+    assertTrue(near.compare(t7.getId(), t14.getId()));
+    assertTrue(!near.compare(t14.getId(), t7.getId()));
+    assertTrue(near.compare(t7.getId(), t15.getId()));
+    assertTrue(!near.compare(t15.getId(), t7.getId()));
+
+    assertTrue(near.compare(t8.getId(), t10.getId()));
+    assertTrue(!near.compare(t10.getId(), t8.getId()));
+    assertTrue(near.compare(t8.getId(), t11.getId()));
+    assertTrue(!near.compare(t11.getId(), t8.getId()));
+    assertTrue(near.compare(t8.getId(), t12.getId()));
+    assertTrue(!near.compare(t12.getId(), t8.getId()));
+
+    assertTrue(near.compare(t8.getId(), t13.getId()));
+    assertTrue(!near.compare(t13.getId(), t8.getId()));
+    assertTrue(near.compare(t8.getId(), t14.getId()));
+    assertTrue(!near.compare(t14.getId(), t8.getId()));
+    assertTrue(near.compare(t8.getId(), t15.getId()));
+    assertTrue(!near.compare(t15.getId(), t8.getId()));
+    
+
+    assertTrue(near.compare(t9.getId(), t10.getId()));
+    assertTrue(!near.compare(t10.getId(), t9.getId()));
+    assertTrue(near.compare(t9.getId(), t11.getId()));
+    assertTrue(!near.compare(t11.getId(), t9.getId()));
+    assertTrue(near.compare(t9.getId(), t12.getId()));
+    assertTrue(!near.compare(t12.getId(), t9.getId()));
+
+    assertTrue(near.compare(t9.getId(), t13.getId()));
+    assertTrue(!near.compare(t13.getId(), t9.getId()));
+    assertTrue(near.compare(t9.getId(), t14.getId()));
+    assertTrue(!near.compare(t14.getId(), t9.getId()));
+    assertTrue(near.compare(t9.getId(), t15.getId()));
+    assertTrue(!near.compare(t15.getId(), t9.getId()));
+
+
+    assertTrue(!near.compare(t10.getId(), t11.getId()));
+    assertTrue(!near.compare(t11.getId(), t12.getId()));
+    assertTrue(!near.compare(t12.getId(), t10.getId()));
+
+    assertTrue(!near.compare(t10.getId(), t13.getId()));
+    assertTrue(!near.compare(t13.getId(), t10.getId()));
+    assertTrue(!near.compare(t10.getId(), t14.getId()));
+    assertTrue(!near.compare(t14.getId(), t10.getId()));
+    assertTrue(!near.compare(t10.getId(), t15.getId()));
+    assertTrue(!near.compare(t15.getId(), t10.getId()));
+
+    assertTrue(!near.compare(t11.getId(), t13.getId()));
+    assertTrue(!near.compare(t13.getId(), t11.getId()));
+    assertTrue(!near.compare(t11.getId(), t14.getId()));
+    assertTrue(!near.compare(t14.getId(), t11.getId()));
+    assertTrue(!near.compare(t11.getId(), t15.getId()));
+    assertTrue(!near.compare(t15.getId(), t11.getId()));
+
+    assertTrue(!near.compare(t12.getId(), t13.getId()));
+    assertTrue(!near.compare(t13.getId(), t12.getId()));
+    assertTrue(!near.compare(t12.getId(), t14.getId()));
+    assertTrue(!near.compare(t14.getId(), t12.getId()));
+    assertTrue(!near.compare(t12.getId(), t15.getId()));
+    assertTrue(!near.compare(t15.getId(), t12.getId()));
+
+    assertTrue(!near.compare(t13.getId(), t14.getId()));
+    assertTrue(!near.compare(t14.getId(), t15.getId()));
+    assertTrue(!near.compare(t15.getId(), t13.getId()));
+
+
+    FarTokenComparator far(foo.getId());
+    assertTrue(!far.compare(foo.getId(), foo.getId()));
+    assertTrue(!far.compare(t4.getId(), t5.getId()));
+    assertTrue(!far.compare(t5.getId(), t6.getId()));
+    assertTrue(!far.compare(t4.getId(), t6.getId()));
+
+    assertTrue(!far.compare(t4.getId(), t7.getId()));
+    assertTrue(!far.compare(t7.getId(), t4.getId()));
+    assertTrue(!far.compare(t4.getId(), t8.getId()));
+    assertTrue(!far.compare(t8.getId(), t4.getId()));
+    assertTrue(!far.compare(t4.getId(), t9.getId()));
+    assertTrue(!far.compare(t9.getId(), t4.getId()));
+
+    assertTrue(!far.compare(t4.getId(), t10.getId()));
+    assertTrue(far.compare(t10.getId(), t4.getId()));
+    assertTrue(!far.compare(t4.getId(), t11.getId()));
+    assertTrue(far.compare(t11.getId(), t4.getId()));
+    assertTrue(!far.compare(t4.getId(), t12.getId()));
+    assertTrue(far.compare(t12.getId(), t4.getId()));
+    
+    assertTrue(!far.compare(t4.getId(), t13.getId()));
+    assertTrue(far.compare(t13.getId(), t4.getId()));
+    assertTrue(!far.compare(t4.getId(), t14.getId()));
+    assertTrue(far.compare(t14.getId(), t4.getId()));
+    assertTrue(!far.compare(t4.getId(), t15.getId()));
+    assertTrue(far.compare(t15.getId(), t4.getId()));
+
+
+    assertTrue(!far.compare(t5.getId(), t7.getId()));
+    assertTrue(!far.compare(t7.getId(), t5.getId()));
+    assertTrue(!far.compare(t5.getId(), t8.getId()));
+    assertTrue(!far.compare(t8.getId(), t5.getId()));
+    assertTrue(!far.compare(t5.getId(), t9.getId()));
+    assertTrue(!far.compare(t9.getId(), t5.getId()));
+
+    assertTrue(!far.compare(t5.getId(), t10.getId()));
+    assertTrue(far.compare(t10.getId(), t5.getId()));
+    assertTrue(!far.compare(t5.getId(), t11.getId()));
+    assertTrue(far.compare(t11.getId(), t5.getId()));
+    assertTrue(!far.compare(t5.getId(), t12.getId()));
+    assertTrue(far.compare(t12.getId(), t5.getId()));
+    
+    assertTrue(!far.compare(t5.getId(), t13.getId()));
+    assertTrue(far.compare(t13.getId(), t5.getId()));
+    assertTrue(!far.compare(t5.getId(), t14.getId()));
+    assertTrue(far.compare(t14.getId(), t5.getId()));
+    assertTrue(!far.compare(t5.getId(), t15.getId()));
+    assertTrue(far.compare(t15.getId(), t5.getId()));
+
+
+    assertTrue(!far.compare(t6.getId(), t7.getId()));
+    assertTrue(!far.compare(t7.getId(), t6.getId()));
+    assertTrue(!far.compare(t6.getId(), t8.getId()));
+    assertTrue(!far.compare(t8.getId(), t6.getId()));
+    assertTrue(!far.compare(t6.getId(), t9.getId()));
+    assertTrue(!far.compare(t9.getId(), t6.getId()));
+
+    assertTrue(!far.compare(t6.getId(), t10.getId()));
+    assertTrue(far.compare(t10.getId(), t6.getId()));
+    assertTrue(!far.compare(t6.getId(), t11.getId()));
+    assertTrue(far.compare(t11.getId(), t6.getId()));
+    assertTrue(!far.compare(t6.getId(), t12.getId()));
+    assertTrue(far.compare(t12.getId(), t6.getId()));
+    
+    assertTrue(!far.compare(t6.getId(), t13.getId()));
+    assertTrue(far.compare(t13.getId(), t6.getId()));
+    assertTrue(!far.compare(t6.getId(), t14.getId()));
+    assertTrue(far.compare(t14.getId(), t6.getId()));
+    assertTrue(!far.compare(t6.getId(), t15.getId()));
+    assertTrue(far.compare(t15.getId(), t6.getId()));
+
+
+
+
+    assertTrue(!far.compare(t7.getId(), t8.getId()));
+    assertTrue(!far.compare(t8.getId(), t9.getId()));
+    assertTrue(!far.compare(t9.getId(), t7.getId()));
+
+    assertTrue(!far.compare(t7.getId(), t10.getId()));
+    assertTrue(far.compare(t10.getId(), t7.getId()));
+    assertTrue(!far.compare(t7.getId(), t11.getId()));
+    assertTrue(far.compare(t11.getId(), t7.getId()));
+    assertTrue(!far.compare(t7.getId(), t12.getId()));
+    assertTrue(far.compare(t12.getId(), t7.getId()));
+
+    assertTrue(!far.compare(t7.getId(), t13.getId()));
+    assertTrue(far.compare(t13.getId(), t7.getId()));
+    assertTrue(!far.compare(t7.getId(), t14.getId()));
+    assertTrue(far.compare(t14.getId(), t7.getId()));
+    assertTrue(!far.compare(t7.getId(), t15.getId()));
+    assertTrue(far.compare(t15.getId(), t7.getId()));
+
+    assertTrue(!far.compare(t8.getId(), t10.getId()));
+    assertTrue(far.compare(t10.getId(), t8.getId()));
+    assertTrue(!far.compare(t8.getId(), t11.getId()));
+    assertTrue(far.compare(t11.getId(), t8.getId()));
+    assertTrue(!far.compare(t8.getId(), t12.getId()));
+    assertTrue(far.compare(t12.getId(), t8.getId()));
+
+    assertTrue(!far.compare(t8.getId(), t13.getId()));
+    assertTrue(far.compare(t13.getId(), t8.getId()));
+    assertTrue(!far.compare(t8.getId(), t14.getId()));
+    assertTrue(far.compare(t14.getId(), t8.getId()));
+    assertTrue(!far.compare(t8.getId(), t15.getId()));
+    assertTrue(far.compare(t15.getId(), t8.getId()));
+    
+
+    assertTrue(!far.compare(t9.getId(), t10.getId()));
+    assertTrue(far.compare(t10.getId(), t9.getId()));
+    assertTrue(!far.compare(t9.getId(), t11.getId()));
+    assertTrue(far.compare(t11.getId(), t9.getId()));
+    assertTrue(!far.compare(t9.getId(), t12.getId()));
+    assertTrue(far.compare(t12.getId(), t9.getId()));
+
+    assertTrue(!far.compare(t9.getId(), t13.getId()));
+    assertTrue(far.compare(t13.getId(), t9.getId()));
+    assertTrue(!far.compare(t9.getId(), t14.getId()));
+    assertTrue(far.compare(t14.getId(), t9.getId()));
+    assertTrue(!far.compare(t9.getId(), t15.getId()));
+    assertTrue(far.compare(t15.getId(), t9.getId()));
+
+
+    assertTrue(!far.compare(t10.getId(), t11.getId()));
+    assertTrue(!far.compare(t11.getId(), t12.getId()));
+    assertTrue(!far.compare(t12.getId(), t10.getId()));
+
+    assertTrue(!far.compare(t10.getId(), t13.getId()));
+    assertTrue(!far.compare(t13.getId(), t10.getId()));
+    assertTrue(!far.compare(t10.getId(), t14.getId()));
+    assertTrue(!far.compare(t14.getId(), t10.getId()));
+    assertTrue(!far.compare(t10.getId(), t15.getId()));
+    assertTrue(!far.compare(t15.getId(), t10.getId()));
+
+    assertTrue(!far.compare(t11.getId(), t13.getId()));
+    assertTrue(!far.compare(t13.getId(), t11.getId()));
+    assertTrue(!far.compare(t11.getId(), t14.getId()));
+    assertTrue(!far.compare(t14.getId(), t11.getId()));
+    assertTrue(!far.compare(t11.getId(), t15.getId()));
+    assertTrue(!far.compare(t15.getId(), t11.getId()));
+
+    assertTrue(!far.compare(t12.getId(), t13.getId()));
+    assertTrue(!far.compare(t13.getId(), t12.getId()));
+    assertTrue(!far.compare(t12.getId(), t14.getId()));
+    assertTrue(!far.compare(t14.getId(), t12.getId()));
+    assertTrue(!far.compare(t12.getId(), t15.getId()));
+    assertTrue(!far.compare(t15.getId(), t12.getId()));
+
+    assertTrue(!far.compare(t13.getId(), t14.getId()));
+    assertTrue(!far.compare(t14.getId(), t15.getId()));
+    assertTrue(!far.compare(t15.getId(), t13.getId()));
+    
+    return true;
+  }
+
+  static bool testValueEnum() {
+    StandardAssembly assembly(Schema::instance());
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    ConstraintEngineId ce = assembly.getConstraintEngine();
+
+    Variable<IntervalIntDomain> intIntVar(ce, IntervalIntDomain(1, 5), true);
+
+    std::list<double> ints;
+    ints.push_back(1);
+    ints.push_back(2);
+    ints.push_back(3);
+    ints.push_back(4);
+    ints.push_back(5);
+    EnumeratedDomain enumIntDom(ints, true, "INTEGER_ENUMERATION");
+    Variable<EnumeratedDomain> enumIntVar(ce, enumIntDom, true);
+
+    std::list<double> strings;
+    strings.push_back(LabelStr("foo"));
+    strings.push_back(LabelStr("bar"));
+    strings.push_back(LabelStr("baz"));
+    strings.push_back(LabelStr("quux"));
+    EnumeratedDomain enumStrDom(strings, false, "SYMBOL_ENUMERATION");
+    Variable<EnumeratedDomain> enumStrVar(ce, enumStrDom, true);
+
+
+    EnumeratedDomain enumObjDom(false, "A");
+    Variable<EnumeratedDomain> enumObjVar(ce, enumObjDom, true);
+    Object o1(db, "A", "o1");
+    Object o2(db, "A", "o2");
+    Object o3(db, "A", "o3");
+    Object o4(db, "A", "o4");
+    db->makeObjectVariableFromType("A", enumObjVar.getId());
+
+    std::string intHeur("<FlawHandler component=\"ValueEnum\">\
+                           <Value val=\"4\"/>\
+                           <Value val=\"1\"/>\
+                           <Value val=\"5\"/>\
+                           <Value val=\"2\"/>\
+                           <Value val=\"3\"/>\
+                         </FlawHandler>");
+    TiXmlElement* intHeurXml = initXml(intHeur);
+    assertTrue(intHeurXml != NULL);
+
+    std::string intTrimHeur("<FlawHandler component=\"ValueEnum\">\
+                               <Value val=\"3\"/>\
+                               <Value val=\"2\"/>\
+                               <Value val=\"4\"/>\
+                             </FlawHandler>");
+    TiXmlElement* intTrimHeurXml = initXml(intTrimHeur);
+    assertTrue(intTrimHeurXml != NULL);
+
+    std::string strHeur("<FlawHandler component=\"ValueEnum\">\
+                           <Value val=\"baz\"/>\
+                           <Value val=\"quux\"/>\
+                           <Value val=\"bar\"/>\
+                           <Value val=\"foo\"/>\
+                         </FlawHandler>");
+    TiXmlElement* strHeurXml = initXml(strHeur);
+    assertTrue(strHeurXml != NULL);
+
+    std::string strTrimHeur("<FlawHandler component=\"ValueEnum\">\
+                               <Value val=\"quux\"/>\
+                               <Value val=\"foo\"/>\
+                             </FlawHandler>");
+    TiXmlElement* strTrimHeurXml = initXml(strTrimHeur);
+    assertTrue(strTrimHeurXml != NULL);
+
+    std::string objHeur("<FlawHandler component=\"ValueEnum\">\
+                           <Value val=\"o3\"/>\
+                           <Value val=\"o2\"/>\
+                           <Value val=\"o4\"/>\
+                           <Value val=\"o1\"/>\
+                         </FlawHandler>");
+    TiXmlElement* objHeurXml = initXml(objHeur);
+    assertTrue(objHeurXml != NULL);
+
+    std::string objTrimHeur("<FlawHandler component=\"ValueEnum\">\
+                               <Value val=\"o1\"/>\
+                               <Value val=\"o4\"/>\
+                               <Value val=\"o2\"/>\
+                             </FlawHandler>");
+    TiXmlElement* objTrimHeurXml = initXml(objTrimHeur);
+    assertTrue(objTrimHeurXml != NULL);
+
+    ValueEnum intIntDP(db->getClient(), intIntVar.getId(), *intHeurXml);
+    ValueEnum enumIntDP(db->getClient(), enumIntVar.getId(), *intHeurXml);
+
+    assertTrue(intIntDP.getNext() == 4);
+    assertTrue(enumIntDP.getNext() == 4);
+    assertTrue(intIntDP.getNext() == 1);
+    assertTrue(enumIntDP.getNext() == 1);
+    assertTrue(intIntDP.getNext() == 5);
+    assertTrue(enumIntDP.getNext() == 5);
+    assertTrue(intIntDP.getNext() == 2);
+    assertTrue(enumIntDP.getNext() == 2);
+    assertTrue(intIntDP.getNext() == 3);
+    assertTrue(enumIntDP.getNext() == 3);
+
+    ValueEnum trimIntIntDP(db->getClient(), intIntVar.getId(), *intTrimHeurXml);
+    ValueEnum trimEnumIntDP(db->getClient(), enumIntVar.getId(), *intTrimHeurXml);
+
+    assertTrue(trimIntIntDP.getNext() == 3);
+    assertTrue(trimEnumIntDP.getNext() == 3); 
+    assertTrue(trimIntIntDP.getNext() == 2);
+    assertTrue(trimEnumIntDP.getNext() == 2); 
+    assertTrue(trimIntIntDP.getNext() == 4);
+    assertTrue(trimEnumIntDP.getNext() == 4); 
+
+    ValueEnum enumStrDP(db->getClient(), enumStrVar.getId(), *strHeurXml);
+
+    assertTrue(enumStrDP.getNext() == LabelStr("baz"));
+    assertTrue(enumStrDP.getNext() == LabelStr("quux"));
+    assertTrue(enumStrDP.getNext() == LabelStr("bar"));
+    assertTrue(enumStrDP.getNext() == LabelStr("foo"));
+
+    ValueEnum trimEnumStrDP(db->getClient(), enumStrVar.getId(), *strTrimHeurXml);
+    
+    assertTrue(trimEnumStrDP.getNext() == LabelStr("quux"));
+    assertTrue(trimEnumStrDP.getNext() == LabelStr("foo"));
+
+    ValueEnum enumObjDP(db->getClient(), enumObjVar.getId(), *objHeurXml);
+
+    assertTrue(enumObjDP.getNext() == o3.getId());
+    assertTrue(enumObjDP.getNext() == o2.getId());
+    assertTrue(enumObjDP.getNext() == o4.getId());
+    assertTrue(enumObjDP.getNext() == o1.getId());
+
+    ValueEnum trimEnumObjDP(db->getClient(), enumObjVar.getId(), *objTrimHeurXml);
+
+    assertTrue(trimEnumObjDP.getNext() == o1.getId());
+    assertTrue(trimEnumObjDP.getNext() == o4.getId());
+    assertTrue(trimEnumObjDP.getNext() == o2.getId());
+
+    delete objTrimHeurXml;
+    delete objHeurXml;
+    delete strTrimHeurXml;
+    delete strHeurXml;
+    delete intTrimHeurXml;
+    delete intHeurXml;
+
+    return true;
+  }
+  static bool testHSTSOpenConditionDecisionPoint() {
+    StandardAssembly assembly(Schema::instance());
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    DbClientId client = db->getClient();
+    Object o1(db, "A", "o1");    
+
+    //flawed token that should be compatible with everything
+    IntervalToken flawedToken(db, "A.Foo", false);
+
+    assertTrue(client->propagate());
+    //test activate only
+    std::string aOnlyHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"activateOnly\"/>");
+    TiXmlElement* aOnlyHeurXml = initXml(aOnlyHeur);
+    HSTS::OpenConditionDecisionPoint aOnly(client, flawedToken.getId(), *aOnlyHeurXml);
+    aOnly.initialize();
+    assertTrue(aOnly.getStateChoices().size() == 1);
+    assertTrue(aOnly.getStateChoices()[0] == Token::ACTIVE);
+    assertTrue(aOnly.getCompatibleTokens().empty());
+
+    //test merge only
+    IntervalToken tok1(db, "A.Foo", false, IntervalIntDomain(1, 10), IntervalIntDomain(6, 20), IntervalIntDomain(5, 10), "o1");
+    client->activate(tok1.getId());
+    std::string mOnlyHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\"/>");
+    TiXmlElement* mOnlyHeurXml = initXml(mOnlyHeur);
+    HSTS::OpenConditionDecisionPoint mOnly(client, flawedToken.getId(), *mOnlyHeurXml);
+    mOnly.initialize();
+    assertTrue(mOnly.getStateChoices().size() == 1);
+    assertTrue(mOnly.getStateChoices()[0] == Token::MERGED);
+    assertTrue(mOnly.getCompatibleTokens().size() == 1);
+    assertTrue(mOnly.getCompatibleTokens()[0] == tok1.getId());
+
+    //test activate/merge
+    std::string aFirstHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"activateFirst\"/>");
+    TiXmlElement* aFirstHeurXml = initXml(aFirstHeur);
+    HSTS::OpenConditionDecisionPoint aFirst(client, flawedToken.getId(), *aFirstHeurXml);
+    assertTrue(client->propagate());
+    aFirst.initialize();
+    assertTrue(aFirst.getStateChoices().size() == 2);
+    assertTrue(aFirst.getStateChoices()[0] == Token::ACTIVE);
+    assertTrue(aFirst.getStateChoices()[1] == Token::MERGED);
+    assertTrue(aFirst.getCompatibleTokens().size() == 1);
+    assertTrue(aFirst.getCompatibleTokens()[0] == tok1.getId());
+
+    //test merge/activate
+    std::string mFirstHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeFirst\"/>");
+    TiXmlElement* mFirstHeurXml = initXml(mFirstHeur);
+    HSTS::OpenConditionDecisionPoint mFirst(client, flawedToken.getId(), *mFirstHeurXml);
+    assertTrue(client->propagate());
+    mFirst.initialize();
+    assertTrue(mFirst.getStateChoices().size() == 2);
+    assertTrue(mFirst.getStateChoices()[0] == Token::MERGED);
+    assertTrue(mFirst.getStateChoices()[1] == Token::ACTIVE);
+    assertTrue(mFirst.getCompatibleTokens().size() == 1);
+    assertTrue(mFirst.getCompatibleTokens()[0] == tok1.getId());
+
+    //test early
+    IntervalToken tok2(db, "A.Foo", false, IntervalIntDomain(3, 10), IntervalIntDomain(8, 20), IntervalIntDomain(5, 10), "o1");
+    client->activate(tok2.getId());
+    std::string mEarlyHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"early\"/>");
+    TiXmlElement* mEarlyHeurXml = initXml(mEarlyHeur);
+    HSTS::OpenConditionDecisionPoint mEarly(client, flawedToken.getId(), *mEarlyHeurXml);
+    mEarly.initialize();
+    assertTrue(mEarly.getStateChoices().size() == 1);
+    assertTrue(mEarly.getStateChoices()[0] == Token::MERGED);
+    assertTrue(mEarly.getCompatibleTokens().size() == 2);
+    assertTrue(mEarly.getCompatibleTokens()[0] == tok1.getId());
+    assertTrue(mEarly.getCompatibleTokens()[1] == tok2.getId());
+
+    //test late
+    std::string mLateHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"late\"/>");
+    TiXmlElement* mLateHeurXml = initXml(mLateHeur);
+    HSTS::OpenConditionDecisionPoint mLate(client, flawedToken.getId(), *mLateHeurXml);
+    mLate.initialize();
+    assertTrue(mLate.getStateChoices().size() == 1);
+    assertTrue(mLate.getStateChoices()[0] == Token::MERGED);
+    assertTrue(mLate.getCompatibleTokens().size() == 2);
+    assertTrue(mLate.getCompatibleTokens()[0] == tok2.getId());
+    assertTrue(mLate.getCompatibleTokens()[1] == tok1.getId());
+
+    //test near
+    //tok1 has midpoint at 11, tok2 has midpoint at 13, so put flawedToken's midpoint at 10
+    const_cast<AbstractDomain&>(flawedToken.getStart()->lastDomain()).intersect(4, 10);
+    const_cast<AbstractDomain&>(flawedToken.getEnd()->lastDomain()).intersect(5, 12);
+    assertTrue(assembly.getConstraintEngine()->propagate());
+    std::string mNearHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"near\"/>");
+    TiXmlElement* mNearHeurXml = initXml(mNearHeur);
+    HSTS::OpenConditionDecisionPoint mNear(client, flawedToken.getId(), *mNearHeurXml);
+    mNear.initialize();
+    assertTrue(mNear.getStateChoices().size() == 1);
+    assertTrue(mNear.getStateChoices()[0] == Token::MERGED);
+    assertTrue(mNear.getCompatibleTokens().size() == 2);
+    assertTrue(mNear.getCompatibleTokens()[0] == tok1.getId());
+    assertTrue(mNear.getCompatibleTokens()[1] == tok2.getId());
+
+    //test far
+    std::string mFarHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"far\"/>");
+    TiXmlElement* mFarHeurXml = initXml(mFarHeur);
+    HSTS::OpenConditionDecisionPoint mFar(client, flawedToken.getId(), *mFarHeurXml);
+    mFar.initialize();
+    assertTrue(mFar.getStateChoices().size() == 1);
+    assertTrue(mFar.getStateChoices()[0] == Token::MERGED);
+    assertTrue(mFar.getCompatibleTokens().size() == 2);
+    assertTrue(mFar.getCompatibleTokens()[0] == tok2.getId());
+    assertTrue(mFar.getCompatibleTokens()[1] == tok1.getId());
+
+    delete aOnlyHeurXml;
+    delete mOnlyHeurXml;
+    delete aFirstHeurXml;
+    delete mFirstHeurXml;
+    delete mEarlyHeurXml;
+    delete mLateHeurXml;
+    delete mNearHeurXml;
+    delete mFarHeurXml;
+    return true;
+  }
+  static bool testHSTSThreatDecisionPoint() {
+    StandardAssembly assembly(Schema::instance());
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    DbClientId client = db->getClient();
+    Timeline o1(db, "A", "o1");
+
+    IntervalToken tok1(db, "A.Foo", false, IntervalIntDomain(3, 10), IntervalIntDomain(7, 14),
+		       IntervalIntDomain(4, 4), "o1");
+    client->activate(tok1.getId());
+
+    IntervalToken tok2(db, "A.Foo", false, IntervalIntDomain(7, 16), IntervalIntDomain(8, 20),
+		       IntervalIntDomain(1, 4), "o1");
+    client->activate(tok2.getId());
+
+    client->constrain(o1.getId(), tok1.getId(), tok1.getId());
+    client->constrain(o1.getId(), tok1.getId(), tok2.getId());
+
+    IntervalToken flawedToken(db, "A.Foo", false, IntervalIntDomain(1, 10), IntervalIntDomain(4, 20), 
+			      IntervalIntDomain(3, 10), "o1");
+    client->activate(flawedToken.getId());
+
+    std::string earlyHeur("<FlawHandler component=\"HSTSThreatDecisionPoint\" order=\"early\"/>");
+    TiXmlElement* earlyHeurXml = initXml(earlyHeur);
+    HSTS::ThreatDecisionPoint early(client, flawedToken.getId(), *earlyHeurXml);
+    assertTrue(client->propagate());
+    early.initialize();
+    assertTrue(early.getOrderingChoices().size() == 3);
+    assertTrue(early.getOrderingChoices()[0].second.second == tok1.getId());
+    assertTrue(early.getOrderingChoices()[1].second.second == tok2.getId());
+    assertTrue(early.getOrderingChoices()[2].second.second == flawedToken.getId());
+
+    std::string lateHeur("<FlawHandler component=\"HSTSThreatDecisionPoint\" order=\"late\"/>");
+    TiXmlElement* lateHeurXml = initXml(lateHeur);
+    HSTS::ThreatDecisionPoint late(client, flawedToken.getId(), *lateHeurXml);
+    assertTrue(client->propagate());
+    late.initialize();
+    assertTrue(late.getOrderingChoices().size() == 3);
+    assertTrue(late.getOrderingChoices()[0].second.second == flawedToken.getId());
+    assertTrue(late.getOrderingChoices()[1].second.second == tok2.getId());
+    assertTrue(late.getOrderingChoices()[2].second.second == tok1.getId());
+
+    std::string nearHeur("<FlawHandler component=\"HSTSThreatDecisionPoint\" order=\"near\"/>");
+    TiXmlElement* nearHeurXml = initXml(nearHeur);
+    HSTS::ThreatDecisionPoint near(client, flawedToken.getId(), *nearHeurXml);
+    assertTrue(client->propagate());
+    near.initialize();
+    assertTrue(near.getOrderingChoices().size() == 3);
+    assertTrue(near.getOrderingChoices()[0].second.second == tok1.getId());
+    assertTrue(near.getOrderingChoices()[1].second.second == tok2.getId() ||
+	       near.getOrderingChoices()[1].second.second == flawedToken.getId());
+    assertTrue(near.getOrderingChoices()[2].second.second == flawedToken.getId() ||
+	       near.getOrderingChoices()[2].second.second == tok2.getId());
+
+
+    std::string farHeur("<FlawHandler component=\"HSTSThreatDecisionPoint\" order=\"far\"/>");
+    TiXmlElement* farHeurXml = initXml(farHeur);
+    HSTS::ThreatDecisionPoint far(client, flawedToken.getId(), *farHeurXml);
+    assertTrue(client->propagate());
+    far.initialize();
+    assertTrue(far.getOrderingChoices().size() == 3);
+    assertTrue(far.getOrderingChoices()[0].second.second == tok2.getId() ||
+	       far.getOrderingChoices()[0].second.second == flawedToken.getId());
+    assertTrue(far.getOrderingChoices()[1].second.second == flawedToken.getId() ||
+	       far.getOrderingChoices()[1].second.second == tok2.getId());
+    assertTrue(far.getOrderingChoices()[2].second.second == tok1.getId());
+
+    delete earlyHeurXml;
+    delete lateHeurXml;
+    delete nearHeurXml;
+    delete farHeurXml;
     return true;
   }
 };
@@ -743,27 +1446,27 @@ private:
 
       // Run the solver again.
       assertTrue(solver.solve());
-      assertTrue(solver.getStepCount() == 3);
-      assertTrue(solver.getDepth() == 3);
+      assertTrue(solver.getStepCount() == 2);
+      assertTrue(solver.getDepth() == 2);
 
       // Now clear it and run it again
       solver.reset();
       assertTrue(solver.solve());
-      assertTrue(solver.getStepCount() == 3);
-      assertTrue(solver.getDepth() == 3);
+      assertTrue(solver.getStepCount() == 2);
+      assertTrue(solver.getDepth() == 2);
 
       // Now partially reset it, and run again
       solver.reset(1);
       assertTrue(solver.solve());
-      assertTrue(solver.getStepCount() == 1);
-      assertTrue(solver.getDepth() == 3);
+      assertTrue(solver.getStepCount() == 1, toString(solver.getStepCount()));
+      assertTrue(solver.getDepth() == 2, toString(solver.getDepth()));
  
       // Now we reset one decision, then clear it. Expect the solution and depth to be 1.
       solver.reset(1);
       solver.clear();
       assertTrue(solver.solve());
-      assertTrue(solver.getStepCount() == 1);
-      assertTrue(solver.getDepth() == 1);
+      assertTrue(solver.getStepCount() == 1, toString(solver.getStepCount()));
+      assertTrue(solver.getDepth() == 1, toString(solver.getDepth()));
     }
 
     return true;

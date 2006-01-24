@@ -13,11 +13,11 @@ namespace EUROPA {
 
     OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData)
       : DecisionPoint(client, flawedToken->getKey()),
-	m_flawedToken(flawedToken), 
-	m_mergeIndex(0),
-	m_choiceIndex(0),
-	m_mergeCount(0),
-	m_choiceCount(0){
+        m_flawedToken(flawedToken), 
+        m_mergeCount(0),
+        m_choiceCount(0),
+        m_mergeIndex(0),
+        m_choiceIndex(0) {
 
       // Retrieve policy information from configuration node
 
@@ -35,51 +35,59 @@ namespace EUROPA {
 
       // Next merge choices if there are any.
       if(stateDomain.isMember(Token::MERGED)){
-	// Use exact test in this case
-	m_flawedToken->getPlanDatabase()->getCompatibleTokens(m_flawedToken, m_compatibleTokens, PLUS_INFINITY, true);
-	m_mergeCount = m_compatibleTokens.size();
-	if(m_mergeCount > 0)
-	  m_choices.push_back(Token::MERGED);
+        // Use exact test in this case
+        m_flawedToken->getPlanDatabase()->getCompatibleTokens(m_flawedToken, m_compatibleTokens, PLUS_INFINITY, true);
+        m_mergeCount = m_compatibleTokens.size();
+        if(m_mergeCount > 0)
+          m_choices.push_back(Token::MERGED);
       }
 
       if(stateDomain.isMember(Token::ACTIVE) )//&& m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken))
-	m_choices.push_back(Token::ACTIVE);
+        m_choices.push_back(Token::ACTIVE);
 
       if(stateDomain.isMember(Token::REJECTED))
-	m_choices.push_back(Token::REJECTED);
+        m_choices.push_back(Token::REJECTED);
 
       m_choiceCount = m_choices.size();
     }
 
-    void OpenConditionDecisionPoint::handleExecute(){
+    void OpenConditionDecisionPoint::handleExecute() {
       checkError(m_choiceIndex < m_choiceCount, 
-		 "Tried to execute past available choices:" << m_choiceIndex << ">=" << m_choiceCount);
-
-      if(m_mergeIndex < m_mergeCount){
-	checkError(m_choiceIndex == 0, 
-		   "Expect Merging to be the first choice but index is:" << m_choiceIndex);
-	checkError(m_choices[m_choiceIndex] == Token::MERGED, 
-		   "Expect this choice to be a merge instead it is:" << m_choices[m_choiceIndex].toString());
-	TokenId activeToken = m_compatibleTokens[m_mergeIndex];
-	m_client->merge(m_flawedToken, activeToken);
+                 "Tried to execute past available choices:" << m_choiceIndex << ">=" << m_choiceCount);
+      if(m_choices[m_choiceIndex] == Token::ACTIVE) {
+        debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
+                 m_flawedToken->getKey() << "), assigning ACTIVE.");
+        m_client->activate(m_flawedToken);
       }
-      else if(m_choices[m_choiceIndex] == Token::ACTIVE)
-	m_client->activate(m_flawedToken);
+      else if(m_choices[m_choiceIndex] == Token::MERGED) {
+        checkError(m_mergeIndex < m_mergeCount, "Tried to merge past available compatible tokens.");
+        TokenId activeToken = m_compatibleTokens[m_mergeIndex];
+        debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
+                 m_flawedToken->getKey() << "), assigning MERGED onto " << activeToken->getPredicateName().toString() << 
+                 "(" << activeToken->getKey() << ").");
+        m_client->merge(m_flawedToken, activeToken);
+      }
       else {
-	checkError(m_choices[m_choiceIndex] == Token::REJECTED, 
-		   "Expect this choice to be REJECTED instead of " + m_choices[m_choiceIndex].toString());
-	m_client->reject(m_flawedToken);
+        checkError(m_choices[m_choiceIndex] == Token::REJECTED, 
+                   "Expect this choice to be REJECTED instead of " + m_choices[m_choiceIndex].toString());
+        debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
+                 m_flawedToken->getKey() << "), assigning REJECTED.");
+        m_client->reject(m_flawedToken);
       }
     }
 
-    void OpenConditionDecisionPoint::handleUndo(){
+    void OpenConditionDecisionPoint::handleUndo() {
+      debugMsg("SolverDecisionPoint:handleUndo", "Retracting open condition decision on " << m_flawedToken->getPredicateName().toString() <<
+               "(" << m_flawedToken->getKey() << ").");
       m_client->cancel(m_flawedToken);
 
-      if(m_mergeIndex < m_mergeCount)
-	m_mergeIndex++;
-
-      if(m_mergeIndex == m_mergeCount)
-	m_choiceIndex++;
+      if(m_choices[m_choiceIndex] == Token::MERGED) {
+        m_mergeIndex++;
+        if(m_mergeIndex == m_mergeCount)
+          m_choiceIndex++;
+      }
+      else
+        m_choiceIndex++;
     }
 
     bool OpenConditionDecisionPoint::hasNext() const {
@@ -89,25 +97,25 @@ namespace EUROPA {
     std::string OpenConditionDecisionPoint::toString() const{
       std::stringstream strStream;
       strStream << "TOKEN STATE: TOKEN=" << 
-	m_flawedToken->getName().toString()  << "(" << m_flawedToken->getKey() << "), " <<
-	"CHOICES=";
+        m_flawedToken->getName().toString()  << "(" << m_flawedToken->getKey() << "), " <<
+        "CHOICES=";
 
       if(!m_compatibleTokens.empty()){
-	strStream << "MERGED {";
-	for(std::vector<TokenId>::const_iterator it = m_compatibleTokens.begin(); it != m_compatibleTokens.end(); ++it){
-	  TokenId token = *it;
-	  strStream << " " << token->getKey() << " ";
-	}
-	strStream << "}";
+        strStream << "MERGED {";
+        for(std::vector<TokenId>::const_iterator it = m_compatibleTokens.begin(); it != m_compatibleTokens.end(); ++it){
+          TokenId token = *it;
+          strStream << " " << token->getKey() << " ";
+        }
+        strStream << "}";
       }
 
       if (m_flawedToken->getState()->lastDomain().isMember(Token::ACTIVE)  && 
-	  (!m_flawedToken->getPlanDatabase()->getConstraintEngine()->constraintConsistent() ||
-	   m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken)))
-	strStream << " ACTIVE ";
+          (!m_flawedToken->getPlanDatabase()->getConstraintEngine()->constraintConsistent() ||
+           m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken)))
+        strStream << " ACTIVE ";
 
       if (m_flawedToken->getState()->lastDomain().isMember(Token::REJECTED))
-	strStream << " REJECTED ";
+        strStream << " REJECTED ";
 
       return strStream.str();
     }

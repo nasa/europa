@@ -17,7 +17,7 @@ namespace EUROPA {
       /**
        * @brief Factory method to create appropriate concrete source
        */
-      static ValueSource* getSource(const ConstrainedVariableId& var);
+      static ValueSource* getSource(const ConstrainedVariableId& var, bool externalOrder = false);
 
       /**
        * @brief Accessor for total number of values available
@@ -37,7 +37,7 @@ namespace EUROPA {
     protected:
       ValueSource(unsigned int count);
 
-      const unsigned int m_count;
+      unsigned int m_count;
     };
 
     class EnumValueSource : public ValueSource {
@@ -46,6 +46,16 @@ namespace EUROPA {
       double getValue(unsigned int index) const;
     private:
       std::vector<double> m_values;
+    };
+
+    class OrderedValueSource : public ValueSource {
+    public:
+      OrderedValueSource(const AbstractDomain& dom);
+      double getValue(unsigned int index) const;
+      void addValue(const double value);
+    private:
+      std::vector<double> m_values;
+      const AbstractDomain& m_dom;
     };
 
     class IntervalValueSource : public ValueSource {

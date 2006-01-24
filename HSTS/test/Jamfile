@@ -9,8 +9,6 @@ if ! $(PLASMA_READY) {
 HSTS_Test_Files = [ FGristFiles AtSubgoalRule DNPConstraints ] ;
 ModuleObjects $(HSTS_Test_Files:S=.cc) : HSTS ;
 
-CET_Files = <ConstraintEngine!test>ConstraintTesting ;
-
 # ConstraintTesting.hh is in ConstraintEngine/test, not here.
 # !!This doesn't work, however, so I've changed the source to '#include "test/ConstraintingTest.hh"' to see if that works.
 # INCLUDES on module-tests.cc += [ FDirName $($(_top)) ConstraintEngine test ] ;
@@ -62,20 +60,20 @@ LocalDepends run-hsts-planner-tests :
         merTest17
         merTest18
         merTest1-h
-        merTest2-h
-        merTest3-h
+        #merTest2-h
+       # merTest3-h
 #3114        merTest4-h # see R2-files-R21-Bill.nddl
 #3114        merTest5-h # see R2-files-R21-IDD2_g
         merTest6-h
-        merTest7-h
+        #merTest7-h
         merTest8-h
         merTest9-h
-        merTest10-h
+        #merTest10-h
 #3114        merTest11-h # see mer-bill-2.nddl
-        merTest12-h
+        #merTest12-h
         merTest13-h
         merTest14-h
-        merTest15-h
+        #merTest15-h
         merTest16-h
         merTest17-h
         merTest18-h
@@ -120,6 +118,7 @@ LocalDepends run-hsts-planner-tests :
 #   Converted from NewPlan/ModuleTests/Parser, e.g.
 #
 ModuleObjects runEUROPAtest.cc : HSTS ;
+ModuleObjects runSolverTest.cc : HSTS ;
 
 rule EUROPA_NDDL {
   local initState = $(1) ;
@@ -167,6 +166,42 @@ rule RunEUROPATest {
  }
 }
 
+rule RunSolverTest {
+  local target = $(1) ;
+  local initialStates = $(2) ;
+  local config = $(3) ;
+  
+  local model ;
+  for model in $(initialStates) {
+    local exe = $(model:S=)-solver ;
+    local hh = $(model:S=.hh) ;
+    local cc = [ FGristFiles $(model:S=.cc) ] ;
+    local other_cc = runSolverTest.cc DNPConstraints.cc ;
+    local xml = $(model:S=.xml) ;
+    local o = $(cc:S=$(SUFOBJ)) $(other_cc:S=$(SUFOBJ)) ;
+    local lib = $(model:S=) ;
+    local options = " -i "$(xml)" -c "$(config) ;
+    local output = run-$(exe).output$(xml)$(config).output ;
+
+    ModuleMain $(exe) : $(o) : HSTS ;
+    RunModuleMain run-$(exe)$(xml)$(config) : $(exe) : $(options) : time : $(output) ;
+    LocalDepends $(target) : run-$(exe)$(xml)$(config) ;
+  }
+}
+
+rule RunBothTests {
+  local target = $(1) ;
+  local initialStates = $(2) ;
+  local heur = $(3) ;
+  local planId = $(4) ;
+  local solverConfig = $(heur)".solver.xml" ;
+
+  RunEUROPATest $(target)-hsts : $(initialStates) : $(heur) : $(planId) ;
+  RunSolverTest $(target)-solver : $(initialStates) : $(solverConfig) ;
+  LocalDepends $(target) : $(target)-hsts ;
+  LocalDepends $(target) : $(target)-solver ;
+}
+
 EUROPA_NDDL timeline0.nddl ;
 RunEUROPATest monkey-timeline : timeline0.nddl ;
 EUROPA_NDDL timeline-hacked.nddl ;
@@ -175,8 +210,14 @@ EUROPA_NDDL timeline-hacked2.nddl ;
 RunEUROPATest monkey-timeline-hacked2 : timeline-hacked2.nddl ;
 EUROPA_NDDL timeline-hacked3.nddl ;
 RunEUROPATest monkey-timeline-hacked3 : timeline-hacked3.nddl ;
-RunEUROPATest monkey-timeline-newHeur : timeline0.nddl : monkeyNewHeur.xml ;
-RunEUROPATest monkey-timeline-extendedHeur : timeline0.nddl : monkeyExtendedHeur.xml ;
+
+RunEUROPATest monkey-timeline-newHeur : timeline0.nddl : monkeyNewHeur.xml ; #have solver xml PASS
+#RunSolverTest monkey-timeline-newHeur-solver : timeline0.nddl : monkeyNewHeur.xml.solver.xml ;
+#RunBothTests monkey-timeline-newHeur : timeline0.nddl : monkeyNewHeur.xml ;
+
+#RunEUROPATest monkey-timeline-extendedHeur : timeline0.nddl : monkeyExtendedHeur.xml ; #have solver xml PASS
+RunBothTests monkey-timeline-extendedHeur : timeline0.nddl : monkeyExtendedHeur.xml ;
+
 EUROPA_NDDL timeline1.nddl ;
 RunEUROPATest monkey1-timeline1 : timeline1.nddl ;
 EUROPA_NDDL timeline-objvar.nddl ;
@@ -296,30 +337,68 @@ RunEUROPATest merTest18 : mer-pma2.nddl ;
 # Same set as just above plus the heuristics and no branch files.
 
 #Working
-RunEUROPATest merTest1-h : R1-files-p1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest2-h : R1-files-p2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest3-h : R1-files-p3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest4-h : R2-files-R21-Bill.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest5-h : R2-files-R21-IDD1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest6-h : R2-files-R21-IDD2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest7-h : R2-files-R21-IDD3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest8-h : R2-files-R21-PMA1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest9-h : R2-files-R21-PMA2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
-RunEUROPATest merTest10-h : mer-1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest11-h : mer-bill-2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest12-h : mer-bill.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest13-h : mer-idd1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest14-h : mer-idd2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest15-h : mer-idd3.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest16-h : mer-pma-comm.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest17-h : mer-pma1.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
-RunEUROPATest merTest18-h : mer-pma2.nddl : mer-heur-high.xml : mer-heur-high.nobr ;
+#RunEUROPATest merTest1-h : R1-files-p1.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+RunBothTests merTest1-h :  R1-files-p1.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #ERROR: decision order difference.  
+#Given variables 2 and 3 with the same priority and number of choices, solver chooses 3 because it has the higher key
+#HTX chooses 2 because it hits 2 first and doesn't consider the key comparison because they have the same number of choices
+
+RunEUROPATest merTest2-h : R1-files-p2.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+#RunBothTests merTest2-h : R1-files-p2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+
+RunEUROPATest merTest3-h : R1-files-p3.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+#RunBothTests merTest3-h : R1-files-p3.nddl : mer-p1-3.xml : mer-p1-3.nobr ; 
+
+RunEUROPATest merTest4-h : R2-files-R21-Bill.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+#RunBothTests merTest4-h : R2-files-R21-Bill.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+
+RunEUROPATest merTest5-h : R2-files-R21-IDD1.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+#RunBothTests merTest5-h : R2-files-R21-IDD1.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+
+#RunEUROPATest merTest6-h : R2-files-R21-IDD2.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+RunBothTests merTest6-h : R2-files-R21-IDD2.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+
+RunEUROPATest merTest7-h : R2-files-R21-IDD3.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+#RunBothTests merTest7-h : R2-files-R21-IDD3.nddl : mer-p1-3.xml : mer-p1-3.nobr ;
+
+#RunEUROPATest merTest8-h : R2-files-R21-PMA1.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+RunBothTests merTest8-h : R2-files-R21-PMA1.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+
+#RunEUROPATest merTest9-h : R2-files-R21-PMA2.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+RunBothTests merTest9-h : R2-files-R21-PMA2.nddl : mer-p1-3.xml : mer-p1-3.nobr ; #have solver xml
+
+RunEUROPATest merTest10-h : mer-1.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+#RunBothTests merTest10-h : mer-1.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+
+RunEUROPATest merTest11-h : mer-bill-2.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+#RunBothTests merTest11-h : mer-bill-2.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+
+RunEUROPATest merTest12-h : mer-bill.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+#RunBothTests merTest12-h : mer-bill.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+
+#RunEUROPATest merTest13-h : mer-idd1.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+RunBothTests merTest13-h : mer-idd1.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+
+#RunEUROPATest merTest14-h : mer-idd2.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+RunBothTests merTest14-h : mer-idd2.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+
+RunEUROPATest merTest15-h : mer-idd3.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+#RunBothTests merTest15-h : mer-idd3.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+
+#RunEUROPATest merTest16-h : mer-pma-comm.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+RunBothTests merTest16-h : mer-pma-comm.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+
+#RunEUROPATest merTest17-h : mer-pma1.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+RunBothTests merTest17-h : mer-pma1.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+
+#RunEUROPATest merTest18-h : mer-pma2.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
+RunBothTests merTest18-h : mer-pma2.nddl : mer-heur-high.xml : mer-heur-high.nobr ; #have solver xml
 
 # Working
 EUROPA_NDDL C3-init.nddl ;
 RunEUROPATest gnats-C3 : C3-init.nddl ;
 EUROPA_NDDL NoBranchBug-init.nddl ;
-RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl : NoBranchBug.xml : NoBranchBug.nobr ;
+RunEUROPATest gnats-NoBranchBug : NoBranchBug-init.nddl : NoBranchBug.xml : NoBranchBug.nobr ; #have solver xml
+#RunBothTests  gnats-NoBranchBug : NoBranchBug-init.nddl : NoBranchBug.xml : NoBranchBug.nobr ;
 
 # These two take multiple hours without completing on Token for some reason and may be infinite loop or similar.
 #   Reported as GNATS 2796.
@@ -388,30 +467,52 @@ RunEUROPATest dnp-twoFreeObs : twoFreeObs.nddl ;
 # Same set as just prior set plus heuristics and no branch info.
 
 # Working
-RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ;
-RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ;
-RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP2heur3.xml ;
-RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ;
+#RunEUROPATest dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ; #have solver xml
+RunBothTests dnp-timeline-h : DNP.timeline.nddl : DNPheur2.xml ; #have solver xml
+
+RunEUROPATest dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ; #have solver xml
+#RunBothTests dnp-DNP2-h : DNP2.timeline.nddl : DNP2heur.xml ; #have solver xml
+
+RunEUROPATest dnp-DNP23-h : DNP2.timeline.nddl : DNP2heur3.xml ; #have solver xml
+#RunBothTests dnp-DNP23-h : DNP2.timeline.nddl : DNP2heur3.xml ; #have solver xml
+
+RunEUROPATest dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ; #have solver xml
+#RunBothTests dnp-allDSS-h : allDSS.nddl : DNP2heur3.xml ; #have solver xml
 
 # Times out
-RunEUROPATest dnp-fourFreeObs-h : fourFreeObs.nddl : DNP2heur3.xml ;
+RunEUROPATest dnp-fourFreeObs-h : fourFreeObs.nddl : DNP2heur3.xml ; #have solver xml
+#RunBothTests dnp-fourFreeObs-h : fourFreeObs.nddl : DNP2heur3.xml ;
 
 # Runs for a while
-RunEUROPATest dnp-DNP3fourFreeObs-h : DNP3.fourFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+RunEUROPATest dnp-DNP3fourFreeObs-h : DNP3.fourFreeObs.nddl : DNP3heur.xml : DNP3nobr ; #have solver xml
+#RunBothTests dnp-DNP3fourFreeObs-h : DNP3.fourFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 
 # Working
-RunEUROPATest dnp-DNP3-h : DNP3.timeline.nddl : DNP3heur.xml : DNP3nobr ;
+RunEUROPATest dnp-DNP3-h : DNP3.timeline.nddl : DNP3heur.xml : DNP3nobr ; #have solver xml
+#RunEUROPATest dnp-DNP3-h : DNP3.timeline.nddl : DNP3heur.xml : DNP3nobr ; #have solver xml
 
 # Runs for a while
 RunEUROPATest dnp-fourFreeObsNotEmpty-h : fourFreeObs-initBufNotEmpty.nddl : DNP3heur.xml : DNP3nobr ;
+#RunBothTests dnp-fourFreeObsNotEmpty-h : fourFreeObs-initBufNotEmpty.nddl : DNP3heur.xml : DNP3nobr ;
+
 RunEUROPATest dnp-freeObs-h : freeObs.nddl : DNP3heur.xml : DNP3nobr ;
+#RunBothTests dnp-freeObs-h : freeObs.nddl : DNP3heur.xml : DNP3nobr ;
+
 RunEUROPATest dnp-freeObsNoEmpty-h : freeObs.noEmpty.nddl : DNP3heur.xml : DNP3nobr ;
+#RunBothTests dnp-freeObsNoEmpty-h : freeObs.noEmpty.nddl : DNP3heur.xml : DNP3nobr ;
+
 RunEUROPATest dnp-tenFreeObs-h : tenFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+#RunBothTests dnp-tenFreeObs-h : tenFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+
 RunEUROPATest dnp-threeFreeObs-h : threeFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+#RunBothTests dnp-threeFreeObs-h : threeFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+
 RunEUROPATest dnp-twentyFreeObs-h : twentyFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+#RunBothTests dnp-twentyFreeObs-h : twentyFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 
 # Working
 RunEUROPATest dnp-twoFreeObs-h : twoFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
+#RunBothTests dnp-twoFreeObs-h : twoFreeObs.nddl : DNP3heur.xml : DNP3nobr ;
 
 # LITA
 # we don't have these files in system test.

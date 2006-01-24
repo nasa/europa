@@ -1,0 +1,27 @@
+<Solver name="HSTSSolver" preferLowPriority="false">
+  <FlawFilter component="HorizonFilter"/>
+  <ThreatManager defaultPriority="99999">
+    <FlawHandler component="HSTSThreatDecisionPoint" order="early" />
+
+  </ThreatManager>
+  <OpenConditionManager defaultPriority="99999">
+    <FlawFilter component="MasterMustBeInsertedFilter"/>
+
+    <FlawHandler component="HSTSOpenConditionDecisionPoint" choice="mergeFirst" order="ascendingKey" />
+
+  </OpenConditionManager>
+  <UnboundVariableManager defaultPriority="99999">
+    <FlawFilter var-match="start"/>
+
+    <FlawFilter var-match="end"/>
+
+    <FlawFilter var-match="duration"/>
+
+    <FlawFilter component="InfiniteDynamicFilter"/>
+
+    <FlawFilter component="ParentMustBeInsertedFilter"/>
+
+    <FlawHandler component="Min"/>
+
+  </UnboundVariableManager>
+</Solver>

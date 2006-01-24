@@ -425,13 +425,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>60</Priority>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Comm_Idle</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Pre_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Pre_Cal</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Comm_Idle</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>

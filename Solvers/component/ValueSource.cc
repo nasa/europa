@@ -12,9 +12,11 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    ValueSource* ValueSource::getSource(const ConstrainedVariableId& var) {
+    ValueSource* ValueSource::getSource(const ConstrainedVariableId& var, bool externalOrder) {
+      if(externalOrder)
+	return new OrderedValueSource(var->lastDomain());
       if(var->lastDomain().isEnumerated())
-	return new EnumValueSource(var->lastDomain());
+	  return new EnumValueSource(var->lastDomain());
       else
 	return new IntervalValueSource(var->lastDomain());
     }
@@ -37,6 +39,24 @@ namespace EUROPA {
     }
 
     double EnumValueSource::getValue(unsigned int index) const { return m_values[index];}
+
+    OrderedValueSource::OrderedValueSource(const AbstractDomain& dom) : ValueSource(0), m_dom(dom) {
+      checkError(!m_dom.isEmpty(), "Cannot create a value ordering for empty domain " << m_dom);
+    }
+    
+    void OrderedValueSource::addValue(const double value) {
+      if(m_dom.isMember(value)) {
+	debugMsg("OrderedValueSource:addValue", "Adding value " << value << " from domain " << m_dom);
+	m_values.push_back(value);
+	m_count++;
+      }
+      condDebugMsg(!m_dom.isMember(value), "OrderedValueSource:addValue", "Value " << value << " not in " << m_dom);
+    }
+
+    double OrderedValueSource::getValue(unsigned int index) const {
+      checkError(!m_values.empty(), "Cannot get an ordered value from an empty set!");
+      return m_values[index];
+    }
 
     IntervalValueSource::IntervalValueSource(const AbstractDomain& dom)
       : ValueSource(calculateSize(dom)),

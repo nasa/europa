@@ -42,13 +42,17 @@ namespace EUROPA {
     check_error(m_var.isValid());
 
     m_open = false;
-
+    
+    debugMsg("CBPlannerDecisionPoint:assign", "For " << m_var->toString() <<
+             ", assigning value " << getChoiceValue(m_choiceIndex) << ".");
     m_dbClient->specify(m_var, getChoiceValue(m_choiceIndex)); 
     m_choiceIndex++;
     return true;
   }
 
   bool ConstrainedVariableDecisionPoint::retract() {
+    debugMsg("CBPlannerDecisionPoint:assign", "Retracting assignment decision on " <<
+             m_var->toString());
     m_dbClient->reset(m_var);
 
     m_open = true;

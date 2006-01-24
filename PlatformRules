@@ -68,15 +68,15 @@ if $(OS) = SOLARIS {
 # LINK = C/C++ linker
 
 if $(GCC_ROOTDIR) {
-  CC = $(GCC_ROOTDIR)/bin/gcc ;
-  C++ = $(GCC_ROOTDIR)/bin/g++ ;
+  CC = $(GCC_PREFIX) $(GCC_ROOTDIR)/bin/gcc ;
+  C++ = $(GCC_PREFIX) $(GCC_ROOTDIR)/bin/g++ ;
   LINK = $(C++) $(LINKER_PASSTHROUGH_FLAG)$(RUNTIME_SHARED_LIBRARY_PATH_FLAG)
                 $(LINKER_PASSTHROUGH_FLAG)$(GCC_ROOTDIR)/lib
                 $(LINKER_PASSTHROUGH_FLAG)$(STATIC_LIBRARY_PATH_FLAG)
                 $(LINKER_PASSTHROUGH_FLAG)$(GCC_ROOTDIR)/lib ;
 } else {
-  CC = gcc ;
-  C++ = g++ ;
+  CC = $(GCC_PREFIX) gcc ;
+  C++ = $(GCC_PREFIX) g++ ;
   LINK = $(C++) ;
 }
 

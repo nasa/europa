@@ -29,6 +29,7 @@
 #include "Id.hh"
 #include "LockManager.hh"
 #include "Entity.hh"
+#include "XMLUtils.hh"
 
 #include <list>
 #include <sstream>
@@ -721,6 +722,31 @@ private:
   }
 };
 
+//TODO: fill this out with more tests for XMLUtils
+class XMLTest {
+public:
+  static bool test() {
+    runTest(testStringParse);
+    return true;
+  }
+private:
+  static bool testStringParse() {
+    std::string test("<Foo><Bar><Bing attr=\"baz\"/></Bar></Foo>");
+    TiXmlElement* xml = initXml(test);
+    assertTrue(xml != NULL);
+    assertTrue(std::string(xml->Value()) == std::string("Foo"));
+    xml = xml->FirstChildElement();
+    assertTrue(xml != NULL);
+    assertTrue(std::string(xml->Value()) == std::string("Bar"));
+    xml = xml->FirstChildElement();
+    assertTrue(xml != NULL);
+    assertTrue(std::string(xml->Value()) == std::string("Bing"));
+    assertTrue(xml->Attribute("attr") != NULL);
+    assertTrue(std::string(xml->Attribute("attr")) == std::string("baz"));
+    return true;
+  }
+};
+
 void UtilModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
   
@@ -730,6 +756,7 @@ void UtilModuleTests::runTests(std::string path) {
   runTestSuite(LabelTests::test);
   runTestSuite(MultithreadTest::test);
   runTestSuite(EntityTest::test);
+  runTestSuite(XMLTest::test);
 
   std::cout << "Finished" << std::endl;
   }

@@ -269,65 +269,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>992.3</Priority>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>after</Relation>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
-   </Master>
-  <DecisionPreference>
-   <State>activate</State>
-   <State>merge</State>
-   <State>reject</State>
-  </DecisionPreference>
-  </Token>
- <Token>
-  <Priority>991</Priority>
-   <PredicateSpec>
     <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
-   <PredicateParameters>
-    <Parameter>
-      <Name>dir</Name>
-      <Value>DOWNLINK</Value>
-    </Parameter>
-    </PredicateParameters>
-   </PredicateSpec>
-  <Master>
-   <Relation>before</Relation>
-   <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
-   <PredicateParameters>
-    <Parameter>
-      <Name>dir</Name>
-      <Value>UPLINK</Value>
-    </Parameter>
-    </PredicateParameters>
-   </PredicateSpec>
-   </Master>
-  <DecisionPreference>
-   <State>merge</State>
-   <State>reject</State>
-  </DecisionPreference>
-  </Token>
- <Token>
-  <Priority>991.5</Priority>
-   <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
-   <PredicateParameters>
-    <Parameter>
-      <Name>dir</Name>
-      <Value>DOWNLINK</Value>
-    </Parameter>
-    </PredicateParameters>
-   </PredicateSpec>
-  <Master>
-   <Relation>before</Relation>
-   <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Stow</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -368,6 +316,41 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>991.5</Priority>
    <PredicateSpec>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Stow</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>before</Relation>
+   <PredicateSpec>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
+   <PredicateParameters>
+    <Parameter>
+      <Name>dir</Name>
+      <Value>DOWNLINK</Value>
+    </Parameter>
+    </PredicateParameters>
+   </PredicateSpec>
+   </Master>
+  <DecisionPreference>
+   <State>activate</State>
+   <State>merge</State>
+   <State>reject</State>
+  </DecisionPreference>
+  </Token>
+ <Token>
+  <Priority>991</Priority>
+   <PredicateSpec>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
+   <PredicateParameters>
+    <Parameter>
+      <Name>dir</Name>
+      <Value>DOWNLINK</Value>
+    </Parameter>
+    </PredicateParameters>
+   </PredicateSpec>
+  <Master>
+   <Relation>before</Relation>
+   <PredicateSpec>
     <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
    <PredicateParameters>
     <Parameter>
@@ -376,11 +359,28 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     </Parameter>
     </PredicateParameters>
    </PredicateSpec>
-  <Master>
-   <Relation>before</Relation>
+   </Master>
+  <DecisionPreference>
+   <State>merge</State>
+   <State>reject</State>
+  </DecisionPreference>
+  </Token>
+ <Token>
+  <Priority>991.5</Priority>
    <PredicateSpec>
     <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Stow</PredicateName>
     <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>before</Relation>
+   <PredicateSpec>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
+   <PredicateParameters>
+    <Parameter>
+      <Name>dir</Name>
+      <Value>UPLINK</Value>
+    </Parameter>
+    </PredicateParameters>
    </PredicateSpec>
    </Master>
   <DecisionPreference>
@@ -392,13 +392,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>988.25</Priority>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
+    <PredicateName>SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>before</Relation>
    <PredicateSpec>
-    <PredicateName>SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -410,13 +410,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>988.5</Priority>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
+    <PredicateName>OPHTR_Class___OPHTR_HGA_SV.OPHTR_HGA_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>after</Relation>
    <PredicateSpec>
-    <PredicateName>OPHTR_Class___OPHTR_HGA_SV.OPHTR_HGA_Active</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -429,13 +429,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>988.75</Priority>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>before</Relation>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -447,13 +447,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>988.8</Priority>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Stow</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>after</Relation>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Stow</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -466,13 +466,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>986</Priority>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Stow</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>after</Relation>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Comm</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Stow</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -484,13 +484,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>986.5</Priority>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Stow</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>before</Relation>
    <PredicateSpec>
-    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Slew</PredicateName>
+    <PredicateName>HGA_Class___HGA_Mode_SV.HGA_Stow</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -503,13 +503,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>985</Priority>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_Goal_SV.IDD_Goal_Active</PredicateName>
+    <PredicateName>IDD_Class___IDD_Goal_SV.IDD_Goal_Idle</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>before</Relation>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_Goal_SV.IDD_Goal_Idle</PredicateName>
+    <PredicateName>IDD_Class___IDD_Goal_SV.IDD_Goal_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -522,13 +522,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>985.5</Priority>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_Goal_SV.IDD_Goal_Active</PredicateName>
+    <PredicateName>IDD_Class___IDD_Goal_SV.IDD_Goal_Idle</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>after</Relation>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_Goal_SV.IDD_Goal_Idle</PredicateName>
+    <PredicateName>IDD_Class___IDD_Goal_SV.IDD_Goal_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -540,16 +540,16 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>984.1</Priority>
+   <PredicateSpec>
+    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_In_Contact</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
    <PredicateSpec>
     <PredicateName>IDD_Class___IDD_APXS_SV.IDD_APXS_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_In_Contact</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <State>activate</State>
@@ -559,16 +559,16 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>984.1</Priority>
+   <PredicateSpec>
+    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_In_Contact</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
    <PredicateSpec>
     <PredicateName>IDD_Class___IDD_MB_SV.IDD_MB_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_In_Contact</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <State>activate</State>
@@ -578,16 +578,16 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>984.1</Priority>
+   <PredicateSpec>
+    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_In_Contact</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
    <PredicateSpec>
     <PredicateName>IDD_Class___IDD_MI_SV.IDD_MI_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_In_Contact</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <State>activate</State>
@@ -598,13 +598,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>984.1</Priority>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_RAT_SV.IDD_RAT_Active</PredicateName>
+    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_In_Contact</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_In_Contact</PredicateName>
+    <PredicateName>IDD_Class___IDD_RAT_SV.IDD_RAT_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -616,12 +616,6 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>983.1</Priority>
-   <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_MB_SV.IDD_MB_Active</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
-  <Master>
-   <Relation>after</Relation>
    <PredicateSpec>
     <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Rotate</PredicateName>
    <PredicateParameters>
@@ -631,6 +625,12 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     </Parameter>
     </PredicateParameters>
    </PredicateSpec>
+  <Master>
+   <Relation>after</Relation>
+   <PredicateSpec>
+    <PredicateName>IDD_Class___IDD_MB_SV.IDD_MB_Active</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <State>activate</State>
@@ -640,12 +640,6 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>983.1</Priority>
-   <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_RAT_SV.IDD_RAT_Active</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
-  <Master>
-   <Relation>after</Relation>
    <PredicateSpec>
     <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Rotate</PredicateName>
    <PredicateParameters>
@@ -655,6 +649,12 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     </Parameter>
     </PredicateParameters>
    </PredicateSpec>
+  <Master>
+   <Relation>after</Relation>
+   <PredicateSpec>
+    <PredicateName>IDD_Class___IDD_RAT_SV.IDD_RAT_Active</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <State>activate</State>
@@ -664,12 +664,6 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>983.1</Priority>
-   <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_APXS_SV.IDD_APXS_Active</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
-  <Master>
-   <Relation>after</Relation>
    <PredicateSpec>
     <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Rotate</PredicateName>
    <PredicateParameters>
@@ -679,6 +673,12 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     </Parameter>
     </PredicateParameters>
    </PredicateSpec>
+  <Master>
+   <Relation>after</Relation>
+   <PredicateSpec>
+    <PredicateName>IDD_Class___IDD_APXS_SV.IDD_APXS_Active</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <State>activate</State>
@@ -689,12 +689,6 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>983.1</Priority>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_MI_SV.IDD_MI_Active</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
-  <Master>
-   <Relation>after</Relation>
-   <PredicateSpec>
     <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Rotate</PredicateName>
    <PredicateParameters>
     <Parameter>
@@ -702,6 +696,12 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
       <Value>MI</Value>
     </Parameter>
     </PredicateParameters>
+   </PredicateSpec>
+  <Master>
+   <Relation>after</Relation>
+   <PredicateSpec>
+    <PredicateName>IDD_Class___IDD_MI_SV.IDD_MI_Active</PredicateName>
+    <PredicateParameters/>
    </PredicateSpec>
    </Master>
   <DecisionPreference>
@@ -713,13 +713,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>984.25</Priority>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Rotate</PredicateName>
+    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Guarded_Move</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>before</Relation>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Guarded_Move</PredicateName>
+    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Rotate</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -732,13 +732,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>984.5</Priority>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Rotate</PredicateName>
+    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Move</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>after</Relation>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Move</PredicateName>
+    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Rotate</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -751,13 +751,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>979</Priority>
    <PredicateSpec>
-    <PredicateName>PMA_Class___PMA_Goal_SV.PMA_Goal_Active</PredicateName>
+    <PredicateName>PMA_Class___PMA_Goal_SV.PMA_Goal_Idle</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>before</Relation>
    <PredicateSpec>
-    <PredicateName>PMA_Class___PMA_Goal_SV.PMA_Goal_Idle</PredicateName>
+    <PredicateName>PMA_Class___PMA_Goal_SV.PMA_Goal_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -770,13 +770,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>979.5</Priority>
    <PredicateSpec>
-    <PredicateName>PMA_Class___PMA_Goal_SV.PMA_Goal_Active</PredicateName>
+    <PredicateName>PMA_Class___PMA_Goal_SV.PMA_Goal_Idle</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>after</Relation>
    <PredicateSpec>
-    <PredicateName>PMA_Class___PMA_Goal_SV.PMA_Goal_Idle</PredicateName>
+    <PredicateName>PMA_Class___PMA_Goal_SV.PMA_Goal_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -789,13 +789,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>600</Priority>
    <PredicateSpec>
-    <PredicateName>PMA_Class___PMA_Mount_SV.PMA_Mount_Parked</PredicateName>
+    <PredicateName>PMA_Class___PMA_Mount_SV.PMA_Mount_Slewing</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>PMA_Class___PMA_Mount_SV.PMA_Mount_Slewing</PredicateName>
+    <PredicateName>PMA_Class___PMA_Mount_SV.PMA_Mount_Parked</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -807,13 +807,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>500</Priority>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Rotate</PredicateName>
+    <PredicateName>RCam_Class___HzC_F_SV.HzC_F_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>RCam_Class___HzC_F_SV.HzC_F_Active</PredicateName>
+    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Rotate</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -827,16 +827,16 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>500</Priority>
+   <PredicateSpec>
+    <PredicateName>RCam_Class___HzC_F_SV.HzC_F_Active</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
    <PredicateSpec>
     <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Move</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>RCam_Class___HzC_F_SV.HzC_F_Active</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <StateOrder>
@@ -848,16 +848,16 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>500</Priority>
+   <PredicateSpec>
+    <PredicateName>RCam_Class___HzC_F_SV.HzC_F_Active</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
    <PredicateSpec>
     <PredicateName>IDD_Class___IDD_IDD_SV.IDD_Guarded_Move</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>RCam_Class___HzC_F_SV.HzC_F_Active</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <StateOrder>
@@ -870,13 +870,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>500</Priority>
    <PredicateSpec>
-    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_In_Contact</PredicateName>
+    <PredicateName>RCam_Class___HzC_F_SV.HzC_F_Active</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>RCam_Class___HzC_F_SV.HzC_F_Active</PredicateName>
+    <PredicateName>IDD_Class___IDD_IDD_SV.IDD_In_Contact</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>

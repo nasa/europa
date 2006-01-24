@@ -362,7 +362,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
-  <PredicateSpec/>
+   <PredicateSpec/>
    </Master>
   <DecisionPreference>
    <State>merge</State>
@@ -375,12 +375,14 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Science___Scan_Platform.Mosaic_HI</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
    <State>activate</State>
    <State>reject</State>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>100</Priority>
    <PredicateSpec>
@@ -389,7 +391,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
-  <PredicateSpec/>
+   <PredicateSpec/>
    </Master>
   <DecisionPreference>
    <State>merge</State>
@@ -402,12 +404,14 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Science___Scan_Platform.Mosaic_LO</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
    <State>activate</State>
    <State>reject</State>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>100</Priority>
    <PredicateSpec>
@@ -426,7 +430,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
-  <PredicateSpec/>
+   <PredicateSpec/>
    </Master>
   <DecisionPreference>
    <State>merge</State>
@@ -439,12 +443,14 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Science___Fields_and_Particles.F_and_P_Observation_LO</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
    <State>activate</State>
    <State>reject</State>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>100</Priority>
    <PredicateSpec>
@@ -453,7 +459,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
-  <PredicateSpec/>
+   <PredicateSpec/>
    </Master>
   <DecisionPreference>
    <State>merge</State>
@@ -466,36 +472,40 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Science___Fields_and_Particles.F_and_P_Observation_HI</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
    <State>activate</State>
    <State>reject</State>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>90</Priority>
    <PredicateSpec>
     <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
    <State>activate</State>
    <State>reject</State>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>90</Priority>
+   <PredicateSpec>
+    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
    <PredicateSpec>
     <PredicateName>DNP_Science___Fields_and_Particles.F_and_P_Observation_LO</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <State>activate</State>
@@ -504,16 +514,16 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>90</Priority>
+   <PredicateSpec>
+    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
    <PredicateSpec>
     <PredicateName>DNP_Science___Fields_and_Particles.F_and_P_Observation_HI</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <State>activate</State>
@@ -522,16 +532,16 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>90</Priority>
+   <PredicateSpec>
+    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
    <PredicateSpec>
     <PredicateName>DNP_Science___Scan_Platform.Mosaic_HI</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <State>activate</State>
@@ -540,16 +550,16 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
   </Token>
  <Token>
   <Priority>90</Priority>
+   <PredicateSpec>
+    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
    <PredicateSpec>
     <PredicateName>DNP_Science___Scan_Platform.Mosaic_LO</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
    </Master>
   <DecisionPreference>
    <State>activate</State>
@@ -577,13 +587,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>90</Priority>
    <PredicateSpec>
-    <PredicateName>DNP_Data___SSR_Storage_Use.Constant_Storage</PredicateName>
+    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
+    <PredicateName>DNP_Data___SSR_Storage_Use.Constant_Storage</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -595,13 +605,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>90</Priority>
    <PredicateSpec>
-    <PredicateName>DNP_Data___SSR_Storage_Use.Playback</PredicateName>
+    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>DNP_Data___SSR_Storage_Use.Record</PredicateName>
+    <PredicateName>DNP_Data___SSR_Storage_Use.Playback</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -636,20 +646,22 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>60</Priority>
    <PredicateSpec>
-    <PredicateName>DNP_Data___SSR_Storage_Use.Playback</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
+    <PredicateName>DNP_Data___SSR_Storage_Use.Playback</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -668,13 +680,32 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>10</Priority>
    <PredicateSpec>
+    <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
+   <PredicateSpec>
     <PredicateName>DNP_Comm___Comm_Activity.Post_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
+   </Master>
+  <DecisionPreference>
+   <State>merge</State>
+   <State>activate</State>
+   <State>reject</State>
+  </DecisionPreference>
+  </Token>
+ <Token>
+  <Priority>10</Priority>
+   <PredicateSpec>
+    <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
+    <PredicateParameters/>
+   </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Pre_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -691,38 +722,21 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
-   </Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
-   <State>merge</State>
-   <State>activate</State>
-   <State>reject</State>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>10</Priority>
    <PredicateSpec>
     <PredicateName>DNP_Comm___Comm_Activity.Pre_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
-  <DecisionPreference>
-  </DecisionPreference>
-  </Token>
- <Token>
-  <Priority>10</Priority>
+  <Master>
+   <Relation>any</Relation>
    <PredicateSpec>
     <PredicateName>DNP_Comm___Comm_Activity.Comm_Idle</PredicateName>
-    <PredicateParameters/>
-   </PredicateSpec>
-  <Master>
-   <Relation>any</Relation>
-   <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Pre_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -732,13 +746,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>30</Priority>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Pre_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Pre_Cal</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -754,20 +768,22 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Comm___Comm_Activity.Post_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>10</Priority>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Comm_Idle</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Post_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Post_Cal</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Comm_Idle</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -777,13 +793,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>30</Priority>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Post_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Post_Cal</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Communicate</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -799,20 +815,22 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DNP_Comm___Comm_Activity.Comm_Idle</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>10</Priority>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Pre_Cal</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Comm_Idle</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Comm_Idle</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Pre_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -822,13 +840,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>10</Priority>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Post_Cal</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Comm_Idle</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>DNP_Comm___Comm_Activity.Comm_Idle</PredicateName>
+    <PredicateName>DNP_Comm___Comm_Activity.Post_Cal</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -841,10 +859,12 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>DSS_Any___DSS_Availability.Downlink_Window</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>50</Priority>
    <PredicateSpec>
@@ -853,7 +873,7 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
-  <PredicateSpec/>
+   <PredicateSpec/>
    </Master>
   <DecisionPreference>
    <StateOrder>

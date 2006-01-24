@@ -41,6 +41,10 @@ namespace EUROPA {
       if(m_mergeIndex < m_compatibleTokens.size()) {
         debugMsg("TokenDecisionPoint", "Merging " << m_tok->getPredicateName().toString() << " with " 
                  << m_compatibleTokens[m_mergeIndex]->getPredicateName().toString());
+
+        debugMsg("CBPlannerDecisionPoint:assign", "For " << m_tok->getPredicateName().toString() << "(" <<
+                 m_tok->getKey() << "), assigning MERGED onto " << m_compatibleTokens[m_mergeIndex]->getPredicateName().toString() << 
+                 "(" << m_compatibleTokens[m_mergeIndex]->getKey() << ").");
         m_dbClient->merge(m_tok, m_compatibleTokens[m_mergeIndex]);
         m_mergeIndex++;
         if (m_mergeIndex == m_compatibleTokens.size())
@@ -58,10 +62,14 @@ namespace EUROPA {
     }
     else if(state == Token::ACTIVE) {
       debugMsg("TokenDecisionPoint", "Activating token " << m_tok->getPredicateName().toString());
+      debugMsg("CBPlannerDecisionPoint:assign", "For " << m_tok->getPredicateName().toString() << "(" <<
+               m_tok->getKey() << "), assigning ACTIVE.");
       m_dbClient->activate(m_tok);
     }
     else if(state == Token::REJECTED) {
       debugMsg("TokenDecisionPoint", "Rejecting token " << m_tok->getPredicateName().toString());
+      debugMsg("CBPlannerDecisionPoint:assign", "For " << m_tok->getPredicateName().toString() << "(" <<
+               m_tok->getKey() << "), assigning REJECTED.");
       m_dbClient->reject(m_tok);
     }
     else
@@ -72,6 +80,8 @@ namespace EUROPA {
   }
 
   bool TokenDecisionPoint::retract() {
+    debugMsg("CBPlannerDecisionPoint:retract", "Retracting open condition decision on " << m_tok->getPredicateName().toString() <<
+             "(" << m_tok->getKey() << ").");
     bool retval = hasRemainingChoices();
     if(m_tok->getState()->isSpecified())
       m_dbClient->cancel(m_tok);

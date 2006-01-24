@@ -93,8 +93,11 @@ namespace EUROPA {
       m_singletonFlawCandidates.erase(var);
 
       if(variableOfNonActiveToken(var) || !var->canBeSpecified() || var->isSpecified() || staticMatch(var)){
-	debugMsg("UnboundVariableManager:updateFlaw", "Excluding: " << var->toString());
-	return;
+        debugMsg("UnboundVariableManager:updateFlaw", "Excluding: " << var->toString());
+        condDebugMsg(variableOfNonActiveToken(var), "UnboundVariableManager:updateFlaw", "Parent is not active.");
+        condDebugMsg(!var->canBeSpecified(), "UnboundVariableManager:updateFlaw", "Variable can't be specified.");
+        condDebugMsg(var->isSpecified(), "UnboundVariableManager:updateFlaw", "Variable is already specified.");
+        return;
       }
 
       debugMsg("UnboundVariableManager:addFlaw",
@@ -128,7 +131,6 @@ namespace EUROPA {
 
       debugMsg("UnboundVariableManager:addGuard", 
 	       "GUARDS=" << refCount << " for " << var->getName().toString() << "(" << var->getKey() << ")");
-
       updateFlaw(var);
     }
 
@@ -238,17 +240,38 @@ namespace EUROPA {
       return (m_guardCache.find(var) != m_guardCache.end());
     }
 
+    //reordered FROM guard, key pref TO choice count, guard
+    //re-reordered from choice count, guard TO guard, choice count
     bool UnboundVariableManager::betterThan(const EntityId& a, const EntityId& b){
+      //we only ever get here because the priority is equal
+      //Added to duplicate behavior from HTX.  This may not be the best idea ever. ~MJI
+      const ConstrainedVariableId va = a;
+      const ConstrainedVariableId vb = b;
       if(a.isId() && b.isId()) {
-	bool aCompat = isCompatGuard(a);
-	bool bCompat = isCompatGuard(b);
-	if(aCompat && !bCompat)
-	  return true;
-	else if(!aCompat && bCompat)
-	  return false;
-      }
+        bool aCompat = isCompatGuard(a);
+        bool bCompat = isCompatGuard(b);
+        if(aCompat && !bCompat) {
+          debugMsg("UnboundVariableManager:betterThan", a->getKey() << " is better than " << b->getKey() << " because it is a guard.");
+          return true;
+        }
+        else if(!aCompat && bCompat) {
+          debugMsg("UnboundVariableManager:betterThan", b->getKey() << " is better than " << a->getKey() << " because it is a guard.");
+          return false;
+        }
 
-      return FlawManager::betterThan(a, b);
+        if(va->lastDomain().getSize() < vb->lastDomain().getSize()) {
+          debugMsg("UnboundVariableManager:betterThan", a->getKey() << " is better than " << b->getKey() << 
+                   " because it has " << va->lastDomain().getSize() << " choices, as opposed to " << vb->lastDomain().getSize());
+          return true; //here goes nothin'...
+        }
+        else if(va->lastDomain().getSize() > vb->lastDomain().getSize()) {
+          debugMsg("UnboundVariableManager:betterThan", b->getKey() << " is better than " << a->getKey() << 
+                   " because it has " << vb->lastDomain().getSize() << " choices, as opposed to " << va->lastDomain().getSize());
+          return false;
+        }
+      }
+      //if a isn't provably better, we return false
+      return false;
     }
 
     std::string UnboundVariableManager::toString(const EntityId& entity) const {

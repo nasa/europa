@@ -100,6 +100,7 @@ rule RunPlannerProblem {
   # create planner with linked model
   ModuleMain $(exe) : $(o) runProblem_link_$(PLANNER).o : System Aver ;
   RunModuleMain run-$(exe) : $(exe) : $(xml) $(configurationFile) $(heuristicsFile) ;
+  #Echo Creating exec target $(exe) run target run-$(exe) ;
 
   Depends $(deptarget) : run-$(exe) ;
 
@@ -122,7 +123,8 @@ rule RunPlannerProblem {
       RunModuleMain run-problem-$(exe) : runProblem_$(PLANNER) : $(arguments) ;
       Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;
       #LocalDepends run-model-tests : run-problem-$(exe) ;
-      LocalDepends run-$(deptarget)-model-tests : run-problem-$(exe) ;
+      #LocalDepends run-$(deptarget)-model-tests : run-problem-$(exe) ;
+      Depends run-$(deptarget)-model-tests : run-problem-$(exe) ; 
       if $(executable) in $(checkin-tests) {
 	LocalDepends run-$(deptarget)-checkin-tests : run-problem-$(exe) ;
       }
@@ -135,9 +137,6 @@ rule RunPlannerProblem {
 #
 # PLANNER SYSTEM TESTS
 #
-RunPlannerProblem HTX.1.nddl : $(DEFAULT_PCONFIG) : HTX.1.heur : cbplanner-tests ;
-RunPlannerProblem HTX.2.nddl : $(DEFAULT_PCONFIG) : HTX.2.heur : cbplanner-tests ;
-RunPlannerProblem HTX.3.nddl : $(DEFAULT_PCONFIG) : HTX.3.heur : cbplanner-tests ;
 RunPlannerProblem Rover-transaction.nddl : $(DEFAULT_PCONFIG) : Rover.heur : cbplanner-tests ;
 RunPlannerProblem k9.backtrack.moderate-transaction.nddl : $(DEFAULT_PCONFIG) : k9.heur : cbplanner-tests ;
 RunPlannerProblem compat_token_cache.nddl : $(DEFAULT_PCONFIG) : compat_token_cache.heur : cbplanner-tests ;
@@ -154,6 +153,10 @@ for model in $(testmodels) {
 
 
 if $(PLANNER) = CBPLANNER {
+  RunPlannerProblem HTX.1.nddl : $(DEFAULT_PCONFIG) : HTX.1.heur : cbplanner-tests ;
+  RunPlannerProblem HTX.2.nddl : $(DEFAULT_PCONFIG) : HTX.2.heur : cbplanner-tests ;
+  RunPlannerProblem HTX.3.nddl : $(DEFAULT_PCONFIG) : HTX.3.heur : cbplanner-tests ;
+
   Depends cbplanner-tests : common-tests ;
   Depends run-nddl-planner-tests : cbplanner-tests ;
   if $(LIBRARIES) = SHARED {
@@ -162,6 +165,10 @@ if $(PLANNER) = CBPLANNER {
   Depends run-checkin-tests : run-cbplanner-tests-checkin-tests ;
 }
 else if $(PLANNER) = SOLVER {
+  RunPlannerProblem HTX.1.solver.nddl : HTX.1.solverConfig.xml : NoFile : solver-tests ;
+  #RunPlannerProblem HTX.2.solver.nddl : HTX.2.solverConfig.xml : NoFile : solver-tests ;
+  RunPlannerProblem HTX.3.solver.nddl : HTX.3.solverConfig.xml : NoFile : solver-tests ;
+
   Depends solver-tests : common-tests ;
   Depends run-nddl-planner-tests : solver-tests ;
   if $(LIBRARIES) = SHARED) {

@@ -33,6 +33,10 @@ namespace EUROPA {
     TokenId successor = m_choices[m_choiceIndex].second.second;
     checkError(predecessor == m_token || successor == m_token,
 	       "Given token must be part of assignment.");
+    debugMsg("CBPlannerDecisionPoint:assign", "For " << m_token->getPredicateName().toString() << "(" <<
+             m_token->getKey() << "), assigning " << predecessor->getPredicateName().toString() << "(" <<
+             predecessor->getKey() << ") to be before " << successor->getPredicateName().toString() << "(" <<
+             successor->getKey() << ").");
     m_dbClient->constrain(object, predecessor, successor);
     m_choiceIndex++;
     return true;
@@ -40,6 +44,8 @@ namespace EUROPA {
 
   bool ObjectDecisionPoint::retract() {
     checkError(m_choiceIndex > 0, "Choice index must be at least 1. Bug in control loop.");
+    debugMsg("CBPlannerDecisionPoint:retract", "Retracting ordering decision on " << m_token->getPredicateName().toString() <<
+             "(" << m_token->getKey() << ").");
     ObjectId object = m_choices[m_choiceIndex-1].first;
     TokenId predecessor = m_choices[m_choiceIndex-1].second.first;
     TokenId successor = m_choices[m_choiceIndex-1].second.second;

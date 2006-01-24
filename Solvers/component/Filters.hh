@@ -13,6 +13,24 @@ namespace EUROPA {
   namespace SOLVERS {
 
     /**
+     * @brief Filters out guards
+     */
+    class GuardFilter : public FlawFilter {
+    public:
+      GuardFilter(const TiXmlElement& configData);
+      virtual bool test(const EntityId& entity);
+    };
+
+    /**
+     * @brief Filters out non-guards
+     */
+    class NotGuardFilter : public GuardFilter {
+    public:
+      NotGuardFilter(const TiXmlElement& configData);
+      bool test(const EntityId& entity);
+    };
+
+    /**
      * @brief Will filter a variable out until its derived domain is closed
      * and finite.
      */
@@ -40,6 +58,15 @@ namespace EUROPA {
       bool test(const EntityId& entity);
     };
 
+
+    /**
+     * @brief Will filter a token out until it's parent token is assigned.
+     */
+    class MasterMustBeAssignedFilter : public FlawFilter {
+    public:
+      MasterMustBeAssignedFilter(const TiXmlElement& configData);
+      bool test(const EntityId& entity);
+    };
 
     /**
      * @brief Will filter a token based on the horizon.

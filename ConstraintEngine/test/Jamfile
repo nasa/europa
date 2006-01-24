@@ -2,6 +2,8 @@ SubDir PLASMA ConstraintEngine test ;
 
 if ! $(PLASMA_READY) {
 
+CET_Files = [ FGristFiles ConstraintTesting ] ; #<ConstraintEngine!test>ConstraintTesting ;
+
 ModuleMain ce-module-tests
 	:
 	module-tests.cc

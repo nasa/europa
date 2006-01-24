@@ -1241,7 +1241,7 @@ namespace EUROPA {
 	char buf[PATH_MAX];
 	while(!configFile.eof()) {
 	  configFile.getline(buf, PATH_MAX);
-	  if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
+	  if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n' || buf[0] == '\r')
 	    continue;
 	  std::string line = buf;
 	  debugMsg("PartialPlanWriter:parseGeneralConfigSection", "Parsing line '" << line << "'");

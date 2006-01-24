@@ -57,26 +57,30 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>Monkey_Class___Banana_SV.HAVE_BANANA</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
    <State>merge</State>
    <State>activate</State>
    <State>reject</State>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>50</Priority>
    <PredicateSpec>
     <PredicateName>Monkey_Class___Banana_SV.GRABBING_BANANA</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
-  <Master/>
+  <Master>
+   <Relation>none</Relation>
+  </Master>
   <DecisionPreference>
    <State>merge</State>
    <State>activate</State>
    <State>reject</State>
   </DecisionPreference>
-  </Token>
+ </Token>
  <Token>
   <Priority>95</Priority>
    <PredicateSpec>
@@ -116,13 +120,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>103</Priority>
    <PredicateSpec>
-    <PredicateName>Monkey_Class___Altitude_SV.LOW</PredicateName>
+    <PredicateName>Monkey_Class___Altitude_SV.CLIMBING</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>any</Relation>
    <PredicateSpec>
-    <PredicateName>Monkey_Class___Altitude_SV.CLIMBING</PredicateName>
+    <PredicateName>Monkey_Class___Altitude_SV.LOW</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -135,13 +139,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>99</Priority>
    <PredicateSpec>
-    <PredicateName>Monkey_Class___Location_SV.At</PredicateName>
+    <PredicateName>Monkey_Class___Location_SV.Going</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>after</Relation>
    <PredicateSpec>
-    <PredicateName>Monkey_Class___Location_SV.Going</PredicateName>
+    <PredicateName>Monkey_Class___Location_SV.At</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -154,13 +158,13 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
  <Token>
   <Priority>101</Priority>
    <PredicateSpec>
-    <PredicateName>Monkey_Class___Location_SV.At</PredicateName>
+    <PredicateName>Monkey_Class___Location_SV.Going</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
   <Master>
    <Relation>before</Relation>
    <PredicateSpec>
-    <PredicateName>Monkey_Class___Location_SV.Going</PredicateName>
+    <PredicateName>Monkey_Class___Location_SV.At</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
    </Master>
@@ -228,6 +232,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>Monkey_Class___Banana_SV.HAVE_BANANA</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
+   <PredicateSpec/>
+   </Master>
   <DecisionPreference>
    <State>merge</State>
    <State>activate</State>
@@ -240,6 +248,10 @@ xsi:schemaLocation="Heuristics-HSTS.xsd">
     <PredicateName>Monkey_Class___Banana_SV.GRABBING_BANANA</PredicateName>
     <PredicateParameters/>
    </PredicateSpec>
+  <Master>
+   <Relation>any</Relation>
+   <PredicateSpec/>
+   </Master>
   <DecisionPreference>
    <State>merge</State>
    <State>activate</State>

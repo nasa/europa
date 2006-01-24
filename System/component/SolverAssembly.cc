@@ -2,6 +2,7 @@
 
 // Support for required major plan database components
 #include "PlanDatabase.hh"
+#include "Token.hh"
 #include "PlanDatabaseWriter.hh"
 #include "ConstraintEngine.hh"
 #include "RulesEngine.hh"
@@ -27,6 +28,7 @@
 #include "SolverDecisionPoint.hh"
 #include "Filters.hh"
 #include "SolverPartialPlanWriter.hh"
+#include "HSTSDecisionPoints.hh"
 
 // Test Support
 #include "TestSupport.hh"
@@ -77,6 +79,15 @@ namespace EUROPA {
     REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
     REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonVariableFilter, HorizonVariableFilter);
     REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::TokenMustBeAssignedFilter, TokenMustBeAssignedFilter);
+    REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::TokenMustBeAssignedFilter, ParentMustBeInsertedFilter);
+    REGISTER_FLAW_FILTER(EUROPA::SOLVERS::SingletonFilter, Singleton);
+    REGISTER_FLAW_FILTER(EUROPA::SOLVERS::MasterMustBeAssignedFilter, MasterMustBeInsertedFilter);
+    
+    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::MinValue, Min);
+    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::MinValue, Max);
+    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::ValueEnum, ValEnum);
+    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::OpenConditionDecisionPoint, HSTSOpenConditionDecisionPoint);
+    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::ThreatDecisionPoint, HSTSThreatDecisionPoint);
     isInitialized() = true;
   }
 

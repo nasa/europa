@@ -1232,6 +1232,21 @@ private:
     // Confirm the slave tokens variable priorities have not changed.
     assertTrue(heuristics.getPriority(location) ==  100, toString(heuristics.getPriority(location)));
 
+    IntervalToken slaveCommunicate(takeSampleMaster.getId(), 
+                                   LabelStr("contained_by"),
+                                   LabelStr("Telemetry.Communicate"), 
+                                   IntervalIntDomain(1, 100),
+                                   IntervalIntDomain(1, 100),
+                                   IntervalIntDomain(1, 100),
+                                   "tel1", false);
+    slaveCommunicate.addParameter(IntervalIntDomain(60, 120, "int"), LabelStr("minutes"));
+    slaveCommunicate.addParameter(IntervalDomain(500.3, 1200.4, "float"), LabelStr("bandwidth"));
+    slaveCommunicate.addParameter(allModes, LabelStr("mode"));
+    slaveCommunicate.close();
+    ce.propagate();
+    
+    assertTrue(heuristics.getPriority(slaveCommunicate.getId()) != 1000);
+
 
     TEARDOWN();
     return true;
