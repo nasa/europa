@@ -946,13 +946,14 @@ namespace EUROPA {
     const AbstractDomain * baseDomain = NULL;
     if (value != NULL) {
       baseDomain = xmlAsAbstractDomain(*value, name);
-      debugMsg("DbClientTransactionPlayer:xmlAsCreateVariable", " type = " << type << " name = " << name << " domain type = " << baseDomain->getTypeName().c_str());
+
       if (type == NULL) {
         type = value->Value();
         if ((strcmp(type, "value") == 0) || (strcmp(type, "new") == 0) || (strcmp(type, "symbol") == 0) || (strcmp(type, "interval") == 0)) {
           type = value->Attribute("type");
         }
       }
+      debugMsg("DbClientTransactionPlayer:xmlAsCreateVariable", " type = " << type << " name = " << name << " domain type = " << baseDomain->getTypeName().c_str());
     }
 
     check_error(type != NULL);
