@@ -324,7 +324,6 @@ namespace EUROPA {
             REGISTER_TOKEN_SORTER(NearTokenComparator, near);
             REGISTER_TOKEN_SORTER(FarTokenComparator, far);
             REGISTER_TOKEN_SORTER(AscendingKeyTokenComparator, ascendingKey);
-
             sl_bool = true;
           }
         }

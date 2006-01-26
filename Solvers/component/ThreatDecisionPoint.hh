@@ -26,6 +26,8 @@ namespace EUROPA {
        */
       static bool test(const EntityId& entity);
 
+      const TokenId& getToken() const {return m_tokenToOrder;}
+
     protected:
       virtual void handleInitialize();
 

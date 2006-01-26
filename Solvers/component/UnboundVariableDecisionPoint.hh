@@ -3,7 +3,6 @@
 
 #include "SolverDecisionPoint.hh"
 #include "ConstrainedVariable.hh"
-#include "FlawHandler.hh"
 
 /**
  * @brief Provides class declarations for handling variable flaws. Includes classes for min, max and random orderings.
@@ -50,11 +49,11 @@ namespace EUROPA {
        */
       std::string toString() const;
 
+      const ConstrainedVariableId& getFlawedVariable() const;
+
     protected:
 
       UnboundVariableDecisionPoint(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
-
-      const ConstrainedVariableId& getFlawedVariable() const;
 
       const ConstrainedVariableId m_flawedVariable; /*!< The Flaw to resolve */
 
