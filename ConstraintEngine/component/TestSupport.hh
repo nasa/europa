@@ -26,7 +26,7 @@ public:
   static void reset() {
     if (!s_instance.isNoId()) {
       delete (ConstraintEngine*) s_instance;
-      s_instance = 0.0; // Patch for GNATS 3184 ConstraintEngineId::noId(); 
+      s_instance = ConstraintEngineId::noId(); 
      }
   }
 
