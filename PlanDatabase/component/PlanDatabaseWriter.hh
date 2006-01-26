@@ -10,7 +10,7 @@ namespace EUROPA {
 
   public:
 
-    static std::string toString(const PlanDatabaseId& db, bool useStandardKeys = true);
+    static std::string toString(const PlanDatabaseId& db, bool _useStandardKeys = true);
 
     static void write(PlanDatabaseId db, std::ostream& os);
 
@@ -30,7 +30,8 @@ namespace EUROPA {
 
     static unsigned int& indent();
 
-    static bool s_useStandardKeys;
+    static bool& useStandardKeys();
+
   };
 
 }

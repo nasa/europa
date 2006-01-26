@@ -7,13 +7,15 @@
 #include "TokenVariable.hh"
 #include "ConstrainedVariable.hh"
 #include "Utils.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
-  bool PlanDatabaseWriter::s_useStandardKeys = true;
+  // bool PlanDatabaseWriter::s_useStandardKeys = true;
 
-    std::string PlanDatabaseWriter::toString(const PlanDatabaseId& db, bool useStandardKeys){
-      s_useStandardKeys = useStandardKeys;
+    std::string PlanDatabaseWriter::toString(const PlanDatabaseId& db, bool _useStandardKeys){
+      useStandardKeys() = _useStandardKeys;
+      checkError(useStandardKeys() == _useStandardKeys, "Failed to set standardKeys to method's input values");
       std::stringstream sstr;
       write(db, sstr);
       return sstr.str();
@@ -167,7 +169,7 @@ namespace EUROPA {
     }
 
     std::string PlanDatabaseWriter::getKey(const TokenId& token){
-      if(s_useStandardKeys)
+      if(useStandardKeys())
 	return EUROPA::toString(token->getKey());
       else
 	return token->getPlanDatabase()->getClient()->getPathAsString(token);
@@ -183,6 +185,11 @@ namespace EUROPA {
     unsigned int& PlanDatabaseWriter::indent(){
       static unsigned int sl_indentLevel(0);
       return sl_indentLevel;
+    }
+
+    bool& PlanDatabaseWriter::useStandardKeys() {
+      static bool sl_useStandardKeys(true);
+      return sl_useStandardKeys;
     }
 
 }
