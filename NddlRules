@@ -5,17 +5,20 @@ include [ FDirName $(SUBDIR) JavaRules ] ;
 
 # TRACE_NDDL ?= TRUE ;
 
-# Runs a planner problem: RunNDDLProblem test-01 : initial-state.nddl : planner : planner-config.xml ;
+# Runs a planner problem: RunNDDLProblem test-01 : initial-state.nddl : planner : planner-config.xml : model : path ;
 # Will ensure initial state is parsed into xml first
 rule RunNDDLProblem {
  local problem = $(1) ;
  local initialState = $(2) ;
  local executable = $(3) ;
  local config = $(4) ;
+ local model = [ FVariantName $(5) : $(VARIANTS) ] ;
+ local path = $(6) ;
+ model = lib$(model)$(SUFSHARE) ;
  local txSource = $(initialState:S=.xml) ;
  NddlParser $(txSource) : $(initialState) ;
  Depends $(problem) : $(txSource) ;
- RunModuleMain $(problem) : $(executable) : $(txSource) $(config) ; 
+ RunModuleMain $(problem) : $(executable) : $(model) $(txSource) $(config) $(path) ; 
 }
 
 # NddlMain run : code.cc : model.nddl : System ;

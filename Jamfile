@@ -53,7 +53,6 @@ SubInclude PLASMA Solvers ;
 SubInclude PLASMA Aver ;
 SubInclude PLASMA HSTS ;
 SubInclude PLASMA System ;
-
 SubInclude PLASMA Examples ;
 
 RemoveBinaries clean-all ;

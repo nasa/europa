@@ -134,7 +134,7 @@ rule FVariantName
     }
     return $(name) ;
   case * :
-    Exit FVariantName unknown variant: $(variant) ;
+    Exit FVariantName unknown variant: $(variant) for $(name) ;
   }
 }
 

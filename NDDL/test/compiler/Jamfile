@@ -44,7 +44,7 @@ for model in
 		NOTFILE $(hh).diff $(cc).diff ;
 		Diff $(hh).diff : $(hh).valid $(hh) ;
 		Diff $(cc).diff : $(cc).valid $(cc) ;
-  	LocalDepends run-nddl-tests : $(hh).diff $(cc).diff ;
+  	        LocalDepends run-nddl-tests : $(hh).diff $(cc).diff ;
 	}
 
   LocalDepends run-nddl-tests : run-$(exe) ;

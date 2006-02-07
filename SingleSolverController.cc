@@ -28,37 +28,48 @@ namespace EUROPA {
       doc.LoadFile();
       m_solver = (new EUROPA::SOLVERS::Solver(getPlanDatabase(), *(doc.RootElement())))->getId();
 
+      // Set defaults for the configuration
+      int start = 0;
+      int end = 0;
+      m_maxSteps = 10000;
+      m_maxDepth = 10000;
+
       // Configure the planner from data in the initial state
       std::list<ObjectId> configObjects;
-      getPlanDatabase()->getObjectsByType("PlannerConfig", configObjects); // Standard configuration class
+      if(Schema::instance()->isType("PlannerConfig")){
+	getPlanDatabase()->getObjectsByType("PlannerConfig", configObjects); // Standard configuration class
 
-      check_error(configObjects.size() == 1,
-		  "Expect exactly one instance of the class 'PlannerConfig'");
 
-      ObjectId configSource = configObjects.front();
-      check_error(configSource.isValid());
+	check_error(configObjects.size() == 1,
+		    "Expect exactly one instance of the class 'PlannerConfig'");
 
-      const std::vector<ConstrainedVariableId>& variables = configSource->getVariables();
-      check_error(variables.size() == 4, "Expecting exactly 4 configuration variables");
+	ObjectId configSource = configObjects.front();
+	check_error(configSource.isValid());
 
-      // Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
-      ConstrainedVariableId horizonStart = variables[0];
-      ConstrainedVariableId horizonEnd = variables[1];
-      ConstrainedVariableId plannerSteps = variables[2];
-      ConstrainedVariableId maxDepth = variables[3];
+	const std::vector<ConstrainedVariableId>& variables = configSource->getVariables();
+	check_error(variables.size() == 4, "Expecting exactly 4 configuration variables");
 
-      int start = (int) horizonStart->baseDomain().getSingletonValue();
-      int end = (int) horizonEnd->baseDomain().getSingletonValue();
+	// Set up the horizon  from the model now. Will cause a refresh of the query, but that is OK.
+	ConstrainedVariableId horizonStart = variables[0];
+	ConstrainedVariableId horizonEnd = variables[1];
+	ConstrainedVariableId plannerSteps = variables[2];
+	ConstrainedVariableId maxDepth = variables[3];
+
+	start = (int) horizonStart->baseDomain().getSingletonValue();
+	end = (int) horizonEnd->baseDomain().getSingletonValue();
+
+	// Now get planner step max
+	m_maxSteps = (int) plannerSteps->baseDomain().getSingletonValue();
+	m_maxDepth = (int) maxDepth->baseDomain().getSingletonValue();
+      }
+
       SOLVERS::HorizonFilter::getHorizon() = IntervalDomain(start, end);
-
-      // Now get planner step max
-      m_maxSteps = (int) plannerSteps->baseDomain().getSingletonValue();
-      m_maxDepth = (int) maxDepth->baseDomain().getSingletonValue();
 
       std::string msg = std::string("SolverConfiguration: \n") +
 	"    Horizon = [" + EUROPA::toString(start) + ", " + EUROPA::toString(end) + "]\n" +
 	"    MaxSteps = " + EUROPA::toString(m_maxSteps) + "\n" +
 	"    MaxDepth = " + EUROPA::toString(m_maxDepth);
+
       logMsg(msg);
     }
 
