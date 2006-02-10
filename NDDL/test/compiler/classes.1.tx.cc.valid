@@ -304,6 +304,7 @@ namespace NDDL {
     // Allocate factories
     REGISTER_TOKEN_FACTORY(Navigator::At::Factory);
     REGISTER_TOKEN_FACTORY(Navigator::Going::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Location, ObjectDomain("Location"));
     REGISTER_OBJECT_FACTORY(LocationFactory0, Location:string);
     REGISTER_TYPE_FACTORY(Path, ObjectDomain("Path"));

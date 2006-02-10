@@ -203,6 +203,7 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Foo::pred4::Factory);
     REGISTER_TOKEN_FACTORY(Foo::pred5::Factory);
     REGISTER_TOKEN_FACTORY(Foo::pred6::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
     // Allocate rules

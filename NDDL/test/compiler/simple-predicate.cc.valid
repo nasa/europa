@@ -312,6 +312,7 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Foo::pred1::Factory);
     REGISTER_TOKEN_FACTORY(Bar::pred1::Factory);
     REGISTER_TOKEN_FACTORY(World::initialState::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Locations, LocationsBaseDomain());
     REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo);

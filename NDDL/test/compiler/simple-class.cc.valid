@@ -89,9 +89,6 @@ namespace NDDL {
     if(m_6.isNoId()){
       m_6 = addVariable(FrequenciesBaseDomain(), "m_6");
     }
-    if(m_7.isNoId()){
-      m_7 = addVariable(Foo::ClassScopedEnumBaseDomain(), "m_7");
-    }
     if(m_8.isNoId()){
       m_8 = addVariable(StringsBaseDomain(), "m_8");
     }
@@ -99,18 +96,6 @@ namespace NDDL {
       close();
   }
   
-  
-  Foo::ClassScopedEnum Foo::ClassScopedEnumBaseDomain(){
-    static Foo::ClassScopedEnum sl_enum("Foo::ClassScopedEnum");
-    if (sl_enum.isOpen()) {
-      // Insert values to initialize
-      sl_enum.insert(LabelStr("A"));
-      sl_enum.insert(LabelStr("B"));
-      sl_enum.insert(LabelStr("C"));
-      sl_enum.close();
-    }
-    return(sl_enum);
-  }
   
   // simple-class.nddl:7 Foo
   void Foo::constructor() {
@@ -143,7 +128,6 @@ namespace NDDL {
     m_4 = addVariable(Locations(LabelStr("Hill"), "Locations"), "m_4");
     m_5 = addVariable(Speeds(100, "Speeds"), "m_5");
     m_6 = addVariable(Frequencies(3.78, "Frequencies"), "m_6");
-    m_7 = addVariable(Foo::ClassScopedEnum(LabelStr("A"), "Foo::ClassScopedEnum"), "m_7");
     m_8 = addVariable(Strings(LabelStr("Martian City"), "Strings"), "m_8");
   }
   
@@ -273,7 +257,6 @@ namespace NDDL {
     id->addEnum("Strings");
     id->addEnum("Speeds");
     id->addEnum("Frequencies");
-    id->addEnum("Foo::ClassScopedEnum");
     id->addMember("Foo", "int", "m_0");
     id->addMember("Foo", "float", "m_1");
     id->addMember("Foo", "bool", "m_2");
@@ -281,7 +264,6 @@ namespace NDDL {
     id->addMember("Foo", "Locations", "m_4");
     id->addMember("Foo", "Speeds", "m_5");
     id->addMember("Foo", "Frequencies", "m_6");
-    id->addMember("Foo", "Foo::ClassScopedEnum", "m_7");
     id->addMember("Foo", "Strings", "m_8");
     id->addMember("World", "int", "m_0");
     id->addMember("World", "int", "m_1");
@@ -294,18 +276,15 @@ namespace NDDL {
     id->addValue("Strings", LabelStr("A1"));
     id->addValue("Strings", LabelStr("B1"));
     id->addValue("Strings", LabelStr("Martian City"));
-    id->addValue("Foo::ClassScopedEnum", LabelStr("A"));
-    id->addValue("Foo::ClassScopedEnum", LabelStr("B"));
-    id->addValue("Foo::ClassScopedEnum", LabelStr("C"));
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TOKEN_FACTORY(World::initialState::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Locations, LocationsBaseDomain());
     REGISTER_TYPE_FACTORY(Strings, StringsBaseDomain());
     REGISTER_TYPE_FACTORY(Speeds, SpeedsBaseDomain());
     REGISTER_TYPE_FACTORY(Frequencies, FrequenciesBaseDomain());
     REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
-    REGISTER_TYPE_FACTORY(Foo::ClassScopedEnum, Foo::ClassScopedEnumBaseDomain());
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
     REGISTER_OBJECT_FACTORY(FooFactory1, Foo:int:float);
     REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));

@@ -1,14 +1,20 @@
+typedef int {1, 2, 3} intEnum;
+typedef int [1 10] intRange;
+typedef float {1.2, 3.0, 4.5} floatEnum;
+typedef float [1.2 4.0] floatRange1;
+typedef float [2.0 4.2] floatRange2;
+typedef float [2.3 4.5] floatRange3;
+enum userValueType1 {USR_115, USR_230}
+enum userValueType2 {USR_116, USR_231}
+enum userValueType3 {USR_117, USR_232}
+enum userValueType4 {USR_118, USR_233}
 
-enum intEnum {1, 2, 3}
-enum intRange [1 10]
-enum floatEnum {1.2, 3, 4.5}
-enum floatRange1 [1.2 4]
-enum floatRange2 [2 4.2]
-enum floatRange3 [2.3 4.5]
-enum userValueType1 { USR_115,  USR_230 }
-enum userValueType2 {'USR_116', USR_231 }
-enum userValueType3 { USR_117, 'USR_232'}
-enum userValueType4 {'USR_118','USR_233'}
+class Class1;  class Class2;  class Class3;  class Class4;  class Class5;
+class Class6;  class Class7;  class Class8;  class Class9;  class Class10;
+class Class11; class Class12; class Class13; class Class14; class Class15;
+class Class16; class Class17; class Class18; class Class19; class Class20;
+class Class21; class Class22; class Class23; class Class24; class Class25;
+class Class26; class Class27; class Class28;
 
 class SuperClass {
 }
@@ -17,27 +23,27 @@ class SubClass
 extends SuperClass
 {
     // fundamental numeric types
-            int INT_SINGLE = 7;
-    private    int INT_SINGLE = 7;
-    public    int INT_SINGLE = 7;
+            int INT_SINGLE1 = 7;
+    private    int INT_SINGLE2 = 7;
+    public    int INT_SINGLE3 = 7;
             int INT_SET1 = {1,2,3};
     private    int INT_SET2 = {1,2,3};
     public    int INT_SET3 = {1,2,3};
             int INT_RANGE1 = [8 10];
     private    int INT_RANGE2 = [8 10];
     public    int INT_RANGE3 = [8 10];
-            float FLOAT_SINGLE = 3.4;
-    private    float FLOAT_SINGLE = 3.4;
-    public    float FLOAT_SINGLE = 3.4;
-            float FLOAT_SET1 = {1.2,2,4.3};
-    private    float FLOAT_SET2 = {1,1.2,2.3};
-    public    float FLOAT_SET3 = {1.2,2.3,3};
-            float FLOAT_RANGE1 = [3 45.5];
-    private    float FLOAT_RANGE2 = [3 45.5];
-    public    float FLOAT_RANGE3 = [3 45.5];
-            float FLOAT_RANGE4 = [4.5 10];
-    private    float FLOAT_RANGE5 = [4.5 10];
-    public    float FLOAT_RANGE6 = [4.5 10];
+            float FLOAT_SINGLE1 = 3.4;
+    private    float FLOAT_SINGLE2 = 3.4;
+    public    float FLOAT_SINGLE3 = 3.4;
+            float FLOAT_SET1 = {1.2,2.0,4.3};
+    private    float FLOAT_SET2 = {1.0,1.2,2.3};
+    public    float FLOAT_SET3 = {1.2,2.3,3.0};
+            float FLOAT_RANGE1 = [3.0 45.5];
+    private    float FLOAT_RANGE2 = [3.0 45.5];
+    public    float FLOAT_RANGE3 = [3.0 45.5];
+            float FLOAT_RANGE4 = [4.5 10.];
+    private    float FLOAT_RANGE5 = [4.5 10.];
+    public    float FLOAT_RANGE6 = [4.5 10.];
             float FLOAT_RANGE7 = [1. 4.3];
     private    float FLOAT_RANGE8 = [1. 4.3];
     public    float FLOAT_RANGE9 = [1. 4.3];
@@ -52,8 +58,8 @@ extends SuperClass
     private    intEnum INT_ENUM_SINGLE2 = 1;
     public    intEnum INT_ENUM_SINGLE3 = 1;
             intRange INT_RANGE_SINGLE1 = 4;
-    private    intRange INT_RANGE_SINGLE1 = 4;
-    public    intRange INT_RANGE_SINGLE1 = 4;
+    private    intRange INT_RANGE_SINGLE2 = 4;
+    public    intRange INT_RANGE_SINGLE3 = 4;
             floatEnum FLOAT_ENUM_SINGLE1 = 1.2;
     private    floatEnum FLOAT_ENUM_SINGLE2 = 1.2;
     public    floatEnum FLOAT_ENUM_SINGLE3 = 1.2;
@@ -71,9 +77,9 @@ extends SuperClass
             userValueType1 ID1 = USR_115;
     private    userValueType1 ID2 = USR_115;
     public    userValueType1 ID3 = USR_115;
-            userValueType1 ID4 = 'USR_115';
-    private    userValueType1 ID5 = 'USR_115';
-    public    userValueType1 ID6 = 'USR_115';
+            userValueType1 ID4 = USR_115;
+    private    userValueType1 ID5 = USR_115;
+    public    userValueType1 ID6 = USR_115;
     
     // object types
     
@@ -116,59 +122,59 @@ extends SuperClass
             Class9 object31 = new Class9(USR_115);
     private    Class9 object32 = new Class9(USR_115);
     public    Class9 object33 = new Class9(USR_115);
-            Class9 object32 = new Class9('USR_115');
-    private    Class9 object33 = new Class9('USR_115');
-    public    Class9 object34 = new Class9('USR_115');
-            Class10 object35 = new Class10(USR_115);
-    private    Class10 object36 = new Class10(USR_115);
-    public    Class10 object37 = new Class10(USR_115);
-            Class10 object38 = new Class10('USR_115');
-    private    Class10 object39 = new Class10('USR_115');
-    public    Class10 object40 = new Class10('USR_115');
+            Class9 object34 = new Class9(USR_115);
+    private    Class9 object35 = new Class9(USR_115);
+    public    Class9 object36 = new Class9(USR_115);
+            Class10 object37 = new Class10(USR_115);
+    private    Class10 object38 = new Class10(USR_115);
+    public    Class10 object39 = new Class10(USR_115);
+            Class10 object40 = new Class10(USR_115);
+    private    Class10 object41 = new Class10(USR_115);
+    public    Class10 object42 = new Class10(USR_115);
     
     // null constructor definitions with initialization of fields
-            Class11 object41 = new Class11();
-    private    Class11 object42 = new Class11();
-    public    Class11 object43 = new Class11();
-            Class12 object44 = new Class12();
-    private    Class12 object45 = new Class12();
-    public    Class12 object46 = new Class12();
-            Class13 object47 = new Class13();
-    private    Class13 object48 = new Class13();
-    public    Class13 object49 = new Class13();
-            Class14 object50 = new Class14();
-    private    Class14 object51 = new Class14();
-    public    Class14 object52 = new Class14();
-            Class15 object53 = new Class15();
-    private    Class15 object54 = new Class15();
-    public    Class15 object55 = new Class15();
-            Class16 object56 = new Class16();
-    private    Class16 object57 = new Class16();
-    public    Class16 object58 = new Class16();
+            Class11 object43 = new Class11();
+    private    Class11 object44 = new Class11();
+    public    Class11 object45 = new Class11();
+            Class12 object46 = new Class12();
+    private    Class12 object47 = new Class12();
+    public    Class12 object48 = new Class12();
+            Class13 object49 = new Class13();
+    private    Class13 object50 = new Class13();
+    public    Class13 object51 = new Class13();
+            Class14 object52 = new Class14();
+    private    Class14 object53 = new Class14();
+    public    Class14 object54 = new Class14();
+            Class15 object55 = new Class15();
+    private    Class15 object56 = new Class15();
+    public    Class15 object57 = new Class15();
+            Class16 object58 = new Class16();
+    private    Class16 object59 = new Class16();
+    public    Class16 object60 = new Class16();
 
     // default initializers for constructors
     // includes do-nothing constructor and initialization of fields
-            Class17 object59 = new Class17();
-    private    Class17 object60 = new Class17();
-    public    Class17 object61 = new Class17();
-            Class17 object62 = new Class17(5);
-    private    Class17 object63 = new Class17(5);
-    public    Class17 object64 = new Class17(5);
-            Class18 object65 = new Class18();
-    private    Class18 object66 = new Class18();
-    public    Class18 object67 = new Class18();
-            Class18 object68 = new Class18(5);
-    private    Class18 object69 = new Class18(5);
-    public    Class18 object70 = new Class18(5);
-            Class19 object71 = new Class19();
-    private    Class19 object72 = new Class19();
-    public    Class19 object73 = new Class19();
-            Class19 object74 = new Class19(6);
-    private    Class19 object75 = new Class19(6);
-    public    Class19 object76 = new Class19(6);
-            Class19 object77 = new Class19(6.2);
-    private    Class19 object78 = new Class19(6.2);
-    public    Class19 object79 = new Class19(6.2);
+            Class17 object61 = new Class17();
+    private    Class17 object62 = new Class17();
+    public    Class17 object63 = new Class17();
+            Class17 object64 = new Class17(5);
+    private    Class17 object65 = new Class17(5);
+    public    Class17 object66 = new Class17(5);
+            Class18 object67 = new Class18();
+    private    Class18 object68 = new Class18();
+    public    Class18 object69 = new Class18();
+            Class18 object70 = new Class18(5);
+    private    Class18 object71 = new Class18(5);
+    public    Class18 object72 = new Class18(5);
+            Class19 object73 = new Class19();
+    private    Class19 object74 = new Class19();
+    public    Class19 object75 = new Class19();
+            Class19 object76 = new Class19(6);
+    private    Class19 object77 = new Class19(6);
+    public    Class19 object78 = new Class19(6);
+            Class19 object79 = new Class19(6.2);
+    private    Class19 object79a = new Class19(6.2);
+    public    Class19 object79b = new Class19(6.2);
             Class20 object80 = new Class20();
     private    Class20 object81 = new Class20();
     public    Class20 object82 = new Class20();
@@ -193,18 +199,18 @@ extends SuperClass
             Class23 object101 = new Class23(USR_115);
     private    Class23 object102 = new Class23(USR_115);
     public    Class23 object103 = new Class23(USR_115);
-            Class23 object104 = new Class23('USR_115');
-    private    Class23 object105 = new Class23('USR_115');
-    public    Class23 object106 = new Class23('USR_115');
+            Class23 object104 = new Class23(USR_115);
+    private    Class23 object105 = new Class23(USR_115);
+    public    Class23 object106 = new Class23(USR_115);
             Class24 object107 = new Class24();
     private    Class24 object108 = new Class24();
     public    Class24 object109 = new Class24();
             Class24 object110 = new Class24(USR_115);
     private    Class24 object111 = new Class24(USR_115);
     public    Class24 object112 = new Class24(USR_115);
-            Class24 object113 = new Class24('USR_115');
-    private    Class24 object114 = new Class24('USR_115');
-    public    Class24 object115 = new Class24('USR_115');
+            Class24 object113 = new Class24(USR_115);
+    private    Class24 object114 = new Class24(USR_115);
+    public    Class24 object115 = new Class24(USR_115);
     
 }
 
@@ -311,7 +317,7 @@ class Class15 {
 class Class16 {
     userValueType1 x;
     Class16 () {
-        x = 'USR_115';
+        x = USR_115;
     }
 }
 
@@ -379,13 +385,13 @@ class Class26 {
 }
 
 class Class27 {
-    Class27(userValueType1 x = 'USR_115') {
+    Class27(userValueType1 x = USR_115) {
     }
 }
 
 class Class28 {
     userValueType1 y;
-    Class28(userValueType1 x = 'USR_115') {
+    Class28(userValueType1 x = USR_115) {
         y = x;
     }
 }

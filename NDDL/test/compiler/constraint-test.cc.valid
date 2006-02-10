@@ -94,7 +94,7 @@ namespace NDDL {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("p4")));
-      vars.push_back(predicateVariable(IntervalDomain(1, 2.0, "float")));
+      vars.push_back(predicateVariable(IntervalDomain(1.0, 2.0, "float")));
       token_constraint(eq, vars);
     }
     {
@@ -300,6 +300,7 @@ namespace NDDL {
     // Allocate factories
     REGISTER_TOKEN_FACTORY(Sample::sample::Factory);
     REGISTER_TOKEN_FACTORY(World::initialState::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(ENUM, ENUMBaseDomain());
     REGISTER_TYPE_FACTORY(Sample, ObjectDomain("Sample"));
     REGISTER_OBJECT_FACTORY(SampleFactory0, Sample);

@@ -1,6 +1,6 @@
 enum Locations {Hill, Rock, Lander};
-enum StringEnum {'s1', 's2', 's3'};
-enum NumericEnum {1, 3, 4, 10.4};
+typedef string {'s1','s2','s3'} StringEnum;
+typedef float {1.0, 3.0, 4.0, 10.4} NumericEnum;
 
 class Foo {
  predicate Bar{}
@@ -26,7 +26,7 @@ class Rover{
 
   eq(v0, {Hill, Lander});
   eq(v1, {'s1', 's2'});
-  eq(v2, {1, 4, 10.4});
+  eq(v2, {1.0, 4.0, 10.4});
   eq(v3, [0 12]);
   eq(v4, [-1.98 2.67]);
   eq(v3, 8);
@@ -150,8 +150,8 @@ a1 contained_by a3;
 goal(Rover.At a4);
 a1 meets a4;
 
-goal(Rover.At a4);
-a1 met_by a4;
+goal(Rover.At a22); //was previously a4, this error was caught by NDDL 1.1
+a1 met_by a22;
 
 goal(Rover.At a5);
 a1 before a5;

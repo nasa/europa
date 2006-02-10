@@ -114,6 +114,7 @@ namespace NDDL {
     id->addValue("Speed", LabelStr("Fast"));
     // Force allocation of model specific type factories
     // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Ints, IntsBaseDomain());
     REGISTER_TYPE_FACTORY(Floats, FloatsBaseDomain());
     REGISTER_TYPE_FACTORY(Strings, StringsBaseDomain());

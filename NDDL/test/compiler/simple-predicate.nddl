@@ -1,7 +1,7 @@
 // Simple class and predicates
 enum Locations {Hill, Rock, Lander};
 
-class Foo{
+class World; class Foo{ 
  int m_0 = 5;
  string m_1 = "Hello"; // Default allocation
 

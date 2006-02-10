@@ -33,9 +33,9 @@ namespace NDDL {
     static NumericEnum sl_enum("NumericEnum");
     if (sl_enum.isOpen()) {
       // Insert values to initialize
-      sl_enum.insert(1);
-      sl_enum.insert(3);
-      sl_enum.insert(4);
+      sl_enum.insert(1.0);
+      sl_enum.insert(3.0);
+      sl_enum.insert(4.0);
       sl_enum.insert(10.4);
       sl_enum.close();
     }
@@ -205,13 +205,13 @@ namespace NDDL {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("v1")));
-      vars.push_back(predicateVariable(SymbolDomain(listFromString("s1$s2$",false), "StringEnum")));
+      vars.push_back(predicateVariable(StringDomain(listFromString("s1$s2$",false), "string")));
       token_constraint(eq, vars);
     }
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("v2")));
-      vars.push_back(predicateVariable(NumericDomain(listFromString("1$4$10.4$",true), "float")));
+      vars.push_back(predicateVariable(NumericDomain(listFromString("1.0$4.0$10.4$",true), "float")));
       token_constraint(eq, vars);
     }
     {
@@ -586,6 +586,7 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Rover::Going::Factory);
     REGISTER_TOKEN_FACTORY(Rover::AnyPredicate::Factory);
     REGISTER_TOKEN_FACTORY(World::initialState::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Locations, LocationsBaseDomain());
     REGISTER_TYPE_FACTORY(StringEnum, StringEnumBaseDomain());
     REGISTER_TYPE_FACTORY(NumericEnum, NumericEnumBaseDomain());

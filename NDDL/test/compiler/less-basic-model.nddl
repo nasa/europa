@@ -1,36 +1,6 @@
 enum Locations {Hill, Rock, Lander};
 
-class Camera {
-  predicate On {
-    eq(duration, [1 2]);
-  }
-  predicate Off {
-    eq(duration, [1 +inf]);
-  }
-  predicate TakingPicture {
-    Locations m_loc;
-    eq(duration, 1);
-  }
-}
-
-Camera::On {
-  meets(TakingPicture t);
-  meets(Off n);
-  met_by(Off o);
-}
-
-Camera::Off {
-  meets(On o);
-}
-
-Camera::TakingPicture {
-  met_by(On o);
-  contained_by(Rover.At a);
-  eq(m_loc, a.m_location);
-  meets(On n);
-}
-
-class Rover{
+class Camera; class Rover{
  Camera m_camera;
  predicate At{
   Locations m_location;
@@ -62,6 +32,36 @@ Rover::Going{
   eq(m_from, from.m_location);
   meets(At to);
   eq(m_to, to.m_location);
+}
+
+class Camera {
+  predicate On {
+    eq(duration, [1 2]);
+  }
+  predicate Off {
+    eq(duration, [1 +inf]);
+  }
+  predicate TakingPicture {
+    Locations m_loc;
+    eq(duration, 1);
+  }
+}
+
+Camera::On {
+  meets(TakingPicture t);
+  meets(Off n);
+  met_by(Off o);
+}
+
+Camera::Off {
+  meets(On o);
+}
+
+Camera::TakingPicture {
+  met_by(On o);
+  contained_by(Rover.At a);
+  eq(m_loc, a.m_location);
+  meets(On n);
 }
 
 // Defines the initial state for the problem.

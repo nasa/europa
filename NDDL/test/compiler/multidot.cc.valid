@@ -340,6 +340,7 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Baz::apred::Factory);
     REGISTER_TOKEN_FACTORY(Baz::bpred::Factory);
     REGISTER_TOKEN_FACTORY(Mumble::mumbPred::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
     REGISTER_TYPE_FACTORY(Bar, ObjectDomain("Bar"));

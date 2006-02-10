@@ -22,6 +22,7 @@ namespace NDDL {
     id->addPrimitive("string");
     // Force allocation of model specific type factories
     // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     // Allocate rules
     return id;
   }

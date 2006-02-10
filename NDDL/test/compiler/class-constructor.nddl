@@ -4,7 +4,7 @@
 
 enum Locations {Hill, Rock, Lander};
 
-class Foo {
+class World; class Foo { //class World predefined for line 15
  int m_0;
  int m_1;
  bool m_2;

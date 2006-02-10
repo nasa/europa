@@ -210,6 +210,7 @@ namespace NDDL {
     id->addMember("Path", "float", "cost");
     // Force allocation of model specific type factories
     // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Location, ObjectDomain("Location"));
     REGISTER_OBJECT_FACTORY(LocationFactory0, Location:string);
     REGISTER_TYPE_FACTORY(Path, ObjectDomain("Path"));

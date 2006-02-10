@@ -8,7 +8,7 @@ class Foo {
  // Declare a constructor with no arguments to conduct default initialization
  Foo(){
   arg1 = 0;
-  arg2 = 0;
+  arg2 = 0.0;
   arg3 = false;
  }
 

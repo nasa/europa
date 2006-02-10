@@ -6,13 +6,13 @@
 
 namespace NDDL {
 
-  class Camera;
-  typedef Id<Camera> CameraId;
-  typedef ObjectDomain CameraDomain;
-  
   class Rover;
   typedef Id<Rover> RoverId;
   typedef ObjectDomain RoverDomain;
+  
+  class Camera;
+  typedef Id<Camera> CameraId;
+  typedef ObjectDomain CameraDomain;
   
   class World;
   typedef Id<World> WorldId;
@@ -24,7 +24,49 @@ namespace NDDL {
   typedef SymbolDomain Locations;
   Locations LocationsBaseDomain();
   
-  // less-basic-model.nddl:3 Camera
+  // less-basic-model.nddl:3 Rover
+  class Rover : public Timeline {
+  public:
+    Rover(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Rover(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Rover(const ObjectId& parent, const LabelStr& name);
+    Rover(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    class At;
+    typedef Id<At> AtId;
+    class Going;
+    typedef Id<Going> GoingId;
+    ConstrainedVariableId m_camera; // SchemaWriter::declareVariable
+    
+    // less-basic-model.nddl:5 At
+    class At : public NddlToken {
+    public:
+      At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      At(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Rover::At, Rover.At);
+      
+      ConstrainedVariableId m_location; // SchemaWriter::declareVariable
+    };
+    
+    // less-basic-model.nddl:10 Going
+    class Going : public NddlToken {
+    public:
+      Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      Going(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Rover::Going, Rover.Going);
+      
+      ConstrainedVariableId m_from; // SchemaWriter::declareVariable
+      ConstrainedVariableId m_to; // SchemaWriter::declareVariable
+    };
+    
+    // less-basic-model.nddl:3 Rover
+    virtual void constructor();
+  };
+  
+  // less-basic-model.nddl:37 Camera
   class Camera : public Timeline {
   public:
     Camera(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -41,7 +83,7 @@ namespace NDDL {
     class TakingPicture;
     typedef Id<TakingPicture> TakingPictureId;
     
-    // less-basic-model.nddl:4 On
+    // less-basic-model.nddl:38 On
     class On : public NddlToken {
     public:
       On(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -51,7 +93,7 @@ namespace NDDL {
       
     };
     
-    // less-basic-model.nddl:7 Off
+    // less-basic-model.nddl:41 Off
     class Off : public NddlToken {
     public:
       Off(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -61,7 +103,7 @@ namespace NDDL {
       
     };
     
-    // less-basic-model.nddl:10 TakingPicture
+    // less-basic-model.nddl:44 TakingPicture
     class TakingPicture : public NddlToken {
     public:
       TakingPicture(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -71,48 +113,6 @@ namespace NDDL {
       
       ConstrainedVariableId m_loc; // SchemaWriter::declareVariable
     };
-  };
-  
-  // less-basic-model.nddl:33 Rover
-  class Rover : public Timeline {
-  public:
-    Rover(const PlanDatabaseId& planDatabase, const LabelStr& name);
-    Rover(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
-    Rover(const ObjectId& parent, const LabelStr& name);
-    Rover(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
-    void handleDefaults(bool autoClose = true); // default variable initialization
-    
-    class At;
-    typedef Id<At> AtId;
-    class Going;
-    typedef Id<Going> GoingId;
-    ConstrainedVariableId m_camera; // SchemaWriter::declareVariable
-    
-    // less-basic-model.nddl:35 At
-    class At : public NddlToken {
-    public:
-      At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
-      At(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
-      void handleDefaults(bool autoClose = true); // default variable initialization
-      DECLARE_TOKEN_FACTORY(Rover::At, Rover.At);
-      
-      ConstrainedVariableId m_location; // SchemaWriter::declareVariable
-    };
-    
-    // less-basic-model.nddl:40 Going
-    class Going : public NddlToken {
-    public:
-      Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
-      Going(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
-      void handleDefaults(bool autoClose = true); // default variable initialization
-      DECLARE_TOKEN_FACTORY(Rover::Going, Rover.Going);
-      
-      ConstrainedVariableId m_from; // SchemaWriter::declareVariable
-      ConstrainedVariableId m_to; // SchemaWriter::declareVariable
-    };
-    
-    // less-basic-model.nddl:33 Rover
-    virtual void constructor();
   };
   
   // less-basic-model.nddl:68 World

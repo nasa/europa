@@ -91,6 +91,7 @@ namespace NDDL {
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TOKEN_FACTORY(Foo::pred::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
     REGISTER_TYPE_FACTORY(Color, ColorBaseDomain());

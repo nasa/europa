@@ -10,7 +10,7 @@ bool global3; // Leave unbound
 
 class Foo extends Timeline {
  predicate pred1{
-  int global1; // Mmake sure scope is OK
+  int global1; // Make sure scope is OK
   int local1;
   neq(local1, global2); // Make sure can access in predicate spec too
  }
@@ -33,7 +33,7 @@ Foo::pred1{
  eq(global4, object);
 }
 
-float global5 = [1 18]; // Leave restricted but unbound
+float global5 = [1.0 18.0]; // Leave restricted but unbound
 
 enum Color {red, green, blue};
 

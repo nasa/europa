@@ -17,15 +17,13 @@ namespace NDDL {
     }
     return(sl_enum);
   }
-  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Object
-  
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
   
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Resource
   
   
   
-  // Resources.nddl:72 UnaryResource
+  // Resources.nddl:73 UnaryResource
   UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "UnaryResource", name, true) {
   }
@@ -47,11 +45,11 @@ namespace NDDL {
   }
   
   
-  // Resources.nddl:72 UnaryResource
+  // Resources.nddl:73 UnaryResource
   DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);
   
   
-  // Resources.nddl:73 uses
+  // Resources.nddl:74 uses
   UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -453,8 +451,8 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Rover::At::Factory);
     REGISTER_TOKEN_FACTORY(Rover::Going::Factory);
     REGISTER_TOKEN_FACTORY(World::initialState::Factory);
-    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
     REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
     REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
     REGISTER_TYPE_FACTORY(Resource, ObjectDomain("Resource"));
     REGISTER_TYPE_FACTORY(UnaryResource, ObjectDomain("UnaryResource"));

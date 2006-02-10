@@ -199,8 +199,6 @@ namespace NDDL {
     }
     return(sl_enum);
   }
-  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Object
-  
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
   
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Resource
@@ -447,6 +445,7 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(UnaryResource::uses::Factory);
     REGISTER_TOKEN_FACTORY(Navigator::At::Factory);
     REGISTER_TOKEN_FACTORY(Navigator::Going::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Location, ObjectDomain("Location"));
     REGISTER_OBJECT_FACTORY(LocationFactory0, Location:string);
     REGISTER_TYPE_FACTORY(Path, ObjectDomain("Path"));
@@ -461,7 +460,6 @@ namespace NDDL {
     REGISTER_OBJECT_FACTORY(PathFactory3, Path:Object:Location:float);
     REGISTER_OBJECT_FACTORY(PathFactory3, Path:Object:Object:float);
     REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
-    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
     REGISTER_TYPE_FACTORY(Resource, ObjectDomain("Resource"));
     REGISTER_TYPE_FACTORY(UnaryResource, ObjectDomain("UnaryResource"));

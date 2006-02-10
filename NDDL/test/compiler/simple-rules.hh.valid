@@ -30,7 +30,7 @@ namespace NDDL {
   
   
   // simple-rules.nddl:2 StringEnum
-  typedef SymbolDomain StringEnum;
+  typedef StringDomain StringEnum;
   StringEnum StringEnumBaseDomain();
   
   

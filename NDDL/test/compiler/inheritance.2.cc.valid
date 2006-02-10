@@ -179,6 +179,7 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Foo::pred1::Factory);
     REGISTER_TOKEN_FACTORY(Bar::pred2::Factory);
     REGISTER_TOKEN_FACTORY(Baz::pred1::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
     REGISTER_TYPE_FACTORY(Bar, ObjectDomain("Bar"));

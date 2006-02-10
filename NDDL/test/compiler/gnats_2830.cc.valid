@@ -536,6 +536,7 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Position::At::Factory);
     REGISTER_TOKEN_FACTORY(Position::Navigate::Factory);
     REGISTER_TOKEN_FACTORY(Foo::FooPred::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(PlannerConfig, ObjectDomain("PlannerConfig"));
     REGISTER_OBJECT_FACTORY(PlannerConfigFactory0, PlannerConfig:int:int:int:int);
     REGISTER_OBJECT_FACTORY(PlannerConfigFactory1, PlannerConfig:int:int:int);

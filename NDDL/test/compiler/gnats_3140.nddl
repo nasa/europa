@@ -1,7 +1,7 @@
 /**
  * Ensure we can handle creation of proxy variable for all types
  */
-enum numericEnum {1, 2, 3, 4, 5}
+typedef int{1, 2, 3, 4, 5} numericEnum;
 enum symbolicEnum {A, AB, ABC}
 
 class Boo {}

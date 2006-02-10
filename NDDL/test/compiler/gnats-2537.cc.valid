@@ -219,6 +219,7 @@ namespace NDDL {
     id->addValue("Location", LabelStr("Lander"));
     // Force allocation of model specific type factories
     // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Location, LocationBaseDomain());
     REGISTER_TYPE_FACTORY(Hill, ObjectDomain("Hill"));
     REGISTER_OBJECT_FACTORY(HillFactory0, Hill);

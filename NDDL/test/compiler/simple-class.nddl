@@ -1,10 +1,12 @@
 enum Locations {Hill, Rock, Lander};
-enum Strings {'A1', 'B1', 'Martian City'};
-enum Speeds {1, 10, 35, 100 };
-enum Frequencies {1.9, 2.67, 3.78};
+typedef string {'A1', 'B1', 'Martian City'} Strings;
+typedef int {1, 10, 35, 100 } Speeds;
+typedef float {1.9, 2.67, 3.78} Frequencies;
 
 // Declares a class of the raw types (and Enumerations), but uses the default constructor
 class Foo {
+ // once we allowed class-scoped enums
+
  int m_0;
  float m_1;
  bool m_2;
@@ -12,8 +14,7 @@ class Foo {
  Locations m_4;
  Speeds m_5;
  Frequencies m_6;
- enum ClassScopedEnum {A, B, C};
- ClassScopedEnum m_7;
+ // once m_7 was a class-scoped enum
  Strings m_8;
  Foo(){
   m_3 = "This string must be initialized";
@@ -28,7 +29,6 @@ class Foo {
   m_4 = Hill;
   m_5 = 100;
   m_6 = 3.78;
-  m_7 = A;
   m_8 = 'Martian City';
  }
 }

@@ -1,4 +1,4 @@
-#include "Core.nddl"
+
 #include "Resources.nddl"
 
 class Battery extends Resource {

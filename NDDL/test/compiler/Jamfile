@@ -20,10 +20,11 @@ for model in
 	simple-class.nddl constraint-test.nddl
 	interval-constants.nddl  simple-predicate.nddl
 	less-basic-model.nddl    foreach-exec.nddl
-	gnats-2537.nddl #gnats-3100.nddl
+	#gnats-2537.nddl globals.nddl
+	gnats-3100.nddl
         simple-resources.nddl 
         multi-resources.nddl
-	multidot.nddl gnats_2830.nddl globals.nddl string-domain.nddl
+	multidot.nddl gnats_2830.nddl string-domain.nddl
 	gnats_3140.nddl
 {
   local exe = $(model:S=) ;

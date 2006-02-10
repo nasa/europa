@@ -36,7 +36,7 @@ namespace NDDL {
   // inheritance.1.nddl:2 Foo
   void Foo::constructor() {
     arg1 = addVariable(IntervalIntDomain(0, 0, "int"), "arg1");
-    arg2 = addVariable(IntervalDomain(0, 0, "float"), "arg2");
+    arg2 = addVariable(IntervalDomain(0.0, 0.0, "float"), "arg2");
     arg3 = addVariable(BoolDomain(false, "bool"), "arg3");
   }
   
@@ -280,6 +280,7 @@ namespace NDDL {
     id->addMember("Bar", "string", "arg4");
     // Force allocation of model specific type factories
     // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
     REGISTER_OBJECT_FACTORY(FooFactory1, Foo:int:float);

@@ -47,8 +47,6 @@ namespace NDDL {
   // Plasma.nddl:8 TokenStates
   typedef SymbolDomain TokenStates;
   TokenStates TokenStatesBaseDomain();
-  // SKIPPING DECLARATION FOR BUILT-IN CLASS Object
-  
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
   
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Resource

@@ -19,7 +19,7 @@ namespace NDDL {
   
   
   // csp.1.nddl:4 Strings
-  typedef SymbolDomain Strings;
+  typedef StringDomain Strings;
   Strings StringsBaseDomain();
   
   

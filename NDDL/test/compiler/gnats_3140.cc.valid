@@ -289,6 +289,7 @@ namespace NDDL {
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TOKEN_FACTORY(Bar::pred::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(numericEnum, numericEnumBaseDomain());
     REGISTER_TYPE_FACTORY(symbolicEnum, symbolicEnumBaseDomain());
     REGISTER_TYPE_FACTORY(Boo, ObjectDomain("Boo"));

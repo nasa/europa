@@ -22,7 +22,7 @@ namespace NDDL {
   
   
   // simple-class.nddl:2 Strings
-  typedef SymbolDomain Strings;
+  typedef StringDomain Strings;
   Strings StringsBaseDomain();
   
   
@@ -44,11 +44,6 @@ namespace NDDL {
     Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
     void handleDefaults(bool autoClose = true); // default variable initialization
     
-    
-    
-    // simple-class.nddl:15 ClassScopedEnum
-    typedef SymbolDomain ClassScopedEnum;
-    static Foo::ClassScopedEnum Foo::ClassScopedEnumBaseDomain();
     ConstrainedVariableId m_0; // SchemaWriter::declareVariable
     ConstrainedVariableId m_1; // SchemaWriter::declareVariable
     ConstrainedVariableId m_2; // SchemaWriter::declareVariable
@@ -56,7 +51,6 @@ namespace NDDL {
     ConstrainedVariableId m_4; // SchemaWriter::declareVariable
     ConstrainedVariableId m_5; // SchemaWriter::declareVariable
     ConstrainedVariableId m_6; // SchemaWriter::declareVariable
-    ConstrainedVariableId m_7; // SchemaWriter::declareVariable
     ConstrainedVariableId m_8; // SchemaWriter::declareVariable
     
     // simple-class.nddl:7 Foo

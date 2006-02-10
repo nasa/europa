@@ -1,7 +1,7 @@
 // Use enumerations to declare user-defined collections where the elements are primitves
-enum Ints {1, 2, 3, 4}; // Enumeration of integers - numeric with no decimal
-enum Floats {1.2, 2.3, 3.4, 67.9}; // Enumeration of floats - decimal point used
-enum Strings {'s1', 's2', 's3'}; // Enumeration of strings - single quoted values
+typedef int{1, 2, 3, 4} Ints; // Enumeration of integers - numeric with no decimal
+typedef float{1.2, 2.3, 3.4, 67.9} Floats; // Enumeration of floats - decimal point used
+typedef string{"s1", "s2", "s3"} Strings; // Enumeration of strings... test altered for consistancy
 enum Symbols {s4, s5, s6}; // Enumeration of symbols
 enum Fruits {Apple, Orange, Banana}; // Enumeration of symbols
 enum Speed {Slow, Medium, Fast}; // Enumeration of symbols
@@ -18,5 +18,5 @@ Symbols g; // Cannot allocate a symbol singleton! No primitive for it.
 // Post equality constraints demonstrating compatibility
 eq(a, b);
 eq(c, d);
-eq(e, f);
+eq(e, f); 
 eq(g, s4);
