@@ -1,14 +1,24 @@
-// ../../../ModuleTests/Parser/dnp/DNP.compats.ddl
+// ../ModuleTests/Parser/dnp/DNP.compats.ddl
 
-enum Observation_Level { 'ObsNo', 'ObsLo', 'ObsHi' } 
+enum Observation_Level { ObsNo, ObsLo, ObsHi } 
 
-enum Done_Flag { 'Done', 'Undone' } 
+enum Done_Flag { Done, Undone } 
 
-enum End_Flag { 'End', 'Noend' } 
+enum End_Flag { End, Noend } 
 
-enum DSS_Id { 'DSS_15', 'DSS_45', 'DSS_14', 'DSS_65' } 
+enum DSS_Id { DSS_15, DSS_45, DSS_14, DSS_65 } 
 
-class DNP_Science___Scan_Platform {
+class DNP_Science;
+class DNP_Science___Scan_Platform;
+class DNP_Science___Fields_and_Particles;
+class DNP_Data;
+class DNP_Data___SSR_Storage_Use;
+class DNP_Comm;
+class DNP_Comm___Comm_Activity;
+class DSS_Any;
+class DSS_Any___DSS_Availability;
+
+class DNP_Science___Scan_Platform extends Timeline {
   predicate Mosaic_LO {
     int ID;
     Observation_Level Data_Rate;
@@ -32,7 +42,7 @@ class DNP_Science___Scan_Platform {
   }
 }
 
-class DNP_Science___Fields_and_Particles {
+class DNP_Science___Fields_and_Particles extends Timeline {
   predicate F_and_P_Observation_LO {
     int ID;
     Observation_Level Data_Rate;
@@ -65,7 +75,7 @@ class DNP_Science {
   }
 }
 
-class DNP_Data___SSR_Storage_Use {
+class DNP_Data___SSR_Storage_Use extends Timeline {
   predicate Record {
     int Start_Storage;
     int End_Storage;
@@ -109,7 +119,7 @@ class DNP_Data {
   }
 }
 
-class DNP_Comm___Comm_Activity {
+class DNP_Comm___Comm_Activity extends Timeline {
   predicate Pre_Cal {
     int Duration;
   }
@@ -141,7 +151,7 @@ class DNP_Comm {
   }
 }
 
-class DSS_Any___DSS_Availability {
+class DSS_Any___DSS_Availability extends Timeline {
   predicate Downlink_Window {
     int Downlink_Rate;
     int Pre_Cal_Time;
@@ -173,7 +183,7 @@ DNP_Science___Scan_Platform::Mosaic_LO {
   meets(DNP_Science___Scan_Platform.Scan_Idle s1);
   starts(DNP_Data___SSR_Storage_Use.Record s2);
     eq(s2.Length, Length);
-    eq(s2.ReqFPRate, Observation_Level.'ObsNo');
+    eq(s2.ReqFPRate, Observation_Level.ObsNo);
     eq(s2.ReqMosRate, Data_Rate);
 }
 
@@ -184,7 +194,7 @@ DNP_Science___Scan_Platform::Mosaic_HI {
   meets(DNP_Science___Scan_Platform.Scan_Idle s1);
   starts(DNP_Data___SSR_Storage_Use.Record s2);
     eq(s2.Length, Length);
-    eq(s2.ReqFPRate, Observation_Level.'ObsNo');
+    eq(s2.ReqFPRate, Observation_Level.ObsNo);
     eq(s2.ReqMosRate, Data_Rate);
 }
 
@@ -214,7 +224,7 @@ DNP_Science___Fields_and_Particles::F_and_P_Observation_LO {
   starts(DNP_Data___SSR_Storage_Use.Record s2);
     eq(s2.Length, Length);
     eq(s2.ReqFPRate, Data_Rate);
-    eq(s2.ReqMosRate, Observation_Level.'ObsNo');
+    eq(s2.ReqMosRate, Observation_Level.ObsNo);
 }
 
 DNP_Science___Fields_and_Particles::F_and_P_Observation_HI {
@@ -225,7 +235,7 @@ DNP_Science___Fields_and_Particles::F_and_P_Observation_HI {
   starts(DNP_Data___SSR_Storage_Use.Record s2);
     eq(s2.Length, Length);
     eq(s2.ReqFPRate, Data_Rate);
-    eq(s2.ReqMosRate, Observation_Level.'ObsNo');
+    eq(s2.ReqMosRate, Observation_Level.ObsNo);
 }
 
 DNP_Science___Fields_and_Particles::F_and_P_Idle {

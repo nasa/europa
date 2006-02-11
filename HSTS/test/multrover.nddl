@@ -1,8 +1,12 @@
-// ../../../ModuleTests/Parser/rover/multrover.ddl
+// ../ModuleTests/Parser/rover/multrover.ddl
 
-enum Location_Label { 'lander', 'rock', 'hill', 'sand', 'martian_city' } 
+enum Location_Label { lander, rock, hill, sand, martian_city } 
 
-class Rover_Class___location {
+class Rover_Class;
+class Rover_Class___location;
+class Rover_Class___charge;
+
+class Rover_Class___location extends Timeline {
   predicate At {
     Location_Label Loc_Label;
   }
@@ -18,7 +22,7 @@ class Rover_Class___location {
   }
 }
 
-class Rover_Class___charge {
+class Rover_Class___charge extends Timeline {
   predicate Maintain {
     int Charge_Value;
     int _0_anon_OR_tag_1;

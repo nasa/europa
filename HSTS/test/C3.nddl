@@ -1,6 +1,11 @@
-// ../../../ModuleTests/Parser/gnats/C3.ddl
+// ../ModuleTests/Parser/gnats/C3.ddl
 
-class P4C3___B {
+class P4C3;
+class P4C3___B;
+class P4C3___Q;
+class P4C3___R;
+
+class P4C3___B extends Timeline {
   predicate C {
     int d;
   }
@@ -14,7 +19,7 @@ class P4C3___B {
   }
 }
 
-class P4C3___Q {
+class P4C3___Q extends Timeline {
   predicate Wb {
     int dx;
     int dy;
@@ -33,7 +38,7 @@ class P4C3___Q {
   }
 }
 
-class P4C3___R {
+class P4C3___R extends Timeline {
   predicate S {
     int x;
     int y;

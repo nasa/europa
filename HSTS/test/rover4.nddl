@@ -1,10 +1,13 @@
-// ../../../ModuleTests/Parser/rover/rover4.ddl
+// ../ModuleTests/Parser/rover/rover4.ddl
 
-enum Location_Label { 'lander', 'rock', 'hill', 'sand', 'martian_city' } 
+enum Location_Label { lander, rock, hill, sand, martian_city } 
 
-enum Camera_Targets { 'nothing', 'lander', 'rock', 'hill', 'rover', 'sand' } 
+enum Camera_Targets { nothing, lander, rock, hill, rover, sand } 
 
-class Rover_Class___location {
+class Rover_Class;
+class Rover_Class___location;
+
+class Rover_Class___location extends Timeline {
   predicate At {
     Location_Label Loc_Label;
     Camera_Targets Picture;

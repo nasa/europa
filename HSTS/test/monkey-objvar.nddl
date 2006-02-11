@@ -1,8 +1,13 @@
-// ../../../ModuleTests/Parser/monkey1/monkey-compats.objvar.ddl
+// ../ModuleTests/Parser/monkey1/monkey-compats.objvar.ddl
 
-enum Location_Label { 'Rock', 'Tree' } 
+enum Location_Label { Rock, Tree } 
 
-class Monkey_Class___Location_SV {
+class Monkey_Class;
+class Monkey_Class___Location_SV;
+class Monkey_Class___Altitude_SV;
+class Monkey_Class___Banana_SV;
+
+class Monkey_Class___Location_SV extends Timeline {
   predicate At {
     Location_Label Loc_Label;
   }
@@ -18,7 +23,7 @@ class Monkey_Class___Location_SV {
   }
 }
 
-class Monkey_Class___Altitude_SV {
+class Monkey_Class___Altitude_SV extends Timeline {
   predicate LOW {
   }
 
@@ -38,7 +43,7 @@ class Monkey_Class___Altitude_SV {
   }
 }
 
-class Monkey_Class___Banana_SV {
+class Monkey_Class___Banana_SV extends Timeline {
   predicate NOT_HAVE_BANANA {
   }
 
@@ -115,12 +120,12 @@ Monkey_Class___Altitude_SV::CLIMBING {
   if (_0_anon_OR_tag_1==1) {
     contained_by(Monkey_Class___Location_SV.At s0);
       eq(object.__DDL__object.Location_SV, s0.object);
-      eq(s0.Loc_Label, Location_Label.'Rock');
+      eq(s0.Loc_Label, Location_Label.Rock);
   }
   if (_0_anon_OR_tag_1==2) {
     contained_by(Monkey_Class___Location_SV.At s0);
       eq(object.__DDL__object.Location_SV, s0.object);
-      eq(s0.Loc_Label, Location_Label.'Tree');
+      eq(s0.Loc_Label, Location_Label.Tree);
   }
 }
 
@@ -155,7 +160,7 @@ Monkey_Class___Banana_SV::GRABBING_BANANA {
   eq(object,s1.object);
   contained_by(Monkey_Class___Location_SV.At s2);
     eq(object.__DDL__object.Location_SV, s2.object);
-    eq(s2.Loc_Label, Location_Label.'Tree');
+    eq(s2.Loc_Label, Location_Label.Tree);
   contained_by(Monkey_Class___Altitude_SV.HIGH s3);
     eq(object.__DDL__object.Altitude_SV, s3.object);
 }

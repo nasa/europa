@@ -1,14 +1,17 @@
 // xmonkey.ddl
 
-enum Location_Label { 'Rock', 'Tree' } 
+enum Location_Label { Rock, Tree } 
 
-enum Return_Status { 'OK', 'Failed' } 
+enum Return_Status { OK, Failed } 
 
-enum Horizon_Label { 'Intermediate_Horizon', 'End_Horizon' } 
+enum Horizon_Label { Intermediate_Horizon, End_Horizon } 
 
-enum Agent_Mode_Label { 'Nominal', 'Standby' } 
+enum Agent_Mode_Label { Nominal, Standby } 
 
-enum Agent_Status { 'Success', 'Failure' } 
+enum Agent_Status { Success, Failure } 
+
+class Monkey_Class;
+class Agent_Class;
 
 class Monkey_Class___Location_SV {
   predicate At {
@@ -147,7 +150,7 @@ Monkey_Class___Location_SV::At {
 //outputSubgoalCreation
   met_by(Monkey_Class___Location_SV.Going s0);
     eq(s0.To_Loc, Loc_Label);
-    eq(s0.status, Return_Status.'OK');
+    eq(s0.status, Return_Status.OK);
     eq(s0.status_rcvd, true);
 //output subgoal
 //outputSubgoalCreation
@@ -176,7 +179,7 @@ Monkey_Class___Altitude_SV::LOW {
 //output subgoal
 //outputSubgoalCreation
   met_by(Monkey_Class___Altitude_SV.CLIMBING_DOWN s0);
-    eq(s0.status, Return_Status.'OK');
+    eq(s0.status, Return_Status.OK);
     eq(s0.status_rcvd, true);
 //output subgoal
 //outputSubgoalCreation
@@ -188,7 +191,7 @@ Monkey_Class___Altitude_SV::HIGH {
 //output subgoal
 //outputSubgoalCreation
   met_by(Monkey_Class___Altitude_SV.CLIMBING s0);
-    eq(s0.status, Return_Status.'OK');
+    eq(s0.status, Return_Status.OK);
     eq(s0.status_rcvd, true);
 //output subgoal
 //outputSubgoalCreation
@@ -206,7 +209,7 @@ Monkey_Class___Altitude_SV::CLIMBING {
 //output subgoal
 //outputSubgoalCreation
   contained_by(Monkey_Class___Location_SV.At s2);
-    eq(s2.Loc_Label, Location_Label.'Tree');
+    eq(s2.Loc_Label, Location_Label.Tree);
 }
 
 Monkey_Class___Altitude_SV::CLIMBING_DOWN {
@@ -235,7 +238,7 @@ Monkey_Class___Banana_SV::HAVE_BANANA {
 //output subgoal
 //outputSubgoalCreation
   met_by(Monkey_Class___Banana_SV.GRABBING_BANANA s0);
-    eq(s0.status, Return_Status.'OK');
+    eq(s0.status, Return_Status.OK);
     eq(s0.status_rcvd, true);
 }
 
@@ -250,7 +253,7 @@ Monkey_Class___Banana_SV::GRABBING_BANANA {
 //output subgoal
 //outputSubgoalCreation
   contained_by(Monkey_Class___Location_SV.At s2);
-    eq(s2.Loc_Label, Location_Label.'Tree');
+    eq(s2.Loc_Label, Location_Label.Tree);
 //output subgoal
 //outputSubgoalCreation
   contained_by(Monkey_Class___Altitude_SV.HIGH s3);
@@ -269,7 +272,7 @@ Agent_Class___Planner_SV::Planning {
   contained_by(Agent_Class___Planning_Horizon_SV.Planning_Horizon s2);
   temporaldistance(s2.start, [4 +inf], this.start);
   temporaldistance(this.end, [4 +inf], s2.end);
-    eq(s2.horizon, Horizon_Label.'Intermediate_Horizon');
+    eq(s2.horizon, Horizon_Label.Intermediate_Horizon);
     eq(s2.Horizon_Start, Start_Horizon);
     eq(s2.Horizon_End, Horizon_End);
 }
@@ -287,37 +290,37 @@ Agent_Class___Planner_SV::Planner_Idle {
 Agent_Class___Planning_Horizon_SV::Planning_Horizon {
   eq(Horizon_Start, [0 100000000]);
   eq(Horizon_End, [0 100000000]);
-  if (horizon==Horizon_Label.'End_Horizon') {
+  if (horizon==Horizon_Label.End_Horizon) {
 //output subgoal
 //outputSubgoalCreation
     met_by(Agent_Class___Planning_Horizon_SV.Planning_Horizon s0);
-      eq(s0.horizon, Horizon_Label.'Intermediate_Horizon');
+      eq(s0.horizon, Horizon_Label.Intermediate_Horizon);
   }
-  if (horizon==Horizon_Label.'Intermediate_Horizon') {
+  if (horizon==Horizon_Label.Intermediate_Horizon) {
 //output subgoal
 //outputSubgoalCreation
     met_by(Agent_Class___Planning_Horizon_SV.Planning_Horizon s0);
-      eq(s0.horizon, Horizon_Label.'Intermediate_Horizon');
+      eq(s0.horizon, Horizon_Label.Intermediate_Horizon);
   }
-  if (horizon==Horizon_Label.'Intermediate_Horizon') {
+  if (horizon==Horizon_Label.Intermediate_Horizon) {
 //output subgoal
 //outputSubgoalCreation
     meets(Agent_Class___Planning_Horizon_SV.Planning_Horizon s0);
       eq(s0.Token_End, Horizon_End);
   }
-  if (horizon==Horizon_Label.'Intermediate_Horizon') {
+  if (horizon==Horizon_Label.Intermediate_Horizon) {
 //output subgoal
 //outputSubgoalCreation
     contains(Agent_Class___Planner_SV.Planning s0);
       eq(s0.Start_Horizon, Horizon_Start);
       eq(s0.Horizon_End, Horizon_End);
   }
-  if (horizon==Horizon_Label.'End_Horizon') {
+  if (horizon==Horizon_Label.End_Horizon) {
     eq(duration, [4 +inf]);
     eq(Token_Start, start);
     eq(Token_End, end);
   }
-  if (horizon==Horizon_Label.'Intermediate_Horizon') {
+  if (horizon==Horizon_Label.Intermediate_Horizon) {
     eq(duration, [4 +inf]);
     eq(Token_Start, start);
     eq(Token_End, end);
@@ -327,13 +330,13 @@ Agent_Class___Planning_Horizon_SV::Planning_Horizon {
 
 Agent_Class___Agent_Mode_SV::Agent_Mode {
   eq(duration, [4 +inf]);
-  if (mode==Agent_Mode_Label.'Standby') {
+  if (mode==Agent_Mode_Label.Standby) {
 //output subgoal
 //outputSubgoalCreation
     meets(Agent_Class___Agent_Mode_SV.Local_Abort s0);
   }
-  if (mode==Agent_Mode_Label.'Nominal') {
-    if (status==Agent_Status.'Success') {
+  if (mode==Agent_Mode_Label.Nominal) {
+    if (status==Agent_Status.Success) {
 //output subgoal
 //outputSubgoalCreation
       contains_start(Monkey_Class___Banana_SV.HAVE_BANANA s0);
@@ -341,37 +344,37 @@ Agent_Class___Agent_Mode_SV::Agent_Mode {
       temporaldistance(s0.start, [0 +inf], this.end);
     }
   }
-  if (mode==Agent_Mode_Label.'Nominal') {
-    if (status==Agent_Status.'Success') {
+  if (mode==Agent_Mode_Label.Nominal) {
+    if (status==Agent_Status.Success) {
     }
   }
-  if (mode==Agent_Mode_Label.'Nominal') {
-    if (status==Agent_Status.'Success') {
+  if (mode==Agent_Mode_Label.Nominal) {
+    if (status==Agent_Status.Success) {
 //output subgoal
 //outputSubgoalCreation
       meets(Agent_Class___Agent_Mode_SV.Local_Abort s0);
     }
   }
-  if (mode==Agent_Mode_Label.'Nominal') {
-    if (status==Agent_Status.'Success') {
+  if (mode==Agent_Mode_Label.Nominal) {
+    if (status==Agent_Status.Success) {
     }
   }
-  if (mode==Agent_Mode_Label.'Nominal') {
-    if (status==Agent_Status.'Failure') {
+  if (mode==Agent_Mode_Label.Nominal) {
+    if (status==Agent_Status.Failure) {
 //output subgoal
 //outputSubgoalCreation
       meets(Agent_Class___Agent_Mode_SV.Agent_Mode s0);
-        eq(s0.mode, Agent_Mode_Label.'Standby');
+        eq(s0.mode, Agent_Mode_Label.Standby);
     }
   }
-  if (mode==Agent_Mode_Label.'Nominal') {
-    if (status==Agent_Status.'Failure') {
+  if (mode==Agent_Mode_Label.Nominal) {
+    if (status==Agent_Status.Failure) {
     }
   }
-  if (mode==Agent_Mode_Label.'Nominal') {
+  if (mode==Agent_Mode_Label.Nominal) {
     eq(duration, [4 +inf]);
   }
-  if (mode==Agent_Mode_Label.'Standby') {
+  if (mode==Agent_Mode_Label.Standby) {
     eq(duration, [4 +inf]);
   }
 }

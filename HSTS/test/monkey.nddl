@@ -1,8 +1,13 @@
-// ../../../ModuleTests/Parser/monkey/monkey-compats.ddl
+// ../ModuleTests/Parser/monkey/monkey-compats.ddl
 
-enum Location_Label { 'Rock', 'Tree' } 
+enum Location_Label { Rock, Tree } 
 
-class Monkey_Class___Location_SV {
+class Monkey_Class;
+class Monkey_Class___Location_SV;
+class Monkey_Class___Altitude_SV;
+class Monkey_Class___Banana_SV;
+
+class Monkey_Class___Location_SV extends Timeline {
   predicate At {
     Location_Label Loc_Label;
   }
@@ -18,7 +23,7 @@ class Monkey_Class___Location_SV {
   }
 }
 
-class Monkey_Class___Altitude_SV {
+class Monkey_Class___Altitude_SV extends Timeline {
   predicate LOW {
   }
 
@@ -39,7 +44,7 @@ class Monkey_Class___Altitude_SV {
   }
 }
 
-class Monkey_Class___Banana_SV {
+class Monkey_Class___Banana_SV extends Timeline {
   predicate NOT_HAVE_BANANA {
   }
 
@@ -104,11 +109,11 @@ Monkey_Class___Altitude_SV::CLIMBING {
   meets(Monkey_Class___Altitude_SV.HIGH s1);
   if (_0_anon_OR_tag_1==1) {
     contained_by(Monkey_Class___Location_SV.At s0);
-      eq(s0.Loc_Label, Location_Label.'Rock');
+      eq(s0.Loc_Label, Location_Label.Rock);
   }
   if (_0_anon_OR_tag_1==2) {
     contained_by(Monkey_Class___Location_SV.At s0);
-      eq(s0.Loc_Label, Location_Label.'Tree');
+      eq(s0.Loc_Label, Location_Label.Tree);
   }
 }
 
@@ -119,11 +124,11 @@ Monkey_Class___Altitude_SV::CLIMBING_DOWN {
   meets(Monkey_Class___Altitude_SV.LOW s1);
   if (_0_anon_OR_tag_1==1) {
     contained_by(Monkey_Class___Location_SV.At s0);
-      eq(s0.Loc_Label, Location_Label.'Rock');
+      eq(s0.Loc_Label, Location_Label.Rock);
   }
   if (_0_anon_OR_tag_1==2) {
     contained_by(Monkey_Class___Location_SV.At s0);
-      eq(s0.Loc_Label, Location_Label.'Tree');
+      eq(s0.Loc_Label, Location_Label.Tree);
   }
 }
 
@@ -142,7 +147,7 @@ Monkey_Class___Banana_SV::GRABBING_BANANA {
   met_by(Monkey_Class___Banana_SV.NOT_HAVE_BANANA s0);
   meets(Monkey_Class___Banana_SV.HAVE_BANANA s1);
   contained_by(Monkey_Class___Location_SV.At s2);
-    eq(s2.Loc_Label, Location_Label.'Tree');
+    eq(s2.Loc_Label, Location_Label.Tree);
   contained_by(Monkey_Class___Altitude_SV.HIGH s3);
 }
 

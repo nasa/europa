@@ -1,8 +1,11 @@
-// ../../../ModuleTests/Parser/rover/rover.ddl
+// ../ModuleTests/Parser/rover/rover.ddl
 
-enum Location_Label { 'lander', 'rock', 'hill', 'sand', 'martian_city' } 
+enum Location_Label { lander, rock, hill, sand, martian_city } 
 
-class Rover_Class___location {
+class Rover_Class;
+class Rover_Class___location;
+
+class Rover_Class___location extends Timeline {
   predicate At {
     Location_Label Loc_Label;
   }

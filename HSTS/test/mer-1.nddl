@@ -1,10 +1,10 @@
-// ../../../ModuleTests/Parser/mer/mer.model.ddl
+// ../ModuleTests/Parser/mer/mer.model.ddl
 
-#include "../../NDDL/core/Plasma.nddl"
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
 #include "mer.nddl"
 
-PlannerConfig world = new PlannerConfig(129513607, 129602383, 2000);
+PlannerConfig world = new PlannerConfig(129513607, 129602383, 1000);
 
 Comm_Window_Class CommWindow = new Comm_Window_Class();
 
@@ -22,19 +22,52 @@ RCam_Class RCam = new RCam_Class();
 
 OPHTR_Class OpHtr = new OPHTR_Class();
 
+Comm_Window_Class.close();
+Comm_Window_Class___Comm_DSN_SV.close();
+Comm_Window_Class___Comm_Orbiter_SV.close();
+HGA_Class.close();
+HGA_Class___HGA_Mode_SV.close();
+IDD_Class.close();
+IDD_Class___IDD_APXS_SV.close();
+IDD_Class___IDD_Goal_SV.close();
+IDD_Class___IDD_IDD_SV.close();
+IDD_Class___IDD_MB_SV.close();
+IDD_Class___IDD_MI_SV.close();
+IDD_Class___IDD_RAT_SV.close();
+OPHTR_Class.close();
+OPHTR_Class___OPHTR_HGA_SV.close();
+OPHTR_Class___OPHTR_IDD_SV.close();
+OPHTR_Class___OPHTR_PC_SV.close();
+OPHTR_Class___OPHTR_PMA_SV.close();
+OPHTR_Class___OPHTR_RAT_SV.close();
+PMA_Class.close();
+PMA_Class___PMA_Goal_SV.close();
+PMA_Class___PMA_MT_SV.close();
+PMA_Class___PMA_Mount_SV.close();
+PMA_Class___PMA_NC_SV.close();
+PMA_Class___PMA_PC_SV.close();
+RCam_Class.close();
+RCam_Class___HzC_F_SV.close();
+RCam_Class___SunC_SV.close();
+SUN_Orient_Class.close();
+SUN_Orient_Class___Sun_Orient_SV.close();
+UHF_Class.close();
+UHF_Class___UHF_Mode_SV.close();
 close();
 
 goal(Comm_Window_Class___Comm_DSN_SV.Comm_DSN_Unavail g170);
   g170.start.specify(129513607);
   g170.end.specify(129528907);
   g170.duration.specify(15300);
+CommWindow.Comm_DSN_SV.constrain(g170);
 
 goal(Comm_Window_Class___Comm_DSN_SV.Comm_DSN_Available g190);
   g190.start.specify(129528907);
   g190.end.specify(129532507);
   g190.duration.specify(3600);
-  g190.dsn_ant.specify(DSN_Antenna.'HGA');
-  g190.dir.specify(Comm_Dir.'DOWNLINK');
+CommWindow.Comm_DSN_SV.constrain(g170, g190);
+  g190.dsn_ant.specify(DSN_Antenna.HGA_);
+  g190.dir.specify(Comm_Dir.DOWNLINK);
   g190.ddl_duration.specify(3600);
   g190.rate.specify(6);
 
@@ -42,8 +75,9 @@ goal(Comm_Window_Class___Comm_DSN_SV.Comm_DSN_Available g217);
   g217.start.specify(129542407);
   g217.end.specify(129546007);
   g217.duration.specify(3600);
-  g217.dsn_ant.specify(DSN_Antenna.'HGA');
-  g217.dir.specify(Comm_Dir.'DOWNLINK');
+CommWindow.Comm_DSN_SV.constrain(g190, g217);
+  g217.dsn_ant.specify(DSN_Antenna.HGA_);
+  g217.dir.specify(Comm_Dir.DOWNLINK);
   g217.ddl_duration.specify(3600);
   g217.rate.specify(6);
 
@@ -51,17 +85,20 @@ goal(Comm_Window_Class___Comm_DSN_SV.Comm_DSN_Unavail g244);
   g244.start.specify([129546007 129602382]);
   g244.end.specify(129602383);
   g244.duration.specify([1 56376]);
+CommWindow.Comm_DSN_SV.constrain(g217, g244);
 
 goal(Comm_Window_Class___Comm_Orbiter_SV.Comm_Orbiter_Unavail g267);
   g267.start.specify(129513607);
   g267.end.specify(129551467);
   g267.duration.specify(37860);
+CommWindow.Comm_Orbiter_SV.constrain(g267);
 
 goal(Comm_Window_Class___Comm_Orbiter_SV.Comm_Orbiter_Available g287);
   g287.start.specify(129551467);
   g287.end.specify(129552367);
   g287.duration.specify(900);
-  g287.dir.specify(Comm_Dir.'DOWNLINK');
+CommWindow.Comm_Orbiter_SV.constrain(g267, g287);
+  g287.dir.specify(Comm_Dir.DOWNLINK);
   g287.ddl_duration.specify(900);
   g287.rate.specify(1);
 
@@ -69,7 +106,8 @@ goal(Comm_Window_Class___Comm_Orbiter_SV.Comm_Orbiter_Available g313);
   g313.start.specify(129595027);
   g313.end.specify(129595927);
   g313.duration.specify(900);
-  g313.dir.specify(Comm_Dir.'DOWNLINK');
+CommWindow.Comm_Orbiter_SV.constrain(g287, g313);
+  g313.dir.specify(Comm_Dir.DOWNLINK);
   g313.ddl_duration.specify(900);
   g313.rate.specify(1);
 
@@ -77,42 +115,50 @@ goal(Comm_Window_Class___Comm_Orbiter_SV.Comm_Orbiter_Unavail g339);
   g339.start.specify([129595927 129602382]);
   g339.end.specify(129602383);
   g339.duration.specify([1 6456]);
+CommWindow.Comm_Orbiter_SV.constrain(g313, g339);
 
 goal(SUN_Orient_Class___Sun_Orient_SV.Survival_Night_Ops g362);
   g362.start.specify(129513607);
   g362.end.specify(129524407);
   g362.duration.specify(10800);
+Sun.Sun_Orient_SV.constrain(g362);
 
 goal(SUN_Orient_Class___Sun_Orient_SV.Sunrise g382);
   g382.start.specify(129524407);
   g382.end.specify(129524707);
   g382.duration.specify(300);
+Sun.Sun_Orient_SV.constrain(g362, g382);
 
 goal(SUN_Orient_Class___Sun_Orient_SV.Sunset g404);
   g404.start.specify(129553207);
   g404.end.specify(129553507);
   g404.duration.specify(300);
+Sun.Sun_Orient_SV.constrain(g382, g404);
 
 goal(HGA_Class___HGA_Mode_SV.HGA_Stow g428);
   g428.start.specify(129513607);
   g428.end.specify([129513608 +inf]);
   g428.duration.specify([1 +inf]);
+HGA.HGA_Mode_SV.constrain(g428);
 
 goal(UHF_Class___UHF_Mode_SV.UHF_Idle g450);
   g450.start.specify(129513607);
   g450.end.specify([129513608 +inf]);
   g450.duration.specify([1 +inf]);
+UHF.UHF_Mode_SV.constrain(g450);
 
 goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Idle g472);
   g472.start.specify(129513607);
   g472.end.specify(129538387);
   g472.duration.specify(24780);
+IDD.IDD_Goal_SV.constrain(g472);
 
 goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Active g492);
   g492.start.specify(129538387);
   g492.end.specify(129581587);
   g492.duration.specify(43200);
-  g492.instr.specify(IDD_Instrument.'MB');
+IDD.IDD_Goal_SV.constrain(g472, g492);
+  g492.instr.specify(IDD_Instrument.MB);
   g492.ddl_duration.specify(43200);
   g492.power.specify(3);
   g492.energy.specify(129600);
@@ -123,7 +169,8 @@ goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Active g529);
   g529.start.specify([129581587 129583182]);
   g529.end.specify([129588787 129590382]);
   g529.duration.specify(7200);
-  g529.instr.specify(IDD_Instrument.'APXS');
+IDD.IDD_Goal_SV.constrain(g492, g529);
+  g529.instr.specify(IDD_Instrument.APXS);
   g529.ddl_duration.specify(7200);
   g529.power.specify(3);
   g529.energy.specify(21600);
@@ -134,7 +181,8 @@ goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Active g566);
   g566.start.specify([129588787 129590382]);
   g566.end.specify([129600787 129602382]);
   g566.duration.specify(12000);
-  g566.instr.specify(IDD_Instrument.'APXS');
+IDD.IDD_Goal_SV.constrain(g529, g566);
+  g566.instr.specify(IDD_Instrument.APXS);
   g566.ddl_duration.specify(12000);
   g566.power.specify(3);
   g566.energy.specify(36000);
@@ -145,42 +193,50 @@ goal(IDD_Class___IDD_Goal_SV.IDD_Goal_Idle g603);
   g603.start.specify([129600787 129602382]);
   g603.end.specify(129602383);
   g603.duration.specify([1 1596]);
+IDD.IDD_Goal_SV.constrain(g566, g603);
 
 goal(IDD_Class___IDD_IDD_SV.IDD_Stow g626);
   g626.start.specify(129513607);
   g626.end.specify([129513608 +inf]);
   g626.duration.specify([1 +inf]);
+IDD.IDD_IDD_SV.constrain(g626);
 
 goal(IDD_Class___IDD_MI_SV.IDD_MI_Idle g648);
   g648.start.specify(129513607);
   g648.end.specify([129513608 +inf]);
   g648.duration.specify([1 +inf]);
+IDD.IDD_MI_SV.constrain(g648);
 
 goal(IDD_Class___IDD_APXS_SV.IDD_APXS_Idle g672);
   g672.start.specify(129513607);
   g672.end.specify([129513608 +inf]);
   g672.duration.specify([1 +inf]);
+IDD.IDD_APXS_SV.constrain(g672);
 
 goal(IDD_Class___IDD_MB_SV.IDD_MB_Idle g694);
   g694.start.specify(129513607);
   g694.end.specify([129513608 +inf]);
   g694.duration.specify([1 +inf]);
+IDD.IDD_MB_SV.constrain(g694);
 
 goal(IDD_Class___IDD_RAT_SV.IDD_RAT_Idle g716);
   g716.start.specify(129513607);
   g716.end.specify([129513608 +inf]);
   g716.duration.specify([1 +inf]);
+IDD.IDD_RAT_SV.constrain(g716);
 
 goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Idle g738);
   g738.start.specify(129513607);
   g738.end.specify(129531607);
   g738.duration.specify(18000);
+PMA.PMA_Goal_SV.constrain(g738);
 
 goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g758);
   g758.start.specify(129531607);
   g758.end.specify(129532087);
   g758.duration.specify(480);
-  g758.instr.specify(PMA_Instrument.'MT');
+PMA.PMA_Goal_SV.constrain(g738, g758);
+  g758.instr.specify(PMA_Instrument.MT);
   g758.ddl_duration.specify(480);
   g758.power.specify(15);
   g758.energy.specify(7200);
@@ -191,7 +247,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g795);
   g795.start.specify(129538807);
   g795.end.specify(129539287);
   g795.duration.specify(480);
-  g795.instr.specify(PMA_Instrument.'MT');
+PMA.PMA_Goal_SV.constrain(g758, g795);
+  g795.instr.specify(PMA_Instrument.MT);
   g795.ddl_duration.specify(480);
   g795.power.specify(15);
   g795.energy.specify(7200);
@@ -202,7 +259,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g832);
   g832.start.specify(129546007);
   g832.end.specify(129546487);
   g832.duration.specify(480);
-  g832.instr.specify(PMA_Instrument.'MT');
+PMA.PMA_Goal_SV.constrain(g795, g832);
+  g832.instr.specify(PMA_Instrument.MT);
   g832.ddl_duration.specify(480);
   g832.power.specify(15);
   g832.energy.specify(7200);
@@ -213,7 +271,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g869);
   g869.start.specify(129553207);
   g869.end.specify(129553687);
   g869.duration.specify(480);
-  g869.instr.specify(PMA_Instrument.'MT');
+PMA.PMA_Goal_SV.constrain(g832, g869);
+  g869.instr.specify(PMA_Instrument.MT);
   g869.ddl_duration.specify(480);
   g869.power.specify(15);
   g869.energy.specify(7200);
@@ -224,7 +283,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g906);
   g906.start.specify(129560407);
   g906.end.specify(129560887);
   g906.duration.specify(480);
-  g906.instr.specify(PMA_Instrument.'MT');
+PMA.PMA_Goal_SV.constrain(g869, g906);
+  g906.instr.specify(PMA_Instrument.MT);
   g906.ddl_duration.specify(480);
   g906.power.specify(15);
   g906.energy.specify(7200);
@@ -235,7 +295,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g943);
   g943.start.specify(129567607);
   g943.end.specify(129568087);
   g943.duration.specify(480);
-  g943.instr.specify(PMA_Instrument.'MT');
+PMA.PMA_Goal_SV.constrain(g906, g943);
+  g943.instr.specify(PMA_Instrument.MT);
   g943.ddl_duration.specify(480);
   g943.power.specify(15);
   g943.energy.specify(7200);
@@ -246,7 +307,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g980);
   g980.start.specify(129574807);
   g980.end.specify(129575287);
   g980.duration.specify(480);
-  g980.instr.specify(PMA_Instrument.'MT');
+PMA.PMA_Goal_SV.constrain(g943, g980);
+  g980.instr.specify(PMA_Instrument.MT);
   g980.ddl_duration.specify(480);
   g980.power.specify(15);
   g980.energy.specify(7200);
@@ -257,7 +319,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g1017);
   g1017.start.specify([129575287 129597022]);
   g1017.end.specify([129576007 129597742]);
   g1017.duration.specify(720);
-  g1017.instr.specify(PMA_Instrument.'PC');
+PMA.PMA_Goal_SV.constrain(g980, g1017);
+  g1017.instr.specify(PMA_Instrument.PC);
   g1017.ddl_duration.specify(720);
   g1017.power.specify(18);
   g1017.energy.specify(12960);
@@ -268,7 +331,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g1054);
   g1054.start.specify([129576007 129597742]);
   g1054.end.specify([129578047 129599782]);
   g1054.duration.specify(2040);
-  g1054.instr.specify(PMA_Instrument.'PC');
+PMA.PMA_Goal_SV.constrain(g1017, g1054);
+  g1054.instr.specify(PMA_Instrument.PC);
   g1054.ddl_duration.specify(2040);
   g1054.power.specify(18);
   g1054.energy.specify(36720);
@@ -279,7 +343,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g1091);
   g1091.start.specify([129578047 129599782]);
   g1091.end.specify([129578767 129600502]);
   g1091.duration.specify(720);
-  g1091.instr.specify(PMA_Instrument.'PC');
+PMA.PMA_Goal_SV.constrain(g1054, g1091);
+  g1091.instr.specify(PMA_Instrument.PC);
   g1091.ddl_duration.specify(720);
   g1091.power.specify(18);
   g1091.energy.specify(12960);
@@ -290,7 +355,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g1128);
   g1128.start.specify([129578767 129600502]);
   g1128.end.specify([129579547 129601282]);
   g1128.duration.specify(780);
-  g1128.instr.specify(PMA_Instrument.'PC');
+PMA.PMA_Goal_SV.constrain(g1091, g1128);
+  g1128.instr.specify(PMA_Instrument.PC);
   g1128.ddl_duration.specify(780);
   g1128.power.specify(18);
   g1128.energy.specify(14040);
@@ -301,7 +367,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g1165);
   g1165.start.specify([129579547 129601282]);
   g1165.end.specify([129580490 129602225]);
   g1165.duration.specify(943);
-  g1165.instr.specify(PMA_Instrument.'PC');
+PMA.PMA_Goal_SV.constrain(g1128, g1165);
+  g1165.instr.specify(PMA_Instrument.PC);
   g1165.ddl_duration.specify(943);
   g1165.power.specify(18);
   g1165.energy.specify(16974);
@@ -312,7 +379,8 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Active g1202);
   g1202.start.specify([129580490 129602225]);
   g1202.end.specify([129580647 129602382]);
   g1202.duration.specify(157);
-  g1202.instr.specify(PMA_Instrument.'PC');
+PMA.PMA_Goal_SV.constrain(g1165, g1202);
+  g1202.instr.specify(PMA_Instrument.PC);
   g1202.ddl_duration.specify(157);
   g1202.power.specify(18);
   g1202.energy.specify(2826);
@@ -323,80 +391,88 @@ goal(PMA_Class___PMA_Goal_SV.PMA_Goal_Idle g1239);
   g1239.start.specify([129580647 129602382]);
   g1239.end.specify(129602383);
   g1239.duration.specify([1 21736]);
+PMA.PMA_Goal_SV.constrain(g1202, g1239);
 
 goal(PMA_Class___PMA_NC_SV.PMA_NC_Idle g1262);
   g1262.start.specify(129513607);
   g1262.end.specify([129513608 +inf]);
   g1262.duration.specify([1 +inf]);
+PMA.PMA_NC_SV.constrain(g1262);
 
 goal(PMA_Class___PMA_PC_SV.PMA_PC_Idle g1284);
   g1284.start.specify(129513607);
   g1284.end.specify([129513608 +inf]);
   g1284.duration.specify([1 +inf]);
+PMA.PMA_PC_SV.constrain(g1284);
 
 goal(PMA_Class___PMA_MT_SV.PMA_MT_Idle g1308);
   g1308.start.specify(129513607);
   g1308.end.specify([129513608 +inf]);
   g1308.duration.specify([1 +inf]);
+PMA.PMA_MT_SV.constrain(g1308);
 
 goal(PMA_Class___PMA_Mount_SV.PMA_Mount_Idle g1332);
   g1332.start.specify(129513607);
   g1332.end.specify([129513608 +inf]);
   g1332.duration.specify([1 +inf]);
+PMA.PMA_Mount_SV.constrain(g1332);
 
 goal(RCam_Class___HzC_F_SV.HzC_F_Idle g1354);
   g1354.start.specify(129513607);
   g1354.end.specify([129513608 +inf]);
   g1354.duration.specify([1 +inf]);
+RCam.HzC_F_SV.constrain(g1354);
 
 goal(RCam_Class___SunC_SV.SunC_Idle g1376);
   g1376.start.specify(129513607);
   g1376.end.specify([129513608 +inf]);
   g1376.duration.specify([1 +inf]);
+RCam.SunC_SV.constrain(g1376);
 
 goal(OPHTR_Class___OPHTR_PMA_SV.OPHTR_PMA_Idle g1398);
   g1398.start.specify(129513607);
   g1398.end.specify([129513608 +inf]);
   g1398.duration.specify([1 +inf]);
+OpHtr.OPHTR_PMA_SV.constrain(g1398);
 
 goal(OPHTR_Class___OPHTR_PC_SV.OPHTR_PC_Idle g1420);
   g1420.start.specify(129513607);
   g1420.end.specify([129513608 +inf]);
   g1420.duration.specify([1 +inf]);
+OpHtr.OPHTR_PC_SV.constrain(g1420);
 
 goal(OPHTR_Class___OPHTR_IDD_SV.OPHTR_IDD_Idle g1442);
   g1442.start.specify(129513607);
   g1442.end.specify([129513608 +inf]);
   g1442.duration.specify([1 +inf]);
+OpHtr.OPHTR_IDD_SV.constrain(g1442);
 
 goal(OPHTR_Class___OPHTR_RAT_SV.OPHTR_RAT_Idle g1464);
   g1464.start.specify(129513607);
   g1464.end.specify([129513608 +inf]);
   g1464.duration.specify([1 +inf]);
+OpHtr.OPHTR_RAT_SV.constrain(g1464);
 
 goal(OPHTR_Class___OPHTR_HGA_SV.OPHTR_HGA_Idle g1486);
   g1486.start.specify(129513607);
   g1486.end.specify([129513608 +inf]);
   g1486.duration.specify([1 +inf]);
+OpHtr.OPHTR_HGA_SV.constrain(g1486);
 
 g170 meets g190; // key=204
-g170 before g190; // key=213
 g190 before g217; // key=231
 g190 before g217; // key=240
 g217 before g244; // key=252
 g217 before g244; // key=262
 g267 meets g287; // key=300
-g267 before g287; // key=309
 g287 before g313; // key=326
 g287 before g313; // key=335
 g313 before g339; // key=347
 g313 before g339; // key=357
 g362 meets g382; // key=391
-g362 before g382; // key=400
 g382 before g404; // key=413
 g382 before g404; // key=423
 g472 meets g492; // key=516
-g472 before g492; // key=525
 g492 before g529; // key=553
 g492 before g529; // key=562
 g529 before g566; // key=590
@@ -404,7 +480,6 @@ g529 before g566; // key=599
 g566 before g603; // key=611
 g566 before g603; // key=621
 g738 meets g758; // key=782
-g738 before g758; // key=791
 g758 before g795; // key=819
 g758 before g795; // key=828
 g795 before g832; // key=856

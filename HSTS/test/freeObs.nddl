@@ -1,8 +1,7 @@
-// ../../../ModuleTests/Parser/dnp3/DNP.compats.ddl
+// ../ModuleTests/Parser/dnp3/DNP.compats.ddl
 
-#include "../../NDDL/core/Plasma.nddl"
-#include "../../NDDL/core/PlannerConfig.nddl"
-#include "DNP3.nddl"
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
 
 PlannerConfig world = new PlannerConfig(0, 31536000, 1000);
 
@@ -14,6 +13,15 @@ DNP_Comm DNP_Comm_Sys = new DNP_Comm();
 
 DSS_Any DNP_DSS = new DSS_Any();
 
+DNP_Comm.close();
+DNP_Comm___Comm_Activity.close();
+DNP_Data.close();
+DNP_Data___SSR_Storage_Use.close();
+DNP_Science.close();
+DNP_Science___Fields_and_Particles.close();
+DNP_Science___Scan_Platform.close();
+DSS_Any.close();
+DSS_Any___DSS_Availability.close();
 close();
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g46);
@@ -21,7 +29,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g46);
   g46.end.specify([1482084 31001800]);
   g46.duration.specify(1800);
   g46.ID.specify(156);
-  g46.Data_Rate.specify(Observation_Level.'ObsLo');
+  g46.Data_Rate.specify(Observation_Level.ObsLo);
   g46.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g62);
@@ -29,7 +37,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g62);
   g62.end.specify([1488810 31003000]);
   g62.duration.specify(3000);
   g62.ID.specify(157);
-  g62.Data_Rate.specify(Observation_Level.'ObsHi');
+  g62.Data_Rate.specify(Observation_Level.ObsHi);
   g62.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g78);
@@ -37,7 +45,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g78);
   g78.end.specify([1493216 31003000]);
   g78.duration.specify(3000);
   g78.ID.specify(335);
-  g78.Data_Rate.specify(Observation_Level.'ObsHi');
+  g78.Data_Rate.specify(Observation_Level.ObsHi);
   g78.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g94);
@@ -45,7 +53,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g94);
   g94.end.specify([1494517 31001800]);
   g94.duration.specify(1800);
   g94.ID.specify(158);
-  g94.Data_Rate.specify(Observation_Level.'ObsLo');
+  g94.Data_Rate.specify(Observation_Level.ObsLo);
   g94.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g110);
@@ -53,7 +61,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g110);
   g110.end.specify([1495419 31001800]);
   g110.duration.specify(1800);
   g110.ID.specify(334);
-  g110.Data_Rate.specify(Observation_Level.'ObsLo');
+  g110.Data_Rate.specify(Observation_Level.ObsLo);
   g110.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g126);
@@ -61,7 +69,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g126);
   g126.end.specify([1501242 31003000]);
   g126.duration.specify(3000);
   g126.ID.specify(159);
-  g126.Data_Rate.specify(Observation_Level.'ObsHi');
+  g126.Data_Rate.specify(Observation_Level.ObsHi);
   g126.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g142);
@@ -69,7 +77,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g142);
   g142.end.specify([1505568 31001800]);
   g142.duration.specify(1800);
   g142.ID.specify(160);
-  g142.Data_Rate.specify(Observation_Level.'ObsLo');
+  g142.Data_Rate.specify(Observation_Level.ObsLo);
   g142.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g158);
@@ -77,7 +85,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g158);
   g158.end.specify([1510222 31003000]);
   g158.duration.specify(3000);
   g158.ID.specify(161);
-  g158.Data_Rate.specify(Observation_Level.'ObsHi');
+  g158.Data_Rate.specify(Observation_Level.ObsHi);
   g158.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g174);
@@ -85,7 +93,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g174);
   g174.end.specify([1514547 31001800]);
   g174.duration.specify(1800);
   g174.ID.specify(162);
-  g174.Data_Rate.specify(Observation_Level.'ObsLo');
+  g174.Data_Rate.specify(Observation_Level.ObsLo);
   g174.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g190);
@@ -93,7 +101,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g190);
   g190.end.specify([1521191 31003000]);
   g190.duration.specify(3000);
   g190.ID.specify(163);
-  g190.Data_Rate.specify(Observation_Level.'ObsHi');
+  g190.Data_Rate.specify(Observation_Level.ObsHi);
   g190.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g206);
@@ -101,7 +109,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g206);
   g206.end.specify([1521474 31003000]);
   g206.duration.specify(3000);
   g206.ID.specify(331);
-  g206.Data_Rate.specify(Observation_Level.'ObsHi');
+  g206.Data_Rate.specify(Observation_Level.ObsHi);
   g206.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g222);
@@ -109,7 +117,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g222);
   g222.end.specify([1523677 31001800]);
   g222.duration.specify(1800);
   g222.ID.specify(330);
-  g222.Data_Rate.specify(Observation_Level.'ObsLo');
+  g222.Data_Rate.specify(Observation_Level.ObsLo);
   g222.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g238);
@@ -117,7 +125,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g238);
   g238.end.specify([1527670 31001800]);
   g238.duration.specify(1800);
   g238.ID.specify(164);
-  g238.Data_Rate.specify(Observation_Level.'ObsLo');
+  g238.Data_Rate.specify(Observation_Level.ObsLo);
   g238.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g254);
@@ -125,7 +133,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g254);
   g254.end.specify([1530300 31001800]);
   g254.duration.specify(1800);
   g254.ID.specify(165);
-  g254.Data_Rate.specify(Observation_Level.'ObsLo');
+  g254.Data_Rate.specify(Observation_Level.ObsLo);
   g254.Length.specify(1800);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g270);
@@ -133,7 +141,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g270);
   g270.end.specify([1533826 31003600]);
   g270.duration.specify(3600);
   g270.ID.specify(55);
-  g270.Data_Rate.specify(Observation_Level.'ObsHi');
+  g270.Data_Rate.specify(Observation_Level.ObsHi);
   g270.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g286);
@@ -141,7 +149,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g286);
   g286.end.specify([1533947 31003600]);
   g286.duration.specify(3600);
   g286.ID.specify(54);
-  g286.Data_Rate.specify(Observation_Level.'ObsHi');
+  g286.Data_Rate.specify(Observation_Level.ObsHi);
   g286.Length.specify(3600);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g302);
@@ -149,7 +157,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g302);
   g302.end.specify([1535087 31003000]);
   g302.duration.specify(3000);
   g302.ID.specify(166);
-  g302.Data_Rate.specify(Observation_Level.'ObsHi');
+  g302.Data_Rate.specify(Observation_Level.ObsHi);
   g302.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g318);
@@ -157,7 +165,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g318);
   g318.end.specify([1537340 31001800]);
   g318.duration.specify(1800);
   g318.ID.specify(167);
-  g318.Data_Rate.specify(Observation_Level.'ObsLo');
+  g318.Data_Rate.specify(Observation_Level.ObsLo);
   g318.Length.specify(1800);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g334);
@@ -165,7 +173,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g334);
   g334.end.specify([1559076 31003600]);
   g334.duration.specify(3600);
   g334.ID.specify(290);
-  g334.Data_Rate.specify(Observation_Level.'ObsHi');
+  g334.Data_Rate.specify(Observation_Level.ObsHi);
   g334.Length.specify(3600);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g350);
@@ -173,7 +181,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g350);
   g350.end.specify([1573947 31001800]);
   g350.duration.specify(1800);
   g350.ID.specify(168);
-  g350.Data_Rate.specify(Observation_Level.'ObsLo');
+  g350.Data_Rate.specify(Observation_Level.ObsLo);
   g350.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g366);
@@ -181,7 +189,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g366);
   g366.end.specify([1580673 31003000]);
   g366.duration.specify(3000);
   g366.ID.specify(169);
-  g366.Data_Rate.specify(Observation_Level.'ObsHi');
+  g366.Data_Rate.specify(Observation_Level.ObsHi);
   g366.Length.specify(3000);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g382);
@@ -189,7 +197,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g382);
   g382.end.specify([1581679 31003600]);
   g382.duration.specify(3600);
   g382.ID.specify(114);
-  g382.Data_Rate.specify(Observation_Level.'ObsHi');
+  g382.Data_Rate.specify(Observation_Level.ObsHi);
   g382.Length.specify(3600);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g398);
@@ -197,7 +205,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g398);
   g398.end.specify([1586380 31001800]);
   g398.duration.specify(1800);
   g398.ID.specify(170);
-  g398.Data_Rate.specify(Observation_Level.'ObsLo');
+  g398.Data_Rate.specify(Observation_Level.ObsLo);
   g398.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g414);
@@ -205,7 +213,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g414);
   g414.end.specify([1593105 31003000]);
   g414.duration.specify(3000);
   g414.ID.specify(171);
-  g414.Data_Rate.specify(Observation_Level.'ObsHi');
+  g414.Data_Rate.specify(Observation_Level.ObsHi);
   g414.Length.specify(3000);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g430);
@@ -213,7 +221,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g430);
   g430.end.specify([1595211 31003600]);
   g430.duration.specify(3600);
   g430.ID.specify(64);
-  g430.Data_Rate.specify(Observation_Level.'ObsHi');
+  g430.Data_Rate.specify(Observation_Level.ObsHi);
   g430.Length.specify(3600);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g446);
@@ -221,7 +229,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g446);
   g446.end.specify([1595652 31003000]);
   g446.duration.specify(3000);
   g446.ID.specify(121);
-  g446.Data_Rate.specify(Observation_Level.'ObsHi');
+  g446.Data_Rate.specify(Observation_Level.ObsHi);
   g446.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g462);
@@ -229,7 +237,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g462);
   g462.end.specify([1597431 31001800]);
   g462.duration.specify(1800);
   g462.ID.specify(172);
-  g462.Data_Rate.specify(Observation_Level.'ObsLo');
+  g462.Data_Rate.specify(Observation_Level.ObsLo);
   g462.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g478);
@@ -237,7 +245,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g478);
   g478.end.specify([1597855 31001800]);
   g478.duration.specify(1800);
   g478.ID.specify(120);
-  g478.Data_Rate.specify(Observation_Level.'ObsLo');
+  g478.Data_Rate.specify(Observation_Level.ObsLo);
   g478.Length.specify(1800);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g494);
@@ -245,7 +253,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g494);
   g494.end.specify([1601470 31003600]);
   g494.duration.specify(3600);
   g494.ID.specify(84);
-  g494.Data_Rate.specify(Observation_Level.'ObsHi');
+  g494.Data_Rate.specify(Observation_Level.ObsHi);
   g494.Length.specify(3600);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g510);
@@ -253,7 +261,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g510);
   g510.end.specify([1602084 31003000]);
   g510.duration.specify(3000);
   g510.ID.specify(173);
-  g510.Data_Rate.specify(Observation_Level.'ObsHi');
+  g510.Data_Rate.specify(Observation_Level.ObsHi);
   g510.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g526);
@@ -261,7 +269,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g526);
   g526.end.specify([1606410 31001800]);
   g526.duration.specify(1800);
   g526.ID.specify(174);
-  g526.Data_Rate.specify(Observation_Level.'ObsLo');
+  g526.Data_Rate.specify(Observation_Level.ObsLo);
   g526.Length.specify(1800);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g542);
@@ -269,7 +277,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g542);
   g542.end.specify([1611705 31003600]);
   g542.duration.specify(3600);
   g542.ID.specify(111);
-  g542.Data_Rate.specify(Observation_Level.'ObsHi');
+  g542.Data_Rate.specify(Observation_Level.ObsHi);
   g542.Length.specify(3600);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g558);
@@ -277,7 +285,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g558);
   g558.end.specify([1613053 31003000]);
   g558.duration.specify(3000);
   g558.ID.specify(175);
-  g558.Data_Rate.specify(Observation_Level.'ObsHi');
+  g558.Data_Rate.specify(Observation_Level.ObsHi);
   g558.Length.specify(3000);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g574);
@@ -285,7 +293,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g574);
   g574.end.specify([1614273 31003600]);
   g574.duration.specify(3600);
   g574.ID.specify(110);
-  g574.Data_Rate.specify(Observation_Level.'ObsHi');
+  g574.Data_Rate.specify(Observation_Level.ObsHi);
   g574.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g590);
@@ -293,7 +301,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g590);
   g590.end.specify([1616000 31003600]);
   g590.duration.specify(3600);
   g590.ID.specify(109);
-  g590.Data_Rate.specify(Observation_Level.'ObsHi');
+  g590.Data_Rate.specify(Observation_Level.ObsHi);
   g590.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g606);
@@ -301,7 +309,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g606);
   g606.end.specify([1617694 31003600]);
   g606.duration.specify(3600);
   g606.ID.specify(108);
-  g606.Data_Rate.specify(Observation_Level.'ObsHi');
+  g606.Data_Rate.specify(Observation_Level.ObsHi);
   g606.Length.specify(3600);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g622);
@@ -309,7 +317,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g622);
   g622.end.specify([1619533 31001800]);
   g622.duration.specify(1800);
   g622.ID.specify(176);
-  g622.Data_Rate.specify(Observation_Level.'ObsLo');
+  g622.Data_Rate.specify(Observation_Level.ObsLo);
   g622.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g638);
@@ -317,7 +325,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g638);
   g638.end.specify([1622163 31001800]);
   g638.duration.specify(1800);
   g638.ID.specify(177);
-  g638.Data_Rate.specify(Observation_Level.'ObsLo');
+  g638.Data_Rate.specify(Observation_Level.ObsLo);
   g638.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g654);
@@ -325,7 +333,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g654);
   g654.end.specify([1626949 31003000]);
   g654.duration.specify(3000);
   g654.ID.specify(178);
-  g654.Data_Rate.specify(Observation_Level.'ObsHi');
+  g654.Data_Rate.specify(Observation_Level.ObsHi);
   g654.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g670);
@@ -333,7 +341,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g670);
   g670.end.specify([1629203 31001800]);
   g670.duration.specify(1800);
   g670.ID.specify(179);
-  g670.Data_Rate.specify(Observation_Level.'ObsLo');
+  g670.Data_Rate.specify(Observation_Level.ObsLo);
   g670.Length.specify(1800);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g686);
@@ -341,7 +349,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g686);
   g686.end.specify([1633928 31003600]);
   g686.duration.specify(3600);
   g686.ID.specify(107);
-  g686.Data_Rate.specify(Observation_Level.'ObsHi');
+  g686.Data_Rate.specify(Observation_Level.ObsHi);
   g686.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g702);
@@ -349,7 +357,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g702);
   g702.end.specify([1636496 31003600]);
   g702.duration.specify(3600);
   g702.ID.specify(106);
-  g702.Data_Rate.specify(Observation_Level.'ObsHi');
+  g702.Data_Rate.specify(Observation_Level.ObsHi);
   g702.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g718);
@@ -357,7 +365,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g718);
   g718.end.specify([1638223 31003600]);
   g718.duration.specify(3600);
   g718.ID.specify(105);
-  g718.Data_Rate.specify(Observation_Level.'ObsHi');
+  g718.Data_Rate.specify(Observation_Level.ObsHi);
   g718.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g734);
@@ -365,7 +373,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g734);
   g734.end.specify([1639917 31003600]);
   g734.duration.specify(3600);
   g734.ID.specify(104);
-  g734.Data_Rate.specify(Observation_Level.'ObsHi');
+  g734.Data_Rate.specify(Observation_Level.ObsHi);
   g734.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g750);
@@ -373,7 +381,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g750);
   g750.end.specify([1648125 31003600]);
   g750.duration.specify(3600);
   g750.ID.specify(60);
-  g750.Data_Rate.specify(Observation_Level.'ObsHi');
+  g750.Data_Rate.specify(Observation_Level.ObsHi);
   g750.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g766);
@@ -381,7 +389,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g766);
   g766.end.specify([1656151 31003600]);
   g766.duration.specify(3600);
   g766.ID.specify(119);
-  g766.Data_Rate.specify(Observation_Level.'ObsHi');
+  g766.Data_Rate.specify(Observation_Level.ObsHi);
   g766.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g782);
@@ -389,7 +397,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g782);
   g782.end.specify([1658719 31003600]);
   g782.duration.specify(3600);
   g782.ID.specify(118);
-  g782.Data_Rate.specify(Observation_Level.'ObsHi');
+  g782.Data_Rate.specify(Observation_Level.ObsHi);
   g782.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g798);
@@ -397,7 +405,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g798);
   g798.end.specify([1660446 31003600]);
   g798.duration.specify(3600);
   g798.ID.specify(117);
-  g798.Data_Rate.specify(Observation_Level.'ObsHi');
+  g798.Data_Rate.specify(Observation_Level.ObsHi);
   g798.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g814);
@@ -405,7 +413,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g814);
   g814.end.specify([1662140 31003600]);
   g814.duration.specify(3600);
   g814.ID.specify(116);
-  g814.Data_Rate.specify(Observation_Level.'ObsHi');
+  g814.Data_Rate.specify(Observation_Level.ObsHi);
   g814.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g830);
@@ -413,7 +421,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g830);
   g830.end.specify([1687264 31003600]);
   g830.duration.specify(3600);
   g830.ID.specify(103);
-  g830.Data_Rate.specify(Observation_Level.'ObsHi');
+  g830.Data_Rate.specify(Observation_Level.ObsHi);
   g830.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g846);
@@ -421,7 +429,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g846);
   g846.end.specify([1689832 31003600]);
   g846.duration.specify(3600);
   g846.ID.specify(102);
-  g846.Data_Rate.specify(Observation_Level.'ObsHi');
+  g846.Data_Rate.specify(Observation_Level.ObsHi);
   g846.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g862);
@@ -429,7 +437,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g862);
   g862.end.specify([1691559 31003600]);
   g862.duration.specify(3600);
   g862.ID.specify(101);
-  g862.Data_Rate.specify(Observation_Level.'ObsHi');
+  g862.Data_Rate.specify(Observation_Level.ObsHi);
   g862.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g878);
@@ -437,7 +445,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g878);
   g878.end.specify([1693253 31003600]);
   g878.duration.specify(3600);
   g878.ID.specify(100);
-  g878.Data_Rate.specify(Observation_Level.'ObsHi');
+  g878.Data_Rate.specify(Observation_Level.ObsHi);
   g878.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_LO g894);
@@ -445,7 +453,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_LO g894);
   g894.end.specify([1725653 31000900]);
   g894.duration.specify(900);
   g894.ID.specify(59);
-  g894.Data_Rate.specify(Observation_Level.'ObsLo');
+  g894.Data_Rate.specify(Observation_Level.ObsLo);
   g894.Length.specify(900);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g910);
@@ -453,7 +461,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g910);
   g910.end.specify([1728943 31003000]);
   g910.duration.specify(3000);
   g910.ID.specify(56);
-  g910.Data_Rate.specify(Observation_Level.'ObsHi');
+  g910.Data_Rate.specify(Observation_Level.ObsHi);
   g910.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g926);
@@ -461,7 +469,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g926);
   g926.end.specify([1731146 31001800]);
   g926.duration.specify(1800);
   g926.ID.specify(57);
-  g926.Data_Rate.specify(Observation_Level.'ObsLo');
+  g926.Data_Rate.specify(Observation_Level.ObsLo);
   g926.Length.specify(1800);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g942);
@@ -469,7 +477,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g942);
   g942.end.specify([1734934 31003600]);
   g942.duration.specify(3600);
   g942.ID.specify(58);
-  g942.Data_Rate.specify(Observation_Level.'ObsHi');
+  g942.Data_Rate.specify(Observation_Level.ObsHi);
   g942.Length.specify(3600);
 
 goal(DNP_Science___Scan_Platform.Mosaic_HI g958);
@@ -477,7 +485,7 @@ goal(DNP_Science___Scan_Platform.Mosaic_HI g958);
   g958.end.specify([1737502 31003600]);
   g958.duration.specify(3600);
   g958.ID.specify(62);
-  g958.Data_Rate.specify(Observation_Level.'ObsHi');
+  g958.Data_Rate.specify(Observation_Level.ObsHi);
   g958.Length.specify(3600);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g974);
@@ -485,7 +493,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g974);
   g974.end.specify([1763889 31001800]);
   g974.duration.specify(1800);
   g974.ID.specify(144);
-  g974.Data_Rate.specify(Observation_Level.'ObsLo');
+  g974.Data_Rate.specify(Observation_Level.ObsLo);
   g974.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g990);
@@ -493,7 +501,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g990);
   g990.end.specify([1770614 31003000]);
   g990.duration.specify(3000);
   g990.ID.specify(145);
-  g990.Data_Rate.specify(Observation_Level.'ObsHi');
+  g990.Data_Rate.specify(Observation_Level.ObsHi);
   g990.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1006);
@@ -501,7 +509,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1006);
   g1006.end.specify([1776321 31001800]);
   g1006.duration.specify(1800);
   g1006.ID.specify(146);
-  g1006.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1006.Data_Rate.specify(Observation_Level.ObsLo);
   g1006.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1022);
@@ -509,7 +517,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1022);
   g1022.end.specify([1783047 31003000]);
   g1022.duration.specify(3000);
   g1022.ID.specify(147);
-  g1022.Data_Rate.specify(Observation_Level.'ObsHi');
+  g1022.Data_Rate.specify(Observation_Level.ObsHi);
   g1022.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1038);
@@ -517,7 +525,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1038);
   g1038.end.specify([1787373 31001800]);
   g1038.duration.specify(1800);
   g1038.ID.specify(148);
-  g1038.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1038.Data_Rate.specify(Observation_Level.ObsLo);
   g1038.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1054);
@@ -525,7 +533,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1054);
   g1054.end.specify([1792026 31003000]);
   g1054.duration.specify(3000);
   g1054.ID.specify(149);
-  g1054.Data_Rate.specify(Observation_Level.'ObsHi');
+  g1054.Data_Rate.specify(Observation_Level.ObsHi);
   g1054.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1070);
@@ -533,7 +541,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1070);
   g1070.end.specify([1796352 31001800]);
   g1070.duration.specify(1800);
   g1070.ID.specify(150);
-  g1070.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1070.Data_Rate.specify(Observation_Level.ObsLo);
   g1070.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1086);
@@ -541,7 +549,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1086);
   g1086.end.specify([1802995 31003000]);
   g1086.duration.specify(3000);
   g1086.ID.specify(151);
-  g1086.Data_Rate.specify(Observation_Level.'ObsHi');
+  g1086.Data_Rate.specify(Observation_Level.ObsHi);
   g1086.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1102);
@@ -549,7 +557,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1102);
   g1102.end.specify([1809475 31001800]);
   g1102.duration.specify(1800);
   g1102.ID.specify(152);
-  g1102.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1102.Data_Rate.specify(Observation_Level.ObsLo);
   g1102.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1118);
@@ -557,7 +565,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1118);
   g1118.end.specify([1812105 31001800]);
   g1118.duration.specify(1800);
   g1118.ID.specify(153);
-  g1118.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1118.Data_Rate.specify(Observation_Level.ObsLo);
   g1118.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1134);
@@ -565,7 +573,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1134);
   g1134.end.specify([1816891 31003000]);
   g1134.duration.specify(3000);
   g1134.ID.specify(154);
-  g1134.Data_Rate.specify(Observation_Level.'ObsHi');
+  g1134.Data_Rate.specify(Observation_Level.ObsHi);
   g1134.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1150);
@@ -573,7 +581,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1150);
   g1150.end.specify([1819145 31001800]);
   g1150.duration.specify(1800);
   g1150.ID.specify(155);
-  g1150.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1150.Data_Rate.specify(Observation_Level.ObsLo);
   g1150.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1166);
@@ -581,7 +589,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1166);
   g1166.end.specify([1835721 31001800]);
   g1166.duration.specify(1800);
   g1166.ID.specify(125);
-  g1166.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1166.Data_Rate.specify(Observation_Level.ObsLo);
   g1166.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1182);
@@ -589,7 +597,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1182);
   g1182.end.specify([1842447 31003000]);
   g1182.duration.specify(3000);
   g1182.ID.specify(130);
-  g1182.Data_Rate.specify(Observation_Level.'ObsHi');
+  g1182.Data_Rate.specify(Observation_Level.ObsHi);
   g1182.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1198);
@@ -597,7 +605,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1198);
   g1198.end.specify([1848154 31001800]);
   g1198.duration.specify(1800);
   g1198.ID.specify(126);
-  g1198.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1198.Data_Rate.specify(Observation_Level.ObsLo);
   g1198.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1214);
@@ -605,7 +613,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1214);
   g1214.end.specify([1854880 31003000]);
   g1214.duration.specify(3000);
   g1214.ID.specify(129);
-  g1214.Data_Rate.specify(Observation_Level.'ObsHi');
+  g1214.Data_Rate.specify(Observation_Level.ObsHi);
   g1214.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1230);
@@ -613,7 +621,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1230);
   g1230.end.specify([1859205 31001800]);
   g1230.duration.specify(1800);
   g1230.ID.specify(124);
-  g1230.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1230.Data_Rate.specify(Observation_Level.ObsLo);
   g1230.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1246);
@@ -621,7 +629,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1246);
   g1246.end.specify([1863859 31003000]);
   g1246.duration.specify(3000);
   g1246.ID.specify(132);
-  g1246.Data_Rate.specify(Observation_Level.'ObsHi');
+  g1246.Data_Rate.specify(Observation_Level.ObsHi);
   g1246.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1262);
@@ -629,7 +637,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1262);
   g1262.end.specify([1868184 31001800]);
   g1262.duration.specify(1800);
   g1262.ID.specify(127);
-  g1262.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1262.Data_Rate.specify(Observation_Level.ObsLo);
   g1262.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1278);
@@ -637,7 +645,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1278);
   g1278.end.specify([1874828 31003000]);
   g1278.duration.specify(3000);
   g1278.ID.specify(333);
-  g1278.Data_Rate.specify(Observation_Level.'ObsHi');
+  g1278.Data_Rate.specify(Observation_Level.ObsHi);
   g1278.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1294);
@@ -645,7 +653,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1294);
   g1294.end.specify([1881308 31001800]);
   g1294.duration.specify(1800);
   g1294.ID.specify(123);
-  g1294.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1294.Data_Rate.specify(Observation_Level.ObsLo);
   g1294.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1310);
@@ -653,7 +661,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1310);
   g1310.end.specify([1883938 31001800]);
   g1310.duration.specify(1800);
   g1310.ID.specify(332);
-  g1310.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1310.Data_Rate.specify(Observation_Level.ObsLo);
   g1310.Length.specify(1800);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1326);
@@ -661,7 +669,7 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g1326);
   g1326.end.specify([1888724 31003000]);
   g1326.duration.specify(3000);
   g1326.ID.specify(131);
-  g1326.Data_Rate.specify(Observation_Level.'ObsHi');
+  g1326.Data_Rate.specify(Observation_Level.ObsHi);
   g1326.Length.specify(3000);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1342);
@@ -669,33 +677,38 @@ goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO g1342);
   g1342.end.specify([1890977 31001800]);
   g1342.duration.specify(1800);
   g1342.ID.specify(128);
-  g1342.Data_Rate.specify(Observation_Level.'ObsLo');
+  g1342.Data_Rate.specify(Observation_Level.ObsLo);
   g1342.Length.specify(1800);
 
 goal(DNP_Science___Scan_Platform.Scan_Idle g1358);
   g1358.start.specify(0);
   g1358.end.specify([1 31535999]);
   g1358.duration.specify([1 31535999]);
+DNP_Sci.Scan_Platform.constrain(g1358);
 
 goal(DNP_Science___Scan_Platform.Scan_Idle g1379);
   g1379.start.specify([1 31535999]);
   g1379.end.specify(31536000);
   g1379.duration.specify([1 31535999]);
+DNP_Sci.Scan_Platform.constrain(g1358, g1379);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Idle g1403);
   g1403.start.specify(0);
   g1403.end.specify([1 31535999]);
   g1403.duration.specify([1 31535999]);
+DNP_Sci.Fields_and_Particles.constrain(g1403);
 
 goal(DNP_Science___Fields_and_Particles.F_and_P_Idle g1424);
   g1424.start.specify([1 31535999]);
   g1424.end.specify(31536000);
   g1424.duration.specify([1 31535999]);
+DNP_Sci.Fields_and_Particles.constrain(g1403, g1424);
 
 goal(DNP_Data___SSR_Storage_Use.Constant_Storage g1448);
   g1448.start.specify(0);
   g1448.end.specify([1 31535999]);
   g1448.duration.specify([1 31535999]);
+DNP_Dat_Stor.SSR_Storage_Use.constrain(g1448);
   g1448.SSR_Storage.specify(0);
   g1448.DSS_Opp_Num.specify([0 +inf]);
 
@@ -703,739 +716,838 @@ goal(DNP_Data___SSR_Storage_Use.Constant_Storage g1476);
   g1476.start.specify([1 31535999]);
   g1476.end.specify(31536000);
   g1476.duration.specify([1 31535999]);
+DNP_Dat_Stor.SSR_Storage_Use.constrain(g1448, g1476);
   g1476.SSR_Storage.specify(0);
   g1476.DSS_Opp_Num.specify([0 +inf]);
-  g1476.Flagged_End.specify(End_Flag.'End');
+  g1476.Flagged_End.specify(End_Flag.End);
 
 goal(DNP_Comm___Comm_Activity.Comm_Idle g1507);
   g1507.start.specify(0);
   g1507.end.specify([1 +inf]);
   g1507.duration.specify([1 +inf]);
+DNP_Comm_Sys.Comm_Activity.constrain(g1507);
 
 goal(DSS_Any___DSS_Availability.No_Window g1530);
   g1530.start.specify(0);
   g1530.end.specify(1743600);
   g1530.duration.specify(1743600);
+DNP_DSS.DSS_Availability.constrain(g1530);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1550);
   g1550.start.specify(1743600);
   g1550.end.specify(1766100);
   g1550.duration.specify(22500);
+DNP_DSS.DSS_Availability.constrain(g1530, g1550);
   g1550.Downlink_Rate.specify(200);
   g1550.Pre_Cal_Time.specify(8100);
   g1550.Post_Cal_Time.specify(900);
-  g1550.loc.specify(DSS_Id.'DSS_45');
+  g1550.loc.specify(DSS_Id.DSS_45);
   g1550.Opp_Number.specify(2);
 
 goal(DSS_Any___DSS_Availability.No_Window g1578);
   g1578.start.specify(1766100);
   g1578.end.specify(1805400);
   g1578.duration.specify(39300);
+DNP_DSS.DSS_Availability.constrain(g1550, g1578);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1599);
   g1599.start.specify(1805400);
   g1599.end.specify(1816800);
   g1599.duration.specify(11400);
+DNP_DSS.DSS_Availability.constrain(g1578, g1599);
   g1599.Downlink_Rate.specify(200);
   g1599.Pre_Cal_Time.specify(4500);
   g1599.Post_Cal_Time.specify(900);
-  g1599.loc.specify(DSS_Id.'DSS_65');
+  g1599.loc.specify(DSS_Id.DSS_65);
   g1599.Opp_Number.specify(3);
 
 goal(DSS_Any___DSS_Availability.No_Window g1627);
   g1627.start.specify(1816800);
   g1627.end.specify(1816801);
   g1627.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g1599, g1627);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1648);
   g1648.start.specify(1816801);
   g1648.end.specify(1841400);
   g1648.duration.specify(24599);
+DNP_DSS.DSS_Availability.constrain(g1627, g1648);
   g1648.Downlink_Rate.specify(20);
   g1648.Pre_Cal_Time.specify(4500);
   g1648.Post_Cal_Time.specify(900);
-  g1648.loc.specify(DSS_Id.'DSS_15');
+  g1648.loc.specify(DSS_Id.DSS_15);
   g1648.Opp_Number.specify(4);
 
 goal(DSS_Any___DSS_Availability.No_Window g1676);
   g1676.start.specify(1841400);
   g1676.end.specify(1842300);
   g1676.duration.specify(900);
+DNP_DSS.DSS_Availability.constrain(g1648, g1676);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1697);
   g1697.start.specify(1842300);
   g1697.end.specify(1863900);
   g1697.duration.specify(21600);
+DNP_DSS.DSS_Availability.constrain(g1676, g1697);
   g1697.Downlink_Rate.specify(200);
   g1697.Pre_Cal_Time.specify(7200);
   g1697.Post_Cal_Time.specify(900);
-  g1697.loc.specify(DSS_Id.'DSS_45');
+  g1697.loc.specify(DSS_Id.DSS_45);
   g1697.Opp_Number.specify(5);
 
 goal(DSS_Any___DSS_Availability.No_Window g1725);
   g1725.start.specify(1863900);
   g1725.end.specify(1873800);
   g1725.duration.specify(9900);
+DNP_DSS.DSS_Availability.constrain(g1697, g1725);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1746);
   g1746.start.specify(1873800);
   g1746.end.specify(1903500);
   g1746.duration.specify(29700);
+DNP_DSS.DSS_Availability.constrain(g1725, g1746);
   g1746.Downlink_Rate.specify(200);
   g1746.Pre_Cal_Time.specify(4500);
   g1746.Post_Cal_Time.specify(900);
-  g1746.loc.specify(DSS_Id.'DSS_65');
+  g1746.loc.specify(DSS_Id.DSS_65);
   g1746.Opp_Number.specify(6);
 
 goal(DSS_Any___DSS_Availability.No_Window g1774);
   g1774.start.specify(1903500);
   g1774.end.specify(1903501);
   g1774.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g1746, g1774);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1795);
   g1795.start.specify(1903501);
   g1795.end.specify(1909800);
   g1795.duration.specify(6299);
+DNP_DSS.DSS_Availability.constrain(g1774, g1795);
   g1795.Downlink_Rate.specify(20);
   g1795.Pre_Cal_Time.specify(4500);
   g1795.Post_Cal_Time.specify(900);
-  g1795.loc.specify(DSS_Id.'DSS_15');
+  g1795.loc.specify(DSS_Id.DSS_15);
   g1795.Opp_Number.specify(7);
 
 goal(DSS_Any___DSS_Availability.No_Window g1823);
   g1823.start.specify(1909800);
   g1823.end.specify(1963500);
   g1823.duration.specify(53700);
+DNP_DSS.DSS_Availability.constrain(g1795, g1823);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1844);
   g1844.start.specify(1963500);
   g1844.end.specify(1989600);
   g1844.duration.specify(26100);
+DNP_DSS.DSS_Availability.constrain(g1823, g1844);
   g1844.Downlink_Rate.specify(200);
   g1844.Pre_Cal_Time.specify(4500);
   g1844.Post_Cal_Time.specify(900);
-  g1844.loc.specify(DSS_Id.'DSS_65');
+  g1844.loc.specify(DSS_Id.DSS_65);
   g1844.Opp_Number.specify(8);
 
 goal(DSS_Any___DSS_Availability.No_Window g1872);
   g1872.start.specify(1989600);
   g1872.end.specify(1989601);
   g1872.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g1844, g1872);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1893);
   g1893.start.specify(1989601);
   g1893.end.specify(1999500);
   g1893.duration.specify(9899);
+DNP_DSS.DSS_Availability.constrain(g1872, g1893);
   g1893.Downlink_Rate.specify(20);
   g1893.Pre_Cal_Time.specify(4500);
   g1893.Post_Cal_Time.specify(900);
-  g1893.loc.specify(DSS_Id.'DSS_15');
+  g1893.loc.specify(DSS_Id.DSS_15);
   g1893.Opp_Number.specify(9);
 
 goal(DSS_Any___DSS_Availability.No_Window g1921);
   g1921.start.specify(1999500);
   g1921.end.specify(2049900);
   g1921.duration.specify(50400);
+DNP_DSS.DSS_Availability.constrain(g1893, g1921);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1942);
   g1942.start.specify(2049900);
   g1942.end.specify(2076000);
   g1942.duration.specify(26100);
+DNP_DSS.DSS_Availability.constrain(g1921, g1942);
   g1942.Downlink_Rate.specify(200);
   g1942.Pre_Cal_Time.specify(4500);
   g1942.Post_Cal_Time.specify(900);
-  g1942.loc.specify(DSS_Id.'DSS_65');
+  g1942.loc.specify(DSS_Id.DSS_65);
   g1942.Opp_Number.specify(10);
 
 goal(DSS_Any___DSS_Availability.No_Window g1970);
   g1970.start.specify(2076000);
   g1970.end.specify(2076001);
   g1970.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g1942, g1970);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g1991);
   g1991.start.specify(2076001);
   g1991.end.specify(2085900);
   g1991.duration.specify(9899);
+DNP_DSS.DSS_Availability.constrain(g1970, g1991);
   g1991.Downlink_Rate.specify(20);
   g1991.Pre_Cal_Time.specify(4500);
   g1991.Post_Cal_Time.specify(900);
-  g1991.loc.specify(DSS_Id.'DSS_15');
+  g1991.loc.specify(DSS_Id.DSS_15);
   g1991.Opp_Number.specify(11);
 
 goal(DSS_Any___DSS_Availability.No_Window g2019);
   g2019.start.specify(2085900);
   g2019.end.specify(2136300);
   g2019.duration.specify(50400);
+DNP_DSS.DSS_Availability.constrain(g1991, g2019);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2040);
   g2040.start.specify(2136300);
   g2040.end.specify(2162100);
   g2040.duration.specify(25800);
+DNP_DSS.DSS_Availability.constrain(g2019, g2040);
   g2040.Downlink_Rate.specify(200);
   g2040.Pre_Cal_Time.specify(4500);
   g2040.Post_Cal_Time.specify(900);
-  g2040.loc.specify(DSS_Id.'DSS_65');
+  g2040.loc.specify(DSS_Id.DSS_65);
   g2040.Opp_Number.specify(12);
 
 goal(DSS_Any___DSS_Availability.No_Window g2068);
   g2068.start.specify(2162100);
   g2068.end.specify(2162101);
   g2068.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g2040, g2068);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2089);
   g2089.start.specify(2162101);
   g2089.end.specify(2172300);
   g2089.duration.specify(10199);
+DNP_DSS.DSS_Availability.constrain(g2068, g2089);
   g2089.Downlink_Rate.specify(20);
   g2089.Pre_Cal_Time.specify(4500);
   g2089.Post_Cal_Time.specify(900);
-  g2089.loc.specify(DSS_Id.'DSS_15');
+  g2089.loc.specify(DSS_Id.DSS_15);
   g2089.Opp_Number.specify(13);
 
 goal(DSS_Any___DSS_Availability.No_Window g2117);
   g2117.start.specify(2172300);
   g2117.end.specify(2225700);
   g2117.duration.specify(53400);
+DNP_DSS.DSS_Availability.constrain(g2089, g2117);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2138);
   g2138.start.specify(2225700);
   g2138.end.specify(2248500);
   g2138.duration.specify(22800);
+DNP_DSS.DSS_Availability.constrain(g2117, g2138);
   g2138.Downlink_Rate.specify(200);
   g2138.Pre_Cal_Time.specify(4500);
   g2138.Post_Cal_Time.specify(900);
-  g2138.loc.specify(DSS_Id.'DSS_65');
+  g2138.loc.specify(DSS_Id.DSS_65);
   g2138.Opp_Number.specify(14);
 
 goal(DSS_Any___DSS_Availability.No_Window g2166);
   g2166.start.specify(2248500);
   g2166.end.specify(2248501);
   g2166.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g2138, g2166);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2187);
   g2187.start.specify(2248501);
   g2187.end.specify(2261700);
   g2187.duration.specify(13199);
+DNP_DSS.DSS_Availability.constrain(g2166, g2187);
   g2187.Downlink_Rate.specify(20);
   g2187.Pre_Cal_Time.specify(4500);
   g2187.Post_Cal_Time.specify(900);
-  g2187.loc.specify(DSS_Id.'DSS_15');
+  g2187.loc.specify(DSS_Id.DSS_15);
   g2187.Opp_Number.specify(15);
 
 goal(DSS_Any___DSS_Availability.No_Window g2215);
   g2215.start.specify(2261700);
   g2215.end.specify(2309100);
   g2215.duration.specify(47400);
+DNP_DSS.DSS_Availability.constrain(g2187, g2215);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2236);
   g2236.start.specify(2309100);
   g2236.end.specify(2334900);
   g2236.duration.specify(25800);
+DNP_DSS.DSS_Availability.constrain(g2215, g2236);
   g2236.Downlink_Rate.specify(200);
   g2236.Pre_Cal_Time.specify(4500);
   g2236.Post_Cal_Time.specify(900);
-  g2236.loc.specify(DSS_Id.'DSS_65');
+  g2236.loc.specify(DSS_Id.DSS_65);
   g2236.Opp_Number.specify(16);
 
 goal(DSS_Any___DSS_Availability.No_Window g2264);
   g2264.start.specify(2334900);
   g2264.end.specify(2334901);
   g2264.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g2236, g2264);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2285);
   g2285.start.specify(2334901);
   g2285.end.specify(2345100);
   g2285.duration.specify(10199);
+DNP_DSS.DSS_Availability.constrain(g2264, g2285);
   g2285.Downlink_Rate.specify(20);
   g2285.Pre_Cal_Time.specify(4500);
   g2285.Post_Cal_Time.specify(900);
-  g2285.loc.specify(DSS_Id.'DSS_15');
+  g2285.loc.specify(DSS_Id.DSS_15);
   g2285.Opp_Number.specify(17);
 
 goal(DSS_Any___DSS_Availability.No_Window g2313);
   g2313.start.specify(2345100);
   g2313.end.specify(2385000);
   g2313.duration.specify(39900);
+DNP_DSS.DSS_Availability.constrain(g2285, g2313);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2334);
   g2334.start.specify(2385000);
   g2334.end.specify(2421000);
   g2334.duration.specify(36000);
+DNP_DSS.DSS_Availability.constrain(g2313, g2334);
   g2334.Downlink_Rate.specify(200);
   g2334.Pre_Cal_Time.specify(6300);
   g2334.Post_Cal_Time.specify(900);
-  g2334.loc.specify(DSS_Id.'DSS_65');
+  g2334.loc.specify(DSS_Id.DSS_65);
   g2334.Opp_Number.specify(18);
 
 goal(DSS_Any___DSS_Availability.No_Window g2362);
   g2362.start.specify(2421000);
   g2362.end.specify(2478300);
   g2362.duration.specify(57300);
+DNP_DSS.DSS_Availability.constrain(g2334, g2362);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2383);
   g2383.start.specify(2478300);
   g2383.end.specify(2507400);
   g2383.duration.specify(29100);
+DNP_DSS.DSS_Availability.constrain(g2362, g2383);
   g2383.Downlink_Rate.specify(200);
   g2383.Pre_Cal_Time.specify(4500);
   g2383.Post_Cal_Time.specify(900);
-  g2383.loc.specify(DSS_Id.'DSS_65');
+  g2383.loc.specify(DSS_Id.DSS_65);
   g2383.Opp_Number.specify(19);
 
 goal(DSS_Any___DSS_Availability.No_Window g2411);
   g2411.start.specify(2507400);
   g2411.end.specify(2507401);
   g2411.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g2383, g2411);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2432);
   g2432.start.specify(2507401);
   g2432.end.specify(2514300);
   g2432.duration.specify(6899);
+DNP_DSS.DSS_Availability.constrain(g2411, g2432);
   g2432.Downlink_Rate.specify(20);
   g2432.Pre_Cal_Time.specify(4500);
   g2432.Post_Cal_Time.specify(900);
-  g2432.loc.specify(DSS_Id.'DSS_15');
+  g2432.loc.specify(DSS_Id.DSS_15);
   g2432.Opp_Number.specify(20);
 
 goal(DSS_Any___DSS_Availability.No_Window g2460);
   g2460.start.specify(2514300);
   g2460.end.specify(2557500);
   g2460.duration.specify(43200);
+DNP_DSS.DSS_Availability.constrain(g2432, g2460);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2481);
   g2481.start.specify(2557500);
   g2481.end.specify(2593500);
   g2481.duration.specify(36000);
+DNP_DSS.DSS_Availability.constrain(g2460, g2481);
   g2481.Downlink_Rate.specify(200);
   g2481.Pre_Cal_Time.specify(6300);
   g2481.Post_Cal_Time.specify(900);
-  g2481.loc.specify(DSS_Id.'DSS_65');
+  g2481.loc.specify(DSS_Id.DSS_65);
   g2481.Opp_Number.specify(21);
 
 goal(DSS_Any___DSS_Availability.No_Window g2509);
   g2509.start.specify(2593500);
   g2509.end.specify(2597100);
   g2509.duration.specify(3600);
+DNP_DSS.DSS_Availability.constrain(g2481, g2509);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2530);
   g2530.start.specify(2597100);
   g2530.end.specify(2631000);
   g2530.duration.specify(33900);
+DNP_DSS.DSS_Availability.constrain(g2509, g2530);
   g2530.Downlink_Rate.specify(20);
   g2530.Pre_Cal_Time.specify(7200);
   g2530.Post_Cal_Time.specify(900);
-  g2530.loc.specify(DSS_Id.'DSS_15');
+  g2530.loc.specify(DSS_Id.DSS_15);
   g2530.Opp_Number.specify(22);
 
 goal(DSS_Any___DSS_Availability.No_Window g2558);
   g2558.start.specify(2631000);
   g2558.end.specify(2661600);
   g2558.duration.specify(30600);
+DNP_DSS.DSS_Availability.constrain(g2530, g2558);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2579);
   g2579.start.specify(2661600);
   g2579.end.specify(2697600);
   g2579.duration.specify(36000);
+DNP_DSS.DSS_Availability.constrain(g2558, g2579);
   g2579.Downlink_Rate.specify(20);
   g2579.Pre_Cal_Time.specify(4500);
   g2579.Post_Cal_Time.specify(900);
-  g2579.loc.specify(DSS_Id.'DSS_15');
+  g2579.loc.specify(DSS_Id.DSS_15);
   g2579.Opp_Number.specify(23);
 
 goal(DSS_Any___DSS_Availability.No_Window g2607);
   g2607.start.specify(2697600);
   g2607.end.specify(2741400);
   g2607.duration.specify(43800);
+DNP_DSS.DSS_Availability.constrain(g2579, g2607);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2628);
   g2628.start.specify(2741400);
   g2628.end.specify(2766000);
   g2628.duration.specify(24600);
+DNP_DSS.DSS_Availability.constrain(g2607, g2628);
   g2628.Downlink_Rate.specify(200);
   g2628.Pre_Cal_Time.specify(4500);
   g2628.Post_Cal_Time.specify(900);
-  g2628.loc.specify(DSS_Id.'DSS_65');
+  g2628.loc.specify(DSS_Id.DSS_65);
   g2628.Opp_Number.specify(24);
 
 goal(DSS_Any___DSS_Availability.No_Window g2656);
   g2656.start.specify(2766000);
   g2656.end.specify(2766001);
   g2656.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g2628, g2656);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2677);
   g2677.start.specify(2766001);
   g2677.end.specify(2777400);
   g2677.duration.specify(11399);
+DNP_DSS.DSS_Availability.constrain(g2656, g2677);
   g2677.Downlink_Rate.specify(20);
   g2677.Pre_Cal_Time.specify(4500);
   g2677.Post_Cal_Time.specify(900);
-  g2677.loc.specify(DSS_Id.'DSS_15');
+  g2677.loc.specify(DSS_Id.DSS_15);
   g2677.Opp_Number.specify(25);
 
 goal(DSS_Any___DSS_Availability.No_Window g2705);
   g2705.start.specify(2777400);
   g2705.end.specify(2811900);
   g2705.duration.specify(34500);
+DNP_DSS.DSS_Availability.constrain(g2677, g2705);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2726);
   g2726.start.specify(2811900);
   g2726.end.specify(2847900);
   g2726.duration.specify(36000);
+DNP_DSS.DSS_Availability.constrain(g2705, g2726);
   g2726.Downlink_Rate.specify(200);
   g2726.Pre_Cal_Time.specify(4500);
   g2726.Post_Cal_Time.specify(900);
-  g2726.loc.specify(DSS_Id.'DSS_65');
+  g2726.loc.specify(DSS_Id.DSS_65);
   g2726.Opp_Number.specify(26);
 
 goal(DSS_Any___DSS_Availability.No_Window g2754);
   g2754.start.specify(2847900);
   g2754.end.specify(2872500);
   g2754.duration.specify(24600);
+DNP_DSS.DSS_Availability.constrain(g2726, g2754);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2775);
   g2775.start.specify(2872500);
   g2775.end.specify(2894700);
   g2775.duration.specify(22200);
+DNP_DSS.DSS_Availability.constrain(g2754, g2775);
   g2775.Downlink_Rate.specify(200);
   g2775.Pre_Cal_Time.specify(6300);
   g2775.Post_Cal_Time.specify(900);
-  g2775.loc.specify(DSS_Id.'DSS_45');
+  g2775.loc.specify(DSS_Id.DSS_45);
   g2775.Opp_Number.specify(27);
 
 goal(DSS_Any___DSS_Availability.No_Window g2803);
   g2803.start.specify(2894700);
   g2803.end.specify(2894701);
   g2803.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g2775, g2803);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2824);
   g2824.start.specify(2894701);
   g2824.end.specify(2908500);
   g2824.duration.specify(13799);
+DNP_DSS.DSS_Availability.constrain(g2803, g2824);
   g2824.Downlink_Rate.specify(200);
   g2824.Pre_Cal_Time.specify(4500);
   g2824.Post_Cal_Time.specify(900);
-  g2824.loc.specify(DSS_Id.'DSS_65');
+  g2824.loc.specify(DSS_Id.DSS_65);
   g2824.Opp_Number.specify(28);
 
 goal(DSS_Any___DSS_Availability.No_Window g2852);
   g2852.start.specify(2908500);
   g2852.end.specify(2916600);
   g2852.duration.specify(8100);
+DNP_DSS.DSS_Availability.constrain(g2824, g2852);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2873);
   g2873.start.specify(2916600);
   g2873.end.specify(2945100);
   g2873.duration.specify(28500);
+DNP_DSS.DSS_Availability.constrain(g2852, g2873);
   g2873.Downlink_Rate.specify(200);
   g2873.Pre_Cal_Time.specify(7200);
   g2873.Post_Cal_Time.specify(900);
-  g2873.loc.specify(DSS_Id.'DSS_65');
+  g2873.loc.specify(DSS_Id.DSS_65);
   g2873.Opp_Number.specify(29);
 
 goal(DSS_Any___DSS_Availability.No_Window g2901);
   g2901.start.specify(2945100);
   g2901.end.specify(2945101);
   g2901.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g2873, g2901);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2922);
   g2922.start.specify(2945101);
   g2922.end.specify(2965500);
   g2922.duration.specify(20399);
+DNP_DSS.DSS_Availability.constrain(g2901, g2922);
   g2922.Downlink_Rate.specify(20);
   g2922.Pre_Cal_Time.specify(4500);
   g2922.Post_Cal_Time.specify(900);
-  g2922.loc.specify(DSS_Id.'DSS_15');
+  g2922.loc.specify(DSS_Id.DSS_15);
   g2922.Opp_Number.specify(30);
 
 goal(DSS_Any___DSS_Availability.No_Window g2950);
   g2950.start.specify(2965500);
   g2950.end.specify(2965501);
   g2950.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g2922, g2950);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g2971);
   g2971.start.specify(2965501);
   g2971.end.specify(2973900);
   g2971.duration.specify(8399);
+DNP_DSS.DSS_Availability.constrain(g2950, g2971);
   g2971.Downlink_Rate.specify(200);
   g2971.Pre_Cal_Time.specify(4500);
   g2971.Post_Cal_Time.specify(900);
-  g2971.loc.specify(DSS_Id.'DSS_45');
+  g2971.loc.specify(DSS_Id.DSS_45);
   g2971.Opp_Number.specify(31);
 
 goal(DSS_Any___DSS_Availability.No_Window g2999);
   g2999.start.specify(2973900);
   g2999.end.specify(3031200);
   g2999.duration.specify(57300);
+DNP_DSS.DSS_Availability.constrain(g2971, g2999);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3020);
   g3020.start.specify(3031200);
   g3020.end.specify(3067200);
   g3020.duration.specify(36000);
+DNP_DSS.DSS_Availability.constrain(g2999, g3020);
   g3020.Downlink_Rate.specify(200);
   g3020.Pre_Cal_Time.specify(4500);
   g3020.Post_Cal_Time.specify(900);
-  g3020.loc.specify(DSS_Id.'DSS_45');
+  g3020.loc.specify(DSS_Id.DSS_45);
   g3020.Opp_Number.specify(32);
 
 goal(DSS_Any___DSS_Availability.No_Window g3048);
   g3048.start.specify(3067200);
   g3048.end.specify(3124800);
   g3048.duration.specify(57600);
+DNP_DSS.DSS_Availability.constrain(g3020, g3048);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3069);
   g3069.start.specify(3124800);
   g3069.end.specify(3153600);
   g3069.duration.specify(28800);
+DNP_DSS.DSS_Availability.constrain(g3048, g3069);
   g3069.Downlink_Rate.specify(200);
   g3069.Pre_Cal_Time.specify(4500);
   g3069.Post_Cal_Time.specify(900);
-  g3069.loc.specify(DSS_Id.'DSS_45');
+  g3069.loc.specify(DSS_Id.DSS_45);
   g3069.Opp_Number.specify(33);
 
 goal(DSS_Any___DSS_Availability.No_Window g3097);
   g3097.start.specify(3153600);
   g3097.end.specify(3153601);
   g3097.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g3069, g3097);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3118);
   g3118.start.specify(3153601);
   g3118.end.specify(3160800);
   g3118.duration.specify(7199);
+DNP_DSS.DSS_Availability.constrain(g3097, g3118);
   g3118.Downlink_Rate.specify(200);
   g3118.Pre_Cal_Time.specify(4500);
   g3118.Post_Cal_Time.specify(900);
-  g3118.loc.specify(DSS_Id.'DSS_65');
+  g3118.loc.specify(DSS_Id.DSS_65);
   g3118.Opp_Number.specify(34);
 
 goal(DSS_Any___DSS_Availability.No_Window g3146);
   g3146.start.specify(3160800);
   g3146.end.specify(3160801);
   g3146.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g3118, g3146);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3167);
   g3167.start.specify(3160801);
   g3167.end.specify(3181500);
   g3167.duration.specify(20699);
+DNP_DSS.DSS_Availability.constrain(g3146, g3167);
   g3167.Downlink_Rate.specify(200);
   g3167.Pre_Cal_Time.specify(5400);
   g3167.Post_Cal_Time.specify(900);
-  g3167.loc.specify(DSS_Id.'DSS_14');
+  g3167.loc.specify(DSS_Id.DSS_14);
   g3167.Opp_Number.specify(35);
 
 goal(DSS_Any___DSS_Availability.No_Window g3195);
   g3195.start.specify(3181500);
   g3195.end.specify(3203100);
   g3195.duration.specify(21600);
+DNP_DSS.DSS_Availability.constrain(g3167, g3195);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3216);
   g3216.start.specify(3203100);
   g3216.end.specify(3224400);
   g3216.duration.specify(21300);
+DNP_DSS.DSS_Availability.constrain(g3195, g3216);
   g3216.Downlink_Rate.specify(20);
   g3216.Pre_Cal_Time.specify(4500);
   g3216.Post_Cal_Time.specify(900);
-  g3216.loc.specify(DSS_Id.'DSS_15');
+  g3216.loc.specify(DSS_Id.DSS_15);
   g3216.Opp_Number.specify(36);
 
 goal(DSS_Any___DSS_Availability.No_Window g3244);
   g3244.start.specify(3224400);
   g3244.end.specify(3224401);
   g3244.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g3216, g3244);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3265);
   g3265.start.specify(3224401);
   g3265.end.specify(3239100);
   g3265.duration.specify(14699);
+DNP_DSS.DSS_Availability.constrain(g3244, g3265);
   g3265.Downlink_Rate.specify(200);
   g3265.Pre_Cal_Time.specify(4500);
   g3265.Post_Cal_Time.specify(900);
-  g3265.loc.specify(DSS_Id.'DSS_45');
+  g3265.loc.specify(DSS_Id.DSS_45);
   g3265.Opp_Number.specify(37);
 
 goal(DSS_Any___DSS_Availability.No_Window g3293);
   g3293.start.specify(3239100);
   g3293.end.specify(3303300);
   g3293.duration.specify(64200);
+DNP_DSS.DSS_Availability.constrain(g3265, g3293);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3314);
   g3314.start.specify(3303300);
   g3314.end.specify(3326400);
   g3314.duration.specify(23100);
+DNP_DSS.DSS_Availability.constrain(g3293, g3314);
   g3314.Downlink_Rate.specify(200);
   g3314.Pre_Cal_Time.specify(11700);
   g3314.Post_Cal_Time.specify(900);
-  g3314.loc.specify(DSS_Id.'DSS_45');
+  g3314.loc.specify(DSS_Id.DSS_45);
   g3314.Opp_Number.specify(38);
 
 goal(DSS_Any___DSS_Availability.No_Window g3342);
   g3342.start.specify(3326400);
   g3342.end.specify(3326401);
   g3342.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g3314, g3342);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3363);
   g3363.start.specify(3326401);
   g3363.end.specify(3332100);
   g3363.duration.specify(5699);
+DNP_DSS.DSS_Availability.constrain(g3342, g3363);
   g3363.Downlink_Rate.specify(200);
   g3363.Pre_Cal_Time.specify(4500);
   g3363.Post_Cal_Time.specify(900);
-  g3363.loc.specify(DSS_Id.'DSS_65');
+  g3363.loc.specify(DSS_Id.DSS_65);
   g3363.Opp_Number.specify(39);
 
 goal(DSS_Any___DSS_Availability.No_Window g3391);
   g3391.start.specify(3332100);
   g3391.end.specify(3360900);
   g3391.duration.specify(28800);
+DNP_DSS.DSS_Availability.constrain(g3363, g3391);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3412);
   g3412.start.specify(3360900);
   g3412.end.specify(3396900);
   g3412.duration.specify(36000);
+DNP_DSS.DSS_Availability.constrain(g3391, g3412);
   g3412.Downlink_Rate.specify(20);
   g3412.Pre_Cal_Time.specify(4500);
   g3412.Post_Cal_Time.specify(900);
-  g3412.loc.specify(DSS_Id.'DSS_15');
+  g3412.loc.specify(DSS_Id.DSS_15);
   g3412.Opp_Number.specify(40);
 
 goal(DSS_Any___DSS_Availability.No_Window g3440);
   g3440.start.specify(3396900);
   g3440.end.specify(3436500);
   g3440.duration.specify(39600);
+DNP_DSS.DSS_Availability.constrain(g3412, g3440);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3461);
   g3461.start.specify(3436500);
   g3461.end.specify(3472500);
   g3461.duration.specify(36000);
+DNP_DSS.DSS_Availability.constrain(g3440, g3461);
   g3461.Downlink_Rate.specify(20);
   g3461.Pre_Cal_Time.specify(4500);
   g3461.Post_Cal_Time.specify(900);
-  g3461.loc.specify(DSS_Id.'DSS_15');
+  g3461.loc.specify(DSS_Id.DSS_15);
   g3461.Opp_Number.specify(41);
 
 goal(DSS_Any___DSS_Availability.No_Window g3489);
   g3489.start.specify(3472500);
   g3489.end.specify(3506700);
   g3489.duration.specify(34200);
+DNP_DSS.DSS_Availability.constrain(g3461, g3489);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3510);
   g3510.start.specify(3506700);
   g3510.end.specify(3542700);
   g3510.duration.specify(36000);
+DNP_DSS.DSS_Availability.constrain(g3489, g3510);
   g3510.Downlink_Rate.specify(200);
   g3510.Pre_Cal_Time.specify(4500);
   g3510.Post_Cal_Time.specify(900);
-  g3510.loc.specify(DSS_Id.'DSS_65');
+  g3510.loc.specify(DSS_Id.DSS_65);
   g3510.Opp_Number.specify(42);
 
 goal(DSS_Any___DSS_Availability.No_Window g3538);
   g3538.start.specify(3542700);
   g3538.end.specify(3592800);
   g3538.duration.specify(50100);
+DNP_DSS.DSS_Availability.constrain(g3510, g3538);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3559);
   g3559.start.specify(3592800);
   g3559.end.specify(3628800);
   g3559.duration.specify(36000);
+DNP_DSS.DSS_Availability.constrain(g3538, g3559);
   g3559.Downlink_Rate.specify(200);
   g3559.Pre_Cal_Time.specify(6300);
   g3559.Post_Cal_Time.specify(900);
-  g3559.loc.specify(DSS_Id.'DSS_65');
+  g3559.loc.specify(DSS_Id.DSS_65);
   g3559.Opp_Number.specify(43);
 
 goal(DSS_Any___DSS_Availability.No_Window g3587);
   g3587.start.specify(3628800);
   g3587.end.specify(3693600);
   g3587.duration.specify(64800);
+DNP_DSS.DSS_Availability.constrain(g3559, g3587);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3608);
   g3608.start.specify(3693600);
   g3608.end.specify(3698400);
   g3608.duration.specify(4800);
+DNP_DSS.DSS_Availability.constrain(g3587, g3608);
   g3608.Downlink_Rate.specify(200);
   g3608.Pre_Cal_Time.specify(4500);
   g3608.Post_Cal_Time.specify(900);
-  g3608.loc.specify(DSS_Id.'DSS_65');
+  g3608.loc.specify(DSS_Id.DSS_65);
   g3608.Opp_Number.specify(44);
 
 goal(DSS_Any___DSS_Availability.No_Window g3636);
   g3636.start.specify(3698400);
   g3636.end.specify(3698401);
   g3636.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g3608, g3636);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3657);
   g3657.start.specify(3698401);
   g3657.end.specify(3729600);
   g3657.duration.specify(31199);
+DNP_DSS.DSS_Availability.constrain(g3636, g3657);
   g3657.Downlink_Rate.specify(20);
   g3657.Pre_Cal_Time.specify(6300);
   g3657.Post_Cal_Time.specify(900);
-  g3657.loc.specify(DSS_Id.'DSS_15');
+  g3657.loc.specify(DSS_Id.DSS_15);
   g3657.Opp_Number.specify(45);
 
 goal(DSS_Any___DSS_Availability.No_Window g3685);
   g3685.start.specify(3729600);
   g3685.end.specify(3774900);
   g3685.duration.specify(45300);
+DNP_DSS.DSS_Availability.constrain(g3657, g3685);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3706);
   g3706.start.specify(3774900);
   g3706.end.specify(3789300);
   g3706.duration.specify(14400);
+DNP_DSS.DSS_Availability.constrain(g3685, g3706);
   g3706.Downlink_Rate.specify(200);
   g3706.Pre_Cal_Time.specify(4500);
   g3706.Post_Cal_Time.specify(900);
-  g3706.loc.specify(DSS_Id.'DSS_65');
+  g3706.loc.specify(DSS_Id.DSS_65);
   g3706.Opp_Number.specify(46);
 
 goal(DSS_Any___DSS_Availability.No_Window g3734);
   g3734.start.specify(3789300);
   g3734.end.specify(3789301);
   g3734.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g3706, g3734);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3755);
   g3755.start.specify(3789301);
   g3755.end.specify(3810900);
   g3755.duration.specify(21599);
+DNP_DSS.DSS_Availability.constrain(g3734, g3755);
   g3755.Downlink_Rate.specify(20);
   g3755.Pre_Cal_Time.specify(4500);
   g3755.Post_Cal_Time.specify(900);
-  g3755.loc.specify(DSS_Id.'DSS_15');
+  g3755.loc.specify(DSS_Id.DSS_15);
   g3755.Opp_Number.specify(47);
 
 goal(DSS_Any___DSS_Availability.No_Window g3783);
   g3783.start.specify(3810900);
   g3783.end.specify(3866100);
   g3783.duration.specify(55200);
+DNP_DSS.DSS_Availability.constrain(g3755, g3783);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3804);
   g3804.start.specify(3866100);
   g3804.end.specify(3875100);
   g3804.duration.specify(9000);
+DNP_DSS.DSS_Availability.constrain(g3783, g3804);
   g3804.Downlink_Rate.specify(200);
   g3804.Pre_Cal_Time.specify(4500);
   g3804.Post_Cal_Time.specify(900);
-  g3804.loc.specify(DSS_Id.'DSS_65');
+  g3804.loc.specify(DSS_Id.DSS_65);
   g3804.Opp_Number.specify(48);
 
 goal(DSS_Any___DSS_Availability.No_Window g3832);
   g3832.start.specify(3875100);
   g3832.end.specify(3875101);
   g3832.duration.specify(1);
+DNP_DSS.DSS_Availability.constrain(g3804, g3832);
 
 goal(DSS_Any___DSS_Availability.Downlink_Window g3853);
   g3853.start.specify(3875101);
   g3853.end.specify(3902100);
   g3853.duration.specify(26999);
+DNP_DSS.DSS_Availability.constrain(g3832, g3853);
   g3853.Downlink_Rate.specify(20);
   g3853.Pre_Cal_Time.specify(6300);
   g3853.Post_Cal_Time.specify(900);
-  g3853.loc.specify(DSS_Id.'DSS_15');
+  g3853.loc.specify(DSS_Id.DSS_15);
   g3853.Opp_Number.specify(49);
 
 goal(DSS_Any___DSS_Availability.No_Window g3881);
   g3881.start.specify(3902100);
   g3881.end.specify(31536000);
   g3881.duration.specify(27633900);
+DNP_DSS.DSS_Availability.constrain(g3853, g3881);
 
 g1358 before g1379; // key=1388
 g1358 before g1379; // key=1398
@@ -1444,194 +1556,98 @@ g1403 before g1424; // key=1443
 g1448 before g1476; // key=1492
 g1448 before g1476; // key=1502
 g1530 meets g1550; // key=1565
-g1530 before g1550; // key=1574
 g1550 meets g1578; // key=1586
-g1550 before g1578; // key=1595
 g1578 meets g1599; // key=1614
-g1578 before g1599; // key=1623
 g1599 meets g1627; // key=1635
-g1599 before g1627; // key=1644
 g1627 meets g1648; // key=1663
-g1627 before g1648; // key=1672
 g1648 meets g1676; // key=1684
-g1648 before g1676; // key=1693
 g1676 meets g1697; // key=1712
-g1676 before g1697; // key=1721
 g1697 meets g1725; // key=1733
-g1697 before g1725; // key=1742
 g1725 meets g1746; // key=1761
-g1725 before g1746; // key=1770
 g1746 meets g1774; // key=1782
-g1746 before g1774; // key=1791
 g1774 meets g1795; // key=1810
-g1774 before g1795; // key=1819
 g1795 meets g1823; // key=1831
-g1795 before g1823; // key=1840
 g1823 meets g1844; // key=1859
-g1823 before g1844; // key=1868
 g1844 meets g1872; // key=1880
-g1844 before g1872; // key=1889
 g1872 meets g1893; // key=1908
-g1872 before g1893; // key=1917
 g1893 meets g1921; // key=1929
-g1893 before g1921; // key=1938
 g1921 meets g1942; // key=1957
-g1921 before g1942; // key=1966
 g1942 meets g1970; // key=1978
-g1942 before g1970; // key=1987
 g1970 meets g1991; // key=2006
-g1970 before g1991; // key=2015
 g1991 meets g2019; // key=2027
-g1991 before g2019; // key=2036
 g2019 meets g2040; // key=2055
-g2019 before g2040; // key=2064
 g2040 meets g2068; // key=2076
-g2040 before g2068; // key=2085
 g2068 meets g2089; // key=2104
-g2068 before g2089; // key=2113
 g2089 meets g2117; // key=2125
-g2089 before g2117; // key=2134
 g2117 meets g2138; // key=2153
-g2117 before g2138; // key=2162
 g2138 meets g2166; // key=2174
-g2138 before g2166; // key=2183
 g2166 meets g2187; // key=2202
-g2166 before g2187; // key=2211
 g2187 meets g2215; // key=2223
-g2187 before g2215; // key=2232
 g2215 meets g2236; // key=2251
-g2215 before g2236; // key=2260
 g2236 meets g2264; // key=2272
-g2236 before g2264; // key=2281
 g2264 meets g2285; // key=2300
-g2264 before g2285; // key=2309
 g2285 meets g2313; // key=2321
-g2285 before g2313; // key=2330
 g2313 meets g2334; // key=2349
-g2313 before g2334; // key=2358
 g2334 meets g2362; // key=2370
-g2334 before g2362; // key=2379
 g2362 meets g2383; // key=2398
-g2362 before g2383; // key=2407
 g2383 meets g2411; // key=2419
-g2383 before g2411; // key=2428
 g2411 meets g2432; // key=2447
-g2411 before g2432; // key=2456
 g2432 meets g2460; // key=2468
-g2432 before g2460; // key=2477
 g2460 meets g2481; // key=2496
-g2460 before g2481; // key=2505
 g2481 meets g2509; // key=2517
-g2481 before g2509; // key=2526
 g2509 meets g2530; // key=2545
-g2509 before g2530; // key=2554
 g2530 meets g2558; // key=2566
-g2530 before g2558; // key=2575
 g2558 meets g2579; // key=2594
-g2558 before g2579; // key=2603
 g2579 meets g2607; // key=2615
-g2579 before g2607; // key=2624
 g2607 meets g2628; // key=2643
-g2607 before g2628; // key=2652
 g2628 meets g2656; // key=2664
-g2628 before g2656; // key=2673
 g2656 meets g2677; // key=2692
-g2656 before g2677; // key=2701
 g2677 meets g2705; // key=2713
-g2677 before g2705; // key=2722
 g2705 meets g2726; // key=2741
-g2705 before g2726; // key=2750
 g2726 meets g2754; // key=2762
-g2726 before g2754; // key=2771
 g2754 meets g2775; // key=2790
-g2754 before g2775; // key=2799
 g2775 meets g2803; // key=2811
-g2775 before g2803; // key=2820
 g2803 meets g2824; // key=2839
-g2803 before g2824; // key=2848
 g2824 meets g2852; // key=2860
-g2824 before g2852; // key=2869
 g2852 meets g2873; // key=2888
-g2852 before g2873; // key=2897
 g2873 meets g2901; // key=2909
-g2873 before g2901; // key=2918
 g2901 meets g2922; // key=2937
-g2901 before g2922; // key=2946
 g2922 meets g2950; // key=2958
-g2922 before g2950; // key=2967
 g2950 meets g2971; // key=2986
-g2950 before g2971; // key=2995
 g2971 meets g2999; // key=3007
-g2971 before g2999; // key=3016
 g2999 meets g3020; // key=3035
-g2999 before g3020; // key=3044
 g3020 meets g3048; // key=3056
-g3020 before g3048; // key=3065
 g3048 meets g3069; // key=3084
-g3048 before g3069; // key=3093
 g3069 meets g3097; // key=3105
-g3069 before g3097; // key=3114
 g3097 meets g3118; // key=3133
-g3097 before g3118; // key=3142
 g3118 meets g3146; // key=3154
-g3118 before g3146; // key=3163
 g3146 meets g3167; // key=3182
-g3146 before g3167; // key=3191
 g3167 meets g3195; // key=3203
-g3167 before g3195; // key=3212
 g3195 meets g3216; // key=3231
-g3195 before g3216; // key=3240
 g3216 meets g3244; // key=3252
-g3216 before g3244; // key=3261
 g3244 meets g3265; // key=3280
-g3244 before g3265; // key=3289
 g3265 meets g3293; // key=3301
-g3265 before g3293; // key=3310
 g3293 meets g3314; // key=3329
-g3293 before g3314; // key=3338
 g3314 meets g3342; // key=3350
-g3314 before g3342; // key=3359
 g3342 meets g3363; // key=3378
-g3342 before g3363; // key=3387
 g3363 meets g3391; // key=3399
-g3363 before g3391; // key=3408
 g3391 meets g3412; // key=3427
-g3391 before g3412; // key=3436
 g3412 meets g3440; // key=3448
-g3412 before g3440; // key=3457
 g3440 meets g3461; // key=3476
-g3440 before g3461; // key=3485
 g3461 meets g3489; // key=3497
-g3461 before g3489; // key=3506
 g3489 meets g3510; // key=3525
-g3489 before g3510; // key=3534
 g3510 meets g3538; // key=3546
-g3510 before g3538; // key=3555
 g3538 meets g3559; // key=3574
-g3538 before g3559; // key=3583
 g3559 meets g3587; // key=3595
-g3559 before g3587; // key=3604
 g3587 meets g3608; // key=3623
-g3587 before g3608; // key=3632
 g3608 meets g3636; // key=3644
-g3608 before g3636; // key=3653
 g3636 meets g3657; // key=3672
-g3636 before g3657; // key=3681
 g3657 meets g3685; // key=3693
-g3657 before g3685; // key=3702
 g3685 meets g3706; // key=3721
-g3685 before g3706; // key=3730
 g3706 meets g3734; // key=3742
-g3706 before g3734; // key=3751
 g3734 meets g3755; // key=3770
-g3734 before g3755; // key=3779
 g3755 meets g3783; // key=3791
-g3755 before g3783; // key=3800
 g3783 meets g3804; // key=3819
-g3783 before g3804; // key=3828
 g3804 meets g3832; // key=3840
-g3804 before g3832; // key=3849
 g3832 meets g3853; // key=3868
-g3832 before g3853; // key=3877
 g3853 meets g3881; // key=3889
-g3853 before g3881; // key=3899

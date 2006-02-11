@@ -16,19 +16,19 @@ goal(Monkey_Class___Location_SV.At g46);
   g46.start.specify(0);
   g46.end.specify([40 96]);
   g46.duration.specify([40 96]);
-  g46.Loc_Label.specify(Location_Label.'Rock');
+  g46.Loc_Label.specify(Location_Label.Rock);
 
 goal(Monkey_Class___Location_SV.At g68);
   g68.start.specify([40 96]);
   g68.end.specify([44 196]);
   g68.duration.specify([4 156]);
-  g68.Loc_Label.specify(Location_Label.'Tree');
+  g68.Loc_Label.specify(Location_Label.Tree);
 
 goal(Monkey_Class___Location_SV.At g91);
   g91.start.specify([44 196]);
   g91.end.specify(200);
   g91.duration.specify([4 156]);
-  g91.Loc_Label.specify(Location_Label.'Rock');
+  g91.Loc_Label.specify(Location_Label.Rock);
 
 goal(Monkey_Class___Altitude_SV.LOW g116);
   g116.start.specify(0);
@@ -66,7 +66,7 @@ goal(Agent_Class___Planning_Horizon_SV.Planning_Horizon g255);
   g255.start.specify(0);
   g255.end.specify(40);
   g255.duration.specify(40);
-  g255.horizon.specify(Horizon_Label.'Intermediate_Horizon');
+  g255.horizon.specify(Horizon_Label.Intermediate_Horizon);
   g255.Token_Start.specify(0);
   g255.Token_End.specify(40);
   g255.Horizon_Start.specify(36);
@@ -76,7 +76,7 @@ goal(Agent_Class___Planning_Horizon_SV.Planning_Horizon g290);
   g290.start.specify(40);
   g290.end.specify(100);
   g290.duration.specify(60);
-  g290.horizon.specify(Horizon_Label.'Intermediate_Horizon');
+  g290.horizon.specify(Horizon_Label.Intermediate_Horizon);
   g290.Token_Start.specify(40);
   g290.Token_End.specify(100);
   g290.Horizon_Start.specify(96);
@@ -86,7 +86,7 @@ goal(Agent_Class___Planning_Horizon_SV.Planning_Horizon g326);
   g326.start.specify(100);
   g326.end.specify(200);
   g326.duration.specify(100);
-  g326.horizon.specify(Horizon_Label.'End_Horizon');
+  g326.horizon.specify(Horizon_Label.End_Horizon);
   g326.Token_Start.specify(100);
   g326.Token_End.specify(200);
   g326.Horizon_Start.specify([0 100000000]);
@@ -96,7 +96,7 @@ goal(Agent_Class___Agent_Mode_SV.Agent_Mode g361);
   g361.start.specify(0);
   g361.end.specify(196);
   g361.duration.specify(196);
-  g361.mode.specify(Agent_Mode_Label.'Nominal');
+  g361.mode.specify(Agent_Mode_Label.Nominal);
 
 g46 before g68; // key=78
 g46 before g68; // key=87

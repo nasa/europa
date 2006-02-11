@@ -1,34 +1,44 @@
-// ../../../ModuleTests/Parser/dnp2/DNP.compats.ddl
+// ../ModuleTests/Parser/dnp2/DNP.compats.ddl
 
-enum Observation_Level { 'ObsNo', 'ObsLo', 'ObsHi' } 
+enum Observation_Level { ObsNo, ObsLo, ObsHi } 
 
-enum Done_Flag { 'Done', 'Undone' } 
+enum Done_Flag { Done, Undone } 
 
-enum End_Flag { 'End', 'Noend' } 
+enum End_Flag { End, Noend } 
 
-enum DSS_Id { 'DSS_15', 'DSS_45', 'DSS_14', 'DSS_65' } 
+enum DSS_Id { DSS_15, DSS_45, DSS_14, DSS_65 } 
 
-enum FP_Idle_Past { 'FP_HI_Bef', 'FP_LO_Bef' } 
+enum FP_Idle_Past { FP_HI_Bef, FP_LO_Bef } 
 
-enum FP_Idle_Future { 'FP_HI_Aft', 'FP_LO_Aft' } 
+enum FP_Idle_Future { FP_HI_Aft, FP_LO_Aft } 
 
-enum Mos_Idle_Past { 'Mos_HI_Bef', 'Mos_LO_Bef' } 
+enum Mos_Idle_Past { Mos_HI_Bef, Mos_LO_Bef } 
 
-enum Mos_Idle_Future { 'Mos_HI_Aft', 'Mos_LO_Aft' } 
+enum Mos_Idle_Future { Mos_HI_Aft, Mos_LO_Aft } 
 
-enum PB_Past { 'CS_Bef_PB', 'Rec_Bef_PB' } 
+enum PB_Past { CS_Bef_PB, Rec_Bef_PB } 
 
-enum CS_Past { 'Rec_Bef_CS', 'PB_Bef_CS' } 
+enum CS_Past { Rec_Bef_CS, PB_Bef_CS } 
 
-enum REC_Past { 'CS_Bef_Rec', 'Rec_Bef_Rec', 'PB_Bef_Rec' } 
+enum REC_Past { CS_Bef_Rec, Rec_Bef_Rec, PB_Bef_Rec } 
 
-enum CS_Future { 'Rec_Aft_CS', 'PB_Aft_CS' } 
+enum CS_Future { Rec_Aft_CS, PB_Aft_CS } 
 
-enum REC_Future { 'CS_Aft_Rec', 'Rec_Aft_Rec', 'PB_Aft_Rec' } 
+enum REC_Future { CS_Aft_Rec, Rec_Aft_Rec, PB_Aft_Rec } 
 
-enum Record_Obs { 'FP_HI', 'FP_LO', 'Mos_HI', 'Mos_LO' } 
+enum Record_Obs { FP_HI, FP_LO, Mos_HI, Mos_LO } 
 
-class DNP_Science___Scan_Platform {
+class DNP_Science;
+class DNP_Science___Scan_Platform;
+class DNP_Science___Fields_and_Particles;
+class DNP_Data;
+class DNP_Data___SSR_Storage_Use;
+class DNP_Comm;
+class DNP_Comm___Comm_Activity;
+class DSS_Any;
+class DSS_Any___DSS_Availability;
+
+class DNP_Science___Scan_Platform extends Timeline {
   predicate Mosaic_LO {
     int ID;
     Observation_Level Data_Rate;
@@ -52,7 +62,7 @@ class DNP_Science___Scan_Platform {
   }
 }
 
-class DNP_Science___Fields_and_Particles {
+class DNP_Science___Fields_and_Particles extends Timeline {
   predicate F_and_P_Observation_LO {
     int ID;
     Observation_Level Data_Rate;
@@ -85,7 +95,7 @@ class DNP_Science {
   }
 }
 
-class DNP_Data___SSR_Storage_Use {
+class DNP_Data___SSR_Storage_Use extends Timeline {
   predicate Record {
     int Start_Storage;
     int End_Storage;
@@ -129,7 +139,7 @@ class DNP_Data {
   }
 }
 
-class DNP_Comm___Comm_Activity {
+class DNP_Comm___Comm_Activity extends Timeline {
   predicate Pre_Cal {
     int Duration;
   }
@@ -161,7 +171,7 @@ class DNP_Comm {
   }
 }
 
-class DSS_Any___DSS_Availability {
+class DSS_Any___DSS_Availability extends Timeline {
   predicate Downlink_Window {
     int Downlink_Rate;
     int Pre_Cal_Time;
@@ -190,41 +200,41 @@ DNP_Science___Scan_Platform::Mosaic_LO {
   eq(ID, [0 +inf]);
   eq(Length, [0 +inf]);
   met_by(DNP_Science___Scan_Platform.Scan_Idle s0);
-    eq(s0.Mos_Post, Mos_Idle_Future.'Mos_LO_Aft');
+    eq(s0.Mos_Post, Mos_Idle_Future.Mos_LO_Aft);
   meets(DNP_Science___Scan_Platform.Scan_Idle s1);
-    eq(s1.Mos_Prior, Mos_Idle_Past.'Mos_LO_Bef');
+    eq(s1.Mos_Prior, Mos_Idle_Past.Mos_LO_Bef);
   starts(DNP_Data___SSR_Storage_Use.Record s2);
     eq(s2.Length, Length);
-    eq(s2.ReqFPRate, Observation_Level.'ObsNo');
+    eq(s2.ReqFPRate, Observation_Level.ObsNo);
     eq(s2.ReqMosRate, Data_Rate);
-    eq(s2.What_obs, Record_Obs.'Mos_LO');
+    eq(s2.What_obs, Record_Obs.Mos_LO);
 }
 
 DNP_Science___Scan_Platform::Mosaic_HI {
   eq(ID, [0 +inf]);
   eq(Length, [0 +inf]);
   met_by(DNP_Science___Scan_Platform.Scan_Idle s0);
-    eq(s0.Mos_Post, Mos_Idle_Future.'Mos_HI_Aft');
+    eq(s0.Mos_Post, Mos_Idle_Future.Mos_HI_Aft);
   meets(DNP_Science___Scan_Platform.Scan_Idle s1);
-    eq(s1.Mos_Prior, Mos_Idle_Past.'Mos_HI_Bef');
+    eq(s1.Mos_Prior, Mos_Idle_Past.Mos_HI_Bef);
   starts(DNP_Data___SSR_Storage_Use.Record s2);
     eq(s2.Length, Length);
-    eq(s2.ReqFPRate, Observation_Level.'ObsNo');
+    eq(s2.ReqFPRate, Observation_Level.ObsNo);
     eq(s2.ReqMosRate, Data_Rate);
-    eq(s2.What_obs, Record_Obs.'Mos_HI');
+    eq(s2.What_obs, Record_Obs.Mos_HI);
 }
 
 DNP_Science___Scan_Platform::Scan_Idle {
-  if (Mos_Prior==Mos_Idle_Past.'Mos_HI_Bef') {
+  if (Mos_Prior==Mos_Idle_Past.Mos_HI_Bef) {
     met_by(DNP_Science___Scan_Platform.Mosaic_HI s0);
   }
-  if (Mos_Prior==Mos_Idle_Past.'Mos_LO_Bef') {
+  if (Mos_Prior==Mos_Idle_Past.Mos_LO_Bef) {
     met_by(DNP_Science___Scan_Platform.Mosaic_LO s0);
   }
-  if (Mos_Post==Mos_Idle_Future.'Mos_HI_Aft') {
+  if (Mos_Post==Mos_Idle_Future.Mos_HI_Aft) {
     meets(DNP_Science___Scan_Platform.Mosaic_HI s0);
   }
-  if (Mos_Post==Mos_Idle_Future.'Mos_LO_Aft') {
+  if (Mos_Post==Mos_Idle_Future.Mos_LO_Aft) {
     meets(DNP_Science___Scan_Platform.Mosaic_LO s0);
   }
 }
@@ -233,41 +243,41 @@ DNP_Science___Fields_and_Particles::F_and_P_Observation_LO {
   eq(ID, [0 +inf]);
   eq(Length, [0 +inf]);
   met_by(DNP_Science___Fields_and_Particles.F_and_P_Idle s0);
-    eq(s0.FP_Post, FP_Idle_Future.'FP_LO_Aft');
+    eq(s0.FP_Post, FP_Idle_Future.FP_LO_Aft);
   meets(DNP_Science___Fields_and_Particles.F_and_P_Idle s1);
-    eq(s1.FP_Prior, FP_Idle_Past.'FP_LO_Bef');
+    eq(s1.FP_Prior, FP_Idle_Past.FP_LO_Bef);
   starts(DNP_Data___SSR_Storage_Use.Record s2);
     eq(s2.Length, Length);
     eq(s2.ReqFPRate, Data_Rate);
-    eq(s2.ReqMosRate, Observation_Level.'ObsNo');
-    eq(s2.What_obs, Record_Obs.'FP_LO');
+    eq(s2.ReqMosRate, Observation_Level.ObsNo);
+    eq(s2.What_obs, Record_Obs.FP_LO);
 }
 
 DNP_Science___Fields_and_Particles::F_and_P_Observation_HI {
   eq(ID, [0 +inf]);
   eq(Length, [0 +inf]);
   met_by(DNP_Science___Fields_and_Particles.F_and_P_Idle s0);
-    eq(s0.FP_Post, FP_Idle_Future.'FP_HI_Aft');
+    eq(s0.FP_Post, FP_Idle_Future.FP_HI_Aft);
   meets(DNP_Science___Fields_and_Particles.F_and_P_Idle s1);
-    eq(s1.FP_Prior, FP_Idle_Past.'FP_HI_Bef');
+    eq(s1.FP_Prior, FP_Idle_Past.FP_HI_Bef);
   starts(DNP_Data___SSR_Storage_Use.Record s2);
     eq(s2.Length, Length);
     eq(s2.ReqFPRate, Data_Rate);
-    eq(s2.ReqMosRate, Observation_Level.'ObsNo');
-    eq(s2.What_obs, Record_Obs.'FP_HI');
+    eq(s2.ReqMosRate, Observation_Level.ObsNo);
+    eq(s2.What_obs, Record_Obs.FP_HI);
 }
 
 DNP_Science___Fields_and_Particles::F_and_P_Idle {
-  if (FP_Prior==FP_Idle_Past.'FP_LO_Bef') {
+  if (FP_Prior==FP_Idle_Past.FP_LO_Bef) {
     met_by(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO s0);
   }
-  if (FP_Prior==FP_Idle_Past.'FP_HI_Bef') {
+  if (FP_Prior==FP_Idle_Past.FP_HI_Bef) {
     met_by(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI s0);
   }
-  if (FP_Post==FP_Idle_Future.'FP_LO_Aft') {
+  if (FP_Post==FP_Idle_Future.FP_LO_Aft) {
     meets(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO s0);
   }
-  if (FP_Post==FP_Idle_Future.'FP_HI_Aft') {
+  if (FP_Post==FP_Idle_Future.FP_HI_Aft) {
     meets(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI s0);
   }
 }
@@ -278,42 +288,42 @@ DNP_Data___SSR_Storage_Use::Record {
   eq(Start_Storage, [0 90000000]);
   eq(End_Storage, [0 90000000]);
   eq(Length, [0 +inf]);
-  if (What_obs==Record_Obs.'FP_HI') {
+  if (What_obs==Record_Obs.FP_HI) {
     starts(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI s0);
   }
-  if (What_obs==Record_Obs.'FP_LO') {
+  if (What_obs==Record_Obs.FP_LO) {
     starts(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO s0);
   }
-  if (What_obs==Record_Obs.'Mos_HI') {
+  if (What_obs==Record_Obs.Mos_HI) {
     starts(DNP_Science___Scan_Platform.Mosaic_HI s0);
   }
-  if (What_obs==Record_Obs.'Mos_LO') {
+  if (What_obs==Record_Obs.Mos_LO) {
     starts(DNP_Science___Scan_Platform.Mosaic_LO s0);
   }
-  if (Rec_Prior==REC_Past.'CS_Bef_Rec') {
+  if (Rec_Prior==REC_Past.CS_Bef_Rec) {
     met_by(DNP_Data___SSR_Storage_Use.Constant_Storage s0);
       eq(s0.SSR_Storage, Start_Storage);
-      eq(s0.CS_Post, CS_Future.'Rec_Aft_CS');
+      eq(s0.CS_Post, CS_Future.Rec_Aft_CS);
   }
-  if (Rec_Prior==REC_Past.'Rec_Bef_Rec') {
+  if (Rec_Prior==REC_Past.Rec_Bef_Rec) {
     met_by(DNP_Data___SSR_Storage_Use.Record s0);
       eq(s0.End_Storage, Start_Storage);
-      eq(s0.Rec_Post, REC_Future.'Rec_Aft_Rec');
+      eq(s0.Rec_Post, REC_Future.Rec_Aft_Rec);
   }
-  if (Rec_Post==REC_Future.'Rec_Aft_Rec') {
+  if (Rec_Post==REC_Future.Rec_Aft_Rec) {
     meets(DNP_Data___SSR_Storage_Use.Record s0);
       eq(s0.Start_Storage, End_Storage);
-      eq(s0.Rec_Prior, REC_Past.'Rec_Bef_Rec');
+      eq(s0.Rec_Prior, REC_Past.Rec_Bef_Rec);
   }
-  if (Rec_Post==REC_Future.'PB_Aft_Rec') {
+  if (Rec_Post==REC_Future.PB_Aft_Rec) {
     meets(DNP_Data___SSR_Storage_Use.Playback s0);
       eq(s0.Start_Storage, End_Storage);
-      eq(s0.PB_Prior, PB_Past.'Rec_Bef_PB');
+      eq(s0.PB_Prior, PB_Past.Rec_Bef_PB);
   }
-  if (Rec_Post==REC_Future.'CS_Aft_Rec') {
+  if (Rec_Post==REC_Future.CS_Aft_Rec) {
     meets(DNP_Data___SSR_Storage_Use.Constant_Storage s0);
       eq(s0.SSR_Storage, End_Storage);
-      eq(s0.CS_Prior, CS_Past.'Rec_Bef_CS');
+      eq(s0.CS_Prior, CS_Past.Rec_Bef_CS);
   }
 }
 
@@ -330,7 +340,7 @@ DNP_Data___SSR_Storage_Use::Playback {
   eq(Allowed_Earlier_Opps, [0 +inf]);
   meets(DNP_Data___SSR_Storage_Use.Constant_Storage s0);
     eq(s0.SSR_Storage, End_Storage);
-    eq(s0.CS_Prior, CS_Past.'PB_Bef_CS');
+    eq(s0.CS_Prior, CS_Past.PB_Bef_CS);
   equals(DNP_Comm___Comm_Activity.Communicate s1);
     eq(s1.Location, Location);
     eq(s1.Playback_Rate, Playback_Rate);
@@ -340,43 +350,43 @@ DNP_Data___SSR_Storage_Use::Playback {
     eq(s4.Downlink_Rate, Playback_Rate);
     eq(s4.loc, Location);
     eq(s4.Opp_Number, DSS_Opp_Num);
-  if (PB_Prior==PB_Past.'CS_Bef_PB') {
+  if (PB_Prior==PB_Past.CS_Bef_PB) {
     met_by(DNP_Data___SSR_Storage_Use.Constant_Storage s0);
       eq(s0.SSR_Storage, Start_Storage);
       eq(s0.DSS_Opp_Num, Allowed_Earlier_Opps);
       eq(s0.Flagged_End, Flagged_End);
-      eq(s0.CS_Post, CS_Future.'PB_Aft_CS');
+      eq(s0.CS_Post, CS_Future.PB_Aft_CS);
   }
-  if (PB_Prior==PB_Past.'Rec_Bef_PB') {
+  if (PB_Prior==PB_Past.Rec_Bef_PB) {
     met_by(DNP_Data___SSR_Storage_Use.Record s0);
       eq(s0.End_Storage, Start_Storage);
-      eq(s0.Rec_Post, REC_Future.'PB_Aft_Rec');
+      eq(s0.Rec_Post, REC_Future.PB_Aft_Rec);
   }
 }
 
 DNP_Data___SSR_Storage_Use::Constant_Storage {
   eq(SSR_Storage, [0 90000000]);
   eq(DSS_Opp_Num, [0 +inf]);
-  if (CS_Prior==CS_Past.'PB_Bef_CS') {
+  if (CS_Prior==CS_Past.PB_Bef_CS) {
     met_by(DNP_Data___SSR_Storage_Use.Playback s0);
       eq(s0.End_Storage, SSR_Storage);
       eq(s0.DSS_Opp_Num, DSS_Opp_Num);
       eq(s0.Flagged_End, Flagged_End);
   }
-  if (CS_Prior==CS_Past.'Rec_Bef_CS') {
+  if (CS_Prior==CS_Past.Rec_Bef_CS) {
     met_by(DNP_Data___SSR_Storage_Use.Record s0);
       eq(s0.End_Storage, SSR_Storage);
-      eq(s0.Rec_Post, REC_Future.'CS_Aft_Rec');
+      eq(s0.Rec_Post, REC_Future.CS_Aft_Rec);
   }
-  if (CS_Post==CS_Future.'Rec_Aft_CS') {
+  if (CS_Post==CS_Future.Rec_Aft_CS) {
     meets(DNP_Data___SSR_Storage_Use.Record s0);
       eq(s0.Start_Storage, SSR_Storage);
-      eq(s0.Rec_Prior, REC_Past.'CS_Bef_Rec');
+      eq(s0.Rec_Prior, REC_Past.CS_Bef_Rec);
   }
-  if (CS_Post==CS_Future.'PB_Aft_CS') {
+  if (CS_Post==CS_Future.PB_Aft_CS) {
     meets(DNP_Data___SSR_Storage_Use.Playback s0);
       eq(s0.Start_Storage, SSR_Storage);
-      eq(s0.PB_Prior, PB_Past.'CS_Bef_PB');
+      eq(s0.PB_Prior, PB_Past.CS_Bef_PB);
   }
 }
 

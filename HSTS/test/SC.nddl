@@ -1,6 +1,9 @@
-// ../../../ModuleTests/Parser/gnats/SC.ddl
+// ../ModuleTests/Parser/gnats/SC.ddl
 
-class Te___st {
+class Te;
+class Te___st;
+
+class Te___st extends Timeline {
   predicate Problem3C {
     float z;
     float a;
@@ -28,9 +31,9 @@ class Te {
 
 Te___st::Problem3C {
   sum(z, a, b);
-  eq(z, -120);
-  eq(a, [5 +inf]);
-  eq(b, [-inf -5]);
+  eq(z, -120.000);
+  eq(a, [5.00000 +inff]);
+  eq(b, [-inff -5.00000]);
 }
 
 Te___st::Problem3C_Int {

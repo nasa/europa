@@ -1,6 +1,9 @@
-// ../../../ModuleTests/Parser/gnats/sum.ddl
+// ../ModuleTests/Parser/gnats/sum.ddl
 
-class Sum___A {
+class Sum;
+class Sum___A;
+
+class Sum___A extends Timeline {
   predicate V {
     int sum;
     int x;

@@ -1,46 +1,56 @@
-// ../../../ModuleTests/Parser/monkey1/monkey-compats.ddl
+// ../ModuleTests/Parser/monkey1/monkey-compats.ddl
 
-#include "../../NDDL/core/Plasma.nddl"
-#include "../../NDDL/core/PlannerConfig.nddl"
-#include "monkey1.nddl"
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+#include "monkey.nddl"
 
 PlannerConfig world = new PlannerConfig(0, 200, 1000);
 
 Monkey_Class Monkey1 = new Monkey_Class();
 
+Monkey_Class.close();
+Monkey_Class___Altitude_SV.close();
+Monkey_Class___Banana_SV.close();
+Monkey_Class___Location_SV.close();
 close();
 
 goal(Monkey_Class___Location_SV.At g26);
   g26.start.specify(0);
   g26.end.specify([1 199]);
   g26.duration.specify([1 199]);
-  g26.Loc_Label.specify(Location_Label.'Rock');
+Monkey1.Location_SV.constrain(g26);
+  g26.Loc_Label.specify(Location_Label.Rock);
 
 goal(Monkey_Class___Location_SV.At g48);
   g48.start.specify([1 199]);
   g48.end.specify(200);
   g48.duration.specify([1 199]);
-  g48.Loc_Label.specify(Location_Label.'Rock');
+Monkey1.Location_SV.constrain(g26, g48);
+  g48.Loc_Label.specify(Location_Label.Rock);
 
 goal(Monkey_Class___Altitude_SV.LOW g73);
   g73.start.specify(0);
   g73.end.specify([1 199]);
   g73.duration.specify([1 199]);
+Monkey1.Altitude_SV.constrain(g73);
 
 goal(Monkey_Class___Altitude_SV.LOW g94);
   g94.start.specify([1 199]);
   g94.end.specify(200);
   g94.duration.specify([1 199]);
+Monkey1.Altitude_SV.constrain(g73, g94);
 
 goal(Monkey_Class___Banana_SV.NOT_HAVE_BANANA g118);
   g118.start.specify(0);
   g118.end.specify([1 199]);
   g118.duration.specify([1 199]);
+Monkey1.Banana_SV.constrain(g118);
 
 goal(Monkey_Class___Banana_SV.HAVE_BANANA g139);
   g139.start.specify([1 199]);
   g139.end.specify(200);
   g139.duration.specify([1 199]);
+Monkey1.Banana_SV.constrain(g118, g139);
 
 g26 before g48; // key=58
 g26 before g48; // key=68

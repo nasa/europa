@@ -1,6 +1,9 @@
-// ../../../ModuleTests/Parser/gnats/NoBranchBug.ddl
+// ../ModuleTests/Parser/gnats/NoBranchBug.ddl
 
-class Test___R {
+class Test;
+class Test___R;
+
+class Test___R extends Timeline {
   predicate V {
     float Value;
     bool MeetsSubgoal;

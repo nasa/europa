@@ -1,8 +1,19 @@
-// ../../../ModuleTests/Parser/robot/robot.ddl
+// ../ModuleTests/Parser/robot/robot.ddl
 
-enum Location { 'A', 'B', 'In_Between' } 
+enum Location { A, B, In_Between } 
 
-class Robot___At {
+class TestSet extends StringData {}
+TestSet TestSet0 = new TestSet("Foo");
+
+class Robot;
+class Robot___At;
+class Robot___Task;
+class Robot___Charge;
+class Hole;
+class Hole___HAt;
+class Hole___HStatus;
+
+class Robot___At extends Timeline {
   predicate Robot_Loc {
     Location Loc;
   }
@@ -13,7 +24,7 @@ class Robot___At {
   }
 }
 
-class Robot___Task {
+class Robot___Task extends Timeline {
   predicate Fixing_Hole {
     Hole Hole_To_Fix;
   }
@@ -36,7 +47,7 @@ class Robot___Task {
   }
 }
 
-class Robot___Charge {
+class Robot___Charge extends Timeline {
   predicate Charge_Full {
   }
 
@@ -63,7 +74,7 @@ class Robot {
   }
 }
 
-class Hole___HAt {
+class Hole___HAt extends Timeline {
   predicate Hole_Loc {
     Location Loc;
   }
@@ -74,7 +85,7 @@ class Hole___HAt {
   }
 }
 
-class Hole___HStatus {
+class Hole___HStatus extends Timeline {
   predicate Hole_Exists {
   }
 
@@ -100,11 +111,11 @@ class Hole {
 }
 
 Robot___At::Robot_Loc {
-  if (Loc==Location.'A') {
+  if (Loc==Location.A) {
   }
-  if (Loc==Location.'B') {
+  if (Loc==Location.B) {
   }
-  if (Loc==Location.'In_Between') {
+  if (Loc==Location.In_Between) {
   }
 }
 
