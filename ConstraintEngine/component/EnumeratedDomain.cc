@@ -25,11 +25,11 @@ namespace EUROPA {
 
   EnumeratedDomain::EnumeratedDomain(bool isNumeric,
                                      const char* typeName)
-    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric) {}
+    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric), m_isString(false) {}
 
   EnumeratedDomain::EnumeratedDomain(const std::list<double>& values, bool isNumeric,
                                      const char* typeName)
-    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric) {
+    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric), m_isString(false) {
     for (std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
       insert(*it);
     close();
@@ -38,7 +38,7 @@ namespace EUROPA {
   EnumeratedDomain::EnumeratedDomain(double value,
                                      bool isNumeric,
                                      const char* typeName)
-    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric) {
+    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric), m_isString(false) {
     insert(value);
     close();
   }
@@ -50,6 +50,7 @@ namespace EUROPA {
     const EnumeratedDomain& enumOrg = static_cast<const EnumeratedDomain&>(org);
     m_values = enumOrg.m_values;
     m_isNumeric = enumOrg.m_isNumeric;
+    m_isString = enumOrg.m_isString;
   }
 
   bool EnumeratedDomain::isFinite() const {
@@ -59,6 +60,11 @@ namespace EUROPA {
   bool EnumeratedDomain::isNumeric() const {
     return(m_isNumeric);
   }
+
+  bool EnumeratedDomain::isString() const {
+      return m_isString;
+  }
+
 
   bool EnumeratedDomain::isSingleton() const {
     return(m_values.size() == 1);

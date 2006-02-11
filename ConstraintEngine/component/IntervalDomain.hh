@@ -67,6 +67,13 @@ namespace EUROPA {
     }
 
     /**
+     * @brief IntervalDomains are not StringDomains
+     */
+    bool isString() const {
+      return(false);
+    }
+
+    /**
      * @brief Get the default name of the type of the domain.
      * @see AbstractDomain::getTypeName
      */

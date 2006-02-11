@@ -3,18 +3,19 @@
 namespace EUROPA {
 
   StringDomain::StringDomain()
-    :EnumeratedDomain(false, getDefaultTypeName().c_str()){}
+    :EnumeratedDomain(false, getDefaultTypeName().c_str()){m_isString = true;}
 
   StringDomain::StringDomain(const char* typeName)
-    :EnumeratedDomain(false, typeName){}
+    :EnumeratedDomain(false, typeName){m_isString = true;}
 
   StringDomain::StringDomain(double value, const char* typeName) 
-    : EnumeratedDomain(value, false, typeName){}
+    : EnumeratedDomain(value, false, typeName){m_isString = true;}
 
   StringDomain::StringDomain(const std::list<double>& values, 
                              const char* typeName)
     : EnumeratedDomain(values, false, typeName)
   {
+    m_isString = true;
   }
 
   StringDomain::StringDomain(const AbstractDomain& org)

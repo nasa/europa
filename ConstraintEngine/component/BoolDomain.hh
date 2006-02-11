@@ -54,7 +54,7 @@ namespace EUROPA {
     virtual BoolDomain *copy() const;
 
     /**
-     * @brief COnvert to true or false as needed
+     * @brief Convert to true or false as needed
      */
     std::string toString(double value) const;
 

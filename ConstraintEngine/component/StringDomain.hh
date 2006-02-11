@@ -7,6 +7,7 @@
  * @brief Declares an enumerated domain of Strings
  */
 #include "EnumeratedDomain.hh"
+#include "Debug.hh"
 #include "LabelStr.hh"
 
 namespace EUROPA {
@@ -64,6 +65,7 @@ namespace EUROPA {
      * @param value The value to set. Must be a LabelStr.
      */
     void set(double value);
+
   };
 
 } // namespace EUROPA

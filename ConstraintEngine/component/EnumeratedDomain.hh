@@ -8,6 +8,7 @@
  * @date August, 2003
  */
 #include "AbstractDomain.hh"
+#include "Debug.hh"
 #include <set>
 
 namespace EUROPA {
@@ -73,6 +74,12 @@ namespace EUROPA {
      * @brief Check if the domain is numeric.
      */
     bool isNumeric() const;
+
+    /**
+     * @brief Domains are not string domains unless they are
+     * later set that way.
+     */
+    bool isString() const;
 
     /**
      * @brief Check if the domain is Bool.
@@ -304,6 +311,7 @@ namespace EUROPA {
 
     std::set<double> m_values; /**< Holds the contents from which the set membership is then derived. */
     bool m_isNumeric;
+    bool m_isString;
   };
 }
 #endif

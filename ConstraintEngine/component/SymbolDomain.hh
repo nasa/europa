@@ -54,6 +54,14 @@ namespace EUROPA {
      */
     static const LabelStr& getDefaultTypeName();
 
+    bool isSymbolic() const {
+      return(true);
+    }
+
+    bool isString() const {
+      return(false);
+    }
+
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
      */
