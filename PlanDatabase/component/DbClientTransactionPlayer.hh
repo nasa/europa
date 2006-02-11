@@ -54,6 +54,12 @@ namespace EUROPA {
     inline void playDefineEnumeration(const TiXmlElement &) {
     }
 
+    /** Define an type.
+     * @note Does nothing as the player cannot create types.
+     */
+    inline void playDefineType(const TiXmlElement &) {
+    }
+
     void playVariableCreated(const TiXmlElement & element);
     void playObjectCreated(const TiXmlElement & element);
     void playTokenCreated(const TiXmlElement & element);

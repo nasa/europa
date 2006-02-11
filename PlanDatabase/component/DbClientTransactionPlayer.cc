@@ -82,6 +82,8 @@ namespace EUROPA {
       playDefineClass(element);
     else if (strcmp(tagname, "enum") == 0)
       playDefineEnumeration(element);
+    else if (strcmp(tagname, "typedef") == 0)
+      playDefineType(element);
     else if (strcmp(tagname, "compat") == 0)
       playDefineCompat(element);
     else if (strcmp(tagname, "var") == 0)
