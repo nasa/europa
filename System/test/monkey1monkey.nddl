@@ -6,6 +6,8 @@
 
 enum Location_Label { Rock,  Tree } 
 
+class Monkey_Class;
+
 class Monkey_Class___Location_SV {
   predicate At {
     Location_Label Loc_Label;

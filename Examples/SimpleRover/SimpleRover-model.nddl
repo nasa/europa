@@ -1,6 +1,8 @@
 #include "../../NDDL/core/Plasma.nddl"
 #include "../../NDDL/core/PlannerConfig.nddl"
 
+class Rover;
+
 /**
 * A point on the planet's surface. We assume a Euclidean Plane.
 */ 
@@ -36,7 +38,7 @@ class Path {
 
 class Battery extends Resource {
   Battery(float ic, float ll_min, float ll_max){
-   super(ic, ll_min, ll_max, 0.0, 0.0, MINUS_INFINITY, MINUS_INFINITY);
+   super(ic, ll_min, ll_max, 0.0, 0.0, -inff, -inff);
   }
 }
 
@@ -99,6 +101,29 @@ class Commands{
 
 }
 
+// Management of the rover's instruments.
+class Instrument{
+ predicate TakeSample{
+  Location rock;
+  leq(10, duration);
+ }
+
+ predicate Place{
+  Location rock;
+  eq([3 12], duration);
+ }
+
+ predicate Stow{
+  eq([2 6], duration);
+ }
+
+ predicate Unstow{
+  eq([2 6], duration);
+ }
+
+ predicate Stowed{}
+}
+
 Commands::TakeSample{
  contains(Instrument.TakeSample a);
  eq(a.rock, rock);
@@ -124,29 +149,6 @@ Commands::PhoneHome{
 Commands::PhoneLander{
  starts(Battery.change tx);
  eq(tx.quantity, -20);
-}
-
-// Management of the rover's instruments.
-class Instrument{
- predicate TakeSample{
-  Location rock;
-  leq(10, duration);
- }
-
- predicate Place{
-  Location rock;
-  eq([3 12], duration);
- }
-
- predicate Stow{
-  eq([2 6], duration);
- }
-
- predicate Unstow{
-  eq([2 6], duration);
- }
-
- predicate Stowed{}
 }
 
 Instrument::TakeSample{

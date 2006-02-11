@@ -24,17 +24,17 @@ goal(A.predicateB t1);
 goal(B.predicateA t2);
 goal(C.predicateA t3);
 goal(D.predicateC t4);
-goal(D.predicateF t8);
+goal(D.predicateF t5);
 
-goal(PredicateRoot.predicateD t5);
-goal(PredicateRoot.predicateE t6);
-goal(PredicateRoot.predicateD t7);
+goal(PredicateRoot.predicateD t6);
+goal(PredicateRoot.predicateE t7);
+goal(PredicateRoot.predicateD t8);
 
-goal(C.predicateC t8);
+goal(C.predicateC t9);
 
-goal(HorizonFiltered.predicate6 t9);
-t9.start.specify(1001);
+goal(HorizonFiltered.predicate6 t10);
+t10.start.specify(1001);
 
-goal(HorizonFiltered.predicate7 t10);
-t10.start.specify(100);
-t10.end.specify(1000);
+goal(HorizonFiltered.predicate7 t11);
+t11.start.specify(100);
+t11.end.specify(1000);

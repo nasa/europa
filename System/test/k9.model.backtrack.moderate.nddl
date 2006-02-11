@@ -3,6 +3,14 @@
 enum Types {ACTION, FLUENT};
 enum Data {CHAMPIMAGE, MOSSBAUER, OPPSCI};
 
+class Rover;
+
+class Energy extends Resource {
+  Energy(float ic, float ll_min, float ll_max) {
+    super(ic, ll_min, ll_max);
+  } 
+}
+
 class Location {
 }
 
@@ -52,29 +60,6 @@ class Target {
     eq(object, target);
   }
 }
-
-Target::NotTracked {
-  meets(object.trackstart tstart);
-  met_by(object.trackstop tstop);
-}
-
-Target::trackstart {
-  meets(object.Tracked t);
-  met_by(object.NotTracked nt);
-  contained_by(Tracker.LandmarksDefined l);
-}
-
-
-Target::Tracked {
-  meets(object.trackstop tstop);
-  met_by(object.trackstart tstart);
-}
-
-Target::trackstop {
-  meets(object.NotTracked nt);
-  met_by(object.Tracked t);
-}
-
 
 class Path {
   Location m_from, m_to;
@@ -133,41 +118,6 @@ class Position {
     eq( m_energy_std_multiplier, 1);
     neq(from, to);
   }  
-}
-
-Position::At{
-  meets(object.navigate a);
-  eq(location , a.from);
-  
-  met_by(object.navigate b);
-  eq(location, b.to);
-}
-
-    
-
-Position::navigate{
-
-  Path path;
-  eq(path.m_from, from);
-  eq(path.m_to, to);
-
-  meets(object.At a);
-  eq(to , a.location);
-  
-  met_by(object.At b);
-  eq(b.location, from);
-
-  //not able to reference parents objects more than one level.
-  Rover rovers;
-  contained_by(Tracker.TrackingOn tOn);
-  commonAncestor(tOn.object, object, rovers); 
-
-  contained_by(OpportunisticScience.OppSciIdle oppsci);
-  commonAncestor(oppsci.object, object, rovers); 
-
-  contained_by(CHAMP.IPIdle ipidle);
-  commonAncestor(ipidle.object, object, rovers); 
-
 }
 
 class Tracker{
@@ -249,51 +199,6 @@ class Tracker{
     eq( m_energy_std, 0);
   }
 
-}
-
-Tracker::TrackingOff{
-  meets(object.trackloadgroup tlgp);
-}
-
-Tracker::trackloadgroup{
-  meets(object.LandmarksDefined tld);
-  met_by(object.TrackingOff toff);
-}
-
-Tracker::LandmarksDefined{
-  met_by(object.trackloadgroup tlgp);
-  meets(object.StartTracking tst);
-}
-
-Tracker::StartTracking{
-  met_by(object.LandmarksDefined tld);
-  meets(object.TrackingOn tto);
-}
-
-Tracker::TrackingOn{
-  meets(object.trackfreeze tfz);
-  bool OR;
-  if(OR == true){
-    met_by(object.StartTracking s0);
-  }
-  if(OR == false){
-    met_by(object.trackunfreeze s0);
-  }
-}
-
-Tracker::trackfreeze{
-  met_by(object.TrackingOn tld);
-  meets(object.TrackingFrozen tto);
-}
-
-Tracker::TrackingFrozen{
-  met_by(object.trackfreeze tld);
-  meets(object.trackunfreeze tto);
-}
-
-Tracker::trackunfreeze{
-  met_by(object.TrackingFrozen tld);
-  meets(object.TrackingOn tto);
 }
 
 class OpportunisticScience {
@@ -380,73 +285,6 @@ class OpportunisticScience {
     eq( m_energy_mean, 1);
     eq( m_energy_std, 0);
   }
-}
-
-OpportunisticScience::oppscidefineproc {
-  met_by(object.OppSciIdle s0);
-  meets(object.OppSciProcDefined s1);
-}
-
-OpportunisticScience::OppSciProcDefined {
-  met_by(object.oppscidefineproc s0);
-  meets(object.oppscisetparams s1);
-}
-
-OpportunisticScience::oppscisetparams {
-  met_by(object.OppSciProcDefined s0);
-  meets(object.OppSciParamsSet s1);
-}
-
-OpportunisticScience::OppSciParamsSet {
-  met_by(object.oppscisetparams s0);
-  meets(object.oppscilooknow s1);
-}
-
-OpportunisticScience::oppscilooknow {
-  met_by(object.OppSciParamsSet s0);
-  meets(object.OppSciDoneLookNow s1);
-  contained_by(Target.Tracked tr);
-  eq(tr.object, target);
-
-  OppSci_Accessable oppsci;
-  eq(oppsci.m_from, at_loc);
-  eq(oppsci.m_to, target);
-
-  Rover rovers;
-  contained_by(Tracker.TrackingFrozen tfo);
-  commonAncestor(tfo.object, object, rovers); 
-
-  contained_by(Position.At at);
-  commonAncestor(at.object, object, rovers); 
-
-  contained_by(CHAMP.IPIdle ipidle);
-  commonAncestor(ipidle.object, object, rovers); 
-    
-}
-OpportunisticScience::OppSciDoneLookNow {
-  met_by(object.oppscilooknow s0);
-  meets(object.oppscigetstatus s1);
-}
-
-OpportunisticScience::oppscigetstatus {
-  met_by(object.OppSciDoneLookNow s0);
-  meets(object.OppSciIdle s1);
-  contained_by(Target.Tracked tr);
-  eq(tr.object, target);
-
-  OppSci_Accessable oppsci;
-  eq(oppsci.m_from, at_loc);
-  eq(oppsci.m_to, target);
-
-  Rover rovers;
-  contained_by(Tracker.TrackingFrozen tfo);
-  commonAncestor(tfo.object, object, rovers); 
-
-  contained_by(Position.At at);
-  commonAncestor(at.object, object, rovers); 
-
-  contained_by(CHAMP.IPIdle ipidle);
-  commonAncestor(ipidle.object, object, rovers); 
 }
 
 class CHAMP {
@@ -547,6 +385,174 @@ class CHAMP {
   }
 }
 
+
+Target::NotTracked {
+  meets(object.trackstart tstart);
+  met_by(object.trackstop tstop);
+}
+
+Target::trackstart {
+  meets(object.Tracked t);
+  met_by(object.NotTracked nt);
+  contained_by(Tracker.LandmarksDefined l);
+}
+
+
+Target::Tracked {
+  meets(object.trackstop tstop);
+  met_by(object.trackstart tstart);
+}
+
+Target::trackstop {
+  meets(object.NotTracked nt);
+  met_by(object.Tracked t);
+}
+
+Position::At{
+  meets(object.navigate a);
+  eq(location , a.from);
+  
+  met_by(object.navigate b);
+  eq(location, b.to);
+}
+
+Position::navigate{
+
+  Path path;
+  eq(path.m_from, from);
+  eq(path.m_to, to);
+
+  meets(object.At a);
+  eq(to , a.location);
+  
+  met_by(object.At b);
+  eq(b.location, from);
+
+  //not able to reference parents objects more than one level.
+  Rover rovers;
+  contained_by(Tracker.TrackingOn tOn);
+  commonAncestor(tOn.object, object, rovers); 
+
+  contained_by(OpportunisticScience.OppSciIdle oppsci);
+  commonAncestor(oppsci.object, object, rovers); 
+
+  contained_by(CHAMP.IPIdle ipidle);
+  commonAncestor(ipidle.object, object, rovers); 
+
+}
+
+Tracker::TrackingOff{
+  meets(object.trackloadgroup tlgp);
+}
+
+Tracker::trackloadgroup{
+  meets(object.LandmarksDefined tld);
+  met_by(object.TrackingOff toff);
+}
+
+Tracker::LandmarksDefined{
+  met_by(object.trackloadgroup tlgp);
+  meets(object.StartTracking tst);
+}
+
+Tracker::StartTracking{
+  met_by(object.LandmarksDefined tld);
+  meets(object.TrackingOn tto);
+}
+
+Tracker::TrackingOn{
+  meets(object.trackfreeze tfz);
+  bool OR;
+  if(OR == true){
+    met_by(object.StartTracking s0);
+  }
+  if(OR == false){
+    met_by(object.trackunfreeze s0);
+  }
+}
+
+Tracker::trackfreeze{
+  met_by(object.TrackingOn tld);
+  meets(object.TrackingFrozen tto);
+}
+
+Tracker::TrackingFrozen{
+  met_by(object.trackfreeze tld);
+  meets(object.trackunfreeze tto);
+}
+
+Tracker::trackunfreeze{
+  met_by(object.TrackingFrozen tld);
+  meets(object.TrackingOn tto);
+}
+
+OpportunisticScience::oppscidefineproc {
+  met_by(object.OppSciIdle s0);
+  meets(object.OppSciProcDefined s1);
+}
+
+OpportunisticScience::OppSciProcDefined {
+  met_by(object.oppscidefineproc s0);
+  meets(object.oppscisetparams s1);
+}
+
+OpportunisticScience::oppscisetparams {
+  met_by(object.OppSciProcDefined s0);
+  meets(object.OppSciParamsSet s1);
+}
+
+OpportunisticScience::OppSciParamsSet {
+  met_by(object.oppscisetparams s0);
+  meets(object.oppscilooknow s1);
+}
+
+OpportunisticScience::oppscilooknow {
+  met_by(object.OppSciParamsSet s0);
+  meets(object.OppSciDoneLookNow s1);
+  contained_by(Target.Tracked tr);
+  eq(tr.object, target);
+
+  OppSci_Accessable oppsci;
+  eq(oppsci.m_from, at_loc);
+  eq(oppsci.m_to, target);
+
+  Rover rovers;
+  contained_by(Tracker.TrackingFrozen tfo);
+  commonAncestor(tfo.object, object, rovers); 
+
+  contained_by(Position.At at);
+  commonAncestor(at.object, object, rovers); 
+
+  contained_by(CHAMP.IPIdle ipidle);
+  commonAncestor(ipidle.object, object, rovers); 
+    
+}
+OpportunisticScience::OppSciDoneLookNow {
+  met_by(object.oppscilooknow s0);
+  meets(object.oppscigetstatus s1);
+}
+
+OpportunisticScience::oppscigetstatus {
+  met_by(object.OppSciDoneLookNow s0);
+  meets(object.OppSciIdle s1);
+  contained_by(Target.Tracked tr);
+  eq(tr.object, target);
+
+  OppSci_Accessable oppsci;
+  eq(oppsci.m_from, at_loc);
+  eq(oppsci.m_to, target);
+
+  Rover rovers;
+  contained_by(Tracker.TrackingFrozen tfo);
+  commonAncestor(tfo.object, object, rovers); 
+
+  contained_by(Position.At at);
+  commonAncestor(at.object, object, rovers); 
+
+  contained_by(CHAMP.IPIdle ipidle);
+  commonAncestor(ipidle.object, object, rovers); 
+}
+
 CHAMP::ipgetname {
   met_by(object.IPIdle s0);
   meets(object.IPHaveName s1);
@@ -570,7 +576,7 @@ CHAMP::ipgetname {
 
 }
 
-CHAMP::iIPHaveName {
+CHAMP::IPHaveName {
   met_by(object.ipgetname s0);
   meets(object.ipsettarget s1);
 }
@@ -652,13 +658,6 @@ CHAMP::ipgetstatus {
   contained_by(OpportunisticScience.OppSciIdle oppsciidle);
   commonAncestor(oppsciidle.object, object, rovers); 
 }
-
-class Energy extends Resource {
-  Energy(float ic, float ll_min, float ll_max) {
-    super(ic, ll_min, ll_max);
-  } 
-}
-
 
 class Rover {
 

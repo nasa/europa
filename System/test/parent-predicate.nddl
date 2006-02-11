@@ -11,7 +11,7 @@ class Battery extends Resource {
  predicate change{}
 
  Battery(int ic, int ll_min, int ll_max) {
-  super(ic, ll_min, ll_max, 0, 0, MINUS_INFINITY, MINUS_INFINITY);
+  super(ic, ll_min, ll_max, 0, 0, -inff, -inff);
  }
 }
 

@@ -10,6 +10,33 @@ class Battery extends Resource {
 }
 
 //*****************************************************************
+class Rover{
+ Battery m_battery;
+
+ Rover( float bat_start, float bat_low, float bat_high,
+	float bat_prod, float mc ) {
+  m_battery = new Battery(bat_start, bat_low, bat_high, 
+	bat_prod, mc);
+ }
+ // Do the work
+ predicate Sample{
+  int m_x, m_y;
+ }
+
+ predicate Drive {
+  int m_from_x, m_from_y, m_to_x, m_to_y;
+ }
+
+ // Doing nothing, waiting for external forces to charge 
+ // our battery
+ predicate Standby{
+  int m_x, m_y;
+  eq(duration, [1 +inf]);
+ }
+
+}
+
+//*****************************************************************
 // Energy producers
 class Wind{
   predicate Velocity{
@@ -41,33 +68,6 @@ Mission::SampleCycle{
   eq(sm.m_x, m_x);
   eq(sm.m_y, m_y);
   eq(duration, [1 90]);
-}
-
-//*****************************************************************
-class Rover{
- Battery m_battery;
-
- Rover( float bat_start, float bat_low, float bat_high,
-	float bat_prod, float mc ) {
-  m_battery = new Battery(bat_start, bat_low, bat_high, 
-	bat_prod, mc);
- }
- // Do the work
- predicate Sample{
-  int m_x, m_y;
- }
-
- predicate Drive {
-  int m_from_x, m_from_y, m_to_x, m_to_y;
- }
-
- // Doing nothing, waiting for external forces to charge 
- // our battery
- predicate Standby{
-  int m_x, m_y;
-  eq(duration, [1 +inf]);
- }
-
 }
 
 Rover::Sample{
