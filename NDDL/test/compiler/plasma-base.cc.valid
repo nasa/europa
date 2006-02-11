@@ -91,7 +91,7 @@ namespace NDDL {
   // default initialization of member variables
   void StringData::handleDefaults(bool autoClose) {
     if(data.isNoId()){
-      data = addVariable(StringDomain("DefaultString"), "data");
+      data = addVariable(StringDomain("string"), "data");
     }
     if (autoClose)
       close();

@@ -20,7 +20,7 @@ namespace NDDL {
   // default initialization of member variables
   void Location::handleDefaults(bool autoClose) {
     if(name.isNoId()){
-      name = addVariable(StringDomain("DefaultString"), "name");
+      name = addVariable(StringDomain("string"), "name");
     }
     if (autoClose)
       close();

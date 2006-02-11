@@ -1,0 +1,40 @@
+// NDDL/test/compiler/gnats-3100.xml
+
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+  class Base;
+  typedef Id<Base> BaseId;
+  typedef ObjectDomain BaseDomain;
+  
+  class Derived;
+  typedef Id<Derived> DerivedId;
+  typedef ObjectDomain DerivedDomain;
+  
+  
+  // gnats-3100.nddl:1 Base
+  class Base : public Object {
+  public:
+    Base(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Base(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Base(const ObjectId& parent, const LabelStr& name);
+    Base(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+  };
+  
+  // gnats-3100.nddl:3 Derived
+  class Derived : public Base {
+  public:
+    Derived(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Derived(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Derived(const ObjectId& parent, const LabelStr& name);
+    Derived(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+  };
+} // End NDDL namespace

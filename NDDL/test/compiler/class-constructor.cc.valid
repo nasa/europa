@@ -44,7 +44,7 @@ namespace NDDL {
       m_3 = addVariable(BoolDomain("bool"), "m_3");
     }
     if(m_4.isNoId()){
-      m_4 = addVariable(StringDomain("DefaultString"), "m_4");
+      m_4 = addVariable(StringDomain("string"), "m_4");
     }
     if(m_5.isNoId()){
       m_5 = addVariable(LocationsBaseDomain(), "m_5");
@@ -466,7 +466,7 @@ namespace NDDL {
   // default initialization of member variables
   void World::handleDefaults(bool autoClose) {
     if(m_str1.isNoId()){
-      m_str1 = addVariable(StringDomain("DefaultString"), "m_str1");
+      m_str1 = addVariable(StringDomain("string"), "m_str1");
     }
     check_error(m_foo1.isValid(), "object variables must be initialized explicitly");
     

@@ -151,7 +151,7 @@ namespace NDDL {
   void Bar::handleDefaults(bool autoClose) {
     Foo::handleDefaults(false);
     if(arg4.isNoId()){
-      arg4 = addVariable(StringDomain("DefaultString"), "arg4");
+      arg4 = addVariable(StringDomain("string"), "arg4");
     }
     if (autoClose)
       close();

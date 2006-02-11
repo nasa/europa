@@ -78,7 +78,7 @@ namespace NDDL {
       m_2 = addVariable(BoolDomain("bool"), "m_2");
     }
     if(m_3.isNoId()){
-      m_3 = addVariable(StringDomain("DefaultString"), "m_3");
+      m_3 = addVariable(StringDomain("string"), "m_3");
     }
     if(m_4.isNoId()){
       m_4 = addVariable(LocationsBaseDomain(), "m_4");
