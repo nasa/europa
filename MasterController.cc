@@ -421,12 +421,14 @@ namespace EUROPA {
 
   void MasterController::write(){
     debugMsg("MasterController:write", "Step " << m_stepCount);
-    m_ppw->write();
+    if(!m_constraintEngine->provenInconsistent())
+      m_ppw->write();
   }
 
   void MasterController::writeStatistics(){
     debugMsg("MasterController:Statistics", "Step " << m_stepCount);
-    m_ppw->writeStatistics();
+    if(!m_constraintEngine->provenInconsistent())
+      m_ppw->writeStatistics();
   }
 
   void MasterController::handleRegistration(){
@@ -457,7 +459,8 @@ namespace EUROPA {
 
   std::string MasterController::toString(const PlanDatabaseId& planDatabase){
     std::stringstream ss;
-    PlanDatabaseWriter::write(planDatabase, ss);
+    if(!planDatabase->getConstraintEngine()->provenInconsistent())
+      PlanDatabaseWriter::write(planDatabase, ss);
     return ss.str();
   }
 

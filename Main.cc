@@ -1,4 +1,6 @@
 #include "MasterController.hh"
+#include "PlanDatabase.hh"
+#include "ConstraintEngine.hh"
 #include "PlanDatabaseWriter.hh"
 #include "Debug.hh"
 #include <string>
@@ -32,12 +34,6 @@ int main(int argc, const char ** argv){
 
   result = completeRun();
 
-  std::string partialPlan = PlanDatabaseWriter::toString(MasterController::instance()->getPlanDatabase());
- 
-  debugMsg("Main", "Final Partial Plan" << std::endl << partialPlan);
-
   terminateRun();
-
-  std::cout << "Result: " << result;
   return 0;
 }
