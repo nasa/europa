@@ -50,8 +50,8 @@ LocalDepends run-hsts-planner-tests :
         merTest7
         merTest8
         merTest9
-        merTest10 # needs heuristics?! ... or 1938 steps
-        merTest11
+        #merTest10 # needs heuristics?! ... or 1938 steps
+        #merTest11
         merTest12
         merTest13
         merTest14
