@@ -4,7 +4,7 @@
 #include "../../NDDL/core/PlannerConfig.nddl"
 #include "missionExec.nddl"
 
-PlannerConfig world = new PlannerConfig(0, 2000, 4000); // Requires more than 4000 steps but didn't use to.
+PlannerConfig world = new PlannerConfig(0, 2000, 4000); // Requires more than 4000 steps but didnt use to.
 
 TEMPEST_Class TEMPEST_Processing = new TEMPEST_Class();
 
@@ -24,7 +24,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.ME_Standby g168);
   g168.end.specify([30 45]);
   g168.duration.specify([30 45]);
   g168.tokenIndex.specify(0);
-  g168.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g168.pred.specify(MissionExecutiveConnectors.DriveAction);
 
 goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g191);
   g191.start.specify([30 45]);
@@ -39,7 +39,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g191);
   g191.startTime.specify([30 45]);
   g191.currTokenIndex.specify(0);
   g191.nextTokenIndex.specify(1);
-  g191.pred.specify(MissionExecutiveConnectors.'Standby');
+  g191.pred.specify(MissionExecutiveConnectors.Standby);
   g191.flexEndTimeCache.specify(27);
   g191.precisionFlag.specify(false);
 
@@ -56,7 +56,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g236);
   g236.startTime.specify([33 267]);
   g236.currTokenIndex.specify(1);
   g236.nextTokenIndex.specify(2);
-  g236.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g236.pred.specify(MissionExecutiveConnectors.DriveAction);
   g236.flexEndTimeCache.specify(144);
   g236.precisionFlag.specify(false);
 
@@ -73,7 +73,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g281);
   g281.startTime.specify([144 387]);
   g281.currTokenIndex.specify(2);
   g281.nextTokenIndex.specify(3);
-  g281.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g281.pred.specify(MissionExecutiveConnectors.DriveAction);
   g281.flexEndTimeCache.specify(261);
   g281.precisionFlag.specify(false);
 
@@ -90,7 +90,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g326);
   g326.startTime.specify([261 504]);
   g326.currTokenIndex.specify(3);
   g326.nextTokenIndex.specify(4);
-  g326.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g326.pred.specify(MissionExecutiveConnectors.DriveAction);
   g326.flexEndTimeCache.specify(381);
   g326.precisionFlag.specify(false);
 
@@ -107,7 +107,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g371);
   g371.startTime.specify([381 621]);
   g371.currTokenIndex.specify(4);
   g371.nextTokenIndex.specify(5);
-  g371.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g371.pred.specify(MissionExecutiveConnectors.DriveAction);
   g371.flexEndTimeCache.specify(498);
   g371.precisionFlag.specify(false);
 
@@ -124,7 +124,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g416);
   g416.startTime.specify([498 741]);
   g416.currTokenIndex.specify(5);
   g416.nextTokenIndex.specify(6);
-  g416.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g416.pred.specify(MissionExecutiveConnectors.DriveAction);
   g416.flexEndTimeCache.specify(615);
   g416.precisionFlag.specify(false);
 
@@ -141,7 +141,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g461);
   g461.startTime.specify([615 858]);
   g461.currTokenIndex.specify(6);
   g461.nextTokenIndex.specify(7);
-  g461.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g461.pred.specify(MissionExecutiveConnectors.DriveAction);
   g461.flexEndTimeCache.specify(735);
   g461.precisionFlag.specify(false);
 
@@ -158,7 +158,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g506);
   g506.startTime.specify([735 975]);
   g506.currTokenIndex.specify(7);
   g506.nextTokenIndex.specify(8);
-  g506.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g506.pred.specify(MissionExecutiveConnectors.DriveAction);
   g506.flexEndTimeCache.specify(852);
   g506.precisionFlag.specify(false);
 
@@ -175,7 +175,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g551);
   g551.startTime.specify([852 1095]);
   g551.currTokenIndex.specify(8);
   g551.nextTokenIndex.specify(9);
-  g551.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g551.pred.specify(MissionExecutiveConnectors.DriveAction);
   g551.flexEndTimeCache.specify(969);
   g551.precisionFlag.specify(false);
 
@@ -192,7 +192,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g596);
   g596.startTime.specify([969 1212]);
   g596.currTokenIndex.specify(9);
   g596.nextTokenIndex.specify(10);
-  g596.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g596.pred.specify(MissionExecutiveConnectors.DriveAction);
   g596.flexEndTimeCache.specify(1089);
   g596.precisionFlag.specify(false);
 
@@ -202,7 +202,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.ViaPointAction g641);
   g641.duration.specify(3);
   g641.currTokenIndex.specify(10);
   g641.nextTokenIndex.specify(11);
-  g641.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g641.pred.specify(MissionExecutiveConnectors.DriveAction);
   g641.startTime.specify([1089 1329]);
   g641.endTime.specify([1092 1332]);
 
@@ -219,7 +219,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g677);
   g677.startTime.specify([1092 1338]);
   g677.currTokenIndex.specify(11);
   g677.nextTokenIndex.specify(12);
-  g677.pred.specify(MissionExecutiveConnectors.'ViaPointAction');
+  g677.pred.specify(MissionExecutiveConnectors.ViaPointAction);
   g677.flexEndTimeCache.specify(1212);
   g677.precisionFlag.specify(false);
 
@@ -236,7 +236,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g722);
   g722.startTime.specify([1212 1452]);
   g722.currTokenIndex.specify(12);
   g722.nextTokenIndex.specify(13);
-  g722.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g722.pred.specify(MissionExecutiveConnectors.DriveAction);
   g722.flexEndTimeCache.specify(1329);
   g722.precisionFlag.specify(false);
 
@@ -248,7 +248,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.ChargeAction g767);
   g767.startTime.specify([1329 1539]);
   g767.currTokenIndex.specify(13);
   g767.nextTokenIndex.specify(14);
-  g767.pred.specify(MissionExecutiveConnectors.'DriveAction');
+  g767.pred.specify(MissionExecutiveConnectors.DriveAction);
   g767.__DDL__duration.specify(150);
 
 goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g806);
@@ -264,7 +264,7 @@ goal(TEMPEST_Class___MissionExecutive_SV.DriveAction g806);
   g806.startTime.specify([1479 1689]);
   g806.currTokenIndex.specify(14);
   g806.nextTokenIndex.specify(15);
-  g806.pred.specify(MissionExecutiveConnectors.'ChargeAction');
+  g806.pred.specify(MissionExecutiveConnectors.ChargeAction);
   g806.flexEndTimeCache.specify(1566);
   g806.precisionFlag.specify(false);
 
@@ -272,14 +272,14 @@ goal(TEMPEST_Class___RoverState_SV.RoverStationary g853);
   g853.start.specify(0);
   g853.end.specify(18);
   g853.duration.specify(18);
-  g853.__DDL__state.specify(RoverStationaryState.'Standby');
+  g853.__DDL__state.specify(RoverStationaryState.Standby);
 
 goal(TEMPEST_Class___RoverState_SV.RoverStationary g879);
   g879.start.specify(18);
   g879.end.specify([21 60018]);
   g879.duration.specify([3 60000]);
-  g879.__DDL__state.specify(RoverStationaryState.'Standby');
-  g879.pred.specify(RoverStateConnectors.'Standby');
+  g879.__DDL__state.specify(RoverStationaryState.Standby);
+  g879.pred.specify(RoverStateConnectors.Standby);
 
 goal(TEMPEST_Class___OperatorInterface_SV.OperatorInterfaceIdle g908);
   g908.start.specify(0);
@@ -295,7 +295,7 @@ goal(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage g955);
   g955.start.specify(0);
   g955.end.specify([3 60000]);
   g955.duration.specify([3 60000]);
-  g955.actionType.specify(RoverStateConnectors.'Standby');
+  g955.actionType.specify(RoverStateConnectors.Standby);
 
 goal(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode g982);
   g982.start.specify(0);
@@ -306,46 +306,46 @@ goal(TEMPEST_Class___VehicleController_SV.VehicleController g1005);
   g1005.start.specify(0);
   g1005.end.specify([3 60000]);
   g1005.duration.specify([3 60000]);
-  g1005.vcState.specify(VehicleControllerState.'VC_Nominal');
+  g1005.vcState.specify(VehicleControllerState.VC_Nominal);
   g1005.afterRecovery.specify(false);
 
 goal(TEMPEST_Class___VC_Health_SV.VcHealth g1032);
   g1032.start.specify(0);
   g1032.end.specify([3 60000]);
   g1032.duration.specify([3 60000]);
-  g1032.vcHealthMode.specify(HealthMode.'NoFaultMode');
+  g1032.vcHealthMode.specify(HealthMode.NoFaultMode);
 
 goal(TEMPEST_Class___Navigator_SV.Navigator g1057);
   g1057.start.specify(0);
   g1057.end.specify([3 60000]);
   g1057.duration.specify([3 60000]);
-  g1057.navState.specify(NavigatorState.'NAV_Nominal');
+  g1057.navState.specify(NavigatorState.NAV_Nominal);
   g1057.afterRecovery.specify(false);
 
 goal(TEMPEST_Class___NAV_Health_SV.NavHealth g1083);
   g1083.start.specify(0);
   g1083.end.specify([3 60000]);
   g1083.duration.specify([3 60000]);
-  g1083.navHealthMode.specify(HealthMode.'NoFaultMode');
+  g1083.navHealthMode.specify(HealthMode.NoFaultMode);
 
 goal(TEMPEST_Class___PositionEstimator_SV.PositionEstimator g1108);
   g1108.start.specify(0);
   g1108.end.specify([3 60000]);
   g1108.duration.specify([3 60000]);
-  g1108.peState.specify(PositionEstimatorState.'PE_Nominal');
+  g1108.peState.specify(PositionEstimatorState.PE_Nominal);
   g1108.afterRecovery.specify(false);
 
 goal(TEMPEST_Class___PE_Health_SV.PeHealth g1136);
   g1136.start.specify(0);
   g1136.end.specify([3 60000]);
   g1136.duration.specify([3 60000]);
-  g1136.peHealthMode.specify(HealthMode.'NoFaultMode');
+  g1136.peHealthMode.specify(HealthMode.NoFaultMode);
 
 goal(TEMPEST_Class___NoArc_Health_SV.NoArcHealth g1161);
   g1161.start.specify(0);
   g1161.end.specify([3 60000]);
   g1161.duration.specify([3 60000]);
-  g1161.NoArcHealthMode.specify(HealthMode.'NoFaultMode');
+  g1161.NoArcHealthMode.specify(HealthMode.NoFaultMode);
 
 goal(TEMPEST_Class___MonitoredFaults_SV.SetFaultIdle g1185);
   g1185.start.specify(0);
@@ -356,7 +356,7 @@ goal(TEMPEST_Class___MonitoredFaults_SV.SetFaultEnable g1206);
   g1206.start.specify(18);
   g1206.end.specify(21);
   g1206.duration.specify(3);
-  g1206.faultEnableState.specify(FaultEnableStates.'VC_Fault_Enable');
+  g1206.faultEnableState.specify(FaultEnableStates.VC_Fault_Enable);
 
 goal(TEMPEST_Class___SStopSet_SV.SStopSetMode g1231);
   g1231.start.specify(0);

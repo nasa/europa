@@ -2,6 +2,7 @@
 
 #include "Plasma.nddl"
 #include "PlannerConfig.nddl"
+#include "monkey2.nddl"
 
 PlannerConfig world = new PlannerConfig(5, 450, 1000);
 

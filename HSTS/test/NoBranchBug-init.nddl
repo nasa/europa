@@ -2,6 +2,7 @@
 
 #include "Plasma.nddl"
 #include "PlannerConfig.nddl"
+#include "NoBranchBug.nddl"
 
 PlannerConfig world = new PlannerConfig(0, 20, 1000);
 

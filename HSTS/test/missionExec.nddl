@@ -1,48 +1,76 @@
 // missionExec.ddl
 
-enum ReturnStatus { 'OK', 'Failed' } 
+enum ReturnStatus { OK, Failed } 
 
-enum InternalReturnStatus { 'OK', 'Failed' } 
+enum InternalReturnStatus { OK, Failed } 
 
-enum LocalRecoveryReturnStatus { 'ClearedObstacle', 'UnableToClearObstacle' } 
+enum LocalRecoveryReturnStatus { ClearedObstacle, UnableToClearObstacle } 
 
-enum RoverStationaryState { 'Standby', 'Charge', 'ReadRoverPosition', 'ViaPoint', 'ScienceAction', 'FluorMosaic' } 
+enum RoverStationaryState { Standby, Charge, ReadRoverPosition, ViaPoint, ScienceAction, FluorMosaic } 
 
-enum MissionExecutiveConnectors { 'DriveAction', 'ChargeAction', 'Standby', 'ViaPointAction', 'ScienceAction', 'FluorMosaicAction' } 
+enum MissionExecutiveConnectors { DriveAction, ChargeAction, Standby, ViaPointAction, ScienceAction, FluorMosaicAction } 
 
-enum RoverStateConnectors { 'DriveAction', 'ChargeAction', 'Standby', 'ReadRoverPosition', 'LocalRecovery', 'ViaPointAction', 'ScienceAction', 'FluorMosaicAction' } 
+enum RoverStateConnectors { DriveAction, ChargeAction, Standby, ReadRoverPosition, LocalRecovery, ViaPointAction, ScienceAction, FluorMosaicAction } 
 
-enum CompletionStatus { 'Nominal', 'Timeout', 'Failure', 'EarlyReturn', 'Fault' } 
+enum CompletionStatus { Nominal, Timeout, Failure, EarlyReturn, Fault } 
 
-enum TempestPlannerMode { 'NewPlan', 'RePlan' } 
+enum TempestPlannerMode { NewPlan, RePlan } 
 
-enum HealthMonitorStatus { 'NoFault', 'NoArcFoundTriggered', 'NoArcFoundUntriggered', 'NotOnMapInNavTriggered', 'NotOnMapInNavUntriggered', 'VehicleControllerCrashTriggered', 'VehicleControllerCrashUntriggered', 'NavigatorCrashTriggered', 'NavigatorCrashUntriggered', 'PositionEstimatorCrashTriggered', 'PositionEstimatorCrashUntriggered', 'UserDefinedFaultTriggered', 'UserDefinedFaultUntriggered' } 
+enum HealthMonitorStatus { NoFault, NoArcFoundTriggered, NoArcFoundUntriggered, NotOnMapInNavTriggered, NotOnMapInNavUntriggered, VehicleControllerCrashTriggered, VehicleControllerCrashUntriggered, NavigatorCrashTriggered, NavigatorCrashUntriggered, PositionEstimatorCrashTriggered, PositionEstimatorCrashUntriggered, UserDefinedFaultTriggered, UserDefinedFaultUntriggered } 
 
-enum InterruptibleFaults { 'NoFault', 'NoArcFoundFault' } 
+enum InterruptibleFaults { NoFault, NoArcFoundFault } 
 
-enum VehicleControllerState { 'VC_Nominal', 'VC_Restart', 'VC_CannotRecover', 'VC_ConfirmStart', 'VC_ConfirmStop', 'VC_OpenLoopStop', 'VC_AchieveSteadyState' } 
+enum VehicleControllerState { VC_Nominal, VC_Restart, VC_CannotRecover, VC_ConfirmStart, VC_ConfirmStop, VC_OpenLoopStop, VC_AchieveSteadyState } 
 
-enum NavigatorState { 'NAV_Nominal', 'NAV_Restart', 'NAV_CannotRecover', 'NAV_ConfirmStart', 'NAV_ConfirmStop', 'NAV_AchieveSteadyState' } 
+enum NavigatorState { NAV_Nominal, NAV_Restart, NAV_CannotRecover, NAV_ConfirmStart, NAV_ConfirmStop, NAV_AchieveSteadyState } 
 
-enum PositionEstimatorState { 'PE_Nominal', 'PE_Restart', 'PE_CannotRecover', 'PE_ResetRoverPosition', 'PE_ConfirmStopSet', 'PE_ConfirmStopClear' } 
+enum PositionEstimatorState { PE_Nominal, PE_Restart, PE_CannotRecover, PE_ResetRoverPosition, PE_ConfirmStopSet, PE_ConfirmStopClear } 
 
-enum FaultEnableStates { 'VC_Fault_Enable', 'VC_Fault_Disable' } 
+enum FaultEnableStates { VC_Fault_Enable, VC_Fault_Disable } 
 
-enum HealthMode { 'NoFaultMode', 'FaultMode' } 
+enum HealthMode { NoFaultMode, FaultMode } 
 
-enum RoverStateData { 'RoverStateData_noId' } 
+enum RoverStateData { RoverStateData_noId } 
 
-enum RecoveryDecisionMode { 'StayInactive', 'ActivateReplan', 'ActivateVC_Recovery', 'ActivateNAV_Recovery', 'ActivatePE_Recovery', 'ActivateNoArc_Recovery' } 
+enum RecoveryDecisionMode { StayInactive, ActivateReplan, ActivateVC_Recovery, ActivateNAV_Recovery, ActivatePE_Recovery, ActivateNoArc_Recovery } 
 
-enum NotifyOperatorMessage { 'NoMessage', 'InvalidPlanFromTempest', 'PeCrashRecoveryFailed', 'NavCrashRecoveryFailed', 'VcCrashRecoveryFailed', 'IMAbortFailed' } 
+enum NotifyOperatorMessage { NoMessage, InvalidPlanFromTempest, PeCrashRecoveryFailed, NavCrashRecoveryFailed, VcCrashRecoveryFailed, IMAbortFailed } 
 
-enum RCLString { 'SampleScienceGoal' } 
+enum RCLString { SampleScienceGoal } 
 
-enum SciencePredecessor { 'MET_BY_IDLE', 'MET_BY_SCIENCE', 'MET_BY_TIMEOUT' } 
+enum SciencePredecessor { MET_BY_IDLE, MET_BY_SCIENCE, MET_BY_TIMEOUT } 
 
-enum ScienceSuccessor { 'MEETS_IDLE', 'MEETS_SCIENCE', 'MEETS_TIMEOUT' } 
+enum ScienceSuccessor { MEETS_IDLE, MEETS_SCIENCE, MEETS_TIMEOUT } 
 
-enum ConfirmationMode { 'Simultaneous', 'Sequential' } 
+enum ConfirmationMode { Simultaneous, Sequential } 
+
+
+class TEMPEST_Class___TEMPEST_SV;
+class TEMPEST_Class___MissionExecutive_SV;
+class TEMPEST_Class___RoverState_SV;
+class TEMPEST_Class___OperatorInterface_SV;
+class TEMPEST_Class___HealthMonitor_SV;
+class TEMPEST_Class___RoverOperationMode_SV;
+class TEMPEST_Class___VehicleController_SV;
+class TEMPEST_Class___VC_Health_SV;
+class TEMPEST_Class___Navigator_SV;
+class TEMPEST_Class___NAV_Health_SV;
+class TEMPEST_Class___PositionEstimator_SV;
+class TEMPEST_Class___PE_Health_SV;
+class TEMPEST_Class___NoArc_Health_SV;
+class TEMPEST_Class___MonitoredFaults_SV;
+class TEMPEST_Class___SStopSet_SV;
+class TEMPEST_Class___SStopSet_Internal_SV;
+class TEMPEST_Class___SStopConfirm_SV;
+class TEMPEST_Class___SStopClear_SV;
+class TEMPEST_Class___RecoveryManager_SV;
+class TEMPEST_Class___RecoveryDecision_SV;
+class TEMPEST_Class___OperatorNotification_SV;
+class TEMPEST_Class;
+class Local_Mode_Class___Local_Mode_SV;
+class Local_Mode_Class;
+class InstrumentManager_Class___InstrumentManager_SV;
+class InstrumentManager_Class;
 
 class TEMPEST_Class___TEMPEST_SV {
   predicate TEMPEST_Idle {
@@ -529,14 +557,14 @@ TEMPEST_Class___TEMPEST_SV::TEMPEST_Idle {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
-      eq(s0.recMode, RecoveryDecisionMode.'ActivateReplan');
+      eq(s0.recMode, RecoveryDecisionMode.ActivateReplan);
   }
-  if (tempestPlannerMode==TempestPlannerMode.'NewPlan') {
+  if (tempestPlannerMode==TempestPlannerMode.NewPlan) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_Planning s0);
   }
-  if (tempestPlannerMode==TempestPlannerMode.'RePlan') {
+  if (tempestPlannerMode==TempestPlannerMode.RePlan) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
@@ -581,15 +609,15 @@ TEMPEST_Class___TEMPEST_SV::TEMPEST_Planning {
 //outputSubgoalCreation
   contained_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s1);
     eq(s1.tokenIndex, tokenIndex);
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
-        eq(s0.opMsg, NotifyOperatorMessage.'InvalidPlanFromTempest');
+        eq(s0.opMsg, NotifyOperatorMessage.InvalidPlanFromTempest);
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
     }
   }
@@ -597,37 +625,37 @@ TEMPEST_Class___TEMPEST_SV::TEMPEST_Planning {
 
 TEMPEST_Class___MissionExecutive_SV::ME_Standby {
   eq(duration, [3 60000]);
-  if (pred==MissionExecutiveConnectors.'ChargeAction') {
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
       eq(s0.currTokenIndex, tokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'DriveAction') {
+  if (pred==MissionExecutiveConnectors.DriveAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
       eq(s0.currTokenIndex, tokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'FluorMosaicAction') {
+  if (pred==MissionExecutiveConnectors.FluorMosaicAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.FluorMosaicAction s0);
       eq(s0.currTokenIndex, tokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'ScienceAction') {
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
       eq(s0.currTokenIndex, tokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'Standby') {
+  if (pred==MissionExecutiveConnectors.Standby) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
       eq(s0.tokenIndex, tokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'ViaPointAction') {
+  if (pred==MissionExecutiveConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ViaPointAction s0);
@@ -654,51 +682,51 @@ TEMPEST_Class___MissionExecutive_SV::DriveAction {
     eq(s0.endTime, endTime);
     eq(s0.flexEndTimeCache, flexEndTimeCache);
     eq(s0.precisionFlag, precisionFlag);
-  if (pred==MissionExecutiveConnectors.'ChargeAction') {
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
       eq(s0.endTime, startTime);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'DriveAction') {
+  if (pred==MissionExecutiveConnectors.DriveAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
       eq(s0.endTime, startTime);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'FluorMosaicAction') {
+  if (pred==MissionExecutiveConnectors.FluorMosaicAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.FluorMosaicAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'ScienceAction') {
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'Standby') {
+  if (pred==MissionExecutiveConnectors.Standby) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
   }
-  if (pred==MissionExecutiveConnectors.'ViaPointAction') {
+  if (pred==MissionExecutiveConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ViaPointAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (status==CompletionStatus.'EarlyReturn') {
+  if (status==CompletionStatus.EarlyReturn) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
       eq(s0.tokenIndex, currTokenIndex);
-      eq(s0.pred, MissionExecutiveConnectors.'DriveAction');
+      eq(s0.pred, MissionExecutiveConnectors.DriveAction);
   }
-  if (status==CompletionStatus.'EarlyReturn') {
+  if (status==CompletionStatus.EarlyReturn) {
 //output subgoal
 //outputSubgoalCreation
     equals(TEMPEST_Class___RoverState_SV.RoverMoving s0);
@@ -712,14 +740,14 @@ TEMPEST_Class___MissionExecutive_SV::DriveAction {
       eq(s0.statusFlag, true);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
   }
-  if (status==CompletionStatus.'Failure') {
+  if (status==CompletionStatus.Failure) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
       eq(s0.tokenIndex, currTokenIndex);
-      eq(s0.pred, MissionExecutiveConnectors.'DriveAction');
+      eq(s0.pred, MissionExecutiveConnectors.DriveAction);
   }
-  if (status==CompletionStatus.'Failure') {
+  if (status==CompletionStatus.Failure) {
 //output subgoal
 //outputSubgoalCreation
     equals(TEMPEST_Class___RoverState_SV.RoverMoving s0);
@@ -730,18 +758,18 @@ TEMPEST_Class___MissionExecutive_SV::DriveAction {
       eq(s0.width, width);
       eq(s0.startTime, startTime);
       eq(s0.endTime, endTime);
-      eq(s0.status, ReturnStatus.'Failed');
+      eq(s0.status, ReturnStatus.Failed);
       eq(s0.statusFlag, true);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
   }
-  if (status==CompletionStatus.'Fault') {
+  if (status==CompletionStatus.Fault) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
       eq(s0.tokenIndex, currTokenIndex);
-      eq(s0.pred, MissionExecutiveConnectors.'DriveAction');
+      eq(s0.pred, MissionExecutiveConnectors.DriveAction);
   }
-  if (status==CompletionStatus.'Fault') {
+  if (status==CompletionStatus.Fault) {
 //output subgoal
 //outputSubgoalCreation
     equals(TEMPEST_Class___RoverState_SV.RoverMoving s0);
@@ -754,14 +782,14 @@ TEMPEST_Class___MissionExecutive_SV::DriveAction {
       eq(s0.endTime, endTime);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
   }
-  if (status==CompletionStatus.'Timeout') {
+  if (status==CompletionStatus.Timeout) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
       eq(s0.tokenIndex, currTokenIndex);
-      eq(s0.pred, MissionExecutiveConnectors.'DriveAction');
+      eq(s0.pred, MissionExecutiveConnectors.DriveAction);
   }
-  if (status==CompletionStatus.'Timeout') {
+  if (status==CompletionStatus.Timeout) {
 //output subgoal
 //outputSubgoalCreation
     equals(TEMPEST_Class___RoverState_SV.RoverMoving s0);
@@ -775,10 +803,10 @@ TEMPEST_Class___MissionExecutive_SV::DriveAction {
       eq(s0.statusFlag, false);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
   }
-//  if (status==CompletionStatus.'EarlyReturn') {
+//  if (status==CompletionStatus.EarlyReturn) {
 //    UpdateDurationOfTokens(end, endTime);
 //  }
-  if (status==CompletionStatus.'Nominal') {
+  if (status==CompletionStatus.Nominal) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
@@ -790,17 +818,17 @@ TEMPEST_Class___MissionExecutive_SV::DriveAction {
         eq(s0.width, width);
         eq(s0.startTime, startTime);
         eq(s0.endTime, endTime);
-        eq(s0.status, ReturnStatus.'OK');
+        eq(s0.status, ReturnStatus.OK);
         eq(s0.statusFlag, true);
         eq(s0.flexEndTimeCache, flexEndTimeCache);
-        eq(s0.hmStatus, HealthMonitorStatus.'NoFault');
+        eq(s0.hmStatus, HealthMonitorStatus.NoFault);
     }
   }
-  if (status==CompletionStatus.'Nominal') {
+  if (status==CompletionStatus.Nominal) {
     if (statusFlag==true) {
     }
   }
-  if (status==CompletionStatus.'Nominal') {
+  if (status==CompletionStatus.Nominal) {
     if (statusFlag==true) {
       eq(end, endTime);
     }
@@ -817,41 +845,41 @@ TEMPEST_Class___MissionExecutive_SV::ChargeAction {
 //output subgoal
 //outputSubgoalCreation
   equals(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-    eq(s0.__DDL__state, RoverStationaryState.'Charge');
+    eq(s0.__DDL__state, RoverStationaryState.Charge);
     eq(s0.startTime, startTime);
     eq(s0.endTime, endTime);
-  if (pred==MissionExecutiveConnectors.'ChargeAction') {
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
       eq(s0.endTime, startTime);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'DriveAction') {
+  if (pred==MissionExecutiveConnectors.DriveAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
       eq(s0.endTime, startTime);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'FluorMosaicAction') {
+  if (pred==MissionExecutiveConnectors.FluorMosaicAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.FluorMosaicAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'ScienceAction') {
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'Standby') {
+  if (pred==MissionExecutiveConnectors.Standby) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
   }
-  if (pred==MissionExecutiveConnectors.'ViaPointAction') {
+  if (pred==MissionExecutiveConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ViaPointAction s0);
@@ -869,32 +897,32 @@ TEMPEST_Class___MissionExecutive_SV::ViaPointAction {
 //output subgoal
 //outputSubgoalCreation
   equals(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-    eq(s0.__DDL__state, RoverStationaryState.'ViaPoint');
-  if (pred==MissionExecutiveConnectors.'ChargeAction') {
+    eq(s0.__DDL__state, RoverStationaryState.ViaPoint);
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'DriveAction') {
+  if (pred==MissionExecutiveConnectors.DriveAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'FluorMosaicAction') {
+  if (pred==MissionExecutiveConnectors.FluorMosaicAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.FluorMosaicAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'ScienceAction') {
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'Standby') {
+  if (pred==MissionExecutiveConnectors.Standby) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
@@ -911,7 +939,7 @@ TEMPEST_Class___MissionExecutive_SV::ScienceAction {
 //output subgoal
 //outputSubgoalCreation
   equals(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-    eq(s0.__DDL__state, RoverStationaryState.'ScienceAction');
+    eq(s0.__DDL__state, RoverStationaryState.ScienceAction);
     eq(s0.startTime, startTime);
     eq(s0.endTime, endTime);
 //output subgoal
@@ -919,51 +947,51 @@ TEMPEST_Class___MissionExecutive_SV::ScienceAction {
   equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s1);
     eq(s1.argument, argument);
     eq(s1.flexEndTimeCache, flexEndTimeCache);
-  if (pred==MissionExecutiveConnectors.'ChargeAction') {
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
       eq(s0.endTime, startTime);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'DriveAction') {
+  if (pred==MissionExecutiveConnectors.DriveAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
       eq(s0.endTime, startTime);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'FluorMosaicAction') {
+  if (pred==MissionExecutiveConnectors.FluorMosaicAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.FluorMosaicAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'ScienceAction') {
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'Standby') {
+  if (pred==MissionExecutiveConnectors.Standby) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
   }
-  if (pred==MissionExecutiveConnectors.'ViaPointAction') {
+  if (pred==MissionExecutiveConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ViaPointAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (status==CompletionStatus.'EarlyReturn') {
+  if (status==CompletionStatus.EarlyReturn) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
       eq(s0.tokenIndex, currTokenIndex);
-      eq(s0.pred, MissionExecutiveConnectors.'ScienceAction');
+      eq(s0.pred, MissionExecutiveConnectors.ScienceAction);
   }
-  if (status==CompletionStatus.'EarlyReturn') {
+  if (status==CompletionStatus.EarlyReturn) {
 //output subgoal
 //outputSubgoalCreation
     equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
@@ -971,14 +999,14 @@ TEMPEST_Class___MissionExecutive_SV::ScienceAction {
       eq(s0.statusFlag, true);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
   }
-  if (status==CompletionStatus.'Timeout') {
+  if (status==CompletionStatus.Timeout) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
       eq(s0.tokenIndex, currTokenIndex);
-      eq(s0.pred, MissionExecutiveConnectors.'ScienceAction');
+      eq(s0.pred, MissionExecutiveConnectors.ScienceAction);
   }
-  if (status==CompletionStatus.'Timeout') {
+  if (status==CompletionStatus.Timeout) {
 //output subgoal
 //outputSubgoalCreation
     equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
@@ -986,51 +1014,51 @@ TEMPEST_Class___MissionExecutive_SV::ScienceAction {
       eq(s0.statusFlag, false);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
   }
-//  if (status==CompletionStatus.'EarlyReturn') {
+//  if (status==CompletionStatus.EarlyReturn) {
 //    UpdateDurationOfTokens(end, endTime);
 //  }
-  if (status==CompletionStatus.'Failure') {
+  if (status==CompletionStatus.Failure) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
         eq(s0.tokenIndex, currTokenIndex);
-        eq(s0.pred, MissionExecutiveConnectors.'ScienceAction');
+        eq(s0.pred, MissionExecutiveConnectors.ScienceAction);
     }
   }
-  if (status==CompletionStatus.'Failure') {
+  if (status==CompletionStatus.Failure) {
     if (statusFlag==true) {
     }
   }
-  if (status==CompletionStatus.'Failure') {
+  if (status==CompletionStatus.Failure) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
         eq(s0.argument, argument);
-        eq(s0.status, ReturnStatus.'Failed');
+        eq(s0.status, ReturnStatus.Failed);
         eq(s0.statusFlag, true);
         eq(s0.flexEndTimeCache, flexEndTimeCache);
     }
   }
-  if (status==CompletionStatus.'Failure') {
+  if (status==CompletionStatus.Failure) {
     if (statusFlag==true) {
     }
   }
-  if (status==CompletionStatus.'Fault') {
+  if (status==CompletionStatus.Fault) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
         eq(s0.tokenIndex, currTokenIndex);
-        eq(s0.pred, MissionExecutiveConnectors.'ScienceAction');
+        eq(s0.pred, MissionExecutiveConnectors.ScienceAction);
     }
   }
-  if (status==CompletionStatus.'Fault') {
+  if (status==CompletionStatus.Fault) {
     if (statusFlag==true) {
     }
   }
-  if (status==CompletionStatus.'Fault') {
+  if (status==CompletionStatus.Fault) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
@@ -1039,26 +1067,26 @@ TEMPEST_Class___MissionExecutive_SV::ScienceAction {
         eq(s0.flexEndTimeCache, flexEndTimeCache);
     }
   }
-  if (status==CompletionStatus.'Fault') {
+  if (status==CompletionStatus.Fault) {
     if (statusFlag==true) {
     }
   }
-  if (status==CompletionStatus.'Nominal') {
+  if (status==CompletionStatus.Nominal) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
         eq(s0.argument, argument);
-        eq(s0.status, ReturnStatus.'OK');
+        eq(s0.status, ReturnStatus.OK);
         eq(s0.statusFlag, true);
         eq(s0.flexEndTimeCache, flexEndTimeCache);
     }
   }
-  if (status==CompletionStatus.'Nominal') {
+  if (status==CompletionStatus.Nominal) {
     if (statusFlag==true) {
     }
   }
-  if (status==CompletionStatus.'Nominal') {
+  if (status==CompletionStatus.Nominal) {
     if (statusFlag==true) {
       eq(end, endTime);
     }
@@ -1075,31 +1103,31 @@ TEMPEST_Class___MissionExecutive_SV::FluorMosaicAction {
 //output subgoal
 //outputSubgoalCreation
   equals(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-    eq(s0.__DDL__state, RoverStationaryState.'FluorMosaic');
-  if (pred==MissionExecutiveConnectors.'ChargeAction') {
+    eq(s0.__DDL__state, RoverStationaryState.FluorMosaic);
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'DriveAction') {
+  if (pred==MissionExecutiveConnectors.DriveAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'ScienceAction') {
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
       eq(s0.nextTokenIndex, currTokenIndex);
   }
-  if (pred==MissionExecutiveConnectors.'Standby') {
+  if (pred==MissionExecutiveConnectors.Standby) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
   }
-  if (pred==MissionExecutiveConnectors.'ViaPointAction') {
+  if (pred==MissionExecutiveConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___MissionExecutive_SV.ViaPointAction s0);
@@ -1109,117 +1137,117 @@ TEMPEST_Class___MissionExecutive_SV::FluorMosaicAction {
 
 TEMPEST_Class___RoverState_SV::RoverStationary {
   eq(duration, [3 60000]);
-  if (pred==RoverStateConnectors.'ChargeAction') {
+  if (pred==RoverStateConnectors.ChargeAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Charge');
+      eq(s0.__DDL__state, RoverStationaryState.Charge);
       eq(s0.endTime, startTime);
   }
-  if (pred==RoverStateConnectors.'DriveAction') {
+  if (pred==RoverStateConnectors.DriveAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverMoving s0);
       eq(s0.endTime, startTime);
   }
-  if (pred==RoverStateConnectors.'FluorMosaicAction') {
+  if (pred==RoverStateConnectors.FluorMosaicAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'FluorMosaic');
+      eq(s0.__DDL__state, RoverStationaryState.FluorMosaic);
       eq(s0.endTime, startTime);
   }
-  if (pred==RoverStateConnectors.'LocalRecovery') {
+  if (pred==RoverStateConnectors.LocalRecovery) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
   }
-  if (pred==RoverStateConnectors.'ReadRoverPosition') {
+  if (pred==RoverStateConnectors.ReadRoverPosition) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'ReadRoverPosition');
+      eq(s0.__DDL__state, RoverStationaryState.ReadRoverPosition);
       eq(s0.endTime, startTime);
   }
-  if (pred==RoverStateConnectors.'ScienceAction') {
+  if (pred==RoverStateConnectors.ScienceAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'ScienceAction');
+      eq(s0.__DDL__state, RoverStationaryState.ScienceAction);
       eq(s0.endTime, startTime);
   }
-  if (pred==RoverStateConnectors.'Standby') {
+  if (pred==RoverStateConnectors.Standby) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
       eq(s0.endTime, startTime);
   }
-  if (pred==RoverStateConnectors.'ViaPointAction') {
+  if (pred==RoverStateConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'ViaPoint');
+      eq(s0.__DDL__state, RoverStationaryState.ViaPoint);
       eq(s0.endTime, startTime);
   }
-  if (__DDL__state==RoverStationaryState.'Charge') {
+  if (__DDL__state==RoverStationaryState.Charge) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
-      eq(s0.actionType, RoverStateConnectors.'ChargeAction');
+      eq(s0.actionType, RoverStateConnectors.ChargeAction);
   }
-  if (__DDL__state==RoverStationaryState.'FluorMosaic') {
+  if (__DDL__state==RoverStationaryState.FluorMosaic) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
-      eq(s0.actionType, RoverStateConnectors.'FluorMosaicAction');
+      eq(s0.actionType, RoverStateConnectors.FluorMosaicAction);
   }
-  if (__DDL__state==RoverStationaryState.'ReadRoverPosition') {
+  if (__DDL__state==RoverStationaryState.ReadRoverPosition) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
-      eq(s0.pred, RoverStateConnectors.'ReadRoverPosition');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.ReadRoverPosition);
   }
-  if (__DDL__state==RoverStationaryState.'ReadRoverPosition') {
+  if (__DDL__state==RoverStationaryState.ReadRoverPosition) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
-      eq(s0.tempestPlannerMode, TempestPlannerMode.'RePlan');
+      eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
   }
-  if (__DDL__state==RoverStationaryState.'ReadRoverPosition') {
+  if (__DDL__state==RoverStationaryState.ReadRoverPosition) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
-      eq(s0.actionType, RoverStateConnectors.'ReadRoverPosition');
+      eq(s0.actionType, RoverStateConnectors.ReadRoverPosition);
   }
-  if (__DDL__state==RoverStationaryState.'Standby') {
+  if (__DDL__state==RoverStationaryState.Standby) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
-      eq(s0.actionType, RoverStateConnectors.'Standby');
+      eq(s0.actionType, RoverStateConnectors.Standby);
   }
-  if (__DDL__state==RoverStationaryState.'ViaPoint') {
+  if (__DDL__state==RoverStationaryState.ViaPoint) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
-      eq(s0.actionType, RoverStateConnectors.'ViaPointAction');
+      eq(s0.actionType, RoverStateConnectors.ViaPointAction);
   }
-  if (__DDL__state==RoverStationaryState.'Charge') {
+  if (__DDL__state==RoverStationaryState.Charge) {
     eq(duration, [3 60000]);
     eq(start, startTime);
     eq(end, endTime);
   }
-  if (__DDL__state==RoverStationaryState.'FluorMosaic') {
+  if (__DDL__state==RoverStationaryState.FluorMosaic) {
     eq(duration, [3 60000]);
   }
-  if (__DDL__state==RoverStationaryState.'ReadRoverPosition') {
+  if (__DDL__state==RoverStationaryState.ReadRoverPosition) {
     eq(duration, 3);
   }
-  if (__DDL__state==RoverStationaryState.'Standby') {
+  if (__DDL__state==RoverStationaryState.Standby) {
     eq(duration, [3 60000]);
   }
-  if (__DDL__state==RoverStationaryState.'ViaPoint') {
+  if (__DDL__state==RoverStationaryState.ViaPoint) {
     eq(duration, [3 60000]);
   }
 }
@@ -1229,31 +1257,31 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
 //outputSubgoalCreation
   equals(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
     eq(s0.hmStatus, hmStatus);
-    eq(s0.actionType, RoverStateConnectors.'DriveAction');
+    eq(s0.actionType, RoverStateConnectors.DriveAction);
 //output subgoal
 //outputSubgoalCreation
   contained_by(TEMPEST_Class___VC_Health_SV.VcHealth s1);
-    eq(s1.vcHealthMode, HealthMode.'NoFaultMode');
+    eq(s1.vcHealthMode, HealthMode.NoFaultMode);
 //output subgoal
 //outputSubgoalCreation
   contained_by(TEMPEST_Class___NAV_Health_SV.NavHealth s2);
-    eq(s2.navHealthMode, HealthMode.'NoFaultMode');
+    eq(s2.navHealthMode, HealthMode.NoFaultMode);
 //output subgoal
 //outputSubgoalCreation
   contained_by(TEMPEST_Class___PE_Health_SV.PeHealth s3);
-    eq(s3.peHealthMode, HealthMode.'NoFaultMode');
+    eq(s3.peHealthMode, HealthMode.NoFaultMode);
 //output subgoal
 //outputSubgoalCreation
   contained_by(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s4);
-    eq(s4.NoArcHealthMode, HealthMode.'NoFaultMode');
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+    eq(s4.NoArcHealthMode, HealthMode.NoFaultMode);
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
-      eq(s0.pred, RoverStateConnectors.'DriveAction');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.DriveAction);
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
@@ -1265,15 +1293,15 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
       eq(s0.endTime, endTime);
       eq(s0.startTime, startTime);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
-      eq(s0.status, CompletionStatus.'Fault');
+      eq(s0.status, CompletionStatus.Fault);
       eq(s0.statusFlag, true);
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
@@ -1285,23 +1313,23 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
       eq(s0.endTime, endTime);
       eq(s0.startTime, startTime);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
-      eq(s0.status, CompletionStatus.'Fault');
+      eq(s0.status, CompletionStatus.Fault);
       eq(s0.statusFlag, true);
   }
-  if (hmStatus==HealthMonitorStatus.'NotOnMapInNavTriggered') {
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
-      eq(s0.pred, RoverStateConnectors.'DriveAction');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.DriveAction);
   }
-  if (hmStatus==HealthMonitorStatus.'NotOnMapInNavTriggered') {
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
-      eq(s0.tempestPlannerMode, TempestPlannerMode.'RePlan');
+      eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
   }
-  if (hmStatus==HealthMonitorStatus.'NotOnMapInNavTriggered') {
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
@@ -1313,17 +1341,17 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
       eq(s0.endTime, endTime);
       eq(s0.startTime, startTime);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
-      eq(s0.status, CompletionStatus.'Fault');
+      eq(s0.status, CompletionStatus.Fault);
       eq(s0.statusFlag, true);
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
-      eq(s0.pred, RoverStateConnectors.'DriveAction');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.DriveAction);
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
@@ -1335,17 +1363,17 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
       eq(s0.endTime, endTime);
       eq(s0.startTime, startTime);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
-      eq(s0.status, CompletionStatus.'Fault');
+      eq(s0.status, CompletionStatus.Fault);
       eq(s0.statusFlag, true);
   }
-  if (hmStatus==HealthMonitorStatus.'UserDefinedFaultTriggered') {
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
-      eq(s0.pred, RoverStateConnectors.'DriveAction');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.DriveAction);
   }
-  if (hmStatus==HealthMonitorStatus.'UserDefinedFaultTriggered') {
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
@@ -1357,17 +1385,17 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
       eq(s0.endTime, endTime);
       eq(s0.startTime, startTime);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
-      eq(s0.status, CompletionStatus.'Fault');
+      eq(s0.status, CompletionStatus.Fault);
       eq(s0.statusFlag, true);
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
-      eq(s0.pred, RoverStateConnectors.'DriveAction');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.DriveAction);
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
@@ -1379,52 +1407,52 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
       eq(s0.endTime, endTime);
       eq(s0.startTime, startTime);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
-      eq(s0.status, CompletionStatus.'Fault');
+      eq(s0.status, CompletionStatus.Fault);
       eq(s0.statusFlag, true);
   }
-  if (pred==RoverStateConnectors.'ChargeAction') {
+  if (pred==RoverStateConnectors.ChargeAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Charge');
+      eq(s0.__DDL__state, RoverStationaryState.Charge);
       eq(s0.endTime, startTime);
   }
-  if (pred==RoverStateConnectors.'DriveAction') {
+  if (pred==RoverStateConnectors.DriveAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverMoving s0);
       eq(s0.endTime, startTime);
   }
-  if (pred==RoverStateConnectors.'FluorMosaicAction') {
+  if (pred==RoverStateConnectors.FluorMosaicAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'FluorMosaic');
+      eq(s0.__DDL__state, RoverStationaryState.FluorMosaic);
   }
-  if (pred==RoverStateConnectors.'ReadRoverPosition') {
+  if (pred==RoverStateConnectors.ReadRoverPosition) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'ReadRoverPosition');
+      eq(s0.__DDL__state, RoverStationaryState.ReadRoverPosition);
   }
-  if (pred==RoverStateConnectors.'ScienceAction') {
+  if (pred==RoverStateConnectors.ScienceAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'ScienceAction');
+      eq(s0.__DDL__state, RoverStationaryState.ScienceAction);
   }
-  if (pred==RoverStateConnectors.'Standby') {
+  if (pred==RoverStateConnectors.Standby) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
       eq(s0.endTime, startTime);
   }
-  if (pred==RoverStateConnectors.'ViaPointAction') {
+  if (pred==RoverStateConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'ViaPoint');
+      eq(s0.__DDL__state, RoverStationaryState.ViaPoint);
   }
   if (roverInSafeguardedMode==true) {
 //output subgoal
@@ -1436,93 +1464,93 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
 //outputSubgoalCreation
     starts(TEMPEST_Class___RoverOperationMode_SV.GoToAutonomousMode s0);
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-        eq(s0.__DDL__state, RoverStationaryState.'Standby');
-        eq(s0.pred, RoverStateConnectors.'DriveAction');
+        eq(s0.__DDL__state, RoverStationaryState.Standby);
+        eq(s0.pred, RoverStateConnectors.DriveAction);
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
         eq(s0.flexEndTimeCache, flexEndTimeCache);
-        eq(s0.status, CompletionStatus.'Failure');
+        eq(s0.status, CompletionStatus.Failure);
         eq(s0.statusFlag, true);
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
       if (precisionFlag==true) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
-          eq(s0.tempestPlannerMode, TempestPlannerMode.'RePlan');
+          eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
       }
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
       if (precisionFlag==true) {
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
           meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-            eq(s0.pred, RoverStateConnectors.'DriveAction');
+            eq(s0.pred, RoverStateConnectors.DriveAction);
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
           meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
-            eq(s0.tempestPlannerMode, TempestPlannerMode.'RePlan');
+            eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
           ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
@@ -1534,24 +1562,24 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
             eq(s0.endTime, endTime);
             eq(s0.startTime, startTime);
             eq(s0.flexEndTimeCache, flexEndTimeCache);
-            eq(s0.status, CompletionStatus.'EarlyReturn');
+            eq(s0.status, CompletionStatus.EarlyReturn);
             eq(s0.statusFlag, true);
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==false) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
           ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
@@ -1561,42 +1589,42 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
             eq(s0.length, length);
             eq(s0.width, width);
             eq(s0.flexEndTimeCache, flexEndTimeCache);
-            eq(s0.status, CompletionStatus.'Nominal');
+            eq(s0.status, CompletionStatus.Nominal);
             eq(s0.statusFlag, true);
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==false) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
         }
       }
     }
   }
-//  if (status==ReturnStatus.'OK') {
+//  if (status==ReturnStatus.OK) {
 //    if (statusFlag==true) {
-//      if (hmStatus==HealthMonitorStatus.'NoFault') {
+//      if (hmStatus==HealthMonitorStatus.NoFault) {
 //        CommandCompletedEarly(earlyFlag, end, flexEndTimeCache);
 //      }
 //    }
 //  }
   if (statusFlag==false) {
-    if (hmStatus==HealthMonitorStatus.'NoFault') {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-        eq(s0.__DDL__state, RoverStationaryState.'ReadRoverPosition');
-        eq(s0.pred, RoverStateConnectors.'DriveAction');
+        eq(s0.__DDL__state, RoverStationaryState.ReadRoverPosition);
+        eq(s0.pred, RoverStateConnectors.DriveAction);
     }
   }
   if (statusFlag==false) {
-    if (hmStatus==HealthMonitorStatus.'NoFault') {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
     }
   }
   if (statusFlag==false) {
-    if (hmStatus==HealthMonitorStatus.'NoFault') {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
       ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
@@ -1608,12 +1636,12 @@ TEMPEST_Class___RoverState_SV::RoverMoving {
         eq(s0.endTime, endTime);
         eq(s0.startTime, startTime);
         eq(s0.flexEndTimeCache, flexEndTimeCache);
-        eq(s0.status, CompletionStatus.'Timeout');
+        eq(s0.status, CompletionStatus.Timeout);
         eq(s0.statusFlag, true);
     }
   }
   if (statusFlag==false) {
-    if (hmStatus==HealthMonitorStatus.'NoFault') {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
     }
   }
 }
@@ -1623,17 +1651,17 @@ TEMPEST_Class___RoverState_SV::RoverPerformingLocalRecovery {
 //output subgoal
 //outputSubgoalCreation
   meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-    eq(s0.__DDL__state, RoverStationaryState.'Standby');
-    eq(s0.pred, RoverStateConnectors.'LocalRecovery');
+    eq(s0.__DDL__state, RoverStationaryState.Standby);
+    eq(s0.pred, RoverStateConnectors.LocalRecovery);
 //output subgoal
 //outputSubgoalCreation
   starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s1);
-    eq(s1.actionType, RoverStateConnectors.'LocalRecovery');
+    eq(s1.actionType, RoverStateConnectors.LocalRecovery);
   if (recoverySucceeded==true) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
-      eq(s0.NoArcHealthMode, HealthMode.'NoFaultMode');
+      eq(s0.NoArcHealthMode, HealthMode.NoFaultMode);
   }
   if (recoverySucceeded==true) {
 //output subgoal
@@ -1657,15 +1685,15 @@ TEMPEST_Class___OperatorInterface_SV::OperatorInterfaceActive {
 //output subgoal
 //outputSubgoalCreation
   meets(TEMPEST_Class___OperatorInterface_SV.OperatorInterfaceIdle s0);
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_Planning s0);
-        eq(s0.tempestPlannerMode, TempestPlannerMode.'NewPlan');
+        eq(s0.tempestPlannerMode, TempestPlannerMode.NewPlan);
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
     }
   }
@@ -1683,9 +1711,9 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
 //output subgoal
 //outputSubgoalCreation
   meets(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'LocalRecovery') {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
 //output subgoal
 //outputSubgoalCreation
         ends(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
@@ -1693,42 +1721,42 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'LocalRecovery') {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-          eq(s0.__DDL__state, RoverStationaryState.'Standby');
-          eq(s0.pred, RoverStateConnectors.'ViaPointAction');
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
-        eq(s0.navHealthMode, HealthMode.'FaultMode');
+        eq(s0.navHealthMode, HealthMode.FaultMode);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
@@ -1737,43 +1765,43 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
         eq(s0.decCount, false);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==true) {
 //output subgoal
 //outputSubgoalCreation
         ends(TEMPEST_Class___Navigator_SV.Navigator s0);
-          eq(s0.navState, NavigatorState.'NAV_Restart');
+          eq(s0.navState, NavigatorState.NAV_Restart);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==true) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
-          eq(s0.navHealthMode, HealthMode.'NoFaultMode');
+          eq(s0.navHealthMode, HealthMode.NoFaultMode);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
 //output subgoal
@@ -1785,25 +1813,25 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
-        eq(s0.NoArcHealthMode, HealthMode.'FaultMode');
+        eq(s0.NoArcHealthMode, HealthMode.FaultMode);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
@@ -1812,28 +1840,28 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
         eq(s0.decCount, false);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-          eq(s0.__DDL__state, RoverStationaryState.'Standby');
-          eq(s0.pred, RoverStateConnectors.'ViaPointAction');
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==true) {
 //output subgoal
@@ -1843,29 +1871,29 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==true) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
-          eq(s0.NoArcHealthMode, HealthMode.'NoFaultMode');
+          eq(s0.NoArcHealthMode, HealthMode.NoFaultMode);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
 //output subgoal
@@ -1877,43 +1905,43 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundUntriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NotOnMapInNavTriggered') {
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NotOnMapInNavTriggered') {
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NotOnMapInNavTriggered') {
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-          eq(s0.__DDL__state, RoverStationaryState.'Standby');
-          eq(s0.pred, RoverStateConnectors.'ViaPointAction');
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'NotOnMapInNavTriggered') {
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'LocalRecovery') {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
 //output subgoal
 //outputSubgoalCreation
         ends(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
@@ -1921,42 +1949,42 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'LocalRecovery') {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-          eq(s0.__DDL__state, RoverStationaryState.'Standby');
-          eq(s0.pred, RoverStateConnectors.'ViaPointAction');
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___PE_Health_SV.PeHealth s0);
-        eq(s0.peHealthMode, HealthMode.'FaultMode');
+        eq(s0.peHealthMode, HealthMode.FaultMode);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
@@ -1965,45 +1993,45 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
         eq(s0.decCount, false);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==true) {
 //output subgoal
 //outputSubgoalCreation
         ends(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-          eq(s0.peState, PositionEstimatorState.'PE_Restart');
-          eq(s0.status, ReturnStatus.'OK');
+          eq(s0.peState, PositionEstimatorState.PE_Restart);
+          eq(s0.status, ReturnStatus.OK);
           eq(s0.statusFlag, false);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==true) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___PE_Health_SV.PeHealth s0);
-          eq(s0.peHealthMode, HealthMode.'NoFaultMode');
+          eq(s0.peHealthMode, HealthMode.NoFaultMode);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
 //output subgoal
@@ -2015,55 +2043,55 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'UserDefinedFaultTriggered') {
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'UserDefinedFaultTriggered') {
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'UserDefinedFaultTriggered') {
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-          eq(s0.__DDL__state, RoverStationaryState.'Standby');
-          eq(s0.pred, RoverStateConnectors.'ViaPointAction');
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'UserDefinedFaultTriggered') {
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'UserDefinedFaultUntriggered') {
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultUntriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
-        eq(s0.tempestPlannerMode, TempestPlannerMode.'RePlan');
+        eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'UserDefinedFaultUntriggered') {
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultUntriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'LocalRecovery') {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
 //output subgoal
 //outputSubgoalCreation
         ends(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
@@ -2071,42 +2099,42 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'LocalRecovery') {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-          eq(s0.__DDL__state, RoverStationaryState.'Standby');
-          eq(s0.pred, RoverStateConnectors.'ViaPointAction');
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
     if (hmStatusFlag==true) {
-      if (actionType==RoverStateConnectors.'ViaPointAction') {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___VC_Health_SV.VcHealth s0);
-        eq(s0.vcHealthMode, HealthMode.'FaultMode');
+        eq(s0.vcHealthMode, HealthMode.FaultMode);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
     if (hmStatusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
@@ -2115,43 +2143,43 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
         eq(s0.decCount, false);
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
     if (hmStatusFlag==true) {
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==true) {
 //output subgoal
 //outputSubgoalCreation
         ends(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-          eq(s0.vcState, VehicleControllerState.'VC_Restart');
+          eq(s0.vcState, VehicleControllerState.VC_Restart);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==true) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___VC_Health_SV.VcHealth s0);
-          eq(s0.vcHealthMode, HealthMode.'NoFaultMode');
+          eq(s0.vcHealthMode, HealthMode.NoFaultMode);
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
 //output subgoal
@@ -2163,7 +2191,7 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
       }
     }
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashUntriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
     if (hmStatusFlag==true) {
       if (recoveryInProgress==false) {
       }
@@ -2171,7 +2199,7 @@ TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
   }
   if (hmStatusFlag==false) {
     eq(duration, [3 60000]);
-    eq(hmStatus, HealthMonitorStatus.'NoFault');
+    eq(hmStatus, HealthMonitorStatus.NoFault);
   }
 }
 
@@ -2193,126 +2221,126 @@ TEMPEST_Class___RoverOperationMode_SV::GoToAutonomousMode {
 }
 
 TEMPEST_Class___VehicleController_SV::VehicleController {
-  if (vcState==VehicleControllerState.'VC_AchieveSteadyState') {
+  if (vcState==VehicleControllerState.VC_AchieveSteadyState) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-      eq(s0.vcState, VehicleControllerState.'VC_ConfirmStop');
+      eq(s0.vcState, VehicleControllerState.VC_ConfirmStop);
       eq(s0.afterRecovery, afterRecovery);
   }
-  if (vcState==VehicleControllerState.'VC_CannotRecover') {
+  if (vcState==VehicleControllerState.VC_CannotRecover) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
-      eq(s0.opMsg, NotifyOperatorMessage.'VcCrashRecoveryFailed');
+      eq(s0.opMsg, NotifyOperatorMessage.VcCrashRecoveryFailed);
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStart') {
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
 //output subgoal
 //outputSubgoalCreation
     contained_by(TEMPEST_Class___SStopClear_SV.SStopClearAction s0);
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStop') {
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
 //output subgoal
 //outputSubgoalCreation
     contained_by(TEMPEST_Class___SStopSet_SV.SStopSetAction s0);
       eq(s0.closedLoop, true);
   }
-  if (vcState==VehicleControllerState.'VC_Nominal') {
+  if (vcState==VehicleControllerState.VC_Nominal) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-      eq(s0.vcState, VehicleControllerState.'VC_OpenLoopStop');
+      eq(s0.vcState, VehicleControllerState.VC_OpenLoopStop);
   }
-  if (vcState==VehicleControllerState.'VC_OpenLoopStop') {
+  if (vcState==VehicleControllerState.VC_OpenLoopStop) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-      eq(s0.vcState, VehicleControllerState.'VC_Restart');
+      eq(s0.vcState, VehicleControllerState.VC_Restart);
       eq(s0.afterRecovery, afterRecovery);
   }
-  if (vcState==VehicleControllerState.'VC_OpenLoopStop') {
+  if (vcState==VehicleControllerState.VC_OpenLoopStop) {
 //output subgoal
 //outputSubgoalCreation
     contained_by(TEMPEST_Class___SStopSet_SV.SStopSetAction s0);
       eq(s0.closedLoop, false);
   }
-  if (vcState==VehicleControllerState.'VC_AchieveSteadyState') {
+  if (vcState==VehicleControllerState.VC_AchieveSteadyState) {
     eq(duration, [3 12]);
   }
-  if (vcState==VehicleControllerState.'VC_CannotRecover') {
+  if (vcState==VehicleControllerState.VC_CannotRecover) {
     eq(duration, [3 60000]);
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStart') {
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
     if (timedOut==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-        eq(s0.vcState, VehicleControllerState.'VC_CannotRecover');
+        eq(s0.vcState, VehicleControllerState.VC_CannotRecover);
     }
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStart') {
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
     if (timedOut==true) {
     }
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStart') {
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
     if (timedOut==false) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-        eq(s0.vcState, VehicleControllerState.'VC_Nominal');
+        eq(s0.vcState, VehicleControllerState.VC_Nominal);
         eq(s0.afterRecovery, afterRecovery);
     }
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStart') {
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
     if (timedOut==false) {
     }
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStart') {
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
     eq(duration, [3 6]);
     condeq(timedOut, 6, duration);
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStop') {
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
     if (timedOut==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-        eq(s0.vcState, VehicleControllerState.'VC_CannotRecover');
+        eq(s0.vcState, VehicleControllerState.VC_CannotRecover);
     }
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStop') {
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
     if (timedOut==true) {
     }
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStop') {
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
     if (timedOut==false) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-        eq(s0.vcState, VehicleControllerState.'VC_ConfirmStart');
+        eq(s0.vcState, VehicleControllerState.VC_ConfirmStart);
         eq(s0.afterRecovery, afterRecovery);
     }
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStop') {
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
     if (timedOut==false) {
     }
   }
-  if (vcState==VehicleControllerState.'VC_ConfirmStop') {
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
     eq(duration, [3 6]);
     condeq(timedOut, 6, duration);
   }
-  if (vcState==VehicleControllerState.'VC_Nominal') {
+  if (vcState==VehicleControllerState.VC_Nominal) {
     if (afterRecovery==true) {
 //output subgoal
 //outputSubgoalCreation
       starts(TEMPEST_Class___VC_Health_SV.VcHealth s0);
-        eq(s0.vcHealthMode, HealthMode.'NoFaultMode');
+        eq(s0.vcHealthMode, HealthMode.NoFaultMode);
     }
   }
-  if (vcState==VehicleControllerState.'VC_Nominal') {
+  if (vcState==VehicleControllerState.VC_Nominal) {
     if (afterRecovery==true) {
     }
   }
-  if (vcState==VehicleControllerState.'VC_Nominal') {
+  if (vcState==VehicleControllerState.VC_Nominal) {
     if (afterRecovery==true) {
 //output subgoal
 //outputSubgoalCreation
@@ -2322,42 +2350,42 @@ TEMPEST_Class___VehicleController_SV::VehicleController {
         eq(s0.activeFaultUntriggered, true);
     }
   }
-  if (vcState==VehicleControllerState.'VC_Nominal') {
+  if (vcState==VehicleControllerState.VC_Nominal) {
     if (afterRecovery==true) {
     }
   }
-  if (vcState==VehicleControllerState.'VC_Nominal') {
+  if (vcState==VehicleControllerState.VC_Nominal) {
     eq(duration, [3 60000]);
   }
-  if (vcState==VehicleControllerState.'VC_OpenLoopStop') {
+  if (vcState==VehicleControllerState.VC_OpenLoopStop) {
     eq(duration, [3 60000]);
   }
-  if (vcState==VehicleControllerState.'VC_Restart') {
+  if (vcState==VehicleControllerState.VC_Restart) {
     if (timedOut==false) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-        eq(s0.vcState, VehicleControllerState.'VC_ConfirmStop');
+        eq(s0.vcState, VehicleControllerState.VC_ConfirmStop);
         eq(s0.afterRecovery, afterRecovery);
     }
   }
-  if (vcState==VehicleControllerState.'VC_Restart') {
+  if (vcState==VehicleControllerState.VC_Restart) {
     if (timedOut==false) {
     }
   }
-  if (vcState==VehicleControllerState.'VC_Restart') {
+  if (vcState==VehicleControllerState.VC_Restart) {
     if (timedOut==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-        eq(s0.vcState, VehicleControllerState.'VC_CannotRecover');
+        eq(s0.vcState, VehicleControllerState.VC_CannotRecover);
     }
   }
-  if (vcState==VehicleControllerState.'VC_Restart') {
+  if (vcState==VehicleControllerState.VC_Restart) {
     if (timedOut==true) {
     }
   }
-  if (vcState==VehicleControllerState.'VC_Restart') {
+  if (vcState==VehicleControllerState.VC_Restart) {
     eq(duration, [3 120]);
     condeq(timedOut, 120, duration);
   }
@@ -2365,150 +2393,150 @@ TEMPEST_Class___VehicleController_SV::VehicleController {
 
 TEMPEST_Class___VC_Health_SV::VcHealth {
   eq(duration, [3 60000]);
-  if (vcHealthMode==HealthMode.'FaultMode') {
+  if (vcHealthMode==HealthMode.FaultMode) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___VC_Health_SV.VcHealth s0);
-      eq(s0.vcHealthMode, HealthMode.'NoFaultMode');
+      eq(s0.vcHealthMode, HealthMode.NoFaultMode);
   }
-  if (vcHealthMode==HealthMode.'NoFaultMode') {
+  if (vcHealthMode==HealthMode.NoFaultMode) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___VC_Health_SV.VcHealth s0);
-      eq(s0.vcHealthMode, HealthMode.'FaultMode');
+      eq(s0.vcHealthMode, HealthMode.FaultMode);
   }
-  if (vcHealthMode==HealthMode.'FaultMode') {
+  if (vcHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
 //output subgoal
 //outputSubgoalCreation
       met_by(TEMPEST_Class___RoverOperationMode_SV.GoToAutonomousMode s0);
     }
   }
-  if (vcHealthMode==HealthMode.'FaultMode') {
+  if (vcHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
     }
   }
-  if (vcHealthMode==HealthMode.'FaultMode') {
+  if (vcHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
 //output subgoal
 //outputSubgoalCreation
       starts(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
     }
   }
-  if (vcHealthMode==HealthMode.'FaultMode') {
+  if (vcHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
     }
   }
 }
 
 TEMPEST_Class___Navigator_SV::Navigator {
-  if (navState==NavigatorState.'NAV_AchieveSteadyState') {
+  if (navState==NavigatorState.NAV_AchieveSteadyState) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___Navigator_SV.Navigator s0);
-      eq(s0.navState, NavigatorState.'NAV_ConfirmStart');
+      eq(s0.navState, NavigatorState.NAV_ConfirmStart);
       eq(s0.afterRecovery, afterRecovery);
   }
-  if (navState==NavigatorState.'NAV_CannotRecover') {
+  if (navState==NavigatorState.NAV_CannotRecover) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
-      eq(s0.opMsg, NotifyOperatorMessage.'NavCrashRecoveryFailed');
+      eq(s0.opMsg, NotifyOperatorMessage.NavCrashRecoveryFailed);
   }
-  if (navState==NavigatorState.'NAV_ConfirmStart') {
+  if (navState==NavigatorState.NAV_ConfirmStart) {
 //output subgoal
 //outputSubgoalCreation
     contained_by(TEMPEST_Class___SStopClear_SV.SStopClearAction s0);
   }
-  if (navState==NavigatorState.'NAV_ConfirmStop') {
+  if (navState==NavigatorState.NAV_ConfirmStop) {
 //output subgoal
 //outputSubgoalCreation
     contained_by(TEMPEST_Class___SStopSet_SV.SStopSetAction s0);
       eq(s0.closedLoop, true);
   }
-  if (navState==NavigatorState.'NAV_Nominal') {
+  if (navState==NavigatorState.NAV_Nominal) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___Navigator_SV.Navigator s0);
-      eq(s0.navState, NavigatorState.'NAV_ConfirmStop');
+      eq(s0.navState, NavigatorState.NAV_ConfirmStop);
   }
-  if (navState==NavigatorState.'NAV_AchieveSteadyState') {
+  if (navState==NavigatorState.NAV_AchieveSteadyState) {
     eq(duration, [3 12]);
   }
-  if (navState==NavigatorState.'NAV_CannotRecover') {
+  if (navState==NavigatorState.NAV_CannotRecover) {
     eq(duration, [3 60000]);
   }
-  if (navState==NavigatorState.'NAV_ConfirmStart') {
+  if (navState==NavigatorState.NAV_ConfirmStart) {
     if (timedOut==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___Navigator_SV.Navigator s0);
-        eq(s0.navState, NavigatorState.'NAV_CannotRecover');
+        eq(s0.navState, NavigatorState.NAV_CannotRecover);
     }
   }
-  if (navState==NavigatorState.'NAV_ConfirmStart') {
+  if (navState==NavigatorState.NAV_ConfirmStart) {
     if (timedOut==true) {
     }
   }
-  if (navState==NavigatorState.'NAV_ConfirmStart') {
+  if (navState==NavigatorState.NAV_ConfirmStart) {
     if (timedOut==false) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___Navigator_SV.Navigator s0);
-        eq(s0.navState, NavigatorState.'NAV_Nominal');
+        eq(s0.navState, NavigatorState.NAV_Nominal);
         eq(s0.afterRecovery, afterRecovery);
     }
   }
-  if (navState==NavigatorState.'NAV_ConfirmStart') {
+  if (navState==NavigatorState.NAV_ConfirmStart) {
     if (timedOut==false) {
     }
   }
-  if (navState==NavigatorState.'NAV_ConfirmStart') {
+  if (navState==NavigatorState.NAV_ConfirmStart) {
     eq(duration, [3 6]);
     condeq(timedOut, 6, duration);
   }
-  if (navState==NavigatorState.'NAV_ConfirmStop') {
+  if (navState==NavigatorState.NAV_ConfirmStop) {
     if (timedOut==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___Navigator_SV.Navigator s0);
-        eq(s0.navState, NavigatorState.'NAV_CannotRecover');
+        eq(s0.navState, NavigatorState.NAV_CannotRecover);
     }
   }
-  if (navState==NavigatorState.'NAV_ConfirmStop') {
+  if (navState==NavigatorState.NAV_ConfirmStop) {
     if (timedOut==true) {
     }
   }
-  if (navState==NavigatorState.'NAV_ConfirmStop') {
+  if (navState==NavigatorState.NAV_ConfirmStop) {
     if (timedOut==false) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___Navigator_SV.Navigator s0);
-        eq(s0.navState, NavigatorState.'NAV_Restart');
+        eq(s0.navState, NavigatorState.NAV_Restart);
         eq(s0.afterRecovery, afterRecovery);
     }
   }
-  if (navState==NavigatorState.'NAV_ConfirmStop') {
+  if (navState==NavigatorState.NAV_ConfirmStop) {
     if (timedOut==false) {
     }
   }
-  if (navState==NavigatorState.'NAV_ConfirmStop') {
+  if (navState==NavigatorState.NAV_ConfirmStop) {
     eq(duration, [3 6]);
     condeq(timedOut, 6, duration);
   }
-  if (navState==NavigatorState.'NAV_Nominal') {
+  if (navState==NavigatorState.NAV_Nominal) {
     if (afterRecovery==true) {
 //output subgoal
 //outputSubgoalCreation
       starts(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
-        eq(s0.navHealthMode, HealthMode.'NoFaultMode');
+        eq(s0.navHealthMode, HealthMode.NoFaultMode);
     }
   }
-  if (navState==NavigatorState.'NAV_Nominal') {
+  if (navState==NavigatorState.NAV_Nominal) {
     if (afterRecovery==true) {
     }
   }
-  if (navState==NavigatorState.'NAV_Nominal') {
+  if (navState==NavigatorState.NAV_Nominal) {
     if (afterRecovery==true) {
 //output subgoal
 //outputSubgoalCreation
@@ -2518,182 +2546,182 @@ TEMPEST_Class___Navigator_SV::Navigator {
         eq(s0.activeFaultUntriggered, true);
     }
   }
-  if (navState==NavigatorState.'NAV_Nominal') {
+  if (navState==NavigatorState.NAV_Nominal) {
     if (afterRecovery==true) {
     }
   }
-  if (navState==NavigatorState.'NAV_Nominal') {
+  if (navState==NavigatorState.NAV_Nominal) {
     eq(duration, [3 60000]);
   }
-  if (navState==NavigatorState.'NAV_Restart') {
+  if (navState==NavigatorState.NAV_Restart) {
     eq(duration, [3 120]);
   }
-  if (navState==NavigatorState.'NAV_Restart') {
+  if (navState==NavigatorState.NAV_Restart) {
     if (timedOut==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___Navigator_SV.Navigator s0);
-        eq(s0.navState, NavigatorState.'NAV_CannotRecover');
+        eq(s0.navState, NavigatorState.NAV_CannotRecover);
     }
   }
-  if (navState==NavigatorState.'NAV_Restart') {
+  if (navState==NavigatorState.NAV_Restart) {
     if (timedOut==true) {
     }
   }
-  if (navState==NavigatorState.'NAV_Restart') {
+  if (navState==NavigatorState.NAV_Restart) {
     if (timedOut==false) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___Navigator_SV.Navigator s0);
-        eq(s0.navState, NavigatorState.'NAV_ConfirmStart');
+        eq(s0.navState, NavigatorState.NAV_ConfirmStart);
         eq(s0.afterRecovery, afterRecovery);
     }
   }
-  if (navState==NavigatorState.'NAV_Restart') {
+  if (navState==NavigatorState.NAV_Restart) {
     if (timedOut==false) {
     }
   }
-  if (navState==NavigatorState.'NAV_Restart') {
+  if (navState==NavigatorState.NAV_Restart) {
     condeq(timedOut, 120, duration);
   }
 }
 
 TEMPEST_Class___NAV_Health_SV::NavHealth {
   eq(duration, [3 60000]);
-  if (navHealthMode==HealthMode.'FaultMode') {
+  if (navHealthMode==HealthMode.FaultMode) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
-      eq(s0.navHealthMode, HealthMode.'NoFaultMode');
+      eq(s0.navHealthMode, HealthMode.NoFaultMode);
   }
-  if (navHealthMode==HealthMode.'NoFaultMode') {
+  if (navHealthMode==HealthMode.NoFaultMode) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
-      eq(s0.navHealthMode, HealthMode.'FaultMode');
+      eq(s0.navHealthMode, HealthMode.FaultMode);
   }
-  if (navHealthMode==HealthMode.'FaultMode') {
+  if (navHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
 //output subgoal
 //outputSubgoalCreation
       met_by(TEMPEST_Class___RoverOperationMode_SV.GoToAutonomousMode s0);
     }
   }
-  if (navHealthMode==HealthMode.'FaultMode') {
+  if (navHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
     }
   }
-  if (navHealthMode==HealthMode.'FaultMode') {
+  if (navHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
 //output subgoal
 //outputSubgoalCreation
       starts(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
     }
   }
-  if (navHealthMode==HealthMode.'FaultMode') {
+  if (navHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
     }
   }
 }
 
 TEMPEST_Class___PositionEstimator_SV::PositionEstimator {
-  if (peState==PositionEstimatorState.'PE_CannotRecover') {
+  if (peState==PositionEstimatorState.PE_CannotRecover) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
-      eq(s0.opMsg, NotifyOperatorMessage.'PeCrashRecoveryFailed');
+      eq(s0.opMsg, NotifyOperatorMessage.PeCrashRecoveryFailed);
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopClear') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
 //output subgoal
 //outputSubgoalCreation
     contained_by(TEMPEST_Class___SStopClear_SV.SStopClearAction s0);
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopSet') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
 //output subgoal
 //outputSubgoalCreation
     contained_by(TEMPEST_Class___SStopSet_SV.SStopSetAction s0);
       eq(s0.closedLoop, true);
   }
-  if (peState==PositionEstimatorState.'PE_Nominal') {
+  if (peState==PositionEstimatorState.PE_Nominal) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-      eq(s0.peState, PositionEstimatorState.'PE_ConfirmStopSet');
+      eq(s0.peState, PositionEstimatorState.PE_ConfirmStopSet);
   }
-  if (peState==PositionEstimatorState.'PE_CannotRecover') {
+  if (peState==PositionEstimatorState.PE_CannotRecover) {
     eq(duration, [3 60000]);
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopClear') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
     if (timedOut==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-        eq(s0.peState, PositionEstimatorState.'PE_CannotRecover');
+        eq(s0.peState, PositionEstimatorState.PE_CannotRecover);
     }
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopClear') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
     if (timedOut==true) {
     }
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopClear') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
     if (timedOut==false) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-        eq(s0.peState, PositionEstimatorState.'PE_Nominal');
+        eq(s0.peState, PositionEstimatorState.PE_Nominal);
         eq(s0.afterRecovery, afterRecovery);
     }
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopClear') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
     if (timedOut==false) {
     }
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopClear') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
     eq(duration, [3 6]);
     condeq(timedOut, 6, duration);
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopSet') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
     if (timedOut==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-        eq(s0.peState, PositionEstimatorState.'PE_CannotRecover');
+        eq(s0.peState, PositionEstimatorState.PE_CannotRecover);
     }
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopSet') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
     if (timedOut==true) {
     }
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopSet') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
     if (timedOut==false) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-        eq(s0.peState, PositionEstimatorState.'PE_Restart');
+        eq(s0.peState, PositionEstimatorState.PE_Restart);
         eq(s0.afterRecovery, afterRecovery);
     }
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopSet') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
     if (timedOut==false) {
     }
   }
-  if (peState==PositionEstimatorState.'PE_ConfirmStopSet') {
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
     eq(duration, [3 6]);
     condeq(timedOut, 6, duration);
   }
-  if (peState==PositionEstimatorState.'PE_Nominal') {
+  if (peState==PositionEstimatorState.PE_Nominal) {
     if (afterRecovery==true) {
 //output subgoal
 //outputSubgoalCreation
       starts(TEMPEST_Class___PE_Health_SV.PeHealth s0);
-        eq(s0.peHealthMode, HealthMode.'NoFaultMode');
+        eq(s0.peHealthMode, HealthMode.NoFaultMode);
     }
   }
-  if (peState==PositionEstimatorState.'PE_Nominal') {
+  if (peState==PositionEstimatorState.PE_Nominal) {
     if (afterRecovery==true) {
     }
   }
-  if (peState==PositionEstimatorState.'PE_Nominal') {
+  if (peState==PositionEstimatorState.PE_Nominal) {
     if (afterRecovery==true) {
 //output subgoal
 //outputSubgoalCreation
@@ -2703,82 +2731,82 @@ TEMPEST_Class___PositionEstimator_SV::PositionEstimator {
         eq(s0.activeFaultUntriggered, true);
     }
   }
-  if (peState==PositionEstimatorState.'PE_Nominal') {
+  if (peState==PositionEstimatorState.PE_Nominal) {
     if (afterRecovery==true) {
     }
   }
-  if (peState==PositionEstimatorState.'PE_Nominal') {
+  if (peState==PositionEstimatorState.PE_Nominal) {
     eq(duration, [3 60000]);
   }
-  if (peState==PositionEstimatorState.'PE_ResetRoverPosition') {
+  if (peState==PositionEstimatorState.PE_ResetRoverPosition) {
     eq(duration, [3 12]);
   }
-  if (peState==PositionEstimatorState.'PE_ResetRoverPosition') {
-    if (status==ReturnStatus.'OK') {
+  if (peState==PositionEstimatorState.PE_ResetRoverPosition) {
+    if (status==ReturnStatus.OK) {
       if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-          eq(s0.peState, PositionEstimatorState.'PE_ConfirmStopClear');
+          eq(s0.peState, PositionEstimatorState.PE_ConfirmStopClear);
           eq(s0.afterRecovery, afterRecovery);
       }
     }
   }
-  if (peState==PositionEstimatorState.'PE_ResetRoverPosition') {
-    if (status==ReturnStatus.'OK') {
+  if (peState==PositionEstimatorState.PE_ResetRoverPosition) {
+    if (status==ReturnStatus.OK) {
       if (statusFlag==true) {
       }
     }
   }
-  if (peState==PositionEstimatorState.'PE_ResetRoverPosition') {
+  if (peState==PositionEstimatorState.PE_ResetRoverPosition) {
     if (statusFlag==false) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-        eq(s0.peState, PositionEstimatorState.'PE_CannotRecover');
+        eq(s0.peState, PositionEstimatorState.PE_CannotRecover);
     }
   }
-  if (peState==PositionEstimatorState.'PE_ResetRoverPosition') {
+  if (peState==PositionEstimatorState.PE_ResetRoverPosition) {
     if (statusFlag==false) {
     }
   }
-  if (peState==PositionEstimatorState.'PE_Restart') {
+  if (peState==PositionEstimatorState.PE_Restart) {
     eq(duration, [3 120]);
   }
-  if (peState==PositionEstimatorState.'PE_Restart') {
+  if (peState==PositionEstimatorState.PE_Restart) {
     if (statusFlag==false) {
       if (timedOut==true) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-          eq(s0.peState, PositionEstimatorState.'PE_CannotRecover');
+          eq(s0.peState, PositionEstimatorState.PE_CannotRecover);
       }
     }
   }
-  if (peState==PositionEstimatorState.'PE_Restart') {
+  if (peState==PositionEstimatorState.PE_Restart) {
     if (statusFlag==false) {
       if (timedOut==true) {
       }
     }
   }
-  if (peState==PositionEstimatorState.'PE_Restart') {
+  if (peState==PositionEstimatorState.PE_Restart) {
     if (statusFlag==false) {
       if (timedOut==false) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-          eq(s0.peState, PositionEstimatorState.'PE_ResetRoverPosition');
+          eq(s0.peState, PositionEstimatorState.PE_ResetRoverPosition);
           eq(s0.afterRecovery, afterRecovery);
       }
     }
   }
-  if (peState==PositionEstimatorState.'PE_Restart') {
+  if (peState==PositionEstimatorState.PE_Restart) {
     if (statusFlag==false) {
       if (timedOut==false) {
       }
     }
   }
-  if (peState==PositionEstimatorState.'PE_Restart') {
+  if (peState==PositionEstimatorState.PE_Restart) {
     if (statusFlag==false) {
       condeq(timedOut, 120, duration);
     }
@@ -2787,37 +2815,37 @@ TEMPEST_Class___PositionEstimator_SV::PositionEstimator {
 
 TEMPEST_Class___PE_Health_SV::PeHealth {
   eq(duration, [3 60000]);
-  if (peHealthMode==HealthMode.'FaultMode') {
+  if (peHealthMode==HealthMode.FaultMode) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___PE_Health_SV.PeHealth s0);
-      eq(s0.peHealthMode, HealthMode.'NoFaultMode');
+      eq(s0.peHealthMode, HealthMode.NoFaultMode);
   }
-  if (peHealthMode==HealthMode.'NoFaultMode') {
+  if (peHealthMode==HealthMode.NoFaultMode) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___PE_Health_SV.PeHealth s0);
-      eq(s0.peHealthMode, HealthMode.'FaultMode');
+      eq(s0.peHealthMode, HealthMode.FaultMode);
   }
-  if (peHealthMode==HealthMode.'FaultMode') {
+  if (peHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
 //output subgoal
 //outputSubgoalCreation
       met_by(TEMPEST_Class___RoverOperationMode_SV.GoToAutonomousMode s0);
     }
   }
-  if (peHealthMode==HealthMode.'FaultMode') {
+  if (peHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
     }
   }
-  if (peHealthMode==HealthMode.'FaultMode') {
+  if (peHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
 //output subgoal
 //outputSubgoalCreation
       starts(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
     }
   }
-  if (peHealthMode==HealthMode.'FaultMode') {
+  if (peHealthMode==HealthMode.FaultMode) {
     if (goToSafeguard==true) {
     }
   }
@@ -2825,22 +2853,22 @@ TEMPEST_Class___PE_Health_SV::PeHealth {
 
 TEMPEST_Class___NoArc_Health_SV::NoArcHealth {
   eq(duration, [3 60000]);
-  if (NoArcHealthMode==HealthMode.'FaultMode') {
+  if (NoArcHealthMode==HealthMode.FaultMode) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
   }
-  if (NoArcHealthMode==HealthMode.'FaultMode') {
+  if (NoArcHealthMode==HealthMode.FaultMode) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
-      eq(s0.NoArcHealthMode, HealthMode.'NoFaultMode');
+      eq(s0.NoArcHealthMode, HealthMode.NoFaultMode);
   }
-  if (NoArcHealthMode==HealthMode.'NoFaultMode') {
+  if (NoArcHealthMode==HealthMode.NoFaultMode) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
-      eq(s0.NoArcHealthMode, HealthMode.'FaultMode');
+      eq(s0.NoArcHealthMode, HealthMode.FaultMode);
   }
 }
 
@@ -2898,25 +2926,25 @@ TEMPEST_Class___SStopSet_Internal_SV::SStopSetAction_Internal {
 //output subgoal
 //outputSubgoalCreation
   meets(TEMPEST_Class___SStopSet_Internal_SV.SStopSetMode_Internal s0);
-  if (confirmMode==ConfirmationMode.'Sequential') {
+  if (confirmMode==ConfirmationMode.Sequential) {
 //output subgoal
 //outputSubgoalCreation
     met_by(TEMPEST_Class___SStopConfirm_SV.Confirmation s0);
-      eq(s0.status, ReturnStatus.'OK');
+      eq(s0.status, ReturnStatus.OK);
       eq(s0.statusFlag, sStopSetStatusFlag);
   }
-  if (confirmMode==ConfirmationMode.'Simultaneous') {
+  if (confirmMode==ConfirmationMode.Simultaneous) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___SStopConfirm_SV.Confirmation s0);
-      eq(s0.status, ReturnStatus.'OK');
+      eq(s0.status, ReturnStatus.OK);
       eq(s0.statusFlag, sStopSetStatusFlag);
   }
-  if (confirmMode==ConfirmationMode.'Sequential') {
+  if (confirmMode==ConfirmationMode.Sequential) {
     eq(duration, 3);
     eq(sStopSetStatusFlag, true);
   }
-  if (confirmMode==ConfirmationMode.'Simultaneous') {
+  if (confirmMode==ConfirmationMode.Simultaneous) {
     eq(duration, [3 6]);
   }
 }
@@ -2958,7 +2986,7 @@ TEMPEST_Class___RecoveryManager_SV::UpdateFaultCount {
 //output subgoal
 //outputSubgoalCreation
         starts(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
-          eq(s0.recMode, RecoveryDecisionMode.'ActivateReplan');
+          eq(s0.recMode, RecoveryDecisionMode.ActivateReplan);
       }
     }
   }
@@ -2985,19 +3013,19 @@ TEMPEST_Class___RecoveryManager_SV::UpdateFaultCount {
   }
   if (nextCount==2) {
     if (decCount==false) {
-      if (interruptibleFault==InterruptibleFaults.'NoArcFoundFault') {
+      if (interruptibleFault==InterruptibleFaults.NoArcFoundFault) {
 //output subgoal
 //outputSubgoalCreation
         starts_during(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
         temporaldistance(s0.start, [0 +inf], this.start);
         temporaldistance(this.start, [0 +inf], s0.end);
-          eq(s0.NoArcHealthMode, HealthMode.'FaultMode');
+          eq(s0.NoArcHealthMode, HealthMode.FaultMode);
       }
     }
   }
   if (nextCount==2) {
     if (decCount==false) {
-      if (interruptibleFault==InterruptibleFaults.'NoArcFoundFault') {
+      if (interruptibleFault==InterruptibleFaults.NoArcFoundFault) {
 //output subgoal
 //outputSubgoalCreation
         starts(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
@@ -3013,80 +3041,80 @@ TEMPEST_Class___RecoveryDecision_SV::RecoveryDecision {
 //output subgoal
 //outputSubgoalCreation
   meets(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
-  if (recMode==RecoveryDecisionMode.'ActivateNAV_Recovery') {
+  if (recMode==RecoveryDecisionMode.ActivateNAV_Recovery) {
 //output subgoal
 //outputSubgoalCreation
     starts_during(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
     temporaldistance(s0.start, [0 +inf], this.start);
     temporaldistance(this.start, [0 +inf], s0.end);
-      eq(s0.navHealthMode, HealthMode.'FaultMode');
+      eq(s0.navHealthMode, HealthMode.FaultMode);
   }
-  if (recMode==RecoveryDecisionMode.'ActivateNAV_Recovery') {
+  if (recMode==RecoveryDecisionMode.ActivateNAV_Recovery) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___Navigator_SV.Navigator s0);
-      eq(s0.navState, NavigatorState.'NAV_ConfirmStop');
+      eq(s0.navState, NavigatorState.NAV_ConfirmStop);
       eq(s0.afterRecovery, true);
   }
-  if (recMode==RecoveryDecisionMode.'ActivateNoArc_Recovery') {
+  if (recMode==RecoveryDecisionMode.ActivateNoArc_Recovery) {
 //output subgoal
 //outputSubgoalCreation
     starts_during(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
     temporaldistance(s0.start, [0 +inf], this.start);
     temporaldistance(this.start, [0 +inf], s0.end);
-      eq(s0.NoArcHealthMode, HealthMode.'FaultMode');
+      eq(s0.NoArcHealthMode, HealthMode.FaultMode);
   }
-  if (recMode==RecoveryDecisionMode.'ActivateNoArc_Recovery') {
+  if (recMode==RecoveryDecisionMode.ActivateNoArc_Recovery) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
   }
-  if (recMode==RecoveryDecisionMode.'ActivatePE_Recovery') {
+  if (recMode==RecoveryDecisionMode.ActivatePE_Recovery) {
 //output subgoal
 //outputSubgoalCreation
     starts_during(TEMPEST_Class___PE_Health_SV.PeHealth s0);
     temporaldistance(s0.start, [0 +inf], this.start);
     temporaldistance(this.start, [0 +inf], s0.end);
-      eq(s0.peHealthMode, HealthMode.'FaultMode');
+      eq(s0.peHealthMode, HealthMode.FaultMode);
   }
-  if (recMode==RecoveryDecisionMode.'ActivatePE_Recovery') {
+  if (recMode==RecoveryDecisionMode.ActivatePE_Recovery) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
-      eq(s0.peState, PositionEstimatorState.'PE_ConfirmStopSet');
+      eq(s0.peState, PositionEstimatorState.PE_ConfirmStopSet);
       eq(s0.afterRecovery, true);
   }
-  if (recMode==RecoveryDecisionMode.'ActivateReplan') {
+  if (recMode==RecoveryDecisionMode.ActivateReplan) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
-      eq(s0.recMode, RecoveryDecisionMode.'StayInactive');
+      eq(s0.recMode, RecoveryDecisionMode.StayInactive);
   }
-  if (recMode==RecoveryDecisionMode.'ActivateReplan') {
+  if (recMode==RecoveryDecisionMode.ActivateReplan) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
-      eq(s0.tempestPlannerMode, TempestPlannerMode.'RePlan');
+      eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
   }
-  if (recMode==RecoveryDecisionMode.'ActivateReplan') {
+  if (recMode==RecoveryDecisionMode.ActivateReplan) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___TEMPEST_SV.TEMPEST_Planning s0);
-      eq(s0.tempestPlannerMode, TempestPlannerMode.'RePlan');
+      eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
   }
-  if (recMode==RecoveryDecisionMode.'ActivateVC_Recovery') {
+  if (recMode==RecoveryDecisionMode.ActivateVC_Recovery) {
 //output subgoal
 //outputSubgoalCreation
     starts_during(TEMPEST_Class___VC_Health_SV.VcHealth s0);
     temporaldistance(s0.start, [0 +inf], this.start);
     temporaldistance(this.start, [0 +inf], s0.end);
-      eq(s0.vcHealthMode, HealthMode.'FaultMode');
+      eq(s0.vcHealthMode, HealthMode.FaultMode);
   }
-  if (recMode==RecoveryDecisionMode.'ActivateVC_Recovery') {
+  if (recMode==RecoveryDecisionMode.ActivateVC_Recovery) {
 //output subgoal
 //outputSubgoalCreation
     starts(TEMPEST_Class___VehicleController_SV.VehicleController s0);
-      eq(s0.vcState, VehicleControllerState.'VC_OpenLoopStop');
+      eq(s0.vcState, VehicleControllerState.VC_OpenLoopStop);
       eq(s0.afterRecovery, true);
   }
 }
@@ -3119,7 +3147,7 @@ InstrumentManager_Class___InstrumentManager_SV::InstrumentManager_Idle {
 //output subgoal
 //outputSubgoalCreation
     meets(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
-      eq(s0.pred, SciencePredecessor.'MET_BY_IDLE');
+      eq(s0.pred, SciencePredecessor.MET_BY_IDLE);
   }
 }
 
@@ -3128,406 +3156,406 @@ InstrumentManager_Class___InstrumentManager_SV::DoScience {
 //outputSubgoalCreation
   equals(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
     eq(s0.hmStatus, hmStatus);
-    eq(s0.actionType, RoverStateConnectors.'ScienceAction');
+    eq(s0.actionType, RoverStateConnectors.ScienceAction);
 //output subgoal
 //outputSubgoalCreation
   contained_by(TEMPEST_Class___VC_Health_SV.VcHealth s1);
-    eq(s1.vcHealthMode, HealthMode.'NoFaultMode');
+    eq(s1.vcHealthMode, HealthMode.NoFaultMode);
 //output subgoal
 //outputSubgoalCreation
   contained_by(TEMPEST_Class___NAV_Health_SV.NavHealth s2);
-    eq(s2.navHealthMode, HealthMode.'NoFaultMode');
+    eq(s2.navHealthMode, HealthMode.NoFaultMode);
 //output subgoal
 //outputSubgoalCreation
   contained_by(TEMPEST_Class___PE_Health_SV.PeHealth s3);
-    eq(s3.peHealthMode, HealthMode.'NoFaultMode');
+    eq(s3.peHealthMode, HealthMode.NoFaultMode);
 //output subgoal
 //outputSubgoalCreation
   contained_by(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s4);
-    eq(s4.NoArcHealthMode, HealthMode.'NoFaultMode');
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+    eq(s4.NoArcHealthMode, HealthMode.NoFaultMode);
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
-      eq(s0.pred, RoverStateConnectors.'ScienceAction');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.ScienceAction);
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
-      eq(s0.pred, SciencePredecessor.'MET_BY_SCIENCE');
-      eq(s0.hmStatus, HealthMonitorStatus.'NavigatorCrashTriggered');
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+      eq(s0.hmStatus, HealthMonitorStatus.NavigatorCrashTriggered);
   }
-  if (hmStatus==HealthMonitorStatus.'NavigatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
       eq(s0.argument, argument);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
-      eq(s0.status, CompletionStatus.'Fault');
+      eq(s0.status, CompletionStatus.Fault);
       eq(s0.statusFlag, true);
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
-      eq(s0.pred, RoverStateConnectors.'ScienceAction');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.ScienceAction);
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
-      eq(s0.pred, SciencePredecessor.'MET_BY_SCIENCE');
-      eq(s0.hmStatus, HealthMonitorStatus.'NoArcFoundTriggered');
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+      eq(s0.hmStatus, HealthMonitorStatus.NoArcFoundTriggered);
   }
-  if (hmStatus==HealthMonitorStatus.'NoArcFoundTriggered') {
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
       eq(s0.argument, argument);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
-      eq(s0.status, CompletionStatus.'Fault');
+      eq(s0.status, CompletionStatus.Fault);
       eq(s0.statusFlag, true);
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
-      eq(s0.pred, RoverStateConnectors.'ScienceAction');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.ScienceAction);
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
-      eq(s0.pred, SciencePredecessor.'MET_BY_SCIENCE');
-      eq(s0.hmStatus, HealthMonitorStatus.'PositionEstimatorCrashTriggered');
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+      eq(s0.hmStatus, HealthMonitorStatus.PositionEstimatorCrashTriggered);
   }
-  if (hmStatus==HealthMonitorStatus.'PositionEstimatorCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
       eq(s0.argument, argument);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
-      eq(s0.status, CompletionStatus.'Fault');
+      eq(s0.status, CompletionStatus.Fault);
       eq(s0.statusFlag, true);
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-      eq(s0.__DDL__state, RoverStationaryState.'Standby');
-      eq(s0.pred, RoverStateConnectors.'ScienceAction');
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.ScienceAction);
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
-      eq(s0.pred, SciencePredecessor.'MET_BY_SCIENCE');
-      eq(s0.hmStatus, HealthMonitorStatus.'VehicleControllerCrashTriggered');
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+      eq(s0.hmStatus, HealthMonitorStatus.VehicleControllerCrashTriggered);
   }
-  if (hmStatus==HealthMonitorStatus.'VehicleControllerCrashTriggered') {
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
 //output subgoal
 //outputSubgoalCreation
     ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
       eq(s0.argument, argument);
       eq(s0.flexEndTimeCache, flexEndTimeCache);
-      eq(s0.status, CompletionStatus.'Fault');
+      eq(s0.status, CompletionStatus.Fault);
       eq(s0.statusFlag, true);
   }
-  if (pred==SciencePredecessor.'MET_BY_IDLE') {
+  if (pred==SciencePredecessor.MET_BY_IDLE) {
 //output subgoal
 //outputSubgoalCreation
     met_by(InstrumentManager_Class___InstrumentManager_SV.InstrumentManager_Idle s0);
   }
-  if (pred==SciencePredecessor.'MET_BY_SCIENCE') {
+  if (pred==SciencePredecessor.MET_BY_SCIENCE) {
 //output subgoal
 //outputSubgoalCreation
     met_by(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
-      eq(s0.succ, ScienceSuccessor.'MEETS_SCIENCE');
+      eq(s0.succ, ScienceSuccessor.MEETS_SCIENCE);
   }
-  if (pred==SciencePredecessor.'MET_BY_TIMEOUT') {
+  if (pred==SciencePredecessor.MET_BY_TIMEOUT) {
 //output subgoal
 //outputSubgoalCreation
     met_by(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
-      eq(s0.succ, ScienceSuccessor.'MEETS_SCIENCE');
+      eq(s0.succ, ScienceSuccessor.MEETS_SCIENCE);
   }
-  if (succ==ScienceSuccessor.'MEETS_IDLE') {
+  if (succ==ScienceSuccessor.MEETS_IDLE) {
 //output subgoal
 //outputSubgoalCreation
     meets(InstrumentManager_Class___InstrumentManager_SV.InstrumentManager_Idle s0);
   }
-  if (succ==ScienceSuccessor.'MEETS_SCIENCE') {
+  if (succ==ScienceSuccessor.MEETS_SCIENCE) {
 //output subgoal
 //outputSubgoalCreation
     meets(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
-      eq(s0.pred, SciencePredecessor.'MET_BY_SCIENCE');
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
   }
-  if (succ==ScienceSuccessor.'MEETS_TIMEOUT') {
+  if (succ==ScienceSuccessor.MEETS_TIMEOUT) {
 //output subgoal
 //outputSubgoalCreation
     meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
-      eq(s0.pred, SciencePredecessor.'MET_BY_SCIENCE');
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-        eq(s0.__DDL__state, RoverStationaryState.'Standby');
-        eq(s0.pred, RoverStateConnectors.'ScienceAction');
+        eq(s0.__DDL__state, RoverStationaryState.Standby);
+        eq(s0.pred, RoverStateConnectors.ScienceAction);
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
-        eq(s0.tempestPlannerMode, TempestPlannerMode.'RePlan');
+        eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
         eq(s0.argument, argument);
         eq(s0.flexEndTimeCache, flexEndTimeCache);
-        eq(s0.status, CompletionStatus.'Failure');
+        eq(s0.status, CompletionStatus.Failure);
         eq(s0.statusFlag, true);
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
           meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-            eq(s0.pred, RoverStateConnectors.'ScienceAction');
+            eq(s0.pred, RoverStateConnectors.ScienceAction);
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
           meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
-            eq(s0.tempestPlannerMode, TempestPlannerMode.'RePlan');
+            eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
           ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
             eq(s0.argument, argument);
             eq(s0.flexEndTimeCache, flexEndTimeCache);
-            eq(s0.status, CompletionStatus.'EarlyReturn');
+            eq(s0.status, CompletionStatus.EarlyReturn);
             eq(s0.statusFlag, true);
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==true) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==false) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
           ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
             eq(s0.argument, argument);
             eq(s0.flexEndTimeCache, flexEndTimeCache);
-            eq(s0.status, CompletionStatus.'Nominal');
+            eq(s0.status, CompletionStatus.Nominal);
             eq(s0.statusFlag, true);
         }
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       if (earlyFlag==false) {
-        if (hmStatus==HealthMonitorStatus.'NoFault') {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
         }
       }
     }
   }
-//  if (status==ReturnStatus.'OK') {
+//  if (status==ReturnStatus.OK) {
 //    if (statusFlag==true) {
-//      if (hmStatus==HealthMonitorStatus.'NoFault') {
+//      if (hmStatus==HealthMonitorStatus.NoFault) {
 //        CommandCompletedEarly(earlyFlag, end, flexEndTimeCache);
 //      }
 //    }
 //  }
   if (statusFlag==false) {
-    if (hmStatus==HealthMonitorStatus.'NoFault') {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
       ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
         eq(s0.argument, argument);
         eq(s0.flexEndTimeCache, flexEndTimeCache);
-        eq(s0.status, CompletionStatus.'Timeout');
+        eq(s0.status, CompletionStatus.Timeout);
     }
   }
   if (statusFlag==false) {
-    if (hmStatus==HealthMonitorStatus.'NoFault') {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
     }
   }
   if (statusFlag==false) {
-    if (hmStatus==HealthMonitorStatus.'NoFault') {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
       meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
-        eq(s0.pred, SciencePredecessor.'MET_BY_SCIENCE');
-        eq(s0.hmStatus, HealthMonitorStatus.'NoFault');
+        eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+        eq(s0.hmStatus, HealthMonitorStatus.NoFault);
     }
   }
   if (statusFlag==false) {
-    if (hmStatus==HealthMonitorStatus.'NoFault') {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
     }
   }
   if (statusFlag==false) {
-    if (hmStatus==HealthMonitorStatus.'NoFault') {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
-        eq(s0.__DDL__state, RoverStationaryState.'Standby');
-        eq(s0.pred, RoverStateConnectors.'ScienceAction');
+        eq(s0.__DDL__state, RoverStationaryState.Standby);
+        eq(s0.pred, RoverStateConnectors.ScienceAction);
     }
   }
   if (statusFlag==false) {
-    if (hmStatus==HealthMonitorStatus.'NoFault') {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
     }
   }
 }
 
 InstrumentManager_Class___InstrumentManager_SV::Abort {
   eq(duration, [3 36]);
-  if (pred==SciencePredecessor.'MET_BY_SCIENCE') {
+  if (pred==SciencePredecessor.MET_BY_SCIENCE) {
 //output subgoal
 //outputSubgoalCreation
     met_by(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
-      eq(s0.succ, ScienceSuccessor.'MEETS_TIMEOUT');
+      eq(s0.succ, ScienceSuccessor.MEETS_TIMEOUT);
   }
   if (statusFlag==false) {
 //output subgoal
 //outputSubgoalCreation
     meets(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
-      eq(s0.opMsg, NotifyOperatorMessage.'IMAbortFailed');
+      eq(s0.opMsg, NotifyOperatorMessage.IMAbortFailed);
   }
   if (statusFlag==false) {
 //output subgoal
 //outputSubgoalCreation
     meets(Local_Mode_Class___Local_Mode_SV.Local_Abort s0);
   }
-  if (succ==ScienceSuccessor.'MEETS_IDLE') {
+  if (succ==ScienceSuccessor.MEETS_IDLE) {
 //output subgoal
 //outputSubgoalCreation
     meets(InstrumentManager_Class___InstrumentManager_SV.InstrumentManager_Idle s0);
   }
-  if (succ==ScienceSuccessor.'MEETS_SCIENCE') {
+  if (succ==ScienceSuccessor.MEETS_SCIENCE) {
 //output subgoal
 //outputSubgoalCreation
     meets(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
-      eq(s0.pred, SciencePredecessor.'MET_BY_TIMEOUT');
+      eq(s0.pred, SciencePredecessor.MET_BY_TIMEOUT);
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
-        eq(s0.opMsg, NotifyOperatorMessage.'IMAbortFailed');
+        eq(s0.opMsg, NotifyOperatorMessage.IMAbortFailed);
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
 //output subgoal
 //outputSubgoalCreation
       meets(Local_Mode_Class___Local_Mode_SV.Local_Abort s0);
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
     }
   }
-  if (status==ReturnStatus.'Failed') {
+  if (status==ReturnStatus.Failed) {
     if (statusFlag==true) {
       eq(duration, [3 36]);
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
       eq(duration, [3 36]);
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
-      if (hmStatus==HealthMonitorStatus.'NoFault') {
+      if (hmStatus==HealthMonitorStatus.NoFault) {
 //output subgoal
 //outputSubgoalCreation
         meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
-          eq(s0.tempestPlannerMode, TempestPlannerMode.'RePlan');
+          eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
-      if (hmStatus==HealthMonitorStatus.'NoFault') {
+      if (hmStatus==HealthMonitorStatus.NoFault) {
       }
     }
   }
-  if (status==ReturnStatus.'OK') {
+  if (status==ReturnStatus.OK) {
     if (statusFlag==true) {
-      if (hmStatus==HealthMonitorStatus.'NoFault') {
+      if (hmStatus==HealthMonitorStatus.NoFault) {
         eq(duration, [3 36]);
       }
     }
