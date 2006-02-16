@@ -35,6 +35,9 @@ namespace EUROPA {
     class Solver;
     typedef Id<Solver> SolverId;
 
+    class Context;
+    typedef Id<Context> ContextId;
+
     typedef std::vector<DecisionPointId> DecisionStack;
 
     typedef double Priority; /*!< Used to reference to the priority used in calculating heuristics. */

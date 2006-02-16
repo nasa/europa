@@ -22,6 +22,7 @@
 #include "MatchingEngine.hh"
 #include "HSTSDecisionPoints.hh"
 #include "PlanDatabaseWriter.hh"
+#include "Context.hh"
 
 /**
  * @file Provides module tests for Solver Module.
@@ -1422,6 +1423,7 @@ public:
     runTest(testBacktrackFirstDecisionPoint);
     runTest(testMultipleSolutionsSearch);
     runTest(testGNATS_3196);
+    runTest(testContext);
     return true;
   }
 
@@ -1657,6 +1659,23 @@ private:
     TokenId onlyToken = *(assembly.getPlanDatabase()->getTokens().begin());
     onlyToken->discard();
     assertTrue(solver.solve(1));
+    return true;
+  }
+
+  static bool testContext() {
+    StandardAssembly assembly(Schema::instance());
+    std::stringstream data;
+    data << "<Solver name=\"TestSolver\">" << std::endl;
+    data << "</Solver>" << std::endl;
+    std::string xml = data.str();
+    TiXmlElement* root = initXml(xml);
+    Solver solver(assembly.getPlanDatabase(), *root);
+    ContextId ctx = solver.getContext();
+    assertTrue(ctx->getName() == LabelStr(solver.getName().toString() + "Context"));
+    ctx->put("foo", 1);
+    assertTrue(ctx->get("foo") == 1);
+    assertTrue(solver.getContext()->get("foo") == 1);
+    ctx->remove("foo");
     return true;
   }
 };
