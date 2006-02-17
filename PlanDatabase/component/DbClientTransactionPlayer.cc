@@ -609,11 +609,11 @@ namespace EUROPA {
       check_error(ALWAYS_FAILS, "Failed to process transaction for " + ident + ":" + name);
     }
     ConstrainedVariableId var = m_variables[ident];
-    check_error(var.isValid(), "Invalid id for " + ident);
+    checkError(var.isValid(), "Invalid id for " << ident);
     ObjectId object = var->lastDomain().getSingletonValue();
-    check_error(object.isValid());
+    checkError(object.isValid(), "Invalid object for " << ident);
     var = object->getVariable(LabelStr(varString));
-    check_error(var.isValid());
+    checkError(var.isValid(), varString << " not found on " << object->toString());
     return var;
   }
 
