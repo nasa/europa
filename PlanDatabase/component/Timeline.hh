@@ -58,7 +58,6 @@ namespace EUROPA {
     void notifyRejected(const TokenId& token);
     void notifyDeleted(const TokenId& token);
 
-    void handleDiscard();
   private:
     /**
      * @brief Initialization utility
@@ -103,8 +102,6 @@ namespace EUROPA {
 
     /** Index to find position in sequence by Token */
     std::map<int, std::list<TokenId>::iterator > m_tokenIndex;
-
-    Id<OrderingChoicesCache> m_cache;
 
     static const bool CLEANING_UP = true;
   };

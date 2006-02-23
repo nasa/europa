@@ -23,175 +23,76 @@
 
 namespace EUROPA {
 
-  /**
-   * @brief Maintains a cache of candidate ordering choices for a given active token.
-   */
-  class OrderingChoicesCache {
-  public:
+  /** TIMELINE IMPLEMENTATION **/
 
-    /**
-     * @brief Stores pertinent information for caching previously computed information regarding
-     * available ordering choices.
-     */
-    class Entry {
-    public:
-      Entry(const TokenId& tokenToOrder, const std::list<TokenId>::iterator& first, const std::list<TokenId>::iterator& last, unsigned int timestamp)
-	: m_tokenToOrder(tokenToOrder), m_tokenToOrderKey(tokenToOrder->getKey()), m_timestamp(timestamp), m_id(this) {}
+  Timeline::Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+    : Object(planDatabase, type, name, true) {commonInit(open);}
 
-      ~Entry(){m_id.remove();}
+  Timeline::Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+    : Object(parent, type, localName, true) {commonInit(open);}
 
-      const Id<Entry>& getId() const {return m_id;}
-
-      const TokenId m_tokenToOrder; /*!< The token for which the ordering choices are cached */
-      const unsigned int m_tokenToOrderKey; /*!< Used for cleanup and validation */
-      std::set<TokenId> m_excludedSuccessors; /*!< Stores prior exclusions */
-      unsigned int m_timestamp; /*!< Use to assess if a reporop has occured and need to reset. */
-    private:
-      Id<Entry> m_id;
-    };
-
-    OrderingChoicesCache(std::list<TokenId>& tokenSequence, const TemporalAdvisorId& temporalAdvisor)
-      :m_id(this), m_tokenSequence(tokenSequence), m_temporalAdvisor(temporalAdvisor){}
-
-    ~OrderingChoicesCache();
-
-    const Id<OrderingChoicesCache>& getId() const {return m_id;}
-
-    /**
-     * @brief Uses cached results as the starting point or allocates a new cache entry
-     * based on the full sequence and prunes from there.
-     */
-    void getOrderingChoices(const TokenId& token, 
-			    std::vector< std::pair<TokenId, TokenId> >& results,
-			    unsigned int limit);
-
-    /**
-     * @brief Integrity check to compare results using a cached entry vs. a new entry
-     */
-    bool validateCachedResult(const TokenId& token, 
-			    const std::vector< std::pair<TokenId, TokenId> >& results,
-			    unsigned int limit);
-
-    /** Synchronization Methods **/
-
-    /**
-     * @brief token no longer requires ordering. Applies when the Token has been ordered or when the
-     * token has been deactivated.
-     */
-    void removeCacheEntry(const TokenId& token);
-
-    /**
-     * @brief When a token is no longer available for ordering, since it was freed from the timeline, deactivated
-     * etc.
-     */
-    void removeInsertedToken(const TokenId& token);
-
-    /**
-     * @brief Retrieve the cache entry for this token.
-     */
-    Id<OrderingChoicesCache::Entry> getCacheEntry(const TokenId& tokenToOrder);
-
-  private:
-    bool isValid() const;
-
-    Id<OrderingChoicesCache> m_id;
-    std::list<TokenId>& m_tokenSequence;
-    TemporalAdvisorId m_temporalAdvisor;
-
-    std::map<TokenId, Id<OrderingChoicesCache::Entry> > m_orderingChoices;
-  };
-
-  OrderingChoicesCache::~OrderingChoicesCache(){
-    cleanup(m_orderingChoices);
-    m_id.remove();
+  Timeline::~Timeline(){
+    discard(false);
   }
 
-  std::string printResults(const std::vector< std::pair<TokenId, TokenId> >& results){
-    std::stringstream sstr;
-    for(std::vector< std::pair<TokenId, TokenId> >::const_iterator it = results.begin(); it!=results.end(); ++it){
-      const std::pair<TokenId, TokenId>& pair = *it;
-      sstr << "<" << pair.first->getKey() << ", " << pair.second->getKey() << "> ";
-    }
-    return sstr.str();
+  void Timeline::commonInit(bool open){
+    if (!open)
+      close();
   }
 
-  bool OrderingChoicesCache::validateCachedResult(const TokenId& token, 
-						  const std::vector< std::pair<TokenId, TokenId> >& results,
-						  unsigned int limit){
-    removeCacheEntry(token);
-    std::vector< std::pair<TokenId, TokenId> > newResults;
-    getOrderingChoices(token, newResults, limit);
-
-    checkError(newResults == results, 
-	       "Results from cached data differ from fresh computation. \n" <<
-	       "CachedData: " << printResults(results) << "\n" <<
-	       "FreshData:  " << printResults(newResults));
-
-    return true;
+  bool Timeline::hasToken(const TokenId& token) const{
+    return m_tokenIndex.find(token->getKey()) != m_tokenIndex.end();
   }
 
-  bool OrderingChoicesCache::isValid() const {
-    for(std::map<TokenId, Id<OrderingChoicesCache::Entry> >::const_iterator it = m_orderingChoices.begin(); it != m_orderingChoices.end(); ++it){
-      check_error(it->second.isValid());
-      checkError(it->second->m_tokenToOrder.isValid(), it->second->m_tokenToOrder);
-      checkError(it->second->m_tokenToOrder->getState()->lastDomain().isMember(Token::ACTIVE), 
-		 "Cache entry should have been removed for " << it->second->m_tokenToOrder->toString());
-    }
-    return true;
-  }
-
-  Id<OrderingChoicesCache::Entry> OrderingChoicesCache::getCacheEntry(const TokenId& tokenToOrder){
-    unsigned int currentTimeStamp = tokenToOrder->getPlanDatabase()->getConstraintEngine()->cycleCount();
-    Id<OrderingChoicesCache::Entry> entry;
-
-    std::map<TokenId, Id<OrderingChoicesCache::Entry> >::const_iterator it = m_orderingChoices.find(tokenToOrder);
-    // If no hit, must allocate
-    if(it == m_orderingChoices.end()){
-      entry = (new OrderingChoicesCache::Entry(tokenToOrder, m_tokenSequence.begin(), m_tokenSequence.end(), currentTimeStamp))->getId();
-      m_orderingChoices.insert(std::pair<TokenId, Id<OrderingChoicesCache::Entry> >(tokenToOrder, entry));
-    }
-    else
-      entry = it->second;
-
-    if(entry->m_timestamp < m_temporalAdvisor->mostRecentRepropagation()){
-      removeCacheEntry(tokenToOrder);
-      entry = getCacheEntry(tokenToOrder);
-    }
-
-    checkError(entry.isValid(), "Must have a valid entry by now for token " << tokenToOrder->toString());
-
-    return entry;
-  }
-
-  void OrderingChoicesCache::getOrderingChoices(const TokenId& token, 
-						std::vector< std::pair<TokenId, TokenId> >& results,
-						unsigned int limit){
-    check_error(isValid());
+  void Timeline::getOrderingChoices(const TokenId& token, 
+				    std::vector< std::pair<TokenId, TokenId> >& results,
+				    unsigned int limit){
     check_error(results.empty());
     check_error(token.isValid());
     check_error(limit > 0, "Cannot set limit to less than 1.");
 
+    debugMsg("Timeline:getOrderingChoices", 
+	     "Getting ordering choices for token (" << token->getKey() << ") " << token->getName().c_str());
+
+    // Force propagation and return if inconsistent - leads to no ordering choices.
+    if (!getPlanDatabase()->getConstraintEngine()->propagate())
+      return;
+
+    check_error(isValid());
+
+    // It makes no sense to query for ordering choices for a Token that has already been inserted. Conseqeuntly,
+    // we trap that as an error. We could just return indicating no choices but that might lead caller to conclude
+    // there is simply an inconsistency rather than force them to write code to ensure this does not happen.
+    check_error(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end(),
+                "Attempted to query for choices to constrain token " + token->getPredicateName().toString() + 
+                " which has already been constrained.");
+
+    // If the sequence is empty, add the case where both elements of the pair are the given token.
+    if (m_tokenSequence.empty()) {
+      debugMsg("Timeline:getOrderingChoices:canPrecede",
+	       "Token sequence is empty, returning a single pair with same token");
+      results.push_back(std::make_pair(token, token));
+      return;
+    }
+
     unsigned int choiceCount = 0;
-    // Obtain the cache entry
-    Id<OrderingChoicesCache::Entry> entry = getCacheEntry(token);
+
+    TemporalAdvisorId temporalAdvisor = getPlanDatabase()->getTemporalAdvisor();
 
     // Alternatively, we can go through the sequence till we find something that we can precede.
     std::list<TokenId>::iterator current = m_tokenSequence.begin(); // Start at first token in the sequence
     const std::list<TokenId>::iterator& last = m_tokenSequence.end(); // For termination criteria
-    std::set<TokenId>& excludedSuccessors = entry->m_excludedSuccessors;
-    std::set<TokenId>::const_iterator notFound = excludedSuccessors.end(); // For comparison w.r.t. membership
 
     // Move forward until we find a Token we can precede
     while (current != last) {
       TokenId successor = *current;
-      if ((excludedSuccessors.find(successor) == notFound) && m_temporalAdvisor->canPrecede(token, successor)) {
-	debugMsg("Timeline:getOrderingChoices:canPrecede"," at first position: " << token->toString() << " precedes " << (*current)->toString());
+      if (temporalAdvisor->canPrecede(token, successor)) {
+	debugMsg("Timeline:getOrderingChoices:canPrecede",
+		 "At first position: " << token->toString() << " precedes " << (*current)->toString());
         break;
       }
       else {
-	debugMsg("Timeline:getOrderingChoices:canPrecede"," at first position: " << token->toString() << " cannot precede " << (*current)->toString());
-	excludedSuccessors.insert(*current);
-      }
+	debugMsg("Timeline:getOrderingChoices:canPrecede"," at first position: " << token->toString() << " cannot precede " << (*current)->toString());      }
       ++current;
     }
 
@@ -220,27 +121,22 @@ namespace EUROPA {
       check_error(predecessor.isValid() && predecessor->isActive());
       check_error(successor.isValid() && successor->isActive());
 
-      // Only worth considering this insertion position if the successor has not already
-      // been excluded
-      if((excludedSuccessors.find(successor) == notFound)){
-	// we still need to check that the predecessor can precede the token,
-	// otherwise we'll return bogus successors (see PlanDatabse::module-tests::testNoChoicesThatFit
-	if (!m_temporalAdvisor->canPrecede(predecessor,token)) {
-	  debugMsg("Timeline:getOrderingChoices:canPrecede",predecessor->toString() << " cannot precede " << token->toString());
-	  foundLastPredecessor = true;
+      // we still need to check that the predecessor can precede the token,
+      // otherwise we'll return bogus successors (see PlanDatabse::module-tests::testNoChoicesThatFit
+      if (!temporalAdvisor->canPrecede(predecessor,token)) {
+	debugMsg("Timeline:getOrderingChoices:canPrecede",predecessor->toString() << " cannot precede " << token->toString());
+	foundLastPredecessor = true;
+      }
+      else {
+	if (temporalAdvisor->canFitBetween(token, predecessor, successor)){
+	  debugMsg("Timeline:getOrderingChoices:canPrecede",
+		   token->toString() << "can be inserted between " << predecessor->toString() << " and " << successor->toString()); 
+	  results.push_back(std::make_pair(token, successor));
+	  choiceCount++;
 	}
 	else {
-	  if (m_temporalAdvisor->canFitBetween(token, predecessor, successor)){
-	    debugMsg("Timeline:getOrderingChoices:canPrecede",
-		     token->toString() << "can be inserted between " << predecessor->toString() << " and " << successor->toString()); 
-	    results.push_back(std::make_pair(token, successor));
-	    choiceCount++;
-	  }
-	  else {
-	    debugMsg("Timeline:getOrderingChoices:canPrecede",
-		     token->toString() << "cannot be inserted between " << predecessor->toString() << " and " << successor->toString());
-	    excludedSuccessors.insert(successor);
-	  }
+	  debugMsg("Timeline:getOrderingChoices:canPrecede",
+		   token->toString() << "cannot be inserted between " << predecessor->toString() << " and " << successor->toString());
 	}
       }
 
@@ -250,8 +146,8 @@ namespace EUROPA {
     // Special case, the token could be placed at the end, which can't precede anything. This
     // results in an ordering choice w.r.t. oneself. For this to be possible, we cannot have already
     // found the last predecessor of the token, but rather we must have come to the end
-    if (choiceCount < limit && !foundLastPredecessor && excludedSuccessors.find(token) == notFound){
-      if(m_temporalAdvisor->canPrecede(m_tokenSequence.back(),token)) {
+    if (choiceCount < limit && !foundLastPredecessor){
+      if(temporalAdvisor->canPrecede(m_tokenSequence.back(),token)) {
 	debugMsg("Timeline:getOrderingChoices:canPrecede",
 		 "last entry " << m_tokenSequence.back()->toString() << " precedes " << token->toString());
 	results.push_back(std::make_pair(m_tokenSequence.back(), token));
@@ -259,91 +155,8 @@ namespace EUROPA {
       else{
 	debugMsg("Timeline:getOrderingChoices:canPrecede",
 		 "last entry " << m_tokenSequence.back()->toString() << " cannot precede " << token->toString());
-	excludedSuccessors.insert(token);
       }
     }
-
-    debugMsg("Timeline:getOrderingChoices:canPrecede", "exiting");
-  }
-
-
-  void OrderingChoicesCache::removeCacheEntry(const TokenId& token){
-    debugMsg("OrderingChoicesCache:removeCacheEntry", token->toString());
-    std::map<TokenId, Id<OrderingChoicesCache::Entry> >::iterator it = m_orderingChoices.find(token);
-    if(it != m_orderingChoices.end()){
-      Id<OrderingChoicesCache::Entry> entry = it->second;
-      m_orderingChoices.erase(it);
-      delete (OrderingChoicesCache::Entry*) entry;
-    }
-  }
-
-  /**
-   * @brief If a token is removed we have to rebuild the cache.
-   */
-  void OrderingChoicesCache::removeInsertedToken(const TokenId& token){
-    debugMsg("OrderingChoiceCache:removeInertedToken", token->toString());
-    cleanup(m_orderingChoices);
-  }
-
-  /** TIMELINE IMPLEMENTATION **/
-
-  Timeline::Timeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
-    : Object(planDatabase, type, name, true) {commonInit(open);}
-
-  Timeline::Timeline(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
-    : Object(parent, type, localName, true) {commonInit(open);}
-
-  Timeline::~Timeline(){
-    discard(false);
-  }
-
-  void Timeline::handleDiscard(){
-    delete (OrderingChoicesCache*) m_cache;
-    Object::handleDiscard();
-  }
-
-  void Timeline::commonInit(bool open){
-    if (!open)
-      close();
-    m_cache = (new OrderingChoicesCache(m_tokenSequence, getPlanDatabase()->getTemporalAdvisor()))->getId();
-  }
-
-  bool Timeline::hasToken(const TokenId& token) const{
-    return m_tokenIndex.find(token->getKey()) != m_tokenIndex.end();
-  }
-
-  void Timeline::getOrderingChoices(const TokenId& token, 
-				    std::vector< std::pair<TokenId, TokenId> >& results,
-				    unsigned int limit){
-    check_error(results.empty());
-    check_error(token.isValid());
-    check_error(limit > 0, "Cannot set limit to less than 1.");
-
-    debugMsg("Timeline:getOrderingChoices", "getting ordering choices for token (" << token->getKey() << ") " << token->getName().c_str());
-
-    // Force propagation and return if inconsistent - leads to no ordering choices.
-    if (!getPlanDatabase()->getConstraintEngine()->propagate())
-      return;
-
-    check_error(isValid());
-
-    // It makes no sense to query for ordering choices for a Token that has already been inserted. Conseqeuntly,
-    // we trap that as an error. We could just return indicating no choices but that might lead caller to conclude
-    // there is simply an inconsistency rather than force them to write code to ensure this does not happen.
-    check_error(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end(),
-                "Attempted to query for choices to constrain token " + token->getPredicateName().toString() + 
-                " which has already been constrained.");
-
-    // If the sequence is empty, add the case where both elements of the pair are the given token.
-    if (m_tokenSequence.empty()) {
-      debugMsg("Timeline:getOrderingChoices:canPrecede"," token sequence is empty, returning a single pair with same token");
-      results.push_back(std::make_pair(token, token));
-      return;
-    }
-
-    m_cache->getOrderingChoices(token, results, limit);
-    debugMsg("Timeline:getOrderingChoices", "Choices are:" << printResults(results));
-    debugMsg("Timeline:getOrderingChoices", (m_cache->validateCachedResult(token, results, limit) ? "Cache is OK." : "Cache is broken"));
   }
 
   void Timeline::getTokensToOrder(std::vector<TokenId>& results) {
@@ -680,13 +493,11 @@ namespace EUROPA {
 
   void Timeline::insertToIndex(const TokenId& token, const std::list<TokenId>::iterator& position){
     // Remove the cache entry for this token as it is now inserted
-    m_cache->removeCacheEntry(token);
     m_tokenIndex.insert(std::pair<int, std::list<TokenId>::iterator>(token->getKey(), position));
   }
 
   void Timeline::removeFromIndex(const TokenId& token){
     m_tokenIndex.erase(token->getKey());
-    m_cache->removeInsertedToken(token);
     notifyOrderingRequired(token);
   }
 
@@ -694,10 +505,9 @@ namespace EUROPA {
     return (!token->isDeleted() && m_tokenIndex.find(token->getKey()) == m_tokenIndex.end());
   }
 
-  void Timeline::notifyMerged(const TokenId& token){ m_cache->removeCacheEntry(token);}
-  void Timeline::notifyRejected(const TokenId& token) { m_cache->removeCacheEntry(token);}
-  void Timeline::notifyDeleted(const TokenId& token){ 
-    m_cache->removeCacheEntry(token);
+  void Timeline::notifyMerged(const TokenId& token){}
+  void Timeline::notifyRejected(const TokenId& token) {}
+  void Timeline::notifyDeleted(const TokenId& token){
     remove(token);
   }
 }

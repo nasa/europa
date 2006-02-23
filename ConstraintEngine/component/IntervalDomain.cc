@@ -38,8 +38,8 @@ namespace EUROPA {
 
   bool IntervalDomain::intersect(const AbstractDomain& dom) {
     safeComparison(*this, dom);
-    check_error(dom.isOpen() || !dom.isEmpty());
-    check_error(isOpen() || !isEmpty());
+    check_error(dom.isOpen() || !dom.isEmpty(), dom.toString());
+    checkError(isOpen() || !isEmpty(), toString());
     double lb, ub;
     dom.getBounds(lb, ub);
     return(intersect(lb, ub));

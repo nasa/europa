@@ -114,6 +114,7 @@ Foo f1 = new Foo(world, 1, true, "hello", Hill);
 Foo f2 = new Foo(world, 100, false);
 Bar bar = new Bar(123.45, world);
 Baz baz = new Baz(f0);
+Foo f = new Baz(f0);
 
 Bar bar1 = new Bar(123.0, world);
 
