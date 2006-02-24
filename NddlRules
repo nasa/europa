@@ -14,11 +14,12 @@ rule RunNDDLProblem {
  local config = $(4) ;
  local model = [ FVariantName $(5) : $(VARIANTS) ] ;
  local path = $(6) ;
+ local prefix = $(7) ;
  model = lib$(model)$(SUFSHARE) ;
  local txSource = $(initialState:S=.xml) ;
  NddlParser $(txSource) : $(initialState) ;
  Depends $(problem) : $(txSource) ;
- RunModuleMain $(problem) : $(executable) : $(model) $(txSource) $(config) $(path) ; 
+ RunModuleMain $(problem) : $(executable) : $(model) $(txSource) $(config) $(path) : $(prefix) ; 
 }
 
 # NddlMain run : code.cc : model.nddl : System ;
