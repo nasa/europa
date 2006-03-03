@@ -41,11 +41,17 @@ class World {
  Foo m_foo2;
 
  predicate initialState{}
+ predicate Hill{}
 
  World(){
   m_foo1 = new Foo();
   m_foo2 = new Foo();
  }
+}
+
+World::initialState{
+ neq(Hill, Locations.Rock);
+ meets(World.Hill h);
 }
 
 World w = new World();
@@ -55,3 +61,5 @@ close();
 
 rejectable(World.initialState g0);
 g0.reject();
+
+goal(World.initialState g1);

@@ -55,14 +55,14 @@ namespace EUROPA {
       checkError(m_choiceIndex < m_choiceCount, 
                  "Tried to execute past available choices:" << m_choiceIndex << ">=" << m_choiceCount);
       if(m_choices[m_choiceIndex] == Token::ACTIVE) {
-        debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
+        debugMsg("DecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
                  m_flawedToken->getKey() << "), assigning ACTIVE.");
         m_client->activate(m_flawedToken);
       }
       else if(m_choices[m_choiceIndex] == Token::MERGED) {
         checkError(m_mergeIndex < m_mergeCount, "Tried to merge past available compatible tokens.");
         TokenId activeToken = m_compatibleTokens[m_mergeIndex];
-        debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
+        debugMsg("DecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
                  m_flawedToken->getKey() << "), assigning MERGED onto " << activeToken->getPredicateName().toString() << 
                  "(" << activeToken->getKey() << ").");
         m_client->merge(m_flawedToken, activeToken);
@@ -70,14 +70,14 @@ namespace EUROPA {
       else {
         checkError(m_choices[m_choiceIndex] == Token::REJECTED, 
                    "Expect this choice to be REJECTED instead of " + m_choices[m_choiceIndex].toString());
-        debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
+        debugMsg("DecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
                  m_flawedToken->getKey() << "), assigning REJECTED.");
         m_client->reject(m_flawedToken);
       }
     }
 
     void OpenConditionDecisionPoint::handleUndo() {
-      debugMsg("SolverDecisionPoint:handleUndo", "Retracting open condition decision on " << m_flawedToken->getPredicateName().toString() <<
+      debugMsg("DecisionPoint:handleUndo", "Retracting open condition decision on " << m_flawedToken->getPredicateName().toString() <<
                "(" << m_flawedToken->getKey() << ").");
       m_client->cancel(m_flawedToken);
 

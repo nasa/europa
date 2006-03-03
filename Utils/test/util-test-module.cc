@@ -315,6 +315,7 @@ private:
   static bool testCollectionSupport();
   static bool testDoubleConversion();
   static bool testCastingSupport();
+  static bool testMultipleInheritanceCasting();
   static bool testBadAllocationErrorHandling();
   static bool testBadIdUsage();
   static bool testIdConversion();
@@ -327,6 +328,7 @@ bool IdTests::test() {
   runTest(testCollectionSupport);
   runTest(testDoubleConversion);
   runTest(testCastingSupport);
+  // NOT APPLICABLE: runTest(testMultipleInheritanceCasting);
   runTest(testTypicalConversionsAndComparisons);
   runTest(testBadAllocationErrorHandling);
   runTest(testBadIdUsage);
@@ -432,6 +434,32 @@ bool IdTests::testCastingSupport()
   Id<Baz> fId1(new Baz());
   // DOES NOT COMPILE: overloadFunc(fId1);
   fId1.release();
+  return true;
+}
+
+class X {
+public:
+  virtual ~X(){}
+};
+
+class Y {
+public:
+  virtual ~Y(){}
+};
+
+class Z: public X, public Y {};
+
+bool IdTests::testMultipleInheritanceCasting(){
+  Id<Z> z_id(new Z());
+  assertTrue(Id<X>::convertable(z_id));
+  assertTrue(Id<Y>::convertable(z_id));
+
+  Id<X> x_id(z_id);
+  Id<Y> y_id(z_id);
+
+  assertTrue (x_id == y_id);
+  z_id.release();
+
   return true;
 }
 
