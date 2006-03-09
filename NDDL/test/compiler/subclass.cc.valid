@@ -137,7 +137,7 @@ namespace NDDL {
   Bar::p0::p0(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
    : Foo::p0(parent, name, relation, false) {
     handleDefaults(close);
-    arg0 = addParameter(IntervalDomain(1.0, 1.0, "float"), "arg0");
+    getVariable("arg0")->restrictBaseDomain(IntervalDomain(1.0, 1.0, "float"));
   }
   
   // default initialization of member variables

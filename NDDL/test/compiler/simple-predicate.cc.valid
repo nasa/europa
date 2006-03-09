@@ -178,6 +178,8 @@ namespace NDDL {
   Bar::pred1::pred1(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
    : Foo::pred1(parent, name, relation, false) {
     handleDefaults(close);
+    getVariable("duration")->restrictBaseDomain(IntervalIntDomain(2, 100, "int"));
+    getVariable("m_3")->restrictBaseDomain(BoolDomain(true, "bool"));
   }
   
   // default initialization of member variables
