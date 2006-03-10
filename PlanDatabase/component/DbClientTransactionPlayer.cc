@@ -106,6 +106,8 @@ namespace EUROPA {
       playCancelled(element);
     else if (strcmp(tagname, "specify") == 0)
       playVariableSpecified(element);
+    else if (strcmp(tagname, "assign") == 0)
+      playVariableAssigned(element);
     else if (strcmp(tagname, "restrict") == 0)
       playVariableRestricted(element);
     else if (strcmp(tagname, "reset") == 0)
@@ -113,7 +115,7 @@ namespace EUROPA {
     else if (strcmp(tagname, "invoke") == 0)
       playInvokeConstraint(element);
     else {
-      check_error(strcmp(tagname, "nddl") == 0, "Unknown tag name" + std::string(tagname));
+      check_error(strcmp(tagname, "nddl") == 0, "Unknown tag name " + std::string(tagname));
       for (TiXmlElement * child_el = element.FirstChildElement() ;
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
         processTransaction(*child_el);
@@ -393,6 +395,20 @@ namespace EUROPA {
     check_error(token.isValid());
     m_client->cancel(token);    
   }
+
+  void DbClientTransactionPlayer::playVariableAssigned(const TiXmlElement & element) {
+
+    const char * name = element.Attribute("name");
+		check_error(name != NULL);
+    debugMsg("DbClientTransactionPlayer:playVariableAssigned", "assigning for " << name);
+    ConstrainedVariableId variable = parseVariable(name);
+    debugMsg("DbClientTransactionPlayer:playVariableAssigned", "found variable " << variable->getKey());
+    TiXmlElement * value_el = element.FirstChildElement();
+    check_error(value_el != NULL);
+    const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+    debugMsg("DbClientTransactionPlayer:playVariableAssigned", "specifying to " << (*value));
+		variable->restrictBaseDomain(*value);
+	}
 
   void DbClientTransactionPlayer::playVariableSpecified(const TiXmlElement & element) {
     TiXmlElement * var_el = element.FirstChildElement();

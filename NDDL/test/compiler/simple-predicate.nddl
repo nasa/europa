@@ -31,9 +31,9 @@ Foo::pred1{
 class Bar extends Foo {
  predicate pred1{
   // CMG: ERROR HERE - won't accept specification to an interval for built in duration 
-  //duration = [2 100];
+  duration = [2 100];
   // CMG: ERROR HERE - it thinks it is adding a parameter
-  //m_3 = true;  
+  m_3 = true;  
  }
 }
 
