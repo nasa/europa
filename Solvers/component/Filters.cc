@@ -49,7 +49,7 @@ namespace EUROPA {
 
     bool InfiniteDynamicFilter::test(const EntityId& entity){
       if(!ConstrainedVariableId::convertable(entity))
-	return false;
+        return false;
 
       ConstrainedVariableId var = entity;  
       debugMsg("InfiniteDynamicFilter:test", "Evaluating " << var->toString() << " for dynamic/infinite filter.");
@@ -65,7 +65,7 @@ namespace EUROPA {
 
     bool SingletonFilter::test(const EntityId& entity) {
       if(!ConstrainedVariableId::convertable(entity))
-	return false;
+        return false;
 
       ConstrainedVariableId var = entity;
       debugMsg("SingletonFilter:test", "Evaluating " << var->toString() << " for singleton filter.");
@@ -82,7 +82,7 @@ namespace EUROPA {
 
     bool TokenMustBeAssignedFilter::test(const EntityId& entity) {
       checkError(ConstrainedVariableId::convertable(entity), 
-		 "Configuration Error. Cannot apply to " << entity->toString());
+                 "Configuration Error. Cannot apply to " << entity->toString());
 
       ConstrainedVariableId var = entity;
 
@@ -145,17 +145,17 @@ namespace EUROPA {
 
       TokenId token;
       if(ConstrainedVariableId::convertable(entity)){
-	EntityId parent = ConstrainedVariableId(entity)->getParent();
-	if(parent.isNoId() || ObjectId::convertable(parent))
-	   return false;
+        EntityId parent = ConstrainedVariableId(entity)->getParent();
+        if(parent.isNoId() || ObjectId::convertable(parent))
+          return false;
 
-	if(RuleInstanceId::convertable(parent))
-	  token = RuleInstanceId(parent)->getToken();
-	else
-	  token = parent;
+        if(RuleInstanceId::convertable(parent))
+          token = RuleInstanceId(parent)->getToken();
+        else
+          token = parent;
       }
       else
-	token = entity;
+        token = entity;
 
       const IntervalIntDomain& horizon = getHorizon();
       checkError(horizon.isFinite(), "Infinite Horizon not permitted." << horizon.toString());
@@ -165,21 +165,21 @@ namespace EUROPA {
       bool withinHorizon = false;
 
       debugMsg("HorizonFilter:test",
-	       "Evaluating: " << token->toString() << 
-	       " Start=" << startTime.toString() << ", End=" << endTime.toString() <<
-	       ", Policy='" << m_policy.toString() << "', Horizon =" << horizon.toString());
+               "Evaluating: " << token->toString() << 
+               " Start=" << startTime.toString() << ", End=" << endTime.toString() <<
+               ", Policy='" << m_policy.toString() << "', Horizon =" << horizon.toString());
 
       if(m_policy == sl_possiblyContained)
-	withinHorizon = startTime.intersects(horizon) && endTime.intersects(horizon);
+        withinHorizon = startTime.intersects(horizon) && endTime.intersects(horizon);
       else if (m_policy == sl_partiallyContained)
-	withinHorizon = (endTime.getLowerBound() > horizon.getLowerBound() &&
-		  startTime.getUpperBound() < horizon.getUpperBound() &&
-		  (startTime.intersects(horizon) || endTime.intersects(horizon)));
+        withinHorizon = (endTime.getLowerBound() > horizon.getLowerBound() &&
+                         startTime.getUpperBound() < horizon.getUpperBound()); //&&
+                         //(startTime.intersects(horizon) || endTime.intersects(horizon)));
       else
-	withinHorizon = horizon.isMember(startTime.getLowerBound()) && horizon.isMember(endTime.getUpperBound());
+        withinHorizon = horizon.isMember(startTime.getLowerBound()) && horizon.isMember(endTime.getUpperBound());
 
       debugMsg("HorizonFilter:test", 
-	       token->toString() << " is " << (withinHorizon ? " inside " : " outside ") << " the horizon.");
+               token->toString() << " is " << (withinHorizon ? " inside " : " outside ") << " the horizon.");
 
       return !withinHorizon && FlawFilter::test(entity);
     }
@@ -199,7 +199,7 @@ namespace EUROPA {
 
     bool HorizonVariableFilter::test(const EntityId& entity) {
       if(!ConstrainedVariableId::convertable(entity))
-	return false;
+        return false;
 
       ConstrainedVariableId var = entity;
 
@@ -208,16 +208,16 @@ namespace EUROPA {
       EntityId parent = var->getParent();
 
       if(parent.isNoId() || ObjectId::convertable(parent))
-	return false;
+        return false;
 
       TokenId token;
 
       if(RuleInstanceId::convertable(parent))
-	token = RuleInstanceId(parent)->getToken();
+        token = RuleInstanceId(parent)->getToken();
       else {
-	checkError(TokenId::convertable(parent), 
-		   "If we have covered our bases, it must be a token, but it ain't:" << var->toString());
-	token = (TokenId) parent;
+        checkError(TokenId::convertable(parent), 
+                   "If we have covered our bases, it must be a token, but it ain't:" << var->toString());
+        token = (TokenId) parent;
       }
 
       // Now simply delegate to the filter stored internally.

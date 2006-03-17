@@ -54,9 +54,9 @@ namespace EUROPA {
         double retval;
 
         if(!isNumber(data, retval)) {
-          if(strcmp(data, "true") == 0 || strcmp(data, "TRUE") == 0)
+          if(strcmp(data, "true") == 0 || strcmp(data, "TRUE") == 0 || strcmp(data, "True") == 0)
             retval = 1;
-          else if(strcmp(data, "false") == 0 || strcmp(data, "FALSE") == 0)
+          else if(strcmp(data, "false") == 0 || strcmp(data, "FALSE") == 0 || strcmp(data, "False") == 0)
             retval = 0;
           else
             retval = LabelStr::getKey(data);
