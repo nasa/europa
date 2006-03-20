@@ -1088,6 +1088,10 @@ private:
 
     std::list<double> ints;
     ints.push_back(1);
+
+    EnumeratedDomain singletonEnumIntDom(ints, true, "INTEGER_ENUMERATION");
+    Variable<EnumeratedDomain> singletonEnumIntVar(ce, singletonEnumIntDom, true);
+
     ints.push_back(2);
     ints.push_back(3);
     ints.push_back(4);
@@ -1211,6 +1215,11 @@ private:
     assertTrue(trimEnumObjDP.getNext() == o1.getId());
     assertTrue(trimEnumObjDP.getNext() == o4.getId());
     assertTrue(trimEnumObjDP.getNext() == o2.getId());
+
+    //the value enumeration should be ignored if the domain is a singleton
+    ValueEnum ignoreHeurDP(db->getClient(), singletonEnumIntVar.getId(), *intTrimHeurXml);
+
+    assertTrue(ignoreHeurDP.getNext() == 1);
 
     delete objTrimHeurXml;
     delete objHeurXml;
