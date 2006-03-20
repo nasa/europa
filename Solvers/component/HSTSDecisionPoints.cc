@@ -17,12 +17,8 @@ namespace EUROPA {
 
       ValueEnum::ValueEnum(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
         : UnboundVariableDecisionPoint(client, flawedVariable, configData), m_choiceIndex(0) {
-
-        TiXmlElement* value = configData.FirstChildElement();
-      
-        checkError(value != NULL, "Attempted to define an empty value enumeration.");
-
-        // have to get rid of the old choice set that UnboundVaraibleDecisionPoint came up with
+ 
+	// have to get rid of the old choice set that UnboundVaraibleDecisionPoint came up with
         delete m_choices;
 
         debugMsg("Solver:ValueEnum", "Instantiating value source for " << flawedVariable->toString());
@@ -31,20 +27,29 @@ namespace EUROPA {
 
         bool convertToObject = Schema::instance()->isObjectType(flawedVariable->baseDomain().getTypeName());
 
-        while(value != NULL) {
-          if(strcmp(value->Value(), "Value") == 0) {
-            double v = readValue(*value);
-            debugMsg("Solver:ValueEnum", "Read value " << v << " from " << *value << " convertToObject " << convertToObject);
-            if(convertToObject) {
-              ObjectId obj = client->getObject((LabelStr(v)).c_str());
-              checkError(obj.isValid(), "No object named '" << LabelStr(v) << "' exists, which is listed in choice ordering for " 
-                         << flawedVariable->toString());
-              v = obj;
-            }
-            ((OrderedValueSource*)m_choices)->addValue(v);
-          }
-          value = value->NextSiblingElement();
-        }
+	if(flawedVariable->lastDomain().isSingleton()) {
+	  debugMsg("Solver:ValueEnum", "Ignoring ordering heuristic because '" << flawedVariable->toString() << "' is singleton.");
+	  ((OrderedValueSource*) m_choices)->addValue(flawedVariable->lastDomain().getSingletonValue());
+	}
+	else {
+	  TiXmlElement* value = configData.FirstChildElement();      
+	  checkError(value != NULL, "Attempted to define an empty value enumeration.");
+	  
+	  while(value != NULL) {
+	    if(strcmp(value->Value(), "Value") == 0) {
+	      double v = readValue(*value);
+	      debugMsg("Solver:ValueEnum", "Read value " << v << " from " << *value << " convertToObject " << convertToObject);
+	      if(convertToObject) {
+		ObjectId obj = client->getObject((LabelStr(v)).c_str());
+		checkError(obj.isValid(), "No object named '" << LabelStr(v) << "' exists, which is listed in choice ordering for " 
+			   << flawedVariable->toString());
+		v = obj;
+	      }
+	      ((OrderedValueSource*)m_choices)->addValue(v);
+	    }
+	    value = value->NextSiblingElement();
+	  }
+	}
       }
     
       double ValueEnum::readValue(const TiXmlElement& element) const {
@@ -65,9 +70,14 @@ namespace EUROPA {
         return retval;
       }
 
-      double ValueEnum::getNext(){return m_choices->getValue(m_choiceIndex++);}
+      double ValueEnum::getNext(){
+	return m_choices->getValue(m_choiceIndex++);
+      }
 
-      bool ValueEnum::hasNext() const {return m_choiceIndex < m_choices->getCount();}
+      bool ValueEnum::hasNext() const {
+	return m_choiceIndex < m_choices->getCount();
+      }
+
       //accepted choice options: mergeFirst, activateFirst, mergeOnly, activateOnly
       //accepted order options (only for merge): early, late, near, far
       OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData) 
