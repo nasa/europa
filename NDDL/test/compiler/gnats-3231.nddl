@@ -1,0 +1,5 @@
+class GnatsClass { predicate p {}}
+GnatsClass::p {meets(p a);}
+// Prior to patch, this would have caused the parse to fail due to what the parser
+// believed to be an attempted redeclaration of 'a'
+GnatsClass::p {met_by(p a);}
