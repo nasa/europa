@@ -71,10 +71,13 @@ namespace EUROPA {
       }
 
       double ValueEnum::getNext(){
+	debugMsg("Solver:ValueEnum:getNext", "Getting value " << m_choices->getValue(m_choiceIndex) << " for variable " << 
+		 getFlawedVariable()->toString() << " (index " << m_choiceIndex << ")");
 	return m_choices->getValue(m_choiceIndex++);
       }
 
       bool ValueEnum::hasNext() const {
+	debugMsg("Solver:ValueEnum:hasNext", "Current index " << m_choiceIndex << " total count " << m_choices->getCount());
 	return m_choiceIndex < m_choices->getCount();
       }
 
