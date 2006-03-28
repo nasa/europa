@@ -1,5 +1,5 @@
-#ifndef _H_ResourceDefs
-#define _H_ResourceDefs
+#ifndef _H_SAVH_ResourceDefs
+#define _H_SAVH_ResourceDefs
 
 #include "ConstraintEngineDefs.hh"
 
@@ -16,6 +16,9 @@ namespace EUROPA {
     
     class Instant;
     typedef Id<Instant> InstantId;
+    
+    class FVDetector;
+    typedef Id<FVDetector> FVDetectorId;
   }
 }
 
