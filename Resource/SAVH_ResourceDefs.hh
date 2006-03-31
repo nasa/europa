@@ -5,7 +5,8 @@
 
 namespace EUROPA {
   namespace SAVH {
-    typedef std::pair<ConstrainedVariableId, ConstrainedVariableId> Transaction;
+    //typedef std::pair<ConstrainedVariableId, ConstrainedVariableId> Transaction;
+    class Transaction;
     typedef Id<Transaction> TransactionId;
     
     class Profile;
@@ -19,6 +20,9 @@ namespace EUROPA {
     
     class FVDetector;
     typedef Id<FVDetector> FVDetectorId;
+
+    class Resource;
+    typedef Id<Resource> ResourceId;
   }
 }
 

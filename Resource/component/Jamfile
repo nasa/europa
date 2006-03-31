@@ -1,0 +1,10 @@
+SubDir PLASMA Resource component ;
+
+if ! $(PLASMA_READY) {
+
+ModuleComponent Resource
+		:
+		SAVH_TimetableProfile.cc
+		;
+
+} # PLASMA_READY

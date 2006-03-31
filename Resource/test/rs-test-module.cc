@@ -4,6 +4,11 @@
 #include "Transaction.hh"
 #include "ResourceConstraint.hh"
 #include "ResourcePropagator.hh"
+#include "SAVH_Profile.hh"
+#include "SAVH_FVDetector.hh"
+#include "SAVH_Instant.hh"
+#include "SAVH_Transaction.hh"
+#include "SAVH_TimetableProfile.hh"
 
 #include "TestSupport.hh"
 #include "IntervalIntDomain.hh"
@@ -738,7 +743,7 @@ private:
       sum += count * current->getTransactionCount();
       count++;
     }
-
+    debugMsg("ResourceTest:checkSum", "Returning " << sum);
     return(sum);
   }
 
@@ -754,8 +759,10 @@ private:
     const std::map<int, InstantId>& instants = r->getInstants();
     double area = 0;
 
-    if(instants.empty())
+    if(instants.empty()) {
+      debugMsg("ResourceTest:checkLevelArea", "No Instants.  Returning 0.");
       return 0;
+    }
 
     std::map<int, InstantId>::const_iterator it = instants.begin();
     InstantId current = it->second;
@@ -763,6 +770,8 @@ private:
 
     while(it != instants.end()){
       InstantId next = it->second;
+      debugMsg("ResourceTest:checkLevelArea", "Current(time: " << current->getTime() << " lowerLevel: " << current->getLevelMin() <<
+	       " upperLevel: " << current->getLevelMax() << ") Next time: " << next->getTime());
       area += ((current->getLevelMax() - current->getLevelMin()) * (next->getTime() - current->getTime()));
       current = next;
       ++it;
@@ -780,7 +789,521 @@ private:
 
 };
 
+class DummyProfile : public SAVH::Profile {
+public:
+  DummyProfile(ConstraintEngineId ce, const SAVH::FVDetectorId fv) 
+    : Profile(ce, fv) {}
+private:
+  void handleTransactionAdded(const SAVH::TransactionId t) {
+    Profile::handleTransactionAdded(t);
+    if(m_recomputeInterval.isValid() && t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
+      delete (SAVH::ProfileIterator*) m_recomputeInterval;
+      m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int)t->time()->lastDomain().getLowerBound()))->getId();
+    }
+  }
+  void handleTransactionRemoved(const SAVH::TransactionId t) {
+    Profile::handleTransactionRemoved(t);
+    if(m_recomputeInterval.isValid() && t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
+      delete (SAVH::ProfileIterator*) m_recomputeInterval;
+      m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int)t->time()->lastDomain().getLowerBound()))->getId();
+    }
+  }
+  void handleTransactionTimeChanged(const SAVH::TransactionId  t, const DomainListener::ChangeType& change) {
+    Profile::handleTransactionTimeChanged(t, change);
+    if(m_recomputeInterval.isValid() && t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
+      delete (SAVH::ProfileIterator*) m_recomputeInterval;
+      m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int) t->time()->lastDomain().getLowerBound()))->getId();
+    }
+  }
+  void handleTransactionQuantityChanged(const SAVH::TransactionId  t, const DomainListener::ChangeType& change) {
+    Profile::handleTransactionQuantityChanged(t, change);
+    if(m_recomputeInterval.isValid() && t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
+      delete (SAVH::ProfileIterator*) m_recomputeInterval;
+      m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int) t->time()->lastDomain().getLowerBound()))->getId();
+    }
+  }
+  void initRecompute(SAVH::InstantId inst){}
+  void initRecompute(){}
+  void recomputeLevels(SAVH::InstantId inst) {
+  }
+};
 
+class DummyDetector : public SAVH::FVDetector {
+public:
+  DummyDetector(const SAVH::ResourceId res) : FVDetector(res) {};
+  bool detect(const SAVH::InstantId inst) {return false;}
+  void initialize(const SAVH::InstantId inst) {}
+  void initialize() {}
+};
+
+/**
+   add tests for getClosedTransactions and getPendingTransactions!
+ */
+class ProfileTest {
+public:
+  static bool test() {
+    runTest(testAdditionRemovalAndIteration);
+    runTest(testRestrictionAndRelaxation);
+    //converted from old timetable profile tests
+    runTest(testTransactionChangeHandling);
+    runTest(testCorrectTransactionAllocation);
+    runTest(testLevelCalculation);
+    runTest(testTransactionUpdates);
+    //testTransactionRemoval only relevent for tokens--use to test reservoir
+    runTest(testIntervalCapacityValues);
+    return true;
+  }
+private:
+  static bool checkTimes(const std::set<int>& times, SAVH::ProfileIterator& profIt) {
+    assertTrue(!profIt.done());
+    assertTrue(!times.empty());
+
+    int retval = 0;
+    std::set<int>::const_iterator it = times.begin();
+    while(!profIt.done()) {
+      assertTrue(profIt.getInstant()->getTime() == *it);
+      profIt.next();
+      ++it;
+      ++retval;
+    }
+    assertTrue((unsigned) retval == times.size());
+    return true;
+  }
+
+  static double checkLevelArea(SAVH::ProfileId prof) {
+    prof->recompute();
+    double area = 0;
+    SAVH::ProfileIterator it(prof);
+    if(it.done()) {
+      debugMsg("ResourceTest:checkLevelArea", "No Instants.  Returning 0.");
+      return 0;
+    }
+    SAVH::InstantId current = it.getInstant();
+    it.next();
+    while(!it.done()) {
+      SAVH::InstantId next = it.getInstant();
+      debugMsg("ResourceTest:checkLevelArea", "Current(time: " << current->getTime() << " lowerLevel: " << current->getLowerLevel() <<
+	       " upperLevel: " << current->getUpperLevel() << ") Next time: " << next->getTime());
+      area += ((current->getUpperLevel() - current->getLowerLevel()) * (next->getTime() - current->getTime()));
+      current = next;
+      it.next();
+    }
+    debugMsg("ResourceTest:checkLevelArea", "Returning " << area);
+    return area;
+  }
+
+  static int checkSum(SAVH::ProfileId prof) {
+    prof->recompute();
+    int sum = 0;
+    int count = 1;
+    debugMsg("ResourceTest:checkSum", "        Transactions");
+    SAVH::ProfileIterator it(prof);
+    while(!it.done()) {
+      SAVH::InstantId inst = it.getInstant();
+      debugMsg("ResourceTest:checkSum", "        " << inst->getTime() << ":[" << inst->getTransactions().size() << "] ");
+      sum += count * inst->getTransactions().size();
+      count++;
+      it.next();
+    }
+    debugMsg("ResourceTest:checkSum", "Returning " << sum);
+    return sum;
+  }
+
+  static bool testAdditionRemovalAndIteration() {
+    RESOURCE_DEFAULT_SETUP(ce, db, true);
+    DummyDetector detector(SAVH::ResourceId::noId());
+    DummyProfile profile(ce.getId(), detector.getId());
+
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 0));
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 10));
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(0, 3));
+    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(1, 4));
+    Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(4, 6));
+    Variable<IntervalDomain> quantity(ce.getId(), IntervalDomain(3, 3));
+
+    std::set<int> times;
+
+    SAVH::Transaction trans1(t1.getId(), quantity.getId(), false);
+    SAVH::Transaction trans2(t2.getId(), quantity.getId(), false); //distinct cases
+    SAVH::Transaction trans3(t3.getId(), quantity.getId(), false); //overlap on left side.  both trans1 and trans2 should appear at time 0
+    SAVH::Transaction trans4(t4.getId(), quantity.getId(), false); //overlap in the middle.  should have trans3 and trans4 at time 1 and only trans4 at time 4
+    SAVH::Transaction trans5(t5.getId(), quantity.getId(), false); //overlap on right side.  both trans 4 and trans5 should appear at time 4
+
+    profile.addTransaction(trans1.getId());
+    times.insert(0);
+    SAVH::ProfileIterator prof1(profile.getId());
+    assertTrue(checkTimes(times, prof1));
+
+    profile.addTransaction(trans2.getId());
+    times.insert(10);
+    SAVH::ProfileIterator prof2(profile.getId());
+    assertTrue(checkTimes(times, prof2));
+
+    profile.addTransaction(trans3.getId());
+    times.insert(3);
+    SAVH::ProfileIterator prof3(profile.getId());
+    assertTrue(checkTimes(times, prof3));
+    SAVH::ProfileIterator oCheck1(profile.getId(), 0, 0);
+    assertTrue(!oCheck1.done());
+    assertTrue(oCheck1.getInstant()->getTransactions().size() == 2);
+    
+    profile.addTransaction(trans4.getId());
+    times.insert(1);
+    times.insert(4);
+    SAVH::ProfileIterator prof4(profile.getId());
+    assertTrue(checkTimes(times, prof4));
+    SAVH::ProfileIterator oCheck2(profile.getId(), 3, 3);
+    assertTrue(!oCheck2.done());
+    assertTrue(oCheck2.getInstant()->getTransactions().size() == 2);
+
+    profile.addTransaction(trans5.getId());
+    times.insert(6);
+    SAVH::ProfileIterator prof5(profile.getId());
+    assertTrue(checkTimes(times, prof5));
+    SAVH::ProfileIterator oCheck3(profile.getId(), 4, 4);
+    assertTrue(!oCheck3.done());
+    assertTrue(oCheck3.getInstant()->getTransactions().size() == 2);
+
+    profile.removeTransaction(trans4.getId());
+    times.erase(1);
+    SAVH::ProfileIterator prof6(profile.getId());
+    assertTrue(checkTimes(times, prof6));
+    SAVH::ProfileIterator oCheck4(profile.getId(), 3, 3);
+    assertTrue(oCheck4.getInstant()->getTransactions().size() == 1);
+    SAVH::ProfileIterator oCheck5(profile.getId(), 4, 4);
+    assertTrue(oCheck5.getInstant()->getTransactions().size() == 1);
+
+    profile.removeTransaction(trans1.getId());
+    profile.removeTransaction(trans2.getId());
+    times.erase(10);
+    SAVH::ProfileIterator prof7(profile.getId());
+    assertTrue(checkTimes(times, prof7));
+    SAVH::ProfileIterator oCheck6(profile.getId(), 0, 0);
+    assertTrue(oCheck6.getInstant()->getTransactions().size() == 1);
+
+    profile.removeTransaction(trans3.getId());
+    profile.removeTransaction(trans5.getId());
+
+    SAVH::ProfileIterator prof8(profile.getId());
+    assertTrue(prof8.done());
+
+    return true;
+  }
+
+  static bool testRestrictionAndRelaxation() {
+    RESOURCE_DEFAULT_SETUP(ce, db, true);
+    DummyDetector detector(SAVH::ResourceId::noId());
+    DummyProfile profile(ce.getId(), detector.getId());
+
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 0));
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 10));
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(0, 3));
+    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(1, 4));
+    Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(4, 6));
+    Variable<IntervalDomain> quantity(ce.getId(), IntervalDomain(3, 3));
+
+    std::set<int> times;
+    times.insert(0); times.insert(1);
+    times.insert(3); times.insert(4);
+    times.insert(6); times.insert(10);
+
+    SAVH::Transaction trans1(t1.getId(), quantity.getId(), false);
+    SAVH::Transaction trans2(t2.getId(), quantity.getId(), false); 
+    SAVH::Transaction trans3(t3.getId(), quantity.getId(), false); 
+    SAVH::Transaction trans4(t4.getId(), quantity.getId(), false); 
+    SAVH::Transaction trans5(t5.getId(), quantity.getId(), false); 
+
+    profile.addTransaction(trans1.getId());
+    profile.addTransaction(trans2.getId());
+    profile.addTransaction(trans3.getId());
+    profile.addTransaction(trans4.getId());
+    profile.addTransaction(trans5.getId());
+
+    SAVH::ProfileIterator baseTest(profile.getId());
+    assertTrue(checkTimes(times, baseTest));
+
+    //should remove the instant at 3 and add an instant at 2.  the instant at 2 should have two transactions (t3 and t4).
+    times.erase(3);
+    times.insert(2);
+    const_cast<AbstractDomain&>(t3.lastDomain()).intersect(0, 2);
+    SAVH::ProfileIterator prof1(profile.getId());
+    assertTrue(checkTimes(times, prof1));
+    SAVH::ProfileIterator oCheck1(profile.getId(), 2, 2);
+    assertTrue(oCheck1.getInstant()->getTransactions().size() == 2);
+    assertTrue(oCheck1.getInstant()->getTransactions().find(trans3.getId()) != oCheck1.getInstant()->getTransactions().end());
+    assertTrue(oCheck1.getInstant()->getTransactions().find(trans4.getId()) != oCheck1.getInstant()->getTransactions().end());
+    SAVH::ProfileIterator oCheck1_1(profile.getId(), 3, 3);
+    assertTrue(oCheck1_1.done());
+
+    times.erase(2);
+    times.insert(3);
+    t3.reset();
+    SAVH::ProfileIterator prof2(profile.getId());
+    assertTrue(checkTimes(times, prof2));
+    SAVH::ProfileIterator oCheck2(profile.getId(), 3, 3);
+    assertTrue(oCheck2.getInstant()->getTransactions().size() == 2);
+    SAVH::ProfileIterator oCheck2_1(profile.getId(), 2, 2);
+    assertTrue(oCheck2_1.done());
+    
+    return true;
+  }
+
+  static bool testTransactionChangeHandling()
+  {
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+    const int HORIZON_END = 1000;
+
+    DummyDetector detector(SAVH::ResourceId::noId());
+    SAVH::TimetableProfile r(ce.getId(), detector.getId());
+
+//     Variable<IntervalIntDomain> t0(ce.getId(), IntervalIntDomain(MINUS_INFINITY, MINUS_INFINITY));
+//     Variable<IntervalDomain> q0(ce.getId(), IntervalDomain(0, 0));
+//     SAVH::Transaction trans0(t0.getId(), q0.getId(), false);
+//     r.addTransaction(trans0.getId());
+
+    assertTrue(checkLevelArea(r.getId()) == 0);
+
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, HORIZON_END));
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(45, 45));
+    SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
+    r.addTransaction(trans1.getId());
+    assertTrue(ce.propagate());
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*1));
+    assertTrue(checkLevelArea(r.getId()) == 1000 * 45);
+
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(1, HORIZON_END));
+    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(35, 35));
+    SAVH::Transaction trans2(t2.getId(), q2.getId(), false);
+    r.addTransaction(trans2.getId());
+    assertTrue(ce.propagate());
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*2));
+    assertTrue(checkLevelArea(r.getId()) == (1*45 + 80*999));
+
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, HORIZON_END));
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(20, 20));
+    SAVH::Transaction trans3(t3.getId(), q3.getId(), false);
+    r.addTransaction(trans3.getId());
+    assertTrue(ce.propagate());
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
+    assertTrue(checkLevelArea(r.getId()) == (1*45 + 1*80 + 998*100));
+
+    trans2.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans2.time()->lastDomain().getUpperBound()));
+    assertTrue(ce.propagate());
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
+    assertTrue(checkLevelArea(r.getId()) == (1*45 + 1*80 + 998*100));
+
+    trans2.time()->restrictBaseDomain(IntervalIntDomain(2, (int)trans2.time()->lastDomain().getUpperBound()));
+    assertTrue(ce.propagate());
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*3 + 3*3));
+    assertTrue(checkLevelArea(r.getId()) == (2*45 + 998*100));
+
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testCorrectTransactionAllocation()
+  {
+    // Test that the right insertion behaviour (in terms of instants) is occuring
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+    
+    DummyDetector detector(SAVH::ResourceId::noId());
+    SAVH::TimetableProfile r(ce.getId(), detector.getId());
+
+    assertTrue(ce.propagate() && checkSum(r.getId()) == 0); 
+
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(4, 6));
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
+    SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
+    r.addTransaction(trans1.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*1));
+
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(-4, 10));
+    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
+    SAVH::Transaction trans2(t2.getId(), q2.getId(), false);
+    r.addTransaction(trans2.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*1));
+
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(1, 3));
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
+    SAVH::Transaction trans3(t3.getId(), q3.getId(), false);
+    r.addTransaction(trans3.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1)); 
+
+    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(1, 2));
+    Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
+    SAVH::Transaction trans4(t4.getId(), q4.getId(), false);
+    r.addTransaction(trans4.getId());    
+    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1)); 
+
+    Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(3, 7));
+    Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
+    SAVH::Transaction trans5(t5.getId(), q5.getId(), false);
+    r.addTransaction(trans5.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1)); 
+
+    Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(4, 7));
+    Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
+    SAVH::Transaction trans6(t6.getId(), q6.getId(), false);
+    r.addTransaction(trans6.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1)); 
+
+    // Insert for a singleton value
+    Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(5, 5));
+    Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
+    SAVH::Transaction trans7(t7.getId(), q7.getId(), false);
+    r.addTransaction(trans7.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1)); 
+
+    // Now free them and check the retractions are working correctly
+
+    r.removeTransaction(trans7.getId());
+    assertTrue(ce.propagate());
+    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
+    r.removeTransaction(trans6.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
+    r.removeTransaction(trans5.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
+    r.removeTransaction(trans4.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
+    r.removeTransaction(trans3.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*2 + 3*2 + 4*1));
+    r.removeTransaction(trans2.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*1));
+    r.removeTransaction(trans1.getId());
+    assertTrue(ce.propagate() && checkSum(r.getId()) == 0);
+
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testLevelCalculation()
+  {
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+
+    DummyDetector detector(SAVH::ResourceId::noId());
+    SAVH::TimetableProfile r(ce.getId(), detector.getId());    
+
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 1));
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(1, 1));
+    SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
+    r.addTransaction(trans1.getId());    
+    ce.propagate();
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*1)); 
+    assertTrue(checkLevelArea(r.getId()) == 1);
+
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(1, 3));
+    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(4, 4));
+    SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
+    r.addTransaction(trans2.getId());
+    ce.propagate();
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*1)); 
+    assertTrue(checkLevelArea(r.getId()) == (1 + 4*2));
+
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, 4));
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans3(t3.getId(), q3.getId(), false);
+    r.addTransaction(trans3.getId());
+    ce.propagate();
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1)); 
+    assertTrue(checkLevelArea(r.getId()) == (1*1 + 4*1 + 12*1 + 8*1));
+
+    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(3, 6));
+    Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(2, 2));
+    SAVH::Transaction trans4(t4.getId(), q4.getId(), false);
+    r.addTransaction(trans4.getId());
+    ce.propagate();
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
+    assertTrue(checkLevelArea(r.getId()) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
+ 
+    Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(2, 10));
+    Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(6, 6));
+    SAVH::Transaction trans5(t5.getId(), q5.getId(), true);
+    r.addTransaction(trans5.getId());
+    ce.propagate();
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
+    assertTrue(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
+
+    Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(6, 8));
+    Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(3, 3));
+    SAVH::Transaction trans6(t6.getId(), q6.getId(), false);
+    r.addTransaction(trans6.getId());
+    ce.propagate();
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
+    assertTrue(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
+
+    Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(7, 8));
+    Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(4, 4));
+    SAVH::Transaction trans7(t7.getId(), q7.getId(), true);
+    r.addTransaction(trans7.getId());
+    ce.propagate();
+    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + +7* 3 + 8*3 + 9*1));
+    assertTrue(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
+
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testTransactionUpdates()
+  {
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+    
+    DummyDetector detector(SAVH::ResourceId::noId());
+    SAVH::TimetableProfile r(ce.getId(), detector.getId());    
+
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10));
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(10, 10));
+    SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
+    r.addTransaction(trans1.getId());
+    ce.propagate();
+    assertTrue(checkLevelArea(r.getId()) == 10*10);
+
+    trans1.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans1.time()->lastDomain().getUpperBound()));
+    assertTrue(checkLevelArea(r.getId()) == 10*9);
+
+    trans1.time()->restrictBaseDomain(IntervalIntDomain((int)trans1.time()->lastDomain().getLowerBound(), 8));
+    assertTrue(checkLevelArea(r.getId()) == 10*7);
+
+    trans1.time()->restrictBaseDomain(IntervalIntDomain((int)trans1.time()->lastDomain().getLowerBound(), 6));
+    assertTrue(checkLevelArea(r.getId()) == 10*5);
+
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testIntervalCapacityValues()
+  {
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+
+    DummyDetector detector(SAVH::ResourceId::noId());
+    SAVH::TimetableProfile r(ce.getId(), detector.getId());        
+
+
+    // Test producer
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10));
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(5, 10));
+    SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
+    r.addTransaction(trans1.getId());
+    ce.propagate();
+    assertTrue(checkLevelArea(r.getId()) == 10*10);
+
+    //test elided: we don't allow transactions that could produce or consume anymore
+    // This tests a transaction that could be a producer or a consumer. We don't know yet!
+//     TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 8), -4, 3))->getId();
+//     ce.propagate();
+//     assertTrue(checkLevelArea(r.getId()) == 10*4 + 17*4 + 17*2);
+
+    // Test consumer
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(1, 5));
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 4));
+    SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
+    r.addTransaction(trans3.getId());
+    ce.propagate();
+    assertTrue(checkLevelArea(r.getId()) == 10*1 + 14*4 + 13*5);//+ 14*3 + 21*1 + 20*3 + 20*2);
+
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+};
 
 void ResourceModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
@@ -791,6 +1314,7 @@ void ResourceModuleTests::runTests(std::string path) {
   initConstraintLibrary();
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
+  runTestSuite(ProfileTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
   uninitConstraintLibrary();
