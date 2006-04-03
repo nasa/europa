@@ -82,9 +82,9 @@ rule NddlCompiler {
 
   local xml ;
   if $(model:S) = .xml {
-    xml = $(model) ;
+    xml = [ FGristFiles $(model) ] ;
   } else {
-    xml = $(model:S=.xml) ;
+    xml = [ FGristFiles $(model:S=.xml) ] ;
     NddlParser $(xml) : $(model) ;
   }
 
@@ -103,7 +103,7 @@ rule NddlCompiler1 {
 }
 
 actions NddlCompiler1 {
-  "$(JAVA)" -cp $(CLASSPATH) nddl.NddlCompiler $(2) 
+  "$(JAVA)" -cp $(CLASSPATH) $(JREFLAGS) nddl.NddlCompiler $(2) 
 }
 
 # NddlParser model.xml : model.nddl ;
@@ -137,7 +137,7 @@ rule NddlParser1 {
 }
 
 actions NddlParser1 {
-  "$(JAVA)" -cp $(CLASSPATH) nddl.Parse -q -o $(1) $(2) 
+  "$(JAVA)" -cp $(CLASSPATH) $(JREFLAGS) nddl.Parse -o $(1) $(2) 
 }
 
 } # NddlRules_INCLUDED
