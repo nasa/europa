@@ -10,7 +10,8 @@ namespace EUROPA {
     
     class TimetableProfile : public Profile {
     public:
-      TimetableProfile(const ConstraintEngineId ce, const FVDetectorId flawDetector);
+      TimetableProfile(const ConstraintEngineId ce, const FVDetectorId flawDetector,
+		       const double initCapacityLb = 0, const double initCapacityUb = 0);
       
     protected:
     private:
@@ -24,9 +25,10 @@ namespace EUROPA {
       void handleTransactionsOrdered(const TransactionId t1, const TransactionId t2);
       
       double m_lowerLevelMin, m_lowerLevelMax, m_upperLevelMin, m_upperLevelMax;
-      double m_minCumulativeConsumption, m_maxCumulativeConsumption;
-      double m_minCumulativeProduction, m_maxCumulativeProduction;
-      
+//       double m_minCumulativeConsumption, m_maxCumulativeConsumption;
+//       double m_minCumulativeProduction, m_maxCumulativeProduction;
+      double m_minPrevConsumption, m_maxPrevConsumption;
+      double m_minPrevProduction, m_maxPrevProduction;
     };
   }
 }

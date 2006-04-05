@@ -5,6 +5,7 @@ if ! $(PLASMA_READY) {
 ModuleComponent Resource
 		:
 		SAVH_TimetableProfile.cc
+		SAVH_TimetableFVDetector.cc
 		;
 
 } # PLASMA_READY
