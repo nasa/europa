@@ -1218,7 +1218,7 @@ namespace EUROPA {
 	bool retval = false;
 	while(!configFile.eof()) {
 	  configFile.getline(buf, PATH_MAX);
-	  if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
+	  if(buf[0] == '\0' || buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
 	    continue;
 	  std::string line = buf;
 
@@ -1241,7 +1241,7 @@ namespace EUROPA {
 	char buf[PATH_MAX];
 	while(!configFile.eof()) {
 	  configFile.getline(buf, PATH_MAX);
-	  if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n' || buf[0] == '\r')
+	  if(buf[0] == '\0' || buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n' || buf[0] == '\r')
 	    continue;
 	  std::string line = buf;
 	  debugMsg("PartialPlanWriter:parseGeneralConfigSection", "Parsing line '" << line << "'");
@@ -1291,7 +1291,7 @@ namespace EUROPA {
 	char buf[PATH_MAX];
 	while(!configFile.eof()) {
 	  configFile.getline(buf, PATH_MAX);
-	  if(buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
+	  if(buf[0] == '\0' || buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
 	    continue;
 	  std::string line = buf;
 	  debugMsg("PartialPlanWriter:parseRuleConfigSection",
