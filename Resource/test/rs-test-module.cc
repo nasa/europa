@@ -9,6 +9,9 @@
 #include "SAVH_Instant.hh"
 #include "SAVH_Transaction.hh"
 #include "SAVH_TimetableProfile.hh"
+#include "SAVH_TimetableFVDetector.hh"
+#include "SAVH_Resource.hh"
+#include "SAVH_ProfilePropagator.hh"
 
 #include "TestSupport.hh"
 #include "IntervalIntDomain.hh"
@@ -44,12 +47,14 @@ const double consumptionMax = -50;
     SchemaId schema = Schema::instance();\
     schema->reset();\
     schema->addObjectType(LabelStr("Resource")); \
+    schema->addObjectType(LabelStr("SAVHResource")); \
     schema->addPredicate(LabelStr("Resource.change"));\
     schema->addMember(LabelStr("Resource.change"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
     PlanDatabase db(ce.getId(), schema); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
     new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId()); \
+    new SAVH::ProfilePropagator(LabelStr("Profile"), ce.getId()); \
     if (autoClose) \
       db.close();
 
@@ -836,6 +841,37 @@ public:
   void initialize() {}
 };
 
+
+class DummyResource : public SAVH::Resource {
+public:
+  DummyResource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name,
+		double initCapacityLb = 0, double initCapacityUb = 0, double lowerLimit = MINUS_INFINITY,
+		double upperLimit = PLUS_INFINITY, double maxInstProduction = PLUS_INFINITY, double maxInstConsumption = PLUS_INFINITY,
+		double maxProduction = PLUS_INFINITY, double maxConsumption = PLUS_INFINITY)
+    : SAVH::Resource(planDatabase, type, name, LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"), initCapacityLb, initCapacityUb, 
+		     lowerLimit, upperLimit, maxInstProduction, maxInstConsumption,
+		     maxProduction, maxConsumption) {}
+
+  void addTransaction(const SAVH::TransactionId trans) {
+    m_profile->addTransaction(trans);
+    //m_profile->recompute();
+  }
+  void removeTransaction(const SAVH::TransactionId trans) {
+    m_profile->removeTransaction(trans);
+    // m_profile->recompute();
+  }
+  SAVH::ProfileId createProfile() {return (new SAVH::TimetableProfile(getPlanDatabase()->getConstraintEngine(), m_detector))->getId();}
+  SAVH::FVDetectorId createDetector() {return (new SAVH::TimetableFVDetector(getId()))->getId();}
+private:
+  void notifyViolated(const SAVH::InstantId inst) {
+    SAVH::TransactionId trans = *(inst->getTransactions().begin());
+    const_cast<AbstractDomain&>(trans->time()->lastDomain()).empty();
+  }
+
+  //no implementation.  no tests for flaw detection
+  void notifyFlawed(const SAVH::InstantId inst) {
+  }
+};
 /**
    add tests for getClosedTransactions and getPendingTransactions!
  */
@@ -851,6 +887,14 @@ public:
     runTest(testTransactionUpdates);
     //testTransactionRemoval only relevent for tokens--use to test reservoir
     runTest(testIntervalCapacityValues);
+    //violation tests
+    runTest(testRateConstraintViolation);
+    runTest(testLowerTotalProductionExceededResourceViolation);
+    runTest(testLowerTotalConsumptionExceededResourceViolation);
+    runTest(testUpperLimitExceededResourceViolation);
+    runTest(testSummationConstraintResourceViolation);
+    //other tests
+    runTest(testPointProfileQueries);
     return true;
   }
 private:
@@ -1299,6 +1343,341 @@ private:
     r.addTransaction(trans3.getId());
     ce.propagate();
     assertTrue(checkLevelArea(r.getId()) == 10*1 + 14*4 + 13*5);//+ 14*3 + 21*1 + 20*3 + 20*2);
+
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testRateConstraintViolation()
+  {
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+    
+    DummyResource r(db.getId(), LabelStr("SAVHResource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
+		    productionRateMax, -(consumptionRateMax), productionMax, -(consumptionMax));
+
+    db.close();
+
+
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 1));
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(productionRateMax, productionRateMax + 1));
+    SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
+    r.addTransaction(trans1.getId());
+    ce.propagate();
+
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(0, 1));
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 1));
+    SAVH::Transaction trans3(t3.getId(), q3.getId(), false);
+    r.addTransaction(trans3.getId());
+
+    // no violation because of temporal flexibility
+    assertTrue(ce.propagate());
+
+    trans1.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans1.time()->lastDomain().getUpperBound()));
+    trans3.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans3.time()->lastDomain().getUpperBound()));
+    assertTrue(!ce.propagate());
+
+    //r->getResourceViolations(violations);
+    //assertTrue(violations.size() == 1);
+    //assertTrue(violations.front()->getType() == ResourceViolation::ProductionRateExceeded);
+    
+    r.removeTransaction(trans3.getId());
+    r.removeTransaction(trans1.getId());
+    assertTrue(ce.propagate());
+
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(0, 1));
+    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(-(consumptionRateMax), -(consumptionRateMax - 1)));
+    SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
+    r.addTransaction(trans2.getId());
+    ce.propagate();
+
+    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(0, 1));
+    Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1, 1));
+    SAVH::Transaction trans4(t4.getId(), q4.getId(), true);
+    r.addTransaction(trans4.getId());
+    // no violation because of temporal flexibility
+    assertTrue(ce.propagate());
+    trans2.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans2.time()->lastDomain().getUpperBound()));
+    trans4.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans4.time()->lastDomain().getUpperBound()));
+    assertTrue(!ce.propagate());
+
+    //violations.clear();
+    //r->getResourceViolations(violations);
+    //assertTrue(violations.size() == 1);
+    //assertTrue(violations.front()->getType() == ResourceViolation::ConsumptionRateExceeded);
+    r.removeTransaction(trans4.getId());
+    r.removeTransaction(trans2.getId());
+    assertTrue(ce.propagate());
+      
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testLowerTotalProductionExceededResourceViolation()
+  {
+    // Define input constrains for the resource spec
+
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+    
+    DummyResource r(db.getId(), LabelStr("SAVHResource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
+		    productionRateMax, -(consumptionRateMax), productionMax, -(consumptionMax));
+    db.close();
+
+    // Test that a violation is detected when the excess in the level cannot be overcome by remaining
+    // production
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(2, 2));
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans1(t1.getId(), q1.getId(), true);
+    r.addTransaction(trans1.getId());
+    assertTrue(ce.propagate());
+
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(3, 3));
+    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
+    r.addTransaction(trans2.getId());
+    assertTrue(ce.propagate());    
+
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(4, 4));
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
+    r.addTransaction(trans3.getId());    
+    assertTrue(ce.propagate());
+
+    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 5));
+    Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans4(t4.getId(), q4.getId(), true);
+    r.addTransaction(trans4.getId());
+    assertTrue(ce.propagate());
+
+    Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(6, 6));
+    Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans5(t5.getId(), q5.getId(), true);
+    r.addTransaction(trans5.getId());
+    assertTrue(ce.propagate());
+
+    // This will push it over the edge
+    Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(10, 10));
+    Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans6(t6.getId(), q6.getId(), true);
+    r.addTransaction(trans6.getId());
+    assertTrue(!ce.propagate());
+
+    assertTrue(checkLevelArea(r.getProfile()) == 0);
+//     r.getResourceViolations(violations);
+//     assertTrue(violations.front()->getType() == ResourceViolation::LevelTooLow);
+
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testLowerTotalConsumptionExceededResourceViolation()
+  {
+    // Define input constrains for the resource spec
+
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+
+    DummyResource r(db.getId(), LabelStr("SAVHResource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
+		    PLUS_INFINITY, -(consumptionMax), PLUS_INFINITY, -(consumptionMax));
+    db.close();
+
+    std::list<ResourceViolationId> violations;
+
+    // Test that a violation is detected when the excess in the level cannot be overcome by remaining
+    // production
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(2, 2));
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans1(t1.getId(), q1.getId(), true);
+    r.addTransaction(trans1.getId());
+    assertTrue(ce.propagate());
+
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(3, 3));
+    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
+    r.addTransaction(trans2.getId());
+    assertTrue(ce.propagate());   
+ 
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(4, 4));
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
+    r.addTransaction(trans3.getId());
+    assertTrue(ce.propagate());
+
+    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 5));
+    Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans4(t4.getId(), q4.getId(), true);
+    r.addTransaction(trans4.getId());
+    assertTrue(ce.propagate());
+
+    Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(6, 6));
+    Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans5(t5.getId(), q5.getId(), true);
+    r.addTransaction(trans5.getId());
+    assertTrue(ce.propagate());
+
+    Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(8, 8));
+    Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans6(t6.getId(), q6.getId(), true);
+    r.addTransaction(trans6.getId());
+    assertTrue(ce.propagate());
+
+    // This will push it over the edge
+    Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(10, 10));
+    Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(8, 8));
+    SAVH::Transaction trans7(t7.getId(), q7.getId(), true);
+    r.addTransaction(trans7.getId());
+    assertTrue(!ce.propagate());
+
+    assertTrue(checkLevelArea(r.getProfile()) == 0);
+//     r->getResourceViolations(violations);
+//     assertTrue(!violations.empty());
+//     assertTrue(violations.front()->getType() == ResourceViolation::ConsumptionSumExceeded);
+
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testUpperLimitExceededResourceViolation()
+  {
+    // Define input constrains for the resource spec
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+    DummyResource r(db.getId(), LabelStr("SAVHResource"), LabelStr("r1"), initialCapacity + 1, initialCapacity + 1, limitMin, limitMax,
+		    productionRateMax, -(consumptionRateMax), productionMax + 100, -(consumptionMax));
+    db.close();
+
+
+    // Test that a violation is detected when the excess in the level cannot be overcome by remaining
+    // consumption
+    std::list<SAVH::TransactionId> transactions;
+    std::list<ConstrainedVariableId> vars;
+    for (int i = 0; i < 11; i++){
+      ConstrainedVariableId time = (new Variable<IntervalIntDomain>(ce.getId(), IntervalIntDomain(i, i)))->getId();
+      ConstrainedVariableId quantity = (new Variable<IntervalDomain>(ce.getId(), IntervalDomain(productionRateMax, productionRateMax)))->getId();
+      SAVH::TransactionId t = (new SAVH::Transaction(time, quantity, false))->getId();
+      r.addTransaction(t);
+      transactions.push_back(t);
+      vars.push_back(quantity);
+      vars.push_back(time);
+      //r->constrain(t);
+      if(i < 10) {
+	assertTrue(ce.propagate());
+      }
+      else {
+	assertTrue(!ce.propagate());
+      }
+    }
+
+    assertTrue(checkLevelArea(r.getProfile()) == 0);
+
+//     std::list<ResourceViolationId> violations;
+//     r->getResourceViolations(violations);
+//     assertTrue(violations.size() == 1);
+//     assertTrue(violations.front()->getType() == ResourceViolation::LevelTooHigh);
+
+    for(std::list<SAVH::TransactionId>::iterator it = transactions.begin(); it != transactions.end(); ++it)
+      delete (SAVH::Transaction*) (*it);
+    for(std::list<ConstrainedVariableId>::iterator it = vars.begin(); it != vars.end(); ++it)
+      delete (ConstrainedVariable*) (*it);
+
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testSummationConstraintResourceViolation()
+  {
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+    
+    DummyResource r(db.getId(), LabelStr("SAVHResource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
+		    productionRateMax, -(consumptionRateMax), productionMax, -(consumptionMax));
+    db.close();
+
+    // Set up constraints so that all rate and level constraints are OK - balanced consumption
+    // and production
+    std::list<SAVH::TransactionId> transactions;
+    std::list<ConstrainedVariableId> variables;
+    for (int i = 0; i < 11; i++){
+      ConstrainedVariableId time = (new Variable<IntervalIntDomain>(ce.getId(), IntervalIntDomain(i, i)))->getId();
+      ConstrainedVariableId quantity = (new Variable<IntervalDomain>(ce.getId(), IntervalDomain(productionRateMax, productionRateMax)))->getId();
+      SAVH::TransactionId t = (new SAVH::Transaction(time, quantity, false))->getId();
+      r.addTransaction(t);
+      //r->constrain(t);
+      transactions.push_back(t);
+      variables.push_back(time);
+      variables.push_back(quantity);
+    }
+    for (int i = 0; i < 11; i++){
+      ConstrainedVariableId time = (new Variable<IntervalIntDomain>(ce.getId(), IntervalIntDomain(i, i)))->getId();
+      ConstrainedVariableId quantity = (new Variable<IntervalDomain>(ce.getId(), IntervalDomain(productionRateMax, productionRateMax)))->getId();
+      SAVH::TransactionId t = (new SAVH::Transaction(time, quantity, true))->getId();
+      r.addTransaction(t);
+      //r->constrain(t);
+      transactions.push_back(t);
+      variables.push_back(time);
+      variables.push_back(quantity);
+    }
+
+    assertTrue(!ce.propagate());
+    assertTrue(checkLevelArea(r.getProfile()) == 0);
+
+    // Ensure the violations remain unchanged
+//     std::list<ResourceViolationId> violations;     
+//     r->getResourceViolations(violations);
+//     assertTrue(violations.size() > 0);
+
+    for(std::list<SAVH::TransactionId>::iterator it = transactions.begin(); it != transactions.end(); ++it)
+      delete (SAVH::Transaction*) (*it);
+    for(std::list<ConstrainedVariableId>::iterator it = variables.begin(); it != variables.end(); ++it)
+      delete (ConstrainedVariable*) (*it);
+    RESOURCE_DEFAULT_TEARDOWN();
+    return(true);
+  }
+
+  static bool testPointProfileQueries()
+  {
+    // Define input constrains for the resource spec
+    RESOURCE_DEFAULT_SETUP(ce,db,false);
+
+    DummyResource r(db.getId(), LabelStr("SAVHResource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
+		    productionRateMax, -(consumptionRateMax), 5, -(consumptionMax));
+    db.close();
+
+    IntervalDomain result;
+    // Verify correct behaviour for the case with no transactions
+    r.getProfile()->getLevel(10, result);
+    assertTrue(result.isSingleton() && result.getSingletonValue() == initialCapacity);
+
+    // Test that a flaw is signalled when there is a possibility to violate limits
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(5, 5));
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(5, 5));
+    SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
+    r.addTransaction(trans1.getId());
+
+    // Have a single transaction, test before, at and after.
+    r.getProfile()->getLevel(0, result);
+    assertTrue(result.isSingleton() && result.getSingletonValue() == initialCapacity);
+    r.getProfile()->getLevel(5, result);
+    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
+    r.getProfile()->getLevel(1000, result);
+    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
+
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(0, 7));
+    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(5, 5));
+    SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
+    r.addTransaction(trans2.getId());
+
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, 10));
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(5, 5));
+    SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
+    r.addTransaction(trans3.getId());
+
+    // Confirm that we can query in the middle
+    r.getProfile()->getLevel(6, result);
+    assertTrue(result == IntervalDomain(initialCapacity+5-10, initialCapacity+5));
+
+    // Confirm that we can query at the end
+    r.getProfile()->getLevel(1000, result);
+    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5 - 10));
+
+    // There should be no violations, only flaws
+    assertTrue(ce.propagate());
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
