@@ -71,6 +71,8 @@ namespace NDDL {
     
     class initialState;
     typedef Id<initialState> initialStateId;
+    class Hill;
+    typedef Id<Hill> HillId;
     ConstrainedVariableId m_0; // SchemaWriter::declareVariable
     ConstrainedVariableId m_1; // SchemaWriter::declareVariable
     ConstrainedVariableId m_foo1; // SchemaWriter::declareVariable
@@ -83,6 +85,16 @@ namespace NDDL {
       initialState(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(World::initialState, World.initialState);
+      
+    };
+    
+    // simple-class.nddl:44 Hill
+    class Hill : public NddlToken {
+    public:
+      Hill(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      Hill(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(World::Hill, World.Hill);
       
     };
     

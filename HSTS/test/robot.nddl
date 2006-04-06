@@ -1,4 +1,5 @@
 // ../ModuleTests/Parser/robot/robot.ddl
+#include "Plasma.nddl"
 
 enum Location { A, B, In_Between } 
 

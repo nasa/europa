@@ -1,35 +1,31 @@
 
-enum Location {Hill, Rock, Lander};
+// As of NDDL 1.1, there is a namespace collision if any class has the same name as a symbol.
+// As such, the class "Hill" was removed from this test, but it should still function in the same fashion.
 
-class Hill {}
+enum Location {Hill, Rock, Lander};
 
 class Foo {}
 
 class Region{
- Hill hill;
  Location location;
  Foo foo;
  Region(){
-  hill = new Hill();
   location = Hill;
   foo = new Foo();
  }
 
- Region(Hill _hill, Foo _foo){
-  hill = _hill;
+ Region(Foo _foo){
   foo = _foo;
  }
 
  Region(Location loc){
-  hill = new Hill();
   location = loc;
   foo = new Foo();
  }
 }
 
-Hill hill = new Hill();
 Foo foo = new Foo();
-Region r0 = new Region(hill, foo);
+Region r0 = new Region(foo);
 Region r1 = new Region();
 Region r2 = new Region(Hill);
 close();

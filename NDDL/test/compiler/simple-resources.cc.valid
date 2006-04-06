@@ -343,10 +343,10 @@ namespace NDDL {
   // simple-resources.nddl:42 World
   void World::constructor() {
     mainBattery = addVariable(BatteryDomain((new Battery(m_id, "mainBattery"))->getId(), "Battery"), "mainBattery");
-    Id<Battery>(singleton(mainBattery))->constructor(100, 0, 1000);
+    Id<Battery>(singleton(mainBattery))->constructor(100.0, 0.0, 1000.0);
     Id<Battery>(singleton(mainBattery))->handleDefaults();
     reserveBattery = addVariable(BatteryDomain((new Battery(m_id, "reserveBattery"))->getId(), "Battery"), "reserveBattery");
-    Id<Battery>(singleton(reserveBattery))->constructor(100, 100, 1000);
+    Id<Battery>(singleton(reserveBattery))->constructor(100.0, 100.0, 1000.0);
     Id<Battery>(singleton(reserveBattery))->handleDefaults();
   }
   

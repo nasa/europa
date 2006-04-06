@@ -1,7 +1,7 @@
 #include "../../NDDL/core/Plasma.nddl"
 #include "../../NDDL/core/PlannerConfig.nddl"
 
-// Very small subset of the IPC-3 Rover Domain translated by hand from NDDL to PDDL to 
+// Very small subset of the IPC-3 Rover Domain translated by hand from PDDL to NDDL to 
 // verify state-based encoding is possible in PLASMA.
 // July 12, 2005
 
@@ -16,7 +16,7 @@ class Can_Traverse {
   Waypoint y;
   Waypoint z;
 
-  Can_Travserse(Rover _x, Waypoint _y, Waypoint _z) {
+  Can_Traverse(Rover _x, Waypoint _y, Waypoint _z) {
     x = _x;
     y = _y;
     z = _z;

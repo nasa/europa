@@ -18,13 +18,13 @@ rule Execute {
 
   local target_exec_arg ;
   if $(arguments) {
-    target_exec_arg = RUN_$(executable) ;
+    target_exec_arg = RUN_$(executable:G=) ;
     local arg ;
     for arg in $(arguments) {
       target_exec_arg = "$(target_exec_arg).$(arg:B)$(arg:S)" ;
     }
   } else {
-    target_exec_arg = RUN_$(executable) ;
+    target_exec_arg = RUN_$(executable:G=) ;
   }
   Depends $(target) : $(target_exec_arg) ;
   ExecuteTarget $(target_exec_arg) : [ FAppendSuffix $(executable) : $(SUFEXE) ] : $(arguments) : $(prefix) : $(outputFN) ;

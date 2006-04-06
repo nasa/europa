@@ -209,6 +209,26 @@ namespace NDDL {
   }
   
   
+  
+  // simple-class.nddl:44 Hill
+  World::Hill::Hill(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
+   : NddlToken(planDatabase, name, rejectable, false) {
+    handleDefaults(close);
+  }
+  
+  World::Hill::Hill(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void World::Hill::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
   // simple-class.nddl:37 World
   void World::constructor() {
     m_foo1 = addVariable(FooDomain((new Foo(m_id, "m_foo1"))->getId(), "Foo"), "m_foo1");
@@ -235,6 +255,27 @@ namespace NDDL {
       return instance;
     }
   };
+  
+  // simple-class.nddl:52 initialState
+  class World$initialState$0$0: public RuleInstance {
+  public:
+    World$initialState$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$0, World$initialState$0$0, World.initialState, "simple-class.nddl,52");
+  
+  void World$initialState$0$0::handleExecute() {
+    slave(World::Hill, World.Hill, h, LabelStr("meets"));
+    meets(this, h);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(ruleVariable(SymbolDomain(LabelStr("Hill"), "Locations")));
+      vars.push_back(ruleVariable(SymbolDomain(LabelStr("Rock"), "Locations")));
+      rule_constraint(neq, vars);
+    }
+  }
   
 } // namespace NDDL
 
@@ -270,6 +311,7 @@ namespace NDDL {
     id->addMember("World", "Foo", "m_foo1");
     id->addMember("World", "Foo", "m_foo2");
     id->addPredicate("World.initialState");
+    id->addPredicate("World.Hill");
     id->addValue("Locations", LabelStr("Hill"));
     id->addValue("Locations", LabelStr("Rock"));
     id->addValue("Locations", LabelStr("Lander"));
@@ -279,6 +321,7 @@ namespace NDDL {
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TOKEN_FACTORY(World::initialState::Factory);
+    REGISTER_TOKEN_FACTORY(World::Hill::Factory);
     REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Locations, LocationsBaseDomain());
     REGISTER_TYPE_FACTORY(Strings, StringsBaseDomain());
@@ -290,6 +333,7 @@ namespace NDDL {
     REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
     REGISTER_OBJECT_FACTORY(WorldFactory2, World);
     // Allocate rules
+    new Rule$World$initialState$0();
     return id;
   }
   

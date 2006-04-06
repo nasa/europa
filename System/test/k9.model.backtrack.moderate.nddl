@@ -677,7 +677,7 @@ class Rover {
     m_tracker = new Tracker(this);
     m_oppsci = new OpportunisticScience (this);
     m_champ = new CHAMP (this);
-    m_energy = new Energy(ic, 0, 518400);
+    m_energy = new Energy(ic, 0.0, 518400.0);
   }
 
 }

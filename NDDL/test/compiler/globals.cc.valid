@@ -17,8 +17,6 @@ namespace NDDL {
     }
     return(sl_enum);
   }
-  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Object
-  
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
   
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Resource
@@ -93,7 +91,7 @@ namespace NDDL {
   // default initialization of member variables
   void StringData::handleDefaults(bool autoClose) {
     if(data.isNoId()){
-      data = addVariable(StringDomain("DefaultString"), "data");
+      data = addVariable(StringDomain("string"), "data");
     }
     if (autoClose)
       close();
@@ -309,8 +307,8 @@ namespace NDDL {
     // Allocate factories
     REGISTER_TOKEN_FACTORY(UnaryResource::uses::Factory);
     REGISTER_TOKEN_FACTORY(Foo::pred1::Factory);
-    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
     REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
     REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
     REGISTER_TYPE_FACTORY(Resource, ObjectDomain("Resource"));
     REGISTER_TYPE_FACTORY(UnaryResource, ObjectDomain("UnaryResource"));

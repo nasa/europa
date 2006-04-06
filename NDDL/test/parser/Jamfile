@@ -29,8 +29,8 @@ MakeLocate [ FGristFiles Plasma.nddl ] : [ FDirName $(SUBDIR) .. .. core ] ;
 Depends use_xml.xml : rover.xml ;
 
 local parser_test ;
-for parser_test in $(NDDL_PARSER_TESTS) {
-  local xml = $(parser_test:S=.xml) ;
+for parser_test in [ FGristFiles $(NDDL_PARSER_TESTS) ] {
+  local xml = $(parser_test:S=.xml:G=) ;
   LocalDepends tests : $(xml) ;
   NddlParser $(xml) : $(parser_test) ;
 }

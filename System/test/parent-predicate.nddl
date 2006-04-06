@@ -10,8 +10,8 @@ class Battery extends Resource {
  // Must explicitly delcare the predicate so we can allocate in a transaction
  predicate change{}
 
- Battery(int ic, int ll_min, int ll_max) {
-  super(ic, ll_min, ll_max, 0, 0, -inff, -inff);
+ Battery(float ic, float ll_min, float ll_max) {
+  super(ic, ll_min, ll_max, 0.0, 0.0, -inff, -inff);
  }
 }
 
@@ -31,7 +31,7 @@ Rover::Move{
 
 // Allocation of objects
 PlannerConfig world = new PlannerConfig(0, 100, 350);
-Battery mainBattery = new Battery(30, 0, 50);
+Battery mainBattery = new Battery(30.0, 0.0, 50.0);
 Rover rover = new Rover(mainBattery);
 close();
 
