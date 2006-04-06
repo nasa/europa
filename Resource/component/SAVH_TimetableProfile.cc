@@ -152,13 +152,13 @@ namespace EUROPA {
     void TimetableProfile::handleTransactionsOrdered(const TransactionId t1, const TransactionId t2) {
     }
 
-    class TimetableProfileLocalStatic {
-    public:
-      TimetableProfileLocalStatic() {
-	REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
-      }
-    };
+//     class TimetableProfileLocalStatic {
+//     public:
+//       TimetableProfileLocalStatic() {
+// 	REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
+//       }
+//     };
 
-    TimetableProfileLocalStatic s_timetableProfileStatic;
+//     TimetableProfileLocalStatic s_timetableProfileStatic;
   }
 }

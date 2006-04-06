@@ -53,13 +53,13 @@ namespace EUROPA {
       return false;
     }
 
-    class TimetableFVDetectorLocalStatic {
-    public:
-      TimetableFVDetectorLocalStatic() {
-	REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
-      }
-    };
+//     class TimetableFVDetectorLocalStatic {
+//     public:
+//       TimetableFVDetectorLocalStatic() {
+// 	REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
+//       }
+//     };
 
-    TimetableFVDetectorLocalStatic s_timetableFVDetectorStatic;
+//     TimetableFVDetectorLocalStatic s_timetableFVDetectorStatic;
   }
 }
