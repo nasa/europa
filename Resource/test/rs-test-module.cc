@@ -860,8 +860,7 @@ public:
     m_profile->removeTransaction(trans);
     // m_profile->recompute();
   }
-  SAVH::ProfileId createProfile() {return (new SAVH::TimetableProfile(getPlanDatabase()->getConstraintEngine(), m_detector))->getId();}
-  SAVH::FVDetectorId createDetector() {return (new SAVH::TimetableFVDetector(getId()))->getId();}
+
 private:
   void notifyViolated(const SAVH::InstantId inst) {
     SAVH::TransactionId trans = *(inst->getTransactions().begin());
@@ -1691,6 +1690,8 @@ void ResourceModuleTests::runTests(std::string path) {
 
   Schema::instance();
   initConstraintLibrary();
+  REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
+  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   runTestSuite(ProfileTest::test);
