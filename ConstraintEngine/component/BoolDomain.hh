@@ -41,7 +41,7 @@ namespace EUROPA {
     bool isTrue() const;
 
     bool isNumeric() const {
-      return(false);
+      return(true);
     }
 
     bool isBool() const {

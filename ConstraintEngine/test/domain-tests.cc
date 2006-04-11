@@ -1850,7 +1850,8 @@ namespace EUROPA {
       SymbolDomain sDom("mySymbol");
       StringDomain stDom("myName");
 
-      assertTrue(bDom.isSymbolic());
+			// change for gnats 3242
+      assertTrue(bDom.isNumeric());
       assertTrue(iiDom.isNumeric());
       assertTrue(iDom.isNumeric());
       assertTrue(nDom.isNumeric());
