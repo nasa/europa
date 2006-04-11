@@ -4,6 +4,7 @@
 
 
 #include "tinyxml.h"
+using namespace EUROPA;
 
 #ifdef TIXML_USE_STL
 	#include <iostream>
