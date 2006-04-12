@@ -26,8 +26,8 @@ namespace EUROPA{
     virtual bool canFitBetween(const TokenId& token, const TokenId& predecessor,
 			       const TokenId& successor);
     virtual bool canBeConcurrent(const TokenId& first, const TokenId& second);
-    virtual const IntervalIntDomain getTemporalDistanceDomain(const TempVarId& first, 
-							      const TempVarId& second,
+    virtual const IntervalIntDomain getTemporalDistanceDomain(const TimeVarId& first, 
+							      const TimeVarId& second,
 							      const bool exact);
 
     unsigned int mostRecentRepropagation() const;

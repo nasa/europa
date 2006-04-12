@@ -43,7 +43,7 @@ namespace EUROPA {
    * @brief Gets the temporal distance between two temporal variables. 
    * @param exact if set to true makes this distance calculation exact.
    */
-  const IntervalIntDomain STNTemporalAdvisor::getTemporalDistanceDomain(const TempVarId& first, const TempVarId& second, const bool exact) {
+  const IntervalIntDomain STNTemporalAdvisor::getTemporalDistanceDomain(const TimeVarId& first, const TimeVarId& second, const bool exact) {
     return (m_propagator->getTemporalDistanceDomain(first, second, exact));
   }
 

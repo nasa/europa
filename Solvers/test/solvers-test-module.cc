@@ -353,6 +353,7 @@ private:
 
   static bool testTokenFiltering(){
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml").c_str(), "OpenConditionManager");
+		check_error(root != NULL, "Error loading xml: " + getTestLoadLibraryPath() + "/FlawFilterTests.xml");
 
     StandardAssembly assembly(Schema::instance());
     OpenConditionManager fm(*root);

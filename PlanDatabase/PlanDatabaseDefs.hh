@@ -3,6 +3,7 @@
 
 #include "ConstraintEngineDefs.hh"
 #include "Entity.hh"
+#include "Variable.hh"
 
 namespace EUROPA {
   class Object;
@@ -32,6 +33,7 @@ namespace EUROPA {
   class StateDomain;
   typedef Id< TokenVariable<StateDomain> > StateVarId;
   
+  typedef Id< Variable<IntervalIntDomain> > TimeVarId;
   typedef Id< TokenVariable<IntervalIntDomain> > TempVarId;
 
   class ObjectDomain;
