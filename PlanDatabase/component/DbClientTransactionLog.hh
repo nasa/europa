@@ -7,7 +7,6 @@
 #include <string>
 #include <iostream>
 
-class TiXmlElement;
 
 /**
  * @file DbClientTransactionLog
@@ -15,6 +14,8 @@ class TiXmlElement;
  */
 
 namespace EUROPA {
+
+	class TiXmlElement;
 
   class DbClientTransactionLog: public DbClientListener {
   public:

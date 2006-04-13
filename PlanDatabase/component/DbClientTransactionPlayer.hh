@@ -6,7 +6,6 @@
 #include <map>
 #include <list>
 
-class TiXmlElement;
 
 /**
  * @file DbClientTransactionPlayer
@@ -15,6 +14,8 @@ class TiXmlElement;
  */
 
 namespace EUROPA {
+
+	class TiXmlElement;
 
   class DbClientTransactionPlayer {
   public:
