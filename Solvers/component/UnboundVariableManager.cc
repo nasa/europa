@@ -186,6 +186,7 @@ namespace EUROPA {
 
     void UnboundVariableManager::notifyRemoved(const ConstrainedVariableId& variable){
       removeFlaw(variable);
+      FlawManager::notifyRemoved(variable);
     }
 
     void UnboundVariableManager::notifyChanged(const ConstrainedVariableId& variable, 

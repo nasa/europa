@@ -47,6 +47,7 @@ namespace EUROPA {
     }
 
     void OpenConditionManager::notifyRemoved(const ConstrainedVariableId& variable){
+      FlawManager::notifyRemoved(variable);
       if(Token::isStateVariable(variable))
 	removeFlaw(variable->getParent());
     }
