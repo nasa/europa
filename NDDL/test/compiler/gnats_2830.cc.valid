@@ -422,15 +422,15 @@ namespace NDDL {
   
   class Position$Navigate$0$0$0: public RuleInstance {
   public:
-    Position$Navigate$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    Position$Navigate$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
   class Position$Navigate$0$0$0$0: public RuleInstance {
   public:
-    Position$Navigate$0$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    Position$Navigate$0$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
@@ -463,7 +463,7 @@ namespace NDDL {
       vars.push_back(varFromObject(std::string("_p"), std::string("_from"), false));
       rule_constraint(eq, vars);
     }
-    addChildRule(new Position$Navigate$0$0$0(m_id, makeScope(var(getId(),std::string("p")))));
+    addChildRule(new Position$Navigate$0$0$0(m_id, makeScope(var(getId(),std::string("p"))),true));
   }
   void Position$Navigate$0$0$0::handleExecute() {
     objectVar(Enable, enable, true, false);
@@ -479,7 +479,7 @@ namespace NDDL {
       vars.push_back(varFromObject(std::string("p"), std::string("_from"), false));
       rule_constraint(eq, vars);
     }
-    addChildRule(new Position$Navigate$0$0$0$0(m_id, makeScope(var(getId(),std::string("enable")))));
+    addChildRule(new Position$Navigate$0$0$0$0(m_id, makeScope(var(getId(),std::string("enable"))),true));
   }
   void Position$Navigate$0$0$0$0::handleExecute() {
     slave(Foo::FooPred, Foo.FooPred, fp, LabelStr("any"));

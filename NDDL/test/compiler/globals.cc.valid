@@ -196,15 +196,15 @@ namespace NDDL {
   
   class Foo$pred1$0$0$0: public RuleInstance {
   public:
-    Foo$pred1$0$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$pred1$0$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$pred1$0$0$1: public RuleInstance {
   public:
-    Foo$pred1$0$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$pred1$0$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
@@ -223,8 +223,8 @@ namespace NDDL {
       vars.push_back(var(getId(),std::string("object")));
       rule_constraint(eq, vars);
     }
-    addChildRule(new Foo$pred1$0$0$0(m_id, var(getId(),std::string("global3")), BoolDomain(true, "bool")));
-    addChildRule(new Foo$pred1$0$0$1(m_id, var(getId(),std::string("global3")), BoolDomain(false, "bool")));
+    addChildRule(new Foo$pred1$0$0$0(m_id, var(getId(),std::string("global3")), BoolDomain(true, "bool"), true));
+    addChildRule(new Foo$pred1$0$0$1(m_id, var(getId(),std::string("global3")), BoolDomain(false, "bool"), true));
   }
   void Foo$pred1$0$0$0::handleExecute() {
     slave(Foo::pred1, Foo.pred1, slave0, LabelStr("meets"));

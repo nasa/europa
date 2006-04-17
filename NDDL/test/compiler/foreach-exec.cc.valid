@@ -468,8 +468,8 @@ namespace NDDL {
   
   class Rover$Navigate$0$0$0: public RuleInstance {
   public:
-    Rover$Navigate$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    Rover$Navigate$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
@@ -502,7 +502,7 @@ namespace NDDL {
       vars.push_back(var(getId(),std::string("p")));
       rule_constraint(eq, vars);
     }
-    addChildRule(new Rover$Navigate$0$0$0(m_id, makeScope(var(getId(),std::string("path")))));
+    addChildRule(new Rover$Navigate$0$0$0(m_id, makeScope(var(getId(),std::string("path"))),true));
   }
   void Rover$Navigate$0$0$0::handleExecute() {
     {
@@ -647,8 +647,8 @@ namespace NDDL {
   
   class World$initialState$1$0$0: public RuleInstance {
   public:
-    World$initialState$1$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    World$initialState$1$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
@@ -691,7 +691,7 @@ namespace NDDL {
         }
       }
     }
-    addChildRule(new World$initialState$1$0$0(m_id, makeScope(var(getId(),std::string("hasPath")))));
+    addChildRule(new World$initialState$1$0$0(m_id, makeScope(var(getId(),std::string("hasPath"))),true));
   }
   void World$initialState$1$0$0::handleExecute() {
     objectVar(Path, emptyPath, false, false);

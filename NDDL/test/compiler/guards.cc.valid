@@ -315,8 +315,8 @@ namespace NDDL {
   
   class Foo$impliedObjectGuard$0$0$0: public RuleInstance {
   public:
-    Foo$impliedObjectGuard$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    Foo$impliedObjectGuard$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
@@ -350,7 +350,7 @@ namespace NDDL {
       vars.push_back(var(getId(),std::string("bar")));
       rule_constraint(eq, vars);
     }
-    addChildRule(new Foo$impliedObjectGuard$0$0$0(m_id, makeScope(var(getId(),std::string("object")))));
+    addChildRule(new Foo$impliedObjectGuard$0$0$0(m_id, makeScope(var(getId(),std::string("object"))),true));
   }
   void Foo$impliedObjectGuard$0$0$0::handleExecute() {
     slave(Bar::pred, Bar.pred, t0, LabelStr("any"));
@@ -387,27 +387,27 @@ namespace NDDL {
   
   class Foo$singletonGuard$2$0$0: public RuleInstance {
   public:
-    Foo$singletonGuard$2$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    Foo$singletonGuard$2$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
   class Foo$singletonGuard$2$0$0$0: public RuleInstance {
   public:
-    Foo$singletonGuard$2$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    Foo$singletonGuard$2$0$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
   DECLARE_AND_DEFINE_RULE(Rule$Foo$singletonGuard$2, Foo$singletonGuard$2$0, Foo.singletonGuard, "guards.nddl,68");
   
   void Foo$singletonGuard$2$0::handleExecute() {
-    addChildRule(new Foo$singletonGuard$2$0$0(m_id, makeScope(var(getId(),std::string("object")))));
+    addChildRule(new Foo$singletonGuard$2$0$0(m_id, makeScope(var(getId(),std::string("object"))),true));
   }
   void Foo$singletonGuard$2$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, g1, LabelStr("meets"));
     meets(this, g1);
-    addChildRule(new Foo$singletonGuard$2$0$0$0(m_id, makeScope(varfromtok(tok(getId(), std::string("g1")), std::string("object")))));
+    addChildRule(new Foo$singletonGuard$2$0$0$0(m_id, makeScope(varfromtok(tok(getId(), std::string("g1")), std::string("object"))),true));
   }
   void Foo$singletonGuard$2$0$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, g2, LabelStr("met_by"));
@@ -430,71 +430,71 @@ namespace NDDL {
   
   class Foo$tokenWithParameters$3$0$0: public RuleInstance {
   public:
-    Foo$tokenWithParameters$3$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$tokenWithParameters$3$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$tokenWithParameters$3$0$1: public RuleInstance {
   public:
-    Foo$tokenWithParameters$3$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$tokenWithParameters$3$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$tokenWithParameters$3$0$2: public RuleInstance {
   public:
-    Foo$tokenWithParameters$3$0$2(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$tokenWithParameters$3$0$2(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$tokenWithParameters$3$0$3: public RuleInstance {
   public:
-    Foo$tokenWithParameters$3$0$3(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$tokenWithParameters$3$0$3(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$tokenWithParameters$3$0$4: public RuleInstance {
   public:
-    Foo$tokenWithParameters$3$0$4(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$tokenWithParameters$3$0$4(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$tokenWithParameters$3$0$5: public RuleInstance {
   public:
-    Foo$tokenWithParameters$3$0$5(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$tokenWithParameters$3$0$5(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$tokenWithParameters$3$0$6: public RuleInstance {
   public:
-    Foo$tokenWithParameters$3$0$6(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$tokenWithParameters$3$0$6(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$tokenWithParameters$3$0$7: public RuleInstance {
   public:
-    Foo$tokenWithParameters$3$0$7(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$tokenWithParameters$3$0$7(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$3, Foo$tokenWithParameters$3$0, Foo.tokenWithParameters, "guards.nddl,78");
   
   void Foo$tokenWithParameters$3$0::handleExecute() {
-    addChildRule(new Foo$tokenWithParameters$3$0$0(m_id, var(getId(),std::string("bool_arg")), BoolDomain(true, "bool")));
-    addChildRule(new Foo$tokenWithParameters$3$0$1(m_id, var(getId(),std::string("int_arg")), IntervalIntDomain(10,10, "int")));
-    addChildRule(new Foo$tokenWithParameters$3$0$2(m_id, var(getId(),std::string("location_arg")), SymbolDomain(LabelStr("Lander"), "Locations")));
-    addChildRule(new Foo$tokenWithParameters$3$0$3(m_id, var(getId(),std::string("bool_arg")), BoolDomain("bool")));
-    addChildRule(new Foo$tokenWithParameters$3$0$4(m_id, var(getId(),std::string("int_arg")), IntervalDomain(1.3, 2.4, "float")));
-    addChildRule(new Foo$tokenWithParameters$3$0$5(m_id, var(getId(),std::string("float_arg")), IntervalIntDomain(1, 9, "int")));
-    addChildRule(new Foo$tokenWithParameters$3$0$6(m_id, var(getId(),std::string("location_arg")), SymbolDomain(listFromString("Hill$Lander$",false), "Locations")));
-    addChildRule(new Foo$tokenWithParameters$3$0$7(m_id, var(getId(),std::string("strEnum_arg")), SymbolDomain(listFromString("ONE$THREE$",false), "StringEnum")));
+    addChildRule(new Foo$tokenWithParameters$3$0$0(m_id, var(getId(),std::string("bool_arg")), BoolDomain(true, "bool"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$1(m_id, var(getId(),std::string("int_arg")), IntervalIntDomain(10,10, "int"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$2(m_id, var(getId(),std::string("location_arg")), SymbolDomain(LabelStr("Lander"), "Locations"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$3(m_id, var(getId(),std::string("bool_arg")), BoolDomain("bool"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$4(m_id, var(getId(),std::string("int_arg")), IntervalDomain(1.3, 2.4, "float"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$5(m_id, var(getId(),std::string("float_arg")), IntervalIntDomain(1, 9, "int"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$6(m_id, var(getId(),std::string("location_arg")), SymbolDomain(listFromString("Hill$Lander$",false), "Locations"), true));
+    addChildRule(new Foo$tokenWithParameters$3$0$7(m_id, var(getId(),std::string("strEnum_arg")), SymbolDomain(listFromString("ONE$THREE$",false), "StringEnum"), true));
   }
   void Foo$tokenWithParameters$3$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t1, LabelStr("meets"));
@@ -539,15 +539,15 @@ namespace NDDL {
   
   class Foo$tokenWithParameters$4$0$0: public RuleInstance {
   public:
-    Foo$tokenWithParameters$4$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    Foo$tokenWithParameters$4$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
   DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$4, Foo$tokenWithParameters$4$0, Foo.tokenWithParameters, "guards.nddl,107");
   
   void Foo$tokenWithParameters$4$0::handleExecute() {
-    addChildRule(new Foo$tokenWithParameters$4$0$0(m_id, makeScope(var(getId(),std::string("bool_arg")))));
+    addChildRule(new Foo$tokenWithParameters$4$0$0(m_id, makeScope(var(getId(),std::string("bool_arg"))),true));
   }
   void Foo$tokenWithParameters$4$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t1, LabelStr("meets"));
@@ -564,8 +564,8 @@ namespace NDDL {
   
   class Foo$mixGuardedWithUnguarded$5$0$0: public RuleInstance {
   public:
-    Foo$mixGuardedWithUnguarded$5$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    Foo$mixGuardedWithUnguarded$5$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
@@ -580,7 +580,7 @@ namespace NDDL {
       vars.push_back(ruleVariable(IntervalIntDomain(20,20, "int")));
       rule_constraint(eq, vars);
     }
-    addChildRule(new Foo$mixGuardedWithUnguarded$5$0$0(m_id, makeScope(varfromtok(tok(getId(), std::string("t1")), std::string("bool_arg")))));
+    addChildRule(new Foo$mixGuardedWithUnguarded$5$0$0(m_id, makeScope(varfromtok(tok(getId(), std::string("t1")), std::string("bool_arg"))),true));
   }
   void Foo$mixGuardedWithUnguarded$5$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t2, LabelStr("meets"));
@@ -597,36 +597,36 @@ namespace NDDL {
   
   class Foo$localVariableGuard$6$0$0: public RuleInstance {
   public:
-    Foo$localVariableGuard$6$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    Foo$localVariableGuard$6$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
   class Foo$localVariableGuard$6$0$1: public RuleInstance {
   public:
-    Foo$localVariableGuard$6$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$localVariableGuard$6$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$localVariableGuard$6$0$2: public RuleInstance {
   public:
-    Foo$localVariableGuard$6$0$2(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$localVariableGuard$6$0$2(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$localVariableGuard$6$0$3: public RuleInstance {
   public:
-    Foo$localVariableGuard$6$0$3(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$localVariableGuard$6$0$3(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$localVariableGuard$6$0$4: public RuleInstance {
   public:
-    Foo$localVariableGuard$6$0$4(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    Foo$localVariableGuard$6$0$4(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
@@ -636,11 +636,11 @@ namespace NDDL {
     localVar(BoolDomain(), b, true);
     localVar(LocationsBaseDomain(), local_locations, true);
     objectVar(Foo, f, true, false);
-    addChildRule(new Foo$localVariableGuard$6$0$0(m_id, makeScope(var(getId(),std::string("b")))));
-    addChildRule(new Foo$localVariableGuard$6$0$1(m_id, var(getId(),std::string("b")), BoolDomain(true, "bool")));
-    addChildRule(new Foo$localVariableGuard$6$0$2(m_id, var(getId(),std::string("b")), BoolDomain(false, "bool")));
-    addChildRule(new Foo$localVariableGuard$6$0$3(m_id, var(getId(),std::string("local_locations")), SymbolDomain(LabelStr("Hill"), "Locations")));
-    addChildRule(new Foo$localVariableGuard$6$0$4(m_id, makeScope(var(getId(),std::string("f")))));
+    addChildRule(new Foo$localVariableGuard$6$0$0(m_id, makeScope(var(getId(),std::string("b"))),true));
+    addChildRule(new Foo$localVariableGuard$6$0$1(m_id, var(getId(),std::string("b")), BoolDomain(true, "bool"), true));
+    addChildRule(new Foo$localVariableGuard$6$0$2(m_id, var(getId(),std::string("b")), BoolDomain(false, "bool"), true));
+    addChildRule(new Foo$localVariableGuard$6$0$3(m_id, var(getId(),std::string("local_locations")), SymbolDomain(LabelStr("Hill"), "Locations"), true));
+    addChildRule(new Foo$localVariableGuard$6$0$4(m_id, makeScope(var(getId(),std::string("f"))),true));
   }
   void Foo$localVariableGuard$6$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t, LabelStr("meets"));
@@ -677,22 +677,22 @@ namespace NDDL {
   
   class Foo$multipleNestedGuards$7$0$0: public RuleInstance {
   public:
-    Foo$multipleNestedGuards$7$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$multipleNestedGuards$7$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$multipleNestedGuards$7$0$0$0: public RuleInstance {
   public:
-    Foo$multipleNestedGuards$7$0$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$multipleNestedGuards$7$0$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
   class Foo$multipleNestedGuards$7$0$0$0$0: public RuleInstance {
   public:
-    Foo$multipleNestedGuards$7$0$0$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    Foo$multipleNestedGuards$7$0$0$0$0(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
@@ -701,11 +701,11 @@ namespace NDDL {
   void Foo$multipleNestedGuards$7$0::handleExecute() {
     localVar(LocationsBaseDomain(), locs, false);
     slave(Foo::tokenWithParameters, Foo.tokenWithParameters, t1, LabelStr("any"));
-    addChildRule(new Foo$multipleNestedGuards$7$0$0(m_id, varfromtok(tok(getId(), std::string("t1")), std::string("int_arg")), IntervalIntDomain(10,10, "int")));
+    addChildRule(new Foo$multipleNestedGuards$7$0$0(m_id, varfromtok(tok(getId(), std::string("t1")), std::string("int_arg")), IntervalIntDomain(10,10, "int"), true));
   }
   void Foo$multipleNestedGuards$7$0$0::handleExecute() {
     localVar(BoolDomain(), OR, true);
-    addChildRule(new Foo$multipleNestedGuards$7$0$0$0(m_id, var(getId(),std::string("OR")), BoolDomain(true, "bool")));
+    addChildRule(new Foo$multipleNestedGuards$7$0$0$0(m_id, var(getId(),std::string("OR")), BoolDomain(true, "bool"), true));
   }
   void Foo$multipleNestedGuards$7$0$0$0::handleExecute() {
     slave(Foo::tokenWithParameters, Foo.tokenWithParameters, t2, LabelStr("meets"));
@@ -716,7 +716,7 @@ namespace NDDL {
       vars.push_back(varfromtok(tok(getId(), std::string("t2")), std::string("location_arg")));
       rule_constraint(eq, vars);
     }
-    addChildRule(new Foo$multipleNestedGuards$7$0$0$0$0(m_id, varfromtok(tok(getId(), std::string("t1")), std::string("location_arg")), SymbolDomain(LabelStr("Hill"), "Locations")));
+    addChildRule(new Foo$multipleNestedGuards$7$0$0$0$0(m_id, varfromtok(tok(getId(), std::string("t1")), std::string("location_arg")), SymbolDomain(LabelStr("Hill"), "Locations"), true));
   }
   void Foo$multipleNestedGuards$7$0$0$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t3, LabelStr("meets"));

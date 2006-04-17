@@ -297,15 +297,15 @@ namespace NDDL {
   
   class World$initialState$1$0$0: public RuleInstance {
   public:
-    World$initialState$1$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars)
-    : RuleInstance(parent, vars){}
+    World$initialState$1$0$0(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& vars, const bool positive)
+    : RuleInstance(parent, vars, positive){}
     void handleExecute();
   };
   
   class World$initialState$1$0$1: public RuleInstance {
   public:
-    World$initialState$1$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain)
-    : RuleInstance(parent, var, domain){}
+    World$initialState$1$0$1(const RuleInstanceId& parent, const ConstrainedVariableId& var, const AbstractDomain& domain, const bool positive)
+    : RuleInstance(parent, var, domain, positive){}
     void handleExecute();
   };
   
@@ -353,8 +353,8 @@ namespace NDDL {
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
       rule_constraint(eq, vars);
     }
-    addChildRule(new World$initialState$1$0$0(m_id, makeScope(var(getId(),std::string("hasPath")))));
-    addChildRule(new World$initialState$1$0$1(m_id, varFromObject(std::string("g"), std::string("m_int"), true), IntervalIntDomain(1,1, "int")));
+    addChildRule(new World$initialState$1$0$0(m_id, makeScope(var(getId(),std::string("hasPath"))),true));
+    addChildRule(new World$initialState$1$0$1(m_id, varFromObject(std::string("g"), std::string("m_int"), true), IntervalIntDomain(1,1, "int"), true));
   }
   void World$initialState$1$0$0::handleExecute() {
     objectVar(Path, p2, false, false);
