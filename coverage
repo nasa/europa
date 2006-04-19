@@ -116,9 +116,9 @@ sub movefiles
 print cyan "EUROPA code test case coverage analysis script - uses gcov\n";
 
 # ensure required .xml files get built. Cheaper than adding dependancy information to System/test jamfile.
-#system("jam -sVARIANTS=COVERAGE -sLIBRARIES=STATIC run-solvers-module-tests") and die red "Build failure";
+system("jam -sVARIANTS=COVERAGE -sLIBRARIES=STATIC run-solvers-module-tests") and die red "Build failure";
 # create gcov files
-#system("jam -sVARIANTS=COVERAGE -sLIBRARIES=STATIC run-all-module-tests") and die red "Build failure";
+system("jam -sVARIANTS=COVERAGE -sLIBRARIES=STATIC run-all-module-tests") and die red "Build failure";
 
 
 print cyan "Generating gcov information for all possible files.\n";
