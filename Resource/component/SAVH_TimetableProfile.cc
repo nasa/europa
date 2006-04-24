@@ -41,12 +41,15 @@ namespace EUROPA {
       double maxCumulativeConsumption(m_maxPrevConsumption), minCumulativeConsumption(m_minPrevConsumption);
 
       const std::set<TransactionId>& transactions(inst->getTransactions());
+      debugMsg("TimetableProfile:recomputeLevels", "Transactions at " << inst->getTime() << ":");
       for(std::set<TransactionId>::const_iterator it = transactions.begin(); it != transactions.end(); ++it) {
 	TransactionId trans = *it;
 	double lb, ub;
 	trans->quantity()->lastDomain().getBounds(lb, ub);
 	bool isConsumer = trans->isConsumer();
-
+	debugMsg("TimetableProfile:recomputeLevels", "Time: [" << trans->time()->lastDomain().getLowerBound() << " " <<
+		 trans->time()->lastDomain().getUpperBound() << "] Quantity: " << (isConsumer ? "-" : "+") <<
+		 "[" << lb << " " << ub << "]");
 	//the minInstant values are 0 unless there is a transaction that cannot happen before or after this instant, so we have to add those
 	if(trans->time()->lastDomain().isSingleton()) {
 	  if(isConsumer)
@@ -103,7 +106,7 @@ namespace EUROPA {
 		   m_minPrevConsumption, m_maxPrevConsumption, m_minPrevProduction, m_maxPrevProduction);
 
       //update the values for production and consumption that must have happened by the next transaction
-      for(std::set<TransactionId>::const_iterator it = inst->getClosedTransactions().begin(); it != inst->getClosedTransactions().end(); ++it) {
+      for(std::set<TransactionId>::const_iterator it = inst->getEndingTransactions().begin(); it != inst->getEndingTransactions().end(); ++it) {
 	TransactionId trans = *it;
 	check_error(trans.isValid());
 	double lb, ub;
@@ -121,31 +124,16 @@ namespace EUROPA {
     
     //for the moment, these always recompute over the entire interval.
     void TimetableProfile::handleTransactionAdded(const TransactionId t) {
-      Profile::handleTransactionAdded(t);
-      if(m_recomputeInterval.isValid())
-	delete (ProfileIterator*) m_recomputeInterval;
-      m_recomputeInterval = (new ProfileIterator(getId()))->getId();
     }
 
     void TimetableProfile::handleTransactionRemoved(const TransactionId t) {
-      Profile::handleTransactionRemoved(t);
-      if(m_recomputeInterval.isValid())
-	delete (ProfileIterator*) m_recomputeInterval;
-      m_recomputeInterval = (new ProfileIterator(getId()))->getId();
     }
     
     void TimetableProfile::handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type) {
-      Profile::handleTransactionTimeChanged(t, type);
-	if(m_recomputeInterval.isValid())
-	  delete (ProfileIterator*) m_recomputeInterval;
-	m_recomputeInterval = (new ProfileIterator(getId()))->getId();
     }
 
     void TimetableProfile::handleTransactionQuantityChanged(const TransactionId t, const DomainListener::ChangeType& type) {
-      Profile::handleTransactionQuantityChanged(t, type);
-      if(m_recomputeInterval.isValid())
-	delete (ProfileIterator*) m_recomputeInterval;
-      m_recomputeInterval = (new ProfileIterator(getId()))->getId();
+
     }
 
     //do nothing, since we don't take those types of changes into account

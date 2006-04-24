@@ -203,9 +203,11 @@ namespace NDDL {
   
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Resource
   
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Reservoir
   
   
-  // Plasma.nddl:83 UnaryResource
+  
+  // Plasma.nddl:141 UnaryResource
   UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "UnaryResource", name, true) {
   }
@@ -227,11 +229,11 @@ namespace NDDL {
   }
   
   
-  // Plasma.nddl:83 UnaryResource
+  // Plasma.nddl:141 UnaryResource
   DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory4, UnaryResource);
   
   
-  // Plasma.nddl:84 uses
+  // Plasma.nddl:142 uses
   UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -259,7 +261,7 @@ namespace NDDL {
   
   
   
-  // Plasma.nddl:93 StringData
+  // Plasma.nddl:151 StringData
   StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "StringData", name, true) {
   }
@@ -280,12 +282,12 @@ namespace NDDL {
   }
   
   
-  // Plasma.nddl:93 StringData
+  // Plasma.nddl:151 StringData
   void StringData::constructor(const LabelStr& _data) {
     data = addVariable(StringDomain(_data, "string"), "data");
   }
   
-  // Plasma.nddl:93 StringData
+  // Plasma.nddl:151 StringData
   class StringDataFactory5: public ConcreteObjectFactory {
   public:
     StringDataFactory5(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -408,6 +410,7 @@ namespace NDDL {
     id->addObjectType("Location", "Object");
     id->addObjectType("Path", "Object");
     id->addObjectType("Resource", "Object");
+    id->addObjectType("Reservoir", "Object");
     id->addObjectType("UnaryResource", "Timeline");
     id->addObjectType("StringData", "Object");
     id->addObjectType("Navigator", "Timeline");
@@ -429,6 +432,17 @@ namespace NDDL {
     id->addMember("Resource", "float", "consumptionMax");
     id->addPredicate("Resource.change");
     id->addMember("Resource.change", "float", "quantity");
+    id->addMember("Reservoir", "float", "initialCapacity");
+    id->addMember("Reservoir", "float", "levelLimitMin");
+    id->addMember("Reservoir", "float", "levelLimitMax");
+    id->addMember("Reservoir", "float", "productionRateMax");
+    id->addMember("Reservoir", "float", "productionMax");
+    id->addMember("Reservoir", "float", "consumptionRateMax");
+    id->addMember("Reservoir", "float", "consumptionMax");
+    id->addPredicate("Reservoir.produce");
+    id->addMember("Reservoir.produce", "float", "quantity");
+    id->addPredicate("Reservoir.consume");
+    id->addMember("Reservoir.consume", "float", "quantity");
     id->addPredicate("UnaryResource.uses");
     id->addMember("StringData", "string", "data");
     id->addPredicate("Navigator.At");
@@ -462,6 +476,7 @@ namespace NDDL {
     REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
     REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
     REGISTER_TYPE_FACTORY(Resource, ObjectDomain("Resource"));
+    REGISTER_TYPE_FACTORY(Reservoir, ObjectDomain("Reservoir"));
     REGISTER_TYPE_FACTORY(UnaryResource, ObjectDomain("UnaryResource"));
     REGISTER_OBJECT_FACTORY(UnaryResourceFactory4, UnaryResource);
     REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));

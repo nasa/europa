@@ -36,7 +36,7 @@ class Rover extends Object {
 Rover::At{
  meets (object.Going to);
  met_by (object.Going from);
- equals(UnaryResource.uses);
+ equals(UnaryResource.uses u);
 }
 
 class World extends Timeline {

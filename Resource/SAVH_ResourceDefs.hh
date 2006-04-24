@@ -23,7 +23,16 @@ namespace EUROPA {
 
     class Resource;
     typedef Id<Resource> ResourceId;
+
+    class Reservoir;
+    typedef Id<Reservoir> ReservoirId;
+
+    class ReservoirToken;
+    typedef Id<ReservoirToken> ReservoirTokenId;
   }
+
+  class TimetableToken;
+  typedef Id<TimetableToken> TimetableTokenId;
 }
 
 #endif

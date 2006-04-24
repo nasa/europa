@@ -67,10 +67,14 @@ checkin-tests =
 	HTX.2
 	HTX.3
         Rover-transaction
+	Rover-transaction-reservoir
         k9.backtrack.moderate-transaction
+	k9.backtrack.moderate-transaction-reservoir
         rejection
         resource-backtrack-test
+        resource-backtrack-test-reservoir
         better-res
+	better-res-reservoir #need to re-write the constraints so that they produce positive consumption values
         constrain-transaction
         foreach-transaction
         force-object-distribution
@@ -138,13 +142,19 @@ rule RunPlannerProblem {
 # PLANNER SYSTEM TESTS
 #
 RunPlannerProblem Rover-transaction.nddl : $(DEFAULT_PCONFIG) : Rover.heur : cbplanner-tests ;
+RunPlannerProblem Rover-transaction-reservoir.nddl : $(DEFAULT_PCONFIG) : Rover.heur : cbplanner-tests ;
 RunPlannerProblem k9.backtrack.moderate-transaction.nddl : $(DEFAULT_PCONFIG) : k9.heur : cbplanner-tests ;
+RunPlannerProblem k9.backtrack.moderate-transaction-reservoir.nddl : $(DEFAULT_PCONFIG) : k9.heur : cbplanner-tests
 RunPlannerProblem compat_token_cache.nddl : $(DEFAULT_PCONFIG) : compat_token_cache.heur : cbplanner-tests ;
 
 local testmodels = k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl
-      force-object-distribution.nddl resource-backtrack-test.nddl rejection.nddl constrain-transaction.nddl
-      parent-predicate.nddl k9-initial.nddl backtr.nddl better-res.nddl CAPER.nddl monkey1monkey-transaction.nddl
-      basic-model-transaction.nddl EOS-backtrack-test.nddl gnats_2837-tx.nddl DynamicObjTest.nddl
+      force-object-distribution.nddl resource-backtrack-test.nddl resource-backtrack-test-reservoir.nddl rejection.nddl constrain-transaction.nddl
+      parent-predicate.nddl parent-predicate-reservoir.nddl k9-initial.nddl backtr.nddl better-res.nddl 
+      better-res-reservoir.nddl
+      CAPER.nddl monkey1monkey-transaction.nddl
+      basic-model-transaction.nddl EOS-backtrack-test.nddl 
+      EOS-backtrack-test-reservoir.nddl
+      gnats_2837-tx.nddl DynamicObjTest.nddl
       rules.0.tx.nddl gnats_2572_interval-tx.nddl gnats_3161.nddl basic-types.nddl ;
 
 for model in $(testmodels) {

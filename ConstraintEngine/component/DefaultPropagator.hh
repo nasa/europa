@@ -10,17 +10,17 @@ namespace EUROPA {
   {
   public:
     DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine);
-    void execute();
-    bool updateRequired() const;
+    virtual void execute();
+    virtual bool updateRequired() const;
   protected:
-    void handleConstraintAdded(const ConstraintId& constrain);
-    void handleConstraintRemoved(const ConstraintId& constraint);
-    void handleConstraintActivated(const ConstraintId& constrain);
-    void handleConstraintDeactivated(const ConstraintId& constraint);
-    void handleNotification(const ConstrainedVariableId& variable, 
-			    int argIndex, 
-			    const ConstraintId& constraint, 
-			    const DomainListener::ChangeType& changeType);
+    virtual void handleConstraintAdded(const ConstraintId& constrain);
+    virtual void handleConstraintRemoved(const ConstraintId& constraint);
+    virtual void handleConstraintActivated(const ConstraintId& constrain);
+    virtual void handleConstraintDeactivated(const ConstraintId& constraint);
+    virtual void handleNotification(const ConstrainedVariableId& variable, 
+				    int argIndex, 
+				    const ConstraintId& constraint, 
+				    const DomainListener::ChangeType& changeType);
 
     ConstraintSet m_agenda;
 

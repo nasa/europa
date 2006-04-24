@@ -19,11 +19,23 @@ namespace NDDL {
   }
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
   
+  
+  ProfileAlgorithm ProfileAlgorithmBaseDomain(){
+    static ProfileAlgorithm sl_enum("ProfileAlgorithm");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("Simple"));
+      sl_enum.insert(LabelStr("MaxFlow"));
+      sl_enum.insert(LabelStr("IncMaxFlow"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Resource
   
   
   
-  // Resources.nddl:73 UnaryResource
+  // Resources.nddl:94 UnaryResource
   UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "UnaryResource", name, true) {
   }
@@ -45,11 +57,11 @@ namespace NDDL {
   }
   
   
-  // Resources.nddl:73 UnaryResource
+  // Resources.nddl:94 UnaryResource
   DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);
   
   
-  // Resources.nddl:74 uses
+  // Resources.nddl:95 uses
   UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -293,8 +305,8 @@ namespace NDDL {
     slave(Rover::Going, Rover.Going, from, LabelStr("met_by"));
     sameObject(object, from);
     met_by(this, from);
-    slave(UnaryResource::uses, UnaryResource.uses, slave2, LabelStr("equals"));
-    equals(this, slave2);
+    slave(UnaryResource::uses, UnaryResource.uses, u, LabelStr("equals"));
+    equals(this, u);
   }
   
   
@@ -414,6 +426,7 @@ namespace NDDL {
     id->addPrimitive("bool");
     id->addPrimitive("string");
     id->addEnum("TokenStates");
+    id->addEnum("ProfileAlgorithm");
     id->addMember("Resource", "float", "initialCapacity");
     id->addMember("Resource", "float", "levelLimitMin");
     id->addMember("Resource", "float", "levelLimitMax");
@@ -421,6 +434,7 @@ namespace NDDL {
     id->addMember("Resource", "float", "productionMax");
     id->addMember("Resource", "float", "consumptionRateMax");
     id->addMember("Resource", "float", "consumptionMax");
+    id->addMember("Resource", "ProfileAlgorithm", "algo");
     id->addPredicate("Resource.change");
     id->addMember("Resource.change", "float", "quantity");
     id->addPredicate("UnaryResource.uses");
@@ -441,6 +455,9 @@ namespace NDDL {
     id->addValue("TokenStates", LabelStr("ACTIVE"));
     id->addValue("TokenStates", LabelStr("MERGED"));
     id->addValue("TokenStates", LabelStr("REJECTED"));
+    id->addValue("ProfileAlgorithm", LabelStr("Simple"));
+    id->addValue("ProfileAlgorithm", LabelStr("MaxFlow"));
+    id->addValue("ProfileAlgorithm", LabelStr("IncMaxFlow"));
     id->addValue("Location", LabelStr("Hill"));
     id->addValue("Location", LabelStr("Rock"));
     id->addValue("Location", LabelStr("Lander"));
@@ -454,6 +471,7 @@ namespace NDDL {
     REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
     REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
+    REGISTER_TYPE_FACTORY(ProfileAlgorithm, ProfileAlgorithmBaseDomain());
     REGISTER_TYPE_FACTORY(Resource, ObjectDomain("Resource"));
     REGISTER_TYPE_FACTORY(UnaryResource, ObjectDomain("UnaryResource"));
     REGISTER_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);

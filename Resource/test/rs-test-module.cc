@@ -54,7 +54,7 @@ const double consumptionMax = -50;
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
     new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId()); \
-    new SAVH::ProfilePropagator(LabelStr("Profile"), ce.getId()); \
+    new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce.getId()); \
     if (autoClose) \
       db.close();
 
@@ -798,35 +798,40 @@ class DummyProfile : public SAVH::Profile {
 public:
   DummyProfile(ConstraintEngineId ce, const SAVH::FVDetectorId fv) 
     : Profile(ce, fv) {}
+  SAVH::InstantId getInstant(const int time) {
+    return getGreatestInstant(time)->second;
+  }
 private:
   void handleTransactionAdded(const SAVH::TransactionId t) {
-    Profile::handleTransactionAdded(t);
-    if(m_recomputeInterval.isValid() && t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
+    if(m_recomputeInterval.isValid() && !m_recomputeInterval->done() &&
+       t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
       delete (SAVH::ProfileIterator*) m_recomputeInterval;
       m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int)t->time()->lastDomain().getLowerBound()))->getId();
     }
   }
   void handleTransactionRemoved(const SAVH::TransactionId t) {
-    Profile::handleTransactionRemoved(t);
-    if(m_recomputeInterval.isValid() && t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
+    if(m_recomputeInterval.isValid() && !m_recomputeInterval->done() &&
+       t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
       delete (SAVH::ProfileIterator*) m_recomputeInterval;
       m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int)t->time()->lastDomain().getLowerBound()))->getId();
     }
   }
   void handleTransactionTimeChanged(const SAVH::TransactionId  t, const DomainListener::ChangeType& change) {
-    Profile::handleTransactionTimeChanged(t, change);
-    if(m_recomputeInterval.isValid() && t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
+    if(m_recomputeInterval.isValid() && !m_recomputeInterval->done() &&
+       t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
       delete (SAVH::ProfileIterator*) m_recomputeInterval;
       m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int) t->time()->lastDomain().getLowerBound()))->getId();
     }
   }
   void handleTransactionQuantityChanged(const SAVH::TransactionId  t, const DomainListener::ChangeType& change) {
-    Profile::handleTransactionQuantityChanged(t, change);
-    if(m_recomputeInterval.isValid() && t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
+    if(m_recomputeInterval.isValid() && !m_recomputeInterval->done() &&
+       t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
       delete (SAVH::ProfileIterator*) m_recomputeInterval;
       m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int) t->time()->lastDomain().getLowerBound()))->getId();
     }
   }
+
+  void handleTransactionsOrdered(const SAVH::TransactionId t1, const SAVH::TransactionId t2) {}
   void initRecompute(SAVH::InstantId inst){}
   void initRecompute(){}
   void recomputeLevels(SAVH::InstantId inst) {
@@ -860,7 +865,8 @@ public:
     m_profile->removeTransaction(trans);
     // m_profile->recompute();
   }
-
+  void addToProfile(const TokenId& token) {}
+  void removeFromProfile(const TokenId& token) {}
 private:
   void notifyViolated(const SAVH::InstantId inst) {
     SAVH::TransactionId trans = *(inst->getTransactions().begin());
@@ -870,6 +876,9 @@ private:
   //no implementation.  no tests for flaw detection
   void notifyFlawed(const SAVH::InstantId inst) {
   }
+
+  void notifyDeleted(const SAVH::InstantId inst) {}
+  void notifyNoLongerFlawed(const SAVH::InstantId inst){}
 };
 /**
    add tests for getClosedTransactions and getPendingTransactions!
@@ -894,6 +903,7 @@ public:
     runTest(testSummationConstraintResourceViolation);
     //other tests
     runTest(testPointProfileQueries);
+    runTest(testGnats3244);
     return true;
   }
 private:
@@ -904,6 +914,7 @@ private:
     int retval = 0;
     std::set<int>::const_iterator it = times.begin();
     while(!profIt.done()) {
+      debugMsg("ResourceTest:checkTimes", *it << " " << profIt.getTime());
       assertTrue(profIt.getInstant()->getTime() == *it);
       profIt.next();
       ++it;
@@ -1680,6 +1691,100 @@ private:
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
+  }
+
+  static bool testGnats3244() {
+    RESOURCE_DEFAULT_SETUP(ce, db, false);
+    DummyDetector detector(SAVH::ResourceId::noId());
+    DummyProfile profile(ce.getId(), detector.getId());
+    
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10), true, "t1");
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 15), true, "t2");
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(5, 15), true, "t3");
+    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 15), true, "t1");
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(1, 1), true, "q1");
+    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(1, 1), true, "q2");
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 1), true, "q3");
+    Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1, 1), true, "q4");
+    
+    SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
+    SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
+    SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
+    SAVH::Transaction trans4(t4.getId(), q4.getId(), false);
+
+    std::cout << "Creating " << trans1.getId() << std::endl;
+    std::cout << "Creating " << trans2.getId() << std::endl;
+    std::cout << "Creating " << trans3.getId() << std::endl;
+    std::cout << "Creating " << trans4.getId() << std::endl;
+
+    profile.addTransaction(trans1.getId());
+    profile.addTransaction(trans2.getId());
+    profile.addTransaction(trans3.getId());
+    profile.addTransaction(trans4.getId());
+
+
+    SAVH::InstantId inst = profile.getInstant(0);
+    assertTrue(inst.isValid());
+    assertTrue(inst->getTime() == 0);
+    for(std::set<SAVH::TransactionId>::const_iterator it = inst->getTransactions().begin();
+	it != inst->getTransactions().end(); ++it) {
+      assertTrue((*it).isValid());
+      assertTrue((*it) == trans1.getId());
+    }
+
+    //for time 5
+    std::set<SAVH::TransactionId> trans;
+    trans.insert(trans1.getId());
+    trans.insert(trans3.getId());
+    trans.insert(trans4.getId());
+
+    inst = profile.getInstant(5);
+    assertTrue(inst.isValid());
+    assertTrue(inst->getTime() == 5);
+    for(std::set<SAVH::TransactionId>::const_iterator it = inst->getTransactions().begin();
+	it != inst->getTransactions().end(); ++it) {
+      assertTrue((*it).isValid());
+      assertTrue(trans.find(*it) != trans.end());
+      trans.erase(*it);
+    }
+    assertTrue(trans.empty());
+
+    //for time 10
+    trans.insert(trans1.getId());
+    trans.insert(trans2.getId());
+    trans.insert(trans3.getId());
+    trans.insert(trans4.getId());
+    
+    inst = profile.getInstant(10);
+    assertTrue(inst.isValid());
+    assertTrue(inst->getTime() == 10);
+    for(std::set<SAVH::TransactionId>::const_iterator it = inst->getTransactions().begin();
+	it != inst->getTransactions().end(); ++it) {
+      assertTrue((*it).isValid());
+      assertTrue(trans.find(*it) != trans.end());
+      trans.erase(*it);
+    }
+    assertTrue(trans.empty());
+
+    //for time 15
+    trans.insert(trans2.getId());
+    trans.insert(trans3.getId());
+    trans.insert(trans4.getId());
+
+    inst = profile.getInstant(15);
+    assertTrue(inst.isValid());
+    assertTrue(inst->getTime() == 15);
+    for(std::set<SAVH::TransactionId>::const_iterator it = inst->getTransactions().begin();
+	it != inst->getTransactions().end(); ++it) {
+      assertTrue((*it).isValid());
+      assertTrue(trans.find(*it) != trans.end());
+      trans.erase(*it);
+    }
+    assertTrue(trans.empty());
+
+    
+    RESOURCE_DEFAULT_TEARDOWN();
+    return true;
   }
 };
 

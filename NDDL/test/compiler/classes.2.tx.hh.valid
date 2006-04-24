@@ -73,8 +73,10 @@ namespace NDDL {
   
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Resource
   
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Reservoir
   
-  // Plasma.nddl:83 UnaryResource
+  
+  // Plasma.nddl:141 UnaryResource
   class UnaryResource : public Timeline {
   public:
     UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -87,7 +89,7 @@ namespace NDDL {
     class uses;
     typedef Id<uses> usesId;
     
-    // Plasma.nddl:84 uses
+    // Plasma.nddl:142 uses
     class uses : public NddlToken {
     public:
       uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -98,7 +100,7 @@ namespace NDDL {
     };
   };
   
-  // Plasma.nddl:93 StringData
+  // Plasma.nddl:151 StringData
   class StringData : public Object {
   public:
     StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -109,7 +111,7 @@ namespace NDDL {
     
     ConstrainedVariableId data; // SchemaWriter::declareVariable
     
-    // Plasma.nddl:93 StringData
+    // Plasma.nddl:151 StringData
     virtual void constructor(const LabelStr& _data);
   };
   

@@ -3,6 +3,7 @@
 #include "ConstraintEngine.hh"
 #include "RulesEngine.hh"
 #include "ResourcePropagator.hh"
+#include "ProfilePropagator.hh"
 #include "DefaultPropagator.hh"
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
@@ -358,6 +359,7 @@ namespace EUROPA {
     new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
     new TemporalPropagator(LabelStr("Temporal"), m_constraintEngine);
     new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
+    //new ProfilePropagator(LabelStr("Profile"), m_constraintEngine, m_planDatabase);
 
     // Link up the Temporal Advisor in the PlanDatabase so that it can use the temporal
     // network for determining temporal distances between time points.

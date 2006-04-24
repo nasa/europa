@@ -6,6 +6,8 @@ ModuleComponent Resource
 		:
 		SAVH_TimetableProfile.cc
 		SAVH_TimetableFVDetector.cc
+		SAVH_InstantTokens.cc
+		SAVH_Reservoir.cc
 		;
 
 } # PLASMA_READY

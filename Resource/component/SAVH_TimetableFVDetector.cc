@@ -11,6 +11,11 @@ namespace EUROPA {
       m_maxInstProduction = res->getMaxInstProduction();
       m_maxCumulativeConsumption = res->getMaxConsumption();
       m_maxCumulativeProduction = res->getMaxProduction();
+      debugMsg("TimetableFVDetector:TimetableFVDetector", "Created FVDetector for " << res->toString());
+      debugMsg("TimetableFVDetector:TimetableFVDetector", "Got values: lower limit(" << m_lowerLimit << ") upper limit(" << 
+	       m_upperLimit << ") max instantaneous consumption(" << m_maxInstConsumption << ") max instantaneous production(" <<
+	       m_maxInstProduction << ") max consumption(" << m_maxCumulativeConsumption << ") max production(" << 
+	       m_maxCumulativeProduction << ")");
     }
 
     bool TimetableFVDetector::detect(const InstantId inst) {
