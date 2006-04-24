@@ -15,6 +15,8 @@
     <FlawFilter var-match="duration"/>
     <FlawFilter class-match="Resource" var-match="time"/>
     <FlawFilter class-match="Resource" var-match="quantity"/>
+    <FlawFilter class-match="Reservoir" var-match="time"/>
+    <FlawFilter class-match="Reservoir" var-match="quantity"/>
     <FlawFilter component="InfiniteDynamicFilter"/>
     <FlawHandler component="StandardVariableHandler"/>
   </UnboundVariableManager>
