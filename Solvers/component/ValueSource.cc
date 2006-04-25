@@ -2,7 +2,10 @@
 #include "ConstrainedVariable.hh"
 #include "AbstractDomain.hh"
 #include "Debug.hh"
+#include "Schema.hh"
+#include "Entity.hh"
 
+#include <algorithm>
 /**
  * @author Michael Iatauro
  * @file ValueSource.cc
@@ -33,7 +36,11 @@ namespace EUROPA {
       : ValueSource(dom.getSize()) {
       std::list<double> values;
       dom.getValues(values);
-    
+      if(Schema::instance()->isObjectType(dom.getTypeName())) {
+	EntityComparator<EntityId> foo;
+	values.sort<EntityComparator<EntityId> >(foo);
+      }
+
       for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
         m_values.push_back(*it);
     }
