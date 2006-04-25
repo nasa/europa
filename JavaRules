@@ -38,6 +38,10 @@ rule JavaJar
   local jar = $(1) ;
   local java_classes = $(2) ;
 
+	# magic pseudotarget to cause all classes of the jar to depend on all sources.
+	local module = $(jar:S=".javamodule") ;
+	NOTFILE $(module) ;
+
   LocalDepends lib : $(jar) ;
   MakeLocate $(jar) : $(JAVA_JARS_DIR) ;
   local java_class ;
@@ -52,6 +56,10 @@ rule JavaJar
 
     UpdateJar $(jar) : $(classfile) ; 
     Depends $(java_class) : $(classfile) ;
+
+		Depends $(module) : $(javafile) ;
+		Depends $(classfile) : $(module) ;
+
     JavaCompile $(classfile) : $(javafile) ;
   }
   JavaClassPath [ FDirName $(JAVA_JARS_DIR) $(jar) ] ;
