@@ -1,0 +1,23 @@
+#include "PlannerConfig.nddl"
+
+class Foo {
+ predicate guard{}
+ predicate boring{}
+}
+
+// between guard or boring and guard or boring
+Foo::guard{
+	bool s_meet, s_met;
+	if(s_met == true) met_by (guard);
+	else met_by(boring);
+
+	if(s_meet != false) meets (boring);
+	else meets(guard);
+
+}
+
+// between two guards
+Foo::boring{
+	meets(guard);
+	met_by(guard);
+}

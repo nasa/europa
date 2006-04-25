@@ -1,0 +1,77 @@
+// NDDL/test/compiler/gnats-3248.xml
+
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+  class PlannerConfig;
+  typedef Id<PlannerConfig> PlannerConfigId;
+  typedef ObjectDomain PlannerConfigDomain;
+  
+  class Foo;
+  typedef Id<Foo> FooId;
+  typedef ObjectDomain FooDomain;
+  
+  
+  // PlannerConfig.nddl:7 PlannerConfig
+  class PlannerConfig : public Object {
+  public:
+    PlannerConfig(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    PlannerConfig(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    PlannerConfig(const ObjectId& parent, const LabelStr& name);
+    PlannerConfig(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId m_horizonStart; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_horizonEnd; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_maxPlannerSteps; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_maxPlannerDepth; // SchemaWriter::declareVariable
+    
+    // PlannerConfig.nddl:7 PlannerConfig
+    virtual void constructor(int start, int end, int maxPlannerSteps, int maxPlannerDepth);
+    
+    // PlannerConfig.nddl:7 PlannerConfig
+    virtual void constructor(int start, int end, int maxPlannerSteps);
+    
+    // PlannerConfig.nddl:7 PlannerConfig
+    virtual void constructor();
+  };
+  
+  // gnats-3248.nddl:3 Foo
+  class Foo : public Timeline {
+  public:
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class guard;
+    typedef Id<guard> guardId;
+    class boring;
+    typedef Id<boring> boringId;
+    
+    // gnats-3248.nddl:4 guard
+    class guard : public NddlToken {
+    public:
+      guard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      guard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::guard, Foo.guard);
+      
+    };
+    
+    // gnats-3248.nddl:5 boring
+    class boring : public NddlToken {
+    public:
+      boring(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      boring(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::boring, Foo.boring);
+      
+    };
+  };
+} // End NDDL namespace
