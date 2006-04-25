@@ -151,26 +151,26 @@ namespace EUROPA {
         delete m_comparator;
       }
 
-      void TokenComparator::extractTokens(std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-                                          std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2,
+      void TokenComparator::extractTokens(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                                          const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2,
                                           TokenId& t1, TokenId& t2) {
         t1 = (p1.second.first == m_flawedTok ? p1.second.second : p1.second.first);
         t2 = (p2.second.first == m_flawedTok ? p2.second.second : p2.second.first);
       }
 
-      bool TokenComparator::compare(std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-                                    std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {
+      bool TokenComparator::compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                                    const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {
         TokenId x, y;
         extractTokens(p1, p2, x, y);
         return compare(x, y);
       }
 
-      bool EarlyTokenComparator::compare(TokenId x, TokenId y) {
+      bool EarlyTokenComparator::compare(const TokenId x, const TokenId y) {
         return x->getStart()->lastDomain().getLowerBound() < y->getStart()->lastDomain().getLowerBound();
       }
 
-      bool EarlyTokenComparator::compare(std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-                                         std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {
+      bool EarlyTokenComparator::compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                                         const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {
         check_error(m_flawedTok.isValid());
         if(m_flawedTok == p1.second.second) {
           if(m_flawedTok == p2.second.second) {
@@ -193,12 +193,12 @@ namespace EUROPA {
         return new EarlyTokenComparator(m_flawedTok);
       }
 
-      bool LateTokenComparator::compare(TokenId x, TokenId y) {
+      bool LateTokenComparator::compare(const TokenId x, const TokenId y) {
         return x->getStart()->lastDomain().getLowerBound() > y->getStart()->lastDomain().getLowerBound();
       }
 
-      bool LateTokenComparator::compare(std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-                                        std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {
+      bool LateTokenComparator::compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                                        const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {
         check_error(m_flawedTok.isValid());
         if(m_flawedTok == p1.second.second) {
           if(m_flawedTok == p2.second.second) {
@@ -220,7 +220,7 @@ namespace EUROPA {
         return new LateTokenComparator(m_flawedTok);
       }
 
-      bool NearTokenComparator::compare(TokenId x, TokenId y) {
+      bool NearTokenComparator::compare(const TokenId x, const TokenId y) {
         bool retval = absoluteDistance(m_flawedTok, x) < absoluteDistance(m_flawedTok, y);
         debugMsg("NearTokenComparator:compare", "" << x->getKey() << " before " << y->getKey() << " ? "
                  << (retval ? "true" : "false"));
@@ -241,7 +241,7 @@ namespace EUROPA {
         return (int)(token->getStart()->lastDomain().getLowerBound() + maxTemporalExtent / 2);
       }
 
-      bool FarTokenComparator::compare(TokenId x, TokenId y) {
+      bool FarTokenComparator::compare(const TokenId x, const TokenId y) {
         bool retval = absoluteDistance(m_flawedTok, x) > absoluteDistance(m_flawedTok, y);
         debugMsg("FarTokenComparator:compare", "" << x->getKey() << " before " << y->getKey() << " ? "
                  << (retval ? "true" : "false"));
@@ -252,7 +252,7 @@ namespace EUROPA {
         return new FarTokenComparator(m_flawedTok);
       }
 
-      bool AscendingKeyTokenComparator::compare(TokenId x, TokenId y) {
+      bool AscendingKeyTokenComparator::compare(const TokenId x, const TokenId y) {
         return x->getKey() < y->getKey();
       }
 
@@ -286,8 +286,23 @@ namespace EUROPA {
         m_comparator = new ThreatComparator((TokenComparator*) Component::AbstractFactory::allocate(orderElem), tokenToOrder);
       }
 
+      class ObjectComparator {
+      public:
+	bool operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+			 const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) const {
+	  ObjectId o1 = p1.first;
+	  ObjectId o2 = p2.first;
+	  return o1->getKey() < o2->getKey();
+	}
+	bool operator==(const ObjectComparator& c){return true;}
+      };
+
       void ThreatDecisionPoint::handleInitialize() {
         SOLVERS::ThreatDecisionPoint::handleInitialize();
+	//first order choices by object key
+	ObjectComparator cmp;
+	std::sort<std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >::iterator, ObjectComparator&>(m_choices.begin(), m_choices.end(), cmp);
+	//then order them by the heuristic
         std::sort<std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >::iterator, ThreatComparator&>(m_choices.begin(), m_choices.end(), *m_comparator);
         debugMsg("ThreatDecisionPoint:handleInitialize", "Final choice order for " << m_tokenToOrder->getKey() << ": " << choicesToString());
       }
@@ -320,10 +335,10 @@ namespace EUROPA {
       ThreatDecisionPoint::ThreatComparator::~ThreatComparator() {
         delete m_comparator;
       }
-
-      bool ThreatDecisionPoint::ThreatComparator::operator() (std::pair<ObjectId, std::pair<TokenId, TokenId> > p1,
-                                                              std::pair<ObjectId, std::pair<TokenId, TokenId> > p2) {
-        return m_comparator->compare(p1, p2);
+      
+      bool ThreatDecisionPoint::ThreatComparator::operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                                                              const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {
+	return m_comparator->compare(p1, p2);
       }
 
       class HSTSDecisionPointLocalStatic {

@@ -65,8 +65,8 @@ namespace EUROPA {
           ThreatComparator(TokenComparator* comparator, const TokenId& tok);
           ThreatComparator(const ThreatComparator& other);
           ~ThreatComparator();
-          bool operator() (std::pair<ObjectId, std::pair<TokenId, TokenId> > p1,
-                           std::pair<ObjectId, std::pair<TokenId, TokenId> > p2);
+          bool operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+			   const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2);
         private:
           TokenComparator* m_comparator;
         };
@@ -78,12 +78,12 @@ namespace EUROPA {
       public:
         TokenComparator(const TiXmlElement& configData) : Component(configData) {}
         TokenComparator(TokenId tok) : m_flawedTok(tok) {}
-        virtual bool compare(TokenId x, TokenId y) = 0;
-        virtual bool compare(std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-                             std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2);
+        virtual bool compare(const TokenId x, const TokenId y) = 0;
+        virtual bool compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                             const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2);
         virtual TokenComparator* copy() = 0;
-        void extractTokens(std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-                           std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2,
+        void extractTokens(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                           const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2,
                            TokenId& t1, TokenId& t2);
         TokenId m_flawedTok;
       };
@@ -103,9 +103,9 @@ namespace EUROPA {
       public:
         EarlyTokenComparator(const TiXmlElement& configData) : TokenComparator(configData) {};
         EarlyTokenComparator(TokenId tok) : TokenComparator(tok) {}
-        bool compare(TokenId x, TokenId y);
-        bool compare(std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-                     std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2);
+        bool compare(const TokenId x, const TokenId y);
+        bool compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                     const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2);
         TokenComparator* copy();
       };
 
@@ -113,9 +113,9 @@ namespace EUROPA {
       public:
         LateTokenComparator(const TiXmlElement& configData) : TokenComparator(configData) {};
         LateTokenComparator(TokenId tok) : TokenComparator(tok) {}
-        bool compare(TokenId x, TokenId y);
-        bool compare(std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-                     std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2);
+        bool compare(const TokenId x, const TokenId y);
+        bool compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+                     const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2);
         TokenComparator* copy();
       };
 
@@ -123,7 +123,7 @@ namespace EUROPA {
       public:
         NearTokenComparator(const TiXmlElement& configData) : TokenComparator(configData) {};
         NearTokenComparator(TokenId tok) : TokenComparator(tok) {}
-        virtual bool compare(TokenId x, TokenId y);
+        virtual bool compare(const TokenId x, const TokenId y);
         virtual TokenComparator* copy();
         static int absoluteDistance(const TokenId& a, const TokenId& b);
         static int midpoint(const TokenId& token);
@@ -133,7 +133,7 @@ namespace EUROPA {
       public:
         FarTokenComparator(const TiXmlElement& configData) : NearTokenComparator(configData) {};
         FarTokenComparator(TokenId tok) : NearTokenComparator(tok) {}
-        bool compare(TokenId x, TokenId y);
+        bool compare(const TokenId x, const TokenId y);
         TokenComparator* copy();
       };
 
@@ -141,7 +141,7 @@ namespace EUROPA {
       public:
         AscendingKeyTokenComparator(const TiXmlElement& configData) : TokenComparator(configData){};
         AscendingKeyTokenComparator(TokenId tok) : TokenComparator(tok) {}
-        bool compare(TokenId x, TokenId y);
+        bool compare(const TokenId x, const TokenId y);
         TokenComparator* copy();
       };
 
