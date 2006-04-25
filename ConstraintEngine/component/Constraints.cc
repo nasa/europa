@@ -1776,10 +1776,13 @@ namespace EUROPA {
   }
 
   void TestEQ::handleExecute(){  
+     
+    debugMsg("TestEQ:handleExecute", "comparing " << m_arg1.toString() << " with " << m_arg2.toString());
+
     if(m_arg1.isSingleton() && 
        m_arg2.isSingleton() && 
-       m_arg1.intersects(m_arg2))// Exactly equal with no flexibility
-      m_test.remove(0);
+       m_arg1.intersects(m_arg2)) // Exactly equal with no flexibility 
+       m_test.remove(0);
     else if(!m_arg1.intersects(m_arg2)) // No intersection so they cannot be equal
       m_test.remove(1);
 
