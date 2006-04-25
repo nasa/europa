@@ -3,6 +3,7 @@ AntlrRules_INCLUDED = TRUE ;
 
 include [ FDirName $(SUBDIR) JavaRules ] ;
 
+
 # AntlrGrammar ParserPrefix : grammar.g grammar.tree.g : grammar.package ;
 rule AntlrGrammar
 {
@@ -11,14 +12,25 @@ rule AntlrGrammar
   local grammar.tree = $(2[2]) ;
   local package = $(3) ;
 
+  local files = $(prefix)Lexer.java $(prefix)Parser.java ;
+  local tokens = $(prefix)TokenTypes.java $(prefix)TokenTypes.txt ;
+
+  local files.tree = $(prefix)TreeParser.java ;
+  local tokens.tree = $(prefix)TreeParserTokenTypes.java $(prefix)TreeParserTokenTypes.txt ;
+
 #  Echo AntlrTool . $(prefix) . $(grammar) . $(grammar.tree) . $(package) ;
 
-  local files = $(prefix)Lexer.java $(prefix)Parser.java $(prefix)TokenTypes.java $(prefix)TokenTypes.txt ;
-  local files.tree = $(prefix)TreeParser.java $(prefix)TreeParserTokenTypes.java $(prefix)TreeParserTokenTypes.txt ;
-  AntlrTool $(files) : $(grammar) : $(package) ;
+	Depends $(files) $(tokens) : $(grammar) ;
+  AntlrTool $(files) $(tokens) : $(grammar) : $(package) ;
+
+	Includes $(files) : $(tokens) ;
+
   if $(files.tree) {
-    Depends $(files.tree) : $(files) ;
-    AntlrTool $(files.tree) : $(grammar.tree) : $(package) ;
+    Depends $(files.tree) $(tokens.tree) : $(files) $(tokens) ;
+    Depends $(files.tree) $(tokens.tree) : $(grammar.tree) ;
+    AntlrTool $(files.tree) $(tokens.tree) : $(grammar.tree) : $(package) ;
+
+		Includes $(files.tree) : $(tokens.tree) ;
   }
 }
 

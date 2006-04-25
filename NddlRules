@@ -137,7 +137,7 @@ rule NddlParser1 {
 }
 
 actions NddlParser1 {
-  "$(JAVA)" -cp $(CLASSPATH) $(JREFLAGS) nddl.Parse -o $(1) $(2) 
+  "$(JAVA)" -cp $(CLASSPATH) $(JREFLAGS) nddl.Parse -q -o $(1) $(2) 
 }
 
 } # NddlRules_INCLUDED
