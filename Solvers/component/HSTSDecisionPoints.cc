@@ -286,22 +286,22 @@ namespace EUROPA {
         m_comparator = new ThreatComparator((TokenComparator*) Component::AbstractFactory::allocate(orderElem), tokenToOrder);
       }
 
-      class ObjectComparator {
-      public:
-	bool operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-			 const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) const {
-	  ObjectId o1 = p1.first;
-	  ObjectId o2 = p2.first;
-	  return o1->getKey() < o2->getKey();
-	}
-	bool operator==(const ObjectComparator& c){return true;}
-      };
+//       class ObjectComparator {
+//       public:
+// 	bool operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+// 			 const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) const {
+// 	  ObjectId o1 = p1.first;
+// 	  ObjectId o2 = p2.first;
+// 	  return o1->getKey() < o2->getKey();
+// 	}
+// 	bool operator==(const ObjectComparator& c){return true;}
+//       };
 
       void ThreatDecisionPoint::handleInitialize() {
         SOLVERS::ThreatDecisionPoint::handleInitialize();
 	//first order choices by object key
-	ObjectComparator cmp;
-	std::sort<std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >::iterator, ObjectComparator&>(m_choices.begin(), m_choices.end(), cmp);
+// 	ObjectComparator cmp;
+// 	std::sort<std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >::iterator, ObjectComparator&>(m_choices.begin(), m_choices.end(), cmp);
 	//then order them by the heuristic
         std::sort<std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >::iterator, ThreatComparator&>(m_choices.begin(), m_choices.end(), *m_comparator);
         debugMsg("ThreatDecisionPoint:handleInitialize", "Final choice order for " << m_tokenToOrder->getKey() << ": " << choicesToString());

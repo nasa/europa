@@ -59,11 +59,24 @@ namespace EUROPA {
       return m_index < m_choiceCount;
     }
 
+    class ObjectComparator {
+    public:
+      bool operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+		       const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) const {
+	ObjectId o1 = p1.first;
+	ObjectId o2 = p2.first;
+	return o1->getKey() < o2->getKey();
+      }
+      bool operator==(const ObjectComparator& c){return true;}
+    };
+
     /**
      * @brief populate over all objects in the tokens object domain. Should customize to change the ordering.
      */
     void ThreatDecisionPoint::handleInitialize() {
       m_tokenToOrder->getPlanDatabase()->getOrderingChoices(m_tokenToOrder, m_choices);
+      ObjectComparator cmp;
+      std::sort<std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >::iterator, ObjectComparator&>(m_choices.begin(), m_choices.end(), cmp);
       m_choiceCount = m_choices.size();
     }
 
