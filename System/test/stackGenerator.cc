@@ -43,14 +43,14 @@ void nddloutputModel(std::ofstream& out, const Problem& prob) {
     else 
       out << prob.targets[i] << ", ";
   }
-  out << "}" << std::endl;
+  out << "};" << std::endl;
   out << "" << std::endl;
   if (prob.numParamChoices >0)  {
-    out << "enum Domain {";
+    out << "typedef int{";
     for (int i=0; i < prob.numParamChoices; ++i)
       out << i << ", ";
     out << prob.numParamChoices;
-    out << "}" << std::endl;
+    out << "} Domain;" << std::endl;
     out << "" << std::endl;
   }
   out << "class Satellite {" << std::endl;
