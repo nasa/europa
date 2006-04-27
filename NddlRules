@@ -103,7 +103,7 @@ rule NddlCompiler1 {
 }
 
 actions NddlCompiler1 {
-  "$(JAVA)" -cp $(CLASSPATH) $(JREFLAGS) nddl.NddlCompiler $(2) 
+  "$(JAVA)" -cp $(CLASSPATH) $(JREFLAGS) nddl.NddlCompiler -q $(2) 
 }
 
 # NddlParser model.xml : model.nddl ;
