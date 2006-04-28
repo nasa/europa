@@ -1,4 +1,4 @@
-// NDDL/test/compiler/simple-rules.xml
+// simple-rules.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

@@ -1,4 +1,4 @@
-// NDDL/test/compiler/string-domain.xml
+// string-domain.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

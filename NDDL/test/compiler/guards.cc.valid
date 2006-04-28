@@ -1,4 +1,4 @@
-// NDDL/test/compiler/guards.xml
+// guards.xml
 
 #include "guards.hh"
 #include "NddlUtils.hh"
@@ -325,6 +325,7 @@ namespace NDDL {
   void Foo$impliedObjectGuard$0$0::handleExecute() {
     objectVar(Bar, bar, false, false);
     slave(Foo::basicToken, Foo.basicToken, g1, LabelStr("meets"));
+    sameObject(object, g1);
     meets(this, g1);
     {
       std::vector<ConstrainedVariableId> vars;
@@ -406,11 +407,13 @@ namespace NDDL {
   }
   void Foo$singletonGuard$2$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, g1, LabelStr("meets"));
+    sameObject(object, g1);
     meets(this, g1);
     addChildRule(new Foo$singletonGuard$2$0$0$0(m_id, makeScope(varfromtok(tok(getId(), std::string("g1")), std::string("object"))),true));
   }
   void Foo$singletonGuard$2$0$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, g2, LabelStr("met_by"));
+    sameObject(object, g2);
     met_by(this, g2);
     {
       std::vector<ConstrainedVariableId> vars;
@@ -498,34 +501,42 @@ namespace NDDL {
   }
   void Foo$tokenWithParameters$3$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t1, LabelStr("meets"));
+    sameObject(object, t1);
     meets(this, t1);
   }
   void Foo$tokenWithParameters$3$0$1::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t2, LabelStr("meets"));
+    sameObject(object, t2);
     meets(this, t2);
   }
   void Foo$tokenWithParameters$3$0$2::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t3, LabelStr("meets"));
+    sameObject(object, t3);
     meets(this, t3);
   }
   void Foo$tokenWithParameters$3$0$3::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t4, LabelStr("meets"));
+    sameObject(object, t4);
     meets(this, t4);
   }
   void Foo$tokenWithParameters$3$0$4::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t4, LabelStr("meets"));
+    sameObject(object, t4);
     meets(this, t4);
   }
   void Foo$tokenWithParameters$3$0$5::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t5, LabelStr("meets"));
+    sameObject(object, t5);
     meets(this, t5);
   }
   void Foo$tokenWithParameters$3$0$6::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t6, LabelStr("meets"));
+    sameObject(object, t6);
     meets(this, t6);
   }
   void Foo$tokenWithParameters$3$0$7::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t6, LabelStr("meets"));
+    sameObject(object, t6);
     meets(this, t6);
   }
   
@@ -551,6 +562,7 @@ namespace NDDL {
   }
   void Foo$tokenWithParameters$4$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t1, LabelStr("meets"));
+    sameObject(object, t1);
     meets(this, t1);
   }
   
@@ -573,6 +585,7 @@ namespace NDDL {
   
   void Foo$mixGuardedWithUnguarded$5$0::handleExecute() {
     slave(Foo::tokenWithParameters, Foo.tokenWithParameters, t1, LabelStr("meets"));
+    sameObject(object, t1);
     meets(this, t1);
     {
       std::vector<ConstrainedVariableId> vars;
@@ -584,6 +597,7 @@ namespace NDDL {
   }
   void Foo$mixGuardedWithUnguarded$5$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t2, LabelStr("meets"));
+    sameObject(object, t2);
     meets(this, t2);
   }
   
@@ -644,18 +658,22 @@ namespace NDDL {
   }
   void Foo$localVariableGuard$6$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t, LabelStr("meets"));
+    sameObject(object, t);
     meets(this, t);
   }
   void Foo$localVariableGuard$6$0$1::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t, LabelStr("meets"));
+    sameObject(object, t);
     meets(this, t);
   }
   void Foo$localVariableGuard$6$0$2::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t, LabelStr("meets"));
+    sameObject(object, t);
     meets(this, t);
   }
   void Foo$localVariableGuard$6$0$3::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t2, LabelStr("met_by"));
+    sameObject(object, t2);
     met_by(this, t2);
   }
   void Foo$localVariableGuard$6$0$4::handleExecute() {
@@ -701,6 +719,7 @@ namespace NDDL {
   void Foo$multipleNestedGuards$7$0::handleExecute() {
     localVar(LocationsBaseDomain(), locs, false);
     slave(Foo::tokenWithParameters, Foo.tokenWithParameters, t1, LabelStr("any"));
+    sameObject(object, t1);
     addChildRule(new Foo$multipleNestedGuards$7$0$0(m_id, varfromtok(tok(getId(), std::string("t1")), std::string("int_arg")), IntervalIntDomain(10,10, "int"), true));
   }
   void Foo$multipleNestedGuards$7$0$0::handleExecute() {
@@ -709,6 +728,7 @@ namespace NDDL {
   }
   void Foo$multipleNestedGuards$7$0$0$0::handleExecute() {
     slave(Foo::tokenWithParameters, Foo.tokenWithParameters, t2, LabelStr("meets"));
+    sameObject(object, t2);
     meets(this, t2);
     {
       std::vector<ConstrainedVariableId> vars;
@@ -720,6 +740,7 @@ namespace NDDL {
   }
   void Foo$multipleNestedGuards$7$0$0$0$0::handleExecute() {
     slave(Foo::basicToken, Foo.basicToken, t3, LabelStr("meets"));
+    sameObject(object, t3);
     meets(t2, t3);
   }
   
@@ -729,7 +750,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/guards");
+    Id<Schema> id = Schema::instance("guards");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

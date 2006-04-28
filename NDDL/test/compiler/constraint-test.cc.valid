@@ -1,4 +1,4 @@
-// NDDL/test/compiler/constraint-test.xml
+// constraint-test.xml
 
 #include "constraint-test.hh"
 #include "NddlUtils.hh"
@@ -275,7 +275,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/constraint-test");
+    Id<Schema> id = Schema::instance("constraint-test");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

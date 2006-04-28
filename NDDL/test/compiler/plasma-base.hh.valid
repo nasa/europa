@@ -1,4 +1,4 @@
-// NDDL/test/compiler/plasma-base.xml
+// plasma-base.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

@@ -1,4 +1,4 @@
-// NDDL/test/compiler/plasma-base.xml
+// plasma-base.xml
 
 #include "plasma-base.hh"
 #include "NddlUtils.hh"
@@ -225,7 +225,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/plasma-base");
+    Id<Schema> id = Schema::instance("plasma-base");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

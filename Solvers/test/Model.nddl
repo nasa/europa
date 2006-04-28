@@ -5,7 +5,7 @@ enum Letters {X, Y, Z};
 class A extends Timeline {
  predicate predicateA{
   int arg1 = [0 1000];
-  float arg2 = [0 1000];
+  float arg2 = [0.0 1000.0];
  }
 
  predicate predicateB{

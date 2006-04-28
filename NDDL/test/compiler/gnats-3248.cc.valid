@@ -1,4 +1,4 @@
-// NDDL/test/compiler/gnats-3248.xml
+// gnats-3248.xml
 
 #include "gnats-3248.hh"
 #include "NddlUtils.hh"
@@ -267,18 +267,22 @@ namespace NDDL {
   }
   void Foo$guard$0$0$0::handleExecute() {
     slave(Foo::guard, Foo.guard, slave0, LabelStr("met_by"));
+    sameObject(object, slave0);
     met_by(this, slave0);
   }
   void Foo$guard$0$0$1::handleExecute() {
     slave(Foo::boring, Foo.boring, slave1, LabelStr("met_by"));
+    sameObject(object, slave1);
     met_by(this, slave1);
   }
   void Foo$guard$0$0$2::handleExecute() {
     slave(Foo::boring, Foo.boring, slave2, LabelStr("meets"));
+    sameObject(object, slave2);
     meets(this, slave2);
   }
   void Foo$guard$0$0$3::handleExecute() {
     slave(Foo::guard, Foo.guard, slave3, LabelStr("meets"));
+    sameObject(object, slave3);
     meets(this, slave3);
   }
   
@@ -294,8 +298,10 @@ namespace NDDL {
   
   void Foo$boring$1$0::handleExecute() {
     slave(Foo::guard, Foo.guard, slave4, LabelStr("meets"));
+    sameObject(object, slave4);
     meets(this, slave4);
     slave(Foo::guard, Foo.guard, slave5, LabelStr("met_by"));
+    sameObject(object, slave5);
     met_by(this, slave5);
   }
   
@@ -305,7 +311,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/gnats-3248");
+    Id<Schema> id = Schema::instance("gnats-3248");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

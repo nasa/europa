@@ -1,4 +1,4 @@
-// NDDL/test/compiler/constraint-test.xml
+// constraint-test.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

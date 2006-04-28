@@ -1,4 +1,4 @@
-// NDDL/test/compiler/gnats_3140.xml
+// gnats_3140.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

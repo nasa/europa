@@ -1,4 +1,4 @@
-// NDDL/test/compiler/gnats_3140.xml
+// gnats_3140.xml
 
 #include "gnats_3140.hh"
 #include "NddlUtils.hh"
@@ -258,7 +258,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/gnats_3140");
+    Id<Schema> id = Schema::instance("gnats_3140");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

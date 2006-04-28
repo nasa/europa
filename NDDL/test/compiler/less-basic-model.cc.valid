@@ -1,4 +1,4 @@
-// NDDL/test/compiler/less-basic-model.xml
+// less-basic-model.xml
 
 #include "less-basic-model.hh"
 #include "NddlUtils.hh"
@@ -145,8 +145,10 @@ namespace NDDL {
   
   void Rover$At$0$0::handleExecute() {
     slave(Rover::Going, Rover.Going, to, LabelStr("meets"));
+    sameObject(object, to);
     meets(this, to);
     slave(Rover::Going, Rover.Going, from, LabelStr("met_by"));
+    sameObject(object, from);
     met_by(this, from);
     {
       std::vector<ConstrainedVariableId> vars;
@@ -174,8 +176,10 @@ namespace NDDL {
   
   void Rover$Going$1$0::handleExecute() {
     slave(Rover::At, Rover.At, from, LabelStr("met_by"));
+    sameObject(object, from);
     met_by(this, from);
     slave(Rover::At, Rover.At, to, LabelStr("meets"));
+    sameObject(object, to);
     meets(this, to);
     {
       std::vector<ConstrainedVariableId> vars;
@@ -322,10 +326,13 @@ namespace NDDL {
   
   void Camera$On$2$0::handleExecute() {
     slave(Camera::TakingPicture, Camera.TakingPicture, t, LabelStr("meets"));
+    sameObject(object, t);
     meets(this, t);
     slave(Camera::Off, Camera.Off, n, LabelStr("meets"));
+    sameObject(object, n);
     meets(this, n);
     slave(Camera::Off, Camera.Off, o, LabelStr("met_by"));
+    sameObject(object, o);
     met_by(this, o);
   }
   
@@ -341,6 +348,7 @@ namespace NDDL {
   
   void Camera$Off$3$0::handleExecute() {
     slave(Camera::On, Camera.On, o, LabelStr("meets"));
+    sameObject(object, o);
     meets(this, o);
   }
   
@@ -356,10 +364,12 @@ namespace NDDL {
   
   void Camera$TakingPicture$4$0::handleExecute() {
     slave(Camera::On, Camera.On, o, LabelStr("met_by"));
+    sameObject(object, o);
     met_by(this, o);
     slave(Rover::At, Rover.At, a, LabelStr("contained_by"));
     contained_by(this, a);
     slave(Camera::On, Camera.On, n, LabelStr("meets"));
+    sameObject(object, n);
     meets(this, n);
     {
       std::vector<ConstrainedVariableId> vars;
@@ -531,7 +541,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/less-basic-model");
+    Id<Schema> id = Schema::instance("less-basic-model");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

@@ -1,4 +1,4 @@
-// NDDL/test/compiler/existential.xml
+// existential.xml
 
 #include "existential.hh"
 #include "NddlUtils.hh"
@@ -317,6 +317,7 @@ namespace NDDL {
     objectVar(Path, p3, false, false);
     objectVar(Path, g, false, false);
     slave(World::Going, World.Going, going, LabelStr("any"));
+    sameObject(object, going);
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(varfromtok(tok(getId(), std::string("going")), std::string("from")));
@@ -420,7 +421,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/existential");
+    Id<Schema> id = Schema::instance("existential");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

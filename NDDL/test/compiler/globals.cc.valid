@@ -1,4 +1,4 @@
-// NDDL/test/compiler/globals.xml
+// globals.xml
 
 #include "globals.hh"
 #include "NddlUtils.hh"
@@ -230,10 +230,12 @@ namespace NDDL {
   }
   void Foo$pred1$0$0$0::handleExecute() {
     slave(Foo::pred1, Foo.pred1, slave0, LabelStr("meets"));
+    sameObject(object, slave0);
     meets(this, slave0);
   }
   void Foo$pred1$0$0$1::handleExecute() {
     slave(Foo::pred1, Foo.pred1, slave1, LabelStr("met_by"));
+    sameObject(object, slave1);
     met_by(this, slave1);
   }
   
@@ -266,7 +268,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/globals");
+    Id<Schema> id = Schema::instance("globals");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

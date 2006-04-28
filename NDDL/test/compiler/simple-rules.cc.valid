@@ -1,4 +1,4 @@
-// NDDL/test/compiler/simple-rules.xml
+// simple-rules.xml
 
 #include "simple-rules.hh"
 #include "NddlUtils.hh"
@@ -288,6 +288,7 @@ namespace NDDL {
     sameObject(object, to);
     meets(this, to);
     slave(Rover::Going, Rover.Going, from, LabelStr("meets"));
+    sameObject(object, from);
     meets(this, from);
     slave(Foo::Bar, Foo.Bar, bar, LabelStr("meets"));
     sameObject(_foo, bar);
@@ -541,7 +542,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/simple-rules");
+    Id<Schema> id = Schema::instance("simple-rules");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

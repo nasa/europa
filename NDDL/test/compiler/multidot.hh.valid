@@ -1,4 +1,4 @@
-// NDDL/test/compiler/multidot.xml
+// multidot.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"

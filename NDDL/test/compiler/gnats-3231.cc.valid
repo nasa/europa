@@ -1,4 +1,4 @@
-// NDDL/test/compiler/gnats-3231.xml
+// gnats-3231.xml
 
 #include "gnats-3231.hh"
 #include "NddlUtils.hh"
@@ -63,6 +63,7 @@ namespace NDDL {
   
   void GnatsClass$p$0$0::handleExecute() {
     slave(GnatsClass::p, GnatsClass.p, a, LabelStr("meets"));
+    sameObject(object, a);
     meets(this, a);
   }
   
@@ -78,6 +79,7 @@ namespace NDDL {
   
   void GnatsClass$p$1$0::handleExecute() {
     slave(GnatsClass::p, GnatsClass.p, a, LabelStr("met_by"));
+    sameObject(object, a);
     met_by(this, a);
   }
   
@@ -87,7 +89,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("NDDL/test/compiler/gnats-3231");
+    Id<Schema> id = Schema::instance("gnats-3231");
     id->reset(); // Reset prior data if present. 
     
     // Invoke commands to populate schema with type definitions

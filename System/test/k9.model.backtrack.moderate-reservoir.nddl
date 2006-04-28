@@ -671,8 +671,8 @@ class Rover {
   float BATTERY_MAX;
 
   Rover(float ic) {    
-    BATTERY_MIN = 0;
-    BATTERY_MAX = 518400;
+    BATTERY_MIN = 0.0;
+    BATTERY_MAX = 518400.0;
     m_position = new Position(this);
     m_tracker = new Tracker(this);
     m_oppsci = new OpportunisticScience (this);

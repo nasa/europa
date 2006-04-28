@@ -1,4 +1,4 @@
-// NDDL/test/compiler/less-basic-model.xml
+// less-basic-model.xml
 
 #include "Db.hh"
 #include "NddlUtils.hh"
