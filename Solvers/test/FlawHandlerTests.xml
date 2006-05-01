@@ -34,6 +34,10 @@
 
   <UnboundVariableManager>
    <FlawHandler component="Min"/>
+   <FlawHandler predicate="pred" class="GuardTest" variable="a" priority="1" component="Min"/>
+   <FlawHandler predicate="pred" class="GuardTest" variable="b" priority="2" component="Min">
+     <Guard name="a" value="0"/>
+   </FlawHandler>
   </UnboundVariableManager>
 
   <OpenConditionManager>

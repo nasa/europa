@@ -1434,6 +1434,7 @@ public:
     runTest(testMultipleSolutionsSearch);
     runTest(testGNATS_3196);
     runTest(testContext);
+    runTest(testDeletedFlaw);
     return true;
   }
 
@@ -1686,6 +1687,37 @@ private:
     assertTrue(ctx->get("foo") == 1);
     assertTrue(solver.getContext()->get("foo") == 1);
     ctx->remove("foo");
+    return true;
+  }
+
+  static bool testDeletedFlaw() {
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestDynamicFlaws");
+    StandardAssembly assembly(Schema::instance());
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    Object o1(db, "GuardTest", "o1");
+    db->close();
+    TokenId t1 = db->getClient()->createToken("GuardTest.pred");
+    TokenId t2 = db->getClient()->createToken("GuardTest.pred");
+    TokenId t3 = db->getClient()->createToken("GuardTest.pred");
+    db->getConstraintEngine()->propagate();
+    t1->activate();
+    t2->activate();
+    t3->activate();
+    db->getConstraintEngine()->propagate();
+    Solver solver(assembly.getPlanDatabase(), *(root->FirstChildElement()));
+    solver.step(); //decide first 'a'
+    t1->discard();
+    solver.reset();
+    t2->discard();
+    solver.step();
+    solver.step();
+    solver.step();
+    t3->discard();
+    //t2->discard();
+    //t1->discard();
+//     solver.backjump(1);
+//     solver.step();
+    //t1->discard();
     return true;
   }
 };

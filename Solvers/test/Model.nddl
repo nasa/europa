@@ -153,3 +153,16 @@ class Foo {
 Foo::p{
  eq(1, 0); // Always fails
 }
+
+class GuardTest extends Object {
+  predicate pred {
+    bool a;
+    int b;
+  }
+}
+
+GuardTest::pred {
+  if(a == false) {
+    eq(b, [0 10]);
+  }
+}
