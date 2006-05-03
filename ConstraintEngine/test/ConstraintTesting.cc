@@ -9,306 +9,222 @@
 
 #include <list>
 #include <set>
+#include <map>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
 #include "Error.hh"
+#include "tinyxml.h"
 #include "AbstractDomain.hh"
 #include "BoolDomain.hh"
 #include "IntervalIntDomain.hh"
 #include "IntervalDomain.hh"
 #include "NumericDomain.hh"
+#include "SymbolDomain.hh"
 #include "ConstraintLibrary.hh"
 #include "Variable.hh"
 #include "Constraint.hh"
 #include "ConstrainedVariable.hh"
 #include "Debug.hh"
 #include "TypeFactory.hh"
+#include "SymbolTypeFactory.hh"
 
 namespace EUROPA {
 
+
+	std::map<std::string, SymbolDomain*>& ConstraintTestCase::symbolDomainsMap() {
+		static std::map<std::string, SymbolDomain*> sl_map;
+		return sl_map;
+	}
+
+	/**
+	 * @brief Convert c string into EUROPA floating point number
+	 * @param a String which will be converted
+	 * @note roughtly the same as the standard atoi(char*), but with EUROPA's +/-inf
+	 */
+	static double atoef(const char * a)
+	{
+		if(strcmp(a,"-inf") == 0)
+			return MINUS_INFINITY;
+		else if(strcmp(a,"+inf") == 0)
+			return PLUS_INFINITY;
+		else
+			return atof(a);
+	}
+
   /**
    * @brief Create a new concrete *Domain from data read from the stream.
-   * @param in Stream to read from.
+   * @param element XML element containing domain.
    * @note Incomplete, but should allow tests to pass.
    */
-  static AbstractDomain* readSet(std::istream& in) {
-    char ch;
-    AbstractDomain *dom = 0;
-    bool negative = false;
-    double value;
-    std::list<double> values;
-    std::string member;
-    std::list<std::string> members;
-    bool isBool = false;
+  static AbstractDomain* readSet(const TiXmlElement & element) {
+		const char * tagname = element.Value();
 
-    for (in.get(ch); ch != '}' && in.good(); ) {
-      switch (ch) {
-      case ' ':
-        negative = false;
-        in.get(ch);
-        continue;
-      case '-':
-        assertTrue(members.empty());
-        negative = true;
-        in.get(ch);
-        continue;
-      case '0': case '1': case '2': case '3': case '4':
-      case '5': case '6': case '7': case '8': case '9':
-        assertTrue(members.empty());
-        if (negative)
-          member = "-";
-        member += ch;
-        for (in.get(ch); ch != '}' && ch != ' ' && in.good(); in.get(ch))
-          member += ch;
-        assertTrue(in.good());
-        value = atof(member.c_str());
-        values.push_back(value);
-        member = "";
-        continue;
-      default:
-        if (negative)
-          member = "-";
-        member += ch;
-        for (in.get(ch); ch != '}' && ch != ' ' && in.good(); in.get(ch))
-          member += ch;
-        assertTrue(in.good());
-        if (member == "-Infinity" || member == "-Inf" || member == "-INF") {
-          values.push_back(MINUS_INFINITY);
-        } else
-          if (member == "Infinity" || member == "Inf" || member == "INF") {
-            values.push_back(PLUS_INFINITY);
-          } else
-            if (member == "false" || member == "False" || member == "FALSE") {
-	      isBool = true;
-              members.push_back("false");
-            } else
-              if (member == "true" || member == "True" || member == "TRUE") {
-		isBool = true;
-                members.push_back("true");
-                // Allow "true" - but not "True"! - to be a member of a user defined type.
-                // Need to know expected type of this arg of constraint to do better.
-              } else {
-                members.push_back(member);
-              }
-        member = "";
-        break;
-      }
-    }
-    assertTrue(in.good() && ch == '}');
-    assertTrue(values.empty() || members.empty());
-    if(isBool){
-      dom = new BoolDomain;
-      dom->empty();
-      for (std::list<std::string>::iterator it = members.begin();
-           it != members.end(); it++)
-        if (*it == "false")
-          dom->insert(false);
-        else {
-          assertTrue(*it == "true", "Only 'false' and 'true' are supported for boolean values");
-          dom->insert(true);
-        }
-    }
-    else if(members.empty())
-      dom = new NumericDomain(values);
-    else
-      return(0);
+			if(strcmp(tagname, "BoolDomain") == 0) {
+      	BoolDomain * dom = new BoolDomain();
+				dom->empty();
+				for (const TiXmlElement * child = element.FirstChildElement() ;
+				     child != NULL ; child = child->NextSiblingElement()) {
+					check_error(strcmp(child->Value(), "element") == 0);
 
-    assertTrue(dom != 0);
+					const char * value = child->Attribute("value");
+					if(strcmp(value,"true") == 0) dom->insert(true);
+					else if(strcmp(value,"false") == 0) dom->insert(false);
+					else check_error(false);
+				}
+				return dom;
+			}
+			else if(strcmp(tagname, "NumericDomain") == 0) {
+      	NumericDomain * dom = new NumericDomain();
+				dom->empty();
+				for (const TiXmlElement * child = element.FirstChildElement() ;
+				     child != NULL ; child = child->NextSiblingElement()) {
+					check_error(strcmp(child->Value(), "element") == 0);
 
-    return(dom);
+					const char * value = child->Attribute("value");
+
+					dom->insert(atoef(value));
+				}
+				dom->close();
+				return dom;
+			}
+			else if(strcmp(tagname, "SymbolDomain") == 0) {
+				const char * type = element.Attribute("type");
+				SymbolDomain * dom = new SymbolDomain(false,type);
+				dom->empty(); dom->open();
+
+				SymbolDomain * base = ConstraintTestCase::symbolDomainsMap()[std::string(type)];
+				if(!base) {
+					base = new SymbolDomain(false,type);
+					base->empty(); base->open();
+					ConstraintTestCase::symbolDomainsMap()[std::string(type)] = base;
+				}
+
+				for (const TiXmlElement * child = element.FirstChildElement() ;
+				     child != NULL ; child = child->NextSiblingElement()) {
+					check_error(strcmp(child->Value(), "element") == 0);
+
+					const char * value = child->Attribute("value");
+
+					dom->insert(LabelStr(value));
+					base->insert(LabelStr(value));
+				}
+				dom->close();
+				return dom;
+			}
+			else {
+				check_error(false);
+			}
+			return NULL;
   }
 
   /**
    * @brief Create a new IntervalDomain from data read from the stream.
    * @note Incomplete, but should allow tests to pass.
    */
-  static AbstractDomain* readInterval(std::istream& in) {
-    char ch;
-    AbstractDomain *dom;
-    bool negative = false;
-    double endPoints[2];
-    unsigned int which = 0; // 0 for no bounds; 1 for lower bound; 2 for upper bound.
-    bool constructInts = true;
-    for (in.get(ch); ch != ']' && in.good(); ) {
-      switch (ch) {
-      case ' ': case '+':
-        negative = false;
-        in.get(ch);
-        continue;
-      case '-':
-        negative = true;
-        in.get(ch);
-        continue;
-      case 'I': case 'i': // Infinity or a variant thereof.
-        which++;
-        assertTrue(which < 3);
-        if (negative)
-          endPoints[which - 1] = MINUS_INFINITY;
-        else
-          endPoints[which - 1] = PLUS_INFINITY;
-        for (in.get(ch); ch != ' ' && ch != ']' && in.good(); in.get(ch))
-          if(ch == '.')
-	    constructInts = false;
-        assertTrue(in.good());
-        continue;
-      case '0': case '1': case '2': case '3': case '4':
-      case '5': case '6': case '7': case '8': case '9':
-        {
-          which++;
-          assertTrue(which < 3);
-          std::string number;
-          if (negative)
-            number = "-";
-          number += ch;
-          for (in.get(ch); ch != ']' && ch != ' ' && in.good(); in.get(ch)) {
-	    if(ch == '.')
-	      constructInts = false;
-            number += ch;
-	  }
-          assertTrue(in.good());
-          endPoints[which - 1] = atof(number.c_str());
-        }
-        continue;
-      default:
-        // Unrecognized input.
-        assertTrue(false);
-        break;
-      }
-    }
-    assertTrue(in.good() && ch == ']' && which < 3);
-    // Presume always IntervalDomain (rather than IntervalIntDomain) for now.
-    // To know which will probably require a DomainType argument to this function.
-    if (which == 0) {
-      if(constructInts)
-	//dom = new IntervalDomain();
-	dom = new IntervalIntDomain();
-      else
-	dom = new IntervalDomain();
-      dom->empty();
-    } else
-      if (which == 1) {
-	if(constructInts)
-	  //dom = new IntervalDomain(endPoints[0]);
-	  dom = new IntervalIntDomain((int) endPoints[0]);
-	else
-	  dom = new IntervalDomain(endPoints[0]);
-      }
-      else {
-	if(constructInts)
-	  //dom = new IntervalDomain(endPoints[0], endPoints[1]);
-	  dom = new IntervalIntDomain((int) endPoints[0], (int) endPoints[1]);
-	else
-	  dom = new IntervalDomain(endPoints[0], endPoints[1]);
-      }
-    assertTrue(dom != 0);
-    return(dom);
+  static AbstractDomain* readInterval(const TiXmlElement & element) {
+		const char * tagname = element.Value();
+
+		const char * lba = element.Attribute("lb");
+		const char * uba = element.Attribute("ub");
+
+			if(strcmp(tagname, "IntervalDomain") == 0) {
+				if(lba == NULL && uba == NULL)
+				{
+					IntervalDomain * toRet = new IntervalDomain();
+					toRet->empty();
+					return toRet;
+				}
+				check_error(lba != NULL && uba != NULL);
+
+				return new IntervalDomain(atoef(lba), atoef(uba));
+			}
+			else if(strcmp(tagname, "IntervalIntDomain") == 0) {
+				if(lba == NULL && uba == NULL)
+				{
+					IntervalIntDomain * toRet = new IntervalIntDomain();
+					toRet->empty();
+					return toRet;
+				}
+				check_error(lba != NULL && uba != NULL);
+
+				return new IntervalIntDomain((int)atoef(lba), (int)atoef(uba));
+			}
+			else
+				check_error(false);
+			return NULL;
   }
 
+  /**
+   * @brief Read domains from an element's children, delegates to readSet or readInterval
+   * @note Incomplete, but should allow tests to pass.
+   */
+	static void readDomains(const TiXmlElement & element, std::list<AbstractDomain*> & domains) {
+		if(&element == NULL) return;
+		const char * name = element.Value();
+		checkError(strcmp(name,"Inputs") == 0 || strcmp(name,"Outputs") == 0,
+		           "unexpected element type \"" << name << "\"");
+
+		for (const TiXmlElement * child_el = element.FirstChildElement() ;
+		     child_el; child_el = child_el->NextSiblingElement()) {
+			const char * cname = child_el->Value();
+			AbstractDomain * dom;
+			if(strcmp(cname,"BoolDomain") == 0 || strcmp(cname,"NumericDomain") == 0 || strcmp(cname,"SymbolDomain") == 0)
+				dom = readSet(*child_el);
+			else if(strcmp(cname,"IntervalDomain") == 0 || strcmp(cname,"IntervalIntDomain") == 0)
+				dom = readInterval(*child_el);
+			else
+				checkError(false,"Parent \"" << element.Value() << "\" shouldn't contain child \"" << cname << "\"");
+
+			if(dom != NULL)
+				domains.push_back(dom);
+		}
+	}
+
   bool readTestCases(std::string file, std::list<ConstraintTestCase>& testCases) {
-    std::ifstream tCS(file.c_str()); /**< testCaseStream. */
-    if (!tCS.is_open() || !tCS.good())
-      return(false);
-    unsigned line = 1; /**< Line within file. */
-    std::string constraintName; /**< Name of a constraint, from each line of file. */
-    char buf[20]; /**< For single "words" of input. */
-    char ch; /**< For braces, brackets, and other miscellany. */
-    AbstractDomain *domain = 0;
-    while (tCS.good() && !tCS.eof()) {
-      tCS.get(ch);
-      static const std::string skipable(" 0123456789");
-      while (skipable.find(ch) != std::string::npos && !tCS.eof() && tCS.good())
-	tCS.get(ch);
+		TiXmlDocument doc(file.c_str());
 
-      if(tCS.eof())
-	break;
+    debugMsg("ConstraintTesting:readTestCases", "Test cases loading from " << file);
+		if(!doc.LoadFile())
+			return false;
 
-      constraintName = "";
-      while(ch != ' ' && tCS.good()){
-        constraintName += ch;
-	tCS.get(ch);
-      }
+		for (TiXmlElement * constraint = doc.RootElement()->FirstChildElement("Constraint") ;
+		     constraint; constraint = constraint->NextSiblingElement("Constraint")) {
+			const char * constraintName = constraint->Attribute("name");
+			const char * testcase = constraint->Attribute("test");
+			check_error(constraintName != NULL);
 
-      assertTrue(constraintName.size() > 0 && !tCS.eof() && tCS.good());
-      tCS.width(7);
-      tCS >> buf;
-      assertTrue(strcmp(buf, "inputs") == 0 && !tCS.eof() && tCS.good());
-      tCS.get(ch);
-      assertTrue(ch == ' ' && !tCS.eof() && tCS.good());
-      // Build input domains until 'o'utputs is seen, then output domains until end of line.
-      // Details depend on NewPlan/Libraries/Domain.cc::Domain::print() or similar, but
-      // this is meant to be fairly flexible so that new tests can be written by hand.
+			TiXmlElement * inputs = constraint->FirstChildElement("Inputs");
+			TiXmlElement * outputs = constraint->FirstChildElement("Outputs");
+
       std::list<AbstractDomain*> domains, inputDoms, outputDoms;
 
-      // Until Europa2 label sets are supported by readSet(),
-      // we may have to skip some tests:
-      bool skipThisTest = false;
+			readDomains(*inputs, inputDoms);
+			readDomains(*outputs, outputDoms);
 
-      bool readingInputDoms = true;
-      for (tCS.get(ch); ch != '\n' && tCS.good(); tCS.get(ch)) {
-        if (skipThisTest)
-          continue;
-        switch (ch) {
-        case ' ': // Blank between fields; ignore it.
-          break;
-        case '{': // Singleton, enumeration, or boolean but could be IntervalDomain, IntervalIntDomain, or BoolDomain.
-          domain = readSet(tCS);
-          // This if is temporary, until readSet is fully implemented.
-          // Presently, it cannot support Europa2 label sets.
-          if (domain == 0) {
-            skipThisTest = true;
-            continue;
-          }
-          assertTrue(domain != 0 && !tCS.eof() && tCS.good());
-          if (readingInputDoms)
-            inputDoms.push_back(domain);
-          else
-            outputDoms.push_back(domain);
-          break;
-        case '[': // Interval, real or integer, but could use 'Infinity' and variations.
-          domain = readInterval(tCS);
-          assertTrue(domain != 0 && !tCS.eof() && tCS.good());
-          if (readingInputDoms)
-            inputDoms.push_back(domain);
-          else
-            outputDoms.push_back(domain);
-          break;
-        case 'o':
-          tCS.width(7);
-          tCS >> buf;
-          assertTrue(strcmp(buf, "utputs") == 0 && !tCS.eof() && tCS.good());
-          readingInputDoms = false;
-          break;
-        default:
-          assertTrue(false);
-          break;
-        } // switch (ch): '{', '[', or 'o'
-      } // for tCS.get(ch); ch != '\n' && tCS.good(); tCS.get(ch)
 
-      if (skipThisTest) {
-        line++; // To preserve comparison to cnt in assertion.
-        continue;
-      }
+     	// Simple checks that this test case is OK.
+     	assertTrue(inputDoms.size() == outputDoms.size());
+	
+     	// OK, done with a line, each line being a test, so
+     	// interleave the input and output domains to make
+     	// things easier in caller.
+     	domains.clear();
+     	while (!inputDoms.empty() && !outputDoms.empty()) {
+       	domains.push_back(inputDoms.front());
+       	inputDoms.pop_front();
+       	domains.push_back(outputDoms.front());
+       	outputDoms.pop_front();
+     	}
 
-      // Simple checks that this test case is OK.
-      assertTrue(inputDoms.size() == outputDoms.size() && !tCS.eof() && tCS.good());
-
-      // OK, done with a line, each line being a test, so
-      // interleave the input and output domains to make
-      // things easier in caller.
-      domains.clear();
-      while (!inputDoms.empty() && !outputDoms.empty()) {
-        domains.push_back(inputDoms.front());
-        inputDoms.pop_front();
-        domains.push_back(outputDoms.front());
-        outputDoms.pop_front();
-      }
       // ... and add this test to the list:
-      testCases.push_back(ConstraintTestCase(constraintName, file, line++, domains));
-    } // while tCS.good() && !tCS.eof()
-    return(tCS.eof());
+      testCases.push_back(ConstraintTestCase(constraintName, file,testcase, domains));
+    } 
+
+    debugMsg("ConstraintTesting:readTestCases", "Test cases loaded from " << file);
+    return true;
   }
 
   bool executeTestCases(const ConstraintEngineId& engine,
@@ -317,12 +233,21 @@ namespace EUROPA {
     //   keeping a count of failed test cases.
     unsigned int problemCount = 0;
     std::set<std::string> warned; /**< List of unregistered constraints seen so far. */
+
+		// Register typefactories for all SymbolDomains.
+		for(std::map<std::string, SymbolDomain*>::iterator it = ConstraintTestCase::symbolDomainsMap().begin();
+		    it != ConstraintTestCase::symbolDomainsMap().end(); ++it) {
+				debugMsg("ConstraintTesting:executeTestCases","Attempting to register a type factory for symbolic type " << it->first);
+				it->second->close();
+				new SymbolTypeFactory(it->first.c_str(), *it->second);
+		}
+
     for ( ; !testCases.empty(); testCases.pop_front()) {
       // Warn about unregistered constraint names and otherwise ignore tests using them.
       if (!ConstraintLibrary::isRegistered(LabelStr(testCases.front().m_constraintName), false)) {
         if (warned.find(testCases.front().m_constraintName) == warned.end()) {
           std::cout << "\n    Warning: " 
-                    << testCases.front().m_fileName << ':' << testCases.front().m_line
+                    << testCases.front().m_fileName << ':' << testCases.front().m_case
                     << ": constraint " << testCases.front().m_constraintName
                     << " is unregistered; skipping tests of it.\n";
           warned.insert(testCases.front().m_constraintName);
@@ -343,13 +268,13 @@ namespace EUROPA {
         assertTrue(domPtr != 0 && (domPtr->isOpen() || !domPtr->isEmpty()));
         testDomains.pop_front();
 
-	LabelStr typeName = domPtr->getTypeName();
-	ConstrainedVariableId cVarId = TypeFactory::createVariable(typeName.c_str(), engine, *domPtr);
+				LabelStr typeName = domPtr->getTypeName();
+				cVarId = TypeFactory::createVariable(typeName.c_str(), engine, *domPtr);
 
         delete domPtr;
         scope.push_back(cVarId);
         domPtr = testDomains.front();
-        assertTrue(domPtr != 0);
+        checkError(domPtr != NULL, "All domains must be defined (possibly empty) for ConstraintTesting");
         outputDoms.push_back(domPtr);
         testDomains.pop_front();
       }
@@ -363,9 +288,9 @@ namespace EUROPA {
 
       ConstraintId constraint = ConstraintLibrary::createConstraint(LabelStr(testCases.front().m_constraintName), engine, scope);
      
-      debugMsg("ConstraintTesting", "Created constraint " << constraint->toString() <<
+      debugMsg("ConstraintTesting:executeTestCases", "Created constraint " << constraint->toString() <<
 	       " with scope " << scopeStr.str() << " for test " 
-	       << testCases.front().m_line);
+	       << testCases.front().m_case);
       assertTrue(engine->pending());
       engine->propagate();
       assertFalse(engine->pending());
@@ -380,7 +305,7 @@ namespace EUROPA {
         if (domPtr->isEmpty()) {
           if (!(*scopeIter)->derivedDomain().isEmpty()) {
             if (!problem)
-              std::cerr << testCases.front().m_fileName << ':' << testCases.front().m_line
+              std::cerr << testCases.front().m_fileName << ':' << testCases.front().m_case
                         << ": unexpected result propagating " << testCases.front().m_constraintName;
             std::cerr << ";\n  argument " << i << " is " << (*scopeIter)->derivedDomain()
                       << "\n     rather than empty";
@@ -390,7 +315,7 @@ namespace EUROPA {
           if ((*scopeIter)->derivedDomain().isEmpty()) {
             if (!domPtr->isEmpty()) {
               if (!problem)
-                std::cerr << testCases.front().m_fileName << ':' << testCases.front().m_line
+                std::cerr << testCases.front().m_fileName << ':' << testCases.front().m_case
                           << ": unexpected result propagating " << testCases.front().m_constraintName;
               std::cerr << ";\n  argument " << i << " is empty"
                         << "\n    rather than " << *domPtr;
@@ -399,7 +324,7 @@ namespace EUROPA {
           } else
             if ((*scopeIter)->derivedDomain() != *domPtr) {
               if (!problem)
-                std::cerr << testCases.front().m_fileName << ':' << testCases.front().m_line
+                std::cerr << testCases.front().m_fileName << ':' << testCases.front().m_case
                           << ": unexpected result propagating " << testCases.front().m_constraintName;
               std::cerr << ";\n  argument " << i << " is " << (*scopeIter)->derivedDomain()
                         << "\n    rather than " << *domPtr;
@@ -427,6 +352,7 @@ namespace EUROPA {
                 << problemCount << " test cases" << std::endl;
       throw Error::GeneralUnknownError();
     }
+		TypeFactory::purgeAll();
     return(true);
   }
 

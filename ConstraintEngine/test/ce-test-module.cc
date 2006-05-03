@@ -2048,7 +2048,7 @@ private:
     domains.push_back(new IntervalIntDomain(2, 10)); // expected value of first output domain
     domains.push_back(new IntervalIntDomain(2, 11)); // second input domain
     domains.push_back(new IntervalIntDomain(2, 10)); // expected value of second output domain
-    tests.push_back(ConstraintTestCase(constraintName, __FILE__, __LINE__, std::list<AbstractDomain*>(domains)));
+    tests.push_back(ConstraintTestCase(constraintName, __FILE__, "1", std::list<AbstractDomain*>(domains)));
 
     // Try reading "test cases" file of NewPlan/ModuleTests/ConstraintLibrary/testCLib,
     //   committed here as CLibTestCases after some minor editing to use '[]' for all
@@ -2060,10 +2060,11 @@ private:
     //   "CLibTestCases".
     // For each file, try twice with different relative paths since we don't know what
     //   the current working directory is.
-    assertTrue(readTestCases(getTestLoadLibraryPath() + std::string("/NewTestCases"), tests) ||
-               readTestCases(std::string("ConstraintEngine/test/NewTestCases"), tests));
-    assertTrue(readTestCases(getTestLoadLibraryPath() + std::string("/CLibTestCases"), tests) ||
-               readTestCases(std::string("ConstraintEngine/test/CLibTestCases"), tests));
+    assertTrue(readTestCases(getTestLoadLibraryPath() + std::string("/NewTestCases.xml"), tests) ||
+               readTestCases(std::string("ConstraintEngine/test/NewTestCases.xml"), tests));
+
+    assertTrue(readTestCases(getTestLoadLibraryPath() + std::string("/CLibTestCases.xml"), tests) ||
+               readTestCases(std::string("ConstraintEngine/test/CLibTestCases.xml"), tests));
 
     return(executeTestCases(ENGINE, tests));
   }

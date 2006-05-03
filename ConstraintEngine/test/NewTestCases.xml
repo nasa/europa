@@ -1,0 +1,559 @@
+<?xml version="1.0"?>
+<ConstraintTests>
+	<Constraint name="CountZeros" test="1">
+		<Inputs>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain/>
+			<IntervalDomain/>
+			<IntervalDomain/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="2">
+		<Inputs>
+			<IntervalDomain lb="0.0" ub="0.0"/>
+			<IntervalDomain lb="0.0" ub="1"/>
+			<IntervalDomain lb="0.0" ub="1"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0.0" ub="0.0"/>
+			<IntervalDomain lb="0.000001" ub="1"/>
+			<IntervalDomain lb="0.000001" ub="1"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="3">
+		<Inputs>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="4">
+		<Inputs>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain/>
+			<IntervalDomain/>
+			<IntervalDomain/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="5">
+		<Inputs>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="6">
+		<Inputs>
+			<IntervalDomain lb="2" ub="+inf"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="2" ub="2"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/></BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="7">
+		<Inputs>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="8">
+		<Inputs>
+			<IntervalDomain lb="0" ub="+inf"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="1" ub="2"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="9">
+		<Inputs>
+			<IntervalDomain lb="1" ub="+inf"/>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+			<IntervalDomain lb="5" ub="10"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+			<IntervalDomain lb="5" ub="10"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="10">
+		<Inputs>
+			<IntervalDomain lb="1" ub="+inf"/>
+			<IntervalDomain lb="-inf" ub="-1"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+			<IntervalDomain lb="5" ub="10"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain/>
+			<IntervalDomain/>
+			<BoolDomain/>
+			<IntervalDomain/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="11">
+		<Inputs>
+			<IntervalDomain lb="2" ub="2"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="2" ub="2"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="AddEqual" test="12">
+		<Inputs>
+			<IntervalDomain lb="0" ub="2"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="2" ub="2"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="2" ub="2"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="2" ub="2"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="13">
+		<Inputs>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="14">
+		<Inputs>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="15">
+		<Inputs>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/></BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="16">
+		<Inputs>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain/>
+			<IntervalDomain/>
+			<IntervalDomain/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="17">
+		<Inputs>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="18">
+		<Inputs>
+			<IntervalDomain lb="2" ub="+inf"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain/>
+			<IntervalDomain/>
+			<BoolDomain/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="19">
+		<Inputs>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="20">
+		<Inputs>
+			<IntervalDomain lb="0" ub="+inf"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="21">
+		<Inputs>
+			<IntervalDomain lb="1" ub="+inf"/>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+			<IntervalDomain lb="5" ub="10"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="2" ub="3"/>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+			<IntervalDomain lb="5" ub="10"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="22">
+		<Inputs>
+			<IntervalDomain lb="1" ub="+inf"/>
+			<IntervalDomain lb="-inf" ub="-1"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+			<IntervalDomain lb="5" ub="10"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="3" ub="3"/>
+			<IntervalDomain lb="-inf" ub="-1"/>
+			<BoolDomain><element value="true"/></BoolDomain>
+			<IntervalDomain lb="5" ub="10"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="23">
+		<Inputs>
+			<IntervalDomain lb="2" ub="2"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain/>
+			<IntervalDomain/>
+			<IntervalDomain/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="24">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.000001" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="3" ub="4"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.000001" ub="+inf"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="25">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.000001" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.000001" ub="+inf"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="26">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.000001" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="2" ub="4"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.000001" ub="+inf"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="27">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.000001" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0" ub="2"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.000001" ub="+inf"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="28">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.0001" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="3" ub="3"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.0001" ub="+inf"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="29">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.0001" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.0001" ub="+inf"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountZeros" test="30">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.0001" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="2" ub="3"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.0001" ub="+inf"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="CountNonZeros" test="31">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.0001" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="1" ub="2"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="0.0001" ub="+inf"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="EqualMinimum" test="32">
+		<Inputs>
+			<IntervalDomain lb="0" ub="6"/>
+			<IntervalDomain lb="2" ub="4"/>
+			<IntervalDomain lb="1" ub="5"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="1" ub="4"/>
+			<IntervalDomain lb="2" ub="4"/>
+			<IntervalDomain lb="1" ub="5"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="EqualMinimum" test="33">
+		<Inputs>
+			<IntervalDomain lb="0" ub="6"/>
+			<IntervalDomain lb="1" ub="5"/>
+			<IntervalDomain lb="2" ub="4"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="1" ub="4"/>
+			<IntervalDomain lb="1" ub="5"/>
+			<IntervalDomain lb="2" ub="4"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="min" test="34">
+		<Inputs>
+			<IntervalDomain lb="2" ub="4"/>
+			<IntervalDomain lb="1" ub="5"/>
+			<IntervalDomain lb="0" ub="6"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="2" ub="4"/>
+			<IntervalDomain lb="1" ub="5"/>
+			<IntervalDomain lb="1" ub="4"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="min" test="35">
+		<Inputs>
+			<IntervalDomain lb="1" ub="5"/>
+			<IntervalDomain lb="2" ub="4"/>
+			<IntervalDomain lb="0" ub="6"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="1" ub="5"/>
+			<IntervalDomain lb="2" ub="4"/>
+			<IntervalDomain lb="1" ub="4"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="EqualMinimum" test="36">
+		<Inputs>
+			<IntervalDomain lb="-1" ub="+inf"/>
+			<IntervalDomain lb="-inf" ub="-1"/>
+			<IntervalDomain lb="-inf" ub="-1"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="-1" ub="-1"/>
+			<IntervalDomain lb="-1" ub="-1"/>
+			<IntervalDomain lb="-1" ub="-1"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="min" test="37">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="-1"/>
+			<IntervalDomain lb="-inf" ub="-1"/>
+			<IntervalDomain lb="-1" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="-1" ub="-1"/>
+			<IntervalDomain lb="-1" ub="-1"/>
+			<IntervalDomain lb="-1" ub="-1"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="EqualMinimum" test="38">
+		<Inputs>
+			<IntervalDomain lb="-1" ub="0"/>
+			<IntervalDomain lb="-1" ub="1"/>
+			<IntervalDomain lb="0" ub="1"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="-1" ub="0"/>
+			<IntervalDomain lb="-1" ub="1"/>
+			<IntervalDomain lb="0" ub="1"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="min" test="39">
+		<Inputs>
+			<IntervalDomain lb="-1" ub="1"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="-1" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="-1" ub="1"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="-1" ub="0"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="Cardinality" test="40">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="2" ub="2"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="2" ub="+inf"/>
+			<IntervalDomain lb="1" ub="1"/>
+			<IntervalDomain lb="2" ub="2"/>
+			<IntervalDomain lb="0" ub="1"/>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="EqualProduct" test="41">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="0"/>
+			<IntervalDomain lb="-inf" ub="0"/>
+			<IntervalDomain lb="-inf" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0" ub="0"/>
+			<IntervalDomain lb="-inf" ub="0"/>
+			<IntervalDomain lb="-inf" ub="0"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="Equal" test="42">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="10"/>
+			<IntervalDomain lb="-10" ub="+inf"/>
+			<IntervalDomain lb="-20" ub="5"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="-10" ub="5"/>
+			<IntervalDomain lb="-10" ub="5"/>
+			<IntervalDomain lb="-10" ub="5"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="Equal" test="43">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="10"/>
+			<IntervalDomain lb="-10" ub="+inf"/>
+			<IntervalDomain lb="20" ub="50"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain/>
+			<IntervalDomain/>
+			<IntervalDomain/>
+		</Outputs>
+	</Constraint>
+</ConstraintTests>

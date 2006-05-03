@@ -8,12 +8,14 @@
  * @brief Functions and a class to assist with testing constraint classes.
  */
 
+#include <map>
 #include <list>
 #include <string>
 #include <iostream>
 #include <fstream>
 
 #include "AbstractDomain.hh"
+#include "SymbolDomain.hh"
 #include "ConstraintEngine.hh"
 
 namespace EUROPA {
@@ -28,17 +30,19 @@ namespace EUROPA {
     /**
      * @brief Primary constructor, requiring all of the info.
      */
-    ConstraintTestCase(std::string cN, std::string fN, unsigned int l,
+    ConstraintTestCase(std::string cN, std::string fN, std::string l,
                        std::list<AbstractDomain*> doms)
-      : m_constraintName(cN), m_fileName(fN), m_line(l),
+      : m_constraintName(cN), m_fileName(fN), m_case(l),
         m_domains(doms) {
     }
 
     // Default copy constructor should be fine.
 
+		static std::map<std::string, SymbolDomain*>& symbolDomainsMap();
+
     const std::string m_constraintName; /**< Equal, AddEqual, etc. */
     const std::string m_fileName; /**< File containing the "source" of the test case.  Printed when test fails. */
-    const unsigned int m_line; /**< Line within file of test case.  Printed when test fails. */
+    const std::string m_case; /**< Name of test case.  Printed when test fails. */
     const std::list<AbstractDomain*> m_domains; /**< Input and (expected) output domains, interleaved.
                                                  * That is, first is first input domain, second is first output domain,
                                                  * third is second input domain, fourth is second output domain, etc.
