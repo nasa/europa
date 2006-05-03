@@ -455,6 +455,7 @@ namespace EUROPA {
                       const std::vector<ConstrainedVariableId>& variables);
 
     ~AllDiffConstraint() {
+			discard(false);
     }
 
   private:
