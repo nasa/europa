@@ -796,8 +796,8 @@ private:
 
 class DummyProfile : public SAVH::Profile {
 public:
-  DummyProfile(ConstraintEngineId ce, const SAVH::FVDetectorId fv) 
-    : Profile(ce, fv) {}
+  DummyProfile(PlanDatabaseId db, const SAVH::FVDetectorId fv) 
+    : Profile(db, fv) {}
   SAVH::InstantId getInstant(const int time) {
     return getGreatestInstant(time)->second;
   }
@@ -966,7 +966,7 @@ private:
   static bool testAdditionRemovalAndIteration() {
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    DummyProfile profile(ce.getId(), detector.getId());
+    DummyProfile profile(db.getId(), detector.getId());
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 0));
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 10));
@@ -1047,7 +1047,7 @@ private:
   static bool testRestrictionAndRelaxation() {
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    DummyProfile profile(ce.getId(), detector.getId());
+    DummyProfile profile(db.getId(), detector.getId());
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 0));
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 10));
@@ -1108,7 +1108,7 @@ private:
     const int HORIZON_END = 1000;
 
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::TimetableProfile r(ce.getId(), detector.getId());
+    SAVH::TimetableProfile r(db.getId(), detector.getId());
 
 //     Variable<IntervalIntDomain> t0(ce.getId(), IntervalIntDomain(MINUS_INFINITY, MINUS_INFINITY));
 //     Variable<IntervalDomain> q0(ce.getId(), IntervalDomain(0, 0));
@@ -1161,7 +1161,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::TimetableProfile r(ce.getId(), detector.getId());
+    SAVH::TimetableProfile r(db.getId(), detector.getId());
 
     assertTrue(ce.propagate() && checkSum(r.getId()) == 0); 
 
@@ -1235,7 +1235,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce,db,false);
 
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::TimetableProfile r(ce.getId(), detector.getId());    
+    SAVH::TimetableProfile r(db.getId(), detector.getId());    
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(1, 1));
@@ -1302,7 +1302,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce,db,false);
     
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::TimetableProfile r(ce.getId(), detector.getId());    
+    SAVH::TimetableProfile r(db.getId(), detector.getId());    
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(10, 10));
@@ -1329,7 +1329,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce,db,false);
 
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::TimetableProfile r(ce.getId(), detector.getId());        
+    SAVH::TimetableProfile r(db.getId(), detector.getId());        
 
 
     // Test producer
@@ -1696,7 +1696,7 @@ private:
   static bool testGnats3244() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
     DummyDetector detector(SAVH::ResourceId::noId());
-    DummyProfile profile(ce.getId(), detector.getId());
+    DummyProfile profile(db.getId(), detector.getId());
     
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10), true, "t1");
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 15), true, "t2");

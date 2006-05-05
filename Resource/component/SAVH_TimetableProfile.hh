@@ -10,7 +10,7 @@ namespace EUROPA {
     
     class TimetableProfile : public Profile {
     public:
-      TimetableProfile(const ConstraintEngineId ce, const FVDetectorId flawDetector,
+      TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector,
 		       const double initCapacityLb = 0, const double initCapacityUb = 0);
       
     protected:

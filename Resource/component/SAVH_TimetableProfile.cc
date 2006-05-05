@@ -6,8 +6,8 @@
 
 namespace EUROPA {
   namespace SAVH {
-    TimetableProfile::TimetableProfile(const ConstraintEngineId ce, const FVDetectorId flawDetector, const double initCapacityLb, const double initCapacityUb) 
-      : Profile(ce, flawDetector, initCapacityLb, initCapacityUb), m_lowerLevelMin(0), m_lowerLevelMax(0), m_upperLevelMin(0), m_upperLevelMax(0),
+    TimetableProfile::TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initCapacityLb, const double initCapacityUb) 
+      : Profile(db, flawDetector, initCapacityLb, initCapacityUb), m_lowerLevelMin(0), m_lowerLevelMax(0), m_upperLevelMin(0), m_upperLevelMax(0),
 	m_minPrevConsumption(0), m_maxPrevConsumption(0), m_minPrevProduction(0), m_maxPrevProduction(0) {}
 
     void TimetableProfile::initRecompute(InstantId inst) {
