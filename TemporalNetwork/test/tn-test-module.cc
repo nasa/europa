@@ -6,6 +6,7 @@
 #include "TemporalAdvisor.hh"
 #include "Schema.hh"
 #include "PlanDatabase.hh"
+#include "PlanDatabaseDefs.hh"
 #include "ObjectTokenRelation.hh"
 #include "IntervalToken.hh"
 #include "Timeline.hh"
@@ -188,6 +189,7 @@ public:
     runTest(testCanPrecede);
     runTest(testCanFitBetween);
     runTest(testCanBeConcurrent);
+    runTest(testTemporalDistance);
     runTest(testTokenStateChangeSynchronization);
     runTest(testInconsistencySynchronization);
     return true;
@@ -452,6 +454,137 @@ private:
     return true;
   }
 
+  static bool testTemporalDistance() {
+    ConstraintEngine ce; 
+    new DefaultPropagator(LabelStr("Default"), ce.getId()); 
+    new TemporalPropagator(LabelStr("Temporal"), ce.getId());
+    PlanDatabase db(ce.getId(), Schema::instance());
+    db.setTemporalAdvisor((new STNTemporalAdvisor( ce.getPropagatorByName(LabelStr("Temporal"))))->getId() ); 
+
+    IntervalIntDomain d1 = IntervalIntDomain(-10, 10);
+    IntervalIntDomain d2 = IntervalIntDomain( 20, 30);
+
+
+    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain> (ce.getId(), d1, true, "v1"))->getId();
+    ConstrainedVariableId v2 = (new Variable<IntervalIntDomain> (ce.getId(), d2, true, "v2"))->getId();
+
+    // <-10>----------<10>
+    //                          <20>----------<30>
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v2, true );      
+
+      assertTrue( 10 == distance.getLowerBound() );
+      assertTrue( 40 == distance.getUpperBound() );
+    }
+    
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v2, v1, true );
+      
+      assertTrue( -40 == distance.getLowerBound() );
+      assertTrue( -10 == distance.getUpperBound() );
+    }
+    
+    IntervalIntDomain d3 = IntervalIntDomain( 5, 15 );
+    ConstrainedVariableId v3 = (new Variable<IntervalIntDomain> (ce.getId(), d3, true, "v3"))->getId();
+
+    // <-10>----------<10>
+    //        <5>----------<15>
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v3, true );
+      
+      assertTrue( -5 == distance.getLowerBound() );
+      assertTrue( 25 == distance.getUpperBound() );
+    }
+    
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v3, v1, true );
+      
+      assertTrue( -25 == distance.getLowerBound() );
+      assertTrue(   5 == distance.getUpperBound() );
+    }
+
+
+    IntervalIntDomain d4 = IntervalIntDomain( 0, 5 );
+    ConstrainedVariableId v4 = (new Variable<IntervalIntDomain> (ce.getId(), d4, true, "v4"))->getId();
+
+    // <-10>--------------<10>
+    //           <0>-<5>
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v4, true );
+      
+      assertTrue( -10 == distance.getLowerBound() );
+      assertTrue(  15 == distance.getUpperBound() );
+    }
+    
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v4, v1, true );
+      
+      assertTrue( -15 == distance.getLowerBound() );
+      assertTrue(  10 == distance.getUpperBound() );
+    }
+
+    IntervalIntDomain d5 = IntervalIntDomain( -20, 20 );
+    ConstrainedVariableId v5 = (new Variable<IntervalIntDomain> (ce.getId(), d5, true, "v5"))->getId();
+
+    //           <-10>--------------<10>
+    //  <-20>---------------------------------<20>
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v5, true );
+      
+      assertTrue( -30 == distance.getLowerBound() );
+      assertTrue(  30 == distance.getUpperBound() );
+    }
+
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v5, v1, true );
+      
+      assertTrue( -30 == distance.getLowerBound() );
+      assertTrue(  30 == distance.getUpperBound() );
+    }
+
+    IntervalIntDomain d6 = IntervalIntDomain( -g_infiniteTime(), g_infiniteTime() );
+    ConstrainedVariableId v6 = (new Variable<IntervalIntDomain> (ce.getId(), d6, true, "v6"))->getId();
+
+    //            <-10>------------<10>
+    //  <-inf>--------------------------------<inf>
+
+    ConstrainedVariableId v7 = (new Variable<IntervalIntDomain> (ce.getId(), d6, true, "v7"))->getId();
+
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v7, true );
+      
+      assertTrue( -g_infiniteTime() == distance.getLowerBound() );
+      assertTrue(  g_infiniteTime() == distance.getUpperBound() );
+    }
+
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v7, v1, true );
+      
+      assertTrue( -g_infiniteTime() == distance.getLowerBound() );
+      assertTrue(  g_infiniteTime() == distance.getUpperBound() );
+    }
+
+    //  <-inf>--------------------------------<inf>
+    //  <-inf>--------------------------------<inf>
+
+    {
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v6, v7, true );
+      
+      assertTrue( -g_infiniteTime() == distance.getLowerBound() );
+      assertTrue(  g_infiniteTime() == distance.getUpperBound() );
+    }
+
+    delete (ConstrainedVariable*) v1;
+    delete (ConstrainedVariable*) v2;
+    delete (ConstrainedVariable*) v3;
+    delete (ConstrainedVariable*) v4;
+    delete (ConstrainedVariable*) v5;
+    delete (ConstrainedVariable*) v6;
+    delete (ConstrainedVariable*) v7;
+
+    return true;
+  }
+
   static bool testTokenStateChangeSynchronization() {
     CD_DEFAULT_SETUP(ce,db,false);
 
@@ -602,7 +735,7 @@ private:
 
   /**  
    *  duplicates behavior of testTemporalPropagation in the TemporalPropagatorTest.
-  */
+   */
 
   static bool testTemporalPropagation() {
     DEFAULT_SETUP_CE_ONLY(ce);
@@ -738,4 +871,4 @@ void TemporalNetworkModuleTests::runTests(std::string path) {
   }
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
-  }
+}

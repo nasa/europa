@@ -6,6 +6,12 @@ ModuleComponent Resource
 		:
 		SAVH_TimetableProfile.cc
 		SAVH_TimetableFVDetector.cc
+		SAVH_Node.cc 
+		SAVH_Edge.cc 
+		SAVH_Graph.cc 
+		SAVH_MaxFlow.cc 
+		SAVH_Types.cc
+		SAVH_FlowProfile.cc
 		SAVH_InstantTokens.cc
 		SAVH_Reservoir.cc
 		;

@@ -6,6 +6,7 @@
 #include "TemporalNetworkDefs.hh"
 #include "TemporalPropagator.hh"
 #include "Debug.hh"
+#include "Utils.hh"
 
 namespace EUROPA {
 
@@ -44,6 +45,31 @@ namespace EUROPA {
    * @param exact if set to true makes this distance calculation exact.
    */
   const IntervalIntDomain STNTemporalAdvisor::getTemporalDistanceDomain(const TimeVarId& first, const TimeVarId& second, const bool exact) {
+    if( first->getExternalEntity().isNoId() 
+	||
+	second->getExternalEntity().isNoId() )
+      {
+	int f_lb = (int) first->getLastDomain().getLowerBound();
+	int f_ub = (int) first->getLastDomain().getUpperBound();
+	
+	int s_lb = (int) second->getLastDomain().getLowerBound();
+	int s_ub = (int) second->getLastDomain().getUpperBound();
+	
+	int min_distance = -g_infiniteTime();
+
+	if( s_lb > -g_infiniteTime() && f_ub < g_infiniteTime() ) {
+	    min_distance = std::max( min_distance, s_lb - f_ub );
+	  }
+	  
+	int max_distance = g_infiniteTime();
+	
+	if( f_lb > -g_infiniteTime() && s_ub < g_infiniteTime() ) {
+	  max_distance = std::min( max_distance, s_ub - f_lb );
+	  }
+
+	return(IntervalIntDomain( min_distance, max_distance ));
+      }
+
     return (m_propagator->getTemporalDistanceDomain(first, second, exact));
   }
 

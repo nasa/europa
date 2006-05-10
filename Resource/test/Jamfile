@@ -2,7 +2,7 @@ SubDir PLASMA Resource test ;
 
 if ! $(PLASMA_READY) {
 
-ModuleMain rs-module-tests : module-tests.cc rs-test-module.cc : Resource ;
+ModuleMain rs-module-tests : module-tests.cc rs-test-module.cc rs-flow-test-module.cc : Resource ;
 RunModuleMain run-rs-module-tests : rs-module-tests ;
 LocalDepends tests : run-rs-module-tests ;
 
