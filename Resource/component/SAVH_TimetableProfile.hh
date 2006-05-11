@@ -17,7 +17,7 @@ namespace EUROPA {
     private:
       void initRecompute(InstantId inst);
       void initRecompute();
-      void recomputeLevels(InstantId inst);
+      void recomputeLevels( InstantId prev, InstantId inst);
       void handleTransactionAdded(const TransactionId t);
       void handleTransactionRemoved(const TransactionId t);
       void handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type);

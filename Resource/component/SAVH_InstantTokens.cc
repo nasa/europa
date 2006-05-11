@@ -14,8 +14,8 @@ namespace EUROPA {
 		   Token::noObject(), false), m_isConsumer(isConsumer) {
       check_error(quantityBaseDomain.getLowerBound() >= 0 &&
 		  quantityBaseDomain.getUpperBound() <= PLUS_INFINITY);
-      commonInit(closed);
-      m_quantity->restrictBaseDomain(quantityBaseDomain);
+      commonInit(closed,quantityBaseDomain);
+      //m_quantity->restrictBaseDomain(quantityBaseDomain);
     }
 
     ReservoirToken::ReservoirToken(const PlanDatabaseId& planDatabase,
@@ -26,7 +26,7 @@ namespace EUROPA {
 				   bool closed)
       : EventToken(planDatabase, predicateName,
 		   false, timeBaseDomain, objectName, false) {
-      commonInit(closed);
+      commonInit(closed, IntervalIntDomain( 0, PLUS_INFINITY ) );
     }
 
     ReservoirToken::ReservoirToken(const TokenId& parent,
@@ -36,13 +36,13 @@ namespace EUROPA {
 				   const LabelStr& objectName,
 				   bool closed)
       : EventToken(parent, relation, predicateName, timeBaseDomain, objectName, false) {
-      commonInit(closed);
+      commonInit(closed, IntervalIntDomain( 0, PLUS_INFINITY ));
     }
 
-    void ReservoirToken::commonInit(bool closed) {
+    void ReservoirToken::commonInit(bool closed, const IntervalDomain& quantityBaseDomain) {
       m_quantity = (new TokenVariable<IntervalDomain>(m_id, m_allVariables.size(),
 						      m_planDatabase->getConstraintEngine(),
-						      IntervalDomain(0, PLUS_INFINITY),
+						      quantityBaseDomain,
 						      true, LabelStr("quantity")))->getId();
       m_allVariables.push_back(m_quantity);
       

@@ -142,7 +142,9 @@ namespace EUROPA
 		     << *edge << " to be {"
 		     << capacity << "}");
 
-	  edge->setEnabled();
+	  if( enabled )
+	    edge->setEnabled();
+
 	  edge->setCapacity( capacity );
 	}
 

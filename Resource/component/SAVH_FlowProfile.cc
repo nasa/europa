@@ -30,16 +30,126 @@ namespace EUROPA
 {
   namespace SAVH 
   {
+    FlowProfileGraph::FlowProfileGraph( const SAVH::TransactionId& source, const SAVH::TransactionId& sink, bool lowerlevel ):
+      m_lowerLevel( lowerlevel ),
+      m_recalculate( false ),
+      m_graph( 0 ),
+      m_source( 0 ),
+      m_sink( 0 )
+    {
+      m_graph = new SAVH::Graph();
+      m_source = m_graph->createNode( source );
+      m_sink = m_graph->createNode( sink );
+    }
+
+    FlowProfileGraph::~FlowProfileGraph()
+    {
+      delete m_graph;
+      m_graph = 0;
+      
+      m_source = 0;
+      m_sink = 0;
+    }
+
+    void FlowProfileGraph::enableAt( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 ) 
+    {
+      m_graph->createEdge( t1, t2, Edge::getMaxCapacity() );
+      m_graph->createEdge( t2, t1, Edge::getMaxCapacity() );
+    }
+
+    void FlowProfileGraph::enableAtOrBefore( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 ) 
+    {
+      check_error( 0 != m_graph->getNode( t1 ) );
+      check_error( 0 != m_graph->getNode( t2 ) );
+
+      m_graph->createEdge( t1, t2, 0 );
+      m_graph->createEdge( t2, t1, Edge::getMaxCapacity() );
+    }
+
+    void FlowProfileGraph::enableTransaction( const SAVH::TransactionId& t )
+    {
+      m_recalculate = true;
+
+      m_graph->createNode( t, true );
+      
+      SAVH::TransactionId source = SAVH::TransactionId::noId();
+      SAVH::TransactionId target = SAVH::TransactionId::noId();
+
+      if( ( m_lowerLevel && t->isConsumer() )
+	  ||
+	  (!m_lowerLevel && !t->isConsumer() ) )
+	{
+	  // connect to the source of the graph
+	  source = m_source->getIdentity();
+	  target = t;
+	}
+      else
+	{
+	  // connect to the sink of the graph
+	  source = t;
+	  target = m_sink->getIdentity();
+	}
+      
+      check_error( SAVH::TransactionId::noId() != source );
+      check_error( SAVH::TransactionId::noId() != target );
+      
+      double edgeCapacity = t->quantity()->lastDomain().getUpperBound();
+
+      m_graph->createEdge( source, target, edgeCapacity );
+      m_graph->createEdge( target, source, 0 );
+    }
+
+    void FlowProfileGraph::removeTransaction( const SAVH::TransactionId& id )
+    {
+      checkError( 0 != m_graph->getNode( id ),
+		  "Trying to remove transaction (" 
+		  << id << ") which is not in the graph!");
+
+      m_graph->removeNode( id );
+    }
+
+    void FlowProfileGraph::reset()
+    {
+      m_recalculate = true;
+
+      m_graph->setDisabled();
+      
+      m_sink->setEnabled();
+      m_source->setEnabled(); 
+    }
+
+    double FlowProfileGraph::getResidualFromSource()
+    {
+      double residual = 0.0;
+
+      if( m_recalculate )
+	{
+	  MaximumFlowAlgorithm maxflow( m_graph, m_source, m_sink );
+	
+	  maxflow.execute();
+
+	  EdgeOutIterator ite( *m_source );
+
+	  for( ; ite.ok(); ++ite )
+	    {
+	      Edge* edge = *ite;
+	    
+	      residual += maxflow.getResidual( edge );
+	    }
+
+	  m_recalculate = false;
+	}
+
+      return residual;
+    }
+
+
+    //-------------------------------
 
     FlowProfile::FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb): 
       Profile( db, flawDetector, initLevelLb, initLevelUb),
-      m_planDatabase( db ),
       m_lowerLevelGraph( 0 ),
-      m_lowerLevelSource( 0 ),
-      m_lowerLevelSink( 0 ),
-      m_upperLevelGraph( 0 ),
-      m_upperLevelSource( 0 ),
-      m_upperLevelSink( 0 ) 
+      m_upperLevelGraph( 0 )
     {
       m_recomputeInterval = (new ProfileIterator(getId()))->getId();
 
@@ -55,45 +165,38 @@ namespace EUROPA
 							 Variable<IntervalIntDomain>( db->getConstraintEngine(), IntervalIntDomain(0, 0) ).getId(),
 							 false ) )->getId();
 
-      m_lowerLevelGraph = new SAVH::Graph();
-      m_lowerLevelSource = m_lowerLevelGraph->createNode( m_dummySourceTransaction );
-      m_lowerLevelSink = m_lowerLevelGraph->createNode( m_dummySinkTransaction );
-
-      m_upperLevelGraph = new SAVH::Graph();
-      m_upperLevelSource = m_upperLevelGraph->createNode( m_dummySourceTransaction );
-      m_upperLevelSink = m_upperLevelGraph->createNode( m_dummySinkTransaction );
+      m_lowerLevelGraph = new FlowProfileGraph( m_dummySourceTransaction, m_dummySinkTransaction, true );
+      m_upperLevelGraph = new FlowProfileGraph( m_dummySourceTransaction, m_dummySinkTransaction, false );
     }
 
-    FlowProfile::~FlowProfile() {
+    FlowProfile::~FlowProfile() 
+    {
 
       delete m_lowerLevelGraph;
       m_lowerLevelGraph = 0;
 
-      // nodes are deleted by the graph
-      m_lowerLevelSource  = 0;
-      m_lowerLevelSink = 0;
-
       delete m_upperLevelGraph;
       m_upperLevelGraph = 0;
-
-      // nodes are deleted by the graph
-      m_upperLevelSource = 0;
-      m_upperLevelSink = 0;
 
       delete (SAVH::Transaction*) m_dummySinkTransaction;
       delete (SAVH::Transaction*) m_dummySourceTransaction;
     }
 
-    void FlowProfile::initRecompute(InstantId inst) {
+    void FlowProfile::initRecompute( InstantId inst ) 
+    {
       check_error(inst.isValid());
 
       debugMsg("FlowProfile:initRecompute","Instant (" << inst->getId() << ")");
     }
 
-    void FlowProfile::initRecompute() {
+    void FlowProfile::initRecompute() 
+    {
       checkError(m_recomputeInterval.isValid(), "Attempted to initialize recomputation without a valid starting point!");
       
       debugMsg("FlowProfile:initRecompute","");
+
+      m_lowerLevelGraph->reset();
+      m_upperLevelGraph->reset();
       
       // initial level
       m_lowerClosedLevel = m_initLevelLb;
@@ -102,128 +205,98 @@ namespace EUROPA
       m_upperClosedLevel = m_initLevelUb;
     }
 
-    void FlowProfile::recomputeLevels(InstantId inst) {
-      check_error(inst.isValid());
+    void FlowProfile::recomputeLevels( InstantId prev, InstantId inst ) 
+    {
+      check_error( prev.isValid() || InstantId::noId() == prev );
+      check_error( inst.isValid() );
 
       debugMsg("FlowProfile:recomputeLevels","Instant (" 
 	       << inst->getId() << ") at time "
 	       << inst->getTime() );
-
-      m_lowerLevelGraph->setDisabled();
-      
-      m_lowerLevelSink->setEnabled();
-      m_lowerLevelSource->setEnabled();
-      
-      m_upperLevelGraph->setDisabled();
-      
-      m_upperLevelSink->setEnabled();
-      m_upperLevelSource->setEnabled();
 
       const std::set<TransactionId>& transactions = inst->getTransactions();
 
       std::set<TransactionId>::const_iterator iter = transactions.begin();
       std::set<TransactionId>::const_iterator end = transactions.end();
 
-      for( ; iter != end; ++iter ){
-	const TransactionId& transaction1 = (*iter);
+      for( ; iter != end; ++iter )
+	{
+	  const TransactionId& transaction1 = (*iter);
 	
-	if( transaction1->time()->lastDomain().getUpperBound() != inst->getTime() )  {
-	  enableTransaction( transaction1 );
-	  
-	  check_error( transaction1.isValid() );
-	  
-	  std::set<TransactionId>::const_iterator secondIter = transactions.begin();
-	  
-	  for( ; secondIter != end; ++secondIter ) {
-	    const TransactionId& transaction2 = (*secondIter);
-	    
-	    if( transaction2->time()->lastDomain().getUpperBound() != inst->getTime() )
-	      {
-		check_error( transaction2.isValid() );
-		
-		if( transaction1 != transaction2 ) {
-		  debugMsg("FlowProfile:recomputeLevels","Transaction (" 
-			   << transaction1->getId() << ") "
-			   << transaction1->time()->toString() << " and Transaction ("
-			   << transaction2->getId() << ") "
-			   << transaction2->time()->toString() );
-		  
-		  if( isConstrainedToAt( transaction1, transaction2 ) ) {
-		    handleOrderedAt( transaction1, transaction2 );
-		  }
-		  else if( isConstrainedToBeforeOrAt( transaction1, transaction2 ) )  {
-		    handleOrderedAtOrBefore( transaction1, transaction2 );
-		  }
-		  else {
-		    debugMsg("FlowProfile::recomputeLevels","Transaction (" 
-			     << transaction1->getId() << ") and Transaction ("
-			     << transaction2->getId() << ") not constrained");
-		  }
+	  // inst->getTransactions returns all transaction overlapping inst->getTime
+	  // right inclusive
+	  if( transaction1->time()->lastDomain().getUpperBound() == inst->getTime() )  
+	    {
+	      m_lowerLevelGraph->removeTransaction( transaction1 );
+	      m_upperLevelGraph->removeTransaction( transaction1 );
+
+	      // if upperbound equals the instant time the transaction enters the closed set
+  	      if( transaction1->isConsumer() ) 
+		{
+		  m_upperClosedLevel -= transaction1->quantity()->lastDomain().getLowerBound();
+		  m_lowerClosedLevel -= transaction1->quantity()->lastDomain().getUpperBound();
 		}
-	      }
-	  }
+	      else 
+		{
+		  m_upperClosedLevel += transaction1->quantity()->lastDomain().getUpperBound();
+		  m_lowerClosedLevel += transaction1->quantity()->lastDomain().getLowerBound();
+		}
+	    }
+	  else
+	    {
+	      if( transaction1->time()->lastDomain().getLowerBound() == inst->getTime() )  
+		{
+		  enableTransaction( transaction1 );
+  
+		  std::set<TransactionId>::const_iterator secondIter = transactions.begin();
+		  
+		  for( ; secondIter != end; ++secondIter ) 
+		    {
+		      const TransactionId& transaction2 = (*secondIter);
+		      
+		      if( transaction1 != transaction2 ) 
+			{
+			  if( transaction2->time()->lastDomain().getUpperBound() != inst->getTime() )
+			    {
+			      debugMsg("FlowProfile:recomputeLevels","Transaction (" 
+				       << transaction1->getId() << ") "
+				       << transaction1->time()->toString() << " and Transaction ("
+				       << transaction2->getId() << ") "
+				       << transaction2->time()->toString() );
+			      
+			      if( isConstrainedToAt( transaction1, transaction2 ) ) 
+				{
+				  handleOrderedAt( transaction1, transaction2 );
+				}
+			      else if( isConstrainedToBeforeOrAt( transaction1, transaction2 ) )  
+				{
+				  handleOrderedAtOrBefore( transaction1, transaction2 );
+				}
+			      else 
+				{
+				  debugMsg("FlowProfile::recomputeLevels","Transaction (" 
+					   << transaction1->getId() << ") and Transaction ("
+					   << transaction2->getId() << ") not constrained");
+				}
+			    }
+			}
+		    }
+		}
+	    }
 	}
-	else {
-	  check_error( transaction1->time()->lastDomain().getUpperBound() == inst->getTime() );
-	  
-	  if( transaction1->isConsumer() ) {
-	    m_upperClosedLevel -= transaction1->quantity()->lastDomain().getLowerBound();
-	    m_lowerClosedLevel -= transaction1->quantity()->lastDomain().getUpperBound();
-	  }
-	  else {
-	    m_upperClosedLevel += transaction1->quantity()->lastDomain().getUpperBound();
-	    m_lowerClosedLevel += transaction1->quantity()->lastDomain().getLowerBound();
-	  }
-	}
-      }
-
-      double lowerboundIncrement = m_lowerClosedLevel;
-
-      {
-	debugMsg("FlowProfile::recomputeLevels","Computing lower level for instance at time "
-		 << inst->getTime() << " closed level is "
-		 << m_lowerClosedLevel );
-
-	MaximumFlowAlgorithm maxflow( m_lowerLevelGraph, m_lowerLevelSource, m_lowerLevelSink );
-	
-	maxflow.execute();
-
-	EdgeOutIterator ite( *m_lowerLevelSource );
-
-	for( ; ite.ok(); ++ite )
-	  {
-	    Edge* edge = *ite;
-	    
-	    lowerboundIncrement -= maxflow.getResidual( edge );
-	  }
-      }
-
-      double upperboundIncrement = m_upperClosedLevel;
-
-      {
-	debugMsg("FlowProfile::recomputeLevels","Computing upper level for instance at time "
-		 << inst->getTime() << " base level is "
-		 << m_upperClosedLevel );
-
-	MaximumFlowAlgorithm maxflow( m_upperLevelGraph, m_upperLevelSource, m_upperLevelSink );
-	
-	maxflow.execute();
 
 
-	EdgeOutIterator ite( *m_upperLevelSource );
+      debugMsg("FlowProfile::recomputeLevels","Computing lower level for instance at time "
+	       << inst->getTime() << " closed level is "
+	       << m_lowerClosedLevel );
 
-	for( ; ite.ok(); ++ite )
-	  {
-	    Edge* edge = *ite;
-	    
-	    upperboundIncrement += maxflow.getResidual( edge );
-	  }
-      }
+      double lowerboundIncrement = m_lowerClosedLevel - m_lowerLevelGraph->getResidualFromSource();
+      double upperboundIncrement = m_upperClosedLevel + m_upperLevelGraph->getResidualFromSource();
 
-	debugMsg("FlowProfile::recomputeLevels","Computed levels for instance at time "
-		 << inst->getTime() << "["
-		 << lowerboundIncrement << "," 
-		 << upperboundIncrement << "]");
+      debugMsg("FlowProfile::recomputeLevels","Computed levels for instance at time "
+	       << inst->getTime() << "["
+	       << lowerboundIncrement << "," 
+	       << upperboundIncrement << "]");
 
       inst->update( lowerboundIncrement, lowerboundIncrement, upperboundIncrement, upperboundIncrement, 
 		    0, 0, 0, 0, 
@@ -231,7 +304,8 @@ namespace EUROPA
 		    0, 0, 0, 0 );
     }
 
-    bool FlowProfile::isConstrainedToBeforeOrAt( const TransactionId t1, const TransactionId t2 ) {
+    bool FlowProfile::isConstrainedToBeforeOrAt( const TransactionId t1, const TransactionId t2 ) 
+    {
       check_error(t1.isValid());
       check_error(t2.isValid());
 
@@ -240,14 +314,16 @@ namespace EUROPA
       return distance.getLowerBound() >= 0;
     }
 
-    bool FlowProfile::isConstrainedToAt( const TransactionId t1, const TransactionId t2 ) {
+    bool FlowProfile::isConstrainedToAt( const TransactionId t1, const TransactionId t2 ) 
+    {
 
       const IntervalIntDomain distance = m_planDatabase->getTemporalAdvisor()->getTemporalDistanceDomain( t1->time(), t2->time(), true );
 
       return distance.getLowerBound() == 0 && distance.getUpperBound() == 0;
     }
 
-    void FlowProfile::handleOrderedAt( const TransactionId t1, const TransactionId t2 ) {
+    void FlowProfile::handleOrderedAt( const TransactionId t1, const TransactionId t2 ) 
+    {
       check_error(t1.isValid());
       check_error(t2.isValid());
       
@@ -255,20 +331,12 @@ namespace EUROPA
 	       << t1->getId() << ") at TransactionId (" 
 	       << t2->getId() << ")");
 
-      check_error( 0 != m_lowerLevelGraph->getNode( t1 ) );
-      check_error( 0 != m_lowerLevelGraph->getNode( t2 ) );
-
-      m_lowerLevelGraph->createEdge( t1, t2, Edge::getMaxCapacity() );
-      m_lowerLevelGraph->createEdge( t2, t1, Edge::getMaxCapacity() );
-
-      check_error( 0 != m_upperLevelGraph->getNode( t1 ) );
-      check_error( 0 != m_upperLevelGraph->getNode( t2 ) );
-
-      m_upperLevelGraph->createEdge( t1, t2, Edge::getMaxCapacity() );
-      m_upperLevelGraph->createEdge( t2, t1, Edge::getMaxCapacity() );
+      m_lowerLevelGraph->enableAt( t1, t2 );
+      m_upperLevelGraph->enableAt( t1, t2 );
     }
 
-    void FlowProfile::handleOrderedAtOrBefore( const TransactionId t1, const TransactionId t2 ) {
+    void FlowProfile::handleOrderedAtOrBefore( const TransactionId t1, const TransactionId t2 ) 
+    {
       check_error(t1.isValid());
       check_error(t2.isValid());
       
@@ -276,20 +344,12 @@ namespace EUROPA
 	       << t1->getId() << ") at or before TransactionId (" 
 	       << t2->getId() << ")");
 
-      check_error( 0 != m_lowerLevelGraph->getNode( t1 ) );
-      check_error( 0 != m_lowerLevelGraph->getNode( t2 ) );
-
-      m_lowerLevelGraph->createEdge( t1, t2, 0 );
-      m_lowerLevelGraph->createEdge( t2, t1, Edge::getMaxCapacity() );
-
-      check_error( 0 != m_upperLevelGraph->getNode( t1 ) );
-      check_error( 0 != m_upperLevelGraph->getNode( t2 ) );
-
-      m_upperLevelGraph->createEdge( t1, t2, 0 );
-      m_upperLevelGraph->createEdge( t2, t1, Edge::getMaxCapacity() );
+      m_lowerLevelGraph->enableAtOrBefore( t1, t2 );
+      m_upperLevelGraph->enableAtOrBefore( t1, t2 );
     }
 
-    void FlowProfile::handleTransactionAdded(const TransactionId t) {
+    void FlowProfile::handleTransactionAdded(const TransactionId t) 
+    {
       check_error(t.isValid());
 
       debugMsg("FlowProfile:handleTransactionAdded","TransactionId (" << t->getId() << ") " << t->time() );
@@ -305,79 +365,19 @@ namespace EUROPA
     void FlowProfile::enableTransaction( const TransactionId t )
     {
       debugMsg("FlowProfile:enableTransaction","TransactionId (" << t->getId() << ")");
-
-      SAVH::Node* lowerLevelNode = m_lowerLevelGraph->createNode( t, true );
-      SAVH::Node* upperLevelNode = m_upperLevelGraph->createNode( t, true );
-
-      if( t->isConsumer() ) 
-	{
-	  m_lowerLevelGraph->createEdge( m_lowerLevelSource->getIdentity(), lowerLevelNode->getIdentity(), t->quantity()->lastDomain().getUpperBound() ); 
-	  m_lowerLevelGraph->createEdge( lowerLevelNode->getIdentity(), m_lowerLevelSource->getIdentity(), 0 ); 
-	  
-	  m_upperLevelGraph->createEdge( upperLevelNode->getIdentity(), m_upperLevelSink->getIdentity(), t->quantity()->lastDomain().getUpperBound() );
-	  m_upperLevelGraph->createEdge( m_upperLevelSink->getIdentity(), upperLevelNode->getIdentity(), 0 );
-	}
-      else 
-	{
-	  m_lowerLevelGraph->createEdge( lowerLevelNode->getIdentity(), m_lowerLevelSink->getIdentity(), t->quantity()->lastDomain().getUpperBound() ); 
-	  m_lowerLevelGraph->createEdge( m_lowerLevelSink->getIdentity(), lowerLevelNode->getIdentity(), 0 ); 
-	  
-	  m_upperLevelGraph->createEdge( m_upperLevelSource->getIdentity(), upperLevelNode->getIdentity(), t->quantity()->lastDomain().getUpperBound() );
-	  m_upperLevelGraph->createEdge( upperLevelNode->getIdentity(), m_upperLevelSource->getIdentity(), 0 );
-	}
+      
+      m_lowerLevelGraph->enableTransaction( t );
+      m_upperLevelGraph->enableTransaction( t );
     }
     
     void FlowProfile::resetEdgeWeights( const TransactionId t ) 
     {
       check_error(t.isValid());
-      checkError( 0 != m_lowerLevelGraph->getNode( t ), "resetEdgeWeights, no node in lower level graph for transaction (" 
-		       << t->getId() << ")");
-      checkError( 0 != m_upperLevelGraph->getNode( t ), "resetEdgeWeights, no node in upper level graph for transaction (" 
-		       << t->getId() << ")");
 
       debugMsg("FlowProfile:resetEdgeWeights","TransactionId (" << t->getId() << ")");
 
-      if( t->isConsumer() ) 
-	{
-	  {
-	    Edge* edge = m_lowerLevelGraph->getEdge( m_lowerLevelSource, m_lowerLevelGraph->getNode( t ) );
-
-	    checkError(0 != edge, "resetEdgeWeights, no edges in lower level graph for transaction (" 
-		       << t->getId() << ")");
-
-	    edge->setCapacity( t->quantity()->lastDomain().getUpperBound() );
-	  }
-
-	  {
-	    Edge* edge = m_upperLevelGraph->getEdge( m_upperLevelGraph->getNode( t ), m_upperLevelSink );
-
-	    checkError(0 != edge, "resetEdgeWeights, no edges in upper level graph for transaction (" 
-		       << t->getId() << ")");
-
-	    edge->setCapacity( t->quantity()->lastDomain().getUpperBound() );
-	  }
-	}
-      else
-	{
-	  {
-
-	    Edge* edge = m_lowerLevelGraph->getEdge( m_lowerLevelGraph->getNode( t ), m_lowerLevelSink );
-
-	    checkError(0 != edge, "resetEdgeWeights, no edges in lower level graph for transaction (" 
-		       << t->getId() << ")");
-
-	    edge->setCapacity( t->quantity()->lastDomain().getUpperBound() );
-	  }
-
-	  {
-	    Edge* edge = m_upperLevelGraph->getEdge( m_upperLevelSource, m_upperLevelGraph->getNode( t ) );
-
-	    checkError(0 != edge, "resetEdgeWeights, no edges in upper level graph for transaction (" 
-		       << t->getId() << ")");
-
-	    edge->setCapacity( t->quantity()->lastDomain().getUpperBound() );
-	  }
-	}
+      m_lowerLevelGraph->enableTransaction( t );
+      m_upperLevelGraph->enableTransaction( t );
     }
 
     void FlowProfile::handleTransactionRemoved( const TransactionId t ) {
@@ -385,17 +385,8 @@ namespace EUROPA
 
       debugMsg("FlowProfile:handleTransactionRemoved","TransactionId (" << t->getId() << ")");
       
-      checkError( 0 != m_lowerLevelGraph->getNode( t ),
-		  "Transaction (" 
-		  << t->getId() << ") removed which is not in the lower level graph!");
-
-      m_lowerLevelGraph->removeNode( t );
-
-      checkError( 0 != m_upperLevelGraph->getNode( t ),
-		  "Transaction (" 
-		  << t->getId() << ") removed which is not in the upper level graph!");
-
-      m_upperLevelGraph->removeNode( t );
+      m_lowerLevelGraph->removeTransaction( t );
+      m_upperLevelGraph->removeTransaction( t );
       
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
@@ -404,12 +395,14 @@ namespace EUROPA
       m_recomputeInterval = (new ProfileIterator(getId()))->getId();
     }
 
-    void FlowProfile::handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type)  {
+    void FlowProfile::handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type)  
+    {
       check_error(t.isValid());
 
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
 
+      // this needs to be 'smarter'
       m_recomputeInterval = (new ProfileIterator(getId()))->getId();
 
       debugMsg("FlowProfile:handleTransactionTimeChanged","TransactionId (" << t->getId() << ") change " << type );

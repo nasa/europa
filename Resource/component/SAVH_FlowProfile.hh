@@ -21,6 +21,30 @@ namespace EUROPA
     class Graph;
     class Node;
 
+    class FlowProfileGraph
+    {
+    public:
+      FlowProfileGraph( const SAVH::TransactionId& source, const SAVH::TransactionId& sink, bool lowerLevel );
+      ~FlowProfileGraph();
+      
+      void enableAt( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 );
+      void enableAtOrBefore( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 );
+      void enableTransaction( const SAVH::TransactionId& transaction );
+
+      double getResidualFromSource();
+
+      bool isLowerLevel() const { return m_lowerLevel; }
+
+      void removeTransaction( const SAVH::TransactionId& id );
+      void reset();
+    private:
+      bool m_lowerLevel;
+      bool m_recalculate;
+      SAVH::Graph* m_graph;
+      SAVH::Node* m_source;
+      SAVH::Node* m_sink;
+    };
+
     class FlowProfile:
       public Profile
     {
@@ -44,23 +68,15 @@ namespace EUROPA
       bool isConstrainedToBeforeOrAt( const TransactionId t1, const TransactionId t2 );
       bool isConstrainedToAt( const TransactionId t1, const TransactionId t2 );
 
-      void recomputeLevels(InstantId inst);
+      void recomputeLevels(InstantId prev, InstantId inst);
       void resetEdgeWeights( const TransactionId t );
 
-      
-      // temp untill the base class has it
-      PlanDatabaseId m_planDatabase;
      
       SAVH::TransactionId m_dummySourceTransaction;
       SAVH::TransactionId m_dummySinkTransaction;
 
-      SAVH::Graph* m_lowerLevelGraph;
-      SAVH::Node* m_lowerLevelSource;
-      SAVH::Node* m_lowerLevelSink;
-      
-      SAVH::Graph* m_upperLevelGraph;
-      SAVH::Node* m_upperLevelSource;
-      SAVH::Node* m_upperLevelSink;
+      SAVH::FlowProfileGraph* m_lowerLevelGraph;
+      SAVH::FlowProfileGraph* m_upperLevelGraph;
 
       double m_lowerClosedLevel;
       double m_upperClosedLevel;

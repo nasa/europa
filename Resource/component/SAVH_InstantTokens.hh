@@ -34,7 +34,7 @@ namespace EUROPA {
       void print(std::ostream& os);
       virtual void close();
     protected:
-      void commonInit(bool closed);
+      void commonInit(bool closed, const IntervalDomain& quantityBaseDomain);
       ConstrainedVariableId m_quantity;
       bool m_isConsumer;
     private:

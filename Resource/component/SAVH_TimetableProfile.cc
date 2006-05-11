@@ -33,7 +33,7 @@ namespace EUROPA {
       m_maxPrevProduction = 0;
     }
 
-    void TimetableProfile::recomputeLevels(InstantId inst) {
+    void TimetableProfile::recomputeLevels( InstantId prev, InstantId inst) {
       check_error(inst.isValid());
       
       double maxInstantProduction(0), minInstantProduction(0), maxInstantConsumption(0), minInstantConsumption(0);

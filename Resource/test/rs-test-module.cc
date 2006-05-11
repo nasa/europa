@@ -834,7 +834,7 @@ private:
   void handleTransactionsOrdered(const SAVH::TransactionId t1, const SAVH::TransactionId t2) {}
   void initRecompute(SAVH::InstantId inst){}
   void initRecompute(){}
-  void recomputeLevels(SAVH::InstantId inst) {
+  void recomputeLevels(SAVH::InstantId prev, SAVH::InstantId inst) {
   }
 };
 
