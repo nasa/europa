@@ -3,7 +3,6 @@
 #include "ConstraintEngine.hh"
 #include "RulesEngine.hh"
 #include "ResourcePropagator.hh"
-#include "ProfilePropagator.hh"
 #include "DefaultPropagator.hh"
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
