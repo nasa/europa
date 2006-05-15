@@ -74,6 +74,7 @@ namespace EUROPA
       
       SAVH::TransactionId source = SAVH::TransactionId::noId();
       SAVH::TransactionId target = SAVH::TransactionId::noId();
+      double edgeCapacity = 0;
 
       if( ( m_lowerLevel && t->isConsumer() )
 	  ||
@@ -82,18 +83,21 @@ namespace EUROPA
 	  // connect to the source of the graph
 	  source = m_source->getIdentity();
 	  target = t;
+	  
+	  edgeCapacity = t->quantity()->lastDomain().getUpperBound();
 	}
       else
 	{
 	  // connect to the sink of the graph
 	  source = t;
 	  target = m_sink->getIdentity();
+
+	  edgeCapacity = t->quantity()->lastDomain().getLowerBound();
 	}
       
       check_error( SAVH::TransactionId::noId() != source );
       check_error( SAVH::TransactionId::noId() != target );
       
-      double edgeCapacity = t->quantity()->lastDomain().getUpperBound();
 
       m_graph->createEdge( source, target, edgeCapacity );
       m_graph->createEdge( target, source, 0 );

@@ -86,14 +86,16 @@ class FlowProfileTest
 public:
 
   static bool test(){
-//     testAddAndRemove();
-//     testScenario0();
-//     testScenario1();
-//     testScenario2();
-//     testScenario3();
-//     testScenario4();
-//     testScenario5();
+    testAddAndRemove();
+    testScenario0();
+    testScenario1();
+    testScenario2();
+    testScenario3();
+    testScenario4();
+    testScenario5();
     testScenario6();
+    testScenario7();
+    testScenario8();
     return true;
   }
 private:
@@ -550,7 +552,93 @@ private:
     */
   }
 
+  static void executeScenario7( SAVH::Profile& profile, ConstraintEngine& ce ) {
+    /*!
+     * Transaction1 constrained to be at Transaction2
+     *
+     * Transaction1   <0-------(+2)-------10>
+     * Transaction2   <0-----[-1,-2]------10>
+     *                 |                   |
+     *                 |                   |
+     * Max level       1                   1
+     * Min level       0                   0
+     *
+     */
 
+    const int nrInstances = 2;
+
+    int itimes[nrInstances] = {0,10};
+    double lowerLevels[nrInstances] = {0, 0};
+    double upperLevels[nrInstances] = {1, 1};
+
+    Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
+    Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
+    
+    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+
+    ce.propagate();
+
+    Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(2, 2), true, "q1" );
+    Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 2), true, "q2" );
+
+    std::set<int> times;
+
+    SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
+    SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
+
+    profile.addTransaction( trans1.getId() );
+    profile.addTransaction( trans2.getId() );
+
+    profile.recompute();
+
+    bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+
+    assertTrue( profileMatches );
+  }
+
+  static void executeScenario8( SAVH::Profile& profile, ConstraintEngine& ce ) {
+    /*!
+     * Transaction1 constrained to be at Transaction2
+     *
+     * Transaction1   <0------[+1,+2]----10>
+     * Transaction2   <0-------(-2)------10>
+     *                 |                   |
+     *                 |                   |
+     * Max level       0                   0
+     * Min level      -1                  -1
+     *
+     */
+
+    const int nrInstances = 2;
+
+    int itimes[nrInstances] = {0,10};
+    double lowerLevels[nrInstances] = {-1, -1};
+    double upperLevels[nrInstances] = {0, 0};
+
+    Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
+    Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
+    
+    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+
+    ce.propagate();
+
+    Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(1, 2), true, "q1" );
+    Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(2, 2), true, "q2" );
+
+    std::set<int> times;
+
+    SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
+    SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
+
+    profile.addTransaction( trans1.getId() );
+    profile.addTransaction( trans2.getId() );
+
+    profile.recompute();
+
+    bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+
+    assertTrue( profileMatches );
+  }
   static bool testNoTransactions() {
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
@@ -674,6 +762,25 @@ private:
     SAVH::FlowProfile profile( db.getId(), detector.getId());
 
     executeScenario6( profile, ce );
+    return true;
+  }
+
+  static bool testScenario7(){
+    std::cout << "  Scenario 7" << std::endl;
+    RESOURCE_DEFAULT_SETUP(ce, db, true);
+    DummyDetector detector(SAVH::ResourceId::noId());
+    SAVH::FlowProfile profile( db.getId(), detector.getId());
+
+    executeScenario7( profile, ce );
+    return true;
+  }
+  static bool testScenario8(){
+    std::cout << "  Scenario 8" << std::endl;
+    RESOURCE_DEFAULT_SETUP(ce, db, true);
+    DummyDetector detector(SAVH::ResourceId::noId());
+    SAVH::FlowProfile profile( db.getId(), detector.getId());
+
+    executeScenario8( profile, ce );
     return true;
   }
   static bool testDeltaTime(){
