@@ -29,19 +29,24 @@ namespace EUROPA
     {
     public:
       /**
-       * @brief 
+       * @brief Creates a directed graph with a \a source and a \sink intended to calculate the 
+       * lower level envelope in case \a lowerLevel is true otherwise intended to calculate the 
+       * upper level envelope.
        */
       FlowProfileGraph( const SAVH::TransactionId& source, const SAVH::TransactionId& sink, bool lowerLevel );
       /**
-       * @brief 
+       * @brief Destructor
        */
       ~FlowProfileGraph();
       /**
-       * @brief 
+       * @brief Creates bi-directional edge between \a t1 and \a t2 with infinite capacity
+       * as a result of a concurrent constraint between the two transactions
        */
       void enableAt( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 );
       /**
-       * @brief 
+       * @brief Creates directed edge between \a t1 and \a t2 with infinite capacity
+       * as a result of a before or at constraint between the two transactions (reverse
+       * capacity set to zero)
        */
       void enableAtOrBefore( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 );
       /**
@@ -126,6 +131,10 @@ namespace EUROPA
       virtual ~FlowProfile();
     private:
       /**
+       * @brief 
+       */
+      void postHandleRecompute();
+      /**
        * @brief Enables a transaction t. A transaction is enabled a time T to calculate the 
        * envelopes for instant at time T if the lower bound of the time equals T (this is assuming
        * envelopes are calculated from earliest to latest instant). Another way of formulating this 
@@ -204,6 +213,9 @@ namespace EUROPA
 
       double m_lowerClosedLevel;
       double m_upperClosedLevel;
+
+      bool m_recalculateLowerLevel;
+      bool m_recalculateUpperLevel;    
     };
   }
 }

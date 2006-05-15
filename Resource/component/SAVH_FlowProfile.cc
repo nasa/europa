@@ -153,7 +153,9 @@ namespace EUROPA
     FlowProfile::FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb): 
       Profile( db, flawDetector, initLevelLb, initLevelUb),
       m_lowerLevelGraph( 0 ),
-      m_upperLevelGraph( 0 )
+      m_upperLevelGraph( 0 ),
+      m_recalculateLowerLevel( false ),
+      m_recalculateUpperLevel( false )
     {
       m_recomputeInterval = (new ProfileIterator(getId()))->getId();
 
@@ -175,7 +177,6 @@ namespace EUROPA
 
     FlowProfile::~FlowProfile() 
     {
-
       delete m_lowerLevelGraph;
       m_lowerLevelGraph = 0;
 
@@ -199,14 +200,23 @@ namespace EUROPA
       
       debugMsg("FlowProfile:initRecompute","");
 
-      m_lowerLevelGraph->reset();
-      m_upperLevelGraph->reset();
+      if( m_recalculateLowerLevel )
+	m_lowerLevelGraph->reset();
+
+      if( m_recalculateUpperLevel )
+	m_upperLevelGraph->reset();
       
       // initial level
       m_lowerClosedLevel = m_initLevelLb;
 
       // initial level
       m_upperClosedLevel = m_initLevelUb;
+    }
+
+    void FlowProfile::postHandleRecompute()
+    {
+      m_recalculateLowerLevel = false;
+      m_recalculateUpperLevel = false;
     }
 
     void FlowProfile::recomputeLevels( InstantId prev, InstantId inst ) 
@@ -231,19 +241,29 @@ namespace EUROPA
 	  // right inclusive
 	  if( transaction1->time()->lastDomain().getUpperBound() == inst->getTime() )  
 	    {
-	      m_lowerLevelGraph->removeTransaction( transaction1 );
-	      m_upperLevelGraph->removeTransaction( transaction1 );
+	      
+	      if( m_recalculateLowerLevel )
+		m_lowerLevelGraph->removeTransaction( transaction1 );
+
+	      if( m_recalculateUpperLevel )
+		m_upperLevelGraph->removeTransaction( transaction1 );
 
 	      // if upperbound equals the instant time the transaction enters the closed set
   	      if( transaction1->isConsumer() ) 
 		{
-		  m_upperClosedLevel -= transaction1->quantity()->lastDomain().getLowerBound();
-		  m_lowerClosedLevel -= transaction1->quantity()->lastDomain().getUpperBound();
+		  if( m_recalculateUpperLevel )
+		    m_upperClosedLevel -= transaction1->quantity()->lastDomain().getLowerBound();
+
+		  if( m_recalculateLowerLevel )
+		    m_lowerClosedLevel -= transaction1->quantity()->lastDomain().getUpperBound();
 		}
 	      else 
 		{
-		  m_upperClosedLevel += transaction1->quantity()->lastDomain().getUpperBound();
-		  m_lowerClosedLevel += transaction1->quantity()->lastDomain().getLowerBound();
+		  if( m_recalculateUpperLevel )
+		    m_upperClosedLevel += transaction1->quantity()->lastDomain().getUpperBound();
+
+		  if( m_recalculateLowerLevel )
+		    m_lowerClosedLevel += transaction1->quantity()->lastDomain().getLowerBound();
 		}
 	    }
 	  else
@@ -294,15 +314,22 @@ namespace EUROPA
 	       << inst->getTime() << " closed level is "
 	       << m_lowerClosedLevel );
 
-      double lowerboundIncrement = m_lowerClosedLevel - m_lowerLevelGraph->getResidualFromSource();
-      double upperboundIncrement = m_upperClosedLevel + m_upperLevelGraph->getResidualFromSource();
+      double lowerLevel = inst->getLowerLevel();
+
+      if( m_recalculateLowerLevel )
+	lowerLevel = m_lowerClosedLevel - m_lowerLevelGraph->getResidualFromSource();
+	
+      double upperLevel = inst->getUpperLevel();
+
+      if( m_recalculateUpperLevel )
+	upperLevel = m_upperClosedLevel + m_upperLevelGraph->getResidualFromSource();
 
       debugMsg("FlowProfile::recomputeLevels","Computed levels for instance at time "
 	       << inst->getTime() << "["
-	       << lowerboundIncrement << "," 
-	       << upperboundIncrement << "]");
+	       << lowerLevel << "," 
+	       << upperLevel << "]");
 
-      inst->update( lowerboundIncrement, lowerboundIncrement, upperboundIncrement, upperboundIncrement, 
+      inst->update( lowerLevel, lowerLevel, upperLevel, upperLevel, 
 		    0, 0, 0, 0, 
 		    0, 0, 0, 0, 
 		    0, 0, 0, 0 );
@@ -360,10 +387,15 @@ namespace EUROPA
 
       enableTransaction( t );
 
+      m_recalculateLowerLevel = true;
+      m_recalculateUpperLevel = true;
+
+      int newStartIteratorTime = std::min( m_recomputeInterval->getTime(), (int) t->time()->lastDomain().getLowerBound() );
+
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
       
-      m_recomputeInterval = (new ProfileIterator(getId()))->getId();
+      m_recomputeInterval = (new ProfileIterator( getId(), newStartIteratorTime ))->getId();
     }
 
     void FlowProfile::enableTransaction( const TransactionId t )
@@ -380,34 +412,49 @@ namespace EUROPA
 
       debugMsg("FlowProfile:resetEdgeWeights","TransactionId (" << t->getId() << ")");
 
-      m_lowerLevelGraph->enableTransaction( t );
-      m_upperLevelGraph->enableTransaction( t );
+      if( m_recalculateLowerLevel )
+	m_lowerLevelGraph->enableTransaction( t );
+
+      if( m_recalculateUpperLevel )
+	m_upperLevelGraph->enableTransaction( t );
     }
 
     void FlowProfile::handleTransactionRemoved( const TransactionId t ) {
       check_error(t.isValid());
 
       debugMsg("FlowProfile:handleTransactionRemoved","TransactionId (" << t->getId() << ")");
+
+      m_recalculateLowerLevel = true;
+      m_recalculateUpperLevel = true;
       
       m_lowerLevelGraph->removeTransaction( t );
       m_upperLevelGraph->removeTransaction( t );
       
-      if(m_recomputeInterval.isValid())
-	delete (ProfileIterator*) m_recomputeInterval;
-
-      // this needs to be 'smarter'
-      m_recomputeInterval = (new ProfileIterator(getId()))->getId();
+      // done if recompute interval has no transactions left if this transaction is removed
+      if( !m_recomputeInterval->done() )
+	{
+	  int newStartIteratorTime = std::min( m_recomputeInterval->getTime(), (int) t->time()->lastDomain().getLowerBound() );
+	  
+	  if(m_recomputeInterval.isValid())
+	    delete (ProfileIterator*) m_recomputeInterval;
+	  
+	  m_recomputeInterval = (new ProfileIterator( getId(), newStartIteratorTime ))->getId();
+	}
     }
 
     void FlowProfile::handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type)  
     {
       check_error(t.isValid());
 
+      m_recalculateLowerLevel = true;
+      m_recalculateUpperLevel = true;
+
+      int newStartIteratorTime = std::min( m_recomputeInterval->getTime(), (int) t->time()->lastDomain().getLowerBound() );
+
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
-
-      // this needs to be 'smarter'
-      m_recomputeInterval = (new ProfileIterator(getId()))->getId();
+      
+      m_recomputeInterval = (new ProfileIterator( getId(), newStartIteratorTime ))->getId();
 
       debugMsg("FlowProfile:handleTransactionTimeChanged","TransactionId (" << t->getId() << ") change " << type );
     }
@@ -418,24 +465,61 @@ namespace EUROPA
 
       switch( type) {
       case DomainListener::UPPER_BOUND_DECREASED: 
+	{
+	  if( t->isConsumer() )
+	    {
+	      m_recalculateLowerLevel = true;
+	    }
+	  else
+	    {
+	      m_recalculateUpperLevel = true;
+	    }
+
+	  resetEdgeWeights( t );
+	}
+      break;
       case DomainListener::RESET:
       case DomainListener::RELAXED: 
       case DomainListener::RESTRICT_TO_SINGLETON:
       case DomainListener::SET_TO_SINGLETON:
 	{
+	  m_recalculateLowerLevel = true;
+	  m_recalculateUpperLevel = true;
 	  resetEdgeWeights( t );
 	}
       break;
+      break;
       case DomainListener::LOWER_BOUND_INCREASED:
+	{
+	  if( t->isConsumer() )
+	    {
+	      m_recalculateUpperLevel = true;
+	    }
+	  else
+	    {
+	      m_recalculateLowerLevel = true;
+	    }
+
+	  resetEdgeWeights( t );
+	}
+      break;
       case DomainListener::BOUNDS_RESTRICTED:
+	{
+	  m_recalculateLowerLevel = true;
+	  m_recalculateUpperLevel = true;
+	  resetEdgeWeights( t );
+	}
+      break;
       default:
 	break;
       };
 
+      int newStartIteratorTime = std::min( m_recomputeInterval->getTime(), (int) t->time()->lastDomain().getLowerBound() );
+
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
-
-      m_recomputeInterval = (new ProfileIterator(getId()))->getId();
+      
+      m_recomputeInterval = (new ProfileIterator( getId(), newStartIteratorTime ))->getId();
 
       debugMsg("FlowProfile:handleTransactionQuantityChanged","TransactionId (" << t->getId() << ") change " << type );
     }
@@ -445,9 +529,13 @@ namespace EUROPA
       check_error(t1.isValid());
       check_error(t2.isValid());
 
+      int newStartIteratorTime = std::min( m_recomputeInterval->getTime(), 
+					   (int) std::min(  t1->time()->lastDomain().getLowerBound(), t2->time()->lastDomain().getLowerBound() )  );
+
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
-      m_recomputeInterval = (new ProfileIterator(getId()))->getId();
+      
+      m_recomputeInterval = (new ProfileIterator( getId(), newStartIteratorTime ))->getId();
 
       debugMsg("FlowProfile:handleTransactionsOrdered","TransactionId1 (" << t1->getId() << ") before TransactionId2 (" << t2->getId() << ")");
 
