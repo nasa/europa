@@ -1,3 +1,9 @@
+M_27
+1. Solver has been created (a replacement for CBPlanner)
+2. The NDDL parser has been completely rewritten.
+3. Documentation restructured and enhanced.
+4. Various and sundry minor features and bug fixes.
+
 M_26
 1. Important changes in the way we handle dynamic domains. We now force object variables of
 dynamic object types to be closed on construction, though the type may be open. We also allow
