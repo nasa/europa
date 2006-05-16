@@ -1,0 +1,11 @@
+SubDir PLASMA Examples PlexilTranslator ;
+
+if ! $(DEMORover_READY) {
+ # Create a build target to run a problem
+ RunNDDLProblem DEMORover : DEMORover-initial-state.nddl : DEMORover-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain DEMORover-planner : DEMORover-Main.cc : DEMORover-model.nddl : System : DEMORover-planner ;
+ # Create a build target for the planner shared library with model.
+ ModuleSharedLibrary DEMORover : DEMORover-model.o : System : DEMORover ;
+} # DEMORover_READY

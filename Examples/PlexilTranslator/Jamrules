@@ -1,0 +1,7 @@
+{
+  local SUBDIR = $(DEMORover) ;
+  local PLASMA = [ FDirName $(DEMORover) .. PLASMA ] ;
+  include [ FDirName $(PLASMA) Jamrules ] ;
+  include [ FDirName $(SUBDIR) Jamfile ] ;
+  DEMORover_READY = TRUE ;
+}

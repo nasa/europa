@@ -1,0 +1,327 @@
+/*
+This model contains a NDDL model derived from the CLARAty Decision-Layer/
+Functional-Layer commanding-update API.
+
+
+1. We will try for as direct a CLARATy FL mapping as possible.
+We'll use FL function names for E2 actions.
+
+2. Assume "N" is Y axis pointing in direction of positive y.
+Assume all coordinates lie in first quadrant.
+
+3. For now assume no information about a path constrains use
+of navigate-to-location vs go-to-location.
+
+4. Assume a constant rate for go-to-location and a different one
+for navigate-to-location.
+
+5. Assume both navigate-to-location and go-to-location must
+follow a path; can't do multiple hops.
+
+6. We will not model drive-rover.  optionally we can have PLEXIL
+decompose go-to-location and navigate-to-location into sequences
+of drive commands.
+
+7. We will include heading in path.
+
+8. At present we need 3 rates to calculate time:
+ a. Rate of navigate-to-location 
+ b. Rate of go-to-location
+ c. Rate of turn-in-place
+
+9. We will assume a single position tolerance, which will always be
+bound to a constant value.  We will not calculate duration based on
+this error.  The PLEXIL translation will simply pass it through.
+
+10. We will also assume opportunistic science is always off.
+
+11. For now, we will ignore all science activities.
+
+12. navigate routines don't include origin in their commands;
+NDDL obvioously needs that, so the PLEXIL translation will 
+have to strip it out.  
+Similarly, turn doesn't include current heading, only new heading.
+Extension required of PLEXIL translation file.
+For now, just list (in order) indices of parameters that you want.
+
+13. Locations in nav routines expressed in x,y; wwill have to expand
+locations in PLEXIL translation.  Another option of the PLEXIL trans file.
+Not sure how best to annotate that.
+
+14. A note about distance and time:
+Recall that time is integer, so all arithmetic 
+defining activity duration has to be integral. 
+Since we're going to be serious about how fast
+rover turns, we need to define the time scale to be seconds.
+Since we want reasonable rover accuracy, we will use 
+distance scale in centimeters.
+Note this defines the position_tolerance in terms of meters
+as .02 meters.
+
+15. A note about the CLARty interface: currently has return values,
+but they are provided on a "subscription" basis.  So, while we can
+implement the "state" conditions in PLEXIL via the same mechanism
+we use now, PLEXIL will have to translate that in order to get the
+returns from CLARAty and interpret them.
+
+
+NDDL I need:
+1. rate constraint
+2. Ability to define model constants (the rates); these don't have
+to be classes, do they?
+
+
+Future work (in order):
+1. Incorporate properties of paths that permit 
+navigate-to-location vs go-to-location.
+2. Incorporate rate as function of whether opportunistic science on or off
+3. Include science activities and durations
+4. Extend all science activities with memory consumption
+5. Extend all activities with energy consumption
+6. Extend with recharge
+7. Extend with dump memory
+8. Extend terrain with property (slope, roughness, etc) that
+impacts duration
+9. Incorporate planner choice of position error based on path,
+and calculate duration based on actual distance to boundary (unless
+it don't matter)
+*/
+
+#include "../PLASMA/NDDL/core/Plasma.nddl"
+#include "../PLASMA/NDDL/core/PlannerConfig.nddl"
+
+//Enumerated Types
+
+enum use_opportunistic_science{On,Off};
+enum type_action{nav,go,turn};
+
+//Classes: Constant Data
+
+float turn_rate_val=1.0; //assumes turn rate of 1 degree per second
+float go_rate_val=1.0;   //assumes travel rate of 1 cm/sec, or 1 m in 1.66min
+float nav_rate_val=1.0;  //assumes travel rate of 1 cm/sec, or 1 m in 1.66min
+float post_go_at_dur_val=60.0;
+float post_nav_at_dur_val=60.0;
+float position_error_val=0.02;
+
+/*
+The CLARATy FL allows drive commands to arbitrary locations.
+This will make planning harder.
+We will assume there are a finite set of waypoints.
+We assume waypoints coordinates are absolute reference frame real values.
+*/
+
+class Location{
+	string name;
+	float position_x;
+	float position_y;
+		Location(string inName, float inx, float iny){
+		name = inName;
+		position_x=inx;
+		position_y=iny;
+	}
+}
+
+/*path constraints.  paths are directed, from -> to.  "symmetric"
+paths must be included separately.
+
+We will assume that 
+
+ dist = sqrt((from.x - to.x)^2 + (from.y - to.y)^2)
+and dur = dist * rate. 
+
+We will include the heading, which works like this:
+the zero-located vector defining the path is
+A=(to.x - from.x, to.y - from.y)
+since heading is relative to north, the angle is measured against the vector
+B=(0,1)
+the heading angle is
+acos(A . B / |A||B|)
+= acos(to.y - from.y / sqrt((from.x - to.x)^2 + (from.y - to.y)^2))
+Since acos has 2 solutions, and we want the heading relative to north,
+we take the positive solution
+
+*/
+
+
+class Path
+{
+	string name;
+	Location from, to;
+	float dist;
+	float head;
+	Path(string inName,
+	     Location inFrom, 
+	     Location inTo, 
+	     float inDist, 
+	     float inHeading){
+		name = inName;
+		from = inFrom;
+		to = inTo;
+		dist = inDist;
+		head = inHeading;
+	}
+}
+
+//Classes: Timelines and Predicates
+
+//Note: I thought I could be clever and eliminate
+//heading from the spec of At.  Can't do that, because
+//even though the heading is deterministic once
+//you start going from place to place,
+//initial heading must be specified, and you can't
+//rilly do that by saying "here's the path I came from."
+
+class Navigator{
+predicate at{
+Location location;
+float heading;
+}
+
+
+
+predicate go_to_location {
+Location from;
+Location to;
+use_opportunistic_science opsci;
+float position_error;
+eq(opsci,Off);
+eq(position_error,position_error_val);
+}
+
+predicate navigate_to_location {
+Location from;
+Location to;
+use_opportunistic_science opsci;
+float position_error;
+eq(opsci,Off);
+eq(position_error,position_error_val);
+}
+
+predicate turn_in_place{
+float position_heading;
+float prev_heading;
+}
+}
+
+class Rover{
+Navigator nav;
+Rover(){
+nav = new Navigator(); 
+}
+}
+
+
+//Rules
+
+/*
+Assumptions about rules: at -> turn, nav,go
+turn -> at
+nav -> at for 1 time unit
+go -> at for a few time units 
+*/
+
+Navigator::at{
+type_action next;
+type_action prev;
+leq(heading,360.0);
+leq(0.0,heading);
+
+if(prev==turn){
+met_by(object.turn_in_place prev_turn);
+}
+if(prev==nav){
+met_by(object.navigate_to_location prev_nav);
+eq(prev_nav.to,location);
+}
+if(prev==go){
+met_by(object.go_to_location prev_go);
+eq(prev_go.to,location);
+}
+
+if(next==turn){
+meets(object.turn_in_place next_turn);
+}
+if(next==nav){
+meets(object.navigate_to_location next_nav);
+eq(next_nav.from,location);
+}
+if(next==go){
+meets(object.go_to_location next_go);
+eq(next_go.from,location);
+}
+}
+
+Navigator::navigate_to_location{
+met_by(object.at prev_at);
+meets(object.at next_at);
+
+Path p;
+eq(p.from,from); 
+eq(p.to,to);
+eq(prev_at.heading,p.head);
+eq(prev_at.location,from);
+
+eq(next_at.location,to);
+eq(next_at.heading,p.head);
+
+leq(post_nav_at_dur_val,next_at.duration);
+
+//Need this becuase mulEq does not take enumerated domains
+float dist;
+eq(dist,p.dist);
+
+mulEq(dist,nav_rate_val,this.duration);
+}
+
+Navigator::go_to_location{
+met_by(object.at prev_at);
+meets(object.at next_at);
+
+Path p;
+eq(p.from,from); 
+eq(p.to,to);
+eq(prev_at.heading,p.head);
+eq(prev_at.location,from);
+
+eq(next_at.location,to);
+eq(next_at.heading,p.head);
+
+leq(post_go_at_dur_val,next_at.duration);
+
+//Need this becuase mulEq does not take enumerated domains
+float dist;
+eq(dist,p.dist);
+mulEq(dist,go_rate_val,this.duration);
+}
+
+
+Navigator::turn_in_place{
+//Constraints on heading; in range [0,360)
+leq(position_heading,360.0);
+leq(prev_heading,360.0);
+leq(0.0,position_heading);
+leq(position_heading,360.0);
+
+neq(position_heading,prev_heading);
+
+met_by(object.at prev_at);
+meets(object.at next_at);
+
+eq(prev_heading,prev_at.heading);
+
+Path p;
+eq(p.head,position_heading);
+float temp;
+//use of addeq to get sub
+//want temp = prev_heading-position_heading
+addEq(temp,position_heading,prev_heading);
+float dheading;
+absVal(dheading,temp);
+mulEq(dheading,turn_rate_val,this.duration);
+
+eq(next_at.location,prev_at.location);
+eq(next_at.heading,p.head);
+
+}
+

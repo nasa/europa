@@ -1,0 +1,7 @@
+Action:
+Navigator.go_to_location 2 3 4 -1
+Navigator.navigate_to_location 2 3 4 -1
+Navigator.turn_in_place 1 -1
+
+State:
+Navigator.at 1 -1
