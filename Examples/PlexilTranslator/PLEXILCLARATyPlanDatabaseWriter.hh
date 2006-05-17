@@ -11,11 +11,12 @@
 #include "ConstrainedVariable.hh"
 #include "TestSupport.hh"
 #include "TemporalAdvisor.hh"
+
+#include "PLEXILKeywords.hh";
+
 #include <string>
-#include <iostream.h>
+#include <iostream>
 #include <fstream>
-#include <stdlib.h>
-#include <strstream>
 
 /*
 PLEXIL Plan Writer.
@@ -60,7 +61,6 @@ for every kept token t
 	write the conditions
 	
 
-
 Data structures needed
 	either a list of predicates, list of objects, or both to check isIgnoredByPlexil
 	if we want to assemble strings, we could have such a data structure too.
@@ -68,148 +68,31 @@ Data structures needed
 Barf if we get a badly formed plan (it has resources, it has active tokens not on an object,
  it is otherwise ill-behaved or appears evil)
 
-
-
 for printing constant classes:
 can grovel over objects to extract objects that are instances of the correct class
 method getvariables that are fields of 
 
 */
 
-
 namespace EUROPA {
 
-        std::string replan = "Abort(), Replan(), Fail()?";
-        std::string preamble= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-        std::string preamble2="<PlexilPlan xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"/Users/vandi/plexil_Schema_051026.xsd\">";
- 	std::string bnode = "<Node>";
- 	std::string enode = "</Node>";
- 	std::string bnodeid = "<NodeId>";
- 	std::string enodeid = "</NodeId>";
- 	std::string bnodelist = "<NodeList>";
- 	std::string enodelist = "</NodeList>";
- 	std::string bnodetimeval = "<NodeTimepointValue>";
- 	std::string enodetimeval = "</NodeTimepointValue>";
- 	std::string bnodestateval = "<NodeStateValue>";
- 	std::string enodestateval = "</NodeStateValue>";
- 	std::string bcomment = "<Comment>";
- 	std::string ecomment = "</Comment>";
- 	std::string bstc = "<StartCondition>";
- 	std::string estc = "</StartCondition>";
- 	std::string bpc = "<PreCondition>";
- 	std::string epc = "</PreCondition>";
- 	std::string bic = "<InvariantCondition>";
- 	std::string eic = "</InvariantCondition>";
- 	std::string bpoc = "<PostCondition>";
- 	std::string epoc = "</PostCondition>";
- 	std::string band = "<AND>";
- 	std::string eand = "</AND>";
- 	std::string bor = "<OR>";
- 	std::string eor = "</OR>";
- 	std::string bge = "<GE>";
- 	std::string ege = "</GE>";
- 	std::string ble = "<LE>";
- 	std::string ele = "</LE>";
- 	std::string blookfreq = "<LookupWithFrequency>";
- 	std::string elookfreq = "</LookupWithFrequency>";
- 	std::string blooknow = "<LookupNow>";
- 	std::string elooknow = "</LookupNow>";
- 	std::string bfreq = "<Frequency>";
- 	std::string efreq = "</Frequency>";
- 	std::string breal = "<RealVariable>";
- 	std::string ereal = "</RealVariable>";
- 	std::string bstate = "<StateName>";
- 	std::string estate = "</StateName>";
- 	std::string binf = "<PlusInfinity>";
- 	std::string einf = "</PlusInfinity>";
- 	std::string bneginf = "<MinusInfinity>";
- 	std::string eneginf = "</MinusInfinity>";
- 	std::string btp = "<Timepoint>";
- 	std::string etp = "</Timepoint>";
- 	std::string badd = "<ADD>";
- 	std::string eadd = "</ADD>";
- 	std::string beqbool = "<EQBoolean>";
- 	std::string eeqbool = "</EQBoolean>";
- 	std::string bboolvar = "<BooleanVariable>";
- 	std::string eboolvar = "</BooleanVariable>";
- 	std::string bbool = "<Boolean>";
- 	std::string ebool = "</Boolean>";
- 	std::string bcmd = "<Command>";
- 	std::string ecmd = "</Command>";
- 	std::string bcmdname = "<CommandName>";
- 	std::string ecmdname = "</CommandName>";
- 	std::string bargs = "<Arguments>";
- 	std::string eargs = "</Arguments>";
-	std::string end = "END";
-	std::string start = "START";
- 	std::string inf = "INF";
- 	std::string neginf = "-INF";
-	std::string fin = "FINISHED";
-	std::string exec = "EXECUTING";
-	std::string finin = "FINISHING";
-	std::string failed = "FAILED";
-	std::string booltrue = "1";
-	std::string boolfalse = "0";
-  std::string time="time";
-
-
-//DEPRECATED
-
-
-        std::string stc = "StartCondition:AND{";
-	std::string prec = "PreCondition:AND{";
-	std::string ic = "InvariantCondition:AND{";
-	std::string poc = "PostCondition:AND{";
-
-	std::string lookupf = "LookupWithFrequency{";
-	std::string lookupn = "LookupNow{";
-	std::string curtime = "CurrentTimeWithin{";
-	std::string abstime = "AbsoluteTimeWithin{";
-
-	std::string node = "Node:{";
-	std::string nodeid = "NodeId:{";
-	std::string nodelist = "NodeList:{";
-	std::string vars = "Variables:{";
-	std::string inter = "Interface:{";
-
-
-
-	std::string infty = "PLUS_INFINIFY";
-  std::string mininfty = "MINUS_INFINITY";
-
-  std::string state = "state";	
-	std::string dot =".";	
-	std::string comma =",";	
-	std::string rbracket ="]";	
-	std::string lbracket ="[";	
-	std::string endbrace = "}";
-	std::string plus = "+";
-	
-	std::string andstr = "AND";
-	std::string orstr = "OR";
-
-	std::string freq = "1.0";
-
-	//following works: string = string + string!
-
-
-  //Need to fill this out enough to put it in a std::set
-  //Conor's recommendation: use Ids
+ 
   class PLEXILCLARATyCmdSpec;
   typedef EUROPA::Id<PLEXILCLARATyCmdSpec> PlexilCmdId;
+ 
   class PLEXILCLARATyCmdSpec{
-  public:
-    std::string name;
-    std::set<int> params;
-    PLEXILCLARATyCmdSpec::PLEXILCLARATyCmdSpec():m_id(this){}
-    PLEXILCLARATyCmdSpec::~PLEXILCLARATyCmdSpec(){
-      m_id.remove();
-    }
-    PLEXILCLARATyCmdSpec::PLEXILCLARATyCmdSpec(PLEXILCLARATyCmdSpec &inSpec){
+    public:
+     std::string name;
+     std::set<int> params;
+     PLEXILCLARATyCmdSpec::PLEXILCLARATyCmdSpec():m_id(this){}
+     PLEXILCLARATyCmdSpec::~PLEXILCLARATyCmdSpec(){
+       m_id.remove();
+     }
+     PLEXILCLARATyCmdSpec::PLEXILCLARATyCmdSpec(PLEXILCLARATyCmdSpec &inSpec){
       name=inSpec.name;
       params=inSpec.params;
-    }
-    void PLEXILCLARATyCmdSpec::setName(std::string inName){
+     }
+     void PLEXILCLARATyCmdSpec::setName(std::string inName){
       name=inName;
     }
     std::string PLEXILCLARATyCmdSpec::getName(){
@@ -240,16 +123,18 @@ namespace EUROPA {
     } 
 
     //Meant for debugging purposes only; deprecate as soon as things work
-    void PLEXILCLARATyCmdSpec::writeSpec(){
-      cout << "Spec:\n";
-      cout << name << "\n";
-      //Wow!  std::set has no output operator.
-      for(std::set<int>::const_iterator sit = params.begin(); sit != params.end(); ++sit){
-	int i=*sit;
-	cout << i << ",";
-      }
-      cout << "\n";
-    }
+    void PLEXILCLARATyCmdSpec::writeSpec();
+
+// {
+//       std::cout << "Spec:\n";
+//       std::cout << name << "\n";
+//       //Wow!  std::set has no output operator.
+//       for(std::set<int>::const_iterator sit = params.begin(); sit != params.end(); ++sit){
+// 	int i=*sit;
+// 	std::cout << i << ",";
+//       }
+//       std::cout << "\n";
+//     }
 
   private:
     PlexilCmdId m_id; 
@@ -258,11 +143,13 @@ namespace EUROPA {
   typedef std::set<std::string> StringSet;
   typedef std::set<PlexilCmdId> SpecSet;
 
+
+
+
+
   class PLEXILCLARATyPlanDatabaseWriter {
 
   public:
-
-
 	TemporalAdvisorId advisor;
 	StringSet actionPreds;
 	StringSet statePreds;
@@ -453,7 +340,7 @@ namespace EUROPA {
 			error=true;
 		}
 		if((error==true)||(sawState==false)){	
-			  cerr << "Malformed EUROPA-PLEXILCLARATy translation configuration file " << inputFileName << endl;
+		  std::cerr << "Malformed EUROPA-PLEXILCLARATy translation configuration file " << inputFileName << std::endl;
 		}
 	}
 
@@ -513,7 +400,7 @@ namespace EUROPA {
 	      if(first==true){
 		first=false;
 	      }
-	      else condString=condString+ ",\n ";
+	      else condString=condString+ "\n ";
 	      ConstrainedVariableId v= (*varit);
 	      
 	      
@@ -537,7 +424,7 @@ namespace EUROPA {
 		  
 		  std::string s=cvid->getName().toString();
 		  if(std::string::npos != s.find("position_x",0)){
-		    condString=condString+  cvid->derivedDomain().toString(cvid->derivedDomain().getSingletonValue())+",\n";
+		    condString=condString+  cvid->derivedDomain().toString(cvid->derivedDomain().getSingletonValue())+"\n";
 		  }
 		  if(std::string::npos != s.find("position_y",0)){
 		    condString=condString+  cvid->derivedDomain().toString(cvid->derivedDomain().getSingletonValue());
@@ -570,12 +457,11 @@ namespace EUROPA {
 
 		std::string plan;
 		plan=preamble + "\n"+preamble2 +"\n";
-		plan=plan+bnode+"\n";
-		plan=plan+bnodeid+"DEMORoverPlan"+enodeid+"\n";
-		plan=plan+bnodelist+"\n";
+		plan=plan + bnode + "\n";
+		plan=plan + bnodeid + "DEMORoverPlan" +enodeid+"\n";
+		plan=plan + bnodetype + bnodelist + enodetype + "\n";
 
-		
-		//Write PLEXILCLARATy nodes for all action tokens
+		//Write PLEXILCLARATy nodes for all action tokens 
      		for(TokenSet::const_iterator tokit = actionTokens.begin(); tokit != actionTokens.end(); ++tokit){
 		        startcondCount=0;
 			precondCount=0;
@@ -588,11 +474,11 @@ namespace EUROPA {
 
 			//Node header
 			nodeHeader=node + nodeid;
-			nodeHeader=nodeHeader + nodekey;
+			nodeHeader=nodeHeader + nodeidPrefix + nodekey;
 			nodeHeader=nodeHeader + endbrace + "\n";
 
 			plan=plan+bnode+"\n";
-			plan=plan+bnodeid+nodekey+enodeid +"\n";
+			plan=plan+bnodeid + nodeidPrefix + nodekey+enodeid +"\n";
 
 
 			first=true;
@@ -661,7 +547,6 @@ namespace EUROPA {
 			startCondition = startCondition + itoa((int)d1.getLowerBound(),10);
 			startCondition = startCondition + "," + infty + endbrace;
 
-
 			startcond=startcond+bstc+"\n";
 			startcondCount++;
 			startcond=startcond+band+"\n";
@@ -693,7 +578,6 @@ namespace EUROPA {
 			invariantCondition = invariantCondition + "+" + itoa((int)d1.getUpperBound(),10);
 			invariantCondition = invariantCondition + endbrace;
 
-
 			invcond=invcond+bic+"\n";
 			invcondCount++;
 			invcond=invcond+band+"\n";
@@ -703,7 +587,7 @@ namespace EUROPA {
 			invcond=invcond+bfreq+breal+freq+ereal+efreq+"\n";
 			invcond=invcond+elookfreq+"\n";			
 			invcond=invcond+bnodetimeval+"\n";
-			invcond=invcond+bnodeid+nodekey+enodeid+"\n";
+			invcond=invcond + bnodeid + nodeidPrefix + nodekey + enodeid +"\n";
 			invcond=invcond+bnodestateval+exec+enodestateval+"\n";
 			invcond=invcond+btp+start+etp+"\n";
 			invcond=invcond+enodetimeval+"\n";
@@ -718,7 +602,7 @@ namespace EUROPA {
 			invcond=invcond+elookfreq+"\n";
 			invcond=invcond+badd+"\n";
 			invcond=invcond+bnodetimeval+"\n";
-			invcond=invcond+bnodeid+nodekey+enodeid+"\n";
+			invcond=invcond+ bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
 			invcond=invcond+bnodestateval+exec+enodestateval+"\n";
 			invcond=invcond+btp+start+etp+"\n";
 			invcond=invcond+enodetimeval+"\n";
@@ -759,7 +643,7 @@ namespace EUROPA {
 						startcond=startcond+elookfreq+"\n";			
 						startcond=startcond+badd+"\n";
 						startcond=startcond+bnodetimeval+"\n";
-						startcond=startcond+bnodeid+nodekey+enodeid+"\n";
+						startcond=startcond+bnodeid+ nodeidPrefix + nodekey + enodeid+"\n";
 						startcond=startcond+bnodestateval+exec+enodestateval+"\n";
 						startcond=startcond+btp+end+etp+"\n";
 						startcond=startcond+enodetimeval+"\n";
@@ -797,7 +681,7 @@ namespace EUROPA {
 						precond=precond+bfreq+breal+freq+ereal+efreq+"\n";
 						precond=precond+elookfreq+"\n";	
 						precond=precond+bnodetimeval+"\n";
-						precond=precond+bnodeid+nodekey+enodeid+"\n";
+						precond=precond+bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
 						precond=precond+bnodestateval+exec+enodestateval+"\n";
 						precond=precond+btp+start+etp+"\n";
 						precond=precond+enodetimeval+"\n";
@@ -813,7 +697,7 @@ namespace EUROPA {
 						precond=precond+elookfreq+"\n";	
 						precond=precond+badd+"\n";		
 						precond=precond+bnodetimeval+"\n";
-						precond=precond+bnodeid+nodekey+enodeid+"\n";
+						precond=precond+bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
 						precond=precond+bnodestateval+exec+enodestateval+"\n";
 						precond=precond+btp+start+etp+"\n";
 						precond=precond+enodetimeval+"\n";
@@ -851,7 +735,7 @@ namespace EUROPA {
 							postcond=postcond+bfreq+breal+freq+ereal+efreq+"\n";
 							postcond=postcond+elookfreq+"\n";	
 							postcond=postcond+bnodetimeval+"\n";
-							postcond=postcond+bnodeid+nodekey+enodeid+"\n";
+							postcond=postcond+bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
 							postcond=postcond+bnodestateval+exec+enodestateval+"\n";
 							postcond=postcond+btp+end+etp+"\n";
 							postcond=postcond+enodetimeval+"\n";
@@ -867,7 +751,7 @@ namespace EUROPA {
 							postcond=postcond+elookfreq+"\n";	
 							postcond=postcond+badd+"\n";		
 							postcond=postcond+bnodetimeval+"\n";
-							postcond=postcond+bnodeid+nodekey+enodeid+"\n";
+							postcond=postcond+bnodeid+ nodeidPrefix + nodekey+enodeid+"\n";
 							postcond=postcond+bnodestateval+exec+enodestateval+"\n";
 							postcond=postcond+btp+end+etp+"\n";
 							postcond=postcond+enodetimeval+"\n";
@@ -898,7 +782,7 @@ namespace EUROPA {
 						precond=precond+bfreq+breal+freq+ereal+efreq+"\n";
 						precond=precond+elookfreq+"\n";	
 						precond=precond+bnodetimeval+"\n";
-						precond=precond+bnodeid+nodekey+enodeid+"\n";
+						precond=precond+bnodeid+ nodeidPrefix + nodekey+enodeid+"\n";
 						precond=precond+bnodestateval+exec+enodestateval+"\n";
 						precond=precond+btp+start+etp+"\n";
 						precond=precond+enodetimeval+"\n";
@@ -914,7 +798,7 @@ namespace EUROPA {
 						precond=precond+elookfreq+"\n";	
 						precond=precond+badd+"\n";		
 						precond=precond+bnodetimeval+"\n";
-						precond=precond+bnodeid+nodekey+enodeid+"\n";
+						precond=precond+bnodeid+ nodeidPrefix + nodekey+enodeid+"\n";
 						precond=precond+bnodestateval+exec+enodestateval+"\n";
 						precond=precond+btp+start+etp+"\n";
 						precond=precond+enodetimeval+"\n";
@@ -944,7 +828,7 @@ namespace EUROPA {
 							startcond=startcond+bfreq+breal+freq+ereal+efreq+"\n";
 							startcond=startcond+elookfreq+"\n";	
 							startcond=startcond+bnodetimeval+"\n";
-							startcond=startcond+bnodeid+nodekey+enodeid+"\n";
+							startcond=startcond+bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
 							startcond=startcond+bnodestateval+exec+enodestateval+"\n";
 							startcond=startcond+btp+start+etp+"\n";
 							startcond=startcond+enodetimeval+"\n";
@@ -960,7 +844,7 @@ namespace EUROPA {
 							startcond=startcond+elookfreq+"\n";	
 							startcond=startcond+badd+"\n";		
 							startcond=startcond+bnodetimeval+"\n";
-							startcond=startcond+bnodeid+nodekey+enodeid+"\n";
+							startcond=startcond+bnodeid+ nodeidPrefix + nodekey+enodeid+"\n";
 							startcond=startcond+bnodestateval+exec+enodestateval+"\n";
 							startcond=startcond+btp+start+etp+"\n";
 							startcond=startcond+enodetimeval+"\n";
@@ -990,7 +874,7 @@ namespace EUROPA {
 							postcond=postcond+bfreq+breal+freq+ereal+efreq+"\n";
 							postcond=postcond+elookfreq+"\n";	
 							postcond=postcond+bnodetimeval+"\n";
-							postcond=postcond+bnodeid+nodekey+enodeid+"\n";
+							postcond=postcond+bnodeid+ nodeidPrefix + nodekey+enodeid+"\n";
 							postcond=postcond+bnodestateval+exec+enodestateval+"\n";
 							postcond=postcond+btp+end+etp+"\n";
 							postcond=postcond+enodetimeval+"\n";
@@ -1006,7 +890,7 @@ namespace EUROPA {
 							postcond=postcond+elookfreq+"\n";	
 							postcond=postcond+badd+"\n";		
 							postcond=postcond+bnodetimeval+"\n";
-							postcond=postcond+bnodeid+nodekey+enodeid+"\n";
+							postcond=postcond+bnodeid+ nodeidPrefix + nodekey+enodeid+"\n";
 							postcond=postcond+bnodestateval+exec+enodestateval+"\n";
 							postcond=postcond+btp+end+etp+"\n";
 							postcond=postcond+enodetimeval+"\n";
@@ -1043,16 +927,16 @@ namespace EUROPA {
 							startcondCount++;
 							startcond=startcond+bor+"\n";
 							startcond=startcond+bnodetimeval+"\n";
-							startcond=startcond+bnodeid+nodekey+enodeid+"\n";
+							startcond=startcond+bnodeid+ nodeidPrefix + nodekey+enodeid+"\n";
 							startcond=startcond+bnodestateval+exec+enodestateval+"\n";
 							startcond=startcond+enodetimeval+"\n";
 							startcond=startcond+bor+"\n";
 							startcond=startcond+bnodetimeval+"\n";
-							startcond=startcond+bnodeid+nodekey+enodeid+"\n";
+							startcond=startcond+bnodeid+ nodeidPrefix + nodekey+enodeid+"\n";
 							startcond=startcond+bnodestateval+fin+enodestateval+"\n";
 							startcond=startcond+enodetimeval+"\n";
 							startcond=startcond+bnodetimeval+"\n";
-							startcond=startcond+bnodeid+nodekey+enodeid+"\n";
+							startcond=startcond+bnodeid+ nodeidPrefix + nodekey+enodeid+"\n";
 							startcond=startcond+bnodestateval+finin+enodestateval+"\n";
 							startcond=startcond+enodetimeval+"\n";
 							startcond=startcond+eor+"\n";
@@ -1069,7 +953,7 @@ namespace EUROPA {
 							startcond=startcond+elookfreq+"\n";
 							startcond=startcond+badd+"\n";		
 							startcond=startcond+bnodetimeval+"\n";	
-							startcond=startcond+bnodeid+nodekey+enodeid+"\n";
+							startcond=startcond+bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
 							startcond=startcond+bnodestateval+exec+enodestateval+"\n";
 							startcond=startcond+btp+start+etp+"\n";
 							startcond=startcond+enodetimeval+"\n";
@@ -1140,8 +1024,6 @@ namespace EUROPA {
 					precond=precond+elooknow+"\n";
 					precond=precond+bboolvar+bbool +boolfalse+ ebool + eboolvar+"\n";
 					precond=precond+eeqbool+"\n";
-
-
 				}
 				else if(meets(t,t2)){
 					//postcondition
@@ -1161,8 +1043,6 @@ namespace EUROPA {
 					postCondition = postCondition + fqn.substr(lastdot+1,slen-lastdot) +"(";
 					appendParamsToString(id2,varList,postCondition);					
 					postCondition = postCondition + ")" + endbrace;
-
-
 
 					std::string stateDescr;
 					stateDescr = fqn.substr(lastdot+1,slen-lastdot)+"(";
@@ -1192,7 +1072,6 @@ namespace EUROPA {
 					invariantCondition = invariantCondition+",\n ";
 					invariantCondition = invariantCondition + lookupf;
 
-
 					//The predicate name is currently a "fully qualified name" including the attribute name.
 					//E2 doesn't provide a "simple" output for this yet.
 					//To handle this, exploit fact that what we want is really the substring from the position of 
@@ -1203,9 +1082,6 @@ namespace EUROPA {
 					invariantCondition = invariantCondition + fqn.substr(lastdot+1,slen-lastdot) +"(";
 					appendParamsToString(id2,varList,invariantCondition);					
 					invariantCondition = invariantCondition+"," + freq + endbrace;
-
-
-
 
 					std::string stateDescr;
 					stateDescr = fqn.substr(lastdot+1,slen-lastdot)+"(";
@@ -1227,9 +1103,6 @@ namespace EUROPA {
 					invcond=invcond+elookfreq+"\n";
 					invcond=invcond+bboolvar+bbool +boolfalse+ ebool +eboolvar+"\n";
 					invcond=invcond+eeqbool+"\n";
-
-
-
 				}
 			}
 
@@ -1307,10 +1180,14 @@ namespace EUROPA {
 			}
 			std::string cmdDescr;
 			cmdDescr=fqn.substr(lastdot+1,slen-lastdot);
-			plan= plan + bcmd + "\n" + cmdDescr + "\n" + ecmd + "\n";
-			cmdDescr="";
+			plan = plan + bcmd + "\n"; 
+			plan = plan + bcmdname + "\n";
+                        plan = plan + cmdDescr + "\n";
+                        plan = plan + ecmdname + "\n";
+	                cmdDescr="";
 			appendParamsToString(id,varList,cmdDescr);
 			plan=plan+bargs+"\n" +cmdDescr+"\n"+eargs+"\n";
+                        plan=plan + ecmd + "\n";
 			plan=plan+enode+"\n";
 		}
 
@@ -1360,11 +1237,6 @@ namespace EUROPA {
 
 	}		
 	
-
-
-	
-
-
   private:
 
  };
