@@ -1988,43 +1988,100 @@ private:
   static bool testOpenMerge() {
     DEFAULT_SETUP(ce, db, true);
     
-    EnumeratedDomain base(true, "Test");
-    base.insert(0);
-    base.insert(1);
-    base.insert(2);
+		SCHEMA->addPrimitive("int");
+		SCHEMA->addMember(DEFAULT_PREDICATE(),"int",LabelStr("FOO"));
+
+    EnumeratedDomain zero(true, "int");
+    zero.insert(0); zero.close();
+
+    EnumeratedDomain one(true, "int");
+    one.insert(1); one.close();
+
     IntervalToken t0(db,
                      DEFAULT_PREDICATE(),
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
-                     IntervalIntDomain(1, 1000));
-    //t0.addParameter(base, LabelStr("FOO"));
-    //t0.close();
+                     IntervalIntDomain(1, 1000),
+										 Token::noObject(),
+										 false);
+    t0.addParameter(zero, LabelStr("FOO"));
+    t0.close();
+
     IntervalToken t1(db,
                      DEFAULT_PREDICATE(),
                      true,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
-                     IntervalIntDomain(1, 1000));
-    t1.getDuration()->restrictBaseDomain(IntervalIntDomain(5, 7));
-    //t1.addParameter(base, LabelStr("FOO"));
-    //t1.getVariable(LabelStr("FOO"))->close();
-    //t1.close();
+                     IntervalIntDomain(1, 1000),
+										 Token::noObject(),
+										 false);
+    t1.addParameter(zero, LabelStr("FOO"));
+    t1.getVariable(LabelStr("FOO"))->open();
+    t1.close();
+
+    IntervalToken t2(db,
+                     DEFAULT_PREDICATE(),
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+										 Token::noObject(),
+										 false);
+    t2.addParameter(zero, LabelStr("FOO"));
+    t2.getVariable(LabelStr("FOO"))->open();
+    t2.close();
+
+    IntervalToken t3(db,
+                     DEFAULT_PREDICATE(),
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+										 Token::noObject(),
+										 false);
+    t3.addParameter(one, LabelStr("FOO"));
+    t3.getVariable(LabelStr("FOO"))->open();
+    t3.close();
+
+    IntervalToken t4(db,
+                     DEFAULT_PREDICATE(),
+                     true,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000),
+										 Token::noObject(),
+										 false);
+    t4.addParameter(one, LabelStr("FOO"));
+    t4.getVariable(LabelStr("FOO"))->open();
+    t4.close();
 
     assertTrue(t0.getObject()->isClosed());
     t1.getObject()->open();
     assertTrue(!t1.getObject()->isClosed());
 
     t0.activate();
+		t2.activate();
+		t4.activate();
     assertTrue(ce->propagate());
 
+    std::vector<TokenId> compatibleTokens0, compatibleTokens1, compatibleTokens3;
+
     assertTrue(db->hasCompatibleTokens(t1.getId()));
-    std::vector<TokenId> compatibleTokens;
-    db->getCompatibleTokens(t1.getId(), compatibleTokens);
-    assertTrue(compatibleTokens.size() == 1);
-    assertTrue(compatibleTokens[0] == t0.getId());
+    db->getCompatibleTokens(t1.getId(), compatibleTokens1);
+    assertTrue(compatibleTokens1.size() == 3); // open {0} intersects with open domains and closed domains containing {0}
+    assertTrue((compatibleTokens1[0] == t0.getId() || compatibleTokens1[0] == t2.getId() || compatibleTokens1[0] == t4.getId()) &&
+               (compatibleTokens1[1] == t0.getId() || compatibleTokens1[1] == t2.getId() || compatibleTokens1[1] == t4.getId()) &&
+               (compatibleTokens1[2] == t0.getId() || compatibleTokens1[2] == t2.getId() || compatibleTokens1[2] == t4.getId()));
+
+    assertTrue(db->hasCompatibleTokens(t3.getId()));
+    db->getCompatibleTokens(t3.getId(), compatibleTokens3);
+    assertTrue(compatibleTokens3.size() == 2); // open {1} intersects with open domains
+    assertTrue((compatibleTokens3[0] == t2.getId() && compatibleTokens3[1] == t4.getId()) ||
+		           (compatibleTokens3[1] == t2.getId() && compatibleTokens3[0] == t4.getId()));
 
     t1.merge(t0.getId());
+		t3.merge(t2.getId());
 
     DEFAULT_TEARDOWN();
     return true;
