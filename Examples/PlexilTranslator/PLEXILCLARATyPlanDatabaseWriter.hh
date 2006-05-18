@@ -17,6 +17,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 /*
 PLEXIL Plan Writer.
@@ -123,18 +124,17 @@ namespace EUROPA {
     } 
 
     //Meant for debugging purposes only; deprecate as soon as things work
-    void PLEXILCLARATyCmdSpec::writeSpec();
-
-// {
-//       std::cout << "Spec:\n";
-//       std::cout << name << "\n";
-//       //Wow!  std::set has no output operator.
-//       for(std::set<int>::const_iterator sit = params.begin(); sit != params.end(); ++sit){
-// 	int i=*sit;
-// 	std::cout << i << ",";
-//       }
-//       std::cout << "\n";
-//     }
+    void PLEXILCLARATyCmdSpec::writeSpec()
+   {
+      std::cout << "Spec:\n";
+      std::cout << name << "\n";
+      //Wow!  std::set has no output operator.
+      for(std::set<int>::const_iterator sit = params.begin(); sit != params.end(); ++sit){
+	int i=*sit;
+	std::cout << i << ",";
+      }
+      std::cout << "\n";
+    }
 
   private:
     PlexilCmdId m_id; 
@@ -143,22 +143,27 @@ namespace EUROPA {
   typedef std::set<std::string> StringSet;
   typedef std::set<PlexilCmdId> SpecSet;
 
-
-
-
-
   class PLEXILCLARATyPlanDatabaseWriter {
 
   public:
 	TemporalAdvisorId advisor;
+        SpecSet actionSpecs;
+        SpecSet stateSpecs;
 	StringSet actionPreds;
-	StringSet statePreds;
+	StringSet statePreds; 
+
+	PLEXILCLARATyPlanDatabaseWriter::PLEXILCLARATyPlanDatabaseWriter(){}
+	PLEXILCLARATyPlanDatabaseWriter::~PLEXILCLARATyPlanDatabaseWriter(){}
+
+
+
+      void PLEXILCLARATyPlanDatabaseWriter::writePLEXILCLARATyPlan(PlanDatabaseId& db,
+							std::ostream& os){
+
 	StringSet childNodes;
 	TokenSet actionTokens;
 	TokenSet stateTokens;
-        SpecSet actionSpecs;
-        SpecSet stateSpecs;
- 
+
 	std::string nodeHeader;
 	std::string startCondition;
 	std::string postCondition;
@@ -166,281 +171,19 @@ namespace EUROPA {
 	std::string invariantCondition;
 	std::string nodekey;
 
-    //temporary string to hang on to one condition
-    std::string startcond;
-    std::string precond;
-    std::string postcond;
-    std::string invcond;
+         //temporary string to hang on to one condition
+        std::string startcond;
+        std::string precond;
+        std::string postcond;
+        std::string invcond;
 
-    //string to hang on to all conditions, with connective logical expressions
-    std::string startcondSet;
-    std::string precondSet;
-    std::string postcondSet;
-    std::string invcondSet;
-
-	PLEXILCLARATyPlanDatabaseWriter::PLEXILCLARATyPlanDatabaseWriter(){}
-	PLEXILCLARATyPlanDatabaseWriter::~PLEXILCLARATyPlanDatabaseWriter(){}
+        //string to hang on to all conditions, with connective logical expressions
+        std::string startcondSet;
+        std::string precondSet;
+        std::string postcondSet;
+        std::string invcondSet;
 
 
-	//Helper functions
-
-	bool PLEXILCLARATyPlanDatabaseWriter::mustPrecede(const TokenId& t,const TokenId& prec, IntervalDomain& d1){
-		//Test to see if prec must precede t.  If so, then pend must precede tstart
-		TempVarId tstart= t->getStart();
-		TempVarId pend = prec->getEnd();
-		d1 = advisor->getTemporalDistanceDomain(pend,tstart,true);
-		if(d1.getLowerBound()>0){
-			return true;
-		}
-		else{
-			return false;
-		}
-	}
-
-
-	bool PLEXILCLARATyPlanDatabaseWriter::mustEndAfter(const TokenId& t,const TokenId& prec,IntervalDomain& d1){
-		//Test to see if pend must precede tend
-		TempVarId tend= t->getEnd();
-		TempVarId pend= prec->getEnd();
-		d1 = advisor->getTemporalDistanceDomain(pend,tend,true);
-		if(d1.getLowerBound()>=0){
-			return true;
-		}
-		else{
-			return false;
-		}
-	}
-
-	bool PLEXILCLARATyPlanDatabaseWriter::mustStartBeforeStart(const TokenId& t,const TokenId& prec, IntervalDomain& d1){
-		//Test to see if pstart must precede tstart
-		TempVarId tstart= t->getStart();
-		TempVarId pstart = prec->getStart();
-		d1 = advisor->getTemporalDistanceDomain(pstart,tstart,true);
-		if(d1.getLowerBound()>=0){
-			return true;
-		}
-		else{
-			return false;
-		}
-	}
-
-	 bool PLEXILCLARATyPlanDatabaseWriter::isContainedBy(const TokenId& t,
-							const TokenId& conc){
-		//Returns true if cstart must precede tstart, tend must precede cend
-		TempVarId tend= t->getEnd();
-		TempVarId tstart= t->getStart();
-		TempVarId cstart = conc->getStart();
-		TempVarId cend = conc->getEnd();
-		IntervalDomain d1,d2;
-		d1 = advisor->getTemporalDistanceDomain(cstart,tstart,true);
-		d2 = advisor->getTemporalDistanceDomain(tend,cend,true);
-		if((d1.getLowerBound()>=0)&&(d2.getLowerBound()>=0)){
-			return true;
-		}
-		else{
-			return false;
-		}
-	}
-
-	 bool PLEXILCLARATyPlanDatabaseWriter::meets(const TokenId& t,const TokenId& meets){
-		TempVarId tend= t->getEnd();
-		TempVarId sstart = meets->getStart();
-		IntervalDomain d1 = advisor->getTemporalDistanceDomain(tend,sstart,true);
-		if((d1.getLowerBound()==0)&&(d1.getUpperBound()==0)){
-			return true;
-		}
-		else{
-			return false;
-		}
-	}
-
-
-	 bool PLEXILCLARATyPlanDatabaseWriter::gatherTokens(PlanDatabaseId db,TokenSet& actionTokens, TokenSet& stateTokens){
-		check_error(!db->getConstraintEngine()->provenInconsistent());
-      		const TokenSet& alltokens = db->getTokens();
-     		for(TokenSet::const_iterator tokit = alltokens.begin(); tokit != alltokens.end(); ++tokit){
-	    		TokenId t = *tokit;
-			if (t->isActive()){
-				if (isPlexilState(t)){
-	    				stateTokens.insert(t);
-				}
-				else if (isPlexilAction(t)){
-	    				actionTokens.insert(t);
-				}
-			}
-	  	}
-		check_error(!(actionTokens.empty()&&(stateTokens.empty())));
-		return true;
-	}
-
-	 void PLEXILCLARATyPlanDatabaseWriter::readIgnoredByPlexil(StringSet& actionPreds,StringSet& statePreds){
-		bool error=false;
-		bool sawState=false;
-		char *inputFileName = "PLEXILCLARATy-Ignore-Predicates.txt";
-		std::ifstream in(inputFileName);
-		std::string nextPred;
-		int nextParam;
-		/*Can't use this method to test for sane opening of file!  Why not?
-		if (in.is_open()) {
-			  cerr << "Can't open input file " << inputFileName << endl;
-		  exit(1);
-		}*/
-
-		PLEXILCLARATyCmdSpec *spec;
-		PlexilCmdId id;
-
-		//File format expected to be:
-		//Action: {list of cmd specs}
-		//State: {list of cmd specs}
-		//CmdSpec: name, {list of params, last is -1 (yech!)}
-		//Lists could be empty
-		//Later on add comments
-		//Need some more bulletproofing
-
-		in >> nextPred;
-		if(nextPred == "Action:"){
-			while(in.good()){
-				in >> nextPred;
-				if(nextPred == "State:")
-					break;
-				else {
-				  actionPreds.insert(nextPred);
-				  spec=new PLEXILCLARATyCmdSpec;
-				  spec->setName(nextPred);
-				  while(in.good()){
-				    in >> nextParam;
-				    if(nextParam!=-1){
-				      spec->addParam(nextParam);
-				    }
-				    else break;
-				  }
-				  id=spec->getId();
-				  actionSpecs.insert(id);
-				}
-			}
-			while(in.good()){
-				sawState=true;
-				in >> nextPred;
-				statePreds.insert(nextPred);
-				spec=new PLEXILCLARATyCmdSpec;
-				spec->setName(nextPred);
-			        while(in.good()){
-				  in >> nextParam;
-				  if(nextParam!=-1){
-				    spec->addParam(nextParam);
-				  }
-				  else break;
-				}
-				id=spec->getId();
-				stateSpecs.insert(id);
-			}
-			in.close();
-		}
-		else {
-			error=true;
-		}
-		if((error==true)||(sawState==false)){	
-		  std::cerr << "Malformed EUROPA-PLEXILCLARATy translation configuration file " << inputFileName << std::endl;
-		}
-	}
-
-	 bool PLEXILCLARATyPlanDatabaseWriter::isPlexilState(const TokenId& t){
-		std::string pred = t->getPredicateName().toString();
-		if(statePreds.count(pred) >0)
-			return true;
-		else return false;
-	}
-
-
-	 bool PLEXILCLARATyPlanDatabaseWriter::isPlexilAction(const TokenId& t){
-		std::string pred = t->getPredicateName().toString();
-		if(actionPreds.count(pred) >0)
-			return true;
-		else return false;
-	}
-
-
-	//I can't believe I need to do this.
-	//C++ on this machine doesn't appear to have itoa or ltoa or other functions to handle this.
-	//Stolen wholesale from the web
-
-	std::string PLEXILCLARATyPlanDatabaseWriter::itoa(int value, int base) {		
-		enum { kMaxDigits = 35 };	
-		std::string buf;		
-		buf.reserve( kMaxDigits ); // Pre-allocate enough space.	
-			
-		// check that the base if valid	
-		// replace this with checkerror one of these days
-		if (base < 2 || base > 16) return buf;	
-		
-		int quotient = value;	
-	
-		// Translating number to string with base:	
-		
-		do {	
-			buf += "0123456789abcdef"[ std::abs( quotient % base ) ];	
-			quotient /= base;	
-		} while ( quotient );	
-		
-		// Append the negative sign for base 10	
-		
-		if ( value < 0 && base == 10) buf += '-';	
-			std::reverse( buf.begin(), buf.end() );	
-		return buf;		
-	}	
-
-        void PLEXILCLARATyPlanDatabaseWriter::appendParamsToString(PlexilCmdId cmd,
-							       std::vector<ConstrainedVariableId> &varList, 
-							       std::string &condString){
-	  int j=1;
-	  bool first=true;
-	  for (std::vector<ConstrainedVariableId>::const_iterator varit = varList.begin(); varit != varList.end(); ++varit) {
-	    //Check to see if we really want this var
-	    if(cmd->isParamPrinted(j)==true){
-	      if(first==true){
-		first=false;
-	      }
-	      else condString=condString+ "\n ";
-	      ConstrainedVariableId v= (*varit);
-	      
-	      
-	      //Check to see if this is a Location; if so, decompose to it's X,Y coordinates.
-	      //Clean up PLEXILcmdspec to capture this later and make it more generic.
-	      //Consider breaking this out as a function.
-	      
-	      if(v->derivedDomain().getTypeName().toString() == "Location"){
-		double d = v->derivedDomain().getSingletonValue();
-		//EVIL!
-		ObjectId oid = (ObjectId)d;
-		std::vector<ConstrainedVariableId> vv=oid->getVariables();
-		for (std::vector<ConstrainedVariableId>::const_iterator varit2 = vv.begin(); varit2 != vv.end(); ++varit2) {
-		  ConstrainedVariableId cvid=*varit2;
-		  
-		  //Asking PLASMA for variable name provides the "fully qualified name".
-		  //That is, we get "rock2.position_x".
-		  //We will do substring check and assume we don't have a problem.
-		  //To do this right, we simply find position of the last period, 
-		  //and replace the 0 below with that position.
-		  
-		  std::string s=cvid->getName().toString();
-		  if(std::string::npos != s.find("position_x",0)){
-		    condString=condString+  cvid->derivedDomain().toString(cvid->derivedDomain().getSingletonValue())+"\n";
-		  }
-		  if(std::string::npos != s.find("position_y",0)){
-		    condString=condString+  cvid->derivedDomain().toString(cvid->derivedDomain().getSingletonValue());
-		  }
-		}
-	      }
-	      else 
-		condString=condString+  v->derivedDomain().toString(v->derivedDomain().getSingletonValue());
-	      
-	    }
-	    j++;
-	  }
-	}
-
-      void PLEXILCLARATyPlanDatabaseWriter::writePLEXILCLARATyPlan(PlanDatabaseId& db,
-							std::ostream& os){
 		check_error(db.isValid() && advisor.isNoId());
 		IntervalIntDomain d1,d2;
 		std::vector<ConstrainedVariableId> varList;
@@ -469,7 +212,8 @@ namespace EUROPA {
 			postcondCount=0;
 
 	    		TokenId t = *tokit;
-			nodekey = itoa(t->getKey(),10);
+			//nodekey = itoa(t->getKey(),10);
+                        nodekey = toString(t->getKey());
 			childNodes.insert(nodekey);
 
 			//Node header
@@ -479,7 +223,6 @@ namespace EUROPA {
 
 			plan=plan+bnode+"\n";
 			plan=plan+bnodeid + nodeidPrefix + nodekey+enodeid +"\n";
-
 
 			first=true;
 			varList = t->getParameters();
@@ -517,7 +260,7 @@ namespace EUROPA {
 			//Pre condition for absolute start time
 			preCondition = preCondition + abstime;
 			preCondition = preCondition + mininfty;
-			preCondition = preCondition + "," + itoa((int)d1.getUpperBound(),10);
+                      	preCondition = preCondition + "," + toString(d1.getUpperBound());
 			preCondition = preCondition + endbrace;
 
 			precond=precond+bpc+"\n";
@@ -539,12 +282,12 @@ namespace EUROPA {
 			precond=precond+bstate+time+estate+"\n";
 			precond=precond+bfreq+breal+freq+ereal+efreq+"\n";
 			precond=precond+elookfreq+"\n";
-			precond=precond+breal+itoa((int)d1.getUpperBound(),10)+ereal+"\n";		
+			precond=precond+breal+toString(d1.getUpperBound())+ereal+"\n";		
 			precond=precond+ele+"\n";
 
 			//Start condition for absolute start time
 			startCondition = startCondition + abstime;
-			startCondition = startCondition + itoa((int)d1.getLowerBound(),10);
+			startCondition = startCondition + toString(d1.getLowerBound());
 			startCondition = startCondition + "," + infty + endbrace;
 
 			startcond=startcond+bstc+"\n";
@@ -555,7 +298,7 @@ namespace EUROPA {
 			startcond=startcond+bstate+time+estate+"\n";
 			startcond=startcond+bfreq+breal+freq+ereal+efreq+"\n";
 			startcond=startcond+elookfreq+"\n";			
-			startcond=startcond+breal+itoa((int)d1.getLowerBound(),10)+ereal+"\n";
+			startcond=startcond+breal+toString(d1.getLowerBound())+ereal+"\n";
 			startcond=startcond+ege+"\n";
 
 			startcondSet=startcond;
@@ -575,7 +318,7 @@ namespace EUROPA {
 			invariantCondition = invariantCondition + nodekey +".start.time";
 			invariantCondition = invariantCondition + "," + nodekey +".start.time";
 			//Time in E2 is always an int so this hack works.
-			invariantCondition = invariantCondition + "+" + itoa((int)d1.getUpperBound(),10);
+			invariantCondition = invariantCondition + "+" + toString(d1.getUpperBound());
 			invariantCondition = invariantCondition + endbrace;
 
 			invcond=invcond+bic+"\n";
@@ -606,7 +349,7 @@ namespace EUROPA {
 			invcond=invcond+bnodestateval+exec+enodestateval+"\n";
 			invcond=invcond+btp+start+etp+"\n";
 			invcond=invcond+enodetimeval+"\n";
-			invcond=invcond+breal+itoa((int)d1.getUpperBound(),10)+ereal+"\n";
+			invcond=invcond+breal+toString(d1.getUpperBound())+ereal+"\n";
 			invcond=invcond+eadd+"\n";
 			invcond=invcond+ele+"\n";
 
@@ -623,13 +366,13 @@ namespace EUROPA {
 						//In this case know t2 must be finished
 						//StartCondition
 
-						nodekey = itoa(t2->getKey(),10);
+					        nodekey = toString(t2->getKey());
 						startCondition = startCondition + ",\n ";
 						startCondition = startCondition + nodekey + " " + fin + ",\n";
 						startCondition = startCondition + curtime;
 						startCondition = startCondition + nodekey +".end.time";
 						//Time in E2 is always an int so this hack works.
-						startCondition = startCondition + "+" + itoa((int)d1.getLowerBound(),10);
+						startCondition = startCondition + "+" + toString(d1.getLowerBound());
  						startCondition = startCondition + "," + infty + endbrace;
 
 						//know 2 startconds already, add another preceeding and
@@ -647,7 +390,7 @@ namespace EUROPA {
 						startcond=startcond+bnodestateval+exec+enodestateval+"\n";
 						startcond=startcond+btp+end+etp+"\n";
 						startcond=startcond+enodetimeval+"\n";
-						startcond=startcond+breal+itoa((int)d1.getLowerBound(),10)+ereal+"\n";
+						startcond=startcond+breal+toString(d1.getLowerBound())+ereal+"\n";
 						startcond=startcond+eadd+"\n";
 						startcond=startcond+ege+"\n";
 						
@@ -668,7 +411,7 @@ namespace EUROPA {
 						preCondition = preCondition + nodekey +".end.time,";
 						//Time in E2 is always an int so this hack works.
 						preCondition = preCondition + nodekey +".end.time";
-						preCondition = preCondition + "+" + itoa((int)d1.getUpperBound(),10);
+						preCondition = preCondition + "+" + toString(d1.getUpperBound());
  						preCondition = preCondition + endbrace;						
 
 						//have 2 preconds, so just add another and
@@ -701,7 +444,7 @@ namespace EUROPA {
 						precond=precond+bnodestateval+exec+enodestateval+"\n";
 						precond=precond+btp+start+etp+"\n";
 						precond=precond+enodetimeval+"\n";
-						precond=precond+breal+itoa((int)d1.getUpperBound(),10)+ereal+"\n";
+						precond=precond+breal+toString(d1.getUpperBound())+ereal+"\n";
 						precond=precond+eadd+"\n";
 						precond=precond+ele+"\n";
 
@@ -715,12 +458,12 @@ namespace EUROPA {
 								postCondition=postCondition+",";
 							}
 							firstPost=false;
-							nodekey = itoa(t2->getKey(),10);
+							nodekey = toString(t2->getKey());
 							postCondition = postCondition + curtime;
 							postCondition = postCondition + nodekey +".end.time,";
 							postCondition = postCondition + nodekey +".end.time";
 							//Time in E2 is always an int so this hack works.
-							postCondition = postCondition + "+" + itoa((int)d2.getUpperBound(),10)+ endbrace;
+							postCondition = postCondition + "+" + toString(d2.getUpperBound())+ endbrace;
 
 							//This might be first post cond, so check count 
 							//If it is, dump this postcond with a previous band
@@ -755,7 +498,7 @@ namespace EUROPA {
 							postcond=postcond+bnodestateval+exec+enodestateval+"\n";
 							postcond=postcond+btp+end+etp+"\n";
 							postcond=postcond+enodetimeval+"\n";
-							postcond=postcond+breal+itoa((int)d2.getUpperBound(),10)+ereal+"\n";
+							postcond=postcond+breal+toString(d2.getUpperBound())+ereal+"\n";
 							postcond=postcond+eadd+"\n";
 							postcond=postcond+ele+"\n";
 
@@ -764,13 +507,13 @@ namespace EUROPA {
 
 					else if(mustStartBeforeStart(t,t2,d1)){
 
-						nodekey = itoa(t->getKey(),10);
+					        nodekey = toString(t->getKey());
 						preCondition=preCondition+",\n ";
 						preCondition = preCondition + curtime;
 						preCondition = preCondition + nodekey +".start.time,";
 						//Time in E2 is always an int so this hack works.
 						preCondition = preCondition + nodekey +".start.time";
-						preCondition = preCondition + "+" + itoa((int)d1.getUpperBound(),10);
+						preCondition = preCondition + "+" + toString(d1.getUpperBound());
  						preCondition = preCondition + endbrace;
 
 						precondSet=precondSet+band+"\n"+precond+"\n";
@@ -802,22 +545,21 @@ namespace EUROPA {
 						precond=precond+bnodestateval+exec+enodestateval+"\n";
 						precond=precond+btp+start+etp+"\n";
 						precond=precond+enodetimeval+"\n";
-						precond=precond+breal+itoa((int)d1.getUpperBound(),10)+ereal+"\n";
+						precond=precond+breal+toString(d1.getUpperBound())+ereal+"\n";
 						precond=precond+eadd+"\n";
 						precond=precond+ele+"\n";
 
 						if(mustEndAfter(t,t2,d2)){
 
 							//in this case know t contained by t2 
-							nodekey = itoa(t2->getKey(),10);
+						        nodekey = toString(t2->getKey());
 							startCondition = startCondition + ",\n ";
 							startCondition = startCondition + nodekey + " " + exec + ",\n ";
 							startCondition = startCondition + curtime;
 							startCondition = startCondition + nodekey +".start.time";
 							//Time in E2 is always an int so this hack works.
-							startCondition = startCondition + "+" + itoa((int)d1.getLowerBound(),10);
+							startCondition = startCondition + "+" + toString(d1.getLowerBound());
  							startCondition = startCondition + "," + infty + endbrace;
-
 
 							startcondSet=startcondSet+band+"\n"+startcond+"\n";
 							startcond="";
@@ -848,7 +590,7 @@ namespace EUROPA {
 							startcond=startcond+bnodestateval+exec+enodestateval+"\n";
 							startcond=startcond+btp+start+etp+"\n";
 							startcond=startcond+enodetimeval+"\n";
-							startcond=startcond+breal+itoa((int)d1.getLowerBound(),10)+ereal+"\n";
+							startcond=startcond+breal+toString(d1.getLowerBound())+ereal+"\n";
 							startcond=startcond+eadd+"\n";
 							startcond=startcond+ele+"\n";
 
@@ -856,12 +598,12 @@ namespace EUROPA {
 								postCondition=postCondition+",";
 							}
 							firstPost=false;
-							nodekey = itoa(t2->getKey(),10);
+							nodekey = toString(t2->getKey());
 							postCondition = postCondition + curtime;
 							postCondition = postCondition + nodekey +".end.time,";
 							postCondition = postCondition + nodekey +".end.time";
 							//Time in E2 is always an int so this hack works.
-							postCondition = postCondition + "+" + itoa((int)d2.getLowerBound(),10)+ endbrace;
+							postCondition = postCondition + "+" + toString(d2.getLowerBound())+ endbrace;
 
 							postcondCount++;
 							if(postcondCount>1){
@@ -894,11 +636,9 @@ namespace EUROPA {
 							postcond=postcond+bnodestateval+exec+enodestateval+"\n";
 							postcond=postcond+btp+end+etp+"\n";
 							postcond=postcond+enodetimeval+"\n";
-							postcond=postcond+breal+itoa((int)d2.getLowerBound(),10)+ereal+"\n";
+							postcond=postcond+breal+toString(d2.getLowerBound())+ereal+"\n";
 							postcond=postcond+eadd+"\n";
 							postcond=postcond+ele+"\n";
-
-
 						}
 						else{
 							//In this case we need to construct the disjunction, since t2 could
@@ -916,7 +656,7 @@ namespace EUROPA {
 							startCondition = startCondition + curtime;
 							startCondition = startCondition + nodekey +".start.time";
 							//Time in E2 is always an int so this hack works.
-							startCondition = startCondition + "+" + itoa((int)d1.getLowerBound(),10);
+							startCondition = startCondition + "+" + toString(d1.getLowerBound());
  							startCondition = startCondition + "," + infty + endbrace + "\n";
 							startCondition = startCondition + endbrace +"\n";
 
@@ -957,7 +697,7 @@ namespace EUROPA {
 							startcond=startcond+bnodestateval+exec+enodestateval+"\n";
 							startcond=startcond+btp+start+etp+"\n";
 							startcond=startcond+enodetimeval+"\n";
-							startcond=startcond+breal+itoa((int)d1.getLowerBound(),10)+ereal+"\n";
+							startcond=startcond+breal+toString(d1.getLowerBound())+ereal+"\n";
 							startcond=startcond+eadd+"\n";
 							startcond=startcond+ege+"\n";
 							
@@ -1233,12 +973,260 @@ namespace EUROPA {
                 plan=plan+enodelist + "\n";
                 plan=plan+enode + "\n";
                 os << plan;
-
-
 	}		
 	
   private:
 
+	//Helper functions
+
+	bool PLEXILCLARATyPlanDatabaseWriter::mustPrecede(const TokenId& t,const TokenId& prec, IntervalDomain& d1){
+		//Test to see if prec must precede t.  If so, then pend must precede tstart
+		TempVarId tstart= t->getStart();
+		TempVarId pend = prec->getEnd();
+		d1 = advisor->getTemporalDistanceDomain(pend,tstart,true);
+		if(d1.getLowerBound()>0){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+
+	bool PLEXILCLARATyPlanDatabaseWriter::mustEndAfter(const TokenId& t,const TokenId& prec,IntervalDomain& d1){
+		//Test to see if pend must precede tend
+		TempVarId tend= t->getEnd();
+		TempVarId pend= prec->getEnd();
+		d1 = advisor->getTemporalDistanceDomain(pend,tend,true);
+		if(d1.getLowerBound()>=0){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+	bool PLEXILCLARATyPlanDatabaseWriter::mustStartBeforeStart(const TokenId& t,const TokenId& prec, IntervalDomain& d1){
+		//Test to see if pstart must precede tstart
+		TempVarId tstart= t->getStart();
+		TempVarId pstart = prec->getStart();
+		d1 = advisor->getTemporalDistanceDomain(pstart,tstart,true);
+		if(d1.getLowerBound()>=0){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+	 bool PLEXILCLARATyPlanDatabaseWriter::isContainedBy(const TokenId& t,
+							const TokenId& conc){
+		//Returns true if cstart must precede tstart, tend must precede cend
+		TempVarId tend= t->getEnd();
+		TempVarId tstart= t->getStart();
+		TempVarId cstart = conc->getStart();
+		TempVarId cend = conc->getEnd();
+		IntervalDomain d1,d2;
+		d1 = advisor->getTemporalDistanceDomain(cstart,tstart,true);
+		d2 = advisor->getTemporalDistanceDomain(tend,cend,true);
+		if((d1.getLowerBound()>=0)&&(d2.getLowerBound()>=0)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+	 bool PLEXILCLARATyPlanDatabaseWriter::meets(const TokenId& t,const TokenId& meets){
+		TempVarId tend= t->getEnd();
+		TempVarId sstart = meets->getStart();
+		IntervalDomain d1 = advisor->getTemporalDistanceDomain(tend,sstart,true);
+		if((d1.getLowerBound()==0)&&(d1.getUpperBound()==0)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+
+	 bool PLEXILCLARATyPlanDatabaseWriter::gatherTokens(PlanDatabaseId db,TokenSet& actionTokens, TokenSet& stateTokens){
+		check_error(!db->getConstraintEngine()->provenInconsistent());
+      		const TokenSet& alltokens = db->getTokens();
+     		for(TokenSet::const_iterator tokit = alltokens.begin(); tokit != alltokens.end(); ++tokit){
+	    		TokenId t = *tokit;
+			if (t->isActive()){
+				if (isPlexilState(t)){
+	    				stateTokens.insert(t);
+				}
+				else if (isPlexilAction(t)){
+	    				actionTokens.insert(t);
+				}
+			}
+	  	}
+		check_error(!(actionTokens.empty()&&(stateTokens.empty())));
+		return true;
+	}
+
+	 void PLEXILCLARATyPlanDatabaseWriter::readIgnoredByPlexil(StringSet& actionPreds,StringSet& statePreds){
+		bool error=false;
+		bool sawState=false;
+		char *inputFileName = "PLEXILCLARATy-Ignore-Predicates.txt";
+		std::ifstream in(inputFileName);
+		std::string nextPred;
+		int nextParam;
+		/*Can't use this method to test for sane opening of file!  Why not?
+		if (in.is_open()) {
+			  cerr << "Can't open input file " << inputFileName << endl;
+		  exit(1);
+		}*/
+
+		PLEXILCLARATyCmdSpec *spec;
+		PlexilCmdId id;
+
+		//File format expected to be:
+		//Action: {list of cmd specs}
+		//State: {list of cmd specs}
+		//CmdSpec: name, {list of params, last is -1 (yech!)}
+		//Lists could be empty
+		//Later on add comments
+		//Need some more bulletproofing
+
+		in >> nextPred;
+		if(nextPred == "Action:"){
+			while(in.good()){
+				in >> nextPred;
+				if(nextPred == "State:")
+					break;
+				else {
+				  actionPreds.insert(nextPred);
+				  spec=new PLEXILCLARATyCmdSpec;
+				  spec->setName(nextPred);
+				  while(in.good()){
+				    in >> nextParam;
+				    if(nextParam!=-1){
+				      spec->addParam(nextParam);
+				    }
+				    else break;
+				  }
+				  id=spec->getId();
+				  actionSpecs.insert(id);
+				}
+			}
+			while(in.good()){
+				sawState=true;
+				in >> nextPred;
+				statePreds.insert(nextPred);
+				spec=new PLEXILCLARATyCmdSpec;
+				spec->setName(nextPred);
+			        while(in.good()){
+				  in >> nextParam;
+				  if(nextParam!=-1){
+				    spec->addParam(nextParam);
+				  }
+				  else break;
+				}
+				id=spec->getId();
+				stateSpecs.insert(id);
+			}
+			in.close();
+		}
+		else {
+			error=true;
+		}
+		if((error==true)||(sawState==false)){	
+		  std::cerr << "Malformed EUROPA-PLEXILCLARATy translation configuration file " << inputFileName << std::endl;
+		}
+	}
+
+	 bool PLEXILCLARATyPlanDatabaseWriter::isPlexilState(const TokenId& t){
+		std::string pred = t->getPredicateName().toString();
+		if(statePreds.count(pred) >0)
+			return true;
+		else return false;
+	}
+
+
+	 bool PLEXILCLARATyPlanDatabaseWriter::isPlexilAction(const TokenId& t){
+		std::string pred = t->getPredicateName().toString();
+		if(actionPreds.count(pred) >0)
+			return true;
+		else return false;
+	}
+
+
+    std::string PLEXILCLARATyPlanDatabaseWriter::toString(double value) {
+          std::string returnResult;
+          std::stringstream temp;
+          temp << value;	
+	  temp >> returnResult;
+          return returnResult;
+    }
+
+
+        void PLEXILCLARATyPlanDatabaseWriter::appendParamsToString(PlexilCmdId cmd,
+							       std::vector<ConstrainedVariableId> &varList, 
+							       std::string &condString){
+	  int j=1;
+	  bool first=true;
+	  for (std::vector<ConstrainedVariableId>::const_iterator varit = varList.begin(); varit != varList.end(); ++varit) {
+	    //Check to see if we really want this var
+	    if(cmd->isParamPrinted(j)==true){
+	      if(first==true){
+		first=false;
+	      }
+	      else condString=condString+ "\n ";
+	      ConstrainedVariableId v= (*varit);
+	      
+	      
+	      //Check to see if this is a Location; if so, decompose to it's X,Y coordinates.
+	      //Clean up PLEXILcmdspec to capture this later and make it more generic.
+	      //Consider breaking this out as a function.
+	      
+	      if(v->derivedDomain().getTypeName().toString() == "Location"){
+		double d = v->derivedDomain().getSingletonValue();
+		//EVIL!
+		ObjectId oid = (ObjectId)d;
+		std::vector<ConstrainedVariableId> vv=oid->getVariables();
+		for (std::vector<ConstrainedVariableId>::const_iterator varit2 = vv.begin(); varit2 != vv.end(); ++varit2) {
+		  ConstrainedVariableId cvid=*varit2;
+		  
+		  //Asking PLASMA for variable name provides the "fully qualified name".
+		  //That is, we get "rock2.position_x".
+		  //We will do substring check and assume we don't have a problem.
+		  //To do this right, we simply find position of the last period, 
+		  //and replace the 0 below with that position.
+		  
+		  std::string s=cvid->getName().toString();
+		  if(std::string::npos != s.find("position_x",0)){
+		    condString=condString+  cvid->derivedDomain().toString(cvid->derivedDomain().getSingletonValue())+"\n";
+		  }
+		  if(std::string::npos != s.find("position_y",0)){
+		    condString=condString+  cvid->derivedDomain().toString(cvid->derivedDomain().getSingletonValue());
+		  }
+		}
+	      }
+	      else {
+		std::string bTypeQualifier = "";
+	        std::string eTypeQualifier = "";
+                if (v->derivedDomain().isNumeric()) {
+		  bTypeQualifier= brealValue;
+                  eTypeQualifier= erealValue;
+                } else if (v->derivedDomain().isBool()) {
+                  bTypeQualifier= bboolValue;
+                  eTypeQualifier= eboolValue;
+                } else {
+		  bTypeQualifier= bstringValue;
+                  eTypeQualifier= estringValue;
+                }
+
+		condString=condString + bTypeQualifier + v->derivedDomain().toString(v->derivedDomain().getSingletonValue()) + eTypeQualifier;
+              }
+	      
+	    }
+	    j++;
+	  }
+	}
  };
 }
 

@@ -43,6 +43,12 @@ namespace EUROPA {
  	const std::string efreq = "</Frequency>";
  	const std::string breal = "<RealVariable>";
  	const std::string ereal = "</RealVariable>";
+        const std::string brealValue ="<RealValue>";
+        const std::string erealValue ="</RealValue>";
+        const std::string bboolValue ="<BooleanValue>";
+        const std::string eboolValue ="</BooleanValue>";
+        const std::string bstringValue ="<StringValue>";
+        const std::string estringValue ="</StringValue>";
  	const std::string bstate = "<StateName>";
  	const std::string estate = "</StateName>";
  	const std::string binf = "<PlusInfinity>";
