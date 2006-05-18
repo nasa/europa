@@ -40,6 +40,9 @@ namespace EUROPA {
     }
 
     void ReservoirToken::commonInit(bool closed, const IntervalDomain& quantityBaseDomain) {
+      StateDomain restrictDomain;
+      restrictDomain.insert(Token::ACTIVE);
+      m_state->restrictBaseDomain(restrictDomain);
       m_quantity = (new TokenVariable<IntervalDomain>(m_id, m_allVariables.size(),
 						      m_planDatabase->getConstraintEngine(),
 						      quantityBaseDomain,
