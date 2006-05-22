@@ -296,5 +296,4 @@ ant_exec_command="exec \"$JAVACMD\" $ANT_OPTS -classpath \"$LOCALCLASSPATH\" -Da
 if $ant_exec_debug ; then
     echo $ant_exec_command
 fi
-echo "ANT_HOME = $ANT_HOME"
 eval $ant_exec_command
