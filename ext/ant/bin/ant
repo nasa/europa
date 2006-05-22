@@ -44,9 +44,10 @@ if $no_config ; then
   usejikes=$use_jikes_default
 else
   # load system-wide ant configuration
-  if [ -f "/etc/ant.conf" ] ; then
-    . /etc/ant.conf
-  fi
+	# too painful
+  #if [ -f "/etc/ant.conf" ] ; then
+    #. /etc/ant.conf
+  #fi
 
   # load user ant configuration
   if [ -f "$HOME/.ant/ant.conf" ] ; then
