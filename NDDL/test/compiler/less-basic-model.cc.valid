@@ -1,4 +1,4 @@
-// less-basic-model.xml
+// less-basic-model.nddl
 
 #include "less-basic-model.hh"
 #include "NddlUtils.hh"
@@ -18,7 +18,7 @@ namespace NDDL {
   }
   
   
-  // less-basic-model.nddl:3 Rover
+  // less-basic-model.nddl:5 Rover
   Rover::Rover(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Rover", name, true) {
   }
@@ -39,7 +39,7 @@ namespace NDDL {
   
   
   
-  // less-basic-model.nddl:5 At
+  // less-basic-model.nddl:7 At
   Rover::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -70,7 +70,7 @@ namespace NDDL {
   
   
   
-  // less-basic-model.nddl:10 Going
+  // less-basic-model.nddl:12 Going
   Rover::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -109,14 +109,14 @@ namespace NDDL {
   }
   
   
-  // less-basic-model.nddl:3 Rover
+  // less-basic-model.nddl:5 Rover
   void Rover::constructor() {
     m_camera = addVariable(CameraDomain((new Camera(m_id, "m_camera"))->getId(), "Camera"), "m_camera");
     Id<Camera>(singleton(m_camera))->constructor();
     Id<Camera>(singleton(m_camera))->handleDefaults();
   }
   
-  // less-basic-model.nddl:3 Rover
+  // less-basic-model.nddl:5 Rover
   class RoverFactory0: public ConcreteObjectFactory {
   public:
     RoverFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -133,7 +133,7 @@ namespace NDDL {
     }
   };
   
-  // less-basic-model.nddl:21 At
+  // less-basic-model.nddl:23 At
   class Rover$At$0$0: public RuleInstance {
   public:
     Rover$At$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -141,7 +141,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Rover$At$0, Rover$At$0$0, Rover.At, "less-basic-model.nddl,21");
+  DECLARE_AND_DEFINE_RULE(Rule$Rover$At$0, Rover$At$0$0, Rover.At, "less-basic-model.nddl,23");
   
   void Rover$At$0$0::handleExecute() {
     slave(Rover::Going, Rover.Going, to, LabelStr("meets"));
@@ -164,7 +164,7 @@ namespace NDDL {
     }
   }
   
-  // less-basic-model.nddl:29 Going
+  // less-basic-model.nddl:31 Going
   class Rover$Going$1$0: public RuleInstance {
   public:
     Rover$Going$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -172,7 +172,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Rover$Going$1, Rover$Going$1$0, Rover.Going, "less-basic-model.nddl,29");
+  DECLARE_AND_DEFINE_RULE(Rule$Rover$Going$1, Rover$Going$1$0, Rover.Going, "less-basic-model.nddl,31");
   
   void Rover$Going$1$0::handleExecute() {
     slave(Rover::At, Rover.At, from, LabelStr("met_by"));
@@ -202,7 +202,7 @@ namespace NDDL {
   }
   
   
-  // less-basic-model.nddl:37 Camera
+  // less-basic-model.nddl:39 Camera
   Camera::Camera(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Camera", name, true) {
   }
@@ -224,11 +224,11 @@ namespace NDDL {
   }
   
   
-  // less-basic-model.nddl:37 Camera
+  // less-basic-model.nddl:39 Camera
   DECLARE_DEFAULT_OBJECT_FACTORY(CameraFactory1, Camera);
   
   
-  // less-basic-model.nddl:38 On
+  // less-basic-model.nddl:40 On
   Camera::On::On(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -256,7 +256,7 @@ namespace NDDL {
   
   
   
-  // less-basic-model.nddl:41 Off
+  // less-basic-model.nddl:43 Off
   Camera::Off::Off(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -284,7 +284,7 @@ namespace NDDL {
   
   
   
-  // less-basic-model.nddl:44 TakingPicture
+  // less-basic-model.nddl:46 TakingPicture
   Camera::TakingPicture::TakingPicture(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -314,7 +314,7 @@ namespace NDDL {
   }
   
   
-  // less-basic-model.nddl:50 On
+  // less-basic-model.nddl:52 On
   class Camera$On$2$0: public RuleInstance {
   public:
     Camera$On$2$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -322,7 +322,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Camera$On$2, Camera$On$2$0, Camera.On, "less-basic-model.nddl,50");
+  DECLARE_AND_DEFINE_RULE(Rule$Camera$On$2, Camera$On$2$0, Camera.On, "less-basic-model.nddl,52");
   
   void Camera$On$2$0::handleExecute() {
     slave(Camera::TakingPicture, Camera.TakingPicture, t, LabelStr("meets"));
@@ -336,7 +336,7 @@ namespace NDDL {
     met_by(this, o);
   }
   
-  // less-basic-model.nddl:56 Off
+  // less-basic-model.nddl:58 Off
   class Camera$Off$3$0: public RuleInstance {
   public:
     Camera$Off$3$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -344,7 +344,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Camera$Off$3, Camera$Off$3$0, Camera.Off, "less-basic-model.nddl,56");
+  DECLARE_AND_DEFINE_RULE(Rule$Camera$Off$3, Camera$Off$3$0, Camera.Off, "less-basic-model.nddl,58");
   
   void Camera$Off$3$0::handleExecute() {
     slave(Camera::On, Camera.On, o, LabelStr("meets"));
@@ -352,7 +352,7 @@ namespace NDDL {
     meets(this, o);
   }
   
-  // less-basic-model.nddl:60 TakingPicture
+  // less-basic-model.nddl:62 TakingPicture
   class Camera$TakingPicture$4$0: public RuleInstance {
   public:
     Camera$TakingPicture$4$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -360,7 +360,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Camera$TakingPicture$4, Camera$TakingPicture$4$0, Camera.TakingPicture, "less-basic-model.nddl,60");
+  DECLARE_AND_DEFINE_RULE(Rule$Camera$TakingPicture$4, Camera$TakingPicture$4$0, Camera.TakingPicture, "less-basic-model.nddl,62");
   
   void Camera$TakingPicture$4$0::handleExecute() {
     slave(Camera::On, Camera.On, o, LabelStr("met_by"));
@@ -380,7 +380,7 @@ namespace NDDL {
   }
   
   
-  // less-basic-model.nddl:68 World
+  // less-basic-model.nddl:70 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -407,7 +407,7 @@ namespace NDDL {
   
   
   
-  // less-basic-model.nddl:74 initialState
+  // less-basic-model.nddl:76 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -426,7 +426,7 @@ namespace NDDL {
   }
   
   
-  // less-basic-model.nddl:68 World
+  // less-basic-model.nddl:70 World
   void World::constructor() {
     m_horizonStart = addVariable(IntervalIntDomain(10, 10, "int"), "m_horizonStart");
     m_horizonEnd = addVariable(IntervalIntDomain(100, 100, "int"), "m_horizonEnd");
@@ -435,7 +435,7 @@ namespace NDDL {
     Id<Rover>(singleton(m_rover))->handleDefaults();
   }
   
-  // less-basic-model.nddl:68 World
+  // less-basic-model.nddl:70 World
   class WorldFactory2: public ConcreteObjectFactory {
   public:
     WorldFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -452,7 +452,7 @@ namespace NDDL {
     }
   };
   
-  // less-basic-model.nddl:83 initialState
+  // less-basic-model.nddl:85 initialState
   class World$initialState$5$0: public RuleInstance {
   public:
     World$initialState$5$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -460,7 +460,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$5, World$initialState$5$0, World.initialState, "less-basic-model.nddl,83");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$5, World$initialState$5$0, World.initialState, "less-basic-model.nddl,85");
   
   void World$initialState$5$0::handleExecute() {
     slave(Rover::At, Rover.At, a, LabelStr("contains"));
@@ -544,6 +544,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("less-basic-model");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Rover", "Timeline");

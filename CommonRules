@@ -113,8 +113,8 @@ rule ExecuteTargetSO {
 }
 
 actions ExecuteTargetSO {
-  cd `dirname $(2)`
-  $(PREFIX) ./`basename $(2)` $(ARGUMENTS)
+cd `dirname $(2)`
+$(PREFIX) ./`basename $(2)` $(ARGUMENTS)
 }
 
 #
@@ -637,7 +637,7 @@ rule Objects
 
 actions together SharedArchive bind NEEDLIBS
 {
-	$(LINK) $(LINKFLAGS) $(SHARED_FLAG) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS) -l$(NEEDSHARES)
+$(LINK) $(LINKFLAGS) $(SHARED_FLAG) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS) -l$(NEEDSHARES)
 }
 
 rule SharedLibraryFromObjects
@@ -733,6 +733,22 @@ rule Yacc
 	Includes $(<) : $(_h) ;
 }
 
+# ApacheAnt target : buildfile sources
+rule ApacheAnt
+{
+	# let jam's dep tree in on what the ant command will try to do
+	SEARCH on $(2) = $(SEARCH_SOURCE) ;
+	LocalDepends $(1) : $(2) ;
+}
+# use cd to move to current subdirectory
+actions ApacheAnt
+{
+echo $(ANT_HOME)
+echo $(ANT)
+$(ANT) -diagnostics
+$(ANT) -f "$(2[1]:G=)"
+}
+
 rule GenerateValid
 {
 	LOCATE on $(2).valid += $(LOCATE_TARGET) ; 
@@ -754,17 +770,17 @@ rule Diff
 
 actions Diff
 {
-	diff $(2)
+diff $(2)
 }
 
 actions together Chmod1
 {
-	$(CHMOD) $(MODE) $(<)
+$(CHMOD) $(MODE) $(<)
 }
 
 actions together Link bind NEEDLIBS
 {
-	$(LINK) $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS) -l$(NEEDSHARES)
+$(LINK) $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS) -l$(NEEDSHARES)
 }
 
 } # CommonRules_INCLUDED

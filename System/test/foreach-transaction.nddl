@@ -1,5 +1,6 @@
+// I'm not terribly pleased about this inclusion
 #include "../../NDDL/test/compiler/foreach.nddl"
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "PlannerConfig.nddl"
 
 // Allocate a world to populate the planner context
 PlannerConfig world = new PlannerConfig(0, 100, 500);

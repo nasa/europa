@@ -86,7 +86,7 @@ P4C3___B::Ib {
 }
 
 P4C3___Q::Wb {
-  condeq(Idle, dx, dy);
+  condEq(Idle, dx, dy);
   eq(dx, [0 +inf]);
   eq(dy, [-inf 0]);
   equals(P4C3___R.S s0);

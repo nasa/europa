@@ -1,3 +1,5 @@
+#include "Plasma.nddl"
+
 // Declare Location as a class to allow allocation of instances
 // at run-time rather than compile time.
 class Location {

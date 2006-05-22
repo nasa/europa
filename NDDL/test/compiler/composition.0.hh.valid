@@ -1,4 +1,4 @@
-// composition.0.xml
+// composition.0.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"

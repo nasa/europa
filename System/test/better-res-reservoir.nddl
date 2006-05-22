@@ -1,5 +1,6 @@
-#include "../../NDDL/core/PlannerConfig.nddl"
-#include "../../NDDL/core/Plasma.nddl"
+#include "PlannerConfig.nddl"
+#include "Plasma.nddl"
+#include "LoraxConstraints.nddl"
 
 //*****************************************************************
 class Battery extends Reservoir {

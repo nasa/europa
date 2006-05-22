@@ -1,4 +1,4 @@
-// gnats_3140.xml
+// gnats_3140.nddl
 
 #include "gnats_3140.hh"
 #include "NddlUtils.hh"
@@ -32,7 +32,7 @@ namespace NDDL {
   }
   
   
-  // gnats_3140.nddl:7 Boo
+  // gnats_3140.nddl:9 Boo
   Boo::Boo(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Boo", name, true) {
   }
@@ -54,11 +54,11 @@ namespace NDDL {
   }
   
   
-  // gnats_3140.nddl:7 Boo
+  // gnats_3140.nddl:9 Boo
   DECLARE_DEFAULT_OBJECT_FACTORY(BooFactory0, Boo);
   
   
-  // gnats_3140.nddl:9 Foo
+  // gnats_3140.nddl:11 Foo
   Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Foo", name, true) {
   }
@@ -90,7 +90,7 @@ namespace NDDL {
   }
   
   
-  // gnats_3140.nddl:9 Foo
+  // gnats_3140.nddl:11 Foo
   void Foo::constructor(bool _field1, int _field2, float _field4, const LabelStr& _field6, const BooId& _field7) {
     field1 = addVariable(BoolDomain(_field1, "bool"), "field1");
     field2 = addVariable(IntervalIntDomain(_field2, _field2, "int"), "field2");
@@ -99,7 +99,7 @@ namespace NDDL {
     field7 = addVariable(BooDomain(_field7, "Boo"), "field7");
   }
   
-  // gnats_3140.nddl:9 Foo
+  // gnats_3140.nddl:11 Foo
   class FooFactory1: public ConcreteObjectFactory {
   public:
     FooFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -147,7 +147,7 @@ namespace NDDL {
   };
   
   
-  // gnats_3140.nddl:30 Bar
+  // gnats_3140.nddl:32 Bar
   Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Bar", name, true) {
   }
@@ -169,11 +169,11 @@ namespace NDDL {
   }
   
   
-  // gnats_3140.nddl:30 Bar
+  // gnats_3140.nddl:32 Bar
   DECLARE_DEFAULT_OBJECT_FACTORY(BarFactory2, Bar);
   
   
-  // gnats_3140.nddl:31 pred
+  // gnats_3140.nddl:33 pred
   Bar::pred::pred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -208,7 +208,7 @@ namespace NDDL {
   }
   
   
-  // gnats_3140.nddl:42 pred
+  // gnats_3140.nddl:44 pred
   class Bar$pred$0$0: public RuleInstance {
   public:
     Bar$pred$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -216,7 +216,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Bar$pred$0, Bar$pred$0$0, Bar.pred, "gnats_3140.nddl,42");
+  DECLARE_AND_DEFINE_RULE(Rule$Bar$pred$0, Bar$pred$0$0, Bar.pred, "gnats_3140.nddl,44");
   
   void Bar$pred$0$0::handleExecute() {
     objectVar(Foo, f, false, false);
@@ -261,6 +261,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("gnats_3140");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Boo", "Object");

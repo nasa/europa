@@ -78,8 +78,9 @@ rule UpdateJar
 
 actions together UpdateJar 
 {
-  touch $(JAVA_CLASSES_DIR)$(SLASH)dummy.class
-  "$(JAR)" cf $(1) -C $(JAVA_CLASSES_DIR) dummy.class $(2)
+echo "Deprecated: Use ApacheAnt for java commands"
+touch $(JAVA_CLASSES_DIR)$(SLASH)dummy.class
+"$(JAR)" cf $(1) -C $(JAVA_CLASSES_DIR) dummy.class $(2)
 }
 #  $(ZIP) -dq $(1) dummy.class
 
@@ -96,8 +97,9 @@ rule JavaCompile
 
 actions JavaCompile
 {
-   #echo "ECHOING" $(CLASSPATH);
-  "$(JAVAC)" $(JAVAFLAGS) -sourcepath $(JAVA_SRC_DIR) -classpath $(CLASSPATH) -d $(JAVA_CLASSES_DIR) $(2) ;
+echo "Deprecated: Use ApacheAnt for java commands"
+#echo "ECHOING" $(CLASSPATH);
+$(JAVAC) $(JAVAFLAGS) -sourcepath $(JAVA_SRC_DIR) -classpath $(CLASSPATH) -d $(JAVA_CLASSES_DIR) $(2) ;
 }
 
 rule JavaThirdPartyJar

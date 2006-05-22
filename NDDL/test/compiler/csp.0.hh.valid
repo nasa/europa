@@ -1,4 +1,4 @@
-// csp.0.xml
+// csp.0.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"

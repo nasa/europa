@@ -1,4 +1,4 @@
-// csp.1.xml
+// csp.1.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -8,32 +8,32 @@ namespace NDDL {
 
   
   
-  // csp.1.nddl:2 Ints
+  // csp.1.nddl:4 Ints
   typedef NumericDomain Ints;
   Ints IntsBaseDomain();
   
   
-  // csp.1.nddl:3 Floats
+  // csp.1.nddl:5 Floats
   typedef NumericDomain Floats;
   Floats FloatsBaseDomain();
   
   
-  // csp.1.nddl:4 Strings
+  // csp.1.nddl:6 Strings
   typedef StringDomain Strings;
   Strings StringsBaseDomain();
   
   
-  // csp.1.nddl:5 Symbols
+  // csp.1.nddl:7 Symbols
   typedef SymbolDomain Symbols;
   Symbols SymbolsBaseDomain();
   
   
-  // csp.1.nddl:6 Fruits
+  // csp.1.nddl:8 Fruits
   typedef SymbolDomain Fruits;
   Fruits FruitsBaseDomain();
   
   
-  // csp.1.nddl:7 Speed
+  // csp.1.nddl:9 Speed
   typedef SymbolDomain Speed;
   Speed SpeedBaseDomain();
 } // End NDDL namespace

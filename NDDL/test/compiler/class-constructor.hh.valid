@@ -1,4 +1,4 @@
-// class-constructor.xml
+// class-constructor.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"

@@ -1,4 +1,4 @@
-// inheritance.1.xml
+// inheritance.1.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"

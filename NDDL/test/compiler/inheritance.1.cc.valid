@@ -1,4 +1,4 @@
-// inheritance.1.xml
+// inheritance.1.nddl
 
 #include "inheritance.1.hh"
 #include "NddlUtils.hh"
@@ -266,6 +266,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("inheritance.1");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");

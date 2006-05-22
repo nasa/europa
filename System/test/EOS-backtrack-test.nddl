@@ -1,5 +1,5 @@
-#include "../../NDDL/core/PlannerConfig.nddl"
-#include "../../NDDL/core/Plasma.nddl"
+#include "PlannerConfig.nddl"
+#include "Plasma.nddl"
 
 class Target {
  string m_name;

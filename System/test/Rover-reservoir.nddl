@@ -1,4 +1,4 @@
-#include "../../NDDL/core/Plasma.nddl"
+#include "Plasma.nddl"
 
 class Battery extends Reservoir {
   Battery(float ic, float ll_min, float ll_max){

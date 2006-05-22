@@ -1,4 +1,4 @@
-// constraint-test.xml
+// constraint-test.nddl
 
 #include "constraint-test.hh"
 #include "NddlUtils.hh"
@@ -17,7 +17,7 @@ namespace NDDL {
   }
   
   
-  // constraint-test.nddl:4 Sample
+  // constraint-test.nddl:8 Sample
   Sample::Sample(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Sample", name, true) {
   }
@@ -39,11 +39,11 @@ namespace NDDL {
   }
   
   
-  // constraint-test.nddl:4 Sample
+  // constraint-test.nddl:8 Sample
   DECLARE_DEFAULT_OBJECT_FACTORY(SampleFactory0, Sample);
   
   
-  // constraint-test.nddl:5 sample
+  // constraint-test.nddl:9 sample
   Sample::sample::sample(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -106,7 +106,7 @@ namespace NDDL {
   }
   
   
-  // constraint-test.nddl:18 sample
+  // constraint-test.nddl:22 sample
   class Sample$sample$0$0: public RuleInstance {
   public:
     Sample$sample$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -114,7 +114,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Sample$sample$0, Sample$sample$0$0, Sample.sample, "constraint-test.nddl,18");
+  DECLARE_AND_DEFINE_RULE(Rule$Sample$sample$0, Sample$sample$0$0, Sample.sample, "constraint-test.nddl,22");
   
   void Sample$sample$0$0::handleExecute() {
     objectVar(Sample, s, false, false);
@@ -179,7 +179,7 @@ namespace NDDL {
   }
   
   
-  // constraint-test.nddl:34 World
+  // constraint-test.nddl:38 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -200,7 +200,7 @@ namespace NDDL {
   
   
   
-  // constraint-test.nddl:36 initialState
+  // constraint-test.nddl:40 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -219,14 +219,14 @@ namespace NDDL {
   }
   
   
-  // constraint-test.nddl:34 World
+  // constraint-test.nddl:38 World
   void World::constructor() {
     sample = addVariable(SampleDomain((new Sample(m_id, "sample"))->getId(), "Sample"), "sample");
     Id<Sample>(singleton(sample))->constructor();
     Id<Sample>(singleton(sample))->handleDefaults();
   }
   
-  // constraint-test.nddl:34 World
+  // constraint-test.nddl:38 World
   class WorldFactory1: public ConcreteObjectFactory {
   public:
     WorldFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -243,7 +243,7 @@ namespace NDDL {
     }
   };
   
-  // constraint-test.nddl:42 initialState
+  // constraint-test.nddl:46 initialState
   class World$initialState$1$0: public RuleInstance {
   public:
     World$initialState$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -251,7 +251,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "constraint-test.nddl,42");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "constraint-test.nddl,46");
   
   void World$initialState$1$0::handleExecute() {
     slave(Sample::sample, Sample.sample, s, LabelStr("any"));
@@ -278,6 +278,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("constraint-test");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Sample", "Timeline");

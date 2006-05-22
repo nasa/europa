@@ -1,4 +1,4 @@
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "PlannerConfig.nddl"
 
 enum Locations {Hill, Rock, Lander};
 

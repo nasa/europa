@@ -1,4 +1,4 @@
-// csp.2.xml
+// csp.2.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -11,7 +11,7 @@ namespace NDDL {
   typedef ObjectDomain FooDomain;
   
   
-  // csp.2.nddl:2 Foo
+  // csp.2.nddl:4 Foo
   class Foo : public Object {
   public:
     Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);

@@ -1,4 +1,4 @@
-// simple-rules.xml
+// simple-rules.nddl
 
 #include "simple-rules.hh"
 #include "NddlUtils.hh"
@@ -43,7 +43,7 @@ namespace NDDL {
   }
   
   
-  // simple-rules.nddl:5 Foo
+  // simple-rules.nddl:7 Foo
   Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Foo", name, true) {
   }
@@ -65,11 +65,11 @@ namespace NDDL {
   }
   
   
-  // simple-rules.nddl:5 Foo
+  // simple-rules.nddl:7 Foo
   DECLARE_DEFAULT_OBJECT_FACTORY(FooFactory0, Foo);
   
   
-  // simple-rules.nddl:6 Bar
+  // simple-rules.nddl:8 Bar
   Foo::Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -89,7 +89,7 @@ namespace NDDL {
   
   
   
-  // simple-rules.nddl:9 Rover
+  // simple-rules.nddl:11 Rover
   Rover::Rover(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Rover", name, true) {
   }
@@ -110,7 +110,7 @@ namespace NDDL {
   
   
   
-  // simple-rules.nddl:11 At
+  // simple-rules.nddl:13 At
   Rover::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -137,7 +137,7 @@ namespace NDDL {
   
   
   
-  // simple-rules.nddl:16 Going
+  // simple-rules.nddl:18 Going
   Rover::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -163,7 +163,7 @@ namespace NDDL {
   
   
   
-  // simple-rules.nddl:20 AnyPredicate
+  // simple-rules.nddl:22 AnyPredicate
   Rover::AnyPredicate::AnyPredicate(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -247,14 +247,14 @@ namespace NDDL {
   }
   
   
-  // simple-rules.nddl:9 Rover
+  // simple-rules.nddl:11 Rover
   void Rover::constructor() {
     foo = addVariable(FooDomain((new Foo(m_id, "foo"))->getId(), "Foo"), "foo");
     Id<Foo>(singleton(foo))->constructor();
     Id<Foo>(singleton(foo))->handleDefaults();
   }
   
-  // simple-rules.nddl:9 Rover
+  // simple-rules.nddl:11 Rover
   class RoverFactory1: public ConcreteObjectFactory {
   public:
     RoverFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -271,7 +271,7 @@ namespace NDDL {
     }
   };
   
-  // simple-rules.nddl:42 At
+  // simple-rules.nddl:44 At
   class Rover$At$0$0: public RuleInstance {
   public:
     Rover$At$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -279,7 +279,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Rover$At$0, Rover$At$0$0, Rover.At, "simple-rules.nddl,42");
+  DECLARE_AND_DEFINE_RULE(Rule$Rover$At$0, Rover$At$0$0, Rover.At, "simple-rules.nddl,44");
   
   void Rover$At$0$0::handleExecute() {
     objectVar(Foo, localFoo, false, false);
@@ -317,7 +317,7 @@ namespace NDDL {
     }
   }
   
-  // simple-rules.nddl:60 Going
+  // simple-rules.nddl:62 Going
   class Rover$Going$1$0: public RuleInstance {
   public:
     Rover$Going$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -325,7 +325,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Rover$Going$1, Rover$Going$1$0, Rover.Going, "simple-rules.nddl,60");
+  DECLARE_AND_DEFINE_RULE(Rule$Rover$Going$1, Rover$Going$1$0, Rover.Going, "simple-rules.nddl,62");
   
   void Rover$Going$1$0::handleExecute() {
     {
@@ -337,7 +337,7 @@ namespace NDDL {
   }
   
   
-  // simple-rules.nddl:65 SuperRover
+  // simple-rules.nddl:67 SuperRover
   SuperRover::SuperRover(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Rover(planDatabase, "SuperRover", name) {
   }
@@ -356,12 +356,12 @@ namespace NDDL {
   }
   
   
-  // simple-rules.nddl:65 SuperRover
+  // simple-rules.nddl:67 SuperRover
   void SuperRover::constructor() {
     Rover::constructor();
   }
   
-  // simple-rules.nddl:65 SuperRover
+  // simple-rules.nddl:67 SuperRover
   class SuperRoverFactory2: public ConcreteObjectFactory {
   public:
     SuperRoverFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -379,7 +379,7 @@ namespace NDDL {
   };
   
   
-  // simple-rules.nddl:72 World
+  // simple-rules.nddl:74 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -400,7 +400,7 @@ namespace NDDL {
   
   
   
-  // simple-rules.nddl:75 initialState
+  // simple-rules.nddl:77 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -419,14 +419,14 @@ namespace NDDL {
   }
   
   
-  // simple-rules.nddl:72 World
+  // simple-rules.nddl:74 World
   void World::constructor() {
     rover = addVariable(RoverDomain((new Rover(m_id, "rover"))->getId(), "Rover"), "rover");
     Id<Rover>(singleton(rover))->constructor();
     Id<Rover>(singleton(rover))->handleDefaults();
   }
   
-  // simple-rules.nddl:72 World
+  // simple-rules.nddl:74 World
   class WorldFactory3: public ConcreteObjectFactory {
   public:
     WorldFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -443,7 +443,7 @@ namespace NDDL {
     }
   };
   
-  // simple-rules.nddl:82 initialState
+  // simple-rules.nddl:84 initialState
   class World$initialState$2$0: public RuleInstance {
   public:
     World$initialState$2$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -451,7 +451,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$2, World$initialState$2$0, World.initialState, "simple-rules.nddl,82");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$2, World$initialState$2$0, World.initialState, "simple-rules.nddl,84");
   
   void World$initialState$2$0::handleExecute() {
     objectVar(Rover, r1, false, false);
@@ -545,6 +545,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("simple-rules");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Timeline");

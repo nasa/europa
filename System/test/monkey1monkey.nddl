@@ -1,5 +1,5 @@
 // From Rover.nddl
-#include "../../NDDL/core/Plasma.nddl"
+#include "Plasma.nddl"
 
 // From NewPlan/ModuleTests/Parser/monkey1/monkey.ddl v1.3
 // Last change to a file that it included was Sept. 2003.

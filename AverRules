@@ -28,9 +28,7 @@ rule AverToXml1 {
 }
 
 actions AverToXml1 {
-#  "$(JAVA)" -Xprof -agentlib:hprof=cpu=times,verbose=y -cp $(CLASSPATH) aver.AverToXML $(2) $(1) ;
-  "$(JAVA)" -cp $(CLASSPATH) $(JREFLAGS) aver.AverToXML $(2) $(1) ;
-#  "$(JAVA)" -cp $(CLASSPATH) -Xmx100m aver.AverToXML $(2) $(1) ;
+$(JAVA) $(JREFLAGS) -jar "$(AVER_JAR)" $(2) $(1) ;
 }
 
 }

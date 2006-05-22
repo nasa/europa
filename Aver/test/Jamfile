@@ -36,7 +36,7 @@ if ! $(PLASMA_READY) {
   local lib = $(model:S=) ;
 
   Includes $(cc) : $(hh) ;
-  NddlCompiler $(hh) $(cc) : $(model) ;
+  Nddl $(hh) $(cc) : $(model) ;
   ModuleObjects $(cc) : NDDL ;
 
   if $(LIBRARIES) = SHARED {

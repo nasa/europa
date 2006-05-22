@@ -1,5 +1,6 @@
-#include "../../NDDL/core/PlannerConfig.nddl"
-#include "../../NDDL/core/Plasma.nddl"
+#include "PlannerConfig.nddl"
+#include "Plasma.nddl"
+#include "LoraxConstraints.nddl"
 
 /*
 	Rover:   Standby, Drive, Sample. Drive and Sample consume at max rate.

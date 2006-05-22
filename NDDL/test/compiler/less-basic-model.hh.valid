@@ -1,4 +1,4 @@
-// less-basic-model.xml
+// less-basic-model.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -20,11 +20,11 @@ namespace NDDL {
   
   
   
-  // less-basic-model.nddl:1 Locations
+  // less-basic-model.nddl:3 Locations
   typedef SymbolDomain Locations;
   Locations LocationsBaseDomain();
   
-  // less-basic-model.nddl:3 Rover
+  // less-basic-model.nddl:5 Rover
   class Rover : public Timeline {
   public:
     Rover(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -39,7 +39,7 @@ namespace NDDL {
     typedef Id<Going> GoingId;
     ConstrainedVariableId m_camera; // SchemaWriter::declareVariable
     
-    // less-basic-model.nddl:5 At
+    // less-basic-model.nddl:7 At
     class At : public NddlToken {
     public:
       At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -50,7 +50,7 @@ namespace NDDL {
       ConstrainedVariableId m_location; // SchemaWriter::declareVariable
     };
     
-    // less-basic-model.nddl:10 Going
+    // less-basic-model.nddl:12 Going
     class Going : public NddlToken {
     public:
       Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -62,11 +62,11 @@ namespace NDDL {
       ConstrainedVariableId m_to; // SchemaWriter::declareVariable
     };
     
-    // less-basic-model.nddl:3 Rover
+    // less-basic-model.nddl:5 Rover
     virtual void constructor();
   };
   
-  // less-basic-model.nddl:37 Camera
+  // less-basic-model.nddl:39 Camera
   class Camera : public Timeline {
   public:
     Camera(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -83,7 +83,7 @@ namespace NDDL {
     class TakingPicture;
     typedef Id<TakingPicture> TakingPictureId;
     
-    // less-basic-model.nddl:38 On
+    // less-basic-model.nddl:40 On
     class On : public NddlToken {
     public:
       On(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -93,7 +93,7 @@ namespace NDDL {
       
     };
     
-    // less-basic-model.nddl:41 Off
+    // less-basic-model.nddl:43 Off
     class Off : public NddlToken {
     public:
       Off(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -103,7 +103,7 @@ namespace NDDL {
       
     };
     
-    // less-basic-model.nddl:44 TakingPicture
+    // less-basic-model.nddl:46 TakingPicture
     class TakingPicture : public NddlToken {
     public:
       TakingPicture(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -115,7 +115,7 @@ namespace NDDL {
     };
   };
   
-  // less-basic-model.nddl:68 World
+  // less-basic-model.nddl:70 World
   class World : public Timeline {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -130,7 +130,7 @@ namespace NDDL {
     ConstrainedVariableId m_horizonEnd; // SchemaWriter::declareVariable
     ConstrainedVariableId m_rover; // SchemaWriter::declareVariable
     
-    // less-basic-model.nddl:74 initialState
+    // less-basic-model.nddl:76 initialState
     class initialState : public NddlToken {
     public:
       initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -140,7 +140,7 @@ namespace NDDL {
       
     };
     
-    // less-basic-model.nddl:68 World
+    // less-basic-model.nddl:70 World
     virtual void constructor();
   };
 } // End NDDL namespace

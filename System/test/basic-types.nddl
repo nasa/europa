@@ -1,5 +1,4 @@
-
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "PlannerConfig.nddl"
 
 enum Fruit { apple, orange, grape, banana }
 enum Color { red, yellow, green, blue, purple }

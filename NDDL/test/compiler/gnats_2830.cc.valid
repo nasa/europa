@@ -1,4 +1,4 @@
-// gnats_2830.xml
+// gnats_2830.nddl
 
 #include "gnats_2830.hh"
 #include "NddlUtils.hh"
@@ -166,7 +166,7 @@ namespace NDDL {
   }
   
   
-  // gnats_2830.nddl:5 Path
+  // gnats_2830.nddl:6 Path
   Path::Path(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Path", name, true) {
   }
@@ -190,13 +190,13 @@ namespace NDDL {
   }
   
   
-  // gnats_2830.nddl:5 Path
+  // gnats_2830.nddl:6 Path
   void Path::constructor(const LabelStr& f, const LabelStr& t) {
     _from = addVariable(Location(f, "Location"), "_from");
     _to = addVariable(Location(t, "Location"), "_to");
   }
   
-  // gnats_2830.nddl:5 Path
+  // gnats_2830.nddl:6 Path
   class PathFactory3: public ConcreteObjectFactory {
   public:
     PathFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -226,7 +226,7 @@ namespace NDDL {
   };
   
   
-  // gnats_2830.nddl:15 Enable
+  // gnats_2830.nddl:16 Enable
   Enable::Enable(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Enable", name, true) {
   }
@@ -249,13 +249,13 @@ namespace NDDL {
   }
   
   
-  // gnats_2830.nddl:15 Enable
+  // gnats_2830.nddl:16 Enable
   void Enable::constructor(const LabelStr& l, const PathId& p) {
     _t = addVariable(Location(l, "Location"), "_t");
     _p = addVariable(PathDomain(p, "Path"), "_p");
   }
   
-  // gnats_2830.nddl:15 Enable
+  // gnats_2830.nddl:16 Enable
   class EnableFactory4: public ConcreteObjectFactory {
   public:
     EnableFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -285,7 +285,7 @@ namespace NDDL {
   };
   
   
-  // gnats_2830.nddl:25 Position
+  // gnats_2830.nddl:26 Position
   Position::Position(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Position", name, true) {
   }
@@ -307,11 +307,11 @@ namespace NDDL {
   }
   
   
-  // gnats_2830.nddl:25 Position
+  // gnats_2830.nddl:26 Position
   DECLARE_DEFAULT_OBJECT_FACTORY(PositionFactory5, Position);
   
   
-  // gnats_2830.nddl:27 At
+  // gnats_2830.nddl:28 At
   Position::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -334,7 +334,7 @@ namespace NDDL {
   
   
   
-  // gnats_2830.nddl:31 Navigate
+  // gnats_2830.nddl:32 Navigate
   Position::Navigate::Navigate(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -364,7 +364,7 @@ namespace NDDL {
   
   
   
-  // gnats_2830.nddl:38 Foo
+  // gnats_2830.nddl:39 Foo
   Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Foo", name, true) {
   }
@@ -386,11 +386,11 @@ namespace NDDL {
   }
   
   
-  // gnats_2830.nddl:38 Foo
+  // gnats_2830.nddl:39 Foo
   DECLARE_DEFAULT_OBJECT_FACTORY(FooFactory6, Foo);
   
   
-  // gnats_2830.nddl:40 FooPred
+  // gnats_2830.nddl:41 FooPred
   Foo::FooPred::FooPred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -412,7 +412,7 @@ namespace NDDL {
   }
   
   
-  // gnats_2830.nddl:45 Navigate
+  // gnats_2830.nddl:46 Navigate
   class Position$Navigate$0$0: public RuleInstance {
   public:
     Position$Navigate$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -434,7 +434,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Position$Navigate$0, Position$Navigate$0$0, Position.Navigate, "gnats_2830.nddl,45");
+  DECLARE_AND_DEFINE_RULE(Rule$Position$Navigate$0, Position$Navigate$0$0, Position.Navigate, "gnats_2830.nddl,46");
   
   void Position$Navigate$0$0::handleExecute() {
     objectVar(Path, p, true, false);
@@ -500,6 +500,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("gnats_2830");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("PlannerConfig", "Object");

@@ -1,4 +1,4 @@
-// multi-resources.xml
+// multi-resources.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -32,7 +32,7 @@ namespace NDDL {
   
   
   
-  // Plasma.nddl:8 TokenStates
+  // Plasma.nddl:10 TokenStates
   typedef SymbolDomain TokenStates;
   TokenStates TokenStatesBaseDomain();
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
@@ -42,7 +42,7 @@ namespace NDDL {
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Reservoir
   
   
-  // Plasma.nddl:141 UnaryResource
+  // Plasma.nddl:143 UnaryResource
   class UnaryResource : public Timeline {
   public:
     UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -55,7 +55,7 @@ namespace NDDL {
     class uses;
     typedef Id<uses> usesId;
     
-    // Plasma.nddl:142 uses
+    // Plasma.nddl:144 uses
     class uses : public NddlToken {
     public:
       uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -66,7 +66,7 @@ namespace NDDL {
     };
   };
   
-  // Plasma.nddl:151 StringData
+  // Plasma.nddl:153 StringData
   class StringData : public Object {
   public:
     StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -77,7 +77,7 @@ namespace NDDL {
     
     ConstrainedVariableId data; // SchemaWriter::declareVariable
     
-    // Plasma.nddl:151 StringData
+    // Plasma.nddl:153 StringData
     virtual void constructor(const LabelStr& _data);
   };
   

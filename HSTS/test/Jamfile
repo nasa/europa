@@ -124,9 +124,10 @@ rule EUROPA_NDDL {
   local initState = $(1) ;
   local hh = $(initState:S=.hh) ;
   local cc = [ FGristFiles $(initState:S=.cc) ] ;
-  NddlCompiler $(hh) $(cc) : $(initState) ;
+  local xml = $(initState:S=.xml) ;
+  Nddl $(xml) $(hh) $(cc) : $(initState) ;
   # create .hh, .cc, .o, and .xml for a .nddl
-  Includes $(cc) : $(hh) ;
+	Includes $(cc) : $(xml) $(hh) ;
   ModuleObjects $(cc) : NDDL ;
 }
 

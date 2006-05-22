@@ -1,4 +1,4 @@
-// multidot.xml
+// multidot.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -23,7 +23,7 @@ namespace NDDL {
   typedef ObjectDomain MumbleDomain;
   
   
-  // multidot.nddl:1 Foo
+  // multidot.nddl:3 Foo
   class Foo : public Object {
   public:
     Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -35,7 +35,7 @@ namespace NDDL {
     
   };
   
-  // multidot.nddl:5 Bar
+  // multidot.nddl:6 Bar
   class Bar : public Object {
   public:
     Bar(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -46,11 +46,11 @@ namespace NDDL {
     
     ConstrainedVariableId m_foo; // SchemaWriter::declareVariable
     
-    // multidot.nddl:5 Bar
+    // multidot.nddl:6 Bar
     virtual void constructor(const FooId& foo);
   };
   
-  // multidot.nddl:14 Baz
+  // multidot.nddl:15 Baz
   class Baz : public Timeline {
   public:
     Baz(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -66,10 +66,10 @@ namespace NDDL {
     ConstrainedVariableId myfoo; // SchemaWriter::declareVariable
     ConstrainedVariableId myBar; // SchemaWriter::declareVariable
     
-    // multidot.nddl:14 Baz
+    // multidot.nddl:15 Baz
     virtual void constructor(const BarId& bar, const FooId& foo);
     
-    // multidot.nddl:23 apred
+    // multidot.nddl:24 apred
     class apred : public NddlToken {
     public:
       apred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -80,7 +80,7 @@ namespace NDDL {
       ConstrainedVariableId predFoo; // SchemaWriter::declareVariable
     };
     
-    // multidot.nddl:27 bpred
+    // multidot.nddl:28 bpred
     class bpred : public NddlToken {
     public:
       bpred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -92,7 +92,7 @@ namespace NDDL {
     };
   };
   
-  // multidot.nddl:39 Mumble
+  // multidot.nddl:40 Mumble
   class Mumble : public Timeline {
   public:
     Mumble(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -105,10 +105,10 @@ namespace NDDL {
     typedef Id<mumbPred> mumbPredId;
     ConstrainedVariableId myBaz; // SchemaWriter::declareVariable
     
-    // multidot.nddl:39 Mumble
+    // multidot.nddl:40 Mumble
     virtual void constructor(const BazId& baz);
     
-    // multidot.nddl:46 mumbPred
+    // multidot.nddl:47 mumbPred
     class mumbPred : public NddlToken {
     public:
       mumbPred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);

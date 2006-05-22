@@ -1,3 +1,5 @@
+#include "Constraints.nddl"
+
 enum Locations {Hill, Rock, Lander};
 
 class Camera; class Rover{

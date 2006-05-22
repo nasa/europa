@@ -101,8 +101,8 @@ rule RunAntlrTool
 
 actions RunAntlrTool
 {
-  rm -f $(1)
-  "$(JAVA)" -cp $(ANTLR_JAR) $(JREFLAGS) antlr.Tool -o $(PATHNAME) $(ANTLRFLAGS) $(2) 
+rm -f $(1)
+$(JAVA) -cp $(ANTLR_JAR) $(JREFLAGS) antlr.Tool -o $(PATHNAME) $(ANTLRFLAGS) $(2) 
 }
 
 } # AntlrRules_INCLUDED

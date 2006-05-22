@@ -1,4 +1,4 @@
-// interval-constants.xml
+// interval-constants.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -15,7 +15,7 @@ namespace NDDL {
   typedef ObjectDomain WorldDomain;
   
   
-  // interval-constants.nddl:1 Foo
+  // interval-constants.nddl:3 Foo
   class Foo : public Timeline {
   public:
     Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -28,7 +28,7 @@ namespace NDDL {
     typedef Id<pred1> pred1Id;
     ConstrainedVariableId f_var; // SchemaWriter::declareVariable
     
-    // interval-constants.nddl:3 pred1
+    // interval-constants.nddl:5 pred1
     class pred1 : public NddlToken {
     public:
       pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -38,11 +38,11 @@ namespace NDDL {
       
     };
     
-    // interval-constants.nddl:1 Foo
+    // interval-constants.nddl:3 Foo
     virtual void constructor();
   };
   
-  // interval-constants.nddl:17 World
+  // interval-constants.nddl:19 World
   class World : public Timeline {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -55,7 +55,7 @@ namespace NDDL {
     typedef Id<initialState> initialStateId;
     ConstrainedVariableId obj1; // SchemaWriter::declareVariable
     
-    // interval-constants.nddl:19 initialState
+    // interval-constants.nddl:21 initialState
     class initialState : public NddlToken {
     public:
       initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -65,7 +65,7 @@ namespace NDDL {
       
     };
     
-    // interval-constants.nddl:17 World
+    // interval-constants.nddl:19 World
     virtual void constructor();
   };
 } // End NDDL namespace

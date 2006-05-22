@@ -1,4 +1,4 @@
-// gnats-3231.xml
+// gnats-3231.nddl
 
 #include "gnats-3231.hh"
 #include "NddlUtils.hh"
@@ -92,6 +92,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("gnats-3231");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("GnatsClass", "Timeline");

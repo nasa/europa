@@ -6,7 +6,7 @@ local compiler_test = no-world.nddl ;
 local hh = $(compiler_test:S=.hh) ;
 local cc = $(compiler_test:S=.cc) ;
 LocalDepends nddl-tests : $(hh) $(cc) ;
-NddlCompiler $(hh) $(cc) : $(compiler_test) ;
+Nddl $(hh) $(cc) : $(compiler_test) ;
 ModuleObjects NddlMain.cc : NDDL ;
 
 local model ;

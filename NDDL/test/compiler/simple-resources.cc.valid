@@ -1,4 +1,4 @@
-// simple-resources.xml
+// simple-resources.nddl
 
 #include "simple-resources.hh"
 #include "NddlUtils.hh"
@@ -35,7 +35,7 @@ namespace NDDL {
   
   
   
-  // Resources.nddl:94 UnaryResource
+  // Resources.nddl:95 UnaryResource
   UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "UnaryResource", name, true) {
   }
@@ -57,11 +57,11 @@ namespace NDDL {
   }
   
   
-  // Resources.nddl:94 UnaryResource
+  // Resources.nddl:95 UnaryResource
   DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);
   
   
-  // Resources.nddl:95 uses
+  // Resources.nddl:96 uses
   UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -414,6 +414,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("simple-resources");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Resource", "Object");

@@ -1,6 +1,7 @@
+#include "Constraints.nddl"
+
 class Foo {
 }
-
 
 class Bar {
     Foo m_foo;

@@ -1,3 +1,5 @@
+#include "Constraints.nddl"
+
 /**
  * Ensure we can handle creation of proxy variable for all types
  */

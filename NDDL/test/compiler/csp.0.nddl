@@ -1,3 +1,5 @@
+#include "Constraints.nddl"
+
 // Declare variables of type int.
 int a; // Declare a variable of type int. It's base domain = [-inf +inf]
 int b = [-inf +inf]; // Equivalent declaration but making the base domain explicit.

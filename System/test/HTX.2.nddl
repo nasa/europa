@@ -2,7 +2,7 @@
  * This test validates that we correctly control the order of states.
  */
 #include "PlannerTestConfig.nddl"
-
+#include "Plasma.nddl"
 
 class A {
   predicate pred {

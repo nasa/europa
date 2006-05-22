@@ -1,4 +1,4 @@
-// guards.xml
+// guards.nddl
 
 #include "guards.hh"
 #include "NddlUtils.hh"
@@ -30,7 +30,7 @@ namespace NDDL {
   }
   
   
-  // guards.nddl:4 Bar
+  // guards.nddl:6 Bar
   Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Bar", name, true) {
   }
@@ -55,11 +55,11 @@ namespace NDDL {
   }
   
   
-  // guards.nddl:4 Bar
+  // guards.nddl:6 Bar
   DECLARE_DEFAULT_OBJECT_FACTORY(BarFactory0, Bar);
   
   
-  // guards.nddl:6 pred
+  // guards.nddl:8 pred
   Bar::pred::pred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -79,7 +79,7 @@ namespace NDDL {
   
   
   
-  // guards.nddl:9 Foo
+  // guards.nddl:11 Foo
   Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Foo", name, true) {
   }
@@ -102,14 +102,14 @@ namespace NDDL {
   }
   
   
-  // guards.nddl:9 Foo
+  // guards.nddl:11 Foo
   void Foo::constructor() {
     arg2 = addVariable(BarDomain((new Bar(m_id, "arg2"))->getId(), "Bar"), "arg2");
     Id<Bar>(singleton(arg2))->constructor();
     Id<Bar>(singleton(arg2))->handleDefaults();
   }
   
-  // guards.nddl:9 Foo
+  // guards.nddl:11 Foo
   class FooFactory1: public ConcreteObjectFactory {
   public:
     FooFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -127,7 +127,7 @@ namespace NDDL {
   };
   
   
-  // guards.nddl:17 basicToken
+  // guards.nddl:19 basicToken
   Foo::basicToken::basicToken(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -147,7 +147,7 @@ namespace NDDL {
   
   
   
-  // guards.nddl:18 tokenWithParameters
+  // guards.nddl:20 tokenWithParameters
   Foo::tokenWithParameters::tokenWithParameters(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -182,7 +182,7 @@ namespace NDDL {
   
   
   
-  // guards.nddl:26 impliedObjectGuard
+  // guards.nddl:28 impliedObjectGuard
   Foo::impliedObjectGuard::impliedObjectGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -206,7 +206,7 @@ namespace NDDL {
   
   
   
-  // guards.nddl:30 impliedLocalVariableGuard
+  // guards.nddl:32 impliedLocalVariableGuard
   Foo::impliedLocalVariableGuard::impliedLocalVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -226,7 +226,7 @@ namespace NDDL {
   
   
   
-  // guards.nddl:32 singletonGuard
+  // guards.nddl:34 singletonGuard
   Foo::singletonGuard::singletonGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -246,7 +246,7 @@ namespace NDDL {
   
   
   
-  // guards.nddl:33 mixGuardedWithUnguarded
+  // guards.nddl:35 mixGuardedWithUnguarded
   Foo::mixGuardedWithUnguarded::mixGuardedWithUnguarded(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -266,7 +266,7 @@ namespace NDDL {
   
   
   
-  // guards.nddl:34 localVariableGuard
+  // guards.nddl:36 localVariableGuard
   Foo::localVariableGuard::localVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -286,7 +286,7 @@ namespace NDDL {
   
   
   
-  // guards.nddl:35 multipleNestedGuards
+  // guards.nddl:37 multipleNestedGuards
   Foo::multipleNestedGuards::multipleNestedGuards(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -305,7 +305,7 @@ namespace NDDL {
   }
   
   
-  // guards.nddl:41 impliedObjectGuard
+  // guards.nddl:43 impliedObjectGuard
   class Foo$impliedObjectGuard$0$0: public RuleInstance {
   public:
     Foo$impliedObjectGuard$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -320,7 +320,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$impliedObjectGuard$0, Foo$impliedObjectGuard$0$0, Foo.impliedObjectGuard, "guards.nddl,41");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$impliedObjectGuard$0, Foo$impliedObjectGuard$0$0, Foo.impliedObjectGuard, "guards.nddl,43");
   
   void Foo$impliedObjectGuard$0$0::handleExecute() {
     objectVar(Bar, bar, false, false);
@@ -358,7 +358,7 @@ namespace NDDL {
     constrainObject(object ,arg2,t0);
   }
   
-  // guards.nddl:62 impliedLocalVariableGuard
+  // guards.nddl:64 impliedLocalVariableGuard
   class Foo$impliedLocalVariableGuard$1$0: public RuleInstance {
   public:
     Foo$impliedLocalVariableGuard$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -366,7 +366,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$impliedLocalVariableGuard$1, Foo$impliedLocalVariableGuard$1$0, Foo.impliedLocalVariableGuard, "guards.nddl,62");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$impliedLocalVariableGuard$1, Foo$impliedLocalVariableGuard$1$0, Foo.impliedLocalVariableGuard, "guards.nddl,64");
   
   void Foo$impliedLocalVariableGuard$1$0::handleExecute() {
     objectVar(Foo, f1, false, false);
@@ -378,7 +378,7 @@ namespace NDDL {
     }
   }
   
-  // guards.nddl:68 singletonGuard
+  // guards.nddl:70 singletonGuard
   class Foo$singletonGuard$2$0: public RuleInstance {
   public:
     Foo$singletonGuard$2$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -400,7 +400,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$singletonGuard$2, Foo$singletonGuard$2$0, Foo.singletonGuard, "guards.nddl,68");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$singletonGuard$2, Foo$singletonGuard$2$0, Foo.singletonGuard, "guards.nddl,70");
   
   void Foo$singletonGuard$2$0::handleExecute() {
     addChildRule(new Foo$singletonGuard$2$0$0(m_id, makeScope(var(getId(),std::string("object"))),true));
@@ -423,7 +423,7 @@ namespace NDDL {
     }
   }
   
-  // guards.nddl:78 tokenWithParameters
+  // guards.nddl:80 tokenWithParameters
   class Foo$tokenWithParameters$3$0: public RuleInstance {
   public:
     Foo$tokenWithParameters$3$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -487,7 +487,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$3, Foo$tokenWithParameters$3$0, Foo.tokenWithParameters, "guards.nddl,78");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$3, Foo$tokenWithParameters$3$0, Foo.tokenWithParameters, "guards.nddl,80");
   
   void Foo$tokenWithParameters$3$0::handleExecute() {
     addChildRule(new Foo$tokenWithParameters$3$0$0(m_id, var(getId(),std::string("bool_arg")), BoolDomain(true, "bool"), true));
@@ -540,7 +540,7 @@ namespace NDDL {
     meets(this, t6);
   }
   
-  // guards.nddl:107 tokenWithParameters
+  // guards.nddl:109 tokenWithParameters
   class Foo$tokenWithParameters$4$0: public RuleInstance {
   public:
     Foo$tokenWithParameters$4$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -555,7 +555,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$4, Foo$tokenWithParameters$4$0, Foo.tokenWithParameters, "guards.nddl,107");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$tokenWithParameters$4, Foo$tokenWithParameters$4$0, Foo.tokenWithParameters, "guards.nddl,109");
   
   void Foo$tokenWithParameters$4$0::handleExecute() {
     addChildRule(new Foo$tokenWithParameters$4$0$0(m_id, makeScope(var(getId(),std::string("bool_arg"))),true));
@@ -566,7 +566,7 @@ namespace NDDL {
     meets(this, t1);
   }
   
-  // guards.nddl:114 mixGuardedWithUnguarded
+  // guards.nddl:116 mixGuardedWithUnguarded
   class Foo$mixGuardedWithUnguarded$5$0: public RuleInstance {
   public:
     Foo$mixGuardedWithUnguarded$5$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -581,7 +581,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$mixGuardedWithUnguarded$5, Foo$mixGuardedWithUnguarded$5$0, Foo.mixGuardedWithUnguarded, "guards.nddl,114");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$mixGuardedWithUnguarded$5, Foo$mixGuardedWithUnguarded$5$0, Foo.mixGuardedWithUnguarded, "guards.nddl,116");
   
   void Foo$mixGuardedWithUnguarded$5$0::handleExecute() {
     slave(Foo::tokenWithParameters, Foo.tokenWithParameters, t1, LabelStr("meets"));
@@ -601,7 +601,7 @@ namespace NDDL {
     meets(this, t2);
   }
   
-  // guards.nddl:123 localVariableGuard
+  // guards.nddl:125 localVariableGuard
   class Foo$localVariableGuard$6$0: public RuleInstance {
   public:
     Foo$localVariableGuard$6$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -644,14 +644,14 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$localVariableGuard$6, Foo$localVariableGuard$6$0, Foo.localVariableGuard, "guards.nddl,123");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$localVariableGuard$6, Foo$localVariableGuard$6$0, Foo.localVariableGuard, "guards.nddl,125");
   
   void Foo$localVariableGuard$6$0::handleExecute() {
     localVar(BoolDomain(), b, true);
     localVar(LocationsBaseDomain(), local_locations, true);
     objectVar(Foo, f, true, false);
     addChildRule(new Foo$localVariableGuard$6$0$0(m_id, makeScope(var(getId(),std::string("b"))),true));
-    addChildRule(new Foo$localVariableGuard$6$0$1(m_id, var(getId(),std::string("b")), BoolDomain(true, "bool"), true));
+    addChildRule(new Foo$localVariableGuard$6$0$1(m_id, var(getId(),std::string("b")), BoolDomain(false, "bool"), false));
     addChildRule(new Foo$localVariableGuard$6$0$2(m_id, var(getId(),std::string("b")), BoolDomain(false, "bool"), true));
     addChildRule(new Foo$localVariableGuard$6$0$3(m_id, var(getId(),std::string("local_locations")), SymbolDomain(LabelStr("Hill"), "Locations"), true));
     addChildRule(new Foo$localVariableGuard$6$0$4(m_id, makeScope(var(getId(),std::string("f"))),true));
@@ -685,7 +685,7 @@ namespace NDDL {
     }
   }
   
-  // guards.nddl:147 multipleNestedGuards
+  // guards.nddl:144 multipleNestedGuards
   class Foo$multipleNestedGuards$7$0: public RuleInstance {
   public:
     Foo$multipleNestedGuards$7$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -714,7 +714,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$multipleNestedGuards$7, Foo$multipleNestedGuards$7$0, Foo.multipleNestedGuards, "guards.nddl,147");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$multipleNestedGuards$7, Foo$multipleNestedGuards$7$0, Foo.multipleNestedGuards, "guards.nddl,144");
   
   void Foo$multipleNestedGuards$7$0::handleExecute() {
     localVar(LocationsBaseDomain(), locs, false);
@@ -753,6 +753,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("guards");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Bar", "Timeline");

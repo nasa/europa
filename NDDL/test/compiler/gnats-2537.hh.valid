@@ -1,4 +1,4 @@
-// gnats-2537.xml
+// gnats-2537.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"

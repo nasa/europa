@@ -1,4 +1,5 @@
 #include "PlannerConfig.nddl"
+#include "Plasma.nddl"
 
 class Location{
  string name;

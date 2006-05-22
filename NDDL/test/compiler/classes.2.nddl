@@ -1,9 +1,6 @@
 // Include prior model file, re-using the definition of Location
 #include "classes.0.nddl"
 
-// Include built-in class definitions. This is where we find the declaration of Timeline
-#include "Plasma.nddl"
-
 // Declare a class for describing basic Navigation state and action.
 class Navigator extends Timeline {
  // A predicate for the state of being at a location for a period of time

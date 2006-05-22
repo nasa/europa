@@ -1,5 +1,7 @@
+#include "Constraints.nddl"
+
 enum Locations {Hill, Rock, Lander};
-enum StringEnum {ONE, TWO, THREE}; //typedef string {"\"ONE\"", "\"TWO\"", "\"THREE\""} StringEnum;
+enum StringEnum {ONE, TWO, THREE};
 
 class Bar{
  Locations loc;
@@ -122,15 +124,10 @@ Foo::mixGuardedWithUnguarded{
 // Test guard based on introduction of a local variable
 Foo::localVariableGuard{
  bool b;
- if(b){
-  meets(basicToken t);
- }
- if(b == true){
-  meets(basicToken t);
- }
- if(b == false){
-  meets(basicToken t);
- }
+ // Test improved guard behavior (GNATS 3248).  Generates code eqivalent to previous test.
+ if(b) meets(basicToken t);
+ if(b != false) meets(basicToken t);
+ else meets(basicToken t);
 
  Locations local_locations;
  if(local_locations == Hill){

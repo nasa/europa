@@ -1,4 +1,4 @@
-// nddl.tx.1.xml
+// nddl.tx.1.nddl
 
 #include "nddl.tx.1.hh"
 #include "NddlUtils.hh"
@@ -6,7 +6,7 @@
 namespace NDDL {
   
   
-  // nddl.tx.1.nddl:3 Foo
+  // nddl.tx.1.nddl:5 Foo
   Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Foo", name, true) {
   }
@@ -28,11 +28,11 @@ namespace NDDL {
   }
   
   
-  // nddl.tx.1.nddl:3 Foo
+  // nddl.tx.1.nddl:5 Foo
   DECLARE_DEFAULT_OBJECT_FACTORY(FooFactory0, Foo);
   
   
-  // nddl.tx.1.nddl:4 pred0
+  // nddl.tx.1.nddl:6 pred0
   Foo::pred0::pred0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -52,7 +52,7 @@ namespace NDDL {
   
   
   
-  // nddl.tx.1.nddl:5 pred1
+  // nddl.tx.1.nddl:7 pred1
   Foo::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -72,7 +72,7 @@ namespace NDDL {
   
   
   
-  // nddl.tx.1.nddl:6 pred2
+  // nddl.tx.1.nddl:8 pred2
   Foo::pred2::pred2(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -92,7 +92,7 @@ namespace NDDL {
   
   
   
-  // nddl.tx.1.nddl:7 pred3
+  // nddl.tx.1.nddl:9 pred3
   Foo::pred3::pred3(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -112,7 +112,7 @@ namespace NDDL {
   
   
   
-  // nddl.tx.1.nddl:8 pred4
+  // nddl.tx.1.nddl:10 pred4
   Foo::pred4::pred4(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -132,7 +132,7 @@ namespace NDDL {
   
   
   
-  // nddl.tx.1.nddl:9 pred5
+  // nddl.tx.1.nddl:11 pred5
   Foo::pred5::pred5(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -152,7 +152,7 @@ namespace NDDL {
   
   
   
-  // nddl.tx.1.nddl:10 pred6
+  // nddl.tx.1.nddl:12 pred6
   Foo::pred6::pred6(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -180,6 +180,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("nddl.tx.1");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Timeline");

@@ -1,6 +1,7 @@
 // /home/sailesh/work/EXPERIMENTS/CPlan1.5/model/k9.ddl
 
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "PlannerConfig.nddl"
+#include "Plasma.nddl"
 
 class Location {
 

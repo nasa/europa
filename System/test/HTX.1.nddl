@@ -6,7 +6,7 @@
  * 3. Rejection will be permitted as an option.
  */
 #include "PlannerTestConfig.nddl"
-
+#include "Plasma.nddl"
 
 class A {
   predicate pred {

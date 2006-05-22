@@ -1,3 +1,5 @@
+#include "Constraints.nddl"
+
 // Declare a base class with one predicate
 class Foo {
  // Declare a predicate with 1 argument

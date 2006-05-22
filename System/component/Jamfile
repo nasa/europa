@@ -4,5 +4,4 @@ if ! $(PLASMA_READY) {
 
 ModuleComponent System	: CBPlannerAssembly.cc SolverAssembly.cc ;
 
-SubInclude PLASMA NDDL core libraries ;
 } # PLASMA_READY

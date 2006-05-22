@@ -1927,6 +1927,7 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(AddEqualConstraint, "AddEqual", "Default");
       REGISTER_CONSTRAINT(MultEqualConstraint, "MultEqual", "Default");
       REGISTER_CONSTRAINT(AddMultEqualConstraint, "AddMultEqual", "Default");
+      REGISTER_CONSTRAINT(AddMultEqualConstraint, "addMulEq", "Default");
       REGISTER_CONSTRAINT(AllDiffConstraint, "AllDiff", "Default");
       REGISTER_CONSTRAINT(CardinalityConstraint, "Cardinality", "Default");
       REGISTER_CONSTRAINT(CondAllDiffConstraint, "CondAllDiff", "Default");
@@ -1963,6 +1964,7 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(AllDiffConstraint, "fadiff", "Default"); // flexible all different
       REGISTER_CONSTRAINT(AllDiffConstraint, "fneq", "Default"); // flexible not equal
       REGISTER_CONSTRAINT(CardinalityConstraint, "card", "Default"); // cardinality not more than
+      REGISTER_CONSTRAINT(CondAllSameConstraint, "condEq", "Default");
       REGISTER_CONSTRAINT(CondAllSameConstraint, "condeq", "Default");
       REGISTER_CONSTRAINT(CondAllSameConstraint, "condasame", "Default");
       REGISTER_CONSTRAINT(TestLessThan, "condlt", "Default");

@@ -1,4 +1,4 @@
-// simple-class.xml
+// simple-class.nddl
 
 #include "simple-class.hh"
 #include "NddlUtils.hh"
@@ -55,7 +55,7 @@ namespace NDDL {
   }
   
   
-  // simple-class.nddl:7 Foo
+  // simple-class.nddl:9 Foo
   Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Foo", name, true) {
   }
@@ -97,12 +97,12 @@ namespace NDDL {
   }
   
   
-  // simple-class.nddl:7 Foo
+  // simple-class.nddl:9 Foo
   void Foo::constructor() {
     m_3 = addVariable(StringDomain(LabelStr("This string must be initialized"), "string"), "m_3");
   }
   
-  // simple-class.nddl:7 Foo
+  // simple-class.nddl:9 Foo
   class FooFactory0: public ConcreteObjectFactory {
   public:
     FooFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -119,7 +119,7 @@ namespace NDDL {
     }
   };
   
-  // simple-class.nddl:7 Foo
+  // simple-class.nddl:9 Foo
   void Foo::constructor(int _m_0, float _m_1) {
     m_0 = addVariable(IntervalIntDomain(_m_0, _m_0, "int"), "m_0");
     m_1 = addVariable(IntervalDomain(_m_1, _m_1, "float"), "m_1");
@@ -131,7 +131,7 @@ namespace NDDL {
     m_8 = addVariable(Strings(LabelStr("Martian City"), "Strings"), "m_8");
   }
   
-  // simple-class.nddl:7 Foo
+  // simple-class.nddl:9 Foo
   class FooFactory1: public ConcreteObjectFactory {
   public:
     FooFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -161,7 +161,7 @@ namespace NDDL {
   };
   
   
-  // simple-class.nddl:37 World
+  // simple-class.nddl:39 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -190,7 +190,7 @@ namespace NDDL {
   
   
   
-  // simple-class.nddl:43 initialState
+  // simple-class.nddl:45 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -210,7 +210,7 @@ namespace NDDL {
   
   
   
-  // simple-class.nddl:44 Hill
+  // simple-class.nddl:46 Hill
   World::Hill::Hill(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -229,7 +229,7 @@ namespace NDDL {
   }
   
   
-  // simple-class.nddl:37 World
+  // simple-class.nddl:39 World
   void World::constructor() {
     m_foo1 = addVariable(FooDomain((new Foo(m_id, "m_foo1"))->getId(), "Foo"), "m_foo1");
     Id<Foo>(singleton(m_foo1))->constructor();
@@ -239,7 +239,7 @@ namespace NDDL {
     Id<Foo>(singleton(m_foo2))->handleDefaults();
   }
   
-  // simple-class.nddl:37 World
+  // simple-class.nddl:39 World
   class WorldFactory2: public ConcreteObjectFactory {
   public:
     WorldFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -256,7 +256,7 @@ namespace NDDL {
     }
   };
   
-  // simple-class.nddl:52 initialState
+  // simple-class.nddl:54 initialState
   class World$initialState$0$0: public RuleInstance {
   public:
     World$initialState$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -264,7 +264,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$0, World$initialState$0$0, World.initialState, "simple-class.nddl,52");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$0, World$initialState$0$0, World.initialState, "simple-class.nddl,54");
   
   void World$initialState$0$0::handleExecute() {
     slave(World::Hill, World.Hill, h, LabelStr("meets"));
@@ -286,6 +286,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("simple-class");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");

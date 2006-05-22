@@ -1,4 +1,4 @@
-// guards.xml
+// guards.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -16,16 +16,16 @@ namespace NDDL {
   
   
   
-  // guards.nddl:1 Locations
+  // guards.nddl:3 Locations
   typedef SymbolDomain Locations;
   Locations LocationsBaseDomain();
   
   
-  // guards.nddl:2 StringEnum
+  // guards.nddl:4 StringEnum
   typedef SymbolDomain StringEnum;
   StringEnum StringEnumBaseDomain();
   
-  // guards.nddl:4 Bar
+  // guards.nddl:6 Bar
   class Bar : public Timeline {
   public:
     Bar(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -39,7 +39,7 @@ namespace NDDL {
     typedef Id<pred> predId;
     ConstrainedVariableId loc; // SchemaWriter::declareVariable
     
-    // guards.nddl:6 pred
+    // guards.nddl:8 pred
     class pred : public NddlToken {
     public:
       pred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -50,7 +50,7 @@ namespace NDDL {
     };
   };
   
-  // guards.nddl:9 Foo
+  // guards.nddl:11 Foo
   class Foo : public Timeline {
   public:
     Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -78,10 +78,10 @@ namespace NDDL {
     ConstrainedVariableId arg1; // SchemaWriter::declareVariable
     ConstrainedVariableId arg2; // SchemaWriter::declareVariable
     
-    // guards.nddl:9 Foo
+    // guards.nddl:11 Foo
     virtual void constructor();
     
-    // guards.nddl:17 basicToken
+    // guards.nddl:19 basicToken
     class basicToken : public NddlToken {
     public:
       basicToken(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -91,7 +91,7 @@ namespace NDDL {
       
     };
     
-    // guards.nddl:18 tokenWithParameters
+    // guards.nddl:20 tokenWithParameters
     class tokenWithParameters : public NddlToken {
     public:
       tokenWithParameters(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -106,7 +106,7 @@ namespace NDDL {
       ConstrainedVariableId strEnum_arg; // SchemaWriter::declareVariable
     };
     
-    // guards.nddl:26 impliedObjectGuard
+    // guards.nddl:28 impliedObjectGuard
     class impliedObjectGuard : public NddlToken {
     public:
       impliedObjectGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -117,7 +117,7 @@ namespace NDDL {
       ConstrainedVariableId allFoo; // SchemaWriter::declareVariable
     };
     
-    // guards.nddl:30 impliedLocalVariableGuard
+    // guards.nddl:32 impliedLocalVariableGuard
     class impliedLocalVariableGuard : public NddlToken {
     public:
       impliedLocalVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -127,7 +127,7 @@ namespace NDDL {
       
     };
     
-    // guards.nddl:32 singletonGuard
+    // guards.nddl:34 singletonGuard
     class singletonGuard : public NddlToken {
     public:
       singletonGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -137,7 +137,7 @@ namespace NDDL {
       
     };
     
-    // guards.nddl:33 mixGuardedWithUnguarded
+    // guards.nddl:35 mixGuardedWithUnguarded
     class mixGuardedWithUnguarded : public NddlToken {
     public:
       mixGuardedWithUnguarded(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -147,7 +147,7 @@ namespace NDDL {
       
     };
     
-    // guards.nddl:34 localVariableGuard
+    // guards.nddl:36 localVariableGuard
     class localVariableGuard : public NddlToken {
     public:
       localVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -157,7 +157,7 @@ namespace NDDL {
       
     };
     
-    // guards.nddl:35 multipleNestedGuards
+    // guards.nddl:37 multipleNestedGuards
     class multipleNestedGuards : public NddlToken {
     public:
       multipleNestedGuards(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);

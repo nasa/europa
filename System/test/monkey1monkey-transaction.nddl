@@ -1,8 +1,8 @@
 // From Rover-transaction.nddl and
 //   monkey1monkey.init, which is a copy of NewPlan/ModuleTests/Parser/monkey1/timeline.init.
 
+#include "PlannerConfig.nddl"
 #include "monkey1monkey.nddl"
-#include "../../NDDL/core/PlannerConfig.nddl"
 
 PlannerConfig world = new PlannerConfig(0, 200, 500);
 

@@ -1,5 +1,5 @@
 #include "Rover-reservoir.nddl"
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "PlannerConfig.nddl"
 
 // Allocate objects of the problem
 PlannerConfig world = new PlannerConfig(0, 100, 100);

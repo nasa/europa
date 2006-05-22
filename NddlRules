@@ -17,7 +17,7 @@ rule RunNDDLProblem {
  local prefix = $(7) ;
  model = lib$(model)$(SUFSHARE) ;
  local txSource = $(initialState:S=.xml) ;
- NddlParser $(txSource) : $(initialState) ;
+ Nddl $(txSource) : $(initialState) ;
  Depends $(problem) : $(txSource) ;
  RunModuleMain $(problem) : $(executable) : $(model) $(txSource) $(config) $(path) : $(prefix) ; 
 }
@@ -36,8 +36,10 @@ rule NddlMain {
 
   local hh = $(model:S=.hh) ;
   local cc = [ FGristFiles $(model:S=.cc) ] ;
+  local xml = $(model:S=.xml) ;
   Includes $(cc) : $(hh) ;
-  NddlCompiler $(hh) $(cc) : $(model) ;
+	Includes $(cc) : $(xml) ;
+  Nddl $(xml) $(hh) $(cc) : $(model) ;
   ModuleMain $(exe) : $(cc) $(code) : $(module) : $(build_target) ;
 }
 
@@ -55,7 +57,7 @@ rule NddlModel {
   local cc = [ FGristFiles $(model:S=.cc) ] ;
   local lib = $(model:S=) ;
   Includes $(cc) : $(hh) ;
-  NddlCompiler $(hh) $(cc) : $(model) ;
+  Nddl $(hh) $(cc) : $(model) ;
   ModuleSharedLibrary $(lib) : $(cc) : $(modules) : $(build_target) ;
 }
 
@@ -70,40 +72,25 @@ rule NddlSystemTest {
   RunModuleMain $(target) : $(exe) : $(model:S=.xml) ;
 }
 
-# NddlCompiler model.hh model.cc : model.xml ;
-# NddlCompiler model.hh model.cc : model.nddl ;
-rule NddlCompiler {
-  local code = $(1) ;
-  local model = $(2) ;
+# Nddl <model.xml> <model.hh model.cc> : model.nddl
+rule Nddl {
+	local code = $(1) ;
+	local model = $(2) ;
 
-  if $(TRACE_NDDL) = TRUE {
-    Echo NddlCompiler $(code) . $(model) ;
-  }
+	if $(TRACE_NDDL) = TRUE {
+		Echo Nddl $(code) . $(model) ;
+	}
 
-  local xml ;
-  if $(model:S) = .xml {
-    xml = [ FGristFiles $(model) ] ;
-  } else {
-    xml = [ FGristFiles $(model:S=.xml) ] ;
-    NddlParser $(xml) : $(model) ;
-  }
-
-  NddlCompiler1 $(code) : $(xml) ;
+	SEARCH on $(model) = $(SEARCH_SOURCE) ;
+	LOCATE on $(code) = $(LOCATE_TARGET) ;
+	Depends $(code) : nddl.jar ;
+	Depends $(code) : $(model) ;
+	LocalClean clean : $(code) ;
 }
 
-rule NddlCompiler1 {
-  local code = $(1) ;
-  local xml = $(2) ;
-
-  SEARCH on $(xml) = $(SEARCH_SOURCE) ;
-  Depends $(code) : nddl.jar ;
-  Depends $(code) : $(xml) ;
-  MakeLocate $(code) : $(LOCATE_TARGET) ;
-  LocalClean clean : $(code) ;
-}
-
-actions NddlCompiler1 {
-  "$(JAVA)" -cp $(CLASSPATH) $(JREFLAGS) nddl.NddlCompiler -q $(2) 
+# send the flag -Wall to Nddl to enable warning messages
+actions Nddl {
+$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" -q $(2)
 }
 
 # NddlParser model.xml : model.nddl ;
@@ -137,7 +124,7 @@ rule NddlParser1 {
 }
 
 actions NddlParser1 {
-  "$(JAVA)" -cp $(CLASSPATH) $(JREFLAGS) nddl.Parse -q -o $(1) $(2) 
+$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" --NddlParser -q $(2) 
 }
 
 } # NddlRules_INCLUDED

@@ -1,3 +1,5 @@
+#include "Constraints.nddl"
+
 // Use enumerations to declare user-defined collections where the elements are primitves
 typedef int{1, 2, 3, 4} Ints; // Enumeration of integers - numeric with no decimal
 typedef float{1.2, 2.3, 3.4, 67.9} Floats; // Enumeration of floats - decimal point used

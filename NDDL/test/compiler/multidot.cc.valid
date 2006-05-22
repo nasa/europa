@@ -1,4 +1,4 @@
-// multidot.xml
+// multidot.nddl
 
 #include "multidot.hh"
 #include "NddlUtils.hh"
@@ -6,7 +6,7 @@
 namespace NDDL {
   
   
-  // multidot.nddl:1 Foo
+  // multidot.nddl:3 Foo
   Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Foo", name, true) {
   }
@@ -28,11 +28,11 @@ namespace NDDL {
   }
   
   
-  // multidot.nddl:1 Foo
+  // multidot.nddl:3 Foo
   DECLARE_DEFAULT_OBJECT_FACTORY(FooFactory0, Foo);
   
   
-  // multidot.nddl:5 Bar
+  // multidot.nddl:6 Bar
   Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Bar", name, true) {
   }
@@ -52,12 +52,12 @@ namespace NDDL {
   }
   
   
-  // multidot.nddl:5 Bar
+  // multidot.nddl:6 Bar
   void Bar::constructor(const FooId& foo) {
     m_foo = addVariable(FooDomain(foo, "Foo"), "m_foo");
   }
   
-  // multidot.nddl:5 Bar
+  // multidot.nddl:6 Bar
   class BarFactory1: public ConcreteObjectFactory {
   public:
     BarFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -81,7 +81,7 @@ namespace NDDL {
   };
   
   
-  // multidot.nddl:14 Baz
+  // multidot.nddl:15 Baz
   Baz::Baz(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Baz", name, true) {
   }
@@ -103,13 +103,13 @@ namespace NDDL {
   }
   
   
-  // multidot.nddl:14 Baz
+  // multidot.nddl:15 Baz
   void Baz::constructor(const BarId& bar, const FooId& foo) {
     myBar = addVariable(BarDomain(bar, "Bar"), "myBar");
     myfoo = addVariable(FooDomain(foo, "Foo"), "myfoo");
   }
   
-  // multidot.nddl:14 Baz
+  // multidot.nddl:15 Baz
   class BazFactory2: public ConcreteObjectFactory {
   public:
     BazFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -139,7 +139,7 @@ namespace NDDL {
   };
   
   
-  // multidot.nddl:23 apred
+  // multidot.nddl:24 apred
   Baz::apred::apred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -163,7 +163,7 @@ namespace NDDL {
   
   
   
-  // multidot.nddl:27 bpred
+  // multidot.nddl:28 bpred
   Baz::bpred::bpred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -186,7 +186,7 @@ namespace NDDL {
   }
   
   
-  // multidot.nddl:32 apred
+  // multidot.nddl:33 apred
   class Baz$apred$0$0: public RuleInstance {
   public:
     Baz$apred$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -194,7 +194,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Baz$apred$0, Baz$apred$0$0, Baz.apred, "multidot.nddl,32");
+  DECLARE_AND_DEFINE_RULE(Rule$Baz$apred$0, Baz$apred$0$0, Baz.apred, "multidot.nddl,33");
   
   void Baz$apred$0$0::handleExecute() {
     slave(Baz::bpred, Baz.bpred, bp, LabelStr("meets"));
@@ -215,7 +215,7 @@ namespace NDDL {
   }
   
   
-  // multidot.nddl:39 Mumble
+  // multidot.nddl:40 Mumble
   Mumble::Mumble(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Mumble", name, true) {
   }
@@ -235,12 +235,12 @@ namespace NDDL {
   }
   
   
-  // multidot.nddl:39 Mumble
+  // multidot.nddl:40 Mumble
   void Mumble::constructor(const BazId& baz) {
     myBaz = addVariable(BazDomain(baz, "Baz"), "myBaz");
   }
   
-  // multidot.nddl:39 Mumble
+  // multidot.nddl:40 Mumble
   class MumbleFactory3: public ConcreteObjectFactory {
   public:
     MumbleFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -264,7 +264,7 @@ namespace NDDL {
   };
   
   
-  // multidot.nddl:46 mumbPred
+  // multidot.nddl:47 mumbPred
   Mumble::mumbPred::mumbPred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -287,7 +287,7 @@ namespace NDDL {
   }
   
   
-  // multidot.nddl:51 mumbPred
+  // multidot.nddl:52 mumbPred
   class Mumble$mumbPred$1$0: public RuleInstance {
   public:
     Mumble$mumbPred$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -295,7 +295,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Mumble$mumbPred$1, Mumble$mumbPred$1$0, Mumble.mumbPred, "multidot.nddl,51");
+  DECLARE_AND_DEFINE_RULE(Rule$Mumble$mumbPred$1, Mumble$mumbPred$1$0, Mumble.mumbPred, "multidot.nddl,52");
   
   void Mumble$mumbPred$1$0::handleExecute() {
     {
@@ -315,6 +315,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("multidot");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");

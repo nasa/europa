@@ -1,4 +1,4 @@
-// existential.xml
+// existential.nddl
 
 #include "existential.hh"
 #include "NddlUtils.hh"
@@ -6,7 +6,7 @@
 namespace NDDL {
   
   
-  // existential.nddl:1 Location
+  // existential.nddl:3 Location
   Location::Location(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Location", name, true) {
   }
@@ -27,12 +27,12 @@ namespace NDDL {
   }
   
   
-  // existential.nddl:1 Location
+  // existential.nddl:3 Location
   void Location::constructor(const LabelStr& _name) {
     name = addVariable(StringDomain(_name, "string"), "name");
   }
   
-  // existential.nddl:1 Location
+  // existential.nddl:3 Location
   class LocationFactory0: public ConcreteObjectFactory {
   public:
     LocationFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -56,7 +56,7 @@ namespace NDDL {
   };
   
   
-  // existential.nddl:8 Path
+  // existential.nddl:10 Path
   Path::Path(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Path", name, true) {
   }
@@ -81,14 +81,14 @@ namespace NDDL {
   }
   
   
-  // existential.nddl:8 Path
+  // existential.nddl:10 Path
   void Path::constructor(const LocationId& _from, const LocationId& _to) {
     from = addVariable(LocationDomain(_from, "Location"), "from");
     to = addVariable(LocationDomain(_to, "Location"), "to");
     m_int = addVariable(IntervalIntDomain(1, 1, "int"), "m_int");
   }
   
-  // existential.nddl:8 Path
+  // existential.nddl:10 Path
   class PathFactory1: public ConcreteObjectFactory {
   public:
     PathFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -118,7 +118,7 @@ namespace NDDL {
   };
   
   
-  // existential.nddl:19 World
+  // existential.nddl:21 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -153,7 +153,7 @@ namespace NDDL {
   
   
   
-  // existential.nddl:30 Going
+  // existential.nddl:32 Going
   World::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -189,7 +189,7 @@ namespace NDDL {
   
   
   
-  // existential.nddl:36 initialState
+  // existential.nddl:38 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -208,7 +208,7 @@ namespace NDDL {
   }
   
   
-  // existential.nddl:19 World
+  // existential.nddl:21 World
   void World::constructor() {
     rock = addVariable(LocationDomain((new Location(m_id, "rock"))->getId(), "Location"), "rock");
     Id<Location>(singleton(rock))->constructor(LabelStr("ROCK"));
@@ -236,7 +236,7 @@ namespace NDDL {
     Id<Path>(singleton(path4))->handleDefaults();
   }
   
-  // existential.nddl:19 World
+  // existential.nddl:21 World
   class WorldFactory2: public ConcreteObjectFactory {
   public:
     WorldFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -253,7 +253,7 @@ namespace NDDL {
     }
   };
   
-  // existential.nddl:49 Going
+  // existential.nddl:51 Going
   class World$Going$0$0: public RuleInstance {
   public:
     World$Going$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -261,7 +261,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$Going$0, World$Going$0$0, World.Going, "existential.nddl,49");
+  DECLARE_AND_DEFINE_RULE(Rule$World$Going$0, World$Going$0$0, World.Going, "existential.nddl,51");
   
   void World$Going$0$0::handleExecute() {
     localVar(IntervalIntDomain(), intVar, false);
@@ -287,7 +287,7 @@ namespace NDDL {
     }
   }
   
-  // existential.nddl:60 initialState
+  // existential.nddl:62 initialState
   class World$initialState$1$0: public RuleInstance {
   public:
     World$initialState$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -309,7 +309,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "existential.nddl,60");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "existential.nddl,62");
   
   void World$initialState$1$0::handleExecute() {
     objectVar(Path, p1, false, false);
@@ -424,6 +424,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("existential");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Location", "Object");

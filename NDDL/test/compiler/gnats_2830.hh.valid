@@ -1,4 +1,4 @@
-// gnats_2830.xml
+// gnats_2830.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -52,11 +52,11 @@ namespace NDDL {
   };
   
   
-  // gnats_2830.nddl:3 Location
+  // gnats_2830.nddl:4 Location
   typedef SymbolDomain Location;
   Location LocationBaseDomain();
   
-  // gnats_2830.nddl:5 Path
+  // gnats_2830.nddl:6 Path
   class Path : public Object {
   public:
     Path(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -68,11 +68,11 @@ namespace NDDL {
     ConstrainedVariableId _from; // SchemaWriter::declareVariable
     ConstrainedVariableId _to; // SchemaWriter::declareVariable
     
-    // gnats_2830.nddl:5 Path
+    // gnats_2830.nddl:6 Path
     virtual void constructor(const LabelStr& f, const LabelStr& t);
   };
   
-  // gnats_2830.nddl:15 Enable
+  // gnats_2830.nddl:16 Enable
   class Enable : public Object {
   public:
     Enable(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -84,11 +84,11 @@ namespace NDDL {
     ConstrainedVariableId _t; // SchemaWriter::declareVariable
     ConstrainedVariableId _p; // SchemaWriter::declareVariable
     
-    // gnats_2830.nddl:15 Enable
+    // gnats_2830.nddl:16 Enable
     virtual void constructor(const LabelStr& l, const PathId& p);
   };
   
-  // gnats_2830.nddl:25 Position
+  // gnats_2830.nddl:26 Position
   class Position : public Timeline {
   public:
     Position(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -103,7 +103,7 @@ namespace NDDL {
     class Navigate;
     typedef Id<Navigate> NavigateId;
     
-    // gnats_2830.nddl:27 At
+    // gnats_2830.nddl:28 At
     class At : public NddlToken {
     public:
       At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -114,7 +114,7 @@ namespace NDDL {
       ConstrainedVariableId _l; // SchemaWriter::declareVariable
     };
     
-    // gnats_2830.nddl:31 Navigate
+    // gnats_2830.nddl:32 Navigate
     class Navigate : public NddlToken {
     public:
       Navigate(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -128,7 +128,7 @@ namespace NDDL {
     };
   };
   
-  // gnats_2830.nddl:38 Foo
+  // gnats_2830.nddl:39 Foo
   class Foo : public Timeline {
   public:
     Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -141,7 +141,7 @@ namespace NDDL {
     class FooPred;
     typedef Id<FooPred> FooPredId;
     
-    // gnats_2830.nddl:40 FooPred
+    // gnats_2830.nddl:41 FooPred
     class FooPred : public NddlToken {
     public:
       FooPred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);

@@ -1,4 +1,4 @@
-// interval-constants.xml
+// interval-constants.nddl
 
 #include "interval-constants.hh"
 #include "NddlUtils.hh"
@@ -6,7 +6,7 @@
 namespace NDDL {
   
   
-  // interval-constants.nddl:1 Foo
+  // interval-constants.nddl:3 Foo
   Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Foo", name, true) {
   }
@@ -28,7 +28,7 @@ namespace NDDL {
   
   
   
-  // interval-constants.nddl:3 pred1
+  // interval-constants.nddl:5 pred1
   Foo::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -61,12 +61,12 @@ namespace NDDL {
   }
   
   
-  // interval-constants.nddl:1 Foo
+  // interval-constants.nddl:3 Foo
   void Foo::constructor() {
     f_var = addVariable(IntervalDomain(10.9, 10.9, "float"), "f_var");
   }
   
-  // interval-constants.nddl:1 Foo
+  // interval-constants.nddl:3 Foo
   class FooFactory0: public ConcreteObjectFactory {
   public:
     FooFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -83,7 +83,7 @@ namespace NDDL {
     }
   };
   
-  // interval-constants.nddl:13 pred1
+  // interval-constants.nddl:15 pred1
   class Foo$pred1$0$0: public RuleInstance {
   public:
     Foo$pred1$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -91,7 +91,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Foo$pred1$0, Foo$pred1$0$0, Foo.pred1, "interval-constants.nddl,13");
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$pred1$0, Foo$pred1$0$0, Foo.pred1, "interval-constants.nddl,15");
   
   void Foo$pred1$0$0::handleExecute() {
     {
@@ -103,7 +103,7 @@ namespace NDDL {
   }
   
   
-  // interval-constants.nddl:17 World
+  // interval-constants.nddl:19 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -124,7 +124,7 @@ namespace NDDL {
   
   
   
-  // interval-constants.nddl:19 initialState
+  // interval-constants.nddl:21 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -143,14 +143,14 @@ namespace NDDL {
   }
   
   
-  // interval-constants.nddl:17 World
+  // interval-constants.nddl:19 World
   void World::constructor() {
     obj1 = addVariable(FooDomain((new Foo(m_id, "obj1"))->getId(), "Foo"), "obj1");
     Id<Foo>(singleton(obj1))->constructor();
     Id<Foo>(singleton(obj1))->handleDefaults();
   }
   
-  // interval-constants.nddl:17 World
+  // interval-constants.nddl:19 World
   class WorldFactory1: public ConcreteObjectFactory {
   public:
     WorldFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -167,7 +167,7 @@ namespace NDDL {
     }
   };
   
-  // interval-constants.nddl:27 initialState
+  // interval-constants.nddl:29 initialState
   class World$initialState$1$0: public RuleInstance {
   public:
     World$initialState$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -175,7 +175,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "interval-constants.nddl,27");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "interval-constants.nddl,29");
   
   void World$initialState$1$0::handleExecute() {
     slave(Foo::pred1, Foo.pred1, foo, LabelStr("any"));
@@ -190,6 +190,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("interval-constants");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Timeline");

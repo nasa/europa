@@ -47,9 +47,9 @@ goal(Rover_Class___location.At g106);
 Bobo.location.constrain(g82, g106);
   g106.Loc_Label.specify(Location_Label.rock);
 
-temporaldistance(g11.end, [0 30], g34.start); // key=45
+temporalDistance(g11.end, [0 30], g34.start); // key=45
 g11 before g34; // key=54
-temporaldistance(g34.end, [20 30], g58.start); // key=69
+temporalDistance(g34.end, [20 30], g58.start); // key=69
 g34 before g58; // key=78
 g58 before g82; // key=93
 g58 before g82; // key=102

@@ -148,7 +148,7 @@ P4C3___A::Ia {
 
 P4C3___Ap::Wa {
   eq(duration, [1 +inf]);
-  condasame(Idle, dx, dy);
+  condEq(Idle, dx, dy);
   eq(dx, [0.00000 +inff]);
   eq(dy, [-inff 0.00000]);
   meets(P4C3___Ap.Na s0);
@@ -164,7 +164,7 @@ P4C3___Ap::Wa {
 
 P4C3___Ap::Na {
   eq(duration, [1 +inf]);
-  condasame(Idle, dx, dy);
+  condEq(Idle, dx, dy);
   eq(dx, [-inff 0.00000]);
   eq(dy, [0.00000 +inff]);
   meets(P4C3___Ap.Wa s0);
@@ -209,7 +209,7 @@ P4C3___B::Ib {
 
 P4C3___Bp::Wb {
   eq(duration, [1 +inf]);
-  condasame(Idle, dx, dy);
+  condEq(Idle, dx, dy);
   eq(dx, [0.00000 +inff]);
   eq(dy, [-inff 0.00000]);
   meets(P4C3___Bp.Nb s0);
@@ -225,7 +225,7 @@ P4C3___Bp::Wb {
 
 P4C3___Bp::Nb {
   eq(duration, [1 +inf]);
-  condasame(Idle, dx, dy);
+  condEq(Idle, dx, dy);
   eq(dx, [-inff 0.00000]);
   eq(dy, [0.00000 +inff]);
   meets(P4C3___Bp.Wb s0);

@@ -1,4 +1,4 @@
-// globals.xml
+// globals.nddl
 
 #include "globals.hh"
 #include "NddlUtils.hh"
@@ -25,7 +25,7 @@ namespace NDDL {
   
   
   
-  // Plasma.nddl:141 UnaryResource
+  // Plasma.nddl:143 UnaryResource
   UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "UnaryResource", name, true) {
   }
@@ -47,11 +47,11 @@ namespace NDDL {
   }
   
   
-  // Plasma.nddl:141 UnaryResource
+  // Plasma.nddl:143 UnaryResource
   DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);
   
   
-  // Plasma.nddl:142 uses
+  // Plasma.nddl:144 uses
   UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -79,7 +79,7 @@ namespace NDDL {
   
   
   
-  // Plasma.nddl:151 StringData
+  // Plasma.nddl:153 StringData
   StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "StringData", name, true) {
   }
@@ -100,12 +100,12 @@ namespace NDDL {
   }
   
   
-  // Plasma.nddl:151 StringData
+  // Plasma.nddl:153 StringData
   void StringData::constructor(const LabelStr& _data) {
     data = addVariable(StringDomain(_data, "string"), "data");
   }
   
-  // Plasma.nddl:151 StringData
+  // Plasma.nddl:153 StringData
   class StringDataFactory1: public ConcreteObjectFactory {
   public:
     StringDataFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -271,6 +271,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("globals");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Resource", "Object");

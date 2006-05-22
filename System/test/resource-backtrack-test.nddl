@@ -1,5 +1,5 @@
-#include "../../NDDL/core/PlannerConfig.nddl"
-#include "../../NDDL/core/Plasma.nddl"
+#include "PlannerConfig.nddl"
+#include "Plasma.nddl"
 
 class Battery extends Resource {
  Battery(float ic, float ll_min, float ll_max) {

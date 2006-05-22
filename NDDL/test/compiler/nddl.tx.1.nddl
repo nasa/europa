@@ -1,3 +1,5 @@
+#include "Constraints.nddl"
+
 // Class declrataion and other preliminaries before we get to the use of
 // Allen Relations for token ordering
 class Foo { // Declare a basic class with a set of simple predicates

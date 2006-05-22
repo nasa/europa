@@ -166,7 +166,7 @@ Monkey_Class___Banana_SV::NOT_HAVE_BANANA {
   meets(GRABBING_BANANA s0);
   eq(object,s0.object);
   ends_before(HAVE_BANANA s1);
-  temporaldistance(this.end, [0 +inf], s1.end);
+  temporalDistance(this.end, [0 +inf], s1.end);
   eq(object,s1.object);
 }
 

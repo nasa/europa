@@ -270,8 +270,8 @@ Agent_Class___Planner_SV::Planning {
 //output subgoal
 //outputSubgoalCreation
   contained_by(Agent_Class___Planning_Horizon_SV.Planning_Horizon s2);
-  temporaldistance(s2.start, [4 +inf], this.start);
-  temporaldistance(this.end, [4 +inf], s2.end);
+  temporalDistance(s2.start, [4 +inf], this.start);
+  temporalDistance(this.end, [4 +inf], s2.end);
     eq(s2.horizon, Horizon_Label.Intermediate_Horizon);
     eq(s2.Horizon_Start, Start_Horizon);
     eq(s2.Horizon_End, Horizon_End);
@@ -324,7 +324,7 @@ Agent_Class___Planning_Horizon_SV::Planning_Horizon {
     eq(duration, [4 +inf]);
     eq(Token_Start, start);
     eq(Token_End, end);
-    addeq(4, Horizon_Start, end);
+    addEq(4, Horizon_Start, end);
   }
 }
 
@@ -340,8 +340,8 @@ Agent_Class___Agent_Mode_SV::Agent_Mode {
 //output subgoal
 //outputSubgoalCreation
       contains_start(Monkey_Class___Banana_SV.HAVE_BANANA s0);
-      temporaldistance(this.start, [0 +inf], s0.start);
-      temporaldistance(s0.start, [0 +inf], this.end);
+      temporalDistance(this.start, [0 +inf], s0.start);
+      temporalDistance(s0.start, [0 +inf], this.end);
     }
   }
   if (mode==Agent_Mode_Label.Nominal) {

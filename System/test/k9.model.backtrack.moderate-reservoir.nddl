@@ -1,4 +1,4 @@
-#include "../../NDDL/core/Plasma.nddl"
+#include "Plasma.nddl"
 
 enum Types {ACTION, FLUENT};
 enum Data {CHAMPIMAGE, MOSSBAUER, OPPSCI};

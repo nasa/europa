@@ -91,7 +91,7 @@ Rover_Class___charge::Maintain {
 }
 
 Rover_Class___charge::Charge {
-  addmuleq(Start_Val, duration, Rate_Val, End_Val);
+  addMulEq(Start_Val, duration, Rate_Val, End_Val);
   eq(Start_Val, [10 100]);
   eq(Start_Val, [0 200]);
   eq(Rate_Val, 20);
@@ -110,7 +110,7 @@ Rover_Class___charge::Charge {
 }
 
 Rover_Class___charge::Use {
-  addmuleq(End_Val, duration, Rate_Val, Start_Val);
+  addMulEq(End_Val, duration, Rate_Val, Start_Val);
   eq(Start_Val, [0 200]);
   eq(Rate_Val, 20);
   eq(End_Val, [0 200]);

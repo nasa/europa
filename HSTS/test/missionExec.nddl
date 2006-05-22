@@ -1,4 +1,5 @@
 // missionExec.ddl
+#include "Plasma.nddl"
 
 enum ReturnStatus { OK, Failed } 
 
@@ -583,8 +584,8 @@ TEMPEST_Class___TEMPEST_SV::TEMPEST_PlanPrep {
 //output subgoal
 //outputSubgoalCreation
     starts_during(InstrumentManager_Class___InstrumentManager_SV.InstrumentManager_Idle s0);
-    temporaldistance(s0.start, [0 +inf], this.start);
-    temporaldistance(this.start, [0 +inf], s0.end);
+    temporalDistance(s0.start, [0 +inf], this.start);
+    temporalDistance(this.start, [0 +inf], s0.end);
   }
   if (during_IM_idle==true) {
 //output subgoal
@@ -667,7 +668,7 @@ TEMPEST_Class___MissionExecutive_SV::DriveAction {
   eq(duration, [3 60000]);
   eq(start, startTime);
   leq(end, endTime);
-  addeq(1, currTokenIndex, nextTokenIndex);
+  addEq(1, currTokenIndex, nextTokenIndex);
   eq(currTokenIndex, [0 1000]);
   eq(nextTokenIndex, [0 1000]);
 //output subgoal
@@ -839,7 +840,7 @@ TEMPEST_Class___MissionExecutive_SV::ChargeAction {
   eq(start, startTime);
   eq(end, endTime);
   eq(duration, __DDL__duration);
-  addeq(1, currTokenIndex, nextTokenIndex);
+  addEq(1, currTokenIndex, nextTokenIndex);
   eq(currTokenIndex, [0 1000]);
   eq(nextTokenIndex, [0 1000]);
 //output subgoal
@@ -891,7 +892,7 @@ TEMPEST_Class___MissionExecutive_SV::ViaPointAction {
   eq(duration, 3);
   eq(start, startTime);
   eq(end, endTime);
-  addeq(1, currTokenIndex, nextTokenIndex);
+  addEq(1, currTokenIndex, nextTokenIndex);
   eq(currTokenIndex, [0 1000]);
   eq(nextTokenIndex, [0 1000]);
 //output subgoal
@@ -933,7 +934,7 @@ TEMPEST_Class___MissionExecutive_SV::ScienceAction {
   eq(duration, [3 60000]);
   eq(start, startTime);
   leq(end, endTime);
-  addeq(1, currTokenIndex, nextTokenIndex);
+  addEq(1, currTokenIndex, nextTokenIndex);
   eq(currTokenIndex, [0 1000]);
   eq(nextTokenIndex, [0 1000]);
 //output subgoal
@@ -1097,7 +1098,7 @@ TEMPEST_Class___MissionExecutive_SV::FluorMosaicAction {
   eq(duration, 3);
   eq(start, startTime);
   eq(end, endTime);
-  addeq(1, currTokenIndex, nextTokenIndex);
+  addEq(1, currTokenIndex, nextTokenIndex);
   eq(currTokenIndex, [0 1000]);
   eq(nextTokenIndex, [0 1000]);
 //output subgoal
@@ -2297,7 +2298,7 @@ TEMPEST_Class___VehicleController_SV::VehicleController {
   }
   if (vcState==VehicleControllerState.VC_ConfirmStart) {
     eq(duration, [3 6]);
-    condeq(timedOut, 6, duration);
+    condEq(timedOut, 6, duration);
   }
   if (vcState==VehicleControllerState.VC_ConfirmStop) {
     if (timedOut==true) {
@@ -2326,7 +2327,7 @@ TEMPEST_Class___VehicleController_SV::VehicleController {
   }
   if (vcState==VehicleControllerState.VC_ConfirmStop) {
     eq(duration, [3 6]);
-    condeq(timedOut, 6, duration);
+    condEq(timedOut, 6, duration);
   }
   if (vcState==VehicleControllerState.VC_Nominal) {
     if (afterRecovery==true) {
@@ -2387,7 +2388,7 @@ TEMPEST_Class___VehicleController_SV::VehicleController {
   }
   if (vcState==VehicleControllerState.VC_Restart) {
     eq(duration, [3 120]);
-    condeq(timedOut, 120, duration);
+    condEq(timedOut, 120, duration);
   }
 }
 
@@ -2493,7 +2494,7 @@ TEMPEST_Class___Navigator_SV::Navigator {
   }
   if (navState==NavigatorState.NAV_ConfirmStart) {
     eq(duration, [3 6]);
-    condeq(timedOut, 6, duration);
+    condEq(timedOut, 6, duration);
   }
   if (navState==NavigatorState.NAV_ConfirmStop) {
     if (timedOut==true) {
@@ -2522,7 +2523,7 @@ TEMPEST_Class___Navigator_SV::Navigator {
   }
   if (navState==NavigatorState.NAV_ConfirmStop) {
     eq(duration, [3 6]);
-    condeq(timedOut, 6, duration);
+    condEq(timedOut, 6, duration);
   }
   if (navState==NavigatorState.NAV_Nominal) {
     if (afterRecovery==true) {
@@ -2582,7 +2583,7 @@ TEMPEST_Class___Navigator_SV::Navigator {
     }
   }
   if (navState==NavigatorState.NAV_Restart) {
-    condeq(timedOut, 120, duration);
+    condEq(timedOut, 120, duration);
   }
 }
 
@@ -2678,7 +2679,7 @@ TEMPEST_Class___PositionEstimator_SV::PositionEstimator {
   }
   if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
     eq(duration, [3 6]);
-    condeq(timedOut, 6, duration);
+    condEq(timedOut, 6, duration);
   }
   if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
     if (timedOut==true) {
@@ -2707,7 +2708,7 @@ TEMPEST_Class___PositionEstimator_SV::PositionEstimator {
   }
   if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
     eq(duration, [3 6]);
-    condeq(timedOut, 6, duration);
+    condEq(timedOut, 6, duration);
   }
   if (peState==PositionEstimatorState.PE_Nominal) {
     if (afterRecovery==true) {
@@ -2808,7 +2809,7 @@ TEMPEST_Class___PositionEstimator_SV::PositionEstimator {
   }
   if (peState==PositionEstimatorState.PE_Restart) {
     if (statusFlag==false) {
-      condeq(timedOut, 120, duration);
+      condEq(timedOut, 120, duration);
     }
   }
 }
@@ -2972,7 +2973,7 @@ TEMPEST_Class___SStopClear_SV::SStopClearAction {
 
 TEMPEST_Class___RecoveryManager_SV::UpdateFaultCount {
   eq(duration, [3 60000]);
-  addeq(deltaCount, prevCount, nextCount);
+  addEq(deltaCount, prevCount, nextCount);
   eq(prevCount, [0 50]);
   eq(deltaCount, [-1 1]);
   eq(nextCount, [0 50]);
@@ -3001,7 +3002,7 @@ TEMPEST_Class___RecoveryManager_SV::UpdateFaultCount {
   }
   if (decCount==true) {
     if (activeFaultUntriggered==true) {
-      condeq(isFaultCountZero, 0, nextCount);
+      condEq(isFaultCountZero, 0, nextCount);
     }
   }
   if (nextCount==1) {
@@ -3017,8 +3018,8 @@ TEMPEST_Class___RecoveryManager_SV::UpdateFaultCount {
 //output subgoal
 //outputSubgoalCreation
         starts_during(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
-        temporaldistance(s0.start, [0 +inf], this.start);
-        temporaldistance(this.start, [0 +inf], s0.end);
+        temporalDistance(s0.start, [0 +inf], this.start);
+        temporalDistance(this.start, [0 +inf], s0.end);
           eq(s0.NoArcHealthMode, HealthMode.FaultMode);
       }
     }
@@ -3045,8 +3046,8 @@ TEMPEST_Class___RecoveryDecision_SV::RecoveryDecision {
 //output subgoal
 //outputSubgoalCreation
     starts_during(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
-    temporaldistance(s0.start, [0 +inf], this.start);
-    temporaldistance(this.start, [0 +inf], s0.end);
+    temporalDistance(s0.start, [0 +inf], this.start);
+    temporalDistance(this.start, [0 +inf], s0.end);
       eq(s0.navHealthMode, HealthMode.FaultMode);
   }
   if (recMode==RecoveryDecisionMode.ActivateNAV_Recovery) {
@@ -3060,8 +3061,8 @@ TEMPEST_Class___RecoveryDecision_SV::RecoveryDecision {
 //output subgoal
 //outputSubgoalCreation
     starts_during(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
-    temporaldistance(s0.start, [0 +inf], this.start);
-    temporaldistance(this.start, [0 +inf], s0.end);
+    temporalDistance(s0.start, [0 +inf], this.start);
+    temporalDistance(this.start, [0 +inf], s0.end);
       eq(s0.NoArcHealthMode, HealthMode.FaultMode);
   }
   if (recMode==RecoveryDecisionMode.ActivateNoArc_Recovery) {
@@ -3073,8 +3074,8 @@ TEMPEST_Class___RecoveryDecision_SV::RecoveryDecision {
 //output subgoal
 //outputSubgoalCreation
     starts_during(TEMPEST_Class___PE_Health_SV.PeHealth s0);
-    temporaldistance(s0.start, [0 +inf], this.start);
-    temporaldistance(this.start, [0 +inf], s0.end);
+    temporalDistance(s0.start, [0 +inf], this.start);
+    temporalDistance(this.start, [0 +inf], s0.end);
       eq(s0.peHealthMode, HealthMode.FaultMode);
   }
   if (recMode==RecoveryDecisionMode.ActivatePE_Recovery) {
@@ -3106,8 +3107,8 @@ TEMPEST_Class___RecoveryDecision_SV::RecoveryDecision {
 //output subgoal
 //outputSubgoalCreation
     starts_during(TEMPEST_Class___VC_Health_SV.VcHealth s0);
-    temporaldistance(s0.start, [0 +inf], this.start);
-    temporaldistance(this.start, [0 +inf], s0.end);
+    temporalDistance(s0.start, [0 +inf], this.start);
+    temporalDistance(this.start, [0 +inf], s0.end);
       eq(s0.vcHealthMode, HealthMode.FaultMode);
   }
   if (recMode==RecoveryDecisionMode.ActivateVC_Recovery) {

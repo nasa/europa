@@ -7,7 +7,7 @@
 ;;;   Max Consumption: 6299.68 */
 
 #include "k9.model.backtrack.moderate.nddl"
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "PlannerConfig.nddl"
 
 PlannerConfig world = new PlannerConfig(0,500,1000);
 

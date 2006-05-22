@@ -1,4 +1,4 @@
-// composition.0.xml
+// composition.0.nddl
 
 #include "composition.0.hh"
 #include "NddlUtils.hh"
@@ -113,6 +113,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("composition.0");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");

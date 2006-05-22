@@ -1,4 +1,4 @@
-// classes.2.tx.xml
+// classes.2.tx.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -6,14 +6,6 @@
 
 namespace NDDL {
 
-  class Location;
-  typedef Id<Location> LocationId;
-  typedef ObjectDomain LocationDomain;
-  
-  class Path;
-  typedef Id<Path> PathId;
-  typedef ObjectDomain PathDomain;
-  
   class UnaryResource;
   typedef Id<UnaryResource> UnaryResourceId;
   typedef ObjectDomain UnaryResourceDomain;
@@ -22,51 +14,21 @@ namespace NDDL {
   typedef Id<StringData> StringDataId;
   typedef ObjectDomain StringDataDomain;
   
+  class Location;
+  typedef Id<Location> LocationId;
+  typedef ObjectDomain LocationDomain;
+  
+  class Path;
+  typedef Id<Path> PathId;
+  typedef ObjectDomain PathDomain;
+  
   class Navigator;
   typedef Id<Navigator> NavigatorId;
   typedef ObjectDomain NavigatorDomain;
   
   
-  // classes.0.nddl:3 Location
-  class Location : public Object {
-  public:
-    Location(const PlanDatabaseId& planDatabase, const LabelStr& name);
-    Location(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
-    Location(const ObjectId& parent, const LabelStr& name);
-    Location(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
-    void handleDefaults(bool autoClose = true); // default variable initialization
-    
-    ConstrainedVariableId name; // SchemaWriter::declareVariable
-    
-    // classes.0.nddl:3 Location
-    virtual void constructor(const LabelStr& _name);
-  };
   
-  // classes.0.nddl:11 Path
-  class Path : public Object {
-  public:
-    Path(const PlanDatabaseId& planDatabase, const LabelStr& name);
-    Path(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
-    Path(const ObjectId& parent, const LabelStr& name);
-    Path(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
-    void handleDefaults(bool autoClose = true); // default variable initialization
-    
-    ConstrainedVariableId from; // SchemaWriter::declareVariable
-    ConstrainedVariableId to; // SchemaWriter::declareVariable
-    ConstrainedVariableId cost; // SchemaWriter::declareVariable
-    
-    // classes.0.nddl:11 Path
-    virtual void constructor(const LocationId& _from, const LocationId& _to);
-    
-    // classes.0.nddl:11 Path
-    virtual void constructor(const LocationId& loc);
-    
-    // classes.0.nddl:11 Path
-    virtual void constructor(const LocationId& _from, const LocationId& _to, float _cost);
-  };
-  
-  
-  // Plasma.nddl:8 TokenStates
+  // Plasma.nddl:10 TokenStates
   typedef SymbolDomain TokenStates;
   TokenStates TokenStatesBaseDomain();
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
@@ -76,7 +38,7 @@ namespace NDDL {
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Reservoir
   
   
-  // Plasma.nddl:141 UnaryResource
+  // Plasma.nddl:143 UnaryResource
   class UnaryResource : public Timeline {
   public:
     UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -89,7 +51,7 @@ namespace NDDL {
     class uses;
     typedef Id<uses> usesId;
     
-    // Plasma.nddl:142 uses
+    // Plasma.nddl:144 uses
     class uses : public NddlToken {
     public:
       uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -100,7 +62,7 @@ namespace NDDL {
     };
   };
   
-  // Plasma.nddl:151 StringData
+  // Plasma.nddl:153 StringData
   class StringData : public Object {
   public:
     StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -111,11 +73,49 @@ namespace NDDL {
     
     ConstrainedVariableId data; // SchemaWriter::declareVariable
     
-    // Plasma.nddl:151 StringData
+    // Plasma.nddl:153 StringData
     virtual void constructor(const LabelStr& _data);
   };
   
-  // classes.2.nddl:8 Navigator
+  // classes.0.nddl:5 Location
+  class Location : public Object {
+  public:
+    Location(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Location(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Location(const ObjectId& parent, const LabelStr& name);
+    Location(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId name; // SchemaWriter::declareVariable
+    
+    // classes.0.nddl:5 Location
+    virtual void constructor(const LabelStr& _name);
+  };
+  
+  // classes.0.nddl:13 Path
+  class Path : public Object {
+  public:
+    Path(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Path(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Path(const ObjectId& parent, const LabelStr& name);
+    Path(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId from; // SchemaWriter::declareVariable
+    ConstrainedVariableId to; // SchemaWriter::declareVariable
+    ConstrainedVariableId cost; // SchemaWriter::declareVariable
+    
+    // classes.0.nddl:13 Path
+    virtual void constructor(const LocationId& _from, const LocationId& _to);
+    
+    // classes.0.nddl:13 Path
+    virtual void constructor(const LocationId& loc);
+    
+    // classes.0.nddl:13 Path
+    virtual void constructor(const LocationId& _from, const LocationId& _to, float _cost);
+  };
+  
+  // classes.2.nddl:5 Navigator
   class Navigator : public Timeline {
   public:
     Navigator(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -130,7 +130,7 @@ namespace NDDL {
     class Going;
     typedef Id<Going> GoingId;
     
-    // classes.2.nddl:10 At
+    // classes.2.nddl:7 At
     class At : public NddlToken {
     public:
       At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -141,7 +141,7 @@ namespace NDDL {
       ConstrainedVariableId location; // SchemaWriter::declareVariable
     };
     
-    // classes.2.nddl:15 Going
+    // classes.2.nddl:12 Going
     class Going : public NddlToken {
     public:
       Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);

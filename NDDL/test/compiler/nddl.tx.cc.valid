@@ -1,4 +1,4 @@
-// nddl.tx.xml
+// nddl.tx.nddl
 
 #include "nddl.tx.hh"
 #include "NddlUtils.hh"
@@ -75,6 +75,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("nddl.tx");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Timeline");

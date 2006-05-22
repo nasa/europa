@@ -1,4 +1,4 @@
-// subclass.xml
+// subclass.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"

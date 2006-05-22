@@ -1,4 +1,4 @@
-// gnats_3140.xml
+// gnats_3140.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -20,16 +20,16 @@ namespace NDDL {
   
   
   
-  // gnats_3140.nddl:4 numericEnum
+  // gnats_3140.nddl:6 numericEnum
   typedef NumericDomain numericEnum;
   numericEnum numericEnumBaseDomain();
   
   
-  // gnats_3140.nddl:5 symbolicEnum
+  // gnats_3140.nddl:7 symbolicEnum
   typedef SymbolDomain symbolicEnum;
   symbolicEnum symbolicEnumBaseDomain();
   
-  // gnats_3140.nddl:7 Boo
+  // gnats_3140.nddl:9 Boo
   class Boo : public Object {
   public:
     Boo(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -41,7 +41,7 @@ namespace NDDL {
     
   };
   
-  // gnats_3140.nddl:9 Foo
+  // gnats_3140.nddl:11 Foo
   class Foo : public Object {
   public:
     Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -56,11 +56,11 @@ namespace NDDL {
     ConstrainedVariableId field6; // SchemaWriter::declareVariable
     ConstrainedVariableId field7; // SchemaWriter::declareVariable
     
-    // gnats_3140.nddl:9 Foo
+    // gnats_3140.nddl:11 Foo
     virtual void constructor(bool _field1, int _field2, float _field4, const LabelStr& _field6, const BooId& _field7);
   };
   
-  // gnats_3140.nddl:30 Bar
+  // gnats_3140.nddl:32 Bar
   class Bar : public Timeline {
   public:
     Bar(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -73,7 +73,7 @@ namespace NDDL {
     class pred;
     typedef Id<pred> predId;
     
-    // gnats_3140.nddl:31 pred
+    // gnats_3140.nddl:33 pred
     class pred : public NddlToken {
     public:
       pred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);

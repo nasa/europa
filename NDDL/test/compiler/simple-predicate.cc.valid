@@ -1,4 +1,4 @@
-// simple-predicate.xml
+// simple-predicate.nddl
 
 #include "simple-predicate.hh"
 #include "NddlUtils.hh"
@@ -286,6 +286,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("simple-predicate");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Timeline");

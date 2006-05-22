@@ -1,4 +1,4 @@
-// csp.1.xml
+// csp.1.nddl
 
 #include "csp.1.hh"
 #include "NddlUtils.hh"
@@ -88,6 +88,7 @@ namespace NDDL {
     Id<Schema> id = Schema::instance("csp.1");
     id->reset(); // Reset prior data if present. 
     
+    // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addPrimitive("int");

@@ -1,3 +1,5 @@
+#include "Constraints.nddl"
+
 class Foo {
  float f_var;
  predicate pred1{

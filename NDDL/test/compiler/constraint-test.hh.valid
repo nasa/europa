@@ -1,4 +1,4 @@
-// constraint-test.xml
+// constraint-test.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -16,11 +16,11 @@ namespace NDDL {
   
   
   
-  // constraint-test.nddl:1 ENUM
+  // constraint-test.nddl:5 ENUM
   typedef SymbolDomain ENUM;
   ENUM ENUMBaseDomain();
   
-  // constraint-test.nddl:4 Sample
+  // constraint-test.nddl:8 Sample
   class Sample : public Timeline {
   public:
     Sample(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -33,7 +33,7 @@ namespace NDDL {
     class sample;
     typedef Id<sample> sampleId;
     
-    // constraint-test.nddl:5 sample
+    // constraint-test.nddl:9 sample
     class sample : public NddlToken {
     public:
       sample(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -48,7 +48,7 @@ namespace NDDL {
     };
   };
   
-  // constraint-test.nddl:34 World
+  // constraint-test.nddl:38 World
   class World : public Timeline {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -61,7 +61,7 @@ namespace NDDL {
     typedef Id<initialState> initialStateId;
     ConstrainedVariableId sample; // SchemaWriter::declareVariable
     
-    // constraint-test.nddl:36 initialState
+    // constraint-test.nddl:40 initialState
     class initialState : public NddlToken {
     public:
       initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -71,7 +71,7 @@ namespace NDDL {
       
     };
     
-    // constraint-test.nddl:34 World
+    // constraint-test.nddl:38 World
     virtual void constructor();
   };
 } // End NDDL namespace

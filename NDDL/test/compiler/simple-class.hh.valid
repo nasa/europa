@@ -1,4 +1,4 @@
-// simple-class.xml
+// simple-class.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -16,26 +16,26 @@ namespace NDDL {
   
   
   
-  // simple-class.nddl:1 Locations
+  // simple-class.nddl:3 Locations
   typedef SymbolDomain Locations;
   Locations LocationsBaseDomain();
   
   
-  // simple-class.nddl:2 Strings
+  // simple-class.nddl:4 Strings
   typedef StringDomain Strings;
   Strings StringsBaseDomain();
   
   
-  // simple-class.nddl:3 Speeds
+  // simple-class.nddl:5 Speeds
   typedef NumericDomain Speeds;
   Speeds SpeedsBaseDomain();
   
   
-  // simple-class.nddl:4 Frequencies
+  // simple-class.nddl:6 Frequencies
   typedef NumericDomain Frequencies;
   Frequencies FrequenciesBaseDomain();
   
-  // simple-class.nddl:7 Foo
+  // simple-class.nddl:9 Foo
   class Foo : public Object {
   public:
     Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -53,14 +53,14 @@ namespace NDDL {
     ConstrainedVariableId m_6; // SchemaWriter::declareVariable
     ConstrainedVariableId m_8; // SchemaWriter::declareVariable
     
-    // simple-class.nddl:7 Foo
+    // simple-class.nddl:9 Foo
     virtual void constructor();
     
-    // simple-class.nddl:7 Foo
+    // simple-class.nddl:9 Foo
     virtual void constructor(int _m_0, float _m_1);
   };
   
-  // simple-class.nddl:37 World
+  // simple-class.nddl:39 World
   class World : public Timeline {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -78,7 +78,7 @@ namespace NDDL {
     ConstrainedVariableId m_foo1; // SchemaWriter::declareVariable
     ConstrainedVariableId m_foo2; // SchemaWriter::declareVariable
     
-    // simple-class.nddl:43 initialState
+    // simple-class.nddl:45 initialState
     class initialState : public NddlToken {
     public:
       initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -88,7 +88,7 @@ namespace NDDL {
       
     };
     
-    // simple-class.nddl:44 Hill
+    // simple-class.nddl:46 Hill
     class Hill : public NddlToken {
     public:
       Hill(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -98,7 +98,7 @@ namespace NDDL {
       
     };
     
-    // simple-class.nddl:37 World
+    // simple-class.nddl:39 World
     virtual void constructor();
   };
 } // End NDDL namespace

@@ -1,4 +1,4 @@
-// nddl.tx.1.xml
+// nddl.tx.1.nddl
 
 #include "Db.hh"
 #include "NddlUtils.hh"
@@ -11,7 +11,7 @@ namespace NDDL {
   typedef ObjectDomain FooDomain;
   
   
-  // nddl.tx.1.nddl:3 Foo
+  // nddl.tx.1.nddl:5 Foo
   class Foo : public Timeline {
   public:
     Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -36,7 +36,7 @@ namespace NDDL {
     class pred6;
     typedef Id<pred6> pred6Id;
     
-    // nddl.tx.1.nddl:4 pred0
+    // nddl.tx.1.nddl:6 pred0
     class pred0 : public NddlToken {
     public:
       pred0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -46,7 +46,7 @@ namespace NDDL {
       
     };
     
-    // nddl.tx.1.nddl:5 pred1
+    // nddl.tx.1.nddl:7 pred1
     class pred1 : public NddlToken {
     public:
       pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -56,7 +56,7 @@ namespace NDDL {
       
     };
     
-    // nddl.tx.1.nddl:6 pred2
+    // nddl.tx.1.nddl:8 pred2
     class pred2 : public NddlToken {
     public:
       pred2(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -66,7 +66,7 @@ namespace NDDL {
       
     };
     
-    // nddl.tx.1.nddl:7 pred3
+    // nddl.tx.1.nddl:9 pred3
     class pred3 : public NddlToken {
     public:
       pred3(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -76,7 +76,7 @@ namespace NDDL {
       
     };
     
-    // nddl.tx.1.nddl:8 pred4
+    // nddl.tx.1.nddl:10 pred4
     class pred4 : public NddlToken {
     public:
       pred4(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -86,7 +86,7 @@ namespace NDDL {
       
     };
     
-    // nddl.tx.1.nddl:9 pred5
+    // nddl.tx.1.nddl:11 pred5
     class pred5 : public NddlToken {
     public:
       pred5(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -96,7 +96,7 @@ namespace NDDL {
       
     };
     
-    // nddl.tx.1.nddl:10 pred6
+    // nddl.tx.1.nddl:12 pred6
     class pred6 : public NddlToken {
     public:
       pred6(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
