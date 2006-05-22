@@ -743,9 +743,6 @@ rule ApacheAnt
 # use cd to move to current subdirectory
 actions ApacheAnt
 {
-echo $(ANT_HOME)
-echo $(ANT)
-$(ANT) -diagnostics
 $(ANT) -f "$(2[1]:G=)"
 }
 
