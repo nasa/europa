@@ -95,7 +95,7 @@ rule Nddl {
 
 # send the flag -Wall to Nddl to enable warning messages
 actions Nddl {
-$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" -C $(2:P) -q $(2)
+$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" -C "$(2:R=.:D)" -q $(2)
 }
 
 # NddlParser model.xml : model.nddl ;
@@ -129,7 +129,7 @@ rule NddlParser1 {
 }
 
 actions NddlParser1 {
-$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" --NddlParser -C $(2:P) -q $(2) 
+$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" --NddlParser -C "$(2:R=.:D)" -q $(2) 
 }
 
 } # NddlRules_INCLUDED
