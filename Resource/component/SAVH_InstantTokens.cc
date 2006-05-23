@@ -1,5 +1,6 @@
 #include "SAVH_InstantTokens.hh"
 #include "TokenVariable.hh"
+#include "SAVH_ResourceTokenRelation.hh"
 
 namespace EUROPA {
   namespace SAVH {
@@ -48,7 +49,10 @@ namespace EUROPA {
 						      quantityBaseDomain,
 						      true, LabelStr("quantity")))->getId();
       m_allVariables.push_back(m_quantity);
-      
+      ConstraintId relation = (new ResourceTokenRelation(m_planDatabase->getConstraintEngine(),
+							 makeScope(m_object),
+							 getId()))->getId();
+      m_standardConstraints.insert(relation);
       if(closed)
 	close();
     }
