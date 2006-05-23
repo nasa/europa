@@ -32,7 +32,7 @@ namespace EUROPA
 
       void recomputeLevels( InstantId prev, InstantId inst );
 
-      void enableOrderings( const TransactionId& t, const InstantId& inst  );
+      void enableOrderings(  const InstantId& inst  );
  
     };
   }

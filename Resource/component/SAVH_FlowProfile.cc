@@ -63,6 +63,7 @@ namespace EUROPA
 
     void FlowProfileGraph::enableAtOrBefore( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 ) 
     {
+      debugMsg("FlowProfileGraph:enableAtOrBefore","Transaction (" << t1->getId() << ") and transaction (" << t2->getId() << ")");
       check_error( 0 != m_graph->getNode( t1 ) );
       check_error( 0 != m_graph->getNode( t2 ) );
 
