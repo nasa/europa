@@ -37,8 +37,7 @@ rule NddlMain {
   local hh = $(model:S=.hh) ;
   local cc = [ FGristFiles $(model:S=.cc) ] ;
   local xml = $(model:S=.xml) ;
-  Includes $(cc) : $(hh) ;
-	Includes $(cc) : $(xml) ;
+  Includes $(cc) : $(hh) $(xml) ;
   Nddl $(xml) $(hh) $(cc) : $(model) ;
   ModuleMain $(exe) : $(cc) $(code) : $(module) : $(build_target) ;
 }
@@ -72,7 +71,7 @@ rule NddlSystemTest {
   RunModuleMain $(target) : $(exe) : $(model:S=.xml) ;
 }
 
-# Nddl <model.xml> <model.hh model.cc> : model.nddl
+# Nddl <model.xml> <model.hh model.cc> : model.nddl : directory
 rule Nddl {
 	local code = $(1) ;
 	local model = $(2) ;
@@ -86,11 +85,17 @@ rule Nddl {
 	Depends $(code) : nddl.jar ;
 	Depends $(code) : $(model) ;
 	LocalClean clean : $(code) ;
+
+  HDRS on $(<) = $(SEARCH_SOURCE) $(SUBDIRHDRS) $(HDRS) ;
+  HDRRULE on $(>) = HdrRule ;
+  HDRSCAN on $(>) = $(HDRPATTERN) ;
+  HDRSEARCH on $(>) = $(SEARCH_SOURCE:E) $(SUBDIRHDRS) $(HDRS) $(STDHDRS) ;
+  HDRGRIST on $(>) = $(HDRGRIST) ;
 }
 
 # send the flag -Wall to Nddl to enable warning messages
 actions Nddl {
-$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" -q $(2)
+$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" -C $(2:P) -q $(2)
 }
 
 # NddlParser model.xml : model.nddl ;
@@ -124,7 +129,7 @@ rule NddlParser1 {
 }
 
 actions NddlParser1 {
-$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" --NddlParser -q $(2) 
+$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" --NddlParser -C $(2:P) -q $(2) 
 }
 
 } # NddlRules_INCLUDED
