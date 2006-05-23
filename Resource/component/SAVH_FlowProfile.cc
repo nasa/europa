@@ -40,10 +40,14 @@ namespace EUROPA
       m_graph = new SAVH::Graph();
       m_source = m_graph->createNode( source );
       m_sink = m_graph->createNode( sink );
+      m_maxflow = new MaximumFlowAlgorithm( m_graph, m_source, m_sink );
     }
 
     FlowProfileGraph::~FlowProfileGraph()
     {
+      delete m_maxflow;
+      m_maxflow = 0;
+
       delete m_graph;
       m_graph = 0;
       
@@ -64,6 +68,13 @@ namespace EUROPA
 
       m_graph->createEdge( t1, t2, 0 );
       m_graph->createEdge( t2, t1, Edge::getMaxCapacity() );
+    }
+
+    bool FlowProfileGraph::isEnabled(  const SAVH::TransactionId& transaction ) const 
+    { 
+      Node* node = m_graph->getNode( transaction ); 
+    
+      return 0 == node ? false : node->isEnabled(); 
     }
 
     void FlowProfileGraph::enableTransaction( const SAVH::TransactionId& t )
@@ -105,10 +116,6 @@ namespace EUROPA
 
     void FlowProfileGraph::removeTransaction( const SAVH::TransactionId& id )
     {
-      checkError( 0 != m_graph->getNode( id ),
-		  "Trying to remove transaction (" 
-		  << id << ") which is not in the graph!");
-
       m_graph->removeNode( id );
     }
 
@@ -128,9 +135,7 @@ namespace EUROPA
 
       if( m_recalculate )
 	{
-	  MaximumFlowAlgorithm maxflow( m_graph, m_source, m_sink );
-	
-	  maxflow.execute();
+	  m_maxflow->execute();
 
 	  EdgeOutIterator ite( *m_source );
 
@@ -138,7 +143,7 @@ namespace EUROPA
 	    {
 	      Edge* edge = *ite;
 	    
-	      residual += maxflow.getResidual( edge );
+	      residual += m_maxflow->getResidual( edge );
 	    }
 
 	  m_recalculate = false;
@@ -146,6 +151,101 @@ namespace EUROPA
 
       return residual;
     }
+
+    double FlowProfileGraph::disableReachableResidualGraph()
+    {
+      double residual = 0.0;
+
+      if( m_recalculate )
+	{
+	  m_maxflow->execute();
+	  
+	  Node2Bool visited;
+
+	  visited[ m_source ] = true;
+
+	  visitNeighbors( m_source, residual, visited );
+	}
+
+      return residual;
+    }
+
+    void FlowProfileGraph::visitNeighbors( const Node* node, double& residual, Node2Bool& visited )
+    {
+      EdgeOutIterator ite( *node );
+      
+      for( ; ite.ok(); ++ite )
+	{
+	  Edge* edge = *ite;
+	  
+	  Node* target = edge->getTarget();
+	  
+	  if( false == visited[ target ] )
+	    {
+	      if( 0 != m_maxflow->getResidual( edge ) )
+		{
+		  visited[ target ] = true;
+		  
+		  if( target != m_source && target != m_sink )
+		    {
+		      debugMsg("FlowProfileGraph::visitNeighbors","Disabling node with transaction ("
+			       << target->getIdentity()->getId() << ") lower level " << std::boolalpha << m_lowerLevel );
+
+		      target->setDisabled();
+
+		      const TransactionId& t = target->getIdentity();
+
+		      int sign = t->isConsumer() ? -1 : +1;
+
+		      if( ( m_lowerLevel && t->isConsumer() )
+			  ||
+			  (!m_lowerLevel && !t->isConsumer() ) )
+			{
+			  debugMsg("FlowProfileGraph::visitNeighbors","Adding "
+				   << sign * t->quantity()->lastDomain().getUpperBound() << " to the level.");
+
+			  residual += sign * t->quantity()->lastDomain().getUpperBound();
+			}
+		      else
+			{
+			  debugMsg("FlowProfileGraph::visitNeighbors","Adding "
+				   << sign* t->quantity()->lastDomain().getLowerBound() << " to the level.");
+
+			  residual += sign * t->quantity()->lastDomain().getLowerBound();
+			}
+		      
+		      visitNeighbors( target, residual, visited );
+		    }
+		}
+	    }
+	}
+    }
+
+    void FlowProfileGraph::disable(  const SAVH::TransactionId& id )
+    {
+      Node* node = m_graph->getNode( id );
+
+      check_error( 0 != node );
+      check_error( node->isEnabled() );
+      
+      node->setDisabled();
+    }
+
+    void FlowProfileGraph::pushFlow( const SAVH::TransactionId& id )
+    {
+      Node* node = m_graph->getNode( id );
+
+      check_error( 0 != node );
+      check_error( node->isEnabled() );
+
+      m_maxflow->pushFlowBack( node );
+    }
+
+    void FlowProfileGraph::restoreFlow()
+    {
+      m_maxflow->execute( false );
+    }
+
 
 
     //-------------------------------
@@ -155,7 +255,9 @@ namespace EUROPA
       m_lowerLevelGraph( 0 ),
       m_upperLevelGraph( 0 ),
       m_recalculateLowerLevel( false ),
-      m_recalculateUpperLevel( false )
+      m_recalculateUpperLevel( false ),
+      m_startRecalculation( PLUS_INFINITY ),
+      m_endRecalculation( MINUS_INFINITY )
     {
       m_recomputeInterval = (new ProfileIterator(getId()))->getId();
 
@@ -191,7 +293,8 @@ namespace EUROPA
     {
       check_error(inst.isValid());
 
-      debugMsg("FlowProfile:initRecompute","Instant (" << inst->getId() << ")");
+      debugMsg("FlowProfile:initRecompute","Instant (" << inst->getId() << ") at time "
+	       << inst->getTime() );
     }
 
     void FlowProfile::initRecompute() 
@@ -217,6 +320,9 @@ namespace EUROPA
     {
       m_recalculateLowerLevel = false;
       m_recalculateUpperLevel = false;
+
+      m_startRecalculation = PLUS_INFINITY;
+      m_endRecalculation = MINUS_INFINITY; 
     }
 
     void FlowProfile::recomputeLevels( InstantId prev, InstantId inst ) 
@@ -362,8 +468,11 @@ namespace EUROPA
 	       << t1->getId() << ") at TransactionId (" 
 	       << t2->getId() << ")");
 
-      m_lowerLevelGraph->enableAt( t1, t2 );
-      m_upperLevelGraph->enableAt( t1, t2 );
+      if( m_recalculateLowerLevel )
+	m_lowerLevelGraph->enableAt( t1, t2 );
+
+      if( m_recalculateUpperLevel )
+	m_upperLevelGraph->enableAt( t1, t2 );
     }
 
     void FlowProfile::handleOrderedAtOrBefore( const TransactionId t1, const TransactionId t2 ) 
@@ -375,8 +484,11 @@ namespace EUROPA
 	       << t1->getId() << ") at or before TransactionId (" 
 	       << t2->getId() << ")");
 
-      m_lowerLevelGraph->enableAtOrBefore( t1, t2 );
-      m_upperLevelGraph->enableAtOrBefore( t1, t2 );
+      if( m_recalculateLowerLevel )
+	m_lowerLevelGraph->enableAtOrBefore( t1, t2 );
+
+      if( m_recalculateUpperLevel )
+	m_upperLevelGraph->enableAtOrBefore( t1, t2 );
     }
 
     void FlowProfile::handleTransactionAdded(const TransactionId t) 
@@ -385,17 +497,18 @@ namespace EUROPA
 
       debugMsg("FlowProfile:handleTransactionAdded","TransactionId (" << t->getId() << ") " << t->time() );
 
-      enableTransaction( t );
+      //enableTransaction( t );
 
       m_recalculateLowerLevel = true;
       m_recalculateUpperLevel = true;
 
-      int newStartIteratorTime = std::min( m_recomputeInterval->getTime(), (int) t->time()->lastDomain().getLowerBound() );
+      m_startRecalculation = MINUS_INFINITY; //std::min( m_startRecalculation, (int) t->time()->lastDomain().getLowerBound() );
+      m_endRecalculation = PLUS_INFINITY;
 
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
       
-      m_recomputeInterval = (new ProfileIterator( getId(), newStartIteratorTime ))->getId();
+      m_recomputeInterval = (new ProfileIterator( getId(), m_startRecalculation, m_endRecalculation ))->getId();
     }
 
     void FlowProfile::enableTransaction( const TransactionId t )
@@ -406,19 +519,6 @@ namespace EUROPA
       m_upperLevelGraph->enableTransaction( t );
     }
     
-    void FlowProfile::resetEdgeWeights( const TransactionId t ) 
-    {
-      check_error(t.isValid());
-
-      debugMsg("FlowProfile:resetEdgeWeights","TransactionId (" << t->getId() << ")");
-
-      if( m_recalculateLowerLevel )
-	m_lowerLevelGraph->enableTransaction( t );
-
-      if( m_recalculateUpperLevel )
-	m_upperLevelGraph->enableTransaction( t );
-    }
-
     void FlowProfile::handleTransactionRemoved( const TransactionId t ) {
       check_error(t.isValid());
 
@@ -431,15 +531,13 @@ namespace EUROPA
       m_upperLevelGraph->removeTransaction( t );
       
       // done if recompute interval has no transactions left if this transaction is removed
-      if( !m_recomputeInterval->done() )
-	{
-	  int newStartIteratorTime = std::min( m_recomputeInterval->getTime(), (int) t->time()->lastDomain().getLowerBound() );
-	  
-	  if(m_recomputeInterval.isValid())
-	    delete (ProfileIterator*) m_recomputeInterval;
-	  
-	  m_recomputeInterval = (new ProfileIterator( getId(), newStartIteratorTime ))->getId();
-	}
+      m_startRecalculation = MINUS_INFINITY; //std::min( m_startRecalculation, (int) t->time()->lastDomain().getLowerBound() );
+      m_endRecalculation = PLUS_INFINITY;
+      
+      if(m_recomputeInterval.isValid())
+	delete (ProfileIterator*) m_recomputeInterval;
+      
+      m_recomputeInterval = (new ProfileIterator( getId(), m_startRecalculation, m_endRecalculation ))->getId();
     }
 
     void FlowProfile::handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type)  
@@ -449,12 +547,15 @@ namespace EUROPA
       m_recalculateLowerLevel = true;
       m_recalculateUpperLevel = true;
 
-      int newStartIteratorTime = std::min( m_recomputeInterval->getTime(), (int) t->time()->lastDomain().getLowerBound() );
+      // TODO: using the base domain to determine the start of the interval to recalculate is too 
+      // conservative, we can do better only if we knew the value before the change
+      m_startRecalculation = MINUS_INFINITY; //std::min( m_startRecalculation, (int) t->time()->baseDomain().getLowerBound() );
+      m_endRecalculation = PLUS_INFINITY;
 
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
       
-      m_recomputeInterval = (new ProfileIterator( getId(), newStartIteratorTime ))->getId();
+      m_recomputeInterval = (new ProfileIterator( getId(), m_startRecalculation, m_endRecalculation ))->getId();
 
       debugMsg("FlowProfile:handleTransactionTimeChanged","TransactionId (" << t->getId() << ") change " << type );
     }
@@ -475,7 +576,6 @@ namespace EUROPA
 	      m_recalculateUpperLevel = true;
 	    }
 
-	  resetEdgeWeights( t );
 	}
       break;
       case DomainListener::RESET:
@@ -485,7 +585,6 @@ namespace EUROPA
 	{
 	  m_recalculateLowerLevel = true;
 	  m_recalculateUpperLevel = true;
-	  resetEdgeWeights( t );
 	}
       break;
       break;
@@ -500,26 +599,26 @@ namespace EUROPA
 	      m_recalculateLowerLevel = true;
 	    }
 
-	  resetEdgeWeights( t );
 	}
       break;
       case DomainListener::BOUNDS_RESTRICTED:
 	{
 	  m_recalculateLowerLevel = true;
 	  m_recalculateUpperLevel = true;
-	  resetEdgeWeights( t );
+
 	}
       break;
       default:
 	break;
       };
 
-      int newStartIteratorTime = std::min( m_recomputeInterval->getTime(), (int) t->time()->lastDomain().getLowerBound() );
+      m_startRecalculation = MINUS_INFINITY; //std::min( m_startRecalculation, (int) t->time()->lastDomain().getLowerBound() );
+      m_endRecalculation = PLUS_INFINITY; //std::max( m_endRecalculation, (int) t->time()->lastDomain().getUpperBound() );
 
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
       
-      m_recomputeInterval = (new ProfileIterator( getId(), newStartIteratorTime ))->getId();
+      m_recomputeInterval = (new ProfileIterator( getId(), m_startRecalculation, m_endRecalculation ))->getId();
 
       debugMsg("FlowProfile:handleTransactionQuantityChanged","TransactionId (" << t->getId() << ") change " << type );
     }
@@ -529,13 +628,19 @@ namespace EUROPA
       check_error(t1.isValid());
       check_error(t2.isValid());
 
-      int newStartIteratorTime = std::min( m_recomputeInterval->getTime(), 
-					   (int) std::min(  t1->time()->lastDomain().getLowerBound(), t2->time()->lastDomain().getLowerBound() )  );
+      m_startRecalculation = MINUS_INFINITY; 
+      //std::min( m_startRecalculation, 
+      // (int) std::min( t1->time()->lastDomain().getLowerBound(), 
+      //  t2->time()->lastDomain().getLowerBound() ) );
+      m_endRecalculation = PLUS_INFINITY; 
+      //std::max( m_endRecalculation,
+      //(int) std::max( t1->time()->lastDomain().getUpperBound(), 
+      //t2->time()->lastDomain().getUpperBound() ) );
 
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
       
-      m_recomputeInterval = (new ProfileIterator( getId(), newStartIteratorTime ))->getId();
+      m_recomputeInterval = (new ProfileIterator( getId(), m_startRecalculation, m_endRecalculation ))->getId();
 
       debugMsg("FlowProfile:handleTransactionsOrdered","TransactionId1 (" << t1->getId() << ") before TransactionId2 (" << t2->getId() << ")");
 

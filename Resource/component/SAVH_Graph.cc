@@ -84,30 +84,6 @@ namespace EUROPA
 	}
     }
 
-    Edge* Graph::getEdge( Node* source, Node* target ) const
-    {
-      checkError( 0 != source, "Null not allowed as input for source" );
-      checkError( 0 != target, "Null not allowed as input for target" );
-
-      const EdgeList& outEdges = source->getOutEdges();
-      
-      EdgeList::const_iterator fIte = outEdges.begin();
-      EdgeList::const_iterator fEnd = outEdges.end();
-      
-      for( ; fIte != fEnd; ++fIte )
-	{
-	  Edge* edge = *fIte;
-
-	  if( edge->getTarget() == target )
-	    {
-	      return edge;
-	      
-	      break;
-	    }
-	}
-
-      return 0;
-    }
 
     void Graph::createEdge( const NodeIdentity& source, const NodeIdentity& target, double capacity, bool enabled )
     {

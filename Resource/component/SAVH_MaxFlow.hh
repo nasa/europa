@@ -45,7 +45,7 @@ namespace EUROPA
       /**
        * @brief
        */
-      inline void execute();
+      inline void execute( bool reset = true );
       /**
        * @brief
        */
@@ -61,6 +61,10 @@ namespace EUROPA
       /**
        * @brief
        */
+      inline void pushFlowBack( Node* node );
+      /**
+       * @brief
+       */
       inline double getResidual( Edge* edge ) const;
     private:
       /**
@@ -70,7 +74,7 @@ namespace EUROPA
       /**
        * @brief
        */
-      inline void initializePre();
+      inline void initializePre( bool reset = true );
       /**
        * @brief
        */
@@ -83,7 +87,15 @@ namespace EUROPA
        * @brief
        */
       inline void reLabel( Node* n );
-    
+      /**
+       * @brief
+       */
+      inline Node* getNextInList();
+      /**
+       * @brief
+       */
+      inline void resetToFront();
+
       typedef std::map< Node*, EdgeList::const_iterator > Node2EdgeListIteratorMap;
 
       Node2EdgeListIteratorMap m_CurrentOutEdgeOnNode;
@@ -97,6 +109,8 @@ namespace EUROPA
       Graph* m_Graph;
       Node* m_Source;
       Node* m_Sink;
+
+      NodeList::iterator m_NodeListIterator;
     };
 
     double MaximumFlowAlgorithm::getMaxFlow() const
@@ -123,20 +137,55 @@ namespace EUROPA
       return edge->getCapacity() - getFlow( edge );
     }
 
+    
+    Node* MaximumFlowAlgorithm::getNextInList()
+    {
+	Node* node = 0;
 
-    void MaximumFlowAlgorithm::execute()
+	if( m_NodeListIterator == 0 )
+	{
+	  m_NodeListIterator = m_Nodes.begin();
+	}
+	else
+	{
+	  ++m_NodeListIterator;
+	}
+
+	NodeList::iterator end = m_Nodes.end();
+
+	while( m_NodeListIterator != end &&  
+	 !(*m_NodeListIterator)->isEnabled() )
+	{
+	  ++m_NodeListIterator;
+	}
+
+	if( m_NodeListIterator != end )
+	  node = *m_NodeListIterator;
+
+	return node;
+    }
+
+    void MaximumFlowAlgorithm::resetToFront()
+    {
+      if( m_NodeListIterator != 0 )
+	{
+	  Node* n = (*m_NodeListIterator);
+	  m_Nodes.erase( m_NodeListIterator );
+	  m_Nodes.push_front( n );
+	  
+	  m_NodeListIterator = 0;
+	}
+    }
+
+
+    void MaximumFlowAlgorithm::execute( bool reset )
     {
       graphDebug("Start execute");
 
-      initializePre();
+      initializePre( reset );
     
-      Node* n = 0;
+      Node* n = getNextInList();
 
-      NodeList::iterator ite = m_Nodes.begin();
-    
-      if( ite != m_Nodes.end() )
-	n = (*ite);
-        
       while( n != 0 )
 	{
 	  long oldDistance = m_DistanceOnNode[ n ];
@@ -145,42 +194,34 @@ namespace EUROPA
 	
 	  if( m_DistanceOnNode[ n ] > oldDistance )
 	    {
-	      // relabel n to the front
-	      m_Nodes.erase( ite );
-
-	      m_Nodes.push_front( n );
-
-	      ite = m_Nodes.begin();
+	      resetToFront();
 	    }
 	
-	  n = 0;
-
-	  // next node
-	  ++ite;
-
-	  if( ite != m_Nodes.end() )
-	    n = (*ite);
+	  n = getNextInList();
 	}
 
       graphDebug("End execute, max flow: " 
 		 << getMaxFlow() );
     }
 
-    void MaximumFlowAlgorithm::initializePre()
+    void MaximumFlowAlgorithm::initializePre( bool reset )
     {
       graphDebug("Start initializePre");
 
       checkError( m_Source->isEnabled(),"Source '" << *m_Source << "' is not enabled.");
       checkError( m_Sink->isEnabled(),"Sink '" << *m_Sink << "' is not enabled." );
 
-      m_CurrentOutEdgeOnNode.clear();
-      m_EndOutEdgeOnNode.clear();
-      m_DistanceOnNode.clear();
-      m_ExcessOnNode.clear();
-
-      m_OnEdge.clear();
-
-      m_Nodes.clear();
+      if( reset )
+	{
+	  m_CurrentOutEdgeOnNode.clear();
+	  m_EndOutEdgeOnNode.clear();
+	  m_DistanceOnNode.clear();
+	  m_ExcessOnNode.clear();
+	  
+	  m_OnEdge.clear();
+	  
+	  m_Nodes.clear();
+	}
 
       const NodeIdentity2Node& nodes = m_Graph->getNodes();
 
@@ -196,37 +237,43 @@ namespace EUROPA
 
 	  if( node->isEnabled() )
 	    {
-	      if( node != m_Source && node != m_Sink )
-		m_Nodes.push_back( node );
-
 	      m_CurrentOutEdgeOnNode[ node ] = node->getOutEdges().begin();
 	      m_EndOutEdgeOnNode[ node ] = node->getOutEdges().end();
-	      m_DistanceOnNode[ node ] = 1;
-	      m_ExcessOnNode[ node ] = 0.0;
-	    
-	      const EdgeList& outEdges = node->getOutEdges();
 
-	      EdgeList::const_iterator fIte = outEdges.begin();
-	      EdgeList::const_iterator fEnd = outEdges.end();
-	    
-	      for( ; fIte != fEnd; ++fIte )
+	      while( m_CurrentOutEdgeOnNode[ node ] != m_EndOutEdgeOnNode[ node ] && !(*m_CurrentOutEdgeOnNode[ node ])->getTarget()->isEnabled() )
+		++m_CurrentOutEdgeOnNode[ node ];
+
+	      if( reset )
 		{
-		  Edge* edge = *fIte;
-		
-		  if( edge->isEnabled() )
+		  if( node != m_Source && node != m_Sink )
+		    m_Nodes.push_back( node );
+		  
+		  m_DistanceOnNode[ node ] = 1;
+		  m_ExcessOnNode[ node ] = 0.0;
+		  
+		  const EdgeList& outEdges = node->getOutEdges();
+	      
+		  EdgeList::const_iterator fIte = outEdges.begin();
+		  EdgeList::const_iterator fEnd = outEdges.end();
+		  
+		  for( ; fIte != fEnd; ++fIte )
 		    {
-		      graphDebug("Initializing flow on edge " 
+		      Edge* edge = *fIte;
+		      
+		      if( edge->isEnabled() )
+			{
+			  graphDebug("Initializing flow on edge " 
 				 << *edge << " to be 0");
-		      
-		      // check edge is enabled
-		      m_OnEdge[ edge ] = 0.0;
-		      
-		      checkError( 0 !=  m_Graph->getEdge( edge->getTarget(), edge->getSource() )
-				  &&
-				  m_Graph->getEdge( edge->getTarget(), edge->getSource() )->isEnabled(),
-				  "No (enabled) reverse edge for edge '" << *edge << "'");
-		      
-		      m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = 0.0;
+			  
+			  m_OnEdge[ edge ] = 0.0;
+			  
+			  checkError( 0 !=  m_Graph->getEdge( edge->getTarget(), edge->getSource() )
+				      &&
+				      m_Graph->getEdge( edge->getTarget(), edge->getSource() )->isEnabled(),
+				      "No (enabled) reverse edge for edge '" << *edge << "'");
+			  
+			  m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = 0.0;
+			}
 		    }
 		}
 	    }
@@ -234,6 +281,8 @@ namespace EUROPA
 
       m_DistanceOnNode[ m_Sink ] = 0;
       m_DistanceOnNode[ m_Source ] = (long) m_Nodes.size();
+
+      m_NodeListIterator = 0;
 
       EdgeOutIterator edgeOutIte( *m_Source );
     
@@ -324,6 +373,27 @@ namespace EUROPA
       return ( m_OnEdge[ edge ] < edge->getCapacity() )
 	&&  
 	( m_DistanceOnNode[ edge->getSource() ] ==  m_DistanceOnNode[ edge->getTarget() ] + 1 );
+    }
+
+    void MaximumFlowAlgorithm::pushFlowBack( Node* node )
+    {
+      EdgeInIterator ite( *node );
+      
+      for( ; ite.ok(); ++ite )
+	{
+	  Edge* edge = *ite;
+
+	  Node* source = edge->getSource();
+		
+	  double flow_pushed_back = getFlow( edge );
+
+	  if( flow_pushed_back > 0 && edge->getCapacity() != 0 )
+	    {
+	      m_ExcessOnNode[ source ] = m_ExcessOnNode[ source ] + flow_pushed_back;
+	      m_OnEdge[ edge ] = 0.0;
+	      m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = 0.0;
+	    }
+	}
     }
 
     void MaximumFlowAlgorithm::push( Edge* edge )

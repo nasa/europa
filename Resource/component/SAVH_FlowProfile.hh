@@ -2,7 +2,7 @@
 #define FLOW_PROFILE_HEADER__
 
 /**
- * @file SAVH_Edge.hh
+ * @file SAVH_Profile.hh
  * @author David Rijsman
  * @brief Defines the public interface for a maximum flow algorithm
  * @date April 2006
@@ -12,6 +12,7 @@
 #include "DomainListener.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_ResourceDefs.hh"
+#include "SAVH_Types.hh"
 #include "TemporalPropagator.hh"
 
 namespace EUROPA 
@@ -19,6 +20,7 @@ namespace EUROPA
   namespace SAVH 
   {
     class Graph;
+    class MaximumFlowAlgorithm;
     class Node;
 
     /**
@@ -57,7 +59,25 @@ namespace EUROPA
        * @brief 
        * @return
        */
+      bool isEnabled(  const SAVH::TransactionId& transaction ) const;
+      /**
+       * @brief 
+       */
+      void disable(  const SAVH::TransactionId& transaction ) ;
+      /**
+       * @brief 
+       */
+      void pushFlow( const SAVH::TransactionId& transaction );
+      /**
+       * @brief 
+       * @return
+       */
       double getResidualFromSource();
+      /**
+       * @brief 
+       * @return
+       */
+      double disableReachableResidualGraph();
       /**
        * @brief 
        * @return
@@ -71,9 +91,17 @@ namespace EUROPA
        * @brief 
        */
       void reset();
+      /**
+       * @brief 
+       */
+      void restoreFlow();
     private:
+      void visitNeighbors( const Node* node, double& residual, Node2Bool& visited );
+
       bool m_lowerLevel;
       bool m_recalculate;
+
+      SAVH::MaximumFlowAlgorithm* m_maxflow;
       SAVH::Graph* m_graph;
       SAVH::Node* m_source;
       SAVH::Node* m_sink;
@@ -129,7 +157,7 @@ namespace EUROPA
        * @brief 
        */
       virtual ~FlowProfile();
-    private:
+    protected:
       /**
        * @brief 
        */
@@ -199,11 +227,6 @@ namespace EUROPA
        * @return
        */
       void recomputeLevels(InstantId prev, InstantId inst);
-      /**
-       * @brief 
-       * @return
-       */
-      void resetEdgeWeights( const TransactionId t );
      
       SAVH::TransactionId m_dummySourceTransaction;
       SAVH::TransactionId m_dummySinkTransaction;
@@ -216,6 +239,9 @@ namespace EUROPA
 
       bool m_recalculateLowerLevel;
       bool m_recalculateUpperLevel;    
+
+      int m_startRecalculation;
+      int m_endRecalculation;
     };
   }
 }

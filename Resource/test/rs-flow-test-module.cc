@@ -10,6 +10,7 @@
 #include "SAVH_Transaction.hh"
 #include "SAVH_TimetableProfile.hh"
 #include "SAVH_FlowProfile.hh"
+#include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_ProfilePropagator.hh"
 
 #include "Debug.hh"
@@ -86,16 +87,31 @@ class FlowProfileTest
 public:
 
   static bool test(){
-    testAddAndRemove();
-    testScenario0();
-    testScenario1();
-    testScenario2();
-    testScenario3();
-    testScenario4();
-    testScenario5();
-    testScenario6();
-    testScenario7();
-    testScenario8();
+    std::cout << " FlowProfile " << std::endl;
+
+    testAddAndRemove< EUROPA::SAVH::FlowProfile> ();
+    testScenario0< EUROPA::SAVH::FlowProfile>();
+    testScenario1< EUROPA::SAVH::FlowProfile>();
+    testScenario2< EUROPA::SAVH::FlowProfile>();
+    testScenario3< EUROPA::SAVH::FlowProfile>();
+    testScenario4< EUROPA::SAVH::FlowProfile>();
+    testScenario5< EUROPA::SAVH::FlowProfile>();
+    testScenario6< EUROPA::SAVH::FlowProfile>();
+    testScenario7< EUROPA::SAVH::FlowProfile>();
+    testScenario8< EUROPA::SAVH::FlowProfile>();
+
+    std::cout << " IncrementalFlowProfile " << std::endl;
+
+    testAddAndRemove< EUROPA::SAVH::IncrementalFlowProfile> ();
+    testScenario0< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario1< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario2< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario3< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario4< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario5< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario6< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario7< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario8< EUROPA::SAVH::IncrementalFlowProfile>();
     return true;
   }
 private:
@@ -642,7 +658,7 @@ private:
   static bool testNoTransactions() {
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile(ce.getId(), detector.getId());
+    SAVH::IncrementalFlowProfile profile(ce.getId(), detector.getId());
 
     profile.recompute();
     return true;
@@ -653,10 +669,12 @@ private:
   static bool testOneNegativeTransaction() {
     return true;
   }
+
+  template< class Profile >
   static bool testAddAndRemove(){
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile(db.getId(), detector.getId());
+    Profile profile(db.getId(), detector.getId());
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain(10, 15), true, "t2" );
@@ -694,91 +712,106 @@ private:
 
     return true;
   }
+
+  template< class Profile >
   static bool testScenario0(){
     std::cout << "  Scenario 0" << std::endl;
 
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId());
 
     executeScenario0( profile, ce );
     return true;
   }
 
+  template< class Profile >
   static bool testScenario1(){
     std::cout << "  Scenario 1" << std::endl;
 
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId());
 
     executeScenario1( profile, ce );
     return true;
   }
+
+  template< class Profile >
   static bool testScenario2(){
     std::cout << "  Scenario 2" << std::endl;
 
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId());
 
     executeScenario2( profile, ce );
     return true;
   }
+
+  template< class Profile >
   static bool testScenario3(){
     std::cout << "  Scenario 3" << std::endl;
 
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId());
 
     executeScenario3( profile, ce );
     return true;
   }
+
+  template< class Profile >
   static bool testScenario4(){
     std::cout << "  Scenario 4" << std::endl;
 
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId());
 
     executeScenario4( profile, ce );
     return true;
   }
+
+  template< class Profile >
   static bool testScenario5(){
     std::cout << "  Scenario 5" << std::endl;
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId());
 
     executeScenario5( profile, ce );
     return true;
   }
 
+  template< class Profile >
   static bool testScenario6(){
     std::cout << "  Scenario 6" << std::endl;
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId());
 
     executeScenario6( profile, ce );
     return true;
   }
 
+  template< class Profile >
   static bool testScenario7(){
     std::cout << "  Scenario 7" << std::endl;
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId());
 
     executeScenario7( profile, ce );
     return true;
   }
+
+  template< class Profile >
   static bool testScenario8(){
     std::cout << "  Scenario 8" << std::endl;
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::FlowProfile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId());
 
     executeScenario8( profile, ce );
     return true;

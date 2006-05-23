@@ -9,8 +9,9 @@
  * @ingroup Resource
  */
 
-#include "SAVH_Types.hh"
 #include "SAVH_Edge.hh"
+#include "SAVH_Node.hh"
+#include "SAVH_Types.hh"
 
 namespace EUROPA 
 {
@@ -46,7 +47,7 @@ namespace EUROPA
       /**
        * @brief
        */
-      Edge* getEdge( Node* source, Node* target ) const;    
+      inline Edge* getEdge( Node* source, Node* target ) const;    
       /**
        * @brief
        */
@@ -71,6 +72,31 @@ namespace EUROPA
     const NodeIdentity2Node& Graph::getNodes() const
     {
       return m_Nodes;
+    }
+
+    Edge* Graph::getEdge( Node* source, Node* target ) const
+    {
+      checkError( 0 != source, "Null not allowed as input for source" );
+      checkError( 0 != target, "Null not allowed as input for target" );
+      
+      const EdgeList& outEdges = source->getOutEdges();
+      
+      EdgeList::const_iterator fIte = outEdges.begin();
+      EdgeList::const_iterator fEnd = outEdges.end();
+      
+      for( ; fIte != fEnd; ++fIte )
+	{
+	  Edge* edge = *fIte;
+
+	  if( edge->getTarget() == target )
+	    {
+	      return edge;
+	      
+	      break;
+	    }
+	}
+
+      return 0;
     }
   }
 }

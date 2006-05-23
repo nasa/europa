@@ -51,6 +51,8 @@ namespace EUROPA
     typedef std::list< Edge* > EdgeList;
     typedef std::list< Node* > NodeList;
 
+    typedef std::map< Node*, bool > Node2Bool;
+    typedef std::map< Node*, int > Node2Int;
     typedef std::map< Node*, long > Node2Long;
     typedef std::map< Node*, double > Node2Double;
   
