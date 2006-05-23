@@ -738,7 +738,7 @@ rule ApacheAnt
 {
 	# let jam's dep tree in on what the ant command will try to do
 	SEARCH on $(2) = $(SEARCH_SOURCE) ;
-	LocalDepends $(1) : $(2) ;
+	Depends $(1) : $(2) ;
 }
 # use cd to move to current subdirectory
 actions ApacheAnt
