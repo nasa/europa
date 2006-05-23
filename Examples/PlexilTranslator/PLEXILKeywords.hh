@@ -1,10 +1,15 @@
 namespace EUROPA {
 
+        const std::string indent = "  ";
         const std::string replan = "Abort(), Replan(), Fail()?";
-        const std::string preamble= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-        const std::string preamble2="<PlexilPlan xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"/Users/vandi/plexil_Schema_051026.xsd\">";
+        const std::string xmlVersion ="<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+        const std::string begin_plexil_plan="<PlexilPlan xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=";
+	const std::string namespaceLocation = "\"../schema/plexil_Schema.xsd\">";
+        const std::string end_plexil_plan = "</PlexilPlan>";
         const std::string bnodetype="<Node NodeType=";
         const std::string enodetype=">";
+        const std::string begin_nodebody="<NodeBody>";
+        const std::string end_nodebody ="</NodeBody>";
         const std::string commandNodetype="\"command\"";
 	const std::string bnode = "<Node>";
  	const std::string enode = "</Node>";
@@ -12,6 +17,7 @@ namespace EUROPA {
  	const std::string bnodeid = "<NodeId>";
  	const std::string enodeid = "</NodeId>";
  	const std::string bnodelist = "\"NodeList\"";
+        const std::string begin_full_nodelist ="<NodeList>";
  	const std::string enodelist = "</NodeList>";
  	const std::string bnodetimeval = "<NodeTimepointValue>";
  	const std::string enodetimeval = "</NodeTimepointValue>";

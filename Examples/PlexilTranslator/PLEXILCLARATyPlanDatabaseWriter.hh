@@ -199,10 +199,14 @@ namespace EUROPA {
 		int postcondCount;
 
 		std::string plan;
-		plan=preamble + "\n"+preamble2 +"\n";
-		plan=plan + bnode + "\n";
-		plan=plan + bnodeid + "DEMORoverPlan" +enodeid+"\n";
-		plan=plan + bnodetype + bnodelist + enodetype + "\n";
+		plan = xmlVersion + "\n"; 
+                plan = plan + begin_plexil_plan + namespaceLocation + "\n";
+	
+                plan= plan + indentTo(1) + bnodetype + bnodelist + enodetype + "\n";
+		plan= plan + indentTo(2) + bnodeid + "DEMORoverPlan" + enodeid + "\n";
+	        
+                plan = plan + indentTo(2) + begin_nodebody + "\n";
+                plan = plan + indentTo(2) + begin_full_nodelist + "\n";
 
 		//Write PLEXILCLARATy nodes for all action tokens 
      		for(TokenSet::const_iterator tokit = actionTokens.begin(); tokit != actionTokens.end(); ++tokit){
@@ -217,12 +221,12 @@ namespace EUROPA {
 			childNodes.insert(nodekey);
 
 			//Node header
-			nodeHeader=node + nodeid;
-			nodeHeader=nodeHeader + nodeidPrefix + nodekey;
-			nodeHeader=nodeHeader + endbrace + "\n";
+		        //nodeHeader= node + nodeid;
+			//nodeHeader=nodeHeader + nodeidPrefix + nodekey;
+			//nodeHeader=nodeHeader + endbrace + "\n";
 
-			plan=plan+bnode+"\n";
-			plan=plan+bnodeid + nodeidPrefix + nodekey+enodeid +"\n";
+			plan=plan + indentTo(3) + bnode + "\n";
+			plan=plan + indentTo(4) + bnodeid + nodeidPrefix + nodekey+enodeid +"\n";
 
 			first=true;
 			varList = t->getParameters();
@@ -234,7 +238,7 @@ namespace EUROPA {
 			    break;
 			  }
 			}
-			os << nodeHeader; 	
+			//os << nodeHeader; 	
 
 			startCondition=stc;
 			preCondition=prec;			
@@ -360,8 +364,6 @@ namespace EUROPA {
      			for(TokenSet::const_iterator tokit2 = actionTokens.begin(); tokit2 != actionTokens.end(); ++tokit2){
 	    			TokenId t2 = *tokit2;
 				if(t != t2){
-
-
 					if(mustPrecede(t,t2,d1)){
 						//In this case know t2 must be finished
 						//StartCondition
@@ -447,9 +449,7 @@ namespace EUROPA {
 						precond=precond+breal+toString(d1.getUpperBound())+ereal+"\n";
 						precond=precond+eadd+"\n";
 						precond=precond+ele+"\n";
-
 					}
-
 
 					else if(mustStartBeforeStart(t2,t,d1)){
 						if(mustEndAfter(t,t2,d2)){
@@ -501,7 +501,6 @@ namespace EUROPA {
 							postcond=postcond+breal+toString(d2.getUpperBound())+ereal+"\n";
 							postcond=postcond+eadd+"\n";
 							postcond=postcond+ele+"\n";
-
 						}
 					}
 
@@ -682,7 +681,6 @@ namespace EUROPA {
 							startcond=startcond+eor+"\n";
 							startcond=startcond+eor+"\n";
 
-
 							startcondSet=startcondSet+band+"\n"+startcond+"\n";
 							startcond="";
 							startcondCount++;
@@ -699,8 +697,7 @@ namespace EUROPA {
 							startcond=startcond+enodetimeval+"\n";
 							startcond=startcond+breal+toString(d1.getLowerBound())+ereal+"\n";
 							startcond=startcond+eadd+"\n";
-							startcond=startcond+ege+"\n";
-							
+							startcond=startcond+ege+"\n";							
 
 							startcondSet=startcondSet+band+"\n"+startcond+"\n";
 							startcond="";
@@ -712,16 +709,13 @@ namespace EUROPA {
 							startcond=startcond+elookfreq+"\n";	
 							startcond=startcond+binf+inf+einf+"\n";
 							startcond=startcond+ele+"\n";
-
-
 						}
 					}
 				}
 			}		
 
 
-			//Handle tokens from action-state token pairs
-			
+			//Handle tokens from action-state token pairs			
      			for(TokenSet::const_iterator tokit2 = stateTokens.begin(); tokit2 != stateTokens.end(); ++tokit2){
 				TokenId t2 = *tokit2;
 				varList = t2->getParameters();
@@ -787,7 +781,7 @@ namespace EUROPA {
 					std::string stateDescr;
 					stateDescr = fqn.substr(lastdot+1,slen-lastdot)+"(";
 					appendParamsToString(id2,varList,stateDescr);
-					stateDescr = stateDescr + ")"; 
+					stateDescr = stateDescr + ")";
 
 					//This might be first post cond, so check count 
 					//If it is, dump this postcond with a previous band
@@ -804,8 +798,6 @@ namespace EUROPA {
 					postcond=postcond+elooknow+"\n";
 					postcond=postcond+bboolvar+bbool +boolfalse+ ebool + eboolvar+"\n";
 					postcond=postcond+eeqbool+"\n";
-
-
 				}
 				else if(isContainedBy(t,t2)){
 					//Invariantcondition
@@ -868,7 +860,6 @@ namespace EUROPA {
 			  invcondSet=invcondSet+eand+"\n";
 			}
 			invcondSet=invcondSet+eic+"\n";
-
 
 			if(firstPost==false){
 			  postcondSet=postcond+"\n";
@@ -972,6 +963,14 @@ namespace EUROPA {
 
                 plan=plan+enodelist + "\n";
                 plan=plan+enode + "\n";
+
+
+                plan = plan + indentTo(2) + enodelist + "\n";
+                plan = plan + indentTo(2) + end_nodebody + "\n";
+                plan = plan + indentTo(1) + "\n";
+                plan = plan + end_plexil_plan + "\n";
+
+
                 os << plan;
 	}		
 	
@@ -979,7 +978,7 @@ namespace EUROPA {
 
 	//Helper functions
 
-	bool PLEXILCLARATyPlanDatabaseWriter::mustPrecede(const TokenId& t,const TokenId& prec, IntervalDomain& d1){
+    bool PLEXILCLARATyPlanDatabaseWriter::mustPrecede(const TokenId& t,const TokenId& prec, IntervalDomain& d1) {
 		//Test to see if prec must precede t.  If so, then pend must precede tstart
 		TempVarId tstart= t->getStart();
 		TempVarId pend = prec->getEnd();
@@ -1155,6 +1154,14 @@ namespace EUROPA {
 	}
 
 
+    std::string  PLEXILCLARATyPlanDatabaseWriter::indentTo(int level) {
+      std::string result = "";
+      for (int i=1; i <= level; ++i) {
+        result = result + indent;
+      }
+      return result;
+    }
+
     std::string PLEXILCLARATyPlanDatabaseWriter::toString(double value) {
           std::string returnResult;
           std::stringstream temp;
@@ -1227,6 +1234,9 @@ namespace EUROPA {
 	    j++;
 	  }
 	}
+
+
+
  };
 }
 
