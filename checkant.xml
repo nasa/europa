@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<project name="CheckAnt" default="check" basedir=".">
+	<description>
+  Check Apache Ant requirements for PLASMA
+	</description>
+
+	<target name="check"
+	  description="Check Apache Ant requirements for PLASMA">
+		<echo message="Testing your ant installation."/>
+		<!-- The following should have caused a failure in this file -->
+		<fail message="  Your ant is severely broken -- org.apache.tools.ant.Project is missing">
+			<condition><not><available classname="org.apache.tools.ant.Project"/></not></condition>
+		</fail>
+		<fail message="  Your ant is severely broken -- org.apache.tools.ant.Target is missing">
+			<condition><not><available classname="org.apache.tools.ant.Target"/></not></condition>
+		</fail>
+		<fail message="  Your ant is severely broken -- missing Description Type">
+			<condition><not><available classname="org.apache.tools.ant.types.Description"/></not></condition>
+		</fail>
+		<fail message="  Your ant is severely broken -- missing Path Type">
+			<condition><not><available classname="org.apache.tools.ant.types.Path"/></not></condition>
+		</fail>
+		<fail message="  Your ant is severely broken -- missing Property Task">
+			<condition><not><available classname="org.apache.tools.ant.taskdefs.Property"/></not></condition>
+		</fail>
+		<!-- What remains are the genuine tests -->
+		<fail message="  Your ant is insufficient -- missing Fileset Type">
+			<condition><not><or>
+				<available classname="org.apache.tools.ant.types.Fileset"/>
+				<available classname="org.apache.tools.ant.types.FileSet"/>
+			</or></not></condition>
+		</fail>
+		<fail message="  Your ant is insufficient -- missing Manifest Task">
+			<condition><not><available classname="org.apache.tools.ant.taskdefs.Manifest"/></not></condition>
+		</fail>
+		<fail message="  Your ant is insufficent -- missing Delete Task">
+			<condition><not><available classname="org.apache.tools.ant.taskdefs.Delete"/></not></condition>
+		</fail>
+		<fail message="  Your ant is insufficent -- missing Jar Task">
+			<condition><not><available classname="org.apache.tools.ant.taskdefs.Jar"/></not></condition>
+		</fail>
+		<fail message="  Your ant is insufficent -- missing Unjar Task">
+			<condition><not><available classname="org.apache.tools.ant.taskdefs.Untar"/></not></condition>
+		</fail>
+		<fail message="  Your ant is insufficent -- missing Tstamp Task">
+			<condition><not><available classname="org.apache.tools.ant.taskdefs.Tstamp"/></not></condition>
+		</fail>
+		<fail message="  Your ant is insufficent -- missing Mkdir Task">
+			<condition><not><available classname="org.apache.tools.ant.taskdefs.Mkdir"/></not></condition>
+		</fail>
+		<fail message="  Your ant is insufficent -- missing Javac Task">
+			<condition><not><available classname="org.apache.tools.ant.taskdefs.Javac"/></not></condition>
+		</fail>
+		<fail message="  Your ant is insufficent -- missing Antlr Task">
+			<condition><not><available classname="org.apache.tools.ant.taskdefs.optional.ANTLR"/></not></condition>
+		</fail>
+		<fail message="  Your ant is insufficent -- missing Depend Task">
+			<condition><not><available classname="org.apache.tools.ant.taskdefs.optional.depend.Depend"/></not></condition>
+		</fail>
+		<echo message="  All tests pass, your ant should do just fine."/>
+	</target>
+
+</project>
