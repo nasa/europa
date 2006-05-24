@@ -152,7 +152,9 @@ namespace EUROPA {
 	StringSet actionPreds;
 	StringSet statePreds; 
 
-	PLEXILCLARATyPlanDatabaseWriter::PLEXILCLARATyPlanDatabaseWriter(){}
+       int indentCount;
+
+    PLEXILCLARATyPlanDatabaseWriter::PLEXILCLARATyPlanDatabaseWriter():indentCount(1){}
 	PLEXILCLARATyPlanDatabaseWriter::~PLEXILCLARATyPlanDatabaseWriter(){}
 
 
@@ -197,16 +199,16 @@ namespace EUROPA {
 		int precondCount;
 		int invcondCount;
 		int postcondCount;
-
+  
 		std::string plan;
 		plan = xmlVersion + "\n"; 
                 plan = plan + begin_plexil_plan + namespaceLocation + "\n";
 	
-                plan= plan + indentTo(1) + bnodetype + bnodelist + enodetype + "\n";
-		plan= plan + indentTo(2) + bnodeid + "DEMORoverPlan" + enodeid + "\n";
+                plan= plan + indentTo(indentCount++) + bnodetype + bnodelist + enodetype + "\n";
+		plan= plan + indentTo(indentCount) + bnodeid + "DEMORoverPlan" + enodeid + "\n";
 	        
-                plan = plan + indentTo(2) + begin_nodebody + "\n";
-                plan = plan + indentTo(2) + begin_full_nodelist + "\n";
+                plan = plan + indentTo(indentCount) + begin_nodebody + "\n";
+                plan = plan + indentTo(indentCount++) + begin_full_nodelist + "\n";
 
 		//Write PLEXILCLARATy nodes for all action tokens 
      		for(TokenSet::const_iterator tokit = actionTokens.begin(); tokit != actionTokens.end(); ++tokit){
@@ -225,8 +227,8 @@ namespace EUROPA {
 			//nodeHeader=nodeHeader + nodeidPrefix + nodekey;
 			//nodeHeader=nodeHeader + endbrace + "\n";
 
-			plan=plan + indentTo(3) + bnode + "\n";
-			plan=plan + indentTo(4) + bnodeid + nodeidPrefix + nodekey+enodeid +"\n";
+			plan=plan + indentTo(indentCount++) + bnode + "\n";
+			plan=plan + indentTo(indentCount) + bnodeid + nodeidPrefix + nodekey+enodeid +"\n";
 
 			first=true;
 			varList = t->getParameters();
@@ -267,54 +269,76 @@ namespace EUROPA {
                       	preCondition = preCondition + "," + toString(d1.getUpperBound());
 			preCondition = preCondition + endbrace;
 
-			precond=precond+bpc+"\n";
+			precond=precond + indentTo(indentCount++) + bpc + "\n";
 			precondCount++;
-			precond=precond+band+"\n";
-			precond=precond+bge+"\n";
-			precond=precond+blookfreq+"\n";
-			precond=precond+bstate+time+estate+"\n";
-			precond=precond+bfreq+breal+freq+ereal+efreq+"\n";
-			precond=precond+elookfreq+"\n";			
-			precond=precond+bneginf+neginf+eneginf+"\n";
-			precond=precond+ege+"\n";
+			precond = precond + indentTo(indentCount++) + band + "\n";
+			precond = precond + indentTo(indentCount++) + bge + "\n";
+			precond = precond + indentTo(indentCount++) + blookfreq + "\n";
+			precond = precond + indentTo(indentCount) + bstate + time + estate + "\n";
+			precond = precond + indentTo(indentCount++) + bfreq + "\n";
+                        precond = precond + indentTo(indentCount) + low_start + brealValue + freq + erealValue + low_end + "\n";
+                        precond = precond + indentTo(indentCount--) + high_start + brealValue + freq + erealValue + high_end + "\n";
+                        precond = precond + indentTo(indentCount--)+ efreq + "\n";
+			precond = precond + indentTo(indentCount) + elookfreq + "\n";			
+			precond = precond + indentTo(indentCount--) + bneginf + neginf + eneginf + "\n";
+			precond = precond + indentTo(indentCount) + ege + "\n";
 
 			precondCount++;
 			precondSet=precond;
 			precond="";
-			precond=precond+ble+"\n";
-			precond=precond+blookfreq+"\n";
-			precond=precond+bstate+time+estate+"\n";
-			precond=precond+bfreq+breal+freq+ereal+efreq+"\n";
-			precond=precond+elookfreq+"\n";
-			precond=precond+breal+toString(d1.getUpperBound())+ereal+"\n";		
-			precond=precond+ele+"\n";
+			precond = precond + indentTo(indentCount++) + ble + "\n";
+			precond = precond + indentTo(indentCount++) + blookfreq +"\n";
+			precond = precond + indentTo(indentCount) + bstate + time + estate + "\n";
+			precond = precond + indentTo(indentCount++) + bfreq + "\n";
+                        precond = precond + indentTo(indentCount) + low_start + brealValue + freq + erealValue + low_end + "\n";
+                        precond = precond + indentTo(indentCount--) + high_start + brealValue + freq + erealValue + high_end + "\n";
+                        precond = precond + indentTo(indentCount--) + efreq + "\n";
+			precond = precond + indentTo(indentCount) + elookfreq + "\n";
+
+                        precond = precond + indentTo(indentCount++) + timeValue_begin + units_begin + "\n";
+                        precond = precond + indentTo(indentCount--) + integerValue_begin + toString(d1.getLowerBound()) + integerValue_end +"\n";
+                        precond = precond + indentTo(indentCount--) + units_end + timeValue_end + "\n";
+	
+			precond=precond + indentTo(indentCount)+ ele + "\n";
 
 			//Start condition for absolute start time
 			startCondition = startCondition + abstime;
 			startCondition = startCondition + toString(d1.getLowerBound());
 			startCondition = startCondition + "," + infty + endbrace;
 
-			startcond=startcond+bstc+"\n";
+			startcond = startcond + indentTo(indentCount++) + bstc+"\n";
 			startcondCount++;
-			startcond=startcond+band+"\n";
-			startcond=startcond+bge+"\n";
-			startcond=startcond+blookfreq+"\n";
-			startcond=startcond+bstate+time+estate+"\n";
-			startcond=startcond+bfreq+breal+freq+ereal+efreq+"\n";
-			startcond=startcond+elookfreq+"\n";			
-			startcond=startcond+breal+toString(d1.getLowerBound())+ereal+"\n";
-			startcond=startcond+ege+"\n";
+			startcond=startcond+ indentTo(indentCount++) + band+"\n";
+			startcond = startcond + indentTo(indentCount++) + bge + "\n";
+			startcond = startcond + indentTo(indentCount++) + blookfreq + "\n";
+			startcond = startcond + indentTo(indentCount) + bstate + time + estate + "\n";
+			startcond = startcond + indentTo(indentCount++) + bfreq + "\n";
+                        startcond = startcond + indentTo(indentCount) + low_start + brealValue + freq + erealValue + low_end + "\n";
+                        startcond = startcond + indentTo(indentCount--) + high_start + brealValue + freq + erealValue + high_end + "\n";
+                        startcond = startcond + indentTo(indentCount--) + efreq +"\n";
+			startcond = startcond + indentTo(indentCount) + elookfreq+"\n";	
+             		
+                        startcond = startcond + indentTo(indentCount++) + timeValue_begin + units_begin + "\n";
+                        startcond = startcond + indentTo(indentCount--) + integerValue_begin + toString(d1.getLowerBound()) + integerValue_end +"\n";
+                        startcond = startcond + indentTo(indentCount--) + units_end + timeValue_end + "\n";
+
+			startcond=startcond + indentTo(indentCount) + ege+"\n";
 
 			startcondSet=startcond;
 			startcond="";
 			startcondCount++;
-			startcond=startcond+ble+"\n";
-			startcond=startcond+blookfreq+"\n";
-			startcond=startcond+bstate+time+estate+"\n";
-			startcond=startcond+bfreq+breal+freq+ereal+efreq+"\n";
-			startcond=startcond+elookfreq+"\n";
-			startcond=startcond+binf+inf+einf+"\n";		
-			startcond=startcond+ele+"\n";
+			startcond=startcond + indentTo(indentCount++) + ble+"\n";
+			startcond=startcond + indentTo(indentCount++) + blookfreq+"\n";
+			startcond=startcond + indentTo(indentCount) + bstate + time + estate+"\n";
+			
+                        startcond = startcond + indentTo(indentCount++) + bfreq + "\n";
+                        startcond = startcond + indentTo(indentCount) + low_start + brealValue + freq + erealValue+ low_end + "\n"; 
+                        startcond = startcond + indentTo(indentCount--) + high_start + brealValue + freq + erealValue+ high_end + "\n"; 
+                        startcond = startcond + indentTo(indentCount--) + efreq+"\n";
+			startcond = startcond + indentTo(indentCount) + elookfreq+"\n";
+			startcond = startcond + indentTo(indentCount--) + binf+inf+einf+"\n";		
+		
+                   	startcond=startcond + indentTo(indentCount--) + ele+"\n";
 
 			//Invariant condition for token duration
 			d1=advisor->getTemporalDistanceDomain(tstart,tend,true);
@@ -325,39 +349,46 @@ namespace EUROPA {
 			invariantCondition = invariantCondition + "+" + toString(d1.getUpperBound());
 			invariantCondition = invariantCondition + endbrace;
 
-			invcond=invcond+bic+"\n";
+			invcond=invcond+ indentTo(indentCount++)+bic+"\n";
 			invcondCount++;
-			invcond=invcond+band+"\n";
-			invcond=invcond+bge+"\n";
-			invcond=invcond+blookfreq+"\n";
-			invcond=invcond+bstate+time+estate+"\n";
-			invcond=invcond+bfreq+breal+freq+ereal+efreq+"\n";
-			invcond=invcond+elookfreq+"\n";			
-			invcond=invcond+bnodetimeval+"\n";
-			invcond=invcond + bnodeid + nodeidPrefix + nodekey + enodeid +"\n";
-			invcond=invcond+bnodestateval+exec+enodestateval+"\n";
-			invcond=invcond+btp+start+etp+"\n";
-			invcond=invcond+enodetimeval+"\n";
-			invcond=invcond+ege+"\n";
+			invcond=invcond+ indentTo(indentCount++) + band+"\n";
+			invcond=invcond + indentTo(indentCount++) + bge+"\n";
+			invcond=invcond + indentTo(indentCount++) + blookfreq+"\n";
+			invcond=invcond + indentTo(indentCount) + bstate + time + estate+"\n";
+			invcond=invcond + indentTo(indentCount++) + bfreq + "\n";
+                        invcond=invcond + indentTo(indentCount) + low_start + brealValue + freq + erealValue + low_end +"\n";
+                        invcond=invcond + indentTo(indentCount--) + high_start + brealValue + freq + erealValue + high_end +"\n";
+                        invcond=invcond + indentTo(indentCount--)  +efreq+"\n";
+			invcond=invcond + indentTo(indentCount--) + elookfreq+"\n";			
+			invcond=invcond + indentTo(indentCount++) + bnodetimeval+"\n";
+			invcond=invcond + indentTo(indentCount) + bnodeid + nodeidPrefix + nodekey + enodeid +"\n";
+			invcond=invcond + indentTo(indentCount) + bnodestateval+exec+enodestateval+"\n";
+			invcond=invcond + indentTo(indentCount--) + btp + start + etp+"\n";
+			invcond=invcond + indentTo(indentCount--) + enodetimeval+"\n";
+			invcond=invcond + indentTo(indentCount) + ege+"\n";
 			invcondSet=invcond;
 			invcond="";
 			invcondCount++;
-			invcond=invcond+ble+"\n";
-			invcond=invcond+blookfreq+"\n";
-			invcond=invcond+bstate+time+estate+"\n";
-			invcond=invcond+bfreq+breal+freq+ereal+efreq+"\n";
-			invcond=invcond+elookfreq+"\n";
-			invcond=invcond+badd+"\n";
-			invcond=invcond+bnodetimeval+"\n";
-			invcond=invcond+ bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
-			invcond=invcond+bnodestateval+exec+enodestateval+"\n";
-			invcond=invcond+btp+start+etp+"\n";
-			invcond=invcond+enodetimeval+"\n";
-			invcond=invcond+breal+toString(d1.getUpperBound())+ereal+"\n";
-			invcond=invcond+eadd+"\n";
-			invcond=invcond+ele+"\n";
+			invcond=invcond + indentTo(indentCount++) + ble+"\n";
+			invcond=invcond + indentTo(indentCount++) + blookfreq+"\n";
+	          	invcond=invcond + indentTo(indentCount) + bstate + time + estate+"\n";
+			invcond=invcond + indentTo(indentCount++) + bfreq + "\n";
+                        invcond=invcond + indentTo(indentCount) + low_start + brealValue + freq + erealValue + low_end +"\n";
+                        invcond=invcond + indentTo(indentCount--) + high_start + brealValue + freq + erealValue + high_end +"\n";
+                        invcond=invcond + indentTo(indentCount--)  +efreq+"\n"; 
+			invcond=invcond + indentTo(indentCount--) +elookfreq+"\n";
+		
+                 	invcond=invcond + indentTo(indentCount++) + badd+"\n";
+			invcond=invcond + indentTo(indentCount++) + bnodetimeval+"\n";
+			invcond=invcond + indentTo(indentCount) + bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
+			invcond=invcond + indentTo(indentCount) + bnodestateval+exec+enodestateval+"\n";
+			invcond=invcond + indentTo(indentCount--) + btp+start+etp+"\n";
+			invcond=invcond + indentTo(indentCount) +enodetimeval+"\n";
+			invcond=invcond + indentTo(indentCount--) + brealValue +toString(d1.getUpperBound())+erealValue+"\n";
+			invcond=invcond + indentTo(indentCount--) + eadd+"\n";
+			invcond=invcond + indentTo(indentCount) + ele+"\n";
 
-			postcond=postcond+bpoc+"\n";
+			postcond=postcond + indentTo(indentCount) +bpoc+"\n";
 
 			//Handle conditions from action-action pairs
 			
@@ -379,33 +410,40 @@ namespace EUROPA {
 
 						//know 2 startconds already, add another preceeding and
 						startcondCount++;
-						startcondSet=startcondSet+band+"\n"+startcond+"\n";
+						startcondSet=startcondSet+ indentTo(indentCount++) + band+"\n";
+						startcondSet=startcondSet+ indentTo(indentCount++) +startcond+"\n";
 						startcond="";
-						startcond=startcond+bge+"\n";
-						startcond=startcond+blookfreq+"\n";
-						startcond=startcond+bstate+time+estate+"\n";
-						startcond=startcond+bfreq+breal+freq+ereal+efreq+"\n";
-						startcond=startcond+elookfreq+"\n";			
-						startcond=startcond+badd+"\n";
-						startcond=startcond+bnodetimeval+"\n";
-						startcond=startcond+bnodeid+ nodeidPrefix + nodekey + enodeid+"\n";
-						startcond=startcond+bnodestateval+exec+enodestateval+"\n";
-						startcond=startcond+btp+end+etp+"\n";
-						startcond=startcond+enodetimeval+"\n";
-						startcond=startcond+breal+toString(d1.getLowerBound())+ereal+"\n";
-						startcond=startcond+eadd+"\n";
-						startcond=startcond+ege+"\n";
+						startcond=startcond + indentTo(--indentCount) + bge+"\n";
+						startcond=startcond + indentTo(indentCount++) + blookfreq+"\n";
+						startcond=startcond + indentTo(indentCount) +bstate+time+estate+"\n";
+						startcond=startcond + indentTo(indentCount++) + bfreq +"\n";
+                                                startcond=startcond + indentTo(indentCount) + low_start + brealValue +freq + erealValue + low_end + "\n";
+                                                startcond=startcond + indentTo(indentCount--) + high_start + brealValue +freq + erealValue + high_end + "\n";
+                                                startcond=startcond + indentTo(indentCount--) +efreq+"\n";
+						startcond=startcond + indentTo(indentCount) + elookfreq+"\n";			
+						startcond=startcond + indentTo(indentCount++) + badd+"\n";
+						startcond=startcond + indentTo(indentCount++) + bnodetimeval+"\n";
+						startcond=startcond + indentTo(indentCount) + bnodeid+ nodeidPrefix + nodekey + enodeid+"\n";
+						startcond=startcond + indentTo(indentCount) + bnodestateval+exec+enodestateval+"\n";
+						startcond=startcond + indentTo(indentCount--) + btp+end+etp+"\n";
+						startcond=startcond + indentTo(indentCount) + enodetimeval+"\n";
+						startcond=startcond + indentTo(indentCount--) + brealValue+toString(d1.getLowerBound())+erealValue+"\n";
+						startcond=startcond + indentTo(indentCount--) + eadd+"\n";
+						startcond=startcond + indentTo(indentCount) +ege+"\n";
 						
 						startcondCount++;
-						startcondSet=startcondSet+band+"\n"+startcond+"\n";
+						startcondSet=startcondSet + indentTo(indentCount) +band+"\n"+startcond+"\n";
 						startcond="";
-						startcond=startcond+ble+"\n";
-						startcond=startcond+blookfreq+"\n";
-						startcond=startcond+bstate+time+estate+"\n";
-						startcond=startcond+bfreq+breal+freq+ereal+efreq+"\n";
-						startcond=startcond+elookfreq+"\n";
-						startcond=startcond+binf+inf+einf+"\n";		
-						startcond=startcond+ele+"\n";
+						startcond=startcond + indentTo(indentCount++) +ble+"\n";
+						startcond=startcond + indentTo(indentCount++)  +blookfreq+"\n";
+						startcond=startcond + indentTo(indentCount) + bstate+time+estate+"\n";
+						startcond=startcond + indentTo(indentCount++) + bfreq +"\n";
+                                                startcond=startcond + indentTo(indentCount) +low_start + brealValue + freq + erealValue + low_end +"\n";
+                                                startcond=startcond + indentTo(indentCount--) + high_start + brealValue + freq + erealValue + high_end +"\n";
+                                                startcond=startcond + indentTo(indentCount--) + efreq+"\n";
+						startcond=startcond + indentTo(indentCount) + elookfreq+"\n";
+						startcond=startcond + indentTo(indentCount--) + binf+inf+einf+"\n";		
+						startcond=startcond + indentTo(indentCount) + ele+"\n";
 
 						//PreCondition
 						preCondition=preCondition+",\n ";
@@ -418,37 +456,44 @@ namespace EUROPA {
 
 						//have 2 preconds, so just add another and
 						precondCount++;
-						precondSet=precondSet+band+"\n"+precond+"\n";
+						precondSet=precondSet+ indentTo(indentCount) + band+"\n"+precond+"\n";
 						precond="";
-						precond=precond+bge+"\n";
-						precond=precond+blookfreq+"\n";
-						precond=precond+bstate+time+estate+"\n";
-						precond=precond+bfreq+breal+freq+ereal+efreq+"\n";
-						precond=precond+elookfreq+"\n";	
-						precond=precond+bnodetimeval+"\n";
-						precond=precond+bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
-						precond=precond+bnodestateval+exec+enodestateval+"\n";
-						precond=precond+btp+start+etp+"\n";
-						precond=precond+enodetimeval+"\n";
-						precond=precond+ege+"\n";
+						precond=precond+indentTo(--indentCount)+bge+"\n";
+                                                indentCount++;
+						precond=precond+ indentTo(indentCount++) + blookfreq+"\n";
+						precond=precond+ indentTo(indentCount) + bstate+time+estate+"\n";
+						precond=precond+ indentTo(indentCount++) +bfreq + "\n";
+                                                precond=precond+ indentTo(indentCount) + low_start + brealValue + freq + erealValue + low_end + "\n";
+                                                precond=precond+ indentTo(indentCount--) + high_start + brealValue + freq + erealValue + high_end + "\n";
+                                                precond=precond+ indentTo(indentCount--) +efreq+"\n";
+						precond=precond+ indentTo(indentCount) + elookfreq+"\n";	
+						precond=precond+ indentTo(indentCount++) +bnodetimeval+"\n";
+						precond=precond+ indentTo(indentCount) + bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
+						precond=precond+ indentTo(indentCount) + bnodestateval+exec+enodestateval+"\n";
+						precond=precond+ indentTo(indentCount--) + btp+start+etp+"\n";
+						precond=precond+ indentTo(indentCount--) +enodetimeval+"\n";
+						precond=precond+ indentTo(indentCount) + ege+"\n";
 
 						precondCount++;
 						precondSet=precondSet+band+"\n"+precond+"\n";
 						precond="";
-						precond=precond+ble+"\n";
-						precond=precond+blookfreq+"\n";
-						precond=precond+bstate+time+estate+"\n";
-						precond=precond+bfreq+breal+freq+ereal+efreq+"\n";
-						precond=precond+elookfreq+"\n";	
+						precond=precond+ indentTo(indentCount++) + ble+"\n";
+						precond=precond+ indentTo(indentCount++) +blookfreq+"\n";
+						precond=precond+ indentTo(indentCount) + bstate+time+estate+"\n";
+						precond=precond+ indentTo(indentCount++) +bfreq+"\n";
+					        precond=precond+ indentTo(indentCount) +low_start + brealValue +freq + erealValue + low_end +"\n";
+                                                precond=precond+ indentTo(indentCount--) +high_start + brealValue +freq + erealValue + high_end +"\n";
+                                                precond=precond+ indentTo(indentCount--) + efreq +"\n";
+						precond=precond+ indentTo(indentCount) + elookfreq+"\n";	
 						precond=precond+badd+"\n";		
-						precond=precond+bnodetimeval+"\n";
-						precond=precond+bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
-						precond=precond+bnodestateval+exec+enodestateval+"\n";
-						precond=precond+btp+start+etp+"\n";
-						precond=precond+enodetimeval+"\n";
-						precond=precond+breal+toString(d1.getUpperBound())+ereal+"\n";
-						precond=precond+eadd+"\n";
-						precond=precond+ele+"\n";
+						precond=precond+ indentTo(indentCount++) +bnodetimeval+"\n";
+						precond=precond+ indentTo(indentCount) + bnodeid + nodeidPrefix + nodekey+enodeid+"\n";
+						precond=precond+ indentTo(indentCount) + bnodestateval+exec+enodestateval+"\n";
+						precond=precond+ indentTo(indentCount--)+ btp+start+etp+"\n";
+						precond=precond+ indentTo(indentCount) +enodetimeval+"\n";
+						precond=precond+ indentTo(indentCount--) + brealValue +toString(d1.getUpperBound())+erealValue+"\n";
+						precond=precond+ indentTo(indentCount--) + eadd+"\n";
+						precond=precond+ indentTo(indentCount) + ele+"\n";
 					}
 
 					else if(mustStartBeforeStart(t2,t,d1)){
@@ -473,7 +518,7 @@ namespace EUROPA {
 							  postcond="";
 							}
 							postcond=postcond+bge+"\n";
-							postcond=postcond+blookfreq+"\n";
+							postcond=postcond+ "55555" + blookfreq+"\n";
 							postcond=postcond+bstate+time+estate+"\n";
 							postcond=postcond+bfreq+breal+freq+ereal+efreq+"\n";
 							postcond=postcond+elookfreq+"\n";	
@@ -488,7 +533,7 @@ namespace EUROPA {
 							postcond="";
 							postcondCount++;
 							postcond=postcond+ble+"\n";
-							postcond=postcond+blookfreq+"\n";
+							postcond=postcond+ "66666" +blookfreq+"\n";
 							postcond=postcond+bstate+time+estate+"\n";
 							postcond=postcond+bfreq+breal+freq+ereal+efreq+"\n";
 							postcond=postcond+elookfreq+"\n";	
@@ -519,7 +564,7 @@ namespace EUROPA {
 						precond="";
 						precondCount++;
 						precond=precond+bge+"\n";
-						precond=precond+blookfreq+"\n";
+						precond=precond+ "77777" + blookfreq+"\n";
 						precond=precond+bstate+time+estate+"\n";
 						precond=precond+bfreq+breal+freq+ereal+efreq+"\n";
 						precond=precond+elookfreq+"\n";	
@@ -534,7 +579,7 @@ namespace EUROPA {
 						precond="";
 						precondCount++;
 						precond=precond+ble+"\n";
-						precond=precond+blookfreq+"\n";
+						precond=precond+ "88888"+ blookfreq+"\n";
 						precond=precond+bstate+time+estate+"\n";
 						precond=precond+bfreq+breal+freq+ereal+efreq+"\n";
 						precond=precond+elookfreq+"\n";	
@@ -564,7 +609,7 @@ namespace EUROPA {
 							startcond="";
 							startcondCount++;
 							startcond=startcond+bge+"\n";
-							startcond=startcond+blookfreq+"\n";
+							startcond=startcond+ "9999" + blookfreq+"\n";
 							startcond=startcond+bstate+time+estate+"\n";
 							startcond=startcond+bfreq+breal+freq+ereal+efreq+"\n";
 							startcond=startcond+elookfreq+"\n";	
@@ -579,7 +624,7 @@ namespace EUROPA {
 							startcond="";
 							startcondCount++;
 							startcond=startcond+ble+"\n";
-							startcond=startcond+blookfreq+"\n";
+							startcond=startcond+ "1000000"+ blookfreq+"\n";
 							startcond=startcond+bstate+time+estate+"\n";
 							startcond=startcond+bfreq+breal+freq+ereal+efreq+"\n";
 							startcond=startcond+elookfreq+"\n";	
@@ -750,14 +795,14 @@ namespace EUROPA {
 					precondCount++;
 					precondSet=precondSet+band+"\n"+precond+"\n";
 					precond="";					
-					precond=precond+beqbool+"\n";
-					precond=precond+blooknow+"\n";
-					precond=precond+bstate+"\n";
-					precond=precond+stateDescr+"\n";
-					precond=precond+estate+"\n";
-					precond=precond+elooknow+"\n";
-					precond=precond+bboolvar+bbool +boolfalse+ ebool + eboolvar+"\n";
-					precond=precond+eeqbool+"\n";
+					precond=precond + indentTo(indentCount++) + beqbool+"\n";
+					precond=precond + indentTo(indentCount++) + blooknow + "\n";
+					precond=precond + indentTo(indentCount--) + bstate;
+					precond=precond + stateDescr;
+					precond=precond + estate+"\n";
+					precond=precond + indentTo(indentCount) + elooknow+"\n";
+					precond=precond + indentTo(indentCount--) + bboolValue + boolfalse + eboolValue + "\n";
+					precond=precond + indentTo(indentCount--) +eeqbool + "\n";
 				}
 				else if(meets(t,t2)){
 					//postcondition
@@ -790,14 +835,14 @@ namespace EUROPA {
 					  postcondSet=postcondSet+band+"\n"+postcond+"\n";
 					  postcond="";
 					}
-					postcond=postcond+beqbool+"\n";
-					postcond=postcond+blooknow+"\n";
-					postcond=postcond+bstate+"\n";
-					postcond=postcond+stateDescr+"\n";
-					postcond=postcond+estate+"\n";
-					postcond=postcond+elooknow+"\n";
-					postcond=postcond+bboolvar+bbool +boolfalse+ ebool + eboolvar+"\n";
-					postcond=postcond+eeqbool+"\n";
+					postcond=postcond + indentTo(indentCount++) +beqbool+"\n";
+					postcond=postcond + indentTo(indentCount++) +blooknow+"\n";
+					postcond=postcond + indentTo(indentCount--) + bstate ;
+					postcond=postcond + stateDescr;
+					postcond=postcond + estate+"\n";
+					postcond=postcond + indentTo(indentCount) + elooknow+"\n";
+					postcond=postcond + indentTo(indentCount--) + bboolValue +boolfalse + eboolValue+"\n";
+					postcond=postcond + indentTo(indentCount--) + eeqbool + "\n";
 				}
 				else if(isContainedBy(t,t2)){
 					//Invariantcondition
@@ -822,19 +867,21 @@ namespace EUROPA {
 
 					//know 2 invconds already, add another preceeding and
 					invcondCount++;
-					invcondSet=invcondSet+band+"\n"+invcond+"\n";
+					invcondSet = invcondSet + indentTo(indentCount++) + 
+					invcondSet = invcondSet + indentTo(indentCount++) + band + "\n";
+					invcondSet = invcondSet + indentTo(indentCount++) + invcond + "\n";
 					invcond="";
-					invcond=invcond+beqbool+"\n";
-					invcond=invcond+blookfreq+"\n";
-					invcond=invcond+bstate + time + estate + "\n";
-					invcond=invcond+bfreq + freq + efreq + "\n";
-					invcond=invcond+elookfreq+"\n";
-					invcond=invcond+bstate+"\n";
-					invcond=invcond+stateDescr+"\n";
-					invcond=invcond+estate+"\n";
-					invcond=invcond+elookfreq+"\n";
-					invcond=invcond+bboolvar+bbool +boolfalse+ ebool +eboolvar+"\n";
-					invcond=invcond+eeqbool+"\n";
+					invcond=invcond+ indentTo(indentCount++) + beqbool+"\n";
+					invcond=invcond + indentTo(indentCount++) +blookfreq+"\n";
+					invcond=invcond+ indentTo(indentCount++) + bstate + time + estate + "\n";
+					invcond=invcond + indentTo(indentCount--) +bfreq + freq + efreq + "\n";
+					invcond=invcond + indentTo(indentCount--) + elookfreq+"\n";
+					invcond=invcond+ indentTo(indentCount) + bstate+"\n";
+					invcond=invcond + indentTo(indentCount--) +stateDescr+"\n";
+					invcond=invcond + indentTo(indentCount--) +estate+"\n";
+					invcond=invcond + indentTo(indentCount--) +elookfreq+"\n";
+					invcond=invcond + indentTo(indentCount--) + bboolValue +boolfalse+ ebool +eboolValue+"\n";
+					invcond=invcond + indentTo(indentCount) + eeqbool+"\n";
 				}
 			}
 
@@ -845,48 +892,30 @@ namespace EUROPA {
 			int q;
 			startcondSet=startcondSet+startcond+"\n";
 			for(q=1;q<startcondCount;q++){
-			  startcondSet=startcondSet+eand+"\n";
+			  startcondSet=startcondSet+ indentTo(indentCount--) +eand+"\n";
 			}
-			startcondSet=startcondSet+estc+"\n";
+			startcondSet=startcondSet+ indentTo(indentCount) + estc+"\n";
 
-			precondSet=precondSet+precond+"\n";
+			precondSet=precondSet + precond +"\n";
 			for(q=1;q<precondCount;q++){
-			  precondSet=precondSet+eand+"\n";
+			  precondSet=precondSet + indentTo(indentCount) +eand+"\n";
 			}
-			precondSet=precondSet+epc+"\n";
+			precondSet=precondSet+ indentTo(indentCount) + epc +"\n";
 
 			invcondSet=invcondSet+invcond+"\n";
 			for(q=1;q<invcondCount;q++){
-			  invcondSet=invcondSet+eand+"\n";
+			  invcondSet=invcondSet+ indentTo(indentCount) + eand+"\n";
 			}
-			invcondSet=invcondSet+eic+"\n";
+			invcondSet=invcondSet + indentTo(indentCount) + eic+"\n";
 
 			if(firstPost==false){
-			  postcondSet=postcond+"\n";
+			  postcondSet=postcond;
 			  for(q=1;q<postcondCount;q++){
-			    postcondSet=postcondSet+eand+"\n";
+			    postcondSet=postcondSet+ indentTo(indentCount) + eand+"\n";
 			  }
-			  postcondSet=postcondSet+epoc+"\n";
+			  postcondSet=postcondSet+ indentTo(indentCount) + epoc+"\n";
 			}
-
-			//All conditions gathered, write them out!
-
-			if(startCondition!=stc){	
-				os << startCondition;
-				os << endbrace+ "\n";
-			}	
-			if(invariantCondition!=ic){
-				os << invariantCondition;
-				os << endbrace+ "\n";
-			}	
-			if(postCondition!=poc){
-				os << postCondition;
-				os << endbrace+ "\n";
-			}	
-			if(preCondition!=prec){
-				os << preCondition;
-				os << endbrace+ "\n";
-			}	
+			
 
 			//The predicate name is currently a "fully qualified name" including the attribute name.
 			//E2 doesn't provide a "simple" output for this yet.
@@ -895,14 +924,11 @@ namespace EUROPA {
 			std::string fqn=t->getPredicateName().toString();
 			int slen=fqn.length();
 			int lastdot=fqn.find_last_of(".");
-      			os << fqn.substr(lastdot+1,slen-lastdot) +"(";
+			//	os << fqn.substr(lastdot+1,slen-lastdot) +"(";
 			std::string par;
 			varList = t->getParameters();
 			appendParamsToString(id,varList,par);			
-			os << par;
-			os << ");" + endbrace + "\n\n";
-			
-			
+		    			
 			plan=plan+startcondSet;
 			plan=plan+precondSet;
 			plan=plan+invcondSet;
@@ -911,15 +937,19 @@ namespace EUROPA {
 			}
 			std::string cmdDescr;
 			cmdDescr=fqn.substr(lastdot+1,slen-lastdot);
-			plan = plan + bcmd + "\n"; 
-			plan = plan + bcmdname + "\n";
-                        plan = plan + cmdDescr + "\n";
+                        plan = plan + indentTo(indentCount++) + begin_nodebody + "\n"; 
+			plan = plan + indentTo(indentCount++) + bcmd + "\n"; 
+		        plan = plan + indentTo(indentCount) + bcmdname;
+                        plan = plan  + cmdDescr;
                         plan = plan + ecmdname + "\n";
 	                cmdDescr="";
 			appendParamsToString(id,varList,cmdDescr);
-			plan=plan+bargs+"\n" +cmdDescr+"\n"+eargs+"\n";
-                        plan=plan + ecmd + "\n";
-			plan=plan+enode+"\n";
+			plan = plan + indentTo(indentCount++) + bargs+"\n";
+			plan = plan + indentTo(indentCount--) + cmdDescr+"\n";
+			plan = plan + indentTo(indentCount--) + eargs+"\n";
+                        plan = plan + indentTo(indentCount--) + ecmd + "\n";
+                        plan = plan + indentTo(indentCount--) + "*****" + end_nodebody + "\n";
+			plan = plan + indentTo(indentCount--) + enode+"\n";
 		}
 
 		//Write PLEXILCLARATy top level node with list of children
@@ -929,41 +959,33 @@ namespace EUROPA {
 		nodeHeader=nodeHeader + nodekey;
 
 		nodeHeader=nodeHeader + endbrace;
-		os << nodeHeader; 	
-		os << nodelist;
 		std::string s;
 		first=true;
      		for(StringSet::const_iterator sit = childNodes.begin(); sit != childNodes.end(); ++sit){
 			if (first==true)
 	    			s = *sit;
 			else s = ","+*sit;
-			os << s;
 			first=false;
 		}
-		os << endbrace + endbrace + "\n\n";
 
 		//Write PLEXILCLARATy top level failure node
 
 		nodekey = "-1";
 		nodeHeader=node + nodeid;
 		nodeHeader=nodeHeader + nodekey + endbrace + "AND{";
-		os << nodeHeader; 	
+		//os << nodeHeader; 	
 		first=true;
     		for(StringSet::const_iterator sit = childNodes.begin(); sit != childNodes.end(); ++sit){
 			if (first==true)
 	    			s = *sit;
 			else s = ","+*sit;
 			s=s+" "+failed;
-			os << s;
+			//os << s;
 			first=false;
 		}
-		os << endbrace + "\n";
-		os << replan;
-		os << endbrace;
 
                 plan=plan+enodelist + "\n";
                 plan=plan+enode + "\n";
-
 
                 plan = plan + indentTo(2) + enodelist + "\n";
                 plan = plan + indentTo(2) + end_nodebody + "\n";
@@ -971,7 +993,7 @@ namespace EUROPA {
                 plan = plan + end_plexil_plan + "\n";
 
 
-                os << plan;
+		os << plan;
 	}		
 	
   private:
@@ -1206,7 +1228,7 @@ namespace EUROPA {
 		  
 		  std::string s=cvid->getName().toString();
 		  if(std::string::npos != s.find("position_x",0)){
-		    condString=condString+  cvid->derivedDomain().toString(cvid->derivedDomain().getSingletonValue())+"\n";
+		    condString=condString+  cvid->derivedDomain().toString(cvid->derivedDomain().getSingletonValue())+", ";
 		  }
 		  if(std::string::npos != s.find("position_y",0)){
 		    condString=condString+  cvid->derivedDomain().toString(cvid->derivedDomain().getSingletonValue());

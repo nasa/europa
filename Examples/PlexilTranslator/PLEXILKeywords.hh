@@ -8,6 +8,10 @@ namespace EUROPA {
         const std::string end_plexil_plan = "</PlexilPlan>";
         const std::string bnodetype="<Node NodeType=";
         const std::string enodetype=">";
+        const std::string low_start ="<Low>";
+        const std::string low_end = "</Low>";
+        const std::string high_start ="<High>";
+        const std::string high_end = "</High>";
         const std::string begin_nodebody="<NodeBody>";
         const std::string end_nodebody ="</NodeBody>";
         const std::string commandNodetype="\"command\"";
@@ -45,8 +49,14 @@ namespace EUROPA {
  	const std::string elookfreq = "</LookupWithFrequency>";
  	const std::string blooknow = "<LookupNow>";
  	const std::string elooknow = "</LookupNow>";
+        const std::string timeValue_begin = "<TimeValue>";
+        const std::string timeValue_end = "</TimeValue>";
+        const std::string units_begin = "<Units>";
+        const std::string units_end = "</Units>";
  	const std::string bfreq = "<Frequency>";
  	const std::string efreq = "</Frequency>";
+	const std::string integerValue_begin = "<IntegerValue>";
+ 	const std::string integerValue_end  = "</IntegerValue>";
  	const std::string breal = "<RealVariable>";
  	const std::string ereal = "</RealVariable>";
         const std::string brealValue ="<RealValue>";
