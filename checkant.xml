@@ -7,57 +7,63 @@
 	<target name="check"
 	  description="Check Apache Ant requirements for PLASMA">
 		<echo message="Testing your ant installation."/>
-		<!-- The following should have caused a failure in this file -->
-		<fail message="  Your ant is severely broken -- org.apache.tools.ant.Project is missing">
-			<condition><not><available classname="org.apache.tools.ant.Project"/></not></condition>
-		</fail>
-		<fail message="  Your ant is severely broken -- org.apache.tools.ant.Target is missing">
-			<condition><not><available classname="org.apache.tools.ant.Target"/></not></condition>
-		</fail>
-		<fail message="  Your ant is severely broken -- missing Description Type">
-			<condition><not><available classname="org.apache.tools.ant.types.Description"/></not></condition>
-		</fail>
-		<fail message="  Your ant is severely broken -- missing Path Type">
-			<condition><not><available classname="org.apache.tools.ant.types.Path"/></not></condition>
-		</fail>
-		<fail message="  Your ant is severely broken -- missing Property Task">
-			<condition><not><available classname="org.apache.tools.ant.taskdefs.Property"/></not></condition>
-		</fail>
-		<!-- What remains are the genuine tests -->
-		<fail message="  Your ant is insufficient -- missing Fileset Type">
-			<condition><not><or>
-				<available classname="org.apache.tools.ant.types.Fileset"/>
-				<available classname="org.apache.tools.ant.types.FileSet"/>
-			</or></not></condition>
-		</fail>
-		<fail message="  Your ant is insufficient -- missing Manifest Task">
-			<condition><not><available classname="org.apache.tools.ant.taskdefs.Manifest"/></not></condition>
-		</fail>
-		<fail message="  Your ant is insufficent -- missing Delete Task">
-			<condition><not><available classname="org.apache.tools.ant.taskdefs.Delete"/></not></condition>
-		</fail>
-		<fail message="  Your ant is insufficent -- missing Jar Task">
-			<condition><not><available classname="org.apache.tools.ant.taskdefs.Jar"/></not></condition>
-		</fail>
-		<fail message="  Your ant is insufficent -- missing Unjar Task">
-			<condition><not><available classname="org.apache.tools.ant.taskdefs.Untar"/></not></condition>
-		</fail>
-		<fail message="  Your ant is insufficent -- missing Tstamp Task">
-			<condition><not><available classname="org.apache.tools.ant.taskdefs.Tstamp"/></not></condition>
-		</fail>
-		<fail message="  Your ant is insufficent -- missing Mkdir Task">
-			<condition><not><available classname="org.apache.tools.ant.taskdefs.Mkdir"/></not></condition>
-		</fail>
-		<fail message="  Your ant is insufficent -- missing Javac Task">
-			<condition><not><available classname="org.apache.tools.ant.taskdefs.Javac"/></not></condition>
-		</fail>
-		<fail message="  Your ant is insufficent -- missing Antlr Task">
-			<condition><not><available classname="org.apache.tools.ant.taskdefs.optional.ANTLR"/></not></condition>
-		</fail>
-		<fail message="  Your ant is insufficent -- missing Depend Task">
-			<condition><not><available classname="org.apache.tools.ant.taskdefs.optional.depend.Depend"/></not></condition>
-		</fail>
+		<condition property="hasclass.project"><available classname="org.apache.tools.ant.Project"/></condition>
+		<condition property="hasclass.target"><available classname="org.apache.tools.ant.Target"/></condition>
+		<condition property="hasclass.description"><available classname="org.apache.tools.ant.types.Description"/></condition>
+		<condition property="hasclass.path"><available classname="org.apache.tools.ant.types.Path"/></condition>
+		<condition property="hasclass.property"><available classname="org.apache.tools.ant.taskdefs.Property"/></condition>
+		<condition property="hasclass.fileset"><or>
+			<available classname="org.apache.tools.ant.types.Fileset"/>
+			<available classname="org.apache.tools.ant.types.FileSet"/>
+		</or></condition>
+		<condition property="hasclass.manifest"><available classname="org.apache.tools.ant.taskdefs.Manifest"/></condition>
+		<condition property="hasclass.delete"><available classname="org.apache.tools.ant.taskdefs.Delete"/></condition>
+		<condition property="hasclass.jar"><available classname="org.apache.tools.ant.taskdefs.Jar"/></condition>
+		<condition property="hasclass.unjar"><available classname="org.apache.tools.ant.taskdefs.Untar"/></condition>
+		<condition property="hasclass.tstamp"><available classname="org.apache.tools.ant.taskdefs.Tstamp"/></condition>
+		<condition property="hasclass.mkdir"><available classname="org.apache.tools.ant.taskdefs.Mkdir"/></condition>
+		<condition property="hasclass.javac"><available classname="org.apache.tools.ant.taskdefs.Javac"/></condition>
+		<condition property="hasclass.antlr"><available classname="org.apache.tools.ant.taskdefs.optional.ANTLR"/></condition>
+		<condition property="hasclass.depend"><available classname="org.apache.tools.ant.taskdefs.optional.depend.Depend"/></condition>
+		<condition property="hasclass.echoproperties"><or>
+			<available classname="org.apache.tools.ant.taskdefs.optional.Echoproperties"/>
+			<available classname="org.apache.tools.ant.taskdefs.optional.EchoProperties"/>
+		</or></condition>
+
+		<condition property="build.severe.ok">
+			<and>
+				<istrue value="${hasclass.project}"/>
+				<istrue value="${hasclass.target}"/>
+				<istrue value="${hasclass.description}"/>
+				<istrue value="${hasclass.path}"/>
+				<istrue value="${hasclass.property}"/>
+				<istrue value="${hasclass.fileset}"/>
+			</and>
+		</condition>
+
+		<condition property="build.ok">
+			<and>
+				<istrue value="${build.severe.ok}"/>
+				<istrue value="${hasclass.manifest}"/>
+				<istrue value="${hasclass.delete}"/>
+				<istrue value="${hasclass.jar}"/>
+				<istrue value="${hasclass.unjar}"/>
+				<istrue value="${hasclass.tstamp}"/>
+				<istrue value="${hasclass.mkdir}"/>
+				<istrue value="${hasclass.javac}"/>
+				<istrue value="${hasclass.antlr}"/>
+				<istrue value="${hasclass.depend}"/>
+				<istrue value="${hasclass.echoproperties}"/>
+			</and>
+		</condition>
+		<antcall target="echoHasclass"/>
+		<fail message="  Your ant is severely broken." unless="build.severe.ok"/>
+		<fail message="  Your ant is insufficent." unless="build.ok"/>
 		<echo message="  All tests pass, your ant should do just fine."/>
+	</target>
+
+	<target name="echoHasclass" unless="build.ok">
+		<echoproperties prefix="hasclass."/>
 	</target>
 
 </project>
