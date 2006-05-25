@@ -279,6 +279,29 @@ else
  echo "  OSTYPE is set to " $OSTYPE
 fi
 
+if [ -z "$ANT_HOME" ]
+then
+	ANT_HOME_SET=0
+	ANT_HOME=$PWD/ext/ant
+	echo "ANT_HOME is not set, using $ANT_HOME"
+else
+	ANT_HOME_SET=1
+	echo "ANT_HOME is set to $ANT_HOME"
+fi
+
+ANTTEST=`$ANT_HOME/bin/ant -f "checkant.xml"`
+if [ $? -eq 0 ]
+then
+	echo "  Ant self test successful."
+else
+	echo "$ANTTEST"
+	if [ $ANT_HOME_SET -eq 1 ]
+	then
+		echo "  Suggest unsetting \$ANT_HOME"
+	else
+		echo "  Suggest installing Apache Ant from http://ant.apache.org and setting \$ANT_HOME accordingly"
+	fi
+fi
 
 if [ -z "$JAVA_HOME" ]
 then
