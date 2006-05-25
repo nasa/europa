@@ -783,12 +783,12 @@ namespace EUROPA {
 					int slen=fqn.length();
 					int lastdot=fqn.find_last_of(".");
 					preCondition = preCondition + fqn.substr(lastdot+1,slen-lastdot) +"(";
-					appendParamsToString(id2,varList,preCondition);
+					state_appendParamsToString(id2,varList,preCondition);
 					preCondition=preCondition+ ")" + endbrace;
 
 					std::string stateDescr;
 					stateDescr = fqn.substr(lastdot+1,slen-lastdot)+"(";
-					appendParamsToString(id2,varList,stateDescr);
+					state_appendParamsToString(id2,varList,stateDescr);
 					stateDescr = stateDescr + ")"; 
 
 
@@ -820,12 +820,12 @@ namespace EUROPA {
 					int slen=fqn.length();
 					int lastdot=fqn.find_last_of(".");
 					postCondition = postCondition + fqn.substr(lastdot+1,slen-lastdot) +"(";
-					appendParamsToString(id2,varList,postCondition);					
+					state_appendParamsToString(id2,varList,postCondition);					
 					postCondition = postCondition + ")" + endbrace;
 
 					std::string stateDescr;
 					stateDescr = fqn.substr(lastdot+1,slen-lastdot)+"(";
-					appendParamsToString(id2,varList,stateDescr);
+					state_appendParamsToString(id2,varList,stateDescr);
 					stateDescr = stateDescr + ")";
 
 					//This might be first post cond, so check count 
@@ -857,12 +857,12 @@ namespace EUROPA {
 					int slen=fqn.length();
 					int lastdot=fqn.find_last_of(".");
 					invariantCondition = invariantCondition + fqn.substr(lastdot+1,slen-lastdot) +"(";
-					appendParamsToString(id2,varList,invariantCondition);					
+					state_appendParamsToString(id2,varList,invariantCondition);					
 					invariantCondition = invariantCondition+"," + freq + endbrace;
 
 					std::string stateDescr;
 					stateDescr = fqn.substr(lastdot+1,slen-lastdot)+"(";
-					appendParamsToString(id2,varList,stateDescr);
+					state_appendParamsToString(id2,varList,stateDescr);
 					stateDescr = stateDescr + ")"; 
 
 					//know 2 invconds already, add another preceeding and
@@ -927,7 +927,7 @@ namespace EUROPA {
 			//	os << fqn.substr(lastdot+1,slen-lastdot) +"(";
 			std::string par;
 			varList = t->getParameters();
-			appendParamsToString(id,varList,par);			
+			action_appendParamsToString(id,varList,par);			
 		    			
 			plan=plan+startcondSet;
 			plan=plan+precondSet;
@@ -943,12 +943,12 @@ namespace EUROPA {
                         plan = plan  + cmdDescr;
                         plan = plan + ecmdname + "\n";
 	                cmdDescr="";
-			appendParamsToString(id,varList,cmdDescr);
+			action_appendParamsToString(id,varList,cmdDescr);
 			plan = plan + indentTo(indentCount++) + bargs+"\n";
 			plan = plan + indentTo(indentCount--) + cmdDescr+"\n";
 			plan = plan + indentTo(indentCount--) + eargs+"\n";
                         plan = plan + indentTo(indentCount--) + ecmd + "\n";
-                        plan = plan + indentTo(indentCount--) + "*****" + end_nodebody + "\n";
+                        plan = plan + indentTo(indentCount--) + end_nodebody + "\n";
 			plan = plan + indentTo(indentCount--) + enode+"\n";
 		}
 
@@ -984,12 +984,13 @@ namespace EUROPA {
 			first=false;
 		}
 
-                plan=plan+enodelist + "\n";
-                plan=plan+enode + "\n";
+                //plan=plan+enodelist + "\n";
+           
 
                 plan = plan + indentTo(2) + enodelist + "\n";
                 plan = plan + indentTo(2) + end_nodebody + "\n";
-                plan = plan + indentTo(1) + "\n";
+                plan = plan + indentTo(1) + enode + "\n";
+               
                 plan = plan + end_plexil_plan + "\n";
 
 
@@ -1193,7 +1194,42 @@ namespace EUROPA {
     }
 
 
-        void PLEXILCLARATyPlanDatabaseWriter::appendParamsToString(PlexilCmdId cmd,
+       void PLEXILCLARATyPlanDatabaseWriter::action_appendParamsToString(PlexilCmdId cmd,
+							       std::vector<ConstrainedVariableId> &varList, 
+							       std::string &condString){
+          int j=1;
+	  bool first=true;
+	  for (std::vector<ConstrainedVariableId>::const_iterator varit = varList.begin(); varit != varList.end(); ++varit) {
+	    //Check to see if we really want this var
+	    if(cmd->isParamPrinted(j)==true){
+	      if(first==true){
+		first=false;
+	      }
+            }
+	      ConstrainedVariableId v= (*varit);
+            
+              std::string bTypeQualifier = "";
+	      std::string eTypeQualifier = "";
+              if (v->derivedDomain().isNumeric()) {
+		  bTypeQualifier= brealValue;
+                  eTypeQualifier= erealValue;
+              } else if (v->derivedDomain().isBool()) {
+                  bTypeQualifier= bboolValue;
+                  eTypeQualifier= eboolValue;
+              } else {
+		  bTypeQualifier= bstringValue;
+                  eTypeQualifier= estringValue;
+              }
+
+	      condString=condString + indentTo(indentCount) + bTypeQualifier + v->derivedDomain().toString(v->derivedDomain().getSingletonValue()) + eTypeQualifier + "\n";
+                
+              j++;
+	  }
+
+       }
+
+
+        void PLEXILCLARATyPlanDatabaseWriter::state_appendParamsToString(PlexilCmdId cmd,
 							       std::vector<ConstrainedVariableId> &varList, 
 							       std::string &condString){
 	  int j=1;
