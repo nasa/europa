@@ -3,6 +3,7 @@
 constraint veryLongConstraint(a, b, c, d) {a <: numeric && b <: numeric && c <: numeric && d <: numeric}
 
 enum ENUM {foo, bar};
+enum Fruits {X, Y, Z};
 
 // Goal is to test generation of constraint code
 class Sample {
@@ -33,6 +34,9 @@ Sample::sample{
  any(Sample.sample sample);
  eq(start, sample.start);
  eq(object, sample.object);
+
+ Fruits f;
+ SubsetOf(f, {X, Z});
 }
 
 class World{
