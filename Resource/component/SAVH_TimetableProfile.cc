@@ -123,22 +123,22 @@ namespace EUROPA {
     }
     
     //for the moment, these always recompute over the entire interval.
-    void TimetableProfile::handleTransactionAdded(const TransactionId t) {
-    }
+//     void TimetableProfile::handleTransactionAdded(const TransactionId t) {
+//     }
 
-    void TimetableProfile::handleTransactionRemoved(const TransactionId t) {
-    }
+//     void TimetableProfile::handleTransactionRemoved(const TransactionId t) {
+//     }
     
-    void TimetableProfile::handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type) {
-    }
+//     void TimetableProfile::handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type) {
+//     }
 
-    void TimetableProfile::handleTransactionQuantityChanged(const TransactionId t, const DomainListener::ChangeType& type) {
+//     void TimetableProfile::handleTransactionQuantityChanged(const TransactionId t, const DomainListener::ChangeType& type) {
 
-    }
+//     }
 
     //do nothing, since we don't take those types of changes into account
-    void TimetableProfile::handleTransactionsOrdered(const TransactionId t1, const TransactionId t2) {
-    }
+//     void TimetableProfile::handleTransactionsOrdered(const TransactionId t1, const TransactionId t2) {
+//     }
 
 //     class TimetableProfileLocalStatic {
 //     public:

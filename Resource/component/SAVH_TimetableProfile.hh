@@ -18,11 +18,11 @@ namespace EUROPA {
       void initRecompute(InstantId inst);
       void initRecompute();
       void recomputeLevels( InstantId prev, InstantId inst);
-      void handleTransactionAdded(const TransactionId t);
-      void handleTransactionRemoved(const TransactionId t);
-      void handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type);
-      void handleTransactionQuantityChanged(const TransactionId t, const DomainListener::ChangeType& type);
-      void handleTransactionsOrdered(const TransactionId t1, const TransactionId t2);
+//       void handleTransactionAdded(const TransactionId t);
+//       void handleTransactionRemoved(const TransactionId t);
+//       void handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type);
+//       void handleTransactionQuantityChanged(const TransactionId t, const DomainListener::ChangeType& type);
+//       void handleTransactionsOrdered(const TransactionId t1, const TransactionId t2);
       
       double m_lowerLevelMin, m_lowerLevelMax, m_upperLevelMin, m_upperLevelMax;
 //       double m_minCumulativeConsumption, m_maxCumulativeConsumption;
