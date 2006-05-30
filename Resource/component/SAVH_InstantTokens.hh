@@ -20,6 +20,7 @@ namespace EUROPA {
 		     bool rejectable,
 		     const IntervalIntDomain& timeBaseDomain,
 		     const LabelStr& objectName,
+		     bool isConsumer,
 		     bool closed);
 
       ReservoirToken(const TokenId& parent,
@@ -27,6 +28,7 @@ namespace EUROPA {
 		     const LabelStr& predicateName,
 		     const IntervalIntDomain& timeBaseDomain,
 		     const LabelStr& objectName,
+		     bool isConsumer,
 		     bool closed);
 
       const ConstrainedVariableId& getQuantity() const;
@@ -47,15 +49,15 @@ namespace EUROPA {
 		    const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 		    const IntervalDomain quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
 		    bool closed = true)
-	: ReservoirToken(planDatabase, predicateName, timeBaseDomain, quantityBaseDomain, true, closed) {}
+	: ReservoirToken(planDatabase, predicateName, timeBaseDomain, quantityBaseDomain, true, closed) {
+      }
       ConsumerToken(const PlanDatabaseId& planDatabase,
 		    const LabelStr& predicateName,
 		    bool rejectable,
 		    const IntervalIntDomain& timeBaseDomain,
 		    const LabelStr& objectName,
 		    bool closed)
-	: ReservoirToken(planDatabase, predicateName, rejectable, timeBaseDomain, objectName, closed) {
-	m_isConsumer = true;
+	: ReservoirToken(planDatabase, predicateName, rejectable, timeBaseDomain, objectName, true, closed) {
       }
       
       ConsumerToken(const TokenId& parent,
@@ -64,8 +66,7 @@ namespace EUROPA {
 		    const IntervalIntDomain& timeBaseDomain,
 		    const LabelStr& objectName,
 		    bool closed)
-	: ReservoirToken(parent, relation, predicateName, timeBaseDomain, objectName, closed) {
-	m_isConsumer = true;
+	: ReservoirToken(parent, relation, predicateName, timeBaseDomain, objectName, true, closed) {
       }
     };
 
@@ -76,15 +77,15 @@ namespace EUROPA {
 		    const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 		    const IntervalDomain quantityBaseDomain = IntervalDomain(0, PLUS_INFINITY),
 		    bool closed = true)
-	: ReservoirToken(planDatabase, predicateName, timeBaseDomain, quantityBaseDomain, false, closed) {}
+	: ReservoirToken(planDatabase, predicateName, timeBaseDomain, quantityBaseDomain, false, closed) {
+      }
       ProducerToken(const PlanDatabaseId& planDatabase,
 		    const LabelStr& predicateName,
 		    bool rejectable,
 		    const IntervalIntDomain& timeBaseDomain,
 		    const LabelStr& objectName,
 		    bool closed)
-	: ReservoirToken(planDatabase, predicateName, rejectable, timeBaseDomain, objectName, closed) {
-	m_isConsumer = false;
+	: ReservoirToken(planDatabase, predicateName, rejectable, timeBaseDomain, objectName, false, closed) {
       }
       
       ProducerToken(const TokenId& parent,
@@ -93,8 +94,7 @@ namespace EUROPA {
 		    const IntervalIntDomain& timeBaseDomain,
 		    const LabelStr& objectName,
 		    bool closed)
-	: ReservoirToken(parent, relation, predicateName, timeBaseDomain, objectName, closed) {
-	m_isConsumer = false;
+	: ReservoirToken(parent, relation, predicateName, timeBaseDomain, objectName, false, closed) {
       }
     };
 

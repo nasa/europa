@@ -24,9 +24,10 @@ namespace EUROPA {
 				   bool rejectable,
 				   const IntervalIntDomain& timeBaseDomain,
 				   const LabelStr& objectName,
+				   bool isConsumer,
 				   bool closed)
       : EventToken(planDatabase, predicateName,
-		   false, timeBaseDomain, objectName, false) {
+		   false, timeBaseDomain, objectName, false), m_isConsumer(isConsumer) {
       commonInit(closed, IntervalIntDomain( 0, PLUS_INFINITY ) );
     }
 
@@ -35,8 +36,9 @@ namespace EUROPA {
 				   const LabelStr& predicateName,
 				   const IntervalIntDomain& timeBaseDomain,
 				   const LabelStr& objectName,
+				   bool isConsumer,
 				   bool closed)
-      : EventToken(parent, relation, predicateName, timeBaseDomain, objectName, false) {
+      : EventToken(parent, relation, predicateName, timeBaseDomain, objectName, false), m_isConsumer(isConsumer) {
       commonInit(closed, IntervalIntDomain( 0, PLUS_INFINITY ));
     }
 
