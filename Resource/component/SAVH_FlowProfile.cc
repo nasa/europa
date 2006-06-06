@@ -138,18 +138,18 @@ namespace EUROPA
 	{
 	  m_maxflow->execute();
 
-	  EdgeOutIterator ite( *m_source );
-
-	  for( ; ite.ok(); ++ite )
-	    {
-	      Edge* edge = *ite;
-	    
-	      residual += m_maxflow->getResidual( edge );
-	    }
-
 	  m_recalculate = false;
 	}
 
+      EdgeOutIterator ite( *m_source );
+      
+      for( ; ite.ok(); ++ite )
+	{
+	  Edge* edge = *ite;
+	  
+	  residual += m_maxflow->getResidual( edge );
+	}
+      
       return residual;
     }
 
@@ -333,7 +333,9 @@ namespace EUROPA
 
       debugMsg("FlowProfile:recomputeLevels","Instant (" 
 	       << inst->getId() << ") at time "
-	       << inst->getTime() );
+	       << inst->getTime() << " closed levels [" 
+	       << m_lowerClosedLevel << "," 
+	       << m_upperClosedLevel << "]");
 
       const std::set<TransactionId>& transactions = inst->getTransactions();
 
@@ -348,7 +350,11 @@ namespace EUROPA
 	  // right inclusive
 	  if( transaction1->time()->lastDomain().getUpperBound() == inst->getTime() )  
 	    {
-	      
+	      debugMsg("FlowProfile::recomputeLevels","Transaction (" 
+		       << transaction1->getId() << ") "
+		       << transaction1->time()->toString() << " "
+		       << transaction1->quantity()->toString() << " enters closed set.");
+
 	      if( m_recalculateLowerLevel )
 		m_lowerLevelGraph->removeTransaction( transaction1 );
 
@@ -426,6 +432,10 @@ namespace EUROPA
       if( m_recalculateLowerLevel )
 	lowerLevel = m_lowerClosedLevel - m_lowerLevelGraph->getResidualFromSource();
 	
+      debugMsg("FlowProfile::recomputeLevels","Computing upper level for instance at time "
+	       << inst->getTime() << " closed level is "
+	       << m_upperClosedLevel );
+
       double upperLevel = inst->getUpperLevel();
 
       if( m_recalculateUpperLevel )
