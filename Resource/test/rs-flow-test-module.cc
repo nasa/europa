@@ -99,7 +99,8 @@ public:
     testScenario6< EUROPA::SAVH::FlowProfile>();
     testScenario7< EUROPA::SAVH::FlowProfile>();
     testScenario8< EUROPA::SAVH::FlowProfile>();
-    testScenario9< EUROPA::SAVH::FlowProfile>();
+    testScenario9< EUROPA::SAVH::FlowProfile>( 0, 0 );
+    testScenario9< EUROPA::SAVH::FlowProfile>( 1, 1 );
 
     std::cout << " IncrementalFlowProfile " << std::endl;
 
@@ -113,7 +114,8 @@ public:
     testScenario6< EUROPA::SAVH::IncrementalFlowProfile>();
     testScenario7< EUROPA::SAVH::IncrementalFlowProfile>();
     testScenario8< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario9< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario9< EUROPA::SAVH::IncrementalFlowProfile>( 0, 0 );
+    testScenario9< EUROPA::SAVH::IncrementalFlowProfile>( 1, 1 );
 
     return true;
   }
@@ -170,25 +172,7 @@ private:
     profile.recompute();
   }
 
-  static void executeScenario1( SAVH::Profile& profile, ConstraintEngine& ce ) {
-    /*!
-     * No explicit ordering between transactions
-     *
-     * Transaction1   <0-------(+1)-------10>
-     * Transaction2    |                 <10--(-1)--15>
-     * Transaction3    |       <5--------(-1)-------15>
-     * Transaction4    |       <5--------(+1)-------15>
-     *                 |        |         |          |
-     *                 |        |         |          |
-     * Max level       1        2         2          0
-     * Min level       0       -1        -1          0
-     *
-     */
-    const int nrInstances = 4;
-
-    int itimes[nrInstances] = {0,5,10,15};
-    double lowerLevels[nrInstances] = {0,-1,-1,0};
-    double upperLevels[nrInstances] = {1,2,2,0};
+  static void executeScenario1( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[] ) {
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain(10, 15), true, "t2" );
@@ -199,8 +183,6 @@ private:
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 1), true, "q2" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 1), true, "q3" );
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(1, 1), true, "q4" );
-
-    std::set<int> times;
 
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
@@ -219,31 +201,13 @@ private:
     assertTrue( profileMatches );
   }
 
-  static void executeScenario2( SAVH::Profile& profile, ConstraintEngine& ce ) {
-    /*!
-     * No explicit ordering between transactions
-     *
-     * Transaction1   <0-------(+1)-------10>
-     * Transaction2   <0-------(-1)-------10>
-     *                 |                   |
-     *                 |                   |
-     * Max level       1                   0
-     * Min level      -1                   0
-     *
-     */
-
-    const int nrInstances = 2;
-
-    int itimes[nrInstances] = {0,10};
-    double lowerLevels[nrInstances] = {-1,0};
-    double upperLevels[nrInstances] = {1,0};
+  static void executeScenario2( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
 
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(1, 1), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 1), true, "q2" );
-    std::set<int> times;
 
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
@@ -258,26 +222,7 @@ private:
     assertTrue( profileMatches );
   }
 
-  static void executeScenario3( SAVH::Profile& profile, ConstraintEngine& ce ) {
-    /*!
-     * No explicit ordering between transactions
-     *
-     * Transaction1   <0-------[1,2]------10>
-     * Transaction2                      <10>[-2,-1]
-     * Transaction3                      <10------[1,2]-------20>
-     *                 |                   |                   | 
-     *                 |                   |                   |
-     * Max level       2                   3                   3                
-     * Min level       0                  -1                   0
-     *
-     */
-
-    const int nrInstances = 3;
-
-    int itimes[nrInstances] = {0,10,20};
-    double lowerLevels[nrInstances] = {0,-1,0};
-    double upperLevels[nrInstances] = {2,3,3};
-
+  static void executeScenario3( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain(  0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 10, 10), true, "t2" );
     Variable<IntervalIntDomain> t3( ce.getId(), IntervalIntDomain( 10, 20), true, "t3" );
@@ -286,8 +231,6 @@ private:
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 2), true, "q2" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 2), true, "q3" );
 
-    std::set<int> times;
-
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
     SAVH::Transaction trans3( t3.getId(), q3.getId(), false ); 
@@ -303,25 +246,7 @@ private:
     assertTrue( profileMatches );
   }
 
-  static void executeScenario4( SAVH::Profile& profile, ConstraintEngine& ce ) {
-    /*!
-     *
-     * Transaction1   <0---[1,2]---5>
-     * Transaction2                    <10---[-2,-1]---15>
-     * Transaction3                                        <20---[1,2]---25>
-     *                 |           |    |               |   |             | 
-     *                 |           |    |               |   |             | 
-     * Max level       2           2    2               1   3             3   
-     * Min level       0           1   -1              -1  -1             0
-     *
-     */
-
-    const int nrInstances = 6;
-
-    int itimes[nrInstances] = {0,5,10,15,20,25};
-    double lowerLevels[nrInstances] = {0,1,-1,-1,-1,0};
-    double upperLevels[nrInstances] = {2,2,2,1,3,3};
-
+  static void executeScenario4( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain(  0, 5), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 10, 15), true, "t2" );
     Variable<IntervalIntDomain> t3( ce.getId(), IntervalIntDomain( 20, 25), true, "t3" );
@@ -330,8 +255,6 @@ private:
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 2), true, "q2" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 2), true, "q3" );
 
-    std::set<int> times;
-
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
     SAVH::Transaction trans3( t3.getId(), q3.getId(), false ); 
@@ -347,24 +270,7 @@ private:
     assertTrue( profileMatches );
   }
 
-  static void executeScenario5( SAVH::Profile& profile, ConstraintEngine& ce ) {
-    /*!
-     * Transaction1 constrained to be at Transaction2
-     *
-     * Transaction1   <0-------(+1)-------10>
-     * Transaction2   <0-------(-1)-------10>
-     *                 |                   |
-     *                 |                   |
-     * Max level       0                   0
-     * Min level       0                   0
-     *
-     */
-
-    const int nrInstances = 2;
-
-    int itimes[nrInstances] = {0,10};
-    double lowerLevels[nrInstances] = {0, 0};
-    double upperLevels[nrInstances] = {0, 0};
+  static void executeScenario5( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
@@ -375,7 +281,6 @@ private:
 
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(1, 1), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 1), true, "q2" );
-    std::set<int> times;
 
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
@@ -421,7 +326,6 @@ private:
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 2), true, "q2" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 2), true, "q3" );
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(1, 2), true, "q4" );
-    std::set<int> times;
 
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
@@ -571,25 +475,7 @@ private:
     */
   }
 
-  static void executeScenario7( SAVH::Profile& profile, ConstraintEngine& ce ) {
-    /*!
-     * Transaction1 constrained to be at Transaction2
-     *
-     * Transaction1   <0-------(+2)-------10>
-     * Transaction2   <0-----[-1,-2]------10>
-     *                 |                   |
-     *                 |                   |
-     * Max level       1                   1
-     * Min level       0                   0
-     *
-     */
-
-    const int nrInstances = 2;
-
-    int itimes[nrInstances] = {0,10};
-    double lowerLevels[nrInstances] = {0, 0};
-    double upperLevels[nrInstances] = {1, 1};
-
+  static void executeScenario7( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
     
@@ -600,8 +486,6 @@ private:
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(2, 2), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 2), true, "q2" );
 
-    std::set<int> times;
-
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
 
@@ -615,25 +499,7 @@ private:
     assertTrue( profileMatches );
   }
 
-  static void executeScenario8( SAVH::Profile& profile, ConstraintEngine& ce ) {
-    /*!
-     * Transaction1 constrained to be at Transaction2
-     *
-     * Transaction1   <0------[+1,+2]----10>
-     * Transaction2   <0-------(-2)------10>
-     *                 |                   |
-     *                 |                   |
-     * Max level       0                   0
-     * Min level      -1                  -1
-     *
-     */
-
-    const int nrInstances = 2;
-
-    int itimes[nrInstances] = {0,10};
-    double lowerLevels[nrInstances] = {-1, -1};
-    double upperLevels[nrInstances] = {0, 0};
-
+  static void executeScenario8( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
     
@@ -644,8 +510,6 @@ private:
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(1, 2), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(2, 2), true, "q2" );
 
-    std::set<int> times;
-
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
 
@@ -659,25 +523,7 @@ private:
     assertTrue( profileMatches );
   }
 
-  static void executeScenario9( SAVH::Profile& profile, ConstraintEngine& ce ) {
-    /*!
-     * No explicit ordering between transactions
-     *
-     * Transaction1   <1----(-1)----3>
-     * Transaction2    |            |            <10--(+1)--12>
-     * Transaction3    |            |  <9(-1)>    |          |
-     * Transaction4    |            |    |        | <11(+1)> |
-     *                 |            |    |        |    |     |
-     *                 |            |    |        |    |     |
-     * Min level(1)   -1           -1   -2       -2   -1     0
-     * Max level(1)    0           -1   -2       -1    0     0
-     *
-     */
-    const int nrInstances = 6;
-
-    int itimes[nrInstances] =         { 1, 3, 9,10,11,12};
-    double lowerLevels[nrInstances] = {-1,-1,-2,-2,-1, 0};
-    double upperLevels[nrInstances] = { 0,-1,-2,-1, 0, 0};
+  static void executeScenario9( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 1, 3), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain(10, 12), true, "t2" );
@@ -688,8 +534,6 @@ private:
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 1), true, "q2" );
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 1), true, "q3" );
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(1, 1), true, "q4" );
-
-    std::set<int> times;
 
     SAVH::Transaction trans1( t1.getId(), q1.getId(), true);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), false ); 
@@ -739,8 +583,6 @@ private:
     Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(1, 1), true, "q3" );
     Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(1, 1), true, "q4" );
 
-    std::set<int> times;
-
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
     SAVH::Transaction trans3( t3.getId(), q3.getId(), true); 
@@ -784,9 +626,31 @@ private:
 
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
+
+    /*!
+     * No explicit ordering between transactions
+     *
+     * Transaction1   <0-------(+1)-------10>
+     * Transaction2    |                 <10--(-1)--15>
+     * Transaction3    |       <5--------(-1)-------15>
+     * Transaction4    |       <5--------(+1)-------15>
+     *                 |        |         |          |
+     *                 |        |         |          |
+     * Max level       1        2         2          0
+     * Min level       0       -1        -1          0
+     *
+     */
+
     Profile profile( db.getId(), detector.getId());
 
-    executeScenario1( profile, ce );
+    const int nrInstances = 4;
+
+    int itimes[nrInstances] = {0,5,10,15};
+    double lowerLevels[nrInstances] = {0,-1,-1,0};
+    double upperLevels[nrInstances] = {1,2,2,0};
+
+    executeScenario1( profile, ce, nrInstances, itimes, lowerLevels, upperLevels );
+
     return true;
   }
 
@@ -796,9 +660,27 @@ private:
 
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
+    /*!
+     * No explicit ordering between transactions
+     *
+     * Transaction1   <0-------(+1)-------10>
+     * Transaction2   <0-------(-1)-------10>
+     *                 |                   |
+     *                 |                   |
+     * Max level       1                   0
+     * Min level      -1                   0
+     *
+     */
+
     Profile profile( db.getId(), detector.getId());
 
-    executeScenario2( profile, ce );
+    const int nrInstances = 2;
+
+    int itimes[nrInstances] = {0,10};
+    double lowerLevels[nrInstances] = {-1,0};
+    double upperLevels[nrInstances] = {1,0};
+
+    executeScenario2( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
     return true;
   }
 
@@ -808,9 +690,29 @@ private:
 
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
+    /*!
+     * No explicit ordering between transactions
+     *
+     * Transaction1   <0-------[1,2]------10>
+     * Transaction2                      <10>[-2,-1]
+     * Transaction3                      <10------[1,2]-------20>
+     *                 |                   |                   | 
+     *                 |                   |                   |
+     * Max level       2                   3                   3                
+     * Min level       0                  -1                   0
+     *
+     */
+
     Profile profile( db.getId(), detector.getId());
 
-    executeScenario3( profile, ce );
+    const int nrInstances = 3;
+
+    int itimes[nrInstances] = {0,10,20};
+    double lowerLevels[nrInstances] = {0,-1,0};
+    double upperLevels[nrInstances] = {2,3,3};
+
+
+    executeScenario3( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
     return true;
   }
 
@@ -820,9 +722,27 @@ private:
 
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
+
+    /*!
+     *
+     * Transaction1   <0---[1,2]---5>
+     * Transaction2                    <10---[-2,-1]---15>
+     * Transaction3                                        <20---[1,2]---25>
+     *                 |           |    |               |   |             | 
+     *                 |           |    |               |   |             | 
+     * Max level       2           2    2               1   3             3   
+     * Min level       0           1   -1              -1  -1             0
+     *
+     */
     Profile profile( db.getId(), detector.getId());
 
-    executeScenario4( profile, ce );
+    const int nrInstances = 6;
+
+    int itimes[nrInstances] = {0,5,10,15,20,25};
+    double lowerLevels[nrInstances] = {0,1,-1,-1,-1,0};
+    double upperLevels[nrInstances] = {2,2,2,1,3,3};
+
+    executeScenario4( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
     return true;
   }
 
@@ -831,9 +751,27 @@ private:
     std::cout << "  Scenario 5" << std::endl;
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
+
+    /*!
+     * Transaction1 constrained to be at Transaction2
+     *
+     * Transaction1   <0-------(+1)-------10>
+     * Transaction2   <0-------(-1)-------10>
+     *                 |                   |
+     *                 |                   |
+     * Max level       0                   0
+     * Min level       0                   0
+     *
+     */
     Profile profile( db.getId(), detector.getId());
 
-    executeScenario5( profile, ce );
+    const int nrInstances = 2;
+
+    int itimes[nrInstances] = {0,10};
+    double lowerLevels[nrInstances] = {0, 0};
+    double upperLevels[nrInstances] = {0, 0};
+
+    executeScenario5( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
     return true;
   }
 
@@ -853,9 +791,27 @@ private:
     std::cout << "  Scenario 7" << std::endl;
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
+    /*!
+     * Transaction1 constrained to be at Transaction2
+     *
+     * Transaction1   <0-------(+2)-------10>
+     * Transaction2   <0-----[-1,-2]------10>
+     *                 |                   |
+     *                 |                   |
+     * Max level       1                   1
+     * Min level       0                   0
+     *
+     */
     Profile profile( db.getId(), detector.getId());
 
-    executeScenario7( profile, ce );
+    const int nrInstances = 2;
+
+    int itimes[nrInstances] = {0,10};
+    double lowerLevels[nrInstances] = {0, 0};
+    double upperLevels[nrInstances] = {1, 1};
+
+
+    executeScenario7( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
     return true;
   }
 
@@ -864,20 +820,60 @@ private:
     std::cout << "  Scenario 8" << std::endl;
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
+    /*!
+     * Transaction1 constrained to be at Transaction2
+     *
+     * Transaction1   <0------[+1,+2]----10>
+     * Transaction2   <0-------(-2)------10>
+     *                 |                   |
+     *                 |                   |
+     * Max level       0                   0
+     * Min level      -1                  -1
+     *
+     */
     Profile profile( db.getId(), detector.getId());
 
-    executeScenario8( profile, ce );
+    const int nrInstances = 2;
+
+    int itimes[nrInstances] = {0,10};
+    double lowerLevels[nrInstances] = {-1, -1};
+    double upperLevels[nrInstances] = {0, 0};
+
+    executeScenario8( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
     return true;
   }
 
   template< class Profile >
-  static bool testScenario9(){
-    std::cout << "  Scenario 9" << std::endl;
+  static bool testScenario9( int initialLowerLevel, int initialUpperLevel ){
+    std::cout << "  Scenario 9, initial levels [" 
+	      << initialLowerLevel << ","
+	      << initialUpperLevel << "]" << std::endl;
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
-    Profile profile( db.getId(), detector.getId());
+    /*!
+     * No explicit ordering between transactions
+     *
+     * Transaction1   <1----(-1)----3>
+     * Transaction2    |            |            <10--(+1)--12>
+     * Transaction3    |            |  <9(-1)>    |          |
+     * Transaction4    |            |    |        | <11(+1)> |
+     *                 |            |    |        |    |     |
+     *                 |            |    |        |    |     |
+     * Min level(1)   -1           -1   -2       -2   -1     0
+     * Max level(1)    0           -1   -2       -1    0     0
+     *
+     */
 
-    executeScenario9( profile, ce );
+    Profile profile( db.getId(), detector.getId(), initialLowerLevel, initialUpperLevel );
+
+    const int nrInstances = 6;
+
+    int itimes[nrInstances] =         { 1, 3, 9,10,11,12};
+    double lowerLevels[nrInstances] = {-1 + initialLowerLevel,-1 + initialLowerLevel,-2 + initialLowerLevel,-2 + initialLowerLevel,-1 + initialLowerLevel, 0 + initialLowerLevel };
+    double upperLevels[nrInstances] = { 0 + initialUpperLevel,-1 + initialUpperLevel,-2 + initialUpperLevel,-1 + initialUpperLevel, 0 + initialUpperLevel, 0 + initialUpperLevel };
+
+    executeScenario9( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
+
     return true;
   }
 

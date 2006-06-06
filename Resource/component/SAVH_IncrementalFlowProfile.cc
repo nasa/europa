@@ -132,12 +132,14 @@ namespace EUROPA
       check_error( prev.isValid() || InstantId::noId() == prev );
       check_error( inst.isValid() );
 
-      debugMsg("IncrementalFlowProfile::recomputeLevels","Instant (" 
-	       << inst->getId() << ") at time "
-	       << inst->getTime() );
-
       double lowerLevel = prev == InstantId::noId() ? m_initLevelLb : prev->getLowerLevel();
       double upperLevel = prev == InstantId::noId() ? m_initLevelUb : prev->getUpperLevel();
+
+      debugMsg("IncrementalFlowProfile::recomputeLevels","Instant (" 
+	       << inst->getId() << ") at time "
+	       << inst->getTime() << " start levels ["
+	       << lowerLevel << "," 
+	       << upperLevel << "]");
 
       const std::set<TransactionId>& startingTransactions = inst->getStartingTransactions();
 
@@ -245,14 +247,14 @@ namespace EUROPA
 		  }
 		else if( ended->time()->lastDomain().isSingleton() )
 		  {
+		    debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+			     << ended->getId() << ") straight from open to closed set");
+
 		    enteredClosedSet = true;
 		  }
 
 		if( enteredClosedSet )
 		  {
-		    debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
-			     << ended->getId() << ") straight from open to closed set");
-
 		    if( ended->isConsumer() )
 		      {
 			upperLevel -= ended->quantity()->lastDomain().getLowerBound();
@@ -270,13 +272,13 @@ namespace EUROPA
 	    if( m_recalculateLowerLevel )
 	      {
 		m_lowerLevelGraph->restoreFlow();
-		lowerLevel += m_lowerClosedLevel - m_lowerLevelGraph->getResidualFromSource();
+		lowerLevel += m_lowerLevelGraph->getResidualFromSource();
 	      }
 
 	    if( m_recalculateUpperLevel )
 	      {
 		m_upperLevelGraph->restoreFlow();
-		upperLevel += m_upperClosedLevel + m_upperLevelGraph->getResidualFromSource();
+		upperLevel += m_upperLevelGraph->getResidualFromSource();
 	      }
 	  }
       }
