@@ -15,6 +15,9 @@ ModuleComponent Resource
 		SAVH_IncrementalFlowProfile.cc
 		SAVH_InstantTokens.cc
 		SAVH_Reservoir.cc
+		SAVH_DurativeTokens.cc
+		SAVH_Reusable.cc
+		SAVH_ReusableFVDetector.cc
 		;
 
 } # PLASMA_READY

@@ -29,6 +29,9 @@ namespace EUROPA {
 
     class ReservoirToken;
     typedef Id<ReservoirToken> ReservoirTokenId;
+
+    class ReusableToken;
+    typedef Id<ReusableToken> ReusableTokenId;
   }
 
   class TimetableToken;

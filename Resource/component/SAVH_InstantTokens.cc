@@ -28,7 +28,7 @@ namespace EUROPA {
 				   bool closed)
       : EventToken(planDatabase, predicateName,
 		   false, timeBaseDomain, objectName, false), m_isConsumer(isConsumer) {
-      commonInit(closed, IntervalIntDomain( 0, PLUS_INFINITY ) );
+      commonInit(closed, IntervalDomain( 0, PLUS_INFINITY ) );
     }
 
     ReservoirToken::ReservoirToken(const TokenId& parent,
@@ -39,7 +39,7 @@ namespace EUROPA {
 				   bool isConsumer,
 				   bool closed)
       : EventToken(parent, relation, predicateName, timeBaseDomain, objectName, false), m_isConsumer(isConsumer) {
-      commonInit(closed, IntervalIntDomain( 0, PLUS_INFINITY ));
+      commonInit(closed, IntervalDomain( 0, PLUS_INFINITY ));
     }
 
     void ReservoirToken::commonInit(bool closed, const IntervalDomain& quantityBaseDomain) {

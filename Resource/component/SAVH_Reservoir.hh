@@ -43,26 +43,24 @@ namespace EUROPA {
        */
       Reservoir(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open);
 
-      virtual ~Reservoir();
+      //~Reservoir();
 
       void getOrderingChoices(const TokenId& token,
 			      std::vector<std::pair<TokenId, TokenId> >& results,
 			      unsigned int limit = PLUS_INFINITY);
+      
+//       void getTokensToOrder(std::vector<TokenId>& results);
 
-      void getTokensToOrder(std::vector<TokenId>& results);
 
     private:
-      void notifyViolated(const InstantId inst);
-      void notifyFlawed(const InstantId inst);
-      void notifyNoLongerFlawed(const InstantId inst);
-      void notifyDeleted(const InstantId inst);
+      //void notifyViolated(const InstantId inst);
+      //void notifyFlawed(const InstantId inst);
+      //void notifyNoLongerFlawed(const InstantId inst);
+      //void notifyDeleted(const InstantId inst);
       void addToProfile(const TokenId& tok);
       void removeFromProfile(const TokenId& tok);
 
       std::map<TokenId, TransactionId> m_tokensToTransactions;
-      std::map<TransactionId, TokenId> m_transactionsToTokens;
-      std::map<TokenId, int> m_flawedTokens;
-      std::map<int, InstantId> m_flawedInstants;
     };
   }
 }

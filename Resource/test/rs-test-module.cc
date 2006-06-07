@@ -12,6 +12,10 @@
 #include "SAVH_TimetableFVDetector.hh"
 #include "SAVH_Resource.hh"
 #include "SAVH_ProfilePropagator.hh"
+#include "SAVH_Reservoir.hh"
+#include "SAVH_InstantTokens.hh"
+#include "SAVH_Reusable.hh"
+#include "SAVH_DurativeTokens.hh"
 
 #include "TestSupport.hh"
 #include "IntervalIntDomain.hh"
@@ -47,6 +51,12 @@ const double consumptionMax = -50;
     SchemaId schema = Schema::instance();\
     schema->reset();\
     schema->addObjectType(LabelStr("Resource")); \
+    schema->addObjectType(LabelStr("Reservoir")); \
+    schema->addPredicate(LabelStr("Reservoir.consume")); \
+    schema->addMember(LabelStr("Reservoir.consume"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
+    schema->addObjectType(LabelStr("Reusable")); \
+    schema->addPredicate("Reusable.uses"); \
+    schema->addMember(LabelStr("Reusable.uses"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
     schema->addObjectType(LabelStr("SAVHResource")); \
     schema->addPredicate(LabelStr("Resource.change"));\
     schema->addMember(LabelStr("Resource.change"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
@@ -797,45 +807,28 @@ private:
 class DummyProfile : public SAVH::Profile {
 public:
   DummyProfile(PlanDatabaseId db, const SAVH::FVDetectorId fv) 
-    : Profile(db, fv) {}
+    : Profile(db, fv), m_receivedNotification(0) {}
   SAVH::InstantId getInstant(const int time) {
     return getGreatestInstant(time)->second;
   }
+  int gotNotified(){return m_receivedNotification;}
+  void resetNotified(){m_receivedNotification = 0;}
 private:
-  void handleTransactionAdded(const SAVH::TransactionId t) {
-    if(m_recomputeInterval.isValid() && !m_recomputeInterval->done() &&
-       t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
-      delete (SAVH::ProfileIterator*) m_recomputeInterval;
-      m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int)t->time()->lastDomain().getLowerBound()))->getId();
-    }
+  void handleTemporalConstraintAdded(const SAVH::TransactionId predecessor, int preArgIndex,
+				     const SAVH::TransactionId successor, int sucArgIndex) { 
+    SAVH::Profile::handleTemporalConstraintAdded(predecessor, preArgIndex, successor, sucArgIndex);
+    m_receivedNotification++;
   }
-  void handleTransactionRemoved(const SAVH::TransactionId t) {
-    if(m_recomputeInterval.isValid() && !m_recomputeInterval->done() &&
-       t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
-      delete (SAVH::ProfileIterator*) m_recomputeInterval;
-      m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int)t->time()->lastDomain().getLowerBound()))->getId();
-    }
+  void handleTemporalConstraintRemoved(const SAVH::TransactionId predecessor, int preArgIndex,
+				       const SAVH::TransactionId successor, int sucArgIndex) {
+    SAVH::Profile::handleTemporalConstraintRemoved(predecessor, preArgIndex, successor, sucArgIndex);
+    m_receivedNotification++;
   }
-  void handleTransactionTimeChanged(const SAVH::TransactionId  t, const DomainListener::ChangeType& change) {
-    if(m_recomputeInterval.isValid() && !m_recomputeInterval->done() &&
-       t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
-      delete (SAVH::ProfileIterator*) m_recomputeInterval;
-      m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int) t->time()->lastDomain().getLowerBound()))->getId();
-    }
-  }
-  void handleTransactionQuantityChanged(const SAVH::TransactionId  t, const DomainListener::ChangeType& change) {
-    if(m_recomputeInterval.isValid() && !m_recomputeInterval->done() &&
-       t->time()->lastDomain().getLowerBound() < m_recomputeInterval->getTime()) {
-      delete (SAVH::ProfileIterator*) m_recomputeInterval;
-      m_recomputeInterval = (new SAVH::ProfileIterator(getId(), (int) t->time()->lastDomain().getLowerBound()))->getId();
-    }
-  }
-
-  void handleTransactionsOrdered(const SAVH::TransactionId t1, const SAVH::TransactionId t2) {}
   void initRecompute(SAVH::InstantId inst){}
   void initRecompute(){}
   void recomputeLevels(SAVH::InstantId prev, SAVH::InstantId inst) {
   }
+  int m_receivedNotification;
 };
 
 class DummyDetector : public SAVH::FVDetector {
@@ -1099,6 +1092,20 @@ private:
     SAVH::ProfileIterator oCheck2_1(profile.getId(), 2, 2);
     assertTrue(oCheck2_1.done());
     
+
+    assertTrue(profile.gotNotified() == 0);
+    ConstraintId constr = db.getClient()->createConstraint("precedes", makeScope(t1.getId(), t2.getId()));
+    assertTrue(profile.gotNotified() == 1);
+    profile.resetNotified();
+    constr->discard();
+    assertTrue(profile.gotNotified() == 1);
+
+    profile.resetNotified();
+    Variable<IntervalIntDomain> temp(ce.getId(), IntervalIntDomain(-1, -1));
+    ConstraintId constr2 = db.getClient()->createConstraint("precedes", makeScope(temp.getId(), t1.getId()));
+    assertTrue(profile.gotNotified() == 0);
+    constr2->discard();
+    assertTrue(profile.gotNotified() == 0);
     return true;
   }
 
@@ -1788,6 +1795,96 @@ private:
   }
 };
 
+class SAVHResourceTest {
+public:
+  static bool test() {
+    runTest(testReservoir);
+    runTest(testReusable);
+    return true;
+  }
+private:
+  static bool testReservoir() {
+    RESOURCE_DEFAULT_SETUP(ce, db, false);
+    SAVH::Reservoir res1(db.getId(), LabelStr("Reservoir"), LabelStr("Battery1"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"),
+			 10, 10, 0, 1000);
+    SAVH::Reservoir res2(db.getId(), LabelStr("Reservoir"), LabelStr("Battery2"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"),
+			 10, 10, 0, 1000);
+    
+    SAVH::ConsumerToken consumer(db.getId(), LabelStr("Reservoir.consume"), IntervalIntDomain(10),
+			   IntervalDomain(5));
+
+    SAVH::ProfileIterator it1(res1.getProfile());
+    assertTrue(it1.done());
+    SAVH::ProfileIterator it2(res2.getProfile());
+    assertTrue(it2.done());
+
+    const_cast<AbstractDomain&>(consumer.getObject()->lastDomain()).remove(res2.getId());
+    SAVH::ProfileIterator it3(res1.getProfile());
+    assertTrue(!it3.done());
+    SAVH::ProfileIterator it4(res2.getProfile());
+    assertTrue(it4.done());
+    
+    const_cast<AbstractDomain&>(consumer.getObject()->lastDomain()).relax(consumer.getObject()->baseDomain());
+    SAVH::ProfileIterator it5(res1.getProfile());
+    assertTrue(it5.done());
+    SAVH::ProfileIterator it6(res2.getProfile());
+    assertTrue(it6.done());
+
+    SAVH::ConsumerToken throwaway(db.getId(), LabelStr("Reservoir.consume"), IntervalIntDomain(10),
+				  IntervalDomain(5));
+
+    res1.constrain(throwaway.getId(), throwaway.getId());
+    throwaway.discard(false);
+
+    //test flaws and violations once we have a decent profile and detector
+    RESOURCE_DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testReusable() {
+    RESOURCE_DEFAULT_SETUP(ce, db, false);
+    SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("Foo"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"));
+
+    SAVH::ReusableToken use(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(0, 5), IntervalIntDomain(10, 15), IntervalIntDomain(1, PLUS_INFINITY),
+			    IntervalDomain(10));
+
+    //should create two transactions and four instants
+    SAVH::ProfileIterator it(res.getProfile());
+    assertTrue(!it.done());
+    std::set<SAVH::TransactionId> trans;
+    int instCount = 0;
+    while(!it.done()) {
+      SAVH::InstantId inst = it.getInstant();
+      for(std::set<SAVH::TransactionId>::const_iterator transIt = inst->getTransactions().begin(); transIt != inst->getTransactions().end(); ++transIt)
+	trans.insert(*transIt);
+      instCount++;
+      it.next();
+    }
+    assertTrue(trans.size() == 2);
+    assertTrue(instCount == 4);
+    
+    use.getStart()->specify(0);
+    use.getEnd()->specify(10);
+    assertTrue(db.getConstraintEngine()->propagate());
+
+    //should reduce the instant count to 2
+    SAVH::ProfileIterator it1(res.getProfile());
+    assertTrue(!it1.done());
+    instCount = 0;
+    while(!it1.done()) {
+      instCount++;
+      it1.next();
+    }
+    assertTrue(instCount == 2);
+
+    SAVH::ReusableToken throwaway(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(50), IntervalIntDomain(51), IntervalIntDomain(1), IntervalDomain(1));
+    throwaway.discard(false);
+
+    RESOURCE_DEFAULT_TEARDOWN();
+    return true;
+  }
+};
+
 void ResourceModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
   LockManager::instance().lock();
@@ -1800,6 +1897,7 @@ void ResourceModuleTests::runTests(std::string path) {
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   runTestSuite(ProfileTest::test);
+  runTestSuite(SAVHResourceTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
   uninitConstraintLibrary();

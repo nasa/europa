@@ -136,9 +136,6 @@ namespace EUROPA {
 
 //     }
 
-    //do nothing, since we don't take those types of changes into account
-//     void TimetableProfile::handleTransactionsOrdered(const TransactionId t1, const TransactionId t2) {
-//     }
 
 //     class TimetableProfileLocalStatic {
 //     public:

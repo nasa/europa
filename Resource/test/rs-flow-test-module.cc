@@ -4,6 +4,7 @@
 #include "Transaction.hh"
 #include "ResourceConstraint.hh"
 #include "ResourcePropagator.hh"
+#include "SAVH_ResourceDefs.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_FVDetector.hh"
 #include "SAVH_Instant.hh"
@@ -12,6 +13,7 @@
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_ProfilePropagator.hh"
+#include "SAVH_ReusableFVDetector.hh"
 
 #include "Debug.hh"
 #include "TestSupport.hh"
@@ -27,6 +29,8 @@
 #include "EventToken.hh"
 #include "TokenVariable.hh"
 #include "STNTemporalAdvisor.hh"
+#include "SAVH_Reusable.hh"
+#include "SAVH_DurativeTokens.hh"
 
 #include "Debug.hh"
 
@@ -44,6 +48,9 @@
     schema->addObjectType(LabelStr("SAVHResource")); \
     schema->addPredicate(LabelStr("Resource.change"));\
     schema->addMember(LabelStr("Resource.change"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
+    schema->addObjectType(LabelStr("Reusable")); \
+    schema->addPredicate(LabelStr("Reusable.uses")); \
+  schema->addMember(LabelStr("Reusable.uses"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
     PlanDatabase db(ce.getId(), schema); \
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId()); \
@@ -600,10 +607,11 @@ private:
     profile.removeTransaction( trans3.getId() );
     profile.removeTransaction( trans4.getId() );
 
-    profile.addTransaction( trans1.getId() );
-    profile.addTransaction( trans2.getId() );
-    profile.addTransaction( trans3.getId() );
-    profile.addTransaction( trans4.getId() );
+    //MJI- commented out because this can't happen.  
+//     profile.addTransaction( trans1.getId() );
+//     profile.addTransaction( trans2.getId() );
+//     profile.addTransaction( trans3.getId() );
+//     profile.addTransaction( trans4.getId() );
 
     return true;
   }
@@ -888,6 +896,49 @@ private:
   }
 };
 
+class FVDetectorTest {
+public:
+  static bool test() {
+    //runTest(testReusableDetector);
+    return true;
+  }
+private:
+  static bool testReusableDetector() {
+    RESOURCE_DEFAULT_SETUP(ce, db, false);
+    
+    SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("res1"), LabelStr("ReusableFVDetector"), LabelStr("IncrementalFlowProfile"),
+		       1, 1, 0);
+    
+    //create a token that violates the limit (i.e. consumes 2)
+    SAVH::ReusableToken tok1(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(1), IntervalIntDomain(10), 
+			     IntervalIntDomain(9), IntervalDomain(2));
+    assertTrue(!ce.propagate());
+    tok1.discard(false);
+    
+    //create a token that doesn't
+    SAVH::ReusableToken tok2(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(9),
+		       IntervalDomain(1));
+    assertTrue(ce.propagate());
+    //create a token that doesn't, but must start during the previous token, causing a violation
+    SAVH::ReusableToken tok3(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(9), IntervalIntDomain(11), IntervalIntDomain(2),
+		       IntervalDomain(1));
+    assertTrue(!ce.propagate());
+    tok3.discard(false);
+    assertTrue(ce.propagate());
+    //create a token that doesn't, and may start afterwards, creating a flaw
+    SAVH::ReusableToken tok4(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(10, 13), IntervalIntDomain(15, 18), IntervalIntDomain(5),
+		       IntervalDomain(1));
+    assertTrue(ce.propagate());
+    assertTrue(db.hasOrderingChoice(tok4.getId()));
+    
+    res.constrain(tok2.getId(), tok4.getId());
+    assertTrue(ce.propagate());
+    assertTrue(!db.hasOrderingChoice(tok4.getId()));
+    RESOURCE_DEFAULT_TEARDOWN();
+    return true;
+  }
+};
+
 void FlowProfileModuleTests::runTests( const std::string& path) {
   LockManager::instance().connect();
   LockManager::instance().lock();
@@ -896,8 +947,13 @@ void FlowProfileModuleTests::runTests( const std::string& path) {
   
   Schema::instance();
   initConstraintLibrary();
+  REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
+  REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
+  REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
+
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(FlowProfileTest::test);
+  runTestSuite(FVDetectorTest::test);
   std::cout << "Finished" << std::endl;
   ConstraintLibrary::purgeAll();
   uninitConstraintLibrary();

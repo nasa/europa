@@ -17,6 +17,7 @@ namespace EUROPA {
     private:
       void initRecompute(InstantId inst);
       void initRecompute();
+
       void recomputeLevels( InstantId prev, InstantId inst);
 //       void handleTransactionAdded(const TransactionId t);
 //       void handleTransactionRemoved(const TransactionId t);
