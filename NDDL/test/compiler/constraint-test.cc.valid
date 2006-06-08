@@ -16,8 +16,20 @@ namespace NDDL {
     return(sl_enum);
   }
   
+  Fruits FruitsBaseDomain(){
+    static Fruits sl_enum("Fruits");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("X"));
+      sl_enum.insert(LabelStr("Y"));
+      sl_enum.insert(LabelStr("Z"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
   
-  // constraint-test.nddl:8 Sample
+  
+  // constraint-test.nddl:9 Sample
   Sample::Sample(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Sample", name, true) {
   }
@@ -39,11 +51,11 @@ namespace NDDL {
   }
   
   
-  // constraint-test.nddl:8 Sample
+  // constraint-test.nddl:9 Sample
   DECLARE_DEFAULT_OBJECT_FACTORY(SampleFactory0, Sample);
   
   
-  // constraint-test.nddl:9 sample
+  // constraint-test.nddl:10 sample
   Sample::sample::sample(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -106,7 +118,7 @@ namespace NDDL {
   }
   
   
-  // constraint-test.nddl:22 sample
+  // constraint-test.nddl:23 sample
   class Sample$sample$0$0: public RuleInstance {
   public:
     Sample$sample$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -114,12 +126,13 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Sample$sample$0, Sample$sample$0$0, Sample.sample, "constraint-test.nddl,22");
+  DECLARE_AND_DEFINE_RULE(Rule$Sample$sample$0, Sample$sample$0$0, Sample.sample, "constraint-test.nddl,23");
   
   void Sample$sample$0$0::handleExecute() {
     objectVar(Sample, s, false, false);
     localVar(IntervalIntDomain(), lv1, false);
     localVar(IntervalIntDomain(), lv2, false);
+    localVar(FruitsBaseDomain(), f, false);
     slave(Sample::sample, Sample.sample, sample, LabelStr("any"));
     {
       std::vector<ConstrainedVariableId> vars;
@@ -176,10 +189,16 @@ namespace NDDL {
       vars.push_back(varfromtok(tok(getId(), std::string("sample")), std::string("object")));
       rule_constraint(eq, vars);
     }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("f")));
+      vars.push_back(ruleVariable(SymbolDomain(listFromString("X$Z$",false), "Fruits")));
+      rule_constraint(SubsetOf, vars);
+    }
   }
   
   
-  // constraint-test.nddl:38 World
+  // constraint-test.nddl:42 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -200,7 +219,7 @@ namespace NDDL {
   
   
   
-  // constraint-test.nddl:40 initialState
+  // constraint-test.nddl:44 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -219,14 +238,14 @@ namespace NDDL {
   }
   
   
-  // constraint-test.nddl:38 World
+  // constraint-test.nddl:42 World
   void World::constructor() {
     sample = addVariable(SampleDomain((new Sample(m_id, "sample"))->getId(), "Sample"), "sample");
     Id<Sample>(singleton(sample))->constructor();
     Id<Sample>(singleton(sample))->handleDefaults();
   }
   
-  // constraint-test.nddl:38 World
+  // constraint-test.nddl:42 World
   class WorldFactory1: public ConcreteObjectFactory {
   public:
     WorldFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -243,7 +262,7 @@ namespace NDDL {
     }
   };
   
-  // constraint-test.nddl:46 initialState
+  // constraint-test.nddl:50 initialState
   class World$initialState$1$0: public RuleInstance {
   public:
     World$initialState$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -251,7 +270,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "constraint-test.nddl,46");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "constraint-test.nddl,50");
   
   void World$initialState$1$0::handleExecute() {
     slave(Sample::sample, Sample.sample, s, LabelStr("any"));
@@ -288,6 +307,7 @@ namespace NDDL {
     id->addPrimitive("bool");
     id->addPrimitive("string");
     id->addEnum("ENUM");
+    id->addEnum("Fruits");
     id->addPredicate("Sample.sample");
     id->addMember("Sample.sample", "int", "p1");
     id->addMember("Sample.sample", "int", "p2");
@@ -297,12 +317,16 @@ namespace NDDL {
     id->addPredicate("World.initialState");
     id->addValue("ENUM", LabelStr("foo"));
     id->addValue("ENUM", LabelStr("bar"));
+    id->addValue("Fruits", LabelStr("X"));
+    id->addValue("Fruits", LabelStr("Y"));
+    id->addValue("Fruits", LabelStr("Z"));
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TOKEN_FACTORY(Sample::sample::Factory);
     REGISTER_TOKEN_FACTORY(World::initialState::Factory);
     REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(ENUM, ENUMBaseDomain());
+    REGISTER_TYPE_FACTORY(Fruits, FruitsBaseDomain());
     REGISTER_TYPE_FACTORY(Sample, ObjectDomain("Sample"));
     REGISTER_OBJECT_FACTORY(SampleFactory0, Sample);
     REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
