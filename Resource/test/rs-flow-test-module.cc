@@ -282,15 +282,16 @@ private:
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
     
-    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
-
-    ce.propagate();
 
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(1, 1), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 1), true, "q2" );
 
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
+
+    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+
+    ce.propagate();
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );
@@ -460,7 +461,7 @@ private:
      */
     std::cout << "    Case 5" << std::endl;
 
-    /*! BEING WORKED ON BY MICHAEL
+    /*! BEING WORKED ON BY MICHAEL */
 
     EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope( t3.getId(), t4.getId()));
 
@@ -479,22 +480,22 @@ private:
       
       assertTrue( profileMatches );
     }
-    */
+
   }
 
   static void executeScenario7( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
     
-    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
-
-    ce.propagate();
-
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(2, 2), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(1, 2), true, "q2" );
 
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
+
+    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+
+    ce.propagate();
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );
@@ -509,16 +510,16 @@ private:
   static void executeScenario8( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
-    
-    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
-
-    ce.propagate();
 
     Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(1, 2), true, "q1" );
     Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(2, 2), true, "q2" );
 
     SAVH::Transaction trans1( t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
+
+    EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+
+    ce.propagate();
 
     profile.addTransaction( trans1.getId() );
     profile.addTransaction( trans2.getId() );
@@ -930,7 +931,6 @@ private:
 		       IntervalDomain(1));
     assertTrue(ce.propagate());
     assertTrue(db.hasOrderingChoice(tok4.getId()));
-    
     res.constrain(tok2.getId(), tok4.getId());
     assertTrue(ce.propagate());
     assertTrue(!db.hasOrderingChoice(tok4.getId()));

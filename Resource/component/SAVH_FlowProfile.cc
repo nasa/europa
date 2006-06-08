@@ -634,27 +634,46 @@ namespace EUROPA
       debugMsg("FlowProfile:handleTransactionQuantityChanged","TransactionId (" << t->getId() << ") change " << type );
     }
 
-    void FlowProfile::handleTransactionsOrdered(const TransactionId t1, const TransactionId t2)
+    void FlowProfile::handleTemporalConstraintAdded( const TransactionId predecessor, const int preArgIndex,
+						     const TransactionId successor, const int sucArgIndex)
     {
-      check_error(t1.isValid());
-      check_error(t2.isValid());
+      debugMsg("FlowProfile:handleTemporalConstraintAdded","TransactionId1 (" << predecessor->getId() << ") before TransactionId2 (" << successor->getId() << ")");
+
+      check_error(predecessor.isValid());
+      check_error(successor.isValid());
 
       m_startRecalculation = MINUS_INFINITY; 
-      //std::min( m_startRecalculation, 
-      // (int) std::min( t1->time()->lastDomain().getLowerBound(), 
-      //  t2->time()->lastDomain().getLowerBound() ) );
       m_endRecalculation = PLUS_INFINITY; 
-      //std::max( m_endRecalculation,
-      //(int) std::max( t1->time()->lastDomain().getUpperBound(), 
-      //t2->time()->lastDomain().getUpperBound() ) );
 
       if(m_recomputeInterval.isValid())
 	delete (ProfileIterator*) m_recomputeInterval;
       
       m_recomputeInterval = (new ProfileIterator( getId(), m_startRecalculation, m_endRecalculation ))->getId();
 
-      debugMsg("FlowProfile:handleTransactionsOrdered","TransactionId1 (" << t1->getId() << ") before TransactionId2 (" << t2->getId() << ")");
+      m_recalculateLowerLevel = true;
+      m_recalculateUpperLevel = true;
 
     }
+      
+    void FlowProfile::handleTemporalConstraintRemoved( const TransactionId predecessor, const int preArgIndex,
+						       const TransactionId successor, const int sucArgIndex)
+    {
+      debugMsg("FlowProfile:handleTemporalConstraintRemoved","TransactionId1 (" << predecessor->getId() << ") before TransactionId2 (" << successor->getId() << ")");
+
+      check_error(predecessor.isValid());
+      check_error(successor.isValid());
+
+      m_startRecalculation = MINUS_INFINITY; 
+      m_endRecalculation = PLUS_INFINITY; 
+
+      if(m_recomputeInterval.isValid())
+	delete (ProfileIterator*) m_recomputeInterval;
+      
+      m_recomputeInterval = (new ProfileIterator( getId(), m_startRecalculation, m_endRecalculation ))->getId();
+
+      m_recalculateLowerLevel = true;
+      m_recalculateUpperLevel = true;
+    }
+
   }
 }

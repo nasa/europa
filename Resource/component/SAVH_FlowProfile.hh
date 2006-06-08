@@ -171,6 +171,21 @@ namespace EUROPA
        */
       void enableTransaction( const TransactionId t );
       /**
+       * @brief Helper method for subclasses to respond to a temporal constraint being added between two transactions.
+       * @param e The transaction whose timepoint has been constrained.
+       * @param argIndex The index of the timepoint in the constraint.
+       */ 
+      void handleTemporalConstraintAdded(const TransactionId predecessor, const int preArgIndex,
+					 const TransactionId successor, const int sucArgIndex);
+      
+      /**
+       * @brief Helper method for subclasses to respond to a temporal constraint being removed between two transactions.
+       * @param e The transaction whose timepoint has been removed from the constraint.
+       * @param argIndex The index of the timepoint in the constraint.
+       */
+      void handleTemporalConstraintRemoved(const TransactionId predecessor, const int preArgIndex,
+					   const TransactionId successor, const int sucArgIndex);
+      /**
        * @brief Updates the maximum flow graphs in case transactions t1 and t2 are now strictly ordered. 
        */
       void handleOrderedAt( const TransactionId t1, const TransactionId t2 );
@@ -197,11 +212,6 @@ namespace EUROPA
        * @return
        */
       void handleTransactionQuantityChanged( const TransactionId t, const DomainListener::ChangeType& type );
-      /**
-       * @brief 
-       * @return
-       */
-      void handleTransactionsOrdered( const TransactionId t1, const TransactionId t2 );
       /**
        * @brief 
        * @return
