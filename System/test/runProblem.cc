@@ -14,6 +14,7 @@
 #include "SAVH_Profile.hh"
 #include "SAVH_TimetableFVDetector.hh"
 #include "SAVH_TimetableProfile.hh"
+#include "SAVH_FlowProfile.hh"
 
 SchemaId schema;
 const char* initialTransactions = NULL;
@@ -223,6 +224,7 @@ void __assert_fail(const char *__assertion,
 int main(int argc, const char** argv) {
   REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
   REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
+  REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
 #define ONE_ASSEMBLY_ONLY
 #ifdef ONE_ASSEMBLY_ONLY
 #ifdef CBPLANNER

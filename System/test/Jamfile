@@ -4,7 +4,7 @@ SubDir PLASMA System test ;
                              
 if ! $(PLASMA_READY) {
 
-PLANNER ?= CBPLANNER ;
+PLANNER ?= SOLVER ;
 
 SubDirHdrs $(PLASMA) PlanDatabase test ;
 
