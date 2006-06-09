@@ -19,9 +19,9 @@ namespace EUROPA
   namespace SAVH 
   {
     Node::Node( const NodeIdentity& identity ):
-      m_Identity( identity ),
       m_Enabled( true ),
-      m_Visit( -1 )
+      m_Visit( -1 ),
+      m_Identity( identity )
     {
     }
 

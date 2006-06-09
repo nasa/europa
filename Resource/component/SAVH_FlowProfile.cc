@@ -331,7 +331,7 @@ namespace EUROPA
       check_error( prev.isValid() || InstantId::noId() == prev );
       check_error( inst.isValid() );
 
-      debugMsg("FlowProfile:recomputeLevels","Instant (" 
+      debugMsg("FlowProfile:recomputeLevels","Computing instant (" 
 	       << inst->getId() << ") at time "
 	       << inst->getTime() << " closed levels [" 
 	       << m_lowerClosedLevel << "," 
@@ -391,13 +391,15 @@ namespace EUROPA
 		    {
 		      const TransactionId& transaction2 = (*secondIter);
 		      
-		      if( transaction1 != transaction2 ) 
+		      if( transaction1 != transaction2  ) 
 			{
+			  enableTransaction( transaction2 );
+
 			  if( transaction2->time()->lastDomain().getUpperBound() != inst->getTime() )
 			    {
-			      debugMsg("FlowProfile:recomputeLevels","Transaction (" 
+			      debugMsg("FlowProfile:recomputeLevels","Determining ordering of pending transaction (" 
 				       << transaction1->getId() << ") "
-				       << transaction1->time()->toString() << " and Transaction ("
+				       << transaction1->time()->toString() << " and pending transaction ("
 				       << transaction2->getId() << ") "
 				       << transaction2->time()->toString() );
 			      
@@ -423,19 +425,11 @@ namespace EUROPA
 	}
 
 
-      debugMsg("FlowProfile::recomputeLevels","Computing lower level for instance at time "
-	       << inst->getTime() << " closed level is "
-	       << m_lowerClosedLevel );
-
       double lowerLevel = inst->getLowerLevel();
 
       if( m_recalculateLowerLevel )
 	lowerLevel = m_lowerClosedLevel - m_lowerLevelGraph->getResidualFromSource();
 	
-      debugMsg("FlowProfile::recomputeLevels","Computing upper level for instance at time "
-	       << inst->getTime() << " closed level is "
-	       << m_upperClosedLevel );
-
       double upperLevel = inst->getUpperLevel();
 
       if( m_recalculateUpperLevel )

@@ -56,7 +56,12 @@ namespace EUROPA
 
       if( 0 == node )
 	{
+
 	  node = new Node( identity );
+
+	  graphDebug("Created node "
+		     << *node );
+
 	  m_Nodes[ identity ] = node;
 	}
 
@@ -79,6 +84,9 @@ namespace EUROPA
 	  Node* node = (*ite).second;
 
 	  m_Nodes.erase( ite );
+
+	  graphDebug("Removed node "
+		     << *node );
 
 	  delete node;
 	}

@@ -19,6 +19,8 @@
 #include "Error.hh"
 #include "SAVH_Transaction.hh"
 
+//#define TRACE_GRAPH = 1
+
 #ifdef TRACE_GRAPH
 
 #define graphDebug( msg )  { \
