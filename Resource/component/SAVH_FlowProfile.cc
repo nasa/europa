@@ -393,10 +393,11 @@ namespace EUROPA
 		      
 		      if( transaction1 != transaction2  ) 
 			{
-			  enableTransaction( transaction2 );
 
 			  if( transaction2->time()->lastDomain().getUpperBound() != inst->getTime() )
 			    {
+			      enableTransaction( transaction2 );
+
 			      debugMsg("FlowProfile:recomputeLevels","Determining ordering of pending transaction (" 
 				       << transaction1->getId() << ") "
 				       << transaction1->time()->toString() << " and pending transaction ("
