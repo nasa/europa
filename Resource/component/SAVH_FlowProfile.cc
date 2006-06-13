@@ -57,15 +57,28 @@ namespace EUROPA
 
     void FlowProfileGraph::enableAt( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 ) 
     {
+      debugMsg("FlowProfileGraph:enableAt","Transaction (" 
+	       << t1->getId() << ") and transaction (" 
+	       << t2->getId() << ") lower level: " 
+	       << std::boolalpha << m_lowerLevel );
+
+      m_recalculate = true;
+
       m_graph->createEdge( t1, t2, Edge::getMaxCapacity() );
       m_graph->createEdge( t2, t1, Edge::getMaxCapacity() );
     }
 
     void FlowProfileGraph::enableAtOrBefore( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 ) 
     {
-      debugMsg("FlowProfileGraph:enableAtOrBefore","Transaction (" << t1->getId() << ") and transaction (" << t2->getId() << ")");
+      debugMsg("FlowProfileGraph:enableAtOrBefore","Transaction (" 
+	       << t1->getId() << ") and transaction (" 
+	       << t2->getId() << ") lower level: " 
+	       << std::boolalpha << m_lowerLevel );
+
       check_error( 0 != m_graph->getNode( t1 ) );
       check_error( 0 != m_graph->getNode( t2 ) );
+
+      m_recalculate = true;
 
       m_graph->createEdge( t1, t2, 0 );
       m_graph->createEdge( t2, t1, Edge::getMaxCapacity() );
@@ -80,6 +93,10 @@ namespace EUROPA
 
     void FlowProfileGraph::enableTransaction( const SAVH::TransactionId& t )
     {
+      debugMsg("FlowProfileGraph:enableTransaction","Transaction (" 
+	       << t->getId() << ") lower level: " 
+	       << std::boolalpha << m_lowerLevel );
+
       m_recalculate = true;
 
       m_graph->createNode( t, true );
@@ -117,6 +134,12 @@ namespace EUROPA
 
     void FlowProfileGraph::removeTransaction( const SAVH::TransactionId& id )
     {
+      debugMsg("FlowProfileGraph:removeTransaction","Transaction (" 
+	       << id->getId() << ") lower level: " 
+	       << std::boolalpha << m_lowerLevel );
+
+      m_recalculate = true;
+
       m_graph->removeNode( id );
     }
 
@@ -155,6 +178,9 @@ namespace EUROPA
 
     double FlowProfileGraph::disableReachableResidualGraph()
     {
+      debugMsg("FlowProfileGraph:disableReachableResidualGraph","Lower level: "
+	       << std::boolalpha << m_lowerLevel );
+
       double residual = 0.0;
 
       if( m_recalculate )
@@ -189,7 +215,7 @@ namespace EUROPA
 		  
 		  if( target != m_source && target != m_sink )
 		    {
-		      debugMsg("FlowProfileGraph::visitNeighbors","Disabling node with transaction ("
+		      debugMsg("FlowProfileGraph:visitNeighbors","Disabling node with transaction ("
 			       << target->getIdentity()->getId() << ") lower level " << std::boolalpha << m_lowerLevel );
 
 		      target->setDisabled();
@@ -202,14 +228,14 @@ namespace EUROPA
 			  ||
 			  (!m_lowerLevel && !t->isConsumer() ) )
 			{
-			  debugMsg("FlowProfileGraph::visitNeighbors","Adding "
+			  debugMsg("FlowProfileGraph:visitNeighbors","Adding "
 				   << sign * t->quantity()->lastDomain().getUpperBound() << " to the level.");
 
 			  residual += sign * t->quantity()->lastDomain().getUpperBound();
 			}
 		      else
 			{
-			  debugMsg("FlowProfileGraph::visitNeighbors","Adding "
+			  debugMsg("FlowProfileGraph:visitNeighbors","Adding "
 				   << sign* t->quantity()->lastDomain().getLowerBound() << " to the level.");
 
 			  residual += sign * t->quantity()->lastDomain().getLowerBound();
@@ -224,6 +250,10 @@ namespace EUROPA
 
     void FlowProfileGraph::disable(  const SAVH::TransactionId& id )
     {
+      debugMsg("FlowProfileGraph:disable","Transaction (" 
+	       << id->getId() << ") lower level: " 
+	       << std::boolalpha << m_lowerLevel );
+
       Node* node = m_graph->getNode( id );
 
       check_error( 0 != node );
@@ -393,7 +423,6 @@ namespace EUROPA
 		      
 		      if( transaction1 != transaction2  ) 
 			{
-
 			  if( transaction2->time()->lastDomain().getUpperBound() != inst->getTime() )
 			    {
 			      enableTransaction( transaction2 );
@@ -501,7 +530,11 @@ namespace EUROPA
     {
       check_error(t.isValid());
 
-      debugMsg("FlowProfile:handleTransactionAdded","TransactionId (" << t->getId() << ") " << t->time() );
+      debugMsg("FlowProfile:handleTransactionAdded","TransactionId (" 
+	       << t->getId() << ") time " 
+	       << t->time()->lastDomain() << " quantity " 
+	       << t->quantity()->lastDomain() << " consumer: "
+	       << std::boolalpha << t->isConsumer() );
 
       //enableTransaction( t );
 

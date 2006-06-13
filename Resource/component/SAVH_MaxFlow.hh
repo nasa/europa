@@ -115,7 +115,7 @@ namespace EUROPA
 
     double MaximumFlowAlgorithm::getMaxFlow() const
     {
-      if( m_ExcessOnNode.find(  m_Sink ) != m_ExcessOnNode.end() )
+      if( m_ExcessOnNode.find(  m_Sink ) == m_ExcessOnNode.end() )
 	return 0.0;
 
       return m_ExcessOnNode.find(  m_Sink )->second;

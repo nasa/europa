@@ -108,6 +108,7 @@ public:
     testScenario8< EUROPA::SAVH::FlowProfile>();
     testScenario9< EUROPA::SAVH::FlowProfile>( 0, 0 );
     testScenario9< EUROPA::SAVH::FlowProfile>( 1, 1 );
+    //testScenario10< EUROPA::SAVH::FlowProfile>();
 
     std::cout << " IncrementalFlowProfile " << std::endl;
 
@@ -123,6 +124,7 @@ public:
     testScenario8< EUROPA::SAVH::IncrementalFlowProfile>();
     testScenario9< EUROPA::SAVH::IncrementalFlowProfile>( 0, 0 );
     testScenario9< EUROPA::SAVH::IncrementalFlowProfile>( 1, 1 );
+    testScenario10< EUROPA::SAVH::IncrementalFlowProfile>();
 
     return true;
   }
@@ -180,6 +182,20 @@ private:
   }
 
   static void executeScenario1( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[] ) {
+
+    /*!
+     * No explicit ordering between transactions
+     *
+     * Transaction1   <0-------(+1)-------10>
+     * Transaction2    |                 <10--(-1)--15>
+     * Transaction3    |       <5--------(-1)-------15>
+     * Transaction4    |       <5--------(+1)-------15>
+     *                 |        |         |          |
+     *                 |        |         |          |
+     * Max level       1        2         2          0
+     * Min level       0       -1        -1          0
+     *
+     */
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain(10, 15), true, "t2" );
@@ -560,6 +576,73 @@ private:
     assertTrue( profileMatches );
   }
 
+  static void executeScenario10( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+
+    /*!
+     * Transaction1 constrained to be at Transaction2
+     *
+     * Transaction1   [0]-3
+     * Transaction2         [10]+3
+     * Transaction3         [10]-2
+     * Transaction4                               [100]+2
+     * Transaction5             <11------[-3]------100>
+     * Transaction6                  <12----(+3)---100>
+     *                 |     |    |   |             |
+     *                 |     |    |   |             |
+     * Max level(5)    2     3    3   3             5
+     * Min level(5)    2     3    0   0             5
+     *
+     */
+
+    Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain(0,0), true, "t1" );
+    Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(3, 3), true, "q1" );
+    SAVH::Transaction trans1( t1.getId(), q1.getId(), true);
+
+    Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain(10, 10), true, "t2" );
+    Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(3, 3), true, "q2" );
+    SAVH::Transaction trans2( t2.getId(), q2.getId(), false ); 
+
+    LessThanEqualConstraint c0(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+
+    Variable<IntervalIntDomain> t3( ce.getId(), IntervalIntDomain(10, 10), true, "t3" );
+    Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(2, 2), true, "q3" );
+    SAVH::Transaction trans3( t3.getId(), q3.getId(), true); 
+
+    Variable<IntervalIntDomain> t4( ce.getId(), IntervalIntDomain(100, 100), true, "t4" );
+    Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(2, 2), true, "q4" );
+    SAVH::Transaction trans4( t4.getId(), q4.getId(), false );
+
+    LessThanEqualConstraint c1(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t3.getId(), t4.getId()));
+
+    Variable<IntervalIntDomain> t5( ce.getId(), IntervalIntDomain(11, 100), true, "t5" );
+    Variable<IntervalDomain> q5( ce.getId(), IntervalDomain(3, 3), true, "q5" );
+    SAVH::Transaction trans5( t5.getId(), q5.getId(), true); 
+
+    Variable<IntervalIntDomain> t6( ce.getId(), IntervalIntDomain(12, 100), true, "t6" );
+    Variable<IntervalDomain> q6( ce.getId(), IntervalDomain(3, 3), true, "q6" );
+    SAVH::Transaction trans6( t6.getId(), q6.getId(), false );
+
+    LessThanEqualConstraint c2(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t5.getId(), t6.getId()));
+
+    LessThanEqualConstraint c3(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t2.getId(), t3.getId()));
+    LessThanEqualConstraint c4(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t2.getId(), t5.getId()));
+
+    ce.propagate();
+
+    profile.addTransaction( trans1.getId() );
+    profile.addTransaction( trans2.getId() );
+    profile.addTransaction( trans3.getId() );
+    profile.addTransaction( trans4.getId() );
+    profile.addTransaction( trans5.getId() );
+    profile.addTransaction( trans6.getId() );
+
+    profile.recompute();
+
+    bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+
+    assertTrue( profileMatches );
+  }
+
   static bool testNoTransactions() {
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
@@ -882,6 +965,41 @@ private:
     double upperLevels[nrInstances] = { 0 + initialUpperLevel,-1 + initialUpperLevel,-2 + initialUpperLevel,-1 + initialUpperLevel, 0 + initialUpperLevel, 0 + initialUpperLevel };
 
     executeScenario9( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
+
+    return true;
+  }
+
+  template< class Profile >
+  static bool testScenario10(){
+    std::cout << "  Scenario 10" << std::endl;
+    RESOURCE_DEFAULT_SETUP(ce, db, true);
+    DummyDetector detector(SAVH::ResourceId::noId());
+
+    Profile profile( db.getId(), detector.getId(), 5, 5);
+
+    /*!
+     * Transaction1 constrained to be at Transaction2
+     *
+     * Transaction1   [0]-3
+     * Transaction2         [10]+3
+     * Transaction3         [10]-2
+     * Transaction4                               [100]+2
+     * Transaction5             <11------[-3]------100>
+     * Transaction6                  <12----(+3)---100>
+     *                 |     |    |   |             |
+     *                 |     |    |   |             |
+     * Max level(5)    2     3    3   3             5
+     * Min level(5)    2     3    0   0             5
+     *
+     */
+
+    const int nrInstances = 5;
+
+    int itimes[nrInstances] = {0,10,11,12,100};
+    double lowerLevels[nrInstances] = {2,3,0,0,5};
+    double upperLevels[nrInstances] = {2,3,3,3,5};
+
+    executeScenario10( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
 
     return true;
   }

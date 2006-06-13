@@ -123,11 +123,7 @@ namespace EUROPA
     {
       return m_Target;
     }
-  
-    bool Edge::isEnabled() const
-    {
-      return m_Enabled;
-    }
+ 
   } //namespace SAVH
 } //namespace EUROPA
 

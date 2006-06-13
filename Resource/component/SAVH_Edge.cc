@@ -73,6 +73,11 @@ namespace EUROPA
 		 << *this );
     }
 
+    bool Edge::isEnabled() const
+    {
+      return m_Enabled && m_Target->isEnabled();
+    }
+
     std::ostream& operator<<( std::ostream& os, const Edge& fe )
     {
       os << fe.getIdentity() << " {" << fe.getCapacity() << "} (enabled: " << std::boolalpha << fe.isEnabled() << ")";

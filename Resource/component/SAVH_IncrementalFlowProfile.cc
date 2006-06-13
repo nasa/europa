@@ -83,50 +83,72 @@ namespace EUROPA
 		{
 		  const TransactionId& transaction2 = (*iter);
 	      
-		  if( transaction1 != transaction2 
-		      && 
-		      !transaction2->time()->lastDomain().isSingleton()
-		      &&
-		      ( ( m_recalculateLowerLevel 
-			  && ( transaction2->time()->lastDomain().getLowerBound() == inst->getTime() || m_lowerLevelGraph->isEnabled( transaction2 ) ) )
-			||
-			( m_recalculateUpperLevel 
-			  && ( transaction2->time()->lastDomain().getLowerBound() == inst->getTime() || m_upperLevelGraph->isEnabled( transaction2 ) ) ) ) ) 
+		  if( m_recalculateLowerLevel )
 		    {
-		      debugMsg("IncrementalFlowProfile:enableOrderings","Transaction (" 
-			       << transaction1->getId() << ") "
-			       << transaction1->time()->toString() << " and Transaction ("
-			       << transaction2->getId() << ") "
-			       << transaction2->time()->toString() );
+		      if( transaction1 != transaction2 
+			  && 
+			  !transaction2->time()->lastDomain().isSingleton() 
+			  &&
+			  transaction2->time()->lastDomain().getUpperBound() != inst->getTime()
+			  &&
+			  (transaction2->time()->lastDomain().getLowerBound() == inst->getTime() || m_lowerLevelGraph->isEnabled( transaction2 ) ) )
+			{
+			  if( isConstrainedToAt( transaction1, transaction2 ) ) 
+			    {
+			      m_lowerLevelGraph->enableAt( transaction1, transaction2 );
+			    }
+			  else if( isConstrainedToBeforeOrAt( transaction1, transaction2 ) )  
+			    {
+			      m_lowerLevelGraph->enableAtOrBefore( transaction1, transaction2 );
+			    }
+			  else if( isConstrainedToBeforeOrAt( transaction2, transaction1 ) )  
+			    {
+			      m_lowerLevelGraph->enableAtOrBefore( transaction2, transaction1 );
+			    }
+			  else 
+			    {
+			      debugMsg("IncrementalFlowProfile:enableOrderings","Transaction (" 
+				       << transaction1->getId() << ") and Transaction ("
+				       << transaction2->getId() << ") not constrained");
+			    }
+			}
+		    }
 		  
-		      if( isConstrainedToAt( transaction1, transaction2 ) ) 
+		  if( m_recalculateUpperLevel )
+		    {
+		      if( transaction1 != transaction2 
+			  && 
+			  !transaction2->time()->lastDomain().isSingleton() 
+			  &&
+			  transaction2->time()->lastDomain().getUpperBound() != inst->getTime()
+			  &&
+			  ( transaction2->time()->lastDomain().getLowerBound() == inst->getTime() || m_upperLevelGraph->isEnabled( transaction2 ) ) )
 			{
-			  if( m_recalculateLowerLevel )
-			    m_lowerLevelGraph->enableAt( transaction1, transaction2 );
-		      
-			  if( m_recalculateUpperLevel )
-			    m_upperLevelGraph->enableAt( transaction1, transaction2 );
-			}
-		      else if( isConstrainedToBeforeOrAt( transaction1, transaction2 ) )  
-			{
-			  if( m_recalculateLowerLevel )
-			    m_lowerLevelGraph->enableAtOrBefore( transaction1, transaction2 );
-		      
-			  if( m_recalculateUpperLevel )
-			    m_upperLevelGraph->enableAtOrBefore( transaction1, transaction2 );
-			}
-		      else 
-			{
-			  debugMsg("IncrementalFlowProfile:enableOrderings","Transaction (" 
-				   << transaction1->getId() << ") and Transaction ("
-				   << transaction2->getId() << ") not constrained");
+			  if( isConstrainedToAt( transaction1, transaction2 ) ) 
+			    {
+			      m_upperLevelGraph->enableAt( transaction1, transaction2 );
+			    }
+			  else if( isConstrainedToBeforeOrAt( transaction1, transaction2 ) )  
+			    {
+			      m_upperLevelGraph->enableAtOrBefore( transaction1, transaction2 );
+			    }
+			  else if( isConstrainedToBeforeOrAt( transaction2, transaction1 ) )  
+			    {
+			      m_upperLevelGraph->enableAtOrBefore( transaction2, transaction1 );
+			    }
+			  else 
+			    {
+			      debugMsg("IncrementalFlowProfile:enableOrderings","Transaction (" 
+				       << transaction1->getId() << ") and Transaction ("
+				       << transaction2->getId() << ") not constrained");
+			    }
 			}
 		    }
 		}
 	    }
 	}
     }
-
+    
     void IncrementalFlowProfile::recomputeLevels( InstantId prev, InstantId inst ) 
     {
       check_error( prev.isValid() || InstantId::noId() == prev );
@@ -222,10 +244,18 @@ namespace EUROPA
 		  {
 		    if( ended->isConsumer() )
 		      {
+			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+				 << ended->getId() << ") decreases lower level by "
+				 << ended->quantity()->lastDomain().getUpperBound() );
+
 			lowerLevel -= ended->quantity()->lastDomain().getUpperBound();
 		      }
 		    else
 		      {
+			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+				 << ended->getId() << ") increases lower level by "
+				 << ended->quantity()->lastDomain().getLowerBound() );
+
 			lowerLevel += ended->quantity()->lastDomain().getLowerBound();
 		      }		  
 		  }
@@ -257,10 +287,18 @@ namespace EUROPA
 		  {
 		    if( ended->isConsumer() )
 		      {
+			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+				 << ended->getId() << ") decreases upper level by "
+				 << ended->quantity()->lastDomain().getLowerBound() );
+
 			upperLevel -= ended->quantity()->lastDomain().getLowerBound();
 		      }
 		    else
 		      {
+			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
+				 << ended->getId() << ") increases upper level by "
+				 << ended->quantity()->lastDomain().getUpperBound() );
+
 			upperLevel += ended->quantity()->lastDomain().getUpperBound();
 		      }
 		  }
