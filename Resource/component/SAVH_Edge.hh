@@ -75,7 +75,7 @@ namespace EUROPA
        * @brief Returns true of the invoking edge is enabled otherwise returns false
        *
        */
-      inline bool isEnabled() const;
+      bool isEnabled() const;
       /**
        * @brief Returns the identity of the invoking edge
        *
