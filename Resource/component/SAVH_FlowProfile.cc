@@ -62,6 +62,13 @@ namespace EUROPA
 	       << t2->getId() << ") lower level: " 
 	       << std::boolalpha << m_lowerLevel );
 
+      if( 0 == m_graph->getNode( t1 ) )
+	return;
+
+      if( 0 == m_graph->getNode( t2 ) )
+	return;
+
+
       m_recalculate = true;
 
       m_graph->createEdge( t1, t2, Edge::getMaxCapacity() );
@@ -75,8 +82,11 @@ namespace EUROPA
 	       << t2->getId() << ") lower level: " 
 	       << std::boolalpha << m_lowerLevel );
 
-      check_error( 0 != m_graph->getNode( t1 ) );
-      check_error( 0 != m_graph->getNode( t2 ) );
+      if( 0 == m_graph->getNode( t1 ) )
+	return;
+
+      if( 0 == m_graph->getNode( t2 ) )
+	return;
 
       m_recalculate = true;
 
@@ -96,13 +106,10 @@ namespace EUROPA
       debugMsg("FlowProfileGraph:enableTransaction","Transaction (" 
 	       << t->getId() << ") lower level: " 
 	       << std::boolalpha << m_lowerLevel );
-
-      m_recalculate = true;
-
-      m_graph->createNode( t, true );
       
       SAVH::TransactionId source = SAVH::TransactionId::noId();
       SAVH::TransactionId target = SAVH::TransactionId::noId();
+
       double edgeCapacity = 0;
 
       if( ( m_lowerLevel && t->isConsumer() )
@@ -123,11 +130,16 @@ namespace EUROPA
 
 	  edgeCapacity = t->quantity()->lastDomain().getLowerBound();
 	}
+
+      if( 0 == edgeCapacity )
+	return;
       
       check_error( SAVH::TransactionId::noId() != source );
       check_error( SAVH::TransactionId::noId() != target );
-      
 
+      m_recalculate = true;
+
+      m_graph->createNode( t, true );
       m_graph->createEdge( source, target, edgeCapacity );
       m_graph->createEdge( target, source, 0 );
     }

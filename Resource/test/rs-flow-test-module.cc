@@ -125,6 +125,8 @@ public:
     testScenario9< EUROPA::SAVH::IncrementalFlowProfile>( 0, 0 );
     testScenario9< EUROPA::SAVH::IncrementalFlowProfile>( 1, 1 );
     testScenario10< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario11< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario12< EUROPA::SAVH::IncrementalFlowProfile>();
 
     return true;
   }
@@ -643,6 +645,113 @@ private:
     assertTrue( profileMatches );
   }
 
+  static void executeScenario11( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+    /*!
+     * Transaction1 constrained to be before or at Transaction2
+     *
+     * Transaction1   <-inf---------[-inf,0]---------inf>
+     * Transaction2   <-inf---------[0, inf]---------inf>
+     *                 |                              |
+     *                 |                              |
+     * Max level      inf                            inf
+     * Min level     -inf                           -inf
+     *
+     */
+
+    Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( MINUS_INFINITY, PLUS_INFINITY ), true, "t1" );
+    Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( MINUS_INFINITY, PLUS_INFINITY ), true, "t2" );
+
+
+    Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(0, PLUS_INFINITY), true, "q1" );
+    Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(0, PLUS_INFINITY), true, "q2" );
+
+    SAVH::Transaction trans1( t1.getId(), q1.getId(), true);
+    SAVH::Transaction trans2( t2.getId(), q2.getId(), false ); 
+
+    LessThanEqualConstraint c1(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+
+    ce.propagate();
+
+    profile.addTransaction( trans1.getId() );
+    profile.addTransaction( trans2.getId() );
+
+    profile.recompute();
+
+    bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+
+    assertTrue( profileMatches );
+  }
+
+  static void executeScenario12( SAVH::Profile& profile, ConstraintEngine& ce ) {
+    /*!
+     * Transaction1 constrained to be before or at Transaction2
+     *
+     * Transaction1   <-inf---------[-inf,0]---------inf>
+     * Transaction2   <-inf---------[0, inf]---------inf>
+     *                 |                              |
+     *                 |                              |
+     * Max level      inf                            inf
+     * Min level     -inf                           -inf
+     *
+     */
+
+    Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( MINUS_INFINITY, PLUS_INFINITY ), true, "t1" );
+    Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( MINUS_INFINITY, PLUS_INFINITY ), true, "t2" );
+
+
+    Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(0, PLUS_INFINITY), true, "q1" );
+    Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(0, PLUS_INFINITY), true, "q2" );
+
+    SAVH::Transaction trans1( t1.getId(), q1.getId(), true);
+    SAVH::Transaction trans2( t2.getId(), q2.getId(), false ); 
+
+
+    Variable<IntervalIntDomain> distance( ce.getId(), IntervalIntDomain( 1, PLUS_INFINITY ), true, "distance" );
+    AddEqualConstraint c1(LabelStr("temporalDistance"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), distance.getId(), t2.getId()));
+
+    ce.propagate();
+
+    profile.addTransaction( trans1.getId() );
+    profile.addTransaction( trans2.getId() );
+
+    std::cout << "    Case 1" << std::endl;
+
+    profile.recompute();
+
+    {
+      const int nrInstances = 2;
+      
+      int itimes[nrInstances] = {MINUS_INFINITY,PLUS_INFINITY};
+      double lowerLevels[nrInstances] = {MINUS_INFINITY,MINUS_INFINITY};
+      double upperLevels[nrInstances] = {PLUS_INFINITY,PLUS_INFINITY};
+      
+      bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+      
+      assertTrue( profileMatches );
+    }
+
+    std::cout << "    Case 2" << std::endl;
+    
+    t1.restrictBaseDomain( IntervalIntDomain( 0, PLUS_INFINITY ) );
+
+    ce.propagate();
+
+    profile.recompute();
+
+    {
+      const int nrInstances = 3;
+      
+      int itimes[nrInstances] = {0,1,PLUS_INFINITY};
+      double lowerLevels[nrInstances] = {MINUS_INFINITY,MINUS_INFINITY,MINUS_INFINITY};
+      double upperLevels[nrInstances] = {0,PLUS_INFINITY,PLUS_INFINITY};
+      
+      bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+      
+      assertTrue( profileMatches );
+    }
+
+  }
+
   static bool testNoTransactions() {
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
@@ -1001,6 +1110,49 @@ private:
 
     executeScenario10( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
 
+    return true;
+  }
+
+  template< class Profile >
+  static bool testScenario11(){
+    std::cout << "  Scenario 11" << std::endl;
+    RESOURCE_DEFAULT_SETUP(ce, db, true);
+    DummyDetector detector(SAVH::ResourceId::noId());
+
+    Profile profile( db.getId(), detector.getId(), 0, 0);
+
+    /*!
+     * Transaction1 constrained to be before or at Transaction2
+     *
+     * Transaction1   <-inf---------[-inf,0]---------inf>
+     * Transaction2   <-inf---------[0, inf]---------inf>
+     *                 |                              |
+     *                 |                              |
+     * Max level      inf                            inf
+     * Min level     -inf                           -inf
+     *
+     */
+
+    const int nrInstances = 2;
+
+
+    int itimes[nrInstances] = {MINUS_INFINITY,PLUS_INFINITY};
+    double lowerLevels[nrInstances] = {MINUS_INFINITY,MINUS_INFINITY};
+    double upperLevels[nrInstances] = {PLUS_INFINITY,PLUS_INFINITY};
+
+    executeScenario11( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
+
+    return true;
+  }
+
+  template< class Profile >
+  static bool testScenario12(){
+    std::cout << "  Scenario 12" << std::endl;
+    RESOURCE_DEFAULT_SETUP(ce, db, true);
+    DummyDetector detector(SAVH::ResourceId::noId());
+    Profile profile( db.getId(), detector.getId());
+
+    executeScenario12( profile, ce );
     return true;
   }
 
