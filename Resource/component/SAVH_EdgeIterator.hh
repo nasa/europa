@@ -29,10 +29,6 @@ namespace EUROPA
       /**
        * @brief
        */
-      inline void operator++();
-      /**
-       * @brief
-       */
       inline Edge* operator*() const;
     protected:
       /**
@@ -45,13 +41,8 @@ namespace EUROPA
 	m_End( edges.end() ),
 	m_Enabled( mustBeEnabled )
       {
-	if( m_Enabled )
-	  {
-	    while( m_Iterator != m_End && !(*m_Iterator)->isEnabled() )
-	      ++m_Iterator;
-	  }
       }
-    private:
+    protected:
       EdgeList::const_iterator m_Iterator;
       EdgeList::const_iterator m_End;
       bool m_Enabled;
@@ -62,16 +53,6 @@ namespace EUROPA
       return m_Iterator != m_End;
     }
 
-    void EdgeIterator::operator++()
-    {
-      ++m_Iterator;
-      
-      if( m_Enabled )
-	{
-	  while( m_Iterator != m_End && !(*m_Iterator)->isEnabled() )
-	    ++m_Iterator;
-	}
-    }
   
     Edge* EdgeIterator::operator*() const
     {
@@ -96,7 +77,24 @@ namespace EUROPA
       EdgeOutIterator( const Node& node, bool mustBeEnabled = true ):
 	EdgeIterator( node.getOutEdges(), mustBeEnabled )
       {
+	if( m_Enabled )
+	  {
+	    while( m_Iterator != m_End && ( !(*m_Iterator)->isEnabled() || !(*m_Iterator)->getTarget()->isEnabled() ) )
+	      ++m_Iterator;
+	  }
       }
+
+      void operator++()
+      {
+	++m_Iterator;
+	
+	if( m_Enabled )
+	  {
+	    while( m_Iterator != m_End && ( !(*m_Iterator)->isEnabled() || !(*m_Iterator)->getTarget()->isEnabled() ) )
+	      ++m_Iterator;
+	  }
+      }
+      
     };
 
     /**
@@ -114,7 +112,24 @@ namespace EUROPA
       EdgeInIterator( const Node& node, bool mustBeEnabled = true  ):
 	EdgeIterator( node.getInEdges(), mustBeEnabled )
       {
+	if( m_Enabled )
+	  {
+	    while( m_Iterator != m_End && ( !(*m_Iterator)->isEnabled() || !(*m_Iterator)->getSource()->isEnabled() ) )
+	      ++m_Iterator;
+	  }
       }
+
+      void operator++()
+      {
+	++m_Iterator;
+	
+	if( m_Enabled )
+	  {
+	    while( m_Iterator != m_End && ( !(*m_Iterator)->isEnabled() || !(*m_Iterator)->getSource()->isEnabled() ) )
+	      ++m_Iterator;
+	  }
+      }
+
     };
   }
 }
