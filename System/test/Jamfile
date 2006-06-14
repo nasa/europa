@@ -184,7 +184,9 @@ else if $(PLANNER) = SOLVER {
   if $(LIBRARIES) = SHARED) {
     Depends run-model-tests : run-solver-tests-model-tests ;
   }
-  Depends run-checkin-tests : run-solver-tests-checkin-tests ;
+	# TODO: if "local checkin-tests" should have some effect on solver
+	# tests, then uncomment this line
+  #Depends run-checkin-tests : run-solver-tests-checkin-tests ;
 }
 
 Depends run-all-tests : run-nddl-planner-tests ;
