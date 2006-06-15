@@ -739,12 +739,19 @@ rule ApacheAnt
 	# let jam's dep tree in on what the ant command will try to do
 	SEARCH on $(2) = $(SEARCH_SOURCE) ;
 	Depends $(1) : $(2) ;
+	Depends clean : $(2[1]) ;
+	ApacheAntClean clean : $(2[1]) ;
 }
 # use cd to move to current subdirectory
 actions ApacheAnt
 {
 $(ANT) -f "$(2[1]:G=)"
 }
+
+actions ApacheAntClean {
+$(ANT) -f "$(2[1]:G=)" clean
+}
+
 
 rule GenerateValid
 {
