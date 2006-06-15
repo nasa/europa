@@ -127,6 +127,7 @@ public:
     testScenario10< EUROPA::SAVH::IncrementalFlowProfile>();
     testScenario11< EUROPA::SAVH::IncrementalFlowProfile>();
     testScenario12< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario13< EUROPA::SAVH::IncrementalFlowProfile>();
 
     return true;
   }
@@ -752,6 +753,49 @@ private:
 
   }
 
+  static void executeScenario13( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+    /*!
+     * Transaction1 constrained to be [1,inf) before Transaction2
+     *
+     * Transaction1   <0---------(-3)---------9>
+     * Transaction2         <1---------(+3)---------10>
+     * Transaction2   [0](-3)
+     *                 |     |                |      |
+     *                 |     |                |      |
+     * Max level      -3    -3               -3      0
+     * Min level      -6    -6               -6     -3
+     *
+     */
+
+    Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 9 ), true, "t1" );
+    Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 1,10 ), true, "t2" );
+    Variable<IntervalIntDomain> t3( ce.getId(), IntervalIntDomain( 0, 0 ), true, "t3" );
+
+
+    Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(3, 3), true, "q1" );
+    Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(3, 3), true, "q2" );
+    Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(3, 3), true, "q3" );
+
+    SAVH::Transaction trans1( t1.getId(), q1.getId(), true);
+    SAVH::Transaction trans2( t2.getId(), q2.getId(), false ); 
+    SAVH::Transaction trans3( t3.getId(), q3.getId(), true ); 
+
+    Variable<IntervalIntDomain> distance( ce.getId(), IntervalIntDomain( 1, PLUS_INFINITY ), true, "distance" );
+    AddEqualConstraint c1(LabelStr("temporalDistance"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), distance.getId(), t2.getId()));
+
+    ce.propagate();
+
+    profile.addTransaction( trans1.getId() );
+    profile.addTransaction( trans2.getId() );
+    profile.addTransaction( trans3.getId() );
+
+    profile.recompute();
+
+    bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+
+    assertTrue( profileMatches );
+  }
+
   static bool testNoTransactions() {
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(SAVH::ResourceId::noId());
@@ -1155,6 +1199,38 @@ private:
     executeScenario12( profile, ce );
     return true;
   }
+
+  template< class Profile >
+  static bool testScenario13(){
+    std::cout << "  Scenario 13" << std::endl;
+    RESOURCE_DEFAULT_SETUP(ce, db, true);
+    DummyDetector detector(SAVH::ResourceId::noId());
+    Profile profile( db.getId(), detector.getId());
+    /*!
+     * Transaction1 constrained to be [1,inf) before Transaction2
+     *
+     * Transaction1   <0---------(-3)---------9>
+     * Transaction2         <1---------(+3)---------10>
+     * Transaction2   [0](-3)
+     *                 |     |                |      |
+     *                 |     |                |      |
+     * Max level      -3    -3               -3     -3
+     * Min level      -6    -6               -6     -3
+     *
+     */
+    const int nrInstances = 4;
+
+
+    int itimes[nrInstances] = {0,1,9,10};
+    double lowerLevels[nrInstances] = {-6,-6,-6,-3};
+    double upperLevels[nrInstances] = {-3,-3,-3,-3};
+
+    executeScenario13( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
+
+    return true;
+  }
+
+
 
   static bool testDeltaTime(){
     return true;

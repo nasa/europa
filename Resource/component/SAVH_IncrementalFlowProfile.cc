@@ -195,12 +195,22 @@ namespace EUROPA
 	  {
 	    if( m_recalculateLowerLevel )
 	      {
-		lowerLevel += m_lowerLevelGraph->disableReachableResidualGraph();
+		double delta = m_lowerLevelGraph->disableReachableResidualGraph();
+
+		debugMsg("IncrementalFlowProfile::recomputeLevels","Expansion leads to delta lower level of "
+			 << delta );
+
+		lowerLevel += delta;
 	      }
 	    
 	    if( m_recalculateUpperLevel )
 	      {
-		upperLevel += m_upperLevelGraph->disableReachableResidualGraph();
+		double delta = m_upperLevelGraph->disableReachableResidualGraph();
+
+		debugMsg("IncrementalFlowProfile::recomputeLevels","Expansion leads to delta upper level of "
+			 << delta );
+
+		upperLevel += delta;
 	      }
 	  }
       }
@@ -225,7 +235,9 @@ namespace EUROPA
 		if( m_lowerLevelGraph->isEnabled( ended ) )
 		  {
 		    debugMsg("IncrementalFlowProfile::recomputeLevels","Contracting from lower graph transaction ("
-			     << ended->getId() << ")");
+			     << ended->getId() << ") "
+			     << ended->time()->toString() << " "
+			     << ended->quantity()->toString() );
 
 		    enteredClosedSet = true;
 		    contraction = true;
@@ -244,19 +256,21 @@ namespace EUROPA
 		  {
 		    if( ended->isConsumer() )
 		      {
+			lowerLevel -= ended->quantity()->lastDomain().getUpperBound();
+
 			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
 				 << ended->getId() << ") decreases lower level by "
-				 << ended->quantity()->lastDomain().getUpperBound() );
-
-			lowerLevel -= ended->quantity()->lastDomain().getUpperBound();
+				 << ended->quantity()->lastDomain().getUpperBound() << " (new level "
+				 << lowerLevel << ")");
 		      }
 		    else
 		      {
+			lowerLevel += ended->quantity()->lastDomain().getLowerBound();
+
 			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
 				 << ended->getId() << ") increases lower level by "
-				 << ended->quantity()->lastDomain().getLowerBound() );
-
-			lowerLevel += ended->quantity()->lastDomain().getLowerBound();
+				 << ended->quantity()->lastDomain().getLowerBound() << " (new level "
+				 << lowerLevel << ")");
 		      }		  
 		  }
 	      }
@@ -268,7 +282,9 @@ namespace EUROPA
 		if( m_upperLevelGraph->isEnabled( ended ) )
 		  {
 		    debugMsg("IncrementalFlowProfile::recomputeLevels","Contracting from upper graph transaction ("
-			     << ended->getId() << ")");
+			     << ended->getId() << ") "
+			     << ended->time()->toString() << " "
+			     << ended->quantity()->toString() );
 
 		    enteredClosedSet = true;
 		    contraction = true;
@@ -287,20 +303,21 @@ namespace EUROPA
 		  {
 		    if( ended->isConsumer() )
 		      {
+			upperLevel -= ended->quantity()->lastDomain().getLowerBound();
+
 			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
 				 << ended->getId() << ") decreases upper level by "
-				 << ended->quantity()->lastDomain().getLowerBound() );
-
-			upperLevel -= ended->quantity()->lastDomain().getLowerBound();
+				 << ended->quantity()->lastDomain().getLowerBound() << " (new level "
+				 << upperLevel << ")");
 		      }
 		    else
 		      {
+			upperLevel += ended->quantity()->lastDomain().getUpperBound();
+
 			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
 				 << ended->getId() << ") increases upper level by "
-				 << ended->quantity()->lastDomain().getUpperBound() );
-
-			upperLevel += ended->quantity()->lastDomain().getUpperBound();
-		      }
+				 << ended->quantity()->lastDomain().getUpperBound() << " (new level "
+				 << upperLevel << ")");		      }
 		  }
 	      }
 	  }
@@ -310,13 +327,25 @@ namespace EUROPA
 	    if( m_recalculateLowerLevel )
 	      {
 		m_lowerLevelGraph->restoreFlow();
-		lowerLevel += m_lowerLevelGraph->getResidualFromSource();
+
+		double delta = m_lowerLevelGraph->disableReachableResidualGraph();//getResidualFromSource(); 
+
+		debugMsg("IncrementalFlowProfile::recomputeLevels","Contraction leads to delta lower level of "
+			 << delta );
+
+		lowerLevel += delta;
 	      }
 
 	    if( m_recalculateUpperLevel )
 	      {
 		m_upperLevelGraph->restoreFlow();
-		upperLevel += m_upperLevelGraph->getResidualFromSource();
+
+		double delta = m_upperLevelGraph->disableReachableResidualGraph();//getResidualFromSource();
+
+		debugMsg("IncrementalFlowProfile::recomputeLevels","Contraction leads to delta upper level of "
+			 << delta );
+
+		upperLevel += delta;
 	      }
 	  }
       }
