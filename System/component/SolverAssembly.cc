@@ -29,6 +29,7 @@
 #include "Filters.hh"
 #include "SolverPartialPlanWriter.hh"
 #include "HSTSDecisionPoints.hh"
+#include "ResourceThreatDecisionPoint.hh"
 
 // Test Support
 #include "TestSupport.hh"
@@ -85,6 +86,7 @@ namespace EUROPA {
     
     REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::MinValue, Min);
     REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::MinValue, Max);
+    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat);
     REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::ValueEnum, ValEnum);
     REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::OpenConditionDecisionPoint, HSTSOpenConditionDecisionPoint);
     REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::ThreatDecisionPoint, HSTSThreatDecisionPoint);
@@ -115,6 +117,8 @@ namespace EUROPA {
     // Now process the transactions
     if(!playTransactions(txSource))
       return false;
+
+    debugMsg("SolverAssembly:plan", "Initial state: " << std::endl << PlanDatabaseWriter::toString(m_planDatabase));
 
     // Configure the planner from data in the initial state
     std::list<ObjectId> configObjects;

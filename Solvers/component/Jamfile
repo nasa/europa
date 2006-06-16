@@ -15,6 +15,7 @@ ModuleComponent Solvers
         SolverPartialPlanWriter.cc
 	SolverConfig.cc
 	HSTSDecisionPoints.cc
+	ResourceThreatDecisionPoint.cc
 	;
 
 } # PLASMA_READY

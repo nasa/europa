@@ -31,22 +31,23 @@ namespace EUROPA {
     protected:
       virtual void handleInitialize();
 
+      void extractParts(unsigned int index, ObjectId& object, TokenId& predecessor, TokenId& successor) const;
+
+      /** Main Interface for the solver **/
+      bool hasNext() const;
+
       const TokenId m_tokenToOrder; /*!< The token that must be ordered */
       std::vector< std::pair<ObjectId, std::pair<TokenId, TokenId> > > m_choices; /*!< Choices across all objects */
       unsigned int m_choiceCount; /*!< Stored choice count - size of m_orderingChoices */
+      unsigned int m_index; /*!< Current choice position in m_orderingChoices */
 
     private:
-      /** Main Interface for the solver **/
-      bool hasNext() const;
-      void handleExecute();
-      void handleUndo();
+      virtual void handleExecute();
+      virtual void handleUndo();
 
       /** HELPER METHODS **/
       std::string toString() const;
       std::string toString(unsigned int index, const std::pair<ObjectId, std::pair<TokenId, TokenId> >& choice) const;
-      void extractParts(unsigned int index, ObjectId& object, TokenId& predecessor, TokenId& successor) const;
-
-      unsigned int m_index; /*!< Current choice position in m_orderingChoices */
     };
 
   }

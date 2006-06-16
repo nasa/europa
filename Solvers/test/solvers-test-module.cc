@@ -22,8 +22,15 @@
 #include "MatchingEngine.hh"
 #include "HSTSDecisionPoints.hh"
 #include "PlanDatabaseWriter.hh"
+#include "ResourceThreatDecisionPoint.hh"
 #include "Context.hh"
-
+#include "SAVH_Profile.hh"
+#include "SAVH_FlowProfile.hh"
+#include "SAVH_IncrementalFlowProfile.hh"
+#include "SAVH_Reusable.hh"
+#include "SAVH_FVDetector.hh"
+#include "SAVH_ReusableFVDetector.hh"
+#include "SAVH_DurativeTokens.hh"
 /**
  * @file Provides module tests for Solver Module.
  * @author Conor McGann
@@ -417,6 +424,7 @@ public:
     runTest(testValueEnum);
     runTest(testHSTSOpenConditionDecisionPoint);
     runTest(testHSTSThreatDecisionPoint);
+    //runTest(testResourceDecisionPoint);
     return true;
   }
 
@@ -1418,6 +1426,63 @@ private:
     delete farHeurXml;
     return true;
   }
+
+  static bool testResourceDecisionPoint() {
+    StandardAssembly assembly(Schema::instance());
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    ConstraintEngineId ce = assembly.getConstraintEngine();
+    DbClientId client = db->getClient();
+
+    SAVH::Reusable reusable(db, "Reusable", "myReusable", "ReusableFVDetector", "FlowProfile", 2, 2, 0);
+
+    SAVH::ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
+			     IntervalDomain(1.0, 1.0), "myReusable");
+    
+    SAVH::ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
+			     IntervalDomain(1.0, 1.0), "myReusable");
+
+    SAVH::ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
+			     IntervalDomain(1.0, 1.0), "myReusable");
+    
+    assertTrue(ce->propagate());
+    assertTrue(reusable.hasTokensToOrder());
+    TiXmlElement dummy("");
+    ResourceThreatDecisionPoint dp1(client, tok1.getId(), dummy);
+
+    int choiceCount = 0;
+    dp1.initialize();
+    while(dp1.hasNext()) {
+      dp1.execute();
+      ce->propagate();
+      dp1.undo();
+      choiceCount++;
+    }
+    assertTrue(choiceCount == 6);
+
+    choiceCount = 0;
+    ResourceThreatDecisionPoint dp2(client, tok2.getId(), dummy);
+    dp2.initialize();
+    while(dp2.hasNext()) {
+      dp2.execute();
+      ce->propagate();
+      dp2.undo();
+      choiceCount++;
+    }
+    assertTrue(choiceCount == 6);
+
+    choiceCount = 0;
+    ResourceThreatDecisionPoint dp3(client, tok3.getId(), dummy);
+    dp3.initialize();
+    while(dp3.hasNext()) {
+      dp3.execute();
+      ce->propagate();
+      dp3.undo();
+      choiceCount++;
+    }
+    assertTrue(choiceCount == 6);
+
+    return true;
+  }
 };
 
 class SolverTests {
@@ -1896,7 +1961,7 @@ void initSolverModuleTests() {
 
   // Allocate the schema with a call to the linked in model function - eventually
   // make this called via dlopen
-  NDDL::loadSchema();
+  EUROPA::NDDL::loadSchema();
  
 }
 
@@ -1931,6 +1996,10 @@ void SolversModuleTests::runTests(std::string path) {
    // Constraints used for testing
    REGISTER_CONSTRAINT(LazyAllDiff, "lazyAllDiff",  "Default");
    REGISTER_CONSTRAINT(LazyAlwaysFails, "lazyAlwaysFails",  "Default");
+
+   REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
+   REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
+   REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
 
    runTestSuite(ComponentFactoryTests::test);
    runTestSuite(FilterTests::test);

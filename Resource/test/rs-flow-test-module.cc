@@ -1246,14 +1246,14 @@ private:
 class FVDetectorTest {
 public:
   static bool test() {
-    //runTest(testReusableDetector);
+    runTest(testReusableDetector);
     return true;
   }
 private:
   static bool testReusableDetector() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
     
-    SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("res1"), LabelStr("ReusableFVDetector"), LabelStr("IncrementalFlowProfile"),
+    SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("res1"), LabelStr("ReusableFVDetector"), LabelStr("FlowProfile"),
 		       1, 1, 0);
     
     //create a token that violates the limit (i.e. consumes 2)
@@ -1277,6 +1277,7 @@ private:
 		       IntervalDomain(1));
     assertTrue(ce.propagate());
     assertTrue(db.hasOrderingChoice(tok4.getId()));
+    std::cout << "CREATING THE CONSTRAINT" << std::endl;
     res.constrain(tok2.getId(), tok4.getId());
     assertTrue(ce.propagate());
     assertTrue(!db.hasOrderingChoice(tok4.getId()));

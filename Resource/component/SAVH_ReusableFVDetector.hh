@@ -13,7 +13,7 @@ namespace EUROPA {
       bool detect(const InstantId inst);
     protected:
     private:
-      double m_lowerLimit, m_maxInstConsumption, m_maxCumulativeConsumption;
+      double m_upperLimit, m_lowerLimit, m_maxInstConsumption, m_maxCumulativeConsumption;
     };
   }
 }

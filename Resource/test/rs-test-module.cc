@@ -1803,6 +1803,7 @@ public:
     return true;
   }
 private:
+
   static bool testReservoir() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
     SAVH::Reservoir res1(db.getId(), LabelStr("Reservoir"), LabelStr("Battery1"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"),

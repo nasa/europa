@@ -1,0 +1,26 @@
+#include "unary-resource-test.nddl"
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+
+PlannerConfig config = new PlannerConfig(0, 100, 100);
+
+IntermediateUnary unary = new IntermediateUnary();
+Foo proj1 = new Foo();
+Foo proj2 = new Foo();
+
+close();
+
+goal(proj1.bar bar11);
+bar11.start = 0;
+bar11.duration = 10;
+
+goal(proj1.bar bar12);
+bar12.end = 50;
+
+//bar11 meets bar12;
+
+//should produce one ordering decision point
+//around bar11/bar21
+goal(proj2.bar bar21);
+leq(config.m_horizonStart, bar21.start);
+leq(bar21.end, config.m_horizonEnd);

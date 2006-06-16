@@ -1,0 +1,35 @@
+#include "reusable-test.nddl"
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+
+PlannerConfig config = new PlannerConfig(0, 100, 100);
+
+IntermediateReusable programmerPool = new IntermediateReusable(5.0, 0.0);
+Project proj1 = new Project();
+Project proj2 = new Project();
+
+close();
+
+goal(proj1.task task11);
+task11.start = 0;
+task11.duration = 10;
+task11.numProgrammers = 3.0;
+
+goal(proj1.task task12);
+task12.end = 100;
+task12.numProgrammers = 2.0;
+
+
+task11 meets task12;
+
+//should produce one ordering decision point
+//around task11/task21
+goal(proj2.task task21);
+leq(config.m_horizonStart, task21.start);
+leq(task21.end, config.m_horizonEnd);
+task21.numProgrammers = 3.0;
+
+rejectable(proj2.task task22);
+leq(config.m_horizonStart, task22.start);
+eq(task22.end, config.m_horizonEnd);
+task22.numProgrammers = 9.0; //should produce a violation and get rejected

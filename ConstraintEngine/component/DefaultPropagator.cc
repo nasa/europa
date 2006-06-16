@@ -2,6 +2,7 @@
 #include "ConstraintEngine.hh"
 #include "ConstrainedVariable.hh"
 #include "Constraint.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -9,22 +10,26 @@ namespace EUROPA {
     : Propagator(name, constraintEngine), m_activeConstraint(0){}
 
   void DefaultPropagator::handleConstraintAdded(const ConstraintId& constraint){
+    debugMsg("DefaultPropagator:handleConstraintAdded", "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
     m_agenda.insert(constraint);
   }
 
   void DefaultPropagator::handleConstraintRemoved(const ConstraintId& constraint){
     // Remove from agenda
+    debugMsg("DefaultPropagator:handleConstraintRemoved", "Removing from the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
     m_agenda.erase(constraint);
     check_error(isValid());
   }
 
   void DefaultPropagator::handleConstraintActivated(const ConstraintId& constraint){
+    debugMsg("DefaultPropagator:handleConstraintActivated", "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
     m_agenda.insert(constraint);
     check_error(isValid());
   }
 
   void DefaultPropagator::handleConstraintDeactivated(const ConstraintId& constraint){
     // Remove from agenda
+    debugMsg("DefaultPropagator:handleConstraintDeactivated", "Removing from the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
     m_agenda.erase(constraint);
     check_error(isValid());
   }
@@ -34,8 +39,10 @@ namespace EUROPA {
 					     const ConstraintId& constraint, 
 					     const DomainListener::ChangeType& changeType){
     checkError(!constraint->isDiscarded(), constraint);
-    if(constraint->getKey() != m_activeConstraint)
+    if(constraint->getKey() != m_activeConstraint) {
+      debugMsg("DefaultPropagator:handleNotification", "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
       m_agenda.insert(constraint);
+    }
   }
 
   void DefaultPropagator::execute(){

@@ -79,6 +79,8 @@ checkin-tests =
         foreach-transaction
         force-object-distribution
 	gnats_3161
+	reusable-test-transaction
+  unary-resource-test-transaction
         ;
 
 #RunPlannerProblem <model> : <configurationFile> : <heuristicsFile> : <target that depends> ;
@@ -155,11 +157,15 @@ local testmodels = k9-transaction.nddl path-filter-transaction.nddl foreach-tran
       basic-model-transaction.nddl EOS-backtrack-test.nddl 
       EOS-backtrack-test-reservoir.nddl
       gnats_2837-tx.nddl DynamicObjTest.nddl
-      rules.0.tx.nddl gnats_2572_interval-tx.nddl gnats_3161.nddl basic-types.nddl ;
+      rules.0.tx.nddl gnats_2572_interval-tx.nddl gnats_3161.nddl basic-types.nddl 
+       ;
 
 for model in $(testmodels) {
   RunPlannerProblem $(model) : $(DEFAULT_PCONFIG) : $(DEFAULT_HEURISTICS) : common-tests ;
 }
+
+RunPlannerProblem reusable-test-transaction.nddl : ReusableTestConfig.xml : $(DEFAULT_HEURISTICS) : solver-tests ;
+RunPlannerProblem unary-resource-test-transaction.nddl : ReusableTestConfig.xml : $(DEFAULT_HEURISTICS) : solver-tests ;
 
 
 if $(PLANNER) = CBPLANNER {

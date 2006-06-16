@@ -2,6 +2,9 @@
 #define _H_SAVH_ResourceDefs
 
 #include "ConstraintEngineDefs.hh"
+#include "PlanDatabaseDefs.hh"
+#include <map>
+#include <set>
 
 namespace EUROPA {
   namespace SAVH {
@@ -32,10 +35,9 @@ namespace EUROPA {
 
     class ReusableToken;
     typedef Id<ReusableToken> ReusableTokenId;
-  }
 
-  class TimetableToken;
-  typedef Id<TimetableToken> TimetableTokenId;
+    typedef std::map<TokenId, std::set<InstantId> > ResourceFlaws;
+  }
 }
 
 #endif

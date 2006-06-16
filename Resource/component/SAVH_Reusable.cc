@@ -54,7 +54,9 @@ namespace EUROPA {
 
       debugMsg("Reusable:removeFromProfile", "Removing token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
       std::pair<TransactionId, TransactionId> trans = m_tokensToTransactions.find(tok)->second;
+      debugMsg("Reusable:removeFromProfile", "Removing transaction for time " << trans.first->time()->toString() << " with quantity " << trans.first->quantity()->toString());
       m_profile->removeTransaction(trans.first);
+      debugMsg("Reusable:removeFromProfile", "Removing transaction for time " << trans.second->time()->toString() << " with quantity " << trans.second->quantity()->toString());
       m_profile->removeTransaction(trans.second);
       m_tokensToTransactions.erase(tok);
       m_transactionsToTokens.erase(trans.first);
