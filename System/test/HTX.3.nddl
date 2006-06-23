@@ -7,7 +7,7 @@
 
 enum Location { Hill, Rock, Lander }
 
-class A {
+class A extends Timeline {
   predicate pred {
    Location location;
    eq(duration, 5);
