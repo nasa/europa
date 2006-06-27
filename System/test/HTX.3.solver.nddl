@@ -3,7 +3,7 @@
  * variable decisions with no choices, which may arise out of prning heuritixs.
  */
 #include "PlannerTestConfig.nddl"
-
+#include "Plasma.nddl"
 
 enum Location { Hill, Rock, Lander }
 
