@@ -166,3 +166,20 @@ GuardTest::pred {
     eq(b, [0 10]);
   }
 }
+
+class CommitTest extends Timeline {
+	predicate chaina {int a;}
+	predicate chainb {int b;}
+}
+
+CommitTest::chaina {
+	eq(a, [0 10]);
+	eq(duration, 10);
+	meets(chainb);
+}
+
+CommitTest::chainb {
+	eq(b, [0 10]);
+	eq(duration, 10);
+	meets(chaina);
+}

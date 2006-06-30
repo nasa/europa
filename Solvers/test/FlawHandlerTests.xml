@@ -81,6 +81,33 @@
  </Solver>
 </TestDynamicFlaws>
 
+<TestCommit>
+  <Solver name="Solver">
+  <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
+  <UnboundVariableManager defaultPriority="0">
+    <FlawFilter var-match="start"/>
+    <FlawFilter var-match="end"/>
+    <FlawFilter var-match="duration"/>
+    <FlawHandler predicate="chaina" class="CommitTest" variable="a" priority="1" component="Min">
+      <MasterGuard name="b" value="3"/>
+    </FlawHandler>
+    <FlawHandler predicate="chainb" class="CommitTest" variable="b" priority="2" component="Min">
+      <MasterGuard name="a" value="0"/>
+    </FlawHandler>
+    <FlawHandler component="StandardVariableHandler"/>
+ </UnboundVariableManager>
+
+  <OpenConditionManager defaultPriority="0">
+    <FlawHandler component="StandardOpenConditionHandler"/>
+  </OpenConditionManager>
+
+  <ThreatManager defaultPriority="0">
+    <FlawHandler component="StandardThreatHandler"/>
+  </ThreatManager>
+
+ </Solver>
+</TestCommit>
+
 <DefaultVariableOrdering>
  <Solver name="SimpleCSPSolver">
   <!-- Will have variable flaws, but no filtering -->
