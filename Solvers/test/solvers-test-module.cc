@@ -1489,23 +1489,19 @@ private:
 class SolverTests {
 public:
   static bool test(){
-    //runTest(testMinValuesSimpleCSP);
-    //runTest(testSuccessfulSearch);
-    //runTest(testExhaustiveSearch);
-    //runTest(testSimpleActivation);
-    //runTest(testSimpleRejection);
-    //runTest(testMultipleSearch);
-    //runTest(testOversearch);
-    //runTest(testBacktrackFirstDecisionPoint);
-    //runTest(testMultipleSolutionsSearch);
-    //runTest(testGNATS_3196);
-    //runTest(testContext);
-    //runTest(testDeletedFlaw);
-		//       XXX             XXX
-		//    XXX                   XXX   
-		// XXX                         XXX
+    runTest(testMinValuesSimpleCSP);
+    runTest(testSuccessfulSearch);
+    runTest(testExhaustiveSearch);
+    runTest(testSimpleActivation);
+    runTest(testSimpleRejection);
+    runTest(testMultipleSearch);
+    runTest(testOversearch);
+    runTest(testBacktrackFirstDecisionPoint);
+    runTest(testMultipleSolutionsSearch);
+    runTest(testGNATS_3196);
+    runTest(testContext);
+    runTest(testDeletedFlaw);
     runTest(testDeleteAfterCommit);
-		// XXX                         XXX
     return true;
   }
 
@@ -1794,7 +1790,6 @@ private:
   }
 
   static bool testDeleteAfterCommit() {
-		DebugMessage::enableAll();
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestCommit");
     TiXmlElement* child = root->FirstChildElement();
     StandardAssembly assembly(Schema::instance());
@@ -1806,86 +1801,53 @@ private:
     // iterate over the possibilties with commiting and deleting with four tokens
     for(int i=1;i<255;i++)
     {
-      std::cout << "Commit Test [" << i << "]" << std::endl;
    		IntervalIntDomain& horizon = HorizonFilter::getHorizon();
    		horizon = IntervalIntDomain(0, 40);
       TokenId first = db->getClient()->createToken("CommitTest.chaina", false);
       first->getStart()->specify(0);
-      std::cout << "I don't think you have a plan" << std::endl;
       solver.solve(100,100);
-      std::cout << "Perhaps I was wrong, what are your steps" << std::endl;
-			PlanDatabaseWriter::write(db, DebugMessage::getStream());
 
-      std::cout << "getting slave 0 off of" << first->toString() << std::endl;
       TokenId second = first->getSlave(0);
       assertTrue(second->getPredicateName() == LabelStr("CommitTest.chainb"), second->getPredicateName().toString());
-      std::cout << "getting slave 0 off of" << second->toString() << std::endl;
       TokenId third = second->getSlave(0);
       assertTrue(third->getPredicateName() == LabelStr("CommitTest.chaina"), third->getPredicateName().toString());
-      std::cout << "getting slave 0 off of" << third->toString() << std::endl;
       TokenId fourth = third->getSlave(0);
       assertTrue(fourth->getPredicateName() == LabelStr("CommitTest.chainb"), fourth->getPredicateName().toString());
-      std::cout << "last slave is" << fourth->toString() << std::endl;
 
-      std::cout << "Well are you ready to commit?: " << !!(i & 15) << std::endl;
-      if(i & (1 << 0)) {
-      	std::cout << "committing " << first->toString() << std::endl;
+      if(i & (1 << 0))
 				first->commit();
-			}
-      if(i & (1 << 1)) {
-      	std::cout << "committing " << second->toString() << std::endl;
+      if(i & (1 << 1))
 				second->commit();
-			}
-      if(i & (1 << 2)) {
-      	std::cout << "committing " << third->toString() << std::endl;
+      if(i & (1 << 2))
 				third->commit();
-			}
-      if(i & (1 << 3)) {
-      	std::cout << "committing " << fourth->toString() << std::endl;
+      if(i & (1 << 3))
 				fourth->commit();
-			}
 
-      std::cout << "Well now that you've commited, I'm forgetting about your first plan..." << std::endl;
       solver.reset();
 
-      std::cout << "... deleting a bit? " << !!(i & 240) << std::endl;
-      if(i & (16 << 0)) {
-      	std::cout << "discarding " << first->toString() << std::endl;
+      if(i & (16 << 0))
 				first->discard();
-			}
-      if(i & (16 << 1)) {
-      	std::cout << "discarding " << second->toString() << std::endl;
+      if(i & (16 << 1))
 				second->discard();
-			}
-      if(i & (16 << 2)) {
-      	std::cout << "discarding " << third->toString() << std::endl;
+      if(i & (16 << 2))
 				third->discard();
-			}
-      if(i & (16 << 3)) {
-      	std::cout << "discarding " << fourth->toString() << std::endl;
+      if(i & (16 << 3))
 				fourth->discard();
-			}
 
       assertTrue(solver.isValid(), "Solver must be valid after discards.");
 
    		horizon = IntervalIntDomain(0, 40);
-      std::cout << "... and trying again." << std::endl;
       solver.solve(100,100);
-			PlanDatabaseWriter::write(db, DebugMessage::getStream());
       assertTrue(solver.isValid(), "Solver must be valid after continuing solving after discards.");
 
       solver.reset();
 			// anything which was not deleted must now be deleted
     	TokenSet tokens = assembly.getPlanDatabase()->getTokens();
     	for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-      	std::cout << " -*- " << std::endl;
 				if(!(*it)->isDiscarded()) {
-      		std::cout << "reset didn't delete " << (*it)->toString() << std::endl;
 					(*it)->discard();
-      		std::cout << " v'` " << std::endl;
 				}
 			}
-     	std::cout << "test complete " << std::endl;
     }
     return true;
   }
