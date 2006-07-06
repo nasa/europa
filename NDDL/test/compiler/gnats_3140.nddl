@@ -1,4 +1,4 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
 /**
  * Ensure we can handle creation of proxy variable for all types
@@ -29,7 +29,7 @@ class Foo {
  }
 }
 
-class Bar{
+class Bar extends Timeline {
  predicate pred{
   bool field1;
   int field2;

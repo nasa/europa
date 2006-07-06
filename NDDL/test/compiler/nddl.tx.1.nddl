@@ -1,8 +1,8 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
 // Class declrataion and other preliminaries before we get to the use of
 // Allen Relations for token ordering
-class Foo { // Declare a basic class with a set of simple predicates
+class Foo extends Timeline { // Declare a basic class with a set of simple predicates
  predicate pred0{}
  predicate pred1{}
  predicate pred2{}

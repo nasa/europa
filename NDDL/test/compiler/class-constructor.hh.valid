@@ -44,7 +44,7 @@ namespace NDDL {
   typedef SymbolDomain Locations;
   Locations LocationsBaseDomain();
   
-  // class-constructor.nddl:7 Foo
+  // class-constructor.nddl:9 Foo
   class Foo : public Object {
   public:
     Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -62,17 +62,17 @@ namespace NDDL {
     ConstrainedVariableId m_6; // SchemaWriter::declareVariable
     ConstrainedVariableId m_7; // SchemaWriter::declareVariable
     
-    // class-constructor.nddl:7 Foo
+    // class-constructor.nddl:9 Foo
     virtual void constructor(const WorldId& w);
     
-    // class-constructor.nddl:7 Foo
+    // class-constructor.nddl:9 Foo
     virtual void constructor(const WorldId& w, int a, bool b, const LabelStr& c, const LabelStr& loc);
     
-    // class-constructor.nddl:7 Foo
+    // class-constructor.nddl:9 Foo
     virtual void constructor(const WorldId& w, int a, bool b);
   };
   
-  // class-constructor.nddl:47 Bar
+  // class-constructor.nddl:49 Bar
   class Bar : public Foo {
   public:
     Bar(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -83,11 +83,11 @@ namespace NDDL {
     
     ConstrainedVariableId m_8; // SchemaWriter::declareVariable
     
-    // class-constructor.nddl:47 Bar
+    // class-constructor.nddl:49 Bar
     virtual void constructor(float m8, const WorldId& w);
   };
   
-  // class-constructor.nddl:55 Baz
+  // class-constructor.nddl:57 Baz
   class Baz : public Object {
   public:
     Baz(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -98,11 +98,11 @@ namespace NDDL {
     
     ConstrainedVariableId m_foo; // SchemaWriter::declareVariable
     
-    // class-constructor.nddl:55 Baz
+    // class-constructor.nddl:57 Baz
     virtual void constructor(const FooId& _foo);
   };
   
-  // class-constructor.nddl:69 Bat
+  // class-constructor.nddl:71 Bat
   class Bat : public Object {
   public:
     Bat(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -113,11 +113,11 @@ namespace NDDL {
     
     ConstrainedVariableId m_baz; // SchemaWriter::declareVariable
     
-    // class-constructor.nddl:69 Bat
+    // class-constructor.nddl:71 Bat
     virtual void constructor(const FooId& _foo);
   };
   
-  // class-constructor.nddl:78 Bing
+  // class-constructor.nddl:80 Bing
   class Bing : public Object {
   public:
     Bing(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -129,7 +129,7 @@ namespace NDDL {
     
   };
   
-  // class-constructor.nddl:79 Bang
+  // class-constructor.nddl:81 Bang
   class Bang : public Bing {
   public:
     Bang(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -140,7 +140,7 @@ namespace NDDL {
     
   };
   
-  // class-constructor.nddl:81 Baluga
+  // class-constructor.nddl:83 Baluga
   class Baluga : public Object {
   public:
     Baluga(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -151,11 +151,11 @@ namespace NDDL {
     
     ConstrainedVariableId location; // SchemaWriter::declareVariable
     
-    // class-constructor.nddl:81 Baluga
+    // class-constructor.nddl:83 Baluga
     virtual void constructor(const LabelStr& loc);
   };
   
-  // class-constructor.nddl:88 World
+  // class-constructor.nddl:90 World
   class World : public Object {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -173,7 +173,7 @@ namespace NDDL {
     ConstrainedVariableId m_bat1; // SchemaWriter::declareVariable
     ConstrainedVariableId m_int1; // SchemaWriter::declareVariable
     
-    // class-constructor.nddl:88 World
+    // class-constructor.nddl:90 World
     virtual void constructor();
   };
 } // End NDDL namespace

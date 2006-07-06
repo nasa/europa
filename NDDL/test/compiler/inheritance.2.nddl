@@ -1,7 +1,7 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
 // Declare a base class with one predicate
-class Foo {
+class Foo extends Timeline{
  // Declare a predicate with 1 argument
  predicate pred1{
   int arg1;

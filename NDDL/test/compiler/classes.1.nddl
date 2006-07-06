@@ -2,7 +2,7 @@
 #include "classes.0.nddl"
 
 // Declare a class for describing basic Navigation state and action.
-class Navigator {
+class Navigator extends Timeline {
  // A predicate for the state of being at a location for a period of time
  predicate At{
   Location location; // Paramater is Location

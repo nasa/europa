@@ -1,4 +1,4 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
 enum Locations {Hill, Rock, Lander};
 typedef string {'A1', 'B1', 'Martian City'} Strings;
@@ -36,7 +36,7 @@ class Foo {
 }
 
 // Declares mandatory world class, with constructor with no arguments.
-class World {
+class World extends Timeline {
  int m_0;
  int m_1;
  Foo m_foo1;

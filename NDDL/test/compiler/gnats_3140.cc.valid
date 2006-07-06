@@ -5,6 +5,404 @@
 
 namespace NDDL {
   
+  TokenStates TokenStatesBaseDomain(){
+    static TokenStates sl_enum("TokenStates");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("INACTIVE"));
+      sl_enum.insert(LabelStr("ACTIVE"));
+      sl_enum.insert(LabelStr("MERGED"));
+      sl_enum.insert(LabelStr("REJECTED"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
+  
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Resource
+  
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Reservoir
+  
+  
+  
+  // Plasma.nddl:137 Reusable
+  Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "Reusable", name, true) {
+  }
+  Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  Reusable::Reusable(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "Reusable", name, true) {}
+  Reusable::Reusable(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void Reusable::handleDefaults(bool autoClose) {
+    if(capacity.isNoId()){
+      capacity = addVariable(IntervalDomain("float"), "capacity");
+    }
+    if(levelLimitMin.isNoId()){
+      levelLimitMin = addVariable(IntervalDomain("float"), "levelLimitMin");
+    }
+    if(consumptionMax.isNoId()){
+      consumptionMax = addVariable(IntervalDomain("float"), "consumptionMax");
+    }
+    if(consumptionRateMax.isNoId()){
+      consumptionRateMax = addVariable(IntervalDomain("float"), "consumptionRateMax");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // Plasma.nddl:143 uses
+  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
+   : NddlToken(planDatabase, name, rejectable, false) {
+    handleDefaults(close);
+  }
+  
+  Reusable::uses::uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Reusable::uses::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if(quantity.isNoId()){
+      quantity = addParameter(IntervalDomain(0.0, +inf, "float"), "quantity");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // Plasma.nddl:137 Reusable
+  void Reusable::constructor(float c, float ll_min) {
+    capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
+    consumptionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "consumptionMax");
+    consumptionRateMax = addVariable(IntervalDomain(+inf, +inf, "float"), "consumptionRateMax");
+  }
+  
+  // Plasma.nddl:137 Reusable
+  class ReusableFactory0: public ConcreteObjectFactory {
+  public:
+    ReusableFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 2);
+      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[0].first.toString() + " to float");
+      check_error(arguments[0].second->isSingleton());
+      float c((float)arguments[0].second->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[1].first.toString() + " to float");
+      check_error(arguments[1].second->isSingleton());
+      float ll_min((float)arguments[1].second->getSingletonValue());
+      
+      ReusableId instance = (new Reusable(planDb, objectType, objectName))->getId();
+      instance->constructor(c, ll_min);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // Plasma.nddl:137 Reusable
+  void Reusable::constructor(float c, float ll_min, float cr_max) {
+    capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
+    consumptionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "consumptionMax");
+    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
+  }
+  
+  // Plasma.nddl:137 Reusable
+  class ReusableFactory1: public ConcreteObjectFactory {
+  public:
+    ReusableFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 3);
+      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[0].first.toString() + " to float");
+      check_error(arguments[0].second->isSingleton());
+      float c((float)arguments[0].second->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[1].first.toString() + " to float");
+      check_error(arguments[1].second->isSingleton());
+      float ll_min((float)arguments[1].second->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[2].second, 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[2].first.toString() + " to float");
+      check_error(arguments[2].second->isSingleton());
+      float cr_max((float)arguments[2].second->getSingletonValue());
+      
+      ReusableId instance = (new Reusable(planDb, objectType, objectName))->getId();
+      instance->constructor(c, ll_min, cr_max);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // Plasma.nddl:137 Reusable
+  void Reusable::constructor(float c, float ll_min, float c_max, float cr_max) {
+    capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
+    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
+    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
+  }
+  
+  // Plasma.nddl:137 Reusable
+  class ReusableFactory2: public ConcreteObjectFactory {
+  public:
+    ReusableFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 4);
+      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[0].first.toString() + " to float");
+      check_error(arguments[0].second->isSingleton());
+      float c((float)arguments[0].second->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[1].first.toString() + " to float");
+      check_error(arguments[1].second->isSingleton());
+      float ll_min((float)arguments[1].second->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[2].second, 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[2].first.toString() + " to float");
+      check_error(arguments[2].second->isSingleton());
+      float c_max((float)arguments[2].second->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[3].second, 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[3].first.toString() + " to float");
+      check_error(arguments[3].second->isSingleton());
+      float cr_max((float)arguments[3].second->getSingletonValue());
+      
+      ReusableId instance = (new Reusable(planDb, objectType, objectName))->getId();
+      instance->constructor(c, ll_min, c_max, cr_max);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // Plasma.nddl:169 Unary
+  Unary::Unary(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "Unary", name, true) {
+  }
+  Unary::Unary(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  Unary::Unary(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "Unary", name, true) {}
+  Unary::Unary(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void Unary::handleDefaults(bool autoClose) {
+    if(consumptionMax.isNoId()){
+      consumptionMax = addVariable(IntervalDomain("float"), "consumptionMax");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // Plasma.nddl:169 Unary
+  void Unary::constructor() {
+    consumptionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "consumptionMax");
+  }
+  
+  // Plasma.nddl:169 Unary
+  class UnaryFactory3: public ConcreteObjectFactory {
+  public:
+    UnaryFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 0);
+      UnaryId instance = (new Unary(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // Plasma.nddl:169 Unary
+  void Unary::constructor(float c_max) {
+    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
+  }
+  
+  // Plasma.nddl:169 Unary
+  class UnaryFactory4: public ConcreteObjectFactory {
+  public:
+    UnaryFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[0].first.toString() + " to float");
+      check_error(arguments[0].second->isSingleton());
+      float c_max((float)arguments[0].second->getSingletonValue());
+      
+      UnaryId instance = (new Unary(planDb, objectType, objectName))->getId();
+      instance->constructor(c_max);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // Plasma.nddl:179 use
+  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
+   : NddlToken(planDatabase, name, rejectable, false) {
+    handleDefaults(close);
+  }
+  
+  Unary::use::use(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Unary::use::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // Plasma.nddl:187 UnaryResource
+  UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "UnaryResource", name, true) {
+  }
+  UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  UnaryResource::UnaryResource(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "UnaryResource", name, true) {}
+  UnaryResource::UnaryResource(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void UnaryResource::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void UnaryResource::constructor() {
+  }
+  
+  
+  // Plasma.nddl:187 UnaryResource
+  DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory5, UnaryResource);
+  
+  
+  // Plasma.nddl:188 uses
+  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
+   : NddlToken(planDatabase, name, rejectable, false) {
+    handleDefaults(close);
+  }
+  
+  UnaryResource::uses::uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void UnaryResource::uses::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+    
+    // Post parameter constraints
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("state")));
+      vars.push_back(predicateVariable(SymbolDomain(LabelStr("ACTIVE"), "TokenStates")));
+      token_constraint(eq, vars);
+    }
+  }
+  
+  
+  
+  // Plasma.nddl:197 StringData
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "StringData", name, true) {
+  }
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  StringData::StringData(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "StringData", name, true) {}
+  StringData::StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void StringData::handleDefaults(bool autoClose) {
+    if(data.isNoId()){
+      data = addVariable(StringDomain("string"), "data");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // Plasma.nddl:197 StringData
+  void StringData::constructor(const LabelStr& _data) {
+    data = addVariable(StringDomain(_data, "string"), "data");
+  }
+  
+  // Plasma.nddl:197 StringData
+  class StringDataFactory6: public ConcreteObjectFactory {
+  public:
+    StringDataFactory6(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0].first.toString() + " to string");
+      check_error(arguments[0].second->isSingleton());
+      LabelStr _data((LabelStr)arguments[0].second->getSingletonValue());
+      
+      StringDataId instance = (new StringData(planDb, objectType, objectName))->getId();
+      instance->constructor(_data);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
   numericEnum numericEnumBaseDomain(){
     static numericEnum sl_enum("numericEnum");
     if (sl_enum.isOpen()) {
@@ -55,7 +453,7 @@ namespace NDDL {
   
   
   // gnats_3140.nddl:9 Boo
-  DECLARE_DEFAULT_OBJECT_FACTORY(BooFactory0, Boo);
+  DECLARE_DEFAULT_OBJECT_FACTORY(BooFactory7, Boo);
   
   
   // gnats_3140.nddl:11 Foo
@@ -100,9 +498,9 @@ namespace NDDL {
   }
   
   // gnats_3140.nddl:11 Foo
-  class FooFactory1: public ConcreteObjectFactory {
+  class FooFactory8: public ConcreteObjectFactory {
   public:
-    FooFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+    FooFactory8(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -170,7 +568,7 @@ namespace NDDL {
   
   
   // gnats_3140.nddl:32 Bar
-  DECLARE_DEFAULT_OBJECT_FACTORY(BarFactory2, Bar);
+  DECLARE_DEFAULT_OBJECT_FACTORY(BarFactory9, Bar);
   
   
   // gnats_3140.nddl:33 pred
@@ -264,6 +662,12 @@ namespace NDDL {
     // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
+    id->addObjectType("Resource", "Timeline");
+    id->addObjectType("Reservoir", "Timeline");
+    id->addObjectType("Reusable", "Timeline");
+    id->addObjectType("Unary", "Timeline");
+    id->addObjectType("UnaryResource", "Timeline");
+    id->addObjectType("StringData", "Object");
     id->addObjectType("Boo", "Object");
     id->addObjectType("Foo", "Object");
     id->addObjectType("Bar", "Timeline");
@@ -271,6 +675,37 @@ namespace NDDL {
     id->addPrimitive("float");
     id->addPrimitive("bool");
     id->addPrimitive("string");
+    id->addEnum("TokenStates");
+    id->addMember("Resource", "float", "initialCapacity");
+    id->addMember("Resource", "float", "levelLimitMin");
+    id->addMember("Resource", "float", "levelLimitMax");
+    id->addMember("Resource", "float", "productionRateMax");
+    id->addMember("Resource", "float", "productionMax");
+    id->addMember("Resource", "float", "consumptionRateMax");
+    id->addMember("Resource", "float", "consumptionMax");
+    id->addPredicate("Resource.change");
+    id->addMember("Resource.change", "float", "quantity");
+    id->addMember("Reservoir", "float", "initialCapacity");
+    id->addMember("Reservoir", "float", "levelLimitMin");
+    id->addMember("Reservoir", "float", "levelLimitMax");
+    id->addMember("Reservoir", "float", "productionRateMax");
+    id->addMember("Reservoir", "float", "productionMax");
+    id->addMember("Reservoir", "float", "consumptionRateMax");
+    id->addMember("Reservoir", "float", "consumptionMax");
+    id->addPredicate("Reservoir.produce");
+    id->addMember("Reservoir.produce", "float", "quantity");
+    id->addPredicate("Reservoir.consume");
+    id->addMember("Reservoir.consume", "float", "quantity");
+    id->addMember("Reusable", "float", "capacity");
+    id->addMember("Reusable", "float", "levelLimitMin");
+    id->addMember("Reusable", "float", "consumptionMax");
+    id->addMember("Reusable", "float", "consumptionRateMax");
+    id->addPredicate("Reusable.uses");
+    id->addMember("Reusable.uses", "float", "quantity");
+    id->addMember("Unary", "float", "consumptionMax");
+    id->addPredicate("Unary.use");
+    id->addPredicate("UnaryResource.uses");
+    id->addMember("StringData", "string", "data");
     id->addEnum("numericEnum");
     id->addEnum("symbolicEnum");
     id->addMember("Foo", "bool", "field1");
@@ -284,22 +719,44 @@ namespace NDDL {
     id->addMember("Bar.pred", "float", "field4");
     id->addMember("Bar.pred", "symbolicEnum", "field6");
     id->addMember("Bar.pred", "Boo", "field7");
+    id->addValue("TokenStates", LabelStr("INACTIVE"));
+    id->addValue("TokenStates", LabelStr("ACTIVE"));
+    id->addValue("TokenStates", LabelStr("MERGED"));
+    id->addValue("TokenStates", LabelStr("REJECTED"));
     id->addValue("symbolicEnum", LabelStr("A"));
     id->addValue("symbolicEnum", LabelStr("AB"));
     id->addValue("symbolicEnum", LabelStr("ABC"));
     // Force allocation of model specific type factories
     // Allocate factories
+    REGISTER_TOKEN_FACTORY(Reusable::uses::Factory);
+    REGISTER_TOKEN_FACTORY(Unary::use::Factory);
+    REGISTER_TOKEN_FACTORY(UnaryResource::uses::Factory);
     REGISTER_TOKEN_FACTORY(Bar::pred::Factory);
     REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
+    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
+    REGISTER_TYPE_FACTORY(Resource, ObjectDomain("Resource"));
+    REGISTER_TYPE_FACTORY(Reservoir, ObjectDomain("Reservoir"));
+    REGISTER_TYPE_FACTORY(Reusable, ObjectDomain("Reusable"));
+    REGISTER_OBJECT_FACTORY(ReusableFactory0, Reusable:float:float);
+    REGISTER_OBJECT_FACTORY(ReusableFactory1, Reusable:float:float:float);
+    REGISTER_OBJECT_FACTORY(ReusableFactory2, Reusable:float:float:float:float);
+    REGISTER_TYPE_FACTORY(Unary, ObjectDomain("Unary"));
+    REGISTER_OBJECT_FACTORY(UnaryFactory3, Unary);
+    REGISTER_OBJECT_FACTORY(UnaryFactory4, Unary:float);
+    REGISTER_TYPE_FACTORY(UnaryResource, ObjectDomain("UnaryResource"));
+    REGISTER_OBJECT_FACTORY(UnaryResourceFactory5, UnaryResource);
+    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_OBJECT_FACTORY(StringDataFactory6, StringData:string);
     REGISTER_TYPE_FACTORY(numericEnum, numericEnumBaseDomain());
     REGISTER_TYPE_FACTORY(symbolicEnum, symbolicEnumBaseDomain());
     REGISTER_TYPE_FACTORY(Boo, ObjectDomain("Boo"));
-    REGISTER_OBJECT_FACTORY(BooFactory0, Boo);
+    REGISTER_OBJECT_FACTORY(BooFactory7, Boo);
     REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
-    REGISTER_OBJECT_FACTORY(FooFactory1, Foo:bool:int:float:symbolicEnum:Boo);
-    REGISTER_OBJECT_FACTORY(FooFactory1, Foo:bool:int:float:symbolicEnum:Object);
+    REGISTER_OBJECT_FACTORY(FooFactory8, Foo:bool:int:float:symbolicEnum:Boo);
+    REGISTER_OBJECT_FACTORY(FooFactory8, Foo:bool:int:float:symbolicEnum:Object);
     REGISTER_TYPE_FACTORY(Bar, ObjectDomain("Bar"));
-    REGISTER_OBJECT_FACTORY(BarFactory2, Bar);
+    REGISTER_OBJECT_FACTORY(BarFactory9, Bar);
     // Allocate rules
     new Rule$Bar$pred$0();
     return id;

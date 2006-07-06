@@ -1,4 +1,6 @@
-class Foo { // Declare a basic class with a simple predicate
+#include "Plasma.nddl"
+
+class Foo extends Timeline { // Declare a basic class with a simple predicate
  predicate pred{int arg;}
 }
 

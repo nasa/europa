@@ -1,7 +1,11 @@
+#include "Plasma.nddl"
+
 // Simple class and predicates
 enum Locations {Hill, Rock, Lander};
 
-class World; class Foo{ 
+class World;
+
+class Foo extends Timeline { 
  int m_0 = 5;
  string m_1 = "Hello"; // Default allocation
 
@@ -38,7 +42,7 @@ class Bar extends Foo {
 }
 
 // Declares mandatory world class, with constructor with no arguments.
-class World {
+class World extends Timeline {
  Foo m_foo1;
  Bar m_bar1;
  predicate initialState{}

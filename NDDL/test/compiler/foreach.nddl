@@ -24,7 +24,7 @@ class Path {
  }
 }
 
-class Target {
+class Target extends Timeline {
  predicate Tracking{}
 }
 
@@ -47,7 +47,7 @@ class NotTrackable extends Trackable {
  }
 }
 
-class Rover {
+class Rover extends Timeline {
  predicate Navigate{
   Path path;
   Location from;

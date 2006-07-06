@@ -1,6 +1,6 @@
 #include "foreach.nddl"
 
-class World {
+class World extends Timeline {
  Rover rover;
  Location loc1;
  Location loc2;

@@ -18,7 +18,7 @@ namespace NDDL {
   }
   
   
-  // class-constructor.nddl:7 Foo
+  // class-constructor.nddl:9 Foo
   Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Foo", name, true) {
   }
@@ -59,7 +59,7 @@ namespace NDDL {
   }
   
   
-  // class-constructor.nddl:7 Foo
+  // class-constructor.nddl:9 Foo
   void Foo::constructor(const WorldId& w) {
     m_0 = addVariable(IntervalIntDomain(100, 100, "int"), "m_0");
     m_1 = addVariable(IntervalIntDomain(200, 200, "int"), "m_1");
@@ -69,7 +69,7 @@ namespace NDDL {
     m_7 = addVariable(WorldDomain(w, "World"), "m_7");
   }
   
-  // class-constructor.nddl:7 Foo
+  // class-constructor.nddl:9 Foo
   class FooFactory0: public ConcreteObjectFactory {
   public:
     FooFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -92,7 +92,7 @@ namespace NDDL {
     }
   };
   
-  // class-constructor.nddl:7 Foo
+  // class-constructor.nddl:9 Foo
   void Foo::constructor(const WorldId& w, int a, bool b, const LabelStr& c, const LabelStr& loc) {
     m_0 = addVariable(IntervalIntDomain(a, a, "int"), "m_0");
     m_2 = addVariable(BoolDomain(b, "bool"), "m_2");
@@ -102,7 +102,7 @@ namespace NDDL {
     m_7 = addVariable(WorldDomain(w, "World"), "m_7");
   }
   
-  // class-constructor.nddl:7 Foo
+  // class-constructor.nddl:9 Foo
   class FooFactory1: public ConcreteObjectFactory {
   public:
     FooFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -149,7 +149,7 @@ namespace NDDL {
     }
   };
   
-  // class-constructor.nddl:7 Foo
+  // class-constructor.nddl:9 Foo
   void Foo::constructor(const WorldId& w, int a, bool b) {
     m_0 = addVariable(IntervalIntDomain(a, a, "int"), "m_0");
     m_2 = addVariable(BoolDomain(b, "bool"), "m_2");
@@ -159,7 +159,7 @@ namespace NDDL {
     m_7 = addVariable(WorldDomain(w, "World"), "m_7");
   }
   
-  // class-constructor.nddl:7 Foo
+  // class-constructor.nddl:9 Foo
   class FooFactory2: public ConcreteObjectFactory {
   public:
     FooFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -195,7 +195,7 @@ namespace NDDL {
   };
   
   
-  // class-constructor.nddl:47 Bar
+  // class-constructor.nddl:49 Bar
   Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Foo(planDatabase, "Bar", name) {
   }
@@ -217,13 +217,13 @@ namespace NDDL {
   }
   
   
-  // class-constructor.nddl:47 Bar
+  // class-constructor.nddl:49 Bar
   void Bar::constructor(float m8, const WorldId& w) {
     Foo::constructor(w, 10, true);
     m_8 = addVariable(IntervalDomain(m8, m8, "float"), "m_8");
   }
   
-  // class-constructor.nddl:47 Bar
+  // class-constructor.nddl:49 Bar
   class BarFactory3: public ConcreteObjectFactory {
   public:
     BarFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -253,7 +253,7 @@ namespace NDDL {
   };
   
   
-  // class-constructor.nddl:55 Baz
+  // class-constructor.nddl:57 Baz
   Baz::Baz(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Baz", name, true) {
   }
@@ -273,12 +273,12 @@ namespace NDDL {
   }
   
   
-  // class-constructor.nddl:55 Baz
+  // class-constructor.nddl:57 Baz
   void Baz::constructor(const FooId& _foo) {
     m_foo = addVariable(FooDomain(_foo, "Foo"), "m_foo");
   }
   
-  // class-constructor.nddl:55 Baz
+  // class-constructor.nddl:57 Baz
   class BazFactory4: public ConcreteObjectFactory {
   public:
     BazFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -302,7 +302,7 @@ namespace NDDL {
   };
   
   
-  // class-constructor.nddl:69 Bat
+  // class-constructor.nddl:71 Bat
   Bat::Bat(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Bat", name, true) {
   }
@@ -322,14 +322,14 @@ namespace NDDL {
   }
   
   
-  // class-constructor.nddl:69 Bat
+  // class-constructor.nddl:71 Bat
   void Bat::constructor(const FooId& _foo) {
     m_baz = addVariable(BazDomain((new Baz(m_id, "m_baz"))->getId(), "Baz"), "m_baz");
     Id<Baz>(singleton(m_baz))->constructor(_foo);
     Id<Baz>(singleton(m_baz))->handleDefaults();
   }
   
-  // class-constructor.nddl:69 Bat
+  // class-constructor.nddl:71 Bat
   class BatFactory5: public ConcreteObjectFactory {
   public:
     BatFactory5(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -353,7 +353,7 @@ namespace NDDL {
   };
   
   
-  // class-constructor.nddl:78 Bing
+  // class-constructor.nddl:80 Bing
   Bing::Bing(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Bing", name, true) {
   }
@@ -375,11 +375,11 @@ namespace NDDL {
   }
   
   
-  // class-constructor.nddl:78 Bing
+  // class-constructor.nddl:80 Bing
   DECLARE_DEFAULT_OBJECT_FACTORY(BingFactory6, Bing);
   
   
-  // class-constructor.nddl:79 Bang
+  // class-constructor.nddl:81 Bang
   Bang::Bang(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Bing(planDatabase, "Bang", name) {
   }
@@ -398,11 +398,11 @@ namespace NDDL {
   }
   
   
-  // class-constructor.nddl:79 Bang
+  // class-constructor.nddl:81 Bang
   DECLARE_DEFAULT_OBJECT_FACTORY(BangFactory7, Bang);
   
   
-  // class-constructor.nddl:81 Baluga
+  // class-constructor.nddl:83 Baluga
   Baluga::Baluga(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Baluga", name, true) {
   }
@@ -423,12 +423,12 @@ namespace NDDL {
   }
   
   
-  // class-constructor.nddl:81 Baluga
+  // class-constructor.nddl:83 Baluga
   void Baluga::constructor(const LabelStr& loc) {
     location = addVariable(Locations(loc, "Locations"), "location");
   }
   
-  // class-constructor.nddl:81 Baluga
+  // class-constructor.nddl:83 Baluga
   class BalugaFactory8: public ConcreteObjectFactory {
   public:
     BalugaFactory8(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -452,7 +452,7 @@ namespace NDDL {
   };
   
   
-  // class-constructor.nddl:88 World
+  // class-constructor.nddl:90 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "World", name, true) {
   }
@@ -488,7 +488,7 @@ namespace NDDL {
   }
   
   
-  // class-constructor.nddl:88 World
+  // class-constructor.nddl:90 World
   void World::constructor() {
     m_str1 = addVariable(StringDomain(LabelStr("This is also a long string"), "string"), "m_str1");
     m_foo1 = addVariable(FooDomain((new Foo(m_id, "m_foo1"))->getId(), "Foo"), "m_foo1");
@@ -510,7 +510,7 @@ namespace NDDL {
     Id<Bat>(singleton(m_bat1))->handleDefaults();
   }
   
-  // class-constructor.nddl:88 World
+  // class-constructor.nddl:90 World
   class WorldFactory9: public ConcreteObjectFactory {
   public:
     WorldFactory9(const LabelStr& name): ConcreteObjectFactory(name){}

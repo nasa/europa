@@ -1,14 +1,14 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
 enum Locations {Hill, Rock, Lander};
 typedef string {'s1','s2','s3'} StringEnum;
 typedef float {1.0, 3.0, 4.0, 10.4} NumericEnum;
 
-class Foo {
+class Foo extends Timeline {
  predicate Bar{}
 }
 
-class Rover{
+class Rover extends Timeline {
  Foo foo;
  predicate At{
   Locations _location;
@@ -71,7 +71,7 @@ class SuperRover extends Rover {
 }
 
 // Defines the initial state for the problem.
-class World {
+class World extends Timeline {
  Rover rover;
 
  predicate initialState{}

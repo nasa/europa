@@ -1,5 +1,7 @@
+#include "Plasma.nddl"
+
 // Declare a basic class with a set of simple predicates
-class Foo { 
+class Foo extends Timeline { 
  predicate pred0{}
  predicate pred1{}
  predicate pred2{}

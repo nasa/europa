@@ -3,7 +3,7 @@
 class TestData extends StringData {
 }
 
-class Foo {
+class Foo extends Timeline {
   predicate Bar {
     TestData test;
   }

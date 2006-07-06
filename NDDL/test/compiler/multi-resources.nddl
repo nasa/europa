@@ -14,7 +14,7 @@ class SolarPanel extends Resource {
 
 enum Locations {Here, There, Everywhere};
 
-class Rover {
+class Rover extends Timeline {
  predicate Drive{
   Locations from, to;
   float expected_energy_used;
@@ -29,7 +29,7 @@ Rover::Drive{
  eq(battery.quantity, expected_energy_used);
 }
 
-class World{
+class World extends Timeline {
  SolarPanel solarPanel;
  Battery mainBattery;
  Battery reserveBattery;

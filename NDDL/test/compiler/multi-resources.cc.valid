@@ -417,6 +417,7 @@ namespace NDDL {
    : NddlResource(parent, type, name, true) {}
   // default initialization of member variables
   void Battery::handleDefaults(bool autoClose) {
+    NddlResource::handleDefaults(false);
     if (autoClose)
       close();
   }
@@ -476,6 +477,7 @@ namespace NDDL {
    : NddlResource(parent, type, name, true) {}
   // default initialization of member variables
   void SolarPanel::handleDefaults(bool autoClose) {
+    NddlResource::handleDefaults(false);
     if (autoClose)
       close();
   }
@@ -759,8 +761,8 @@ namespace NDDL {
     // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
-    id->addObjectType("Resource", "Object");
-    id->addObjectType("Reservoir", "Object");
+    id->addObjectType("Resource", "Timeline");
+    id->addObjectType("Reservoir", "Timeline");
     id->addObjectType("Reusable", "Timeline");
     id->addObjectType("Unary", "Timeline");
     id->addObjectType("UnaryResource", "Timeline");

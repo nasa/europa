@@ -1,4 +1,5 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
+
 // a constraint which exists only for the purpose of this test:
 constraint veryLongConstraint(a, b, c, d) {a <: numeric && b <: numeric && c <: numeric && d <: numeric}
 
@@ -6,7 +7,7 @@ enum ENUM {foo, bar};
 enum Fruits {X, Y, Z};
 
 // Goal is to test generation of constraint code
-class Sample {
+class Sample extends Timeline {
  predicate sample{
   int p1;
   int p2;
@@ -39,7 +40,7 @@ Sample::sample{
  SubsetOf(f, {X, Z});
 }
 
-class World{
+class World extends Timeline {
  Sample sample;
  predicate initialState{}
  World(){

@@ -8,15 +8,15 @@ namespace NDDL {
   
   // gnats-3231.nddl:1 GnatsClass
   GnatsClass::GnatsClass(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : Timeline(planDatabase, "GnatsClass", name, true) {
+   : Object(planDatabase, "GnatsClass", name, true) {
   }
   GnatsClass::GnatsClass(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
-   : Timeline(planDatabase, type, name, true) {
+   : Object(planDatabase, type, name, true) {
   }
   GnatsClass::GnatsClass(const ObjectId& parent, const LabelStr& name)
-   : Timeline(parent, "GnatsClass", name, true) {}
+   : Object(parent, "GnatsClass", name, true) {}
   GnatsClass::GnatsClass(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
-   : Timeline(parent, type, name, true) {}
+   : Object(parent, type, name, true) {}
   // default initialization of member variables
   void GnatsClass::handleDefaults(bool autoClose) {
     if (autoClose)
@@ -95,7 +95,7 @@ namespace NDDL {
     // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
-    id->addObjectType("GnatsClass", "Timeline");
+    id->addObjectType("GnatsClass", "Object");
     id->addPrimitive("int");
     id->addPrimitive("float");
     id->addPrimitive("bool");

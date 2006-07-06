@@ -1,8 +1,10 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
 enum Locations {Hill, Rock, Lander};
 
-class Camera; class Rover{
+class Camera;
+
+class Rover extends Timeline {
  Camera m_camera;
  predicate At{
   Locations m_location;
@@ -36,7 +38,7 @@ Rover::Going{
   eq(m_to, to.m_location);
 }
 
-class Camera {
+class Camera extends Timeline{
   predicate On {
     eq(duration, [1 2]);
   }
@@ -67,7 +69,7 @@ Camera::TakingPicture {
 }
 
 // Defines the initial state for the problem.
-class World {
+class World extends Timeline {
  // Horizon information
  int m_horizonStart;
  int m_horizonEnd;

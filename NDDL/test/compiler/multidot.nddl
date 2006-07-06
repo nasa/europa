@@ -1,4 +1,4 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
 class Foo {
 }
@@ -12,7 +12,7 @@ class Bar {
 
 }
 
-class Baz {
+class Baz extends Timeline {
     Foo myfoo;
     Bar myBar;
 
@@ -37,7 +37,7 @@ Baz::apred {
 }
 
 
-class Mumble {
+class Mumble extends Timeline {
     Baz myBaz;
 
     Mumble(Baz baz) {

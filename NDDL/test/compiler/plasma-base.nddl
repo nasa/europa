@@ -9,7 +9,7 @@ class BaseTimeline extends Timeline {
  predicate p0{};
 }
 
-class World extends Object {
+class World {
  BaseTimeline _o1;
 
  World(){

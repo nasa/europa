@@ -1,14 +1,14 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
 enum Locations {Hill, Rock, Lander};
 enum StringEnum {ONE, TWO, THREE};
 
-class Bar{
+class Bar extends Timeline {
  Locations loc;
  predicate pred{}
 }
 
-class Foo{
+class Foo extends Timeline{
  int arg1=20;
  Bar arg2;
 

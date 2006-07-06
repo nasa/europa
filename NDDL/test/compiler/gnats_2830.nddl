@@ -1,5 +1,5 @@
 #include "PlannerConfig.nddl"
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
 enum Location {Hill, Rock, Lander};
 
@@ -23,7 +23,7 @@ class Enable {
     }
 }
 
-class Position {
+class Position extends Timeline {
 
     predicate At {
 	Location _l;
@@ -36,7 +36,7 @@ class Position {
     }
 }
  
-class Foo {
+class Foo extends Timeline {
     
     predicate FooPred {
 	Location loc;

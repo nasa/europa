@@ -1,6 +1,6 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
-class Foo {
+class Foo extends Timeline {
  float f_var;
  predicate pred1{
   eq(duration, [4 10]);
@@ -16,7 +16,7 @@ Foo::pred1{
  eq(object.f_var, [10.9 10.9]);
 }
 
-class World {
+class World extends Timeline {
  Foo obj1;
  predicate initialState{
  }

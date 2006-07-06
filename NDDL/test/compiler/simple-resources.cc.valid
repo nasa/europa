@@ -89,7 +89,7 @@ namespace NDDL {
   
   
   
-  // simple-resources.nddl:4 Battery
+  // simple-resources.nddl:3 Battery
   Battery::Battery(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlResource(planDatabase, "Battery", name, true) {
   }
@@ -102,13 +102,14 @@ namespace NDDL {
    : NddlResource(parent, type, name, true) {}
   // default initialization of member variables
   void Battery::handleDefaults(bool autoClose) {
+    NddlResource::handleDefaults(false);
     if (autoClose)
       close();
   }
   
   
   
-  // simple-resources.nddl:5 change
+  // simple-resources.nddl:4 change
   Battery::change::change(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlResource::change(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -142,12 +143,12 @@ namespace NDDL {
   }
   
   
-  // simple-resources.nddl:4 Battery
+  // simple-resources.nddl:3 Battery
   void Battery::constructor(float ic, float ll_min, float ll_max) {
     NddlResource::constructor(ic, ll_min, ll_max);
   }
   
-  // simple-resources.nddl:4 Battery
+  // simple-resources.nddl:3 Battery
   class BatteryFactory1: public ConcreteObjectFactory {
   public:
     BatteryFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -195,7 +196,7 @@ namespace NDDL {
   }
   
   
-  // simple-resources.nddl:19 Rover
+  // simple-resources.nddl:18 Rover
   Rover::Rover(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "Rover", name, true) {
   }
@@ -216,7 +217,7 @@ namespace NDDL {
   
   
   
-  // simple-resources.nddl:20 At
+  // simple-resources.nddl:19 At
   Rover::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -239,7 +240,7 @@ namespace NDDL {
   
   
   
-  // simple-resources.nddl:24 Going
+  // simple-resources.nddl:23 Going
   Rover::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -264,14 +265,14 @@ namespace NDDL {
   }
   
   
-  // simple-resources.nddl:19 Rover
+  // simple-resources.nddl:18 Rover
   void Rover::constructor() {
     mutex = addVariable(UnaryResourceDomain((new UnaryResource(m_id, "mutex"))->getId(), "UnaryResource"), "mutex");
     Id<UnaryResource>(singleton(mutex))->constructor();
     Id<UnaryResource>(singleton(mutex))->handleDefaults();
   }
   
-  // simple-resources.nddl:19 Rover
+  // simple-resources.nddl:18 Rover
   class RoverFactory2: public ConcreteObjectFactory {
   public:
     RoverFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -288,7 +289,7 @@ namespace NDDL {
     }
   };
   
-  // simple-resources.nddl:36 At
+  // simple-resources.nddl:35 At
   class Rover$At$0$0: public RuleInstance {
   public:
     Rover$At$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -296,7 +297,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Rover$At$0, Rover$At$0$0, Rover.At, "simple-resources.nddl,36");
+  DECLARE_AND_DEFINE_RULE(Rule$Rover$At$0, Rover$At$0$0, Rover.At, "simple-resources.nddl,35");
   
   void Rover$At$0$0::handleExecute() {
     slave(Rover::Going, Rover.Going, to, LabelStr("meets"));
@@ -310,7 +311,7 @@ namespace NDDL {
   }
   
   
-  // simple-resources.nddl:42 World
+  // simple-resources.nddl:41 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -333,7 +334,7 @@ namespace NDDL {
   
   
   
-  // simple-resources.nddl:46 initialState
+  // simple-resources.nddl:45 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : NddlToken(planDatabase, name, rejectable, false) {
     handleDefaults(close);
@@ -352,7 +353,7 @@ namespace NDDL {
   }
   
   
-  // simple-resources.nddl:42 World
+  // simple-resources.nddl:41 World
   void World::constructor() {
     mainBattery = addVariable(BatteryDomain((new Battery(m_id, "mainBattery"))->getId(), "Battery"), "mainBattery");
     Id<Battery>(singleton(mainBattery))->constructor(100.0, 0.0, 1000.0);
@@ -362,7 +363,7 @@ namespace NDDL {
     Id<Battery>(singleton(reserveBattery))->handleDefaults();
   }
   
-  // simple-resources.nddl:42 World
+  // simple-resources.nddl:41 World
   class WorldFactory3: public ConcreteObjectFactory {
   public:
     WorldFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -379,7 +380,7 @@ namespace NDDL {
     }
   };
   
-  // simple-resources.nddl:54 initialState
+  // simple-resources.nddl:53 initialState
   class World$initialState$1$0: public RuleInstance {
   public:
     World$initialState$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -387,7 +388,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "simple-resources.nddl,54");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "simple-resources.nddl,53");
   
   void World$initialState$1$0::handleExecute() {
     slave(Battery::change, Battery.change, tx, LabelStr("any"));

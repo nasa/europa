@@ -1,4 +1,4 @@
-#include "Constraints.nddl"
+#include "Plasma.nddl"
 
 class Location{
  string name;
@@ -18,7 +18,7 @@ class Path{
  }
 }
 
-class World{
+class World extends Timeline {
  Location rock;
  Location hill;
  Location lander;

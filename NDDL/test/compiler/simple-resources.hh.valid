@@ -61,7 +61,7 @@ namespace NDDL {
     };
   };
   
-  // simple-resources.nddl:4 Battery
+  // simple-resources.nddl:3 Battery
   class Battery : public NddlResource {
   public:
     Battery(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -73,7 +73,7 @@ namespace NDDL {
     class change;
     typedef Id<change> changeId;
     
-    // simple-resources.nddl:5 change
+    // simple-resources.nddl:4 change
     class change : public NddlResource::change {
     public:
       change(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -85,16 +85,16 @@ namespace NDDL {
       ConstrainedVariableId actualQuantity; // SchemaWriter::declareVariable
     };
     
-    // simple-resources.nddl:4 Battery
+    // simple-resources.nddl:3 Battery
     virtual void constructor(float ic, float ll_min, float ll_max);
   };
   
   
-  // simple-resources.nddl:17 Location
+  // simple-resources.nddl:16 Location
   typedef SymbolDomain Location;
   Location LocationBaseDomain();
   
-  // simple-resources.nddl:19 Rover
+  // simple-resources.nddl:18 Rover
   class Rover : public Object {
   public:
     Rover(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -108,7 +108,7 @@ namespace NDDL {
     class Going;
     typedef Id<Going> GoingId;
     
-    // simple-resources.nddl:20 At
+    // simple-resources.nddl:19 At
     class At : public NddlToken {
     public:
       At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -119,7 +119,7 @@ namespace NDDL {
       ConstrainedVariableId location; // SchemaWriter::declareVariable
     };
     
-    // simple-resources.nddl:24 Going
+    // simple-resources.nddl:23 Going
     class Going : public NddlToken {
     public:
       Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -132,11 +132,11 @@ namespace NDDL {
     };
     ConstrainedVariableId mutex; // SchemaWriter::declareVariable
     
-    // simple-resources.nddl:19 Rover
+    // simple-resources.nddl:18 Rover
     virtual void constructor();
   };
   
-  // simple-resources.nddl:42 World
+  // simple-resources.nddl:41 World
   class World : public Timeline {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -150,7 +150,7 @@ namespace NDDL {
     ConstrainedVariableId mainBattery; // SchemaWriter::declareVariable
     ConstrainedVariableId reserveBattery; // SchemaWriter::declareVariable
     
-    // simple-resources.nddl:46 initialState
+    // simple-resources.nddl:45 initialState
     class initialState : public NddlToken {
     public:
       initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
@@ -160,7 +160,7 @@ namespace NDDL {
       
     };
     
-    // simple-resources.nddl:42 World
+    // simple-resources.nddl:41 World
     virtual void constructor();
   };
 } // End NDDL namespace

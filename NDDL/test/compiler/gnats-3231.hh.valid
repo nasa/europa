@@ -12,7 +12,7 @@ namespace NDDL {
   
   
   // gnats-3231.nddl:1 GnatsClass
-  class GnatsClass : public Timeline {
+  class GnatsClass : public Object {
   public:
     GnatsClass(const PlanDatabaseId& planDatabase, const LabelStr& name);
     GnatsClass(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
