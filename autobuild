@@ -422,11 +422,13 @@ sub main {
 		print " |   VARIANTS => $build->{VARIANTS}\n" if(defined($build->{VARIANTS}));
 		print " +------------------------------------------------------------\n";
 		if(-d $cvsname) {
+			system("bash -c 'chmod -fR u+w $cvsname'") and softdie("Error moving canon checkout: $!");
 			rmtree($cvsname) or softdie("Error deleting directory in preparation for build $build->{NAME}: $!\n");
 		}
-		system("bash -c 'cp -pr $cvscanon $cvsname'") and softdie("Error moving canon checkout: $!");
+		system("bash -c 'cp -pR $cvscanon $cvsname'") and softdie("Error moving canon checkout: $!");
 		sanityCheck();
 		jam($build);
+		system("bash -c 'chmod -fR u+w $cvsname'") and softdie("Error moving canon checkout: $!");
 		rmtree($cvsname) or softdie("Error deleting directory for build $build->{NAME}: $!\n");
 	}
 	mailresults(@buildtypes);
