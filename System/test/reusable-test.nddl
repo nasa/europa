@@ -6,7 +6,7 @@ class IntermediateReusable extends Reusable {
   }
 }
 
-class Project extends Object {
+class Project {
 //   IntermediateReusable m_programmerPool;
   
 //   Project() {

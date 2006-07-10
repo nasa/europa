@@ -5,7 +5,7 @@ class IntermediateUnary extends Unary {
   IntermediateUnary(float c_max) {super(c_max);}
 }
 
-class Foo extends Object {
+class Foo {
   predicate bar {
   }
 }

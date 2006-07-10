@@ -1,6 +1,7 @@
 #include "PlannerConfig.nddl"
+#include "Plasma.nddl"
 
-class Foo {
+class Foo extends Timeline {
   predicate bar { }
   predicate baz { }
 }

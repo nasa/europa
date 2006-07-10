@@ -15,7 +15,7 @@ class Battery extends Resource {
  }
 }
 
-class Rover{
+class Rover extends Timeline {
  Battery battery;
 
  predicate Move{}

@@ -8,7 +8,6 @@
 #include "PlannerTestConfig.nddl"
 #include "Plasma.nddl"
 
-
 class A extends Timeline {
   predicate pred {
    eq(duration, 10);

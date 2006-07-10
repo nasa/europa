@@ -15,7 +15,7 @@ class Battery extends Reservoir {
  }
 }
 
-class Rover{
+class Rover extends Timeline {
  Battery battery;
 
  predicate Move{}

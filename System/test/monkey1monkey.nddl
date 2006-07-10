@@ -8,7 +8,7 @@ enum Location_Label { Rock,  Tree }
 
 class Monkey_Class;
 
-class Monkey_Class___Location_SV {
+class Monkey_Class___Location_SV extends Timeline {
   predicate At {
     Location_Label Loc_Label;
 
@@ -28,7 +28,7 @@ class Monkey_Class___Location_SV {
   }
 }
 
-class Monkey_Class___Altitude_SV {
+class Monkey_Class___Altitude_SV extends Timeline {
   predicate LOW {
     eq(duration, [1 +inf]);
   }
@@ -54,7 +54,7 @@ class Monkey_Class___Altitude_SV {
   }
 }
 
-class Monkey_Class___Banana_SV {
+class Monkey_Class___Banana_SV extends Timeline {
   predicate NOT_HAVE_BANANA {
     eq(duration, [1 +inf]);
   }

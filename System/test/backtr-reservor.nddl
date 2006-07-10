@@ -21,18 +21,18 @@ class Battery extends Resource {
 }
 //*****************************************************************
 
-class Antenna {
+class Antenna extends Timeline {
   predicate Transmit{}
   predicate Idle{}
 }
 
-class Memory {
+class Memory extends Timeline {
   predicate Full{}
   predicate Empty{}
   predicate Busy{}
 }
 
-class Rover{
+class Rover extends Timeline {
  Battery m_battery;
  Antenna m_antenna;
  Memory m_memory;

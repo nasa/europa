@@ -3,7 +3,7 @@
 
 enum Locations {Hill, Rock, Lander};
 
-class Rover{
+class Rover extends Timeline {
  predicate At{
   Locations m_location;
   eq(duration, 1);

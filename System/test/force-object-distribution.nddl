@@ -1,13 +1,13 @@
 #include "PlannerConfig.nddl"
 #include "Plasma.nddl"
 
-class Battery {
+class Battery extends Timeline {
  predicate uses{
   eq(duration, 30);
  }
 }
 
-class Rover{
+class Rover extends Timeline {
 
  predicate Drive{
   eq(duration, 10);

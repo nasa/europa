@@ -36,8 +36,7 @@ class Path {
 
 class Rover;
 
-class Navigator
-{
+class Navigator extends Timeline {
  predicate At{
   Location location;
  }
@@ -73,7 +72,7 @@ Navigator::Going{
 }
 
 
-class Instrument{
+class Instrument extends Timeline {
  predicate TakeSample{
   Location rock;
   leq(10, duration);
@@ -158,7 +157,7 @@ Instrument::Stowed{
 }
 
 
-class Commands{
+class Commands extends Timeline {
  predicate TakeSample{
   Location rock;
   eq(duration, [20 25]); // Flexible durations for taking a sample

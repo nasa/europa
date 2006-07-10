@@ -16,7 +16,7 @@ class Path{
  }
 }
 
-class Rover{
+class Rover extends Timeline {
  predicate Going{
   Location from;
   Location to;

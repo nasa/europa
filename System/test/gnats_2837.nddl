@@ -27,7 +27,7 @@ class Location {
  * Instruments can be positioned on destinations which must be locations
  */
 
-class Instrument {
+class Instrument extends Timeline {
 
  predicate Position {
   Location destination;

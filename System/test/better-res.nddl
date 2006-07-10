@@ -11,7 +11,7 @@ class Battery extends Resource {
 }
 
 //*****************************************************************
-class Rover{
+class Rover extends Timeline {
  Battery m_battery;
 
  Rover( float bat_start, float bat_low, float bat_high,
@@ -39,7 +39,7 @@ class Rover{
 
 //*****************************************************************
 // Energy producers
-class Wind{
+class Wind extends Timeline {
   predicate Velocity{
     float m_velocity;
   }
@@ -56,7 +56,7 @@ Wind::Velocity{
 // Sun::XXX
 
 //*****************************************************************
-class Mission{
+class Mission extends Timeline {
   predicate SampleCycle{
     // Euclidean cordinates
     int m_x;

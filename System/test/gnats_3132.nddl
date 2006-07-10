@@ -1,6 +1,6 @@
 #include "PlannerTestConfig.nddl"
 
-class Foo {
+class Foo extends Timeline {
  int fieldValue;
 
  predicate pred{int arg;}

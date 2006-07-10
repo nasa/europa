@@ -4,7 +4,7 @@
 enum Location {Hill, Rock, Lander}
 
 // Declare a class Rover such that it does not imply a mutex by extending a timeline.
-class Rover extends Object {
+class Rover {
  predicate At{
   Location location;
  }

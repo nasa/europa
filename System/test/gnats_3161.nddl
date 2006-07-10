@@ -8,7 +8,7 @@ class Foo {
   }
 }
 
-class Bar extends Object {
+class Bar {
   bool b;
   Bar(){b = true;}
 

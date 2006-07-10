@@ -17,7 +17,7 @@ class Path {
  }
 }
 
-class Foo {
+class Foo extends Timeline {
  predicate at{
   Location loc;
  }

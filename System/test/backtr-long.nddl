@@ -6,7 +6,7 @@
 // GNATS 2519: Typefactory not registered.
 // GNATS 2491, 2520, : Bad domain in temporal propagator, updating.
 //****************************************************************
-class Rover{
+class Rover extends Timeline {
  Antenna m_antenna;
  Memory m_memory;
 
@@ -122,7 +122,7 @@ Rover::Standby{
   */
 }
 
-class Antenna {
+class Antenna extends Timeline {
   predicate Transmit{}
   predicate Idle{}
 }
@@ -145,7 +145,7 @@ Antenna::Idle {
   met_by(Transmit t2);
 }
 
-class Memory {
+class Memory extends Timeline {
   predicate Full{}
   predicate Empty{}
   predicate Busy{}

@@ -3,7 +3,7 @@
 #include "PlannerConfig.nddl"
 #include "Plasma.nddl"
 
-class Location {
+class Location extends Timeline {
 
     predicate NotTracked {
       Location target;
@@ -37,7 +37,7 @@ class Path {
   }  
 }
 
-class Position {  
+class Position extends Timeline {  
   predicate At {
     Location location;
   }
@@ -74,7 +74,7 @@ Position::navigate{
 
 }
 
-class Tracker{
+class Tracker extends Timeline {
 
   predicate TrackingOff {
   }
@@ -102,7 +102,7 @@ class Tracker{
 
 }
 
-class OpportunisticScience {
+class OpportunisticScience extends Timeline {
 
   predicate OppSciIdle {   
   }
@@ -138,7 +138,7 @@ class OpportunisticScience {
   }
 }
 
-class CHAMP {
+class CHAMP extends Timeline {
   predicate IPIdle {
   }
   

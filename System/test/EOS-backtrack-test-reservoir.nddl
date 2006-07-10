@@ -51,7 +51,7 @@ class Storage extends Reservoir {
   }
 }
 
-class GroundStation extends Object {
+class GroundStation {
   Storage m_disk;
 
  GroundStation () {
@@ -63,7 +63,7 @@ class GroundStation extends Object {
  }
 }
 
-class Satellite {
+class Satellite extends Timeline {
  Antenna m_antenna;
  Memory m_memory;
  int m_slewRate;

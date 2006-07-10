@@ -14,7 +14,7 @@ class Energy extends Resource {
 class Location {
 }
 
-class Target {
+class Target extends Timeline {
 
   predicate NotTracked {
     Target target;
@@ -90,7 +90,7 @@ class OppSci_Accessable {
   }  
 }
 
-class Position {  
+class Position extends Timeline {  
   Rover m_rover;
 
   Position(Rover rover) {
@@ -120,7 +120,7 @@ class Position {
   }  
 }
 
-class Tracker{
+class Tracker extends Timeline {
   Rover m_rover;
 
   Tracker(Rover rover) {

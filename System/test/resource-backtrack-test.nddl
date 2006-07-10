@@ -13,7 +13,7 @@ class Disk extends Resource {
  }
 }
 
-class DriveSubsystem{
+class DriveSubsystem extends Timeline {
  predicate Drive{
   eq(duration, 50);
  }
@@ -35,7 +35,7 @@ DriveSubsystem::Stroll{
  eq(tx.quantity, -25);
 }
 
-class Rover{
+class Rover extends Timeline {
  DriveSubsystem dss;
  Battery battery;
  Disk disk;
