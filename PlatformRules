@@ -81,16 +81,8 @@ if $(GCC_ROOTDIR) {
 }
 
 # PROFILE_FLAGS = flags for profiling
-
-if $(OS) = SOLARIS {
-	PROFILE_FLAGS ?= -pg ;
-} else {
-        if $(OS) = LINUX {
-	        PROFILE_FLAGS ?= -pg ;
-        } else {
-        	PROFILE_FLAGS ?= -p ;
-        }
-}
+# there were once some shenanigans about using '-p' on some platforms
+PROFILE_FLAGS ?= -pg ;
 
 # OPTIMIZE_FLAGS = flags for optimization
 
