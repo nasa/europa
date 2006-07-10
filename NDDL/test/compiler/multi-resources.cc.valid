@@ -27,15 +27,15 @@ namespace NDDL {
   
   // Plasma.nddl:137 Reusable
   Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : Timeline(planDatabase, "Reusable", name, true) {
+   : Object(planDatabase, "Reusable", name, true) {
   }
   Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
-   : Timeline(planDatabase, type, name, true) {
+   : Object(planDatabase, type, name, true) {
   }
   Reusable::Reusable(const ObjectId& parent, const LabelStr& name)
-   : Timeline(parent, "Reusable", name, true) {}
+   : Object(parent, "Reusable", name, true) {}
   Reusable::Reusable(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
-   : Timeline(parent, type, name, true) {}
+   : Object(parent, type, name, true) {}
   // default initialization of member variables
   void Reusable::handleDefaults(bool autoClose) {
     if(capacity.isNoId()){
@@ -210,15 +210,15 @@ namespace NDDL {
   
   // Plasma.nddl:169 Unary
   Unary::Unary(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : Timeline(planDatabase, "Unary", name, true) {
+   : Object(planDatabase, "Unary", name, true) {
   }
   Unary::Unary(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
-   : Timeline(planDatabase, type, name, true) {
+   : Object(planDatabase, type, name, true) {
   }
   Unary::Unary(const ObjectId& parent, const LabelStr& name)
-   : Timeline(parent, "Unary", name, true) {}
+   : Object(parent, "Unary", name, true) {}
   Unary::Unary(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
-   : Timeline(parent, type, name, true) {}
+   : Object(parent, type, name, true) {}
   // default initialization of member variables
   void Unary::handleDefaults(bool autoClose) {
     if(consumptionMax.isNoId()){
@@ -761,10 +761,10 @@ namespace NDDL {
     // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
-    id->addObjectType("Resource", "Timeline");
-    id->addObjectType("Reservoir", "Timeline");
-    id->addObjectType("Reusable", "Timeline");
-    id->addObjectType("Unary", "Timeline");
+    id->addObjectType("Resource", "Object");
+    id->addObjectType("Reservoir", "Object");
+    id->addObjectType("Reusable", "Object");
+    id->addObjectType("Unary", "Object");
     id->addObjectType("UnaryResource", "Timeline");
     id->addObjectType("StringData", "Object");
     id->addObjectType("Battery", "Resource");
