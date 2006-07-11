@@ -102,7 +102,6 @@ namespace NDDL {
    : NddlResource(parent, type, name, true) {}
   // default initialization of member variables
   void Battery::handleDefaults(bool autoClose) {
-    NddlResource::handleDefaults(false);
     if (autoClose)
       close();
   }

@@ -67,7 +67,7 @@ namespace NDDL {
   
   
   // Plasma.nddl:137 Reusable
-  class Reusable : public Timeline {
+  class Reusable : public Object {
   public:
     Reusable(const PlanDatabaseId& planDatabase, const LabelStr& name);
     Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
@@ -104,7 +104,7 @@ namespace NDDL {
   };
   
   // Plasma.nddl:169 Unary
-  class Unary : public Timeline {
+  class Unary : public Object {
   public:
     Unary(const PlanDatabaseId& planDatabase, const LabelStr& name);
     Unary(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
