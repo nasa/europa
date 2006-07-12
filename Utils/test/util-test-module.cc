@@ -703,11 +703,11 @@ private:
 
       if(toggle) {
         assertTrue(LockManager::instance().getCurrentUser() == LabelStr("FIRST_USER"),
-                   "Failed to get expected user.  Instead got " + LockManager::instance().getCurrentUser().toString());
+                   "Failed to get expected user.  Instead got \"" + LockManager::instance().getCurrentUser().toString() + "\"");
       }
       else {
         assertTrue(LockManager::instance().getCurrentUser() == LabelStr("SECOND_USER"),
-                   "Failed to get expected user.  Instead got " + LockManager::instance().getCurrentUser().toString());
+                   "Failed to get expected user.  Instead got \"" + LockManager::instance().getCurrentUser().toString() + "\"");
       }
 
       LockManager::instance().unlock();
