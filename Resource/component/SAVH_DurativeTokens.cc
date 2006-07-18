@@ -11,11 +11,12 @@ namespace EUROPA {
 				 const IntervalIntDomain& durationBaseDomain,
 				 const IntervalDomain& quantityBaseDomain,
 				 const LabelStr& objectName,
-				 bool closed)
+				 bool closed,
+				 bool activate)
       : IntervalToken(planDatabase, predicateName, false, startBaseDomain, endBaseDomain, durationBaseDomain,
 		      objectName, false) {
       check_error(quantityBaseDomain.getLowerBound() >= 0 && quantityBaseDomain.getUpperBound() <= PLUS_INFINITY);
-      commonInit(closed, quantityBaseDomain);
+      commonInit(closed, activate, quantityBaseDomain);
     }
 
     ReusableToken::ReusableToken(const PlanDatabaseId& planDatabase,
@@ -24,9 +25,39 @@ namespace EUROPA {
 				 const IntervalIntDomain& endBaseDomain,
 				 const IntervalIntDomain& durationBaseDomain,
 				 const LabelStr& objectName,
-				 bool closed) 
+				 bool closed,
+				 bool activate) 
       : IntervalToken(planDatabase, predicateName, false, startBaseDomain, endBaseDomain, durationBaseDomain, objectName, false) {
-      commonInit(closed, IntervalDomain(0, PLUS_INFINITY));
+      commonInit(closed, activate, IntervalDomain(0, PLUS_INFINITY));
+    }
+
+    ReusableToken::ReusableToken(const PlanDatabaseId& planDatabase,
+				 const LabelStr& predicateName,
+				 bool rejectable,
+				 const IntervalIntDomain& startBaseDomain,
+				 const IntervalIntDomain& endBaseDomain,
+				 const IntervalIntDomain& durationBaseDomain,
+				 const IntervalDomain& quantityBaseDomain,
+				 const LabelStr& objectName,
+				 bool closed,
+				 bool activate)
+      : IntervalToken(planDatabase, predicateName, rejectable, startBaseDomain, endBaseDomain, durationBaseDomain,
+		      objectName, false) {
+      check_error(quantityBaseDomain.getLowerBound() >= 0 && quantityBaseDomain.getUpperBound() <= PLUS_INFINITY);
+      commonInit(closed, activate, quantityBaseDomain);
+    }
+
+    ReusableToken::ReusableToken(const PlanDatabaseId& planDatabase,
+				 const LabelStr& predicateName,
+				 bool rejectable,
+				 const IntervalIntDomain& startBaseDomain,
+				 const IntervalIntDomain& endBaseDomain,
+				 const IntervalIntDomain& durationBaseDomain,
+				 const LabelStr& objectName,
+				 bool closed,
+				 bool activate) 
+      : IntervalToken(planDatabase, predicateName, rejectable, startBaseDomain, endBaseDomain, durationBaseDomain, objectName, false) {
+      commonInit(closed, activate, IntervalDomain(0, PLUS_INFINITY));
     }
 
     ReusableToken::ReusableToken(const TokenId& master, 
@@ -36,9 +67,10 @@ namespace EUROPA {
 				 const IntervalIntDomain& endBaseDomain,
 				 const IntervalIntDomain& durationBaseDomain,
 				 const LabelStr& objectName,
-				 bool closed)
+				 bool closed,
+				 bool activate)
       : IntervalToken(master, relation, predicateName, startBaseDomain, endBaseDomain, durationBaseDomain, objectName, false) {
-      commonInit(closed, IntervalDomain(0, PLUS_INFINITY));
+      commonInit(closed, activate, IntervalDomain(0, PLUS_INFINITY));
     }
 
   ReusableToken::ReusableToken(const TokenId& master, 
@@ -49,22 +81,26 @@ namespace EUROPA {
 			       const IntervalIntDomain& durationBaseDomain,
 			       const IntervalDomain& quantityBaseDomain,
 			       const LabelStr& objectName,
-			       bool closed)
+			       bool closed,
+			       bool activate)
     : IntervalToken(master, relation, predicateName, startBaseDomain, endBaseDomain, durationBaseDomain, objectName, false) {
-    commonInit(closed, quantityBaseDomain);
+    commonInit(closed, activate, quantityBaseDomain);
   }
 
-    void ReusableToken::commonInit(bool closed, const IntervalDomain& quantityBaseDomain) {
-      StateDomain restrictDomain;
-      restrictDomain.insert(Token::ACTIVE);
-      m_state->restrictBaseDomain(restrictDomain);
+    void ReusableToken::commonInit(bool closed, bool activate, const IntervalDomain& quantityBaseDomain) {
+      m_activate = activate;
+      if(activate) {
+	StateDomain restrictDomain;
+	restrictDomain.insert(Token::ACTIVE);
+	m_state->restrictBaseDomain(restrictDomain);
+      }
       m_quantity = (new TokenVariable<IntervalDomain>(m_id, m_allVariables.size(),
 						      m_planDatabase->getConstraintEngine(),
 						      quantityBaseDomain,
 						      true, LabelStr("quantity")))->getId();
       m_allVariables.push_back(m_quantity);
       ConstraintId relation = (new ResourceTokenRelation(m_planDatabase->getConstraintEngine(),
-							 makeScope(m_object),
+							 makeScope(m_state, m_object),
 							 getId()))->getId();
       m_standardConstraints.insert(relation);
       if(closed)
@@ -73,7 +109,8 @@ namespace EUROPA {
 
     void ReusableToken::close() {
       IntervalToken::close();
-      activateInternal();
+      if(m_activate)
+	activateInternal();
     }
 
     const ConstrainedVariableId& ReusableToken::getQuantity() const {
@@ -81,22 +118,35 @@ namespace EUROPA {
     }
 
     UnaryToken::UnaryToken(const PlanDatabaseId& planDatabase,
-	       const LabelStr& predicateName,
-	       const IntervalIntDomain& startBaseDomain,
-	       const IntervalIntDomain& endBaseDomain,
-	       const IntervalIntDomain& durationBaseDomain,
-	       const LabelStr& objectName,
-	       bool closed)
-      : ReusableToken(planDatabase, predicateName, startBaseDomain, endBaseDomain, durationBaseDomain, IntervalDomain(1), objectName, closed) {}
+			   const LabelStr& predicateName,
+			   const IntervalIntDomain& startBaseDomain,
+			   const IntervalIntDomain& endBaseDomain,
+			   const IntervalIntDomain& durationBaseDomain,
+			   const LabelStr& objectName,
+			   bool closed,
+			   bool activate)
+      : ReusableToken(planDatabase, predicateName, startBaseDomain, endBaseDomain, durationBaseDomain, IntervalDomain(1), objectName, closed, activate) {}
+
+    UnaryToken::UnaryToken(const PlanDatabaseId& planDatabase,
+			   const LabelStr& predicateName,
+			   bool rejectable,
+			   const IntervalIntDomain& startBaseDomain,
+			   const IntervalIntDomain& endBaseDomain,
+			   const IntervalIntDomain& durationBaseDomain,
+			   const LabelStr& objectName,
+			   bool closed,
+			   bool activate)
+      : ReusableToken(planDatabase, predicateName, rejectable, startBaseDomain, endBaseDomain, durationBaseDomain, IntervalDomain(1), objectName, closed, activate) {}
 
     UnaryToken::UnaryToken(const TokenId& master, 
-	       const LabelStr& relation,
-	       const LabelStr& predicateName, 
-	       const IntervalIntDomain& startBaseDomain,
-	       const IntervalIntDomain& endBaseDomain,
-	       const IntervalIntDomain& durationBaseDomain,
-	       const LabelStr& objectName,
-	       bool closed)
-      : ReusableToken(master, relation, predicateName, startBaseDomain, endBaseDomain, durationBaseDomain, IntervalDomain(1), objectName, closed) {}
+			   const LabelStr& relation,
+			   const LabelStr& predicateName, 
+			   const IntervalIntDomain& startBaseDomain,
+			   const IntervalIntDomain& endBaseDomain,
+			   const IntervalIntDomain& durationBaseDomain,
+			   const LabelStr& objectName,
+			   bool closed,
+			   bool activate)
+      : ReusableToken(master, relation, predicateName, startBaseDomain, endBaseDomain, durationBaseDomain, IntervalDomain(1), objectName, closed, activate) {}
   }
 }

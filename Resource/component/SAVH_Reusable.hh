@@ -17,11 +17,11 @@ namespace EUROPA {
 	       double maxConsumption = PLUS_INFINITY);
       Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open);
       Reusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open);
-      //virtual ~Reusable();
+      virtual ~Reusable() {}
 
-      void getOrderingChoices(const TokenId& token,
-			      std::vector<std::pair<TokenId, TokenId> >& results,
-			      unsigned int limit = PLUS_INFINITY);
+      virtual void getOrderingChoices(const TokenId& token,
+				      std::vector<std::pair<TokenId, TokenId> >& results,
+				      unsigned int limit = PLUS_INFINITY);
       //void getTokensToOrder(std::vector<TokenId>& results);
     protected:
     private:
@@ -32,6 +32,15 @@ namespace EUROPA {
       void removeFromProfile(const TokenId& tok);
 
       std::map<TokenId, std::pair<TransactionId, TransactionId> > m_tokensToTransactions;
+    };
+
+    class UnaryTimeline : public Reusable {
+    public:
+      UnaryTimeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
+      UnaryTimeline(const ObjectId& parent, const LabelStr& type, const LabelStr& name, bool open = false);
+      virtual ~UnaryTimeline() {}
+    protected:
+    private:
     };
   }
 }

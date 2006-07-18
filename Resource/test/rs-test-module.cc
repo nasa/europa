@@ -811,6 +811,11 @@ public:
   SAVH::InstantId getInstant(const int time) {
     return getGreatestInstant(time)->second;
   }
+  void getTransactionsToOrder(const SAVH::InstantId& inst, std::vector<SAVH::TransactionId>& results) {
+    check_error(inst.isValid());
+    check_error(results.empty());
+    results.insert(results.end(), inst->getTransactions().begin(), inst->getTransactions().end());
+  }
   int gotNotified(){return m_receivedNotification;}
   void resetNotified(){m_receivedNotification = 0;}
 private:
@@ -1820,6 +1825,7 @@ private:
     assertTrue(it2.done());
 
     const_cast<AbstractDomain&>(consumer.getObject()->lastDomain()).remove(res2.getId());
+    ce.propagate();
     SAVH::ProfileIterator it3(res1.getProfile());
     assertTrue(!it3.done());
     SAVH::ProfileIterator it4(res2.getProfile());

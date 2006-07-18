@@ -9,13 +9,14 @@ namespace EUROPA {
 				   const IntervalIntDomain& timeBaseDomain,
 				   const IntervalDomain& quantityBaseDomain,
 				   bool isConsumer,
-				   bool closed) 
+				   bool closed,
+				   bool activate) 
       : EventToken(planDatabase, predicateName,
 		   false, timeBaseDomain,
 		   Token::noObject(), false), m_isConsumer(isConsumer) {
       check_error(quantityBaseDomain.getLowerBound() >= 0 &&
 		  quantityBaseDomain.getUpperBound() <= PLUS_INFINITY);
-      commonInit(closed,quantityBaseDomain);
+      commonInit(closed, activate, quantityBaseDomain);
       //m_quantity->restrictBaseDomain(quantityBaseDomain);
     }
 
@@ -25,10 +26,11 @@ namespace EUROPA {
 				   const IntervalIntDomain& timeBaseDomain,
 				   const LabelStr& objectName,
 				   bool isConsumer,
-				   bool closed)
+				   bool closed,
+				   bool activate)
       : EventToken(planDatabase, predicateName,
-		   false, timeBaseDomain, objectName, false), m_isConsumer(isConsumer) {
-      commonInit(closed, IntervalDomain( 0, PLUS_INFINITY ) );
+		   rejectable, timeBaseDomain, objectName, false), m_isConsumer(isConsumer) {
+      commonInit(closed, activate, IntervalDomain( 0, PLUS_INFINITY ) );
     }
 
     ReservoirToken::ReservoirToken(const TokenId& parent,
@@ -37,22 +39,26 @@ namespace EUROPA {
 				   const IntervalIntDomain& timeBaseDomain,
 				   const LabelStr& objectName,
 				   bool isConsumer,
-				   bool closed)
+				   bool closed,
+				   bool activate)
       : EventToken(parent, relation, predicateName, timeBaseDomain, objectName, false), m_isConsumer(isConsumer) {
-      commonInit(closed, IntervalDomain( 0, PLUS_INFINITY ));
+      commonInit(closed, activate, IntervalDomain( 0, PLUS_INFINITY ));
     }
 
-    void ReservoirToken::commonInit(bool closed, const IntervalDomain& quantityBaseDomain) {
-      StateDomain restrictDomain;
-      restrictDomain.insert(Token::ACTIVE);
-      m_state->restrictBaseDomain(restrictDomain);
+    void ReservoirToken::commonInit(bool closed, bool activate, const IntervalDomain& quantityBaseDomain) {
+      m_activate = activate;
+      if(activate) {
+	StateDomain restrictDomain;
+	restrictDomain.insert(Token::ACTIVE);
+	m_state->restrictBaseDomain(restrictDomain);
+      }
       m_quantity = (new TokenVariable<IntervalDomain>(m_id, m_allVariables.size(),
 						      m_planDatabase->getConstraintEngine(),
 						      quantityBaseDomain,
 						      true, LabelStr("quantity")))->getId();
       m_allVariables.push_back(m_quantity);
       ConstraintId relation = (new ResourceTokenRelation(m_planDatabase->getConstraintEngine(),
-							 makeScope(m_object),
+							 makeScope(m_state, m_object),
 							 getId()))->getId();
       m_standardConstraints.insert(relation);
       if(closed)
@@ -61,7 +67,8 @@ namespace EUROPA {
 
     void ReservoirToken::close() {
       EventToken::close();
-      activateInternal();
+      if(m_activate)
+	activateInternal();
     }
     
     const ConstrainedVariableId& ReservoirToken::getQuantity() const {

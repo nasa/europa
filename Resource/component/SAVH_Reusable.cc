@@ -28,13 +28,16 @@ namespace EUROPA {
 				      std::vector<std::pair<TokenId, TokenId> >& results,
 				      unsigned int limit) {
       checkError(m_tokensToTransactions.find(token) != m_tokensToTransactions.end(), "Token " << token->getPredicateName().toString() <<
-		 "(" << token->getKey() << ") not in profile.");
+                 "(" << token->getKey() << ") not in profile for " << toString());
       Resource::getOrderingChoices(token, results, limit);
     }
 
     void Reusable::addToProfile(const TokenId& tok) {
-      checkError(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end(),
+      if(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end()) {
+	debugMsg("Reusable:addToProfile", 
 		 "Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") is already in the profile.");
+	return;
+      }
       ReusableTokenId t(tok);
       debugMsg("Reusable:addToProfile", "Adding token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
       //here's the major difference between Resuable and Reservoir:  always consume the quantity at the start
@@ -50,8 +53,8 @@ namespace EUROPA {
 
     void Reusable::removeFromProfile(const TokenId& tok) {
       if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end())
-	return;
-
+        return;
+      
       debugMsg("Reusable:removeFromProfile", "Removing token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
       std::pair<TransactionId, TransactionId> trans = m_tokensToTransactions.find(tok)->second;
       debugMsg("Reusable:removeFromProfile", "Removing transaction for time " << trans.first->time()->toString() << " with quantity " << trans.first->quantity()->toString());
@@ -61,9 +64,20 @@ namespace EUROPA {
       m_tokensToTransactions.erase(tok);
       m_transactionsToTokens.erase(trans.first);
       m_transactionsToTokens.erase(trans.second);
-      m_flawedTokens.erase(tok);
+      std::map<TokenId, std::set<InstantId> >::iterator it = m_flawedTokens.find(tok);
+      if(it != m_flawedTokens.end()) {
+        m_flawedTokens.erase(it);
+        notifyOrderingNoLongerRequired(tok);
+      }
       delete (Transaction*) trans.first;
       delete (Transaction*) trans.second;
+      
     }
+
+    UnaryTimeline::UnaryTimeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open) 
+      : Reusable(planDatabase, type, name, open) {init(1, 1, 0, 1, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, "ReusableFVDetector", "IncrementalFlowProfile");}
+
+    UnaryTimeline::UnaryTimeline(const ObjectId& parent, const LabelStr& type, const LabelStr& name, bool open) 
+      : Reusable(parent, type, name, open) {init(1, 1, 0, 1, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, "ReusableFVDetector", "IncrementalFlowProfile");}
   }
 }

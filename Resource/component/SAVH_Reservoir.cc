@@ -25,11 +25,14 @@ namespace EUROPA {
       Resource(parent, type, localName, open) {}
 
     void Reservoir::addToProfile(const TokenId& tok) {
-      checkError(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end(),
-		 "Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") is already in the profile.");
+      if(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end()) {
+        debugMsg("Reservoir:addToProfile",
+                 "Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") is already in the profile.");
+        return;
+      }
       ReservoirTokenId t(tok);
       debugMsg("Reservoir:addToProfile", "Adding " << (t->isConsumer() ? "consumer " : "producer ") << "token " << 
-	       tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
+               tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
       TransactionId trans = (new Transaction(t->getTime(), t->getQuantity(), t->isConsumer()))->getId();
       m_transactionsToTokens.insert(std::pair<TransactionId, TokenId>(trans, tok));
       m_tokensToTransactions.insert(std::pair<TokenId, TransactionId>(tok, trans));
