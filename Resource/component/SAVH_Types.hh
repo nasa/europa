@@ -17,6 +17,7 @@
 #include <sstream>
 
 #include "Error.hh"
+#include "SAVH_Instant.hh"
 #include "SAVH_Transaction.hh"
 
 //#define TRACE_GRAPH = 1
@@ -59,6 +60,7 @@ namespace EUROPA
     typedef std::map< Node*, double > Node2Double;
   
     typedef std::map< Edge*, double > Edge2DoubleMap;
+    typedef std::map< TransactionId, InstantId > TransactionId2InstantId;
 
 
     std::ostream& operator<<( std::ostream& os, const EdgeIdentity& fei ) ;

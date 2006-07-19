@@ -188,7 +188,7 @@ namespace EUROPA
       return residual;
     }
 
-    double FlowProfileGraph::disableReachableResidualGraph()
+    double FlowProfileGraph::disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant )
     {
       debugMsg("FlowProfileGraph:disableReachableResidualGraph","Lower level: "
 	       << std::boolalpha << m_lowerLevel );
@@ -203,13 +203,13 @@ namespace EUROPA
 
 	  visited[ m_source ] = true;
 
-	  visitNeighbors( m_source, residual, visited );
+	  visitNeighbors( m_source, residual, visited, contributions, instant );
 	}
 
       return residual;
     }
 
-    void FlowProfileGraph::visitNeighbors( const Node* node, double& residual, Node2Bool& visited )
+    void FlowProfileGraph::visitNeighbors( const Node* node, double& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  )
     {
       EdgeOutIterator ite( *node );
       
@@ -234,6 +234,8 @@ namespace EUROPA
 
 		      const TransactionId& t = target->getIdentity();
 
+		      contributions[ t ] = instant;
+
 		      int sign = t->isConsumer() ? -1 : +1;
 
 		      if( ( m_lowerLevel && t->isConsumer() )
@@ -253,7 +255,7 @@ namespace EUROPA
 			  residual += sign * t->quantity()->lastDomain().getLowerBound();
 			}
 		      
-		      visitNeighbors( target, residual, visited );
+		      visitNeighbors( target, residual, visited, contributions, instant );
 		    }
 		}
 	    }
@@ -445,11 +447,13 @@ namespace EUROPA
 				       << transaction2->getId() << ") "
 				       << transaction2->time()->toString() );
 			      
-			      if( isConstrainedToAt( transaction1, transaction2 ) ) 
+			      Order order = getOrdering( transaction1, transaction2 );
+
+			      if( STRICTLY_AT == order ) 
 				{
 				  handleOrderedAt( transaction1, transaction2 );
 				}
-			      else if( isConstrainedToBeforeOrAt( transaction1, transaction2 ) )  
+			      else if( BEFORE_OR_AT == order )  
 				{
 				  handleOrderedAtOrBefore( transaction1, transaction2 );
 				}
@@ -488,25 +492,26 @@ namespace EUROPA
 		    0, 0, 0, 0 );
     }
 
-    bool FlowProfile::isConstrainedToBeforeOrAt( const TransactionId t1, const TransactionId t2 ) 
+    FlowProfile::Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
     {
+      Order returnValue = NOT_ORDERED;
+
       check_error(t1.isValid());
       check_error(t2.isValid());
 
       const IntervalIntDomain distance = m_planDatabase->getTemporalAdvisor()->getTemporalDistanceDomain( t1->time(), t2->time(), true );
-      
-      return distance.getLowerBound() >= 0;
+
+      if( distance.getLowerBound() == 0 && distance.getUpperBound() == 0 )
+	returnValue = STRICTLY_AT;
+      else if( distance.getLowerBound() >= 0 )
+	returnValue = BEFORE_OR_AT;
+      else if( distance.getUpperBound() <= 0 )
+	returnValue = AFTER_OR_AT;
+      	
+      return returnValue;
     }
 
-    bool FlowProfile::isConstrainedToAt( const TransactionId t1, const TransactionId t2 ) 
-    {
-
-      const IntervalIntDomain distance = m_planDatabase->getTemporalAdvisor()->getTemporalDistanceDomain( t1->time(), t2->time(), true );
-
-      return distance.getLowerBound() == 0 && distance.getUpperBound() == 0;
-    }
-
-    void FlowProfile::handleOrderedAt( const TransactionId t1, const TransactionId t2 ) 
+   void FlowProfile::handleOrderedAt( const TransactionId t1, const TransactionId t2 ) 
     {
       check_error(t1.isValid());
       check_error(t2.isValid());
@@ -540,7 +545,7 @@ namespace EUROPA
 
     void FlowProfile::handleTransactionAdded(const TransactionId t) 
     {
-      check_error(t.isValid());
+      check_error( t.isValid() );
 
       debugMsg("FlowProfile:handleTransactionAdded","TransactionId (" 
 	       << t->getId() << ") time " 
@@ -553,10 +558,15 @@ namespace EUROPA
       m_recalculateLowerLevel = true;
       m_recalculateUpperLevel = true;
 
-      m_startRecalculation = MINUS_INFINITY; //std::min( m_startRecalculation, (int) t->time()->lastDomain().getLowerBound() );
+//       if( ProfileIteratorId::noId() != m_recomputeInterval )
+// 	m_startRecalculation = std::min( m_recomputeInterval->getStartTime(), (int) t->time()->lastDomain().getLowerBound() );
+//       else
+// 	m_startRecalculation = (int) t->time()->lastDomain().getLowerBound();
+
+      m_startRecalculation = MINUS_INFINITY;
       m_endRecalculation = PLUS_INFINITY;
 
-      if(m_recomputeInterval.isValid())
+      if( ProfileIteratorId::noId() != m_recomputeInterval )
 	delete (ProfileIterator*) m_recomputeInterval;
       
       m_recomputeInterval = (new ProfileIterator( getId(), m_startRecalculation, m_endRecalculation ))->getId();
@@ -580,6 +590,9 @@ namespace EUROPA
       
       m_lowerLevelGraph->removeTransaction( t );
       m_upperLevelGraph->removeTransaction( t );
+
+      m_lowerLevelContribution.erase( t );
+      m_upperLevelContribution.erase( t );
       
       // done if recompute interval has no transactions left if this transaction is removed
       m_startRecalculation = MINUS_INFINITY; //std::min( m_startRecalculation, (int) t->time()->lastDomain().getLowerBound() );

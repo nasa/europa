@@ -33,24 +33,61 @@ namespace EUROPA
     IncrementalFlowProfile::IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb ):
       FlowProfile( db, flawDetector, initLevelLb, initLevelUb )
     {
-      debugMsg("IncrementalFlowProfile:IncrementalFlowProfile","");
+      debugMsg("IncrementalFlowProfile:IncrementalFlowProfile","Initial level [" << initLevelLb << "," << initLevelUb << "]");
     }
      
     IncrementalFlowProfile::~IncrementalFlowProfile()
     {
     }
- 
+
+    void IncrementalFlowProfile::initRecompute( InstantId inst ) 
+    {
+      debugMsg("IncrementalFlowProfile::initRecompute","For instant (" << inst->getId() << ")");
+
+      std::map<int, InstantId>::iterator it = getGreatestInstant( inst->getTime() - 1 );
+
+      if( m_instants.end() != it  )
+	{
+	  InstantId previous = it->second;
+
+	  debugMsg("IncrementalFlowProfile::initRecompute","For instant (" 
+		   << inst << ") getting initial levels from instant ("
+		   << previous << ")");
+	  // initial level
+	  m_lowerClosedLevel = previous->getLowerLevel();
+	  
+	  // initial level
+	  m_upperClosedLevel = previous->getUpperLevel();
+	}
+      else
+	{
+	  // initial level
+	  m_lowerClosedLevel = m_initLevelLb;
+	  
+	  // initial level
+	  m_upperClosedLevel = m_initLevelUb;
+	}
+
+      recomputeLevels( inst, m_lowerClosedLevel, m_upperClosedLevel );
+    }
+
     void IncrementalFlowProfile::initRecompute() 
     {
       checkError(m_recomputeInterval.isValid(), "Attempted to initialize recomputation without a valid starting point!");
       
-      debugMsg("FlowProfile:initRecompute","");
+      debugMsg("IncrementalFlowProfile::initRecompute","");
 
       if( m_recalculateLowerLevel )
-	m_lowerLevelGraph->reset();
+	{
+	  m_lowerLevelContribution.clear();
+	  m_lowerLevelGraph->reset();
+	}
 
       if( m_recalculateUpperLevel )
-	m_upperLevelGraph->reset();
+	{
+	  m_upperLevelContribution.clear();
+	  m_upperLevelGraph->reset();
+	}
       
       // initial level
       m_lowerClosedLevel = m_initLevelLb;
@@ -83,6 +120,9 @@ namespace EUROPA
 		{
 		  const TransactionId& transaction2 = (*iter);
 	      
+		  bool ordering12Calculated = false;
+		  Order ordering12 = UNKNOWN;
+
 		  if( m_recalculateLowerLevel )
 		    {
 		      if( transaction1 != transaction2 
@@ -93,15 +133,18 @@ namespace EUROPA
 			  &&
 			  (transaction2->time()->lastDomain().getLowerBound() == inst->getTime() || m_lowerLevelGraph->isEnabled( transaction2 ) ) )
 			{
-			  if( isConstrainedToAt( transaction1, transaction2 ) ) 
+			  ordering12 = getOrdering( transaction1, transaction2 );
+			  ordering12Calculated = true;
+			  
+			  if( STRICTLY_AT == ordering12 ) 
 			    {
 			      m_lowerLevelGraph->enableAt( transaction1, transaction2 );
 			    }
-			  else if( isConstrainedToBeforeOrAt( transaction1, transaction2 ) )  
+			  else if( BEFORE_OR_AT == ordering12 )  
 			    {
 			      m_lowerLevelGraph->enableAtOrBefore( transaction1, transaction2 );
 			    }
-			  else if( isConstrainedToBeforeOrAt( transaction2, transaction1 ) )  
+			  else if( AFTER_OR_AT == ordering12  )  
 			    {
 			      m_lowerLevelGraph->enableAtOrBefore( transaction2, transaction1 );
 			    }
@@ -124,15 +167,18 @@ namespace EUROPA
 			  &&
 			  ( transaction2->time()->lastDomain().getLowerBound() == inst->getTime() || m_upperLevelGraph->isEnabled( transaction2 ) ) )
 			{
-			  if( isConstrainedToAt( transaction1, transaction2 ) ) 
+			  if( !ordering12Calculated )
+			    ordering12 = getOrdering( transaction1, transaction2 );
+
+			  if( STRICTLY_AT == ordering12 ) 
 			    {
 			      m_upperLevelGraph->enableAt( transaction1, transaction2 );
 			    }
-			  else if( isConstrainedToBeforeOrAt( transaction1, transaction2 ) )  
+			  else if( BEFORE_OR_AT == ordering12 )  
 			    {
 			      m_upperLevelGraph->enableAtOrBefore( transaction1, transaction2 );
 			    }
-			  else if( isConstrainedToBeforeOrAt( transaction2, transaction1 ) )  
+			  else if( AFTER_OR_AT == ordering12  )  
 			    {
 			      m_upperLevelGraph->enableAtOrBefore( transaction2, transaction1 );
 			    }
@@ -154,9 +200,18 @@ namespace EUROPA
       check_error( prev.isValid() || InstantId::noId() == prev );
       check_error( inst.isValid() );
 
-      double lowerLevel = prev == InstantId::noId() ? m_initLevelLb : prev->getLowerLevel();
-      double upperLevel = prev == InstantId::noId() ? m_initLevelUb : prev->getUpperLevel();
+      debugMsg("IncrementalFlowProfile::recomputeLevels","Previous instant (" 
+	       << prev << ") and current instant ("
+	       << inst << ")");
 
+      double lowerLevel = prev == InstantId::noId() ? m_lowerClosedLevel : prev->getLowerLevel();
+      double upperLevel = prev == InstantId::noId() ? m_upperClosedLevel : prev->getUpperLevel();
+
+      recomputeLevels( inst, lowerLevel, upperLevel );
+    }
+
+    void IncrementalFlowProfile::recomputeLevels( InstantId inst, double lowerLevel, double upperLevel ) 
+    {
       debugMsg("IncrementalFlowProfile::recomputeLevels","Instant (" 
 	       << inst->getId() << ") at time "
 	       << inst->getTime() << " start levels ["
@@ -195,7 +250,7 @@ namespace EUROPA
 	  {
 	    if( m_recalculateLowerLevel )
 	      {
-		double delta = m_lowerLevelGraph->disableReachableResidualGraph();
+		double delta = m_lowerLevelGraph->disableReachableResidualGraph( m_lowerLevelContribution, inst );
 
 		debugMsg("IncrementalFlowProfile::recomputeLevels","Expansion leads to delta lower level of "
 			 << delta );
@@ -205,7 +260,7 @@ namespace EUROPA
 	    
 	    if( m_recalculateUpperLevel )
 	      {
-		double delta = m_upperLevelGraph->disableReachableResidualGraph();
+		double delta = m_upperLevelGraph->disableReachableResidualGraph( m_upperLevelContribution, inst );
 
 		debugMsg("IncrementalFlowProfile::recomputeLevels","Expansion leads to delta upper level of "
 			 << delta );
@@ -254,9 +309,12 @@ namespace EUROPA
 
 		if( enteredClosedSet )
 		  {
+		    m_lowerLevelContribution[ ended ] = inst;
+
 		    if( ended->isConsumer() )
 		      {
 			lowerLevel -= ended->quantity()->lastDomain().getUpperBound();
+
 
 			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
 				 << ended->getId() << ") decreases lower level by "
@@ -266,6 +324,7 @@ namespace EUROPA
 		    else
 		      {
 			lowerLevel += ended->quantity()->lastDomain().getLowerBound();
+
 
 			debugMsg("IncrementalFlowProfile::recomputeLevels","Transaction ("
 				 << ended->getId() << ") increases lower level by "
@@ -301,6 +360,8 @@ namespace EUROPA
 
 		if( enteredClosedSet )
 		  {
+		    m_upperLevelContribution[ ended ] = inst;
+
 		    if( ended->isConsumer() )
 		      {
 			upperLevel -= ended->quantity()->lastDomain().getLowerBound();
@@ -328,7 +389,7 @@ namespace EUROPA
 	      {
 		m_lowerLevelGraph->restoreFlow();
 
-		double delta = m_lowerLevelGraph->disableReachableResidualGraph();//getResidualFromSource(); 
+		double delta = m_lowerLevelGraph->disableReachableResidualGraph( m_lowerLevelContribution, inst );
 
 		debugMsg("IncrementalFlowProfile::recomputeLevels","Contraction leads to delta lower level of "
 			 << delta );
@@ -340,7 +401,7 @@ namespace EUROPA
 	      {
 		m_upperLevelGraph->restoreFlow();
 
-		double delta = m_upperLevelGraph->disableReachableResidualGraph();//getResidualFromSource();
+		double delta = m_upperLevelGraph->disableReachableResidualGraph( m_upperLevelContribution, inst );
 
 		debugMsg("IncrementalFlowProfile::recomputeLevels","Contraction leads to delta upper level of "
 			 << delta );
@@ -356,10 +417,16 @@ namespace EUROPA
 	       << lowerLevel << "," 
 	       << upperLevel << "]");
 
+      debugMsg("IncrementalFlowProfile::calculatedLevels","Computed levels for instance at time "
+	       << inst->getTime() << "["
+	       << lowerLevel << "," 
+	       << upperLevel << "]");
+
       inst->update( lowerLevel, lowerLevel, upperLevel, upperLevel, 
 		    0, 0, 0, 0, 
 		    0, 0, 0, 0, 
-		    0, 0, 0, 0 );      
-    }
+		    0, 0, 0, 0 );          }
+
   }
+
 }

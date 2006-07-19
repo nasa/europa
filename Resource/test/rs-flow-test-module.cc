@@ -94,20 +94,20 @@ class FlowProfileTest
 public:
 
   static bool test(){
-    std::cout << " FlowProfile " << std::endl;
+//     std::cout << " FlowProfile " << std::endl;
 
-    testAddAndRemove< EUROPA::SAVH::FlowProfile> ();
-    testScenario0< EUROPA::SAVH::FlowProfile>();
-    testScenario1< EUROPA::SAVH::FlowProfile>();
-    testScenario2< EUROPA::SAVH::FlowProfile>();
-    testScenario3< EUROPA::SAVH::FlowProfile>();
-    testScenario4< EUROPA::SAVH::FlowProfile>();
-    testScenario5< EUROPA::SAVH::FlowProfile>();
-    testScenario6< EUROPA::SAVH::FlowProfile>();
-    testScenario7< EUROPA::SAVH::FlowProfile>();
-    testScenario8< EUROPA::SAVH::FlowProfile>();
-    testScenario9< EUROPA::SAVH::FlowProfile>( 0, 0 );
-    testScenario9< EUROPA::SAVH::FlowProfile>( 1, 1 );
+//     testAddAndRemove< EUROPA::SAVH::FlowProfile> ();
+//     testScenario0< EUROPA::SAVH::FlowProfile>();
+//     testScenario1< EUROPA::SAVH::FlowProfile>();
+//     testScenario2< EUROPA::SAVH::FlowProfile>();
+//     testScenario3< EUROPA::SAVH::FlowProfile>();
+//     testScenario4< EUROPA::SAVH::FlowProfile>();
+//     testScenario5< EUROPA::SAVH::FlowProfile>();
+//     testScenario6< EUROPA::SAVH::FlowProfile>();
+//     testScenario7< EUROPA::SAVH::FlowProfile>();
+//     testScenario8< EUROPA::SAVH::FlowProfile>();
+//     testScenario9< EUROPA::SAVH::FlowProfile>( 0, 0 );
+//     testScenario9< EUROPA::SAVH::FlowProfile>( 1, 1 );
     //testScenario10< EUROPA::SAVH::FlowProfile>();
 
     std::cout << " IncrementalFlowProfile " << std::endl;
@@ -128,6 +128,7 @@ public:
     testScenario11< EUROPA::SAVH::IncrementalFlowProfile>();
     testScenario12< EUROPA::SAVH::IncrementalFlowProfile>();
     testScenario13< EUROPA::SAVH::IncrementalFlowProfile>();
+    testScenario14< EUROPA::SAVH::IncrementalFlowProfile>();
 
     return true;
   }
@@ -480,8 +481,6 @@ private:
      */
     std::cout << "    Case 5" << std::endl;
 
-    /*! BEING WORKED ON BY MICHAEL */
-
     EqualConstraint c0(LabelStr("concurrent"), LabelStr("Temporal"), ce.getId() , makeScope( t3.getId(), t4.getId()));
 
     ce.propagate();
@@ -499,7 +498,6 @@ private:
       
       assertTrue( profileMatches );
     }
-
   }
 
   static void executeScenario7( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
@@ -795,6 +793,143 @@ private:
 
     assertTrue( profileMatches );
   }
+
+  static void executeScenario14( SAVH::Profile& profile, ConstraintEngine& ce ) {
+    /*!
+    *
+     * Transaction1   <0---------(-3)---------10>
+     *                 |                       |      
+     * Max level       0                      -3      
+     * Min level      -3                      -3     
+     *
+     */
+
+    std::cout << "    Case 1" << std::endl;
+
+    Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10 ), true, "t1" );
+    Variable<IntervalDomain> q1( ce.getId(), IntervalDomain(3, 3), true, "q1" );
+    SAVH::Transaction trans1( t1.getId(), q1.getId(), true);
+
+    profile.addTransaction( trans1.getId() );
+
+    ce.propagate();
+
+    profile.recompute();
+
+    {
+      const int nrInstances = 2;
+      int itimes[nrInstances] = {0,10};
+      double lowerLevels[nrInstances] = { -3, -3};
+      double upperLevels[nrInstances] = {  0, -3};
+      
+      bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+
+      assertTrue( profileMatches );
+    }    
+    
+    /*!
+    *
+     * Transaction1   <0---------(-3)---------10>
+     * Transaction2               <5---------(-3)---------15>
+     *                 |           |           |           |      
+     * Max level       0           0          -3          -6
+     * Min level      -3          -6          -6          -6
+     *
+     */
+    std::cout << "    Case 2" << std::endl;
+
+    Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 5, 15 ), true, "t2" );
+    Variable<IntervalDomain> q2( ce.getId(), IntervalDomain(3, 3), true, "q2" );
+    SAVH::Transaction trans2( t2.getId(), q2.getId(), true ); 
+
+    profile.addTransaction( trans2.getId() );
+
+    ce.propagate();
+
+    profile.recompute();
+
+    {
+      const int nrInstances = 4;
+      int itimes[nrInstances] = { 0,5,10,15 };
+      double lowerLevels[nrInstances] = { -3, -6,-6,-6 };
+      double upperLevels[nrInstances] = {  0,  0,-3,-6 };
+      
+      bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+
+      assertTrue( profileMatches );
+    }    
+
+
+    /*!
+    *
+     * Transaction1   <0---------(-3)---------10>
+     * Transaction2               <5---------(-3)---------15>
+     * Transaction3                                            <20---------(-3)---------25>
+     *                 |           |           |           |    |                        |   
+     * Max level       0           0          -3          -6   -6                       -9
+     * Min level      -3          -6          -6          -6   -9                       -9
+     *
+     */
+
+    std::cout << "    Case 3" << std::endl;
+
+    Variable<IntervalIntDomain> t3( ce.getId(), IntervalIntDomain( 20, 25  ), true, "t3" );
+    Variable<IntervalDomain> q3( ce.getId(), IntervalDomain(3, 3), true, "q3" );
+    SAVH::Transaction trans3( t3.getId(), q3.getId(), true ); 
+
+    profile.addTransaction( trans3.getId() );
+
+    ce.propagate();
+
+    profile.recompute();
+
+    {
+      const int nrInstances = 6;
+      int itimes[nrInstances] = { 0,5,10,15,20,25 };
+      double lowerLevels[nrInstances] = { -3, -6,-6,-6,-6,-9 };
+      double upperLevels[nrInstances] = {  0,  0,-3,-6,-9,-9 };
+      
+      bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+
+      assertTrue( profileMatches );
+    }    
+
+    /*!
+    *
+     * Transaction1                 <0---------(-3)---------10>
+     * Transaction2                             <5---------(-3)---------15>
+     * Transaction3                                                          <20---------(-3)---------25>
+     * Transaction4 <-10--(-3)------<0>
+     *               |               |           |           |           |    |                        |   
+     * Max level     0              -3          -3          -6          -9   -9                       -12
+     * Min level    -3              -6          -9          -9          -9   -12                      -12
+     *
+     */
+
+    std::cout << "    Case 4" << std::endl;
+
+    Variable<IntervalIntDomain> t4( ce.getId(), IntervalIntDomain(-10, 0 ), true, "t4" );
+    Variable<IntervalDomain> q4( ce.getId(), IntervalDomain(3, 3), true, "q4" );
+    SAVH::Transaction trans4( t4.getId(), q4.getId(), true ); 
+
+    profile.addTransaction( trans4.getId() );
+
+    ce.propagate();
+
+    profile.recompute();
+
+    {
+      const int nrInstances = 7;
+      int itimes[nrInstances] = { -10,0,5,10,15,20,25 };
+      double lowerLevels[nrInstances] = { -3, -6,-9,-9,-9,-12,-12 };
+      double upperLevels[nrInstances] = {  0, -3,-3,-6,-9,-9,-12  };
+      
+      bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+
+      assertTrue( profileMatches );
+    }    
+  }
+
 
   static bool testNoTransactions() {
     RESOURCE_DEFAULT_SETUP(ce, db, true);
@@ -1230,6 +1365,16 @@ private:
     return true;
   }
 
+  template< class Profile >
+  static bool testScenario14(){
+    std::cout << "  Scenario 14" << std::endl;
+    RESOURCE_DEFAULT_SETUP(ce, db, true);
+    DummyDetector detector(SAVH::ResourceId::noId());
+    Profile profile( db.getId(), detector.getId());
+
+    executeScenario14( profile, ce );
+    return true;
+  }
 
 
   static bool testDeltaTime(){

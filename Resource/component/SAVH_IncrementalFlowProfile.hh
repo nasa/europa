@@ -27,13 +27,25 @@ namespace EUROPA
        * @brief 
        */
       virtual ~IncrementalFlowProfile();
-
+      /**
+       * @brief 
+       */
+      void initRecompute( InstantId inst );
+      /**
+       * @brief 
+       */
       void initRecompute();
-
+      /**
+       * @brief 
+       */
       void recomputeLevels( InstantId prev, InstantId inst );
-
+      /**
+       * @brief 
+       */
       void enableOrderings(  const InstantId& inst  );
- 
+    private:
+      void recomputeLevels( InstantId inst, double lowerLevel, double upperLevel );
+
     };
   }
 }

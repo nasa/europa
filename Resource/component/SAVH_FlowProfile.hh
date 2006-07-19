@@ -77,7 +77,7 @@ namespace EUROPA
        * @brief 
        * @return
        */
-      double disableReachableResidualGraph();
+      double disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant  );
       /**
        * @brief 
        * @return
@@ -96,7 +96,7 @@ namespace EUROPA
        */
       void restoreFlow();
     private:
-      void visitNeighbors( const Node* node, double& residual, Node2Bool& visited );
+      void visitNeighbors( const Node* node, double& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  );
 
       bool m_lowerLevel;
       bool m_recalculate;
@@ -158,6 +158,14 @@ namespace EUROPA
        */
       virtual ~FlowProfile();
     protected:
+      enum Order {
+	AFTER_OR_AT = 0,
+	BEFORE_OR_AT,
+	NOT_ORDERED,
+	STRICTLY_AT,
+	UNKNOWN
+      };
+
       /**
        * @brief 
        */
@@ -226,12 +234,7 @@ namespace EUROPA
        * @brief 
        * @return
        */
-      bool isConstrainedToBeforeOrAt( const TransactionId t1, const TransactionId t2 );
-      /**
-       * @brief 
-       * @return
-       */
-      bool isConstrainedToAt( const TransactionId t1, const TransactionId t2 );
+      Order getOrdering( const TransactionId t1, const TransactionId t2 );
       /**
        * @brief 
        * @return
@@ -243,6 +246,9 @@ namespace EUROPA
 
       SAVH::FlowProfileGraph* m_lowerLevelGraph;
       SAVH::FlowProfileGraph* m_upperLevelGraph;
+
+      TransactionId2InstantId m_lowerLevelContribution;
+      TransactionId2InstantId m_upperLevelContribution;
 
       double m_lowerClosedLevel;
       double m_upperClosedLevel;
