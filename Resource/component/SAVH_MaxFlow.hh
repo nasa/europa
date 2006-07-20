@@ -180,7 +180,7 @@ namespace EUROPA
 
     void MaximumFlowAlgorithm::execute( bool reset )
     {
-      graphDebug("Start execute");
+      graphDebug("Start execute, reset is " << std::boolalpha << reset );
 
       initializePre( reset );
     
@@ -248,6 +248,9 @@ namespace EUROPA
 		  if( node != m_Source && node != m_Sink )
 		    m_Nodes.push_back( node );
 		  
+		  graphDebug("Setting distance and excess for node " 
+			     << *node << " to 1 and 0.0");
+
 		  m_DistanceOnNode[ node ] = 1;
 		  m_ExcessOnNode[ node ] = 0.0;
 		  
@@ -294,6 +297,12 @@ namespace EUROPA
 
 	  double flow = m_OnEdge[ edge ];
 	  double residual = edge->getCapacity() - flow;
+
+	  graphDebug("Initializing flow from source "
+		     << *m_Source << " for edge " 
+		     << *edge << ", flow is "
+		     << flow << " residual is "
+		     << residual );
 
 	  if( residual != 0 )
 	    {
@@ -427,6 +436,9 @@ namespace EUROPA
 
     void MaximumFlowAlgorithm::reLabel( Node* n )
     {
+      graphDebug("Relabel node "
+		 << *n );
+
       long minLabel = LONG_MAX;
 
       EdgeOutIterator edgeOutIte( *n );
@@ -437,12 +449,21 @@ namespace EUROPA
 
 	  Node* target = edge->getTarget();
 
+	  graphDebug("Relabel node "
+		     << *n << " checking edge "
+		     << *edge << " to relabel, flow on edge is "
+		     << m_OnEdge[ edge ] );
+
 	  if( m_OnEdge[ edge ] < edge->getCapacity() )
 	    {
 	      long label = m_DistanceOnNode[ target ];
 	    
-	      if( minLabel > label )
+	      if( minLabel >= label )
 		{
+		  graphDebug("Node " 
+			     << *target << " is labeled with label "
+			     << label );
+
 		  minLabel = label;
 		}
 	    }

@@ -21,6 +21,7 @@ namespace EUROPA {
       debugMsg("ReusableFVDetector:detect", "Max instantaneous production: " << m_maxInstConsumption << 
 	       ".  At instant: " << inst->getMaxInstantProduction() << ".");
       debugMsg("ReusableFVDetector:detect", "Lower limit: " << m_lowerLimit << ".  Level: [" << inst->getLowerLevel() << " " << inst->getUpperLevel() << "]");
+      debugMsg("ReusableFVDetector:detect", "Upper limit: " << m_upperLimit << ".  Level: [" << inst->getLowerLevel() << " " << inst->getUpperLevel() << "]");
       bool isFlawed = inst->isFlawed();
       inst->setViolated(false);
 
@@ -41,6 +42,7 @@ namespace EUROPA {
 
 	inst->setViolated(true);
 	notifyOfViolation(inst);
+	return true;
       }
       else if(inst->getLowerLevel() < m_lowerLimit || inst->getUpperLevel() > m_upperLimit) {
 	inst->setFlawed(true);

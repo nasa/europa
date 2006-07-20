@@ -110,25 +110,25 @@ public:
 //     testScenario9< EUROPA::SAVH::FlowProfile>( 1, 1 );
     //testScenario10< EUROPA::SAVH::FlowProfile>();
 
-    std::cout << " IncrementalFlowProfile " << std::endl;
+     std::cout << " IncrementalFlowProfile " << std::endl;
 
-    testAddAndRemove< EUROPA::SAVH::IncrementalFlowProfile> ();
-    testScenario0< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario1< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario2< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario3< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario4< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario5< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario6< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario7< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario8< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario9< EUROPA::SAVH::IncrementalFlowProfile>( 0, 0 );
-    testScenario9< EUROPA::SAVH::IncrementalFlowProfile>( 1, 1 );
-    testScenario10< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario11< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario12< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario13< EUROPA::SAVH::IncrementalFlowProfile>();
-    testScenario14< EUROPA::SAVH::IncrementalFlowProfile>();
+     testAddAndRemove< EUROPA::SAVH::IncrementalFlowProfile> ();
+     testScenario0< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario1< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario2< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario3< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario4< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario5< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario6< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario7< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario8< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario9< EUROPA::SAVH::IncrementalFlowProfile>( 0, 0 );
+     testScenario9< EUROPA::SAVH::IncrementalFlowProfile>( 1, 1 );
+     testScenario10< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario11< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario12< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario13< EUROPA::SAVH::IncrementalFlowProfile>();
+     testScenario14< EUROPA::SAVH::IncrementalFlowProfile>();
 
     return true;
   }
@@ -886,8 +886,8 @@ private:
     {
       const int nrInstances = 6;
       int itimes[nrInstances] = { 0,5,10,15,20,25 };
-      double lowerLevels[nrInstances] = { -3, -6,-6,-6,-6,-9 };
-      double upperLevels[nrInstances] = {  0,  0,-3,-6,-9,-9 };
+      double lowerLevels[nrInstances] = { -3,-6,-6,-6,-9,-9 };
+      double upperLevels[nrInstances] = {  0, 0,-3,-6,-6,-9 };
       
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
@@ -1398,7 +1398,7 @@ private:
   static bool testReusableDetector() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
     
-    SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("res1"), LabelStr("ReusableFVDetector"), LabelStr("FlowProfile"),
+    SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("res1"), LabelStr("ReusableFVDetector"), LabelStr("IncrementalFlowProfile"),
 		       1, 1, 0);
     
     //create a token that violates the limit (i.e. consumes 2)

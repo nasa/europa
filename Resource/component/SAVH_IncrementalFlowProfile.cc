@@ -68,6 +68,124 @@ namespace EUROPA
 	  m_upperClosedLevel = m_initLevelUb;
 	}
 
+      initializeGraphs();
+
+      std::set<TransactionId> enabledLower;
+      std::set<TransactionId> enabledUpper;
+
+      // we got to put all the transactions which are pending at this instant but are not yet contributing
+      // to the levels back into the maximum flow!
+      const std::set<TransactionId>& transactions = inst->getTransactions();
+      
+      {
+	std::set<TransactionId>::const_iterator iter = transactions.begin();
+	std::set<TransactionId>::const_iterator end = transactions.end();
+	  
+	for( ; iter != end; ++iter )
+	  {
+	    const TransactionId& transaction = (*iter);
+
+	    TransactionId2InstantId::const_iterator llc_iter = m_lowerLevelContribution.find( transaction );
+	    TransactionId2InstantId::const_iterator ulc_iter = m_upperLevelContribution.find( transaction );
+	  
+	    if( ( llc_iter != m_lowerLevelContribution.end() 
+		  && 
+		  llc_iter->second->getTime() >= inst->getTime() )
+		||
+		llc_iter == m_lowerLevelContribution.end() )
+	      {
+		m_lowerLevelGraph->enableTransaction( transaction );
+		enabledLower.insert( transaction );
+	      }
+
+	    if( ( ulc_iter != m_upperLevelContribution.end() 
+		  && 
+		  ulc_iter->second->getTime() >= inst->getTime() )
+		||
+		ulc_iter == m_upperLevelContribution.end() )
+	      {
+		m_upperLevelGraph->enableTransaction( transaction );
+		enabledUpper.insert( transaction );
+	      }
+	  }
+      }
+
+      {
+	std::set<TransactionId>::const_iterator iter = enabledLower.begin();
+	std::set<TransactionId>::const_iterator end = enabledLower.end();
+	  
+	for( ; iter != end; ++iter )
+	  {
+	    const TransactionId& transaction1 = (*iter);
+
+	    std::set<TransactionId>::const_iterator iter2 = enabledLower.begin();
+	    for( ; iter2 != end; ++iter2 )
+	      {
+		const TransactionId& transaction2 = (*iter2);
+
+		Order order = getOrdering( transaction1, transaction2 );
+			  
+		if( STRICTLY_AT == order ) 
+		  {
+		    m_lowerLevelGraph->enableAt( transaction1, transaction2 );
+		  }
+		else if( BEFORE_OR_AT == order )  
+		  {
+		    m_lowerLevelGraph->enableAtOrBefore( transaction1, transaction2 );
+		  }
+		else if( AFTER_OR_AT == order  )  
+		  {
+		    m_lowerLevelGraph->enableAtOrBefore( transaction2, transaction1 );
+		  }
+		else 
+		  {
+		    debugMsg("IncrementalFlowProfile:enableOrderings","Transaction (" 
+			     << transaction1->getId() << ") and Transaction ("
+			     << transaction2->getId() << ") not constrained");
+		  }
+	      }
+	  
+	  }
+      }    
+
+      {
+	std::set<TransactionId>::const_iterator iter = enabledUpper.begin();
+	std::set<TransactionId>::const_iterator end = enabledUpper.end();
+	  
+	for( ; iter != end; ++iter )
+	  {
+	    const TransactionId& transaction1 = (*iter);
+
+	    std::set<TransactionId>::const_iterator iter2 = enabledUpper.begin();
+	    for( ; iter2 != end; ++iter2 )
+	      {
+		const TransactionId& transaction2 = (*iter2);
+
+		Order order = getOrdering( transaction1, transaction2 );
+			  
+		if( STRICTLY_AT == order ) 
+		  {
+		    m_upperLevelGraph->enableAt( transaction1, transaction2 );
+		  }
+		else if( BEFORE_OR_AT == order )  
+		  {
+		    m_upperLevelGraph->enableAtOrBefore( transaction1, transaction2 );
+		  }
+		else if( AFTER_OR_AT == order  )  
+		  {
+		    m_upperLevelGraph->enableAtOrBefore( transaction2, transaction1 );
+		  }
+		else 
+		  {
+		    debugMsg("IncrementalFlowProfile:enableOrderings","Transaction (" 
+			     << transaction1->getId() << ") and Transaction ("
+			     << transaction2->getId() << ") not constrained");
+		  }
+	      }
+	  
+	  }
+      }    
+
       recomputeLevels( inst, m_lowerClosedLevel, m_upperClosedLevel );
     }
 
@@ -77,16 +195,16 @@ namespace EUROPA
       
       debugMsg("IncrementalFlowProfile::initRecompute","");
 
+      initializeGraphs();
+
       if( m_recalculateLowerLevel )
 	{
 	  m_lowerLevelContribution.clear();
-	  m_lowerLevelGraph->reset();
 	}
 
       if( m_recalculateUpperLevel )
 	{
 	  m_upperLevelContribution.clear();
-	  m_upperLevelGraph->reset();
 	}
       
       // initial level
@@ -212,6 +330,11 @@ namespace EUROPA
 
     void IncrementalFlowProfile::recomputeLevels( InstantId inst, double lowerLevel, double upperLevel ) 
     {
+//        static int counter = 0;
+//        counter++;
+      
+//        debugMsg("Performance::recomputeLevels", "Invocation counter = " << counter );
+
       debugMsg("IncrementalFlowProfile::recomputeLevels","Instant (" 
 	       << inst->getId() << ") at time "
 	       << inst->getTime() << " start levels ["

@@ -169,6 +169,10 @@ namespace EUROPA
       /**
        * @brief 
        */
+      void initializeGraphs();
+      /**
+       * @brief 
+       */
       void postHandleRecompute();
       /**
        * @brief Enables a transaction t. A transaction is enabled a time T to calculate the 
@@ -240,7 +244,12 @@ namespace EUROPA
        * @return
        */
       void recomputeLevels(InstantId prev, InstantId inst);
-     
+
+      typedef std::pair< int, int > IntIntPair;
+      typedef std::map< TransactionId, IntIntPair > TransactionId2IntIntPair;
+
+      TransactionId2IntIntPair m_previousTimeBounds;
+
       SAVH::TransactionId m_dummySourceTransaction;
       SAVH::TransactionId m_dummySinkTransaction;
 
