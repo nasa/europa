@@ -18,7 +18,6 @@
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_Graph.hh"
 #include "SAVH_Instant.hh"
-#include "SAVH_MaxFlow.hh"
 #include "SAVH_Node.hh"
 #include "SAVH_Transaction.hh"
 #include "SAVH_Profile.hh"
@@ -189,83 +188,6 @@ namespace EUROPA
 	}
       
       return residual;
-    }
-
-    double FlowProfileGraph::disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant )
-    {
-      debugMsg("FlowProfileGraph:disableReachableResidualGraph","Lower level: "
-	       << std::boolalpha << m_lowerLevel );
-
-      double residual = 0.0;
-
-      if( m_recalculate )
-	{
-	  debugMsg("FlowProfileGraph:disableReachableResidualGraph","Lower level: "
-		   << std::boolalpha << m_lowerLevel << ", recalculate invoked.");
-
-	  m_maxflow->execute();
-	  
-	  Node2Bool visited;
-
-	  visited[ m_source ] = true;
-
-	  visitNeighbors( m_source, residual, visited, contributions, instant );
-	}
-
-      return residual;
-    }
-
-    void FlowProfileGraph::visitNeighbors( const Node* node, double& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  )
-    {
-      EdgeOutIterator ite( *node );
-      
-      for( ; ite.ok(); ++ite )
-	{
-	  Edge* edge = *ite;
-	  
-	  Node* target = edge->getTarget();
-	  
-	  if( false == visited[ target ] )
-	    {
-	      if( 0 != m_maxflow->getResidual( edge ) )
-		{
-		  visited[ target ] = true;
-		  
-		  if( target != m_source && target != m_sink )
-		    {
-		      debugMsg("FlowProfileGraph:visitNeighbors","Disabling node with transaction ("
-			       << target->getIdentity()->getId() << ") lower level " << std::boolalpha << m_lowerLevel );
-
-		      target->setDisabled();
-
-		      const TransactionId& t = target->getIdentity();
-
-		      contributions[ t ] = instant;
-
-		      int sign = t->isConsumer() ? -1 : +1;
-
-		      if( ( m_lowerLevel && t->isConsumer() )
-			  ||
-			  (!m_lowerLevel && !t->isConsumer() ) )
-			{
-			  debugMsg("FlowProfileGraph:visitNeighbors","Adding "
-				   << sign * t->quantity()->lastDomain().getUpperBound() << " to the level.");
-
-			  residual += sign * t->quantity()->lastDomain().getUpperBound();
-			}
-		      else
-			{
-			  debugMsg("FlowProfileGraph:visitNeighbors","Adding "
-				   << sign* t->quantity()->lastDomain().getLowerBound() << " to the level.");
-
-			  residual += sign * t->quantity()->lastDomain().getLowerBound();
-			}
-		      
-		      visitNeighbors( target, residual, visited, contributions, instant );
-		    }
-		}
-	    }
-	}
     }
 
     void FlowProfileGraph::disable(  const SAVH::TransactionId& id )
@@ -513,11 +435,18 @@ namespace EUROPA
 
     FlowProfile::Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
     {
-      Order returnValue = NOT_ORDERED;
-
       check_error(t1.isValid());
       check_error(t2.isValid());
 
+      TransactionIdTransactionIdPair2Order::const_iterator ite = m_orderings.find( std::make_pair( t1, t2 ) );
+
+      if( ite != m_orderings.end() )
+	{
+	  return (*ite).second; 
+	}
+
+      Order returnValue = NOT_ORDERED;
+      
       const IntervalIntDomain distance = m_planDatabase->getTemporalAdvisor()->getTemporalDistanceDomain( t1->time(), t2->time(), true );
 
       if( distance.getLowerBound() == 0 && distance.getUpperBound() == 0 )
@@ -527,6 +456,8 @@ namespace EUROPA
       else if( distance.getUpperBound() <= 0 )
 	returnValue = AFTER_OR_AT;
       	
+      m_orderings[ std::make_pair( t1, t2 ) ] = returnValue;
+      
       return returnValue;
     }
 
@@ -778,6 +709,8 @@ namespace EUROPA
       check_error(predecessor.isValid());
       check_error(successor.isValid());
 
+      m_orderings.clear();
+
       if( ProfileIteratorId::noId() != m_recomputeInterval )
 	{
 	  m_startRecalculation = std::min( m_recomputeInterval->getStartTime(), std::min( (int) predecessor->time()->lastDomain().getLowerBound(), (int) successor->time()->lastDomain().getLowerBound() ) );	  
@@ -806,6 +739,8 @@ namespace EUROPA
 
       check_error(predecessor.isValid());
       check_error(successor.isValid());
+
+      m_orderings.clear();
 
       if( ProfileIteratorId::noId() != m_recomputeInterval )
 	{

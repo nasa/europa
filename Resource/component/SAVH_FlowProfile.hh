@@ -10,6 +10,7 @@
  */
 
 #include "DomainListener.hh"
+#include "SAVH_MaxFlow.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_ResourceDefs.hh"
 #include "SAVH_Types.hh"
@@ -77,7 +78,7 @@ namespace EUROPA
        * @brief 
        * @return
        */
-      double disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant  );
+      inline double disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant  );
       /**
        * @brief 
        * @return
@@ -96,7 +97,7 @@ namespace EUROPA
        */
       void restoreFlow();
     private:
-      void visitNeighbors( const Node* node, double& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  );
+      inline void visitNeighbors( const Node* node, double& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  );
 
       bool m_lowerLevel;
       bool m_recalculate;
@@ -106,6 +107,85 @@ namespace EUROPA
       SAVH::Node* m_source;
       SAVH::Node* m_sink;
     };
+
+    double FlowProfileGraph::disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant )
+    {
+      debugMsg("FlowProfileGraph:disableReachableResidualGraph","Lower level: "
+	       << std::boolalpha << m_lowerLevel );
+
+      double residual = 0.0;
+
+      if( m_recalculate )
+	{
+	  debugMsg("FlowProfileGraph:disableReachableResidualGraph","Lower level: "
+		   << std::boolalpha << m_lowerLevel << ", recalculate invoked.");
+
+	  m_maxflow->execute();
+	  
+	  Node2Bool visited;
+
+	  visited[ m_source ] = true;
+
+	  visitNeighbors( m_source, residual, visited, contributions, instant );
+	}
+
+      return residual;
+    }
+
+    void FlowProfileGraph::visitNeighbors( const Node* node, double& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  )
+    {
+      EdgeOutIterator ite( *node );
+      
+      for( ; ite.ok(); ++ite )
+	{
+	  Edge* edge = *ite;
+	  
+	  Node* target = edge->getTarget();
+	  
+	  if( false == visited[ target ] )
+	    {
+	      if( 0 != m_maxflow->getResidual( edge ) )
+		{
+		  visited[ target ] = true;
+		  
+		  if( target != m_source && target != m_sink )
+		    {
+		      debugMsg("FlowProfileGraph:visitNeighbors","Disabling node with transaction ("
+			       << target->getIdentity()->getId() << ") lower level " << std::boolalpha << m_lowerLevel );
+
+		      target->setDisabled();
+
+		      const TransactionId& t = target->getIdentity();
+
+		      contributions[ t ] = instant;
+
+		      int sign = t->isConsumer() ? -1 : +1;
+
+		      if( ( m_lowerLevel && t->isConsumer() )
+			  ||
+			  (!m_lowerLevel && !t->isConsumer() ) )
+			{
+			  debugMsg("FlowProfileGraph:visitNeighbors","Adding "
+				   << sign * t->quantity()->lastDomain().getUpperBound() << " to the level.");
+
+			  residual += sign * t->quantity()->lastDomain().getUpperBound();
+			}
+		      else
+			{
+			  debugMsg("FlowProfileGraph:visitNeighbors","Adding "
+				   << sign* t->quantity()->lastDomain().getLowerBound() << " to the level.");
+
+			  residual += sign * t->quantity()->lastDomain().getLowerBound();
+			}
+		      
+		      visitNeighbors( target, residual, visited, contributions, instant );
+		    }
+		}
+	    }
+	}
+    }
+
+
 
     /**
      * @brief Calculates the lower and upper level envelope of a resource.
@@ -267,6 +347,11 @@ namespace EUROPA
 
       int m_startRecalculation;
       int m_endRecalculation;
+
+      typedef std::pair<TransactionId,TransactionId> TransactionIdTransactionIdPair;
+      typedef std::map< TransactionIdTransactionIdPair, Order > TransactionIdTransactionIdPair2Order;
+
+      TransactionIdTransactionIdPair2Order m_orderings;
     };
   }
 }

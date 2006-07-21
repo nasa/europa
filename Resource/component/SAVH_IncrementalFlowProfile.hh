@@ -46,6 +46,7 @@ namespace EUROPA
     private:
       void recomputeLevels( InstantId inst, double lowerLevel, double upperLevel );
 
+
     };
   }
 }
