@@ -352,6 +352,7 @@ namespace EUROPA
       typedef std::map< TransactionIdTransactionIdPair, Order > TransactionIdTransactionIdPair2Order;
 
       TransactionIdTransactionIdPair2Order m_orderings;
+      TransactionIdTransactionIdPair2Order m_orderedAt;
     };
   }
 }

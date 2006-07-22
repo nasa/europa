@@ -22,6 +22,8 @@
 #include "SAVH_Transaction.hh"
 #include "SAVH_Profile.hh"
 #include "TemporalAdvisor.hh"
+#include "Token.hh"
+#include "TokenVariable.hh"
 #include "Utils.hh"
 #include "Variable.hh"
 
@@ -56,9 +58,9 @@ namespace EUROPA
 
     void FlowProfileGraph::enableAt( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 ) 
     {
-      debugMsg("FlowProfileGraph:enableAt","Transaction (" 
-	       << t1->getId() << ") and transaction (" 
-	       << t2->getId() << ") lower level: " 
+      debugMsg("FlowProfileGraph:enableAt","Transaction " 
+	       << t1->time()->toString() << " and transaction " 
+	       << t2->time()->toString() << " lower level: " 
 	       << std::boolalpha << m_lowerLevel );
 
 
@@ -76,9 +78,9 @@ namespace EUROPA
 
     void FlowProfileGraph::enableAtOrBefore( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 ) 
     {
-      debugMsg("FlowProfileGraph:enableAtOrBefore","Transaction (" 
-	       << t1->getId() << ") and transaction (" 
-	       << t2->getId() << ") lower level: " 
+      debugMsg("FlowProfileGraph:enableAtOrBefore","Transaction " 
+	       << t1->time()->toString() << " and transaction " 
+	       << t2->time()->toString() << " lower level: " 
 	       << std::boolalpha << m_lowerLevel );
 
 
@@ -435,28 +437,90 @@ namespace EUROPA
 
     FlowProfile::Order FlowProfile::getOrdering( const TransactionId t1, const TransactionId t2 )
     {
+      // in case constraint added and already constrained to be before or after we no longer have to 
+      // recalculate
+
       check_error(t1.isValid());
       check_error(t2.isValid());
 
-      TransactionIdTransactionIdPair2Order::const_iterator ite = m_orderings.find( std::make_pair( t1, t2 ) );
+      TransactionIdTransactionIdPair p12 = std::make_pair( t1, t2 );
 
+      TransactionIdTransactionIdPair2Order::const_iterator ite = m_orderedAt.find( p12 );
+      
+      if( ite != m_orderedAt.end() )
+	{
+	  return (*ite).second; 
+	}
+      
+      ite = m_orderings.find( p12 );
+      
       if( ite != m_orderings.end() )
 	{
 	  return (*ite).second; 
 	}
 
-      Order returnValue = NOT_ORDERED;
-      
-      const IntervalIntDomain distance = m_planDatabase->getTemporalAdvisor()->getTemporalDistanceDomain( t1->time(), t2->time(), true );
+      TransactionIdTransactionIdPair p21 = std::make_pair( t2, t1 );
 
-      if( distance.getLowerBound() == 0 && distance.getUpperBound() == 0 )
-	returnValue = STRICTLY_AT;
-      else if( distance.getLowerBound() >= 0 )
-	returnValue = BEFORE_OR_AT;
-      else if( distance.getUpperBound() <= 0 )
-	returnValue = AFTER_OR_AT;
-      	
-      m_orderings[ std::make_pair( t1, t2 ) ] = returnValue;
+      ite = m_orderings.find( p21 );
+
+      if( ite != m_orderings.end() )
+	{
+	  if( (*ite).second == BEFORE_OR_AT )
+	    return AFTER_OR_AT;
+
+	  if( (*ite).second == AFTER_OR_AT )
+	    return BEFORE_OR_AT;
+
+	  return (*ite).second;
+	}
+
+
+      Order returnValue = NOT_ORDERED;
+
+      // if the two transistion belong to a start and end variable of the same
+      // token we know the ordering without having to ask for the temporal 
+      // distance
+      if( t1->time()->getParent() == t2->time()->getParent()
+	  &&
+	  TokenId::convertable( t1->time()->getParent() ) )
+	{
+	  TokenId token( t1->time()->getParent() );
+
+	  if( token->getStart() == t1->time() )
+	    {
+	      returnValue = BEFORE_OR_AT;
+	    }
+	  else
+	    {
+	      returnValue = AFTER_OR_AT;
+	    }
+	}
+      else
+	{
+	  const IntervalIntDomain distance = m_planDatabase->getTemporalAdvisor()->getTemporalDistanceDomain( t1->time(), t2->time(), true );
+	  
+	  if( distance.getLowerBound() == 0 && distance.getUpperBound() == 0 )
+	    {
+	      returnValue = STRICTLY_AT;
+	    }
+	  else if( distance.getLowerBound() >= 0 )
+	    {
+	      returnValue = BEFORE_OR_AT;
+	    }
+	  else if( distance.getUpperBound() <= 0 )
+	    {
+	      returnValue = AFTER_OR_AT;
+	    }
+	}
+      
+      if( returnValue == STRICTLY_AT ) 
+	{
+	  m_orderedAt[ std::make_pair( t1, t2 ) ] = returnValue;
+	}
+      else
+	{
+	  m_orderings[ std::make_pair( t1, t2 ) ] = returnValue;
+	}
       
       return returnValue;
     }
@@ -741,6 +805,7 @@ namespace EUROPA
       check_error(successor.isValid());
 
       m_orderings.clear();
+      m_orderedAt.clear();
 
       if( ProfileIteratorId::noId() != m_recomputeInterval )
 	{

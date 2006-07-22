@@ -42,7 +42,7 @@ namespace EUROPA
       /**
        * @brief 
        */
-      void enableOrderings(  const InstantId& inst  );
+      bool enableOrderings(  const InstantId& inst  );
     private:
       void recomputeLevels( InstantId inst, double lowerLevel, double upperLevel );
 

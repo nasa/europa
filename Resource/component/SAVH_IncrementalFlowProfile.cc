@@ -84,10 +84,10 @@ namespace EUROPA
 	for( ; iter != end; ++iter )
 	  {
 	    const TransactionId& transaction = (*iter);
-
+	    
 	    TransactionId2InstantId::const_iterator llc_iter = m_lowerLevelContribution.find( transaction );
 	    TransactionId2InstantId::const_iterator ulc_iter = m_upperLevelContribution.find( transaction );
-	  
+	    
 	    if( ( llc_iter != m_lowerLevelContribution.end() 
 		  && 
 		  llc_iter->second->getTime() >= inst->getTime() )
@@ -118,30 +118,34 @@ namespace EUROPA
 	  {
 	    const TransactionId& transaction1 = (*iter);
 
-	    std::set<TransactionId>::const_iterator iter2 = enabledLower.begin();
+	    std::set<TransactionId>::const_iterator iter2 = iter;
+
 	    for( ; iter2 != end; ++iter2 )
 	      {
 		const TransactionId& transaction2 = (*iter2);
 
-		Order order = getOrdering( transaction1, transaction2 );
-			  
-		if( STRICTLY_AT == order ) 
+		if( transaction1 != transaction2 )
 		  {
-		    m_lowerLevelGraph->enableAt( transaction1, transaction2 );
-		  }
-		else if( BEFORE_OR_AT == order )  
-		  {
-		    m_lowerLevelGraph->enableAtOrBefore( transaction1, transaction2 );
-		  }
-		else if( AFTER_OR_AT == order  )  
-		  {
-		    m_lowerLevelGraph->enableAtOrBefore( transaction2, transaction1 );
-		  }
-		else 
-		  {
-		    debugMsg("IncrementalFlowProfile:enableOrderings","Transaction (" 
-			     << transaction1->getId() << ") and Transaction ("
-			     << transaction2->getId() << ") not constrained");
+		    Order order = getOrdering( transaction1, transaction2 );
+		    
+		    if( STRICTLY_AT == order ) 
+		      {
+			m_lowerLevelGraph->enableAt( transaction1, transaction2 );
+		      }
+		    else if( BEFORE_OR_AT == order )  
+		      {
+			m_lowerLevelGraph->enableAtOrBefore( transaction1, transaction2 );
+		      }
+		    else if( AFTER_OR_AT == order  )  
+		      {
+			m_lowerLevelGraph->enableAtOrBefore( transaction2, transaction1 );
+		      }
+		    else 
+		      {
+			debugMsg("IncrementalFlowProfile:enableOrderings","Transaction (" 
+				 << transaction1->getId() << ") and Transaction ("
+				 << transaction2->getId() << ") not constrained");
+		      }
 		  }
 	      }
 	  
@@ -156,30 +160,34 @@ namespace EUROPA
 	  {
 	    const TransactionId& transaction1 = (*iter);
 
-	    std::set<TransactionId>::const_iterator iter2 = enabledUpper.begin();
+	    std::set<TransactionId>::const_iterator iter2 = iter;
+
 	    for( ; iter2 != end; ++iter2 )
 	      {
 		const TransactionId& transaction2 = (*iter2);
 
-		Order order = getOrdering( transaction1, transaction2 );
-			  
-		if( STRICTLY_AT == order ) 
+		if( transaction1 != transaction2 )
 		  {
-		    m_upperLevelGraph->enableAt( transaction1, transaction2 );
-		  }
-		else if( BEFORE_OR_AT == order )  
-		  {
-		    m_upperLevelGraph->enableAtOrBefore( transaction1, transaction2 );
-		  }
-		else if( AFTER_OR_AT == order  )  
-		  {
+		    Order order = getOrdering( transaction1, transaction2 );
+		    
+		    if( STRICTLY_AT == order ) 
+		      {
+			m_upperLevelGraph->enableAt( transaction1, transaction2 );
+		      }
+		    else if( BEFORE_OR_AT == order )  
+		      {
+			m_upperLevelGraph->enableAtOrBefore( transaction1, transaction2 );
+		      }
+		    else if( AFTER_OR_AT == order  )  
+		      {
 		    m_upperLevelGraph->enableAtOrBefore( transaction2, transaction1 );
-		  }
-		else 
-		  {
-		    debugMsg("IncrementalFlowProfile:enableOrderings","Transaction (" 
-			     << transaction1->getId() << ") and Transaction ("
-			     << transaction2->getId() << ") not constrained");
+		      }
+		    else 
+		      {
+			debugMsg("IncrementalFlowProfile:enableOrderings","Transaction (" 
+				 << transaction1->getId() << ") and Transaction ("
+				 << transaction2->getId() << ") not constrained");
+		      }
 		  }
 	      }
 	  
@@ -214,9 +222,11 @@ namespace EUROPA
       m_upperClosedLevel = m_initLevelUb;
     }
 
-    void IncrementalFlowProfile::enableOrderings( const InstantId& inst  )
+    bool IncrementalFlowProfile::enableOrderings( const InstantId& inst  )
     {
       debugMsg("IncrementalFlowProfile:enableOrderings","Instant Id (" << inst->getId() << ")");
+
+      bool returnValue = false;
 
       const std::set<TransactionId>& startingTransactions = inst->getStartingTransactions();
       
@@ -229,6 +239,10 @@ namespace EUROPA
 
 	  if( !transaction1->time()->lastDomain().isSingleton() )
 	    {
+	      enableTransaction( transaction1 );
+	      
+	      returnValue = true;
+
 	      const std::set<TransactionId>& transactions = inst->getTransactions();
 	  
 	      std::set<TransactionId>::const_iterator iter = transactions.begin();
@@ -311,6 +325,8 @@ namespace EUROPA
 		}
 	    }
 	}
+
+      return returnValue;
     }
     
     void IncrementalFlowProfile::recomputeLevels( InstantId prev, InstantId inst ) 
@@ -341,34 +357,9 @@ namespace EUROPA
 	       << lowerLevel << "," 
 	       << upperLevel << "]");
 
-      const std::set<TransactionId>& startingTransactions = inst->getStartingTransactions();
-
-      bool expansion = false;
+      bool expansion = enableOrderings( inst );
       
       {
-	std::set<TransactionId>::const_iterator ite = startingTransactions.begin();
-	std::set<TransactionId>::const_iterator end = startingTransactions.end();
-	
-	for( ; ite != end; ++ite )
-	  {
-	    const TransactionId& started = (*ite);
-	    
-	    check_error( started->time()->lastDomain().getLowerBound() == inst->getTime() );
-
-	    // if the transaction is a singleton it goes straight into the closed set
-	    if( !started->time()->lastDomain().isSingleton() )
-	      {
-		debugMsg("IncrementalFlowProfile::recomputeLevels","Expanding graphs with transaction ("
-			 << started->getId() << ")");
-
-		expansion = true;
-		
-		enableTransaction( started );
-	      }
-	  }
-	
-	enableOrderings( inst );
-
 	if( expansion )
 	  {
 	    if( m_recalculateLowerLevel )
