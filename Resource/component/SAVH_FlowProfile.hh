@@ -53,58 +53,120 @@ namespace EUROPA
        */
       void enableAtOrBefore( const SAVH::TransactionId& t1, const SAVH::TransactionId& t2 );
       /**
-       * @brief 
+       * @brief Creates a node in the network and creates an edge:
+       *
+       * \verbatim
+       *                               |            lower level               |            upper level 
+       *   ---------------------------------------------------------------------------------------------------------
+       *   transaction is consumer     |  <source, transaction> w = q.upper   |  <transaction, sink> w = q.lower
+       *   ---------------------------------------------------------------------------------------------------------
+       *   transaction is producer     |  <transaction, sink > w = q.lower    |  <source, transaction> w = q.upper        
+       *   ---------------------------------------------------------------------------------------------------------
+       * \endverbatim
        */
       void enableTransaction( const SAVH::TransactionId& transaction );
       /**
-       * @brief 
-       * @return
+       * @brief Returns true if \a transaction is enabled in the invoking 
+       * instance
        */
       bool isEnabled(  const SAVH::TransactionId& transaction ) const;
       /**
-       * @brief 
+       * @brief Disables \a transaction, if enabled, for the invoking instance
        */
-      void disable(  const SAVH::TransactionId& transaction ) ;
+      void disable( const SAVH::TransactionId& transaction ) ;
       /**
-       * @brief 
+       * @brief Will push any flow wich flows through the node corresponding with \a transaction
+       * back to the source of the edge the flow originates from. 
+       * 
+       * When we move from one instant to another we retract all the transactions whose end time
+       * is equal to the new instant time and the transaction is still in the network. This method
+       * will push any flow going through this node back to where it is coming from after which we 
+       * try again to push the flow to the sink.
+
+       * Will error out if no node corresponding to \a transaction is in the network or if the node
+       * is not enabled.
+       *
+       * If a recalculation of the maximum flow is required this method will do nothing.
+       * \todo verify if this is really required or perhaps we should error out?
        */
       void pushFlow( const SAVH::TransactionId& transaction );
       /**
-       * @brief 
-       * @return
+       * @brief Returns the cummulative residual capacity originating from the source.
+       *
+       * Iterates over all outgoing edges from the source and sums the residual capicity of each
+       * edge. Might trigger a maximum flow (re) calculation if required.
        */
       double getResidualFromSource();
       /**
-       * @brief 
-       * @return
+       * @brief Disables every node reachable from the source in the residual network. Returns the sum 
+       * of the contribution of each disabled node. The contribution is determined as following:
+       * \verbatim
+       *                               |  lower level |  upper level 
+       *   ---------------------------------------------------------------------------------------------------------
+       *   transaction is consumer     |    q.upper   |   q.lower 
+       *   ---------------------------------------------------------------------------------------------------------
+       *   transaction is producer     |    q.lower   |   q.upper
+       *   ---------------------------------------------------------------------------------------------------------
+       * \endverbatim
+       *
+       * where q is the quantity variable associated with the transactions associated with the node. The parameter \a
+       * contributions, which maps a TransactionId to a InstantId is maps every transaction associated with a disabled
+       * node to \a instant.
        */
       inline double disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant  );
       /**
-       * @brief 
-       * @return
+       * @brief Returns true if the invoking instance calculates the lower level, otherwise returns false which indicates
+       * the invoking instance is calculating the upper level.
        */
       bool isLowerLevel() const { return m_lowerLevel; }
       /**
-       * @brief 
+       * @brief Removes transaction \a id from the network. 
        */
       void removeTransaction( const SAVH::TransactionId& id );
       /**
-       * @brief 
+       * @brief Resets the invoking instance.
+       *
+       * Resetting entails disabling all the nodes, implying disabling all the edges, except for the 
+       * source and the sink.
+       * 
        */
       void reset();
       /**
-       * @brief 
+       * @brief Restore flow invokes the maximum flow algorithm without resetting the existing distances 
+       * and existing flows on the nodes.
+       *
+       * Restore flows is done after extracting all the nodes that expire (go from pending to closed set
+       * at an instant) from the network by pushing flow back. 
        */
       void restoreFlow();
     private:
+      /**
+       * @brief Helper function for disableReachableResidualGraph
+       */
       inline void visitNeighbors( const Node* node, double& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  );
-
+      /*!
+       * @brief Boolean indicating if the instance is intended to calculate the lower level
+       */
       bool m_lowerLevel;
+      /*!
+       * @brief Boolean indicating if the maximum flow solution needs to be recalculated
+       */
       bool m_recalculate;
-
+      /*!
+       * @brief
+       */
       SAVH::MaximumFlowAlgorithm* m_maxflow;
+      /*!
+       * @brief Bi directional graph datastructure 
+       */
       SAVH::Graph* m_graph;
+      /*!
+       * @brief Source for the maximum flow problem
+       */
       SAVH::Node* m_source;
+      /*!
+       * @brief Sink for the maximum flow problem
+       */
       SAVH::Node* m_sink;
     };
 
@@ -230,24 +292,26 @@ namespace EUROPA
     {
     public:
       /**
-       * @brief 
+       * @brief Constructor
        */
       FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb = 0, const double initLevelUb = 0 );
       /**
-       * @brief 
+       * @brief Destructor
        */
       virtual ~FlowProfile();
     protected:
-      enum Order {
-	AFTER_OR_AT = 0,
-	BEFORE_OR_AT,
-	NOT_ORDERED,
-	STRICTLY_AT,
-	UNKNOWN
-      };
-
       /**
-       * @brief 
+       * @brief Indicates the ordering between two time variables associated with a transaction
+       */
+      enum Order {
+	AFTER_OR_AT = 0, /*!< Indicates one transaction is strictly after or at the same time with another transaction. */ 
+	BEFORE_OR_AT,/*!< Indicates one transaction is strictly before or at the same time with another transaction. */ 
+	NOT_ORDERED,/*!< Indicates one transaction is not ordered with another transaction. */ 
+	STRICTLY_AT,/*!< Indicates one transaction is strictly at the same time with another transaction. */ 
+	UNKNOWN 
+      };
+      /**
+       * @brief Deletes pre-existing FlowProfileGraphs for the lower and upper level and allocates new ones.
        */
       void initializeGraphs();
       /**
@@ -344,9 +408,6 @@ namespace EUROPA
 
       bool m_recalculateLowerLevel;
       bool m_recalculateUpperLevel;    
-
-      int m_startRecalculation;
-      int m_endRecalculation;
 
       typedef std::pair<TransactionId,TransactionId> TransactionIdTransactionIdPair;
       typedef std::map< TransactionIdTransactionIdPair, Order > TransactionIdTransactionIdPair2Order;
