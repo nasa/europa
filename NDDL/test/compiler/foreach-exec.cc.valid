@@ -826,6 +826,7 @@ namespace NDDL {
             vars.push_back(var(getId(),std::string("t_local_0")));
             rule_constraint(eq, vars);
           }
+          clearLoopVar("t");
         }
       }
     }
@@ -965,6 +966,7 @@ namespace NDDL {
           loopVar(Rover, t);
           slave(Rover::Navigate, Rover.Navigate, n, LabelStr("contains"));
           contains(this, n);
+          clearLoopVar("t");
         }
       }
     }
@@ -1015,6 +1017,7 @@ namespace NDDL {
           loopVar(Path, q);
           slave(Rover::Navigate, Rover.Navigate, n, LabelStr("contains"));
           contains(this, n);
+          clearLoopVar("q");
         }
       }
     }

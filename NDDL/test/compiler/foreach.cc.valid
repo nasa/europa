@@ -826,6 +826,7 @@ namespace NDDL {
             vars.push_back(var(getId(),std::string("t_local_0")));
             rule_constraint(eq, vars);
           }
+          clearLoopVar("t");
         }
       }
     }
