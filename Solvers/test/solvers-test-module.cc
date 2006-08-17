@@ -2208,12 +2208,12 @@ public:
 private:
 
   static bool testUnboundVariableFlawIteration() {
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "UnboundVariableManager");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "UnboundVariableManager");
     
     StandardAssembly assembly(Schema::instance());
     UnboundVariableManager fm(*root);
     fm.initialize(assembly.getPlanDatabase());
-    assert(assembly.playTransactions("UnboundVariableFiltering.xml"));
+    assert(assembly.playTransactions((getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str()));
 
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
@@ -2240,14 +2240,14 @@ private:
   }
   
   static bool testOpenConditionFlawIteration() {
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "OpenConditionManager");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "OpenConditionManager");
     
     StandardAssembly assembly(Schema::instance());
     OpenConditionManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
     fm.initialize(assembly.getPlanDatabase());
-    assert(assembly.playTransactions("OpenConditionFiltering.xml"));
+    assert(assembly.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.xml").c_str()));
 
     TokenSet tokens = assembly.getPlanDatabase()->getTokens();
     IteratorId flawIterator = fm.createIterator();
@@ -2273,14 +2273,14 @@ private:
   }
 
   static bool testThreatFlawIteration() {
-    TiXmlElement* root = initXml("FlawFilterTests.xml", "ThreatManager");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "ThreatManager");
 
     StandardAssembly assembly(Schema::instance());
     ThreatManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
     fm.initialize(assembly.getPlanDatabase());
-    assert(assembly.playTransactions("ThreatFiltering.xml"));
+    assert(assembly.playTransactions((getTestLoadLibraryPath() + "/ThreatFiltering.xml").c_str()));
 
     TokenSet tokens = assembly.getPlanDatabase()->getTokens();
     IteratorId flawIterator = fm.createIterator();
@@ -2305,7 +2305,7 @@ private:
   }
 
   static bool testSolverIteration() {
-    TiXmlElement* root = initXml("IterationTests.xml", "Solver");
+    TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/IterationTests.xml" ).c_str(), "Solver");
     StandardAssembly assembly(Schema::instance());
     ThreatManager tm(*(root->FirstChildElement("ThreatManager")));
     OpenConditionManager ocm(*(root->FirstChildElement("OpenConditionManager")));
@@ -2315,9 +2315,9 @@ private:
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
 
-    assert(assembly.playTransactions("ThreatFiltering.xml"));
-    //assert(assembly.playTransactions("OpenConditionFiltering.xml"));
-    //assert(assembly.playTransactions("UnboundVariableFiltering.xml"));
+    assert(assembly.playTransactions((getTestLoadLibraryPath() + "/ThreatFiltering.xml").c_str()));
+    //assert(assembly.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.xml").c_str()));
+    //assert(assembly.playTransactions((getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str()));
 
     tm.initialize(assembly.getPlanDatabase());
     ocm.initialize(assembly.getPlanDatabase());
