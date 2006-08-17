@@ -4,7 +4,7 @@ if ! $(PLASMA_READY) {
 
 Module TinyXml ;
 
-SubInclude PLASMA TinyXml core ;
+SubInclude PLASMA TinyXml base ;
 SubInclude PLASMA TinyXml component ;
 SubInclude PLASMA TinyXml documentation ;
 SubInclude PLASMA TinyXml test ;

@@ -3754,7 +3754,7 @@ public:
       }
       // Would do:
       // DECLARE_TOKEN_FACTORY(TestClass2::Sample, TestClass2.Sample);
-      // ... but that is in NDDL/core/NddlUtils.hh, which this should not depend on, so:
+      // ... but that is in NDDL/base/NddlUtils.hh, which this should not depend on, so:
       class Factory : public ConcreteTokenFactory {
       public:
         Factory()

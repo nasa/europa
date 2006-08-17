@@ -49,17 +49,17 @@ namespace EUROPA {
 
     DecisionPointId UnboundVariableManager::nextZeroCommitmentDecision(){
       for(ConstrainedVariableSet::const_iterator it = m_singletonFlawCandidates.begin(); 
-	  it != m_singletonFlawCandidates.end(); ++it){
-	ConstrainedVariableId var = *it;
-	checkError(var.isValid(), var);
-	checkError(var->lastDomain().isSingleton(), "Buffer management error:" << var->toString());
-
-	if(!dynamicMatch(var)){
-	  debugMsg("UnboundVariableManager:nextZeroCommitmentDecision", "Allocating for " << var->toString());
-	  return allocateDecisionPoint(var);
-	}
+          it != m_singletonFlawCandidates.end(); ++it){
+        ConstrainedVariableId var = *it;
+        checkError(var.isValid(), var);
+        checkError(var->lastDomain().isSingleton(), "Buffer management error:" << var->toString());
+        
+        if(!dynamicMatch(var)){
+          debugMsg("UnboundVariableManager:nextZeroCommitmentDecision", "Allocating for " << var->toString());
+          return allocateDecisionPoint(var, "unit");
+        }
       }
-
+      
       return DecisionPointId::noId();
     }
 
@@ -243,7 +243,7 @@ namespace EUROPA {
 
     //reordered FROM guard, key pref TO choice count, guard
     //re-reordered from choice count, guard TO guard, choice count
-    bool UnboundVariableManager::betterThan(const EntityId& a, const EntityId& b){
+    bool UnboundVariableManager::betterThan(const EntityId& a, const EntityId& b, LabelStr& explanation){
       //we only ever get here because the priority is equal
       //Added to duplicate behavior from HTX.  This may not be the best idea ever. ~MJI
       const ConstrainedVariableId va = a;
@@ -253,6 +253,7 @@ namespace EUROPA {
         bool bCompat = isCompatGuard(b);
         if(aCompat && !bCompat) {
           debugMsg("UnboundVariableManager:betterThan", a->getKey() << " is better than " << b->getKey() << " because it is a guard.");
+          explanation = "aGuard";
           return true;
         }
         else if(!aCompat && bCompat) {
@@ -263,6 +264,7 @@ namespace EUROPA {
         if(va->lastDomain().getSize() < vb->lastDomain().getSize()) {
           debugMsg("UnboundVariableManager:betterThan", a->getKey() << " is better than " << b->getKey() << 
                    " because it has " << va->lastDomain().getSize() << " choices, as opposed to " << vb->lastDomain().getSize());
+          explanation = "aSmaller";
           return true; //here goes nothin'...
         }
         else if(va->lastDomain().getSize() > vb->lastDomain().getSize()) {

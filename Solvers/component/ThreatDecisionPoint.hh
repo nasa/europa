@@ -19,7 +19,8 @@ namespace EUROPA {
     class ThreatDecisionPoint: public DecisionPoint {
     public:
 
-      ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData);
+      ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData, 
+                          const LabelStr& explanation = "unknown");
 
       /**
        * @brief Used to prune entities out which are not active tokens

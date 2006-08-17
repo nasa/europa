@@ -6,7 +6,7 @@ Module ConstraintEngine : Utils TinyXml ;
 
 ModuleFiles ConstraintEngine : ConstraintEngineDefs.cc ;
 
-SubInclude PLASMA ConstraintEngine core ;
+SubInclude PLASMA ConstraintEngine base ;
 SubInclude PLASMA ConstraintEngine component ;
 
 

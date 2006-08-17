@@ -53,7 +53,8 @@ namespace EUROPA {
 
     protected:
 
-      UnboundVariableDecisionPoint(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
+      UnboundVariableDecisionPoint(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData,
+                                   const LabelStr& explanation = "unknown");
 
       const ConstrainedVariableId m_flawedVariable; /*!< The Flaw to resolve */
 
@@ -79,7 +80,7 @@ namespace EUROPA {
      */
     class MinValue: public UnboundVariableDecisionPoint {
     public:
-      MinValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
+      MinValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
       bool hasNext() const;
       double getNext();
 
@@ -93,7 +94,7 @@ namespace EUROPA {
      */
     class MaxValue: public UnboundVariableDecisionPoint {
     public:
-      MaxValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
+      MaxValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
       bool hasNext() const;
       double getNext();
 
@@ -110,7 +111,7 @@ namespace EUROPA {
      */
     class RandomValue: public UnboundVariableDecisionPoint {
     public:
-      RandomValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData);
+      RandomValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
       bool hasNext() const;
       double getNext();
 

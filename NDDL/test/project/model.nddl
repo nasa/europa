@@ -1,5 +1,5 @@
-#include "../../core/Plasma.nddl"
-#include "../../core/PlannerConfig.nddl"
+#include "../../base/Plasma.nddl"
+#include "../../base/PlannerConfig.nddl"
 
 /**
  * @brief Place holder class with a single predicate

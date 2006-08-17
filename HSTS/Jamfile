@@ -6,7 +6,7 @@ Module HSTS : NDDL ConstraintEngine RulesEngine PlanDatabase TemporalNetwork CBP
 
 ModuleLibraries HSTS : $(DLOPEN_LIBRARY) ;
 
-SubInclude PLASMA HSTS core ;
+SubInclude PLASMA HSTS base ;
 SubInclude PLASMA HSTS component ;
 SubInclude PLASMA HSTS documentation ;
 SubInclude PLASMA HSTS test ;

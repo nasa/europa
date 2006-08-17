@@ -87,8 +87,8 @@ and calculate duration based on actual distance to boundary (unless
 it don't matter)
 */
 
-#include "../../NDDL/core/Plasma.nddl"
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "../../NDDL/base/Plasma.nddl"
+#include "../../NDDL/base/PlannerConfig.nddl"
 
 //Enumerated Types
 

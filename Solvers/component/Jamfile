@@ -16,6 +16,8 @@ ModuleComponent Solvers
 	SolverConfig.cc
 	HSTSDecisionPoints.cc
 	ResourceThreatDecisionPoint.cc
+  SAVH_ThreatManager.cc
+  SAVH_ThreatDecisionPoint.cc
 	;
 
 } # PLASMA_READY

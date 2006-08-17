@@ -23,6 +23,7 @@ namespace EUROPA{
     virtual ~STNTemporalAdvisor();
 
     virtual bool canPrecede(const TokenId& first, const TokenId& second);
+    virtual bool canPrecede(const TimeVarId& first, const TimeVarId& second);
     virtual bool canFitBetween(const TokenId& token, const TokenId& predecessor,
 			       const TokenId& successor);
     virtual bool canBeConcurrent(const TokenId& first, const TokenId& second);

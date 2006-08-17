@@ -33,8 +33,8 @@ public:
 };
 
 void nddloutputModel(std::ofstream& out, const Problem& prob) {
-  out << "#include \"../../NDDL/core/Plasma.nddl\"" << std::endl;
-  out << "#include \"../../NDDL/core/PlannerConfig.nddl\"" << std::endl; 
+  out << "#include \"../../NDDL/base/Plasma.nddl\"" << std::endl;
+  out << "#include \"../../NDDL/base/PlannerConfig.nddl\"" << std::endl; 
   out << std::endl;
   out << "enum Target {";  
   for (int i=1; i <= prob.numTargets; ++i) {

@@ -4,7 +4,7 @@ if ! $(PLASMA_READY) {
 
 Module PlanDatabase : ConstraintEngine ;
 
-SubInclude PLASMA PlanDatabase core ;
+SubInclude PLASMA PlanDatabase base ;
 SubInclude PLASMA PlanDatabase component ;
 SubInclude PLASMA PlanDatabase documentation ;
 SubInclude PLASMA PlanDatabase test ;

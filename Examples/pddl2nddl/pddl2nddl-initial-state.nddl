@@ -1,62 +1,33 @@
-#include "./pddl2nddl-model.nddl"
+#include "pddl2nddl-model.nddl"
+// Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth
+PlannerConfig world  = new PlannerConfig(0, 1000, 1000, +inf);
 
-PlannerConfig planner = new PlannerConfig(0, 100, 600);
+/////// STATE VARIABLES ////////
 
-// A single rover.
-Rover rover1 = new Rover();
+Var1 var1 = new Var1();
+Var0 var0 = new Var0();
 
-// Simple world of three waypoints.
-Waypoint waypoint1 = new Waypoint();
-Waypoint waypoint2 = new Waypoint();
-Waypoint waypoint3 = new Waypoint();
+/////// ACTIONS ////////
 
-// only path is wp1->wp2->wp3
-Can_Traverse t1 = new Can_Traverse(rover1, waypoint1, waypoint2);
-Can_Traverse t2 = new Can_Traverse(rover1, waypoint2, waypoint3);
+unload_truck_pkg1_truck1_postoffice1 action1 = new unload_truck_pkg1_truck1_postoffice1();
+load_truck_pkg1_truck1_postoffice1 action2 = new load_truck_pkg1_truck1_postoffice1();
 
-Visible v1 = new Visible (waypoint1, waypoint2);
-Visible v2 = new Visible (waypoint2, waypoint1);
-Visible v3 = new Visible (waypoint2, waypoint3);
-Visible v4 = new Visible (waypoint3, waypoint2);
-
-// Mutex relationships.
-At_and_not_at_mutex mutex1 = new At_and_not_at_mutex(rover1, waypoint1);
-At_and_not_at_mutex mutex2 = new At_and_not_at_mutex(rover1, waypoint2);
-At_and_not_at_mutex mutex4 = new At_and_not_at_mutex(rover1, waypoint3);
-
-At_and_navigate_mutex mutex5 = new At_and_navigate_mutex(rover1, waypoint1);
-At_and_navigate_mutex mutex6 = new At_and_navigate_mutex(rover1, waypoint2);
-At_and_navigate_mutex mutex7 = new At_and_navigate_mutex(rover1, waypoint3);
-
-Not_at_and_navigate_mutex mutex8 = new Not_at_and_navigate_mutex(rover1, waypoint1);
-Not_at_and_navigate_mutex mutex9 = new Not_at_and_navigate_mutex(rover1, waypoint2);
-Not_at_and_navigate_mutex mutex10 = new Not_at_and_navigate_mutex(rover1, waypoint3);
-
-Domain theDomain = new Domain();
-
+ // Close the the PLASMA Database - no more objects can be created.
 close();
 
-// Inital state
-goal(Domain.at initialPosition);
-initialPosition.object.specify(theDomain);
-initialPosition.x.specify(rover1);
-initialPosition.y.specify(waypoint1);
+/////// INITIAL STATE ////////
 
-// Goal State
-goal(Domain.at goalPosition);
-goalPosition.x.specify(rover1);
-goalPosition.y.specify(waypoint2);
-goalPosition.activate();
+goal(var0.in_pkg1_truck1 initialStateEntry1);
+eq(initialStateEntry1.start, world.m_horizonStart);
+precedes(initialStateEntry1.end, world.m_horizonEnd);
 
-// Temporal relationship between inital state and goal state
+goal(var1.at_truck1_postoffice1 initialStateEntry2);
+eq(initialStateEntry2.start, world.m_horizonStart);
+precedes(initialStateEntry2.end, world.m_horizonEnd);
 
-// everything ends before the plan ends
-leq(planner.m_horizonStart, initialPosition.start);
-leq(initialPosition.end, planner.m_horizonEnd);
-leq(planner.m_horizonStart, goalPosition.start);
-leq(goalPosition.end, planner.m_horizonEnd);
+/////// GOAL STATE ////////
 
-// the intial facts end before the goal facts
-leq(initialPosition.end, goalPosition.start);
-eq(initialPosition.start, 0);
-eq(initialPosition.end, 1);
+goal(var0.at_pkg1_postoffice1 goalStateEntry1);
+precedes(world.m_horizonStart, goalStateEntry1.start);
+precedes(goalStateEntry1.end, world.m_horizonEnd);
+

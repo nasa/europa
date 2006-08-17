@@ -4,7 +4,7 @@ if ! $(PLASMA_READY) {
 
 Module CBPlanner : RulesEngine Resource HeuristicsEngine ;
 
-SubInclude PLASMA CBPlanner core ;
+SubInclude PLASMA CBPlanner base ;
 SubInclude PLASMA CBPlanner component ;
 SubInclude PLASMA CBPlanner documentation ;
 SubInclude PLASMA CBPlanner test ;

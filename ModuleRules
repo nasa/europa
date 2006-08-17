@@ -30,7 +30,7 @@ rule Module {
   LOCATE_OBJECTS on $(module) = [ FDirName $(SUBDIR) [ ObjectsSubdirName $(VARIANTS) ] ] ;
   LOCATE_SHARED on $(module) = [ FDirName $($(_top)) lib ] ;
   INCLUDES on $(module) += $(SUBDIR) ;
-  INCLUDES on $(module) += [ FDirName $(SUBDIR) core ] ;
+  INCLUDES on $(module) += [ FDirName $(SUBDIR) base ] ;
   INCLUDES on $(module) += [ FDirName $(SUBDIR) component ] ;
 }
 
@@ -48,8 +48,8 @@ rule ModuleFiles {
   ModulePart $(module) : $(files) ;
 }
 
-# ModuleCore <name> : <files for this module > ;
-rule ModuleCore {
+# ModuleBase <name> : <files for this module > ;
+rule ModuleBase {
   ModuleFiles $(1) : $(2) ;
 }
 

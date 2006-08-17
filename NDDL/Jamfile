@@ -4,7 +4,7 @@ if ! $(PLASMA_READY) {
 
 Module NDDL : RulesEngine Resource TemporalNetwork PlanDatabase ;
 
-SubInclude PLASMA NDDL core ;
+SubInclude PLASMA NDDL base ;
 SubInclude PLASMA NDDL component ;
 
 ModuleFiles NDDL : NddlDefs.cc ;

@@ -30,7 +30,7 @@
 #include "SolverPartialPlanWriter.hh"
 #include "HSTSDecisionPoints.hh"
 #include "ResourceThreatDecisionPoint.hh"
-
+#include "SAVH_ThreatDecisionPoint.hh"
 // Test Support
 #include "TestSupport.hh"
 #include "PLASMAPerformanceConstraint.hh"
@@ -90,6 +90,7 @@ namespace EUROPA {
     REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::ValueEnum, ValEnum);
     REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::OpenConditionDecisionPoint, HSTSOpenConditionDecisionPoint);
     REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::ThreatDecisionPoint, HSTSThreatDecisionPoint);
+
     isInitialized() = true;
   }
 

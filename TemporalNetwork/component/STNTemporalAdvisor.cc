@@ -23,6 +23,12 @@ namespace EUROPA {
     return (retval);
   }
 
+  bool STNTemporalAdvisor::canPrecede(const TimeVarId& first, const TimeVarId& second) {
+    if(!DefaultTemporalAdvisor::canPrecede(first, second))
+      return false;
+    return m_propagator->canPrecede(first, second);
+  }
+
   bool STNTemporalAdvisor::canFitBetween(const TokenId& token, const TokenId& predecessor, const TokenId& successor){
     if (!DefaultTemporalAdvisor::canFitBetween(token, predecessor, successor))
       return false;

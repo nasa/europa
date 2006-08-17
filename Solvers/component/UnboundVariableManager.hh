@@ -40,7 +40,7 @@ namespace EUROPA {
       void removeGuard(const ConstrainedVariableId& var);
       void handleConstraintAddition(const ConstraintId& constraint);
       void handleConstraintRemoval(const ConstraintId& constraint);
-      bool betterThan(const EntityId& a, const EntityId& b);
+      bool betterThan(const EntityId& a, const EntityId& b, LabelStr& explanation);
 
       /**
        * @brief Utility to test if the given variable is part of a token that is merged, rejected or inactive.

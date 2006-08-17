@@ -1,7 +1,7 @@
 // ../../../ModuleTests/Parser/rover/rover2a.ddl
 
-#include "../../NDDL/core/Plasma.nddl"
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "../../NDDL/base/Plasma.nddl"
+#include "../../NDDL/base/PlannerConfig.nddl"
 #include "rover2a.nddl"
 
 PlannerConfig world = new PlannerConfig(0, 200, 1000);

@@ -15,10 +15,10 @@ namespace EUROPA {
   namespace SOLVERS {
     namespace HSTS {
 
-      ValueEnum::ValueEnum(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
-        : UnboundVariableDecisionPoint(client, flawedVariable, configData), m_choiceIndex(0) {
+      ValueEnum::ValueEnum(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation)
+        : UnboundVariableDecisionPoint(client, flawedVariable, configData, explanation), m_choiceIndex(0) {
  
-	// have to get rid of the old choice set that UnboundVaraibleDecisionPoint came up with
+        // have to get rid of the old choice set that UnboundVaraibleDecisionPoint came up with
         delete m_choices;
 
         debugMsg("Solver:ValueEnum", "Instantiating value source for " << flawedVariable->toString());
@@ -27,29 +27,29 @@ namespace EUROPA {
 
         bool convertToObject = Schema::instance()->isObjectType(flawedVariable->baseDomain().getTypeName());
 
-	if(flawedVariable->lastDomain().isSingleton()) {
-	  debugMsg("Solver:ValueEnum", "Ignoring ordering heuristic because '" << flawedVariable->toString() << "' is singleton.");
-	  ((OrderedValueSource*) m_choices)->addValue(flawedVariable->lastDomain().getSingletonValue());
-	}
-	else {
-	  TiXmlElement* value = configData.FirstChildElement();      
-	  checkError(value != NULL, "Attempted to define an empty value enumeration.");
+        if(flawedVariable->lastDomain().isSingleton()) {
+          debugMsg("Solver:ValueEnum", "Ignoring ordering heuristic because '" << flawedVariable->toString() << "' is singleton.");
+          ((OrderedValueSource*) m_choices)->addValue(flawedVariable->lastDomain().getSingletonValue());
+        }
+        else {
+          TiXmlElement* value = configData.FirstChildElement();      
+          checkError(value != NULL, "Attempted to define an empty value enumeration.");
 	  
-	  while(value != NULL) {
-	    if(strcmp(value->Value(), "Value") == 0) {
-	      double v = readValue(*value);
-	      debugMsg("Solver:ValueEnum", "Read value " << v << " from " << *value << " convertToObject " << convertToObject);
-	      if(convertToObject) {
-		ObjectId obj = client->getObject((LabelStr(v)).c_str());
-		checkError(obj.isValid(), "No object named '" << LabelStr(v) << "' exists, which is listed in choice ordering for " 
-			   << flawedVariable->toString());
-		v = obj;
-	      }
-	      ((OrderedValueSource*)m_choices)->addValue(v);
-	    }
-	    value = value->NextSiblingElement();
-	  }
-	}
+          while(value != NULL) {
+            if(strcmp(value->Value(), "Value") == 0) {
+              double v = readValue(*value);
+              debugMsg("Solver:ValueEnum", "Read value " << v << " from " << *value << " convertToObject " << convertToObject);
+              if(convertToObject) {
+                ObjectId obj = client->getObject((LabelStr(v)).c_str());
+                checkError(obj.isValid(), "No object named '" << LabelStr(v) << "' exists, which is listed in choice ordering for " 
+                           << flawedVariable->toString());
+                v = obj;
+              }
+              ((OrderedValueSource*)m_choices)->addValue(v);
+            }
+            value = value->NextSiblingElement();
+          }
+        }
       }
     
       double ValueEnum::readValue(const TiXmlElement& element) const {
@@ -71,20 +71,20 @@ namespace EUROPA {
       }
 
       double ValueEnum::getNext(){
-	debugMsg("Solver:ValueEnum:getNext", "Getting value " << m_choices->getValue(m_choiceIndex) << " for variable " << 
-		 getFlawedVariable()->toString() << " (index " << m_choiceIndex << ")");
-	return m_choices->getValue(m_choiceIndex++);
+        debugMsg("Solver:ValueEnum:getNext", "Getting value " << m_choices->getValue(m_choiceIndex) << " for variable " << 
+                 getFlawedVariable()->toString() << " (index " << m_choiceIndex << ")");
+        return m_choices->getValue(m_choiceIndex++);
       }
 
       bool ValueEnum::hasNext() const {
-	debugMsg("Solver:ValueEnum:hasNext", "Current index " << m_choiceIndex << " total count " << m_choices->getCount());
-	return m_choiceIndex < m_choices->getCount();
+        debugMsg("Solver:ValueEnum:hasNext", "Current index " << m_choiceIndex << " total count " << m_choices->getCount());
+        return m_choiceIndex < m_choices->getCount();
       }
 
       //accepted choice options: mergeFirst, activateFirst, mergeOnly, activateOnly
       //accepted order options (only for merge): early, late, near, far
-      OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData) 
-        : SOLVERS::OpenConditionDecisionPoint(client, flawedToken, configData) {
+      OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData, const LabelStr& explanation) 
+        : SOLVERS::OpenConditionDecisionPoint(client, flawedToken, configData, explanation) {
         std::string choice(configData.Attribute("choice") == NULL ? "mergeFirst" : configData.Attribute("choice"));
         std::string order(configData.Attribute("order") == NULL ? "early" : configData.Attribute("order"));
 
@@ -276,8 +276,8 @@ namespace EUROPA {
         delete m_comparator;
       }
 
-      ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData)
-        : SOLVERS::ThreatDecisionPoint(client, tokenToOrder, configData) {
+      ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData, const LabelStr& explanation)
+        : SOLVERS::ThreatDecisionPoint(client, tokenToOrder, configData, explanation) {
         std::string order((configData.Attribute("order") == NULL ? "early" : configData.Attribute("order")));
       
         debugMsg("ThreatDecisionPoint:constructor", "Constructing for " << tokenToOrder->getKey() << " with choice order " << order);
@@ -286,23 +286,23 @@ namespace EUROPA {
         m_comparator = new ThreatComparator((TokenComparator*) Component::AbstractFactory::allocate(orderElem), tokenToOrder);
       }
 
-//       class ObjectComparator {
-//       public:
-// 	bool operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
-// 			 const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) const {
-// 	  ObjectId o1 = p1.first;
-// 	  ObjectId o2 = p2.first;
-// 	  return o1->getKey() < o2->getKey();
-// 	}
-// 	bool operator==(const ObjectComparator& c){return true;}
-//       };
+      //       class ObjectComparator {
+      //       public:
+      // 	bool operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+      // 			 const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) const {
+      // 	  ObjectId o1 = p1.first;
+      // 	  ObjectId o2 = p2.first;
+      // 	  return o1->getKey() < o2->getKey();
+      // 	}
+      // 	bool operator==(const ObjectComparator& c){return true;}
+      //       };
 
       void ThreatDecisionPoint::handleInitialize() {
         SOLVERS::ThreatDecisionPoint::handleInitialize();
-	//first order choices by object key
-// 	ObjectComparator cmp;
-// 	std::sort<std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >::iterator, ObjectComparator&>(m_choices.begin(), m_choices.end(), cmp);
-	//then order them by the heuristic
+        //first order choices by object key
+        // 	ObjectComparator cmp;
+        // 	std::sort<std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >::iterator, ObjectComparator&>(m_choices.begin(), m_choices.end(), cmp);
+        //then order them by the heuristic
         std::sort<std::vector<std::pair<ObjectId, std::pair<TokenId, TokenId> > >::iterator, ThreatComparator&>(m_choices.begin(), m_choices.end(), *m_comparator);
         debugMsg("ThreatDecisionPoint:handleInitialize", "Final choice order for " << m_tokenToOrder->getKey() << ": " << choicesToString());
       }
@@ -338,7 +338,7 @@ namespace EUROPA {
       
       bool ThreatDecisionPoint::ThreatComparator::operator() (const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
                                                               const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {
-	return m_comparator->compare(p1, p2);
+        return m_comparator->compare(p1, p2);
       }
 
       class HSTSDecisionPointLocalStatic {

@@ -1,5 +1,5 @@
-#include "../../NDDL/core/Plasma.nddl"
-#include "../../NDDL/core/PlannerConfig.nddl"
+#include "../../NDDL/base/Plasma.nddl"
+#include "../../NDDL/base/PlannerConfig.nddl"
 
 class PhysicalStatus extends Timeline {
   predicate Sleeping {}

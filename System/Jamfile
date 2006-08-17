@@ -5,7 +5,7 @@ if ! $(PLASMA_READY) {
 Module System : NDDL Solvers CBPlanner Aver ;
 ModuleLibraries System : $(DLOPEN_LIBRARY) ;
 
-SubInclude PLASMA System core ;
+SubInclude PLASMA System base ;
 SubInclude PLASMA System component ;
 SubInclude PLASMA System documentation ;
 SubInclude PLASMA System test ;

@@ -18,14 +18,15 @@ namespace EUROPA {
     }
 
     UnboundVariableDecisionPoint::UnboundVariableDecisionPoint(const DbClientId& dbClient, 
-							       const ConstrainedVariableId& flawedVariable, 
-							       const TiXmlElement& configData)
-      : DecisionPoint(dbClient, flawedVariable->getKey()),
-	m_flawedVariable(flawedVariable),
-	m_choices(ValueSource::getSource(flawedVariable)){
+                                                               const ConstrainedVariableId& flawedVariable, 
+                                                               const TiXmlElement& configData,
+                                                               const LabelStr& explanation)
+      : DecisionPoint(dbClient, flawedVariable->getKey(), explanation),
+        m_flawedVariable(flawedVariable),
+        m_choices(ValueSource::getSource(flawedVariable)){
       checkError(flawedVariable->lastDomain().areBoundsFinite(),
-		 "Attempted to allocate a Decision Point for a domain with infinite bounds for variable " 
-		 << flawedVariable->toString());
+                 "Attempted to allocate a Decision Point for a domain with infinite bounds for variable " 
+                 << flawedVariable->toString());
 
       checkError(strcmp(configData.Value(), "FlawHandler") == 0,
 		 "Configuration error. Expected element <FlawHandler> but found " << configData.Value());
@@ -65,24 +66,24 @@ namespace EUROPA {
     }
 
 
-    MinValue::MinValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
-      : UnboundVariableDecisionPoint(client, flawedVariable, configData), m_choiceIndex(0){}
+    MinValue::MinValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation)
+      : UnboundVariableDecisionPoint(client, flawedVariable, configData, explanation), m_choiceIndex(0){}
 
     bool MinValue::hasNext() const {return m_choiceIndex < m_choices->getCount();}
 
     double MinValue::getNext(){return m_choices->getValue(m_choiceIndex++);}
 
     /** MAX VALUE **/
-    MaxValue::MaxValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
-      : UnboundVariableDecisionPoint(client, flawedVariable, configData), m_choiceIndex(m_choices->getCount()){}
+    MaxValue::MaxValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation)
+      : UnboundVariableDecisionPoint(client, flawedVariable, configData, explanation), m_choiceIndex(m_choices->getCount()){}
 
     bool MaxValue::hasNext() const { return m_choiceIndex > 0; }
 
     double MaxValue::getNext(){return m_choices->getValue(--m_choiceIndex);}
 
     /** RANDOM VALUE **/
-    RandomValue::RandomValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData)
-      : UnboundVariableDecisionPoint(client, flawedVariable, configData), m_distribution(NORMAL){
+    RandomValue::RandomValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation)
+      : UnboundVariableDecisionPoint(client, flawedVariable, configData, explanation), m_distribution(NORMAL){
       static bool sl_seeded(false);
 
       if(!sl_seeded){

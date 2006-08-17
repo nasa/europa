@@ -11,8 +11,9 @@ namespace EUROPA {
       return(TokenId::convertable(entity) || TokenId(entity)->isInactive());
     }
 
-    OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData)
-      : DecisionPoint(client, flawedToken->getKey()),
+    OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData, 
+                                                           const LabelStr& explanation)
+      : DecisionPoint(client, flawedToken->getKey(), explanation),
         m_flawedToken(flawedToken), 
         m_mergeCount(0),
         m_choiceCount(0),

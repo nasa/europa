@@ -24,7 +24,7 @@ NDDL_PARSER_TESTS =
 	Plasma.nddl
 	;
 
-MakeLocate [ FGristFiles Plasma.nddl ] : [ FDirName $(SUBDIR) .. .. core ] ;
+MakeLocate [ FGristFiles Plasma.nddl ] : [ FDirName $(SUBDIR) .. .. base ] ;
 
 Depends use_xml.xml : rover.xml ;
 

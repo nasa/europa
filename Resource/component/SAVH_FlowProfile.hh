@@ -64,16 +64,16 @@ namespace EUROPA
        *   ---------------------------------------------------------------------------------------------------------
        * \endverbatim
        */
-      void enableTransaction( const SAVH::TransactionId& transaction );
+      void enableTransaction( const TransactionId& transaction, const InstantId& inst, TransactionId2InstantId& contributions );
       /**
        * @brief Returns true if \a transaction is enabled in the invoking 
        * instance
        */
-      bool isEnabled(  const SAVH::TransactionId& transaction ) const;
+      bool isEnabled(  const TransactionId& transaction ) const;
       /**
        * @brief Disables \a transaction, if enabled, for the invoking instance
        */
-      void disable( const SAVH::TransactionId& transaction ) ;
+      void disable( const TransactionId& transaction ) ;
       /**
        * @brief Will push any flow wich flows through the node corresponding with \a transaction
        * back to the source of the edge the flow originates from. 
@@ -219,6 +219,10 @@ namespace EUROPA
 
 		      const TransactionId& t = target->getIdentity();
 
+		      debugMsg("FlowProfileGraph::visitNeighbors","Transaction " 
+			       << t << " starts contributing at " 
+			       << instant->getTime() << " lower level " << std::boolalpha << m_lowerLevel ); 
+
 		      contributions[ t ] = instant;
 
 		      int sign = t->isConsumer() ? -1 : +1;
@@ -299,6 +303,20 @@ namespace EUROPA
        * @brief Destructor
        */
       virtual ~FlowProfile();
+      /**
+       * @brief Retrieves the first (earliest) instant the transaction \t starts contributing to 
+       * lower level. Will return true in case a instant has been associated with a transaction 
+       * and will in that case store the instant in parameter \i. Returns false if no instant 
+       * has been associated with transaction t.
+       */
+      bool getEarliestLowerLevelInstant( const TransactionId& t, InstantId& i );
+      /**
+       * @brief Retrieves the first (earliest) instant the transaction \t starts contributing to 
+       * upper level. Will return true in case a instant has been associated with a transaction 
+       * and will in that case store the instant in parameter \i. Returns false if no instant 
+       * has been associated with transaction t.
+       */
+      bool getEarliestUpperLevelInstant( const TransactionId& t, InstantId& i );
     protected:
       /**
        * @brief Indicates the ordering between two time variables associated with a transaction
@@ -325,7 +343,7 @@ namespace EUROPA
        * is that a transaction is enabled at the time it moves from the open set to the pending set
        * or straight to the closed set if the time is a singleton.
        */
-      void enableTransaction( const TransactionId t );
+      void enableTransaction( const TransactionId t, const InstantId i );
       /**
        * @brief Helper method for subclasses to respond to a temporal constraint being added between two transactions.
        * @param e The transaction whose timepoint has been constrained.
@@ -390,7 +408,7 @@ namespace EUROPA
       void recomputeLevels(InstantId prev, InstantId inst);
 
       typedef std::pair< int, int > IntIntPair;
-      typedef std::map< TransactionId, IntIntPair > TransactionId2IntIntPair;
+      typedef hash_map< TransactionId, IntIntPair, TransactionIdHash > TransactionId2IntIntPair;
 
       TransactionId2IntIntPair m_previousTimeBounds;
 
@@ -399,9 +417,6 @@ namespace EUROPA
 
       SAVH::FlowProfileGraph* m_lowerLevelGraph;
       SAVH::FlowProfileGraph* m_upperLevelGraph;
-
-      TransactionId2InstantId m_lowerLevelContribution;
-      TransactionId2InstantId m_upperLevelContribution;
 
       double m_lowerClosedLevel;
       double m_upperClosedLevel;
@@ -414,6 +429,9 @@ namespace EUROPA
 
       TransactionIdTransactionIdPair2Order m_orderings;
       TransactionIdTransactionIdPair2Order m_orderedAt;
+
+      TransactionId2InstantId m_lowerLevelContribution;
+      TransactionId2InstantId m_upperLevelContribution;
     };
   }
 }

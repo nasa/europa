@@ -6,6 +6,8 @@
 #include "Filters.hh"
 #include "Token.hh"
 #include "ConstrainedVariable.hh"
+#include "SAVH_ThreatManager.hh"
+#include "SAVH_ThreatDecisionPoint.hh"
 
 namespace EUROPA {
   namespace SOLVERS {
@@ -27,6 +29,9 @@ namespace EUROPA {
 
 	REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ThreatDecisionPoint, StandardThreatHandler);
 	REGISTER_FLAW_MANAGER(EUROPA::SOLVERS::ThreatManager, ThreatManager);
+
+  REGISTER_FLAW_HANDLER(EUROPA::SAVH::ThreatDecisionPoint, SAVHThreatHandler);
+  REGISTER_FLAW_MANAGER(EUROPA::SAVH::ThreatManager, SAVHThreatManager);
 
 	REGISTER_FLAW_FILTER(EUROPA::SOLVERS::SingletonFilter, Singleton);
 	REGISTER_FLAW_FILTER(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);

@@ -29,7 +29,8 @@ namespace EUROPA {
       /**
        * @brief Constructor. Test signature for DecisionPointFactory
        */
-      OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData);
+      OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData, 
+                                 const LabelStr& explanation = "unknown");
 
       virtual ~OpenConditionDecisionPoint();
 

@@ -103,7 +103,7 @@ namespace EUROPA
       return 0 == node ? false : node->isEnabled(); 
     }
 
-    void FlowProfileGraph::enableTransaction( const SAVH::TransactionId& t )
+    void FlowProfileGraph::enableTransaction( const SAVH::TransactionId& t, const InstantId& i, TransactionId2InstantId& contributions )
     {
       debugMsg("FlowProfileGraph:enableTransaction","Transaction (" 
 	       << t->getId() << ") " 
@@ -135,7 +135,15 @@ namespace EUROPA
 	}
 
       if( 0 == edgeCapacity )
-	return;
+	{
+	  debugMsg("FlowProfileGraph:enableTransaction","Transaction " 
+		   << t << " starts contributing at " 
+		   << i->getTime() << " lower level " << std::boolalpha << m_lowerLevel ); 
+
+	  contributions[ t ] = i;
+
+	  return;
+	}
       
       check_error( SAVH::TransactionId::noId() != source );
       check_error( SAVH::TransactionId::noId() != target );
@@ -276,6 +284,34 @@ namespace EUROPA
       delete (SAVH::Transaction*) m_dummySourceTransaction;
     }
 
+    bool FlowProfile::getEarliestLowerLevelInstant( const TransactionId& t, InstantId& i )
+    {
+      check_error( t.isValid());
+
+      TransactionId2InstantId::iterator ite = m_lowerLevelContribution.find( t );
+      
+      if( m_lowerLevelContribution.end() == ite )
+	return false;
+
+      i = (*ite).second;
+
+      return true;
+    }
+
+    bool FlowProfile::getEarliestUpperLevelInstant( const TransactionId& t, InstantId& i )
+    {
+      check_error( t.isValid());
+	
+      TransactionId2InstantId::iterator ite = m_upperLevelContribution.find( t );
+      
+      if( m_upperLevelContribution.end() == ite )
+	return false;
+
+      i = (*ite).second;
+
+      return true;
+    }
+
     void FlowProfile::initializeGraphs() 
     {
       delete m_lowerLevelGraph;
@@ -379,7 +415,7 @@ namespace EUROPA
 	    {
 	      if( transaction1->time()->lastDomain().getLowerBound() == inst->getTime() )  
 		{
-		  enableTransaction( transaction1 );
+		  enableTransaction( transaction1, inst );
   
 		  std::set<TransactionId>::const_iterator secondIter = transactions.begin();
 		  
@@ -391,7 +427,7 @@ namespace EUROPA
 			{
 			  if( transaction2->time()->lastDomain().getUpperBound() != inst->getTime() )
 			    {
-			      enableTransaction( transaction2 );
+			      enableTransaction( transaction2, inst );
 
 			      debugMsg("FlowProfile:recomputeLevels","Determining ordering of pending transaction (" 
 				       << transaction1->getId() << ") "
@@ -604,12 +640,12 @@ namespace EUROPA
       debugMsg("FlowProfile:handleTransactionAdded","Set interval to [" << startRecalculation << "," << endRecalculation << "]");
     }
 
-    void FlowProfile::enableTransaction( const TransactionId t )
+    void FlowProfile::enableTransaction( const TransactionId t, const InstantId inst )
     {
       debugMsg("FlowProfile:enableTransaction","TransactionId (" << t->getId() << ")");
       
-      m_lowerLevelGraph->enableTransaction( t );
-      m_upperLevelGraph->enableTransaction( t );
+      m_lowerLevelGraph->enableTransaction( t, inst, m_lowerLevelContribution );
+      m_upperLevelGraph->enableTransaction( t, inst, m_upperLevelContribution );
     }
     
     void FlowProfile::handleTransactionRemoved( const TransactionId t ) {
@@ -783,7 +819,7 @@ namespace EUROPA
       
       m_recomputeInterval = (new ProfileIterator( getId(), startRecalculation, endRecalculation ))->getId();
 
-      debugMsg("FlowProfile:handleTransactionQuantityChanged","TransactionId (" << t->getId() << ") change " << type );
+      debugMsg("FlowProfile:handleTransactionQuantityChanged","TransactionId (" << t->getId() << ") change " << type << " to " << t->quantity()->toString() );
     }
 
     void FlowProfile::handleTemporalConstraintAdded( const TransactionId predecessor, const int preArgIndex,
@@ -857,6 +893,5 @@ namespace EUROPA
       m_recalculateLowerLevel = true;
       m_recalculateUpperLevel = true;
     }
- 
   }
 }

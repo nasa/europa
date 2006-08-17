@@ -1,4 +1,4 @@
-#include "../../NDDL/core/Plasma.nddl"
+#include "../../NDDL/base/Plasma.nddl"
 
 enum Letters {X, Y, Z};
 

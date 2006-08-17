@@ -6,7 +6,7 @@ Module Utils : TinyXml ;
 
 ModuleLibraries Utils : $(DLOPEN_LIBRARY) ;
 
-SubInclude PLASMA Utils core ;
+SubInclude PLASMA Utils base ;
 SubInclude PLASMA Utils component ;
 SubInclude PLASMA Utils documentation ;
 SubInclude PLASMA Utils test ;

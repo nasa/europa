@@ -3,7 +3,7 @@ SubDir PLASMA HSTS component ;
 if ! $(PLASMA_READY) {
 
 SubDirHdrs $(PLASMA) CBPlanner ;
-SubDirHdrs $(PLASMA) CBPlanner core ;
+SubDirHdrs $(PLASMA) CBPlanner base ;
 SubDirHdrs $(PLASMA) CBPlanner component ;
 
 ModuleComponent HSTS

@@ -9,6 +9,9 @@
  * @ingroup Resource
  */
 
+#include <ext/hash_map>
+using namespace __gnu_cxx;
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -54,13 +57,49 @@ namespace EUROPA
     typedef std::list< Edge* > EdgeList;
     typedef std::list< Node* > NodeList;
 
-    typedef std::map< Node*, bool > Node2Bool;
-    typedef std::map< Node*, int > Node2Int;
-    typedef std::map< Node*, long > Node2Long;
-    typedef std::map< Node*, double > Node2Double;
+    class NodeHash: 
+      public std::unary_function<Node*, size_t>
+    {
+    public:
+      size_t operator()(Node* n) const
+      {
+	hash<long> H;
+	return H( (long) n);
+      }
+      
+    };
+
+    class EdgeHash: 
+      public std::unary_function<Edge*, size_t>
+    {
+    public:
+      size_t operator()(Edge* n) const
+      {
+	hash<long> H;
+	return H( (long) n );
+      }
+      
+    };
+
+    class TransactionIdHash: 
+      public std::unary_function< TransactionId, size_t>
+    {
+    public:
+      size_t operator()(TransactionId n) const
+      {
+	hash<long> H;
+	return H( (long) ( (Transaction*) n ) );
+      }
+      
+    };
+
+    typedef hash_map< Node*, bool, NodeHash > Node2Bool;
+    typedef hash_map< Node*, int, NodeHash > Node2Int;
+    typedef hash_map< Node*, long, NodeHash > Node2Long;
+    typedef hash_map< Node*, double, NodeHash > Node2Double;
   
-    typedef std::map< Edge*, double > Edge2DoubleMap;
-    typedef std::map< TransactionId, InstantId > TransactionId2InstantId;
+    typedef hash_map< Edge*, double, EdgeHash > Edge2DoubleMap;
+    typedef hash_map< TransactionId, InstantId, TransactionIdHash > TransactionId2InstantId;
 
 
     std::ostream& operator<<( std::ostream& os, const EdgeIdentity& fei ) ;

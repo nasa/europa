@@ -96,7 +96,7 @@ namespace EUROPA
        */
       inline void resetToFront();
 
-      typedef std::map< Node*, EdgeList::const_iterator > Node2EdgeListIteratorMap;
+      typedef hash_map< Node*, EdgeList::const_iterator, NodeHash > Node2EdgeListIteratorMap;
 
       Node2EdgeListIteratorMap m_CurrentOutEdgeOnNode;
       Node2EdgeListIteratorMap m_EndOutEdgeOnNode;
@@ -123,17 +123,11 @@ namespace EUROPA
 
     double MaximumFlowAlgorithm::getFlow( Edge* edge  ) const
     {
-      checkError( m_OnEdge.find( edge ) != m_OnEdge.end(),
-		  "Edge " << *edge << " has no flow, maximum flow algorithm probably not been executed.");
-
       return m_OnEdge.find( edge )->second;
     }
 
     double MaximumFlowAlgorithm::getResidual( Edge* edge ) const
     {
-      checkError( m_OnEdge.find( edge ) != m_OnEdge.end(),
-		  "Edge " << *edge << " has no flow, maximum flow algorithm probably not been executed.");
-
       return edge->getCapacity() - getFlow( edge );
     }
 
@@ -307,7 +301,7 @@ namespace EUROPA
 	  if( residual != 0 )
 	    {
 	      m_OnEdge[ edge ] = flow + residual;
-	      m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = - m_OnEdge[ edge ];
+	      m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = - (flow + residual);
 
 
 	      Node* target = edge->getTarget();
@@ -417,8 +411,9 @@ namespace EUROPA
 
       double delta = (excess > residual ) ? residual : excess;
 
-      m_OnEdge[ edge ] = m_OnEdge[ edge ] + delta;
-      m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = - m_OnEdge[ edge ];
+      double newFlow = m_OnEdge[ edge ] + delta;
+      m_OnEdge[ edge ] = newFlow;
+      m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = - newFlow;
 
       m_ExcessOnNode[ target ] = m_ExcessOnNode[ target ] + delta;
       m_ExcessOnNode[ source ] = m_ExcessOnNode[ source ] - delta;
@@ -453,8 +448,8 @@ namespace EUROPA
 		     << *n << " checking edge "
 		     << *edge << " to relabel, flow on edge is "
 		     << m_OnEdge[ edge ] );
-
-	  if( m_OnEdge[ edge ] < edge->getCapacity() )
+	  //m_OnEdge[ edge ] < edge->getCapacity()
+	  if( getResidual( edge ) > 0  )
 	    {
 	      long label = m_DistanceOnNode[ target ];
 	    

@@ -8,8 +8,9 @@ namespace EUROPA {
     class ResourceThreatDecisionPoint : public ThreatDecisionPoint {
     public:
       ResourceThreatDecisionPoint(const DbClientId& client,
-				  const TokenId& tokenToOrder,
-				  const TiXmlElement& configData);
+                                  const TokenId& tokenToOrder,
+                                  const TiXmlElement& configData,
+                                  const LabelStr& explanation = "unknown");
       void execute() {ThreatDecisionPoint::execute();}
       void undo() {ThreatDecisionPoint::undo();}
       bool hasNext() const {return ThreatDecisionPoint::hasNext();}

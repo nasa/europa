@@ -4,7 +4,7 @@ if ! $(PLASMA_READY) {
 
 Module RulesEngine : PlanDatabase ;
 
-SubInclude PLASMA RulesEngine core ;
+SubInclude PLASMA RulesEngine base ;
 SubInclude PLASMA RulesEngine component ;
 SubInclude PLASMA RulesEngine documentation ;
 SubInclude PLASMA RulesEngine test ;

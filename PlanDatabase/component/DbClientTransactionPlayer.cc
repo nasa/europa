@@ -294,8 +294,10 @@ namespace EUROPA {
     // If it is mandatory, then activate immediately so there is less for a
     // client to figure out, or specify in the transactions
     if (b_mandatory){
-      m_client->activate(token);
-      token->getState()->restrictBaseDomain(token->getState()->lastDomain());
+      if (!token->isActive()) {
+        m_client->activate(token);
+        token->getState()->restrictBaseDomain(token->getState()->lastDomain());
+      }
     }
     else {
       StateDomain state = token->getState()->lastDomain();

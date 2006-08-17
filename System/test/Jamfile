@@ -202,7 +202,7 @@ Depends run-all-tests : run-nddl-planner-tests ;
 #
 
 Main stackGenerator : stackGenerator.cc ;
-ObjectHdrs stackGenerator.cc : [ FDirName $(PLASMA) Utils core ] ;
+ObjectHdrs stackGenerator.cc : [ FDirName $(PLASMA) Utils base ] ;
 MakeLocate [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(SUBDIR) ;
 
 rule FSatelliteModel {

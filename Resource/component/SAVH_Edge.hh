@@ -10,6 +10,7 @@
  */
 
 #include "SAVH_Types.hh"
+#include "SAVH_Node.hh"
 
 namespace EUROPA 
 {
@@ -75,7 +76,7 @@ namespace EUROPA
        * @brief Returns true of the invoking edge is enabled otherwise returns false
        *
        */
-      bool isEnabled() const;
+      inline bool isEnabled() const;
       /**
        * @brief Returns the identity of the invoking edge
        *
@@ -124,6 +125,11 @@ namespace EUROPA
       return m_Target;
     }
  
+    bool Edge::isEnabled() const
+    {
+      return m_Enabled && m_Target->isEnabled();
+    }
+
   } //namespace SAVH
 } //namespace EUROPA
 

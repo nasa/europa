@@ -9,9 +9,10 @@ namespace EUROPA {
   namespace SOLVERS {
 
     ResourceThreatDecisionPoint::ResourceThreatDecisionPoint(const DbClientId& client,
-							     const TokenId& tokenToOrder,
-							     const TiXmlElement& configData) 
-      : ThreatDecisionPoint(client, tokenToOrder, configData) {}
+                                                             const TokenId& tokenToOrder,
+                                                             const TiXmlElement& configData,
+                                                             const LabelStr& explanation) 
+      : ThreatDecisionPoint(client, tokenToOrder, configData, explanation) {}
 
 
     void ResourceThreatDecisionPoint::handleExecute() {
