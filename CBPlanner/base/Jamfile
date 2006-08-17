@@ -1,0 +1,16 @@
+SubDir PLASMA CBPlanner base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase CBPlanner
+	:
+	CBPlanner.cc
+	Condition.cc
+	DecisionManager.cc
+	OpenDecisionManager.cc
+	DecisionManagerListener.cc
+	DecisionPoint.cc
+	Horizon.cc
+	;
+
+} # PLASMA_READY

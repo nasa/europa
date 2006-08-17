@@ -1,0 +1,15 @@
+SubDir PLASMA RulesEngine base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase RulesEngine
+	:
+	Rule.cc
+	RuleInstance.cc
+	RulesEngine.cc
+	RulesEngineListener.cc
+	RuleVariableListener.cc
+	ProxyVariableRelation.cc
+	;
+
+} # PLASMA_READY

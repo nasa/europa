@@ -1,0 +1,7 @@
+constraint windPower(a, b);
+constraint sampleBattery(a, b, c);
+constraint sampleDuration(a, b, c);
+constraint diffSquare(a, b, c);
+constraint distanceSquares(a, b, c);
+constraint driveBattery(a, b);
+constraint driveDuration(a, b);

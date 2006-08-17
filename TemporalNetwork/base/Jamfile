@@ -1,0 +1,12 @@
+SubDir PLASMA TemporalNetwork base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase TemporalNetwork
+	:
+	DistanceGraph.cc
+	TemporalNetwork.cc
+	queues.cc
+	;
+
+} # PLASMA_READY

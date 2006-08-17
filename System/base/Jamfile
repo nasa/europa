@@ -1,0 +1,7 @@
+SubDir PLASMA System base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase System : PLASMAPerformanceConstraint.cc LoraxConstraints.cc	;
+
+} # PLASMA_READY
