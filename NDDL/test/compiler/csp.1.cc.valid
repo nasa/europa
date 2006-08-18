@@ -43,8 +43,8 @@ namespace NDDL {
     return(sl_enum);
   }
   
-  Symbols SymbolsBaseDomain(){
-    static Symbols sl_enum("Symbols");
+  Symbol SymbolBaseDomain(){
+    static Symbol sl_enum("Symbol");
     if (sl_enum.isOpen()) {
       // Insert values to initialize
       sl_enum.insert(LabelStr("s4"));
@@ -55,8 +55,8 @@ namespace NDDL {
     return(sl_enum);
   }
   
-  Fruits FruitsBaseDomain(){
-    static Fruits sl_enum("Fruits");
+  Fruit FruitBaseDomain(){
+    static Fruit sl_enum("Fruit");
     if (sl_enum.isOpen()) {
       // Insert values to initialize
       sl_enum.insert(LabelStr("Apple"));
@@ -74,6 +74,20 @@ namespace NDDL {
       sl_enum.insert(LabelStr("Slow"));
       sl_enum.insert(LabelStr("Medium"));
       sl_enum.insert(LabelStr("Fast"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  
+  Color ColorBaseDomain(){
+    static Color sl_enum("Color");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("Red"));
+      sl_enum.insert(LabelStr("Orange"));
+      sl_enum.insert(LabelStr("Yellow"));
+      sl_enum.insert(LabelStr("Green"));
+      sl_enum.insert(LabelStr("Blue"));
       sl_enum.close();
     }
     return(sl_enum);
@@ -98,30 +112,37 @@ namespace NDDL {
     id->addEnum("Ints");
     id->addEnum("Floats");
     id->addEnum("Strings");
-    id->addEnum("Symbols");
-    id->addEnum("Fruits");
+    id->addEnum("Symbol");
+    id->addEnum("Fruit");
     id->addEnum("Speed");
+    id->addEnum("Color");
     id->addValue("Strings", LabelStr("s1"));
     id->addValue("Strings", LabelStr("s2"));
     id->addValue("Strings", LabelStr("s3"));
-    id->addValue("Symbols", LabelStr("s4"));
-    id->addValue("Symbols", LabelStr("s5"));
-    id->addValue("Symbols", LabelStr("s6"));
-    id->addValue("Fruits", LabelStr("Apple"));
-    id->addValue("Fruits", LabelStr("Orange"));
-    id->addValue("Fruits", LabelStr("Banana"));
+    id->addValue("Symbol", LabelStr("s4"));
+    id->addValue("Symbol", LabelStr("s5"));
+    id->addValue("Symbol", LabelStr("s6"));
+    id->addValue("Fruit", LabelStr("Apple"));
+    id->addValue("Fruit", LabelStr("Orange"));
+    id->addValue("Fruit", LabelStr("Banana"));
     id->addValue("Speed", LabelStr("Slow"));
     id->addValue("Speed", LabelStr("Medium"));
     id->addValue("Speed", LabelStr("Fast"));
+    id->addValue("Color", LabelStr("Red"));
+    id->addValue("Color", LabelStr("Orange"));
+    id->addValue("Color", LabelStr("Yellow"));
+    id->addValue("Color", LabelStr("Green"));
+    id->addValue("Color", LabelStr("Blue"));
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(Ints, IntsBaseDomain());
     REGISTER_TYPE_FACTORY(Floats, FloatsBaseDomain());
     REGISTER_TYPE_FACTORY(Strings, StringsBaseDomain());
-    REGISTER_TYPE_FACTORY(Symbols, SymbolsBaseDomain());
-    REGISTER_TYPE_FACTORY(Fruits, FruitsBaseDomain());
+    REGISTER_TYPE_FACTORY(Symbol, SymbolBaseDomain());
+    REGISTER_TYPE_FACTORY(Fruit, FruitBaseDomain());
     REGISTER_TYPE_FACTORY(Speed, SpeedBaseDomain());
+    REGISTER_TYPE_FACTORY(Color, ColorBaseDomain());
     // Allocate rules
     return id;
   }
