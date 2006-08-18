@@ -116,6 +116,7 @@ public class NddlType implements NddlTokenTypes, Cloneable
 		else
 			toRet.eDomain = null;
 		toRet.constructors = constructors;
+		toRet.predicates = predicates;
 		return toRet;
 	}
 	public void setSuperType(NddlType superType)
@@ -138,6 +139,7 @@ public class NddlType implements NddlTokenTypes, Cloneable
 	public boolean isAssignableFrom(NddlType other)
 	{
 		if(other == null || other.isTypeless()) return false;
+		if(this.equals(other)) return true;
 		if(isObject() && other.isObject())
 		{
 			return typeName.equals(other.typeName)
@@ -250,6 +252,7 @@ public class NddlType implements NddlTokenTypes, Cloneable
 		if(typeName != null) return typeName;
 		switch(type)
 		{
+			case -1:     return "typeless";
 			case INT:    return "int";
 			case FLOAT:  return "float";
 			case BOOL:   return "bool";

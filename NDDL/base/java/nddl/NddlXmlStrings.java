@@ -29,4 +29,5 @@ interface NddlXmlStrings {
 	public static final String x_column = "column";
 	public static final String x_filename = "filename";
 	public static final String x_inherited = "inherited";
+	public static final String x_filter = "filter";
 };

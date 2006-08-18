@@ -266,9 +266,9 @@ public class NddlParserState implements NddlTokenTypes
 	 *   - find the first element in the required context given current context
 	 *   - recursively search using required context
 	 */
-	public Object getName(String name, boolean searchVars, boolean searchTypes, boolean searchPredicates, boolean searchSymbols) throws SemanticException
+	public Object getName(String name, NddlType hint, boolean searchVars, boolean searchTypes, boolean searchPredicates, boolean searchSymbols) throws SemanticException
 	{
-		assert(DebugMsg.debugMsg("NddlParserState:getName"," getName(\""+name+"\", search: "+(searchVars? "[vars]" : "")+
+		assert(DebugMsg.debugMsg("NddlParserState:getName"," getName(\""+name+"\", hint: "+hint+", search: "+(searchVars? "[vars]" : "")+
 		                                               (searchTypes? "[types]" : "")+
 																									 (searchPredicates? "[predicates]" : "")+
 																									 (searchSymbols? "[symbols]" : "")+ ")"));
@@ -280,6 +280,7 @@ public class NddlParserState implements NddlTokenTypes
 			return primative;
 		else if(primative != null)
 			return null;
+
 
 		NddlVariable var = null;
 		NddlType type = null;
@@ -293,6 +294,9 @@ public class NddlParserState implements NddlTokenTypes
 		String reqContext = getRequiredContext(name);
 		String unqualifiedName = NddlUtil.last(name);
 		NddlName matches = (NddlName)names.get(unqualifiedName);
+
+		// hints will let you avoid flags, use with caution
+		if(hint!=null && !hint.isTypeless() && matches.isType(hint)) return hint;
 
 		boolean searching = true; // as soon as we find something at the most specific level, return it
 		if(matches != null)
@@ -308,7 +312,7 @@ public class NddlParserState implements NddlTokenTypes
 					if(searchVars && var == null) var = matches.getVariable(searchString);
 					if(searchTypes && type == null) type = matches.getType(searchString);
 					if(searchPredicates && pred == null) pred = matches.getPredicate(searchString);
-					if(searchSymbols && enumer == null) enumer = matches.getEnum(searchPath);
+					if(searchSymbols && enumer == null) enumer = matches.getEnum(searchString);
 					if(type != null || var != null || pred != null || enumer != null) searching = false;
 					searchPath = getParentContext(searchPath);
 				}
@@ -326,7 +330,7 @@ public class NddlParserState implements NddlTokenTypes
 						if(searchVars && var == null) var = matches.getVariable(searchString);
 						if(searchTypes && type == null) type = matches.getType(searchString);
 						if(searchPredicates && pred == null) pred = matches.getPredicate(searchString);
-						if(searchSymbols && enumer == null) enumer = matches.getEnum(parentContext);
+						if(searchSymbols && enumer == null) enumer = matches.getEnum(searchString);
 						if(type != null || var != null || pred != null || enumer != null) searching = false;
 						parentContext = getParentContext(parentContext);
 					}
@@ -337,7 +341,7 @@ public class NddlParserState implements NddlTokenTypes
 					if(searchVars && var == null) var = matches.getVariable(unqualifiedName);
 					if(searchTypes && type == null) type = matches.getType(unqualifiedName);
 					if(searchPredicates && pred == null) pred = matches.getPredicate(unqualifiedName);
-					if(searchSymbols && enumer == null) enumer = matches.getEnum("");
+					if(searchSymbols && enumer == null) enumer = matches.getEnum(unqualifiedName);
 				}
 			}
 		}
@@ -362,7 +366,7 @@ public class NddlParserState implements NddlTokenTypes
 	private String getRequiredContext(String name) throws SemanticException
 	{
 		if(name.indexOf('.') == -1) return null;
-		NddlType contextType = getNameType(NddlUtil.butLast(name),true,true,true,false);
+		NddlType contextType = getNameType(NddlUtil.butLast(name),null,true,true,true,false);
 		if(contextType == null) throw new SemanticException("Could not determine type of "+NddlUtil.butLast(name));
 		return contextType.getName();
 	}
@@ -372,20 +376,20 @@ public class NddlParserState implements NddlTokenTypes
 		NddlName n = getNddlName(name);
 		return !n.isEmpty();
 	}
-	public NddlType getNameType(String name, boolean searchVars, boolean searchTypes, boolean searchPredicates, boolean searchSymbols) throws SemanticException
+	public NddlType getNameType(String name, NddlType hint, boolean searchVars, boolean searchTypes, boolean searchPredicates, boolean searchSymbols) throws SemanticException
 	{
-		Object o = getName(name,searchVars,searchTypes,searchPredicates,searchSymbols);
+		Object o = getName(name,hint,searchVars,searchTypes,searchPredicates,searchSymbols);
 		assert(DebugMsg.debugMsg("NddlParserState:getNameType"," Looking for \""+name+"\" found "+o));
 		if(o == null) return null;
 		else if(o instanceof NddlType) return (NddlType)o;
 		else if(o instanceof NddlVariable) return ((NddlVariable)o).getType();
 		throw new ClassCastException();
 	}
-	public NddlVariable getVariable(String name) throws SemanticException { return (NddlVariable)getName(name,true,false,false,false); }
+	public NddlVariable getVariable(String name) throws SemanticException { return (NddlVariable)getName(name,null,true,false,false,false); }
 	public NddlType getPrimative(String name) throws SemanticException { return (NddlType)primatives.get(name);}
-	public NddlType getType(String name) throws SemanticException { return (NddlType)getName(name,false,true,false,false); }
-	public NddlType getPredicate(String name) throws SemanticException { return (NddlType)getName(name,false,false,true,false); }
-	public NddlType getSymbol(String name) throws SemanticException { return (NddlType)getName(name,false,false,false,true); }
+	public NddlType getType(String name) throws SemanticException { return (NddlType)getName(name,null,false,true,false,false); }
+	public NddlType getPredicate(String name) throws SemanticException { return (NddlType)getName(name,null,false,false,true,false); }
+	public NddlType getSymbol(String name) throws SemanticException { return (NddlType)getName(name,null,false,false,false,true); }
 
 	private String getParentContext(String context) throws SemanticException
 	{
