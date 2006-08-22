@@ -754,11 +754,24 @@ private:
 class XMLTest {
 public:
   static bool test() {
-    runTest(testStringParse);
+    runTest(testInitXmlString);
+    runTest(testExtractData);
+    runTest(testInitXmlFile);
+		runTest(testGetTextChild);
+		runTest(testIsNumber);
     return true;
   }
 private:
-  static bool testStringParse() {
+  static bool testExtractData() {
+    std::string test("<Tag attribute=\"value\">");
+    TiXmlElement* xml = initXml(test);
+    assertTrue(xml != NULL);
+    LabelStr value = extractData(*xml,"attribute");
+    assertTrue(value == LabelStr("value"));
+    return true;
+  }
+
+  static bool testInitXmlString() {
     std::string test("<Foo><Bar><Bing attr=\"baz\"/></Bar></Foo>");
     TiXmlElement* xml = initXml(test);
     assertTrue(xml != NULL);
@@ -773,9 +786,50 @@ private:
     assertTrue(std::string(xml->Attribute("attr")) == std::string("baz"));
     return true;
   }
+
+  static bool testInitXmlFile() {
+		TiXmlElement* xml = initXml((getTestLoadLibraryPath() + "/XMLUtil-test.xml").c_str());
+    assertTrue(xml != NULL);
+    assertTrue(std::string(xml->Value()) == std::string("test"));
+    xml = xml->FirstChildElement();
+    assertTrue(xml != NULL);
+    assertTrue(std::string(xml->Value()) == std::string("Foo"));
+    xml = xml->FirstChildElement();
+    assertTrue(xml != NULL);
+    assertTrue(std::string(xml->Value()) == std::string("Bar"));
+    xml = xml->FirstChildElement();
+    assertTrue(xml != NULL);
+    assertTrue(std::string(xml->Value()) == std::string("Bing"));
+    assertTrue(xml->Attribute("attr") != NULL);
+    assertTrue(std::string(xml->Attribute("attr")) == std::string("baz"));
+    return true;
+  }
+
+  static bool testGetTextChild() {
+    std::string test("<Foo>Ceci n'est pas un attribute</Foo>");
+    TiXmlElement* xml = initXml(test);
+    assertTrue(xml != NULL);
+    assertTrue(std::string(xml->Value()) == std::string("Foo"));
+		assertTrue(std::string(getTextChild(*xml)) == std::string("Ceci n'est pas un attribute"));
+    return true;
+  }
+
+  static bool testIsNumber() {
+		assertTrue(isNumber("324.34532"));
+		assertFalse(isNumber("Foo"));
+		double testNum = 0;
+		// nice and prime:
+		assertTrue(isNumber("31337",testNum));
+		assertTrue(testNum == 31337);
+		assertFalse(isNumber("Bar"));
+		assertTrue(testNum == 31337);
+    return true;
+  }
 };
 
 void UtilModuleTests::runTests(std::string path) {
+	setTestLoadLibraryPath(path);
+
   LockManager::instance().connect();
   
   runTestSuite(ErrorTest::test);

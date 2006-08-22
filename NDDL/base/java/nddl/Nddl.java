@@ -176,7 +176,7 @@ class Nddl {
    */
   public static void nddlModel(String model) {
     File modelFile =  ModelAccessor.generateIncludeFileName("",model);
-    if(!modelFile.canRead())
+    if(modelFile == null || !modelFile.canRead())
       die("Cannot read input model file \""+model+"\"",false);
 
     try {

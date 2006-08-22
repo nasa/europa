@@ -8,6 +8,7 @@
 #endif
 
 #include <sstream>
+#include <string>
 
 #include "Error.hh"
 
@@ -63,6 +64,10 @@ namespace EUROPA {
   DECLARE_GLOBAL_CONST(int, g_infiniteTime);
   DECLARE_GLOBAL_CONST(int, g_noTime);
   DECLARE_GLOBAL_CONST(double, g_epsilon);
+
+  void setTestLoadLibraryPath(std::string path);
+
+  std::string getTestLoadLibraryPath();
 }
 
 #define MAX_INT (EUROPA::g_maxInt())

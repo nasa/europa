@@ -4,6 +4,8 @@ if ! $(PLASMA_READY) {
 
 Module Utils : TinyXml ;
 
+ModuleFiles Utils : CommonDefs.cc ;
+
 ModuleLibraries Utils : $(DLOPEN_LIBRARY) ;
 
 SubInclude PLASMA Utils base ;

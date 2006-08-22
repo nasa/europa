@@ -28,7 +28,7 @@ namespace EUROPA {
 			xmlElement = (TiXmlElement*)xmlElement->NextSibling();
 		if(xmlElement == NULL) {
 			// here's a bit of a hack to do string concatination.
-			// it's in an if statemet so we don't construct the string otherwise.
+			// it's in an if statement so we don't construct the string otherwise.
 			std::string message = "\"";
 			message = message + element + "\" could not be found in " + sourceFile;
 			assertTrue(xmlElement != NULL, message);
@@ -63,10 +63,7 @@ namespace EUROPA {
     char * pEnd;
     value = strtod (data, &pEnd);
 
-    // If successful then quit now
-    if(pEnd != data)
-      return true;
-    else
-      return false;
+		// if there's a number the pointer has advanced.
+    return pEnd != data;
   }
 }

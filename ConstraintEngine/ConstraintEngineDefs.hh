@@ -11,7 +11,6 @@
 
 #include <list>
 #include <set>
-#include <string>
 
 namespace EUROPA {
   class AbstractDomain;
@@ -53,11 +52,6 @@ namespace EUROPA {
    * @brief Uninitialize all default elements of the module e.g. factories
    */
   void uninitConstraintEngine();
-
-
-  void setTestLoadLibraryPath(std::string path);
-
-  std::string getTestLoadLibraryPath();
 
   /**
    * @brief Helper method to cast singleton values
