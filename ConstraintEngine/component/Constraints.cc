@@ -904,22 +904,6 @@ namespace EUROPA {
     for (unsigned int i = 2; i < ARG_COUNT; i++) {
       check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[1]),
                                                 getCurrentDomain(m_variables[i])));
-
-      // If this second condition is not enforced, the value used for
-      // minDelta() in handleExecute() depends on the order of the
-      // variables within the scope.  It should, in fact, probably be
-      // enforced by AbstractDomain::canBeCompared().  Another
-      // possibility would be to change the '==' here to '<=' ...
-      // Or permit any pairing of numeric domains here since we're
-      // doing equality tests, which don't really care about minDelta().
-      // Presently, e.g., this precludes real and integer intervals
-      // from appearing in the same constraint, which isn't really a problem.
-      // --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 21
-      checkError(getCurrentDomain(m_variables[1]).minDelta() == getCurrentDomain(m_variables[i]).minDelta(),
-		 "In CondAllSameConstraint, variable 1: " << m_variables[1]->toString() << " has a different minDelta than variable " <<
-		 i << ": " << m_variables[i]->toString() << " " << getCurrentDomain(m_variables[1]).minDelta() << " " << 
-		 getCurrentDomain(m_variables[i]).minDelta());
-
     }
   }
 

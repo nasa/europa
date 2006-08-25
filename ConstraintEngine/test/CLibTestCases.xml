@@ -43188,6 +43188,20 @@
 			<BoolDomain><element value="false"/></BoolDomain>
 		</Outputs>
 	</Constraint>
+	<Constraint name="condeq" test="3341-1">
+		<Inputs>
+			<BoolDomain><element value="true"/></BoolDomain>
+			<IntervalDomain lb="0.0" ub="3.0"/>
+			<IntervalIntDomain lb="3" ub="3"/>
+			<IntervalDomain lb="2.0" ub="8.0"/>
+		</Inputs>
+		<Outputs>
+			<BoolDomain><element value="true"/></BoolDomain>
+			<IntervalDomain lb="3.0" ub="3.0"/>
+			<IntervalIntDomain lb="3" ub="3"/>
+			<IntervalDomain lb="3.0" ub="3.0"/>
+		</Outputs>
+	</Constraint>
 	<Constraint name="withinBounds" test="3342">
 		<Inputs>
 			<IntervalIntDomain lb="-inf" ub="+inf"/>
