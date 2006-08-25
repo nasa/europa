@@ -7,13 +7,13 @@ namespace EUROPA {
 
   static const char* TYPE_DELIMITER = ":"; /*!< Used to delimit types in the factory signature*/
 
-  LabelStr ObjectFactory::makeFactoryName(const LabelStr& objectType, const std::vector<ConstructorArgument>& arguments){
+  LabelStr ObjectFactory::makeFactoryName(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments){
     std::string signature = objectType.toString();
 
     debugMsg("ObjectFactory:makeFactoryName", "Making factory name " << signature);
     // Iterate over the argument types and compose full signature
-    for(std::vector<ConstructorArgument>::const_iterator it = arguments.begin(); it != arguments.end(); ++it){
-      signature = signature + TYPE_DELIMITER + it->first.toString();
+    for(std::vector<const AbstractDomain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it){
+      signature = signature + TYPE_DELIMITER + (*it)->getTypeName().toString();
     }
 
     return signature;
@@ -29,7 +29,7 @@ namespace EUROPA {
    * matches(descendant, ancestor)
    * matches(x, x)
    */
-  ConcreteObjectFactoryId ObjectFactory::getFactory(const LabelStr& objectType, const std::vector<ConstructorArgument>& arguments){
+  ConcreteObjectFactoryId ObjectFactory::getFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments){
     std::map<double, ConcreteObjectFactoryId>& factories = getInstance().m_factories;
 
     // Build the full signature for the factory
@@ -64,14 +64,14 @@ namespace EUROPA {
       // Now do a type by type comparison
       bool found = true;
       for (unsigned int j=1;j<signatureTypes.size();j++){
-	if(schema->isType(arguments[j-1].first) &&
+	if(schema->isType(arguments[j-1]->getTypeName()) &&
 	   schema->isType(signatureTypes[j])){
-	  if(!schema->isA(arguments[j-1].first, signatureTypes[j])){
+	  if(!schema->isA(arguments[j-1]->getTypeName(), signatureTypes[j])){
 	    found = false;
 	    break;
 	  }
 	}
-	else if(arguments[j-1].first != signatureTypes[j]){
+	else if(arguments[j-1]->getTypeName() != signatureTypes[j]){
 	  found = false;
 	  break;
 	}
@@ -120,7 +120,7 @@ namespace EUROPA {
   ObjectId ObjectFactory::createInstance(const PlanDatabaseId& planDb, 
 					 const LabelStr& objectType, 
 					 const LabelStr& objectName,
-					 const std::vector<ConstructorArgument>& arguments){
+					 const std::vector<const AbstractDomain*>& arguments){
     check_error(planDb.isValid());
 
     debugMsg("ObjectFactory:createInstance", "objectType " << objectType.toString() << " objectName " << objectName.toString());

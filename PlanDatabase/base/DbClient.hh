@@ -69,7 +69,7 @@ namespace EUROPA {
      * @param arguments A vector of name/value pairs used to invoke a particular constructor.
      * @return The Id of the object created. Will error out rather than return a noId.
      */
-    ObjectId createObject(const char* type, const char* name, const std::vector<ConstructorArgument>& arguments);
+    ObjectId createObject(const char* type, const char* name, const std::vector<const AbstractDomain*>& arguments);
 
     /**
      * @brief Close the database. This will prohibit any further insertion of objects.

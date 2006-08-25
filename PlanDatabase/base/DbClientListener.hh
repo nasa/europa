@@ -27,7 +27,7 @@ namespace EUROPA {
     const DbClientListenerId& getId() const {return m_id;}
 
     virtual void notifyObjectCreated(const ObjectId& object) {}
-    virtual void notifyObjectCreated(const ObjectId& object, const std::vector<ConstructorArgument>& arguments){}
+    virtual void notifyObjectCreated(const ObjectId& object, const std::vector<const AbstractDomain*>& arguments){}
     virtual void notifyClosed(){}
     virtual void notifyClosed(const LabelStr& objectType){}
     virtual void notifyTokenCreated(const TokenId& token){}

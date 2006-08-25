@@ -83,7 +83,7 @@
     ObjectId createInstance(const PlanDatabaseId& planDb, 
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       assert(arguments.empty());
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       foo->constructor();
@@ -103,7 +103,7 @@
     ObjectId createInstance(const PlanDatabaseId& planDb, 
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       // Type check the arguments
       assert(arguments.size() == 2);
@@ -3399,11 +3399,11 @@ public:
   }
 private:
   static bool testFactoryMethods(){
-    std::vector<ConstructorArgument> arguments;
+    std::vector<const AbstractDomain*> arguments;
     IntervalIntDomain arg0(10, 10, "int");
     LabelSet arg1(LabelStr("Label"), "string");
-    arguments.push_back(ConstructorArgument(arg0.getTypeName(), &arg0)); 
-    arguments.push_back(ConstructorArgument(arg1.getTypeName(), &arg1));
+    arguments.push_back(AbstractDomain*(arg0.getTypeName(), &arg0)); 
+    arguments.push_back(AbstractDomain*(arg1.getTypeName(), &arg1));
     LabelStr factoryName = ObjectFactory::makeFactoryName(LabelStr("Foo"), arguments);
     assertTrue(factoryName == LabelStr("Foo:int:string"));
     return true;
@@ -3419,11 +3419,11 @@ private:
     DBFooId foo1 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo1");
     assertTrue(foo1.isValid());
 
-    std::vector<ConstructorArgument> arguments;
+    std::vector<const AbstractDomain*> arguments;
     IntervalIntDomain arg0(10);
     LabelSet arg1(LabelSet::getDefaultTypeName(), "Label");
-    arguments.push_back(ConstructorArgument(IntervalIntDomain::getDefaultTypeName(), &arg0)); 
-    arguments.push_back(ConstructorArgument(LabelSet::getDefaultTypeName(), &arg1));
+    arguments.push_back(AbstractDomain*(IntervalIntDomain::getDefaultTypeName(), &arg0)); 
+    arguments.push_back(AbstractDomain*(LabelSet::getDefaultTypeName(), &arg1));
     DBFooId foo2 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo2", arguments);
     assertTrue(foo2.isValid());
 
@@ -3566,7 +3566,7 @@ public:
 
   /*
    * For lists of arguments, by type and name (or type and string (even if "1") value).
-   * @note This has a different use and purpose than a list or vector of ConstructorArgument.
+   * @note This has a different use and purpose than a list or vector of AbstractDomain*.
    * That is for a type name and abstract domain; this is for a type name and a variable name.
    */
   typedef std::list<std::pair<std::string, std::string> > ArgList;
@@ -3787,7 +3787,7 @@ public:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       assertTrue(arguments.size() == 0 || arguments.size() == 4);
       if (arguments.size() == 4) {
         //!!I'm not sure why this first one is passed in; it appears to be the object's type info.
@@ -3915,7 +3915,7 @@ public:
   }
 
   /** Helper function to clean up after otherwise memory leaking calls to new. */
-  inline static void cleanDomains(std::vector<AbstractDomain*>& doms) {
+  inline static void cleanDomains(std::vector<const AbstractDomain*>& doms) {
     for (unsigned i = 0; i < doms.size(); i++)
       delete doms[i];
     doms.clear();
@@ -3926,7 +3926,7 @@ public:
    * @note Side-effect: leaves two objects, "testObj2a" and "testObj2b", in plan db.
    */
   static void testCreateObject() {
-    std::vector<AbstractDomain*> domains;
+    std::vector<const AbstractDomain*> domains;
     domains.push_back(new IntervalIntDomain(1));
     domains.push_back(new IntervalDomain(1.414));
     domains.push_back(new Locations(LabelStr("Hill"), "Locations"));
@@ -4485,7 +4485,7 @@ public:
 
   /**
    * Helper function: map relation names to the constraints it implies on the two tokens given.
-   * @note I think that this should be part of the core API, not part of the test code.
+   * @note I think that this should be part of the base API, not part of the test code.
    * --wedgingt@email.arc.nasa.gov 2004 Dec 13
    */
   static void getConstraintsFromRelations(const TokenId& master, const TokenId& slave, const LabelStr& relation,
@@ -4645,7 +4645,7 @@ public:
 
   /** Create an XML string that creates a model object. */
   static std::string buildXMLCreateObjectStr(const std::string& className, const std::string& objName,
-                                             const std::vector<AbstractDomain*>& args);
+                                             const std::vector<const AbstractDomain*>& args);
 
   /** Create an XML string that specifies a variable's domain. */
   static std::string buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const AbstractDomain& dom);
@@ -4892,7 +4892,7 @@ assertTrue(line == l_line);
 }
 
 std::string DbTransPlayerTest::buildXMLCreateObjectStr(const std::string& className, const std::string& objName,
-                                                       const std::vector<AbstractDomain*>& domains) {
+                                                       const std::vector<const AbstractDomain*>& domains) {
   assertTrue(!domains.empty());
   std::string str("<new type=\"");
   str += className;

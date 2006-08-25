@@ -328,7 +328,7 @@ namespace EUROPA {
      *@param obj the Object that was created.
      *@param args the arguments to the Object's constructor.
      */
-    DECLARE_EVENT_ARG(notifyObjectCreated, const ObjectId& obj, const std::vector<ConstructorArgument>& args);
+    DECLARE_EVENT_ARG(notifyObjectCreated, const ObjectId& obj, const std::vector<const AbstractDomain*>& args);
 
     /**
      *@brief Receive a notification that the PlanDatabase has been closed.

@@ -34,7 +34,7 @@ namespace EUROPA {
      * @param arguments The sequence of name/value pairs to be passed as arguments for construction of the object
      * @return A ':' deliimited string of <objectType>:<arg0.type>:..:<argn.type>
      */
-    static LabelStr makeFactoryName(const LabelStr& objectType, const std::vector<ConstructorArgument>& arguments);
+    static LabelStr makeFactoryName(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
 
     /**
      * @brief Create a root object instance
@@ -43,7 +43,7 @@ namespace EUROPA {
     static ObjectId createInstance(const PlanDatabaseId& planDb, 
 				   const LabelStr& objectType, 
 				   const LabelStr& objectName,
-				   const std::vector<ConstructorArgument>& arguments);
+				   const std::vector<const AbstractDomain*>& arguments);
 
     /**
      * @brief Delete all factory instances stored. Should only be used to support testing, since
@@ -62,7 +62,7 @@ namespace EUROPA {
     /**
      * @brief Obtain the factory based on the type of object to create and the types of the arguments to the constructor
      */ 
-    static ConcreteObjectFactoryId getFactory(const LabelStr& objectType, const std::vector<ConstructorArgument>& arguments);
+    static ConcreteObjectFactoryId getFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
 
     static ObjectFactory& getInstance();
 
@@ -106,7 +106,7 @@ namespace EUROPA {
     virtual ObjectId createInstance(const PlanDatabaseId& planDb, 
 				    const LabelStr& objectType, 
 				    const LabelStr& objectName,
-				    const std::vector<ConstructorArgument>& arguments) const = 0;
+				    const std::vector<const AbstractDomain*>& arguments) const = 0;
 
   private:
     ConcreteObjectFactoryId m_id;

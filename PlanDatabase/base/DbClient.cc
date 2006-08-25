@@ -73,14 +73,14 @@ namespace EUROPA {
   }
 
   ObjectId DbClient::createObject(const char* type, const char* name){
-    static const std::vector<ConstructorArgument> noArguments;
+    static const std::vector<const AbstractDomain*> noArguments;
     ObjectId object = ObjectFactory::createInstance(m_planDb, type, name, noArguments);
     debugMsg("DbClient:createObject", object->toString());
     publish(notifyObjectCreated(object));
     return object;
   }
 
-  ObjectId DbClient::createObject(const char* type, const char* name, const std::vector<ConstructorArgument>& arguments){
+  ObjectId DbClient::createObject(const char* type, const char* name, const std::vector<const AbstractDomain*>& arguments){
     ObjectId object = ObjectFactory::createInstance(m_planDb, type, name, arguments);
     debugMsg("DbClient:createObject", object->toString());
     publish(notifyObjectCreated(object, arguments));

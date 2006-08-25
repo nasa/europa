@@ -843,18 +843,20 @@ namespace EUROPA {
       }
       const char * type = value.Attribute("type");
       check_error(type != NULL);
-      std::vector<ConstructorArgument> arguments;
+      std::vector<const AbstractDomain*> arguments;
       for (TiXmlElement * child_el = value.FirstChildElement() ;
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
         const AbstractDomain * domain = xmlAsAbstractDomain(*child_el);
-        arguments.push_back(ConstructorArgument(domain->getTypeName(), domain));
+        arguments.push_back(domain);
       }
       ObjectId object = m_client->createObject(type, name, arguments);
       check_error(object.isValid());
 
       // Now deallocate domains created for arguments
-      for (std::vector<ConstructorArgument>::const_iterator it = arguments.begin(); it != arguments.end(); ++it)
-        delete it->second;
+      for (std::vector<const AbstractDomain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it) {
+      	AbstractDomain* tmp = (AbstractDomain*)(*it);
+        delete tmp;
+      }
       return (double)object;
     }
     if (strcmp(tag, "value") == 0) {

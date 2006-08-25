@@ -395,7 +395,7 @@ class ClassWriter {
     writer.write("ObjectId createInstance(const PlanDatabaseId& planDb,\n"); 
     writer.write("                        const LabelStr& objectType, \n");
     writer.write("                        const LabelStr& objectName,\n");
-    writer.write("                        const std::vector<ConstructorArgument>& arguments) const {\n");
+    writer.write("                        const std::vector<const AbstractDomain*>& arguments) const {\n");
     writer.indent();
 
     Vector constructorAssignments = constructor.getChildrenNamed("arg");
@@ -411,15 +411,15 @@ class ClassWriter {
       IXMLElement element = (IXMLElement)constructorAssignments.elementAt(i);
       String target = XMLUtil.getAttribute(element,"name");
       String type = XMLUtil.getAttribute(element, "type");
-      writer.write("check_error(AbstractDomain::canBeCompared(*arguments["+i+"].second, \n");
+      writer.write("check_error(AbstractDomain::canBeCompared(*arguments["+i+"], \n");
       writer.write("                                          TypeFactory::baseDomain(\""+type+"\")), \n");
-      writer.write("            \"Cannot convert \" + arguments["+i+"].first.toString() + \" to "+type+"\");\n");
-      writer.write("check_error(arguments["+i+"].second->isSingleton());\n");
+      writer.write("            \"Cannot convert \" + arguments["+i+"]->getTypeName().toString() + \" to "+type+"\");\n");
+      writer.write("check_error(arguments["+i+"]->isSingleton());\n");
 
       String localVarType = makeArgumentType(type); // Some conversion may be required for Id's or strings or enumerations
 
       // Declare local variable for current argument
-      writer.write(localVarType + " " + target + "(("+localVarType + ")arguments["+i+"].second->getSingletonValue());\n\n");
+      writer.write(localVarType + " " + target + "(("+localVarType + ")arguments["+i+"]->getSingletonValue());\n\n");
       constructorArguments = constructorArguments + comma + target;
       comma = ", ";
     }

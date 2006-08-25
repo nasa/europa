@@ -24,7 +24,7 @@ namespace EUROPA {
 
     /* Declare DbClient event handlers we will over-ride */
     void notifyObjectCreated(const ObjectId& object);
-    void notifyObjectCreated(const ObjectId& object, const std::vector<ConstructorArgument>& arguments);
+    void notifyObjectCreated(const ObjectId& object, const std::vector<const AbstractDomain*>& arguments);
     void notifyClosed();
     void notifyClosed(const LabelStr& objectType);
     void notifyTokenCreated(const TokenId& token);

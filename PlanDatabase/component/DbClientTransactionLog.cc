@@ -60,19 +60,19 @@ namespace EUROPA {
   }
 
   void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object){
-    const std::vector<ConstructorArgument> noArguments;
+    const std::vector<const AbstractDomain*> noArguments;
     notifyObjectCreated(object, noArguments);
   }
 
-  void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object, const std::vector<ConstructorArgument>& arguments){
+  void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object, const std::vector<const AbstractDomain*>& arguments){
     TiXmlElement * element = allocateXmlElement("new");
     if (LabelStr::isString(object->getName())) {
       element->SetAttribute("name", object->getName().toString());
     }
     element->SetAttribute("type", object->getType().toString());
-    std::vector<ConstructorArgument>::const_iterator iter;
+    std::vector<const AbstractDomain*>::const_iterator iter;
     for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
-      element->LinkEndChild(abstractDomainAsXml(iter->second));
+      element->LinkEndChild(abstractDomainAsXml(*iter));
     }
     pushTransaction(element);
   }

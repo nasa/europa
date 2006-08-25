@@ -63,8 +63,6 @@ namespace EUROPA {
   class DbClientTransactionTokenMapper;
   typedef Id<DbClientTransactionTokenMapper> DbClientTransactionTokenMapperId;
 
-  typedef std::pair<LabelStr, const AbstractDomain*> ConstructorArgument;
-
   /**
    * @brief Used for returning ordering choices for tokens on objects
    */
