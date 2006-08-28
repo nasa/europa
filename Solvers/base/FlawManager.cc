@@ -60,7 +60,7 @@ namespace EUROPA {
           debugMsg("FlawManager:isValid", "Variable listener scope: " << scope.str());
         }
       }
-      debugMsg("FlawManager:isValid", "If zero, it's crazy time: " <<m_activeFlawHandlersByKey.size());
+
       for(std::map<unsigned int, FlawHandlerEntry>::const_iterator it = m_activeFlawHandlersByKey.begin(); it != m_activeFlawHandlersByKey.end();
           ++it) {
         EntityId entity = Entity::getEntity(it->first);
