@@ -107,11 +107,11 @@
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       // Type check the arguments
       assert(arguments.size() == 2);
-      assert(arguments[0].first == IntervalIntDomain::getDefaultTypeName());
-      assert(arguments[1].first == LabelSet::getDefaultTypeName());
+      assert(arguments[0]->getTypeName() == IntervalIntDomain::getDefaultTypeName());
+      assert(arguments[1]->getTypeName() == LabelSet::getDefaultTypeName());
 
-      int arg0((int) arguments[0].second->getSingletonValue());
-      LabelStr arg1(arguments[1].second->getSingletonValue());
+      int arg0((int) arguments[0]->getSingletonValue());
+      LabelStr arg1(arguments[1]->getSingletonValue());
       foo->constructor(arg0, arg1);
       foo->handleDefaults();
       return foo;
@@ -3402,8 +3402,8 @@ private:
     std::vector<const AbstractDomain*> arguments;
     IntervalIntDomain arg0(10, 10, "int");
     LabelSet arg1(LabelStr("Label"), "string");
-    arguments.push_back(AbstractDomain*(arg0.getTypeName(), &arg0)); 
-    arguments.push_back(AbstractDomain*(arg1.getTypeName(), &arg1));
+    arguments.push_back(&arg0); 
+    arguments.push_back(&arg1);
     LabelStr factoryName = ObjectFactory::makeFactoryName(LabelStr("Foo"), arguments);
     assertTrue(factoryName == LabelStr("Foo:int:string"));
     return true;
@@ -3422,8 +3422,8 @@ private:
     std::vector<const AbstractDomain*> arguments;
     IntervalIntDomain arg0(10);
     LabelSet arg1(LabelSet::getDefaultTypeName(), "Label");
-    arguments.push_back(AbstractDomain*(IntervalIntDomain::getDefaultTypeName(), &arg0)); 
-    arguments.push_back(AbstractDomain*(LabelSet::getDefaultTypeName(), &arg1));
+    arguments.push_back(&arg0); 
+    arguments.push_back(&arg1);
     DBFooId foo2 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo2", arguments);
     assertTrue(foo2.isValid());
 
@@ -3792,19 +3792,19 @@ public:
       if (arguments.size() == 4) {
         //!!I'm not sure why this first one is passed in; it appears to be the object's type info.
         //!!--wedgingt@email.arc.nasa.gov 2004 Nov 1
-        assertTrue(arguments[0].first == LabelStr(StringDomain::getDefaultTypeName()));
-        assertTrue(arguments[1].first == LabelStr(IntervalIntDomain::getDefaultTypeName()));
-        assertTrue(arguments[2].first == LabelStr(IntervalDomain::getDefaultTypeName()));
-        assertTrue(arguments[3].first == LabelStr("Locations"));
+        assertTrue(arguments[0]->getTypeName() == LabelStr(StringDomain::getDefaultTypeName()));
+        assertTrue(arguments[1]->getTypeName() == LabelStr(IntervalIntDomain::getDefaultTypeName()));
+        assertTrue(arguments[2]->getTypeName() == LabelStr(IntervalDomain::getDefaultTypeName()));
+        assertTrue(arguments[3]->getTypeName() == LabelStr("Locations"));
       }
       TestClass2Id instance = (new TestClass2(planDb, objectType, objectName))->getId();
       instance->handleDefaults();
       std::vector<ConstrainedVariableId> vars = instance->getVariables();
       for (unsigned int i = 1; i < arguments.size(); i++){
-	if(arguments[i].second->isSingleton())
-	   vars[i - 1]->specify(arguments[i].second->getSingletonValue());
+	if(arguments[i]->isSingleton())
+	   vars[i - 1]->specify(arguments[i]->getSingletonValue());
 	else
-	  vars[i - 1]->restrictBaseDomain(*(arguments[i].second));
+	  vars[i - 1]->restrictBaseDomain(*(arguments[i]));
       }
       std::cout << "TestClass2 objectId " << instance->getId() << ' ' << instance->getName().toString()
                 << " has varIds " << vars[0] << ' ' << vars[1] << ' ' << vars[2] << '\n';
