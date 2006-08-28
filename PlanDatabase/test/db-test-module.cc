@@ -3421,7 +3421,7 @@ private:
 
     std::vector<const AbstractDomain*> arguments;
     IntervalIntDomain arg0(10);
-    LabelSet arg1(LabelSet::getDefaultTypeName(), "Label");
+    LabelSet arg1(LabelStr("Label"), LabelSet::getDefaultTypeName().c_str());
     arguments.push_back(&arg0); 
     arguments.push_back(&arg1);
     DBFooId foo2 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo2", arguments);
