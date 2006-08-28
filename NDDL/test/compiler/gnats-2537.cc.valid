@@ -83,7 +83,7 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 0);
       RegionId instance = (new Region(planDb, objectType, objectName))->getId();
       instance->constructor();
@@ -105,13 +105,13 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
                                                 TypeFactory::baseDomain("Foo")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to Foo");
-      check_error(arguments[0].second->isSingleton());
-      FooId _foo((FooId)arguments[0].second->getSingletonValue());
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to Foo");
+      check_error(arguments[0]->isSingleton());
+      FooId _foo((FooId)arguments[0]->getSingletonValue());
       
       RegionId instance = (new Region(planDb, objectType, objectName))->getId();
       instance->constructor(_foo);
@@ -136,13 +136,13 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
                                                 TypeFactory::baseDomain("Location")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to Location");
-      check_error(arguments[0].second->isSingleton());
-      LabelStr loc((LabelStr)arguments[0].second->getSingletonValue());
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
+      check_error(arguments[0]->isSingleton());
+      LabelStr loc((LabelStr)arguments[0]->getSingletonValue());
       
       RegionId instance = (new Region(planDb, objectType, objectName))->getId();
       instance->constructor(loc);

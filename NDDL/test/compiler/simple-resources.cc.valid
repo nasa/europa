@@ -155,25 +155,25 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 3);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
                                                 TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to float");
-      check_error(arguments[0].second->isSingleton());
-      float ic((float)arguments[0].second->getSingletonValue());
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to float");
+      check_error(arguments[0]->isSingleton());
+      float ic((float)arguments[0]->getSingletonValue());
       
-      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[1], 
                                                 TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[1].first.toString() + " to float");
-      check_error(arguments[1].second->isSingleton());
-      float ll_min((float)arguments[1].second->getSingletonValue());
+                  "Cannot convert " + arguments[1]->getTypeName().toString() + " to float");
+      check_error(arguments[1]->isSingleton());
+      float ll_min((float)arguments[1]->getSingletonValue());
       
-      check_error(AbstractDomain::canBeCompared(*arguments[2].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[2], 
                                                 TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[2].first.toString() + " to float");
-      check_error(arguments[2].second->isSingleton());
-      float ll_max((float)arguments[2].second->getSingletonValue());
+                  "Cannot convert " + arguments[2]->getTypeName().toString() + " to float");
+      check_error(arguments[2]->isSingleton());
+      float ll_max((float)arguments[2]->getSingletonValue());
       
       BatteryId instance = (new Battery(planDb, objectType, objectName))->getId();
       instance->constructor(ic, ll_min, ll_max);
@@ -279,7 +279,7 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 0);
       RoverId instance = (new Rover(planDb, objectType, objectName))->getId();
       instance->constructor();
@@ -370,7 +370,7 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 0);
       WorldId instance = (new World(planDb, objectType, objectName))->getId();
       instance->constructor();

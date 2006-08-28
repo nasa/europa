@@ -77,13 +77,13 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
                                                 TypeFactory::baseDomain("World")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to World");
-      check_error(arguments[0].second->isSingleton());
-      WorldId w((WorldId)arguments[0].second->getSingletonValue());
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to World");
+      check_error(arguments[0]->isSingleton());
+      WorldId w((WorldId)arguments[0]->getSingletonValue());
       
       FooId instance = (new Foo(planDb, objectType, objectName))->getId();
       instance->constructor(w);
@@ -110,37 +110,37 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 5);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
                                                 TypeFactory::baseDomain("World")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to World");
-      check_error(arguments[0].second->isSingleton());
-      WorldId w((WorldId)arguments[0].second->getSingletonValue());
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to World");
+      check_error(arguments[0]->isSingleton());
+      WorldId w((WorldId)arguments[0]->getSingletonValue());
       
-      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[1], 
                                                 TypeFactory::baseDomain("int")), 
-                  "Cannot convert " + arguments[1].first.toString() + " to int");
-      check_error(arguments[1].second->isSingleton());
-      int a((int)arguments[1].second->getSingletonValue());
+                  "Cannot convert " + arguments[1]->getTypeName().toString() + " to int");
+      check_error(arguments[1]->isSingleton());
+      int a((int)arguments[1]->getSingletonValue());
       
-      check_error(AbstractDomain::canBeCompared(*arguments[2].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[2], 
                                                 TypeFactory::baseDomain("bool")), 
-                  "Cannot convert " + arguments[2].first.toString() + " to bool");
-      check_error(arguments[2].second->isSingleton());
-      bool b((bool)arguments[2].second->getSingletonValue());
+                  "Cannot convert " + arguments[2]->getTypeName().toString() + " to bool");
+      check_error(arguments[2]->isSingleton());
+      bool b((bool)arguments[2]->getSingletonValue());
       
-      check_error(AbstractDomain::canBeCompared(*arguments[3].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[3], 
                                                 TypeFactory::baseDomain("string")), 
-                  "Cannot convert " + arguments[3].first.toString() + " to string");
-      check_error(arguments[3].second->isSingleton());
-      LabelStr c((LabelStr)arguments[3].second->getSingletonValue());
+                  "Cannot convert " + arguments[3]->getTypeName().toString() + " to string");
+      check_error(arguments[3]->isSingleton());
+      LabelStr c((LabelStr)arguments[3]->getSingletonValue());
       
-      check_error(AbstractDomain::canBeCompared(*arguments[4].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[4], 
                                                 TypeFactory::baseDomain("Locations")), 
-                  "Cannot convert " + arguments[4].first.toString() + " to Locations");
-      check_error(arguments[4].second->isSingleton());
-      LabelStr loc((LabelStr)arguments[4].second->getSingletonValue());
+                  "Cannot convert " + arguments[4]->getTypeName().toString() + " to Locations");
+      check_error(arguments[4]->isSingleton());
+      LabelStr loc((LabelStr)arguments[4]->getSingletonValue());
       
       FooId instance = (new Foo(planDb, objectType, objectName))->getId();
       instance->constructor(w, a, b, c, loc);
@@ -167,25 +167,25 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 3);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
                                                 TypeFactory::baseDomain("World")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to World");
-      check_error(arguments[0].second->isSingleton());
-      WorldId w((WorldId)arguments[0].second->getSingletonValue());
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to World");
+      check_error(arguments[0]->isSingleton());
+      WorldId w((WorldId)arguments[0]->getSingletonValue());
       
-      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[1], 
                                                 TypeFactory::baseDomain("int")), 
-                  "Cannot convert " + arguments[1].first.toString() + " to int");
-      check_error(arguments[1].second->isSingleton());
-      int a((int)arguments[1].second->getSingletonValue());
+                  "Cannot convert " + arguments[1]->getTypeName().toString() + " to int");
+      check_error(arguments[1]->isSingleton());
+      int a((int)arguments[1]->getSingletonValue());
       
-      check_error(AbstractDomain::canBeCompared(*arguments[2].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[2], 
                                                 TypeFactory::baseDomain("bool")), 
-                  "Cannot convert " + arguments[2].first.toString() + " to bool");
-      check_error(arguments[2].second->isSingleton());
-      bool b((bool)arguments[2].second->getSingletonValue());
+                  "Cannot convert " + arguments[2]->getTypeName().toString() + " to bool");
+      check_error(arguments[2]->isSingleton());
+      bool b((bool)arguments[2]->getSingletonValue());
       
       FooId instance = (new Foo(planDb, objectType, objectName))->getId();
       instance->constructor(w, a, b);
@@ -231,19 +231,19 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 2);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
                                                 TypeFactory::baseDomain("float")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to float");
-      check_error(arguments[0].second->isSingleton());
-      float m8((float)arguments[0].second->getSingletonValue());
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to float");
+      check_error(arguments[0]->isSingleton());
+      float m8((float)arguments[0]->getSingletonValue());
       
-      check_error(AbstractDomain::canBeCompared(*arguments[1].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[1], 
                                                 TypeFactory::baseDomain("World")), 
-                  "Cannot convert " + arguments[1].first.toString() + " to World");
-      check_error(arguments[1].second->isSingleton());
-      WorldId w((WorldId)arguments[1].second->getSingletonValue());
+                  "Cannot convert " + arguments[1]->getTypeName().toString() + " to World");
+      check_error(arguments[1]->isSingleton());
+      WorldId w((WorldId)arguments[1]->getSingletonValue());
       
       BarId instance = (new Bar(planDb, objectType, objectName))->getId();
       instance->constructor(m8, w);
@@ -286,13 +286,13 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
                                                 TypeFactory::baseDomain("Foo")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to Foo");
-      check_error(arguments[0].second->isSingleton());
-      FooId _foo((FooId)arguments[0].second->getSingletonValue());
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to Foo");
+      check_error(arguments[0]->isSingleton());
+      FooId _foo((FooId)arguments[0]->getSingletonValue());
       
       BazId instance = (new Baz(planDb, objectType, objectName))->getId();
       instance->constructor(_foo);
@@ -337,13 +337,13 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
                                                 TypeFactory::baseDomain("Foo")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to Foo");
-      check_error(arguments[0].second->isSingleton());
-      FooId _foo((FooId)arguments[0].second->getSingletonValue());
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to Foo");
+      check_error(arguments[0]->isSingleton());
+      FooId _foo((FooId)arguments[0]->getSingletonValue());
       
       BatId instance = (new Bat(planDb, objectType, objectName))->getId();
       instance->constructor(_foo);
@@ -436,13 +436,13 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
-      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
                                                 TypeFactory::baseDomain("Locations")), 
-                  "Cannot convert " + arguments[0].first.toString() + " to Locations");
-      check_error(arguments[0].second->isSingleton());
-      LabelStr loc((LabelStr)arguments[0].second->getSingletonValue());
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to Locations");
+      check_error(arguments[0]->isSingleton());
+      LabelStr loc((LabelStr)arguments[0]->getSingletonValue());
       
       BalugaId instance = (new Baluga(planDb, objectType, objectName))->getId();
       instance->constructor(loc);
@@ -518,7 +518,7 @@ namespace NDDL {
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
-                            const std::vector<ConstructorArgument>& arguments) const {
+                            const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 0);
       WorldId instance = (new World(planDb, objectType, objectName))->getId();
       instance->constructor();
