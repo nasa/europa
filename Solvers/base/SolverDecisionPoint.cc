@@ -27,7 +27,7 @@ namespace EUROPA {
       checkError(hasNext(), "Tried to execute past available choices. This indicates a bug in the Solver.");
       debugMsg("DecisionPoint:execute", sl_counter++ << ": Executing current decision. " << toString());
       handleExecute();
-      debugMsg("DecisionPoint:execute", sl_counter++ << ": Executed current decision. " << toString());
+      debugMsg("DecisionPoint:execute", sl_counter << ": Executed current decision. " << toString());
       m_isExecuted = true;
     }
 
