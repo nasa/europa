@@ -94,135 +94,167 @@ namespace EUROPA {
     IteratorId FlawManager::createIterator(){ return IteratorId::noId();}
 
     void FlawManager::notifyRemoved(const ConstraintId& constraint) {
-     /*
+      // Check if it's the correct type (FlawHandler::VariableListener)
+      // then we search through the map and remove any instances of it.
       if(Id<FlawHandler::VariableListener>::convertable(constraint)) {
-        debugMsg("FlawManager:notifyRemoved", getId() << " Removing " << constraint->toString() << " from m_flawHandlerGuards");
-
+        debugMsg("FlawManager:notifyRemoved:Constraint", getId() << "->notifyRemoved( " <<
+                 constraint->getName().toString() << "(" << constraint->getKey() << ") )");
         Id<FlawHandler::VariableListener> listener = constraint;
-        int targetKey = listener->getTarget()->getKey();
-        double weight = listener->getHandler()->getWeight();
-        m_flawHandlerGuards.erase(targetKey);
-
-        std::map<unsigned int, FlawHandlerEntry>::iterator activeFlawHandlerEntry = m_activeFlawHandlersByKey.find(targetKey);
-        if(activeFlawHandlerEntry == m_activeFlawHandlersByKey.end()) {
-          debugMsg("FlawManager:notifyRemoved", "Badges, we don't need no stinking badges.");
-          return;
-        }
-        FlawHandlerEntry& entry = m_activeFlawHandlersByKey.find(targetKey)->second;
-        FlawHandlerEntry::iterator it = entry.find(weight);
-        while(it != entry.end() && it->first == weight) {
-          if(it->second == listener->getHandler()) {
-            debugMsg("FlawManager:notifyRemoved", getId() << " Removing " << it->second->toString() << " from flaw handler entry for " << targetKey);
-            entry.erase(it);
-            break;
-          }
-          ++it;
-        }
-        //check_error(it != entry.end());
-        //check_error(it->second == listener->getHandler());
-      }
-      */
-    }
-
-    /**
-     * Remove flaw handler guard constraints for this variable, and if it is a state
-     * variable also reomve for the token
-     */
-    void FlawManager::notifyRemoved(const ConstrainedVariableId& var){
-      debugMsg("FlawManager:notifyRemoved", getId() << " Removing active flaw handlers and guards for " << var->toString());
-      // TODO: recomment when this breaks something
-      // ERROR: The error is here
-      for(std::multimap<unsigned int, ConstraintId>::iterator it = m_flawHandlerGuards.find(var->getKey());
-          it != m_flawHandlerGuards.end() && it->first == (unsigned int) var->getKey(); ++it) {
-        it->second->discard();
-      }
-      unsigned int mapsize = m_flawHandlerGuards.size();
-      m_flawHandlerGuards.erase(var->getKey());
-      debugMsg("FlawManager:notifyRemoved", getId() << " removed " << var->getKey() << " from m_flawHandlerGuards (" <<
-               mapsize << ", " << m_flawHandlerGuards.size() << ")");
-
-      mapsize = m_activeFlawHandlersByKey.size();
-      m_activeFlawHandlersByKey.erase(var->getKey());
-      debugMsg("FlawManager:notifyRemoved", getId() << " removed " << var->getKey() << " from m_activeFlawHandlersByKey (" <<
-               mapsize << ", " << m_activeFlawHandlersByKey.size() << ")");
-
-      mapsize = m_staticFiltersByKey.size();
-      m_staticFiltersByKey.erase(var->getKey());
-      debugMsg("FlawManager:notifyRemoved", getId() << " removed " << var->getKey() << " from m_staticFiltersByKey (" <<
-               mapsize << ", " << m_staticFiltersByKey.size() << ")");
-
-      mapsize = m_dynamicFiltersByKey.size();
-      m_dynamicFiltersByKey.erase(var->getKey());
-      debugMsg("FlawManager:notifyRemoved", getId() << " removed " << var->getKey() << " from m_dynamicFiltersByKey (" <<
-               mapsize << ", " << m_dynamicFiltersByKey.size() << ")");
-
-      for(std::multimap<unsigned int, ConstraintId>::iterator it = m_flawHandlerGuards.begin(); it != m_flawHandlerGuards.end(); ++it) {
-        if(std::find(it->second->getScope().begin(),it->second->getScope().end(),var) != it->second->getScope().end()) {
-
-          Id<FlawHandler::VariableListener> listener = it->second;
+        
+        // As the target of a FlawHandler::VariableListener is only set by its constructor,
+        // copying such a constraint (as in a merge) will leave its target set to NULL.
+        if(listener->getTarget().isValid()) {
           int targetKey = listener->getTarget()->getKey();
           double weight = listener->getHandler()->getWeight();
 
+          debugMsg("FlawManager:notifyRemoved:Constraint", "Looking for active flaw handlers on target key.");
           std::map<unsigned int, FlawHandlerEntry>::iterator activeFlawHandlerEntry = m_activeFlawHandlersByKey.find(targetKey);
           if(activeFlawHandlerEntry != m_activeFlawHandlersByKey.end()) {
-            FlawHandlerEntry& entry = m_activeFlawHandlersByKey.find(targetKey)->second;
+            debugMsg("FlawManager:notifyRemoved:Constraint", "Found one.");
+            FlawHandlerEntry& entry = activeFlawHandlerEntry->second;
             FlawHandlerEntry::iterator eit = entry.find(weight);
             while(eit != entry.end() && eit->first == weight) {
               if(eit->second == listener->getHandler()) {
-                debugMsg("FlawManager:notifyRemoved", getId() << " Removing " << eit->second->toString() << " from flaw handler entry for " << targetKey);
+                //debugMsg("FlawManager:erase:handler", getId() << " Removing " << eit->second->toString() << " from flaw handler entry for " << targetKey);
+								debugMsg("FlawManager:erase:handler", " [" << __FILE__ << ":" << __LINE__ << "] removing flaw handler entry with key " << targetKey);
                 entry.erase(eit);
                 break;
               }
               ++eit;
             }
           }
-
-          std::multimap<unsigned int, ConstraintId>::iterator temp = it;
-          --it;
-          m_flawHandlerGuards.erase(temp);
         }
+
+        for(std::multimap<unsigned int, ConstraintId>::iterator it = m_flawHandlerGuards.begin(); it != m_flawHandlerGuards.end();) {
+          if(it->second == listener) {
+            debugMsg("FlawManager:notifyRemoved:Constraint", "Removing ("<< constraint->getKey() << ") from m_flawHandlerGuards, its constraint is deleted.");
+            unsigned int size = m_flawHandlerGuards.size();
+						debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << it->first << " from m_flawHandlerGuards");
+            m_flawHandlerGuards.erase(it++);
+            debugMsg("FlawManager:notifyRemoved:Constraint", "m_flawHandlerGuards.size() == " << m_flawHandlerGuards.size());
+            checkError(m_flawHandlerGuards.size() == size - 1, "Map size not consistant with erasure: " << size << " - 1 != " << m_flawHandlerGuards.size());
+          }
+          else
+            ++it;
+        }
+      }
+    }
+
+    /**
+     * Remove flaw handler guard constraints for this variable, and if it is a state
+     * variable also remove for the token.
+     */
+    void FlawManager::notifyRemoved(const ConstrainedVariableId& var){
+      debugMsg("FlawManager:notifyRemoved", getId() << " Removing active flaw handlers and guards for " << var->toString());
+      for(std::multimap<unsigned int, ConstraintId>::iterator it = m_flawHandlerGuards.find(var->getKey());
+          it != m_flawHandlerGuards.end() && it->first == (unsigned int) var->getKey();) {
+        debugMsg("FlawManager:notifyRemoved", getId() << " Removing a " << typeid(it->second).name());
+        ConstraintId cid = it->second;
+				debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << var->getKey() << " from m_flawHandlerGuards");
+        m_flawHandlerGuards.erase(it++);
+				debugMsg("FlawManager:discard", " [" << __FILE__ << ":" << __LINE__ << "] discarding a constraint in m_flawHandlerGuards: " << cid->toString());
+        cid->discard();
+      }
+			condDebugMsg(m_flawHandlerGuards.find(var->getKey()) != m_flawHandlerGuards.end(), "FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getKey() << " from m_flawHandlerGuards");
+      m_flawHandlerGuards.erase(var->getKey());
+
+			condDebugMsg(m_activeFlawHandlersByKey.find(var->getKey()) != m_activeFlawHandlersByKey.end(), "FlawManager:erase:active", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getKey() << " from m_activeFlawHandlersByKey");
+      m_activeFlawHandlersByKey.erase(var->getKey());
+
+			condDebugMsg(m_staticFiltersByKey.find(var->getKey()) != m_staticFiltersByKey.end(), "FlawManager:erase:static", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getKey() << " from m_staticFiltersByKey");
+      m_staticFiltersByKey.erase(var->getKey());
+
+			condDebugMsg(m_dynamicFiltersByKey.find(var->getKey()) != m_dynamicFiltersByKey.end(), "FlawManager:erase:dynamic", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getKey() << " from m_dynamicFiltersByKey");
+      m_dynamicFiltersByKey.erase(var->getKey());
+
+      // Handle a guard variable getting removed before the flawed variable does.
+      for(std::multimap<unsigned int, ConstraintId>::iterator it = m_flawHandlerGuards.begin(); it != m_flawHandlerGuards.end();) {
+        debugMsg("FlawManager:notifyRemoved", "Removing from a guard in m_flawHandlerGuards.");
+        if(std::find(it->second->getScope().begin(),it->second->getScope().end(),var) != it->second->getScope().end()) {
+					debugMsg("FlawManager:nonexecuting", "This doesn't/shouldn't execute (According to MJI)");
+
+          Id<FlawHandler::VariableListener> listener = it->second;
+          // As the target of a FlawHandler::VariableListener is only set by its constructor,
+          // copying such a constraint (as in a merge) will leave its target set to NULL.
+          if(listener->getTarget().isValid()) {
+            int targetKey = listener->getTarget()->getKey();
+            double weight = listener->getHandler()->getWeight();
+
+            debugMsg("FlawManager:notifyRemoved", "Looking for active flaw handlers on target key.");
+            std::map<unsigned int, FlawHandlerEntry>::iterator activeFlawHandlerEntry = m_activeFlawHandlersByKey.find(targetKey);
+            if(activeFlawHandlerEntry != m_activeFlawHandlersByKey.end()) {
+              debugMsg("FlawManager:notifyRemoved", "Found one.");
+              FlawHandlerEntry& entry = activeFlawHandlerEntry->second;
+              for(FlawHandlerEntry::iterator eit = entry.find(weight);eit != entry.end() && eit->first == weight; ++eit) {
+                if(eit->second == listener->getHandler()) {
+                  debugMsg("FlawManager:notifyRemoved", getId() << " Removing " << eit->second->toString() << " from flaw handler entry for " << targetKey);
+                  entry.erase(eit);
+                  break;
+                }
+              }
+            }
+            m_flawHandlerGuards.erase(it++);
+          }
+          else
+            ++it;
+        }
+        else
+          ++it;
       }
 
       if(Token::isStateVariable(var)){
         debugMsg("FlawManager:notifyRemoved", 
                  getId() << " Variable " << var->toString() << " is a state variable.  Removing flaw handlers and guards for " <<
                  ((Token*)var->getParent())->getPredicateName().toString());
-        // TODO: recomment when this breaks something
-        for(std::multimap<unsigned int, ConstraintId>::iterator it = m_flawHandlerGuards.find(var->getParent()->getKey());
-            it != m_flawHandlerGuards.end() && it->first == (unsigned int)var->getParent()->getKey(); ++it) {
-          it->second->discard();
+        unsigned int parentKey = (unsigned int)var->getParent()->getKey();
+        debugMsg("FlawManager:notifyRemoved", "Parent Key: " << parentKey);
+        debugMsg("FlawManager:notifyRemoved", "m_flawHandlerGuards.size() == " << m_flawHandlerGuards.size());
+        for(std::multimap<unsigned int, ConstraintId>::iterator it = m_flawHandlerGuards.find(parentKey);
+            it != m_flawHandlerGuards.end() && it->first == parentKey;) {
+          check_error(it->second.isValid());
+          ConstraintId cid = it->second;
+					debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << var->getParent()->getKey() << " from m_flawHandlerGuards");
+          m_flawHandlerGuards.erase(it++);
+					debugMsg("FlawManager:discard", " [" << __FILE__ << ":" << __LINE__ << "] discarding a constraint in m_flawHandlerGuards: " << cid->toString());
+          cid->discard();
         }
+				condDebugMsg(m_flawHandlerGuards.find(var->getParent()->getKey()) != m_flawHandlerGuards.end(), "FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getParent()->getKey() << " from m_flawHandlerGuards");
         m_flawHandlerGuards.erase(var->getParent()->getKey());
+
+				condDebugMsg(m_activeFlawHandlersByKey.find(var->getParent()->getKey()) != m_activeFlawHandlersByKey.end(), "FlawManager:erase:active", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getParent()->getKey() << " from m_activeFlawHandlersByKey");
         m_activeFlawHandlersByKey.erase(var->getParent()->getKey());
+
+				condDebugMsg(m_staticFiltersByKey.find(var->getParent()->getKey()) != m_staticFiltersByKey.end(), "FlawManager:erase:static", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getParent()->getKey() << " from m_staticFiltersByKey");
         m_staticFiltersByKey.erase(var->getParent()->getKey());
+
+				condDebugMsg(m_dynamicFiltersByKey.find(var->getParent()->getKey()) != m_dynamicFiltersByKey.end(), "FlawManager:erase:dynamic", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getParent()->getKey() << " from m_dynamicFiltersByKey");
         m_dynamicFiltersByKey.erase(var->getParent()->getKey());
-        check_error(m_flawHandlerGuards.find(var->getParent()->getKey()) == m_flawHandlerGuards.end());
-        check_error(m_activeFlawHandlersByKey.find(var->getParent()->getKey()) == m_activeFlawHandlersByKey.end());
-        check_error(m_staticFiltersByKey.find(var->getParent()->getKey()) == m_staticFiltersByKey.end());
-        check_error(m_dynamicFiltersByKey.find(var->getParent()->getKey()) == m_dynamicFiltersByKey.end());
       }
-      check_error(m_flawHandlerGuards.find(var->getKey()) == m_flawHandlerGuards.end());
-      check_error(m_activeFlawHandlersByKey.find(var->getKey()) == m_activeFlawHandlersByKey.end());
-      check_error(m_staticFiltersByKey.find(var->getKey()) == m_staticFiltersByKey.end());
-      check_error(m_dynamicFiltersByKey.find(var->getKey()) == m_dynamicFiltersByKey.end());
       condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
     }
 
     void FlawManager::notifyRemoved(const TokenId& token) {
       debugMsg("FlawManager:notifyRemoved", getId() << " Removing active flaw handlers and guards for " << token->getPredicateName().toString() <<
                "(" << token->getKey() << ")");
-      // TODO: recomment when this breaks something
       for(std::multimap<unsigned int, ConstraintId>::iterator it = m_flawHandlerGuards.find(token->getKey());
-          it != m_flawHandlerGuards.end() && it->first == (unsigned int) token->getKey(); ++it)
-        it->second->discard();
+          it != m_flawHandlerGuards.end() && it->first == (unsigned int) token->getKey();) {
+        ConstraintId cid = it->second;
+				debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << token->getKey() << " from m_flawHandlerGuards");
+        m_flawHandlerGuards.erase(it++);
+				debugMsg("FlawManager:discard", " [" << __FILE__ << ":" << __LINE__ << "] discarding a constraint in m_flawHandlerGuards: " << cid->toString());
+        cid->discard();
+      }
+			condDebugMsg(m_flawHandlerGuards.find(token->getKey()) != m_flawHandlerGuards.end(), "FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << token->getKey() << " from m_flawHandlerGuards");
       m_flawHandlerGuards.erase(token->getKey());
+
+			condDebugMsg(m_activeFlawHandlersByKey.find(token->getKey()) != m_activeFlawHandlersByKey.end(), "FlawManager:erase:active", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << token->getKey() << " from m_activeFlawHandlersByKey");
       m_activeFlawHandlersByKey.erase(token->getKey());
+
+			condDebugMsg(m_staticFiltersByKey.find(token->getKey()) != m_staticFiltersByKey.end(), "FlawManager:erase:static", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << token->getKey() << " from m_staticFiltersByKey");
       m_staticFiltersByKey.erase(token->getKey());
+
+			condDebugMsg(m_dynamicFiltersByKey.find(token->getKey()) != m_dynamicFiltersByKey.end(), "FlawManager:erase:dynamic", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << token->getKey() << " from m_dynamicFiltersByKey");
       m_dynamicFiltersByKey.erase(token->getKey());
-      check_error(m_flawHandlerGuards.find(token->getKey()) == m_flawHandlerGuards.end());
-      check_error(m_activeFlawHandlersByKey.find(token->getKey()) == m_activeFlawHandlersByKey.end());
-      check_error(m_staticFiltersByKey.find(token->getKey()) == m_staticFiltersByKey.end());
-      check_error(m_dynamicFiltersByKey.find(token->getKey()) == m_dynamicFiltersByKey.end());
 
       condDebugMsg(!isValid(), "FlawManager:isValid", getId() << " Invalid datastructures in flaw manager.");
     }
