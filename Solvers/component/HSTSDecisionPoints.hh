@@ -142,6 +142,8 @@ namespace EUROPA {
         AscendingKeyTokenComparator(const TiXmlElement& configData) : TokenComparator(configData){};
         AscendingKeyTokenComparator(TokenId tok) : TokenComparator(tok) {}
         bool compare(const TokenId x, const TokenId y);
+	bool compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+		     const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2);
         TokenComparator* copy();
       };
 

@@ -256,6 +256,16 @@ namespace EUROPA {
         return x->getKey() < y->getKey();
       }
 
+      bool AscendingKeyTokenComparator::compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
+						const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {
+	if(p1.first->getKey() < p2.first->getKey())
+	  return true;
+	if(p1.first->getKey() > p2.first->getKey())
+	  return false;
+	return TokenComparator::compare(p1, p2);
+      }
+
+
       TokenComparator* AscendingKeyTokenComparator::copy() {
         return new AscendingKeyTokenComparator(m_flawedTok);
       }
