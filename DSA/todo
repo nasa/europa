@@ -1,0 +1,6 @@
+1. Implement Component.getActions
+2. Implement getResources
+3. Implement ResourceProfile
+4. Allow updates of time for constrained move
+5. Allow notifications for create, delete and update
+6. Integrate Solver
