@@ -54,6 +54,7 @@ SubInclude PLASMA Aver ;
 SubInclude PLASMA HSTS ;
 SubInclude PLASMA System ;
 SubInclude PLASMA Examples ;
+SubInclude PLASMA DSA ;
 
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;
