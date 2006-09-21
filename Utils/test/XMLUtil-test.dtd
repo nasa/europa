@@ -1,5 +1,0 @@
-<!ELEMENT test (Foo)>
-<!ELEMENT Foo (Bar)>
-<!ELEMENT Bar (Baz)>
-<!ELEMENT Bing>
-<!ATTLIST Bing attr CDATA #IMPLIED>

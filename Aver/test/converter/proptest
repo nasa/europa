@@ -1,6 +1,0 @@
-Test('Proptest',
-At any step : Property('foo', Tokens()) < 30;
-At any step : Property('foo', Objects()) < 30;
-At any step : Property('foo', Entity(3, Tokens())) < 30;
-At any step : Property('foo', Entity(3, Objects())) < 30;
-);

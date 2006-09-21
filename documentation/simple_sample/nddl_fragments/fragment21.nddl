@@ -1,1 +1,0 @@
-PlannerConfig world = new PlannerConfig(0, 100, 600);
