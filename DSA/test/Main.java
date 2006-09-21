@@ -4,10 +4,12 @@ import junit.framework.*;
 import java.util.*;
 
 public class Main extends TestCase {
+    static String s_path = null;
 
     public Main(String str){ super(str);}
 
     public static void main(String [] args){
+	s_path = args[0];
 	junit.textui.TestRunner.run(new TestSuite(Main.class));
     }
 
@@ -17,10 +19,10 @@ public class Main extends TestCase {
 
     public void testModelLoading(){
 	try{
-	    DSA.instance().loadModel("libmodel.1_g.so");
-	    DSA.instance().loadTransactions("model.1.xml");
-	    DSA.instance().loadModel("libmodel.2_g.so");
-	    DSA.instance().loadTransactions("model.2.xml");
+	    DSA.instance().loadModel(s_path + "libmodel.1_g.so");
+	    DSA.instance().loadTransactions(s_path + "model.1.xml");
+	    DSA.instance().loadModel(s_path + "libmodel.2_g.so");
+	    DSA.instance().loadTransactions(s_path + "model.2.xml");
 	}
 	catch(Exception e){
 	    Assert.assertTrue(false);
@@ -29,8 +31,8 @@ public class Main extends TestCase {
 
     public void testComponentQuery(){
 	try{
-	    DSA.instance().loadModel("libmodel.1_g.so");
-	    DSA.instance().loadTransactions("model.1.xml");
+	    DSA.instance().loadModel(s_path + "libmodel.1_g.so");
+	    DSA.instance().loadTransactions(s_path + "model.1.xml");
 	    List<Component> components = DSA.instance().getComponents();
 	    Assert.assertTrue(components.size() == 1);
 	}
@@ -41,10 +43,10 @@ public class Main extends TestCase {
 
     public void testSolverExecution(){
 	try{
-	    DSA.instance().loadModel("libmodel.1_g.so");
-	    DSA.instance().loadTransactions("model.1.xml");
+	    DSA.instance().loadModel(s_path + "libmodel.1_g.so");
+	    DSA.instance().loadTransactions(s_path + "model.1.xml");
 
-	    Solver solver = Solver.createInstance("solver.1.cfg", 0, 1000, 10, 10);
+	    Solver solver = Solver.createInstance(s_path + "solver.1.cfg", 0, 1000, 10, 10);
 	    Assert.assertTrue(solver.solve());
 	    Assert.assertTrue(solver.getStepCount() == 2);
 	    Assert.assertTrue(solver.getDepth() == 2);
@@ -56,7 +58,7 @@ public class Main extends TestCase {
 	    Assert.assertTrue(solver.getDepth() == 2);
 
 	    // Now allocate againa and confirm the base data. This time no work to do
-	    solver = Solver.createInstance("solver.1.cfg", 0, 1000, 10, 10);
+	    solver = Solver.createInstance(s_path + "solver.1.cfg", 0, 1000, 10, 10);
 	    Assert.assertTrue(solver.solve());
 	    Assert.assertTrue(solver.getStepCount() == 0);
 	    Assert.assertTrue(solver.getDepth() == 0);

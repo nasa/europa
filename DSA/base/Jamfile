@@ -24,8 +24,11 @@ ApacheAnt DSA.jar :
 	dsa/InvalidSinkException.java
 	dsa/PlanNotSavedException.java
 	dsa/NoActivePlanException.java
-	dsa/InvalidKeyException.java :
-	createJNI
+	dsa/InvalidKeyException.java 
+	nddl.jar :
+	DSA
 ;
+
+Depends DSA.jar : nddl.jar ;
 	
 } # PLASMA_READY
