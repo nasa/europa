@@ -10,9 +10,7 @@ public class Solver {
 	if(s_instance == null)
 	    s_instance = new Solver(maxSteps, maxDepth);
 
-	JNI.solverConfigure(configurationFile, horizonStart, horizonEnd);
-
-	s_instance.updateState();
+	s_instance.updateState(JNI.solverConfigure(configurationFile, horizonStart, horizonEnd));
 
 	return s_instance;
     }
@@ -30,19 +28,16 @@ public class Solver {
     }
 
     public boolean solve(){
-	JNI.solverSolve(m_maxSteps, m_maxDepth);
-	updateState();
+	updateState(JNI.solverSolve(m_maxSteps, m_maxDepth));
 	return !hasFlaws();
     }
 
     public void step(){
-	JNI.solverStep();
-	updateState();
+	updateState(JNI.solverStep());
     }
 
     public void reset(){
-	JNI.solverReset();
-	updateState();
+	updateState(JNI.solverReset());
     }
 
     public int getStepCount(){ return m_stepCount; }
@@ -55,21 +50,21 @@ public class Solver {
 
     private boolean hasFlaws(){ return m_hasFlaws;}
 
-    private void updateState(){
+    private void updateState(String xmlStr){
 	m_stepCount = 0;
 	m_depth = 0;
 	m_isExhausted = false;
 	m_isTimedOut = false;
 	m_hasFlaws = true;
 
-	// Read the response file and parse the data
+	// Read the state file and parse the data
 	try{
-	    IXMLElement response = DSA.readResponse();
-	    m_stepCount = response.getAttribute("stepCount", 0);
-	    m_depth = response.getAttribute("depth", 0);
-	    m_isExhausted = (response.getAttribute("isExhausted", 0) == 0 ? false : true);
-	    m_isTimedOut = (response.getAttribute("isTimedOut", 0) == 0 ? false : true);
-	    m_hasFlaws = (response.getAttribute("hasFlaws", 0) == 0 ? false : true);
+	    IXMLElement state = DSA.toXML(xmlStr);
+	    m_stepCount = state.getAttribute("stepCount", 0);
+	    m_depth = state.getAttribute("depth", 0);
+	    m_isExhausted = (state.getAttribute("isExhausted", 0) == 0 ? false : true);
+	    m_isTimedOut = (state.getAttribute("isTimedOut", 0) == 0 ? false : true);
+	    m_hasFlaws = (state.getAttribute("hasFlaws", 0) == 0 ? false : true);
 	}
 	catch(Exception e){
 	    e.printStackTrace();

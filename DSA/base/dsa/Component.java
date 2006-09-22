@@ -9,8 +9,13 @@ public class Component extends Entity {
 
     public String getName(){return m_name;}
 
-    public List<Action> getActions() throws NoActivePlanException, InvalidKeyException {
+    public List<Action> getActions() {
 	return new Vector<Action>();
     }
+
+    public List<Attribute> getAttributes() {
+	return new Vector<Attribute>();
+    }
+
     private String m_name;
 }

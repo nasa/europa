@@ -1,9 +1,14 @@
 package dsa;
 
-public class Token extends Entity {
-    public Token(int key){super(key);}
+import java.util.List;
 
-    ParameterCollection getParameters(){
-	return null;
-    }
+interface Token {
+    int getKey();
+    int getEarliestStart();
+    int getLatestStart();
+    int getEarliestEnd();
+    int getLatestEnd();
+    int getDurationMin();
+    int getDurationMax();
+    List<Parameter> getParameters();
 }

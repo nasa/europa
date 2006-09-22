@@ -28,43 +28,77 @@
 #include <fstream>
 #include <sstream>
 
+/**
+ * The JNI binding support below should probably be factored into a separate compilation unit if
+ * we generalize to handle a variety of integration models.
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-  
+
+  jstring makeSolverState(JNIEnv * env, const EUROPA::SOLVERS::SolverId& solver){
+    std::stringstream ss;
+
+    ss << "<SOLVER_STATE hasFlaws=\"" << !solver->noMoreFlaws() << 
+      "\" isTimedOut=\"" << solver->isTimedOut() << 
+      "\" isExhausted=\"" << solver->isExhausted() << 
+      "\" stepCount=\"" << solver->getStepCount() << 
+      "\" depth=\"" << solver->getDepth() << "\"/>";
+
+    return env->NewStringUTF(ss.str().c_str());
+  }
+
+  jstring makeReply(JNIEnv * env, const EUROPA::DSA::ResultSet& rs){
+    return env->NewStringUTF(rs.toXML().c_str());
+  }
+
   JNIEXPORT void JNICALL Java_dsa_JNI_load(JNIEnv * env, jclass, jstring model){
     const char* modelStr = env->GetStringUTFChars(model, NULL);
     EUROPA::DSA::DSA::instance().load(modelStr);
   }
   
-  JNIEXPORT void JNICALL Java_dsa_JNI_loadTransactions(JNIEnv * env, jclass, jstring txSource){
+  JNIEXPORT void JNICALL Java_dsa_JNI_addPlan(JNIEnv * env, jclass, jstring txSource){
     const char* txSourceStr = env->GetStringUTFChars(txSource, NULL);
-    EUROPA::DSA::DSA::instance().loadTransactions(txSourceStr);
+    EUROPA::DSA::DSA::instance().addPlan(txSourceStr);
   }
 
-  JNIEXPORT void JNICALL Java_dsa_JNI_getComponents(JNIEnv *, jclass){
-    EUROPA::DSA::DSA::instance().queryGetComponents();
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_getComponents(JNIEnv * env, jclass){
+    return(makeReply(env, EUROPA::DSA::DSA::instance().queryGetComponents()));
   }
 
-  JNIEXPORT void JNICALL Java_dsa_JNI_solverConfigure(JNIEnv * env, jclass, jstring solverCfg, jint horizonStart, jint horizonEnd){
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverConfigure(JNIEnv * env, jclass, jstring solverCfg, jint horizonStart, jint horizonEnd){
     const char* solverCfgStr = env->GetStringUTFChars(solverCfg, NULL);
-    EUROPA::DSA::DSA::instance().solverConfigure(solverCfgStr, (int) horizonStart, (int) horizonEnd);
+    EUROPA::DSA::DSA::instance().configureSolver(solverCfgStr, (int) horizonStart, (int) horizonEnd);
+    return(makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver()));
   }
 
-  JNIEXPORT void JNICALL Java_dsa_JNI_solverSolve(JNIEnv *, jclass, jint maxSteps, jint maxDepth){
-    EUROPA::DSA::DSA::instance().solverSolve((int) maxSteps, (int) maxDepth);
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverSolve(JNIEnv * env, jclass klass, jint maxSteps, jint maxDepth){
+
+    EUROPA::DSA::DSA::instance().getSolver()->solve((int) maxSteps, (int) maxDepth);
+
+    // Invoke call back api - just a test for now. Eventually implement a listener on events to do this
+    jmethodID method = env->GetStaticMethodID(klass, "handleCallBack", "()V");
+    checkError(method != NULL, "No Method found");
+
+    env->CallStaticVoidMethod(klass, method); 
+
+    return(makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver()));
   }
 
-  JNIEXPORT void JNICALL Java_dsa_JNI_solverStep(JNIEnv *, jclass){
-    EUROPA::DSA::DSA::instance().solverStep();
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverStep(JNIEnv * env, jclass){
+    EUROPA::DSA::DSA::instance().getSolver()->step();
+    return(makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver()));
   }
 
-  JNIEXPORT void JNICALL Java_dsa_JNI_solverReset(JNIEnv *, jclass){
-    EUROPA::DSA::DSA::instance().solverReset();
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverReset(JNIEnv * env, jclass){
+    EUROPA::DSA::DSA::instance().getSolver()->reset();
+    return(makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver()));
   }
 
-  JNIEXPORT void JNICALL Java_dsa_JNI_solverClear(JNIEnv *, jclass){
-    EUROPA::DSA::DSA::instance().solverClear();
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverClear(JNIEnv * env, jclass){
+    EUROPA::DSA::DSA::instance().getSolver()->clear();
+    return(makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver()));
   }
 
 
@@ -89,7 +123,7 @@ namespace EUROPA {
       init();
     }
 
-    void DSA::loadTransactions(const char* txSource){
+    void DSA::addPlan(const char* txSource){
       // Obtain the client to play transactions on.
       DbClientId client = m_db->getClient();
 
@@ -102,26 +136,30 @@ namespace EUROPA {
       player.play(in);
     }
 
-    void DSA::queryGetComponents(){
+    const ResultSet& DSA::queryGetComponents(){
+      static StringResultSet sl_resultSet;
+
       checkError(m_db.isValid(), "No good database");
 
-      std::ofstream os("RESPONSE_FILE");
+      std::stringstream ss;
 
-      os << "<COLLECTION>" << std::endl;
+      ss << "<COLLECTION>" << std::endl;
 
       const ObjectSet& objects = m_db->getObjects();
       for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
 	ObjectId object = *it;
 	if(Schema::instance()->isA(object->getType(), "Timeline"))
-	  os << "   <Component key=\"" << object->getKey() << "\" name=\"" << object->getName().toString() << "\"/>" << std::endl;
+	  ss << "   <Component key=\"" << object->getKey() << "\" name=\"" << object->getName().toString() << "\"/>" << std::endl;
       }
 
-      os << "</COLLECTION>" << std::endl;
-      os.close();
+      ss << "</COLLECTION>" << std::endl;
+
+      sl_resultSet.str() = ss.str();
+
+      return sl_resultSet;
     }
 
-
-    void DSA::solverConfigure(const char* source, int horizonStart, int horizonEnd){
+    void DSA::configureSolver(const char* source, int horizonStart, int horizonEnd){
       std::ifstream in(source);
       checkError(in, "Invalid configuration source '" + std::string(source) + "'.");
 
@@ -135,30 +173,6 @@ namespace EUROPA {
       m_solver = (new EUROPA::SOLVERS::Solver(m_db, *(doc.RootElement())))->getId();
 
       SOLVERS::HorizonFilter::getHorizon() = IntervalDomain(horizonStart, horizonEnd);
-    }
-
-    void DSA::solverSolve(int maxSteps, int maxDepth){
-      checkError(m_solver.isId(), "Solver has not been allocated.");
-      m_solver->solve(maxSteps, maxDepth);
-      writeSolverState();
-    }
-
-    void DSA::solverStep(){
-      checkError(m_solver.isId(), "Solver has not been allocated.");
-      m_solver->step();
-      writeSolverState();
-    }
-
-    void DSA::solverReset(){
-      checkError(m_solver.isId(), "Solver has not been allocated.");
-      m_solver->reset();
-      writeSolverState();
-    }
-
-    void DSA::solverClear(){
-      checkError(m_solver.isId(), "Solver has not been allocated.");
-      m_solver->clear();
-      writeSolverState();
     }
 
     void DSA::loadModelLibrary(const char* modelStr){
@@ -245,19 +259,6 @@ namespace EUROPA {
 
       // Allocate the rules engine to process rules
       m_re = (new RulesEngine(m_db))->getId();
-    }
-
-    void DSA::writeSolverState(){
-      // Now output the state in the RESPONSE_FILE
-      std::ofstream os("RESPONSE_FILE");
-
-      os << "<SOLVER_STATE hasFlaws=\"" << !m_solver->noMoreFlaws() << 
-	"\" isTimedOut=\"" << m_solver->isTimedOut() << 
-	"\" isExhausted=\"" << m_solver->isExhausted() << 
-	"\" stepCount=\"" << m_solver->getStepCount() << 
-	"\" depth=\"" << m_solver->getDepth() << "\"/>";
-
-      os.close();
     }
   }
 }
