@@ -4,7 +4,18 @@ import java.util.*;
 
 public class TokenImpl extends Entity implements Slot, Proposition {
 
-    public TokenImpl(int key){super(key);}
+    public TokenImpl(String type, int key, int startLb, int startUb, int endLb, int endUb, int durationLb, int durationUb ){
+	super(key);
+	m_type = type;
+	m_earliestStart = startLb;
+	m_latestStart = startUb;
+	m_earliestEnd = endLb;
+	m_latestEnd = endUb;
+	m_durationMin = durationLb;
+	m_durationMax = durationUb;
+    }
+
+    public String getType(){return m_type;}
 
     public boolean isTrue(){return true;}
 
@@ -24,6 +35,8 @@ public class TokenImpl extends Entity implements Slot, Proposition {
 	return new Vector<Parameter>();
     }
 
+
+    private String m_type;
     private int m_earliestStart;
     private int m_latestStart;
     private int m_earliestEnd;

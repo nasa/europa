@@ -7,6 +7,10 @@ public class JNI {
     public static native void load(String model);
     public static native void addPlan(String txSource);
     public static native String getComponents();
+    public static native String getActions(int componentKey);
+    public static native String getConditions(int actionKey);
+    public static native String getEffects(int actionKey);
+    public static native String getChildActions(int actionKey);
     public static native String getViolations(int actionKey);
 
     /** Solver API Calls **/

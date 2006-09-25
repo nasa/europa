@@ -28,13 +28,29 @@ public class Main extends TestCase {
 	    Assert.assertTrue(false);
 	}
     }
-
+   
     public void testComponentQuery(){
 	try{
 	    DSA.instance().loadModel(s_path + "libmodel.1_g.so");
 	    DSA.instance().addPlan(s_path + "model.1.xml");
 	    List<Component> components = DSA.instance().getComponents();
 	    Assert.assertTrue(components.size() == 1);
+	}
+	catch(Exception e){
+	    Assert.assertTrue(false);
+	}
+    }
+
+    public void testActionQuery(){
+	try{
+	    DSA.instance().loadModel(s_path + "libmodel.1_g.so");
+	    DSA.instance().addPlan(s_path + "model.1.xml");
+	    List<Component> components = DSA.instance().getComponents();
+	    ListIterator<Component> it = components.listIterator();
+	    while(it.hasNext()){
+		Component component = it.next();
+		List<Action> actions = component.getActions();
+	    }
 	}
 	catch(Exception e){
 	    Assert.assertTrue(false);
@@ -67,5 +83,4 @@ public class Main extends TestCase {
 	    Assert.assertTrue(false);
 	}
     }
-
 }

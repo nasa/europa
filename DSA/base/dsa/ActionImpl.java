@@ -3,12 +3,9 @@ package dsa;
 import java.util.*;
 
 public class ActionImpl extends TokenImpl implements Action {
-    public ActionImpl(String type, int key){
-	super(key);
-	m_type = type;
+    public ActionImpl(String type, int key, int startLb, int startUb, int endLb, int endUb, int durationLb, int durationUb){
+	super(type, key, startLb, startUb, endLb, endUb, durationLb, durationUb);
     }
-
-    public String getType(){return m_type;}
 
     public boolean hasViolations(){return false;}
 
@@ -19,6 +16,4 @@ public class ActionImpl extends TokenImpl implements Action {
     public List<Proposition> getEffects(){return null;}
 
     public List<Violation> getViolations(){return null;}
-
-    private String m_type;
 }

@@ -2,8 +2,9 @@ package dsa;
 
 import java.util.List;
 
-interface Token {
+public interface Token {
     int getKey();
+    String getType();
     int getEarliestStart();
     int getLatestStart();
     int getEarliestEnd();

@@ -3,7 +3,7 @@ package dsa;
 import java.util.*;
 import net.n3.nanoxml.IXMLElement;
 
-interface Action extends Token {
+public interface Action extends Token {
     public String getType();
     public boolean hasViolations();
     public List<Action> getChildActions();

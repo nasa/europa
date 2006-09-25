@@ -1,8 +1,5 @@
-#ifndef H_DSA
-#define H_DSA
-
-#include "JNI.h"
 #include "DSA.hh"
+#include "JNI.h"
 #include "Nddl.hh"
 #include "Schema.hh"
 #include "Debug.hh"
@@ -12,6 +9,8 @@
 #include "Rule.hh"
 #include "NddlDefs.hh"
 #include "PlanDatabase.hh"
+#include "Token.hh"
+#include "TokenVariable.hh"
 #include "RulesEngine.hh"
 #include "ConstraintEngine.hh"
 #include "STNTemporalAdvisor.hh"
@@ -53,9 +52,14 @@ extern "C" {
     return env->NewStringUTF(rs.toXML().c_str());
   }
 
-  JNIEXPORT void JNICALL Java_dsa_JNI_load(JNIEnv * env, jclass, jstring model){
+  JNIEXPORT void JNICALL Java_dsa_JNI_load(JNIEnv * env, jclass klass, jstring model){
     const char* modelStr = env->GetStringUTFChars(model, NULL);
     EUROPA::DSA::DSA::instance().load(modelStr);
+
+    // Invoke call back api - just a test for now. Eventually implement a listener on events to do this
+    jmethodID method = env->GetStaticMethodID(klass, "handleCallBack", "()V");
+    checkError(method != NULL, "No Method found");
+    env->CallStaticVoidMethod(klass, method);
   }
   
   JNIEXPORT void JNICALL Java_dsa_JNI_addPlan(JNIEnv * env, jclass, jstring txSource){
@@ -64,79 +68,63 @@ extern "C" {
   }
 
   JNIEXPORT jstring JNICALL Java_dsa_JNI_getComponents(JNIEnv * env, jclass){
-    return(makeReply(env, EUROPA::DSA::DSA::instance().queryGetComponents()));
+    return(makeReply(env, EUROPA::DSA::DSA::instance().getComponents()));
+  }
+
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_getActions(JNIEnv * env, jclass, jint componentKey){
+    return(makeReply(env, EUROPA::DSA::DSA::instance().getActions(componentKey)));
+  }
+
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_getConditions(JNIEnv * env, jclass, jint actionKey){
+    return(0);
+  }
+
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_getEffects(JNIEnv * env, jclass, jint actionKey){
+    return(0);
+  }
+
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_getChildActions(JNIEnv * env, jclass, jint actionKey){
+    return(0);
   }
 
   JNIEXPORT jstring JNICALL Java_dsa_JNI_solverConfigure(JNIEnv * env, jclass, jstring solverCfg, jint horizonStart, jint horizonEnd){
     const char* solverCfgStr = env->GetStringUTFChars(solverCfg, NULL);
-    EUROPA::DSA::DSA::instance().configureSolver(solverCfgStr, (int) horizonStart, (int) horizonEnd);
-    return(makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver()));
+    EUROPA::DSA::DSA::instance().solverConfigure(solverCfgStr, (int) horizonStart, (int) horizonEnd);
+    return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverSolve(JNIEnv * env, jclass klass, jint maxSteps, jint maxDepth){
-
-    EUROPA::DSA::DSA::instance().getSolver()->solve((int) maxSteps, (int) maxDepth);
-
-    // Invoke call back api - just a test for now. Eventually implement a listener on events to do this
-    jmethodID method = env->GetStaticMethodID(klass, "handleCallBack", "()V");
-    checkError(method != NULL, "No Method found");
-
-    env->CallStaticVoidMethod(klass, method); 
-
-    return(makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver()));
+  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverSolve(JNIEnv * env, jclass, jint maxSteps, jint maxDepth){
+    EUROPA::DSA::DSA::instance().solverSolve((int) maxSteps, (int) maxDepth);
+    return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
 
   JNIEXPORT jstring JNICALL Java_dsa_JNI_solverStep(JNIEnv * env, jclass){
-    EUROPA::DSA::DSA::instance().getSolver()->step();
-    return(makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver()));
+    EUROPA::DSA::DSA::instance().solverStep();
+    return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
 
   JNIEXPORT jstring JNICALL Java_dsa_JNI_solverReset(JNIEnv * env, jclass){
-    EUROPA::DSA::DSA::instance().getSolver()->reset();
-    return(makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver()));
+    EUROPA::DSA::DSA::instance().solverReset();
+    return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
 
   JNIEXPORT jstring JNICALL Java_dsa_JNI_solverClear(JNIEnv * env, jclass){
-    EUROPA::DSA::DSA::instance().getSolver()->clear();
-    return(makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver()));
+    EUROPA::DSA::DSA::instance().solverClear();
+    return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
-
 
 #ifdef __cplusplus
 }
 #endif
 
-
 namespace EUROPA {
-  namespace DSA{
-
-    const LabelStr LOAD_TRANSACTIONS("LOAD_TRANSACTIONS");
+  namespace DSA {
 
     DSA::DSA(){
       m_libHandle = NULL;
-      Error::doThrowExceptions();
     }
 
-    void DSA::load(const char* modelStr){
-      unload();
-      loadModelLibrary(modelStr);
-      init();
-    }
-
-    void DSA::addPlan(const char* txSource){
-      // Obtain the client to play transactions on.
-      DbClientId client = m_db->getClient();
-
-      // Construct player
-      DbClientTransactionPlayer player(client);
-
-      // Open transaction source and play transactions
-      std::ifstream in(txSource);
-      checkError(in, "Invalid transaction source '" + std::string(txSource) + "'.");
-      player.play(in);
-    }
-
-    const ResultSet& DSA::queryGetComponents(){
+    const ResultSet& DSA::getComponents(){
       static StringResultSet sl_resultSet;
 
       checkError(m_db.isValid(), "No good database");
@@ -159,23 +147,56 @@ namespace EUROPA {
       return sl_resultSet;
     }
 
-    void DSA::configureSolver(const char* source, int horizonStart, int horizonEnd){
-      std::ifstream in(source);
-      checkError(in, "Invalid configuration source '" + std::string(source) + "'.");
-
-      if(m_solver.isId()){
-	delete (Solver*) m_solver;
-	m_solver = SolverId::noId();
-      }
-
-      TiXmlDocument doc(source);
-      doc.LoadFile();
-      m_solver = (new EUROPA::SOLVERS::Solver(m_db, *(doc.RootElement())))->getId();
-
-      SOLVERS::HorizonFilter::getHorizon() = IntervalDomain(horizonStart, horizonEnd);
+    const ResultSet& DSA::getActions(int componentKey){
+      checkError(m_db.isValid(), "No good database");
+      EntityId entity = Entity::getEntity(componentKey);
+      checkError(entity.isValid() && ObjectId::convertable(entity), "No component for key [" << componentKey << "]");
+      ObjectId component = (ObjectId) entity;
+      const TokenSet& tokens = component->getTokens();
+      return makeTokenCollection(tokens);
     }
 
-    void DSA::loadModelLibrary(const char* modelStr){
+
+    const ResultSet& DSA::makeTokenCollection(const TokenSet& tokens){
+      static StringResultSet sl_resultSet;
+
+      checkError(m_db.isValid(), "No good database");
+
+      std::stringstream ss;
+
+      ss << "<COLLECTION>" << std::endl;
+
+      const TokenSet& objects = m_db->getTokens();
+      for(TokenSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
+	TokenId token = *it;
+	ss << "   <Token key=\"" << token->getKey() << "\" " 
+	  "type=\""  << token->getPredicateName().toString() << "\"" <<
+	  "startLb=\""  << token->getStart()->lastDomain().getLowerBound() << "\"" <<
+	  "startUb=\""  << token->getStart()->lastDomain().getUpperBound() << "\"" <<
+	  "endLb=\""  << token->getEnd()->lastDomain().getLowerBound() << "\"" <<
+	  "endUb=\""  << token->getEnd()->lastDomain().getUpperBound() << "\"" <<
+	  "durationLb=\""  << token->getDuration()->lastDomain().getLowerBound() << "\"" <<
+	  "durationUb=\""  << token->getDuration()->lastDomain().getUpperBound() << "\"" << ">" << std::endl;
+
+	const std::vector<ConstrainedVariableId>& params = token->getParameters();
+	for(std::vector<ConstrainedVariableId>::const_iterator it = params.begin(); it != params.end(); ++it){
+	  ConstrainedVariableId var = *it;
+	  ss << "<Parameter name=\"" << var->getName().toString() << "\" value=\"" << var->lastDomain().toString() << "\">" << std::endl;
+	}
+
+	ss << "</Token>" << std::endl;
+      }
+
+      ss << "</COLLECTION>" << std::endl;
+
+      sl_resultSet.str() = ss.str();
+
+      return sl_resultSet;
+    }
+
+    void DSA::load(const char* modelStr){
+      unload();
+
       m_libHandle = dlopen(modelStr, RTLD_NOW);
 
       //locate the NDDL 'loadSchema' function in the library and check for errors
@@ -260,7 +281,62 @@ namespace EUROPA {
       // Allocate the rules engine to process rules
       m_re = (new RulesEngine(m_db))->getId();
     }
+
+
+    void DSA::addPlan(const char* txSource){
+      checkError(m_libHandle, "Must have a model loaded.");
+
+      if(m_db.isNoId())
+	init();
+
+      checkError(m_db.isValid(), "Invalid database instance.");
+
+      DbClientId client = m_db->getClient();
+
+      // Construct player
+      DbClientTransactionPlayer player(client);
+
+      // Open transaction source and play transactions
+      debugMsg("DSA:addPlan", "Reading initial state from " << txSource);
+      std::ifstream in(txSource);
+      checkError(in, "Invalid transaction source '" + std::string(txSource) + "'.");
+      player.play(in);
+    }
+
+    void DSA::solverConfigure(const char* source, int horizonStart, int horizonEnd){
+      std::ifstream in(source);
+      checkError(in, "Invalid configuration source '" + std::string(source) + "'.");
+
+      if(m_solver.isId()){
+	delete (Solver*) m_solver;
+	m_solver = SolverId::noId();
+      }
+
+      TiXmlDocument doc(source);
+      doc.LoadFile();
+      m_solver = (new EUROPA::SOLVERS::Solver(m_db, *(doc.RootElement())))->getId();
+
+      SOLVERS::HorizonFilter::getHorizon() = IntervalDomain(horizonStart, horizonEnd);
+    }
+
+    void DSA::solverSolve(int maxSteps, int maxDepth){
+      checkError(m_solver.isId(), "Solver has not been allocated.");
+      m_solver->solve(maxSteps, maxDepth);
+    }
+
+    void DSA::solverStep(){
+      checkError(m_solver.isId(), "Solver has not been allocated.");
+      m_solver->step();
+    }
+
+    void DSA::solverReset(){
+      checkError(m_solver.isId(), "Solver has not been allocated.");
+      m_solver->reset();
+    }
+
+    void DSA::solverClear(){
+      checkError(m_solver.isId(), "Solver has not been allocated.");
+      m_solver->clear();
+    }
   }
 }
-
-#endif

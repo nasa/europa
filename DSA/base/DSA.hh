@@ -1,3 +1,6 @@
+#ifndef H_DSA
+#define H_DSA
+
 #include "PlanDatabaseDefs.hh"
 #include "ConstraintEngineDefs.hh"
 #include "RulesEngineDefs.hh"
@@ -30,22 +33,31 @@ namespace EUROPA {
 	static DSA sl_instance;
 	return sl_instance;
       }
-
+      
       void load(const char* model);
 
       void addPlan(const char* txSource);
 
-      void configureSolver(const char* source, int horizonStart, int horizonEnd);
+      const ResultSet& getComponents();
+      const ResultSet& getActions(int componentKey);
+      const ResultSet& getChildActions(int actionKey);
+      const ResultSet& getConditions(int actionKey);
+      const ResultSet& getEffects(int actionKey);
 
       const SolverId& getSolver(){return m_solver;}
-
-      const ResultSet& queryGetComponents();
+      void solverConfigure(const char* source, int horizonStart, int horizonEnd);
+      void solverSolve(int maxSteps, int maxDepth);
+      void solverStep();
+      void solverReset();
+      void solverClear();
 
     private:
       DSA();
       void init();
       void unload();
       void loadModelLibrary(const char* model);
+      void writeSolverState();
+      const ResultSet& makeTokenCollection(const TokenSet& tokens);
 
       ConstraintEngineId m_ce; /*!< A Constraint Engine for propagation of relations */
       PlanDatabaseId m_db; /*!< A PlanDatabase as central state representation */
@@ -56,3 +68,4 @@ namespace EUROPA {
 
   }
 }
+#endif
