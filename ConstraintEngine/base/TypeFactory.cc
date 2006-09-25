@@ -1,4 +1,5 @@
 #include "TypeFactory.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -43,8 +44,16 @@ namespace EUROPA {
   {
     std::map<double, ConcreteTypeFactoryId>& factories = getInstance().m_factories;
     check_error(factory.isValid());
-    check_error(factories.find(factory->getTypeName().getKey()) == factories.end(),
-                "registering a duplicate TypeFactory named '" + factory->getTypeName().toString() + "'");
+
+    if(factories.find(factory->getTypeName().getKey()) != factories.end()){
+      debugMsg("TypeFactory:registerFactory", "Over-writing prior registration for " << factory->getTypeName());
+      ConcreteTypeFactoryId oldFactory = factories.find(factory->getTypeName().getKey())->second;
+      factories.erase(factory->getTypeName().getKey());
+      delete (ConcreteTypeFactory*) oldFactory;
+    }
+
+    checkError(factories.find(factory->getTypeName().getKey()) == factories.end(), "Already have '" + factory->getTypeName().toString() + "' registered.");
+
     factories.insert(std::pair<double, ConcreteTypeFactoryId>(factory->getTypeName().getKey(), factory));
   }
 

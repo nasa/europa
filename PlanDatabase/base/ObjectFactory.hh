@@ -26,7 +26,7 @@ namespace EUROPA {
     /**
      * @brief Should be private, but breaks with Andrews compiler if it is.
      */
-    ~ObjectFactory();
+    virtual ~ObjectFactory();
 
     /**
      * @brief Helper method to compose full factory signature from type and arguments

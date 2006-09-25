@@ -112,6 +112,13 @@ namespace EUROPA {
 
     debugMsg("ObjectFactory:registerFactory", "Registering factory with signature " << factory->getSignature().toString());
 
+    if(factories.find(factory->getSignature().getKey()) != factories.end()){
+      ConcreteObjectFactoryId oldFactory = factories.find(factory->getSignature().getKey())->second;
+      factories.erase(factory->getSignature().getKey());
+      delete (ConcreteObjectFactory*) oldFactory;
+      debugMsg("ObjectFactory:registerFactory", "Over-riding registeration for factory with signature " << factory->getSignature().toString());
+    }
+
     // Ensure it is not present already
     check_error(factories.find(factory->getSignature().getKey()) == factories.end());
     factories.insert(std::pair<double, ConcreteObjectFactoryId>(factory->getSignature().getKey(), factory));
