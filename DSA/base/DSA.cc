@@ -23,6 +23,13 @@
 #include "Filters.hh"
 #include "Error.hh"
 
+// JRB
+#include "Constraints.hh"
+#include "SAVH_ReusableFVDetector.hh"
+#include "SAVH_IncrementalFlowProfile.hh" 
+#include "ResourceThreatDecisionPoint.hh"
+#include "SAVH_ProfilePropagator.hh"
+
 #include <dlfcn.h>
 #include <fstream>
 #include <sstream>
@@ -120,8 +127,13 @@ extern "C" {
 namespace EUROPA {
   namespace DSA {
 
+
     DSA::DSA(){
       m_libHandle = NULL;
+
+	 REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
+	 REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
+	 REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreatDecisionPoint);
     }
 
     const ResultSet& DSA::getComponents(){
@@ -147,6 +159,16 @@ namespace EUROPA {
       return sl_resultSet;
     }
 
+    int asInt(double d)
+    {
+    	if (d == PLUS_INFINITY)
+    	    return INT_MAX;
+    	else if (d == MINUS_INFINITY)
+    	    return INT_MIN;
+    	
+    	return (int)d;
+    }
+    
     const ResultSet& DSA::getActions(int componentKey){
       checkError(m_db.isValid(), "No good database");
       EntityId entity = Entity::getEntity(componentKey);
@@ -170,18 +192,18 @@ namespace EUROPA {
       for(TokenSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
 	TokenId token = *it;
 	ss << "   <Token key=\"" << token->getKey() << "\" " 
-	  "type=\""  << token->getPredicateName().toString() << "\"" <<
-	  "startLb=\""  << token->getStart()->lastDomain().getLowerBound() << "\"" <<
-	  "startUb=\""  << token->getStart()->lastDomain().getUpperBound() << "\"" <<
-	  "endLb=\""  << token->getEnd()->lastDomain().getLowerBound() << "\"" <<
-	  "endUb=\""  << token->getEnd()->lastDomain().getUpperBound() << "\"" <<
-	  "durationLb=\""  << token->getDuration()->lastDomain().getLowerBound() << "\"" <<
-	  "durationUb=\""  << token->getDuration()->lastDomain().getUpperBound() << "\"" << ">" << std::endl;
+	  "type=\""        << token->getPredicateName().toString() << "\"" <<
+	  "startLb=\""     << asInt(token->getStart()->lastDomain().getLowerBound()) << "\"" <<
+	  "startUb=\""     << asInt(token->getStart()->lastDomain().getUpperBound()) << "\"" <<
+	  "endLb=\""       << asInt(token->getEnd()->lastDomain().getLowerBound()) << "\"" <<
+	  "endUb=\""       << asInt(token->getEnd()->lastDomain().getUpperBound()) << "\"" <<
+	  "durationLb=\""  << asInt(token->getDuration()->lastDomain().getLowerBound()) << "\"" <<
+	  "durationUb=\""  << asInt(token->getDuration()->lastDomain().getUpperBound()) << "\"" << ">" << std::endl;
 
 	const std::vector<ConstrainedVariableId>& params = token->getParameters();
 	for(std::vector<ConstrainedVariableId>::const_iterator it = params.begin(); it != params.end(); ++it){
 	  ConstrainedVariableId var = *it;
-	  ss << "<Parameter name=\"" << var->getName().toString() << "\" value=\"" << var->lastDomain().toString() << "\">" << std::endl;
+	  ss << "<Parameter name=\"" << var->getName().toString() << "\" value=\"" << var->lastDomain().toString() << "\"/>" << std::endl;
 	}
 
 	ss << "</Token>" << std::endl;
@@ -260,7 +282,8 @@ namespace EUROPA {
       checkError(m_libHandle != NULL, "Should have a model loaded");
       checkError(m_db.isNoId(), "Should not have a database instance");
       initNDDL();
-
+      initConstraintLibrary();
+      
       // Allocate the Constraint Engine
       m_ce = (new ConstraintEngine())->getId();
 
@@ -272,6 +295,8 @@ namespace EUROPA {
       new DefaultPropagator(LabelStr("Default"), m_ce);
       new TemporalPropagator(LabelStr("Temporal"), m_ce);
       new ResourcePropagator(LabelStr("Resource"), m_ce, m_db);
+      new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_ce);
+
 
       // Link up the Temporal Advisor in the PlanDatabase so that it can use the temporal
       // network for determining temporal distances between time points.
