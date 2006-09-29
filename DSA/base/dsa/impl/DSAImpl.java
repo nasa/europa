@@ -87,10 +87,17 @@ public class DSAImpl
 
 	public Action getAction(int key) 
 	{
-		// TODO Auto-generated method stub
+		// TODO Implement this efficiently
 		for (Action a : getActions()) {
 			if (a.getKey() == key)
 				return a;
+		}
+		
+		for (Component c : getComponents()) {
+			for (Action a : c.getActions()) {
+				if (a.getKey() == key)
+					return a;
+			}
 		}
 		
 		return null;
