@@ -52,7 +52,7 @@ extern "C" {
     return env->NewStringUTF(rs.toXML().c_str());
   }
 
-  JNIEXPORT void JNICALL Java_dsa_JNI_load(JNIEnv * env, jclass klass, jstring model){
+  JNIEXPORT void JNICALL Java_dsa_impl_JNI_load(JNIEnv * env, jclass klass, jstring model){
     const char* modelStr = env->GetStringUTFChars(model, NULL);
     EUROPA::DSA::DSA::instance().load(modelStr);
 
@@ -62,53 +62,53 @@ extern "C" {
     env->CallStaticVoidMethod(klass, method);
   }
   
-  JNIEXPORT void JNICALL Java_dsa_JNI_addPlan(JNIEnv * env, jclass, jstring txSource){
+  JNIEXPORT void JNICALL Java_dsa_impl_JNI_addPlan(JNIEnv * env, jclass, jstring txSource){
     const char* txSourceStr = env->GetStringUTFChars(txSource, NULL);
     EUROPA::DSA::DSA::instance().addPlan(txSourceStr);
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_getComponents(JNIEnv * env, jclass){
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getComponents(JNIEnv * env, jclass){
     return(makeReply(env, EUROPA::DSA::DSA::instance().getComponents()));
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_getActions(JNIEnv * env, jclass, jint componentKey){
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getActions(JNIEnv * env, jclass, jint componentKey){
     return(makeReply(env, EUROPA::DSA::DSA::instance().getActions(componentKey)));
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_getConditions(JNIEnv * env, jclass, jint actionKey){
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getConditions(JNIEnv * env, jclass, jint actionKey){
     return(0);
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_getEffects(JNIEnv * env, jclass, jint actionKey){
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getEffects(JNIEnv * env, jclass, jint actionKey){
     return(0);
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_getChildActions(JNIEnv * env, jclass, jint actionKey){
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getChildActions(JNIEnv * env, jclass, jint actionKey){
     return(0);
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverConfigure(JNIEnv * env, jclass, jstring solverCfg, jint horizonStart, jint horizonEnd){
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_solverConfigure(JNIEnv * env, jclass, jstring solverCfg, jint horizonStart, jint horizonEnd){
     const char* solverCfgStr = env->GetStringUTFChars(solverCfg, NULL);
     EUROPA::DSA::DSA::instance().solverConfigure(solverCfgStr, (int) horizonStart, (int) horizonEnd);
     return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverSolve(JNIEnv * env, jclass, jint maxSteps, jint maxDepth){
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_solverSolve(JNIEnv * env, jclass, jint maxSteps, jint maxDepth){
     EUROPA::DSA::DSA::instance().solverSolve((int) maxSteps, (int) maxDepth);
     return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverStep(JNIEnv * env, jclass){
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_solverStep(JNIEnv * env, jclass){
     EUROPA::DSA::DSA::instance().solverStep();
     return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverReset(JNIEnv * env, jclass){
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_solverReset(JNIEnv * env, jclass){
     EUROPA::DSA::DSA::instance().solverReset();
     return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
 
-  JNIEXPORT jstring JNICALL Java_dsa_JNI_solverClear(JNIEnv * env, jclass){
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_solverClear(JNIEnv * env, jclass){
     EUROPA::DSA::DSA::instance().solverClear();
     return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }

@@ -8,20 +8,17 @@ MakeLocate DSA.jar : [ FDirName $(SUBDIR) .. .. lib ] ;
 
 ApacheAnt JNI.h : [ FGristFiles build.xml ] : createJNI ;
 
-Depends JNI.h : dsa/JNI.java ;
+Depends JNI.h : dsa/impl/JNI.java ;
 
 ApacheAnt DSA.jar : 
 	[ FGristFiles build.xml ]
 	dsa/DSA.java
-	dsa/JNI.java
 	dsa/Entity.java
 	dsa/Component.java
 	dsa/Attribute.java
 	dsa/Slot.java
 	dsa/Token.java
-	dsa/TokenImpl.java
 	dsa/Action.java
-	dsa/ActionImpl.java
 	dsa/Proposition.java
 	dsa/Parameter.java
 	dsa/Violation.java
@@ -30,6 +27,9 @@ ApacheAnt DSA.jar :
 	dsa/PlanNotSavedException.java
 	dsa/NoActivePlanException.java
 	dsa/InvalidKeyException.java
+	dsa/impl/JNI.java
+	dsa/impl/TokenImpl.java
+	dsa/impl/ActionImpl.java
 	nddl.jar :
 	DSA
 ;

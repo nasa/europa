@@ -62,7 +62,7 @@
 
   <target name="createJNI" depends = "compile" description="create the JNI interface to Planners">
     <delete file="JNI.h"/>
-    <javah outputFile="JNI.h" classpath="${build}" class="dsa.JNI"/>
+    <javah outputFile="JNI.h" classpath="${build}" class="dsa.impl.JNI"/>
 
     <echo message="Creating: base/JNI.h"/>
   </target>
