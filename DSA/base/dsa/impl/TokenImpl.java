@@ -13,7 +13,7 @@ public class TokenImpl
 
     public TokenImpl(String type, int key, int startLb, int startUb, int endLb, int endUb, int durationLb, int durationUb )
     {
-	super(key);
+	super(key,type);
 	m_type = type;
 	m_earliestStart = startLb;
 	m_latestStart = startUb;
