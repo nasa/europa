@@ -12,9 +12,8 @@ public interface Action
     public List<Proposition> getConditions();
     public List<Proposition> getEffects();
 
-    // @return Sum of penalty values for all violated constraints by this activity
     public boolean hasViolations();
+    // @return Sum of penalty values for all violated constraints by this activity
     double getViolation();
     public List<Violation> getViolations();
-
 }

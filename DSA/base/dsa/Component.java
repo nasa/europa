@@ -2,12 +2,11 @@ package dsa;
 
 import java.util.List;
 
+import dsa.impl.AttributeImpl;
+
 public interface Component 
     extends Entity
 {
-
-	public abstract List<Action> getActions();
-
-	public abstract List<Attribute> getAttributes();
-
+	public List<Action> getActions();
+	public List<Attribute> getAttributes();
 }

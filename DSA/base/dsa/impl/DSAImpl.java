@@ -5,11 +5,10 @@ import java.util.*;
 import java.net.*;
 
 import dsa.Action;
-import dsa.Attribute;
 import dsa.Component;
+import dsa.Attribute;
 import dsa.DSA;
 import dsa.InvalidSourceException;
-import dsa.JNI;
 import dsa.NoModelException;
 import dsa.Proposition;
 import dsa.Resource;

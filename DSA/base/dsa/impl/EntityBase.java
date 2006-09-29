@@ -1,4 +1,6 @@
-package dsa;
+package dsa.impl;
+
+import dsa.Entity;
 
 public class EntityBase 
     implements Entity 

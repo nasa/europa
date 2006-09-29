@@ -1,7 +1,8 @@
 package dsa;
 
-interface AbstractType {
-    boolean isInterval();
-    boolean isNumeric();
-    boolean isVector();
+public interface AbstractType 
+{
+    public boolean isInterval();
+    public boolean isNumeric();
+    public boolean isVector();
 }

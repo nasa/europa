@@ -1,27 +1,16 @@
 package dsa;
 
-import java.util.*;
+import java.util.List;
 
-public class Attribute extends EntityBase {
+public interface Attribute 
+{
 
-    public Attribute(int key, String name){
-	super(key);
-	m_name = name;
-    }
+	public List<Component> getComponents();
 
-    List<Component> getComponents(){
-	return new Vector<Component>();
-    }
+	public List<Slot> getValues();
 
-    List<Slot> getValues(){
-	return new Vector<Slot>();
-    }
+	public List<Slot> getConstraints();
 
-    List<Slot> getConstraints(){
-	return new Vector<Slot>();
-    }
+	public void setValue(int from, int to, AbstractType value);
 
-    void setValue(int from, int to, AbstractType value){}
-
-    String m_name;
 }

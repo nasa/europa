@@ -1,8 +1,8 @@
 package dsa;
 
-interface IntType 
+public interface IntDomain
     extends AbstractType 
 {
-    int lb();
-    int ub();
+    public int lb();
+    public int ub();
 }

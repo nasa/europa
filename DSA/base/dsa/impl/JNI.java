@@ -1,9 +1,10 @@
-package dsa;
+package dsa.impl;
 
 import java.io.*;
 import java.util.*;
 
-public class JNI {
+public class JNI 
+{
     public static native void load(String model);
     public static native void addPlan(String txSource);
     public static native String getComponents();

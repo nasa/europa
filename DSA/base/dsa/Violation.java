@@ -1,6 +1,5 @@
 package dsa;
 
-public class Violation 
+public interface Violation 
 {
-    public Violation(){}
 }

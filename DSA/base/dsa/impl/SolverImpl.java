@@ -1,6 +1,5 @@
 package dsa.impl;
 
-import dsa.JNI;
 import dsa.Solver;
 import net.n3.nanoxml.IXMLElement;
 
