@@ -2,7 +2,9 @@ package dsa;
 
 import java.util.List;
 
-public interface Token {
+public interface Token 
+    extends Entity
+{
     int getKey();
     String getType();
     int getEarliestStart();

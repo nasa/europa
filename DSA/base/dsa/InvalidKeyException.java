@@ -1,5 +1,6 @@
 package dsa;
 
-class InvalidKeyException extends Exception {
-
+class InvalidKeyException 
+    extends RuntimeException 
+{
 }

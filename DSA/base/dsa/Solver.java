@@ -2,8 +2,8 @@ package dsa;
 
 import net.n3.nanoxml.IXMLElement;
 
-public class Solver {
-
+public class Solver 
+{
     private static Solver s_instance = null;
 
     public static Solver createInstance(String configurationFile, int horizonStart, int horizonEnd, int maxSteps, int maxDepth){
@@ -59,7 +59,7 @@ public class Solver {
 
 	// Read the state file and parse the data
 	try{
-	    IXMLElement state = DSA.toXML(xmlStr);
+	    IXMLElement state = DSAImpl.toXML(xmlStr);
 	    m_stepCount = state.getAttribute("stepCount", 0);
 	    m_depth = state.getAttribute("depth", 0);
 	    m_isExhausted = (state.getAttribute("isExhausted", 0) == 0 ? false : true);

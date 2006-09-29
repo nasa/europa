@@ -1,5 +1,7 @@
 package dsa;
 
-public interface Proposition extends Token {
+public interface Proposition 
+    extends Token 
+{
     boolean isTrue();
 }

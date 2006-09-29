@@ -2,7 +2,7 @@ package dsa;
 
 import java.util.*;
 
-public class Attribute extends Entity {
+public class Attribute extends EntityBase {
 
     public Attribute(int key, String name){
 	super(key);

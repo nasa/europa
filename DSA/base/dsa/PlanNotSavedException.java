@@ -1,5 +1,6 @@
 package dsa;
 
-class PlanNotSavedException extends Exception {
-
+class PlanNotSavedException 
+    extends RuntimeException 
+{
 }

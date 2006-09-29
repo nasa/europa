@@ -1,5 +1,6 @@
 package dsa;
 
-class InvalidSourceException extends Exception {
-
+class InvalidSourceException 
+    extends RuntimeException 
+{
 }

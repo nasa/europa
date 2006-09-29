@@ -2,9 +2,13 @@ package dsa;
 
 import java.util.*;
 
-public class TokenImpl extends Entity implements Slot, Proposition {
+public class TokenImpl
+    extends EntityBase
+    implements Token, Slot
+{
 
-    public TokenImpl(String type, int key, int startLb, int startUb, int endLb, int endUb, int durationLb, int durationUb ){
+    public TokenImpl(String type, int key, int startLb, int startUb, int endLb, int endUb, int durationLb, int durationUb )
+    {
 	super(key);
 	m_type = type;
 	m_earliestStart = startLb;

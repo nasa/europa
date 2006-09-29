@@ -1,5 +1,6 @@
 package dsa;
 
-class NoActivePlanException extends Exception {
-
+class NoActivePlanException 
+    extends RuntimeException 
+{
 }

@@ -1,3 +1,6 @@
 package dsa;
 
-public interface Slot extends Proposition {}
+public interface Slot 
+    extends Proposition 
+{
+}

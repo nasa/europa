@@ -1,5 +1,5 @@
 package dsa;
 
-public class Parameter {
-
+public class Parameter 
+{
 }
