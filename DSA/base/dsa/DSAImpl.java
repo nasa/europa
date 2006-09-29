@@ -76,8 +76,20 @@ public class DSAImpl
 	return new Vector<Action>();
     }
 
-    public List<Proposition> getPropositions() {
-	return new Vector<Proposition>();
+	public Action getAction(int key) 
+	{
+		// TODO Auto-generated method stub
+		for (Action a : getActions()) {
+			if (a.getKey() == key)
+				return a;
+		}
+		
+		return null;
+	}
+
+    public List<Proposition> getPropositions() 
+    {
+	    return new Vector<Proposition>();
     }
 
     protected static IXMLElement toXML(String xmlStr) throws Exception {
@@ -87,14 +99,9 @@ public class DSAImpl
 	return (IXMLElement) parser.parse();
     }
 
-	public Action getAction(int key) 
+	public List<Resource> getResources() 
 	{
 		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public List<Resource> getResources() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Vector<Resource>();
 	}
 }
