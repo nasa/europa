@@ -53,6 +53,4 @@ public class ComponentImpl
     public List<Attribute> getAttributes() {
 	return new Vector<Attribute>();
     }
-
-    private String m_name;
 }
