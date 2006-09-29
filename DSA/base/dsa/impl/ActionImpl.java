@@ -1,6 +1,10 @@
-package dsa;
+package dsa.impl;
 
 import java.util.*;
+
+import dsa.Action;
+import dsa.Proposition;
+import dsa.Violation;
 
 public class ActionImpl 
     extends TokenImpl 

@@ -1,6 +1,12 @@
-package dsa;
+package dsa.impl;
 
 import java.util.*;
+
+import dsa.Action;
+import dsa.Attribute;
+import dsa.Component;
+import dsa.EntityBase;
+import dsa.JNI;
 import net.n3.nanoxml.IXMLElement;
 
 public class ComponentImpl 

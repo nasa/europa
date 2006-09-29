@@ -1,6 +1,6 @@
 package dsa;
 
-class InvalidSinkException 
+public class InvalidSinkException 
     extends RuntimeException 
 {
 }

@@ -1,6 +1,11 @@
-package dsa;
+package dsa.impl;
 
 import java.util.*;
+
+import dsa.EntityBase;
+import dsa.Parameter;
+import dsa.Slot;
+import dsa.Token;
 
 public class TokenImpl
     extends EntityBase
