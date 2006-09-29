@@ -14,15 +14,15 @@ public class Main extends TestCase {
     }
 
     public void setUp(){
-	DSA.instance();
+	DSAManager.getInstance();
     }
 
     public void testModelLoading(){
 	try{
-	    DSA.instance().loadModel(s_path + "libmodel.1_g.so");
-	    DSA.instance().addPlan(s_path + "model.1.xml");
-	    DSA.instance().loadModel(s_path + "libmodel.2_g.so");
-	    DSA.instance().addPlan(s_path + "model.2.xml");
+	    DSAManager.getInstance().loadModel(s_path + "libmodel.1_g.so");
+	    DSAManager.getInstance().addPlan(s_path + "model.1.xml");
+	    DSAManager.getInstance().loadModel(s_path + "libmodel.2_g.so");
+	    DSAManager.getInstance().addPlan(s_path + "model.2.xml");
 	}
 	catch(Exception e){
 	    Assert.assertTrue(false);
@@ -31,9 +31,9 @@ public class Main extends TestCase {
    
     public void testComponentQuery(){
 	try{
-	    DSA.instance().loadModel(s_path + "libmodel.1_g.so");
-	    DSA.instance().addPlan(s_path + "model.1.xml");
-	    List<Component> components = DSA.instance().getComponents();
+	    DSAManager.getInstance().loadModel(s_path + "libmodel.1_g.so");
+	    DSAManager.getInstance().addPlan(s_path + "model.1.xml");
+	    List<Component> components = DSAManager.getInstance().getComponents();
 	    Assert.assertTrue(components.size() == 1);
 	}
 	catch(Exception e){
@@ -43,9 +43,9 @@ public class Main extends TestCase {
 
     public void testActionQuery(){
 	try{
-	    DSA.instance().loadModel(s_path + "libmodel.1_g.so");
-	    DSA.instance().addPlan(s_path + "model.1.xml");
-	    List<Component> components = DSA.instance().getComponents();
+	    DSAManager.getInstance().loadModel(s_path + "libmodel.1_g.so");
+	    DSAManager.getInstance().addPlan(s_path + "model.1.xml");
+	    List<Component> components = DSAManager.getInstance().getComponents();
 	    ListIterator<Component> it = components.listIterator();
 	    while(it.hasNext()){
 		Component component = it.next();
@@ -59,10 +59,10 @@ public class Main extends TestCase {
 
     public void testSolverExecution(){
 	try{
-	    DSA.instance().loadModel(s_path + "libmodel.1_g.so");
-	    DSA.instance().addPlan(s_path + "model.1.xml");
+	    DSAManager.getInstance().loadModel(s_path + "libmodel.1_g.so");
+	    DSAManager.getInstance().addPlan(s_path + "model.1.xml");
 
-	    Solver solver = Solver.createInstance(s_path + "solver.1.cfg", 0, 1000, 10, 10);
+	    Solver solver = SolverManager.createInstance(s_path + "solver.1.cfg", 0, 1000, 10, 10);
 	    Assert.assertTrue(solver.solve());
 	    Assert.assertTrue(solver.getStepCount() == 2);
 	    Assert.assertTrue(solver.getDepth() == 2);
@@ -74,7 +74,7 @@ public class Main extends TestCase {
 	    Assert.assertTrue(solver.getDepth() == 2);
 
 	    // Now allocate againa and confirm the base data. This time no work to do
-	    solver = Solver.createInstance(s_path + "solver.1.cfg", 0, 1000, 10, 10);
+	    solver = SolverManager.createInstance(s_path + "solver.1.cfg", 0, 1000, 10, 10);
 	    Assert.assertTrue(solver.solve());
 	    Assert.assertTrue(solver.getStepCount() == 0);
 	    Assert.assertTrue(solver.getDepth() == 0);
