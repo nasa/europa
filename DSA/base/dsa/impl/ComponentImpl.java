@@ -11,12 +11,10 @@ public class ComponentImpl
     extends EntityBase 
     implements Component 
 {
-    protected ComponentImpl(int key, String name){
-	super(key);
+    protected ComponentImpl(int key, String name)
+    {
+	   super(key,name);
     }
-
-    public String getName(){return m_name;}
-
 
     /* (non-Javadoc)
 	 * @see dsa.Component#getActions()
