@@ -17,6 +17,7 @@
 #include <list>
 #include <string>
 #include <cmath>
+#include <limits>
 
 namespace EUROPA {
 

@@ -125,7 +125,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
 #ifndef EUROPA_FAST
       check_error(ptr != 0, std::string("Cannot generate an Id<") + typeid(T).name() + "> for 0 pointer.",
                   IdErr::IdMgrInvalidItemPtrError());
-      m_key = IdTable::insert((unsigned int)(ptr), typeid(T).name());
+      m_key = IdTable::insert((unsigned long int)(ptr), typeid(T).name());
       check_error(m_key != 0, std::string("Cannot generate an Id<") + typeid(T).name() + "> for a pointer that has not been cleaned up.",
                   IdErr::IdMgrInvalidItemPtrError());
 #endif
@@ -164,13 +164,13 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
       if (val == 0)
         m_key = 0;
       else {
-        m_key = IdTable::getKey((unsigned int) val);
+        m_key = IdTable::getKey((unsigned long int) val);
         check_error(m_key != 0,
                     std::string("Cannot instantiate an Id<") + typeid(T).name() + "> for this address. No instance present.",
                     IdErr::IdMgrInvalidItemPtrError());
       }
 #endif
-      m_ptr = (T*) (unsigned int) val;
+      m_ptr = (T*) (unsigned long int) val;
     }
 
     /**
@@ -187,7 +187,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @brief Cast the pointer to a double.
      */
     inline operator double() const {
-        return((double) (unsigned int) m_ptr);
+        return((double) (unsigned long int) m_ptr);
     }
 
     /**
@@ -307,7 +307,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      */
     inline bool isValid() const {
 #ifndef EUROPA_FAST
-      return(m_ptr != 0 && m_key != 0 && IdTable::getKey((unsigned int)m_ptr) == m_key);
+      return(m_ptr != 0 && m_key != 0 && IdTable::getKey((unsigned long int)m_ptr) == m_key);
 #else
       return(m_ptr != 0);
 #endif
@@ -397,7 +397,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
       check_error(isValid(), std::string("Cannot release an invalid Id<") + typeid(T).name() + ">.",
                   IdErr::IdMgrInvalidItemPtrError());
       m_key = 0;
-      IdTable::remove((unsigned int) ptr);
+      IdTable::remove((unsigned long int) ptr);
 #endif
       m_ptr = 0;
       delete ptr;
@@ -412,7 +412,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
 #ifndef EUROPA_FAST
       check_error(isValid(), std::string("Cannot remove an invalid Id<") + typeid(T).name() + ">.",
                   IdErr::IdMgrInvalidItemPtrError());
-      IdTable::remove((unsigned int) m_ptr);
+      IdTable::remove((unsigned long int) m_ptr);
       m_key = 0;
 #endif
       m_ptr = 0;
@@ -430,7 +430,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
       }
       check_error(Id<T>::convertable(org), std::string("Invalid cast from Id<") + typeid(X).name() + "> to Id<" + typeid(T).name() + ">.",
                   IdErr::IdMgrInvalidItemPtrError());
-      m_key = IdTable::getKey((unsigned int) m_ptr);
+      m_key = IdTable::getKey((unsigned long int) m_ptr);
       check_error(m_key != 0, std::string("Cannot create an Id<") + typeid(X).name() + "> for this address since no instance is present.",
                   IdErr::IdMgrInvalidItemPtrError());
 #endif

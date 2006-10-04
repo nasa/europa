@@ -41,7 +41,7 @@ namespace EUROPA {
   class IdTable {
   public:
     static unsigned int size();
-    static std::map<unsigned int, unsigned int> getCollection();
+    static std::map<unsigned long int, unsigned int> getCollection();
     static IdTable& getInstance();
 
     /**
@@ -50,15 +50,15 @@ namespace EUROPA {
     static void printTypeCnts(std::ostream& os);
 
     static void output(std::ostream& os);
-    static unsigned int insert(unsigned int id, const char* baseType);
-    static bool allocated(unsigned int id);
-    static unsigned int getKey(unsigned int id);
-    static void remove(unsigned int id);
+    static unsigned int insert(unsigned long int id, const char* baseType);
+    static bool allocated(unsigned long int id);
+    static unsigned int getKey(unsigned long int id);
+    static void remove(unsigned long int id);
 
     ~IdTable(); // deallocating statics requires public access on beos
   private:
     IdTable();
-    std::map<unsigned int, unsigned int> m_collection;
+    std::map<unsigned long int, unsigned int> m_collection;  /*<! Map from pointers to keys*/
     std::map<std::string, unsigned int> m_typeCnts;
   };
 }
