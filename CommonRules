@@ -738,6 +738,7 @@ rule ApacheAnt
 {
 	# let jam's dep tree in on what the ant command will try to do
 	SEARCH on $(2) = $(SEARCH_SOURCE) ;
+	LOCATE on $(1) = $(LOCATE_TARGET) ;
 	Depends $(1) : $(2) ;
 	Depends clean : $(2[1]) ;
 	ApacheAntClean clean : $(2[1]) ;
