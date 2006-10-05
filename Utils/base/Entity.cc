@@ -5,7 +5,7 @@
 namespace EUROPA {
 
   Entity::Entity():m_key(allocateKey()), m_refCount(1), m_discarded(false){
-    entitiesByKey().insert(std::pair<int, int>(m_key, (int) this));
+    entitiesByKey().insert(std::pair<int, unsigned long int>(m_key, (unsigned long int) this));
     check_error(!isPurging());
     debugMsg("Entity:Entity", "Allocating " << m_key);
   }
@@ -55,7 +55,7 @@ namespace EUROPA {
 
   EntityId Entity::getEntity(int key){
     EntityId entity;
-    std::map<int, int>::const_iterator it = entitiesByKey().find(key);
+    std::map<int, unsigned long int>::const_iterator it = entitiesByKey().find(key);
     if(it != entitiesByKey().end())
       entity = (EntityId) it->second;
     return entity;
@@ -76,8 +76,8 @@ namespace EUROPA {
     return m_externalEntity;
   }
 
-  std::map<int, int>& Entity::entitiesByKey(){
-    static std::map<int, int> sl_entitiesByKey;
+  std::map<int, unsigned long int>& Entity::entitiesByKey(){
+    static std::map<int, unsigned long int> sl_entitiesByKey;
     return sl_entitiesByKey;
   }
 

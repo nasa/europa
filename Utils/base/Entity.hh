@@ -147,7 +147,7 @@ namespace EUROPA{
     unsigned int m_refCount;
     bool m_discarded;
     std::set<Entity*> m_dependents;
-    static std::map<int, int>& entitiesByKey();
+    static std::map<int, unsigned long int>& entitiesByKey();
     static std::set<Entity*>& discardedEntities();
     static bool& getPurgeStatus();
   };
