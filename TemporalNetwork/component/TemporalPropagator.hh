@@ -57,7 +57,8 @@ namespace EUROPA {
     void getTemporalNogood(const ConstrainedVariableId& useAsOrigin,
                            std::vector<ConstrainedVariableId>& fromvars,
                            std::vector<ConstrainedVariableId>& tovars,
-                           std::vector<long>& lengths
+                           //std::vector<long>& lengths
+			   std::vector<int>& lengths
                            );
 
     void addListener(const TemporalNetworkListenerId& listener);

@@ -471,7 +471,7 @@ namespace EUROPA {
 	numTokens = numVariables = numConstraints = 0;
 
 	char stepstr[NBBY * sizeof(nstep) * 28/93 + 4];
-	sprintf(stepstr, "%d", nstep);
+	sprintf(stepstr, "%d", (int) nstep);
     
 	std::string stepnum(STEP + stepstr);
 

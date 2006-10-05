@@ -794,7 +794,7 @@ namespace EUROPA {
   (const ConstrainedVariableId& useAsOrigin,
    std::vector<ConstrainedVariableId>& fromvars,
    std::vector<ConstrainedVariableId>& tovars,
-   std::vector<long>& lengths)
+   std::vector<int>& lengths)//std::vector<long>& lengths)
   {
     std::list<DedgeId> edgeNogoodList = m_tnet->getEdgeNogoodList();
     TimepointId origin = m_tnet->getOrigin();

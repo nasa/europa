@@ -23,6 +23,7 @@
 #include <list>
 #include <queue>
 #include <string>
+#include <limits>
 
 namespace EUROPA {
 
@@ -30,10 +31,15 @@ namespace EUROPA {
 // This is so that the legal values will be closed under negation.
 // The following achieves that without provoking over or under flow.
 
-#if (LONG_MIN + LONG_MAX <= 0)  // LONG_MAX has lesser or same magnitude
-#define TIME_MAX LONG_MAX
-#else                           // LONG_MIN has the lesser magnitude
-#define TIME_MAX -LONG_MIN
+// #if (LONG_MIN + LONG_MAX <= 0)  // LONG_MAX has lesser or same magnitude
+// #define TIME_MAX LONG_MAX
+// #else                           // LONG_MIN has the lesser magnitude
+// #define TIME_MAX -LONG_MIN
+// #endif
+#if (INT_MIN + INT_MAX <= 0)
+#define TIME_MAX std::numeric_limits<int>::max()
+#else
+#define TIME_MAX -std::numeric_limits<int>::min()
 #endif
 
 #define TIME_MIN -TIME_MAX      // Underflow has been protected against.

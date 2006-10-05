@@ -9,7 +9,7 @@ namespace EUROPA {
   typedef bool Bool;
   typedef int Int;
   typedef void Void;
-  typedef long Time;
+  typedef int Time;//typedef long Time;
 
   class Dnode;
   typedef Id<Dnode> DnodeId;

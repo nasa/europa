@@ -53,7 +53,7 @@ namespace EUROPA {
 	bool destAlreadyInitialized;
 	long long int seqId;
 	int numTokens, numConstraints, numVariables;
-	int stepsPerWrite, nstep, writeCounter, maxChoices;
+	long stepsPerWrite, nstep, writeCounter, maxChoices;
 	double m_writing;
 	std::vector<LabelStr> stepTransactions;
 
