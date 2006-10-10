@@ -179,7 +179,8 @@ namespace EUROPA {
     }
 
 
-    const ResultSet& DSA::makeTokenCollection(const TokenSet& tokens){
+    const ResultSet& DSA::makeTokenCollection(const TokenSet& tokens) 
+    {
       static StringResultSet sl_resultSet;
 
       checkError(m_db.isValid(), "No good database");
@@ -188,25 +189,24 @@ namespace EUROPA {
 
       ss << "<COLLECTION>" << std::endl;
 
-      const TokenSet& objects = m_db->getTokens();
-      for(TokenSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
-	TokenId token = *it;
-	ss << "   <Token key=\"" << token->getKey() << "\" " 
-	  "type=\""        << token->getPredicateName().toString() << "\"" <<
-	  "startLb=\""     << asInt(token->getStart()->lastDomain().getLowerBound()) << "\"" <<
-	  "startUb=\""     << asInt(token->getStart()->lastDomain().getUpperBound()) << "\"" <<
-	  "endLb=\""       << asInt(token->getEnd()->lastDomain().getLowerBound()) << "\"" <<
-	  "endUb=\""       << asInt(token->getEnd()->lastDomain().getUpperBound()) << "\"" <<
-	  "durationLb=\""  << asInt(token->getDuration()->lastDomain().getLowerBound()) << "\"" <<
-	  "durationUb=\""  << asInt(token->getDuration()->lastDomain().getUpperBound()) << "\"" << ">" << std::endl;
-
-	const std::vector<ConstrainedVariableId>& params = token->getParameters();
-	for(std::vector<ConstrainedVariableId>::const_iterator it = params.begin(); it != params.end(); ++it){
-	  ConstrainedVariableId var = *it;
-	  ss << "<Parameter name=\"" << var->getName().toString() << "\" value=\"" << var->lastDomain().toString() << "\"/>" << std::endl;
-	}
-
-	ss << "</Token>" << std::endl;
+      for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it){
+		TokenId token = *it;
+		ss << "   <Token key=\"" << token->getKey() << "\" " 
+		  "type=\""        << token->getPredicateName().toString() << "\"" <<
+		  "startLb=\""     << asInt(token->getStart()->lastDomain().getLowerBound()) << "\"" <<
+		  "startUb=\""     << asInt(token->getStart()->lastDomain().getUpperBound()) << "\"" <<
+		  "endLb=\""       << asInt(token->getEnd()->lastDomain().getLowerBound()) << "\"" <<
+		  "endUb=\""       << asInt(token->getEnd()->lastDomain().getUpperBound()) << "\"" <<
+		  "durationLb=\""  << asInt(token->getDuration()->lastDomain().getLowerBound()) << "\"" <<
+		  "durationUb=\""  << asInt(token->getDuration()->lastDomain().getUpperBound()) << "\"" << ">" << std::endl;
+	
+		const std::vector<ConstrainedVariableId>& params = token->getParameters();
+		for(std::vector<ConstrainedVariableId>::const_iterator it = params.begin(); it != params.end(); ++it){
+		  ConstrainedVariableId var = *it;
+		  ss << "<Parameter name=\"" << var->getName().toString() << "\" value=\"" << var->lastDomain().toString() << "\"/>" << std::endl;
+		}
+	
+		ss << "</Token>" << std::endl;
       }
 
       ss << "</COLLECTION>" << std::endl;
