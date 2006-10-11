@@ -60,7 +60,7 @@ public class DSAImpl
 	String responseStr = JNI.getComponents();
 
 	try{
-	    IXMLElement response = toXML(responseStr);
+	    IXMLElement response = Util.toXML(responseStr);
 	    
 	    Enumeration children = response.enumerateChildren();
 	    while(children.hasMoreElements()){
@@ -97,16 +97,28 @@ public class DSAImpl
 	    return new Vector<Proposition>();
     }
 
-    protected static IXMLElement toXML(String xmlStr) throws Exception {
-	IXMLParser parser = XMLParserFactory.createDefaultXMLParser();
-	IXMLReader reader = StdXMLReader.stringReader(xmlStr);
-	parser.setReader(reader);
-	return (IXMLElement) parser.parse();
-    }
-
 	public List<Resource> getResources() 
 	{
-		// TODO Auto-generated method stub
-		return new Vector<Resource>();
-	}
+		
+		Vector<Resource> resources = new Vector<Resource>();
+		
+		String responseStr = JNI.getComponents();
+
+		try{
+		    IXMLElement response = Util.toXML(responseStr);
+		    
+		    Enumeration children = response.enumerateChildren();
+		    while(children.hasMoreElements()) {
+		    	IXMLElement componentXml = (IXMLElement) children.nextElement();
+		    	int key = componentXml.getAttribute("key", 0);
+		    	String name = componentXml.getAttribute("name", "NO_NAME");
+		    	resources.add(new ResourceImpl(key, name));
+		    }
+		}
+		catch(Exception e){
+		    e.printStackTrace();
+		}
+
+		return resources;
+	}	
 }

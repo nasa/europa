@@ -1,9 +1,9 @@
 package dsa;
 
-import java.util.List;
+import java.util.Iterator;
 
 public interface ResourceProfile
 {
-    public List<Instant> getInstants();
-    public double getValue(Instant i);
+    public Iterator<Integer> getTimes();
+    public double getValue(int time);
 }

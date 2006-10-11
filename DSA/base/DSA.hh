@@ -5,6 +5,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "RulesEngineDefs.hh"
 #include "SolverDefs.hh"
+#include "SAVH_ResourceDefs.hh"
 
 using namespace EUROPA::SOLVERS;
 
@@ -45,6 +46,10 @@ namespace EUROPA {
       const ResultSet& getConditions(int actionKey);
       const ResultSet& getEffects(int actionKey);
 
+      const ResultSet& getResources();
+      const ResultSet& getResourceCapacityProfile(int resourceKey);
+      const ResultSet& getResourceUsageProfile(int resourceKey);
+
       const SolverId& getSolver(){return m_solver;}
       void solverConfigure(const char* source, int horizonStart, int horizonEnd);
       void solverSolve(int maxSteps, int maxDepth);
@@ -59,6 +64,9 @@ namespace EUROPA {
       void loadModelLibrary(const char* model);
       void writeSolverState();
       const ResultSet& makeTokenCollection(const TokenSet& tokens);
+      const ResultSet& getObjectsByType(const std::string& type) const;
+      const std::string makeCapacityProfile(const SAVH::ResourceId& res) const; 
+      const std::string makeUsageProfile(const SAVH::ResourceId& res) const;
 
       ConstraintEngineId m_ce; /*!< A Constraint Engine for propagation of relations */
       PlanDatabaseId m_db; /*!< A PlanDatabase as central state representation */

@@ -8,6 +8,10 @@ import dsa.Action;
 import dsa.Component;
 import dsa.Attribute;
 import net.n3.nanoxml.IXMLElement;
+import net.n3.nanoxml.IXMLParser;
+import net.n3.nanoxml.IXMLReader;
+import net.n3.nanoxml.StdXMLReader;
+import net.n3.nanoxml.XMLParserFactory;
 
 class Util
 {
@@ -16,7 +20,7 @@ class Util
 		List<Action> actions = new Vector<Action>();
 
 		try{
-		    IXMLElement response = DSAImpl.toXML(xml);
+		    IXMLElement response = toXML(xml);
 		    
 		    Enumeration children = response.enumerateChildren();
 		    while(children.hasMoreElements()){
@@ -38,4 +42,13 @@ class Util
 
 		return actions;
 	}
+	
+    public static IXMLElement toXML(String xmlStr) 
+        throws Exception 
+    {
+    	IXMLParser parser = XMLParserFactory.createDefaultXMLParser();
+    	IXMLReader reader = StdXMLReader.stringReader(xmlStr);
+    	parser.setReader(reader);
+    	return (IXMLElement) parser.parse();
+    }	
 }

@@ -67,7 +67,7 @@ public class SolverImpl implements Solver
 
     	// Read the state file and parse the data
     	try{
-    		IXMLElement state = DSAImpl.toXML(xmlStr);
+    		IXMLElement state = Util.toXML(xmlStr);
     		m_stepCount = state.getAttribute("stepCount", 0);
     		m_depth = state.getAttribute("depth", 0);
     		m_isExhausted = (state.getAttribute("isExhausted", 0) == 0 ? false : true);

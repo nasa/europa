@@ -14,6 +14,9 @@ public class JNI
     public static native String getEffects(int actionKey);
     public static native String getChildActions(int actionKey);
     public static native String getViolations(int actionKey);
+    public static native String getResources();
+    public static native String getResourceCapacityProfile(int resourceKey);
+    public static native String getResourceUsageProfile(int resourceKey);
 
     /** Solver API Calls **/
     public static native String solverConfigure(String configFile, int horizonStart, int horizonEnd);

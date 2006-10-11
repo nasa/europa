@@ -29,6 +29,7 @@
 #include "SAVH_IncrementalFlowProfile.hh" 
 #include "ResourceThreatDecisionPoint.hh"
 #include "SAVH_ProfilePropagator.hh"
+#include "SAVH_Resource.hh"
 
 #include <dlfcn.h>
 #include <fstream>
@@ -99,6 +100,18 @@ extern "C" {
     return(0);
   }
 
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getResources(JNIEnv * env, jclass){
+    return(makeReply(env, EUROPA::DSA::DSA::instance().getResources()));
+  }
+
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getResourceCapacityProfile(JNIEnv * env, jclass, jint resourceKey){
+    return(makeReply(env, EUROPA::DSA::DSA::instance().getResourceCapacityProfile(resourceKey)));
+  }
+
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getResourceUsageProfile(JNIEnv * env, jclass, jint resourceKey){
+    return(makeReply(env, EUROPA::DSA::DSA::instance().getResourceUsageProfile(resourceKey)));
+  }
+
   JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_solverConfigure(JNIEnv * env, jclass, jstring solverCfg, jint horizonStart, jint horizonEnd){
     const char* solverCfgStr = env->GetStringUTFChars(solverCfg, NULL);
     EUROPA::DSA::DSA::instance().solverConfigure(solverCfgStr, (int) horizonStart, (int) horizonEnd);
@@ -164,6 +177,132 @@ namespace EUROPA {
       return sl_resultSet;
     }
 
+    const ResultSet& DSA::getResources()
+    {
+    	return getObjectsByType("Resource");
+    }
+
+    const ResultSet& DSA::getObjectsByType(const std::string& type) const
+    {
+      static StringResultSet sl_resultSet;
+
+      checkError(m_db.isValid(), "No good database");
+
+      std::stringstream ss;
+
+      ss << "<COLLECTION>" << std::endl;
+
+      const ObjectSet& objects = m_db->getObjects();
+      for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
+	      ObjectId object = *it;
+	      if(Schema::instance()->isA(object->getType(), type.c_str()))
+	          ss << "   <Resource key=\"" << object->getKey() 
+	                        << "\" name=\"" << object->getName().toString() 
+	                        << "\"/>" 
+	                        << std::endl;
+      }
+
+      ss << "</COLLECTION>" << std::endl;
+
+      sl_resultSet.str() = ss.str();
+
+      return sl_resultSet;
+    }
+    
+    const ResultSet& DSA::getResourceCapacityProfile(int resourceKey)
+    {
+      static StringResultSet sl_resultSet;
+      
+      checkError(m_db.isValid(), "No good database");
+      EntityId entity = Entity::getEntity(resourceKey);
+      checkError(entity.isValid() && SAVH::ResourceId::convertable(entity), "No resource for key [" << resourceKey << "]");
+      SAVH::ResourceId res = (SAVH::ResourceId) entity;
+      
+      std::stringstream ss;
+      ss << makeCapacityProfile(res);
+
+      sl_resultSet.str() = ss.str();
+
+      return sl_resultSet;
+    }
+
+    const ResultSet& DSA::getResourceUsageProfile(int resourceKey)
+    {
+      static StringResultSet sl_resultSet;
+      
+      checkError(m_db.isValid(), "No good database");
+      EntityId entity = Entity::getEntity(resourceKey);
+      checkError(entity.isValid() && SAVH::ResourceId::convertable(entity), "No resource for key [" << resourceKey << "]");
+      SAVH::ResourceId res = (SAVH::ResourceId) entity;
+      
+      std::stringstream ss;
+      ss << makeUsageProfile(res);
+
+      sl_resultSet.str() = ss.str();
+
+      return sl_resultSet;
+    }
+
+    /*
+     *  TODO: hacking it to be a constant range for the entire timeline for now
+     */
+    const std::string DSA::makeCapacityProfile(const SAVH::ResourceId& res) const
+    {
+      checkError(m_db.isValid(), "No good database");
+
+      std::stringstream ss;
+
+      double lb = res->getLowerLimit();
+      double ub = res->getUpperLimit();
+      
+      SAVH::ProfileIterator it(res->getProfile());     
+      int start = it.getStartTime();
+      int end = it.getEndTime();
+      
+      ss << "<COLLECTION>" << std::endl;
+      
+	  ss << "   <ProfileEntry " 
+	     << "time=\"" << start << "\" " 
+	     << "lb=\"" << lb << "\" " 
+	     << "ub=\"" << ub << "\"" 
+	     << "/>" << std::endl;
+	     	
+	  ss << "   <ProfileEntry " 
+	     << "time=\"" << end << "\" " 
+	     << "lb=\"" << lb << "\" " 
+	     << "ub=\"" << ub << "\"" 
+	     << "/>" << std::endl;
+	     	
+      ss << "</COLLECTION>" << std::endl;
+
+      return ss.str();
+    }
+
+
+    /*
+     *  TODO: this is probably not usage right now, but level. need to fix it
+     */
+    const std::string DSA::makeUsageProfile(const SAVH::ResourceId& res) const
+    {
+      checkError(m_db.isValid(), "No good database");
+
+      std::stringstream ss;
+
+      ss << "<COLLECTION>" << std::endl;
+      SAVH::ProfileIterator it(res->getProfile());     
+      for(; !it.done(); it.next()){
+		ss << "   <ProfileEntry " 
+		   << "time=\"" << it.getTime() << "\" " 
+		   << "lb=\"" << it.getLowerBound() << "\" " 
+		   << "ub=\"" << it.getUpperBound() << "\"" 
+		   << "/>" << std::endl;	
+      }
+      ss << "</COLLECTION>" << std::endl;
+
+      return ss.str();
+    }
+
+
     int asInt(double d)
     {
     	if (d == PLUS_INFINITY)
@@ -188,7 +327,7 @@ namespace EUROPA {
     {
       checkError(m_db.isValid(), "No good database");
       EntityId entity = Entity::getEntity(actionKey);
-      checkError(entity.isValid() && ObjectId::convertable(entity), "No action for key [" << actionKey << "]");
+      checkError(entity.isValid() && TokenId::convertable(entity), "No action for key [" << actionKey << "]");
       TokenId action = (TokenId) entity;
       TokenSet tokens;
       tokens.insert(action);
