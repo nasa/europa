@@ -82,6 +82,11 @@ extern "C" {
     return(makeReply(env, EUROPA::DSA::DSA::instance().getActions(componentKey)));
   }
 
+  // TODO: returning a collection to reuse existing code, optimize.
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getAction(JNIEnv * env, jclass, jint actionKey){
+    return(makeReply(env, EUROPA::DSA::DSA::instance().getAction(actionKey)));
+  }
+
   JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getConditions(JNIEnv * env, jclass, jint actionKey){
     return(0);
   }
@@ -175,6 +180,18 @@ namespace EUROPA {
       checkError(entity.isValid() && ObjectId::convertable(entity), "No component for key [" << componentKey << "]");
       ObjectId component = (ObjectId) entity;
       const TokenSet& tokens = component->getTokens();
+      return makeTokenCollection(tokens);
+    }
+
+
+    const ResultSet& DSA::getAction(int actionKey)
+    {
+      checkError(m_db.isValid(), "No good database");
+      EntityId entity = Entity::getEntity(actionKey);
+      checkError(entity.isValid() && ObjectId::convertable(entity), "No action for key [" << actionKey << "]");
+      TokenId action = (TokenId) entity;
+      TokenSet tokens;
+      tokens.insert(action);
       return makeTokenCollection(tokens);
     }
 

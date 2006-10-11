@@ -85,22 +85,11 @@ public class DSAImpl
 	return new Vector<Action>();
     }
 
-	public Action getAction(int key) 
+	public Action getAction(int actionKey) 
 	{
-		// TODO Implement this efficiently
-		for (Action a : getActions()) {
-			if (a.getKey() == key)
-				return a;
-		}
-		
-		for (Component c : getComponents()) {
-			for (Action a : c.getActions()) {
-				if (a.getKey() == key)
-					return a;
-			}
-		}
-		
-		return null;
+    	String xml = JNI.getAction(actionKey);
+		List<Action> actions = Util.getActionsFromXML(xml);
+		return (actions.size() > 0 ? actions.get(0) : null);
 	}
 
     public List<Proposition> getPropositions() 

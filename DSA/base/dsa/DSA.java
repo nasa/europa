@@ -12,7 +12,7 @@ public interface DSA
     public List<Component>    getComponents();
     public List<Attribute>    getAttributes();
  
-	public Action             getAction(int key);
+	public Action             getAction(int actionKey);
     public List<Action>       getActions();
     public List<Proposition>  getPropositions();
     

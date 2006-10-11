@@ -40,6 +40,7 @@ namespace EUROPA {
 
       const ResultSet& getComponents();
       const ResultSet& getActions(int componentKey);
+      const ResultSet& getAction(int actionKey);
       const ResultSet& getChildActions(int actionKey);
       const ResultSet& getConditions(int actionKey);
       const ResultSet& getEffects(int actionKey);
