@@ -102,7 +102,7 @@ public class DSAImpl
 		
 		Vector<Resource> resources = new Vector<Resource>();
 		
-		String responseStr = JNI.getComponents();
+		String responseStr = JNI.getResources();
 
 		try{
 		    IXMLElement response = Util.toXML(responseStr);
