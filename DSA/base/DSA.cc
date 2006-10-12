@@ -154,27 +154,9 @@ namespace EUROPA {
 	 REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreatDecisionPoint);
     }
 
-    const ResultSet& DSA::getComponents(){
-      static StringResultSet sl_resultSet;
-
-      checkError(m_db.isValid(), "No good database");
-
-      std::stringstream ss;
-
-      ss << "<COLLECTION>" << std::endl;
-
-      const ObjectSet& objects = m_db->getObjects();
-      for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
-	ObjectId object = *it;
-	if(Schema::instance()->isA(object->getType(), "Timeline"))
-	  ss << "   <Component key=\"" << object->getKey() << "\" name=\"" << object->getName().toString() << "\"/>" << std::endl;
-      }
-
-      ss << "</COLLECTION>" << std::endl;
-
-      sl_resultSet.str() = ss.str();
-
-      return sl_resultSet;
+    const ResultSet& DSA::getComponents()
+    {
+    	return getObjectsByType("Timeline");    	
     }
 
     const ResultSet& DSA::getResources()
@@ -186,6 +168,7 @@ namespace EUROPA {
     {
       static StringResultSet sl_resultSet;
 
+      //std::cout << "Getting Objects of type : " << type << std::endl; 
       checkError(m_db.isValid(), "No good database");
 
       std::stringstream ss;
@@ -195,11 +178,13 @@ namespace EUROPA {
       const ObjectSet& objects = m_db->getObjects();
       for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
 	      ObjectId object = *it;
-	      if(Schema::instance()->isA(object->getType(), type.c_str()))
+	      if(Schema::instance()->isA(object->getType(), type.c_str())) {
+	      	  //std::cout << "Object:" << object->getName().toString() << " type:" << object->getType().toString() << std::endl;
 	          ss << "   <Resource key=\"" << object->getKey() 
 	                        << "\" name=\"" << object->getName().toString() 
 	                        << "\"/>" 
 	                        << std::endl;
+	      }
       }
 
       ss << "</COLLECTION>" << std::endl;
@@ -215,6 +200,9 @@ namespace EUROPA {
       
       checkError(m_db.isValid(), "No good database");
       EntityId entity = Entity::getEntity(resourceKey);
+      if (!SAVH::ResourceId::convertable(entity))
+         std::cout << entity->getName().toString() << std::endl;
+         
       checkError(entity.isValid() && SAVH::ResourceId::convertable(entity), "No resource for key [" << resourceKey << "]");
       SAVH::ResourceId res = (SAVH::ResourceId) entity;
       
