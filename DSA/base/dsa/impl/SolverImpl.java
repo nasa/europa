@@ -50,12 +50,14 @@ public class SolverImpl implements Solver
     public int getStepCount(){ return m_stepCount; }
 
     public int getDepth() {return m_depth;}
+    
+    public int getOpenDecisionCnt() { return m_openDecisionCount; }
 
     public boolean isExhausted(){ return m_isExhausted;}
 
     public boolean isTimedOut(){ return m_isTimedOut;}
 
-    private boolean hasFlaws(){ return m_hasFlaws;}
+    public boolean hasFlaws(){ return m_hasFlaws;}
 
     private void updateState(String xmlStr)
     {
@@ -70,6 +72,7 @@ public class SolverImpl implements Solver
     		IXMLElement state = Util.toXML(xmlStr);
     		m_stepCount = state.getAttribute("stepCount", 0);
     		m_depth = state.getAttribute("depth", 0);
+    		m_openDecisionCount = state.getAttribute("openDecisionCount", 0);
     		m_isExhausted = (state.getAttribute("isExhausted", 0) == 0 ? false : true);
     		m_isTimedOut = (state.getAttribute("isTimedOut", 0) == 0 ? false : true);
     		m_hasFlaws = (state.getAttribute("hasFlaws", 0) == 0 ? false : true);
@@ -80,11 +83,12 @@ public class SolverImpl implements Solver
 
     }
 
-    private int m_maxSteps;
-    private int m_maxDepth;
-    private int m_stepCount;
-    private int m_depth;
-    private boolean m_isExhausted;
-    private boolean m_isTimedOut;
-    private boolean m_hasFlaws;
+    protected int m_maxSteps;
+    protected int m_maxDepth;
+    protected int m_stepCount;
+    protected int m_depth;
+    protected int m_openDecisionCount;
+    protected boolean m_isExhausted;
+    protected boolean m_isTimedOut;
+    protected boolean m_hasFlaws;
 }

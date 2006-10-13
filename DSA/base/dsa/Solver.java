@@ -2,17 +2,21 @@ package dsa;
 
 public interface Solver 
 {
-	public abstract boolean solve();
+	public  boolean solve();
 
-	public abstract void step();
+	public  void step();
 
-	public abstract void reset();
+	public  void reset();
 
-	public abstract int getStepCount();
+	public  int getStepCount();
 
-	public abstract int getDepth();
+	public  int getDepth();
 
-	public abstract boolean isExhausted();
+	public  int getOpenDecisionCnt();	
+	
+	public  boolean isExhausted();
 
-	public abstract boolean isTimedOut();
+	public  boolean isTimedOut();
+	
+	public  boolean hasFlaws();	
 }
