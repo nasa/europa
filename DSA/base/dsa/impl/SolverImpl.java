@@ -1,5 +1,10 @@
 package dsa.impl;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+import java.util.StringTokenizer;
+
 import dsa.Solver;
 import net.n3.nanoxml.IXMLElement;
 
@@ -57,6 +62,8 @@ public class SolverImpl implements Solver
 
     public boolean isTimedOut(){ return m_isTimedOut;}
 
+	public  boolean isConstraintConsistent() { return m_isConstraintConsistent; }
+    
     public boolean hasFlaws(){ return m_hasFlaws;}
 
     private void updateState(String xmlStr)
@@ -75,12 +82,31 @@ public class SolverImpl implements Solver
     		m_openDecisionCount = state.getAttribute("decisionStackSize", 0);
     		m_isExhausted = (state.getAttribute("isExhausted", 0) == 0 ? false : true);
     		m_isTimedOut = (state.getAttribute("isTimedOut", 0) == 0 ? false : true);
+    		m_isConstraintConsistent = (state.getAttribute("isConstraintConsistent", 0) == 0 ? false : true);
     		m_hasFlaws = (state.getAttribute("hasFlaws", 0) == 0 ? false : true);
-    	}
+    	} 
     	catch(Exception e){
     		e.printStackTrace();
     	}
 
+    }
+    
+    public List<String> getOpenDecisions()
+    {
+    	String s = JNI.solverGetOpenDecisions();
+    	List<String> retval = new Vector<String>();
+    	//System.out.println(s);
+    	
+    	StringTokenizer tok = new StringTokenizer(s,"\n");
+    	while (tok.hasMoreTokens()) {
+    		String decision = tok.nextToken();
+    		if (!decision.startsWith(" Open")
+    				&& !decision.startsWith(" }")) {
+    			retval.add(decision);
+    		}
+    	}
+    	
+    	return retval;
     }
 
     protected int m_maxSteps;
@@ -90,5 +116,6 @@ public class SolverImpl implements Solver
     protected int m_openDecisionCount;
     protected boolean m_isExhausted;
     protected boolean m_isTimedOut;
+    protected boolean m_isConstraintConsistent;
     protected boolean m_hasFlaws;
 }

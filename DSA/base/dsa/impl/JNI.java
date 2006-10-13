@@ -24,6 +24,7 @@ public class JNI
     public static native String solverStep();
     public static native String solverReset();
     public static native String solverClear();
+    public static native String solverGetOpenDecisions();
 
     /** Call-back handlers **/
     public static void handleCallBack(){

@@ -1,5 +1,7 @@
 package dsa;
 
+import java.util.List;
+
 public interface Solver 
 {
 	public  boolean solve();
@@ -11,6 +13,8 @@ public interface Solver
 	public  int getStepCount();
 
 	public  int getDepth();
+	
+    public List<String> getOpenDecisions();	
 
 	public  int getOpenDecisionCnt();	
 	
@@ -18,5 +22,7 @@ public interface Solver
 
 	public  boolean isTimedOut();
 	
+	public  boolean isConstraintConsistent();
+
 	public  boolean hasFlaws();	
 }
