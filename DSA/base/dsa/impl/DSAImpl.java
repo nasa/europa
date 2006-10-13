@@ -1,8 +1,6 @@
 package dsa.impl;
 
-import java.io.*;
 import java.util.*;
-import java.net.*;
 
 import dsa.Action;
 import dsa.Component;
@@ -14,11 +12,6 @@ import dsa.Proposition;
 import dsa.Resource;
 
 // nanoxml support
-import net.n3.nanoxml.StdXMLReader;
-import net.n3.nanoxml.XMLParserFactory;
-import net.n3.nanoxml.IXMLReader;
-import net.n3.nanoxml.XMLWriter;
-import net.n3.nanoxml.IXMLParser;
 import net.n3.nanoxml.IXMLElement;
 
 public class DSAImpl 
