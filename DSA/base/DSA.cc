@@ -169,9 +169,27 @@ namespace EUROPA {
     	return getObjectsByType("Timeline");    	
     }
 
+    void printAllObjectTypes()
+    {
+    	std::cout << "All Object Types:" << std::endl;
+    	const std::set<LabelStr>& ot = Schema::instance()->getAllObjectTypes();
+    	for(std::set<LabelStr>::const_iterator it = ot.begin(); it != ot.end(); ++it) {
+    		std::cout << it->toString() << std::endl;
+    	}
+    }
+    
+    void printAncestors(const LabelStr& objectType)
+    {
+    	std::cout << "Ancestors for : " << objectType.toString() << std::endl;
+    	const std::vector<LabelStr>& ot = Schema::instance()->getAllObjectTypes(objectType);
+    	for(std::vector<LabelStr>::const_iterator it = ot.begin(); it != ot.end(); ++it) {
+    		std::cout << it->toString() << std::endl;
+    	}
+    }
+    
     const ResultSet& DSA::getResources()
     {
-    	return getObjectsByType("Resource");
+    	return getObjectsByType("Reusable");
     }
 
     const ResultSet& DSA::getObjectsByType(const std::string& type) const
