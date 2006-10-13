@@ -47,11 +47,14 @@ extern "C" {
   jstring makeSolverState(JNIEnv * env, const EUROPA::SOLVERS::SolverId& solver){
     std::stringstream ss;
 
-    ss << "<SOLVER_STATE hasFlaws=\"" << !solver->noMoreFlaws() << 
-      "\" isTimedOut=\"" << solver->isTimedOut() << 
-      "\" isExhausted=\"" << solver->isExhausted() << 
-      "\" stepCount=\"" << solver->getStepCount() << 
-      "\" depth=\"" << solver->getDepth() << "\"/>";
+    ss << "<SOLVER_STATE"
+       << " hasFlaws=\"" << !solver->noMoreFlaws() << "\""
+       << " isTimedOut=\"" << solver->isTimedOut() << "\""
+       << " isExhausted=\"" << solver->isExhausted() <<  "\""
+       << " stepCount=\"" << solver->getStepCount() << "\""
+       << " depth=\"" << solver->getDepth() << "\"" 
+       << " decisionStackSize=\"" << solver->getDecisionStack().size() << "\"" 
+       << "/>";
 
     return env->NewStringUTF(ss.str().c_str());
   }
@@ -138,6 +141,7 @@ extern "C" {
     return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
 
+
 #ifdef __cplusplus
 }
 #endif
@@ -168,7 +172,7 @@ namespace EUROPA {
     {
       static StringResultSet sl_resultSet;
 
-      //std::cout << "Getting Objects of type : " << type << std::endl; 
+      std::cout << "Getting Objects of type : " << type << std::endl; 
       checkError(m_db.isValid(), "No good database");
 
       std::stringstream ss;
@@ -178,6 +182,7 @@ namespace EUROPA {
       const ObjectSet& objects = m_db->getObjects();
       for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
 	      ObjectId object = *it;
+     	  //std::cout << "Object:" << object->getName().toString() << " type:" << object->getType().toString() << std::endl;
 	      if(Schema::instance()->isA(object->getType(), type.c_str())) {
 	      	  //std::cout << "Object:" << object->getName().toString() << " type:" << object->getType().toString() << std::endl;
 	          ss << "   <Resource key=\"" << object->getKey() 
