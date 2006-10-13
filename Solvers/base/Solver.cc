@@ -572,6 +572,10 @@ namespace EUROPA {
       return FlawHandlerId::noId();
     }
 
+    bool Solver::isConstraintConsistent() const {
+      return m_db->getConstraintEngine()->constraintConsistent();
+    }
+    
     /**
      * @brief Will print the open decisions in priority order
      */

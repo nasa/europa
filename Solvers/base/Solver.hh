@@ -163,6 +163,7 @@ namespace EUROPA {
        */
       FlawHandlerId getFlawHandler(const EntityId entity);
 
+      bool isConstraintConsistent() const;
       std::string printOpenDecisions() const;
 
       /**
