@@ -51,6 +51,7 @@ extern "C" {
        << " hasFlaws=\"" << !solver->noMoreFlaws() << "\""
        << " isTimedOut=\"" << solver->isTimedOut() << "\""
        << " isExhausted=\"" << solver->isExhausted() <<  "\""
+       << " isConstraintConsistent=\"" << solver->isConstraintConsistent() <<  "\""
        << " stepCount=\"" << solver->getStepCount() << "\""
        << " depth=\"" << solver->getDepth() << "\"" 
        << " decisionStackSize=\"" << solver->getDecisionStack().size() << "\"" 
@@ -141,6 +142,11 @@ extern "C" {
     return makeSolverState(env, EUROPA::DSA::DSA::instance().getSolver());
   }
 
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_solverGetOpenDecisions(JNIEnv * env, jclass){
+    std::string retval = EUROPA::DSA::DSA::instance().getSolver()->printOpenDecisions();
+    return env->NewStringUTF(retval.c_str());
+  }
+
 
 #ifdef __cplusplus
 }
@@ -172,7 +178,7 @@ namespace EUROPA {
     {
       static StringResultSet sl_resultSet;
 
-      std::cout << "Getting Objects of type : " << type << std::endl; 
+      //std::cout << "Getting Objects of type : " << type << std::endl; 
       checkError(m_db.isValid(), "No good database");
 
       std::stringstream ss;
