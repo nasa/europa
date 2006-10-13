@@ -72,7 +72,7 @@ public class SolverImpl implements Solver
     		IXMLElement state = Util.toXML(xmlStr);
     		m_stepCount = state.getAttribute("stepCount", 0);
     		m_depth = state.getAttribute("depth", 0);
-    		m_openDecisionCount = state.getAttribute("openDecisionCount", 0);
+    		m_openDecisionCount = state.getAttribute("decisionStackSize", 0);
     		m_isExhausted = (state.getAttribute("isExhausted", 0) == 0 ? false : true);
     		m_isTimedOut = (state.getAttribute("isTimedOut", 0) == 0 ? false : true);
     		m_hasFlaws = (state.getAttribute("hasFlaws", 0) == 0 ? false : true);
