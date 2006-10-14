@@ -121,6 +121,8 @@ namespace EUROPA {
 
     unsigned int Solver::getStepCount() const {return m_stepCount;}
 
+    std::string Solver::getLastExecutedDecision() const {return m_lastExecutedDecision;}
+
     bool Solver::noMoreFlaws() const{return m_noFlawsFound;}
 
     const DecisionStack& Solver::getDecisionStack() const {return m_decisionStack;}
@@ -263,6 +265,7 @@ namespace EUROPA {
 
       if(m_activeDecision->hasNext()){
         m_activeDecision->execute();
+        m_lastExecutedDecision = m_activeDecision->toString();
         m_stepCount++;
 
         if(m_db->getConstraintEngine()->propagate()){

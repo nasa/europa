@@ -1,6 +1,5 @@
 package dsa.impl;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.StringTokenizer;
@@ -56,7 +55,7 @@ public class SolverImpl implements Solver
 
     public int getDepth() {return m_depth;}
     
-    public int getOpenDecisionCnt() { return m_openDecisionCount; }
+    public String getLastExecutedDecision() { return m_lastExecutedDecision; }
 
     public boolean isExhausted(){ return m_isExhausted;}
 
@@ -79,7 +78,7 @@ public class SolverImpl implements Solver
     		IXMLElement state = Util.toXML(xmlStr);
     		m_stepCount = state.getAttribute("stepCount", 0);
     		m_depth = state.getAttribute("depth", 0);
-    		m_openDecisionCount = state.getAttribute("decisionStackSize", 0);
+    		m_lastExecutedDecision = state.getAttribute("lastExecutedDecision", "");
     		m_isExhausted = (state.getAttribute("isExhausted", 0) == 0 ? false : true);
     		m_isTimedOut = (state.getAttribute("isTimedOut", 0) == 0 ? false : true);
     		m_isConstraintConsistent = (state.getAttribute("isConstraintConsistent", 0) == 0 ? false : true);
@@ -113,7 +112,7 @@ public class SolverImpl implements Solver
     protected int m_maxDepth;
     protected int m_stepCount;
     protected int m_depth;
-    protected int m_openDecisionCount;
+    protected String m_lastExecutedDecision;
     protected boolean m_isExhausted;
     protected boolean m_isTimedOut;
     protected boolean m_isConstraintConsistent;

@@ -54,7 +54,7 @@ extern "C" {
        << " isConstraintConsistent=\"" << solver->isConstraintConsistent() <<  "\""
        << " stepCount=\"" << solver->getStepCount() << "\""
        << " depth=\"" << solver->getDepth() << "\"" 
-       << " decisionStackSize=\"" << solver->getDecisionStack().size() << "\"" 
+       << " lastExecutedDecision=\"" << solver->getLastExecutedDecision() << "\"" 
        << "/>";
 
     return env->NewStringUTF(ss.str().c_str());

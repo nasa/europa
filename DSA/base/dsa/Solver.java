@@ -16,7 +16,7 @@ public interface Solver
 	
     public List<String> getOpenDecisions();	
 
-	public  int getOpenDecisionCnt();	
+	public  String getLastExecutedDecision();	
 	
 	public  boolean isExhausted();
 

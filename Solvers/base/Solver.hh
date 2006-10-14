@@ -164,8 +164,11 @@ namespace EUROPA {
       FlawHandlerId getFlawHandler(const EntityId entity);
 
       bool isConstraintConsistent() const;
-      std::string printOpenDecisions() const;
 
+      std::string getLastExecutedDecision() const;
+
+      std::string printOpenDecisions() const;
+      
       /**
        * @brief Access the context of this Solver.
        */
@@ -253,6 +256,7 @@ namespace EUROPA {
       ContextId m_context; /*<! Used to share data from the Solver on down.*/
       FlawManagers m_flawManagers; /*!< Sequence of flaw managers to include in scope */
       DecisionStack m_decisionStack; /*!< Stack of decisions made */
+      std::string m_lastExecutedDecision; /*!< Kept for debugging and UI purposes */
       std::list<SearchListenerId> m_listeners; /*!< The set of listeners for the search */
 
       class FlawIterator : public Iterator {
