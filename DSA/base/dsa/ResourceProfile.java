@@ -5,5 +5,6 @@ import java.util.Iterator;
 public interface ResourceProfile
 {
     public Iterator<Integer> getTimes();
-    public double getValue(int time);
+    public double getLowerBound(int time);
+    public double getUpperBound(int time);
 }
