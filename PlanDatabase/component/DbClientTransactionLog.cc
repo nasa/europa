@@ -220,24 +220,23 @@ namespace EUROPA {
       return (value ? "true" : "false");
     }
    else 
-   if (domain->isNumeric()) {
-      if (isInt(domain->getTypeName().toString())) {
-        char s[64];
-        snprintf(s, sizeof(s), "%d", (int)value);
-        return s;
-      } else {
-        char s[64];
-        snprintf(s, sizeof(s), "%16f", (double)value);
-        return s;
-      }
-    } else if (LabelStr::isString(domain->getUpperBound())) {
-      const LabelStr& label = value;
-      return label.toString();
-    } else {
-      ObjectId object = value;
-      check_error(object.isValid());
-      return object->getName().toString();
-    }
+     if (domain->isNumeric()) {
+       // CMG: Do not use snprintf. Not supported on DEC
+       std::stringstream ss;
+       if (isInt(domain->getTypeName().toString())) {
+	 ss << (int) value;
+       } else {
+	 ss << value;
+       }
+       return ss.str();
+     } else if (LabelStr::isString(domain->getUpperBound())) {
+       const LabelStr& label = value;
+       return label.toString();
+     } else {
+       ObjectId object = value;
+       check_error(object.isValid());
+       return object->getName().toString();
+     }
   }
 
   TiXmlElement *

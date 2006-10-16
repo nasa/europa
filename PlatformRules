@@ -162,7 +162,11 @@ if $(OS) = CYGWIN {
 
 if $(OS) = CYGWIN {
   DLOPEN_LIBRARY = ;
-} else {
+}
+else if $(OS) = OSF {
+  DLOPEN_LIBRARY = ;
+}
+else {
   DLOPEN_LIBRARY = dl ;
 }
 
@@ -178,6 +182,7 @@ if $(OS) = CYGWIN {
 if $(OS) = BEOS {
   LINKLIBS += -lbe ;
 }
+
 
 # Using ar scan causes problems on MacOS X and Cygwin
 # Without ar scan building static libraries is more
