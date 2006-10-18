@@ -413,15 +413,15 @@ namespace EUROPA {
 
     std::string ThreatDecisionPoint::toString() const {
       std::stringstream os;
-      os << "INSTANT=" << m_instTime << " on " << m_resName.toString() << " CHOICES:";
+      os << "INSTANT=" << m_instTime << " on " << m_resName.toString() << " CHOICES";
       for(unsigned int i = 0; i < m_choiceCount; i++)
-        os << toString(m_choices[i]) << " ";
+        os << " : " << toString(m_choices[i]);
       return os.str();
     }
 
     std::string ThreatDecisionPoint::toString(const std::pair<TransactionId, TransactionId>& choice) const {
       std::stringstream os;
-      os << "<" << choice.first->toString() << ":" << choice.second->toString() << ">";
+      os << "<" << choice.first->toString() << " *** " << choice.second->toString() << ">";
       return os.str();
     }
     
