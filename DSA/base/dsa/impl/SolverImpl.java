@@ -14,7 +14,7 @@ public class SolverImpl implements Solver
     public static Solver createInstance(String configurationFile, int horizonStart, int horizonEnd, int maxSteps, int maxDepth)
     {
     	if(s_instance == null)
-    	    s_instance = new SolverImpl(maxSteps, maxDepth);
+    	    s_instance = new SolverImpl(configurationFile, horizonStart, horizonEnd, maxSteps, maxDepth);
 
     	s_instance.updateState(JNI.solverConfigure(configurationFile, horizonStart, horizonEnd));
 
@@ -29,8 +29,11 @@ public class SolverImpl implements Solver
     	return s_instance;
     }
 
-    private SolverImpl(int maxSteps, int maxDepth)
+    private SolverImpl(String configurationFile, int horizonStart, int horizonEnd, int maxSteps, int maxDepth)
     {
+    	m_configFilename = configurationFile;
+    	m_horizonStart = horizonStart;
+    	m_horizonEnd = horizonEnd;
 	    m_maxSteps = maxSteps;
 	    m_maxDepth = maxDepth;
     }
@@ -107,14 +110,25 @@ public class SolverImpl implements Solver
     	
     	return retval;
     }
+    
+    // Configuration
+    public Integer getHorizonStart() { return m_horizonStart; }
+    public Integer getHorizonEnd() { return m_horizonEnd;}
+    public Integer getMaxSteps() { return m_maxSteps;}
+    public Integer getMaxDepth() { return m_maxDepth; }
+    public String getConfigFilename() { return m_configFilename; }
 
+    protected int m_horizonStart;
+    protected int m_horizonEnd;
     protected int m_maxSteps;
     protected int m_maxDepth;
+    protected String m_configFilename;
+    
     protected int m_stepCount;
     protected int m_depth;
     protected String m_lastExecutedDecision;
     protected boolean m_isExhausted;
     protected boolean m_isTimedOut;
     protected boolean m_isConstraintConsistent;
-    protected boolean m_hasFlaws;
+    protected boolean m_hasFlaws;    
 }

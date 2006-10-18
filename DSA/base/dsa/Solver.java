@@ -25,4 +25,11 @@ public interface Solver
 	public  boolean isConstraintConsistent();
 
 	public  boolean hasFlaws();	
+	
+    // Configuration
+    public Integer getHorizonStart();
+    public Integer getHorizonEnd();
+    public Integer getMaxSteps();
+    public Integer getMaxDepth();
+    public String getConfigFilename();	
 }
