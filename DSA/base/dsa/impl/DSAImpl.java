@@ -25,20 +25,25 @@ public class DSAImpl
 
     private DSAImpl(){}
 
-    /**
-     * @todo Make the suffix _g settable as input from the build or command line, or a configuration file
-     */
     static public DSA instance(){
 	if(s_instance == null){
 	    s_instance = new DSAImpl();
-	    System.loadLibrary("DSA_g");
 	}
 	return s_instance;
     }
 
-    public void loadModel(String model) throws InvalidSourceException {
-	m_model = model;
-	JNI.load(model);
+    /**
+     * @todo Make the library suffix settable as input from the build or command line, or a configuration file
+     */
+    public void loadModel(String model) 
+        throws InvalidSourceException 
+    {
+		// Infer debug vs fast from library name
+		boolean debug = model.contains("_g");
+		String suffix = (debug ? "g" : "o");
+	    System.loadLibrary("DSA_"+suffix);
+    	m_model = model;
+	    JNI.load(model);
     }
 
     public void addPlan(String txSource) throws InvalidSourceException, NoModelException {
