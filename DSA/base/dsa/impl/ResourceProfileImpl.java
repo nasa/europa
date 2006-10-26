@@ -7,7 +7,6 @@ import java.util.TreeMap;
 
 import net.n3.nanoxml.IXMLElement;
 
-import dsa.Instant;
 import dsa.ResourceProfile;
 
 public class ResourceProfileImpl 

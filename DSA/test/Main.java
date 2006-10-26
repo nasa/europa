@@ -1,5 +1,4 @@
 import dsa.*;
-import org.junit.runner.*;
 import junit.framework.*;
 import java.util.*;
 
@@ -50,6 +49,7 @@ public class Main extends TestCase {
 	    while(it.hasNext()){
 		Component component = it.next();
 		List<Action> actions = component.getActions();
+		Assert.assertTrue(actions != null);
 	    }
 	}
 	catch(Exception e){

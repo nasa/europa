@@ -5,8 +5,6 @@ import java.util.Vector;
 import java.util.Enumeration;
 
 import dsa.Action;
-import dsa.Component;
-import dsa.Attribute;
 import net.n3.nanoxml.IXMLElement;
 import net.n3.nanoxml.IXMLParser;
 import net.n3.nanoxml.IXMLReader;

@@ -5,7 +5,6 @@ import java.util.*;
 import dsa.Action;
 import dsa.Component;
 import dsa.Attribute;
-import net.n3.nanoxml.IXMLElement;
 
 public class ComponentImpl 
     extends EntityBase 

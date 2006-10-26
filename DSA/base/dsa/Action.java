@@ -2,8 +2,6 @@ package dsa;
 
 import java.util.*;
 
-import net.n3.nanoxml.IXMLElement;
-
 public interface Action 
     extends Token 
 {

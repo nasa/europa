@@ -21,6 +21,7 @@ public class TokenImpl
 	m_latestEnd = endUb;
 	m_durationMin = durationLb;
 	m_durationMax = durationUb;
+	m_parameters = new Vector<Parameter>();
     }
 
     public String getType(){return m_type;}
@@ -40,7 +41,7 @@ public class TokenImpl
     public int getDurationMax() {return m_durationMax;}
 
     public List<Parameter> getParameters(){
-	return new Vector<Parameter>();
+	return m_parameters;
     }
 
 

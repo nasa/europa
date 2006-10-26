@@ -2,8 +2,6 @@ package dsa;
 
 import java.util.List;
 
-import dsa.impl.AttributeImpl;
-
 public interface DSA 
 {
     public void loadModel(String model) throws InvalidSourceException;
