@@ -21,7 +21,7 @@ public class ComponentImpl
     public List<Action> getActions() 
     {
     	String xml = JNI.getActions(getKey());
-    	return Util.getActionsFromXML(xml);
+    	return Util.xmlToActions(xml);
     }
 
     /* (non-Javadoc)

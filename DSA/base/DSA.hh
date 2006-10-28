@@ -42,9 +42,11 @@ namespace EUROPA {
       const ResultSet& getComponents();
       const ResultSet& getActions(int componentKey);
       const ResultSet& getAction(int actionKey);
+      const ResultSet& getMaster(int actionKey);
       const ResultSet& getChildActions(int actionKey);
       const ResultSet& getConditions(int actionKey);
       const ResultSet& getEffects(int actionKey);
+      const ResultSet& getComponentForAction(int actionKey);
 
       const ResultSet& getResources();
       const ResultSet& getResourceCapacityProfile(int resourceKey);
@@ -64,6 +66,7 @@ namespace EUROPA {
       void loadModelLibrary(const char* model);
       void writeSolverState();
       const ResultSet& makeTokenCollection(const TokenSet& tokens);
+      const ResultSet& makeObjectCollection(const ObjectSet& objects) const;
       const ResultSet& getObjectsByType(const std::string& type) const;
       const std::string makeCapacityProfile(const SAVH::ResourceId& res) const; 
       const std::string makeUsageProfile(const SAVH::ResourceId& res) const;

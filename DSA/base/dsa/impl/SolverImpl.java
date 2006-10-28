@@ -5,6 +5,7 @@ import java.util.Vector;
 import java.util.StringTokenizer;
 
 import dsa.Solver;
+import dsa.SolverListener;
 import net.n3.nanoxml.IXMLElement;
 
 public class SolverImpl implements Solver 
@@ -36,6 +37,8 @@ public class SolverImpl implements Solver
     	m_horizonEnd = horizonEnd;
 	    m_maxSteps = maxSteps;
 	    m_maxDepth = maxDepth;
+	    
+	    m_listeners = new Vector<SolverListener>();
     }
 
     public boolean solve()
@@ -47,6 +50,8 @@ public class SolverImpl implements Solver
     public void step() 
     {
 	    updateState(JNI.solverStep());
+	    for (SolverListener l : m_listeners)
+	    	l.stepCompleted(this);
     }
 
     public void reset()
@@ -130,5 +135,17 @@ public class SolverImpl implements Solver
     protected boolean m_isExhausted;
     protected boolean m_isTimedOut;
     protected boolean m_isConstraintConsistent;
-    protected boolean m_hasFlaws;    
+    protected boolean m_hasFlaws;
+    
+    List<SolverListener> m_listeners;
+
+	public void addListener(SolverListener l) 
+	{
+		m_listeners.add(l);
+	}
+
+	public void removeListener(SolverListener l) 
+	{
+		m_listeners.remove(l);
+	}    
 }

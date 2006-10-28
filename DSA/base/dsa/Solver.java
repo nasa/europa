@@ -32,4 +32,8 @@ public interface Solver
     public Integer getMaxSteps();
     public Integer getMaxDepth();
     public String getConfigFilename();	
+    
+    // Listeners
+    public void addListener(SolverListener l);
+    public void removeListener(SolverListener l);
 }

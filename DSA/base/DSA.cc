@@ -103,6 +103,14 @@ extern "C" {
   JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getChildActions(JNIEnv * env, jclass, jint actionKey){
     return(0);
   }
+  
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getComponentForAction(JNIEnv * env, jclass, jint actionKey){
+    return(makeReply(env, EUROPA::DSA::DSA::instance().getComponentForAction(actionKey)));
+  }  
+
+  JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getMaster(JNIEnv * env, jclass, jint actionKey){
+    return(makeReply(env, EUROPA::DSA::DSA::instance().getMaster(actionKey)));
+  }  
 
   JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getResources(JNIEnv * env, jclass){
     return(makeReply(env, EUROPA::DSA::DSA::instance().getResources()));
@@ -352,6 +360,61 @@ namespace EUROPA {
     }
 
 
+    const ResultSet& DSA::getMaster(int actionKey)
+    {
+      checkError(m_db.isValid(), "No good database");
+      EntityId entity = Entity::getEntity(actionKey);
+      checkError(entity.isValid() && TokenId::convertable(entity), "No action for key [" << actionKey << "]");
+      TokenId action = (TokenId) entity;
+      TokenSet tokens;
+      
+      TokenId master = action->getMaster();
+      
+      if (!master.isNoId())
+          tokens.insert(master);
+          
+      return makeTokenCollection(tokens);
+    }
+
+
+    const ResultSet& DSA::makeObjectCollection(const ObjectSet& objects) const
+    {
+      static StringResultSet sl_resultSet;
+      std::stringstream ss;
+      ss << "<COLLECTION>" << std::endl;
+
+      for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
+	      ObjectId object = *it;
+          ss << "   <Resource key=\"" << object->getKey() 
+                       << "\" name=\"" << object->getName().toString() 
+                       << "\"/>" 
+             << std::endl;
+      }
+
+      ss << "</COLLECTION>" << std::endl;
+      sl_resultSet.str() = ss.str();
+      return sl_resultSet;
+    }
+    
+    const ResultSet& DSA::getComponentForAction(int actionKey)
+    {
+      checkError(m_db.isValid(), "No good database");
+      EntityId entity = Entity::getEntity(actionKey);
+      checkError(entity.isValid() && TokenId::convertable(entity), "No action for key [" << actionKey << "]");
+      TokenId action = (TokenId) entity;
+      
+      ObjectVarId id = action->getObject();
+      
+      ObjectSet objects;
+      if (id->getLastDomain().isSingleton()) {
+      	ObjectId obj = id->getLastDomain().getSingletonValue();
+        objects.insert(obj);
+      } 
+      
+      return makeObjectCollection(objects);
+    }
+
+
     const ResultSet& DSA::makeTokenCollection(const TokenSet& tokens) 
     {
       static StringResultSet sl_resultSet;
@@ -366,6 +429,7 @@ namespace EUROPA {
 		TokenId token = *it;
 		ss << "   <Token key=\"" << token->getKey() << "\" " 
 		  "type=\""        << token->getPredicateName().toString() << "\"" <<
+		  "name=\""        << token->getName().toString() << "\"" <<
 		  "startLb=\""     << asInt(token->getStart()->lastDomain().getLowerBound()) << "\"" <<
 		  "startUb=\""     << asInt(token->getStart()->lastDomain().getUpperBound()) << "\"" <<
 		  "endLb=\""       << asInt(token->getEnd()->lastDomain().getLowerBound()) << "\"" <<

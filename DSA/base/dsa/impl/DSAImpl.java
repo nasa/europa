@@ -53,28 +53,12 @@ public class DSAImpl
 	JNI.addPlan(txSource);
     }
 
-    public List<Component> getComponents() {
-	List<Component> components =  new Vector<Component>();
-	String responseStr = JNI.getComponents();
-
-	try{
-	    IXMLElement response = Util.toXML(responseStr);
-	    
-	    Enumeration children = response.enumerateChildren();
-	    while(children.hasMoreElements()){
-		IXMLElement componentXml = (IXMLElement) children.nextElement();
-		int key = componentXml.getAttribute("key", 0);
-		String name = componentXml.getAttribute("name", "NO_NAME");
-		components.add(new ComponentImpl(key, name));
-	    }
-	}
-	catch(Exception e){
-	    e.printStackTrace();
-	}
-
-	return components;
+    public List<Component> getComponents() 
+    {
+    	String responseStr = JNI.getComponents();
+    	return Util.xmlToComponents(responseStr);
     }
-
+    
     public List<Attribute> getAttributes() {
 	return new Vector<Attribute>();
     }
@@ -86,7 +70,7 @@ public class DSAImpl
 	public Action getAction(int actionKey) 
 	{
     	String xml = JNI.getAction(actionKey);
-		List<Action> actions = Util.getActionsFromXML(xml);
+		List<Action> actions = Util.xmlToActions(xml);
 		return (actions.size() > 0 ? actions.get(0) : null);
 	}
 

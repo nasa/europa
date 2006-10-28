@@ -11,9 +11,9 @@ public class TokenImpl
     implements Token, Slot
 {
 
-    public TokenImpl(String type, int key, int startLb, int startUb, int endLb, int endUb, int durationLb, int durationUb )
+    public TokenImpl(String type, String name, int key, int startLb, int startUb, int endLb, int endUb, int durationLb, int durationUb )
     {
-	super(key,type);
+	super(key,name);
 	m_type = type;
 	m_earliestStart = startLb;
 	m_latestStart = startUb;
@@ -44,13 +44,17 @@ public class TokenImpl
 	return m_parameters;
     }
 
+	public void addParameter(Parameter p)
+	{
+		m_parameters.add(p);
+	}    
 
-    private String m_type;
-    private int m_earliestStart;
-    private int m_latestStart;
-    private int m_earliestEnd;
-    private int m_latestEnd;
-    private int m_durationMin;
-    private int m_durationMax;
-    private List<Parameter> m_parameters;
+    protected String m_type;
+    protected int m_earliestStart;
+    protected int m_latestStart;
+    protected int m_earliestEnd;
+    protected int m_latestEnd;
+    protected int m_durationMin;
+    protected int m_durationMax;
+    protected List<Parameter> m_parameters;
 }

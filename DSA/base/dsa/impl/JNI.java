@@ -12,6 +12,8 @@ public class JNI
     public static native String getEffects(int actionKey);
     public static native String getChildActions(int actionKey);
     public static native String getViolations(int actionKey);
+    public static native String getMaster(int actionKey);
+    public static native String getComponentForAction(int actionKey);
     public static native String getResources();
     public static native String getResourceCapacityProfile(int resourceKey);
     public static native String getResourceUsageProfile(int resourceKey);

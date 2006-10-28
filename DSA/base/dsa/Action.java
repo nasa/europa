@@ -14,4 +14,7 @@ public interface Action
     // @return Sum of penalty values for all violated constraints by this activity
     double getViolation();
     public List<Violation> getViolations();
+    
+    Component getComponent();
+    Action getMaster();
 }
