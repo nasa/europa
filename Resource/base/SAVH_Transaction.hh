@@ -50,9 +50,13 @@ namespace EUROPA {
       bool isConsumer() const {return m_isConsumer;}
       TransactionId getId() const {return m_id;}
       std::string toString() const {
+      	EntityId parent = m_time->getParent();
         std::stringstream os;
-        os << "{(" << m_time->getParent()->getKey() << ") time=[" << m_time->lastDomain().getLowerBound() << " " << m_time->lastDomain().getUpperBound() << "],quantity=" <<
-          (m_isConsumer ? "-" : "+") << "[" << m_quantity->lastDomain().getLowerBound() << " " << m_quantity->lastDomain().getUpperBound() << "]}";
+        os << "{"
+           << "(token=" << parent->getKey() << ")"
+           << " time=[" << m_time->lastDomain().getLowerBound() << " " << m_time->lastDomain().getUpperBound() << "]"
+           << ",quantity=" << (m_isConsumer ? "-" : "+") << "[" << m_quantity->lastDomain().getLowerBound() << " " << m_quantity->lastDomain().getUpperBound() << "]"
+           << "}";
         return os.str();
       }
     protected:

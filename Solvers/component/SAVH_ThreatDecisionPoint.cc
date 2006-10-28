@@ -413,7 +413,16 @@ namespace EUROPA {
 
     std::string ThreatDecisionPoint::toString() const {
       std::stringstream os;
-      os << "INSTANT=" << m_instTime << " on " << m_resName.toString() << " CHOICES";
+      os << "INSTANT=" << m_instTime << " on " << m_resName.toString() << " : ";
+
+      TransactionId predecessor = m_choices[m_index].first;
+      TransactionId successor = m_choices[m_index].second;
+      os << "  DECISION (" << m_index << " of CHOICES) " 
+         << predecessor->toString() 
+         << " to be before " << successor->toString()
+         << " : ";
+
+      os << "  CHOICES ";
       for(unsigned int i = 0; i < m_choiceCount; i++)
         os << " : " << toString(m_choices[i]);
       return os.str();
@@ -522,7 +531,7 @@ namespace EUROPA {
           else {
             checkError(ALWAYS_FAIL, "Expected a 'Predecessor' or 'Successor' order.");
           }
-          ChoiceComparator* cmp;
+          ChoiceComparator* cmp=NULL;
           if(orderStr.find("earliest") != std::string::npos)
             cmp = new SwitchComparator(new EarliestTransactionComparator(), predecessor);
           else if(orderStr.find("latest") != std::string::npos)
