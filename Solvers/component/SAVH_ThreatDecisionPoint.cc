@@ -417,14 +417,14 @@ namespace EUROPA {
 
       TransactionId predecessor = m_choices[m_index].first;
       TransactionId successor = m_choices[m_index].second;
-      os << "  DECISION (" << m_index << " of CHOICES) " 
+      os << "  DECISION (CHOICE=" << (m_index+1) << " of MAX_CHOICE=" << m_choiceCount<< ") " 
          << predecessor->toString() 
          << " to be before " << successor->toString()
          << " : ";
 
       os << "  CHOICES ";
       for(unsigned int i = 0; i < m_choiceCount; i++)
-        os << " : " << toString(m_choices[i]);
+        os << " : " << i << " " << toString(m_choices[i]);
       return os.str();
     }
 
