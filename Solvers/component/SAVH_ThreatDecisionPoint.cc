@@ -424,7 +424,7 @@ namespace EUROPA {
 
       os << "  CHOICES ";
       for(unsigned int i = 0; i < m_choiceCount; i++)
-        os << " : " << i << " " << toString(m_choices[i]);
+        os << " : " << (i+1) << " " << toString(m_choices[i]);
       return os.str();
     }
 
