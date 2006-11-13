@@ -11,6 +11,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "Entity.hh"
 #include "LabelStr.hh"
+#include "AbstractDomain.hh"
 #include <set>
 
 namespace EUROPA {
