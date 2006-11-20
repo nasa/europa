@@ -19,7 +19,7 @@ namespace EUROPA {
 
   class DbClientTransactionPlayer {
   public:
-    DbClientTransactionPlayer(const DbClientId & client);
+    DbClientTransactionPlayer(const DbClientId & client,bool interpreted=false);
     ~DbClientTransactionPlayer();
 
     /**
@@ -37,29 +37,10 @@ namespace EUROPA {
   protected:
     void processTransaction(const TiXmlElement & element);
 
-    /** Define a class.
-     * @note Does nothing as the player cannot create classes.
-     */
-    inline void playDefineClass(const TiXmlElement &) {
-    }
-
-    /** Define a compatibility.
-     * @note Does nothing as the player cannot create compatibilities.
-     */
-    inline void playDefineCompat(const TiXmlElement &) {
-    }
-
-    /** Define an enumeration.
-     * @note Does nothing as the player cannot create enumerations.
-     */
-    inline void playDefineEnumeration(const TiXmlElement &) {
-    }
-
-    /** Define an type.
-     * @note Does nothing as the player cannot create types.
-     */
-    inline void playDefineType(const TiXmlElement &) {
-    }
+    void playDefineClass(const TiXmlElement &); 
+    void playDefineCompat(const TiXmlElement &);
+    void playDefineEnumeration(const TiXmlElement &);
+    void playDefineType(const TiXmlElement &);
 
     void playVariableCreated(const TiXmlElement & element);
     void playObjectCreated(const TiXmlElement & element);
@@ -85,6 +66,10 @@ namespace EUROPA {
     std::map<std::string, ConstrainedVariableId> m_variables;
     std::list<std::string> m_enumerations;
     std::list<std::string> m_classes;
+
+    // temporary flag to allow users to switch back and forth between
+    // interpreted and code-generated implementations of some of the elements
+    bool m_interpreted;
 
   //! string input functions
 

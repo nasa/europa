@@ -2,6 +2,7 @@
 #include "Schema.hh"
 #include "TypeFactory.hh"
 #include "Debug.hh"
+#include "Object.hh"
 
 namespace EUROPA {
 
@@ -176,4 +177,39 @@ namespace EUROPA {
   const LabelStr& ConcreteObjectFactory::getSignature() const {return m_signature;}
 
   const std::vector<LabelStr>& ConcreteObjectFactory::getSignatureTypes() const {return m_signatureTypes;}
+
+
+	GenericObjectFactory::GenericObjectFactory(const LabelStr& name)
+	    : ConcreteObjectFactory(name) 
+	{
+	    // TODO: keep track of expected arg count, arg types and constructor code
+	}
+	
+	ObjectId GenericObjectFactory::createInstance(
+	                        const PlanDatabaseId& planDb,
+	                        const LabelStr& objectType, 
+	                        const LabelStr& objectName,
+	                        const std::vector<const AbstractDomain*>& arguments) const 
+	{
+	  //check_error(arguments.size() == m_argCount);
+	  ObjectId instance = (new Object(planDb, objectType, objectName))->getId();
+	  constructor(instance,arguments);
+	  handleDefaults(instance);
+	  instance->close();
+	  
+	  return instance;
+	}  	  
+	
+	void GenericObjectFactory::constructor(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const
+	{
+		// TODO: check arg count, arg size and execute code in constructor
+		// TODO: execute code for superclass?, or it must be explicit
+	}
+	
+	void GenericObjectFactory::handleDefaults(ObjectId& instance) const
+	{
+		// TODO: assign base domains to member variables if they haven't been initialized
+		// TODO: handle defaults for superclass?, or it must be explicit
+	}  
+
 }

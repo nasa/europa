@@ -114,6 +114,20 @@ namespace EUROPA {
     std::vector<LabelStr> m_signatureTypes;
   };
 
+  class GenericObjectFactory : public ConcreteObjectFactory
+  {
+  	public:
+  	    GenericObjectFactory(const LabelStr& name);
+  	    
+	private:
+	    ObjectId createInstance(const PlanDatabaseId& planDb,
+	                            const LabelStr& objectType, 
+	                            const LabelStr& objectName,
+	                            const std::vector<const AbstractDomain*>& arguments) const; 
+	    void constructor(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const;
+	    void handleDefaults(ObjectId& instance) const;
+  };
+  
   /**
    * Macro for registering object factories with a signature for lookup
    */

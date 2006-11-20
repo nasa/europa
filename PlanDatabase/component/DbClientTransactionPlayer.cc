@@ -38,8 +38,8 @@ namespace EUROPA {
     return result;
   }
 
-  DbClientTransactionPlayer::DbClientTransactionPlayer(const DbClientId & client)
-    : m_client(client), m_objectCount(0), m_varCount(0) {
+  DbClientTransactionPlayer::DbClientTransactionPlayer(const DbClientId & client, bool interpreted)
+    : m_client(client), m_objectCount(0), m_varCount(0), m_interpreted(interpreted) {
   }
 
   DbClientTransactionPlayer::~DbClientTransactionPlayer() {
@@ -124,6 +124,71 @@ namespace EUROPA {
       }
     }
     m_client->propagate();
+  }
+
+  void DbClientTransactionPlayer::playDefineClass(const TiXmlElement& element) 
+  {
+  	if (!m_interpreted)
+  	   return;
+  	   
+    const char* className = element.Attribute("name");
+    const char* parentClassName = element.Attribute("extends");
+    parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
+    
+    Id<Schema> id = Schema::instance();
+    id->addObjectType(className,parentClassName);
+    
+    std::cout << "class " << className  
+                          << (parentClassName != NULL ? " extends " : "") 
+                          << (parentClassName != NULL ? parentClassName : "") 
+                          << " {" << std::endl;
+                          
+    const TiXmlElement* child;
+    for( child = element.FirstChildElement(); child; child = child->NextSiblingElement() ) {
+    	
+    	const char * tagname = child->Value();
+	    if (strcmp(tagname, "var") == 0) {
+	      const char* type = child->Attribute("type");	
+	      const char* name = child->Attribute("name");	
+	      std::cout << "     " << type << " " << name << std::endl;
+          id->addMember(className, type, name);
+	    }   
+	    else if (strcmp(tagname, "constructor") == 0) {
+	      std::cout << tagname << std::endl; 
+	    }  
+	    else if (strcmp(tagname, "predicate") == 0) {
+	      std::string predName = std::string(className) + "." + child->Attribute("name");	
+	      std::cout << tagname << " " <<  predName << "(";
+          id->addPredicate(predName.c_str());
+          const TiXmlElement* predArg;
+          for( predArg = element.FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
+		      const char* type = child->Attribute("type");	
+		      const char* name = child->Attribute("name");	
+    	      std::cout << type << " " << name << "," << std::endl;
+              id->addMember(predName.c_str(), type, name);              
+          }	
+          std::cout << ")" << std::endl;
+	    }       	
+    }
+    std::cout << "}" << std::endl;
+  }
+
+  void DbClientTransactionPlayer::playDefineCompat(const TiXmlElement &)
+  {
+  	if (!m_interpreted)
+  	   return;  	   
+  }
+  
+  void DbClientTransactionPlayer::playDefineEnumeration(const TiXmlElement &)
+  {
+  	if (!m_interpreted)
+  	   return;  	   
+  }
+
+  void DbClientTransactionPlayer::playDefineType(const TiXmlElement &)
+  {
+  	if (!m_interpreted)
+  	   return;  	   
   }
 
   void DbClientTransactionPlayer::playVariableCreated(const TiXmlElement & element) {
