@@ -19,9 +19,9 @@ public class Main extends TestCase {
     public void testModelLoading(){
 	try{
 	    DSAManager.getInstance().loadModel(s_path + "libmodel.1_g.so");
-	    DSAManager.getInstance().addPlan(s_path + "model.1.xml");
+	    DSAManager.getInstance().addPlan(s_path + "model.1.xml",false);
 	    DSAManager.getInstance().loadModel(s_path + "libmodel.2_g.so");
-	    DSAManager.getInstance().addPlan(s_path + "model.2.xml");
+	    DSAManager.getInstance().addPlan(s_path + "model.2.xml",false);
 	}
 	catch(Exception e){
 	    Assert.assertTrue(false);
@@ -31,7 +31,7 @@ public class Main extends TestCase {
     public void testComponentQuery(){
 	try{
 	    DSAManager.getInstance().loadModel(s_path + "libmodel.1_g.so");
-	    DSAManager.getInstance().addPlan(s_path + "model.1.xml");
+	    DSAManager.getInstance().addPlan(s_path + "model.1.xml",false);
 	    List<Component> components = DSAManager.getInstance().getComponents();
 	    Assert.assertTrue(components.size() == 1);
 	}
@@ -43,7 +43,7 @@ public class Main extends TestCase {
     public void testActionQuery(){
 	try{
 	    DSAManager.getInstance().loadModel(s_path + "libmodel.1_g.so");
-	    DSAManager.getInstance().addPlan(s_path + "model.1.xml");
+	    DSAManager.getInstance().addPlan(s_path + "model.1.xml",false);
 	    List<Component> components = DSAManager.getInstance().getComponents();
 	    ListIterator<Component> it = components.listIterator();
 	    while(it.hasNext()){
@@ -60,7 +60,7 @@ public class Main extends TestCase {
     public void testSolverExecution(){
 	try{
 	    DSAManager.getInstance().loadModel(s_path + "libmodel.1_g.so");
-	    DSAManager.getInstance().addPlan(s_path + "model.1.xml");
+	    DSAManager.getInstance().addPlan(s_path + "model.1.xml",false);
 
 	    Solver solver = SolverManager.createInstance(s_path + "solver.1.cfg", 0, 1000, 10, 10);
 	    Assert.assertTrue(solver.solve());

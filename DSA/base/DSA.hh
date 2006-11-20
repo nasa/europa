@@ -37,7 +37,7 @@ namespace EUROPA {
       
       void load(const char* model);
 
-      void addPlan(const char* txSource);
+      void addPlan(const char* txSource,bool interpreted);
 
       const ResultSet& getComponents();
       const ResultSet& getActions(int componentKey);

@@ -5,7 +5,12 @@ import java.util.List;
 public interface DSA 
 {
     public void loadModel(String model) throws InvalidSourceException;
-    public void addPlan(String txSource) throws InvalidSourceException, NoModelException;
+    
+    /*
+     * intepreted is a temporary flag to switch between interpreted and code-generated implementations
+     * when everything can be interpreted it will go away
+     */
+    public void addPlan(String txSource, boolean interpreted) throws InvalidSourceException, NoModelException;
     
     public List<Component>    getComponents();
     public List<Attribute>    getAttributes();

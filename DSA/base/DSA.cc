@@ -74,9 +74,10 @@ extern "C" {
     env->CallStaticVoidMethod(klass, method);
   }
   
-  JNIEXPORT void JNICALL Java_dsa_impl_JNI_addPlan(JNIEnv * env, jclass, jstring txSource){
+  JNIEXPORT void JNICALL Java_dsa_impl_JNI_addPlan(JNIEnv * env, jclass, jstring txSource, jboolean interp){
     const char* txSourceStr = env->GetStringUTFChars(txSource, NULL);
-    EUROPA::DSA::DSA::instance().addPlan(txSourceStr);
+    bool interpreted = (interp == JNI_TRUE);
+    EUROPA::DSA::DSA::instance().addPlan(txSourceStr,interpreted);
   }
 
   JNIEXPORT jstring JNICALL Java_dsa_impl_JNI_getComponents(JNIEnv * env, jclass){
@@ -545,18 +546,19 @@ namespace EUROPA {
     }
 
 
-    void DSA::addPlan(const char* txSource){
-      checkError(m_libHandle, "Must have a model loaded.");
+    void DSA::addPlan(const char* txSource, bool interpreted){
+      if (!interpreted)	
+          checkError(m_libHandle, "Must have a model loaded.");
 
       if(m_db.isNoId())
-	init();
+          init();
 
       checkError(m_db.isValid(), "Invalid database instance.");
 
       DbClientId client = m_db->getClient();
 
       // Construct player
-      DbClientTransactionPlayer player(client);
+      DbClientTransactionPlayer player(client,interpreted);
 
       // Open transaction source and play transactions
       debugMsg("DSA:addPlan", "Reading initial state from " << txSource);

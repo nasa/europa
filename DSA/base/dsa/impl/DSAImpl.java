@@ -46,11 +46,13 @@ public class DSAImpl
 	    JNI.load(model);
     }
 
-    public void addPlan(String txSource) throws InvalidSourceException, NoModelException {
+    public void addPlan(String txSource,boolean interpreted) 
+        throws InvalidSourceException, NoModelException 
+    {
 	if(m_model == null)
 	    throw new NoModelException();
 
-	JNI.addPlan(txSource);
+	JNI.addPlan(txSource,interpreted);
     }
 
     public List<Component> getComponents() 
