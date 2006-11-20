@@ -13,6 +13,8 @@
 *_p
 *_p_no
 *_p_rt
+*test*.cc
+*test*.hh
 CAPER.cc
 CAPER.hh
 DynamicObjTest.cc
@@ -20,6 +22,8 @@ DynamicObjTest.hh
 EOS-backtrack-test
 EOS-backtrack-test.cc
 EOS-backtrack-test.hh
+EOS-backtrack-test-reservoir.cc
+EOS-backtrack-test-reservoir.hh
 RUN_*.gprof
 RUN_*.output
 Rover-transaction
@@ -43,6 +47,8 @@ basic-types.hh
 better-res
 better-res.cc
 better-res.hh
+better-res-reservoir.cc
+better-res-reservoir.hh
 constrain-transaction
 constrain-transaction.cc
 constrain-transaction.hh
@@ -57,6 +63,10 @@ gnats_2572_interval-tx.cc
 gnats_2572_interval-tx.hh
 gnats_2837-tx.cc
 gnats_2837-tx.hh
+gnats_3161.cc
+gnats_3161.hh
+HTX.*.*.cc
+HTX.*.*.hh
 k9-initial
 k9-initial.cc
 k9-initial.hh
@@ -73,8 +83,8 @@ k9.hh
 monkey1monkey-transaction.cc
 monkey1monkey-transaction.hh
 parent-predicate
-parent-predicate.cc
-parent-predicate.hh
+parent-predicate*.cc
+parent-predicate*.hh
 path-filter-transaction
 path-filter-transaction.cc
 path-filter-transaction.hh
