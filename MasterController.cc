@@ -440,6 +440,7 @@ namespace EUROPA {
     REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
     REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
     REGISTER_CONSTRAINT(LessThanConstraint, "lessThan", "Default");
+    REGISTER_CONSTRAINT(LessThanConstraint, "LessThan", "Default");
     REGISTER_CONSTRAINT(AddEqualConstraint, "addEq", "Default");
     REGISTER_CONSTRAINT(NegateConstraint, "neg", "Default");
     REGISTER_CONSTRAINT(MultEqualConstraint, "mulEq", "Default");
