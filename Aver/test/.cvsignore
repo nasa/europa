@@ -2,7 +2,7 @@ aver-test-model.cc
 aver-test-model.hh
 aver-test-model.xml
 modtest.xml
-*_g_rt
+*rt
 *.so
 *.o
 RUN_*
