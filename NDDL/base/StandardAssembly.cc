@@ -62,7 +62,14 @@ namespace EUROPA {
     check_error(!isInitialized(), 
 		"Cannot initialize if already initialized. Call 'terminate' first.");
     initNDDL();
-
+    initConstraintLibrary();
+    
+    /*
+     *  TODO: constraint registration below needs to be removed, initConstraintLibrary takes care of this
+     *  leaving it for now for backwards compatibility since some constraints are named differently
+     * and some other constraints like Lock and Ancestor are not registered by initConstraintLibrary for some reason
+     */
+     
     // Procedural Constraints used with Default Propagation
     REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
     REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
