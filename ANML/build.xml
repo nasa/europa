@@ -11,7 +11,9 @@
   <property name="lib.dir" value="lib"/>
 	
 <path id="project.classpath">
-  <pathelement location="${lib.dir}/antlr.jar"/>
+  <pathelement location="${lib.dir}/antlr-3.0b5.jar"/>
+  <pathelement location="${lib.dir}/antlr-2.7.7.jar"/>
+  <pathelement location="${lib.dir}/stringtemplate-3.0.jar"/>
   <pathelement location="${build.dir}/classes"/>
 </path>
 
@@ -25,12 +27,10 @@
 <target name="cleanparser">
     <delete>
         <fileset dir="${src.dir}/anml">
+   	      <include name="ANML__.g"/>
+  	      <include name="ANML.tokens"/>
 	      <include name="ANMLLexer.java"/>
-  	      <include name="ANMLLexer.smap"/>
 	      <include name="ANMLParser.java"/>
-  	      <include name="ANMLParser.smap"/>
-	      <include name="ANMLParserTokenTypes.java"/>
-	      <include name="ANMLParserTokenTypes.txt"/>
         </fileset>
     </delete>
 </target>
@@ -59,10 +59,10 @@
 </target>
 	
 <target name="anmlparser">
-    <java classname="antlr.Tool"
+    <java classname="org.antlr.Tool"
           dir="${src.dir}/anml"
           fork="true">
-      <arg value="ANMLGrammar.g" />
+      <arg value="ANML.g" />
       <classpath refid="project.classpath"/>
     </java>
 </target>

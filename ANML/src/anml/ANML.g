@@ -1,14 +1,25 @@
-header {
+
+
+grammar ANML;
+options {k=3; backtrack=true; memoize=true;}
+@header {
     package anml;
 }
 
-class ANMLParser extends Parser;
-options {
+/*options {
     //buildAST = true;	// uses CommonAST by default
     k=3;
     //defaultErrorHandler=false;
 }
+@header {
+    package anml;
+}
+*/
 
+anml_program 
+	:	 (declaration | comment)*
+	      
+;
 
 declaration : vartype_decl
               | var_declaration
@@ -178,7 +189,7 @@ effect : temporal_qualif LCURLY effect_fluent RCURLY
 
 effect_fluent : atomic_fluent (AND effect_fluent)?
               | LPAREN effect_fluent RPAREN
-              | WHEN LCURLY cond_fluent CURLY LCURLY effect_fluent RCURLY
+              | WHEN LCURLY cond_fluent  LCURLY effect_fluent RCURLY
 ;
 
 change_stmt : CHANGE (change | (LCURLY change (COMMA change)* RCURLY))
@@ -205,7 +216,7 @@ decomp_stmt : DECOMPOSITION (condition | LCURLY condition (COMMA condition)* RCU
 ;
 
 // TODO: define constraint
-constraint : "CONSTRAINT"
+constraint : 'CONSTRAINT'
 ;
 
 // TODO: allow expressions?
@@ -224,58 +235,56 @@ object                  : IDENTIFIER;
 variable                : IDENTIFIER;
 
 
-class ANMLLexer extends Lexer;
-options { 
+
+/*options { 
     k=5;
     //caseSensitive=false; 
     testLiterals=false;   // don't automatically test for literals
-}
-/*
-{
-	static final int DOT = 0;
-	static final int NUM_FLOAT = 1;
-	static final int NUM_DOUBLE = 2;
-	static final int NUM_LONG = 3;	
-}
-*/
-tokens {
-	ACTION   = "action";
-	AFTER    = "after";
-	ALL      = "all";
-	AT       = "at";
-	BEFORE   = "before";
-    BOOL     = "bool";
-    CHANGE   = "change";
-    CONTAINS = "contains";
-    CONDITION = "condition";
-    CONSUMES = "consumes";
-    DECOMPOSITION = "decomposition";
-    DUR      = "dur";
-    DURATION = "duration";
-    EFFECT   = "effect";
-    END      = "end";
-    ENUM     = "enum";
-    FACT     = "fact";
-    IN       = "in";
-    INT      = "int";
-    FLOAT    = "float";
-    FOR      = "for";
-    FROM     = "from";
-    FUNCTION = "function";
-    NOT      = "not";
-    OBJECT   = "object";
-    OBJTYPE  = "objtype";
-    PRODUCES = "produces";
-    START    = "start";
-    STRING   = "string";
-    USES     = "uses";
-    VARTYPE  = "vartype";
-    VECTOR   = "vector";
-    WHEN     = "when";
-}
+}*/
+//tokens {
+    ACTION   : 'action';
+	AFTER    : 'after';
+	ALL      : 'all';
+	AT       : 'at';
+	BEFORE   : 'before';
+    BOOL     : 'bool';
+    CHANGE   : 'change';
+    CONTAINS : 'contains';
+    CONDITION : 'condition';
+    CONSUMES : 'consumes';
+    DECOMPOSITION : 'decomposition';
+    DUR      : 'dur';
+    DURATION : 'duration';
+    EFFECT   : 'effect';
+    END      : 'end';
+    ENUM     : 'enum';
+    FACT     : 'fact';
+    GOAL    : 'goal';
+    IN       : 'in';
+    INT      : 'int';
+    FLOAT    : 'float';
+    FOR      : 'for';
+    FROM     : 'from';
+    FUNCTION : 'function';
+    NOT      : 'not';
+    OVER : 'over';
+    OBJECT   : 'object';
+    OBJTYPE  : 'objtype';
+    ORDERED : 'ordered';
+    UNORDERED : 'unordered';
+    PREDICATE : 'predicate';
+    PRODUCES : 'produces';
+    START    : 'start';
+    STRING   : 'string';
+    TRANSITION : 'transition';
+    USES     : 'uses';
+    VARTYPE  : 'vartype';
+    VECTOR   : 'vector';
+    WHEN     : 'when';
+//}
 
 IDENTIFIER 
-	options {testLiterals=true;}
+	/*options {testLiterals=true;}*/
 	:	('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'$')*
 ;
 
@@ -300,9 +309,9 @@ ARROW : '-' '>' ;
 
 // a numeric literal
 NUMERIC_LITERAL
-	{boolean isDecimal=false; Token t=null;}
+	@init {boolean isDecimal=false; Token t=null;}
     :   '.' { /*_ttype = DOT;*/}
-            (	('0'..'9')+ (EXPONENT)? (f1:FLOAT_SUFFIX {t=f1;})?
+            (	('0'..'9')+ (EXPONENT)? (f1=FLOAT_SUFFIX {t=f1;})?
                 {
 				if (t != null && t.getText().toUpperCase().indexOf('F')>=0) {
                 	//_ttype = NUM_FLOAT;
@@ -321,10 +330,10 @@ NUMERIC_LITERAL
 					// know when to stop: ambig.  ANTLR resolves
 					// it correctly by matching immediately.  It
 					// is therefor ok to hush warning.
-					options {
+					/*options {
 						warnWhenFollowAmbig=false;
-					}
-				:	HEX_DIGIT
+					}*/
+					HEX_DIGIT
 				)+
 			|	('0'..'7')+									// octal
 			)?
@@ -334,9 +343,9 @@ NUMERIC_LITERAL
 
 		// only check to see if it's a float if looks like decimal so far
 		|	{isDecimal}?
-            (   '.' ('0'..'9')* (EXPONENT)? (f2:FLOAT_SUFFIX {t=f2;})?
-            |   EXPONENT (f3:FLOAT_SUFFIX {t=f3;})?
-            |   f4:FLOAT_SUFFIX {t=f4;}
+            (   '.' ('0'..'9')* (EXPONENT)? (f2=FLOAT_SUFFIX {t=f2;})?
+            |   EXPONENT (f3=FLOAT_SUFFIX {t=f3;})?
+            |   f4=FLOAT_SUFFIX {t=f4;}
             )
             {
 			if (t != null && t.getText().toUpperCase() .indexOf('F') >= 0) {
@@ -351,20 +360,20 @@ NUMERIC_LITERAL
 
 
 // a couple protected methods to assist in matching floating point numbers
-protected
+fragment
 EXPONENT
 	:	('e'|'E') ('+'|'-')? ('0'..'9')+
 	;
 
 
-protected
+fragment
 FLOAT_SUFFIX
 	:	'f'|'F'|'d'|'D'
 	;
 
 
 // hexadecimal digit (again, note it's protected!)
-protected
+fragment
 HEX_DIGIT
 	:	('0'..'9'|'A'..'F'|'a'..'f')
 	;
@@ -382,7 +391,7 @@ STRING_LITERAL
 // them go back to STRING_LITERAL to be matched.  ANTLR does the
 // right thing by matching immediately; hence, it's ok to shut off
 // the FOLLOW ambig warnings.
-protected
+fragment
 ESC
 	:	'\\'
 		(	'n'
@@ -396,24 +405,34 @@ ESC
 		|	('u')+ HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
 		|	'0'..'3'
 			(
-				options {
+				/*options {
 					warnWhenFollowAmbig = false;
-				}
-			:	'0'..'7'
+				}*/
+				'0'..'7'
 				(
-					options {
+					/*options {
 						warnWhenFollowAmbig = false;
-					}
-				:	'0'..'7'
+					}*/
+					'0'..'7'
 				)?
 			)?
 		|	'4'..'7'
 			(
-				options {
+				/*options {
 					warnWhenFollowAmbig = false;
-				}
-			:	'0'..'7'
+				}*/
+				'0'..'7'
 			)?
 		)              
 	;
 
+comment : (COMMENT | LINE_COMMENT)
+;
+
+COMMENT
+    :   '/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
+    ;
+
+LINE_COMMENT
+    : '//' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;}
+    ;
