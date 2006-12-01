@@ -15,13 +15,17 @@ options {k=3; backtrack=true; memoize=true;}
 */
 
 anml_program 
-	:	 (declaration)*
-	      
+	: (anml_stmt)*	      
 ;
 
-//    | fun_declaration
+anml_stmt
+    : declaration
+    | problem_stmt
+;
+  
 declaration 
     : objtype_decl
+    | func_declaration
     | (
        vartype_decl
        | var_declaration
@@ -31,135 +35,183 @@ declaration
       SEMI_COLON
 ;
 
-vartype_decl : VARTYPE user_defined_type_name COLON var_type
-;
-
-var_declaration : var_type var_init (COMMA var_init)*
-;
-
-var_type : BOOL
-           | (INT | FLOAT) (range)?
-           | STRING
-           | ENUM LCURLY constant (COMMA constant)* RCURLY
-           | VECTOR typed_arg_list 
-           | user_defined_type_name
-;
-
-var_init : var_name (EQUAL constant)?
-;
-
-typed_arg_list : LPAREN arg_declaration (COMMA arg_declaration)* RPAREN
-;
-
-arg_declaration : var_type var_name
-;
-
-objtype_decl : 
-   OBJTYPE user_defined_type_name (COLON obj_type)?
-   (LCURLY obj_body RCURLY)?
+problem_stmt
+    : fact
+    | goal
 ;
    
-obj_body : (declaration | constraint | action_def)*
+vartype_decl 
+    : VARTYPE user_defined_type_name COLON var_type
 ;
 
-obj_declaration : obj_type IDENTIFIER (COMMA IDENTIFIER)*
+var_declaration 
+    : var_type var_init (COMMA var_init)*
 ;
 
-obj_type : OBJECT | user_defined_type_name
+var_type 
+    : BOOL
+    | (INT | FLOAT) (range)?
+    | STRING
+    | ENUM LCURLY constant (COMMA constant)* RCURLY
+    | VECTOR typed_arg_list 
+    | user_defined_type_name
 ;
 
-/*
-fun_declaration : FUNCTION var_type function (COMMA function)*
-;
-*/
-function : function_symbol typed_arg_list
+var_init 
+    : var_name (EQUAL constant)?
 ;
 
-pred_declaration : PREDICATE predicate (COMMA predicate)*
+typed_arg_list 
+    : LPAREN (arg_declaration_list)? RPAREN
 ;
 
-predicate : predicate_symbol typed_arg_list
+arg_declaration_list 
+    : arg_declaration (COMMA arg_declaration)* 
 ;
 
-proposition : cntxt_proposition  
-            | FOR object_name LCURLY cntxt_proposition RCURLY
+arg_declaration 
+    : var_type var_name
 ;
 
-cntxt_proposition : qualif_fluent
-                  | FROM time_pt LCURLY qualif_fluent_list RCURLY
+objtype_decl 
+    : OBJTYPE user_defined_type_name (COLON obj_type)?
+      (LCURLY obj_body RCURLY)?
+;
+   
+obj_body 
+    : (declaration | constraint | action_def)*
 ;
 
-qualif_fluent_list : qualif_fluent (SEMI_COLON qualif_fluent)*
+obj_declaration 
+    : obj_type IDENTIFIER (COMMA IDENTIFIER)*
 ;
 
-qualif_fluent : temporal_qualif LCURLY fluent_list RCURLY
+obj_type 
+    : OBJECT 
+    | user_defined_type_name
 ;
 
-fluent_list : fluent (SEMI_COLON fluent)*
+
+func_declaration 
+    : FUNCTION var_type function (COMMA function)*
 ;
 
-temporal_qualif : AT time_pt
-                | OVER interval
-                | IN interval (DUR numeric_term)?
-                | AFTER time_pt (DUR numeric_term)?
-                | BEFORE time_pt (DUR numeric_term)?
-                | CONTAINS interval
+function 
+    : function_symbol typed_arg_list
 ;
 
-interval : ALL (LPAREN fluent RPAREN)?
-         | LBRACK time_pt COMMA time_pt RBRACK
+pred_declaration 
+    : PREDICATE predicate (COMMA predicate)*
 ;
 
-time_pt : numeric_term
+predicate 
+    : predicate_symbol typed_arg_list
 ;
 
-numeric_term : atomic_term ((PLUS | MINUS | MULT | DIV) atomic_term)?
-             | START (LPAREN fluent RPAREN)?
-             | END (LPAREN fluent RPAREN)?
+proposition 
+    : cntxt_proposition  
+    | FOR object_name LCURLY cntxt_proposition RCURLY
 ;
 
-atomic_term : NUMERIC_LITERAL | var_name
+cntxt_proposition 
+    : qualif_fluent
+    | FROM time_pt LCURLY qualif_fluent_list RCURLY
 ;
 
-fluent : atomic_fluent ((AND | OR) atomic_fluent)?
-       | LPAREN fluent RPAREN
-       | NOT fluent
+qualif_fluent_list 
+    : qualif_fluent (SEMI_COLON qualif_fluent)*
 ;
 
-atomic_fluent : proposition_symbol
-              | predicate_symbol term_list
-              | term EQUAL term
+qualif_fluent 
+    : temporal_qualif LCURLY fluent_list RCURLY
 ;
 
-term_list : LPAREN (term (COMMA term)*)? RPAREN
+fluent_list 
+    : fluent (SEMI_COLON fluent)*
 ;
 
-term : constant
-     | var_name
-     | function_symbol term_list
+temporal_qualif 
+    : AT time_pt
+    | OVER interval
+    | IN interval (DUR numeric_term)?
+    | AFTER time_pt (DUR numeric_term)?
+    | BEFORE time_pt (DUR numeric_term)?
+    | CONTAINS interval
 ;
 
-fact : FACT proposition
-     | FACT LCURLY proposition (COMMA proposition)* RCURLY
+interval 
+    : ALL (LPAREN fluent RPAREN)?
+    | LBRACK time_pt time_pt RBRACK
 ;
 
-goal : GOAL (proposition  | (LCURLY proposition (SEMI_COLON proposition)* RCURLY))
+time_pt 
+    : numeric_term
 ;
 
-transition : TRANSITION var_name LCURLY trans_pair (SEMI_COLON trans_pair)* RCURLY
+numeric_term 
+    : atomic_term ((PLUS | MINUS | MULT | DIV) atomic_term)?
+    | START (LPAREN fluent RPAREN)?
+    | END (LPAREN fluent RPAREN)?
 ;
 
-trans_pair : constant ARROW (constant  | LCURLY constant (COMMA constant)* RCURLY)
+atomic_term 
+    : NUMERIC_LITERAL | var_name
 ;
 
-action_def : ACTION action_symbol typed_arg_list LCURLY action_body RCURLY 
+fluent 
+    : atomic_fluent ((AND | OR) atomic_fluent)?
+    | LPAREN fluent RPAREN
+    | NOT fluent
 ;
 
-action_body : (duration_stmt)? 
-              (condition_stmt)*
-              (effect_stmt)*
-              (change_stmt)*
-              (decomp_stmt)* 
+// TODO: Decompositions use conditions which in term are composed of fluents
+// that's the resource for the dot notation and the optional naming in the rule below
+// are we sure this is what we mean? It would seem that decompositions can only refer to other actions
+// whereas conditions cannot refer to actions
+atomic_fluent 
+    : proposition_symbol
+    | (object_name DOT)? predicate_symbol term_list (COLON var_name)?
+    | term EQUAL term
+;
+
+term_list 
+    : LPAREN (term (COMMA term)*)? RPAREN
+;
+
+term 
+    : constant
+    | var_name (DOT var_name)*
+    | function_symbol term_list
+;
+
+fact 
+    : FACT proposition
+    | FACT LCURLY proposition (COMMA proposition)* RCURLY
+;
+
+goal 
+    : GOAL (proposition  | (LCURLY proposition (SEMI_COLON proposition)* RCURLY))
+;
+
+transition 
+    : TRANSITION var_name LCURLY trans_pair (SEMI_COLON trans_pair)* RCURLY
+;
+
+trans_pair 
+    : constant ARROW (constant  | LCURLY constant (COMMA constant)* RCURLY)
+;
+
+action_def 
+    : ACTION action_symbol typed_arg_list LCURLY action_body RCURLY 
+;
+
+action_body 
+    : (duration_stmt SEMI_COLON)? 
+      (condition_stmt SEMI_COLON)*
+      (effect_stmt SEMI_COLON)*
+      (change_stmt SEMI_COLON)*
+      (decomp_stmt SEMI_COLON)* 
+      (constraint SEMI_COLON)* 
 ;
 
 duration_stmt : DURATION numeric_term
@@ -212,15 +264,15 @@ atomic_change  : resource_change
 resource_change : (CONSUMES | PRODUCES | USES)  LPAREN var_name (COMMA numeric_term)?
 ;
 
-decomp_stmt : DECOMPOSITION (condition | LCURLY condition (COMMA condition)* RCURLY)
+decomp_stmt : DECOMPOSITION (condition | LCURLY condition (COMMA condition)* (constraint)* RCURLY)
 ;
 
 // TODO: define constraint
-constraint : constraint_symbol LPAREN RPAREN
+constraint : constraint_symbol term_list
 ;
 
 // TODO: allow expressions?
-range : LBRACK NUMERIC_LITERAL COMMA NUMERIC_LITERAL RBRACK
+range : LBRACK NUMERIC_LITERAL NUMERIC_LITERAL RBRACK
 ;
 
 constant : NUMERIC_LITERAL | STRING_LITERAL
@@ -244,45 +296,45 @@ user_defined_type_name  : IDENTIFIER;
     testLiterals=false;   // don't automatically test for literals
 }*/
 //tokens {
-    ACTION   : 'action';
-	AFTER    : 'after';
-	ALL      : 'all';
-	AT       : 'at';
-	BEFORE   : 'before';
-    BOOL     : 'bool';
-    CHANGE   : 'change';
-    CONTAINS : 'contains';
-    CONDITION : 'condition';
-    CONSUMES : 'consumes';
+    ACTION        : 'action';
+	AFTER         : 'after';
+	ALL           : 'all';
+	AT            : 'at';
+	BEFORE        : 'before';
+    BOOL          : 'bool';
+    CHANGE        : 'change';
+    CONTAINS      : 'contains';
+    CONDITION     : 'condition';
+    CONSUMES      : 'consumes';
     DECOMPOSITION : 'decomposition';
-    DUR      : 'dur';
-    DURATION : 'duration';
-    EFFECT   : 'effect';
-    END      : 'end';
-    ENUM     : 'enum';
-    FACT     : 'fact';
-    GOAL    : 'goal';
-    IN       : 'in';
-    INT      : 'int';
-    FLOAT    : 'float';
-    FOR      : 'for';
-    FROM     : 'from';
-    FUNCTION : 'function';
-    NOT      : 'not';
-    OVER : 'over';
-    OBJECT   : 'object';
-    OBJTYPE  : 'objtype';
-    ORDERED : 'ordered';
-    UNORDERED : 'unordered';
-    PREDICATE : 'predicate';
-    PRODUCES : 'produces';
-    START    : 'start';
-    STRING   : 'string';
-    TRANSITION : 'transition';
-    USES     : 'uses';
-    VARTYPE  : 'vartype';
-    VECTOR   : 'vector';
-    WHEN     : 'when';
+    DUR           : 'dur';
+    DURATION      : 'duration';
+    EFFECT        : 'effect';
+    END           : 'end';
+    ENUM          : 'enum';
+    FACT          : 'fact';
+    GOAL          : 'goal';
+    IN            : 'in';
+    INT           : 'int';
+    FLOAT         : 'float';
+    FOR           : 'for';
+    FROM          : 'from';
+    FUNCTION      : 'function';
+    NOT           : 'not';
+    OVER          : 'over';
+    OBJECT        : 'object';
+    OBJTYPE       : 'objtype';
+    ORDERED       : 'ordered';
+    UNORDERED     : 'unordered';
+    PREDICATE     : 'predicate';
+    PRODUCES      : 'produces';
+    START         : 'start';
+    STRING        : 'string';
+    TRANSITION    : 'transition';
+    USES          : 'uses';
+    VARTYPE       : 'vartype';
+    VECTOR        : 'vector';
+    WHEN          : 'when';
 //}
 
 IDENTIFIER 
@@ -306,6 +358,7 @@ MULT            :   '*'     ;
 DIV             :   '/'     ;
 AND             :   '&'     ;
 OR              :   '|'     ;
+DOT             :   '.'     ;
 
 ARROW : '-' '>' ;
 
@@ -314,7 +367,7 @@ NUMERIC_LITERAL
 	@init {boolean isDecimal=false; Token t=null;}
     :   '+inf'
     |   '-inf'
-    |   '.' { /*_ttype = DOT;*/}
+    |   '.' { /*_ttype = DOT;*/ }
             (	('0'..'9')+ (EXPONENT)? (f1=FLOAT_SUFFIX {t=f1;})?
                 {
 				if (t != null && t.getText().toUpperCase().indexOf('F')>=0) {

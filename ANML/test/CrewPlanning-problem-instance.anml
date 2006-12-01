@@ -2,15 +2,23 @@
 // We'll plan the dailyroutines for 3 crew members over 4 days,
 // adding regular filter changes, medical conferences and some payload operations
 
-horizon [0,5760]; // Plan for 4 days
+int horizon = [0,5760]; // Plan for 4 days
 
-CrewMember crew1,crew2,crew3;
+CrewMember cm1,cm2,cm3;
 
 // Set up daily routines
 CrewPlanner cp1,cp2,cp3;
-goal at 0 : cp1.state == in_progress(crew1);
-goal at 0 : cp2.state == in_progress(crew2);
-goal at 0 : cp3.state == in_progress(crew3);
+fact over all { 
+    cp1.crewMember_ = cm1;
+    cp2.crewMember_ = cm2;
+    cp3.crewMember_ = cm3;
+}    
+
+goal at 0 { 
+    cp1.state = "in_progress";
+    cp2.state = "in_progress";
+    cp3.state = "in_progress";
+}    
 
 // Set up medical conferences
 goal in [0 1440] : crew1.mcs_ == finished;
@@ -22,11 +30,12 @@ FilterState spaceshipFilter;
 goal in [0 1440] : spaceshipFiter.state == changed;
 
 // Set up payload activities;
-goal in horizon : CrewMember.payload_act_completed(1,"Kardio-ODNT",60,1,1440,0,1);
-goal in horizon : CrewMember.payload_act_completed(1,"Cardiolog-2",60,1,1440,1,1);
-goal in horizon : CrewMember.payload_act_completed(1,"Renal Stone Risk",60,1,1440,0,1);
-goal in horizon : CrewMember.payload_act_completed(1,"Public Afffairs Office - 1",60,1,2880,1,0);
-goal in horizon : CrewMember.payload_act_completed(1,"Public Afffairs Office - 1",60,1,5760,2,0);
+// TODO: payload_act_completed should allow for a parameter that tells us who performed it. syntax?
+goal in horizon : payload_act_completed(1,"Kardio-ODNT",60,1,1440,0,1);
+goal in horizon : payload_act_completed(1,"Cardiolog-2",60,1,1440,1,1);
+goal in horizon : payload_act_completed(1,"Renal Stone Risk",60,1,1440,0,1);
+goal in horizon : payload_act_completed(1,"Public Afffairs Office - 1",60,1,2880,1,0);
+goal in horizon : payload_act_completed(1,"Public Afffairs Office - 1",60,1,5760,2,0);
 
 RPCM rpcm_recovery;
 // recover during the last day

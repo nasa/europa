@@ -5,16 +5,14 @@
  
 // Time unit is minutes throughout the model
 
-vartype int [0 +inf] PositiveInt;
+vartype PositiveInt       : int [0 +inf];
+vartype TDRS              : PositiveInt; // Communication Channels
+vartype ExerciseEquipment : PositiveInt; 
+vartype PRACapacity       : PositiveInt; // Max number of Physically Restraining activities  
 
-vartype PositiveInt TDRS; // Communication Channels
-vartype PositiveInt ExerciseEquipment; 
-vartype PositiveInt PRACapacity; // Max number of Physically Restraining activities  
-
-
-// TODO: corect syntax for declaring vartypes?
-vartype  {changing,changed} FilterState;
-vartype  {in_progress,finished} MedConfState;
+vartype ProcessState : enum {"in_progress","finished"};
+vartype FilterState  : enum {"changing","changed"};
+vartype FastingState : enum {"fasting","not_fasting"}; 
 
 
 /* 
@@ -23,10 +21,10 @@ vartype  {in_progress,finished} MedConfState;
  */
 objtype FastingWindow
 {
-    State state { range {fasting,not_fasting}; }
+    FastingState state_;
       
-    action not_fasting {
-        changes over all : state -> {fasting,not_fasting,fasting};
+    action not_fasting() {
+        change over all { transition state_  { "fasting" -> {"not_fasting","fasting"} } };
     }
 }
  
@@ -43,62 +41,60 @@ predicate payload_act_completed(
 objtype CrewMember
 {
     FastingWindow fw_;
-    MedConfState mcs_;
-
+    ProcessState mcs_;  // Medical Conference state
         
-    action pre_sleep { 
-        condition over all : fw_.state == not_fasting(); 
-        duration == 120; 
-        
+    action pre_sleep() { 
+        condition over all { fw_.state_ = "not_fasting" }; 
+        eq(duration,120);   // TODO: added constraints to the grammar for actions to allow for this      
     }
     
-    action sleep { 
-        duration == 480; 
+    action sleep() { 
+        eq(duration,480); 
     }
     
-    action post_sleep { 
-        condition over all : fw_.state == not_fasting(); 
-        duration == 180; 
+    action post_sleep() { 
+        condition over all { fw_.state_ = "not_fasting" }; 
+        eq(duration,180); 
     }
     
-    action dpc { 
-        duration == 15;
+    action dpc() { 
+        eq(duration,15);
     }
     
-    action meal { 
-        condition over all : fw_.state == not_fasting();
+    action meal() { 
+        condition over all { fw_.state_ = "not_fasting" };
         
         // keep separation between meals >= 4 hrs
-        condition over [start-240 start] : fw_.state == fasting();  
-        condition over [end end+240] : fw_.state == fasting();  
+        condition over [start-240 start] { fw_.state_ = "fasting" };  
+        condition over [end end+240] { fw_.state_ = "fasting" };  
 
-        duration == 60; 
+        eq(duration,60); 
     }
     
-    action exercise { 
+    action exercise() { 
         // Can't excercise within an hour of finishing a meal
-        condition over [start-60 start] : fw_.state == fasting();
-        change over all : uses(ExerciseEquipment,1);
+        condition over [start-60 start] { fw_.state_ == "fasting" };
+        change over all { uses(ExerciseEquipment,1) }; // TODO: how do we say "use one of the available pieces of equipment"?
 
-        duration == 60; 
+        eq(duration,60); 
     } 
     
     action change_filter(FilterState fs) {         
-        change over all : fs -> {changed,changing,changed};
+        change over all { transition fs { "changed" -> {"changing","changed"} } };
         
         // make sure next filter change happens within the next 24 to 48 hours
-        effect in [end+1440 end+2880] : fs == changing;
+        effect in [end+1440 end+2880] { fs = "changing" };
         
-        duration == 60; 
+        eq(duration,60); 
     }    
     
-    action medical_conference { 
-        change over all : mcs_ -> {finished,in_progress,finished};
+    action medical_conference() { 
+        change over all { transition mcs_ { "finished" -> {"in_progress","finished"} } };
         
         // make sure next medical conference happens within the next 24 to 48 hours
-        effect in [end+1440 end+2880] : mcs_ == in_progress;
+        effect in [end+1440 end+2880] { mcs_ = "in_progress" };
         
-        duration == 60; 
+        eq(duration,60); 
     }
 
   
@@ -113,103 +109,104 @@ objtype CrewMember
         int isPhysicallyRestraining,
         PRACapacity praCapacity) {
         
-        condition start >= 0; // Is this still necessary to force into planning window? 
-        condition end <= dueDate;
+        // TODO: only relational operator currently allowed in the grammar is =
+        // TODO: condition start >= 0; // Is this still necessary to force into planning window? 
+        // TODO: condition end <= dueDate;
+                
+        effect when { (usesComms = 1) } { uses(comms,1) };
+        effect when { isPhysicallyRestraining = 1 }  { uses(praCapacity,1) };
         
-        effect when (usesComms == 1) : uses(comms,1);
-        effect when (isPhysicallyRestraining == 1) : uses(praCapacity,1);
-        
-        effect at end : payload_act_completed(id,desc,length,priority,dueDate,usesComms,isPhysicallyRestraining);
-        duration == length;        
+        effect at end { payload_act_completed(id,desc,length,priority,dueDate,usesComms,isPhysicallyRestraining) };
+        eq(duration,length);        
     }
     
     // RPCM R&R Actions
-    action remove_sleep_station { 
-        duration == 60; 
+    action remove_sleep_station() { 
+        eq(duration,60); 
     }
     
     action reconfigure_thermal_loops(int loopCnt)
     {  
-        duration == 60; 
+        eq(duration,60); 
     }
     
-    action remove_power_source { 
-        duration == 60; 
+    action remove_power_source() { 
+        eq(duration,60); 
     }
     
-    action replace_rpcm { 
-        duration == 60; 
+    action replace_rpcm() { 
+        eq(duration,60); 
     }
     
-    action place_power_source { 
-        duration == 60; 
+    action place_power_source() { 
+        eq(duration,60); 
     }
     
-    action assemble_sleep_station { 
-        duration == 60; 
+    action assemble_sleep_station() { 
+        eq(duration,60); 
     }        
 }
 
 objtype CrewPlanner
 {
-    State state { range {in_progress(CrewMember),finished(CrewMember)} };
+    CrewMember crewMember_;    
+    ProcessState state_;
     
-    action daily_routine(CrewMember c) {
-        change : state -> {finished(c),in_progress(c),finished(c)};
+    action daily_routine() {
+        change over all { transition state_ { "finished" -> {"in_progress","finished"} } };
         
-        // I'll guess the syntax for decomposition
         decomposition {
-            c.post_sleep post_s;
-            c.dpc dpc;
-            c.meal meal;
-            c.exercise exercise;
-            c. pre_sleep pre_s;
-            c.sleep sleep;
+            crewMember_.pre_sleep pre_sleep;
+            crewMember_.sleep sleep;
+            crewMember_.post_sleep post_sleep;
+            crewMember_.dpc dpc;
+            crewMember_.meal meal;
+            crewMember_.exercise exercise;
             
             // Precedence relationships
-            post_s.end == dpc.start;
-            pre_s.end == sleep.start;
+            eq(post_sleep.end,dpc.start);
+            eq(pre_sleep.end,sleep.start);
             
             // Start the day with post_sleep and finish with sleep
-            start == post_s.start;
-            end == sleep.end;    
+            eq(start,post_sleep.start);
+            eq(end,sleep.end);    
         }
         
         // setup the next daily routine
-        effect at end+1 : state == in_progress(c); 
+        effect at end+1 { state_ = "in_progress" };  
         
-        duration == 1440; // 24 hours
+        eq(duration,1440); // 24 hours
     }
 }
 
 objtype RPCM
 {
-    State state { range {in_progress,finished} };
+    ProcessState state_;
     
     action perform() {
         // I want any CrewMember to perform any activity, is CrewMember.* the intended ANML syntax?
-        change : state -> {finished,in_progress,finished};
+        change over all { transition state_ { "finished" -> { "in_progress" -> "finished" } } };
         
         decomposition {
-		    CrewMember.remove_sleep_station step1;
-		    CrewMember.remove_power_source step2;
-		    step1.end <= step2.start;
+		    CrewMember.remove_sleep_station() step1;
+		    CrewMember.remove_power_source() step2;
+		    lt(step1.end,step2.start);
 		    
 		    // Reconfigure thermal loops as single loop
 		    CrewMember.reconfigure_thermal_loops(1) step3;
 		        
-		    CrewMember.replace_rpcm step4;
-		    step2.end <= step4.start;
-		    step3.end <= step4.start;
+		    CrewMember.replace_rpcm() step4;
+		    lt(step2.end,step4.start);
+		    lt(step3.end,step4.start);
 		    
-		    CrewMember.place_power_source step5;
-		    CrewMember.assemble_sleep_station step6;
-		    step4.end <= step5.start;
-		    step5.end <= step6.start;
+		    CrewMember.place_power_source() step5;
+		    CrewMember.assemble_sleep_station() step6;
+		    lt(step4.end,step5.start);
+		    lt(step5.end,step6.start);
 		    
 		    // Reconfigure thermal loops as redundant loops
 		    CrewMember.reconfigure_thermal_loops(2) step7;
-		    step4.end <= step7.start;
+		    lt(step4.end,step7.start);
         }
     }            
 }
