@@ -1,9 +1,7 @@
-
-
 grammar ANML;
 options {k=3; backtrack=true; memoize=true;}
 @header {
-    package anml;
+    //package anml;
 }
 
 /*options {
@@ -17,16 +15,20 @@ options {k=3; backtrack=true; memoize=true;}
 */
 
 anml_program 
-	:	 (declaration | comment)*
+	:	 (declaration)*
 	      
 ;
 
-declaration : vartype_decl
-              | var_declaration
-              | fun_declaration
-              | pred_declaration
-              | objtype_decl
-              | obj_declaration
+//    | fun_declaration
+declaration 
+    : objtype_decl
+    | (
+       vartype_decl
+       | var_declaration
+       | pred_declaration
+       | obj_declaration
+      ) 
+      SEMI_COLON
 ;
 
 vartype_decl : VARTYPE user_defined_type_name COLON var_type
@@ -39,17 +41,17 @@ var_type : BOOL
            | (INT | FLOAT) (range)?
            | STRING
            | ENUM LCURLY constant (COMMA constant)* RCURLY
-           | VECTOR ( typed_arg_list )
+           | VECTOR typed_arg_list 
            | user_defined_type_name
 ;
 
-var_init : variable (EQUAL constant)?
+var_init : var_name (EQUAL constant)?
 ;
 
-typed_arg_list : arg_declaration (COMMA arg_declaration)*
+typed_arg_list : LPAREN arg_declaration (COMMA arg_declaration)* RPAREN
 ;
 
-arg_declaration : var_type variable (COMMA variable)*
+arg_declaration : var_type var_name
 ;
 
 objtype_decl : 
@@ -66,20 +68,21 @@ obj_declaration : obj_type IDENTIFIER (COMMA IDENTIFIER)*
 obj_type : OBJECT | user_defined_type_name
 ;
 
+/*
 fun_declaration : FUNCTION var_type function (COMMA function)*
 ;
-
-function : function_symbol ( typed_arg_list )
+*/
+function : function_symbol typed_arg_list
 ;
 
 pred_declaration : PREDICATE predicate (COMMA predicate)*
 ;
 
-predicate : predicate_symbol ( typed_arg_list )
+predicate : predicate_symbol typed_arg_list
 ;
 
 proposition : cntxt_proposition  
-            | FOR object LCURLY cntxt_proposition RCURLY
+            | FOR object_name LCURLY cntxt_proposition RCURLY
 ;
 
 cntxt_proposition : qualif_fluent
@@ -115,7 +118,7 @@ numeric_term : atomic_term ((PLUS | MINUS | MULT | DIV) atomic_term)?
              | END (LPAREN fluent RPAREN)?
 ;
 
-atomic_term : NUMERIC_LITERAL | variable
+atomic_term : NUMERIC_LITERAL | var_name
 ;
 
 fluent : atomic_fluent ((AND | OR) atomic_fluent)?
@@ -132,7 +135,7 @@ term_list : LPAREN (term (COMMA term)*)? RPAREN
 ;
 
 term : constant
-     | variable
+     | var_name
      | function_symbol term_list
 ;
 
@@ -143,16 +146,13 @@ fact : FACT proposition
 goal : GOAL (proposition  | (LCURLY proposition (SEMI_COLON proposition)* RCURLY))
 ;
 
-transition : TRANSITION variable LCURLY trans_pair (SEMI_COLON trans_pair)* RCURLY
+transition : TRANSITION var_name LCURLY trans_pair (SEMI_COLON trans_pair)* RCURLY
 ;
 
 trans_pair : constant ARROW (constant  | LCURLY constant (COMMA constant)* RCURLY)
 ;
 
-action_def : ACTION action_name LPAREN typed_list RPAREN LCURLY action_body RCURLY 
-;
-
-typed_list : (var_type variable (COMMA var_type variable)*)?
+action_def : ACTION action_symbol typed_arg_list LCURLY action_body RCURLY 
 ;
 
 action_body : (duration_stmt)? 
@@ -209,14 +209,14 @@ atomic_change  : resource_change
 ;
 
 // TODO: this should probably be constraints like any others
-resource_change : (CONSUMES | PRODUCES | USES)  LPAREN variable (COMMA numeric_term)?
+resource_change : (CONSUMES | PRODUCES | USES)  LPAREN var_name (COMMA numeric_term)?
 ;
 
 decomp_stmt : DECOMPOSITION (condition | LCURLY condition (COMMA condition)* RCURLY)
 ;
 
 // TODO: define constraint
-constraint : 'CONSTRAINT'
+constraint : constraint_symbol LPAREN RPAREN
 ;
 
 // TODO: allow expressions?
@@ -226,13 +226,15 @@ range : LBRACK NUMERIC_LITERAL COMMA NUMERIC_LITERAL RBRACK
 constant : NUMERIC_LITERAL | STRING_LITERAL
 ;
 
-action_name             : IDENTIFIER ;
-user_defined_type_name  : IDENTIFIER ;
-function_symbol         : IDENTIFIER ;
+action_symbol           : IDENTIFIER;
+constraint_symbol       : IDENTIFIER;
+function_symbol         : IDENTIFIER;
 predicate_symbol        : IDENTIFIER;
 proposition_symbol      : IDENTIFIER;
-object                  : IDENTIFIER;
-variable                : IDENTIFIER;
+
+object_name             : IDENTIFIER;
+var_name                : IDENTIFIER;
+user_defined_type_name  : IDENTIFIER;
 
 
 
@@ -310,7 +312,9 @@ ARROW : '-' '>' ;
 // a numeric literal
 NUMERIC_LITERAL
 	@init {boolean isDecimal=false; Token t=null;}
-    :   '.' { /*_ttype = DOT;*/}
+    :   '+inf'
+    |   '-inf'
+    |   '.' { /*_ttype = DOT;*/}
             (	('0'..'9')+ (EXPONENT)? (f1=FLOAT_SUFFIX {t=f1;})?
                 {
 				if (t != null && t.getText().toUpperCase().indexOf('F')>=0) {
@@ -380,51 +384,13 @@ HEX_DIGIT
 
 // string literals
 STRING_LITERAL
-	:	'"' (ESC|~('"'|'\\')|'#')* '"'
-	;
+    :  '"' ( EscapeSequence | ~('\\'|'"') )* '"'
+    ;
 
-// escape sequence 
-//   note that this is protected; it can only be called from another lexer rule 
-//   it will not ever directly return a token to the parser
-// There are various ambiguities hushed in this rule.  The optional
-// '0'...'9' digit matches should be matched here rather than letting
-// them go back to STRING_LITERAL to be matched.  ANTLR does the
-// right thing by matching immediately; hence, it's ok to shut off
-// the FOLLOW ambig warnings.
 fragment
-ESC
-	:	'\\'
-		(	'n'
-		|	'r'
-		|	't'
-		|	'b'
-		|	'f'
-		|	'"'
-		|	'\''
-		|	'\\'
-		|	('u')+ HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
-		|	'0'..'3'
-			(
-				/*options {
-					warnWhenFollowAmbig = false;
-				}*/
-				'0'..'7'
-				(
-					/*options {
-						warnWhenFollowAmbig = false;
-					}*/
-					'0'..'7'
-				)?
-			)?
-		|	'4'..'7'
-			(
-				/*options {
-					warnWhenFollowAmbig = false;
-				}*/
-				'0'..'7'
-			)?
-		)              
-	;
+EscapeSequence
+    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
+    ;
 
 comment : (COMMENT | LINE_COMMENT)
 ;
