@@ -28,8 +28,8 @@ declaration
     | func_declaration
     | (
        vartype_decl
-       | var_declaration
        | pred_declaration
+       | var_declaration
        | obj_declaration
       ) 
       SEMI_COLON
@@ -57,16 +57,13 @@ var_type
     | user_defined_type_name
 ;
 
+// TODO: should initialization allow for expressions instead of constants?
 var_init 
     : var_name (EQUAL constant)?
 ;
 
 typed_arg_list 
-    : LPAREN (arg_declaration_list)? RPAREN
-;
-
-arg_declaration_list 
-    : arg_declaration (COMMA arg_declaration)* 
+    : LPAREN (arg_declaration (COMMA arg_declaration)*)? RPAREN
 ;
 
 arg_declaration 
@@ -77,11 +74,15 @@ objtype_decl
     : OBJTYPE user_defined_type_name (COLON obj_type)?
       (LCURLY obj_body RCURLY)?
 ;
-   
+
+// TODO: Any declaration is allowed within an object type, will have to think about implications on scoping
+// Are all nested objects visible from outside, or just variables and objects?
+// TODO: added constraint, where should constraints be allowed?
 obj_body 
     : (declaration | constraint | action_def)*
 ;
 
+// TODO: var_declaration and obj_declaration can probably be merged
 obj_declaration 
     : obj_type IDENTIFIER (COMMA IDENTIFIER)*
 ;
@@ -91,11 +92,11 @@ obj_type
     | user_defined_type_name
 ;
 
-
 func_declaration 
     : FUNCTION var_type function (COMMA function)*
 ;
 
+// TODO: where are the semantics of the function specified?
 function 
     : function_symbol typed_arg_list
 ;
@@ -139,6 +140,7 @@ temporal_qualif
     | CONTAINS interval
 ;
 
+// all(fluent) is shorthand for the interval [start(fluent),end(fluent)]
 interval 
     : ALL (LPAREN fluent RPAREN)?
     | LBRACK time_pt time_pt RBRACK
@@ -149,35 +151,67 @@ time_pt
 ;
 
 numeric_term 
-    : atomic_term ((PLUS | MINUS | MULT | DIV) atomic_term)?
+    : numeric_add_term
+;
+
+numeric_add_term
+    : numeric_mult_term ((PLUS | MINUS) numeric_mult_term)*
+;
+ 
+numeric_mult_term
+    : numeric_simple_term ((MULT | DIV) numeric_simple_term)*
+;
+
+numeric_simple_term 
+    : numeric_atomic_term    
     | START (LPAREN fluent RPAREN)?
     | END (LPAREN fluent RPAREN)?
 ;
 
-atomic_term 
-    : NUMERIC_LITERAL | var_name
+// TODO: added object dot notation here as it seemed to be missing
+numeric_atomic_term 
+    : NUMERIC_LITERAL 
+    | var_name (DOT var_name)*
 ;
 
 fluent 
-    : atomic_fluent ((AND | OR) atomic_fluent)?
+    : logical_or_fluent
+;
+
+logical_or_fluent
+    : logical_and_fluent (OR logical_and_fluent)*
+;
+
+logical_and_fluent
+    : simple_fluent (AND simple_fluent)*
+;
+
+simple_fluent
+    : atomic_fluent 
     | LPAREN fluent RPAREN
     | NOT fluent
 ;
 
-// TODO: Decompositions use conditions which in term are composed of fluents
+// TODO: Decompositions use conditions which in turn are composed of fluents
 // that's the resource for the dot notation and the optional naming in the rule below
-// are we sure this is what we mean? It would seem that decompositions can only refer to other actions
-// whereas conditions cannot refer to actions
+// are we sure this is what we mean? It would seem (to me, I guess) that decompositions should only refer to other actions
+// whereas conditions should not refer to actions
+// It would seem that decompositions need an element in the grammar different from condition
+// TODO: what about relational operators other than EQUAL?
 atomic_fluent 
-    : proposition_symbol
+    : proposition_symbol term_list
     | (object_name DOT)? predicate_symbol term_list (COLON var_name)?
     | term EQUAL term
 ;
 
+// TODO: shouldn't terms be able to take advantage of the full power of numeric_terms and fluents?
+// TODO: typically, numeric terms and fluents are unified and expressions and type checking makes sure semantics are correct
+//  we should probably do that for ANML
 term_list 
     : LPAREN (term (COMMA term)*)? RPAREN
 ;
 
+// TODO: added object notation
 term 
     : constant
     | var_name (DOT var_name)*
@@ -205,77 +239,129 @@ action_def
     : ACTION action_symbol typed_arg_list LCURLY action_body RCURLY 
 ;
 
+// TODO: there are many things that can go in an action and remembering the right order may be hard, allow more flexibility?
 action_body 
     : (duration_stmt SEMI_COLON)? 
       (condition_stmt SEMI_COLON)*
-      (effect_stmt SEMI_COLON)*
       (change_stmt SEMI_COLON)*
+      (effect_stmt SEMI_COLON)*
       (decomp_stmt SEMI_COLON)* 
       (constraint SEMI_COLON)* 
 ;
 
-duration_stmt : DURATION numeric_term
+duration_stmt 
+    : DURATION numeric_term
 ;
 
-condition_stmt : CONDITION (condition | (LCURLY condition (COMMA condition)* RCURLY)) 
+condition_stmt 
+    : CONDITION (condition | (LCURLY condition (COMMA condition)* RCURLY)) 
 ;
 
-// TODO: fix the grammar for precedence and associativity
-condition : temporal_qualif LCURLY cond_fluent RCURLY
-          | LPAREN condition RPAREN (AND | OR) condition
-;
- 
-cond_fluent : atomic_fluent ((AND | OR) atomic_fluent)?
-            | LPAREN cond_fluent RPAREN
-            | ORDERED LPAREN (cond_fluent)+ RPAREN
-            | UNORDERED LPAREN (cond_fluent)+ RPAREN
+// TODO: fix precedence for AND/OR
+condition 
+    : logical_or_condition
 ;
 
+logical_or_condition
+    : logical_and_condition (OR logical_and_condition)*
+;
+
+logical_and_condition
+    : simple_condition (AND simple_condition)*
+;
+
+// TODO: added cond_fluent, otherwise conditions that don't start with a temporal_qualif must start with a "{"
+// which is weird, specially if the condition is already inside brackets (like in a "when")
+simple_condition
+    : temporal_qualif LCURLY cond_fluent RCURLY
+    | cond_fluent
+    | LPAREN condition RPAREN
+;
+     
+cond_fluent 
+    : logical_or_cond_fluent 
+;
+
+logical_or_cond_fluent
+    : logical_and_cond_fluent (OR logical_and_cond_fluent)*
+;
+
+logical_and_cond_fluent
+    : simple_cond_fluent (AND simple_cond_fluent)*
+;
+
+simple_cond_fluent
+    : atomic_fluent 
+    | LPAREN cond_fluent RPAREN
+    | ORDERED LPAREN cond_fluent (COMMA cond_fluent)* RPAREN
+    | UNORDERED LPAREN cond_fluent (COMMA cond_fluent)* RPAREN
+;
+    
 effect_stmt : EFFECT (effect | (LCURLY effect (COMMA effect)* RCURLY))
 ;
 
-effect : temporal_qualif LCURLY effect_fluent RCURLY
-       | LPAREN effect RPAREN AND effect
-       | WHEN LCURLY condition RCURLY LCURLY effect RCURLY
+effect 
+    : logical_and_effect
 ;
 
-effect_fluent : atomic_fluent (AND effect_fluent)?
-              | LPAREN effect_fluent RPAREN
-              | WHEN LCURLY cond_fluent  LCURLY effect_fluent RCURLY
+logical_and_effect
+    : simple_effect (AND simple_effect)*
 ;
 
-change_stmt : CHANGE (change | (LCURLY change (COMMA change)* RCURLY))
+// TODO: this part of the BNF was messed up, this is my interpretation
+// do we only want to allow atomic_fluents here?
+simple_effect
+    : (temporal_qualif | WHEN LCURLY condition RCURLY) LCURLY effect_fluent RCURLY
+    | LPAREN effect RPAREN
 ;
 
-change : temporal_qualif LCURLY change_expression RCURLY
-       | LPAREN change RPAREN AND change
-       | WHEN LCURLY condition RCURLY LCURLY change RCURLY
+effect_fluent 
+    : atomic_fluent 
 ;
 
-change_expression : atomic_change (AND atomic_change)?
-                  | WHEN LCURLY cond_fluent RCURLY LCURLY change_expression RCURLY
+change_stmt 
+    : CHANGE (change | (LCURLY change (COMMA change)* RCURLY))
 ;
 
-atomic_change  : resource_change
-               | transition
+change 
+    : temporal_qualif LCURLY change_expression RCURLY
+    | LPAREN change RPAREN AND change
+    | WHEN LCURLY condition RCURLY LCURLY change RCURLY
+;
+
+// TODO: clean up this rule, second branch doesn't look clean
+change_expression 
+    : atomic_change (AND atomic_change)?
+    | WHEN LCURLY cond_fluent RCURLY LCURLY change_expression RCURLY
+;
+
+atomic_change  
+    : resource_change
+    | transition
 ;
 
 // TODO: this should probably be constraints like any others
-resource_change : (CONSUMES | PRODUCES | USES)  LPAREN var_name (COMMA numeric_term)?
+resource_change 
+    : (CONSUMES | PRODUCES | USES)  LPAREN var_name (COMMA numeric_term)? RPAREN
 ;
 
-decomp_stmt : DECOMPOSITION (condition | LCURLY condition (COMMA condition)* (constraint)* RCURLY)
+// TODO: added constraints. where should constraints be allowed?
+decomp_stmt 
+    : DECOMPOSITION (condition | LCURLY condition (COMMA condition)* (constraint)* RCURLY)
 ;
 
-// TODO: define constraint
-constraint : constraint_symbol term_list
+// TODO: define grammar to support infix notation for constraints
+constraint 
+    : constraint_symbol term_list
 ;
 
 // TODO: allow expressions?
-range : LBRACK NUMERIC_LITERAL NUMERIC_LITERAL RBRACK
+range 
+    : LBRACK NUMERIC_LITERAL NUMERIC_LITERAL RBRACK
 ;
 
-constant : NUMERIC_LITERAL | STRING_LITERAL
+constant 
+    : NUMERIC_LITERAL | STRING_LITERAL
 ;
 
 action_symbol           : IDENTIFIER;
