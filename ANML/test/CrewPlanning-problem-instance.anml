@@ -2,7 +2,10 @@
 // We'll plan the dailyroutines for 3 crew members over 4 days,
 // adding regular filter changes, medical conferences and some payload operations
 
-int horizon = [0,5760]; // Plan for 4 days
+include "CrewPlanning-model.anml"
+
+int start_horizon = 0,
+    end_horizon = 5760; // Plan for 4 days
 
 CrewMember cm1,cm2,cm3;
 
@@ -11,32 +14,33 @@ CrewPlanner cp1,cp2,cp3;
 fact over all { 
     cp1.crewMember_ = cm1;
     cp2.crewMember_ = cm2;
-    cp3.crewMember_ = cm3;
-}    
+    cp3.crewMember_ = cm3
+};   
 
 goal at 0 { 
     cp1.state = "in_progress";
     cp2.state = "in_progress";
-    cp3.state = "in_progress";
-}    
+    cp3.state = "in_progress"
+};
 
 // Set up medical conferences
-goal in [0 1440] : crew1.mcs_ == finished;
-goal in [0 1440] : crew2.mcs_ == finished;
-goal in [0 1440] : crew2.mcs_ == finished;
+goal in [0 1440] : crew1.mcs_ = finished;
+goal in [0 1440] : crew2.mcs_ = finished;
+goal in [0 1440] : crew2.mcs_ = finished;
 
 // Set up filter changes
 FilterState spaceshipFilter;
-goal in [0 1440] : spaceshipFiter.state == changed;
+goal in [0 1440] : spaceshipFiter.state = changed;
 
 // Set up payload activities;
 // TODO: payload_act_completed should allow for a parameter that tells us who performed it. syntax?
-goal in horizon : payload_act_completed(1,"Kardio-ODNT",60,1,1440,0,1);
-goal in horizon : payload_act_completed(1,"Cardiolog-2",60,1,1440,1,1);
-goal in horizon : payload_act_completed(1,"Renal Stone Risk",60,1,1440,0,1);
-goal in horizon : payload_act_completed(1,"Public Afffairs Office - 1",60,1,2880,1,0);
-goal in horizon : payload_act_completed(1,"Public Afffairs Office - 1",60,1,5760,2,0);
+goal in [start_horizon end_horizon] : payload_act_completed(1,"Kardio-ODNT",60,1,1440,0,1);
+goal in [start_horizon end_horizon] : payload_act_completed(1,"Cardiolog-2",60,1,1440,1,1);
+goal in [start_horizon end_horizon] : payload_act_completed(1,"Renal Stone Risk",60,1,1440,0,1);
+goal in [start_horizon end_horizon] : payload_act_completed(1,"Public Afffairs Office - 1",60,1,2880,1,0);
+goal in [start_horizon end_horizon] : payload_act_completed(1,"Public Afffairs Office - 1",60,1,5760,2,0);
 
 RPCM rpcm_recovery;
 // recover during the last day
-goal in [4320,5760] : rpcm_recovery.state == finished;
+goal in [4320 5760] : rpcm_recovery.state = finished;
+

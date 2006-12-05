@@ -1,5 +1,7 @@
 header {
     package anml;
+
+    import java.io.*;
 }
 
 /* for ANTLR 3
@@ -24,6 +26,23 @@ anml_program
 anml_stmt
     : declaration
     | problem_stmt
+    | include_file
+;
+
+// quick implementation in java
+include_file : 
+    INCLUDE s1:STRING_LIT
+{
+    try {
+        String filename=s1.getText().replace('\"',' ').trim();
+        ANMLLexer sublexer = new ANMLLexer(new FileInputStream(filename));
+        ANMLParser parser = new ANMLParser(sublexer);
+        parser.anml_program();
+    }
+    catch (Exception e) {
+    	throw new RuntimeException(e);
+    }
+}
 ;
   
 declaration 
@@ -218,7 +237,7 @@ term
 
 fact 
     : FACT proposition
-    | FACT LCURLY proposition (COMMA proposition)* RCURLY
+    | FACT LCURLY proposition (SEMI_COLON proposition)* RCURLY
 ;
 
 goal 
@@ -435,6 +454,7 @@ tokens {
     FACT          = "fact";
     GOAL          = "goal";
     IN            = "in";
+    INCLUDE       = "include";
     INT           = "int";
     FLOAT         = "float";
     FOR           = "for";
