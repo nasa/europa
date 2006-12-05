@@ -49,9 +49,9 @@ declaration
     : objtype_decl
     | (
        vartype_decl
-       | pred_declaration
        | var_obj_declaration
        | function_declaration
+       | predicate_declaration
       ) 
       SEMI_COLON
 ;
@@ -78,6 +78,12 @@ var_type
     | VECTOR typed_arg_list 
     | user_defined_type_name
 ;
+
+// TODO: allow expressions?
+range 
+    : LBRACK numeric_literal numeric_literal RBRACK
+;
+
 
 // TODO: should initialization allow for expressions instead of constants?
 // yes, but vars can only be init'd once
@@ -108,24 +114,28 @@ obj_type
     | user_defined_type_name
 ;
 
+// In ANML, functions are not mathematical functions.
+// Instead, they are variables with arguments.
 function_declaration 
     : FUNCTION var_type function_signature (COMMA function_signature)*
 ;
 
-// In ANML, functions are not mathematical functions.
-// Instead, they are variables with arguments.
-// Propositions are functions on {true,false}.
-// TODO: Shouldn't syntax for propositions and functions be the same then?
 function_signature 
     : function_symbol typed_arg_list
 ;
 
-pred_declaration 
-    : PREDICATE predicate (COMMA predicate)*
+// Predicates are functions on {true,false}.
+predicate_declaration 
+    : PREDICATE function_signature (COMMA function_signature)*
 ;
 
-predicate 
-    : predicate_symbol typed_arg_list
+fact 
+    : FACT proposition
+    | FACT LCURLY proposition (SEMI_COLON proposition)* RCURLY
+;
+
+goal 
+    : GOAL (proposition  | (LCURLY proposition (SEMI_COLON proposition)* RCURLY))
 ;
 
 proposition 
@@ -147,7 +157,37 @@ qualif_fluent
 ;
 
 fluent_list 
-    : fluent (SEMI_COLON fluent)*
+    : fluent (COMMA fluent)*
+;
+
+fluent 
+    : or_fluent
+;
+
+or_fluent
+    : and_fluent (options {greedy=true;} : OR and_fluent)*
+;
+
+and_fluent
+    : simple_fluent (options {greedy=true;} : AND simple_fluent)*
+;
+
+simple_fluent
+    : relational_fluent 
+    | LPAREN fluent RPAREN
+    | NOT fluent
+;
+
+relational_fluent 
+    : term (relop term)?
+;
+
+relop
+    : EQUAL
+    | LT
+    | LE
+    | GT
+    | GE
 ;
 
 temporal_qualif 
@@ -193,63 +233,15 @@ numeric_atomic_term
     | function_symbol LPAREN term_list RPAREN
 ;
 
-fluent 
-    : or_fluent
-;
-
-or_fluent
-    : and_fluent (options {greedy=true;} : OR and_fluent)*
-;
-
-and_fluent
-    : simple_fluent (options {greedy=true;} : AND simple_fluent)*
-;
-
-simple_fluent
-    : atomic_fluent 
-    | LPAREN fluent RPAREN
-    | NOT fluent
-;
-
-atomic_fluent 
-    : term (relop term)?
-;
-
-relop
-    : EQUAL
-    | LT
-    | LE
-    | GT
-    | GE
-;
-
+// TODO: a term list should probably allow for full-blown expressions (numerical and logical-fluents)
 term_list 
     : LPAREN (term (COMMA term)*)? RPAREN
 ;
 
-// TODO: shouldn't terms be able to take advantage of the full power of numeric_terms and fluents?
-// TODO: typically, numeric terms and fluents are unified and expressions and type checking makes sure semantics are correct we should probably do that for ANML
 term 
     : constant
     | var_name (DOT var_name)*
     | function_symbol term_list
-;
-
-fact 
-    : FACT proposition
-    | FACT LCURLY proposition (SEMI_COLON proposition)* RCURLY
-;
-
-goal 
-    : GOAL (proposition  | (LCURLY proposition (SEMI_COLON proposition)* RCURLY))
-;
-
-transition 
-    : TRANSITION var_name LCURLY trans_pair (SEMI_COLON trans_pair)* RCURLY
-;
-
-trans_pair 
-    : constant ARROW (constant  | LCURLY constant (COMMA constant)* RCURLY)
 ;
 
 action_def 
@@ -265,8 +257,8 @@ action_body
 action_body_stmt
     : duration_stmt 
     | condition_stmt
-    | change_stmt 
     | effect_stmt 
+    | change_stmt 
     | decomp_stmt 
     | constraint
 ;
@@ -311,7 +303,7 @@ and_cond_fluent
 ;
 
 simple_cond_fluent
-    : atomic_fluent 
+    : relational_fluent 
     | LPAREN condition RPAREN
 ;
     
@@ -333,7 +325,7 @@ simple_effect
 ;
 
 effect_fluent 
-    : atomic_fluent 
+    : relational_fluent 
 ;
 
 change_stmt 
@@ -371,6 +363,14 @@ resource_change
     : (CONSUMES | PRODUCES | USES)  LPAREN var_name (COMMA numeric_term)? RPAREN
 ;
 
+transition 
+    : TRANSITION var_name LCURLY trans_pair (SEMI_COLON trans_pair)* RCURLY
+;
+
+trans_pair 
+    : constant ARROW (constant  | LCURLY constant (COMMA constant)* RCURLY)
+;
+
 decomp_stmt 
     : DECOMPOSITION (decomp_step | LCURLY (decomp_step)* RCURLY)
 ;
@@ -397,11 +397,6 @@ constraint
     : CONSTRAINT constraint_symbol term_list
 ;
 
-// TODO: allow expressions?
-range 
-    : LBRACK numeric_literal numeric_literal RBRACK
-;
-
 constant 
     : numeric_literal | string_literal
 ;
@@ -418,7 +413,6 @@ string_literal
 action_symbol           : IDENTIFIER;
 constraint_symbol       : IDENTIFIER;
 function_symbol         : IDENTIFIER;
-predicate_symbol        : IDENTIFIER;
 proposition_symbol      : IDENTIFIER;
 
 object_name             : IDENTIFIER;
