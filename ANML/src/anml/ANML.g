@@ -155,7 +155,7 @@ numeric_term
 ;
 
 numeric_add_term
-    : numeric_mult_term ((PLUS | MINUS) numeric_mult_term)*
+    : numeric_mult_term (options {greedy=true;} : (PLUS | MINUS) numeric_mult_term)*
 ;
  
 numeric_mult_term
@@ -179,11 +179,11 @@ fluent
 ;
 
 or_fluent
-    : and_fluent (OR and_fluent)*
+    : and_fluent (options {greedy=true;} : OR and_fluent)*
 ;
 
 and_fluent
-    : simple_fluent (AND simple_fluent)*
+    : simple_fluent (options {greedy=true;} : AND simple_fluent)*
 ;
 
 simple_fluent
@@ -277,7 +277,6 @@ and_condition
 simple_condition
     : temporal_qualif LCURLY cond_fluent RCURLY
     | cond_fluent
-    | LPAREN condition RPAREN
 ;
      
 cond_fluent 
@@ -285,16 +284,16 @@ cond_fluent
 ;
 
 or_cond_fluent
-    : and_cond_fluent (OR and_cond_fluent)*
+    : and_cond_fluent (options {greedy=true;} : OR and_cond_fluent)*
 ;
 
 and_cond_fluent
-    : simple_cond_fluent (AND simple_cond_fluent)*
+    : simple_cond_fluent (options {greedy=true;} : AND simple_cond_fluent)*
 ;
 
 simple_cond_fluent
     : atomic_fluent 
-    | LPAREN cond_fluent RPAREN
+    | LPAREN condition RPAREN
 ;
     
 effect_stmt : EFFECT (effect | (LCURLY effect (COMMA effect)* RCURLY))
@@ -339,7 +338,7 @@ and_change_expression
 
 // TODO: this allows nested WHEN expressions. is this what we want?
 simple_change_expression
-    : atomic_change (AND atomic_change)?
+    : atomic_change (options {greedy=true;} : AND atomic_change)?
     | WHEN LCURLY cond_fluent RCURLY LCURLY change_expression RCURLY
 ;
 
@@ -582,16 +581,15 @@ HEX_DIGIT
 
 // string literals
 STRING_LIT
-	:	'"' (ESC | ~('"'|'\\') | '#')* '"'
+	:	'"' (ESC|~('"'|'\\'|'\n'|'\r'))* '"'
 	;
-
 
 // escape sequence -- note that this is protected; it can only be called
 //   from another lexer rule -- it will not ever directly return a token to
 //   the parser
 // There are various ambiguities hushed in this rule.  The optional
 // '0'...'9' digit matches should be matched here rather than letting
-// them go back to STRING_LIT to be matched.  ANTLR does the
+// them go back to STRING_LITERAL to be matched.  ANTLR does the
 // right thing by matching immediately; hence, it's ok to shut off
 // the FOLLOW ambig warnings.
 protected
@@ -626,7 +624,7 @@ ESC
 				}
 			:	'0'..'7'
 			)?
-		)              
+		)
 	;
 
 // Single-line comments
