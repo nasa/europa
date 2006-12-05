@@ -1,7 +1,14 @@
-// Crew Planning problem instance in ANML
-// We'll plan the dailyroutines for 3 crew members over 4 days,
-// adding regular filter changes, medical conferences and some payload operations
-
+/*
+ * Crew Planning problem instance in ANML
+ *
+ * We'll plan the basic daily routines for 3 crew members over 4 days.
+ * Adding : 
+ *     - regular filter changes
+ *     - medical conferences 
+ *     - some payload operations
+ *
+ */
+ 
 include "CrewPlanning-model.anml"
 
 int start_horizon = 0,
@@ -17,6 +24,7 @@ fact over all {
     cp3.crewMember_ = cm3
 };   
 
+// TODO: is this the right way to boostrap the cycle for the CrewPlanner objects?
 goal at 0 { 
     cp1.state = "in_progress";
     cp2.state = "in_progress";
@@ -30,10 +38,10 @@ goal in [0 1440] : crew2.mcs_ = "finished";
 
 // Set up filter changes
 FilterState spaceshipFilter;
-goal in [0 1440] : spaceshipFiter.state = "changed";
+goal in [0 1440] : spaceshipFilter.state = "changed";
 
 // Set up payload activities;
-// TODO: payload_act_completed should allow for a parameter that tells us who performed it. syntax?
+// TODO: How do we know who performed each activity in the end?
 goal in [start_horizon end_horizon] : payload_act_completed(1,"Kardio-ODNT",60,1,1440,0,1);
 goal in [start_horizon end_horizon] : payload_act_completed(1,"Cardiolog-2",60,1,1440,1,1);
 goal in [start_horizon end_horizon] : payload_act_completed(1,"Renal Stone Risk",60,1,1440,0,1);
