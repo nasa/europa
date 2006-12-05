@@ -369,7 +369,7 @@ resource_change
 ;
 
 transition_change
-    : var_name EQUAL term (ARROW term)*
+    : var_name (DOT var_name)* EQUAL term (ARROW term)*
 ;
 
 decomp_stmt 

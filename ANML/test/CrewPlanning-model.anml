@@ -43,6 +43,11 @@ predicate payload_act_completed(
     int usesComms,
     int isPhysicallyRestraining);
     
+    
+// TODO: This still follows a nddl pattern where the action will cause some subgoaling in the future
+// see CrewMember.change_filter, CrewMember.medical_conference and CrewPlanner.daily_routine
+// This pattern won't work in ANML since subgoaling can only be caused by conditions in the past
+    
 objtype CrewMember
 {
     FastingWindow fw_;
@@ -52,7 +57,9 @@ objtype CrewMember
     action pre_sleep() 
     { 
         duration 120;    
-        condition over all { fw_.state_ = "not_fasting" }; 
+        
+        // pre_sleep includes dinner
+        change over all { fw_.state_ = "fasting" -> "not_fasting" -> "fasting" }; 
     }
     
     action sleep() 
@@ -63,7 +70,9 @@ objtype CrewMember
     action post_sleep() 
     { 
         duration 180;    
-        condition over all { fw_.state_ = "not_fasting" }; 
+
+        // post_sleep includes breakfast
+        change over all { fw_.state_ = "fasting" -> "not_fasting" -> "fasting" }; 
     }
     
     action dpc() 
@@ -74,10 +83,10 @@ objtype CrewMember
     action meal() 
     { 
         duration 60;    
-        condition over all { fw_.state_ = "not_fasting" };
         
         // keep separation between meals >= 4 hrs
         condition over [start-240 start] { fw_.state_ = "fasting" };  
+        change over all { fw_.state_ = "fasting" -> "not_fasting" -> "fasting" };
     }
     
     action exercise() 
@@ -86,6 +95,7 @@ objtype CrewMember
 
         // Can't excercise within an hour of finishing a meal
         condition over [start-60 start] { fw_.state_ = "fasting" };
+
         change over all { uses(ExerciseEquipment,1) }; 
     } 
     
@@ -97,6 +107,7 @@ objtype CrewMember
         
         // make sure next filter change happens within the next 24 to 48 hours
         effect in [end+1440 end+2880] { fs = "changing" };
+        effect over all { fw_.state_ = "fasting" }; 
     }    
     
     action medical_conference() 
@@ -107,7 +118,6 @@ objtype CrewMember
         // make sure next medical conference happens within the next 24 to 48 hours
         effect in [end+1440 end+2880] { mcs_ = "in_progress" };
     }
-
   
     action payload_activity (
         int id,
