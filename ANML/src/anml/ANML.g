@@ -157,7 +157,7 @@ qualif_fluent
 ;
 
 fluent_list 
-    : fluent (COMMA fluent)*
+    : fluent (SEMI_COLON fluent)*
 ;
 
 fluent 
