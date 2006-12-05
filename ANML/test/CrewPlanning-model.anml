@@ -21,9 +21,15 @@ vartype FastingState : enum {"fasting","not_fasting"};
 objtype FastingWindow
 {
     FastingState state_;
+
+    constraint transition state_ { 
+        "fasting"     -> "not_fasting" ; 
+        "not_fasting" -> "fasting" 
+    };    
       
-    action not_fasting() {
-        change over all { transition state_  { "fasting" -> {"not_fasting","fasting"} } };
+    action not_fasting() 
+    {
+        change over all { state_  = "fasting" -> "not_fasting" -> "fasting" };
     }
 }
  
@@ -42,27 +48,31 @@ objtype CrewMember
     FastingWindow fw_;
     ProcessState mcs_;  // Medical Conference state
     // TODO: add a variable to keep track of activities performed since this isn't a NDDL timeline
-    
-    // TODO: added constraints to the grammar for actions, is that correct?         
-    action pre_sleep() { 
+
+    action pre_sleep() 
+    { 
         duration 120;    
         condition over all { fw_.state_ = "not_fasting" }; 
     }
     
-    action sleep() { 
+    action sleep() 
+    { 
         duration 480;    
     }
     
-    action post_sleep() { 
+    action post_sleep() 
+    { 
         duration 180;    
         condition over all { fw_.state_ = "not_fasting" }; 
     }
     
-    action dpc() { 
+    action dpc() 
+    { 
         duration 15;    
     }
     
-    action meal() { 
+    action meal() 
+    { 
         duration 60;    
         condition over all { fw_.state_ = "not_fasting" };
         
@@ -70,7 +80,8 @@ objtype CrewMember
         condition over [start-240 start] { fw_.state_ = "fasting" };  
     }
     
-    action exercise() { 
+    action exercise() 
+    { 
         duration 60;    
 
         // Can't excercise within an hour of finishing a meal
@@ -78,18 +89,20 @@ objtype CrewMember
         change over all { uses(ExerciseEquipment,1) }; 
     } 
     
-    action change_filter(FilterState fs) {         
+    action change_filter(FilterState fs) 
+    {         
         duration 60;    
-        
-        change over all { transition fs { "changed" -> {"changing","changed"} } };
+
+        change over all { fs = "changed" -> "changing" -> "changed" };
         
         // make sure next filter change happens within the next 24 to 48 hours
         effect in [end+1440 end+2880] { fs = "changing" };
     }    
     
-    action medical_conference() { 
+    action medical_conference() 
+    { 
         duration 60;    
-        change over all { transition mcs_ { "finished" -> {"in_progress","finished"} } };
+        change over all { mcs_ = "finished" -> "in_progress" -> "finished" };
         
         // make sure next medical conference happens within the next 24 to 48 hours
         effect in [end+1440 end+2880] { mcs_ = "in_progress" };
@@ -105,14 +118,12 @@ objtype CrewMember
         int usesComms,
         TDRS comms,
         int isPhysicallyRestraining,
-        PRACapacity praCapacity) {
-        
+        PRACapacity praCapacity) 
+    {    
         duration length;    
-        // TODO: only relational operator currently allowed in the grammar is =
-        // TODO: condition start >= 0; // Is this still necessary to force into planning window? 
-        // TODO: condition end <= dueDate;
+        condition start >= 0; // Is this still necessary to force into planning window? 
+        condition end <= dueDate;
                 
-        // TODO: had to introduce temporal qualification for this to parse ok. is this really necessary?
         change when { usesComms = 1 } { over all { uses(comms,1) } };
         change when { isPhysicallyRestraining = 1 }  { over all { uses(praCapacity,1) } };
         
@@ -120,7 +131,8 @@ objtype CrewMember
     }
     
     // RPCM R&R Actions
-    action remove_sleep_station() { 
+    action remove_sleep_station() 
+    { 
         duration 60;    
     }
     
@@ -129,19 +141,23 @@ objtype CrewMember
         duration 60;    
     }
     
-    action remove_power_source() { 
+    action remove_power_source() 
+    { 
         duration 60;    
     }
     
-    action replace_rpcm() { 
+    action replace_rpcm() 
+    { 
         duration 60;    
     }
     
-    action place_power_source() { 
+    action place_power_source() 
+    { 
         duration 60;    
     }
     
-    action assemble_sleep_station() { 
+    action assemble_sleep_station() 
+    { 
         duration 60;    
     }        
 }
@@ -151,14 +167,12 @@ objtype CrewPlanner
     CrewMember crewMember_;    
     ProcessState state_;
     
-    action daily_routine() {
+    action daily_routine() 
+    {
         duration 1440;    
 
-        change over all { transition state_ { "finished" -> {"in_progress","finished"} } };
+        change over all { state_ = "finished" -> "in_progress" -> "finished" };
         
-        // setup the next daily routine
-        effect at end+1 { state_ = "in_progress" };          
-
         decomposition {
           contains all unordered(
             crewMember_.pre_sleep()  : pre_sleep,
@@ -177,6 +191,9 @@ objtype CrewPlanner
           constraint eq(start,post_sleep.start);
           constraint eq(end,sleep.end);                
         };       
+        
+        // setup the next daily routine
+        effect at end+1 { state_ = "in_progress" };          
     }
 }
 
@@ -184,12 +201,13 @@ objtype RPCM
 {
     ProcessState state_;
     
-    action perform() {
-        // I want any CrewMember to perform any activity, is CrewMember.* the intended ANML syntax?
-        change over all { transition state_ { "finished" -> { "in_progress","finished" } } };
+    action perform() 
+    {
+        change over all { state_ = "finished" -> "in_progress" -> "finished" };
         
-        // TODO: added constraints to the grammar for decompositions, is that correct?         
         decomposition {
+          // TODO: I want any CrewMember to perform any activity, is CrewMember.* the intended ANML syntax?
+          // TODO: "contains all" isn't intuitive, think of different syntax?
           contains all unordered (
 		    CrewMember.remove_sleep_station()       : step1,
 		    CrewMember.remove_power_source()        : step2,		  		    

@@ -106,7 +106,13 @@ objtype_decl
 
 // TODO: out of all declarations inside an objtype_body,  only variables and objects are visible from outside
 objtype_body 
-    : (declaration | constraint | action_def)*
+    : (objtype_body_stmt)*
+;
+
+objtype_body_stmt
+    : declaration
+    | action_def
+    | constraint SEMI_COLON
 ;
 
 obj_type 
@@ -355,20 +361,15 @@ simple_change_expression
 
 atomic_change  
     : resource_change
-    | transition
+    | transition_change
 ;
 
-// TODO: this should probably be constraints like any others
 resource_change 
     : (CONSUMES | PRODUCES | USES)  LPAREN var_name (COMMA numeric_term)? RPAREN
 ;
 
-transition 
-    : TRANSITION var_name LCURLY trans_pair (SEMI_COLON trans_pair)* RCURLY
-;
-
-trans_pair 
-    : constant ARROW (constant  | LCURLY constant (COMMA constant)* RCURLY)
+transition_change
+    : var_name EQUAL term (ARROW term)*
 ;
 
 decomp_stmt 
@@ -391,10 +392,23 @@ action_set_element
     | action_set
 ;
     
-// TODO: Added "constraint" keyword to disambiguate for now
-// TODO: define grammar to support infix notation for constraints
+// TODO: Added "constraint" keyword to be consistent with other elements
 constraint 
-    : CONSTRAINT constraint_symbol term_list
+    : CONSTRAINT constraint_expr
+;
+
+// TODO: define grammar to support infix notation for constraints
+constraint_expr 
+    : constraint_symbol term_list
+    | transition_constraint
+;
+
+transition_constraint 
+    : TRANSITION var_name LCURLY trans_pair (SEMI_COLON trans_pair)* RCURLY
+;
+
+trans_pair 
+    : constant ARROW (constant  | LCURLY constant (COMMA constant)* RCURLY)
 ;
 
 constant 
