@@ -14,7 +14,6 @@ vartype ProcessState : enum {"in_progress","finished"};
 vartype FilterState  : enum {"changing","changed"};
 vartype FastingState : enum {"fasting","not_fasting"}; 
 
-
 /* 
  * Class and actions to keep track of fasting window
  * this would be better handled through a state constraint        
@@ -42,6 +41,7 @@ objtype CrewMember
 {
     FastingWindow fw_;
     ProcessState mcs_;  // Medical Conference state
+    // TODO: add a variable to keep track of activities performed since this isn't a NDDL timeline
     
     // TODO: added constraints to the grammar for actions, is that correct?         
     action pre_sleep() { 
@@ -68,7 +68,6 @@ objtype CrewMember
         
         // keep separation between meals >= 4 hrs
         condition over [start-240 start] { fw_.state_ = "fasting" };  
-        condition over [end end+240] { fw_.state_ = "fasting" };  
     }
     
     action exercise() { 
@@ -76,7 +75,7 @@ objtype CrewMember
 
         // Can't excercise within an hour of finishing a meal
         condition over [start-60 start] { fw_.state_ = "fasting" };
-        change over all { uses(ExerciseEquipment,1) }; // TODO: how do we say "use one of the available pieces of equipment"?
+        change over all { uses(ExerciseEquipment,1) }; 
     } 
     
     action change_filter(FilterState fs) {         
@@ -113,9 +112,9 @@ objtype CrewMember
         // TODO: condition start >= 0; // Is this still necessary to force into planning window? 
         // TODO: condition end <= dueDate;
                 
-        // TODO: accourding to the grammar this is invalid since uses can only be used as part of a change stmt
-        effect when { usesComms = 1 } { uses(comms,1) };
-        effect when { isPhysicallyRestraining = 1 }  { uses(praCapacity,1) };
+        // TODO: had to introduce temporal qualification for this to parse ok. is this really necessary?
+        change when { usesComms = 1 } { over all { uses(comms,1) } };
+        change when { isPhysicallyRestraining = 1 }  { over all { uses(praCapacity,1) } };
         
         effect at end { payload_act_completed(id,desc,length,priority,dueDate,usesComms,isPhysicallyRestraining) };
     }
@@ -161,21 +160,23 @@ objtype CrewPlanner
         effect at end+1 { state_ = "in_progress" };          
 
         decomposition {
-            crewMember_.pre_sleep pre_sleep;
-            crewMember_.sleep sleep;
-            crewMember_.post_sleep post_sleep;
-            crewMember_.dpc dpc;
-            crewMember_.meal meal;
-            crewMember_.exercise exercise;
+          contains all unordered(
+            crewMember_.pre_sleep()  : pre_sleep,
+            crewMember_.sleep()      : sleep,
+            crewMember_.post_sleep() : post_sleep,
+            crewMember_.dpc()        : dpc,
+            crewMember_.meal()       : meal,
+            crewMember_.exercise()   : exercise
+          );
             
-            // Precedence relationships
-            eq(post_sleep.end,dpc.start);
-            eq(pre_sleep.end,sleep.start);
+          // Precedence relationships
+          constraint eq(post_sleep.end,dpc.start);
+          constraint eq(pre_sleep.end,sleep.start);
             
-            // Start the day with post_sleep and finish with sleep
-            eq(start,post_sleep.start);
-            eq(end,sleep.end);    
-        }        
+          // Start the day with post_sleep and finish with sleep
+          constraint eq(start,post_sleep.start);
+          constraint eq(end,sleep.end);                
+        };       
     }
 }
 
@@ -185,30 +186,27 @@ objtype RPCM
     
     action perform() {
         // I want any CrewMember to perform any activity, is CrewMember.* the intended ANML syntax?
-        change over all { transition state_ { "finished" -> { "in_progress" -> "finished" } } };
+        change over all { transition state_ { "finished" -> { "in_progress","finished" } } };
         
         // TODO: added constraints to the grammar for decompositions, is that correct?         
         decomposition {
-		    CrewMember.remove_sleep_station() step1;
-		    CrewMember.remove_power_source() step2;
-		    lt(step1.end,step2.start);
-		    
-		    // Reconfigure thermal loops as single loop
-		    CrewMember.reconfigure_thermal_loops(1) step3;
-		        
-		    CrewMember.replace_rpcm() step4;
-		    lt(step2.end,step4.start);
-		    lt(step3.end,step4.start);
-		    
-		    CrewMember.place_power_source() step5;
-		    CrewMember.assemble_sleep_station() step6;
-		    lt(step4.end,step5.start);
-		    lt(step5.end,step6.start);
-		    
-		    // Reconfigure thermal loops as redundant loops
-		    CrewMember.reconfigure_thermal_loops(2) step7;
-		    lt(step4.end,step7.start);
-        }
+          contains all unordered (
+		    CrewMember.remove_sleep_station()       : step1,
+		    CrewMember.remove_power_source()        : step2,		  		    
+		    CrewMember.reconfigure_thermal_loops(1) : step3, // Reconfigure thermal loops as single loop		        
+		    CrewMember.replace_rpcm()               : step4,
+		    CrewMember.place_power_source()         : step5,
+		    CrewMember.assemble_sleep_station()     : step6,
+		    CrewMember.reconfigure_thermal_loops(2) : step7 // Reconfigure thermal loops as redundant loops
+          );
+          
+		  constraint lt(step1.end,step2.start);
+		  constraint lt(step2.end,step4.start);
+		  constraint lt(step3.end,step4.start);		    
+		  constraint lt(step4.end,step5.start);
+		  constraint lt(step5.end,step6.start);		  		    
+		  constraint lt(step4.end,step7.start);
+        };
     }            
 }
  

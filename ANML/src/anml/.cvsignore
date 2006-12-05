@@ -1,4 +1,4 @@
-ANML__.g
-ANML.tokens
+ANML*.smap
 ANMLLexer.java
 ANMLParser.java
+ANMLParserTokenTypes.*
