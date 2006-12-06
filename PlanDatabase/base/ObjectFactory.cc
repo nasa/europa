@@ -203,7 +203,6 @@ namespace EUROPA {
 	void GenericObjectFactory::constructor(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const
 	{
 		// TODO: check arg count, arg size and execute code in constructor
-		// TODO: execute code for superclass?, or it must be explicit
 	}
 	
 	void GenericObjectFactory::handleDefaults(ObjectId& instance) const
