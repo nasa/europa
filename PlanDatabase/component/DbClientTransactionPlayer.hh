@@ -58,6 +58,11 @@ namespace EUROPA {
     void playInvokeConstraint(const TiXmlElement & element);
     void playInvokeTransaction(const TiXmlElement & element);
 
+    void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+    void defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+    void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+    void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+
   private:
     DbClientId m_client;
     int m_objectCount;

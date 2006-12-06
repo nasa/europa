@@ -15,6 +15,8 @@
 #include "DbClientTransactionPlayer.hh"
 #include "DbClientTransactionLog.hh"
 #include <algorithm>
+#include <iostream>
+#include <sstream>
 
 namespace EUROPA {
 
@@ -126,53 +128,98 @@ namespace EUROPA {
     m_client->propagate();
   }
 
+  const char* safeStr(const char* str)
+  {
+  	return (str !=NULL ? str : "NULL");
+  }
+
+  std::ostringstream dbgout;
+  const char* ident="    ";
+  
   void DbClientTransactionPlayer::playDefineClass(const TiXmlElement& element) 
   {
   	if (!m_interpreted)
   	   return;
-  	   
+      	   
     const char* className = element.Attribute("name");
     const char* parentClassName = element.Attribute("extends");
     parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
+
+    // TODO jrb : Check for System classes
     
-    Id<Schema> id = Schema::instance();
-    id->addObjectType(className,parentClassName);
+    Id<Schema> schema = Schema::instance();
+    schema->addObjectType(className,parentClassName);
     
-    std::cout << "class " << className  
-                          << (parentClassName != NULL ? " extends " : "") 
-                          << (parentClassName != NULL ? parentClassName : "") 
-                          << " {" << std::endl;
+    dbgout.str("");
+    dbgout << "class " << className  
+                       << (parentClassName != NULL ? " extends " : "") 
+                        << (parentClassName != NULL ? parentClassName : "") 
+                        << " {" << std::endl;
                           
-    const TiXmlElement* child;
-    for( child = element.FirstChildElement(); child; child = child->NextSiblingElement() ) {
-    	
+    for(const TiXmlElement* child = element.FirstChildElement(); child; child = child->NextSiblingElement() ) {    	
     	const char * tagname = child->Value();
-	    if (strcmp(tagname, "var") == 0) {
-	      const char* type = child->Attribute("type");	
-	      const char* name = child->Attribute("name");	
-	      std::cout << "     " << type << " " << name << std::endl;
-          id->addMember(className, type, name);
-	    }   
-	    else if (strcmp(tagname, "constructor") == 0) {
-	      std::cout << tagname << std::endl; 
-	    }  
-	    else if (strcmp(tagname, "predicate") == 0) {
-	      std::string predName = std::string(className) + "." + child->Attribute("name");	
-	      std::cout << tagname << " " <<  predName << "(";
-          id->addPredicate(predName.c_str());
-          const TiXmlElement* predArg;
-          for( predArg = element.FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
-		      const char* type = child->Attribute("type");	
-		      const char* name = child->Attribute("name");	
-    	      std::cout << type << " " << name << "," << std::endl;
-              id->addMember(predName.c_str(), type, name);              
-          }	
-          std::cout << ")" << std::endl;
-	    }       	
+    	
+	    if (strcmp(tagname, "var") == 0) 
+	    	defineClassMember(schema,className,child);
+	    else if (strcmp(tagname, "constructor") == 0) 
+	    	defineConstructor(schema,className,child);	    	
+	    else if (strcmp(tagname, "predicate") == 0) 
+	    	declarePredicate(schema,className,child);	    	
+	    else if (strcmp(tagname, "enum") == 0) 
+	    	defineEnum(schema,className,child);	    	
     }
-    std::cout << "}" << std::endl;
+    
+    dbgout << "}" << std::endl;    
+    std::cout << dbgout.str() << std::endl; 
   }
 
+  void DbClientTransactionPlayer::defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  {	
+	  const char* type = safeStr(element->Attribute("type"));	
+	  const char* name = safeStr(element->Attribute("name"));	
+	  dbgout << ident << type << " " << name << std::endl;
+	  schema->addMember(className, type, name);
+  }
+
+  void DbClientTransactionPlayer::defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  {	
+      dbgout << ident << "constructor ("; 
+      for(const TiXmlElement* child = element->FirstChildElement(); child; child = child->NextSiblingElement() ) {
+      	  if (strcmp(child->getValue(),"arg" == 0) {
+	          const char* type = safeStr(child->Attribute("type"));	
+	          const char* name = safeStr(child->Attribute("name"));	
+	          dbgout << type << " " << name << ",";
+      	  }
+      	  if (strcmp(child->getValue(),"assign" == 0) {
+      	  	// TODO: jrb
+      	  }
+      	  if (strcmp(child->getValue(),"super" == 0) {
+      	  	// TODO: jrb
+      	  }
+      }	
+      dbgout << ")" << std::endl;
+  }
+    
+  void DbClientTransactionPlayer::declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  {	
+      std::string predName = std::string(className) + "." + element->Attribute("name");	
+      schema->addPredicate(predName.c_str());
+
+      dbgout << ident << "predicate " <<  predName << "(";
+      for(const TiXmlElement* predArg = element->FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
+	      const char* type = safeStr(predArg->Attribute("type"));	
+	      const char* name = safeStr(predArg->Attribute("name"));	
+	      dbgout << type << " " << name << ",";
+          schema->addMember(predName.c_str(), type, name);              
+      }	
+      dbgout << ")" << std::endl;
+  }
+    
+  void DbClientTransactionPlayer::defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  {	
+  	  // TODO jrb - implement this. Enum is scoped within the class
+  }
+  
   void DbClientTransactionPlayer::playDefineCompat(const TiXmlElement &)
   {
   	if (!m_interpreted)
