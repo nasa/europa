@@ -185,15 +185,15 @@ namespace EUROPA {
   {	
       dbgout << ident << "constructor ("; 
       for(const TiXmlElement* child = element->FirstChildElement(); child; child = child->NextSiblingElement() ) {
-      	  if (strcmp(child->getValue(),"arg" == 0) {
+      	  if (strcmp(child->Value(),"arg") == 0) {
 	          const char* type = safeStr(child->Attribute("type"));	
 	          const char* name = safeStr(child->Attribute("name"));	
 	          dbgout << type << " " << name << ",";
       	  }
-      	  if (strcmp(child->getValue(),"assign" == 0) {
+      	  if (strcmp(child->Value(),"assign") == 0) {
       	  	// TODO: jrb
       	  }
-      	  if (strcmp(child->getValue(),"super" == 0) {
+      	  if (strcmp(child->Value(),"super") == 0) {
       	  	// TODO: jrb
       	  }
       }	
