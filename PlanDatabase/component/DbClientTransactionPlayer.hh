@@ -19,8 +19,8 @@ namespace EUROPA {
 
   class DbClientTransactionPlayer {
   public:
-    DbClientTransactionPlayer(const DbClientId & client,bool interpreted=false);
-    ~DbClientTransactionPlayer();
+    DbClientTransactionPlayer(const DbClientId & client);
+    virtual ~DbClientTransactionPlayer();
 
     /**
      * @brief Play all transactions from an input stream
@@ -37,10 +37,12 @@ namespace EUROPA {
   protected:
     void processTransaction(const TiXmlElement & element);
 
-    void playDefineClass(const TiXmlElement &); 
-    void playDefineCompat(const TiXmlElement &);
-    void playDefineEnumeration(const TiXmlElement &);
-    void playDefineType(const TiXmlElement &);
+    // This are handled by code-generation
+    virtual void playDefineClass(const TiXmlElement &)        {} 
+    virtual void playDefineCompat(const TiXmlElement &)       {}
+    virtual void playDefineEnumeration(const TiXmlElement &)  {}
+    virtual void playDefineType(const TiXmlElement &)         {}
+    // end code-generation
 
     void playVariableCreated(const TiXmlElement & element);
     void playObjectCreated(const TiXmlElement & element);
@@ -58,12 +60,6 @@ namespace EUROPA {
     void playInvokeConstraint(const TiXmlElement & element);
     void playInvokeTransaction(const TiXmlElement & element);
 
-    void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-    void defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-    void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-    void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-
-  private:
     DbClientId m_client;
     int m_objectCount;
     int m_varCount;
@@ -71,10 +67,6 @@ namespace EUROPA {
     std::map<std::string, ConstrainedVariableId> m_variables;
     std::list<std::string> m_enumerations;
     std::list<std::string> m_classes;
-
-    // temporary flag to allow users to switch back and forth between
-    // interpreted and code-generated implementations of some of the elements
-    bool m_interpreted;
 
   //! string input functions
 
@@ -134,6 +126,23 @@ namespace EUROPA {
 
   };
 
+  class InterpretedDbClientTransactionPlayer : public DbClientTransactionPlayer {
+    public:
+      InterpretedDbClientTransactionPlayer(const DbClientId & client);
+      virtual ~InterpretedDbClientTransactionPlayer();
+
+    protected:
+      virtual void playDefineClass(const TiXmlElement &); 
+      virtual void playDefineCompat(const TiXmlElement &);
+      virtual void playDefineEnumeration(const TiXmlElement &);
+      virtual void playDefineType(const TiXmlElement &);
+      
+      void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+      void defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+      void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+      void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);      
+  };
+  
 }
 
 #endif // _H_DbClientTransactionPlayer

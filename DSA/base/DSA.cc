@@ -558,13 +558,19 @@ namespace EUROPA {
       DbClientId client = m_db->getClient();
 
       // Construct player
-      DbClientTransactionPlayer player(client,interpreted);
+      DbClientTransactionPlayer* player;
+      
+      if (interpreted)
+          player = new InterpretedDbClientTransactionPlayer(client);
+      else
+          player = new DbClientTransactionPlayer(client);
 
       // Open transaction source and play transactions
       debugMsg("DSA:addPlan", "Reading initial state from " << txSource);
       std::ifstream in(txSource);
       checkError(in, "Invalid transaction source '" + std::string(txSource) + "'.");
-      player.play(in);
+      player->play(in);
+      delete player;
     }
 
     void DSA::solverConfigure(const char* source, int horizonStart, int horizonEnd){
