@@ -29,22 +29,6 @@ anml_stmt
     | include_file
 ;
 
-// quick implementation in java
-include_file : 
-    INCLUDE s1:STRING_LIT
-{
-    try {
-        String filename=s1.getText().replace('\"',' ').trim();
-        ANMLLexer sublexer = new ANMLLexer(new FileInputStream(filename));
-        ANMLParser parser = new ANMLParser(sublexer);
-        parser.anml_program();
-    }
-    catch (Exception e) {
-    	throw new RuntimeException(e);
-    }
-}
-;
-  
 declaration 
     : objtype_decl
     | (
@@ -61,6 +45,22 @@ problem_stmt
     | goal
 ;
    
+include_file : 
+    INCLUDE s1:STRING_LIT
+{
+    try {
+        // quick implementation in java
+        String filename=s1.getText().replace('\"',' ').trim();
+        ANMLLexer sublexer = new ANMLLexer(new FileInputStream(filename));
+        ANMLParser parser = new ANMLParser(sublexer);
+        parser.anml_program();
+    }
+    catch (Exception e) {
+    	throw new RuntimeException(e);
+    }
+}
+;
+  
 vartype_decl 
     : VARTYPE user_defined_type_name COLON var_type
 ;
@@ -75,7 +75,7 @@ var_type
     | (INT | FLOAT) (range)?
     | STRING
     | ENUM LCURLY constant (COMMA constant)* RCURLY
-    | VECTOR typed_arg_list 
+    | VECTOR LPAREN (arg_declaration_list)? RPAREN 
     | user_defined_type_name
 ;
 
@@ -86,13 +86,13 @@ range
 
 
 // TODO: should initialization allow for expressions instead of constants?
-// yes, but vars can only be init'd once
+// yes, but vars can only be init'd once. and expression semantics are declarative, not procedural
 var_init 
     : var_name (EQUAL constant)?
 ;
 
-typed_arg_list 
-    : LPAREN (arg_declaration (COMMA arg_declaration)*)? RPAREN
+arg_declaration_list
+    : arg_declaration (COMMA arg_declaration)*
 ;
 
 arg_declaration 
@@ -104,20 +104,21 @@ objtype_decl
       (LCURLY objtype_body RCURLY)?
 ;
 
-// TODO: out of all declarations inside an objtype_body,  only variables and objects are visible from outside
+obj_type 
+    : OBJECT 
+    | user_defined_type_name
+;
+
 objtype_body 
     : (objtype_body_stmt)*
 ;
 
+// TODO: semantic layer to make sure that out of all declarations inside an objtype_body,  
+// only variables and objects are visible from outside
 objtype_body_stmt
     : declaration
     | action_def
-    | constraint SEMI_COLON
-;
-
-obj_type 
-    : OBJECT 
-    | user_defined_type_name
+    | transition_constraint SEMI_COLON
 ;
 
 // In ANML, functions are not mathematical functions.
@@ -127,7 +128,7 @@ function_declaration
 ;
 
 function_signature 
-    : function_symbol typed_arg_list
+    : function_symbol LPAREN (arg_declaration_list)? RPAREN
 ;
 
 // Predicates are functions on {true,false}.
@@ -135,23 +136,34 @@ predicate_declaration
     : PREDICATE function_signature (COMMA function_signature)*
 ;
 
+
+// Fluents are the same for {Facts,Effects} and for {Goals,Conditions}
+// For Effects and Facts :
+// - OR is not allowed
+// - Temporal qualifiers IN, BEFORE, AFTER and CONTAINS are not allowed. What about FROM?
+
 fact 
-    : FACT proposition
-    | FACT LCURLY proposition (SEMI_COLON proposition)* RCURLY
+    : FACT (proposition | LCURLY proposition_list RCURLY)
 ;
 
 goal 
-    : GOAL (proposition  | (LCURLY proposition (SEMI_COLON proposition)* RCURLY))
+    : GOAL (proposition  | LCURLY  proposition_list RCURLY)
 ;
 
+proposition_list 
+    : proposition (SEMI_COLON proposition)*
+;
+
+// TODO: "FOR object_name {proposition}" to be implemented later
 proposition 
     : cntxt_proposition  
-    | FOR object_name LCURLY cntxt_proposition RCURLY
+    | FOR object_name LCURLY (cntxt_proposition)? RCURLY
 ;
 
+// TODO: should "FROM time_pt { qualif_fluent_list }" appear wherever temporal_qualif is allowed?, not just here?
 cntxt_proposition 
     : qualif_fluent
-    | FROM time_pt LCURLY qualif_fluent_list RCURLY
+    | FROM time_pt LCURLY (qualif_fluent_list)? RCURLY
 ;
 
 qualif_fluent_list 
@@ -162,7 +174,7 @@ qualif_fluent
     : temporal_qualif LCURLY fluent_list RCURLY
 ;
 
-fluent_list 
+fluent_list
     : fluent (SEMI_COLON fluent)*
 ;
 
@@ -170,38 +182,63 @@ fluent
     : or_fluent
 ;
 
+// TODO: OR is not allowed for effects and facts. check and throw exception if necessary
 or_fluent
     : and_fluent (options {greedy=true;} : OR and_fluent)*
 ;
 
 and_fluent
-    : simple_fluent (options {greedy=true;} : AND simple_fluent)*
+    : primary_fluent (options {greedy=true;} : AND primary_fluent)*
 ;
 
-simple_fluent
+// NOTE : NOT is not supported for now
+primary_fluent
     : relational_fluent 
     | LPAREN fluent RPAREN
-    | NOT fluent
+    //| NOT fluent
 ;
 
+// NOTE: if the rhs is not present, that means we're stating a predicate to be true
+// TODO: should we remove predicates and just support functions?
+// TODO: rhs is very simple for now (see expr rule below), just constants, variables or functions
 relational_fluent 
-    : term (relop term)?
+    : lhs_expr (relop expr)?
 ;
 
+// TODO: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
+lhs_expr
+    : function_symbol LPAREN (arg_list)? RPAREN 
+    | var_name (DOT var_name)*  
+;
+    
+// TODO: we should allow for full-blown expressions (logical and numerical) at some point
+expr 
+    : constant
+    | lhs_expr
+;
+
+    
+// NOTE : Only EQUAL operator allowed for now in fluent expressions
 relop
     : EQUAL
+    /*
     | LT
     | LE
     | GT
     | GE
+    */
 ;
 
+// TODO: For effects and facts:
+// - Temporal qualifiers IN, BEFORE, AFTER (and CONTAINS??) are not allowed. What about FROM?
+// check and throw semantic exception if necessary
+// TODO: how can these be combined with FROM?
 temporal_qualif 
     : AT time_pt
     | OVER interval
-    | IN interval (DUR numeric_term)?
-    | AFTER time_pt (DUR numeric_term)?
-    | BEFORE time_pt (DUR numeric_term)?
+    | IN interval (DUR numeric_expr)?
+    | AFTER time_pt (DUR numeric_expr)?
+    | BEFORE time_pt (DUR numeric_expr)?
     | CONTAINS interval
 ;
 
@@ -212,50 +249,40 @@ interval
 ;
 
 time_pt 
-    : numeric_term
+    : numeric_expr
 ;
 
-numeric_term 
-    : numeric_add_term
+numeric_expr 
+    : add_expr
 ;
 
-numeric_add_term
-    : numeric_mult_term (options {greedy=true;} : (PLUS | MINUS) numeric_mult_term)*
+add_expr
+    : mult_expr (options {greedy=true;} : (PLUS | MINUS) mult_expr)*
 ;
  
-numeric_mult_term
-    : numeric_simple_term ((MULT | DIV) numeric_simple_term)*
+mult_expr
+    : primary_expr ((MULT | DIV) primary_expr)*
 ;
 
-numeric_simple_term 
-    : numeric_atomic_term    
+primary_expr 
+    : atomic_expr    
+    | LPAREN add_expr RPAREN
 ;
 
-// TODO: added object dot notation here as it seemed to be missing
-// TODO: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
-numeric_atomic_term 
+atomic_expr 
     : numeric_literal 
-    | var_name (DOT var_name)* 
-    | function_symbol LPAREN term_list RPAREN
+    | lhs_expr
 ;
 
-// TODO: a term list should probably allow for full-blown expressions (numerical and logical-fluents)
-term_list 
-    : LPAREN (term (COMMA term)*)? RPAREN
-;
-
-term 
-    : constant
-    | var_name (DOT var_name)*
-    | function_symbol term_list
+arg_list 
+    : expr (COMMA expr)*
 ;
 
 action_def 
-    : ACTION action_symbol typed_arg_list LCURLY action_body RCURLY 
+    : ACTION action_symbol LPAREN (arg_declaration_list)? RPAREN 
+      LCURLY action_body RCURLY 
 ;
 
-// TODO: This easily allows the different kinds of action_body_stmts to be mixed in any order,
-// but semantic layer needs to enforce that only one duration_stmt is allowed
 action_body 
     : (action_body_stmt SEMI_COLON)*
 ;
@@ -268,70 +295,38 @@ action_body_stmt
     | decomp_stmt 
     | constraint
 ;
-    
+
+// TODO: semantic layer to enforce tha only one duration statement is allowed    
 duration_stmt 
-    : DURATION numeric_term
+    : DURATION numeric_expr
 ;
 
 condition_stmt 
-    : CONDITION (condition | (LCURLY condition (COMMA condition)* RCURLY)) 
+    : CONDITION (condition | (LCURLY (condition_list)? RCURLY)) 
+;
+
+condition_list
+    : condition (COMMA condition)*
 ;
 
 condition 
-    : or_condition
-;
-
-or_condition
-    : and_condition (OR and_condition)*
-;
-
-and_condition
-    : simple_condition (AND simple_condition)*
-;
-
-// TODO: added cond_fluent, otherwise conditions that don't start with a temporal_qualif must start with a "{"
-// which is weird, specially if the condition is already inside brackets (like in a "when")
-simple_condition
-    : temporal_qualif LCURLY cond_fluent RCURLY
-    | cond_fluent
-;
-     
-cond_fluent 
-    : or_cond_fluent 
-;
-
-or_cond_fluent
-    : and_cond_fluent (options {greedy=true;} : OR and_cond_fluent)*
-;
-
-and_cond_fluent
-    : simple_cond_fluent (options {greedy=true;} : AND simple_cond_fluent)*
-;
-
-simple_cond_fluent
-    : relational_fluent 
-    | LPAREN condition RPAREN
+    : qualif_fluent
 ;
     
-effect_stmt : EFFECT (effect | (LCURLY effect (COMMA effect)* RCURLY))
+effect_stmt : EFFECT (effect | LCURLY (effect_list)? RCURLY)
+;
+
+effect_list
+    : effect (COMMA effect)*
 ;
 
 effect 
-    : and_effect
+    : effect_fluent
+    | WHEN LCURLY condition RCURLY LCURLY effect_fluent RCURLY
 ;
 
-and_effect
-    : simple_effect (AND simple_effect)*
-;
-
-simple_effect
-    : temporal_qualif LCURLY effect_fluent RCURLY
-    | WHEN LCURLY condition RCURLY LCURLY effect RCURLY
-    | LPAREN effect RPAREN
-;
-
-effect_fluent 
-    : relational_fluent 
+effect_fluent
+    : qualif_fluent
 ;
 
 change_stmt 
@@ -350,13 +345,13 @@ change_expression
 ;
 
 and_change_expression
-    : simple_change_expression (AND simple_change_expression)*
+    : primary_change_expression (AND primary_change_expression)*
 ;
 
 // TODO: this allows nested WHEN expressions. is this what we want?
-simple_change_expression
+primary_change_expression
     : atomic_change (options {greedy=true;} : AND atomic_change)?
-    | WHEN LCURLY cond_fluent RCURLY LCURLY change_expression RCURLY
+    | WHEN LCURLY fluent RCURLY LCURLY change_expression RCURLY
 ;
 
 atomic_change  
@@ -365,20 +360,17 @@ atomic_change
 ;
 
 resource_change 
-    : (CONSUMES | PRODUCES | USES)  LPAREN var_name (COMMA numeric_term)? RPAREN
+    : (CONSUMES | PRODUCES | USES)  LPAREN var_name (COMMA numeric_expr)? RPAREN
 ;
 
 transition_change
-    : var_name (DOT var_name)* EQUAL term (ARROW term)*
+    : var_name (DOT var_name)* EQUAL expr (ARROW expr)*
 ;
 
 decomp_stmt 
     : DECOMPOSITION (decomp_step | LCURLY (decomp_step)* RCURLY)
 ;
 
-
-// TODO: changed to allow only subactions and constraints, verify with David
-// TODO: semantic layer must make sure there is at least one action
 decomp_step
     : (temporal_qualif action_set | constraint ) SEMI_COLON
 ;
@@ -388,21 +380,20 @@ action_set
 ;
 
 action_set_element
-    : (object_name DOT)? action_symbol term_list (COLON var_name)?
+    : (object_name DOT)? action_symbol LPAREN (arg_list)? RPAREN (COLON var_name)?
     | action_set
 ;
     
-// TODO: Added "constraint" keyword to be consistent with other elements
 constraint 
-    : CONSTRAINT constraint_expr
+    : constraint_expr
 ;
 
 // TODO: define grammar to support infix notation for constraints
 constraint_expr 
-    : constraint_symbol term_list
-    | transition_constraint
+    : constraint_symbol LPAREN (arg_list)? RPAREN
 ;
 
+// This constraint is only allowed in the main body of an objtype definition
 transition_constraint 
     : TRANSITION var_name LCURLY trans_pair (SEMI_COLON trans_pair)* RCURLY
 ;
@@ -427,10 +418,10 @@ string_literal
 action_symbol           : IDENTIFIER;
 constraint_symbol       : IDENTIFIER;
 function_symbol         : IDENTIFIER;
-proposition_symbol      : IDENTIFIER;
 
 object_name             : IDENTIFIER;
 var_name                : IDENTIFIER | START | END;
+
 user_defined_type_name  : IDENTIFIER;
 
 
