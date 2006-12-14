@@ -216,25 +216,25 @@ objtype RPCM
         change over all { state_ = "finished" -> "in_progress" -> "finished" };
         
         decomposition {
-          // TODO: I want any CrewMember to perform any activity, is CrewMember.* the intended ANML syntax?
           
           contains [start end] 
+            exists (CrewMember c1,c2,c3,c4,c5,c6,c7)
             ordered ( // Steps 1-4 before steps 4-7
 
               ordered( 
                 unordered(
- 		          CrewMember.reconfigure_thermal_loops(1) : step1, // Reconfigure thermal loops as single loop		        
-	    	      CrewMember.remove_sleep_station()       : step2
+ 		          c1.reconfigure_thermal_loops(1) : step1, // Reconfigure thermal loops as single loop		        
+	    	      c2.remove_sleep_station()       : step2
 	    	    ),
-		        CrewMember.remove_power_source()          : step3,
-     	        CrewMember.replace_rpcm()                 : step4		      
+		        c3.remove_power_source()          : step3,
+     	        c4.replace_rpcm()                 : step4		      
 		      ),
 		    
 		      ordered(  
-    	        CrewMember.place_power_source()           : step5,
+    	        c5.place_power_source()           : step5,
 		        unordered(  
-		          CrewMember.assemble_sleep_station()     : step6,
-  		          CrewMember.reconfigure_thermal_loops(2) : step7 // Reconfigure thermal loops as redundant loops
+		          c6.assemble_sleep_station()     : step6,
+  		          c7.reconfigure_thermal_loops(2) : step7 // Reconfigure thermal loops as redundant loops
 		        )
 		      )  
           );          

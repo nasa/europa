@@ -79,14 +79,14 @@ var_type
     | user_defined_type_name
 ;
 
-// TODO: allow expressions?
+// TODO: eventually allow at least constant expressions
 range 
     : LBRACK numeric_literal numeric_literal RBRACK
 ;
 
 
-// TODO: should initialization allow for expressions instead of constants?
-// yes, but vars can only be init'd once. and expression semantics are declarative, not procedural
+// TODO: eventually allow for expressions instead of constants. make expression semantics declarative, not procedural
+// TODO: semantic layer to ensure that vars are only init'd once. 
 var_init 
     : var_name (EQUAL constant)?
 ;
@@ -121,8 +121,7 @@ objtype_body_stmt
     | transition_constraint SEMI_COLON
 ;
 
-// In ANML, functions are not mathematical functions.
-// Instead, they are variables with arguments.
+// In ANML, functions are variables with arguments.
 function_declaration 
     : FUNCTION var_type function_signature (COMMA function_signature)*
 ;
@@ -136,34 +135,71 @@ predicate_declaration
     : PREDICATE function_signature (COMMA function_signature)*
 ;
 
-
 // Fluents are the same for {Facts,Effects} and for {Goals,Conditions}
 // For Effects and Facts :
 // - OR is not allowed
-// - Temporal qualifiers IN, BEFORE, AFTER and CONTAINS are not allowed. What about FROM?
+// - Temporal qualifiers IN, BEFORE, AFTER and CONTAINS are not allowed.
+// - existential quantifier is not allowed
+// For Goals and Conditions
+// - WHEN clause is not allowed
 
 fact 
-    : FACT (proposition | LCURLY proposition_list RCURLY)
+    : FACT (effect_fluent | LCURLY effect_fluent_list RCURLY)
 ;
 
 goal 
-    : GOAL (proposition  | LCURLY  proposition_list RCURLY)
+    : GOAL (condition_fluent | LCURLY condition_fluent_list RCURLY)
 ;
 
-proposition_list 
-    : proposition (SEMI_COLON proposition)*
+effect_fluent 
+    : and_fluent
 ;
 
-// TODO: "FOR object_name {proposition}" to be implemented later
-proposition 
-    : cntxt_proposition  
-    | FOR object_name LCURLY (cntxt_proposition)? RCURLY
+effect_fluent_list 
+    : effect_fluent (SEMI_COLON effect_fluent)*
 ;
 
-// TODO: should "FROM time_pt { qualif_fluent_list }" appear wherever temporal_qualif is allowed?, not just here?
-cntxt_proposition 
-    : qualif_fluent
-    | FROM time_pt LCURLY (qualif_fluent_list)? RCURLY
+condition_fluent 
+    : or_fluent
+;
+
+condition_fluent_list 
+    : condition_fluent (SEMI_COLON condition_fluent)*
+;
+
+fluent
+    : or_fluent
+;
+
+// TODO: OR is not allowed for effects and facts. check and throw exception if necessary
+or_fluent
+    : and_fluent (options {greedy=true;} : OR and_fluent)*
+;
+
+and_fluent
+    : primary_fluent (options {greedy=true;} : AND primary_fluent)*
+;
+
+// NOTE : NOT is not supported for now
+// TODO : WHEN is only allowed for {Effects,Facts} not for {Conditions,Goals}. semantic layer to enforce this
+// TODO : FOR and FROM branches to be implemented later
+primary_fluent
+    : relational_fluent 
+    | qualif_fluent
+    | WHEN LCURLY condition_fluent RCURLY LCURLY effect_fluent RCURLY
+    | quantif_clause fluent
+    | FROM time_pt LCURLY qualif_fluent_list RCURLY
+    | FOR object_name LCURLY (fluent)? RCURLY
+    | LPAREN fluent RPAREN
+    //| NOT fluent
+;
+
+quantif_clause
+    : (FORALL | EXISTS) LPAREN var_type var_name_list RPAREN
+;
+
+var_name_list
+    : var_name (COMMA var_name)*
 ;
 
 qualif_fluent_list 
@@ -178,34 +214,12 @@ fluent_list
     : fluent (SEMI_COLON fluent)*
 ;
 
-fluent 
-    : or_fluent
-;
-
-// TODO: OR is not allowed for effects and facts. check and throw exception if necessary
-or_fluent
-    : and_fluent (options {greedy=true;} : OR and_fluent)*
-;
-
-and_fluent
-    : primary_fluent (options {greedy=true;} : AND primary_fluent)*
-;
-
-// NOTE : NOT is not supported for now
-primary_fluent
-    : relational_fluent 
-    | LPAREN fluent RPAREN
-    //| NOT fluent
-;
-
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
-// TODO: should we remove predicates and just support functions?
-// TODO: rhs is very simple for now (see expr rule below), just constants, variables or functions
 relational_fluent 
     : lhs_expr (relop expr)?
 ;
 
-// TODO: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
+// NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 lhs_expr
     : function_symbol LPAREN (arg_list)? RPAREN 
     | var_name (DOT var_name)*  
@@ -232,7 +246,6 @@ relop
 // TODO: For effects and facts:
 // - Temporal qualifiers IN, BEFORE, AFTER (and CONTAINS??) are not allowed. What about FROM?
 // check and throw semantic exception if necessary
-// TODO: how can these be combined with FROM?
 temporal_qualif 
     : AT time_pt
     | OVER interval
@@ -296,62 +309,39 @@ action_body_stmt
     | constraint
 ;
 
-// TODO: semantic layer to enforce tha only one duration statement is allowed    
+// TODO: semantic layer to enforce that only one duration statement is allowed    
 duration_stmt 
     : DURATION numeric_expr
 ;
 
 condition_stmt 
-    : CONDITION (condition | (LCURLY (condition_list)? RCURLY)) 
-;
-
-condition_list
-    : condition (COMMA condition)*
-;
-
-condition 
-    : qualif_fluent
+    : CONDITION (condition_fluent | (LCURLY condition_fluent_list RCURLY)) 
 ;
     
-effect_stmt : EFFECT (effect | LCURLY (effect_list)? RCURLY)
-;
-
-effect_list
-    : effect (COMMA effect)*
-;
-
-effect 
-    : effect_fluent
-    | WHEN LCURLY condition RCURLY LCURLY effect_fluent RCURLY
-;
-
-effect_fluent
-    : qualif_fluent
+effect_stmt : EFFECT (effect_fluent | LCURLY effect_fluent_list RCURLY)
 ;
 
 change_stmt 
-    : CHANGE (change | (LCURLY change (COMMA change)* RCURLY))
+    : CHANGE (change_expr | (LCURLY change_expr_list RCURLY))
 ;
 
-change 
-    : temporal_qualif LCURLY change_expression RCURLY
-    | WHEN LCURLY condition RCURLY LCURLY change RCURLY
-    // TODO: what's the difference between a bunch of changes inside {} and this:
-    // | LPAREN change RPAREN AND change
+change_expr_list
+    : change_expr (COMMA change_expr)*
+; 
+
+change_expr 
+    : and_change_expr
 ;
 
-change_expression 
-    : and_change_expression
+and_change_expr
+    : primary_change_expr (AND primary_change_expr)*
 ;
 
-and_change_expression
-    : primary_change_expression (AND primary_change_expression)*
-;
-
-// TODO: this allows nested WHEN expressions. is this what we want?
-primary_change_expression
-    : atomic_change (options {greedy=true;} : AND atomic_change)?
-    | WHEN LCURLY fluent RCURLY LCURLY change_expression RCURLY
+primary_change_expr
+    : atomic_change 
+    | temporal_qualif LCURLY change_expr RCURLY
+    | WHEN LCURLY fluent RCURLY LCURLY change_expr RCURLY
+    | LPAREN change_expr RPAREN 
 ;
 
 atomic_change  
@@ -376,7 +366,7 @@ decomp_step
 ;
 
 action_set
-    : (ORDERED | UNORDERED) LPAREN (action_set_element (COMMA action_set_element)*)? RPAREN
+    : (quantif_clause)? (ORDERED | UNORDERED) LPAREN (action_set_element (COMMA action_set_element)*)? RPAREN
 ;
 
 action_set_element
@@ -450,7 +440,9 @@ tokens {
     EFFECT        = "effect";
     END           = "end";
     ENUM          = "enum";
+    EXISTS        = "exists";
     FACT          = "fact";
+    FORALL        = "forall";
     GOAL          = "goal";
     IN            = "in";
     INCLUDE       = "include";
