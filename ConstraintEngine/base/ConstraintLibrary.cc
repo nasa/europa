@@ -29,14 +29,15 @@ namespace EUROPA {
   const void ConstraintLibrary::registerFactory(ConstraintFactory* factory, const LabelStr& name) {
     if(isRegistered(name)){
       debugMsg("ConstraintLibrary:registerFactory", "Over-riding prior registration for " << name);
-      ConstraintFactory* oldFactory = getInstance().getFactory(name);
+      ConstraintFactoryId oldFactory = getInstance().getFactory(name);
       std::map<double, ConstraintFactoryId>& factories = getInstance().m_constraintsByName;
       factories.erase(name.getKey());
-      delete oldFactory;
+      oldFactory.release();
     }
 
     check_error(isNotRegistered(name), "Constraint factory for '" + name.toString() + "' should not be registered, and yet it is....");
-    m_constraintsByName.insert(std::pair<double, ConstraintFactoryId>(name.getKey(), ConstraintFactoryId(factory)));
+    m_constraintsByName.insert(std::pair<double, ConstraintFactoryId>(name.getKey(),
+								      factory->getId()));
   }
 
   const ConstraintFactoryId& ConstraintLibrary::getFactory(const LabelStr& name) {

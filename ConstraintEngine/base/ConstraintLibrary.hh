@@ -71,6 +71,8 @@ namespace EUROPA {
       return m_systemDefined;
     }
 
+    const ConstraintFactoryId& getId() const {return m_id;}
+
     virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine, 
 					  const std::vector<ConstrainedVariableId>& scope) {
       check_error(ALWAYS_FAILS);
@@ -78,9 +80,12 @@ namespace EUROPA {
     }
 
   protected:
-    ConstraintFactory(const LabelStr& name, const LabelStr& propagatorName, bool systemDefined = false)
-      : m_name(name), m_propagatorName(propagatorName), m_systemDefined(systemDefined) { }
+    ConstraintFactory(const LabelStr& name, const LabelStr& propagatorName,
+		      bool systemDefined = false)
+      : m_id(this), m_name(name), m_propagatorName(propagatorName),
+	m_systemDefined(systemDefined) { }
 
+    ConstraintFactoryId m_id;
     const LabelStr m_name;
     const LabelStr m_propagatorName;
     const bool m_systemDefined;
