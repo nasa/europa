@@ -144,27 +144,48 @@ predicate_declaration
 // - WHEN clause is not allowed
 
 fact 
-    : FACT (effect_fluent | LCURLY effect_fluent_list RCURLY)
+    : FACT (effect_proposition | LCURLY effect_proposition_list RCURLY)
 ;
 
 goal 
-    : GOAL (condition_fluent | LCURLY condition_fluent_list RCURLY)
+    : GOAL (condition_proposition | LCURLY condition_proposition_list RCURLY)
 ;
 
-effect_fluent 
-    : and_fluent
+effect_proposition 
+    : proposition
 ;
 
-effect_fluent_list 
-    : effect_fluent (SEMI_COLON effect_fluent)*
+effect_proposition_list 
+    : effect_proposition (SEMI_COLON effect_proposition)*
 ;
 
-condition_fluent 
-    : or_fluent
+condition_proposition 
+    : proposition
 ;
 
-condition_fluent_list 
-    : condition_fluent (SEMI_COLON condition_fluent)*
+condition_proposition_list 
+    : condition_proposition (SEMI_COLON condition_proposition)*
+;
+
+// TODO : WHEN is only allowed for {Effects,Facts}, not allowed for {Conditions,Goals}. semantic layer to enforce this
+// TODO : FROM and FOR branches to be implemented later
+proposition
+    : qualif_fluent
+    | WHEN LCURLY condition_proposition RCURLY LCURLY effect_proposition RCURLY
+    | FROM time_pt LCURLY qualif_fluent_list RCURLY
+    | FOR object_name LCURLY fluent RCURLY
+;
+
+qualif_fluent 
+    : temporal_qualif LCURLY fluent_list RCURLY
+;
+
+qualif_fluent_list 
+    : qualif_fluent (SEMI_COLON qualif_fluent)*
+;
+
+fluent_list
+    : fluent (SEMI_COLON fluent)*
 ;
 
 fluent
@@ -181,15 +202,9 @@ and_fluent
 ;
 
 // NOTE : NOT is not supported for now
-// TODO : WHEN is only allowed for {Effects,Facts} not for {Conditions,Goals}. semantic layer to enforce this
-// TODO : FOR and FROM branches to be implemented later
 primary_fluent
     : relational_fluent 
-    | qualif_fluent
-    | WHEN LCURLY condition_fluent RCURLY LCURLY effect_fluent RCURLY
     | quantif_clause fluent
-    | FROM time_pt LCURLY qualif_fluent_list RCURLY
-    | FOR object_name LCURLY (fluent)? RCURLY
     | LPAREN fluent RPAREN
     //| NOT fluent
 ;
@@ -202,24 +217,13 @@ var_name_list
     : var_name (COMMA var_name)*
 ;
 
-qualif_fluent_list 
-    : qualif_fluent (SEMI_COLON qualif_fluent)*
-;
-
-qualif_fluent 
-    : temporal_qualif LCURLY fluent_list RCURLY
-;
-
-fluent_list
-    : fluent (SEMI_COLON fluent)*
-;
-
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
 relational_fluent 
     : lhs_expr (relop expr)?
 ;
 
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
+// TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
 lhs_expr
     : function_symbol LPAREN (arg_list)? RPAREN 
     | var_name (DOT var_name)*  
@@ -315,33 +319,37 @@ duration_stmt
 ;
 
 condition_stmt 
-    : CONDITION (condition_fluent | (LCURLY condition_fluent_list RCURLY)) 
+    : CONDITION (condition_proposition | (LCURLY condition_proposition_list RCURLY)) 
 ;
     
-effect_stmt : EFFECT (effect_fluent | LCURLY effect_fluent_list RCURLY)
+effect_stmt : EFFECT (effect_proposition | LCURLY effect_proposition_list RCURLY)
 ;
 
 change_stmt 
-    : CHANGE (change_expr | (LCURLY change_expr_list RCURLY))
+    : CHANGE (change_proposition | (LCURLY change_proposition_list RCURLY))
 ;
 
-change_expr_list
-    : change_expr (COMMA change_expr)*
+change_proposition
+    : temporal_qualif LCURLY change_fluent RCURLY
+    | WHEN LCURLY condition_proposition RCURLY LCURLY change_proposition RCURLY
+;
+
+change_proposition_list
+    : change_proposition (COMMA change_proposition)*
 ; 
 
-change_expr 
-    : and_change_expr
+change_fluent 
+    : and_change_fluent
 ;
 
-and_change_expr
-    : primary_change_expr (AND primary_change_expr)*
+and_change_fluent
+    : primary_change_fluent (options {greedy=true;} : AND primary_change_fluent)*
 ;
 
-primary_change_expr
+primary_change_fluent
     : atomic_change 
-    | temporal_qualif LCURLY change_expr RCURLY
-    | WHEN LCURLY fluent RCURLY LCURLY change_expr RCURLY
-    | LPAREN change_expr RPAREN 
+    | quantif_clause change_fluent
+    | LPAREN change_fluent RPAREN 
 ;
 
 atomic_change  
