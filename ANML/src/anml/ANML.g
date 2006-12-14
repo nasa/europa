@@ -366,7 +366,11 @@ decomp_step
 ;
 
 action_set
-    : (quantif_clause)? (ORDERED | UNORDERED) LPAREN (action_set_element (COMMA action_set_element)*)? RPAREN
+    : (quantif_clause)? (ORDERED | UNORDERED) LPAREN action_set_element_list RPAREN
+;
+
+action_set_element_list
+    : action_set_element (COMMA action_set_element)*
 ;
 
 action_set_element
