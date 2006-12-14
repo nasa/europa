@@ -6,9 +6,7 @@ ModuleBase DSA : DSA.cc ;
 
 MakeLocate DSA.jar : [ FDirName $(SUBDIR) .. .. lib ] ;
 
-ApacheAnt JNI.h : [ FGristFiles build.xml ] : createJNI ;
-
-Depends JNI.h : dsa/impl/JNI.java ;
+ApacheAnt JNI.h : [ FGristFiles build.xml ] dsa/impl/JNI.java : createJNI ;
 
 ApacheAnt DSA.jar : 
 	[ FGristFiles build.xml ]

@@ -2,7 +2,7 @@ SubDir PLASMA DSA test ;
 
 if ! $(PLASMA_READY) {
 
-ApacheAnt dsa-test : [ FGristFiles build.xml ] Main.java DSA.jar libDSA_g.so ;
+ApacheAnt dsa-test : [ FGristFiles build.xml ] Main.java DSA.jar ;
 NddlModel model.1.nddl : System : dsa-test ;
 NddlModel model.2.nddl : System : dsa-test ;
 
