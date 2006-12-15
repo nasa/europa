@@ -4,6 +4,20 @@
 
 namespace EUROPA {
   namespace SAVH {
+    class TimetableFVDetectorLocalStatic {
+    public:
+      TimetableFVDetectorLocalStatic() {
+	static bool sl_registerFactory = false;
+	check_error(!sl_registerFactory, "Should only be called once.");
+	if(!sl_registerFactory) {
+	  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
+	  sl_registerFactory = true;
+	}
+      }
+    };
+
+    TimetableFVDetectorLocalStatic s_localStatic;
+
     TimetableFVDetector::TimetableFVDetector(const ResourceId res) : FVDetector(res) {
       m_lowerLimit = res->getLowerLimit();
       m_upperLimit = res->getUpperLimit();
@@ -57,14 +71,5 @@ namespace EUROPA {
       //if(instant->getUpperMax() > m_upperLimit){}
       return false;
     }
-
-  class TimetableFVDetectorLocalStatic {
-    public:
-      TimetableFVDetectorLocalStatic() {
-	REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
-      }
-    };
-
-    TimetableFVDetectorLocalStatic s_timetableFVDetectorStatic;
   }
 }

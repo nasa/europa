@@ -12,7 +12,12 @@ namespace EUROPA {
     }
 
     void FVDetectorFactory::registerFactory(const LabelStr& name, FVDetectorFactory* factory) {
-      checkError(factoryMap().find(name) == factoryMap().end(), "Tried to reigster factory for '" << name.toString() << "' twice.");
+      //checkError(factoryMap().find(name) == factoryMap().end(), "Tried to reigster factory for '" << name.toString() << "' twice.");
+      std::map<double, FVDetectorFactory*>::iterator it = factoryMap().find(name);
+      if(it != factoryMap().end()) {
+	delete it->second;
+	factoryMap().erase(it);
+      }
       factoryMap().insert(std::pair<double, FVDetectorFactory*>(name, factory));
     }
 

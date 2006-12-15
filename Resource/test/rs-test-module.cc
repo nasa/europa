@@ -1900,7 +1900,7 @@ void ResourceModuleTests::runTests(std::string path) {
   Schema::instance();
   initConstraintLibrary();
   REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
-  // REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
+  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   runTestSuite(ProfileTest::test);
