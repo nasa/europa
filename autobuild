@@ -89,7 +89,7 @@ sub checkJava {
 	my $JAVA = shift;
 	return 0 if(!(-x $JAVA));
 	my ($i, $j, $k) = `bash -c '$JAVA -version 2>&1'` =~ m/version \"(\d+)\.(\d+)\.(\d+)/m;
-	if($i < 1 || ($i == 1 && $j < 4) || ($i == 1 && $j == 4 && $k < 2)) {
+	if($i < 1 || ($i == 1 && $j < 5) || ($i == 1 && $j == 5 && $k < 0)) {
 		return 0;
 	}
 	return 1;
