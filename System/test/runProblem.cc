@@ -9,7 +9,6 @@
 #include <stdlib.h>
 
 #include "SolverAssembly.hh"
-#include "CBPlannerAssembly.hh"
 #include "SAVH_FVDetector.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_TimetableFVDetector.hh"
@@ -22,7 +21,6 @@ SchemaId schema;
 const char* initialTransactions = NULL;
 const char* averTestFile = NULL;
 const char* plannerConfig = NULL;
-const char* heuristics = NULL;
 bool replayRequired = false;
 
 
@@ -54,7 +52,7 @@ bool runPlanner(){
   doc.LoadFile();
   
 
-  assert(assembly.plan(initialTransactions,*(doc.RootElement()), heuristics, averTestFile));
+  assert(assembly.plan(initialTransactions,*(doc.RootElement()), averTestFile));
 
   debugMsg("Main:runPlanner", "Found a plan at depth " 
 	   << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched());
@@ -103,9 +101,8 @@ int internalMain(int argc, const char** argv){
 #define MODEL_INDEX 1
 #define TRANS_INDEX 2
 #define PCONF_INDEX 3
-#define HCONF_INDEX 4
-#define AVER_INDEX 5
-#define ARGC 6
+#define AVER_INDEX 4
+#define ARGC 5
 
   const char* error_msg;
   void* libHandle;
@@ -114,14 +111,13 @@ int internalMain(int argc, const char** argv){
 
   if(argc != ARGC && argc != ARGC - 1) {
     std::cout << "usage: runProblem <model shared library path>" <<
-      " <initial transaction file> <planner config file> <heuristics> [Aver test file]" << std::endl;
+      " <initial transaction file> <planner config file> [Aver test file]" << std::endl;
     return 1;
   }
   
   libPath = argv[MODEL_INDEX];
   initialTransactions = argv[TRANS_INDEX];
   plannerConfig = argv[PCONF_INDEX];
-  heuristics = argv[HCONF_INDEX];
 
   if(argc == ARGC)
     averTestFile = argv[AVER_INDEX];
@@ -155,18 +151,16 @@ int internalMain(int argc, const char** argv){
 #else //STANDALONE
 #define TRANS_INDEX 1
 #define PCONF_INDEX 2
-#define HCONF_INDEX 3
-#define AVER_INDEX 4
-#define ARGC 5
+#define AVER_INDEX 3
+#define ARGC 4
   if(argc != ARGC && argc != ARGC-1) {
     std::cout << "usage: runProblem <initial transaction file> "
-	      << "<planner config> <heuristics file> [Aver test file]" << std::endl;
+	      << "<planner config> [Aver test file]" << std::endl;
     std::cout << ARGC << " " << argc << std::endl;
     return 1;
   }
   initialTransactions = argv[TRANS_INDEX];
   plannerConfig = argv[PCONF_INDEX];
-  heuristics = argv[HCONF_INDEX];
 
   if(argc == ARGC)
     averTestFile = argv[AVER_INDEX];
@@ -232,13 +226,13 @@ int main(int argc, const char** argv) {
 #define ONE_ASSEMBLY_ONLY
 #ifdef ONE_ASSEMBLY_ONLY
 #ifdef CBPLANNER
-  return internalMain<CBPlannerAssembly>(argc, argv);
+#error "CBPlanner is now deprecated."
 #else
   return internalMain<SolverAssembly>(argc, argv);
 #endif
 #else
 #ifdef CBPLANNER
-  bool result = internalMain<CBPlannerAssembly>(argc, argv);
+#error "CBPlanner is now deprecated."
 #else
   bool result = internalMain<SolverAssembly>(argc, argv);
 #endif
@@ -247,9 +241,9 @@ int main(int argc, const char** argv) {
     return result;
   else {
 #ifdef CBPLANNER
-    return internalMain<SolverAssembly>(argc, argv);
+#error "CBPlanner is now deprecated."
 #else
-    return internalMain<CBPlannerAssembly>(argc, argv);
+    return internalMain<SolverAssembly>(argc, argv);
 #endif
   }
 #endif

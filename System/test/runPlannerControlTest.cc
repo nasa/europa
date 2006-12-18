@@ -44,7 +44,7 @@ int main(int argc, const char ** argv) {
     exit(1);
   }
 
-  // load the CBPlannerControl shared library
+  // load the planner control shared library
   printf("runPlannerControlTest:Loading planner shared library file: %s\n", plannerLibPath);
   fflush(stdout);
   

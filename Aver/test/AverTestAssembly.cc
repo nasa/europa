@@ -47,7 +47,6 @@ const char* s_plannerConfig = "DefaultPlannerConfig.xml";
 namespace EUROPA {
 
   AverTestAssembly::AverTestAssembly(const SchemaId& schema, const char* averFile) : StandardAssembly(schema) { 
-    //m_planner = (new CBPlanner(m_planDatabase, m_horizon.getId()))->getId();
     TiXmlDocument doc(s_plannerConfig);
     doc.LoadFile();
     m_planner = (new SOLVERS::Solver(m_planDatabase, *(doc.RootElement())))->getId();

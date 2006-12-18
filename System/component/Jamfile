@@ -2,6 +2,6 @@ SubDir PLASMA System component ;
 
 if ! $(PLASMA_READY) {
 
-ModuleComponent System	: CBPlannerAssembly.cc SolverAssembly.cc ;
+ModuleComponent System	: SolverAssembly.cc ;
 
 } # PLASMA_READY

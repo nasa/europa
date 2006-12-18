@@ -13,8 +13,6 @@
 #include "ConstraintEngineDefs.hh"
 #include "RulesEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
-//#include "TemporalNetworkDefs.hh"
-//#include "CBPlannerDefs.hh"
 #include "SolverDefs.hh"
 #include "SolverDecisionPoint.hh"
 #include "Object.hh"
