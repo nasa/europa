@@ -224,7 +224,7 @@ void __assert_fail(const char *__assertion,
 
 
 int main(int argc, const char** argv) {
-  //REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
+  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
   REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
   REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
   REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
