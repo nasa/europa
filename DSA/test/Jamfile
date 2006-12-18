@@ -16,5 +16,6 @@ if $(LIBRARIES) = SHARED {
 # C++ test Harness
 ModuleMain dsa-module-tests : module-tests.cc dsa-test-module.cc : DSA ;
 RunModuleMain run-dsa-module-tests : dsa-module-tests ;
+LocalDepends tests : run-dsa-module-tests ;
 
 } # PLASMA_READY
