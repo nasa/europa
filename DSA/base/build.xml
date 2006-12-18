@@ -27,7 +27,7 @@
 
   <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" debug="${debug}" deprecation="${deprecation}">
+    <javac source="1.5" target="1.5" srcdir="${src}" destdir="${build}" debug="${debug}" deprecation="${deprecation}">
        <classpath>
 	  <pathelement location="../../NDDL/base/jars/nddl.jar"/>
        </classpath>
