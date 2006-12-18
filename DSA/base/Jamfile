@@ -3,7 +3,15 @@ SubDir PLASMA DSA base ;
 if ! $(PLASMA_READY) {
 
 if $(JAVA_HOME) {
-	SubDirC++Flags -I$(JAVA_HOME)/include ;
+	if $(OS) = SOLARIS {
+		SubDirC++Flags -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/solaris ;
+	}
+	else if $(OS) = LINUX {
+		SubDirC++Flags -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux ;
+	}
+	else {
+		SubDirC++Flags -I$(JAVA_HOME)/include ;
+	}
 }
 
 ModuleBase DSA : DSA.cc ;
