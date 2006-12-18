@@ -10,6 +10,7 @@ import dsa.InvalidSourceException;
 import dsa.NoModelException;
 import dsa.Proposition;
 import dsa.Resource;
+import dsa.LibraryLoader;
 
 // nanoxml support
 import net.n3.nanoxml.IXMLElement;
@@ -41,7 +42,7 @@ public class DSAImpl
 		// Infer debug vs fast from library name
 		boolean debug = model.contains("_g");
 		String suffix = (debug ? "g" : "o");
-	    System.loadLibrary("DSA_"+suffix);
+	    LibraryLoader.loadLibrary("DSA_"+suffix);
     	m_model = model;
 	    JNI.load(model);
     }

@@ -2,6 +2,10 @@ SubDir PLASMA DSA base ;
 
 if ! $(PLASMA_READY) {
 
+if $(JAVA_HOME) {
+	SubDirC++Flags -I$(JAVA_HOME)/include ;
+}
+
 ModuleBase DSA : DSA.cc ;
 
 MakeLocate DSA.jar : [ FDirName $(SUBDIR) .. .. lib ] ;
@@ -20,6 +24,7 @@ ApacheAnt DSA.jar :
 	dsa/Proposition.java
 	dsa/Parameter.java
 	dsa/Violation.java
+	dsa/LibraryLoader.java
 	dsa/InvalidSourceException.java
 	dsa/InvalidSinkException.java
 	dsa/PlanNotSavedException.java

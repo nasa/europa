@@ -27,7 +27,8 @@
   <target name="execute" depends="compile" description="build and run test harness" >
     <!-- Compile the java code from ${src} into ${build} -->
     <java classname="Main">
-       <arg value="${env.PLASMA_HOME}/DSA/test/"/>
+       <arg value="${basedir}"/>
+       <arg value="${PLASMA.variant.suffix}"/>
        <classpath>
 	  <pathelement location="${dist}/DSA.jar"/>
 	  <pathelement location="${jars}/junit/junit-4.1.jar"/>

@@ -12,21 +12,20 @@ public class Main extends TestCase {
 	s_path = args[0];
 	
 	if (args.length > 1)
-		libVersion = "_"+args[1];
+		libVersion = args[1];
 	
 	junit.textui.TestRunner.run(new TestSuite(Main.class));
     }
 
     static String makeLibName(String lib)
     {
-    	// TODO: ".so" is platform specific, fix it.    	
-        return lib+libVersion+".so"; 	
+        return LibraryLoader.mapLibraryName(lib+libVersion);
     }
     
     static String makeLibPath(String lib)
     {
-    	System.out.println("\n"+s_path + makeLibName(lib));
-    	return s_path + makeLibName(lib);
+    	System.out.println("\n"+s_path + "/" + makeLibName(lib));
+    	return s_path + "/" + makeLibName(lib);
     }
     
     public void setUp(){
@@ -35,10 +34,10 @@ public class Main extends TestCase {
 
     public void testModelLoading(){
 	try{
-	    DSAManager.getInstance().loadModel(makeLibPath("libmodel.1"));
-	    DSAManager.getInstance().addPlan(s_path + "model.1.xml",false);
-	    DSAManager.getInstance().loadModel(makeLibPath("libmodel.2"));
-	    DSAManager.getInstance().addPlan(s_path + "model.2.xml",false);
+	    DSAManager.getInstance().loadModel(makeLibPath("model.1"));
+	    DSAManager.getInstance().addPlan(s_path + "/model.1.xml",false);
+	    DSAManager.getInstance().loadModel(makeLibPath("model.2"));
+	    DSAManager.getInstance().addPlan(s_path + "/model.2.xml",false);
 	}
 	catch(Exception e){
 	    Assert.assertTrue(false);
@@ -47,8 +46,8 @@ public class Main extends TestCase {
    
     public void testComponentQuery(){
 	try{
-	    DSAManager.getInstance().loadModel(makeLibPath("libmodel.1"));
-	    DSAManager.getInstance().addPlan(s_path + "model.1.xml",false);
+	    DSAManager.getInstance().loadModel(makeLibPath("model.1"));
+	    DSAManager.getInstance().addPlan(s_path + "/model.1.xml",false);
 	    List<Component> components = DSAManager.getInstance().getComponents();
 	    Assert.assertTrue(components.size() == 1);
 	}
@@ -59,8 +58,8 @@ public class Main extends TestCase {
 
     public void testActionQuery(){
 	try{
-	    DSAManager.getInstance().loadModel(makeLibPath("libmodel.1"));
-	    DSAManager.getInstance().addPlan(s_path + "model.1.xml",false);
+	    DSAManager.getInstance().loadModel(makeLibPath("model.1"));
+	    DSAManager.getInstance().addPlan(s_path + "/model.1.xml",false);
 	    List<Component> components = DSAManager.getInstance().getComponents();
 	    ListIterator<Component> it = components.listIterator();
 	    while(it.hasNext()){
@@ -76,10 +75,10 @@ public class Main extends TestCase {
 
     public void testSolverExecution(){
 	try{
-	    DSAManager.getInstance().loadModel(makeLibPath("libmodel.1"));
-	    DSAManager.getInstance().addPlan(s_path + "model.1.xml",false);
+	    DSAManager.getInstance().loadModel(makeLibPath("model.1"));
+	    DSAManager.getInstance().addPlan(s_path + "/model.1.xml",false);
 
-	    Solver solver = SolverManager.createInstance(s_path + "solver.1.cfg", 0, 1000, 10, 10);
+	    Solver solver = SolverManager.createInstance(s_path + "/solver.1.cfg", 0, 1000, 10, 10);
 	    Assert.assertTrue(solver.solve());
 	    Assert.assertTrue(solver.getStepCount() == 2);
 	    Assert.assertTrue(solver.getDepth() == 2);
@@ -91,7 +90,7 @@ public class Main extends TestCase {
 	    Assert.assertTrue(solver.getDepth() == 2);
 
 	    // Now allocate again and confirm the base data. This time no work to do
-	    solver = SolverManager.createInstance(s_path + "solver.1.cfg", 0, 1000, 10, 10);
+	    solver = SolverManager.createInstance(s_path + "/solver.1.cfg", 0, 1000, 10, 10);
 	    Assert.assertTrue(solver.solve());
 	    Assert.assertTrue(solver.getStepCount() == 0);
 	    Assert.assertTrue(solver.getDepth() == 0);

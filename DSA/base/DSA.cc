@@ -457,6 +457,7 @@ namespace EUROPA {
     void DSA::load(const char* modelStr){
       unload();
 
+			debugMsg("DSA:load", "Attempting to load " << modelStr);
       m_libHandle = dlopen(modelStr, RTLD_NOW);
 
       //locate the NDDL 'loadSchema' function in the library and check for errors

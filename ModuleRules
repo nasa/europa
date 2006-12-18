@@ -12,6 +12,7 @@ include [ FDirName $(SUBDIR) VariantRules ] ;
 #   NONE
 
 LIBRARIES ?= SHARED ;
+SUFPIC ?= "" ;
 
 # Module <name> : <modules this module depends on> ;
 rule Module {
@@ -117,7 +118,7 @@ rule ModuleObjects {
 
           local output = [ FVariantName $(file:S=) : $(variant) ] ;
           if $(use_pic_flag) = YES {
-            output = $(output)_pic ;
+            output = $(output)$(SUFPIC) ;
           }
           output = $(output)$(SUFOBJ) ;
           local HDRS = $(headers) ;
@@ -177,7 +178,7 @@ rule ModuleNamedObjects {
           local localoutput = [ FVariantName $(output) : $(variant) ] ;
           #local output = [ FVariantName $(file:S=) : $(variant) ] ;
           if $(use_pic_flag) = YES {
-            localoutput = $(localoutput)_pic ;
+            localoutput = $(localoutput)$(SUFPIC) ;
           }
           localoutput = $(localoutput)$(SUFOBJ) ;
           localoutput = [ FGristFiles $(localoutput) ] ; 
@@ -260,7 +261,7 @@ rule ModuleMain {
           }
           local output = [ FVariantName $(file:S=) : $(variant) ] ;
           if $(library) = SHARED {
-            output = $(output)_pic ;
+            output = $(output)$(SUFPIC) ;
           }
           output = $(output)$(SUFOBJ) ;
           outputs += $(output) ;
@@ -294,7 +295,7 @@ rule ModuleSharedLibrary {
         for file in $(files) {
           file = [ FGristFiles $(file) ] ;
           local output = [ FVariantName $(file:S=) : $(variant) ] ;
-          output = $(output)_pic ;
+          output = $(output)$(SUFPIC) ;
           output = $(output)$(SUFOBJ) ;
           outputs += $(output) ;
         }
@@ -435,7 +436,7 @@ rule ModulePart {
           file = [ FGristFiles $(file) ] ;
           local output = [ FVariantName $(file:S=) : $(variant) ] ;
           if $(library) = SHARED {
-            output = $(output)_pic ;
+            output = $(output)$(SUFPIC) ;
           }
           output = $(output)$(SUFOBJ) ;
           outputs += $(output) ;
