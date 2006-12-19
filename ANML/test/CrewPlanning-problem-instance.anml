@@ -9,7 +9,7 @@
  *
  */
  
-include "CrewPlanning-model.anml"
+#include "CrewPlanning-model.anml"
 
 int start_horizon = 0,
     end_horizon = 5760; // Plan for 4 days

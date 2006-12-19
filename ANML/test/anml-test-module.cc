@@ -10,11 +10,11 @@
 #include "DefaultPropagator.hh"
 #include "Object.hh"
 #include "Constraints.hh"
+#include "ANMLParser.hpp"
 
 #include "LockManager.hh"
 
 using namespace EUROPA;
-using namespace ANML;
 
 class CrewTest {
 public:
@@ -25,18 +25,20 @@ public:
 private:
   static bool testParse() {
     // do tests with assertTrue!
+		assertTrue(ANMLParser::parse(getTestLoadLibraryPath(),"CrewPlanning-problem-instance.anml"));
     return true;
   }
-}
+};
 
 void ANMLModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
   LockManager::instance().lock();
+	setTestLoadLibraryPath(path);
 
   REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
 
   // Pre-allocate a schema
-  SCHEMA;
+  //SCHEMA;
 
   //initANML();
   runTestSuite(CrewTest::test); 

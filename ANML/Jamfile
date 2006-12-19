@@ -2,7 +2,7 @@ SubDir PLASMA ANML ;
 
 if ! $(PLASMA_READY) {
 
-Module ANML : RulesEngine Resource TemporalNetwork PlanDatabase ;
+Module ANML : Antlr RulesEngine Resource TemporalNetwork PlanDatabase ;
 
 SubInclude PLASMA ANML base ;
 SubInclude PLASMA ANML component ;

@@ -1,0 +1,10 @@
+SubDir PLASMA Antlr ;
+
+if ! $(PLASMA_READY) {
+
+Module Antlr ;
+
+SubInclude PLASMA Antlr base ;
+# SubInclude PLASMA Antlr documentation ;
+
+} # PLASMA_READY

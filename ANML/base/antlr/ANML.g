@@ -1,5 +1,19 @@
-header {
+header "post_include_hpp" {
+#include <string>
 #include <iostream>
+#include <fstream>
+#include "antlr/TokenStreamSelector.hpp"
+
+class ANMLParser;
+class ANMLLexer;
+
+// Define a selector that can handle nested include files.
+// These variables are public so the parser/lexer can see them.
+extern ANTLR_USE_NAMESPACE(antlr)TokenStreamSelector selector;
+extern const std::string* searchDir;
+extern ANMLParser* parser;
+extern ANMLLexer* mainLexer;
+#include "ANMLLexer.hpp"
 }
 
 /* for ANTLR 3
@@ -11,7 +25,50 @@ header {
 */
 options {
   language="Cpp";
-	namespace="ANML";
+}
+
+{
+
+  // Define a selector that can handle nested include files.
+  // These variables are public so the parser/lexer can see them.
+  ANTLR_USE_NAMESPACE(antlr)TokenStreamSelector selector;
+  ANMLParser* parser;
+  ANMLLexer* mainLexer;
+	const std::string* searchDir;
+
+  bool ANMLParser::parse(const std::string& path, const std::string& filename) {
+		searchDir = &path;
+    try {
+      // attach java lexer to the input stream,
+      std::ifstream* input = new std::ifstream((path + "/" + filename).c_str());
+      if (!*input) {
+        std::cerr << "cannot find file " << filename << std::endl;
+      }   
+      mainLexer = new ANMLLexer(*input);
+
+      // notify selector about starting lexer; name for convenience
+      selector.addInputStream(mainLexer, "main");
+      selector.select("main"); // start with main P lexer
+
+      // Create parser attached to selector
+      parser = new ANMLParser(selector);
+
+      // Parse the input language: ANML
+      parser->setFilename(filename);
+      parser->anml_program();
+    }
+    catch( antlr::ANTLRException& e )
+    {
+      std::cerr << "exception: " << e.getMessage() << std::endl;
+      return false;
+    }
+    catch( std::exception& e )
+    {
+      std::cerr << "exception: " << e.what() << std::endl;
+      return false;
+    }
+    return true;
+  }
 }
 
 class ANMLParser extends Parser;
@@ -22,14 +79,8 @@ options {
 }
 
 {
-	int main(int argc, char** argv) {
-		assert(argc == 1);
-		std::cout << "Parsing \"" << argv[0] << "\"" << std::endl;
-		ANMLLexer lexer = ANMLLexer(ifstream(argv[0]));
-		ANMLParser parser = ANMLParser(lexer);
-		parser.anml_program();
-		return 0;
-	}
+	public:
+		static bool parse(const std::string& path, const std::string& filename);
 }
 
 anml_program 
@@ -39,7 +90,6 @@ anml_program
 anml_stmt
     : declaration
     | problem_stmt
-    | include_file
 ;
 
 declaration 
@@ -58,13 +108,6 @@ problem_stmt
     | goal
 ;
    
-include_file : 
-    INCLUDE s1:STRING_LIT
-{
-	std::cout << "do include here" << std::endl;
-}
-;
-  
 vartype_decl 
     : VARTYPE user_defined_type_name COLON var_type
 ;
@@ -244,10 +287,10 @@ expr
 relop
     : EQUAL
     /*
-    | LT
-    | LE
-    | GT
-    | GE
+    | LTH
+    | LEQ
+    | GTH
+    | GEQ
     */
 ;
 
@@ -414,7 +457,7 @@ constant
 
 numeric_literal 
     : NUMERIC_LIT
-    | (PLUS|MINUS) INFINITY
+    | (PLUS|MINUS) INF
 ;
 
 string_literal
@@ -430,10 +473,16 @@ var_name                : IDENTIFIER | START | END;
 
 user_defined_type_name  : IDENTIFIER;
 
+{
+#include <iostream>
+#include <fstream>
+#include "ANMLParser.hpp"
+}
 
 class ANMLLexer extends Lexer;
 options { 
     k=5;
+		charVocabulary = '\3'..'\377';
     //caseSensitive=false; 
     testLiterals=false;   // don't automatically test for literals
 }
@@ -461,7 +510,6 @@ tokens {
     FORALL        = "forall";
     GOAL          = "goal";
     IN            = "in";
-    INCLUDE       = "include";
     INT           = "int";
     FLOAT         = "float";
     FOR           = "for";
@@ -482,8 +530,54 @@ tokens {
     VARTYPE       = "vartype";
     VECTOR        = "vector";
     WHEN          = "when";
-    INFINITY      = "inf";
+    INF           = "inf";
 }
+
+{
+	void uponEOF() /*throws TokenStreamException, CharStreamException*/ {
+		if ( selector.getCurrentStream() != mainLexer ) {
+			// don't allow EOF until main lexer.  Force the
+			// selector to retry for another token.
+			selector.pop(); // return to old lexer/stream
+			selector.retry();
+		}
+		else {
+			ANTLR_USE_NAMESPACE(std)cout << "Hit EOF of main file" << ANTLR_USE_NAMESPACE(std)endl;
+		}
+	}
+}
+
+INCLUDE
+	:	"#include" (WS)? f:STRING_LIT
+		{
+		ANTLR_USING_NAMESPACE(std)
+		// create lexer to handle include
+		string name = f->getText();
+		ifstream* input = new ifstream((*searchDir + "/" + name).c_str());
+		if (!*input) {
+			cerr << "cannot find file " << name << endl;
+			cerr << "tried " << *searchDir << "/" << name << endl;
+		}
+		ANMLLexer* sublexer = new ANMLLexer(*input);
+		// make sure errors are reported in right file
+		sublexer->setFilename(name);
+		parser->setFilename(name);
+
+		// you can't just call nextToken of sublexer
+		// because you need a stream of tokens to
+		// head to the parser.  The only way is
+		// to blast out of this lexer and reenter
+		// the nextToken of the sublexer instance
+		// of this class.
+
+		selector.push(sublexer);
+		// ignore this as whitespace; ask selector to try
+		// to get another token.  It will call nextToken()
+		// of the new instance of this lexer.
+		selector.retry(); // throws TokenStreamRetryException
+		$setType(ANTLR_USE_NAMESPACE(antlr)Token::SKIP);
+		}
+	;
 
 IDENTIFIER 
 	options {testLiterals=true;}
@@ -506,10 +600,10 @@ AND             :   '&'     ;
 OR              :   '|'     ;
 
 EQUAL	        :   '='     ;
-GE			    :	">="	;
-GT			    :	">"		;
-LE			    :	"<="	;
-LT			    :	'<'		;
+GEQ			    :	">="	;
+GTH			    :	">"		;
+LEQ			    :	"<="	;
+LTH			    :	'<'		;
 
 PLUS            :   '+'     ;
 MINUS           :   '-'     ;
@@ -532,21 +626,27 @@ WS	:	(	' '
 			)
 			{ newline(); }
 		)+
-		{ _ttype = Token.SKIP; }
+		{ _ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP; }
 ;
+
 
 // a numeric literal
 NUMERIC_LIT
-	{boolean isDecimal=false; Token t=null;}
-    :   '.' { _ttype = DOT; }
+	{
+		bool isDecimal = false;
+		ANTLR_USE_NAMESPACE(antlr)RefToken t = ANTLR_USE_NAMESPACE(antlr)nullToken;
+	}
+    :   '.' {_ttype = DOT;}
             (	('0'..'9')+ (EXPONENT)? (f1:FLOAT_SUFFIX {t=f1;})?
-                {
-				if (t != null && t.getText().toUpperCase().indexOf('F')>=0) {
-                	//_ttype = NUM_FLOAT;
-				}
-				else {
-                	//_ttype = NUM_DOUBLE; // assume double
-				}
+            {
+					if ( t &&
+						  (t->getText().find('f') != ANTLR_USE_NAMESPACE(std)string::npos ||
+							t->getText().find('F') != ANTLR_USE_NAMESPACE(std)string::npos ) ) {
+						//_ttype = NUM_FLOAT;
+					}
+					else {
+						//_ttype = NUM_DOUBLE; // assume double
+					}
 				}
             )?
 
@@ -563,11 +663,13 @@ NUMERIC_LIT
 					}
 				:	HEX_DIGIT
 				)+
+			|	//float or double with leading zero
+				(('0'..'9')+ ('.'|EXPONENT|FLOAT_SUFFIX)) => ('0'..'9')+
 			|	('0'..'7')+									// octal
 			)?
 		|	('1'..'9') ('0'..'9')*  {isDecimal=true;}		// non-zero decimal
 		)
-		(	('l'|'L') { /*_ttype = NUM_LONG;*/ }
+		(	('l'|'L') { /* _ttype = NUM_LONG; */ }
 
 		// only check to see if it's a float if looks like decimal so far
 		|	{isDecimal}?
@@ -576,13 +678,15 @@ NUMERIC_LIT
             |   f4:FLOAT_SUFFIX {t=f4;}
             )
             {
-			if (t != null && t.getText().toUpperCase() .indexOf('F') >= 0) {
-                //_ttype = NUM_FLOAT;
-			}
-            else {
-	           	//_ttype = NUM_DOUBLE; // assume double
-			}
-			}
+					if ( t &&
+						  (t->getText().find('f') != ANTLR_USE_NAMESPACE(std)string::npos ||
+							t->getText().find('F') != ANTLR_USE_NAMESPACE(std)string::npos ) ) {
+						//_ttype = NUM_FLOAT;
+					}
+					else {
+						//_ttype = NUM_DOUBLE; // assume double
+					}
+				}
         )?
 	;
 
@@ -608,7 +712,7 @@ HEX_DIGIT
 
 // string literals
 STRING_LIT
-	:	'"' (ESC|~('"'|'\\'|'\n'|'\r'))* '"'
+	:	'"'! (ESC|~('"'|'\\'|'\n'|'\r'))* '"'!
 	;
 
 // escape sequence -- note that this is protected; it can only be called
@@ -658,7 +762,7 @@ ESC
 SL_COMMENT
 	:	"//"
 		(~('\n'|'\r'))* ('\n'|'\r'('\n')?)
-		{$setType(Token.SKIP); newline();}
+		{$setType(ANTLR_USE_NAMESPACE(antlr)Token::SKIP); newline();}
 	;
 
 // multiple-line comments
@@ -682,6 +786,6 @@ ML_COMMENT
 		|	~('*'|'\n'|'\r')
 		)*
 		"*/"
-		{$setType(Token.SKIP);}
+		{$setType(ANTLR_USE_NAMESPACE(antlr)Token::SKIP);}
 	;
 
