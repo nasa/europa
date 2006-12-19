@@ -1,0 +1,8 @@
+*.so
+*.o
+RUN*
+SimpleRover*.cc
+SimpleRover*.hh
+SimpleRover*.xml
+*rt
+
