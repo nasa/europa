@@ -38,7 +38,7 @@ rule AntlrTool
 
 #  Echo AntlrTool . $(files) . $(grammar) ;
 
-	LOCATE on $(files) = $(LOCATE_TARGET) ;
+	LOCATE on $(files) = $(LOCATE_SOURCE) ;
   SEARCH on $(grammar) = $(SEARCH_SOURCE) ;
   RunAntlrTool $(files) : $(grammar) ;
 }

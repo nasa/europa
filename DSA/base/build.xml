@@ -20,6 +20,7 @@
     <tstamp/>
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}"/>
+    <mkdir dir="${dist}"/>
     <!-- echo message="init completed"/ -->
   </target>
 
@@ -29,7 +30,7 @@
     <!-- Compile the java code from ${src} into ${build} -->
     <javac source="1.5" target="1.5" srcdir="${src}" destdir="${build}" debug="${debug}" deprecation="${deprecation}">
        <classpath>
-	  <pathelement location="../../NDDL/base/jars/nddl.jar"/>
+	  <pathelement location="${dist}/nddl.jar"/>
        </classpath>
     </javac>
     <echo message="compile completed"/>
@@ -57,6 +58,7 @@
 				<attribute name="Main-Class" value="dsa.DSA"/>
 			</manifest>
 		</jar>
+		<touch file="${dist}/DSA.jar"/>
     <echo message=" DSA.jar completed"/>
   </target>
 

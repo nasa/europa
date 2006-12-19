@@ -16,8 +16,6 @@ if $(JAVA_HOME) {
 
 ModuleBase DSA : DSA.cc ;
 
-MakeLocate DSA.jar : [ FDirName $(SUBDIR) .. .. lib ] ;
-
 ApacheAnt JNI.h : [ FGristFiles build.xml ] dsa/impl/JNI.java : createJNI ;
 
 ApacheAnt DSA.jar : 
@@ -41,10 +39,12 @@ ApacheAnt DSA.jar :
 	dsa/impl/JNI.java
 	dsa/impl/TokenImpl.java
 	dsa/impl/ActionImpl.java
-	nddl.jar :
+	:
 	DSA
 ;
 
 Depends DSA.jar : nddl.jar ;
+
+MakeLocate DSA.jar : lib ;
 	
 } # PLASMA_READY

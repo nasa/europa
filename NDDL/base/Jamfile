@@ -11,9 +11,6 @@ ModuleBase NDDL
 	NddlRules.cc
 	;
 
-# some workaround stuff for new ApacheAnt target
-MakeLocate nddl.jar : [ FDirName $(SUBDIR) jars ] ;
-
 ApacheAnt nddl.jar :
 	[ FGristFiles build.xml ]
 	# ANTLR Grammars
@@ -57,6 +54,6 @@ ApacheAnt nddl.jar :
 	java/nddl/NddlUtil.java
 	;
 
-NDDL_JAR = $(SUBDIR)/jars/nddl.jar ;
+MakeLocate nddl.jar : lib ;
 
 } # PLASMA_READY

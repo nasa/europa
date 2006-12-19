@@ -32,7 +32,7 @@
        <classpath>
 	  <pathelement location="${dist}/DSA.jar"/>
 	  <pathelement location="${jars}/junit/junit-4.1.jar"/>
-	  <pathelement location="../../NDDL/base/jars/nddl.jar"/>
+	  <pathelement location="${dist}/nddl.jar"/>
 	  <pathelement location="./classes"/>
        </classpath>
     </java>

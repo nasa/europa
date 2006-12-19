@@ -7,7 +7,7 @@
 	<property name="src" location="java"/>
 	<property name="class" location="classes"/>
 	<property name="cache" location="classes/cache"/>
-	<property name="jars" location="jars"/>
+	<property name="dist" location="../../lib"/>
 	<property name="libraries" location="../../ext/lib"/>
 
 	<target name="antlr"
@@ -49,8 +49,8 @@
 		</unjar>
 		<delete dir="${cache}/unjar/META-INF"/>
 
-		<mkdir dir="${jars}"/>
-		<jar jarfile="${jars}/nddl.jar">
+		<mkdir dir="${dist}"/>
+		<jar jarfile="${dist}/nddl.jar">
 			<fileset dir="${class}">
 				<exclude name="cache"/>
 				<exclude name="cache/**/*"/>
@@ -60,13 +60,14 @@
 				<attribute name="Main-Class" value="nddl.Nddl"/>
 			</manifest>
 		</jar>
+		<touch file="${dist}/nddl.jar"/>
 	</target>
 
 	<target name="clean"
 	  description="Remove all generated files and directories">
 		<delete dir="${cache}"/>
 		<delete dir="${class}"/>
-		<delete file="${jars}/nddl.jar"/>
+		<delete file="${dist}/nddl.jar"/>
 		<delete file="${src}/nddl/NddlLexer.java"/>
 		<delete file="${src}/nddl/NddlParser.java"/>
 		<delete file="${src}/nddl/NddlTreeParser.java"/>
