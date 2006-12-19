@@ -12,6 +12,7 @@ ModuleComponent PlanDatabase
 	EventToken.cc
 	IntervalToken.cc
 	Timeline.cc
+	TransactionInterpreter.cc
 	;
 
 } # PLASMA_READY

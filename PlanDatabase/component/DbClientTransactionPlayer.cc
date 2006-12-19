@@ -8,12 +8,15 @@
 #include "TypeFactory.hh"
 #include "PlanDatabase.hh"
 #include "Object.hh"
+#include "ObjectFactory.hh"
 #include "UnifyMemento.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"
 #include "DbClient.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "DbClientTransactionLog.hh"
+#include "TransactionInterpreter.hh"
+
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -995,7 +998,8 @@ namespace EUROPA {
    * 
    * InterpretedDbClientTransactionPlayer
    * 
-   */    
+   */ 
+       
   InterpretedDbClientTransactionPlayer::InterpretedDbClientTransactionPlayer(const DbClientId & client)
     : DbClientTransactionPlayer(client) 
   {
@@ -1042,7 +1046,7 @@ namespace EUROPA {
 	    else if (strcmp(tagname, "enum") == 0) 
 	    	defineEnum(schema,className,child);	    	
     }
-    
+
     dbgout << "}" << std::endl;    
     std::cout << dbgout.str() << std::endl; 
   }
@@ -1057,21 +1061,47 @@ namespace EUROPA {
 
   void InterpretedDbClientTransactionPlayer::defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
   {	
-      dbgout << ident << "constructor ("; 
+  	  std::ostringstream signature;
+  	  signature << className;
+
+      std::vector<std::string> constructorArgNames;
+      std::vector<std::string> constructorArgTypes;
+      std::vector<Expr*> constructorBody;
+        	  
       for(const TiXmlElement* child = element->FirstChildElement(); child; child = child->NextSiblingElement() ) {
       	  if (strcmp(child->Value(),"arg") == 0) {
 	          const char* type = safeStr(child->Attribute("type"));	
 	          const char* name = safeStr(child->Attribute("name"));	
-	          dbgout << type << " " << name << ",";
-      	  }
-      	  if (strcmp(child->Value(),"assign") == 0) {
-      	  	// TODO: jrb
+	          constructorArgNames.push_back(name);
+	          constructorArgTypes.push_back(type);
+	          signature << ":" << type;
       	  }
       	  if (strcmp(child->Value(),"super") == 0) {
       	  	// TODO: jrb
+      	  	
+      	  	constructorBody.push_back(new ExprConstructorSuperCall(className));
+      	  }
+      	  if (strcmp(child->Value(),"assign") == 0) {
+      	  	const TiXmlElement* rhsChild = child->FirstChildElement();
+
+      	  	const char* lhs = child->Attribute("name");
+      	  	const char* rhs = rhsChild->Attribute("name");
+
+            // rhs type can be "value" (constant), "new" (new object) or "id" (parameter)  
+      	  	const char* rhsType = rhsChild->Value();
+
+      	  	constructorBody.push_back(new ExprConstructorAssignment(lhs,rhs,rhsType));
       	  }
       }	
-      dbgout << ")" << std::endl;
+      dbgout << ident << "constructor (" << signature.str() << ")"; 
+      
+      // The ObjectFactory constructor automatically registers the factory
+      new InterpretedObjectFactory(
+          signature.str(),
+          constructorArgNames,
+          constructorArgTypes,
+          constructorBody
+      ); 
   }
 
   void InterpretedDbClientTransactionPlayer::declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
@@ -1081,10 +1111,15 @@ namespace EUROPA {
 
       dbgout << ident << "predicate " <<  predName << "(";
       for(const TiXmlElement* predArg = element->FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
+      	if (strcmp(predArg->Value(),"var") == 0) {
 	      const char* type = safeStr(predArg->Attribute("type"));	
 	      const char* name = safeStr(predArg->Attribute("name"));	
 	      dbgout << type << " " << name << ",";
-          schema->addMember(predName.c_str(), type, name);              
+          schema->addMember(predName.c_str(), type, name);
+      	}
+      	else if (strcmp(predArg->Value(),"invoke") == 0) {
+      		dbgout << "constraint " << predArg->Attribute("name");
+      	}             
       }	
       dbgout << ")" << std::endl;
   }
