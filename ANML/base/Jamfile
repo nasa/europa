@@ -1,0 +1,11 @@
+SubDir PLASMA ANML base ;
+
+if ! $(PLASMA_READY) {
+
+ ModuleBase ANML
+	 :
+	 ANMLLexer.cpp
+	 ANMLParser.cpp
+	 ;
+
+} # PLASMA_READY

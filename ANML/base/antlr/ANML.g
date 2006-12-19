@@ -1,7 +1,5 @@
 header {
-    package anml;
-
-    import java.io.*;
+#include <iostream>
 }
 
 /* for ANTLR 3
@@ -11,12 +9,27 @@ header {
     package anml;
 }
 */
+options {
+  language="Cpp";
+	namespace="ANML";
+}
 
 class ANMLParser extends Parser;
 options {
     //buildAST = true;	// uses CommonAST by default
     k=3;
     //defaultErrorHandler=false;
+}
+
+{
+	int main(int argc, char** argv) {
+		assert(argc == 1);
+		std::cout << "Parsing \"" << argv[0] << "\"" << std::endl;
+		ANMLLexer lexer = ANMLLexer(ifstream(argv[0]));
+		ANMLParser parser = ANMLParser(lexer);
+		parser.anml_program();
+		return 0;
+	}
 }
 
 anml_program 
@@ -48,16 +61,7 @@ problem_stmt
 include_file : 
     INCLUDE s1:STRING_LIT
 {
-    try {
-        // quick implementation in java
-        String filename=s1.getText().replace('\"',' ').trim();
-        ANMLLexer sublexer = new ANMLLexer(new FileInputStream(filename));
-        ANMLParser parser = new ANMLParser(sublexer);
-        parser.anml_program();
-    }
-    catch (Exception e) {
-    	throw new RuntimeException(e);
-    }
+	std::cout << "do include here" << std::endl;
 }
 ;
   
