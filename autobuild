@@ -54,14 +54,14 @@ my @buildtypes =
  	{NAME => "Static-Optimized", TARGET => "run-all-tests",
  	   LIBRARIES => "STATIC",      VARIANTS => "OPTIMIZED"},
  	{NAME => "Static-Profile",   TARGET => "run-all-tests",
- 	   LIBRARIES => "STATIC",      VARIANTS => "PROFILE"},
+ 	   LIBRARIES => "STATIC",      VARIANTS => "PROFILE"}
 
- 	{NAME => "Nolibs-Dev",       TARGET => "run-all-tests",
- 	   LIBRARIES => "NONE",        VARIANTS => "DEV"},
- 	{NAME => "Nolibs-Optimized", TARGET => "run-all-tests",
- 	   LIBRARIES => "NONE",        VARIANTS => "OPTIMIZED"},
- 	{NAME => "Nolibs-Profile",   TARGET => "run-all-tests",
- 	   LIBRARIES => "NONE",        VARIANTS => "PROFILE"}
+# 	{NAME => "Nolibs-Dev",       TARGET => "run-all-tests",
+# 	   LIBRARIES => "NONE",        VARIANTS => "DEV"},
+# 	{NAME => "Nolibs-Optimized", TARGET => "run-all-tests",
+# 	   LIBRARIES => "NONE",        VARIANTS => "OPTIMIZED"},
+# 	{NAME => "Nolibs-Profile",   TARGET => "run-all-tests",
+# 	   LIBRARIES => "NONE",        VARIANTS => "PROFILE"}
 );
 
 ######################################################################
@@ -423,13 +423,13 @@ sub main {
 		print " +------------------------------------------------------------\n";
 		if(-d $cvsname) {
 			system("bash -c 'chmod -fR u+w $cvsname'") and softdie("Error moving canon checkout: $!");
-			rmtree($cvsname) or softdie("Error deleting directory in preparation for build $build->{NAME}: $!\n");
+			system("rm -rf $cvsname") and softdie("Error deleting directory in preparation for build $build->{NAME}: $!\n");
 		}
 		system("bash -c 'cp -pR $cvscanon $cvsname'") and softdie("Error moving canon checkout: $!");
 		sanityCheck();
 		jam($build);
 		system("bash -c 'chmod -fR u+w $cvsname'") and softdie("Error moving canon checkout: $!");
-		rmtree($cvsname) or softdie("Error deleting directory for build $build->{NAME}: $!\n");
+		system("rm -rf $cvsname") and softdie("Error deleting directory for build $build->{NAME}: $!\n");
 	}
 	mailresults(@buildtypes);
 	return 0;
