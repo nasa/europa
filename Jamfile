@@ -48,8 +48,7 @@ SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA TemporalNetwork ;
 SubInclude PLASMA Resource ;
 SubInclude PLASMA NDDL ;
-# There's a bit more work to go
-# SubInclude PLASMA ANML ;
+SubInclude PLASMA ANML ;
 SubInclude PLASMA Solvers ;
 SubInclude PLASMA Aver ;
 SubInclude PLASMA System ;
