@@ -74,6 +74,7 @@ options {
 class ANMLParser extends Parser;
 options {
     //buildAST = true;	// uses CommonAST by default
+		exportVocab = ANML;
     k=3;
     //defaultErrorHandler=false;
 }
