@@ -144,7 +144,7 @@ sub init {
 		$ENV{PATH} = "$ENV{PATH}:$dir" if(-x $dir);
 	}
 
-	my @javapaths = (</usr/java/jdk*>, </usr/local/j2sdk*>, "/System/Library/Frameworks/JavaVM.framework/Home", @commondirs);
+	my @javapaths = (</usr/java/jdk*>, </usr/local/jdk*>, "/System/Library/Frameworks/JavaVM.framework/Home", @commondirs);
 	foreach my $path (@javapaths) {
 		$ENV{JAVA_HOME} = $path;
 		last if(checkJava("$ENV{JAVA_HOME}/bin/java"));
