@@ -69,10 +69,6 @@ namespace EUROPA {
   	    virtual DataRef eval(EvalContext& context) const = 0;
   };
   
-  /*
-   * TODO: make more general expressions later
-   */
-  
   // Call to super inside a constructor 
   class ExprConstructorSuperCall : public Expr
   {      	
@@ -84,25 +80,63 @@ namespace EUROPA {
   };
   
   // Assignment inside a constructor 
+  // TODO: make lhs an Expr as well to make this a generic assignment
   class ExprConstructorAssignment : public Expr
   {      	
   	public:
   	    ExprConstructorAssignment(const char* lhs, 
-  	                              const char* rhs, 
-  	                              const char* rhsType);
+  	                              Expr* rhs);
   	    virtual ~ExprConstructorAssignment();
   	    
   	    virtual DataRef eval(EvalContext& context) const;
   	    
     protected:
-        // TODO: use expressions for rhs instead
-        enum RhsType {CONSTANT,PARAMETER,NEW_OBJECT};    
-        static RhsType getRhsType(const char* typeStr);
-                
         const char* m_lhs;
-        const char* m_rhs;
-        RhsType m_rhsType;  	    
+        Expr* m_rhs;
   };
+  
+  class ExprConstant : public Expr
+  {
+  	public:
+  	    ExprConstant(const AbstractDomain* d);
+  	    virtual ~ExprConstant();
+
+  	    virtual DataRef eval(EvalContext& context) const;  
+  	    
+  	protected:
+  	    DataRef m_data;    	    
+  };
+  
+  class ExprVariableRef : public Expr
+  {
+  	public:
+  	    ExprVariableRef(const char* name);
+  	    virtual ~ExprVariableRef();
+
+  	    virtual DataRef eval(EvalContext& context) const;  
+  	    
+  	protected:
+  	    const char* m_varName;    	    
+  };
+  
+  class ExprNewObject : public Expr
+  {
+  	public:
+  	    ExprNewObject(const PlanDatabaseId& planDb,
+	                    const LabelStr& objectType, 
+	                    const LabelStr& objectName,
+	                    const std::vector<const AbstractDomain*>& arguments);
+	    virtual ~ExprNewObject();
+
+  	    virtual DataRef eval(EvalContext& context) const;  
+  	    
+  	protected:
+        const PlanDatabaseId& m_planDb;
+	    const LabelStr&       m_objectType; 
+	    const LabelStr&       m_objectName;
+	    std::vector<const AbstractDomain*> m_arguments;  
+  };
+  
     
   class InterpretedObjectFactory : public ConcreteObjectFactory
   {

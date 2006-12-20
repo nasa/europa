@@ -1085,12 +1085,32 @@ namespace EUROPA {
       	  	const TiXmlElement* rhsChild = child->FirstChildElement();
 
       	  	const char* lhs = child->Attribute("name");
-      	  	const char* rhs = rhsChild->Attribute("name");
 
-            // rhs type can be "value" (constant), "new" (new object) or "id" (parameter)  
+      	  	Expr* rhs=NULL;
+            // rhs type can be "value | interval | set" (constant), "id" (parameter) or "new" (new object)  
       	  	const char* rhsType = rhsChild->Value();
+      	  	if (strcmp(rhsType,"value") == 0 || 
+      	  	    strcmp(rhsType,"interval") == 0 ||
+      	  	    strcmp(rhsType,"set") == 0) {
+      	  		rhs = new ExprConstant(xmlAsAbstractDomain(*rhsChild));
+      	  	}
+      	  	else if (strcmp(rhsType,"id") == 0) {
+          	  	const char* varName = rhsChild->Attribute("name");
+          	  	rhs = new ExprVariableRef(varName);
+      	  	}
+      	  	else if (strcmp(rhsType,"new") == 0) {
+      	  		// TODO
+      	  		/*
+      	  		rhs = new ExprNewObject(
+      	  		    planDb,
+      	  		    objectType,
+      	  		    objectName,
+      	  		    args
+      	  		);
+      	  		*/ 
+      	  	}
 
-      	  	constructorBody.push_back(new ExprConstructorAssignment(lhs,rhs,rhsType));
+      	  	constructorBody.push_back(new ExprConstructorAssignment(lhs,rhs));
       	  }
       }	
       dbgout << ident << "constructor (" << signature.str() << ")"; 

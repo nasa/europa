@@ -97,27 +97,12 @@ namespace EUROPA {
      * ExprConstructorAssignment
      */   
   	ExprConstructorAssignment::ExprConstructorAssignment(const char* lhs, 
-  	                                                     const char* rhs, 
-  	                                                     const char* rhsType)
+  	                                                     Expr* rhs)
   	    : m_lhs(lhs)
   	    , m_rhs(rhs)
-  	    , m_rhsType(getRhsType(rhsType))
   	{
   	}
   	
-    ExprConstructorAssignment::RhsType 
-    ExprConstructorAssignment::getRhsType(const char* typeStr)
-    {
-    	if (strcmp(typeStr,"value") == 0)    	
-    	    return CONSTANT;
-    	else if (strcmp(typeStr,"id") == 0)
-    	    return PARAMETER;
-    	else {
-    		check_error(strcmp(typeStr,"new") == 0);
-    	    return NEW_OBJECT;
-    	}
-    }
-    
   	ExprConstructorAssignment::~ExprConstructorAssignment()
   	{
   	}
@@ -125,45 +110,81 @@ namespace EUROPA {
   	DataRef ExprConstructorAssignment::eval(EvalContext& context) const
   	{
   		ObjectId object = context.getVar("this").getDataRef().getValue()->getSingletonValue();
+     	const AbstractDomain* domain = m_rhs->eval(context).getConstValue();
+     	// TODO: make sure each variable isn't assigned to more than once
+     	object->addVariable(*domain,m_lhs);
   		
-  		switch(m_rhsType) {
-  			case CONSTANT :
-  			    {
-     			    // TODO: use DbClientTransactionPlayer::xmlAsAbstractDomain
-     			    // to pass in abstractDomain
-     			    // object->addVariable(m_constantDomain,m_lhs);
-  			    }
-  			    break;
-  			    
-  			case PARAMETER :
-  			    {
-  			    	TIVariable& rhs = context.getVar(m_rhs);
-  			    	// TODO: Make sure AbstractDomain will stay around
-  			    	const AbstractDomain& domain = *(rhs.getDataRef().getConstValue());
-  			    	object->addVariable(domain,m_lhs);
-  			    }
-  			    break;
-  			    
-  			case NEW_OBJECT :
-  			    {
-  			    	/*
-  			    	// TODO: pass objectType and constructor arguments
-     			    // call object factory with parameters     			     
-     			    ObjectId newObject = objectFactory.createInstance(
-     			            planDb,
-	                        objectType, 
-	                        m_lhs,
-	                        arguments);
-	                object.addVariable(ObjectDomain(newObject,objectType),m_lhs);
-	                */         
-  			    }
-  			    break;
-  			
-  			default:
-  			    break;  			    
-  		}
-  			
   		return DataRef::null;
+  	} 
+
+    /*
+     * ExprConstant
+     */   
+    ExprConstant::ExprConstant(const AbstractDomain* d)
+        : m_data(d)
+    {
+    }
+    
+  	ExprConstant::~ExprConstant()
+  	{
+  	}
+
+  	DataRef ExprConstant::eval(EvalContext& context) const
+  	{
+  		return m_data;
+  	}  
+  	    
+
+    /*
+     * ExprVariableRef
+     */   
+    ExprVariableRef::ExprVariableRef(const char* varName)
+        : m_varName(varName)
+    {
+    }
+  	
+  	ExprVariableRef::~ExprVariableRef()
+  	{
+  	}
+
+  	DataRef ExprVariableRef::eval(EvalContext& context) const
+  	{
+     	TIVariable& rhs = context.getVar(m_varName);
+     	return rhs.getDataRef();
+  	}  
+
+    /*
+     * ExprNewObject
+     */   
+    ExprNewObject::ExprNewObject(const PlanDatabaseId& planDb,
+	                    const LabelStr& objectType, 
+	                    const LabelStr& objectName,
+	                    const std::vector<const AbstractDomain*>& arguments)
+	    : m_planDb(planDb)
+	    , m_objectType(objectType)
+	    , m_objectName(objectName)
+	    , m_arguments(arguments)
+	{
+	}
+	    
+    ExprNewObject::~ExprNewObject()
+    {
+    }
+
+  	DataRef ExprNewObject::eval(EvalContext& context) const
+  	{  
+  		/*
+        // TODO: call object factory with parameters
+        ObjectFactory objectFactory = ???     			     
+     	ObjectId newObject = objectFactory.createInstance(
+     		            m_planDb,
+	                    m_objectType, 
+	                    m_objectName,
+	                    m_arguments);
+	    // TODO: must not leak ObjectDomain                
+	    return DataRef(new ObjectDomain(newObject,objectType));
+	    */
+	    return DataRef::null;
   	}
   	     
     /*
