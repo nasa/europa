@@ -3,6 +3,7 @@ header "post_include_hpp" {
 #include <iostream>
 #include <fstream>
 #include "antlr/TokenStreamSelector.hpp"
+#include "antlr/ASTFactory.hpp"
 
 class ANMLParser;
 class ANMLLexer;
@@ -34,10 +35,10 @@ options {
   ANTLR_USE_NAMESPACE(antlr)TokenStreamSelector selector;
   ANMLParser* parser;
   ANMLLexer* mainLexer;
-	const std::string* searchDir;
+  const std::string* searchDir;
 
-  bool ANMLParser::parse(const std::string& path, const std::string& filename) {
-		searchDir = &path;
+  ANTLR_USE_NAMESPACE(antlr)RefAST ANMLParser::parse(const std::string& path, const std::string& filename) {
+    searchDir = &path;
     try {
       // attach java lexer to the input stream,
       std::ifstream* input = new std::ifstream((path + "/" + filename).c_str());
@@ -50,38 +51,41 @@ options {
       selector.addInputStream(mainLexer, "main");
       selector.select("main"); // start with main P lexer
 
+      ANTLR_USE_NAMESPACE(antlr)ASTFactory astfactory;
       // Create parser attached to selector
       parser = new ANMLParser(selector);
 
       // Parse the input language: ANML
       parser->setFilename(filename);
+      parser->initializeASTFactory(astfactory);
+      parser->setASTFactory(&astfactory);
       parser->anml_program();
     }
     catch( antlr::ANTLRException& e )
     {
       std::cerr << "exception: " << e.getMessage() << std::endl;
-      return false;
+      return ANTLR_USE_NAMESPACE(antlr)nullAST;
     }
     catch( std::exception& e )
     {
       std::cerr << "exception: " << e.what() << std::endl;
-      return false;
+      return ANTLR_USE_NAMESPACE(antlr)nullAST;
     }
-    return true;
+    return parser->getAST();
   }
 }
 
 class ANMLParser extends Parser;
 options {
-    //buildAST = true;	// uses CommonAST by default
-		exportVocab = ANML;
+    buildAST = true;	// uses CommonAST by default
+    exportVocab = ANML;
     k=3;
     //defaultErrorHandler=false;
 }
 
 {
 	public:
-		static bool parse(const std::string& path, const std::string& filename);
+		static ANTLR_USE_NAMESPACE(antlr)RefAST parse(const std::string& path, const std::string& filename);
 }
 
 anml_program 
@@ -101,7 +105,7 @@ declaration
        | function_declaration
        | predicate_declaration
       ) 
-      SEMI_COLON
+      SEMI_COLON!
 ;
 
 problem_stmt
@@ -110,37 +114,37 @@ problem_stmt
 ;
    
 vartype_decl 
-    : VARTYPE user_defined_type_name COLON var_type
+    : VARTYPE^ user_defined_type_name COLON! var_type
 ;
 
 // TODO: semantic layer to check whether we're declaring an object or a variable
 var_obj_declaration 
-    : var_type var_init (COMMA var_init)*
+    : var_type var_init (COMMA! var_init)*
 ;
 
 var_type 
     : BOOL
     | (INT | FLOAT) (range)?
     | STRING
-    | ENUM LCURLY constant (COMMA constant)* RCURLY
-    | VECTOR LPAREN (arg_declaration_list)? RPAREN 
+    | ENUM^ LCURLY^ constant (COMMA! constant)* RCURLY!
+    | VECTOR^ LPAREN^ (arg_declaration_list)? RPAREN!
     | user_defined_type_name
 ;
 
 // TODO: eventually allow at least constant expressions
 range 
-    : LBRACK numeric_literal numeric_literal RBRACK
+    : LBRACK^ numeric_literal numeric_literal RBRACK!
 ;
 
 
 // TODO: eventually allow for expressions instead of constants. make expression semantics declarative, not procedural
 // TODO: semantic layer to ensure that vars are only init'd once. 
 var_init 
-    : var_name (EQUAL constant)?
+    : var_name (EQUAL^ constant)?
 ;
 
 arg_declaration_list
-    : arg_declaration (COMMA arg_declaration)*
+    : arg_declaration (COMMA! arg_declaration)*
 ;
 
 arg_declaration 
@@ -148,12 +152,12 @@ arg_declaration
 ;
 
 objtype_decl 
-    : OBJTYPE user_defined_type_name (COLON obj_type)?
-      (LCURLY objtype_body RCURLY)?
+    : OBJTYPE^ user_defined_type_name (COLON^ obj_type)?
+      (LCURLY^ objtype_body RCURLY!)?
 ;
 
 obj_type 
-    : OBJECT 
+    : OBJECT^
     | user_defined_type_name
 ;
 
@@ -166,21 +170,21 @@ objtype_body
 objtype_body_stmt
     : declaration
     | action_def
-    | transition_constraint SEMI_COLON
+    | transition_constraint SEMI_COLON!
 ;
 
 // In ANML, functions are variables with arguments.
 function_declaration 
-    : FUNCTION var_type function_signature (COMMA function_signature)*
+    : FUNCTION var_type function_signature (COMMA! function_signature)*
 ;
 
 function_signature 
-    : function_symbol LPAREN (arg_declaration_list)? RPAREN
+    : function_symbol LPAREN^ (arg_declaration_list)? RPAREN!
 ;
 
 // Predicates are functions on {true,false}.
 predicate_declaration 
-    : PREDICATE function_signature (COMMA function_signature)*
+    : PREDICATE^ function_signature (COMMA! function_signature)*
 ;
 
 // Fluents are the same for {Facts,Effects} and for {Goals,Conditions}
@@ -192,11 +196,11 @@ predicate_declaration
 // - WHEN clause is not allowed
 
 fact 
-    : FACT (effect_proposition | LCURLY effect_proposition_list RCURLY)
+    : FACT^ (effect_proposition | LCURLY^ effect_proposition_list RCURLY!)
 ;
 
 goal 
-    : GOAL (condition_proposition | LCURLY condition_proposition_list RCURLY)
+    : GOAL^ (condition_proposition | LCURLY^ condition_proposition_list RCURLY!)
 ;
 
 effect_proposition 
@@ -204,7 +208,7 @@ effect_proposition
 ;
 
 effect_proposition_list 
-    : effect_proposition (SEMI_COLON effect_proposition)*
+    : effect_proposition (SEMI_COLON! effect_proposition)*
 ;
 
 condition_proposition 
@@ -212,28 +216,28 @@ condition_proposition
 ;
 
 condition_proposition_list 
-    : condition_proposition (SEMI_COLON condition_proposition)*
+    : condition_proposition (SEMI_COLON! condition_proposition)*
 ;
 
 // TODO : WHEN is only allowed for {Effects,Facts}, not allowed for {Conditions,Goals}. semantic layer to enforce this
 // TODO : FROM and FOR branches to be implemented later
 proposition
     : qualif_fluent
-    | WHEN LCURLY condition_proposition RCURLY LCURLY effect_proposition RCURLY
-    | FROM time_pt LCURLY qualif_fluent_list RCURLY
-    | FOR object_name LCURLY fluent RCURLY
+    | WHEN^ LCURLY^ condition_proposition RCURLY! LCURLY^ effect_proposition RCURLY!
+    | FROM^ time_pt LCURLY^ qualif_fluent_list RCURLY!
+    | FOR^ object_name LCURLY^ fluent RCURLY!
 ;
 
 qualif_fluent 
-    : temporal_qualif LCURLY fluent_list RCURLY
+    : temporal_qualif LCURLY^ fluent_list RCURLY!
 ;
 
 qualif_fluent_list 
-    : qualif_fluent (SEMI_COLON qualif_fluent)*
+    : qualif_fluent (SEMI_COLON! qualif_fluent)*
 ;
 
 fluent_list
-    : fluent (SEMI_COLON fluent)*
+    : fluent (SEMI_COLON! fluent)*
 ;
 
 fluent
@@ -242,27 +246,27 @@ fluent
 
 // TODO: OR is not allowed for effects and facts. check and throw exception if necessary
 or_fluent
-    : and_fluent (options {greedy=true;} : OR and_fluent)*
+    : and_fluent (options {greedy=true;} : OR^ and_fluent)*
 ;
 
 and_fluent
-    : primary_fluent (options {greedy=true;} : AND primary_fluent)*
+    : primary_fluent (options {greedy=true;} : AND^ primary_fluent)*
 ;
 
 // NOTE : NOT is not supported for now
 primary_fluent
     : relational_fluent 
     | quantif_clause fluent
-    | LPAREN fluent RPAREN
+    | LPAREN^ fluent RPAREN!
     //| NOT fluent
 ;
 
 quantif_clause
-    : (FORALL | EXISTS) LPAREN var_type var_name_list RPAREN
+    : (FORALL^ | EXISTS^) LPAREN^ var_type var_name_list RPAREN!
 ;
 
 var_name_list
-    : var_name (COMMA var_name)*
+    : var_name (COMMA! var_name)*
 ;
 
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
@@ -273,8 +277,8 @@ relational_fluent
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 // TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
 lhs_expr
-    : function_symbol LPAREN (arg_list)? RPAREN 
-    | var_name (DOT var_name)*  
+    : function_symbol LPAREN^ (arg_list)? RPAREN!
+    | var_name (DOT^ var_name)*  
 ;
     
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
@@ -286,7 +290,7 @@ expr
     
 // NOTE : Only EQUAL operator allowed for now in fluent expressions
 relop
-    : EQUAL
+    : EQUAL^
     /*
     | LTH
     | LEQ
@@ -299,18 +303,18 @@ relop
 // - Temporal qualifiers IN, BEFORE, AFTER (and CONTAINS??) are not allowed. What about FROM?
 // check and throw semantic exception if necessary
 temporal_qualif 
-    : AT time_pt
-    | OVER interval
-    | IN interval (DUR numeric_expr)?
-    | AFTER time_pt (DUR numeric_expr)?
-    | BEFORE time_pt (DUR numeric_expr)?
-    | CONTAINS interval
+    : AT^ time_pt
+    | OVER^ interval
+    | IN^ interval (DUR numeric_expr)?
+    | AFTER^ time_pt (DUR numeric_expr)?
+    | BEFORE^ time_pt (DUR numeric_expr)?
+    | CONTAINS^ interval
 ;
 
 // all(fluent) is shorthand for the interval [start(fluent),end(fluent)]
 interval 
-    : ALL (LPAREN fluent RPAREN)?
-    | LBRACK time_pt time_pt RBRACK
+    : ALL^ (LPAREN^ fluent RPAREN!)?
+    | LBRACK^ time_pt time_pt RBRACK!
 ;
 
 time_pt 
@@ -322,16 +326,16 @@ numeric_expr
 ;
 
 add_expr
-    : mult_expr (options {greedy=true;} : (PLUS | MINUS) mult_expr)*
+    : mult_expr (options {greedy=true;} : (PLUS^ | MINUS^) mult_expr)*
 ;
  
 mult_expr
-    : primary_expr ((MULT | DIV) primary_expr)*
+    : primary_expr ((MULT^ | DIV^) primary_expr)*
 ;
 
 primary_expr 
     : atomic_expr    
-    | LPAREN add_expr RPAREN
+    | LPAREN^ add_expr RPAREN!
 ;
 
 atomic_expr 
@@ -340,16 +344,16 @@ atomic_expr
 ;
 
 arg_list 
-    : expr (COMMA expr)*
+    : expr (COMMA! expr)*
 ;
 
 action_def 
-    : ACTION action_symbol LPAREN (arg_declaration_list)? RPAREN 
-      LCURLY action_body RCURLY 
+    : ACTION^ action_symbol LPAREN^ (arg_declaration_list)? RPAREN!
+      LCURLY^ action_body RCURLY!
 ;
 
 action_body 
-    : (action_body_stmt SEMI_COLON)*
+    : (action_body_stmt SEMI_COLON!)*
 ;
 
 action_body_stmt
@@ -367,14 +371,14 @@ duration_stmt
 ;
 
 condition_stmt 
-    : CONDITION (condition_proposition | (LCURLY condition_proposition_list RCURLY)) 
+    : CONDITION^ (condition_proposition | (LCURLY^ condition_proposition_list RCURLY!)) 
 ;
     
-effect_stmt : EFFECT (effect_proposition | LCURLY effect_proposition_list RCURLY)
+effect_stmt : EFFECT^ (effect_proposition | LCURLY^ effect_proposition_list RCURLY!)
 ;
 
 change_stmt 
-    : CHANGE (change_proposition | (LCURLY change_proposition_list RCURLY))
+    : CHANGE^ (change_proposition | (LCURLY^ change_proposition_list RCURLY!))
 ;
 
 change_proposition
@@ -490,10 +494,10 @@ options {
 
 tokens {
     ACTION        = "action";
-	AFTER         = "after";
-	ALL           = "all";
-	AT            = "at";
-	BEFORE        = "before";
+    AFTER         = "after";
+    ALL           = "all";
+    AT            = "at";
+    BEFORE        = "before";
     BOOL          = "bool";
     CHANGE        = "change";
     CONTAINS      = "contains";
