@@ -45,6 +45,6 @@ ApacheAnt DSA.jar :
 
 Depends DSA.jar : nddl.jar ;
 
-MakeLocate DSA.jar : lib ;
+MakeLocate DSA.jar : [ FDirName $(SUBDIR) .. .. lib ] ;
 	
 } # PLASMA_READY
