@@ -411,7 +411,7 @@ sub main {
 	chdir($ENV{AUTOBUILD_HOME}) or softdie "Error moving to AUTOBUILD_HOME: $!";
 	print "checking out $cvsname...\n";
 	print "  cvs checkout $cvsname\n";
-	system("bash -c 'cvs checkout -d $cvscanon $cvsname &> /dev/null'") and softdie("Error during checkout");
+	system("bash -c 'cvs checkout -d $cvscanon $cvsname > /dev/null 2>&1'") and softdie("Error during checkout");
 	print "Checkout complete.\n";
 	for(my $i = 0; $i <= $#buildtypes; $i++) {
 		my $build = $buildtypes[$i];
