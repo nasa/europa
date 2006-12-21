@@ -6,38 +6,4 @@ if ! $(PLASMA_READY) {
 
 SubInclude PLASMA Antlr base antlr ;
 
-#ModuleBase Antlr
-#	:
-#	#antlr/dll.cpp
-#	antlr/ANTLRUtil.cpp
-#	antlr/ASTFactory.cpp
-#	antlr/ASTNULLType.cpp
-#	antlr/ASTRefCount.cpp
-#	antlr/BaseAST.cpp
-#	antlr/BitSet.cpp
-#	antlr/CharBuffer.cpp
-#	antlr/CharScanner.cpp
-#	antlr/CommonAST.cpp
-#	antlr/CommonASTWithHiddenTokens.cpp
-#	antlr/CommonHiddenStreamToken.cpp
-#	antlr/CommonToken.cpp
-#	antlr/InputBuffer.cpp
-#	antlr/LLkParser.cpp
-#	antlr/MismatchedCharException.cpp
-#	antlr/MismatchedTokenException.cpp
-#	antlr/NoViableAltException.cpp
-#	antlr/NoViableAltForCharException.cpp
-#	antlr/Parser.cpp
-#	antlr/RecognitionException.cpp
-#	antlr/String.cpp
-#	antlr/Token.cpp
-#	antlr/TokenBuffer.cpp
-#	antlr/TokenRefCount.cpp
-#	antlr/TokenStreamBasicFilter.cpp
-#	antlr/TokenStreamHiddenTokenFilter.cpp
-#	antlr/TokenStreamRewriteEngine.cpp
-#	antlr/TokenStreamSelector.cpp
-#	antlr/TreeParser.cpp
-#	;
-
 } # PLASMA_READY

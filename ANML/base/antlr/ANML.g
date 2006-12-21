@@ -118,17 +118,27 @@ vartype_decl
 ;
 
 // TODO: semantic layer to check whether we're declaring an object or a variable
-var_obj_declaration 
-    : var_type var_init (COMMA! var_init)*
+var_obj_declaration
+    : t:var_type i:var_init
+		  {#var_obj_declaration = #(#t, #i);}
+		  (COMMA! var_init)*
 ;
 
 var_type 
     : BOOL
-    | (INT | FLOAT) (range)?
+    | (INT^ | FLOAT^) (range)?
     | STRING
-    | ENUM^ LCURLY^ constant (COMMA! constant)* RCURLY!
-    | VECTOR^ LPAREN^ (arg_declaration_list)? RPAREN!
+    | ENUM^ enum_body
+    | VECTOR^ vector_body
     | user_defined_type_name
+;
+
+enum_body
+    : LCURLY^ constant (COMMA! constant)* RCURLY!
+;
+
+vector_body
+    : LPAREN^ (arg_declaration_list)? RPAREN!
 ;
 
 // TODO: eventually allow at least constant expressions
@@ -147,8 +157,9 @@ arg_declaration_list
     : arg_declaration (COMMA! arg_declaration)*
 ;
 
-arg_declaration 
-    : var_type var_name
+arg_declaration!
+    : t:var_type n:var_name
+		  {#arg_declaration = #(#t, #n);}
 ;
 
 objtype_decl 
@@ -175,7 +186,7 @@ objtype_body_stmt
 
 // In ANML, functions are variables with arguments.
 function_declaration 
-    : FUNCTION var_type function_signature (COMMA! function_signature)*
+    : FUNCTION^ var_type function_signature (COMMA! function_signature)*
 ;
 
 function_signature 
@@ -367,7 +378,7 @@ action_body_stmt
 
 // TODO: semantic layer to enforce that only one duration statement is allowed    
 duration_stmt 
-    : DURATION numeric_expr
+    : DURATION^ numeric_expr
 ;
 
 condition_stmt 
@@ -382,12 +393,12 @@ change_stmt
 ;
 
 change_proposition
-    : temporal_qualif LCURLY change_fluent RCURLY
-    | WHEN LCURLY condition_proposition RCURLY LCURLY change_proposition RCURLY
+    : temporal_qualif LCURLY^ change_fluent RCURLY!
+    | WHEN^ LCURLY^ condition_proposition RCURLY! LCURLY^ change_proposition RCURLY!
 ;
 
 change_proposition_list
-    : change_proposition (COMMA change_proposition)*
+    : change_proposition (COMMA! change_proposition)*
 ; 
 
 change_fluent 
@@ -395,13 +406,13 @@ change_fluent
 ;
 
 and_change_fluent
-    : primary_change_fluent (options {greedy=true;} : AND primary_change_fluent)*
+    : primary_change_fluent (options {greedy=true;} : AND^ primary_change_fluent)*
 ;
 
 primary_change_fluent
     : atomic_change 
     | quantif_clause change_fluent
-    | LPAREN change_fluent RPAREN 
+    | LPAREN^ change_fluent RPAREN! 
 ;
 
 atomic_change  
@@ -410,31 +421,31 @@ atomic_change
 ;
 
 resource_change 
-    : (CONSUMES | PRODUCES | USES)  LPAREN var_name (COMMA numeric_expr)? RPAREN
+    : (CONSUMES^ | PRODUCES^ | USES^)  LPAREN^ var_name (COMMA! numeric_expr)? RPAREN!
 ;
 
 transition_change
-    : var_name (DOT var_name)* EQUAL expr (ARROW expr)*
+    : var_name (DOT^ var_name)* EQUAL^ expr (ARROW^ expr)*
 ;
 
 decomp_stmt 
-    : DECOMPOSITION (decomp_step | LCURLY (decomp_step)* RCURLY)
+    : DECOMPOSITION^ (decomp_step | LCURLY^ (decomp_step)* RCURLY!)
 ;
 
 decomp_step
-    : (temporal_qualif action_set | constraint ) SEMI_COLON
+    : (temporal_qualif action_set | constraint ) SEMI_COLON!
 ;
 
 action_set
-    : (quantif_clause)? (ORDERED | UNORDERED) LPAREN action_set_element_list RPAREN
+    : (quantif_clause)? (ORDERED^ | UNORDERED^) LPAREN^ action_set_element_list RPAREN!
 ;
 
 action_set_element_list
-    : action_set_element (COMMA action_set_element)*
+    : action_set_element (COMMA! action_set_element)*
 ;
 
 action_set_element
-    : (object_name DOT)? action_symbol LPAREN (arg_list)? RPAREN (COLON var_name)?
+    : (object_name DOT^)? action_symbol LPAREN^ (arg_list)? RPAREN! (COLON! var_name)?
     | action_set
 ;
     
@@ -444,16 +455,16 @@ constraint
 
 // TODO: define grammar to support infix notation for constraints
 constraint_expr 
-    : constraint_symbol LPAREN (arg_list)? RPAREN
+    : constraint_symbol LPAREN^ (arg_list)? RPAREN!
 ;
 
 // This constraint is only allowed in the main body of an objtype definition
 transition_constraint 
-    : TRANSITION var_name LCURLY trans_pair (SEMI_COLON trans_pair)* RCURLY
+    : TRANSITION^ var_name LCURLY^ trans_pair (SEMI_COLON! trans_pair)* RCURLY!
 ;
 
 trans_pair 
-    : constant ARROW (constant  | LCURLY constant (COMMA constant)* RCURLY)
+    : constant ARROW^ (constant  | LCURLY^ constant (COMMA! constant)* RCURLY!)
 ;
 
 constant 
@@ -462,7 +473,7 @@ constant
 
 numeric_literal 
     : NUMERIC_LIT
-    | (PLUS|MINUS) INF
+    | (PLUS^|MINUS^) INF
 ;
 
 string_literal
