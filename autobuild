@@ -233,7 +233,7 @@ sub jam {
 	$build->{COMMAND} .= "$build->{TARGET} " if(defined $build->{TARGET});
 	$build->{LOG} = "$ENV{AUTOBUILD_HOME}/jam-$build->{NAME}.log";
 	chdir($ENV{PLASMA_HOME});
-	print "$build->{COMMAND}&> $build->{LOG}\n";
+	print "$build->{COMMAND}> $build->{LOG} 2>&1\n";
 	my $timer = time();
 	# add limits later if appropriate.
 	# Apply limits; some planner runs want lots of RAM (>2GB).
@@ -245,7 +245,7 @@ sub jam {
 
 	# Print the limits so it is obvious what they are when something goes wrong.
 	#ulimit -a
-	$build->{STATUS} = system("bash -c '$build->{COMMAND}&> $build->{LOG}'");
+	$build->{STATUS} = system("bash -c '$build->{COMMAND}> $build->{LOG} 2>&1'");
 	$build->{DURATION} = readableDuration(time() - $timer);
 	print "  build exited (\$status = $build->{STATUS}) Duration: [$build->{DURATION}]\n";
 	chdir($ENV{AUTOBUILD_HOME});
