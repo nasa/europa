@@ -113,15 +113,18 @@ problem_stmt
     | goal
 ;
    
-vartype_decl 
-    : VARTYPE^ user_defined_type_name COLON! var_type
+vartype_decl
+    : v:VARTYPE^ n:user_defined_type_name COLON! t:var_type
 ;
 
 // TODO: semantic layer to check whether we're declaring an object or a variable
 var_obj_declaration
-    : t:var_type i:var_init
+    : t:var_type i:var_init_list
 		  {#var_obj_declaration = #(#t, #i);}
-		  (COMMA! var_init)*
+;
+
+var_init_list
+		: var_init (COMMA! var_init)*
 ;
 
 var_type 
@@ -288,10 +291,10 @@ relational_fluent
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 // TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
 lhs_expr
-    : function_symbol LPAREN^ (arg_list)? RPAREN!
-    | var_name (DOT^ var_name)*  
+    : (IDENTIFIER LPAREN) => function_symbol LPAREN^ (arg_list)? RPAREN!
+    | var_name (DOT^ var_name)*
 ;
-    
+
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
 expr 
     : constant
@@ -355,7 +358,7 @@ atomic_expr
 ;
 
 arg_list 
-    : expr (COMMA! expr)*
+    : expr (COMMA! arg_list)?
 ;
 
 action_def 

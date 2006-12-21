@@ -1,0 +1,16 @@
+SubDir PLASMA ANML test parser ;
+
+if ! $(PLASMA_READY) {
+
+# make model test parser.
+ModuleMain ANMLParser : Main.cc : ANML ;
+
+local model ;
+
+for model in
+	VarType.anml CrewPlanning-problem-instance.anml
+{
+  RunModuleMain run-anml-tests : ANMLParser : $(model) $(model:S=.dot) ;
+}
+
+} # PLASMA_READY

@@ -6,4 +6,6 @@ if ! $(PLASMA_READY) {
  RunModuleMain run-anml-module-tests : anml-module-tests ;
  LocalDepends tests : run-anml-module-tests ;
 
+ SubInclude PLASMA ANML test parser ;
+
 } # PLASMA_READY
