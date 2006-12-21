@@ -54,6 +54,6 @@ ApacheAnt nddl.jar :
 	java/nddl/NddlUtil.java
 	;
 
-MakeLocate nddl.jar : [ FDirName $(SUBDIR) .. .. lib ] ;
+LOCATE on nddl.jar = [ FDirName $(SUBDIR) .. .. lib ] ;
 
 } # PLASMA_READY
