@@ -8,7 +8,8 @@ ModuleMain ANMLParser : Main.cc : ANML ;
 local model ;
 
 for model in
-	VarType.anml CrewPlanning-problem-instance.anml
+	VarType.anml var_obj_declaration.anml
+	CrewPlanning-problem-instance.anml
 {
   RunModuleMain run-anml-tests : ANMLParser : $(model) $(model:S=.dot) ;
 }

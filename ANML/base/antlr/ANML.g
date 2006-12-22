@@ -141,7 +141,7 @@ enum_body
 ;
 
 vector_body
-    : LPAREN^ (arg_declaration_list)? RPAREN!
+    : parameters
 ;
 
 // TODO: eventually allow at least constant expressions
@@ -156,18 +156,22 @@ var_init
     : var_name (EQUAL^ constant)?
 ;
 
-arg_declaration_list
-    : arg_declaration (COMMA! arg_declaration)*
+parameters
+    : LPAREN^ (parameter_list)? RPAREN!
 ;
 
-arg_declaration!
+parameter_list
+    : parameter_decl (COMMA! parameter_decl)*
+;
+
+parameter_decl!
     : t:var_type n:var_name
-		  {#arg_declaration = #(#t, #n);}
+		  {#parameter_decl = #(#t, #n);}
 ;
 
-objtype_decl 
+objtype_decl
     : OBJTYPE^ user_defined_type_name (COLON^ obj_type)?
-      (LCURLY^ objtype_body RCURLY!)?
+      (objtype_body)?
 ;
 
 obj_type 
@@ -176,7 +180,7 @@ obj_type
 ;
 
 objtype_body 
-    : (objtype_body_stmt)*
+    : LCURLY^ (objtype_body_stmt)* RCURLY!
 ;
 
 // TODO: semantic layer to make sure that out of all declarations inside an objtype_body,  
@@ -193,7 +197,7 @@ function_declaration
 ;
 
 function_signature 
-    : function_symbol LPAREN^ (arg_declaration_list)? RPAREN!
+    : function_symbol parameters
 ;
 
 // Predicates are functions on {true,false}.
@@ -210,11 +214,11 @@ predicate_declaration
 // - WHEN clause is not allowed
 
 fact 
-    : FACT^ (effect_proposition | LCURLY^ effect_proposition_list RCURLY!)
+    : FACT^ (effect_proposition | effect_proposition_list)
 ;
 
 goal 
-    : GOAL^ (condition_proposition | LCURLY^ condition_proposition_list RCURLY!)
+    : GOAL^ (condition_proposition | condition_proposition_list)
 ;
 
 effect_proposition 
@@ -222,7 +226,7 @@ effect_proposition
 ;
 
 effect_proposition_list 
-    : effect_proposition (SEMI_COLON! effect_proposition)*
+    : LCURLY^ effect_proposition (SEMI_COLON! effect_proposition)* RCURLY!
 ;
 
 condition_proposition 
@@ -230,24 +234,28 @@ condition_proposition
 ;
 
 condition_proposition_list 
-    : condition_proposition (SEMI_COLON! condition_proposition)*
+    : LCURLY^ condition_proposition (SEMI_COLON! condition_proposition)* RCURLY!
 ;
 
 // TODO : WHEN is only allowed for {Effects,Facts}, not allowed for {Conditions,Goals}. semantic layer to enforce this
 // TODO : FROM and FOR branches to be implemented later
-proposition
+proposition!
     : qualif_fluent
-    | WHEN^ LCURLY^ condition_proposition RCURLY! LCURLY^ effect_proposition RCURLY!
-    | FROM^ time_pt LCURLY^ qualif_fluent_list RCURLY!
-    | FOR^ object_name LCURLY^ fluent RCURLY!
+    | w:WHEN cc:LCURLY cp:condition_proposition RCURLY ec:LCURLY ep:effect_proposition RCURLY
+		  {#proposition = #(#w, #(#cc, #cp), #(#ec, #ep)); }
+    | fr:FROM t:time_pt qf:qualif_fluent_list
+		  {#proposition = #(#fr, #qf); }
+    | fo:FOR o:object_name fc:LCURLY f:fluent RCURLY
+		  {#proposition = #(#fo, #(#fc, #f)); }
 ;
 
-qualif_fluent 
-    : temporal_qualif LCURLY^ fluent_list RCURLY!
+qualif_fluent!
+    : q:temporal_qualif c:LCURLY l:fluent_list RCURLY
+		  {#qualif_fluent = #(#q, #(#c, #l)); }
 ;
 
 qualif_fluent_list 
-    : qualif_fluent (SEMI_COLON! qualif_fluent)*
+    : LCURLY^ qualif_fluent (SEMI_COLON! qualif_fluent)* RCURLY!
 ;
 
 fluent_list
@@ -276,11 +284,11 @@ primary_fluent
 ;
 
 quantif_clause
-    : (FORALL^ | EXISTS^) LPAREN^ var_type var_name_list RPAREN!
+    : (FORALL^ | EXISTS^) var_list
 ;
 
-var_name_list
-    : var_name (COMMA! var_name)*
+var_list
+    : LPAREN^ var_type var_name (COMMA! var_name)* RPAREN!
 ;
 
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
@@ -291,8 +299,8 @@ relational_fluent
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 // TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
 lhs_expr
-    : (IDENTIFIER LPAREN) => function_symbol LPAREN^ (arg_list)? RPAREN!
-    | var_name (DOT^ var_name)*
+    : (IDENTIFIER LPAREN) => function_symbol arguments
+    | qualified_var_name
 ;
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
@@ -357,12 +365,16 @@ atomic_expr
     | lhs_expr
 ;
 
+arguments
+    : LPAREN^ (arg_list)? RPAREN
+;
+
 arg_list 
     : expr (COMMA! arg_list)?
 ;
 
 action_def 
-    : ACTION^ action_symbol LPAREN^ (arg_declaration_list)? RPAREN!
+    : ACTION^ action_symbol parameters
       LCURLY^ action_body RCURLY!
 ;
 
@@ -428,7 +440,11 @@ resource_change
 ;
 
 transition_change
-    : var_name (DOT^ var_name)* EQUAL^ expr (ARROW^ expr)*
+    : qualified_var_name EQUAL^ directed_expr_list
+;
+
+directed_expr_list
+    : expr (ARROW expr)*
 ;
 
 decomp_stmt 
@@ -448,8 +464,14 @@ action_set_element_list
 ;
 
 action_set_element
-    : (object_name DOT^)? action_symbol LPAREN^ (arg_list)? RPAREN! (COLON! var_name)?
+    : qualified_action_symbol arguments (COLON! var_name)?
     | action_set
+;
+
+qualified_action_symbol
+    :! o:object_name d:DOT a:action_symbol
+		   { #qualified_action_symbol = #(#o, #(#d, #a)); }
+		| action_symbol
 ;
     
 constraint 
@@ -458,12 +480,16 @@ constraint
 
 // TODO: define grammar to support infix notation for constraints
 constraint_expr 
-    : constraint_symbol LPAREN^ (arg_list)? RPAREN!
+    : constraint_symbol arguments
 ;
 
 // This constraint is only allowed in the main body of an objtype definition
-transition_constraint 
-    : TRANSITION^ var_name LCURLY^ trans_pair (SEMI_COLON! trans_pair)* RCURLY!
+transition_constraint
+    : TRANSITION^ var_name trans_pair_list
+;
+
+trans_pair_list
+    : LCURLY^ trans_pair (SEMI_COLON! trans_pair)* RCURLY!
 ;
 
 trans_pair 
@@ -489,6 +515,12 @@ function_symbol         : IDENTIFIER;
 
 object_name             : IDENTIFIER;
 var_name                : IDENTIFIER | START | END;
+
+qualified_var_name!
+    : n:var_name (d:DOT q:qualified_var_name)?
+		  { #qualified_var_name = #(#n, #(#d, #q)); }
+;
+
 
 user_defined_type_name  : IDENTIFIER;
 

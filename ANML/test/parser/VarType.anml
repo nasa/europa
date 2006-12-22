@@ -1,3 +1,5 @@
+// Test vartype_decl rule (and subrules)
+
 vartype BoolAlias          : bool;
 vartype BoolAliasAlias     : BoolAlias;
 
