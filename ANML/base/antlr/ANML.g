@@ -118,13 +118,13 @@ vartype_decl
 ;
 
 // TODO: semantic layer to check whether we're declaring an object or a variable
-var_obj_declaration
+var_obj_declaration!
     : t:var_type i:var_init_list
 		  {#var_obj_declaration = #(#t, #i);}
 ;
 
 var_init_list
-		: var_init (COMMA! var_init)*
+		: var_init (COMMA! var_init_list)?
 ;
 
 var_type 
@@ -161,7 +161,7 @@ parameters
 ;
 
 parameter_list
-    : parameter_decl (COMMA! parameter_decl)*
+    : parameter_decl (COMMA! parameter_list)?
 ;
 
 parameter_decl!
@@ -170,7 +170,7 @@ parameter_decl!
 ;
 
 objtype_decl
-    : OBJTYPE^ user_defined_type_name (COLON^ obj_type)?
+    : OBJTYPE^ user_defined_type_name (COLON! obj_type)?
       (objtype_body)?
 ;
 
@@ -249,9 +249,8 @@ proposition!
 		  {#proposition = #(#fo, #(#fc, #f)); }
 ;
 
-qualif_fluent!
-    : q:temporal_qualif c:LCURLY l:fluent_list RCURLY
-		  {#qualif_fluent = #(#q, #(#c, #l)); }
+qualif_fluent
+    : temporal_qualif fluent_list
 ;
 
 qualif_fluent_list 
@@ -259,7 +258,7 @@ qualif_fluent_list
 ;
 
 fluent_list
-    : fluent (SEMI_COLON! fluent)*
+    : LCURLY^ fluent (SEMI_COLON! fluent)* RCURLY!
 ;
 
 fluent
@@ -335,8 +334,12 @@ temporal_qualif
 
 // all(fluent) is shorthand for the interval [start(fluent),end(fluent)]
 interval 
-    : ALL^ (LPAREN^ fluent RPAREN!)?
+    : ALL^ (fluent_arg)?
     | LBRACK^ time_pt time_pt RBRACK!
+;
+
+fluent_arg
+    : LPAREN^ f:fluent RPAREN!
 ;
 
 time_pt 
@@ -352,7 +355,7 @@ add_expr
 ;
  
 mult_expr
-    : primary_expr ((MULT^ | DIV^) primary_expr)*
+    : primary_expr ((MULT^ | DIV^) mult_expr)?
 ;
 
 primary_expr 
@@ -374,12 +377,11 @@ arg_list
 ;
 
 action_def 
-    : ACTION^ action_symbol parameters
-      LCURLY^ action_body RCURLY!
+    : ACTION^ action_symbol parameters action_body
 ;
 
 action_body 
-    : (action_body_stmt SEMI_COLON!)*
+    : LCURLY^ (action_body_stmt SEMI_COLON!)* RCURLY!
 ;
 
 action_body_stmt
@@ -397,23 +399,23 @@ duration_stmt
 ;
 
 condition_stmt 
-    : CONDITION^ (condition_proposition | (LCURLY^ condition_proposition_list RCURLY!)) 
+    : CONDITION^ (condition_proposition | condition_proposition_list) 
 ;
     
-effect_stmt : EFFECT^ (effect_proposition | LCURLY^ effect_proposition_list RCURLY!)
+effect_stmt : EFFECT^ (effect_proposition | effect_proposition_list)
 ;
 
 change_stmt 
-    : CHANGE^ (change_proposition | (LCURLY^ change_proposition_list RCURLY!))
+    : CHANGE^ (change_proposition | change_proposition_list)
 ;
 
 change_proposition
-    : temporal_qualif LCURLY^ change_fluent RCURLY!
-    | WHEN^ LCURLY^ condition_proposition RCURLY! LCURLY^ change_proposition RCURLY!
+    : temporal_qualif (LCURLY^ change_fluent RCURLY!)
+    | WHEN^ LCURLY! condition_proposition RCURLY! LCURLY! change_proposition RCURLY!
 ;
 
 change_proposition_list
-    : change_proposition (COMMA! change_proposition)*
+    : LCURLY^ change_proposition (COMMA! change_proposition)* RCURLY!
 ; 
 
 change_fluent 
@@ -436,7 +438,7 @@ atomic_change
 ;
 
 resource_change 
-    : (CONSUMES^ | PRODUCES^ | USES^)  LPAREN^ var_name (COMMA! numeric_expr)? RPAREN!
+    : (CONSUMES^ | PRODUCES^ | USES^)  LPAREN! var_name (COMMA! numeric_expr)? RPAREN!
 ;
 
 transition_change
@@ -456,11 +458,11 @@ decomp_step
 ;
 
 action_set
-    : (quantif_clause)? (ORDERED^ | UNORDERED^) LPAREN^ action_set_element_list RPAREN!
+    : (quantif_clause)? (ORDERED^ | UNORDERED^) action_set_element_list
 ;
 
 action_set_element_list
-    : action_set_element (COMMA! action_set_element)*
+    : LPAREN^ action_set_element (COMMA! action_set_element)* RPAREN!
 ;
 
 action_set_element
@@ -591,9 +593,6 @@ tokens {
 			// selector to retry for another token.
 			selector.pop(); // return to old lexer/stream
 			selector.retry();
-		}
-		else {
-			ANTLR_USE_NAMESPACE(std)cout << "Hit EOF of main file" << ANTLR_USE_NAMESPACE(std)endl;
 		}
 	}
 }

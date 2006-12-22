@@ -11,7 +11,7 @@ int max(int a, int b) {
 
 int outputAST2Dot(std::ostream& out, const antlr::RefAST ast, const int depth, const int parent, int& node) {
   if(ast == antlr::nullAST)
-    return depth;
+    return depth-1;
   int maxdepth = depth;
 
   // saved for iteration over children.

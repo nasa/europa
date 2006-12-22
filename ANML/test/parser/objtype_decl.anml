@@ -1,0 +1,12 @@
+vartype Booly : int [0 1];
+objtype MyObject
+{
+    Booly mybooly_;
+
+    action not_this() 
+    { 
+        duration 120;    
+        
+        change over all { uses(ExerciseEquipment,1) }; 
+    } 
+}
