@@ -290,6 +290,7 @@ namespace EUROPA {
       // If still left in a backtrack state, the deicion stack must be exhausted
       if(m_exhausted) {
         checkError(m_decisionStack.empty(), "Must be exhausted if we failed to backtrack out.");
+        debugMsg("Solver:step", "Solver exhausted at step " << getStepCount());
         publish(notifyExhausted,);
       }
     }
@@ -299,7 +300,7 @@ namespace EUROPA {
      * we arrive at a point from which we can resume.
      */
     bool Solver::backtrack(){
-      debugMsg("Solver:backtrack", "Starting");
+      debugMsg("Solver:backtrack", "Starting. Depth is:" << m_decisionStack.size());
 
       bool backtracking = true;
 
@@ -308,7 +309,7 @@ namespace EUROPA {
         if(m_activeDecision.isNoId() && !m_decisionStack.empty()){
           m_activeDecision = m_decisionStack.back();
           m_decisionStack.pop_back();
-          debugMsg("Solver:backtrack", "Retrieving closed decision.");
+          debugMsg("Solver:backtrack", "Retrieving closed decision. Depth is:" << m_decisionStack.size());
         }
 
         debugMsg("Solver:backtrack", "Backtracking decision " << m_activeDecision->toString());
