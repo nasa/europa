@@ -17,21 +17,36 @@ namespace EUROPA {
 	class PSVariable;
 	class PSVarValue;
 
+    // TODO: use IDs?
+    // Need to be able to make memory management easy for the client
 	typedef Id<PSObject>          PSObjectId;
 	typedef Id<PSResource>        PSResourceId;
 	typedef Id<PSResourceProfile> PSResourceProfileId;
 	typedef Id<PSSolver>          PSSolverId;
 	typedef Id<PSToken>           PSTokenId;
+	typedef Id<PSVariable>        PSVariableId;
 
     // TODO: flesh this out, make it easy to wrap
     template<class T>
-    class List
+    class PSList
     {
       public:
-    	int size() const;
-    	T& get(int idx);
-    }
+    	int size() const { return m_elements.size(); }
+    	T& get(int idx) { return m_elements[idx]; }
+     	
+      protected:
+        std::vector<T> m_elements;    	
+    };
     
+    /* Wihtout a query interface PSObjects and PSResources may need to :
+     * - have lazy instanciation (otherwise calls that return collections of objects may end up being very expensive)
+     * - deal gracefully with deletions/changes
+     * lazy evaluation gets tricky with multi-threading
+     */
+     // TODO: Simplest option would be support for multi-threading with query language and non-lazy instanciation
+     // see how close we can get to that in first round.
+     // Initially we may want to keep it simple and do non-lazy instanciation even without queries and take potential performance hit
+     // TODO: Add change notification for variables and resource profiles? 
 	class PSEngine 
 	{
 	  public:
@@ -47,13 +62,13 @@ namespace EUROPA {
 		void executeTxns(const std::string& xmlTxnSource); // TODO: fold XML into executeScript?
 		void executeScript(const std::string& language, const std::string& script);
 	
-		List<PSObjectId> getObjectsByType(const std::string& objectType);
+		PSList<PSObjectId> getObjectsByType(const std::string& objectType);
 		PSObjectId getObjectByKey(PSEntityKey id);
 		
-		List<PSResourceId> getResourcesByType(const std::string& resourceType);
+		PSList<PSResourceId> getResourcesByType(const std::string& resourceType);
 		PSResourceId getResourceByKey(PSEntityKey id);
 		
-		const List<PSTokenId>& getTokens();    	 
+		const PSList<PSTokenId>& getTokens();    	 
 		PSTokenId getTokenByKey(PSEntityKey id);	
 		
 		PSSolverId createSolver(const std::string& configurationFile);		
@@ -70,10 +85,10 @@ namespace EUROPA {
     class PSObject : public PSEntity
     {
        public:
-	     const List<PSVariableId>& getMemberVariables();
+	     const PSList<PSVariableId>& getMemberVariables();
 	     PSVariableId getMemberVariable(const std::string& name);
 
-    	 const List<PSTokenId>& getTokens();	    	 
+    	 const PSList<PSTokenId>& getTokens();	    	 
     };
 
     class PSResource : public PSEntity
@@ -85,7 +100,7 @@ namespace EUROPA {
     
     class PSResourceProfile
     {
-        List<Instant> getTimes();
+        PSList<Instant> getTimes();
         double getLowerBound(Instant time);
         double getUpperBound(Instant time);    	
     };
@@ -101,16 +116,16 @@ namespace EUROPA {
 		int getStepCount();
 		int getDepth();
 			
-		boolean isExhausted();
-		boolean isTimedOut();	
-		boolean isConstraintConsistent();
+		bool isExhausted();
+		bool isTimedOut();	
+		bool isConstraintConsistent();
 	
 		// TODO: relationship between flaws and open decisions?
 		// Can we call getFlaws() and get something different from open decisions?
-		boolean hasFlaws();	
+		bool hasFlaws();	
 		
 	    int getOpenDecisionCnt();	
-	    List<std::string> getOpenDecisions();	
+	    PSList<std::string> getOpenDecisions();	
 		const std::string& getLastExecutedDecision();	
 		
 	    // Configuration
@@ -132,7 +147,7 @@ namespace EUROPA {
 	    double getViolation();
 	    const std::string& getViolationExpl();
 	    
-	    List<PSVariableId> getParameters();
+	    PSList<PSVariableId> getParameters();
 	    PSVariableId getParameter(const std::string& name);
 	    
 	    /*
@@ -153,18 +168,18 @@ namespace EUROPA {
     class PSVariable
     {
       public:
-	    String getName();
+	    const std::string& getName();
 	    
 	    bool isEnumerated();
 	    bool isInterval();
 	
-	    PSVarType getType(); // nddl type
+	    PSVarType getType(); 
 	    
-	    boolean isSingleton();
+	    bool isSingleton();
 	
 	    PSVarValue getSingletonValue();    // Call to get value if isSingleton()==true 
 	
-	    List<PSVarValue> getValues();  // if isSingleton()==false && isEnumerated() == true
+	    PSList<PSVarValue> getValues();  // if isSingleton()==false && isEnumerated() == true
 	
 	    double getLowerBound();  // if isSingleton()==false && isInterval() == true
 	    double getUpperBound();  // if isSingleton()==false && isInterval() == true
@@ -178,7 +193,7 @@ namespace EUROPA {
     {
       public:
        
-        PSVarType getType const;
+        PSVarType getType() const;
         
         PSObjectId          asObject();
         int                 asInt();

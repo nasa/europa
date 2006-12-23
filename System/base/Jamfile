@@ -2,6 +2,11 @@ SubDir PLASMA System base ;
 
 if ! $(PLASMA_READY) {
 
-ModuleBase System : PLASMAPerformanceConstraint.cc LoraxConstraints.cc	;
+ModuleBase System 
+	: 
+	PLASMAPerformanceConstraint.cc 
+	LoraxConstraints.cc	
+	PSEngine.cc
+	;
 
 } # PLASMA_READY
