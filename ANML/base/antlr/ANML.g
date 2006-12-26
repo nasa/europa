@@ -240,7 +240,8 @@ condition_proposition_list
 // TODO : WHEN is only allowed for {Effects,Facts}, not allowed for {Conditions,Goals}. semantic layer to enforce this
 // TODO : FROM and FOR branches to be implemented later
 proposition!
-    : qualif_fluent
+    : q:qualif_fluent
+		  {#proposition = #q;}
     | w:WHEN cc:LCURLY cp:condition_proposition RCURLY ec:LCURLY ep:effect_proposition RCURLY
 		  {#proposition = #(#w, #(#cc, #cp), #(#ec, #ep)); }
     | fr:FROM t:time_pt qf:qualif_fluent_list
@@ -410,9 +411,11 @@ change_stmt
 ;
 
 change_proposition
-    : temporal_qualif (LCURLY^ change_fluent RCURLY!)
+    : temporal_qualif LCURLY! change_fluent RCURLY!
     | WHEN^ LCURLY! condition_proposition RCURLY! LCURLY! change_proposition RCURLY!
 ;
+
+
 
 change_proposition_list
     : LCURLY^ change_proposition (COMMA! change_proposition)* RCURLY!
