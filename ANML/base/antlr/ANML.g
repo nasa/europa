@@ -96,8 +96,8 @@ anml_program
 anml_stmt
     : declaration
     | problem_stmt
-		| transition_constraint
-		| action_def            // <- implicit global object
+    | transition_constraint
+    | action_def            // <- implicit global object
 ;
 
 declaration 
@@ -250,8 +250,8 @@ proposition!
 		  {#proposition = #(#w, #(#cc, #cp), #(#ec, #ep)); }
     | fr:FROM t:time_pt qf:qualif_fluent_list
 		  {#proposition = #(#fr, #qf); }
-    | fo:FOR o:object_name fc:LCURLY f:fluent RCURLY
-		  {#proposition = #(#fo, #(#fc, #f)); }
+    | fo:FOR o:object_name fc:LCURLY p:proposition RCURLY
+		  {#proposition = #(#fo, #(#fc, #p)); }
 ;
 
 qualif_fluent
@@ -337,14 +337,14 @@ temporal_qualif
     | CONTAINS^ interval
 ;
 
-// all(fluent) is shorthand for the interval [start(fluent),end(fluent)]
+// all(action) is shorthand for the interval [action.start,action.end]
 interval 
-    : ALL^ (fluent_arg)?
+    : ALL^ (action_label_arg)?
     | LBRACK^ time_pt time_pt RBRACK!
 ;
 
-fluent_arg
-    : LPAREN^ f:fluent RPAREN!
+action_label_arg
+    : LPAREN^ a:action_instance_label RPAREN!
 ;
 
 time_pt 
@@ -394,7 +394,6 @@ action_body_stmt
     | effect_stmt 
     | change_stmt 
     | decomp_stmt 
-    | constraint
 ;
 
 // TODO: semantic layer to enforce that only one duration statement is allowed    
@@ -413,16 +412,14 @@ change_stmt
     : CHANGE^ (change_proposition | change_proposition_list)
 ;
 
+change_proposition_list
+    : LCURLY^ change_proposition (COMMA! change_proposition)* RCURLY!
+; 
+
 change_proposition
     : temporal_qualif LCURLY! change_fluent RCURLY!
     | WHEN^ LCURLY! condition_proposition RCURLY! LCURLY! change_proposition RCURLY!
 ;
-
-
-
-change_proposition_list
-    : LCURLY^ change_proposition (COMMA! change_proposition)* RCURLY!
-; 
 
 change_fluent 
     : and_change_fluent
@@ -472,7 +469,7 @@ action_set_element_list
 ;
 
 action_set_element
-    : qualified_action_symbol arguments (COLON! var_name)?
+    : qualified_action_symbol arguments (COLON! action_instance_label)?
     | action_set
 ;
 
@@ -528,6 +525,7 @@ string_literal
 ;
 
 action_symbol           : IDENTIFIER;
+action_instance_label   : IDENTIFIER;
 constraint_symbol       : IDENTIFIER;
 function_symbol         : IDENTIFIER;
 
