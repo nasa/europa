@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "Error.hh"
+#include "Debug.hh"
 
 // Support for default setup
 #include "ANMLParser.hpp"
@@ -59,16 +60,17 @@ int outputAST2Dot(std::ostream& out, const antlr::RefAST ast, const int depth, c
  * Called with two filenames: [ANML model] [Output Digraph AST].
  */
 int main(int argc, char** argv) {
-  std::cout << "Starting ANML Test Parser" << std::endl;
-  for(int i=0; i< argc; ++i) {
-    std::cout << "arg[" << i << "] = " << argv[i] << std::endl;
-  }
   assertTrue(argc == 3, "Expected exactly two filename arguments: [ANML model] [Output Digraph AST]");
 
-  ANTLR_USE_NAMESPACE(antlr)RefAST ast =
-    ANMLParser::parse(".", argv[1]);
+	debugMsg("ANMLParser:main", "Phase 1: parsing \"" << argv[1] << "\"");
 
-  assertTrue(ast != ANTLR_USE_NAMESPACE(antlr)nullAST, "Parse failed to return an AST");
+  antlr::RefAST ast = ANMLParser::parse(".", argv[1]);
+
+	debugMsg("ANMLParser:main", "Phase 1 complete");
+
+  assertTrue(ast != antlr::nullAST, "Parse failed to return an AST");
+
+	debugMsg("ANMLParser:main", "Phase 2: dumping parse tree to \"" << argv[2] << "\"");
 
   std::ofstream digraph(argv[2]);
 
@@ -76,6 +78,8 @@ int main(int argc, char** argv) {
   digraph << "digraph ANMLAst {" << std::endl;
   outputAST2Dot(digraph, ast, 1, -1, node);
   digraph << "}" << std::endl;
+
+	debugMsg("ANMLParser:main", "Phase 2 complete");
 
   return 0;
 }

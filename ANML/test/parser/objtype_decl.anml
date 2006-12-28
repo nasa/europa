@@ -1,12 +1,13 @@
-vartype Booly : int [0 1];
-objtype MyObject
+objtype EmptyStruct
 {
-    Booly mybooly_;
+}
 
-    action not_this() 
-    { 
-        duration 120;    
-        
-        change over all { uses(ExerciseEquipment,1) }; 
-    } 
+objtype SimpleStruct
+{
+	int a;
+}
+
+objtype ExtendedStruct : SimpleStruct
+{
+	int b;
 }

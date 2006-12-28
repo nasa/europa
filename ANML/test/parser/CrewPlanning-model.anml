@@ -10,9 +10,9 @@ vartype TDRS              : PositiveInt; // Communication Channels
 vartype ExerciseEquipment : PositiveInt; 
 vartype PRACapacity       : PositiveInt; // Max number of Physically Restraining activities  
 
-vartype ProcessState : enum {"in_progress","finished"};
-vartype FilterState  : enum {"changing","changed"};
-vartype FastingState : enum {"fasting","not_fasting"}; 
+vartype ProcessState : string {"in_progress","finished"};
+vartype FilterState  : string {"changing","changed"};
+vartype FastingState : string {"fasting","not_fasting"}; 
 
 /* 
  * Class and actions to keep track of fasting window

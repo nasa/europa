@@ -5,8 +5,12 @@ vartype BoolAliasAlias     : BoolAlias;
 
 vartype IntAlias           : int;
 vartype IntAliasAlias      : IntAlias;
-vartype PositiveInt        : int [0 +inf];
+vartype PositiveInt        : int [1 +inf];
 vartype PositiveIntAlias   : PositiveInt; 
+vartype NegativeInt        : int [-inf -1];
+vartype NegativeIntAlias   : NegativeInt; 
+
+vartype HexDigit           : int [0x0 0xF];
 
 vartype FloatAlias         : float;
 vartype FloatAliasAlias    : FloatAlias;
@@ -16,7 +20,7 @@ vartype PositiveFloatAlias : PositiveFloat;
 vartype StringAlias        : string;
 vartype StringAliasAlias   : StringAlias;
 
-vartype EnumExample        : enum { "string1", "string2", "string3" };
+vartype EnumExample        : string { "string1", "string2", "string3" };
 vartype EnumExampleAlias   : EnumExample;
 
 vartype VectorExample      : vector (int a, float b);

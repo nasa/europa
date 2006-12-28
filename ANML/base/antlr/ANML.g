@@ -10,7 +10,7 @@ class ANMLLexer;
 
 // Define a selector that can handle nested include files.
 // These variables are public so the parser/lexer can see them.
-extern ANTLR_USE_NAMESPACE(antlr)TokenStreamSelector selector;
+extern antlr::TokenStreamSelector selector;
 extern const std::string* searchDir;
 extern ANMLParser* parser;
 extern ANMLLexer* mainLexer;
@@ -32,12 +32,12 @@ options {
 
   // Define a selector that can handle nested include files.
   // These variables are public so the parser/lexer can see them.
-  ANTLR_USE_NAMESPACE(antlr)TokenStreamSelector selector;
+  antlr::TokenStreamSelector selector;
   ANMLParser* parser;
   ANMLLexer* mainLexer;
   const std::string* searchDir;
 
-  ANTLR_USE_NAMESPACE(antlr)RefAST ANMLParser::parse(const std::string& path, const std::string& filename) {
+  antlr::RefAST ANMLParser::parse(const std::string& path, const std::string& filename) {
     searchDir = &path;
     try {
       // attach java lexer to the input stream,
@@ -51,7 +51,7 @@ options {
       selector.addInputStream(mainLexer, "main");
       selector.select("main"); // start with main P lexer
 
-      ANTLR_USE_NAMESPACE(antlr)ASTFactory astfactory;
+      antlr::ASTFactory astfactory;
       // Create parser attached to selector
       parser = new ANMLParser(selector);
 
@@ -64,12 +64,12 @@ options {
     catch( antlr::ANTLRException& e )
     {
       std::cerr << "exception: " << e.getMessage() << std::endl;
-      return ANTLR_USE_NAMESPACE(antlr)nullAST;
+      return antlr::nullAST;
     }
     catch( std::exception& e )
     {
       std::cerr << "exception: " << e.what() << std::endl;
-      return ANTLR_USE_NAMESPACE(antlr)nullAST;
+      return antlr::nullAST;
     }
     return parser->getAST();
   }
@@ -85,7 +85,7 @@ options {
 
 {
 	public:
-		static ANTLR_USE_NAMESPACE(antlr)RefAST parse(const std::string& path, const std::string& filename);
+		static antlr::RefAST parse(const std::string& path, const std::string& filename);
 }
 
 anml_program 
@@ -95,6 +95,8 @@ anml_program
 anml_stmt
     : declaration
     | problem_stmt
+		| transition_constraint
+		| action_def            // <- implicit global object
 ;
 
 declaration 
@@ -129,9 +131,9 @@ var_init_list
 
 var_type 
     : BOOL
-    | (INT^ | FLOAT^) (range)?
-    | STRING
-    | ENUM^ enum_body
+    | (INT^ | FLOAT^) (range|enum_body)?
+    | STRING^ (enum_body)?
+    //| ENUM^ enum_body
     | VECTOR^ vector_body
     | user_defined_type_name
 ;
@@ -169,9 +171,10 @@ parameter_decl!
 		  {#parameter_decl = #(#t, #n);}
 ;
 
-objtype_decl
-    : OBJTYPE^ user_defined_type_name (COLON! obj_type)?
-      (objtype_body)?
+objtype_decl!
+    : ot:OBJTYPE n:user_defined_type_name (COLON x:obj_type)?
+      b:objtype_body
+			{ #objtype_decl= #(#ot, #(#n, #x), #b); }
 ;
 
 obj_type 
@@ -226,7 +229,7 @@ effect_proposition
 ;
 
 effect_proposition_list 
-    : LCURLY^ effect_proposition (SEMI_COLON! effect_proposition)* RCURLY!
+    : LCURLY^ effect_proposition (SEMI_COLON! effect_proposition)* (SEMI_COLON!)? RCURLY!
 ;
 
 condition_proposition 
@@ -234,7 +237,7 @@ condition_proposition
 ;
 
 condition_proposition_list 
-    : LCURLY^ condition_proposition (SEMI_COLON! condition_proposition)* RCURLY!
+    : LCURLY^ condition_proposition (SEMI_COLON! condition_proposition)* (SEMI_COLON!)? RCURLY!
 ;
 
 // TODO : WHEN is only allowed for {Effects,Facts}, not allowed for {Conditions,Goals}. semantic layer to enforce this
@@ -255,11 +258,11 @@ qualif_fluent
 ;
 
 qualif_fluent_list 
-    : LCURLY^ qualif_fluent (SEMI_COLON! qualif_fluent)* RCURLY!
+    : LCURLY^ qualif_fluent (SEMI_COLON! qualif_fluent)* (SEMI_COLON!)? RCURLY!
 ;
 
 fluent_list
-    : LCURLY^ fluent (SEMI_COLON! fluent)* RCURLY!
+    : LCURLY^ fluent (options {greedy=true;} : SEMI_COLON! fluent)* (SEMI_COLON!)? RCURLY!
 ;
 
 fluent
@@ -365,8 +368,8 @@ primary_expr
 ;
 
 atomic_expr 
-    : numeric_literal 
-    | lhs_expr
+    : numeric_literal
+		| lhs_expr
 ;
 
 arguments
@@ -494,7 +497,7 @@ transition_constraint
 ;
 
 trans_pair_list
-    : LCURLY^ trans_pair (SEMI_COLON! trans_pair)* RCURLY!
+    : LCURLY^ trans_pair (SEMI_COLON! trans_pair)* (SEMI_COLON!)? RCURLY!
 ;
 
 trans_pair 
@@ -502,12 +505,15 @@ trans_pair
 ;
 
 constant 
-    : numeric_literal | string_literal
+    : numeric_literal | string_literal | bool_literal
 ;
 
 numeric_literal 
-    : NUMERIC_LIT
-    | (PLUS^|MINUS^) INF
+    : (PLUS^ | MINUS^)? (NUMERIC_LIT | INF)
+;
+
+bool_literal
+    : TRUE | FALSE
 ;
 
 string_literal
@@ -586,7 +592,9 @@ tokens {
     VARTYPE       = "vartype";
     VECTOR        = "vector";
     WHEN          = "when";
-    INF           = "inf";
+		INF           = "inf";
+		TRUE          = "true";
+		FALSE         = "false";
 }
 
 {
@@ -628,7 +636,7 @@ INCLUDE
 		// to get another token.  It will call nextToken()
 		// of the new instance of this lexer.
 		selector.retry(); // throws TokenStreamRetryException
-		$setType(ANTLR_USE_NAMESPACE(antlr)Token::SKIP);
+		$setType(antlr::Token::SKIP);
 		}
 	;
 
@@ -679,33 +687,19 @@ WS	:	(	' '
 			)
 			{ newline(); }
 		)+
-		{ _ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP; }
+		{ _ttype = antlr::Token::SKIP; }
 ;
-
 
 // a numeric literal
 NUMERIC_LIT
 	{
 		bool isDecimal = false;
-		ANTLR_USE_NAMESPACE(antlr)RefToken t = ANTLR_USE_NAMESPACE(antlr)nullToken;
 	}
-    :   '.' {_ttype = DOT;}
-            (	('0'..'9')+ (EXPONENT)? (f1:FLOAT_SUFFIX {t=f1;})?
-            {
-					if ( t &&
-						  (t->getText().find('f') != ANTLR_USE_NAMESPACE(std)string::npos ||
-							t->getText().find('F') != ANTLR_USE_NAMESPACE(std)string::npos ) ) {
-						//_ttype = NUM_FLOAT;
-					}
-					else {
-						//_ttype = NUM_DOUBLE; // assume double
-					}
-				}
-            )?
-
-	|	(	'0' {isDecimal = true;} // special case for just '0'
-			(	('x'|'X')
-				(											// hex
+    : '.' {_ttype = DOT;}
+      ( ('0'..'9')+ (EXPONENT)? (FLOAT_SUFFIX)? )?
+    | (	'0' {isDecimal = true;} // special case for just '0'
+			(	('x'|'X') // hex
+				(
 					// the 'e'|'E' and float suffix stuff look
 					// like hex digits, hence the (...)+ doesn't
 					// know when to stop: ambig.  ANTLR resolves
@@ -720,26 +714,15 @@ NUMERIC_LIT
 				(('0'..'9')+ ('.'|EXPONENT|FLOAT_SUFFIX)) => ('0'..'9')+
 			|	('0'..'7')+									// octal
 			)?
-		|	('1'..'9') ('0'..'9')*  {isDecimal=true;}		// non-zero decimal
-		)
-		(	('l'|'L') { /* _ttype = NUM_LONG; */ }
+      | ('1'..'9') ('0'..'9')*  {isDecimal=true;}		// non-zero decimal
+		) ( ('l'|'L') 
 
 		// only check to see if it's a float if looks like decimal so far
 		|	{isDecimal}?
-            (   '.' ('0'..'9')* (EXPONENT)? (f2:FLOAT_SUFFIX {t=f2;})?
-            |   EXPONENT (f3:FLOAT_SUFFIX {t=f3;})?
-            |   f4:FLOAT_SUFFIX {t=f4;}
+            (   '.' ('0'..'9')* (EXPONENT)? (FLOAT_SUFFIX)?
+            |   EXPONENT (FLOAT_SUFFIX)?
+            |   FLOAT_SUFFIX
             )
-            {
-					if ( t &&
-						  (t->getText().find('f') != ANTLR_USE_NAMESPACE(std)string::npos ||
-							t->getText().find('F') != ANTLR_USE_NAMESPACE(std)string::npos ) ) {
-						//_ttype = NUM_FLOAT;
-					}
-					else {
-						//_ttype = NUM_DOUBLE; // assume double
-					}
-				}
         )?
 	;
 
@@ -815,7 +798,7 @@ ESC
 SL_COMMENT
 	:	"//"
 		(~('\n'|'\r'))* ('\n'|'\r'('\n')?)
-		{$setType(ANTLR_USE_NAMESPACE(antlr)Token::SKIP); newline();}
+		{$setType(antlr::Token::SKIP); newline();}
 	;
 
 // multiple-line comments
@@ -839,6 +822,6 @@ ML_COMMENT
 		|	~('*'|'\n'|'\r')
 		)*
 		"*/"
-		{$setType(ANTLR_USE_NAMESPACE(antlr)Token::SKIP);}
+		{$setType(antlr::Token::SKIP);}
 	;
 
