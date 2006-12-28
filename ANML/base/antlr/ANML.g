@@ -90,6 +90,7 @@ options {
 
 anml_program 
 	: (anml_stmt)*	      
+		{ #anml_program = #(#[ANML,"ANML"],#anml_program); }
 ;
 
 anml_stmt
@@ -556,6 +557,7 @@ options {
 }
 
 tokens {
+		ANML;         // The root of the AST.
     ACTION        = "action";
     AFTER         = "after";
     ALL           = "all";
