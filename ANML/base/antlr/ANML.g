@@ -148,7 +148,7 @@ vector_body
 
 // TODO: eventually allow at least constant expressions
 range 
-    : LBRACK^ numeric_literal numeric_literal RBRACK!
+    : LBRACK^ signed_literal signed_literal RBRACK!
 ;
 
 
@@ -308,7 +308,7 @@ lhs_expr
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
 expr 
-    : constant
+    : unsigned_constant
     | lhs_expr
 ;
 
@@ -368,8 +368,7 @@ primary_expr
 ;
 
 atomic_expr 
-    : numeric_literal
-		| lhs_expr
+    : (PLUS! | MINUS^)? (numeric_literal | lhs_expr)
 ;
 
 arguments
@@ -504,12 +503,19 @@ trans_pair
     : constant ARROW^ (constant  | LCURLY^ constant (COMMA! constant)* RCURLY!)
 ;
 
-constant 
+unsigned_constant 
     : numeric_literal | string_literal | bool_literal
+;
+constant 
+    : signed_literal | string_literal | bool_literal
+;
+
+signed_literal
+    : (PLUS! | MINUS^)? numeric_literal
 ;
 
 numeric_literal 
-    : (PLUS^ | MINUS^)? (NUMERIC_LIT | INF)
+    : (NUMERIC_LIT | INF)
 ;
 
 bool_literal
