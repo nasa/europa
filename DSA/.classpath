@@ -3,7 +3,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry excluding="*.cc|*.h|*.hh|*.o|*.so|.cvsignore|Jamfile|build.xml" kind="src" path="base"/>
 	<classpathentry excluding="*.cc|*.cfg|*.hh|*.nddl|*.o|*.so|*.xml|.cvsignore|Jamfile|RESPONSE_FILE|build.xml|classes/" kind="src" path="test"/>
-	<classpathentry kind="lib" path="/PLASMA/NDDL/base/jars/nddl.jar"/>
+	<classpathentry kind="lib" path="/PLASMA/lib/nddl.jar"/>
 	<classpathentry kind="lib" path="/PLASMA/ext/junit/junit-4.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
