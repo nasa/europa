@@ -5,6 +5,7 @@
 
 // Support for default setup
 #include "ANMLParser.hpp"
+#include "ANMLTreeParser.hpp"
 
 int max(int a, int b) {
   return (a<b)? b : a;
@@ -66,11 +67,9 @@ int main(int argc, char** argv) {
 
   antlr::RefAST ast = ANMLParser::parse(".", argv[1]);
 
-	debugMsg("ANMLParser:main", "Phase 1 complete");
-
   assertTrue(ast != antlr::nullAST, "Parse failed to return an AST");
 
-	debugMsg("ANMLParser:main", "Phase 2: dumping parse tree to \"" << argv[2] << "\"");
+	debugMsg("ANMLParser:main", "Phase 1: dumping parse tree to \"" << argv[2] << "\"");
 
   std::ofstream digraph(argv[2]);
 
@@ -78,6 +77,14 @@ int main(int argc, char** argv) {
   digraph << "digraph ANMLAst {" << std::endl;
   outputAST2Dot(digraph, ast, 1, -1, node);
   digraph << "}" << std::endl;
+
+	debugMsg("ANMLParser:main", "Phase 1 complete");
+
+	debugMsg("ANMLParser:main", "Phase 2: Walking parse tree");
+
+	ANMLTreeParser* treeParser = new ANMLTreeParser();
+	
+	treeParser->anml(ast);
 
 	debugMsg("ANMLParser:main", "Phase 2 complete");
 

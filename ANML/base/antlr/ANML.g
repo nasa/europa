@@ -167,7 +167,7 @@ vartype_decl
 // TODO: semantic layer to check whether we're declaring an object or a variable
 var_obj_declaration!
     : t:var_type i:var_init_list
-		  {#var_obj_declaration = #(#t, #i);}
+		  {#var_obj_declaration = #(#[VARIABLE,"variable"], #t, #i);}
 ;
 
 var_init_list
@@ -213,7 +213,7 @@ parameter_list
 
 parameter_decl!
     : t:var_type n:var_name
-		  {#parameter_decl = #(#t, #n);}
+		  {#parameter_decl = #(#[PARAMETER, "param"], #t, #n);}
 ;
 
 objtype_decl!
@@ -298,8 +298,9 @@ proposition!
 		  {#proposition = #(#fo, #o, #(#fc, #p)); }
 ;
 
-qualif_fluent
-    : temporal_qualif fluent_list
+qualif_fluent!
+    : q:temporal_qualif f:fluent_list
+			{#qualif_fluent = #(#[FLUENT, "fluent"], #q, #f);}
 ;
 
 qualif_fluent_list 
@@ -349,7 +350,7 @@ relational_fluent!
 // TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
 lhs_expr
     :! (IDENTIFIER LPAREN) => f:function_symbol a:arguments
-		  {#lhs_expr = #(#f, #a);}
+		  {#lhs_expr = #(#[FUNCALL, "funcall"], #f, #a);}
     | qualified_var_name
 ;
 
@@ -465,7 +466,7 @@ change_proposition_list
 
 change_proposition
     :! tq:temporal_qualif LCURLY cf:change_fluent RCURLY
-		  {#change_proposition = #(#tq, #cf); }
+		  {#change_proposition = #(#[FLUENT, "fluent"], #tq, #cf); }
     | WHEN^ LCURLY! condition_proposition RCURLY! LCURLY! change_proposition RCURLY!
 ;
 
@@ -510,7 +511,7 @@ decomp_steps
 
 decomp_step
     :! tq:temporal_qualif as:action_set SEMI_COLON
-			{ #decomp_step = #(#tq, #as); }
+			{ #decomp_step = #(#[ACTIONS, "actions"], #tq, #as); }
 		| constraint SEMI_COLON!
 ;
 
@@ -524,7 +525,7 @@ action_set_element_list
 
 action_set_element
     :! q:qualified_action_symbol a:arguments (COLON l:action_instance_label)?
-		 {#action_set_element = #(#q, #a, #l); }
+		 {#action_set_element = #(#[ACTION], #q, #a, #l); }
     | action_set
 ;
 
@@ -541,7 +542,7 @@ constraint
 // TODO: define grammar to support infix notation for constraints
 constraint_expr!
     : cs:constraint_symbol a:arguments
-		  {#constraint_expr = #(#cs, #a); }
+		  {#constraint_expr = #(#[CONSTRAINT], #cs, #a); }
 ;
 
 // This constraint is only allowed in the main body of an objtype definition
@@ -612,6 +613,11 @@ options {
 
 tokens {
 		ANML;         // The root of the AST.
+		VARIABLE;
+		PARAMETER;
+		FLUENT;
+		FUNCALL;
+		ACTIONS;
     ACTION        = "action";
     AFTER         = "after";
     ALL           = "all";

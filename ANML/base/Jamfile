@@ -2,12 +2,13 @@ SubDir PLASMA ANML base ;
 
 if ! $(PLASMA_READY) {
 
- AntlrGrammar ANML : antlr/ANML.g ;
+ AntlrGrammar ANML : antlr/ANML.g antlr/ANML.tree.g ;
 
  ModuleBase ANML
 	 :
 	 ANMLLexer.cpp
 	 ANMLParser.cpp
+	 ANMLTreeParser.cpp
 	 ;
 
 } # PLASMA_READY
