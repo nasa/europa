@@ -2,6 +2,7 @@ header "post_include_hpp" {
 #include <string>
 #include <iostream>
 #include <fstream>
+#include "Debug.hh"
 #include "antlr/TokenStreamSelector.hpp"
 #include "antlr/ASTFactory.hpp"
 
@@ -73,6 +74,46 @@ options {
     }
     return parser->getAST();
   }
+
+#define LONG_RULE_SIZE 26
+
+  /**
+   * Custom traceIn for Antlr which uses debugMsg.
+   */
+  void ANMLParser::traceIn(const char* rname) {
+		int indentsize = LONG_RULE_SIZE-strlen(rname)+traceDepth+2;
+    char indent[indentsize+1];
+		for(int i=0; i < indentsize; ++i)
+			indent[i] = ' ';
+		indent[LONG_RULE_SIZE-strlen(rname)+1] = '|';
+		indent[indentsize] = '\0';
+    ++traceDepth;
+
+		debugMsg((std::string("ANMLParser:traceIn:")+rname).c_str(),
+		         indent << "> " << rname << ((inputState->guessing > 0)? "; [guessing]" : ";") <<
+						 " LA(1)==" << ((LT(1) == antlr::nullToken)? "null" : LT(1)->getText()) <<
+						 " LA(2)==" << ((LT(2) == antlr::nullToken)? "null" : LT(2)->getText()) <<
+						 " LA(3)==" << ((LT(3) == antlr::nullToken)? "null" : LT(3)->getText()));
+  }
+
+  /**
+   * Custom traceOut for Antlr which uses debugMsg.
+   */
+  void ANMLParser::traceOut(const char* rname) {
+    --traceDepth;
+		int indentsize = LONG_RULE_SIZE-strlen(rname)+traceDepth+1;
+    char indent[indentsize+1];
+		for(int i=0; i < indentsize; ++i)
+			indent[i] = ' ';
+		indent[LONG_RULE_SIZE-strlen(rname)] = '|';
+		indent[indentsize] = '\0';
+
+		debugMsg((std::string("ANMLParser:traceOut:")+rname).c_str(),
+		         indent << "> " << rname << ((inputState->guessing > 0)? "; [guessing]" : ";") <<
+						 " LA(1)==" << ((LT(1) == antlr::nullToken)? "null" : LT(1)->getText()) <<
+						 " LA(2)==" << ((LT(2) == antlr::nullToken)? "null" : LT(2)->getText()) <<
+						 " LA(3)==" << ((LT(3) == antlr::nullToken)? "null" : LT(3)->getText()));
+  }
 }
 
 class ANMLParser extends Parser;
@@ -86,6 +127,9 @@ options {
 {
 	public:
 		static antlr::RefAST parse(const std::string& path, const std::string& filename);
+	protected:
+		void ANMLParser::traceIn(const char* rname);
+		void ANMLParser::traceOut(const char* rname);
 }
 
 anml_program 
@@ -117,7 +161,7 @@ problem_stmt
 ;
    
 vartype_decl
-    : v:VARTYPE^ n:user_defined_type_name COLON! t:var_type
+    : VARTYPE^ user_defined_type_name COLON! var_type
 ;
 
 // TODO: semantic layer to check whether we're declaring an object or a variable
@@ -179,7 +223,7 @@ objtype_decl!
 ;
 
 obj_type 
-    : OBJECT^
+    : OBJECT
     | user_defined_type_name
 ;
 
@@ -237,7 +281,7 @@ condition_proposition
     : proposition
 ;
 
-condition_proposition_list 
+condition_proposition_list
     : LCURLY^ condition_proposition (SEMI_COLON! condition_proposition)* (SEMI_COLON!)? RCURLY!
 ;
 
@@ -249,9 +293,9 @@ proposition!
     | w:WHEN cc:LCURLY cp:condition_proposition RCURLY ec:LCURLY ep:effect_proposition RCURLY
 		  {#proposition = #(#w, #(#cc, #cp), #(#ec, #ep)); }
     | fr:FROM t:time_pt qf:qualif_fluent_list
-		  {#proposition = #(#fr, #qf); }
+		  {#proposition = #(#fr, #t, #qf); }
     | fo:FOR o:object_name fc:LCURLY p:proposition RCURLY
-		  {#proposition = #(#fo, #(#fc, #p)); }
+		  {#proposition = #(#fo, #o, #(#fc, #p)); }
 ;
 
 qualif_fluent
@@ -296,14 +340,16 @@ var_list
 ;
 
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
-relational_fluent 
-    : lhs_expr (relop expr)?
+relational_fluent!
+    : l:lhs_expr (o:relop r:expr)?
+		 {#relational_fluent = #(#o, #l, #r);}
 ;
 
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 // TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
 lhs_expr
-    : (IDENTIFIER LPAREN) => function_symbol arguments
+    :! (IDENTIFIER LPAREN) => f:function_symbol a:arguments
+		  {#lhs_expr = #(#f, #a);}
     | qualified_var_name
 ;
 
@@ -316,7 +362,7 @@ expr
     
 // NOTE : Only EQUAL operator allowed for now in fluent expressions
 relop
-    : EQUAL^
+    : EQUAL
     /*
     | LTH
     | LEQ
@@ -331,9 +377,9 @@ relop
 temporal_qualif 
     : AT^ time_pt
     | OVER^ interval
-    | IN^ interval (DUR numeric_expr)?
-    | AFTER^ time_pt (DUR numeric_expr)?
-    | BEFORE^ time_pt (DUR numeric_expr)?
+    | IN^ interval (DUR! numeric_expr)?
+    | AFTER^ time_pt (DUR! numeric_expr)?
+    | BEFORE^ time_pt (DUR! numeric_expr)?
     | CONTAINS^ interval
 ;
 
@@ -344,7 +390,7 @@ interval
 ;
 
 action_label_arg
-    : LPAREN^ a:action_instance_label RPAREN!
+    : LPAREN^ action_instance_label RPAREN!
 ;
 
 time_pt 
@@ -394,6 +440,7 @@ action_body_stmt
     | effect_stmt 
     | change_stmt 
     | decomp_stmt 
+		| constraint
 ;
 
 // TODO: semantic layer to enforce that only one duration statement is allowed    
@@ -417,7 +464,8 @@ change_proposition_list
 ; 
 
 change_proposition
-    : temporal_qualif LCURLY! change_fluent RCURLY!
+    :! tq:temporal_qualif LCURLY cf:change_fluent RCURLY
+		  {#change_proposition = #(#tq, #cf); }
     | WHEN^ LCURLY! condition_proposition RCURLY! LCURLY! change_proposition RCURLY!
 ;
 
@@ -449,15 +497,21 @@ transition_change
 ;
 
 directed_expr_list
-    : expr (ARROW expr)*
+    : expr (ARROW^ expr)*
 ;
 
 decomp_stmt 
-    : DECOMPOSITION^ (decomp_step | LCURLY^ (decomp_step)* RCURLY!)
+    : DECOMPOSITION^ (decomp_step | decomp_steps)
+;
+
+decomp_steps
+    : LCURLY^ (decomp_step)+ RCURLY!
 ;
 
 decomp_step
-    : (temporal_qualif action_set | constraint ) SEMI_COLON!
+    :! tq:temporal_qualif as:action_set SEMI_COLON
+			{ #decomp_step = #(#tq, #as); }
+		| constraint SEMI_COLON!
 ;
 
 action_set
@@ -469,7 +523,8 @@ action_set_element_list
 ;
 
 action_set_element
-    : qualified_action_symbol arguments (COLON! action_instance_label)?
+    :! q:qualified_action_symbol a:arguments (COLON l:action_instance_label)?
+		 {#action_set_element = #(#q, #a, #l); }
     | action_set
 ;
 
@@ -484,8 +539,9 @@ constraint
 ;
 
 // TODO: define grammar to support infix notation for constraints
-constraint_expr 
-    : constraint_symbol arguments
+constraint_expr!
+    : cs:constraint_symbol a:arguments
+		  {#constraint_expr = #(#cs, #a); }
 ;
 
 // This constraint is only allowed in the main body of an objtype definition
