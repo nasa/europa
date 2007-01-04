@@ -2,205 +2,288 @@
 #define _H_PSEngine
 
 #include "Id.hh"
+#include "Entity.hh"
+#include "ConstraintEngineDefs.hh"
+#include "PlanDatabaseDefs.hh"
+#include "SAVH_ResourceDefs.hh"
+#include "SolverDefs.hh"
+#include "RulesEngineDefs.hh"
 
-#define Instant int
-#define PSEntityKey int
+// #define Instant int
+// #define PSEntityKey int
+
+/*
+  Changes by Mike (01/03/2007):
+  1) got rid of Id types.  They create a necessity for a double-wrapping.
+  2) changed "getCapacity" and "getUsage" to "getLimits" and "getLevels".  This is more in
+     line with internal usage and is also much clearer
+  3) changed "getTokens" in PSObject to return a pointer to a list, since the list changes.
+     as a result, we may want to have the PSList destructor destroy the things it wraps.
+  4) changed Instant and PSEntityKey into typedefs rather than #defines because it plays havoc
+     with other code
+  5) re-named "Instant" to "TimePoint" so as not to clash with existing Instant definition in 
+     Resource.
+ */
 
 namespace EUROPA {
-	
-	class PSEntity;
-	class PSObject;
-	class PSResource;
-	class PSResourceProfile;
-	class PSSolver;
-	class PSToken;
-	class PSVariable;
-	class PSVarValue;
 
-    // TODO: use IDs?
-    // Need to be able to make memory management easy for the client
-	typedef Id<PSObject>          PSObjectId;
-	typedef Id<PSResource>        PSResourceId;
-	typedef Id<PSResourceProfile> PSResourceProfileId;
-	typedef Id<PSSolver>          PSSolverId;
-	typedef Id<PSToken>           PSTokenId;
-	typedef Id<PSVariable>        PSVariableId;
+  typedef int TimePoint;
+  typedef int PSEntityKey;
+  
+  // TODO: flesh this out, make it easy to wrap
+  template<class T>
+  class PSList
+  {
+  public:
+    int size() const { return m_elements.size(); }
+    T& get(int idx) { return m_elements[idx]; }
+    void push_back(T& value) {m_elements.push_back(value);}
+  protected:
+    std::vector<T> m_elements;    	
+  };
 
-    // TODO: flesh this out, make it easy to wrap
-    template<class T>
-    class PSList
-    {
-      public:
-    	int size() const { return m_elements.size(); }
-    	T& get(int idx) { return m_elements[idx]; }
-     	
-      protected:
-        std::vector<T> m_elements;    	
-    };
+  class PSObject;
+  class PSResource;
+  class PSToken;
+  class PSSolver;
+  class PSVariable;
+  class PSResourceProfile;
+  class PSVarValue;
     
-    /* Wihtout a query interface PSObjects and PSResources may need to :
-     * - have lazy instanciation (otherwise calls that return collections of objects may end up being very expensive)
-     * - deal gracefully with deletions/changes
-     * lazy evaluation gets tricky with multi-threading
-     */
-     // TODO: Simplest option would be support for multi-threading with query language and non-lazy instanciation
-     // see how close we can get to that in first round.
-     // Initially we may want to keep it simple and do non-lazy instanciation even without queries and take potential performance hit
-     // TODO: Add change notification for variables and resource profiles? 
-	class PSEngine 
-	{
-	  public:
-	    PSEngine();
-	    virtual ~PSEngine();
+  /* Wihtout a query interface PSObjects and PSResources may need to :
+   * - have lazy instanciation (otherwise calls that return collections of objects may end up being very expensive)
+   * - deal gracefully with deletions/changes
+   * lazy evaluation gets tricky with multi-threading
+   */
+  // TODO: Simplest option would be support for multi-threading with query language and non-lazy instanciation
+  // see how close we can get to that in first round.
+  // Initially we may want to keep it simple and do non-lazy instanciation even without queries and take potential performance hit
+  // TODO: Add change notification for variables and resource profiles? 
+  class PSEngine 
+  {
+  public:
+    PSEngine();
+    ~PSEngine();
 	    
-	    void start();
-	    void shutdown();
+    void start();
+    void shutdown();
 	     
-		// Loads a planning model in binary format
-		void loadModel(const std::string& modelFileName);
+    // Loads a planning model in binary format
+    void loadModel(const std::string& modelFileName);
         		
-		void executeTxns(const std::string& xmlTxnSource); // TODO: fold XML into executeScript?
-		void executeScript(const std::string& language, const std::string& script);
+    void executeTxns(const std::string& xmlTxnSource); // TODO: fold XML into executeScript?
+    //What's this supposed to do, exactly? ~MJI
+    void executeScript(const std::string& language, const std::string& script);
 	
-		PSList<PSObjectId> getObjectsByType(const std::string& objectType);
-		PSObjectId getObjectByKey(PSEntityKey id);
+    PSList<PSObject*>* getObjectsByType(const std::string& objectType);
+    PSObject* getObjectByKey(PSEntityKey id);
 		
-		PSList<PSResourceId> getResourcesByType(const std::string& resourceType);
-		PSResourceId getResourceByKey(PSEntityKey id);
+    PSList<PSResource*>* getResourcesByType(const std::string& resourceType);
+    PSResource* getResourceByKey(PSEntityKey id);
 		
-		const PSList<PSTokenId>& getTokens();    	 
-		PSTokenId getTokenByKey(PSEntityKey id);	
+    PSList<PSToken*>* getTokens();    	 
+    PSToken* getTokenByKey(PSEntityKey id);	
 		
-		PSSolverId createSolver(const std::string& configurationFile);		
-	};		
-
-    class PSEntity
-    {
-      public: 
-        PSEntityKey getKey() const;
-        const std::string& getName() const;
-	    const std::string& getType() const;
-    };	
+    PSSolver* createSolver(const std::string& configurationFile);		
     
-    class PSObject : public PSEntity
-    {
-       public:
-	     const PSList<PSVariableId>& getMemberVariables();
-	     PSVariableId getMemberVariable(const std::string& name);
+  private:
+    ConstraintEngineId m_constraintEngine;
+    PlanDatabaseId m_planDatabase;
+    RulesEngineId m_rulesEngine;
+  };		
 
-    	 const PSList<PSTokenId>& getTokens();	    	 
-    };
+  class PSEntity
+  {
+  public: 
+    PSEntityKey getKey() const;
+    const std::string& getName() const;
+    const std::string& getType() const;
+  protected:
+    PSEntity(const EntityId& entity);
+  private:
+    EntityId m_entity;
+  };	
+    
+  class PSObject : public PSEntity
+  {
+  public:
+    const PSList<PSVariable*>& getMemberVariables();
+    PSVariable* getMemberVariable(const std::string& name);
 
-    class PSResource : public PSEntity
-    {
-    	public:
-          PSResourceProfileId getCapacity();
-          PSResourceProfileId getUsage();        	  
-    };   
+    //const PSList<PSToken*>& getTokens();
+    PSList<PSToken*>* getTokens();
+  protected:
+    friend class PSEngine;
+    friend class PSToken;
+    friend class PSVarValue;
+    PSObject(const ObjectId& obj);
+    ~PSObject();
+  private:
+    ObjectId m_obj;
+    PSList<PSVariable*> m_vars;
+  };
+
+  class PSResource : public PSEntity
+  {
+  public:
+    PSResourceProfile* getLimits();
+    PSResourceProfile* getLevels();        	  
+  protected:
+    friend class PSEngine;
+    PSResource(const SAVH::ResourceId& res);
+  private:
+    SAVH::ResourceId m_res;
+  };   
     
-    class PSResourceProfile
-    {
-        PSList<Instant> getTimes();
-        double getLowerBound(Instant time);
-        double getUpperBound(Instant time);    	
-    };
+  class PSResourceProfile
+  {
+    const PSList<TimePoint>& getTimes();
+    double getLowerBound(TimePoint time);
+    double getUpperBound(TimePoint time);
+  protected:
+    friend class PSResource;
+    PSResourceProfile(const double lb, const double ub);
+    PSResourceProfile(const SAVH::ProfileId& profile);
+  private:
+    bool m_isConst;
+    double m_lb, m_ub;
+    PSList<TimePoint> m_times;
+    SAVH::ProfileId m_profile;
+  };
     
-    class PSSolver
-    {
-      public:
-		void step();
-		void solve(int maxSteps,int maxDepth);
-		void reset();
-	    void destroy();
+  class PSSolver
+  {
+  public:
+    void step();
+    //Solver::solve returns a bool to determine if a solution was found.  Should this perhaps
+    //do the same?  ~MJI
+    void solve(int maxSteps,int maxDepth);
+    void reset();
+    //What is this supposed to do? ~MJI
+    void destroy();
 	    
-		int getStepCount();
-		int getDepth();
+    int getStepCount();
+    int getDepth();
 			
-		bool isExhausted();
-		bool isTimedOut();	
-		bool isConstraintConsistent();
+    bool isExhausted();
+    bool isTimedOut();	
+    //The Solver always leaves the database in a consistent state.  What does this do?
+    bool isConstraintConsistent();
 	
-		// TODO: relationship between flaws and open decisions?
-		// Can we call getFlaws() and get something different from open decisions?
-		bool hasFlaws();	
+    // TODO: relationship between flaws and open decisions?
+    // Can we call getFlaws() and get something different from open decisions?
+    bool hasFlaws();	
 		
-	    int getOpenDecisionCnt();	
-	    PSList<std::string> getOpenDecisions();	
-		const std::string& getLastExecutedDecision();	
+    int getOpenDecisionCnt();	
+    //What are these strings supposed to look like? ~MJI
+    PSList<std::string>* getOpenDecisions();	
+    std::string getLastExecutedDecision();	
 		
-	    // Configuration
-		// TODO: should horizon start and end be part of configuration?
-	    const std::string& getConfigFilename();	
-	    int getHorizonStart();
-	    int getHorizonEnd();
+    // Configuration
+    // TODO: should horizon start and end be part of configuration?
+    const std::string& getConfigFilename();	
+    int getHorizonStart();
+    int getHorizonEnd();
 	    
-	    void configure(const std::string& configFilename, int horizonStart, int horizonEnd);
-    };
+    void configure(const std::string& configFilename, int horizonStart, int horizonEnd);
+  protected:
+    friend class PSEngine;
+    PSSolver(const SOLVERS::SolverId& solver);
+  private:
+    SOLVERS::SolverId m_solver;
+    std::string m_configFile;
+  };
 
-    class PSToken : public PSEntity
-    {	    
-	    PSObjectId getOwner(); 
+  class PSToken : public PSEntity
+  {	    
+  public:
+    PSObject* getOwner(); 
 	    
-	    // TODO: Add setStatus(int newStatus)?; ask Mike Iatauro
-	    // TODO: getStatus()? -> MERGED, ACTIVE, REJECTED, etc
+    // TODO: Add setStatus(int newStatus)?; ask Mike Iatauro
+    // TODO: getStatus()? -> MERGED, ACTIVE, REJECTED, etc
 	    
-	    double getViolation();
-	    const std::string& getViolationExpl();
+    //What does this do? ~MJI
+    double getViolation();
+    const std::string& getViolationExpl();
 	    
-	    PSList<PSVariableId> getParameters();
-	    PSVariableId getParameter(const std::string& name);
+    //Traditionally, the temporal variables and the object and state variables aren't 
+    //considered "parameters".  I'm putting them in for the moment, but clearly the token
+    //interface has the least thought put into it. ~MJI
+    const PSList<PSVariable*>& getParameters();
+    PSVariable* getParameter(const std::string& name);
 	    
-	    /*
-	    static final double NO_CONFLICT=0.0;
-	    static final double HARD_CONFLICT=Double.MAX_VALUE;
-	    */
+    /*
+      static final double NO_CONFLICT=0.0;
+      static final double HARD_CONFLICT=Double.MAX_VALUE;
+    */
 	    
-	    // Parameters available for all tokens
-	    /*
-	    static final const std::string& START="start";
-	    static final const std::string& END="end";
-	    static final const std::string& DURATION="duration";
-	    */    
-    };
+    // Parameters available for all tokens
+    /*
+      static final const std::string& START="start";
+      static final const std::string& END="end";
+      static final const std::string& DURATION="duration";
+    */    
+  protected:
+    friend class PSEngine;
+    friend class PSObject;
+    PSToken(const TokenId& tok);
+
+    TokenId m_tok;
+    PSList<PSVariable*> m_vars;
+  };
     
-    enum PSVarType {OBJECT,STRING,INTEGER,DOUBLE,BOOLEAN};
+  enum PSVarType {OBJECT,STRING,INTEGER,DOUBLE,BOOLEAN};
+  
+  class PSVariable
+  {
+  public:
+    const std::string& getName();
+	    
+    bool isEnumerated();
+    bool isInterval();
+	
+    PSVarType getType(); 
+	    
+    bool isSingleton();
+	
+    PSVarValue getSingletonValue();    // Call to get value if isSingleton()==true 
+	
+    PSList<PSVarValue> getValues();  // if isSingleton()==false && isEnumerated() == true
+	
+    double getLowerBound();  // if isSingleton()==false && isInterval() == true
+    double getUpperBound();  // if isSingleton()==false && isInterval() == true
+	    
+    void specifyValue(PSVarValue& v);
+	    
+    std::string toString();
+  protected:
+    friend class PSObject;
+    friend class PSToken;
+
+    PSVariable(const ConstrainedVariableId& var);
+  private:
+    ConstrainedVariableId m_var;
+    PSVarType m_type;
+  };
     
-    class PSVariable
-    {
-      public:
-	    const std::string& getName();
-	    
-	    bool isEnumerated();
-	    bool isInterval();
-	
-	    PSVarType getType(); 
-	    
-	    bool isSingleton();
-	
-	    PSVarValue getSingletonValue();    // Call to get value if isSingleton()==true 
-	
-	    PSList<PSVarValue> getValues();  // if isSingleton()==false && isEnumerated() == true
-	
-	    double getLowerBound();  // if isSingleton()==false && isInterval() == true
-	    double getUpperBound();  // if isSingleton()==false && isInterval() == true
-	    
-	    void specifyValue(PSVarValue v);
-	    
-	    std::string toString();	    
-    };
-    
-    class PSVarValue
-    {
-      public:
+  class PSVarValue
+  {
+  public:
        
-        PSVarType getType() const;
+    PSVarType getType() const;
         
-        PSObjectId          asObject();
-        int                 asInt();
-        double              asDouble();
-        bool                asBoolean();
-        const std::string&  asString();
-    };                
+    PSObject*          asObject();
+    int                 asInt();
+    double              asDouble();
+    bool                asBoolean();
+    const std::string&  asString();
+  protected:
+    friend class PSVariable;
+    PSVarValue(const double val, const PSVarType type);
+  private:
+    double m_val;
+    PSVarType m_type;
+  };                
 }	
 
 #endif // _H_PSEngine
