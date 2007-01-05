@@ -1,6 +1,49 @@
+header "post_include_hpp" {
+#include "Debug.hh"
+#include "antlr/ASTFactory.hpp"
+}
+
 // run antlr.Tool on this file to generate a tree parser
 options {
 	language="Cpp";
+}
+
+{
+#define LONG_RULE_SIZE 26
+
+  /**
+   * Custom traceIn for Antlr which uses debugMsg.
+   */
+  void ANMLTreeParser::traceIn(const char* rname, antlr::RefAST t) {
+		int indentsize = LONG_RULE_SIZE-strlen(rname)+traceDepth+2;
+    char indent[indentsize+1];
+		for(int i=0; i < indentsize; ++i)
+			indent[i] = ' ';
+		indent[LONG_RULE_SIZE-strlen(rname)+1] = '|';
+		indent[indentsize] = '\0';
+    ++traceDepth;
+
+		debugMsg((std::string("ANMLTreeParser:traceIn:")+rname).c_str(), indent << "> " << rname << 
+						 ((inputState->guessing > 0)? "; [guessing]" : ";") <<
+						 " LA==" << ((t == antlr::nullAST)? "null" : t->getText()));
+  }
+
+  /**
+   * Custom traceOut for Antlr which uses debugMsg.
+   */
+  void ANMLTreeParser::traceOut(const char* rname, antlr::RefAST t) {
+    --traceDepth;
+		int indentsize = LONG_RULE_SIZE-strlen(rname)+traceDepth+1;
+    char indent[indentsize+1];
+		for(int i=0; i < indentsize; ++i)
+			indent[i] = ' ';
+		indent[LONG_RULE_SIZE-strlen(rname)] = '|';
+		indent[indentsize] = '\0';
+
+		debugMsg((std::string("ANMLTreeParser:traceOut:")+rname).c_str(),
+		         indent << "< " << rname << ((inputState->guessing > 0)? "; [guessing]" : ";") <<
+						 " LA==" << ((t == antlr::nullAST)? "null" : t->getText()));
+  }
 }
 
 class ANMLTreeParser extends TreeParser;
@@ -10,6 +53,9 @@ options {
 }
 
 {
+	protected:
+		void ANMLTreeParser::traceIn(const char* rname, antlr::RefAST t);
+		void ANMLTreeParser::traceOut(const char* rname, antlr::RefAST t);
 }
 
 anml
@@ -192,9 +238,9 @@ expr
 temporal_qualif 
     : #(AT time_pt)
     | #(OVER interval)
-    | #(IN interval (DUR numeric_expr)?)
-    | #(AFTER time_pt (DUR numeric_expr)?)
-    | #(BEFORE time_pt (DUR numeric_expr)?)
+    | #(IN interval (numeric_expr)?)
+    | #(AFTER time_pt (numeric_expr)?)
+    | #(BEFORE time_pt (numeric_expr)?)
     | #(CONTAINS interval)
 ;
 
@@ -250,7 +296,7 @@ action_body_stmt
 
 // TODO: semantic layer to enforce that only one duration statement is allowed    
 duration_stmt 
-    : #(DURATION numeric_expr)
+    : #(DURATION (numeric_expr | range))
 ;
 
 condition_stmt 
@@ -316,12 +362,12 @@ action_set_element_list
 ;
 
 action_set_element
-    : #(ACTION qualified_action_symbol arguments action_instance_label)
+    : #(ACTION qualified_action_symbol arguments (action_instance_label)?)
     | action_set
 ;
 
 qualified_action_symbol
-    : (#(IDENTIFIER DOT)) => #(IDENTIFIER (DOT action_symbol)?)
+    : (#(IDENTIFIER DOT))=> #(IDENTIFIER (#(DOT action_symbol))?)
 		| action_symbol
 ;
 

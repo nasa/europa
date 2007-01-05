@@ -1,0 +1,15 @@
+vartype Location : vector (int x, int y);
+vartype Battery : int [0 1000];
+
+Battery battery;
+
+predicate At(Location loc);
+
+action Navigate(Location from_, Location to_) {
+	duration 50;
+	condition at start { At(from_); };
+	effect at end { At(to_); };
+	change at start { uses(battery, 9); };
+	// test decomp elsewhere
+	neq(from_, to_);
+}

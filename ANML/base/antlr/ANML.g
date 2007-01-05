@@ -109,7 +109,7 @@ options {
 		indent[indentsize] = '\0';
 
 		debugMsg((std::string("ANMLParser:traceOut:")+rname).c_str(),
-		         indent << "> " << rname << ((inputState->guessing > 0)? "; [guessing]" : ";") <<
+		         indent << "< " << rname << ((inputState->guessing > 0)? "; [guessing]" : ";") <<
 						 " LA(1)==" << ((LT(1) == antlr::nullToken)? "null" : LT(1)->getText()) <<
 						 " LA(2)==" << ((LT(2) == antlr::nullToken)? "null" : LT(2)->getText()) <<
 						 " LA(3)==" << ((LT(3) == antlr::nullToken)? "null" : LT(3)->getText()));
@@ -146,11 +146,10 @@ anml_stmt
 
 declaration 
     : objtype_decl
-    | (
-       vartype_decl
-       | var_obj_declaration
-       | function_declaration
-       | predicate_declaration
+    | ( vartype_decl
+      | var_obj_declaration
+      | function_declaration
+      | predicate_declaration
       ) 
       SEMI_COLON!
 ;
@@ -176,14 +175,13 @@ var_init_list
 
 var_type 
     : BOOL
-    | (INT^ | FLOAT^) (range|enum_body)?
-    | STRING^ (enum_body)?
-    //| ENUM^ enum_body
+    | (INT^ | FLOAT^) (range|enumer)?
+    | STRING^ (enumer)?
     | VECTOR^ vector_body
     | user_defined_type_name
 ;
 
-enum_body
+enumer
     : LCURLY^ constant (COMMA! constant)* RCURLY!
 ;
 
@@ -200,7 +198,7 @@ range
 // TODO: eventually allow for expressions instead of constants. make expression semantics declarative, not procedural
 // TODO: semantic layer to ensure that vars are only init'd once. 
 var_init 
-    : var_name (EQUAL^ constant)?
+    : var_name (EQUAL^ (constant | arguments))?
 ;
 
 parameters
@@ -415,12 +413,13 @@ primary_expr
     | LPAREN^ add_expr RPAREN!
 ;
 
+// TODO: Verify the addition of enumerations and ranges to atomic expressions.
 atomic_expr 
-    : (PLUS! | MINUS^)? (numeric_literal | lhs_expr)
+    : (PLUS! | MINUS^)? (enumer | range | numeric_literal | lhs_expr)
 ;
 
 arguments
-    : LPAREN^ (arg_list)? RPAREN
+    : LPAREN^ (arg_list)? RPAREN!
 ;
 
 arg_list 
@@ -460,18 +459,19 @@ change_stmt
     : CHANGE^ (change_proposition | change_proposition_list)
 ;
 
+// TODO: Verify the switch from COMMA to SEMI_COLON which was made for conformity.
 change_proposition_list
-    : LCURLY^ change_proposition (COMMA! change_proposition)* RCURLY!
+    : LCURLY^ change_proposition (SEMI_COLON! change_proposition)* (SEMI_COLON!)? RCURLY!
 ; 
 
 change_proposition
-    :! tq:temporal_qualif LCURLY cf:change_fluent RCURLY
+    :! tq:temporal_qualif LCURLY cf:change_fluent (SEMI_COLON)? RCURLY
 		  {#change_proposition = #(#[FLUENT, "fluent"], #tq, #cf); }
     | WHEN^ LCURLY! condition_proposition RCURLY! LCURLY! change_proposition RCURLY!
 ;
 
 change_fluent 
-    : and_change_fluent
+    : and_change_fluent 
 ;
 
 and_change_fluent
@@ -506,17 +506,18 @@ decomp_stmt
 ;
 
 decomp_steps
-    : LCURLY^ (decomp_step)+ RCURLY!
+    : LCURLY^ (decomp_step SEMI_COLON!)+ RCURLY!
 ;
 
 decomp_step
-    :! tq:temporal_qualif as:action_set SEMI_COLON
+    :! tq:temporal_qualif as:action_set
 			{ #decomp_step = #(#[ACTIONS, "actions"], #tq, #as); }
-		| constraint SEMI_COLON!
+		| constraint
 ;
 
 action_set
-    : (quantif_clause)? (ORDERED^ | UNORDERED^) action_set_element_list
+    : (quantif_clause)?
+			(DISJUNCTION^ | CONJUNCTION^ | ORDERED^ | UNORDERED^) action_set_element_list
 ;
 
 action_set_element_list
@@ -525,7 +526,7 @@ action_set_element_list
 
 action_set_element
     :! q:qualified_action_symbol a:arguments (COLON l:action_instance_label)?
-		 {#action_set_element = #(#[ACTION], #q, #a, #l); }
+		 {#action_set_element = #(#[ACTION, "action"], #q, #a, #l); }
     | action_set
 ;
 
@@ -542,7 +543,7 @@ constraint
 // TODO: define grammar to support infix notation for constraints
 constraint_expr!
     : cs:constraint_symbol a:arguments
-		  {#constraint_expr = #(#[CONSTRAINT], #cs, #a); }
+		  {#constraint_expr = #(#[CONSTRAINT, "constraint"], #cs, #a); }
 ;
 
 // This constraint is only allowed in the main body of an objtype definition
@@ -605,7 +606,7 @@ user_defined_type_name  : IDENTIFIER;
 
 class ANMLLexer extends Lexer;
 options { 
-    k=5;
+    k=2;
 		charVocabulary = '\3'..'\377';
     //caseSensitive=false; 
     testLiterals=false;   // don't automatically test for literals
@@ -651,6 +652,8 @@ tokens {
     OBJTYPE       = "objtype";
     ORDERED       = "ordered";
     UNORDERED     = "unordered";
+		DISJUNCTION   = "disjunction";
+		CONJUNCTION   = "conjunction";
     PREDICATE     = "predicate";
     PRODUCES      = "produces";
     START         = "start";
