@@ -222,13 +222,13 @@ relational_fluent
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 // TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
 lhs_expr
-    : #(FUNCALL function_symbol arguments)
+    : #(FUNCTION function_symbol arguments)
     | qualified_var_name
 ;
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
 expr 
-    : unsigned_constant
+    : constant
     | lhs_expr
 ;
 

@@ -347,14 +347,14 @@ relational_fluent!
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 // TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
 lhs_expr
-    :! (IDENTIFIER LPAREN) => f:function_symbol a:arguments
-		  {#lhs_expr = #(#[FUNCALL, "funcall"], #f, #a);}
+		: (IDENTIFIER LPAREN)=> function_symbol arguments
+		  {#lhs_expr = #(#[FUNCTION, "function"], #lhs_expr);}
     | qualified_var_name
 ;
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
 expr 
-    : unsigned_constant
+    : constant
     | lhs_expr
 ;
 
@@ -617,7 +617,6 @@ tokens {
 		VARIABLE;
 		PARAMETER;
 		FLUENT;
-		FUNCALL;
 		ACTIONS;
     ACTION        = "action";
     AFTER         = "after";
