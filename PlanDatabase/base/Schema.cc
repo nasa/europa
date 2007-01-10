@@ -42,7 +42,7 @@ namespace EUROPA {
   }
 
   Schema::Schema(const LabelStr& name): m_id(this), m_name(name){
-    addObjectType(rootObject());
+    reset();
   }
 
   Schema::~Schema(){m_id.remove();}
@@ -70,7 +70,13 @@ namespace EUROPA {
     childOfRelation.clear();
     objectPredicates.clear();
     typesWithNoPredicates.clear();
-    addObjectType(rootObject());
+
+    // Add System entities    
+    addObjectType(rootObject());    
+	addPrimitive("int");
+	addPrimitive("float");
+	addPrimitive("bool");
+	addPrimitive("string");	
   }
 
   bool Schema::isType(const LabelStr& type) const{
