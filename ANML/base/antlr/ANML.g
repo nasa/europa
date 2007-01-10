@@ -517,7 +517,7 @@ decomp_step
 
 action_set
     : (quantif_clause)?
-			(DISJUNCTION^ | CONJUNCTION^ | ORDERED^ | UNORDERED^) action_set_element_list
+			(ORDERED^ | UNORDERED^) action_set_element_list
 ;
 
 action_set_element_list
