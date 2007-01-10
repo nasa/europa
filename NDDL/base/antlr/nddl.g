@@ -457,7 +457,9 @@ classDeclaration!:
     {addClass(c,x);}
     {state.openContext(c.getText());} cb:classBlock {state.closeContext();}
     {#classDeclaration = #(#ck, #c, #(#xk, #x), #cb);})
-  | SEMICOLON! {state.addPredeclaredClass(c.getText());})
+  | s:SEMICOLON
+    {state.addPredeclaredClass(c.getText());}
+    {#classDeclaration = #(#ck, #c, #s);})
   ;
 
 // add GNATS and suspend for supporting modifiers

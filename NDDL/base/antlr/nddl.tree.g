@@ -203,12 +203,16 @@ classDeclaration![IXMLElement parent]
       { if (parent != null) parent.addChild(classDeclaration);
         copyPosition(classDeclaration,_t); copyFilename(classDeclaration,_t); }
       name:IDENT // name of the component type
-    (#(EXTENDS_KEYWORD i:IDENT))?
+    (((#(EXTENDS_KEYWORD i:IDENT))?
       classBlock[classDeclaration]
       {classDeclaration.setAttribute(NddlXmlStrings.x_name,name.getText());
       if(i!=null)
         classDeclaration.setAttribute(NddlXmlStrings.x_extends,i.getText());}
      )
+     | SEMICOLON
+      {classDeclaration.setName("class_decl");
+       classDeclaration.setAttribute(NddlXmlStrings.x_name,name.getText()); }
+     ))
   ;
 
 classBlock[IXMLElement parent] {IXMLElement cte;}
