@@ -104,11 +104,7 @@ class SchemaWriter {
     private static Vector s_constraintRegistrations = new Vector();
 
   static {
-      // Commands to populate primitive types in the schema
-      s_commands.add("addPrimitive(\"int\")");
-      s_commands.add("addPrimitive(\"float\")");
-      s_commands.add("addPrimitive(\"bool\")");
-      s_commands.add("addPrimitive(\"string\")");
+	  // Load built-in types
       s_objectTypeCommands.add("addObjectType(\"Timeline\",\"Object\")");
   }
 }
