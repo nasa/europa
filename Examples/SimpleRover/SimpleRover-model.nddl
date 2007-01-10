@@ -46,7 +46,7 @@ class Battery extends Resource {
  * Navigation portion of a rover. Responsible for managing the location the 
  * rover is at together with the state of navigating between locations.
  */
-class Navigator
+class Navigator extends Timeline
 {
  // Rover maybe AT a location.
  predicate At{
@@ -87,7 +87,7 @@ Navigator::Going{
 
 // Component of the rover for handling commands such as 
 // taking samples or transmitting information back to the lander. 
-class Commands{
+class Commands {
  predicate TakeSample{
   Location rock;
   eq(duration, [20 25]); // Flexible durations for taking a sample
@@ -102,7 +102,7 @@ class Commands{
 }
 
 // Management of the rover's instruments.
-class Instrument{
+class Instrument extends Timeline {
  predicate TakeSample{
   Location rock;
   leq(10, duration);
