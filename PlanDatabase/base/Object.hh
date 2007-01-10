@@ -37,6 +37,7 @@ namespace EUROPA {
 
     virtual ~Object();
 
+	virtual void constructor(const std::vector<const AbstractDomain*>& arguments) {};
 
     /**
      * @brief Add a variable as a member to the object. This is used when building the object
@@ -304,16 +305,17 @@ namespace EUROPA {
     std::vector<ConstrainedVariableId> m_variables;
     std::set<double> m_explicitConstraints; /**< Stores list of explicitly posted constraints to order tokens */
     unsigned int m_lastOrderingChoiceCount; /*!< The last computed count of ordering choices */
+    std::multimap<int, ConstraintId> m_constraintsByTokenKey; /**< All Constraints by Token Key */
+    std::map<double, ConstraintId> m_constraintsByKeyPair; /**< Constraints by string encoded key pair */
+    std::map<int, double> m_keyPairsByConstraintKey; /**< Reverse lookup to obtain the key pair */
+    ConstrainedVariableId m_thisVar; /**< Used to constrain against */
+
   private:
 
     void clean(const TokenId& token);
     void clean(const ConstraintId& constraint, int tokenKey);
     void constrainToThisObjectAsNeeded(const TokenId& token);
 
-    std::multimap<int, ConstraintId> m_constraintsByTokenKey; /**< All Constraints by Token Key */
-    std::map<double, ConstraintId> m_constraintsByKeyPair; /**< Constraints by string encoded key pair */
-    std::map<int, double> m_keyPairsByConstraintKey; /**< Reverse lookup to obtain the key pair */
-    ConstrainedVariableId m_thisVar; /**< Used to constrain against */
     Object(const Object&); /**< NO IMPL - Prevent use of copy constructor. */
   };
 
