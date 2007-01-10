@@ -355,6 +355,7 @@ decomp_step
 action_set
     : #(ORDERED (quantif_clause)? action_set_element_list)
     | #(UNORDERED (quantif_clause)? action_set_element_list)
+    | #(DISJUNCTION (quantif_clause)? action_set_element_list)
 ;
 
 action_set_element_list

@@ -345,7 +345,6 @@ relational_fluent!
 ;
 
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
-// TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
 lhs_expr
 		: (IDENTIFIER LPAREN)=> function_symbol arguments
 		  {#lhs_expr = #(#[FUNCTION, "function"], #lhs_expr);}
@@ -459,7 +458,6 @@ change_stmt
     : CHANGE^ (change_proposition | change_proposition_list)
 ;
 
-// TODO: Verify the switch from COMMA to SEMI_COLON which was made for conformity.
 change_proposition_list
     : LCURLY^ change_proposition (SEMI_COLON! change_proposition)* (SEMI_COLON!)? RCURLY!
 ; 
@@ -517,7 +515,7 @@ decomp_step
 
 action_set
     : (quantif_clause)?
-			(ORDERED^ | UNORDERED^) action_set_element_list
+			(ORDERED^ | UNORDERED^ | DISJUNCTION^) action_set_element_list
 ;
 
 action_set_element_list
@@ -613,11 +611,11 @@ options {
 }
 
 tokens {
-		ANML;         // The root of the AST.
-		VARIABLE;
-		PARAMETER;
-		FLUENT;
-		ACTIONS;
+    ANML;         // The root of the AST.
+    VARIABLE;
+    PARAMETER;
+    FLUENT;
+    ACTIONS;
     ACTION        = "action";
     AFTER         = "after";
     ALL           = "all";
@@ -651,8 +649,7 @@ tokens {
     OBJTYPE       = "objtype";
     ORDERED       = "ordered";
     UNORDERED     = "unordered";
-		DISJUNCTION   = "disjunction";
-		CONJUNCTION   = "conjunction";
+    DISJUNCTION   = "or";
     PREDICATE     = "predicate";
     PRODUCES      = "produces";
     START         = "start";
@@ -662,9 +659,9 @@ tokens {
     VARTYPE       = "vartype";
     VECTOR        = "vector";
     WHEN          = "when";
-		INF           = "inf";
-		TRUE          = "true";
-		FALSE         = "false";
+    INF           = "inf";
+    TRUE          = "true";
+    FALSE         = "false";
 }
 
 {
