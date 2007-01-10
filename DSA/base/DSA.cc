@@ -518,7 +518,7 @@ namespace EUROPA {
     }
 
     void DSA::init(){
-      checkError(m_libHandle != NULL, "Should have a model loaded");
+      //checkError(m_libHandle != NULL, "Should have a model loaded");
       checkError(m_db.isNoId(), "Should not have a database instance");
       initNDDL();
       initConstraintLibrary();
