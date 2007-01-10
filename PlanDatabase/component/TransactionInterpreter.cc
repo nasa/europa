@@ -8,6 +8,7 @@
 #include "TransactionInterpreter.hh"
 #include "Error.hh"
 #include "Object.hh" 
+#include "ObjectFactory.hh"
 
 namespace EUROPA {
 
@@ -90,6 +91,12 @@ namespace EUROPA {
   	
   	DataRef ExprConstructorSuperCall::eval(EvalContext& context) const
   	{
+  		// TODO : Implement this
+  		ObjectId object = context.getVar("this").getDataRef().getValue()->getSingletonValue();
+
+  		// const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments
+  		// ConcreteObjectFactoryId factory = ObjectFactory::getFactory(m_objectType,arguments);
+  		// factory->constructor(object,arguments);
   		return DataRef::null;
   	}      	 
 
@@ -111,7 +118,7 @@ namespace EUROPA {
   	{
   		ObjectId object = context.getVar("this").getDataRef().getValue()->getSingletonValue();
      	const AbstractDomain* domain = m_rhs->eval(context).getConstValue();
-     	// TODO: make sure each variable isn't assigned to more than once
+     	check_error(object->getVariable(m_lhs) == ConstrainedVariableId::noId());
      	object->addVariable(*domain,m_lhs);
   		
   		return DataRef::null;
@@ -173,18 +180,13 @@ namespace EUROPA {
 
   	DataRef ExprNewObject::eval(EvalContext& context) const
   	{  
-  		/*
-        // TODO: call object factory with parameters
-        ObjectFactory objectFactory = ???     			     
-     	ObjectId newObject = objectFactory.createInstance(
+     	ObjectId newObject = ObjectFactory::createInstance(
      		            m_planDb,
 	                    m_objectType, 
 	                    m_objectName,
 	                    m_arguments);
 	    // TODO: must not leak ObjectDomain                
-	    return DataRef(new ObjectDomain(newObject,objectType));
-	    */
-	    return DataRef::null;
+	    return DataRef(new ObjectDomain(newObject,m_objectType.c_str()));
   	}
   	     
     /*

@@ -137,6 +137,29 @@ namespace EUROPA {
 	    std::vector<const AbstractDomain*> m_arguments;  
   };
   
+  
+  class InterpretedConstructor
+  {
+  	public:
+  	    void eval(const std::vector<const AbstractDomain*>& arguments);
+
+    protected:
+        std::vector<Expr*> m_constructorBody;	                                	    
+  };
+  
+  class InterpretedObject : public Object
+  {
+  	public:
+        InterpretedObject(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
+
+        InterpretedObject(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open = false);
+
+        virtual ~InterpretedObject();
+
+	    virtual void constructor(const std::vector<const AbstractDomain*>& arguments);
+	    
+	    // std::map<std::string,InterpretedConstructor> m_constructors;  	  
+  };
     
   class InterpretedObjectFactory : public ConcreteObjectFactory
   {

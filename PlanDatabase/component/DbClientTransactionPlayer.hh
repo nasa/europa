@@ -37,7 +37,8 @@ namespace EUROPA {
   protected:
     void processTransaction(const TiXmlElement & element);
 
-    // This are handled by code-generation
+    // These are handled by code-generation
+    virtual void playDeclareClass(const TiXmlElement &)       {} 
     virtual void playDefineClass(const TiXmlElement &)        {} 
     virtual void playDefineCompat(const TiXmlElement &)       {}
     virtual void playDefineEnumeration(const TiXmlElement &)  {}
@@ -132,6 +133,7 @@ namespace EUROPA {
       virtual ~InterpretedDbClientTransactionPlayer();
 
     protected:
+      virtual void playDeclareClass(const TiXmlElement &); 
       virtual void playDefineClass(const TiXmlElement &); 
       virtual void playDefineCompat(const TiXmlElement &);
       virtual void playDefineEnumeration(const TiXmlElement &);
@@ -140,7 +142,10 @@ namespace EUROPA {
       void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-      void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);      
+      void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+      
+      // TODO: move this to schema
+      std::set<std::string> m_systemClasses;      
   };
   
 }

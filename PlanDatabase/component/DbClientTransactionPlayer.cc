@@ -83,7 +83,9 @@ namespace EUROPA {
     const char * tagname = element.Value();
 
     sl_txCount++;
-    if (strcmp(tagname, "class") == 0)
+    if (strcmp(tagname, "class_decl") == 0)
+      playDeclareClass(element);
+    else if (strcmp(tagname, "class") == 0)
       playDefineClass(element);
     else if (strcmp(tagname, "enum") == 0)
       playDefineEnumeration(element);
@@ -1003,6 +1005,7 @@ namespace EUROPA {
   InterpretedDbClientTransactionPlayer::InterpretedDbClientTransactionPlayer(const DbClientId & client)
     : DbClientTransactionPlayer(client) 
   {
+  	m_systemClasses.insert("Timeline");
   }
 
   InterpretedDbClientTransactionPlayer::~InterpretedDbClientTransactionPlayer() 
@@ -1017,14 +1020,21 @@ namespace EUROPA {
   std::ostringstream dbgout;
   const char* ident="    ";
   
+  void InterpretedDbClientTransactionPlayer::playDeclareClass(const TiXmlElement& element) 
+  {
+    const char* className = element.Attribute("name");
+    dbgout.str("");
+    dbgout << "Declared class " << className << std::endl;
+    std::cout << dbgout.str();
+  }
+  
   void InterpretedDbClientTransactionPlayer::playDefineClass(const TiXmlElement& element) 
   {
     const char* className = element.Attribute("name");
+
     const char* parentClassName = element.Attribute("extends");
     parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
 
-    // TODO jrb : Check for System classes, they don't need to be registered
-    
     Id<Schema> schema = Schema::instance();
     schema->addObjectType(className,parentClassName);
     
@@ -1048,6 +1058,13 @@ namespace EUROPA {
     }
 
     dbgout << "}" << std::endl;    
+    
+    // TODO: deal with System classes like Timeline, make sure the right factory is defined
+    /*
+    if (m_systemClasses.find(className) != m_systemClasses.end())
+        return;
+    */
+            
     std::cout << dbgout.str() << std::endl; 
   }
 
@@ -1077,8 +1094,7 @@ namespace EUROPA {
 	          signature << ":" << type;
       	  }
       	  if (strcmp(child->Value(),"super") == 0) {
-      	  	// TODO: jrb
-      	  	
+      	  	// TODO: jrb, get arguments      	  	
       	  	constructorBody.push_back(new ExprConstructorSuperCall(className));
       	  }
       	  if (strcmp(child->Value(),"assign") == 0) {
@@ -1113,7 +1129,7 @@ namespace EUROPA {
       	  	constructorBody.push_back(new ExprConstructorAssignment(lhs,rhs));
       	  }
       }	
-      dbgout << ident << "constructor (" << signature.str() << ")"; 
+      dbgout << ident << "constructor (" << signature.str() << ")" << std::endl; 
       
       // The ObjectFactory constructor automatically registers the factory
       new InterpretedObjectFactory(
