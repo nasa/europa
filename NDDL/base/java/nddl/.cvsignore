@@ -5,3 +5,4 @@ NddlTokenTypes.txt
 NddlTreeParser.java
 NddlTreeParserTokenTypes.java
 NddlTreeParserTokenTypes.txt
+*.smap
