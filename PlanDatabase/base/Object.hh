@@ -230,6 +230,13 @@ namespace EUROPA {
      */
     virtual void notifyDeleted(const TokenId& token);
 
+  /*
+   * Hack! Code generation currently skips the factories and directly calls the constructor that specifies the parent,
+   * so this is necessary for the interpreter to provide the same behavior
+   * Everybody should be going through the factories
+   */
+    void Object::setParent(const ObjectId& parent);
+
   protected:
 
     /**
