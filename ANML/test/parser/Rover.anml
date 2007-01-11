@@ -12,11 +12,12 @@ objtype Battery : Resource {
 
 action TakeSample(Location rock) {
 	duration [20 25];
-	decomposition contains all ordered(
+	decomposition { contains all ordered(
 		Instrument.TakeSample(rock),
-		disjunction(PhoneHome(),
-		            PhoneLander())
+	  or(PhoneHome(),
+		   PhoneLander())
 	);
+	};
 }
 
 action PhoneHome() {
