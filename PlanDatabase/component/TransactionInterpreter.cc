@@ -6,6 +6,7 @@
  */
 
 #include "TransactionInterpreter.hh"
+#include "DbClient.hh"
 #include "Error.hh"
 #include "Object.hh" 
 #include "ObjectFactory.hh"
@@ -81,7 +82,9 @@ namespace EUROPA {
     /*
      * ExprConstructorSuperCall
      */   
-  	ExprConstructorSuperCall::ExprConstructorSuperCall(const char* className)
+  	ExprConstructorSuperCall::ExprConstructorSuperCall(const LabelStr& superClassName, const std::vector<Expr*>& argExprs)
+  	    : m_superClassName(superClassName)
+  	    , m_argExprs(argExprs)
   	{
   	}
   	
@@ -91,12 +94,16 @@ namespace EUROPA {
   	
   	DataRef ExprConstructorSuperCall::eval(EvalContext& context) const
   	{
-  		// TODO : Implement this
   		ObjectId object = context.getVar("this").getDataRef().getValue()->getSingletonValue();
 
-  		// const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments
-  		// ConcreteObjectFactoryId factory = ObjectFactory::getFactory(m_objectType,arguments);
-  		// factory->constructor(object,arguments);
+  		std::vector<const AbstractDomain*> arguments;
+  		for (unsigned int i=0; i < m_argExprs.size(); i++) {
+			DataRef arg = m_argExprs[i]->eval(context);
+			arguments.push_back(arg.getConstValue());
+  		}
+  		
+  		ObjectFactory::invokeConstructor(object,m_superClassName,arguments);
+  		
   		return DataRef::null;
   	}      	 
 
@@ -163,14 +170,14 @@ namespace EUROPA {
     /*
      * ExprNewObject
      */   
-    ExprNewObject::ExprNewObject(const PlanDatabaseId& planDb,
-	                    const LabelStr& objectType, 
-	                    const LabelStr& objectName,
-	                    const std::vector<const AbstractDomain*>& arguments)
-	    : m_planDb(planDb)
+    ExprNewObject::ExprNewObject(const DbClientId& dbClient,
+	                             const LabelStr& objectType, 
+	                             const LabelStr& objectName,
+	                             const std::vector<Expr*>& argExprs)
+	    : m_dbClient(dbClient)
 	    , m_objectType(objectType)
 	    , m_objectName(objectName)
-	    , m_arguments(arguments)
+	    , m_argExprs(argExprs)
 	{
 	}
 	    
@@ -180,11 +187,30 @@ namespace EUROPA {
 
   	DataRef ExprNewObject::eval(EvalContext& context) const
   	{  
-     	ObjectId newObject = ObjectFactory::createInstance(
-     		            m_planDb,
-	                    m_objectType, 
-	                    m_objectName,
-	                    m_arguments);
+  		std::vector<const AbstractDomain*> arguments;
+  		for (unsigned int i=0; i < m_argExprs.size(); i++) {
+			DataRef arg = m_argExprs[i]->eval(context);
+			arguments.push_back(arg.getConstValue());
+  		}
+  		
+  		// TODO: when this is the rhs of an assignment in a constructor, 
+  		// this must create an object specifying the enclosing object (for which the constructor is being executed)
+  		// as the parent.
+  		// This is a problem, everybody should go through the factory, the way it is now, inside a constructor objects are
+  		// created directly in C++ through new (in the generated code) and are created through the factories if
+  		// they're in the initial state
+  		// faking it for now, but this is a hack
+
+  		// This assumes for now this is only called inside a constructor  		
+  		ObjectId thisObject = context.getVar("this").getDataRef().getValue()->getSingletonValue();
+  		LabelStr name(std::string(thisObject->getName().toString() + "." + m_objectName.toString()));  		
+     	ObjectId newObject = m_dbClient->createObject(
+     	    m_objectType.c_str(), 
+     	    name.c_str(), 
+     	    arguments
+     	);
+     	newObject->setParent(thisObject);
+     	 
 	    // TODO: must not leak ObjectDomain                
 	    return DataRef(new ObjectDomain(newObject,m_objectType.c_str()));
   	}
@@ -193,11 +219,13 @@ namespace EUROPA {
      * InterpretedObjectFactory
      */     	     
 	InterpretedObjectFactory::InterpretedObjectFactory(
+	                               const char* className,
 	                               const LabelStr& signature, 
 	                               const std::vector<std::string>& constructorArgNames,
 	                               const std::vector<std::string>& constructorArgTypes,
 	                               const std::vector<Expr*>& constructorBody)
 	    : ConcreteObjectFactory(signature) 
+	    , m_className(className)
 	    , m_constructorArgNames(constructorArgNames)
 	    , m_constructorArgTypes(constructorArgTypes)
 	    , m_constructorBody(constructorBody)
@@ -236,7 +264,10 @@ namespace EUROPA {
 	                        const LabelStr& objectType, 
 	                        const LabelStr& objectName) const
 	{
-	  ObjectId instance = (new Object(planDb, objectType, objectName))->getId();
+	  // TODO: If a class has a native C++ ancestor the ancestor instance must be instanciated instead
+	  // Every native ancestor must extend Object 
+	  // This should be implemented so that the appropriate factory for the superclass gets a shot at creating the object first
+	  ObjectId instance = (new Object(planDb, objectType, objectName,true))->getId();
 	  
 	  // NOTE: here we'd normally add variables and initialize with default values, 
 	  // making sure superclasses are handled as well
@@ -253,7 +284,7 @@ namespace EUROPA {
 		EvalContext evalContext(NULL);
 
         // Add new object and arguments to eval context
-		ObjectDomain thisDomain(instance);		
+		ObjectDomain thisDomain(instance,m_className.c_str());		
 		evalContext.addVar("this",&thisDomain);
 		
 		for (unsigned int i=0;i<m_constructorArgNames.size();i++) 

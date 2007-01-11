@@ -73,10 +73,14 @@ namespace EUROPA {
   class ExprConstructorSuperCall : public Expr
   {      	
   	public:
-  	    ExprConstructorSuperCall(const char* className);
+  	    ExprConstructorSuperCall(const LabelStr& superClassName, const std::vector<Expr*>& argExprs);
   	    virtual ~ExprConstructorSuperCall();
   	    
   	    virtual DataRef eval(EvalContext& context) const;
+  	    
+  	protected:
+  	    LabelStr m_superClassName;
+        std::vector<Expr*> m_argExprs;	                                	      	    
   };
   
   // Assignment inside a constructor 
@@ -122,49 +126,27 @@ namespace EUROPA {
   class ExprNewObject : public Expr
   {
   	public:
-  	    ExprNewObject(const PlanDatabaseId& planDb,
-	                    const LabelStr& objectType, 
-	                    const LabelStr& objectName,
-	                    const std::vector<const AbstractDomain*>& arguments);
+  	    ExprNewObject(const DbClientId& dbClient,
+	                  const LabelStr& objectType, 
+	                  const LabelStr& objectName,
+	                  const std::vector<Expr*>& argExprs);
+	                  
 	    virtual ~ExprNewObject();
 
   	    virtual DataRef eval(EvalContext& context) const;  
   	    
   	protected:
-        const PlanDatabaseId& m_planDb;
-	    const LabelStr&       m_objectType; 
-	    const LabelStr&       m_objectName;
-	    std::vector<const AbstractDomain*> m_arguments;  
-  };
-  
-  
-  class InterpretedConstructor
-  {
-  	public:
-  	    void eval(const std::vector<const AbstractDomain*>& arguments);
-
-    protected:
-        std::vector<Expr*> m_constructorBody;	                                	    
-  };
-  
-  class InterpretedObject : public Object
-  {
-  	public:
-        InterpretedObject(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open = false);
-
-        InterpretedObject(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open = false);
-
-        virtual ~InterpretedObject();
-
-	    virtual void constructor(const std::vector<const AbstractDomain*>& arguments);
-	    
-	    // std::map<std::string,InterpretedConstructor> m_constructors;  	  
+        DbClientId            m_dbClient;
+	    LabelStr              m_objectType; 
+	    LabelStr              m_objectName;
+	    std::vector<Expr*>    m_argExprs;  
   };
     
   class InterpretedObjectFactory : public ConcreteObjectFactory
   {
   	public:
   	    InterpretedObjectFactory(
+  	        const char* className,
   	        const LabelStr& signature, 
   	        const std::vector<std::string>& constructorArgNames,
   	        const std::vector<std::string>& constructorArgTypes,
@@ -179,7 +161,7 @@ namespace EUROPA {
 	                            const LabelStr& objectName,
 	                            const std::vector<const AbstractDomain*>& arguments) const;
 	                             
-	    void constructor(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const;
+	    virtual void constructor(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const;
   
     	ObjectId makeNewObject( 
 	                        const PlanDatabaseId& planDb,
@@ -188,6 +170,7 @@ namespace EUROPA {
 	                        
 	    bool checkArgs(const std::vector<const AbstractDomain*>& arguments) const;
 
+        LabelStr m_className;
         std::vector<std::string> m_constructorArgNames;	                          
         std::vector<std::string> m_constructorArgTypes;	                          
         std::vector<Expr*> m_constructorBody;	                          
