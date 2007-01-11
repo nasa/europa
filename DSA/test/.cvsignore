@@ -2,6 +2,7 @@
 classes
 *.so
 *.o
+*.output
 model*.cc
 model*.hh
 model*.xml
