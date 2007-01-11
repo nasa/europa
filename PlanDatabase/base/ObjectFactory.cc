@@ -142,6 +142,12 @@ namespace EUROPA {
     return object;
   }
 
+  void ObjectFactory::invokeConstructor(ObjectId& instance, const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments)
+  {
+  	ConcreteObjectFactoryId factory = ObjectFactory::getFactory(objectType,arguments);
+  	factory->constructor(instance,arguments);
+  }				   
+
   void ObjectFactory::purgeAll(){
     debugMsg("ObjectFactory:purgeAll", "Purging all");
     std::map<double,ConcreteObjectFactoryId >& factories = getInstance().m_factories;
