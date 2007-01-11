@@ -1,6 +1,7 @@
 #include "Debug.hh"
 #include "tinyxml.h"
 #include "EnumeratedDomain.hh"
+#include "EnumeratedTypeFactory.hh"
 #include "BoolDomain.hh"
 #include "StringDomain.hh"
 #include "SymbolDomain.hh"
@@ -1023,6 +1024,8 @@ namespace EUROPA {
   void InterpretedDbClientTransactionPlayer::playDeclareClass(const TiXmlElement& element) 
   {
     const char* className = element.Attribute("name");
+    Id<Schema> schema = Schema::instance();
+    schema->declareObjectType(className);
     dbgout.str("");
     dbgout << "Declared class " << className << std::endl;
     std::cout << dbgout.str();
@@ -1037,7 +1040,14 @@ namespace EUROPA {
 
     Id<Schema> schema = Schema::instance();
     schema->addObjectType(className,parentClassName);
-    
+    // The TypeFactory constructor automatically registers the factory
+    // TODO: This should probably be done by Schema::addObjectType
+    new EnumeratedTypeFactory(
+        className,
+        className,
+        ObjectDomain(className)
+    );             
+
     dbgout.str("");
     dbgout << "class " << className  
                        << (parentClassName != NULL ? " extends " : "") 
@@ -1057,15 +1067,15 @@ namespace EUROPA {
 	    	defineEnum(schema,className,child);	    	
     }
 
-    dbgout << "}" << std::endl;    
-    
-    // TODO: deal with System classes like Timeline, make sure the right factory is defined
+    // TODO: deal with System classes like Timeline, make sure the right object factories are registered
     /*
     if (m_systemClasses.find(className) != m_systemClasses.end())
         return;
     */
-            
-    std::cout << dbgout.str() << std::endl; 
+    
+    // TODO: register a default factory with no arguments if one is not provided explicitly
+    dbgout << "}" << std::endl;    
+    std::cout << dbgout.str() << std::endl;     
   }
 
   void InterpretedDbClientTransactionPlayer::defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
@@ -1093,11 +1103,23 @@ namespace EUROPA {
 	          constructorArgTypes.push_back(type);
 	          signature << ":" << type;
       	  }
-      	  if (strcmp(child->Value(),"super") == 0) {
-      	  	// TODO: jrb, get arguments      	  	
-      	  	constructorBody.push_back(new ExprConstructorSuperCall(className));
+      	  else if (strcmp(child->Value(),"super") == 0) {
+      	  	std::vector<Expr*> argExprs;     	  	
+            for(const TiXmlElement* argChild = child->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() ) {
+          	    if (strcmp(argChild->Value(),"value") == 0) {
+          	    	Expr* arg = new ExprConstant(xmlAsAbstractDomain(*argChild));
+          	    	argExprs.push_back(arg);
+          	    }
+          	    else if (strcmp(argChild->Value(),"id") == 0) {
+          	    	const char* varName = argChild->Attribute("name");
+          	    	Expr* arg = new ExprVariableRef(varName);
+          	    	argExprs.push_back(arg);
+          	    }
+            }
+
+      	  	constructorBody.push_back(new ExprConstructorSuperCall(Schema::instance()->getParent(className),argExprs));
       	  }
-      	  if (strcmp(child->Value(),"assign") == 0) {
+      	  else if (strcmp(child->Value(),"assign") == 0) {
       	  	const TiXmlElement* rhsChild = child->FirstChildElement();
 
       	  	const char* lhs = child->Attribute("name");
@@ -1115,15 +1137,27 @@ namespace EUROPA {
           	  	rhs = new ExprVariableRef(varName);
       	  	}
       	  	else if (strcmp(rhsType,"new") == 0) {
-      	  		// TODO
-      	  		/*
+	          	 const char* objectType = rhsChild->Attribute("type");      	  		
+      	  		
+	      	  	std::vector<Expr*> argExprs;     	  	
+	            for(const TiXmlElement* argChild = rhsChild->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() ) {
+	          	    if (strcmp(argChild->Value(),"value") == 0) {
+	          	    	Expr* arg = new ExprConstant(xmlAsAbstractDomain(*argChild));
+	          	    	argExprs.push_back(arg);
+	          	    }
+	          	    else if (strcmp(argChild->Value(),"id") == 0) {
+	          	    	const char* varName = argChild->Attribute("name");
+	          	    	Expr* arg = new ExprVariableRef(varName);
+	          	    	argExprs.push_back(arg);
+	          	    }
+	            }
+
       	  		rhs = new ExprNewObject(
-      	  		    planDb,
+      	  		    m_client,
       	  		    objectType,
-      	  		    objectName,
-      	  		    args
+      	  		    lhs,
+      	  		    argExprs
       	  		);
-      	  		*/ 
       	  	}
 
       	  	constructorBody.push_back(new ExprConstructorAssignment(lhs,rhs));
@@ -1133,6 +1167,7 @@ namespace EUROPA {
       
       // The ObjectFactory constructor automatically registers the factory
       new InterpretedObjectFactory(
+          className,
           signature.str(),
           constructorArgNames,
           constructorArgTypes,
