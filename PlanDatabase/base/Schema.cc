@@ -448,6 +448,10 @@ namespace EUROPA {
     primitives.insert(primitiveName);
   }
 
+  void Schema::declareObjectType(const LabelStr& objectType) {
+    objectTypes.insert(objectType);			                 	
+  }
+  
   void Schema::addObjectType(const LabelStr& objectType) {
     // Enforce assumption of a singly rooted class hierarchy
     if(objectType != rootObject()){

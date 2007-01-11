@@ -258,6 +258,13 @@ namespace EUROPA {
     void addPrimitive(const LabelStr& primitiveName);
 
     /**
+     * @brief Declare an object type. The type can be referenced from now on.
+     * I'ts the responsibility of the client to make sure that addObjectType will be called for this type eventually
+     *  
+     */
+    void declareObjectType(const LabelStr& objectType);
+
+    /**
      * @brief Add an object type. It must not be present already.
      */
     void addObjectType(const LabelStr& objectType);
