@@ -95,15 +95,20 @@ namespace EUROPA {
   		ObjectId object = context.getVar("this")->getDataRef().getValue()->getSingletonValue();
 
   		std::vector<const AbstractDomain*> arguments;
+
+        evalArgs(context,arguments);  		
+  		ObjectFactory::evalConstructorBody(object,m_superClassName,arguments);
+  		
+  		return DataRef::null;
+  	}      	 
+
+    void ExprConstructorSuperCall::evalArgs(EvalContext& context, std::vector<const AbstractDomain*>& arguments) const
+    {
   		for (unsigned int i=0; i < m_argExprs.size(); i++) {
 			DataRef arg = m_argExprs[i]->eval(context);
 			arguments.push_back(arg.getConstValue());
   		}
-  		
-  		ObjectFactory::invokeConstructor(object,m_superClassName,arguments);
-  		
-  		return DataRef::null;
-  	}      	 
+    }
 
     /*
      * ExprConstructorAssignment
@@ -221,14 +226,16 @@ namespace EUROPA {
 	                               const LabelStr& signature, 
 	                               const std::vector<std::string>& constructorArgNames,
 	                               const std::vector<std::string>& constructorArgTypes,
-	                               Expr* superCallExpr,
-	                               const std::vector<Expr*>& constructorBody)
+	                               ExprConstructorSuperCall* superCallExpr,
+	                               const std::vector<Expr*>& constructorBody,
+	                               bool canMakeNewObject)
 	    : ConcreteObjectFactory(signature) 
 	    , m_className(className)
 	    , m_constructorArgNames(constructorArgNames)
 	    , m_constructorArgTypes(constructorArgTypes)
 	    , m_superCallExpr(superCallExpr)
 	    , m_constructorBody(constructorBody)
+	    , m_canMakeNewObject(canMakeNewObject)
 	{
 	}
 	
@@ -249,15 +256,8 @@ namespace EUROPA {
 	{
 	    check_error(checkArgs(arguments));
 	  
-	    // TODO: go up the hierarchy and give the parents a chance to create the object, this allows native classes to be exported
 	    ObjectId instance = makeNewObject(planDb, objectType, objectName,arguments);
-	    // if (m_canCreateObjects)
-	    //     instance = makeNewObject(planDb, objectType, objectName,arguments);
-	    // else
-	    //     objectFactory = objectFactory for superExprCall signature
-	    //     instance = objectFactory->makeNewObject(planDb, objectType, objectName,arguments);
-	    
-	    constructor(instance,arguments);
+	    evalConstructorBody(instance,arguments);
 	    instance->close();
 	  
 	    return instance;
@@ -282,18 +282,33 @@ namespace EUROPA {
 	                        const LabelStr& objectName,
 	                        const std::vector<const AbstractDomain*>& arguments) const
 	{
-	  std::cout << "Created Object:" << objectName.toString() << " type:" << objectType.toString() << std::endl;
-	  return (new Object(planDb, objectType, objectName,true))->getId();
+	  
+      // go up the hierarchy and give the parents a chance to create the object, this allows native classes to be exported
+      // TODO: some effort can be saved by keeping track of whether a class has a native ancestor different from Object.
+      // If it doesn't, the object can be created right away and this traversal up the hierarchy can be skipped
+	  if (m_canMakeNewObject) {
+    	  std::cout << "Created Object:" << objectName.toString() << " type:" << objectType.toString() << std::endl;
+	      return (new Object(planDb, objectType, objectName,true))->getId();
+	  }
+	  else {
+	        check_error(m_superCallExpr != NULL, "Failed to find factory that can makeNewObject");
+	        // TODO: argumentsForSuper are eval'd twice, once here and once when the constructor body is eval'd
+	        //  figure out how to do it only once
+	    	std::vector<const AbstractDomain*> argumentsForSuper;
+     	    EvalContext evalContext(NULL);
+     	    m_superCallExpr->evalArgs(evalContext,argumentsForSuper);
+	        return ObjectFactory::makeNewObject(planDb, m_superCallExpr->getSuperClassName(), objectType, objectName,argumentsForSuper);
+	  }
 	}
 	
-	void InterpretedObjectFactory::constructor(ObjectId& instance, 
+	void InterpretedObjectFactory::evalConstructorBody(ObjectId& instance, 
 	                                           const std::vector<const AbstractDomain*>& arguments) const
 	{
 	    // NOTE: here we'd normally add variables and initialize with default values, 
 	    // However, for now we'll follow the approach used by the code generation piece, where variables are
 	    // added as they're initialized, and uninitialized variables are added at the end
 	  
-        // TODO: need to pass in global eval context somehow
+        // TODO: need to pass in eval context from outside
 	    EvalContext evalContext(NULL);
 	    
         // Add new object and arguments to eval context

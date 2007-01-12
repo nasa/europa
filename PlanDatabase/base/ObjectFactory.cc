@@ -142,10 +142,24 @@ namespace EUROPA {
     return object;
   }
 
-  void ObjectFactory::invokeConstructor(ObjectId& instance, const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments)
+  ObjectId ObjectFactory::makeNewObject(
+	                        const PlanDatabaseId& planDb,
+	                        const LabelStr& ancestorType, 
+	                        const LabelStr& objectType, 
+	                        const LabelStr& objectName,
+	                        const std::vector<const AbstractDomain*>& arguments) 
+  {
+  	ConcreteObjectFactoryId factory = ObjectFactory::getFactory(ancestorType,arguments);
+  	return factory->makeNewObject(planDb,objectType,objectName,arguments);
+  }	                     
+
+  void ObjectFactory::evalConstructorBody(
+                            ObjectId& instance, 
+                            const LabelStr& objectType, 
+                            const std::vector<const AbstractDomain*>& arguments)
   {
   	ConcreteObjectFactoryId factory = ObjectFactory::getFactory(objectType,arguments);
-  	factory->constructor(instance,arguments);
+  	factory->evalConstructorBody(instance,arguments);
   }				   
 
   void ObjectFactory::purgeAll(){

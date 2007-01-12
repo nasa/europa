@@ -80,6 +80,10 @@ namespace EUROPA {
   	    
   	    virtual DataRef eval(EvalContext& context) const;
   	    
+  	    const LabelStr& getSuperClassName() const { return m_superClassName; }
+  	    
+  	    void evalArgs(EvalContext& context, std::vector<const AbstractDomain*>& arguments) const;
+  	    
   	protected:
   	    LabelStr m_superClassName;
         std::vector<Expr*> m_argExprs;	                                	      	    
@@ -152,34 +156,38 @@ namespace EUROPA {
   	        const LabelStr& signature, 
   	        const std::vector<std::string>& constructorArgNames,
   	        const std::vector<std::string>& constructorArgTypes,
-  	        Expr* superCallExpr,
-  	        const std::vector<Expr*>& constructorBody
+  	        ExprConstructorSuperCall* superCallExpr,
+  	        const std::vector<Expr*>& constructorBody,
+  	        bool canMakeNewObject = false
   	    );
   	    
   	    virtual ~InterpretedObjectFactory();
   	      	    
 	protected:
+	    // createInstance = makeNewObject + evalConstructorBody
 	    virtual ObjectId createInstance(const PlanDatabaseId& planDb,
 	                            const LabelStr& objectType, 
 	                            const LabelStr& objectName,
 	                            const std::vector<const AbstractDomain*>& arguments) const;
 	                             
-	    virtual void constructor(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const;
-  
-        // Any exported C++ classes must register a factory for each C++ constructor and override this method to call it 
+        // Any exported C++ classes must register a factory for each C++ constructor 
+        // and override this method to call the C++ constructor 
     	virtual ObjectId makeNewObject( 
 	                        const PlanDatabaseId& planDb,
 	                        const LabelStr& objectType, 
 	                        const LabelStr& objectName,
 	                        const std::vector<const AbstractDomain*>& arguments) const;
 	                        
+	    virtual void evalConstructorBody(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const;
+  
 	    bool checkArgs(const std::vector<const AbstractDomain*>& arguments) const;
 
         LabelStr m_className;
-        std::vector<std::string> m_constructorArgNames;	                          
-        std::vector<std::string> m_constructorArgTypes;	
-        Expr*                    m_superCallExpr;                          
-        std::vector<Expr*>       m_constructorBody;	                          
+        std::vector<std::string>  m_constructorArgNames;	                          
+        std::vector<std::string>  m_constructorArgTypes;	
+        ExprConstructorSuperCall* m_superCallExpr;                          
+        std::vector<Expr*>        m_constructorBody;
+        bool                      m_canMakeNewObject;	                          
   };  
   
   // TODO: create a separate file for exported C++ classes?
@@ -188,12 +196,13 @@ namespace EUROPA {
   	public:
   	    TimelineObjectFactory(const LabelStr& signature) 
   	        : InterpretedObjectFactory(
-  	              "Timeline",
-  	              signature,
-  	              std::vector<std::string>(),
-  	              std::vector<std::string>(),
-  	              NULL,
-  	              std::vector<Expr*>()
+  	              "Timeline",                 // className
+  	              signature,                  // signature
+  	              std::vector<std::string>(), // ConstructorArgNames
+  	              std::vector<std::string>(), // constructorArgTypes
+  	              NULL,                       // SuperCallExpr
+  	              std::vector<Expr*>(),       // constructorBody
+  	              true                        // canCreateObjects
   	          )
   	    {
   	    }
@@ -207,7 +216,7 @@ namespace EUROPA {
 	                        const LabelStr& objectName,
 	                        const std::vector<const AbstractDomain*>& arguments) const
 	    {
-	    	std::cout << "Created Timeline: " << objectName.toString() << " type:" << objectType.toString() << std::endl;
+	    	std::cout << "Created Timeline:" << objectName.toString() << " type:" << objectType.toString() << std::endl;
 	    	return (new Timeline(planDb, objectType, objectName,true))->getId();
 	    }
   };

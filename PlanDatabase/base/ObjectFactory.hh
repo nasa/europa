@@ -44,8 +44,15 @@ namespace EUROPA {
 				   const LabelStr& objectType, 
 				   const LabelStr& objectName,
 				   const std::vector<const AbstractDomain*>& arguments);
-				   
-    static void invokeConstructor(ObjectId& instance, 
+		
+	static ObjectId makeNewObject(
+	                        const PlanDatabaseId& planDb,
+	                        const LabelStr& ancestorType, 
+	                        const LabelStr& objectType, 
+	                        const LabelStr& objectName,
+	                        const std::vector<const AbstractDomain*>& arguments);
+	                        
+    static void evalConstructorBody(ObjectId& instance, 
                                   const LabelStr& objectType, 
                                   const std::vector<const AbstractDomain*>& arguments);				   
 
@@ -107,19 +114,30 @@ namespace EUROPA {
     /**
      * @brief Create a root object instance
      * @see DbClient::createObject(const LabelStr& type, const LabelStr& name)
+     * for the interpreted version createInstance = makeObject + evalConstructorBody
      */
     virtual ObjectId createInstance(const PlanDatabaseId& planDb, 
 				    const LabelStr& objectType, 
 				    const LabelStr& objectName,
 				    const std::vector<const AbstractDomain*>& arguments) const = 0;
+	
 				    
+    /**
+     * @brief makes an instance of a new object, this is purely construction, initialization happens in evalConstructorBody
+     * TODO make pure virtual and fix code generation accordingly 
+     */
+   virtual ObjectId makeNewObject( 
+	                        const PlanDatabaseId& planDb,
+	                        const LabelStr& objectType, 
+	                        const LabelStr& objectName,
+	                        const std::vector<const AbstractDomain*>& arguments) const { return ObjectId::noId(); };
     /**
      * @brief The body of the constructor after the object is created
      * any operations done by createInstance to the object after it is created must be done by this method
      * so that calls to "super()" in subclasses can be supported correctly
      * TODO make pure virtual and fix code generation accordingly 
      */
-    virtual void constructor(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const {};
+    virtual void evalConstructorBody(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const {};
 				    
 
   private:

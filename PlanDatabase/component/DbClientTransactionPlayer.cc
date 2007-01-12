@@ -1003,12 +1003,12 @@ namespace EUROPA {
    * 
    */ 
        
-  void createDefaultObjectFactory(const char* className)
+  void createDefaultObjectFactory(const char* className, bool canCreateObjects)
   {
       std::vector<std::string> constructorArgNames;
       std::vector<std::string> constructorArgTypes;
       std::vector<Expr*> constructorBody;
-      Expr* superCallExpr = NULL;
+      ExprConstructorSuperCall* superCallExpr = NULL;
       
       // The ObjectFactory constructor automatically registers the factory
       new InterpretedObjectFactory(
@@ -1017,7 +1017,8 @@ namespace EUROPA {
           constructorArgNames,
           constructorArgTypes,
           superCallExpr,
-          constructorBody
+          constructorBody,
+          canCreateObjects
       );       
   }
   
@@ -1029,7 +1030,7 @@ namespace EUROPA {
   	  
   	  // TODO: this should be done once after the schema is initialized
   	  // TODO: check to make sure this is done only once
-  	  createDefaultObjectFactory("Object");
+  	  createDefaultObjectFactory("Object", true);
       REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);	    	    	  
   }
 
@@ -1098,7 +1099,7 @@ namespace EUROPA {
     // Register a default factory with no arguments if one is not provided explicitly
     if (!definedDefaultConstructor &&
         m_systemClasses.find(className) == m_systemClasses.end()) { 
-        	createDefaultObjectFactory(className);
+        	createDefaultObjectFactory(className, false);
         	dbgout << "    generated default constructor" << std::endl;
     }
     
@@ -1122,7 +1123,7 @@ namespace EUROPA {
       std::vector<std::string> constructorArgNames;
       std::vector<std::string> constructorArgTypes;
       std::vector<Expr*> constructorBody;
-      Expr* superCallExpr = NULL;
+      ExprConstructorSuperCall* superCallExpr = NULL;
         	  
       for(const TiXmlElement* child = element->FirstChildElement(); child; child = child->NextSiblingElement() ) {
       	  if (strcmp(child->Value(),"arg") == 0) {
