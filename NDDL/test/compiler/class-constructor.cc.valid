@@ -547,10 +547,6 @@ namespace NDDL {
     id->addObjectType("Bang", "Bing");
     id->addObjectType("Baluga", "Object");
     id->addObjectType("World", "Object");
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addEnum("Locations");
     id->addMember("Foo", "int", "m_0");
     id->addMember("Foo", "int", "m_1");

@@ -422,10 +422,6 @@ namespace NDDL {
     id->addObjectType("Battery", "Resource");
     id->addObjectType("Rover", "Object");
     id->addObjectType("World", "Timeline");
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addEnum("TokenStates");
     id->addEnum("ProfileAlgorithm");
     id->addMember("Resource", "float", "initialCapacity");

@@ -723,10 +723,6 @@ namespace NDDL {
     id->addObjectType("UnaryResource", "Timeline");
     id->addObjectType("StringData", "Object");
     id->addObjectType("Foo", "Timeline");
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addMember("PlannerConfig", "int", "m_horizonStart");
     id->addMember("PlannerConfig", "int", "m_horizonEnd");
     id->addMember("PlannerConfig", "int", "m_maxPlannerSteps");

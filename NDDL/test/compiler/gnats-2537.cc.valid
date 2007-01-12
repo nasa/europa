@@ -165,10 +165,6 @@ namespace NDDL {
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");
     id->addObjectType("Region", "Object");
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addEnum("Location");
     id->addMember("Region", "Location", "location");
     id->addMember("Region", "Foo", "foo");

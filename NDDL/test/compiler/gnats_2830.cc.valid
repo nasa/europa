@@ -912,10 +912,6 @@ namespace NDDL {
     id->addObjectType("Enable", "Object");
     id->addObjectType("Position", "Timeline");
     id->addObjectType("Foo", "Timeline");
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addMember("PlannerConfig", "int", "m_horizonStart");
     id->addMember("PlannerConfig", "int", "m_horizonEnd");
     id->addMember("PlannerConfig", "int", "m_maxPlannerSteps");

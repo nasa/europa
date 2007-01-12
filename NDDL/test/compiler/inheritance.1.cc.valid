@@ -271,10 +271,6 @@ namespace NDDL {
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");
     id->addObjectType("Bar", "Foo");
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addMember("Foo", "int", "arg1");
     id->addMember("Foo", "float", "arg2");
     id->addMember("Foo", "bool", "arg3");

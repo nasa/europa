@@ -44,10 +44,6 @@ namespace NDDL {
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));

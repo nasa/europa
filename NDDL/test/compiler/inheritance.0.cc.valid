@@ -520,10 +520,6 @@ namespace NDDL {
     id->addObjectType("Bar", "Foo");
     id->addObjectType("Baz", "Foo");
     id->addObjectType("Bing", "Baz");
-    id->addPrimitive("int");
-    id->addPrimitive("float");
-    id->addPrimitive("bool");
-    id->addPrimitive("string");
     id->addEnum("TokenStates");
     id->addMember("Resource", "float", "initialCapacity");
     id->addMember("Resource", "float", "levelLimitMin");

@@ -181,10 +181,10 @@ private:
 
   static bool testPrimitives(){
     SCHEMA->reset();
-    SCHEMA->addPrimitive("int");
-    SCHEMA->addPrimitive("float");
-    SCHEMA->addPrimitive("bool");
-    SCHEMA->addPrimitive("string");
+    ////SCHEMA->addPrimitive("int");
+    //SCHEMA->addPrimitive("float");
+    //SCHEMA->addPrimitive("bool");
+    //SCHEMA->addPrimitive("string");
     assertTrue(SCHEMA->isPrimitive("int"));
     assertTrue(SCHEMA->isPrimitive("float"));
     assertTrue(SCHEMA->isPrimitive("bool"));
@@ -242,9 +242,9 @@ private:
 
   static bool testObjectTypeRelationships() {
     SCHEMA->reset();
-    SCHEMA->addPrimitive("int");
-    SCHEMA->addPrimitive("float");
-    SCHEMA->addPrimitive("bool");
+    //SCHEMA->addPrimitive("int");
+    //SCHEMA->addPrimitive("float");
+    //SCHEMA->addPrimitive("bool");
     SCHEMA->addObjectType(LabelStr("Foo"));
     SCHEMA->addObjectType(LabelStr("Baz"));
     SCHEMA->addPredicate("Baz.pred");
@@ -388,7 +388,7 @@ private:
     SCHEMA->addObjectType(LabelStr("Bar"), LabelStr("Foo"));
     SCHEMA->addPredicate(LabelStr("Bar.Argle"));
     assertTrue(SCHEMA->hasParent(LabelStr("Bar.Argle")));
-    SCHEMA->addPrimitive("float");
+    //SCHEMA->addPrimitive("float");
     SCHEMA->addMember(LabelStr("Bar.Argle"), LabelStr("float"), LabelStr("huey"));
     assertTrue(SCHEMA->getMemberType(LabelStr("Bar.Argle"), LabelStr("huey")) == LabelStr("float"));
 
@@ -1988,7 +1988,7 @@ private:
   static bool testOpenMerge() {
     DEFAULT_SETUP(ce, db, true);
     
-		SCHEMA->addPrimitive("int");
+		//SCHEMA->addPrimitive("int");
 		SCHEMA->addMember(DEFAULT_PREDICATE(),"int",LabelStr("FOO"));
 
     EnumeratedDomain zero(true, "int");
