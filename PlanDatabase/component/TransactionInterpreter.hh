@@ -4,6 +4,7 @@
 #include "PlanDatabaseDefs.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
+#include "Timeline.hh"
 #include <map>
 #include <vector>
 
@@ -56,7 +57,7 @@ namespace EUROPA {
   	    virtual ~EvalContext();
   	    
   	    virtual void addVar(const char* name,const AbstractDomain* value); 
-  	    virtual TIVariable& getVar(const char* name);
+  	    virtual TIVariable* getVar(const char* name);
   	
   	protected:
   	    EvalContext* m_parent;      	    
@@ -73,7 +74,8 @@ namespace EUROPA {
   class ExprConstructorSuperCall : public Expr
   {      	
   	public:
-  	    ExprConstructorSuperCall(const LabelStr& superClassName, const std::vector<Expr*>& argExprs);
+  	    ExprConstructorSuperCall(const LabelStr& superClassName, 
+  	                             const std::vector<Expr*>& argExprs);
   	    virtual ~ExprConstructorSuperCall();
   	    
   	    virtual DataRef eval(EvalContext& context) const;
@@ -150,6 +152,7 @@ namespace EUROPA {
   	        const LabelStr& signature, 
   	        const std::vector<std::string>& constructorArgNames,
   	        const std::vector<std::string>& constructorArgTypes,
+  	        Expr* superCallExpr,
   	        const std::vector<Expr*>& constructorBody
   	    );
   	    
@@ -163,19 +166,53 @@ namespace EUROPA {
 	                             
 	    virtual void constructor(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const;
   
-    	ObjectId makeNewObject( 
+        // Any exported C++ classes must register a factory for each C++ constructor and override this method to call it 
+    	virtual ObjectId makeNewObject( 
 	                        const PlanDatabaseId& planDb,
 	                        const LabelStr& objectType, 
-	                        const LabelStr& objectName) const;
+	                        const LabelStr& objectName,
+	                        const std::vector<const AbstractDomain*>& arguments) const;
 	                        
 	    bool checkArgs(const std::vector<const AbstractDomain*>& arguments) const;
 
         LabelStr m_className;
         std::vector<std::string> m_constructorArgNames;	                          
-        std::vector<std::string> m_constructorArgTypes;	                          
-        std::vector<Expr*> m_constructorBody;	                          
+        std::vector<std::string> m_constructorArgTypes;	
+        Expr*                    m_superCallExpr;                          
+        std::vector<Expr*>       m_constructorBody;	                          
   };  
   
+  // TODO: create a separate file for exported C++ classes?
+  class TimelineObjectFactory : public InterpretedObjectFactory
+  {
+  	public:
+  	    TimelineObjectFactory(const LabelStr& signature) 
+  	        : InterpretedObjectFactory(
+  	              "Timeline",
+  	              signature,
+  	              std::vector<std::string>(),
+  	              std::vector<std::string>(),
+  	              NULL,
+  	              std::vector<Expr*>()
+  	          )
+  	    {
+  	    }
+  	    
+  	    virtual ~TimelineObjectFactory() {}
+  	    
+  	protected:
+    	virtual ObjectId makeNewObject( 
+	                        const PlanDatabaseId& planDb,
+	                        const LabelStr& objectType, 
+	                        const LabelStr& objectName,
+	                        const std::vector<const AbstractDomain*>& arguments) const
+	    {
+	    	std::cout << "Created Timeline: " << objectName.toString() << " type:" << objectType.toString() << std::endl;
+	    	return (new Timeline(planDb, objectType, objectName,true))->getId();
+	    }
+  };
+  
 }
+
 
 #endif // _H_TransactionInterpreter

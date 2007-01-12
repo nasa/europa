@@ -1003,10 +1003,34 @@ namespace EUROPA {
    * 
    */ 
        
-  InterpretedDbClientTransactionPlayer::InterpretedDbClientTransactionPlayer(const DbClientId & client)
-    : DbClientTransactionPlayer(client) 
+  void createDefaultObjectFactory(const char* className)
   {
-  	m_systemClasses.insert("Timeline");
+      std::vector<std::string> constructorArgNames;
+      std::vector<std::string> constructorArgTypes;
+      std::vector<Expr*> constructorBody;
+      Expr* superCallExpr = NULL;
+      
+      // The ObjectFactory constructor automatically registers the factory
+      new InterpretedObjectFactory(
+          className,
+          className,
+          constructorArgNames,
+          constructorArgTypes,
+          superCallExpr,
+          constructorBody
+      );       
+  }
+  
+  InterpretedDbClientTransactionPlayer::InterpretedDbClientTransactionPlayer(const DbClientId & client)
+      : DbClientTransactionPlayer(client) 
+  {  	  
+  	  m_systemClasses.insert("Object");
+  	  m_systemClasses.insert("Timeline");
+  	  
+  	  // TODO: this should be done once after the schema is initialized
+  	  // TODO: check to make sure this is done only once
+  	  createDefaultObjectFactory("Object");
+      REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);	    	    	  
   }
 
   InterpretedDbClientTransactionPlayer::~InterpretedDbClientTransactionPlayer() 
@@ -1054,26 +1078,30 @@ namespace EUROPA {
                         << (parentClassName != NULL ? parentClassName : "") 
                         << " {" << std::endl;
                           
+    bool definedDefaultConstructor = false;                          
     for(const TiXmlElement* child = element.FirstChildElement(); child; child = child->NextSiblingElement() ) {    	
     	const char * tagname = child->Value();
     	
 	    if (strcmp(tagname, "var") == 0) 
 	    	defineClassMember(schema,className,child);
-	    else if (strcmp(tagname, "constructor") == 0) 
-	    	defineConstructor(schema,className,child);	    	
+	    else if (strcmp(tagname, "constructor") == 0) { 
+	    	int argCnt = defineConstructor(schema,className,child);
+	    	if (argCnt == 0)
+	    	    definedDefaultConstructor = true;	
+	    }	    	    	
 	    else if (strcmp(tagname, "predicate") == 0) 
 	    	declarePredicate(schema,className,child);	    	
 	    else if (strcmp(tagname, "enum") == 0) 
 	    	defineEnum(schema,className,child);	    	
     }
 
-    // TODO: deal with System classes like Timeline, make sure the right object factories are registered
-    /*
-    if (m_systemClasses.find(className) != m_systemClasses.end())
-        return;
-    */
+    // Register a default factory with no arguments if one is not provided explicitly
+    if (!definedDefaultConstructor &&
+        m_systemClasses.find(className) == m_systemClasses.end()) { 
+        	createDefaultObjectFactory(className);
+        	dbgout << "    generated default constructor" << std::endl;
+    }
     
-    // TODO: register a default factory with no arguments if one is not provided explicitly
     dbgout << "}" << std::endl;    
     std::cout << dbgout.str() << std::endl;     
   }
@@ -1086,7 +1114,7 @@ namespace EUROPA {
 	  schema->addMember(className, type, name);
   }
 
-  void InterpretedDbClientTransactionPlayer::defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  int InterpretedDbClientTransactionPlayer::defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
   {	
   	  std::ostringstream signature;
   	  signature << className;
@@ -1094,6 +1122,7 @@ namespace EUROPA {
       std::vector<std::string> constructorArgNames;
       std::vector<std::string> constructorArgTypes;
       std::vector<Expr*> constructorBody;
+      Expr* superCallExpr = NULL;
         	  
       for(const TiXmlElement* child = element->FirstChildElement(); child; child = child->NextSiblingElement() ) {
       	  if (strcmp(child->Value(),"arg") == 0) {
@@ -1117,7 +1146,7 @@ namespace EUROPA {
           	    }
             }
 
-      	  	constructorBody.push_back(new ExprConstructorSuperCall(Schema::instance()->getParent(className),argExprs));
+      	  	superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),argExprs);
       	  }
       	  else if (strcmp(child->Value(),"assign") == 0) {
       	  	const TiXmlElement* rhsChild = child->FirstChildElement();
@@ -1164,15 +1193,22 @@ namespace EUROPA {
       	  }
       }	
       dbgout << ident << "constructor (" << signature.str() << ")" << std::endl; 
-      
+
+		// If constructor for super class isn't called explicitly, call default one with no args
+        if (superCallExpr == NULL) 
+            superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),std::vector<Expr*>());                 	
+            
       // The ObjectFactory constructor automatically registers the factory
       new InterpretedObjectFactory(
           className,
           signature.str(),
           constructorArgNames,
           constructorArgTypes,
+          superCallExpr,
           constructorBody
       ); 
+      
+      return constructorArgNames.size();
   }
 
   void InterpretedDbClientTransactionPlayer::declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element)

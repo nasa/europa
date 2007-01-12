@@ -140,7 +140,7 @@ namespace EUROPA {
       virtual void playDefineType(const TiXmlElement &);
       
       void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-      void defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+      int  defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       

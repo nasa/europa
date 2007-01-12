@@ -32,8 +32,7 @@ namespace EUROPA {
     AbstractDomain* DataRef::getValue() { return m_value.domain; }
     
     const AbstractDomain* DataRef::getConstValue() const { return m_value.constDomain; }
-  	    
-    
+  	        
     TIVariable::TIVariable(const char* name,const AbstractDomain* value)
         : m_name(name)
         , m_value(value)
@@ -65,18 +64,17 @@ namespace EUROPA {
   		m_variables[name] = v;
   	} 
 
-  	TIVariable& EvalContext::getVar(const char* name)
+  	TIVariable* EvalContext::getVar(const char* name)
   	{
   		std::map<std::string,TIVariable>::iterator it = 
   		    m_variables.find(name);
   		    
-        if( it != m_variables.end() ) {
-            return it->second;
-  	    }
-  	    else {
-  	    	check_error(m_parent != NULL);
+        if( it != m_variables.end() ) 
+            return &(it->second);
+  	    else if (m_parent != NULL)
   	    	return m_parent->getVar(name);
-  	    }
+  	    else 
+  	        return NULL;
   	}
 
     /*
@@ -94,7 +92,7 @@ namespace EUROPA {
   	
   	DataRef ExprConstructorSuperCall::eval(EvalContext& context) const
   	{
-  		ObjectId object = context.getVar("this").getDataRef().getValue()->getSingletonValue();
+  		ObjectId object = context.getVar("this")->getDataRef().getValue()->getSingletonValue();
 
   		std::vector<const AbstractDomain*> arguments;
   		for (unsigned int i=0; i < m_argExprs.size(); i++) {
@@ -123,7 +121,7 @@ namespace EUROPA {
   	    
   	DataRef ExprConstructorAssignment::eval(EvalContext& context) const
   	{
-  		ObjectId object = context.getVar("this").getDataRef().getValue()->getSingletonValue();
+  		ObjectId object = context.getVar("this")->getDataRef().getValue()->getSingletonValue();
      	const AbstractDomain* domain = m_rhs->eval(context).getConstValue();
      	check_error(object->getVariable(m_lhs) == ConstrainedVariableId::noId());
      	object->addVariable(*domain,m_lhs);
@@ -163,8 +161,8 @@ namespace EUROPA {
 
   	DataRef ExprVariableRef::eval(EvalContext& context) const
   	{
-     	TIVariable& rhs = context.getVar(m_varName);
-     	return rhs.getDataRef();
+     	TIVariable* rhs = context.getVar(m_varName);
+     	return rhs->getDataRef();
   	}  
 
     /*
@@ -193,16 +191,16 @@ namespace EUROPA {
 			arguments.push_back(arg.getConstValue());
   		}
   		
-  		// TODO: when this is the rhs of an assignment in a constructor, 
-  		// this must create an object specifying the enclosing object (for which the constructor is being executed)
-  		// as the parent.
-  		// This is a problem, everybody should go through the factory, the way it is now, inside a constructor objects are
-  		// created directly in C++ through new (in the generated code) and are created through the factories if
-  		// they're in the initial state
+  		// TODO: when this is the rhs of an assignment in a constructor, this must create an object specifying 
+  		// the enclosing object (for which the constructor is being executed) as the parent.
+  		// The way it is now, objects are created :
+  		// - directly in C++ through new (in the generated code) if the stmt is inside a NDDL constructor
+  		// - through the factories if the stmtm is in the initial state
+  		// This is a problem, everybody should go through the factory
   		// faking it for now, but this is a hack
 
   		// This assumes for now this is only called inside a constructor  		
-  		ObjectId thisObject = context.getVar("this").getDataRef().getValue()->getSingletonValue();
+  		ObjectId thisObject = context.getVar("this")->getDataRef().getValue()->getSingletonValue();
   		LabelStr name(std::string(thisObject->getName().toString() + "." + m_objectName.toString()));  		
      	ObjectId newObject = m_dbClient->createObject(
      	    m_objectType.c_str(), 
@@ -223,17 +221,22 @@ namespace EUROPA {
 	                               const LabelStr& signature, 
 	                               const std::vector<std::string>& constructorArgNames,
 	                               const std::vector<std::string>& constructorArgTypes,
+	                               Expr* superCallExpr,
 	                               const std::vector<Expr*>& constructorBody)
 	    : ConcreteObjectFactory(signature) 
 	    , m_className(className)
 	    , m_constructorArgNames(constructorArgNames)
 	    , m_constructorArgTypes(constructorArgTypes)
+	    , m_superCallExpr(superCallExpr)
 	    , m_constructorBody(constructorBody)
 	{
 	}
 	
 	InterpretedObjectFactory::~InterpretedObjectFactory()
 	{
+		if (m_superCallExpr != NULL)
+    		delete m_superCallExpr;
+		
 		for (unsigned int i=0; i < m_constructorBody.size(); i++) 
 		    delete m_constructorBody[i];
 	}
@@ -244,13 +247,20 @@ namespace EUROPA {
 	                        const LabelStr& objectName,
 	                        const std::vector<const AbstractDomain*>& arguments) const 
 	{
-	  check_error(checkArgs(arguments));
+	    check_error(checkArgs(arguments));
 	  
-      ObjectId instance = makeNewObject(planDb, objectType, objectName);	  
-	  constructor(instance,arguments);
-	  instance->close();
+	    // TODO: go up the hierarchy and give the parents a chance to create the object, this allows native classes to be exported
+	    ObjectId instance = makeNewObject(planDb, objectType, objectName,arguments);
+	    // if (m_canCreateObjects)
+	    //     instance = makeNewObject(planDb, objectType, objectName,arguments);
+	    // else
+	    //     objectFactory = objectFactory for superExprCall signature
+	    //     instance = objectFactory->makeNewObject(planDb, objectType, objectName,arguments);
+	    
+	    constructor(instance,arguments);
+	    instance->close();
 	  
-	  return instance;
+	    return instance;
 	} 
 
     bool InterpretedObjectFactory::checkArgs(const std::vector<const AbstractDomain*>& arguments) const
@@ -259,30 +269,33 @@ namespace EUROPA {
     	return true;
     }
     	
+    /*
+     * If a class has a native C++ ancestor the ancestor instance must be instanciated instead
+     * - Every exported C++ class (like Timeline) must extend Object
+     * - Every exported C++ class must register an InterpretedObjectFactory for each one of its constructors 
+     *   that overrides this method and calls the appropriate constructor
+     * 
+	 */  
 	ObjectId InterpretedObjectFactory::makeNewObject( 
 	                        const PlanDatabaseId& planDb,
 	                        const LabelStr& objectType, 
-	                        const LabelStr& objectName) const
+	                        const LabelStr& objectName,
+	                        const std::vector<const AbstractDomain*>& arguments) const
 	{
-	  // TODO: If a class has a native C++ ancestor the ancestor instance must be instanciated instead
-	  // Every native ancestor must extend Object 
-	  // This should be implemented so that the appropriate factory for the superclass gets a shot at creating the object first
-	  ObjectId instance = (new Object(planDb, objectType, objectName,true))->getId();
-	  
-	  // NOTE: here we'd normally add variables and initialize with default values, 
-	  // making sure superclasses are handled as well
-	  // However, initially we'll follow the approach from code generation, where variables are
-	  // added as they're initialized
-	  
-	  return instance;
+	  std::cout << "Created Object:" << objectName.toString() << " type:" << objectType.toString() << std::endl;
+	  return (new Object(planDb, objectType, objectName,true))->getId();
 	}
 	
 	void InterpretedObjectFactory::constructor(ObjectId& instance, 
 	                                           const std::vector<const AbstractDomain*>& arguments) const
 	{
-		// TODO: need to pass in global eval context somehow
-		EvalContext evalContext(NULL);
-
+	    // NOTE: here we'd normally add variables and initialize with default values, 
+	    // However, for now we'll follow the approach used by the code generation piece, where variables are
+	    // added as they're initialized, and uninitialized variables are added at the end
+	  
+        // TODO: need to pass in global eval context somehow
+	    EvalContext evalContext(NULL);
+	    
         // Add new object and arguments to eval context
 		ObjectDomain thisDomain(instance,m_className.c_str());		
 		evalContext.addVar("this",&thisDomain);
@@ -290,15 +303,18 @@ namespace EUROPA {
 		for (unsigned int i=0;i<m_constructorArgNames.size();i++) 
 			evalContext.addVar(m_constructorArgNames[i].c_str(),arguments[i]);
 		
+		if (m_superCallExpr != NULL)
+		    m_superCallExpr->eval(evalContext);
+		
 		for (unsigned int i=0; i < m_constructorBody.size(); i++) 
 			m_constructorBody[i]->eval(evalContext);
 			
-	    // Initialize variables that were not explicitly initialized, including inherited vars?
+	    // TODO: Initialize any variables that were not explicitly initialized
 		/*
 		   std::vector<std::string> varNames = getVarNamesFromClassName(m_className);
 		   std::vector<std::string> varTypes = getVarTypesFromClassName(m_className);		   
 		   for (unsigned int i=0; i < varNames.size(); i++) {
-		       if (instance.getVariable(varNames[i] == ConstrainedVariableId::noId())) {
+		       if (instance.getVariable(varNames[i]) == ConstrainedVariableId::noId()) {
 		           instance.addVariable(getDefaultDomain(varTypes[i]),varNames[i]);
 		       } 
 		   }
