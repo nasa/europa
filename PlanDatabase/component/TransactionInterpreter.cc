@@ -10,6 +10,8 @@
 #include "Error.hh"
 #include "Object.hh" 
 #include "ObjectFactory.hh"
+#include "TypeFactory.hh"
+#include "Schema.hh"
 
 namespace EUROPA {
 
@@ -27,6 +29,7 @@ namespace EUROPA {
     
     DataRef::~DataRef()
     {
+    	// TODO: should DataRef delete the AbstractDomain?, it'll prevent leaks in many cases
     }
   	    
     AbstractDomain* DataRef::getValue() { return m_value.domain; }
@@ -130,6 +133,7 @@ namespace EUROPA {
      	const AbstractDomain* domain = m_rhs->eval(context).getConstValue();
      	check_error(object->getVariable(m_lhs) == ConstrainedVariableId::noId());
      	object->addVariable(*domain,m_lhs);
+     	std::cout << "Initialized variable:" << object->getName().toString() << "." << m_lhs << " in constructor" << std::endl;
   		
   		return DataRef::null;
   	} 
@@ -304,10 +308,6 @@ namespace EUROPA {
 	void InterpretedObjectFactory::evalConstructorBody(ObjectId& instance, 
 	                                           const std::vector<const AbstractDomain*>& arguments) const
 	{
-	    // NOTE: here we'd normally add variables and initialize with default values, 
-	    // However, for now we'll follow the approach used by the code generation piece, where variables are
-	    // added as they're initialized, and uninitialized variables are added at the end
-	  
         // TODO: need to pass in eval context from outside
 	    EvalContext evalContext(NULL);
 	    
@@ -323,17 +323,28 @@ namespace EUROPA {
 		
 		for (unsigned int i=0; i < m_constructorBody.size(); i++) 
 			m_constructorBody[i]->eval(evalContext);
+		
+		const std::vector<ConstrainedVariableId>& vars = instance->getVariables();
+		std::cout << "    Vars for " << m_className.toString() << " " << instance->getName().toString() << " are:";
+		for (unsigned j=0; j < vars.size(); j++) {
+			std::cout << vars[j]->getName().toString() << ",";
+		}
+		std::cout << std::endl;
 			
-	    // TODO: Initialize any variables that were not explicitly initialized
-		/*
-		   std::vector<std::string> varNames = getVarNamesFromClassName(m_className);
-		   std::vector<std::string> varTypes = getVarTypesFromClassName(m_className);		   
-		   for (unsigned int i=0; i < varNames.size(); i++) {
-		       if (instance.getVariable(varNames[i]) == ConstrainedVariableId::noId()) {
-		           instance.addVariable(getDefaultDomain(varTypes[i]),varNames[i]);
-		       } 
-		   }
-	    */ 	    
+	    // Initialize any variables that were not explicitly initialized
+	    const Schema::NameValueVector& members = Schema::instance()->getMembers(m_className);
+	    for (unsigned int i=0; i < members.size(); i++) {
+	    	std::string varName = instance->getName().toString() + "." + members[i].second.toString();
+	        if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
+	    	    AbstractDomain* baseDomain = TypeFactory::baseDomain(members[i].first.c_str()).copy(); 
+	            instance->addVariable(
+	                *baseDomain,
+	                members[i].second.c_str()
+	            );
+	            delete baseDomain;
+	            std::cout << "Used default initializer for " << m_className.toString() << "." << members[i].second.toString() << std::endl; 
+	        } 
+	    }
 	}	
 }
 
