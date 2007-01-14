@@ -190,6 +190,14 @@ namespace EUROPA {
     return false;
   }
 
+  const Schema::NameValueVector& Schema::getMembers(const LabelStr& objectType) const
+  {
+    std::map<LabelStr, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
+      
+    check_error(it != membershipRelation.end(), "Unable to find members for object type:" + objectType.toString() );
+    return it->second;
+  }
+
   bool Schema::hasMember(const LabelStr& parentType, const LabelStr& memberName) const{
     check_error(isType(parentType), parentType.toString() + " is undefined.");
 

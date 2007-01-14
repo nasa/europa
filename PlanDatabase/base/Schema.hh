@@ -29,6 +29,10 @@ namespace EUROPA {
    */
   class Schema: public DomainComparator {
   public:
+
+    typedef std::pair<LabelStr, LabelStr> NameValuePair;
+    typedef std::vector<NameValuePair> NameValueVector;
+
     /**
      * @brief Accessor for singleton instance, if present
      */
@@ -119,6 +123,15 @@ namespace EUROPA {
 		    const LabelStr& memberType,
 		    const LabelStr& memberName) const;
 
+    /**
+     * 
+     * @brief returns a vector with the members of an object type
+     * each element in the vector is a pair:
+     * - the first element is the member's type
+     * - the second elemnt is the member's name 
+     */
+    const NameValueVector& getMembers(const LabelStr& objectType) const;
+    
     /**
      * @brief Determines if the given member is contained in the parent
      * @param parentType the type of the composing object or predicate
@@ -328,8 +341,6 @@ namespace EUROPA {
 
     typedef std::set<double> ValueSet;
     typedef std::set<LabelStr> LabelStrSet;
-    typedef std::pair<LabelStr, LabelStr> NameValuePair;
-    typedef std::vector<NameValuePair> NameValueVector;
     typedef std::map<LabelStr, LabelStr> LabelStr_LabelStr_Map;
     typedef std::map<LabelStr, LabelStrSet > LabelStr_LabelStrSet_Map;
     typedef std::map<LabelStr, ValueSet > LabelStr_ValueSet_Map;
