@@ -28,6 +28,12 @@
 #include "Rule.hh"
 #include "DbClient.hh"
 #include "DbClientTransactionPlayer.hh"
+#include "Filters.hh"
+#include "DefaultPropagator.hh"
+#include "TemporalPropagator.hh"
+#include "SAVH_ProfilePropagator.hh"
+#include "STNTemporalAdvisor.hh"
+#include "ResourcePropagator.hh"
 
 
 #include <fstream>
@@ -54,6 +60,11 @@ namespace EUROPA {
     }
   }
 
+  PSObject::~PSObject() {
+    for(int i = 0; i < m_vars.size(); ++i)
+      delete m_vars.get(i);
+  }
+
   const PSList<PSVariable*>& PSObject::getMemberVariables() {
     return m_vars;
   }
@@ -69,13 +80,13 @@ namespace EUROPA {
     return retval;
   }
 
-  PSList<PSToken*>* PSObject::getTokens() {
-    PSList<PSToken*>* retval = new PSList<PSToken*>();
+  PSList<PSToken*> PSObject::getTokens() {
+    PSList<PSToken*> retval;
     const TokenSet& tokens = m_obj->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
       PSToken* tok = new PSToken(*it);
       check_error(tok != NULL);
-      retval->push_back(tok);
+      retval.push_back(tok);
     }
     return retval;
   }
@@ -122,6 +133,8 @@ namespace EUROPA {
     m_profile->getLevel((int) time, dom);
     return dom.getUpperBound();
   }
+
+  const PSList<TimePoint>& PSResourceProfile::getTimes() {return m_times;}
 
   PSToken::PSToken(const TokenId& tok) : PSEntity(tok), m_tok(tok) {
     const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
@@ -177,8 +190,9 @@ namespace EUROPA {
       else
 	m_type =  INTEGER;
     }
-    checkError(ALWAYS_FAIL, "Failed to correctly determine the type of " << var->toString());
-    m_type =  STRING;
+    else {
+      checkError(ALWAYS_FAIL, "Failed to correctly determine the type of " << var->toString());
+    }
   }
   
   const std::string& PSVariable::getName() {
@@ -255,8 +269,10 @@ namespace EUROPA {
 
   PSVarType PSVarValue::getType() const {return m_type;}
   
-  //FIXME
-  PSObject* PSVarValue::asObject() {check_error(m_type == OBJECT); return NULL;}
+  PSObject* PSVarValue::asObject() {
+    check_error(m_type == OBJECT);
+    return new PSObject(ObjectId(m_val));
+  }
 
   int PSVarValue::asInt() {check_error(m_type == INTEGER); return (int) m_val;}
   
@@ -283,7 +299,10 @@ namespace EUROPA {
     m_solver->reset();
   }
 
-  void PSSolver::destroy() {}
+  void PSSolver::destroy() {
+    delete (SOLVERS::Solver*) m_solver;
+    m_solver = SOLVERS::SolverId::noId();
+  }
 
   int PSSolver::getStepCount() {
     return (int) m_solver->getStepCount();
@@ -301,9 +320,8 @@ namespace EUROPA {
     return m_solver->isTimedOut();
   }
 
-  //FIXME
   bool PSSolver::isConstraintConsistent() {
-    return true;
+    return m_solver->isConstraintConsistent();
   }
 
   bool PSSolver::hasFlaws() {
@@ -321,16 +339,16 @@ namespace EUROPA {
     return count;
   }
 
-  PSList<std::string>* PSSolver::getOpenDecisions() {
-    PSList<std::string>* retval = new PSList<std::string>();
+  PSList<std::string> PSSolver::getFlaws() {
+    PSList<std::string> retval;
     IteratorId flawIt = m_solver->createIterator();
     while(!flawIt->done()) {
       EntityId entity = flawIt->next();
       check_error(entity.isValid());
       std::string str = entity->toString();
-      retval->push_back(str);
+      retval.push_back(str);
     }
-    delete (Iterator*) retval;
+    delete (Iterator*) flawIt;
     return retval;
   }
 
@@ -340,22 +358,24 @@ namespace EUROPA {
 
   const std::string& PSSolver::getConfigFilename() {return m_configFile;}
 
-  //FIXME
   int PSSolver::getHorizonStart() {
-    return MINUS_INFINITY;
+    return (int) SOLVERS::HorizonFilter::getHorizon().getLowerBound();
   }
 
-  //FIXME
   int PSSolver::getHorizonEnd() {
-    return PLUS_INFINITY;
+    return (int) SOLVERS::HorizonFilter::getHorizon().getUpperBound();
   }
 
-  //FIXME
   void PSSolver::configure(const std::string& configFilename,
 			   int horizonStart, int horizonEnd) {
+    check_error(horizonStart <= horizonEnd);
+    SOLVERS::HorizonFilter::getHorizon().reset(IntervalIntDomain());
+    SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
   }
 
   PSEngine::PSEngine() {}
+
+  PSEngine::~PSEngine() {}
 
   //FIXME
   void PSEngine::start() {
@@ -364,6 +384,10 @@ namespace EUROPA {
     check_error(m_rulesEngine.isNoId());
     
     m_constraintEngine = (new ConstraintEngine())->getId();
+    new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
+    new TemporalPropagator(LabelStr("Temporal"), m_constraintEngine);
+    new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
+
     initConstraintLibrary();
     initNDDL();
     
@@ -372,6 +396,8 @@ namespace EUROPA {
 
   //FIXME
   void PSEngine::shutdown() {
+    Entity::purgeStarted();
+
     uninitConstraintLibrary();
     uninitNDDL();
     ObjectFactory::purgeAll();
@@ -380,8 +406,13 @@ namespace EUROPA {
     Rule::purgeAll();
 
     delete (RulesEngine*) m_rulesEngine;
+    m_rulesEngine = RulesEngineId::noId();
     delete (PlanDatabase*) m_planDatabase;
+    m_planDatabase = PlanDatabaseId::noId();
     delete (ConstraintEngine*) m_constraintEngine;
+    m_constraintEngine = ConstraintEngineId::noId();
+
+    Entity::purgeEnded();
   }
     
   void PSEngine::loadModel(const std::string& modelFileName) {
@@ -401,6 +432,10 @@ namespace EUROPA {
     SchemaId schema = (*fcn_schema)();
     
     m_planDatabase = (new PlanDatabase(m_constraintEngine, schema))->getId();
+    new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
+    PropagatorId temporalPropagator =
+      m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
+    m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
     m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
   }
 
@@ -417,17 +452,17 @@ namespace EUROPA {
   void PSEngine::executeScript(const std::string& language, const std::string& script) {
   }
 
-  PSList<PSObject*>* PSEngine::getObjectsByType(const std::string& objectType) {
+  PSList<PSObject*> PSEngine::getObjectsByType(const std::string& objectType) {
     check_error(m_planDatabase.isValid());
 
     std::list<ObjectId> objs;
     m_planDatabase->getObjectsByType(LabelStr(objectType), objs);
 
-    PSList<PSObject*>* retval = new PSList<PSObject*>();
+    PSList<PSObject*> retval;
     
     for(std::list<ObjectId>::const_iterator it = objs.begin(); it != objs.end(); ++it) {
       PSObject* obj = new PSObject(*it);
-      retval->push_back(obj);
+      retval.push_back(obj);
     }
     return retval;
   }
@@ -440,18 +475,18 @@ namespace EUROPA {
     return new PSObject(entity);
   }
 
-  PSList<PSResource*>* PSEngine::getResourcesByType(const std::string& objectType) {
+  PSList<PSResource*> PSEngine::getResourcesByType(const std::string& objectType) {
     check_error(m_planDatabase.isValid());
     
     std::list<SAVH::ResourceId> objs;
     m_planDatabase->getObjectsByType(objectType, objs);
 
-    PSList<PSResource*>* retval = new PSList<PSResource*>();
+    PSList<PSResource*> retval;
     
     for(std::list<SAVH::ResourceId>::const_iterator it = objs.begin(); it != objs.end();
 	++it) {
       PSResource* res = new PSResource(*it);
-      retval->push_back(res);
+      retval.push_back(res);
     }
     return retval;
   }
@@ -464,15 +499,15 @@ namespace EUROPA {
     return new PSResource(entity);
   }
 
-  PSList<PSToken*>* PSEngine::getTokens() {
+  PSList<PSToken*> PSEngine::getTokens() {
     check_error(m_planDatabase.isValid());
 
     const TokenSet& tokens = m_planDatabase->getTokens();
-    PSList<PSToken*>* retval = new PSList<PSToken*>();
+    PSList<PSToken*> retval;
 
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
       PSToken* tok = new PSToken(*it);
-      retval->push_back(tok);
+      retval.push_back(tok);
     }
     return retval;
   }

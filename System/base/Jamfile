@@ -9,4 +9,8 @@ ModuleBase System
 	PSEngine.cc
 	;
 
+if $(LIBRARIES) = SHARED {
+  SwigJava PSEngine.i : swig : cpp : PSEngine : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine Resource NDDL TemporalNetwork Solvers System : PSEngine ;
+}
+
 } # PLASMA_READY

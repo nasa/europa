@@ -75,13 +75,13 @@ namespace EUROPA {
     //What's this supposed to do, exactly? ~MJI
     void executeScript(const std::string& language, const std::string& script);
 	
-    PSList<PSObject*>* getObjectsByType(const std::string& objectType);
+    PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
 		
-    PSList<PSResource*>* getResourcesByType(const std::string& resourceType);
+    PSList<PSResource*> getResourcesByType(const std::string& resourceType);
     PSResource* getResourceByKey(PSEntityKey id);
 		
-    PSList<PSToken*>* getTokens();    	 
+    PSList<PSToken*> getTokens();    	 
     PSToken* getTokenByKey(PSEntityKey id);	
 		
     PSSolver* createSolver(const std::string& configurationFile);		
@@ -111,13 +111,13 @@ namespace EUROPA {
     PSVariable* getMemberVariable(const std::string& name);
 
     //const PSList<PSToken*>& getTokens();
-    PSList<PSToken*>* getTokens();
+    PSList<PSToken*> getTokens();
+    ~PSObject();
   protected:
     friend class PSEngine;
     friend class PSToken;
     friend class PSVarValue;
     PSObject(const ObjectId& obj);
-    ~PSObject();
   private:
     ObjectId m_obj;
     PSList<PSVariable*> m_vars;
@@ -137,6 +137,7 @@ namespace EUROPA {
     
   class PSResourceProfile
   {
+  public:
     const PSList<TimePoint>& getTimes();
     double getLowerBound(TimePoint time);
     double getUpperBound(TimePoint time);
@@ -176,7 +177,7 @@ namespace EUROPA {
 		
     int getOpenDecisionCnt();	
     //What are these strings supposed to look like? ~MJI
-    PSList<std::string>* getOpenDecisions();	
+    PSList<std::string> getFlaws();	
     std::string getLastExecutedDecision();	
 		
     // Configuration
@@ -185,6 +186,7 @@ namespace EUROPA {
     int getHorizonStart();
     int getHorizonEnd();
 	    
+    //it isn't currently possible to configure a solver from an XML file after construction
     void configure(const std::string& configFilename, int horizonStart, int horizonEnd);
   protected:
     friend class PSEngine;

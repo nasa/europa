@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="PSEngine" default="PSEngine" basedir=".">
+  
+  <property name="build.dir" value="${src.dir}/classes"/>
+  <property name="cache" value="${build.dir}/cache"/>
+  <property name="dist" location="../../lib"/>
+  <property name="libraries" location="../../ext/lib"/>
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${cache}"/>
+  </target>
+  
+  <target name="compile" depends="init">
+    <depend srcdir="${src.dir}" destdir="${build.dir}" cache="${cache}" closure="yes"/>
+    <javac source="1.4" target="1.4" srcdir="${src.dir}" destdir="${build.dir}">
+      <classpath>
+	<fileset dir="${libraries}">
+	  <include name="*.jar"/>
+	</fileset>
+      </classpath>
+    </javac>
+  </target>
+  
+  <target name="PSEngine" depends="compile">
+    <mkdir dir="${cache}/unjar"/>
+    <unjar dest="${cache}/unjar">
+      <fileset dir="${libraries}">
+	<include name="*.jar"/>
+      </fileset>
+    </unjar>
+    <delete dir="${cache}/unjar/META-INF"/>
+    <mkdir dir="${dist}"/>
+    <jar jarfile="${dist}/PSEngine.jar">
+      <fileset dir="${build.dir}">
+	<exclude name="cache"/>
+	<exclude name="cache/**/*"/>
+      </fileset>
+      <fileset dir="${cache}/unjar"/>
+    </jar>
+    <touch file="${dist}/PSEngine.jar"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${cache}"/>
+    <delete dir="${build.dir}"/>
+    <delete file="${dist}/PSEngine.jar"/>
+  </target>
+
+</project>
