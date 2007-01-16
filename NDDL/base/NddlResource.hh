@@ -10,6 +10,10 @@
 
 namespace NDDL {
 
+  typedef EUROPA::ObjectDomain UnaryDomain;
+  typedef EUROPA::ObjectDomain ResuableDomain;
+  typedef EUROPA::ObjectDomain ReservoirDomain;
+
   class NddlUnaryToken : public EUROPA::SAVH::UnaryToken {
   public:
     NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable = false, const bool& close = false);
