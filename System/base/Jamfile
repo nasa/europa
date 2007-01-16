@@ -2,11 +2,14 @@ SubDir PLASMA System base ;
 
 if ! $(PLASMA_READY) {
 
+SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
+
 ModuleBase System 
 	: 
 	PLASMAPerformanceConstraint.cc 
 	LoraxConstraints.cc	
 	PSEngine.cc
+	TransactionInterpreter.cc
 	;
 
 if $(LIBRARIES) = SHARED {

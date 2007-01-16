@@ -1,9 +1,13 @@
 #ifndef _H_TransactionInterpreter
 #define _H_TransactionInterpreter
 
-#include "PlanDatabaseDefs.hh"
+#include "DbClientTransactionPlayer.hh"
+#include "IntervalToken.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
+#include "PlanDatabaseDefs.hh"
+#include "Rule.hh"
+#include "RuleInstance.hh"
 #include "Timeline.hh"
 #include <map>
 #include <vector>
@@ -11,6 +15,27 @@
 
 namespace EUROPA {
 
+  class InterpretedDbClientTransactionPlayer : public DbClientTransactionPlayer {
+    public:
+      InterpretedDbClientTransactionPlayer(const DbClientId & client);
+      virtual ~InterpretedDbClientTransactionPlayer();
+
+    protected:
+      virtual void playDeclareClass(const TiXmlElement &); 
+      virtual void playDefineClass(const TiXmlElement &); 
+      virtual void playDefineCompat(const TiXmlElement &);
+      virtual void playDefineEnumeration(const TiXmlElement &);
+      virtual void playDefineType(const TiXmlElement &);
+      
+      void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+      int  defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+      void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+      void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+      
+      // TODO: move this to schema
+      std::set<std::string> m_systemClasses;      
+  };
+  
   class DataRef
   {
   	public :
@@ -221,6 +246,47 @@ namespace EUROPA {
 	    }
   };
   
+  // InterpretedToken is the interpreted version of NddlToken
+  class InterpretedToken : public IntervalToken
+  {
+  	public:
+  	    // Same Constructor signatures as NddlToken, see if both are needed
+  	    InterpretedToken(const PlanDatabaseId& planDatabase, 
+  	                     const LabelStr& predicateName, 
+  	                     const bool& rejectable = false, 
+  	                     const bool& close = false);
+  	                     
+        InterpretedToken(const TokenId& master, 
+                         const LabelStr& predicateName, 
+                         const LabelStr& relation, 
+                         const bool& close = false);
+        
+  	    virtual ~InterpretedToken();
+  };
+  
+  class InterpretedRuleInstance : public RuleInstance
+  {
+  	public:
+  	    InterpretedRuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb);
+  	    virtual ~InterpretedRuleInstance();
+  	    
+    protected:
+        /**
+         * @brief provide implementation for this method for firing the rule
+         */
+        virtual void handleExecute();
+  };
+  
+  class InterpretedRuleFactory : public Rule
+  {
+    public:
+        InterpretedRuleFactory(const LabelStr& predicate, const LabelStr& source); 
+        virtual ~InterpretedRuleFactory();
+        
+        virtual RuleInstanceId createInstance(const TokenId& token, 
+                                              const PlanDatabaseId& planDb, 
+                                              const RulesEngineId &rulesEngine) const;
+  };   
 }
 
 

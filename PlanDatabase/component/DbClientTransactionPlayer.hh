@@ -126,28 +126,6 @@ namespace EUROPA {
         }
 
   };
-
-  class InterpretedDbClientTransactionPlayer : public DbClientTransactionPlayer {
-    public:
-      InterpretedDbClientTransactionPlayer(const DbClientId & client);
-      virtual ~InterpretedDbClientTransactionPlayer();
-
-    protected:
-      virtual void playDeclareClass(const TiXmlElement &); 
-      virtual void playDefineClass(const TiXmlElement &); 
-      virtual void playDefineCompat(const TiXmlElement &);
-      virtual void playDefineEnumeration(const TiXmlElement &);
-      virtual void playDefineType(const TiXmlElement &);
-      
-      void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-      int  defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-      void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-      void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-      
-      // TODO: move this to schema
-      std::set<std::string> m_systemClasses;      
-  };
-  
 }
 
 #endif // _H_DbClientTransactionPlayer

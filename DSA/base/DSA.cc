@@ -30,6 +30,7 @@
 #include "ResourceThreatDecisionPoint.hh"
 #include "SAVH_ProfilePropagator.hh"
 #include "SAVH_Resource.hh"
+#include "TransactionInterpreter.hh"
 
 #include <dlfcn.h>
 #include <fstream>
