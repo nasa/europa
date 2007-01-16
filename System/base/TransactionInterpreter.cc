@@ -247,6 +247,7 @@ namespace EUROPA {
           schema->addMember(predName.c_str(), type, name);
       	}
       	else if (strcmp(predArg->Value(),"invoke") == 0) {
+      		// TODO: deal with this
       		dbgout << "constraint " << predArg->Attribute("name");
       	}             
       }	
@@ -255,7 +256,8 @@ namespace EUROPA {
     
   void InterpretedDbClientTransactionPlayer::defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
   {	
-  	  // TODO jrb - implement this. Enum is scoped within the class
+  	  // Enum is scoped within the class but in the generated code it doesn't make a difference
+  	  playDefineEnumeration(*element);
   }
   
   void InterpretedDbClientTransactionPlayer::playDefineCompat(const TiXmlElement &)
@@ -263,9 +265,27 @@ namespace EUROPA {
       // TODO: jrb
   }
   
-  void InterpretedDbClientTransactionPlayer::playDefineEnumeration(const TiXmlElement &)
+  void InterpretedDbClientTransactionPlayer::playDefineEnumeration(const TiXmlElement &element)
   {
       // TODO: jrb
+      const char* enumName = element.Attribute("name");
+      const TiXmlElement* setElement = element.FirstChildElement();
+      check_error(strcmp(setElement->Value(),"set") == 0, "Expected value set as part of Enum definition");
+      
+      Id<Schema> schema = Schema::instance();
+      schema->addEnum(enumName);
+      
+      const TiXmlElement* enumValue;
+      for(enumValue = setElement->FirstChildElement(); enumValue; enumValue = enumValue->NextSiblingElement() ) {
+      	if (strcmp(enumValue->Value(),"symbol") == 0) {
+      		LabelStr symbolValue(enumValue->Attribute("value"));
+            schema->addValue(enumName, symbolValue);
+      	}
+      	else {
+      	    // TODO: deal with other types
+      	    check_error(ALWAYS_FAILS,std::string("Don't now how to deal with enum values of type ") + enumValue->Value());
+      	}
+      }	      
   }
 
   void InterpretedDbClientTransactionPlayer::playDefineType(const TiXmlElement &)
