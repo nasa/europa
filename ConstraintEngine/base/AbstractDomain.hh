@@ -132,13 +132,13 @@ namespace EUROPA {
      * @brief Test if the domain is closed (i.e. can be used yet)
      * @see close
      */
-    bool isClosed() const;
+    virtual bool isClosed() const;
 
     /**
      * @brief Test if the domain is closed
      * @note negation of isClosed
      */
-    bool isOpen() const;
+    virtual bool isOpen() const;
 
     /**
      * @brief Check if there are a finite number of values in the domain.
@@ -177,28 +177,28 @@ namespace EUROPA {
      * Will error out if that is not the case.
      * @param listener the listener to attach.
      */
-    void setListener(const DomainListenerId& listener);
+    virtual void setListener(const DomainListenerId& listener);
 
     /**
      * @brief Accessor for the listener.
      * @return the listener. May be noId() if no listener attached
      */
-    const DomainListenerId& getListener() const;
+    virtual const DomainListenerId& getListener() const;
 
     /**
      * @brief Get the domain's type's name.
      */
-    const LabelStr& getTypeName() const;
+    virtual const LabelStr& getTypeName() const;
 
     /**
      * @brief Check if the domain is an enumerated set.
      */
-    bool isEnumerated() const;
+    virtual bool isEnumerated() const;
 
     /**
      * @brief Check if the domain is an interval.
      */
-    bool isInterval() const;
+    virtual bool isInterval() const;
 
     /**
      * @brief Check if the domain is a singleton.
@@ -385,7 +385,7 @@ namespace EUROPA {
     /**
      * @brief Returns the minimum allowed delta in values between elements of the set.
      */
-    inline double minDelta() const {return m_minDelta;}
+    virtual double minDelta() const {return m_minDelta;}
 
     /**
      * @brief Returns a value for number based on the semantics of the domain.
@@ -403,7 +403,7 @@ namespace EUROPA {
     /**
      * @brief Tests if both bounds are finite. Trivially true for symbolic domains.
      */
-    bool areBoundsFinite() const;
+    virtual bool areBoundsFinite() const;
 
     /**
      * @brief Tests if two domains can be compared. For example, one cannot compare a symbolic
@@ -449,7 +449,7 @@ namespace EUROPA {
     /**
      * @brief Creates a verbose string for displaying the contents of the domain
      */
-    std::string toString() const;
+    virtual std::string toString() const;
 
     /**
      * @brief Creates a concise string for displaying the value
@@ -483,7 +483,7 @@ namespace EUROPA {
     /**
      * @brief Check that the value is correct w.r.t. the semantics of the domain. Infinite safe if numeric.
      */
-    bool check_value(double value) const;
+    virtual bool check_value(double value) const;
 
     /**
      * @brief Check the precision of a value in terms of a particular Domain class.
