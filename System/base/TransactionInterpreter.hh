@@ -9,6 +9,7 @@
 #include "Rule.hh"
 #include "RuleInstance.hh"
 #include "Timeline.hh"
+#include "TokenFactory.hh"
 #include <map>
 #include <vector>
 
@@ -253,17 +254,43 @@ namespace EUROPA {
   	    // Same Constructor signatures as NddlToken, see if both are needed
   	    InterpretedToken(const PlanDatabaseId& planDatabase, 
   	                     const LabelStr& predicateName, 
-  	                     const bool& rejectable = false, 
-  	                     const bool& close = false);
+                         const std::vector<LabelStr>& parameterNames,
+                         const std::vector<LabelStr>& parameterTypes,
+                         const bool& rejectable = false, 
+  	                     const bool& close = false); 
   	                     
         InterpretedToken(const TokenId& master, 
                          const LabelStr& predicateName, 
                          const LabelStr& relation, 
-                         const bool& close = false);
+                         const std::vector<LabelStr>& parameterNames,
+                         const std::vector<LabelStr>& parameterTypes,
+                         const bool& close = false); 
+                         
         
   	    virtual ~InterpretedToken();
+
+    protected:
+        void InterpretedToken::commonInit(const std::vector<LabelStr>& parameterNames,
+                                          const std::vector<LabelStr>& parameterTypes,
+                                          const bool& autoClose);      	
   };
   
+  class InterpretedTokenFactory: public ConcreteTokenFactory 
+  { 
+    public: 
+	  InterpretedTokenFactory(const LabelStr& predicateName,
+	                          const std::vector<LabelStr>& parameterNames,
+                              const std::vector<LabelStr>& parameterTypes);
+	  
+	protected:
+	  std::vector<LabelStr> m_parameterNames;    
+	  std::vector<LabelStr> m_parameterTypes;    
+
+	private: 
+	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const;
+	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
+  };
+
   class InterpretedRuleInstance : public RuleInstance
   {
   	public:

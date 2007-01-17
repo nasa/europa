@@ -9,10 +9,12 @@
 #include "tinyxml.h"
 #include "Debug.hh"
 #include "Error.hh"
+//#include "AbstractDomain.hh"
 #include "DbClient.hh"
 #include "EnumeratedTypeFactory.hh"
 #include "Object.hh" 
 #include "ObjectFactory.hh"
+#include "TokenVariable.hh"
 #include "TypeFactory.hh"
 #include "Schema.hh"
 
@@ -86,6 +88,7 @@ namespace EUROPA {
 
     Id<Schema> schema = Schema::instance();
     schema->addObjectType(className,parentClassName);
+    
     // The TypeFactory constructor automatically registers the factory
     // TODO: This should probably be done by Schema::addObjectType
     new EnumeratedTypeFactory(
@@ -238,6 +241,9 @@ namespace EUROPA {
       std::string predName = std::string(className) + "." + element->Attribute("name");	
       schema->addPredicate(predName.c_str());
 
+      std::vector<LabelStr> parameterNames;
+      std::vector<LabelStr> parameterTypes;
+      
       dbgout << ident << "predicate " <<  predName << "(";
       for(const TiXmlElement* predArg = element->FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
       	if (strcmp(predArg->Value(),"var") == 0) {
@@ -245,6 +251,8 @@ namespace EUROPA {
 	      const char* name = safeStr(predArg->Attribute("name"));	
 	      dbgout << type << " " << name << ",";
           schema->addMember(predName.c_str(), type, name);
+          parameterNames.push_back(name);
+          parameterTypes.push_back(type);
       	}
       	else if (strcmp(predArg->Value(),"invoke") == 0) {
       		// TODO: deal with this
@@ -252,6 +260,14 @@ namespace EUROPA {
       	}             
       }	
       dbgout << ")" << std::endl;
+      
+      // The TokenFactory's constructor automatically registers the factory
+      // TODO: pass along parameters and constraints
+      new InterpretedTokenFactory(
+          predName,
+          parameterNames,
+          parameterTypes
+      );
   }
     
   void InterpretedDbClientTransactionPlayer::defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
@@ -260,14 +276,20 @@ namespace EUROPA {
   	  playDefineEnumeration(*element);
   }
   
-  void InterpretedDbClientTransactionPlayer::playDefineCompat(const TiXmlElement &)
+  void InterpretedDbClientTransactionPlayer::playDefineCompat(const TiXmlElement& element)
   {
-      // TODO: jrb
+      std::string predName = std::string(element.Attribute("class")) + "." + element.Attribute("name");	
+      std::string source = std::string(element.Attribute("filename")) + 
+          " line " + element.Attribute("line") +
+          " column " + element.Attribute("column");	
+      
+      // The RuleFactory's constructor automatically registers the factory
+      // TODO: pass along the expressions that make up the body of the rule
+      new InterpretedRuleFactory(predName,source);
   }
   
   void InterpretedDbClientTransactionPlayer::playDefineEnumeration(const TiXmlElement &element)
   {
-      // TODO: jrb
       const char* enumName = element.Attribute("name");
       const TiXmlElement* setElement = element.FirstChildElement();
       check_error(strcmp(setElement->Value(),"set") == 0, "Expected value set as part of Enum definition");
@@ -283,7 +305,7 @@ namespace EUROPA {
       	}
       	else {
       	    // TODO: deal with other types
-      	    check_error(ALWAYS_FAILS,std::string("Don't now how to deal with enum values of type ") + enumValue->Value());
+      	    check_error(ALWAYS_FAILS,std::string("Don't know how to deal with enum values of type ") + enumValue->Value());
       	}
       }	      
   }
@@ -607,13 +629,15 @@ namespace EUROPA {
 		
 		for (unsigned int i=0; i < m_constructorBody.size(); i++) 
 			m_constructorBody[i]->eval(evalContext);
-		
+
+        /*		
 		const std::vector<ConstrainedVariableId>& vars = instance->getVariables();
 		std::cout << "    Vars for " << m_className.toString() << " " << instance->getName().toString() << " are:";
 		for (unsigned j=0; j < vars.size(); j++) {
 			std::cout << vars[j]->getName().toString() << ",";
 		}
 		std::cout << std::endl;
+	    */
 			
 	    // Initialize any variables that were not explicitly initialized
 	    const Schema::NameValueVector& members = Schema::instance()->getMembers(m_className);
@@ -636,8 +660,11 @@ namespace EUROPA {
      */     	     
     InterpretedToken::InterpretedToken(const PlanDatabaseId& planDatabase, 
                      const LabelStr& predicateName, 
+                     const std::vector<LabelStr>& parameterNames,
+                     const std::vector<LabelStr>& parameterTypes, 
                      const bool& rejectable, 
-                     const bool& close)
+                     const bool& close) 
+                     
         : IntervalToken(planDatabase, 
                         predicateName,
                         rejectable,
@@ -647,11 +674,14 @@ namespace EUROPA {
                         Token::noObject(),                    // Object Name
                         false) 
     {
+    	commonInit(parameterNames, parameterTypes, close);
     }
   	                     
     InterpretedToken::InterpretedToken(const TokenId& master, 
                      const LabelStr& predicateName, 
                      const LabelStr& relation, 
+                     const std::vector<LabelStr>& parameterNames,
+                     const std::vector<LabelStr>& parameterTypes, 
                      const bool& close)
         : IntervalToken(master, 
                         relation,
@@ -659,15 +689,179 @@ namespace EUROPA {
                         IntervalIntDomain(),                 // start
                         IntervalIntDomain(),                 // end
                         IntervalIntDomain(1, PLUS_INFINITY), // duration
-                        EUROPA::Token::noObject(),           // Object Name
+                        Token::noObject(),                   // Object Name
                         false) 
     {
+    	commonInit(parameterNames, parameterTypes, close);
     }
         
     InterpretedToken::~InterpretedToken()
     {
     }
+
+    // Hack to get around limitation of TokenVariable that requires the domain of the
+    // variable to be known at compile time. that needs to be fixed. in the mean time
+    // this Abstract domain wrpper allows us to create generic TokenVariables
+    class MonoDomain : public AbstractDomain 
+    {
+      public:
+        MonoDomain(AbstractDomain& wrappedDomain)
+            : AbstractDomain(false,false,"")
+            , m_wrappedDomain(wrappedDomain)
+        {
+        }
+
+        AbstractDomain& getWrappedDomain() const { return m_wrappedDomain; }
+        
+        MonoDomain(const AbstractDomain& rhs)
+            : AbstractDomain(false,false,"")
+            , m_wrappedDomain((dynamic_cast<const MonoDomain&>(rhs)).getWrappedDomain())
+        {
+        }
+        
+        virtual void close()  { m_wrappedDomain.close(); }
+        virtual void open()   { m_wrappedDomain.open(); }
+        virtual bool isClosed() const { return m_wrappedDomain.isClosed(); }
+        virtual bool isOpen() const   { return m_wrappedDomain.isOpen(); }
+
+        virtual bool isFinite() const  { return m_wrappedDomain.isFinite(); }
+        virtual bool isNumeric() const { return m_wrappedDomain.isNumeric(); }
+        virtual bool isBool() const    { return m_wrappedDomain.isBool(); }
+        virtual bool isString() const  { return m_wrappedDomain.isString(); }
+
+        virtual void setListener(const DomainListenerId& listener) { m_wrappedDomain.setListener(listener); }
+        virtual const DomainListenerId& getListener() const { return m_wrappedDomain.getListener(); }
+
+        virtual const LabelStr& getTypeName() const { return m_wrappedDomain.getTypeName(); }
+
+        virtual bool isEnumerated() const { return m_wrappedDomain.isEnumerated(); }
+        virtual bool isInterval() const { return m_wrappedDomain.isInterval(); }
+
+        virtual bool isSingleton() const { return m_wrappedDomain.isSingleton(); }
+        virtual bool isEmpty() const { return m_wrappedDomain.isEmpty(); };
+
+        virtual void empty() { m_wrappedDomain.empty(); }
+
+        virtual unsigned int getSize() const { return m_wrappedDomain.getSize(); }
+
+        virtual void operator>>(ostream& os) const { os << m_wrappedDomain; }
+
+        virtual double getUpperBound() const { return m_wrappedDomain.getUpperBound(); }
+        virtual double getLowerBound() const { return m_wrappedDomain.getLowerBound(); }
+
+        virtual double getSingletonValue() const { return m_wrappedDomain.getSingletonValue(); }
+
+        virtual bool getBounds(double& lb, double& ub) const { return m_wrappedDomain.getBounds(lb,ub); }
+
+        virtual void set(double value) { m_wrappedDomain.set(value); }
+
+        virtual void reset(const AbstractDomain& dom) { m_wrappedDomain.reset(dom); }
+
+        virtual void relax(const AbstractDomain& dom) { m_wrappedDomain.isFinite(); }
+
+        virtual void relax(double value) { m_wrappedDomain.relax(value); }
+
+        virtual void insert(double value) { m_wrappedDomain.insert(value); }
+
+        virtual void insert(const std::list<double>& values) { m_wrappedDomain.insert(values); }
+
+        virtual void remove(double value) { m_wrappedDomain.remove(value); }
+
+        virtual bool intersect(const AbstractDomain& dom) { return m_wrappedDomain.intersect(dom); }
+
+        virtual bool intersect(double lb, double ub) { return m_wrappedDomain.intersect(lb,ub); }
+
+        virtual bool difference(const AbstractDomain& dom) { return m_wrappedDomain.difference(dom); }
+
+        virtual AbstractDomain& operator=(const AbstractDomain& dom) { return m_wrappedDomain=dom; }
+
+        virtual bool isMember(double value) const { return m_wrappedDomain.isMember(value); }
+
+        virtual bool operator==(const AbstractDomain& dom) const { return m_wrappedDomain == dom; }
+
+        virtual bool operator!=(const AbstractDomain& dom) const { return m_wrappedDomain != dom; }
+
+        virtual bool isSubsetOf(const AbstractDomain& dom) const { return m_wrappedDomain.isSubsetOf(dom); }
+
+        virtual bool intersects(const AbstractDomain& dom) const { return m_wrappedDomain.intersects(dom); }
+
+        virtual bool equate(AbstractDomain& dom) { return m_wrappedDomain.equate(dom); }
+
+        virtual void getValues(std::list<double>& results) const { return m_wrappedDomain.getValues(results); };
+
+        virtual double minDelta() const { return m_wrappedDomain.minDelta(); }
+
+        virtual double translateNumber(double number, bool asMin) const { return m_wrappedDomain.translateNumber(number,asMin); }
+
+        virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const { return m_wrappedDomain.convertToMemberValue(strValue,dblValue); }
+
+        virtual bool areBoundsFinite() const { return m_wrappedDomain.areBoundsFinite(); }
+
+        virtual AbstractDomain *copy() const { return m_wrappedDomain.copy(); }
+
+        virtual std::string toString() const { return m_wrappedDomain.toString(); }
+
+        virtual std::string toString(double value) const { return m_wrappedDomain.toString(value); }
+
+      protected:
+          virtual void testPrecision(const double& value) const { /*noop*/ }
+          
+          AbstractDomain& m_wrappedDomain;               
+    };
   
+    void InterpretedToken::commonInit(
+                     const std::vector<LabelStr>& parameterNames,
+                     const std::vector<LabelStr>& parameterTypes, 
+                     const bool& autoClose)
+    {
+    	// TODO: initialize parameters that have exprs 
+    	// TODO: add any constraints included in the declaration
+    	
+	    for (unsigned int i=0; i < parameterNames.size(); i++) {
+	        if (getVariable(parameterNames[i]) == ConstrainedVariableId::noId()) {
+	    	    AbstractDomain* d = TypeFactory::baseDomain(parameterTypes[i].c_str()).copy();
+	    	    // This is a hack needed because TokenVariable is parametrized by the domain arg to addParameter 
+	    	    MonoDomain baseDomain(*d);
+	            addParameter(
+	                baseDomain,
+	                parameterNames[i]
+	            );
+	            // TODO: will d be leaked?
+	            //std::cout << "Used default initializer for " << m_className.toString() << "." << members[i].second.toString() << std::endl; 
+	        } 
+	    }
+    	
+        if (autoClose)
+            close();    	
+    }
+      
+    /*
+     * InterpretedTokenFactory
+     */     	     
+    InterpretedTokenFactory::InterpretedTokenFactory(
+                                       const LabelStr& predicateName,
+                                       const std::vector<LabelStr>& parameterNames,
+                                       const std::vector<LabelStr>& parameterTypes) 
+	    : ConcreteTokenFactory(predicateName) 
+	    , m_parameterNames(parameterNames)
+	    , m_parameterTypes(parameterTypes)
+	{ 
+	} 
+	
+	TokenId InterpretedTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable) const 
+	{ 
+		// TODO: add token parameters and constraints
+	    TokenId token = (new InterpretedToken(planDb, name, m_parameterNames, m_parameterTypes, rejectable, true))->getId(); 
+	    return token; 
+	} 
+	
+	TokenId InterpretedTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const 
+	{ 
+		// TODO: add token parameters and constraints
+	    TokenId token = (new InterpretedToken(master, name, relation, m_parameterNames, m_parameterTypes , true))->getId(); 
+	    return token; 
+	 } 
+	 
     /*
      * InterpretedRuleInstance
      */     	     
@@ -683,6 +877,7 @@ namespace EUROPA {
     void InterpretedRuleInstance::handleExecute()
     {
     	// TODO: Implement this
+    	std::cout << "Executed interpreted rule:" << getRule()->getName().toString() << std::endl;
     }
 
     /*
@@ -702,6 +897,7 @@ namespace EUROPA {
                                   const PlanDatabaseId& planDb, 
                                   const RulesEngineId &rulesEngine) const
     {
+    	// TODO: Pass expressions in Rule Body
         InterpretedRuleInstance *foo = new InterpretedRuleInstance(m_id, token, planDb);
         foo->setRulesEngine(rulesEngine);
         return foo->getId();
