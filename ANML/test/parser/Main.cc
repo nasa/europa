@@ -5,7 +5,7 @@
 
 // Support for default setup
 #include "ANMLParser.hpp"
-#include "ANMLTreeParser.hpp"
+#include "ANML2NDDL.hpp"
 
 int max(int a, int b) {
   return (a<b)? b : a;
@@ -82,9 +82,11 @@ int main(int argc, char** argv) {
 
 	debugMsg("ANMLParser:main", "Phase 2: Walking parse tree");
 
-	ANMLTreeParser* treeParser = new ANMLTreeParser();
+	ANML2NDDL* treeParser = new ANML2NDDL();
 	
-	treeParser->anml(ast);
+	for(int i=0; i <= FINAL_PASS; ++i) {
+		treeParser->anml(ast, i);
+	}
 
 	debugMsg("ANMLParser:main", "Phase 2 complete");
 

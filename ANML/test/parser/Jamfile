@@ -3,7 +3,9 @@ SubDir PLASMA ANML test parser ;
 if ! $(PLASMA_READY) {
 
 # make model test parser.
-ModuleMain ANMLParser : Main.cc : ANML ;
+
+#ModuleMain ANMLParser : Main.cc : ANML ;
+ModuleMain ANML2NDDL : Main.cc : ANML ;
 
 local model ;
 
@@ -15,7 +17,8 @@ for model in
 	CrewPlanning-problem-instance.anml
 	Rover.anml
 {
-  RunModuleMain run-anml-tests : ANMLParser : $(model) $(model:S=.dot) ;
+  #RunModuleMain run-anml-tests : ANMLParser : $(model) $(model:S=.dot) ;
+  RunModuleMain run-anml-tests : ANML2NDDL : $(model) $(model:S=.dot) ;
 }
 
 } # PLASMA_READY
