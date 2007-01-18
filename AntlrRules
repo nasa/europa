@@ -25,7 +25,7 @@ rule AntlrGrammar
 	Includes $(sources) : $(headers) ;
 
 	if $(grammar.tree) {
-  	AntlrTool $(sources.tree) $(headers.tree) : $(grammar.tree) ;
+  	AntlrTreeTool $(sources.tree) $(headers.tree) : $(grammar.tree) ;
 
 		Includes $(sources.tree) : $(headers.tree) ;
 	}
@@ -60,6 +60,37 @@ actions RunAntlrTool
 {
 rm -f $(1)
 $(JAVA) -cp $(ANTLR_JAR) $(JREFLAGS) antlr.Tool -traceParser -o ./$(1[0]:D) $(ANTLRFLAGS) $(2) 
+}
+
+rule AntlrTreeTool
+{
+  local files = $(1) ;
+  local grammar = $(2) ;
+
+#  Echo AntlrTreeTool . $(files) . $(grammar) ;
+
+	LOCATE on $(files) = $(LOCATE_SOURCE) ;
+  SEARCH on $(grammar) = $(SEARCH_SOURCE) ;
+  RunAntlrTreeTool $(files) : $(grammar) ;
+}
+
+rule RunAntlrTreeTool
+{
+  local files = $(1) ;
+  local grammar = $(2) ;
+
+#  Echo RunAntlrTreeTool . $(files) . $(grammar) ;
+
+  Depends $(files) : $(grammar) ;
+  LocalClean clean : $(files) ;
+}
+
+#  cd $(PATHNAME) 
+
+actions RunAntlrTreeTool
+{
+rm -f $(1)
+$(JAVA) -cp $(ANTLR_JAR) $(JREFLAGS) antlr.Tool -traceTreeParser -o ./$(1[0]:D) $(ANTLRFLAGS) $(2) 
 }
 
 } # AntlrRules_INCLUDED
