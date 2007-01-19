@@ -229,6 +229,7 @@ lhs_expr
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
 expr 
     : constant
+		| arguments
     | lhs_expr
 ;
 

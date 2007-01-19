@@ -12,6 +12,10 @@ options {
 	static const char* PASS_0 = "Table Construction";
 	static const char* PASS_1 = "Primary Pass";
 	static const char* PASS_UNKNOWN = "Unnamed Pass";
+
+	ANML2NDDL::ANML2NDDL(std::ostream& nddl) :
+		antlr::TreeParser(), pass(-1), nddl(nddl) {
+	}
   /**
    * Custom traceIn for Antlr which uses debugMsg.
    */
@@ -59,20 +63,25 @@ class ANML2NDDL extends TreeParser;
 
 options {
   importVocab = ANML;
+	noConstructors = true;
 }
 
 {
 	#define LONG_RULE_SIZE 26
 	#define FINAL_PASS 1
+	public:
+		ANML2NDDL(std::ostream& nddl);
 	protected:
-		void ANML2NDDL::traceIn(const char* rname, antlr::RefAST t);
-		void ANML2NDDL::traceOut(const char* rname, antlr::RefAST t);
+		void traceIn(const char* rname, antlr::RefAST t);
+		void traceOut(const char* rname, antlr::RefAST t);
 	private:
+		const char* passName();
+
 		int pass;
-		const char* ANML2NDDL::passName();
+		const std::ostream& nddl;
 }
 
-anml[int pass]
+anml[const int pass]
   : #(ANML
 	    {this->pass = pass;
 			 debugMsg("ANML2NDDL:anml", "                     ==========|  Starting " << passName() << "   |==========");
@@ -248,6 +257,7 @@ lhs_expr
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
 expr 
     : constant
+		| arguments
     | lhs_expr
 ;
 

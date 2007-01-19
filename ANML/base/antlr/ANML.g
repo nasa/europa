@@ -133,8 +133,8 @@ options {
 }
 
 anml_program 
-	: (anml_stmt)*	      
-		{ #anml_program = #(#[ANML,"ANML"],#anml_program); }
+    : (anml_stmt)*	      
+      {#anml_program = #(#[ANML,"ANML"],#anml_program); }
 ;
 
 anml_stmt
@@ -166,11 +166,11 @@ vartype_decl
 // TODO: semantic layer to check whether we're declaring an object or a variable
 var_obj_declaration!
     : t:var_type i:var_init_list
-		  {#var_obj_declaration = #(#[VARIABLE,"variable"], #t, #i);}
+      {#var_obj_declaration = #(#[VARIABLE,"variable"], #t, #i);}
 ;
 
 var_init_list
-		: var_init (COMMA! var_init_list)?
+    : var_init (COMMA! var_init_list)?
 ;
 
 var_type 
@@ -211,13 +211,13 @@ parameter_list
 
 parameter_decl!
     : t:var_type n:var_name
-		  {#parameter_decl = #(#[PARAMETER, "param"], #t, #n);}
+      {#parameter_decl = #(#[PARAMETER, "param"], #t, #n);}
 ;
 
 objtype_decl!
     : ot:OBJTYPE n:user_defined_type_name (COLON x:obj_type)?
       b:objtype_body
-			{ #objtype_decl= #(#ot, #(#n, #x), #b); }
+      { #objtype_decl= #(#ot, #(#n, #x), #b); }
 ;
 
 obj_type 
@@ -268,7 +268,7 @@ goal
 ;
 
 effect_proposition 
-    : proposition
+    : proposition[FACT]
 ;
 
 effect_proposition_list 
@@ -276,7 +276,7 @@ effect_proposition_list
 ;
 
 condition_proposition 
-    : proposition
+    : proposition[GOAL]
 ;
 
 condition_proposition_list
@@ -285,20 +285,20 @@ condition_proposition_list
 
 // TODO : WHEN is only allowed for {Effects,Facts}, not allowed for {Conditions,Goals}. semantic layer to enforce this
 // TODO : FROM and FOR branches to be implemented later
-proposition!
+proposition! [int type]
     : q:qualif_fluent
-		  {#proposition = #q;}
-    | w:WHEN cc:LCURLY cp:condition_proposition RCURLY ec:LCURLY ep:effect_proposition RCURLY
-		  {#proposition = #(#w, #(#cc, #cp), #(#ec, #ep)); }
+      {#proposition = #q;}
+    | {type == FACT}? w:WHEN cc:LCURLY cp:condition_proposition RCURLY ec:LCURLY ep:effect_proposition RCURLY
+      {#proposition = #(#w, #(#cc, #cp), #(#ec, #ep)); }
     | fr:FROM t:time_pt qf:qualif_fluent_list
-		  {#proposition = #(#fr, #t, #qf); }
-    | fo:FOR o:object_name fc:LCURLY p:proposition RCURLY
-		  {#proposition = #(#fo, #o, #(#fc, #p)); }
+      {#proposition = #(#fr, #t, #qf); }
+    | fo:FOR o:object_name fc:LCURLY p:proposition[type] RCURLY
+      {#proposition = #(#fo, #o, #(#fc, #p)); }
 ;
 
 qualif_fluent!
     : q:temporal_qualif f:fluent_list
-			{#qualif_fluent = #(#[FLUENT, "fluent"], #q, #f);}
+      {#qualif_fluent = #(#[FLUENT, "fluent"], #q, #f);}
 ;
 
 qualif_fluent_list 
@@ -341,19 +341,20 @@ var_list
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
 relational_fluent!
     : l:lhs_expr (o:relop r:expr)?
-		 {#relational_fluent = #(#o, #l, #r);}
+      {#relational_fluent = #(#o, #l, #r);}
 ;
 
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 lhs_expr
-		: (IDENTIFIER LPAREN)=> function_symbol arguments
-		  {#lhs_expr = #(#[FUNCTION, "function"], #lhs_expr);}
+    : (IDENTIFIER LPAREN)=> function_symbol arguments
+      {#lhs_expr = #(#[FUNCTION, "function"], #lhs_expr);}
     | qualified_var_name
 ;
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
 expr 
     : constant
+    | arguments // vector assignment.
     | lhs_expr
 ;
 
@@ -439,7 +440,7 @@ action_body_stmt
     | effect_stmt 
     | change_stmt 
     | decomp_stmt 
-		| constraint
+    | constraint
 ;
 
 // TODO: semantic layer to enforce that only one duration statement is allowed    
@@ -464,7 +465,7 @@ change_proposition_list
 
 change_proposition
     :! tq:temporal_qualif LCURLY cf:change_fluent (SEMI_COLON)? RCURLY
-		  {#change_proposition = #(#[FLUENT, "fluent"], #tq, #cf); }
+       {#change_proposition = #(#[FLUENT, "fluent"], #tq, #cf); }
     | WHEN^ LCURLY! condition_proposition RCURLY! LCURLY! change_proposition RCURLY!
 ;
 
@@ -509,13 +510,13 @@ decomp_steps
 
 decomp_step
     :! tq:temporal_qualif as:action_set
-			{ #decomp_step = #(#[ACTIONS, "actions"], #tq, #as); }
-		| constraint
+       { #decomp_step = #(#[ACTIONS, "actions"], #tq, #as); }
+    | constraint
 ;
 
 action_set
     : (quantif_clause)?
-			(ORDERED^ | UNORDERED^ | DISJUNCTION^) action_set_element_list
+      (ORDERED^ | UNORDERED^ | DISJUNCTION^) action_set_element_list
 ;
 
 action_set_element_list
@@ -524,14 +525,14 @@ action_set_element_list
 
 action_set_element
     :! q:qualified_action_symbol a:arguments (COLON l:action_instance_label)?
-		 {#action_set_element = #(#[ACTION, "action"], #q, #a, #l); }
+      {#action_set_element = #(#[ACTION, "action"], #q, #a, #l); }
     | action_set
 ;
 
 qualified_action_symbol
     :! o:object_name d:DOT a:action_symbol
-		   { #qualified_action_symbol = #(#o, #(#d, #a)); }
-		| action_symbol
+       { #qualified_action_symbol = #(#o, #(#d, #a)); }
+    | action_symbol
 ;
     
 constraint 
@@ -541,7 +542,7 @@ constraint
 // TODO: define grammar to support infix notation for constraints
 constraint_expr!
     : cs:constraint_symbol a:arguments
-		  {#constraint_expr = #(#[CONSTRAINT, "constraint"], #cs, #a); }
+      {#constraint_expr = #(#[CONSTRAINT, "constraint"], #cs, #a); }
 ;
 
 // This constraint is only allowed in the main body of an objtype definition
@@ -590,7 +591,7 @@ var_name                : IDENTIFIER | START | END;
 
 qualified_var_name!
     : n:var_name (d:DOT q:qualified_var_name)?
-		  { #qualified_var_name = #(#n, #(#d, #q)); }
+      {#qualified_var_name = #(#n, #(#d, #q)); }
 ;
 
 
