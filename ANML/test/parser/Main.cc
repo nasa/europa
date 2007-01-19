@@ -61,17 +61,18 @@ int outputAST2Dot(std::ostream& out, const antlr::RefAST ast, const int depth, c
  * Called with two filenames: [ANML model] [Output Digraph AST].
  */
 int main(int argc, char** argv) {
-  assertTrue(argc == 3, "Expected exactly two filename arguments: [ANML model] [Output Digraph AST]");
+  assertTrue(argc == 2, "Expected exactly one filename pattern argument: [Model common root]");
 
-	debugMsg("ANMLParser:main", "Phase 1: parsing \"" << argv[1] << "\"");
+	std::string prefix(argv[1]);
+	debugMsg("ANMLParser:main", "Phase 1: parsing \"" << prefix << ".anml\"");
 
-  antlr::RefAST ast = ANMLParser::parse(".", argv[1]);
+  antlr::RefAST ast = ANMLParser::parse(".", prefix + ".anml");
 
   assertTrue(ast != antlr::nullAST, "Parse failed to return an AST");
 
-	debugMsg("ANMLParser:main", "Phase 1: dumping parse tree to \"" << argv[2] << "\"");
+	debugMsg("ANMLParser:main", "Phase 1: dumping parse tree to \"" << prefix << ".dot\"");
 
-  std::ofstream digraph(argv[2]);
+  std::ofstream digraph((prefix + ".dot").c_str());
 
   int node = 0;
   digraph << "digraph ANMLAst {" << std::endl;
@@ -82,7 +83,9 @@ int main(int argc, char** argv) {
 
 	debugMsg("ANMLParser:main", "Phase 2: Walking parse tree");
 
-	ANML2NDDL* treeParser = new ANML2NDDL();
+	std::ofstream nddl((prefix + ".nddl").c_str());
+
+	ANML2NDDL* treeParser = new ANML2NDDL(nddl);
 	
 	for(int i=0; i <= FINAL_PASS; ++i) {
 		treeParser->anml(ast, i);

@@ -15,10 +15,10 @@ for model in
 	function_declaration.anml predicate_declaration.anml problem_stmt.anml transition_constraint.anml
 	action_def.anml
 	CrewPlanning-problem-instance.anml
-	Rover.anml
+	HelloWorld-problem-instance.anml Rover.anml
 {
   #RunModuleMain run-anml-tests : ANMLParser : $(model) $(model:S=.dot) ;
-  RunModuleMain run-anml-tests : ANML2NDDL : $(model) $(model:S=.dot) ;
+  RunModuleMain run-anml-tests : ANML2NDDL : $(model:S=) ;
 }
 
 } # PLASMA_READY

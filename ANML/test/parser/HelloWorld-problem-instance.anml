@@ -1,0 +1,19 @@
+fact {
+  over all {
+    //new PlannerConfig(0, 100, 500, +inf);
+		//done via implicit predicate hack
+    PlannerConfig(0, 100, 500, +inf);
+  };
+  at start {
+    //goal(YourObject.helloWorld initialToken);
+    //initialToken.start.specify(0);
+    YourObject.helloWorld;
+  };
+}
+
+//not required in original NDDL, but we now distinguish fluents from actions.
+goal {
+  at end {
+    YourObject.helloWorld;
+  };
+}

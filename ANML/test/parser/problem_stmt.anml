@@ -31,7 +31,6 @@ goal {
 	before end         { x = 5; };
 	before end dur 3   { x = 5; };
 	contains [5 10]    { x = 5; };
-	when { at start { x = 5; } } { at end { x = 6; } };
 	from start { at end { x = 6; } }
 }
 // goals
