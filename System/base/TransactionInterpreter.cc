@@ -18,6 +18,51 @@
 #include "TypeFactory.hh"
 #include "Schema.hh"
 
+// To support Rule Interpretation
+#include "NddlRules.hh"
+#include "NddlUtils.hh"
+
+// Hack!! the macro in NddlRules.hh only works with code-generation
+// so this is redefined here. this is brittle though
+// TODO: change code-generation code to work with this macro instead
+namespace NDDL {
+#define relation(relationname, origin, originvar, target, targetvar) {\
+ std::vector<ConstrainedVariableId> vars;\
+ vars.push_back(getSlave(LabelStr(origin))->get##originvar());\
+ vars.push_back(getSlave(LabelStr(target))->get##targetvar());\
+ rule_constraint(relationname,vars);\
+  } 
+}  
+
+/*
+ * Here is what can be used as a main to run an interpreted version through the DSA
+ * 
+bool runDSATest(const char* plannerConfig, const char* txSource)
+{
+    DSA::DSA& dsa = DSA::DSA::instance();
+    dsa.addPlan(txSource,true);
+    dsa.solverConfigure(plannerConfig,0,100);
+    dsa.solverSolve(500,500);
+    dsa.writePlan(std::cout);
+    
+	return false;
+}
+
+int main(int argc, const char ** argv){
+  if (argc != 3) {
+    std::cerr << "Must provide initial transactions file." << std::endl;
+    return -1;
+  }
+
+  const char* txSource = argv[1];
+  const char* plannerConfig = argv[2];
+  
+  if (!runDSATest(plannerConfig,txSource))
+      return 0;
+}
+ */
+  
+
 namespace EUROPA {
 
   /*
@@ -32,6 +77,10 @@ namespace EUROPA {
       std::vector<std::string> constructorArgTypes;
       std::vector<Expr*> constructorBody;
       ExprConstructorSuperCall* superCallExpr = NULL;
+      
+      // If it can't create objects, generate default super call
+      if (!canCreateObjects) 
+            superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),std::vector<Expr*>());                 	
       
       // The ObjectFactory constructor automatically registers the factory
       new InterpretedObjectFactory(
@@ -51,7 +100,7 @@ namespace EUROPA {
   	  m_systemClasses.insert("Object");
   	  m_systemClasses.insert("Timeline");
   	  
-  	  // TODO: this should be done once after the schema is initialized
+  	  // TODO: this should be done once after the schema is initialized, not for every TransactionPlayer
   	  // TODO: check to make sure this is done only once
   	  createDefaultObjectFactory("Object", true);
       REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);	    	    	  
@@ -103,16 +152,15 @@ namespace EUROPA {
                         << (parentClassName != NULL ? parentClassName : "") 
                         << " {" << std::endl;
                           
-    bool definedDefaultConstructor = false;                          
+    bool definedConstructor = false;                          
     for(const TiXmlElement* child = element.FirstChildElement(); child; child = child->NextSiblingElement() ) {    	
     	const char * tagname = child->Value();
     	
 	    if (strcmp(tagname, "var") == 0) 
 	    	defineClassMember(schema,className,child);
 	    else if (strcmp(tagname, "constructor") == 0) { 
-	    	int argCnt = defineConstructor(schema,className,child);
-	    	if (argCnt == 0)
-	    	    definedDefaultConstructor = true;	
+	    	defineConstructor(schema,className,child);
+	    	definedConstructor = true;	
 	    }	    	    	
 	    else if (strcmp(tagname, "predicate") == 0) 
 	    	declarePredicate(schema,className,child);	    	
@@ -121,7 +169,7 @@ namespace EUROPA {
     }
 
     // Register a default factory with no arguments if one is not provided explicitly
-    if (!definedDefaultConstructor &&
+    if (!definedConstructor &&
         m_systemClasses.find(className) == m_systemClasses.end()) { 
         	createDefaultObjectFactory(className, false);
         	dbgout << "    generated default constructor" << std::endl;
@@ -131,6 +179,21 @@ namespace EUROPA {
     std::cout << dbgout.str() << std::endl;     
   }
 
+  Expr* InterpretedDbClientTransactionPlayer::valueToExpr(const TiXmlElement* element)
+  {
+    if (strcmp(element->Value(),"value") == 0) {
+    	return new ExprConstant(xmlAsAbstractDomain(*element));
+    }
+    else if (strcmp(element->Value(),"id") == 0) {
+      	const char* varName = element->Attribute("name");
+      	return new ExprVariableRef(varName);
+    }
+    else
+        check_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + element->Value());
+        
+    return NULL;        
+  }
+  
   void InterpretedDbClientTransactionPlayer::defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
   {	
 	  const char* type = safeStr(element->Attribute("type"));	
@@ -159,17 +222,8 @@ namespace EUROPA {
       	  }
       	  else if (strcmp(child->Value(),"super") == 0) {
       	  	std::vector<Expr*> argExprs;     	  	
-            for(const TiXmlElement* argChild = child->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() ) {
-          	    if (strcmp(argChild->Value(),"value") == 0) {
-          	    	Expr* arg = new ExprConstant(xmlAsAbstractDomain(*argChild));
-          	    	argExprs.push_back(arg);
-          	    }
-          	    else if (strcmp(argChild->Value(),"id") == 0) {
-          	    	const char* varName = argChild->Attribute("name");
-          	    	Expr* arg = new ExprVariableRef(varName);
-          	    	argExprs.push_back(arg);
-          	    }
-            }
+            for(const TiXmlElement* argChild = child->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() ) 
+            	argExprs.push_back(valueToExpr(argChild));
 
       	  	superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),argExprs);
       	  }
@@ -253,6 +307,7 @@ namespace EUROPA {
           schema->addMember(predName.c_str(), type, name);
           parameterNames.push_back(name);
           parameterTypes.push_back(type);
+          // TODO: Check for value assignment
       	}
       	else if (strcmp(predArg->Value(),"invoke") == 0) {
       		// TODO: deal with this
@@ -262,7 +317,7 @@ namespace EUROPA {
       dbgout << ")" << std::endl;
       
       // The TokenFactory's constructor automatically registers the factory
-      // TODO: pass along parameters and constraints
+      // TODO: pass along parameter domain restrictions and constraints
       new InterpretedTokenFactory(
           predName,
           parameterNames,
@@ -276,16 +331,62 @@ namespace EUROPA {
   	  playDefineEnumeration(*element);
   }
   
+  /*
+   * figures out the type of a predicate given an instance
+   * 
+   */
+  const char* predicateInstanceToType(const char* className,const char* predicateInstance)
+  {
+  	// TODO: implement this
+  	return "YourObject.helloWorld";
+  }
+  
   void InterpretedDbClientTransactionPlayer::playDefineCompat(const TiXmlElement& element)
   {
       std::string predName = std::string(element.Attribute("class")) + "." + element.Attribute("name");	
       std::string source = std::string(element.Attribute("filename")) + 
           " line " + element.Attribute("line") +
           " column " + element.Attribute("column");	
+
+      int slave_cnt = 0;      
+      std::vector<RuleExpr*> ruleBody;
+      
+      for(const TiXmlElement* child = element.FirstChildElement()->FirstChildElement(); child; child = child->NextSiblingElement() ) {
+      	if (strcmp(child->Value(),"invoke") == 0) {
+
+      		std::vector<Expr*> constraintArgs;
+            for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) 
+            	constraintArgs.push_back(valueToExpr(arg));
+            	
+      		ruleBody.push_back(new ExprConstraint(child->Attribute("name"),constraintArgs));
+      	}
+      	else if (strcmp(child->Value(),"subgoal") == 0) {
+      		const char* predicateInstance = NULL;
+      		const char* name = NULL;
+            for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) {
+            	if (strcmp(arg->Value(),"predicateinstance") == 0) { 
+            		predicateInstance = arg->Attribute("type");
+            		name = arg->Attribute("name");
+            	}            		
+             	else 
+      	            check_error(ALWAYS_FAILS,std::string("Unknown subgoal element:") + arg->Value());
+            }
+            check_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
+
+            const char* predicateType = predicateInstanceToType(element.Attribute("class"), predicateInstance);    
+            if (name == NULL) {
+            	std::ostringstream tmpname;
+            	tmpname << "slave" << (slave_cnt++);            
+                name = LabelStr(tmpname.str()).c_str();
+            }                 
+      		ruleBody.push_back(new ExprSubgoal(name,predicateType,predicateInstance,child->Attribute("relation")));
+      	}
+      	else 
+      	   check_error(ALWAYS_FAILS,std::string("Unknown Compatibility element:") + child->Value());
+      }
       
       // The RuleFactory's constructor automatically registers the factory
-      // TODO: pass along the expressions that make up the body of the rule
-      new InterpretedRuleFactory(predName,source);
+      new InterpretedRuleFactory(predName,source,ruleBody);
   }
   
   void InterpretedDbClientTransactionPlayer::playDefineEnumeration(const TiXmlElement &element)
@@ -477,6 +578,11 @@ namespace EUROPA {
   	DataRef ExprVariableRef::eval(EvalContext& context) const
   	{
      	TIVariable* rhs = context.getVar(m_varName);
+
+     	if (rhs == NULL) 
+     	    // TODO: throw exception
+     	    return DataRef::null;
+     	    
      	return rhs->getDataRef();
   	}  
 
@@ -527,6 +633,57 @@ namespace EUROPA {
 	    // TODO: must not leak ObjectDomain                
 	    return DataRef(new ObjectDomain(newObject,m_objectType.c_str()));
   	}
+  	
+  	
+  	ExprConstraint::ExprConstraint(const char* name,const std::vector<Expr*> args)
+  	    : m_name(name)
+  	    , m_args(args)
+  	{
+  	}
+
+  	ExprConstraint::~ExprConstraint()
+  	{
+  	}
+
+  	DataRef ExprConstraint::eval(EvalContext& context) const
+  	{
+  		std::vector<ConstrainedVariableId> vars;
+  		for (unsigned int i=0; i < m_args.size(); i++) {
+			DataRef arg = m_args[i]->eval(context);
+			// TODO: Implement DataRef::getVariable
+			//vars.push_back(arg.getVariable());
+  		}
+
+  		m_ruleInstance->createConstraint(m_name,vars);
+  		std::cout << "Evaluated Constraint : " << m_name.toString() << std::endl;
+  		return DataRef::null;
+  	}  
+  	    
+  
+    // TODO: predicateType that comes from xml is something like object.fw.fasting. That needs to be translated
+    // into something that the token factory understands : ObjectType "." PredicateName, for instance FastingWindow.fasting
+  	ExprSubgoal::ExprSubgoal(const char* name,
+  	                         const char* predicateType, 
+  	                         const char* predicateInstance, 
+  	                         const char* relation)
+  	    : m_name(name)
+  	    , m_predicateType(predicateType)
+  	    , m_predicateInstance(predicateInstance)
+  	    , m_relation(relation)
+    {
+    }  	      	    
+  	
+  	ExprSubgoal::~ExprSubgoal()
+  	{
+  	}
+
+  	DataRef ExprSubgoal::eval(EvalContext& context) const  
+  	{
+  		std::cout << "Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString() << std::endl;
+  		m_ruleInstance->createSubgoal(m_name,m_predicateType,m_relation);
+  		std::cout << "Create subgoal " << m_predicateType.toString() << ":" << m_name.toString() << std::endl;
+  		return DataRef::null;
+  	}  
   	     
     /*
      * InterpretedObjectFactory
@@ -601,7 +758,7 @@ namespace EUROPA {
 	      return (new Object(planDb, objectType, objectName,true))->getId();
 	  }
 	  else {
-	        check_error(m_superCallExpr != NULL, "Failed to find factory that can makeNewObject");
+	        check_error(m_superCallExpr != NULL, std::string("Failed to find factory for object ") + objectName.toString() + " of type "+objectType.toString());
 	        // TODO: argumentsForSuper are eval'd twice, once here and once when the constructor body is eval'd
 	        //  figure out how to do it only once
 	    	std::vector<const AbstractDomain*> argumentsForSuper;
@@ -865,8 +1022,12 @@ namespace EUROPA {
     /*
      * InterpretedRuleInstance
      */     	     
-    InterpretedRuleInstance::InterpretedRuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    InterpretedRuleInstance::InterpretedRuleInstance(const RuleId& rule, 
+                                                     const TokenId& token, 
+                                                     const PlanDatabaseId& planDb,
+                                                     const std::vector<RuleExpr*>& body)
         : RuleInstance(rule, token, planDb)
+        , m_body(body)
     {
     }
 
@@ -876,15 +1037,109 @@ namespace EUROPA {
 
     void InterpretedRuleInstance::handleExecute()
     {
-    	// TODO: Implement this
+        // TODO: need to pass in eval context from outside
+	    EvalContext evalContext(NULL);
+	    
+        // TODO: Add object and token to the context
+        
+    	std::cout << "Executing interpreted rule:" << getRule()->getName().toString() << std::endl;
+		for (unsigned int i=0; i < m_body.size(); i++) {
+			m_body[i]->setRuleInstance(this);
+			m_body[i]->eval(evalContext);
+		}		
     	std::cout << "Executed interpreted rule:" << getRule()->getName().toString() << std::endl;
     }
+    
+    void InterpretedRuleInstance::createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars)
+    {
+    	// TODO: Hardcoded constraint!
+        vars.push_back(NDDL::var(getId(),std::string("duration")));
+        vars.push_back(ruleVariable(IntervalIntDomain(10,10, "int")));
+        addConstraint(LabelStr(name),vars);    	
+    }
+
+    void InterpretedRuleInstance::createSubgoal(const LabelStr& name,const LabelStr& predicateType, const LabelStr& relation)
+    {
+  		TokenId slave = TokenFactory::createInstance(m_token,LabelStr(predicateType),LabelStr(relation));
+  		addSlave(slave,name);
+  		
+  		// TODO: for qualified names like "object.helloWorld" must add constraint to constraint the object variable on the slave token:
+  		// for instance:
+  		// TODO: hardcoded constraint!!!
+  		{
+  			std::vector<ConstrainedVariableId> vars;
+            vars.push_back(NDDL::var(getId(),"object"));
+            vars.push_back(slave->getObject());
+            addConstraint(LabelStr("eq"),vars);    	
+  		} 
+  		
+  		const char* relationName = relation.c_str();
+  		
+  		if (strcmp(relationName,"meets") == 0) {
+  			meets("this",name);
+  		} 
+  		else if (strcmp(relationName,"met_by") == 0) {
+  			met_by("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"contains") == 0) {
+  			contains("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"before") == 0) {
+  			before("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"after") == 0) {
+  			after("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"starts") == 0) {
+  			starts("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"ends") == 0) {
+  			ends("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"ends_after") == 0) {
+  			ends_after("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"ends_before") == 0) {
+  			ends_before("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"ends_after_start") == 0) {
+  			ends_after_start("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"starts_before_end") == 0) {
+  			starts_before_end("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"starts_during") == 0) {
+  			starts_during("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"contains_start") == 0) {
+  			contains_start("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"ends_during") == 0) {
+  			ends_during("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"contains_end") == 0) {
+  			contains_end("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"starts_after") == 0) {
+  			starts_after("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"starts_before") == 0) {
+  			starts_before("this",name);
+  		}   	  		   
+  		else if (strcmp(relationName,"equals") == 0) {
+  			equals("this",name);
+  		}   	  		   
+    }
+    
 
     /*
      * InterpretedRuleFactory
      */     	     
-    InterpretedRuleFactory::InterpretedRuleFactory(const LabelStr& predicate, const LabelStr& source) 
+    InterpretedRuleFactory::InterpretedRuleFactory(const LabelStr& predicate, 
+                                                   const LabelStr& source, 
+                                                   const std::vector<RuleExpr*>& body)
       : Rule(predicate,source)
+      , m_body(body)
     {
     }
         
@@ -898,7 +1153,7 @@ namespace EUROPA {
                                   const RulesEngineId &rulesEngine) const
     {
     	// TODO: Pass expressions in Rule Body
-        InterpretedRuleInstance *foo = new InterpretedRuleInstance(m_id, token, planDb);
+        InterpretedRuleInstance *foo = new InterpretedRuleInstance(m_id, token, planDb, m_body);
         foo->setRulesEngine(rulesEngine);
         return foo->getId();
     }	

@@ -16,6 +16,8 @@
 
 namespace EUROPA {
 
+  class Expr;
+  
   class InterpretedDbClientTransactionPlayer : public DbClientTransactionPlayer {
     public:
       InterpretedDbClientTransactionPlayer(const DbClientId & client);
@@ -32,6 +34,8 @@ namespace EUROPA {
       int  defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
+      
+      Expr* valueToExpr(const TiXmlElement* element);
       
       // TODO: move this to schema
       std::set<std::string> m_systemClasses;      
@@ -272,7 +276,7 @@ namespace EUROPA {
     protected:
         void InterpretedToken::commonInit(const std::vector<LabelStr>& parameterNames,
                                           const std::vector<LabelStr>& parameterTypes,
-                                          const bool& autoClose);      	
+                                          const bool& autoClose);      	                                          
   };
   
   class InterpretedTokenFactory: public ConcreteTokenFactory 
@@ -291,13 +295,24 @@ namespace EUROPA {
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
   };
 
+  class RuleExpr;
+  
   class InterpretedRuleInstance : public RuleInstance
   {
   	public:
-  	    InterpretedRuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb);
+  	    InterpretedRuleInstance(const RuleId& rule, 
+  	                            const TokenId& token, 
+  	                            const PlanDatabaseId& planDb,
+                                const std::vector<RuleExpr*>& body);
   	    virtual ~InterpretedRuleInstance();
   	    
+        void createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars);
+
+        void createSubgoal(const LabelStr& name,const LabelStr& predicateType, const LabelStr& relation);
+
     protected:
+        std::vector<RuleExpr*> m_body;                                          
+
         /**
          * @brief provide implementation for this method for firing the rule
          */
@@ -307,13 +322,61 @@ namespace EUROPA {
   class InterpretedRuleFactory : public Rule
   {
     public:
-        InterpretedRuleFactory(const LabelStr& predicate, const LabelStr& source); 
+        InterpretedRuleFactory(const LabelStr& predicate, const LabelStr& source, const std::vector<RuleExpr*>& ruleBody); 
         virtual ~InterpretedRuleFactory();
         
         virtual RuleInstanceId createInstance(const TokenId& token, 
                                               const PlanDatabaseId& planDb, 
                                               const RulesEngineId &rulesEngine) const;
+                                              
+    protected:
+        std::vector<RuleExpr*> m_body;                                                                                            
   };   
+  
+  /*
+   * Expr that appears in the body of an interpreted rule instance
+   * 
+   */
+  class RuleExpr  : public Expr
+  {
+  	protected:
+  	    friend class InterpretedRuleInstance;
+  	    
+  	    InterpretedRuleInstance* m_ruleInstance;
+  	    
+  	    void setRuleInstance(InterpretedRuleInstance* ri) { m_ruleInstance = ri; }  	    
+  };
+  
+  class ExprConstraint : public RuleExpr
+  {
+  	public:
+  	    ExprConstraint(const char* name,const std::vector<Expr*> args);
+  	    virtual ~ExprConstraint();
+
+  	    virtual DataRef eval(EvalContext& context) const;  
+  	    
+  	protected:
+  	    LabelStr m_name;
+  	    std::vector<Expr*> m_args;    	    
+  };
+  
+  class ExprSubgoal : public RuleExpr
+  {
+  	public:
+  	    ExprSubgoal(const char* name,
+  	                const char* predicateType,
+  	                const char* predicateInstance,
+  	                const char* relation);
+  	    virtual ~ExprSubgoal();
+
+  	    virtual DataRef eval(EvalContext& context) const;  
+  	    
+  	protected:
+  	    LabelStr m_name;
+  	    LabelStr m_predicateType;
+  	    LabelStr m_predicateInstance;
+  	    LabelStr m_relation;
+  };  
 }
 
 
