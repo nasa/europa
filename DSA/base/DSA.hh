@@ -59,6 +59,8 @@ namespace EUROPA {
       void solverReset();
       void solverClear();
 
+      void writePlan(std::ostream& os) const;
+
     private:
       DSA();
       void init();

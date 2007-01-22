@@ -31,6 +31,7 @@
 #include "SAVH_ProfilePropagator.hh"
 #include "SAVH_Resource.hh"
 #include "TransactionInterpreter.hh"
+#include "PlanDatabaseWriter.hh"
 
 #include <dlfcn.h>
 #include <fstream>
@@ -610,5 +611,9 @@ namespace EUROPA {
       checkError(m_solver.isId(), "Solver has not been allocated.");
       m_solver->clear();
     }
+    
+    void DSA::writePlan(std::ostream& os) const {
+        PlanDatabaseWriter::write(m_db, os);
+    }    
   }
 }
