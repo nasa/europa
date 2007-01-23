@@ -12,7 +12,6 @@ namespace EUROPA {
   }
 
   void ConstraintLibrary::registerFactory(ConstraintFactory* factory) {
-    debugMsg("ConstraintLibrary:registerFactory", "Registering factory " << factory->getName().toString());
     getInstance().registerFactory(factory, factory->getName());
   }
 
@@ -38,6 +37,7 @@ namespace EUROPA {
     check_error(isNotRegistered(name), "Constraint factory for '" + name.toString() + "' should not be registered, and yet it is....");
     m_constraintsByName.insert(std::pair<double, ConstraintFactoryId>(name.getKey(),
 								      factory->getId()));
+    debugMsg("ConstraintLibrary:registerFactory", "Registered factory " << factory->getName().toString());
   }
 
   const ConstraintFactoryId& ConstraintLibrary::getFactory(const LabelStr& name) {
