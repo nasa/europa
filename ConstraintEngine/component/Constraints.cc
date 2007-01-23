@@ -1905,7 +1905,7 @@ namespace EUROPA {
     if( !constraintLibraryInitialized()) {
       constraintLibraryInitialized() = true;
      
-      debugMsg("Constriants:initConstriantLibrary", "Initializing the constraint library");
+      debugMsg("Constraints:initConstriantLibrary", "Initializing the constraint library");
       // Register constraint Factories
       REGISTER_CONSTRAINT(UnaryConstraint, "UNARY", "Default");
       REGISTER_CONSTRAINT(AddEqualConstraint, "AddEqual", "Default");
@@ -1994,7 +1994,7 @@ namespace EUROPA {
 
     
     } else {
-       debugMsg("Constriants:initConstriantLibrary", "Constraint library already initalized - no action taken");
+       debugMsg("Constraints:initConstriantLibrary", "Constraint library already initalized - no action taken");
     }
 
   }
