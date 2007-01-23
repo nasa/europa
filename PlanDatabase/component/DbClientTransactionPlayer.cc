@@ -121,7 +121,6 @@ namespace EUROPA {
     else if (strcmp(tagname, "invoke") == 0)
       playInvokeConstraint(element);
     else {
-    	std::cout << element << std::endl;
       check_error(strcmp(tagname, "nddl") == 0, "Unknown tag name " + std::string(tagname));
       for (TiXmlElement * child_el = element.FirstChildElement() ;
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
