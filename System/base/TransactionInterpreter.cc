@@ -9,7 +9,6 @@
 #include "tinyxml.h"
 #include "Debug.hh"
 #include "Error.hh"
-//#include "AbstractDomain.hh"
 #include "DbClient.hh"
 #include "EnumeratedTypeFactory.hh"
 #include "Object.hh" 
@@ -33,6 +32,15 @@ namespace NDDL {
  rule_constraint(relationname,vars);\
   } 
 }  
+
+
+/*
+ * stil TODO to support HelloWorld without hard-coded stuff:
+ * - implement predicateInstanceToType() below, at least for the simplest case object.predicateName
+ * - evaluate the arguments to constraints in the body of a rule (ExprConstraint::eval)
+ * - add the right constraint for the slave's object variable in InterpretedRuleInstance::createSubgoal 
+ * 
+ */
 
 /*
  * Here is what can be used as a main to run an interpreted version through the DSA
@@ -338,6 +346,7 @@ namespace EUROPA {
   const char* predicateInstanceToType(const char* className,const char* predicateInstance)
   {
   	// TODO: implement this
+  	// see ModelAccessor.getSlaveObjectType() in NDDL compiler
   	return "YourObject.helloWorld";
   }
   
@@ -681,6 +690,7 @@ namespace EUROPA {
   	{
   		std::cout << "Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString() << std::endl;
   		m_ruleInstance->createSubgoal(m_name,m_predicateType,m_relation);
+  		// TODO: add new slave to EvalContext
   		std::cout << "Create subgoal " << m_predicateType.toString() << ":" << m_name.toString() << std::endl;
   		return DataRef::null;
   	}  
@@ -1040,8 +1050,6 @@ namespace EUROPA {
         // TODO: need to pass in eval context from outside
 	    EvalContext evalContext(NULL);
 	    
-        // TODO: Add object and token to the context
-        
     	std::cout << "Executing interpreted rule:" << getRule()->getName().toString() << std::endl;
 		for (unsigned int i=0; i < m_body.size(); i++) {
 			m_body[i]->setRuleInstance(this);
@@ -1061,11 +1069,15 @@ namespace EUROPA {
     void InterpretedRuleInstance::createSubgoal(const LabelStr& name,const LabelStr& predicateType, const LabelStr& relation)
     {
   		TokenId slave = TokenFactory::createInstance(m_token,LabelStr(predicateType),LabelStr(relation));
-  		addSlave(slave,name);
-  		
+  		addSlave(slave,name);  		
   		// TODO: for qualified names like "object.helloWorld" must add constraint to constraint the object variable on the slave token:
   		// for instance:
-  		// TODO: hardcoded constraint!!!
+  		// TODO: hardcoded constraint!!
+  		// In compiler, see:
+  		// - ModelAccessor.isConstrained to see if we need to generate a constraint here 
+  		// - See RuleWriter.allocateSlave to see if we should generate a sameObject or a constrainObject from NddlRules.hh
+  		// hardcoded approach below assumes we need a sameObject() 
+  		// 
   		{
   			std::vector<ConstrainedVariableId> vars;
             vars.push_back(NDDL::var(getId(),"object"));
