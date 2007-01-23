@@ -38,6 +38,7 @@ rule Swig {
 }
 
 actions Swig {
+  echo swig $(ARGUMENTS) $(2) ;
   swig $(ARGUMENTS) $(2)
 }
 
@@ -67,11 +68,12 @@ rule SwigSharedLibrary {
 
 rule SwigJava {
      local swigfile = $(1) ;
-     local outdir = $(2) ;
-     local cpp = $(3) ;
-     local libname = $(4) ;
-     local deps = $(5) ;
-     local target = $(6) ;
+     local package = $(2) ;
+     local outdir = $(3) ;
+     local cpp = $(4) ;
+     local libname = $(5) ;
+     local deps = $(6) ;
+     local target = $(7) ;
 
      if $(JAVA_HOME) {
 	if $(OS) = SOLARIS {
@@ -84,7 +86,7 @@ rule SwigJava {
 		SubDirC++Flags -I$(JAVA_HOME)/include ;
 	}
      }
-     SwigSharedLibrary $(swigfile) : java : $(outdir) : $(cpp) : $(libname) : $(deps) : $(target) ;
+     SwigSharedLibrary $(swigfile) : java "package $(package)" : $(outdir) : $(cpp) : $(libname) : $(deps) : $(target) ;
 
      local javadir ;
      if $(outdir) {
