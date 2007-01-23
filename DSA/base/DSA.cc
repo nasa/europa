@@ -509,8 +509,8 @@ namespace EUROPA {
 
       ObjectFactory::purgeAll();
       TokenFactory::purgeAll();
-      ConstraintLibrary::purgeAll();
       Rule::purgeAll();
+      uninitConstraintLibrary();
       uninitNDDL();
 
       if(m_libHandle != NULL){
@@ -546,6 +546,7 @@ namespace EUROPA {
 
       // Allocate the rules engine to process rules
       m_re = (new RulesEngine(m_db))->getId();
+      debugMsg("DSA:init", "Initialized DSA");
     }
 
 
