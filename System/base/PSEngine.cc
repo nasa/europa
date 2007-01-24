@@ -419,6 +419,16 @@ namespace EUROPA {
     Entity::purgeEnded();
   }
     
+  void PSEngine::initDatabase() 
+  {
+    m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();
+    new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
+    PropagatorId temporalPropagator =
+      m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
+    m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
+    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
+  }
+   
   void PSEngine::loadModel(const std::string& modelFileName) {
     check_error(m_planDatabase.isNoId());
     check_error(m_rulesEngine.isNoId());
@@ -434,16 +444,14 @@ namespace EUROPA {
 	       p_dlerror());
 
     SchemaId schema = (*fcn_schema)();
-    
-    m_planDatabase = (new PlanDatabase(m_constraintEngine, schema))->getId();
-    new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
-    PropagatorId temporalPropagator =
-      m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
-    m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
-    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
+    initDatabase();    
   }
 
   void PSEngine::executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) {
+  	// if we're using the TransactionInterpreter, we'll be starting from scratch
+    if(m_planDatabase.isNoId())
+          initDatabase();
+
     check_error(m_planDatabase.isValid());
     
     DbClientId client = m_planDatabase->getClient();

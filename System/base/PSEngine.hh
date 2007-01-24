@@ -86,6 +86,9 @@ namespace EUROPA {
 		
     PSSolver* createSolver(const std::string& configurationFile);		
     
+  protected:
+      void initDatabase();
+           
   private:
     ConstraintEngineId m_constraintEngine;
     PlanDatabaseId m_planDatabase;
