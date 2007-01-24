@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.io.OutputStreamWriter;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.StringWriter;
 import java.io.IOException;
 import java.util.Set;
 import java.util.Set;
@@ -26,7 +27,7 @@ import gnu.getopt.Getopt;
  * @author: Matthew E. Boyce
  * A replacement for nddl.Parse and nddl.NddlCompiler
  */
-class Nddl {
+public class Nddl {
 
   // options
   static final boolean combinedVersion = true;
@@ -168,6 +169,27 @@ class Nddl {
     for(int i=0;i<models.length;i++)
       nddlModel(models[i]);
     assert(DebugMsg.debugMsg("Exiting "+execName));
+  }
+  
+  /*
+   * Method to be called to bypass main and parse only.
+   * I'm sure code can be refactored so this is not a completely separate thing
+   */
+  public static String nddlToXML(String model)
+      throws IOException
+  {
+	  noxml = true;
+	  ModelAccessor.init();
+	  
+	  File modelFile =  ModelAccessor.generateIncludeFileName("",model);
+	  IXMLElement xml = nddlParse(modelFile);
+	  StringWriter result = new StringWriter();
+      BufferedWriter writer = new BufferedWriter(result);
+      XMLWriter xmlWriter = new XMLWriter(writer);
+      xmlWriter.write(xml,true,2,true);
+      writer.close();
+      
+      return result.toString();
   }
 
   /**
