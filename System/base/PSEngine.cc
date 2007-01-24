@@ -28,6 +28,7 @@
 #include "Rule.hh"
 #include "DbClient.hh"
 #include "DbClientTransactionPlayer.hh"
+#include "TransactionInterpreter.hh"
 #include "Filters.hh"
 #include "DefaultPropagator.hh"
 #include "TemporalPropagator.hh"
@@ -442,13 +443,29 @@ namespace EUROPA {
     m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
   }
 
-  void PSEngine::executeTxns(const std::string& xmlTxnSource) {
+  void PSEngine::executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) {
     check_error(m_planDatabase.isValid());
+    
     DbClientId client = m_planDatabase->getClient();
-    DbClientTransactionPlayer player(client);
-    std::ifstream in(xmlTxnSource.c_str());
-    check_error(in);
-    player.play(in);
+
+    DbClientTransactionPlayer* player;      
+    if (useInterpreter)
+        player = new InterpretedDbClientTransactionPlayer(client);
+    else
+        player = new DbClientTransactionPlayer(client);
+
+    std::istream* in;    
+    if (isFile)
+      in = new std::ifstream(xmlTxnSource.c_str());
+    else
+      in = new std::istringstream(xmlTxnSource);
+
+    //check_error(*in);
+    player->play(*in);
+
+    delete in;    
+    delete player;
+      
   }
 
   //FIXME

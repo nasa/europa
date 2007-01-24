@@ -71,7 +71,7 @@ namespace EUROPA {
     // Loads a planning model in binary format
     void loadModel(const std::string& modelFileName);
         		
-    void executeTxns(const std::string& xmlTxnSource); // TODO: fold XML into executeScript?
+    void executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter); // TODO: fold XML into executeScript?
     //What's this supposed to do, exactly? ~MJI
     void executeScript(const std::string& language, const std::string& script);
 	
