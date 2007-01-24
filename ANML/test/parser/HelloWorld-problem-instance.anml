@@ -1,19 +1,37 @@
+#include "HelloWorld-model.anml"
+
+YourObject object;
+
 fact {
   over all {
-    //new PlannerConfig(0, 100, 500, +inf);
-		//done via implicit predicate hack
+    // implicit predicate hack will translate predicate into constructor for NDDL
+    // only for PlannerConfig
     PlannerConfig(0, 100, 500, +inf);
   };
   at start {
-    //goal(YourObject.helloWorld initialToken);
-    //initialToken.start.specify(0);
-    YourObject.helloWorld;
+    object.busy = true;
   };
 }
 
-//not required in original NDDL, but we now distinguish fluents from actions.
+// Notice that the NDDL version starts the sequence from the beginning
+// In ANML we can't have effects in the future, so we need to start at the end
+// This may actually cause different plans to be generated between the NDDL versio and the ANML version 
+// depending on the size of the planning horizon
 goal {
   at end {
-    YourObject.helloWorld;
+    object.busy = true;
   };
 }
+
+/*
+  NDDL Version
+  
+  PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);
+
+  YourObject object = new YourObject();
+  close(); // Close the the PLASMA Database - no more objects can be created.
+
+  goal(YourObject.helloWorld initialToken);
+  initialToken.start.specify(0); // Starts at beginning of the horizon  
+*/  
+  

@@ -1,0 +1,37 @@
+/*
+ * @author Javier Barreiro
+ * @brief HelloWorld model, generates a sequence of helloWorld activities of duration 10
+ */
+
+objtype YourObject
+{
+    bool busy;
+    
+    action helloWorld()
+    {
+        duration 10;        
+        condition at start { busy = true; } // met by another HelloWorld action        
+        effect over all { busy = true; }
+    }
+}
+
+
+/*
+
+NDDL version:
+
+#include "Plasma.nddl"
+
+class YourObject 
+{
+    predicate helloWorld{}
+}
+
+YourObject::helloWorld
+{
+    eq(duration, 10);
+    meets (object.helloWorld);
+    met_by(object.helloWorld);
+}
+
+*/
