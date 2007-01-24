@@ -244,13 +244,13 @@ namespace EUROPA {
 
   double PSVariable::getLowerBound() {
     check_error(m_var.isValid());
-    check_error(!isSingleton() && isInterval());
+    check_error(isInterval());
     return m_var->lastDomain().getLowerBound();
   }
 
   double PSVariable::getUpperBound() {
     check_error(m_var.isValid());
-    check_error(!isSingleton() && isInterval());
+    check_error(isInterval());
     return m_var->lastDomain().getLowerBound();
   }
 
@@ -285,7 +285,11 @@ namespace EUROPA {
     return LabelStr(m_val).toString();
   }
 
-  PSSolver::PSSolver(const SOLVERS::SolverId& solver) : m_solver(solver) {}
+  PSSolver::PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename) 
+      : m_solver(solver) 
+      , m_configFile(configFilename)
+  {
+  }
 
   void PSSolver::step() {
     m_solver->step();
@@ -366,8 +370,7 @@ namespace EUROPA {
     return (int) SOLVERS::HorizonFilter::getHorizon().getUpperBound();
   }
 
-  void PSSolver::configure(const std::string& configFilename,
-			   int horizonStart, int horizonEnd) {
+  void PSSolver::configure(int horizonStart, int horizonEnd) {
     check_error(horizonStart <= horizonEnd);
     SOLVERS::HorizonFilter::getHorizon().reset(IntervalIntDomain());
     SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
@@ -527,7 +530,7 @@ namespace EUROPA {
     SOLVERS::SolverId solver =
       (new SOLVERS::Solver(m_planDatabase, *(doc->RootElement())))->getId();
 
-    return new PSSolver(solver);
+    return new PSSolver(solver,configurationFile);
   }
 
 }

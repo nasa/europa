@@ -187,10 +187,10 @@ namespace EUROPA {
     int getHorizonEnd();
 	    
     //it isn't currently possible to configure a solver from an XML file after construction
-    void configure(const std::string& configFilename, int horizonStart, int horizonEnd);
+    void configure(int horizonStart, int horizonEnd);
   protected:
     friend class PSEngine;
-    PSSolver(const SOLVERS::SolverId& solver);
+    PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename);
   private:
     SOLVERS::SolverId m_solver;
     std::string m_configFile;

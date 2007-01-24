@@ -134,7 +134,7 @@ namespace EUROPA {
     int getHorizonStart();
     int getHorizonEnd();
 	    
-    void configure(const std::string& configFilename, int horizonStart, int horizonEnd);
+    void configure(int horizonStart, int horizonEnd);
   protected:
     PSSolver();
   };
