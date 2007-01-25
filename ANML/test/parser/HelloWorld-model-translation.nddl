@@ -1,0 +1,50 @@
+
+// TODO: this needs to be part of a class Library
+class ANMLBool extends Timeline
+{
+    predicate setValue { bool value; };
+}
+
+ANMLBool::setValue
+{
+}
+
+class YourObject
+{
+    ANMLBool busy;
+       
+    predicate action_HelloWorld {};
+    predicate action_HelloWorld_cond1 {};
+    predicate action_HelloWorld_effect1 {};    
+}
+   
+YourObject::YourObject()
+{
+    busy = new ANMLBool();
+}   
+
+// TODO: should make sure all conditions are satisfied before attempting to add effects to the plan?
+// This can be done by generating a PLannerConfig.xml
+YourObject::action_HelloWorld()
+{
+    eq(duration,10);
+    
+    // at start { cond1 }
+    object.actionHelloWorld_cond1 cond1;
+    leq(cond1.start, start);
+    leq(start,cond1.end);
+    
+    // over all { effect1 }
+    object.action_HelloWorld_effect1 effect1;
+    equals(effect1);        
+}
+
+YourObject::action_HelloWorld_cond1()
+{
+    equals(busy.setValue(true));
+}
+
+YourObject::action_HelloWorld_effect1()
+{
+    equals(busy.setValue(true));
+}
