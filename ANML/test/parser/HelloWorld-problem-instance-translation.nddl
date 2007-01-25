@@ -4,8 +4,8 @@ PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);
 YourObject object = new YourObject();
 close(); // Close the the PLASMA Database - no more objects can be created.
 
-// TODO: how do we do this?, do we look for effects that contains the ANML
-// goal and generate a disjunction here?
+// For each goal, we'd need to look for actions that
+// can bring them about and generate a disjunction here
 goal(YourObject.action_HelloWorld goal1);
 leq(goal1.start,100);   
 leq(100,goal1.end);   

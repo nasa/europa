@@ -4,31 +4,29 @@ YourObject object;
 
 fact {
   over all {
-    // implicit predicate hack will translate predicate into constructor for NDDL
-    // only for PlannerConfig
-    PlannerConfig(0, 100, 500, +inf);
+    PlannerConfig(0, 100, 500, +inf); // Hack to deal with PlannerConfig
   };
 }
 
 // Notice that the NDDL version starts the sequence from the beginning
 // In ANML we can't have effects in the future, so we need to start at the end
-// This may actually cause different plans to be generated between the NDDL versio and the ANML version 
-// depending on the size of the planning horizon
+// This may actually cause different plans to be generated between the NDDL version 
+// and the ANML version, depending on the size of the planning horizon
 goal {
+  // TODO: perhaps we should say "over all" here? translatio but have to take  action duration into account
   at end {
     object.busy = true;
   };
 }
 
-/*
-  NDDL Version
+/* Original NDDL Version
   
-  PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);
+PlannerConfig p = new PlannerConfig(0, 100, 500, +inf);
 
-  YourObject object = new YourObject();
-  close(); // Close the the PLASMA Database - no more objects can be created.
+YourObject object = new YourObject();
+close(); // Close the the PLASMA Database - no more objects can be created.
 
-  goal(YourObject.helloWorld initialToken);
-  initialToken.start.specify(0); // Starts at beginning of the horizon  
+goal(YourObject.helloWorld initialToken);
+initialToken.start.specify(0); // Starts at beginning of the horizon  
 */  
   

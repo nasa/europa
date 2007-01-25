@@ -24,7 +24,7 @@ YourObject::YourObject()
 }   
 
 // TODO: should make sure all conditions are satisfied before attempting to add effects to the plan?
-// This can be done by generating a PLannerConfig.xml
+// This can be done by generating a PlannerConfig.xml
 YourObject::action_HelloWorld()
 {
     eq(duration,10);
@@ -41,7 +41,9 @@ YourObject::action_HelloWorld()
 
 YourObject::action_HelloWorld_cond1()
 {
-    equals(busy.setValue(true));
+    // For each condition, we'd need to look for actions that
+    // can bring them about and generate a disjunction here
+    contains(object.action_HelloWorld);
 }
 
 YourObject::action_HelloWorld_effect1()

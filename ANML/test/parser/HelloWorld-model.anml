@@ -15,12 +15,7 @@ objtype YourObject
     }
 }
 
-
-/*
-
-NDDL version:
-
-#include "Plasma.nddl"
+/* Original NDDL version:
 
 class YourObject 
 {
@@ -33,5 +28,4 @@ YourObject::helloWorld
     meets (object.helloWorld);
     met_by(object.helloWorld);
 }
-
 */
