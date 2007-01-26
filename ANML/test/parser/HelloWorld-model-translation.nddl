@@ -29,24 +29,38 @@ YourObject::action_HelloWorld()
 {
     eq(duration,10);
     
-    // at start { cond1 }
-    object.actionHelloWorld_cond1 cond1;
+    // condition1 : at start { busy=true; }
+    object.busy_eq_true cond1;
     leq(cond1.start, start);
     leq(start,cond1.end);
     
-    // over all { effect1 }
-    object.action_HelloWorld_effect1 effect1;
-    equals(effect1);        
+    // effect1 : over all { busy=true; }
+    object.busy_eq_true_effect effect1;
+    eq(effect1.start,start);        
+    eq(effect1.end,end);        
 }
 
-YourObject::action_HelloWorld_cond1()
+YourObject::busy_eq_true()
 {
+    int option = [1 2];
+
+    // A goal can be satisfied by being in the plan already, or by actions that bring it about    
+    
+    if (option == 1) { // see if the goal is already in the plan
+        // TODO: Use planner config to make sure that this can only be merged
+        equals(object.busy_eq_true_effect mergeOnly);
+    }
+    
     // For each condition, we'd need to look for actions that
     // can bring them about and generate a disjunction here
-    contains(object.action_HelloWorld);
+    if (option == 2) {
+        contains(object.action_HelloWorld);
+    }
 }
 
-YourObject::action_HelloWorld_effect1()
+// This is also what can be stated as a fact
+// TODO: would busy_eq_true_fact be a better name for this?
+YourObject::busy_eq_true_effect()
 {
     // The semantics of an assignment in ANML is that we do nothing if
     // the variable already has that value and that the value persists 

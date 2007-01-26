@@ -4,7 +4,7 @@ YourObject object;
 
 fact {
   over all {
-    PlannerConfig(0, 100, 500, +inf); // Hack to deal with PlannerConfig
+    PlanningHorizon(0, 100); // Hack to deal with PlannerConfig
   };
 }
 
@@ -13,7 +13,8 @@ fact {
 // This may actually cause different plans to be generated between the NDDL version 
 // and the ANML version, depending on the size of the planning horizon
 goal {
-  // TODO: perhaps we should say "over all" here? translatio but have to take  action duration into account
+  // TODO: perhaps we should say "over all" here? translation would have to take action duration into account
+  // and generate disjunction that would cover the interval specified by "over"
   at end {
     object.busy = true;
   };
