@@ -36,20 +36,21 @@ namespace EUROPA {
 
   //trying template instantiation to get the right results.
 
+
   %rename(PSStringList) PSList<std::string>;
   class PSList<std::string> {
   public:
     int size() const;
-    std::string& get(int idx);    
+    std::string get(int idx);    
   };
 
   %rename(PSTimePointList) PSList<int>;
   class PSList<int> {
   public:
     int size() const;
-    int& get(int idx);
+    int get(int idx);
   };
-  
+
   class PSEngine {
   public:
     PSEngine();
