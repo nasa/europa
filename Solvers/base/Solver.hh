@@ -167,7 +167,9 @@ namespace EUROPA {
 
       std::string getLastExecutedDecision() const;
 
-      std::string printOpenDecisions() const;
+      std::multimap<Priority, std::string> getOpenDecisions() const; 
+
+      std::string printOpenDecisions() const;      
       
       /**
        * @brief Access the context of this Solver.

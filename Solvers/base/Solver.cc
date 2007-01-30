@@ -593,12 +593,8 @@ namespace EUROPA {
       return m_db->getConstraintEngine()->constraintConsistent();
     }
     
-    /**
-     * @brief Will print the open decisions in priority order
-     */
-    std::string Solver::printOpenDecisions() const {
-      static const std::string sl_indentation("   ");
-
+    std::multimap<Priority, std::string> Solver::getOpenDecisions() const 
+    {
       checkError(m_db->getConstraintEngine()->constraintConsistent(),
                  "Can only call this if variable changes have been propagated first.");
 
@@ -613,21 +609,27 @@ namespace EUROPA {
           std::stringstream os;
           EntityId flaw = flawIterator->next();
           const Priority priority = fm->getPriority(flaw);
-          os << std::endl << sl_indentation << fm->toString(flaw) << " PRIORITY==" << priority;
-          priorityQueue.insert(std::pair<Priority, std::string>(priority + adjustment, os.str()));
+          priorityQueue.insert(std::pair<Priority, std::string>(priority + adjustment, fm->toString(flaw)));
         }
 
         delete (Iterator*) flawIterator;
       }
+      
+      return priorityQueue;
+    }
+    
+    /**
+     * @brief Will print the open decisions in priority order
+     */
+    std::string Solver::printOpenDecisions() const {
+      static const std::string sl_indentation("   ");
 
       std::stringstream os;
       os << " OpenDecisions:{ ";
-
-      // Order based on semantics of priority
-      for(std::multimap<Priority, std::string>::const_iterator it=priorityQueue.begin();it!=priorityQueue.end(); ++it){
-        const std::string& str = it->second;
-        os << str;
-      }
+      
+      std::multimap<Priority, std::string> priorityQueue = getOpenDecisions();
+      for(std::multimap<Priority, std::string>::const_iterator it=priorityQueue.begin();it!=priorityQueue.end(); ++it)
+        os << std::endl << sl_indentation << it->second << " PRIORITY==" << it->first;
 
       os << std::endl << " }";
 
