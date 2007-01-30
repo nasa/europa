@@ -412,7 +412,9 @@ namespace EUROPA {
 
     delete (RulesEngine*) m_rulesEngine;
     m_rulesEngine = RulesEngineId::noId();
-    delete (PlanDatabase*) m_planDatabase;
+    
+    // TODO: this is causing a crash, fix it
+    //delete (PlanDatabase*) m_planDatabase;
     m_planDatabase = PlanDatabaseId::noId();
     delete (ConstraintEngine*) m_constraintEngine;
     m_constraintEngine = ConstraintEngineId::noId();
