@@ -36,6 +36,10 @@
 #include "STNTemporalAdvisor.hh"
 #include "ResourcePropagator.hh"
 
+// TODO: registration for these needs to happen somewhere else
+#include "SAVH_ReusableFVDetector.hh"
+#include "SAVH_IncrementalFlowProfile.hh" 
+#include "ResourceThreatDecisionPoint.hh"
 
 #include <fstream>
 
@@ -387,9 +391,17 @@ namespace EUROPA {
     SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
   }
 
-  PSEngine::PSEngine() {}
+  PSEngine::PSEngine() 
+  {
+  	// TODO: this needs to happen somewhere else
+	 REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
+	 REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
+	 REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreatDecisionPoint);
+  }
 
-  PSEngine::~PSEngine() {}
+  PSEngine::~PSEngine() 
+  {  	
+  }
 
   //FIXME
   void PSEngine::start() {
@@ -494,15 +506,17 @@ namespace EUROPA {
   PSList<PSObject*> PSEngine::getObjectsByType(const std::string& objectType) {
     check_error(m_planDatabase.isValid());
 
-    std::list<ObjectId> objs;
-    m_planDatabase->getObjectsByType(LabelStr(objectType), objs);
-
     PSList<PSObject*> retval;
-    
-    for(std::list<ObjectId>::const_iterator it = objs.begin(); it != objs.end(); ++it) {
-      PSObject* obj = new PSObject(*it);
-      retval.push_back(obj);
+
+    const ObjectSet& objects = m_planDatabase->getObjects();
+    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
+        ObjectId object = *it;
+	    if(Schema::instance()->isA(object->getType(), objectType.c_str())) {
+            PSObject* obj = new PSObject(*it);
+            retval.push_back(obj);
+	    }
     }
+
     return retval;
   }
 
