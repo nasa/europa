@@ -455,6 +455,13 @@ namespace EUROPA {
       for(FlawManagers::const_iterator it = flawManagers.begin(); it != flawManagers.end(); ++it)
         m_iterators.push_back((*it)->createIterator());
       m_it = m_iterators.begin();
+
+      // move it to the first real one, so that done() will allways work consistently
+      IteratorId it = (*m_it);
+      while (it->done() && (m_it != m_iterators.end())) {
+      	++m_it;
+      	it = (*m_it);
+      }        
     }
 
     Solver::FlawIterator::~FlawIterator() {
@@ -462,11 +469,15 @@ namespace EUROPA {
         delete (Iterator*) (*m_it);
     }
 
-    bool Solver::FlawIterator::done() const {return m_it == m_iterators.end();}
+    bool Solver::FlawIterator::done() const 
+    {
+    	return m_it == m_iterators.end();
+    }
    
     const EntityId Solver::FlawIterator::next() {
       if(done())
         return EntityId::noId();
+        
       IteratorId it = (*m_it);
       //if current iterator is done, move to the next one
       //and return that iterator's next
@@ -483,7 +494,7 @@ namespace EUROPA {
       //it's nearly done, so the previous call should bump it
       //into doneness.  call next to bump the meta-iterator forward.
       if(it->done())
-        retval = next();
+        next();
 
       return retval;
     }
