@@ -457,10 +457,12 @@ namespace EUROPA {
       m_it = m_iterators.begin();
 
       // move it to the first real one, so that done() will allways work consistently
-      IteratorId it = (*m_it);
-      while (it->done() && (m_it != m_iterators.end())) {
-      	++m_it;
-      	it = (*m_it);
+      while (m_it != m_iterators.end()) {
+          IteratorId it = (*m_it);
+          if (it->done()) 
+      	      ++m_it;
+      	  else
+      	      break;
       }        
     }
 
