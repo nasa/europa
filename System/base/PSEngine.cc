@@ -349,7 +349,8 @@ namespace EUROPA {
     IteratorId flawIt = m_solver->createIterator();
     while(!flawIt->done()) {
       EntityId entity = flawIt->next();
-      check_error(entity.isValid());
+      if (entity == EntityId::noId())
+         break;
       std::string str = entity->toString();
       retval.push_back(str);
     }
