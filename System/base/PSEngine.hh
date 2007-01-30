@@ -37,7 +37,7 @@ namespace EUROPA {
   public:
     int size() const { return m_elements.size(); }
     T& get(int idx) { return m_elements[idx]; }
-    void push_back(T& value) {m_elements.push_back(value);}
+    void push_back(const T& value) {m_elements.push_back(value);}
   protected:
     std::vector<T> m_elements;    	
   };

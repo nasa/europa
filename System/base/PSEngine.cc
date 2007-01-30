@@ -346,15 +346,24 @@ namespace EUROPA {
 
   PSList<std::string> PSSolver::getFlaws() {
     PSList<std::string> retval;
+
+    /*    
     IteratorId flawIt = m_solver->createIterator();
     while(!flawIt->done()) {
       EntityId entity = flawIt->next();
-      if (entity == EntityId::noId())
-         break;
-      std::string str = entity->toString();
-      retval.push_back(str);
+      std::string flaw = entity->toString();
+      retval.push_back(flaw);
     }
     delete (Iterator*) flawIt;
+    */  
+
+    std::multimap<SOLVERS::Priority, std::string> priorityQueue = m_solver->getOpenDecisions();
+    for(std::multimap<SOLVERS::Priority, std::string>::const_iterator it=priorityQueue.begin();it!=priorityQueue.end(); ++it) {
+        std::stringstream os;      
+        os << it->second << " PRIORITY==" << it->first; 
+        retval.push_back(os.str());
+    }
+    
     return retval;
   }
 
@@ -410,13 +419,12 @@ namespace EUROPA {
     ConstraintLibrary::purgeAll();
     Rule::purgeAll();
 
+    // TODO: deletes are causing a crash, fix it
     delete (RulesEngine*) m_rulesEngine;
-    m_rulesEngine = RulesEngineId::noId();
-    
-    // TODO: this is causing a crash, fix it
+    m_rulesEngine = RulesEngineId::noId();    
     //delete (PlanDatabase*) m_planDatabase;
     m_planDatabase = PlanDatabaseId::noId();
-    delete (ConstraintEngine*) m_constraintEngine;
+    //delete (ConstraintEngine*) m_constraintEngine;
     m_constraintEngine = ConstraintEngineId::noId();
 
     Entity::purgeEnded();
