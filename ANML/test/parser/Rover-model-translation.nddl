@@ -1,0 +1,216 @@
+// Rover-model-translation.nddl
+
+enum StowState { 'stowing', 'stowed', 'unstowing', 'unstowed' };
+
+class Location extends Timeline
+{
+    copy { Location rhs; }
+    setValue {string name; int x; int y;}
+}
+
+Location::copy {}
+Location::setValue {}
+
+class Path extends Timeline
+{
+    copy { Path rhs; }
+    setValue {string name; Location from; Location to; double cost};
+}
+
+Path::copy {}
+Path::setValue {}
+
+
+class Instrument 
+{
+	StowState state_;
+
+    TakeSample {Location rock;}
+    TakeSample_decomposition1 {Location rock;}
+    
+    Sample     {Location rock;}
+    Place      {Location rock;}
+    Stow       {} 
+    Unstow     {}
+}
+
+Instrument::TakeSample
+{
+     // TODO: are all decompositions contained within the action?
+     contains(object.TakeSample_decomposition1 decomposition1);
+     eq(decomposition1.rock,rock);
+     // in general, we'd add temporal constraints here
+     // since the temporal qualifier is "contains all", we don't need constraints
+}
+
+Instrument::TakeSample_decomposition1() 
+{
+    contains(object.Unstow step1);
+    contains(object.Place step2);
+    eq(step2.rock,rock);
+    contains(object.Sample step3);
+    eq(step3.rock,rock);
+    contains(object.Stow step4);
+
+    precedes(step1,step2);
+    precedes(step2,step3);
+    precedes(step3,step4);        
+}
+
+Instrument::Sample
+{
+	eq(duration,[0 10]);
+}
+
+Instrument::Place
+{
+	eq(duration,[3 12]);
+}
+
+// TODO: that if the instrument is already Stowed/Unstowed??
+Instrument::Stow 
+{
+	eq(duration,[2 6]);
+
+    // change over all { state_ = "unstowed" -> "stowing" -> "stowed" };
+    // TODO: will this cause holes in state_'s timeline ?
+    met_by(object.state_.setValue sv1);
+    eq(sv1.value,"unstowed");
+
+    contained_by(object.state_.setValue sv2);
+    eq(sv2.value,"stowing");
+
+    meets(object.state_.setValue sv3);
+    eq(sv3.value,"stowed");
+}
+
+Instrument::Unstow 
+{
+	eq(duration,[2 6]);
+
+    // change over all { state_ = "stowed" -> "unstowing" -> "unstowed" };
+    met_by(object.state_.setValue sv1);
+    eq(sv1.value,"stowed");
+
+    contained_by(object.state_.setValue sv2);
+    eq(sv2.value,"unstowing");
+
+    meets(object.state_.setValue sv3);
+    eq(sv3.value,"unstowed");        
+}
+
+class Rover 
+{
+    Battery battery_;
+    Instrument instrument_;
+    Location location_;
+    
+    Rover()
+    {
+        battery_ = new Battery();
+        instrument_ = new Instrument();
+        location_ = new Location();
+    }
+    
+    predicate Go { Location from; Location to; }
+
+    predicate locationEQ { Location value; }
+    
+    predicate TakeSample { Location rock; }
+    predicate TakeSample_decomposition1 { Location rock; }
+    predicate TakeSample_decomposition1_step2 { Location rock; }
+    
+    predicate PhoneHome {}
+    predicate PhoneLander {}
+}
+      
+
+Rover::Go()
+{
+	neq(from,to);
+		
+	// assert existence of path from from to to
+	Path p;
+    eq(p.from, from);
+    eq(p.to, to);
+
+    eq(duration,p.cost); 
+       
+    //condition at start { location_ = from; };
+    object.locationEQ cond1;
+    eq(cond1.value,from);
+    leq(cond1.start,start);
+    leq(start,cond1.end);
+	    	    
+	//effect at end { location_ = to; };
+	object.locationEQ effect1;
+    eq(effect1.value,to);
+    leq(effect1.start,start);
+    leq(start,effect1.end);
+		
+	// change over all { uses(battery_, p.cost); };
+    equals(battery_.uses b);
+    eq(b.quantity, -p.cost);     
+}
+
+Rover::locationEQ
+{
+    contained_by(object.location_.copy copy);
+    eq(copy.value,value);
+}
+
+Rover::TakeSample
+{
+    duration [20 25];
+	    
+	//condition contains all { location_ = rock; };
+	// TODO: "contains all" means contains?, we probably want contained_by here
+    contains(object.locationEQ cond1);
+    eq(cond1.value,rock);
+
+    // TODO: this "contains all" means contains whereas the previous one means contained_by???
+   	contains(TakeSample_decomposition1 decomp1);
+   	eq(decomp1.rock,rock);   	
+}
+
+Rover::TakeSample_decomposition1
+{
+    contains(object.instrument_.TakeSample step1);
+    eq(step1.rock,rock);
+	
+    contains(object.decomposition1_step2 step2);
+    
+    precedes(step1,step2);
+}
+
+Rover::TakeSample_decomposition1_step2
+{
+	bool or1;
+	
+	if (or1 == 1) {
+        contains(object.PhoneHome step1);
+    }
+    if (or1 == 2) {
+        contains(object.PhoneLander step2);
+    }    
+}
+	
+// TODO: when should we prefer to PhoneHome over PhoneLander?
+Rover::PhoneHome 
+{
+    eq(duration,10);
+
+    //change over all { uses(battery_, 600); };
+    equals(battery_.uses b);
+    eq(b.quantity, -600.0);     
+}
+
+Rover::PhoneLander
+{
+    eq(duration,5);
+    
+    //change over all { uses(battery_, 20); };
+    equals(battery_.uses b);
+    eq(b.quantity, -20.0);     
+}
+
