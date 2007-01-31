@@ -1,0 +1,100 @@
+// Rover-model.anml
+
+vartype Location : vector(string name, int x, int y);
+vartype Path : vector(string name, Location _from, Location _to, float cost);
+vartype StowState : string { "stowing", "stowed", "unstowing", "unstowed" };
+vartype Battery : int [0 50];
+
+objtype Instrument 
+{
+	StowState state_;
+
+	action TakeSample(Location rock) 
+	{
+		decomposition over all ordered (
+			Unstow(),
+			Place(rock),
+			Sample(rock),
+			Stow()
+		);
+	}
+
+	action Sample(Location rock) 
+	{
+		duration [0 10];
+	}
+
+	action Place(Location rock) 
+	{
+		duration [3 12];
+	}
+
+	action Stow() 
+	{
+		duration [2 6];
+        change over all { state_ = "unstowed" -> "stowing" -> "stowed" };
+	}
+
+	action Unstow() 
+	{
+		duration [2 6];
+        change over all { state_ = "stowed" -> "unstowing" -> "unstowed" };
+	}
+}
+
+objtype Rover 
+{
+    Battery battery_;
+    Instrument instrument_;
+    Location location_;
+    
+	action Go(Location from, Location to) 
+	{
+		neq(from, to);
+		
+		// assert existence of path from from to to
+ 		exists (Path p)
+        eq(p.from, from);
+	    eq(p.to, to);
+
+        // TODO: compute duration based on distance?
+        // for now just equal to cost?
+        eq(duration,p.cost); 
+        
+	    condition at start { location_ = from; };
+	    	    
+		effect at end { location_ = to; };
+		
+		change over all { uses(battery_, p.cost); };
+	}
+
+    action TakeSample(Location rock) 
+    {
+	    duration [20 25];
+	    
+		condition contains all { location_ = rock; };
+
+    	decomposition { 
+          contains all 
+	        ordered(
+		        instrument_.TakeSample(rock),
+	            or(PhoneHome(),
+		           PhoneLander())
+	        );
+	    };
+	}
+	
+	// TODO: when should we prefer to PhoneHome over PhoneLander?
+    action PhoneHome() 
+    {
+        duration 10;
+        change over all { uses(battery_, 600); };
+    }
+
+    action PhoneLander() 
+    {
+        duration 5;
+    	change over all { uses(battery_, 20); };
+    }
+}
+
