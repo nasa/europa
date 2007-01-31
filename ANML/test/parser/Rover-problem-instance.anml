@@ -8,15 +8,15 @@ Rover spirit;
 fact over all {
     PlannerConfig(0, 100);
 
-    lander = new Location("LANDER", 0, 0);
-    rock1  = new Location("ROCK1",  9, 9);
-    rock2  = new Location("ROCK2",  1, 6);
-    rock3  = new Location("ROCK3",  4, 8);
-    rock4  = new Location("ROCK4",  3, 9);
+    lander = ("LANDER", 0, 0);
+    rock1  = ("ROCK1",  9, 9);
+    rock2  = ("ROCK2",  1, 6);
+    rock3  = ("ROCK3",  4, 8);
+    rock4  = ("ROCK4",  3, 9);
 
-    p1 = new Path("Very Long Way", lander, rock4, -2000.0);
-    p2 = new Path("Moderately Long Way", lander, rock4, -1500.0);
-    p3 = new Path("Short Cut", lander, rock4, -400.0);
+    p1 = ("Very Long Way", lander, rock4, -2000.0);
+    p2 = ("Moderately Long Way", lander, rock4, -1500.0);
+    p3 = ("Short Cut", lander, rock4, -400.0);
 };
 
 fact at start {
