@@ -1,6 +1,15 @@
 // Rover-model-translation.nddl
 
-enum StowState { 'stowing', 'stowed', 'unstowing', 'unstowed' };
+enum StowStateEnum { 'stowing', 'stowed', 'unstowing', 'unstowed' };
+
+class StowState extends Timeline
+{
+    copy { StowState rhs; }
+    setValue {StowStateEnum value;}
+}
+
+StowState::copy {}
+StowState::setValue {}
 
 class Location extends Timeline
 {
@@ -20,6 +29,16 @@ class Path extends Timeline
 Path::copy {}
 Path::setValue {}
 
+// in ANML : vartype Battery : int [0 50];
+// Given its use, we must infer that Battery is a resource
+class Battery extends Reusable
+{
+    Battery()
+    {
+        // Capacity, Lower limit
+        super(50.0,0.0);
+    }
+}
 
 class Instrument 
 {

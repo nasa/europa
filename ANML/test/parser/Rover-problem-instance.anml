@@ -6,7 +6,8 @@ Path p1,p2,p3;
 Rover spirit;
 
 fact over all {
-    PlannerConfig(0, 100);
+    PlanningHorizon(0, 100);
+    SolverConfig(500,500); // MaxSteps,MaxDepth
 
     lander = ("LANDER", 0, 0);
     rock1  = ("ROCK1",  9, 9);

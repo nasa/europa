@@ -1,0 +1,63 @@
+// Rover-problem-instance-translation.nddl
+
+Location lander = new Location(), 
+         rock1 = new Location(), 
+         rock2 = new Location(), 
+         rock3 = new Location(), 
+         rock4 = new Location(); 
+         
+Path p1 = new Path(),
+     p2 = new Path(),
+     p3 = new Path();
+     
+Rover spirit = new Rover();
+
+int startHorizon = 0;
+int endHorizon = 100;
+
+PlannerConfig pc = new PlannerConfig(startHorizon, endHorizon,500,500);
+
+// TODO: extend NDDL to include facts
+fact(lander.setValue("LANDER", 0, 0)      fact1);
+fact(rock1.setValue("ROCK1",  9, 9)       fact2);
+fact(rock2.setValue("ROCK2",  1, 6)       fact3);
+fact(rock3.setValue("RO.setValue,  4, 8)  fact4);
+fact(rock4.setValue("ROCK4",  3, 9)       fact5);
+
+fact(p1.setValue("Very Long Way", lander, rock4, -2000.0)       fact6);
+fact(p2.setValue("Moderately Long Way", lander, rock4, -1500.0) fact7);
+fact(p3.setValue("Short Cut", lander, rock4, -400.0)            fact8);
+
+// these facts "over all"
+leq(startHorizon,fact1.start); leq(fact1.end,endHorizon);
+leq(startHorizon,fact2.start); leq(fact2.end,endHorizon);
+leq(startHorizon,fact3.start); leq(fact3.end,endHorizon);
+leq(startHorizon,fact4.start); leq(fact4.end,endHorizon);
+leq(startHorizon,fact5.start); leq(fact5.end,endHorizon);
+leq(startHorizon,fact6.start); leq(fact6.end,endHorizon);
+leq(startHorizon,fact7.start); leq(fact7.end,endHorizon);
+leq(startHorizon,fact8.start); leq(fact8.end,endHorizon);
+
+// TODO: need to figure this out, this must be passed in the constructor right now
+// setLevel doesn't exist
+fact(spirit.battery_.setLevel fact9);
+eq(fact9.quantity,100);
+
+fact(spirit.location_.copy fact10);
+eq(fact10.value,lander);
+
+fact(spirit.instrument_.state_.setValue fact11);
+eq(fact11.value,"stowed");
+
+// these facts "at start"
+leq(fact9.start,startHorizon); leq(startHorizon,fact9.end);
+leq(fact10.start,startHorizon); leq(startHorizon,fact10.end);
+leq(fact11.start,startHorizon); leq(startHorizon,fact11.end);
+
+goal(spirit.TakeSample goal_1);
+eq(goal1.rock,rock4);
+leq(0,goal1.start); leq(goal1.end,100);
+
+
+
+
