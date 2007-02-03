@@ -41,36 +41,9 @@ namespace NDDL {
  * 
  * TODO: temp variables : an easy way to deal with garbage collection could be to register them with the PlanDatabase when they're created
  * and flush every time we're done interpreting an XML statement
+ * TODO: handle assignments and constraints in predicate declaration
+ * TODO: add named subgoals to eval context
  */
-
-/*
- * Here is what can be used as a main to run an interpreted version through the DSA
- * 
-bool runDSATest(const char* plannerConfig, const char* txSource)
-{
-    DSA::DSA& dsa = DSA::DSA::instance();
-    dsa.addPlan(txSource,true);
-    dsa.solverConfigure(plannerConfig,0,100);
-    dsa.solverSolve(500,500);
-    dsa.writePlan(std::cout);
-    
-	return false;
-}
-
-int main(int argc, const char ** argv){
-  if (argc != 3) {
-    std::cerr << "Must provide initial transactions file." << std::endl;
-    return -1;
-  }
-
-  const char* txSource = argv[1];
-  const char* plannerConfig = argv[2];
-  
-  if (!runDSATest(plannerConfig,txSource))
-      return 0;
-}
- */
-  
 
 namespace EUROPA {
 
@@ -615,7 +588,7 @@ namespace EUROPA {
   		// the enclosing object (for which the constructor is being executed) as the parent.
   		// The way it is now, objects are created :
   		// - directly in C++ through new (in the generated code) if the stmt is inside a NDDL constructor
-  		// - through the factories if the stmtm is in the initial state
+  		// - through the factories if the stmt is in the initial state
   		// This is a problem, everybody should go through the factory
   		// faking it for now, but this is a hack
 
@@ -1194,4 +1167,80 @@ namespace EUROPA {
         return foo->getId();
     }	
 }
+
+/*
+ * Here is what can be used as a main to run an interpreted version of NDDL-XML through PSEngine or DSA
+ * It's also possible to run NDDL (what is support it of it so far) fully interpreted
+ * through the java version of PSEngine, see NDDLHelloWorld example in PlanWorks/PSUI  
+
+#include "Nddl.hh" 
+#include "SolverAssembly.hh" 
+#include "../PLASMA/DSA/base/DSA.hh"
+#include "PSEngine.hh" 
+
+using namespace EUROPA;
+
+ 
+void printFlaws(int it, PSList<std::string>& flaws)
+{
+	std::cout << "Iteration:" << it << " " << flaws.size() << " flaws" << std::endl;
+	
+	for (int i=0; i<flaws.size(); i++) {
+		std::cout << "    " << (i+1) << " - " << flaws.get(i) << std::endl;
+	}
+}
+
+bool runPSEngineTest(const char* plannerConfig, const char* txSource)
+{
+	PSEngine engine;
+	
+	engine.start();
+	engine.executeTxns(txSource,true,true);
+	
+	PSSolver* solver = engine.createSolver(plannerConfig);
+	solver->configure(0,100);
+	
+	for (int i = 0; i<50; i++) {
+		solver->step();
+		PSList<std::string> flaws = solver->getFlaws();
+		if (flaws.size() == 0)
+		    break;
+		printFlaws(i,flaws);
+	}
+	
+	delete solver;	
+	engine.shutdown();
+
+	return false;
+}
+
+ 
+bool runDSATest(const char* plannerConfig, const char* txSource)
+{
+    DSA::DSA& dsa = DSA::DSA::instance();
+    dsa.addPlan(txSource,true);
+    dsa.solverConfigure(plannerConfig,0,100);
+    dsa.solverSolve(500,500);
+    dsa.writePlan(std::cout);
+    
+	return false;
+}
+
+int main(int argc, const char ** argv){
+  if (argc != 3) {
+    std::cerr << "Must provide initial transactions file." << std::endl;
+    return -1;
+  }
+
+  const char* txSource = argv[1];
+  const char* plannerConfig = argv[2];
+  
+  if (!runPSEngineTest(plannerConfig,txSource)) 
+      return 0;
+
+  if (!runDSATest(plannerConfig,txSource))
+      return 0;
+}
+*/
+  
 
