@@ -22,8 +22,8 @@ Location::setValue {}
 
 class Path extends Timeline
 {
-    copy { Path rhs; }
-    setValue {string name; Location from; Location to; double cost};
+    predicate copy { Path rhs; }
+    predicate setValue {string name; Location from; Location to; double cost};
 }
 
 Path::copy {}
@@ -44,18 +44,17 @@ class Instrument
 {
 	StowState state_;
 
-    TakeSample {Location rock;}
-    TakeSample_decomposition1 {Location rock;}
+    predicate TakeSample {Location rock;}
+    predicate TakeSample_decomposition1 {Location rock;}
     
-    Sample     {Location rock;}
-    Place      {Location rock;}
-    Stow       {} 
-    Unstow     {}
+    predicate Sample     {Location rock;}
+    predicate Place      {Location rock;}
+    predicate Stow       {} 
+    predicate Unstow     {}
 }
 
 Instrument::TakeSample
 {
-     // TODO: are all decompositions contained within the action?
      contains(object.TakeSample_decomposition1 decomposition1);
      eq(decomposition1.rock,rock);
      // in general, we'd add temporal constraints here
@@ -78,44 +77,44 @@ Instrument::TakeSample_decomposition1()
 
 Instrument::Sample
 {
-	eq(duration,[0 10]);
+	eq(duration,10);
 }
 
 Instrument::Place
 {
-	eq(duration,[3 12]);
+	eq(duration,3);
 }
 
 // TODO: that if the instrument is already Stowed/Unstowed??
 Instrument::Stow 
 {
-	eq(duration,[2 6]);
+	eq(duration,2);
 
     // change over all { state_ = "unstowed" -> "stowing" -> "stowed" };
-    // TODO: will this cause holes in state_'s timeline ?
+    // TODO: this may cause holes in state_'s timeline. live with it for now
     met_by(object.state_.setValue sv1);
-    eq(sv1.value,"unstowed");
+    eq(sv1.value,'unstowed');
 
     contained_by(object.state_.setValue sv2);
-    eq(sv2.value,"stowing");
+    eq(sv2.value,'stowing');
 
     meets(object.state_.setValue sv3);
-    eq(sv3.value,"stowed");
+    eq(sv3.value,'stowed');
 }
 
 Instrument::Unstow 
 {
-	eq(duration,[2 6]);
+	eq(duration,2);
 
     // change over all { state_ = "stowed" -> "unstowing" -> "unstowed" };
     met_by(object.state_.setValue sv1);
-    eq(sv1.value,"stowed");
+    eq(sv1.value,'stowed');
 
     contained_by(object.state_.setValue sv2);
-    eq(sv2.value,"unstowing");
+    eq(sv2.value,'unstowing');
 
     meets(object.state_.setValue sv3);
-    eq(sv3.value,"unstowed");        
+    eq(sv3.value,'unstowed');        
 }
 
 class Rover 
@@ -131,7 +130,7 @@ class Rover
         location_ = new Location();
     }
     
-    predicate Go { Location from; Location to; }
+    predicate Go { Locations from; Location to; }
 
     predicate locationEQ { Location value; }
     
@@ -176,18 +175,23 @@ Rover::locationEQ
 {
     contained_by(object.location_.copy copy);
     eq(copy.value,value);
+    
+    // TODO: shouldn't this be conditional??, if we already have a fact, this subgoal will be generated anyway.
+    // Normally a disjunction would be generated here, in this case, there is only one option
+    // TODO: met_by only works if the action says "effect at end", operator needs to be generated
+    // based on temporal qualifier for the effect in the action
+    met_by(object.Go action1);
+    eq(action1.to,value); // TODO: figuring out which variables map to which may be non-trivial
 }
 
 Rover::TakeSample
 {
     duration [20 25];
 	    
-	//condition contains all { location_ = rock; };
-	// TODO: "contains all" means contains?, we probably want contained_by here
-    contains(object.locationEQ cond1);
+	//condition over all { location_ = rock; };
+    contained(object.locationEQ cond1);
     eq(cond1.value,rock);
 
-    // TODO: this "contains all" means contains whereas the previous one means contained_by???
    	contains(TakeSample_decomposition1 decomp1);
    	eq(decomp1.rock,rock);   	
 }
@@ -207,10 +211,10 @@ Rover::TakeSample_decomposition1_step2
 	bool or1;
 	
 	if (or1 == 1) {
-        contains(object.PhoneHome step1);
+        contains(object.PhoneLander step1);
     }
     if (or1 == 2) {
-        contains(object.PhoneLander step2);
+        contains(object.PhoneHome step2);
     }    
 }
 	

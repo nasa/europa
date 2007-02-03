@@ -21,23 +21,23 @@ objtype Instrument
 
 	action Sample(Location rock) 
 	{
-		duration [0 10];
+		duration 10;
 	}
 
 	action Place(Location rock) 
 	{
-		duration [3 12];
+		duration 3;
 	}
 
 	action Stow() 
 	{
-		duration [2 6];
+		duration 2;
         change over all { state_ = "unstowed" -> "stowing" -> "stowed" };
 	}
 
 	action Unstow() 
 	{
-		duration [2 6];
+		duration 2;
         change over all { state_ = "stowed" -> "unstowing" -> "unstowed" };
 	}
 }
@@ -50,19 +50,21 @@ objtype Rover
     
 	action Go(Location from, Location to) 
 	{
-		neq(from, to);
-		
-		// assert existence of path from from to to
- 		exists (Path p)
-        eq(p.from, from);
-	    eq(p.to, to);
-
-        // TODO: compute duration based on distance?
-        // for now just equal to cost?
-        eq(duration,p.cost); 
-        
 	    condition at start { location_ = from; };
-	    	    
+	
+	    condition over all {
+ 		    neq(from, to);
+		
+		    // assert existence of path from from to to
+ 		    exists (Path p)
+            eq(p.from, from);
+	        eq(p.to, to);
+	        
+            // TODO: compute duration based on distance?
+            // for now just equal to cost?
+            eq(duration,p.cost); 	        
+        };
+        	    	    
 		effect at end { location_ = to; };
 		
 		change over all { uses(battery_, p.cost); };
@@ -70,21 +72,25 @@ objtype Rover
 
     action TakeSample(Location rock) 
     {
-	    duration [20 25];
+	    duration 20;
 	    
-		condition contains all { location_ = rock; };
+		condition over all { location_ = rock; };
 
     	decomposition { 
           contains all 
 	        ordered(
 		        instrument_.TakeSample(rock),
-	            or(PhoneHome(),
-		           PhoneLander())
+	            or(PhoneLander(),
+		           PhoneHome())
 	        );
 	    };
 	}
 	
-	// TODO: when should we prefer to PhoneHome over PhoneLander?
+	// TODO: PhoneHome is longer and more costly than PhoneLander
+	// the model is probably missing a condition under which we'd
+	// prefer to PhoneHome over PhoneLander
+	// Maybe if the Lander isn't answering?
+	
     action PhoneHome() 
     {
         duration 10;
