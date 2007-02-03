@@ -37,9 +37,10 @@ namespace NDDL {
 /*
  * stil TODO to support HelloWorld without hard-coded stuff:
  * - implement predicateInstanceToType() below, at least for the simplest case object.predicateName
- * - evaluate the arguments to constraints in the body of a rule (ExprConstraint::eval)
  * - add the right constraint for the slave's object variable in InterpretedRuleInstance::createSubgoal 
  * 
+ * TODO: temp variables : an easy way to deal with garbage collection could be to register them with the PlanDatabase when they're created
+ * and flush every time we're done interpreting an XML statement
  */
 
 /*
@@ -102,7 +103,7 @@ namespace EUROPA {
       );       
   }
   
-  InterpretedDbClientTransactionPlayer::InterpretedDbClientTransactionPlayer(const DbClientId & client)
+  InterpretedDbClientTransactionPlayer::InterpretedDbClientTransactionPlayer(const DbClientId & client)                                                              
       : DbClientTransactionPlayer(client) 
   {  	  
   	  m_systemClasses.insert("Object");
@@ -190,7 +191,7 @@ namespace EUROPA {
   Expr* InterpretedDbClientTransactionPlayer::valueToExpr(const TiXmlElement* element)
   {
     if (strcmp(element->Value(),"value") == 0) {
-    	return new ExprConstant(xmlAsAbstractDomain(*element));
+     	return new ExprConstant(m_client,element->Attribute("type"),xmlAsAbstractDomain(*element));
     }
     else if (strcmp(element->Value(),"id") == 0) {
       	const char* varName = element->Attribute("name");
@@ -246,7 +247,7 @@ namespace EUROPA {
       	  	if (strcmp(rhsType,"value") == 0 || 
       	  	    strcmp(rhsType,"interval") == 0 ||
       	  	    strcmp(rhsType,"set") == 0) {
-      	  		rhs = new ExprConstant(xmlAsAbstractDomain(*rhsChild));
+      	  		rhs = new ExprConstant(m_client,rhsChild->Attribute("type"),xmlAsAbstractDomain(*rhsChild));
       	  	}
       	  	else if (strcmp(rhsType,"id") == 0) {
           	  	const char* varName = rhsChild->Attribute("name");
@@ -258,7 +259,7 @@ namespace EUROPA {
 	      	  	std::vector<Expr*> argExprs;     	  	
 	            for(const TiXmlElement* argChild = rhsChild->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() ) {
 	          	    if (strcmp(argChild->Value(),"value") == 0) {
-	          	    	Expr* arg = new ExprConstant(xmlAsAbstractDomain(*argChild));
+	          	    	Expr* arg = new ExprConstant(m_client,argChild->Attribute("type"),xmlAsAbstractDomain(*argChild));
 	          	    	argExprs.push_back(arg);
 	          	    }
 	          	    else if (strcmp(argChild->Value(),"id") == 0) {
@@ -430,41 +431,22 @@ namespace EUROPA {
      */   
     DataRef DataRef::null;
     
-    DataRef::DataRef(AbstractDomain* d)
+    DataRef::DataRef()
+        : m_value(ConstrainedVariableId::noId())
     {
-    	m_value.domain = d;
     }
     
-    DataRef::DataRef(const AbstractDomain* d)
+    DataRef::DataRef(const ConstrainedVariableId& v)
+        : m_value(v)
     {
-    	m_value.constDomain = d;
     }
     
     DataRef::~DataRef()
     {
-    	// TODO: should DataRef delete the AbstractDomain?, it'll prevent leaks in many cases
     }
   	    
-    AbstractDomain* DataRef::getValue() { return m_value.domain; }
+    ConstrainedVariableId& DataRef::getValue() { return m_value; }
     
-    const AbstractDomain* DataRef::getConstValue() const { return m_value.constDomain; }
-  	        
-    /*
-     * TIVariable
-     */   
-    TIVariable::TIVariable(const char* name,const AbstractDomain* value)
-        : m_name(name)
-        , m_value(value)
-    {
-    }
-
-    TIVariable::~TIVariable()
-    {
-    }
-
-    const char* TIVariable::getName() const { return m_name; }
-    DataRef& TIVariable::getDataRef() { return m_value; }
-
     /*
      * EvalContext
      */
@@ -477,23 +459,22 @@ namespace EUROPA {
     {
     }
 
-  	void EvalContext::addVar(const char* name,const AbstractDomain* value)
+  	void EvalContext::addVar(const char* name,const ConstrainedVariableId& v)
   	{
-  		TIVariable v(name,value);
   		m_variables[name] = v;
   	} 
 
-  	TIVariable* EvalContext::getVar(const char* name)
+  	ConstrainedVariableId EvalContext::getVar(const char* name)
   	{
-  		std::map<std::string,TIVariable>::iterator it = 
+  		std::map<std::string,ConstrainedVariableId>::iterator it = 
   		    m_variables.find(name);
   		    
         if( it != m_variables.end() ) 
-            return &(it->second);
+            return it->second;
   	    else if (m_parent != NULL)
   	    	return m_parent->getVar(name);
   	    else 
-  	        return NULL;
+  	        return ConstrainedVariableId::noId();
   	}
 
     /*
@@ -511,7 +492,7 @@ namespace EUROPA {
   	
   	DataRef ExprConstructorSuperCall::eval(EvalContext& context) const
   	{
-  		ObjectId object = context.getVar("this")->getDataRef().getValue()->getSingletonValue();
+  		ObjectId object = context.getVar("this")->derivedDomain().getSingletonValue();
 
   		std::vector<const AbstractDomain*> arguments;
 
@@ -525,7 +506,7 @@ namespace EUROPA {
     {
   		for (unsigned int i=0; i < m_argExprs.size(); i++) {
 			DataRef arg = m_argExprs[i]->eval(context);
-			arguments.push_back(arg.getConstValue());
+			arguments.push_back(&(arg.getValue()->derivedDomain()));
   		}
     }
 
@@ -544,11 +525,12 @@ namespace EUROPA {
   	}
   	    
   	DataRef ExprConstructorAssignment::eval(EvalContext& context) const
-  	{
-  		ObjectId object = context.getVar("this")->getDataRef().getValue()->getSingletonValue();
-     	const AbstractDomain* domain = m_rhs->eval(context).getConstValue();
+  	{     	
+  		ObjectId object = context.getVar("this")->derivedDomain().getSingletonValue();
      	check_error(object->getVariable(m_lhs) == ConstrainedVariableId::noId());
-     	object->addVariable(*domain,m_lhs);
+     	ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue(); 
+     	const AbstractDomain& domain = rhsValue->derivedDomain();
+     	object->addVariable(domain,m_lhs);
      	std::cout << "Initialized variable:" << object->getName().toString() << "." << m_lhs << " in constructor" << std::endl;
   		
   		return DataRef::null;
@@ -557,18 +539,24 @@ namespace EUROPA {
     /*
      * ExprConstant
      */   
-    ExprConstant::ExprConstant(const AbstractDomain* d)
-        : m_data(d)
+    ExprConstant::ExprConstant(DbClientId& dbClient, const char* type, const AbstractDomain* domain)
     {
+		m_var = dbClient->createVariable(
+		    type,
+		    *domain,
+		    "TMP_VAR",
+		    true
+		);    	
     }
     
   	ExprConstant::~ExprConstant()
   	{
+  		// TODO: delete temp variable?
   	}
 
   	DataRef ExprConstant::eval(EvalContext& context) const
   	{
-  		return m_data;
+  		return DataRef(m_var);
   	}  
   	    
 
@@ -586,13 +574,15 @@ namespace EUROPA {
 
   	DataRef ExprVariableRef::eval(EvalContext& context) const
   	{
-     	TIVariable* rhs = context.getVar(m_varName);
+     	ConstrainedVariableId rhs = context.getVar(m_varName.c_str());
 
-     	if (rhs == NULL) 
-     	    // TODO: throw exception
+     	if (rhs == ConstrainedVariableId::noId()) {
+     	    // TODO: Throw exception so that client can recover
+     	    check_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_varName.toString()+" in EvalContext");
      	    return DataRef::null;
+     	}
      	    
-     	return rhs->getDataRef();
+     	return DataRef(rhs);
   	}  
 
     /*
@@ -618,7 +608,7 @@ namespace EUROPA {
   		std::vector<const AbstractDomain*> arguments;
   		for (unsigned int i=0; i < m_argExprs.size(); i++) {
 			DataRef arg = m_argExprs[i]->eval(context);
-			arguments.push_back(arg.getConstValue());
+			arguments.push_back(&(arg.getValue()->derivedDomain()));
   		}
   		
   		// TODO: when this is the rhs of an assignment in a constructor, this must create an object specifying 
@@ -630,7 +620,7 @@ namespace EUROPA {
   		// faking it for now, but this is a hack
 
   		// This assumes for now this is only called inside a constructor  		
-  		ObjectId thisObject = context.getVar("this")->getDataRef().getValue()->getSingletonValue();
+  		ObjectId thisObject = context.getVar("this")->derivedDomain().getSingletonValue();
   		LabelStr name(std::string(thisObject->getName().toString() + "." + m_objectName.toString()));  		
      	ObjectId newObject = m_dbClient->createObject(
      	    m_objectType.c_str(), 
@@ -639,8 +629,7 @@ namespace EUROPA {
      	);
      	newObject->setParent(thisObject);
      	 
-	    // TODO: must not leak ObjectDomain                
-	    return DataRef(new ObjectDomain(newObject,m_objectType.c_str()));
+	    return DataRef(newObject->getThis());
   	}
   	
   	
@@ -659,8 +648,7 @@ namespace EUROPA {
   		std::vector<ConstrainedVariableId> vars;
   		for (unsigned int i=0; i < m_args.size(); i++) {
 			DataRef arg = m_args[i]->eval(context);
-			// TODO: Implement DataRef::getVariable
-			//vars.push_back(arg.getVariable());
+			vars.push_back(arg.getValue());
   		}
 
   		m_ruleInstance->createConstraint(m_name,vars);
@@ -734,7 +722,7 @@ namespace EUROPA {
 	    check_error(checkArgs(arguments));
 	  
 	    ObjectId instance = makeNewObject(planDb, objectType, objectName,arguments);
-	    evalConstructorBody(instance,arguments);
+	    evalConstructorBody(planDb->getClient(),instance,arguments);
 	    instance->close();
 	  
 	    return instance;
@@ -774,28 +762,42 @@ namespace EUROPA {
 	    	std::vector<const AbstractDomain*> argumentsForSuper;
      	    EvalContext evalContext(NULL);
      	    m_superCallExpr->evalArgs(evalContext,argumentsForSuper);
-	        return ObjectFactory::makeNewObject(planDb, m_superCallExpr->getSuperClassName(), objectType, objectName,argumentsForSuper);
+	        ObjectId retval = ObjectFactory::makeNewObject(planDb, m_superCallExpr->getSuperClassName(), objectType, objectName,argumentsForSuper);
+  		    return retval;
 	  }
 	}
 	
-	void InterpretedObjectFactory::evalConstructorBody(ObjectId& instance, 
+	void InterpretedObjectFactory::evalConstructorBody(
+	                                           DbClientId dbClient,
+	                                           ObjectId& instance, 
 	                                           const std::vector<const AbstractDomain*>& arguments) const
 	{
         // TODO: need to pass in eval context from outside
 	    EvalContext evalContext(NULL);
 	    
         // Add new object and arguments to eval context
-		ObjectDomain thisDomain(instance,m_className.c_str());		
-		evalContext.addVar("this",&thisDomain);
+		evalContext.addVar("this",instance->getThis());
 		
-		for (unsigned int i=0;i<m_constructorArgNames.size();i++) 
-			evalContext.addVar(m_constructorArgNames[i].c_str(),arguments[i]);
+		for (unsigned int i=0;i<m_constructorArgNames.size();i++) {
+    		std::ostringstream argName;
+    		argName << "arg" << i;
+			// TODO: destroy these temporary variables
+			ConstrainedVariableId arg = dbClient->createVariable(
+			    m_constructorArgTypes[i].c_str(),
+			    *(arguments[i]),
+			    argName.str().c_str(),
+			    true
+			);
+			evalContext.addVar(m_constructorArgNames[i].c_str(),arg);
+		}
 		
 		if (m_superCallExpr != NULL)
 		    m_superCallExpr->eval(evalContext);
 		
 		for (unsigned int i=0; i < m_constructorBody.size(); i++) 
 			m_constructorBody[i]->eval(evalContext);
+
+    	// TODO: destroy temporary variables created for args
 
         /*		
 		const std::vector<ConstrainedVariableId>& vars = instance->getVariables();
@@ -1028,6 +1030,31 @@ namespace EUROPA {
 	    TokenId token = (new InterpretedToken(master, name, relation, m_parameterNames, m_parameterTypes , true))->getId(); 
 	    return token; 
 	 } 
+	
+	
+    /*
+     * RuleInstanceEvalContext
+     * Puts RuleInstance variables like duration, start, end, in context
+     */     	     
+  	 RuleInstanceEvalContext::RuleInstanceEvalContext(EvalContext* parent, const RuleInstanceId& ruleInstance) 
+  	     : EvalContext(parent) 
+  	     , m_ruleInstance(ruleInstance)
+  	 {
+  	 }
+     
+     RuleInstanceEvalContext::~RuleInstanceEvalContext()
+     {
+     }   	
+  	    
+  	 ConstrainedVariableId RuleInstanceEvalContext::getVar(const char* name)
+  	 {
+  	 	ConstrainedVariableId var = m_ruleInstance->getVariable(LabelStr(name));
+  	 	
+  	 	if (var != ConstrainedVariableId::noId())
+  	 	    return var;
+  	 	else
+  	 	    return EvalContext::getVar(name);
+  	 }  	    
 	 
     /*
      * InterpretedRuleInstance
@@ -1048,7 +1075,7 @@ namespace EUROPA {
     void InterpretedRuleInstance::handleExecute()
     {
         // TODO: need to pass in eval context from outside
-	    EvalContext evalContext(NULL);
+	    RuleInstanceEvalContext evalContext(NULL,getId());
 	    
     	std::cout << "Executing interpreted rule:" << getRule()->getName().toString() << std::endl;
 		for (unsigned int i=0; i < m_body.size(); i++) {
@@ -1060,9 +1087,6 @@ namespace EUROPA {
     
     void InterpretedRuleInstance::createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars)
     {
-    	// TODO: Hardcoded constraint!
-        vars.push_back(NDDL::var(getId(),std::string("duration")));
-        vars.push_back(ruleVariable(IntervalIntDomain(10,10, "int")));
         addConstraint(LabelStr(name),vars);    	
     }
 

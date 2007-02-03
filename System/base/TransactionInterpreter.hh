@@ -2,12 +2,14 @@
 #define _H_TransactionInterpreter
 
 #include "DbClientTransactionPlayer.hh"
+#include "ConstrainedVariable.hh"
 #include "IntervalToken.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
 #include "PlanDatabaseDefs.hh"
 #include "Rule.hh"
 #include "RuleInstance.hh"
+#include "RulesEngineDefs.hh"
 #include "Timeline.hh"
 #include "TokenFactory.hh"
 #include <map>
@@ -44,40 +46,16 @@ namespace EUROPA {
   class DataRef
   {
   	public :
-  	    DataRef(AbstractDomain* d);
-  	    DataRef(const AbstractDomain* d=NULL);
+  	    DataRef();
+  	    DataRef(const ConstrainedVariableId& v);
   	    virtual ~DataRef();
   	    
-  	    AbstractDomain* getValue();
-  	    const AbstractDomain* getConstValue() const;
+  	    ConstrainedVariableId& getValue();
   	    
   	    static DataRef null;
 
-  	protected :
-  	    union DataRefValue {
-  	        AbstractDomain* domain;
-  	        const AbstractDomain* constDomain;
-  	    };
-  	    
-  	    DataRefValue m_value;
-  };
-  
-  /*
-   * Transaction Interpreter Variable
-   */
-  class TIVariable
-  {
-  	public:
-  	    TIVariable() {} // TODO: this is so that EvalContext can add to the var map, fix it  	    
-  	    TIVariable(const char* name,const AbstractDomain* d);
-  	    virtual ~TIVariable();
-  	    
-  	    const char* getName() const;
-  	    DataRef& getDataRef();
-  	    
-  	protected:
-  	    const char* m_name;
-  	    DataRef m_value;
+  	protected :  	    
+  	    ConstrainedVariableId m_value;
   };
   
   class EvalContext 
@@ -86,12 +64,12 @@ namespace EUROPA {
   	    EvalContext(EvalContext* parent); 
   	    virtual ~EvalContext();
   	    
-  	    virtual void addVar(const char* name,const AbstractDomain* value); 
-  	    virtual TIVariable* getVar(const char* name);
+  	    virtual void addVar(const char* name,const ConstrainedVariableId& v); 
+  	    virtual ConstrainedVariableId getVar(const char* name);
   	
   	protected:
   	    EvalContext* m_parent;      	    
-  	    std::map<std::string,TIVariable> m_variables;
+  	    std::map<std::string,ConstrainedVariableId> m_variables;
   };
   
   class Expr
@@ -138,13 +116,13 @@ namespace EUROPA {
   class ExprConstant : public Expr
   {
   	public:
-  	    ExprConstant(const AbstractDomain* d);
+  	    ExprConstant(DbClientId& dbClient, const char* type, const AbstractDomain* d);
   	    virtual ~ExprConstant();
 
   	    virtual DataRef eval(EvalContext& context) const;  
   	    
   	protected:
-  	    DataRef m_data;    	    
+  	    ConstrainedVariableId m_var;
   };
   
   class ExprVariableRef : public Expr
@@ -156,7 +134,7 @@ namespace EUROPA {
   	    virtual DataRef eval(EvalContext& context) const;  
   	    
   	protected:
-  	    const char* m_varName;    	    
+  	    LabelStr m_varName;    	    
   };
   
   class ExprNewObject : public Expr
@@ -208,7 +186,10 @@ namespace EUROPA {
 	                        const LabelStr& objectName,
 	                        const std::vector<const AbstractDomain*>& arguments) const;
 	                        
-	    virtual void evalConstructorBody(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const;
+	    virtual void evalConstructorBody(
+	                       DbClientId dbClient,
+	                       ObjectId& instance, 
+	                       const std::vector<const AbstractDomain*>& arguments) const;
   
 	    bool checkArgs(const std::vector<const AbstractDomain*>& arguments) const;
 
@@ -217,7 +198,7 @@ namespace EUROPA {
         std::vector<std::string>  m_constructorArgTypes;	
         ExprConstructorSuperCall* m_superCallExpr;                          
         std::vector<Expr*>        m_constructorBody;
-        bool                      m_canMakeNewObject;	                          
+        bool                      m_canMakeNewObject;	 
   };  
   
   // TODO: create a separate file for exported C++ classes?
@@ -317,6 +298,18 @@ namespace EUROPA {
          * @brief provide implementation for this method for firing the rule
          */
         virtual void handleExecute();
+  };
+  
+  class RuleInstanceEvalContext : public EvalContext
+  {
+  	public:
+  	    RuleInstanceEvalContext(EvalContext* parent, const RuleInstanceId& ruleInstance);
+  	    virtual ~RuleInstanceEvalContext();   	
+  	    
+  	    virtual ConstrainedVariableId getVar(const char* name);  
+  	    
+  	protected:
+  	    RuleInstanceId m_ruleInstance;	    
   };
   
   class InterpretedRuleFactory : public Rule

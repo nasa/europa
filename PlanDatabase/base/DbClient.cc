@@ -42,30 +42,35 @@ namespace EUROPA {
   const DbClientId& DbClient::getId() const{return m_id;}
 
   ConstrainedVariableId
-  DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name)
+  DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar)
   {
     ConstrainedVariableId variable = TypeFactory::createVariable(typeName, m_planDb->getConstraintEngine(), baseDomain, true, name);
     if (m_planDb->getSchema()->isObjectType(typeName) && !variable->isClosed()) {
       m_planDb->makeObjectVariableFromType(typeName, variable);
     }
 
-    // Register as a global variable
-    m_planDb->registerGlobalVariable(variable);
+    if (!isTmpVar) {
+       // Register as a global variable
+        m_planDb->registerGlobalVariable(variable);
+    }
 
     publish(notifyVariableCreated(variable));
     return variable;
   }
 
   ConstrainedVariableId
-  DbClient::createVariable(const char* typeName, const char* name)
+  DbClient::createVariable(const char* typeName, const char* name, bool isTmpVar)
   {
     ConstrainedVariableId variable = TypeFactory::createVariable(typeName, m_planDb->getConstraintEngine(), true, name);
     if (m_planDb->getSchema()->isObjectType(typeName)) {
       m_planDb->makeObjectVariableFromType(typeName, variable);
     }
 
-    // Register as a global variable
-    m_planDb->registerGlobalVariable(variable);
+    // TODO: register TmpVariables so that they can be cleaned up easily
+    if (!isTmpVar) {
+       // Register as a global variable
+        m_planDb->registerGlobalVariable(variable);
+    }
 
     publish(notifyVariableCreated(variable));
 

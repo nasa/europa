@@ -38,7 +38,7 @@ namespace EUROPA {
      * @param name The name for the variable. Must be unique.
      * @return The Id of the variable created. Will error out rather than return a noId.
      */
-    ConstrainedVariableId createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name);
+    ConstrainedVariableId createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar = false);
 
     /**
      * @brief Create a variable
@@ -46,7 +46,7 @@ namespace EUROPA {
      * @param name The name for the variable. Must be unique.
      * @return The Id of the variable created. Will error out rather than return a noId.
      */
-    ConstrainedVariableId createVariable(const char* typeName, const char* name);
+    ConstrainedVariableId createVariable(const char* typeName, const char* name, bool isTmpVar = false);
 
     /**
      * @brief Create an object instance in the dabatase.
