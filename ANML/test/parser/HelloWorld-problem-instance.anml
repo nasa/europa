@@ -1,6 +1,6 @@
 #include "HelloWorld-model.anml"
 
-YourObject object;
+YourObject obj;
 
 fact {
   over all {
@@ -16,7 +16,7 @@ goal {
   // TODO: perhaps we should say "over all" here? translation would have to take action duration into account
   // and generate disjunction that would cover the interval specified by "over"
   at end {
-    object.busy = true;
+    obj.busy = true;
   };
 }
 
