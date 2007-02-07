@@ -10,8 +10,8 @@ objtype YourObject
     action helloWorld()
     {
         duration 10;        
-        condition at start { busy = true; } // met by another HelloWorld action        
-        effect over all { busy = true; }
+        condition at start { busy = true; }; // met by another HelloWorld action        
+        effect over all { busy = true; };
     }
 }
 

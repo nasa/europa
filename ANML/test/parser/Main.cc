@@ -7,11 +7,78 @@
 #include "ANMLParser.hpp"
 #include "ANML2NDDL.hpp"
 
-int max(int a, int b) {
-  return (a<b)? b : a;
+int max(int a, int b) { return (a<b)? b : a; }
+
+void parse        (const std::string& filename, antlr::RefAST& ast);
+void translate    (const std::string& filename, antlr::RefAST& ast);
+void dumpDigraph  (const std::string& filename, const antlr::RefAST& ast);
+int outputAST2Dot(std::ostream& out, const antlr::RefAST& ast, const int depth, const int parent, int& node); 
+
+
+
+/**
+ * Interface for testing ANML models for parsability.
+ * Called with one filename: [ANML model] without the extension (.anml)
+ */
+int main(int argc, char** argv) 
+{
+  assertTrue(argc == 2, "Expected exactly one filename pattern argument: [ANML Model], without the extension");
+
+  std::string filename(argv[1]);  
+  antlr::RefAST ast;
+  
+  parse(filename,ast);
+  translate(filename,ast);
+  
+  return 0;
 }
 
-int outputAST2Dot(std::ostream& out, const antlr::RefAST ast, const int depth, const int parent, int& node) {
+void parse(const std::string& filename, antlr::RefAST& ast)
+{
+  debugMsg("ANMLTest:parser", "Phase 1: parsing \"" << filename << ".anml\"");
+  
+  ast = ANMLParser::parse(".", filename + ".anml");
+  assertTrue(ast != antlr::nullAST, "Parse failed to return an AST");
+  
+  // debug output
+  dumpDigraph(filename,ast);
+  
+  debugMsg("ANMLTest:parser", "Phase 1 complete");
+}
+
+void translate(const std::string& filename, antlr::RefAST& ast)
+{
+  debugMsg("ANMLTest:translator", "Phase 2: Walking parse tree");
+  std::ofstream nddl((filename + "-auto.nddl").c_str());
+
+  ANML2NDDL* treeParser = new ANML2NDDL(nddl);
+	
+  for(int i=0; i <= FINAL_PASS; ++i) {
+      treeParser->anml(ast, i);
+  }
+
+  debugMsg("ANMLTest:translator", "Phase 2 complete");
+}
+
+void dumpDigraph(const std::string& filename, const antlr::RefAST& ast)
+{
+  debugMsg("ANMLTest:parser", "Phase 1: dumping parse tree to \"" << filename << ".dot\"");
+
+  std::ofstream digraph((filename + ".dot").c_str());
+
+  int node = 0;
+  digraph << "digraph ANMLAst {" << std::endl;
+  outputAST2Dot(digraph, ast, 1, -1, node);
+  digraph << "}" << std::endl;
+  digraph.flush();	
+}
+
+int outputAST2Dot(std::ostream& out, 
+                  const antlr::RefAST& ast, 
+                  const int depth, 
+                  const int parent, 
+                  int& node) 
+{
   if(ast == antlr::nullAST)
     return depth-1;
   int maxdepth = depth;
@@ -56,42 +123,3 @@ int outputAST2Dot(std::ostream& out, const antlr::RefAST ast, const int depth, c
   return maxdepth;
 }
 
-/**
- * Interface for testing ANML models for parsability.
- * Called with two filenames: [ANML model] [Output Digraph AST].
- */
-int main(int argc, char** argv) {
-  assertTrue(argc == 2, "Expected exactly one filename pattern argument: [Model common root]");
-
-	std::string prefix(argv[1]);
-	debugMsg("ANMLParser:main", "Phase 1: parsing \"" << prefix << ".anml\"");
-
-  antlr::RefAST ast = ANMLParser::parse(".", prefix + ".anml");
-
-  assertTrue(ast != antlr::nullAST, "Parse failed to return an AST");
-
-	debugMsg("ANMLParser:main", "Phase 1: dumping parse tree to \"" << prefix << ".dot\"");
-
-  std::ofstream digraph((prefix + ".dot").c_str());
-
-  int node = 0;
-  digraph << "digraph ANMLAst {" << std::endl;
-  outputAST2Dot(digraph, ast, 1, -1, node);
-  digraph << "}" << std::endl;
-
-	debugMsg("ANMLParser:main", "Phase 1 complete");
-
-	debugMsg("ANMLParser:main", "Phase 2: Walking parse tree");
-
-	std::ofstream nddl((prefix + ".nddl").c_str());
-
-	ANML2NDDL* treeParser = new ANML2NDDL(nddl);
-	
-	for(int i=0; i <= FINAL_PASS; ++i) {
-		treeParser->anml(ast, i);
-	}
-
-	debugMsg("ANMLParser:main", "Phase 2 complete");
-
-  return 0;
-}
