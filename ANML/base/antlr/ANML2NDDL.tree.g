@@ -83,12 +83,15 @@ options {
 
 anml[const int pass]
   : #(ANML
-	    {this->pass = pass;
-			 debugMsg("ANML2NDDL:anml", "                     ==========|  Starting " << passName() << "   |==========");
-			}
+	    {
+	       this->pass = pass;
+           debugMsg("ANML2NDDL:anml", "                     ==========|  Starting Pass " << pass << " : " << passName() << "   |==========");
+        }
       (anml_stmt)*
-	    {debugMsg("ANML2NDDL:anml", "                     ==========|  Ending " << passName() << "     |==========");}
-			)
+	    {
+	       debugMsg("ANML2NDDL:anml", "                     ==========|  Ending   Pass " << pass << " : " << passName() << "   |==========");
+	    }
+    )
   ;
 
 anml_stmt
