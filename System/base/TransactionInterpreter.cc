@@ -312,21 +312,86 @@ namespace EUROPA {
   	  // Enum is scoped within the class but in the generated code it doesn't make a difference
   	  playDefineEnumeration(*element);
   }
-  
+
+  bool isClass(const char* className)
+  {
+  	  // TODO: implement this
+  	  return false;
+  }
+    
+  const char* getTokenVarClass(const char* className,const char* var)
+  {
+      if (strcmp(var,"object") == 0) {
+      	return className;
+      }
+      else {
+      	// TODO: implement this
+      	check_error(ALWAYS_FAILS,std::string("Undefined variable:")+var);
+      	return NULL;
+      }
+  }
+
+  const char* getObjectVarClass(const char* className,const char* var)
+  {
+  	  // TODO: implement this
+      check_error(ALWAYS_FAILS,std::string("Undefined variable:")+var);
+      return NULL;
+  }
+
   /*
    * figures out the type of a predicate given an instance
    * 
    */
-  const char* predicateInstanceToType(const char* className,const char* predicateInstance)
+  LabelStr predicateInstanceToType(const char* className,const char* predicateInstance)
   {
-  	// TODO: implement this
-  	// see ModelAccessor.getSlaveObjectType() in NDDL compiler
-  	return "YourObject.helloWorld";
+  	// see ModelAccessor.getSlaveObjectType() in NDDL compiler  	
+  	LabelStr str(predicateInstance);
+  	
+  	unsigned int tokenCnt = str.countElements(".");
+  	
+  	if (tokenCnt == 1) {
+  		std::string retval = std::string(className)+"."+predicateInstance;
+  		// TODO: make sure type is valid
+  		return LabelStr(retval);
+  	}
+  	else if (tokenCnt == 2) {
+  		LabelStr prefix(str.getElement(0,"."));
+  		LabelStr suffix(str.getElement(1,"."));
+  		
+  		if (prefix.toString() == std::string("object")) {
+      		std::string retval = std::string(className)+"."+suffix.toString();
+  	    	// TODO: make sure type is valid
+  		    return LabelStr(retval.c_str());
+  		}
+  		else if (isClass(prefix.c_str())) {
+  	    	// TODO: make sure type is valid
+  		     return LabelStr(predicateInstance);
+  		}
+  		else {
+  		    check_error(ALWAYS_FAILS,std::string("Invalid predicate:") + predicateInstance);
+            return LabelStr("NO_VALUE");
+  		}
+  	}
+  	else {
+  	    LabelStr var = str.getElement(0,".");
+  	    // TODO: include token parameters and token local variables
+  		const char* clazz = getTokenVarClass(className,var.c_str());
+  		for (unsigned int i=1;i<tokenCnt-1;i++) {
+  			LabelStr var = str.getElement(i,".");
+  			clazz = getObjectVarClass(clazz,var.c_str());
+  		}
+  		
+  		LabelStr predicate = str.getElement(tokenCnt-1,".");
+  		std::string retval = std::string(clazz) + "." + predicate.toString();  	    
+  	    // TODO: make sure type is valid
+  		return LabelStr(retval);  		
+  	}  	  	
   }
   
   void InterpretedDbClientTransactionPlayer::playDefineCompat(const TiXmlElement& element)
   {
-      std::string predName = std::string(element.Attribute("class")) + "." + element.Attribute("name");	
+  	  const char* className = element.Attribute("class");
+      std::string predName = std::string(className) + "." + element.Attribute("name");	
       std::string source = std::string(element.Attribute("filename")) + 
           " line " + element.Attribute("line") +
           " column " + element.Attribute("column");	
@@ -356,7 +421,7 @@ namespace EUROPA {
             }
             check_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
 
-            const char* predicateType = predicateInstanceToType(element.Attribute("class"), predicateInstance);    
+            const char* predicateType = predicateInstanceToType(className, predicateInstance).c_str();    
             if (name == NULL) {
             	std::ostringstream tmpname;
             	tmpname << "slave" << (slave_cnt++);            
