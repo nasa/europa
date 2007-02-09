@@ -289,7 +289,11 @@ namespace EUROPA {
   	    
         void createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars);
 
-        void createSubgoal(const LabelStr& name,const LabelStr& predicateType, const LabelStr& relation);
+        void createSubgoal(
+                   const LabelStr& name,
+                   const LabelStr& predicateType, 
+                   const LabelStr& predicateInstance, 
+                   const LabelStr& relation);
 
     protected:
         std::vector<RuleExpr*> m_body;                                          

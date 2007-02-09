@@ -35,10 +35,6 @@ namespace NDDL {
 
 
 /*
- * stil TODO to support HelloWorld without hard-coded stuff:
- * - implement predicateInstanceToType() below, at least for the simplest case object.predicateName
- * - add the right constraint for the slave's object variable in InterpretedRuleInstance::createSubgoal 
- * 
  * TODO: temp variables : an easy way to deal with garbage collection could be to register them with the PlanDatabase when they're created
  * and flush every time we're done interpreting an XML statement
  * TODO: handle assignments and constraints in predicate declaration
@@ -715,7 +711,7 @@ namespace EUROPA {
   	DataRef ExprSubgoal::eval(EvalContext& context) const  
   	{
   		std::cout << "Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString() << std::endl;
-  		m_ruleInstance->createSubgoal(m_name,m_predicateType,m_relation);
+  		m_ruleInstance->createSubgoal(m_name,m_predicateType,m_predicateInstance,m_relation);
   		// TODO: add new slave to EvalContext
   		std::cout << "Create subgoal " << m_predicateType.toString() << ":" << m_name.toString() << std::endl;
   		return DataRef::null;
@@ -1128,23 +1124,50 @@ namespace EUROPA {
         addConstraint(LabelStr(name),vars);    	
     }
 
-    void InterpretedRuleInstance::createSubgoal(const LabelStr& name,const LabelStr& predicateType, const LabelStr& relation)
+  	// see ModelAccessor.isConstrained in Nddl compiler 
+    bool isConstrained(const LabelStr& predicateInstance)
+    {
+    	unsigned int tokenCnt = predicateInstance.countElements(".");
+    	
+    	// If the predicate is not qualified that means it belongs to the object in scope
+    	if (tokenCnt == 1)
+    	    return true;
+    	    
+    	// If the prefix is a class, it means it can be any object instance, so it must not be constrained    
+        LabelStr prefix(predicateInstance.getElement(0,"."));
+        if (!isClass(prefix.c_str()))
+            return true;
+    	
+    	return false;
+    }
+    
+    void InterpretedRuleInstance::createSubgoal(
+                                        const LabelStr& name,
+                                        const LabelStr& predicateType, 
+                                        const LabelStr& predicateInstance, 
+                                        const LabelStr& relation)
     {
   		TokenId slave = TokenFactory::createInstance(m_token,LabelStr(predicateType),LabelStr(relation));
   		addSlave(slave,name);  		
-  		// TODO: for qualified names like "object.helloWorld" must add constraint to constraint the object variable on the slave token:
-  		// for instance:
-  		// TODO: hardcoded constraint!!
-  		// In compiler, see:
-  		// - ModelAccessor.isConstrained to see if we need to generate a constraint here 
-  		// - See RuleWriter.allocateSlave to see if we should generate a sameObject or a constrainObject from NddlRules.hh
-  		// hardcoded approach below assumes we need a sameObject() 
-  		// 
-  		{
+
+  		// For qualified names like "object.helloWorld" must add constraint to the object variable on the slave token
+  		// See RuleWriter.allocateSlave in Nddl compiler 
+  		if (isConstrained(predicateInstance)) {
   			std::vector<ConstrainedVariableId> vars;
-            vars.push_back(NDDL::var(getId(),"object"));
+  			    
+         	unsigned int tokenCnt = predicateInstance.countElements(".");
+  		    // TODO: getting the object to constrain should be handled through a qualified var Expr
+  			if (tokenCnt <= 2) { // equivalent of sameObject() in NddlRules.hh
+                vars.push_back(NDDL::var(getId(),"object"));
+  			}
+  			else {  // equivalent of constrainObject() in NddlRules.hh
+  				LabelStr prefix(predicateInstance.getElement(0,"."));
+  				std::string suffix = predicateInstance.toString().substr(prefix.toString().size());
+                vars.push_back(varFromObject(prefix.toString(),suffix));
+  			}
+  			
             vars.push_back(slave->getObject());
-            addConstraint(LabelStr("eq"),vars);    	
+            addConstraint(LabelStr("eq"),vars);  			
   		} 
   		
   		const char* relationName = relation.c_str();
