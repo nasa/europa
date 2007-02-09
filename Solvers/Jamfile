@@ -2,7 +2,7 @@ SubDir PLASMA Solvers ;
 
 if ! $(PLASMA_READY) {
 
-	Module Solvers : NDDL ;
+	Module Solvers : NDDL TinyXml ;
 
 	SubInclude PLASMA Solvers base ;
 	SubInclude PLASMA Solvers component ;

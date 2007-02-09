@@ -18,6 +18,8 @@
 #include <vector>
 
 namespace EUROPA {
+  class TiXmlElement;
+
   namespace SOLVERS {
     namespace PlanWriter {
 
@@ -42,7 +44,6 @@ namespace EUROPA {
 	void addSourcePath(const char* path);
 	static int noFullWrite, writeStep;
       protected:
-	virtual bool parseSection(std::ifstream& configFile);
 	inline long long int getPPId(void){return ppId;}
 	long long int ppId;
 	std::string dest;
@@ -69,9 +70,9 @@ namespace EUROPA {
 
 	void allocateListeners();
 	void initOutputDestination();
-	void parseConfigFile(std::ifstream &);
-	void parseGeneralConfigSection(std::ifstream&);
-	void parseRuleConfigSection(std::ifstream&);
+	void parseConfigFile(const char*);
+	void parseGeneralConfigSection(const TiXmlElement*);
+	void parseRuleConfigSection(const TiXmlElement*);
 	void commonInit(const PlanDatabaseId& db, const ConstraintEngineId& ce, const RulesEngineId& re);
 	void outputObject(const ObjectId &, const int, std::ofstream &, std::ofstream &);
 	void outputToken(const TokenId &, const int, const int, const int, const int, 

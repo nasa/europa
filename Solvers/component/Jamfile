@@ -2,6 +2,8 @@ SubDir PLASMA Solvers component ;
 
 if ! $(PLASMA_READY) {
 
+SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
+
 ModuleComponent Solvers
 	:
 	ValueSource.cc

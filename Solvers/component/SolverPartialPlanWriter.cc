@@ -31,6 +31,8 @@
 
 #include "Debug.hh"
 
+#include "tinyxml.h"
+
 #include <algorithm>
 #include <exception>
 #include <fstream>
@@ -139,8 +141,8 @@ namespace EUROPA {
       const std::string CAUSAL("CAUSAL");
       const std::string ENUM_DOMAIN("EnumeratedDomain");
       const std::string INT_DOMAIN("IntervalDomain");
-      const std::string GENERAL_CONFIG_SECTION("GeneralConfigSection:");
-      const std::string RULE_CONFIG_SECTION("RuleConfigSection:");
+      const std::string GENERAL_CONFIG_SECTION("GeneralConfigSection");
+      const std::string RULE_CONFIG_SECTION("RuleConfigSection");
       const std::string SOURCE_PATH("SourcePath");
       const std::string AUTO_WRITE("AutoWrite");
       const std::string STEPS_PER_WRITE("StepsPerWrite");
@@ -251,15 +253,9 @@ namespace EUROPA {
 	  FatalErrno();
 	}
 
-	// std::cerr << "PPW DEBUG:constructing:configFile; configBuf = " << configBuf << std::endl;
-	std::ifstream configFile(configBuf);
-	if (!configFile) {
-	  std::cerr << "Failed to open config file " << configBuf << std::endl;
-	  FatalErrno();
-	}
 	std::string buf;
 
-	parseConfigFile(configFile);
+	parseConfigFile(configBuf);
 
 	if (stepsPerWrite != 0) {
 	  allocateListeners();
@@ -1207,109 +1203,71 @@ namespace EUROPA {
 	return retval;
       }
 
-      void PartialPlanWriter::parseConfigFile(std::ifstream& configFile) {
-	while(parseSection(configFile)){}
-	if(!configFile.eof())
-	  FatalError("!configFile.eof()", "Error parsing config file.");
+      void PartialPlanWriter::parseConfigFile(const char * configFile) {
+        TiXmlDocument doc(configFile);
+        bool loadOkay = doc.LoadFile();
+        if(!loadOkay) {
+          std::cerr << "Failed to open config file " << configFile << std::endl;
+          FatalErrno();
+        }
+        parseGeneralConfigSection(doc.FirstChildElement(GENERAL_CONFIG_SECTION));
+        parseRuleConfigSection(doc.FirstChildElement(RULE_CONFIG_SECTION));
       }
 
-      bool PartialPlanWriter::parseSection(std::ifstream& configFile) {
-	char buf[PATH_MAX];
-	bool retval = false;
-	while(!configFile.eof()) {
-	  configFile.getline(buf, PATH_MAX);
-	  if(buf[0] == '\0' || buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
-	    continue;
-	  std::string line = buf;
+      void PartialPlanWriter::parseGeneralConfigSection(const TiXmlElement* config) {
+        if(config == NULL)
+          return;
 
-	  debugMsg("PartialPlanWriter:parseSection", "Parsing line '" << line << "'");
-	  if(line == GENERAL_CONFIG_SECTION) {
-	    parseGeneralConfigSection(configFile);
-	    retval = true;
+        const TiXmlElement* child = config->FirstChildElement();
+        while(child != NULL) {
+          std::string name = std::string(child->Value());
+          const char * value = child->Attribute("value");
+	  if(name == AUTO_WRITE) {
+	    std::cerr << " autoWrite " << value << std::endl;
+	    noFullWrite = value[0] != '1';
 	  }
-	  else if(line == RULE_CONFIG_SECTION) {
-	    parseRuleConfigSection(configFile);
-	    retval = true;
-	  }
-	  else
-	    return false;
-	}
-	return retval;
-      }
-
-      void PartialPlanWriter::parseGeneralConfigSection(std::ifstream& configFile) {
-	char buf[PATH_MAX];
-	while(!configFile.eof()) {
-	  configFile.getline(buf, PATH_MAX);
-	  if(buf[0] == '\0' || buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n' || buf[0] == '\r')
-	    continue;
-	  std::string line = buf;
-	  debugMsg("PartialPlanWriter:parseGeneralConfigSection", "Parsing line '" << line << "'");
-	  if(line.find(AUTO_WRITE) != std::string::npos) {
-	    std::string autoWrite = line.substr(line.find("=")+1);
-	    std::cerr << " autoWrite " << autoWrite << std::endl;
-	    noFullWrite = (autoWrite.find("1") != std::string::npos ? 0 : 1);
-	  }
-	  else if(line.find(STEPS_PER_WRITE) != std::string::npos) {
-	    std::string spw = line.substr(line.find("=")+1);
-	    stepsPerWrite = strtol(spw.c_str(), NULL, 10);
+	  else if(name == STEPS_PER_WRITE) {
+	    stepsPerWrite = strtol(value, NULL, 10);
 	    if(stepsPerWrite < 0)
 	      FatalError("stepsPerWrite < 0", "StepsPerWrite must be a non-negative value");
 	    if(stepsPerWrite == LONG_MAX || stepsPerWrite == LONG_MIN)
 	      FatalErrno();
 	  }
-	  else if(line.find(WRITE_FINAL_STEP) != std::string::npos) {
-	    std::string wfs = line.substr(line.find("=")+1);
-	    writeStep = (wfs.find("0") != std::string::npos ? 0 : 1);
+	  else if(name == WRITE_FINAL_STEP) {
+	    writeStep = value[0] != '0';
 	  }
-	  else if(line.find(WRITE_DEST) != std::string::npos) {
-	    std::string wd = line.substr(line.find("=")+1);
-	    dest = wd;
+	  else if(name == WRITE_DEST) {
+	    dest = std::string(value);
 	  }
-	  else if(line.find(MAX_CHOICES) != std::string::npos) {
-	    std::string mc = line.substr(line.find("=")+1);
-	    maxChoices = strtol(mc.c_str(), NULL, 10);
+	  else if(name == MAX_CHOICES) {
+	    maxChoices = strtol(value, NULL, 10);
 	    if(maxChoices < 0)
 	      FatalError("maxChoices < 0", "MaxChoices must be a non-negative value");
 	    if(maxChoices == LONG_MAX || maxChoices == LONG_MIN)
 	      FatalErrno();
 	  }
 	  else {
-	    for(int i = 0; i < 2; i++) {
-	      if(line.find(configSections[i]) != std::string::npos) {
-		for(int j = strlen(buf); j >= 0; j--)
-		  configFile.putback(buf[j]);
-		return;
-	      }
-	    }
-	    FatalError("Config parse error: unexpected line: ", line);
+	    FatalError("Config parse error: unexpected element:", name);
 	  }
+	  child = child->NextSiblingElement();
 	}
       }
 
-      void PartialPlanWriter::parseRuleConfigSection(std::ifstream& configFile) {
-	char buf[PATH_MAX];
-	while(!configFile.eof()) {
-	  configFile.getline(buf, PATH_MAX);
-	  if(buf[0] == '\0' || buf[0] == '#' || buf[0] == ' ' || buf[0] == '\n')
-	    continue;
-	  std::string line = buf;
-	  debugMsg("PartialPlanWriter:parseRuleConfigSection",
-		   "Parsing line '" << line << "'");
-	  if(line.find(SOURCE_PATH) != std::string::npos) {
-	    std::string path = line.substr(line.find("=")+1);
-	    sourcePaths.push_back(path);
+      void PartialPlanWriter::parseRuleConfigSection(const TiXmlElement* config) {
+        if(config == NULL)
+          return;
+
+        const TiXmlElement* child = config->FirstChildElement();
+        while(child != NULL) {
+          std::string name = std::string(child->Value());
+          const char * value = child->Attribute("value");
+	  if(name == SOURCE_PATH) {
+	    sourcePaths.push_back(std::string(value));
 	  }
 	  else {
-	    for(int i = 0; i < 2; i++) {
-	      if(line.find(configSections[i]) != std::string::npos) {
-		for(int j = strlen(buf); j >= 0; j--)
-		  configFile.putback(buf[j]);
-		return;
-	      }
-	    }
-	    FatalError("Config parse error: unexpected line: ", line);
+	    FatalError("Config parse error: unexpected element: ", name);
 	  }
+	  child = child->NextSiblingElement();
 	}
       }
 
@@ -1324,7 +1282,7 @@ namespace EUROPA {
       }
       
       bool PartialPlanWriter::isStep(const LabelStr& trans) {
-	return std::find(stepTransactions.begin(), stepTransactions.end(), trans) != stepTransactions.end();	
+	return std::find(stepTransactions.begin(), stepTransactions.end(), trans) != stepTransactions.end();
       }
 
       void PartialPlanWriter::incrementStep(){nstep++;}
