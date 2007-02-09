@@ -141,6 +141,7 @@ namespace EUROPA {
       const std::string CAUSAL("CAUSAL");
       const std::string ENUM_DOMAIN("EnumeratedDomain");
       const std::string INT_DOMAIN("IntervalDomain");
+      const std::string ROOT_CONFIG("PartialPlanWriterConfig");
       const std::string GENERAL_CONFIG_SECTION("GeneralConfigSection");
       const std::string RULE_CONFIG_SECTION("RuleConfigSection");
       const std::string SOURCE_PATH("SourcePath");
@@ -1210,8 +1211,13 @@ namespace EUROPA {
           std::cerr << "Failed to open config file " << configFile << std::endl;
           FatalErrno();
         }
-        parseGeneralConfigSection(doc.FirstChildElement(GENERAL_CONFIG_SECTION));
-        parseRuleConfigSection(doc.FirstChildElement(RULE_CONFIG_SECTION));
+        TiXmlElement* root = doc.FirstChildElement(ROOT_CONFIG);
+        if(root == NULL) {
+          std::cerr << "Config file missing root element " << ROOT_CONFIG << std::endl;
+          FatalErrno();
+        }
+        parseGeneralConfigSection(root->FirstChildElement(GENERAL_CONFIG_SECTION));
+        parseRuleConfigSection(root->FirstChildElement(RULE_CONFIG_SECTION));
       }
 
       void PartialPlanWriter::parseGeneralConfigSection(const TiXmlElement* config) {
