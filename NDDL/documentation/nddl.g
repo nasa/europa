@@ -3,113 +3,113 @@
 nddl: (nddlStatement)*
     ;
 
-nddlStatement: inclusion | enumeration | typeDefinition SEMICOLON | constraintSignature | allocation SEMICOLON
-             | variableDeclaration SEMICOLON | classDeclaration | rule | goal SEMICOLON | relation SEMICOLON
-             | function SEMICOLON | assignment SEMICOLON
-             | constraintInstantiation SEMICOLON | SEMICOLON
+nddlStatement: inclusion | enumeration | typeDefinition ";" | constraintSignature | allocation ";"
+             | variableDeclaration ";" | classDeclaration | rule | goal ";" | relation ";"
+             | function ";" | assignment ";"
+             | constraintInstantiation ";" | ";"
              ;
 
-inclusion: INCLUDE_DECL STRING
+inclusion: "#include" STRING
          ;
 
-enumeration: ENUM_KEYWORD IDENT symbolSet 
+enumeration: "enum" IDENT symbolSet 
            ;
 
-symbolSet: LBRACE (symbolDefinitions)? RBRACE
+symbolSet: "{" (symbolDefinitions)? "}"
          ;
 
-symbolDefinitions: symbolDefinition (COMMA symbolDefinition)*
+symbolDefinitions: symbolDefinition ("," symbolDefinition)*
                  ;
 
 symbolDefinition: IDENT
                 ;
 
-typeDefinition: TYPEDEF_KEYWORD typeWithBaseDomain IDENT
+typeDefinition: "typedef" typeWithBaseDomain IDENT
               ;
 
-typeWithBaseDomain: INT_KEYWORD    (intervalIntDomain|enumeratedIntDomain)?
-                  | FLOAT_KEYWORD  (intervalFloatDomain|enumeratedFloatDomain)?
-                  | BOOL_KEYWORD   (enumeratedBoolDomain)?
-                  | STRING_KEYWORD (enumeratedStringDomain)?
-                  | IDENT          (enumeratedSymbolDomain|enumeratedObjectDomain)?
+typeWithBaseDomain: "int"     (intervalIntDomain|enumeratedIntDomain)?
+                  | "float"   (intervalFloatDomain|enumeratedFloatDomain)?
+                  | "boolean" (enumeratedBoolDomain)?
+                  | "string"  (enumeratedStringDomain)?
+                  | IDENT     (enumeratedSymbolDomain|enumeratedObjectDomain)?
                   ;
 
-constraintSignature: CONSTRAINT_KEYWORD IDENT typeArgumentList
-                     (EXTENDS_KEYWORD IDENT typeArgumentList)? 
-                     (signatureBlock | SEMICOLON) 
+constraintSignature: "constraint" IDENT typeArgumentList
+                     ("extends" IDENT typeArgumentList)? 
+                     (signatureBlock | ";") 
                    ;
 
-signatureBlock: LBRACE (signatureExpression)? RBRACE
+signatureBlock: "{" (signatureExpression)? "}"
               ;
 
-signatureExpression: signatureAtom ((DAMP | DPIPE) signatureAtom)*
+signatureExpression: signatureAtom (("&&" | "||") signatureAtom)*
                    ;
 
-signatureAtom: LPAREN signatureExpression RPAREN
-             | IDENT IS_A (type | NUMERIC_KEYWORD | IDENT )
+signatureAtom: "(" signatureExpression ")"
+             | IDENT "<:" (type | "numeric" | IDENT )
              ;
 
-classDeclaration: CLASS_KEYWORD IDENT (
-                    ((EXTENDS_KEYWORD IDENT)? classBlock)
-                    | SEMICOLON )
+classDeclaration: "class" IDENT (
+                    (("extends" IDENT)? classBlock)
+                    | ";" )
                 ;
 
-classBlock: LBRACE (classStatement)* RBRACE
+classBlock: "{" (classStatement)* "}"
           ;
 
-classStatement: constructor | predicate | variableDeclaration SEMICOLON | SEMICOLON
+classStatement: constructor | predicate | variableDeclaration ";" | ";"
               ;
 
 constructor: IDENT constructorParameterList constructorBlock
            ;
 
-constructorBlock: LBRACE (constructorStatement)* RBRACE
+constructorBlock: "{" (constructorStatement)* "}"
                 ;
 
-constructorStatement: (assignment | superInvocation) SEMICOLON | flowControl | SEMICOLON
+constructorStatement: (assignment | superInvocation) ";" | flowControl | ";"
                     ;
 
-constructorParameterList: LPAREN (constructorParameters)? RPAREN
+constructorParameterList: "(" (constructorParameters)? ")"
                         ;
 
-constructorParameters: constructorParameter  (COMMA constructorParameters)?
+constructorParameters: constructorParameter  ("," constructorParameters)?
                      ;
 
 constructorParameter: type IDENT
                     ;
 
-predicate: PREDICATE_KEYWORD IDENT predicateBlock 
+predicate: "predicate" IDENT predicateBlock 
          ;
 
-predicateBlock: LBRACE (predicateStatement)* RBRACE
+predicateBlock: "{" (predicateStatement)* "}"
               ;
 
 // Note: Allocations are not legal here.
-predicateStatement: ( variableDeclaration | constraintInstantiation | assignment)? SEMICOLON
+predicateStatement: ( variableDeclaration | constraintInstantiation | assignment)? ";"
                   ;
 
-rule: IDENT DCOLON IDENT ruleBlock
+rule: IDENT "::" IDENT ruleBlock
     ;
 
-ruleBlock: LBRACE (ruleStatement)* RBRACE | ruleStatement
+ruleBlock: "{" (ruleStatement)* "}" | ruleStatement
          ;
 
-ruleStatement: (relation | variableDeclaration | constraintInstantiation) SEMICOLON | flowControl | SEMICOLON
+ruleStatement: (relation | variableDeclaration | constraintInstantiation) ";" | flowControl | ";"
              ;
 
-type: INT_KEYWORD | FLOAT_KEYWORD | BOOL_KEYWORD | STRING_KEYWORD | IDENT
+type: "int" | "float" | "boolean" | "string" | IDENT
     ;
 
-relation: (IDENT | THIS_KEYWORD)? temporalRelation predicateArgumentList
+relation: (IDENT | "this")? temporalRelation predicateArgumentList
         ;
 
-goal: (REJECTABLE_KEYWORD | GOAL_KEYWORD) predicateArgumentList
+goal: ("rejectable" | "goal") predicateArgumentList
     ;
 
-predicateArgumentList: IDENT | LPAREN (predicateArguments)? RPAREN
+predicateArgumentList: IDENT | "(" (predicateArguments)? ")"
                      ;
 
-predicateArguments: predicateArgument (COMMA predicateArgument)*
+predicateArguments: predicateArgument ("," predicateArgument)*
                   ;
 
 predicateArgument: qualified (IDENT)?
@@ -121,23 +121,23 @@ constraintInstantiation: IDENT variableArgumentList
 constructorInvocation: IDENT variableArgumentList
                      ;
 
-superInvocation: SUPER_KEYWORD variableArgumentList
+superInvocation: "super" variableArgumentList
                ;
 
-variableArgumentList: LPAREN (variableArguments)? RPAREN
+variableArgumentList: "(" (variableArguments)? ")"
                     ;
 
-variableArguments: variableArgument (COMMA variableArgument)*
+variableArguments: variableArgument ("," variableArgument)*
                  ;
 
 // Note: Allocation not legal here
 variableArgument: anyValue
                 ;
 
-typeArgumentList: LPAREN (typeArguments)? RPAREN
+typeArgumentList: "(" (typeArguments)? ")"
                 ;
 
-typeArguments: typeArgument (COMMA typeArgument)*
+typeArguments: typeArgument ("," typeArgument)*
              ;
 
 typeArgument: IDENT
@@ -147,110 +147,107 @@ domain : intLiteral | intervalIntDomain| enumeratedIntDomain | floatLiteral | in
        | enumeratedStringDomain | enumeratedBoolDomain | enumeratedSymbolDomain
        ;
 
-intervalIntDomain: LBRACKET intLiteral (COMMA)? intLiteral RBRACKET
+intervalIntDomain: "[" intLiteral (",")? intLiteral "]"
                  ;
 
-intervalFloatDomain: LBRACKET floatLiteral (COMMA)? floatLiteral RBRACKET
+intervalFloatDomain: "[" floatLiteral (",")? floatLiteral "]"
                    ;
 
-enumeratedIntDomain: LBRACE intSet RBRACE
+enumeratedIntDomain: "{" intSet "}"
                    ;
 
-intSet: intLiteral (COMMA intLiteral)*
+intSet: intLiteral ("," intLiteral)*
       ;
 
-enumeratedFloatDomain: LBRACE floatSet RBRACE
+enumeratedFloatDomain: "{" floatSet "}"
                      ;
 
-floatSet: floatLiteral (COMMA floatLiteral)*
+floatSet: floatLiteral ("," floatLiteral)*
         ;
 
-enumeratedObjectDomain: LBRACE objectSet RBRACE
+enumeratedObjectDomain: "{" objectSet "}"
                       ;
 
-objectSet: (constructorInvocation|qualified) (COMMA (constructorInvocation|qualified))*
+objectSet: (constructorInvocation|qualified) ("," (constructorInvocation|qualified))*
          ;
 
-enumeratedSymbolDomain: LBRACE qsymbolSet RBRACE
+enumeratedSymbolDomain: "{" qsymbolSet "}"
                       ;
 
-qsymbolSet: qualified (COMMA qualified)*
+qsymbolSet: qualified ("," qualified)*
           ;
 
-enumeratedStringDomain: LBRACE stringSet RBRACE
+enumeratedStringDomain: "{" stringSet "}"
                       ;
 
-stringSet: STRING (COMMA STRING)*
+stringSet: STRING ("," STRING)*
          ;
 
-enumeratedBoolDomain: LBRACE boolSet RBRACE
+enumeratedBoolDomain: "{" boolSet "}"
                     ;
 
-boolSet: boolLiteral (COMMA boolLiteral)*
+boolSet: boolLiteral ("," boolLiteral)*
        ;
 
-flowControl: (IF_KEYWORD expression ruleBlock (ELSE_KEYWORD  ruleBlock )?)
-           | (FOREACH_KEYWORD LPAREN IDENT IN_KEYWORD qualified RPAREN ruleBlock )
+flowControl: ("if" expression ruleBlock ("else"  ruleBlock )?)
+           | ("foreach" "(" IDENT "in" qualified ")" ruleBlock )
            ;
 
 // Note: Allocation not legal here
-expression: LPAREN anyValue ((DEQUALS|NEQUALS) anyValue)? RPAREN
+expression: "(" anyValue (("=="|"!=") anyValue)? ")"
           ;
 
-allocation: NEW_KEYWORD constructorInvocation
+allocation: "new" constructorInvocation
           ;
 
-variableDeclaration: (FILTER_KEYWORD)? type nameWithBase (COMMA nameWithBase)* 
+variableDeclaration: ("filter")? type nameWithBase ("," nameWithBase)* 
                    ;
 
-nameWithBase: IDENT (LPAREN anyValue RPAREN)?
-            | IDENT EQUALS anyValue
+nameWithBase: IDENT ("(" anyValue ")" )?
+            | IDENT "=" anyValue
             ;
 
-assignment: qualified (IN_KEYWORD|EQUALS) anyValue
+assignment: qualified ("in"|"=") anyValue
           ;
-
-modifiers: (FILTER_KEYWORD)*
-         ;
 
 anyValue: STRING | boolLiteral | qualified | domain | allocation
         ;
 
-qualified: THIS_KEYWORD
-         | (THIS_KEYWORD DOT)? IDENT (DOT IDENT)*
+qualified: "this"
+         | ("this.")? IDENT ("." IDENT)*
          ;
 
-temporalRelation: TR_ANY_KEYWORD | TR_ENDS_KEYWORD | TR_STARTS_KEYWORD | TR_EQUALS_KEYWORD | TR_EQUAL_KEYWORD
-                | TR_BEFORE_KEYWORD | TR_AFTER_KEYWORD | TR_CONTAINS_KEYWORD | TR_CONTAINED_BY_KEYWORD
-                | TR_ENDS_BEFORE_KEYWORD | TR_ENDS_AFTER_KEYWORD | TR_STARTS_BEFORE_END_KEYWORD | TR_ENDS_AFTER_START_KEYWORD
-                | TR_CONTAINS_START_KEYWORD | TR_STARTS_DURING_KEYWORD | TR_CONTAINS_END_KEYWORD | TR_ENDS_DURING_KEYWORD
-                | TR_MEETS_KEYWORD | TR_MET_BY_KEYWORD | TR_PARALLELS_KEYWORD | TR_PARALLELED_BY_KEYWORD
-                | TR_STARTS_BEFORE_KEYWORD | TR_STARTS_AFTER_KEYWORD
+temporalRelation: "any" | "ends" | "starts" | "equals" | "equal"
+                | "before" | "after" | "contains" | "contained_by"
+                | "ends_before" | "ends_after" | "starts_before_end" | "ends_after_start"
+                | "contains_start" | "starts_during" | "contains_end" | "ends_during"
+                | "meets" | "met_by" | "parallels" | "paralleled_by"
+                | "starts_before" | "starts_after"
                 ;
 
-intLiteral: INT | PINF | NINF 
+intLiteral: INT | "+inf" | "-inf" 
           ;
 
-floatLiteral: FLOAT | PINFF | NINFF 
+floatLiteral: FLOAT | "+inff" | "-inff" 
             ;
 
-boolLiteral: TRUE_KEYWORD | FALSE_KEYWORD 
+boolLiteral: "true" | "false" 
            ;
 
 function : qualifiedName DOT 
-           ( SPECIFY_KEYWORD variableArgumentList
-           | FREE_KEYWORD variableArgumentList
-           | CONSTRAIN_KEYWORD variableArgumentList
-           | MERGE_KEYWORD variableArgumentList
-           | ACTIVATE_KEYWORD LPAREN RPAREN
-           | RESET_KEYWORD LPAREN RPAREN
-           | REJECT_KEYWORD LPAREN RPAREN
-           | CANCEL_KEYWORD LPAREN RPAREN)
-         | (IDENT DOT)? CLOSE_KEYWORD LPAREN RPAREN
+           ( "specify" variableArgumentList
+           | "free" variableArgumentList
+           | "constrain" variableArgumentList
+           | "merge" variableArgumentList
+           | "activate()"
+           | "reset()"
+           | "reject()"
+           | "cancel()")
+         | (IDENT ".")? "close()"
          ;
 
-tokenNameList: LPAREN (tokenNames)? RPAREN
+tokenNameList: "(" (tokenNames)? ")"
              ;
 
-tokenNames: IDENT (COMMA IDENT)*
+tokenNames: IDENT ("," IDENT)*
           ;
