@@ -35,7 +35,7 @@
 #ifndef _H_Error
 #define _H_Error
 
-/* $Id: Error.hh,v 1.1 2006-08-17 00:52:58 meboyce Exp $ */
+/* $Id: Error.hh,v 1.2 2007-02-10 02:05:23 javier Exp $ */
 
 #include <iostream>
 #include <string>
@@ -162,6 +162,27 @@
 }
 
 #endif /* EUROPA_FAST */
+
+/**
+ * @def check_runtime_error
+ * @brief If the condition is false, throw an exception
+ * @param cond The condition to test.
+ * @note check_error is used for testing assertions that could potentially be removed
+ * from the final binary depending on the debug level that is used to build
+ * check_runtime_error on the other hand is always part of the code, calling code needs to be able to 
+ * handle the possible failure (even if it's at the outer-most level). 
+ * TODO: we may also provide a flag to remove even check_runtime_error at some point.
+ * we probably need to rethink flag/build setup, as we need to be able to build in release mode, while keeping
+ * check_runtime_error. 
+ * removing check_error has to do with debug levels.
+ * removing check_runtime_error doesn't have to do with debugging, but with leaving behavior out for speed sake.
+ */
+#define check_runtime_error(cond, optarg...) { \
+  if (!(cond)) { \
+    throw Error(#cond, ##optarg, __FILE__, __LINE__); \
+  } \
+}
+
 
 /**
    @class Error
