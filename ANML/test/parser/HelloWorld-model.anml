@@ -5,13 +5,10 @@
 
 objtype YourObject
 {
-    bool busy;
-    
     action helloWorld()
     {
         duration 10;        
-        condition at start { busy = true; }; // met by another HelloWorld action        
-        effect over all { busy = true; };
+        condition over all /*start-10*/ { helloWorld(); }; // met by another HelloWorld action        
     }
 }
 

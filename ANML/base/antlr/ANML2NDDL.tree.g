@@ -1,6 +1,8 @@
 header "post_include_hpp" {
 #include "Debug.hh"
 #include "antlr/ASTFactory.hpp"
+#include "SymbolTable.hh"
+
 }
 
 // run antlr.Tool on this file to generate a tree parser
@@ -9,12 +11,19 @@ options {
 }
 
 {
+	static int TABLE_CONSTRUCTION = 0;
+	static int CODE_GENERATION = 1;
+	
 	static const char* PASS_0 = "Table Construction";
-	static const char* PASS_1 = "Primary Pass";
+	static const char* PASS_1 = "Code Generation";
 	static const char* PASS_UNKNOWN = "Unnamed Pass";
 
-	ANML2NDDL::ANML2NDDL(std::ostream& nddl) :
-		antlr::TreeParser(), pass(-1), nddl(nddl) {
+	ANML2NDDL::ANML2NDDL(std::ostream& nddl) 
+		: antlr::TreeParser()
+		, m_symbolTable()
+		, pass(-1)
+		, nddl(nddl) 
+    {
 	}
   /**
    * Custom traceIn for Antlr which uses debugMsg.
@@ -71,12 +80,16 @@ options {
 	#define FINAL_PASS 1
 	public:
 		ANML2NDDL(std::ostream& nddl);
+		
+		const ANML::SymbolTable& getSymbolTable() { return m_symbolTable; }
+		
 	protected:
 		void traceIn(const char* rname, antlr::RefAST t);
 		void traceOut(const char* rname, antlr::RefAST t);
-	private:
+
 		const char* passName();
 
+        ANML::SymbolTable m_symbolTable;
 		int pass;
 		const std::ostream& nddl;
 }
@@ -85,11 +98,11 @@ anml[const int pass]
   : #(ANML
 	    {
 	       this->pass = pass;
-           debugMsg("ANML2NDDL:anml", "                     ==========|  Starting Pass " << pass << " : " << passName() << "   |==========");
+           debugMsg("ANML2NDDL:anml", "==========|  Starting Pass " << pass << " : " << passName() << "   |==========");
         }
       (anml_stmt)*
 	    {
-	       debugMsg("ANML2NDDL:anml", "                     ==========|  Ending   Pass " << pass << " : " << passName() << "   |==========");
+	       debugMsg("ANML2NDDL:anml", "==========|  Ending   Pass " << pass << " : " << passName() << "   |==========");
 	    }
     )
   ;
@@ -162,7 +175,15 @@ parameter_decl!
 ;
 
 objtype_decl!
-    : #(OBJTYPE #(IDENTIFIER (IDENTIFIER | OBJECT)?)
+    : #(OBJTYPE #(className:IDENTIFIER parent:(IDENTIFIER | OBJECT)?)
+      {
+      	if (pass == TABLE_CONSTRUCTION) {
+      		std::string parentClass("object");
+      		if (parent.get() != NULL)
+      		    parentClass = parent->getText();
+          	m_symbolTable.addClass(className->getText(),parentClass);
+      	}
+      }
         #(LCURLY (objtype_body_stmt)*))
 ;
 

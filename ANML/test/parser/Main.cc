@@ -23,12 +23,18 @@ int outputAST2Dot(std::ostream& out, const antlr::RefAST& ast, const int depth, 
 int main(int argc, char** argv) 
 {
   assertTrue(argc == 2, "Expected exactly one filename pattern argument: [ANML Model], without the extension");
-
   std::string filename(argv[1]);  
-  antlr::RefAST ast;
+
+  try {
+      antlr::RefAST ast;
   
-  parse(filename,ast);
-  translate(filename,ast);
+      parse(filename,ast);
+      translate(filename,ast);
+  }
+  catch (ANML::RuntimeException& e) {
+      std::cerr << "Failed translating " << filename << " : " << e.toString() << std::endl;
+      return -1;	  
+  }
   
   return 0;
 }
@@ -48,7 +54,7 @@ void parse(const std::string& filename, antlr::RefAST& ast)
 
 void translate(const std::string& filename, antlr::RefAST& ast)
 {
-  debugMsg("ANMLTest:translator", "Phase 2: Walking parse tree");
+  debugMsg("ANMLTest:translator", "Phase 2: Walking parse tree FOOBAR");
   std::ofstream nddl((filename + "-auto.nddl").c_str());
 
   ANML2NDDL* treeParser = new ANML2NDDL(nddl);
@@ -58,6 +64,9 @@ void translate(const std::string& filename, antlr::RefAST& ast)
   }
 
   debugMsg("ANMLTest:translator", "Phase 2 complete");
+  debugMsg("ANMLTest:translator", "Generated Symbol table\n" << treeParser->getSymbolTable().toString());
+  
+  delete treeParser;
 }
 
 void dumpDigraph(const std::string& filename, const antlr::RefAST& ast)

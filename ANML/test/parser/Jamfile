@@ -28,4 +28,7 @@ for model in
   RunModuleMain run-anml-tests : ANML2NDDL : $(model:S=) ;
 }
 
+  RunModuleMain run-test : ANML2NDDL : HelloWorld-problem-instance ;
+
+
 } # PLASMA_READY
