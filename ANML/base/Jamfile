@@ -15,7 +15,7 @@ if ! $(PLASMA_READY) {
 	 ANMLParser.cpp
 	 #ANMLTreeParser.cpp
 	 ANML2NDDL.cpp
-	 SymbolTable.cc
+	 ANMLTranslator.cc
 	 ;
 
 } # PLASMA_READY
