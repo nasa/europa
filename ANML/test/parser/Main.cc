@@ -31,8 +31,8 @@ int main(int argc, char** argv)
       parse(filename,ast);
       translate(filename,ast);
   }
-  catch (ANML::RuntimeException& e) {
-      std::cerr << "Failed translating " << filename << " : " << e.toString() << std::endl;
+  catch (Error& e) {
+      std::cerr << "Failed translating " << filename << " : " << e.getMsg() << std::endl;
       return -1;	  
   }
   
@@ -64,7 +64,7 @@ void translate(const std::string& filename, antlr::RefAST& ast)
   }
 
   debugMsg("ANMLTest:translator", "Phase 2 complete");
-  debugMsg("ANMLTest:translator", "Generated Symbol table\n" << treeParser->getSymbolTable().toString());
+  debugMsg("ANMLTest:translator", "Generated Symbol table\n" << treeParser->getTranslator().toString());
   
   delete treeParser;
 }

@@ -1,7 +1,7 @@
 header "post_include_hpp" {
 #include "Debug.hh"
 #include "antlr/ASTFactory.hpp"
-#include "SymbolTable.hh"
+#include "ANMLTranslator.hh"
 
 }
 
@@ -20,7 +20,7 @@ options {
 
 	ANML2NDDL::ANML2NDDL(std::ostream& nddl) 
 		: antlr::TreeParser()
-		, m_symbolTable()
+		, m_translator()
 		, pass(-1)
 		, nddl(nddl) 
     {
@@ -81,7 +81,7 @@ options {
 	public:
 		ANML2NDDL(std::ostream& nddl);
 		
-		const ANML::SymbolTable& getSymbolTable() { return m_symbolTable; }
+		const ANML::ANMLTranslator& getTranslator() { return m_translator; }
 		
 	protected:
 		void traceIn(const char* rname, antlr::RefAST t);
@@ -89,7 +89,7 @@ options {
 
 		const char* passName();
 
-        ANML::SymbolTable m_symbolTable;
+        ANML::ANMLTranslator m_translator;
 		int pass;
 		const std::ostream& nddl;
 }
@@ -175,13 +175,13 @@ parameter_decl!
 ;
 
 objtype_decl!
-    : #(OBJTYPE #(className:IDENTIFIER parent:(IDENTIFIER | OBJECT)?)
+    : #(OBJTYPE #(objtypeName:IDENTIFIER parent:(IDENTIFIER | OBJECT)?)
       {
       	if (pass == TABLE_CONSTRUCTION) {
-      		std::string parentClass("object");
+      		std::string parentType("object");
       		if (parent.get() != NULL)
-      		    parentClass = parent->getText();
-          	m_symbolTable.addClass(className->getText(),parentClass);
+      		    parentType = parent->getText();
+          	m_translator.addObjType(objtypeName->getText(),parentType);
       	}
       }
         #(LCURLY (objtype_body_stmt)*))
@@ -332,7 +332,11 @@ arg_list
 ;
 
 action_def 
-    : #(ACTION action_symbol parameters action_body)
+    : #(ACTION action_symbol parameters 
+    {
+     // TODO:
+    }    
+    action_body)
 ;
 
 action_body 
