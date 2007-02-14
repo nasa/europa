@@ -1,13 +1,26 @@
 // NDDL Grammar (Without semantic checks)
 
+class NddlParser extends Parser;
+
 nddl: (nddlStatement)*
     ;
 
-nddlStatement: inclusion | enumeration | typeDefinition ";" | constraintSignature | allocation ";"
-             | variableDeclaration ";" | classDeclaration | rule | goal ";" | relation ";"
-             | function ";" | assignment ";"
-             | constraintInstantiation ";" | ";"
-             ;
+nddlStatement: 
+    inclusion 
+    | enumeration 
+    | constraintSignature 
+    | typeDefinition ";" 
+    | variableDeclaration ";" 
+    | classDeclaration 
+    | rule 
+    | allocation ";"           
+    | assignment ";"
+    | function ";" 
+    | constraintInstantiation ";" 
+    | relation ";"
+    | goal ";" 
+    | ";"
+;
 
 inclusion: "#include" STRING
          ;
