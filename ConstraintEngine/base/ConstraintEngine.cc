@@ -454,7 +454,8 @@ namespace EUROPA
     for(ConstraintList::const_iterator c_it = variable->m_constraints.begin(); c_it != variable->m_constraints.end(); ++c_it){
       const ConstraintId& constraint= c_it->first;
       if(constraint->isActive()){
-	const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
+	const std::vector<ConstrainedVariableId>& scope =
+	  constraint->getModifiedVariables(variable);
 	for(std::vector<ConstrainedVariableId>::const_iterator v_it = scope.begin(); v_it != scope.end(); ++v_it){
 	  const ConstrainedVariableId& id = *v_it;
 	  if(id->lastRelaxed() < m_cycleCount){

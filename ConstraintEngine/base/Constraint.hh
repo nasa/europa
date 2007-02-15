@@ -23,7 +23,7 @@ namespace EUROPA {
    * @class Constraint
    * @brief Provides the base class from which all constraints are derived.
    *
-   * The constraint class is an example of a Command Pattern. It is responsible for enforcing local consistency among 
+   * The constraint class is an example of a Command Pattern. It is responsible for enforcing local consistency among
    * ConstrainedVariable instances. This class
    * provides a base class from which all constraints are derived. This class:
    * @li Ensures that a constraint belongs to exactly one ConstraintEngine
@@ -56,9 +56,9 @@ namespace EUROPA {
      * @param variables The variables that will form the scope of the constraint.
      */
     Constraint(const LabelStr& name,
-               const LabelStr& propagatorName,
-               const ConstraintEngineId& constraintEngine, 
-               const std::vector<ConstrainedVariableId>& variables);
+	       const LabelStr& propagatorName,
+	       const ConstraintEngineId& constraintEngine,
+	       const std::vector<ConstrainedVariableId>& variables);
 
     virtual ~Constraint();
 
@@ -135,7 +135,7 @@ namespace EUROPA {
 
     /**
      * @brief Utility to capture the state of the constraint.
-     */ 
+     */
     virtual std::string toString() const;
 
     /**
@@ -187,9 +187,9 @@ namespace EUROPA {
      * @param changeType - the nature of the change occuring in the given variable.
      * @see ConstraintEngine::execute(), ConstraintEngine::PENDING, DomainListener::ChangeType
      */
-    virtual void handleExecute(const ConstrainedVariableId& variable, 
-                               int argIndex, 
-                               const DomainListener::ChangeType& changeType);
+    virtual void handleExecute(const ConstrainedVariableId& variable,
+			       int argIndex,
+			       const DomainListener::ChangeType& changeType);
 
     /**
      * @brief Determine if a change notification can be ignored for further processing.
@@ -203,9 +203,21 @@ namespace EUROPA {
      * @return true if the event cannot impact the consistency of the Constraint given its current state. Othwerwise false.
      * @see ConstraintEngine::notify()
      */
-    virtual bool canIgnore(const ConstrainedVariableId& variable, 
-                           int argIndex, 
-                           const DomainListener::ChangeType& changeType);
+    virtual bool canIgnore(const ConstrainedVariableId& variable,
+			   int argIndex,
+			   const DomainListener::ChangeType& changeType);
+
+
+    /**
+     * @brief Get the varibles in scope that might be modified by executing this constraint.
+     *
+     * Primarily used during network relaxation to determine which variables need to be relaxed
+     * in response to a particular relaxation.
+     * @param variable - the variable from within its scope that has been relaxed.
+     * @return the vector of variables that this constraint modifies.  Defaults to the scope.
+     * @see ConstraintEngine::getScope(), ConstraintEngine::handleRelax()
+     */
+    virtual const std::vector<ConstrainedVariableId>& getModifiedVariables(const ConstrainedVariableId& variable) const;
 
     /**
      * @brief Allow implementation class to take action in the event of activation
