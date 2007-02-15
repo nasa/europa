@@ -1,3 +1,4 @@
+
 header "post_include_hpp" {
 #include "Debug.hh"
 #include "antlr/ASTFactory.hpp"
@@ -114,12 +115,12 @@ anml_stmt
     | action_def            // <- implicit global object
 ;
 
-declaration 
-    : objtype_decl
-    | vartype_decl
-    | var_obj_declaration
-    | (#(FUNCTION IDENT LPAREN)) => predicate_declaration
-    | function_declaration
+declaration returns [ANML::ANMLElement* element]
+    : element=objtype_decl
+    | element=vartype_decl
+    | element=var_obj_declaration
+    | (#(FUNCTION IDENT LPAREN)) => element=predicate_declaration
+    | element=function_declaration
 ;
 
 problem_stmt
@@ -127,12 +128,12 @@ problem_stmt
     | goal
 ;
    
-vartype_decl
+vartype_decl returns [ANML::ANMLElement* element]
     : #(VARTYPE user_defined_type_name var_type)
 ;
 
 // TODO: semantic layer to check whether we're declaring an object or a variable
-var_obj_declaration!
+var_obj_declaration! returns [ANML::ANMLElement* element]
     : #(VARIABLE var_type var_init_list)
 ;
 
@@ -140,11 +141,11 @@ var_init_list
 		: (var_init)+
 ;
 
-var_type 
+var_type returns [ANML::Type* t;]
     : BOOL
     | IDENTIFIER
     | #(INT (range|enum_body)?)
-		| #(FLOAT (range|enum_body)?)
+	| #(FLOAT (range|enum_body)?)
     | #(STRING (enum_body)?)
     | #(VECTOR vector_body)
 ;
@@ -166,34 +167,49 @@ var_init
 		| var_name
 ;
 
-parameters
-    : #(LPAREN (parameter_decl)*)
+parameters returns [std::vector<ANML::Variable*> params;]
+{
+	ANML::Variable* p;
+}
+    : #(LPAREN (p=parameter_decl { params.push_back(p); })*)
 ;
 
-parameter_decl!
-    : #(PARAMETER var_type var_name)
+parameter_decl! returns [ANML::Variable* v;]
+{
+	ANML::Type* type;
+}
+    : #(PARAMETER type=var_type name:var_name)
+    {
+    	v = new ANML::Variable(*type,name->getText());
+    }
 ;
 
-objtype_decl!
+objtype_decl! returns [ANML::ANMLElement* element]
+{
+	ANML::ObjType* newType;
+	ANML::ANMLElement* childElement;
+}
     : #(OBJTYPE #(objtypeName:IDENTIFIER parent:(IDENTIFIER | OBJECT)?)
       {
-      	if (pass == TABLE_CONSTRUCTION) {
-      		std::string parentType("object");
-      		if (parent.get() != NULL)
-      		    parentType = parent->getText();
-          	m_translator.addObjType(objtypeName->getText(),parentType);
-      	}
+   		std::string parentType("object");
+   		if (parent.get() != NULL)
+   		    parentType = parent->getText();
+       	newType = m_translator.addObjType(objtypeName->getText(),parentType);
+       	// TODO: set new SymbolTable
       }
-        #(LCURLY (objtype_body_stmt)*))
+        #(LCURLY (element=objtype_body_stmt)*))
+      {
+      	newType->addElement(childElement);
+      }
 ;
 
-objtype_body_stmt
-    : declaration
-    | action_def
-    | transition_constraint
+objtype_body_stmt returns [ANML::ANMLElement* element]
+    : element=declaration
+    | element=action_def
+    | element=transition_constraint
 ;
 
-function_declaration 
+function_declaration returns [ANML::ANMLElement* element]
     : #(FUNCTION var_type (function_signature)+)
 ;
 
@@ -201,7 +217,7 @@ function_signature
     : function_symbol parameters
 ;
 
-predicate_declaration 
+predicate_declaration returns [ANML::ANMLElement* element]
     : #(FUNCTION (function_signature)+)
 ;
 
@@ -331,19 +347,32 @@ arg_list
     : (expr)+
 ;
 
-action_def 
-    : #(ACTION action_symbol parameters 
+action_def returns [ANML::ANMLElement* element]
+{
+	std::vector<ANML::ANMLElement*> body;
+	std::vector<ANML::Variable*> params;
+    ANML::Action* a;
+}
+    : #(ACTION name:action_symbol params=parameters 
     {
-     // TODO:
+      a = new ANML::Action(name->getText(),params);
     }    
-    action_body)
+    body=action_body)
+    {
+      a->setBody(body);	
+      element = a;
+      // TODO: add to enclosing scope, set new scope
+    }
 ;
 
-action_body 
-    : #(LCURLY (action_body_stmt)*)
+action_body returns [std::vector<ANML::ANMLElement*> body] 
+{
+	ANML::ANMLElement* stmt;
+}
+    : #(LCURLY (stmt=action_body_stmt { body.push_back(stmt); })*)
 ;
 
-action_body_stmt
+action_body_stmt returns [ANML::ANMLElement* element]
     : duration_stmt 
     | condition_stmt
     | effect_stmt 
@@ -433,7 +462,7 @@ constraint
     : #(CONSTRAINT constraint_symbol arguments)
 ;
 
-transition_constraint
+transition_constraint returns [ANML::ANMLElement* element]
     : #(TRANSITION var_name trans_pair_list)
 ;
 

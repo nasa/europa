@@ -58,13 +58,10 @@ void translate(const std::string& filename, antlr::RefAST& ast)
   std::ofstream nddl((filename + "-auto.nddl").c_str());
 
   ANML2NDDL* treeParser = new ANML2NDDL(nddl);
-	
-  for(int i=0; i <= FINAL_PASS; ++i) {
-      treeParser->anml(ast, i);
-  }
+  treeParser->anml(ast, 0);
 
   debugMsg("ANMLTest:translator", "Phase 2 complete");
-  debugMsg("ANMLTest:translator", "Generated Symbol table\n" << treeParser->getTranslator().toString());
+  debugMsg("ANMLTest:translator", "Generated ANML elements\n" << treeParser->getTranslator().toString());
   
   delete treeParser;
 }

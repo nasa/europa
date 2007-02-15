@@ -14,10 +14,12 @@ namespace ANML
     {
     }
       
-    void ANMLTranslator::addObjType(const std::string& className,const std::string& parentObjType)
+    ObjType* ANMLTranslator::addObjType(const std::string& className,const std::string& parentObjType)
     {
     	ObjType* newType = m_symbolTable.addObjType(className,parentObjType);
     	m_elements.push_back(newType);
+    	
+    	return newType;
     }
       
     void ANMLTranslator::toNDDL(std::ostream& os)
@@ -35,9 +37,52 @@ namespace ANML
         return os.str();    	
     }
 
-    ObjType::ObjType(const std::string& className,ObjType* parentObjType)
-        : ANMLElement("OBJTYPE")
-        , m_name(className)
+	Type::Type(const std::string& name)
+	    : ANMLElement("TYPE")
+	    , m_name(name)
+	{
+	}
+	
+	Type::~Type()
+	{
+	}
+	        
+    std::string Type::toString() const
+    {
+    	std::ostringstream os;
+        
+        os << "Type:" << m_name << std::endl;
+        
+        return os.str();    	
+    }
+
+    Variable::Variable(const Type& type, const std::string& name)
+        : ANMLElement("VARIABLE")
+        , m_type(type)
+        , m_name(name)
+    {
+    }
+    
+    Variable::~Variable()
+    {
+    }
+
+    void Variable::toNDDL(std::ostream& os)
+    {
+    	os << m_type.getName() << " " << m_name << std::endl;
+    }
+    
+    std::string Variable::toString() const
+    {
+    	std::ostringstream os;
+        
+        os << "Var: " << m_type.getName() << " " << m_name << std::endl;
+        
+        return os.str();    	
+    }
+
+    ObjType::ObjType(const std::string& name,ObjType* parentObjType)
+        : Type(name)
         , m_parent(parentObjType)
     {
     }
@@ -53,6 +98,34 @@ namespace ANML
         std::string parent = (m_parent != NULL ? (std::string(" extends ") + m_parent->getName()) : "");
         os << "objtype " << m_name << parent << " {" << std::endl;
         os << "}" << std::endl;
+        
+        return os.str();    	
+    }
+
+    Action::Action(const std::string& name, const std::vector<Variable*>& params)
+        : ANMLElement("ACTION")
+        , m_name(name)        
+        , m_params(params)
+    {
+    }
+    
+    Action::~Action()
+    {
+    }
+    
+    void Action::setBody(const std::vector<ANMLElement*>& body)
+    {
+    	m_body = body;
+    }
+    
+    std::string Action::toString() const
+    {
+    	std::ostringstream os;
+
+        os << "action " << m_name << " {" << std::endl;
+    	for (unsigned int i=0; i<m_body.size(); i++)
+    	    os << m_body[i]->toString();        
+        os << "}" << std::endl;        
         
         return os.str();    	
     }
