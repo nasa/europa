@@ -1,7 +1,0 @@
-classes
-*.so
-*.o
-model*.cc
-model*.hh
-model*.xml
-RESPONSE_FILE

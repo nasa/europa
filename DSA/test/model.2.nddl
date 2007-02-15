@@ -1,5 +1,0 @@
-#include "Plasma.nddl"
-
-class Foo extends Timeline {
-	predicate p{}
-}

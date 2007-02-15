@@ -110,6 +110,10 @@ namespace EUROPA {
     return false;
   }
 
+  const std::vector<ConstrainedVariableId>& Constraint::getModifiedVariables(const ConstrainedVariableId& variable) const {
+    return getScope();
+  }
+
   /**
    * @todo Figure a way to propagate first and deactivate only after safe
    * propagation.

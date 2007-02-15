@@ -1,4 +1,0 @@
-SubDir PLASMA Aver component ;
-
-if ! $(PLASMA_READY) {
-}

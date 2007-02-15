@@ -1,9 +1,0 @@
-SubDir PLASMA NDDL test project ;
-
-if ! $(PLASMA_READY) {
- # Tests sample project materials
- RunNDDLProblem problem : initial-state.nddl : planner ;
-
- # Build rule to build the main executable. Upgrade to use dynamic linking approach later
- NddlMain planner : Main.cc : model.nddl : NDDL : planner ;
-} # PLASMA_READY
