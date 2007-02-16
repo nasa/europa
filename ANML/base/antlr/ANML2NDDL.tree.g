@@ -12,17 +12,9 @@ options {
 }
 
 {
-	static int TABLE_CONSTRUCTION = 0;
-	static int CODE_GENERATION = 1;
-	
-	static const char* PASS_0 = "Table Construction";
-	static const char* PASS_1 = "Code Generation";
-	static const char* PASS_UNKNOWN = "Unnamed Pass";
-
 	ANML2NDDL::ANML2NDDL(std::ostream& nddl) 
 		: antlr::TreeParser()
 		, m_translator()
-		, pass(-1)
 		, nddl(nddl) 
     {
 	}
@@ -59,14 +51,6 @@ options {
 		         indent << "< " << rname << ((inputState->guessing > 0)? "; [guessing]" : ";") <<
 						 " LA==" << ((t == antlr::nullAST)? "null" : t->getText()));
   }
-
-	const char* ANML2NDDL::passName() {
-		switch(pass) {
-			case 0: return PASS_0;
-			case 1: return PASS_1;
-			default: return PASS_UNKNOWN;
-		}
-	}
 }
 
 class ANML2NDDL extends TreeParser;
@@ -78,7 +62,6 @@ options {
 
 {
 	#define LONG_RULE_SIZE 26
-	#define FINAL_PASS 1
 	public:
 		ANML2NDDL(std::ostream& nddl);
 		
@@ -88,31 +71,30 @@ options {
 		void traceIn(const char* rname, antlr::RefAST t);
 		void traceOut(const char* rname, antlr::RefAST t);
 
-		const char* passName();
-
         ANML::ANMLTranslator m_translator;
-		int pass;
 		const std::ostream& nddl;
 }
 
-anml[const int pass]
+anml
+{
+	ANML::ANMLElement* stmt;
+}
   : #(ANML
 	    {
-	       this->pass = pass;
-           debugMsg("ANML2NDDL:anml", "==========|  Starting Pass " << pass << " : " << passName() << "   |==========");
+           debugMsg("ANML2NDDL:anml", "Parsing...");
         }
-      (anml_stmt)*
+      (stmt=anml_stmt { m_translator.getContext().addElement(stmt); debugMsg("ANML2NDDL:anml", "Added Element " << stmt->getType());})*
 	    {
-	       debugMsg("ANML2NDDL:anml", "==========|  Ending   Pass " << pass << " : " << passName() << "   |==========");
+	       debugMsg("ANML2NDDL:anml", "Done parsing");
 	    }
     )
   ;
 
-anml_stmt
-    : declaration
-    | problem_stmt
-    | transition_constraint
-    | action_def            // <- implicit global object
+anml_stmt returns [ANML::ANMLElement* element]
+    : element=declaration
+    | element=problem_stmt
+    | element=transition_constraint
+    | element=action_def            // <- implicit global object
 ;
 
 declaration returns [ANML::ANMLElement* element]
@@ -123,9 +105,9 @@ declaration returns [ANML::ANMLElement* element]
     | element=function_declaration
 ;
 
-problem_stmt
-    : fact
-    | goal
+problem_stmt returns [ANML::ANMLElement* element]
+    : element=fact
+    | element=goal
 ;
    
 vartype_decl returns [ANML::ANMLElement* element]
@@ -134,6 +116,9 @@ vartype_decl returns [ANML::ANMLElement* element]
 
 // TODO: semantic layer to check whether we're declaring an object or a variable
 var_obj_declaration! returns [ANML::ANMLElement* element]
+{
+    element = new ANML::ANMLElement("VARIABLE");	
+}    
     : #(VARIABLE var_type var_init_list)
 ;
 
@@ -194,16 +179,17 @@ objtype_decl! returns [ANML::ANMLElement* element]
    		std::string parentType("object");
    		if (parent.get() != NULL)
    		    parentType = parent->getText();
-       	newType = m_translator.addObjType(objtypeName->getText(),parentType);
-       	// TODO: set new SymbolTable
+       	newType = m_translator.getContext().addObjType(objtypeName->getText(),parentType);
+       	m_translator.pushContext(newType);
       }
-        #(LCURLY (element=objtype_body_stmt)*))
+        #(LCURLY (childElement=objtype_body_stmt { newType->addElement(childElement); } )*))
       {
-      	newType->addElement(childElement);
+      	element = newType;
+        m_translator.popContext();      	
       }
 ;
 
-objtype_body_stmt returns [ANML::ANMLElement* element]
+objtype_body_stmt returns [ANML::ANMLElement* element=NULL]
     : element=declaration
     | element=action_def
     | element=transition_constraint
@@ -221,11 +207,17 @@ predicate_declaration returns [ANML::ANMLElement* element]
     : #(FUNCTION (function_signature)+)
 ;
 
-fact 
+fact returns [ANML::ANMLElement* element]
+{
+    element = new ANML::ANMLElement("FACT");	
+}    
     : #(FACT (effect_proposition | effect_proposition_list))
 ;
 
-goal 
+goal returns [ANML::ANMLElement* element]
+{
+    element = new ANML::ANMLElement("GOAL");	
+}    
     : #(GOAL (condition_proposition | condition_proposition_list))
 ;
 
@@ -328,7 +320,7 @@ time_pt
 ;
 
 numeric_expr 
-    : (#(PLUS numeric_expr numeric_expr)) => #(PLUS numeric_expr numeric_expr)
+    :     (#(PLUS numeric_expr numeric_expr)) => #(PLUS numeric_expr numeric_expr)
 		| (#(MINUS numeric_expr numeric_expr)) => #(MINUS numeric_expr numeric_expr)
 		| #(MULT numeric_expr numeric_expr)
 		| #(DIV numeric_expr numeric_expr)
@@ -336,7 +328,7 @@ numeric_expr
 		| #(PLUS numeric_expr)
 		| #(MINUS numeric_expr)
 		| numeric_literal
-		|	lhs_expr
+		| lhs_expr
 ;
 
 arguments
@@ -354,14 +346,16 @@ action_def returns [ANML::ANMLElement* element]
     ANML::Action* a;
 }
     : #(ACTION name:action_symbol params=parameters 
-    {
-      a = new ANML::Action(name->getText(),params);
-    }    
-    body=action_body)
+        {
+            a = new ANML::Action(name->getText(),params);
+            m_translator.pushContext(a);
+        }    
+        body=action_body
+      )
     {
       a->setBody(body);	
       element = a;
-      // TODO: add to enclosing scope, set new scope
+      m_translator.popContext();
     }
 ;
 
@@ -373,27 +367,33 @@ action_body returns [std::vector<ANML::ANMLElement*> body]
 ;
 
 action_body_stmt returns [ANML::ANMLElement* element]
-    : duration_stmt 
-    | condition_stmt
-    | effect_stmt 
-    | change_stmt 
-    | decomp_stmt 
+    : element=duration_stmt 
+    | element=condition_stmt
+    | element=effect_stmt 
+    | element=change_stmt 
+    | element=decomp_stmt 
 ;
 
 // TODO: semantic layer to enforce that only one duration statement is allowed    
-duration_stmt 
+duration_stmt returns [ANML::ANMLElement* element]
+{
+    element = new ANML::ANMLElement("DURATION");	
+}    
     : #(DURATION (numeric_expr | range))
 ;
 
-condition_stmt 
+condition_stmt returns [ANML::ANMLElement* element]
+{
+    element = new ANML::ANMLElement("CONDITION");	
+}    
     : #(CONDITION (condition_proposition | condition_proposition_list))
 ;
     
-effect_stmt
+effect_stmt returns [ANML::ANMLElement* element]
     : #(EFFECT (effect_proposition | effect_proposition_list))
 ;
 
-change_stmt 
+change_stmt returns [ANML::ANMLElement* element]
     : #(CHANGE (change_proposition | change_proposition_list))
 ;
 
@@ -429,7 +429,7 @@ directed_expr_list
 		| expr
 ;
 
-decomp_stmt 
+decomp_stmt returns [ANML::ANMLElement* element]
     : #(DECOMPOSITION (decomp_step | #(LCURLY (decomp_step)+)))
 ;
 

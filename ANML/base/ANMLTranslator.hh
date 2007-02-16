@@ -8,23 +8,9 @@
 namespace ANML
 {
 
+class ANMLContext;
 class ANMLElement;
 class ObjType;
-
-class SymbolTable
-{
-  public:
-	SymbolTable();
-	virtual ~SymbolTable();
-	
-	virtual ObjType* addObjType(const std::string& className,const std::string& parentObjType);
-	virtual ObjType* getObjType(const std::string& className);
-	
-	virtual std::string toString() const;
-	
-  protected:
-    std::map<std::string,ObjType*> m_classes;
-};
 
 class ANMLTranslator
 {
@@ -32,27 +18,61 @@ class ANMLTranslator
       ANMLTranslator();
       virtual ~ANMLTranslator();
       
-      virtual ObjType* addObjType(const std::string& className,const std::string& parentObjType);
-      
+      virtual void pushContext(ANMLContext* context);
+      virtual void popContext();      
+
+      virtual ANMLContext& getContext() { return *m_context; }
+            
       virtual void toNDDL(std::ostream& os);
       
 	  virtual std::string toString() const;      
       
   protected:
-      SymbolTable m_symbolTable;
-      std::vector<ANMLElement*> m_elements;      
+      ANMLContext* m_context;
+      
+      ANMLContext* createGlobalContext();          
+};
+
+class ANMLContext
+{
+  public:
+	ANMLContext(const ANMLContext* parent=NULL);
+	virtual ~ANMLContext();
+
+    virtual const ANMLContext* getParent() { return m_parent; }
+    virtual void setParent(const ANMLContext* parent) { m_parent = parent; }
+    	
+    virtual void addElement(ANMLElement* element);
+    
+	virtual ObjType* getObjType(const std::string& name) const;
+	virtual ObjType* addObjType(const std::string& name,const std::string& parentName);
+	
+    virtual void toNDDL(std::ostream& os);
+    
+	virtual std::string toString() const;
+		
+  protected:
+    const ANMLContext* m_parent;
+    std::vector<ANMLElement*> m_elements;      
+    std::map<std::string,ObjType*> m_objTypes;
+    
+	void addObjType(ObjType* objType);
+	
+    friend class ANMLTranslator;
 };
 
 class ANMLElement
 {
   public:
-    const std::string& getType() { return m_type; }
-    virtual void toNDDL(std::ostream& os) {}
-    virtual std::string toString() const { return "";};
-    
-  protected:
     ANMLElement(const std::string& type) : m_type(type) {}
     virtual ~ANMLElement() {}    
+
+    const std::string& getType() { return m_type; }
+    virtual void toNDDL(std::ostream& os) { os << m_type; }
+    virtual const std::string& getType() const { return m_type; }
+    virtual std::string toString() const { return m_type;};
+    
+  protected:
     
     std::string m_type;
 };
@@ -88,16 +108,14 @@ class Variable : public ANMLElement
 	std::string m_name;
 };
     
-class ObjType : public Type
+class ObjType : public Type, public ANMLContext
 {
   public:
     ObjType(const std::string& className,ObjType* parentObjType);
     virtual ~ObjType();
     
     ObjType* getParent() const { return m_parent; }
-    
-    virtual void addElement(ANMLElement* element) { /* TODO: make this a SymbolTable?*/ }
-    
+        
     virtual void toNDDL(std::ostream& os) {}
     
     virtual std::string toString() const;
@@ -106,7 +124,7 @@ class ObjType : public Type
     ObjType* m_parent;   	
 };
 
-class Action : public ANMLElement
+class Action : public ANMLElement, public ANMLContext
 {
   public:
     Action(const std::string& name,const std::vector<Variable*>& params);
