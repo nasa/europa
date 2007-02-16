@@ -481,6 +481,12 @@ rule ModulePart {
           }
         }
         if $(library) = STATIC {
+	#MJI COPIED FROM ABOVE
+          local LOCATE_TARGET = [ FDirName $($(_top)) lib ] ;
+          LINKFLAGS on $(libname) = $(LINKFLAGS)
+                                    $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)$(LOCATE_TARGET) ;
+          LINKLIBS on $(libname) = $(LINKLIBS) ;
+
           if $(variant) in $(VARIANTS) {
             ModuleStaticLibraryFromObjects $(libname) : $(outputs) ;
           } else {
