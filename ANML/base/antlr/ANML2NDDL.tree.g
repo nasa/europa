@@ -65,7 +65,7 @@ options {
 	public:
 		ANML2NDDL(std::ostream& nddl);
 		
-		const ANML::ANMLTranslator& getTranslator() { return m_translator; }
+		ANML::ANMLTranslator& getTranslator() { return m_translator; }
 		
 	protected:
 		void traceIn(const char* rname, antlr::RefAST t);
@@ -347,7 +347,7 @@ action_def returns [ANML::ANMLElement* element]
 }
     : #(ACTION name:action_symbol params=parameters 
         {
-            a = new ANML::Action(name->getText(),params);
+            a = new ANML::Action((ANML::ObjType&)(m_translator.getContext()),name->getText(),params);
             m_translator.pushContext(a);
         }    
         body=action_body

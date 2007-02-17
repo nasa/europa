@@ -119,8 +119,7 @@ namespace ANML
     }
 
 	Type::Type(const std::string& name)
-	    : ANMLElement("TYPE")
-	    , m_name(name)
+	    : ANMLElement("TYPE",name)
 	{
 	}
 	
@@ -137,10 +136,9 @@ namespace ANML
         return os.str();    	
     }
 
-    Variable::Variable(const Type& type, const std::string& name)
-        : ANMLElement("VARIABLE")
-        , m_type(type)
-        , m_name(name)
+    Variable::Variable(const Type& dataType, const std::string& name)
+        : ANMLElement("VARIABLE",name)
+        , m_dataType(dataType)
     {
     }
     
@@ -150,14 +148,14 @@ namespace ANML
 
     void Variable::toNDDL(std::ostream& os)
     {
-    	os << m_type.getName() << " " << m_name;
+    	os << m_dataType.getName() << " " << m_name;
     }
     
     std::string Variable::toString() const
     {
     	std::ostringstream os;
         
-        os << m_type.getName() << " " << m_name;
+        os << m_dataType.getName() << " " << m_name;
         
         return os.str();    	
     }
@@ -172,6 +170,31 @@ namespace ANML
     {
     }
     
+    void ObjType::toNDDL(std::ostream& os)
+    {
+        std::string parent = ((m_parent != NULL && m_parent->getName() != "object") ? (std::string(" extends ") + m_parent->getName()) : "");
+        os << "class " << m_name << parent << std::endl 
+           << "{" << std::endl;
+           
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    	    if (m_elements[i]->getType() == "ACTION") {
+    	    	Action* a = (Action*) m_elements[i];
+    	    	os << "    predicate " << a->getName() << " {";
+    	    	
+    	    	const std::vector<Variable*> params = a->getParams();
+                for (unsigned int j=0; j<params.size(); j++) {
+        	        params[j]->toNDDL(os);
+       	            os << ";";
+                }    	
+    	    	
+    	        os << "}" << std::endl;
+    	    }
+    	}
+           
+        os << "}" << std::endl;
+        ANMLContext::toNDDL(os);
+    }
+    
     std::string ObjType::toString() const
     {
     	std::ostringstream os;
@@ -184,9 +207,9 @@ namespace ANML
         return os.str();    	
     }
 
-    Action::Action(const std::string& name, const std::vector<Variable*>& params)
-        : ANMLElement("ACTION")
-        , m_name(name)        
+    Action::Action(ObjType& objType,const std::string& name, const std::vector<Variable*>& params)
+        : ANMLElement("ACTION",name)
+        , m_objType(objType)        
         , m_params(params)
     {
     }
@@ -198,6 +221,20 @@ namespace ANML
     void Action::setBody(const std::vector<ANMLElement*>& body)
     {
     	m_body = body;
+    }
+    
+    void Action::toNDDL(std::ostream& os)
+    {
+    	os << m_objType.getName() << "::" << m_name << "(";
+    	os << ")" << std::endl;
+        for (unsigned int i=0; i<m_params.size(); i++) {
+        	if (i>0)
+        	    os << ",";
+        	m_params[i]->toNDDL(os);
+        }    	
+    	os << "{" << std::endl;
+    	// TODO: generate NDDL for internal elements
+    	os << "}" << std::endl;
     }
     
     std::string Action::toString() const

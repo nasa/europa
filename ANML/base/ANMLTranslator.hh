@@ -65,16 +65,17 @@ class ANMLElement
 {
   public:
     ANMLElement(const std::string& type) : m_type(type) {}
+    ANMLElement(const std::string& type,const std::string& name) : m_type(type), m_name(name) {}
     virtual ~ANMLElement() {}    
 
-    const std::string& getType() { return m_type; }
-    virtual void toNDDL(std::ostream& os) { os << m_type; }
-    virtual const std::string& getType() const { return m_type; }
-    virtual std::string toString() const { return m_type;};
+    virtual const std::string& getType() { return m_type; }
+    virtual const std::string& getName() const { return m_name; }
+    virtual void toNDDL(std::ostream& os) { os << toString(); }
+    virtual std::string toString() const { return m_type+" "+m_name;}
     
-  protected:
-    
+  protected:    
     std::string m_type;
+    std::string m_name;	  
 };
 
 class Type : public ANMLElement
@@ -82,15 +83,10 @@ class Type : public ANMLElement
   public:
 	Type(const std::string& name);
 	virtual ~Type();
-	
-    const std::string& getName() const { return m_name; }
-    
+	    
     virtual void toNDDL(std::ostream& os) {}
     
     virtual std::string toString() const;
-    
-  protected:
-    std::string m_name;	  
 };
 	
 class Variable : public ANMLElement
@@ -104,19 +100,18 @@ class Variable : public ANMLElement
     virtual std::string toString() const;
   
   protected:
-	const Type& m_type;
-	std::string m_name;
+	const Type& m_dataType;
 };
     
 class ObjType : public Type, public ANMLContext
 {
   public:
-    ObjType(const std::string& className,ObjType* parentObjType);
+    ObjType(const std::string& name,ObjType* parentObjType);
     virtual ~ObjType();
     
     ObjType* getParent() const { return m_parent; }
         
-    virtual void toNDDL(std::ostream& os) {}
+    virtual void toNDDL(std::ostream& os);
     
     virtual std::string toString() const;
     
@@ -127,17 +122,19 @@ class ObjType : public Type, public ANMLContext
 class Action : public ANMLElement, public ANMLContext
 {
   public:
-    Action(const std::string& name,const std::vector<Variable*>& params);
+    Action(ObjType& objType,const std::string& name,const std::vector<Variable*>& params);
     virtual ~Action();
+    
+    const std::vector<Variable*> getParams() const { return m_params; }
     
     void setBody(const std::vector<ANMLElement*>& body);
   
-    virtual void toNDDL(std::ostream& os) {}
+    virtual void toNDDL(std::ostream& os);
     
     virtual std::string toString() const;
     
   protected:
-    std::string m_name;
+    ObjType& m_objType;
     std::vector<Variable*> m_params;
     std::vector<ANMLElement*> m_body;
 };

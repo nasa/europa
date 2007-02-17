@@ -64,6 +64,7 @@ void translate(const std::string& filename, antlr::RefAST& ast)
   debugMsg("ANMLTest:translator", "Phase 2 complete");
   debugMsg("ANMLTest:translator", "Generated ANML elements\n" << treeParser->getTranslator().toString());
   
+  treeParser->getTranslator().toNDDL(nddl);  
   delete treeParser;
 }
 
