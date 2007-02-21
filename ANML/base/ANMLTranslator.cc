@@ -133,6 +133,18 @@ namespace ANML
     	return os.str();
     }
 
+    void ANMLElement::toNDDL(std::ostream& os) const 
+    { 
+    	os << m_type << " " << m_name; 
+    }
+    
+    std::string ANMLElement::toString() const 
+    { 
+    	std::ostringstream os; 
+    	toNDDL(os); 
+    	return os.str(); 
+    }
+    
 	Type::Type(const std::string& name)
 	    : ANMLElement("TYPE",name)
 	{
@@ -273,14 +285,6 @@ namespace ANML
     	os << ";";
     }
     
-    std::string VarDeclaration::toString() const
-    {
-    	std::ostringstream os;
-    	toNDDL(os);
-    	return os.str();
-    }  
-
-
     ObjType::ObjType(const std::string& name,ObjType* parentObjType)
         : Type(name)
         , m_parent(parentObjType)
@@ -347,14 +351,18 @@ namespace ANML
     void Action::toNDDL(std::ostream& os) const
     {
     	os << m_objType.getName() << "::" << m_name << "(";
-    	os << ")" << std::endl;
         for (unsigned int i=0; i<m_params.size(); i++) {
         	if (i>0)
         	    os << ",";
         	m_params[i]->toNDDL(os);
         }    	
+    	os << ")" << std::endl;
+
     	os << "{" << std::endl;
-    	// TODO: generate NDDL for internal elements
+        for (unsigned int i=0; i<m_body.size(); i++) {
+        	m_body[i]->toNDDL(os);
+        	os << std::endl;
+        }    	
     	os << "}" << std::endl;
     }
     
@@ -377,4 +385,26 @@ namespace ANML
         
         return os.str();    	
     }
+        
+    ActionDuration::ActionDuration(const std::vector<std::string>& values)
+        : ANMLElement("ACTION_DURATION")
+        , m_values(values)
+    {
+    }
+    
+    ActionDuration::~ActionDuration()
+    {    	
+    }
+    
+    void ActionDuration::toNDDL(std::ostream& os) const
+    {
+    	os << "    eq(duration,";
+    	
+    	if (m_values.size() == 2) 
+    		os << "[" << m_values[0] << " " << m_values[1] << "]";
+    	else 
+    	    os << m_values[0];
+    	    
+    	os << ");";
+    }      
 }

@@ -70,8 +70,8 @@ class ANMLElement
 
     virtual const std::string& getType() { return m_type; }
     virtual const std::string& getName() const { return m_name; }
-    virtual void toNDDL(std::ostream& os) const { os << toString(); }
-    virtual std::string toString() const { return m_type+" "+m_name;}
+    virtual void toNDDL(std::ostream& os) const;
+    virtual std::string toString() const;
     
   protected:    
     std::string m_type;
@@ -164,9 +164,7 @@ class VarDeclaration : public ANMLElement
     virtual ~VarDeclaration();
 
     virtual void toNDDL(std::ostream& os) const;
-    
-    virtual std::string toString() const;
-  
+      
   protected:
 	const Type& m_dataType;
 	std::vector<VarInit*> m_init;
@@ -208,6 +206,18 @@ class Action : public ANMLElement, public ANMLContext
     ObjType& m_objType;
     std::vector<Variable*> m_params;
     std::vector<ANMLElement*> m_body;
+};
+
+class ActionDuration : public ANMLElement
+{
+  public:
+    ActionDuration(const std::vector<std::string>& values);
+    virtual ~ActionDuration();
+    
+    virtual void toNDDL(std::ostream& os) const;
+    
+  protected:  
+    std::vector<std::string> m_values;    	
 };
 
 /*

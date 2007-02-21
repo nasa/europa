@@ -360,7 +360,7 @@ time_pt
     : numeric_expr
 ;
 
-numeric_expr 
+numeric_expr returns [std::string expr;]
     :     (#(PLUS numeric_expr numeric_expr)) => #(PLUS numeric_expr numeric_expr)
 		| (#(MINUS numeric_expr numeric_expr)) => #(MINUS numeric_expr numeric_expr)
 		| #(MULT numeric_expr numeric_expr)
@@ -368,7 +368,7 @@ numeric_expr
 		| #(LPAREN numeric_expr)
 		| #(PLUS numeric_expr)
 		| #(MINUS numeric_expr)
-		| numeric_literal
+		| expr=numeric_literal
 		| lhs_expr
 ;
 
@@ -418,9 +418,13 @@ action_body_stmt returns [ANML::ANMLElement* element]
 // TODO: semantic layer to enforce that only one duration statement is allowed    
 duration_stmt returns [ANML::ANMLElement* element]
 {
-    element = new ANML::ANMLElement("DURATION");	
+    std::vector<std::string> values;
+    std::string v;
 }    
-    : #(DURATION (numeric_expr | range))
+    : #(DURATION (v=numeric_expr { values.push_back(v); } | values=range))
+{
+    element = new ANML::ActionDuration(values);	
+}    
 ;
 
 condition_stmt returns [ANML::ANMLElement* element]
