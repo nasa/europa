@@ -10,6 +10,7 @@ namespace ANML
 
 class ANMLContext;
 class ANMLElement;
+class Type;
 class ObjType;
 
 class ANMLTranslator
@@ -23,7 +24,7 @@ class ANMLTranslator
 
       virtual ANMLContext& getContext() { return *m_context; }
             
-      virtual void toNDDL(std::ostream& os);
+      virtual void toNDDL(std::ostream& os) const;
       
 	  virtual std::string toString() const;      
       
@@ -44,21 +45,20 @@ class ANMLContext
     	
     virtual void addElement(ANMLElement* element);
     
-	virtual ObjType* getObjType(const std::string& name) const;
+	virtual void     addType(Type* type);
 	virtual ObjType* addObjType(const std::string& name,const std::string& parentName);
+
+	virtual Type*    getType(const std::string& name,bool mustExist=false) const;
+	virtual ObjType* getObjType(const std::string& name) const;
 	
-    virtual void toNDDL(std::ostream& os);
+    virtual void toNDDL(std::ostream& os) const;
     
 	virtual std::string toString() const;
 		
   protected:
     const ANMLContext* m_parent;
     std::vector<ANMLElement*> m_elements;      
-    std::map<std::string,ObjType*> m_objTypes;
-    
-	void addObjType(ObjType* objType);
-	
-    friend class ANMLTranslator;
+    std::map<std::string,Type*> m_types;    
 };
 
 class ANMLElement
@@ -70,7 +70,7 @@ class ANMLElement
 
     virtual const std::string& getType() { return m_type; }
     virtual const std::string& getName() const { return m_name; }
-    virtual void toNDDL(std::ostream& os) { os << toString(); }
+    virtual void toNDDL(std::ostream& os) const { os << toString(); }
     virtual std::string toString() const { return m_type+" "+m_name;}
     
   protected:    
@@ -84,9 +84,46 @@ class Type : public ANMLElement
 	Type(const std::string& name);
 	virtual ~Type();
 	    
-    virtual void toNDDL(std::ostream& os) {}
+	virtual bool isPrimitive() const { return true; }
+	    
+    virtual void toNDDL(std::ostream& os) const {}
     
     virtual std::string toString() const;
+};
+
+class Range : public Type
+{
+  public:
+	Range(const Type& dataType,const std::string& lb,const std::string& ub);
+	virtual ~Range();
+	    
+	virtual bool isPrimitive() const { return true; }
+	    
+    virtual void toNDDL(std::ostream& os) const;
+    
+    virtual std::string toString() const;
+
+  protected:
+    const Type& m_dataType;
+    std::string m_lb;
+    std::string m_ub;
+};
+
+class Enumeration : public Type
+{
+  public:
+	Enumeration(const Type& dataType,const std::vector<std::string>& values);
+	virtual ~Enumeration();
+	    
+	virtual bool isPrimitive() const { return m_dataType.isPrimitive(); }
+	    
+    virtual void toNDDL(std::ostream& os) const;
+    
+    virtual std::string toString() const;
+
+  protected:
+    const Type& m_dataType;
+    std::vector<std::string> m_values;
 };
 	
 class Variable : public ANMLElement
@@ -95,7 +132,7 @@ class Variable : public ANMLElement
     Variable(const Type& type, const std::string& name);
     ~Variable();
 
-    virtual void toNDDL(std::ostream& os);
+    virtual void toNDDL(std::ostream& os) const;
     
     virtual std::string toString() const;
   
@@ -103,6 +140,38 @@ class Variable : public ANMLElement
 	const Type& m_dataType;
 };
     
+class VarInit
+{
+  public:
+      VarInit(const std::string& name, const std::string& value)
+          : m_name(name)
+          , m_value(value)
+      {
+      }
+      
+      const std::string& getName() const { return m_name; }
+      const std::string& getValue() const { return m_value; }
+      
+  protected:
+      std::string m_name;
+      std::string m_value;	
+};
+    
+class VarDeclaration : public ANMLElement
+{
+  public:
+    VarDeclaration(const Type& type, const std::vector<VarInit*>& init);
+    virtual ~VarDeclaration();
+
+    virtual void toNDDL(std::ostream& os) const;
+    
+    virtual std::string toString() const;
+  
+  protected:
+	const Type& m_dataType;
+	std::vector<VarInit*> m_init;
+};
+
 class ObjType : public Type, public ANMLContext
 {
   public:
@@ -111,7 +180,9 @@ class ObjType : public Type, public ANMLContext
     
     ObjType* getParent() const { return m_parent; }
         
-    virtual void toNDDL(std::ostream& os);
+	virtual bool isPrimitive() const { return false; }
+
+    virtual void toNDDL(std::ostream& os) const;
     
     virtual std::string toString() const;
     
@@ -129,7 +200,7 @@ class Action : public ANMLElement, public ANMLContext
     
     void setBody(const std::vector<ANMLElement*>& body);
   
-    virtual void toNDDL(std::ostream& os);
+    virtual void toNDDL(std::ostream& os) const;
     
     virtual std::string toString() const;
     

@@ -114,42 +114,83 @@ vartype_decl returns [ANML::ANMLElement* element]
     : #(VARTYPE user_defined_type_name var_type)
 ;
 
-// TODO: semantic layer to check whether we're declaring an object or a variable
 var_obj_declaration! returns [ANML::ANMLElement* element]
 {
-    element = new ANML::ANMLElement("VARIABLE");	
+	ANML::Type* type;
+	std::vector<ANML::VarInit*> varInit;
 }    
-    : #(VARIABLE var_type var_init_list)
+    : #(VARIABLE type=var_type varInit=var_init_list)
+{
+    element = new ANML::VarDeclaration(*type,varInit);	
+}    
 ;
 
-var_init_list
-		: (var_init)+
+var_init_list returns [std::vector<ANML::VarInit*> varInit;]
+{
+	ANML::VarInit* vi;
+}
+	: (vi=var_init { varInit.push_back(vi); })+
 ;
 
 var_type returns [ANML::Type* t;]
-    : BOOL
-    | IDENTIFIER
-    | #(INT (range|enum_body)?)
-	| #(FLOAT (range|enum_body)?)
-    | #(STRING (enum_body)?)
-    | #(VECTOR vector_body)
+{
+	std::vector<std::string> values;
+	ANML::ANMLContext& context = m_translator.getContext();
+}
+    : BOOL { t = context.getType("bool"); }
+    | s:IDENTIFIER { t = context.getType(s->getText(),true); }
+    | #(INT { t = context.getType("int"); } 
+         (  values=range     { t = new ANML::Range(*t,values[0],values[1]); context.addType(t); } 
+           |values=enum_body { t = new ANML::Enumeration(*t,values); context.addType(t); }
+         )?
+      )
+	| #(FLOAT { t = context.getType("float"); }
+	     (  values=range     { t = new ANML::Range(*t,values[0],values[1]); context.addType(t); }
+	       |values=enum_body { t = new ANML::Enumeration(*t,values); context.addType(t); }
+	     )?
+	  )
+    | #(STRING { t = context.getType("string"); }
+         (values=enum_body { t = new ANML::Enumeration(*t,values); context.addType(t);}
+         )?
+      )
+    | #(VECTOR vector_body)   { throw Error("Vector data type not suported yet"); }
 ;
 
-enum_body
-    : #(LCURLY (constant)+)
+enum_body returns [std::vector<std::string> values;]
+{
+	std::string v;
+}
+    : #(LCURLY (constant { values.push_back(v); })+)
 ;
 
 vector_body
     : parameters
 ;
 
-range 
-    : #(LBRACK signed_literal signed_literal)
+range returns [std::vector<std::string> values;]
+{
+	std::string lb,ub;
+}
+    : #(LBRACK lb=signed_literal ub=signed_literal)
+{
+	// TODO: validate range
+	values.push_back(lb);
+	values.push_back(ub);	
+}    
 ;
 
-var_init 
-    : #(EQUAL var_name (constant)?)
-		| var_name
+var_init returns [ANML::VarInit* vi;]
+{
+	std::string name;
+	std::string value;
+}
+    : #(EQUAL name=var_name (value=constant)?)
+	| name=var_name
+{
+	// TODO: do type checking for initialization!
+	// TODO: Add variable to context
+	vi = new ANML::VarInit(name,value);
+}	
 ;
 
 parameters returns [std::vector<ANML::Variable*> params;]
@@ -477,25 +518,29 @@ trans_pair
 unsigned_constant 
     : numeric_literal | string_literal | bool_literal
 ;
-constant 
-    : signed_literal | string_literal | bool_literal
+constant returns [std::string s;]
+    : s=signed_literal 
+    | s=string_literal 
+    | s=bool_literal
 ;
 
-signed_literal
-    : numeric_literal
-		| #(MINUS numeric_literal) 
+signed_literal returns [std::string s;]
+    : t1:numeric_literal           { s = t1->getText(); }
+	| #(MINUS t2:numeric_literal)  { s = "-" + t2->getText(); }
 ;
 
-numeric_literal 
-    : NUMERIC_LIT | INF
+numeric_literal returns [std::string s;]
+    : t1:NUMERIC_LIT { s = t1->getText(); }
+    | t2:INF         { s = t2->getText(); }
 ;
 
-bool_literal
-    : TRUE | FALSE
+bool_literal returns [std::string s;]
+    : t1:TRUE  { s = t1->getText(); }
+    | t2:FALSE { s = t2->getText(); }
 ;
 
-string_literal
-    : STRING_LIT
+string_literal returns [std::string s;]
+    : t:STRING_LIT { s = t->getText(); }
 ;
 
 action_symbol           : IDENTIFIER;
@@ -504,7 +549,11 @@ constraint_symbol       : IDENTIFIER;
 function_symbol         : IDENTIFIER;
 
 object_name             : IDENTIFIER;
-var_name                : IDENTIFIER | START | END;
+var_name returns [std::string s;]               
+    : t1:IDENTIFIER { s = t1->getText(); } 
+    | t2:START      { s = t2->getText(); } 
+    | t3:END        { s = t3->getText(); }
+;
 
 qualified_var_name!
     : #(DOT qualified_var_name qualified_var_name)

@@ -20,7 +20,11 @@ namespace ANML
     {
     	ANMLContext* context = new ANMLContext();
     	
-    	context->addObjType(new ObjType("object",NULL));
+    	context->addType(new Type("bool"));
+    	context->addType(new Type("int"));
+    	context->addType(new Type("float"));
+    	context->addType(new Type("string"));
+    	context->addType(new ObjType("object",NULL));
     	
     	return context;
     }
@@ -37,7 +41,7 @@ namespace ANML
     	check_runtime_error(m_context != NULL,"ANMLTranslator context can't be NULL");
     }      
             
-    void ANMLTranslator::toNDDL(std::ostream& os)
+    void ANMLTranslator::toNDDL(std::ostream& os) const
     {
     	return m_context->toNDDL(os);        
     }
@@ -68,37 +72,48 @@ namespace ANML
     	    std::cerr << "ERROR: tried to add null element to ANMLContext" << std::endl;    	    
     }
 
-    ObjType* ANMLContext::addObjType(const std::string& className,const std::string& parentObjType)
+    ObjType* ANMLContext::addObjType(const std::string& name,const std::string& parentObjType)
     {
-    	check_runtime_error(getObjType(className) == NULL,"class "+className+" already defined");
+    	check_runtime_error(getType(name) == NULL,"data type "+name+" already defined");
     	    
     	ObjType* parent = getObjType(parentObjType);
     	check_runtime_error(parent != NULL,"parent class "+parentObjType+" has not been defined");
     	
-    	ObjType* newType = new ObjType(className,parent);
-    	m_objTypes[className] = newType;
-    	debugMsg("ANMLContext","Added class:" << className);
+    	ObjType* newType = new ObjType(name,parent);
+    	addType(newType);
     	
     	return newType;
     }
 	
-    void ANMLContext::addObjType(ObjType* objType)
+    void ANMLContext::addType(Type* type)
     {
-    	m_objTypes[objType->getName()] = objType;
-    	debugMsg("ANMLContext","Added class:" << objType->getName());
+    	m_types[type->getName()] = type;
+    	debugMsg("ANMLContext","Added type:" << type->getName());
     }
 	
-	ObjType* ANMLContext::getObjType(const std::string& className) const
+	Type* ANMLContext::getType(const std::string& name,bool mustExist) const
 	{
-		std::map<std::string,ObjType*>::const_iterator it = m_objTypes.find(className);
+		std::map<std::string,Type*>::const_iterator it = m_types.find(name);
 		
-		if (it != m_objTypes.end())
+		if (it != m_types.end()) 
 		    return it->second;
 		   
-		 return NULL;
+		if (mustExist)
+    		check_runtime_error(false, "Type "+name+" has not been defined");
+		   
+    	return NULL;
+	}
+
+	ObjType* ANMLContext::getObjType(const std::string& name) const
+	{
+		Type* type = getType(name);
+		check_runtime_error(type != NULL, "Object type "+name+" has not been defined");
+		check_runtime_error(!(type->isPrimitive()),name+" is a primitive type, not an Object type");
+		   
+		 return (ObjType*)type;
 	}
 	
-    void ANMLContext::toNDDL(std::ostream& os)
+    void ANMLContext::toNDDL(std::ostream& os) const
     {
     	for (unsigned int i=0; i<m_elements.size(); i++) {
     	    m_elements[i]->toNDDL(os);
@@ -135,6 +150,76 @@ namespace ANML
         
         return os.str();    	
     }
+ 
+    std::string autoTypeName(const char* base)
+    {
+    	static int cnt=0;
+    	std::ostringstream os;
+        
+        os << base << "_" << cnt++;
+        
+        return os.str();    	
+    }
+
+	Range::Range(const Type& dataType,const std::string& lb,const std::string& ub)	
+	    : Type(autoTypeName("Range"))
+	    , m_dataType(dataType)
+	    , m_lb(lb)
+	    , m_ub(ub)
+	{
+		// TODO: convert lb,ub to typed values
+	}
+	
+	Range::~Range()
+	{
+	}
+	        
+    void Range::toNDDL(std::ostream& os) const
+    {
+    	os << toString();
+    }
+    
+    std::string Range::toString() const
+    {
+    	std::ostringstream os;
+        
+        os << m_dataType.getName() << " [" << m_lb << " " << m_ub <<  "]";
+        
+        return os.str();    	
+    }
+
+
+	Enumeration::Enumeration(const Type& dataType,const std::vector<std::string>& values)
+	    : Type(autoTypeName("Enumeration"))
+	    , m_dataType(dataType)
+	    , m_values(values)
+	{
+		// TODO: convert lb,ub to typed values
+	}
+	
+	Enumeration::~Enumeration()
+	{
+	}
+	        
+    void Enumeration::toNDDL(std::ostream& os) const
+    {
+    	os << toString();
+    }
+    
+    std::string Enumeration::toString() const
+    {
+    	std::ostringstream os;
+        
+        os << m_dataType.getName() << " {";
+        
+        for (unsigned int i=0;i<m_values.size(); i++) {
+            if (i>0)
+                os << ",";
+            os << m_values[i];
+        }                           
+        
+        return os.str();    	
+    }
 
     Variable::Variable(const Type& dataType, const std::string& name)
         : ANMLElement("VARIABLE",name)
@@ -146,7 +231,7 @@ namespace ANML
     {
     }
 
-    void Variable::toNDDL(std::ostream& os)
+    void Variable::toNDDL(std::ostream& os) const
     {
     	os << m_dataType.getName() << " " << m_name;
     }
@@ -160,6 +245,42 @@ namespace ANML
         return os.str();    	
     }
 
+    VarDeclaration::VarDeclaration(const Type& type, const std::vector<VarInit*>& init)
+        : ANMLElement("VAR_DECLARATION")
+        , m_dataType(type)
+        , m_init(init)
+    {
+    }
+    
+    VarDeclaration::~VarDeclaration()
+    {
+    }
+
+    void VarDeclaration::toNDDL(std::ostream& os) const
+    {
+    	os << m_dataType.getName() << " ";
+    	for (unsigned int i=0; i < m_init.size(); i++) {
+    		if (i>0)
+    		    os << " , ";
+    		os << m_init[i]->getName();
+    		if (m_init[i]->getValue().length() > 0) {
+    			os << "=" << m_init[i]->getValue();
+    		}
+    		else if (!m_dataType.isPrimitive()) {
+    			os << " = new " << m_dataType.getName() << "()";
+    		}
+    	}
+    	os << ";";
+    }
+    
+    std::string VarDeclaration::toString() const
+    {
+    	std::ostringstream os;
+    	toNDDL(os);
+    	return os.str();
+    }  
+
+
     ObjType::ObjType(const std::string& name,ObjType* parentObjType)
         : Type(name)
         , m_parent(parentObjType)
@@ -170,7 +291,7 @@ namespace ANML
     {
     }
     
-    void ObjType::toNDDL(std::ostream& os)
+    void ObjType::toNDDL(std::ostream& os) const
     {
         std::string parent = ((m_parent != NULL && m_parent->getName() != "object") ? (std::string(" extends ") + m_parent->getName()) : "");
         os << "class " << m_name << parent << std::endl 
@@ -223,7 +344,7 @@ namespace ANML
     	m_body = body;
     }
     
-    void Action::toNDDL(std::ostream& os)
+    void Action::toNDDL(std::ostream& os) const
     {
     	os << m_objType.getName() << "::" << m_name << "(";
     	os << ")" << std::endl;
