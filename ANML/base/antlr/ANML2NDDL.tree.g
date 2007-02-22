@@ -159,6 +159,7 @@ var_type returns [ANML::Type* t;]
 enum_body returns [std::vector<std::string> values;]
 {
 	std::string v;
+	// TODO: validate values (flag  duplicates, type checking)
 }
     : #(LCURLY (constant { values.push_back(v); })+)
 ;
@@ -173,7 +174,7 @@ range returns [std::vector<std::string> values;]
 }
     : #(LBRACK lb=signed_literal ub=signed_literal)
 {
-	// TODO: validate range
+	// TODO: validate range, do type checking
 	values.push_back(lb);
 	values.push_back(ub);	
 }    
@@ -270,38 +271,51 @@ effect_proposition_list
     : #(LCURLY (effect_proposition)+)
 ;
 
-condition_proposition 
-    : proposition
+condition_proposition returns [ANML::Proposition* p;]
+    : p=proposition
 ;
 
-condition_proposition_list
-    : #(LCURLY (condition_proposition)+)
+condition_proposition_list returns [std::vector<ANML::Proposition*> l;]
+{
+    ANML::Proposition* p;
+}
+    : #(LCURLY (p=condition_proposition { l.push_back(p); })+)
 ;
 
-proposition!
-    : qualif_fluent
+proposition! returns [ANML::Proposition* p;]
+    : p=qualif_fluent
     | #(WHEN #(LCURLY condition_proposition) #(LCURLY effect_proposition))
     | #(FROM time_pt qualif_fluent_list)
-    | #(FOR object_name #(LCURLY proposition))
+    | #(FOR object_name #(LCURLY proposition))    
 ;
 
-qualif_fluent
-    : #(FLUENT temporal_qualif fluent_list)
+qualif_fluent returns [ANML::Proposition* p;]
+{
+	ANML::TemporalQualifier* tq;
+	std::vector<ANML::Fluent*> fluents;
+}
+    : #(FLUENT tq=temporal_qualif fluents=fluent_list)
+{
+	p = new ANML::Proposition(tq,fluents);
+}    
 ;
 
 qualif_fluent_list 
     : #(LCURLY (qualif_fluent)+)
 ;
 
-fluent_list
-    : #(LCURLY (fluent)+)
+fluent_list returns [std::vector<ANML::Fluent*> fluents;]
+{
+	ANML::Fluent* f;
+} 
+    : #(LCURLY (f=fluent { fluents.push_back(f); })+)
 ;
 
-fluent
-    : #(LPAREN fluent)
+fluent returns [ANML::Fluent* f;]
+    : #(LPAREN f=fluent)
 		| #(OR fluent fluent)
 		| #(AND fluent fluent)
-		| relational_fluent 
+		| f=relational_fluent 
     | quantif_clause fluent
 ;
 
@@ -315,29 +329,37 @@ var_list
 ;
 
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
-relational_fluent 
-    : #(EQUAL lhs_expr expr)
-		| lhs_expr
+relational_fluent returns [ANML::RelationalFluent* f;]
+{
+	ANML::LHSExpr* lhs;
+	ANML::Expr*    rhs;
+}
+    : #(EQUAL lhs=lhs_expr rhs=expr)
+	| lhs=lhs_expr
+{
+	// TODO: do type checking for lhs and rhs
+	f = new ANML::RelationalFluent(lhs,rhs);
+}	
 ;
 
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 // TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
-lhs_expr
-    : #(FUNCTION function_symbol arguments)
+lhs_expr returns [ANML::LHSExpr* p;]
+    : #(FUNCTION function_symbol arguments) // This an action or a function
     | qualified_var_name
 ;
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
-expr 
+expr returns [ANML::Expr* e;] 
     : constant
-		| arguments
-    | lhs_expr
+	| arguments
+    | e=lhs_expr
 ;
 
 // TODO: For effects and facts:
 // - Temporal qualifiers IN, BEFORE, AFTER (and CONTAINS??) are not allowed. What about FROM?
 // check and throw semantic exception if necessary
-temporal_qualif 
+temporal_qualif returns [ANML::TemporalQualifier* tq;]
     : #(AT time_pt)
     | #(OVER interval)
     | #(IN interval (numeric_expr)?)
@@ -429,9 +451,15 @@ duration_stmt returns [ANML::ANMLElement* element]
 
 condition_stmt returns [ANML::ANMLElement* element]
 {
-    element = new ANML::ANMLElement("CONDITION");	
+    std::vector<ANML::Proposition*> propositions;
+    ANML::Proposition* p;
 }    
-    : #(CONDITION (condition_proposition | condition_proposition_list))
+    : #(CONDITION (
+         p=condition_proposition { propositions.push_back(p); }
+         | propositions=condition_proposition_list))
+{
+    element = new ANML::Condition(propositions);	
+}    
 ;
     
 effect_stmt returns [ANML::ANMLElement* element]

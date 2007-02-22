@@ -220,6 +220,91 @@ class ActionDuration : public ANMLElement
     std::vector<std::string> m_values;    	
 };
 
+class Expr;
+class LHSExpr;
+class Fluent;
+class Proposition;
+class TemporalQualifier;
+
+class Condition : public ANMLElement
+{
+  public:
+    Condition(const std::vector<Proposition*>& propositions) : ANMLElement("CONDITION"), m_propositions(propositions) {}
+    virtual ~Condition() {}
+    
+    virtual void toNDDL(std::ostream& os) const { /*TODO*/}
+    
+  protected:  
+    std::vector<Proposition*> m_propositions;    	
+};
+
+class Proposition : public ANMLElement
+{
+  public:
+    Proposition(TemporalQualifier* tq,const std::vector<Fluent*>& fluents) 
+       : ANMLElement("PROPOSITION"), m_temporalQualifier(tq), m_fluents(fluents) {}
+    virtual ~Proposition() {}
+    
+    virtual void toNDDL(std::ostream& os) const { /*TODO*/}
+    
+  protected:  
+    TemporalQualifier* m_temporalQualifier;
+    std::vector<Fluent*> m_fluents;    	
+};
+
+class TemporalQualifier : public ANMLElement
+{
+  public:
+    TemporalQualifier() : ANMLElement("TEMPORAL_QUALIFIER") {}
+    virtual ~TemporalQualifier() {}
+    
+    virtual void toNDDL(std::ostream& os) const { /*TODO*/}
+};
+
+class Fluent : public ANMLElement
+{
+  public:
+    Fluent() : ANMLElement("FLUENT"){}
+    virtual ~Fluent() {}
+    
+    virtual void toNDDL(std::ostream& os) const { /*TODO*/}    
+};
+
+class RelationalFluent : public Fluent
+{
+  public:
+    RelationalFluent(LHSExpr* lhs,Expr* rhs) : m_lhs(lhs), m_rhs(rhs) {}
+    virtual ~RelationalFluent() {}
+    
+    virtual void toNDDL(std::ostream& os) const { /*TODO*/}
+    
+  protected:  
+    LHSExpr* m_lhs;
+    Expr* m_rhs;    	
+};
+
+class Expr : public ANMLElement
+{
+  public:
+    Expr() : ANMLElement("EXPR") {}
+    virtual ~Expr() {}
+    
+    virtual void toNDDL(std::ostream& os) const { /*TODO*/}    
+};
+
+class LHSExpr : public Expr
+{
+  public:
+    LHSExpr() {}
+    virtual ~LHSExpr() {}
+    
+    virtual void toNDDL(std::ostream& os) const { /*TODO*/}
+    
+  protected:  
+    //std::vector<Proposition*> m_propositions;    	
+};
+
+
 /*
 class RuntimeException
 {
