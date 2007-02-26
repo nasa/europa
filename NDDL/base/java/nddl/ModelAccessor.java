@@ -11,7 +11,7 @@ import java.io.FileNotFoundException;
  * @brief Integrates all access to the XML structure in a common place
  * and returns the information for substitution into code by the caller.
  */
-class ModelAccessor {
+public class ModelAccessor {
   static String s_directory = System.getProperty("user.dir");
 	static String s_cfgFilename = "NDDL.cfg";
   static boolean s_cfgExact = true;
