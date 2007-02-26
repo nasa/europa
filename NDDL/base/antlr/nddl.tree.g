@@ -144,7 +144,7 @@ inclusion[IXMLElement parent]
         copyPosition(include,_t); }
       str:STRING
       { String filename = str.getText();
-      include.setAttribute(NddlXmlStrings.x_name,filename.substring(1,filename.length()-1)); }
+      include.setAttribute(NddlXmlStrings.x_name,filename); }
      )
   ;
 
@@ -660,7 +660,7 @@ value![IXMLElement parent]
       /* copyPosition(element,_t); */}
     str:STRING
     { String string = str.getText();
-      element.setAttribute(NddlXmlStrings.x_name, string.substring(1,string.length()-1));
+      element.setAttribute(NddlXmlStrings.x_name, string);
       element.setAttribute(NddlXmlStrings.x_type, NddlXmlStrings.x_string);}
   | element=number[parent]
   ;

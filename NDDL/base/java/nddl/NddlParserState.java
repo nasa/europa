@@ -1,6 +1,7 @@
 package nddl;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.Stack;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,6 +28,8 @@ import antlr.SemanticException;
 public class NddlParserState implements NddlTokenTypes
 {
 	protected Stack parsers = new Stack();
+	protected List parsedFiles = new ArrayList();
+	protected PrintStream err = System.err;
 
 	private LinkedList context = new LinkedList();
 	private int anonymousContext = 0;
@@ -52,24 +55,34 @@ public class NddlParserState implements NddlTokenTypes
 		}
 		else
 		{
+			primatives.putAll(init.primatives);
 			names.putAll(init.names);
 			constraints.putAll(init.constraints);
 			predeclaredClasses.addAll(init.predeclaredClasses);
 			parsers.addAll(init.parsers);
+			err = init.err;
 			errorCount = init.errorCount;
 			warningCount = init.warningCount;
 		}
 	}
 	
+	public void setErrStream(PrintStream err) {this.err = err;}
+	public void addFile(File file) {parsedFiles.add(file);}
+	public boolean containsFile(File file) { return parsedFiles.contains(file);}
 	public void pushParser(NddlParser parser) {this.parsers.push(parser);}
 	public NddlParser popParser() {return (NddlParser)parsers.pop();}
 	public NddlParser getParser() {return (NddlParser)parsers.peek();}
+
+	public void resetCounts() {
+		warningCount = 0;
+		errorCount = 0;
+	}
 
 	public void warn(String type, String message)
 	{
 		++warningCount;
 		if(NddlParser.warnings.contains(type) || NddlParser.warnings.contains("all"))
-			System.err.println(getErrorPrefix("warning", null)+message);
+			err.println(getErrorPrefix("warning", null)+message);
 		else
 			++suppressedCount;
 	}
@@ -77,19 +90,19 @@ public class NddlParserState implements NddlTokenTypes
 	{
 		++warningCount;
 		if(NddlParser.warnings.contains(type) || NddlParser.warnings.contains("all"))
-			System.err.println(getErrorPrefix("warning",ex)+ex.getMessage());
+			err.println(getErrorPrefix("warning",ex)+ex.getMessage());
 		else
 			++suppressedCount;
 	}
 	public void error(String message)
 	{
 		++errorCount;
-		System.err.println(getErrorPrefix("error",null)+message);
+		err.println(getErrorPrefix("error",null)+message);
 	}
 	public void error(Exception ex)
 	{
 		++errorCount;
-		System.err.println(getErrorPrefix("error",ex)+ex.getMessage());
+		err.println(getErrorPrefix("error",ex)+ex.getMessage());
 	}
 	private String getErrorPrefix(String type, Exception ex)
 	{
@@ -125,18 +138,19 @@ public class NddlParserState implements NddlTokenTypes
 	public boolean printWarnCount()
 	{
 		if(warningCount == 0) return false;
-		if(warningCount == 1) System.err.print("1 warning");
-		else System.err.print(warningCount+" warnings");
-		if(suppressedCount == 1) System.err.println(" ("+suppressedCount+" message suppressed)");
-		else if(suppressedCount > 1) System.err.println(" ("+suppressedCount+" messages suppressed)");
-		else System.err.println();
+		if(warningCount == 1) err.print("1 warning");
+		else err.print(warningCount+" warnings");
+		if(suppressedCount == 1) err.println(" ("+suppressedCount+" message suppressed)");
+		else if(suppressedCount > 1) err.println(" ("+suppressedCount+" messages suppressed)");
+		else err.println();
 		return true;
 	}
+
 	public boolean printErrorCount()
 	{
 		if(errorCount == 0) return false;
-		else if(errorCount == 1) System.err.println("1 error");
-		else System.err.println(errorCount+" errors");
+		else if(errorCount == 1) err.println("1 error");
+		else err.println(errorCount+" errors");
 		return true;
 	}
 

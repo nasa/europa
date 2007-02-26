@@ -1,16 +1,20 @@
 header {
 package nddl;
 
+import antlr.TokenStreamRecognitionException;
+import antlr.MismatchedCharException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.Reader;
 import java.io.Writer;
 }
 
@@ -95,14 +99,12 @@ tokens {
 }
 
 {
-  static final int MAJOR_RELEASE = 1;
-  static final int MINOR_RELEASE = 1;
-
   /// for some strange reason there is no access to the LLkParser's k variable.
   static final int K = 3;
 
-  static List parsed = new ArrayList();
-  static Set warnings = new HashSet();
+  /// a set of enabled warning messages
+  public static final Set warnings = new HashSet();
+	private boolean interp = false;
 
   NddlParserState state;
   NddlLexer lexer;
@@ -116,28 +118,19 @@ tokens {
     this(lexer);
     this.lexer = lexer;
     setASTFactory(new NddlASTFactory(lexer));
-    if(state == null)
-      this.state = new NddlParserState(null);
-    else
-      this.state = state;
+    this.state = new NddlParserState(state);
   }
 
   public NddlParserState getState() {
     return state;
   }
 
-  public static String version() {
-    return "NddlParser "+
-           MAJOR_RELEASE+"."+
-           MINOR_RELEASE;
-  }
-  
   private static String getCanonicalPath(File file) {
     try {
       return file.getCanonicalPath();
     }
     catch(java.io.IOException ex) {
-      return "UNIQ-"+file.getName();
+      return file.getName();
     }
   }
 
@@ -175,16 +168,15 @@ tokens {
   public static NddlParser parse(NddlParserState init, File file, Writer debugWriter) throws RecognitionException, TokenStreamException, FileNotFoundException {
     if(!file.exists())
       throw new FileNotFoundException("Could not parse missing file: "+file);
-    if(parsed.contains(getCanonicalPath(file)))
+    if(init != null && init.containsFile(file))
       return null;
-    else
-      parsed.add(getCanonicalPath(file));
 
     BufferedReader reader = new BufferedReader(new FileReader(file));
-    NddlLexer lexer = new NddlLexer(reader,file);
+    NddlLexer lexer = new NddlLexer(reader,file, false);
     NddlParser parser = new NddlParser(lexer, init);
 
     parser.getState().pushParser(parser);
+    parser.getState().addFile(file);
     parser.nddl();
     parser.getState().popParser();
 
@@ -202,19 +194,42 @@ tokens {
     return parser;
   }
 
-  private AST addFileToState(String quotedFn) throws RecognitionException, TokenStreamException, FileNotFoundException {
-    //For now, assume string has no escaped characters
-    String fn = quotedFn.substring(1,quotedFn.length()-1);
-    File include = ModelAccessor.generateIncludeFileName(lexer.getFile().getParent(), fn);
+  public static NddlParser eval(NddlParserState init, Reader reader) throws RecognitionException, TokenStreamException, EOFException {
+    NddlLexer lexer = new NddlLexer(reader, null, true);
+    NddlParser parser = new NddlParser(lexer, init);
+
+    parser.getState().pushParser(parser);
+		parser.interp = true;
+		try {
+    	parser.nddlInterp();
+		}
+		catch(TokenStreamRecognitionException ex) {
+			// Magic number is EOF
+		  if((ex.recog instanceof MismatchedCharException) && ((MismatchedCharException) ex.recog).foundChar == 65535)
+				throw new EOFException();
+			throw ex;
+		}
+		if(parser.getState().getErrorCount() == 0 && lexer.hasPrematureEOF())
+			throw new EOFException();
+   	parser.getState().popParser();
+
+    return parser;
+  }
+
+  private AST addFileToState(String fn) throws RecognitionException, TokenStreamException, FileNotFoundException {
+		String directory = (lexer.getFile() != null)? lexer.getFile().getParent() : null;
+    File include = ModelAccessor.generateIncludeFileName(directory, fn);
     if(include == null)
       throw new FileNotFoundException("Cannot find \""+fn+"\"");
 
+    if(state.containsFile(include))
+      state.warn("includes","Previously parsed: "+getCanonicalPath(include));
+
     NddlParser parser = NddlParser.parse(state,include,null);
+		state = parser.getState();
 
     if(parser!=null)
       return parser.getAST();
-    else
-      state.warn("includes","Previously parsed: "+getCanonicalPath(include));
 
     return null;
   }
@@ -291,7 +306,14 @@ tokens {
   }
 
   public void reportError(RecognitionException ex) {
-    state.error(ex);
+		// let's the interpreter know about incomplete code (missing EOF) rather than erroring out.
+		if(interp &&
+		    (((ex instanceof MismatchedTokenException) && ((MismatchedTokenException) ex).token.getType() == Token.EOF_TYPE) ||
+		     ((ex instanceof NoViableAltException) && ((NoViableAltException) ex).token.getType() == Token.EOF_TYPE)))
+			lexer.setPrematureEOF();
+		else {
+    	state.error(ex);
+		}
   }
 
   public void reportWarning(RecognitionException ex) {
@@ -346,7 +368,11 @@ tokens {
   }
 }
 
-// GNATS for const
+nddlInterp:
+    (nddlStatement)* EOF!
+    {#nddlInterp = #(#[NDDL,"NDDL"],#nddlInterp);}
+  ;
+
 nddl:
     (nddlStatement)* EOF!
     {#nddl = #(#[NDDL,"NDDL"],#nddl);}
@@ -371,8 +397,8 @@ nddlStatement:
   ;
   exception 
   catch [RecognitionException ex] {
-    state.error(ex.getMessage());
-    match(LA(1));
+   	reportError(ex);
+   	match(LA(1));
   } 
   catch [TokenStreamException tx] {
     state.error(tx.getMessage()); match(LA(1));
@@ -485,7 +511,6 @@ constructorBlock:
 
 constructorStatement:
     (assignment | superInvocation) SEMICOLON!
-  | flowControl
   | SEMICOLON!
   ;
 
@@ -722,8 +747,8 @@ enumeratedStringDomain[NddlType t] {Set s;}:
   ;
 
 stringSet returns [Set s = new HashSet(2);]:
-    st:STRING {s.add(st.getText().substring(1,st.getText().length()-1));}
-    (COMMA! st2:STRING {s.add(st2.getText().substring(1,st2.getText().length()-1));})*
+    st:STRING {s.add(st.getText());}
+    (COMMA! st2:STRING {s.add(st2.getText());})*
   ;
 
 enumeratedBoolDomain[NddlType t] {Set s;}:
@@ -827,8 +852,7 @@ literalOrName[NddlType t] {Boolean b;}:
     { if(t!=null) {
         if(t.isTypeless())
           t.setType(null,state.getPrimative("string"),STRING);
-        String s = a.getText();
-        intersect(STRING,t,s.substring(1,s.length()-1));
+        intersect(STRING,t,a.getText());
       }
     }
   | b=boolLiteral {if(t!=null&&t.isTypeless()) t.setType(null,state.getPrimative("bool"),BOOL); intersect(BOOL,t,b);}
@@ -971,25 +995,28 @@ options {
 }
 
 {
-  static final int NDDL_MAJOR_RELEASE = 1;
-  static final int NDDL_MINOR_RELEASE = 1;
-  static final int NDDL_LEXER_RELEASE = 0;
-  public String toString()
-  {
-    return "NddlLexer "+
-           NDDL_MAJOR_RELEASE+"."+
-           NDDL_MINOR_RELEASE+"."+
-           NDDL_LEXER_RELEASE;
-  }
-
-  File file = null;
-  public NddlLexer(Reader reader, File file)
+	protected boolean interp = false;
+	private boolean prematureEOF = false;
+  private File file = null;
+  public NddlLexer(Reader reader, File file, boolean interp)
   {
     this(reader);
     this.file = file;
-    setFilename(file.getName());
+		this.interp = interp;
+    if(file != null)
+      setFilename(file.getName());
+    else
+      setFilename("eval");
   }
   public File getFile() {return file;}
+
+	public void setPrematureEOF() {
+		prematureEOF = true;
+	}
+
+	public boolean hasPrematureEOF() {
+		return prematureEOF;
+	}
 }
 
 LBRACKET: '[';
@@ -1021,8 +1048,8 @@ LINE_DECL: "#line" (SIMPLEWS)+ (DIGIT)+
            setFilename(getText().substring(sstart));
          } '"')? {$setType(Token.SKIP);}
          ;
-STRING: '"' (ESC|~('"'|'\\'))* '"'
-      | '\'' (ESC|~('\''|'\\'))* '\''
+STRING: '"'! (ESC|~('"'|'\\'))* '"'!
+      | '\''! (ESC|~('\''|'\\'))* '\''!
       ;
 ESC: '\\' ('n' | 't' | 'b' | 'f' | '"' | '\'' | '\\' | UNICODE_ESC | NUMERIC_ESC);
 protected UNICODE_ESC: 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT;

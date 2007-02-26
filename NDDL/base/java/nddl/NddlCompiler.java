@@ -20,18 +20,9 @@ import gnu.getopt.Getopt;
 
 class NddlCompiler {
 
-  public static final int MAJOR_RELEASE = 1;
-  public static final int MINOR_RELEASE = 0;
   public static final String execName = "java nddl.NddlCompiler";
 
   static String output = null;
-
-  public static String version()
-  {
-    return "NddlCompiler "+
-      MAJOR_RELEASE+"."+
-      MINOR_RELEASE;
-  }
 
   // returns the path to the cc file generated.
   public static String compile(IXMLElement el, File modelFile, File sourceFile, File headerFile) throws IOException {
@@ -40,7 +31,7 @@ class NddlCompiler {
 
     ModelAccessor.setModelName(modelFile.getName().replaceAll("\\.[^.]+$",""));
 
-    assert(DebugMsg.debugMsg(version() + ": Generating \""+headerFile+"\""));	
+    assert(DebugMsg.debugMsg(Nddl.versionString() + ": Generating \""+headerFile+"\""));	
     IndentWriter header = new IndentWriter(new BufferedWriter(new FileWriter(headerFile)));
     header.write("// "+modelFile.getName()+"\n\n");
     // write class and function prototypes
@@ -50,14 +41,14 @@ class NddlCompiler {
 
     if(!sourceFile.canWrite()&&sourceFile.exists())
       throw new IOException("Cannot generate sourcefile to compile \""+sourceFile.getAbsolutePath()+"\"");
-    assert(DebugMsg.debugMsg(version() + ": Generating \""+sourceFile+"\""));	
+    assert(DebugMsg.debugMsg(Nddl.versionString() + ": Generating \""+sourceFile+"\""));	
 
     IndentWriter implementation = new IndentWriter(new BufferedWriter(new FileWriter(sourceFile)));
     implementation.write("// "+modelFile.getName()+"\n\n");
     implementation.write("#include \""+headerFile.getName()+"\"\n");
     new ImplementationGenerator(implementation).generate(el);
 
-    assert(DebugMsg.debugMsg(version() + ": Writing Schema"));
+    assert(DebugMsg.debugMsg(Nddl.versionString() + ": Writing Schema"));
     implementation.write("\n\n");
     SchemaWriter.generate(implementation);
     implementation.flush();
@@ -81,7 +72,7 @@ class NddlCompiler {
   }
 
   private static void printUsage() {
-    System.out.println(version());
+    System.out.println(Nddl.versionString());
     System.out.println("Usage: "+execName+" [OPTION]... [FILE]...");
     System.out.println("");
     System.out.println("  -C, --directory <directory>   Change to directory before processing the remaining arguments.");
@@ -117,7 +108,7 @@ class NddlCompiler {
 				case 'N': ModelAccessor.setConfigFile(parser.getOptarg()); break;
         case 'o': output = parser.getOptarg(); break;
         case 'q': DebugMsg.debugMsgEnabled = false; break;
-        case 'v': System.out.println(version()); System.exit(0);
+        case 'v': System.out.println(Nddl.versionString()); System.exit(0);
                   // later, when the compiler generates warnings....
         case 'W': System.err.println("Compiler doesn't yet support warnings!"); break;
         case '?': die("Error processing arguments",true);
@@ -134,7 +125,7 @@ class NddlCompiler {
 
   public static void main(String [] args) throws Exception {
     String[] models = getOptions(args);
-    assert(DebugMsg.debugMsg(version()));
+    assert(DebugMsg.debugMsg(Nddl.versionString()));
     ModelAccessor.init();
 
     if(output != null && models.length == 1) {

@@ -28,7 +28,7 @@ class Parse {
 		super();
 	}
     
-	private static String version() {return NddlParser.version();}
+	private static String versionString() {return Nddl.versionString();}
 
 	private static void die(String message, boolean usage)
 	{
@@ -38,7 +38,7 @@ class Parse {
 	}
 
 	private static void printUsage() {
-		System.out.println(version());
+		System.out.println(versionString());
 		System.out.println("Usage: "+execName+" [OPTION]... [FILE]...");
 		System.out.println("");
 		System.out.println("  -C, --directory <directory>   Change to directory before processing the remaining arguments.");
@@ -74,7 +74,7 @@ class Parse {
 				case 'h': printUsage(); System.exit(0);
 				case 'o': output = parser.getOptarg(); break;
 				case 'q': DebugMsg.debugMsgEnabled = false; break;
-				case 'v': System.out.println(version()); System.exit(0);
+				case 'v': System.out.println(versionString()); System.exit(0);
 				case 'W': NddlParser.warnings.add(parser.getOptarg()); break;
 				case '?': die("Error processing arguments",true);
 				default:  die("Option '"+(char)c+"' not implemented.",true);
@@ -88,7 +88,7 @@ class Parse {
 
 	public static void main(String [] args) {
 		getOptions(args);
-		assert(DebugMsg.debugMsg(version()));
+		assert(DebugMsg.debugMsg(versionString()));
 		ModelAccessor.init();
 
 		File modelFile =  ModelAccessor.generateIncludeFileName("",model);
@@ -130,6 +130,6 @@ class Parse {
 			e.printStackTrace();
 			die("Exception while parsing",false);
 		}
-		assert(DebugMsg.debugMsg("Exiting "+NddlParser.version()));
+		assert(DebugMsg.debugMsg("Exiting "+Nddl.versionString()));
 	}
 }

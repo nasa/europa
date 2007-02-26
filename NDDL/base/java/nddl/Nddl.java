@@ -29,12 +29,12 @@ import gnu.getopt.Getopt;
  */
 public class Nddl {
 
-  // options
-  static final boolean combinedVersion = true;
-  static final int MAJOR_VERSION = 1;
-  static final int MINOR_VERSION = 1;
-
   static final String execName = "java nddl.Nddl";
+
+  public static final int MAJOR_VERSION = 1;
+  public static final int MINOR_VERSION = 2;
+
+  // options
   static String debug = null;
   static Writer debugWriter = null;
   static boolean noxml = false;
@@ -42,19 +42,16 @@ public class Nddl {
   static boolean asNddlCompiler = false;
 
   /**
-   * Return the version of Nddl, or send version of NddlParser/Compiler if running in a mode.
+   * Return the version of Nddl.
    * @return A version string.
    */
-  private static String version() {
-    if(!combinedVersion) {
-      String toRet = "";
-      if(!asNddlCompiler)
-        toRet += NddlParser.version() + " ";
-      if(!asNddlParser)
-        toRet += NddlCompiler.version();
-    }
+  public static String versionString() {
     return "Nddl "+ MAJOR_VERSION + "." + MINOR_VERSION;
   }
+
+	public static double version() {
+		return Double.parseDouble(MAJOR_VERSION + "." + MINOR_VERSION);
+	}
 
   /**
    * Print a message and exit with a non-zero status.
@@ -79,7 +76,7 @@ public class Nddl {
    * Print a terse description of Nddl's available command line arguments.
    */
   private static void printUsage() {
-    System.out.println(version());
+    System.out.println(versionString());
     System.out.println("Usage: "+execName+" [options] file...");
     System.out.println("");
     System.out.println("  --ast <filename>              Print AST to file");
@@ -128,7 +125,7 @@ public class Nddl {
         case 'h': printUsage(); System.exit(0);
         case 'q': DebugMsg.debugMsgEnabled = false; break;
         case 'N': ModelAccessor.setConfigFile(parser.getOptarg()); break;
-        case 'v': System.out.print(version()); System.exit(0);
+        case 'v': System.out.print(versionString()); System.exit(0);
                   // later, when the compiler generates warnings....
         case 'W': NddlParser.warnings.add(parser.getOptarg()); break;
         case '?': die("Error processing arguments",true);
@@ -149,7 +146,7 @@ public class Nddl {
    */
   public static void main(String [] args) {
     String[] models = getOptions(args);
-    assert(DebugMsg.debugMsg(null,version()));
+    assert(DebugMsg.debugMsg(null,versionString()));
     assert(DebugMsg.debugMsg("DebugMsg:status",DebugMsg.staticToString()));
 
     if(debug!=null) {
@@ -234,7 +231,7 @@ public class Nddl {
     catch (Exception ex) {
       ex.printStackTrace(); System.err.println(execName+": Skipping \""+model+"\" due to exception");
     }
-    assert(DebugMsg.debugMsg(version()+": Finished with model \""+model+"\""));
+    assert(DebugMsg.debugMsg(versionString()+": Finished with model \""+model+"\""));
   }
 
   /**
@@ -252,7 +249,7 @@ public class Nddl {
         die("Cannot write intermediate xml to file \""+outputFile+"\"",false);
     }
     try {
-      assert(DebugMsg.debugMsg(NddlParser.version()+": Loading \""+modelFile+"\""));
+      assert(DebugMsg.debugMsg(versionString()+": Loading \""+modelFile+"\""));
 
       NddlParser parser = NddlParser.parse(modelFile,debugWriter);
       parser.getState().printWarnCount();
@@ -262,7 +259,7 @@ public class Nddl {
       treeParser.nddl(parser.getAST(),xml);
 
       if(!noxml) {
-        assert(DebugMsg.debugMsg(NddlParser.version()+": Writing \""+outputFile+"\""));
+        assert(DebugMsg.debugMsg(versionString()+": Writing \""+outputFile+"\""));
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
         XMLWriter xmlWriter = new XMLWriter(writer);
