@@ -60,6 +60,7 @@ public class NddlParserState implements NddlTokenTypes
 			constraints.putAll(init.constraints);
 			predeclaredClasses.addAll(init.predeclaredClasses);
 			parsers.addAll(init.parsers);
+			parsedFiles.addAll(init.parsedFiles);
 			err = init.err;
 			errorCount = init.errorCount;
 			warningCount = init.warningCount;
@@ -70,8 +71,8 @@ public class NddlParserState implements NddlTokenTypes
 	public void addFile(File file) {parsedFiles.add(file);}
 	public boolean containsFile(File file) { return parsedFiles.contains(file);}
 	public void pushParser(NddlParser parser) {this.parsers.push(parser);}
-	public NddlParser popParser() {return (NddlParser)parsers.pop();}
-	public NddlParser getParser() {return (NddlParser)parsers.peek();}
+	public NddlParser popParser() {return parsers.size()==0? null : (NddlParser)parsers.pop();}
+	public NddlParser getParser() {return parsers.size()==0? null : (NddlParser)parsers.peek();}
 
 	public void resetCounts() {
 		warningCount = 0;
@@ -121,11 +122,14 @@ public class NddlParserState implements NddlTokenTypes
 			else if(getParser().getLexer().getLine()>0)
 				prefix.append(":").append(getParser().getLexer().getLine());
 		}
-		else
+		else if(getParser() != null)
 		{
 			prefix.append(getParser().getFilename());
 			if(getParser().getLexer().getLine()>0)
 				prefix.append(":").append(getParser().getLexer().getLine());
+		}
+		else {
+			return type + ": ";
 		}
 		return prefix.append(": ").append(type).append(": ").toString();
 	}

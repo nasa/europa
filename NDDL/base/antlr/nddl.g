@@ -168,8 +168,10 @@ tokens {
   public static NddlParser parse(NddlParserState init, File file, Writer debugWriter) throws RecognitionException, TokenStreamException, FileNotFoundException {
     if(!file.exists())
       throw new FileNotFoundException("Could not parse missing file: "+file);
-    if(init != null && init.containsFile(file))
+    if(init != null && init.containsFile(file)) {
+      init.warn("includes","Previously parsed: "+getCanonicalPath(file));
       return null;
+		}
 
     BufferedReader reader = new BufferedReader(new FileReader(file));
     NddlLexer lexer = new NddlLexer(reader,file, false);
@@ -222,8 +224,10 @@ tokens {
     if(include == null)
       throw new FileNotFoundException("Cannot find \""+fn+"\"");
 
-    if(state.containsFile(include))
+    if(state.containsFile(include)) {
       state.warn("includes","Previously parsed: "+getCanonicalPath(include));
+			return null;
+		}
 
     NddlParser parser = NddlParser.parse(state,include,null);
 		state = parser.getState();
