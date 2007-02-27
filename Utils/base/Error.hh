@@ -35,7 +35,7 @@
 #ifndef _H_Error
 #define _H_Error
 
-/* $Id: Error.hh,v 1.2 2007-02-10 02:05:23 javier Exp $ */
+/* $Id: Error.hh,v 1.3 2007-02-27 22:54:33 meboyce Exp $ */
 
 #include <iostream>
 #include <string>
@@ -141,7 +141,7 @@
 
 #define check_error(cond, optarg...) { \
   if (!(cond)) { \
-    Error(#cond, ##optarg, __FILE__, __LINE__).handleAssert(); \
+    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
   } \
 }
 
@@ -149,7 +149,7 @@
   if (!(cond)) { \
     std::stringstream sstr; \
     sstr << msg; \
-    Error(#cond, sstr.str(), __FILE__, __LINE__).handleAssert(); \
+    (new Error(#cond, sstr.str(), __FILE__, __LINE__))->handleAssert(); \
   } \
 }
 
@@ -179,7 +179,7 @@
  */
 #define check_runtime_error(cond, optarg...) { \
   if (!(cond)) { \
-    throw Error(#cond, ##optarg, __FILE__, __LINE__); \
+    throw new Error(#cond, ##optarg, __FILE__, __LINE__); \
   } \
 }
 
@@ -278,6 +278,14 @@ public:
   */
   inline const std::string& getType() const {
     return(m_type);
+  }
+
+  inline const std::string& getCondition() const {
+    return(m_condition);
+  }
+
+  inline const int getLine() const {
+    return(m_line);
   }
 
   /**
