@@ -35,7 +35,7 @@
 #ifndef _H_Error
 #define _H_Error
 
-/* $Id: Error.hh,v 1.3 2007-02-27 22:54:33 meboyce Exp $ */
+/* $Id: Error.hh,v 1.4 2007-02-28 00:44:08 meboyce Exp $ */
 
 #include <iostream>
 #include <string>
@@ -58,7 +58,7 @@
  * class Error constructor.
  */
 #define handle_error(cond, optarg...) { \
-  Error(#cond, ##optarg, __FILE__, __LINE__); \
+  new Error(#cond, ##optarg, __FILE__, __LINE__); \
 }
 
 /**
@@ -74,13 +74,13 @@
 
 #define assertTrue(cond, optarg...) { \
   if (!(cond)) { \
-    Error(#cond, ##optarg, __FILE__, __LINE__).handleAssert(); \
+    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
   } \
 }
 
 #define assertFalse(cond, optarg...) { \
   if (cond) { \
-    Error(#cond, ##optarg, __FILE__, __LINE__).handleAssert(); \
+    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
   } \
 }
 
