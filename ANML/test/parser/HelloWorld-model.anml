@@ -8,7 +8,7 @@ objtype YourObject
     action helloWorld()
     {
         duration 10;        
-        condition over all /*start-10*/ { helloWorld(); }; // met by another HelloWorld action        
+        condition over [start-10 start] { helloWorld(); }; // met by another HelloWorld action        
     }
 }
 

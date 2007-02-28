@@ -283,8 +283,7 @@ condition_proposition_list
     : LCURLY^ condition_proposition (SEMI_COLON! condition_proposition)* (SEMI_COLON!)? RCURLY!
 ;
 
-// TODO : WHEN is only allowed for {Effects,Facts}, not allowed for {Conditions,Goals}. semantic layer to enforce this
-// TODO : FROM and FOR branches to be implemented later
+// WHEN is only allowed for {Effects,Facts}, not allowed for {Conditions,Goals}. semantic layer to enforce this
 proposition! [int type]
     : q:qualif_fluent
       {#proposition = #q;}

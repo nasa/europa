@@ -8,10 +8,17 @@
 namespace ANML
 {
 
+class Action;
 class ANMLContext;
 class ANMLElement;
-class Type;
+class Expr;
+class Fluent;
+class LHSExpr;
+class Proposition;
 class ObjType;
+class TemporalQualifier;
+class Type;
+class Variable;
 
 class ANMLTranslator
 {
@@ -51,14 +58,27 @@ class ANMLContext
 	virtual Type*    getType(const std::string& name,bool mustExist=false) const;
 	virtual ObjType* getObjType(const std::string& name) const;
 	
+	virtual void addAction(Action* a);
+	virtual Action* getAction(const std::string& name,bool mustExist=false) const;
+	
+	// Variables, Functions and Predicates are included here, 
+	// a function is just a var with args, a predicate is just a function on the boolean domain
+	virtual void addVariable(Variable* v);
+	virtual Variable* getVariable(const std::string& name,bool mustExist=false) const;
+	
     virtual void toNDDL(std::ostream& os) const;
     
 	virtual std::string toString() const;
 		
   protected:
-    const ANMLContext* m_parent;
-    std::vector<ANMLElement*> m_elements;      
-    std::map<std::string,Type*> m_types;    
+    const ANMLContext*        m_parent;
+    std::vector<ANMLElement*> m_elements;              
+
+    // maps to quickly get to elements by name
+    std::map<std::string,Type*>      m_types;    
+    std::map<std::string,Action*>    m_actions;
+    std::map<std::string,Variable*>  m_variables;    
+
 };
 
 class ANMLElement
@@ -86,9 +106,7 @@ class Type : public ANMLElement
 	    
 	virtual bool isPrimitive() const { return true; }
 	    
-    virtual void toNDDL(std::ostream& os) const {}
-    
-    virtual std::string toString() const;
+    virtual void toNDDL(std::ostream& os) const {}    
 };
 
 class Range : public Type
@@ -101,8 +119,6 @@ class Range : public Type
 	    
     virtual void toNDDL(std::ostream& os) const;
     
-    virtual std::string toString() const;
-
   protected:
     const Type& m_dataType;
     std::string m_lb;
@@ -119,25 +135,40 @@ class Enumeration : public Type
 	    
     virtual void toNDDL(std::ostream& os) const;
     
-    virtual std::string toString() const;
-
   protected:
     const Type& m_dataType;
     std::vector<std::string> m_values;
 };
 	
+class Arg
+{
+  public:
+    Arg(const std::string& name,const Type& type) : m_name(name), m_dataType(type) {}    
+    virtual ~Arg() {}
+
+    const std::string& getName() const { return m_name; }    
+    const Type& getType() const { return m_dataType; }
+
+  protected:
+    std::string m_name;    
+    const Type& m_dataType;
+};	
+	
 class Variable : public ANMLElement
 {
   public:
     Variable(const Type& type, const std::string& name);
-    ~Variable();
+    Variable(const Type& type, const std::string& name, const std::vector<Arg*>& args);
+    
+    virtual ~Variable();
 
+    const std::vector<Arg*>& getArgs() const { return m_args; }
+    
     virtual void toNDDL(std::ostream& os) const;
     
-    virtual std::string toString() const;
-  
   protected:
 	const Type& m_dataType;
+	std::vector<Arg*> m_args;
 };
     
 class VarInit
@@ -182,8 +213,6 @@ class ObjType : public Type, public ANMLContext
 
     virtual void toNDDL(std::ostream& os) const;
     
-    virtual std::string toString() const;
-    
   protected:
     ObjType* m_parent;   	
 };
@@ -199,9 +228,7 @@ class Action : public ANMLElement, public ANMLContext
     void setBody(const std::vector<ANMLElement*>& body);
   
     virtual void toNDDL(std::ostream& os) const;
-    
-    virtual std::string toString() const;
-    
+        
   protected:
     ObjType& m_objType;
     std::vector<Variable*> m_params;
@@ -211,28 +238,34 @@ class Action : public ANMLElement, public ANMLContext
 class ActionDuration : public ANMLElement
 {
   public:
-    ActionDuration(const std::vector<std::string>& values);
+    ActionDuration(const std::vector<Expr*>& values);
     virtual ~ActionDuration();
     
     virtual void toNDDL(std::ostream& os) const;
     
   protected:  
-    std::vector<std::string> m_values;    	
+    std::vector<Expr*> m_values;    	
 };
-
-class Expr;
-class LHSExpr;
-class Fluent;
-class Proposition;
-class TemporalQualifier;
 
 class Condition : public ANMLElement
 {
   public:
-    Condition(const std::vector<Proposition*>& propositions) : ANMLElement("CONDITION"), m_propositions(propositions) {}
-    virtual ~Condition() {}
+    Condition(const std::vector<Proposition*>& propositions);
+    virtual ~Condition();
     
-    virtual void toNDDL(std::ostream& os) const { /*TODO*/}
+    virtual void toNDDL(std::ostream& os) const;
+    
+  protected:  
+    std::vector<Proposition*> m_propositions;    	
+};
+
+class Goal : public ANMLElement
+{
+  public:
+    Goal(const std::vector<Proposition*>& props);
+    virtual ~Goal();
+    
+    virtual void toNDDL(std::ostream& os) const;
     
   protected:  
     std::vector<Proposition*> m_propositions;    	
@@ -241,55 +274,78 @@ class Condition : public ANMLElement
 class Proposition : public ANMLElement
 {
   public:
-    Proposition(TemporalQualifier* tq,const std::vector<Fluent*>& fluents) 
-       : ANMLElement("PROPOSITION"), m_temporalQualifier(tq), m_fluents(fluents) {}
-    virtual ~Proposition() {}
+    enum Context {GOAL,CONDITION,FACT,EFFECT};
     
-    virtual void toNDDL(std::ostream& os) const { /*TODO*/}
+    Proposition(TemporalQualifier* tq,const std::vector<Fluent*>& fluents);
+    virtual ~Proposition();
+    
+    void setContext(Context c) { m_context = c; }
+    Context getContext() const { return m_context; }
+    
+    virtual void toNDDL(std::ostream& os) const;
     
   protected:  
+    Context m_context;    	
     TemporalQualifier* m_temporalQualifier;
-    std::vector<Fluent*> m_fluents;    	
+    std::vector<Fluent*> m_fluents;
 };
 
-class TemporalQualifier : public ANMLElement
+class PropositionComponent
 {
   public:
-    TemporalQualifier() : ANMLElement("TEMPORAL_QUALIFIER") {}
-    virtual ~TemporalQualifier() {}
+    PropositionComponent() {}
     
-    virtual void toNDDL(std::ostream& os) const { /*TODO*/}
+    void setProposition(Proposition* p) { m_parent = p; }
+  
+  protected:
+    Proposition* m_parent;	
 };
 
-class Fluent : public ANMLElement
+class TemporalQualifier : public PropositionComponent
 {
   public:
-    Fluent() : ANMLElement("FLUENT"){}
+    TemporalQualifier(const std::string& op,const std::vector<Expr*>& args);
+    virtual ~TemporalQualifier();
+     
+    virtual void toNDDL(std::ostream& os,const std::string& fluentName) const;
+    
+  protected:
+    std::string m_operator;
+    std::vector<Expr*> m_args;
+};
+
+class Fluent : public PropositionComponent
+{
+  public:
+    Fluent() {}
     virtual ~Fluent() {}
     
-    virtual void toNDDL(std::ostream& os) const { /*TODO*/}    
+    virtual std::string getName() const = 0;
+    virtual void toNDDL(std::ostream& os) const = 0;
 };
 
 class RelationalFluent : public Fluent
 {
   public:
-    RelationalFluent(LHSExpr* lhs,Expr* rhs) : m_lhs(lhs), m_rhs(rhs) {}
-    virtual ~RelationalFluent() {}
+    RelationalFluent(LHSExpr* lhs,Expr* rhs);
+    virtual ~RelationalFluent();
     
-    virtual void toNDDL(std::ostream& os) const { /*TODO*/}
+    virtual std::string getName() const;
+    virtual void toNDDL(std::ostream& os) const;
     
   protected:  
     LHSExpr* m_lhs;
     Expr* m_rhs;    	
 };
 
-class Expr : public ANMLElement
+class Expr 
 {
   public:
-    Expr() : ANMLElement("EXPR") {}
+    Expr() {}
     virtual ~Expr() {}
-    
-    virtual void toNDDL(std::ostream& os) const { /*TODO*/}    
+        
+    virtual std::string toString() const = 0; // temporary hack! until exprs are fully fleshed out
+    virtual void toNDDL(std::ostream& os,Proposition::Context context) const = 0;    
 };
 
 class LHSExpr : public Expr
@@ -298,34 +354,70 @@ class LHSExpr : public Expr
     LHSExpr() {}
     virtual ~LHSExpr() {}
     
-    virtual void toNDDL(std::ostream& os) const { /*TODO*/}
+    virtual std::string getName() const = 0;
+    virtual std::string toString() const { return getName(); } 
+    virtual void toNDDL(std::ostream& os,Proposition::Context context) const = 0;
+    
+    virtual void setArgs(const std::vector<Expr*>& args) { m_args = args; }
+    virtual const std::vector<Expr*>& getArgs() const { return m_args; } 
     
   protected:  
-    //std::vector<Proposition*> m_propositions;    	
+    std::vector<Expr*> m_args;    	
 };
 
-
-/*
-class RuntimeException
+class LHSAction : public LHSExpr
 {
   public:
-    RuntimeException(const char* msg) : m_msg(msg) {}
-    RuntimeException(const std::string& msg) : m_msg(msg) {}
-    virtual ~RuntimeException() {}
+	LHSAction(Action* a) : m_action(a) {}
+	virtual ~LHSAction() {}
+	
+    virtual std::string getName() const  { return m_action->getName(); }
+    virtual void toNDDL(std::ostream& os,Proposition::Context context) const;
     
-    virtual std::string toString() const { return m_msg; }
-
   protected:
-    std::string m_msg;    
+    Action* m_action;  	  
 };
-*/	
+
+class LHSVariable : public LHSExpr
+{
+  public:
+	LHSVariable(Variable* v) : m_var(v) {}
+	virtual ~LHSVariable() {}
+	
+    virtual std::string getName() const  { return m_var->getName(); }
+    virtual void toNDDL(std::ostream& os,Proposition::Context context) const { os << m_var->getName(); }
+    
+  protected:
+    Variable* m_var;  	  
+};
+
+// TODO: this should go away, it must be translated into either a LHSVariable or a LHSAction
+class LHSQualifiedVar : public LHSExpr
+{
+  public:
+	LHSQualifiedVar(const std::string& s) : m_path(s) {}
+	virtual ~LHSQualifiedVar() {}
+	
+    virtual std::string getName() const  { return m_path; }
+    virtual void toNDDL(std::ostream& os,Proposition::Context context) const;
+    
+  protected:
+    std::string m_path;  	  
+};
+
+class ExprConstant : public Expr
+{
+  public:
+    ExprConstant(const std::string& value) : m_value(value) {}
+    virtual ~ExprConstant() {}
+        
+    virtual std::string toString() const { return m_value; } 
+    virtual void toNDDL(std::ostream& os,Proposition::Context context) const { os << m_value; }    
+  
+  protected:
+    std::string m_value;    
+};
 
 }
-
-/*
-#define check_runtime_error(cond,msg) \
-if (!(cond)) \
-    throw RuntimeException(msg);\
-*/
 
 #endif /*ANMLTRANSLATOR_H_*/

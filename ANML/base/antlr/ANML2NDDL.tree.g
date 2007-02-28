@@ -135,17 +135,18 @@ var_init_list returns [std::vector<ANML::VarInit*> varInit;]
 var_type returns [ANML::Type* t;]
 {
 	std::vector<std::string> values;
+	std::vector<ANML::Expr*> rangeValues;
 	ANML::ANMLContext& context = m_translator.getContext();
 }
     : BOOL { t = context.getType("bool"); }
     | s:IDENTIFIER { t = context.getType(s->getText(),true); }
     | #(INT { t = context.getType("int"); } 
-         (  values=range     { t = new ANML::Range(*t,values[0],values[1]); context.addType(t); } 
+         (  rangeValues=range     { t = new ANML::Range(*t,rangeValues[0]->toString(),rangeValues[1]->toString()); context.addType(t); } 
            |values=enum_body { t = new ANML::Enumeration(*t,values); context.addType(t); }
          )?
       )
 	| #(FLOAT { t = context.getType("float"); }
-	     (  values=range     { t = new ANML::Range(*t,values[0],values[1]); context.addType(t); }
+	     (  rangeValues=range     { t = new ANML::Range(*t,rangeValues[0]->toString(),rangeValues[1]->toString()); context.addType(t); }
 	       |values=enum_body { t = new ANML::Enumeration(*t,values); context.addType(t); }
 	     )?
 	  )
@@ -153,7 +154,7 @@ var_type returns [ANML::Type* t;]
          (values=enum_body { t = new ANML::Enumeration(*t,values); context.addType(t);}
          )?
       )
-    | #(VECTOR vector_body)   { throw Error("Vector data type not suported yet"); }
+    | #(VECTOR vector_body)   { check_runtime_error(false,"Vector data type not suported yet"); }
 ;
 
 enum_body returns [std::vector<std::string> values;]
@@ -161,22 +162,22 @@ enum_body returns [std::vector<std::string> values;]
 	std::string v;
 	// TODO: validate values (flag  duplicates, type checking)
 }
-    : #(LCURLY (constant { values.push_back(v); })+)
+    : #(LCURLY (v=constant { values.push_back(v); })+)
 ;
 
 vector_body
     : parameters
 ;
 
-range returns [std::vector<std::string> values;]
+range returns [std::vector<ANML::Expr*> values;]
 {
 	std::string lb,ub;
 }
     : #(LBRACK lb=signed_literal ub=signed_literal)
 {
 	// TODO: validate range, do type checking
-	values.push_back(lb);
-	values.push_back(ub);	
+	values.push_back(new ANML::ExprConstant(lb));
+	values.push_back(new ANML::ExprConstant(ub));	
 }    
 ;
 
@@ -256,11 +257,17 @@ fact returns [ANML::ANMLElement* element]
     : #(FACT (effect_proposition | effect_proposition_list))
 ;
 
-goal returns [ANML::ANMLElement* element]
+goal returns [ANML::Goal* element]
 {
-    element = new ANML::ANMLElement("GOAL");	
+	ANML::Proposition* p;
+    std::vector<ANML::Proposition*> propositions;	
 }    
-    : #(GOAL (condition_proposition | condition_proposition_list))
+    : #(GOAL 
+       (p=condition_proposition { propositions.push_back(p); } 
+        | propositions=condition_proposition_list))
+{
+    element = new ANML::Goal(propositions);	
+}    
 ;
 
 effect_proposition 
@@ -282,11 +289,15 @@ condition_proposition_list returns [std::vector<ANML::Proposition*> l;]
     : #(LCURLY (p=condition_proposition { l.push_back(p); })+)
 ;
 
+// TODO : FROM and FOR branches to be implemented later
 proposition! returns [ANML::Proposition* p;]
     : p=qualif_fluent
-    | #(WHEN #(LCURLY condition_proposition) #(LCURLY effect_proposition))
-    | #(FROM time_pt qualif_fluent_list)
-    | #(FOR object_name #(LCURLY proposition))    
+    | #(WHEN { check_runtime_error(false, "WHEN not supported yet"); } 
+        #(LCURLY condition_proposition) #(LCURLY effect_proposition))
+    | #(FROM { check_runtime_error(false, "FROM not supported yet"); } 
+        time_pt qualif_fluent_list)
+    | #(FOR { check_runtime_error(false, "FOR not supported yet"); } 
+        object_name #(LCURLY proposition))    
 ;
 
 qualif_fluent returns [ANML::Proposition* p;]
@@ -316,7 +327,7 @@ fluent returns [ANML::Fluent* f;]
 		| #(OR fluent fluent)
 		| #(AND fluent fluent)
 		| f=relational_fluent 
-    | quantif_clause fluent
+        | quantif_clause fluent
 ;
 
 quantif_clause
@@ -331,22 +342,43 @@ var_list
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
 relational_fluent returns [ANML::RelationalFluent* f;]
 {
-	ANML::LHSExpr* lhs;
-	ANML::Expr*    rhs;
+	ANML::LHSExpr* lhs=NULL;
+	ANML::Expr*    rhs=NULL;
 }
     : #(EQUAL lhs=lhs_expr rhs=expr)
 	| lhs=lhs_expr
 {
 	// TODO: do type checking for lhs and rhs
+	// TODO: if rhs is absent, lhs must be a predicate
 	f = new ANML::RelationalFluent(lhs,rhs);
 }	
 ;
 
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
-// TODO: antlr is complaining about non-determinism here, but I don't see it, LPAREN should never be in follow(lhs_expr). anyway, order of subrules means parser does the right thing
 lhs_expr returns [ANML::LHSExpr* p;]
-    : #(FUNCTION function_symbol arguments) // This an action or a function
-    | qualified_var_name
+{
+	std::string name;
+	std::vector<ANML::Expr*> args;
+}
+    : #(FUNCTION 
+          name=function_symbol // This can be an action, a function or a predicate
+          {
+          	ANML::Variable* v;
+          	ANML::Action* a;
+          	
+            if ((v=m_translator.getContext().getVariable(name)) != NULL)
+                p = new ANML::LHSVariable(v);
+          	else if ((a=m_translator.getContext().getAction(name)) != NULL)
+              	p = new ANML::LHSAction(a);
+            else
+                check_runtime_error(false,std::string("No function, action or predicate called ") + name + " in scope");
+          }
+          args=arguments
+          {
+          	p->setArgs(args);
+          }
+      ) 
+    | name=qualified_var_name { p = new ANML::LHSQualifiedVar(name); } 
 ;
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
@@ -357,49 +389,79 @@ expr returns [ANML::Expr* e;]
 ;
 
 // TODO: For effects and facts:
-// - Temporal qualifiers IN, BEFORE, AFTER (and CONTAINS??) are not allowed. What about FROM?
-// check and throw semantic exception if necessary
+// - Temporal qualifiers IN, BEFORE, AFTER and CONTAINS are not allowed. 
 temporal_qualif returns [ANML::TemporalQualifier* tq;]
-    : #(AT time_pt)
-    | #(OVER interval)
-    | #(IN interval (numeric_expr)?)
-    | #(AFTER time_pt (numeric_expr)?)
-    | #(BEFORE time_pt (numeric_expr)?)
-    | #(CONTAINS interval)
+{
+	std::string op;
+	ANML::Expr* arg;
+	std::vector<ANML::Expr*> args;
+}
+    : (
+      #(AT arg=time_pt) { op="at"; args.push_back(arg); } 
+      
+    | #(OVER args=interval)  { op="over"; } 
+    
+    | #(IN args=interval (arg=numeric_expr { args.push_back(arg); })?) { op="in"; }
+    
+    | #(AFTER arg=time_pt { args.push_back(arg); }
+           (arg=numeric_expr { args.push_back(arg); })?) { op="after"; }
+           
+    | #(BEFORE arg=time_pt 
+          (arg=numeric_expr { args.push_back(arg); })?) { op="before"; }
+    
+    | #(CONTAINS args=interval) { op="contains"; }
+    )
+{
+	tq = new ANML::TemporalQualifier(op,args);
+}    
 ;
 
 // all(action) is shorthand for the interval [action.start,action.end]
-interval 
+interval returns [std::vector<ANML::Expr*> bounds;]
+{
+	ANML::Expr* b;
+}
     : #(ALL (action_label_arg)?)
-    | #(LBRACK time_pt time_pt)
+    | #(LBRACK 
+           b=time_pt { bounds.push_back(b); }
+           b=time_pt { bounds.push_back(b); }
+       )
 ;
 
 action_label_arg
     : #(LPAREN action_instance_label)
 ;
 
-time_pt 
-    : numeric_expr
+time_pt returns [ANML::Expr* expr]
+    : expr=numeric_expr
 ;
 
-numeric_expr returns [std::string expr;]
+numeric_expr returns [ANML::Expr* expr]
+{
+	std::string s;
+	ANML::Expr  *op1,*op2;
+}
     :     (#(PLUS numeric_expr numeric_expr)) => #(PLUS numeric_expr numeric_expr)
-		| (#(MINUS numeric_expr numeric_expr)) => #(MINUS numeric_expr numeric_expr)
+		| (#(MINUS numeric_expr numeric_expr)) => #(MINUS op1=numeric_expr op2=numeric_expr) 
+		        { /*TODO:Hack!*/ expr = new ANML::ExprConstant(op1->toString()+"-"+op2->toString()); }
 		| #(MULT numeric_expr numeric_expr)
 		| #(DIV numeric_expr numeric_expr)
-		| #(LPAREN numeric_expr)
+		| #(LPAREN expr=numeric_expr)
 		| #(PLUS numeric_expr)
 		| #(MINUS numeric_expr)
-		| expr=numeric_literal
-		| lhs_expr
+		| s=numeric_literal { expr = new ANML::ExprConstant(s); }
+		| expr=lhs_expr
 ;
 
-arguments
-    : #(LPAREN (arg_list)?)
+arguments returns [std::vector<ANML::Expr*> args;]
+    : #(LPAREN (args=arg_list)?)
 ;
 
-arg_list 
-    : (expr)+
+arg_list  returns [std::vector<ANML::Expr*> args;]
+{
+	ANML::Expr* arg;
+}
+    : (arg=expr { args.push_back(arg); })+
 ;
 
 action_def returns [ANML::ANMLElement* element]
@@ -411,6 +473,7 @@ action_def returns [ANML::ANMLElement* element]
     : #(ACTION name:action_symbol params=parameters 
         {
             a = new ANML::Action((ANML::ObjType&)(m_translator.getContext()),name->getText(),params);
+            m_translator.getContext().addAction(a);
             m_translator.pushContext(a);
         }    
         body=action_body
@@ -440,8 +503,8 @@ action_body_stmt returns [ANML::ANMLElement* element]
 // TODO: semantic layer to enforce that only one duration statement is allowed    
 duration_stmt returns [ANML::ANMLElement* element]
 {
-    std::vector<std::string> values;
-    std::string v;
+    std::vector<ANML::Expr*> values;
+    ANML::Expr* v;
 }    
     : #(DURATION (v=numeric_expr { values.push_back(v); } | values=range))
 {
@@ -550,46 +613,55 @@ trans_pair
 unsigned_constant 
     : numeric_literal | string_literal | bool_literal
 ;
-constant returns [std::string s;]
+constant returns [std::string s]
     : s=signed_literal 
     | s=string_literal 
     | s=bool_literal
 ;
 
-signed_literal returns [std::string s;]
+signed_literal returns [std::string s]
     : t1:numeric_literal           { s = t1->getText(); }
 	| #(MINUS t2:numeric_literal)  { s = "-" + t2->getText(); }
 ;
 
-numeric_literal returns [std::string s;]
+numeric_literal returns [std::string s]
     : t1:NUMERIC_LIT { s = t1->getText(); }
     | t2:INF         { s = t2->getText(); }
 ;
 
-bool_literal returns [std::string s;]
+bool_literal returns [std::string s]
     : t1:TRUE  { s = t1->getText(); }
     | t2:FALSE { s = t2->getText(); }
 ;
 
-string_literal returns [std::string s;]
+string_literal returns [std::string s]
     : t:STRING_LIT { s = t->getText(); }
 ;
 
-action_symbol           : IDENTIFIER;
-action_instance_label   : IDENTIFIER;
-constraint_symbol       : IDENTIFIER;
-function_symbol         : IDENTIFIER;
+action_symbol         returns [std::string s]  : i:IDENTIFIER { s = i->getText(); };
+action_instance_label returns [std::string s]  : i:IDENTIFIER { s = i->getText(); };
+constraint_symbol     returns [std::string s]  : i:IDENTIFIER { s = i->getText(); };
+function_symbol       returns [std::string s]  : i:IDENTIFIER { s = i->getText(); };
 
-object_name             : IDENTIFIER;
-var_name returns [std::string s;]               
+object_name           returns [std::string s]  : i:IDENTIFIER { s = i->getText(); };
+
+var_name returns [std::string s]               
     : t1:IDENTIFIER { s = t1->getText(); } 
     | t2:START      { s = t2->getText(); } 
     | t3:END        { s = t3->getText(); }
 ;
 
-qualified_var_name!
-    : #(DOT qualified_var_name qualified_var_name)
-		| var_name
+// TODO: validate var_names
+qualified_var_name! returns [std::string s] 
+{
+	std::string s1;
+}    
+    : s=var_name 
+      (#(DOT 
+           s1=qualified_var_name { s += s1; }
+         )
+      )?
 ;
+
 
 user_defined_type_name  : IDENTIFIER;
