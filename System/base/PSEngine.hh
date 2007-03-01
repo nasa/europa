@@ -8,6 +8,7 @@
 #include "SAVH_ResourceDefs.hh"
 #include "SolverDefs.hh"
 #include "RulesEngineDefs.hh"
+#include "ANMLTranslator.hh"
 
 // #define Instant int
 // #define PSEntityKey int
@@ -73,7 +74,7 @@ namespace EUROPA {
         		
     void executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter); // TODO: fold XML into executeScript?
     //What's this supposed to do, exactly? ~MJI
-    void executeScript(const std::string& language, const std::string& script);
+    std::string executeScript(const std::string& language, const std::string& script);
 	
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
@@ -93,7 +94,8 @@ namespace EUROPA {
     ConstraintEngineId m_constraintEngine;
     PlanDatabaseId m_planDatabase;
     RulesEngineId m_rulesEngine;
-  };		
+		ANML::ANMLTranslator m_anmlTranslator;
+  };
 
   class PSEntity
   {

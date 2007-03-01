@@ -57,7 +57,7 @@ void translate(const std::string& filename, antlr::RefAST& ast)
   debugMsg("ANMLTest:translator", "Phase 2: Walking parse tree");
   std::ofstream nddl((filename + "-auto.nddl").c_str());
 
-  ANML2NDDL* treeParser = new ANML2NDDL(nddl);
+  ANML2NDDL* treeParser = new ANML2NDDL();
   treeParser->anml(ast);
 
   treeParser->getTranslator().toString();

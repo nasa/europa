@@ -35,6 +35,8 @@
 #include "SAVH_ProfilePropagator.hh"
 #include "STNTemporalAdvisor.hh"
 #include "ResourcePropagator.hh"
+#include "ANMLParser.hpp"
+#include "ANML2NDDL.hpp"
 
 // TODO: registration for these needs to happen somewhere else
 #include "SAVH_ReusableFVDetector.hh"
@@ -391,7 +393,7 @@ namespace EUROPA {
     SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
   }
 
-  PSEngine::PSEngine() 
+  PSEngine::PSEngine()
   {
   	// TODO: this needs to happen somewhere else
 	 REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
@@ -400,7 +402,7 @@ namespace EUROPA {
   }
 
   PSEngine::~PSEngine() 
-  {  	
+  {
   }
 
   //FIXME
@@ -503,7 +505,23 @@ namespace EUROPA {
   }
 
   //FIXME
-  void PSEngine::executeScript(const std::string& language, const std::string& script) {
+  std::string PSEngine::executeScript(const std::string& language, const std::string& script) {
+		if(language == "anml") {
+			antlr::RefAST ast;
+			// create and invoke parser
+			ast = ANMLParser::eval(script);
+			// create translator
+			ANML2NDDL treeParser(m_anmlTranslator);
+			// pass AST to translator
+			treeParser.anml(ast);
+			// return result.
+			return m_anmlTranslator.toString();
+		}
+		else if(language == "nddl") {
+			return "";
+		}
+    checkRuntimeError(ALWAYS_FAIL, "Cannot execute script of unknown language \"" << language << "\"");
+		return "";
   }
 
   PSList<PSObject*> PSEngine::getObjectsByType(const std::string& objectType) {

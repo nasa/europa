@@ -2,6 +2,7 @@ header "post_include_hpp" {
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include "Debug.hh"
 #include "antlr/TokenStreamSelector.hpp"
 #include "antlr/ASTFactory.hpp"
@@ -37,16 +38,28 @@ options {
   ANMLParser* parser;
   ANMLLexer* mainLexer;
   const std::string* searchDir;
+  bool interp;
+
+  antlr::RefAST ANMLParser::eval(const std::string& code) {
+    std::stringstream input(code);
+    interp = true;
+    return parse(input, "<eval>");
+  }
 
   antlr::RefAST ANMLParser::parse(const std::string& path, const std::string& filename) {
     searchDir = &path;
+    std::ifstream input((path + "/" + filename).c_str());
+    if (!input) {
+      std::cerr << "cannot find file " << filename << std::endl;
+    }
+    interp = false;
+    return parse(input, filename);
+  }
+
+  antlr::RefAST ANMLParser::parse(std::istream& input, const std::string& source) {
     try {
-      // attach java lexer to the input stream,
-      std::ifstream* input = new std::ifstream((path + "/" + filename).c_str());
-      if (!*input) {
-        std::cerr << "cannot find file " << filename << std::endl;
-      }   
-      mainLexer = new ANMLLexer(*input);
+      // attach ANML lexer to the input stream,
+      mainLexer = new ANMLLexer(input);
 
       // notify selector about starting lexer; name for convenience
       selector.addInputStream(mainLexer, "main");
@@ -57,19 +70,31 @@ options {
       parser = new ANMLParser(selector);
 
       // Parse the input language: ANML
-      parser->setFilename(filename);
+      parser->setFilename(source);
       parser->initializeASTFactory(astfactory);
       parser->setASTFactory(&astfactory);
       parser->anml_program();
     }
-    catch( antlr::ANTLRException& e )
+    catch(antlr::ANTLRException& e)
     {
-      std::cerr << "exception: " << e.getMessage() << std::endl;
+      if(interp) {
+        // if it's from an EOF rethrow the error as an EOF error later.
+        check_runtime_error(ALWAYS_FAIL, e.toString());
+      }
+      else {
+        std::cerr << "exception: " << e.getMessage() << std::endl;
+      }
       return antlr::nullAST;
     }
-    catch( std::exception& e )
+    catch(std::exception& e)
     {
-      std::cerr << "exception: " << e.what() << std::endl;
+      if(interp) {
+        check_runtime_error(ALWAYS_FAIL, e.what());
+			}
+      else {
+        std::cerr << "exception: " << e.what() << std::endl;
+			}
+
       return antlr::nullAST;
     }
     return parser->getAST();
@@ -77,23 +102,32 @@ options {
 
 #define LONG_RULE_SIZE 26
 
+  void ANMLParser::reportError(const antlr::RecognitionException& ex) {
+    if(interp) {
+      check_runtime_error(ALWAYS_FAIL, ex.toString());
+    }
+    else {
+      std::cerr << ex.toString().c_str() << std::endl;
+    }
+  }
+
   /**
    * Custom traceIn for Antlr which uses debugMsg.
    */
   void ANMLParser::traceIn(const char* rname) {
-		int indentsize = LONG_RULE_SIZE-strlen(rname)+traceDepth+2;
+    int indentsize = LONG_RULE_SIZE-strlen(rname)+traceDepth+2;
     char indent[indentsize+1];
-		for(int i=0; i < indentsize; ++i)
-			indent[i] = ' ';
-		indent[LONG_RULE_SIZE-strlen(rname)+1] = '|';
-		indent[indentsize] = '\0';
+    for(int i=0; i < indentsize; ++i)
+      indent[i] = ' ';
+    indent[LONG_RULE_SIZE-strlen(rname)+1] = '|';
+    indent[indentsize] = '\0';
     ++traceDepth;
 
-		debugMsg((std::string("ANMLParser:traceIn:")+rname).c_str(),
-		         indent << "> " << rname << ((inputState->guessing > 0)? "; [guessing]" : ";") <<
-						 " LA(1)==" << ((LT(1) == antlr::nullToken)? "null" : LT(1)->getText()) <<
-						 " LA(2)==" << ((LT(2) == antlr::nullToken)? "null" : LT(2)->getText()) <<
-						 " LA(3)==" << ((LT(3) == antlr::nullToken)? "null" : LT(3)->getText()));
+    debugMsg((std::string("ANMLParser:traceIn:")+rname).c_str(),
+             indent << "> " << rname << ((inputState->guessing > 0)? "; [guessing]" : ";") <<
+             " LA(1)==" << ((LT(1) == antlr::nullToken)? "null" : LT(1)->getText()) <<
+             " LA(2)==" << ((LT(2) == antlr::nullToken)? "null" : LT(2)->getText()) <<
+             " LA(3)==" << ((LT(3) == antlr::nullToken)? "null" : LT(3)->getText()));
   }
 
   /**
@@ -101,18 +135,18 @@ options {
    */
   void ANMLParser::traceOut(const char* rname) {
     --traceDepth;
-		int indentsize = LONG_RULE_SIZE-strlen(rname)+traceDepth+1;
+    int indentsize = LONG_RULE_SIZE-strlen(rname)+traceDepth+1;
     char indent[indentsize+1];
-		for(int i=0; i < indentsize; ++i)
-			indent[i] = ' ';
-		indent[LONG_RULE_SIZE-strlen(rname)] = '|';
-		indent[indentsize] = '\0';
+    for(int i=0; i < indentsize; ++i)
+      indent[i] = ' ';
+    indent[LONG_RULE_SIZE-strlen(rname)] = '|';
+    indent[indentsize] = '\0';
 
-		debugMsg((std::string("ANMLParser:traceOut:")+rname).c_str(),
-		         indent << "< " << rname << ((inputState->guessing > 0)? "; [guessing]" : ";") <<
-						 " LA(1)==" << ((LT(1) == antlr::nullToken)? "null" : LT(1)->getText()) <<
-						 " LA(2)==" << ((LT(2) == antlr::nullToken)? "null" : LT(2)->getText()) <<
-						 " LA(3)==" << ((LT(3) == antlr::nullToken)? "null" : LT(3)->getText()));
+    debugMsg((std::string("ANMLParser:traceOut:")+rname).c_str(),
+             indent << "< " << rname << ((inputState->guessing > 0)? "; [guessing]" : ";") <<
+             " LA(1)==" << ((LT(1) == antlr::nullToken)? "null" : LT(1)->getText()) <<
+             " LA(2)==" << ((LT(2) == antlr::nullToken)? "null" : LT(2)->getText()) <<
+             " LA(3)==" << ((LT(3) == antlr::nullToken)? "null" : LT(3)->getText()));
   }
 }
 
@@ -126,8 +160,10 @@ options {
 
 {
 	public:
+		static antlr::RefAST eval(const std::string& code);
 		static antlr::RefAST parse(const std::string& path, const std::string& filename);
-	protected:
+  	static antlr::RefAST parse(std::istream& input, const std::string& source);
+  	void ANMLParser::reportError(const antlr::RecognitionException& ex);
 		void ANMLParser::traceIn(const char* rname);
 		void ANMLParser::traceOut(const char* rname);
 }

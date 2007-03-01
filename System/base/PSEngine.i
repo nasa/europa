@@ -99,7 +99,7 @@ namespace EUROPA {
     void shutdown();
     void loadModel(const std::string& modelFileName);
     void executeTxns(const std::string& xmlTxnSource, bool isFile, bool useInterpreter) throw(Error);
-    void executeScript(const std::string& language, const std::string& script) throw(Error);
+    std::string executeScript(const std::string& language, const std::string& script) throw(Error);
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
     PSList<PSResource*> getResourcesByType(const std::string& resourceType);

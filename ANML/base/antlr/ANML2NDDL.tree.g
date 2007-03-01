@@ -12,10 +12,15 @@ options {
 }
 
 {
-	ANML2NDDL::ANML2NDDL(std::ostream& nddl) 
+	ANML2NDDL::ANML2NDDL(ANML::ANMLTranslator translator)
+		: antlr::TreeParser()
+		, m_translator(translator)
+    {
+	}
+
+	ANML2NDDL::ANML2NDDL() 
 		: antlr::TreeParser()
 		, m_translator()
-		, nddl(nddl) 
     {
 	}
   /**
@@ -63,7 +68,8 @@ options {
 {
 	#define LONG_RULE_SIZE 26
 	public:
-		ANML2NDDL(std::ostream& nddl);
+		ANML2NDDL(ANML::ANMLTranslator translator);
+		ANML2NDDL();
 		
 		ANML::ANMLTranslator& getTranslator() { return m_translator; }
 		
@@ -72,7 +78,6 @@ options {
 		void traceOut(const char* rname, antlr::RefAST t);
 
         ANML::ANMLTranslator m_translator;
-		const std::ostream& nddl;
 }
 
 anml
@@ -154,7 +159,7 @@ var_type returns [ANML::Type* t;]
          (values=enum_body { t = new ANML::Enumeration(*t,values); context.addType(t);}
          )?
       )
-    | #(VECTOR vector_body)   { check_runtime_error(false,"Vector data type not suported yet"); }
+    | #(VECTOR vector_body)   { check_runtime_error(ALWAYS_FAIL, "Vector data type not suported yet"); }
 ;
 
 enum_body returns [std::vector<std::string> values;]

@@ -2,7 +2,7 @@ SubDir PLASMA System ;
 
 if ! $(PLASMA_READY) {
 
-Module System : NDDL Solvers Aver ;
+Module System : ANML NDDL Solvers Aver ;
 ModuleLibraries System : $(DLOPEN_LIBRARY) ;
 
 SubInclude PLASMA System base ;
