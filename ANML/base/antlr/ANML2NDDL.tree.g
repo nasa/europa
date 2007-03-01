@@ -652,15 +652,15 @@ var_name returns [std::string s]
 ;
 
 // TODO: validate var_names
-qualified_var_name! returns [std::string s] 
+qualified_var_name returns [std::string s] 
 {
 	std::string s1;
 }    
-    : s=var_name 
-      (#(DOT 
-           s1=qualified_var_name { s += s1; }
-         )
-      )?
+    : #(DOT 
+           s=var_name 
+           s1=qualified_var_name
+         ) { s += "." + s1; }
+      | s=var_name
 ;
 
 

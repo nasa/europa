@@ -307,7 +307,7 @@ class TemporalQualifier : public PropositionComponent
     TemporalQualifier(const std::string& op,const std::vector<Expr*>& args);
     virtual ~TemporalQualifier();
      
-    virtual void toNDDL(std::ostream& os,const std::string& fluentName) const;
+    virtual void toNDDL(std::ostream& os,const std::string& ident,const std::string& fluentName) const;
     
   protected:
     std::string m_operator;

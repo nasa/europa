@@ -589,8 +589,9 @@ object_name             : IDENTIFIER;
 var_name                : IDENTIFIER | START | END;
 
 qualified_var_name!
-    : n:var_name (d:DOT q:qualified_var_name)?
-      {#qualified_var_name = #(#n, #(#d, #q)); }
+    : n:var_name {#qualified_var_name = #(#n); }
+      (d:DOT q:qualified_var_name {#qualified_var_name = #(#d,#n, #q); })?
+      
 ;
 
 

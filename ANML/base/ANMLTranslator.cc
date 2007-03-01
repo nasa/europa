@@ -186,10 +186,8 @@ namespace ANML
 	
     void ANMLContext::toNDDL(std::ostream& os) const
     {
-    	for (unsigned int i=0; i<m_elements.size(); i++) {
+    	for (unsigned int i=0; i<m_elements.size(); i++) 
     	    m_elements[i]->toNDDL(os);
-    	    os << std::endl;
-    	}
     }
 	
     std::string ANMLContext::toString() const
@@ -199,7 +197,7 @@ namespace ANML
     	for (unsigned int i=0; i<m_elements.size(); i++) {
     		debugMsg("ANMLContext", "toString:" << i << " " << m_elements[i]->getType()); 
     	    os << m_elements[i]->toString() << std::endl; 
-    	}   	    
+    	}   	     
     	
     	return os.str();
     }
@@ -357,7 +355,7 @@ namespace ANML
     	    }
     	}
            
-        os << "}" << std::endl;
+        os << "}" << std::endl << std::endl;
         ANMLContext::toNDDL(os);
     }
     
@@ -391,9 +389,8 @@ namespace ANML
         for (unsigned int i=0; i<m_body.size(); i++) {
     		debugMsg("ANMLContext", "Action::toNDDL " << i << " " << m_body[i]->getType()); 
         	m_body[i]->toNDDL(os);
-        	os << std::endl;
         }    	
-    	os << "}" << std::endl;
+    	os << "}" << std::endl << std::endl;
     }
     
     ActionDuration::ActionDuration(const std::vector<Expr*>& values)
@@ -415,7 +412,7 @@ namespace ANML
     	else 
     	    os << m_values[0]->toString();
     	    
-    	os << ");";
+    	os << ");" << std::endl;
     }    
     
     
@@ -429,10 +426,8 @@ namespace ANML
     {
     }
      
-    void TemporalQualifier::toNDDL(std::ostream& os,const std::string& fluentName) const 
+    void TemporalQualifier::toNDDL(std::ostream& os, const std::string& ident,const std::string& fluentName) const 
     { 
-    	static std::string ident="    ";
-    	
     	if (m_operator == "at") {
     		Expr* timePoint = m_args[0];
     		// TODO: determine context for timePoint, eval expr if necessary
@@ -451,6 +446,9 @@ namespace ANML
     	else if (m_operator == "after") {
     	}
     	else if (m_operator == "before") {
+    		Expr* timePoint = m_args[0];
+    		// TODO: determine context for timePoint, eval expr if necessary
+    		os << ident << "leq(" << fluentName << ".end," << timePoint->toString() << ");" << std::endl;
     	}
     	else if (m_operator == "contains") {
     	}
@@ -532,9 +530,10 @@ namespace ANML
     
     void Proposition::toNDDL(std::ostream& os) const 
     { 
+    	std::string ident = (m_context == GOAL || m_context == FACT ? "" : "    ");
     	for (unsigned int i=0;i<m_fluents.size();i++) { 
     	    m_fluents[i]->toNDDL(os);
-    		m_temporalQualifier->toNDDL(os,m_fluents[i]->getName());
+    		m_temporalQualifier->toNDDL(os,ident,m_fluents[i]->getName());
     	}
     }
     
@@ -545,7 +544,7 @@ namespace ANML
     		    os << "goal(" << m_action->getName() << ");" << std::endl;
     		    break; 
     		case Proposition::CONDITION : 
-    		    os << "any(" << m_action->getName() << ");" << std::endl;
+    		    os << "    any(" << m_action->getName() << ");" << std::endl;
     		    break; 
     		case Proposition::FACT : 
     		    check_runtime_error(false,"ERROR! LHSAction not supported for FACTS");
@@ -561,13 +560,13 @@ namespace ANML
     
     void LHSQualifiedVar::toNDDL(std::ostream& os,Proposition::Context context) const 
     { 
-    	// hack! : assuming this is and Action for now
+    	// hack! : assuming this is and Action for now, this could also be a Var
     	switch (context) {
     		case Proposition::GOAL : 
     		    os << "goal(" << m_path << ");" << std::endl;
     		    break; 
     		case Proposition::CONDITION : 
-    		    os << "any(" << m_path << ");" << std::endl;
+    		    os << "    any(" << m_path << ");" << std::endl;
     		    break; 
     		case Proposition::FACT : 
     		    check_runtime_error(false,"ERROR! LHSAction not supported for FACTS");
