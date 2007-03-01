@@ -9,11 +9,13 @@ namespace ANML
     ANMLTranslator::ANMLTranslator()
     {
     	m_context = createGlobalContext();
+    	m_plannerConfig = new LHSPlannerConfig();
     }
     
     ANMLTranslator::~ANMLTranslator()
     {
     	delete m_context;
+    	delete m_plannerConfig;
     }
     
     ANMLContext* ANMLTranslator::createGlobalContext()
@@ -63,12 +65,15 @@ namespace ANML
             
     void ANMLTranslator::toNDDL(std::ostream& os) const
     {
-    	return m_context->toNDDL(os);        
+    	m_plannerConfig->toNDDL(os);
+    	m_context->toNDDL(os);        
     }
 
     std::string ANMLTranslator::toString() const
     {
-    	return m_context->toString();        
+    	std::ostringstream os;    
+    	toNDDL(os);            	
+    	return os.str();
     }
 
     ANMLContext::ANMLContext(const ANMLContext* parent)
@@ -223,7 +228,7 @@ namespace ANML
 	{
 	}
 	        
-    std::string autoTypeName(const char* base)
+    std::string autoIdentifier(const char* base)
     {
     	static int cnt=0;
     	std::ostringstream os;
@@ -234,7 +239,7 @@ namespace ANML
     }
 
 	Range::Range(const Type& dataType,const std::string& lb,const std::string& ub)	
-	    : Type(autoTypeName("Range"))
+	    : Type(autoIdentifier("Range"))
 	    , m_dataType(dataType)
 	    , m_lb(lb)
 	    , m_ub(ub)
@@ -252,7 +257,7 @@ namespace ANML
     }
     
 	Enumeration::Enumeration(const Type& dataType,const std::vector<std::string>& values)
-	    : Type(autoTypeName("Enumeration"))
+	    : Type(autoIdentifier("Enumeration"))
 	    , m_dataType(dataType)
 	    , m_values(values)
 	{
@@ -321,7 +326,7 @@ namespace ANML
     			os << " = new " << m_dataType.getName() << "()";
     		}
     	}
-    	os << ";";
+    	os << ";" << std::endl;
     }
     
     ObjType::ObjType(const std::string& name,ObjType* parentObjType)
@@ -469,11 +474,19 @@ namespace ANML
     	return m_lhs->getName();
     }
     
-    void RelationalFluent::toNDDL(std::ostream& os) const 
+    void RelationalFluent::toNDDL(std::ostream& os, TemporalQualifier* tq) const 
     {
-    	m_lhs->toNDDL(os,m_parent->getContext());
+    	std::string ident = (m_parent->getContext() == Proposition::GOAL || 
+    	                     m_parent->getContext() == Proposition::FACT ? "" : "    ");
+    	                     
+   	    std::string varName = (m_lhs->needsVar() ? autoIdentifier("_v") : "");
+   	    
+    	m_lhs->toNDDL(os,m_parent->getContext(),varName);
+    	if (m_lhs->needsVar()) 
+   		    tq->toNDDL(os,ident,varName);
+   		
     	if (m_rhs != NULL)
-    	    m_rhs->toNDDL(os,m_parent->getContext());     
+    	    m_rhs->toNDDL(os,m_parent->getContext(),varName);     
     }    
     
     Condition::Condition(const std::vector<Proposition*>& propositions) 
@@ -509,9 +522,26 @@ namespace ANML
     
     void Goal::toNDDL(std::ostream& os) const 
     { 
-    	for (unsigned int i=0; i<m_propositions.size(); i++) {
+    	for (unsigned int i=0; i<m_propositions.size(); i++) 
     		m_propositions[i]->toNDDL(os);
-    	}
+    }
+    
+    Fact::Fact(const std::vector<Proposition*>& propositions) 
+        : ANMLElement("FACT")
+        , m_propositions(propositions) 
+    {
+    	for (unsigned int i=0;i<m_propositions.size();i++) 
+    		m_propositions[i]->setContext(Proposition::FACT);
+    }
+    
+    Fact::~Fact() 
+    {
+    }
+    
+    void Fact::toNDDL(std::ostream& os) const 
+    { 
+    	for (unsigned int i=0; i<m_propositions.size(); i++) 
+    		m_propositions[i]->toNDDL(os);
     }
     
     Proposition::Proposition(TemporalQualifier* tq,const std::vector<Fluent*>& fluents) 
@@ -530,21 +560,18 @@ namespace ANML
     
     void Proposition::toNDDL(std::ostream& os) const 
     { 
-    	std::string ident = (m_context == GOAL || m_context == FACT ? "" : "    ");
-    	for (unsigned int i=0;i<m_fluents.size();i++) { 
-    	    m_fluents[i]->toNDDL(os);
-    		m_temporalQualifier->toNDDL(os,ident,m_fluents[i]->getName());
-    	}
+    	for (unsigned int i=0;i<m_fluents.size();i++) 
+    	    m_fluents[i]->toNDDL(os,m_temporalQualifier);
     }
     
-    void LHSAction::toNDDL(std::ostream& os,Proposition::Context context) const 
+    void LHSAction::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const 
     { 
     	switch (context) {
     		case Proposition::GOAL : 
-    		    os << "goal(" << m_action->getName() << ");" << std::endl;
+    		    os << "goal(" << m_action->getName() << " " << varName << ");" << std::endl;
     		    break; 
     		case Proposition::CONDITION : 
-    		    os << "    any(" << m_action->getName() << ");" << std::endl;
+    		    os << "    any(" << m_action->getName() << " " << varName << ");" << std::endl;
     		    break; 
     		case Proposition::FACT : 
     		    check_runtime_error(false,"ERROR! LHSAction not supported for FACTS");
@@ -558,15 +585,21 @@ namespace ANML
     	}
     }          
     
-    void LHSQualifiedVar::toNDDL(std::ostream& os,Proposition::Context context) const 
+    void LHSVariable::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const 
+    { 
+    	// TODO: implement this
+    	os << m_var->getName(); 
+    }
+    
+    void LHSQualifiedVar::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const 
     { 
     	// hack! : assuming this is and Action for now, this could also be a Var
     	switch (context) {
     		case Proposition::GOAL : 
-    		    os << "goal(" << m_path << ");" << std::endl;
+    		    os << "goal(" << m_path << " " << varName << ");" << std::endl;
     		    break; 
     		case Proposition::CONDITION : 
-    		    os << "    any(" << m_path << ");" << std::endl;
+    		    os << "    any(" << m_path << " " << varName << ");" << std::endl;
     		    break; 
     		case Proposition::FACT : 
     		    check_runtime_error(false,"ERROR! LHSAction not supported for FACTS");
@@ -578,5 +611,46 @@ namespace ANML
     		    check_error(false,"Unexpected error");
     		    break;
     	}
-    }              
+    }    
+    
+    // Special expression to handle PlannerConfig
+    LHSPlannerConfig::LHSPlannerConfig()
+        : m_startHorizon(NULL)
+        , m_endHorizon(NULL)
+        , m_maxSteps(NULL)
+        , m_maxDepth(NULL)
+    {
+    }
+	
+	LHSPlannerConfig::~LHSPlannerConfig()
+	{
+	}
+	
+    void LHSPlannerConfig::setArgs(const std::string& predicate,const std::vector<Expr*>& args)
+    {
+    	if (predicate == "PlannerConfig") {
+    		m_maxSteps = args[0]; 
+    		m_maxDepth = args[1]; 
+    	}
+    	else { // PlanningHorizon
+    		m_startHorizon = args[0]; 
+    		m_endHorizon = args[1]; 
+    	}    	  
+    }
+    
+    void LHSPlannerConfig::toNDDL(std::ostream& os) const
+    {
+    	std::string sh = (m_startHorizon != NULL ? m_startHorizon->toString() : "0");
+    	std::string eh = (m_endHorizon != NULL ? m_endHorizon->toString() : "1");
+    	std::string ms = (m_maxSteps != NULL ? m_maxSteps->toString() : "+inf");
+    	std::string md = (m_maxDepth != NULL ? m_maxDepth->toString() : "+inf");
+     	
+   	    os << "int start=" << sh << ";" << std::endl;
+   	    os << "int end="   << eh << ";" << std::endl;
+   	    os << "int solver_maxSteps=" << ms << ";" << std::endl;
+   	    os << "int solver_maxDepth=" << md << ";" << std::endl;
+    	
+    	os << "PlannerConfig plannerConfiguration = new PlannerConfig(start,end,solver_MaxSteps,solver_maxDepth);" 
+    	   << std::endl << std::endl;    	
+    }            
 }

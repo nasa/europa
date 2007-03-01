@@ -14,6 +14,7 @@ class ANMLElement;
 class Expr;
 class Fluent;
 class LHSExpr;
+class LHSPlannerConfig;
 class Proposition;
 class ObjType;
 class TemporalQualifier;
@@ -30,6 +31,8 @@ class ANMLTranslator
       virtual void popContext();      
 
       virtual ANMLContext& getContext() { return *m_context; }
+      
+      virtual LHSPlannerConfig* getPlannerConfig() { return m_plannerConfig; }
             
       virtual void toNDDL(std::ostream& os) const;
       
@@ -37,6 +40,7 @@ class ANMLTranslator
       
   protected:
       ANMLContext* m_context;
+      LHSPlannerConfig* m_plannerConfig;
       
       ANMLContext* createGlobalContext();          
 };
@@ -271,6 +275,18 @@ class Goal : public ANMLElement
     std::vector<Proposition*> m_propositions;    	
 };
 
+class Fact : public ANMLElement
+{
+  public:
+    Fact(const std::vector<Proposition*>& props);
+    virtual ~Fact();
+    
+    virtual void toNDDL(std::ostream& os) const;
+    
+  protected:  
+    std::vector<Proposition*> m_propositions;    	
+};
+
 class Proposition : public ANMLElement
 {
   public:
@@ -321,7 +337,7 @@ class Fluent : public PropositionComponent
     virtual ~Fluent() {}
     
     virtual std::string getName() const = 0;
-    virtual void toNDDL(std::ostream& os) const = 0;
+    virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const = 0;
 };
 
 class RelationalFluent : public Fluent
@@ -331,7 +347,7 @@ class RelationalFluent : public Fluent
     virtual ~RelationalFluent();
     
     virtual std::string getName() const;
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const;
     
   protected:  
     LHSExpr* m_lhs;
@@ -345,7 +361,7 @@ class Expr
     virtual ~Expr() {}
         
     virtual std::string toString() const = 0; // temporary hack! until exprs are fully fleshed out
-    virtual void toNDDL(std::ostream& os,Proposition::Context context) const = 0;    
+    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const = 0;    
 };
 
 class LHSExpr : public Expr
@@ -354,15 +370,35 @@ class LHSExpr : public Expr
     LHSExpr() {}
     virtual ~LHSExpr() {}
     
+    virtual bool needsVar() { return true; }
     virtual std::string getName() const = 0;
     virtual std::string toString() const { return getName(); } 
-    virtual void toNDDL(std::ostream& os,Proposition::Context context) const = 0;
+    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const = 0;
     
     virtual void setArgs(const std::vector<Expr*>& args) { m_args = args; }
     virtual const std::vector<Expr*>& getArgs() const { return m_args; } 
     
   protected:  
     std::vector<Expr*> m_args;    	
+};
+
+class LHSPlannerConfig : public LHSExpr
+{
+  public:
+	LHSPlannerConfig();
+	virtual ~LHSPlannerConfig();
+	
+    virtual bool needsVar() { return false; }
+    virtual void setArgs(const std::string& predicate,const std::vector<Expr*>& args);
+    virtual std::string getName() const  { return "PlannerConfig"; }
+    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const {}
+    
+  protected:
+    Expr* m_startHorizon;
+    Expr* m_endHorizon;
+    Expr* m_maxSteps;
+    Expr* m_maxDepth;  	  
 };
 
 class LHSAction : public LHSExpr
@@ -372,7 +408,7 @@ class LHSAction : public LHSExpr
 	virtual ~LHSAction() {}
 	
     virtual std::string getName() const  { return m_action->getName(); }
-    virtual void toNDDL(std::ostream& os,Proposition::Context context) const;
+    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
     
   protected:
     Action* m_action;  	  
@@ -385,13 +421,13 @@ class LHSVariable : public LHSExpr
 	virtual ~LHSVariable() {}
 	
     virtual std::string getName() const  { return m_var->getName(); }
-    virtual void toNDDL(std::ostream& os,Proposition::Context context) const { os << m_var->getName(); }
+    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
     
   protected:
     Variable* m_var;  	  
 };
 
-// TODO: this should go away, it must be translated into either a LHSVariable or a LHSAction
+// TODO: this should go away, at run time it must be translated into either a LHSVariable or a LHSAction
 class LHSQualifiedVar : public LHSExpr
 {
   public:
@@ -399,7 +435,7 @@ class LHSQualifiedVar : public LHSExpr
 	virtual ~LHSQualifiedVar() {}
 	
     virtual std::string getName() const  { return m_path; }
-    virtual void toNDDL(std::ostream& os,Proposition::Context context) const;
+    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
     
   protected:
     std::string m_path;  	  
@@ -412,7 +448,7 @@ class ExprConstant : public Expr
     virtual ~ExprConstant() {}
         
     virtual std::string toString() const { return m_value; } 
-    virtual void toNDDL(std::ostream& os,Proposition::Context context) const { os << m_value; }    
+    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const { os << m_value; }    
   
   protected:
     std::string m_value;    
