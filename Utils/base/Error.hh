@@ -35,7 +35,7 @@
 #ifndef _H_Error
 #define _H_Error
 
-/* $Id: Error.hh,v 1.4 2007-02-28 00:44:08 meboyce Exp $ */
+/* $Id: Error.hh,v 1.5 2007-03-01 20:53:34 meboyce Exp $ */
 
 #include <iostream>
 #include <string>
@@ -179,10 +179,17 @@
  */
 #define check_runtime_error(cond, optarg...) { \
   if (!(cond)) { \
-    throw new Error(#cond, ##optarg, __FILE__, __LINE__); \
+    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
   } \
 }
 
+#define checkRuntimeError(cond, msg) { \
+  if (!(cond)) { \
+    std::stringstream sstr; \
+    sstr << msg; \
+    (new Error(#cond, sstr.str(), __FILE__, __LINE__))->handleAssert(); \
+  } \
+}
 
 /**
    @class Error
@@ -262,7 +269,7 @@ public:
   /**
      @brief Get the Error's message.
   */
-  inline std::string getMsg() const {
+  inline const std::string& getMsg() const {
     return(m_msg);
   }
 
