@@ -257,9 +257,15 @@ predicate_declaration returns [ANML::ANMLElement* element]
 
 fact returns [ANML::ANMLElement* element]
 {
-    element = new ANML::ANMLElement("FACT");	
+	ANML::Proposition* p;
+    std::vector<ANML::Proposition*> propositions;	
 }    
-    : #(FACT (effect_proposition | effect_proposition_list))
+    : #(FACT 
+       (p=effect_proposition { propositions.push_back(p); } 
+        | propositions=effect_proposition_list))
+{
+    element = new ANML::Fact(propositions);	
+}    
 ;
 
 goal returns [ANML::Goal* element]
@@ -275,19 +281,22 @@ goal returns [ANML::Goal* element]
 }    
 ;
 
-effect_proposition 
-    : proposition
-;
-
-effect_proposition_list 
-    : #(LCURLY (effect_proposition)+)
-;
-
-condition_proposition returns [ANML::Proposition* p;]
+effect_proposition returns [ANML::Proposition* p]
     : p=proposition
 ;
 
-condition_proposition_list returns [std::vector<ANML::Proposition*> l;]
+effect_proposition_list returns [std::vector<ANML::Proposition*> l]
+{
+    ANML::Proposition* p;
+}
+    : #(LCURLY (p=effect_proposition { l.push_back(p); })+)
+;
+
+condition_proposition returns [ANML::Proposition* p]
+    : p=proposition
+;
+
+condition_proposition_list returns [std::vector<ANML::Proposition*> l]
 {
     ANML::Proposition* p;
 }
@@ -380,7 +389,14 @@ lhs_expr returns [ANML::LHSExpr* p;]
           }
           args=arguments
           {
-          	p->setArgs(args);
+          	if (name == "PlannerConfig" || name == "PlanningHorizon") {
+          		ANML::LHSPlannerConfig* p1 = m_translator.getPlannerConfig();
+          		p1->setArgs(name,args);
+          		p = p1;
+          	}
+          	else {          	
+             	p->setArgs(args);
+          	}
           }
       ) 
     | name=qualified_var_name { p = new ANML::LHSQualifiedVar(name); } 
@@ -388,8 +404,11 @@ lhs_expr returns [ANML::LHSExpr* p;]
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
 expr returns [ANML::Expr* e;] 
-    : constant
-	| arguments
+{
+	std::string s;
+}
+    : s=constant { e = new ANML::ExprConstant(s); }
+	| arguments { check_runtime_error(false,"Vector data type not supported yet"); }
     | e=lhs_expr
 ;
 
@@ -425,16 +444,22 @@ temporal_qualif returns [ANML::TemporalQualifier* tq;]
 interval returns [std::vector<ANML::Expr*> bounds;]
 {
 	ANML::Expr* b;
+	std::string label;
 }
-    : #(ALL (action_label_arg)?)
+    : #(ALL (label=action_label_arg { label += "."; })?
+           {
+               bounds.push_back(new ANML::ExprConstant(label+"start"));
+               bounds.push_back(new ANML::ExprConstant(label+"end"));
+           } 
+       )
     | #(LBRACK 
            b=time_pt { bounds.push_back(b); }
            b=time_pt { bounds.push_back(b); }
        )
 ;
 
-action_label_arg
-    : #(LPAREN action_instance_label)
+action_label_arg returns [std::string s]
+    : #(LPAREN s=action_instance_label)
 ;
 
 time_pt returns [ANML::Expr* expr]
@@ -462,7 +487,7 @@ arguments returns [std::vector<ANML::Expr*> args;]
     : #(LPAREN (args=arg_list)?)
 ;
 
-arg_list  returns [std::vector<ANML::Expr*> args;]
+arg_list returns [std::vector<ANML::Expr*> args;]
 {
 	ANML::Expr* arg;
 }

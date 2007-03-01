@@ -60,9 +60,8 @@ void translate(const std::string& filename, antlr::RefAST& ast)
   ANML2NDDL* treeParser = new ANML2NDDL();
   treeParser->anml(ast);
 
-  treeParser->getTranslator().toString();
   debugMsg("ANMLTest:translator", "Phase 2 complete");
-  debugMsg("ANMLTest:translator", "Generated ANML elements\n" << treeParser->getTranslator().toString());
+  debugMsg("ANMLTest:translator", "\n" << treeParser->getTranslator().toString());
   
   treeParser->getTranslator().toNDDL(nddl);  
   delete treeParser;
