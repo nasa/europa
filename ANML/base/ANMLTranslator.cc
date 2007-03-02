@@ -22,30 +22,33 @@ namespace ANML
     {
     	ANMLContext* context = new ANMLContext();
     	
-    	context->addType(new Type("bool"));
-    	context->addType(new Type("int"));
+    	Type* boolType   = new Type("bool");
+    	Type* intType    = new Type("int");
+    	
+    	context->addType(boolType);
+    	context->addType(intType);    	
     	context->addType(new Type("float"));
     	context->addType(new Type("string"));
+    	
+    	
     	context->addType(new ObjType("object",NULL));
+    	
+    	// start and end of the planning horizon
+    	context->addVariable(new Variable(*intType,"start"));
+    	context->addVariable(new Variable(*intType,"end"));
     	
     	{
     		std::vector<Arg*> args;
-    		const Type& intType = *(context->getType("int"));
-    		args.push_back(new Arg("start_horizon",intType));
-    		args.push_back(new Arg("end_horizon"  ,intType));
-    		
-    		const Type& boolType = *(context->getType("bool"));
-    	    context->addVariable(new Variable(boolType,"PlanningHorizon",args));
+    		args.push_back(new Arg("start_horizon",*intType));
+    		args.push_back(new Arg("end_horizon"  ,*intType));    		
+    	    context->addVariable(new Variable(*boolType,"PlanningHorizon",args));
     	}
     	
     	{
     		std::vector<Arg*> args;
-    		const Type& intType = *(context->getType("int"));
-    		args.push_back(new Arg("max_steps",intType));
-    		args.push_back(new Arg("max_depth",intType));
-    		
-    		const Type& boolType = *(context->getType("bool"));
-    	    context->addVariable(new Variable(boolType,"PlannerConfig",args));
+    		args.push_back(new Arg("max_steps",*intType));
+    		args.push_back(new Arg("max_depth",*intType));
+    	    context->addVariable(new Variable(*boolType,"PlannerConfig",args));
     	}
     	
     	return context;
@@ -87,14 +90,10 @@ namespace ANML
 
     void ANMLContext::addElement(ANMLElement* element)
     {
-    	// TODO: temporarily ignore NULL elements until Translator is complete
-    	// check_error(element != NULL, "Can't add a NULL element to an ANML context");
-    	if (element != NULL) {
-    	    m_elements.push_back(element);
-    	    debugMsg("ANMLContext","Added element:" << element->getType());    	    
-    	}
-    	else
-    	    std::cerr << "ERROR: tried to add null element to ANMLContext" << std::endl;    	    
+    	check_error(element != NULL, "Can't add a NULL element to an ANML context");
+    	
+   	    m_elements.push_back(element);
+   	    debugMsg("ANMLContext","Added element:" << element->getType());    	    
     }
 
     ObjType* ANMLContext::addObjType(const std::string& name,const std::string& parentObjType)
@@ -424,6 +423,7 @@ namespace ANML
     TemporalQualifier::TemporalQualifier(const std::string& op,const std::vector<Expr*>& args) 
         : m_operator(op)
         , m_args(args)
+        , m_argValues(args.size())
     {
     }
     
@@ -431,29 +431,44 @@ namespace ANML
     {
     }
      
+    void TemporalQualifier::toNDDL(std::ostream& os,Proposition::Context context) const 
+    {
+        // Evaluate all args, cache var names if necessary.
+        for (unsigned int i=0;i<m_args.size();i++) {
+            if (m_args[i]->needsVar()) {
+            	std::string varName = autoIdentifier("_v");
+            	m_argValues[i] = varName;
+            	m_args[i]->toNDDL(os,context,varName);
+            }
+            else {
+            	m_argValues[i] = m_args[i]->toString();
+            }
+        }                 
+    }
+     
     void TemporalQualifier::toNDDL(std::ostream& os, const std::string& ident,const std::string& fluentName) const 
     { 
     	if (m_operator == "at") {
-    		Expr* timePoint = m_args[0];
+    		const std::string& timePoint = m_argValues[0];
     		// TODO: determine context for timePoint, eval expr if necessary
-    		os << ident << "leq(" << fluentName << ".start," << timePoint->toString() << ");" << std::endl;
-    		os << ident << "leq(" << timePoint->toString() << "," << fluentName << ".end);"<< std::endl;    		
+    		os << ident << "leq(" << fluentName << ".start," << timePoint << ");" << std::endl;
+    		os << ident << "leq(" << timePoint << "," << fluentName << ".end);"<< std::endl;    		
     	}
     	else if (m_operator == "over") {
-    		Expr* lb = m_args[0];
-    		Expr* ub = m_args[1];
+    		const std::string& lb = m_argValues[0];
+    		const std::string& ub = m_argValues[1];
     		// TODO: determine context for time points, eval expr if necessary
-    		os << ident << "leq(" << fluentName << ".start," << lb->toString() << ");" << std::endl;
-    		os << ident << "leq(" << ub->toString() << "," << fluentName << ".end);" << std::endl;    		                		
+    		os << ident << "leq(" << fluentName << ".start," << lb << ");" << std::endl;
+    		os << ident << "leq(" << ub << "," << fluentName << ".end);" << std::endl;    		                		
     	}
     	else if (m_operator == "in") {
     	}
     	else if (m_operator == "after") {
     	}
     	else if (m_operator == "before") {
-    		Expr* timePoint = m_args[0];
+    		const std::string& timePoint = m_argValues[0];
     		// TODO: determine context for timePoint, eval expr if necessary
-    		os << ident << "leq(" << fluentName << ".end," << timePoint->toString() << ");" << std::endl;
+    		os << ident << "leq(" << fluentName << ".end," << timePoint << ");" << std::endl;
     	}
     	else if (m_operator == "contains") {
     	}
@@ -468,12 +483,7 @@ namespace ANML
     RelationalFluent::~RelationalFluent() 
     {
     }
-    
-    std::string RelationalFluent::getName() const
-    {
-    	return m_lhs->getName();
-    }
-    
+        
     void RelationalFluent::toNDDL(std::ostream& os, TemporalQualifier* tq) const 
     {
     	std::string ident = (m_parent->getContext() == Proposition::GOAL || 
@@ -559,7 +569,10 @@ namespace ANML
     }
     
     void Proposition::toNDDL(std::ostream& os) const 
-    { 
+    {
+    	// output any expressions needed for the parameters of the temporal qualifier
+    	m_temporalQualifier->toNDDL(os,m_context);
+    	 
     	for (unsigned int i=0;i<m_fluents.size();i++) 
     	    m_fluents[i]->toNDDL(os,m_temporalQualifier);
     }
@@ -588,30 +601,36 @@ namespace ANML
     void LHSVariable::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const 
     { 
     	// TODO: implement this
-    	os << m_var->getName(); 
     }
     
-    void LHSQualifiedVar::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const 
-    { 
-    	// hack! : assuming this is and Action for now, this could also be a Var
-    	switch (context) {
-    		case Proposition::GOAL : 
-    		    os << "goal(" << m_path << " " << varName << ");" << std::endl;
-    		    break; 
-    		case Proposition::CONDITION : 
-    		    os << "    any(" << m_path << " " << varName << ");" << std::endl;
-    		    break; 
-    		case Proposition::FACT : 
-    		    check_runtime_error(false,"ERROR! LHSAction not supported for FACTS");
-    		    break; 
-    		case Proposition::EFFECT : 
-    		    check_runtime_error(false,"ERROR! LHSAction not supported for EFFECTS");
-    		    break;
-    		default:
-    		    check_error(false,"Unexpected error");
-    		    break;
-    	}
-    }    
+   void ExprArithOp::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const 
+   {
+       std::string op1,op2;
+       
+       if (m_op1->needsVar()) {
+         op1 = autoIdentifier("_v");
+         m_op1->toNDDL(os,context,op1);
+       }
+       else {
+       	 op1 = m_op1->toString();
+       }
+       	
+       if (m_op2->needsVar()) {
+         op2 = autoIdentifier("_v");
+         m_op2->toNDDL(os,context,op2);
+       }
+       else {
+       	 op2 = m_op2->toString();
+       }
+       
+       std::string ident="    ";
+       if (m_operator == "-") {
+       	   // TODO: need real type here!
+       	   os << ident << "int " << varName << ";" << std::endl;
+           // addEq(x,y,z) means x+y=z which implies x=z-y
+           os << ident << "addEq(" << varName << "," << op2 << "," << op1 << ");" << std::endl << std::endl;
+       }
+   }    
     
     // Special expression to handle PlannerConfig
     LHSPlannerConfig::LHSPlannerConfig()

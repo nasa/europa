@@ -51,6 +51,8 @@ class ANMLContext
 	ANMLContext(const ANMLContext* parent=NULL);
 	virtual ~ANMLContext();
 
+    virtual std::string getContextDesc() const { return "Global Context"; }
+
     virtual const ANMLContext* getParent() { return m_parent; }
     virtual void setParent(const ANMLContext* parent) { m_parent = parent; }
     	
@@ -166,6 +168,7 @@ class Variable : public ANMLElement
     
     virtual ~Variable();
 
+    const Type& getDataType() const { return m_dataType; }
     const std::vector<Arg*>& getArgs() const { return m_args; }
     
     virtual void toNDDL(std::ostream& os) const;
@@ -211,7 +214,9 @@ class ObjType : public Type, public ANMLContext
     ObjType(const std::string& name,ObjType* parentObjType);
     virtual ~ObjType();
     
-    ObjType* getParent() const { return m_parent; }
+    virtual std::string getContextDesc() const { return m_name; }
+
+    virtual ObjType* getParent() const { return m_parent; }
         
 	virtual bool isPrimitive() const { return false; }
 
@@ -226,6 +231,8 @@ class Action : public ANMLElement, public ANMLContext
   public:
     Action(ObjType& objType,const std::string& name,const std::vector<Variable*>& params);
     virtual ~Action();
+
+    virtual std::string getContextDesc() const { return m_objType.getName() + "::" + m_name; }
     
     const std::vector<Variable*> getParams() const { return m_params; }
     
@@ -323,11 +330,13 @@ class TemporalQualifier : public PropositionComponent
     TemporalQualifier(const std::string& op,const std::vector<Expr*>& args);
     virtual ~TemporalQualifier();
      
+    virtual void toNDDL(std::ostream& os,Proposition::Context context) const;
     virtual void toNDDL(std::ostream& os,const std::string& ident,const std::string& fluentName) const;
     
   protected:
     std::string m_operator;
     std::vector<Expr*> m_args;
+    mutable std::vector<std::string> m_argValues;
 };
 
 class Fluent : public PropositionComponent
@@ -336,7 +345,6 @@ class Fluent : public PropositionComponent
     Fluent() {}
     virtual ~Fluent() {}
     
-    virtual std::string getName() const = 0;
     virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const = 0;
 };
 
@@ -346,7 +354,6 @@ class RelationalFluent : public Fluent
     RelationalFluent(LHSExpr* lhs,Expr* rhs);
     virtual ~RelationalFluent();
     
-    virtual std::string getName() const;
     virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const;
     
   protected:  
@@ -360,7 +367,8 @@ class Expr
     Expr() {}
     virtual ~Expr() {}
         
-    virtual std::string toString() const = 0; // temporary hack! until exprs are fully fleshed out
+    virtual bool needsVar() { return true; }
+    virtual std::string toString() const = 0; 
     virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const = 0;    
 };
 
@@ -369,10 +377,8 @@ class LHSExpr : public Expr
   public:
     LHSExpr() {}
     virtual ~LHSExpr() {}
-    
-    virtual bool needsVar() { return true; }
-    virtual std::string getName() const = 0;
-    virtual std::string toString() const { return getName(); } 
+        
+    virtual std::string toString() const =0;
     virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const = 0;
     
     virtual void setArgs(const std::vector<Expr*>& args) { m_args = args; }
@@ -390,7 +396,7 @@ class LHSPlannerConfig : public LHSExpr
 	
     virtual bool needsVar() { return false; }
     virtual void setArgs(const std::string& predicate,const std::vector<Expr*>& args);
-    virtual std::string getName() const  { return "PlannerConfig"; }
+    virtual std::string toString() const  { return "PlannerConfig"; }
     virtual void toNDDL(std::ostream& os) const;
     virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const {}
     
@@ -404,41 +410,30 @@ class LHSPlannerConfig : public LHSExpr
 class LHSAction : public LHSExpr
 {
   public:
-	LHSAction(Action* a) : m_action(a) {}
+	LHSAction(Action* a,const std::string& path) : m_action(a), m_path(path) {}
 	virtual ~LHSAction() {}
 	
-    virtual std::string getName() const  { return m_action->getName(); }
+    virtual std::string toString() const  { return m_path; }
     virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
     
   protected:
     Action* m_action;  	  
+    std::string m_path;
 };
 
 class LHSVariable : public LHSExpr
 {
   public:
-	LHSVariable(Variable* v) : m_var(v) {}
+	LHSVariable(Variable* v,const std::string& path) : m_var(v), m_path(path) {}
 	virtual ~LHSVariable() {}
 	
-    virtual std::string getName() const  { return m_var->getName(); }
+    virtual bool needsVar() { return false; }
+    virtual std::string toString() const  { return m_path; }
     virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
     
   protected:
     Variable* m_var;  	  
-};
-
-// TODO: this should go away, at run time it must be translated into either a LHSVariable or a LHSAction
-class LHSQualifiedVar : public LHSExpr
-{
-  public:
-	LHSQualifiedVar(const std::string& s) : m_path(s) {}
-	virtual ~LHSQualifiedVar() {}
-	
-    virtual std::string getName() const  { return m_path; }
-    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
-    
-  protected:
-    std::string m_path;  	  
+    std::string m_path;
 };
 
 class ExprConstant : public Expr
@@ -447,11 +442,28 @@ class ExprConstant : public Expr
     ExprConstant(const std::string& value) : m_value(value) {}
     virtual ~ExprConstant() {}
         
+    virtual bool needsVar() { return false; }
     virtual std::string toString() const { return m_value; } 
-    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const { os << m_value; }    
+    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const {}    
   
   protected:
     std::string m_value;    
+};
+
+class ExprArithOp : public Expr
+{
+  public:
+    ExprArithOp(const std::string& op, Expr* operand1, Expr* operand2) : m_operator(op), m_op1(operand1), m_op2(operand2) {}
+    virtual ~ExprArithOp() {}
+        
+    virtual bool needsVar() { return true; }
+    virtual std::string toString() const { return m_op1->toString() + m_operator + m_op2->toString(); } 
+    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;    
+  
+  protected:
+    std::string m_operator;
+    Expr* m_op1;
+    Expr* m_op2;        
 };
 
 }
