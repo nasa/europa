@@ -112,7 +112,7 @@ namespace EUROPA {
     const LabelStr& getPredicateName() const;
 
     /**
-     * @brief Access to the unqualified predicate name (if it has delimiters they are stripped.
+     * @brief Access to the unqualified predicate name (if it has delimiters they are stripped).
      */
     const LabelStr& getUnqualifiedPredicateName() const;
 

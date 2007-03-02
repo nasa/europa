@@ -265,12 +265,10 @@ namespace EUROPA {
   }
 
   void IntervalDomain::relax(double value) {
-    // Ensure this domain is a subset of the new bounds for relaxation.
-    check_error(isEmpty() || (m_ub == value && m_lb == value));
-
-    if (isEmpty()) {
-      m_lb = value;
-      m_ub = m_lb;
+    bool wasEmpty = isEmpty();
+    m_ub = value;
+    m_lb = value;
+    if (wasEmpty) {
       notifyChange(DomainListener::RELAXED);
     }
   }
@@ -280,7 +278,7 @@ namespace EUROPA {
     check_error(leq(lb, ub));
 
     // Ensure this domain is a subset of the new bounds for relaxation.
-    check_error(isEmpty() || (leq(lb, m_lb) && leq(m_ub, ub)));
+    checkError(isEmpty() || (leq(lb, m_lb) && leq(m_ub, ub)), lb << " >=" << m_lb << " OR " << m_ub << " >= " << ub);
 
     // Test if really causes a change.
     bool relaxed = (lt(m_ub, ub) || lt(lb, m_lb));
