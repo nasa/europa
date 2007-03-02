@@ -27,8 +27,6 @@
 #include "ConstraintLibrary.hh"
 #include "Rule.hh"
 #include "DbClient.hh"
-#include "DbClientTransactionPlayer.hh"
-#include "TransactionInterpreter.hh"
 #include "Filters.hh"
 #include "DefaultPropagator.hh"
 #include "TemporalPropagator.hh"
@@ -455,6 +453,9 @@ namespace EUROPA {
       m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
     m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
     m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
+    DbClientId client = m_planDatabase->getClient();
+		m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
+		m_transactionPlayer = new DbClientTransactionPlayer(client);
   }
    
   void PSEngine::loadModel(const std::string& modelFileName) {
@@ -482,13 +483,12 @@ namespace EUROPA {
 
     check_error(m_planDatabase.isValid());
     
-    DbClientId client = m_planDatabase->getClient();
 
-    DbClientTransactionPlayer* player;      
+    DbClientTransactionPlayerId player;      
     if (useInterpreter)
-        player = new InterpretedDbClientTransactionPlayer(client);
+        player = m_interpTransactionPlayer;
     else
-        player = new DbClientTransactionPlayer(client);
+        player = m_transactionPlayer;
 
     std::istream* in;    
     if (isFile)
@@ -500,8 +500,6 @@ namespace EUROPA {
     player->play(*in);
 
     delete in;    
-    delete player;
-      
   }
 
   //FIXME

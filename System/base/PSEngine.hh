@@ -9,6 +9,8 @@
 #include "SolverDefs.hh"
 #include "RulesEngineDefs.hh"
 #include "ANMLTranslator.hh"
+#include "DbClientTransactionPlayer.hh"
+#include "TransactionInterpreter.hh"
 
 // #define Instant int
 // #define PSEntityKey int
@@ -91,10 +93,12 @@ namespace EUROPA {
       void initDatabase();
            
   private:
+    DbClientTransactionPlayerId m_interpTransactionPlayer;
+    DbClientTransactionPlayerId m_transactionPlayer;
     ConstraintEngineId m_constraintEngine;
     PlanDatabaseId m_planDatabase;
     RulesEngineId m_rulesEngine;
-		ANML::ANMLTranslator m_anmlTranslator;
+    ANML::ANMLTranslator m_anmlTranslator;
   };
 
   class PSEntity
