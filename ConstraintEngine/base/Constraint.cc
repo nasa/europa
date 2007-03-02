@@ -40,6 +40,9 @@ namespace EUROPA {
       // volatility of a variable. Extend this when locking comes on stream!
       if(!m_variables[i]->baseDomain().isSingleton())
 	variableCount++;
+
+      if(!m_variables[i]->isActive())
+	m_deactivationRefCount++;
     }
 
     if(variableCount > 1)

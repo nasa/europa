@@ -141,16 +141,17 @@ namespace EUROPA {
   }
 
   void TemporalPropagator::handleVariableDeactivated(const ConstrainedVariableId& var){
+    debugMsg("TemporalPropagator:handleVariableDeactivated", var->toString());
     const TimepointId& timepoint = getTimepoint(var);
     if(timepoint.isId()){
       timepoint->clearDeletionMarker();
+      m_variablesForDeletion.insert(timepoint);
       EntityId tw = var->getExternalEntity();
       delete (Entity*) tw;
     }
-    else {
-      m_changedVariables.erase(var->getKey());
-      m_activeVariables.erase(var->getKey());
-    }
+
+    m_changedVariables.erase(var->getKey());
+    m_activeVariables.erase(var->getKey());
   }
 
   void TemporalPropagator::handleNotification(const ConstrainedVariableId& variable, 
@@ -295,6 +296,8 @@ namespace EUROPA {
     static const LabelStr sl_precedes("precedes");
     static const LabelStr sl_before("before");
 
+    checkError(constraint->isActive(), constraint->toString());
+
     checkError(constraint->getScope().size() == 2 || constraint->getScope().size() == 3,
                "Invalid argument count of " << constraint->getScope().size() <<
                " for constraint " << constraint->getName().toString());
@@ -320,6 +323,8 @@ namespace EUROPA {
     else if (constraint->getName() != sl_concurrent)
       ub = g_infiniteTime();
 
+    checkError(start->isActive(), start->toString());
+    checkError(end->isActive(), end->toString());
     const TimepointId& startTp = getTimepoint(start);
     const TimepointId& endTp = getTimepoint(end);
     check_error(startTp.isValid());
@@ -379,6 +384,10 @@ namespace EUROPA {
     // Process variables that have changed
     for(std::map<int,ConstrainedVariableId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
       ConstrainedVariableId var = it->second;
+
+      if(!var->isActive())
+	continue;
+
       debugMsg("TemporalPropagator:updateTnet", "Calling updateTimepoint");
       updateTimepoint(var);
     }
@@ -387,6 +396,9 @@ namespace EUROPA {
     // Process constraints that have changed, or been added
     for(std::set<ConstraintId>::const_iterator it = m_changedConstraints.begin(); it != m_changedConstraints.end(); ++it){
       ConstraintId constraint = *it;
+      if(!constraint->isActive())
+	continue;
+
       debugMsg("TemporalPropagator:updateTnet", "Calling updateTemporalConstraint");
       updateTemporalConstraint(constraint);
     }
@@ -401,7 +413,7 @@ namespace EUROPA {
     debugMsg("TemporalPropagator:updateTempVar", "In updateTempVar");
 
     std::vector<TokenId> updatedTokens; // Used to push update to duration
-    const std::set<TimepointId>& updatedTimepoints = m_tnet->getUpdatedTimepoints();
+    const std::set<TimepointId> updatedTimepoints = m_tnet->getUpdatedTimepoints();
     for(std::set<TimepointId>::const_iterator it = updatedTimepoints.begin(); it != updatedTimepoints.end(); ++it){
       const TimepointId& tp = *it;
       check_error(tp.isValid());
@@ -412,8 +424,10 @@ namespace EUROPA {
 
       check_error(tp->getExternalEntity().isValid(), "Ensure the connection between TempVar and Timepointis correct");
       ConstrainedVariableId var = tp->getExternalEntity();
-
-      checkError(var->isActive(), "Variable should be active " << var->toString());
+      if(!var->isActive()){
+	handleVariableDeactivated(var);
+	continue;
+      }
 
       IntervalIntDomain& dom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(var));
 
@@ -564,6 +578,7 @@ namespace EUROPA {
     sl_counter++;
 
     check_error(var.isValid());
+    checkError(var->isActive(), var->toString());
     check_error(!var->getExternalEntity().isNoId());
 
     const TimepointId& tp = getTimepoint(var);
