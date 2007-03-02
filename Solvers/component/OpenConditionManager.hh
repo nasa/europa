@@ -25,13 +25,15 @@ namespace EUROPA {
 
       std::string toString(const EntityId& entity) const;
 
+    protected:
+      virtual void addFlaw(const TokenId& token);
+      virtual void removeFlaw(const TokenId& token);
+      virtual void handleInitialize();
+
     private:
       friend class OpenConditionIterator;
       void notifyRemoved(const ConstrainedVariableId& variable);
       void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
-      void handleInitialize();
-      void addFlaw(const TokenId& token);
-      void removeFlaw(const TokenId& token);
 
       TokenSet m_flawCandidates; /*!< The set of candidate token flaws */
     };
