@@ -127,6 +127,9 @@ var_obj_declaration! returns [ANML::ANMLElement* element]
     : #(VARIABLE type=var_type varInit=var_init_list)
 {
     element = new ANML::VarDeclaration(*type,varInit);	
+    for (unsigned int i=0;i<varInit.size();i++) {
+        m_translator.getContext().addVariable(new ANML::Variable(*type,varInit[i]->getName()));
+    }
 }    
 ;
 
@@ -381,9 +384,9 @@ lhs_expr returns [ANML::LHSExpr* p;]
           	ANML::Action* a;
           	
             if ((v=m_translator.getContext().getVariable(name)) != NULL)
-                p = new ANML::LHSVariable(v);
+                p = new ANML::LHSVariable(v,name);
           	else if ((a=m_translator.getContext().getAction(name)) != NULL)
-              	p = new ANML::LHSAction(a);
+              	p = new ANML::LHSAction(a,name);
             else
                 check_runtime_error(false,std::string("No function, action or predicate called ") + name + " in scope");
           }
@@ -399,7 +402,7 @@ lhs_expr returns [ANML::LHSExpr* p;]
           	}
           }
       ) 
-    | name=qualified_var_name { p = new ANML::LHSQualifiedVar(name); } 
+    | p=qualified_var_name[m_translator.getContext(),""] 
 ;
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
@@ -473,7 +476,7 @@ numeric_expr returns [ANML::Expr* expr]
 }
     :     (#(PLUS numeric_expr numeric_expr)) => #(PLUS numeric_expr numeric_expr)
 		| (#(MINUS numeric_expr numeric_expr)) => #(MINUS op1=numeric_expr op2=numeric_expr) 
-		        { /*TODO:Hack!*/ expr = new ANML::ExprConstant(op1->toString()+"-"+op2->toString()); }
+		        { expr = new ANML::ExprArithOp("-",op1,op2); }
 		| #(MULT numeric_expr numeric_expr)
 		| #(DIV numeric_expr numeric_expr)
 		| #(LPAREN expr=numeric_expr)
@@ -587,7 +590,7 @@ resource_change
 ;
 
 transition_change
-    : #(EQUAL qualified_var_name directed_expr_list)
+    : #(EQUAL qualified_var_name[m_translator.getContext(),""] directed_expr_list)
 ;
 
 directed_expr_list
@@ -682,15 +685,37 @@ var_name returns [std::string s]
 ;
 
 // TODO: validate var_names
-qualified_var_name returns [std::string s] 
+qualified_var_name [ANML::ANMLContext context,const std::string& path] returns [ANML::LHSExpr* expr] 
 {
-	std::string s1;
+	std::string s;
+	std::string newPath;
+	ANML::ANMLContext* newContext;
 }    
     : #(DOT 
            s=var_name 
-           s1=qualified_var_name
-         ) { s += "." + s1; }
+           { 
+           	   newPath = (path=="" ? s : path+"."+s); 
+               ANML::Variable* v;
+               if ((v=context.getVariable(s)) != NULL)
+                  newContext = context.getObjType(v->getDataType().getName());
+               else  	
+                  check_runtime_error(false,"Variable " + s + " has not been defined in " + context.getContextDesc());  	
+           }
+           expr=qualified_var_name[*newContext,newPath]
+         ) 
       | s=var_name
+        {
+            ANML::Variable* v;
+          	ANML::Action* a;
+          	
+          	newPath = (path=="" ? s : path+"."+s); 
+            if ((v=context.getVariable(s)) != NULL)
+                expr = new ANML::LHSVariable(v,newPath);
+          	else if ((a=context.getAction(s)) != NULL)
+              	expr = new ANML::LHSAction(a,newPath);        	
+            else  	
+                check_runtime_error(false,s + " has not been defined in " + context.getContextDesc());  	
+        }
 ;
 
 
