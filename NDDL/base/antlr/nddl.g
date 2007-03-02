@@ -104,7 +104,7 @@ tokens {
 
   /// a set of enabled warning messages
   public static final Set warnings = new HashSet();
-	private boolean interp = false;
+  private boolean interp = false;
 
   NddlParserState state;
   NddlLexer lexer;
@@ -171,7 +171,7 @@ tokens {
     if(init != null && init.containsFile(file)) {
       init.warn("includes","Previously parsed: "+getCanonicalPath(file));
       return null;
-		}
+    }
 
     BufferedReader reader = new BufferedReader(new FileReader(file));
     NddlLexer lexer = new NddlLexer(reader,file, false);
@@ -201,36 +201,36 @@ tokens {
     NddlParser parser = new NddlParser(lexer, init);
 
     parser.getState().pushParser(parser);
-		parser.interp = true;
-		try {
-    	parser.nddlInterp();
-		}
-		catch(TokenStreamRecognitionException ex) {
-			// Magic number is EOF
-		  if((ex.recog instanceof MismatchedCharException) && ((MismatchedCharException) ex.recog).foundChar == 65535)
-				throw new EOFException();
-			throw ex;
-		}
-		if(parser.getState().getErrorCount() == 0 && lexer.hasPrematureEOF())
-			throw new EOFException();
-   	parser.getState().popParser();
+    parser.interp = true;
+    try {
+      parser.nddlInterp();
+    }
+    catch(TokenStreamRecognitionException ex) {
+      // Magic number is EOF
+      if((ex.recog instanceof MismatchedCharException) && ((MismatchedCharException) ex.recog).foundChar == 65535)
+        throw new EOFException();
+      throw ex;
+    }
+    if(parser.getState().getErrorCount() == 0 && lexer.hasPrematureEOF())
+      throw new EOFException();
+    parser.getState().popParser();
 
     return parser;
   }
 
   private AST addFileToState(String fn) throws RecognitionException, TokenStreamException, FileNotFoundException {
-		String directory = (lexer.getFile() != null)? lexer.getFile().getParent() : null;
+    String directory = (lexer.getFile() != null)? lexer.getFile().getParent() : null;
     File include = ModelAccessor.generateIncludeFileName(directory, fn);
     if(include == null)
       throw new FileNotFoundException("Cannot find \""+fn+"\"");
 
     if(state.containsFile(include)) {
       state.warn("includes","Previously parsed: "+getCanonicalPath(include));
-			return null;
-		}
+      return null;
+    }
 
     NddlParser parser = NddlParser.parse(state,include,null);
-		state = parser.getState();
+    state = parser.getState();
 
     if(parser!=null)
       return parser.getAST();
@@ -310,14 +310,14 @@ tokens {
   }
 
   public void reportError(RecognitionException ex) {
-		// let's the interpreter know about incomplete code (missing EOF) rather than erroring out.
-		if(interp &&
-		    (((ex instanceof MismatchedTokenException) && ((MismatchedTokenException) ex).token.getType() == Token.EOF_TYPE) ||
-		     ((ex instanceof NoViableAltException) && ((NoViableAltException) ex).token.getType() == Token.EOF_TYPE)))
-			lexer.setPrematureEOF();
-		else {
-    	state.error(ex);
-		}
+    // let's the interpreter know about incomplete code (missing EOF) rather than erroring out.
+    if(interp &&
+       (((ex instanceof MismatchedTokenException) && ((MismatchedTokenException) ex).token.getType() == Token.EOF_TYPE) ||
+         ((ex instanceof NoViableAltException) && ((NoViableAltException) ex).token.getType() == Token.EOF_TYPE)))
+      lexer.setPrematureEOF();
+    else {
+      state.error(ex);
+    }
   }
 
   public void reportWarning(RecognitionException ex) {
@@ -401,8 +401,8 @@ nddlStatement:
   ;
   exception 
   catch [RecognitionException ex] {
-   	reportError(ex);
-   	match(LA(1));
+    reportError(ex);
+    match(LA(1));
   } 
   catch [TokenStreamException tx] {
     state.error(tx.getMessage()); match(LA(1));
@@ -879,19 +879,19 @@ qualified[NddlType t, boolean searchVars, boolean searchTypes, boolean searchPre
       }}
   | (THIS_KEYWORD DOT^)? q:qualifiedPart
     { String name = infixString(#qualified);
-			Object nameTypeOrVariable = state.getName(name,t,searchVars,searchTypes,searchPredicates,searchSymbols);
+      Object nameTypeOrVariable = state.getName(name,t,searchVars,searchTypes,searchPredicates,searchSymbols);
       if(nameTypeOrVariable == null)
         throw new SemanticException("\""+name+"\" undeclared");
 
       #qualified = #(#[IDENT,name]);
 
-			NddlType nameType = null;
-			if(nameTypeOrVariable instanceof NddlType)
-				nameType = (NddlType)nameTypeOrVariable;
-			else if(nameTypeOrVariable instanceof NddlVariable) {
-				nameType = ((NddlVariable)nameTypeOrVariable).getType();
+      NddlType nameType = null;
+      if(nameTypeOrVariable instanceof NddlType)
+        nameType = (NddlType)nameTypeOrVariable;
+      else if(nameTypeOrVariable instanceof NddlVariable) {
+        nameType = ((NddlVariable)nameTypeOrVariable).getType();
         #qualified.addChild(#[TYPE,nameType.mangled()]);
-			}
+      }
 
       if(t != null && t.isTypeless())
         t.setType(nameType.getName(),nameType,nameType.getType());
@@ -941,7 +941,27 @@ temporalRelation:
 
 
 intLiteral returns [Double d = null]:
-    i:INT {d = new Double(i.getText());}
+    i:INT
+    {
+      String number = i.getText();
+      int start = 0;
+      if(number.charAt(0) == '-' || number.charAt(0) == '+')
+        start = 1;
+
+      if(number.length() > start+2 && number.charAt(start) == '0') {
+        if(number.charAt(start+1) == 'x' || number.charAt(start+1) == 'X') {
+          if(start == 1 && number.charAt(0) == '-')
+            d = new Double(-Integer.parseInt(number.substring(3), 16));
+          else
+            d = new Double(Integer.parseInt(number.substring(2), 16));
+        }
+        else
+          d = new Double(Integer.parseInt(number, 8));
+      }
+      else {
+        d = new Double(number);
+      }
+    }
   | PINF {d = new Double(Double.POSITIVE_INFINITY);}
   | NINF {d = new Double(Double.NEGATIVE_INFINITY);}
   ;
@@ -999,14 +1019,14 @@ options {
 }
 
 {
-	protected boolean interp = false;
-	private boolean prematureEOF = false;
+  protected boolean interp = false;
+  private boolean prematureEOF = false;
   private File file = null;
   public NddlLexer(Reader reader, File file, boolean interp)
   {
     this(reader);
     this.file = file;
-		this.interp = interp;
+    this.interp = interp;
     if(file != null)
       setFilename(file.getName());
     else
@@ -1014,13 +1034,13 @@ options {
   }
   public File getFile() {return file;}
 
-	public void setPrematureEOF() {
-		prematureEOF = true;
-	}
+  public void setPrematureEOF() {
+    prematureEOF = true;
+  }
 
-	public boolean hasPrematureEOF() {
-		return prematureEOF;
-	}
+  public boolean hasPrematureEOF() {
+    return prematureEOF;
+  }
 }
 
 LBRACKET: '[';
