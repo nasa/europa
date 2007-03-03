@@ -57,6 +57,7 @@ namespace EUROPA {
     void handleExecute();
 
   private:
+
     AbstractDomain& m_x;
     AbstractDomain& m_y;
     AbstractDomain& m_z;
@@ -138,6 +139,8 @@ namespace EUROPA {
 		   const DomainListener::ChangeType& changeType);
 
   private:
+    bool testIsRedundant(const ConstrainedVariableId& var = ConstrainedVariableId::noId()) const;
+
     AbstractDomain& m_x;
     AbstractDomain& m_y;
     static const int X = 0;

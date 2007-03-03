@@ -308,6 +308,18 @@ namespace EUROPA {
 	   (argIndex == Y &&
 	    (changeType == DomainListener::LOWER_BOUND_INCREASED)));
   }
+  /**
+   * @todo
+   */
+  bool LessThanEqualConstraint::testIsRedundant(const ConstrainedVariableId& var) const{
+    if(Constraint::testIsRedundant(var))
+      return true;
+
+    if(getScope()[X]->baseDomain().getUpperBound() <= getScope()[Y]->baseDomain().getLowerBound())
+      return true;
+
+    return false;
+  }
 
   NotEqualConstraint::NotEqualConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
@@ -1905,7 +1917,7 @@ namespace EUROPA {
     if( !constraintLibraryInitialized()) {
       constraintLibraryInitialized() = true;
      
-      debugMsg("Constraints:initConstriantLibrary", "Initializing the constraint library");
+      debugMsg("Constriants:initConstriantLibrary", "Initializing the constraint library");
       // Register constraint Factories
       REGISTER_CONSTRAINT(UnaryConstraint, "UNARY", "Default");
       REGISTER_CONSTRAINT(AddEqualConstraint, "AddEqual", "Default");
@@ -1994,7 +2006,7 @@ namespace EUROPA {
 
     
     } else {
-       debugMsg("Constraints:initConstriantLibrary", "Constraint library already initalized - no action taken");
+       debugMsg("Constriants:initConstriantLibrary", "Constraint library already initalized - no action taken");
     }
 
   }
