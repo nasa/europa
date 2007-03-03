@@ -96,6 +96,7 @@ class ANMLElement
 
     virtual const std::string& getType() { return m_type; }
     virtual const std::string& getName() const { return m_name; }
+    virtual void setName(const std::string& n) { m_name = n; }
     virtual void toNDDL(std::ostream& os) const;
     virtual std::string toString() const;
     
@@ -115,10 +116,38 @@ class Type : public ANMLElement
     virtual void toNDDL(std::ostream& os) const {}    
 };
 
+class TypeAlias : public Type
+{
+  public:
+	TypeAlias(const std::string& name,const Type& t);
+	virtual ~TypeAlias();
+	    
+	virtual bool isPrimitive() const { return m_wrappedType.isPrimitive(); }
+	    
+    virtual void toNDDL(std::ostream& os) const;    
+
+  protected:    
+    const Type& m_wrappedType;
+};
+
+class Vector : public Type
+{
+  public:
+	Vector(const std::string& name,const std::vector<Variable*>& attrs);
+	virtual ~Vector();
+	    
+	virtual bool isPrimitive() const { return false; }
+	    
+    virtual void toNDDL(std::ostream& os) const; 
+
+  protected:    
+    std::vector<Variable*> m_attrs;
+};
+
 class Range : public Type
 {
   public:
-	Range(const Type& dataType,const std::string& lb,const std::string& ub);
+	Range(const std::string& name,const Type& dataType,const std::string& lb,const std::string& ub);
 	virtual ~Range();
 	    
 	virtual bool isPrimitive() const { return true; }
@@ -134,7 +163,7 @@ class Range : public Type
 class Enumeration : public Type
 {
   public:
-	Enumeration(const Type& dataType,const std::vector<std::string>& values);
+	Enumeration(const std::string& name,const Type& dataType,const std::vector<std::string>& values);
 	virtual ~Enumeration();
 	    
 	virtual bool isPrimitive() const { return m_dataType.isPrimitive(); }
@@ -181,17 +210,17 @@ class Variable : public ANMLElement
 class VarInit
 {
   public:
-      VarInit(const std::string& name, const std::string& value)
-          : m_name(name)
+      VarInit(const Variable* v, const std::string& value)
+          : m_var(v)
           , m_value(value)
       {
       }
       
-      const std::string& getName() const { return m_name; }
+      const std::string& getName() const { return m_var->getName(); }
       const std::string& getValue() const { return m_value; }
       
   protected:
-      std::string m_name;
+      const Variable* m_var;
       std::string m_value;	
 };
     

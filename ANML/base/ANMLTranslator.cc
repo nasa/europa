@@ -93,7 +93,7 @@ namespace ANML
     	check_error(element != NULL, "Can't add a NULL element to an ANML context");
     	
    	    m_elements.push_back(element);
-   	    debugMsg("ANMLContext","Added element:" << element->getType());    	    
+   	    debugMsg("ANMLContext","Added element:" << element->getType() << " " << element->getName());    	    
     }
 
     ObjType* ANMLContext::addObjType(const std::string& name,const std::string& parentObjType)
@@ -236,9 +236,24 @@ namespace ANML
         
         return os.str();    	
     }
-
-	Range::Range(const Type& dataType,const std::string& lb,const std::string& ub)	
-	    : Type(autoIdentifier("Range"))
+    
+	TypeAlias::TypeAlias(const std::string& name,const Type& t) 
+	    : Type(name)
+	    , m_wrappedType(t) 
+	{
+	}
+	
+	TypeAlias::~TypeAlias() 
+	{
+	}
+	    	    
+    void TypeAlias::toNDDL(std::ostream& os) const 
+    { 
+    	os << "typedef " << m_name << " " << m_wrappedType.getName() << ";" << std::endl; 
+    }    
+    
+	Range::Range(const std::string& name,const Type& dataType,const std::string& lb,const std::string& ub)	
+	    : Type(name!="" ? name : autoIdentifier("Range"))
 	    , m_dataType(dataType)
 	    , m_lb(lb)
 	    , m_ub(ub)
@@ -255,8 +270,8 @@ namespace ANML
         os << m_dataType.getName() << " [" << m_lb << " " << m_ub <<  "]";
     }
     
-	Enumeration::Enumeration(const Type& dataType,const std::vector<std::string>& values)
-	    : Type(autoIdentifier("Enumeration"))
+	Enumeration::Enumeration(const std::string& name,const Type& dataType,const std::vector<std::string>& values)
+	    : Type(name!="" ? name : autoIdentifier("Enumeration"))
 	    , m_dataType(dataType)
 	    , m_values(values)
 	{
@@ -278,6 +293,26 @@ namespace ANML
         }                                   
     }
     
+	Vector::Vector(const std::string& name,const std::vector<Variable*>& attrs) 
+	    : Type(name!="" ? name : autoIdentifier("Vector"))
+	    , m_attrs(attrs) 
+	{
+	}
+	
+	Vector::~Vector() 
+	{
+	}
+	    
+    void Vector::toNDDL(std::ostream& os) const 
+    { 
+    	os << "class " << m_name << std::endl;
+    	for (unsigned int i=0; i<m_attrs.size();i++) 
+    	    os << m_attrs[i]->getDataType().getName() << " " << m_attrs[i]->getName() << ";" << std::endl;
+    	
+    	// TODO: generate constructor    
+    	os << "}" << std::endl; 
+    }    
+        
     Variable::Variable(const Type& dataType, const std::string& name)
         : ANMLElement("VARIABLE",name)
         , m_dataType(dataType)

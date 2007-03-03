@@ -1,7 +1,7 @@
 // Rover-model.anml
 
 vartype Location : vector(string name, int x, int y);
-vartype Path : vector(string name, Location from, Location to, float cost);
+vartype Path : vector(string name, Location origin, Location dest, float cost);
 vartype StowState : string { "stowing", "stowed", "unstowing", "unstowed" };
 vartype Battery : int [0 50];
 
@@ -48,24 +48,24 @@ objtype Rover
     Instrument instrument_;
     Location location_;
     
-	action Go(Location from, Location to) 
+	action Go(Location origin, Location dest) 
 	{
-	    condition at start { location_ = from; };
+	    condition at start { location_ = origin; };
 	
 	    condition over all {
- 		    neq(from, to);
+ 		    neq(origin, dest);
 		
 		    // assert existence of path from from to to
  		    exists (Path p)
-            eq(p.from, from);
-	        eq(p.to, to);
+            eq(p.origin, origin);
+	        eq(p.dest, dest);
 	        
             // TODO: compute duration based on distance?
             // for now just equal to cost?
             eq(duration,p.cost); 	        
         };
         	    	    
-		effect at end { location_ = to; };
+		effect at end { location_ = dest; };
 		
 		change over all { uses(battery_, p.cost); };
 	}

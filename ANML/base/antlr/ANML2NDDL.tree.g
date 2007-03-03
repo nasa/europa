@@ -88,7 +88,7 @@ anml
 	    {
            debugMsg("ANML2NDDL:anml", "Parsing...");
         }
-      (stmt=anml_stmt { m_translator.getContext().addElement(stmt); debugMsg("ANML2NDDL:anml", "Added Element " << stmt->getType());})*
+      (stmt=anml_stmt { m_translator.getContext().addElement(stmt); debugMsg("ANML2NDDL:anml", "Added Element " << stmt->getType() << " " << stmt->getName());})*
 	    {
 	       debugMsg("ANML2NDDL:anml", "Done parsing");
 	    }
@@ -116,7 +116,14 @@ problem_stmt returns [ANML::ANMLElement* element]
 ;
    
 vartype_decl returns [ANML::ANMLElement* element]
-    : #(VARTYPE user_defined_type_name var_type)
+{
+	std::string name;
+	ANML::Type* t;
+}
+    : #(VARTYPE name=user_defined_type_name t=var_type[name])
+{
+	element = t;
+}    
 ;
 
 var_obj_declaration! returns [ANML::ANMLElement* element]
@@ -124,45 +131,57 @@ var_obj_declaration! returns [ANML::ANMLElement* element]
 	ANML::Type* type;
 	std::vector<ANML::VarInit*> varInit;
 }    
-    : #(VARIABLE type=var_type varInit=var_init_list)
+    : #(VARIABLE type=var_type varInit=var_init_list[type])
 {
     element = new ANML::VarDeclaration(*type,varInit);	
-    for (unsigned int i=0;i<varInit.size();i++) {
-        m_translator.getContext().addVariable(new ANML::Variable(*type,varInit[i]->getName()));
-    }
 }    
 ;
 
-var_init_list returns [std::vector<ANML::VarInit*> varInit;]
+var_init_list[ANML::Type* type] returns [std::vector<ANML::VarInit*> varInit;]
 {
 	ANML::VarInit* vi;
 }
-	: (vi=var_init { varInit.push_back(vi); })+
+	: (vi=var_init[type] { varInit.push_back(vi); })+
 ;
 
-var_type returns [ANML::Type* t;]
+var_type[const std::string& name=""] returns [ANML::Type* t]
 {
 	std::vector<std::string> values;
 	std::vector<ANML::Expr*> rangeValues;
 	ANML::ANMLContext& context = m_translator.getContext();
+	bool newType=false;
+    std::vector<ANML::Variable*> vb;	
 }
-    : BOOL { t = context.getType("bool"); }
+    : (
+    BOOL { t = context.getType("bool"); }
     | s:IDENTIFIER { t = context.getType(s->getText(),true); }
     | #(INT { t = context.getType("int"); } 
-         (  rangeValues=range     { t = new ANML::Range(*t,rangeValues[0]->toString(),rangeValues[1]->toString()); context.addType(t); } 
-           |values=enum_body { t = new ANML::Enumeration(*t,values); context.addType(t); }
+         (  rangeValues=range { t = new ANML::Range(name,*t,rangeValues[0]->toString(),rangeValues[1]->toString()); newType=true; } 
+           |values=enum_body  { t = new ANML::Enumeration(name,*t,values); newType=true; }
          )?
       )
 	| #(FLOAT { t = context.getType("float"); }
-	     (  rangeValues=range     { t = new ANML::Range(*t,rangeValues[0]->toString(),rangeValues[1]->toString()); context.addType(t); }
-	       |values=enum_body { t = new ANML::Enumeration(*t,values); context.addType(t); }
+	     (  rangeValues=range  { t = new ANML::Range(name,*t,rangeValues[0]->toString(),rangeValues[1]->toString()); newType=true; }
+	       |values=enum_body   { t = new ANML::Enumeration(name,*t,values); newType=true; }
 	     )?
 	  )
     | #(STRING { t = context.getType("string"); }
-         (values=enum_body { t = new ANML::Enumeration(*t,values); context.addType(t);}
+         (values=enum_body { t = new ANML::Enumeration(name,*t,values); newType=true;}
          )?
       )
-    | #(VECTOR vector_body)   { check_runtime_error(ALWAYS_FAIL, "Vector data type not suported yet"); }
+    | #(VECTOR vb=vector_body)   { t = new ANML::Vector(name,vb); newType=true; }
+    )
+{
+	if (newType) {
+		context.addType(t);
+	}
+	else {
+		if (name != "") {
+			t = new ANML::TypeAlias(name,*t);
+			context.addType(t);
+		}
+	}
+}    
 ;
 
 enum_body returns [std::vector<std::string> values;]
@@ -173,8 +192,8 @@ enum_body returns [std::vector<std::string> values;]
     : #(LCURLY (v=constant { values.push_back(v); })+)
 ;
 
-vector_body
-    : parameters
+vector_body returns [std::vector<ANML::Variable*> attrs;]
+    : attrs=parameters
 ;
 
 range returns [std::vector<ANML::Expr*> values;]
@@ -189,7 +208,7 @@ range returns [std::vector<ANML::Expr*> values;]
 }    
 ;
 
-var_init returns [ANML::VarInit* vi;]
+var_init[ANML::Type* type] returns [ANML::VarInit* vi;]
 {
 	std::string name;
 	std::string value;
@@ -198,8 +217,9 @@ var_init returns [ANML::VarInit* vi;]
 	| name=var_name
 {
 	// TODO: do type checking for initialization!
-	// TODO: Add variable to context
-	vi = new ANML::VarInit(name,value);
+	ANML::Variable* v = new ANML::Variable(*type,name);
+    m_translator.getContext().addVariable(v);
+	vi = new ANML::VarInit(v,value);
 }	
 ;
 
@@ -210,7 +230,7 @@ parameters returns [std::vector<ANML::Variable*> params;]
     : #(LPAREN (p=parameter_decl { params.push_back(p); })*)
 ;
 
-parameter_decl! returns [ANML::Variable* v;]
+parameter_decl! returns [ANML::Variable* v]
 {
 	ANML::Type* type;
 }
@@ -506,8 +526,11 @@ action_def returns [ANML::ANMLElement* element]
     : #(ACTION name:action_symbol params=parameters 
         {
             a = new ANML::Action((ANML::ObjType&)(m_translator.getContext()),name->getText(),params);
-            m_translator.getContext().addAction(a);
+            m_translator.getContext().addAction(a); // TODO: add at the end so that errors are handled gracefully
             m_translator.pushContext(a);
+            
+            for (unsigned int i=0; i<params.size();i++)
+                m_translator.getContext().addVariable(params[i]);
         }    
         body=action_body
       )
@@ -719,4 +742,4 @@ qualified_var_name [ANML::ANMLContext context,const std::string& path] returns [
 ;
 
 
-user_defined_type_name  : IDENTIFIER;
+user_defined_type_name returns [std::string s] : i:IDENTIFIER { s = i->getText(); };

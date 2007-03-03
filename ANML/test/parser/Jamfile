@@ -28,7 +28,12 @@ for model in
   RunModuleMain run-anml-tests : ANML2NDDL : $(model:S=) ;
 }
 
-  RunModuleMain run-test : ANML2NDDL : HelloWorld-problem-instance ;
+for model in
+	HelloWorld-problem-instance 
+	Rover-problem-instance
+{
+  RunModuleMain run-test : ANML2NDDL : $(model) ;
+}
 
 
 } # PLASMA_READY

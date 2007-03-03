@@ -1,5 +1,7 @@
 // Rover-problem-instance.anml
 
+#include "Rover-model.anml"
+
 // TODO: we need collections
 Location lander, rock1, rock2, rock3, rock4;
 Path p1,p2,p3;
