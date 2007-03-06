@@ -364,12 +364,13 @@ fluent returns [ANML::Fluent* f;]
 		| #(OR fluent fluent)
 		| #(AND fluent fluent)
 		| f=relational_fluent 
-        | quantif_clause fluent
 ;
 
-quantif_clause
-    : #(FORALL var_list)
-    | #(EXISTS var_list)
+free_vars_decl returns [ANML::ANMLElement* element]
+    : #(VARIABLES  var_list)
+{
+	element = new ANML::ANMLElement("FREE_VARS");
+}
 ;
 
 var_list
@@ -550,6 +551,7 @@ action_body returns [std::vector<ANML::ANMLElement*> body]
 
 action_body_stmt returns [ANML::ANMLElement* element]
     : element=duration_stmt 
+    | element=free_vars_decl
     | element=condition_stmt
     | element=effect_stmt 
     | element=change_stmt 
@@ -601,7 +603,6 @@ change_proposition
 change_fluent 
     : #(AND change_fluent change_fluent) 
     | #(LPAREN change_fluent)
-    | quantif_clause change_fluent
     | resource_change
     | transition_change
 ;
@@ -631,9 +632,9 @@ decomp_step
 ;
 
 action_set
-    : #(ORDERED (quantif_clause)? action_set_element_list)
-    | #(UNORDERED (quantif_clause)? action_set_element_list)
-    | #(DISJUNCTION (quantif_clause)? action_set_element_list)
+    : #(ORDERED action_set_element_list)
+    | #(UNORDERED action_set_element_list)
+    | #(DISJUNCTION action_set_element_list)
 ;
 
 action_set_element_list

@@ -52,13 +52,36 @@ void parse(const std::string& filename, antlr::RefAST& ast)
   debugMsg("ANMLTest:parser", "Phase 1 complete");
 }
 
+
+void DumpAST( const antlr::RefAST& top, const std::string& ident )
+{
+  if (top != NULL) {
+    //std::cout << top->getLine() << " ";
+
+    std::string str;
+
+    str = top->getText();
+    std::cout << str <<  std::endl;
+    if (top->getFirstChild() != NULL) {
+      std::string newIdent = ident + "    ";
+      std::cout << newIdent << "kid: ";
+      DumpAST( top->getFirstChild(), newIdent);
+    }    
+    if (top->getNextSibling() != NULL) {
+      std::cout << ident << "sib: ";
+      DumpAST( top->getNextSibling(), ident);
+    }
+  }
+}
 void translate(const std::string& filename, antlr::RefAST& ast)
 {
   debugMsg("ANMLTest:translator", "Phase 2: Walking parse tree");
   std::ofstream nddl((filename + "-auto.nddl").c_str());
 
+  DumpAST(ast,"");
+   
   ANML2NDDL* treeParser = new ANML2NDDL();
-  treeParser->anml(ast);
+  treeParser->anml(ast);  
 
   debugMsg("ANMLTest:translator", "Phase 2 complete");
   debugMsg("ANMLTest:translator", "\n" << treeParser->getTranslator().toString());
@@ -66,6 +89,7 @@ void translate(const std::string& filename, antlr::RefAST& ast)
   treeParser->getTranslator().toNDDL(nddl);  
   delete treeParser;
 }
+
 
 void dumpDigraph(const std::string& filename, const antlr::RefAST& ast)
 {

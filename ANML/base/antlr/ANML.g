@@ -291,7 +291,6 @@ predicate_declaration
 // For Effects and Facts :
 // - OR is not allowed
 // - Temporal qualifiers IN, BEFORE, AFTER and CONTAINS are not allowed.
-// - existential quantifier is not allowed
 // For Goals and Conditions
 // - WHEN clause is not allowed
 
@@ -360,15 +359,14 @@ and_fluent
 // NOTE : NOT is not supported for now
 primary_fluent
     : relational_fluent 
-    | quantif_clause fluent
     | LPAREN^ fluent RPAREN!
     //| NOT fluent
 ;
 
-quantif_clause
-    : (FORALL^ | EXISTS^) var_list
+free_vars_decl
+    : VARIABLES^  var_list
 ;
-
+    
 var_list
     : LPAREN^ var_type var_name (COMMA! var_name)* RPAREN!
 ;
@@ -471,6 +469,7 @@ action_body
 
 action_body_stmt
     : duration_stmt 
+    | free_vars_decl
     | condition_stmt
     | effect_stmt 
     | change_stmt 
@@ -514,7 +513,6 @@ and_change_fluent
 
 primary_change_fluent
     : atomic_change 
-    | quantif_clause change_fluent
     | LPAREN^ change_fluent RPAREN! 
 ;
 
@@ -550,8 +548,7 @@ decomp_step
 ;
 
 action_set
-    : (quantif_clause)?
-      (ORDERED^ | UNORDERED^ | DISJUNCTION^) action_set_element_list
+    : (ORDERED^ | UNORDERED^ | DISJUNCTION^) action_set_element_list
 ;
 
 action_set_element_list
@@ -693,6 +690,7 @@ tokens {
     STRING        = "string";
     TRANSITION    = "transition";
     USES          = "uses";
+    VARIABLES     = "variables";
     VARTYPE       = "vartype";
     VECTOR        = "vector";
     WHEN          = "when";

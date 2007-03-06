@@ -93,7 +93,7 @@ namespace ANML
     	check_error(element != NULL, "Can't add a NULL element to an ANML context");
     	
    	    m_elements.push_back(element);
-   	    debugMsg("ANMLContext","Added element:" << element->getType() << " " << element->getName());    	    
+   	    debugMsg("ANMLContext", getContextDesc() << ", added element:" << element->getType() << " " << element->getName());    	    
     }
 
     ObjType* ANMLContext::addObjType(const std::string& name,const std::string& parentObjType)

@@ -51,17 +51,16 @@ objtype Rover
 	action Go(Location origin, Location dest) 
 	{
 	    condition at start { location_ = origin; };
-	
+	        
+	    variables (Path p); // there needs to be a path from origin to dest
+	    
 	    condition over all {
  		    neq(origin, dest);
 		
-		    // assert existence of path from from to to
- 		    exists (Path p)
             eq(p.origin, origin);
 	        eq(p.dest, dest);
 	        
-            // TODO: compute duration based on distance?
-            // for now just equal to cost?
+            // TODO: compute duration based on distance? for now just equal to cost?
             eq(duration,p.cost); 	        
         };
         	    	    
