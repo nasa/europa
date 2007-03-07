@@ -47,21 +47,25 @@ objtype Rover
     Battery battery_;
     Instrument instrument_;
     Location location_;
-    
+
 	action Go(Location origin, Location dest) 
 	{
-	    condition at start { location_ = origin; };
-	        
-	    variables (Path p); // there needs to be a path from origin to dest
+	    //condition at start { location_ = origin; };
+	      
+	    variables (
+	        Path p, // there needs to be a path from origin to dest
+	        int act_dur
+	    ); 
 	    
 	    condition over all {
- 		    neq(origin, dest);
+ 		    constraint neq(origin, dest);
 		
-            eq(p.origin, origin);
-	        eq(p.dest, dest);
+            constraint eq(p.origin, origin);
+	        constraint eq(p.dest, dest);
 	        
             // TODO: compute duration based on distance? for now just equal to cost?
-            eq(duration,p.cost); 	        
+            //act_dur = end; //end-start;
+            //constraint eq(act_dur,p.cost); 	        
         };
         	    	    
 		effect at end { location_ = dest; };

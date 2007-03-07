@@ -186,10 +186,10 @@ var_type[const std::string& name=""] returns [ANML::Type* t]
 
 enum_body returns [std::vector<std::string> values;]
 {
-	std::string v;
+	ANML::Expr* e;
 	// TODO: validate values (flag  duplicates, type checking)
 }
-    : #(LCURLY (v=constant { values.push_back(v); })+)
+    : #(LCURLY (e=constant { values.push_back(e->toString()); })+)
 ;
 
 vector_body returns [std::vector<ANML::Variable*> attrs;]
@@ -198,28 +198,34 @@ vector_body returns [std::vector<ANML::Variable*> attrs;]
 
 range returns [std::vector<ANML::Expr*> values;]
 {
-	std::string lb,ub;
+	ANML::Expr *lb,*ub;
 }
     : #(LBRACK lb=signed_literal ub=signed_literal)
 {
 	// TODO: validate range, do type checking
-	values.push_back(new ANML::ExprConstant(lb));
-	values.push_back(new ANML::ExprConstant(ub));	
+	values.push_back(lb);
+	values.push_back(ub);	
 }    
 ;
 
-var_init[ANML::Type* type] returns [ANML::VarInit* vi;]
+var_init[ANML::Type* type] returns [ANML::VarInit* vi]
 {
 	std::string name;
-	std::string value;
+	ANML::Expr* value=NULL;
 }
     : #(EQUAL name=var_name (value=constant)?)
 	| name=var_name
 {
-	// TODO: do type checking for initialization!
+	if (value != NULL) {
+    	// TODO: do more intelligent type checking
+	    if (type->getName() != value->getDataType().getName())
+	       check_runtime_error(ALWAYS_FAIL,"Can't initialize " + type->getName() + " with " + value->getDataType().getName());
+	}	       
+	    
 	ANML::Variable* v = new ANML::Variable(*type,name);
     m_translator.getContext().addVariable(v);
-	vi = new ANML::VarInit(v,value);
+    // TODO : pass along expr?
+	vi = new ANML::VarInit(v,(value !=NULL ? value->toString() : ""));
 }	
 ;
 
@@ -360,10 +366,14 @@ fluent_list returns [std::vector<ANML::Fluent*> fluents;]
 ;
 
 fluent returns [ANML::Fluent* f;]
+{
+	ANML::Fluent *lhs,*rhs;
+}
     : #(LPAREN f=fluent)
-		| #(OR fluent fluent)
-		| #(AND fluent fluent)
-		| f=relational_fluent 
+	| #(OR  lhs=fluent rhs=fluent)  { f = new ANML::CompositeFluent("and",lhs,rhs); }
+	| #(AND lhs=fluent rhs=fluent)  { f = new ANML::CompositeFluent("or",lhs,rhs); }
+	| f=relational_fluent 
+	| f=constraint
 ;
 
 free_vars_decl returns [ANML::ANMLElement* element]
@@ -374,7 +384,7 @@ free_vars_decl returns [ANML::ANMLElement* element]
 ;
 
 var_list
-    : #(LPAREN var_type (var_name)+)
+    : #(LPAREN (var_type var_name)+)
 ;
 
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
@@ -428,10 +438,7 @@ lhs_expr returns [ANML::LHSExpr* p;]
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
 expr returns [ANML::Expr* e;] 
-{
-	std::string s;
-}
-    : s=constant { e = new ANML::ExprConstant(s); }
+    : e=constant 
 	| arguments { check_runtime_error(false,"Vector data type not supported yet"); }
     | e=lhs_expr
 ;
@@ -472,8 +479,8 @@ interval returns [std::vector<ANML::Expr*> bounds;]
 }
     : #(ALL (label=action_label_arg { label += "."; })?
            {
-               bounds.push_back(new ANML::ExprConstant(label+"start"));
-               bounds.push_back(new ANML::ExprConstant(label+"end"));
+               bounds.push_back(new ANML::ExprConstant(ANML::Type::INT,label+"start"));
+               bounds.push_back(new ANML::ExprConstant(ANML::Type::INT,label+"end"));
            } 
        )
     | #(LBRACK 
@@ -492,18 +499,20 @@ time_pt returns [ANML::Expr* expr]
 
 numeric_expr returns [ANML::Expr* expr]
 {
-	std::string s;
 	ANML::Expr  *op1,*op2;
 }
-    :     (#(PLUS numeric_expr numeric_expr)) => #(PLUS numeric_expr numeric_expr)
+    :     (#(PLUS numeric_expr numeric_expr)) => #(PLUS op1=numeric_expr op2=numeric_expr)
+		        { expr = new ANML::ExprArithOp("+",op1,op2); }
 		| (#(MINUS numeric_expr numeric_expr)) => #(MINUS op1=numeric_expr op2=numeric_expr) 
 		        { expr = new ANML::ExprArithOp("-",op1,op2); }
-		| #(MULT numeric_expr numeric_expr)
-		| #(DIV numeric_expr numeric_expr)
+		| #(MULT op1=numeric_expr op2=numeric_expr)
+		        { expr = new ANML::ExprArithOp("*",op1,op2); }
+		| #(DIV op1=numeric_expr op2=numeric_expr)
+		        { expr = new ANML::ExprArithOp("/",op1,op2); }
 		| #(LPAREN expr=numeric_expr)
-		| #(PLUS numeric_expr)
-		| #(MINUS numeric_expr)
-		| s=numeric_literal { expr = new ANML::ExprConstant(s); }
+		| #(PLUS expr=numeric_expr) 
+		| #(MINUS expr=numeric_expr) { /* TODO: apply minus!!*/ }
+		| expr=numeric_literal 
 		| expr=lhs_expr
 ;
 
@@ -556,6 +565,7 @@ action_body_stmt returns [ANML::ANMLElement* element]
     | element=effect_stmt 
     | element=change_stmt 
     | element=decomp_stmt 
+    // TODO: constraints?
 ;
 
 // TODO: semantic layer to enforce that only one duration statement is allowed    
@@ -584,11 +594,23 @@ condition_stmt returns [ANML::ANMLElement* element]
 ;
     
 effect_stmt returns [ANML::ANMLElement* element]
-    : #(EFFECT (effect_proposition | effect_proposition_list))
+{
+    std::vector<ANML::Proposition*> propositions;
+    ANML::Proposition* p;
+}    
+    : #(EFFECT (
+         p=effect_proposition { propositions.push_back(p); }
+         | propositions=effect_proposition_list))
+{
+    element = new ANML::Effect(propositions);	
+}    
 ;
 
 change_stmt returns [ANML::ANMLElement* element]
     : #(CHANGE (change_proposition | change_proposition_list))
+{
+	element = new ANML::Change();
+}    
 ;
 
 change_proposition_list
@@ -624,6 +646,9 @@ directed_expr_list
 
 decomp_stmt returns [ANML::ANMLElement* element]
     : #(DECOMPOSITION (decomp_step | #(LCURLY (decomp_step)+)))
+{
+	element = new ANML::Decomposition();
+}    
 ;
 
 decomp_step
@@ -651,8 +676,21 @@ qualified_action_symbol
 		| action_symbol
 ;
 
-constraint 
-    : #(CONSTRAINT constraint_symbol arguments)
+constraint returns [ANML::Constraint* element]
+{
+	std::string name;
+	std::vector<ANML::Expr*> args;
+}
+    : #(CONSTRAINT name=constraint_symbol args=arguments)
+{
+	std::vector<const ANML::Type*> argTypes;
+	for (unsigned int i=0;i<args.size();i++)
+	    argTypes.push_back(&(args[i]->getDataType()));// TODO: eliminate this de-reference
+	
+	// Make sure that the constraint exists    
+	m_translator.getContext().getConstraint(name,argTypes,true);
+	element = new ANML::Constraint(name,args);
+}    
 ;
 
 transition_constraint returns [ANML::ANMLElement* element]
@@ -667,32 +705,36 @@ trans_pair
     : #(ARROW constant (constant | #(LCURLY (constant)+)))
 ;
 
-unsigned_constant 
-    : numeric_literal | string_literal | bool_literal
-;
-constant returns [std::string s]
-    : s=signed_literal 
-    | s=string_literal 
-    | s=bool_literal
+unsigned_constant returns [ANML::Expr* e]
+    : e=numeric_literal 
+    | e=string_literal 
+    | e=bool_literal
 ;
 
-signed_literal returns [std::string s]
-    : t1:numeric_literal           { s = t1->getText(); }
-	| #(MINUS t2:numeric_literal)  { s = "-" + t2->getText(); }
+constant returns [ANML::Expr* e]
+    : e=signed_literal 
+    | e=string_literal 
+    | e=bool_literal
 ;
 
-numeric_literal returns [std::string s]
-    : t1:NUMERIC_LIT { s = t1->getText(); }
-    | t2:INF         { s = t2->getText(); }
+signed_literal returns [ANML::Expr* e]
+    : e=numeric_literal         
+	| #(MINUS e=numeric_literal)  { /* TODO!!: append - to numeric literal */  }
 ;
 
-bool_literal returns [std::string s]
-    : t1:TRUE  { s = t1->getText(); }
-    | t2:FALSE { s = t2->getText(); }
+// TODO: What about floats??
+numeric_literal returns [ANML::Expr* e]
+    : t1:NUMERIC_LIT  { e = new ANML::ExprConstant(ANML::Type::INT,t1->getText()); }
+    | t2:INF          { e = new ANML::ExprConstant(ANML::Type::BOOL,t2->getText()); }
 ;
 
-string_literal returns [std::string s]
-    : t:STRING_LIT { s = t->getText(); }
+bool_literal returns [ANML::Expr* e]
+    : t1:TRUE  { e = new ANML::ExprConstant(ANML::Type::BOOL,t1->getText()); }
+    | t2:FALSE { e = new ANML::ExprConstant(ANML::Type::BOOL,t2->getText()); }
+;
+
+string_literal returns [ANML::Expr* e]
+    : t:STRING_LIT { e = new ANML::ExprConstant(ANML::Type::STRING,t->getText()); }
 ;
 
 action_symbol         returns [std::string s]  : i:IDENTIFIER { s = i->getText(); };

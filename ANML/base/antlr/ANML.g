@@ -83,6 +83,7 @@ options {
       }
       else {
         std::cerr << "exception: " << e.getMessage() << std::endl;
+        throw e;
       }
       return antlr::nullAST;
     }
@@ -108,6 +109,7 @@ options {
     }
     else {
       std::cerr << ex.toString().c_str() << std::endl;
+      throw ex;
     }
   }
 
@@ -345,6 +347,7 @@ fluent_list
 
 fluent
     : or_fluent
+    | constraint
 ;
 
 // TODO: OR is not allowed for effects and facts. check and throw exception if necessary
@@ -359,7 +362,7 @@ and_fluent
 // NOTE : NOT is not supported for now
 primary_fluent
     : relational_fluent 
-    | LPAREN^ fluent RPAREN!
+    | LPAREN^ or_fluent RPAREN!
     //| NOT fluent
 ;
 
@@ -368,7 +371,7 @@ free_vars_decl
 ;
     
 var_list
-    : LPAREN^ var_type var_name (COMMA! var_name)* RPAREN!
+    : LPAREN^ var_type var_name (COMMA! var_type var_name)* RPAREN!
 ;
 
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
@@ -568,7 +571,7 @@ qualified_action_symbol
 ;
     
 constraint 
-    : constraint_expr
+    : CONSTRAINT constraint_expr
 ;
 
 // TODO: define grammar to support infix notation for constraints

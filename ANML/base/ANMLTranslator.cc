@@ -22,14 +22,15 @@ namespace ANML
     {
     	ANMLContext* context = new ANMLContext();
     	
-    	Type* boolType   = new Type("bool");
-    	Type* intType    = new Type("int");
+    	Type* boolType   = &Type::BOOL;
+    	Type* intType    = &Type::INT;
+    	Type* floatType  = &Type::FLOAT;
+    	Type* stringType = &Type::STRING;
     	
     	context->addType(boolType);
     	context->addType(intType);    	
-    	context->addType(new Type("float"));
-    	context->addType(new Type("string"));
-    	
+    	context->addType(floatType);
+    	context->addType(stringType);    	
     	
     	context->addType(new ObjType("object",NULL));
     	
@@ -49,6 +50,27 @@ namespace ANML
     		args.push_back(new Arg("max_steps",*intType));
     		args.push_back(new Arg("max_depth",*intType));
     	    context->addVariable(new Variable(*boolType,"PlannerConfig",args));
+    	}
+    	
+    	{
+    		std::vector<Arg*> args;
+    		args.push_back(new Arg("resource",*intType));
+    		args.push_back(new Arg("quantity",*intType));
+    	    context->addVariable(new Variable(*boolType,"uses",args));
+    	}
+    	
+    	{
+    		std::vector<const Type*> argTypes;
+    		argTypes.push_back(intType);
+    		argTypes.push_back(intType);
+    	    context->addConstraint(new ConstraintDef("eq",argTypes));
+    	}
+    	
+    	{
+    		std::vector<const Type*> argTypes;
+    		argTypes.push_back(intType);
+    		argTypes.push_back(intType);
+    	    context->addConstraint(new ConstraintDef("neq",argTypes));
     	}
     	
     	return context;
@@ -187,6 +209,43 @@ namespace ANML
 		   
     	return NULL;
 	}
+		
+	std::string makeKey(const std::string& name,const std::vector<const Type*>& argTypes)
+	{
+		std::ostringstream os;
+		
+		os << name;
+		
+		for (unsigned int i=0;i<argTypes.size();i++) 
+		    os << ":" << argTypes[i]->getName();
+		
+		return os.str();
+	}
+	 	
+    void ANMLContext::addConstraint(ConstraintDef* c)
+    {
+    	check_runtime_error(getConstraint(c->getName(),c->getArgTypes()) == NULL,"Constraint "+c->getName()+" already defined");
+    	m_constraints[makeKey(c->getName(),c->getArgTypes())] = c;
+    }
+    
+    ConstraintDef* ANMLContext::getConstraint(const std::string& name,const std::vector<const Type*>& argTypes,bool mustExist) const
+    {
+    	std::string key = makeKey(name,argTypes);
+    	debugMsg("ANMLContext","Constraint key:" << key);
+		std::map<std::string,ConstraintDef*>::const_iterator it = m_constraints.find(key);
+		
+		if (it != m_constraints.end()) 
+		    return it->second;
+        // TODO: check for generic matches, like numeric vs int,float		    
+		   
+		if (m_parent != NULL)
+		    return m_parent->getConstraint(name,argTypes,mustExist);
+				     
+		if (mustExist)
+    		check_runtime_error(false, "Constraint "+key+" has not been defined");
+		   
+    	return NULL;
+    }
 	
     void ANMLContext::toNDDL(std::ostream& os) const
     {
@@ -217,6 +276,12 @@ namespace ANML
     	toNDDL(os); 
     	return os.str(); 
     }
+    
+    Type Type::VOID("void");
+    Type Type::BOOL("bool");
+    Type Type::INT("int");
+    Type Type::FLOAT("float");
+    Type Type::STRING("string");
     
 	Type::Type(const std::string& name)
 	    : ANMLElement("TYPE",name)
@@ -534,6 +599,30 @@ namespace ANML
     	    m_rhs->toNDDL(os,m_parent->getContext(),varName);     
     }    
     
+    Constraint::Constraint(const std::string& name,const std::vector<ANML::Expr*>& args) 
+        : m_name(name)
+        , m_args(args)
+    {
+    } 
+       
+    Constraint::~Constraint() 
+    {
+    }
+    
+    void Constraint::toNDDL(std::ostream& os, TemporalQualifier* tq) const
+    {
+    	// TODO: deal with the temporal qualifier??
+    	os << m_name << "(";
+    	
+    	for (unsigned int i=0;i<m_args.size();i++) {
+    		if (i>0)
+    		    os << ",";
+    		os << m_args[i]->toString();
+    	}    	
+    	
+    	os << ");" << std::endl;
+    }
+
     Condition::Condition(const std::vector<Proposition*>& propositions) 
         : ANMLElement("CONDITION")
         , m_propositions(propositions) 
@@ -552,6 +641,26 @@ namespace ANML
     		m_propositions[i]->toNDDL(os);
     	}
     }
+    
+    Effect::Effect(const std::vector<Proposition*>& propositions) 
+        : ANMLElement("EFFECT")
+        , m_propositions(propositions) 
+    {
+    	for (unsigned int i=0;i<m_propositions.size();i++) 
+    		m_propositions[i]->setContext(Proposition::EFFECT);
+    }
+    
+    Effect::~Effect() 
+    {
+    }
+    
+    void Effect::toNDDL(std::ostream& os) const 
+    { 
+    	for (unsigned int i=0; i<m_propositions.size(); i++) {
+    		m_propositions[i]->toNDDL(os);
+    	}
+    }
+    
     
     Goal::Goal(const std::vector<Proposition*>& propositions) 
         : ANMLElement("GOAL")
