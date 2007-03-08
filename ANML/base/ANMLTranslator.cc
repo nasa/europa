@@ -68,8 +68,22 @@ namespace ANML
     	
     	{
     		std::vector<const Type*> argTypes;
+    		argTypes.push_back(stringType);
+    		argTypes.push_back(stringType);
+    	    context->addConstraint(new ConstraintDef("eq",argTypes));
+    	}
+
+    	{
+    		std::vector<const Type*> argTypes;
     		argTypes.push_back(intType);
     		argTypes.push_back(intType);
+    	    context->addConstraint(new ConstraintDef("neq",argTypes));
+    	}
+    	
+    	{
+    		std::vector<const Type*> argTypes;
+    		argTypes.push_back(stringType);
+    		argTypes.push_back(stringType);
     	    context->addConstraint(new ConstraintDef("neq",argTypes));
     	}
     	
@@ -78,13 +92,13 @@ namespace ANML
     
     void ANMLTranslator::pushContext(ANMLContext* context)
     {
-    	context->setParent(m_context);
+    	context->setParentContext(m_context);
     	m_context = context;
     }
  
     void ANMLTranslator::popContext()
     {
-    	m_context = (ANMLContext*)(m_context->getParent());
+    	m_context = (ANMLContext*)(m_context->getParentContext());
     	check_runtime_error(m_context != NULL,"ANMLTranslator context can't be NULL");
     }      
             
@@ -102,7 +116,7 @@ namespace ANML
     }
 
     ANMLContext::ANMLContext(const ANMLContext* parent)
-        : m_parent(parent)
+        : m_parentContext(parent)
 	{
 	}
 	
@@ -115,7 +129,7 @@ namespace ANML
     	check_error(element != NULL, "Can't add a NULL element to an ANML context");
     	
    	    m_elements.push_back(element);
-   	    debugMsg("ANMLContext", getContextDesc() << ", added element:" << element->getType() << " " << element->getName());    	    
+   	    debugMsg("ANMLContext", getContextDesc() << " Added element:" << element->getType() << " " << element->getName());    	    
     }
 
     ObjType* ANMLContext::addObjType(const std::string& name,const std::string& parentObjType)
@@ -134,7 +148,7 @@ namespace ANML
     void ANMLContext::addType(Type* type)
     {
     	m_types[type->getName()] = type;
-    	debugMsg("ANMLContext","Added type:" << type->getName());
+    	debugMsg("ANMLContext",getContextDesc() << " Added type:" << type->getName());
     }
 	
 	Type* ANMLContext::getType(const std::string& name,bool mustExist) const
@@ -144,8 +158,8 @@ namespace ANML
 		if (it != m_types.end()) 
 		    return it->second;
 		
-		if (m_parent != NULL)
-		    return m_parent->getType(name,mustExist);
+		if (m_parentContext != NULL)
+		    return m_parentContext->getType(name,mustExist);
 		       
 		if (mustExist)
     		check_runtime_error(false, "Type "+name+" has not been defined");
@@ -177,8 +191,8 @@ namespace ANML
 		if (it != m_actions.end()) 
 		    return it->second;
 		   
-		if (m_parent != NULL)
-		    return m_parent->getAction(name,mustExist);
+		if (m_parentContext != NULL)
+		    return m_parentContext->getAction(name,mustExist);
 		       
 		if (mustExist)
     		check_runtime_error(false, "Action "+name+" has not been defined");
@@ -192,6 +206,7 @@ namespace ANML
 		// TODO: warn if it hides an element in a parent context?
     	check_runtime_error(getVariable(v->getName()) == NULL,"Variable "+v->getName()+" already defined");
 		m_variables[v->getName()] = v;
+    	debugMsg("ANMLContext",getContextDesc() << " Added variable:" << v->getName());		
 	}
 	
 	Variable* ANMLContext::getVariable(const std::string& name,bool mustExist) const
@@ -201,8 +216,8 @@ namespace ANML
 		if (it != m_variables.end()) 
 		    return it->second;
 		   
-		if (m_parent != NULL)
-		    return m_parent->getVariable(name,mustExist);
+		if (m_parentContext != NULL)
+		    return m_parentContext->getVariable(name,mustExist);
 		       
 		if (mustExist)
     		check_runtime_error(false, "Variable "+name+" has not been defined");
@@ -224,22 +239,23 @@ namespace ANML
 	 	
     void ANMLContext::addConstraint(ConstraintDef* c)
     {
-    	check_runtime_error(getConstraint(c->getName(),c->getArgTypes()) == NULL,"Constraint "+c->getName()+" already defined");
-    	m_constraints[makeKey(c->getName(),c->getArgTypes())] = c;
+    	std::string key = makeKey(c->getName(),c->getArgTypes());
+    	check_runtime_error(getConstraint(c->getName(),c->getArgTypes()) == NULL,"Constraint "+key+" already defined");
+    	m_constraints[key] = c;
+    	debugMsg("ANMLContext",getContextDesc() << " Added Constraint " << key);
     }
     
     ConstraintDef* ANMLContext::getConstraint(const std::string& name,const std::vector<const Type*>& argTypes,bool mustExist) const
     {
     	std::string key = makeKey(name,argTypes);
-    	debugMsg("ANMLContext","Constraint key:" << key);
 		std::map<std::string,ConstraintDef*>::const_iterator it = m_constraints.find(key);
 		
 		if (it != m_constraints.end()) 
 		    return it->second;
         // TODO: check for generic matches, like numeric vs int,float		    
 		   
-		if (m_parent != NULL)
-		    return m_parent->getConstraint(name,argTypes,mustExist);
+		if (m_parentContext != NULL)
+		    return m_parentContext->getConstraint(name,argTypes,mustExist);
 				     
 		if (mustExist)
     		check_runtime_error(false, "Constraint "+key+" has not been defined");
@@ -358,26 +374,6 @@ namespace ANML
         }                                   
     }
     
-	Vector::Vector(const std::string& name,const std::vector<Variable*>& attrs) 
-	    : Type(name!="" ? name : autoIdentifier("Vector"))
-	    , m_attrs(attrs) 
-	{
-	}
-	
-	Vector::~Vector() 
-	{
-	}
-	    
-    void Vector::toNDDL(std::ostream& os) const 
-    { 
-    	os << "class " << m_name << std::endl;
-    	for (unsigned int i=0; i<m_attrs.size();i++) 
-    	    os << m_attrs[i]->getDataType().getName() << " " << m_attrs[i]->getName() << ";" << std::endl;
-    	
-    	// TODO: generate constructor    
-    	os << "}" << std::endl; 
-    }    
-        
     Variable::Variable(const Type& dataType, const std::string& name)
         : ANMLElement("VARIABLE",name)
         , m_dataType(dataType)
@@ -428,9 +424,25 @@ namespace ANML
     	os << ";" << std::endl;
     }
     
+    FreeVarDeclaration::FreeVarDeclaration(const std::vector<Variable*>& vars)
+        : ANMLElement("FREE_VAR_DECLARATION")
+        , m_vars(vars)
+    {
+    }
+    
+    FreeVarDeclaration::~FreeVarDeclaration()
+    {
+    }
+
+    void FreeVarDeclaration::toNDDL(std::ostream& os) const
+    {
+    	for (unsigned int i=0; i < m_vars.size(); i++) 
+    		os << m_vars[i]->getDataType().getName() << m_vars[i]->getName() << ";";
+    }
+    
     ObjType::ObjType(const std::string& name,ObjType* parentObjType)
         : Type(name)
-        , m_parent(parentObjType)
+        , m_parentObjType(parentObjType)
     {
     }
     
@@ -440,9 +452,16 @@ namespace ANML
     
     void ObjType::toNDDL(std::ostream& os) const
     {
-        std::string parent = ((m_parent != NULL && m_parent->getName() != "object") ? (std::string(" extends ") + m_parent->getName()) : "");
+        std::string parent = (
+            (m_parentObjType != NULL && m_parentObjType->getName() != "object") 
+                ? (std::string(" extends ") + m_parentObjType->getName()) 
+                : ""
+        );
+        
         os << "class " << m_name << parent << std::endl 
            << "{" << std::endl;
+           
+        // TODO: generate constructor and initialize members that require contructors themselves
            
         for (unsigned int i=0; i<m_elements.size(); i++) {
     	    if (m_elements[i]->getType() == "ACTION") {
@@ -578,6 +597,7 @@ namespace ANML
         : m_lhs(lhs)
         , m_rhs(rhs) 
     {
+    	debugMsg("ANMLContext","Created RelationalExpr : " << lhs->toString() << " = " << (rhs != NULL ? rhs->toString() : "NULL"));
     }
     
     RelationalFluent::~RelationalFluent() 
@@ -586,17 +606,17 @@ namespace ANML
         
     void RelationalFluent::toNDDL(std::ostream& os, TemporalQualifier* tq) const 
     {
-    	std::string ident = (m_parent->getContext() == Proposition::GOAL || 
-    	                     m_parent->getContext() == Proposition::FACT ? "" : "    ");
+    	std::string ident = (m_parentProp->getContext() == Proposition::GOAL || 
+    	                     m_parentProp->getContext() == Proposition::FACT ? "" : "    ");
     	                     
    	    std::string varName = (m_lhs->needsVar() ? autoIdentifier("_v") : "");
    	    
-    	m_lhs->toNDDL(os,m_parent->getContext(),varName);
+    	m_lhs->toNDDL(os,m_parentProp->getContext(),varName);
     	if (m_lhs->needsVar()) 
    		    tq->toNDDL(os,ident,varName);
    		
     	if (m_rhs != NULL)
-    	    m_rhs->toNDDL(os,m_parent->getContext(),varName);     
+    	    m_rhs->toNDDL(os,m_parentProp->getContext(),varName);     
     }    
     
     Constraint::Constraint(const std::string& name,const std::vector<ANML::Expr*>& args) 
@@ -703,6 +723,7 @@ namespace ANML
        , m_temporalQualifier(tq)
        , m_fluents(fluents) 
     {
+  	    debugMsg("ANMLContext","Creating  Proposition with " << fluents.size() << " fluents");
     	m_temporalQualifier->setProposition(this);
     	for (unsigned int i=0;i<m_fluents.size();i++) 
     	    m_fluents[i]->setProposition(this); 

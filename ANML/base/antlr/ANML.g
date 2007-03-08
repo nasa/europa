@@ -571,7 +571,7 @@ qualified_action_symbol
 ;
     
 constraint 
-    : CONSTRAINT constraint_expr
+    : CONSTRAINT ce:constraint_expr { #constraint = #ce; }
 ;
 
 // TODO: define grammar to support infix notation for constraints

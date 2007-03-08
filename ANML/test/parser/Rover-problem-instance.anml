@@ -9,7 +9,7 @@ Rover spirit;
 
 fact over all {
     PlanningHorizon(0, 100);
-    SolverConfig(500,500); // MaxSteps,MaxDepth
+    PlannerConfig(500,500); // MaxSteps,MaxDepth
 
     lander = ("LANDER", 0, 0);
     rock1  = ("ROCK1",  9, 9);

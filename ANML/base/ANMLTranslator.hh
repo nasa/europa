@@ -54,8 +54,8 @@ class ANMLContext
 
     virtual std::string getContextDesc() const { return "Global Context"; }
 
-    virtual const ANMLContext* getParent() { return m_parent; }
-    virtual void setParent(const ANMLContext* parent) { m_parent = parent; }
+    virtual const ANMLContext* getParentContext() { return m_parentContext; }
+    virtual void setParentContext(const ANMLContext* parent) { m_parentContext = parent; }
     	
     virtual void addElement(ANMLElement* element);
     
@@ -81,7 +81,7 @@ class ANMLContext
 	virtual std::string toString() const;
 		
   protected:
-    const ANMLContext*        m_parent;
+    const ANMLContext*        m_parentContext;
     std::vector<ANMLElement*> m_elements;              
 
     // maps to quickly get to elements by name
@@ -153,20 +153,6 @@ class TypeAlias : public Type
 
   protected:    
     const Type& m_wrappedType;
-};
-
-class Vector : public Type
-{
-  public:
-	Vector(const std::string& name,const std::vector<Variable*>& attrs);
-	virtual ~Vector();
-	    
-	virtual bool isPrimitive() const { return false; }
-	    
-    virtual void toNDDL(std::ostream& os) const; 
-
-  protected:    
-    std::vector<Variable*> m_attrs;
 };
 
 class Range : public Type
@@ -262,6 +248,20 @@ class VarDeclaration : public ANMLElement
 	std::vector<VarInit*> m_init;
 };
 
+// TODO: figure out whether this should be integrated with VarDeclaration
+class FreeVarDeclaration : public ANMLElement
+{
+  public:
+    FreeVarDeclaration(const std::vector<Variable*>& vars);
+    virtual ~FreeVarDeclaration();
+    
+    virtual void toNDDL(std::ostream& os) const;
+      
+  protected:
+	std::vector<Variable*> m_vars;    
+};
+
+
 class ObjType : public Type, public ANMLContext
 {
   public:
@@ -270,14 +270,14 @@ class ObjType : public Type, public ANMLContext
     
     virtual std::string getContextDesc() const { return m_name; }
 
-    virtual ObjType* getParent() const { return m_parent; }
+    virtual ObjType* getParentObjType() const { return m_parentObjType; }
         
 	virtual bool isPrimitive() const { return false; }
 
     virtual void toNDDL(std::ostream& os) const;
     
   protected:
-    ObjType* m_parent;   	
+    ObjType* m_parentObjType;   	
 };
 
 class Action : public ANMLElement, public ANMLContext
@@ -409,10 +409,10 @@ class PropositionComponent
   public:
     PropositionComponent() {}
     
-    void setProposition(Proposition* p) { m_parent = p; }
+    void setProposition(Proposition* p) { m_parentProp = p; }
   
   protected:
-    Proposition* m_parent;	
+    Proposition* m_parentProp;	
 };
 
 class TemporalQualifier : public PropositionComponent

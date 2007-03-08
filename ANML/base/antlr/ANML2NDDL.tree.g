@@ -169,7 +169,14 @@ var_type[const std::string& name=""] returns [ANML::Type* t]
          (values=enum_body { t = new ANML::Enumeration(name,*t,values); newType=true;}
          )?
       )
-    | #(VECTOR vb=vector_body)   { t = new ANML::Vector(name,vb); newType=true; }
+    | #(VECTOR vb=vector_body)   
+       { 
+           ANML::ObjType* vectorType = new ANML::ObjType(name,context.getObjType("object")); newType=true; 
+           for (unsigned int i=0; i<vb.size(); i++)
+               vectorType->addVariable(vb[i]);
+              
+           t = vectorType;    
+       }
     )
 {
 	if (newType) {
@@ -358,14 +365,14 @@ qualif_fluent_list
     : #(LCURLY (qualif_fluent)+)
 ;
 
-fluent_list returns [std::vector<ANML::Fluent*> fluents;]
+fluent_list returns [std::vector<ANML::Fluent*> fluents]
 {
-	ANML::Fluent* f;
+	ANML::Fluent* f=NULL;
 } 
-    : #(LCURLY (f=fluent { fluents.push_back(f); })+)
+    : #(LCURLY (f=fluent { check_error(f!=NULL,"Can't have NULL fluents"); fluents.push_back(f); })+)
 ;
 
-fluent returns [ANML::Fluent* f;]
+fluent returns [ANML::Fluent* f]
 {
 	ANML::Fluent *lhs,*rhs;
 }
@@ -377,24 +384,41 @@ fluent returns [ANML::Fluent* f;]
 ;
 
 free_vars_decl returns [ANML::ANMLElement* element]
-    : #(VARIABLES  var_list)
 {
-	element = new ANML::ANMLElement("FREE_VARS");
+	std::vector<ANML::Variable*> vars;
+}
+    : #(VARIABLES  vars=var_list)
+{
+	element = new ANML::FreeVarDeclaration(vars);
 }
 ;
 
-var_list
-    : #(LPAREN (var_type var_name)+)
+var_list returns [std::vector<ANML::Variable*> vars]
+{
+	ANML::Type* vt;
+	std::string vn;
+}
+    : #(LPAREN 
+           (vt=var_type vn=var_name 
+               {
+                   ANML::Variable* v = new ANML::Variable(*vt,vn);
+                   m_translator.getContext().addVariable(v);
+               }
+           )+
+       )    
 ;
 
 // NOTE: if the rhs is not present, that means we're stating a predicate to be true
-relational_fluent returns [ANML::RelationalFluent* f;]
+relational_fluent returns [ANML::RelationalFluent* f]
 {
 	ANML::LHSExpr* lhs=NULL;
 	ANML::Expr*    rhs=NULL;
 }
-    : #(EQUAL lhs=lhs_expr rhs=expr)
-	| lhs=lhs_expr
+    : 
+    (
+        #(EQUAL lhs=lhs_expr rhs=expr)
+    	| lhs=lhs_expr 
+    )
 {
 	// TODO: do type checking for lhs and rhs
 	// TODO: if rhs is absent, lhs must be a predicate
@@ -751,11 +775,11 @@ var_name returns [std::string s]
 ;
 
 // TODO: validate var_names
-qualified_var_name [ANML::ANMLContext context,const std::string& path] returns [ANML::LHSExpr* expr] 
+qualified_var_name [ANML::ANMLContext& context,const std::string& path] returns [ANML::LHSExpr* expr] 
 {
 	std::string s;
 	std::string newPath;
-	ANML::ANMLContext* newContext;
+	ANML::ANMLContext* newContext=NULL;
 }    
     : #(DOT 
            s=var_name 
@@ -763,7 +787,7 @@ qualified_var_name [ANML::ANMLContext context,const std::string& path] returns [
            	   newPath = (path=="" ? s : path+"."+s); 
                ANML::Variable* v;
                if ((v=context.getVariable(s)) != NULL)
-                  newContext = context.getObjType(v->getDataType().getName());
+                  newContext = m_translator.getContext().getObjType(v->getDataType().getName());
                else  	
                   check_runtime_error(false,"Variable " + s + " has not been defined in " + context.getContextDesc());  	
            }
