@@ -22,68 +22,62 @@ namespace ANML
     {
     	ANMLContext* context = new ANMLContext();
     	
-    	Type* boolType   = &Type::BOOL;
-    	Type* intType    = &Type::INT;
-    	Type* floatType  = &Type::FLOAT;
-    	Type* stringType = &Type::STRING;
-    	
-    	context->addType(boolType);
-    	context->addType(intType);    	
-    	context->addType(floatType);
-    	context->addType(stringType);    	
-    	
-    	context->addType(new ObjType("object",NULL));
+    	context->addType(Type::BOOL);
+    	context->addType(Type::INT);    	
+    	context->addType(Type::FLOAT);
+    	context->addType(Type::STRING);    	   	
+    	context->addType(Type::OBJECT);
     	
     	// start and end of the planning horizon
-    	context->addVariable(new Variable(*intType,"start"));
-    	context->addVariable(new Variable(*intType,"end"));
+    	context->addVariable(new Variable(*Type::INT,"start"));
+    	context->addVariable(new Variable(*Type::INT,"end"));
     	
     	{
     		std::vector<Arg*> args;
-    		args.push_back(new Arg("start_horizon",*intType));
-    		args.push_back(new Arg("end_horizon"  ,*intType));    		
-    	    context->addVariable(new Variable(*boolType,"PlanningHorizon",args));
+    		args.push_back(new Arg("start_horizon",*Type::INT));
+    		args.push_back(new Arg("end_horizon"  ,*Type::INT));    		
+    	    context->addVariable(new Variable(*Type::BOOL,"PlanningHorizon",args));
     	}
     	
     	{
     		std::vector<Arg*> args;
-    		args.push_back(new Arg("max_steps",*intType));
-    		args.push_back(new Arg("max_depth",*intType));
-    	    context->addVariable(new Variable(*boolType,"PlannerConfig",args));
+    		args.push_back(new Arg("max_steps",*Type::INT));
+    		args.push_back(new Arg("max_depth",*Type::INT));
+    	    context->addVariable(new Variable(*Type::BOOL,"PlannerConfig",args));
     	}
     	
     	{
     		std::vector<Arg*> args;
-    		args.push_back(new Arg("resource",*intType));
-    		args.push_back(new Arg("quantity",*intType));
-    	    context->addVariable(new Variable(*boolType,"uses",args));
+    		args.push_back(new Arg("resource",*Type::INT));
+    		args.push_back(new Arg("quantity",*Type::INT));
+    	    context->addVariable(new Variable(*Type::BOOL,"uses",args));
     	}
     	
     	{
     		std::vector<const Type*> argTypes;
-    		argTypes.push_back(intType);
-    		argTypes.push_back(intType);
+    		argTypes.push_back(Type::INT);
+    		argTypes.push_back(Type::INT);
     	    context->addConstraint(new ConstraintDef("eq",argTypes));
     	}
     	
     	{
     		std::vector<const Type*> argTypes;
-    		argTypes.push_back(stringType);
-    		argTypes.push_back(stringType);
+    		argTypes.push_back(Type::STRING);
+    		argTypes.push_back(Type::STRING);
     	    context->addConstraint(new ConstraintDef("eq",argTypes));
     	}
 
     	{
     		std::vector<const Type*> argTypes;
-    		argTypes.push_back(intType);
-    		argTypes.push_back(intType);
+    		argTypes.push_back(Type::INT);
+    		argTypes.push_back(Type::INT);
     	    context->addConstraint(new ConstraintDef("neq",argTypes));
     	}
     	
     	{
     		std::vector<const Type*> argTypes;
-    		argTypes.push_back(stringType);
-    		argTypes.push_back(stringType);
+    		argTypes.push_back(Type::STRING);
+    		argTypes.push_back(Type::STRING);
     	    context->addConstraint(new ConstraintDef("neq",argTypes));
     	}
     	
@@ -283,7 +277,7 @@ namespace ANML
 
     void ANMLElement::toNDDL(std::ostream& os) const 
     { 
-    	os << m_type << " " << m_name; 
+    	os << m_type << " " << m_name << std::endl; 
     }
     
     std::string ANMLElement::toString() const 
@@ -293,11 +287,12 @@ namespace ANML
     	return os.str(); 
     }
     
-    Type Type::VOID("void");
-    Type Type::BOOL("bool");
-    Type Type::INT("int");
-    Type Type::FLOAT("float");
-    Type Type::STRING("string");
+    Type* Type::VOID   = new Type("void");
+    Type* Type::BOOL   = new Type("bool");
+    Type* Type::INT    = new Type("int");
+    Type* Type::FLOAT  = new Type("float");
+    Type* Type::STRING = new Type("string");
+    Type* Type::OBJECT = new ObjType("object",NULL);
     
 	Type::Type(const std::string& name)
 	    : ANMLElement("TYPE",name)
@@ -330,7 +325,7 @@ namespace ANML
 	    	    
     void TypeAlias::toNDDL(std::ostream& os) const 
     { 
-    	os << "typedef " << m_name << " " << m_wrappedType.getName() << ";" << std::endl; 
+    	os << "typedef " << m_wrappedType.getName() << " " << m_name << ";" << std::endl; 
     }    
     
 	Range::Range(const std::string& name,const Type& dataType,const std::string& lb,const std::string& ub)	
@@ -348,7 +343,7 @@ namespace ANML
 	        
     void Range::toNDDL(std::ostream& os) const
     {
-        os << m_dataType.getName() << " [" << m_lb << " " << m_ub <<  "]";
+        os << "typedef " << m_dataType.getName() << " [" << m_lb << " " << m_ub <<  "] " << getName() << ";"<< std::endl << std::endl;
     }
     
 	Enumeration::Enumeration(const std::string& name,const Type& dataType,const std::vector<std::string>& values)
@@ -365,13 +360,14 @@ namespace ANML
 	        
     void Enumeration::toNDDL(std::ostream& os) const
     {
-        os << m_dataType.getName() << " {";
+        os << "enum " << getName() << " {";
         
         for (unsigned int i=0;i<m_values.size(); i++) {
             if (i>0)
                 os << ",";
             os << m_values[i];
-        }                                   
+        }   
+        os << "};" << std::endl << std::endl;                                
     }
     
     Variable::Variable(const Type& dataType, const std::string& name)
@@ -460,9 +456,7 @@ namespace ANML
         
         os << "class " << m_name << parent << std::endl 
            << "{" << std::endl;
-           
-        // TODO: generate constructor and initialize members that require contructors themselves
-           
+                      
         for (unsigned int i=0; i<m_elements.size(); i++) {
     	    if (m_elements[i]->getType() == "ACTION") {
     	    	Action* a = (Action*) m_elements[i];
@@ -476,10 +470,35 @@ namespace ANML
     	    	
     	        os << "}" << std::endl;
     	    }
+    	    else if (m_elements[i]->getType() == "VAR_DECLARATION") {
+    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
+    	    	for (unsigned j=0;j<vd->getInit().size();j++)
+    	    	    os << "    " << vd->getDataType().getName() << " " << vd->getInit()[j]->getName() << ";" << std::endl;
+    	    }
     	}
+
+        // Generate constructor and initialize members that require contructors themselves
+        os << std::endl << "    " << getName() << "()" << std::endl 
+           << "    {" << std::endl;
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    	    if (m_elements[i]->getType() == "VAR_DECLARATION") {
+    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
+    	    	if (!vd->getDataType().isPrimitive()) {
+        	        for (unsigned j=0;j<vd->getInit().size();j++) {
+    	    	        os << "        " << vd->getInit()[j]->getName() 
+    	    	           << " = new " << vd->getDataType().getName() << "();" << std::endl;
+        	        }
+    	    	}
+    	    }
+        }
+        os << "    }" << std::endl;
            
         os << "}" << std::endl << std::endl;
-        ANMLContext::toNDDL(os);
+        
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    	    if (m_elements[i]->getType() != "VAR_DECLARATION") 
+    	        m_elements[i]->toNDDL(os);
+        }    	     
     }
     
     Action::Action(ObjType& objType,const std::string& name, const std::vector<Variable*>& params)
@@ -796,6 +815,43 @@ namespace ANML
            os << ident << "addEq(" << varName << "," << op2 << "," << op1 << ");" << std::endl << std::endl;
        }
    }    
+   
+   ExprVector::ExprVector(const std::vector<Expr*>& values)
+       : m_values(values) 
+   {
+   	   m_dataType = new ObjType(autoIdentifier("VectorType_"),(ObjType*)Type::OBJECT);
+       for (unsigned int i=0;i<m_values.size();i++)  {
+       	   std::ostringstream name; name << "member_" << i;
+           m_dataType->addVariable(new Variable(m_values[i]->getDataType(),name.str()));
+       }
+   }
+   
+   ExprVector::~ExprVector() 
+   {
+       delete m_dataType;
+   }
+  
+   std::string ExprVector::toString() const
+   {
+       std::ostringstream os;
+    
+       os << "(";   
+       for (unsigned int i=0;i<m_values.size();i++) {
+           if (i>0)
+             os << ",";
+           os << m_values[i]->toString();
+       }
+       os << ")" << std::endl;
+       
+       return os.str();
+   }
+    
+   void ExprVector::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const
+   {
+       // TODO: implement this correctly
+       os << toString();
+   }
+   
     
     // Special expression to handle PlannerConfig
     LHSPlannerConfig::LHSPlannerConfig()

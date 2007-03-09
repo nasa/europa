@@ -131,14 +131,17 @@ class Type : public ANMLElement
 	virtual ~Type();
 	    
 	virtual bool isPrimitive() const { return true; }
+	
+	virtual bool isAssignableFrom(const Type& rhs) const { return getName() == rhs.getName(); }
 	    
     virtual void toNDDL(std::ostream& os) const {}
     
-    static Type VOID;    
-    static Type BOOL;    
-    static Type INT;    
-    static Type FLOAT;    
-    static Type STRING;    
+    static Type* VOID;    
+    static Type* BOOL;    
+    static Type* INT;    
+    static Type* FLOAT;    
+    static Type* STRING;    
+    static Type* OBJECT;    
 };
 
 class TypeAlias : public Type
@@ -241,6 +244,9 @@ class VarDeclaration : public ANMLElement
     VarDeclaration(const Type& type, const std::vector<VarInit*>& init);
     virtual ~VarDeclaration();
 
+    const Type& getDataType() const { return m_dataType; }
+    const std::vector<VarInit*>& getInit() const { return m_init; }
+    
     virtual void toNDDL(std::ostream& os) const;
       
   protected:
@@ -513,7 +519,7 @@ class LHSPlannerConfig : public LHSExpr
     virtual bool needsVar() { return false; }
     virtual void setArgs(const std::string& predicate,const std::vector<Expr*>& args);
     virtual std::string toString() const  { return "PlannerConfig"; }
-    virtual const Type& getDataType() const { return Type::BOOL; }
+    virtual const Type& getDataType() const { return *Type::BOOL; }
     virtual void toNDDL(std::ostream& os) const;
     virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const {}
     
@@ -530,7 +536,7 @@ class LHSAction : public LHSExpr
 	LHSAction(Action* a,const std::string& path) : m_action(a), m_path(path) {}
 	virtual ~LHSAction() {}
 	
-    virtual const Type& getDataType() const { return Type::VOID; }
+    virtual const Type& getDataType() const { return *Type::VOID; }
     virtual std::string toString() const  { return m_path; }
     virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
     
@@ -587,6 +593,24 @@ class ExprArithOp : public Expr
     Expr* m_op1;
     Expr* m_op2;        
 };
+
+class ExprVector : public Expr
+{
+  public:
+    ExprVector(const std::vector<Expr*>& values);
+    virtual ~ExprVector();
+        
+    virtual bool needsVar() { return false; }
+    virtual std::string toString() const; 
+    virtual const Type& getDataType() const { return *m_dataType; }
+    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
+    
+  protected:
+    ObjType* m_dataType;
+    std::vector<Expr*> m_values;        
+};
+
+
 
 }
 

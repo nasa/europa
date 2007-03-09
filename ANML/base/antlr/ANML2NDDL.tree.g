@@ -171,9 +171,13 @@ var_type[const std::string& name=""] returns [ANML::Type* t]
       )
     | #(VECTOR vb=vector_body)   
        { 
-           ANML::ObjType* vectorType = new ANML::ObjType(name,context.getObjType("object")); newType=true; 
-           for (unsigned int i=0; i<vb.size(); i++)
+           ANML::ObjType* vectorType = new ANML::ObjType(name,(ANML::ObjType*)ANML::Type::OBJECT); newType=true; 
+           for (unsigned int i=0; i<vb.size(); i++) {
                vectorType->addVariable(vb[i]);
+               std::vector<ANML::VarInit*> init;
+               init.push_back(new ANML::VarInit(vb[i],""));
+               vectorType->addElement(new ANML::VarDeclaration(vb[i]->getDataType(),init));
+           }
               
            t = vectorType;    
        }
@@ -191,7 +195,7 @@ var_type[const std::string& name=""] returns [ANML::Type* t]
 }    
 ;
 
-enum_body returns [std::vector<std::string> values;]
+enum_body returns [std::vector<std::string> values]
 {
 	ANML::Expr* e;
 	// TODO: validate values (flag  duplicates, type checking)
@@ -203,7 +207,7 @@ vector_body returns [std::vector<ANML::Variable*> attrs;]
     : attrs=parameters
 ;
 
-range returns [std::vector<ANML::Expr*> values;]
+range returns [std::vector<ANML::Expr*> values]
 {
 	ANML::Expr *lb,*ub;
 }
@@ -223,11 +227,8 @@ var_init[ANML::Type* type] returns [ANML::VarInit* vi]
     : #(EQUAL name=var_name (value=constant)?)
 	| name=var_name
 {
-	if (value != NULL) {
-    	// TODO: do more intelligent type checking
-	    if (type->getName() != value->getDataType().getName())
+	if (value!=NULL && !type->isAssignableFrom(value->getDataType()))
 	       check_runtime_error(ALWAYS_FAIL,"Can't initialize " + type->getName() + " with " + value->getDataType().getName());
-	}	       
 	    
 	ANML::Variable* v = new ANML::Variable(*type,name);
     m_translator.getContext().addVariable(v);
@@ -420,8 +421,12 @@ relational_fluent returns [ANML::RelationalFluent* f]
     	| lhs=lhs_expr 
     )
 {
-	// TODO: do type checking for lhs and rhs
-	// TODO: if rhs is absent, lhs must be a predicate
+	// TODO: do type checking for lhs and rhs	
+	//if (rhs!=NULL && !lhs->getDataType().isAssignableFrom(rhs->getDataType()))
+	//    check_runtime_error(ALWAYS_FAIL,type->getName() + " and " + value->getDataType().getName() + " are incompatible types");	
+	//else if (!lhs->getDataType() != ANML::Type::BOOL) // TODO: if rhs is absent, lhs must be a predicate 
+	//    check_runtime_error(ALWAYS_FAIL,"Only predicates can be stated without a right hand side expr. the following is not a predicate:" + lhs->toString());
+	
 	f = new ANML::RelationalFluent(lhs,rhs);
 }	
 ;
@@ -461,9 +466,12 @@ lhs_expr returns [ANML::LHSExpr* p;]
 ;
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point
-expr returns [ANML::Expr* e;] 
+expr returns [ANML::Expr* e]
+{
+	std::vector<ANML::Expr*> vectorValues;
+} 
     : e=constant 
-	| arguments { check_runtime_error(false,"Vector data type not supported yet"); }
+	| vectorValues=arguments { e = new ANML::ExprVector(vectorValues); }
     | e=lhs_expr
 ;
 
@@ -502,9 +510,9 @@ interval returns [std::vector<ANML::Expr*> bounds;]
 	std::string label;
 }
     : #(ALL (label=action_label_arg { label += "."; })?
-           {
-               bounds.push_back(new ANML::ExprConstant(ANML::Type::INT,label+"start"));
-               bounds.push_back(new ANML::ExprConstant(ANML::Type::INT,label+"end"));
+           {           	
+               bounds.push_back(new ANML::ExprConstant(*ANML::Type::INT,label+"start"));
+               bounds.push_back(new ANML::ExprConstant(*ANML::Type::INT,label+"end"));
            } 
        )
     | #(LBRACK 
@@ -748,17 +756,17 @@ signed_literal returns [ANML::Expr* e]
 
 // TODO: What about floats??
 numeric_literal returns [ANML::Expr* e]
-    : t1:NUMERIC_LIT  { e = new ANML::ExprConstant(ANML::Type::INT,t1->getText()); }
-    | t2:INF          { e = new ANML::ExprConstant(ANML::Type::BOOL,t2->getText()); }
+    : t1:NUMERIC_LIT  { e = new ANML::ExprConstant(*ANML::Type::INT,t1->getText()); }
+    | t2:INF          { e = new ANML::ExprConstant(*ANML::Type::BOOL,t2->getText()); }
 ;
 
 bool_literal returns [ANML::Expr* e]
-    : t1:TRUE  { e = new ANML::ExprConstant(ANML::Type::BOOL,t1->getText()); }
-    | t2:FALSE { e = new ANML::ExprConstant(ANML::Type::BOOL,t2->getText()); }
+    : t1:TRUE  { e = new ANML::ExprConstant(*ANML::Type::BOOL,t1->getText()); }
+    | t2:FALSE { e = new ANML::ExprConstant(*ANML::Type::BOOL,t2->getText()); }
 ;
 
 string_literal returns [ANML::Expr* e]
-    : t:STRING_LIT { e = new ANML::ExprConstant(ANML::Type::STRING,t->getText()); }
+    : t:STRING_LIT { e = new ANML::ExprConstant(*ANML::Type::STRING,t->getText()); }
 ;
 
 action_symbol         returns [std::string s]  : i:IDENTIFIER { s = i->getText(); };
