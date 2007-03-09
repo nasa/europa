@@ -177,7 +177,7 @@ class Range : public Type
 class Enumeration : public Type
 {
   public:
-	Enumeration(const std::string& name,const Type& dataType,const std::vector<std::string>& values);
+	Enumeration(const std::string& name,const Type& dataType,const std::vector<Expr*>& values);
 	virtual ~Enumeration();
 	    
 	virtual bool isPrimitive() const { return m_dataType.isPrimitive(); }
@@ -186,7 +186,7 @@ class Enumeration : public Type
     
   protected:
     const Type& m_dataType;
-    std::vector<std::string> m_values;
+    std::vector<Expr*> m_values;
 };
 	
 class Arg

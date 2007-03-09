@@ -146,27 +146,26 @@ var_init_list[ANML::Type* type] returns [std::vector<ANML::VarInit*> varInit;]
 
 var_type[const std::string& name=""] returns [ANML::Type* t]
 {
-	std::vector<std::string> values;
-	std::vector<ANML::Expr*> rangeValues;
+	std::vector<ANML::Expr*> values;
 	ANML::ANMLContext& context = m_translator.getContext();
 	bool newType=false;
     std::vector<ANML::Variable*> vb;	
 }
     : (
-    BOOL { t = context.getType("bool"); }
+    BOOL { t = ANML::Type::BOOL; }
     | s:IDENTIFIER { t = context.getType(s->getText(),true); }
-    | #(INT { t = context.getType("int"); } 
-         (  rangeValues=range { t = new ANML::Range(name,*t,rangeValues[0]->toString(),rangeValues[1]->toString()); newType=true; } 
-           |values=enum_body  { t = new ANML::Enumeration(name,*t,values); newType=true; }
+    | #(INT { t = ANML::Type::INT; } 
+         (  values=range[t]     { t = new ANML::Range(name,*t,values[0]->toString(),values[1]->toString()); newType=true; } 
+           |values=enum_body[t] { t = new ANML::Enumeration(name,*t,values); newType=true; }
          )?
       )
-	| #(FLOAT { t = context.getType("float"); }
-	     (  rangeValues=range  { t = new ANML::Range(name,*t,rangeValues[0]->toString(),rangeValues[1]->toString()); newType=true; }
-	       |values=enum_body   { t = new ANML::Enumeration(name,*t,values); newType=true; }
+	| #(FLOAT { t = ANML::Type::FLOAT; }
+	     (  values=range[t]      { t = new ANML::Range(name,*t,values[0]->toString(),values[1]->toString()); newType=true; }
+	       |values=enum_body[t]  { t = new ANML::Enumeration(name,*t,values); newType=true; }
 	     )?
 	  )
-    | #(STRING { t = context.getType("string"); }
-         (values=enum_body { t = new ANML::Enumeration(name,*t,values); newType=true;}
+    | #(STRING { t = ANML::Type::STRING; }
+         (values=enum_body[t] { t = new ANML::Enumeration(name,*t,values); newType=true;}
          )?
       )
     | #(VECTOR vb=vector_body)   
@@ -195,28 +194,50 @@ var_type[const std::string& name=""] returns [ANML::Type* t]
 }    
 ;
 
-enum_body returns [std::vector<std::string> values]
+range[const ANML::Type* t] returns [std::vector<ANML::Expr*> values]
+{
+	ANML::Expr *lb,*ub;
+}
+    : #(LBRACK 
+         lb=signed_literal 
+         { 
+         	if (!t->isAssignableFrom(lb->getDataType())) 
+         	    check_runtime_error(ALWAYS_FAIL,"Can't specify bound of type " + lb->getDataType().getName() +
+         	                                   " for range of type " + t->getName()); 
+         }
+         ub=signed_literal
+         { 
+         	if (!t->isAssignableFrom(ub->getDataType())) 
+         	    check_runtime_error(ALWAYS_FAIL,"Can't specify bound of type " + ub->getDataType().getName() +
+         	                                   " for range of type " + t->getName()); 
+         }
+      )
+{
+	// TODO: validate range
+	values.push_back(lb);
+	values.push_back(ub);	
+}    
+;
+
+enum_body[const ANML::Type* t] returns [std::vector<ANML::Expr*> values]
 {
 	ANML::Expr* e;
-	// TODO: validate values (flag  duplicates, type checking)
 }
-    : #(LCURLY (e=constant { values.push_back(e->toString()); })+)
+    : #(LCURLY 
+           (e=constant 
+               { 
+                	if (!t->isAssignableFrom(e->getDataType())) 
+                 	    check_runtime_error(ALWAYS_FAIL,"Can't specify element of type " + e->getDataType().getName() +
+         	                                   " in enumeration of type " + t->getName()); 
+                   // TODO: flag  duplicates
+                   values.push_back(e); 
+               }
+           )+
+      )
 ;
 
 vector_body returns [std::vector<ANML::Variable*> attrs;]
     : attrs=parameters
-;
-
-range returns [std::vector<ANML::Expr*> values]
-{
-	ANML::Expr *lb,*ub;
-}
-    : #(LBRACK lb=signed_literal ub=signed_literal)
-{
-	// TODO: validate range, do type checking
-	values.push_back(lb);
-	values.push_back(ub);	
-}    
 ;
 
 var_init[ANML::Type* type] returns [ANML::VarInit* vi]
@@ -510,7 +531,8 @@ interval returns [std::vector<ANML::Expr*> bounds;]
 	std::string label;
 }
     : #(ALL (label=action_label_arg { label += "."; })?
-           {           	
+           {
+           	   // TODO: make sure that label corresponds to an action in scope           	
                bounds.push_back(new ANML::ExprConstant(*ANML::Type::INT,label+"start"));
                bounds.push_back(new ANML::ExprConstant(*ANML::Type::INT,label+"end"));
            } 
@@ -606,7 +628,7 @@ duration_stmt returns [ANML::ANMLElement* element]
     std::vector<ANML::Expr*> values;
     ANML::Expr* v;
 }    
-    : #(DURATION (v=numeric_expr { values.push_back(v); } | values=range))
+    : #(DURATION (v=numeric_expr { values.push_back(v); } | values=range[ANML::Type::INT]))
 {
     element = new ANML::ActionDuration(values);	
 }    

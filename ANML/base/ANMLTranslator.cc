@@ -346,7 +346,7 @@ namespace ANML
         os << "typedef " << m_dataType.getName() << " [" << m_lb << " " << m_ub <<  "] " << getName() << ";"<< std::endl << std::endl;
     }
     
-	Enumeration::Enumeration(const std::string& name,const Type& dataType,const std::vector<std::string>& values)
+	Enumeration::Enumeration(const std::string& name,const Type& dataType,const std::vector<Expr*>& values)
 	    : Type(name!="" ? name : autoIdentifier("Enumeration"))
 	    , m_dataType(dataType)
 	    , m_values(values)
@@ -365,7 +365,8 @@ namespace ANML
         for (unsigned int i=0;i<m_values.size(); i++) {
             if (i>0)
                 os << ",";
-            os << m_values[i];
+            // TODO: translate different types differently?    
+            os << m_values[i]->toString();
         }   
         os << "};" << std::endl << std::endl;                                
     }
