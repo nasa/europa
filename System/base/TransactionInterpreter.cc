@@ -309,29 +309,27 @@ namespace EUROPA {
   	  playDefineEnumeration(*element);
   }
 
-  bool isClass(const char* className)
-  {
-  	  // TODO: implement this
-  	  return false;
+  bool isClass(LabelStr className)
+  {  	  
+  	  return Schema::instance()->isObjectType(className);
   }
     
-  const char* getTokenVarClass(const char* className,const char* var)
+  LabelStr getTokenVarClass(LabelStr className,LabelStr var)
   {
-      if (strcmp(var,"object") == 0) {
+      if (strcmp(var.c_str(),"object") == 0) {
       	return className;
       }
       else {
-      	// TODO: implement this
-      	check_error(ALWAYS_FAILS,std::string("Undefined variable:")+var);
-      	return NULL;
+      	check_runtime_error(ALWAYS_FAILS,std::string("Undefined variable:")+var.c_str());
+      	return LabelStr("");
       }
   }
 
-  const char* getObjectVarClass(const char* className,const char* var)
+  LabelStr getObjectVarClass(LabelStr className,LabelStr var)
   {
-  	  // TODO: implement this
-      check_error(ALWAYS_FAILS,std::string("Undefined variable:")+var);
-      return NULL;
+      const SchemaId& schema = Schema::instance();
+      check_runtime_error(schema->hasMember(className,var),className.toString()+" has no member called "+var.toString());
+      return schema->getMemberType(className,var);
   }
 
   /*
@@ -359,7 +357,7 @@ namespace EUROPA {
   	    	// TODO: make sure type is valid
   		    return LabelStr(retval.c_str());
   		}
-  		else if (isClass(prefix.c_str())) {
+  		else if (isClass(prefix)) {
   	    	// TODO: make sure type is valid
   		     return LabelStr(predicateInstance);
   		}
@@ -371,14 +369,14 @@ namespace EUROPA {
   	else {
   	    LabelStr var = str.getElement(0,".");
   	    // TODO: include token parameters and token local variables
-  		const char* clazz = getTokenVarClass(className,var.c_str());
+  		LabelStr clazz = getTokenVarClass(className,var);
   		for (unsigned int i=1;i<tokenCnt-1;i++) {
   			LabelStr var = str.getElement(i,".");
-  			clazz = getObjectVarClass(clazz,var.c_str());
+  			clazz = getObjectVarClass(clazz,var);
   		}
   		
   		LabelStr predicate = str.getElement(tokenCnt-1,".");
-  		std::string retval = std::string(clazz) + "." + predicate.toString();  	    
+  		std::string retval = clazz.toString() + "." + predicate.toString();  	    
   	    // TODO: make sure type is valid
   		return LabelStr(retval);  		
   	}  	  	
@@ -426,7 +424,7 @@ namespace EUROPA {
       		ruleBody.push_back(new ExprSubgoal(name,predicateType,predicateInstance,child->Attribute("relation")));
       	}
       	else 
-      	   check_error(ALWAYS_FAILS,std::string("Unknown Compatibility element:") + child->Value());
+      	   check_runtime_error(ALWAYS_FAILS,std::string("Unknown Compatibility element:") + child->Value());
       }
       
       // The RuleFactory's constructor automatically registers the factory
@@ -611,8 +609,7 @@ namespace EUROPA {
      	ConstrainedVariableId rhs = context.getVar(m_varName.c_str());
 
      	if (rhs == ConstrainedVariableId::noId()) {
-     	    // TODO: Throw exception so that client can recover
-     	    check_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_varName.toString()+" in EvalContext");
+     	    check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_varName.toString()+" in EvalContext");
      	    return DataRef::null;
      	}
      	    
@@ -1135,7 +1132,7 @@ namespace EUROPA {
     	    
     	// If the prefix is a class, it means it can be any object instance, so it must not be constrained    
         LabelStr prefix(predicateInstance.getElement(0,"."));
-        if (!isClass(prefix.c_str()))
+        if (!isClass(prefix))
             return true;
     	
     	return false;
