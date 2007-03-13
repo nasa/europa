@@ -299,10 +299,10 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Rover$At$0, Rover$At$0$0, Rover.At, "simple-resources.nddl,35");
   
   void Rover$At$0$0::handleExecute() {
-    slave(Rover::Going, Rover.Going, to, LabelStr("meets"));
+    localSlave(Going, to, "meets");
     sameObject(object, to);
     meets(this, to);
-    slave(Rover::Going, Rover.Going, from, LabelStr("met_by"));
+    localSlave(Going, from, "met_by");
     sameObject(object, from);
     met_by(this, from);
     slave(UnaryResource::uses, UnaryResource.uses, u, LabelStr("equals"));

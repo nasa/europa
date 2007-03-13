@@ -62,7 +62,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$GnatsClass$p$0, GnatsClass$p$0$0, GnatsClass.p, "gnats-3231.nddl,2");
   
   void GnatsClass$p$0$0::handleExecute() {
-    slave(GnatsClass::p, GnatsClass.p, a, LabelStr("meets"));
+    localSlave(p, a, "meets");
     sameObject(object, a);
     meets(this, a);
   }
@@ -78,7 +78,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$GnatsClass$p$1, GnatsClass$p$1$0, GnatsClass.p, "gnats-3231.nddl,5");
   
   void GnatsClass$p$1$0::handleExecute() {
-    slave(GnatsClass::p, GnatsClass.p, a, LabelStr("met_by"));
+    localSlave(p, a, "met_by");
     sameObject(object, a);
     met_by(this, a);
   }

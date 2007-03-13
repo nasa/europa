@@ -542,10 +542,10 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Rover$At$0, Rover$At$0$0, Rover.At, "less-basic-model.nddl,25");
   
   void Rover$At$0$0::handleExecute() {
-    slave(Rover::Going, Rover.Going, to, LabelStr("meets"));
+    localSlave(Going, to, "meets");
     sameObject(object, to);
     meets(this, to);
-    slave(Rover::Going, Rover.Going, from, LabelStr("met_by"));
+    localSlave(Going, from, "met_by");
     sameObject(object, from);
     met_by(this, from);
     {
@@ -573,10 +573,10 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Rover$Going$1, Rover$Going$1$0, Rover.Going, "less-basic-model.nddl,33");
   
   void Rover$Going$1$0::handleExecute() {
-    slave(Rover::At, Rover.At, from, LabelStr("met_by"));
+    localSlave(At, from, "met_by");
     sameObject(object, from);
     met_by(this, from);
-    slave(Rover::At, Rover.At, to, LabelStr("meets"));
+    localSlave(At, to, "meets");
     sameObject(object, to);
     meets(this, to);
     {
@@ -723,13 +723,13 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Camera$On$2, Camera$On$2$0, Camera.On, "less-basic-model.nddl,54");
   
   void Camera$On$2$0::handleExecute() {
-    slave(Camera::TakingPicture, Camera.TakingPicture, t, LabelStr("meets"));
+    localSlave(TakingPicture, t, "meets");
     sameObject(object, t);
     meets(this, t);
-    slave(Camera::Off, Camera.Off, n, LabelStr("meets"));
+    localSlave(Off, n, "meets");
     sameObject(object, n);
     meets(this, n);
-    slave(Camera::Off, Camera.Off, o, LabelStr("met_by"));
+    localSlave(Off, o, "met_by");
     sameObject(object, o);
     met_by(this, o);
   }
@@ -745,7 +745,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Camera$Off$3, Camera$Off$3$0, Camera.Off, "less-basic-model.nddl,60");
   
   void Camera$Off$3$0::handleExecute() {
-    slave(Camera::On, Camera.On, o, LabelStr("meets"));
+    localSlave(On, o, "meets");
     sameObject(object, o);
     meets(this, o);
   }
@@ -761,12 +761,12 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Camera$TakingPicture$4, Camera$TakingPicture$4$0, Camera.TakingPicture, "less-basic-model.nddl,64");
   
   void Camera$TakingPicture$4$0::handleExecute() {
-    slave(Camera::On, Camera.On, o, LabelStr("met_by"));
+    localSlave(On, o, "met_by");
     sameObject(object, o);
     met_by(this, o);
     slave(Rover::At, Rover.At, a, LabelStr("contained_by"));
     contained_by(this, a);
-    slave(Camera::On, Camera.On, n, LabelStr("meets"));
+    localSlave(On, n, "meets");
     sameObject(object, n);
     meets(this, n);
     {

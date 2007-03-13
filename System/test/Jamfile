@@ -72,7 +72,7 @@ checkin-tests =
         force-object-distribution
 	gnats_3161
 	reusable-test-transaction
-  unary-resource-test-transaction
+  	unary-resource-test-transaction
         ;
 
 #RunPlannerProblem <model> : <configurationFile> : <heuristicsFile> : <target that depends> ;
@@ -135,7 +135,7 @@ rule RunPlannerProblem {
 # PLANNER SYSTEM TESTS
 #
 
-local testmodels = k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl
+local testmodels = subtype-extension.tx.nddl k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl
       force-object-distribution.nddl resource-backtrack-test.nddl resource-backtrack-test-reservoir.nddl rejection.nddl constrain-transaction.nddl
       parent-predicate.nddl parent-predicate-reservoir.nddl k9-initial.nddl backtr.nddl better-res.nddl 
       better-res-reservoir.nddl

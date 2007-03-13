@@ -504,12 +504,12 @@ namespace NDDL {
     addChildRule(new Foo$pred1$0$0$1(m_id, var(getId(),std::string("global3")), BoolDomain(false, "bool"), true));
   }
   void Foo$pred1$0$0$0::handleExecute() {
-    slave(Foo::pred1, Foo.pred1, slave0, LabelStr("meets"));
+    localSlave(pred1, slave0, "meets");
     sameObject(object, slave0);
     meets(this, slave0);
   }
   void Foo$pred1$0$0$1::handleExecute() {
-    slave(Foo::pred1, Foo.pred1, slave1, LabelStr("met_by"));
+    localSlave(pred1, slave1, "met_by");
     sameObject(object, slave1);
     met_by(this, slave1);
   }

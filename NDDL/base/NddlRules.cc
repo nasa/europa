@@ -1,5 +1,7 @@
 #include "NddlRules.hh"
 #include "Utils.hh"
+#include "TokenFactory.hh"
+#include "Token.hh"
 
 /**
  * @file Provides implementations for utilities employed in integration with
@@ -29,4 +31,9 @@ namespace NDDL {
     return sl_values;
   }
 
+  TokenId allocateOnSameObject(const TokenId& master, const LabelStr& predicateSuffix, const LabelStr& relationToMaster){
+    std::string tokenType = master->getBaseObjectType().toString() + "." + predicateSuffix.toString();
+    TokenId slave = TokenFactory::createInstance(master, tokenType, relationToMaster);
+    return slave;
+  }
 }

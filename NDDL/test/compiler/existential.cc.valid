@@ -714,7 +714,7 @@ namespace NDDL {
     localVar(BoolDomain(), hasPath, true);
     objectVar(Path, p3, false, false);
     objectVar(Path, g, false, false);
-    slave(World::Going, World.Going, going, LabelStr("any"));
+    localSlave(Going, going, "any");
     sameObject(object, going);
     {
       std::vector<ConstrainedVariableId> vars;

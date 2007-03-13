@@ -33,6 +33,11 @@ namespace NDDL {
   const std::list<double>& listFromString(const std::string& str, bool isNumeric);
 
   /**
+   * @brief Function to allocate a token on the same object as the master
+   */
+  TokenId allocateOnSameObject(const TokenId& parent, const LabelStr& predicateSuffix, const LabelStr& relationToMaster);
+
+  /**
    * Macro declaration and definition for the Rule which provides a factory
    * for apparopriate RuleInstances
    */
@@ -52,6 +57,8 @@ namespace NDDL {
  * Called within the context of a rule
  */
 #define slave(klass, nddl_type, name, relation) addSlave(new klass(m_token, LabelStr(#nddl_type), relation, true), LabelStr(#name));
+
+#define localSlave(predicate, name, relation) addSlave(allocateOnSameObject(m_token, #predicate, relation), LabelStr(#name));
 
 /**
  * Called within the context of a rule, for a subgoal to be restricted to the same object as the parent

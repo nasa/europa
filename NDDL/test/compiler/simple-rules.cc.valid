@@ -682,10 +682,10 @@ namespace NDDL {
   void Rover$At$0$0::handleExecute() {
     objectVar(Foo, localFoo, false, false);
     objectVar(Rover, r, false, false);
-    slave(Rover::Going, Rover.Going, to, LabelStr("meets"));
+    localSlave(Going, to, "meets");
     sameObject(object, to);
     meets(this, to);
-    slave(Rover::Going, Rover.Going, from, LabelStr("meets"));
+    localSlave(Going, from, "meets");
     sameObject(object, from);
     meets(this, from);
     slave(Foo::Bar, Foo.Bar, bar, LabelStr("meets"));

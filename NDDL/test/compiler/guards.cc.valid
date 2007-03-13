@@ -722,7 +722,7 @@ namespace NDDL {
   
   void Foo$impliedObjectGuard$0$0::handleExecute() {
     objectVar(Bar, bar, false, false);
-    slave(Foo::basicToken, Foo.basicToken, g1, LabelStr("meets"));
+    localSlave(basicToken, g1, "meets");
     sameObject(object, g1);
     meets(this, g1);
     {
@@ -804,13 +804,13 @@ namespace NDDL {
     addChildRule(new Foo$singletonGuard$2$0$0(m_id, makeScope(var(getId(),std::string("object"))),true));
   }
   void Foo$singletonGuard$2$0$0::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, g1, LabelStr("meets"));
+    localSlave(basicToken, g1, "meets");
     sameObject(object, g1);
     meets(this, g1);
     addChildRule(new Foo$singletonGuard$2$0$0$0(m_id, makeScope(varfromtok(tok(getId(), std::string("g1")), std::string("object"))),true));
   }
   void Foo$singletonGuard$2$0$0$0::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, g2, LabelStr("met_by"));
+    localSlave(basicToken, g2, "met_by");
     sameObject(object, g2);
     met_by(this, g2);
     {
@@ -898,42 +898,42 @@ namespace NDDL {
     addChildRule(new Foo$tokenWithParameters$3$0$7(m_id, var(getId(),std::string("strEnum_arg")), SymbolDomain(listFromString("ONE$THREE$",false), "StringEnum"), true));
   }
   void Foo$tokenWithParameters$3$0$0::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t1, LabelStr("meets"));
+    localSlave(basicToken, t1, "meets");
     sameObject(object, t1);
     meets(this, t1);
   }
   void Foo$tokenWithParameters$3$0$1::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t2, LabelStr("meets"));
+    localSlave(basicToken, t2, "meets");
     sameObject(object, t2);
     meets(this, t2);
   }
   void Foo$tokenWithParameters$3$0$2::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t3, LabelStr("meets"));
+    localSlave(basicToken, t3, "meets");
     sameObject(object, t3);
     meets(this, t3);
   }
   void Foo$tokenWithParameters$3$0$3::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t4, LabelStr("meets"));
+    localSlave(basicToken, t4, "meets");
     sameObject(object, t4);
     meets(this, t4);
   }
   void Foo$tokenWithParameters$3$0$4::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t4, LabelStr("meets"));
+    localSlave(basicToken, t4, "meets");
     sameObject(object, t4);
     meets(this, t4);
   }
   void Foo$tokenWithParameters$3$0$5::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t5, LabelStr("meets"));
+    localSlave(basicToken, t5, "meets");
     sameObject(object, t5);
     meets(this, t5);
   }
   void Foo$tokenWithParameters$3$0$6::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t6, LabelStr("meets"));
+    localSlave(basicToken, t6, "meets");
     sameObject(object, t6);
     meets(this, t6);
   }
   void Foo$tokenWithParameters$3$0$7::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t6, LabelStr("meets"));
+    localSlave(basicToken, t6, "meets");
     sameObject(object, t6);
     meets(this, t6);
   }
@@ -959,7 +959,7 @@ namespace NDDL {
     addChildRule(new Foo$tokenWithParameters$4$0$0(m_id, makeScope(var(getId(),std::string("bool_arg"))),true));
   }
   void Foo$tokenWithParameters$4$0$0::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t1, LabelStr("meets"));
+    localSlave(basicToken, t1, "meets");
     sameObject(object, t1);
     meets(this, t1);
   }
@@ -982,7 +982,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Foo$mixGuardedWithUnguarded$5, Foo$mixGuardedWithUnguarded$5$0, Foo.mixGuardedWithUnguarded, "guards.nddl,116");
   
   void Foo$mixGuardedWithUnguarded$5$0::handleExecute() {
-    slave(Foo::tokenWithParameters, Foo.tokenWithParameters, t1, LabelStr("meets"));
+    localSlave(tokenWithParameters, t1, "meets");
     sameObject(object, t1);
     meets(this, t1);
     {
@@ -994,7 +994,7 @@ namespace NDDL {
     addChildRule(new Foo$mixGuardedWithUnguarded$5$0$0(m_id, makeScope(varfromtok(tok(getId(), std::string("t1")), std::string("bool_arg"))),true));
   }
   void Foo$mixGuardedWithUnguarded$5$0$0::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t2, LabelStr("meets"));
+    localSlave(basicToken, t2, "meets");
     sameObject(object, t2);
     meets(this, t2);
   }
@@ -1055,22 +1055,22 @@ namespace NDDL {
     addChildRule(new Foo$localVariableGuard$6$0$4(m_id, makeScope(var(getId(),std::string("f"))),true));
   }
   void Foo$localVariableGuard$6$0$0::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t, LabelStr("meets"));
+    localSlave(basicToken, t, "meets");
     sameObject(object, t);
     meets(this, t);
   }
   void Foo$localVariableGuard$6$0$1::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t, LabelStr("meets"));
+    localSlave(basicToken, t, "meets");
     sameObject(object, t);
     meets(this, t);
   }
   void Foo$localVariableGuard$6$0$2::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t, LabelStr("meets"));
+    localSlave(basicToken, t, "meets");
     sameObject(object, t);
     meets(this, t);
   }
   void Foo$localVariableGuard$6$0$3::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t2, LabelStr("met_by"));
+    localSlave(basicToken, t2, "met_by");
     sameObject(object, t2);
     met_by(this, t2);
   }
@@ -1116,7 +1116,7 @@ namespace NDDL {
   
   void Foo$multipleNestedGuards$7$0::handleExecute() {
     localVar(LocationsBaseDomain(), locs, false);
-    slave(Foo::tokenWithParameters, Foo.tokenWithParameters, t1, LabelStr("any"));
+    localSlave(tokenWithParameters, t1, "any");
     sameObject(object, t1);
     addChildRule(new Foo$multipleNestedGuards$7$0$0(m_id, varfromtok(tok(getId(), std::string("t1")), std::string("int_arg")), IntervalIntDomain(10,10, "int"), true));
   }
@@ -1125,7 +1125,7 @@ namespace NDDL {
     addChildRule(new Foo$multipleNestedGuards$7$0$0$0(m_id, var(getId(),std::string("OR")), BoolDomain(true, "bool"), true));
   }
   void Foo$multipleNestedGuards$7$0$0$0::handleExecute() {
-    slave(Foo::tokenWithParameters, Foo.tokenWithParameters, t2, LabelStr("meets"));
+    localSlave(tokenWithParameters, t2, "meets");
     sameObject(object, t2);
     meets(this, t2);
     {
@@ -1137,7 +1137,7 @@ namespace NDDL {
     addChildRule(new Foo$multipleNestedGuards$7$0$0$0$0(m_id, varfromtok(tok(getId(), std::string("t1")), std::string("location_arg")), SymbolDomain(LabelStr("Hill"), "Locations"), true));
   }
   void Foo$multipleNestedGuards$7$0$0$0$0::handleExecute() {
-    slave(Foo::basicToken, Foo.basicToken, t3, LabelStr("meets"));
+    localSlave(basicToken, t3, "meets");
     sameObject(object, t3);
     meets(t2, t3);
   }

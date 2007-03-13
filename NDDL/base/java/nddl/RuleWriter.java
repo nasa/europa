@@ -395,23 +395,30 @@ class RuleWriter {
     String nddlClass = predicateObjectType + "." + predicate;
     String cppClass = predicateObjectType + "::" + predicate;
 
-    // Now output c++ code
-    writer.write("slave(" + cppClass + ", " +
-        nddlClass + ", " +
-        slaveName + ", LabelStr(\"" + relation + "\"));\n");
+    // If on the same object, use a special form to allocate a local slave that uses the type
+    // of the current object and also constrain the object variable.
+    if(slaveType.indexOf(".") == -1 || (slaveType.indexOf("object.") == 0 && slaveType.lastIndexOf(".") == 6))
+	writer.write("localSlave(" + predicate + ", " + slaveName + ", \"" + relation + "\");\n");
+    else 
+	writer.write("slave(" + cppClass + ", " + nddlClass + ", " + slaveName + ", LabelStr(\"" + relation + "\"));\n");
 
-    // Generate constraint for same object if necessary
+    // Constrain the object variable if necessary
     if(constrainObjectVariable) {
-      String suffix = "object";
-      if(slaveType.indexOf(".") > -1) suffix = slaveType.substring(0, slaveType.lastIndexOf("."));
-      if(suffix.indexOf(".") < 0)
-        writer.write("sameObject(" + suffix + ", " + slaveName + ");\n");
-      else {
-        String prefix = suffix.substring(0, suffix.indexOf("."));
-        suffix = suffix.substring(suffix.indexOf(".") + 1, suffix.length());
-        writer.write("constrainObject("+prefix+" ," + suffix + "," + slaveName +  ");\n");
-      }
+	String suffix = "object";
+
+	// If it has a delimiter, extract the prefix
+	if(slaveType.indexOf(".") > -1) 
+	    suffix = slaveType.substring(0, slaveType.lastIndexOf("."));
+
+	if(suffix.indexOf(".") < 0)
+	    writer.write("sameObject(" + suffix + ", " + slaveName + ");\n");
+	else {
+	    String prefix = suffix.substring(0, suffix.indexOf("."));
+	    suffix = suffix.substring(suffix.indexOf(".") + 1, suffix.length());
+	    writer.write("constrainObject("+prefix+" ," + suffix + "," + slaveName +  ");\n");
+	}
     }
+
     return slaveName;
   }
 

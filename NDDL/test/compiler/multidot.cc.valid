@@ -595,7 +595,7 @@ namespace NDDL {
   DECLARE_AND_DEFINE_RULE(Rule$Baz$apred$0, Baz$apred$0$0, Baz.apred, "multidot.nddl,33");
   
   void Baz$apred$0$0::handleExecute() {
-    slave(Baz::bpred, Baz.bpred, bp, LabelStr("meets"));
+    localSlave(bpred, bp, "meets");
     sameObject(object, bp);
     meets(this, bp);
     {
