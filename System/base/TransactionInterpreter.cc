@@ -18,8 +18,8 @@
 #include "Schema.hh"
 #include "Utils.hh"
 
-// To support Rule Interpretation
-#include "NddlRules.hh"
+#include "NddlResource.hh"
+#include "NddlRules.hh" 
 #include "NddlUtils.hh"
 
 // Hack!! the macro in NddlRules.hh only works with code-generation
@@ -78,11 +78,22 @@ namespace EUROPA {
   {  	  
   	  m_systemClasses.insert("Object");
   	  m_systemClasses.insert("Timeline");
+  	  //m_systemClasses.insert("Resource"); // TODO: export NddlResource
+  	  m_systemClasses.insert("Reusable");
+  	  m_systemTokens.insert("Reusable.uses");
   	  
   	  // TODO: this should be done once after the schema is initialized, not for every TransactionPlayer
   	  // TODO: check to make sure this is done only once
   	  createDefaultObjectFactory("Object", true);
       REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);	    	    	  
+
+      //REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);	    	    	  
+
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable);	    	    	  
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:int:int);	    	    	  
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:int:int:int);	    	    	  
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:int:int:int:int);	    	    	  
+      new ReusableUsesTokenFactory("Reusable.uses");
   }
 
   InterpretedDbClientTransactionPlayer::~InterpretedDbClientTransactionPlayer() 
@@ -114,6 +125,7 @@ namespace EUROPA {
     const char* parentClassName = element.Attribute("extends");
     parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
 
+    // TODO: should do nothing here for native classes, need to make PLasma.nddl consistent with this
     Id<Schema> schema = Schema::instance();
     schema->addObjectType(className,parentClassName);
     
@@ -124,7 +136,7 @@ namespace EUROPA {
         className,
         ObjectDomain(className)
     );             
-
+ 
     dbgout.str("");
     dbgout << "class " << className  
                        << (parentClassName != NULL ? " extends " : "") 
@@ -138,9 +150,15 @@ namespace EUROPA {
 	    if (strcmp(tagname, "var") == 0) 
 	    	defineClassMember(schema,className,child);
 	    else if (strcmp(tagname, "constructor") == 0) { 
-	    	defineConstructor(schema,className,child);
-	    	definedConstructor = true;	
-	    }	    	    	
+            if (m_systemClasses.find(className) == m_systemClasses.end()) {
+	    	    defineConstructor(schema,className,child);
+	    	    definedConstructor = true;
+            }
+            else {	
+            	// TODO: should always be displayed as WARNING!
+    	        debugMsg("XMLInterpreter","Skipping constructor declaration for System class : " << className);
+	        }	  
+	    }  	    	
 	    else if (strcmp(tagname, "predicate") == 0) 
 	    	declarePredicate(schema,className,child);	    	
 	    else if (strcmp(tagname, "enum") == 0) 
@@ -159,7 +177,9 @@ namespace EUROPA {
   }
 
   Expr* InterpretedDbClientTransactionPlayer::valueToExpr(const TiXmlElement* element)
-  {
+  {  	
+    check_runtime_error(element != NULL,"Unexpected NULL element, expected value or id element");
+    
     if (strcmp(element->Value(),"value") == 0) {
      	return new ExprConstant(m_client,element->Attribute("type"),xmlAsAbstractDomain(*element));
     }
@@ -168,7 +188,7 @@ namespace EUROPA {
       	return new ExprVariableRef(varName);
     }
     else
-        check_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + element->Value());
+        check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + element->Value() + ", expected value or id element");
         
     return NULL;        
   }
@@ -276,6 +296,8 @@ namespace EUROPA {
 
       std::vector<LabelStr> parameterNames;
       std::vector<LabelStr> parameterTypes;
+      std::vector<LabelStr> assignVars;
+      std::vector<Expr*> assignValues;
       
       dbgout << ident << "predicate " <<  predName << "(";
       for(const TiXmlElement* predArg = element->FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
@@ -286,21 +308,37 @@ namespace EUROPA {
           schema->addMember(predName.c_str(), type, name);
           parameterNames.push_back(name);
           parameterTypes.push_back(type);
-          // TODO: Check for value assignment
+      	}
+      	if (strcmp(predArg->Value(),"assign") == 0) {
+	      const char* type = safeStr(predArg->Attribute("type"));	
+	      const char* name = safeStr(predArg->Attribute("name"));
+	      bool inherited = (predArg->Attribute("inherited") != NULL ? true : false);	
+	      dbgout << type << " " << name << ",";
+	      if (!inherited)
+              schema->addMember(predName.c_str(), type, name);
+          assignVars.push_back(name);
+          assignValues.push_back(valueToExpr(predArg->FirstChildElement()));                 
       	}
       	else if (strcmp(predArg->Value(),"invoke") == 0) {
-      		// TODO: deal with this
       		dbgout << "constraint " << predArg->Attribute("name");
+      		// TODO: deal with this
+      		std::cerr << "Constraint in predicate declaration for predicate " << predName << " not supported yet" << std::endl;
       	}             
       }	
       dbgout << ")" << std::endl;
-      
+
+      if (m_systemTokens.find(predName) != m_systemTokens.end()) {
+          // TODO: should always be displayed as WARNING!
+	      debugMsg("XMLInterpreter","Skipping factory registration for System token : " << predName);     
+      }       
       // The TokenFactory's constructor automatically registers the factory
-      // TODO: pass along parameter domain restrictions and constraints
+      // TODO: pass along constraints
       new InterpretedTokenFactory(
           predName,
           parameterNames,
-          parameterTypes
+          parameterTypes,
+          assignVars,
+          assignValues
       );
   }
     
@@ -989,6 +1027,8 @@ namespace EUROPA {
                      const LabelStr& predicateName, 
                      const std::vector<LabelStr>& parameterNames,
                      const std::vector<LabelStr>& parameterTypes, 
+                     const std::vector<LabelStr>& assignVars,
+                     const std::vector<Expr*>& assignValues,
                      const bool& rejectable, 
                      const bool& close) 
                      
@@ -1001,7 +1041,7 @@ namespace EUROPA {
                         Token::noObject(),                    // Object Name
                         false) 
     {
-    	commonInit(parameterNames, parameterTypes, close);
+    	commonInit(parameterNames, parameterTypes, assignVars, assignValues, close);
     }
   	                     
     InterpretedToken::InterpretedToken(const TokenId& master, 
@@ -1009,6 +1049,8 @@ namespace EUROPA {
                      const LabelStr& relation, 
                      const std::vector<LabelStr>& parameterNames,
                      const std::vector<LabelStr>& parameterTypes, 
+                     const std::vector<LabelStr>& assignVars,
+                     const std::vector<Expr*>& assignValues,
                      const bool& close)
         : IntervalToken(master, 
                         relation,
@@ -1019,7 +1061,7 @@ namespace EUROPA {
                         Token::noObject(),                   // Object Name
                         false) 
     {
-    	commonInit(parameterNames, parameterTypes, close);
+    	commonInit(parameterNames, parameterTypes, assignVars, assignValues, close);
     }
         
     InterpretedToken::~InterpretedToken()
@@ -1139,6 +1181,8 @@ namespace EUROPA {
     void InterpretedToken::commonInit(
                      const std::vector<LabelStr>& parameterNames,
                      const std::vector<LabelStr>& parameterTypes, 
+                     const std::vector<LabelStr>& assignVars,
+                     const std::vector<Expr*>& assignValues,
                      const bool& autoClose)
     {
     	// TODO: initialize parameters that have exprs 
@@ -1161,6 +1205,11 @@ namespace EUROPA {
 	            */                                    
 	        } 
 	    }
+	    
+	    // Take care of initializations that were part of the predicate declaration
+	    EvalContext context(NULL); // TODO: provide token context if we want to allow anything other than constants
+	    for (unsigned int i=0; i < assignVars.size(); i++)
+	        getVariable(assignVars[i])->restrictBaseDomain(assignValues[i]->eval(context).getValue()->baseDomain()); 
     	
         if (autoClose)
             close();    	
@@ -1172,22 +1221,42 @@ namespace EUROPA {
     InterpretedTokenFactory::InterpretedTokenFactory(
                                        const LabelStr& predicateName,
                                        const std::vector<LabelStr>& parameterNames,
-                                       const std::vector<LabelStr>& parameterTypes) 
+                                       const std::vector<LabelStr>& parameterTypes, 
+                                       const std::vector<LabelStr>& assignVars,
+                                       const std::vector<Expr*>& assignValues)
 	    : ConcreteTokenFactory(predicateName) 
 	    , m_parameterNames(parameterNames)
 	    , m_parameterTypes(parameterTypes)
+	    , m_assignVars(assignVars)
+	    , m_assignValues(assignValues)
 	{ 
 	} 
 	
 	TokenId InterpretedTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable) const 
 	{ 
-	    TokenId token = (new InterpretedToken(planDb, name, m_parameterNames, m_parameterTypes, rejectable, true))->getId(); 
+	    TokenId token = (new InterpretedToken(
+	        planDb, 
+	        name, 
+	        m_parameterNames, 
+	        m_parameterTypes,
+	        m_assignVars,
+	        m_assignValues, 
+	        rejectable, 
+	        true))->getId(); 
 	    return token; 
 	} 
 	
 	TokenId InterpretedTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const 
 	{ 
-	    TokenId token = (new InterpretedToken(master, name, relation, m_parameterNames, m_parameterTypes , true))->getId(); 
+	    TokenId token = (new InterpretedToken(
+	        master, 
+	        name, 
+	        relation, 
+	        m_parameterNames, 
+	        m_parameterTypes, 
+	        m_assignVars,
+	        m_assignValues, 
+	        true))->getId(); 
 	    return token; 
     } 
 	
@@ -1413,6 +1482,80 @@ namespace EUROPA {
         foo->setRulesEngine(rulesEngine);
         return foo->getId();
     }	
+    
+    
+    // Factories for exported C++ classes
+  	TimelineObjectFactory::TimelineObjectFactory(const LabelStr& signature) 
+  	    : NativeObjectFactory("Timeline",signature) 
+  	{
+  	} 
+    
+    TimelineObjectFactory::~TimelineObjectFactory() 
+  	{
+  	} 
+
+   	ObjectId TimelineObjectFactory::makeNewObject( 
+	                        const PlanDatabaseId& planDb, 
+	                        const LabelStr& objectType, 
+	                        const LabelStr& objectName, 
+	                        const std::vector<const AbstractDomain*>& arguments) const 
+	{ 
+	    ObjectId instance =  (new Timeline(planDb, objectType, objectName,true))->getId();
+	    debugMsg("XMLInterpreter","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString()); 
+	    
+	    return instance; 
+	}
+
+  	ReusableObjectFactory::ReusableObjectFactory(const LabelStr& signature) 
+  	        : NativeObjectFactory("Reusable",signature) 
+  	{
+  	}
+  	 
+  	ReusableObjectFactory::~ReusableObjectFactory() 
+  	{
+  	} 
+  	
+    ObjectId ReusableObjectFactory::makeNewObject( 
+                        const PlanDatabaseId& planDb, 
+                        const LabelStr& objectType, 
+                        const LabelStr& objectName, 
+                        const std::vector<const AbstractDomain*>& arguments) const 
+	{ 
+	   	Id<NDDL::NddlReusable>  instance = (new NDDL::NddlReusable(planDb, objectType, objectName,true))->getId();
+    	
+	   	std::vector<float> argValues;
+	   	for (unsigned int i=0;i<arguments.size();i++)
+	   	    argValues.push_back((float)(arguments[i]->getSingletonValue()));
+	   	    
+	   	if (argValues.size() == 0) 
+    		instance->constructor();
+    	else if (argValues.size() == 2)
+    		instance->constructor(argValues[0],argValues[1]);
+    	else if (argValues.size() == 3)
+    		instance->constructor(argValues[0],argValues[1],argValues[2]);
+    	else if (argValues.size() == 4)
+    		instance->constructor(argValues[0],argValues[1],argValues[2],argValues[3]);
+    	else {
+    		std::ostringstream os;
+    		os << "Unexpected number of args in Reusable constructor:" << argValues.size();
+    	    check_runtime_error(ALWAYS_FAILS,os.str());
+    	}	
+	    		
+    	instance->handleDefaults(false /*don't close the object yet*/); 	    	
+	   	debugMsg("XMLInterpreter","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString()); 
+
+    	return instance;	
+    }   
+    
+	TokenId ReusableUsesTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable) const
+	{
+		return new NDDL::NddlReusable::uses(planDb,name,rejectable,true);
+	}
+	
+	TokenId ReusableUsesTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+	{
+		return new NDDL::NddlReusable::uses(master,name,relation,true);
+	}        
 }
 
 /*

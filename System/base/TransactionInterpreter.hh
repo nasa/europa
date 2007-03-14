@@ -12,6 +12,7 @@
 #include "RulesEngineDefs.hh"
 #include "Timeline.hh"
 #include "TokenFactory.hh"
+#include "Debug.hh"
 #include <map>
 #include <vector>
 
@@ -39,8 +40,9 @@ namespace EUROPA {
       
       Expr* valueToExpr(const TiXmlElement* element);
       
-      // TODO: move this to schema
+      // TODO: move these to schema
       std::set<std::string> m_systemClasses;      
+      std::set<std::string> m_systemTokens;      
   };
   
   class DataRef
@@ -207,37 +209,6 @@ namespace EUROPA {
         bool                      m_canMakeNewObject;	 
   };  
   
-  // TODO: create a separate file for exported C++ classes?
-  class TimelineObjectFactory : public InterpretedObjectFactory
-  {
-  	public:
-  	    TimelineObjectFactory(const LabelStr& signature) 
-  	        : InterpretedObjectFactory(
-  	              "Timeline",                 // className
-  	              signature,                  // signature
-  	              std::vector<std::string>(), // ConstructorArgNames
-  	              std::vector<std::string>(), // constructorArgTypes
-  	              NULL,                       // SuperCallExpr
-  	              std::vector<Expr*>(),       // constructorBody
-  	              true                        // canCreateObjects
-  	          )
-  	    {
-  	    }
-  	    
-  	    virtual ~TimelineObjectFactory() {}
-  	    
-  	protected:
-    	virtual ObjectId makeNewObject( 
-	                        const PlanDatabaseId& planDb,
-	                        const LabelStr& objectType, 
-	                        const LabelStr& objectName,
-	                        const std::vector<const AbstractDomain*>& arguments) const
-	    {
-	    	std::cout << "Created Timeline:" << objectName.toString() << " type:" << objectType.toString() << std::endl;
-	    	return (new Timeline(planDb, objectType, objectName,true))->getId();
-	    }
-  };
-  
   // InterpretedToken is the interpreted version of NddlToken
   class InterpretedToken : public IntervalToken
   {
@@ -247,6 +218,8 @@ namespace EUROPA {
   	                     const LabelStr& predicateName, 
                          const std::vector<LabelStr>& parameterNames,
                          const std::vector<LabelStr>& parameterTypes,
+	                     const std::vector<LabelStr>& assignVars,
+                         const std::vector<Expr*>& assignValues,
                          const bool& rejectable = false, 
   	                     const bool& close = false); 
   	                     
@@ -255,6 +228,8 @@ namespace EUROPA {
                          const LabelStr& relation, 
                          const std::vector<LabelStr>& parameterNames,
                          const std::vector<LabelStr>& parameterTypes,
+	                     const std::vector<LabelStr>& assignVars,
+                         const std::vector<Expr*>& assignValues,
                          const bool& close = false); 
                          
         
@@ -263,6 +238,8 @@ namespace EUROPA {
     protected:
         void InterpretedToken::commonInit(const std::vector<LabelStr>& parameterNames,
                                           const std::vector<LabelStr>& parameterTypes,
+                                          const std::vector<LabelStr>& assignVars,
+                                          const std::vector<Expr*>& assignValues,
                                           const bool& autoClose);      	                                          
   };
   
@@ -271,11 +248,15 @@ namespace EUROPA {
     public: 
 	  InterpretedTokenFactory(const LabelStr& predicateName,
 	                          const std::vector<LabelStr>& parameterNames,
-                              const std::vector<LabelStr>& parameterTypes);
+                              const std::vector<LabelStr>& parameterTypes,
+	                          const std::vector<LabelStr>& assignVars,
+                              const std::vector<Expr*>& assignValues);
 	  
 	protected:
 	  std::vector<LabelStr> m_parameterNames;    
 	  std::vector<LabelStr> m_parameterTypes;    
+	  std::vector<LabelStr> m_assignVars;    
+	  std::vector<Expr*> m_assignValues;    
 
 	private: 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const;
@@ -411,7 +392,82 @@ namespace EUROPA {
 
   	    virtual DataRef eval(EvalContext& context) const;  
   };        
+  
+  
+  // TODO: create a separate file for exported C++ classes?
+  class NativeObjectFactory : public InterpretedObjectFactory
+  {
+  	public:
+  	    NativeObjectFactory(const char* className, const LabelStr& signature) 
+  	        : InterpretedObjectFactory(
+  	              className,                  // className
+  	              signature,                  // signature
+  	              std::vector<std::string>(), // ConstructorArgNames
+  	              std::vector<std::string>(), // constructorArgTypes
+  	              NULL,                       // SuperCallExpr
+  	              std::vector<Expr*>(),       // constructorBody
+  	              true                        // canCreateObjects
+  	          )
+  	    {
+  	    }
+  	    
+  	    virtual ~NativeObjectFactory() {}
+  	    
+  	protected:
+    	virtual ObjectId makeNewObject( 
+	                        const PlanDatabaseId& planDb,
+	                        const LabelStr& objectType, 
+	                        const LabelStr& objectName,
+	                        const std::vector<const AbstractDomain*>& arguments) const = 0;
+  };
+  
+  class NativeTokenFactory: public ConcreteTokenFactory 
+  { 
+    public: 
+	  NativeTokenFactory(const LabelStr& predicateName) : ConcreteTokenFactory(predicateName) {}
+	  
+	private: 
+	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const = 0;
+	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
+  };  
+  
+  class TimelineObjectFactory : public NativeObjectFactory 
+  { 
+  	public: 
+  	    TimelineObjectFactory(const LabelStr& signature);
+  	    virtual ~TimelineObjectFactory(); 
+  	
+  	protected: 
+    	virtual ObjectId makeNewObject( 
+	                        const PlanDatabaseId& planDb, 
+	                        const LabelStr& objectType, 
+	                        const LabelStr& objectName, 
+	                        const std::vector<const AbstractDomain*>& arguments) const;
+  }; 
+  
+  class ReusableObjectFactory : public NativeObjectFactory 
+  { 
+  	public: 
+  	    ReusableObjectFactory(const LabelStr& signature);
+  	    virtual ~ReusableObjectFactory(); 
+  	
+  	protected: 
+    	virtual ObjectId makeNewObject( 
+	                        const PlanDatabaseId& planDb, 
+	                        const LabelStr& objectType, 
+	                        const LabelStr& objectName, 
+	                        const std::vector<const AbstractDomain*>& arguments) const;
+  };   
+  
+  class ReusableUsesTokenFactory: public NativeTokenFactory 
+  { 
+    public: 
+	  ReusableUsesTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+	  
+	private: 
+	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const;
+	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
+  };   
 }
-
 
 #endif // _H_TransactionInterpreter
