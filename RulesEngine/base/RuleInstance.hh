@@ -269,8 +269,10 @@ namespace EUROPA{
     std::vector<ConstrainedVariableId> m_guards; /*!< Guard variables for implicit and explcit guards */
     AbstractDomain* m_guardDomain; /*!< If an explicit equality test, will ahve this be non-null */
     ConstraintId m_guardListener; /*!< If guarded, listener is a constraint */
+
+  protected:    
     bool m_isExecuted; /*!< Indicates if the rule has been fired */
-		bool m_isPositive; /*!< If this is false, the rule's guard is on a negative test. */
+    bool m_isPositive; /*!< If this is false, the rule's guard is on a negative test. */
     std::vector<ConstraintId> m_constraints; /*!< Constraints introduced through rule execution */
     std::vector<RuleInstanceId> m_childRules; /*!< Child rules introduced through rule execution */
     std::vector<ConstrainedVariableId> m_variables; /*< Local variables introduced through rule execution */
