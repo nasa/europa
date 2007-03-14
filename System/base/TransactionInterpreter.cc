@@ -16,6 +16,7 @@
 #include "TokenVariable.hh"
 #include "TypeFactory.hh"
 #include "Schema.hh"
+#include "Utils.hh"
 
 // To support Rule Interpretation
 #include "NddlRules.hh"
@@ -103,7 +104,7 @@ namespace EUROPA {
     schema->declareObjectType(className);
     dbgout.str("");
     dbgout << "Declared class " << className << std::endl;
-    std::cout << dbgout.str();
+    debugMsg("XMLInterpreter",dbgout.str());
   }
   
   void InterpretedDbClientTransactionPlayer::playDefineClass(const TiXmlElement& element) 
@@ -154,7 +155,7 @@ namespace EUROPA {
     }
     
     dbgout << "}" << std::endl;    
-    std::cout << dbgout.str() << std::endl;     
+    debugMsg("XMLInterpreter",dbgout.str());     
   }
 
   Expr* InterpretedDbClientTransactionPlayer::valueToExpr(const TiXmlElement* element)
@@ -423,6 +424,18 @@ namespace EUROPA {
             }                 
       		ruleBody.push_back(new ExprSubgoal(name,predicateType,predicateInstance,child->Attribute("relation")));
       	}
+      	else if (strcmp(child->Value(),"var") == 0) {
+      		LabelStr name(child->Attribute("name"));
+      		LabelStr type(child->Attribute("type"));
+      		// TODO: deal with domain restrictions ???
+      		if (child->FirstChildElement() != NULL)
+      	        check_runtime_error(ALWAYS_FAILS,std::string("Can't deal with domain restrictions for local var ") + name.toString());      		
+      		ruleBody.push_back(new ExprLocalVar(name,type));
+      	}
+      	else if (strcmp(child->Value(),"if") == 0) {
+      		// TODO: implement this
+      		ruleBody.push_back(new ExprIf());
+      	}
       	else 
       	   check_runtime_error(ALWAYS_FAILS,std::string("Unknown Compatibility element:") + child->Value());
       }
@@ -494,6 +507,7 @@ namespace EUROPA {
   	void EvalContext::addVar(const char* name,const ConstrainedVariableId& v)
   	{
   		m_variables[name] = v;
+  		debugMsg("XMLInterpreter","Added var:" << name << " to EvalContext");
   	} 
 
   	ConstrainedVariableId EvalContext::getVar(const char* name)
@@ -509,6 +523,50 @@ namespace EUROPA {
   	        return ConstrainedVariableId::noId();
   	}
 
+  	void EvalContext::addToken(const char* name,const TokenId& t)
+  	{
+  		m_tokens[name] = t;
+  	} 
+
+  	TokenId EvalContext::getToken(const char* name)
+  	{
+  		std::map<std::string,TokenId>::iterator it = 
+  		    m_tokens.find(name);
+  		    
+        if( it != m_tokens.end() ) 
+            return it->second;
+  	    else if (m_parent != NULL)
+  	    	return m_parent->getToken(name);
+  	    else 
+  	        return TokenId::noId();
+  	}
+
+    std::string EvalContext::toString() const
+    {
+    	std::ostringstream os;
+    	
+    	if (m_parent == NULL)
+    	    os << "EvalContext {" << std::endl;    
+    	else
+    	    os << m_parent->toString();
+    	    
+  		std::map<std::string,ConstrainedVariableId>::const_iterator varIt = m_variables.begin();    	
+    	os << "    vars {";    
+    	for (;varIt != m_variables.end();++varIt)
+    	    os << varIt->first << " " << varIt->second->toString() << ",";
+    	os << "    }" << std::endl;
+    	
+  		std::map<std::string,TokenId>::const_iterator tokenIt = m_tokens.begin();    	
+    	os << "    tokens {";    
+    	for (;tokenIt != m_tokens.end();++tokenIt)
+    	    os << tokenIt->first << " " << tokenIt->second->getPredicateName().toString() << ",";
+    	os << "    }"  << std::endl;
+    	
+    	if (m_parent == NULL)
+    	    os << "}" << std::endl;
+    	    
+    	return os.str();        	    
+    }
     /*
      * ExprConstructorSuperCall
      */   
@@ -563,7 +621,7 @@ namespace EUROPA {
      	ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue(); 
      	const AbstractDomain& domain = rhsValue->derivedDomain();
      	object->addVariable(domain,m_lhs);
-     	std::cout << "Initialized variable:" << object->getName().toString() << "." << m_lhs << " in constructor" << std::endl;
+     	debugMsg("XMLInterpreter","Initialized variable:" << object->getName().toString() << "." << m_lhs << " in constructor");
   		
   		return DataRef::null;
   	} 
@@ -606,11 +664,43 @@ namespace EUROPA {
 
   	DataRef ExprVariableRef::eval(EvalContext& context) const
   	{
-     	ConstrainedVariableId rhs = context.getVar(m_varName.c_str());
+  		// TODO: do this only once
+  		std::vector<std::string> vars;
+  		tokenize(m_varName.toString(),vars,".");
+  		std::string varName=vars[0];
+  		
+  		unsigned int idx = 1;
 
-     	if (rhs == ConstrainedVariableId::noId()) {
-     	    check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_varName.toString()+" in EvalContext");
-     	    return DataRef::null;
+        // TODO: this is confusing because variables at higher levels will hide tokens at lower levels. FIXME  		
+     	ConstrainedVariableId rhs = context.getVar(vars[0].c_str());
+        
+     	if (rhs.isNoId()) {
+     		TokenId tok = context.getToken(vars[0].c_str());
+     		if (tok == TokenId::noId())  
+     	        check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+varName+" in Evaluation Context");
+     		
+     		//debugMsg("XMLInterpreter", vars[0] << " is a token");
+     		rhs = tok->getVariable(vars[1]);
+     		varName += "." + vars[1];
+         	if (rhs.isNoId()) 
+     	        check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+varName+" in token of type " +tok->getPredicateName().toString());
+     	        
+     		idx=2;
+     	}
+     	else {
+     		//debugMsg("XMLInterpreter", vars[0] << " is a variable");
+     		//debugMsg("XMLInterpreter", context.toString());
+     	}
+     	
+     	
+     	for (;idx<vars.size();idx++) {
+     		// TODO: should probably make sure it's an object var first
+     		//debugMsg("XMLInterpreter","vars.size() is:" << vars.size() << " idx is:" << idx);
+     		ObjectId object = rhs->derivedDomain().getSingletonValue();
+     		rhs = object->getVariable(vars[idx]);
+     		varName += "." + vars[idx];
+         	if (rhs.isNoId()) 
+     	        check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+varName+" in Evaluation Context");
      	}
      	    
      	return DataRef(rhs);
@@ -683,7 +773,7 @@ namespace EUROPA {
   		}
 
   		m_ruleInstance->createConstraint(m_name,vars);
-  		std::cout << "Evaluated Constraint : " << m_name.toString() << std::endl;
+  		debugMsg("XMLInterpreter","Evaluated Constraint : " << m_name.toString());
   		return DataRef::null;
   	}  
   	    
@@ -707,11 +797,48 @@ namespace EUROPA {
 
   	DataRef ExprSubgoal::eval(EvalContext& context) const  
   	{
-  		std::cout << "Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString() << std::endl;
-  		m_ruleInstance->createSubgoal(m_name,m_predicateType,m_predicateInstance,m_relation);
-  		// TODO: add new slave to EvalContext
-  		std::cout << "Create subgoal " << m_predicateType.toString() << ":" << m_name.toString() << std::endl;
+  		debugMsg("XMLInterpreter","Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString());
+  		TokenId slave = m_ruleInstance->createSubgoal(m_name,m_predicateType,m_predicateInstance,m_relation);
+  		context.addToken(m_name.c_str(),slave);
+  		debugMsg("XMLInterpreter","Created  subgoal " << m_predicateType.toString() << ":" << m_name.toString());
   		return DataRef::null;
+  	}  
+  	 
+  	ExprLocalVar::ExprLocalVar(const LabelStr& name,const LabelStr& type)
+  	    : m_name(name)
+  	    , m_type(type)
+  	{
+  		m_baseDomain = TypeFactory::baseDomain(type.c_str()).copy();
+  	}
+  	
+  	ExprLocalVar::~ExprLocalVar()
+  	{
+  	}
+
+  	DataRef ExprLocalVar::eval(EvalContext& context) const
+  	{
+  		ConstrainedVariableId localVar = m_ruleInstance->addLocalVariable(
+  		    *m_baseDomain,
+  		    false, // can't be specified
+  		    m_name
+  		);
+  		context.addVar(m_name.c_str(),localVar);
+  		debugMsg("XMLInterpreter","Added RuleInstance local var:" << m_name.toString());
+  		return DataRef::null;
+  	}  
+  	  
+  	ExprIf::ExprIf()
+  	{
+  	}
+  	
+  	ExprIf::~ExprIf()
+  	{
+  	}
+
+  	DataRef ExprIf::eval(EvalContext& context) const
+  	{
+  		std::cerr << "ERROR:if staments not supported yet" << std::endl;
+  		return DataRef::null;  		
   	}  
   	     
     /*
@@ -783,7 +910,7 @@ namespace EUROPA {
       // TODO: some effort can be saved by keeping track of whether a class has a native ancestor different from Object.
       // If it doesn't, the object can be created right away and this traversal up the hierarchy can be skipped
 	  if (m_canMakeNewObject) {
-    	  std::cout << "Created Object:" << objectName.toString() << " type:" << objectType.toString() << std::endl;
+    	  debugMsg("XMLInterpreter","Created Object:" << objectName.toString() << " type:" << objectType.toString());
 	      return (new Object(planDb, objectType, objectName,true))->getId();
 	  }
 	  else {
@@ -832,11 +959,11 @@ namespace EUROPA {
 
         /*		
 		const std::vector<ConstrainedVariableId>& vars = instance->getVariables();
-		std::cout << "    Vars for " << m_className.toString() << " " << instance->getName().toString() << " are:";
+		debugMsg("XMLInterpreter","    Vars for " << m_className.toString() << " " << instance->getName().toString() << " are:";
 		for (unsigned j=0; j < vars.size(); j++) {
-			std::cout << vars[j]->getName().toString() << ",";
+			debugMsg("XMLInterpreter",vars[j]->getName().toString() << ",";
 		}
-		std::cout << std::endl;
+		debugMsg("XMLInterpreter",std::endl;
 	    */
 			
 	    // Initialize any variables that were not explicitly initialized
@@ -850,7 +977,7 @@ namespace EUROPA {
 	                members[i].second.c_str()
 	            );
 	            delete baseDomain;
-	            std::cout << "Used default initializer for " << m_className.toString() << "." << members[i].second.toString() << std::endl; 
+	            debugMsg("XMLInterpreter","Used default initializer for " << m_className.toString() << "." << members[i].second.toString()); 
 	        } 
 	    }
 	}	
@@ -1017,6 +1144,7 @@ namespace EUROPA {
     	// TODO: initialize parameters that have exprs 
     	// TODO: add any constraints included in the declaration
     	
+        //debugMsg("XMLInterpreter","Token " << getName().toString() << " has " << parameterNames.size() << " parameters"); 
 	    for (unsigned int i=0; i < parameterNames.size(); i++) {
 	        if (getVariable(parameterNames[i]) == ConstrainedVariableId::noId()) {
 	    	    AbstractDomain* d = TypeFactory::baseDomain(parameterTypes[i].c_str()).copy();
@@ -1027,7 +1155,10 @@ namespace EUROPA {
 	                parameterNames[i]
 	            );
 	            // TODO: will d be leaked?
-	            //std::cout << "Used default initializer for " << m_className.toString() << "." << members[i].second.toString() << std::endl; 
+	            /*
+	            debugMsg("XMLInterpreter","Token " << getName().toString() << " added Parameter " 
+	                                               << parameterTypes[i].toString() << " " << parameterNames[i].toString());
+	            */                                    
 	        } 
 	    }
     	
@@ -1050,17 +1181,15 @@ namespace EUROPA {
 	
 	TokenId InterpretedTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable) const 
 	{ 
-		// TODO: add token parameters and constraints
 	    TokenId token = (new InterpretedToken(planDb, name, m_parameterNames, m_parameterTypes, rejectable, true))->getId(); 
 	    return token; 
 	} 
 	
 	TokenId InterpretedTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const 
 	{ 
-		// TODO: add token parameters and constraints
 	    TokenId token = (new InterpretedToken(master, name, relation, m_parameterNames, m_parameterTypes , true))->getId(); 
 	    return token; 
-	 } 
+    } 
 	
 	
     /*
@@ -1081,8 +1210,10 @@ namespace EUROPA {
   	 {
   	 	ConstrainedVariableId var = m_ruleInstance->getVariable(LabelStr(name));
   	 	
-  	 	if (var != ConstrainedVariableId::noId())
+  	 	if (!var.isNoId()) {
+  	 		//debugMsg("XMLInterpreter","Found var in rule instance:" << name);
   	 	    return var;
+  	 	}  	 	    
   	 	else
   	 	    return EvalContext::getVar(name);
   	 }  	    
@@ -1108,12 +1239,12 @@ namespace EUROPA {
         // TODO: need to pass in eval context from outside
 	    RuleInstanceEvalContext evalContext(NULL,getId());
 	    
-    	std::cout << "Executing interpreted rule:" << getRule()->getName().toString() << std::endl;
+    	debugMsg("XMLInterpreter","Executing interpreted rule:" << getRule()->getName().toString());
 		for (unsigned int i=0; i < m_body.size(); i++) {
 			m_body[i]->setRuleInstance(this);
 			m_body[i]->eval(evalContext);
 		}		
-    	std::cout << "Executed interpreted rule:" << getRule()->getName().toString() << std::endl;
+    	debugMsg("XMLInterpreter","Executed  interpreted rule:" << getRule()->getName().toString());
     }
     
     void InterpretedRuleInstance::createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars)
@@ -1138,7 +1269,7 @@ namespace EUROPA {
     	return false;
     }
     
-    void InterpretedRuleInstance::createSubgoal(
+    TokenId InterpretedRuleInstance::createSubgoal(
                                         const LabelStr& name,
                                         const LabelStr& predicateType, 
                                         const LabelStr& predicateInstance, 
@@ -1158,13 +1289,18 @@ namespace EUROPA {
                 vars.push_back(NDDL::var(getId(),"object"));
   			}
   			else {  // equivalent of constrainObject() in NddlRules.hh
-  				LabelStr prefix(predicateInstance.getElement(0,"."));
-  				std::string suffix = predicateInstance.toString().substr(prefix.toString().size());
-                vars.push_back(varFromObject(prefix.toString(),suffix));
+  				// TODO: this can be done more efficiently
+  				int cnt = predicateInstance.countElements(".");
+  				std::string prefix(predicateInstance.getElement(0,".").toString());
+  				std::string tokenName(predicateInstance.getElement(cnt-1,".").toString());
+  				std::string asString = predicateInstance.toString();
+  				std::string suffix = asString.substr(prefix.size()+1,asString.size()-(prefix.size()+tokenName.size()+2));
+  				//debugMsg("XMLInterpreter","Subgoal slave object constraint. prefix=" << prefix << " suffix=" << suffix << " tokenName=" << tokenName);
+                vars.push_back(varFromObject(prefix,suffix));
   			}
   			
             vars.push_back(slave->getObject());
-            addConstraint(LabelStr("eq"),vars);  			
+            addConstraint(LabelStr("eq"),vars);             
   		} 
   		
   		const char* relationName = relation.c_str();
@@ -1223,7 +1359,33 @@ namespace EUROPA {
   		else if (strcmp(relationName,"equals") == 0) {
   			equals("this",name);
   		}   	  		   
+  		
+  		return slave; 			
     }
+    
+    ConstrainedVariableId InterpretedRuleInstance::addLocalVariable( 
+                       const AbstractDomain& baseDomain,
+				       bool canBeSpecified,
+				       const LabelStr& name)                   
+	{
+        ConstrainedVariableId localVariable = TypeFactory::createVariable(
+            baseDomain.getTypeName().c_str(),
+            m_planDb->getConstraintEngine(),
+		    baseDomain,
+		    canBeSpecified,
+		    name.c_str(),
+		    m_id,
+		    m_variables.size()
+	    )->getId();
+		  
+        // Only allowed add a variable for an executed rule instance
+        check_error(isExecuted());
+
+        m_variables.push_back(localVariable);
+        addVariable(localVariable, name);
+        return localVariable;
+    }
+    
     
 
     /*
@@ -1254,66 +1416,24 @@ namespace EUROPA {
 }
 
 /*
- * Here is what can be used as a main to run an interpreted version of NDDL-XML through PSEngine or DSA
+ * Here is what can be used as a main to run an interpreted version of NDDL-XML through PSEngine
  * It's also possible to run NDDL (what is support it of it so far) fully interpreted
  * through the java version of PSEngine, see NDDLHelloWorld example in PlanWorks/PSUI  
 
 #include "Nddl.hh" 
 #include "SolverAssembly.hh" 
-#include "../PLASMA/DSA/base/DSA.hh"
 #include "PSEngine.hh" 
+#include "Debug.hh"
 
 using namespace EUROPA;
 
- 
-void printFlaws(int it, PSList<std::string>& flaws)
+bool runPSEngineTest(const char* plannerConfig, const char* txSource);
+void printFlaws(int it, PSList<std::string>& flaws);
+
+int main(int argc, const char ** argv)
 {
-	std::cout << "Iteration:" << it << " " << flaws.size() << " flaws" << std::endl;
-	
-	for (int i=0; i<flaws.size(); i++) {
-		std::cout << "    " << (i+1) << " - " << flaws.get(i) << std::endl;
-	}
-}
-
-bool runPSEngineTest(const char* plannerConfig, const char* txSource)
-{
-	PSEngine engine;
-	
-	engine.start();
-	engine.executeTxns(txSource,true,true);
-	
-	PSSolver* solver = engine.createSolver(plannerConfig);
-	solver->configure(0,100);
-	
-	for (int i = 0; i<50; i++) {
-		solver->step();
-		PSList<std::string> flaws = solver->getFlaws();
-		if (flaws.size() == 0)
-		    break;
-		printFlaws(i,flaws);
-	}
-	
-	delete solver;	
-	engine.shutdown();
-
-	return false;
-}
-
- 
-bool runDSATest(const char* plannerConfig, const char* txSource)
-{
-    DSA::DSA& dsa = DSA::DSA::instance();
-    dsa.addPlan(txSource,true);
-    dsa.solverConfigure(plannerConfig,0,100);
-    dsa.solverSolve(500,500);
-    dsa.writePlan(std::cout);
-    
-	return false;
-}
-
-int main(int argc, const char ** argv){
   if (argc != 3) {
-    std::cerr << "Must provide initial transactions file." << std::endl;
+    std::cerr << "Must provide initial transactions file and planner config file ." << std::endl;
     return -1;
   }
 
@@ -1321,11 +1441,50 @@ int main(int argc, const char ** argv){
   const char* plannerConfig = argv[2];
   
   if (!runPSEngineTest(plannerConfig,txSource)) 
-      return 0;
-
-  if (!runDSATest(plannerConfig,txSource))
-      return 0;
+      return -1;
+      
+  return 0;
 }
+ 
+bool runPSEngineTest(const char* plannerConfig, const char* txSource)
+{
+    try {
+	  PSEngine engine;
+	
+	  engine.start();
+	  engine.executeTxns(txSource,true,true);
+	
+	  PSSolver* solver = engine.createSolver(plannerConfig);
+	  solver->configure(0,100);
+	
+	  for (int i = 0; i<50; i++) {
+		solver->step();
+		PSList<std::string> flaws = solver->getFlaws();
+		if (flaws.size() == 0)
+		    break;
+		printFlaws(i,flaws);
+	  }
+	
+	  delete solver;	
+	  engine.shutdown();
+
+	  return true;
+	}
+	catch (Error& e) {
+		std::cerr << "PSEngine failed:" << e.getMsg() << std::endl;
+		return false;
+	}	
+}
+
+void printFlaws(int it, PSList<std::string>& flaws)
+{
+	debugMsg("XMLInterpreter","Iteration:" << it << " " << flaws.size() << " flaws");
+	
+	for (int i=0; i<flaws.size(); i++) {
+		debugMsg("XMLInterpreter","    " << (i+1) << " - " << flaws.get(i));
+	}
+}
+
 */
   
 

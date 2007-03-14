@@ -67,9 +67,15 @@ namespace EUROPA {
   	    virtual void addVar(const char* name,const ConstrainedVariableId& v); 
   	    virtual ConstrainedVariableId getVar(const char* name);
   	
+  	    virtual void addToken(const char* name,const TokenId& t); 
+  	    virtual TokenId getToken(const char* name);
+
+        virtual std::string EvalContext::toString() const;
+  	    
   	protected:
   	    EvalContext* m_parent;      	    
   	    std::map<std::string,ConstrainedVariableId> m_variables;
+  	    std::map<std::string,TokenId> m_tokens;
   };
   
   class Expr
@@ -289,11 +295,18 @@ namespace EUROPA {
   	    
         void createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars);
 
-        void createSubgoal(
+        TokenId createSubgoal(
                    const LabelStr& name,
                    const LabelStr& predicateType, 
                    const LabelStr& predicateInstance, 
                    const LabelStr& relation);
+                   
+        // TODO: this should eventually replace addVariable in RuleInstance    
+        // it's a dynamic version that doesn't require knowing the actual baseDomain of the variable at compile time               
+        ConstrainedVariableId addLocalVariable( 
+                       const AbstractDomain& baseDomain,
+				       bool canBeSpecified,
+				       const LabelStr& name);                   
 
     protected:
         std::vector<RuleExpr*> m_body;                                          
@@ -373,7 +386,31 @@ namespace EUROPA {
   	    LabelStr m_predicateType;
   	    LabelStr m_predicateInstance;
   	    LabelStr m_relation;
-  };  
+  };
+  
+  class ExprLocalVar : public RuleExpr
+  {
+  	public:
+  	    ExprLocalVar(const LabelStr& name,
+  	                 const LabelStr& type);
+  	    virtual ~ExprLocalVar();
+
+  	    virtual DataRef eval(EvalContext& context) const;  
+  	    
+  	protected:
+  	    LabelStr m_name;
+  	    LabelStr m_type;
+  	    const AbstractDomain* m_baseDomain;
+  };      
+  
+  class ExprIf : public RuleExpr
+  {
+  	public:
+  	    ExprIf();
+  	    virtual ~ExprIf();
+
+  	    virtual DataRef eval(EvalContext& context) const;  
+  };        
 }
 
 
