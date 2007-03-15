@@ -6,10 +6,14 @@
  */
 
 #include "TransactionInterpreter.hh"
+
 #include "tinyxml.h"
 #include "Debug.hh"
 #include "Error.hh"
+
+#include "ConstraintLibrary.hh"
 #include "DbClient.hh"
+#include "EnumeratedDomain.hh"
 #include "EnumeratedTypeFactory.hh"
 #include "Object.hh" 
 #include "ObjectFactory.hh"
@@ -125,7 +129,7 @@ namespace EUROPA {
     const char* parentClassName = element.Attribute("extends");
     parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
 
-    // TODO: should do nothing here for native classes, need to make PLasma.nddl consistent with this
+    // TODO: should do nothing here for native classes, need to make Plasma.nddl consistent with this
     Id<Schema> schema = Schema::instance();
     schema->addObjectType(className,parentClassName);
     
@@ -180,7 +184,9 @@ namespace EUROPA {
   {  	
     check_runtime_error(element != NULL,"Unexpected NULL element, expected value or id element");
     
-    if (strcmp(element->Value(),"value") == 0) {
+    if (strcmp(element->Value(),"value") == 0 ||
+        strcmp(element->Value(),"symbol") == 0 ||
+        strcmp(element->Value(),"interval") == 0) {
      	return new ExprConstant(m_client,element->Attribute("type"),xmlAsAbstractDomain(*element));
     }
     else if (strcmp(element->Value(),"id") == 0) {
@@ -269,6 +275,8 @@ namespace EUROPA {
 
       	  	constructorBody.push_back(new ExprConstructorAssignment(lhs,rhs));
       	  }
+          else
+            check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + child->Value());
       }	
       dbgout << ident << "constructor (" << signature.str() << ")" << std::endl; 
 
@@ -298,6 +306,7 @@ namespace EUROPA {
       std::vector<LabelStr> parameterTypes;
       std::vector<LabelStr> assignVars;
       std::vector<Expr*> assignValues;
+      std::vector<ExprConstraint*> constraints;
       
       dbgout << ident << "predicate " <<  predName << "(";
       for(const TiXmlElement* predArg = element->FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
@@ -321,8 +330,11 @@ namespace EUROPA {
       	}
       	else if (strcmp(predArg->Value(),"invoke") == 0) {
       		dbgout << "constraint " << predArg->Attribute("name");
-      		// TODO: deal with this
-      		std::cerr << "Constraint in predicate declaration for predicate " << predName << " not supported yet" << std::endl;
+      		std::vector<Expr*> constraintArgs;
+            for(const TiXmlElement* arg = predArg->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) 
+            	constraintArgs.push_back(valueToExpr(arg));
+            	
+      		constraints.push_back(new ExprConstraint(predArg->Attribute("name"),constraintArgs));
       	}             
       }	
       dbgout << ")" << std::endl;
@@ -332,13 +344,13 @@ namespace EUROPA {
 	      debugMsg("XMLInterpreter","Skipping factory registration for System token : " << predName);     
       }       
       // The TokenFactory's constructor automatically registers the factory
-      // TODO: pass along constraints
       new InterpretedTokenFactory(
           predName,
           parameterNames,
           parameterTypes,
           assignVars,
-          assignValues
+          assignValues,
+          constraints
       );
   }
     
@@ -450,9 +462,9 @@ namespace EUROPA {
             		name = arg->Attribute("name");
             	}            		
              	else 
-      	            check_error(ALWAYS_FAILS,std::string("Unknown subgoal element:") + arg->Value());
+      	            check_runtime_error(ALWAYS_FAILS,std::string("Unknown subgoal element:") + arg->Value());
             }
-            check_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
+            check_runtime_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
 
             const char* predicateType = predicateInstanceToType(className, predicateInstance).c_str();    
             if (name == NULL) {
@@ -491,17 +503,26 @@ namespace EUROPA {
       Id<Schema> schema = Schema::instance();
       schema->addEnum(enumName);
       
+      std::list<double> values;
       const TiXmlElement* enumValue;
       for(enumValue = setElement->FirstChildElement(); enumValue; enumValue = enumValue->NextSiblingElement() ) {
       	if (strcmp(enumValue->Value(),"symbol") == 0) {
       		LabelStr symbolValue(enumValue->Attribute("value"));
             schema->addValue(enumName, symbolValue);
+            values.push_back(symbolValue);
       	}
       	else {
       	    // TODO: deal with other types
       	    check_error(ALWAYS_FAILS,std::string("Don't know how to deal with enum values of type ") + enumValue->Value());
       	}
       }	      
+      
+      new EnumeratedTypeFactory(
+        enumName,
+        enumName,
+        EnumeratedDomain(values,false,enumName)
+    );             
+      
   }
 
   void InterpretedDbClientTransactionPlayer::playDefineType(const TiXmlElement &)
@@ -1029,6 +1050,7 @@ namespace EUROPA {
                      const std::vector<LabelStr>& parameterTypes, 
                      const std::vector<LabelStr>& assignVars,
                      const std::vector<Expr*>& assignValues,
+                     const std::vector<ExprConstraint*>& constraints,
                      const bool& rejectable, 
                      const bool& close) 
                      
@@ -1041,7 +1063,7 @@ namespace EUROPA {
                         Token::noObject(),                    // Object Name
                         false) 
     {
-    	commonInit(parameterNames, parameterTypes, assignVars, assignValues, close);
+    	commonInit(parameterNames, parameterTypes, assignVars, assignValues, constraints, close);
     }
   	                     
     InterpretedToken::InterpretedToken(const TokenId& master, 
@@ -1051,6 +1073,7 @@ namespace EUROPA {
                      const std::vector<LabelStr>& parameterTypes, 
                      const std::vector<LabelStr>& assignVars,
                      const std::vector<Expr*>& assignValues,
+                     const std::vector<ExprConstraint*>& constraints,
                      const bool& close)
         : IntervalToken(master, 
                         relation,
@@ -1061,7 +1084,7 @@ namespace EUROPA {
                         Token::noObject(),                   // Object Name
                         false) 
     {
-    	commonInit(parameterNames, parameterTypes, assignVars, assignValues, close);
+    	commonInit(parameterNames, parameterTypes, assignVars, assignValues, constraints, close);
     }
         
     InterpretedToken::~InterpretedToken()
@@ -1178,16 +1201,24 @@ namespace EUROPA {
           AbstractDomain& m_wrappedDomain;               
     };
   
+// slight modification of the version in NddlRules.hh  
+#define token_constraint1(name, vars)\
+{\
+  ConstraintId c0 = ConstraintLibrary::createConstraint(\
+                            name,\
+							m_planDatabase->getConstraintEngine(),\
+							vars);\
+  m_standardConstraints.insert(c0);\
+}
+  
     void InterpretedToken::commonInit(
                      const std::vector<LabelStr>& parameterNames,
                      const std::vector<LabelStr>& parameterTypes, 
                      const std::vector<LabelStr>& assignVars,
                      const std::vector<Expr*>& assignValues,
+                     const std::vector<ExprConstraint*>& constraints,
                      const bool& autoClose)
     {
-    	// TODO: initialize parameters that have exprs 
-    	// TODO: add any constraints included in the declaration
-    	
         //debugMsg("XMLInterpreter","Token " << getName().toString() << " has " << parameterNames.size() << " parameters"); 
 	    for (unsigned int i=0; i < parameterNames.size(); i++) {
 	        if (getVariable(parameterNames[i]) == ConstrainedVariableId::noId()) {
@@ -1210,9 +1241,22 @@ namespace EUROPA {
             close();    	
 	    
 	    // Take care of initializations that were part of the predicate declaration
-	    EvalContext context(NULL); // TODO: provide token context if we want to allow anything other than constants
-	    for (unsigned int i=0; i < assignVars.size(); i++)
-	        getVariable(assignVars[i])->restrictBaseDomain(assignValues[i]->eval(context).getValue()->baseDomain());     	
+	    for (unsigned int i=0; i < assignVars.size(); i++) {
+    	    EvalContext context(NULL); // TODO: provide token context if we want to allow anything other than constants
+	        getVariable(assignVars[i])->restrictBaseDomain(assignValues[i]->eval(context).getValue()->baseDomain());
+	    }     	
+
+        // Post parameter constraints
+	    for (unsigned int i=0; i < constraints.size(); i++) {
+	    	const std::vector<Expr*>& args = constraints[i]->getArgs();
+	  		std::vector<ConstrainedVariableId> constraintArgs;
+	  		for (unsigned int j=0; j < args.size(); j++) {
+        	    EvalContext context(NULL); // TODO: provide token context if we want to allow anything other than constants
+				DataRef arg = args[j]->eval(context);
+				constraintArgs.push_back(arg.getValue());
+	  		}
+    	    token_constraint1(constraints[i]->getName(),constraintArgs);
+	    }    	
     }
       
     /*
@@ -1223,12 +1267,14 @@ namespace EUROPA {
                                        const std::vector<LabelStr>& parameterNames,
                                        const std::vector<LabelStr>& parameterTypes, 
                                        const std::vector<LabelStr>& assignVars,
-                                       const std::vector<Expr*>& assignValues)
+                                       const std::vector<Expr*>& assignValues,
+                                       const std::vector<ExprConstraint*>& constraints)
 	    : ConcreteTokenFactory(predicateName) 
 	    , m_parameterNames(parameterNames)
 	    , m_parameterTypes(parameterTypes)
 	    , m_assignVars(assignVars)
 	    , m_assignValues(assignValues)
+	    , m_constraints(constraints)
 	{ 
 	} 
 	
@@ -1240,7 +1286,8 @@ namespace EUROPA {
 	        m_parameterNames, 
 	        m_parameterTypes,
 	        m_assignVars,
-	        m_assignValues, 
+	        m_assignValues,
+	        m_constraints, 
 	        rejectable, 
 	        true))->getId(); 
 	    return token; 
@@ -1255,7 +1302,8 @@ namespace EUROPA {
 	        m_parameterNames, 
 	        m_parameterTypes, 
 	        m_assignVars,
-	        m_assignValues, 
+	        m_assignValues,
+	        m_constraints, 
 	        true))->getId(); 
 	    return token; 
     } 

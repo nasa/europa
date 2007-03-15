@@ -209,6 +209,8 @@ namespace EUROPA {
         bool                      m_canMakeNewObject;	 
   };  
   
+  class ExprConstraint;
+  
   // InterpretedToken is the interpreted version of NddlToken
   class InterpretedToken : public IntervalToken
   {
@@ -220,6 +222,7 @@ namespace EUROPA {
                          const std::vector<LabelStr>& parameterTypes,
 	                     const std::vector<LabelStr>& assignVars,
                          const std::vector<Expr*>& assignValues,
+                         const std::vector<ExprConstraint*>& constraints,
                          const bool& rejectable = false, 
   	                     const bool& close = false); 
   	                     
@@ -230,6 +233,7 @@ namespace EUROPA {
                          const std::vector<LabelStr>& parameterTypes,
 	                     const std::vector<LabelStr>& assignVars,
                          const std::vector<Expr*>& assignValues,
+                         const std::vector<ExprConstraint*>& constraints,
                          const bool& close = false); 
                          
         
@@ -240,6 +244,7 @@ namespace EUROPA {
                                           const std::vector<LabelStr>& parameterTypes,
                                           const std::vector<LabelStr>& assignVars,
                                           const std::vector<Expr*>& assignValues,
+                                          const std::vector<ExprConstraint*>& constraints,
                                           const bool& autoClose);      	                                          
   };
   
@@ -250,13 +255,15 @@ namespace EUROPA {
 	                          const std::vector<LabelStr>& parameterNames,
                               const std::vector<LabelStr>& parameterTypes,
 	                          const std::vector<LabelStr>& assignVars,
-                              const std::vector<Expr*>& assignValues);
+                              const std::vector<Expr*>& assignValues,
+                              const std::vector<ExprConstraint*>& constraints);
 	  
 	protected:
 	  std::vector<LabelStr> m_parameterNames;    
 	  std::vector<LabelStr> m_parameterTypes;    
 	  std::vector<LabelStr> m_assignVars;    
 	  std::vector<Expr*> m_assignValues;    
+	  std::vector<ExprConstraint*> m_constraints;
 
 	private: 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const;
@@ -345,6 +352,9 @@ namespace EUROPA {
   	    virtual ~ExprConstraint();
 
   	    virtual DataRef eval(EvalContext& context) const;  
+  	    
+  	    const LabelStr getName() const { return m_name; }
+  	    const std::vector<Expr*>& getArgs() const { return m_args; }
   	    
   	protected:
   	    LabelStr m_name;
