@@ -1206,13 +1206,13 @@ namespace EUROPA {
 	        } 
 	    }
 	    
+        if (autoClose)
+            close();    	
+	    
 	    // Take care of initializations that were part of the predicate declaration
 	    EvalContext context(NULL); // TODO: provide token context if we want to allow anything other than constants
 	    for (unsigned int i=0; i < assignVars.size(); i++)
-	        getVariable(assignVars[i])->restrictBaseDomain(assignValues[i]->eval(context).getValue()->baseDomain()); 
-    	
-        if (autoClose)
-            close();    	
+	        getVariable(assignVars[i])->restrictBaseDomain(assignValues[i]->eval(context).getValue()->baseDomain());     	
     }
       
     /*
