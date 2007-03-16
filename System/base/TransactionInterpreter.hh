@@ -20,6 +20,7 @@
 namespace EUROPA {
 
   class Expr;
+  class RuleExpr;
   
   class InterpretedDbClientTransactionPlayer : public DbClientTransactionPlayer {
     public:
@@ -33,6 +34,7 @@ namespace EUROPA {
       virtual void playDefineEnumeration(const TiXmlElement &);
       virtual void playDefineType(const TiXmlElement &);
       
+      void buildRuleBody(const char* className, const TiXmlElement* element, std::vector<RuleExpr*>& ruleBody);
       void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       int  defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
@@ -248,6 +250,18 @@ namespace EUROPA {
                                           const bool& autoClose);      	                                          
   };
   
+  class TokenEvalContext : public EvalContext
+  {
+  	public:
+  	    TokenEvalContext(EvalContext* parent, const TokenId& ruleInstance);
+  	    virtual ~TokenEvalContext();   	
+  	    
+  	    virtual ConstrainedVariableId getVar(const char* name);  
+  	    
+  	protected:
+  	    TokenId m_token;	    
+  };
+  
   class InterpretedTokenFactory: public ConcreteTokenFactory 
   { 
     public: 
@@ -279,6 +293,13 @@ namespace EUROPA {
   	                            const TokenId& token, 
   	                            const PlanDatabaseId& planDb,
                                 const std::vector<RuleExpr*>& body);
+
+        InterpretedRuleInstance(const RuleInstanceId& parent, 
+                                const ConstrainedVariableId& var, 
+                                const AbstractDomain& domain, 
+                                const bool positive,
+                                const std::vector<RuleExpr*>& body);
+                                
   	    virtual ~InterpretedRuleInstance();
   	    
         void createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars);
@@ -303,6 +324,8 @@ namespace EUROPA {
          * @brief provide implementation for this method for firing the rule
          */
         virtual void handleExecute();
+        
+        friend class ExprIf;
   };
   
   class RuleInstanceEvalContext : public EvalContext
@@ -325,7 +348,7 @@ namespace EUROPA {
         
         virtual RuleInstanceId createInstance(const TokenId& token, 
                                               const PlanDatabaseId& planDb, 
-                                              const RulesEngineId &rulesEngine) const;
+                                              const RulesEngineId &rulesEngine) const;                                                                                           
                                               
     protected:
         std::vector<RuleExpr*> m_body;                                                                                            
@@ -397,10 +420,16 @@ namespace EUROPA {
   class ExprIf : public RuleExpr
   {
   	public:
-  	    ExprIf();
+  	    ExprIf(const char* op, Expr* lhs,Expr* rhs,const std::vector<RuleExpr*>& ifBody);
   	    virtual ~ExprIf();
 
-  	    virtual DataRef eval(EvalContext& context) const;  
+  	    virtual DataRef eval(EvalContext& context) const;
+  	     
+    protected:
+        const std::string m_op;
+        Expr* m_lhs;
+        Expr* m_rhs;
+        const std::vector<RuleExpr*> m_ifBody;     
   };        
   
   
