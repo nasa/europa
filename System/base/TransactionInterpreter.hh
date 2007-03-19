@@ -40,7 +40,7 @@ namespace EUROPA {
       void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       
-      Expr* valueToExpr(const TiXmlElement* element);
+      Expr* valueToExpr(const TiXmlElement* element,bool isRule=true);
       
       // TODO: move these to schema
       std::set<std::string> m_systemClasses;      
@@ -74,7 +74,7 @@ namespace EUROPA {
   	    virtual void addToken(const char* name,const TokenId& t); 
   	    virtual TokenId getToken(const char* name);
 
-        virtual std::string EvalContext::toString() const;
+        virtual std::string toString() const;
   	    
   	protected:
   	    EvalContext* m_parent;      	    
@@ -326,18 +326,23 @@ namespace EUROPA {
         virtual void handleExecute();
         
         friend class ExprIf;
+        friend class ExprRuleVariableRef;
   };
-  
+
+  typedef Id<InterpretedRuleInstance> InterpretedRuleInstanceId;  
   class RuleInstanceEvalContext : public EvalContext
   {
   	public:
-  	    RuleInstanceEvalContext(EvalContext* parent, const RuleInstanceId& ruleInstance);
+  	    RuleInstanceEvalContext(EvalContext* parent, const InterpretedRuleInstanceId& ruleInstance);
   	    virtual ~RuleInstanceEvalContext();   	
   	    
   	    virtual ConstrainedVariableId getVar(const char* name);  
+  	    virtual InterpretedRuleInstanceId& getRuleInstance() { return m_ruleInstance; }
+  	     
+        virtual std::string toString() const;
   	    
   	protected:
-  	    RuleInstanceId m_ruleInstance;	    
+  	    InterpretedRuleInstanceId m_ruleInstance;	    
   };
   
   class InterpretedRuleFactory : public Rule
@@ -358,14 +363,30 @@ namespace EUROPA {
    * Expr that appears in the body of an interpreted rule instance
    * 
    */
+   
   class RuleExpr  : public Expr
   {
+  	public:
+  	    virtual DataRef eval(EvalContext& context) const
+  	    {
+  	    	RuleInstanceEvalContext* ec = (RuleInstanceEvalContext*)&context;
+  	    	return doEval(*ec);
+  	    }    	
+  	    
+  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const = 0;  	    
+  };
+  
+  class ExprRuleVariableRef : public RuleExpr
+  {
+  	public:
+  	    ExprRuleVariableRef(const char* name);
+  	    virtual ~ExprRuleVariableRef();
+
+  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;  	    
+  	    
   	protected:
-  	    friend class InterpretedRuleInstance;
-  	    
-  	    InterpretedRuleInstance* m_ruleInstance;
-  	    
-  	    void setRuleInstance(InterpretedRuleInstance* ri) { m_ruleInstance = ri; }  	    
+  	    std::string m_parentName;
+  	    std::string m_varName;    	    
   };
   
   class ExprConstraint : public RuleExpr
@@ -374,7 +395,7 @@ namespace EUROPA {
   	    ExprConstraint(const char* name,const std::vector<Expr*> args);
   	    virtual ~ExprConstraint();
 
-  	    virtual DataRef eval(EvalContext& context) const;  
+  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;  	    
   	    
   	    const LabelStr getName() const { return m_name; }
   	    const std::vector<Expr*>& getArgs() const { return m_args; }
@@ -393,7 +414,7 @@ namespace EUROPA {
   	                const char* relation);
   	    virtual ~ExprSubgoal();
 
-  	    virtual DataRef eval(EvalContext& context) const;  
+  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;  	    
   	    
   	protected:
   	    LabelStr m_name;
@@ -409,7 +430,7 @@ namespace EUROPA {
   	                 const LabelStr& type);
   	    virtual ~ExprLocalVar();
 
-  	    virtual DataRef eval(EvalContext& context) const;  
+  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;  	    
   	    
   	protected:
   	    LabelStr m_name;
@@ -423,7 +444,7 @@ namespace EUROPA {
   	    ExprIf(const char* op, Expr* lhs,Expr* rhs,const std::vector<RuleExpr*>& ifBody);
   	    virtual ~ExprIf();
 
-  	    virtual DataRef eval(EvalContext& context) const;
+  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;  	    
   	     
     protected:
         const std::string m_op;

@@ -180,7 +180,7 @@ namespace EUROPA {
     debugMsg("XMLInterpreter",dbgout.str());     
   }
 
-  Expr* InterpretedDbClientTransactionPlayer::valueToExpr(const TiXmlElement* element)
+  Expr* InterpretedDbClientTransactionPlayer::valueToExpr(const TiXmlElement* element, bool isRule)
   {  	
     check_runtime_error(element != NULL,"Unexpected NULL element, expected value or id element");
     
@@ -191,10 +191,13 @@ namespace EUROPA {
     }
     else if (strcmp(element->Value(),"id") == 0) {
       	const char* varName = element->Attribute("name");
-      	return new ExprVariableRef(varName);
+      	if (isRule)
+      	    return new ExprRuleVariableRef(varName);
+      	else
+      	    return new ExprVariableRef(varName);
     }
     else
-        check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + element->Value() + ", expected value or id element");
+        check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + element->Value() + ", expected constant(value,symbol,interval) or id element");
         
     return NULL;        
   }
@@ -228,7 +231,7 @@ namespace EUROPA {
       	  else if (strcmp(child->Value(),"super") == 0) {
       	  	std::vector<Expr*> argExprs;     	  	
             for(const TiXmlElement* argChild = child->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() ) 
-            	argExprs.push_back(valueToExpr(argChild));
+            	argExprs.push_back(valueToExpr(argChild,false));
 
       	  	superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),argExprs);
       	  }
@@ -769,6 +772,7 @@ namespace EUROPA {
      	for (;idx<vars.size();idx++) {
      		// TODO: should probably make sure it's an object var first
      		//debugMsg("XMLInterpreter","vars.size() is:" << vars.size() << " idx is:" << idx);
+     		check_runtime_error(rhs->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+vars[idx]);
      		ObjectId object = rhs->derivedDomain().getSingletonValue();
      		rhs = object->getVariable(object->getName().toString()+"."+vars[idx]);
      		varName += "." + vars[idx];
@@ -828,6 +832,55 @@ namespace EUROPA {
   	}
   	
   	
+    /*
+     * ExprRuleVariableRef
+     */   
+    ExprRuleVariableRef::ExprRuleVariableRef(const char* varName)
+        : m_varName(varName)
+    {
+  		std::vector<std::string> vars;    	
+  		tokenize(m_varName,vars,".");
+  		
+  		if (vars.size() > 1) {
+  		    m_parentName = vars[0];
+  		    m_varName = m_varName.substr(m_parentName.length()+1);
+  		    debugMsg("XMLInterpreter","Split " << varName << " into " << m_parentName << " and " << m_varName);
+  		}
+  		else {
+  			m_parentName = "";
+  		    debugMsg("XMLInterpreter","Didn't split " << varName);
+  		} 
+    }
+  	
+  	ExprRuleVariableRef::~ExprRuleVariableRef()
+  	{
+  	}
+
+    DataRef ExprRuleVariableRef::doEval(RuleInstanceEvalContext& context) const 	    
+  	{
+
+     	ConstrainedVariableId var; 
+     	
+     	if (m_parentName == "") {
+     	    var = context.getVar(m_varName.c_str());     	    
+            check_runtime_error(!var.isNoId(),std::string("Couldn't find variable ")+m_varName+" in Evaluation Context");
+     	}  
+     	else {
+     		var = context.getVar(m_parentName.c_str());
+     		if (!var.isNoId()) {
+     			var = context.getRuleInstance()->varFromObject(m_parentName,m_varName,false);
+     		}
+     		else  {
+    		    TokenId tok = context.getToken(m_parentName.c_str());
+   		        if (tok.isNoId())  
+   	                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_parentName+" in Evaluation Context");
+   	            var = context.getRuleInstance()->varfromtok(tok,m_varName);         			
+     		}
+     	}   	    
+     	
+     	return DataRef(var);
+  	}  
+  	
   	ExprConstraint::ExprConstraint(const char* name,const std::vector<Expr*> args)
   	    : m_name(name)
   	    , m_args(args)
@@ -838,7 +891,7 @@ namespace EUROPA {
   	{
   	}
 
-  	DataRef ExprConstraint::eval(EvalContext& context) const
+  	DataRef ExprConstraint::doEval(RuleInstanceEvalContext& context) const
   	{
   		std::vector<ConstrainedVariableId> vars;
   		for (unsigned int i=0; i < m_args.size(); i++) {
@@ -846,7 +899,7 @@ namespace EUROPA {
 			vars.push_back(arg.getValue());
   		}
 
-  		m_ruleInstance->createConstraint(m_name,vars);
+  		context.getRuleInstance()->createConstraint(m_name,vars);
   		debugMsg("XMLInterpreter","Evaluated Constraint : " << m_name.toString());
   		return DataRef::null;
   	}  
@@ -869,10 +922,10 @@ namespace EUROPA {
   	{
   	}
 
-  	DataRef ExprSubgoal::eval(EvalContext& context) const  
+  	DataRef ExprSubgoal::doEval(RuleInstanceEvalContext& context) const  
   	{
   		debugMsg("XMLInterpreter","Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString());
-  		TokenId slave = m_ruleInstance->createSubgoal(m_name,m_predicateType,m_predicateInstance,m_relation);
+  		TokenId slave = context.getRuleInstance()->createSubgoal(m_name,m_predicateType,m_predicateInstance,m_relation);
   		context.addToken(m_name.c_str(),slave);
   		debugMsg("XMLInterpreter","Created  subgoal " << m_predicateType.toString() << ":" << m_name.toString());
   		return DataRef::null;
@@ -889,9 +942,9 @@ namespace EUROPA {
   	{
   	}
 
-  	DataRef ExprLocalVar::eval(EvalContext& context) const
+  	DataRef ExprLocalVar::doEval(RuleInstanceEvalContext& context) const
   	{
-  		ConstrainedVariableId localVar = m_ruleInstance->addLocalVariable(
+  		ConstrainedVariableId localVar = context.getRuleInstance()->addLocalVariable(
   		    *m_baseDomain,
   		    false, // can't be specified
   		    m_name
@@ -913,7 +966,7 @@ namespace EUROPA {
   	{
   	}
 
-  	DataRef ExprIf::eval(EvalContext& context) const
+  	DataRef ExprIf::doEval(RuleInstanceEvalContext& context) const
   	{
   		bool isOpEquals = (m_op == "equals");
   		
@@ -921,9 +974,9 @@ namespace EUROPA {
   		DataRef rhs = m_rhs->eval(context);
   		
   		// TODO: this assumes tht the variable is always on the lhs, is this true and enforced by the parser?
-        m_ruleInstance->addChildRule(
+        context.getRuleInstance()->addChildRule(
             new InterpretedRuleInstance(
-                m_ruleInstance->getId(), 
+                context.getRuleInstance()->getId(), 
                 rhs.getValue(), 
                 lhs.getValue()->derivedDomain(), 
                 isOpEquals,
@@ -1346,7 +1399,7 @@ namespace EUROPA {
      * RuleInstanceEvalContext
      * Puts RuleInstance variables like duration, start, end, in context
      */     	     
-  	 RuleInstanceEvalContext::RuleInstanceEvalContext(EvalContext* parent, const RuleInstanceId& ruleInstance) 
+  	 RuleInstanceEvalContext::RuleInstanceEvalContext(EvalContext* parent, const InterpretedRuleInstanceId& ruleInstance) 
   	     : EvalContext(parent) 
   	     , m_ruleInstance(ruleInstance)
   	 {
@@ -1361,12 +1414,31 @@ namespace EUROPA {
   	 	ConstrainedVariableId var = m_ruleInstance->getVariable(LabelStr(name));
   	 	
   	 	if (!var.isNoId()) {
-  	 		//debugMsg("XMLInterpreter","Found var in rule instance:" << name);
+  	 		debugMsg("XMLInterpreter","Found var in rule instance:" << name);
   	 	    return var;
   	 	}  	 	    
-  	 	else
+  	 	else {
+  	 		debugMsg("XMLInterpreter","Didn't find var in rule instance:" << name);
   	 	    return EvalContext::getVar(name);
-  	 }  	    
+  	 	}
+  	 }  
+  	 
+  	 std::string RuleInstanceEvalContext::toString() const 
+  	 {
+  	 	std::ostringstream os;
+  	 	
+  	 	os << EvalContext::toString();
+  	 	
+  	 	os << "Token variables {";
+        const std::vector<ConstrainedVariableId>& vars = m_ruleInstance->getToken()->getVariables();
+        for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it){
+            ConstrainedVariableId var = *it;
+            os << var->getName().toString() << "," ;
+        }        
+        os << "}" << std::endl;
+  	 	
+  	 	return os.str();
+  	 }	    
 	 
     /*
      * RuleInstanceEvalContext
@@ -1427,12 +1499,9 @@ namespace EUROPA {
         // TODO: need to pass in eval context from outside
 	    RuleInstanceEvalContext evalContext(NULL,getId());
 	    
-	    // put "object" var in context
-	    evalContext.addVar("object",getToken()->getObject());
-	    
     	debugMsg("XMLInterpreter","Executing interpreted rule:" << getRule()->getName().toString());
 		for (unsigned int i=0; i < m_body.size(); i++) {
-			m_body[i]->setRuleInstance(this);
+//			m_body[i]->setRuleInstance(this);
 			m_body[i]->eval(evalContext);
 		}		
     	debugMsg("XMLInterpreter","Executed  interpreted rule:" << getRule()->getName().toString());
@@ -1440,7 +1509,7 @@ namespace EUROPA {
     
     void InterpretedRuleInstance::createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars)
     {
-        addConstraint(LabelStr(name),vars);    	
+        addConstraint(name,vars);    	
     }
 
   	// see ModelAccessor.isConstrained in Nddl compiler 
