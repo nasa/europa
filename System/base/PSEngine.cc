@@ -280,7 +280,7 @@ namespace EUROPA {
   double PSVariable::getUpperBound() {
     check_runtime_error(m_var.isValid());
     check_runtime_error(isInterval());
-    return m_var->lastDomain().getLowerBound();
+    return m_var->lastDomain().getUpperBound();
   }
 
   void PSVariable::specifyValue(PSVarValue& v) {
