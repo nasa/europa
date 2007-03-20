@@ -428,10 +428,9 @@ namespace EUROPA {
   }
 
   //FIXME
-  void PSEngine::start() {
-		// throw exceptions!
-		Error::doThrowExceptions();
-		Error::doNotDisplayErrors();
+  void PSEngine::start() {		
+	Error::doThrowExceptions(); // throw exceptions!
+	Error::doDisplayErrors();
     check_error(m_constraintEngine.isNoId());
     check_error(m_planDatabase.isNoId());
     check_error(m_rulesEngine.isNoId());
