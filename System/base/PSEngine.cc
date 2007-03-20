@@ -68,7 +68,7 @@ namespace EUROPA {
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
       PSVariable* var = new PSVariable(*it); 
-      check_error(var != NULL);
+      check_runtime_error(var != NULL);
       m_vars.push_back(var);
     }
   }
@@ -98,7 +98,7 @@ namespace EUROPA {
     const TokenSet& tokens = m_obj->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
       PSToken* tok = new PSToken(*it);
-      check_error(tok != NULL);
+      check_runtime_error(tok != NULL);
       retval.push_back(tok);
     }
     return retval;
@@ -154,7 +154,7 @@ namespace EUROPA {
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
       PSVariable* var = new PSVariable(*it);
-      check_error(var != NULL);
+      check_runtime_error(var != NULL);
       m_vars.push_back(var);
     }
   }
@@ -165,7 +165,7 @@ namespace EUROPA {
       return NULL;
     else
       return new PSObject(ObjectId(objVar->lastDomain().getSingletonValue()));
-    check_error(ALWAYS_FAIL);
+    check_runtime_error(ALWAYS_FAIL);
     return NULL;
   }
 
@@ -202,7 +202,7 @@ namespace EUROPA {
 
 
   PSVariable::PSVariable(const ConstrainedVariableId& var) : m_var(var) {
-    check_error(m_var.isValid());
+    check_runtime_error(m_var.isValid());
     if(m_var->baseDomain().isString())
       m_type =  STRING;
     else if(m_var->baseDomain().isSymbolic()) {
@@ -225,39 +225,39 @@ namespace EUROPA {
   }
   
   const std::string& PSVariable::getName() {
-    check_error(m_var.isValid());
+    check_runtime_error(m_var.isValid());
     return m_var->getName().toString();
   }
 
   bool PSVariable::isEnumerated() {
-    check_error(m_var.isValid());
+    check_runtime_error(m_var.isValid());
     return m_var->baseDomain().isEnumerated();
   }
 
   bool PSVariable::isInterval() {
-    check_error(m_var.isValid());
+    check_runtime_error(m_var.isValid());
     return m_var->baseDomain().isInterval();
   }
   
   PSVarType PSVariable::getType() {
-    check_error(m_var.isValid());
+    check_runtime_error(m_var.isValid());
     return m_type;
   }
 
   bool PSVariable::isSingleton() {
-    check_error(m_var.isValid());
+    check_runtime_error(m_var.isValid());
     return m_var->lastDomain().isSingleton();
   }
 
   PSVarValue PSVariable::getSingletonValue() {
-    check_error(m_var.isValid());
-    check_error(isSingleton());
+    check_runtime_error(m_var.isValid());
+    check_runtime_error(isSingleton());
     return PSVarValue(m_var->lastDomain().getSingletonValue(), getType());
   }
 
   PSList<PSVarValue> PSVariable::getValues() {
-    check_error(m_var.isValid());
-    check_error(!isSingleton() && isEnumerated());
+    check_runtime_error(m_var.isValid());
+    check_runtime_error(!isSingleton() && isEnumerated());
     PSList<PSVarValue> retval;
     std::list<double> values;
     m_var->lastDomain().getValues(values);
@@ -272,25 +272,25 @@ namespace EUROPA {
 
 
   double PSVariable::getLowerBound() {
-    check_error(m_var.isValid());
-    check_error(isInterval());
+    check_runtime_error(m_var.isValid());
+    check_runtime_error(isInterval());
     return m_var->lastDomain().getLowerBound();
   }
 
   double PSVariable::getUpperBound() {
-    check_error(m_var.isValid());
-    check_error(isInterval());
+    check_runtime_error(m_var.isValid());
+    check_runtime_error(isInterval());
     return m_var->lastDomain().getLowerBound();
   }
 
   void PSVariable::specifyValue(PSVarValue& v) {
-    check_error(m_var.isValid());
-    check_error(getType() == v.getType());
+    check_runtime_error(m_var.isValid());
+    check_runtime_error(getType() == v.getType());
     m_var->specify(v.asDouble());
   }
 
   std::string PSVariable::toString() {
-    check_error(m_var.isValid());
+    check_runtime_error(m_var.isValid());
     return m_var->toString();
   }
 
@@ -299,18 +299,18 @@ namespace EUROPA {
   PSVarType PSVarValue::getType() const {return m_type;}
   
   PSObject* PSVarValue::asObject() {
-    check_error(m_type == OBJECT);
+    check_runtime_error(m_type == OBJECT);
     return new PSObject(ObjectId(m_val));
   }
 
-  int PSVarValue::asInt() {check_error(m_type == INTEGER); return (int) m_val;}
+  int PSVarValue::asInt() {check_runtime_error(m_type == INTEGER); return (int) m_val;}
   
   double PSVarValue::asDouble() {return m_val;}
 
-  bool PSVarValue::asBoolean() {check_error(m_type == BOOLEAN); return (bool) m_val;}
+  bool PSVarValue::asBoolean() {check_runtime_error(m_type == BOOLEAN); return (bool) m_val;}
 
   const std::string& PSVarValue::asString() {
-    check_error(m_type == STRING);
+    check_runtime_error(m_type == STRING);
     return LabelStr(m_val).toString();
   }
 
@@ -410,7 +410,7 @@ namespace EUROPA {
   }
 
   void PSSolver::configure(int horizonStart, int horizonEnd) {
-    check_error(horizonStart <= horizonEnd);
+    check_runtime_error(horizonStart <= horizonEnd);
     SOLVERS::HorizonFilter::getHorizon().reset(IntervalIntDomain());
     SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
   }
@@ -431,9 +431,9 @@ namespace EUROPA {
   void PSEngine::start() {		
 	Error::doThrowExceptions(); // throw exceptions!
 	Error::doDisplayErrors();
-    check_error(m_constraintEngine.isNoId());
-    check_error(m_planDatabase.isNoId());
-    check_error(m_rulesEngine.isNoId());
+    check_runtime_error(m_constraintEngine.isNoId());
+    check_runtime_error(m_planDatabase.isNoId());
+    check_runtime_error(m_rulesEngine.isNoId());
     
     m_constraintEngine = (new ConstraintEngine())->getId();
     new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
@@ -482,8 +482,8 @@ namespace EUROPA {
   }
    
   void PSEngine::loadModel(const std::string& modelFileName) {
-    check_error(m_planDatabase.isNoId());
-    check_error(m_rulesEngine.isNoId());
+    check_runtime_error(m_planDatabase.isNoId());
+    check_runtime_error(m_rulesEngine.isNoId());
 
     void* libHandle = p_dlopen(modelFileName.c_str(), RTLD_NOW);
     checkError(libHandle != NULL,
@@ -504,7 +504,7 @@ namespace EUROPA {
     if(m_planDatabase.isNoId())
           initDatabase();
 
-    check_error(m_planDatabase.isValid());
+    check_runtime_error(m_planDatabase.isValid());
     
 
     DbClientTransactionPlayerId player;      
@@ -519,7 +519,7 @@ namespace EUROPA {
     else
       in = new std::istringstream(xmlTxnSource);
 
-    //check_error(*in);
+    //check_runtime_error(*in);
     player->play(*in);
 
     delete in;    
@@ -546,7 +546,7 @@ namespace EUROPA {
   }
 
   PSList<PSObject*> PSEngine::getObjectsByType(const std::string& objectType) {
-    check_error(m_planDatabase.isValid());
+    check_runtime_error(m_planDatabase.isValid());
 
     PSList<PSObject*> retval;
 
@@ -563,15 +563,15 @@ namespace EUROPA {
   }
 
   PSObject* PSEngine::getObjectByKey(PSEntityKey id) {
-    check_error(m_planDatabase.isValid());
+    check_runtime_error(m_planDatabase.isValid());
 
     EntityId entity = Entity::getEntity(id);
-    check_error(entity.isValid());
+    check_runtime_error(entity.isValid());
     return new PSObject(entity);
   }
 
   PSList<PSResource*> PSEngine::getResourcesByType(const std::string& objectType) {
-    check_error(m_planDatabase.isValid());
+    check_runtime_error(m_planDatabase.isValid());
     
     std::list<SAVH::ResourceId> objs;
     m_planDatabase->getObjectsByType(objectType, objs);
@@ -587,15 +587,15 @@ namespace EUROPA {
   }
   
   PSResource* PSEngine::getResourceByKey(PSEntityKey id) {
-    check_error(m_planDatabase.isValid());
+    check_runtime_error(m_planDatabase.isValid());
 
     EntityId entity = Entity::getEntity(id);
-    check_error(entity.isValid());
+    check_runtime_error(entity.isValid());
     return new PSResource(entity);
   }
 
   PSList<PSToken*> PSEngine::getTokens() {
-    check_error(m_planDatabase.isValid());
+    check_runtime_error(m_planDatabase.isValid());
 
     const TokenSet& tokens = m_planDatabase->getTokens();
     PSList<PSToken*> retval;
@@ -608,10 +608,10 @@ namespace EUROPA {
   }
 
   PSToken* PSEngine::getTokenByKey(PSEntityKey id) {
-    check_error(m_planDatabase.isValid());
+    check_runtime_error(m_planDatabase.isValid());
 
     EntityId entity = Entity::getEntity(id);
-    check_error(entity.isValid());
+    check_runtime_error(entity.isValid());
     return new PSToken(entity);
   }
 
