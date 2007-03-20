@@ -54,6 +54,14 @@ namespace EUROPA {
 
   //FIXME
   const std::string& PSEntity::getType() const {return UNKNOWN;}
+  
+  std::string PSEntity::toString()
+  {
+  	std::ostringstream os;
+  	
+  	os << "Entity(" << getKey() << "," << getName() << ")";
+  	return os.str();
+  }
 
   PSObject::PSObject(const ObjectId& obj) : PSEntity(obj), m_obj(obj) {
     const std::vector<ConstrainedVariableId>& vars = m_obj->getVariables();
@@ -177,12 +185,28 @@ namespace EUROPA {
     return retval;
   }
 
+  std::string PSToken::toString()
+  {
+  	std::ostringstream os;
+  	
+  	os << "Token(" << PSEntity::toString() << ") {" << std::endl;
+  	
+  	for (int i=0;i<m_vars.size();i++) {
+  	    os << "    " << m_vars.get(i)->toString() << std::endl;
+  	}
+  	
+  	os << "}" << std::endl;
+  	
+  	return os.str();
+  }
+
+
   PSVariable::PSVariable(const ConstrainedVariableId& var) : m_var(var) {
     check_error(m_var.isValid());
     if(m_var->baseDomain().isString())
       m_type =  STRING;
     else if(m_var->baseDomain().isSymbolic()) {
-      if(LabelStr::isString(m_var->baseDomain().getLowerBound()))
+      if(m_var->baseDomain().isEmpty() || LabelStr::isString(m_var->baseDomain().getLowerBound()))
 	m_type =  STRING;
       else
 	m_type =  OBJECT; //this may not be the best assumption ~MJI

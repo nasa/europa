@@ -115,6 +115,9 @@ namespace EUROPA {
     PSEntityKey getKey() const;
     const std::string& getName() const;
     const std::string& getType() const;
+    
+    std::string toString();
+        
   protected:
     PSEntity(); //protected constructors prevent wrapper generation
   };
@@ -190,6 +193,9 @@ namespace EUROPA {
 
     const PSList<PSVariable*>& getParameters();
     PSVariable* getParameter(const std::string& name);
+    
+    std::string toString();
+    
   protected:
     PSToken();
   };

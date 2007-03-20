@@ -12,9 +12,6 @@
 #include "DbClientTransactionPlayer.hh"
 #include "TransactionInterpreter.hh"
 
-// #define Instant int
-// #define PSEntityKey int
-
 /*
   Changes by Mike (01/03/2007):
   1) got rid of Id types.  They create a necessity for a double-wrapping.
@@ -104,11 +101,17 @@ namespace EUROPA {
   class PSEntity
   {
   public: 
+    virtual ~PSEntity() {}
+    
     PSEntityKey getKey() const;
     const std::string& getName() const;
     const std::string& getType() const;
+
+    virtual std::string toString();
+
   protected:
     PSEntity(const EntityId& entity);
+
   private:
     EntityId m_entity;
   };	
@@ -116,17 +119,19 @@ namespace EUROPA {
   class PSObject : public PSEntity
   {
   public:
+    virtual ~PSObject();
+    
     const PSList<PSVariable*>& getMemberVariables();
     PSVariable* getMemberVariable(const std::string& name);
 
-    //const PSList<PSToken*>& getTokens();
     PSList<PSToken*> getTokens();
-    ~PSObject();
+    
   protected:
     friend class PSEngine;
     friend class PSToken;
     friend class PSVarValue;
     PSObject(const ObjectId& obj);
+    
   private:
     ObjectId m_obj;
     PSList<PSVariable*> m_vars;
@@ -208,6 +213,8 @@ namespace EUROPA {
   class PSToken : public PSEntity
   {	    
   public:
+    virtual ~PSToken() {}
+
     PSObject* getOwner(); 
 	    
     // TODO: Add setStatus(int newStatus)?; ask Mike Iatauro
@@ -223,6 +230,8 @@ namespace EUROPA {
     const PSList<PSVariable*>& getParameters();
     PSVariable* getParameter(const std::string& name);
 	    
+    virtual std::string toString();
+
     /*
       static final double NO_CONFLICT=0.0;
       static final double HARD_CONFLICT=Double.MAX_VALUE;
@@ -266,7 +275,7 @@ namespace EUROPA {
 	    
     void specifyValue(PSVarValue& v);
 	    
-    std::string toString();
+    virtual std::string toString();
   protected:
     friend class PSObject;
     friend class PSToken;
