@@ -1622,6 +1622,9 @@ namespace EUROPA {
   		else if (strcmp(relationName,"contains") == 0) {
   			contains("this",name);
   		}   	  		   
+  		else if (strcmp(relationName,"contained_by") == 0) {
+  			contained_by("this",name);
+  		}   	  		   
   		else if (strcmp(relationName,"before") == 0) {
   			before("this",name);
   		}   	  		   
@@ -1666,7 +1669,10 @@ namespace EUROPA {
   		}   	  		   
   		else if (strcmp(relationName,"equals") == 0) {
   			equals("this",name);
-  		}   	  		   
+  		}  
+  		else {
+  			check_runtime_error(ALWAYS_FAILS,std::string("Unrecognized relation:")+relationName);
+  		} 	  		   
   		
   		return slave; 			
     }
