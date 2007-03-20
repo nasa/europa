@@ -354,13 +354,15 @@ namespace EUROPA {
      */
     std::list<ObjectId> makeObjectList() const;
 
+    virtual ObjectDomain *copy() const;
+    
     /**
      * @brief Translate the double encoded value to a suitable output. In this case, the object name
      * @param value must be a member of the domain. 
      */
     virtual std::string toString(double value) const;
 
-    std::string toString() const;
+    virtual std::string toString() const;
 
   };
 }

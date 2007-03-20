@@ -641,7 +641,7 @@ namespace EUROPA {
   }
 
   std::string ObjectDomain::toString() const{ 
-     return EnumeratedDomain::toString();
+     return "OBJECT-"+EnumeratedDomain::toString();
   }
 
   std::string ObjectDomain::toString(double value) const {
@@ -668,6 +668,13 @@ namespace EUROPA {
 
     return objects;
   }
+  
+  ObjectDomain *ObjectDomain::copy() const {
+    ObjectDomain *ptr = new ObjectDomain(*this);
+    check_error(ptr != 0);
+    return(ptr);
+  }
+  
 
   ConstrainedVariableId Object::addVariable(const AbstractDomain& baseDomain, const char* name){
       check_error(!isComplete(), 
