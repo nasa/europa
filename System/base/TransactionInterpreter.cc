@@ -1357,7 +1357,7 @@ namespace EUROPA {
 	        	// TODO: this will probably break as the code does some static casts somewhere else
 	    	    AbstractDomain* d = TypeFactory::baseDomain(parameterTypes[i].c_str()).copy();  
     	    	MonoDomain baseDomain(d);
-    	        ConstrainedVariableId parameter = addParameter(
+    	        parameter = addParameter(
 	                baseDomain,
 	                parameterNames[i]
 	            );
@@ -1799,7 +1799,7 @@ namespace EUROPA {
 	
 	TokenId ReusableUsesTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
 	{
-		return new NDDL::NddlReusable::uses(master,name,relation,true);
+		return (new NDDL::NddlReusable::uses(master,name,relation,true))->getId();
 	}        
 }
 
