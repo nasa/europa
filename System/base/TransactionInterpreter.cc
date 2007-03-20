@@ -42,8 +42,6 @@ namespace NDDL {
 /*
  * TODO: temp variables : an easy way to deal with garbage collection could be to register them with the PlanDatabase when they're created
  * and flush every time we're done interpreting an XML statement
- * TODO: handle assignments and constraints in predicate declaration
- * TODO: add named subgoals to eval context
  */
 
 namespace EUROPA {
@@ -117,6 +115,7 @@ namespace EUROPA {
     const char* className = element.Attribute("name");
     Id<Schema> schema = Schema::instance();
     schema->declareObjectType(className);
+
     dbgout.str("");
     dbgout << "Declared class " << className << std::endl;
     debugMsg("XMLInterpreter",dbgout.str());
@@ -422,7 +421,6 @@ namespace EUROPA {
   	}
   	else {
   	    LabelStr var = str.getElement(0,".");
-  	    // TODO: include token parameters and token local variables
   		LabelStr clazz = getTokenVarClass(className,var);
   		for (unsigned int i=1;i<tokenCnt-1;i++) {
   			LabelStr var = str.getElement(i,".");
@@ -434,6 +432,33 @@ namespace EUROPA {
   	    // TODO: make sure type is valid
   		return LabelStr(retval);  		
   	}  	  	
+  }
+  
+  bool isGuarded(const LabelStr& varName,const TiXmlElement* node)
+  {
+  	if (node->Parent() == NULL)
+  	    return false;
+  	    
+    if(strcmp(node->Value(),"id") == 0) {
+      const char* name = node->Attribute("name");
+
+      const TiXmlElement* parent = (const TiXmlElement*)node->Parent();
+      if (strcmp(name,varName.c_str())==0 &&
+          (
+              strcmp(parent->Value(),"if")==0 || 
+              strcmp(parent->Value(),"equals")==0 ||
+              strcmp(parent->Value(),"nequals")==0
+          )
+      )
+        return true; /* We are done */
+    }
+
+    for(const TiXmlElement* child = node->FirstChildElement(); child; child = child->NextSiblingElement() ) {
+      if(isGuarded(varName, child))
+        return true;
+    }
+
+    return false;
   }
   
   void InterpretedDbClientTransactionPlayer::buildRuleBody(
@@ -479,7 +504,7 @@ namespace EUROPA {
       		// TODO: deal with domain restrictions ???
       		if (child->FirstChildElement() != NULL)
       	        check_runtime_error(ALWAYS_FAILS,std::string("Can't deal with domain restrictions for local var ") + name.toString());      		
-      		ruleBody.push_back(new ExprLocalVar(name,type));
+      		ruleBody.push_back(new ExprLocalVar(name,type, isGuarded(name,element)));
       	}
       	else if (strcmp(child->Value(),"if") == 0) {
       		const TiXmlElement* opElement = child->FirstChildElement();
@@ -697,7 +722,7 @@ namespace EUROPA {
      	ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue(); 
      	const AbstractDomain& domain = rhsValue->derivedDomain();
      	object->addVariable(domain,m_lhs);
-     	debugMsg("XMLInterpreter","Initialized variable:" << object->getName().toString() << "." << m_lhs << " in constructor");
+     	debugMsg("XMLInterpreter","Initialized variable:" << object->getName().toString() << "." << m_lhs << " to " << rhsValue->derivedDomain().toString() << " in constructor");
   		
   		return DataRef::null;
   	} 
@@ -893,20 +918,20 @@ namespace EUROPA {
 
   	DataRef ExprConstraint::doEval(RuleInstanceEvalContext& context) const
   	{
+  		std::ostringstream os;
   		std::vector<ConstrainedVariableId> vars;
   		for (unsigned int i=0; i < m_args.size(); i++) {
 			DataRef arg = m_args[i]->eval(context);
 			vars.push_back(arg.getValue());
+			os << arg.getValue()->getName().toString() << ",";
   		}
 
   		context.getRuleInstance()->createConstraint(m_name,vars);
-  		debugMsg("XMLInterpreter","Evaluated Constraint : " << m_name.toString());
+  		debugMsg("XMLInterpreter","Evaluated Constraint : " << m_name.toString() << " - " << os.str());
   		return DataRef::null;
   	}  
   	    
   
-    // TODO: predicateType that comes from xml is something like object.fw.fasting. That needs to be translated
-    // into something that the token factory understands : ObjectType "." PredicateName, for instance FastingWindow.fasting
   	ExprSubgoal::ExprSubgoal(const char* name,
   	                         const char* predicateType, 
   	                         const char* predicateInstance, 
@@ -931,9 +956,10 @@ namespace EUROPA {
   		return DataRef::null;
   	}  
   	 
-  	ExprLocalVar::ExprLocalVar(const LabelStr& name,const LabelStr& type)
+  	ExprLocalVar::ExprLocalVar(const LabelStr& name,const LabelStr& type, bool guarded)
   	    : m_name(name)
   	    , m_type(type)
+  	    , m_guarded(guarded)
   	{
   		m_baseDomain = TypeFactory::baseDomain(type.c_str()).copy();
   	}
@@ -944,9 +970,10 @@ namespace EUROPA {
 
   	DataRef ExprLocalVar::doEval(RuleInstanceEvalContext& context) const
   	{
+  		// TODO!: deal with primitive var vs. object var. Object var must be added with addObjectVariable
   		ConstrainedVariableId localVar = context.getRuleInstance()->addLocalVariable(
   		    *m_baseDomain,
-  		    false, // can't be specified
+  		    m_guarded, // can't be specified
   		    m_name
   		);
   		context.addVar(m_name.c_str(),localVar);
@@ -973,12 +1000,12 @@ namespace EUROPA {
   		DataRef lhs = m_lhs->eval(context);
   		DataRef rhs = m_rhs->eval(context);
   		
-  		// TODO: this assumes tht the variable is always on the lhs, is this true and enforced by the parser?
+  		// TODO: this assumes that the variable is always on the lhs, is this true and enforced by the parser?
         context.getRuleInstance()->addChildRule(
             new InterpretedRuleInstance(
                 context.getRuleInstance()->getId(), 
-                rhs.getValue(), 
-                lhs.getValue()->derivedDomain(), 
+                lhs.getValue(), 
+                rhs.getValue()->derivedDomain(), 
                 isOpEquals,
                 m_ifBody
             )
@@ -1151,6 +1178,7 @@ namespace EUROPA {
                         false) 
     {
     	commonInit(parameterNames, parameterTypes, assignVars, assignValues, constraints, close);
+    	debugMsg("XMLInterpreter:InterpretedToken","Created token(" << getKey() << ") of type:" << predicateName.toString());
     }
   	                     
     InterpretedToken::InterpretedToken(const TokenId& master, 
@@ -1172,6 +1200,7 @@ namespace EUROPA {
                         false) 
     {
     	commonInit(parameterNames, parameterTypes, assignVars, assignValues, constraints, close);
+    	debugMsg("XMLInterpreter:InterpretedToken","Created slave token(" << getKey() << ") of type:" << predicateName.toString());
     }
         
     InterpretedToken::~InterpretedToken()
@@ -1184,108 +1213,111 @@ namespace EUROPA {
     class MonoDomain : public AbstractDomain 
     {
       public:
-        MonoDomain(AbstractDomain& wrappedDomain)
+        MonoDomain(AbstractDomain* wrappedDomain)
             : AbstractDomain(false,false,"")
             , m_wrappedDomain(wrappedDomain)
         {
         }
-
-        AbstractDomain& getWrappedDomain() const { return m_wrappedDomain; }
         
         MonoDomain(const AbstractDomain& rhs)
             : AbstractDomain(false,false,"")
-            , m_wrappedDomain((dynamic_cast<const MonoDomain&>(rhs)).getWrappedDomain())
+            , m_wrappedDomain(rhs.copy())
         {
         }
         
-        virtual void close()  { m_wrappedDomain.close(); }
-        virtual void open()   { m_wrappedDomain.open(); }
-        virtual bool isClosed() const { return m_wrappedDomain.isClosed(); }
-        virtual bool isOpen() const   { return m_wrappedDomain.isOpen(); }
+        ~MonoDomain()
+        {
+        	delete m_wrappedDomain;
+        }
+        
+        virtual void close()  { m_wrappedDomain->close(); }
+        virtual void open()   { m_wrappedDomain->open(); }
+        virtual bool isClosed() const { return m_wrappedDomain->isClosed(); }
+        virtual bool isOpen() const   { return m_wrappedDomain->isOpen(); }
 
-        virtual bool isFinite() const  { return m_wrappedDomain.isFinite(); }
-        virtual bool isNumeric() const { return m_wrappedDomain.isNumeric(); }
-        virtual bool isBool() const    { return m_wrappedDomain.isBool(); }
-        virtual bool isString() const  { return m_wrappedDomain.isString(); }
+        virtual bool isFinite() const  { return m_wrappedDomain->isFinite(); }
+        virtual bool isNumeric() const { return m_wrappedDomain->isNumeric(); }
+        virtual bool isBool() const    { return m_wrappedDomain->isBool(); }
+        virtual bool isString() const  { return m_wrappedDomain->isString(); }
 
-        virtual void setListener(const DomainListenerId& listener) { m_wrappedDomain.setListener(listener); }
-        virtual const DomainListenerId& getListener() const { return m_wrappedDomain.getListener(); }
+        virtual void setListener(const DomainListenerId& listener) { m_wrappedDomain->setListener(listener); }
+        virtual const DomainListenerId& getListener() const { return m_wrappedDomain->getListener(); }
 
-        virtual const LabelStr& getTypeName() const { return m_wrappedDomain.getTypeName(); }
+        virtual const LabelStr& getTypeName() const { return m_wrappedDomain->getTypeName(); }
 
-        virtual bool isEnumerated() const { return m_wrappedDomain.isEnumerated(); }
-        virtual bool isInterval() const { return m_wrappedDomain.isInterval(); }
+        virtual bool isEnumerated() const { return m_wrappedDomain->isEnumerated(); }
+        virtual bool isInterval() const { return m_wrappedDomain->isInterval(); }
 
-        virtual bool isSingleton() const { return m_wrappedDomain.isSingleton(); }
-        virtual bool isEmpty() const { return m_wrappedDomain.isEmpty(); };
+        virtual bool isSingleton() const { return m_wrappedDomain->isSingleton(); }
+        virtual bool isEmpty() const { return m_wrappedDomain->isEmpty(); };
 
-        virtual void empty() { m_wrappedDomain.empty(); }
+        virtual void empty() { m_wrappedDomain->empty(); }
 
-        virtual unsigned int getSize() const { return m_wrappedDomain.getSize(); }
+        virtual unsigned int getSize() const { return m_wrappedDomain->getSize(); }
 
-        virtual void operator>>(ostream& os) const { os << m_wrappedDomain; }
+        virtual void operator>>(ostream& os) const { os << *m_wrappedDomain; }
 
-        virtual double getUpperBound() const { return m_wrappedDomain.getUpperBound(); }
-        virtual double getLowerBound() const { return m_wrappedDomain.getLowerBound(); }
+        virtual double getUpperBound() const { return m_wrappedDomain->getUpperBound(); }
+        virtual double getLowerBound() const { return m_wrappedDomain->getLowerBound(); }
 
-        virtual double getSingletonValue() const { return m_wrappedDomain.getSingletonValue(); }
+        virtual double getSingletonValue() const { return m_wrappedDomain->getSingletonValue(); }
 
-        virtual bool getBounds(double& lb, double& ub) const { return m_wrappedDomain.getBounds(lb,ub); }
+        virtual bool getBounds(double& lb, double& ub) const { return m_wrappedDomain->getBounds(lb,ub); }
 
-        virtual void set(double value) { m_wrappedDomain.set(value); }
+        virtual void set(double value) { m_wrappedDomain->set(value); }
 
-        virtual void reset(const AbstractDomain& dom) { m_wrappedDomain.reset(dom); }
+        virtual void reset(const AbstractDomain& dom) { m_wrappedDomain->reset(dom); }
 
-        virtual void relax(const AbstractDomain& dom) { m_wrappedDomain.isFinite(); }
+        virtual void relax(const AbstractDomain& dom) { m_wrappedDomain->isFinite(); }
 
-        virtual void relax(double value) { m_wrappedDomain.relax(value); }
+        virtual void relax(double value) { m_wrappedDomain->relax(value); }
 
-        virtual void insert(double value) { m_wrappedDomain.insert(value); }
+        virtual void insert(double value) { m_wrappedDomain->insert(value); }
 
-        virtual void insert(const std::list<double>& values) { m_wrappedDomain.insert(values); }
+        virtual void insert(const std::list<double>& values) { m_wrappedDomain->insert(values); }
 
-        virtual void remove(double value) { m_wrappedDomain.remove(value); }
+        virtual void remove(double value) { m_wrappedDomain->remove(value); }
 
-        virtual bool intersect(const AbstractDomain& dom) { return m_wrappedDomain.intersect(dom); }
+        virtual bool intersect(const AbstractDomain& dom) { return m_wrappedDomain->intersect(dom); }
 
-        virtual bool intersect(double lb, double ub) { return m_wrappedDomain.intersect(lb,ub); }
+        virtual bool intersect(double lb, double ub) { return m_wrappedDomain->intersect(lb,ub); }
 
-        virtual bool difference(const AbstractDomain& dom) { return m_wrappedDomain.difference(dom); }
+        virtual bool difference(const AbstractDomain& dom) { return m_wrappedDomain->difference(dom); }
 
-        virtual AbstractDomain& operator=(const AbstractDomain& dom) { return m_wrappedDomain=dom; }
+        virtual AbstractDomain& operator=(const AbstractDomain& dom) { return *m_wrappedDomain=dom; }
 
-        virtual bool isMember(double value) const { return m_wrappedDomain.isMember(value); }
+        virtual bool isMember(double value) const { return m_wrappedDomain->isMember(value); }
 
-        virtual bool operator==(const AbstractDomain& dom) const { return m_wrappedDomain == dom; }
+        virtual bool operator==(const AbstractDomain& dom) const { return *m_wrappedDomain == dom; }
 
-        virtual bool operator!=(const AbstractDomain& dom) const { return m_wrappedDomain != dom; }
+        virtual bool operator!=(const AbstractDomain& dom) const { return *m_wrappedDomain != dom; }
 
-        virtual bool isSubsetOf(const AbstractDomain& dom) const { return m_wrappedDomain.isSubsetOf(dom); }
+        virtual bool isSubsetOf(const AbstractDomain& dom) const { return m_wrappedDomain->isSubsetOf(dom); }
 
-        virtual bool intersects(const AbstractDomain& dom) const { return m_wrappedDomain.intersects(dom); }
+        virtual bool intersects(const AbstractDomain& dom) const { return m_wrappedDomain->intersects(dom); }
 
-        virtual bool equate(AbstractDomain& dom) { return m_wrappedDomain.equate(dom); }
+        virtual bool equate(AbstractDomain& dom) { return m_wrappedDomain->equate(dom); }
 
-        virtual void getValues(std::list<double>& results) const { return m_wrappedDomain.getValues(results); };
+        virtual void getValues(std::list<double>& results) const { return m_wrappedDomain->getValues(results); };
 
-        virtual double minDelta() const { return m_wrappedDomain.minDelta(); }
+        virtual double minDelta() const { return m_wrappedDomain->minDelta(); }
 
-        virtual double translateNumber(double number, bool asMin) const { return m_wrappedDomain.translateNumber(number,asMin); }
+        virtual double translateNumber(double number, bool asMin) const { return m_wrappedDomain->translateNumber(number,asMin); }
 
-        virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const { return m_wrappedDomain.convertToMemberValue(strValue,dblValue); }
+        virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const { return m_wrappedDomain->convertToMemberValue(strValue,dblValue); }
 
-        virtual bool areBoundsFinite() const { return m_wrappedDomain.areBoundsFinite(); }
+        virtual bool areBoundsFinite() const { return m_wrappedDomain->areBoundsFinite(); }
 
-        virtual AbstractDomain *copy() const { return m_wrappedDomain.copy(); }
+        virtual AbstractDomain* copy() const { return new MonoDomain(m_wrappedDomain->copy()); }
 
-        virtual std::string toString() const { return m_wrappedDomain.toString(); }
+        virtual std::string toString() const { return m_wrappedDomain->toString(); }
 
-        virtual std::string toString(double value) const { return m_wrappedDomain.toString(value); }
+        virtual std::string toString(double value) const { return m_wrappedDomain->toString(value); }
 
       protected:
           virtual void testPrecision(const double& value) const { /*noop*/ }
           
-          AbstractDomain& m_wrappedDomain;               
+          AbstractDomain* m_wrappedDomain;
     };
   
 // slight modification of the version in NddlRules.hh  
@@ -1308,20 +1340,35 @@ namespace EUROPA {
     {
         //debugMsg("XMLInterpreter","Token " << getName().toString() << " has " << parameterNames.size() << " parameters"); 
 	    for (unsigned int i=0; i < parameterNames.size(); i++) {
-	        if (getVariable(parameterNames[i]) == ConstrainedVariableId::noId()) {
-	    	    AbstractDomain* d = TypeFactory::baseDomain(parameterTypes[i].c_str()).copy();
-	    	    // This is a hack needed because TokenVariable is parametrized by the domain arg to addParameter 
-	    	    MonoDomain baseDomain(*d);
-	            addParameter(
+	        check_runtime_error(getVariable(parameterNames[i]) == ConstrainedVariableId::noId(), "Token parameter "+parameterNames[i].toString()+ " already exists!"); 
+	    	
+	    	// This is a hack needed because TokenVariable is parametrized by the domain arg to addParameter 
+	        ConstrainedVariableId parameter;
+	        
+	        // same as completeObjectParam in NddlRules.hh
+	        if (isClass(parameterTypes[i])) {
+    	        parameter = addParameter(
+	                ObjectDomain(parameterTypes[i].c_str()),
+	                parameterNames[i]
+	            );
+                getPlanDatabase()->makeObjectVariableFromType(parameterTypes[i], parameter);
+	        }
+	        else {
+	        	// TODO: this will probably break as the code does some static casts somewhere else
+	    	    AbstractDomain* d = TypeFactory::baseDomain(parameterTypes[i].c_str()).copy();  
+    	    	MonoDomain baseDomain(d);
+    	        ConstrainedVariableId parameter = addParameter(
 	                baseDomain,
 	                parameterNames[i]
 	            );
-	            // TODO: will d be leaked?
-	            /*
-	            debugMsg("XMLInterpreter","Token " << getName().toString() << " added Parameter " 
-	                                               << parameterTypes[i].toString() << " " << parameterNames[i].toString());
-	            */                                    
-	        } 
+	        }
+                	        
+	        debugMsg("XMLInterpreter:InterpretedToken","parameter " << parameter->toString() << " : wrapped " 
+	                                                  << TypeFactory::baseDomain(parameterTypes[i].c_str()).toString());
+            /*
+            debugMsg("XMLInterpreter","Token " << getName().toString() << " added Parameter " 
+                                               << parameterTypes[i].toString() << " " << parameterNames[i].toString());
+            */                                    
 	    }
 	    
         if (autoClose)
@@ -1501,7 +1548,6 @@ namespace EUROPA {
 	    
     	debugMsg("XMLInterpreter","Executing interpreted rule:" << getRule()->getName().toString());
 		for (unsigned int i=0; i < m_body.size(); i++) {
-//			m_body[i]->setRuleInstance(this);
 			m_body[i]->eval(evalContext);
 		}		
     	debugMsg("XMLInterpreter","Executed  interpreted rule:" << getRule()->getName().toString());
@@ -1535,7 +1581,7 @@ namespace EUROPA {
                                         const LabelStr& predicateInstance, 
                                         const LabelStr& relation)
     {
-  		TokenId slave = TokenFactory::createInstance(m_token,LabelStr(predicateType),LabelStr(relation));
+  		TokenId slave = TokenFactory::createInstance(m_token,predicateType,relation);
   		addSlave(slave,name);  		
 
   		// For qualified names like "object.helloWorld" must add constraint to the object variable on the slave token
@@ -1561,7 +1607,9 @@ namespace EUROPA {
   			
             vars.push_back(slave->getObject());
             addConstraint(LabelStr("eq"),vars);             
-  		} 
+  		}
+  		else 
+  	        debugMsg("XMLInterpreter",predicateInstance.toString() << " NotConstrained");
   		
   		const char* relationName = relation.c_str();
   		

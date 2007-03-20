@@ -316,6 +316,7 @@ namespace EUROPA {
     if (name != NULL) {
       std::string std_name = name;
       m_tokens[std_name] = token;
+      debugMsg("DbClientTransactionPlayer:createToken", "created Token:" << name);      
     }
   }
 
@@ -463,11 +464,17 @@ namespace EUROPA {
       return;
     }
     // normal constraints
+    std::ostringstream os;
     std::vector<ConstrainedVariableId> variables;
     for (TiXmlElement * child_el = element.FirstChildElement() ;
-         child_el != NULL ; child_el = child_el->NextSiblingElement())
-      variables.push_back(xmlAsVariable(*child_el));
+         child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+       ConstrainedVariableId v = xmlAsVariable(*child_el);   	
+       variables.push_back(v);
+       os << v->toString() <<",";
+    }
+    debugMsg("DbClientTransactionPlayer:playInvokeConstraint","Adding constraint " << name << " args: " << os.str());
     m_client->createConstraint(name, variables);
+    debugMsg("DbClientTransactionPlayer:playInvokeConstraint","Added constraint " << name << " args: " << os.str());
   }
 
   void DbClientTransactionPlayer::playInvokeTransaction(const TiXmlElement & element) {

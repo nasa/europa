@@ -427,7 +427,8 @@ namespace EUROPA {
   {
   	public:
   	    ExprLocalVar(const LabelStr& name,
-  	                 const LabelStr& type);
+  	                 const LabelStr& type,
+  	                 bool guarded);
   	    virtual ~ExprLocalVar();
 
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;  	    
@@ -435,6 +436,7 @@ namespace EUROPA {
   	protected:
   	    LabelStr m_name;
   	    LabelStr m_type;
+  	    bool m_guarded;
   	    const AbstractDomain* m_baseDomain;
   };      
   
