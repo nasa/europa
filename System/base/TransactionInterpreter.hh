@@ -34,7 +34,7 @@ namespace EUROPA {
       virtual void playDefineEnumeration(const TiXmlElement &);
       virtual void playDefineType(const TiXmlElement &);
       
-      void buildRuleBody(const char* className, const TiXmlElement* element, std::vector<RuleExpr*>& ruleBody);
+      void buildRuleBody(const char* className, const std::string& predName, const TiXmlElement* element, std::vector<RuleExpr*>& ruleBody);
       void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       int  defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);

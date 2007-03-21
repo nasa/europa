@@ -351,17 +351,6 @@ namespace EUROPA {
   	  return Schema::instance()->isObjectType(className);
   }
     
-  LabelStr getTokenVarClass(LabelStr className,LabelStr var)
-  {
-      if (strcmp(var.c_str(),"object") == 0) {
-      	return className;
-      }
-      else {
-      	check_runtime_error(ALWAYS_FAILS,std::string("Undefined variable:")+var.c_str());
-      	return LabelStr("");
-      }
-  }
-
   LabelStr getObjectVarClass(LabelStr className,LabelStr var)
   {
       const SchemaId& schema = Schema::instance();
@@ -369,11 +358,27 @@ namespace EUROPA {
       return schema->getMemberType(className,var);
   }
 
+  LabelStr getTokenVarClass(LabelStr className,LabelStr predName,LabelStr var)
+  {
+      if (strcmp(var.c_str(),"object") == 0) // is it the object variable? 
+      	return className;
+      else { // look through the parameters to the token
+          const SchemaId& schema = Schema::instance();
+          if (schema->hasMember(predName,var))
+              return schema->getMemberType(predName,var); 	
+      } 
+      
+      // if everything fails, see if it's an object member	
+      return getObjectVarClass(className,var);
+  }
+
   /*
    * figures out the type of a predicate given an instance
    * 
    */
-  LabelStr predicateInstanceToType(const char* className,const char* predicateInstance)
+  LabelStr predicateInstanceToType(const char* className,
+                                   const char* predicateName, 
+                                   const char* predicateInstance)
   {
   	// see ModelAccessor.getSlaveObjectType() in NDDL compiler  	
   	LabelStr str(predicateInstance);
@@ -399,13 +404,15 @@ namespace EUROPA {
   		     return LabelStr(predicateInstance);
   		}
   		else {
-  		    check_error(ALWAYS_FAILS,std::string("Invalid predicate:") + predicateInstance);
-            return LabelStr("NO_VALUE");
+     		LabelStr clazz = getTokenVarClass(className,predicateName,prefix);
+      		std::string retval = clazz.toString()+"."+suffix.toString();
+  	    	// TODO: make sure type is valid
+  		    return LabelStr(retval.c_str());
   		}
   	}
   	else {
   	    LabelStr var = str.getElement(0,".");
-  		LabelStr clazz = getTokenVarClass(className,var);
+  		LabelStr clazz = getTokenVarClass(className,predicateName,var);
   		for (unsigned int i=1;i<tokenCnt-1;i++) {
   			LabelStr var = str.getElement(i,".");
   			clazz = getObjectVarClass(clazz,var);
@@ -447,6 +454,7 @@ namespace EUROPA {
   
   void InterpretedDbClientTransactionPlayer::buildRuleBody(
                                           const char* className,
+                                          const std::string& predName,
                                           const TiXmlElement* element, 
                                           std::vector<RuleExpr*>& ruleBody)
   {
@@ -474,7 +482,7 @@ namespace EUROPA {
             }
             check_runtime_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
 
-            const char* predicateType = predicateInstanceToType(className, predicateInstance).c_str();    
+            const char* predicateType = predicateInstanceToType(className, predName.c_str(), predicateInstance).c_str();    
             if (name == NULL) {
             	std::ostringstream tmpname;
             	tmpname << "slave" << (slave_cnt++);            
@@ -497,7 +505,7 @@ namespace EUROPA {
       		Expr* lhs = valueToExpr(opArg);
       		Expr* rhs = valueToExpr(opArg->NextSiblingElement());
       		std::vector<RuleExpr*> ifBody;
-      		buildRuleBody(className,opElement->NextSiblingElement(),ifBody);
+      		buildRuleBody(className,predName,opElement->NextSiblingElement(),ifBody);
       		ruleBody.push_back(new ExprIf(child->Value(),lhs,rhs,ifBody));
       	}
       	else 
@@ -514,7 +522,7 @@ namespace EUROPA {
           " column " + element.Attribute("column");	
       
       std::vector<RuleExpr*> ruleBody;
-      buildRuleBody(className,element.FirstChildElement(),ruleBody);      
+      buildRuleBody(className,predName,element.FirstChildElement(),ruleBody);      
 
       // The RuleFactory's constructor automatically registers the factory
       new InterpretedRuleFactory(predName,source,ruleBody);
