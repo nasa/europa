@@ -421,6 +421,8 @@ namespace EUROPA
     check_error(variable.isValid());
     check_error(variable->getCurrentDomain().isEmpty());
     m_emptied = variable;
+    debugMsg("ConstraintEngine:emptied","Emptied var:" << m_emptied->toString()
+        << " parent:" << (m_emptied->getParent().isNoId() ? "NULL" : m_emptied->getParent()->toString()));
     check_error(m_relaxed == false);
   }
 
