@@ -796,16 +796,12 @@ namespace EUROPA {
   		tokenize(m_varName.toString(),vars,".");
   		std::string varName=vars[0];
   		
-  		unsigned int idx = 1;
-
-        // TODO: this is confusing because variables at higher levels will hide tokens at lower levels. FIXME
-        // getVar goes all the way up to the top level, instead of looking for tokens and variables at the lower levels first
      	ConstrainedVariableId rhs = context.getVar(vars[0].c_str());
      	
    	    if (rhs.isNoId()) 
 	        check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+varName+" in Evaluation Context");
      	
-     	for (;idx<vars.size();idx++) {
+     	for (unsigned int idx = 1;idx<vars.size();idx++) {
      		// TODO: should probably make sure it's an object var first
      		check_runtime_error(rhs->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+vars[idx]);
      		ObjectId object = rhs->derivedDomain().getSingletonValue();
