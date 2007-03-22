@@ -901,15 +901,15 @@ namespace EUROPA {
             check_runtime_error(!var.isNoId(),std::string("Couldn't find variable ")+m_varName+" in Evaluation Context");
      	}  
      	else {
-     		var = context.getVar(m_parentName.c_str());
-     		if (!var.isNoId()) {
-     			var = context.getRuleInstance()->varFromObject(m_parentName,m_varName,false);
-     		}
-     		else  {
-    		    TokenId tok = context.getToken(m_parentName.c_str());
-   		        if (tok.isNoId())  
-   	                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_parentName+" in Evaluation Context");
+    		TokenId tok = context.getToken(m_parentName.c_str());
+   		    if (!tok.isNoId())  
    	            var = context.getRuleInstance()->varfromtok(tok,m_varName);         			
+   	        else {    
+     		    var = context.getVar(m_parentName.c_str());
+     		    if (!var.isNoId()) 
+     			    var = context.getRuleInstance()->varFromObject(m_parentName,m_varName,false);
+     			else
+   	                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_parentName+" in Evaluation Context");
      		}
      	}   	    
      	
