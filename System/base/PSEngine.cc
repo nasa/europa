@@ -168,6 +168,25 @@ namespace EUROPA {
     check_runtime_error(ALWAYS_FAIL);
     return NULL;
   }
+  
+  PSToken* PSToken::getMaster() {
+  	TokenId master = m_tok->getMaster();
+  	if (master.isNoId())
+  	    return NULL;
+  	
+  	return new PSToken(master);    
+  }
+  
+  PSList<PSToken*> PSToken::getSlaves() {
+    const TokenSet& tokens = m_tok->getSlaves();
+    PSList<PSToken*> retval;
+
+    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+      PSToken* tok = new PSToken(*it);
+      retval.push_back(tok);
+    }
+    return retval;    	
+  }  
 
   double PSToken::getViolation() {return 0.0;}
 

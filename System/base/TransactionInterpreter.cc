@@ -922,18 +922,27 @@ namespace EUROPA {
   	{
   	}
 
+    std::string varsToString(const std::vector<ConstrainedVariableId>& vars)
+    {
+  		std::ostringstream os;
+  		for (unsigned int i=0; i < vars.size(); i++) {
+  			if (i>0) os << ",";
+			os << vars[i]->toString();
+  		}
+  		
+  		return os.str();
+    }
+    
   	DataRef ExprConstraint::doEval(RuleInstanceEvalContext& context) const
   	{
-  		std::ostringstream os;
   		std::vector<ConstrainedVariableId> vars;
   		for (unsigned int i=0; i < m_args.size(); i++) {
 			DataRef arg = m_args[i]->eval(context);
 			vars.push_back(arg.getValue());
-			os << arg.getValue()->getName().toString() << ",";
   		}
 
   		context.getRuleInstance()->createConstraint(m_name,vars);
-  		debugMsg("XMLInterpreter:InterpretedRule","Evaluated Constraint : " << m_name.toString() << " - " << os.str());
+  		debugMsg("XMLInterpreter:InterpretedRule","Evaluated Constraint : " << m_name.toString() << " - " << varsToString(vars));
   		return DataRef::null;
   	}  
   	    

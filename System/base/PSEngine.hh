@@ -217,6 +217,10 @@ namespace EUROPA {
 
     PSObject* getOwner(); 
 	    
+	PSToken* getMaster();
+	
+	PSList<PSToken*> getSlaves();
+	    
     // TODO: Add setStatus(int newStatus)?; ask Mike Iatauro
     // TODO: getStatus()? -> MERGED, ACTIVE, REJECTED, etc
 	    

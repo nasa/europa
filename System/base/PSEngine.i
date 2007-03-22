@@ -188,6 +188,9 @@ namespace EUROPA {
   public:
     PSObject* getOwner();
 
+    PSToken* getMaster();
+    PSList<PSToken*> getSlaves();
+    
     double getViolation();
     const std::string& getViolationExpl();
 
