@@ -34,7 +34,7 @@ namespace EUROPA {
       virtual void playDefineEnumeration(const TiXmlElement &);
       virtual void playDefineType(const TiXmlElement &);
       
-      void buildRuleBody(const char* className, const std::string& predName, const TiXmlElement* element, std::vector<RuleExpr*>& ruleBody);
+      void buildRuleBody(const char* className, const std::string& predName, const TiXmlElement* element, std::vector<RuleExpr*>& ruleBody,std::map<std::string,std::string>& localVars);
       void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       int  defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
@@ -183,7 +183,8 @@ namespace EUROPA {
   	      	    
 	protected:
 	    // createInstance = makeNewObject + evalConstructorBody
-	    virtual ObjectId createInstance(const PlanDatabaseId& planDb,
+	    virtual ObjectId createInstance(
+	                            const PlanDatabaseId& planDb,
 	                            const LabelStr& objectType, 
 	                            const LabelStr& objectName,
 	                            const std::vector<const AbstractDomain*>& arguments) const;
@@ -208,7 +209,8 @@ namespace EUROPA {
         std::vector<std::string>  m_constructorArgTypes;	
         ExprConstructorSuperCall* m_superCallExpr;                          
         std::vector<Expr*>        m_constructorBody;
-        bool                      m_canMakeNewObject;	 
+        bool                      m_canMakeNewObject;
+        mutable EvalContext*	  m_evalContext;
   };  
   
   class ExprConstraint;
@@ -317,12 +319,22 @@ namespace EUROPA {
 				       bool canBeSpecified,
 				       const LabelStr& name);                   
 
+        ConstrainedVariableId addObjectVariable(
+                       const LabelStr& type, 
+                       const AbstractDomain& baseDomain,
+				       bool canBeSpecified,
+				       const LabelStr& name); 
+				       
+        void executeLoop(EvalContext& evalContext,
+                         const LabelStr& loopVarName,
+                         const LabelStr& loopVarType,
+                         const LabelStr& valueSet,
+                         const std::vector<RuleExpr*>& loopBody);	
+				                         
+				       
     protected:
         std::vector<RuleExpr*> m_body;                                          
 
-        /**
-         * @brief provide implementation for this method for firing the rule
-         */
         virtual void handleExecute();
         
         friend class ExprIf;
@@ -455,6 +467,21 @@ namespace EUROPA {
         const std::vector<RuleExpr*> m_ifBody;     
   };        
   
+  
+  class ExprLoop : public RuleExpr
+  {
+  	public:
+  	    ExprLoop(const char* varName, const char* varType, const char* varValue,const std::vector<RuleExpr*>& loopBody);
+  	    virtual ~ExprLoop();
+
+  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;  	    
+  	     
+    protected:
+        LabelStr m_varName;
+        LabelStr m_varType;
+        LabelStr m_varValue;
+        const std::vector<RuleExpr*> m_loopBody;     
+  };        
   
   // TODO: create a separate file for exported C++ classes?
   class NativeObjectFactory : public InterpretedObjectFactory

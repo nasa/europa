@@ -368,17 +368,24 @@ namespace EUROPA {
               return schema->getMemberType(predName,var); 	
       } 
       
-      // if everything fails, see if it's an object member	
+      // if everything else fails, see if it's an object member	
       return getObjectVarClass(className,var);
   }
 
+  LabelStr checkPredicateType(LabelStr type)
+  {
+  	check_runtime_error(Schema::instance()->isPredicate(type),type.toString()+" is not a Type");
+  	return type;
+  }
+  
   /*
    * figures out the type of a predicate given an instance
    * 
    */
   LabelStr predicateInstanceToType(const char* className,
                                    const char* predicateName, 
-                                   const char* predicateInstance)
+                                   const char* predicateInstance,
+                                   std::map<std::string,std::string>& localVars)
   {
   	// see ModelAccessor.getSlaveObjectType() in NDDL compiler  	
   	LabelStr str(predicateInstance);
@@ -387,32 +394,37 @@ namespace EUROPA {
   	
   	if (tokenCnt == 1) {
   		std::string retval = std::string(className)+"."+predicateInstance;
-  		// TODO: make sure type is valid
-  		return LabelStr(retval);
+  		return checkPredicateType(LabelStr(retval));
   	}
   	else if (tokenCnt == 2) {
   		LabelStr prefix(str.getElement(0,"."));
   		LabelStr suffix(str.getElement(1,"."));
   		
-  		if (prefix.toString() == std::string("object")) {
+  		if (prefix.toString() == "object") {
       		std::string retval = std::string(className)+"."+suffix.toString();
-  	    	// TODO: make sure type is valid
-  		    return LabelStr(retval.c_str());
+  		    return checkPredicateType(LabelStr(retval.c_str()));
   		}
   		else if (isClass(prefix)) {
-  	    	// TODO: make sure type is valid
-  		     return LabelStr(predicateInstance);
+  		     return checkPredicateType(LabelStr(predicateInstance));
+  		}
+  		else if (localVars.find(prefix.toString()) != localVars.end()) {
+  			std::string clazz = localVars[prefix.toString()];
+  			return checkPredicateType(clazz+"."+suffix.toString());
   		}
   		else {
      		LabelStr clazz = getTokenVarClass(className,predicateName,prefix);
       		std::string retval = clazz.toString()+"."+suffix.toString();
-  	    	// TODO: make sure type is valid
-  		    return LabelStr(retval.c_str());
+  		    return checkPredicateType(LabelStr(retval.c_str()));
   		}
   	}
   	else {
   	    LabelStr var = str.getElement(0,".");
-  		LabelStr clazz = getTokenVarClass(className,predicateName,var);
+  		LabelStr clazz;
+  		if (localVars.find(var.toString()) != localVars.end()) 
+  		    clazz = localVars[var.toString()];
+  		else 
+  		    clazz = getTokenVarClass(className,predicateName,var);
+  		    
   		for (unsigned int i=1;i<tokenCnt-1;i++) {
   			LabelStr var = str.getElement(i,".");
   			clazz = getObjectVarClass(clazz,var);
@@ -420,8 +432,7 @@ namespace EUROPA {
   		
   		LabelStr predicate = str.getElement(tokenCnt-1,".");
   		std::string retval = clazz.toString() + "." + predicate.toString();  	    
-  	    // TODO: make sure type is valid
-  		return LabelStr(retval);  		
+  		return checkPredicateType(LabelStr(retval));  		
   	}  	  	
   }
   
@@ -456,7 +467,8 @@ namespace EUROPA {
                                           const char* className,
                                           const std::string& predName,
                                           const TiXmlElement* element, 
-                                          std::vector<RuleExpr*>& ruleBody)
+                                          std::vector<RuleExpr*>& ruleBody,
+                                          std::map<std::string,std::string>& localVars)
   {
       int slave_cnt = 0;      
       
@@ -482,7 +494,7 @@ namespace EUROPA {
             }
             check_runtime_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
 
-            const char* predicateType = predicateInstanceToType(className, predName.c_str(), predicateInstance).c_str();    
+            const char* predicateType = predicateInstanceToType(className, predName.c_str(), predicateInstance,localVars).c_str();    
             if (name == NULL) {
             	std::ostringstream tmpname;
             	tmpname << "slave" << (slave_cnt++);            
@@ -493,6 +505,8 @@ namespace EUROPA {
       	else if (strcmp(child->Value(),"var") == 0) {
       		LabelStr name(child->Attribute("name"));
       		LabelStr type(child->Attribute("type"));
+      		localVars[name.toString()]=type.toString();
+      		
       		// TODO: deal with domain restrictions ???
       		if (child->FirstChildElement() != NULL)
       	        check_runtime_error(ALWAYS_FAILS,std::string("Can't deal with domain restrictions for local var ") + name.toString());      		
@@ -505,8 +519,17 @@ namespace EUROPA {
       		Expr* lhs = valueToExpr(opArg);
       		Expr* rhs = valueToExpr(opArg->NextSiblingElement());
       		std::vector<RuleExpr*> ifBody;
-      		buildRuleBody(className,predName,opElement->NextSiblingElement(),ifBody);
+      		buildRuleBody(className,predName,opElement->NextSiblingElement(),ifBody,localVars);
       		ruleBody.push_back(new ExprIf(child->Value(),lhs,rhs,ifBody));
+      	}
+      	else if (strcmp(child->Value(),"loop") == 0) {
+      		const char* varName = child->Attribute("name");
+      		const char* varType = child->Attribute("type");
+      		const char* varValue = child->Attribute("value");
+      		localVars[varName]=varType;
+      		std::vector<RuleExpr*> loopBody;
+      		buildRuleBody(className,predName,child->FirstChildElement(),loopBody,localVars);
+      		ruleBody.push_back(new ExprLoop(varName,varType,varValue,loopBody));
       	}
       	else 
       	   check_runtime_error(ALWAYS_FAILS,std::string("Unknown Compatibility element:") + child->Value());
@@ -522,7 +545,8 @@ namespace EUROPA {
           " column " + element.Attribute("column");	
       
       std::vector<RuleExpr*> ruleBody;
-      buildRuleBody(className,predName,element.FirstChildElement(),ruleBody);      
+      std::map<std::string,std::string> localVars; // name-type map for local vars
+      buildRuleBody(className,predName,element.FirstChildElement(),ruleBody,localVars);      
 
       // The RuleFactory's constructor automatically registers the factory
       new InterpretedRuleFactory(predName,source,ruleBody);
@@ -947,15 +971,21 @@ namespace EUROPA {
 
   	DataRef ExprLocalVar::doEval(RuleInstanceEvalContext& context) const
   	{
-  		// TODO!: deal with primitive var vs. object var. Object var must be added with addObjectVariable
+  		ConstrainedVariableId localVar;
   		if (isClass(m_type))
-  		    check_runtime_error(ALWAYS_FAILS,"Don't know how to deal with Object local vars yet, only primitives");
-  		    
-  		ConstrainedVariableId localVar = context.getRuleInstance()->addLocalVariable(
-  		    *m_baseDomain,
-  		    m_guarded, // can't be specified
-  		    m_name
-  		);
+  		  localVar = context.getRuleInstance()->addObjectVariable(
+  		      m_type,
+  		      *m_baseDomain,
+  		      m_guarded, // can't be specified
+  		      m_name
+  		  );
+  		else
+  		  localVar = context.getRuleInstance()->addLocalVariable(
+  		      *m_baseDomain,
+  		      m_guarded, // can't be specified
+  		      m_name
+  		  );
+  		  
   		context.addVar(m_name.c_str(),localVar);
   		debugMsg("XMLInterpreter:InterpretedRule","Added RuleInstance local var:" << m_name.toString());
   		return DataRef::null;
@@ -993,7 +1023,25 @@ namespace EUROPA {
         
   		return DataRef::null;  		
   	}  
-  	     
+
+  	ExprLoop::ExprLoop(const char* varName, const char* varType, const char* varValue,const std::vector<RuleExpr*>& loopBody)
+  	    : m_varName(varName)
+  	    , m_varType(varType)
+  	    , m_varValue(varValue)
+  	    , m_loopBody(loopBody)
+  	{
+  	}
+  	
+  	ExprLoop::~ExprLoop()
+  	{
+  	}
+
+  	DataRef ExprLoop::doEval(RuleInstanceEvalContext& context) const
+  	{
+        context.getRuleInstance()->executeLoop(context,m_varName,m_varType,m_varValue,m_loopBody);
+  		return DataRef::null;  		
+  	}
+  	  	     
     /*
      * InterpretedObjectFactory
      */     	     
@@ -1030,11 +1078,33 @@ namespace EUROPA {
 	                        const LabelStr& objectName,
 	                        const std::vector<const AbstractDomain*>& arguments) const 
 	{
-	    check_error(checkArgs(arguments));
+	    check_runtime_error(checkArgs(arguments));
+
+        // TODO: should pass in eval context from outside to have access to globals
+	    EvalContext evalContext(NULL);
 	  
+        // Add arguments to eval context		
+		for (unsigned int i=0;i<m_constructorArgNames.size();i++) {
+    		std::ostringstream argName;
+    		argName << "arg" << i;
+			// TODO: destroy these temporary variables
+			ConstrainedVariableId arg = planDb->getClient()->createVariable(
+			    m_constructorArgTypes[i].c_str(),
+			    *(arguments[i]),
+			    argName.str().c_str(),
+			    true
+			);
+			evalContext.addVar(m_constructorArgNames[i].c_str(),arg);
+		}
+		
+		m_evalContext = &evalContext;
 	    ObjectId instance = makeNewObject(planDb, objectType, objectName,arguments);
+		evalContext.addVar("this",instance->getThis());
 	    evalConstructorBody(planDb->getClient(),instance,arguments);
 	    instance->close();
+		m_evalContext = NULL;
+
+    	// TODO: destroy temporary variables created for args
 	  
 	    return instance;
 	} 
@@ -1052,7 +1122,7 @@ namespace EUROPA {
      *   that overrides this method and calls the appropriate constructor
      * 
 	 */  
-	ObjectId InterpretedObjectFactory::makeNewObject( 
+	ObjectId InterpretedObjectFactory::makeNewObject(
 	                        const PlanDatabaseId& planDb,
 	                        const LabelStr& objectType, 
 	                        const LabelStr& objectName,
@@ -1071,8 +1141,7 @@ namespace EUROPA {
 	        // TODO: argumentsForSuper are eval'd twice, once here and once when the constructor body is eval'd
 	        //  figure out how to do it only once
 	    	std::vector<const AbstractDomain*> argumentsForSuper;
-     	    EvalContext evalContext(NULL);
-     	    m_superCallExpr->evalArgs(evalContext,argumentsForSuper);
+     	    m_superCallExpr->evalArgs(*m_evalContext,argumentsForSuper);
 	        ObjectId retval = ObjectFactory::makeNewObject(planDb, m_superCallExpr->getSuperClassName(), objectType, objectName,argumentsForSuper);
   		    return retval;
 	  }
@@ -1082,33 +1151,13 @@ namespace EUROPA {
 	                                           DbClientId dbClient,
 	                                           ObjectId& instance, 
 	                                           const std::vector<const AbstractDomain*>& arguments) const
-	{
-        // TODO: should pass in eval context from outside to have access to globals
-	    EvalContext evalContext(NULL);
-	    
-        // Add new object and arguments to eval context
-		evalContext.addVar("this",instance->getThis());
-		
-		for (unsigned int i=0;i<m_constructorArgNames.size();i++) {
-    		std::ostringstream argName;
-    		argName << "arg" << i;
-			// TODO: destroy these temporary variables
-			ConstrainedVariableId arg = dbClient->createVariable(
-			    m_constructorArgTypes[i].c_str(),
-			    *(arguments[i]),
-			    argName.str().c_str(),
-			    true
-			);
-			evalContext.addVar(m_constructorArgNames[i].c_str(),arg);
-		}
-		
+	{	    
+		EvalContext& evalContext = *m_evalContext;
 		if (m_superCallExpr != NULL)
 		    m_superCallExpr->eval(evalContext);
 		
 		for (unsigned int i=0; i < m_constructorBody.size(); i++) 
 			m_constructorBody[i]->eval(evalContext);
-
-    	// TODO: destroy temporary variables created for args
 
 	    // Initialize any variables that were not explicitly initialized
 	    const Schema::NameValueVector& members = Schema::instance()->getMembers(m_className);
@@ -1650,7 +1699,7 @@ namespace EUROPA {
 	{
         ConstrainedVariableId localVariable = TypeFactory::createVariable(
             baseDomain.getTypeName().c_str(),
-            m_planDb->getConstraintEngine(),
+            getPlanDatabase()->getConstraintEngine(),
 		    baseDomain,
 		    canBeSpecified,
 		    name.c_str(),
@@ -1666,7 +1715,74 @@ namespace EUROPA {
         return localVariable;
     }
     
-    
+    ConstrainedVariableId InterpretedRuleInstance::addObjectVariable( 
+                       const LabelStr& type,
+                       const AbstractDomain& baseDomain,
+				       bool canBeSpecified,
+				       const LabelStr& name)                   
+	{
+		ConstrainedVariableId localVariable = addLocalVariable(baseDomain,canBeSpecified,name);
+		getPlanDatabase()->makeObjectVariableFromType(type,localVariable,canBeSpecified);
+		
+		return localVariable;
+	}    
+
+    void InterpretedRuleInstance::executeLoop(EvalContext& evalContext,
+                                              const LabelStr& loopVarName,
+                                              const LabelStr& loopVarType,
+                                              const LabelStr& valueSet,
+                                              const std::vector<RuleExpr*>& loopBody)	
+    {
+      // Create a local domain based on the objects included in the valueSet
+      ConstrainedVariableId setVar = NDDL::var(getId(),valueSet.toString());
+      const ObjectDomain& loopObjectSet =
+          dynamic_cast<const ObjectDomain&>(setVar->lastDomain()); 
+        
+      if (!loopObjectSet.isEmpty()){
+          // Post a locking constraint on the set
+          {
+              std::vector<ConstrainedVariableId> loop_vars;
+              loop_vars.push_back(NDDL::var(getId(), valueSet.toString()));
+              loop_vars.push_back(ruleVariable(loopObjectSet));
+              rule_constraint(Lock, loop_vars);
+          }
+           
+          std::list<double> loopObjectSet_values;
+          loopObjectSet.getValues(loopObjectSet_values);
+        
+          // Translate into a set ordered by key to ensure reliable ordering across runs
+          ObjectSet loopObjectSet_valuesByKey;          
+          for(std::list<double>::iterator it=loopObjectSet_values.begin();
+              it!=loopObjectSet_values.end(); ++it) {
+              ConstrainedVariableId t = *it;
+              loopObjectSet_valuesByKey.insert(t);
+          }
+        
+          // execute loop body
+          
+          for(ObjectSet::const_iterator it=loopObjectSet_valuesByKey.begin()
+              ;it!=loopObjectSet_valuesByKey.end(); ++it) {
+             ConstrainedVariableId loop_var = *it;
+             check_error(loop_var.isValid());
+          
+             // Allocate a local variable for this singleton object
+             // see loopVar(Allocation, a);
+             {
+                 ObjectDomain loopVarDomain(loopVarType.c_str());
+                 loopVarDomain.insert(loop_var);
+                 loopVarDomain.close();
+                 // This will automatically put it in the evalContext, since all RuleInstance vars are reachable there
+                 addVariable(loopVarDomain, false, loopVarName);
+             }
+
+     	     for (unsigned int i=0; i < m_body.size(); i++) 
+		         loopBody[i]->eval(evalContext);
+                    
+             clearLoopVar(loopVarName);
+          }
+       }
+    }
+	
 
     /*
      * InterpretedRuleFactory
