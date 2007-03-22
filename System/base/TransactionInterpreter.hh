@@ -325,7 +325,7 @@ namespace EUROPA {
 
         ConstrainedVariableId addObjectVariable(
                        const LabelStr& type, 
-                       const AbstractDomain& baseDomain,
+                       const ObjectDomain& baseDomain,
 				       bool canBeSpecified,
 				       const LabelStr& name); 
 				       

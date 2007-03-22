@@ -520,7 +520,7 @@ namespace EUROPA {
       		Expr* rhs = valueToExpr(opArg->NextSiblingElement());
       		std::vector<RuleExpr*> ifBody;
       		buildRuleBody(className,predName,opElement->NextSiblingElement(),ifBody,localVars);
-      		ruleBody.push_back(new ExprIf(child->Value(),lhs,rhs,ifBody));
+      		ruleBody.push_back(new ExprIf(opElement->Value(),lhs,rhs,ifBody));
       	}
       	else if (strcmp(child->Value(),"loop") == 0) {
       		const char* varName = child->Attribute("name");
@@ -769,7 +769,8 @@ namespace EUROPA {
 		    m_type.c_str(),
 		    *m_domain,
 		    "TMP_VAR",
-		    true
+		    true, // isTmp
+		    false // cannot be specified
 		);    	
 		
   		return DataRef(var);
@@ -1019,7 +1020,7 @@ namespace EUROPA {
   		if (isClass(m_type))
   		  localVar = context.getRuleInstance()->addObjectVariable(
   		      m_type,
-  		      *m_baseDomain,
+  		      ObjectDomain(m_type.c_str()),
   		      m_guarded, // can't be specified
   		      m_name
   		  );
@@ -1031,7 +1032,7 @@ namespace EUROPA {
   		  );
   		  
   		context.addVar(m_name.c_str(),localVar);
-  		debugMsg("XMLInterpreter:InterpretedRule","Added RuleInstance local var:" << m_name.toString());
+  		debugMsg("XMLInterpreter:InterpretedRule","Added RuleInstance local var:" << localVar->toString());
   		return DataRef::null;
   	}  
   	  
@@ -1724,6 +1725,7 @@ namespace EUROPA {
   			check_runtime_error(ALWAYS_FAILS,std::string("Unrecognized relation:")+relationName);
   		} 	  		   
   		
+  		debugMsg("XMLInterpreter:InterpretedRule","Created relation " << relationName << " " << predicateInstance.c_str());
   		return slave; 			
     }
     
@@ -1752,11 +1754,11 @@ namespace EUROPA {
     
     ConstrainedVariableId InterpretedRuleInstance::addObjectVariable( 
                        const LabelStr& type,
-                       const AbstractDomain& baseDomain,
+                       const ObjectDomain& baseDomain,
 				       bool canBeSpecified,
 				       const LabelStr& name)                   
 	{
-		ConstrainedVariableId localVariable = addLocalVariable(baseDomain,canBeSpecified,name);
+		ConstrainedVariableId localVariable = addVariable(baseDomain,canBeSpecified,name);
 		getPlanDatabase()->makeObjectVariableFromType(type,localVariable,canBeSpecified);
 		
 		return localVariable;
@@ -1769,15 +1771,18 @@ namespace EUROPA {
                                               const std::vector<RuleExpr*>& loopBody)	
     {
       // Create a local domain based on the objects included in the valueSet
-      ConstrainedVariableId setVar = NDDL::var(getId(),valueSet.toString());
+      ConstrainedVariableId setVar = evalContext.getVar(valueSet.c_str());
+      check_error(!setVar.isNoId(),"Loop var can't be NULL");
+      const AbstractDomain& loopVarDomain = setVar->lastDomain();
+      debugMsg("XMLInterpreter:InterpretedRule","loop var domain:" << loopVarDomain.toString());
       const ObjectDomain& loopObjectSet =
-          dynamic_cast<const ObjectDomain&>(setVar->lastDomain()); 
+          dynamic_cast<const ObjectDomain&>(loopVarDomain); 
         
       if (!loopObjectSet.isEmpty()){
           // Post a locking constraint on the set
           {
               std::vector<ConstrainedVariableId> loop_vars;
-              loop_vars.push_back(NDDL::var(getId(), valueSet.toString()));
+              loop_vars.push_back(setVar);
               loop_vars.push_back(ruleVariable(loopObjectSet));
               rule_constraint(Lock, loop_vars);
           }
@@ -1789,7 +1794,7 @@ namespace EUROPA {
           ObjectSet loopObjectSet_valuesByKey;          
           for(std::list<double>::iterator it=loopObjectSet_values.begin();
               it!=loopObjectSet_values.end(); ++it) {
-              ConstrainedVariableId t = *it;
+              ObjectId t = *it;
               loopObjectSet_valuesByKey.insert(t);
           }
         
@@ -1797,7 +1802,7 @@ namespace EUROPA {
           
           for(ObjectSet::const_iterator it=loopObjectSet_valuesByKey.begin()
               ;it!=loopObjectSet_valuesByKey.end(); ++it) {
-             ConstrainedVariableId loop_var = *it;
+             ObjectId loop_var = *it;
              check_error(loop_var.isValid());
           
              // Allocate a local variable for this singleton object
@@ -1910,11 +1915,13 @@ namespace EUROPA {
     
 	TokenId ReusableUsesTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable) const
 	{
+	   	debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reusable.uses"); 
 		return new NDDL::NddlReusable::uses(planDb,name,rejectable,true);
 	}
 	
 	TokenId ReusableUsesTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
 	{
+	   	debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reusable.uses"); 
 		return (new NDDL::NddlReusable::uses(master,name,relation,true))->getId();
 	}        
 }
