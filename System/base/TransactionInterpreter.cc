@@ -748,13 +748,10 @@ namespace EUROPA {
      * ExprConstant
      */   
     ExprConstant::ExprConstant(DbClientId& dbClient, const char* type, const AbstractDomain* domain)
+        : m_dbClient(dbClient)
+        , m_type(type)
+        , m_domain(domain)
     {
-		m_var = dbClient->createVariable(
-		    type,
-		    *domain,
-		    "TMP_VAR",
-		    true
-		);    	
     }
     
   	ExprConstant::~ExprConstant()
@@ -764,7 +761,18 @@ namespace EUROPA {
 
   	DataRef ExprConstant::eval(EvalContext& context) const
   	{
-  		return DataRef(m_var);
+  		// need to create a new variable every time this is evaluated, since propagation
+  		// will affect the variable, should provide immutable variables so that a single var
+  		// can be created for a constant
+  		// TODO: Who destroys this variable, need to give handle to RuleInstance
+		ConstrainedVariableId var = m_dbClient->createVariable(
+		    m_type.c_str(),
+		    *m_domain,
+		    "TMP_VAR",
+		    true
+		);    	
+		
+  		return DataRef(var);
   	}  
   	    
 
@@ -948,10 +956,46 @@ namespace EUROPA {
   	{
   	}
 
+  	// see ModelAccessor.isConstrained in Nddl compiler 
+    bool isConstrained(const LabelStr& predicateInstance)
+    {
+    	unsigned int tokenCnt = predicateInstance.countElements(".");
+    	
+    	// If the predicate is not qualified that means it belongs to the object in scope
+    	if (tokenCnt == 1)
+    	    return true;
+    	    
+    	// If the prefix is a class, it means it can be any object instance, so it must not be constrained    
+        LabelStr prefix(predicateInstance.getElement(0,"."));
+        if (!isClass(prefix))
+            return true;
+    	
+    	return false;
+    }    
+
   	DataRef ExprSubgoal::doEval(RuleInstanceEvalContext& context) const  
   	{
   		debugMsg("XMLInterpreter:InterpretedRule","Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString());
-  		TokenId slave = context.getRuleInstance()->createSubgoal(m_name,m_predicateType,m_predicateInstance,m_relation);
+  		
+  		bool constrained = isConstrained(m_predicateInstance);
+  		ConstrainedVariableId owner;
+  		if (constrained) {
+         	unsigned int tokenCnt = m_predicateInstance.countElements(".");
+  			if (tokenCnt == 1) 
+  			    owner = context.getVar("object");
+  			else      
+  			    owner = context.getVar(m_predicateInstance.getElement(0,".").c_str());  
+  		}
+  		  		
+  		TokenId slave = context.getRuleInstance()->createSubgoal(
+  		    m_name,
+  		    m_predicateType,
+  		    m_predicateInstance,
+  		    m_relation,
+  		    constrained,
+  		    owner
+  		);
+  		
   		context.addToken(m_name.c_str(),slave);
   		debugMsg("XMLInterpreter:InterpretedRule","Created  subgoal " << m_predicateType.toString() << ":" << m_name.toString());
   		return DataRef::null;
@@ -1020,6 +1064,8 @@ namespace EUROPA {
                 m_ifBody
             )
         );
+
+  		debugMsg("XMLInterpreter:InterpretedRule","Evaluated IF " << m_op << " " << lhs.getValue()->toString() << " " << rhs.getValue()->toString());
         
   		return DataRef::null;  		
   	}  
@@ -1039,6 +1085,7 @@ namespace EUROPA {
   	DataRef ExprLoop::doEval(RuleInstanceEvalContext& context) const
   	{
         context.getRuleInstance()->executeLoop(context,m_varName,m_varType,m_varValue,m_loopBody);
+  		debugMsg("XMLInterpreter:InterpretedRule","Evaluated LOOP " << m_varName.toString() << "," << m_varValue.toString());
   		return DataRef::null;  		
   	}
   	  	     
@@ -1197,7 +1244,7 @@ namespace EUROPA {
                         false) 
     {
     	commonInit(parameterNames, parameterTypes, assignVars, assignValues, constraints, close);
-    	debugMsg("XMLInterpreter:InterpretedToken","Created token(" << getKey() << ") of type:" << predicateName.toString());
+    	debugMsg("XMLInterpreter:InterpretedToken","Created token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
     }
   	                     
     InterpretedToken::InterpretedToken(const TokenId& master, 
@@ -1219,7 +1266,7 @@ namespace EUROPA {
                         false) 
     {
     	commonInit(parameterNames, parameterTypes, assignVars, assignValues, constraints, close);
-    	debugMsg("XMLInterpreter:InterpretedToken","Created slave token(" << getKey() << ") of type:" << predicateName.toString());
+    	debugMsg("XMLInterpreter:InterpretedToken","Created slave token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
     }
         
     InterpretedToken::~InterpretedToken()
@@ -1561,11 +1608,11 @@ namespace EUROPA {
         // TODO: need to pass in eval context from outside
 	    RuleInstanceEvalContext evalContext(NULL,getId());
 	    
-    	debugMsg("XMLInterpreter:InterpretedRule","Executing interpreted rule:" << getRule()->getName().toString());
+    	debugMsg("XMLInterpreter:InterpretedRule","Executing interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
 		for (unsigned int i=0; i < m_body.size(); i++) {
 			m_body[i]->eval(evalContext);
 		}		
-    	debugMsg("XMLInterpreter:InterpretedRule","Executed  interpreted rule:" << getRule()->getName().toString());
+    	debugMsg("XMLInterpreter:InterpretedRule","Executed  interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
     }
     
     void InterpretedRuleInstance::createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars)
@@ -1573,51 +1620,39 @@ namespace EUROPA {
         addConstraint(name,vars);    	
     }
 
-  	// see ModelAccessor.isConstrained in Nddl compiler 
-    bool isConstrained(const LabelStr& predicateInstance)
-    {
-    	unsigned int tokenCnt = predicateInstance.countElements(".");
-    	
-    	// If the predicate is not qualified that means it belongs to the object in scope
-    	if (tokenCnt == 1)
-    	    return true;
-    	    
-    	// If the prefix is a class, it means it can be any object instance, so it must not be constrained    
-        LabelStr prefix(predicateInstance.getElement(0,"."));
-        if (!isClass(prefix))
-            return true;
-    	
-    	return false;
-    }
-    
     TokenId InterpretedRuleInstance::createSubgoal(
                                         const LabelStr& name,
                                         const LabelStr& predicateType, 
                                         const LabelStr& predicateInstance, 
-                                        const LabelStr& relation)
+                                        const LabelStr& relation,
+                                        bool isConstrained,
+                                        ConstrainedVariableId& owner)
     {
   		TokenId slave = TokenFactory::createInstance(m_token,predicateType,relation);
   		addSlave(slave,name);  		
 
   		// For qualified names like "object.helloWorld" must add constraint to the object variable on the slave token
   		// See RuleWriter.allocateSlave in Nddl compiler 
-  		if (isConstrained(predicateInstance)) {
+  		if (isConstrained) {
   			std::vector<ConstrainedVariableId> vars;
   			    
          	unsigned int tokenCnt = predicateInstance.countElements(".");
-  		    // TODO: getting the object to constrain should be handled through a qualified var Expr
-  			if (tokenCnt <= 2) { // equivalent of sameObject() in NddlRules.hh
-                vars.push_back(NDDL::var(getId(),"object"));
+  			if (tokenCnt <= 2) {
+  			    vars.push_back(owner);
   			}
   			else {  // equivalent of constrainObject() in NddlRules.hh
   				// TODO: this can be done more efficiently
   				int cnt = predicateInstance.countElements(".");
-  				std::string prefix(predicateInstance.getElement(0,".").toString());
+  				std::string ownerName(predicateInstance.getElement(0,".").toString());
+  				std::string prefix(predicateInstance.getElement(1,".").toString());
   				std::string tokenName(predicateInstance.getElement(cnt-1,".").toString());
   				std::string asString = predicateInstance.toString();
-  				std::string suffix = asString.substr(prefix.size()+1,asString.size()-(prefix.size()+tokenName.size()+2));
-  				//debugMsg("XMLInterpreter","Subgoal slave object constraint. prefix=" << prefix << " suffix=" << suffix << " tokenName=" << tokenName);
-                vars.push_back(varFromObject(prefix,suffix));
+  				std::string suffix = asString.substr(
+  				    ownerName.size()+prefix.size()+2,
+  				    asString.size()-(prefix.size()+tokenName.size()+2)
+  				);
+  				debugMsg("XMLInterpreter:InterpretedRule","Subgoal slave object constraint. prefix=" << prefix << " suffix=" << suffix << " tokenName=" << tokenName);
+                vars.push_back(varFromObject(owner,prefix,suffix));
   			}
   			
             vars.push_back(slave->getObject());

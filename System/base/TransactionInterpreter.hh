@@ -132,7 +132,9 @@ namespace EUROPA {
   	    virtual DataRef eval(EvalContext& context) const;  
   	    
   	protected:
-  	    ConstrainedVariableId m_var;
+  	    DbClientId& m_dbClient;
+  	    LabelStr m_type;
+  	    const AbstractDomain* m_domain;
   };
   
   class ExprVariableRef : public Expr
@@ -310,7 +312,9 @@ namespace EUROPA {
                    const LabelStr& name,
                    const LabelStr& predicateType, 
                    const LabelStr& predicateInstance, 
-                   const LabelStr& relation);
+                   const LabelStr& relation,
+                   bool isConstrained,
+                   ConstrainedVariableId& owner);
                    
         // TODO: this should eventually replace addVariable in RuleInstance    
         // it's a dynamic version that doesn't require knowing the actual baseDomain of the variable at compile time               
