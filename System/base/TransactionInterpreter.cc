@@ -1428,6 +1428,8 @@ namespace EUROPA {
 	                baseDomain,
 	                parameterNames[i]
 	            );
+                debugMsg("XMLInterpreter:InterpretedToken","Token " << getName().toString() << " added MonoDomain Parameter " 
+                                               << parameter->toString() << " " << parameterNames[i].toString());
 	        }
                 	        
             debugMsg("XMLInterpreter:InterpretedToken","Token " << getName().toString() << " added Parameter " 
@@ -1610,9 +1612,8 @@ namespace EUROPA {
 	    RuleInstanceEvalContext evalContext(NULL,getId());
 	    
     	debugMsg("XMLInterpreter:InterpretedRule","Executing interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
-		for (unsigned int i=0; i < m_body.size(); i++) {
+		for (unsigned int i=0; i < m_body.size(); i++) 
 			m_body[i]->eval(evalContext);
-		}		
     	debugMsg("XMLInterpreter:InterpretedRule","Executed  interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
     }
     
@@ -1815,7 +1816,7 @@ namespace EUROPA {
                  addVariable(loopVarDomain, false, loopVarName);
              }
 
-     	     for (unsigned int i=0; i < m_body.size(); i++) 
+     	     for (unsigned int i=0; i < loopBody.size(); i++) 
 		         loopBody[i]->eval(evalContext);
                     
              clearLoopVar(loopVarName);
