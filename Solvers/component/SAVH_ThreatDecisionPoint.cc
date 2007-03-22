@@ -438,6 +438,8 @@ namespace EUROPA {
       check_error(m_flawedInstant.isValid());
       m_flawedInstant->getProfile()->getResource()->getOrderingChoices(m_flawedInstant, m_choices);
 
+      debugMsg("ThreatDecisionPoint:handleInitialize", "Found " << m_choices.size() << " choices before filtering.");
+
       //filter based on the configuration
       ChoiceFilters filter;
       createFilter(filter, m_filter, const_cast<ProfileId&>(m_flawedInstant->getProfile()));
