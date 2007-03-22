@@ -38,7 +38,7 @@ namespace EUROPA {
      * @param name The name for the variable. Must be unique.
      * @return The Id of the variable created. Will error out rather than return a noId.
      */
-    ConstrainedVariableId createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar = false);
+    ConstrainedVariableId createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar = false, bool canBeSpecified=true);
 
     /**
      * @brief Create a variable

@@ -42,9 +42,9 @@ namespace EUROPA {
   const DbClientId& DbClient::getId() const{return m_id;}
 
   ConstrainedVariableId
-  DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar)
+  DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar,bool canBeSpecified)
   {
-    ConstrainedVariableId variable = TypeFactory::createVariable(typeName, m_planDb->getConstraintEngine(), baseDomain, true, name);
+    ConstrainedVariableId variable = TypeFactory::createVariable(typeName, m_planDb->getConstraintEngine(), baseDomain, canBeSpecified, name);
     if (m_planDb->getSchema()->isObjectType(typeName) && !variable->isClosed()) {
       m_planDb->makeObjectVariableFromType(typeName, variable);
     }
