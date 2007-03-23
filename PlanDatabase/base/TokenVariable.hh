@@ -66,7 +66,7 @@ namespace EUROPA{
 
     void handleConstraintRemoved(const ConstraintId& constraint);
 			
-    DomainType m_integratedBaseDomain; /**< The integrated base domain over this and all supported tokens. */
+    DomainType* m_integratedBaseDomain; /**< The integrated base domain over this and all supported tokens. */
     bool m_isLocallySpecified;
     double m_localSpecifiedValue;
     const TokenId m_parentToken;
@@ -80,32 +80,35 @@ namespace EUROPA{
 					   bool canBeSpecified,
 					   const LabelStr& name)
     : Variable<DomainType>(constraintEngine, baseDomain, canBeSpecified, name, parent, index), 
-      m_integratedBaseDomain(baseDomain), m_isLocallySpecified(false), m_localSpecifiedValue(0),
+      m_integratedBaseDomain(static_cast<DomainType*>(baseDomain.copy())), m_isLocallySpecified(false), m_localSpecifiedValue(0),
       m_parentToken(parent){
     check_error(m_parentToken.isValid());
     check_error(this->getIndex() >= 0);
   }
 
   template <class DomainType> 
-  TokenVariable<DomainType>::~TokenVariable() {}
+  TokenVariable<DomainType>::~TokenVariable() 
+  {
+  	delete m_integratedBaseDomain;
+  }
 
   template<class DomainType>
   void TokenVariable<DomainType>::insert(double value) {
     Variable<DomainType>::insert(value);
-    this->m_integratedBaseDomain.insert(value);
+    this->m_integratedBaseDomain->insert(value);
   }
 
   template<class DomainType>
   void TokenVariable<DomainType>::remove(double value) {
     Variable<DomainType>::remove(value);
-    if(this->m_integratedBaseDomain.isMember(value))
-      this->m_integratedBaseDomain.remove(value);
+    if(this->m_integratedBaseDomain->isMember(value))
+      this->m_integratedBaseDomain->remove(value);
   }
 
   template <class DomainType>
   void TokenVariable<DomainType>::close(){
     Variable<DomainType>::close();
-    this->m_integratedBaseDomain.close();
+    this->m_integratedBaseDomain->close();
   }
 
   template <class DomainType>
@@ -124,10 +127,10 @@ namespace EUROPA{
   void TokenVariable<DomainType>::handleRestrictBaseDomain(const AbstractDomain& domain){
     Variable<DomainType>::handleRestrictBaseDomain(domain);
 
-    if(this->m_integratedBaseDomain.isOpen() && domain.isClosed())
-      this->m_integratedBaseDomain.close();
+    if(this->m_integratedBaseDomain->isOpen() && domain.isClosed())
+      this->m_integratedBaseDomain->close();
 
-    this->m_integratedBaseDomain.intersect(domain);
+    this->m_integratedBaseDomain->intersect(domain);
   }
 
   template <class DomainType>
@@ -155,7 +158,7 @@ namespace EUROPA{
 
     // If it should no longer be specified, relax it to the integrated base domain
     if(!shouldBeSpecified)
-      Variable<DomainType>::reset(this->m_integratedBaseDomain);
+      Variable<DomainType>::reset(*(this->m_integratedBaseDomain));
 
     // Notify active token variable to recompute specified domain if necessary
     if(this->m_parentToken->isMerged()){
@@ -166,8 +169,8 @@ namespace EUROPA{
 
   template <class DomainType>
   void TokenVariable<DomainType>::handleBase(const AbstractDomain& domain){
-    this->m_integratedBaseDomain.intersect(domain);
-    this->m_derivedDomain.intersect(domain);
+    this->m_integratedBaseDomain->intersect(domain);
+    this->m_derivedDomain->intersect(domain);
   }
 
   template <class DomainType>
@@ -192,14 +195,14 @@ namespace EUROPA{
 
     // If it is already specified, reset it, otherwsie just relax it.
     if(this->isSpecified())
-      this->m_derivedDomain.reset(this->m_integratedBaseDomain);
+      this->m_derivedDomain->reset(*(this->m_integratedBaseDomain));
     else
-      this->m_derivedDomain.relax(this->m_integratedBaseDomain);
+      this->m_derivedDomain->relax(*(this->m_integratedBaseDomain));
   }
 
   template <class DomainType>
   bool TokenVariable<DomainType>::computeBaseDomain(){
-    this->m_integratedBaseDomain.relax(this->m_baseDomain);
+    this->m_integratedBaseDomain->relax(*(this->m_baseDomain));
     bool shouldBeSpecified(false);
     double specifiedValue(0);
 
@@ -212,8 +215,8 @@ namespace EUROPA{
       const Id<TokenVariable<DomainType> >& var = mergedToken->getVariables()[this->getIndex()];
 
       // Update the base domain to include any restrictions on merged token
-      this->m_integratedBaseDomain.intersect(var->baseDomain());
-     	checkError(var->baseDomain().isOpen() || !this->m_integratedBaseDomain.isEmpty(), var->toString() << " cannot merge.");
+      this->m_integratedBaseDomain->intersect(var->baseDomain());
+     	checkError(var->baseDomain().isOpen() || !this->m_integratedBaseDomain->isEmpty(), var->toString() << " cannot merge.");
 
       // if not specified, ignore it
       if(!var->isSpecified())

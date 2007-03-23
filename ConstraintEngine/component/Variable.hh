@@ -99,8 +99,8 @@ namespace EUROPA {
     AbstractDomain& getCurrentDomain();
 
   protected:
-    DomainType m_baseDomain; /**< The initial (and maximal, unless dynamic) set for the domain of this variable. */
-    DomainType m_derivedDomain; /**< The current domain of the variable based on user specifications and derived from
+    DomainType* m_baseDomain; /**< The initial (and maximal, unless dynamic) set for the domain of this variable. */
+    DomainType* m_derivedDomain; /**< The current domain of the variable based on user specifications and derived from
                                    constraint propagation. */
   };
 
@@ -112,12 +112,12 @@ namespace EUROPA {
                                  const EntityId& parent,
                                  int index) 
     : ConstrainedVariable(constraintEngine, canBeSpecified, name, parent, index), 
-    m_baseDomain(baseDomain),
-    m_derivedDomain(baseDomain) {
+    m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),
+    m_derivedDomain(static_cast<DomainType*>(baseDomain.copy())) {
     debugMsg("Variable:Variable", "Base Domain = " << baseDomain.toString());
 
     // Note that we permit the domain to be empty initially
-    m_derivedDomain.setListener(m_listener);
+    m_derivedDomain->setListener(m_listener);
 
     // Don't propagate set operations on dynamic or empty domains.
     if (baseDomain.isOpen() || baseDomain.isEmpty())
@@ -126,11 +126,13 @@ namespace EUROPA {
   
   template<class DomainType>
   Variable<DomainType>::~Variable() {
+  	delete m_baseDomain;
+  	delete m_derivedDomain;
   }
 
   template<class DomainType>
   const DomainType& Variable<DomainType>::getBaseDomain() const {
-    return(m_baseDomain);
+    return(*m_baseDomain);
   }
 
   template<class DomainType>
@@ -139,12 +141,12 @@ namespace EUROPA {
       update();
 
     if (!provenInconsistent())
-      return(m_derivedDomain);
+      return(*m_derivedDomain);
 
     static bool sl_initialized = false;
     static DomainType* sl_emptyDomain = 0;
     if (!sl_initialized) {
-      sl_emptyDomain = static_cast<DomainType*>(m_derivedDomain.copy());
+      sl_emptyDomain = static_cast<DomainType*>(m_derivedDomain->copy());
       if (sl_emptyDomain->isOpen())
         sl_emptyDomain->close();
       sl_emptyDomain->empty();
@@ -156,19 +158,19 @@ namespace EUROPA {
   template<class DomainType>
   AbstractDomain& Variable<DomainType>::getCurrentDomain() {
     check_error(validate());
-    return(m_derivedDomain);
+    return(*m_derivedDomain);
   }
 
   template<class DomainType>
   const DomainType& Variable<DomainType>::getLastDomain() const {
     check_error(validate());
-    return(m_derivedDomain);
+    return(*m_derivedDomain);
   }
 
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::lastDomain() const {
     check_error(validate());
-    return(m_derivedDomain);
+    return(*m_derivedDomain);
   }
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::derivedDomain() {
@@ -179,30 +181,30 @@ namespace EUROPA {
   template<class DomainType>
   const AbstractDomain& Variable<DomainType>::baseDomain() const {
     check_error(validate());
-    return(m_baseDomain);
+    return(*m_baseDomain);
   }
 
   template<class DomainType>
   void Variable<DomainType>::handleRestrictBaseDomain(const AbstractDomain& newBaseDomain) {
     check_error(validate());
 
-    if(newBaseDomain.isClosed() && m_baseDomain.isOpen())
-      m_baseDomain.close();
+    if(newBaseDomain.isClosed() && m_baseDomain->isOpen())
+      m_baseDomain->close();
 
     // Restrict the base domain - no change will quit
-    if(!m_baseDomain.intersect(newBaseDomain))
+    if(!m_baseDomain->intersect(newBaseDomain))
       return;
 
-    m_derivedDomain.intersect(m_baseDomain);
+    m_derivedDomain->intersect(*m_baseDomain);
 
     // If a singleton, since it has changed, we have to set the value.
-    if(m_baseDomain.isClosed() && m_baseDomain.isSingleton() && !isSpecified())
-      internalSpecify(m_baseDomain.getSingletonValue());
+    if(m_baseDomain->isClosed() && m_baseDomain->isSingleton() && !isSpecified())
+      internalSpecify(m_baseDomain->getSingletonValue());
   }
 
   template<class DomainType>
   AbstractDomain& Variable<DomainType>::internal_baseDomain() {
-    return(m_baseDomain);
+    return(*m_baseDomain);
   }
 }
 #endif

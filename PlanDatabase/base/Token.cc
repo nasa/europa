@@ -27,7 +27,7 @@ namespace EUROPA{
 
   StateDomain::StateDomain(const AbstractDomain& org)
     : EnumeratedDomain(org){
-    check_error(dynamic_cast<const StateDomain*>(&org) != 0,
+    check_error(org.getTypeName().toString() == "TokenStates",
 		"Attempted to construct a StateDomain with invalid type " + org.getTypeName().toString());
   }
 
