@@ -42,6 +42,7 @@ class PredicateWriter {
     writer.write(" : "+ superCppClass +"(planDatabase, name, rejectable, false) {\n");
     writer.indent();
     writer.write("handleDefaults(close);\n");
+    writeAssignments(writer,predicate);
 
     writer.unindent();
     writer.write("}\n\n");
@@ -51,7 +52,7 @@ class PredicateWriter {
     writer.write(" {\n");
     writer.indent();
     writer.write("handleDefaults(close);\n");
-		writeAssignments(writer,predicate);
+    writeAssignments(writer,predicate);
     writer.unindent();
     writer.write("}\n\n");
 
