@@ -1294,120 +1294,9 @@ namespace EUROPA {
     {
     }
 
-    // Hack to get around limitation of TokenVariable that requires the domain of the
-    // variable to be known at compile time. that needs to be fixed. in the mean time
-    // this Abstract domain wrpper allows us to create generic TokenVariables
-    class MonoDomain : public AbstractDomain 
-    {
-      public:
-        MonoDomain(AbstractDomain* wrappedDomain)
-            : AbstractDomain(false,false,"")
-            , m_wrappedDomain(wrappedDomain)
-        {
-        }
-        
-        MonoDomain(const AbstractDomain& rhs)
-            : AbstractDomain(false,false,"")
-            , m_wrappedDomain(rhs.copy())
-        {
-        }
-        
-        ~MonoDomain()
-        {
-        	delete m_wrappedDomain;
-        }
-        
-        virtual void close()  { m_wrappedDomain->close(); }
-        virtual void open()   { m_wrappedDomain->open(); }
-        virtual bool isClosed() const { return m_wrappedDomain->isClosed(); }
-        virtual bool isOpen() const   { return m_wrappedDomain->isOpen(); }
-
-        virtual bool isFinite() const  { return m_wrappedDomain->isFinite(); }
-        virtual bool isNumeric() const { return m_wrappedDomain->isNumeric(); }
-        virtual bool isBool() const    { return m_wrappedDomain->isBool(); }
-        virtual bool isString() const  { return m_wrappedDomain->isString(); }
-
-        virtual void setListener(const DomainListenerId& listener) { m_wrappedDomain->setListener(listener); }
-        virtual const DomainListenerId& getListener() const { return m_wrappedDomain->getListener(); }
-
-        virtual const LabelStr& getTypeName() const { return m_wrappedDomain->getTypeName(); }
-
-        virtual bool isEnumerated() const { return m_wrappedDomain->isEnumerated(); }
-        virtual bool isInterval() const { return m_wrappedDomain->isInterval(); }
-
-        virtual bool isSingleton() const { return m_wrappedDomain->isSingleton(); }
-        virtual bool isEmpty() const { return m_wrappedDomain->isEmpty(); };
-
-        virtual void empty() { m_wrappedDomain->empty(); }
-
-        virtual unsigned int getSize() const { return m_wrappedDomain->getSize(); }
-
-        virtual void operator>>(ostream& os) const { os << *m_wrappedDomain; }
-
-        virtual double getUpperBound() const { return m_wrappedDomain->getUpperBound(); }
-        virtual double getLowerBound() const { return m_wrappedDomain->getLowerBound(); }
-
-        virtual double getSingletonValue() const { return m_wrappedDomain->getSingletonValue(); }
-
-        virtual bool getBounds(double& lb, double& ub) const { return m_wrappedDomain->getBounds(lb,ub); }
-
-        virtual void set(double value) { m_wrappedDomain->set(value); }
-
-        virtual void reset(const AbstractDomain& dom) { m_wrappedDomain->reset(dom); }
-
-        virtual void relax(const AbstractDomain& dom) { m_wrappedDomain->isFinite(); }
-
-        virtual void relax(double value) { m_wrappedDomain->relax(value); }
-
-        virtual void insert(double value) { m_wrappedDomain->insert(value); }
-
-        virtual void insert(const std::list<double>& values) { m_wrappedDomain->insert(values); }
-
-        virtual void remove(double value) { m_wrappedDomain->remove(value); }
-
-        virtual bool intersect(const AbstractDomain& dom) { return m_wrappedDomain->intersect(dom); }
-
-        virtual bool intersect(double lb, double ub) { return m_wrappedDomain->intersect(lb,ub); }
-
-        virtual bool difference(const AbstractDomain& dom) { return m_wrappedDomain->difference(dom); }
-
-        virtual AbstractDomain& operator=(const AbstractDomain& dom) { return *m_wrappedDomain=dom; }
-
-        virtual bool isMember(double value) const { return m_wrappedDomain->isMember(value); }
-
-        virtual bool operator==(const AbstractDomain& dom) const { return *m_wrappedDomain == dom; }
-
-        virtual bool operator!=(const AbstractDomain& dom) const { return *m_wrappedDomain != dom; }
-
-        virtual bool isSubsetOf(const AbstractDomain& dom) const { return m_wrappedDomain->isSubsetOf(dom); }
-
-        virtual bool intersects(const AbstractDomain& dom) const { return m_wrappedDomain->intersects(dom); }
-
-        virtual bool equate(AbstractDomain& dom) { return m_wrappedDomain->equate(dom); }
-
-        virtual void getValues(std::list<double>& results) const { return m_wrappedDomain->getValues(results); };
-
-        virtual double minDelta() const { return m_wrappedDomain->minDelta(); }
-
-        virtual double translateNumber(double number, bool asMin) const { return m_wrappedDomain->translateNumber(number,asMin); }
-
-        virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const { return m_wrappedDomain->convertToMemberValue(strValue,dblValue); }
-
-        virtual bool areBoundsFinite() const { return m_wrappedDomain->areBoundsFinite(); }
-
-        virtual AbstractDomain* copy() const { return new MonoDomain(m_wrappedDomain->copy()); }
-
-        virtual std::string toString() const { return m_wrappedDomain->toString(); }
-
-        virtual std::string toString(double value) const { return m_wrappedDomain->toString(value); }
-
-      protected:
-          virtual void testPrecision(const double& value) const { /*noop*/ }
-          
-          AbstractDomain* m_wrappedDomain;
-    };
-  
-// slight modification of the version in NddlRules.hh  
+// slight modification of the version in NddlRules.hh that can be used with a variable name
+// instead of a literal  
+// TODO: make code generator use this instead
 #define token_constraint1(name, vars)\
 {\
   ConstraintId c0 = ConstraintLibrary::createConstraint(\
@@ -1441,15 +1330,10 @@ namespace EUROPA {
                 getPlanDatabase()->makeObjectVariableFromType(parameterTypes[i], parameter);
 	        }
 	        else {
-	        	// TODO!: this will probably break as the code does some static casts in other places and it never expects a MonoDomain
-	    	    AbstractDomain* d = TypeFactory::baseDomain(parameterTypes[i].c_str()).copy();  
-    	    	MonoDomain baseDomain(d);
     	        parameter = addParameter(
-	                baseDomain,
+	                TypeFactory::baseDomain(parameterTypes[i].c_str()),
 	                parameterNames[i]
 	            );
-                debugMsg("XMLInterpreter:InterpretedToken","Token " << getName().toString() << " added MonoDomain Parameter " 
-                                               << parameter->toString() << " " << parameterNames[i].toString());
 	        }
                 	        
             debugMsg("XMLInterpreter:InterpretedToken","Token " << getName().toString() << " added Parameter " 
