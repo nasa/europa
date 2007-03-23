@@ -75,19 +75,26 @@ namespace EUROPA {
   {  	  
   	  m_systemClasses.insert("Object");
   	  m_systemClasses.insert("Timeline");
-  	  //m_systemClasses.insert("Resource"); // TODO: export NddlResource
+  	  m_systemClasses.insert("Resource"); 
+  	  m_systemClasses.insert("Resource.change");
   	  m_systemClasses.insert("Reusable");
   	  m_systemTokens.insert("Reusable.uses");
+  	  // TODO: expose Reservoir and Unary
   	  
   	  // TODO: this should be done only once after the schema is initialized, not for every TransactionPlayer
   	  createDefaultObjectFactory("Object", true);
       REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);	    	    	  
-      //REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);	    	    	  
+
+      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);	    	    	  
+      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float);	    	    	  
+      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float);	    	    	  
+      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float);	    	    	  
+      new ResourceChangeTokenFactory("Resource.change");
 
       REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable);	    	    	  
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:int:int);	    	    	  
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:int:int:int);	    	    	  
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:int:int:int:int);	    	    	  
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float);	    	    	  
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float);	    	    	  
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float:float);	    	    	  
       new ReusableUsesTokenFactory("Reusable.uses");
   }
 
@@ -565,7 +572,7 @@ namespace EUROPA {
       for(enumValue = setElement->FirstChildElement(); enumValue; enumValue = enumValue->NextSiblingElement() ) {
       	double newValue=0;
       	
-    	// TODO: deal with enum types other than symbol
+    	// TODO: deal with enum types other than symbol, this will be needed to support typedef
       	if (strcmp(enumValue->Value(),"symbol") == 0) {
       		LabelStr symbolValue(enumValue->Attribute("value"));
       		newValue = symbolValue;
@@ -1886,6 +1893,59 @@ namespace EUROPA {
 	    return instance; 
 	}
 
+  	ResourceObjectFactory::ResourceObjectFactory(const LabelStr& signature) 
+  	        : NativeObjectFactory("Resource",signature) 
+  	{
+  	}
+  	 
+  	ResourceObjectFactory::~ResourceObjectFactory() 
+  	{
+  	} 
+  	
+    ObjectId ResourceObjectFactory::makeNewObject( 
+                        const PlanDatabaseId& planDb, 
+                        const LabelStr& objectType, 
+                        const LabelStr& objectName, 
+                        const std::vector<const AbstractDomain*>& arguments) const 
+	{ 
+	   	Id<NDDL::NddlResource>  instance = (new NDDL::NddlResource(planDb, objectType, objectName,true))->getId();
+    	
+	   	std::vector<float> argValues;
+	   	for (unsigned int i=0;i<arguments.size();i++)
+	   	    argValues.push_back((float)(arguments[i]->getSingletonValue()));
+	   	    
+	   	if (argValues.size() == 0) 
+    		instance->constructor();
+    	else if (argValues.size() == 3)
+    		instance->constructor(argValues[0],argValues[1],argValues[2]);
+    	else if (argValues.size() == 5)
+    		instance->constructor(argValues[0],argValues[1],argValues[2],argValues[3],argValues[4]);
+    	else if (argValues.size() == 7)
+    		instance->constructor(argValues[0],argValues[1],argValues[2],argValues[3],argValues[4],argValues[5],argValues[6]);
+    	else {
+    		std::ostringstream os;
+    		os << "Unexpected number of args in Resource constructor:" << argValues.size();
+    	    check_runtime_error(ALWAYS_FAILS,os.str());
+    	}	
+	    		
+    	instance->handleDefaults(false /*don't close the object yet*/); 	    	
+	   	debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString()); 
+
+    	return instance;	
+    }   
+    
+	TokenId ResourceChangeTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable) const
+	{
+	   	debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Resource.change"); 
+		return new NDDL::NddlResource::change(planDb,name,rejectable,true);
+	}
+	
+	TokenId ResourceChangeTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+	{
+	   	debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Resource.change"); 
+		return (new NDDL::NddlResource::change(master,name,relation,true))->getId();
+	}     
+		  
   	ReusableObjectFactory::ReusableObjectFactory(const LabelStr& signature) 
   	        : NativeObjectFactory("Reusable",signature) 
   	{
@@ -1943,7 +2003,7 @@ namespace EUROPA {
 /*
  * Here is what can be used as a main to run an interpreted version of NDDL-XML through PSEngine
  * It's also possible to run NDDL (what is support it of it so far) fully interpreted
- * through the java version of PSEngine, see NDDLHelloWorld example in PlanWorks/PSUI  
+ * through the java version of PSEngine, see NDDLHelloWorld example in PlanWorks/PSUI/test  
 
 #include "Nddl.hh" 
 #include "SolverAssembly.hh" 
@@ -1968,18 +2028,13 @@ int main(int argc, const char ** argv)
   int endHorizon   = 100;
   int maxSteps     = 1000;
   
-  if (!runPSEngineTest(plannerConfig,txSource,startHorizon,endHorizon,maxSteps)) 
+  if (!executeWithEngineTest(plannerConfig,txSource,startHorizon,endHorizon,maxSteps)) 
       return -1;
       
   return 0;
 }
  
-bool runPSEngineTest(
-          const char* plannerConfig, 
-          const char* txSource,
-          int startHorizon,
-          int endHorizon,
-          int maxSteps)
+bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int startHorizon, int endHorizon, int maxSteps)
 {
     try {
 	  PSEngine engine;
@@ -1989,8 +2044,11 @@ bool runPSEngineTest(
 	
 	  PSSolver* solver = engine.createSolver(plannerConfig);
 	  solver->configure(startHorizon,endHorizon);
-	
-      for (int i = 0; i<maxSteps; i = solver->getStepCount()) {
+	  int i;
+      for (i = 0; 
+           !solver->isExhausted() &&
+           !solver->isTimedOut() &&
+           i<maxSteps; i = solver->getStepCount()) {
 		  solver->step();
 		  PSList<std::string> flaws;
 		  if (solver->isConstraintConsistent()) {
@@ -2000,9 +2058,19 @@ bool runPSEngineTest(
 			      break;
 		  }
 		  else
-			debugMsg("XMLInterpreter","Iteration " << i << " Solver is not constraint consistent");
+			debugMsg("Main","Iteration " << i << " Solver is not constraint consistent");
 	  }
-	
+	  
+	  if (solver->isExhausted()) {
+	      debugMsg("Main","Solver was exhausted after " << i << " steps");	  
+	  }
+	  else if (solver->isTimedOut()) {
+	      debugMsg("Main","Solver timed out after " << i << " steps");
+	  }
+	  else {    
+	      debugMsg("Main","Solver finished after " << i << " steps");
+	  }	      
+	      
 	  delete solver;	
 	  engine.shutdown();
 
