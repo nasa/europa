@@ -79,11 +79,9 @@ namespace EUROPA {
   	  m_systemClasses.insert("Reusable");
   	  m_systemTokens.insert("Reusable.uses");
   	  
-  	  // TODO: this should be done once after the schema is initialized, not for every TransactionPlayer
-  	  // TODO: check to make sure this is done only once
+  	  // TODO: this should be done only once after the schema is initialized, not for every TransactionPlayer
   	  createDefaultObjectFactory("Object", true);
       REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);	    	    	  
-
       //REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);	    	    	  
 
       REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable);	    	    	  
@@ -506,11 +504,12 @@ namespace EUROPA {
       		LabelStr name(child->Attribute("name"));
       		LabelStr type(child->Attribute("type"));
       		localVars[name.toString()]=type.toString();
-      		
-      		// TODO: deal with domain restrictions ???
+
+            Expr* domainRestriction=NULL;        		
       		if (child->FirstChildElement() != NULL)
-      	        check_runtime_error(ALWAYS_FAILS,std::string("Can't deal with domain restrictions for local var ") + name.toString());      		
-      		ruleBody.push_back(new ExprLocalVar(name,type, isGuarded(name,element)));
+      	        domainRestriction=valueToExpr(child->FirstChildElement());
+      	              		
+      		ruleBody.push_back(new ExprLocalVar(name,type, isGuarded(name,element), domainRestriction));
       	}
       	else if (strcmp(child->Value(),"if") == 0) {
       		const TiXmlElement* opElement = child->FirstChildElement();
@@ -564,15 +563,19 @@ namespace EUROPA {
       std::list<double> values;
       const TiXmlElement* enumValue;
       for(enumValue = setElement->FirstChildElement(); enumValue; enumValue = enumValue->NextSiblingElement() ) {
+      	double newValue=0;
+      	
+    	// TODO: deal with enum types other than symbol
       	if (strcmp(enumValue->Value(),"symbol") == 0) {
       		LabelStr symbolValue(enumValue->Attribute("value"));
-            schema->addValue(enumName, symbolValue);
-            values.push_back(symbolValue);
+      		newValue = symbolValue;
       	}
       	else {
-      	    // TODO: deal with other types
       	    check_runtime_error(ALWAYS_FAILS,std::string("Don't know how to deal with enum values of type ") + enumValue->Value());
       	}
+      	
+        schema->addValue(enumName, newValue);
+        values.push_back(newValue);
       }	      
       
       new EnumeratedTypeFactory(
@@ -756,7 +759,6 @@ namespace EUROPA {
     
   	ExprConstant::~ExprConstant()
   	{
-  		// TODO: delete temp variable?
   	}
 
   	DataRef ExprConstant::eval(EvalContext& context) const
@@ -764,7 +766,7 @@ namespace EUROPA {
   		// need to create a new variable every time this is evaluated, since propagation
   		// will affect the variable, should provide immutable variables so that a single var
   		// can be created for a constant
-  		// TODO: Who destroys this variable, need to give handle to RuleInstance
+  		// TODO: Who destroys this variable?, need to give handle to RuleInstance
 		ConstrainedVariableId var = m_dbClient->createVariable(
 		    m_type.c_str(),
 		    *m_domain,
@@ -802,7 +804,7 @@ namespace EUROPA {
 	        check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+varName+" in Evaluation Context");
      	
      	for (unsigned int idx = 1;idx<vars.size();idx++) {
-     		// TODO: should probably make sure it's an object var first
+     		check_error(isClass(rhs->baseDomain().getTypeName()), std::string("Can't apply dot operator to:")+rhs->baseDomain().getTypeName().toString());
      		check_runtime_error(rhs->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+vars[idx]);
      		ObjectId object = rhs->derivedDomain().getSingletonValue();
      		rhs = object->getVariable(object->getName().toString()+"."+vars[idx]);
@@ -841,15 +843,15 @@ namespace EUROPA {
 			arguments.push_back(&(arg.getValue()->derivedDomain()));
   		}
   		
-  		// TODO: when this is the rhs of an assignment in a constructor, this must create an object specifying 
+  		// when this is the rhs of an assignment in a constructor, an object var must be created to specify 
   		// the enclosing object (for which the constructor is being executed) as the parent.
-  		// The way it is now, objects are created :
+  		// TODO: The way it is now, when using code generation objects are created :
   		// - directly in C++ through new (in the generated code) if the stmt is inside a NDDL constructor
   		// - through the factories if the stmt is in the initial state
   		// This is a problem, everybody should go through the factory
   		// faking it for now, but this is a hack
 
-  		// This assumes for now this is only called inside a constructor  		
+  		// This assumes for now this is only called inside a constructor, not as part of an initial-state   		
   		ObjectId thisObject = context.getVar("this")->derivedDomain().getSingletonValue();
   		LabelStr name(std::string(thisObject->getName().toString() + "." + m_objectName.toString()));  		
      	ObjectId newObject = m_dbClient->createObject(
@@ -1007,16 +1009,18 @@ namespace EUROPA {
   		return DataRef::null;
   	}  
   	 
-  	ExprLocalVar::ExprLocalVar(const LabelStr& name,const LabelStr& type, bool guarded)
+  	ExprLocalVar::ExprLocalVar(const LabelStr& name,const LabelStr& type, bool guarded, Expr* domainRestriction)
   	    : m_name(name)
   	    , m_type(type)
   	    , m_guarded(guarded)
+  	    , m_domainRestriction(domainRestriction)
   	{
-  		m_baseDomain = TypeFactory::baseDomain(type.c_str()).copy();
+  		m_baseDomain = TypeFactory::baseDomain(type.c_str()).copy();  		
   	}
   	
   	ExprLocalVar::~ExprLocalVar()
   	{
+  		delete m_baseDomain;
   	}
 
   	DataRef ExprLocalVar::doEval(RuleInstanceEvalContext& context) const
@@ -1035,6 +1039,9 @@ namespace EUROPA {
   		      m_guarded, // can't be specified
   		      m_name
   		  );
+  		
+  		if (m_domainRestriction != NULL)  
+  		    localVar->restrictBaseDomain(m_domainRestriction->eval(context).getValue()->derivedDomain());
   		  
   		context.addVar(m_name.c_str(),localVar);
   		debugMsg("XMLInterpreter:InterpretedRule","Added RuleInstance local var:" << localVar->toString());
@@ -1060,7 +1067,8 @@ namespace EUROPA {
   		DataRef lhs = m_lhs->eval(context);
   		DataRef rhs = m_rhs->eval(context);
   		
-  		// TODO: this assumes that the variable is always on the lhs, is this true and enforced by the parser?
+  		// TODO: this assumes that the variable is always on the lhs and the value on the rhs
+  		// is this enforced by the parser?
         context.getRuleInstance()->addChildRule(
             new InterpretedRuleInstance(
                 context.getRuleInstance()->getId(), 
@@ -1157,7 +1165,7 @@ namespace EUROPA {
 	    instance->close();
 		m_evalContext = NULL;
 
-    	// TODO: destroy temporary variables created for args
+    	// TODO: destroy temporary variables created for args here
 	  
 	    return instance;
 	} 
@@ -1426,7 +1434,7 @@ namespace EUROPA {
                 getPlanDatabase()->makeObjectVariableFromType(parameterTypes[i], parameter);
 	        }
 	        else {
-	        	// TODO: this will probably break as the code does some static casts in other places and it never expects a MonoDomain
+	        	// TODO!: this will probably break as the code does some static casts in other places and it never expects a MonoDomain
 	    	    AbstractDomain* d = TypeFactory::baseDomain(parameterTypes[i].c_str()).copy();  
     	    	MonoDomain baseDomain(d);
     	        parameter = addParameter(
@@ -1613,7 +1621,7 @@ namespace EUROPA {
 
     void InterpretedRuleInstance::handleExecute()
     {
-        // TODO: need to pass in eval context from outside
+        // TODO: should pass in eval context from outside
 	    RuleInstanceEvalContext evalContext(NULL,getId());
 	    
     	debugMsg("XMLInterpreter:InterpretedRule","Executing interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());

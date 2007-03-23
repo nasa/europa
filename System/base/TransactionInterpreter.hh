@@ -444,7 +444,8 @@ namespace EUROPA {
   	public:
   	    ExprLocalVar(const LabelStr& name,
   	                 const LabelStr& type,
-  	                 bool guarded);
+  	                 bool guarded,
+  	                 Expr* domainRestriction);
   	    virtual ~ExprLocalVar();
 
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;  	    
@@ -453,7 +454,8 @@ namespace EUROPA {
   	    LabelStr m_name;
   	    LabelStr m_type;
   	    bool m_guarded;
-  	    const AbstractDomain* m_baseDomain;
+  	    Expr* m_domainRestriction;
+  	    AbstractDomain* m_baseDomain;
   };      
   
   class ExprIf : public RuleExpr
