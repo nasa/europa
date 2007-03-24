@@ -1,6 +1,7 @@
 #include "Schema.hh"
 #include "SymbolDomain.hh"
 #include "TokenFactory.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -481,6 +482,7 @@ namespace EUROPA {
     objectTypes.insert(objectType);
     membershipRelation.insert(std::pair<LabelStr, NameValueVector>(objectType, NameValueVector()));
     childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
+    debugMsg("Schema","Added object type " << objectType.toString() << " that extends " << parent.toString());
   }
 
   void Schema::addPredicate(const LabelStr& predicate) {

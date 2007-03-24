@@ -46,7 +46,7 @@ namespace EUROPA {
     check_error(factory.isValid());
 
     if(factories.find(factory->getTypeName().getKey()) != factories.end()){
-      debugMsg("TypeFactory:registerFactory", "Over-writing prior registration for " << factory->getTypeName());
+      debugMsg("TypeFactory:registerFactory", "Over-writing prior registration for " << factory->getTypeName().toString());
       ConcreteTypeFactoryId oldFactory = factories.find(factory->getTypeName().getKey())->second;
       factories.erase(factory->getTypeName().getKey());
       delete (ConcreteTypeFactory*) oldFactory;
@@ -55,6 +55,7 @@ namespace EUROPA {
     checkError(factories.find(factory->getTypeName().getKey()) == factories.end(), "Already have '" + factory->getTypeName().toString() + "' registered.");
 
     factories.insert(std::pair<double, ConcreteTypeFactoryId>(factory->getTypeName().getKey(), factory));
+    debugMsg("TypeFactory:registerFactory", "Registered type factory " << factory->getTypeName().toString());
   }
 
   ConstrainedVariableId
