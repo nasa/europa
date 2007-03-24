@@ -316,8 +316,6 @@ namespace EUROPA {
                    bool isConstrained,
                    ConstrainedVariableId& owner);
                    
-        // TODO: this should eventually replace addVariable in RuleInstance    
-        // it's a dynamic version that doesn't require knowing the actual baseDomain of the variable at compile time               
         ConstrainedVariableId addLocalVariable( 
                        const AbstractDomain& baseDomain,
 				       bool canBeSpecified,
@@ -455,7 +453,7 @@ namespace EUROPA {
   	    LabelStr m_type;
   	    bool m_guarded;
   	    Expr* m_domainRestriction;
-  	    AbstractDomain* m_baseDomain;
+  	    const AbstractDomain& m_baseDomain;
   };      
   
   class ExprIf : public RuleExpr

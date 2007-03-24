@@ -572,7 +572,6 @@ namespace EUROPA {
       for(enumValue = setElement->FirstChildElement(); enumValue; enumValue = enumValue->NextSiblingElement() ) {
       	double newValue=0;
       	
-    	// TODO: deal with enum types other than symbol, this will be needed to support typedef
       	if (strcmp(enumValue->Value(),"symbol") == 0) {
       		LabelStr symbolValue(enumValue->Attribute("value"));
       		newValue = symbolValue;
@@ -593,10 +592,35 @@ namespace EUROPA {
       
   }
 
-  void InterpretedDbClientTransactionPlayer::playDefineType(const TiXmlElement &)
+  void InterpretedDbClientTransactionPlayer::playDefineType(const TiXmlElement& element)
   {
-  	  // TODO: implement this
-      check_runtime_error(ALWAYS_FAILS,std::string("typedef is not supported yet"));
+      const char* name = element.Attribute("name");
+
+      const AbstractDomain* restrictedDomain = NULL;
+      if (element.FirstChildElement() != NULL)
+          restrictedDomain =  xmlAsAbstractDomain(*(element.FirstChildElement()),"");
+      
+      const AbstractDomain& domain = (
+          restrictedDomain != NULL 
+              ? *restrictedDomain 
+              : TypeFactory::baseDomain(element.Attribute("basetype"))
+      );
+      
+      
+      if (domain.isEnumerated()) 
+          new EnumeratedTypeFactory(name,name,domain);
+      else
+          new IntervalTypeFactory(name,domain);         
+              
+      std::string domainString = domain.toString();        
+      debugMsg("XMLInterpreter:typedef", "Created type factory " << name 
+                  << " with base domain " << domainString);
+                  
+      if (restrictedDomain != NULL)
+          delete restrictedDomain;   
+          
+      // TODO: this is what the code generator does for every typedef, it doesn't seem right for interval types though    
+      Schema::instance()->addEnum(name);          
   }  
   
     /*
@@ -1021,13 +1045,12 @@ namespace EUROPA {
   	    , m_type(type)
   	    , m_guarded(guarded)
   	    , m_domainRestriction(domainRestriction)
+  		, m_baseDomain(TypeFactory::baseDomain(type.c_str())) 		
   	{
-  		m_baseDomain = TypeFactory::baseDomain(type.c_str()).copy();  		
   	}
   	
   	ExprLocalVar::~ExprLocalVar()
   	{
-  		delete m_baseDomain;
   	}
 
   	DataRef ExprLocalVar::doEval(RuleInstanceEvalContext& context) const
@@ -1042,7 +1065,7 @@ namespace EUROPA {
   		  );
   		else
   		  localVar = context.getRuleInstance()->addLocalVariable(
-  		      *m_baseDomain,
+  		      m_baseDomain,
   		      m_guarded, // can't be specified
   		      m_name
   		  );
@@ -1639,22 +1662,7 @@ namespace EUROPA {
 				       bool canBeSpecified,
 				       const LabelStr& name)                   
 	{
-        ConstrainedVariableId localVariable = TypeFactory::createVariable(
-            baseDomain.getTypeName().c_str(),
-            getPlanDatabase()->getConstraintEngine(),
-		    baseDomain,
-		    canBeSpecified,
-		    name.c_str(),
-		    m_id,
-		    m_variables.size()
-	    )->getId();
-		  
-        // Only allowed add a variable for an executed rule instance
-        check_error(isExecuted());
-
-        m_variables.push_back(localVariable);
-        addVariable(localVariable, name);
-        return localVariable;
+		return addVariable(baseDomain,canBeSpecified,name);
     }
     
     ConstrainedVariableId InterpretedRuleInstance::addObjectVariable( 
