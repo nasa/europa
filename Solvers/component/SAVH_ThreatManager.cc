@@ -62,7 +62,7 @@ namespace EUROPA {
                " to " << b->getTime() << " on " << b->getProfile()->getResource()->toString());
       for(std::list<InstantComparator*>::const_iterator it = m_cmps.begin(); it != m_cmps.end(); ++it) {
         InstantComparator* cmp = *it;
-        check_error(it != NULL);
+        check_error(*it != NULL);
         debugMsg("ThreatManager:betterThan", "Using " << cmp->toString());
         if((*cmp)(a, b)) {
           debugMsg("ThreatManager:betterThan", "a better than b");

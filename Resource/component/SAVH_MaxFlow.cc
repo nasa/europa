@@ -20,7 +20,8 @@ namespace EUROPA
       MaximumFlowAlgorithm::MaximumFlowAlgorithm( Graph* g, Node* source, Node* sink  ):
       m_Graph( g ),
       m_Source( source ),
-      m_Sink( sink )
+      m_Sink( sink ),
+      m_NodeListIterator( m_Nodes.end() )
     {
       checkError( g != 0, "Null not allowed as input for g" );
       checkError( source != 0, "Null not allowed as input for source" );
