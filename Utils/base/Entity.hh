@@ -118,13 +118,13 @@ namespace EUROPA{
     /**
      * @brief Test of the entity by the given key is pooled for deallocation
      */
-    static bool Entity::isPooled(Entity* entity);
+    static bool isPooled(Entity* entity);
 
     /**
      * @brief Garbage collect discarded entities
      * @return The number of entities deleted
      */
-    static unsigned int Entity::garbageCollect();
+    static unsigned int garbageCollect();
 
   protected:
     Entity();

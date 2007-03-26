@@ -366,12 +366,12 @@ namespace EUROPA {
     /**
      * @brief Utility to index an active token.
      */
-    void PlanDatabase::insertActiveToken(const TokenId& token);
+    void insertActiveToken(const TokenId& token);
 
     /**
      * @brief Utility to remove an active token
      */
-    void PlanDatabase::removeActiveToken(const TokenId& token);
+    void removeActiveToken(const TokenId& token);
 
     /* In the data structures below, the key is a LabelStr representation of a name */
 

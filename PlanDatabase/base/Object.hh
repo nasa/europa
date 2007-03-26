@@ -235,7 +235,7 @@ namespace EUROPA {
    * so this is necessary for the interpreter to provide the same behavior
    * Everybody should be going through the factories
    */
-    void Object::setParent(const ObjectId& parent);
+    void setParent(const ObjectId& parent);
 
   protected:
 

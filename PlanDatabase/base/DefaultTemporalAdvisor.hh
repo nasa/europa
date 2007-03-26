@@ -26,7 +26,7 @@ namespace EUROPA{
 							      const TimeVarId& second,
 							      const bool exact);
 
-    virtual unsigned int DefaultTemporalAdvisor::mostRecentRepropagation() const;
+    virtual unsigned int mostRecentRepropagation() const;
 
     const TemporalAdvisorId& getId() const;
   protected:

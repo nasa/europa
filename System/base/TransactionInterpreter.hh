@@ -237,7 +237,7 @@ namespace EUROPA {
                          const LabelStr& relation, 
                          const std::vector<LabelStr>& parameterNames,
                          const std::vector<LabelStr>& parameterTypes,
-	                     const std::vector<LabelStr>& assignVars,
+			 const std::vector<LabelStr>& assignVars,
                          const std::vector<Expr*>& assignValues,
                          const std::vector<ExprConstraint*>& constraints,
                          const bool& close = false); 
@@ -246,12 +246,12 @@ namespace EUROPA {
   	    virtual ~InterpretedToken();
 
     protected:
-        void InterpretedToken::commonInit(const std::vector<LabelStr>& parameterNames,
-                                          const std::vector<LabelStr>& parameterTypes,
-                                          const std::vector<LabelStr>& assignVars,
-                                          const std::vector<Expr*>& assignValues,
-                                          const std::vector<ExprConstraint*>& constraints,
-                                          const bool& autoClose);      	                                          
+        void commonInit(const std::vector<LabelStr>& parameterNames,
+                        const std::vector<LabelStr>& parameterTypes,
+			const std::vector<LabelStr>& assignVars,
+			const std::vector<Expr*>& assignValues,
+			const std::vector<ExprConstraint*>& constraints,
+			const bool& autoClose);      	                                          
   };
   
   class TokenEvalContext : public EvalContext

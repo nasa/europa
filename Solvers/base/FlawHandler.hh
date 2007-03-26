@@ -169,7 +169,7 @@ namespace EUROPA {
       /**
        * @brief Helper method to stringify a guard
        */
-      static std::string FlawHandler::toString(const GuardEntry& entry);
+      static std::string toString(const GuardEntry& entry);
 
       /**
        * @brief Helper method to test a guard value

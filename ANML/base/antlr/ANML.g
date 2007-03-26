@@ -165,9 +165,9 @@ options {
 		static antlr::RefAST eval(const std::string& code);
 		static antlr::RefAST parse(const std::string& path, const std::string& filename);
   	static antlr::RefAST parse(std::istream& input, const std::string& source);
-  	void ANMLParser::reportError(const antlr::RecognitionException& ex);
-		void ANMLParser::traceIn(const char* rname);
-		void ANMLParser::traceOut(const char* rname);
+  	void reportError(const antlr::RecognitionException& ex);
+		void traceIn(const char* rname);
+		void traceOut(const char* rname);
 }
 
 anml_program 
