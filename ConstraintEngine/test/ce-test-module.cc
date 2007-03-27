@@ -1369,7 +1369,7 @@ private:
     // Signs tested
     {
       Variable<IntervalDomain> v0(ENGINE, IntervalDomain(-2.3, -1.8));
-      Variable<IntervalIntDomain> v1(ENGINE, IntervalDomain(1, PLUS_INFINITY));
+      Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, PLUS_INFINITY));
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(-11.6, 12.4));
       MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
@@ -1381,14 +1381,14 @@ private:
 
     // Signs tested
     {
+      Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, PLUS_INFINITY));
       Variable<IntervalDomain> v1(ENGINE, IntervalDomain(-2.3, -1.8));
-      Variable<IntervalIntDomain> v0(ENGINE, IntervalDomain(1, PLUS_INFINITY));
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(-11.6, 12.4));
       MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v1.getDerivedDomain() == IntervalDomain(-2.3, -1.8), v0.getDerivedDomain().toString());
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 6), v1.getDerivedDomain().toString());
+      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 6), v0.getDerivedDomain().toString());
+      assertTrue(v1.getDerivedDomain() == IntervalDomain(-2.3, -1.8), v1.getDerivedDomain().toString());
       assertTrue(v2.getDerivedDomain() == IntervalDomain(-11.6, -1.8), v2.getDerivedDomain().toString());
     }
     return true;
