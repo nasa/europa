@@ -65,16 +65,14 @@ namespace EUROPA {
       return worstCasePriority();
     }
 
- 
-
-
-
     /**
      * @brief Defines a configuration class
      */
     class SolverConfig{
     public:
       SolverConfig();
+
+      static void init();
     };
 
     namespace PlanWriter {
