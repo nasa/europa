@@ -1,3 +1,4 @@
+*.smap
 AverLexer.java
 AverParser.java
 AverTokenTypes.java
