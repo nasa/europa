@@ -15,6 +15,7 @@ namespace EUROPA {
     class ResultSet{
     public:
       virtual const std::string& toXML() const = 0;
+      virtual ~ResultSet(){}
     };
 
     class DSA {

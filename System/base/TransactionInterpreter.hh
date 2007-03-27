@@ -86,6 +86,7 @@ namespace EUROPA {
   {      	
   	public:
   	    virtual DataRef eval(EvalContext& context) const = 0;
+    virtual ~Expr(){}
   };
   
   // Call to super inside a constructor 
@@ -388,6 +389,7 @@ namespace EUROPA {
   	    }    	
   	    
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const = 0;  	    
+    virtual ~RuleExpr(){}
   };
   
   class ExprRuleVariableRef : public RuleExpr

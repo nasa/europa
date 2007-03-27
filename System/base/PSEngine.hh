@@ -261,6 +261,8 @@ namespace EUROPA {
   class PSVariable
   {
   public:
+    virtual ~PSVariable(){}
+
     const std::string& getName();
 	    
     bool isEnumerated();
