@@ -98,3 +98,5 @@ rules.0.tx.cc
 rules.0.tx.hh
 satellites*
 stackGenerator
+subtype-extension.tx.cc
+subtype-extension.tx.hh

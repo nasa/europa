@@ -74,3 +74,5 @@ string-domain.hh
 subclass
 subclass.cc
 subclass.hh
+subtype-extension.cc
+subtype-extension.hh
