@@ -970,8 +970,15 @@ namespace EUROPA {
   ConstrainedVariableId
   DbClientTransactionPlayer::xmlAsCreateVariable(const char * type, const char * name, const TiXmlElement * value)
   {
+    // Default settings for variable allocation
+    bool isTmpVar = false;
+    bool canBeSpecified = true;
     std::string gen_name;
+
+    // If no name is specified, it should not be decidable by a solver and does not need to be registered
     if (name == NULL) {
+      canBeSpecified = false;
+      isTmpVar = true;
       std::stringstream gen_stream;
       gen_stream << "$VAR[" << m_varCount++ << "]" << std::ends;
       gen_name = gen_stream.str();
@@ -988,12 +995,13 @@ namespace EUROPA {
           type = value->Attribute("type");
         }
       }
-      debugMsg("DbClientTransactionPlayer:xmlAsCreateVariable", " type = " << type << " name = " << name << " domain type = " << baseDomain->getTypeName().c_str());
+      debugMsg("DbClientTransactionPlayer:xmlAsCreateVariable", 
+	       " type = " << type << " name = " << name << " domain type = " << baseDomain->getTypeName().c_str());
     }
 
     check_error(type != NULL);
     if (baseDomain != NULL) {
-      ConstrainedVariableId variable = m_client->createVariable(type, *baseDomain, name);
+      ConstrainedVariableId variable = m_client->createVariable(type, *baseDomain, name, isTmpVar, canBeSpecified);
       delete baseDomain;
       return variable;
     }
