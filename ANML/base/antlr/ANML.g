@@ -525,7 +525,7 @@ atomic_change
 ;
 
 resource_change 
-    : (CONSUMES^ | PRODUCES^ | USES^)  LPAREN! var_name (COMMA! numeric_expr)? RPAREN!
+    : (CONSUMES^ | PRODUCES^ | USES^)  LPAREN! qualified_var_name (COMMA! numeric_expr)? RPAREN!
 ;
 
 transition_change
