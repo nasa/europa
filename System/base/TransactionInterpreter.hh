@@ -305,6 +305,11 @@ namespace EUROPA {
                                 const bool positive,
                                 const std::vector<RuleExpr*>& body);
                                 
+        InterpretedRuleInstance(const RuleInstanceId& parent, 
+                                const std::vector<ConstrainedVariableId>& vars, 
+                                const bool positive,
+                                const std::vector<RuleExpr*>& body);
+                                
   	    virtual ~InterpretedRuleInstance();
   	    
         void createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars);

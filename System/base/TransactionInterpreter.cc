@@ -88,7 +88,7 @@ namespace EUROPA {
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);	    	    	  
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float);	    	    	  
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float);	    	    	  
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float);	    	    	  
+      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float:float:float);	    	    	  
       new ResourceChangeTokenFactory("Resource.change");
 
       REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable);	    	    	  
@@ -522,11 +522,21 @@ namespace EUROPA {
       		const TiXmlElement* opElement = child->FirstChildElement();
       		const TiXmlElement* opArg = opElement->FirstChildElement();
       		
-      		Expr* lhs = valueToExpr(opArg);
-      		Expr* rhs = valueToExpr(opArg->NextSiblingElement());
+      		Expr *lhs=NULL,*rhs=NULL;
+      		std::string op = "equals";      		
+      		      		
+      		if (opArg != NULL) {
+      		    lhs = valueToExpr(opArg);
+      		    rhs = valueToExpr(opArg->NextSiblingElement());
+      		    op = opElement->Value();
+      		}
+      		else {
+      		    lhs = valueToExpr(opElement);
+      		}
+      		
       		std::vector<RuleExpr*> ifBody;
       		buildRuleBody(className,predName,opElement->NextSiblingElement(),ifBody,localVars);
-      		ruleBody.push_back(new ExprIf(opElement->Value(),lhs,rhs,ifBody));
+      		ruleBody.push_back(new ExprIf(op.c_str(),lhs,rhs,ifBody));
       	}
       	else if (strcmp(child->Value(),"loop") == 0) {
       		const char* varName = child->Attribute("name");
@@ -1095,21 +1105,34 @@ namespace EUROPA {
   		bool isOpEquals = (m_op == "equals");
   		
   		DataRef lhs = m_lhs->eval(context);
-  		DataRef rhs = m_rhs->eval(context);
   		
   		// TODO: this assumes that the variable is always on the lhs and the value on the rhs
   		// is this enforced by the parser?
-        context.getRuleInstance()->addChildRule(
-            new InterpretedRuleInstance(
-                context.getRuleInstance()->getId(), 
-                lhs.getValue(), 
-                rhs.getValue()->derivedDomain(), 
-                isOpEquals,
-                m_ifBody
-            )
-        );
-
-  		debugMsg("XMLInterpreter:InterpretedRule","Evaluated IF " << m_op << " " << lhs.getValue()->toString() << " " << rhs.getValue()->toString());
+       
+        if (m_rhs != NULL) {
+  		    DataRef rhs = m_rhs->eval(context);
+            context.getRuleInstance()->addChildRule(
+                new InterpretedRuleInstance(
+                    context.getRuleInstance()->getId(), 
+                    lhs.getValue(), 
+                    rhs.getValue()->derivedDomain(), 
+                    isOpEquals,
+                    m_ifBody
+                )
+            );
+  		    debugMsg("XMLInterpreter:InterpretedRule","Evaluated IF " << m_op << " " << lhs.getValue()->toString() << " " << rhs.getValue()->toString());
+        }
+        else {
+            context.getRuleInstance()->addChildRule(
+                new InterpretedRuleInstance(
+                    context.getRuleInstance()->getId(), 
+                    makeScope(lhs.getValue()), 
+                    isOpEquals,
+                    m_ifBody
+                )
+            );
+  		    debugMsg("XMLInterpreter:InterpretedRule","Evaluated IF " << m_op << " " << lhs.getValue()->toString());
+        }
         
   		return DataRef::null;  		
   	}  
@@ -1163,6 +1186,38 @@ namespace EUROPA {
 		    delete m_constructorBody[i];
 	}
 	
+	class ObjectFactoryEvalContext : public EvalContext
+	{
+      public:
+          ObjectFactoryEvalContext(const PlanDatabaseId& planDb,
+                                   const std::vector<std::string>& argNames,
+	                               const std::vector<std::string>& argTypes,
+	                               const std::vector<const AbstractDomain*>& args)
+	          : EvalContext(NULL) // TODO: should pass in eval context from outside to have access to globals                        
+          {
+		      // Add arguments to eval context		
+		      for (unsigned int i=0;i<argNames.size();i++) {
+				  ConstrainedVariableId arg = planDb->getClient()->createVariable(
+				      argTypes[i].c_str(),
+			          *(args[i]),
+					  argNames[i].c_str(), 
+					  true
+				   );
+				   m_tmpVars.push_back(arg);
+				   addVar(argNames[i].c_str(),arg);
+				}
+          }
+          
+          virtual ~ObjectFactoryEvalContext()
+          {
+              for (unsigned int i=0;i<m_tmpVars.size();i++)
+                  m_tmpVars[i].release();
+          }
+      
+      protected:
+          std::vector<ConstrainedVariableId> m_tmpVars;        
+	};
+	
 	ObjectId InterpretedObjectFactory::createInstance(
 	                        const PlanDatabaseId& planDb,
 	                        const LabelStr& objectType, 
@@ -1170,33 +1225,22 @@ namespace EUROPA {
 	                        const std::vector<const AbstractDomain*>& arguments) const 
 	{
 	    check_runtime_error(checkArgs(arguments));
-
-        // TODO: should pass in eval context from outside to have access to globals
-	    EvalContext evalContext(NULL);
-	  
-        // Add arguments to eval context		
-		for (unsigned int i=0;i<m_constructorArgNames.size();i++) {
-    		std::ostringstream argName;
-    		argName << "arg" << i;
-			// TODO: destroy these temporary variables
-			ConstrainedVariableId arg = planDb->getClient()->createVariable(
-			    m_constructorArgTypes[i].c_str(),
-			    *(arguments[i]),
-			    argName.str().c_str(),
-			    true
-			);
-			evalContext.addVar(m_constructorArgNames[i].c_str(),arg);
-		}
-		
+        
+	    ObjectFactoryEvalContext evalContext(
+	        planDb,
+	        m_constructorArgNames,
+	        m_constructorArgTypes,
+	        arguments
+	    );	  			    
 		m_evalContext = &evalContext;
+		
 	    ObjectId instance = makeNewObject(planDb, objectType, objectName,arguments);
 		evalContext.addVar("this",instance->getThis());
 	    evalConstructorBody(planDb->getClient(),instance,arguments);
 	    instance->close();
+		
 		m_evalContext = NULL;
 
-    	// TODO: destroy temporary variables created for args here
-	  
 	    return instance;
 	} 
 
@@ -1232,7 +1276,22 @@ namespace EUROPA {
 	        // TODO: argumentsForSuper are eval'd twice, once here and once when the constructor body is eval'd
 	        //  figure out how to do it only once
 	    	std::vector<const AbstractDomain*> argumentsForSuper;
+	    	
+	    	bool needsContext = (m_evalContext == NULL);
+	    	if (needsContext) {
+	    	    m_evalContext = new ObjectFactoryEvalContext(
+	                planDb,
+	                m_constructorArgNames,
+	                m_constructorArgTypes,
+	                arguments
+	            );
+	        }	  			    	    	    
      	    m_superCallExpr->evalArgs(*m_evalContext,argumentsForSuper);
+     	    if (needsContext) {
+     	    	delete m_evalContext;
+     	    	m_evalContext = NULL;
+     	    }
+     	    
 	        ObjectId retval = ObjectFactory::makeNewObject(planDb, m_superCallExpr->getSuperClassName(), objectType, objectName,argumentsForSuper);
   		    return retval;
 	  }
@@ -1528,6 +1587,15 @@ namespace EUROPA {
     {
     }    
     
+    InterpretedRuleInstance::InterpretedRuleInstance(
+                                const RuleInstanceId& parent, 
+                                const std::vector<ConstrainedVariableId>& vars, 
+                                const bool positive,
+                                const std::vector<RuleExpr*>& body)
+        : RuleInstance(parent,vars,positive)
+        , m_body(body)
+    {
+    }        
 
     InterpretedRuleInstance::~InterpretedRuleInstance()
     {
