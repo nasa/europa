@@ -1210,8 +1210,10 @@ namespace EUROPA {
           
           virtual ~ObjectFactoryEvalContext()
           {
-              for (unsigned int i=0;i<m_tmpVars.size();i++)
-                  m_tmpVars[i].release();
+              for (unsigned int i=0;i<m_tmpVars.size();i++) {
+              	  // TODO: must release temprary vars, causing crash?
+                  //m_tmpVars[i].release();
+              }
           }
       
       protected:
