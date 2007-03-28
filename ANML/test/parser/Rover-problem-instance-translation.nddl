@@ -12,52 +12,83 @@ Path p1 = new Path(),
      
 Rover spirit = new Rover();
 
-int startHorizon = 0;
+int startHorizon = 1;
 int endHorizon = 100;
 
-PlannerConfig pc = new PlannerConfig(startHorizon, endHorizon,500,500);
+// compute real planning horizon as startHorizon-1,endHorizon-1
+int _start_ = 0;
+int _end_ = 101;
+PlannerConfig pc = new PlannerConfig(_start_,_end_,500,500);
 
 // TODO: extend NDDL to include facts
-fact(lander.setValue("LANDER", 0, 0)      fact1);
-fact(rock1.setValue("ROCK1",  9, 9)       fact2);
-fact(rock2.setValue("ROCK2",  1, 6)       fact3);
-fact(rock3.setValue("RO.setValue,  4, 8)  fact4);
-fact(rock4.setValue("ROCK4",  3, 9)       fact5);
+fact(lander.setValue fact1);
+eq(fact1.name,"LANDER");eq(fact1.x,0);eq(fact1.y,0);
 
-fact(p1.setValue("Very Long Way", lander, rock4, -2000.0)       fact6);
-fact(p2.setValue("Moderately Long Way", lander, rock4, -1500.0) fact7);
-fact(p3.setValue("Short Cut", lander, rock4, -400.0)            fact8);
+fact(rock1.setValue fact2);
+eq(fact2.name,"ROCK1");eq(fact2.x,9);eq(fact2.y,9);
 
-// these facts "over all"
-leq(startHorizon,fact1.start); leq(fact1.end,endHorizon);
-leq(startHorizon,fact2.start); leq(fact2.end,endHorizon);
-leq(startHorizon,fact3.start); leq(fact3.end,endHorizon);
-leq(startHorizon,fact4.start); leq(fact4.end,endHorizon);
-leq(startHorizon,fact5.start); leq(fact5.end,endHorizon);
-leq(startHorizon,fact6.start); leq(fact6.end,endHorizon);
-leq(startHorizon,fact7.start); leq(fact7.end,endHorizon);
-leq(startHorizon,fact8.start); leq(fact8.end,endHorizon);
+fact(rock2.setValue fact3);
+eq(fact3.name,"ROCK2");eq(fact3.x,1);eq(fact3.y,6);
 
-// TODO: need to figure this out, this must be passed in the constructor right now
-// setLevel doesn't exist
-fact(spirit.battery_.setLevel fact9);
-eq(fact9.quantity,100);
+fact(rock3.setValue fact4);
+eq(fact4.name,"ROCK3");eq(fact4.x,4);eq(fact4.y,8);
 
-fact(spirit.location_.copy fact10);
-eq(fact10.value,lander);
+fact(rock4.setValue fact5);
+eq(fact5.name,"ROCK4");eq(fact5.x,3);eq(fact5.y,9);
 
-fact(spirit.instrument_.state_.setValue fact11);
-eq(fact11.value,"stowed");
+fact(p1.setValue fact6);
+eq(fact6.name,"Very Long Way");eq(fact6.origin,lander);eq(fact6.dest,rock4);eq(fact6.cost,-2000.0);
 
-// these facts "at start"
-leq(fact9.start,startHorizon); leq(startHorizon,fact9.end);
-leq(fact10.start,startHorizon); leq(startHorizon,fact10.end);
-leq(fact11.start,startHorizon); leq(startHorizon,fact11.end);
+fact(p2.setValue fact7);
+eq(fact7.name,"Moderately Long Way");eq(fact7.origin,lander);eq(fact7.dest,rock4);eq(fact7.cost,-1500.0);
 
-goal(spirit.TakeSample goal_1);
+fact(p3.setValue fact8);
+eq(fact8.name,"Short Cut");eq(fact8.origin,lander);eq(fact8.dest,rock4);eq(fact8.cost,-400.0);
+
+// facts 1-8 "over all"
+precedes(startHorizon,fact1.start); precedes(fact1.end,endHorizon);
+precedes(startHorizon,fact2.start); precedes(fact2.end,endHorizon);
+precedes(startHorizon,fact3.start); precedes(fact3.end,endHorizon);
+precedes(startHorizon,fact4.start); precedes(fact4.end,endHorizon);
+precedes(startHorizon,fact5.start); precedes(fact5.end,endHorizon);
+precedes(startHorizon,fact6.start); precedes(fact6.end,endHorizon);
+precedes(startHorizon,fact7.start); precedes(fact7.end,endHorizon);
+precedes(startHorizon,fact8.start); precedes(fact8.end,endHorizon);
+
+// TODO: this is a hack, EUROPA resources cannot really handle level specification
+fact(spirit.battery_.uses fact9);
+eq(fact9.quantity,30.0); // 30.0 must be derived from the max specified for Battery - the specified level = (100.0 - 70.0)
+
+fact(LocationCopier.copy fact10);
+eq(fact10.lhs,spirit.location_);eq(fact10.rhs,lander);
+
+fact(StowStateCopier.copy fact11);
+eq(fact11.lhs,spirit.instrument_.state_);eq(fact11.rhs,stowed);
+
+// facts 9-11 "at start"
+precedes(fact9.start,startHorizon); precedes(startHorizon,fact9.end);
+precedes(fact10.start,startHorizon); precedes(startHorizon,fact10.end);
+precedes(fact11.start,startHorizon); precedes(startHorizon,fact11.end);
+
+goal(spirit.TakeSample goal1);
 eq(goal1.rock,rock4);
-leq(0,goal1.start); leq(goal1.end,100);
+// goal1 in [0 100]
+precedes(0,goal1.start); precedes(goal1.end,100);
 
+// make sure all goals and facts fit within the horizon
+precedes(_start_,fact1.start);precedes(fact1.end,_end_);
+precedes(_start_,fact2.start);precedes(fact2.end,_end_);
+precedes(_start_,fact3.start);precedes(fact3.end,_end_);
+precedes(_start_,fact4.start);precedes(fact4.end,_end_);
+precedes(_start_,fact5.start);precedes(fact5.end,_end_);
+precedes(_start_,fact6.start);precedes(fact6.end,_end_);
+precedes(_start_,fact7.start);precedes(fact7.end,_end_);
+precedes(_start_,fact8.start);precedes(fact8.end,_end_);
+precedes(_start_,fact9.start);precedes(fact9.end,_end_);
+precedes(_start_,fact10.start);precedes(fact10.end,_end_);
+precedes(_start_,fact11.start);precedes(fact11.end,_end_);
+
+precedes(_start_,goal1.start);precedes(goal1.end,_end_);
 
 
 

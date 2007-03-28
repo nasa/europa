@@ -1,33 +1,72 @@
 // Rover-model-translation.nddl
 
-enum StowStateEnum { 'stowing', 'stowed', 'unstowing', 'unstowed' };
+enum StowStateEnum {stowing,stowed,unstowing,unstowed};
 
 class StowState extends Timeline
 {
-    copy { StowState rhs; }
     setValue {StowStateEnum value;}
 }
 
-StowState::copy {}
 StowState::setValue {}
+
+class StowStateCopier 
+{
+    copy { StowState lhs; StowState rhs; }
+}
+
+StowStateCopier::copy 
+{
+    contained_by(lhs.setValue lhsValue);
+    contained_by(rhs.setValue rhsValue);
+    
+    eq(lhsValue.value,rhsValue.value);
+}
 
 class Location extends Timeline
 {
-    copy { Location rhs; }
     setValue {string name; int x; int y;}
 }
 
-Location::copy {}
 Location::setValue {}
+
+class LocationCopier
+{
+    copy { Location lhs; Location rhs;}
+}
+
+LocationCopier::copy 
+{
+    contained_by(lhs.setValue lhsValue);
+    contained_by(rhs.setValue rhsValue);
+    
+    eq(lhsValue.name,rhsValue.name);
+    eq(lhsValue.x,rhsValue.x);
+    eq(lhsValue.y,rhsValue.y);
+}
 
 class Path extends Timeline
 {
-    predicate copy { Path rhs; }
-    predicate setValue {string name; Location from; Location to; double cost};
+    predicate setValue {string name; Location origin; Location dest; double cost};
 }
 
-Path::copy {}
 Path::setValue {}
+
+class PathCopier
+{
+    predicate copy { Path lhs; Path rhs; }
+}
+
+Path::copy 
+{
+    contained_by(lhs.setValue lhsValue);
+    contained_by(rhs.setValue rhsValue);
+    
+    eq(lhsValue.name,rhsValue.name);
+    eq(lhsValue.origin,rhsValue.origin);
+    eq(lhsValue.dest,rhsValue.dest);
+    eq(lhsValue.cost,rhsValue.cost);
+}
+
 
 // in ANML : vartype Battery : int [0 50];
 // Given its use, we must infer that Battery is a resource
@@ -85,7 +124,6 @@ Instrument::Place
 	eq(duration,3);
 }
 
-// TODO: that if the instrument is already Stowed/Unstowed??
 Instrument::Stow 
 {
 	eq(duration,2);
@@ -93,13 +131,13 @@ Instrument::Stow
     // change over all { state_ = "unstowed" -> "stowing" -> "stowed" };
     // TODO: this may cause holes in state_'s timeline. live with it for now
     met_by(object.state_.setValue sv1);
-    eq(sv1.value,'unstowed');
+    eq(sv1.value,unstowed);
 
     contained_by(object.state_.setValue sv2);
-    eq(sv2.value,'stowing');
+    eq(sv2.value,stowing);
 
     meets(object.state_.setValue sv3);
-    eq(sv3.value,'stowed');
+    eq(sv3.value,stowed);
 }
 
 Instrument::Unstow 
@@ -108,13 +146,13 @@ Instrument::Unstow
 
     // change over all { state_ = "stowed" -> "unstowing" -> "unstowed" };
     met_by(object.state_.setValue sv1);
-    eq(sv1.value,'stowed');
+    eq(sv1.value,stowed);
 
     contained_by(object.state_.setValue sv2);
-    eq(sv2.value,'unstowing');
+    eq(sv2.value,unstowing);
 
     meets(object.state_.setValue sv3);
-    eq(sv3.value,'unstowed');        
+    eq(sv3.value,unstowed);        
 }
 
 class Rover 
@@ -130,7 +168,7 @@ class Rover
         location_ = new Location();
     }
     
-    predicate Go { Locations from; Location to; }
+    predicate Go { Location origin; Location dest; }
 
     predicate locationEQ { Location value; }
     
@@ -147,22 +185,22 @@ Rover::Go()
 {
 	neq(from,to);
 		
-	// assert existence of path from from to to
+	// assert existence of path from origin to dest
 	Path p;
-    eq(p.from, from);
-    eq(p.to, to);
+    eq(p.origin, origin);
+    eq(p.dest, dest);
 
     eq(duration,p.cost); 
        
-    //condition at start { location_ = from; };
+    //condition at start { location_ = origin; };
     object.locationEQ cond1;
-    eq(cond1.value,from);
+    eq(cond1.value,origin);
     leq(cond1.start,start);
     leq(start,cond1.end);
 	    	    
-	//effect at end { location_ = to; };
+	//effect at end { location_ = dest; };
 	object.locationEQ effect1;
-    eq(effect1.value,to);
+    eq(effect1.value,dest);
     leq(effect1.start,start);
     leq(start,effect1.end);
 		
@@ -171,22 +209,33 @@ Rover::Go()
     eq(b.quantity, -p.cost);     
 }
 
+// TODO: when variables are set to constant values a disjunction should be generated
+// constant values should be tried first :
+// if (constValue == 1) {}
+// else if (constValue == 3) {}
+// ...
+// else if (value) { try generic version like here}
 Rover::locationEQ
 {
-    contained_by(object.location_.copy copy);
+    contained_by(LocationCopier.copy copier);
+    eq(copier.lhs, object.location_);
     eq(copy.value,value);
     
-    // TODO: shouldn't this be conditional??, if we already have a fact, this subgoal will be generated anyway.
-    // Normally a disjunction would be generated here, in this case, there is only one option
-    // TODO: met_by only works if the action says "effect at end", operator needs to be generated
-    // based on temporal qualifier for the effect in the action
-    met_by(object.Go action1);
-    eq(action1.to,value); // TODO: figuring out which variables map to which may be non-trivial
+    // Normally a disjunction would be generated here, considering all the actions that include this
+    // in their effects. In this case, there is only one option    
+    int or1 = [1 1];
+    
+    if (or1 == 1) {
+        // TODO: met_by only works if the action says "effect at end", operator needs to be generated
+        // based on temporal qualifier for the effect in the action
+        met_by(object.Go action1);
+        eq(action1.to,value); // TODO: figuring out which variables map to which may be non-trivial
+    }
 }
 
 Rover::TakeSample
 {
-    duration [20 25];
+    eq(duration,20);
 	    
 	//condition over all { location_ = rock; };
     contained(object.locationEQ cond1);
@@ -208,7 +257,7 @@ Rover::TakeSample_decomposition1
 
 Rover::TakeSample_decomposition1_step2
 {
-	bool or1;
+	int or1 = [1 2];
 	
 	if (or1 == 1) {
         contains(object.PhoneLander step1);
@@ -218,7 +267,6 @@ Rover::TakeSample_decomposition1_step2
     }    
 }
 	
-// TODO: when should we prefer to PhoneHome over PhoneLander?
 Rover::PhoneHome 
 {
     eq(duration,10);

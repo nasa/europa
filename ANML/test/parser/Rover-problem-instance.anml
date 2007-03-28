@@ -8,7 +8,7 @@ Path p1,p2,p3;
 Rover spirit;
 
 fact over all {
-    PlanningHorizon(0, 100);
+    PlanningHorizon(1, 100);
     PlannerConfig(500,500); // MaxSteps,MaxDepth
 
     lander = ("LANDER", 0, 0);
@@ -23,7 +23,7 @@ fact over all {
 };
 
 fact at start {
-    spirit.battery_ = 100.0;
+    spirit.battery_ = 70.0;
     spirit.location_ = lander;
     spirit.instrument_.state_ = "stowed";
 };
