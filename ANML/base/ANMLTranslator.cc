@@ -277,7 +277,7 @@ namespace ANML
 
     void ANMLElement::toNDDL(std::ostream& os) const 
     { 
-    	os << m_type << " " << m_name << std::endl; 
+    	os << "//" << m_type << " " << m_name << std::endl; 
     }
     
     std::string ANMLElement::toString() const 
@@ -292,7 +292,7 @@ namespace ANML
     Type* Type::INT    = new Type("int");
     Type* Type::FLOAT  = new Type("float");
     Type* Type::STRING = new Type("string");
-    Type* Type::OBJECT = new ObjType("object",NULL);
+    ObjType* Type::OBJECT = new ObjType("object",NULL);
     
 	Type::Type(const std::string& name)
 	    : ANMLElement("TYPE",name)
@@ -601,8 +601,10 @@ namespace ANML
     		os << ident << "leq(" << ub << "," << fluentName << ".end);" << std::endl;    		                		
     	}
     	else if (m_operator == "in") {
+    		// TODO: implement this
     	}
     	else if (m_operator == "after") {
+    		// TODO: implement this
     	}
     	else if (m_operator == "before") {
     		const std::string& timePoint = m_argValues[0];
@@ -610,6 +612,7 @@ namespace ANML
     		os << ident << "leq(" << fluentName << ".end," << timePoint << ");" << std::endl;
     	}
     	else if (m_operator == "contains") {
+    		// TODO: implement this
     	}
     }
     
@@ -701,7 +704,6 @@ namespace ANML
     	}
     }
     
-    
     Goal::Goal(const std::vector<Proposition*>& propositions) 
         : ANMLElement("GOAL")
         , m_propositions(propositions) 
@@ -738,12 +740,25 @@ namespace ANML
     		m_propositions[i]->toNDDL(os);
     }
     
+    Proposition::Proposition(TemporalQualifier* tq,Fluent* f) 
+       : ANMLElement("PROPOSITION")
+       , m_temporalQualifier(tq)
+    {
+    	m_fluents.push_back(f);
+    	commonInit();
+    }
+    
     Proposition::Proposition(TemporalQualifier* tq,const std::vector<Fluent*>& fluents) 
        : ANMLElement("PROPOSITION")
        , m_temporalQualifier(tq)
        , m_fluents(fluents) 
     {
-  	    debugMsg("ANMLContext","Creating  Proposition with " << fluents.size() << " fluents");
+    	commonInit();
+    }
+    
+    void Proposition::commonInit()
+    {
+  	    debugMsg("ANMLContext","Creating  Proposition with " << m_fluents.size() << " fluents");
     	m_temporalQualifier->setProposition(this);
     	for (unsigned int i=0;i<m_fluents.size();i++) 
     	    m_fluents[i]->setProposition(this); 
@@ -762,6 +777,73 @@ namespace ANML
     	    m_fluents[i]->toNDDL(os,m_temporalQualifier);
     }
     
+    Change:: Change(Proposition* when_condition,TemporalQualifier* tq,Fluent* f) 
+        : Proposition(tq,f)
+        , m_whenCondition(when_condition)
+    {
+   	    m_type = "CHANGE";
+   	    setContext(EFFECT);
+    }
+   
+    Change::~Change()
+    {
+       	
+    }
+   
+    void Change::toNDDL(std::ostream& os) const
+    {
+        if (m_whenCondition != NULL) {
+            // TODO: deal with this
+        }
+       
+        Proposition::toNDDL(os);
+    }    
+        
+    ResourceChangeFluent::ResourceChangeFluent(const std::string& op,Expr* var,Expr* qty)
+        : m_op(op)
+        , m_var(var)
+        , m_qty(qty)
+    {
+    }
+    
+    ResourceChangeFluent::~ResourceChangeFluent()
+    {
+    }
+
+    void ResourceChangeFluent::toNDDL(std::ostream& os, TemporalQualifier* tq) const
+    {
+    	os << "    // TODO:  generate NDDL for ResourceChangeFluent" << std::endl;
+    	std::string v1 = autoIdentifier("_v");
+    	os << "    contains(" << m_var->toString() << "." << m_op << " " << v1 << ");" << std::endl;    	  
+    	os << "    eq(" << v1 << ".quantity," << (m_qty != NULL ? m_qty->toString() : "1.0") << ");" << std::endl;
+    }
+
+
+    TransitionChangeFluent::TransitionChangeFluent(Expr* var, const std::vector<Expr*>& states)
+        : m_var(var)
+        , m_states(states)
+    {
+    	
+    }
+    
+    TransitionChangeFluent::~TransitionChangeFluent()
+    {
+    }
+
+    void TransitionChangeFluent::toNDDL(std::ostream& os, TemporalQualifier* tq) const
+    {
+    	unsigned int stateCnt = m_states.size();
+    	os << "    // TODO:  generate NDDL for TransitionChangeFluent " << m_states.size() << std::endl;
+    	os << "    // " << m_var->toString();
+    	
+    	for (unsigned int i=0;i<m_states.size();i++) {
+    		std::string state = m_states[i]->toString(); 
+    	    os << "->" << state;
+    	}
+    	
+    	os << std::endl;        	
+    }
+
     void LHSAction::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const 
     { 
     	switch (context) {
@@ -810,8 +892,7 @@ namespace ANML
        
        std::string ident="    ";
        if (m_operator == "-") {
-       	   // TODO: need real type here!
-       	   os << ident << "int " << varName << ";" << std::endl;
+       	   os << ident; getDataType().toNDDL(os); os << " " << varName << ";" << std::endl;
            // addEq(x,y,z) means x+y=z which implies x=z-y
            os << ident << "addEq(" << varName << "," << op2 << "," << op1 << ");" << std::endl << std::endl;
        }
@@ -820,7 +901,7 @@ namespace ANML
    ExprVector::ExprVector(const std::vector<Expr*>& values)
        : m_values(values) 
    {
-   	   m_dataType = new ObjType(autoIdentifier("VectorType_"),(ObjType*)Type::OBJECT);
+   	   m_dataType = new ObjType(autoIdentifier("VectorType_"),Type::OBJECT);
        for (unsigned int i=0;i<m_values.size();i++)  {
        	   std::ostringstream name; name << "member_" << i;
            m_dataType->addVariable(new Variable(m_values[i]->getDataType(),name.str()));

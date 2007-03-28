@@ -1,5 +1,6 @@
 
 header "post_include_hpp" {
+#include "Error.hh"	
 #include "Debug.hh"
 #include "antlr/ASTFactory.hpp"
 #include "ANMLTranslator.hh"
@@ -170,7 +171,7 @@ var_type[const std::string& name=""] returns [ANML::Type* t]
       )
     | #(VECTOR vb=vector_body)   
        { 
-           ANML::ObjType* vectorType = new ANML::ObjType(name,(ANML::ObjType*)ANML::Type::OBJECT); newType=true; 
+           ANML::ObjType* vectorType = new ANML::ObjType(name,ANML::Type::OBJECT); newType=true; 
            for (unsigned int i=0; i<vb.size(); i++) {
                vectorType->addVariable(vb[i]);
                std::vector<ANML::VarInit*> init;
@@ -364,11 +365,11 @@ condition_proposition_list returns [std::vector<ANML::Proposition*> l]
 // TODO : FROM and FOR branches to be implemented later
 proposition! returns [ANML::Proposition* p;]
     : p=qualif_fluent
-    | #(WHEN { check_runtime_error(false, "WHEN not supported yet"); } 
+    | #(WHEN { check_runtime_error(ALWAYS_FAIL, "WHEN not supported yet"); } 
         #(LCURLY condition_proposition) #(LCURLY effect_proposition))
-    | #(FROM { check_runtime_error(false, "FROM not supported yet"); } 
+    | #(FROM { check_runtime_error(ALWAYS_FAIL, "FROM not supported yet"); } 
         time_pt qualif_fluent_list)
-    | #(FOR { check_runtime_error(false, "FOR not supported yet"); } 
+    | #(FOR { check_runtime_error(ALWAYS_FAIL, "FOR not supported yet"); } 
         object_name #(LCURLY proposition))    
 ;
 
@@ -469,7 +470,7 @@ lhs_expr returns [ANML::LHSExpr* p;]
           	else if ((a=m_translator.getContext().getAction(name)) != NULL)
               	p = new ANML::LHSAction(a,name);
             else
-                check_runtime_error(false,std::string("No function, action or predicate called ") + name + " in scope");
+                check_runtime_error(ALWAYS_FAIL,std::string("No function, action or predicate called ") + name + " in scope");
           }
           args=arguments
           {
@@ -661,41 +662,99 @@ effect_stmt returns [ANML::ANMLElement* element]
 ;
 
 change_stmt returns [ANML::ANMLElement* element]
-    : #(CHANGE (change_proposition | change_proposition_list))
+    : #(CHANGE (element=change_proposition | element=change_proposition_list))
+;
+
+change_proposition_list returns [ANML::ANMLElement* element]
 {
-	element = new ANML::Change();
+	ANML::ANMLElementList* l = new ANML::ANMLElementList();
+	ANML::Change* change;
+}
+    : #(LCURLY (change=change_proposition {l->add(change);})+)
+{
+	element = l;
+}
+; 
+
+change_proposition returns [ANML::Change* change]
+{
+	ANML::TemporalQualifier* tq;
+	ANML::Fluent* fluent;
+    ANML::Proposition* when_condition=NULL;	
+}
+    : #(FLUENT tq=temporal_qualif fluent=change_fluent
+          {
+              change = new ANML::Change(when_condition,tq,fluent);
+          }
+      )
+    | #(WHEN when_condition=condition_proposition change=change_proposition
+          {
+              change->setWhenCondition(when_condition);
+          }
+      )
+;
+
+change_fluent returns [ANML::Fluent* fluent]
+{
+	ANML::Fluent* lhs;
+	ANML::Fluent* rhs;
+}
+    : #(AND lhs=change_fluent rhs=change_fluent {fluent = new ANML::CompositeFluent("and",lhs,rhs);}) 
+    | #(LPAREN fluent=change_fluent)
+    | fluent=resource_change
+    | fluent=transition_change
+;
+
+resource_change returns [ANML::ResourceChangeFluent* fluent]
+{
+	std::string op;
+	ANML::Expr* var;
+	ANML::Expr* qty=NULL;
+}
+    : (
+      #(CONSUMES var=qualified_var_name[m_translator.getContext(),"",true] (qty=numeric_expr)?)   { op = "consumes"; }
+      | #(PRODUCES var=qualified_var_name[m_translator.getContext(),"",true] (qty=numeric_expr)?) { op = "produces"; } 
+      | #(USES var=qualified_var_name[m_translator.getContext(),"",true] (qty=numeric_expr)?)     { op = "uses"; }
+    )     
+{ 
+	// TODO: need to make sure this cast is safe
+	ANML::LHSVariable* v = static_cast<ANML::LHSVariable*>(var);
+	
+	// TODO: perform type checking
+	//if (&(v->getDataType()) != ANML::Type::FLOAT)
+    //    check_runtime_error(ALWAYS_FAIL,"Resource change variable must be of type float. " + var->toString() + " is of type " + var->getDataType().getName());
+    
+    // TODO : mark var as resource var    
+	
+	if (qty != NULL) {
+    	if (&(qty->getDataType()) != ANML::Type::INT &&
+	        &(qty->getDataType()) != ANML::Type::FLOAT)
+            check_runtime_error(ALWAYS_FAIL,"Resource change quantity must be of numeric type. " + qty->toString() + " is of type " + qty->getDataType().getName());
+	}
+        
+	fluent = new ANML::ResourceChangeFluent(op,v,qty); 
+}
+;
+
+transition_change returns [ANML::TransitionChangeFluent* tc]
+{
+	ANML::Expr* var;
+	std::vector<ANML::Expr*> states;
+}
+    : #(EQUAL var=qualified_var_name[m_translator.getContext(),"",true] directed_expr_list[states])
+{
+	tc = new ANML::TransitionChangeFluent(var,states);
 }    
 ;
 
-change_proposition_list
-    : #(LCURLY (change_proposition)+)
-; 
-
-change_proposition
-    : #(FLUENT temporal_qualif change_fluent)
-    | #(WHEN condition_proposition change_proposition)
-;
-
-change_fluent 
-    : #(AND change_fluent change_fluent) 
-    | #(LPAREN change_fluent)
-    | resource_change
-    | transition_change
-;
-
-resource_change 
-    : #(CONSUMES var_name (numeric_expr)?)
-    | #(PRODUCES var_name (numeric_expr)?)
-    | #(USES var_name (numeric_expr)?)
-;
-
-transition_change
-    : #(EQUAL qualified_var_name[m_translator.getContext(),""] directed_expr_list)
-;
-
-directed_expr_list
-    : #(ARROW directed_expr_list directed_expr_list)
-		| expr
+directed_expr_list[std::vector<ANML::Expr*>& states]
+{
+	ANML::Expr* e;
+	// TODO: perform type checking
+}
+    : #(ARROW (directed_expr_list[states] | e=expr {states.push_back(e);} )
+              e=expr {states.push_back(e);}
+      )
 ;
 
 decomp_stmt returns [ANML::ANMLElement* element]
@@ -804,8 +863,7 @@ var_name returns [std::string s]
     | t3:END        { s = t3->getText(); }
 ;
 
-// TODO: validate var_names
-qualified_var_name [ANML::ANMLContext& context,const std::string& path] returns [ANML::LHSExpr* expr] 
+qualified_var_name [ANML::ANMLContext& context,const std::string& path, bool onlyVarAllowed=false] returns [ANML::LHSExpr* expr] 
 {
 	std::string s;
 	std::string newPath;
@@ -819,7 +877,7 @@ qualified_var_name [ANML::ANMLContext& context,const std::string& path] returns 
                if ((v=context.getVariable(s)) != NULL)
                   newContext = m_translator.getContext().getObjType(v->getDataType().getName());
                else  	
-                  check_runtime_error(false,"Variable " + s + " has not been defined in " + context.getContextDesc());  	
+                  check_runtime_error(ALWAYS_FAIL,"Variable " + s + " has not been defined in " + context.getContextDesc());  	
            }
            expr=qualified_var_name[*newContext,newPath]
          ) 
@@ -829,12 +887,15 @@ qualified_var_name [ANML::ANMLContext& context,const std::string& path] returns 
           	ANML::Action* a;
           	
           	newPath = (path=="" ? s : path+"."+s); 
-            if ((v=context.getVariable(s)) != NULL)
-                expr = new ANML::LHSVariable(v,newPath);
+            if ((v=context.getVariable(s)) != NULL) 
+                expr = new ANML::LHSVariable(v,newPath);                
+            else if (onlyVarAllowed) {
+                check_runtime_error(ALWAYS_FAIL,"Variable " + s + " has not been defined in " + context.getContextDesc());  	
+            }
           	else if ((a=context.getAction(s)) != NULL)
               	expr = new ANML::LHSAction(a,newPath);        	
             else  	
-                check_runtime_error(false,s + " has not been defined in " + context.getContextDesc());  	
+                check_runtime_error(ALWAYS_FAIL,s + " has not been defined in " + context.getContextDesc());  	
         }
 ;
 

@@ -124,6 +124,25 @@ class ANMLElement
     std::string m_name;	  
 };
 
+class ANMLElementList : public ANMLElement
+{
+  public:
+    ANMLElementList() : ANMLElement("Element list") {}
+    
+    void add(ANMLElement* e) { m_elements.push_back(e); }
+    
+    virtual void toNDDL(std::ostream& os) const
+    {
+    	for (unsigned int i=0;i<m_elements.size();i++)
+    	    m_elements[i]->toNDDL(os);
+    }
+    
+  protected:
+    std::vector<ANMLElement*> m_elements;  	
+};
+
+class ObjType;
+
 class Type : public ANMLElement
 {
   public:
@@ -134,14 +153,14 @@ class Type : public ANMLElement
 	
 	virtual bool isAssignableFrom(const Type& rhs) const { return getName() == rhs.getName(); }
 	    
-    virtual void toNDDL(std::ostream& os) const {}
+    virtual void toNDDL(std::ostream& os) const { os << m_name; }
     
     static Type* VOID;    
     static Type* BOOL;    
     static Type* INT;    
     static Type* FLOAT;    
     static Type* STRING;    
-    static Type* OBJECT;    
+    static ObjType* OBJECT;    
 };
 
 class TypeAlias : public Type
@@ -343,18 +362,6 @@ class Effect : public ANMLElement
     std::vector<Proposition*> m_propositions;    	
 };
 
-class Change : public ANMLElement
-{
-  public:
-    Change() : ANMLElement("CHANGE") {}
-    virtual ~Change() {}
-    
-    //virtual void toNDDL(std::ostream& os) const;
-    
-  protected:  
-    //std::vector<Proposition*> m_propositions;    	
-};
-
 class Decomposition : public ANMLElement
 {
   public:
@@ -396,6 +403,7 @@ class Proposition : public ANMLElement
   public:
     enum Context {GOAL,CONDITION,FACT,EFFECT};
     
+    Proposition(TemporalQualifier* tq,Fluent* f); 
     Proposition(TemporalQualifier* tq,const std::vector<Fluent*>& fluents);
     virtual ~Proposition();
     
@@ -408,6 +416,22 @@ class Proposition : public ANMLElement
     Context m_context;    	
     TemporalQualifier* m_temporalQualifier;
     std::vector<Fluent*> m_fluents;
+    
+    void commonInit();    
+};
+
+class Change : public Proposition
+{
+  public:
+    Change(Proposition* when_condition,TemporalQualifier* tq,Fluent* f);
+    virtual ~Change();
+    
+    void setWhenCondition(Proposition* p) { m_whenCondition = p; }
+    
+    virtual void toNDDL(std::ostream& os) const;
+    
+  protected:  
+    Proposition* m_whenCondition;
 };
 
 class PropositionComponent
@@ -483,6 +507,33 @@ class RelationalFluent : public Fluent
   protected:  
     LHSExpr* m_lhs;
     Expr* m_rhs;    	
+};
+
+class ResourceChangeFluent : public Fluent
+{
+  public:
+    ResourceChangeFluent(const std::string& op,Expr* var,Expr* qty);
+    virtual ~ResourceChangeFluent();
+
+    virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const;
+
+  protected:
+	std::string m_op;
+	Expr* m_var;
+	Expr* m_qty;      
+};
+
+class TransitionChangeFluent : public Fluent
+{
+  public :
+    TransitionChangeFluent(Expr* var, const std::vector<Expr*>& states);
+    virtual ~TransitionChangeFluent();
+
+    virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const;
+    
+  protected:    
+    Expr* m_var;
+	std::vector<Expr*> m_states;
 };
 
 class Expr 
