@@ -388,14 +388,15 @@ namespace EUROPA {
     std::map<double, TokenSet > m_activeTokensByPredicate; /*!< All active tokens sorted by predicate */
   };
 
+
   template<class ID>
   void PlanDatabase::getObjectsByType(const LabelStr& type, std::list<ID>& results) {
     check_error(results.empty());
     checkError(m_schema->isObjectType(type), type.toString());
 
     for (std::multimap<double, ObjectId>::const_iterator it = m_objectsByType.find(type.getKey());
-         it != m_objectsByType.end() && it->first == type.getKey();
-         ++it) {
+	 it != m_objectsByType.end() && it->first == type.getKey();
+	 ++it) {
       debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName().toString() << "' of type '" << 
 	       it->second->getType().toString() << "' for type '" << type.toString() << "'");
       debugMsg("PlanDatabase:getObjectsByType", "Typeid for object: " << typeid((*(it->second))).name());

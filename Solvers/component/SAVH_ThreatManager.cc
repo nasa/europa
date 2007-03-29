@@ -58,11 +58,11 @@ namespace EUROPA {
     bool DecisionOrder::operator()(const InstantId& a, const InstantId& b, LabelStr& explanation) const {
       check_error(!m_cmps.empty());
       check_error(a.isValid() && b.isValid());
-      debugMsg("ThreadManager:betterThan", "Comparing instant " << a->getTime() << " on " << a->getProfile()->getResource()->toString() <<
+      debugMsg("ThreatManager:betterThan", "Comparing instant " << a->getTime() << " on " << a->getProfile()->getResource()->toString() <<
                " to " << b->getTime() << " on " << b->getProfile()->getResource()->toString());
       for(std::list<InstantComparator*>::const_iterator it = m_cmps.begin(); it != m_cmps.end(); ++it) {
         InstantComparator* cmp = *it;
-        check_error(*it != NULL);
+        check_error(cmp != NULL);
         debugMsg("ThreatManager:betterThan", "Using " << cmp->toString());
         if((*cmp)(a, b)) {
           debugMsg("ThreatManager:betterThan", "a better than b");

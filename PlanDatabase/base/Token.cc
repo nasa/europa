@@ -618,7 +618,7 @@ namespace EUROPA{
 
     // Merged and rejected tokens can be immediately terminated without any consideration of their variables or their
     // constraints
-    if(isMerged() || isRejected())
+    if(isMerged() || isRejected() || isInactive())
       return true;
 
     // Construct the set of constraints on variables of this token
